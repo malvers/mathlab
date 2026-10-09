@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Erwartungswert, Varianz und Standardabweichung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w36-erwartungswert-sigma',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Erwartungswert, Varianz und Standardabweichung',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 36 (LB 4) · 20 Aufgaben: E(X) = n·p, V(X) = n·p·(1 − p), σ; Deutung am Histogramm · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 36 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: formulas (1-6), contexts (7-11), working backwards (12-13), meaning and histogram (14-20). */
+  questions: [
+    {
+      q: '$X$ ist binomialverteilt mit $n = 50$ und $p = 0{,}2$. Bestimme $E(X)$.',
+      opts: ['$E(X) = 0{,}2$', '$E(X) = 40$', '$E(X) = 10$', '$E(X) = 8$'],
+      steps: [
+        '$E(X) = n \\cdot p = 50 \\cdot 0{,}2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Mit denselben Werten: Bestimme die Varianz $V(X)$.',
+      opts: ['$V(X) = 8$', '$V(X) = 2{,}83$', '$V(X) = 10$', '$V(X) = 0{,}16$'],
+      steps: [
+        '$V(X) = n \\cdot p \\cdot (1 - p) = 50 \\cdot 0{,}2 \\cdot 0{,}8$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit denselben Werten: Bestimme die Standardabweichung $\\sigma$.',
+      opts: ['$\\sigma \\approx 3{,}16$', '$\\sigma \\approx 2{,}83$', '$\\sigma = 64$', '$\\sigma = 8$'],
+      steps: [
+        '$\\sigma = \\sqrt{V(X)} = \\sqrt{8} \\approx 2{,}83$'
+      ],
+      solution: 1
+    },
+    {
+      q: '$n = 100$, $p = 0{,}5$. Bestimme $E(X)$ und $\\sigma$.',
+      opts: ['$E(X) = 50$, $\\sigma = 5$', '$E(X) = 50$, $\\sigma = 0{,}5$', '$E(X) = 50$, $\\sigma = 25$', '$E(X) = 25$, $\\sigma = 5$'],
+      steps: [
+        '$E(X) = 100 \\cdot 0{,}5 = 50$',
+        '$\\sigma = \\sqrt{100 \\cdot 0{,}5 \\cdot 0{,}5} = \\sqrt{25} = 5$'
+      ],
+      solution: 0
+    },
+    {
+      q: '$n = 20$, $p = 0{,}05$. Bestimme $E(X)$.',
+      opts: ['$E(X) = 20$', '$E(X) = 1$', '$E(X) = 0{,}95$', '$E(X) = 0{,}05$'],
+      steps: [
+        '$20 \\cdot 0{,}05 = 1$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Erwartungswert hat ein einzelnes Bernoulli-Experiment ($n = 1$)?',
+      opts: ['$E(X) = 1 - p$', '$E(X) = 1$', '$E(X) = 0{,}5$', '$E(X) = p$'],
+      steps: [
+        '$E(X) = 0 \\cdot (1 - p) + 1 \\cdot p = p$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Würfel wird 60-mal geworfen. Wie viele Sechsen erwartet man?',
+      opts: ['6', '10', '60', '1'],
+      steps: [
+        '$60 \\cdot \\dfrac{1}{6} = 10$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist dabei die Standardabweichung der Anzahl der Sechsen?',
+      opts: ['10', 'etwa 1,67', 'etwa 2,89', 'etwa 8,33'],
+      steps: [
+        '$V(X) = 60 \\cdot \\dfrac{1}{6} \\cdot \\dfrac{5}{6} = \\dfrac{50}{6} \\approx 8{,}33$',
+        '$\\sigma = \\sqrt{8{,}33} \\approx 2{,}89$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Test hat 20 Fragen mit je 4 Antworten. Wie viele richtige Antworten erwartet man beim Raten?',
+      opts: ['10', '4', '5', '15'],
+      steps: [
+        '$20 \\cdot \\dfrac{1}{4} = 5$'
+      ],
+      solution: 2
+    },
+    {
+      q: '2 % der Bauteile sind fehlerhaft. Wie viele fehlerhafte erwartet man unter 1000?',
+      opts: ['2', '980', '200', '20'],
+      steps: [
+        '$1000 \\cdot 0{,}02 = 20$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist dabei die Standardabweichung?',
+      opts: ['etwa 4,43', '20', 'etwa 0,14', 'etwa 19,6'],
+      steps: [
+        '$\\sigma = \\sqrt{1000 \\cdot 0{,}02 \\cdot 0{,}98} = \\sqrt{19{,}6} \\approx 4{,}43$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Münze wird 400-mal geworfen. Bestimme $E(X)$ und $\\sigma$ für die Anzahl Kopf.',
+      opts: ['$E(X) = 100$, $\\sigma = 10$', '$E(X) = 200$, $\\sigma = 20$', '$E(X) = 200$, $\\sigma = 10$', '$E(X) = 200$, $\\sigma = 100$'],
+      steps: [
+        '$E(X) = 400 \\cdot 0{,}5 = 200$',
+        '$V(X) = 400 \\cdot 0{,}25 = 100$, $\\sigma = \\sqrt{100} = 10$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine binomialverteilte Zufallsgröße hat $n = 40$ und $E(X) = 12$. Wie groß ist $p$?',
+      opts: ['$p = 3{,}33$', '$p = 0{,}12$', '$p = 0{,}3$', '$p = 0{,}4$'],
+      steps: [
+        '$n \\cdot p = 12 \\Rightarrow p = \\dfrac{12}{40}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Es gilt $E(X) = 6$ und $V(X) = 4{,}2$. Bestimme $p$ und $n$.',
+      opts: ['$p = 0{,}6$, $n = 10$', '$p = 0{,}3$, $n = 6$', '$p = 0{,}7$, $n = 20$', '$p = 0{,}3$, $n = 20$'],
+      steps: [
+        '$\\dfrac{V(X)}{E(X)} = 1 - p = \\dfrac{4{,}2}{6} = 0{,}7$, also $p = 0{,}3$.',
+        '$n = \\dfrac{6}{0{,}3} = 20$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was bedeutet $E(X) = 10$ bei 60 Würfen eines Würfels?',
+      opts: ['Im Mittel über viele Serien von 60 Würfen gibt es 10 Sechsen.', 'Bei 60 Würfen gibt es sicher 10 Sechsen.', 'Genau 10 Sechsen sind am wahrscheinlichsten und haben über 50 %.', 'Es gibt höchstens 10 Sechsen.'],
+      steps: [
+        'Der Erwartungswert ist ein Mittelwert auf lange Sicht.',
+        '$P(X = 10)$ selbst ist nur etwa 0,14.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welches Intervall ist die $\\sigma$-Umgebung um den Erwartungswert für $n = 100$, $p = 0{,}5$?',
+      opts: ['$[25;\\,75]$', '$[40;\\,60]$', '$[49;\\,51]$', '$[45;\\,55]$'],
+      steps: [
+        '$E(X) = 50$, $\\sigma = 5$',
+        '$[50 - 5;\\,50 + 5]$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was zeigt eine größere Standardabweichung im Histogramm?',
+      opts: ['Alle Balken sind höher.', 'Die Balken verteilen sich breiter um den Erwartungswert.', 'Das Histogramm ist symmetrisch.', 'Der höchste Balken liegt weiter rechts.'],
+      steps: [
+        '$\\sigma$ misst die Streuung um $E(X)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für festes $n$: Bei welchem $p$ ist die Varianz am größten?',
+      opts: ['Bei $p = 0$', 'Bei $p = 0{,}5$', 'Bei $p = 1$', 'Bei $p = 0{,}1$'],
+      steps: [
+        '$p(1 - p)$ ist eine nach unten geöffnete Parabel mit Scheitel bei $p = 0{,}5$.',
+        'Bei $p = 0$ oder $p = 1$ gibt es gar keine Streuung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was passiert mit $E(X)$ und $\\sigma$, wenn man $n$ vervierfacht (gleiches $p$)?',
+      opts: ['$E(X)$ vervierfacht sich, $\\sigma$ verdoppelt sich.', 'Beide verdoppeln sich.', 'Beide vervierfachen sich.', '$E(X)$ verdoppelt sich, $\\sigma$ vervierfacht sich.'],
+      steps: [
+        '$E(X) = n \\cdot p$ wächst linear mit $n$.',
+        '$\\sigma = \\sqrt{n \\cdot p (1 - p)}$ wächst mit $\\sqrt{n}$, also $\\sqrt{4} = 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Einheit hat $\\sigma$, wenn $X$ die Anzahl defekter Teile zählt?',
+      opts: ['Keine, $\\sigma$ ist immer eine Wahrscheinlichkeit', 'Stück²', 'Prozent', 'Dieselbe wie $X$: Stück'],
+      steps: [
+        'Die Varianz hat „Stück²“, die Wurzel daraus wieder „Stück“.',
+        'Deshalb deutet man $\\sigma$ und nicht $V(X)$ im Sachzusammenhang.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

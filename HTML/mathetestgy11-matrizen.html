@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Matrizen und Gleichungssysteme — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w13-matrizen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Matrizen und Gleichungssysteme',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 13 (LB 2) · 20 Aufgaben: Matrizenschreibweise, Typ, Multiplikation verketteter Matrizen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 13 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: notation and type (1-5), matrix times vector (6-9), matrix times matrix (10-15), applications (16-20). */
+  questions: [
+    {
+      q: 'Wie schreibt man das Gleichungssystem $x + 2y = 5$, $3x - y = 1$ in der Form $A \\cdot \\vec{x} = \\vec{b}$?',
+      opts: ['$\\begin{pmatrix} 5 & 1 \\\\ 1 & 3 \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 3 \\\\ 2 & -1 \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 \\\\ 3 & -1 \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 \\\\ 3 & 1 \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        'Jede Gleichung liefert eine Zeile der Koeffizientenmatrix.',
+        'Erste Zeile $(1 \\;\\; 2)$, zweite Zeile $(3 \\;\\; -1)$; rechts der Vektor der Absolutglieder.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Typ hat eine Matrix mit 2 Zeilen und 3 Spalten?',
+      opts: ['$(3,2)$', '$(2,2)$', '$(6,1)$', '$(2,3)$'],
+      steps: [
+        'Der Typ $(m,n)$ nennt zuerst die Zeilen, dann die Spalten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Koeffizientenmatrix von $x + y + z = 6$, $2x - z = 1$, $y + 3z = 4$?',
+      opts: ['$\\begin{pmatrix} 1 & 1 & 1 \\\\ 2 & -1 & 0 \\\\ 1 & 3 & 0 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 & 0 \\\\ 1 & 0 & 1 \\\\ 1 & -1 & 3 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 1 & 1 \\\\ 2 & 1 & -1 \\\\ 1 & 1 & 3 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 1 & 1 \\\\ 2 & 0 & -1 \\\\ 0 & 1 & 3 \\end{pmatrix}$'],
+      steps: [
+        'Fehlende Variablen bekommen den Koeffizienten 0.',
+        'Die Spalten stehen für $x$, $y$, $z$ in fester Reihenfolge.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie sieht die erweiterte Koeffizientenmatrix von $2x + y = 7$, $x - 3y = 0$ aus?',
+      opts: ['$\\left(\\begin{array}{cc|c} 1 & 2 & 7 \\\\ -3 & 1 & 0 \\end{array}\\right)$', '$\\left(\\begin{array}{cc|c} 2 & 7 & 1 \\\\ 1 & 0 & -3 \\end{array}\\right)$', '$\\left(\\begin{array}{cc|c} 2 & 1 & 7 \\\\ 1 & -3 & 0 \\end{array}\\right)$', '$\\left(\\begin{array}{cc|c} 2 & 1 & 0 \\\\ 1 & -3 & 7 \\end{array}\\right)$'],
+      steps: [
+        'Links die Koeffizienten, rechts vom Strich die Absolutglieder.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ist $(x;\\,y;\\,z) = (1;\\,2;\\,-1)$ eine Lösung von $\\begin{pmatrix} 1 & 1 & 1 \\\\ 2 & -1 & 3 \\end{pmatrix} \\cdot \\vec{x} = \\begin{pmatrix} 2 \\\\ -3 \\end{pmatrix}$?',
+      opts: ['Nein, die erste Zeile stimmt nicht.', 'Ja, beide Zeilen stimmen.', 'Nein, die zweite Zeile stimmt nicht.', 'Das lässt sich ohne Gauß-Verfahren nicht prüfen.'],
+      steps: [
+        'Erste Zeile: $1 + 2 - 1 = 2$',
+        'Zweite Zeile: $2 - 2 - 3 = -3$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix} \\cdot \\begin{pmatrix} 1 \\\\ 1 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 1 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 7 \\end{pmatrix}$'],
+      steps: [
+        'Zeile mal Spalte: $1 \\cdot 1 + 2 \\cdot 1 = 3$',
+        '$3 \\cdot 1 + 4 \\cdot 1 = 7$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 2 & 0 & 1 \\\\ 1 & 3 & -1 \\end{pmatrix} \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 5 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 6 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 5 \\\\ 10 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$'],
+      steps: [
+        '$2 \\cdot 1 + 0 \\cdot 2 + 1 \\cdot 3 = 5$',
+        '$1 \\cdot 1 + 3 \\cdot 2 + (-1) \\cdot 3 = 4$',
+        'Typ $(2,3)$ mal $(3,1)$ ergibt Typ $(2,1)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Typ hat das Produkt einer $(2,3)$-Matrix mit einer $(3,1)$-Matrix?',
+      opts: ['Das Produkt ist nicht definiert.', '$(2,3)$', '$(2,1)$', '$(3,3)$'],
+      steps: [
+        'Die inneren Zahlen müssen übereinstimmen (3 und 3).',
+        'Die äußeren ergeben den Typ des Produkts: $(2,1)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Kann man eine $(3,2)$-Matrix mit einer $(3,2)$-Matrix multiplizieren?',
+      opts: ['Ja, das Ergebnis hat den Typ $(3,3)$.', 'Ja, das Ergebnis hat den Typ $(3,2)$.', 'Ja, man multipliziert elementweise.', 'Nein, die Spaltenzahl der ersten (2) passt nicht zur Zeilenzahl der zweiten (3).'],
+      steps: [
+        'Für $A \\cdot B$ braucht $A$ so viele Spalten, wie $B$ Zeilen hat.',
+        'Die Matrizen müssen „verkettet“ sein.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $A \\cdot B$ für $A = \\begin{pmatrix} 1 & 2 \\\\ 0 & 1 \\end{pmatrix}$ und $B = \\begin{pmatrix} 1 & 0 \\\\ 3 & 1 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 7 & 2 \\\\ 3 & 1 \\end{pmatrix}$', '$\\begin{pmatrix} 2 & 2 \\\\ 3 & 2 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 \\\\ 3 & 7 \\end{pmatrix}$'],
+      steps: [
+        'Element in Zeile $i$, Spalte $k$: Zeile $i$ von $A$ mal Spalte $k$ von $B$.',
+        'Erste Zeile: $1 \\cdot 1 + 2 \\cdot 3 = 7$ und $1 \\cdot 0 + 2 \\cdot 1 = 2$.',
+        'Zweite Zeile: $0 \\cdot 1 + 1 \\cdot 3 = 3$ und $0 \\cdot 0 + 1 \\cdot 1 = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit denselben Matrizen: Berechne $B \\cdot A$.',
+      opts: ['$\\begin{pmatrix} 1 & 2 \\\\ 3 & 7 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 0 \\\\ 3 & 7 \\end{pmatrix}$', '$\\begin{pmatrix} 7 & 2 \\\\ 3 & 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 \\\\ 3 & 1 \\end{pmatrix}$'],
+      steps: [
+        'Erste Zeile von $B$: $(1 \\;\\; 0)$, mal die Spalten von $A$: 1 und 2.',
+        'Zweite Zeile $(3 \\;\\; 1)$: $3 \\cdot 1 + 1 \\cdot 0 = 3$ und $3 \\cdot 2 + 1 \\cdot 1 = 7$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was zeigen die beiden letzten Aufgaben?',
+      opts: ['Die Matrizenmultiplikation ist kommutativ.', 'Die Matrizenmultiplikation ist nicht kommutativ: $A \\cdot B \\neq B \\cdot A$.', 'Man darf Matrizen nicht multiplizieren.', '$A \\cdot B$ ist immer die Einheitsmatrix.'],
+      steps: [
+        '$A \\cdot B$ und $B \\cdot A$ haben verschiedene Ergebnisse.',
+        'Ein Gegenbeispiel genügt, um das Kommutativgesetz zu widerlegen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Typ hat das Produkt einer $(2,3)$-Matrix mit einer $(3,4)$-Matrix?',
+      opts: ['Das Produkt ist nicht definiert.', '$(2,4)$', '$(3,3)$', '$(4,2)$'],
+      steps: [
+        'Innen $3 = 3$: definiert.',
+        'Außen $(2,4)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $A^2 = A \\cdot A$ für $A = \\begin{pmatrix} 1 & 1 \\\\ 0 & 1 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 1 & 1 \\\\ 0 & 0 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 1 \\\\ 0 & 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 \\\\ 0 & 1 \\end{pmatrix}$', '$\\begin{pmatrix} 2 & 2 \\\\ 0 & 2 \\end{pmatrix}$'],
+      steps: [
+        'Erste Zeile: $1 \\cdot 1 + 1 \\cdot 0 = 1$, $1 \\cdot 1 + 1 \\cdot 1 = 2$.',
+        'Zweite Zeile: 0 und 1.',
+        'Falle: Man darf nicht elementweise quadrieren.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ergibt $E \\cdot \\vec{x}$ mit der Einheitsmatrix $E = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\\\ 0 & 0 & 1 \\end{pmatrix}$?',
+      opts: ['Den Nullvektor', '$\\vec{x}$', '$3\\vec{x}$', 'Die Summe der Koordinaten'],
+      steps: [
+        'Jede Zeile von $E$ greift genau eine Koordinate heraus.',
+        'Die Einheitsmatrix spielt die Rolle der Zahl 1.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Firma braucht pro Produkt $P_1$ 2 kg Rohstoff $R_1$ und 1 kg $R_2$, pro $P_2$ 1 kg $R_1$ und 3 kg $R_2$. Wie viel Rohstoff braucht sie für 10 Stück $P_1$ und 20 Stück $P_2$?',
+      opts: ['40 kg $R_1$ und 60 kg $R_2$', '30 kg $R_1$ und 40 kg $R_2$', '50 kg $R_1$ und 50 kg $R_2$', '40 kg $R_1$ und 70 kg $R_2$'],
+      steps: [
+        'Bedarfsmatrix mal Produktionsvektor: $\\begin{pmatrix} 2 & 1 \\\\ 1 & 3 \\end{pmatrix} \\cdot \\begin{pmatrix} 10 \\\\ 20 \\end{pmatrix}$',
+        '$2 \\cdot 10 + 1 \\cdot 20 = 40$; $1 \\cdot 10 + 3 \\cdot 20 = 70$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Matrix $D = \\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}$ dreht Punkte um den Ursprung. Wohin wird $P(1 \\mid 0)$ abgebildet?',
+      opts: ['$P^{\\prime}(1 \\mid 0)$', '$P^{\\prime}(0 \\mid 1)$', '$P^{\\prime}(0 \\mid -1)$', '$P^{\\prime}(-1 \\mid 0)$'],
+      steps: [
+        '$D \\cdot \\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix} = \\begin{pmatrix} 0 \\\\ 1 \\end{pmatrix}$',
+        'Das ist eine Drehung um 90° gegen den Uhrzeigersinn.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wohin dreht dieselbe Matrix $D$ den Punkt $Q(2 \\mid 1)$?',
+      opts: ['$Q^{\\prime}(1 \\mid -2)$', '$Q^{\\prime}(-2 \\mid -1)$', '$Q^{\\prime}(-1 \\mid 2)$', '$Q^{\\prime}(1 \\mid 2)$'],
+      steps: [
+        '$0 \\cdot 2 + (-1) \\cdot 1 = -1$',
+        '$1 \\cdot 2 + 0 \\cdot 1 = 2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix} + \\begin{pmatrix} 0 & 1 \\\\ -1 & 2 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 1 & 3 \\\\ 2 & 6 \\end{pmatrix}$', '$\\begin{pmatrix} 0 & 2 \\\\ -3 & 8 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 1 \\\\ 2 & 2 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 3 \\\\ 4 & 6 \\end{pmatrix}$'],
+      steps: [
+        'Matrizen gleichen Typs werden elementweise addiert.',
+        '$1 + 0$, $2 + 1$, $3 + (-1)$, $4 + 2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $2 \\cdot \\begin{pmatrix} 1 & -1 \\\\ 0 & 3 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 2 & -2 \\\\ 0 & 6 \\end{pmatrix}$', '$\\begin{pmatrix} 3 & 1 \\\\ 2 & 5 \\end{pmatrix}$', '$\\begin{pmatrix} 2 & -1 \\\\ 0 & 3 \\end{pmatrix}$', '$\\begin{pmatrix} 2 & -2 \\\\ 2 & 6 \\end{pmatrix}$'],
+      steps: [
+        'Eine Zahl mal Matrix: Jedes Element wird mit der Zahl multipliziert.',
+        'Die Null bleibt null.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

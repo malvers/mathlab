@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Änderungsraten: Sekante und Tangente — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w04-aenderungsraten',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Änderungsraten: Sekante und Tangente',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 4 (LB 1) · 20 Aufgaben: Differenzenquotient, Differentialquotient, mittlere und lokale Änderungsrate · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: average rate of change (1-6), meaning and notation (7-11), local rate via h -> 0 (12-17), context (18-20). */
+  questions: [
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = x^2$ im Intervall $[1;\\,3]$.',
+      opts: ['8', '4', '6', '2'],
+      steps: [
+        'Differenzenquotient: $\\dfrac{f(3) - f(1)}{3 - 1}$',
+        '$\\dfrac{9 - 1}{2} = 4$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = x^3$ im Intervall $[0;\\,2]$.',
+      opts: ['2', '8', '4', '12'],
+      steps: [
+        '$\\dfrac{f(2) - f(0)}{2 - 0} = \\dfrac{8 - 0}{2}$',
+        'Ergebnis 4. Wer nur $f(2) - f(0)$ rechnet, erhält fälschlich 8.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Körper fällt nach $s(t) = 5t^2$ ($s$ in m, $t$ in s). Wie groß ist seine mittlere Geschwindigkeit zwischen $t = 1$ und $t = 3$?',
+      opts: ['45 m/s', '20 m/s', '10 m/s', '40 m/s'],
+      steps: [
+        '$s(3) = 45$, $s(1) = 5$',
+        '$\\bar v = \\dfrac{45 - 5}{3 - 1} = \\dfrac{40}{2} = 20$ m/s'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = \\sqrt{x}$ zwischen $x = 1$ und $x = 4$.',
+      opts: ['1', '$\\dfrac{1}{2}$', '3', '$\\dfrac{1}{3}$'],
+      steps: [
+        '$f(4) = 2$, $f(1) = 1$',
+        '$\\dfrac{2 - 1}{4 - 1} = \\dfrac{1}{3}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = \\dfrac{1}{x}$ im Intervall $[1;\\,2]$.',
+      opts: ['$\\dfrac{1}{2}$', '−1', '$-\\dfrac{1}{2}$', '$-\\dfrac{3}{2}$'],
+      steps: [
+        '$f(2) = \\dfrac{1}{2}$, $f(1) = 1$',
+        '$\\dfrac{\\frac{1}{2} - 1}{2 - 1} = -\\dfrac{1}{2}$',
+        'Negativ, denn die Funktion fällt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Um 6 Uhr zeigt das Thermometer 12 °C, um 10 Uhr 20 °C. Wie groß ist die mittlere Änderungsrate?',
+      opts: ['8 °C pro Stunde', '0,5 °C pro Stunde', '2 °C pro Stunde', '4 °C pro Stunde'],
+      steps: [
+        'Änderung der Temperatur: 8 °C in 4 Stunden.',
+        '$\\dfrac{20 - 12}{10 - 6} = 2$, also 2 °C pro Stunde.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was gibt der Differenzenquotient $\\dfrac{f(b) - f(a)}{b - a}$ geometrisch an?',
+      opts: ['Den Flächeninhalt unter dem Graphen.', 'Den Anstieg der Tangente im Punkt $(a \\mid f(a))$.', 'Die Länge der Strecke zwischen beiden Punkten.', 'Den Anstieg der Sekante durch $(a \\mid f(a))$ und $(b \\mid f(b))$.'],
+      steps: [
+        'Er ist Höhenunterschied durch Breitenunterschied zweier Kurvenpunkte.',
+        'Das ist der Anstieg der Geraden durch beide Punkte, der Sekante.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was gibt der Differentialquotient $f^{\\prime}(x_0)$ an?',
+      opts: ['Den Funktionswert an der Stelle $x_0$.', 'Die mittlere Änderungsrate über die ganze Definitionsmenge.', 'Den Anstieg der Sekante über $[0;\\,x_0]$.', 'Den Anstieg der Tangente im Punkt $(x_0 \\mid f(x_0))$, die lokale Änderungsrate.'],
+      steps: [
+        'Der Differentialquotient ist der Grenzwert der Differenzenquotienten für $h \\to 0$.',
+        'Aus den Sekanten wird die Tangente, aus der mittleren die lokale Änderungsrate.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Term ist der Differenzenquotient von $f$ an der Stelle $x_0$ mit der Schrittweite $h$?',
+      opts: ['$\\dfrac{f(x_0 + h) - f(x_0)}{x_0}$', '$\\dfrac{f(x_0 + h) - f(x_0)}{h}$', '$f(x_0 + h) - f(x_0)$', '$\\dfrac{f(x_0) + f(h)}{h}$'],
+      steps: [
+        'Die Intervallbreite ist $(x_0 + h) - x_0 = h$.',
+        'Höhenunterschied $f(x_0 + h) - f(x_0)$ durch diese Breite.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Wasserstand $W$ eines Flusses wird in cm gemessen, die Zeit $t$ in Stunden. Welche Einheit hat die Änderungsrate $W^{\\prime}(t)$?',
+      opts: ['cm·h', 'h/cm', 'cm/h', 'cm'],
+      steps: [
+        'Die Änderungsrate ist ein Quotient: Änderung von $W$ durch Änderung von $t$.',
+        'Einheit: cm durch h.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Von wem stammt die Schreibweise $\\dfrac{dy}{dx}$ für die Ableitung?',
+      opts: ['Gottfried Wilhelm Leibniz', 'Carl Friedrich Gauß', 'Isaac Newton', 'Leonhard Euler'],
+      steps: [
+        'Leibniz dachte an das Verhältnis „unendlich kleiner“ Differenzen $dy$ und $dx$.',
+        'Newton schrieb $\\dot{y}$ und sprach von Fluxionen. Beide fanden die Differentialrechnung im 17. Jahrhundert unabhängig voneinander.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für $f(x) = x^2$ und $x_0 = 3$ vereinfacht sich der Differenzenquotient zu $6 + h$. Wie groß ist der Anstieg der Tangente bei $x_0 = 3$?',
+      opts: ['3', '$6 + h$', '9', '6'],
+      steps: [
+        '$\\dfrac{(3 + h)^2 - 9}{h} = \\dfrac{6h + h^2}{h} = 6 + h$',
+        'Für $h \\to 0$ bleibt 6.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die lokale Änderungsrate von $f(x) = x^2$ an der Stelle $x_0 = -2$.',
+      opts: ['−4', '4', '2', '−2'],
+      steps: [
+        '$\\dfrac{(-2 + h)^2 - 4}{h} = \\dfrac{-4h + h^2}{h} = -4 + h$',
+        'Für $h \\to 0$: −4. Die Parabel fällt dort.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Körper fällt nach $s(t) = 5t^2$. Wie groß ist seine Momentangeschwindigkeit bei $t = 2$?',
+      opts: ['10 m/s', '40 m/s', '5 m/s', '20 m/s'],
+      steps: [
+        '$\\dfrac{5(2 + h)^2 - 20}{h} = \\dfrac{20h + 5h^2}{h} = 20 + 5h$',
+        'Für $h \\to 0$: 20 m/s.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme mit $h \\to 0$ den Anstieg von $f(x) = x^3$ an der Stelle $x_0 = 1$.',
+      opts: ['3', '$3 + 3h + h^2$', '1', '0'],
+      steps: [
+        '$(1 + h)^3 = 1 + 3h + 3h^2 + h^3$',
+        '$\\dfrac{(1 + h)^3 - 1}{h} = 3 + 3h + h^2$',
+        'Für $h \\to 0$ bleibt 3.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Gleichung der Tangente an $f(x) = x^2$ im Punkt $(1 \\mid 1)$?',
+      opts: ['$y = 2x$', '$y = 2x + 1$', '$y = 2x - 1$', '$y = x$'],
+      steps: [
+        'Anstieg: $\\dfrac{(1 + h)^2 - 1}{h} = 2 + h \\to 2$.',
+        'Ansatz $y = 2x + n$ mit dem Punkt $(1 \\mid 1)$: $1 = 2 + n$, also $n = -1$.',
+        'Tangente $y = 2x - 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Ball fliegt nach $h(t) = 20t - 5t^2$ ($h$ in m, $t$ in s). Wie schnell steigt er bei $t = 1$?',
+      opts: ['10 m/s', '20 m/s', '5 m/s', '15 m/s'],
+      steps: [
+        '$h(1) = 15$, $h(1 + k) = 20 + 20k - 5(1 + 2k + k^2) = 15 + 10k - 5k^2$',
+        'Differenzenquotient: $\\dfrac{10k - 5k^2}{k} = 10 - 5k$',
+        'Für $k \\to 0$: 10 m/s.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Kosten einer Produktion sind $K(x) = 0{,}5x^2 + 10$ (in €, $x$ in Stück). Wie stark steigen sie im Mittel zwischen 10 und 20 Stück?',
+      opts: ['20 € pro Stück', '15 € pro Stück', '10 € pro Stück', '150 € pro Stück'],
+      steps: [
+        '$K(10) = 60$, $K(20) = 210$',
+        '$\\dfrac{210 - 60}{20 - 10} = 15$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die mittlere Änderungsrate von $f$ auf $[a;\\,b]$ ist null. Was folgt daraus?',
+      opts: ['$f(a) = f(b) = 0$', '$f(a) = f(b)$', '$f$ ist auf $[a;\\,b]$ konstant.', '$f$ hat in $[a;\\,b]$ eine Nullstelle.'],
+      steps: [
+        'Der Zähler $f(b) - f(a)$ muss null sein.',
+        'Also $f(a) = f(b)$; dazwischen darf $f$ steigen und fallen, z. B. $x^2$ auf $[-1;\\,1]$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Auto fährt eine Stunde lang mit der mittleren Geschwindigkeit 80 km/h. Was ist sicher?',
+      opts: ['Es hat in dieser Stunde 80 km zurückgelegt.', 'Es war nie schneller als 80 km/h.', 'Es fuhr nie langsamer als 80 km/h.', 'Der Tacho zeigte immer 80 km/h.'],
+      steps: [
+        'Die mittlere Geschwindigkeit ist eine mittlere Änderungsrate: Weg durch Zeit.',
+        'Sie sagt nichts über die Momentangeschwindigkeit zu einzelnen Zeitpunkten.',
+        'Sicher ist nur: 80 km in einer Stunde.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

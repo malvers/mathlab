@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Das Gauß-Jordan-Verfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w14-gauss-jordan',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Das Gauß-Jordan-Verfahren',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 14 (LB 2) · 20 Aufgaben: Zeilenumformungen, Lösen linearer Gleichungssysteme, Lösbarkeit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 14 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: row operations (1-4), solving (5-11), number of solutions (12-15), word problems (16-20). */
+  questions: [
+    {
+      q: 'Welche Umformung ist beim Gauß-Jordan-Verfahren NICHT erlaubt?',
+      opts: ['Ein Vielfaches einer Zeile zu einer anderen addieren', 'Zwei Zeilen vertauschen', 'Eine Zeile mit 0 multiplizieren', 'Eine Zeile mit einer Zahl ungleich 0 multiplizieren'],
+      steps: [
+        'Erlaubt sind nur Umformungen, die die Lösungsmenge nicht ändern.',
+        'Mal 0 löscht eine Gleichung und damit Information.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist das Ziel des Gauß-Jordan-Verfahrens?',
+      opts: ['Links vom Strich soll die Einheitsmatrix stehen; rechts steht dann die Lösung.', 'Alle Einträge sollen null werden.', 'Die Matrix soll symmetrisch werden.', 'Die rechte Seite soll null werden.'],
+      steps: [
+        'Gauß bringt die Matrix auf Stufenform, Jordan räumt auch oberhalb der Diagonalen ab.',
+        'Am Ende lautet jede Zeile $x = \\ldots$, $y = \\ldots$, $z = \\ldots$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Zeile entsteht aus $\\left(\\begin{array}{ccc|c} 1 & 1 & 1 & 6 \\\\ 2 & -1 & 1 & 3 \\end{array}\\right)$ durch $Z_2 - 2 \\cdot Z_1$?',
+      opts: ['$(0 \\;\\; -3 \\;\\; 1 \\mid -9)$', '$(0 \\;\\; -3 \\;\\; -1 \\mid -9)$', '$(0 \\;\\; 1 \\;\\; -1 \\mid 3)$', '$(0 \\;\\; -3 \\;\\; -1 \\mid 9)$'],
+      steps: [
+        '$2 - 2 \\cdot 1 = 0$, $-1 - 2 \\cdot 1 = -3$, $1 - 2 \\cdot 1 = -1$',
+        'Rechts: $3 - 2 \\cdot 6 = -9$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Endform lautet $\\left(\\begin{array}{ccc|c} 1 & 0 & 0 & 2 \\\\ 0 & 1 & 0 & -1 \\\\ 0 & 0 & 1 & 4 \\end{array}\\right)$. Wie heißt die Lösung?',
+      opts: ['$x = 2$, $y = -1$, $z = 4$', '$x = 1$, $y = 1$, $z = 1$', 'Keine Lösung', '$x = 4$, $y = -1$, $z = 2$'],
+      steps: [
+        'Jede Zeile ist eine Gleichung: $1x + 0y + 0z = 2$ usw.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $x + y = 5$, $x - y = 1$.',
+      opts: ['$x = 5$, $y = 0$', '$x = 4$, $y = 1$', '$x = 3$, $y = 2$', '$x = 2$, $y = 3$'],
+      steps: [
+        'Addieren: $2x = 6$, also $x = 3$.',
+        'Einsetzen: $y = 5 - 3 = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse $\\left(\\begin{array}{cc|c} 1 & 2 & 5 \\\\ 3 & 1 & 5 \\end{array}\\right)$ mit $Z_2 - 3 \\cdot Z_1$.',
+      opts: ['$x = -1$, $y = 3$', '$x = 5$, $y = 0$', '$x = 2$, $y = 1$', '$x = 1$, $y = 2$'],
+      steps: [
+        '$Z_2 - 3Z_1$: $(0 \\;\\; -5 \\mid -10)$, also $y = 2$.',
+        'Erste Zeile: $x + 4 = 5$, also $x = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse $2x + 3y = 12$, $4x - y = 10$.',
+      opts: ['$x = 3$, $y = 4$', '$x = 3$, $y = 2$', '$x = 6$, $y = 0$', '$x = 2$, $y = 3$'],
+      steps: [
+        '$Z_2 - 2Z_1$: $-7y = -14$, also $y = 2$.',
+        '$2x + 6 = 12$, also $x = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse das Stufensystem $x + y + z = 6$, $y + z = 5$, $z = 3$.',
+      opts: ['$x = 6$, $y = 5$, $z = 3$', '$x = 1$, $y = 5$, $z = 3$', '$x = 1$, $y = 2$, $z = 3$', '$x = 3$, $y = 2$, $z = 1$'],
+      steps: [
+        'Von unten nach oben: $z = 3$.',
+        '$y = 5 - 3 = 2$, dann $x = 6 - 2 - 3 = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse $x + y + z = 6$, $2x - y + z = 3$, $x + 2y - z = 2$.',
+      opts: ['$x = 1$, $y = 2$, $z = 3$', '$x = 3$, $y = 2$, $z = 1$', '$x = 0$, $y = 3$, $z = 3$', '$x = 2$, $y = 1$, $z = 3$'],
+      steps: [
+        '$Z_2 - 2Z_1$: $-3y - z = -9$; $Z_3 - Z_1$: $y - 2z = -4$.',
+        'Aus der zweiten: $y = 2z - 4$; eingesetzt: $-6z + 12 - z = -9$, also $z = 3$, $y = 2$.',
+        'Dann $x = 6 - 2 - 3 = 1$. Probe in allen drei Gleichungen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum macht man am Ende eine Probe?',
+      opts: ['Weil das CAS sonst nicht rechnet.', 'Um Rechenfehler zu finden: Die Lösung muss alle ursprünglichen Gleichungen erfüllen.', 'Weil das Verfahren manchmal falsche Lösungen liefert, auch ohne Rechenfehler.', 'Eine Probe ist überflüssig.'],
+      steps: [
+        'Die Umformungen sind äquivalent, das Verfahren selbst ist zuverlässig.',
+        'Rechenfehler unterwegs fallen aber erst bei der Probe auf.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Das CAS zeigt für ein System die reduzierte Form $\\left(\\begin{array}{ccc|c} 1 & 0 & 2 & 3 \\\\ 0 & 1 & -1 & 1 \\end{array}\\right)$ (Variablen $x$, $y$, $z$). Was folgt?',
+      opts: ['Keine Lösung.', '$x = 2$, $y = -1$, $z = 3$.', 'Unendlich viele Lösungen: $x = 3 - 2z$, $y = 1 + z$, $z$ beliebig.', 'Genau eine Lösung $x = 3$, $y = 1$.'],
+      steps: [
+        'Zwei Gleichungen für drei Unbekannte: $z$ bleibt frei.',
+        '$x + 2z = 3$ und $y - z = 1$ nach $x$ bzw. $y$ auflösen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Nach den Umformungen steht die Zeile $(0 \\;\\; 0 \\;\\; 0 \\mid 5)$. Was folgt?',
+      opts: ['Das System hat keine Lösung.', 'Das System hat unendlich viele Lösungen.', '$x = y = z = 0$', '$z = 5$'],
+      steps: [
+        'Die Zeile bedeutet $0x + 0y + 0z = 5$, also $0 = 5$.',
+        'Ein Widerspruch: Die Lösungsmenge ist leer.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Lösungen hat $x + y = 2$, $2x + 2y = 4$?',
+      opts: ['Keine', 'Genau zwei', 'Genau eine', 'Unendlich viele'],
+      steps: [
+        'Die zweite Gleichung ist das Doppelte der ersten.',
+        'Es bleibt nur eine Bedingung für zwei Unbekannte: Gerade aus Lösungen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Lösungen hat $x + y = 2$, $2x + 2y = 5$?',
+      opts: ['Keine', 'Genau zwei', 'Unendlich viele', 'Genau eine'],
+      steps: [
+        '$Z_2 - 2Z_1$: $0 = 1$, Widerspruch.',
+        'Geometrisch: zwei parallele Geraden.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was bedeutet geometrisch ein lineares Gleichungssystem mit zwei Gleichungen und zwei Unbekannten und genau einer Lösung?',
+      opts: ['Zwei Geraden sind parallel.', 'Zwei Geraden sind identisch.', 'Zwei Ebenen schneiden sich.', 'Zwei Geraden schneiden sich in genau einem Punkt.'],
+      steps: [
+        'Jede Gleichung $ax + by = c$ beschreibt eine Gerade.',
+        'Die Lösung ist ihr Schnittpunkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: '2 Erwachsene und 3 Kinder zahlen 31 € Eintritt, 1 Erwachsener und 2 Kinder 18 €. Was kostet ein Kinderticket?',
+      opts: ['8 €', '5 €', '6 €', '4 €'],
+      steps: [
+        '$2E + 3K = 31$, $E + 2K = 18$',
+        '$Z_1 - 2Z_2$: $-K = -5$, also $K = 5$ und $E = 8$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Drei Zahlen haben die Summe 14. Die erste ist doppelt so groß wie die zweite, die dritte ist um 2 größer als die zweite. Wie heißt die zweite Zahl?',
+      opts: ['6', '5', '4', '3'],
+      steps: [
+        '$x = 2y$, $z = y + 2$, $x + y + z = 14$',
+        '$2y + y + y + 2 = 14 \\Rightarrow 4y = 12 \\Rightarrow y = 3$; dann $x = 6$, $z = 5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Parabel $y = ax^2 + bx + c$ geht durch $(0 \\mid 1)$, $(1 \\mid 2)$ und $(2 \\mid 5)$. Wie lautet sie?',
+      opts: ['$y = 2x^2 - x + 1$', '$y = x + 1$', '$y = x^2 + x + 1$', '$y = x^2 + 1$'],
+      steps: [
+        '$c = 1$; $a + b + 1 = 2$; $4a + 2b + 1 = 5$',
+        '$a + b = 1$ und $2a + b = 2$, also $a = 1$, $b = 0$.',
+        'Vorgeschmack auf die Steckbriefaufgaben in Woche 15.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Firma braucht pro Stück $P_1$ 2 kg $R_1$ und 1 kg $R_2$, pro Stück $P_2$ 1 kg $R_1$ und 3 kg $R_2$. Vorrätig sind 40 kg $R_1$ und 70 kg $R_2$. Wie viele Stück lassen sich herstellen, wenn alles verbraucht wird?',
+      opts: ['15 Stück $P_1$ und 10 Stück $P_2$', '20 Stück $P_1$ und 10 Stück $P_2$', '10 Stück $P_1$ und 20 Stück $P_2$', '10 Stück $P_1$ und 15 Stück $P_2$'],
+      steps: [
+        '$2x + y = 40$, $x + 3y = 70$',
+        '$2 \\cdot Z_2 - Z_1$: $5y = 100$, also $y = 20$ und $x = 10$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Gleichungssystem hat 4 Unbekannte und 4 Gleichungen mit krummen Koeffizienten. Wie geht man im Unterricht sinnvoll vor?',
+      opts: ['Raten und einsetzen.', 'Mit dem CAS lösen und das Ergebnis am Sachverhalt prüfen.', 'Eine Gleichung streichen.', 'Es ist grundsätzlich nicht lösbar.'],
+      steps: [
+        'Ohne Hilfsmittel sind laut Lehrplan bis zu drei Unbekannte mit einfachen Koeffizienten verlangt.',
+        'Darüber hinaus übernimmt das CAS das Rechnen; Deuten und Prüfen bleiben Handarbeit.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

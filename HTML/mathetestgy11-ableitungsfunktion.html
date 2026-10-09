@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Die Ableitungsfunktion — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w05-ableitungsfunktion',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Die Ableitungsfunktion',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 5 (LB 1) · 20 Aufgaben: Ableitung nach Definition, Tangenten, Graph der Ableitungsfunktion · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 5 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: derivative by definition (1-6), slopes and tangents (7-11), graph of f and f-prime (12-18), outlook (19-20). */
+  questions: [
+    {
+      q: 'Der Differenzenquotient von $f(x) = x^2$ ist $\\dfrac{(x + h)^2 - x^2}{h}$. Wie lautet er vereinfacht?',
+      opts: ['$2x$', '$x + h$', '$2x + h$', '$2x + h^2$'],
+      steps: [
+        '$(x + h)^2 - x^2 = x^2 + 2xh + h^2 - x^2 = 2xh + h^2$',
+        'Durch $h$ teilen: $2x + h$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Ableitungsfunktion hat $f(x) = x^2$?',
+      opts: ['$f^{\\prime}(x) = x$', '$f^{\\prime}(x) = 2x + h$', '$f^{\\prime}(x) = 2x$', '$f^{\\prime}(x) = x^2$'],
+      steps: [
+        '$f^{\\prime}(x) = \\lim\\limits_{h \\to 0} (2x + h)$',
+        '$= 2x$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Ableitungsfunktion hat $f(x) = x^3$? Der Differenzenquotient ist $3x^2 + 3xh + h^2$.',
+      opts: ['$f^{\\prime}(x) = 3x^2$', '$f^{\\prime}(x) = 3x$', '$f^{\\prime}(x) = 3x^2 + 3x$', '$f^{\\prime}(x) = x^2$'],
+      steps: [
+        'Für $h \\to 0$ fallen $3xh$ und $h^2$ weg.',
+        '$f^{\\prime}(x) = 3x^2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Ableitungsfunktion hat $f(x) = 3x + 1$?',
+      opts: ['$f^{\\prime}(x) = 3$', '$f^{\\prime}(x) = 4$', '$f^{\\prime}(x) = 3x$', '$f^{\\prime}(x) = 1$'],
+      steps: [
+        '$\\dfrac{3(x + h) + 1 - (3x + 1)}{h} = \\dfrac{3h}{h} = 3$',
+        'Eine Gerade hat überall denselben Anstieg.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Ableitungsfunktion hat $f(x) = 7$?',
+      opts: ['$f^{\\prime}(x) = 7x$', '$f^{\\prime}(x) = 7$', '$f^{\\prime}(x) = 1$', '$f^{\\prime}(x) = 0$'],
+      steps: [
+        '$\\dfrac{7 - 7}{h} = 0$',
+        'Der Graph ist waagerecht, sein Anstieg ist überall null.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $f(x) = \\dfrac{1}{x}$ ergibt der Differenzenquotient $-\\dfrac{1}{x(x + h)}$. Welche Ableitung folgt?',
+      opts: ['$f^{\\prime}(x) = -\\dfrac{1}{x}$', '$f^{\\prime}(x) = \\ln x$', '$f^{\\prime}(x) = -\\dfrac{1}{x^2}$', '$f^{\\prime}(x) = \\dfrac{1}{x^2}$'],
+      steps: [
+        'Für $h \\to 0$ wird aus $x(x + h)$ der Nenner $x^2$.',
+        '$f^{\\prime}(x) = -\\dfrac{1}{x^2}$; negativ, denn $\\dfrac{1}{x}$ fällt auf beiden Ästen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist der Anstieg von $f(x) = x^2$ an der Stelle $x = 3$?',
+      opts: ['6', '2', '9', '3'],
+      steps: [
+        '$f^{\\prime}(x) = 2x$',
+        '$f^{\\prime}(3) = 6$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Tangente an $f(x) = x^2$ an der Stelle $x_0 = -1$?',
+      opts: ['$y = -x$', '$y = -2x - 1$', '$y = 2x + 3$', '$y = -2x + 1$'],
+      steps: [
+        '$f(-1) = 1$, $f^{\\prime}(-1) = -2$',
+        '$y = -2(x + 1) + 1 = -2x - 1$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In welchem Punkt hat $f(x) = x^2$ den Anstieg 4?',
+      opts: ['$P(-2 \\mid 4)$', '$P(2 \\mid 4)$', '$P(2 \\mid 2)$', '$P(4 \\mid 16)$'],
+      steps: [
+        '$f^{\\prime}(x) = 2x = 4$, also $x = 2$.',
+        '$f(2) = 4$, Punkt $(2 \\mid 4)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'An welcher Stelle ist die Tangente an $f(x) = x^2$ parallel zur Geraden $y = -6x + 1$?',
+      opts: ['$x = -6$', '$x = -3$', '$x = 3$', '$x = \\dfrac{1}{6}$'],
+      steps: [
+        'Parallel heißt: gleicher Anstieg, also $f^{\\prime}(x) = -6$.',
+        '$2x = -6$, also $x = -3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum haben $f(x) = x^2$ und $g(x) = x^2 + 5$ dieselbe Ableitung?',
+      opts: ['Weil 5 eine Primzahl ist.', 'Der Graph von $g$ ist nur nach oben verschoben, die Anstiege bleiben gleich.', 'Sie haben nicht dieselbe Ableitung.', 'Weil beide Parabeln dieselben Nullstellen haben.'],
+      steps: [
+        'Verschieben in $y$-Richtung ändert an keiner Stelle den Anstieg.',
+        'Rechnerisch: Die Konstante 5 fällt im Differenzenquotienten weg.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Graph von $f$ ist eine nach oben geöffnete Parabel mit Scheitel bei $x = 2$. Welche Aussage über $f^{\\prime}$ stimmt?',
+      opts: ['$f^{\\prime}$ ist ebenfalls eine Parabel.', '$f^{\\prime}$ ist überall positiv.', '$f^{\\prime}(2) = 0$, links davon ist $f^{\\prime}$ positiv, rechts negativ.', '$f^{\\prime}(2) = 0$, links davon ist $f^{\\prime}$ negativ, rechts positiv.'],
+      steps: [
+        'Im Scheitel ist die Tangente waagerecht: $f^{\\prime}(2) = 0$.',
+        'Links fällt die Parabel ($f^{\\prime} < 0$), rechts steigt sie ($f^{\\prime} > 0$).',
+        'Der Graph von $f^{\\prime}$ ist eine steigende Gerade durch $(2 \\mid 0)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$f$ hat an der Stelle $x_0$ einen Hochpunkt. Was gilt für den Graphen von $f^{\\prime}$ dort?',
+      opts: ['Er hat dort ebenfalls einen Hochpunkt.', 'Er schneidet die $x$-Achse von unten nach oben.', 'Er schneidet die $x$-Achse von oben nach unten.', 'Er hat dort eine Polstelle.'],
+      steps: [
+        'Vor dem Hochpunkt steigt $f$: $f^{\\prime} > 0$.',
+        'Danach fällt $f$: $f^{\\prime} < 0$.',
+        'Also Nullstelle von $f^{\\prime}$ mit Vorzeichenwechsel von plus nach minus.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$f$ steigt im Intervall $(1;\\,4)$ überall. Was gilt dort für $f^{\\prime}$?',
+      opts: ['$f^{\\prime}(x) \\geq 0$', '$f^{\\prime}$ steigt ebenfalls.', '$f^{\\prime}(x) = 0$', '$f^{\\prime}(x) \\leq 0$'],
+      steps: [
+        'Wo der Graph steigt, haben die Tangenten keinen negativen Anstieg.',
+        'Der Graph von $f^{\\prime}$ liegt dort nicht unterhalb der $x$-Achse.',
+        'Ob $f^{\\prime}$ selbst steigt, ist damit nicht gesagt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Graph von $f^{\\prime}$ ist die waagerechte Gerade $y = 3$. Was ist der Graph von $f$?',
+      opts: ['Eine Parabel.', 'Die waagerechte Gerade $y = 3$.', 'Eine Gerade durch den Ursprung mit dem Anstieg 0.', 'Eine Gerade mit dem Anstieg 3.'],
+      steps: [
+        'Konstante Ableitung heißt: überall derselbe Anstieg.',
+        'Also ist $f$ eine Gerade $f(x) = 3x + n$; $n$ lässt sich nicht ablesen.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$f$ ist eine Funktion dritten Grades mit Hochpunkt bei $x = -1$ und Tiefpunkt bei $x = 1$. Wie sieht der Graph von $f^{\\prime}$ aus?',
+      opts: ['Eine Gerade durch $(-1 \\mid 0)$ und $(1 \\mid 0)$.', 'Eine nach unten geöffnete Parabel mit den Nullstellen −1 und 1.', 'Eine Parabel mit Scheitel bei $x = 1$.', 'Eine nach oben geöffnete Parabel mit den Nullstellen −1 und 1.'],
+      steps: [
+        'An den Extremstellen ist $f^{\\prime} = 0$: Nullstellen bei −1 und 1.',
+        'Zwischen den Extrema fällt $f$, also $f^{\\prime} < 0$; außen steigt $f$, also $f^{\\prime} > 0$.',
+        'Das passt zu einer nach oben geöffneten Parabel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ist $f(x) = |x|$ an der Stelle 0 differenzierbar?',
+      opts: ['Nein, links ist der Anstieg −1, rechts 1: Der Graph hat einen Knick.', 'Ja, die Ableitung ist 1.', 'Nein, weil $|x|$ bei 0 unstetig ist.', 'Ja, die Ableitung ist 0.'],
+      steps: [
+        'Für $h > 0$ ist der Differenzenquotient $\\dfrac{|h|}{h} = 1$, für $h < 0$ ist er −1.',
+        'Die einseitigen Grenzwerte sind verschieden, also gibt es keine Tangente.',
+        'Stetig ist $|x|$ trotzdem.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Formel beschreibt die Ableitung von $f$ an der Stelle $x_0$?',
+      opts: ['$f^{\\prime}(x_0) = \\dfrac{f(x_0)}{x_0}$', '$f^{\\prime}(x_0) = \\lim\\limits_{h \\to 0} \\bigl(f(x_0 + h) - f(x_0)\\bigr)$', '$f^{\\prime}(x_0) = \\dfrac{f(x_0 + 1) - f(x_0)}{1}$', '$f^{\\prime}(x_0) = \\lim\\limits_{h \\to 0} \\dfrac{f(x_0 + h) - f(x_0)}{h}$'],
+      steps: [
+        'Erst der Differenzenquotient, dann der Grenzübergang $h \\to 0$.',
+        'Ohne den Nenner $h$ wäre der Grenzwert bei stetigen Funktionen immer null.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zu welcher Funktion gehört die Ableitung $f^{\\prime}(x) = 4x^3$?',
+      opts: ['$f(x) = 4x^4$', '$f(x) = x^3$', '$f(x) = x^4$', '$f(x) = 12x^2$'],
+      steps: [
+        'Nach dem Muster $x^2 \\mapsto 2x$, $x^3 \\mapsto 3x^2$ gilt $x^4 \\mapsto 4x^3$.',
+        'Das ist die Umkehrung des Differenzierens; auch $x^4 + 1$ hätte diese Ableitung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welche Funktion ist die Ableitungsfunktion überall null?',
+      opts: ['$f(x) = x^2$', '$f(x) = -2$', '$f(x) = x$', '$f(x) = \\dfrac{1}{x}$'],
+      steps: [
+        'Anstieg null an jeder Stelle heißt: waagerechter Graph.',
+        'Das ist eine konstante Funktion wie $f(x) = -2$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

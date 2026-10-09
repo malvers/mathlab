@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Klausur 11/I: Differentialrechnung und Matrizen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w20-ka1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Klausur 11/I: Differentialrechnung und Matrizen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 20 (KL 11/I) · 20 Aufgaben: gemischte Aufgaben zu LB 1 und LB 2 zur Klausurvorbereitung · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 20 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: limits and rates (1-4), derivatives (5-9), investigating functions (10-14), conditions and optimisation (15-17), matrices (18-20). */
+  questions: [
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to \\infty} \\dfrac{4x^2 - x}{2x^2 + 3}$.',
+      opts: ['$\\infty$', '2', '0', '4'],
+      steps: [
+        'Gleicher Grad: Quotient der Leitkoeffizienten.',
+        '$\\dfrac{4}{2} = 2$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 5} \\dfrac{x^2 - 25}{x - 5}$.',
+      opts: ['0', '5', '10', 'Der Grenzwert existiert nicht.'],
+      steps: [
+        '$\\dfrac{(x - 5)(x + 5)}{x - 5} = x + 5$ für $x \\neq 5$',
+        'Grenzwert $5 + 5 = 10$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = x^2 + 1$ im Intervall $[1;\\,4]$.',
+      opts: ['5', '15', '3', '8'],
+      steps: [
+        '$f(4) = 17$, $f(1) = 2$',
+        '$\\dfrac{17 - 2}{4 - 1} = 5$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was gibt $f^{\\prime}(x_0)$ geometrisch an?',
+      opts: ['Die Krümmung des Graphen.', 'Den Anstieg der Tangente an den Graphen im Punkt $(x_0 \\mid f(x_0))$.', 'Den Funktionswert an der Stelle $x_0$.', 'Den Anstieg einer Sekante.'],
+      steps: [
+        'Der Differentialquotient ist der Grenzwert der Sekantenanstiege.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 4x^3 - \\dfrac{2}{x} + \\sqrt{x}$.',
+      opts: ['$f^{\\prime}(x) = 12x^2 - \\dfrac{2}{x^2} + \\dfrac{1}{2\\sqrt{x}}$', '$f^{\\prime}(x) = 12x^2 + \\dfrac{2}{x^2} + 2\\sqrt{x}$', '$f^{\\prime}(x) = 12x^2 + 2\\ln x + \\dfrac{1}{2\\sqrt{x}}$', '$f^{\\prime}(x) = 12x^2 + \\dfrac{2}{x^2} + \\dfrac{1}{2\\sqrt{x}}$'],
+      steps: [
+        '$-\\dfrac{2}{x} = -2x^{-1}$, abgeleitet $2x^{-2}$.',
+        '$\\sqrt{x} = x^{\\frac{1}{2}}$, abgeleitet $\\dfrac{1}{2\\sqrt{x}}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^2 e^x$.',
+      opts: ['$f^{\\prime}(x) = 2x e^x$', '$f^{\\prime}(x) = x^2 e^x$', '$f^{\\prime}(x) = 2x e^{x-1}$', '$f^{\\prime}(x) = (x^2 + 2x)e^x$'],
+      steps: [
+        'Produktregel: $2x \\cdot e^x + x^2 \\cdot e^x$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sin(3x - 1)$.',
+      opts: ['$f^{\\prime}(x) = 3\\sin(3x - 1)$', '$f^{\\prime}(x) = \\cos(3x - 1)$', '$f^{\\prime}(x) = -3\\cos(3x - 1)$', '$f^{\\prime}(x) = 3\\cos(3x - 1)$'],
+      steps: [
+        'Kettenregel: äußere Ableitung $\\cos(3x - 1)$ mal innere Ableitung 3.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\ln(2x + 1)$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{2x}$', '$f^{\\prime}(x) = 2\\ln(2x + 1)$', '$f^{\\prime}(x) = \\dfrac{1}{2x + 1}$', '$f^{\\prime}(x) = \\dfrac{2}{2x + 1}$'],
+      steps: [
+        '$\\dfrac{1}{2x + 1} \\cdot 2$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Tangente an $f(x) = x^2 - 3x$ an der Stelle $x_0 = 2$?',
+      opts: ['$y = x - 4$', '$y = 2x - 6$', '$y = x - 2$', '$y = -2x + 2$'],
+      steps: [
+        '$f(2) = 4 - 6 = -2$; $f^{\\prime}(x) = 2x - 3$, $f^{\\prime}(2) = 1$',
+        '$y = 1 \\cdot (x - 2) - 2 = x - 4$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Extrempunkte von $f(x) = x^3 - 6x^2 + 9x$.',
+      opts: ['$H(1 \\mid 4)$ und $T(3 \\mid 4)$', '$H(0 \\mid 0)$ und $T(3 \\mid 0)$', '$H(1 \\mid 4)$ und $T(3 \\mid 0)$', '$H(3 \\mid 0)$ und $T(1 \\mid 4)$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 12x + 9 = 3(x - 1)(x - 3)$',
+        '$f^{\\prime\\prime}(x) = 6x - 12$: $f^{\\prime\\prime}(1) = -6$ (Hochpunkt), $f^{\\prime\\prime}(3) = 6$ (Tiefpunkt).',
+        '$f(1) = 4$, $f(3) = 27 - 54 + 27 = 0$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme den Wendepunkt von $f(x) = x^3 - 6x^2 + 9x$.',
+      opts: ['$W(2 \\mid 2)$', '$W(2 \\mid 0)$', '$W(0 \\mid 0)$', '$W(1 \\mid 4)$'],
+      steps: [
+        '$f^{\\prime\\prime}(x) = 6x - 12 = 0 \\Rightarrow x = 2$',
+        '$f(2) = 8 - 24 + 18 = 2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Asymptoten hat $f(x) = \\dfrac{3x}{x + 2}$?',
+      opts: ['$x = 0$ und $y = 3$', '$x = -2$ und $y = 3$', '$x = 2$ und $y = 3$', '$x = -2$ und $y = 0$'],
+      steps: [
+        'Polstelle: Nenner null bei $x = -2$.',
+        'Gleicher Grad: $y = \\dfrac{3}{1} = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = x^5 - 4x^3 + x$?',
+      opts: ['Beide', 'Punktsymmetrie zum Ursprung', 'Keine', 'Achsensymmetrie zur $y$-Achse'],
+      steps: [
+        'Nur ungerade Exponenten: $f(-x) = -f(x)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$f^{\\prime}$ hat bei $x = 2$ eine Nullstelle mit Vorzeichenwechsel von plus nach minus. Was gilt für $f$?',
+      opts: ['$f$ hat bei $x = 2$ eine Nullstelle.', '$f$ hat bei $x = 2$ einen Wendepunkt.', '$f$ hat bei $x = 2$ einen Hochpunkt.', '$f$ hat bei $x = 2$ einen Tiefpunkt.'],
+      steps: [
+        'Vorher steigt $f$, danach fällt $f$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Parabel geht durch $(0 \\mid 1)$ und hat den Scheitel bei $(1 \\mid -1)$. Wie lautet sie?',
+      opts: ['$f(x) = -2x^2 + 4x + 1$', '$f(x) = x^2 - 2x + 1$', '$f(x) = 2x^2 - 4x + 1$', '$f(x) = 2x^2 + 4x + 1$'],
+      steps: [
+        '$f(x) = a(x - 1)^2 - 1$ mit $f(0) = a - 1 = 1$, also $a = 2$.',
+        '$2(x^2 - 2x + 1) - 1 = 2x^2 - 4x + 1$'
+      ],
+      solution: 2
+    },
+    {
+      q: '$f(x) = ax^3 + bx$ hat den Tiefpunkt $T(1 \\mid -2)$. Bestimme $a$ und $b$.',
+      opts: ['$a = 1$, $b = -3$', '$a = 1$, $b = 3$', '$a = -1$, $b = 3$', '$a = 2$, $b = -4$'],
+      steps: [
+        '$f(1) = a + b = -2$, $f^{\\prime}(1) = 3a + b = 0$',
+        '$2a = 2 \\Rightarrow a = 1$, $b = -3$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang 36 cm. Wie groß ist sein Flächeninhalt höchstens?',
+      opts: ['324 cm²', '72 cm²', '81 cm²', '36 cm²'],
+      steps: [
+        '$y = 18 - x$, $A(x) = x(18 - x)$',
+        '$A^{\\prime}(x) = 18 - 2x = 0 \\Rightarrow x = 9$; $A = 81$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 & -2 \\\\ 3 & 0 \\end{pmatrix} \\cdot \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 0 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 3 \\end{pmatrix}$'],
+      steps: [
+        '$1 \\cdot 2 + (-2) \\cdot 1 = 0$',
+        '$3 \\cdot 2 + 0 \\cdot 1 = 6$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $x + y + z = 4$, $y - z = 1$, $2z = 2$.',
+      opts: ['$x = 1$, $y = 1$, $z = 2$', '$x = 1$, $y = 2$, $z = 1$', '$x = 2$, $y = 1$, $z = 1$', '$x = 0$, $y = 3$, $z = 1$'],
+      steps: [
+        '$z = 1$, dann $y = 1 + 1 = 2$.',
+        '$x = 4 - 2 - 1 = 1$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Nach den Umformungen steht in einem 3×3-System die Zeile $(0 \\;\\; 0 \\;\\; 0 \\mid 0)$, die anderen beiden Zeilen sind widerspruchsfrei. Was folgt?',
+      opts: ['Das System hat keine Lösung.', 'Alle Unbekannten sind null.', 'Das System hat genau eine Lösung.', 'Das System hat unendlich viele Lösungen.'],
+      steps: [
+        'Die Zeile $0 = 0$ ist immer wahr und liefert keine Information.',
+        'Es bleiben zwei Gleichungen für drei Unbekannte: eine Unbekannte ist frei.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

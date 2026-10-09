@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Grenzwert an einer Stelle und Stetigkeit — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w03-grenzwert-stetigkeit',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Grenzwert an einer Stelle und Stetigkeit',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 3 (LB 1) · 20 Aufgaben: Grenzwert an einer Stelle, Grenzwertsätze, Stetigkeit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 3 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: limits at a point (1-8), limit laws (9-11), continuity (12-18), bridge to the derivative (19-20). */
+  questions: [
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 2} (x^2 + 1)$.',
+      opts: ['Der Grenzwert existiert nicht.', '5', '3', '4'],
+      steps: [
+        '$x^2 + 1$ ist stetig, man darf einsetzen.',
+        '$2^2 + 1 = 5$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 3} \\dfrac{x^2 - 9}{x - 3}$.',
+      opts: ['6', 'Der Grenzwert existiert nicht, weil man durch null teilt.', '0', '3'],
+      steps: [
+        'Einsetzen ergibt $\\dfrac{0}{0}$, das ist kein Ergebnis.',
+        'Dritte binomische Formel: $\\dfrac{(x - 3)(x + 3)}{x - 3} = x + 3$ für $x \\neq 3$.',
+        '$\\lim\\limits_{x \\to 3} (x + 3) = 6$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 1} \\dfrac{x^2 - 1}{x - 1}$.',
+      opts: ['1', 'Der Grenzwert existiert nicht.', '0', '2'],
+      steps: [
+        '$x^2 - 1 = (x - 1)(x + 1)$',
+        'Für $x \\neq 1$ kürzen: $x + 1$.',
+        '$\\lim\\limits_{x \\to 1} (x + 1) = 2$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 0} \\dfrac{x^2 + 2x}{x}$.',
+      opts: ['2', '1', '0', '$\\infty$'],
+      steps: [
+        '$x$ ausklammern: $\\dfrac{x(x + 2)}{x} = x + 2$ für $x \\neq 0$.',
+        '$\\lim\\limits_{x \\to 0} (x + 2) = 2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was gilt für $f(x) = \\dfrac{1}{x}$, wenn $x$ von rechts gegen null geht?',
+      opts: ['$f(x) \\to -\\infty$', '$f(x) \\to 0$', '$f(x) \\to \\infty$', '$f(x) \\to 1$'],
+      steps: [
+        'Für kleine positive $x$ ist $\\dfrac{1}{x}$ groß und positiv: $f(0{,}01) = 100$.',
+        'Also rechtsseitig $f(x) \\to \\infty$.',
+        'Von links gilt $f(x) \\to -\\infty$; einen Grenzwert an der Stelle 0 gibt es deshalb nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$f(x) = 1$ für $x < 0$ und $f(x) = 2$ für $x \\geq 0$. Was gilt an der Stelle $x_0 = 0$?',
+      opts: ['Der Grenzwert ist 1,5.', 'Der Grenzwert ist 2, weil $f(0) = 2$.', 'Links- und rechtsseitiger Grenzwert sind verschieden, es gibt keinen Grenzwert.', 'Der Grenzwert ist 1.'],
+      steps: [
+        'Linksseitig: $f(x) = 1$, also Grenzwert 1.',
+        'Rechtsseitig: $f(x) = 2$, also Grenzwert 2.',
+        'Verschiedene einseitige Grenzwerte: Es gibt keinen Grenzwert, der Graph hat einen Sprung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was gilt für $f(x) = \\dfrac{1}{(x - 3)^2}$ in der Nähe von $x_0 = 3$?',
+      opts: ['$f(x) \\to 3$', '$f(x) \\to 0$', 'Von beiden Seiten $f(x) \\to \\infty$.', 'Links $f(x) \\to -\\infty$, rechts $f(x) \\to \\infty$.'],
+      steps: [
+        'Der Nenner $(x - 3)^2$ geht gegen null und ist immer positiv.',
+        'Ein Bruch mit positivem Zähler und kleinem positiven Nenner wird beliebig groß.',
+        'Polstelle ohne Vorzeichenwechsel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to -1} \\dfrac{x^3 + 1}{x + 1}$.',
+      opts: ['−1', '3', '0', '1'],
+      steps: [
+        'Polynomdivision oder Faktorisieren: $x^3 + 1 = (x + 1)(x^2 - x + 1)$.',
+        'Für $x \\neq -1$ bleibt $x^2 - x + 1$.',
+        '$(-1)^2 - (-1) + 1 = 3$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Es gilt $\\lim\\limits_{x \\to x_0} f(x) = 3$ und $\\lim\\limits_{x \\to x_0} g(x) = -2$. Bestimme $\\lim\\limits_{x \\to x_0} \\bigl(f(x) \\cdot g(x)\\bigr)$.',
+      opts: ['−6', '5', '−1,5', '1'],
+      steps: [
+        'Grenzwertsatz für Produkte: Der Grenzwert des Produkts ist das Produkt der Grenzwerte.',
+        '$3 \\cdot (-2) = -6$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit denselben Grenzwerten ($f \\to 3$, $g \\to -2$): Bestimme $\\lim\\limits_{x \\to x_0} \\bigl(2f(x) - g(x)\\bigr)$.',
+      opts: ['8', '−8', '6', '4'],
+      steps: [
+        'Summen- und Faktorregel für Grenzwerte.',
+        '$2 \\cdot 3 - (-2) = 6 + 2 = 8$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit denselben Grenzwerten ($f \\to 3$, $g \\to -2$): Bestimme $\\lim\\limits_{x \\to x_0} \\dfrac{f(x)}{g(x)}$.',
+      opts: ['Der Grenzwert existiert nicht.', '$-\\dfrac{2}{3}$', '$-\\dfrac{3}{2}$', '1'],
+      steps: [
+        'Quotientenregel für Grenzwerte, erlaubt weil der Grenzwert des Nenners nicht null ist.',
+        '$\\dfrac{3}{-2} = -\\dfrac{3}{2}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was bedeutet: $f$ ist an der Stelle $x_0$ stetig?',
+      opts: ['$f$ ist an der Stelle $x_0$ definiert.', 'Der Graph hat bei $x_0$ eine waagerechte Tangente.', '$f(x_0) = 0$', '$\\lim\\limits_{x \\to x_0} f(x)$ existiert und ist gleich $f(x_0)$.'],
+      steps: [
+        'Anschaulich: Der Graph lässt sich an dieser Stelle ohne Absetzen zeichnen.',
+        'Formal: Grenzwert existiert und stimmt mit dem Funktionswert überein.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Funktion ist an der Stelle $x_0 = 0$ unstetig?',
+      opts: ['$f(x) = 1$ für $x < 0$, $f(x) = 2$ für $x \\geq 0$', '$f(x) = e^x$', '$f(x) = x^2$', '$f(x) = |x|$'],
+      steps: [
+        'Die Sprungfunktion hat links den Grenzwert 1, rechts 2.',
+        '$|x|$ hat bei 0 einen Knick, ist aber stetig.',
+        '$x^2$ und $e^x$ sind überall stetig.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$f(x) = \\dfrac{x^2 - 4}{x - 2}$ ist an der Stelle 2 nicht definiert. Welchen Wert muss man $f(2)$ geben, damit die Funktion dort stetig wird?',
+      opts: ['$f(2) = 0$', 'Das ist nicht möglich.', '$f(2) = 2$', '$f(2) = 4$'],
+      steps: [
+        'Für $x \\neq 2$ gilt $f(x) = x + 2$.',
+        '$\\lim\\limits_{x \\to 2} (x + 2) = 4$',
+        'Mit $f(2) = 4$ ist die Lücke geschlossen (behebbare Definitionslücke).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $a$ ist $f(x) = x + a$ für $x < 1$ und $f(x) = 2x$ für $x \\geq 1$ an der Stelle 1 stetig?',
+      opts: ['$a = -1$', '$a = 2$', '$a = 0$', '$a = 1$'],
+      steps: [
+        'Rechts: $f(1) = 2 \\cdot 1 = 2$.',
+        'Links: $\\lim\\limits_{x \\to 1} (x + a) = 1 + a$.',
+        'Stetig, wenn $1 + a = 2$, also $a = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Parkhaus kostet 2 € für jede angefangene Stunde. Was gilt für die Funktion Parkdauer $\\mapsto$ Preis?',
+      opts: ['Sie ist überall stetig.', 'Sie ist an jeder vollen Stunde unstetig.', 'Sie hat Polstellen.', 'Sie ist nur bei 0 Stunden unstetig.'],
+      steps: [
+        'Bei 59 Minuten kostet es 2 €, bei 61 Minuten 4 €.',
+        'An jeder vollen Stunde springt der Preis: Treppenfunktion.',
+        'Sprungstellen sind Unstetigkeitsstellen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 4} \\sqrt{x}$.',
+      opts: ['16', '2', '4', '$\\sqrt{2}$'],
+      steps: [
+        'Die Wurzelfunktion ist für $x \\geq 0$ stetig.',
+        'Also einsetzen: $\\sqrt{4} = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Wertetabelle zeigt $\\dfrac{\\sin x}{x}$ für $x = 0{,}1$; 0,01; 0,001: etwa 0,9983; 0,99998; 0,9999998. Was vermutest du für $x \\to 0$?',
+      opts: ['Grenzwert $\\infty$', 'Kein Grenzwert, weil man durch null teilt.', 'Grenzwert 1', 'Grenzwert 0'],
+      steps: [
+        'An der Stelle 0 selbst ist $\\dfrac{\\sin x}{x}$ nicht definiert.',
+        'Die Werte nähern sich aber erkennbar der 1.',
+        'Tatsächlich gilt $\\lim\\limits_{x \\to 0} \\dfrac{\\sin x}{x} = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{h \\to 0} \\dfrac{(2 + h)^2 - 4}{h}$.',
+      opts: ['Der Grenzwert existiert nicht.', '0', '2', '4'],
+      steps: [
+        'Ausmultiplizieren: $(2 + h)^2 - 4 = 4h + h^2$.',
+        'Durch $h$ teilen: $4 + h$.',
+        'Für $h \\to 0$ bleibt 4. So wird nächste Woche der Anstieg der Tangente berechnet.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Aussage ist richtig?',
+      opts: ['Jede Funktion mit einem Knick ist unstetig.', 'Wenn $f$ an $x_0$ stetig ist, gilt $\\lim\\limits_{x \\to x_0} f(x) = f(x_0)$.', 'Wenn $f(x_0)$ existiert, ist $f$ dort stetig.', 'Eine Funktion mit Definitionslücke hat dort immer eine Polstelle.'],
+      steps: [
+        'Die erste Aussage ist genau die Definition der Stetigkeit.',
+        '$|x|$ hat einen Knick und ist stetig.',
+        'Die Sprungfunktion ist bei 0 definiert und trotzdem unstetig; $\\dfrac{x^2 - 4}{x - 2}$ hat eine behebbare Lücke, keinen Pol.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

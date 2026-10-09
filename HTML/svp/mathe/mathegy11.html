@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 11 Grundkurs (Gymnasium) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Gymnasium &middot; Jahrgangsstufe 11</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_gy_mathematik.pdf#page=45', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Grundkurs, Kurshalbjahre 11/I + 11/II &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Differentialrechnung</div>
+            <div class="vu">52 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Matrizen</div>
+            <div class="vu">6 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Vektoren, Geraden und Ebenen</div>
+            <div class="vu">32 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Binomialverteilte Zufallsgr&ouml;&szlig;en</div>
+            <div class="vu">18 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich 2</div>
+            <div class="v">Numerische Verfahren zum L&ouml;sen von Gleichungen</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-bright">Fortsetzung Jahrgangsstufe 12</div>
+            <div class="v">Integralrechnung &middot; Beurteilende Statistik &middot; Abst&auml;nde und Winkel &middot; Weitere Anwendungen</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Der Lehrplan f&uuml;hrt den Grundkurs als Block f&uuml;r die Jahrgangsstufen 11/12 (192 Ustd.) und legt
+        nur die Wochen fest: 26 in Jahrgangsstufe 11, 22 in Jahrgangsstufe 12. Aufteilung in Lehrplan-Reihenfolge:
+        Jahrgangsstufe 11 = LB 1 (52) + LB 2 (6) + LB 3 (32) + LB 4 (18) = 108 Ustd.; Jahrgangsstufe 12 = LB 5 bis LB 8
+        (84 Ustd.). Die Matrizen stehen mitten in LB 1, direkt vor dem Bestimmen ganzrationaler Funktionen &mdash;
+        dort wird das Gau&szlig;-Jordan-Verfahren gebraucht. Gew&auml;hlt ist WB 2 Numerische Verfahren: er setzt
+        die Ableitung voraus und schlie&szlig;t das Kurshalbjahr 11/I ab. Klausuren: je eine pro Kurshalbjahr
+        &mdash; Termine an den Klausurplan der Schule anpassen. Kurzwochen tragen nur so viele Stunden, wie
+        Unterrichtstage da sind.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 4 Ustd./week (Grundkurs); u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Kursauftakt: Organisation der Kursphase, Brücke aus Klasse 10', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisation: Kurssystem, Bewertung (Klausuren und laufende Noten), Hilfsmittel (CAS, Tafelwerk)',
+                'Wiederholung Kl. 10: Funktionsklassen, Verketten von Funktionen, Folgen und Grenzwert anschaulich',
+                'CAS einrichten: Graphen, Tabellen, Lösen von Gleichungen'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/52', topic: 'Grenzwerte: Verhalten im Unendlichen', ziel: 'Kennen des Ermittelns von Grenzwerten bei Funktionen', remark: 'Anschluss an Kl. 10, LB 4 (Folgen)', quiz: { href: '../../mathetestgy11-grenzwerte-unendlich.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Verhalten für $x \\to \\pm\\infty$ an Graph und Wertetabelle',
+                'Waagerechte Asymptoten erkennen und angeben',
+                'Ganzrationale, gebrochenrationale und Exponentialfunktionen vergleichen'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/52', topic: 'Grenzwert an einer Stelle, Grenzwertsätze, Stetigkeit', ziel: 'Einblick gewinnen in den Begriff Stetigkeit einer Funktion', remark: 'Unstetigkeitsstellen', quiz: { href: '../../mathetestgy11-grenzwert-stetigkeit.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Links- und rechtsseitiger Grenzwert, $\\lim_{x \\to x_0} f(x)$',
+                'Grenzwertsätze für Summe, Produkt und Quotient',
+                'Stetigkeit anschaulich: Sprungstellen, Lücken, Polstellen'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/52', topic: 'Änderungsraten: von der Sekante zur Tangente', ziel: 'Beherrschen des Differenzierens: inhaltliches Verständnis des Ableitungsbegriffs', remark: 'Beiträge von I. Newton und G. W. Leibniz', quiz: { href: '../../mathetestgy11-aenderungsraten.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Differenzenquotient als Anstieg der Sekante und als mittlere Änderungsrate',
+                'Differentialquotient als Anstieg der Tangente und als lokale Änderungsrate',
+                'Newton und Leibniz: zwei Wege zur Ableitung'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/52', topic: 'Die Ableitungsfunktion', ziel: 'Ermitteln der Ableitungsfunktion nach Definition', remark: '$f(x) = x^2$ nach Definition', quiz: { href: '../../mathetestgy11-ableitungsfunktion.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Ableitung von $f(x) = x^2$ über den Grenzwert des Differenzenquotienten',
+                'Von der Ableitung an einer Stelle zur Ableitungsfunktion $f\'$',
+                'Graph der Ableitungsfunktion zu einem vorgegebenen Graphen skizzieren'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '17–20/52', topic: 'Ableitungsregeln für Potenzfunktionen', ziel: 'Ermitteln von Ableitungen ohne Hilfsmittel', remark: 'eine Regel herleiten; PH Gk 11, LB 2', quiz: { href: '../../mathetestgy11-ableitungsregeln.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Potenz-, Faktor- und Summenregel, eine davon hergeleitet',
+                'Potenzfunktionen mit rationalen Exponenten: $\\sqrt{x}$, $\\frac{1}{x}$',
+                'Einblick: Umkehrung des Differenzierens bei Potenzfunktionen'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '21–24/52', topic: 'Ableitung von $e^x$, $\\ln x$, $\\sin x$; Produktregel', ziel: 'Ermitteln von Ableitungen ohne Hilfsmittel', remark: 'ohne Quotientenregel', quiz: { href: '../../mathetestgy11-e-ln-sin-produktregel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Ableitungen von $e^x$, $\\ln x$, $\\sin x$ und $\\cos x$',
+                'Produktregel an Beispielen wie $f(x) = 3x^2 \\cdot e^{x}$',
+                'Mit CAS kontrollieren'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '25–28/52', topic: 'Kettenregel: einfache Verkettungen und Verknüpfungen', ziel: 'Ermitteln von Ableitungen ohne und mit Hilfsmitteln', remark: 'mit Hilfsmitteln: beliebige Funktionen', quiz: { href: '../../mathetestgy11-kettenregel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Innere und äußere Funktion, Kettenregel',
+                'Beispiele aus dem Lehrplan: $f(x) = 3x^2 \\cdot e^{2x-1}$, $f(x) = \\ln(3x-5)$',
+                'Mit CAS: Ableitungen beliebiger Funktionen'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb1', u: '29–32/52', topic: 'Monotonie und Extrema', ziel: 'Anwenden der Kenntnisse über Funktionen und ihre Ableitungen', remark: 'notwendige und hinreichende Bedingung', quiz: { href: '../../mathetestgy11-monotonie-extrema.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Monotonie über das Vorzeichen von $f\'$',
+                'Lokale und globale Extrema: notwendige und hinreichende Bedingung',
+                'Intervall- und Mengenschreibweise: $[a;b]$, $(a;b)$, $\\mathbb{R} \\setminus \\{0\\}$'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb1', u: '33–36/52', topic: 'Wendepunkte, Nullstellen, Symmetrie', ziel: 'Anwenden der Kenntnisse über Funktionen und ihre Ableitungen', remark: 'zweite Ableitung', quiz: { href: '../../mathetestgy11-wendepunkte-symmetrie.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Krümmung und Wendepunkte über $f\'\'$',
+                'Nullstellen und Symmetrie zum Ursprung bzw. zur $y$-Achse',
+                'Definitions- und Wertebereich angeben'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb1', u: '37–40/52', topic: 'Polstellen, Asymptoten, Funktionsuntersuchung mit CAS', ziel: 'Anwenden der Kenntnisse über Funktionen und ihre Ableitungen auf das Lösen von Problemen', remark: 'keine routinemäßige Kurvendiskussion', quiz: { href: '../../mathetestgy11-polstellen-asymptoten.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Polstellen und achsenparallele Asymptoten',
+                'Im Sachzusammenhang nur die interessierenden Eigenschaften untersuchen',
+                'CAS für entdeckendes Lernen und zum Deuten der Ergebnisse'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'ue', u: '', topic: 'Übung: Ableitungen und Funktionsuntersuchung', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', details: [
+                'Ableitungen ohne Hilfsmittel trainieren',
+                'Graph und Ableitungsgraph einander zuordnen',
+                'Vermischte Aufgaben mit CAS'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '1–4/6', topic: 'Matrizen: Gleichungssysteme in Matrizenschreibweise', ziel: 'Kennen der Verwendung von Matrizen beim Darstellen und Lösen linearer Gleichungssysteme', remark: 'Gleichungssysteme mit drei Unbekannten', quiz: { href: '../../mathetestgy11-matrizen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Lineare Gleichungssysteme als $A \\cdot \\vec{x} = \\vec{b}$ schreiben',
+                'Multiplizieren verketteter Matrizen: Typen $(m,n) \\cdot (n,1)$ und $(m,n) \\cdot (n,k)$',
+                'Kommutativgesetz gilt nicht: Gegenbeispiele'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '5–6/6', topic: 'Gauß-Jordan-Verfahren; Einblick: Drehungen und Verflechtungen', ziel: 'Einblick gewinnen in ein weiteres Einsatzbeispiel für das Rechnen mit Matrizen', remark: 'zweite Hälfte der Woche: Übung LGS mit CAS', quiz: { href: '../../mathetestgy11-gauss-jordan.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Lösen linearer Gleichungssysteme mit dem Gauß-Jordan-Verfahren',
+                'Drehung geometrischer Objekte in der Ebene als Matrix',
+                'Übung: Gleichungssysteme ohne und mit CAS'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb1', u: '41–44/52', topic: 'Bestimmen ganzrationaler Funktionen aus Bedingungen', ziel: 'Bestimmen von Gleichungen ganzrationaler Funktionen durch Lösen entsprechender Gleichungssysteme', remark: 'ohne Hilfsmittel bis zu drei Unbekannte', quiz: { href: '../../mathetestgy11-steckbrief.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Eigenschaften in Gleichungen übersetzen: Punkt, Extremum, Wendepunkt',
+                'Gleichungssystem aufstellen und lösen',
+                'Mit Hilfsmitteln: mehr als drei Unbekannte'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb1', u: '45–48/52', topic: 'Extremwertprobleme', ziel: 'Lösen von Extremwertproblemen', remark: 'inner- und außermathematische Sachverhalte', quiz: { href: '../../mathetestgy11-extremwertprobleme.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zielfunktion und Nebenbedingung aufstellen',
+                'Extremum bestimmen, Randwerte prüfen',
+                'Ergebnis am Sachverhalt deuten'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'ue', u: '', topic: 'Kurzwoche: Knobeln mit Extremwerten', remark: 'nur Mo–Di', details: [
+                'Klassische Extremwert-Rätsel (Schachtel, Zaun, Dose)',
+                'Lösungswege vergleichen'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb1', u: '49–52/52', topic: 'Funktionsgleichungen durch Regression', ziel: 'Beherrschen des Bestimmens von Funktionsgleichungen mithilfe von Regression', remark: 'CAS; Kl. 10, LB 1', quiz: { href: '../../mathetestgy11-regression.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Messdaten mit passendem Funktionstyp modellieren',
+                'Regression mit CAS, Güte des Modells beurteilen',
+                'Abschluss LB 1: Überblick über die Differentialrechnung'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'ue', u: '', topic: 'Wiederholung: Differentialrechnung und Matrizen', remark: 'Vorbereitung Klausur 11/I', details: [
+                'Ableitungen und Funktionsuntersuchung',
+                'Gleichungssysteme und Steckbriefaufgaben',
+                'Extremwertprobleme; Fragestunde'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lk', u: 'KL 11/I', topic: 'Klausur 11/I (LB 1 Differentialrechnung, LB 2 Matrizen)', remark: 'Termin nach Klausurplan', quiz: { href: '../../mathetestgy11-ka1.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Klausur Kurshalbjahr 11/I',
+                'Auswertung und Fehleranalyse'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'wb', u: '1–4/8', topic: 'Gleichungen grafisch lösen, Bisektionsmethode', ziel: 'Kennen des Lösens von Gleichungen mit grafischen Methoden', remark: 'Kl. 8, LB 3', quiz: { href: '../../mathetestgy11-bisektion.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Wann versagt die Algebra? Gleichungen wie $e^x = 3 - x$',
+                'Schnittpunkte grafisch bestimmen',
+                'Bisektionsmethode: Intervall halbieren, mit CAS-Liste auswerten'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'wb', u: '5–8/8', topic: 'Newton-Verfahren; Verfahren beurteilen', ziel: 'Beherrschen der Bisektionsmethode und des Newton-Verfahrens', remark: 'Ende Kurshalbjahr 11/I', quiz: { href: '../../mathetestgy11-newton-verfahren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Newton-Verfahren: Tangente statt Graph, $x_{n+1} = x_n - \\frac{f(x_n)}{f\'(x_n)}$',
+                'Rekursion mit CAS, Konvergenz und Versagen',
+                'Algebraische, grafische und numerische Verfahren vergleichen'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '1–4/32', topic: 'Das räumliche kartesische Koordinatensystem', ziel: 'Beherrschen der Darstellung geometrischer Objekte im räumlichen kartesischen Koordinatensystem', remark: 'Software für 3D-Darstellungen', quiz: { href: '../../mathetestgy11-raum-koordinaten.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Punkte im Raum eintragen und ablesen',
+                'Quader, Pyramide und Prisma im Schrägbild',
+                'Koordinatenebenen und Spurpunkte anschaulich'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '5–8/32', topic: 'Vektoren: Addition, Subtraktion, Vielfache', ziel: 'Beherrschen der Addition, Subtraktion und Vielfachenbildung von Vektoren', remark: 'Hinweis auf vektorielle Größen; PH Lk 11, LB 3', quiz: { href: '../../mathetestgy11-vektoren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Vektor als Pfeilklasse, Ortsvektor, Verbindungsvektor',
+                'Addieren, Subtrahieren, Vervielfachen, geometrisch und rechnerisch',
+                'Rechengesetze für Vektoren'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '9–12/32', topic: 'Lineare Abhängigkeit, Betrag, Mittelpunkte', ziel: 'Anwenden von Vektoren beim Arbeiten mit geometrischen Objekten', remark: 'geometrische Veranschaulichung', quiz: { href: '../../mathetestgy11-lineare-abhaengigkeit.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Linearkombination; lineare Abhängigkeit und Unabhängigkeit geometrisch deuten',
+                'Betrag eines Vektors, Länge einer Strecke',
+                'Mittelpunkte und Teilungspunkte, Parallelogramm nachweisen'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb3', u: '13–16/32', topic: 'Geraden in Parameterform', ziel: 'Gleichungen von Geraden in Parameterform', remark: 'DGS', quiz: { href: '../../mathetestgy11-geraden.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Geradengleichung $\\vec{x} = \\vec{p} + t \\cdot \\vec{u}$ aufstellen',
+                'Punktprobe; Strecken als Geradenstücke',
+                'Bewegung im Raum als Gerade beschreiben'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb3', u: '17–20/32', topic: 'Lagebeziehungen von Geraden', ziel: 'Untersuchen der Lagebeziehungen einschließlich des Bestimmens von Schnittpunkten: Gerade – Gerade', remark: 'nur Mo–Do', quiz: { href: '../../mathetestgy11-lage-geraden.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Parallel, identisch, schneidend, windschief',
+                'Schnittpunkt über ein Gleichungssystem',
+                'Entscheidungsweg als Ablaufplan'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb3', u: '21–24/32', topic: 'Ebenen in Parameterform', ziel: 'Gleichungen von Ebenen in Parameterform', remark: '', quiz: { href: '../../mathetestgy11-ebenen-parameterform.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Ebene aus drei Punkten bzw. Punkt und zwei Richtungsvektoren',
+                'Punktprobe in der Ebene',
+                'Ebenen im Raum zeichnen, Spurgeraden'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb3', u: '25–28/32', topic: 'Ebenen in parameterfreier Form', ziel: 'Gleichungen von Ebenen in parameterfreier Form', remark: 'Normalenvektor erst in Jgst. 12, LB 7', quiz: { href: '../../mathetestgy11-ebenen-koordinatenform.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Koordinatenform $ax + by + cz = d$ durch Eliminieren der Parameter',
+                'Achsenabschnitte und Spurpunkte aus der Koordinatenform',
+                'Wechsel zwischen den Darstellungen'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb3', u: '29–32/32', topic: 'Lagebeziehung Gerade – Ebene', ziel: 'Untersuchen der Lagebeziehungen einschließlich des Bestimmens von Schnittpunkten: Gerade – Ebene', remark: 'Abschluss LB 3', quiz: { href: '../../mathetestgy11-gerade-ebene.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Gerade schneidet, liegt in oder ist parallel zur Ebene',
+                'Durchstoßpunkt bestimmen',
+                'Anwendung: Schattenpunkte, Flugbahnen'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb4', u: '1–4/18', topic: 'Mehrstufige Zufallsexperimente: Urnenmodell und Pfadregeln', ziel: 'Beherrschen des Veranschaulichens sowie des Berechnens bzw. Abschätzens von Wahrscheinlichkeiten bei mehrstufigen Zufallsexperimenten', remark: 'Diskussion unterschiedlicher Lösungswege', quiz: { href: '../../mathetestgy11-mehrstufig.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Urnenmodell: Ziehen mit und ohne Zurücklegen',
+                'Baumdiagramm und Pfadregeln',
+                'Simulation von Zufallsexperimenten'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb4', u: '5–6/18', topic: 'Vierfeldertafel und stochastische Unabhängigkeit', ziel: 'stochastische Unabhängigkeit bzw. Abhängigkeit von Ereignissen und Zufallsgrößen', remark: 'nur Mo–Mi: Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei', quiz: { href: '../../mathetestgy11-vierfeldertafel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Vierfeldertafel aufstellen und lesen',
+                'Unabhängigkeit prüfen: $P(A \\cap B) = P(A) \\cdot P(B)$'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lb4', u: '7–10/18', topic: 'Bernoulli-Ketten und Binomialkoeffizient', ziel: 'Beherrschen des Berechnens von Wahrscheinlichkeiten binomialverteilter Zufallsgrößen', remark: 'Begriffe Fakultät, Binomialkoeffizient; BIO Kl. 10, LB 1', quiz: { href: '../../mathetestgy11-bernoulli.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Bernoulli-Experiment und Bernoulli-Kette',
+                'Fakultät und Binomialkoeffizient $\\binom{n}{k}$',
+                'Formel für die Einzelwahrscheinlichkeit herleiten'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'lb4', u: '11–12/18', topic: 'Einzelwahrscheinlichkeit $P(X = k)$', ziel: 'Einzelwahrscheinlichkeit binomialverteilter Zufallsgrößen', remark: 'nur Mi–Fr', quiz: { href: '../../mathetestgy11-binomialverteilung.html', label: 'Aufgaben 1 (20)' }, details: [
+                '$P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot (1-p)^{n-k}$ anwenden',
+                'Histogramme binomialverteilter Zufallsgrößen'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'lb4', u: '13–16/18', topic: 'Kumulierte Wahrscheinlichkeiten', ziel: 'kumulierte Wahrscheinlichkeit auch unter Verwendung des Summensymbols', remark: '„höchstens k“, „mindestens k“', quiz: { href: '../../mathetestgy11-kumuliert.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Kumulierte Wahrscheinlichkeit $P(X \\le k)$ mit Summensymbol',
+                '„mindestens“, „höchstens“, „zwischen“ sicher übersetzen',
+                'Mit CAS bzw. Tabelle berechnen'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'lb4', u: '17–18/18', topic: 'Erwartungswert, Varianz und Standardabweichung', ziel: 'Kenngrößen binomialverteilter Zufallsgrößen', remark: 'Abschluss LB 4; zweite Hälfte der Woche Übung', quiz: { href: '../../mathetestgy11-erwartungswert-sigma.html', label: 'Aufgaben 1 (20)' }, details: [
+                '$E(X) = n \\cdot p$ und $\\sigma = \\sqrt{n \\cdot p \\cdot (1-p)}$',
+                'Kenngrößen am Histogramm deuten',
+                'Übung: vermischte Aufgaben zur Binomialverteilung'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'ue', u: '', topic: 'Wiederholung: Vektoren, Geraden, Ebenen und Binomialverteilung', remark: 'Vorbereitung Klausur 11/II', details: [
+                'Lagebeziehungen im Raum',
+                'Binomialverteilte Zufallsgrößen in Sachaufgaben',
+                'Fragestunde'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'lk', u: 'KL 11/II', topic: 'Klausur 11/II (LB 3 Vektoren, Geraden und Ebenen, LB 4 Binomialverteilte Zufallsgrößen)', remark: 'Termin nach Klausurplan', quiz: { href: '../../mathetestgy11-ka2.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Klausur Kurshalbjahr 11/II',
+                'Auswertung und Fehleranalyse'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Vertiefung nach Bedarf', remark: 'Puffer', details: [
+                'Schwerpunkte aus der Auswertung der Klausur',
+                'Differenzierte Übung zu allen Lernbereichen'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Vernetzen: Analysis, Geometrie und Stochastik', remark: 'Puffer', details: [
+                'Aufgaben, die mehrere Lernbereiche verbinden',
+                'Arbeiten mit dem CAS festigen',
+                'Was in Jahrgangsstufe 12 kommt'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr',
+                'Mathematische Spiele',
+                'Ausblick auf die Jahrgangsstufe 12'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_gy_mathematik.pdf where that Lernbereich starts
+        // (the Grundkurs 11/12 block: Ziele on page 44, LB 1 on page 45).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_gy_mathematik.pdf',
+            page: 44,
+            lb1: {
+                page: 45,
+                bullets: [
+                    'Grenzwerte bei Funktionen, Einblick in die Stetigkeit',
+                    'Ableitungsbegriff: Sekante und Tangente, mittlere und lokale Änderungsrate',
+                    'Ableitungsregeln ohne Hilfsmittel, mit Hilfsmitteln beliebige Funktionen',
+                    'Funktionsuntersuchung im Sachzusammenhang, Bestimmen ganzrationaler Funktionen',
+                    'Extremwertprobleme, Regression',
+                ]
+            },
+            lb2: {
+                page: 46,
+                bullets: [
+                    'Lineare Gleichungssysteme in Matrizenschreibweise',
+                    'Multiplizieren verketteter Matrizen',
+                    'Gauß-Jordan-Verfahren, Drehungen und Verflechtungen',
+                ]
+            },
+            lb3: {
+                page: 46,
+                bullets: [
+                    'Räumliches kartesisches Koordinatensystem',
+                    'Rechnen mit Vektoren, lineare Abhängigkeit',
+                    'Geraden und Ebenen in Parameterform und parameterfreier Form',
+                    'Lagebeziehungen Gerade – Gerade und Gerade – Ebene',
+                ]
+            },
+            lb4: {
+                page: 46,
+                bullets: [
+                    'Mehrstufige Zufallsexperimente: Urnenmodell, Baumdiagramm, Vierfeldertafel',
+                    'Stochastische Unabhängigkeit',
+                    'Bernoulli-Kette, Einzel- und kumulierte Wahrscheinlichkeit',
+                    'Erwartungswert, Varianz, Standardabweichung',
+                ]
+            },
+            wb: {
+                page: 49,
+                bullets: [
+                    'Wahlbereich 2: Numerische Verfahren zum Lösen von Gleichungen (gewählt)',
+                    'Gleichungen grafisch lösen, Bisektionsmethode, Newton-Verfahren',
+                    'Eignung algebraischer, grafischer und numerischer Verfahren beurteilen',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            wb: ['b-green', 'WB 2'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', '\u00dcBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+
+        // Not-chosen Wahlbereiche, shown as dimmed pills in the legend with
+        // Lehrplan-PDF deep links.
+        window.ALT_BADGES = {
+            wb: [['WB 1', 48], ['WB 3', 49], ['WB 4', 49], ['WB 5', 49], ['WB 6', 50]]
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>

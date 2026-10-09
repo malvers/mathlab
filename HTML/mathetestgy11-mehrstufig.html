@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Mehrstufige Zufallsexperimente — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w31-mehrstufig',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Mehrstufige Zufallsexperimente',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 31 (LB 4) · 20 Aufgaben: Urnenmodell mit und ohne Zurücklegen, Baumdiagramm, Pfadregeln, Simulation · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 31 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: path rules (1-2), urn with and without replacement (3-9), dice, coins and wheels (10-15), complement and estimates (16-18), simulation (19-20). */
+  questions: [
+    {
+      q: 'Wie berechnet man die Wahrscheinlichkeit eines Pfades im Baumdiagramm?',
+      opts: ['Man multipliziert die Wahrscheinlichkeiten längs des Pfades.', 'Man addiert die Wahrscheinlichkeiten längs des Pfades.', 'Man teilt durch die Zahl der Stufen.', 'Man nimmt die kleinste Wahrscheinlichkeit des Pfades.'],
+      steps: [
+        '1. Pfadregel (Produktregel).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie berechnet man die Wahrscheinlichkeit eines Ereignisses, zu dem mehrere Pfade gehören?',
+      opts: ['Man nimmt den wahrscheinlichsten Pfad.', 'Man addiert die Wahrscheinlichkeiten dieser Pfade.', 'Man multipliziert die Pfadwahrscheinlichkeiten.', 'Man zählt nur die Pfade.'],
+      steps: [
+        '2. Pfadregel (Summenregel).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einer Urne liegen 3 rote und 2 blaue Kugeln. Man zieht zweimal MIT Zurücklegen. Wie groß ist die Wahrscheinlichkeit für zwei rote Kugeln?',
+      opts: ['$\\dfrac{3}{10}$', '$\\dfrac{9}{25}$', '$\\dfrac{3}{5}$', '$\\dfrac{6}{25}$'],
+      steps: [
+        'Mit Zurücklegen bleibt die Wahrscheinlichkeit gleich: $\\dfrac{3}{5}$.',
+        '$\\dfrac{3}{5} \\cdot \\dfrac{3}{5} = \\dfrac{9}{25}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einer Urne liegen 3 rote und 2 blaue Kugeln. Man zieht zweimal OHNE Zurücklegen. Wie groß ist die Wahrscheinlichkeit für zwei rote Kugeln?',
+      opts: ['$\\dfrac{3}{10}$', '$\\dfrac{2}{5}$', '$\\dfrac{1}{2}$', '$\\dfrac{9}{25}$'],
+      steps: [
+        'Nach der ersten roten Kugel liegen noch 2 rote unter 4 Kugeln.',
+        '$\\dfrac{3}{5} \\cdot \\dfrac{2}{4} = \\dfrac{6}{20} = \\dfrac{3}{10}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einer Urne liegen 3 rote und 2 blaue Kugeln. Zweimal ohne Zurücklegen: Wie wahrscheinlich ist genau eine rote Kugel?',
+      opts: ['$\\dfrac{3}{5}$', '$\\dfrac{12}{25}$', '$\\dfrac{1}{2}$', '$\\dfrac{3}{10}$'],
+      steps: [
+        'Zwei Pfade: rot–blau und blau–rot.',
+        '$\\dfrac{3}{5} \\cdot \\dfrac{2}{4} + \\dfrac{2}{5} \\cdot \\dfrac{3}{4} = \\dfrac{6}{20} + \\dfrac{6}{20} = \\dfrac{3}{5}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einer Urne liegen 3 rote und 2 blaue Kugeln. Zweimal MIT Zurücklegen: Wie wahrscheinlich sind zwei verschiedene Farben?',
+      opts: ['$\\dfrac{13}{25}$', '$\\dfrac{12}{25}$', '$\\dfrac{6}{25}$', '$\\dfrac{3}{5}$'],
+      steps: [
+        '$2 \\cdot \\dfrac{3}{5} \\cdot \\dfrac{2}{5} = \\dfrac{12}{25}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einer Urne liegen 3 rote und 2 blaue Kugeln. Zweimal mit Zurücklegen: Wie wahrscheinlich ist mindestens eine blaue Kugel?',
+      opts: ['$\\dfrac{16}{25}$', '$\\dfrac{2}{5}$', '$\\dfrac{4}{25}$', '$\\dfrac{9}{25}$'],
+      steps: [
+        'Gegenereignis: zweimal rot, $\\dfrac{9}{25}$.',
+        '$1 - \\dfrac{9}{25} = \\dfrac{16}{25}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einer Urne liegen 3 rote und 2 blaue Kugeln. Man zieht dreimal ohne Zurücklegen. Wie wahrscheinlich sind drei rote Kugeln?',
+      opts: ['$\\dfrac{3}{5}$', '$\\dfrac{27}{125}$', '$\\dfrac{1}{5}$', '$\\dfrac{1}{10}$'],
+      steps: [
+        '$\\dfrac{3}{5} \\cdot \\dfrac{2}{4} \\cdot \\dfrac{1}{3} = \\dfrac{6}{60}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ändert sich beim Ziehen OHNE Zurücklegen von Stufe zu Stufe?',
+      opts: ['Die Summe aller Pfadwahrscheinlichkeiten wird kleiner als 1.', 'Die Wahrscheinlichkeiten, weil sich der Urneninhalt ändert.', 'Nur die Zahl der Stufen.', 'Nichts.'],
+      steps: [
+        'Die Wahrscheinlichkeiten auf der zweiten Stufe hängen vom Ergebnis der ersten ab.',
+        'Die Summe aller Pfade bleibt 1.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Münze wird dreimal geworfen. Wie wahrscheinlich ist mindestens einmal Kopf?',
+      opts: ['$\\dfrac{1}{8}$', '$\\dfrac{1}{2}$', '$\\dfrac{7}{8}$', '$\\dfrac{3}{8}$'],
+      steps: [
+        'Gegenereignis: dreimal Zahl, $\\left(\\dfrac{1}{2}\\right)^3 = \\dfrac{1}{8}$.',
+        '$1 - \\dfrac{1}{8} = \\dfrac{7}{8}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Würfel werden geworfen. Wie wahrscheinlich ist die Augensumme 7?',
+      opts: ['$\\dfrac{1}{11}$', '$\\dfrac{7}{36}$', '$\\dfrac{1}{12}$', '$\\dfrac{1}{6}$'],
+      steps: [
+        'Günstig: $(1,6), (2,5), (3,4), (4,3), (5,2), (6,1)$, also 6 von 36.',
+        'Falle: Die 11 möglichen Summen sind nicht gleich wahrscheinlich.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Würfel werden geworfen. Wie wahrscheinlich ist ein Pasch (zwei gleiche Augenzahlen)?',
+      opts: ['$\\dfrac{1}{12}$', '$\\dfrac{1}{3}$', '$\\dfrac{1}{36}$', '$\\dfrac{1}{6}$'],
+      steps: [
+        '6 Pasche unter 36 Ergebnissen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Würfel wird viermal geworfen. Wie wahrscheinlich ist mindestens eine Sechs?',
+      opts: ['etwa 0,667', 'genau 0,25', 'etwa 0,482', 'etwa 0,518'],
+      steps: [
+        'Gegenereignis: keine Sechs, $\\left(\\dfrac{5}{6}\\right)^4 \\approx 0{,}482$.',
+        '$1 - 0{,}482 = 0{,}518$. Das war schon im 17. Jahrhundert eine Wette des Chevalier de Méré.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Glücksrad zeigt mit Wahrscheinlichkeit $\\dfrac{1}{4}$ Rot und sonst Grün. Es wird zweimal gedreht. Wie wahrscheinlich ist zweimal Grün?',
+      opts: ['$\\dfrac{3}{8}$', '$\\dfrac{1}{16}$', '$\\dfrac{9}{16}$', '$\\dfrac{3}{4}$'],
+      steps: [
+        '$\\dfrac{3}{4} \\cdot \\dfrac{3}{4} = \\dfrac{9}{16}$'
+      ],
+      solution: 2
+    },
+    {
+      q: '60 % der Schülerinnen und Schüler einer großen Schule kommen mit dem Bus. Zwei werden zufällig gewählt. Wie wahrscheinlich kommen beide mit dem Bus?',
+      opts: ['1,2', '0,6', '0,36', '0,48'],
+      steps: [
+        'Bei einer großen Schule ändert die erste Auswahl den Anteil kaum: wie mit Zurücklegen.',
+        '$0{,}6 \\cdot 0{,}6 = 0{,}36$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann lohnt sich das Gegenereignis beim Rechnen?',
+      opts: ['Nur bei Würfeln.', 'Nie, es ist immer umständlicher.', 'Bei „mindestens einmal“: Das Gegenereignis „keinmal“ hat nur einen Pfad.', 'Nur bei genau zwei Stufen.'],
+      steps: [
+        '$P(\\text{mindestens eins}) = 1 - P(\\text{keins})$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel wird zehnmal geworfen. Wie wahrscheinlich ist mindestens eine Sechs, gerundet?',
+      opts: ['etwa 1,67', 'etwa 0,16', 'etwa 0,84', 'etwa 0,5'],
+      steps: [
+        '$1 - \\left(\\dfrac{5}{6}\\right)^{10} \\approx 1 - 0{,}16 = 0{,}84$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Lösungswege für dieselbe Wahrscheinlichkeit liefern verschiedene Ergebnisse. Was ist sinnvoll?',
+      opts: ['Beide gelten lassen.', 'Beide Wege vergleichen und den Fehler suchen; das richtige Ergebnis ist eindeutig.', 'Das größere Ergebnis nehmen.', 'Den Mittelwert nehmen.'],
+      steps: [
+        'Eine Wahrscheinlichkeit hat genau einen Wert.',
+        'Unterschiedliche Lösungswege sind eine gute Kontrolle.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie simuliert man mit Zufallsziffern 0 bis 9 ein Ereignis mit der Wahrscheinlichkeit 0,3?',
+      opts: ['Die Ziffern 0, 1, 2 gelten als Treffer.', 'Die Ziffer 3 gilt als Treffer.', 'Jede ungerade Ziffer gilt als Treffer.', 'Die Ziffern 0 bis 3 gelten als Treffer.'],
+      steps: [
+        '3 von 10 gleich wahrscheinlichen Ziffern ergeben 0,3.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum führt man eine Simulation sehr oft durch?',
+      opts: ['Damit alle Ergebnisse gleich oft vorkommen.', 'Weil wenige Durchgänge verboten sind.', 'Damit das Ergebnis exakt wird.', 'Die relative Häufigkeit stabilisiert sich bei vielen Durchgängen und schätzt die Wahrscheinlichkeit.'],
+      steps: [
+        'Empirisches Gesetz der großen Zahlen.',
+        'Ein Simulationsergebnis bleibt eine Schätzung.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Binomialverteilung: Einzelwahrscheinlichkeiten — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w34-binomialverteilung',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Binomialverteilung: Einzelwahrscheinlichkeiten',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 34 (LB 4) · 20 Aufgaben: P(X = k) berechnen, n und p erkennen, Histogramme deuten · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 34 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: formula and model (1-4), computing P(X = k) (5-13), histograms (14-18), properties (19-20). */
+  questions: [
+    {
+      q: 'Wie lautet die Formel für die Einzelwahrscheinlichkeit einer binomialverteilten Zufallsgröße?',
+      opts: ['$P(X = k) = \\dfrac{k}{n}$', '$P(X = k) = \\dbinom{n}{k} \\cdot p^n$', '$P(X = k) = \\dbinom{n}{k} \\cdot p^k \\cdot (1 - p)^{n - k}$', '$P(X = k) = p^k \\cdot (1 - p)^k$'],
+      steps: [
+        'Anzahl der Pfade mal Wahrscheinlichkeit eines Pfades.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was bedeutet die Schreibweise $B_{n;\\,p}(k)$?',
+      opts: ['Die Wahrscheinlichkeit für genau $k$ Treffer bei $n$ Versuchen mit Trefferwahrscheinlichkeit $p$', 'Den Erwartungswert', 'Die Wahrscheinlichkeit für höchstens $k$ Treffer', 'Den Binomialkoeffizienten $\\dbinom{n}{k}$'],
+      steps: [
+        '$B_{n;\\,p}(k) = P(X = k)$ für $X$ binomialverteilt mit $n$ und $p$.'
+      ],
+      solution: 0
+    },
+    {
+      q: '90 % der Samen einer Sorte keimen. Man sät 10 Samen. Was ist die Zufallsgröße $X$ und wie ist sie verteilt?',
+      opts: ['$X$: Anzahl der Samen, immer 10', '$X$: Anzahl der keimenden Samen, binomialverteilt mit $n = 10$, $p = 0{,}9$', '$X$: Anteil der Samen, gleichverteilt', '$X$: Keimdauer, binomialverteilt mit $n = 10$'],
+      steps: [
+        'Jeder Samen ist ein Bernoulli-Experiment: keimt oder keimt nicht.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Situation ist NICHT binomialverteilt?',
+      opts: ['Zehnmal würfeln, $X$: Anzahl Sechsen', '20 Münzwürfe, $X$: Anzahl Kopf', 'Fünf Fragen raten, $X$: Anzahl richtig', 'Aus einer Urne mit 3 roten und 2 blauen Kugeln dreimal ohne Zurücklegen ziehen, $X$: Anzahl rot'],
+      steps: [
+        'Ohne Zurücklegen bei so wenigen Kugeln ändert sich $p$ deutlich.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$X$ ist binomialverteilt mit $n = 10$, $p = 0{,}5$. Berechne $P(X = 5)$.',
+      opts: ['etwa 0,377', '0,5', 'etwa 0,246', 'etwa 0,05'],
+      steps: [
+        '$\\dbinom{10}{5} \\cdot 0{,}5^{10} = \\dfrac{252}{1024}$',
+        '$\\approx 0{,}246$: Selbst der wahrscheinlichste Wert tritt nur in einem Viertel der Fälle ein.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$n = 5$, $p = 0{,}2$. Berechne $P(X = 0)$.',
+      opts: ['0,2', '0,32768', '0,00032', '0'],
+      steps: [
+        '$0{,}8^5 = 0{,}327\\,68$'
+      ],
+      solution: 1
+    },
+    {
+      q: '$n = 5$, $p = 0{,}2$. Berechne $P(X = 1)$.',
+      opts: ['0,2', '0,08192', '0,4096', '0,32768'],
+      steps: [
+        '$\\dbinom{5}{1} \\cdot 0{,}2 \\cdot 0{,}8^4 = 5 \\cdot 0{,}2 \\cdot 0{,}4096$',
+        '$= 0{,}4096$'
+      ],
+      solution: 2
+    },
+    {
+      q: '$n = 4$, $p = 0{,}3$. Berechne $P(X = 2)$.',
+      opts: ['0,0441', '0,2646', '0,3', '0,09'],
+      steps: [
+        '$\\dbinom{4}{2} \\cdot 0{,}3^2 \\cdot 0{,}7^2 = 6 \\cdot 0{,}09 \\cdot 0{,}49$'
+      ],
+      solution: 1
+    },
+    {
+      q: '$n = 20$, $p = 0{,}1$. Berechne $P(X = 2)$ (gerundet).',
+      opts: ['0,01', '0,1', '0,2852', '0,1901'],
+      steps: [
+        '$\\dbinom{20}{2} \\cdot 0{,}1^2 \\cdot 0{,}9^{18} = 190 \\cdot 0{,}01 \\cdot 0{,}1501$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel wird sechsmal geworfen. Wie wahrscheinlich ist genau eine Sechs?',
+      opts: ['$\\dfrac{1}{6}$', 'etwa 0,335', '1', 'etwa 0,402'],
+      steps: [
+        '$\\dbinom{6}{1} \\cdot \\dfrac{1}{6} \\cdot \\left(\\dfrac{5}{6}\\right)^5 = \\left(\\dfrac{5}{6}\\right)^5$',
+        '$\\approx 0{,}402$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Von 10 Samen ($p = 0{,}9$): Wie wahrscheinlich keimen alle?',
+      opts: ['0,9', 'etwa 0,1', 'etwa 0,387', 'etwa 0,349'],
+      steps: [
+        '$0{,}9^{10} \\approx 0{,}349$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Von 10 Samen ($p = 0{,}9$): Wie wahrscheinlich keimen genau 9?',
+      opts: ['0,9', 'etwa 0,387', '0,09', 'etwa 0,349'],
+      steps: [
+        '$\\dbinom{10}{9} \\cdot 0{,}9^9 \\cdot 0{,}1 = 0{,}9^9 \\approx 0{,}387$',
+        'Also ist „genau 9“ wahrscheinlicher als „alle 10“.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist $P(X = n)$ bei einer Binomialverteilung?',
+      opts: ['$p^n$', '1', '$n \\cdot p$', '$(1 - p)^n$'],
+      steps: [
+        'Nur ein Pfad: alles Treffer.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was zeigt das Histogramm einer Binomialverteilung?',
+      opts: ['Nur den Erwartungswert', 'Die kumulierten Wahrscheinlichkeiten', 'Die Pfade des Baumdiagramms', 'Über jedem $k$ einen Balken der Höhe $P(X = k)$'],
+      steps: [
+        'Breite 1, also ist auch die Fläche jedes Balkens $P(X = k)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie sieht das Histogramm für $p = 0{,}5$ aus?',
+      opts: ['Symmetrisch zu $k = \\dfrac{n}{2}$', 'Alle Balken gleich hoch', 'Rechtssteil', 'Linkssteil'],
+      steps: [
+        'Treffer und Niete sind gleich wahrscheinlich, also gilt $P(X = k) = P(X = n - k)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo liegt etwa der höchste Balken für $n = 10$, $p = 0{,}3$?',
+      opts: ['Bei $k = 10$', 'Bei $k = 5$', 'Bei $k = 3$', 'Bei $k = 0$'],
+      steps: [
+        'Der wahrscheinlichste Wert liegt in der Nähe von $n \\cdot p = 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie sieht das Histogramm für $n = 20$, $p = 0{,}1$ aus?',
+      opts: ['Die Balken drängen sich links, rechts läuft es flach aus (linkssteil).', 'Alle Balken gleich hoch', 'Die Balken drängen sich rechts.', 'Symmetrisch'],
+      steps: [
+        'Kleine $p$: wenige Treffer sind wahrscheinlich, viele kaum.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Vergleiche für $n = 10$, $p = 0{,}5$: $P(X = 4)$ und $P(X = 6)$.',
+      opts: ['$P(X = 6)$ ist größer.', 'Man kann es nicht sagen.', '$P(X = 4)$ ist größer.', 'Sie sind gleich.'],
+      steps: [
+        '$\\dbinom{10}{4} = \\dbinom{10}{6} = 210$ und $0{,}5^{10}$ ist für beide gleich.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ergibt die Summe aller Einzelwahrscheinlichkeiten $P(X = 0) + \\ldots + P(X = n)$?',
+      opts: ['0,5', '1', '$n$', '$n \\cdot p$'],
+      steps: [
+        'Irgendeine Trefferzahl tritt sicher ein.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei $n = 3$ gilt $P(X = 3) = p^3$. Für welches $p$ ist $P(X = 3) = 0{,}125$?',
+      opts: ['$p = 0{,}5$', '$p = 0{,}375$', '$p = 0{,}125$', '$p = 0{,}25$'],
+      steps: [
+        '$p^3 = 0{,}125 = \\dfrac{1}{8}$',
+        '$p = \\dfrac{1}{2}$'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

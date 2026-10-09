@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Grenzwerte im Unendlichen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w02-grenzwerte-unendlich',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Grenzwerte im Unendlichen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 2 (LB 1) · 20 Aufgaben: Verhalten für große x, waagerechte Asymptoten, Langzeitverhalten · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: power and rational functions (1-8), asymptotes (9-12), exponential, log and sine (13-17), context (18-20). */
+  questions: [
+    {
+      q: 'Wie verhält sich $f(x) = \\dfrac{1}{x}$ für $x \\to \\infty$?',
+      opts: ['$f(x) \\to \\infty$', '$f(x) \\to 0$', '$f(x) \\to 1$', 'Es gibt keinen Grenzwert.'],
+      steps: [
+        'Für große $x$ wird der Nenner immer größer, der Bruch immer kleiner.',
+        'Wertetabelle: $f(10) = 0{,}1$, $f(1000) = 0{,}001$.',
+        'Also $\\lim\\limits_{x \\to \\infty} \\dfrac{1}{x} = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to \\infty} \\dfrac{3x + 1}{x}$.',
+      opts: ['$\\infty$', '1', '0', '3'],
+      steps: [
+        'Zähler und Nenner durch $x$ teilen: $\\dfrac{3x + 1}{x} = 3 + \\dfrac{1}{x}$.',
+        'Der Summand $\\dfrac{1}{x}$ geht gegen null.',
+        'Grenzwert: 3.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to \\infty} \\dfrac{2x^2 - 5}{x^2 + 1}$.',
+      opts: ['$\\infty$', '−5', '2', '0'],
+      steps: [
+        'Zähler und Nenner durch die höchste Potenz $x^2$ teilen.',
+        '$\\dfrac{2 - \\frac{5}{x^2}}{1 + \\frac{1}{x^2}} \\to \\dfrac{2 - 0}{1 + 0}$',
+        'Gleicher Grad oben und unten: Der Grenzwert ist der Quotient der Leitkoeffizienten, hier 2.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to \\infty} \\dfrac{4x}{x^2 + 1}$.',
+      opts: ['4', '0', '1', '$\\infty$'],
+      steps: [
+        'Durch $x^2$ teilen: $\\dfrac{\\frac{4}{x}}{1 + \\frac{1}{x^2}}$.',
+        'Der Zähler geht gegen null, der Nenner gegen eins.',
+        'Der Nennergrad ist größer als der Zählergrad, also Grenzwert 0.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verhält sich $f(x) = x^3 - 100x^2$ für $x \\to \\infty$?',
+      opts: ['$f(x) \\to 0$', '$f(x) \\to -100$', '$f(x) \\to -\\infty$', '$f(x) \\to \\infty$'],
+      steps: [
+        'Für das Verhalten im Unendlichen entscheidet der Summand mit der höchsten Potenz.',
+        '$f(x) = x^2 \\cdot (x - 100)$: Für $x > 100$ sind beide Faktoren positiv und wachsen.',
+        'Also $f(x) \\to \\infty$, auch wenn der Graph zunächst fällt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie verhält sich $f(x) = -2x^4 + x$ für $x \\to \\infty$ und für $x \\to -\\infty$?',
+      opts: ['In beiden Fällen $f(x) \\to -\\infty$.', 'In beiden Fällen $f(x) \\to \\infty$.', 'In beiden Fällen $f(x) \\to 0$.', '$f(x) \\to -\\infty$ für $x \\to \\infty$, $f(x) \\to \\infty$ für $x \\to -\\infty$.'],
+      steps: [
+        'Entscheidend ist $-2x^4$.',
+        'Der Exponent ist gerade, also ist $x^4$ für große positive und große negative $x$ groß und positiv.',
+        'Mit dem Faktor −2 geht $f(x)$ auf beiden Seiten gegen $-\\infty$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie verhält sich $f(x) = x^3$ für $x \\to -\\infty$?',
+      opts: ['$f(x) \\to -\\infty$', '$f(x) \\to -1$', '$f(x) \\to \\infty$', '$f(x) \\to 0$'],
+      steps: [
+        'Ungerader Exponent: Das Vorzeichen bleibt erhalten.',
+        '$(-10)^3 = -1000$, $(-100)^3 = -1\\,000\\,000$.',
+        'Also $f(x) \\to -\\infty$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Folge $a_n = \\dfrac{n + 1}{n}$ aus Klasse 10 gehört zur Funktion $f(x) = \\dfrac{x + 1}{x}$. Wogegen strebt sie?',
+      opts: ['0', '$\\infty$', '1', '2'],
+      steps: [
+        '$\\dfrac{n + 1}{n} = 1 + \\dfrac{1}{n}$',
+        '$\\dfrac{1}{n}$ wird beliebig klein.',
+        'Grenzwert 1; die Folgenglieder liegen alle knapp darüber.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche waagerechte Asymptote hat der Graph von $f(x) = \\dfrac{6x + 1}{2x - 3}$?',
+      opts: ['$y = -\\dfrac{1}{3}$', '$y = 6$', '$x = \\dfrac{3}{2}$', '$y = 3$'],
+      steps: [
+        'Gleicher Grad in Zähler und Nenner: Quotient der Leitkoeffizienten.',
+        '$\\dfrac{6}{2} = 3$, also $y = 3$.',
+        '$x = \\dfrac{3}{2}$ ist eine senkrechte Asymptote, keine waagerechte.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche waagerechte Asymptote hat $f(x) = 2 + \\dfrac{1}{x^2}$?',
+      opts: ['$y = 0$', 'Es gibt keine.', '$y = 2$', '$y = 3$'],
+      steps: [
+        '$\\dfrac{1}{x^2} \\to 0$ für $x \\to \\pm\\infty$.',
+        'Also $f(x) \\to 2$.',
+        'Der Graph nähert sich der Geraden $y = 2$ von oben.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Funktion hat für $x \\to \\infty$ die $x$-Achse als Asymptote?',
+      opts: ['$f(x) = \\dfrac{3}{x + 1}$', '$f(x) = \\dfrac{x^2}{x + 1}$', '$f(x) = 3x$', '$f(x) = \\dfrac{x}{x + 1}$'],
+      steps: [
+        'Die $x$-Achse ist die Gerade $y = 0$; gesucht ist also $f(x) \\to 0$.',
+        '$\\dfrac{3}{x + 1}$: Zählergrad kleiner als Nennergrad, Grenzwert 0.',
+        '$\\dfrac{x}{x + 1} \\to 1$, die anderen beiden wachsen über alle Grenzen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Nähert sich ein Graph seiner waagerechten Asymptote immer nur von einer Seite?',
+      opts: ['Nein, eine Asymptote gibt es nur bei Polstellen.', 'Nein, er kann sie auch schneiden, z. B. $f(x) = \\dfrac{\\sin x}{x}$.', 'Ja, ein Graph schneidet seine Asymptote nie.', 'Ja, immer von oben.'],
+      steps: [
+        'Asymptote heißt nur: Für $x \\to \\infty$ wird der Abstand beliebig klein.',
+        '$\\dfrac{\\sin x}{x}$ pendelt um die $x$-Achse und schneidet sie unendlich oft.',
+        'Trotzdem gilt $\\dfrac{\\sin x}{x} \\to 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verhält sich $f(x) = e^x$ für $x \\to -\\infty$?',
+      opts: ['$f(x) \\to e$', '$f(x) \\to 0$', '$f(x) \\to -\\infty$', '$f(x) \\to 1$'],
+      steps: [
+        '$e^{-x} = \\dfrac{1}{e^x}$ und $e^x$ wächst für $x \\to \\infty$ über alle Grenzen.',
+        'Für $x \\to -\\infty$ wird $e^x$ also beliebig klein, bleibt aber positiv.',
+        'Die $x$-Achse ist waagerechte Asymptote.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to \\infty} \\left(5 - 2e^{-x}\\right)$.',
+      opts: ['3', '5', '$-\\infty$', '7'],
+      steps: [
+        '$e^{-x} \\to 0$ für $x \\to \\infty$.',
+        'Also $5 - 2 \\cdot 0 = 5$.',
+        'Der Graph nähert sich $y = 5$ von unten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verhält sich $f(x) = x \\cdot e^{-x}$ für $x \\to \\infty$?',
+      opts: ['Es gibt keinen Grenzwert.', '$f(x) \\to \\infty$', '$f(x) \\to 1$', '$f(x) \\to 0$'],
+      steps: [
+        '$f(x) = \\dfrac{x}{e^x}$: Zähler und Nenner wachsen.',
+        'Die Exponentialfunktion wächst schneller als jede Potenz: $\\dfrac{10}{e^{10}} \\approx 0{,}000\\,45$.',
+        'Also $f(x) \\to 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie verhält sich $f(x) = \\ln x$ für $x \\to \\infty$?',
+      opts: ['$f(x) \\to e$', '$f(x)$ nähert sich einer Asymptote.', '$f(x) \\to \\infty$, aber sehr langsam.', '$f(x) \\to 0$'],
+      steps: [
+        '$\\ln x$ ist die Umkehrfunktion von $e^x$.',
+        'Jeder Wert wird erreicht: $\\ln x = 100$ für $x = e^{100}$.',
+        'Also keine Asymptote, $f(x) \\to \\infty$, nur sehr langsam.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Hat $f(x) = \\sin x$ für $x \\to \\infty$ einen Grenzwert?',
+      opts: ['Nein, die Werte pendeln immer zwischen −1 und 1.', 'Ja, 0.', 'Ja, 1.', 'Ja, $\\infty$.'],
+      steps: [
+        'Ein Grenzwert verlangt, dass sich die Werte einer festen Zahl beliebig nähern.',
+        '$\\sin x$ nimmt in jeder Periode wieder 1 und −1 an.',
+        'Deshalb existiert $\\lim\\limits_{x \\to \\infty} \\sin x$ nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Konzentration eines Medikaments im Blut ist $c(t) = \\dfrac{8t}{t^2 + 4}$ (in mg/l, $t$ in Stunden). Was gilt langfristig?',
+      opts: ['$c(t) \\to 0$: Das Medikament wird abgebaut.', '$c(t) \\to 2$', '$c(t) \\to 8$', '$c(t) \\to \\infty$'],
+      steps: [
+        'Zählergrad 1 ist kleiner als Nennergrad 2.',
+        'Also $c(t) \\to 0$ für $t \\to \\infty$.',
+        'Im Sachzusammenhang: Nach langer Zeit ist praktisch nichts mehr im Blut.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Tee kühlt nach $T(t) = 20 + 70 \\cdot e^{-0{,}1t}$ ab ($T$ in °C, $t$ in Minuten). Welche Temperatur erreicht er langfristig?',
+      opts: ['90 °C', '70 °C', '20 °C', '0 °C'],
+      steps: [
+        '$e^{-0{,}1t} \\to 0$ für $t \\to \\infty$.',
+        '$T(t) \\to 20 + 70 \\cdot 0 = 20$.',
+        'Der Tee nimmt die Raumtemperatur an; zu Beginn hat er $T(0) = 90$ °C.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Bestand wächst nach $N(t) = \\dfrac{500}{1 + 9e^{-0{,}5t}}$. Welcher Grenze nähert er sich?',
+      opts: ['50', '450', '$\\infty$', '500'],
+      steps: [
+        '$e^{-0{,}5t} \\to 0$, also geht der Nenner gegen 1.',
+        '$N(t) \\to \\dfrac{500}{1} = 500$.',
+        'Startwert ist $N(0) = \\dfrac{500}{10} = 50$: beschränktes Wachstum.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

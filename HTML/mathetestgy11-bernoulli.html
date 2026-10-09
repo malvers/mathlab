@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Bernoulli-Ketten und Binomialkoeffizient — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w33-bernoulli',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Bernoulli-Ketten und Binomialkoeffizient',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 33 (LB 4) · 20 Aufgaben: Bernoulli-Experiment, Bernoulli-Kette, Fakultät, Binomialkoeffizient · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 33 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: Bernoulli experiment and chain (1-5), factorial and binomial coefficient (6-12), single probabilities (13-20). */
+  questions: [
+    {
+      q: 'Was ist ein Bernoulli-Experiment?',
+      opts: ['Ein Experiment, das immer einen Treffer liefert.', 'Ein Experiment mit sechs gleich wahrscheinlichen Ergebnissen.', 'Ein Ziehen ohne Zurücklegen.', 'Ein Zufallsexperiment mit genau zwei Ergebnissen, Treffer und Niete.'],
+      steps: [
+        'Treffer mit Wahrscheinlichkeit $p$, Niete mit $1 - p$.',
+        'Auch ein Würfel wird zum Bernoulli-Experiment, wenn nur „Sechs oder nicht“ zählt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist eine Bernoulli-Kette der Länge $n$?',
+      opts: ['$n$ verschiedene Experimente mit verschiedenen $p$.', '$n$ Ziehungen ohne Zurücklegen.', 'Ein Experiment mit $n$ Ergebnissen.', '$n$ unabhängige Wiederholungen eines Bernoulli-Experiments mit gleichem $p$.'],
+      steps: [
+        'Entscheidend: gleiche Trefferwahrscheinlichkeit und Unabhängigkeit der Stufen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ist das Ziehen von 3 Kugeln ohne Zurücklegen aus einer Urne mit 3 roten und 2 blauen Kugeln eine Bernoulli-Kette?',
+      opts: ['Nein, die Trefferwahrscheinlichkeit ändert sich von Zug zu Zug.', 'Nur wenn man auf Rot setzt.', 'Ja, immer.', 'Ja, es gibt nur zwei Farben.'],
+      steps: [
+        'Ohne Zurücklegen hängt jede Stufe von der vorigen ab.',
+        'Mit Zurücklegen wäre es eine Bernoulli-Kette mit $p = \\dfrac{3}{5}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: '5 % der Glühlampen einer Lieferung sind defekt. 10 werden zufällig geprüft. Welches Modell passt?',
+      opts: ['Bernoulli-Kette mit $n = 5$ und $p = 0{,}1$', 'Bernoulli-Kette mit $n = 10$ und $p = 0{,}05$', 'Bernoulli-Kette mit $n = 10$ und $p = 0{,}95$ für „defekt“', 'Kein Zufallsexperiment'],
+      steps: [
+        'Treffer: „defekt“ mit $p = 0{,}05$; bei einer großen Lieferung sind die Prüfungen praktisch unabhängig.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Test hat 5 Fragen mit je 4 Antworten, eine davon richtig. Jemand rät. Welches $p$ hat ein Treffer?',
+      opts: ['$p = \\dfrac{1}{5}$', '$p = \\dfrac{1}{2}$', '$p = \\dfrac{1}{4}$', '$p = \\dfrac{3}{4}$'],
+      steps: [
+        'Eine von vier Antworten ist richtig.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $5!$.',
+      opts: ['25', '15', '60', '120'],
+      steps: [
+        '$5! = 5 \\cdot 4 \\cdot 3 \\cdot 2 \\cdot 1 = 120$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Wert hat $0!$?',
+      opts: ['Nicht definiert', '1', '0', '$\\infty$'],
+      steps: [
+        'Man legt $0! = 1$ fest, damit Formeln wie $\\binom{n}{0} = \\dfrac{n!}{0! \\cdot n!} = 1$ stimmen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\dbinom{5}{2}$.',
+      opts: ['20', '5', '10', '2,5'],
+      steps: [
+        '$\\dbinom{5}{2} = \\dfrac{5!}{2! \\cdot 3!} = \\dfrac{5 \\cdot 4}{2 \\cdot 1}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\dbinom{10}{3}$.',
+      opts: ['210', '720', '30', '120'],
+      steps: [
+        '$\\dfrac{10 \\cdot 9 \\cdot 8}{3 \\cdot 2 \\cdot 1} = \\dfrac{720}{6}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\dbinom{20}{18}$.',
+      opts: ['18', '190', '20', '380'],
+      steps: [
+        '$\\dbinom{n}{k} = \\dbinom{n}{n - k}$, also $\\dbinom{20}{18} = \\dbinom{20}{2}$.',
+        '$\\dfrac{20 \\cdot 19}{2} = 190$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was zählt $\\dbinom{6}{2}$ im Baumdiagramm einer Bernoulli-Kette der Länge 6?',
+      opts: ['Alle Pfade, nämlich 64', 'Die Pfade mit mindestens 2 Treffern', 'Die Stufen des Baums', 'Die Pfade mit genau 2 Treffern, nämlich 15'],
+      steps: [
+        'Man wählt aus 6 Stufen die 2 Trefferstufen aus.',
+        '$\\dbinom{6}{2} = 15$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Aus 7 Personen wird ein Ausschuss von 3 Personen gewählt. Wie viele Möglichkeiten gibt es?',
+      opts: ['35', '21', '343', '210'],
+      steps: [
+        'Reihenfolge egal, ohne Wiederholung: $\\dbinom{7}{3}$.',
+        '$\\dfrac{7 \\cdot 6 \\cdot 5}{6} = 35$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Wahrscheinlichkeit hat EIN bestimmter Pfad mit $k$ Treffern in einer Bernoulli-Kette der Länge $n$?',
+      opts: ['$k \\cdot p$', '$p^k \\cdot (1 - p)^{n - k}$', '$\\dbinom{n}{k} \\cdot p^k$', '$p^n$'],
+      steps: [
+        'Längs des Pfades: $k$-mal $p$ und $(n - k)$-mal $1 - p$ multiplizieren.',
+        'Alle Pfade mit $k$ Treffern haben dieselbe Wahrscheinlichkeit.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum steht in der Formel für $P(X = k)$ der Faktor $\\dbinom{n}{k}$?',
+      opts: ['Er ist ein Korrekturfaktor für das Runden.', 'Er gibt die Zahl der Nieten an.', 'Er zählt die Pfade mit genau $k$ Treffern; ihre Wahrscheinlichkeiten werden addiert.', 'Er macht die Formel symmetrisch.'],
+      steps: [
+        '2. Pfadregel: gleiche Pfadwahrscheinlichkeit mal Anzahl der Pfade.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel wird dreimal geworfen. Wie wahrscheinlich sind genau zwei Sechsen?',
+      opts: ['$\\dfrac{5}{72}$', '$\\dfrac{5}{216}$', '$\\dfrac{1}{36}$', '$\\dfrac{1}{12}$'],
+      steps: [
+        '$\\dbinom{3}{2} \\cdot \\left(\\dfrac{1}{6}\\right)^2 \\cdot \\dfrac{5}{6} = 3 \\cdot \\dfrac{5}{216}$',
+        '$= \\dfrac{15}{216} = \\dfrac{5}{72}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Münze wird viermal geworfen. Wie wahrscheinlich ist genau zweimal Kopf?',
+      opts: ['$\\dfrac{3}{8}$', '$\\dfrac{1}{4}$', '$\\dfrac{1}{16}$', '$\\dfrac{1}{2}$'],
+      steps: [
+        '$\\dbinom{4}{2} \\cdot \\left(\\dfrac{1}{2}\\right)^4 = \\dfrac{6}{16}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie wahrscheinlich sind bei $p = 0{,}5$ vier Treffer in vier Versuchen?',
+      opts: ['$\\dfrac{4}{16}$', '$\\dfrac{1}{4}$', '$\\dfrac{1}{16}$', '$\\dfrac{1}{2}$'],
+      steps: [
+        'Nur ein Pfad: $0{,}5^4 = \\dfrac{1}{16}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Test mit 5 Fragen wird geraten ($p = \\dfrac{1}{4}$). Wie wahrscheinlich ist alles falsch?',
+      opts: ['0,25', 'etwa 0,237', 'etwa 0,763', 'etwa 0,001'],
+      steps: [
+        '$\\left(\\dfrac{3}{4}\\right)^5 = \\dfrac{243}{1024} \\approx 0{,}237$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie wahrscheinlich ist beim Raten genau eine richtige Antwort?',
+      opts: ['etwa 0,079', '0,25', 'etwa 0,396', 'etwa 0,237'],
+      steps: [
+        '$\\dbinom{5}{1} \\cdot \\dfrac{1}{4} \\cdot \\left(\\dfrac{3}{4}\\right)^4 = 5 \\cdot \\dfrac{81}{1024}$',
+        '$= \\dfrac{405}{1024} \\approx 0{,}396$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie berechnet man $\\dbinom{4}{2}$ mit dem Pascalschen Dreieck?',
+      opts: ['Als Summe der beiden Zahlen darüber: $3 + 3 = 6$', 'Als $\\dfrac{4}{2} = 2$', 'Als $4 - 2 = 2$', 'Als Produkt $4 \\cdot 2 = 8$'],
+      steps: [
+        'Zeile 3 lautet 1, 3, 3, 1; Zeile 4 lautet 1, 4, 6, 4, 1.',
+        '$\\dbinom{n}{k} = \\dbinom{n - 1}{k - 1} + \\dbinom{n - 1}{k}$'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

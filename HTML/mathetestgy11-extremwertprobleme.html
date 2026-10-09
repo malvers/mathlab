@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Extremwertprobleme — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w16-extremwertprobleme',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Extremwertprobleme',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 16 (LB 1) · 20 Aufgaben: Zielfunktion, Nebenbedingung, Definitionsbereich, Randwerte · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 16 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: method (1-4), numbers and rectangles (5-10), boxes and cross sections (11-15), economics and other contexts (16-20). */
+  questions: [
+    {
+      q: 'Was ist bei einem Extremwertproblem die Zielfunktion?',
+      opts: ['Die Gleichung, die zwei Variablen verknüpft.', 'Die Ableitung der Nebenbedingung.', 'Die Funktion, deren Nullstellen gesucht sind.', 'Die Funktion der Größe, die maximal oder minimal werden soll.'],
+      steps: [
+        'Beispiel: Flächeninhalt $A = x \\cdot y$ soll maximal werden.',
+        'Die Nebenbedingung, z. B. $2x + 2y = 20$, macht daraus eine Funktion einer Variablen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wozu dient die Nebenbedingung?',
+      opts: ['Die zweite Ableitung zu ersetzen.', 'Eine Variable durch die andere auszudrücken, damit die Zielfunktion nur noch von einer abhängt.', 'Sie wird nicht gebraucht.', 'Den Extremwert zu berechnen.'],
+      steps: [
+        'Mit zwei Variablen lässt sich nicht einfach ableiten.',
+        'Nach einer Variablen umstellen und einsetzen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum muss man bei Extremwertproblemen die Randwerte des Definitionsbereichs prüfen?',
+      opts: ['Weil die Ableitung am Rand null ist.', 'Das größte bzw. kleinste Ergebnis kann am Rand liegen statt im lokalen Extremum.', 'Weil dort immer das Maximum liegt.', 'Das ist nicht nötig.'],
+      steps: [
+        '$f^{\\prime} = 0$ findet nur lokale Extrema im Inneren.',
+        'Gefragt ist aber meist das globale Extremum.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Man hat für den maximalen Flächeninhalt $x = 5$ gefunden. Was gehört noch zur Antwort?',
+      opts: ['Nichts, $x = 5$ ist die Antwort.', 'Die Nullstellen der Zielfunktion.', 'Der Grenzwert der Zielfunktion.', 'Die fehlende Seitenlänge und der Flächeninhalt selbst, mit Einheiten.'],
+      steps: [
+        'Gefragt ist meist nach den Maßen und dem Extremwert.',
+        'Also $y$ aus der Nebenbedingung und $A$ aus der Zielfunktion berechnen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang 20 cm. Wie groß ist sein Flächeninhalt höchstens?',
+      opts: ['20 cm²', '100 cm²', '25 cm²', '24 cm²'],
+      steps: [
+        '$2x + 2y = 20 \\Rightarrow y = 10 - x$, $A(x) = x(10 - x) = 10x - x^2$',
+        '$A^{\\prime}(x) = 10 - 2x = 0 \\Rightarrow x = 5$, $y = 5$',
+        '$A = 25$ cm²: Das Quadrat ist optimal.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei positive Zahlen haben die Summe 10. Wie groß ist ihr Produkt höchstens?',
+      opts: ['25', '10', '24', '50'],
+      steps: [
+        '$P(x) = x(10 - x)$',
+        '$P^{\\prime}(x) = 10 - 2x = 0 \\Rightarrow x = 5$; $P = 25$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Zahlen unterscheiden sich um 8. Wie klein kann ihr Produkt werden?',
+      opts: ['16', '−8', '−16', '0'],
+      steps: [
+        '$P(x) = x(x + 8) = x^2 + 8x$',
+        '$P^{\\prime}(x) = 2x + 8 = 0 \\Rightarrow x = -4$; die Zahlen sind −4 und 4.',
+        '$P = -16$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'An einer Mauer soll mit 40 m Zaun ein rechteckiges Beet eingezäunt werden (drei Seiten Zaun). Wie groß wird die Fläche höchstens?',
+      opts: ['400 m²', '200 m²', '100 m²', '160 m²'],
+      steps: [
+        'Parallel zur Mauer $x$, zwei Seiten $y$: $x + 2y = 40$.',
+        '$A(y) = (40 - 2y) \\cdot y$, $A^{\\prime}(y) = 40 - 4y = 0 \\Rightarrow y = 10$, $x = 20$',
+        '$A = 200$ m²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Unter dem Graphen von $f(x) = 9 - x^2$ liegt ein Rechteck mit Ecken $(\\pm u \\mid 0)$ und $(\\pm u \\mid f(u))$. Für welches $u$ ist es am größten?',
+      opts: ['$u = 3$', '$u = \\dfrac{3}{2}$', '$u = 1$', '$u = \\sqrt{3}$'],
+      steps: [
+        '$A(u) = 2u \\cdot (9 - u^2) = 18u - 2u^3$',
+        '$A^{\\prime}(u) = 18 - 6u^2 = 0 \\Rightarrow u^2 = 3$',
+        'Größter Inhalt: $A = 2\\sqrt{3} \\cdot 6 = 12\\sqrt{3} \\approx 20{,}8$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rechteck im ersten Quadranten hat eine Ecke im Ursprung und die gegenüberliegende Ecke auf der Geraden $y = 6 - 2x$. Wie groß ist es höchstens?',
+      opts: ['9', '6', '4,5', '3'],
+      steps: [
+        '$A(x) = x(6 - 2x) = 6x - 2x^2$',
+        '$A^{\\prime}(x) = 6 - 4x = 0 \\Rightarrow x = 1{,}5$, $y = 3$',
+        '$A = 4{,}5$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Aus einem quadratischen Karton (12 cm Seitenlänge) werden an den Ecken Quadrate der Seite $x$ ausgeschnitten und die Ränder hochgeklappt. Welches Volumen hat die Schachtel?',
+      opts: ['$V(x) = x(12 - 2x)^2$', '$V(x) = x^2(12 - x)$', '$V(x) = 12x(12 - 2x)$', '$V(x) = (12 - x)^3$'],
+      steps: [
+        'Grundfläche: Quadrat mit Seite $12 - 2x$.',
+        'Höhe: $x$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Definitionsbereich ist für die Schachtel sinnvoll?',
+      opts: ['$0 < x < 6$', '$0 < x < 12$', '$x > 0$', '$x \\in \\mathbb{R}$'],
+      steps: [
+        '$x$ muss positiv sein.',
+        '$12 - 2x > 0$, also $x < 6$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $x$ wird das Volumen der Schachtel maximal, und wie groß ist es?',
+      opts: ['$x = 2$: 128 cm³', '$x = 3$: 108 cm³', '$x = 6$: 0 cm³', '$x = 4$: 64 cm³'],
+      steps: [
+        '$V^{\\prime}(x) = (12 - 2x)^2 - 4x(12 - 2x) = (12 - 2x)(12 - 6x)$',
+        'Im Definitionsbereich: $x = 2$.',
+        '$V(2) = 2 \\cdot 8^2 = 128$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Aus einem 30 cm breiten Blech wird eine Regenrinne mit rechteckigem Querschnitt gebogen (Ränder je $x$ cm hoch). Wann ist der Querschnitt am größten?',
+      opts: ['Bei $x = 10$ cm: 100 cm²', 'Bei $x = 7{,}5$ cm: 112,5 cm²', 'Bei $x = 5$ cm: 100 cm²', 'Bei $x = 15$ cm: 0 cm²'],
+      steps: [
+        '$A(x) = x(30 - 2x)$',
+        '$A^{\\prime}(x) = 30 - 4x = 0 \\Rightarrow x = 7{,}5$',
+        '$A = 7{,}5 \\cdot 15 = 112{,}5$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Quader mit quadratischer Grundfläche hat die Kantenlängensumme 48 cm. Wie groß ist sein Volumen höchstens?',
+      opts: ['64 cm³', '48 cm³', '72 cm³', '216 cm³'],
+      steps: [
+        '$8a + 4h = 48 \\Rightarrow h = 12 - 2a$; $V(a) = a^2(12 - 2a)$',
+        '$V^{\\prime}(a) = 24a - 6a^2 = 0 \\Rightarrow a = 4$, $h = 4$',
+        '$V = 64$ cm³: wieder ein Würfel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Gewinn wird durch $G(x) = -2x^2 + 120x - 1000$ beschrieben. Wie groß ist der höchste Gewinn?',
+      opts: ['1000', '800', '30', '1800'],
+      steps: [
+        '$G^{\\prime}(x) = -4x + 120 = 0 \\Rightarrow x = 30$',
+        '$G(30) = -1800 + 3600 - 1000 = 800$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei einem Preis von $p(x) = 100 - 2x$ € pro Stück werden $x$ Stück verkauft. Bei welcher Menge ist der Erlös am größten?',
+      opts: ['50 Stück (Erlös 0 €)', '20 Stück (Erlös 1200 €)', '25 Stück (Erlös 1250 €)', '100 Stück'],
+      steps: [
+        '$E(x) = x \\cdot (100 - 2x)$',
+        '$E^{\\prime}(x) = 100 - 4x = 0 \\Rightarrow x = 25$; $E = 25 \\cdot 50 = 1250$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei positive Zahlen haben das Produkt 16. Wie klein kann ihre Summe sein?',
+      opts: ['16', '17', '10', '8'],
+      steps: [
+        '$S(x) = x + \\dfrac{16}{x}$',
+        '$S^{\\prime}(x) = 1 - \\dfrac{16}{x^2} = 0 \\Rightarrow x = 4$',
+        '$S = 4 + 4 = 8$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $x + 2y = 12$ mit positiven $x$, $y$ soll $x \\cdot y$ maximal werden. Welche Werte ergeben sich?',
+      opts: ['$x = 12$, $y = 0$, Produkt 0', '$x = 3$, $y = 4{,}5$, Produkt 13,5', '$x = 6$, $y = 3$, Produkt 18', '$x = 4$, $y = 4$, Produkt 16'],
+      steps: [
+        '$x = 12 - 2y$, $P(y) = (12 - 2y)y$',
+        '$P^{\\prime}(y) = 12 - 4y = 0 \\Rightarrow y = 3$, $x = 6$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie prüft man, ob $x = 2$ für $V(x) = x(12 - 2x)^2$ wirklich ein Maximum liefert?',
+      opts: ['Gar nicht, es ist immer ein Maximum.', '$V(2) > 0$ zeigen.', '$V^{\\prime}(2) = 0$ zeigen, das reicht.', '$V^{\\prime\\prime}(2) < 0$ zeigen oder mit den Randwerten $V(0) = V(6) = 0$ vergleichen.'],
+      steps: [
+        '$V^{\\prime\\prime}(x) = 24x - 96$, $V^{\\prime\\prime}(2) = -48 < 0$.',
+        'Oder: Im Inneren gibt es nur diesen kritischen Punkt, an den Rändern ist $V = 0$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

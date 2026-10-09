@@ -321,14 +321,39 @@ def fos12(nr, slug, thema, lb, blurb, comment=''):
     return _fos(12, nr, slug, thema, lb, blurb, comment)
 
 
+# ------------------------------------------------------ Gymnasium Mathe ----
+def _gy(stufe, nr, slug, thema, lb, blurb, comment):
+    return Quiz(
+        id='mathegy%d-w%02d-%s' % (stufe, nr, slug),
+        file='mathetestgy%d-%s.html' % (stufe, slug),
+        title='Aufgaben · ' + thema,
+        subtitle='Gymnasium · Jahrgangsstufe %d · Grundkurs · Woche %d (%s) · 20 Aufgaben: %s · genau eine Antwort pro Aufgabe'
+                 % (stufe, nr, lb, blurb),
+        dash_sub='Gymnasium · Jahrgangsstufe %d · Woche %d · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe'
+                 % (stufe, nr),
+        back='svp/mathe/mathegy%d.html' % stufe,
+        comment=comment)
+
+
+def gy11(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Gymnasium-11 Grundkurs Mathematik plan (mathe/mathegy11.html)."""
+    return _gy(11, nr, slug, thema, lb, blurb, comment)
+
+
+def gy12(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Gymnasium-12 Grundkurs Mathematik plan (mathe/mathegy12.html)."""
+    return _gy(12, nr, slug, thema, lb, blurb, comment)
+
+
 # ------------------------------------------------------------------ wiring ----
 def wire(plan, nr, href, label='Aufgaben 1 (20)'):
-    """Put quiz: { href, label } into the plan row with nr: <nr> (replacing an old one)."""
+    """Put quiz: { href, label } into the plan row with nr: <nr> (replacing an old one).
+    Rows may carry a Lehrplan goal (ziel: '…') between topic and remark."""
     path = plan if os.path.isabs(plan) else os.path.join(ROOT, plan)
     s = open(path, encoding='utf-8').read()
     S = r"'(?:[^'\\]|\\.)*'"
-    pat = re.compile(r"(\{ nr: %d, kw: \d+, date: %s, type: %s, u: %s, topic: %s, remark: %s, )(quiz: \{[^}]*\}, )?"
-                     % (nr, S, S, S, S, S))
+    pat = re.compile(r"(\{ nr: %d, kw: \d+, date: %s, type: %s, u: %s, topic: %s, (?:ziel: %s, )?remark: %s, )(quiz: \{[^}]*\}, )?"
+                     % (nr, S, S, S, S, S, S))
     m = pat.search(s)
     if not m:
         raise SystemExit('%s: Zeile nr %d nicht gefunden' % (plan, nr))

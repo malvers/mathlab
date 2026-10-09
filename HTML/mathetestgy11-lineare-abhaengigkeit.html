@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lineare Abhängigkeit, Betrag, Mittelpunkte — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w25-lineare-abhaengigkeit',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lineare Abhängigkeit, Betrag, Mittelpunkte',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 25 (LB 3) · 20 Aufgaben: Linearkombination, lineare (Un-)Abhängigkeit, Längen, Teilungspunkte · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 25 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: linear combination (1-3), dependence (4-10), lengths (11-14), midpoints and division points (15-20). */
+  questions: [
+    {
+      q: 'Stelle $\\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix}$ als Linearkombination von $\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ -1 \\end{pmatrix}$ dar.',
+      opts: ['$3 \\cdot \\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix} + 2 \\cdot \\begin{pmatrix} 1 \\\\ -1 \\end{pmatrix}$', '$5 \\cdot \\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix} + \\begin{pmatrix} 1 \\\\ -1 \\end{pmatrix}$', '$2 \\cdot \\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix} + 3 \\cdot \\begin{pmatrix} 1 \\\\ -1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix} + 4 \\cdot \\begin{pmatrix} 1 \\\\ -1 \\end{pmatrix}$'],
+      steps: [
+        'Ansatz: $r + s = 5$ und $2r - s = 1$.',
+        'Addieren: $3r = 6$, also $r = 2$, $s = 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Stelle $\\begin{pmatrix} 4 \\\\ 5 \\\\ 6 \\end{pmatrix}$ als $r \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ dar. Wie groß ist $s$?',
+      opts: ['$s = 1{,}5$', '$s = 3{,}5$', '$s = 5$', '$s = 2{,}5$'],
+      steps: [
+        '$r + t = 4$, $r + s = 5$, $s + t = 6$; alles addiert: $2(r + s + t) = 15$.',
+        '$r + s + t = 7{,}5$, also $s = 7{,}5 - 4 = 3{,}5$ (und $r = 1{,}5$, $t = 2{,}5$).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist eine Linearkombination der Vektoren $\\vec{a}$ und $\\vec{b}$?',
+      opts: ['Nur die Summe $\\vec{a} + \\vec{b}$.', 'Das Produkt $\\vec{a} \\cdot \\vec{b}$.', 'Der Betrag $|\\vec{a} + \\vec{b}|$.', 'Ein Vektor der Form $r\\vec{a} + s\\vec{b}$ mit reellen Zahlen $r$, $s$.'],
+      steps: [
+        'Vielfache addieren: Mit zwei nicht parallelen Vektoren erreicht man so jeden Punkt ihrer Ebene.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wann sind zwei Vektoren (beide nicht der Nullvektor) linear abhängig?',
+      opts: ['Wenn sie gleich lang sind.', 'Wenn sie senkrecht aufeinander stehen.', 'Wenn sie parallel (kollinear) sind.', 'Nie.'],
+      steps: [
+        'Linear abhängig: Einer ist ein Vielfaches des anderen.',
+        'Geometrisch: Sie liegen auf einer Geraden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann sind drei Vektoren im Raum linear abhängig?',
+      opts: ['Wenn sie in einer Ebene liegen (komplanar sind).', 'Wenn sie paarweise nicht parallel sind.', 'Immer.', 'Wenn sie alle gleich lang sind.'],
+      steps: [
+        'Dann lässt sich einer als Linearkombination der anderen schreiben.',
+        'Drei linear unabhängige Vektoren spannen dagegen den ganzen Raum auf.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Sind $\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ und $\\begin{pmatrix} 2 \\\\ 4 \\\\ 5 \\end{pmatrix}$ linear abhängig?',
+      opts: ['Das lässt sich nicht entscheiden.', 'Nein, die dritte Koordinate passt nicht zum Faktor 2.', 'Ja, beide haben positive Koordinaten.', 'Ja, der zweite ist das Doppelte des ersten.'],
+      steps: [
+        '$x$ und $y$ legen den Faktor 2 fest.',
+        'Aber $2 \\cdot 3 = 6 \\neq 5$: kein Vielfaches, also linear unabhängig.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Sind $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$, $\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ linear abhängig?',
+      opts: ['Ja, der dritte ist die Summe der beiden anderen.', 'Nein, sie zeigen in drei verschiedene Richtungen.', 'Nein, keine zwei sind parallel.', 'Nur wenn man noch den Nullvektor hinzunimmt.'],
+      steps: [
+        '$\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$',
+        'Alle drei liegen in der $xy$-Ebene: komplanar.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $r$ ist $\\begin{pmatrix} 3 \\\\ r \\\\ 6 \\end{pmatrix}$ parallel zu $\\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$?',
+      opts: ['$r = 3$', '$r = 6$', 'Für kein $r$', '$r = 2$'],
+      steps: [
+        'Faktor aus der ersten Koordinate: 3.',
+        'Prüfen: $3 \\cdot 2 = 6$ passt zur dritten Koordinate; also $r = 3 \\cdot 2 = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie prüft man rechnerisch, ob drei Vektoren linear unabhängig sind?',
+      opts: ['$r\\vec{a} + s\\vec{b} + t\\vec{c} = \\vec{o}$ darf nur die Lösung $r = s = t = 0$ haben.', 'Man addiert sie und prüft, ob der Nullvektor herauskommt.', 'Man vergleicht nur die ersten Koordinaten.', 'Man prüft, ob alle gleich lang sind.'],
+      steps: [
+        'Das liefert ein homogenes Gleichungssystem.',
+        'Hat es nur die triviale Lösung, sind die Vektoren linear unabhängig.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Liegen $A(1 \\mid 2 \\mid 3)$, $B(2 \\mid 4 \\mid 5)$ und $C(4 \\mid 8 \\mid 9)$ auf einer Geraden?',
+      opts: ['Ja, $\\overrightarrow{AC} = 3 \\cdot \\overrightarrow{AB}$.', 'Nein, drei Punkte liegen nie auf einer Geraden.', 'Ja, weil alle Koordinaten positiv sind.', 'Nein, $\\overrightarrow{AC}$ ist kein Vielfaches von $\\overrightarrow{AB}$.'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} 3 \\\\ 6 \\\\ 6 \\end{pmatrix}$',
+        'Kollinear, also liegen die Punkte auf einer Geraden.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lang ist die Strecke $AB$ mit $A(1 \\mid 2 \\mid 2)$ und $B(3 \\mid 5 \\mid 8)$?',
+      opts: ['11', '49', '$\\sqrt{11}$', '7'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 2 \\\\ 3 \\\\ 6 \\end{pmatrix}$',
+        '$|\\overrightarrow{AB}| = \\sqrt{4 + 9 + 36} = 7$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ist das Dreieck mit $A(1 \\mid 1 \\mid 1)$, $B(3 \\mid 1 \\mid 1)$, $C(2 \\mid 3 \\mid 1)$ gleichschenklig?',
+      opts: ['Nein, es ist rechtwinklig.', 'Nein, alle Seiten sind verschieden lang.', 'Ja, es ist sogar gleichseitig.', 'Ja, $|\\overrightarrow{AC}| = |\\overrightarrow{BC}| = \\sqrt{5}$.'],
+      steps: [
+        '$|\\overrightarrow{AB}| = 2$, $|\\overrightarrow{AC}| = \\sqrt{1 + 4} = \\sqrt{5}$, $|\\overrightarrow{BC}| = \\sqrt{1 + 4} = \\sqrt{5}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lang ist $2\\vec{a}$ für $\\vec{a} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$?',
+      opts: ['6', '9', '3', '$2\\sqrt{3}$'],
+      steps: [
+        '$|\\vec{a}| = 3$',
+        '$|2\\vec{a}| = 2 \\cdot |\\vec{a}| = 6$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme den Einheitsvektor in Richtung $\\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 1 \\\\ -\\frac{1}{2} \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} \\frac{2}{5} \\\\ -\\frac{1}{5} \\\\ \\frac{2}{5} \\end{pmatrix}$', '$\\begin{pmatrix} \\frac{2}{3} \\\\ -\\frac{1}{3} \\\\ \\frac{2}{3} \\end{pmatrix}$'],
+      steps: [
+        'Betrag: $\\sqrt{4 + 1 + 4} = 3$.',
+        'Durch 3 teilen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Mittelpunkt von $A(-2 \\mid 4 \\mid 1)$ und $B(6 \\mid 0 \\mid 3)$.',
+      opts: ['$M(4 \\mid 2 \\mid 2)$', '$M(4 \\mid 4 \\mid 4)$', '$M(2 \\mid 2 \\mid 2)$', '$M(8 \\mid -4 \\mid 2)$'],
+      steps: [
+        '$\\vec{m} = \\dfrac{1}{2}(\\vec{a} + \\vec{b})$',
+        '$\\dfrac{1}{2} \\cdot \\begin{pmatrix} 4 \\\\ 4 \\\\ 4 \\end{pmatrix}$'
+      ],
+      solution: 2
+    },
+    {
+      q: '$M(1 \\mid 1 \\mid 1)$ ist Mittelpunkt von $A(3 \\mid 0 \\mid -1)$ und $B$. Bestimme $B$.',
+      opts: ['$B(5 \\mid -1 \\mid -3)$', '$B(-1 \\mid 2 \\mid 3)$', '$B(2 \\mid 0{,}5 \\mid 0)$', '$B(-2 \\mid 1 \\mid 2)$'],
+      steps: [
+        '$\\vec{b} = 2\\vec{m} - \\vec{a}$',
+        '$\\begin{pmatrix} 2 \\\\ 2 \\\\ 2 \\end{pmatrix} - \\begin{pmatrix} 3 \\\\ 0 \\\\ -1 \\end{pmatrix} = \\begin{pmatrix} -1 \\\\ 2 \\\\ 3 \\end{pmatrix}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Punkt $T$ teilt $AB$ mit $A(0 \\mid 0 \\mid 0)$ und $B(6 \\mid 3 \\mid 9)$ im Verhältnis 1 : 2 (von $A$ aus). Bestimme $T$.',
+      opts: ['$T(3 \\mid 1{,}5 \\mid 4{,}5)$', '$T(2 \\mid 1 \\mid 3)$', '$T(4 \\mid 2 \\mid 6)$', '$T(1 \\mid 0{,}5 \\mid 1{,}5)$'],
+      steps: [
+        'Verhältnis 1 : 2 heißt: $T$ liegt bei einem Drittel der Strecke.',
+        '$\\vec{t} = \\vec{a} + \\dfrac{1}{3}\\overrightarrow{AB}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Schwerpunkt des Dreiecks $A(1 \\mid 0 \\mid 0)$, $B(0 \\mid 3 \\mid 0)$, $C(2 \\mid 0 \\mid 6)$.',
+      opts: ['$S(0 \\mid 1 \\mid 2)$', '$S(3 \\mid 3 \\mid 6)$', '$S(1 \\mid 1 \\mid 2)$', '$S(1{,}5 \\mid 1{,}5 \\mid 3)$'],
+      steps: [
+        '$\\vec{s} = \\dfrac{1}{3}(\\vec{a} + \\vec{b} + \\vec{c})$',
+        '$\\dfrac{1}{3} \\cdot \\begin{pmatrix} 3 \\\\ 3 \\\\ 6 \\end{pmatrix}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Woran erkennt man rechnerisch, dass $ABCD$ ein Parallelogramm ist?',
+      opts: ['$\\overrightarrow{AB} = \\overrightarrow{CD}$', '$|\\overrightarrow{AB}| = |\\overrightarrow{BC}|$', '$\\overrightarrow{AB} = \\overrightarrow{DC}$', '$\\overrightarrow{AC} = \\overrightarrow{BD}$'],
+      steps: [
+        'Gegenüberliegende Seiten sind gleich lang und parallel, also gleiche Vektoren.',
+        'Achtung auf die Richtung: $\\overrightarrow{AB}$ und $\\overrightarrow{DC}$ laufen gleich.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was bedeutet: Der Nullvektor lässt sich als $r\\vec{a} + s\\vec{b} = \\vec{o}$ mit $r \\neq 0$ schreiben?',
+      opts: ['$\\vec{a}$ und $\\vec{b}$ sind senkrecht.', '$\\vec{a}$ ist der Nullvektor.', '$\\vec{a}$ und $\\vec{b}$ sind linear unabhängig.', '$\\vec{a}$ und $\\vec{b}$ sind linear abhängig.'],
+      steps: [
+        'Dann ist $\\vec{a} = -\\dfrac{s}{r}\\vec{b}$, ein Vielfaches von $\\vec{b}$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

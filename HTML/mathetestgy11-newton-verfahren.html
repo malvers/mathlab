@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Das Newton-Verfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w22-newton-verfahren',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Das Newton-Verfahren',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 22 (WB 2) · 20 Aufgaben: Tangentenidee, Iteration, Konvergenz und Versagen, Verfahrensvergleich · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 22 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: idea and formula (1-4), iterations by hand (5-11), convergence and failure (12-16), comparison (17-20). */
+  questions: [
+    {
+      q: 'Welche Idee steckt hinter dem Newton-Verfahren?',
+      opts: ['Man liest die Nullstelle aus einer Wertetabelle ab.', 'Man ersetzt den Graphen durch seine Tangente und nimmt deren Nullstelle als neue Näherung.', 'Man ersetzt den Graphen durch eine Sekante durch zwei Randpunkte.', 'Man halbiert ein Intervall mit Vorzeichenwechsel.'],
+      steps: [
+        'Die Tangente liegt in der Nähe des Berührpunkts dicht am Graphen.',
+        'Ihre Nullstelle ist leicht zu berechnen und meist eine bessere Näherung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Iterationsvorschrift des Newton-Verfahrens?',
+      opts: ['$x_{n+1} = x_n - \\dfrac{f(x_n)}{f^{\\prime}(x_n)}$', '$x_{n+1} = x_n - \\dfrac{f^{\\prime}(x_n)}{f(x_n)}$', '$x_{n+1} = \\dfrac{x_n + f(x_n)}{2}$', '$x_{n+1} = x_n + \\dfrac{f(x_n)}{f^{\\prime}(x_n)}$'],
+      steps: [
+        'Tangente in $x_n$: $y = f(x_n) + f^{\\prime}(x_n)(x - x_n)$.',
+        '$y = 0$ setzen und nach $x$ auflösen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was muss die Funktion für das Newton-Verfahren erfüllen?',
+      opts: ['Sie muss ein Polynom sein.', 'Sie muss punktsymmetrisch sein.', 'Sie muss differenzierbar sein, und $f^{\\prime}(x_n)$ darf nicht null werden.', 'Sie muss an den Intervallrändern verschiedene Vorzeichen haben.'],
+      steps: [
+        'Die Formel braucht $f^{\\prime}(x_n)$ im Nenner.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann bricht man die Iteration in der Praxis ab?',
+      opts: ['Nach genau drei Schritten.', 'Wenn $f^{\\prime}(x_n) > 0$ ist.', 'Wenn $x_n$ eine ganze Zahl ist.', 'Wenn sich $x_{n+1}$ und $x_n$ um weniger als die gewünschte Genauigkeit unterscheiden.'],
+      steps: [
+        'Abbruchkriterium: $|x_{n+1} - x_n| < \\varepsilon$, z. B. $\\varepsilon = 10^{-6}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Newton für $f(x) = x^2 - 2$ mit $x_0 = 1$. Wie groß ist $x_1$?',
+      opts: ['2', '0,5', '1,5', '1,25'],
+      steps: [
+        '$f(1) = -1$, $f^{\\prime}(x) = 2x$, $f^{\\prime}(1) = 2$',
+        '$x_1 = 1 - \\dfrac{-1}{2} = 1{,}5$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Weiter mit $x_1 = 1{,}5$. Wie groß ist $x_2$?',
+      opts: ['etwa 1,4142', '1,5', 'etwa 1,4167', '1,25'],
+      steps: [
+        '$f(1{,}5) = 0{,}25$, $f^{\\prime}(1{,}5) = 3$',
+        '$x_2 = 1{,}5 - \\dfrac{0{,}25}{3} \\approx 1{,}4167$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gegen welche Zahl konvergiert diese Folge?',
+      opts: ['$-\\sqrt{2}$', '$\\sqrt{2}$', '1,5', '2'],
+      steps: [
+        'Die positive Nullstelle von $x^2 - 2$ ist $\\sqrt{2} \\approx 1{,}414\\,21$.',
+        'Schon $x_3 \\approx 1{,}414\\,216$ stimmt auf fünf Stellen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Newton für $f(x) = x^3 - x - 1$ mit $x_0 = 1$. Wie groß ist $x_1$?',
+      opts: ['1', '1,5', '2', '0,5'],
+      steps: [
+        '$f(1) = -1$, $f^{\\prime}(x) = 3x^2 - 1$, $f^{\\prime}(1) = 2$',
+        '$x_1 = 1 + \\dfrac{1}{2} = 1{,}5$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Weiter mit $x_1 = 1{,}5$ für $f(x) = x^3 - x - 1$. Wie groß ist $x_2$ ungefähr?',
+      opts: ['1,413', '1,348', '1,250', '1,5'],
+      steps: [
+        '$f(1{,}5) = 3{,}375 - 1{,}5 - 1 = 0{,}875$; $f^{\\prime}(1{,}5) = 6{,}75 - 1 = 5{,}75$',
+        '$x_2 = 1{,}5 - \\dfrac{0{,}875}{5{,}75} \\approx 1{,}348$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Newton für $f(x) = e^x + x - 3$ mit $x_0 = 1$. Wie groß ist $x_1$ ungefähr?',
+      opts: ['0,807', '0,72', '1,193', '0,5'],
+      steps: [
+        '$f(1) = e - 2 \\approx 0{,}718$, $f^{\\prime}(x) = e^x + 1$, $f^{\\prime}(1) \\approx 3{,}718$',
+        '$x_1 = 1 - \\dfrac{0{,}718}{3{,}718} \\approx 0{,}807$; die Lösung liegt bei 0,792.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Newton für $f(x) = \\cos x - x$ mit $x_0 = 1$. Wie groß ist $x_1$ ungefähr?',
+      opts: ['0,540', '0,460', '0,750', '1,250'],
+      steps: [
+        '$f(1) \\approx 0{,}540 - 1 = -0{,}460$; $f^{\\prime}(x) = -\\sin x - 1$, $f^{\\prime}(1) \\approx -1{,}841$',
+        '$x_1 = 1 - \\dfrac{-0{,}460}{-1{,}841} \\approx 0{,}750$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was passiert, wenn $f^{\\prime}(x_n) = 0$ ist?',
+      opts: ['Das Verfahren konvergiert besonders schnell.', 'Man setzt $x_{n+1} = 0$.', 'Man hat die Nullstelle gefunden.', 'Die Tangente ist waagerecht und hat keine Nullstelle; das Verfahren bricht ab.'],
+      steps: [
+        'Division durch null in der Formel.',
+        'Geometrisch: Eine waagerechte Tangente schneidet die $x$-Achse nicht (außer sie liegt auf ihr).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Newton für $f(x) = x^3 - 2x + 2$ mit $x_0 = 0$ liefert $x_1 = 1$ und $x_2 = 0$. Was passiert?',
+      opts: ['Die Folge springt immer zwischen 0 und 1 hin und her und konvergiert nicht.', 'Die Folge konvergiert gegen 0,5.', 'Das Verfahren bricht wegen $f^{\\prime} = 0$ ab.', '0 ist eine Nullstelle.'],
+      steps: [
+        '$x_1 = 0 - \\dfrac{2}{-2} = 1$; $x_2 = 1 - \\dfrac{1}{1} = 0$',
+        'Ein Zyklus: Ein anderer Startwert, z. B. $x_0 = -2$, führt zur Nullstelle bei etwa −1,77.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Funktion hat zwei Nullstellen. Wovon hängt ab, welche das Newton-Verfahren findet?',
+      opts: ['Vom Startwert $x_0$', 'Es findet immer die kleinere.', 'Davon, wie oft man iteriert', 'Von der Abbruchgenauigkeit'],
+      steps: [
+        'Die Tangente führt meist zur benachbarten Nullstelle.',
+        'Deshalb wählt man den Startwert mithilfe einer Skizze.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was passiert, wenn $x_n$ zufällig genau eine Nullstelle ist?',
+      opts: ['Das Verfahren bricht ab.', 'Dann ist $x_{n+1} = 0$.', 'Dann ist $x_{n+1} = x_n$, die Folge bleibt stehen.', 'Dann springt die Folge weg.'],
+      steps: [
+        '$f(x_n) = 0$, also wird nichts abgezogen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie schnell konvergiert das Newton-Verfahren in der Nähe einer einfachen Nullstelle?',
+      opts: ['Immer genau eine Stelle pro Schritt.', 'Sehr schnell: Die Zahl der richtigen Stellen verdoppelt sich ungefähr pro Schritt.', 'Gar nicht.', 'Wie die Bisektion: eine halbe Stelle pro Schritt.'],
+      steps: [
+        'Beispiel $\\sqrt{2}$: 1,5 → 1,4167 → 1,414216.',
+        'Man spricht von quadratischer Konvergenz.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Das Heron-Verfahren $x_{n+1} = \\dfrac{1}{2}\\left(x_n + \\dfrac{a}{x_n}\\right)$ berechnet $\\sqrt{a}$. Wie hängt es mit Newton zusammen?',
+      opts: ['Es ist das Newton-Verfahren für $f(x) = x^2 - a$.', 'Es ist das Newton-Verfahren für $f(x) = \\sqrt{x} - a$.', 'Es ist die Bisektion für $x^2 - a$.', 'Es hat nichts damit zu tun.'],
+      steps: [
+        '$x_n - \\dfrac{x_n^2 - a}{2x_n} = \\dfrac{x_n}{2} + \\dfrac{a}{2x_n}$',
+        'Heron von Alexandria kannte es schon vor etwa 2000 Jahren.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne mit Heron einen Schritt für $\\sqrt{10}$ mit $x_0 = 3$.',
+      opts: ['$x_1 = 3{,}5$', '$x_1 = 3{,}1623$', '$x_1 = \\dfrac{10}{3}$', '$x_1 = \\dfrac{19}{6} \\approx 3{,}1667$'],
+      steps: [
+        '$\\dfrac{1}{2}\\left(3 + \\dfrac{10}{3}\\right) = \\dfrac{1}{2} \\cdot \\dfrac{19}{3} = \\dfrac{19}{6}$',
+        '$\\sqrt{10} \\approx 3{,}1623$: schon nach einem Schritt nah dran.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Aussage zum Vergleich der Verfahren ist richtig?',
+      opts: ['Numerische Verfahren liefern immer exakte Lösungen.', 'Grafische Verfahren sind am genauesten.', 'Das Newton-Verfahren funktioniert immer, die Bisektion nie.', 'Algebraisch: exakt, aber nur für spezielle Gleichungen; numerisch: immer anwendbar, liefert Näherungen.'],
+      steps: [
+        'Jedes Verfahren hat seinen Platz: Skizze für den Überblick, Algebra wenn möglich, Numerik sonst.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie gibt man die Newton-Iteration für $f(x) = x^2 - 2$ im CAS als Rekursion ein?',
+      opts: ['$x_{n+1} = \\dfrac{x_n^2 - 2}{2x_n}$ mit $x_0 = 1$', '$x_{n+1} = 2x_n$ mit $x_0 = 1$', '$x_{n+1} = x_n^2 - 2$ mit $x_0 = 1$', '$x_{n+1} = x_n - \\dfrac{x_n^2 - 2}{2x_n}$ mit $x_0 = 1$'],
+      steps: [
+        'In die Formel $f(x_n)$ und $f^{\\prime}(x_n) = 2x_n$ einsetzen.',
+        'Die Listen- oder Folgenfunktion des CAS liefert dann $x_1, x_2, \\ldots$'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

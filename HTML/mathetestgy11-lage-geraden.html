@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lagebeziehungen von Geraden — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w27-lage-geraden',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lagebeziehungen von Geraden',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 27 (LB 3) · 20 Aufgaben: parallel, identisch, schneidend, windschief; Schnittpunkte · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 27 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: the four cases (1-4), parallel or identical (5-7), intersecting or skew (8-14), method and context (15-20). */
+  questions: [
+    {
+      q: 'Welche Lagebeziehungen können zwei Geraden im Raum haben?',
+      opts: ['identisch, parallel, schneidend, windschief', 'identisch, parallel, senkrecht', 'nur parallel oder schneidend', 'schneidend oder windschief'],
+      steps: [
+        'In der Ebene gibt es nur drei Fälle.',
+        'Im Raum kommt „windschief“ hinzu.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was bedeutet „windschief“?',
+      opts: ['Die Geraden sind nicht parallel und haben keinen gemeinsamen Punkt.', 'Die Geraden sind identisch.', 'Die Geraden sind parallel, aber verschieden.', 'Die Geraden schneiden sich unter einem spitzen Winkel.'],
+      steps: [
+        'Sie „gehen aneinander vorbei“, wie zwei Straßen auf verschiedenen Ebenen einer Kreuzung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gibt es windschiefe Geraden in der Ebene?',
+      opts: ['Nein, zwei nicht parallele Geraden in der Ebene schneiden sich immer.', 'Ja, immer wenn sie verschiedene Anstiege haben.', 'Nur bei Geraden durch den Ursprung.', 'Ja, wenn sie senkrecht sind.'],
+      steps: [
+        'Windschiefe Geraden brauchen die dritte Dimension.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Am Würfel: Welche zwei Kanten sind windschief?',
+      opts: ['Eine Kante der Grundfläche und eine nicht parallele Kante der Deckfläche', 'Zwei senkrechte Kanten', 'Zwei Kanten mit gemeinsamer Ecke', 'Zwei gegenüberliegende Kanten der Grundfläche'],
+      steps: [
+        'Kanten der Grund- und der Deckfläche liegen in parallelen Ebenen und treffen sich nie.',
+        'Sind sie nicht parallel, sind sie windschief.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was zeigt man zuerst, um die Lage zweier Geraden zu bestimmen?',
+      opts: ['Ob die Stützvektoren gleich sind.', 'Ob die Geraden durch den Ursprung gehen.', 'Ob die Richtungsvektoren Vielfache voneinander sind.', 'Ob die Richtungsvektoren gleich lang sind.'],
+      steps: [
+        'Kollineare Richtungsvektoren: parallel oder identisch.',
+        'Sonst: schneidend oder windschief.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie liegen $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec{x} = \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 2 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['Identisch', 'Windschief', 'Parallel und verschieden', 'Schneidend'],
+      steps: [
+        '$\\begin{pmatrix} 2 \\\\ 2 \\\\ 0 \\end{pmatrix} = 2 \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$: parallel oder identisch.',
+        'Liegt $(0 \\mid 1 \\mid 0)$ auf $g$? Aus $x$: $t = -1$, dann $y = -1 \\neq 1$. Nein, also parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie liegen $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec{x} = \\begin{pmatrix} 3 \\\\ 1 \\\\ 2 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 4 \\\\ 2 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['Windschief', 'Schneidend', 'Parallel und verschieden', 'Identisch'],
+      steps: [
+        'Die Richtungsvektoren sind kollinear.',
+        '$(3 \\mid 1 \\mid 2)$ liegt auf $g$ für $t = 1$: identisch.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Schnittpunkt von $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $h\\colon \\vec{x} = \\begin{pmatrix} 2 \\\\ 0 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['$S(2 \\mid 0 \\mid 1)$', 'Sie schneiden sich nicht.', '$S(1 \\mid 1 \\mid 0)$', '$S(2 \\mid 1 \\mid 1)$'],
+      steps: [
+        'Gleichsetzen: $1 + t = 2$, $1 = s$, $t = 1$.',
+        'Alle drei Gleichungen passen mit $t = 1$, $s = 1$.',
+        'Einsetzen in $g$: $(2 \\mid 1 \\mid 1)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Schnittpunkt von $g\\colon \\vec{x} = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ und $h\\colon \\vec{x} = \\begin{pmatrix} 2 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} -1 \\\\ 2 \\\\ 3 \\end{pmatrix}$.',
+      opts: ['Sie schneiden sich nicht.', '$S(1 \\mid 2 \\mid 3)$', '$S(0 \\mid 0 \\mid 0)$', '$S(2 \\mid 0 \\mid 0)$'],
+      steps: [
+        '$t = 2 - s$, $2t = 2s$, $3t = 3s$.',
+        'Aus der zweiten: $t = s$, also $t = s = 1$; die dritte passt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie liegen $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $h\\colon \\vec{x} = \\begin{pmatrix} 3 \\\\ 0 \\\\ 4 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$?',
+      opts: ['Identisch', 'Schneidend', 'Windschief', 'Parallel'],
+      steps: [
+        'Nicht kollinear. Gleichsetzen: $1 + t = 3$, also $t = 2$; $2 = s$; $t = 4 + s$.',
+        'Dritte Gleichung: $2 = 6$ ist falsch: kein Schnittpunkt.',
+        'Nicht parallel und kein Schnittpunkt: windschief.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme den Schnittpunkt von $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec{x} = \\begin{pmatrix} 0 \\\\ 2 \\\\ 3 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['Sie schneiden sich nicht.', '$S(1 \\mid 3 \\mid 3)$', '$S(1 \\mid 2 \\mid 3)$', '$S(0 \\mid 2 \\mid 3)$'],
+      steps: [
+        '$1 + t = 0$, $2 = 2 + s$, $3 = 3$',
+        '$t = -1$, $s = 0$: Schnittpunkt ist der Stützpunkt von $h$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Beim Gleichsetzen zweier Geraden entstehen drei Gleichungen für zwei Unbekannte. Was ist zu tun?',
+      opts: ['Eine Gleichung weglassen.', 'Mit zwei Gleichungen $t$ und $s$ bestimmen und die dritte prüfen.', 'Das System ist immer unlösbar.', 'Eine dritte Unbekannte einführen.'],
+      steps: [
+        'Erfüllt die Lösung auch die dritte Gleichung: Schnittpunkt.',
+        'Sonst: kein gemeinsamer Punkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $a$ schneiden sich $g\\colon \\vec{x} = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec{x} = \\begin{pmatrix} 2 \\\\ 0 \\\\ a \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['$a = 1$', 'Für jedes $a$', '$a = 0$', '$a = 2$'],
+      steps: [
+        '$t = 2$, $t = s$, $0 = a$.',
+        'Nur für $a = 0$ ist die dritte Gleichung erfüllbar.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Das Gleichungssystem beim Gleichsetzen zweier nicht paralleler Geraden hat keine Lösung. Wie liegen die Geraden?',
+      opts: ['Identisch', 'Windschief', 'Parallel', 'Schneidend'],
+      steps: [
+        'Nicht parallel schließt parallel und identisch aus.',
+        'Kein gemeinsamer Punkt schließt schneidend aus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei parallele, verschiedene Geraden werden gleichgesetzt. Was ergibt das Gleichungssystem?',
+      opts: ['Die Lösung $t = s = 0$', 'Keine Lösung', 'Unendlich viele Lösungen', 'Genau eine Lösung'],
+      steps: [
+        'Parallele verschiedene Geraden haben keinen gemeinsamen Punkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei identische Geraden werden gleichgesetzt. Was ergibt das Gleichungssystem?',
+      opts: ['Einen Widerspruch', 'Unendlich viele Lösungen', 'Genau eine Lösung', 'Keine Lösung'],
+      steps: [
+        'Jeder Punkt ist gemeinsam.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Sind $\\begin{pmatrix} 2 \\\\ -4 \\\\ 6 \\end{pmatrix}$ und $\\begin{pmatrix} -1 \\\\ 2 \\\\ -3 \\end{pmatrix}$ kollinear?',
+      opts: ['Nein, sie sind verschieden lang.', 'Nein, die Vorzeichen sind verschieden.', 'Ja, aber nur in der $xy$-Ebene.', 'Ja, der erste ist das $(-2)$-Fache des zweiten.'],
+      steps: [
+        '$-2 \\cdot (-1) = 2$, $-2 \\cdot 2 = -4$, $-2 \\cdot (-3) = 6$',
+        'Entgegengesetzte Richtung ist ebenfalls kollinear.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Flugzeuge fliegen auf windschiefen Bahnen. Was folgt?',
+      opts: ['Sie können nicht zusammenstoßen, weil sich die Bahnen nicht treffen.', 'Sie stoßen zusammen, wenn sie gleich schnell sind.', 'Ihre Bahnen sind parallel.', 'Sie stoßen sicher zusammen.'],
+      steps: [
+        'Windschiefe Bahnen haben keinen gemeinsamen Punkt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Flugzeuge fliegen auf Bahnen, die sich schneiden. Stoßen sie zusammen?',
+      opts: ['Nein, nie.', 'Ja, immer.', 'Nur wenn beide zur selben Zeit im Schnittpunkt sind.', 'Nur wenn die Bahnen senkrecht sind.'],
+      steps: [
+        'Der Bahnparameter ist die Zeit.',
+        'Kollision nur, wenn im Schnittpunkt $t = s$ gilt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Ablauf entscheidet die Lage zweier Geraden vollständig?',
+      opts: ['Nur gleichsetzen und die Zahl der Lösungen zählen, ohne Richtungsvektoren.', 'Nur Stützvektoren vergleichen.', 'Die Längen der Richtungsvektoren vergleichen.', 'Richtungsvektoren kollinear? Ja: Punktprobe (identisch/parallel). Nein: Gleichsetzen (schneidend/windschief).'],
+      steps: [
+        'Zwei Fragen genügen: Sind sie parallel? Haben sie gemeinsame Punkte?'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

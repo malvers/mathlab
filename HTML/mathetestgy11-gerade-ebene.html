@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lagebeziehung Gerade – Ebene — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w30-gerade-ebene',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lagebeziehung Gerade – Ebene',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 30 (LB 3) · 20 Aufgaben: schneidet, parallel, liegt in; Durchstoßpunkte, Anwendungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 30 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: cases and method (1-4), with coordinate form (5-12), with parametric form (13-14), applications (15-20). */
+  questions: [
+    {
+      q: 'Welche Lagen kann eine Gerade zu einer Ebene haben?',
+      opts: ['Sie liegt immer in ihr.', 'Sie kann auch windschief zu ihr sein.', 'Nur schneiden oder parallel.', 'Sie schneidet sie, ist parallel zu ihr oder liegt in ihr.'],
+      steps: [
+        '„Windschief“ gibt es nur zwischen zwei Geraden.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele gemeinsame Punkte haben Gerade und Ebene, wenn sich beide schneiden?',
+      opts: ['Zwei', 'Unendlich viele', 'Keinen', 'Genau einen, den Durchstoßpunkt'],
+      steps: [
+        'Im Schnittfall durchstößt die Gerade die Ebene an genau einer Stelle.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie bestimmt man mit der Koordinatenform den Durchstoßpunkt?',
+      opts: ['Die Richtungsvektoren addieren.', 'Stützvektoren gleichsetzen.', 'Die Ebenengleichung nach $z$ auflösen und $t = 0$ setzen.', 'Die Koordinaten der Geraden in die Ebenengleichung einsetzen und nach $t$ auflösen.'],
+      steps: [
+        'Es entsteht eine Gleichung mit der einen Unbekannten $t$.',
+        '$t$ in die Geradengleichung einsetzen liefert den Punkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Beim Einsetzen fällt $t$ weg und es bleibt eine falsche Aussage wie $0 = 5$. Was folgt?',
+      opts: ['Man hat sich verrechnet.', 'Es gibt genau einen Schnittpunkt.', 'Die Gerade ist parallel zur Ebene und liegt nicht in ihr.', 'Die Gerade liegt in der Ebene.'],
+      steps: [
+        'Für kein $t$ liegt ein Geradenpunkt in der Ebene.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme den Durchstoßpunkt von $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$ mit $E\\colon x + y + z = 7$.',
+      opts: ['$S(2 \\mid 2 \\mid 3)$', '$S(3 \\mid 2 \\mid 2)$', '$S(7 \\mid 0 \\mid 0)$', 'Kein Schnittpunkt'],
+      steps: [
+        '$(1 + t) + t + t = 7 \\Rightarrow 3t = 6 \\Rightarrow t = 2$',
+        '$\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + 2 \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 2 \\\\ 2 \\end{pmatrix}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie liegt $g\\colon \\vec{x} = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$ zu $E\\colon x + y + z = 5$?',
+      opts: ['Sie liegt in $E$.', 'Sie schneidet $E$ in $(5 \\mid 0 \\mid 0)$.', 'Parallel', 'Sie schneidet $E$ im Ursprung.'],
+      steps: [
+        '$t - t + 0 = 5$ ergibt $0 = 5$.',
+        'Kein gemeinsamer Punkt: parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie liegt $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$ zu $E\\colon x + y + z = 2$?',
+      opts: ['Windschief', 'Sie liegt in $E$.', 'Parallel', 'Sie schneidet $E$ in genau einem Punkt.'],
+      steps: [
+        '$(1 + t) + (1 - t) + 0 = 2$ ergibt $2 = 2$.',
+        'Für jedes $t$ wahr: Alle Geradenpunkte liegen in $E$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Durchstoßpunkt von $g\\colon \\vec{x} = \\begin{pmatrix} 2 \\\\ 0 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ -1 \\end{pmatrix}$ mit $E\\colon 2x - y + z = 5$.',
+      opts: ['$S(1 \\mid -2 \\mid 2)$', 'Kein Schnittpunkt', '$S(3 \\mid 2 \\mid 0)$', '$S(2 \\mid 0 \\mid 1)$'],
+      steps: [
+        '$2(2 + t) - 2t + (1 - t) = 5 \\Rightarrow 5 - t = 5 \\Rightarrow t = 0$',
+        'Der Stützpunkt selbst liegt schon in $E$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie liegt $g\\colon \\vec{x} = \\begin{pmatrix} 0 \\\\ 1 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ -1 \\end{pmatrix}$ zu $E\\colon x + z = 2$?',
+      opts: ['Sie liegt in $E$.', 'Sie schneidet $E$ in $(0 \\mid 1 \\mid 2)$, sonst nirgends.', 'Sie schneidet $E$ in $(2 \\mid 1 \\mid 0)$, sonst nirgends.', 'Parallel'],
+      steps: [
+        '$t + (2 - t) = 2$ ergibt $2 = 2$: immer wahr.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Und wie liegt dieselbe Gerade $g\\colon \\vec{x} = \\begin{pmatrix} 0 \\\\ 1 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ -1 \\end{pmatrix}$ zu $F\\colon x + z = 5$?',
+      opts: ['Sie schneidet $F$ in genau einem Punkt.', 'Sie schneidet $F$ in zwei Punkten.', 'Parallel', 'Sie liegt in $F$.'],
+      steps: [
+        '$t + 2 - t = 5$ ergibt $2 = 5$: falsch für jedes $t$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo durchstößt die $z$-Achse die Ebene $2x + 3y + 6z = 12$?',
+      opts: ['In $(0 \\mid 0 \\mid 2)$', 'In $(0 \\mid 0 \\mid 12)$', 'Gar nicht', 'In $(0 \\mid 0 \\mid 6)$'],
+      steps: [
+        '$z$-Achse: $\\vec{x} = t \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$, also $6t = 12$.',
+        '$t = 2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo durchstößt $g\\colon \\vec{x} = \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$ die Ebene $x = 4$?',
+      opts: ['In $(4 \\mid 3 \\mid 1)$', 'In $(4 \\mid 2 \\mid 0)$', 'Gar nicht', 'In $(4 \\mid 1 \\mid 1)$'],
+      steps: [
+        '$2t = 4 \\Rightarrow t = 2$',
+        '$y = 1 + 2 = 3$, $z = 1$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo schneidet $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$ die Ebene $\\vec{x} = r \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['In $(1 \\mid 2 \\mid 0)$', 'In $(1 \\mid 2 \\mid 3)$', 'In $(0 \\mid 0 \\mid 0)$', 'Gar nicht'],
+      steps: [
+        'Die Ebene ist die $xy$-Ebene, die Gerade verläuft senkrecht dazu.',
+        '$3 + t = 0 \\Rightarrow t = -3$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welches Gleichungssystem entsteht beim Schnitt einer Geraden mit einer Ebene in Parameterform?',
+      opts: ['Zwei Gleichungen mit zwei Unbekannten', 'Drei Gleichungen mit zwei Unbekannten', 'Drei Gleichungen mit den drei Unbekannten $t$, $r$, $s$', 'Eine Gleichung mit einer Unbekannten'],
+      steps: [
+        'Gleichsetzen liefert eine Vektorgleichung, also drei Koordinatengleichungen.',
+        'Lösen mit dem Gauß-Verfahren aus LB 2.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Fahnenmastspitze ist in $(0 \\mid 0 \\mid 6)$. Sonnenstrahlen haben die Richtung $\\begin{pmatrix} 2 \\\\ 1 \\\\ -3 \\end{pmatrix}$. Wo liegt der Schattenpunkt auf dem Boden $z = 0$?',
+      opts: ['$(4 \\mid 2 \\mid 0)$', '$(0 \\mid 0 \\mid 0)$', '$(6 \\mid 3 \\mid 0)$', '$(2 \\mid 1 \\mid 0)$'],
+      steps: [
+        '$6 - 3t = 0 \\Rightarrow t = 2$',
+        '$\\begin{pmatrix} 0 \\\\ 0 \\\\ 6 \\end{pmatrix} + 2 \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ -3 \\end{pmatrix} = \\begin{pmatrix} 4 \\\\ 2 \\\\ 0 \\end{pmatrix}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Laserstrahl startet in $(0 \\mid 0 \\mid 10)$ mit Richtung $\\begin{pmatrix} 1 \\\\ 2 \\\\ -5 \\end{pmatrix}$. Wo trifft er den Boden $z = 0$?',
+      opts: ['$(10 \\mid 20 \\mid 0)$', '$(2 \\mid 4 \\mid 0)$', '$(1 \\mid 2 \\mid 0)$', '$(5 \\mid 10 \\mid 0)$'],
+      steps: [
+        '$10 - 5t = 0 \\Rightarrow t = 2$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Flugzeug startet im Ursprung und steigt je Minute um $\\begin{pmatrix} 4 \\\\ 3 \\\\ 1 \\end{pmatrix}$ (in km). Wann erreicht es die Wolkenschicht $z = 2$, und wo?',
+      opts: ['Nach 2 Minuten in $(4 \\mid 3 \\mid 2)$', 'Nie', 'Nach 1 Minute in $(4 \\mid 3 \\mid 1)$', 'Nach 2 Minuten in $(8 \\mid 6 \\mid 2)$'],
+      steps: [
+        '$t = 2$ aus der $z$-Koordinate.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Sonnenstrahl verläuft parallel zu einer Hauswand. Was bedeutet das rechnerisch?',
+      opts: ['Der Richtungsvektor ist der Nullvektor.', 'Das Einsetzen in die Ebenengleichung der Wand ergibt einen Widerspruch oder eine immer wahre Aussage.', 'Die Wand ist die $xy$-Ebene.', 'Es gibt genau einen Durchstoßpunkt.'],
+      steps: [
+        'Parallel heißt: $t$ fällt beim Einsetzen heraus.',
+        'Widerspruch: Strahl außerhalb der Wand; wahre Aussage: Strahl streift genau in der Wand.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie liegt die Gerade $g\\colon \\vec{x} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$ zur Ebene $z = 3$?',
+      opts: ['Sie steht senkrecht auf ihr.', 'Sie liegt in der Ebene.', 'Sie ist parallel und verschieden.', 'Sie schneidet sie in $(1 \\mid 2 \\mid 3)$, sonst nirgends.'],
+      steps: [
+        'Die $z$-Koordinate ist für alle $t$ gleich 3.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Und wie liegt dieselbe Gerade zur Ebene $z = 0$?',
+      opts: ['Sie liegt in der Ebene.', 'Sie schneidet sie in $(2 \\mid 1 \\mid 0)$.', 'Parallel', 'Sie schneidet sie in $(1 \\mid 2 \\mid 0)$.'],
+      steps: [
+        '$z = 3 \\neq 0$ für jedes $t$: kein gemeinsamer Punkt.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

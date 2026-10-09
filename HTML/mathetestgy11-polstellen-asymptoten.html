@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Polstellen, Asymptoten, Funktionsuntersuchung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w11-polstellen-asymptoten',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Polstellen, Asymptoten, Funktionsuntersuchung',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 11 (LB 1) · 20 Aufgaben: Polstellen, achsenparallele Asymptoten, Untersuchung im Sachzusammenhang · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: poles and gaps (1-6), horizontal asymptotes (7-9), mixed investigation (10-13), context with CAS (14-20). */
+  questions: [
+    {
+      q: 'Wo hat $f(x) = \\dfrac{1}{x - 2}$ eine Polstelle?',
+      opts: ['Bei $x = 0$', 'Bei $x = 2$', 'Bei $x = 1$', 'Bei $x = -2$'],
+      steps: [
+        'Der Nenner wird bei $x = 2$ null, der Zähler nicht.',
+        'Dort wachsen die Funktionswerte betragsmäßig über alle Grenzen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche senkrechte Asymptote hat der Graph von $f(x) = \\dfrac{3}{x + 4}$?',
+      opts: ['$y = 0$', '$x = 4$', '$y = 3$', '$x = -4$'],
+      steps: [
+        'Nenner null: $x + 4 = 0 \\Rightarrow x = -4$.',
+        'Senkrechte Asymptoten haben die Form $x = \\ldots$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was hat $f(x) = \\dfrac{x + 1}{x^2 - 1}$ an den Stellen $x = 1$ und $x = -1$?',
+      opts: ['Bei 1 eine Polstelle, bei −1 eine behebbare Lücke.', 'Bei 1 eine Lücke, bei −1 eine Polstelle.', 'Bei beiden eine Nullstelle.', 'Bei beiden eine Polstelle.'],
+      steps: [
+        '$x^2 - 1 = (x - 1)(x + 1)$, also $f(x) = \\dfrac{1}{x - 1}$ für $x \\neq -1$.',
+        'Bei −1 kürzt sich der Faktor weg: Lücke. Bei 1 bleibt der Nenner null: Pol.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie verhält sich der Graph von $f(x) = \\dfrac{1}{x^2}$ an der Polstelle 0?',
+      opts: ['Polstelle mit Vorzeichenwechsel.', 'Von beiden Seiten nach $-\\infty$.', 'Es ist keine Polstelle, sondern eine Lücke.', 'Polstelle ohne Vorzeichenwechsel: von beiden Seiten nach $+\\infty$.'],
+      steps: [
+        '$x^2$ ist für $x \\neq 0$ positiv, also auch $\\dfrac{1}{x^2}$.',
+        'Beide Äste gehen nach oben.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gib den Definitionsbereich von $f(x) = \\dfrac{x}{x^2 - 9}$ an.',
+      opts: ['$\\mathbb{R} \\setminus \\{0\\}$', '$\\mathbb{R} \\setminus \\{9\\}$', '$\\mathbb{R} \\setminus \\{-3;\\,3\\}$', '$(3;\\,\\infty)$'],
+      steps: [
+        '$x^2 - 9 = 0 \\Leftrightarrow x = \\pm 3$',
+        'Diese beiden Zahlen werden ausgeschlossen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme Nullstelle und Polstelle von $f(x) = \\dfrac{x - 2}{x + 5}$.',
+      opts: ['Nullstelle 2, Polstelle −5', 'Nullstelle −5, Polstelle 2', 'Nullstelle 2, keine Polstelle', 'Nullstelle −2, Polstelle 5'],
+      steps: [
+        'Nullstelle: Zähler null, Nenner nicht: $x = 2$.',
+        'Polstelle: Nenner null, Zähler nicht: $x = -5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche waagerechte Asymptote hat $f(x) = \\dfrac{2x}{x - 1}$?',
+      opts: ['$y = -2$', '$y = 0$', '$y = 2$', '$x = 1$'],
+      steps: [
+        'Zähler- und Nennergrad sind gleich.',
+        'Quotient der Leitkoeffizienten: $\\dfrac{2}{1} = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Asymptoten hat $f(x) = \\dfrac{2}{x - 3} + 1$?',
+      opts: ['$x = 1$ und $y = 3$', '$x = -3$ und $y = 1$', '$x = 3$ und $y = 2$', '$x = 3$ und $y = 1$'],
+      steps: [
+        'Polstelle bei $x = 3$.',
+        'Für $x \\to \\pm\\infty$ geht $\\dfrac{2}{x - 3} \\to 0$, also $f(x) \\to 1$.',
+        'Der Graph von $\\dfrac{2}{x}$, verschoben um 3 nach rechts und 1 nach oben.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was gilt für $f(x) = \\ln x$ in der Nähe von 0?',
+      opts: ['Für $x \\to 0$ von rechts gilt $f(x) \\to -\\infty$; die $y$-Achse ist senkrechte Asymptote.', '$f(x) \\to \\infty$', '$f(x) \\to 0$', '$f(0) = 0$'],
+      steps: [
+        '$\\ln 0{,}01 \\approx -4{,}6$, $\\ln 0{,}000\\,01 \\approx -11{,}5$',
+        'Die Werte fallen ohne Grenze.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Extrempunkte hat $f(x) = x + \\dfrac{1}{x}$?',
+      opts: ['Keine', '$H(1 \\mid 2)$ und $T(-1 \\mid -2)$', '$T(1 \\mid 2)$ und $H(-1 \\mid -2)$', 'Nur $T(1 \\mid 2)$'],
+      steps: [
+        '$f^{\\prime}(x) = 1 - \\dfrac{1}{x^2} = 0 \\Rightarrow x = \\pm 1$',
+        '$f^{\\prime\\prime}(x) = \\dfrac{2}{x^3}$: positiv bei 1 (Tiefpunkt), negativ bei −1 (Hochpunkt).',
+        'Kurios: Der Hochpunkt liegt tiefer als der Tiefpunkt, dazwischen ist der Pol.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = \\dfrac{x^2 + 1}{x}$?',
+      opts: ['Keine', 'Punktsymmetrie zum Ursprung', 'Achsensymmetrie zur $y$-Achse', 'Beide'],
+      steps: [
+        '$f(-x) = \\dfrac{x^2 + 1}{-x} = -f(x)$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gib den Wertebereich von $f(x) = \\dfrac{1}{x^2 + 1}$ an.',
+      opts: ['$[0;\\,1]$', '$(0;\\,\\infty)$', '$\\mathbb{R}$', '$(0;\\,1]$'],
+      steps: [
+        'Der Nenner ist mindestens 1, also $f(x) \\leq 1$ mit Gleichheit bei $x = 0$.',
+        '$f(x) > 0$ immer, und für $x \\to \\pm\\infty$ kommt $f$ der 0 beliebig nahe, erreicht sie aber nicht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Das CAS liefert für $f^{\\prime}(x) = 0$ die Lösung $x \\approx 1{,}37$. Was ist noch zu tun, bevor man von einem Extremum spricht?',
+      opts: ['Den Grenzwert für $x \\to \\infty$ bestimmen.', 'Nichts, $f^{\\prime} = 0$ reicht.', 'Prüfen, ob $f(1{,}37) = 0$ ist.', 'Die hinreichende Bedingung prüfen, z. B. Vorzeichenwechsel von $f^{\\prime}$ oder $f^{\\prime\\prime}(1{,}37) \\neq 0$.'],
+      steps: [
+        '$f^{\\prime}(x_0) = 0$ ist nur notwendig.',
+        'Erst mit Vorzeichenwechsel oder $f^{\\prime\\prime}(x_0) \\neq 0$ ist das Extremum gesichert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Stückkosten eines Betriebs sind $k(x) = \\dfrac{200 + 5x}{x}$ (in €, $x$ in Stück). Was passiert bei sehr großen Stückzahlen?',
+      opts: ['Sie nähern sich 5 € pro Stück.', 'Sie nähern sich 0 €.', 'Sie nähern sich 200 € pro Stück.', 'Sie wachsen über alle Grenzen.'],
+      steps: [
+        '$k(x) = \\dfrac{200}{x} + 5$',
+        'Die Fixkosten verteilen sich auf immer mehr Stück: $\\dfrac{200}{x} \\to 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Konzentration eines Medikaments ist $c(t) = 10t\\,e^{-0{,}5t}$ ($t$ in h). Wann ist sie am größten?',
+      opts: ['Nach 1 Stunde', 'Nach 2 Stunden', 'Nach 10 Stunden', 'Nach 5 Stunden'],
+      steps: [
+        '$c^{\\prime}(t) = 10e^{-0{,}5t} - 5t\\,e^{-0{,}5t} = 10e^{-0{,}5t}(1 - 0{,}5t)$',
+        '$c^{\\prime}(t) = 0 \\Rightarrow t = 2$; davor positiv, danach negativ.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die höchste Konzentration $c(2)$ für $c(t) = 10t\\,e^{-0{,}5t}$ ungefähr?',
+      opts: ['etwa 2,72', 'etwa 10', 'etwa 7,36', 'etwa 20'],
+      steps: [
+        '$c(2) = 20\\,e^{-1} = \\dfrac{20}{e}$',
+        '$\\dfrac{20}{2{,}718} \\approx 7{,}36$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bei welcher Zeit hat $c(t) = 10t\\,e^{-0{,}5t}$ seine Wendestelle, und was bedeutet sie?',
+      opts: ['$t = 0$: Beginn der Einnahme.', '$t = 4$: Dort ist die Konzentration null.', '$t = 4$: Dort nimmt die Konzentration am stärksten ab.', '$t = 2$: höchste Konzentration.'],
+      steps: [
+        '$c^{\\prime\\prime}(t) = 10e^{-0{,}5t}(0{,}25t - 1) = 0 \\Rightarrow t = 4$',
+        'Nach dem Maximum fällt $c$; in der Wendestelle ist die Abnahmerate am größten.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was gilt für $c(t) = 10t\\,e^{-0{,}5t}$ langfristig?',
+      opts: ['$c(t) \\to \\infty$', '$c(t) \\to 0$', '$c(t) \\to 10$', '$c(t) \\to 5$'],
+      steps: [
+        'Die Exponentialfunktion im Nenner wächst schneller als $10t$.',
+        'Das Medikament wird vollständig abgebaut.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Bestand wächst logistisch nach $N(t) = \\dfrac{1000}{1 + 9e^{-t}}$. Bei welchem Bestand wächst er am schnellsten?',
+      opts: ['Bei 100', 'Bei 500', 'Bei 1000', 'Bei 900'],
+      steps: [
+        'Logistisches Wachstum hat seine Wendestelle bei der halben Sättigungsgrenze.',
+        'Sättigung 1000, also schnellstes Wachstum bei 500 (zur Zeit $t = \\ln 9 \\approx 2{,}2$).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Worauf kommt es bei einer Funktionsuntersuchung im Sachzusammenhang an?',
+      opts: ['Nur die Eigenschaften untersuchen, nach denen gefragt ist, und sie im Sachzusammenhang deuten.', 'Nur mit dem CAS zeichnen, nichts rechnen.', 'Den Definitionsbereich ignorieren.', 'Immer alle Eigenschaften in fester Reihenfolge abarbeiten.'],
+      steps: [
+        'Der Lehrplan betont: keine routinemäßige Kurvendiskussion.',
+        'Sinnvoll ist auch der Definitionsbereich aus dem Sachzusammenhang, z. B. $t \\geq 0$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

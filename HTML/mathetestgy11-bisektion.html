@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gleichungen grafisch lösen, Bisektionsmethode — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w21-bisektion',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Gleichungen grafisch lösen, Bisektionsmethode',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 21 (WB 2) · 20 Aufgaben: Schnittpunkte deuten, Vorzeichenwechsel, Intervallhalbierung · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 21 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: graphical solving (1-5), sign change (6-9), bisection steps (10-15), accuracy and limits (16-20). */
+  questions: [
+    {
+      q: 'Warum lässt sich $e^x = 3 - x$ nicht mit den bekannten Umformungen nach $x$ auflösen?',
+      opts: ['Doch, mit $x = \\ln 3$.', 'Die Gleichung hat keine Lösung.', 'Man darf $e^x$ nicht logarithmieren.', '$x$ steht einmal im Exponenten und einmal als Summand; Logarithmieren hilft nicht.'],
+      steps: [
+        '$\\ln(3 - x) = x$ hat dasselbe Problem.',
+        'Solche Gleichungen löst man grafisch oder numerisch.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie liest man die Lösung von $f(x) = g(x)$ aus den Graphen ab?',
+      opts: ['Als $x$-Koordinate des Schnittpunkts beider Graphen.', 'Als Schnittpunkt mit der $y$-Achse.', 'Als $y$-Koordinate des Schnittpunkts.', 'Als Nullstelle von $f$.'],
+      steps: [
+        'Im Schnittpunkt haben beide Funktionen denselben Funktionswert.',
+        'Gesucht ist die Stelle $x$, an der das passiert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie formt man $e^x = 3 - x$ in eine Nullstellenaufgabe um?',
+      opts: ['$h(x) = e^x \\cdot (3 - x) = 0$', '$h(x) = e^{3 - x} = 0$', '$h(x) = e^x - x - 3 = 0$', '$h(x) = e^x + x - 3 = 0$'],
+      steps: [
+        'Alles auf eine Seite bringen.',
+        'Die Lösung der Gleichung ist die Nullstelle von $h$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Lösungen hat $x^2 = 2^x$?',
+      opts: ['Zwei', 'Eine', 'Drei', 'Keine'],
+      steps: [
+        'Sofort sieht man $x = 2$ und $x = 4$.',
+        'Für negative $x$ fällt $x^2$ von oben, $2^x$ geht gegen 0: ein dritter Schnittpunkt bei $x \\approx -0{,}77$.',
+        'Erst die Skizze zeigt alle Lösungen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse $x^2 = x + 2$ grafisch (Normalparabel und Gerade).',
+      opts: ['Keine Lösung', '$x = 1$ und $x = -2$', '$x = 2$', '$x = -1$ und $x = 2$'],
+      steps: [
+        'Schnittpunkte $(-1 \\mid 1)$ und $(2 \\mid 4)$.',
+        'Rechnerische Probe: $x^2 - x - 2 = (x - 2)(x + 1) = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$h(x) = e^x + x - 3$: Es gilt $h(0) = -2$ und $h(1) \\approx 0{,}72$. Was folgt?',
+      opts: ['Es folgt nichts.', 'Zwischen 0 und 1 liegt mindestens eine Nullstelle.', 'Die Nullstelle ist genau 0,5.', 'Zwischen 0 und 1 liegt keine Nullstelle.'],
+      steps: [
+        '$h$ ist stetig und wechselt das Vorzeichen.',
+        'Der Graph muss die $x$-Achse dazwischen kreuzen (Nullstellensatz).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was braucht die Bisektionsmethode am Start?',
+      opts: ['Eine stetige Funktion und ein Intervall $[a;\\,b]$ mit $h(a) \\cdot h(b) < 0$.', 'Eine Funktion ohne Extrema.', 'Die Ableitung der Funktion.', 'Einen Startwert in der Nähe der Nullstelle, sonst nichts.'],
+      steps: [
+        '$h(a) \\cdot h(b) < 0$ heißt: verschiedene Vorzeichen an den Rändern.',
+        'Ableitungen braucht erst das Newton-Verfahren.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In welchem Intervall liegt eine Nullstelle von $h(x) = x^3 + x - 1$?',
+      opts: ['$[-1;\\,0]$', '$[2;\\,3]$', '$[1;\\,2]$', '$[0;\\,1]$'],
+      steps: [
+        '$h(0) = -1$, $h(1) = 1$: Vorzeichenwechsel.',
+        '$h(-1) = -3$ und $h(2) = 9$ helfen bei den anderen Intervallen nicht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In welchem Intervall liegt die Lösung von $\\cos x = x$?',
+      opts: ['$[-1;\\,0]$', '$[2;\\,3]$', '$[0;\\,1]$', '$[1;\\,2]$'],
+      steps: [
+        '$h(x) = \\cos x - x$: $h(0) = 1$, $h(1) \\approx 0{,}54 - 1 = -0{,}46$.',
+        'Vorzeichenwechsel zwischen 0 und 1.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bisektion für $h(x) = e^x + x - 3$ auf $[0;\\,1]$: Es ist $h(0{,}5) \\approx -0{,}85$. Wie heißt das neue Intervall?',
+      opts: ['$[0;\\,0{,}5]$', '$[0{,}25;\\,0{,}75]$', '$[0{,}5;\\,1]$', '$[0;\\,1]$'],
+      steps: [
+        '$h(0{,}5) < 0$ und $h(1) > 0$: Der Vorzeichenwechsel liegt rechts.',
+        'Neues Intervall $[0{,}5;\\,1]$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Weiter: $h(0{,}75) \\approx -0{,}13$. Wie heißt das neue Intervall?',
+      opts: ['$[0{,}75;\\,1]$', '$[0{,}5;\\,0{,}75]$', '$[0;\\,0{,}75]$', '$[0{,}625;\\,0{,}875]$'],
+      steps: [
+        '$h(0{,}75) < 0$, $h(1) > 0$.',
+        'Die Nullstelle liegt in $[0{,}75;\\,1]$; tatsächlich bei etwa 0,79.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bisektion für $h(x) = x^3 + x - 1$ auf $[0;\\,1]$. Welcher Mittelpunkt wird zuerst berechnet und welches Intervall folgt?',
+      opts: ['$h(0{,}5) = -0{,}375$, also $[0;\\,0{,}5]$', '$h(0{,}5) = -0{,}375$, also $[0{,}5;\\,1]$', '$h(0{,}5) = 0{,}375$, also $[0;\\,0{,}5]$', '$h(1) = 1$, also $[1;\\,2]$'],
+      steps: [
+        '$0{,}5^3 + 0{,}5 - 1 = 0{,}125 - 0{,}5 = -0{,}375$',
+        'Negativ, und $h(1) > 0$: weiter mit $[0{,}5;\\,1]$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die CAS-Tabelle für $h(x) = x^3 - 2x - 1$ zeigt $h(1{,}6) = -0{,}104$ und $h(1{,}7) = 0{,}513$. Was folgt?',
+      opts: ['Eine Nullstelle liegt zwischen 1,6 und 1,7.', 'Die Nullstelle ist 1,6.', 'Zwischen 1,6 und 1,7 liegt keine Nullstelle.', 'Die Nullstelle ist 1,65.'],
+      steps: [
+        'Vorzeichenwechsel zwischen den beiden Tabellenwerten.',
+        'Exakt ist es $\\dfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$, der Goldene Schnitt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In welchem Intervall liegt die Lösung von $\\ln x = 2 - x$?',
+      opts: ['$[0;\\,1]$', '$[1;\\,2]$', '$[2;\\,3]$', '$[3;\\,4]$'],
+      steps: [
+        '$h(x) = \\ln x + x - 2$: $h(1) = -1$, $h(2) = \\ln 2 \\approx 0{,}69$.',
+        'Vorzeichenwechsel zwischen 1 und 2.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist nach einem Bisektionsschritt immer garantiert?',
+      opts: ['Das Intervall wird um 0,1 kürzer.', 'Man hat die Nullstelle exakt gefunden.', 'Das Intervall mit der Nullstelle ist halb so lang wie vorher.', 'Der Mittelpunkt ist näher an der Nullstelle als vorher.'],
+      steps: [
+        'Jeder Schritt halbiert die Intervallbreite.',
+        'Ob der neue Mittelpunkt näher liegt, ist nicht garantiert, die Einschachtelung aber schon.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Startintervall hat die Länge 1. Wie lang ist es nach 10 Bisektionsschritten?',
+      opts: ['$\\dfrac{1}{1024}$, also kleiner als 0,001', '$\\dfrac{1}{20}$', '$\\dfrac{1}{100}$', '$\\dfrac{1}{10}$'],
+      steps: [
+        'Jeder Schritt halbiert: $\\left(\\dfrac{1}{2}\\right)^{10} = \\dfrac{1}{1024}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Schritte braucht man mindestens, damit ein Intervall der Länge 1 kürzer als 0,01 wird?',
+      opts: ['5', '7', '10', '100'],
+      steps: [
+        '$2^6 = 64 < 100$, $2^7 = 128 > 100$.',
+        'Nach 7 Schritten ist die Länge $\\dfrac{1}{128} < 0{,}01$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Intervall $[2;\\,3]$ wird dreimal halbiert. Wie lang ist es danach?',
+      opts: ['0,333', '0,5', '0,25', '0,125'],
+      steps: [
+        '$1 \\cdot \\left(\\dfrac{1}{2}\\right)^3 = \\dfrac{1}{8}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum findet die Bisektion die Nullstelle von $h(x) = (x - 1)^2$ nicht?',
+      opts: ['Sie findet sie, nur langsam.', '$h$ hat bei der doppelten Nullstelle keinen Vorzeichenwechsel.', 'Weil die Nullstelle eine ganze Zahl ist.', 'Weil $h$ nicht stetig ist.'],
+      steps: [
+        '$h(x) \\geq 0$ überall: Es gibt kein Intervall mit verschiedenen Vorzeichen.',
+        'Berührpunkte bleiben der Bisektion verborgen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Aussage über grafisches Lösen und Bisektion stimmt?',
+      opts: ['Die Skizze liefert exakte Lösungen.', 'Die Bisektion ist schneller als jedes andere Verfahren.', 'Die Skizze verschafft den Überblick, die Bisektion liefert beliebig genaue Näherungen.', 'Die Bisektion findet immer alle Lösungen.'],
+      steps: [
+        'Aus der Skizze kommen Anzahl und grobe Lage der Lösungen.',
+        'Die Bisektion ist zuverlässig, aber langsam: ein Bit Genauigkeit pro Schritt.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

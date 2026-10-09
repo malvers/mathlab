@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Kumulierte Wahrscheinlichkeiten — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11-w35-kumuliert',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Kumulierte Wahrscheinlichkeiten',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Grundkurs · Woche 35 (LB 4) · 20 Aufgaben: „höchstens“, „mindestens“, „zwischen“; Summensymbol, Gegenereignis · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Woche 35 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11.html', /* opened from the plan */
+  /* Blocks: translating words (1-6), summation sign and tables (7-9), computing (10-17), minimum number of trials (18-20). */
+  questions: [
+    {
+      q: 'Was bedeutet „höchstens 3 Treffer“?',
+      opts: ['$X = 3$', '$X \\leq 3$', '$X \\geq 3$', '$X < 3$'],
+      steps: [
+        'Höchstens 3: 0, 1, 2 oder 3 Treffer.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet „mehr als 3 Treffer“?',
+      opts: ['$X \\leq 3$', '$X \\geq 3$', '$X \\geq 4$', '$X > 4$'],
+      steps: [
+        'Mehr als 3 schließt die 3 aus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was bedeutet „weniger als 3 Treffer“?',
+      opts: ['$X \\leq 2$', '$X \\geq 3$', '$X < 2$', '$X \\leq 3$'],
+      steps: [
+        'Weniger als 3: 0, 1 oder 2.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie berechnet man $P(X \\geq 1)$ am schnellsten?',
+      opts: ['$P(X = 1)$', '$P(X \\leq 1)$', '$1 - P(X = 1)$', '$1 - P(X = 0)$'],
+      steps: [
+        'Gegenereignis von „mindestens ein Treffer“ ist „kein Treffer“.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie berechnet man $P(X \\geq k)$ aus einer Tabelle der Werte $P(X \\leq k)$?',
+      opts: ['$1 - P(X \\leq k)$', '$1 - P(X \\leq k - 1)$', '$P(X \\leq k) - 1$', '$P(X \\leq k + 1)$'],
+      steps: [
+        'Gegenereignis von „mindestens $k$“ ist „höchstens $k - 1$“.',
+        'Typischer Fehler: $1 - P(X \\leq k)$ schließt $k$ selbst mit aus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist das Gegenereignis von „höchstens 2 Treffer“?',
+      opts: ['Genau 2 Treffer', 'Höchstens 3 Treffer', 'Mindestens 2 Treffer', 'Mindestens 3 Treffer'],
+      steps: [
+        '$X \\leq 2$ und $X \\geq 3$ ergänzen sich zu allen Möglichkeiten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie schreibt man $P(X \\leq 2)$ mit dem Summensymbol?',
+      opts: ['$\\sum\\limits_{k=0}^{2} \\dbinom{n}{k} p^k (1 - p)^{n - k}$', '$\\sum\\limits_{k=1}^{2} p^k$', '$\\dbinom{n}{2} p^2 (1 - p)^{n - 2}$', '$\\sum\\limits_{k=2}^{n} \\dbinom{n}{k} p^k (1 - p)^{n - k}$'],
+      steps: [
+        'Die Einzelwahrscheinlichkeiten für $k = 0$, 1 und 2 werden addiert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie erhält man $P(X = k)$ aus kumulierten Werten?',
+      opts: ['$P(X \\leq k) \\cdot P(X \\leq k - 1)$', '$1 - P(X \\leq k)$', '$P(X \\leq k) - P(X \\leq k - 1)$', '$P(X \\leq k) + P(X \\leq k - 1)$'],
+      steps: [
+        'Die beiden Summen unterscheiden sich genau um den Summanden $P(X = k)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie berechnet man „zwischen 2 und 5 Treffer (jeweils einschließlich)“?',
+      opts: ['$P(X = 5) - P(X = 2)$', '$P(X \\leq 5) - P(X \\leq 1)$', '$P(X \\leq 5) + P(X \\leq 2)$', '$P(X \\leq 5) - P(X \\leq 2)$'],
+      steps: [
+        '$P(2 \\leq X \\leq 5)$: Von „bis 5“ wird „bis 1“ abgezogen, damit die 2 dabei bleibt.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$n = 4$, $p = 0{,}5$. Berechne $P(X \\leq 1)$.',
+      opts: ['$\\dfrac{1}{16}$', '$\\dfrac{11}{16}$', '$\\dfrac{5}{16}$', '$\\dfrac{4}{16}$'],
+      steps: [
+        '$P(X = 0) + P(X = 1) = \\dfrac{1}{16} + \\dfrac{4}{16}$'
+      ],
+      solution: 2
+    },
+    {
+      q: '$n = 5$, $p = 0{,}2$. Berechne $P(X \\geq 1)$.',
+      opts: ['0,4096', '0,2', '0,67232', '0,32768'],
+      steps: [
+        '$1 - 0{,}8^5 = 1 - 0{,}327\\,68$'
+      ],
+      solution: 2
+    },
+    {
+      q: '$n = 5$, $p = 0{,}2$. Berechne $P(X \\leq 1)$.',
+      opts: ['0,73728', '0,32768', '0,26272', '0,4096'],
+      steps: [
+        '$0{,}327\\,68 + 0{,}4096 = 0{,}737\\,28$'
+      ],
+      solution: 0
+    },
+    {
+      q: '$n = 10$, $p = 0{,}5$. Berechne $P(X \\geq 9)$.',
+      opts: ['$\\dfrac{1}{1024}$', '$\\dfrac{10}{1024}$', '$\\dfrac{11}{1024}$', '$\\dfrac{1013}{1024}$'],
+      steps: [
+        '$P(X = 9) + P(X = 10) = \\dfrac{10 + 1}{1024}$',
+        '$\\approx 0{,}0107$'
+      ],
+      solution: 2
+    },
+    {
+      q: '$n = 3$, $p = 0{,}4$. Berechne $P(X \\geq 2)$.',
+      opts: ['0,648', '0,288', '0,064', '0,352'],
+      steps: [
+        '$P(X = 2) = 3 \\cdot 0{,}16 \\cdot 0{,}6 = 0{,}288$',
+        '$P(X = 3) = 0{,}064$; zusammen 0,352.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Fünf Fragen werden geraten ($p = \\dfrac{1}{4}$). Wie wahrscheinlich sind mindestens 3 richtig?',
+      opts: ['etwa 0,104', 'etwa 0,088', 'etwa 0,896', 'etwa 0,25'],
+      steps: [
+        '$\\dbinom{5}{3} \\cdot \\dfrac{9}{1024} + \\dbinom{5}{4} \\cdot \\dfrac{3}{1024} + \\dfrac{1}{1024} = \\dfrac{90 + 15 + 1}{1024}$',
+        '$= \\dfrac{106}{1024} \\approx 0{,}104$: Raten lohnt sich nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: '20 % der Menschen sind Linkshänder. In einer Gruppe von 10: Wie wahrscheinlich ist höchstens ein Linkshänder?',
+      opts: ['etwa 0,107', 'etwa 0,376', 'etwa 0,268', 'etwa 0,624'],
+      steps: [
+        '$P(X = 0) = 0{,}8^{10} \\approx 0{,}107$, $P(X = 1) = 10 \\cdot 0{,}2 \\cdot 0{,}8^9 \\approx 0{,}268$',
+        'Zusammen $\\approx 0{,}376$.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$n = 4$, $p = 0{,}5$. Berechne $P(2 \\leq X \\leq 3)$.',
+      opts: ['$\\dfrac{3}{8}$', '$\\dfrac{1}{4}$', '$\\dfrac{11}{16}$', '$\\dfrac{5}{8}$'],
+      steps: [
+        '$\\dfrac{6}{16} + \\dfrac{4}{16} = \\dfrac{10}{16}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie oft muss man mindestens würfeln, um mit mindestens 90 % Wahrscheinlichkeit wenigstens eine Sechs zu haben?',
+      opts: ['13-mal', '60-mal', '6-mal', '9-mal'],
+      steps: [
+        '$1 - \\left(\\dfrac{5}{6}\\right)^n \\geq 0{,}9 \\Leftrightarrow \\left(\\dfrac{5}{6}\\right)^n \\leq 0{,}1$',
+        '$n \\geq \\dfrac{\\ln 0{,}1}{\\ln \\frac{5}{6}} \\approx 12{,}6$, also $n = 13$.',
+        'Beim Teilen durch $\\ln \\frac{5}{6} < 0$ dreht sich das Relationszeichen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist $P(X < 0)$ bei einer binomialverteilten Zufallsgröße?',
+      opts: ['Nicht definiert', '0', '1', '$(1 - p)^n$'],
+      steps: [
+        'Weniger als null Treffer sind unmöglich.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum ist $P(X \\leq n) = 1$?',
+      opts: ['Das stimmt nur für $p = 0{,}5$.', 'Weil das Histogramm symmetrisch ist.', 'Weil $p \\leq 1$ ist.', 'Mehr als $n$ Treffer sind bei $n$ Versuchen unmöglich.'],
+      steps: [
+        '„Höchstens $n$“ umfasst alle Möglichkeiten.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
