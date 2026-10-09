@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Funktionenscharen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w25-funktionenscharen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Funktionenscharen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 25 (LB 8) · 20 Aufgaben: Gemeinsame Punkte, Extrema mit Parameter, Ortskurven, Parameter bestimmen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 25 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Scheitel und Ortskurven (1, 2, 13-15, 19), gemeinsame Punkte (3, 4, 16), Nullstellen und Extrema (5-8, 18, 20), Parameter bestimmen (9-12, 17). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Wo liegt der Scheitelpunkt von $f_a(x) = x^2 - 2ax$?',
+      opts: ['$(a \\mid a^2)$', '$(-a \\mid a^2)$', '$(2a \\mid 0)$', '$(a \\mid -a^2)$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 2x - 2a = 0$ gibt $x = a$.',
+        '$f_a(a) = a^2 - 2a^2 = -a^2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Auf welcher Kurve liegen die Scheitelpunkte $(a \\mid -a^2)$ aus Aufgabe 1 für alle $a$?',
+      opts: ['$y = -x$', '$y = x^2$', '$y = -x^2$', '$y = -2x$'],
+      steps: [
+        '$x = a$ setzen, dann $y = -a^2 = -x^2$.',
+        'Diese Kurve heißt Ortskurve der Scheitelpunkte.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Punkt haben alle Graphen von $f_a(x) = ax^2$ mit $a \\neq 0$ gemeinsam?',
+      opts: ['$(0 \\mid 1)$', '$(0 \\mid 0)$', '$(1 \\mid 1)$', 'keinen'],
+      steps: [
+        '$f_a(0) = 0$ für jedes $a$.',
+        'Für $x \\neq 0$ hängt $ax^2$ von $a$ ab; dort schneiden sich zwei Graphen nicht.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Punkte haben alle Graphen von $f_a(x) = a \\cdot x \\cdot (x - 2)$ mit $a \\neq 0$ gemeinsam?',
+      opts: ['$(2 \\mid 2)$', '$(1 \\mid -1)$', 'nur $(0 \\mid 0)$', '$(0 \\mid 0)$ und $(2 \\mid 0)$'],
+      steps: [
+        '$f_a(x) = f_b(x)$ mit $a \\neq b$ heißt $(a - b)\\,x\\,(x - 2) = 0$.',
+        'Also $x = 0$ oder $x = 2$: die gemeinsamen Nullstellen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche $a$ hat $f_a(x) = x^3 - ax$ drei verschiedene Nullstellen?',
+      opts: ['$a = 0$', 'für alle $a$', '$a < 0$', '$a > 0$'],
+      steps: [
+        '$x(x^2 - a) = 0$: $x = 0$ oder $x^2 = a$.',
+        'Zwei weitere Nullstellen $\\pm\\sqrt a$ gibt es nur für $a > 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo hat $f_a(x) = x^3 - 3ax$ mit $a > 0$ seine Extremstellen?',
+      opts: ['$x = \\pm\\sqrt a$', '$x = 0$', '$x = \\pm 3a$', '$x = \\pm a$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 3x^2 - 3a = 0$.',
+        '$x^2 = a$, also $x = \\pm\\sqrt a$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo hat $f_a(x) = e^x - ax$ mit $a > 0$ seinen Tiefpunkt?',
+      opts: ['bei $x = 0$', 'bei $x = e^a$', 'bei $x = \\ln a$', 'bei $x = a$'],
+      steps: [
+        '$f_a^{\\prime}(x) = e^x - a = 0$ gibt $x = \\ln a$.',
+        '$f_a^{\\prime\\prime}(x) = e^x > 0$: Tiefpunkt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $a$ hat $f_a(x) = x^2 - 4x + a$ genau eine Nullstelle?',
+      opts: ['$a = 2$', '$a = 4$', '$a = 0$', '$a = -4$'],
+      steps: [
+        'Diskriminante der $pq$-Formel: $4 - a = 0$.',
+        '$a = 4$: $f_4(x) = (x - 2)^2$ berührt die $x$-Achse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Graph der Schar $f_a(x) = ax^2 - 1$ geht durch $(2 \\mid 3)$?',
+      opts: ['$a = 1$', '$a = 4$', '$a = 2$', '$a = \\tfrac12$'],
+      steps: [
+        '$4a - 1 = 3$.',
+        '$a = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Graph von $f_t(x) = tx - x^2$ mit $t > 0$ schließt mit der $x$-Achse die Fläche $\\tfrac{t^3}{6}$ ein. Wie groß ist sie für $t = 3$?',
+      opts: ['$1{,}5$', '$4{,}5$', '$9$', '$27$'],
+      steps: [
+        '$\\tfrac{27}{6}$.',
+        '$= 4{,}5$. Kontrolle: $\\int_0^3 (3x - x^2)\\,dx = 13{,}5 - 9$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $t$ ist die Fläche aus Aufgabe 10 genau $36$?',
+      opts: ['$t = 3$', '$t = 6$', '$t = 216$', '$t = 12$'],
+      steps: [
+        '$\\tfrac{t^3}{6} = 36$, also $t^3 = 216$.',
+        '$t = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $a$ hat $f_a(x) = x^2 - 2ax + 1$ an der Stelle $0$ die Steigung $4$?',
+      opts: ['$a = -2$', '$a = -4$', '$a = 2$', '$a = 4$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 2x - 2a$, also $f_a^{\\prime}(0) = -2a$.',
+        '$-2a = 4$, $a = -2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo liegt der Wendepunkt von $f_a(x) = x^3 - 3ax^2$?',
+      opts: ['$(3a \\mid 0)$', '$(a \\mid -2a^3)$', '$(0 \\mid 0)$', '$(a \\mid -a^3)$'],
+      steps: [
+        '$f_a^{\\prime\\prime}(x) = 6x - 6a = 0$ gibt $x = a$; $f_a^{\\prime\\prime\\prime} = 6 \\neq 0$.',
+        '$f_a(a) = a^3 - 3a^3 = -2a^3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf welcher Kurve liegen die Wendepunkte aus Aufgabe 13?',
+      opts: ['$y = -2x^2$', '$y = -x^3$', '$y = 2x^3$', '$y = -2x^3$'],
+      steps: [
+        '$x = a$ einsetzen in $y = -2a^3$.',
+        'Ortskurve $y = -2x^3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was haben die Graphen von $f_a(x) = (x - a)^2$ gemeinsam?',
+      opts: ['Es sind verschobene Normalparabeln mit dem Scheitel auf der $x$-Achse.', 'Sie haben alle den Scheitel $(0 \\mid a)$.', 'Sie gehen alle durch den Ursprung.', 'Sie sind alle gleich.'],
+      steps: [
+        'Scheitelform mit dem Scheitel $(a \\mid 0)$.',
+        'Der Parameter verschiebt die Normalparabel entlang der $x$-Achse.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Punkte haben zwei verschiedene Graphen von $f_a(x) = a \\cdot e^{-x}$ gemeinsam?',
+      opts: ['unendlich viele', '$(0 \\mid 0)$', 'keinen', '$(0 \\mid 1)$'],
+      steps: [
+        '$a e^{-x} = b e^{-x}$ mit $a \\neq b$ hieße $(a - b)\\,e^{-x} = 0$.',
+        'Das ist unmöglich, weil $e^{-x} > 0$ ist.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $a$ berührt die Parabel $y = x^2 + a$ die Gerade $y = 2x$?',
+      opts: ['$a = 1$', '$a = 0$', '$a = 2$', '$a = -1$'],
+      steps: [
+        '$x^2 - 2x + a = 0$ muss genau eine Lösung haben.',
+        'Diskriminante $1 - a = 0$, $a = 1$; Berührpunkt $(1 \\mid 2)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Nullstellen hat $f_k(x) = kx^3 - x$ für $k = 4$?',
+      opts: ['$0$ und $\\pm 2$', 'nur $0$', '$0$ und $\\pm\\tfrac14$', '$0$ und $\\pm\\tfrac12$'],
+      steps: [
+        '$x(kx^2 - 1) = 0$: $x = 0$ oder $x = \\pm\\tfrac{1}{\\sqrt k}$.',
+        'Für $k = 4$: $\\pm\\tfrac12$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo liegt der Hochpunkt von $f_a(x) = -x^2 + 2ax$?',
+      opts: ['$(a \\mid -a^2)$', '$(-a \\mid a^2)$', '$(a \\mid a^2)$', '$(2a \\mid 0)$'],
+      steps: [
+        '$f_a^{\\prime}(x) = -2x + 2a = 0$, $x = a$.',
+        '$f_a(a) = -a^2 + 2a^2 = a^2$. Ortskurve: $y = x^2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $a$ liegt der Tiefpunkt von $f_a(x) = x^2 - ax$ bei $x = 3$?',
+      opts: ['$a = 9$', '$a = 1{,}5$', '$a = 6$', '$a = 3$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 2x - a = 0$ gibt $x = \\tfrac a2$.',
+        '$\\tfrac a2 = 3$, $a = 6$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

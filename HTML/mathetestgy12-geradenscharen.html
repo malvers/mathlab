@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Geradenscharen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w26-geradenscharen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Geradenscharen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 26 (LB 8) · 20 Aufgaben: Büschel und Parallelenscharen, Parameter für Lage, Winkel und Abstand · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 26 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Geradenscharen in der Ebene (3-7, 15-17), im Raum: Punkt und Richtung (1, 2, 14, 18, 20), gemeinsame Ebene (8, 9, 12, 19), Lage, Winkel (10, 11, 13). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Welche Gerade der Schar $g_a\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} a \\\\ 1 \\\\ 0 \\end{pmatrix}$ geht durch $P(3 \\mid 1 \\mid 0)$?',
+      opts: ['keine', '$a = 3$', '$a = 1$', '$a = 2$'],
+      steps: [
+        '$y$-Koordinate: $t = 1$.',
+        '$x$-Koordinate: $1 + a = 3$, $a = 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $a$ steht $g_a$ mit dem Richtungsvektor $\\begin{pmatrix} a \\\\ 1 \\\\ 0 \\end{pmatrix}$ senkrecht auf $\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$?',
+      opts: ['$a = -1$', '$a = 0$', '$a = 1$', 'für kein $a$'],
+      steps: [
+        '$(a;\\ 1;\\ 0) \\cdot (1;\\ 1;\\ 1) = a + 1$.',
+        '$a + 1 = 0$, $a = -1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Punkt haben alle Geraden $y = ax + 1$ gemeinsam?',
+      opts: ['$(0 \\mid 1)$', '$(1 \\mid 0)$', '$(0 \\mid 0)$', 'keinen'],
+      steps: [
+        'Für $x = 0$ ist $y = 1$, unabhängig von $a$.',
+        'Die Schar ist ein Geradenbüschel durch $(0 \\mid 1)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was beschreibt die Schar $y = 2x + a$?',
+      opts: ['Geraden durch den Ursprung', 'ein Geradenbüschel durch $(0 \\mid 2)$', 'parallele Geraden mit der Steigung $2$', 'Geraden mit der Steigung $a$'],
+      steps: [
+        'Die Steigung ist immer $2$, nur der $y$-Achsenabschnitt $a$ ändert sich.',
+        'Eine Parallelenschar.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Punkt haben alle Geraden $y = a(x - 2)$ gemeinsam?',
+      opts: ['$(-2 \\mid 0)$', '$(0 \\mid 0)$', '$(2 \\mid 0)$', '$(0 \\mid -2)$'],
+      steps: [
+        'Für $x = 2$ ist $y = 0$ für jedes $a$.',
+        'Ein Büschel durch $(2 \\mid 0)$ in Punkt-Steigungs-Form.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Gerade der Schar $y = ax + 1$ geht durch $(2 \\mid 5)$?',
+      opts: ['$a = 3$', '$a = 2$', '$a = 2{,}5$', '$a = 5$'],
+      steps: [
+        '$5 = 2a + 1$.',
+        '$a = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Geraden der Schar $y = ax + 1$ berühren die Parabel $y = x^2 + 2$?',
+      opts: ['$a = 2$ und $a = -2$', 'keine', 'nur $a = 2$', '$a = 0$'],
+      steps: [
+        '$x^2 + 2 = ax + 1$, also $x^2 - ax + 1 = 0$ mit genau einer Lösung.',
+        'Diskriminante $a^2 - 4 = 0$: $a = \\pm 2$, zwei Tangenten aus dem Punkt $(0 \\mid 1)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo liegen alle Geraden $g_a\\colon \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ a \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['auf der $z$-Achse', 'in der Ebene $z = 0$', 'in der Ebene $x = 0$', 'in der Ebene $y = 0$'],
+      steps: [
+        'Alle Punkte haben die Form $(t \\mid 0 \\mid a)$.',
+        'Parallelen zur $x$-Achse in der $x$-$z$-Ebene.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was haben die Geraden $g_a\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ a \\\\ 0 \\end{pmatrix}$ gemeinsam?',
+      opts: ['Sie liegen auf der $z$-Achse.', 'Sie sind parallel.', 'Sie gehen durch $(1 \\mid 2 \\mid 3)$ und liegen in der Ebene $z = 3$.', 'Sie gehen durch den Ursprung.'],
+      steps: [
+        'Gemeinsamer Stützpunkt $(1 \\mid 2 \\mid 3)$.',
+        'Die $z$-Komponente des Richtungsvektors ist $0$: Ein Büschel in der Ebene $z = 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $a$ liegt $g_a\\colon \\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ a \\end{pmatrix}$ in der Ebene $x - y + z = 0$?',
+      opts: ['$a = 1$', '$a = 0$', '$a = -1$', 'für jedes $a$'],
+      steps: [
+        'Der Ursprung liegt in der Ebene.',
+        'Richtungsvektor parallel zur Ebene: $(1;\\ 1;\\ a) \\cdot (1;\\ -1;\\ 1) = a = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welche $a$ bildet eine Gerade mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 0 \\\\ a \\end{pmatrix}$ mit der $x$-$y$-Ebene einen Winkel von $45^\\circ$?',
+      opts: ['nur $a = 1$', '$a = 0$', '$a = 1$ oder $a = -1$', '$a = \\sqrt2$'],
+      steps: [
+        '$\\sin\\varphi = \\dfrac{|a|}{\\sqrt{1 + a^2}} = \\tfrac{1}{\\sqrt2}$.',
+        '$2a^2 = 1 + a^2$, $a^2 = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo liegen alle Geraden $g_a\\colon \\vec x = \\begin{pmatrix} a \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$?',
+      opts: ['in der Ebene $x = 0$', 'in der Ebene $y = 0$', 'auf einer gemeinsamen Geraden', 'in der Ebene $y = z$'],
+      steps: [
+        'Punkte $(a \\mid t \\mid t)$: Es gilt immer $y = z$.',
+        'Eine Parallelenschar in der Ebene $y - z = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo schneidet $g_a\\colon \\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ a \\\\ 0 \\end{pmatrix}$ die Gerade $h\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + s\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['Sie schneiden sich nicht.', 'in $(1 \\mid a \\mid 0)$', 'in $(1 \\mid 0 \\mid 0)$', 'in $(a \\mid 1 \\mid 0)$'],
+      steps: [
+        '$t = 1$ aus der $x$-Koordinate, dann $s = a$.',
+        'Schnittpunkt $(1 \\mid a \\mid 0)$: Jede Gerade der Schar trifft $h$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $a$ ist der Richtungsvektor $\\begin{pmatrix} a \\\\ 2 \\\\ 1 \\end{pmatrix}$ parallel zu $\\begin{pmatrix} 4 \\\\ 4 \\\\ 2 \\end{pmatrix}$?',
+      opts: ['$a = 4$', '$a = 2$', 'für kein $a$', '$a = 1$'],
+      steps: [
+        '$(4;\\ 4;\\ 2) = 2 \\cdot (2;\\ 2;\\ 1)$.',
+        'Also $a = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Gerade der Schar $y = ax$ geht durch $(3 \\mid -6)$?',
+      opts: ['$a = 2$', '$a = -3$', '$a = -\\tfrac12$', '$a = -2$'],
+      steps: [
+        '$-6 = 3a$.',
+        '$a = -2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Geraden durch $P(1 \\mid 1)$ haben die Gleichung $y = m(x - 1) + 1$. Welche schneidet die $x$-Achse bei $x = 3$?',
+      opts: ['$m = 3$', '$m = -2$', '$m = \\tfrac12$', '$m = -\\tfrac12$'],
+      steps: [
+        '$0 = m \\cdot 2 + 1$.',
+        '$m = -\\tfrac12$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Gerade der Schar $y = ax + 2$ hat vom Ursprung den größten Abstand?',
+      opts: ['$a = 0$, Abstand $2$', '$a = 2$, Abstand $\\tfrac{2}{\\sqrt5}$', '$a = 1$, Abstand $\\sqrt2$', 'Der Abstand wächst mit $a$ ohne Grenze.'],
+      steps: [
+        'Abstand $d(a) = \\dfrac{2}{\\sqrt{1 + a^2}}$.',
+        'Der Nenner ist für $a = 0$ am kleinsten: $d = 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welche $a$ steht der Richtungsvektor $\\begin{pmatrix} 1 \\\\ a \\\\ a^2 \\end{pmatrix}$ senkrecht auf $\\begin{pmatrix} 1 \\\\ 1 \\\\ -2 \\end{pmatrix}$?',
+      opts: ['$a = 1$ oder $a = -\\tfrac12$', '$a = 0$', '$a = 2$ oder $a = -1$', 'nur $a = 1$'],
+      steps: [
+        '$1 + a - 2a^2 = 0$, also $2a^2 - a - 1 = 0$.',
+        '$a = \\tfrac{1 \\pm 3}{4}$: $1$ oder $-\\tfrac12$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was beschreibt die Schar $g_a\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + t\\begin{pmatrix} a \\\\ 1 - a \\\\ 0 \\end{pmatrix}$?',
+      opts: ['Geraden auf der $z$-Achse', 'Geraden durch den Ursprung', 'ein Geradenbüschel durch $(1 \\mid 1 \\mid 1)$ in der Ebene $z = 1$', 'parallele Geraden'],
+      steps: [
+        'Alle haben den Stützpunkt $(1 \\mid 1 \\mid 1)$.',
+        'Die $z$-Komponente der Richtung ist $0$: Alle liegen in $z = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $a$ trifft $g_a\\colon \\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ a \\end{pmatrix}$ die Ebene $z = 4$ im Punkt $(2 \\mid 2 \\mid 4)$?',
+      opts: ['$a = \\tfrac12$', '$a = 2$', '$a = 1$', '$a = 4$'],
+      steps: [
+        '$x$- und $y$-Koordinate: $t = 2$.',
+        '$z$: $2a = 4$, $a = 2$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Extremale Entfernungen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w22-extremale-abstaende',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Extremale Entfernungen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 22 (LB 8) · 20 Aufgaben: Abstand Punkt–Gerade, kürzeste Wege zu Graphen, bewegte Objekte · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 22 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Abstandsfunktion (1, 12, 17), Punkt und Gerade (2-5, 13, 14, 18, 20), Punkt und Graph (6-8, 15, 19), bewegte Objekte (9-11, 16). Taschenrechner erlaubt. */
+  questions: [
+    {
+      q: 'Welchen kleinsten Abstand hat ein Punkt $P_t(t \\mid 2 - t \\mid 0)$ vom Ursprung?',
+      opts: ['$\\sqrt2$', '$0$', '$1$', '$2$'],
+      steps: [
+        '$d(t)^2 = t^2 + (2 - t)^2 = 2t^2 - 4t + 4$, Scheitel bei $t = 1$.',
+        '$d(1)^2 = 2$, also $d = \\sqrt2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist der Ursprung von der Geraden $g\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ entfernt?',
+      opts: ['$1$', '$2$', '$\\sqrt5$', '$3$'],
+      steps: [
+        '$d(t)^2 = (1 + t)^2 + 4$ ist für $t = -1$ am kleinsten.',
+        'Lotfußpunkt $F(0 \\mid 2 \\mid 0)$, Abstand $2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Bedingung erfüllt der Lotfußpunkt $F$ von $P$ auf einer Geraden mit dem Richtungsvektor $\\vec u$?',
+      opts: ['$\\vec{PF} \\cdot \\vec u = 0$', '$|\\vec{PF}| = |\\vec u|$', '$\\vec{PF} = \\vec u$', '$\\vec{PF} \\times \\vec u = \\vec 0$'],
+      steps: [
+        'Die kürzeste Verbindung von $P$ zur Geraden steht senkrecht auf ihr.',
+        'Das liefert eine Gleichung für den Parameter von $F$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist $P(1 \\mid 2 \\mid 3)$ von der Geraden $\\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$ entfernt?',
+      opts: ['$2\\sqrt3$', '$\\sqrt2$', '$\\sqrt{14}$', '$1$'],
+      steps: [
+        '$(t - 1;\\ t - 2;\\ t - 3) \\cdot (1;\\ 1;\\ 1) = 3t - 6 = 0$, $t = 2$, $F(2 \\mid 2 \\mid 2)$.',
+        '$|\\vec{PF}| = |(1;\\ 0;\\ -1)| = \\sqrt2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist $P(3 \\mid 0 \\mid 0)$ von der $y$-Achse entfernt?',
+      opts: ['$0$', '$\\sqrt3$', '$3$', '$9$'],
+      steps: [
+        'Lotfußpunkt ist der Ursprung.',
+        'Abstand $3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Punkte der Parabel $y = x^2$ liegen dem Punkt $(0 \\mid 2)$ am nächsten?',
+      opts: ['$(\\pm\\sqrt{1{,}5} \\mid 1{,}5)$', '$(0 \\mid 0)$', '$(\\pm\\sqrt2 \\mid 2)$', '$(\\pm 1 \\mid 1)$'],
+      steps: [
+        '$d(x)^2 = x^2 + (x^2 - 2)^2 = x^4 - 3x^2 + 4$, Ableitung $4x^3 - 6x = 0$.',
+        '$x^2 = 1{,}5$, $d^2 = 1{,}75$, $d \\approx 1{,}32$. Der Scheitel $(0 \\mid 0)$ hat den Abstand $2$, er ist weiter weg.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist der Ursprung von der Geraden $y = 2x + 1$ in der Ebene entfernt?',
+      opts: ['$1$', '$\\tfrac{2}{\\sqrt5} \\approx 0{,}89$', '$0{,}5$', '$\\tfrac{1}{\\sqrt5} \\approx 0{,}45$'],
+      steps: [
+        '$d(x)^2 = x^2 + (2x + 1)^2 = 5x^2 + 4x + 1$, Scheitel bei $x = -0{,}4$.',
+        'Lotfußpunkt $(-0{,}4 \\mid 0{,}2)$, $d^2 = 0{,}2$, $d = \\tfrac{1}{\\sqrt5}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Punkt des Graphen von $f(x) = \\sqrt x$ liegt $(2{,}5 \\mid 0)$ am nächsten?',
+      opts: ['$(1 \\mid 1)$, Abstand $\\approx 1{,}80$', '$(0 \\mid 0)$, Abstand $2{,}5$', '$(2{,}5 \\mid \\sqrt{2{,}5})$, Abstand $\\approx 1{,}58$', '$(2 \\mid \\sqrt2)$, Abstand $1{,}5$'],
+      steps: [
+        '$d(x)^2 = (x - 2{,}5)^2 + x = x^2 - 4x + 6{,}25$, Scheitel bei $x = 2$.',
+        '$d^2 = 4 - 8 + 6{,}25 = 2{,}25$, also $d = 1{,}5$. Der Punkt senkrecht darüber ist nicht der nächste.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Punkte bewegen sich: $A_t(t \\mid 0 \\mid 0)$ und $B_t(0 \\mid 6 - t \\mid 0)$. Wie nah kommen sie sich?',
+      opts: ['$6$', '$3$', '$0$', '$3\\sqrt2 \\approx 4{,}24$'],
+      steps: [
+        '$d(t)^2 = t^2 + (6 - t)^2$, Scheitel bei $t = 3$.',
+        '$d(3) = \\sqrt{18} = 3\\sqrt2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Schiff startet in $(0 \\mid 0)$ und fährt je Stunde um $\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$ km. Ein Leuchtturm steht bei $L(10 \\mid 0)$. Wie nah kommt das Schiff ihm?',
+      opts: ['$8$ km', '$6$ km', '$4{,}8$ km', '$10$ km'],
+      steps: [
+        '$t = \\dfrac{\\vec{OL} \\cdot \\vec v}{\\vec v \\cdot \\vec v} = \\dfrac{30}{25} = 1{,}2$: Position $(3{,}6 \\mid 4{,}8)$.',
+        'Abstand $\\sqrt{6{,}4^2 + 4{,}8^2} = \\sqrt{64} = 8$ km.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wann ist das Schiff aus Aufgabe 10 dem Leuchtturm am nächsten?',
+      opts: ['nach $60$ min', 'nach $72$ min', 'nach $1{,}2$ min', 'nach $2$ h'],
+      steps: [
+        '$t = 1{,}2$ h.',
+        '$1{,}2 \\cdot 60 = 72$ min.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum darf man statt $d(t)$ auch $d(t)^2$ minimieren?',
+      opts: ['Weil man nur Quadrate ableiten kann.', 'Die Wurzel ist streng monoton steigend, beide haben dieselbe Minimalstelle.', 'Weil $d(t)^2$ immer kleiner ist.', 'Weil $d(t)^2 = d(t)$ ist.'],
+      steps: [
+        'Ist $d(t_0)^2$ der kleinste Wert, so ist auch $d(t_0) = \\sqrt{d(t_0)^2}$ der kleinste.',
+        '$d^2$ ist ohne Wurzel leichter abzuleiten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist $P(1 \\mid 2 \\mid 0)$ von der Geraden $\\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ entfernt?',
+      opts: ['$\\sqrt2$', '$\\sqrt5$', '$2$', '$1$'],
+      steps: [
+        '$\\vec{PF} = (0;\\ t - 2;\\ t)$, $\\cdot\\ (0;\\ 1;\\ 1) = 2t - 2 = 0$, $t = 1$.',
+        '$F(1 \\mid 1 \\mid 1)$, $|\\vec{PF}| = |(0;\\ -1;\\ 1)| = \\sqrt2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist $P(2 \\mid 3 \\mid 1)$ von der $x$-Achse entfernt?',
+      opts: ['$4$', '$2$', '$\\sqrt{14} \\approx 3{,}74$', '$\\sqrt{10} \\approx 3{,}16$'],
+      steps: [
+        'Lotfußpunkt $(2 \\mid 0 \\mid 0)$.',
+        '$\\sqrt{3^2 + 1^2} = \\sqrt{10}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Punkt der Hyperbel $y = \\tfrac1x$ mit $x > 0$ liegt dem Ursprung am nächsten?',
+      opts: ['$(2 \\mid 0{,}5)$, Abstand $\\approx 2{,}06$', '$(0{,}5 \\mid 2)$, Abstand $\\approx 2{,}06$', '$(1 \\mid 1)$, Abstand $\\sqrt2$', 'Es gibt keinen nächsten Punkt.'],
+      steps: [
+        '$d(x)^2 = x^2 + \\tfrac{1}{x^2}$, Ableitung $2x - \\tfrac{2}{x^3} = 0$.',
+        '$x^4 = 1$, $x = 1$: $d^2 = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Flugzeuge fliegen auf $A_t(-10 + 2t \\mid 0 \\mid 8)$ und $B_t(0 \\mid -10 + 2t \\mid 9)$ ($t$ in min, km). Wie nah kommen sie sich?',
+      opts: ['$\\sqrt2$ km', '$0$ km', '$10$ km', '$1$ km'],
+      steps: [
+        '$d(t)^2 = 2(2t - 10)^2 + 1$, am kleinsten bei $t = 5$.',
+        '$d = 1$ km: Beide sind dann über dem Ursprung, nur durch die Höhen getrennt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für eine Abstandsfunktion gilt $d(t)^2 = 2t^2 - 8t + 11$. Wie groß ist der kleinste Abstand?',
+      opts: ['$3$', '$\\sqrt{11}$', '$\\sqrt3$', '$2$'],
+      steps: [
+        'Scheitel bei $t = \\tfrac{8}{4} = 2$.',
+        '$d(2)^2 = 8 - 16 + 11 = 3$, $d = \\sqrt3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie weit ist $P(4 \\mid 0 \\mid 0)$ von der Geraden durch $O$ mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ entfernt?',
+      opts: ['$2$', '$4$', '$2\\sqrt2 \\approx 2{,}83$', '$\\sqrt{8} \\cdot 2$'],
+      steps: [
+        '$t = \\dfrac{(4;\\ 0;\\ 0) \\cdot (1;\\ 1;\\ 0)}{2} = 2$, $F(2 \\mid 2 \\mid 0)$.',
+        '$|\\vec{PF}| = |(-2;\\ 2;\\ 0)| = 2\\sqrt2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Punkt des Kreises $x^2 + y^2 = 25$ liegt dem Punkt $(6 \\mid 8)$ am nächsten?',
+      opts: ['$(4 \\mid 3)$, Abstand $\\approx 5{,}39$', '$(5 \\mid 0)$, Abstand $\\approx 8{,}06$', '$(3 \\mid 4)$, Abstand $5$', '$(0 \\mid 5)$, Abstand $\\approx 6{,}71$'],
+      steps: [
+        'Der nächste Punkt liegt auf der Strecke vom Mittelpunkt zu $(6 \\mid 8)$.',
+        '$(6 \\mid 8)$ hat vom Ursprung den Abstand $10$; bei Radius $5$ ist das die Hälfte: $(3 \\mid 4)$, Abstand $5$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie weit sind die parallelen Geraden $g\\colon \\vec x = t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec x = \\begin{pmatrix} 0 \\\\ 3 \\\\ 4 \\end{pmatrix} + s\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ voneinander entfernt?',
+      opts: ['$7$', '$5$', '$3$', '$0$'],
+      steps: [
+        'Abstand eines Punktes von $h$, z. B. $(0 \\mid 3 \\mid 4)$, zu $g$: Lotfußpunkt ist der Ursprung.',
+        '$|(0;\\ 3;\\ 4)| = 5$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

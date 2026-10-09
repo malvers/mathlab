@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wiederholung für Klausur 12/I — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w14-klausur1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Wiederholung für Klausur 12/I',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 14 (Klausur) · 20 Aufgaben: Integralrechnung, numerische Integration, Schätzen und Testen gemischt · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 14 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Integrieren (1-6, 13, 14), Flächen und Bestand (7-9), numerische Verfahren (10-12), Schätzen (15, 16), Testen (17-20). Teil 1 bis 9 ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Berechne $\\int (6x^2 + 4x)\\,\\mathrm{d}x$.',
+      opts: ['$3x^3 + 2x^2 + C$', '$6x^3 + 4x^2 + C$', '$2x^3 + 2x^2 + C$', '$12x + 4 + C$'],
+      steps: [
+        '$6 \\cdot \\tfrac{x^3}{3} + 4 \\cdot \\tfrac{x^2}{2}$.',
+        '$= 2x^3 + 2x^2 + C$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\int_0^2 (x^3 - x)\\,\\mathrm{d}x$.',
+      opts: ['$4$', '$0$', '$2$', '$6$'],
+      steps: [
+        '$\\left[\\tfrac14 x^4 - \\tfrac12 x^2\\right]_0^2 = 4 - 2$.',
+        '$= 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\int \\mathrm{e}^{3x}\\,\\mathrm{d}x$.',
+      opts: ['$\\tfrac13\\,\\mathrm{e}^{3x} + C$', '$\\mathrm{e}^{3x} + C$', '$\\tfrac{1}{3x}\\,\\mathrm{e}^{3x} + C$', '$3\\,\\mathrm{e}^{3x} + C$'],
+      steps: [
+        'Lineare Verkettung, innere Ableitung $3$.',
+        'Probe: $\\left(\\tfrac13\\,\\mathrm{e}^{3x}\\right)^{\\prime} = \\mathrm{e}^{3x}$ ✔'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int_1^{\\mathrm{e}} \\dfrac2x\\,\\mathrm{d}x$.',
+      opts: ['$2\\mathrm{e} - 2$', '$\\ln 2$', '$1$', '$2$'],
+      steps: [
+        '$\\left[2\\ln x\\right]_1^{\\mathrm{e}} = 2 \\cdot 1 - 2 \\cdot 0$.',
+        '$= 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int_0^{\\pi/2} \\sin x\\,\\mathrm{d}x$.',
+      opts: ['$2$', '$1$', '$-1$', '$0$'],
+      steps: [
+        '$\\left[-\\cos x\\right]_0^{\\pi/2} = -0 - (-1)$.',
+        '$= 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Stammfunktion von $f(x) = 4x^3$ geht durch $(1 \\mid 3)$?',
+      opts: ['$F(x) = x^4 + 2$', '$F(x) = 12x^2 - 9$', '$F(x) = x^4 + 3$', '$F(x) = 4x^4 - 1$'],
+      steps: [
+        '$F(x) = x^4 + C$, $1 + C = 3$.',
+        '$C = 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Flächeninhalt zwischen dem Graphen von $f(x) = x^2 - 9$ und der $x$-Achse.',
+      opts: ['$72$', '$18$', '$-36$', '$36$'],
+      steps: [
+        'Nullstellen $\\pm 3$: $\\int_{-3}^3 (x^2 - 9)\\,\\mathrm{d}x = \\left[\\tfrac13 x^3 - 9x\\right]_{-3}^3 = -18 - 18$.',
+        '$= -36$, die Fläche ist $36$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Inhalt der Fläche zwischen $f(x) = x^2$ und $g(x) = x^3$ über $[0;\\ 1]$.',
+      opts: ['$\\tfrac{1}{12}$', '$\\tfrac{7}{12}$', '$\\tfrac13$', '$\\tfrac14$'],
+      steps: [
+        'Auf $[0;\\ 1]$ liegt $x^2$ oben.',
+        '$\\int_0^1 (x^2 - x^3)\\,\\mathrm{d}x = \\tfrac13 - \\tfrac14 = \\tfrac{1}{12}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Speicher enthält $50$ l. Die Rate ist $r(t) = 8 - 2t$ (l/min). Wie viel enthält er nach $6$ Minuten?',
+      opts: ['$62$ l', '$12$ l', '$46$ l', '$66$ l'],
+      steps: [
+        '$50 + \\int_0^6 (8 - 2t)\\,\\mathrm{d}t = 50 + \\left[8t - t^2\\right]_0^6$.',
+        '$= 50 + 12 = 62$ l. Bis $t = 4$ fließen $16$ l zu, danach $4$ l ab.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne die Mittelpunktsumme für $x^3$ auf $[0;\\ 2]$ mit $n = 2$ Streifen.',
+      opts: ['$3{,}5$', '$4$', '$5$', '$9$'],
+      steps: [
+        '$\\Delta x = 1$, Mittelpunkte $0{,}5$ und $1{,}5$.',
+        '$1 \\cdot (0{,}125 + 3{,}375) = 3{,}5$. Genau ist $4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne die Trapezsumme $T_2$ für $x^3$ auf $[0;\\ 2]$.',
+      opts: ['$4$', '$5$', '$3{,}5$', '$9$'],
+      steps: [
+        '$1 \\cdot \\left(\\tfrac02 + 1 + \\tfrac82\\right)$.',
+        '$= 5$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für $x^3$ auf $[0;\\ 2]$ ist $M_2 = 3{,}5$, $T_2 = 5$, genau $4$. Woran liegt es, dass die Mittelpunktsumme zu klein und die Trapezsumme zu groß ist?',
+      opts: ['$x^3$ hat bei $0$ eine Nullstelle.', '$x^3$ ist auf $[0;\\ 2]$ fallend.', '$x^3$ ist auf $[0;\\ 2]$ linksgekrümmt.', '$x^3$ ist punktsymmetrisch.'],
+      steps: [
+        'Linkskrümmung: Sehnen liegen über, Tangenten unter dem Graphen.',
+        'Trapeze überschätzen, Mittelpunktrechtecke (flächengleich zum Tangententrapez) unterschätzen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Integralfunktion $I(x) = \\int_0^x \\cos t\\,\\mathrm{d}t$.',
+      opts: ['$I(x) = \\cos x - 1$', '$I(x) = -\\sin x$', '$I(x) = \\sin x$', '$I(x) = \\sin x + C$'],
+      steps: [
+        '$I(x) = \\left[\\sin t\\right]_0^x = \\sin x - \\sin 0$.',
+        '$= \\sin x$, die untere Grenze legt die Konstante fest.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist $\\int_{-a}^{a} x^5\\,\\mathrm{d}x$ für jedes $a > 0$?',
+      opts: ['$\\tfrac13 a^6$', '$0$', '$a^5$', '$2a^6$'],
+      steps: [
+        '$x^5$ ist punktsymmetrisch.',
+        '$\\left[\\tfrac16 x^6\\right]_{-a}^a = \\tfrac16 a^6 - \\tfrac16 a^6 = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei einer Kontrolle sind $48$ von $400$ Geräten fehlerhaft. Schätze den Fehleranteil.',
+      opts: ['$1{,}2\\,\\%$', '$48\\,\\%$', '$8{,}3\\,\\%$', '$12\\,\\%$'],
+      steps: [
+        '$\\hat p = \\tfrac{48}{400} = 0{,}12$.',
+        'Also etwa $12\\,\\%$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne die Stichprobenvarianz $s^2 = \\dfrac{1}{n - 1}\\sum (x_i - \\bar x)^2$ der Werte $12$; $15$; $9$; $14$.',
+      opts: ['$s^2 = 21$', '$s^2 = 5{,}25$', '$s^2 = 2{,}65$', '$s^2 = 7$'],
+      steps: [
+        '$\\bar x = 12{,}5$, Abweichungen $-0{,}5$; $2{,}5$; $-3{,}5$; $1{,}5$, Quadratsumme $21$.',
+        '$s^2 = \\tfrac{21}{3} = 7$. Mit $\\tfrac1n$ wären es $5{,}25$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Rechtsseitiger Test, $n = 20$, $H_0\\colon p = 0{,}3$, $\\alpha = 5\\,\\%$. Es gilt $P(X \\ge 9) \\approx 0{,}113$ und $P(X \\ge 10) \\approx 0{,}048$. Wie lautet der Ablehnungsbereich?',
+      opts: ['$K = \\{6;\\ \\ldots;\\ 20\\}$', '$K = \\{10;\\ \\ldots;\\ 20\\}$', '$K = \\{9;\\ \\ldots;\\ 20\\}$', '$K = \\{0;\\ \\ldots;\\ 10\\}$'],
+      steps: [
+        'Kleinstes $k$ mit $P(X \\ge k) \\le 0{,}05$.',
+        '$k = 10$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zweiseitiger Münztest, $n = 100$, $\\alpha = 5\\,\\%$, $K = \\{0;\\ \\ldots;\\ 39\\} \\cup \\{61;\\ \\ldots;\\ 100\\}$. Es fällt $37$-mal Zahl. Entscheidung?',
+      opts: ['$H_0$ wird nicht abgelehnt.', 'Der Test ist nicht anwendbar.', '$H_0\\colon p = 0{,}5$ wird abgelehnt.', 'Die Münze ist bewiesen fair.'],
+      steps: [
+        '$37 \\in \\{0;\\ \\ldots;\\ 39\\}$.',
+        'Auffällig wenig Zahl: Ablehnung auf dem $5\\,\\%$-Niveau.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche statistische Sicherheit hat ein Test mit dem Signifikanzniveau $\\alpha = 1\\,\\%$?',
+      opts: ['$90\\,\\%$', '$1\\,\\%$', '$95\\,\\%$', '$99\\,\\%$'],
+      steps: [
+        'Statistische Sicherheit $= 1 - \\alpha$.',
+        '$1 - 0{,}01 = 0{,}99$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie sieht der Ablehnungsbereich eines linksseitigen Tests aus?',
+      opts: ['$K = \\{k\\}$', '$K = \\{0;\\ 1;\\ \\ldots;\\ k\\}$', '$K = \\{k;\\ \\ldots;\\ n\\}$', '$K = \\{0;\\ n\\}$'],
+      steps: [
+        'Linksseitig sprechen nur auffällig kleine Werte gegen $H_0$.',
+        'Der kritische Wert $k$ ist der größte Wert im Ablehnungsbereich.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

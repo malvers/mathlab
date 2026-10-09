@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Fehlerfallen vor der Prüfung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w29-konsultation',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Fehlerfallen vor der Prüfung',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 29 (Abitur) · 20 Aufgaben: Die Klassiker unter den Fehlern: erkennen und vermeiden · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 29 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Ableiten (1, 5, 6, 15, 16), Stammfunktion und Integral (2, 3, 14, 18), Kurvendiskussion (4, 20), Logarithmus (17), Vektoren (7-10, 19), Stochastik (11-13). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Leite $f(x) = e^{x^2}$ ab.',
+      opts: ['$f^{\\prime}(x) = e^{2x}$', '$f^{\\prime}(x) = x^2\\,e^{x^2 - 1}$', '$f^{\\prime}(x) = 2x\\,e^{x^2}$', '$f^{\\prime}(x) = e^{x^2}$'],
+      steps: [
+        'Kettenregel: Die innere Funktion $x^2$ hat die Ableitung $2x$.',
+        'Die Falle: Die $e$-Funktion bleibt nur ohne innere Funktion unverändert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Funktion ist eine Stammfunktion von $f(x) = \\dfrac{1}{x^2}$?',
+      opts: ['$F(x) = -\\dfrac{2}{x^3}$', '$F(x) = -\\dfrac1x$', '$F(x) = \\ln x^2$', '$F(x) = \\dfrac{1}{3x^3}$'],
+      steps: [
+        '$\\dfrac{1}{x^2} = x^{-2}$, Potenzregel: $\\dfrac{x^{-1}}{-1}$.',
+        'Probe: $\\left(-\\tfrac1x\\right)^{\\prime} = \\tfrac{1}{x^2}$ ✔ Der Logarithmus gehört nur zu $\\tfrac1x$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Es gilt $\\int_{-1}^{1} x\\,dx = 0$. Wie groß ist die Fläche zwischen dem Graphen von $f(x) = x$ und der $x$-Achse über $[-1;\\ 1]$?',
+      opts: ['$2$', '$1$', '$\\tfrac12$', '$0$'],
+      steps: [
+        'Unterhalb der Achse zählt das Integral negativ, die Teilflächen heben sich auf.',
+        'Fläche: $2 \\cdot \\tfrac12 = 1$. Darum an den Nullstellen aufteilen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für $f(x) = x^3$ gilt $f^{\\prime}(0) = 0$. Was liegt bei $x = 0$ vor?',
+      opts: ['ein Tiefpunkt', 'eine Nullstelle von $f^{\\prime\\prime}$ ohne Bedeutung', 'ein Hochpunkt', 'ein Sattelpunkt, kein Extremum'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 \\geq 0$ wechselt das Vorzeichen bei $0$ nicht.',
+        '$f^{\\prime}(x_0) = 0$ ist nur notwendig, nicht hinreichend.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite $f(x) = \\ln(2x)$ ab.',
+      opts: ['$f^{\\prime}(x) = \\dfrac1x$', '$f^{\\prime}(x) = 2\\ln x$', '$f^{\\prime}(x) = \\dfrac2x$', '$f^{\\prime}(x) = \\dfrac{1}{2x}$'],
+      steps: [
+        'Kettenregel: $\\dfrac{1}{2x} \\cdot 2$.',
+        '$= \\tfrac1x$. Auch so: $\\ln(2x) = \\ln 2 + \\ln x$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Leite $f(x) = e^{-x}$ ab.',
+      opts: ['$f^{\\prime}(x) = e^{-x}$', '$f^{\\prime}(x) = -x\\,e^{-x - 1}$', '$f^{\\prime}(x) = -e^{-x}$', '$f^{\\prime}(x) = e^{x}$'],
+      steps: [
+        'Innere Ableitung $-1$.',
+        '$f^{\\prime}(x) = -e^{-x}$: Der Graph fällt überall.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ergibt das Skalarprodukt zweier Vektoren im Raum?',
+      opts: ['eine Zahl', 'eine Ebene', 'eine Matrix', 'einen Vektor'],
+      steps: [
+        '$\\vec a \\cdot \\vec b = a_1 b_1 + a_2 b_2 + a_3 b_3$.',
+        'Einen Vektor liefert das Vektorprodukt $\\vec a \\times \\vec b$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit welcher Winkelfunktion berechnet man den Winkel zwischen einer Geraden und einer Ebene aus $\\vec u$ und $\\vec n$?',
+      opts: ['mit dem Kosinus und dann $+90^\\circ$', 'mit dem Sinus', 'mit dem Tangens', 'mit dem Kosinus'],
+      steps: [
+        'Der Kosinusansatz liefert den Winkel zur Normalen.',
+        'Der Winkel zur Ebene ergänzt ihn zu $90^\\circ$: daher der Sinus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Jemand berechnet den Abstand von $O$ zur Ebene $2x + y + 2z = 6$ als $6$. Was ist falsch?',
+      opts: ['Es fehlt die Division durch $|\\vec n| = 3$; richtig ist $2$.', 'Man muss durch $d = 6$ teilen; richtig ist $1$.', 'Es fehlt ein Vorzeichen; richtig ist $-6$.', 'Nichts, der Abstand ist $6$.'],
+      steps: [
+        'Abstand $\\dfrac{|\\vec n \\cdot \\vec p - d|}{|\\vec n|}$.',
+        '$\\tfrac63 = 2$. Abstände sind nie negativ.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Geraden haben parallele Richtungsvektoren und keinen gemeinsamen Punkt. Wie liegen sie?',
+      opts: ['Sie schneiden sich.', 'windschief', 'identisch', 'echt parallel'],
+      steps: [
+        'Windschief setzt nicht parallele Richtungen voraus.',
+        'Parallele Richtung ohne gemeinsamen Punkt: echt parallel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine faire Münze wird dreimal geworfen. Wie groß ist die Wahrscheinlichkeit für mindestens einmal Wappen?',
+      opts: ['$\\tfrac38$', '$\\tfrac18$', '$\\tfrac12$', '$\\tfrac78$'],
+      steps: [
+        'Gegenereignis: keinmal Wappen, $\\tfrac18$.',
+        '$1 - \\tfrac18 = \\tfrac78$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$X$ nimmt nur ganze Zahlen an. Wie schreibt man $P(X > 3)$ mit der kumulierten Verteilung?',
+      opts: ['$1 - P(X < 3)$', '$P(X \\leq 3)$', '$1 - P(X \\leq 4)$', '$1 - P(X \\leq 3)$'],
+      steps: [
+        '$X > 3$ heißt $X \\geq 4$; das Gegenereignis ist $X \\leq 3$.',
+        'Die Falle: $1 - P(X \\leq 4)$ lässt den Wert $4$ weg.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was gibt das Signifikanzniveau $\\alpha$ eines Tests an?',
+      opts: ['die Wahrscheinlichkeit, dass $H_0$ wahr ist', 'den Anteil der Treffer in der Stichprobe', 'die höchstens zulässige Wahrscheinlichkeit für einen Fehler 1. Art', 'die Wahrscheinlichkeit für einen Fehler 2. Art'],
+      steps: [
+        'Der Ablehnungsbereich wird so gewählt, dass $P(\\text{Ablehnung} \\mid H_0) \\leq \\alpha$.',
+        'Ob $H_0$ wahr ist, sagt der Test nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Zuflussrate ist in Liter pro Minute gegeben, die Zeit in Minuten. Welche Einheit hat $\\int_0^{10} r(t)\\,dt$?',
+      opts: ['Liter', 'Liter pro Quadratminute', 'Liter pro Minute', 'Minuten'],
+      steps: [
+        'Integral: Rate mal Zeit, wie bei der Fläche unter der Kurve.',
+        '$\\tfrac{\\text{l}}{\\text{min}} \\cdot \\text{min} = \\text{l}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Leite $f(x) = \\sin(3x)$ ab.',
+      opts: ['$f^{\\prime}(x) = -3\\cos(3x)$', '$f^{\\prime}(x) = 3\\cos x$', '$f^{\\prime}(x) = 3\\cos(3x)$', '$f^{\\prime}(x) = \\cos(3x)$'],
+      steps: [
+        'Äußere Ableitung $\\cos(3x)$, innere Ableitung $3$.',
+        '$f^{\\prime}(x) = 3\\cos(3x)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Leite $f(x) = \\dfrac{x}{x + 1}$ ab.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{-1}{(x + 1)^2}$', '$f^{\\prime}(x) = \\dfrac{2x + 1}{(x + 1)^2}$', '$f^{\\prime}(x) = 1$', '$f^{\\prime}(x) = \\dfrac{1}{(x + 1)^2}$'],
+      steps: [
+        'Quotientenregel: $\\dfrac{1 \\cdot (x + 1) - x \\cdot 1}{(x + 1)^2}$.',
+        '$= \\dfrac{1}{(x + 1)^2}$. Die Falle: Zähler und Nenner einzeln ableiten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Gleichung stimmt für $a, b > 0$?',
+      opts: ['$\\ln(a + b) = \\ln a \\cdot \\ln b$', '$\\ln(a \\cdot b) = \\ln a + \\ln b$', '$\\ln(a + b) = \\ln a + \\ln b$', '$\\ln(a \\cdot b) = \\ln a \\cdot \\ln b$'],
+      steps: [
+        'Der Logarithmus macht aus Produkten Summen.',
+        'Für $\\ln(a + b)$ gibt es keine solche Regel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Funktion ist eine Stammfunktion von $f(x) = e^{2x}$?',
+      opts: ['$F(x) = \\tfrac12 e^{2x}$', '$F(x) = e^{2x}$', '$F(x) = 2e^{2x}$', '$F(x) = \\tfrac{e^{2x + 1}}{2x + 1}$'],
+      steps: [
+        'Probe durch Ableiten: $\\left(\\tfrac12 e^{2x}\\right)^{\\prime} = \\tfrac12 \\cdot 2 e^{2x}$ ✔',
+        'Bei linearer innerer Funktion durch die innere Ableitung teilen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Ebene wird von $\\vec u$ und $\\vec v$ aufgespannt. Wie erhält man einen Normalenvektor?',
+      opts: ['$\\vec u \\cdot \\vec v$', '$\\vec u + \\vec v$', '$\\vec u \\times \\vec v$', '$\\vec u - \\vec v$'],
+      steps: [
+        'Der Normalenvektor muss auf beiden Spannvektoren senkrecht stehen.',
+        'Das leistet das Vektorprodukt; Summe und Differenz liegen in der Ebene.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für $f(x) = x^4$ gilt $f^{\\prime\\prime}(0) = 0$. Hat $f$ bei $x = 0$ eine Wendestelle?',
+      opts: ['Ja, weil $f(0) = 0$ ist.', 'Nein, $f^{\\prime\\prime}(x) = 12x^2$ wechselt das Vorzeichen nicht.', 'Das lässt sich nicht entscheiden.', 'Ja, weil $f^{\\prime\\prime}(0) = 0$ ist.'],
+      steps: [
+        '$f^{\\prime\\prime}(x_0) = 0$ ist nur notwendig.',
+        '$f^{\\prime\\prime} \\geq 0$ überall: Bei $0$ liegt ein Tiefpunkt, keine Wendestelle.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

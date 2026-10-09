@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Rechteckverfahren und Geschichte der Integralrechnung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w09-rechteckverfahren',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Rechteckverfahren und Geschichte der Integralrechnung',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 9 (WB 5) · 20 Aufgaben: Links-, Rechts- und Mittelpunktsummen, Archimedes, Leibniz, Riemann · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 9 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Rechtecksummen rechnen (1-5, 12, 13, 16, 18), Eigenschaften und Genauigkeit (6-8, 14, 17, 19), Geschichte (9-11), Tabellenkalkulation und Messwerte (15, 20). Taschenrechner erlaubt. */
+  questions: [
+    {
+      q: 'Das Intervall $[0;\\ 2]$ wird in $n = 8$ gleich breite Streifen geteilt. Wie breit ist jeder Streifen?',
+      opts: ['$\\Delta x = 0{,}125$', '$\\Delta x = 0{,}5$', '$\\Delta x = 0{,}25$', '$\\Delta x = 4$'],
+      steps: [
+        '$\\Delta x = \\dfrac{b - a}{n} = \\dfrac{2 - 0}{8}$.',
+        '$= 0{,}25$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne für $f(x) = x^2$ auf $[0;\\ 1]$ die Linkssumme mit $n = 4$ Streifen.',
+      opts: ['$0{,}21875$', '$0{,}328125$', '$0{,}875$', '$0{,}46875$'],
+      steps: [
+        '$\\Delta x = 0{,}25$, linke Ränder $0$; $0{,}25$; $0{,}5$; $0{,}75$.',
+        '$0{,}25 \\cdot (0 + 0{,}0625 + 0{,}25 + 0{,}5625) = 0{,}25 \\cdot 0{,}875 = 0{,}21875$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne für $f(x) = x^2$ auf $[0;\\ 1]$ die Rechtssumme mit $n = 4$ Streifen.',
+      opts: ['$0{,}21875$', '$1{,}875$', '$0{,}34375$', '$0{,}46875$'],
+      steps: [
+        'Rechte Ränder $0{,}25$; $0{,}5$; $0{,}75$; $1$.',
+        '$0{,}25 \\cdot (0{,}0625 + 0{,}25 + 0{,}5625 + 1) = 0{,}25 \\cdot 1{,}875 = 0{,}46875$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne für $f(x) = x^2$ auf $[0;\\ 1]$ die Mittelpunktsumme mit $n = 4$ Streifen.',
+      fig: '<svg viewBox="0 0 400 300" width="400" height="300" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mittelpunktsumme mit vier Rechtecken unter f(x) = x hoch 2 auf 0 bis 1"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="340" height="248"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="79" y1="266" x2="79" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="144" y1="266" x2="144" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="209" y1="266" x2="209" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="274" y1="266" x2="274" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="339" y1="266" x2="339" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="242.19" x2="378" y2="242.19" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="192.6" x2="378" y2="192.6" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="143" x2="378" y2="143" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="93.4" x2="378" y2="93.4" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="43.81" x2="378" y2="43.81" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="242.19" x2="378" y2="242.19" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="79" y1="266" x2="79" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="380" y="258.19" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="67" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="72" y="257.19" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="144" y1="238.69" x2="144" y2="245.69" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="144" y="258.19" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">0</text><line x1="209" y1="238.69" x2="209" y2="245.69" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="209" y="258.19" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">0</text><line x1="274" y1="238.69" x2="274" y2="245.69" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="274" y="258.19" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="339" y1="238.69" x2="339" y2="245.69" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="339" y="258.19" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="75.5" y1="192.6" x2="82.5" y2="192.6" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="72" y="196.6" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0</text><line x1="75.5" y1="143" x2="82.5" y2="143" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="72" y="147" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0</text><line x1="75.5" y1="93.4" x2="82.5" y2="93.4" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="72" y="97.4" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><line x1="75.5" y1="43.81" x2="82.5" y2="43.81" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="72" y="47.81" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><rect x="79" y="239.09" width="65" height="3.1" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="1" opacity="0.5"/><circle cx="111.5" cy="239.09" r="2.8" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><rect x="144" y="214.3" width="65" height="27.9" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="1" opacity="0.5"/><circle cx="176.5" cy="214.3" r="2.8" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><rect x="209" y="164.7" width="65" height="77.49" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="1" opacity="0.5"/><circle cx="241.5" cy="164.7" r="2.8" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><rect x="274" y="90.3" width="65" height="151.89" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="1" opacity="0.5"/><circle cx="306.5" cy="90.3" r="2.8" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><g clip-path="url(#f1-clip)"><path d="M 53 240.21 L 54.16 240.38 L 55.32 240.55 L 56.48 240.71 L 57.64 240.85 L 58.8 241 L 59.96 241.13 L 61.12 241.26 L 62.28 241.37 L 63.44 241.48 L 64.6 241.59 L 65.76 241.68 L 66.92 241.77 L 68.08 241.84 L 69.24 241.91 L 70.4 241.98 L 71.56 242.03 L 72.72 242.08 L 73.88 242.12 L 75.04 242.15 L 76.2 242.17 L 77.36 242.19 L 78.52 242.19 L 79.68 242.19 L 80.84 242.18 L 82 242.17 L 83.16 242.14 L 84.32 242.11 L 85.48 242.07 L 86.64 242.02 L 87.8 241.97 L 88.96 241.9 L 90.12 241.83 L 91.28 241.75 L 92.44 241.66 L 93.6 241.57 L 94.76 241.46 L 95.92 241.35 L 97.08 241.23 L 98.24 241.11 L 99.4 240.97 L 100.56 240.83 L 101.72 240.68 L 102.88 240.52 L 104.04 240.35 L 105.2 240.18 L 106.36 240 L 107.52 239.81 L 108.68 239.61 L 109.84 239.4 L 111 239.19 L 112.16 238.97 L 113.32 238.74 L 114.48 238.5 L 115.64 238.25 L 116.8 238 L 117.96 237.74 L 119.12 237.47 L 120.28 237.19 L 121.44 236.91 L 122.6 236.61 L 123.76 236.31 L 124.92 236.01 L 126.08 235.69 L 127.24 235.36 L 128.4 235.03 L 129.56 234.69 L 130.72 234.34 L 131.88 233.99 L 133.04 233.62 L 134.2 233.25 L 135.36 232.87 L 136.52 232.48 L 137.68 232.09 L 138.84 231.68 L 140 231.27 L 141.16 230.85 L 142.32 230.43 L 143.48 229.99 L 144.64 229.55 L 145.8 229.1 L 146.96 228.64 L 148.12 228.17 L 149.28 227.7 L 150.44 227.22 L 151.6 226.73 L 152.76 226.23 L 153.92 225.72 L 155.08 225.21 L 156.24 224.68 L 157.4 224.16 L 158.56 223.62 L 159.72 223.07 L 160.88 222.52 L 162.04 221.96 L 163.2 221.39 L 164.36 220.81 L 165.52 220.23 L 166.68 219.63 L 167.84 219.03 L 169 218.42 L 170.16 217.81 L 171.32 217.18 L 172.48 216.55 L 173.64 215.91 L 174.8 215.26 L 175.96 214.6 L 177.12 213.94 L 178.28 213.27 L 179.44 212.59 L 180.6 211.9 L 181.76 211.2 L 182.92 210.5 L 184.08 209.79 L 185.24 209.07 L 186.4 208.34 L 187.56 207.61 L 188.72 206.86 L 189.88 206.11 L 191.04 205.35 L 192.2 204.59 L 193.36 203.81 L 194.52 203.03 L 195.68 202.24 L 196.84 201.44 L 198 200.63 L 199.16 199.82 L 200.32 199 L 201.48 198.17 L 202.64 197.33 L 203.8 196.49 L 204.96 195.63 L 206.12 194.77 L 207.28 193.9 L 208.44 193.02 L 209.6 192.14 L 210.76 191.24 L 211.92 190.34 L 213.08 189.43 L 214.24 188.52 L 215.4 187.59 L 216.56 186.66 L 217.72 185.72 L 218.88 184.77 L 220.04 183.82 L 221.2 182.85 L 222.36 181.88 L 223.52 180.9 L 224.68 179.91 L 225.84 178.92 L 227 177.91 L 228.16 176.9 L 229.32 175.88 L 230.48 174.85 L 231.64 173.82 L 232.8 172.77 L 233.96 171.72 L 235.12 170.66 L 236.28 169.6 L 237.44 168.52 L 238.6 167.44 L 239.76 166.35 L 240.92 165.25 L 242.08 164.14 L 243.24 163.03 L 244.4 161.91 L 245.56 160.78 L 246.72 159.64 L 247.88 158.49 L 249.04 157.34 L 250.2 156.18 L 251.36 155.01 L 252.52 153.83 L 253.68 152.65 L 254.84 151.45 L 256 150.25 L 257.16 149.04 L 258.32 147.83 L 259.48 146.6 L 260.64 145.37 L 261.8 144.13 L 262.96 142.88 L 264.12 141.62 L 265.28 140.36 L 266.44 139.09 L 267.6 137.81 L 268.76 136.52 L 269.92 135.22 L 271.08 133.92 L 272.24 132.61 L 273.4 131.29 L 274.56 129.96 L 275.72 128.62 L 276.88 127.28 L 278.04 125.93 L 279.2 124.57 L 280.36 123.2 L 281.52 121.83 L 282.68 120.45 L 283.84 119.05 L 285 117.66 L 286.16 116.25 L 287.32 114.83 L 288.48 113.41 L 289.64 111.98 L 290.8 110.54 L 291.96 109.1 L 293.12 107.64 L 294.28 106.18 L 295.44 104.71 L 296.6 103.24 L 297.76 101.75 L 298.92 100.26 L 300.08 98.76 L 301.24 97.25 L 302.4 95.73 L 303.56 94.2 L 304.72 92.67 L 305.88 91.13 L 307.04 89.58 L 308.2 88.02 L 309.36 86.46 L 310.52 84.89 L 311.68 83.31 L 312.84 81.72 L 314 80.12 L 315.16 78.52 L 316.32 76.91 L 317.48 75.29 L 318.64 73.66 L 319.8 72.02 L 320.96 70.38 L 322.12 68.73 L 323.28 67.07 L 324.44 65.4 L 325.6 63.73 L 326.76 62.05 L 327.92 60.35 L 329.08 58.66 L 330.24 56.95 L 331.4 55.23 L 332.56 53.51 L 333.72 51.78 L 334.88 50.04 L 336.04 48.3 L 337.2 46.54 L 338.36 44.78 L 339.52 43.01 L 340.68 41.23 L 341.84 39.45 L 343 37.66 L 344.16 35.85 L 345.32 34.04 L 346.48 32.23 L 347.64 30.4 L 348.8 28.57 L 349.96 26.73 L 351.12 24.88 L 352.28 23.02 L 353.44 21.16 L 354.6 19.29" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g></svg>',
+      figcap: 'Mittelpunktsumme: Rechteckhöhe ist der Funktionswert in der Streifenmitte',
+      opts: ['$0{,}34375$', '$0{,}328125$', '$1{,}3125$', '$0{,}3125$'],
+      steps: [
+        'Mittelpunkte $0{,}125$; $0{,}375$; $0{,}625$; $0{,}875$; Quadrate $0{,}015625$; $0{,}140625$; $0{,}390625$; $0{,}765625$.',
+        'Summe $1{,}3125$, mal $0{,}25$: $0{,}328125$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der genaue Wert ist $\\int_0^1 x^2\\,\\mathrm{d}x = \\tfrac13$. Welche der drei Summen aus den Aufgaben 2 bis 4 liegt am nächsten daran?',
+      opts: ['die Rechtssumme', 'alle drei gleich nah', 'die Mittelpunktsumme', 'die Linkssumme'],
+      steps: [
+        'Abweichungen: links $0{,}115$, rechts $0{,}135$, Mitte $0{,}005$.',
+        'Bei der Mittelpunktsumme gleichen sich Zuviel und Zuwenig in jedem Streifen fast aus.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$f$ ist auf $[a;\\ b]$ streng monoton steigend. Welche Aussage gilt für jede Streifenzahl $n$?',
+      opts: ['Linkssumme $\\le$ Integral $\\le$ Rechtssumme', 'Rechtssumme $\\le$ Integral $\\le$ Linkssumme', 'Mittelpunktsumme $=$ Integral', 'Linkssumme $=$ Rechtssumme'],
+      steps: [
+        'Bei steigender Funktion ist der linke Rand eines Streifens der kleinste Wert darin.',
+        'Die Linkssumme ist dann eine Untersumme, die Rechtssumme eine Obersumme.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Linkssumme $L_n$ für $f$ auf $[a;\\ b]$ mit $n$ Streifen der Breite $\\Delta x$?',
+      opts: ['$L_n = \\Delta x \\cdot \\sum\\limits_{i=0}^{n-1} f(a + i\\,\\Delta x)$', '$L_n = \\sum\\limits_{i=0}^{n-1} f(a + i\\,\\Delta x)$', '$L_n = \\Delta x \\cdot \\sum\\limits_{i=1}^{n} f(a + i\\,\\Delta x)$', '$L_n = \\Delta x \\cdot \\left(f(a) + f(b)\\right)$'],
+      steps: [
+        'Die Stützstellen sind die linken Ränder $a, a + \\Delta x, \\ldots, a + (n - 1)\\Delta x$.',
+        'Die Summe von $i = 1$ bis $n$ ist die Rechtssumme; ohne $\\Delta x$ fehlt die Breite.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Man verdoppelt bei der Linkssumme einer glatten, monotonen Funktion die Streifenzahl. Wie ändert sich der Fehler ungefähr?',
+      opts: ['Er verdoppelt sich.', 'Er viertelt sich ungefähr.', 'Er halbiert sich ungefähr.', 'Er bleibt gleich.'],
+      steps: [
+        'Der Fehler der Links- und Rechtssumme wächst ungefähr mit $\\Delta x$.',
+        'Halbe Breite, halber Fehler. Bei Mittelpunkt- und Trapezverfahren sinkt er schneller, etwa auf ein Viertel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was zeigte Archimedes im 3. Jahrhundert v. Chr. über ein Parabelsegment?',
+      opts: ['Es lässt sich nicht berechnen.', 'Es ist $\\tfrac43$ so groß wie das Dreieck mit derselben Grundseite und Höhe.', 'Es ist halb so groß wie das umschließende Rechteck.', 'Es ist $\\pi$-mal so groß wie das Dreieck.'],
+      steps: [
+        'Archimedes füllte das Segment mit immer kleineren Dreiecken; ihre Summe ist eine geometrische Reihe $1 + \\tfrac14 + \\tfrac{1}{16} + \\ldots = \\tfrac43$.',
+        'Probe: $\\int_{-2}^2 (4 - x^2)\\,\\mathrm{d}x = \\tfrac{32}{3}$, das Dreieck hat $\\tfrac12 \\cdot 4 \\cdot 4 = 8$, und $\\tfrac43 \\cdot 8 = \\tfrac{32}{3}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Vorstellung steckt in Leibniz’ Schreibweise $\\int f(x)\\,\\mathrm{d}x$?',
+      opts: ['eine Ableitung von $f$ nach $x$', 'ein Produkt aus $f$ und $x$', 'ein Bruch aus $f$ und $\\mathrm{d}x$', 'eine Summe von Produkten $f(x) \\cdot \\mathrm{d}x$ über unendlich schmale Streifen'],
+      steps: [
+        'Das Zeichen $\\int$ ist ein langgezogenes S für Summe, $\\mathrm{d}x$ die Breite eines Streifens.',
+        'Rechteckhöhe $f(x)$ mal Breite $\\mathrm{d}x$, alles aufsummiert: genau das Rechteckverfahren im Grenzfall.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was erlaubt die Riemann-Summe im Unterschied zu Links- oder Rechtssumme?',
+      opts: ['Streifen beliebiger negativer Breite', 'Nur unstetige Funktionen', 'In jedem Streifen eine beliebige Stelle als Höhe zu nehmen', 'Auf die Streifenbreite zu verzichten'],
+      steps: [
+        'Riemann nimmt in jedem Teilintervall irgendeine Stelle $\\xi_i$ und bildet $\\sum f(\\xi_i)\\,\\Delta x_i$.',
+        'Streben alle diese Summen bei feiner werdender Zerlegung gegen denselben Wert, ist das das Integral.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne die Linkssumme für $f(x) = \\dfrac1x$ auf $[1;\\ 2]$ mit $n = 2$ Streifen.',
+      opts: ['$\\approx 0{,}833$', '$\\approx 0{,}583$', '$\\approx 1{,}667$', '$\\approx 0{,}693$'],
+      steps: [
+        '$\\Delta x = 0{,}5$, linke Ränder $1$ und $1{,}5$.',
+        '$0{,}5 \\cdot \\left(1 + \\tfrac23\\right) = \\tfrac56 \\approx 0{,}833$. Genau wäre $\\ln 2 \\approx 0{,}693$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne die Rechtssumme für $f(x) = \\dfrac1x$ auf $[1;\\ 2]$ mit $n = 2$ Streifen.',
+      opts: ['$\\approx 0{,}708$', '$\\approx 1{,}167$', '$\\approx 0{,}833$', '$\\approx 0{,}583$'],
+      steps: [
+        'Rechte Ränder $1{,}5$ und $2$.',
+        '$0{,}5 \\cdot \\left(\\tfrac23 + \\tfrac12\\right) = \\tfrac{7}{12} \\approx 0{,}583$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$f$ ist auf $[a;\\ b]$ streng monoton fallend. Was ist dann die Linkssumme?',
+      opts: ['eine Untersumme', 'eine Obersumme', 'genau das Integral', 'immer null'],
+      steps: [
+        'Bei fallender Funktion ist der linke Rand der größte Wert im Streifen.',
+        'Die Rechtecke ragen über den Graphen hinaus, siehe $\\tfrac1x$ in Aufgabe 12.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einer Tabellenkalkulation sollen die Mittelpunkte der Streifen berechnet werden. Welche Stelle gehört zum $i$-ten Streifen ($i = 1, \\ldots, n$)?',
+      opts: ['$a + (i - 0{,}5)\\,\\Delta x$', '$a + i\\,\\Delta x$', '$\\tfrac12 (a + b)$', '$a + (i - 1)\\,\\Delta x$'],
+      steps: [
+        'Der $i$-te Streifen reicht von $a + (i - 1)\\Delta x$ bis $a + i\\,\\Delta x$.',
+        'Seine Mitte liegt einen halben Streifen weiter als der linke Rand.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne die Mittelpunktsumme für $\\sin x$ auf $[0;\\ \\pi]$ mit $n = 2$ Streifen.',
+      opts: ['$2$', '$\\approx 1{,}571$', '$\\approx 1{,}414$', '$\\approx 2{,}221$'],
+      steps: [
+        '$\\Delta x = \\tfrac\\pi2$, Mittelpunkte $\\tfrac\\pi4$ und $\\tfrac{3\\pi}{4}$, beide Sinuswerte $\\tfrac{\\sqrt2}{2}$.',
+        '$\\tfrac\\pi2 \\cdot \\sqrt2 \\approx 2{,}221$. Der genaue Wert ist $2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $f(x) = x$ auf $[0;\\ 1]$ ist die Linkssumme $L_n = \\dfrac{n - 1}{2n}$. Wie viele Streifen braucht man mindestens, damit der Fehler kleiner als $0{,}01$ ist?',
+      opts: ['$n = 10$', '$n = 100$', '$n = 50$', '$n = 51$'],
+      steps: [
+        'Fehler $\\tfrac12 - \\tfrac{n - 1}{2n} = \\tfrac{1}{2n} < 0{,}01$ gibt $n > 50$.',
+        'Also mindestens $n = 51$. Bei $n = 50$ ist der Fehler genau $0{,}01$, nicht kleiner.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$\\int_0^1 \\mathrm{e}^{-x^2}\\,\\mathrm{d}x$ hat keine elementare Stammfunktion. Was liefert die Mittelpunktsumme mit $n = 2$?',
+      opts: ['$\\approx 1{,}509$', '$\\approx 0{,}684$', '$\\approx 0{,}755$', '$\\approx 0{,}868$'],
+      steps: [
+        'Mittelpunkte $0{,}25$ und $0{,}75$: $\\mathrm{e}^{-0{,}0625} \\approx 0{,}9394$, $\\mathrm{e}^{-0{,}5625} \\approx 0{,}5698$.',
+        '$0{,}5 \\cdot (0{,}9394 + 0{,}5698) \\approx 0{,}755$. Der genaue Wert ist etwa $0{,}747$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welche Funktionen liefert die Mittelpunktsumme schon mit einem Streifen den genauen Wert?',
+      opts: ['für alle monotonen Funktionen', 'für lineare Funktionen', 'für alle quadratischen Funktionen', 'für keine Funktion'],
+      steps: [
+        'Bei einer Geraden ist das Rechteck mit der Mittenhöhe flächengleich zum Trapez unter der Geraden.',
+        'Das Dreieck, das oben fehlt, ist genauso groß wie das, das übersteht.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Auto beschleunigt; gemessen wird $v = 0$; $4$; $7$; $9$ m/s nach $0$; $1$; $2$; $3$ s. Zwischen welchen Werten liegt der Weg in diesen $3$ s sicher?',
+      opts: ['zwischen $15$ m und $16$ m', 'zwischen $11$ m und $20$ m', 'zwischen $0$ m und $9$ m', 'zwischen $20$ m und $27$ m'],
+      steps: [
+        '$v$ steigt: Linkssumme $1 \\cdot (0 + 4 + 7) = 11$ m ist zu klein, Rechtssumme $1 \\cdot (4 + 7 + 9) = 20$ m zu groß.',
+        'Der wahre Weg liegt dazwischen. Das Trapezverfahren nächste Woche schätzt $15{,}5$ m.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

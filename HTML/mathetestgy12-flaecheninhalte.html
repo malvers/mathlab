@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Flächeninhalte auf drei Wegen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w24-flaecheninhalte',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Flächeninhalte auf drei Wegen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 24 (LB 8) · 20 Aufgaben: Elementargeometrisch, mit dem Vektorprodukt und mit Integralen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 24 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Vektorprodukt (1-3, 9-11, 14-16, 18, 20), Integral (5-7, 12, 13, 17, 19), elementargeometrisch und Körper (4, 8). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Wie groß ist das Dreieck $A(1 \\mid 0 \\mid 0)$, $B(0 \\mid 1 \\mid 0)$, $C(0 \\mid 0 \\mid 1)$?',
+      opts: ['$\\sqrt3 \\approx 1{,}73$', '$\\tfrac{\\sqrt3}{2} \\approx 0{,}87$', '$\\tfrac12$', '$1$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AC} = (-1;\\ 1;\\ 0) \\times (-1;\\ 0;\\ 1) = (1;\\ 1;\\ 1)$.',
+        '$A = \\tfrac12 \\sqrt3$. $\\sqrt3$ wäre das Parallelogramm.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist das Parallelogramm, das $\\begin{pmatrix} 2 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 3 \\\\ 0 \\end{pmatrix}$ aufspannen?',
+      opts: ['$6$', '$\\sqrt{10} \\cdot 2$', '$3$', '$2$'],
+      steps: [
+        '$\\vec a \\times \\vec b = (0;\\ 0;\\ 6)$.',
+        'Kontrolle: Grundseite $2$, Höhe $3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Formel liefert den Flächeninhalt eines Dreiecks $ABC$ mit dem Winkel $\\alpha$ bei $A$?',
+      opts: ['$\\tfrac12 \\cdot \\vec{AB} \\cdot \\vec{AC}$', '$|\\vec{AB}| + |\\vec{AC}|$', '$\\tfrac12 \\cdot |\\vec{AB}| \\cdot |\\vec{AC}| \\cdot \\sin\\alpha$', '$|\\vec{AB}| \\cdot |\\vec{AC}| \\cdot \\cos\\alpha$'],
+      steps: [
+        'Grundseite $|\\vec{AB}|$, Höhe $|\\vec{AC}| \\sin\\alpha$.',
+        'Das ist genau $\\tfrac12 |\\vec{AB} \\times \\vec{AC}|$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $f(x) = x + 1$ und der $x$-Achse über $[0;\\ 2]$?',
+      opts: ['$6$', '$2$', '$4$', '$3$'],
+      steps: [
+        'Elementargeometrisch: ein Trapez mit den parallelen Seiten $f(0) = 1$ und $f(2) = 3$, Höhe $2$.',
+        '$A = \\tfrac{1 + 3}{2} \\cdot 2 = 4$. Mit dem Integral: $\\left[\\tfrac{x^2}{2} + x\\right]_0^2 = 4$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Fläche unter $f(x) = x^2$ über $[0;\\ 3]$?',
+      opts: ['$27$', '$6$', '$9$', '$3$'],
+      steps: [
+        '$\\int_0^3 x^2\\,dx = \\left[\\tfrac{x^3}{3}\\right]_0^3$.',
+        '$= \\tfrac{27}{3} = 9$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen $f(x) = x$ und $g(x) = x^2$ über $[0;\\ 1]$?',
+      opts: ['$\\tfrac12$', '$\\tfrac16$', '$\\tfrac56$', '$\\tfrac13$'],
+      steps: [
+        'Auf $[0;\\ 1]$ liegt $x$ über $x^2$: $\\int_0^1 (x - x^2)\\,dx$.',
+        '$= \\tfrac12 - \\tfrac13 = \\tfrac16$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Fläche unter einem Bogen der Sinuskurve, über $[0;\\ \\pi]$?',
+      opts: ['$1$', '$2$', '$0$', '$\\pi$'],
+      steps: [
+        '$\\int_0^\\pi \\sin x\\,dx = [-\\cos x]_0^\\pi$.',
+        '$= 1 - (-1) = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Pyramide hat die Grundfläche $O$, $(4 \\mid 0 \\mid 0)$, $(0 \\mid 4 \\mid 0)$ und die Spitze $(0 \\mid 0 \\mid 6)$. Welches Volumen hat sie?',
+      opts: ['$48$', '$8$', '$16$', '$32$'],
+      steps: [
+        'Grundfläche: rechtwinkliges Dreieck, $\\tfrac12 \\cdot 4 \\cdot 4 = 8$; Höhe $6$.',
+        '$V = \\tfrac13 \\cdot 8 \\cdot 6 = 16$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist das Dreieck $A(1 \\mid 1 \\mid 1)$, $B(3 \\mid 1 \\mid 1)$, $C(1 \\mid 4 \\mid 1)$?',
+      opts: ['$5$', '$6$', '$\\sqrt{13}$', '$3$'],
+      steps: [
+        '$\\vec{AB} = (2;\\ 0;\\ 0)$, $\\vec{AC} = (0;\\ 3;\\ 0)$, Kreuzprodukt $(0;\\ 0;\\ 6)$.',
+        '$A = 3$: ein rechtwinkliges Dreieck mit den Katheten $2$ und $3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Das Rechteck $ABCD$ hat $A(0 \\mid 0 \\mid 0)$, $B(3 \\mid 0 \\mid 0)$ und $D(0 \\mid 4 \\mid 5)$. Wie groß ist es?',
+      opts: ['$12$', '$3\\sqrt{41} \\approx 19{,}21$', '$60$', '$\\sqrt{50} \\approx 7{,}07$'],
+      steps: [
+        '$\\vec{AB} \\cdot \\vec{AD} = 0$: rechter Winkel, Seiten $3$ und $\\sqrt{16 + 25} = \\sqrt{41}$.',
+        '$A = 3\\sqrt{41}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Ebene $2x + 3y + 6z = 12$ hat die Spurpunkte $(6 \\mid 0 \\mid 0)$, $(0 \\mid 4 \\mid 0)$, $(0 \\mid 0 \\mid 2)$. Wie groß ist das Spurdreieck?',
+      opts: ['$28$', '$14$', '$24$', '$12$'],
+      steps: [
+        '$(-6;\\ 4;\\ 0) \\times (-6;\\ 0;\\ 2) = (8;\\ 12;\\ 24)$ mit Betrag $\\sqrt{784} = 28$.',
+        '$A = 14$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen der Parabel $f(x) = 4 - x^2$ und der $x$-Achse?',
+      opts: ['$16$', '$8$', '$\\tfrac{16}{3} \\approx 5{,}33$', '$\\tfrac{32}{3} \\approx 10{,}67$'],
+      steps: [
+        'Nullstellen $\\pm 2$: $\\int_{-2}^{2} (4 - x^2)\\,dx = \\left[4x - \\tfrac{x^3}{3}\\right]_{-2}^{2}$.',
+        '$= \\left(8 - \\tfrac83\\right) - \\left(-8 + \\tfrac83\\right) = \\tfrac{32}{3}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $f(x) = x^3$ und der $x$-Achse über $[-1;\\ 1]$?',
+      opts: ['$\\tfrac12$', '$\\tfrac14$', '$1$', '$0$'],
+      steps: [
+        '$\\int_{-1}^{1} x^3\\,dx = 0$, weil sich die Teilflächen aufheben.',
+        'Fläche: $2 \\cdot \\int_0^1 x^3\\,dx = 2 \\cdot \\tfrac14 = \\tfrac12$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist das Dreieck mit den Ecken $(0 \\mid 0)$, $(4 \\mid 1)$, $(1 \\mid 3)$ in der Ebene?',
+      opts: ['$5{,}5$', '$11$', '$6$', '$6{,}5$'],
+      steps: [
+        'Als Raumvektoren mit $z = 0$: $(4;\\ 1;\\ 0) \\times (1;\\ 3;\\ 0) = (0;\\ 0;\\ 11)$.',
+        '$A = \\tfrac{11}{2} = 5{,}5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist die gesamte Oberfläche des Tetraeders mit den Ecken $O$, $(1 \\mid 0 \\mid 0)$, $(0 \\mid 1 \\mid 0)$, $(0 \\mid 0 \\mid 1)$?',
+      opts: ['$\\tfrac32 + \\tfrac{\\sqrt3}{2} \\approx 2{,}37$', '$2$', '$2\\sqrt3 \\approx 3{,}46$', '$\\tfrac{\\sqrt3}{2} \\approx 0{,}87$'],
+      steps: [
+        'Drei rechtwinklige Dreiecke mit je $\\tfrac12$ in den Koordinatenebenen.',
+        'Dazu das schräge Dreieck aus Aufgabe 1: $\\tfrac{\\sqrt3}{2}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Das Dreieck $A(1 \\mid 0 \\mid 0)$, $B(0 \\mid 1 \\mid 0)$, $C(0 \\mid 0 \\mid 1)$ hat den Inhalt $\\tfrac{\\sqrt3}{2}$. Wie lang ist seine Höhe auf $AB$?',
+      opts: ['$\\tfrac{\\sqrt3}{2} \\approx 0{,}87$', '$\\sqrt2 \\approx 1{,}41$', '$1$', '$\\tfrac{\\sqrt6}{2} \\approx 1{,}22$'],
+      steps: [
+        '$|\\vec{AB}| = \\sqrt2$, $A = \\tfrac12 \\cdot \\sqrt2 \\cdot h$.',
+        '$h = \\tfrac{\\sqrt3}{\\sqrt2} = \\tfrac{\\sqrt6}{2}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen $f(x) = x^2$ und $g(x) = 2x$?',
+      opts: ['$4$', '$\\tfrac83$', '$\\tfrac43$', '$\\tfrac23$'],
+      steps: [
+        'Schnittstellen $0$ und $2$; dazwischen liegt $2x$ oben.',
+        '$\\int_0^2 (2x - x^2)\\,dx = 4 - \\tfrac83 = \\tfrac43$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Das Parallelogramm $ABCD$ hat $A(1 \\mid 0 \\mid 2)$, $B(3 \\mid 1 \\mid 2)$, $D(1 \\mid 2 \\mid 4)$. Wie groß ist es?',
+      opts: ['$\\sqrt{20}$', '$36$', '$3$', '$6$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AD} = (2;\\ 1;\\ 0) \\times (0;\\ 2;\\ 2) = (2;\\ -4;\\ 4)$.',
+        'Betrag $\\sqrt{4 + 16 + 16} = 6$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Fläche unter $f(x) = e^x$ über $[0;\\ 1]$?',
+      opts: ['$e \\approx 2{,}72$', '$1$', '$\\tfrac{e}{2} \\approx 1{,}36$', '$e - 1 \\approx 1{,}72$'],
+      steps: [
+        '$\\int_0^1 e^x\\,dx = [e^x]_0^1$.',
+        '$= e - 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Dreieck hat zwei Seiten der Längen $4$ und $5$, die $30^\\circ$ einschließen. Wie groß ist es?',
+      opts: ['$5$', '$10$', '$20$', '$5\\sqrt3 \\approx 8{,}66$'],
+      steps: [
+        '$A = \\tfrac12 \\cdot 4 \\cdot 5 \\cdot \\sin 30^\\circ$.',
+        '$= 10 \\cdot \\tfrac12 = 5$. Mit dem Kosinus käme fälschlich $5\\sqrt3$ heraus.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

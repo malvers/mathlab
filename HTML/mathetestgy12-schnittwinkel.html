@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Schnittwinkel von Geraden und Ebenen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w18-schnittwinkel',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Schnittwinkel von Geraden und Ebenen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 18 (LB 7) · 20 Aufgaben: Winkel zwischen zwei Geraden und zwischen Gerade und Ebene · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 18 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Gerade und Gerade (1-6, 13, 17), Gerade und Ebene (7-12, 14-16), Anwendungen (18-20). Taschenrechner erlaubt. */
+  questions: [
+    {
+      q: 'Unter welchem Winkel schneiden sich zwei Geraden mit den Richtungsvektoren $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['$90^\\circ$', '$135^\\circ$', '$45^\\circ$', '$60^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{|1|}{1 \\cdot \\sqrt2}$.',
+        '$\\varphi = 45^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Unter welchem Winkel schneiden sich zwei Geraden mit den Richtungsvektoren $\\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ und $\\begin{pmatrix} 2 \\\\ 1 \\\\ -2 \\end{pmatrix}$?',
+      opts: ['$90^\\circ$', '$0^\\circ$', '$45^\\circ$', '$\\approx 63{,}6^\\circ$'],
+      steps: [
+        'Skalarprodukt $2 + 2 - 4 = 0$.',
+        'Die Geraden schneiden sich senkrecht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit welcher Formel berechnet man den Schnittwinkel zweier Geraden mit den Richtungsvektoren $\\vec u$ und $\\vec v$?',
+      opts: ['$\\cos\\varphi = |\\vec u| \\cdot |\\vec v|$', '$\\cos\\varphi = \\dfrac{|\\vec u \\cdot \\vec v|}{|\\vec u| \\cdot |\\vec v|}$', '$\\cos\\varphi = \\vec u \\times \\vec v$', '$\\sin\\varphi = \\dfrac{|\\vec u \\cdot \\vec v|}{|\\vec u| \\cdot |\\vec v|}$'],
+      steps: [
+        'Der Winkel zwischen den Geraden ist der Winkel zwischen ihren Richtungsvektoren.',
+        'Der Betrag im Zähler sorgt für den spitzen Winkel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum steht in der Formel für den Schnittwinkel zweier Geraden der Betrag $|\\vec u \\cdot \\vec v|$?',
+      opts: ['Damit das Ergebnis eine ganze Zahl wird.', 'Damit man den Taschenrechner nicht braucht.', 'Weil Skalarprodukte nie negativ sind.', 'Der Schnittwinkel zweier Geraden liegt zwischen $0^\\circ$ und $90^\\circ$.'],
+      steps: [
+        'Ein negatives Skalarprodukt liefert einen stumpfen Winkel zwischen den Vektoren.',
+        'Zwei Geraden bilden aber immer zwei Winkel, die sich zu $180^\\circ$ ergänzen; man nimmt den spitzen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Unter welchem Winkel schneiden sich zwei Geraden mit den Richtungsvektoren $\\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ und $\\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$?',
+      opts: ['$\\approx 41{,}8^\\circ$', '$\\approx 131{,}8^\\circ$', '$\\approx 70{,}5^\\circ$', '$\\approx 48{,}2^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{2}{3 \\cdot 1}$.',
+        '$\\varphi \\approx 48{,}2^\\circ$. Mit dem Sinus kämen fälschlich $41{,}8^\\circ$ heraus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Richtungsvektoren zweier sich schneidender Geraden schließen $135^\\circ$ ein. Welchen Schnittwinkel haben die Geraden?',
+      opts: ['$45^\\circ$', '$135^\\circ$', '$67{,}5^\\circ$', '$90^\\circ$'],
+      steps: [
+        'Der Schnittwinkel ist der spitze Winkel.',
+        '$180^\\circ - 135^\\circ = 45^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit welcher Formel berechnet man den Winkel zwischen einer Geraden mit Richtungsvektor $\\vec u$ und einer Ebene mit Normalenvektor $\\vec n$?',
+      opts: ['$\\tan\\varphi = \\vec u \\cdot \\vec n$', '$\\sin\\varphi = \\dfrac{|\\vec u \\cdot \\vec n|}{|\\vec u| \\cdot |\\vec n|}$', '$\\sin\\varphi = |\\vec u| \\cdot |\\vec n|$', '$\\cos\\varphi = \\dfrac{|\\vec u \\cdot \\vec n|}{|\\vec u| \\cdot |\\vec n|}$'],
+      steps: [
+        'Der Kosinusansatz liefert den Winkel zwischen $\\vec u$ und dem Normalenvektor.',
+        'Der gesuchte Winkel zur Ebene ergänzt ihn zu $90^\\circ$; daraus wird der Sinus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Richtungsvektor einer Geraden schließt mit dem Normalenvektor einer Ebene $30^\\circ$ ein. Welchen Winkel bildet die Gerade mit der Ebene?',
+      opts: ['$60^\\circ$', '$120^\\circ$', '$30^\\circ$', '$90^\\circ$'],
+      steps: [
+        'Gerade und Normale ergänzen sich zum rechten Winkel.',
+        '$90^\\circ - 30^\\circ = 60^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Winkel bildet die $z$-Achse mit der Ebene $z = 0$?',
+      opts: ['$0^\\circ$', '$45^\\circ$', '$90^\\circ$', '$180^\\circ$'],
+      steps: [
+        'Richtungsvektor $(0;\\ 0;\\ 1)$ und Normalenvektor $(0;\\ 0;\\ 1)$ sind gleich.',
+        '$\\sin\\varphi = 1$, die Achse steht senkrecht auf der Ebene.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Winkel bildet eine Gerade mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ mit der Ebene $z = 0$?',
+      opts: ['$90^\\circ$', '$45^\\circ$', '$\\approx 35{,}3^\\circ$', '$0^\\circ$'],
+      steps: [
+        '$(1;\\ 1;\\ 0) \\cdot (0;\\ 0;\\ 1) = 0$, also $\\sin\\varphi = 0$.',
+        'Die Gerade verläuft parallel zur Ebene oder liegt in ihr.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Winkel bildet eine Gerade mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ mit der Ebene $z = 0$?',
+      opts: ['$45^\\circ$', '$90^\\circ$', '$60^\\circ$', '$0^\\circ$'],
+      steps: [
+        '$\\sin\\varphi = \\dfrac{1}{\\sqrt2 \\cdot 1}$.',
+        '$\\varphi = 45^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Winkel bildet eine Gerade mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ mit der Ebene $E\\colon 2x - y + 2z = 3$?',
+      opts: ['$90^\\circ$', '$0^\\circ$', '$\\approx 26{,}4^\\circ$', '$\\approx 63{,}6^\\circ$'],
+      steps: [
+        '$\\vec u \\cdot \\vec n = 2 - 2 + 4 = 4$, $|\\vec u| = |\\vec n| = 3$.',
+        '$\\sin\\varphi = \\tfrac49$, $\\varphi \\approx 26{,}4^\\circ$. $63{,}6^\\circ$ ist der Winkel zur Normalen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Winkel bildet eine Gerade mit dem Richtungsvektor $\\begin{pmatrix} 2 \\\\ 1 \\\\ 2 \\end{pmatrix}$ mit der $y$-Achse?',
+      opts: ['$90^\\circ$', '$\\approx 70{,}5^\\circ$', '$\\approx 19{,}5^\\circ$', '$\\approx 48{,}2^\\circ$'],
+      steps: [
+        'Richtungsvektor der $y$-Achse: $(0;\\ 1;\\ 0)$.',
+        '$\\cos\\varphi = \\tfrac13$, $\\varphi \\approx 70{,}5^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Gerade hat den Richtungsvektor $\\begin{pmatrix} 3 \\\\ 4 \\\\ 5 \\end{pmatrix}$. Wie groß ist ihr Steigungswinkel gegenüber der $x$-$y$-Ebene?',
+      opts: ['$45^\\circ$', '$\\approx 53{,}1^\\circ$', '$60^\\circ$', '$\\approx 36{,}9^\\circ$'],
+      steps: [
+        '$|\\vec u| = \\sqrt{9 + 16 + 25} = \\sqrt{50} = 5\\sqrt2$.',
+        '$\\sin\\varphi = \\tfrac{5}{5\\sqrt2}$, $\\varphi = 45^\\circ$. Waagerecht legt sie $5$ zurück, senkrecht ebenfalls $5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Gerade hat den Richtungsvektor $\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$, die Ebene ist $x + y + z = 1$. Wie liegen sie zueinander?',
+      opts: ['Die Gerade ist parallel zur Ebene.', 'Die Gerade steht senkrecht auf der Ebene.', 'Die Gerade liegt in der Ebene.', 'Sie schneiden sich unter $45^\\circ$.'],
+      steps: [
+        'Der Richtungsvektor ist gleich dem Normalenvektor.',
+        'Also $\\sin\\varphi = 1$ und $\\varphi = 90^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für den Richtungsvektor $\\vec u$ einer Geraden $g$ und den Normalenvektor $\\vec n$ der Ebene $E$ gilt $\\vec u \\cdot \\vec n = 0$. Was folgt?',
+      opts: ['$g$ steht senkrecht auf $E$.', '$g$ ist parallel zu $E$ oder liegt in $E$.', '$g$ ist windschief zu $E$.', '$g$ schneidet $E$ unter $45^\\circ$.'],
+      steps: [
+        '$\\vec u$ steht senkrecht auf dem Normalenvektor, verläuft also in Richtung der Ebene.',
+        'Eine Punktprobe mit dem Stützpunkt entscheidet, ob $g$ in $E$ liegt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Geraden $g\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec x = \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + s\\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$ schneiden sich. Wo und unter welchem Winkel?',
+      opts: ['in $(1 \\mid 0 \\mid 0)$ unter $45^\\circ$', 'Sie sind windschief.', 'in $(1 \\mid 0 \\mid 0)$ unter $90^\\circ$', 'in $(0 \\mid 1 \\mid 0)$ unter $90^\\circ$'],
+      steps: [
+        '$1 + t = s$ und $t = 1 - s$ ergibt $t = 0$, $s = 1$: Schnittpunkt $(1 \\mid 0 \\mid 0)$.',
+        '$(1;\\ 1;\\ 0) \\cdot (1;\\ -1;\\ 0) = 0$: Sie schneiden sich senkrecht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Rampe steigt auf $10$ m waagerechter Strecke um $1$ m an, Richtungsvektor $\\begin{pmatrix} 10 \\\\ 0 \\\\ 1 \\end{pmatrix}$. Welchen Winkel bildet sie mit dem Boden $z = 0$?',
+      opts: ['$10^\\circ$', '$\\approx 84{,}3^\\circ$', '$\\approx 0{,}1^\\circ$', '$\\approx 5{,}7^\\circ$'],
+      steps: [
+        '$\\sin\\varphi = \\dfrac{1}{\\sqrt{101}}$.',
+        '$\\varphi \\approx 5{,}7^\\circ$, also $10\\,\\%$ Steigung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Pyramide hat die quadratische Grundfläche mit den Ecken $(\\pm 1 \\mid \\pm 1 \\mid 0)$ und die Spitze $S(0 \\mid 0 \\mid 2)$. Welchen Winkel bildet eine Seitenkante mit der Grundfläche?',
+      opts: ['$45^\\circ$', '$\\approx 35{,}3^\\circ$', '$\\approx 54{,}7^\\circ$', '$\\approx 63{,}4^\\circ$'],
+      steps: [
+        'Kante von $(1 \\mid 1 \\mid 0)$ nach $S$: $\\vec u = (-1;\\ -1;\\ 2)$, $|\\vec u| = \\sqrt6$.',
+        '$\\sin\\varphi = \\tfrac{2}{\\sqrt6}$, $\\varphi \\approx 54{,}7^\\circ$. $63{,}4^\\circ$ ist der Winkel der Seitenfläche.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Gerade durch $A(1 \\mid 2 \\mid 3)$ und $B(3 \\mid 2 \\mid 5)$: Welchen Winkel bildet sie mit der Ebene $x = 0$?',
+      opts: ['$60^\\circ$', '$0^\\circ$', '$90^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\vec{AB} = (2;\\ 0;\\ 2)$, Normalenvektor $(1;\\ 0;\\ 0)$.',
+        '$\\sin\\varphi = \\tfrac{2}{2\\sqrt2} = \\tfrac{1}{\\sqrt2}$, $\\varphi = 45^\\circ$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

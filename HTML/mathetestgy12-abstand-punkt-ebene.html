@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Abstand Punkt–Punkt und Punkt–Ebene — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w20-abstand-punkt-ebene',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Abstand Punkt–Punkt und Punkt–Ebene',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 20 (LB 7) · 20 Aufgaben: Abstände zwischen Punkten, Hessesche Normalform, Lotfußpunkt · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 20 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Punkt und Punkt (1, 2, 14, 15, 20), Abstandsformel und HNF (3-7, 11, 18), Lotfußpunkt (8, 9), Seiten und Parameter (12, 13, 19), parallele Ebenen und Körper (10, 16, 17). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Wie weit sind $A(1 \\mid 2 \\mid 3)$ und $B(3 \\mid 4 \\mid 4)$ voneinander entfernt?',
+      opts: ['$\\sqrt5$', '$3$', '$9$', '$5$'],
+      steps: [
+        '$\\vec{AB} = (2;\\ 2;\\ 1)$.',
+        '$|\\vec{AB}| = \\sqrt{4 + 4 + 1} = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist $P(2 \\mid 3 \\mid 6)$ vom Ursprung entfernt?',
+      opts: ['$7$', '$11$', '$\\sqrt{11}$', '$49$'],
+      steps: [
+        '$\\sqrt{4 + 9 + 36} = \\sqrt{49}$.',
+        '$= 7$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit welcher Formel berechnet man den Abstand des Punktes $P$ von der Ebene $E\\colon \\vec n \\cdot \\vec x = d$?',
+      opts: ['$\\dfrac{|\\vec n \\cdot \\vec p - d|}{|\\vec n|}$', '$|\\vec p - \\vec n|$', '$|\\vec n \\cdot \\vec p - d|$', '$\\dfrac{\\vec n \\cdot \\vec p}{d}$'],
+      steps: [
+        'Man setzt $P$ in die Hessesche Normalform ein.',
+        'Ohne die Division durch $|\\vec n|$ stimmt das Ergebnis nur für Normalenvektoren der Länge $1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist der Ursprung von der Ebene $2x + y + 2z = 6$ entfernt?',
+      opts: ['$6$', '$3$', '$1{,}2$', '$2$'],
+      steps: [
+        '$|\\vec n| = 3$.',
+        '$d = \\tfrac{|0 - 6|}{3} = 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit ist $P(1 \\mid 1 \\mid 1)$ von der Ebene $2x - y + 2z = 9$ entfernt?',
+      opts: ['$\\tfrac{4}{3}$', '$6$', '$2$', '$3$'],
+      steps: [
+        'Einsetzen: $2 - 1 + 2 - 9 = -6$.',
+        '$d = \\tfrac{|-6|}{3} = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie weit ist $P(3 \\mid 4 \\mid 5)$ von der Ebene $z = 0$ entfernt?',
+      opts: ['$4$', '$3$', '$\\sqrt{50}$', '$5$'],
+      steps: [
+        'Der Abstand von der $x$-$y$-Ebene ist der Betrag der $z$-Koordinate.',
+        '$d = 5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit ist $P(1 \\mid 2 \\mid 3)$ von der Ebene $x + y + z = 0$ entfernt?',
+      opts: ['$\\sqrt{14}$', '$2\\sqrt3 \\approx 3{,}46$', '$6$', '$2$'],
+      steps: [
+        '$\\dfrac{|1 + 2 + 3|}{\\sqrt3} = \\dfrac{6}{\\sqrt3}$.',
+        '$= 2\\sqrt3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Punkt der Ebene $2x + y + 2z = 9$ liegt dem Ursprung am nächsten?',
+      opts: ['$(0 \\mid 9 \\mid 0)$', '$(2 \\mid 1 \\mid 2)$', '$(1 \\mid 1 \\mid 1)$', '$(4{,}5 \\mid 0 \\mid 0)$'],
+      steps: [
+        'Lotgerade $\\vec x = t \\cdot (2;\\ 1;\\ 2)$ in $E$ einsetzen: $9t = 9$, $t = 1$.',
+        'Lotfußpunkt $F(2 \\mid 1 \\mid 2)$, Abstand $|\\vec{OF}| = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher ist der Lotfußpunkt von $P(3 \\mid 4 \\mid 5)$ auf der Ebene $z = 0$?',
+      opts: ['$(3 \\mid 4 \\mid -5)$', '$(0 \\mid 0 \\mid 0)$', '$(3 \\mid 4 \\mid 0)$', '$(0 \\mid 0 \\mid 5)$'],
+      steps: [
+        'Die Lotgerade läuft senkrecht nach unten, nur $z$ ändert sich.',
+        '$F(3 \\mid 4 \\mid 0)$. $(3 \\mid 4 \\mid -5)$ wäre der Spiegelpunkt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie weit sind die parallelen Ebenen $2x + y + 2z = 3$ und $2x + y + 2z = 12$ voneinander entfernt?',
+      opts: ['$3$', '$5$', '$1$', '$9$'],
+      steps: [
+        'Gleicher Normalenvektor, Betrag $3$.',
+        '$d = \\tfrac{|12 - 3|}{3} = 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Hessesche Normalform der Ebene $2x + y + 2z = 6$?',
+      opts: ['$\\tfrac13 (2x + y + 2z - 6) = 0$', '$\\tfrac15 (2x + y + 2z - 6) = 0$', '$\\tfrac16 (2x + y + 2z) = 1$', '$2x + y + 2z - 6 = 1$'],
+      steps: [
+        'Durch den Betrag des Normalenvektors teilen, $\\sqrt{4 + 1 + 4} = 3$.',
+        'Setzt man einen Punkt links ein, erhält man seinen Abstand mit Vorzeichen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Liegen $O(0 \\mid 0 \\mid 0)$ und $Q(3 \\mid 3 \\mid 3)$ auf derselben Seite der Ebene $2x + y + 2z = 6$?',
+      opts: ['Ja, beide liegen über der Ebene.', 'Das lässt sich ohne Zeichnung nicht entscheiden.', 'Nein, die Vorzeichen in der Hesseschen Normalform sind verschieden.', 'Ja, beide haben den Abstand $2$.'],
+      steps: [
+        '$O$: $\\tfrac13 (0 - 6) = -2$; $Q$: $\\tfrac13 (6 + 3 + 6 - 6) = 3$.',
+        'Verschiedene Vorzeichen, also verschiedene Seiten: Die Strecke $OQ$ durchstößt $E$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Punkte der $z$-Achse haben von $E\\colon 2x + y + 2z = 6$ den Abstand $3$?',
+      opts: ['nur $(0 \\mid 0 \\mid 7{,}5)$', '$(0 \\mid 0 \\mid 3)$ und $(0 \\mid 0 \\mid -3)$', '$(0 \\mid 0 \\mid 4{,}5)$', '$(0 \\mid 0 \\mid 7{,}5)$ und $(0 \\mid 0 \\mid -1{,}5)$'],
+      steps: [
+        '$\\tfrac{|2z - 6|}{3} = 3$, also $2z - 6 = 9$ oder $2z - 6 = -9$.',
+        '$z = 7{,}5$ oder $z = -1{,}5$: je ein Punkt auf jeder Seite.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit sind $P(1 \\mid 2 \\mid -1)$ und $Q(4 \\mid 6 \\mid -1)$ voneinander entfernt?',
+      opts: ['$7$', '$\\sqrt7$', '$5$', '$25$'],
+      steps: [
+        '$\\vec{PQ} = (3;\\ 4;\\ 0)$.',
+        '$\\sqrt{9 + 16} = 5$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Punkt der $x$-Achse ist von $A(1 \\mid 1 \\mid 0)$ und $B(3 \\mid -1 \\mid 2)$ gleich weit entfernt?',
+      opts: ['$(1 \\mid 0 \\mid 0)$', '$(4 \\mid 0 \\mid 0)$', '$(2 \\mid 0 \\mid 0)$', '$(3 \\mid 0 \\mid 0)$'],
+      steps: [
+        '$(x - 1)^2 + 1 = (x - 3)^2 + 1 + 4$, also $-2x + 2 = -6x + 14$.',
+        '$x = 3$. Probe: beide Abstände $\\sqrt5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Tetraeder hat die Grundfläche durch $(1 \\mid 0 \\mid 0)$, $(0 \\mid 1 \\mid 0)$, $(0 \\mid 0 \\mid 1)$ und die Spitze $O$. Wie hoch ist es?',
+      opts: ['$\\tfrac{1}{\\sqrt3} \\approx 0{,}58$', '$\\sqrt3 \\approx 1{,}73$', '$1$', '$\\tfrac13$'],
+      steps: [
+        'Grundfläche in $E\\colon x + y + z = 1$.',
+        'Höhe $=$ Abstand von $O$ zu $E$ $= \\tfrac{1}{\\sqrt3}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Kugel mit dem Mittelpunkt $M(1 \\mid 2 \\mid 3)$ berührt die Ebene $z = 0$. Wie groß ist ihr Radius?',
+      opts: ['$6$', '$3$', '$1$', '$\\sqrt{14}$'],
+      steps: [
+        'Berühren heißt: Der Radius ist der Abstand des Mittelpunkts von der Ebene.',
+        '$r = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist $P(2 \\mid 2 \\mid 2)$ von der Ebene $x + 2y + 2z = 1$ entfernt?',
+      opts: ['$9$', '$1$', '$\\tfrac{10}{3}$', '$3$'],
+      steps: [
+        'Einsetzen: $2 + 4 + 4 - 1 = 9$, $|\\vec n| = 3$.',
+        '$d = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche $d$ hat die Ebene $2x - y + 2z = d$ vom Ursprung den Abstand $2$?',
+      opts: ['$d = 2$', '$d = \\pm 2$', '$d = 6$ oder $d = -6$', 'nur $d = 6$'],
+      steps: [
+        '$\\tfrac{|d|}{3} = 2$.',
+        '$|d| = 6$: zwei parallele Ebenen, je eine auf jeder Seite.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Punkte der Geraden $\\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ haben vom Ursprung den Abstand $3$?',
+      opts: ['$(3 \\mid 6 \\mid 6)$', '$(1 \\mid 2 \\mid 2)$ und $(-1 \\mid -2 \\mid -2)$', '$(1 \\mid 1 \\mid 1)$', 'nur $(1 \\mid 2 \\mid 2)$'],
+      steps: [
+        '$|t| \\cdot 3 = 3$, also $t = \\pm 1$.',
+        'Zwei Punkte, symmetrisch zum Ursprung.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

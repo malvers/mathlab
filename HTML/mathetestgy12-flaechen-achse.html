@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Flächen zwischen Graph und x-Achse — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w07-flaechen-achse',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Flächen zwischen Graph und x-Achse',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 7 (LB 5) · 20 Aufgaben: Nullstellen als Grenzen, Teilflächen, unbekannte Grenze · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 7 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: eine Fläche über oder unter der Achse (1-3, 6, 7, 13, 15), Teilflächen mit Vorzeichenwechsel (4, 5, 8, 11, 12, 17), Grenze oder Parameter gesucht (9, 10, 16), unbegrenzte Flächen (18, 19), Anwendung (20), Begründung (14). Ohne Hilfsmittel, Aufgabe 20 mit. */
+  questions: [
+    {
+      q: 'Berechne den Flächeninhalt zwischen dem Graphen von $f(x) = x^2 + 1$ und der $x$-Achse über $[0;\\ 3]$.',
+      opts: ['$10$', '$9$', '$13$', '$12$'],
+      steps: [
+        '$f > 0$ auf dem ganzen Intervall, also Fläche = Integral.',
+        '$\\left[\\tfrac13 x^3 + x\\right]_0^3 = 9 + 3 = 12$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Flächeninhalt, den der Graph von $f(x) = 4 - x^2$ mit der $x$-Achse einschließt.',
+      opts: ['$16$', '$\\tfrac{16}{3}$', '$8$', '$\\tfrac{32}{3}$'],
+      steps: [
+        'Nullstellen $\\pm 2$ als Grenzen: $\\int_{-2}^2 (4 - x^2)\\,\\mathrm{d}x = \\left[4x - \\tfrac13 x^3\\right]_{-2}^2$.',
+        '$= \\left(8 - \\tfrac83\\right) - \\left(-8 + \\tfrac83\\right) = \\tfrac{32}{3} \\approx 10{,}67$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Flächeninhalt, den der Graph von $f(x) = x^2 - 4x$ mit der $x$-Achse einschließt.',
+      opts: ['$-\\tfrac{32}{3}$', '$32$', '$\\tfrac{32}{3}$', '$\\tfrac{64}{3}$'],
+      steps: [
+        'Nullstellen $0$ und $4$; dazwischen liegt der Graph unter der Achse.',
+        '$\\int_0^4 (x^2 - 4x)\\,\\mathrm{d}x = \\tfrac{64}{3} - 32 = -\\tfrac{32}{3}$. Ein Flächeninhalt ist positiv: $\\tfrac{32}{3}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $f(x) = x^3 - x$ und der $x$-Achse über $[-1;\\ 1]$?',
+      opts: ['$\\tfrac12$', '$\\tfrac14$', '$0$', '$1$'],
+      steps: [
+        'Nullstelle $0$ im Intervall: zwei Teilflächen, je $\\left|\\int_0^1 (x^3 - x)\\,\\mathrm{d}x\\right| = \\left|\\tfrac14 - \\tfrac12\\right| = \\tfrac14$.',
+        'Zusammen $\\tfrac12$. Das Integral über $[-1;\\ 1]$ ist $0$, weil sich die Teile aufheben.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $\\sin x$ und der $x$-Achse über $[0;\\ 2\\pi]$?',
+      opts: ['$4$', '$0$', '$2\\pi$', '$2$'],
+      steps: [
+        'Auf $[0;\\ \\pi]$ liegt eine Halbwelle mit Inhalt $2$ über, auf $[\\pi;\\ 2\\pi]$ eine mit $2$ unter der Achse.',
+        'Fläche $2 + 2 = 4$, Integral $2 - 2 = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne die Fläche unter $f(x) = \\mathrm{e}^x$ über $[0;\\ \\ln 2]$.',
+      opts: ['$1$', '$\\mathrm{e}^2 - 1$', '$\\ln 2$', '$2$'],
+      steps: [
+        '$\\left[\\mathrm{e}^x\\right]_0^{\\ln 2} = \\mathrm{e}^{\\ln 2} - \\mathrm{e}^0$.',
+        '$= 2 - 1 = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne die Fläche unter $f(x) = \\dfrac1x$ über $[1;\\ \\mathrm{e}^2]$.',
+      opts: ['$\\ln 2$', '$1$', '$2$', '$\\mathrm{e}^2 - 1$'],
+      steps: [
+        '$\\left[\\ln x\\right]_1^{\\mathrm{e}^2} = \\ln\\mathrm{e}^2 - \\ln 1$.',
+        '$= 2 - 0 = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $f(x) = x^2 - 1$ und der $x$-Achse über $[0;\\ 2]$?',
+      fig: '<svg viewBox="0 0 420 300" width="420" height="300" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f(x) = x hoch 2 minus 1 auf 0 bis 2, eine Teilfläche unter und eine über der x-Achse"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="360" height="248"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="99.67" y1="266" x2="99.67" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="219" y1="266" x2="219" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="338.33" y1="266" x2="338.33" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="237.62" x2="398" y2="237.62" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="190.31" x2="398" y2="190.31" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="143" x2="398" y2="143" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="95.69" x2="398" y2="95.69" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="48.38" x2="398" y2="48.38" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="190.31" x2="398" y2="190.31" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="99.67" y1="266" x2="99.67" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="400" y="206.31" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="87.67" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="92.67" y="205.31" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="219" y1="186.81" x2="219" y2="193.81" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="219" y="206.31" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="338.33" y1="186.81" x2="338.33" y2="193.81" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="338.33" y="206.31" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="96.17" y1="237.62" x2="103.17" y2="237.62" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="92.67" y="241.62" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-1</text><line x1="96.17" y1="143" x2="103.17" y2="143" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="92.67" y="147" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><line x1="96.17" y1="95.69" x2="103.17" y2="95.69" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="92.67" y="99.69" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><line x1="96.17" y1="48.38" x2="103.17" y2="48.38" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="92.67" y="52.38" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">3</text><g clip-path="url(#f1-clip)"><path d="M 99.67 190.31 L 99.67 237.62 L 100.33 237.61 L 100.99 237.61 L 101.66 237.6 L 102.32 237.59 L 102.98 237.58 L 103.64 237.56 L 104.31 237.54 L 104.97 237.52 L 105.63 237.5 L 106.3 237.47 L 106.96 237.44 L 107.62 237.41 L 108.29 237.37 L 108.95 237.33 L 109.61 237.29 L 110.27 237.24 L 110.94 237.19 L 111.6 237.14 L 112.26 237.09 L 112.93 237.03 L 113.59 236.97 L 114.25 236.91 L 114.91 236.84 L 115.58 236.77 L 116.24 236.7 L 116.9 236.63 L 117.57 236.55 L 118.23 236.47 L 118.89 236.39 L 119.56 236.3 L 120.22 236.21 L 120.88 236.12 L 121.54 236.03 L 122.21 235.93 L 122.87 235.83 L 123.53 235.72 L 124.2 235.62 L 124.86 235.51 L 125.52 235.39 L 126.19 235.28 L 126.85 235.16 L 127.51 235.04 L 128.17 234.92 L 128.84 234.79 L 129.5 234.66 L 130.16 234.53 L 130.83 234.39 L 131.49 234.25 L 132.15 234.11 L 132.81 233.97 L 133.48 233.82 L 134.14 233.67 L 134.8 233.51 L 135.47 233.36 L 136.13 233.2 L 136.79 233.04 L 137.46 232.87 L 138.12 232.7 L 138.78 232.53 L 139.44 232.36 L 140.11 232.18 L 140.77 232 L 141.43 231.82 L 142.1 231.63 L 142.76 231.45 L 143.42 231.26 L 144.09 231.06 L 144.75 230.86 L 145.41 230.66 L 146.07 230.46 L 146.74 230.25 L 147.4 230.05 L 148.06 229.83 L 148.73 229.62 L 149.39 229.4 L 150.05 229.18 L 150.71 228.96 L 151.38 228.73 L 152.04 228.5 L 152.7 228.27 L 153.37 228.04 L 154.03 227.8 L 154.69 227.56 L 155.36 227.31 L 156.02 227.07 L 156.68 226.82 L 157.34 226.56 L 158.01 226.31 L 158.67 226.05 L 159.33 225.79 L 160 225.52 L 160.66 225.26 L 161.32 224.99 L 161.99 224.71 L 162.65 224.44 L 163.31 224.16 L 163.97 223.88 L 164.64 223.59 L 165.3 223.3 L 165.96 223.01 L 166.63 222.72 L 167.29 222.42 L 167.95 222.13 L 168.61 221.82 L 169.28 221.52 L 169.94 221.21 L 170.6 220.9 L 171.27 220.58 L 171.93 220.27 L 172.59 219.95 L 173.26 219.63 L 173.92 219.3 L 174.58 218.97 L 175.24 218.64 L 175.91 218.31 L 176.57 217.97 L 177.23 217.63 L 177.9 217.28 L 178.56 216.94 L 179.22 216.59 L 179.89 216.24 L 180.55 215.88 L 181.21 215.53 L 181.87 215.16 L 182.54 214.8 L 183.2 214.43 L 183.86 214.07 L 184.53 213.69 L 185.19 213.32 L 185.85 212.94 L 186.51 212.56 L 187.18 212.17 L 187.84 211.79 L 188.5 211.4 L 189.17 211 L 189.83 210.61 L 190.49 210.21 L 191.16 209.81 L 191.82 209.4 L 192.48 209 L 193.14 208.59 L 193.81 208.17 L 194.47 207.76 L 195.13 207.34 L 195.8 206.92 L 196.46 206.49 L 197.12 206.06 L 197.79 205.63 L 198.45 205.2 L 199.11 204.76 L 199.77 204.32 L 200.44 203.88 L 201.1 203.44 L 201.76 202.99 L 202.43 202.54 L 203.09 202.08 L 203.75 201.63 L 204.41 201.17 L 205.08 200.7 L 205.74 200.24 L 206.4 199.77 L 207.07 199.3 L 207.73 198.82 L 208.39 198.34 L 209.06 197.86 L 209.72 197.38 L 210.38 196.89 L 211.04 196.41 L 211.71 195.91 L 212.37 195.42 L 213.03 194.92 L 213.7 194.42 L 214.36 193.92 L 215.02 193.41 L 215.69 192.9 L 216.35 192.39 L 217.01 191.87 L 217.67 191.35 L 218.34 190.83 L 219 190.31 L 219 190.31 Z" fill="#B02418" opacity="0.25"/></g><g clip-path="url(#f1-clip)"><path d="M 219 190.31 L 219 190.31 L 219.66 189.78 L 220.33 189.25 L 220.99 188.72 L 221.65 188.18 L 222.31 187.64 L 222.98 187.1 L 223.64 186.56 L 224.3 186.01 L 224.97 185.46 L 225.63 184.91 L 226.29 184.35 L 226.96 183.79 L 227.62 183.23 L 228.28 182.66 L 228.94 182.09 L 229.61 181.52 L 230.27 180.95 L 230.93 180.37 L 231.6 179.79 L 232.26 179.21 L 232.92 178.63 L 233.59 178.04 L 234.25 177.45 L 234.91 176.85 L 235.57 176.25 L 236.24 175.65 L 236.9 175.05 L 237.56 174.45 L 238.23 173.84 L 238.89 173.22 L 239.55 172.61 L 240.21 171.99 L 240.88 171.37 L 241.54 170.75 L 242.2 170.12 L 242.87 169.49 L 243.53 168.86 L 244.19 168.22 L 244.86 167.59 L 245.52 166.95 L 246.18 166.3 L 246.84 165.66 L 247.51 165.01 L 248.17 164.35 L 248.83 163.7 L 249.5 163.04 L 250.16 162.38 L 250.82 161.71 L 251.49 161.05 L 252.15 160.38 L 252.81 159.7 L 253.47 159.03 L 254.14 158.35 L 254.8 157.67 L 255.46 156.98 L 256.13 156.29 L 256.79 155.6 L 257.45 154.91 L 258.11 154.21 L 258.78 153.51 L 259.44 152.81 L 260.1 152.11 L 260.77 151.4 L 261.43 150.69 L 262.09 149.97 L 262.76 149.26 L 263.42 148.54 L 264.08 147.81 L 264.74 147.09 L 265.41 146.36 L 266.07 145.63 L 266.73 144.89 L 267.4 144.15 L 268.06 143.41 L 268.72 142.67 L 269.39 141.93 L 270.05 141.18 L 270.71 140.42 L 271.37 139.67 L 272.04 138.91 L 272.7 138.15 L 273.36 137.39 L 274.03 136.62 L 274.69 135.85 L 275.35 135.08 L 276.01 134.3 L 276.68 133.53 L 277.34 132.74 L 278 131.96 L 278.67 131.17 L 279.33 130.38 L 279.99 129.59 L 280.66 128.79 L 281.32 128 L 281.98 127.19 L 282.64 126.39 L 283.31 125.58 L 283.97 124.77 L 284.63 123.96 L 285.3 123.14 L 285.96 122.32 L 286.62 121.5 L 287.29 120.68 L 287.95 119.85 L 288.61 119.02 L 289.27 118.18 L 289.94 117.35 L 290.6 116.51 L 291.26 115.67 L 291.93 114.82 L 292.59 113.97 L 293.25 113.12 L 293.91 112.27 L 294.58 111.41 L 295.24 110.55 L 295.9 109.69 L 296.57 108.82 L 297.23 107.95 L 297.89 107.08 L 298.56 106.21 L 299.22 105.33 L 299.88 104.45 L 300.54 103.56 L 301.21 102.68 L 301.87 101.79 L 302.53 100.9 L 303.2 100 L 303.86 99.1 L 304.52 98.2 L 305.19 97.3 L 305.85 96.39 L 306.51 95.48 L 307.17 94.57 L 307.84 93.65 L 308.5 92.74 L 309.16 91.81 L 309.83 90.89 L 310.49 89.96 L 311.15 89.03 L 311.81 88.1 L 312.48 87.16 L 313.14 86.22 L 313.8 85.28 L 314.47 84.34 L 315.13 83.39 L 315.79 82.44 L 316.46 81.49 L 317.12 80.53 L 317.78 79.57 L 318.44 78.61 L 319.11 77.64 L 319.77 76.68 L 320.43 75.7 L 321.1 74.73 L 321.76 73.75 L 322.42 72.77 L 323.09 71.79 L 323.75 70.81 L 324.41 69.82 L 325.07 68.83 L 325.74 67.83 L 326.4 66.83 L 327.06 65.83 L 327.73 64.83 L 328.39 63.83 L 329.05 62.82 L 329.71 61.8 L 330.38 60.79 L 331.04 59.77 L 331.7 58.75 L 332.37 57.73 L 333.03 56.7 L 333.69 55.67 L 334.36 54.64 L 335.02 53.6 L 335.68 52.57 L 336.34 51.53 L 337.01 50.48 L 337.67 49.43 L 338.33 48.38 L 338.33 190.31 Z" fill="#799E31" opacity="0.35"/></g><g clip-path="url(#f1-clip)"><path d="M 51.93 230.05 L 53.13 230.42 L 54.32 230.78 L 55.51 231.14 L 56.71 231.48 L 57.9 231.82 L 59.09 232.15 L 60.29 232.46 L 61.48 232.77 L 62.67 233.07 L 63.87 233.36 L 65.06 233.64 L 66.25 233.91 L 67.45 234.17 L 68.64 234.42 L 69.83 234.66 L 71.03 234.89 L 72.22 235.11 L 73.41 235.33 L 74.61 235.53 L 75.8 235.72 L 76.99 235.91 L 78.19 236.08 L 79.38 236.25 L 80.57 236.4 L 81.77 236.55 L 82.96 236.69 L 84.15 236.82 L 85.35 236.93 L 86.54 237.04 L 87.73 237.14 L 88.93 237.23 L 90.12 237.31 L 91.31 237.38 L 92.51 237.45 L 93.7 237.5 L 94.89 237.54 L 96.09 237.57 L 97.28 237.6 L 98.47 237.61 L 99.67 237.62 L 100.86 237.61 L 102.05 237.6 L 103.25 237.57 L 104.44 237.54 L 105.63 237.5 L 106.83 237.45 L 108.02 237.38 L 109.21 237.31 L 110.41 237.23 L 111.6 237.14 L 112.79 237.04 L 113.99 236.93 L 115.18 236.82 L 116.37 236.69 L 117.57 236.55 L 118.76 236.4 L 119.95 236.25 L 121.15 236.08 L 122.34 235.91 L 123.53 235.72 L 124.73 235.53 L 125.92 235.33 L 127.11 235.11 L 128.31 234.89 L 129.5 234.66 L 130.69 234.42 L 131.89 234.17 L 133.08 233.91 L 134.27 233.64 L 135.47 233.36 L 136.66 233.07 L 137.85 232.77 L 139.05 232.46 L 140.24 232.15 L 141.43 231.82 L 142.63 231.48 L 143.82 231.14 L 145.01 230.78 L 146.21 230.42 L 147.4 230.05 L 148.59 229.66 L 149.79 229.27 L 150.98 228.87 L 152.17 228.46 L 153.37 228.04 L 154.56 227.61 L 155.75 227.17 L 156.95 226.72 L 158.14 226.26 L 159.33 225.79 L 160.53 225.31 L 161.72 224.82 L 162.91 224.33 L 164.11 223.82 L 165.3 223.3 L 166.49 222.78 L 167.69 222.25 L 168.88 221.7 L 170.07 221.15 L 171.27 220.58 L 172.46 220.01 L 173.65 219.43 L 174.85 218.84 L 176.04 218.24 L 177.23 217.63 L 178.43 217.01 L 179.62 216.38 L 180.81 215.74 L 182.01 215.09 L 183.2 214.43 L 184.39 213.77 L 185.59 213.09 L 186.78 212.41 L 187.97 211.71 L 189.17 211 L 190.36 210.29 L 191.55 209.57 L 192.75 208.83 L 193.94 208.09 L 195.13 207.34 L 196.33 206.58 L 197.52 205.81 L 198.71 205.03 L 199.91 204.24 L 201.1 203.44 L 202.29 202.63 L 203.49 201.81 L 204.68 200.98 L 205.87 200.14 L 207.07 199.3 L 208.26 198.44 L 209.45 197.57 L 210.65 196.7 L 211.84 195.81 L 213.03 194.92 L 214.23 194.02 L 215.42 193.1 L 216.61 192.18 L 217.81 191.25 L 219 190.31 L 220.19 189.36 L 221.39 188.4 L 222.58 187.43 L 223.77 186.45 L 224.97 185.46 L 226.16 184.46 L 227.35 183.45 L 228.55 182.44 L 229.74 181.41 L 230.93 180.37 L 232.13 179.33 L 233.32 178.27 L 234.51 177.21 L 235.71 176.13 L 236.9 175.05 L 238.09 173.96 L 239.29 172.86 L 240.48 171.74 L 241.67 170.62 L 242.87 169.49 L 244.06 168.35 L 245.25 167.2 L 246.45 166.04 L 247.64 164.88 L 248.83 163.7 L 250.03 162.51 L 251.22 161.31 L 252.41 160.11 L 253.61 158.89 L 254.8 157.67 L 255.99 156.43 L 257.19 155.19 L 258.38 153.93 L 259.57 152.67 L 260.77 151.4 L 261.96 150.12 L 263.15 148.82 L 264.35 147.52 L 265.54 146.21 L 266.73 144.89 L 267.93 143.56 L 269.12 142.22 L 270.31 140.88 L 271.51 139.52 L 272.7 138.15 L 273.89 136.77 L 275.09 135.39 L 276.28 133.99 L 277.47 132.59 L 278.67 131.17 L 279.86 129.75 L 281.05 128.32 L 282.25 126.87 L 283.44 125.42 L 284.63 123.96 L 285.83 122.49 L 287.02 121.01 L 288.21 119.52 L 289.41 118.02 L 290.6 116.51 L 291.79 114.99 L 292.99 113.46 L 294.18 111.92 L 295.37 110.38 L 296.57 108.82 L 297.76 107.25 L 298.95 105.68 L 300.15 104.09 L 301.34 102.5 L 302.53 100.9 L 303.73 99.28 L 304.92 97.66 L 306.11 96.03 L 307.31 94.39 L 308.5 92.74 L 309.69 91.08 L 310.89 89.41 L 312.08 87.73 L 313.27 86.04 L 314.47 84.34 L 315.66 82.63 L 316.85 80.91 L 318.05 79.19 L 319.24 77.45 L 320.43 75.7 L 321.63 73.95 L 322.82 72.19 L 324.01 70.41 L 325.21 68.63 L 326.4 66.83 L 327.59 65.03 L 328.79 63.22 L 329.98 61.4 L 331.17 59.57 L 332.37 57.73 L 333.56 55.88 L 334.75 54.02 L 335.95 52.15 L 337.14 50.27 L 338.33 48.38 L 339.53 46.49 L 340.72 44.58 L 341.91 42.67 L 343.11 40.74 L 344.3 38.8 L 345.49 36.86 L 346.69 34.91 L 347.88 32.94 L 349.07 30.97 L 350.27 28.99 L 351.46 27 L 352.65 25 L 353.85 22.99 L 355.04 20.97 L 356.23 18.94 L 357.43 16.9 L 358.62 14.85 L 359.81 12.79 L 361.01 10.72 L 362.2 8.65" fill="none" stroke="#0E244E" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g></svg>',
+      figcap: 'f(x) = x² − 1 auf [0; 2]: rot unter, grün über der Achse',
+      opts: ['$\\tfrac43$', '$\\tfrac83$', '$2$', '$\\tfrac23$'],
+      steps: [
+        'Nullstelle $1$ im Intervall: $\\int_0^1 = -\\tfrac23$, $\\int_1^2 = \\tfrac43$.',
+        'Fläche $\\tfrac23 + \\tfrac43 = 2$. Das Integral über $[0;\\ 2]$ wäre nur $\\tfrac23$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $b > 0$ ist die Fläche unter $f(x) = x^2$ über $[0;\\ b]$ gleich $9$?',
+      opts: ['$b = \\sqrt{27}$', '$b = 3$', '$b = 27$', '$b = 9$'],
+      steps: [
+        '$\\int_0^b x^2\\,\\mathrm{d}x = \\tfrac13 b^3 = 9$.',
+        '$b^3 = 27$, also $b = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Fläche unter $f(x) = 3x^2$ über $[0;\\ b]$ ist $64$. Bestimme $b$.',
+      opts: ['$b = \\tfrac{64}{3}$', '$b = 8$', '$b = 4$', '$b = 16$'],
+      steps: [
+        '$\\left[x^3\\right]_0^b = b^3 = 64$.',
+        '$b = 4$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $f(x) = x^3 - 6x^2 + 8x$ und der $x$-Achse über $[0;\\ 4]$?',
+      fig: '<svg viewBox="0 0 440 300" width="440" height="300" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f(x) = x hoch 3 minus 6x hoch 2 plus 8x mit Nullstellen 0, 2 und 4"><defs><clipPath id="f2-clip"><rect x="39" y="19" width="380" height="248"/></clipPath><marker id="f2-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="77.8" y1="266" x2="77.8" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="153.4" y1="266" x2="153.4" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="229" y1="266" x2="229" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="304.6" y1="266" x2="304.6" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="380.2" y1="266" x2="380.2" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="245.5" x2="418" y2="245.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="211.33" x2="418" y2="211.33" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="177.17" x2="418" y2="177.17" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="143" x2="418" y2="143" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="108.83" x2="418" y2="108.83" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="74.67" x2="418" y2="74.67" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="40.5" x2="418" y2="40.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="143" x2="418" y2="143" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><line x1="77.8" y1="266" x2="77.8" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><text x="420" y="159" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="65.8" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="70.8" y="158" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="153.4" y1="139.5" x2="153.4" y2="146.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="153.4" y="159" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="229" y1="139.5" x2="229" y2="146.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="229" y="159" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="304.6" y1="139.5" x2="304.6" y2="146.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="304.6" y="159" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="380.2" y1="139.5" x2="380.2" y2="146.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="380.2" y="159" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="74.3" y1="245.5" x2="81.3" y2="245.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="70.8" y="249.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-3</text><line x1="74.3" y1="211.33" x2="81.3" y2="211.33" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="70.8" y="215.33" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-2</text><line x1="74.3" y1="177.17" x2="81.3" y2="177.17" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="70.8" y="181.17" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-1</text><line x1="74.3" y1="108.83" x2="81.3" y2="108.83" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="70.8" y="112.83" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><line x1="74.3" y1="74.67" x2="81.3" y2="74.67" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="70.8" y="78.67" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><line x1="74.3" y1="40.5" x2="81.3" y2="40.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="70.8" y="44.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">3</text><g clip-path="url(#f2-clip)"><path d="M 77.8 143 L 77.8 143 L 78.64 139.99 L 79.48 137.03 L 80.32 134.12 L 81.16 131.25 L 82 128.44 L 82.84 125.68 L 83.68 122.96 L 84.52 120.3 L 85.36 117.68 L 86.2 115.11 L 87.04 112.59 L 87.88 110.12 L 88.72 107.69 L 89.56 105.31 L 90.4 102.98 L 91.24 100.69 L 92.08 98.45 L 92.92 96.26 L 93.76 94.11 L 94.6 92.01 L 95.44 89.95 L 96.28 87.94 L 97.12 85.97 L 97.96 84.04 L 98.8 82.16 L 99.64 80.32 L 100.48 78.53 L 101.32 76.78 L 102.16 75.07 L 103 73.4 L 103.84 71.78 L 104.68 70.2 L 105.52 68.65 L 106.36 67.16 L 107.2 65.7 L 108.04 64.28 L 108.88 62.9 L 109.72 61.57 L 110.56 60.27 L 111.4 59.01 L 112.24 57.8 L 113.08 56.62 L 113.92 55.48 L 114.76 54.38 L 115.6 53.31 L 116.44 52.29 L 117.28 51.3 L 118.12 50.35 L 118.96 49.44 L 119.8 48.56 L 120.64 47.72 L 121.48 46.92 L 122.32 46.15 L 123.16 45.42 L 124 44.72 L 124.84 44.06 L 125.68 43.44 L 126.52 42.85 L 127.36 42.29 L 128.2 41.77 L 129.04 41.28 L 129.88 40.82 L 130.72 40.4 L 131.56 40.01 L 132.4 39.65 L 133.24 39.33 L 134.08 39.03 L 134.92 38.77 L 135.76 38.54 L 136.6 38.34 L 137.44 38.18 L 138.28 38.04 L 139.12 37.93 L 139.96 37.86 L 140.8 37.81 L 141.64 37.79 L 142.48 37.81 L 143.32 37.85 L 144.16 37.92 L 145 38.02 L 145.84 38.14 L 146.68 38.3 L 147.52 38.48 L 148.36 38.69 L 149.2 38.92 L 150.04 39.19 L 150.88 39.48 L 151.72 39.79 L 152.56 40.13 L 153.4 40.5 L 154.24 40.89 L 155.08 41.31 L 155.92 41.75 L 156.76 42.22 L 157.6 42.71 L 158.44 43.22 L 159.28 43.76 L 160.12 44.32 L 160.96 44.91 L 161.8 45.51 L 162.64 46.14 L 163.48 46.8 L 164.32 47.47 L 165.16 48.17 L 166 48.88 L 166.84 49.62 L 167.68 50.38 L 168.52 51.16 L 169.36 51.96 L 170.2 52.78 L 171.04 53.62 L 171.88 54.48 L 172.72 55.36 L 173.56 56.25 L 174.4 57.17 L 175.24 58.1 L 176.08 59.05 L 176.92 60.02 L 177.76 61.01 L 178.6 62.01 L 179.44 63.03 L 180.28 64.07 L 181.12 65.12 L 181.96 66.19 L 182.8 67.28 L 183.64 68.38 L 184.48 69.5 L 185.32 70.63 L 186.16 71.77 L 187 72.93 L 187.84 74.11 L 188.68 75.29 L 189.52 76.5 L 190.36 77.71 L 191.2 78.94 L 192.04 80.18 L 192.88 81.43 L 193.72 82.69 L 194.56 83.97 L 195.4 85.26 L 196.24 86.56 L 197.08 87.87 L 197.92 89.19 L 198.76 90.52 L 199.6 91.86 L 200.44 93.21 L 201.28 94.57 L 202.12 95.94 L 202.96 97.32 L 203.8 98.71 L 204.64 100.11 L 205.48 101.51 L 206.32 102.92 L 207.16 104.34 L 208 105.77 L 208.84 107.2 L 209.68 108.64 L 210.52 110.09 L 211.36 111.55 L 212.2 113 L 213.04 114.47 L 213.88 115.94 L 214.72 117.42 L 215.56 118.9 L 216.4 120.38 L 217.24 121.87 L 218.08 123.36 L 218.92 124.86 L 219.76 126.36 L 220.6 127.86 L 221.44 129.37 L 222.28 130.88 L 223.12 132.39 L 223.96 133.9 L 224.8 135.41 L 225.64 136.93 L 226.48 138.45 L 227.32 139.96 L 228.16 141.48 L 229 143 L 229 143 Z" fill="#799E31" opacity="0.35"/></g><g clip-path="url(#f2-clip)"><path d="M 229 143 L 229 143 L 229.84 144.52 L 230.68 146.04 L 231.52 147.55 L 232.36 149.07 L 233.2 150.59 L 234.04 152.1 L 234.88 153.61 L 235.72 155.12 L 236.56 156.63 L 237.4 158.14 L 238.24 159.64 L 239.08 161.14 L 239.92 162.64 L 240.76 164.13 L 241.6 165.62 L 242.44 167.1 L 243.28 168.58 L 244.12 170.06 L 244.96 171.53 L 245.8 173 L 246.64 174.45 L 247.48 175.91 L 248.32 177.36 L 249.16 178.8 L 250 180.23 L 250.84 181.66 L 251.68 183.08 L 252.52 184.49 L 253.36 185.89 L 254.2 187.29 L 255.04 188.68 L 255.88 190.06 L 256.72 191.43 L 257.56 192.79 L 258.4 194.14 L 259.24 195.48 L 260.08 196.81 L 260.92 198.13 L 261.76 199.44 L 262.6 200.74 L 263.44 202.03 L 264.28 203.31 L 265.12 204.57 L 265.96 205.82 L 266.8 207.06 L 267.64 208.29 L 268.48 209.5 L 269.32 210.71 L 270.16 211.89 L 271 213.07 L 271.84 214.23 L 272.68 215.37 L 273.52 216.5 L 274.36 217.62 L 275.2 218.72 L 276.04 219.81 L 276.88 220.88 L 277.72 221.93 L 278.56 222.97 L 279.4 223.99 L 280.24 224.99 L 281.08 225.98 L 281.92 226.95 L 282.76 227.9 L 283.6 228.83 L 284.44 229.75 L 285.28 230.64 L 286.12 231.52 L 286.96 232.38 L 287.8 233.22 L 288.64 234.04 L 289.48 234.84 L 290.32 235.62 L 291.16 236.38 L 292 237.12 L 292.84 237.83 L 293.68 238.53 L 294.52 239.2 L 295.36 239.86 L 296.2 240.49 L 297.04 241.09 L 297.88 241.68 L 298.72 242.24 L 299.56 242.78 L 300.4 243.29 L 301.24 243.78 L 302.08 244.25 L 302.92 244.69 L 303.76 245.11 L 304.6 245.5 L 305.44 245.87 L 306.28 246.21 L 307.12 246.52 L 307.96 246.81 L 308.8 247.08 L 309.64 247.31 L 310.48 247.52 L 311.32 247.7 L 312.16 247.86 L 313 247.98 L 313.84 248.08 L 314.68 248.15 L 315.52 248.19 L 316.36 248.21 L 317.2 248.19 L 318.04 248.14 L 318.88 248.07 L 319.72 247.96 L 320.56 247.82 L 321.4 247.66 L 322.24 247.46 L 323.08 247.23 L 323.92 246.97 L 324.76 246.67 L 325.6 246.35 L 326.44 245.99 L 327.28 245.6 L 328.12 245.18 L 328.96 244.72 L 329.8 244.23 L 330.64 243.71 L 331.48 243.15 L 332.32 242.56 L 333.16 241.94 L 334 241.28 L 334.84 240.58 L 335.68 239.85 L 336.52 239.08 L 337.36 238.28 L 338.2 237.44 L 339.04 236.56 L 339.88 235.65 L 340.72 234.7 L 341.56 233.71 L 342.4 232.69 L 343.24 231.62 L 344.08 230.52 L 344.92 229.38 L 345.76 228.2 L 346.6 226.99 L 347.44 225.73 L 348.28 224.43 L 349.12 223.1 L 349.96 221.72 L 350.8 220.3 L 351.64 218.84 L 352.48 217.35 L 353.32 215.8 L 354.16 214.22 L 355 212.6 L 355.84 210.93 L 356.68 209.22 L 357.52 207.47 L 358.36 205.68 L 359.2 203.84 L 360.04 201.96 L 360.88 200.03 L 361.72 198.06 L 362.56 196.05 L 363.4 193.99 L 364.24 191.89 L 365.08 189.74 L 365.92 187.55 L 366.76 185.31 L 367.6 183.02 L 368.44 180.69 L 369.28 178.31 L 370.12 175.88 L 370.96 173.41 L 371.8 170.89 L 372.64 168.32 L 373.48 165.7 L 374.32 163.04 L 375.16 160.32 L 376 157.56 L 376.84 154.75 L 377.68 151.88 L 378.52 148.97 L 379.36 146.01 L 380.2 143 L 380.2 143 Z" fill="#B02418" opacity="0.25"/></g><g clip-path="url(#f2-clip)"><path d="M 55.12 244.37 L 56.46 237.27 L 57.8 230.32 L 59.13 223.51 L 60.47 216.84 L 61.81 210.32 L 63.15 203.94 L 64.48 197.7 L 65.82 191.6 L 67.16 185.63 L 68.5 179.81 L 69.83 174.12 L 71.17 168.57 L 72.51 163.15 L 73.85 157.86 L 75.18 152.71 L 76.52 147.68 L 77.86 142.79 L 79.2 138.02 L 80.53 133.38 L 81.87 128.87 L 83.21 124.48 L 84.55 120.22 L 85.88 116.08 L 87.22 112.06 L 88.56 108.16 L 89.9 104.37 L 91.23 100.71 L 92.57 97.17 L 93.91 93.74 L 95.25 90.42 L 96.58 87.22 L 97.92 84.13 L 99.26 81.15 L 100.6 78.28 L 101.93 75.52 L 103.27 72.87 L 104.61 70.33 L 105.95 67.89 L 107.28 65.55 L 108.62 63.32 L 109.96 61.19 L 111.3 59.17 L 112.63 57.24 L 113.97 55.41 L 115.31 53.68 L 116.65 52.04 L 117.98 50.5 L 119.32 49.06 L 120.66 47.7 L 122 46.44 L 123.33 45.27 L 124.67 44.19 L 126.01 43.2 L 127.35 42.3 L 128.68 41.48 L 130.02 40.75 L 131.36 40.1 L 132.7 39.53 L 134.03 39.05 L 135.37 38.64 L 136.71 38.32 L 138.05 38.07 L 139.38 37.91 L 140.72 37.81 L 142.06 37.8 L 143.4 37.85 L 144.74 37.98 L 146.07 38.18 L 147.41 38.45 L 148.75 38.79 L 150.09 39.2 L 151.42 39.68 L 152.76 40.22 L 154.1 40.82 L 155.44 41.49 L 156.77 42.23 L 158.11 43.02 L 159.45 43.87 L 160.79 44.78 L 162.12 45.75 L 163.46 46.78 L 164.8 47.86 L 166.14 49 L 167.47 50.19 L 168.81 51.43 L 170.15 52.73 L 171.49 54.07 L 172.82 55.46 L 174.16 56.91 L 175.5 58.39 L 176.84 59.92 L 178.17 61.5 L 179.51 63.12 L 180.85 64.78 L 182.19 66.48 L 183.52 68.23 L 184.86 70.01 L 186.2 71.83 L 187.54 73.68 L 188.87 75.57 L 190.21 77.49 L 191.55 79.45 L 192.89 81.44 L 194.22 83.46 L 195.56 85.51 L 196.9 87.58 L 198.24 89.69 L 199.57 91.82 L 200.91 93.98 L 202.25 96.15 L 203.59 98.36 L 204.92 100.58 L 206.26 102.82 L 207.6 105.09 L 208.94 107.37 L 210.27 109.67 L 211.61 111.98 L 212.95 114.31 L 214.29 116.65 L 215.62 119.01 L 216.96 121.38 L 218.3 123.75 L 219.64 126.14 L 220.97 128.53 L 222.31 130.93 L 223.65 133.34 L 224.99 135.75 L 226.32 138.17 L 227.66 140.58 L 229 143 L 230.34 145.42 L 231.68 147.83 L 233.01 150.25 L 234.35 152.66 L 235.69 155.07 L 237.03 157.47 L 238.36 159.86 L 239.7 162.25 L 241.04 164.62 L 242.38 166.99 L 243.71 169.35 L 245.05 171.69 L 246.39 174.02 L 247.73 176.33 L 249.06 178.63 L 250.4 180.91 L 251.74 183.18 L 253.08 185.42 L 254.41 187.64 L 255.75 189.85 L 257.09 192.02 L 258.43 194.18 L 259.76 196.31 L 261.1 198.42 L 262.44 200.49 L 263.78 202.54 L 265.11 204.56 L 266.45 206.55 L 267.79 208.51 L 269.13 210.43 L 270.46 212.32 L 271.8 214.17 L 273.14 215.99 L 274.48 217.77 L 275.81 219.52 L 277.15 221.22 L 278.49 222.88 L 279.83 224.5 L 281.16 226.08 L 282.5 227.61 L 283.84 229.09 L 285.18 230.54 L 286.51 231.93 L 287.85 233.27 L 289.19 234.57 L 290.53 235.81 L 291.86 237 L 293.2 238.14 L 294.54 239.22 L 295.88 240.25 L 297.21 241.22 L 298.55 242.13 L 299.89 242.98 L 301.23 243.77 L 302.56 244.51 L 303.9 245.18 L 305.24 245.78 L 306.58 246.32 L 307.91 246.8 L 309.25 247.21 L 310.59 247.55 L 311.93 247.82 L 313.26 248.02 L 314.6 248.15 L 315.94 248.2 L 317.28 248.19 L 318.62 248.09 L 319.95 247.93 L 321.29 247.68 L 322.63 247.36 L 323.97 246.95 L 325.3 246.47 L 326.64 245.9 L 327.98 245.25 L 329.32 244.52 L 330.65 243.7 L 331.99 242.8 L 333.33 241.81 L 334.67 240.73 L 336 239.56 L 337.34 238.3 L 338.68 236.94 L 340.02 235.5 L 341.35 233.96 L 342.69 232.32 L 344.03 230.59 L 345.37 228.76 L 346.7 226.83 L 348.04 224.81 L 349.38 222.68 L 350.72 220.45 L 352.05 218.11 L 353.39 215.67 L 354.73 213.13 L 356.07 210.48 L 357.4 207.72 L 358.74 204.85 L 360.08 201.87 L 361.42 198.78 L 362.75 195.58 L 364.09 192.26 L 365.43 188.83 L 366.77 185.29 L 368.1 181.63 L 369.44 177.84 L 370.78 173.94 L 372.12 169.92 L 373.45 165.78 L 374.79 161.52 L 376.13 157.13 L 377.47 152.62 L 378.8 147.98 L 380.14 143.21 L 381.48 138.32 L 382.82 133.29 L 384.15 128.14 L 385.49 122.85 L 386.83 117.43 L 388.17 111.88 L 389.5 106.19 L 390.84 100.37 L 392.18 94.4 L 393.52 88.3 L 394.85 82.06 L 396.19 75.68 L 397.53 69.16 L 398.87 62.49 L 400.2 55.68 L 401.54 48.73 L 402.88 41.63" fill="none" stroke="#0E244E" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g></svg>',
+      figcap: 'f(x) = x³ − 6x² + 8x mit zwei gleich großen Teilflächen',
+      opts: ['$4$', '$0$', '$16$', '$8$'],
+      steps: [
+        '$f(x) = x(x - 2)(x - 4)$, Nullstellen $0$, $2$, $4$. $\\int_0^2 f = 4$, $\\int_2^4 f = -4$.',
+        'Fläche $4 + 4 = 8$, Integral $0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne die Fläche, die $f(x) = -x^2 + 2x + 3$ mit der $x$-Achse einschließt.',
+      opts: ['$12$', '$9$', '$\\tfrac{16}{3}$', '$\\tfrac{32}{3}$'],
+      steps: [
+        'Nullstellen: $x^2 - 2x - 3 = 0$, also $x = -1$ und $x = 3$.',
+        '$\\left[-\\tfrac13 x^3 + x^2 + 3x\\right]_{-1}^3 = 9 - \\left(-\\tfrac53\\right) = \\tfrac{32}{3}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $f(x) = \\sqrt{x}$, der $x$-Achse und der Geraden $x = 4$?',
+      opts: ['$2$', '$\\tfrac{16}{3}$', '$\\tfrac{14}{3}$', '$8$'],
+      steps: [
+        'Grenzen $0$ (Nullstelle) und $4$.',
+        '$\\left[\\tfrac23 x^{3/2}\\right]_0^4 = \\tfrac23 \\cdot 8 = \\tfrac{16}{3}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum muss man bei der Flächenberechnung das Integrationsintervall an den Nullstellen teilen?',
+      opts: ['Weil man über Nullstellen nicht integrieren darf.', 'Weil die Stammfunktion an Nullstellen nicht definiert ist.', 'Weil sonst das Integral zu groß wird.', 'Weil Flächen unter der Achse im Integral negativ zählen und sich sonst mit positiven aufheben.'],
+      steps: [
+        'Das Integral ist ein orientierter Flächeninhalt.',
+        'Erst die Beträge der Teilintegrale ergeben zusammen den Flächeninhalt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen $\\cos x$ und der $x$-Achse über $[0;\\ \\pi]$?',
+      opts: ['$2$', '$\\pi$', '$0$', '$1$'],
+      steps: [
+        'Nullstelle $\\tfrac\\pi2$: $\\int_0^{\\pi/2} \\cos x\\,\\mathrm{d}x = 1$ und $\\int_{\\pi/2}^{\\pi} \\cos x\\,\\mathrm{d}x = -1$.',
+        'Fläche $1 + 1 = 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $k > 0$ ist die Fläche unter $f(x) = kx^2$ über $[0;\\ 3]$ gleich $18$?',
+      opts: ['$k = 6$', '$k = 2$', '$k = 9$', '$k = \\tfrac23$'],
+      steps: [
+        '$\\int_0^3 kx^2\\,\\mathrm{d}x = k \\cdot 9 = 18$.',
+        '$k = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $f(x) = x^3$ und der $x$-Achse über $[-2;\\ 1]$?',
+      opts: ['$-\\tfrac{15}{4}$', '$\\tfrac{15}{4}$', '$\\tfrac{17}{4}$', '$\\tfrac{9}{2}$'],
+      steps: [
+        'Nullstelle $0$: $\\int_{-2}^0 x^3\\,\\mathrm{d}x = -4$, $\\int_0^1 x^3\\,\\mathrm{d}x = \\tfrac14$.',
+        'Fläche $4 + \\tfrac14 = \\tfrac{17}{4}$. Das Integral über $[-2;\\ 1]$ ist $-\\tfrac{15}{4}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Fläche unter $f(x) = \\mathrm{e}^{-x}$ über $[0;\\ b]$ ist $1 - \\mathrm{e}^{-b}$. Welchen Wert nimmt sie für $b \\to \\infty$ an?',
+      opts: ['$0$', '$1$', 'unendlich', '$\\mathrm{e}$'],
+      steps: [
+        'Für $b \\to \\infty$ geht $\\mathrm{e}^{-b} \\to 0$.',
+        'Die unbegrenzte Fläche hat den endlichen Inhalt $1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Inhalt hat die Fläche unter $f(x) = \\dfrac{1}{x^2}$ über $[1;\\ b]$ für $b \\to \\infty$?',
+      opts: ['$1$', 'unendlich', '$0$', '$\\tfrac12$'],
+      steps: [
+        '$\\int_1^b \\tfrac{1}{x^2}\\,\\mathrm{d}x = \\left[-\\tfrac1x\\right]_1^b = 1 - \\tfrac1b$.',
+        'Für $b \\to \\infty$: $1$. Bei $\\tfrac1x$ dagegen wächst $\\ln b$ über alle Grenzen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kanal hat den Querschnitt zwischen der $x$-Achse und dem Graphen von $f(x) = 0{,}25x^2 - 4$ (in m). Wie groß ist die Querschnittsfläche?',
+      opts: ['$16$ m²', '$\\tfrac{64}{3} \\approx 21{,}3$ m²', '$32$ m²', '$\\tfrac{32}{3} \\approx 10{,}7$ m²'],
+      steps: [
+        'Nullstellen: $0{,}25x^2 = 4$, also $x = \\pm 4$.',
+        '$\\left|\\int_{-4}^4 (0{,}25x^2 - 4)\\,\\mathrm{d}x\\right| = \\left|\\tfrac{128}{12} - 32\\right| = \\tfrac{64}{3}$ m².'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

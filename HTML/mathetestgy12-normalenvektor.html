@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Normalenvektor und Koordinatenform — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w16-normalenvektor',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Normalenvektor und Koordinatenform',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 16 (LB 7) · 20 Aufgaben: Normalenvektor, Normalen- und Koordinatenform, Spurpunkte, Lage von Ebenen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 16 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Normalenvektor ablesen und berechnen (1, 2, 9, 12, 19), Ebenengleichungen aufstellen (3, 4, 7, 17, 18), Punktprobe und Spurpunkte (5, 6, 15), besondere Ebenen (10, 11, 14), parallel und orthogonal (8, 13, 16, 20). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Welcher Vektor ist ein Normalenvektor der Ebene $E\\colon 2x - y + 3z = 5$?',
+      opts: ['$\\begin{pmatrix} -1 \\\\ 3 \\\\ 5 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 1 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 5 \\\\ 0 \\\\ 0 \\end{pmatrix}$'],
+      steps: [
+        'In der Koordinatenform $ax + by + cz = d$ ist $(a;\\ b;\\ c)$ ein Normalenvektor.',
+        'Also $(2;\\ -1;\\ 3)$; jedes Vielfache davon auch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Ebene $E$ wird von $\\vec u = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ aufgespannt. Welcher Vektor ist ein Normalenvektor?',
+      opts: ['$\\begin{pmatrix} -1 \\\\ -1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 1 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        '$\\vec u \\times \\vec v = (0 \\cdot 1 - 1 \\cdot 1;\\ 1 \\cdot 0 - 1 \\cdot 1;\\ 1 \\cdot 1 - 0 \\cdot 0)$.',
+        '$= (-1;\\ -1;\\ 1)$. Probe: $(-1;\\ -1;\\ 1) \\cdot \\vec u = 0$ und $\\cdot\\ \\vec v = 0$ ✔'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Koordinatengleichung der Ebene durch $A(1 \\mid 2 \\mid 0)$ mit dem Normalenvektor $\\begin{pmatrix} 2 \\\\ 1 \\\\ -1 \\end{pmatrix}$?',
+      opts: ['$x + 2y = 4$', '$2x + y - z = 0$', '$2x + y - z = 2$', '$2x + y - z = 4$'],
+      steps: [
+        '$d = \\vec n \\cdot \\vec{OA} = 2 \\cdot 1 + 1 \\cdot 2 - 1 \\cdot 0$.',
+        '$= 4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Normalenform einer Ebene durch $P$ mit Normalenvektor $\\vec n$?',
+      opts: ['$(\\vec x - \\vec p) \\times \\vec n = 0$', '$\\vec x \\cdot \\vec p = \\vec n$', '$(\\vec x - \\vec p) \\cdot \\vec n = 0$', '$\\vec x = \\vec p + t \\cdot \\vec n$'],
+      steps: [
+        'Jeder Verbindungsvektor von $P$ zu einem Punkt $X$ der Ebene steht senkrecht auf $\\vec n$.',
+        'Ausmultipliziert ergibt sich die Koordinatenform. $\\vec p + t\\vec n$ wäre die Lotgerade.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Liegt $P(1 \\mid 1 \\mid 1)$ in $E\\colon 2x + y - z = 2$?',
+      opts: ['Nein, $2 + 1 + 1 = 4$.', 'Das lässt sich nicht entscheiden.', 'Nein, $1 + 1 + 1 = 3$.', 'Ja, $2 + 1 - 1 = 2$.'],
+      steps: [
+        'Punktprobe: Koordinaten einsetzen.',
+        '$2 \\cdot 1 + 1 - 1 = 2$ ✔'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Spurpunkte hat $E\\colon 2x + 3y + 6z = 12$?',
+      opts: ['$(2 \\mid 0 \\mid 0)$, $(0 \\mid 3 \\mid 0)$, $(0 \\mid 0 \\mid 6)$', '$(6 \\mid 4 \\mid 2)$', '$(6 \\mid 0 \\mid 0)$, $(0 \\mid 4 \\mid 0)$, $(0 \\mid 0 \\mid 2)$', '$(12 \\mid 0 \\mid 0)$, $(0 \\mid 12 \\mid 0)$, $(0 \\mid 0 \\mid 12)$'],
+      steps: [
+        'Je zwei Koordinaten null setzen: $2x = 12$, $3y = 12$, $6z = 12$.',
+        'Spurpunkte $(6 \\mid 0 \\mid 0)$, $(0 \\mid 4 \\mid 0)$, $(0 \\mid 0 \\mid 2)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Koordinatengleichung hat die Ebene durch $A(1 \\mid 0 \\mid 0)$, $B(0 \\mid 2 \\mid 0)$, $C(0 \\mid 0 \\mid 3)$?',
+      opts: ['$x + y + z = 1$', '$2x + 3y + 6z = 6$', '$6x + 3y + 2z = 6$', '$x + 2y + 3z = 6$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AC} = (-1;\\ 2;\\ 0) \\times (-1;\\ 0;\\ 3) = (6;\\ 3;\\ 2)$, $d = 6$.',
+        'Probe: $B$: $6$ ✔, $C$: $6$ ✔. Die Kehrwerte der Achsenabschnitte $1;\\ \\tfrac12;\\ \\tfrac13$ mal $6$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Sind $\\begin{pmatrix} 2 \\\\ 1 \\\\ -2 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ orthogonal?',
+      opts: ['Nein, das Skalarprodukt ist $4$.', 'Ja, das Skalarprodukt ist $0$.', 'Nein, sie sind parallel.', 'Ja, weil beide ganzzahlig sind.'],
+      steps: [
+        '$2 \\cdot 1 + 1 \\cdot 0 + (-2) \\cdot 1 = 0$.',
+        'Orthogonalitätsbedingung: $\\vec a \\cdot \\vec b = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Vektor steht senkrecht auf der Ebene $x + y + z = 3$?',
+      opts: ['$\\begin{pmatrix} 1 \\\\ 1 \\\\ -2 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 2 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 0 \\\\ 0 \\end{pmatrix}$'],
+      steps: [
+        'Normalenvektor $(1;\\ 1;\\ 1)$; jedes Vielfache steht ebenfalls senkrecht.',
+        '$(1;\\ -1;\\ 0)$ und $(1;\\ 1;\\ -2)$ liegen dagegen parallel zur Ebene.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Ebene ist parallel zur $x$-$y$-Ebene und geht durch $(0 \\mid 0 \\mid 4)$?',
+      opts: ['$z = 4$', '$x + y = 4$', '$x = 4$', '$x + y + z = 4$'],
+      steps: [
+        'Normalenvektor $(0;\\ 0;\\ 1)$, also $z = d$.',
+        'Durch $(0 \\mid 0 \\mid 4)$: $z = 4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie liegt die Ebene $x = 2$?',
+      opts: ['durch den Ursprung', 'senkrecht zur $y$-$z$-Ebene', 'parallel zur $x$-$y$-Ebene', 'parallel zur $y$-$z$-Ebene'],
+      steps: [
+        'Normalenvektor $(1;\\ 0;\\ 0)$ zeigt in $x$-Richtung.',
+        'Die Ebene enthält alle Punkte mit $x = 2$: eine Wand im Abstand $2$ von der $y$-$z$-Ebene.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet eine Koordinatengleichung der Ebene durch $A(1 \\mid 1 \\mid 0)$, $B(3 \\mid 1 \\mid 1)$, $C(1 \\mid 4 \\mid 2)$?',
+      opts: ['$3x + 4y + 6z = 7$', '$3x + 4y - 6z = 7$', '$2x + 3y + 2z = 5$', '$x + y + z = 2$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AC} = (2;\\ 0;\\ 1) \\times (0;\\ 3;\\ 2) = (-3;\\ -4;\\ 6)$, mal $-1$: $(3;\\ 4;\\ -6)$.',
+        '$d = 3 + 4 - 0 = 7$. Probe: $B$: $9 + 4 - 6 = 7$ ✔, $C$: $3 + 16 - 12 = 7$ ✔'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie liegen $E_1\\colon 2x - y + z = 1$ und $E_2\\colon -4x + 2y - 2z = 3$ zueinander?',
+      opts: ['echt parallel', 'orthogonal', 'identisch', 'sie schneiden sich in einer Geraden unter $60^\\circ$'],
+      steps: [
+        '$\\vec n_2 = -2\\,\\vec n_1$: parallele Normalenvektoren.',
+        '$E_1$ mal $-2$ ergibt $-4x + 2y - 2z = -2 \\neq 3$: nicht identisch, also echt parallel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Ebene enthält den Ursprung?',
+      opts: ['$3x - y + 2z = 0$', '$z = -2$', '$3x - y + 2z = 1$', '$x = 1$'],
+      steps: [
+        'Einsetzen von $(0 \\mid 0 \\mid 0)$ ergibt links immer $0$.',
+        'Also enthält eine Ebene den Ursprung genau dann, wenn $d = 0$ ist.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $a$ liegt $P(2 \\mid a \\mid 1)$ in $E\\colon x + 2y - z = 5$?',
+      opts: ['$a = 1$', '$a = 0$', '$a = 3$', '$a = 2$'],
+      steps: [
+        '$2 + 2a - 1 = 5$.',
+        '$2a = 4$, $a = 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Stehen $E_1\\colon x + 2y - z = 0$ und $E_2\\colon 3x - y + z = 1$ senkrecht aufeinander?',
+      opts: ['Nein, $\\vec n_1 \\cdot \\vec n_2 = 6$.', 'Ja, $\\vec n_1 \\cdot \\vec n_2 = 3 - 2 - 1 = 0$.', 'Ja, weil $d_1 = 0$ ist.', 'Nein, sie sind parallel.'],
+      steps: [
+        'Zwei Ebenen sind orthogonal, wenn ihre Normalenvektoren orthogonal sind.',
+        '$(1;\\ 2;\\ -1) \\cdot (3;\\ -1;\\ 1) = 0$ ✔'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Ebene $E$ hat die Achsenabschnitte $2$, $4$ und $4$. Wie lautet ihre Koordinatengleichung?',
+      opts: ['$x + y + z = 10$', '$2x + y + z = 4$', '$x + 2y + 2z = 4$', '$2x + 4y + 4z = 1$'],
+      steps: [
+        'Achsenabschnittsform $\\tfrac{x}{2} + \\tfrac{y}{4} + \\tfrac{z}{4} = 1$, mal $4$.',
+        '$2x + y + z = 4$. Probe: $(2 \\mid 0 \\mid 0)$ ✔, $(0 \\mid 4 \\mid 0)$ ✔, $(0 \\mid 0 \\mid 4)$ ✔'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Ebene enthält die Gerade $g\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und den Punkt $P(0 \\mid 0 \\mid 1)$?',
+      opts: ['$x - y - z = 1$', '$x + y + z = 1$', '$z = 1$', '$x - y + z = 1$'],
+      steps: [
+        'Spannvektoren $(1;\\ 1;\\ 0)$ und $\\vec{AP} = (-1;\\ 0;\\ 1)$, Kreuzprodukt $(1;\\ -1;\\ 1)$.',
+        'Mit $A(1 \\mid 0 \\mid 0)$: $d = 1$. Probe: $P$: $0 - 0 + 1 = 1$ ✔'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Vektor ist der Einheitsnormalenvektor zu $\\begin{pmatrix} 2 \\\\ 1 \\\\ 2 \\end{pmatrix}$?',
+      opts: ['$\\begin{pmatrix} 1 \\\\ \\tfrac12 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} \\tfrac23 \\\\ \\tfrac13 \\\\ \\tfrac23 \\end{pmatrix}$', '$\\begin{pmatrix} \\tfrac25 \\\\ \\tfrac15 \\\\ \\tfrac25 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 1 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        '$|\\vec n| = \\sqrt{4 + 1 + 4} = 3$.',
+        'Durch $3$ teilen. Durch die Summe $5$ zu teilen ergibt keine Länge $1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ist $\\vec w = \\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$ parallel zur Ebene $x + y + 2z = 0$?',
+      opts: ['Ja, denn $\\vec n \\cdot \\vec w = 0$.', 'Ja, denn beide haben eine Null.', 'Nein, denn $\\vec w \\neq \\vec n$.', 'Nein, denn $\\vec n \\cdot \\vec w = 2$.'],
+      steps: [
+        '$(1;\\ 1;\\ 2) \\cdot (1;\\ -1;\\ 0) = 1 - 1 + 0 = 0$.',
+        'Ein Vektor senkrecht zum Normalenvektor liegt parallel zur Ebene.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

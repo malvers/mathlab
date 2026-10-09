@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Integrieren mit Hilfsmitteln — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w04-integrieren-cas',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Integrieren mit Hilfsmitteln',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 4 (LB 5) · 20 Aufgaben: lineare Verkettungen, CAS-Ergebnisse prüfen und deuten · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: lineare Verkettung von Hand (1-6, 10-12, 16), CAS-Ergebnis prüfen (7-9, 13, 15, 20), Anwendung (17), Grenzen des CAS (14, 18, 19). Mit CAS, aber Ergebnisse immer durch Ableiten bestätigen. */
+  questions: [
+    {
+      q: 'Berechne $\\int \\mathrm{e}^{2x}\\,\\mathrm{d}x$.',
+      opts: ['$\\dfrac{\\mathrm{e}^{2x+1}}{2x + 1} + C$', '$\\mathrm{e}^{2x} + C$', '$2\\,\\mathrm{e}^{2x} + C$', '$\\tfrac12\\,\\mathrm{e}^{2x} + C$'],
+      steps: [
+        'Lineare Verkettung: $\\int f(ax + b)\\,\\mathrm{d}x = \\tfrac1a F(ax + b) + C$.',
+        'Mit $a = 2$: $\\tfrac12\\,\\mathrm{e}^{2x}$. Probe: $\\left(\\tfrac12\\,\\mathrm{e}^{2x}\\right)^{\\prime} = \\mathrm{e}^{2x}$ ✔. $2\\,\\mathrm{e}^{2x}$ ist die Ableitung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int \\sin(3x)\\,\\mathrm{d}x$.',
+      opts: ['$-\\tfrac13 \\cos(3x) + C$', '$-3\\cos(3x) + C$', '$-\\cos(3x) + C$', '$\\tfrac13 \\cos(3x) + C$'],
+      steps: [
+        'Stammfunktion von $\\sin$ ist $-\\cos$, wegen der inneren Ableitung $3$ teilt man durch $3$.',
+        'Probe: $\\left(-\\tfrac13 \\cos(3x)\\right)^{\\prime} = \\tfrac13 \\sin(3x) \\cdot 3 = \\sin(3x)$ ✔'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int (2x + 1)^4\\,\\mathrm{d}x$.',
+      opts: ['$8(2x + 1)^3 + C$', '$\\tfrac{1}{10} (2x + 1)^5 + C$', '$\\tfrac15 (2x + 1)^5 + C$', '$\\tfrac25 (2x + 1)^5 + C$'],
+      steps: [
+        '$\\tfrac15 (2x + 1)^5$ und dann durch die innere Ableitung $2$ teilen: $\\tfrac{1}{10}$.',
+        'Probe: $\\left(\\tfrac{1}{10}(2x + 1)^5\\right)^{\\prime} = \\tfrac{5}{10}(2x + 1)^4 \\cdot 2 = (2x + 1)^4$ ✔'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int \\dfrac{1}{2x + 1}\\,\\mathrm{d}x$ für $x > -\\tfrac12$.',
+      opts: ['$\\ln(2x + 1) + C$', '$\\tfrac12 \\ln(2x + 1) + C$', '$2\\ln(2x + 1) + C$', '$-\\dfrac{2}{(2x + 1)^2} + C$'],
+      steps: [
+        '$\\int \\tfrac1u\\,\\mathrm{d}u = \\ln u$, innere Funktion $2x + 1$ mit Ableitung $2$.',
+        'Also $\\tfrac12 \\ln(2x + 1) + C$. Probe: $\\tfrac12 \\cdot \\dfrac{2}{2x + 1}$ ✔'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int \\mathrm{e}^{-x/2}\\,\\mathrm{d}x$.',
+      opts: ['$-2\\,\\mathrm{e}^{-x/2} + C$', '$-\\tfrac12\\,\\mathrm{e}^{-x/2} + C$', '$\\mathrm{e}^{-x/2} + C$', '$2\\,\\mathrm{e}^{-x/2} + C$'],
+      steps: [
+        'Innere Ableitung von $-\\tfrac{x}{2}$ ist $-\\tfrac12$; durch $-\\tfrac12$ teilen heißt mit $-2$ malnehmen.',
+        'Probe: $\\left(-2\\,\\mathrm{e}^{-x/2}\\right)^{\\prime} = -2 \\cdot \\left(-\\tfrac12\\right)\\mathrm{e}^{-x/2}$ ✔'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int \\cos(\\pi x)\\,\\mathrm{d}x$.',
+      opts: ['$\\sin(\\pi x) + C$', '$-\\dfrac{1}{\\pi}\\sin(\\pi x) + C$', '$\\pi\\sin(\\pi x) + C$', '$\\dfrac{1}{\\pi}\\sin(\\pi x) + C$'],
+      steps: [
+        '$\\int \\cos u\\,\\mathrm{d}u = \\sin u$, innere Ableitung $\\pi$.',
+        'Ergebnis $\\tfrac1\\pi \\sin(\\pi x) + C$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein CAS liefert $\\int x\\,\\mathrm{e}^x\\,\\mathrm{d}x = (x - 1)\\,\\mathrm{e}^x$. Berechne damit $\\int_0^1 x\\,\\mathrm{e}^x\\,\\mathrm{d}x$.',
+      opts: ['$-1$', '$1$', '$0$', '$\\mathrm{e} - 1$'],
+      steps: [
+        'Probe: $\\left((x - 1)\\,\\mathrm{e}^x\\right)^{\\prime} = \\mathrm{e}^x + (x - 1)\\,\\mathrm{e}^x = x\\,\\mathrm{e}^x$ ✔',
+        '$\\left[(x - 1)\\,\\mathrm{e}^x\\right]_0^1 = 0 - (-1) = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Mit $\\int x\\cos x\\,\\mathrm{d}x = x\\sin x + \\cos x$: Berechne $\\int_0^{\\pi} x\\cos x\\,\\mathrm{d}x$.',
+      opts: ['$2$', '$0$', '$-2$', '$\\pi$'],
+      steps: [
+        'Obere Grenze: $\\pi \\sin\\pi + \\cos\\pi = -1$. Untere Grenze: $0 + \\cos 0 = 1$.',
+        '$-1 - 1 = -2$. Das Integral ist negativ, weil $x\\cos x$ auf $(\\tfrac\\pi2;\\ \\pi)$ stärker negativ als vorher positiv ist.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Rechner geben für $\\int (2x + 2)\\,\\mathrm{d}x$ verschiedene Antworten: $(x + 1)^2$ und $x^2 + 2x$. Was stimmt?',
+      opts: ['Nur $(x + 1)^2$ ist richtig.', 'Nur $x^2 + 2x$ ist richtig.', 'Keine ist richtig, es fehlt $+ C$ im Ergebnis.', 'Beide sind richtig, sie unterscheiden sich um die Konstante $1$.'],
+      steps: [
+        'Ableiten: $\\left((x + 1)^2\\right)^{\\prime} = 2x + 2$ und $(x^2 + 2x)^{\\prime} = 2x + 2$.',
+        '$(x + 1)^2 = x^2 + 2x + 1$: Stammfunktionen dürfen sich um eine Konstante unterscheiden.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int_0^1 (3x + 1)^2\\,\\mathrm{d}x$.',
+      opts: ['$\\dfrac{16}{3}$', '$7$', '$\\dfrac{64}{9}$', '$21$'],
+      steps: [
+        'Stammfunktion: $\\tfrac19 (3x + 1)^3$.',
+        '$\\tfrac19 (64 - 1) = 7$. Wer die $1$ an der unteren Grenze vergisst, erhält $\\tfrac{64}{9}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int_0^2 \\mathrm{e}^{0{,}5x}\\,\\mathrm{d}x$ auf zwei Nachkommastellen.',
+      opts: ['$\\approx 2{,}72$', '$\\approx 1{,}72$', '$\\approx 3{,}44$', '$\\approx 6{,}87$'],
+      steps: [
+        'Stammfunktion: $2\\,\\mathrm{e}^{0{,}5x}$.',
+        '$2\\,\\mathrm{e}^1 - 2\\,\\mathrm{e}^0 = 2(\\mathrm{e} - 1) \\approx 3{,}44$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\int_0^{\\pi} \\sin(2x)\\,\\mathrm{d}x$.',
+      opts: ['$2$', '$-1$', '$0$', '$1$'],
+      steps: [
+        'Stammfunktion $-\\tfrac12 \\cos(2x)$: $-\\tfrac12 \\cos(2\\pi) + \\tfrac12 \\cos 0 = -\\tfrac12 + \\tfrac12$.',
+        '$= 0$: Auf $[0;\\ \\pi]$ liegen eine positive und eine gleich große negative Halbwelle.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein CAS liefert $\\int \\dfrac{x}{x^2 + 1}\\,\\mathrm{d}x = \\tfrac12 \\ln(x^2 + 1)$. Welche Probe bestätigt das?',
+      opts: ['$\\left(\\dfrac{x}{x^2 + 1}\\right)^{\\prime} = \\tfrac12 \\ln(x^2 + 1)$', '$\\tfrac12 \\ln(0^2 + 1) = 0$', '$\\ln(x^2 + 1) = \\ln x^2 + \\ln 1$', '$\\left(\\tfrac12 \\ln(x^2 + 1)\\right)^{\\prime} = \\tfrac12 \\cdot \\dfrac{2x}{x^2 + 1} = \\dfrac{x}{x^2 + 1}$'],
+      steps: [
+        'Eine Stammfunktion prüft man durch Ableiten, hier mit der Kettenregel.',
+        'Die innere Ableitung $2x$ hebt sich mit dem Faktor $\\tfrac12$ zu $x$ im Zähler.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein CAS gibt $\\int \\mathrm{e}^{-x^2}\\,\\mathrm{d}x$ nur mit einer besonderen Funktion an (der Fehlerfunktion). Was folgt daraus?',
+      opts: ['Man kann bestimmte Integrale davon trotzdem numerisch berechnen.', 'Die Fläche unter dem Graphen ist unendlich groß.', 'Der Rechner ist defekt.', 'Das Integral existiert nicht.'],
+      steps: [
+        'Nicht jede Stammfunktion lässt sich mit den bekannten Funktionen hinschreiben.',
+        'Bestimmte Integrale wie $\\int_0^1 \\mathrm{e}^{-x^2}\\,\\mathrm{d}x \\approx 0{,}747$ berechnet man numerisch, siehe Wahlbereich 5.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein CAS liefert $\\int \\ln x\\,\\mathrm{d}x = x\\ln x - x$. Berechne $\\int_1^{\\mathrm{e}} \\ln x\\,\\mathrm{d}x$.',
+      opts: ['$1$', '$0$', '$\\mathrm{e}$', '$\\mathrm{e} - 1$'],
+      steps: [
+        'Obere Grenze: $\\mathrm{e}\\ln\\mathrm{e} - \\mathrm{e} = 0$, untere Grenze: $1 \\cdot \\ln 1 - 1 = -1$.',
+        '$0 - (-1) = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int_0^2 \\dfrac{1}{x + 1}\\,\\mathrm{d}x$ auf drei Nachkommastellen.',
+      opts: ['$\\approx 2{,}000$', '$\\approx 1{,}099$', '$\\approx 0{,}667$', '$\\approx 0{,}693$'],
+      steps: [
+        'Stammfunktion $\\ln(x + 1)$.',
+        '$\\ln 3 - \\ln 1 = \\ln 3 \\approx 1{,}099$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einen Tank fließen $r(t) = 20\\,\\mathrm{e}^{-0{,}1t}$ Liter pro Minute. Wie viel Wasser fließt in den ersten $10$ Minuten zu?',
+      opts: ['$\\approx 200{,}0$ l', '$\\approx 73{,}6$ l', '$\\approx 126{,}4$ l', '$\\approx 7{,}4$ l'],
+      steps: [
+        '$\\int_0^{10} 20\\,\\mathrm{e}^{-0{,}1t}\\,\\mathrm{d}t = \\left[-200\\,\\mathrm{e}^{-0{,}1t}\\right]_0^{10}$.',
+        '$= -200\\,\\mathrm{e}^{-1} + 200 = 200(1 - \\mathrm{e}^{-1}) \\approx 126{,}4$ l. $7{,}4$ l/min ist die Rate am Ende.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein CAS liefert $\\int_0^{\\pi} \\sin^2 x\\,\\mathrm{d}x = \\dfrac{\\pi}{2}$. Welcher Wert ist das auf zwei Nachkommastellen?',
+      opts: ['$\\approx 2{,}00$', '$\\approx 3{,}14$', '$\\approx 0{,}79$', '$\\approx 1{,}57$'],
+      steps: [
+        '$\\tfrac{\\pi}{2} \\approx 1{,}5708$.',
+        'Plausibel: $\\sin^2 x$ liegt zwischen $0$ und $1$ und hat den Mittelwert $\\tfrac12$, also etwa $\\tfrac12 \\cdot \\pi$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Antwort eines CAS für $\\int \\dfrac{2x + 3}{x^2 + 3x}\\,\\mathrm{d}x$ ($x > 0$) ist richtig?',
+      opts: ['$\\dfrac{1}{x^2 + 3x} + C$', '$(2x + 3)\\ln x + C$', '$\\ln(x^2 + 3x) + C$', '$\\dfrac{x^2 + 3x}{\\frac13 x^3 + \\frac32 x^2} + C$'],
+      steps: [
+        'Im Zähler steht die Ableitung des Nenners: $(x^2 + 3x)^{\\prime} = 2x + 3$.',
+        'Dann ist $\\ln(x^2 + 3x)$ eine Stammfunktion. Probe mit der Kettenregel ✔'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\int_0^1 x^2\\,\\mathrm{e}^{x^3}\\,\\mathrm{d}x$ mit $\\int x^2\\,\\mathrm{e}^{x^3}\\,\\mathrm{d}x = \\tfrac13\\,\\mathrm{e}^{x^3}$.',
+      opts: ['$\\dfrac{\\mathrm{e} - 1}{3} \\approx 0{,}573$', '$\\dfrac13 \\approx 0{,}333$', '$\\mathrm{e} - 1 \\approx 1{,}718$', '$\\dfrac{\\mathrm{e}}{3} \\approx 0{,}906$'],
+      steps: [
+        'Probe: $\\left(\\tfrac13\\,\\mathrm{e}^{x^3}\\right)^{\\prime} = \\tfrac13 \\cdot 3x^2\\,\\mathrm{e}^{x^3}$ ✔',
+        '$\\tfrac13 (\\mathrm{e}^1 - \\mathrm{e}^0) = \\tfrac{\\mathrm{e} - 1}{3} \\approx 0{,}573$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

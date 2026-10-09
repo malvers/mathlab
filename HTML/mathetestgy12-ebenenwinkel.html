@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Winkel zwischen zwei Ebenen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w19-ebenenwinkel',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Winkel zwischen zwei Ebenen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 19 (LB 7) · 20 Aufgaben: Schnittwinkel zweier Ebenen, Schnittgerade, Dach- und Hangneigung · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Formel und Begriff (1, 8, 9, 20), Winkel berechnen (2-4, 7, 10, 11, 17), Schnittgerade (12-14, 18), Parameter (15), Anwendungen (5, 6, 16, 19). Taschenrechner erlaubt. */
+  questions: [
+    {
+      q: 'Mit welcher Formel berechnet man den Schnittwinkel zweier Ebenen mit den Normalenvektoren $\\vec n_1$ und $\\vec n_2$?',
+      opts: ['$\\cos\\varphi = \\vec n_1 \\times \\vec n_2$', '$\\tan\\varphi = \\dfrac{|\\vec n_1|}{|\\vec n_2|}$', '$\\sin\\varphi = \\dfrac{|\\vec n_1 \\cdot \\vec n_2|}{|\\vec n_1| \\cdot |\\vec n_2|}$', '$\\cos\\varphi = \\dfrac{|\\vec n_1 \\cdot \\vec n_2|}{|\\vec n_1| \\cdot |\\vec n_2|}$'],
+      steps: [
+        'Die Ebenen schließen denselben Winkel ein wie ihre Normalenvektoren.',
+        'Also der Kosinusansatz, mit Betrag für den spitzen Winkel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Winkel schließen die Ebenen $z = 0$ und $x = 0$ ein?',
+      opts: ['$60^\\circ$', '$45^\\circ$', '$90^\\circ$', '$0^\\circ$'],
+      steps: [
+        '$(0;\\ 0;\\ 1) \\cdot (1;\\ 0;\\ 0) = 0$.',
+        'Boden und Wand stehen senkrecht aufeinander.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Winkel schließen die Ebenen $z = 0$ und $x + z = 1$ ein?',
+      opts: ['$90^\\circ$', '$60^\\circ$', '$30^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\vec n_1 = (0;\\ 0;\\ 1)$, $\\vec n_2 = (1;\\ 0;\\ 1)$.',
+        '$\\cos\\varphi = \\tfrac{1}{\\sqrt2}$, $\\varphi = 45^\\circ$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Winkel schließen $E_1\\colon 2x + y + 2z = 3$ und $E_2\\colon 2x - y + 2z = 1$ ein?',
+      opts: ['$90^\\circ$', '$\\approx 38{,}9^\\circ$', '$\\approx 51{,}1^\\circ$', '$0^\\circ$'],
+      steps: [
+        '$\\vec n_1 \\cdot \\vec n_2 = 4 - 1 + 4 = 7$, beide Beträge $3$.',
+        '$\\cos\\varphi = \\tfrac79$, $\\varphi \\approx 38{,}9^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Dachfläche geht durch $(0 \\mid 0 \\mid 3)$, $(10 \\mid 0 \\mid 3)$ und $(0 \\mid 4 \\mid 6)$. Wie groß ist ihre Neigung gegenüber dem Boden $z = 0$?',
+      opts: ['$\\approx 41{,}4^\\circ$', '$\\approx 53{,}1^\\circ$', '$45^\\circ$', '$\\approx 36{,}9^\\circ$'],
+      steps: [
+        'Spannvektoren $(10;\\ 0;\\ 0)$ und $(0;\\ 4;\\ 3)$, Normalenvektor $(0;\\ -3;\\ 4)$.',
+        '$\\cos\\varphi = \\tfrac45$, $\\varphi \\approx 36{,}9^\\circ$. Kontrolle: $3$ m Anstieg auf $4$ m.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Hang liegt in der Ebene $x + y + z = 10$, die $z$-Achse zeigt nach oben. Wie steil ist er?',
+      opts: ['$45^\\circ$', '$\\approx 54{,}7^\\circ$', '$60^\\circ$', '$\\approx 35{,}3^\\circ$'],
+      steps: [
+        'Winkel zwischen $(1;\\ 1;\\ 1)$ und $(0;\\ 0;\\ 1)$: $\\cos\\varphi = \\tfrac{1}{\\sqrt3}$.',
+        '$\\varphi \\approx 54{,}7^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Winkel schließen die Ebenen $x + y = 2$ und $y = 0$ ein?',
+      opts: ['$0^\\circ$', '$\\approx 35{,}3^\\circ$', '$45^\\circ$', '$90^\\circ$'],
+      steps: [
+        '$(1;\\ 1;\\ 0) \\cdot (0;\\ 1;\\ 0) = 1$, Beträge $\\sqrt2$ und $1$.',
+        '$\\cos\\varphi = \\tfrac{1}{\\sqrt2}$, $\\varphi = 45^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum nimmt man den Betrag $|\\vec n_1 \\cdot \\vec n_2|$?',
+      opts: ['Weil das Kreuzprodukt negativ ist.', 'Weil Normalenvektoren immer die Länge $1$ haben.', 'Ein Normalenvektor kann in beide Richtungen zeigen; der Ebenenwinkel ist höchstens $90^\\circ$.', 'Damit der Winkel stumpf wird.'],
+      steps: [
+        'Mit $-\\vec n_2$ statt $\\vec n_2$ würde der Kosinus sein Vorzeichen wechseln.',
+        'Der Betrag macht das Ergebnis unabhängig von dieser Wahl.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Normalenvektoren zweier Ebenen schließen $120^\\circ$ ein. Welchen Winkel haben die Ebenen?',
+      opts: ['$60^\\circ$', '$120^\\circ$', '$90^\\circ$', '$30^\\circ$'],
+      steps: [
+        'Der Ebenenwinkel ist der spitze Winkel.',
+        '$180^\\circ - 120^\\circ = 60^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Winkel bildet die Ebene $x + 2y + 2z = 5$ mit der $x$-$y$-Ebene?',
+      opts: ['$\\approx 70{,}5^\\circ$', '$\\approx 48{,}2^\\circ$', '$\\approx 41{,}8^\\circ$', '$\\approx 33{,}7^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{|(1;\\ 2;\\ 2) \\cdot (0;\\ 0;\\ 1)|}{3 \\cdot 1} = \\tfrac23$.',
+        '$\\varphi \\approx 48{,}2^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Winkel schließen die Ebenen $3x + 4z = 0$ und $x = 0$ ein?',
+      opts: ['$\\approx 36{,}9^\\circ$', '$90^\\circ$', '$\\approx 53{,}1^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\vec n_1 = (3;\\ 0;\\ 4)$ mit Betrag $5$, $\\vec n_2 = (1;\\ 0;\\ 0)$.',
+        '$\\cos\\varphi = \\tfrac35$, $\\varphi \\approx 53{,}1^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist die Schnittgerade der Ebenen $z = 0$ und $x = 0$?',
+      opts: ['die $y$-Achse', 'die $z$-Achse', 'die $x$-Achse', 'Es gibt keine, die Ebenen sind parallel.'],
+      steps: [
+        'Punkte mit $x = 0$ und $z = 0$ haben die Form $(0 \\mid y \\mid 0)$.',
+        'Das ist die $y$-Achse.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Gerade ist die Schnittgerade von $x + y + z = 2$ und $x - y = 0$?',
+      opts: ['$\\vec x = t\\begin{pmatrix} 1 \\\\ 1 \\\\ -2 \\end{pmatrix}$', '$\\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 2 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$', '$\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 2 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 1 \\\\ -2 \\end{pmatrix}$'],
+      steps: [
+        '$x = y = t$ setzen, dann $z = 2 - 2t$.',
+        'Probe: $t + t + 2 - 2t = 2$ ✔ und $t - t = 0$ ✔. Ohne Stützvektor läge der Ursprung auf der Geraden, er erfüllt aber $x + y + z = 2$ nicht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie erhält man einen Richtungsvektor der Schnittgeraden zweier Ebenen am schnellsten?',
+      opts: ['$\\vec n_1 \\cdot \\vec n_2$', '$\\vec n_1 \\times \\vec n_2$', '$\\vec n_1 + \\vec n_2$', '$\\vec n_1 - \\vec n_2$'],
+      steps: [
+        'Die Schnittgerade liegt in beiden Ebenen, ihr Richtungsvektor steht also senkrecht auf beiden Normalenvektoren.',
+        'Genau das leistet das Vektorprodukt. Beispiel 13: $(1;\\ 1;\\ 1) \\times (1;\\ -1;\\ 0) = (1;\\ 1;\\ -2)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $a$ stehen $x + y + az = 1$ und $x - y + z = 0$ senkrecht aufeinander?',
+      opts: ['$a = -1$', '$a = 0$', '$a = 1$', '$a = 2$'],
+      steps: [
+        '$(1;\\ 1;\\ a) \\cdot (1;\\ -1;\\ 1) = 1 - 1 + a$.',
+        '$a = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Pyramide hat die quadratische Grundfläche mit den Ecken $(\\pm 1 \\mid \\pm 1 \\mid 0)$ und die Spitze $S(0 \\mid 0 \\mid 2)$. Welchen Winkel bildet eine Seitenfläche mit der Grundfläche?',
+      opts: ['$\\approx 54{,}7^\\circ$', '$\\approx 26{,}6^\\circ$', '$45^\\circ$', '$\\approx 63{,}4^\\circ$'],
+      steps: [
+        'Seitenfläche durch $(1 \\mid 1 \\mid 0)$, $(1 \\mid -1 \\mid 0)$, $S$: Normalenvektor $(2;\\ 0;\\ 1)$.',
+        '$\\cos\\varphi = \\tfrac{1}{\\sqrt5}$, $\\varphi \\approx 63{,}4^\\circ$. Kontrolle: $\\tan\\varphi = \\tfrac21$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Winkel schließen die Ebenen $x = 0$ und $x + y + \\sqrt2\\,z = 0$ ein?',
+      opts: ['$60^\\circ$', '$30^\\circ$', '$90^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$|(1;\\ 1;\\ \\sqrt2)| = \\sqrt{1 + 1 + 2} = 2$.',
+        '$\\cos\\varphi = \\tfrac12$, $\\varphi = 60^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie liegen $E_1\\colon 2x - y + z = 1$ und $E_2\\colon -4x + 2y - 2z = 5$ zueinander?',
+      opts: ['identisch', 'Sie schneiden sich unter $60^\\circ$.', 'echt parallel, ohne Schnittgerade', 'Sie schneiden sich senkrecht.'],
+      steps: [
+        '$\\vec n_2 = -2\\,\\vec n_1$: parallele Normalenvektoren.',
+        '$E_1$ mal $-2$ ergibt rechts $-2 \\neq 5$: echt parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Satteldach hat zwei Dachflächen mit je $40^\\circ$ Neigung. Welchen Winkel schließen die beiden Dachflächen am First ein?',
+      opts: ['$100^\\circ$', '$140^\\circ$', '$80^\\circ$', '$40^\\circ$'],
+      steps: [
+        'Im Querschnitt bilden die Dachflächen mit dem Boden ein Dreieck mit zwei Basiswinkeln von $40^\\circ$.',
+        'Am First: $180^\\circ - 2 \\cdot 40^\\circ = 100^\\circ$. Der Schnittwinkel der Ebenen (spitz) wäre $80^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie misst man den Winkel zwischen zwei Ebenen an einem Modell?',
+      opts: ['in einer Ebene, die senkrecht auf der Schnittgeraden steht', 'entlang der Schnittgeraden', 'zwischen zwei beliebigen Geraden der Ebenen', 'zwischen den Spurpunkten'],
+      steps: [
+        'Man schneidet beide Ebenen mit einer Ebene senkrecht zur Schnittgeraden.',
+        'Die beiden Schnittlinien schließen den Ebenenwinkel ein; er stimmt mit dem Winkel der Normalen überein.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

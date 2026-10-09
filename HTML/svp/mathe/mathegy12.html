@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 12 Grundkurs (Gymnasium) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Gymnasium &middot; Jahrgangsstufe 12</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_gy_mathematik.pdf#page=47', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Grundkurs, Abiturjahrgang, Kurshalbjahre 12/I + 12/II &middot;
+            Unterricht bis 13.04.2027 &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb5">
+            <div class="k c-violet">Lernbereich 5</div>
+            <div class="v">Integralrechnung</div>
+            <div class="vu">28 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb6">
+            <div class="k c-pink">Lernbereich 6</div>
+            <div class="v">Beurteilende Statistik</div>
+            <div class="vu">12 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb7">
+            <div class="k c-cyan">Lernbereich 7</div>
+            <div class="v">Abst&auml;nde und Winkel</div>
+            <div class="vu">24 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb8">
+            <div class="k c-orange">Lernbereich 8</div>
+            <div class="v">Weitere Anwendungen</div>
+            <div class="vu">20 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich 5</div>
+            <div class="v">Numerische Integrationsverfahren</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-bright">Abitur 2027</div>
+            <div class="v">Mathematik schriftlich Mi 05.05.2027 &middot; m&uuml;ndlich 13.05.&ndash;04.06.2027</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot" data-ferien="abi">
+        Der Lehrplan f&uuml;hrt den Grundkurs als Block f&uuml;r die Jahrgangsstufen 11/12 (192 Ustd.) und legt
+        nur die Wochen fest: 26 in Jahrgangsstufe 11, 22 in Jahrgangsstufe 12 (Lehrplan Gymnasium Mathematik, S. 4 und 5).
+        Aufteilung in Lehrplan-Reihenfolge, abgestimmt mit dem Plan der Jahrgangsstufe 11: Jahrgangsstufe 12 = LB 5 (28)
+        + LB 6 (12) + LB 7 (24) + LB 8 (20) = 84 Ustd. Gew&auml;hlt ist WB 5 Numerische Integrationsverfahren direkt hinter
+        der Integralrechnung. Abiturtermine 2027 nach der VwV Bedarf und Schuljahresablauf 2026/2027, Abschnitt IV
+        Gymnasium: Zeugnisse Kurshalbjahr 12/I am 22.12.2026, Zulassung und Konsultationen 07.&ndash;13.04.2027,
+        schriftliche Pr&uuml;fungen 19.04.&ndash;11.05.2027, Mathematik Mi 05.05.2027 (Nachtermin Mo 24.05.2027),
+        m&uuml;ndliche Pr&uuml;fungen 13.05.&ndash;04.06.2027, Zeugnisse der allgemeinen Hochschulreife 24.06.&ndash;09.07.2027.
+        Klausuren: je eine pro Kurshalbjahr, 12/II unter Abiturbedingungen &mdash; Termine an den Klausurplan der Schule anpassen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 4 Ustd./week (Grundkurs); u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // quiz: the week's 20-question exercise page (mathetestgy12-*.html, js/quiz-engine.js).
+        // type: lb5 | lb6 | lb7 | lb8 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Kursauftakt Abiturjahr: Organisation, Fahrplan bis zum Abitur, Wiederholung Differentialrechnung', remark: 'Erster Schultag Mo 17.08.; Rückblick Jgst. 11', quiz: { href: '../../mathetestgy12-auftakt.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Organisatorisches: Kurshalbjahre, Klausuren, Hilfsmittel (CAS), Abiturtermine',
+                'Wiederholung Jgst. 11: Ableitungsregeln, Extrem- und Wendepunkte, Tangenten',
+                'Ausblick: Wozu man das Ableiten umkehren möchte'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb5', u: '1–4/28', topic: 'Stammfunktion und unbestimmtes Integral', ziel: 'Beherrschen des Integrierens von Funktionen', remark: 'Umkehrung des Differenzierens; Beiträge von Leibniz und Newton', quiz: { href: '../../mathetestgy12-stammfunktion.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Vom Ableiten zum Aufleiten: Stammfunktionen suchen und prüfen',
+                'Alle Stammfunktionen unterscheiden sich um eine Konstante: $F(x) + C$',
+                'Das unbestimmte Integral $\\int f(x)\\,\\mathrm{d}x$ und seine Schreibweise'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb5', u: '5–8/28', topic: 'Integrieren ohne Hilfsmittel: ganzrationale Funktionen, Potenzfunktionen mit rationalen Exponenten, $\\int \\mathrm{e}^x\\,\\mathrm{d}x$, $\\int \\tfrac1x\\,\\mathrm{d}x$, $\\int \\sin x\\,\\mathrm{d}x$', ziel: 'Ermitteln von Integralen ohne Hilfsmittel', remark: 'hilfsmittelfrei', quiz: { href: '../../mathetestgy12-grundintegrale.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Potenzregel $\\int x^r\\,\\mathrm{d}x = \\tfrac{x^{r+1}}{r+1} + C$ auch für Wurzeln und Brüche',
+                'Faktor- und Summenregel; Grundintegrale von $\\mathrm{e}^x$, $\\tfrac1x$ und $\\sin x$',
+                'Probe durch Ableiten'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb5', u: '9–12/28', topic: 'Integrieren mit Hilfsmitteln: verkettete und verknüpfte Funktionen', ziel: 'Ermitteln von Integralen mit Hilfsmitteln', remark: 'CAS: entdeckendes Lernen, Ergebnis am Sachverhalt reflektieren', quiz: { href: '../../mathetestgy12-integrieren-cas.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Lineare Verkettungen: $\\int \\mathrm{e}^{ax+b}\\,\\mathrm{d}x$, $\\int \\sin(ax+b)\\,\\mathrm{d}x$, $\\int (ax+b)^n\\,\\mathrm{d}x$',
+                'Integrale mit dem CAS bestimmen und durch Ableiten bestätigen',
+                'Grenzen des CAS: Darstellungsformen vergleichen'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb5', u: '13–16/28', topic: 'Bestimmtes Integral als aus Änderungen rekonstruierter Bestand', ziel: 'Inhaltliches Verständnis des bestimmten Integrals', remark: 'Würdigung B. Riemann', quiz: { href: '../../mathetestgy12-bestand.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zuflussraten, Geschwindigkeiten, Leistungen: Bestand aus der Änderungsrate',
+                'Ober- und Untersummen, Grenzwert der Summen',
+                'Orientierter Flächeninhalt: Beiträge unter der Achse zählen negativ'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb5', u: '17–20/28', topic: 'Eigenschaften des bestimmten Integrals; Hauptsatz der Differential- und Integralrechnung', remark: '', quiz: { href: '../../mathetestgy12-hauptsatz.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Linearität, Intervalladditivität, Vertauschen der Grenzen',
+                'Hauptsatz: $\\int_a^b f(x)\\,\\mathrm{d}x = F(b) - F(a)$',
+                'Integralfunktion und Stammfunktion'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb5', u: '21–24/28', topic: 'Flächeninhalte zwischen Funktionsgraph und $x$-Achse', remark: '', quiz: { href: '../../mathetestgy12-flaechen-achse.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Nullstellen als Grenzen, Teilflächen getrennt berechnen',
+                'Beträge addieren: Integral und Flächeninhalt unterscheiden',
+                'Unbekannte Grenze aus einem vorgegebenen Flächeninhalt'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb5', u: '25–28/28', topic: 'Flächeninhalte zwischen zwei Funktionsgraphen', remark: 'LB 5 abgeschlossen', quiz: { href: '../../mathetestgy12-flaechen-graphen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Schnittstellen als Grenzen, Differenzfunktion integrieren',
+                'Mehrere Schnittstellen: abschnittsweise rechnen',
+                'Sachaufgaben: Querschnitte, Materialbedarf'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'wb', u: '1–4/8', topic: 'Wahlbereich 5: Geschichte der Integralrechnung; Rechteckverfahren', ziel: 'Einblick gewinnen in die Geschichte der Integralrechnung', remark: 'Archimedes, Newton, Leibniz, Riemann', quiz: { href: '../../mathetestgy12-rechteckverfahren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Archimedes und die Parabel, Leibniz und das Summenzeichen, Riemann',
+                'Rechteckverfahren mit linken, rechten und mittleren Stützstellen',
+                'Tabellenkalkulation: Näherungen mit wachsender Streifenzahl'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'wb', u: '5–8/8', topic: 'Wahlbereich 5: Trapezverfahren; Genauigkeit der Verfahren', ziel: 'Kennen von numerischen Integrationsverfahren', remark: 'WB abgeschlossen', quiz: { href: '../../mathetestgy12-trapezverfahren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Trapezverfahren herleiten und anwenden',
+                'Fehler mit dem exakten Wert vergleichen, Streifenzahl verdoppeln',
+                'Integrale ohne Stammfunktion: $\\mathrm{e}^{-x^2}$ numerisch'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb6', u: '1–4/12', topic: 'Grundprobleme der beurteilenden Statistik; Schätzen von Parametern: Stichprobenmittel und Stichprobenvarianz', ziel: 'Kennen von Grundproblemen der beurteilenden Statistik', remark: 'Wahlprognosen durch Hochrechnung', quiz: { href: '../../mathetestgy12-schaetzen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Von der Zufallsstichprobe auf die Grundgesamtheit schließen',
+                'Stichprobenmittel und Stichprobenvarianz berechnen',
+                'Hochrechnungen und Messergebnisse in Medien kritisch lesen'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb6', u: '5–8/12', topic: 'Einseitige Signifikanztests für binomialverteilte Zufallsgrößen', ziel: 'Übertragen der Kenntnisse über binomialverteilte Zufallsgrößen auf das Testen von Hypothesen', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', quiz: { href: '../../mathetestgy12-signifikanztest.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Nullhypothese und Testgröße festlegen',
+                'Signifikanzniveau, kritischer Wert und Ablehnungsbereich bestimmen',
+                'Entscheidungsregel formulieren und anwenden'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb6', u: '9–12/12', topic: 'Zweiseitige Signifikanztests; statistische Sicherheit', remark: 'LB 6 abgeschlossen', quiz: { href: '../../mathetestgy12-zweiseitige-tests.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zweiseitiger Ablehnungsbereich: das Niveau auf beide Seiten verteilen',
+                'Was „signifikant“ bedeutet und was nicht',
+                'Tests mit dem CAS: kumulierte Binomialverteilung'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lk', u: 'KL 12/I', topic: 'Wiederholung + Klausur 12/I (LB 5, WB 5, LB 6)', remark: 'Termin nach Klausurplan', quiz: { href: '../../mathetestgy12-klausur1.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Wiederholung: Integrieren, Flächen, numerische Verfahren, Signifikanztests',
+                'Klausur 12/I',
+                'Auswertung'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb7', u: '1–4/24', topic: 'Skalarprodukt und Vektorprodukt mit ihrer geometrischen Interpretation', ziel: 'Beherrschen des Ermittelns von Abständen und Winkeln', remark: '', quiz: { href: '../../mathetestgy12-skalar-vektorprodukt.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Skalarprodukt: Winkel zwischen Vektoren, Projektion',
+                'Vektorprodukt: senkrechter Vektor, Betrag als Flächeninhalt',
+                'Rechenregeln und Probe'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb7', u: '5–8/24', topic: 'Orthogonalitätsbedingung, Normalenvektor, Normalen- und Koordinatenform der Ebene', remark: '', quiz: { href: '../../mathetestgy12-normalenvektor.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Orthogonalität: $\\vec a \\cdot \\vec b = 0$',
+                'Normalenvektor mit dem Vektorprodukt, Koordinatenform aufstellen',
+                'Spurpunkte und Lage im Koordinatensystem'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer: Vektoren im Raum, Knobelaufgaben', remark: 'nur Mo/Di; Di 22.12. Zeugnisse Kurshalbjahr 12/I', quiz: { href: '../../mathetestgy12-jahresausklang.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Vermischte Aufgaben zu Skalar- und Vektorprodukt',
+                'Knobelaufgaben im Raum'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb7', u: '9–12/24', topic: 'Schnittwinkel Gerade–Gerade und Gerade–Ebene', remark: 'Mo 04.01. Beginn Kurshalbjahr 12/II', quiz: { href: '../../mathetestgy12-schnittwinkel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Winkel zwischen Richtungsvektoren, spitzer Schnittwinkel',
+                'Gerade und Ebene: Sinus mit dem Normalenvektor',
+                'Anwendungen: Dachneigung, Einfallswinkel'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb7', u: '13–16/24', topic: 'Schnittwinkel Ebene–Ebene', remark: '', quiz: { href: '../../mathetestgy12-ebenenwinkel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Winkel zwischen den Normalenvektoren',
+                'Neigungswinkel gegen die Grundebene',
+                'Winkel an Körpern: Pyramide, Prisma'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb7', u: '17–20/24', topic: 'Abstände Punkt–Punkt und Punkt–Ebene', remark: '', quiz: { href: '../../mathetestgy12-abstand-punkt-ebene.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Abstand zweier Punkte als Betrag',
+                'Lotgerade und Lotfußpunkt',
+                'Abstandsformel mit dem Normalenvektor'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb7', u: '21–24/24', topic: 'Abstände und Winkel in inner- und außermathematischen Problemen', remark: 'LB 7 abgeschlossen', quiz: { href: '../../mathetestgy12-abstaende-anwendungen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Körper im Koordinatensystem: Höhe, Neigung, Kantenwinkel',
+                'Anwendungen aus Architektur und Technik',
+                'Lösungspläne beschreiben und vergleichen'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb8', u: '1–4/20', topic: 'Minimale und maximale Entfernungen in Ebene und Raum', ziel: 'Anwenden der mathematischen Kenntnisse beim Lösen inner- und außermathematischer Problemstellungen', remark: 'extremale Abstände: Geometrie und Analysis verbinden', quiz: { href: '../../mathetestgy12-extremale-abstaende.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Abstand eines Punktes von einer Kurve als Zielfunktion',
+                'Kürzeste Entfernung eines Punktes von einer Geraden über den Parameter',
+                'Ergebnis geometrisch deuten: Lot'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb8', u: '5–8/20', topic: 'Spiegelung eines Punktes an einer Ebene', remark: '', quiz: { href: '../../mathetestgy12-spiegelung.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Lotfußpunkt als Mittelpunkt von Punkt und Bildpunkt',
+                'Spiegelpunkt berechnen und prüfen',
+                'Anwendungen: Lichtstrahl am Spiegel, kürzester Weg über eine Ebene'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb8', u: '9–12/20', topic: 'Inhalte begrenzter Flächen: elementargeometrisch, mit Vektorprodukt, mit Integralrechnung', remark: 'Teilgebiete verknüpfen', quiz: { href: '../../mathetestgy12-flaecheninhalte.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Dreiecke und Parallelogramme im Raum mit dem Vektorprodukt',
+                'Krummlinig begrenzte Flächen mit dem Integral',
+                'Methoden vergleichen: Wann welches Verfahren?'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb8', u: '13–16/20', topic: 'Parameter: einfache Funktionenscharen', remark: 'CAS zum Entdecken von Eigenschaften', quiz: { href: '../../mathetestgy12-funktionenscharen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Scharkurven zeichnen, gemeinsame Punkte finden',
+                'Extrem- und Wendepunkte in Abhängigkeit vom Parameter',
+                'Ortskurven und Flächen mit Parameter'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb8', u: '17–20/20', topic: 'Parameter: Geradenscharen; vernetzte Aufgaben im Abiturstil', remark: 'LB 8 abgeschlossen', quiz: { href: '../../mathetestgy12-geradenscharen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Geradenscharen: gemeinsamer Punkt, Lage in Abhängigkeit vom Parameter',
+                'Parameter so bestimmen, dass Winkel oder Abstand passen',
+                'Komplexe Aufgaben aus Analysis, Geometrie und Stochastik'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lk', u: 'KL 12/II', topic: 'Klausur 12/II unter Abiturbedingungen', remark: 'Termin nach Klausurplan; ab Fr 26.03. Osterferien', quiz: { href: '../../mathetestgy12-klausur2.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Klausur im Abiturformat: hilfsmittelfreier Teil und Teil mit CAS',
+                'Auswertung und individuelle Schwerpunkte'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'org', u: '', topic: 'Abiturvorbereitung: Generalprobe und Fragestunde', remark: 'Mi 07.04. Zulassung; Konsultationen 07.–13.04.', quiz: { href: '../../mathetestgy12-abiturvorbereitung.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Hilfsmittelfreier Teil unter Zeitdruck',
+                'Aufgaben im Abiturformat zu allen Lernbereichen der Jahrgangsstufen 11 und 12',
+                'Prüfungsstrategie: Reihenfolge, Zeit, Kontrolle mit dem CAS'
+            ] },
+            { nr: 29, kw: 15, date: '12.–13.04.27', type: 'org', u: '', topic: 'Konsultationen Mathematik', remark: 'nur Mo/Di; Unterricht und Konsultationen enden Di 13.04.', quiz: { href: '../../mathetestgy12-konsultation.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Fragen der Prüflinge, letzte Lücken schließen',
+                'Ablauf der Prüfung und Hilfsmittel'
+            ] },
+            { ferien: 'Schriftliche Abiturprüfungen · 19.04.–11.05.2027 · Mathematik Mi 05.05.2027, Nachtermin Mo 24.05.2027' },
+            { ferien: 'Mündliche Prüfungen · 13.05.–04.06.2027 · Bekanntgabe der schriftlichen Ergebnisse 08.06.2027' },
+            { ferien: 'Zeugnisse der allgemeinen Hochschulreife · 24.06.–09.07.2027' }
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_gy_mathematik.pdf where that Lernbereich starts.
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_gy_mathematik.pdf',
+            lb5: {
+                page: 47,
+                bullets: [
+                    'Stammfunktion und unbestimmtes Integral',
+                    'Integrieren ohne Hilfsmittel: ganzrationale Funktionen, Potenzfunktionen, $\\mathrm{e}^x$, $\\tfrac1x$, $\\sin x$',
+                    'Bestimmtes Integral als rekonstruierter Bestand und als Flächeninhalt, Hauptsatz',
+                    'Berechnung von Flächeninhalten',
+                ]
+            },
+            lb6: {
+                page: 47,
+                bullets: [
+                    'Grundprobleme der beurteilenden Statistik, Schätzen von Parametern',
+                    'Stichprobenmittel und Stichprobenvarianz',
+                    'Ein- und zweiseitige Signifikanztests für binomialverteilte Zufallsgrößen',
+                    'Nullhypothese, Signifikanzniveau, kritischer Wert, Ablehnungsbereich, statistische Sicherheit',
+                ]
+            },
+            lb7: {
+                page: 48,
+                bullets: [
+                    'Skalarprodukt und Vektorprodukt mit geometrischer Interpretation',
+                    'Orthogonalitätsbedingung, Normalenvektor',
+                    'Schnittwinkel Gerade–Gerade, Gerade–Ebene, Ebene–Ebene',
+                    'Abstände Punkt–Punkt und Punkt–Ebene',
+                ]
+            },
+            lb8: {
+                page: 48,
+                bullets: [
+                    'Minimale und maximale Entfernungen in Ebene und Raum',
+                    'Spiegelung eines Punktes an einer Ebene',
+                    'Flächeninhalte elementargeometrisch, mit Vektorprodukt, mit Integralrechnung',
+                    'Parameter: einfache Funktionenscharen, Geradenscharen',
+                ]
+            },
+            wb: {
+                page: 49,
+                bullets: [
+                    'Wahlbereich 5: Numerische Integrationsverfahren (gewählt)',
+                    'Geschichte der Integralrechnung: Archimedes, Newton, Leibniz, Riemann',
+                    'Rechteckverfahren und Trapezverfahren',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb5: ['b-violet', 'LB 5'],
+            lb6: ['b-pink', 'LB 6'],
+            lb7: ['b-cyan', 'LB 7'],
+            lb8: ['b-orange', 'LB 8'],
+            wb: ['b-green', 'WB 5'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', 'ÜBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+
+        // Not-chosen Wahlbereiche: dimmed pills in the legend with a deep link into the Lehrplan PDF.
+        // WB 2 is taken in Jahrgangsstufe 11 (svp/mathe/mathegy11.html).
+        window.ALT_BADGES = {
+            wb: [['WB 1', 48], ['WB 3', 49], ['WB 4', 49], ['WB 6', 50]]
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>

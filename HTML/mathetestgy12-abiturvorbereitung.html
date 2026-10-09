@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Generalprobe Abitur — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12-w28-abiturvorbereitung',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Generalprobe Abitur',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Grundkurs · Woche 28 (Abitur) · 20 Aufgaben: Querschnitt durch Analysis, Integral, Stochastik und Geometrie · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Woche 28 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12.html', /* opened from the plan */
+  /* Blocks: Ableiten und Kurven (1-8, 20), Integral (9-11), Stochastik (12-14), Vektoren, Geraden, Ebenen (15, 16, 18, 19), Gleichungssysteme (17). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Gegeben ist $f(x) = x^3 - 2x$. Berechne $f^{\\prime}(2)$.',
+      opts: ['$4$', '$8$', '$12$', '$10$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 2$.',
+        '$f^{\\prime}(2) = 12 - 2 = 10$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite $f(x) = e^{2x}$ ab.',
+      opts: ['$f^{\\prime}(x) = e^{2}$', '$f^{\\prime}(x) = 2x\\,e^{2x - 1}$', '$f^{\\prime}(x) = e^{2x}$', '$f^{\\prime}(x) = 2e^{2x}$'],
+      steps: [
+        'Kettenregel: äußere Ableitung $e^{2x}$, innere Ableitung $2$.',
+        '$f^{\\prime}(x) = 2e^{2x}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite $f(x) = x \\cdot e^x$ ab.',
+      opts: ['$f^{\\prime}(x) = 1 \\cdot e^x$', '$f^{\\prime}(x) = x\\,e^x$', '$f^{\\prime}(x) = e^x$', '$f^{\\prime}(x) = (1 + x)\\,e^x$'],
+      steps: [
+        'Produktregel: $1 \\cdot e^x + x \\cdot e^x$.',
+        '$= (1 + x)\\,e^x$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo hat $f(x) = x^3 - 3x$ seinen Hochpunkt?',
+      opts: ['$(1 \\mid -2)$', '$(\\sqrt3 \\mid 0)$', '$(-1 \\mid 2)$', '$(0 \\mid 0)$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 3 = 0$ gibt $x = \\pm 1$; $f^{\\prime\\prime}(x) = 6x$.',
+        '$f^{\\prime\\prime}(-1) = -6 < 0$: Hochpunkt $(-1 \\mid 2)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo hat $f(x) = x^3 - 6x^2$ seine Wendestelle?',
+      opts: ['$x = 2$', '$x = 4$', '$x = 6$', '$x = 0$'],
+      steps: [
+        '$f^{\\prime\\prime}(x) = 6x - 12 = 0$.',
+        '$x = 2$; $f^{\\prime\\prime\\prime} = 6 \\neq 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Tangente an $f(x) = x^2$ im Punkt $(1 \\mid 1)$?',
+      opts: ['$y = x$', '$y = 2x$', '$y = 2x + 1$', '$y = 2x - 1$'],
+      steps: [
+        'Steigung $f^{\\prime}(1) = 2$.',
+        '$y = 2(x - 1) + 1 = 2x - 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\lim\\limits_{x \\to \\infty} \\dfrac{2x^2 + 1}{x^2 - 3}$.',
+      opts: ['$-\\tfrac13$', '$2$', '$0$', '$\\infty$'],
+      steps: [
+        'Zähler und Nenner durch $x^2$ teilen: $\\dfrac{2 + \\frac{1}{x^2}}{1 - \\frac{3}{x^2}}$.',
+        'Für $x \\to \\infty$: $\\tfrac21 = 2$. Gleicher Grad: Quotient der Leitkoeffizienten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Parabel geht durch den Ursprung und hat den Scheitel $(2 \\mid 4)$. Wie lautet ihre Gleichung?',
+      opts: ['$f(x) = x^2 + 4$', '$f(x) = -x^2 + 4x$', '$f(x) = x^2 - 4x$', '$f(x) = -(x + 2)^2 + 4$'],
+      steps: [
+        'Scheitelform $f(x) = a(x - 2)^2 + 4$ mit $f(0) = 4a + 4 = 0$.',
+        '$a = -1$: $f(x) = -(x - 2)^2 + 4 = -x^2 + 4x$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int_1^e \\dfrac1x\\,dx$.',
+      opts: ['$e$', '$1$', '$0$', '$e - 1$'],
+      steps: [
+        '$\\left[\\ln x\\right]_1^e = \\ln e - \\ln 1$.',
+        '$= 1 - 0 = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen dem Graphen von $f(x) = x - x^3$ und der $x$-Achse über $[0;\\ 1]$?',
+      opts: ['$\\tfrac34$', '$\\tfrac12$', '$\\tfrac14$', '$0$'],
+      steps: [
+        '$f \\geq 0$ auf $[0;\\ 1]$: $\\int_0^1 (x - x^3)\\,dx$.',
+        '$= \\tfrac12 - \\tfrac14 = \\tfrac14$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einen Tank fließt Wasser mit der Rate $r(t) = 2t$ (Liter pro Minute). Wie viel fließt in den ersten $3$ Minuten zu?',
+      opts: ['$3$ l', '$9$ l', '$6$ l', '$18$ l'],
+      steps: [
+        'Zufluss $= \\int_0^3 2t\\,dt = [t^2]_0^3$.',
+        '$= 9$ l. $6$ wäre nur die Rate am Ende.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine faire Münze wird dreimal geworfen. Wie groß ist die Wahrscheinlichkeit, nie Wappen zu werfen?',
+      opts: ['$\\tfrac38$', '$\\tfrac12$', '$\\tfrac18$', '$0$'],
+      steps: [
+        '$P(X = 0) = 0{,}5^3$.',
+        '$= \\tfrac18$.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$X$ ist binomialverteilt mit $n = 50$ und $p = 0{,}2$. Wie groß ist der Erwartungswert?',
+      opts: ['$10$', '$2$', '$25$', '$8$'],
+      steps: [
+        '$E(X) = n \\cdot p$.',
+        '$= 50 \\cdot 0{,}2 = 10$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist ein Fehler 2. Art?',
+      opts: ['$H_0$ wird abgelehnt, obwohl $H_0$ wahr ist.', 'Man testet zweiseitig statt einseitig.', 'Man wählt das Signifikanzniveau zu groß.', '$H_0$ wird angenommen, obwohl $H_0$ falsch ist.'],
+      steps: [
+        'Der Test erkennt eine falsche Nullhypothese nicht.',
+        'Seine Wahrscheinlichkeit hängt vom wahren Wert von $p$ ab.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lang ist der Vektor $\\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$?',
+      opts: ['$9$', '$5$', '$3$', '$\\sqrt5$'],
+      steps: [
+        '$\\sqrt{4 + 1 + 4} = \\sqrt9$.',
+        '$= 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Richtungsvektoren zweier Geraden sind nicht parallel, und die Geraden haben keinen Schnittpunkt. Wie liegen sie zueinander?',
+      opts: ['windschief', 'identisch', 'parallel', 'Sie schneiden sich senkrecht.'],
+      steps: [
+        'Parallel oder identisch scheidet aus, weil die Richtungen verschieden sind.',
+        'Ohne Schnittpunkt bleibt nur windschief.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse das Gleichungssystem $x + y = 3$, $x - y = 1$.',
+      opts: ['$x = 3$, $y = 0$', '$x = 2$, $y = 1$', '$x = 1$, $y = 2$', 'keine Lösung'],
+      steps: [
+        'Addieren: $2x = 4$, $x = 2$.',
+        'Einsetzen: $y = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist der Ursprung von der Ebene $2x + y + 2z = 6$ entfernt?',
+      opts: ['$3$', '$6$', '$2$', '$1$'],
+      steps: [
+        '$\\dfrac{|0 - 6|}{\\sqrt{4 + 1 + 4}}$.',
+        '$= \\tfrac63 = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Winkel schließen $\\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ ein?',
+      opts: ['$60^\\circ$', '$90^\\circ$', '$30^\\circ$', '$45^\\circ$'],
+      steps: [
+        'Skalarprodukt $1$, Beträge je $\\sqrt2$.',
+        '$\\cos\\varphi = \\tfrac12$, also $60^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Das Newton-Verfahren für $f(x) = x^2 - 2$ startet bei $x_0 = 1$. Welchen Wert liefert der erste Schritt?',
+      opts: ['$x_1 = 1{,}5$', '$x_1 = 0{,}5$', '$x_1 = 2$', '$x_1 = 1{,}41$'],
+      steps: [
+        '$x_1 = x_0 - \\dfrac{f(x_0)}{f^{\\prime}(x_0)} = 1 - \\dfrac{-1}{2}$.',
+        '$= 1{,}5$, schon nah an $\\sqrt2 \\approx 1{,}414$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
