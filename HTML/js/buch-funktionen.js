@@ -21,22 +21,7 @@
     const { fmt, texNum, math, range, seg, div, Plot } = B;
     const W = B.widget;
 
-    // signed TeX term: "+ 2{,}5" / "- 2{,}5", empty for 0
-    function sg(v, d = 2, first = false) {
-        if (Math.abs(v) < 1e-12) return '';
-        const s = texNum(Math.abs(v), d);
-        if (first) return (v < 0 ? '-' : '') + s;
-        return v < 0 ? ' - ' + s : ' + ' + s;
-    }
-    // coefficient written in front of a variable: 1 → "", −1 → "-", else the number
-    function co(v, d = 2) { return Math.abs(v - 1) < 1e-9 ? '' : Math.abs(v + 1) < 1e-9 ? '-' : texNum(v, d); }
-    // signed term with a variable: "+ x", "- 2{,}5x", empty for 0
-    function sgx(v, x, d = 2) { if (Math.abs(v) < 1e-12) return ''; const a = Math.abs(v); return (v < 0 ? ' - ' : ' + ') + (Math.abs(a - 1) < 1e-9 ? '' : texNum(a, d)) + x; }
-    function compile(expr) {
-        const e = String(expr).replace(/\^/g, '**');
-        // eslint-disable-next-line no-new-func
-        return new Function('x', 'with (Math) { return (' + e + '); }');
-    }
+    const { sg, co, sgx, compile } = B;                               // term helpers (js/buch.js)
     const COLORS = ['lambda', 'cyan', 'phi', 'red', 'violet', 'pink'];
 
     /* ---------- fixed figure ---------- */

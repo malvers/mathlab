@@ -387,7 +387,7 @@ input[type="range"].b-slider::-moz-range-thumb { width: 16px; height: 16px; bord
 @media (max-width: 760px) { .b-two { grid-template-columns: minmax(0, 1fr); } }
 
 /* tables (four-field tables, counts) */
-.b-table-wrap { overflow-x: auto; }
+.b-table-wrap { overflow-x: auto; position: relative; }   /* relative: KaTeX's hidden MathML is absolute and would escape the scroller */
 .b-table { border-collapse: collapse; margin: 4px 0; min-width: 100%; font-size: 1rem; }
 .b-table th, .b-table td { border: 0.5px solid rgba(2, 100, 123, 0.6); padding: 7px 10px; text-align: center; }
 .b-table th { color: var(--b-dim); font-weight: 700; background: rgba(2, 100, 123, 0.1); }
@@ -518,3 +518,25 @@ a.b-top-book:hover { color: var(--b-lambda); }
 .st-door img.apple-emoji, .st-door img { width: 1em; height: 1em; }
 .st-say { text-align: center; min-height: 1.6em; margin: 0 0 10px; color: #e8edf5; }
 .st-say-acts { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; min-height: 36px; }
+
+/* =====================================================================
+   Widgets of the calculus and vector chapters (Klasse 12: js/buch-analysis.js, js/buch-vektoren.js)
+   ===================================================================== */
+.an-opt { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 16px; align-items: center; margin: 4px 0 10px; }
+.an-sketch svg { display: block; width: 100%; height: auto; max-height: 300px; }
+@media (max-width: 760px) { .an-opt { grid-template-columns: minmax(0, 1fr); } }
+/* 3D stage: Three.js draws into the canvas, the hint sits in the corner */
+.vk-stage { position: relative; }
+.vk-stage canvas { display: block; width: 100%; height: 100%; }
+.vk-hint { position: absolute; right: 10px; bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 1px; color: var(--b-faint); pointer-events: none; }
+.vk-inputs { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; margin: 0 0 10px; }
+.vk-inputs .b-ctrls { margin: 0; }
+.vk-row { display: inline-flex; align-items: center; gap: 4px; }
+.vk-name { font-weight: 700; font-style: italic; min-width: 1.4em; font-size: 1.05rem; }
+.vk-par { color: var(--b-dim); }
+.b-in.vk-in { width: 62px; padding: 5px 6px; text-align: center; }
+.vk-four .vk-row { flex: 0 0 auto; }
+/* independence: unit square beside the four-field table (js/buch-stochastik.js) */
+.st-ind { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 18px; align-items: center; margin: 6px 0 12px; }
+.st-ind-sq svg { display: block; width: 100%; height: auto; }
+@media (max-width: 640px) { .st-ind { grid-template-columns: minmax(0, 1fr); } .st-ind-sq { max-width: 300px; } }

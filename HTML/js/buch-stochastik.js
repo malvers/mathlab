@@ -5,6 +5,11 @@
  *   vierfeld-trainer fill in the missing cells of a four-field table, new table on request
  *   simulation       relative frequency over n against the probability (law of large numbers)
  *   ziegen           the goat problem: play it, or let the computer play a thousand times
+ *   histo-hero       decorative histogram (binomial, or any weights) for a chapter opener (Klasse 12)
+ *   unabhaengig      independence: sliders for P(A), P(B), P(A ∩ B), four-field table and the unit square
+ *   zufallsgroesse   a random variable: bar chart, table, E(X), V(X), σ, fair or not, play it a thousand times
+ *   binomial         B(n; p) as a histogram: P(X = k), P(X ≤ k), P(X ≥ k), P(a ≤ X ≤ b), μ and σ
+ *   bernoulli-baum   the tree of a Bernoulli chain, every path with exactly k hits lit
  * Looks: js/buch.css (section "Widgets of the stochastics chapters").
  */
 (function () {
@@ -523,5 +528,231 @@
             else finish(b.dataset.act, +b.dataset.to);
         });
         newGame(); table();
+    });
+    /* =========================== Klasse 12: random variables and the binomial distribution =========================== */
+    const B = window.Buch, div = B.div;
+    function binom(n, k) { if (k < 0 || k > n) return 0; let c = 1; for (let i = 1; i <= k; i++) c = c * (n - k + i) / i; return c; }
+    function pmf(n, p, k) { return binom(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k); }
+    function cdf(n, p, k) { let s = 0; for (let i = 0; i <= Math.min(k, n); i++) s += pmf(n, p, i); return Math.min(1, s); }
+    window.Buch.binom = { coef: binom, pmf, cdf };
+
+    /* ---------- chapter opener: a quiet histogram with a lit region ---------- */
+    // data-n / data-p: B(n; p) · or data-w="1,2,3,…" (weights) with data-x0 (first value): any distribution
+    W('histo-hero', function (box) {
+        const d = box.dataset, w = d.w ? d.w.split(',').map(Number) : null;
+        const n = w ? w.length - 1 : +(d.n || 20), p = +(d.p || 0.35), x0 = +(d.x0 || 0), lo = +(d.lo || 5), hi = +(d.hi || 9), step = +(d.step || 5);
+        const P = k => w ? w[k] : pmf(n, p, k);
+        const Wd = 520, Ht = 240, bw = Wd / (n + 1), max = Math.max(...Array.from({ length: n + 1 }, (_, k) => P(k)));
+        let bars = '';
+        for (let k = 0; k <= n; k++) {
+            const h = P(k) / max * (Ht - 40), on = k + x0 >= lo && k + x0 <= hi;
+            bars += '<rect x="' + (k * bw + 2).toFixed(1) + '" y="' + (Ht - 22 - h).toFixed(1) + '" width="' + (bw - 4).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" style="' +
+                (on ? 'fill:rgba(245,194,66,0.55);stroke:rgb(245,194,66)' : 'fill:rgba(127,216,238,0.18);stroke:rgba(127,216,238,0.6)') + ';stroke-width:1.2"/>';
+            if ((k + x0) % step === 0) bars += '<text x="' + (k * bw + bw / 2).toFixed(1) + '" y="' + (Ht - 6) + '" text-anchor="middle" style="fill:#8fa3bd;font:12px Raleway,sans-serif">' + (k + x0) + '</text>';
+        }
+        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" role="img" aria-label="Histogramm einer Binomialverteilung">' +
+            '<line x1="0" y1="' + (Ht - 22) + '" x2="' + Wd + '" y2="' + (Ht - 22) + '" style="stroke:rgba(255,255,255,0.4);stroke-width:1"/>' + bars + '</svg>';
+    });
+
+    /* ---------- independence: four-field table and the unit square (mosaic) ---------- */
+    W('unabhaengig', function (box) {
+        const S = { a: 0.4, b: 0.5, ab: 0.3 };
+        const sl = div(box, '');
+        B.range(sl, { label: '$P(A)$', min: 0.05, max: 0.95, step: 0.05, value: S.a, fmt: v => fmt(v, 2), onInput: v => { S.a = v; fix(); render(); } });
+        B.range(sl, { label: '$P(B)$', min: 0.05, max: 0.95, step: 0.05, value: S.b, fmt: v => fmt(v, 2), onInput: v => { S.b = v; fix(); render(); } });
+        const rab = B.range(sl, { label: '$P(A \\cap B)$', min: 0, max: 0.95, step: 0.01, value: S.ab, fmt: v => fmt(v, 2), onInput: v => { S.ab = v; fix(); render(); } });
+        const acts = div(box, 'b-ctrls');
+        acts.innerHTML = '<button type="button" class="b-btn" data-u>Unabhängig machen</button><button type="button" class="b-btn" data-x>Unvereinbar machen</button>';
+        acts.querySelector('[data-u]').addEventListener('click', () => { S.ab = Math.round(S.a * S.b * 100) / 100; fix(); render(); });
+        acts.querySelector('[data-x]').addEventListener('click', () => { S.ab = 0; fix(); render(); });
+        const wrap = div(box, 'st-ind');
+        const sq = div(wrap, 'st-ind-sq'), tab = div(wrap, 'b-table-wrap');
+        const out = div(box, 'b-out');
+        function fix() {                                         // P(A ∩ B) must fit into both events
+            const lo = Math.max(0, S.a + S.b - 1), hi = Math.min(S.a, S.b);
+            S.ab = Math.min(hi, Math.max(lo, S.ab)); rab.set(S.ab);
+        }
+        function render() {
+            const { a, b, ab } = S, aB = a - ab, Ab = b - ab, AB = 1 - a - b + ab;
+            const pBA = ab / b, pnBA = aB / (1 - b), ind = Math.abs(ab - a * b) < 0.0051;
+            const Z = 300, wb = b * Z;
+            // mosaic: column B (left, width P(B)) and not-B; in each column A at the bottom with the conditional probability
+            const col = (x, w, pA, lab) => '<rect x="' + x + '" y="' + (Z - pA * Z) + '" width="' + w + '" height="' + pA * Z + '" style="fill:rgba(245,194,66,0.45);stroke:rgb(245,194,66)"/>' +
+                '<rect x="' + x + '" y="0" width="' + w + '" height="' + (Z - pA * Z) + '" style="fill:rgba(127,216,238,0.12);stroke:rgba(127,216,238,0.6)"/>' +
+                '<text x="' + (x + w / 2) + '" y="' + (Z + 18) + '" text-anchor="middle" style="fill:#cfd8e6;font:italic 14px Raleway,sans-serif">' + lab + '</text>';
+            sq.innerHTML = '<svg viewBox="-30 -10 340 340" role="img" aria-label="Einheitsquadrat: Anteil von A in B und in nicht B">' + col(0, wb, pBA, 'B') + col(wb, Z - wb, pnBA, 'B̄') +
+                '<line x1="0" y1="' + (Z - a * Z) + '" x2="' + Z + '" y2="' + (Z - a * Z) + '" style="stroke:#e2665a;stroke-width:1.5;stroke-dasharray:6 5"/>' +
+                '<text x="-8" y="' + (Z - a * Z + 4) + '" text-anchor="end" style="fill:#e2665a;font:13px Raleway,sans-serif">P(A)</text></svg>';
+            const c = x => '$' + texNum(x, 2) + '$';
+            tab.innerHTML = '<table class="b-table" style="min-width:0"><tr><th></th><th>$B$</th><th>$\\overline{B}$</th><th>Summe</th></tr>' +
+                '<tr><th>$A$</th><td>' + c(ab) + '</td><td>' + c(aB) + '</td><td>' + c(a) + '</td></tr>' +
+                '<tr><th>$\\overline{A}$</th><td>' + c(Ab) + '</td><td>' + c(AB) + '</td><td>' + c(1 - a) + '</td></tr>' +
+                '<tr><th>Summe</th><td>' + c(b) + '</td><td>' + c(1 - b) + '</td><td>$1$</td></tr></table>';
+            out.innerHTML = '<p style="margin:0 0 6px">$P(A) \\cdot P(B) = ' + texNum(a, 2) + ' \\cdot ' + texNum(b, 2) + ' = ' + texNum(a * b, 4) + '$ und $P(A \\cap B) = ' + texNum(ab, 2) + '$</p>' +
+                '<p style="margin:0 0 6px">$P_B(A) = \\dfrac{P(A \\cap B)}{P(B)} \\approx ' + texNum(pBA, 3) + '$ · $P_{\\overline{B}}(A) \\approx ' + texNum(pnBA, 3) + '$ · $P(A) = ' + texNum(a, 2) + '$</p>' +
+                '<p style="margin:0">' + (ind ? '<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.'
+                    : ab === 0 ? '<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.'
+                    : '<b>Abhängig:</b> $B$ verändert die Wahrscheinlichkeit von $A$ ' + (pBA > a ? 'nach oben' : 'nach unten') + '.') + '</p>';
+            math(tab); math(out);
+        }
+        fix(); render(); math(sl);
+    });
+
+    /* ---------- a random variable: distribution, expected value, variance, simulation ---------- */
+    W('zufallsgroesse', function (box) {
+        const F = (n, d) => [n, d];
+        const P = {
+            wuerfel: { k: 'Würfel', x: 'Augenzahl', v: [1, 2, 3, 4, 5, 6], p: Array(6).fill(F(1, 6)), draw: () => 1 + rnd(6) },
+            muenzen: { k: 'Drei Münzen', x: 'Anzahl Wappen', v: [0, 1, 2, 3], p: [F(1, 8), F(3, 8), F(3, 8), F(1, 8)], draw: () => [0, 1, 2].reduce(s => s + rnd(2), 0) },
+            summe: { k: 'Augensumme', x: 'Augensumme zweier Würfel', v: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], p: [1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1].map(c => F(c, 36)), draw: () => 2 + rnd(6) + rnd(6) },
+            rad: { k: 'Glücksrad', x: 'Gewinn = Auszahlung − Einsatz', pay: [0, 1, 2, 10], p: [F(1, 2), F(1, 4), F(1, 8), F(1, 8)], stake: 2, unit: ' €',
+                draw() { const r = Math.random(); return (r < 0.5 ? 0 : r < 0.75 ? 1 : r < 0.875 ? 2 : 10) - this.stake; } },
+            chuck: { k: 'Chuck-a-luck', x: 'Gewinn bei 1 € Einsatz', v: [-1, 1, 2, 3], p: [F(125, 216), F(75, 216), F(15, 216), F(1, 216)], unit: ' €',
+                draw() { const z = 1 + rnd(6); const k = [0, 1, 2].filter(() => 1 + rnd(6) === z).length; return k ? k : -1; } }
+        };
+        let key = 'wuerfel', n = 0, sum = 0, last = [];
+        const ctl = div(box, 'b-ctrls');
+        B.seg(ctl, Object.keys(P).map(k => [k, P[k].k]), key, v => { key = v; reset(); render(); }, 'Zufallsgröße');
+        const help = div(box, 'b-help');
+        const stakeBox = div(box, '');
+        B.range(stakeBox, { label: 'Einsatz', min: 0.5, max: 3, step: 0.25, value: P.rad.stake, fmt: v => fmt(v, 2) + ' €', onInput: v => { P.rad.stake = v; reset(); render(); } });
+        const plot = new B.Plot(div(box, ''), { height: 240, yLabel: 'P', aria: 'Wahrscheinlichkeitsverteilung als Stabdiagramm' });
+        const tab = div(box, 'b-table-wrap');
+        const sim = div(box, '');
+        sim.innerHTML = '<div class="b-ctrls" style="margin-top:12px"><span class="b-ctrl">Spielen:</span>' +
+            [1, 10, 100, 1000].map(k => '<button type="button" class="b-btn" data-n="' + k + '">+' + int(k) + '</button>').join('') +
+            '<button type="button" class="b-btn b-hintbtn" data-reset>Zurücksetzen</button></div>' +
+            '<div class="st-sim-stats"><div class="st-stat"><span class="st-stat-k">SPIELE n</span><span class="st-stat-v" data-s="n">0</span></div>' +
+            '<div class="st-stat"><span class="st-stat-k">MITTELWERT</span><span class="st-stat-v lambda" data-s="m">–</span></div>' +
+            '<div class="st-stat"><span class="st-stat-k">ERWARTUNGSWERT</span><span class="st-stat-v" data-s="e"></span></div>' +
+            '<div class="st-stat"><span class="st-stat-k">LETZTE</span><span class="st-stat-v" data-s="l" style="font-size:0.95rem">–</span></div></div>';
+        const out = div(box, 'b-out');
+        out.style.marginTop = '12px';
+        sim.addEventListener('click', e => {
+            const b = e.target.closest('button'); if (!b) return;
+            if (b.hasAttribute('data-reset')) reset();
+            else { const G = P[key], k = +b.dataset.n; for (let i = 0; i < k; i++) { const x = G.draw(); sum += x; n++; last.push(x); } last = last.slice(-8); }
+            stats();
+        });
+        function reset() { n = 0; sum = 0; last = []; }
+        function vals(G) { return G.pay ? G.pay.map(a => a - G.stake) : G.v; }
+        function ev() {
+            const G = P[key], v = vals(G), p = G.p.map(([a, b]) => a / b);
+            const mu = v.reduce((s, x, i) => s + x * p[i], 0), V = v.reduce((s, x, i) => s + (x - mu) ** 2 * p[i], 0);
+            return { G, v, p, mu, V, sd: Math.sqrt(V) };
+        }
+        function stats() {
+            const { G, mu } = ev(), u = G.unit || '';
+            box.querySelector('[data-s="n"]').textContent = int(n);
+            box.querySelector('[data-s="m"]').textContent = n ? fmt(sum / n, 3) + u : '–';
+            box.querySelector('[data-s="e"]').textContent = fmt(mu, 4) + u;
+            box.querySelector('[data-s="l"]').textContent = last.length ? last.map(x => fmt(x, 2)).join(' · ') : '–';
+        }
+        function render() {
+            const { G, v, p, mu, V, sd } = ev();
+            stakeBox.style.display = G.pay ? '' : 'none';
+            help.innerHTML = '$X$ = ' + G.x + '.' + (G.pay ? ' Auszahlungen 0 €, 1 €, 2 €, 10 € mit den Wahrscheinlichkeiten $\\tfrac12$, $\\tfrac14$, $\\tfrac18$, $\\tfrac18$.' : '') +
+                (key === 'chuck' ? ' Du setzt 1 € auf eine Zahl, dann werden drei Würfel geworfen. Für jeden Würfel mit deiner Zahl bekommst du 1 € Gewinn, sonst ist der Einsatz weg.' : '');
+            math(help);
+            const lo = Math.min(...v), hi = Math.max(...v), padX = Math.max(1, (hi - lo) * 0.1);
+            plot.view([lo - padX, hi + padX], [0, Math.max(...p) * 1.25]);
+            plot.draw(v.map((x, i) => ({ seg: [[x, 0], [x, p[i]]], color: 'cyan', width: 5 }))
+                .concat([{ pts: v.map((x, i) => [x, p[i]]), color: 'cyan', r: 4 }, { vline: mu, color: 'lambda' }, { text: 'μ', at: [mu, Math.max(...p) * 1.12], color: 'lambda' }]));
+            const r4 = x => texNum(x, 4);
+            tab.innerHTML = '<table class="b-table" style="min-width:0"><tr><th>$x_i$</th>' + v.map(x => '<td>' + texWrap(r4(x)) + '</td>').join('') + '</tr>' +
+                '<tr><th>$P(X = x_i)$</th>' + G.p.map(([a, b]) => '<td>$\\tfrac{' + a + '}{' + b + '}$</td>').join('') + '</tr>' +
+                '<tr><th>$x_i \\cdot P$</th>' + v.map((x, i) => '<td>' + texWrap(r4(x * p[i])) + '</td>').join('') + '</tr>' +
+                '<tr><th>$(x_i - \\mu)^2 \\cdot P$</th>' + v.map((x, i) => '<td>' + texWrap(r4((x - mu) ** 2 * p[i])) + '</td>').join('') + '</tr></table>';
+            out.innerHTML = '<p style="margin:0 0 6px">Erwartungswert: $E(X) = \\mu = \\sum x_i \\cdot P(X = x_i) \\approx ' + r4(mu) + '$' +
+                (G.unit ? (Math.abs(mu) < 1e-9 ? ' · Das Spiel ist <b>fair</b>.' : mu < 0 ? ' · Auf lange Sicht <b>verlierst</b> du im Mittel ' + texWrap(r4(-mu)) + ' € pro Spiel.' : ' · Auf lange Sicht <b>gewinnst</b> du im Mittel ' + texWrap(r4(mu)) + ' € pro Spiel.') : '') + '</p>' +
+                '<p style="margin:0">Varianz: $V(X) = \\sum (x_i - \\mu)^2 \\cdot P(X = x_i) \\approx ' + r4(V) + '$ · Standardabweichung: $\\sigma = \\sqrt{V(X)} \\approx ' + r4(sd) + '$</p>';
+            math(tab); math(out);
+            stats();
+        }
+        const texWrap = t => '$' + t + '$';
+        render();
+    });
+
+    /* ---------- the binomial distribution: histogram, single and cumulative probabilities ---------- */
+    W('binomial', function (box) {
+        const S = { n: 20, p: 0.3, mode: 'eq', k: 6, a: 4, b: 8 };
+        const sl = div(box, '');
+        B.range(sl, { label: 'Anzahl der Versuche $n$', min: 1, max: 100, step: 1, value: S.n, fmt: v => String(v), onInput: v => { S.n = v; clamp(); render(); } });
+        B.range(sl, { label: 'Trefferwahrscheinlichkeit $p$', min: 0.01, max: 0.99, step: 0.01, value: S.p, fmt: v => fmt(v, 2), onInput: v => { S.p = v; render(); } });
+        const ctl = div(box, 'b-ctrls');
+        B.seg(ctl, [['eq', '$P(X = k)$'], ['le', '$P(X \\le k)$'], ['ge', '$P(X \\ge k)$'], ['ab', '$P(a \\le X \\le b)$']], S.mode, v => { S.mode = v; render(); }, 'Was wird berechnet?');
+        math(ctl);
+        const kBox = div(box, ''), abBox = div(box, '');
+        const rk = B.range(kBox, { label: '$k$', min: 0, max: S.n, step: 1, value: S.k, fmt: v => String(v), onInput: v => { S.k = v; render(); } });
+        const ra = B.range(abBox, { label: '$a$', min: 0, max: S.n, step: 1, value: S.a, fmt: v => String(v), onInput: v => { S.a = Math.min(v, S.b); render(); } });
+        const rb = B.range(abBox, { label: '$b$', min: 0, max: S.n, step: 1, value: S.b, fmt: v => String(v), onInput: v => { S.b = Math.max(v, S.a); render(); } });
+        const plot = new B.Plot(div(box, ''), { height: 280, yLabel: 'P', xLabel: 'k', aria: 'Histogramm der Binomialverteilung' });
+        const out = div(box, 'b-out');
+        function clamp() {
+            [rk, ra, rb].forEach(r => { r.input.max = S.n; });
+            S.k = Math.min(S.k, S.n); S.a = Math.min(S.a, S.n); S.b = Math.min(S.b, S.n);
+            rk.set(S.k); ra.set(S.a); rb.set(S.b);
+        }
+        function render() {
+            const { n, p, mode } = S, q = 1 - p, mu = n * p, sd = Math.sqrt(n * p * q);
+            kBox.style.display = mode === 'ab' ? 'none' : ''; abBox.style.display = mode === 'ab' ? '' : 'none';
+            const inSel = k => mode === 'eq' ? k === S.k : mode === 'le' ? k <= S.k : mode === 'ge' ? k >= S.k : k >= S.a && k <= S.b;
+            const on = [], off = [];
+            let max = 0, x0 = n, x1 = 0;
+            for (let k = 0; k <= n; k++) {
+                const P = pmf(n, p, k); max = Math.max(max, P);
+                if (P > 1e-4) { x0 = Math.min(x0, k); x1 = Math.max(x1, k); }
+                (inSel(k) ? on : off).push([k - 0.42, k + 0.42, P]);
+            }
+            const sel = [S.k, S.a, S.b].filter(v => v <= n);
+            x0 = Math.min(x0, ...sel); x1 = Math.max(x1, ...sel);
+            plot.view([x0 - 0.8, x1 + 0.8], [0, max * 1.2]);
+            plot.draw([{ rects: off, color: 'cyan' }, { rects: on, color: 'lambda' }, { vline: mu, color: 'red' }, { text: 'μ', at: [mu, max * 1.1], color: 'red' },
+                { vline: mu - sd }, { vline: mu + sd }]);
+            const pt = texNum(p, 2), qt = texNum(q, 2), k = S.k;
+            let tex;
+            if (mode === 'eq') tex = 'P(X = ' + k + ') = \\binom{' + n + '}{' + k + '} \\cdot ' + pt + '^{' + k + '} \\cdot ' + qt + '^{' + (n - k) + '} \\approx ' + texNum(pmf(n, p, k), 4);
+            else if (mode === 'le') tex = 'P(X \\le ' + k + ') = \\sum_{i=0}^{' + k + '} \\binom{' + n + '}{i} \\cdot ' + pt + '^{i} \\cdot ' + qt + '^{' + n + '-i} \\approx ' + texNum(cdf(n, p, k), 4);
+            else if (mode === 'ge') tex = 'P(X \\ge ' + k + ') = 1 - P(X \\le ' + (k - 1) + ') \\approx ' + texNum(k ? 1 - cdf(n, p, k - 1) : 1, 4);
+            else tex = 'P(' + S.a + ' \\le X \\le ' + S.b + ') = P(X \\le ' + S.b + ') - P(X \\le ' + (S.a - 1) + ') \\approx ' + texNum(cdf(n, p, S.b) - (S.a ? cdf(n, p, S.a - 1) : 0), 4);
+            out.innerHTML = '<p style="margin:0 0 6px">$X$ ist binomialverteilt mit $n = ' + n + '$ und $p = ' + pt + '$.</p>' +
+                '<p style="margin:0 0 6px">$' + tex + '$</p>' +
+                '<p style="margin:0">Erwartungswert $\\mu = n \\cdot p = ' + texNum(mu, 2) + '$ · Standardabweichung $\\sigma = \\sqrt{n \\cdot p \\cdot (1 - p)} \\approx ' + texNum(sd, 3) + '$</p>';
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- Bernoulli chain as a tree: all paths with exactly k hits ---------- */
+    W('bernoulli-baum', function (box) {
+        const S = { n: 3, p: 0.3, k: 1 };
+        const ctl = div(box, 'b-ctrls');
+        ctl.innerHTML = '<span class="b-ctrl">Stufen $n$:</span>';
+        B.seg(ctl, [[2, '2'], [3, '3'], [4, '4']], S.n, v => { S.n = +v; S.k = Math.min(S.k, S.n); kSeg(); render(); }, 'Anzahl der Stufen');
+        const kc = div(box, 'b-ctrls');
+        B.range(div(box, ''), { label: 'Trefferwahrscheinlichkeit $p$', min: 0.05, max: 0.95, step: 0.05, value: S.p, fmt: v => fmt(v, 2), onInput: v => { S.p = v; render(); } });
+        const tree = div(box, 'b-svgbox b-scroll');
+        const out = div(box, 'b-out');
+        function kSeg() {
+            kc.innerHTML = '<span class="b-ctrl">Genau $k$ Treffer:</span>';
+            B.seg(kc, Array.from({ length: S.n + 1 }, (_, k) => [k, String(k)]), S.k, v => { S.k = +v; render(); }, 'Anzahl der Treffer');
+            math(kc);
+        }
+        function render() {
+            const { n, p, k } = S, ps = fmt(p, 2), qs = fmt(1 - p, 2);
+            const build = (key, d) => d === n ? [] : [['T', ps, 'r'], ['N', qs, 'b']].map(([L, e, cls]) => ({ key: key + L, cls, label: L, edge: e, children: build(key + L, d + 1) }));
+            const hits = key => (key.match(/T/g) || []).length;
+            const on = key => { const t = hits(key); return t <= k && k - t <= n - key.length; };
+            tree.innerHTML = treeSVG({ key: '', children: build('', 0) }, {
+                stepX: n === 4 ? 105 : 130, spacing: n === 4 ? 34 : 44, leafW: 118, minW: 0, aria: 'Baumdiagramm einer Bernoulli-Kette',
+                on: key => key.length === n ? hits(key) === k : on(key),
+                leaf: (node, w) => '<text x="10" y="20">' + node.key + '</text><text class="st-leaf-p" x="' + (w - 10) + '" y="20" text-anchor="end">' + fmt(Math.pow(p, hits(node.key)) * Math.pow(1 - p, n - hits(node.key)), 4) + '</text>'
+            });
+            const c = binom(n, k), pathP = Math.pow(p, k) * Math.pow(1 - p, n - k);
+            out.innerHTML = '<p style="margin:0 0 6px">Pfade mit genau ' + k + ' Treffern: $\\binom{' + n + '}{' + k + '} = ' + c + '$ · jeder hat die Wahrscheinlichkeit $' + texNum(p, 2) + '^{' + k + '} \\cdot ' + texNum(1 - p, 2) + '^{' + (n - k) + '} \\approx ' + texNum(pathP, 4) + '$</p>' +
+                '<p style="margin:0">Formel von Bernoulli: $P(X = ' + k + ') = \\binom{' + n + '}{' + k + '} \\cdot p^{' + k + '} \\cdot (1 - p)^{' + (n - k) + '} \\approx ' + texNum(c * pathP, 4) + '$</p>';
+            math(out);
+        }
+        kSeg(); render(); math(ctl);
     });
 })();

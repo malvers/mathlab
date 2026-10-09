@@ -152,6 +152,7 @@
         }
         say('Grafiken werden gezeichnet …');
         await document.fonts.ready;
+        await Buch.settled();                                              // widgets that load first (Three.js)
         await wait(900);                                                   // widgets draw, KaTeX settles
         window.dispatchEvent(new Event('resize'));
         await wait(400);
@@ -164,6 +165,10 @@
         say('Seiten werden gesetzt … (das dauert einen Moment)');
         const t0 = performance.now();
         if (window.Farbschema && Farbschema.freeze) Farbschema.freeze();     // Paged.js copies the sheets: nothing more to translate
+        // the running head names the book (kapitel.js), e.g. "DOC ALVERS MATHE-LABOR · MATHEMATIK 12"
+        const head = document.createElement('style');
+        head.textContent = '@page { @top-right { content: "DOC ALVERS MATHE-LABOR · ' + String(B.short || '').toUpperCase().replace(/"/g, '') + '"; } }';
+        document.head.appendChild(head);
         // only the book goes onto the pages; the status bar stays outside
         const frag = document.createDocumentFragment();
         frag.appendChild(book);

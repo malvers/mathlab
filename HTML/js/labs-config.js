@@ -35,6 +35,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathe12",
+        "href": "buch/mathe12/index.html",
+        "title": "Mathematik BGY 12",
+        "description": "Unser zweites Buch: das interaktive Lehrbuch Mathematik für das Berufliche Gymnasium, Klasse 12, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan des Grundkurses. Elf Kapitel in der Reihenfolge des Schuljahres – bedingte Wahrscheinlichkeit, Zufallsgrößen und Binomialverteilung, die ganze Differenzialrechnung von Grenzwerten über Ableitungsregeln bis zu Steckbrief- und Extremwertaufgaben, dazu Vektoren im Raum und das Skalarprodukt. Zum Ausprobieren: Sekanten, die zu Tangenten werden, ein Ableitungstrainer, Funktionen aus ziehbaren Bedingungen, Schachtel und Dose zum Optimieren und Vektoren in echtem 3D. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik 12 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe12"],
+        "category": "buecher neu funktionen stochastik geometrie grade12",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 berufliches gymnasium bgy sachsen lehrplan grundkurs kapitel bedingte wahrscheinlichkeit vierfeldertafel unabhaengigkeit zufallsgroesse erwartungswert varianz standardabweichung faires spiel binomialverteilung bernoulli binomialkoeffizient grenzwert asymptote stetigkeit ableitung differenzenquotient differenzialquotient sekante tangente normale ableitungsregeln potenzregel produktregel e-funktion sinus monotonie extrempunkt hochpunkt tiefpunkt wendepunkt kruemmung symmetrie steckbrief extremwertproblem optimierung vektoren vektor raum betrag mittelpunkt schwerpunkt skalarprodukt orthogonal winkel parallelogramm 3d aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",

@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 100 labs, 1758 terms, 2026-10-09
+ * 101 labs, 1772 terms, 2026-10-09
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -62,6 +62,7 @@ const LABS_TERMS = {
     "kreisteilung": ["Abspielen", "Allgemeine Lage", "Anhalten", "Anzahl n", "Die Folge", "Flächen", "Flächen färben", "Kreisteilung", "Kreisteilungsproblem", "maximal möglich", "Nummern", "Punkte auf dem Kreis", "Punkte n", "Regelmäßig", "Schnittpunkte", "Sehnen", "weniger als möglich", "Zählwerk"],
     "langley": ["ALLE AN/AUS", "Basis AB", "Diagonale AC", "Diagonale BD", "Geometrie & Trigonometrie", "Linie CD", "Phase 1: Rechtes Dreieck", "Phase 2: Linkes Dreieck", "Phase 3: Innere Winkel", "Phase 4: Das Rätsel", "Phase 5: Lösung", "Punkt P", "Schenkel AD", "Symmetrieachse EP", "Verlängerung zu E", "ΔABC (Sinussatz)", "ΔABD (Sinussatz)", "ΔBCD & Lösung"],
     "lehrbuch-mathe11": ["Abkühlen", "Bremsweg", "Ein Mathebuch, das zurückrechnet", "exponentiell", "Funktionen und ihre Eigenschaften", "Gleichungen, Formeln, Figuren", "Graphen und Parameter", "Kerze", "linear", "Lineare Gleichungssysteme und Matrizen", "Mathematik", "Mathematik · Berufliches Gymnasium 11", "Numerische Verfahren und Simulationen", "Periodische Vorgänge", "Quadratische Funktionen und Gleichungen", "Regression", "sin x", "Tag des Jahres", "Umkehrfunktionen und Logarithmus", "Wachstum und Zerfall", "Weltbevölkerung", "Zeitraum"],
+    "lehrbuch-mathe12": ["Ableitungsregeln", "Bedingte Wahrscheinlichkeit", "Die Ableitung", "Die Binomialverteilung", "Ein Mathebuch, das zurückrechnet", "Graphen untersuchen", "Grenzwerte", "Mathematik", "Mathematik · Berufliches Gymnasium 12", "Monotonie, Extrema, Wendepunkte", "Skalarprodukt und Winkel", "Steckbriefe und Extremwertprobleme", "Vektoren im Raum", "Zufallsgrößen"],
     "lissajous": ["Amplitude A", "Amplitude B", "Kurvenfarbe (Hue)", "LISSAJOUS · PARAMETRISCHE KURVEN", "Pfad-Umfang (× Perioden)", "Phase δ (Grad)", "SIMULATION", "ωₓ (Kreisfrequenz)", "ωᵧ (Kreisfrequenz)"],
     "litchi3d": ["Form-Faktor (Y)", "Frucht-Reife", "SDF KONTROLLE", "Stachel-Intensität"],
     "logikspiel": ["Antwort", "BESTÄTIGEN", "HILFE ANFORDERN", "HILFE-PROTOKOLL", "LEVEL", "MISSIONS-STATUS", "MUL (X)", "NÄCHSTES PROTOKOLL", "PROTOKOLL GELÖST!", "PROTOKOLL NEUSTART", "PROTOKOLL-AUSWAHL", "RECHEN-MODUS", "Zahlen-Puzzle", "ZEIT", "ZÜGE"],

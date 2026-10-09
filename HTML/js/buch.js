@@ -54,6 +54,23 @@
     }
     // the same inside TeX: the comma must not add space ({,})
     function texNum(x, digits = 4) { return fmt(x, digits).replace(',', '{,}'); }
+    // terms in TeX: signed number "+ 2{,}5" / "- 2{,}5" (empty for 0; first = no plus in front)
+    function sg(v, d = 2, first = false) {
+        if (Math.abs(v) < 1e-12) return '';
+        const s = texNum(Math.abs(v), d);
+        if (first) return (v < 0 ? '-' : '') + s;
+        return v < 0 ? ' - ' + s : ' + ' + s;
+    }
+    // coefficient in front of a variable: 1 → "", −1 → "-", else the number
+    function co(v, d = 2) { return Math.abs(v - 1) < 1e-9 ? '' : Math.abs(v + 1) < 1e-9 ? '-' : texNum(v, d); }
+    // signed term with a variable: "+ x", "- 2{,}5x", empty for 0
+    function sgx(v, x, d = 2) { if (Math.abs(v) < 1e-12) return ''; const a = Math.abs(v); return (v < 0 ? ' - ' : ' + ') + (Math.abs(a - 1) < 1e-9 ? '' : texNum(a, d)) + x; }
+    // a term in JS notation ("x^2", "2^x", "sin(x)") as a function of x
+    function compile(expr) {
+        const e = String(expr).replace(/\^/g, '**');
+        // eslint-disable-next-line no-new-func
+        return new Function('x', 'with (Math) { return (' + e + '); }');
+    }
     function pct(x, digits = 1) { return fmt(x * 100, digits) + ' %'; }
 
     // what a student types: "1/36", "0,25", "25 %", "≈ 0.49", "1 / 3"
@@ -497,6 +514,11 @@
     // builds tasks, self-checks, examples, lab cards, widgets and maths inside root - also for content loaded later
     // (the print edition, js/buch-druck.js, fetches all chapters into one page and renders them with this)
     let PRINT = false;
+    // widgets that load something first (Three.js for the vector chapters) hand in a promise; the print edition
+    // waits for all of them before it freezes the canvases (js/buch-druck.js)
+    const pending = [];
+    function later(p) { pending.push(Promise.resolve(p).catch(e => dbg('later: ' + e.message))); return p; }
+    function settled() { return Promise.all(pending.splice(0)); }
     function render(root, opt = {}) {
         PRINT = !!opt.print;
         buildTasks(root);
@@ -520,5 +542,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 
-    window.Buch = { widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele };
+    window.Buch = { widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile };
 })();
