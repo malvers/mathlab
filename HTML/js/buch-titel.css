@@ -30,12 +30,117 @@
     font-family: 'Orbitron', sans-serif; font-size: clamp(0.45rem, 1.3vw, 0.6rem); letter-spacing: 1.4px; color: rgba(255, 255, 255, 0.72);
 }
 
-/* the opening of the book page: cover left, a few words and the way in on the right */
-.b-start { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 40px; align-items: center; margin: 34px 0 10px; }
+/* the opening of the book page: cover left; on the right the cinema banner flush with the top of the cover
+ * in the corner, below it a few words and the way in */
+.b-start {
+    display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 40px;
+    align-items: center; margin: 34px 0 10px;
+}
+.b-start > .b-titel { grid-row: 1 / span 2; align-self: start; }
+.b-start > .b-kino { grid-column: 2; grid-row: 1; align-self: start; justify-self: end; width: max(51%, 300px); margin: 0; }
+.b-start > .b-start-text { grid-column: 2; grid-row: 2; }
 .b-start-text h2 { font-family: 'Orbitron', sans-serif; font-size: clamp(1.2rem, 2.4vw, 1.6rem); margin: 0 0 14px; letter-spacing: 0.6px; }
 .b-start-acts { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; }
 .b-start-acts a { text-decoration: none; }
 @media (max-width: 860px) {
-    .b-start { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+    .b-start { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; gap: 26px; }
+    .b-start > .b-titel, .b-start > .b-kino, .b-start > .b-start-text { grid-column: 1; grid-row: auto; }
+    .b-start > .b-kino { width: 100%; }
     .b-titel { margin: 0 auto; }
+}
+
+/* "The Making of" - a cinema banner above the start text that leads to the deck about how the book was made.
+ * Film strip top and bottom, projector light, grain, a gold title with a sweeping shine and a play button.
+ * It sits in this sheet so it stays dark like the cover in every colour scheme. */
+.b-kino {
+    display: block; position: relative; margin: 0 0 24px; border-radius: 10px; overflow: hidden; container-type: inline-size;
+    text-decoration: none; color: #fff; background: #040507;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(245, 194, 66, 0.4);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.b-kino:hover, .b-kino:focus-visible {
+    transform: translateY(-3px); outline: none;
+    box-shadow: 0 24px 54px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(245, 194, 66, 0.9), 0 0 38px rgba(245, 194, 66, 0.35);
+}
+.b-kino-strip {
+    display: block; height: 9px; background-color: #040507; background-repeat: repeat-x; background-position: 0 50%; background-size: 13.5px 9px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='16'%3E%3Crect x='7' y='4' width='10' height='8' rx='2' fill='%23e8dcc0' fill-opacity='.85'/%3E%3C/svg%3E");
+    animation: b-kino-run 4s linear infinite;
+}
+.b-kino:hover .b-kino-strip { animation-duration: 0.45s; }
+.b-kino-frame {
+    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: clamp(12px, 4cqi, 24px); align-items: center;
+    padding: clamp(14px, 4.5cqi, 24px) clamp(16px, 5cqi, 28px); overflow: hidden;
+    background: linear-gradient(160deg, #0f2547 0%, #071328 55%, #03070f 100%);
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.75);
+}
+.b-kino-frame > :not(.b-kino-beam):not(.b-kino-play) { grid-column: 1; position: relative; z-index: 1; display: block; }
+/* projector light from the top left, a red glow bottom right, flickering a little like a real projector */
+.b-kino-beam {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(70% 140% at 0% 0%, rgba(245, 194, 66, 0.3), transparent 62%),
+                radial-gradient(60% 120% at 100% 100%, rgba(176, 36, 24, 0.35), transparent 65%);
+    animation: b-kino-flicker 3.2s steps(1) infinite;
+}
+/* film grain on top of everything */
+.b-kino-frame::after {
+    content: ""; position: absolute; inset: -50%; z-index: 2; pointer-events: none; opacity: 0.13; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: b-kino-grain 0.9s steps(4) infinite;
+}
+.b-kino-pre {
+    font-family: 'Orbitron', sans-serif; font-size: clamp(0.5rem, 2cqi, 0.72rem); letter-spacing: 0.3em; color: rgba(255, 255, 255, 0.78);
+}
+.b-kino-title {
+    margin: 0.28em 0 0.22em; font-family: 'Orbitron', sans-serif; font-weight: 700; line-height: 1.05; letter-spacing: 0.06em; white-space: nowrap;
+    font-size: clamp(1.1rem, 6.4cqi, 2.6rem);
+    background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.95) 50%, transparent 58%) 100% 0 / 250% 100% no-repeat,
+                linear-gradient(180deg, #fff6d6 0%, rgb(245, 194, 66) 45%, #c08a1e 72%, #ffe08a 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+    filter: drop-shadow(0 0 14px rgba(245, 194, 66, 0.35));
+    animation: b-kino-in 1.4s ease-out both, b-kino-shine 6s 1.4s ease-in-out infinite;
+}
+.b-kino-tag { font-family: 'Orbitron', sans-serif; font-size: clamp(0.72rem, 3cqi, 1.05rem); letter-spacing: 0.04em; color: #e8eef7; }
+.b-kino-tag b { color: rgb(245, 194, 66); font-weight: 700; font-size: 1.15em; white-space: nowrap; }
+.b-kino-credits {
+    margin-top: clamp(8px, 2.6cqi, 14px); padding-top: clamp(6px, 1.8cqi, 9px); border-top: 1px solid rgba(245, 194, 66, 0.35);
+    font-family: Raleway, sans-serif; font-weight: 600; font-variant-numeric: lining-nums;
+    font-size: clamp(0.62rem, 2.5cqi, 0.82rem); letter-spacing: 0.1em; line-height: 1.5; color: rgba(255, 255, 255, 0.82);
+}
+.b-kino-credits > span { white-space: nowrap; }
+.b-kino-credits > span + span::before { content: " · "; }
+.b-kino-play {
+    grid-column: 2; grid-row: 1 / span 4; position: relative; z-index: 1; display: grid; place-items: center;
+    width: clamp(42px, 13cqi, 68px); aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff1c4, rgb(245, 194, 66) 45%, #b47d16 100%);
+    box-shadow: 0 0 22px rgba(245, 194, 66, 0.55); transition: transform 0.25s ease;
+}
+.b-kino-play svg { width: 46%; height: 46%; margin-left: 8%; fill: #0a1630; }
+.b-kino-play::before, .b-kino-play::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(245, 194, 66, 0.8);
+    animation: b-kino-ring 2.2s ease-out infinite;
+}
+.b-kino-play::after { animation-delay: 1.1s; }
+.b-kino:hover .b-kino-play { transform: scale(1.1); }
+
+/* narrow banner (phone): line one and the credits run under the play button, the credits in two lines */
+@container (max-width: 480px) {
+    .b-kino .b-kino-frame > .b-kino-pre, .b-kino .b-kino-frame > .b-kino-credits { grid-column: 1 / -1; }
+    .b-kino-play { grid-row: 2 / span 2; width: 13cqi; }
+    .b-kino-frame { padding: 5cqi; column-gap: 4cqi; }
+    .b-kino-title { font-size: 6cqi; }
+    .b-kino-pre { letter-spacing: 0.16em; }
+    .b-kino-tag { font-size: 3.6cqi; }
+    .b-kino-credits > span { display: block; }
+    .b-kino-credits > span + span::before { content: none; }
+}
+
+@keyframes b-kino-run { to { background-position: 13.5px 50%; } }
+@keyframes b-kino-flicker { 0%, 100% { opacity: 1; } 31% { opacity: 0.86; } 34% { opacity: 1; } 62% { opacity: 0.92; } 64% { opacity: 1; } }
+@keyframes b-kino-grain { 0% { transform: translate(0, 0); } 25% { transform: translate(-7%, 4%); } 50% { transform: translate(5%, -6%); } 75% { transform: translate(-3%, -2%); } }
+@keyframes b-kino-in { from { opacity: 0; letter-spacing: 0.4em; filter: blur(6px) drop-shadow(0 0 14px rgba(245, 194, 66, 0.35)); } }
+@keyframes b-kino-shine { 0% { background-position: 100% 0, 0 0; } 35%, 100% { background-position: 0% 0, 0 0; } }
+@keyframes b-kino-ring { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.7); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .b-kino, .b-kino *, .b-kino *::before, .b-kino *::after, .b-kino-frame::after { animation: none !important; transition: none !important; }
 }
