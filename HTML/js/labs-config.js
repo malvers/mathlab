@@ -112,6 +112,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathegy12",
+        "href": "buch/mathegy12/index.html",
+        "title": "Mathematik GY 12",
+        "description": "Unser neuntes Buch: das interaktive Lehrbuch Mathematik für das Gymnasium, Jahrgangsstufe 12, Grundkurs, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Elf Kapitel in der Reihenfolge des Schuljahres – Stammfunktionen und Integrieren, das bestimmte Integral mit dem Hauptsatz, Flächeninhalte, numerische Integration, beurteilende Statistik mit Schätzen und Signifikanztests, Skalarprodukt, Vektorprodukt und Normalenform, Schnittwinkel, Abstände, extremale Entfernungen und Spiegelungen, Flächen und Scharen und ein Kapitel zur Abiturvorbereitung. Zum Ausprobieren: ein Integrier-Trainer, Ober- und Untersummen, die zum Integral zusammenrücken, tausend Stichproben aus einer Abfüllanlage, Schnittwinkel und Abstände in echtem 3D, der nächste Punkt einer Kurve und Geradenscharen. Mit Druckausgabe, QR-Code je Kapitel, Lösungsanhang und 29 Übungsblättern online.",
+        "tagline": "Buch / Mathematik GY 12 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy12"],
+        "category": "buecher neu funktionen stochastik geometrie grade12",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 jahrgangsstufe 12 gymnasium gy grundkurs abitur sachsen lehrplan kapitel stammfunktion unbestimmtes integral integrationskonstante grundintegrale potenzregel integrationsregeln lineare verkettung cas bestimmtes integral bestand aenderungsrate obersumme untersumme riemann hauptsatz integralfunktion orientierter flaecheninhalt flaeche zwischen graphen numerische integration rechteckverfahren trapezverfahren keplersche fassregel beurteilende statistik stichprobe schaetzen hochrechnung stichprobenmittel stichprobenvarianz signifikanztest nullhypothese ablehnungsbereich signifikanzniveau fehler erster art fehler zweiter art zweiseitiger test skalarprodukt vektorprodukt kreuzprodukt normalenvektor normalenform koordinatenform spurpunkte schnittwinkel winkel gerade ebene abstand lotfusspunkt hessesche normalform spiegelung spiegelpunkt extremale entfernung abstandsfunktion funktionenschar ortskurve geradenschar parameter aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",
