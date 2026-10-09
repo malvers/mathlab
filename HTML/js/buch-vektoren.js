@@ -9,6 +9,9 @@
  *   ebene3d       a plane: parametric form → normal vector (cross product) → coordinate equation, trace triangle;
  *                 point test; line through the plane with intersection point and angle
  *   pyramide      pyramid and (oblique) prism: base, volume, lateral surface with cross products
+ *   kreuzprodukt  the cross product of two vectors: normal vector, area of parallelogram and triangle (book FOS 12)
+ *   lot3d         the perpendicular from a point to a plane: foot, distance, mirror point (book FOS 12)
+ *   zentralprojektion  a box and a row of posts in central projection with a draggable vanishing point, 2D (book FOS 12)
  * Mathematical axes: x towards the viewer, y to the right, z up (as in the school book); in Three.js that is (y, z, x).
  * Labels are sprites inside the scene, so the frozen print picture (js/buch-druck.js) keeps them.
  */
@@ -463,7 +466,7 @@
                         html = 'Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ' + texNum(dist, 3) + '$.';
                     }
                 }
-                out.innerHTML = '<p style="margin:0 0 6px">$g\\colon \\vec{x} = ' + vtex(P) + ' + t \\cdot ' + vtex(u) + '$, $\;h\\colon \\vec{x} = ' + vtex(Q) + ' + s \\cdot ' + vtex(v) + '$</p><p style="margin:0">' + html + '</p>';
+                out.innerHTML = '<p style="margin:0 0 6px">$g\\colon \\vec{x} = ' + vtex(P) + ' + t \\cdot ' + vtex(u) + '$, $\\;h\\colon \\vec{x} = ' + vtex(Q) + ' + s \\cdot ' + vtex(v) + '$</p><p style="margin:0">' + html + '</p>';
                 math(out); R.render();
             });
         }
@@ -576,6 +579,182 @@
                 }
                 out.innerHTML = html; math(out); R.render();
             });
+        }
+        draw();
+    });
+
+    /* =========================== Book FOS 12: cross product, perpendicular foot, central projection =========================== */
+    // a coordinate equation "x + 2y + 2z" from a normal vector (the same writing as in ebene3d)
+    const coordTex = n => n.map((x, i) => ({ x, v: 'xyz'[i] })).filter(o => !near0(o.x)).map((o, i) => (i ? (o.x < 0 ? ' - ' : ' + ') : (o.x < 0 ? '-' : '')) + (Math.abs(Math.abs(o.x) - 1) < 1e-9 ? '' : n2(Math.abs(o.x))) + o.v).join('') || '0';
+    const par = x => (x < 0 ? '(' + n2(x) + ')' : n2(x));
+    // two unit vectors in the plane with normal n (for patches and right-angle marks)
+    function inPlane(n) {
+        const nh = mul(1 / len(n), n), a = Math.abs(nh[0]) < 0.8 ? [1, 0, 0] : [0, 1, 0];
+        const e1 = (() => { const c = cross(nh, a); return mul(1 / len(c), c); })();
+        return [e1, cross(nh, e1)];
+    }
+
+    /* ---------- the cross product: a normal vector and the area of parallelogram and triangle ---------- */
+    W('kreuzprodukt', function (box) {
+        const PRE = {
+            schief: { k: 'zwei Vektoren', u: [2, 1, 0], v: [1, 3, 2] },
+            dach: { k: 'Dachfläche', u: [0, 4, 0], v: [-2, 0, 2] },
+            achsen: { k: 'in der x-y-Ebene', u: [3, 0, 0], v: [0, 2, 0] },
+            para: { k: 'parallel', u: [1, 2, 1], v: [2, 4, 2] }
+        };
+        const S = { u: PRE.schief.u.slice(), v: PRE.schief.v.slice(), tri: false };
+        presetRow(box, PRE, pr => { cu.set(pr.u.slice()); cv.set(pr.v.slice()); draw(); });
+        const inBox = div(box, 'vk-inputs');
+        const cu = coords(inBox, 'u', S.u, draw, 'cyan'), cv = coords(inBox, 'v', S.v, draw, 'phi');
+        B.seg(div(inBox, 'b-ctrls'), [['0', 'Parallelogramm'], ['1', 'Dreieck']], '0', v => { S.tri = v === '1'; draw(); }, 'Welche Fläche?');
+        math(inBox);
+        const R = new Raum(box, { height: 380 });
+        const out = div(box, 'b-out');
+        R.onScheme = () => draw();
+        const IJ = [[1, 2], [2, 0], [0, 1]];
+        function draw() {
+            R.ready.then(() => {
+                R.clear();
+                const { u, v } = S, O = [0, 0, 0], n = cross(u, v), A = len(n), s = add(u, v);
+                R.face(S.tri ? [O, u, v] : [O, u, s, v], 'lambda', 0.22);
+                if (S.tri) R.rod(u, v, 'lambda', 0.025);
+                else { R.line(u, s, 'dim', { dash: true }); R.line(v, s, 'dim', { dash: true }); }
+                R.arrow(O, u, 'cyan'); R.arrow(O, v, 'phi');
+                R.label('u', add(u, [0, 0, 0.4]), 'cyan'); R.label('v', add(v, [0, 0, 0.4]), 'phi');
+                const comp = IJ.map(([i, j]) => n2(u[i]) + ' \\cdot ' + par(v[j]) + ' - ' + par(u[j]) + ' \\cdot ' + par(v[i]));
+                let html = '<p style="margin:0 0 6px">$\\vec{u} \\times \\vec{v} = \\begin{pmatrix} ' + comp.join(' \\\\ ') + ' \\end{pmatrix} = ' + vtex(n) + '$</p>';
+                if (A < 1e-9) {
+                    html += '<p style="margin:0">$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.</p>';
+                } else {
+                    // the normal drawn at most 4 units long, so it stays in the picture
+                    const nn = A > 4 ? mul(4 / A, n) : n;
+                    R.arrow(O, nn, 'pink', { r: 0.06 }); R.label('u × v', add(nn, [0, 0, 0.45]), 'pink', 0.36);
+                    const q = 0.4, nh = mul(q / A, n), uh = mul(q / len(u), u);
+                    R.line(uh, add(uh, nh), 'white', { opacity: 0.7 }); R.line(add(uh, nh), nh, 'white', { opacity: 0.7 });
+                    html += '<p style="margin:0 0 6px">Probe: $(\\vec{u} \\times \\vec{v}) \\circ \\vec{u} = ' + n2(dot(n, u)) + '$ und $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = ' + n2(dot(n, v)) + '$: Das Vektorprodukt steht senkrecht auf beiden Vektoren' +
+                        (A > 4 ? ' (im Bild verkürzt gezeichnet)' : '') + '.</p>' +
+                        '<p style="margin:0">' + (S.tri ? 'Dreieck: $A = \\tfrac12\\,|\\vec{u} \\times \\vec{v}| = \\tfrac12 \\cdot ' + rootTex(dot(n, n)).split(' \\approx ')[0] + ' \\approx ' + texNum(A / 2, 3) + '$'
+                            : 'Parallelogramm: $A = |\\vec{u} \\times \\vec{v}| = ' + rootTex(dot(n, n)) + '$') + ' Flächeneinheiten</p>';
+                }
+                out.innerHTML = html; math(out); R.render();
+            });
+        }
+        draw();
+    });
+
+    /* ---------- the perpendicular from a point to a plane: foot, distance, mirror point ---------- */
+    W('lot3d', function (box) {
+        const PRE = {
+            std: { k: 'Punkt über E', n: [1, 2, 2], d: 6, P: [3, 3, 3] },
+            ursprung: { k: 'Ursprung', n: [2, 1, 2], d: 9, P: [0, 0, 0] },
+            unten: { k: 'Punkt unter E', n: [2, 2, 1], d: 8, P: [0, 1, -1] },
+            in: { k: 'Punkt in E', n: [1, 2, 2], d: 6, P: [2, 1, 1] }
+        };
+        const S = { n: PRE.std.n.slice(), d: PRE.std.d, P: PRE.std.P.slice(), mirror: false };
+        presetRow(box, PRE, pr => { cn.set(pr.n.slice()); cP.set(pr.P.slice()); S.d = pr.d; rd.set(pr.d); draw(); });
+        const inBox = div(box, 'vk-inputs');
+        const cn = coords(inBox, 'n', S.n, draw, 'pink'), cP = coords(inBox, 'P', S.P, draw, 'cyan');
+        const t = div(inBox, 'b-ctrls');
+        t.innerHTML = '<label class="b-ctrl"><input type="checkbox"> Spiegelpunkt P′ zeigen</label>';
+        t.querySelector('input').addEventListener('change', e => { S.mirror = e.target.checked; draw(); });
+        math(inBox);
+        const rd = B.range(div(box, ''), { label: 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$', min: -12, max: 12, step: 1, value: S.d, fmt: v => String(v).replace('-', '−'), onInput: v => { S.d = v; draw(); } });
+        const R = new Raum(box, { height: 400 });
+        const out = div(box, 'b-out');
+        R.onScheme = () => draw();
+        function draw() {
+            R.ready.then(() => {
+                R.clear();
+                const { n, d, P } = S, nn = dot(n, n);
+                if (nn < 1e-9) { out.innerHTML = '<p style="margin:0">Der Normalenvektor darf nicht der Nullvektor sein.</p>'; R.render(); return; }
+                const nP = dot(n, P), t = (d - nP) / nn, F = add(P, mul(t, n)), dist = Math.abs(t) * Math.sqrt(nn), nh = mul(1 / Math.sqrt(nn), n);
+                // the plane: its trace triangle if the axis intercepts lie in the picture, else a square around F
+                const ax = [0, 1, 2].map(i => near0(n[i]) ? null : d / n[i]);
+                if (ax.every(x => x != null && Math.abs(x) <= 7 && !near0(x))) {
+                    const T = ax.map((x, i) => [0, 1, 2].map(j => (j === i ? x : 0)));
+                    R.face(T, 'violet', 0.26); T.forEach((p, i) => R.rod(p, T[(i + 1) % 3], 'violet', 0.022));
+                } else {
+                    const [e1, e2] = inPlane(n), c = [[-3, -3], [3, -3], [3, 3], [-3, 3]].map(([a, b]) => add(F, add(mul(a, e1), mul(b, e2))));
+                    R.face(c, 'violet', 0.22);
+                }
+                const [e1n] = inPlane(n);
+                R.label('E', add(F, add(mul(-1.8, e1n), [0, 0, 0.2])), 'violet', 0.42);
+                // the perpendicular line through P and F, the distance in red, the normal at F
+                const lo = Math.min(0, t * Math.sqrt(nn)) - 1.3, hi = Math.max(0, t * Math.sqrt(nn)) + 1.3;
+                R.line(add(P, mul(lo, nh)), add(P, mul(hi, nh)), 'dim', { dash: true });
+                if (dist > 1e-9) R.rod(P, F, 'red', 0.04);
+                const up = t <= 0 ? 1 : -1;                                  // the side of the plane where P lies
+                const foot = add(F, mul(1.4, e1n)), nUp = mul(1.3 * (dist > 1e-9 ? up : 1), nh);   // the normal beside the foot, not hidden by PF
+                R.arrow(foot, add(foot, nUp), 'pink', { r: 0.04 }); R.label('n', add(foot, mul(1.25, nUp)), 'pink', 0.36);
+                if (dist > 1e-9) {                                          // a right-angle mark at the foot
+                    const [e1] = inPlane(n), q = 0.32, a1 = mul(q, e1), a2 = mul(q * up, nh);
+                    R.line(add(F, a1), add(F, add(a1, a2)), 'white', { opacity: 0.8 }); R.line(add(F, add(a1, a2)), add(F, a2), 'white', { opacity: 0.8 });
+                }
+                R.dot(P, 'cyan'); R.label('P', add(P, [0, 0, 0.45]), 'cyan');
+                R.dot(F, 'lambda', 0.11); R.label('F', add(F, [0, 0.35, -0.4]), 'lambda');
+                let html = '<p style="margin:0 0 6px">$E\\colon ' + coordTex(n) + ' = ' + n2(d) + '$ · Lotgerade $l\\colon \\vec{x} = ' + vtex(P) + ' + t \\cdot ' + vtex(n) + '$</p>' +
+                    '<p style="margin:0 0 6px">$l$ in $E$ einsetzen: $' + n2(nP) + sgn(nn) + 't = ' + n2(d) + '$, also $t = ' + texNum(t, 3) + '$ · Lotfußpunkt $F(' + g3(F) + ')$</p>';
+                if (dist < 1e-9) html += '<p style="margin:0">$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.</p>';
+                else {
+                    const exact = Math.abs(dist - Math.round(dist)) < 1e-9, dTex = (exact ? ' = ' : ' \\approx ') + texNum(dist, 3), nTex = rootTex(nn).split(' \\approx ')[0];
+                    html += '<p style="margin:0' + (S.mirror ? ' 0 6px' : '') + '">Abstand: $|\\vec{PF}| = |t| \\cdot |\\vec{n}| = ' + texNum(Math.abs(t), 3) + ' \\cdot ' + nTex + dTex + '$ · ohne Lotfußpunkt: $\\dfrac{|' + n2(nP) + ' - ' + par(d) + '|}{' + nTex + '}' + dTex + '$</p>';
+                    if (S.mirror) {
+                        const Pm = add(P, mul(2 * t, n));
+                        R.line(F, Pm, 'violet', { dash: true }); R.dot(Pm, 'violet', 0.11); R.label('P′', add(Pm, [0, 0, -0.45]), 'violet');
+                        html += '<p style="margin:0">Spiegelpunkt: $t$ verdoppeln, $\\vec{OP\'} = \\vec{OP} + 2t \\cdot \\vec{n}$, also $P\'(' + g3(Pm) + ')$</p>';
+                    }
+                }
+                out.innerHTML = html; math(out); R.render();
+            });
+        }
+        const sgn = x => ' ' + (x < 0 ? '-' : '+') + ' ' + n2(Math.abs(x));
+        draw();
+    });
+
+    /* ---------- central projection: one vanishing point, posts that shrink with the depth ---------- */
+    W('zentralprojektion', function (box) {
+        const S = { ex: 5, ey: 2.4, f: 6, show: true };
+        const sl = div(box, '');
+        B.range(sl, { label: 'Abstand des Auges $a$', min: 2, max: 14, step: 0.5, value: S.f, fmt: v => fmt(v, 1), onInput: v => { S.f = v; draw(); } });
+        const acts = div(box, 'b-ctrls');
+        acts.innerHTML = '<label class="b-ctrl"><input type="checkbox" checked> Fluchtlinien zeigen</label>';
+        acts.querySelector('input').addEventListener('change', e => { S.show = e.target.checked; draw(); });
+        div(box, 'b-help').textContent = 'Zieh den Fluchtpunkt V. Er liegt auf dem Horizont in Augenhöhe.';
+        const holder = div(box, '');
+        const p = new B.Plot(holder, { x: [0.5, 9.5], y: [-0.3, 3.8], equal: true, height: 340, grid: false, aria: 'Zentralprojektion eines Quaders und einer Pfostenreihe mit Fluchtpunkt' });
+        // equal units on both axes: the height follows the width, so the ground and the horizon both stay in the picture
+        const fit = () => { const w = holder.clientWidth; if (w) p.box.style.height = Math.round(Math.max(240, Math.min(480, w * 0.46))) + 'px'; };
+        if (window.ResizeObserver) new ResizeObserver(fit).observe(holder);
+        fit();
+        const out = div(box, 'b-out');
+        const hs = [{ x: S.ex, y: S.ey, color: 'red' }];
+        p.handles(hs, (i, x, y) => { S.ex = Math.round(Math.max(1, Math.min(9, x)) * 10) / 10; S.ey = Math.round(Math.max(0.3, Math.min(3.5, y)) * 10) / 10; draw(); });
+        // world: picture plane z = 0, the eye at (ex, ey, -a); a point behind the plane is pulled towards the vanishing point
+        const pr = ([x, y, z]) => { const k = S.f / (S.f + z); return [S.ex + (x - S.ex) * k, S.ey + (y - S.ey) * k]; };
+        const BOX = [[5.8, 0, 0], [8, 0, 0], [8, 1.6, 0], [5.8, 1.6, 0]], DEPTH = 3;
+        function draw() {
+            hs[0].x = S.ex; hs[0].y = S.ey;
+            const L = [{ hline: S.ey, color: 'dim' }];
+            const front = BOX.map(pr), back = BOX.map(([x, y, z]) => pr([x, y, z + DEPTH]));
+            // the box: front face parallel to the picture keeps its shape, its depth edges run into V
+            L.push({ polys: [front], color: 'lambda' });
+            front.forEach((q, i) => { L.push({ seg: [q, front[(i + 1) % 4]], color: 'lambda', width: 2.2 }, { seg: [back[i], back[(i + 1) % 4]], color: 'lambda', width: 1.4 }, { seg: [q, back[i]], color: 'lambda', width: 1.6 }); });
+            // the road and a row of equal posts every 2 units of depth
+            const road = [[1.6, 0], [3.6, 0]];
+            road.forEach(([x]) => L.push({ seg: [pr([x, 0, 0]), pr([x, 0, 400])], color: 'cyan', width: 1.6 }));
+            const posts = [0, 2, 4, 6, 8, 10].map(z => [pr([1.2, 0, z]), pr([1.2, 1.8, z])]);
+            posts.forEach(([a, b]) => L.push({ seg: [a, b], color: 'phi', width: 2.4 }));
+            if (S.show) {
+                front.forEach(q => L.push({ seg: [q, [S.ex, S.ey]], color: 'red', dash: true, width: 1 }));
+                L.push({ seg: [posts[0][1], [S.ex, S.ey]], color: 'red', dash: true, width: 1 });
+            }
+            L.push({ text: 'V', at: [S.ex, S.ey], color: 'red', dx: 10, dy: -10 }, { text: 'Horizont', at: [0.55, S.ey], color: 'dim', dy: -8 });
+            p.draw(L);
+            const k8 = S.f / (S.f + 8);
+            out.innerHTML = '<p style="margin:0 0 6px">Fluchtpunkt $V(' + texNum(S.ex, 1) + ' \\mid ' + texNum(S.ey, 1) + ')$ · Bildebene vor dem Quader, Auge im Abstand $a = ' + texNum(S.f, 1) + '$ davor</p>' +
+                '<p style="margin:0 0 6px">Alle Kanten, die in die Tiefe laufen, treffen sich in $V$. Kanten parallel zur Bildebene bleiben parallel und behalten ihr Verhältnis.</p>' +
+                '<p style="margin:0">Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{' + texNum(S.f, 1) + '}{' + texNum(S.f + 8, 1) + '} \\approx ' + texNum(k8, 2) + '$ so hoch wie vorn.</p>';
+            math(out);
         }
         draw();
     });

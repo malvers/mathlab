@@ -68,6 +68,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathefos12",
+        "href": "buch/mathefos12/index.html",
+        "title": "Mathematik FOS 12",
+        "description": "Unser fünftes Buch: das interaktive Lehrbuch Mathematik für die Fachoberschule, Klasse 12, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Dreizehn Kapitel in der Reihenfolge des Schuljahres – Vektoren und Skalarprodukt, Geraden und Ebenen im Raum, Lot, Abstand und Flächen mit dem Vektorprodukt, Grenzwerte und Änderungsraten, Ableitung, Kurvendiskussion, Scharen, Steckbriefe und Extremalaufgaben, Integralrechnung, gebrochenrationale Funktionen und Exponentialfunktionen zur Basis e, ein Trainingskapitel für die FHR-Prüfung und der Wahlbereich Differenzial- und Integralrechnung mit CAS. Zum Ausprobieren: Geraden und Ebenen in echtem 3D drehen, das Vektorprodukt senkrecht auf einem Parallelogramm, das Lot auf eine Ebene mit Spiegelpunkt, eine Sekante, die zur Tangente wird, Polstellen und Lücken aus Linearfaktoren, die Basis mit der Steigung 1 und ein Fluchtpunkt zum Ziehen. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik FOS 12 / 13 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathefos12"],
+        "category": "buecher neu funktionen geometrie oberstufe",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 fachoberschule fos fo sachsen lehrplan fhr fachhochschulreife pruefung kapitel vektoren vektor raum 3d betrag einheitsvektor skalarprodukt winkel orthogonal gerade geraden parametergleichung punktprobe spurpunkte lagebeziehung windschief schnittpunkt schnittwinkel ebene ebenen parameterform koordinatengleichung normalenvektor vektorprodukt kreuzprodukt durchstosspunkt lot lotfusspunkt abstand spiegelpunkt flaecheninhalt parallelogramm dreieck pyramide grenzwert folge stetigkeit aenderungsrate differenzenquotient differenzialquotient ableitung ableitungsregeln kettenregel produktregel quotientenregel tangente normale kurvendiskussion nullstellen vielfachheit symmetrie monotonie extrempunkt wendepunkt kruemmung funktionenschar ortskurve steckbrief extremalaufgabe optimierung stammfunktion integral hauptsatz flaeche gebrochenrational polstelle luecke asymptote e-funktion eulersche zahl exponentialgleichung wachstum zerfall cas geogebra regression zentralprojektion fluchtpunkt aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",

@@ -12,6 +12,9 @@
  *   optimieren    box from a sheet, tin can, fence at a wall: target function, slider, maximum by f' = 0
  *   schar         a family f_a with its members, the extreme points and their locus (Klasse 13, Lernbereich 6)
  *   gewinn        costs, revenue and profit: break-even points and maximum profit for a chosen price
+ *   titelbildfos12  the cover of the FOS 12 book: e-curve with tangent and rectangles, hyperbola, parallelogram with its cross product
+ *   bruchfunktion   rational functions from linear factors: zeros, poles with or without sign change, holes, asymptotes (book FOS 12)
+ *   efunktion       the number e: the base with slope 1 at 0, f(x) = a·e^(bx) + c, continuous compounding (book FOS 12)
  * Looks: js/buch.css (section "Widgets of the calculus chapters").
  */
 (function () {
@@ -702,5 +705,237 @@
             math(out);
         }
         render();
+    });
+
+    /* =========================== Book FOS 12 =========================== */
+
+    /* ---------- the cover of the FOS 12 book ---------- */
+    // One picture per Lernbereich, calm like the cover of book 12: an exponential curve u·e^(-u) with its high point and
+    // the tangent at the point of inflection (LB 2), rectangles under it (LB 3), a hyperbola with its two asymptotes at the
+    // bottom (LB 4), and in the free corner beside the title a parallelogram in space with its cross product standing
+    // perpendicular on it (LB 1).
+    W('titelbildfos12', function (box) {
+        const Wd = 600, Ht = 850, X = x => (x + 3) / 9 * Wd, Y = y => (10 - y) / 13 * Ht;
+        const n1 = v => v.toFixed(1);
+        const path = (g, a, b, n = 160) => {
+            let d = '';
+            for (let i = 0; i <= n; i++) { const x = a + (b - a) * i / n; d += (i ? 'L' : 'M') + n1(X(x)) + ' ' + n1(Y(g(x))); }
+            return d;
+        };
+        // f(x) = A·u·e^(-u/s) with u = x + x0: zero at -x0, high point at u = s, point of inflection at u = 2s
+        const x0 = 2.2, s = 1.6, A = 5.44;
+        const f = x => A * (x + x0) * Math.exp(-(x + x0) / s);
+        const xH = s - x0, xW = 2 * s - x0, yW = f(xW), mW = A * Math.exp(-2) * -1;
+        let grid = '';
+        for (let x = -3; x <= 6; x++) grid += '<line x1="' + X(x) + '" y1="' + Y(5.8) + '" x2="' + X(x) + '" y2="' + Ht + '" />';
+        for (let y = -3; y <= 5; y++) grid += '<line x1="0" y1="' + Y(y) + '" x2="' + Wd + '" y2="' + Y(y) + '" />';
+        // midpoint rectangles under the falling part of the curve
+        let bars = '';
+        for (let k = 0; k < 8; k++) {
+            const a = 1.6 + k * 0.4, h = f(a + 0.2);
+            bars += '<rect x="' + n1(X(a) + 1) + '" y="' + n1(Y(h)) + '" width="' + n1(X(0.4) - X(0) - 2) + '" height="' + n1(Y(0) - Y(h)) + '" rx="2"/>';
+        }
+        // the hyperbola y = -1.5 ± 0.45/(x - 1.5) with its asymptotes
+        const xp = 1.5, ya = -1.5, c = 0.45, hy = x => ya + c / (x - xp);
+        let hyp = '<line x1="' + n1(X(xp)) + '" y1="' + n1(Y(-0.2)) + '" x2="' + n1(X(xp)) + '" y2="' + Ht + '" stroke="#B8A4F2" stroke-opacity="0.45" stroke-width="1.4" stroke-dasharray="6 7"/>' +
+            '<line x1="0" y1="' + n1(Y(ya)) + '" x2="' + Wd + '" y2="' + n1(Y(ya)) + '" stroke="#B8A4F2" stroke-opacity="0.45" stroke-width="1.4" stroke-dasharray="6 7"/>';
+        [[xp + c / (-0.25 - ya), 6], [-3, xp - c / (3.3 + ya)]].forEach(([a, b]) => {
+            hyp += '<path d="' + path(hy, a, b, 120) + '" stroke="#B8A4F2" stroke-opacity="0.85" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+        });
+        let art = '';
+        art += '<line x1="0" y1="' + n1(Y(0)) + '" x2="' + Wd + '" y2="' + n1(Y(0)) + '" stroke="#cfe4f5" stroke-opacity="0.2" stroke-width="1.2"/>';
+        art += '<path d="' + path(f, -x0, 6) + '" stroke="#F5C242" stroke-width="3.6" fill="none" stroke-linecap="round" filter="url(#tbf12-glow)"/>';
+        const t1 = [X(xW - 1.6), Y(yW - 1.6 * mW)], t2 = [X(xW + 1.6), Y(yW + 1.6 * mW)];
+        art += '<line x1="' + n1(t1[0]) + '" y1="' + n1(t1[1]) + '" x2="' + n1(t2[0]) + '" y2="' + n1(t2[1]) + '" stroke="url(#tbf12-tan)" stroke-width="2.6" stroke-linecap="round" filter="url(#tbf12-glow)"/>';
+        art += '<circle cx="' + n1(X(xH)) + '" cy="' + n1(Y(f(xH))) + '" r="13" fill="#fff" fill-opacity="0.12"/><circle cx="' + n1(X(xH)) + '" cy="' + n1(Y(f(xH))) + '" r="6" fill="#fff"/>';
+        art += '<circle cx="' + n1(X(xW)) + '" cy="' + n1(Y(yW)) + '" r="13" fill="#7fd8ee" fill-opacity="0.12"/>' +
+            '<circle cx="' + n1(X(xW)) + '" cy="' + n1(Y(yW)) + '" r="6" fill="#0b1830" stroke="#7fd8ee" stroke-width="2.6"/>';
+        // space: three faint axes, a parallelogram A, A+u, A+u+v, A+v and u × v from its centre with a right-angle mark
+        const O = [400, 470], ex = [-34, 24], ey = [96, 0], ez = [0, -88];
+        const pt = p => [O[0] + p[0] * ex[0] + p[1] * ey[0] + p[2] * ez[0], O[1] + p[0] * ex[1] + p[1] * ey[1] + p[2] * ez[1]];
+        const vadd = (a, b) => a.map((v, i) => v + b[i]), vmul = (r, a) => a.map(v => r * v);
+        function pfeil(p, q, sz, colr, w, extra) {
+            const ang = Math.atan2(q[1] - p[1], q[0] - p[0]), cs = Math.cos(ang), sn = Math.sin(ang);
+            const at = (back, side) => n1(q[0] - back * cs - side * sn) + ',' + n1(q[1] - back * sn + side * cs);
+            return '<line x1="' + n1(p[0]) + '" y1="' + n1(p[1]) + '" x2="' + n1(q[0] - 0.62 * sz * cs) + '" y2="' + n1(q[1] - 0.62 * sz * sn) +
+                '" stroke="' + colr + '" stroke-width="' + w + '" stroke-linecap="round"' + (extra || '') + '/>' +
+                '<polygon points="' + at(0, 0) + ' ' + at(sz, 0.42 * sz) + ' ' + at(0.68 * sz, 0) + ' ' + at(sz, -0.42 * sz) + '" fill="' + colr + '"' + (extra || '') + '/>';
+        }
+        const Ap = [0, 0, 1.2], u = [1, 0, -0.25], v = [0, 1.2, -1], n = [0.3, 1, 1.2];      // u × v = n
+        const M = vadd(Ap, vmul(0.5, vadd(u, v))), nl = Math.hypot(...n), ul = Math.hypot(...u);
+        const quad = [Ap, vadd(Ap, u), vadd(Ap, vadd(u, v)), vadd(Ap, v)].map(pt);
+        let raum = '';
+        [[1.9, 0, 0], [0, 1.75, 0], [0, 0, 1.75]].forEach(e => { raum += pfeil(O, pt(e), 10, '#cfe4f5', 1.6, ' opacity="0.55"'); });
+        raum += '<polygon points="' + quad.map(q => n1(q[0]) + ',' + n1(q[1])).join(' ') + '" fill="#B8A4F2" fill-opacity="0.2" stroke="#B8A4F2" stroke-opacity="0.75" stroke-width="1.6" stroke-linejoin="round"/>';
+        raum += pfeil(pt(Ap), pt(vadd(Ap, u)), 12, '#7fd8ee', 2.4) + pfeil(pt(Ap), pt(vadd(Ap, v)), 12, '#A0C85A', 2.4);
+        const q = 0.2, a1 = vadd(M, vmul(q / ul, u)), a2 = vadd(a1, vmul(q / nl, n)), a3 = vadd(M, vmul(q / nl, n));
+        raum += '<polyline points="' + [a1, a2, a3].map(pt).map(r => n1(r[0]) + ',' + n1(r[1])).join(' ') + '" fill="none" stroke="#fff" stroke-opacity="0.75" stroke-width="1.4"/>';
+        raum += '<g filter="url(#tbf12-glow)">' + pfeil(pt(M), pt(vadd(M, vmul(0.8, n))), 18, '#e682be', 3.4) + '</g>';
+        raum += '<circle cx="' + n1(pt(M)[0]) + '" cy="' + n1(pt(M)[1]) + '" r="3.5" fill="#e682be"/><circle cx="' + O[0] + '" cy="' + O[1] + '" r="3.5" fill="#cfe4f5" fill-opacity="0.8"/>';
+        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Titelbild: Exponentialkurve mit Hochpunkt, Wendetangente und Rechtecken darunter, eine Hyperbel mit Asymptoten und ein Parallelogramm im Raum mit seinem Vektorprodukt">' +
+            '<defs><linearGradient id="tbf12-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.45" stop-color="#fff" stop-opacity="1"/>' +
+            '<stop offset="0.86" stop-color="#fff" stop-opacity="1"/><stop offset="0.97" stop-color="#fff" stop-opacity="0.2"/></linearGradient>' +
+            '<mask id="tbf12-mask"><rect width="' + Wd + '" height="' + Ht + '" fill="url(#tbf12-fade)"/></mask>' +
+            '<linearGradient id="tbf12-tan" gradientUnits="userSpaceOnUse" x1="' + n1(t1[0]) + '" y1="' + n1(t1[1]) + '" x2="' + n1(t2[0]) + '" y2="' + n1(t2[1]) + '">' +
+            '<stop offset="0" stop-color="#7fd8ee" stop-opacity="0"/><stop offset="0.25" stop-color="#7fd8ee"/><stop offset="0.75" stop-color="#7fd8ee"/><stop offset="1" stop-color="#7fd8ee" stop-opacity="0"/></linearGradient>' +
+            '<filter id="tbf12-glow" filterUnits="userSpaceOnUse" x="0" y="0" width="' + Wd + '" height="' + Ht + '"><feGaussianBlur stdDeviation="5" result="b"/>' +
+            '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
+            '<g mask="url(#tbf12-mask)"><g stroke="#7fd8ee" stroke-opacity="0.08" stroke-width="1">' + grid + '</g>' +
+            '<g fill="#A0C85A" fill-opacity="0.28" stroke="#A0C85A" stroke-opacity="0.55" stroke-width="1.2">' + bars + '</g>' + hyp + art + '</g>' + raum + '</svg>';
+    });
+
+    /* ---------- rational functions: zeros, poles and holes from the linear factors ---------- */
+    W('bruchfunktion', function (box) {
+        const PRE = {
+            pol: { k: 'Polstelle', ki: 5, z: [-1], p: [2] },
+            luecke: { k: 'Lücke', ki: 5, z: [1], p: [1, -2] },
+            doppelt: { k: 'ohne Vorzeichenwechsel', ki: 6, z: [], p: [1, 1] },
+            schief: { k: 'schiefe Asymptote', ki: 4, z: [-1, 2], p: [1] }
+        };
+        const KS = [-3, -2, -1, -0.5, 0.5, 1, 2, 3], ZD = [-1, 2], PD = [2, -2];
+        let S = null;
+        const pick = pr => { S = { ki: pr.ki, z: pr.z.slice(), p: pr.p.slice() }; build(); };
+        const pre = div(box, 'b-ctrls');
+        pre.innerHTML = '<span class="b-ctrl">Beispiele:</span>' + Object.keys(PRE).map(k => '<button type="button" class="b-btn" data-p="' + k + '">' + PRE[k].k + '</button>').join('');
+        pre.addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) pick(PRE[b.dataset.p]); });
+        const deg = div(box, 'b-ctrls');
+        const sl = div(box, '');
+        const p = new Plot(div(box, ''), { x: [-6, 6], y: [-6, 6], height: 320, aria: 'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten' });
+        const out = div(box, 'b-out');
+        const near = (a, b) => Math.abs(a - b) < 1e-9;
+        const uniq = a => a.filter((x, i) => a.findIndex(y => near(x, y)) === i).sort((u, w) => u - w);
+        const lin = z => (near(z, 0) ? 'x' : '(x ' + (z < 0 ? '+' : '-') + ' ' + texNum(Math.abs(z), 1) + ')');
+        function facTex(list) {                                    // (x - 1)^2 (x + 2), equal factors grouped
+            return uniq(list).map(z => { const m = list.filter(y => near(y, z)).length; return lin(z) + (m > 1 ? '^{' + m + '}' : ''); }).join('');
+        }
+        function frac(k, zs, ps) {
+            let top = zs.length ? co(k, 1) + facTex(zs) : texNum(k, 1);
+            if (zs.length === 1 && Math.abs(k - 1) < 1e-9 && !near(zs[0], 0)) top = top.slice(1, -1);
+            let bot = facTex(ps);
+            if (ps.length === 1 && !near(ps[0], 0)) bot = bot.slice(1, -1);
+            return bot ? '\\dfrac{' + top + '}{' + bot + '}' : top;
+        }
+        function build() {
+            deg.innerHTML = '<span class="b-ctrl">Zähler:</span>';
+            segBox(deg, [['0', 'Grad 0'], ['1', 'Grad 1'], ['2', 'Grad 2']], String(S.z.length), v => { S.z = ZD.slice(0, +v).map((d, i) => S.z[i] != null ? S.z[i] : d); build(); }, 'Grad des Zählers');
+            const s2 = document.createElement('span'); s2.className = 'b-ctrl'; s2.textContent = 'Nenner:'; deg.appendChild(s2);
+            segBox(deg, [['1', 'Grad 1'], ['2', 'Grad 2']], String(S.p.length), v => { S.p = PD.slice(0, +v).map((d, i) => S.p[i] != null ? S.p[i] : d); build(); }, 'Grad des Nenners');
+            sl.innerHTML = '';
+            range(sl, { label: 'Faktor $k$', min: 0, max: KS.length - 1, step: 1, value: S.ki, fmt: i => fmt(KS[i], 1), onInput: v => { S.ki = v; render(); } });
+            S.z.forEach((z, i) => range(sl, { label: 'Nullstelle des Zählers $z_' + (i + 1) + '$', min: -4, max: 4, step: 0.5, value: z, fmt: v => fmt(v, 1), onInput: v => { S.z[i] = v; render(); } }));
+            S.p.forEach((q, i) => range(sl, { label: 'Nullstelle des Nenners $p_' + (i + 1) + '$', min: -4, max: 4, step: 0.5, value: q, fmt: v => fmt(v, 1), onInput: v => { S.p[i] = v; render(); } }));
+            math(sl);
+            render();
+        }
+        function render() {
+            const k = KS[S.ki], zs = S.z, ps = S.p;
+            // cancel common linear factors
+            const rz = zs.slice(), rp = [];
+            ps.forEach(q => { const i = rz.findIndex(z => near(z, q)); if (i >= 0) rz.splice(i, 1); else rp.push(q); });
+            const f = x => k * zs.reduce((s, z) => s * (x - z), 1) / ps.reduce((s, q) => s * (x - q), 1);
+            const fr = x => k * rz.reduce((s, z) => s * (x - z), 1) / rp.reduce((s, q) => s * (x - q), 1);
+            const gaps = uniq(ps);
+            const poles = gaps.filter(q => rp.some(r => near(r, q))).map(q => ({ x: q, ord: rp.filter(r => near(r, q)).length }));
+            const holes = gaps.filter(q => !rp.some(r => near(r, q))).map(q => [q, fr(q)]);
+            const zeros = uniq(rz.filter(z => !gaps.some(g => near(g, z))));
+            const L = [];
+            poles.forEach(o => L.push({ vline: o.x, color: 'red' }));
+            let asy = '', asyFn = null;
+            const m = zs.length, n = ps.length;
+            if (!rp.length) asy = 'Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ' + (rz.length ? 'eine Gerade' : 'eine waagerechte Gerade') + ' mit ' + (holes.length > 1 ? 'Löchern' : 'einem Loch') + '.';
+            else if (m < n) { asyFn = 0; asy = 'Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.'; }
+            else if (m === n) { asyFn = k; asy = 'Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ' + texNum(k, 1) + '$ (Quotient der Leitkoeffizienten).'; }
+            else {
+                const q = ps[0], a = k, b = k * (q - zs[0] - zs[1]), r = k * (q - zs[0]) * (q - zs[1]);
+                L.push({ fn: x => a * x + b, color: 'cyan', dash: true, width: 1.6 });
+                asy = 'Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ' + co(a, 1) + 'x' + sg(b, 2) + ' + \\dfrac{' + texNum(r, 2) + '}{' + facTex([q]).replace(/^\((.*)\)$/, '$1') + '}$, schiefe Asymptote $y = ' + co(a, 1) + 'x' + sg(b, 2) + '$.';
+            }
+            if (asyFn != null) L.push({ hline: asyFn, color: 'cyan' });
+            L.push({ fn: f, color: 'lambda', label: 'f' });
+            if (zeros.length) L.push({ pts: zeros.map(z => [z, 0]), color: 'phi', r: 5.5 });
+            holes.forEach(([x, y]) => { if (Math.abs(y) < 6.5) L.push({ pts: [[x, y]], color: 'lambda', r: 6 }, { pts: [[x, y]], color: '#0a1426', r: 3.5 }); });
+            p.draw(L);
+            const set = gaps.map(q => texNum(q, 1)).join('; ');
+            let html = '<p style="margin:0 0 6px">$f(x) = ' + frac(k, zs, ps) + '$ · $D = \\mathbb{R} \\setminus \\{' + set + '\\}$</p>';
+            if (holes.length) html += '<p style="margin:0 0 6px">Kürzen: $f(x) = ' + frac(k, rz, rp) + '$ für $x \\neq ' + holes.map(h => texNum(h[0], 1)).join(', ') + '$ · hebbare Lücke' + (holes.length > 1 ? 'n' : '') + ' ' + holes.map(([x, y]) => '$(' + texNum(x, 1) + ' \\mid ' + texNum(y, 3) + ')$').join(', ') + '</p>';
+            html += '<p style="margin:0 0 6px">Nullstellen: ' + (zeros.length ? zeros.map(z => '$x = ' + texNum(z, 1) + '$').join(', ') : 'keine') + ' · Polstellen: ' +
+                (poles.length ? poles.map(o => '$x = ' + texNum(o.x, 1) + '$ ' + (o.ord % 2 ? 'mit' : 'ohne') + ' Vorzeichenwechsel').join(', ') + ' (senkrechte Asymptote)' : 'keine') + '</p>';
+            html += '<p style="margin:0">' + asy + '</p>';
+            out.innerHTML = html; math(out);
+        }
+        pick(PRE.pol);
+    });
+
+    /* ---------- the number e: the base with slope 1, e-functions, continuous compounding ---------- */
+    W('efunktion', function (box) {
+        let mode = box.dataset.mode || 'basis';
+        const S = { a: 2, A: 2, b: -1, c: 1, ni: 0 };
+        const NS = [[1, 'jährlich'], [2, 'halbjährlich'], [4, 'vierteljährlich'], [12, 'monatlich'], [52, 'wöchentlich'], [365, 'täglich'], [8760, 'stündlich'], [525600, 'minütlich']];
+        const ctl = div(box, 'b-ctrls');
+        segBox(ctl, [['basis', 'Welche Basis?'], ['graph', 'a · eᵇˣ + c'], ['zins', 'Zinseszins']], mode, v => { mode = v; build(); }, 'Was wird gezeigt?');
+        const sl = div(box, '');
+        const p = new Plot(div(box, ''), { x: [-3, 3], y: [-1, 8], height: 300, aria: 'Exponentialfunktionen und die Eulersche Zahl e' });
+        const out = div(box, 'b-out');
+        const ex = (b, d = 2) => '\\mathrm{e}^{' + (Math.abs(b) < 1e-12 ? '0' : co(b, d) + 'x') + '}';
+        function build() {
+            sl.innerHTML = '';
+            if (mode === 'basis') {
+                const r = range(sl, { label: 'Basis $a$', min: 1.5, max: 4, step: 0.01, value: S.a, fmt: v => fmt(v, 2), onInput: v => { S.a = v; render(); } });
+                const b = div(sl, 'b-ctrls');
+                b.innerHTML = '<button type="button" class="b-btn">a = e setzen</button>';
+                b.querySelector('button').addEventListener('click', () => { S.a = Math.E; r.set(Math.E); render(); });
+            } else if (mode === 'graph') {
+                range(sl, { label: 'Faktor $a$', min: -3, max: 3, step: 0.5, value: S.A, fmt: v => fmt(v, 1), onInput: v => { S.A = v; render(); } });
+                range(sl, { label: 'im Exponenten $b$', min: -2, max: 2, step: 0.25, value: S.b, fmt: v => fmt(v, 2), onInput: v => { S.b = v; render(); } });
+                range(sl, { label: 'Verschiebung $c$', min: -3, max: 3, step: 0.5, value: S.c, fmt: v => fmt(v, 1), onInput: v => { S.c = v; render(); } });
+            } else {
+                range(sl, { label: 'Verzinsung', min: 0, max: NS.length - 1, step: 1, value: S.ni, fmt: i => NS[i][1], onInput: v => { S.ni = v; render(); } });
+            }
+            math(sl);
+            render();
+        }
+        function render() {
+            if (mode === 'basis') {
+                const a = S.a, la = Math.log(a), f = x => Math.pow(a, x);
+                p.view([-3, 3], [-1, 8]);
+                p.draw([{ fn: x => la * f(x), color: 'violet', dash: true, width: 1.8, label: 'f′', labelAt: -2.4 }, { fn: f, color: 'lambda', label: 'f', labelAt: 1.6 },
+                    { fn: x => 1 + la * x, color: 'cyan', width: 1.6, domain: [-1.8, 1.8] }, { pts: [[0, 1]], color: 'white', r: 5 }]);
+                const hit = Math.abs(la - 1) < 0.006;
+                out.innerHTML = '<p style="margin:0 0 6px">$f(x) = ' + texNum(a, 3) + '^x$ · Steigung in $(0 \\mid 1)$: $f\'(0) = \\lim\\limits_{h \\to 0} \\dfrac{a^h - 1}{h} \\approx ' + texNum(la, 4) + '$</p>' +
+                    '<p style="margin:0">' + (hit ? '<b>Treffer:</b> Bei $a = \\mathrm{e} \\approx 2{,}71828$ ist die Steigung genau $1$ und $f\'(x) = f(x)$: Die Graphen von $f$ und $f\'$ liegen aufeinander.'
+                        : 'Die Ableitung ist $f\'(x) = ' + texNum(la, 3) + ' \\cdot f(x)$, ein Vielfaches von $f$. Für welche Basis ist der Faktor genau $1$?') + '</p>';
+            } else if (mode === 'graph') {
+                const { A, b, c } = S, f = x => A * Math.exp(b * x) + c;
+                p.view([-4, 4], [-6, 8]);
+                const L = [{ fn: f, color: 'lambda', label: 'f' }, { pts: [[0, A + c]], color: 'white', r: 5 }];
+                let html = '<p style="margin:0 0 6px">$f(x) = ' + (Math.abs(A) < 1e-12 ? '' : co(A, 1) + ex(b)) + (Math.abs(A) < 1e-12 ? texNum(c, 1) : sg(c, 1)) + '$';
+                if (Math.abs(A) < 1e-12 || Math.abs(b) < 1e-12) {
+                    html += ' · Mit $a = 0$ oder $b = 0$ ist $f$ konstant.</p>';
+                } else {
+                    L.push({ hline: c, color: 'cyan' });
+                    const q = -c / A, z = q > 0 ? Math.log(q) / b : null;
+                    if (z != null && Math.abs(z) < 4.2) L.push({ pts: [[z, 0]], color: 'phi', r: 5.5 });
+                    const up = A * b > 0, side = b > 0 ? 'x \\to -\\infty' : 'x \\to +\\infty', other = b > 0 ? 'x \\to +\\infty' : 'x \\to -\\infty';
+                    html += ' · $f\'(x) = ' + co(A * b, 2) + ex(b) + '$</p>' +
+                        '<p style="margin:0 0 6px">Schnittpunkt mit der $y$-Achse: $(0 \\mid ' + texNum(A + c, 2) + ')$ · Nullstelle: ' +
+                        (z != null ? '$' + co(A, 1) + ex(b) + ' = ' + texNum(-c, 1) + '$, also $x = \\dfrac{\\ln(' + texNum(q, 3) + ')}{' + texNum(b, 2) + '} \\approx ' + texNum(z, 3) + '$' : 'keine, denn $\\mathrm{e}^{bx} > 0$ kann nicht $' + texNum(q, 3) + '$ sein') + '</p>' +
+                        '<p style="margin:0">Für $' + side + '$ geht $f(x) \\to ' + texNum(c, 1) + '$: waagerechte Asymptote $y = ' + texNum(c, 1) + '$. Für $' + other + '$ geht $f(x) \\to ' + (A > 0 ? '+' : '-') + '\\infty$. ' +
+                        '$f$ ist überall streng monoton ' + (up ? 'steigend' : 'fallend') + ', weil $f\'(x)$ immer ' + (up ? 'positiv' : 'negativ') + ' ist.</p>';
+                }
+                p.draw(L);
+                out.innerHTML = html;
+            } else {
+                const [n, t] = NS[S.ni], K = Math.pow(1 + 1 / n, n);
+                p.view([0, 41], [1.8, 2.9]);
+                const seq = []; for (let k = 1; k <= 40; k++) seq.push([k, Math.pow(1 + 1 / k, k)]);
+                const L = [{ hline: Math.E, color: 'cyan' }, { pts: seq, color: 'violet', r: 3 }, { text: 'e', at: [38, Math.E], color: 'cyan', dy: -8 }];
+                if (n <= 40) L.push({ pts: [[n, K]], color: 'lambda', r: 6 });
+                p.draw(L);
+                out.innerHTML = '<p style="margin:0 0 6px">Ein Euro, 100 % Zinsen im Jahr, ' + t + ' verzinst: ' + n.toLocaleString('de-DE') + '-mal $\\tfrac{100\\,\\%}{' + n + '}$, also $\\left(1 + \\tfrac{1}{' + n + '}\\right)^{' + n + '} \\approx ' + texNum(K, 6) + '$ €</p>' +
+                    '<p style="margin:0">Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $\\lim\\limits_{n \\to \\infty} \\left(1 + \\tfrac1n\\right)^n = \\mathrm{e}$.</p>';
+            }
+            math(out);
+        }
+        build();
     });
 })();
