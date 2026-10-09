@@ -1,0 +1,41 @@
+/* buch-titel.css — the cover of the textbook (buch/…/index.html and page 1 of the print edition).
+ * A cover is a printed object: it stays dark navy with gold in every colour scheme, so this sheet is loaded
+ * with data-fs-skip and js/farbschema.js leaves it alone. The artwork is the 'titelbild' widget (js/buch-funktionen.js).
+ */
+.b-titel {
+    position: relative; overflow: hidden; aspect-ratio: 1 / 1.414; width: 100%; max-width: 460px;
+    border-radius: 6px 16px 16px 6px; color: #fff;
+    background: radial-gradient(110% 70% at 100% 0%, rgba(245, 194, 66, 0.22), transparent 60%),
+                linear-gradient(165deg, #10264a 0%, #081428 55%, #040a18 100%);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), inset 10px 0 0 rgba(255, 255, 255, 0.04), inset 13px 0 0 rgba(0, 0, 0, 0.25);
+}
+.b-titel-art { position: absolute; inset: 0; }
+.b-titel-art svg { width: 100%; height: 100%; display: block; }
+.b-titel-top {
+    position: absolute; left: 9%; right: 8%; top: 5.5%; display: flex; align-items: center; gap: 10px;
+    font-family: 'Orbitron', sans-serif; font-size: clamp(0.5rem, 1.6vw, 0.72rem); letter-spacing: 2px; color: rgba(255, 255, 255, 0.82);
+}
+.b-titel-top .b-logo { width: 26px; height: 26px; }
+.b-titel-main { position: absolute; left: 9%; right: 8%; top: 15%; }
+.b-titel-kicker { margin: 0 0 6px; font-family: 'Orbitron', sans-serif; font-size: clamp(0.5rem, 1.5vw, 0.7rem); letter-spacing: 3px; color: rgb(245, 194, 66); }
+.b-titel h1 {
+    margin: 0; font-family: 'Orbitron', sans-serif; font-weight: 700; line-height: 1.02; letter-spacing: 1px;
+    font-size: clamp(1.9rem, 6.2vw, 3.1rem); color: #fff; text-shadow: 0 0 28px rgba(245, 194, 66, 0.25);
+}
+.b-titel-sub { margin: 12px 0 0; font-family: 'Orbitron', sans-serif; font-size: clamp(0.62rem, 2vw, 0.95rem); letter-spacing: 1.5px; color: #cfe4f5; line-height: 1.5; }
+.b-titel-sub b { color: rgb(245, 194, 66); font-weight: 700; }
+.b-titel-foot {
+    position: absolute; left: 9%; right: 8%; bottom: 4.5%; display: flex; justify-content: space-between; gap: 10px;
+    padding-top: 10px; border-top: 1px solid rgba(245, 194, 66, 0.45);
+    font-family: 'Orbitron', sans-serif; font-size: clamp(0.45rem, 1.3vw, 0.6rem); letter-spacing: 1.4px; color: rgba(255, 255, 255, 0.72);
+}
+
+/* the opening of the book page: cover left, a few words and the way in on the right */
+.b-start { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 40px; align-items: center; margin: 34px 0 10px; }
+.b-start-text h2 { font-family: 'Orbitron', sans-serif; font-size: clamp(1.2rem, 2.4vw, 1.6rem); margin: 0 0 14px; letter-spacing: 0.6px; }
+.b-start-acts { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; }
+.b-start-acts a { text-decoration: none; }
+@media (max-width: 860px) {
+    .b-start { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+    .b-titel { margin: 0 auto; }
+}

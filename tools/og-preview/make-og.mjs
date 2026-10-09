@@ -67,6 +67,30 @@ const EXTRA = [{
     description: 'Interaktive Labore fuer Mathematik, Physik und Informatik — von der Grundrechenart bis zum Quantenschluesselaustausch. Alles im Browser, ohne Installation, kostenlos.',
 }];
 
+// The textbooks (HTML/buch/<book>/): a card for the cover page and one per chapter. The texts come from the
+// book's own kapitel.js (window.BUCH) - the single list of chapters - never from labs-config.js.
+function readBooks() {
+    const out = [], dir = path.join(HTML, 'buch');
+    if (!fs.existsSync(dir)) return out;
+    for (const b of fs.readdirSync(dir)) {
+        const k = path.join(dir, b, 'kapitel.js');
+        if (!fs.existsSync(k)) continue;
+        const win = {};
+        new Function('window', fs.readFileSync(k, 'utf8'))(win);
+        const B = win.BUCH;
+        if (!B || !B.chapters) continue;
+        out.push({ id: 'buch-' + b, href: `buch/${b}/index.html`, title: B.title, tagline: `Interaktives Lehrbuch / ${B.chapters.length} Kapitel`,
+            description: B.description || B.title, alt: B.title + ' \u2014 Titelseite des interaktiven Lehrbuchs' });
+        for (const c of B.chapters) {
+            out.push({ id: `buch-${b}-${c.file.replace(/\.html$/, '')}`, href: `buch/${b}/${c.file}`,
+                title: `Kapitel ${c.k}: ${c.title}`, tagline: `${B.short || B.title} / ${c.lb}`,
+                description: `${c.sub}. Kapitel ${c.k} des interaktiven Lehrbuchs ${B.title}: Erklärungen, Beispiele, Aufgaben in drei Stufen, Selbsttests und Labs zum Ausprobieren.`,
+                alt: `Kapitel ${c.k}: ${c.title} \u2014 Vorschaubild aus dem interaktiven Lehrbuch` });
+        }
+    }
+    return out;
+}
+
 // ------------------------------------------------------------------- text bits
 // Orbitron has no glyph for these; they would render as empty boxes on the card.
 const GLYPH_FIX = [[/[\u00b7\u2022]/g, '/'], [/[\u201e\u201c\u201d]/g, '"'], [/[\u2018\u2019]/g, "'"]];
@@ -192,7 +216,7 @@ function metaBlock(lab) {
         `<meta property="og:image:type" content="image/jpeg">`,
         `<meta property="og:image:width" content="1200">`,
         `<meta property="og:image:height" content="630">`,
-        `<meta property="og:image:alt" content="${esc(forCard(lab.title))} \u2014 Vorschaubild des Labors">`,
+        `<meta property="og:image:alt" content="${esc(lab.alt || forCard(lab.title) + ' \u2014 Vorschaubild des Labors')}">`,
         `<meta name="twitter:card" content="summary_large_image">`,
         `<meta name="twitter:title" content="${esc(title)}">`,
         `<meta name="twitter:description" content="${esc(desc)}">`,
@@ -230,7 +254,7 @@ function injectMeta(lab) {
 
 // --------------------------------------------------------------------------- run
 const main = async () => {
-    let labs = [...EXTRA, ...readLabs()];
+    let labs = [...EXTRA, ...readBooks(), ...readLabs()];
     if (ONLY.length) labs = labs.filter((l) => ONLY.includes(l.id));
     if (!labs.length) { console.error('no labs matched --only'); process.exit(1); }
 

@@ -1,0 +1,113 @@
+/* buch-druck.css — pages for the print edition of a textbook (js/buch-druck.js, set by Paged.js).
+ * A4, page number at the foot, the chapter as running head, the cover bleeds to the edge. Colours are the light
+ * scheme of js/farbschema.js (the page forces it); this sheet is data-fs-skip and writes print colours itself.
+ */
+@page {
+    size: A4;
+    margin: 17mm 16mm 19mm 16mm;
+    @top-left { content: string(kapitel); font-family: 'Orbitron', sans-serif; font-size: 6.5pt; letter-spacing: 1px; color: #6d8199; }
+    @top-right { content: "DOC ALVERS MATHE-LABOR · MATHEMATIK 11"; font-family: 'Orbitron', sans-serif; font-size: 6.5pt; letter-spacing: 1px; color: #9aa8bb; }
+    @bottom-center { content: counter(page); font-family: Raleway, sans-serif; font-size: 9pt; color: #3a4558; }
+}
+@page cover { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
+/* the cover is always page 1 - :first is the sure way in Paged.js, the named page alone was not applied */
+@page :first { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
+@page front { @top-left { content: none; } }
+
+/* ---- the screen around it: status bar, grey desk under the sheets ---- */
+html, body.b-print { background: #e9edf3 !important; }
+body.b-print { font-size: 13px; color: #18223a; }
+html { font-size: 12.5px; }
+.d-bar {
+    position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 14px; padding: 10px 18px;
+    background: #fff; border-bottom: 1px solid #d5dce8; font-family: Raleway, sans-serif; font-size: 14px;
+}
+.d-bar .b-logo { width: 26px; height: 26px; }
+.d-bar b { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1.2px; }
+#d-status { color: #4c5b75; }
+#d-print { margin-left: auto; opacity: 0.45; pointer-events: none; }
+body.d-ready #d-print { opacity: 1; pointer-events: auto; }
+#d-book { width: 178mm; margin: 0 auto; }            /* the text width of the page, so widgets draw at print size */
+.pagedjs_page #d-book { width: 100%; margin: 0; }     /* Paged.js repeats the wrapper on every page: there it is just the page
+.pagedjs_pages { padding: 20px 0 60px; }
+.pagedjs_page { background: #fff; margin: 0 auto 18px; box-shadow: 0 4px 18px rgba(30, 45, 75, 0.18); }
+@media print {
+    .d-bar { display: none !important; }
+    html, body.b-print { background: #fff !important; }
+    .pagedjs_pages { padding: 0; }
+    .pagedjs_page { margin: 0; box-shadow: none; }
+}
+body.b-print { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* ---- cover ---- */
+.d-cover { page: cover; break-after: page; break-inside: avoid; width: 210mm; height: 297mm; overflow: hidden; }
+.d-cover .b-titel { max-width: none; width: 210mm; height: 297mm; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+.d-cover .b-titel h1 { font-size: 46pt; }
+.d-cover .b-titel-sub { font-size: 15pt; }
+.d-cover .b-titel-kicker, .d-cover .b-titel-top { font-size: 9pt; }
+.d-cover .b-titel-foot { font-size: 8pt; }
+.d-cover .b-titel-top .b-logo { width: 34px; height: 34px; }
+
+/* ---- front matter: how to use, contents ---- */
+.d-front { page: front; break-after: page; }
+.d-front h1, .d-toc-h { font-family: 'Orbitron', sans-serif; font-size: 20pt; margin: 0 0 14pt; color: #0e244e; }
+.d-toc { page: front; break-after: page; }
+.d-toc-list { list-style: none; margin: 0; padding: 0; }
+.d-toc-list li { border-bottom: 1px dotted #b8c3d4; }
+.d-toc-list a { display: flex; align-items: baseline; gap: 12pt; padding: 7pt 0; text-decoration: none; color: #18223a; }
+.d-toc-k { font-family: 'Orbitron', sans-serif; font-weight: 700; color: rgb(226, 120, 0); width: 30pt; flex: 0 0 auto; }
+.d-toc-t { flex: 1 1 auto; font-size: 12pt; font-weight: 700; }
+.d-toc-t small { display: block; font-weight: 400; font-size: 9pt; color: #6d8199; margin-top: 2pt; }
+.d-toc-list a::after { content: target-counter(attr(href), page); font-family: Raleway, sans-serif; font-weight: 700; color: #0e244e; }
+
+/* ---- chapters ---- */
+.d-chapter { break-before: page; }
+.d-khead { display: flex; justify-content: space-between; gap: 16pt; align-items: flex-start; padding: 0 0 10pt; margin: 0 0 12pt; border-bottom: 2pt solid rgb(226, 120, 0); }
+.d-kkick { margin: 0 0 4pt; font-family: 'Orbitron', sans-serif; font-size: 7.5pt; letter-spacing: 1.4px; color: rgb(226, 120, 0); }
+.d-ktitle { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 20pt; line-height: 1.2; color: #0e244e; string-set: kapitel content(text); }
+.d-ksub { margin: 5pt 0 0; color: #4c5b75; font-size: 11pt; }
+.d-qr { flex: 0 0 auto; display: flex; gap: 8pt; align-items: center; text-decoration: none; color: #4c5b75; font-size: 7.5pt; line-height: 1.35; }
+.d-qr svg { width: 62pt; height: 62pt; }
+.d-qr svg path, .d-qr svg rect[fill="black"] { fill: #0e244e; }
+.d-online { margin: 8pt 0 0; font-size: 8.5pt; color: #6d8199; font-style: italic; }
+img.d-frozen { display: block; max-width: 100%; height: auto; border-radius: 6px; }
+
+/* the screen layout, flattened for paper */
+body.b-print .b-sec { margin-top: 18pt; }
+body.b-print .b-hero { margin: 0 0 12pt; padding: 12pt 14pt; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+body.b-print .b-hero-lead { font-size: 11pt; }
+body.b-print .b-row { display: block; }
+body.b-print .b-aside { display: flex; flex-wrap: wrap; gap: 0 18pt; }
+body.b-print .b-aside > .b-note { flex: 1 1 200pt; }
+body.b-print .b-grid2 { display: block; }
+body.b-print .b-grid2 > .b-box { margin: 0 0 10pt; }
+body.b-print .b-box, body.b-print .b-task, body.b-print .b-q, body.b-print .b-rueck, body.b-print .b-lab, body.b-print img.d-frozen,
+body.b-print .b-table-wrap, body.b-print .katex-display, body.b-print .d-loes { break-inside: avoid; }
+body.b-print .b-widget { break-inside: avoid; }        /* a frozen figure never leaves its title alone on the page before */
+body.b-print h2, body.b-print h3, body.b-print .b-band, body.b-print .b-box-title { break-after: avoid; }
+body.b-print .b-band { margin-bottom: 10pt; }
+body.b-print .b-labs { display: block; }
+body.b-print .b-lab { padding: 6pt 8pt; margin: 0 0 6pt; }
+body.b-print .b-lab-icon { width: 30pt; height: 30pt; }
+body.b-print .b-lab-icon svg { width: 28pt; height: 28pt; }
+body.b-print .b-lab::after { content: attr(href); display: block; font-size: 7.5pt; color: #6d8199; margin-left: 8pt; }
+body.b-print .b-check-score { display: none; }
+body.b-print .b-answer { margin: 6pt 0 2pt; padding-top: 14pt; border-bottom: 1px solid #b8c3d4; width: 60%; font-size: 9pt; color: #6d8199; }
+body.b-print .b-mc { display: block; }
+body.b-print .b-mc button { display: block; width: 100%; margin: 0 0 4pt; text-align: left; }
+body.b-print .b-mc button::before { content: "☐  "; }
+body.b-print .b-reveal.b-loose { display: block; margin-top: 6pt; }       /* worked examples: the solution belongs to the text */
+body.b-print .b-reveal.b-loose::before { content: "Lösung"; display: block; font-family: 'Orbitron', sans-serif; font-size: 7.5pt; letter-spacing: 1px; color: rgb(226, 120, 0); margin-bottom: 4pt; }
+.d-qno { font-weight: 700; margin-right: 6pt; color: #0e244e; }
+body.b-print .b-q-text { display: inline; }
+
+/* ---- solutions ---- */
+.d-loesungen { break-before: page; }
+.d-loes-intro { color: #4c5b75; margin: 6pt 0 12pt; }
+.d-loes-kap { margin: 0 0 12pt; }
+.d-loes-h { font-family: 'Orbitron', sans-serif; font-size: 10.5pt; color: #0e244e; margin: 14pt 0 6pt; padding-bottom: 3pt; border-bottom: 1px solid #d5dce8; break-after: avoid; }
+.d-loes-t { font-weight: 700; margin: 8pt 0 3pt; color: #4c5b75; font-size: 10pt; }
+.d-loes { display: flex; gap: 8pt; margin: 0 0 5pt; font-size: 10pt; line-height: 1.45; }
+.d-loes-no { flex: 0 0 18pt; font-weight: 700; color: rgb(226, 120, 0); }
+.d-loes-body p { margin: 0 0 3pt; }
+.d-loes-body .b-table { font-size: 9pt; }
