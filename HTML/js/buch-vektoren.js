@@ -12,6 +12,7 @@
  *   kreuzprodukt  the cross product of two vectors: normal vector, area of parallelogram and triangle (book FOS 12)
  *   lot3d         the perpendicular from a point to a plane: foot, distance, mirror point (book FOS 12)
  *   zentralprojektion  a box and a row of posts in central projection with a draggable vanishing point, 2D (book FOS 12)
+ *   winkel3d      intersection angles: line and line, line and plane (sine with the normal), plane and plane (book GY 12)
  * Mathematical axes: x towards the viewer, y to the right, z up (as in the school book); in Three.js that is (y, z, x).
  * Labels are sprites inside the scene, so the frozen print picture (js/buch-druck.js) keeps them.
  */
@@ -197,9 +198,10 @@
     B.Raum = Raum;
 
     // a row of coordinate inputs: "A ( 2 | 1 | 3 )"
-    function coords(parent, name, val, onChange, c) {
-        const row = div(parent, 'vk-row'), vec = name.length === 1 && name === name.toLowerCase();
-        row.innerHTML = '<span class="vk-name" style="color:' + (PAL[c] || '#fff') + '">' + (vec ? '$\\vec{' + name + '}$' : name) + '</span><span class="vk-par">(</span>' +
+    // tex (optional) replaces the shown name, e.g. '\\vec{n}_1' for the vector n1
+    function coords(parent, name, val, onChange, c, tex) {
+        const row = div(parent, 'vk-row'), vec = !!tex || (name.length === 1 && name === name.toLowerCase());
+        row.innerHTML = '<span class="vk-name" style="color:' + (PAL[c] || '#fff') + '">' + (tex ? '$' + tex + '$' : vec ? '$\\vec{' + name + '}$' : name) + '</span><span class="vk-par">(</span>' +
             val.map((v, i) => '<input class="b-in vk-in" type="number" step="0.5" min="-6" max="6" value="' + v + '" aria-label="' + (vec ? 'Vektor ' : 'Punkt ') + name + ', ' + 'xyz'[i] + '-Koordinate">').join('<span class="vk-par">|</span>') +
             '<span class="vk-par">)</span>';
         const ins = Array.from(row.querySelectorAll('input'));
@@ -709,6 +711,119 @@
         }
         const sgn = x => ' ' + (x < 0 ? '-' : '+') + ' ' + n2(Math.abs(x));
         draw();
+    });
+
+    /* ---------- intersection angles: line and line, line and plane, plane and plane (book GY 12) ---------- */
+    W('winkel3d', function (box) {
+        const MODES = {
+            gg: { k: 'Gerade – Gerade', a: ['u', '\\vec{u}', 'cyan'], b: ['v', '\\vec{v}', 'phi'], pre: {
+                spitz: { k: 'spitz', a: [1, 2, 2], b: [0, 0, 1] }, stumpf: { k: 'stumpfe Vektoren', a: [1, 0, 0], b: [-1, 1, 0] }, ortho: { k: 'senkrecht', a: [1, 2, 2], b: [2, 1, -2] } } },
+            ge: { k: 'Gerade – Ebene', a: ['u', '\\vec{u}', 'cyan'], b: ['n', '\\vec{n}', 'pink'], pre: {
+                schraeg: { k: 'schräg', a: [1, 2, 2], b: [2, -1, 2] }, steil: { k: 'senkrecht', a: [1, 1, 1], b: [1, 1, 1] }, flach: { k: 'parallel', a: [1, 1, 0], b: [0, 0, 1] } } },
+            ee: { k: 'Ebene – Ebene', a: ['n1', '\\vec{n}_1', 'pink'], b: ['n2', '\\vec{n}_2', 'violet'], pre: {
+                dach: { k: 'Dach und Boden', a: [0, 3, 4], b: [0, 0, 1] }, schraeg: { k: 'schräg', a: [2, 1, 2], b: [2, -1, 2] }, ortho: { k: 'senkrecht', a: [0, 0, 1], b: [1, 0, 0] } } }
+        };
+        let mode = MODES[box.dataset.mode] ? box.dataset.mode : 'ge', ca, cb;
+        const first = m => MODES[m].pre[Object.keys(MODES[m].pre)[0]];
+        const S = { a: first(mode).a.slice(), b: first(mode).b.slice() };
+        B.seg(div(box, 'b-ctrls'), Object.keys(MODES).map(k => [k, MODES[k].k]), mode, v => { mode = v; S.a = first(v).a.slice(); S.b = first(v).b.slice(); ui(); }, 'Welcher Winkel?');
+        const preBox = div(box, ''), inBox = div(box, 'vk-inputs');
+        const R = new Raum(box, { height: 400 });
+        const out = div(box, 'b-out');
+        R.onScheme = () => draw();
+        function ui() {
+            const M = MODES[mode];
+            preBox.innerHTML = ''; inBox.innerHTML = '';
+            presetRow(preBox, M.pre, pr => { ca.set(pr.a.slice()); cb.set(pr.b.slice()); draw(); });
+            ca = coords(inBox, M.a[0], S.a, draw, M.a[2], M.a[1]); cb = coords(inBox, M.b[0], S.b, draw, M.b[2], M.b[1]);
+            math(inBox); draw();
+        }
+        const O = [0, 0, 0], unit = a => mul(1 / len(a), a), deg = x => texNum(x, 1) + '^\\circ';
+        // the part of w orthogonal to the unit vector e1, normalised (null if w is parallel to e1)
+        const perp = (e1, w) => { const q = sub(w, mul(dot(w, e1), e1)); return len(q) < 1e-9 ? null : unit(q); };
+        // the angle phi as a filled arc about O, from e1 towards e2 (orthogonal unit vectors); returns its middle point
+        function arc(e1, e2, phi, r) {
+            const pts = [];
+            for (let i = 0; i <= 24; i++) { const t = phi * i / 24; pts.push(add(mul(r * Math.cos(t), e1), mul(r * Math.sin(t), e2))); }
+            for (let i = 0; i < 24; i++) R.line(pts[i], pts[i + 1], 'lambda');
+            R.face([O].concat(pts), 'lambda', 0.22);
+            R.label('φ', mul(1.5, pts[12]), 'lambda', 0.38);
+        }
+        function plane(n, c, s) {
+            const [e1, e2] = inPlane(n), q = [[-s, -s], [s, -s], [s, s], [-s, s]].map(([x, y]) => add(mul(x, e1), mul(y, e2)));
+            R.face(q, c, 0.2); q.forEach((p, i) => R.line(p, q[(i + 1) % 4], c, { opacity: 0.6 }));
+            return q;
+        }
+        const root = s => rootTex(s).split(' \\approx ')[0];
+        const quot = (s, A, Bn) => '\\dfrac{|' + n2(s) + '|}{' + root(A) + ' \\cdot ' + root(Bn) + '}';
+        function draw() {
+            R.ready.then(() => {
+                R.clear();
+                const a = S.a, b = S.b, la = len(a), lb = len(b), M = MODES[mode];
+                if (la < 1e-9 || lb < 1e-9) { out.innerHTML = '<p style="margin:0">Der Nullvektor hat keine Richtung, er liefert keinen Winkel.</p>'; R.render(); return; }
+                const ah = unit(a), bh = unit(b), s = dot(a, b), c = Math.min(1, Math.abs(s) / (la * lb));
+                let html = '';
+                if (mode === 'gg') {
+                    // two lines through a common point S = O with the directions u and v
+                    R.line(mul(-4.2, ah), mul(4.2, ah), 'cyan'); R.line(mul(-4.2, bh), mul(4.2, bh), 'phi');
+                    R.arrow(O, mul(2.4, ah), 'cyan', { r: 0.04 }); R.arrow(O, mul(2.4, bh), 'phi', { r: 0.04 });
+                    R.label('g', mul(4.5, ah), 'cyan'); R.label('h', mul(4.5, bh), 'phi');
+                    R.dot(O, 'white', 0.1); R.label('S', [0, 0.35, -0.45], 'white');
+                    const e2 = perp(ah, s >= 0 ? bh : mul(-1, bh)), phi = Math.acos(c);
+                    if (e2) arc(ah, e2, phi, 1.15);
+                    const psi = Math.acos(Math.max(-1, Math.min(1, s / (la * lb)))) * 180 / Math.PI;
+                    html = '<p style="margin:0 0 6px">$\\cos\\varphi = \\dfrac{|\\vec{u} \\circ \\vec{v}|}{|\\vec{u}| \\cdot |\\vec{v}|} = ' + quot(s, dot(a, a), dot(b, b)) + ' \\approx ' + texNum(c, 4) + '$, also $\\varphi \\approx ' + deg(phi * 180 / Math.PI) + '$</p>' +
+                        (!e2 ? '<p style="margin:0">Die Richtungsvektoren sind parallel: Die Geraden sind parallel oder identisch, sie schneiden sich nicht unter einem Winkel.</p>'
+                            : s < -1e-9 ? '<p style="margin:0">Die Vektoren selbst schließen $' + deg(psi) + '$ ein, also einen stumpfen Winkel. Die Geraden bilden den spitzen Nebenwinkel $180^\\circ - ' + deg(psi) + '$; dafür steht der Betrag im Zähler.</p>'
+                            : Math.abs(s) < 1e-9 ? '<p style="margin:0">Das Skalarprodukt ist $0$: Die Geraden schneiden sich senkrecht.</p>'
+                            : '<p style="margin:0">Das Skalarprodukt ist positiv, der Winkel zwischen den Vektoren ist schon spitz.</p>');
+                } else if (mode === 'ge') {
+                    // the plane through O with the normal n, the line through O with the direction u
+                    const q = plane(b, 'violet', 3.2);
+                    R.label('E', add(q[1], mul(0.4, sub(q[1], q[0]))), 'violet', 0.42);
+                    const side = s >= 0 ? 1 : -1, ud = mul(side, ah);
+                    if (Math.abs(s) < 1e-9) R.line(mul(-4.2, ah), mul(4.2, ah), 'cyan');
+                    else { R.line(mul(-4.2, ud), O, 'cyan', { dash: true }); R.line(O, mul(4.2, ud), 'cyan'); }
+                    R.arrow(O, mul(2.4, ud), 'cyan', { r: 0.04 }); R.label('g', mul(4.5, ud), 'cyan');
+                    R.arrow(O, mul(1.8, bh), 'pink', { r: 0.04 }); R.label('n', mul(2.15, bh), 'pink', 0.36);
+                    R.dot(O, 'white', 0.1);
+                    const pr = sub(ud, mul(dot(ud, bh), bh)), phi = Math.asin(c);
+                    if (len(pr) > 1e-9) {
+                        const ph = unit(pr);
+                        R.line(O, mul(3.2, ph), 'lambda', { dash: true });
+                        const e2 = perp(ph, ud);
+                        if (e2) arc(ph, e2, phi, 1.25);
+                    } else {                                                    // u is a normal: a right-angle mark
+                        const [e1] = inPlane(b), k = 0.4, m1 = mul(k, e1), m2 = mul(k, bh);
+                        R.line(m1, add(m1, m2), 'white', { opacity: 0.8 }); R.line(add(m1, m2), m2, 'white', { opacity: 0.8 });
+                    }
+                    const alpha = Math.acos(c) * 180 / Math.PI;
+                    html = '<p style="margin:0 0 6px">Winkel zwischen $\\vec{u}$ und dem Normalenvektor: $\\cos\\alpha = ' + quot(s, dot(a, a), dot(b, b)) + '$, $\\alpha \\approx ' + deg(alpha) + '$</p>' +
+                        '<p style="margin:0">Der Winkel zur Ebene ergänzt ihn zu $90^\\circ$: $\\sin\\varphi = \\dfrac{|\\vec{u} \\circ \\vec{n}|}{|\\vec{u}| \\cdot |\\vec{n}|} \\approx ' + texNum(c, 4) + '$, also $\\varphi \\approx ' + deg(phi * 180 / Math.PI) + '$' +
+                        (Math.abs(s) < 1e-9 ? '. Das Skalarprodukt ist $0$: $g$ ist parallel zu $E$ oder liegt in $E$.' : c > 1 - 1e-9 ? '. $\\vec{u}$ ist ein Vielfaches von $\\vec{n}$: $g$ steht senkrecht auf $E$.' : '. Gelb gestrichelt: die Projektion von $g$ in die Ebene.') + '</p>';
+                } else {
+                    // two planes through O, their line of intersection and the angle across it
+                    plane(a, 'pink', 2.8); plane(b, 'violet', 2.8);
+                    R.arrow(O, mul(1.7, ah), 'pink', { r: 0.04 }); R.label('n₁', mul(2.05, ah), 'pink', 0.34);
+                    R.arrow(O, mul(1.7, bh), 'violet', { r: 0.04 }); R.label('n₂', mul(2.05, bh), 'violet', 0.34);
+                    const g = cross(a, b), phi = Math.acos(c);
+                    if (len(g) > 1e-9) {
+                        const gh = unit(g), w1 = unit(cross(gh, ah));
+                        let w2 = unit(cross(gh, bh));
+                        if (dot(w1, w2) < 0) w2 = mul(-1, w2);
+                        R.line(mul(-4.2, gh), mul(4.2, gh), 'white'); R.label('s', mul(4.5, gh), 'white');
+                        R.line(O, mul(3, w1), 'pink'); R.line(O, mul(3, w2), 'violet');
+                        const e2 = perp(w1, w2);
+                        if (e2) arc(w1, e2, phi, 1.3);
+                    }
+                    html = '<p style="margin:0 0 6px">$\\cos\\varphi = \\dfrac{|\\vec{n}_1 \\circ \\vec{n}_2|}{|\\vec{n}_1| \\cdot |\\vec{n}_2|} = ' + quot(s, dot(a, a), dot(b, b)) + ' \\approx ' + texNum(c, 4) + '$, also $\\varphi \\approx ' + deg(phi * 180 / Math.PI) + '$</p>' +
+                        (len(g) < 1e-9 ? '<p style="margin:0">Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.</p>'
+                            : '<p style="margin:0">Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $\\vec{n}_1 \\times \\vec{n}_2 = ' + vtex(g) + '$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.</p>');
+                }
+                out.innerHTML = html; math(out); R.render();
+            });
+        }
+        ui();
     });
 
     /* ---------- central projection: one vanishing point, posts that shrink with the depth ---------- */

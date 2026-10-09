@@ -8,6 +8,7 @@
  *   kurve         f(x) = ax³ + bx² + cx + d: monotony, extrema and inflection point with f' and f''
  *   tangente      tangent and normal at a draggable point, both equations
  *   ableiten      derivative trainer: random terms, type f'(x), checked numerically
+ *   integrieren   antiderivative trainer: random integrands, type F(x), right if it differs from a solution by a constant (data-kinds, book GY 12)
  *   steckbrief    a function from conditions: draggable points, the system of equations and its solution (data-modes="p3 ext wp")
  *   optimieren    box from a sheet, tin can, fence at a wall: target function, slider, maximum by f' = 0
  *   schar         a family f_a with its members, the extreme points and their locus (Klasse 13, Lernbereich 6)
@@ -15,6 +16,9 @@
  *   titelbildfos12  the cover of the FOS 12 book: e-curve with tangent and rectangles, hyperbola, parallelogram with its cross product
  *   bruchfunktion   rational functions from linear factors: zeros, poles with or without sign change, holes, asymptotes (book FOS 12)
  *   efunktion       the number e: the base with slope 1 at 0, f(x) = a·e^(bx) + c, continuous compounding (book FOS 12)
+ *   abstandmin      the point of a curve nearest to P: distance function d(x), its minimum, the right angle to the tangent (book GY 12)
+ *   geradenschar    families of lines: a pencil through a point, parallels, lines cutting or touching a parabola (book GY 12)
+ *   titelbildgy12   the cover of the GY 12 book: an area with trapezoids, a test histogram, a line through a plane with its angle and the normal
  * Looks: js/buch.css (section "Widgets of the calculus chapters").
  */
 (function () {
@@ -490,6 +494,115 @@
         row.querySelector('[data-n]').addEventListener('click', next);
         next();
     });
+
+    /* ---------- antiderivative trainer: random integrands, type F(x), right if it differs from a solution by a constant (book GY 12) ---------- */
+    // a reduced fraction p/q as a coefficient in front of a term: 1 → "", −1 → "-", 3 → "3", 3/4 → "\tfrac34"
+    function fco(p, q) {
+        const g = (function gcd(a, b) { return b ? gcd(b, a % b) : Math.abs(a); })(p, q), s = (p < 0) !== (q < 0) ? '-' : '';
+        const P = Math.abs(p) / g, Q = Math.abs(q) / g;
+        return Q === 1 ? (P === 1 ? s : s + P) : s + '\\tfrac{' + P + '}{' + Q + '}';
+    }
+    const lin = (a, b) => co(a) + 'x' + sg(b, 0);
+    const ITASKS = {
+        potenz() {
+            const n = 1 + rnd(6), a = pick([1, 2, 3, 4, 6, -2, -3, n + 1, 2 * (n + 1)]);
+            return { tex: co(a) + (n === 1 ? 'x' : 'x^{' + n + '}'), f: x => a * x ** n, F: x => a / (n + 1) * x ** (n + 1), Ftex: fco(a, n + 1) + 'x^{' + (n + 1) + '}',
+                rule: 'Potenzregel rückwärts: Exponent um 1 erhöhen, durch den neuen Exponenten teilen, $\\int x^n\\,\\mathrm{d}x = \\dfrac{x^{n+1}}{n+1} + C$.' };
+        },
+        summe() {
+            const c = [pick([1, 2, -3, 5, 4]), pick([2, -4, 6, 1, 0]), pick([3, -6, 9, 0]), pick([0, 4, -8, 2])];
+            const terms = [], Fterms = [];
+            for (let k = c.length - 1; k >= 0; k--) {
+                if (!c[k]) continue;
+                const t = k === 0 ? '' : k === 1 ? 'x' : 'x^{' + k + '}', T = k + 1 === 1 ? 'x' : 'x^{' + (k + 1) + '}';
+                const ct = k === 0 ? texNum(Math.abs(c[k]), 0) : co(Math.abs(c[k])), Fc = fco(Math.abs(c[k]), k + 1);
+                terms.push((c[k] < 0 ? (terms.length ? ' - ' : '-') : (terms.length ? ' + ' : '')) + ct + t);
+                Fterms.push((c[k] < 0 ? (Fterms.length ? ' - ' : '-') : (Fterms.length ? ' + ' : '')) + Fc + T);
+            }
+            return { tex: terms.join(''), f: x => pval(c, x), F: x => c.reduce((s, a, k) => s + a / (k + 1) * x ** (k + 1), 0), Ftex: Fterms.join(''),
+                rule: 'Summen- und Faktorregel: Jeder Summand wird einzeln integriert, ein Faktor bleibt stehen. Eine Konstante $a$ hat die Stammfunktion $ax$.' };
+        },
+        wurzel() {
+            return pick([
+                () => { const a = pick([1, 3, 6, 9]); return { tex: co(a) + '\\sqrt{x}', f: x => a * Math.sqrt(x), F: x => 2 * a / 3 * x ** 1.5, Ftex: fco(2 * a, 3) + 'x^{\\frac32}',
+                    rule: '$\\sqrt{x} = x^{\\frac12}$: Exponent $\\tfrac12 + 1 = \\tfrac32$, durch $\\tfrac32$ teilen heißt mit $\\tfrac23$ malnehmen.' }; },
+                () => { const a = pick([1, 2, 3, 5]); return { tex: '\\dfrac{' + a + '}{x^2}', f: x => a / (x * x), F: x => -a / x, Ftex: '-\\dfrac{' + a + '}{x}',
+                    rule: '$\\tfrac{1}{x^2} = x^{-2}$: Exponent $-1$, durch $-1$ teilen, also $-x^{-1} = -\\tfrac1x$.' }; },
+                () => { const a = pick([1, 2, 3]); return { tex: '\\dfrac{' + a + '}{\\sqrt{x}}', f: x => a / Math.sqrt(x), F: x => 2 * a * Math.sqrt(x), Ftex: co(2 * a) + '\\sqrt{x}',
+                    rule: '$\\tfrac{1}{\\sqrt{x}} = x^{-\\frac12}$: Exponent $\\tfrac12$, durch $\\tfrac12$ teilen heißt verdoppeln.' }; },
+                () => { const p = pick([1, 3, 5]), q = 2; return { tex: 'x^{\\frac{' + p + '}{' + q + '}}', f: x => x ** (p / q), F: x => q / (p + q) * x ** ((p + q) / q), Ftex: fco(q, p + q) + 'x^{\\frac{' + (p + q) + '}{' + q + '}}',
+                    rule: 'Die Potenzregel gilt für jeden Exponenten $r \\neq -1$: $\\int x^r\\,\\mathrm{d}x = \\dfrac{x^{r+1}}{r+1} + C$.' }; }
+            ])();
+        },
+        exsin() {
+            return pick([
+                () => { const a = pick([1, 2, 3, -1]); return { tex: co(a) + '\\mathrm{e}^x', f: x => a * Math.exp(x), F: x => a * Math.exp(x), Ftex: co(a) + '\\mathrm{e}^x',
+                    rule: '$\\mathrm{e}^x$ ist seine eigene Ableitung, also auch seine eigene Stammfunktion.' }; },
+                () => { const a = pick([1, 2, 4]); return { tex: '\\dfrac{' + a + '}{x}', f: x => a / x, F: x => a * Math.log(x), Ftex: co(a) + '\\ln|x|',
+                    rule: 'Die Lücke der Potenzregel: $\\int \\tfrac1x\\,\\mathrm{d}x = \\ln|x| + C$. Für $x > 0$ reicht $\\ln x$.' }; },
+                () => { const a = pick([1, 2, 3]); return { tex: co(a) + '\\sin x', f: x => a * Math.sin(x), F: x => -a * Math.cos(x), Ftex: co(-a) + '\\cos x',
+                    rule: '$(\\cos x)\' = -\\sin x$, also $\\int \\sin x\\,\\mathrm{d}x = -\\cos x + C$.' }; },
+                () => { const a = pick([1, 2, 5]); return { tex: co(a) + '\\cos x', f: x => a * Math.cos(x), F: x => a * Math.sin(x), Ftex: co(a) + '\\sin x',
+                    rule: '$(\\sin x)\' = \\cos x$, also $\\int \\cos x\\,\\mathrm{d}x = \\sin x + C$.' }; }
+            ])();
+        },
+        linear() {
+            const a = pick([2, 3, 4, -2, 0.5]), b = pick([0, 1, -1, 3]), at = a === 0.5 ? 2 : null;
+            const inv = a === 0.5 ? '2' : fco(1, a);                       // 1/a as a coefficient
+            return pick([
+                () => ({ tex: '\\mathrm{e}^{' + lin(a, b) + '}', f: x => Math.exp(a * x + b), F: x => Math.exp(a * x + b) / a, Ftex: inv + '\\mathrm{e}^{' + lin(a, b) + '}',
+                    rule: 'Lineare Verkettung: $\\int \\mathrm{e}^{ax+b}\\,\\mathrm{d}x = \\tfrac1a\\,\\mathrm{e}^{ax+b} + C$. Probe: Die Kettenregel liefert den Faktor $a$, $\\tfrac1a$ hebt ihn auf.' }),
+                () => ({ tex: '\\sin(' + lin(a, b) + ')', f: x => Math.sin(a * x + b), F: x => -Math.cos(a * x + b) / a, Ftex: (a === 0.5 ? '-2' : fco(-1, a)) + '\\cos(' + lin(a, b) + ')',
+                    rule: '$\\int \\sin(ax+b)\\,\\mathrm{d}x = -\\tfrac1a \\cos(ax+b) + C$: erst die Stammfunktion von $\\sin$, dann durch die innere Ableitung $a$ teilen.' }),
+                () => { const n = pick([2, 3, 4]); return { tex: '(' + lin(a, b) + ')^{' + n + '}', f: x => (a * x + b) ** n, F: x => (a * x + b) ** (n + 1) / (a * (n + 1)),
+                    Ftex: (at ? fco(2, n + 1) : fco(1, a * (n + 1))) + '(' + lin(a, b) + ')^{' + (n + 1) + '}',
+                    rule: '$\\int (ax+b)^n\\,\\mathrm{d}x = \\dfrac{(ax+b)^{n+1}}{a\\,(n+1)} + C$: Potenzregel für die Klammer, dann durch die innere Ableitung teilen.' }; }
+            ])();
+        }
+    };
+    W('integrieren', function (box) {
+        const ALL = [['potenz', 'Potenzen'], ['summe', 'Summen'], ['wurzel', 'Wurzeln und Brüche'], ['exsin', 'eˣ, 1/x, sin, cos'], ['linear', 'Lineare Verkettung'], ['mix', 'Gemischt']];
+        // data-kinds="linear" limits the choice (with one kind there is no selector)
+        const want = (box.dataset.kinds || '').split(/\s+/).filter(Boolean);
+        const KINDS = want.length ? ALL.filter(k => want.includes(k[0])) : ALL;
+        let kind = KINDS[KINDS.length - 1][0], T = null, solved = 0, tried = 0;
+        if (KINDS.length > 1) segBox(div(box, 'b-ctrls'), KINDS, kind, v => { kind = v; next(); }, 'Aufgabenart');
+        const q = div(box, 'b-out');
+        const row = div(box, 'b-ctrls');
+        row.innerHTML = '<label class="b-ctrl" style="flex:1 1 260px">$F(x) =$ <input class="b-in" type="text" autocomplete="off" spellcheck="false" placeholder="z. B. x^3/3 - 2x oder -cos(2x)/2" style="flex:1;min-width:0"></label>' +
+            '<button type="button" class="b-btn b-go" data-c>Prüfen</button><button type="button" class="b-btn b-hintbtn" data-s>Lösung</button><button type="button" class="b-btn" data-n>Neue Aufgabe</button>';
+        const inp = row.querySelector('input'), fb = div(box, 'b-out');
+        fb.style.display = 'none';
+        function next() {
+            const pool = kind === 'mix' ? KINDS.map(k => k[0]).filter(k => k !== 'mix') : [kind];
+            T = ITASKS[pick(pool)]();
+            q.innerHTML = '<p style="margin:0">Bestimme eine Stammfunktion: $f(x) = ' + T.tex + '$</p>';
+            inp.value = ''; fb.style.display = 'none';
+            math(q); math(row);
+        }
+        function say(html) { fb.style.display = ''; fb.innerHTML = html; math(fb); }
+        // right: F_user − F differs by the same constant at every test point (so any + C is fine)
+        function differsByConstant(Fu) {
+            const xs = [0.37, 0.81, 1.23, 1.77, 2.31, 2.9], d = xs.map(x => Fu(x) - T.F(x));
+            if (!d.every(isFinite)) return false;
+            const scale = Math.max(1, ...xs.map(x => Math.abs(T.F(x))));
+            return d.every(v => Math.abs(v - d[0]) <= 1e-6 * scale);
+        }
+        function check() {
+            const raw = inp.value.replace(/\+\s*c\s*$/i, '');
+            if (!raw.trim()) return;
+            const fn = parseTerm(raw);
+            if (!fn) { say('<p style="margin:0">Das kann ich nicht lesen. Schreibe zum Beispiel <code>x^4/4 + 2x</code>, <code>2/3 x^(3/2)</code>, <code>-cos(x)</code>, <code>e^(2x+1)/2</code>, <code>ln(x)</code>.</p>'); return; }
+            tried++;
+            if (differsByConstant(fn)) { solved++; say('<p style="margin:0"><b>Richtig!</b> $F(x) = ' + T.Ftex + ' + C$ · ' + solved + ' von ' + tried + ' gelöst</p>'); }
+            else say('<p style="margin:0">Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ' + T.rule + '</p>');
+        }
+        row.querySelector('[data-c]').addEventListener('click', check);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+        row.querySelector('[data-s]').addEventListener('click', () => say('<p style="margin:0">$F(x) = ' + T.Ftex + ' + C$</p><p style="margin:6px 0 0">' + T.rule + '</p>'));
+        row.querySelector('[data-n]').addEventListener('click', next);
+        next();
+    });
     B.parseTerm = parseTerm;                                   // for the debug window and tests
 
     /* ---------- a function from conditions ---------- */
@@ -937,5 +1050,184 @@
             math(out);
         }
         build();
+    });
+
+    /* ---------- extremal distances: the point of a curve nearest to P and the distance function d(x) (book GY 12) ---------- */
+    W('abstandmin', function (box) {
+        const PRE = {
+            gerade: { k: 'Gerade', ftex: '2x + 1', f: x => 2 * x + 1, df: () => 2, P: [0, 0], x: [-3, 3], y: [-2.2, 4], dx: [-2.5, 1.5], x0: 1 },
+            parabel: { k: 'Parabel', ftex: 'x^2', f: x => x * x, df: x => 2 * x, P: [0, 2], x: [-2.8, 2.8], y: [-0.6, 4.4], dx: [-2, 2], x0: 0.2 },
+            wurzel: { k: 'Wurzelkurve', ftex: '\\sqrt{x}', f: x => Math.sqrt(x), df: x => 0.5 / Math.sqrt(x), P: [2.5, 0], x: [-0.6, 5.2], y: [-0.9, 2.7], dx: [0, 5], x0: 0.5 }
+        };
+        let G = PRE[box.dataset.preset] || PRE.parabel, P = G.P.slice(), xq = G.x0;
+        const pre = div(box, 'b-ctrls');
+        pre.innerHTML = '<span class="b-ctrl">Kurve:</span>' + Object.keys(PRE).map(k => '<button type="button" class="b-btn" data-p="' + k + '">' + PRE[k].k + '</button>').join('');
+        pre.addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) { G = PRE[b.dataset.p]; P = G.P.slice(); xq = G.x0; build(); } });
+        const sl = div(box, '');
+        div(box, 'b-help').textContent = 'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).';
+        const h1 = div(box, ''), h2 = div(box, '');
+        const p1 = new Plot(h1, { x: G.x, y: G.y, equal: true, height: 320, aria: 'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand' });
+        const p2 = new Plot(h2, { x: G.dx, y: [0, 3], height: 190, yLabel: 'd', aria: 'Abstandsfunktion d(x) mit ihrem Minimum' });
+        const out = div(box, 'b-out');
+        const hs = [{ x: P[0], y: P[1], color: 'cyan' }];
+        p1.handles(hs, (i, x, y) => { P = [Math.round(x * 10) / 10, Math.round(y * 10) / 10]; render(); });
+        const d = x => Math.hypot(x - P[0], G.f(x) - P[1]);
+        // the smallest distance: a fine grid, then a golden-section search around the best grid point
+        function argmin() {
+            const [a, b] = G.dx, n = 600;
+            let bi = 0, bv = Infinity;
+            for (let i = 0; i <= n; i++) { const v = d(a + (b - a) * i / n); if (v < bv) { bv = v; bi = i; } }
+            let lo = a + (b - a) * Math.max(0, bi - 1) / n, hi = a + (b - a) * Math.min(n, bi + 1) / n;
+            const g = (Math.sqrt(5) - 1) / 2;
+            for (let k = 0; k < 60; k++) { const m1 = hi - g * (hi - lo), m2 = lo + g * (hi - lo); if (d(m1) < d(m2)) hi = m2; else lo = m1; }
+            return (lo + hi) / 2;
+        }
+        // equal units on both axes: the height follows the width; where it is capped, the x-range widens, so the whole y-range stays in the picture
+        function fit() {
+            const w = h1.clientWidth; if (!w) return;
+            const xs = G.x[1] - G.x[0], ys = G.y[1] - G.y[0], h = Math.max(230, Math.min(440, w * ys / xs)), xw = Math.max(xs, ys * w / h), xm = (G.x[0] + G.x[1]) / 2;
+            p1.box.style.height = Math.round(h) + 'px';
+            p1.view([xm - xw / 2, xm + xw / 2], G.y);
+            p1.draw();
+        }
+        if (window.ResizeObserver) new ResizeObserver(fit).observe(h1);
+        function build() {
+            sl.innerHTML = '';
+            range(sl, { label: '$x$-Koordinate von $Q$', min: G.dx[0], max: G.dx[1], step: 0.05, value: xq, fmt: v => fmt(v, 2), onInput: v => { xq = v; render(); } });
+            math(sl);
+            p2.view(G.dx, null);
+            fit();
+            render();
+        }
+        const sq = (v, c) => Math.abs(c) < 1e-9 ? (v.length > 1 ? '(' + v + ')' : v) + '^2' : '(' + v + (c > 0 ? ' - ' : ' + ') + num(Math.abs(c), 1) + ')^2';
+        function render() {
+            hs[0].x = P[0]; hs[0].y = P[1];
+            const xm = argmin(), Q = [xq, G.f(xq)], M = [xm, G.f(xm)], dm = d(xm);
+            let top = 0;
+            for (let i = 0; i <= 200; i++) top = Math.max(top, d(G.dx[0] + (G.dx[1] - G.dx[0]) * i / 200));
+            p2.view(null, [0, Math.max(1, top * 1.08)]);
+            const L1 = [{ fn: G.f, color: 'lambda', label: 'f', domain: G.dx[0] === 0 ? [0, G.x[1]] : null }];
+            const m = G.df(xm);
+            if (isFinite(m)) L1.push({ fn: x => M[1] + m * (x - xm), color: 'dim', width: 1, dash: true });
+            L1.push({ seg: [P, M], color: 'phi', dash: true }, { seg: [P, Q], color: 'cyan' }, { pts: [M], color: 'phi', r: 5 }, { pts: [Q], color: 'white', r: 5 }, { text: 'Q', at: Q, color: 'white' });
+            p1.draw(L1);
+            p2.draw([{ fn: d, color: 'cyan', label: 'd', domain: G.dx }, { pts: [[xm, dm]], color: 'phi', r: 6 }, { pts: [[xq, d(xq)]], color: 'white', r: 5 }, { vline: xq, color: 'dim' }]);
+            // the angle between PM and the tangent at M, as a check of the right angle
+            const tx = [1, isFinite(m) ? m : 1e9], pm = [M[0] - P[0], M[1] - P[1]], lp = Math.hypot(...pm);
+            const ang = lp < 1e-9 ? null : Math.acos(Math.min(1, Math.abs(tx[0] * pm[0] + tx[1] * pm[1]) / (Math.hypot(...tx) * lp))) * 180 / Math.PI;
+            const inner = Math.abs(xm - G.dx[0]) > 1e-3 && Math.abs(xm - G.dx[1]) > 1e-3;
+            out.innerHTML = '<p style="margin:0 0 6px">$f(x) = ' + G.ftex + '$, $P(' + num(P[0], 1) + ' \\mid ' + num(P[1], 1) + ')$, $Q(x \\mid f(x))$: $\\;d(x)^2 = ' + sq('x', P[0]) + ' + ' + sq(G.ftex, P[1]) + '$</p>' +
+                '<p style="margin:0 0 6px">Jetzt: $x = ' + num(xq, 2) + '$, $d \\approx ' + num(d(xq), 3) + '$ · am kleinsten bei $x \\approx ' + num(xm, 3) + '$: $d_{\\min} \\approx ' + num(dm, 3) + '$</p>' +
+                '<p style="margin:0">' + (lp < 1e-9 ? '$P$ liegt auf der Kurve, der Abstand ist $0$.'
+                    : inner ? 'Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ' + texNum(ang, 1) + '^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.'
+                        : 'Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.') + '</p>';
+            math(out);
+        }
+        build();
+    });
+
+    /* ---------- families of lines: a pencil through a point, parallels, tangents to a parabola (book GY 12) ---------- */
+    W('geradenschar', function (box) {
+        const P = {
+            buendel: { k: 'Büschel', tex: a => 'y = ' + num(a, 1) + ' \\cdot (x - 2) + 1', f: (a, x) => a * (x - 2) + 1, lo: -3, hi: 3, a: 1, y: [-4, 5],
+                note: () => 'Alle Geraden gehen durch $(2 \\mid 1)$: Für $x = 2$ fällt $a$ heraus. Der Parameter ist die Steigung, eine Gerade fehlt aber: die senkrechte $x = 2$.' },
+            parallel: { k: 'Parallelen', tex: a => 'y = 0{,}5x' + sg(a, 1), f: (a, x) => 0.5 * x + a, lo: -3, hi: 3, a: 1, y: [-4, 5],
+                note: () => 'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.' },
+            tangente: { k: 'Gerade und Parabel', tex: a => 'y = ' + (Math.abs(a) < 1e-9 ? '' : co(a) + 'x') + (Math.abs(a) < 1e-9 ? '1' : ' + 1'), f: (a, x) => a * x + 1, lo: -4, hi: 4, a: 1, y: [-1, 7], parab: x => x * x + 2,
+                note: a => { const D = a * a - 4, n = D > 1e-9 ? 2 : D < -1e-9 ? 0 : 1;
+                    return 'Schnitt mit $y = x^2 + 2$: $x^2 - ' + (Math.abs(a) < 1e-9 ? '0' : num(a, 1)) + 'x + 1 = 0$, Diskriminante $a^2 - 4 = ' + num(D, 2) + '$: ' +
+                        (n === 2 ? 'zwei Schnittpunkte.' : n === 0 ? 'kein gemeinsamer Punkt.' : 'genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ' + num(a / 2, 1) + '$. Das passiert für $a = \\pm 2$.'); } }
+        };
+        let G = P.buendel, a = G.a;
+        const ctl = div(box, 'b-ctrls');
+        B.seg(ctl, Object.keys(P).map(k => [k, P[k].k]), 'buendel', v => { G = P[v]; a = G.a; build(); }, 'Geradenschar');
+        const sl = div(box, '');
+        const p = new Plot(div(box, ''), { x: [-4, 4], y: [-4, 5], height: 320, aria: 'Geradenschar mit der hervorgehobenen Geraden für den gewählten Parameter' });
+        const out = div(box, 'b-out');
+        function build() {
+            sl.innerHTML = '';
+            range(sl, { label: 'Parameter $a$', min: G.lo, max: G.hi, step: 0.25, value: a, fmt: v => fmt(v, 2), onInput: v => { a = v; render(); } });
+            math(sl); render();
+        }
+        function render() {
+            p.view([-4, 4], G.y);
+            const L = [];
+            for (let b = G.lo; b <= G.hi + 1e-9; b += 1) L.push({ fn: x => G.f(b, x), color: 'dim', width: 1 });
+            if (G.parab) L.push({ fn: G.parab, color: 'violet', label: 'p' });
+            L.push({ fn: x => G.f(a, x), color: 'lambda', label: 'g', width: 2.6 });
+            if (G === P.buendel) L.push({ pts: [[2, 1]], color: 'white', r: 6 });
+            if (G.parab) {
+                const D = a * a - 4;
+                if (D >= -1e-9) { const r = Math.sqrt(Math.max(0, D)); L.push({ pts: [(a - r) / 2, (a + r) / 2].map(x => [x, G.f(a, x)]), color: 'red', r: 5 }); }
+            }
+            p.draw(L);
+            out.innerHTML = '<p style="margin:0 0 6px">$' + G.tex(a) + '$</p><p style="margin:0">' + G.note(a) + '</p>';
+            math(out);
+        }
+        build();
+    });
+
+    /* ---------- the cover of book GY 12: an area with trapezoids, a test histogram, a line through a plane with its angle ---------- */
+    W('titelbildgy12', function (box) {
+        const Wd = 600, Ht = 850, X = x => (x + 3) / 9 * Wd, Y = y => (10 - y) / 13 * Ht;
+        const n1 = v => v.toFixed(1);
+        const path = (g, a, b, n = 160) => {
+            let d = '';
+            for (let i = 0; i <= n; i++) { const x = a + (b - a) * i / n; d += (i ? 'L' : 'M') + n1(X(x)) + ' ' + n1(Y(g(x))); }
+            return d;
+        };
+        // below the title: a hump over the base line y = 0.8, its area from a to b, trapezoids under it
+        const base = 0.8, f = x => base + 0.25 + 2.3 * Math.exp(-((x - 0.4) ** 2) / 2.2) - 0.05 * x, a = -2.4, b = 3, nT = 5;
+        let grid = '';
+        for (let x = -3; x <= 6; x++) grid += '<line x1="' + X(x) + '" y1="0" x2="' + X(x) + '" y2="' + Ht + '" />';
+        for (let y = -3; y <= 10; y++) grid += '<line x1="0" y1="' + Y(y) + '" x2="' + Wd + '" y2="' + Y(y) + '" />';
+        let area = 'M' + n1(X(a)) + ' ' + n1(Y(base));
+        for (let i = 0; i <= 160; i++) { const x = a + (b - a) * i / 160; area += 'L' + n1(X(x)) + ' ' + n1(Y(f(x))); }
+        area += 'L' + n1(X(b)) + ' ' + n1(Y(base)) + 'Z';
+        let traps = '';
+        for (let k = 0; k < nT; k++) {
+            const x0 = a + (b - a) * k / nT, x1 = a + (b - a) * (k + 1) / nT;
+            traps += '<polygon points="' + [[x0, base], [x0, f(x0)], [x1, f(x1)], [x1, base]].map(([x, y]) => n1(X(x)) + ',' + n1(Y(y))).join(' ') + '"/>';
+        }
+        let art = '<line x1="0" y1="' + n1(Y(base)) + '" x2="' + Wd + '" y2="' + n1(Y(base)) + '" stroke="#cfe4f5" stroke-opacity="0.22" stroke-width="1.2"/>';
+        art += '<path d="' + area + '" fill="#F5C242" fill-opacity="0.13"/>';
+        art += '<g fill="#A0C85A" fill-opacity="0.16" stroke="#A0C85A" stroke-opacity="0.7" stroke-width="1.4" stroke-linejoin="round">' + traps + '</g>';
+        art += '<path d="' + path(f, -3, 3.3) + '" stroke="#F5C242" stroke-width="3.6" fill="none" stroke-linecap="round" filter="url(#tbg12-glow)"/>';
+        [a, b].forEach(x => { art += '<line x1="' + n1(X(x)) + '" y1="' + n1(Y(base)) + '" x2="' + n1(X(x)) + '" y2="' + n1(Y(f(x))) + '" stroke="#F5C242" stroke-opacity="0.75" stroke-width="1.6" stroke-dasharray="5 6"/>'; });
+        // lower left: B(12; 0,5) with a two-sided rejection region in red
+        const binom = k => { let c = 1; for (let i = 0; i < k; i++) c = c * (12 - i) / (i + 1); return c / 4096; };
+        let bars = '';
+        for (let k = 0; k <= 12; k++) {
+            const h = binom(k) * 560, x = 34 + k * 17, red = k <= 2 || k >= 10;
+            bars += '<rect x="' + x + '" y="' + n1(745 - h) + '" width="13" height="' + n1(h) + '" rx="2" fill="' + (red ? '#e2665a' : '#7fd8ee') + '" fill-opacity="' + (red ? 0.8 : 0.45) + '"/>';
+        }
+        bars += '<line x1="26" y1="745.5" x2="268" y2="745.5" stroke="#cfe4f5" stroke-opacity="0.35" stroke-width="1.2"/>';
+        // lower right: a plane, a line piercing it at S with the angle to its projection, the normal at S
+        const O = [470, 690], ex = [-37, 24], ey = [94, 0], ez = [0, -86];
+        const pt = p => [O[0] + p[0] * ex[0] + p[1] * ey[0] + p[2] * ez[0], O[1] + p[0] * ex[1] + p[1] * ey[1] + p[2] * ez[1]];
+        const vadd = (u, v) => u.map((c, i) => c + v[i]), vmul = (r, u) => u.map(c => r * c), pts = q => q.map(pt).map(r => n1(r[0]) + ',' + n1(r[1])).join(' ');
+        function pfeil(p, q, sz, colr, w) {
+            const ang = Math.atan2(q[1] - p[1], q[0] - p[0]), cs = Math.cos(ang), sn = Math.sin(ang);
+            const at = (back, side) => n1(q[0] - back * cs - side * sn) + ',' + n1(q[1] - back * sn + side * cs);
+            return '<line x1="' + n1(p[0]) + '" y1="' + n1(p[1]) + '" x2="' + n1(q[0] - 0.62 * sz * cs) + '" y2="' + n1(q[1] - 0.62 * sz * sn) + '" stroke="' + colr + '" stroke-width="' + w + '" stroke-linecap="round"/>' +
+                '<polygon points="' + at(0, 0) + ' ' + at(sz, 0.42 * sz) + ' ' + at(0.68 * sz, 0) + ' ' + at(sz, -0.42 * sz) + '" fill="' + colr + '"/>';
+        }
+        const Sp = [0.3, 0.2, 0], dv = [0.45, 0.85, 1.05], pr = [dv[0], dv[1], 0], prl = Math.hypot(...pr), phi = Math.atan2(dv[2], prl);
+        let raum = '<polygon points="' + pts([[-1.2, -1.0, 0], [1.4, -1.0, 0], [1.4, 1.6, 0], [-1.2, 1.6, 0]]) + '" fill="#B8A4F2" fill-opacity="0.2" stroke="#B8A4F2" stroke-opacity="0.75" stroke-width="1.6" stroke-linejoin="round"/>';
+        raum += '<line x1="' + n1(pt(vadd(Sp, vmul(-1.1, dv)))[0]) + '" y1="' + n1(pt(vadd(Sp, vmul(-1.1, dv)))[1]) + '" x2="' + n1(pt(Sp)[0]) + '" y2="' + n1(pt(Sp)[1]) + '" stroke="#7fd8ee" stroke-opacity="0.6" stroke-width="2.4" stroke-dasharray="6 7"/>';
+        raum += '<line x1="' + n1(pt(Sp)[0]) + '" y1="' + n1(pt(Sp)[1]) + '" x2="' + n1(pt(vadd(Sp, vmul(1.25, pr)))[0]) + '" y2="' + n1(pt(vadd(Sp, vmul(1.25, pr)))[1]) + '" stroke="#F5C242" stroke-opacity="0.8" stroke-width="1.6" stroke-dasharray="5 6"/>';
+        let wedge = [Sp];
+        for (let i = 0; i <= 20; i++) { const t = phi * i / 20, r = 0.5; wedge.push(vadd(Sp, vadd(vmul(r * Math.cos(t) / prl, pr), [0, 0, r * Math.sin(t)]))); }
+        raum += '<polygon points="' + pts(wedge) + '" fill="#F5C242" fill-opacity="0.35" stroke="#F5C242" stroke-width="1.6" stroke-linejoin="round"/>';
+        raum += '<g filter="url(#tbg12-glow)">' + pfeil(pt(Sp), pt(vadd(Sp, vmul(1.25, dv))), 16, '#7fd8ee', 3) + '</g>';
+        raum += pfeil(pt(Sp), pt(vadd(Sp, [0, 0, 0.85])), 12, '#e682be', 2.4);
+        raum += '<circle cx="' + n1(pt(Sp)[0]) + '" cy="' + n1(pt(Sp)[1]) + '" r="4" fill="#7fd8ee"/>';
+        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor">' +
+            '<defs><linearGradient id="tbg12-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="1"/>' +
+            '<stop offset="0.9" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0.3"/></linearGradient>' +
+            '<mask id="tbg12-mask"><rect width="' + Wd + '" height="' + Ht + '" fill="url(#tbg12-fade)"/></mask>' +
+            '<filter id="tbg12-glow" filterUnits="userSpaceOnUse" x="0" y="0" width="' + Wd + '" height="' + Ht + '"><feGaussianBlur stdDeviation="5" result="b"/>' +
+            '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
+            '<g mask="url(#tbg12-mask)"><g stroke="#7fd8ee" stroke-opacity="0.08" stroke-width="1">' + grid + '</g>' + art + bars + '</g>' + raum + '</svg>';
     });
 })();
