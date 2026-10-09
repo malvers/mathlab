@@ -48,6 +48,8 @@
         ['mathe/mathefos11.html', 'FO MA 11', 'b-grey', 'Mathematik Fachoberschule Klasse 11 (FO)'],
         ['mathe/mathefos12.html', 'FO MA 12', 'b-grey', 'Mathematik Fachoberschule Klasse 12 (FO)'],
         ['mathe/uebung.html', 'Üben', 'b-grey', 'Übung macht den Meister'],
+        /* Doc, 09.10.2026: the filler detector (HTML/aehm.html), first in MRA, never a card */
+        ['../aehm.html', 'Ähm-Detektor', 'b-grey', 'Ähm-Detektor - blitzt bei jedem Äh'],
         ['notes.html', 'Notizen', 'b-grey', 'Notizen'],
         /* Doc, 24.09.2026: the run of every lesson of the week, across all plans -
            read on the phone during the lesson, not in the plan page. */
@@ -117,7 +119,7 @@
     // These open in a new tab so the current plan stays put.
     // The Stundenplan no longer does (Doc, 10.09.2026: "auf click SP unter dem
     // Header wie alles sonst") - it opens in place, below this nav band.
-    const NEW_TAB = new Set(['notes.html', 'fahrplan.html', 'schuljahr.html', 'konzepte.html', 'operatoren.html',
+    const NEW_TAB = new Set(['../aehm.html', 'notes.html', 'fahrplan.html', 'schuljahr.html', 'konzepte.html', 'operatoren.html',
         'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', 'notenvergabe-fos.html',
         'notenvergabe-osgy.html', '../fokus.html']);
 
@@ -157,7 +159,7 @@
                The grade sub-menu is just "Noten" (Doc, 29.09.2026). */
             /* Doc, 05.10.2026: Doc's own tools fold into one sub-menu "MRA" (Michael R. Alvers) at the
                top, so the menu gets shorter - the demo class used to close the menu below a divider. */
-            [null, [{ sub: 'MRA', hrefs: ['notes.html', 'fahrplan.html', '../vote.html?host', 'genii.html'] },
+            [null, [{ sub: 'MRA', hrefs: ['../aehm.html', 'notes.html', 'fahrplan.html', '../vote.html?host', 'genii.html'] },
                     'schuljahr.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Noten', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
                                                   'bewertungen.html', 'notenvergabe-fos.html',
