@@ -1,6 +1,7 @@
 /* buch-analysis.js — widgets for the chapters on differential calculus (Lernbereich 2, Klasse 12) of the textbook
  * (js/buch.js, js/buch-plot.js).
- *   titelbild12   the cover of book 12: a curve with tangent and derivative, binomial bars, a vector
+ *   titelbild12   the cover of book 12: a curve with its tangent at the point of inflection and its derivative,
+ *                 binomial bars, a vector in space
  *   grenzwert     approach a point or infinity step by step: table of values, graph, asymptotes, a hole
  *   sekante       secant through P and Q, Q slides towards P: difference quotient → derivative
  *   ableitungsgraph  drag P along f, its slope draws the graph of f' point by point
@@ -68,15 +69,26 @@
     function segBox(box, items, value, onPick, aria) { return B.seg(box, items, value, onPick, aria); }
 
     /* ---------- the cover of book 12 ---------- */
+    // Reworked 09.10.2026 (Doc: "der Vektor sieht da noch nicht so toll aus … die Kurven finde ich auch noch nicht so
+    // berauschend"): a calm cubic, symmetric about its point of inflection, with the tangent there; its derivative
+    // crosses a faint x-axis exactly under the high and the low point. The vector stands in space now - the diagonal of
+    // a box on three axes, the picture of Lernbereich 5 - in the free corner beside the title. The glow is a soft blur
+    // instead of a wide band; the binomial bars stay as they were.
     W('titelbild12', function (box) {
         const Wd = 600, Ht = 850, X = x => (x + 3) / 9 * Wd, Y = y => (10 - y) / 13 * Ht;
-        const path = (f, a, b, n = 160) => {
+        const n1 = v => v.toFixed(1);
+        const path = (g, a, b, n = 160) => {
             let d = '';
-            for (let i = 0; i <= n; i++) { const x = a + (b - a) * i / n, y = f(x); d += (i ? 'L' : 'M') + X(x).toFixed(1) + ' ' + Y(y).toFixed(1); }
+            for (let i = 0; i <= n; i++) { const x = a + (b - a) * i / n; d += (i ? 'L' : 'M') + n1(X(x)) + ' ' + n1(Y(g(x))); }
             return d;
         };
-        const f = x => 0.1 * (x + 2.2) * (x - 1) * (x - 4.8) + 1.4;
-        const fd = x => (f(x + 1e-5) - f(x - 1e-5)) / 2e-5;
+        // f(x) = a(x - xw)³ - b(x - xw) + yw: high point H at xw - dd, low point T at xw + dd, both ends inside the cover.
+        // T lies well below the x-axis, so the zero of f' above it stands apart (at 0.2 below, the two dots touched)
+        const xw = 1.5, dd = 2.3, yH = 4.0, yT = -0.7;
+        const a = (yH - yT) / (4 * dd ** 3), b = 3 * a * dd * dd, yw = (yH + yT) / 2;
+        const f = x => a * (x - xw) ** 3 - b * (x - xw) + yw;
+        const fd = x => 3 * a * (x - xw) ** 2 - b;
+        const S = 0.33;                                         // the derivative at a third of its size: the same zeros, clear of the bars
         let grid = '';
         for (let x = -3; x <= 6; x++) grid += '<line x1="' + X(x) + '" y1="' + Y(5.8) + '" x2="' + X(x) + '" y2="' + Ht + '" />';
         for (let y = -3; y <= 5; y++) grid += '<line x1="0" y1="' + Y(y) + '" x2="' + Wd + '" y2="' + Y(y) + '" />';
@@ -89,26 +101,56 @@
             const P = c * pB ** k * (1 - pB) ** (nB - k), x = -2.6 + k * 0.78, h = P * 9.5;
             bars += '<rect x="' + X(x - 0.3).toFixed(1) + '" y="' + Y(-3 + h).toFixed(1) + '" width="' + (X(0.6) - X(0)).toFixed(1) + '" height="' + (Y(-3) - Y(-3 + h)).toFixed(1) + '" rx="3"/>';
         }
+        // an arrowhead with a notch, its tip at q; the shaft ends in the notch so no line cap pokes through
+        function pfeil(p, q, s, col, w, extra) {
+            const ang = Math.atan2(q[1] - p[1], q[0] - p[0]), cs = Math.cos(ang), sn = Math.sin(ang);
+            const at = (back, side) => n1(q[0] - back * cs - side * sn) + ',' + n1(q[1] - back * sn + side * cs);
+            return '<line x1="' + n1(p[0]) + '" y1="' + n1(p[1]) + '" x2="' + n1(q[0] - 0.62 * s * cs) + '" y2="' + n1(q[1] - 0.62 * s * sn) +
+                '" stroke="' + col + '" stroke-width="' + w + '" stroke-linecap="round"' + (extra || '') + '/>' +
+                '<polygon points="' + at(0, 0) + ' ' + at(s, 0.42 * s) + ' ' + at(0.68 * s, 0) + ' ' + at(s, -0.42 * s) + '" fill="' + col + '"' + (extra || '') + '/>';
+        }
         let art = '';
-        const glow = (d, col, w, dash) => '<path d="' + d + '" stroke="' + col + '" stroke-width="12" stroke-opacity="0.13" fill="none" stroke-linecap="round"/>' +
-            '<path d="' + d + '" stroke="' + col + '" stroke-width="' + w + '" fill="none" stroke-linecap="round"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + '/>';
-        art += glow(path(x => fd(x) * 0.8 - 0.6, -3, 6), '#B8A4F2', 2.4, '7 9');                    // the derivative, dashed
-        art += glow(path(f, -3, 6), '#F5C242', 3.4);                                                  // the curve
-        const x0 = 3.6, m = fd(x0);
-        art += glow(path(x => f(x0) + m * (x - x0), 1.6, 6), '#7fd8ee', 2.6);                         // tangent
-        // the vector: an arrow up and to the right
-        const ax = X(-2.4), ay = Y(-0.6), bx = X(0.2), by = Y(2.6), ang = Math.atan2(by - ay, bx - ax);
-        const hd = (s, t) => (bx + 22 * Math.cos(ang + s)).toFixed(1) + ',' + (by + 22 * Math.sin(ang + s)).toFixed(1);
-        art += '<line x1="' + ax + '" y1="' + ay + '" x2="' + bx + '" y2="' + by + '" stroke="#e682be" stroke-width="3.2" stroke-linecap="round"/>' +
-            '<polygon points="' + bx + ',' + by + ' ' + hd(Math.PI - 0.38) + ' ' + hd(Math.PI + 0.38) + '" fill="#e682be"/>';
-        // extrema and the point of tangency
-        zeros(fd, -3, 6).concat([x0]).forEach(x => { art += '<circle cx="' + X(x) + '" cy="' + Y(f(x)) + '" r="6" fill="#fff"/><circle cx="' + X(x) + '" cy="' + Y(f(x)) + '" r="12" fill="#fff" fill-opacity="0.12"/>'; });
-        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Titelbild: Kurve mit Tangente und Ableitung, Binomialverteilung und ein Vektor">' +
+        // the x-axis, faint, and the dotted way from the extrema down to the zeros of f'
+        art += '<line x1="0" y1="' + n1(Y(0)) + '" x2="' + Wd + '" y2="' + n1(Y(0)) + '" stroke="#cfe4f5" stroke-opacity="0.2" stroke-width="1.2"/>';
+        [xw - dd, xw + dd].forEach(x => {
+            art += '<line x1="' + n1(X(x)) + '" y1="' + n1(Y(f(x))) + '" x2="' + n1(X(x)) + '" y2="' + n1(Y(0)) + '" stroke="#cfe4f5" stroke-opacity="0.4" stroke-width="1.4" stroke-dasharray="1.5 5" stroke-linecap="round"/>';
+        });
+        art += '<path d="' + path(x => S * fd(x), -3, 6) + '" stroke="#B8A4F2" stroke-opacity="0.9" stroke-width="2.2" stroke-dasharray="7 8" fill="none" stroke-linecap="round"/>';
+        [xw - dd, xw + dd].forEach(x => { art += '<circle cx="' + n1(X(x)) + '" cy="' + n1(Y(0)) + '" r="4.5" fill="#B8A4F2"/>'; });
+        art += '<path d="' + path(f, -3, 6) + '" stroke="#F5C242" stroke-width="3.6" fill="none" stroke-linecap="round" filter="url(#tb12-glow)"/>';
+        // the tangent at the point of inflection, long enough to be seen crossing the curve there, fading out at both ends
+        const t1 = [X(xw - 1.7), Y(yw - b * -1.7)], t2 = [X(xw + 1.7), Y(yw - b * 1.7)];
+        art += '<line x1="' + n1(t1[0]) + '" y1="' + n1(t1[1]) + '" x2="' + n1(t2[0]) + '" y2="' + n1(t2[1]) + '" stroke="url(#tb12-tan)" stroke-width="2.6" stroke-linecap="round" filter="url(#tb12-glow)"/>';
+        // high and low point white, the point of inflection a cyan ring
+        [xw - dd, xw + dd].forEach(x => {
+            art += '<circle cx="' + n1(X(x)) + '" cy="' + n1(Y(f(x))) + '" r="13" fill="#fff" fill-opacity="0.12"/><circle cx="' + n1(X(x)) + '" cy="' + n1(Y(f(x))) + '" r="6" fill="#fff"/>';
+        });
+        art += '<circle cx="' + n1(X(xw)) + '" cy="' + n1(Y(yw)) + '" r="13" fill="#7fd8ee" fill-opacity="0.12"/>' +
+            '<circle cx="' + n1(X(xw)) + '" cy="' + n1(Y(yw)) + '" r="6" fill="#0b1830" stroke="#7fd8ee" stroke-width="2.6"/>';
+        // the vector in space: three axes, a box drawn faintly, its diagonal as the vector, the shadow on the floor dashed
+        const O = [412, 407], ex = [-36, 26], ey = [100, 0], ez = [0, -92];
+        const pt = (i, j, k) => [O[0] + i * ex[0] + j * ey[0] + k * ez[0], O[1] + i * ex[1] + j * ey[1] + k * ez[1]];
+        const strich = (p, q, attr) => '<line x1="' + n1(p[0]) + '" y1="' + n1(p[1]) + '" x2="' + n1(q[0]) + '" y2="' + n1(q[1]) + '" ' + attr + '/>';
+        let raum = '';
+        // the box's edges away from the origin - the three at the origin lie on the axes
+        [[[1, 0, 0], [1, 1, 0]], [[0, 1, 0], [1, 1, 0]], [[1, 0, 0], [1, 0, 1]], [[0, 1, 0], [0, 1, 1]], [[1, 1, 0], [1, 1, 1]],
+         [[0, 0, 1], [1, 0, 1]], [[0, 0, 1], [0, 1, 1]], [[1, 0, 1], [1, 1, 1]], [[0, 1, 1], [1, 1, 1]]].forEach(([p, q]) => {
+            raum += strich(pt(...p), pt(...q), 'stroke="#cfe4f5" stroke-opacity="0.3" stroke-width="1.2"');
+        });
+        [[1.9, 0, 0], [0, 1.5, 0], [0, 0, 1.45]].forEach(e => { raum += pfeil(O, pt(...e), 10, '#cfe4f5', 1.6, ' opacity="0.6"'); });
+        raum += strich(O, pt(1, 1, 0), 'stroke="#e682be" stroke-opacity="0.6" stroke-width="1.6" stroke-dasharray="5 6" stroke-linecap="round"');
+        raum += '<g filter="url(#tb12-glow)">' + pfeil(O, pt(1, 1, 1), 19, '#e682be', 3.4) + '</g>';
+        raum += '<circle cx="' + O[0] + '" cy="' + O[1] + '" r="3.5" fill="#cfe4f5" fill-opacity="0.8"/>';
+        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Titelbild: Kurve mit Wendetangente und Ableitung, Binomialverteilung und ein Vektor im Raum">' +
             '<defs><linearGradient id="tb12-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.45" stop-color="#fff" stop-opacity="1"/>' +
             '<stop offset="0.86" stop-color="#fff" stop-opacity="1"/><stop offset="0.97" stop-color="#fff" stop-opacity="0.2"/></linearGradient>' +
-            '<mask id="tb12-mask"><rect width="' + Wd + '" height="' + Ht + '" fill="url(#tb12-fade)"/></mask></defs>' +
+            '<mask id="tb12-mask"><rect width="' + Wd + '" height="' + Ht + '" fill="url(#tb12-fade)"/></mask>' +
+            '<linearGradient id="tb12-tan" gradientUnits="userSpaceOnUse" x1="' + n1(t1[0]) + '" y1="' + n1(t1[1]) + '" x2="' + n1(t2[0]) + '" y2="' + n1(t2[1]) + '">' +
+            '<stop offset="0" stop-color="#7fd8ee" stop-opacity="0"/><stop offset="0.25" stop-color="#7fd8ee"/><stop offset="0.75" stop-color="#7fd8ee"/><stop offset="1" stop-color="#7fd8ee" stop-opacity="0"/></linearGradient>' +
+            '<filter id="tb12-glow" filterUnits="userSpaceOnUse" x="0" y="0" width="' + Wd + '" height="' + Ht + '"><feGaussianBlur stdDeviation="5" result="b"/>' +
+            '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
             '<g mask="url(#tb12-mask)"><g stroke="#7fd8ee" stroke-opacity="0.08" stroke-width="1">' + grid + '</g>' +
-            '<g fill="#A0C85A" fill-opacity="0.32" stroke="#A0C85A" stroke-opacity="0.55" stroke-width="1.2">' + bars + '</g>' + art + '</g></svg>';
+            '<g fill="#A0C85A" fill-opacity="0.32" stroke="#A0C85A" stroke-opacity="0.55" stroke-width="1.2">' + bars + '</g>' + art + '</g>' + raum + '</svg>';
     });
 
     /* ---------- limits: step by step towards a point or infinity ---------- */
