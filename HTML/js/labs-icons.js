@@ -4,18 +4,10 @@
  */
 
 const LAB_ICONS = {
-    "lehrbuch-mathe11": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <!-- the cover of the textbook in small (buch/mathe11/index.html): navy with a spine, the gold λ square,
-                 the title bar, a parabola and a sine wave as on the cover art -->
-            <rect x="20" y="6" width="62" height="88" rx="5" fill="#0d1f3c" stroke="#F5C242" stroke-width="2.5"/>
-            <rect x="20" y="6" width="7" height="88" rx="3" fill="rgba(255,255,255,0.12)"/>
-            <rect x="33" y="14" width="11" height="11" rx="2.5" fill="#F5C242"/>
-            <path d="M36.3 16.8 L41.2 22.6 M38.9 19.8 L35.6 22.6" stroke="#0E244E" stroke-width="1.9" stroke-linecap="round"/>
-            <rect x="33" y="31" width="40" height="5.5" rx="2" fill="#ffffff"/>
-            <rect x="33" y="40" width="26" height="3.5" rx="1.5" fill="#F5C242"/>
-            <path d="M33 84 Q 52 44 71 84" fill="none" stroke="#00D2FF" stroke-width="2.6" stroke-linecap="round"/>
-            <path d="M30 70 Q 37 58 44 70 T 58 70 T 72 70 T 80 66" fill="none" stroke="#F5C242" stroke-width="2.6" stroke-linecap="round"/>
-        </svg>`,
+    // books show their real cover, a photo among the drawn icons (Doc, 09.10.2026: "Nimm als Logo tatsächlich
+    // das Cover ... bei Büchern gut"); the picture is made by tools/og-preview/make-og.mjs from the book's cover page
+    "lehrbuch-mathe11": `<img src="resources/og/buch-mathe11-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     "ziffernraetsel": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- the MONEY stack itself (Doc, 29.09.2026: "icon -> MONEY stack"): SEND over MORE, a rule, MONEY in gold -
                  one letter per column, so the columns stand as on paper -->

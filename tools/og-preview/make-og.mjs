@@ -80,7 +80,7 @@ function readBooks() {
         new Function('window', fs.readFileSync(k, 'utf8'))(win);
         const B = win.BUCH;
         if (!B || !B.chapters) continue;
-        out.push({ id: 'buch-' + b, href: `buch/${b}/index.html`, title: B.title, tagline: `Interaktives Lehrbuch / ${B.chapters.length} Kapitel`,
+        out.push({ id: 'buch-' + b, href: `buch/${b}/index.html`, cover: true, title: B.title, tagline: `Interaktives Lehrbuch / ${B.chapters.length} Kapitel`,
             description: B.description || B.title, alt: B.title + ' \u2014 Titelseite des interaktiven Lehrbuchs' });
         for (const c of B.chapters) {
             out.push({ id: `buch-${b}-${c.file.replace(/\.html$/, '')}`, href: `buch/${b}/${c.file}`,
@@ -165,6 +165,12 @@ async function shootLab(browser, lab, port) {
         await page.addStyleTag({ content: '.canvas-branding{display:none!important}' }).catch(() => {});
         await page.waitForTimeout(3500);          // let intros, fonts and canvases settle
         await page.screenshot({ path: dest });
+        // a book's cover page: its cover also as a picture of its own - the book's card on the hub shows it
+        // (Doc, 09.10.2026: "Nimm als Logo tatsächlich das Cover")
+        if (lab.cover) {
+            const el = await page.$('.b-titel');
+            if (el && !DRY) await el.screenshot({ path: path.join(OUT, lab.id + '-cover.jpg'), type: 'jpeg', quality: 88 });
+        }
         return dest;
     } finally {
         await ctx.close();

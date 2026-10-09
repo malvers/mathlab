@@ -14,11 +14,16 @@
 @page :first { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
 @page front { @top-left { content: none; } }
 
-/* ---- the screen around it: status bar, grey desk under the sheets ---- */
-html, body.b-print { background: #e9edf3 !important; }
-body.b-print { font-size: 13px; color: #18223a; }
+/* ---- the screen around it: status bar, grey desk under the sheets ----
+ * Only while html.d-screen is set: js/buch-druck.js removes it on "beforeprint" and puts it back afterwards.
+ * @media print does not work here - Paged.js drops those rules when it takes over the styles, and the screen gaps
+ * then shifted every printed page down (Doc, 09.10.2026: "erste Seite nach unten verschoben"). */
+html, body.b-print { background: #ffffff; }
+html.d-screen, html.d-screen body.b-print { background: #e9edf3; }
+body.b-print { font-size: 13px; color: #18223a; margin: 0; }
 html { font-size: 12.5px; }
-.d-bar {
+.d-bar { display: none; }
+html.d-screen .d-bar {
     position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 14px; padding: 10px 18px;
     background: #fff; border-bottom: 1px solid #d5dce8; font-family: Raleway, sans-serif; font-size: 14px;
 }
@@ -28,15 +33,10 @@ html { font-size: 12.5px; }
 #d-print { margin-left: auto; opacity: 0.45; pointer-events: none; }
 body.d-ready #d-print { opacity: 1; pointer-events: auto; }
 #d-book { width: 178mm; margin: 0 auto; }            /* the text width of the page, so widgets draw at print size */
-.pagedjs_page #d-book { width: 100%; margin: 0; }     /* Paged.js repeats the wrapper on every page: there it is just the page
-.pagedjs_pages { padding: 20px 0 60px; }
-.pagedjs_page { background: #fff; margin: 0 auto 18px; box-shadow: 0 4px 18px rgba(30, 45, 75, 0.18); }
-@media print {
-    .d-bar { display: none !important; }
-    html, body.b-print { background: #fff !important; }
-    .pagedjs_pages { padding: 0; }
-    .pagedjs_page { margin: 0; box-shadow: none; }
-}
+.pagedjs_page #d-book { width: 100%; margin: 0; }     /* Paged.js repeats the wrapper on every page: there it is just the page */
+.pagedjs_page { background: #fff; }
+html.d-screen .pagedjs_pages { padding: 20px 0 60px; }
+html.d-screen .pagedjs_page { margin: 0 auto 18px; box-shadow: 0 4px 18px rgba(30, 45, 75, 0.18); }
 body.b-print { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
 /* ---- cover ---- */

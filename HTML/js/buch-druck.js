@@ -168,6 +168,14 @@
         window.__druckFertig = pages;
     }
 
+    // screen decoration (grey desk, gaps, shadows, status bar) only on screen: off while printing (js/buch-druck.css)
+    const root = document.documentElement;
+    root.classList.add('d-screen');
+    const printing = on => root.classList.toggle('d-screen', !on);
+    addEventListener('beforeprint', () => printing(true));
+    addEventListener('afterprint', () => printing(false));
+    const mq = matchMedia('print');
+    if (mq.addEventListener) mq.addEventListener('change', e => printing(e.matches));
     document.getElementById('d-print')?.addEventListener('click', () => window.print());
     window.addEventListener('load', () => { build().catch(e => { say('Fehler: ' + e.message); console.error(e); }); });
 })();
