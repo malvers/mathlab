@@ -79,6 +79,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathegy9",
+        "href": "buch/mathegy9/index.html",
+        "title": "Mathematik GY 9",
+        "description": "Unser sechstes Buch: das interaktive Lehrbuch Mathematik für das Gymnasium, Klasse 9, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Elf Kapitel in der Reihenfolge des Schuljahres – Potenzen, Wurzeln und Wurzelgleichungen, Potenzfunktionen mit Polstellen und Asymptoten, Parameter und quadratische Funktionen, quadratische Gleichungen, Vieta und Extremwertaufgaben ohne Ableitung, Kreis, Zylinder und Kugel, die Satzgruppe des Pythagoras, Trigonometrie im rechtwinkligen Dreieck, Pyramide und Kegel mit dem Projekt Landvermessung, Daten auswerten, Mathematik mit Tabellenkalkulation und CAS und der goldene Schnitt. Zum Ausprobieren: ein rechtwinkliges Dreieck auf dem Thaleskreis mit den Quadraten über allen Seiten, Sinus und Kosinus als Seitenverhältnisse, π zwischen zwei Vielecken wie bei Archimedes, das versteckte Dreieck in Pyramide und Kegel, ein Ausreißer, der den Mittelwert kippt, eine abgeschnittene Diagrammachse und das Pentagramm. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik GY 9 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy9"],
+        "category": "buecher neu funktionen geometrie grade9",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 9 gymnasium gy sachsen lehrplan kapitel potenz potenzen wurzel wurzeln radizieren potenzgesetze rationale exponenten reelle zahlen irrational wurzelgleichung scheinloesung probe potenzfunktion hyperbel definitionsbereich wertebereich symmetrie nullstelle polstelle asymptote polynom parameter strecken stauchen verschieben spiegeln quadratische funktion parabel normalform scheitelpunktform quadratische ergaenzung quadratische gleichung loesungsformel diskriminante vieta extremwertaufgabe maximum minimum kreis kreisbogen kreisausschnitt kreisring zylinder kugel oberflaeche volumen masse dichte archimedes pythagoras satz des pythagoras hypotenuse kathete beweis raumdiagonale hoehensatz kathetensatz umkehrung indirekter beweis trigonometrie sinus kosinus tangens steigung hoehenwinkel regelmaessiges vieleck pi pyramide kegel mantellinie seitenhoehe landvermessung modalwert median mittelwert arithmetisches mittel skala streuung spannweite varianz standardabweichung histogramm klassen manipulation prozentpunkte tabellenkalkulation cas goldener schnitt phi pentagramm fuenfeck fibonacci aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",

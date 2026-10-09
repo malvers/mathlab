@@ -18,6 +18,8 @@
  *   lage             two lines y = m·x + n: intersecting, orthogonal, parallel or identical; intersection point and angles (book FOS 11)
  *   parabelschar     families of parabolas with a case distinction on the parameter: number of zeros, vertex, locus (book FOS 11)
  *   ganzrational     f(x) = a·(x − x1)^k1·(x − x2)^k2·(x − x3)^k3: draggable zeros, multiplicities, behaviour at infinity (book FOS 11)
+ *   potenzfunktion   f(x) = x^n for n = −3 … 4 and n = 1/3, 1/2, 3/2: domain, range, symmetry, zeros, poles, asymptotes (book GY 9)
+ *   extremwert       extreme value problems without derivatives: fence along a wall, rectangle with fixed perimeter, maximum at the vertex (book GY 9)
  */
 (function () {
     'use strict';
@@ -775,6 +777,109 @@
                 '<ul class="gr-list">' + list + '</ul>' +
                 '<p style="margin:6px 0 0">Für $x \\to +\\infty$ geht $f(x) \\to ' + sgn(a) + '$, für $x \\to -\\infty$ geht $f(x) \\to ' + sgn(n % 2 ? -a : a) + '$. ' +
                 'Es entscheidet nur der Summand mit der höchsten Potenz: $' + co(a, 1) + 'x' + (n > 1 ? '^{' + n + '}' : '') + '$.</p>';
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- power functions (book GY 9) ---------- */
+    // [key, p, q]: exponent p/q; rational exponents only for x ≥ 0
+    const POT = [['-3', -3, 1], ['-2', -2, 1], ['-1', -1, 1], ['1/3', 1, 3], ['1/2', 1, 2], ['1', 1, 1], ['3/2', 3, 2], ['2', 2, 1], ['3', 3, 1], ['4', 4, 1]];
+    const potTex = (p, q) => q === 1 ? String(p) : '\\frac{' + p + '}{' + q + '}';
+    const potFn = (p, q) => x => q === 1 ? Math.pow(x, p) : x < 0 ? NaN : Math.pow(x, p / q);
+    const potKind = (p, q) => q > 1 ? 'r' : (p > 0 ? 'p' : 'n') + (p % 2 ? 'u' : 'g');
+    W('potenzfunktion', function (box) {
+        let cur = POT.find(e => e[0] === (box.dataset.n || '2')) || POT[7], fam = false;
+        const ctr = div(box, 'b-ctrls');
+        seg(ctr, POT.map(e => [e[0], '$x^{' + potTex(e[1], e[2]) + '}$']), cur[0], v => { cur = POT.find(e => e[0] === v); render(); }, 'Exponent');
+        const fb = div(ctr, 'b-ctrl');
+        fb.innerHTML = '<button type="button" class="b-btn">Verwandte zeigen</button>';
+        fb.firstChild.addEventListener('click', () => { fam = !fam; fb.firstChild.classList.toggle('open', fam); render(); });
+        math(ctr);
+        const plotBox = div(box, '');
+        const p = new Plot(plotBox, { x: [-4, 4], y: [-4, 4], height: 360, aria: 'Graph einer Potenzfunktion' });
+        const out = div(box, 'b-out');
+        function render() {
+            const [, a, q] = cur, kind = potKind(a, q), even = q === 1 && a % 2 === 0;
+            const layers = [];
+            if (fam) POT.filter(e => e !== cur && potKind(e[1], e[2]) === kind).forEach(e => layers.push({ fn: potFn(e[1], e[2]), color: 'dim', width: 1.6, label: 'x^' + e[0], labelAt: 1.7 }));
+            layers.push({ fn: potFn(a, q), color: 'lambda', width: 3, label: 'f', labelAt: q > 1 ? 3 : 1.45 });
+            if (a < 0) layers.push({ vline: 0, color: 'red' }, { hline: 0, color: 'red' });
+            const P = [[1, 1]];
+            if (q === 1) P.push([-1, even ? 1 : -1]);
+            if (a > 0) P.push([0, 0]);
+            layers.push({ pts: P, color: 'white' });
+            p.draw(layers);
+            const D = q > 1 ? 'x \\geq 0' : a > 0 ? '\\mathbb{R}' : '\\mathbb{R} \\setminus \\{0\\}';
+            const Wb = q > 1 ? 'y \\geq 0' : a > 0 ? (even ? 'y \\geq 0' : '\\mathbb{R}') : (even ? 'y > 0' : '\\mathbb{R} \\setminus \\{0\\}');
+            const sym = q > 1 ? 'keine, $f$ ist nur für $x \\geq 0$ definiert' : even ? 'achsensymmetrisch zur $y$-Achse, denn $f(-x) = f(x)$' : 'punktsymmetrisch zum Ursprung, denn $f(-x) = -f(x)$';
+            const mono = q > 1 ? 'steigt für $x \\geq 0$' : a > 0 ? (even ? 'fällt für $x < 0$, steigt für $x > 0$' : 'steigt überall') : (even ? 'steigt für $x < 0$, fällt für $x > 0$' : 'fällt für $x < 0$ und fällt für $x > 0$');
+            const alt = q === 1 ? (a < 0 ? ' = \\dfrac{1}{x^{' + -a + '}}'.replace('x^{1}', 'x') : '') : a === 1 ? ' = \\sqrt' + (q === 3 ? '[3]' : '') + '{x}' : ' = \\sqrt{x^{' + a + '}}';
+            const row = (k, v) => '<tr><th>' + k + '</th><td>' + v + '</td></tr>';
+            out.innerHTML = '<p style="margin:0 0 8px">$f(x) = x^{' + potTex(a, q) + '}' + alt + '$</p><table class="b-table g-props">' +
+                row('Definitionsbereich', '$' + D + '$') + row('Wertebereich', '$' + Wb + '$') + row('Symmetrie', sym) +
+                row('Nullstelle', a > 0 ? '$x = 0$' : 'keine') +
+                row('Polstelle', a < 0 ? '$x = 0$, ' + (even ? 'ohne' : 'mit') + ' Vorzeichenwechsel' : 'keine') +
+                row('Asymptoten', a < 0 ? '<span style="color:#e2665a">senkrecht $x = 0$, waagerecht $y = 0$</span>' : 'keine') +
+                row('Monotonie', mono) +
+                row('Gemeinsame Punkte', P.map(([x, y]) => '$(' + texNum(x, 0) + ' \\mid ' + texNum(y, 0) + ')$').join(', ')) + '</table>';
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- extreme values without derivatives (book GY 9) ---------- */
+    const EXT = {
+        mauer: { k: 'Zaun an der Mauer', xmax: 20, x0: 6, f: x => x * (40 - 2 * x), unit: 'm', x: [-1, 21], y: [-12, 230], yl: 'A in m²' },
+        umfang: { k: 'Rechteck mit Umfang 24 cm', xmax: 12, x0: 3, f: x => x * (12 - x), unit: 'cm', x: [-0.6, 12.6], y: [-2.5, 42], yl: 'A in cm²' }
+    };
+    W('extremwert', function (box) {
+        let mode = EXT[box.dataset.mode] ? box.dataset.mode : 'mauer', G = EXT[mode], x = G.x0;
+        const ctr = div(box, 'b-ctrls');
+        seg(ctr, Object.keys(EXT).map(k => [k, EXT[k].k]), mode, v => { mode = v; G = EXT[v]; x = G.x0; rx.input.max = G.xmax; rx.set(x); p.view(G.x, G.y); p.opt.yLabel = G.yl; p.opt.xLabel = 'x in ' + G.unit; render(); }, 'Aufgabe');
+        const sl = div(box, '');
+        const rx = range(sl, { label: 'Seite $x$', min: 0, max: G.xmax, step: 0.5, value: x, fmt: v => fmt(v, 1) + ' ' + G.unit, onInput: v => { x = v; render(); } });
+        math(sl);
+        const two = div(box, 'b-two');
+        const pic = div(two, 'b-svgbox g-svg'), plotBox = div(two, '');
+        const p = new Plot(plotBox, { x: G.x, y: G.y, height: 260, xLabel: 'x in ' + G.unit, yLabel: G.yl, aria: 'Flächeninhalt in Abhängigkeit von x' });
+        const out = div(box, 'b-out');
+        function render() {
+            const A = G.f(x), xv = G.xmax / 2, Av = G.f(xv), top = Math.abs(x - xv) < 1e-9;
+            let s = '';
+            if (mode === 'mauer') {
+                const k = 9, w = (40 - 2 * x) * k, d = x * k, x0 = 200 - w / 2;
+                s += '<line x1="10" y1="34" x2="390" y2="34" style="stroke:#8fa3bd;stroke-width:6"/>';
+                for (let i = 14; i < 390; i += 14) s += '<line x1="' + i + '" y1="31" x2="' + (i + 8) + '" y2="20" style="stroke:#8fa3bd;stroke-width:1.4"/>';
+                s += '<text x="200" y="16" text-anchor="middle" class="g-small">MAUER</text>';
+                if (w > 0 && d > 0) s += '<rect x="' + x0 + '" y="37" width="' + w + '" height="' + d + '" style="fill:rgba(160,200,90,' + (top ? 0.32 : 0.16) + ')"/>';
+                s += '<path d="M' + x0 + ' 37 V' + (37 + d) + ' H' + (x0 + w) + ' V37" style="fill:none;stroke:rgb(245,194,66);stroke-width:4;stroke-linejoin:round"/>';
+                s += '<text x="' + (x0 - 8) + '" y="' + (37 + d / 2 + 5) + '" text-anchor="end" class="g-side">x</text>';
+                if (w > 70) s += '<text x="200" y="' + (37 + d + 22) + '" text-anchor="middle" class="g-side">40 − 2x</text>';
+                pic.innerHTML = '<svg viewBox="0 0 400 260" role="img" aria-label="Rechteckiges Gehege an einer Mauer mit 40 m Zaun">' + s + '</svg>';
+            } else {
+                const k = 17, w = x * k, h = (12 - x) * k, x0 = 200 - w / 2, y0 = 130 - h / 2;
+                s += '<rect x="' + x0 + '" y="' + y0 + '" width="' + w + '" height="' + h + '" style="fill:rgba(160,200,90,' + (top ? 0.32 : 0.16) + ');stroke:rgb(245,194,66);stroke-width:4"/>';
+                if (w > 18) s += '<text x="200" y="' + (y0 + h + 22) + '" text-anchor="middle" class="g-side">x</text>';
+                if (h > 18) s += '<text x="' + (x0 + w + 10) + '" y="' + (135) + '" class="g-side">12 − x</text>';
+                pic.innerHTML = '<svg viewBox="0 0 400 260" role="img" aria-label="Rechteck mit festem Umfang 24 cm">' + s + '</svg>';
+            }
+            p.draw([
+                { fn: G.f, color: 'phi', label: 'A', labelAt: G.xmax * 0.8, domain: [0, G.xmax] },
+                { seg: [[xv, 0], [xv, Av]], color: 'dim', dash: true },
+                { pts: [[xv, Av]], color: 'dim', r: 5 },
+                { pts: [[x, A]], color: 'lambda', r: 6 }
+            ]);
+            const u = G.unit;
+            out.innerHTML = mode === 'mauer'
+                ? '<p style="margin:0">Zielgröße $A = x \\cdot (40 - 2x)$, Nebenbedingung: Zaunlänge $x + (40 - 2x) + x = 40$.</p>' +
+                  '<p style="margin:0">Jetzt: $A(' + texNum(x, 1) + ') = ' + texNum(x, 1) + ' \\cdot ' + texNum(40 - 2 * x, 1) + ' = ' + texNum(A, 1) + '\\,\\text{m}^2$</p>' +
+                  '<p style="margin:0">Scheitelpunktform: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$</p>' +
+                  (top ? '<p class="g-ok" style="margin:6px 0 0">Maximum: $x = 10\\,\\text{m}$, Breite $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.</p>' : '<p class="b-help" style="margin:6px 0 0">Such die größte Fläche. Sie liegt am Scheitel der Parabel.</p>')
+                : '<p style="margin:0">Zielgröße $A = x \\cdot y$, Nebenbedingung $2x + 2y = 24$, also $y = 12 - x$.</p>' +
+                  '<p style="margin:0">Jetzt: $A(' + texNum(x, 1) + ') = ' + texNum(x, 1) + ' \\cdot ' + texNum(12 - x, 1) + ' = ' + texNum(A, 2) + '\\,\\text{cm}^2$</p>' +
+                  '<p style="margin:0">Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$</p>' +
+                  (top ? '<p class="g-ok" style="margin:6px 0 0">Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.</p>' : '<p class="b-help" style="margin:6px 0 0">Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?</p>');
             math(out);
         }
         render();
