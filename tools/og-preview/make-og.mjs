@@ -52,7 +52,8 @@ function readLabs() {
     const src = fs.readFileSync(path.join(HTML, 'js', 'labs-config.js'), 'utf8');
     const fn = new Function('LAB_ICONS', src + '\nreturn LABS_DATA;');
     const labs = fn(new Proxy({}, { get: () => '' }));
-    const local = labs.filter((l) => l.href && !/^https?:\/\//i.test(l.href));
+    // books (buch/…) get their cards from their own kapitel.js, see readBooks()
+    const local = labs.filter((l) => l.href && !/^https?:\/\//i.test(l.href) && !l.href.startsWith('buch/'));
     const dead = local.filter((l) => !fs.existsSync(path.join(HTML, l.href)));
     for (const l of dead) console.log(`!! ${l.id}: ${l.href} gibt es nicht — uebersprungen (Eintrag in labs-config.js pruefen)`);
     return local.filter((l) => fs.existsSync(path.join(HTML, l.href)));

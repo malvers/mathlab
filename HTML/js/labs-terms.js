@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 99 labs, 1735 terms, 2026-10-07
+ * 100 labs, 1758 terms, 2026-10-09
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -61,6 +61,7 @@ const LABS_TERMS = {
     "kovarianz": ["ABBILDUNG A", "Ausgewählter Wert", "Basisvektoren", "DREHEN", "homogene Koordinaten", "KOVARIANZ Σ", "Kovarianz-Achsen", "Kreis und Bildellipse", "Parallelen", "Punkte", "Punktwolke", "Raum verbiegen", "VERTEILUNGSWOLKE"],
     "kreisteilung": ["Abspielen", "Allgemeine Lage", "Anhalten", "Anzahl n", "Die Folge", "Flächen", "Flächen färben", "Kreisteilung", "Kreisteilungsproblem", "maximal möglich", "Nummern", "Punkte auf dem Kreis", "Punkte n", "Regelmäßig", "Schnittpunkte", "Sehnen", "weniger als möglich", "Zählwerk"],
     "langley": ["ALLE AN/AUS", "Basis AB", "Diagonale AC", "Diagonale BD", "Geometrie & Trigonometrie", "Linie CD", "Phase 1: Rechtes Dreieck", "Phase 2: Linkes Dreieck", "Phase 3: Innere Winkel", "Phase 4: Das Rätsel", "Phase 5: Lösung", "Punkt P", "Schenkel AD", "Symmetrieachse EP", "Verlängerung zu E", "ΔABC (Sinussatz)", "ΔABD (Sinussatz)", "ΔBCD & Lösung"],
+    "lehrbuch-mathe11": ["Abkühlen", "Bremsweg", "Ein Mathebuch, das zurückrechnet", "exponentiell", "Funktionen und ihre Eigenschaften", "Gleichungen, Formeln, Figuren", "Graphen und Parameter", "Kerze", "linear", "Lineare Gleichungssysteme und Matrizen", "Mathematik", "Mathematik · Berufliches Gymnasium 11", "Numerische Verfahren und Simulationen", "Periodische Vorgänge", "Quadratische Funktionen und Gleichungen", "Regression", "sin x", "Tag des Jahres", "Umkehrfunktionen und Logarithmus", "Wachstum und Zerfall", "Weltbevölkerung", "Zeitraum"],
     "lissajous": ["Amplitude A", "Amplitude B", "Kurvenfarbe (Hue)", "LISSAJOUS · PARAMETRISCHE KURVEN", "Pfad-Umfang (× Perioden)", "Phase δ (Grad)", "SIMULATION", "ωₓ (Kreisfrequenz)", "ωᵧ (Kreisfrequenz)"],
     "litchi3d": ["Form-Faktor (Y)", "Frucht-Reife", "SDF KONTROLLE", "Stachel-Intensität"],
     "logikspiel": ["Antwort", "BESTÄTIGEN", "HILFE ANFORDERN", "HILFE-PROTOKOLL", "LEVEL", "MISSIONS-STATUS", "MUL (X)", "NÄCHSTES PROTOKOLL", "PROTOKOLL GELÖST!", "PROTOKOLL NEUSTART", "PROTOKOLL-AUSWAHL", "RECHEN-MODUS", "Zahlen-Puzzle", "ZEIT", "ZÜGE"],
@@ -80,7 +81,7 @@ const LABS_TERMS = {
     "pythagorasbeweis": ["AUẞERHALB DES RAHMENS", "BEWEIS RESET", "FLÄCHE CM²", "KOLLISION ERKANNT", "MISSIONS-STATUS", "Pythagoras-Beweis", "Summe Dreiecke", "SUMME Σ", "TRIANGULIERUNG AN", "TRIANGULIERUNG AUS", "TRIANGULIERUNG DEAKTIVIERT", "Zielfläche [ABCD]"],
     "reaction-diffusion": ["Eis", "Feuer", "Graustufen", "Grün", "LEEREN", "SÄEN", "Violett"],
     "rechenrallye": ["armenian", "brahmic", "cjk", "cyrillic", "Dein Spitzname", "georgian", "hangul", "latin", "Math Rally", "Rechen-Rallye", "Your nickname"],
-    "rueckmeldung": ["AUF NULL", "Code für die Klasse", "NEUER CODE", "QR-CODE AUSBLENDEN", "Rückmeldung"],
+    "rueckmeldung": ["AUF NULL", "Code für die Klasse", "NACHRICHTEN", "NEUER CODE", "QR-CODE AUSBLENDEN", "Rückmeldung"],
     "shell": ["DAS BILD IST EIN PROTOKOLL", "DAS SUBSTRAT IST DIE ERKLÄRUNG", "EINE ZELLE STECKT AN", "FORMELN", "SUBSTRAT-SCHATTEN", "VIELE ZÜNDUNGEN - ZELTE", "WEITER &rarr", "WENIGE ZÜNDUNGEN - LINIEN", "ZWEI WELLEN LÖSCHEN SICH AUS"],
     "solita-avatar": ["Ansicht: Kopf", "Frage an Solita", "Sprechen", "Stimmung: neutral"],
     "steigung": ["DREIECK BREITE (ΔX)", "DREIECK POSITION (X)", "FUNKTION", "GERADEN-STEIGUNG M", "LINEARE FUNKTIONEN", "NULLSTELLE X₀", "STEIGUNG M", "Y-ABSCHNITT N"],

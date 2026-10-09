@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "lehrbuch-mathe11",
+        "href": "buch/mathe11/index.html",
+        "title": "Lehrbuch Mathematik 11",
+        "description": "Unser erstes Buch: ein interaktives Lehrbuch Mathematik für das Berufliche Gymnasium, Klasse 11, nach dem sächsischen Lehrplan. Elf Kapitel in der Reihenfolge des Schuljahres – Gleichungen, Funktionen von linear bis Sinus, Regression und Logarithmus, Gleichungssysteme und Matrizen, Wahrscheinlichkeit und Numerik. Jedes Kapitel mit Erkundungen, Merkkästen, Beispielen, Aufgaben in drei Stufen, Selbsttests mit sofortiger Rückmeldung und Labs zum Ausprobieren: Parabeln ziehen, Gauß-Schritte ausführen, Zufallsversuche tausendmal laufen lassen. Dazu eine Druckausgabe mit Seitenzahlen, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik 11 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe11"],
+        "category": "buecher neu funktionen stochastik grade11",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 11 berufliches gymnasium bgy sachsen lehrplan kapitel gleichungen formeln binomische formeln prozent funktionen lineare funktion exponentialfunktion wachstum zerfall zinseszins halbwertszeit quadratische funktion parabel scheitelpunktform loesungsformel vieta sinus sinusfunktion einheitskreis regression logarithmus umkehrfunktion parameter gleichungssystem lgs gauss matrix matrizen wahrscheinlichkeit baumdiagramm pfadregel vierfeldertafel simulation bisektion monte carlo numerik aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",
