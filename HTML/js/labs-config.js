@@ -101,6 +101,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathegy11",
+        "href": "buch/mathegy11/index.html",
+        "title": "Mathematik GY 11",
+        "description": "Unser achtes Buch: das interaktive Lehrbuch Mathematik für das Gymnasium, Jahrgangsstufe 11, Grundkurs, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Zwölf Kapitel in der Reihenfolge des Schuljahres – Grenzwerte und Stetigkeit, Änderungsraten und Ableitung, Ableitungsregeln bis zur Kettenregel, Funktionsuntersuchung, Matrizen und Gauß-Jordan-Verfahren, Funktionen nach Maß mit Extremwertproblemen und Regression, numerische Verfahren bis zum Newton-Verfahren, Vektoren, Geraden und Ebenen im Raum, mehrstufige Zufallsexperimente und die Binomialverteilung. Zum Ausprobieren: eine Sekante, die zur Tangente wird, die Kettenregel Schritt für Schritt, Matrizen multiplizieren und Figuren drehen, das Newton-Verfahren Tangente für Tangente, Geraden und Ebenen in echtem 3D und Bernoulli-Ketten. Mit Druckausgabe, QR-Code je Kapitel, Lösungsanhang und 33 Übungsblättern online.",
+        "tagline": "Buch / Mathematik GY 11 / 12 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy11"],
+        "category": "buecher neu funktionen stochastik geometrie grade11",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 11 jahrgangsstufe 11 gymnasium gy grundkurs sachsen lehrplan kapitel grenzwert stetigkeit aenderungsrate sekante tangente differenzenquotient differentialquotient ableitung ableitungsfunktion ableitungsregeln potenzregel faktorregel summenregel produktregel kettenregel e-funktion logarithmus sinus funktionsuntersuchung monotonie extrempunkt wendepunkt symmetrie polstelle asymptote matrix matrizen matrizenmultiplikation gauss-jordan lgs drehung drehmatrix steckbrief funktionen aus bedingungen extremwertproblem optimierung regression numerische verfahren bisektion newton-verfahren vektor vektoren raum 3d lineare abhaengigkeit betrag gerade geraden parameterform spurpunkt lagebeziehung windschief ebene ebenen koordinatenform durchstosspunkt urnenmodell baumdiagramm pfadregel vierfeldertafel unabhaengigkeit bernoulli kette binomialkoeffizient binomialverteilung kumulierte wahrscheinlichkeit erwartungswert standardabweichung aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",
