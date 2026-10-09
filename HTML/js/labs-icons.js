@@ -18,6 +18,8 @@ const LAB_ICONS = {
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     "lehrbuch-mathegy9": `<img src="resources/og/buch-mathegy9-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    "lehrbuch-mathegy10": `<img src="resources/og/buch-mathegy10-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     "ziffernraetsel": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- the MONEY stack itself (Doc, 29.09.2026: "icon -> MONEY stack"): SEND over MORE, a rule, MONEY in gold -
                  one letter per column, so the columns stand as on paper -->

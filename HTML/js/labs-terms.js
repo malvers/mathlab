@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 105 labs, 1834 terms, 2026-10-09
+ * 106 labs, 1849 terms, 2026-10-09
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -66,6 +66,7 @@ const LABS_TERMS = {
     "lehrbuch-mathe13": ["Das bestimmte Integral", "Ein Mathebuch, das mitrechnet", "Fit fürs Abitur", "Flächeninhalte", "Geraden und Ebenen", "Grundgesamtheit und Stichprobe", "Koordinatengleichung und Lagebeziehungen", "Mathematik", "Mathematik · Berufliches Gymnasium 13", "Numerische Integration und Anwendungen", "Schnittwinkel, Prismen und Pyramiden", "Signifikanztests", "Stammfunktionen", "Weitere Anwendungen"],
     "lehrbuch-mathefos11": ["Abzählen, Urnenmodell und Bernoulli-Ketten", "Ein Mathebuch, das mitrechnet", "Finanzmathematik", "Funktionen und lineare Funktionen", "Ganzrationale Funktionen", "Geraden und lineare Gleichungssysteme", "Komplexe Zahlen und Schaltalgebra", "Lineare Gleichungen und Ungleichungen", "Mathematik", "Mathematik · Fachoberschule 11", "Mehrstufige Zufallsexperimente", "Parabeln nach Maß", "Quadratische Funktionen und Gleichungen", "Zahlen, Terme und Formeln", "Zufall und Wahrscheinlichkeit"],
     "lehrbuch-mathefos12": ["Die Ableitung", "Differenzial- und Integralrechnung mit CAS", "Ebenen im Raum", "Ein Mathebuch, das mitrechnet", "Exponentialfunktionen zur Basis e", "Fit für die FHR-Prüfung", "Gebrochenrationale Funktionen", "Geraden im Raum", "Grenzwerte und Änderungsraten", "Integralrechnung", "Kurvendiskussion", "Lot, Abstand und Flächen", "Mathematik", "Mathematik · Fachoberschule 12", "Scharen, Steckbriefe und Extremalaufgaben", "Vektoren und Skalarprodukt", "Verzinsung"],
+    "lehrbuch-mathegy10": ["Berechnungen an Dreiecken und Körpern", "Ein Mathebuch, das mitrechnet", "Erwartungswert und faire Spiele", "Funktionen im Überblick", "Komplexe Zahlen", "Mathematik", "Mathematik · Gymnasium 10", "Periodische Vorgänge und die Sinusfunktion", "Sinussatz, Kosinussatz und Flächeninhalt", "Umkehrfunktion und Logarithmus", "Verknüpfen, Verketten und die Tangensfunktion", "Wachstum und Exponentialfunktionen", "Zahlenfolgen und Grenzwerte", "Zinsrechnung", "Zufallsgrößen und Pfadregeln"],
     "lehrbuch-mathegy9": ["Daten auswerten", "Der goldene Schnitt", "Die Satzgruppe des Pythagoras", "Ein Mathebuch, das mitrechnet", "Kreis, Zylinder und Kugel", "Mathematik", "Mathematik · Gymnasium 9", "Mathematik und moderne Rechentechnik", "Parameter und quadratische Funktionen", "Potenzen und Wurzeln", "Potenzfunktionen", "Pyramide und Kreiskegel", "Quadrate abschneiden", "Quadratische Gleichungen und Extremwerte", "Trigonometrie im rechtwinkligen Dreieck"],
     "lissajous": ["Amplitude A", "Amplitude B", "Kurvenfarbe (Hue)", "LISSAJOUS · PARAMETRISCHE KURVEN", "Pfad-Umfang (× Perioden)", "Phase δ (Grad)", "SIMULATION", "ωₓ (Kreisfrequenz)", "ωᵧ (Kreisfrequenz)"],
     "litchi3d": ["Form-Faktor (Y)", "Frucht-Reife", "SDF KONTROLLE", "Stachel-Intensität"],

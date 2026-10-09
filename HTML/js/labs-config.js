@@ -90,6 +90,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathegy10",
+        "href": "buch/mathegy10/index.html",
+        "title": "Mathematik GY 10",
+        "description": "Unser siebtes Buch: das interaktive Lehrbuch Mathematik für das Gymnasium, Klasse 10, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Dreizehn Kapitel in der Reihenfolge des Schuljahres – Wachstum und Exponentialfunktionen, periodische Vorgänge und die Sinusfunktion, Zufallsgrößen, Erwartungswert und faire Spiele, Sinussatz, Kosinussatz und Berechnungen an Dreiecken und Körpern, Umkehrfunktion, Logarithmus und Exponentialgleichungen, Verketten und Tangens, Funktionen im Überblick, Zahlenfolgen und Grenzwerte, Zinsrechnung und komplexe Zahlen. Zum Ausprobieren: vier Wachstumsmodelle, Messkurven von Ebbe und Flut bis zum EKG, Dreiecke mit ziehbaren Ecken, ein Dreieckslöser mit dem mehrdeutigen Fall, ein Rechenschieber, acht Spieler mit je hundert Runden Glücksspiel, ein Streifen um den Grenzwert und Lösungen, die die reelle Achse verlassen. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik GY 10 / 13 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy10"],
+        "category": "buecher neu funktionen stochastik geometrie grade10",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 10 gymnasium gy sachsen lehrplan kapitel wachstum zerfall linear exponentiell beschraenkt logistisch rekursiv explizit wachstumsfaktor halbwertszeit verdopplungszeit regression exponentialfunktion periodisch periode amplitude mittellage frequenz bogenmass einheitskreis sinus sinusfunktion kosinus tageslaenge riesenrad gezeiten zufallsgroesse wahrscheinlichkeitsverteilung stabdiagramm histogramm pfadregel baumdiagramm genau mindestens hoechstens gegenereignis erwartungswert varianz standardabweichung risiko faires spiel roulette sinussatz kosinussatz flaecheninhalt dreieck sss sws wsw ssw vermessung triangulation pyramide kegel neigungswinkel umkehrfunktion logarithmus lg ln logarithmengesetze basiswechsel rechenschieber logarithmusfunktion exponentialgleichung dezibel richterskala verkettung verknuepfung innere aeussere funktion tangens polstelle funktionsklassen steckbrief symmetrie skizzieren zahlenfolge arithmetisch geometrisch monotonie schranke grenzwert konvergenz parameterdarstellung kreis zinsrechnung zinseszins tilgung annuitaet kredit komplexe zahlen imaginaere einheit gausssche zahlenebene betrag argument aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",
