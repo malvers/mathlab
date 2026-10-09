@@ -10,6 +10,8 @@
  *   zufallsgroesse   a random variable: bar chart, table, E(X), V(X), σ, fair or not, play it a thousand times
  *   binomial         B(n; p) as a histogram: P(X = k), P(X ≤ k), P(X ≥ k), P(a ≤ X ≤ b), μ and σ
  *   bernoulli-baum   the tree of a Bernoulli chain, every path with exactly k hits lit
+ *   stichprobe       many samples from one population: the sample shares scatter around p (Klasse 13)
+ *   signifikanztest  test of H0: p = p0, left/right/two-sided, rejection region, decision, error of the second kind
  * Looks: js/buch.css (section "Widgets of the stochastics chapters").
  */
 (function () {
@@ -754,5 +756,101 @@
             math(out);
         }
         kSeg(); render(); math(ctl);
+    });
+    /* =========================== Klasse 13: samples and significance tests =========================== */
+    /* ---------- many samples from one population: how much do the sample shares scatter? ---------- */
+    W('stichprobe', function (box) {
+        const S = { p: 0.3, n: 50, shares: [], last: null };
+        const sl = div(box, '');
+        B.range(sl, { label: 'Anteil in der Grundgesamtheit $p$', min: 0.05, max: 0.95, step: 0.05, value: S.p, fmt: v => fmt(v, 2), onInput: v => { S.p = v; S.shares = []; S.last = null; render(); } });
+        B.range(sl, { label: 'Stichprobenumfang $n$', min: 10, max: 500, step: 10, value: S.n, fmt: v => String(v), onInput: v => { S.n = v; S.shares = []; S.last = null; render(); } });
+        const acts = div(box, 'b-ctrls');
+        acts.innerHTML = '<span class="b-ctrl">Stichproben ziehen:</span>' + [1, 10, 100, 1000].map(k => '<button type="button" class="b-btn" data-k="' + k + '">+' + int(k) + '</button>').join('') +
+            '<button type="button" class="b-btn b-hintbtn" data-reset>Zurücksetzen</button>';
+        const plot = new B.Plot(div(box, ''), { height: 240, x: [0, 1], y: [0, 1], xLabel: 'h', yLabel: '', aria: 'Verteilung der relativen Häufigkeiten vieler Stichproben' });
+        const out = div(box, 'b-out');
+        acts.addEventListener('click', e => {
+            const b = e.target.closest('button'); if (!b) return;
+            if (b.hasAttribute('data-reset')) { S.shares = []; S.last = null; }
+            else for (let i = 0; i < +b.dataset.k; i++) { let h = 0; for (let j = 0; j < S.n; j++) if (Math.random() < S.p) h++; S.last = h / S.n; S.shares.push(S.last); }
+            render();
+        });
+        function render() {
+            const m = S.shares.length, bin = 0.02, bins = new Array(50).fill(0);
+            S.shares.forEach(h => { bins[Math.min(49, Math.floor(h / bin + 1e-9))]++; });
+            const max = Math.max(1, ...bins);
+            const sdT = Math.sqrt(S.p * (1 - S.p) / S.n);
+            plot.view([0, 1], [0, 1.15]);
+            const rects = bins.map((c, i) => [i * bin + 0.002, (i + 1) * bin - 0.002, c / max]).filter(r => r[2] > 0);
+            plot.draw([{ rects, color: 'cyan' }, { vline: S.p, color: 'red' }, { text: 'p', at: [S.p, 1.05], color: 'red' }].concat(S.last != null ? [{ pts: [[S.last, 0]], color: 'lambda', r: 6 }] : []));
+            const mean = m ? S.shares.reduce((a, b) => a + b, 0) / m : NaN;
+            const sd = m > 1 ? Math.sqrt(S.shares.reduce((a, h) => a + (h - mean) ** 2, 0) / (m - 1)) : NaN;
+            out.innerHTML = '<p style="margin:0 0 6px">' + (m ? int(m) + ' Stichproben vom Umfang ' + S.n + ' · letzte: $h = ' + texNum(S.last, 3) + '$ (gold)' : 'Noch keine Stichprobe gezogen.') + '</p>' +
+                '<p style="margin:0">' + (m > 1 ? 'Mittelwert der $h$: $' + texNum(mean, 3) + '$ · Standardabweichung der $h$: $' + texNum(sd, 4) + '$ · ' : '') +
+                'Theorie: $\\sqrt{\\tfrac{p(1-p)}{n}} \\approx ' + texNum(sdT, 4) + '$. Viermal so großes $n$ halbiert die Streuung.</p>';
+            math(out);
+        }
+        render(); math(sl);
+    });
+
+    /* ---------- significance test for a binomial proportion, errors of the first and second kind ---------- */
+    W('signifikanztest', function (box) {
+        const S = { n: 50, p0: 0.5, alpha: 0.05, side: 'r', k: 31, beta: false, p1: 0.65 };
+        const sl = div(box, '');
+        B.range(sl, { label: 'Stichprobenumfang $n$', min: 10, max: 200, step: 5, value: S.n, fmt: v => String(v), onInput: v => { S.n = v; clamp(); render(); } });
+        B.range(sl, { label: 'Nullhypothese $p_0$', min: 0.05, max: 0.95, step: 0.05, value: S.p0, fmt: v => fmt(v, 2), onInput: v => { S.p0 = v; render(); } });
+        const c1 = div(box, 'b-ctrls');
+        c1.innerHTML = '<span class="b-ctrl">Test:</span>';
+        B.seg(c1, [['l', 'linksseitig'], ['r', 'rechtsseitig'], ['z', 'zweiseitig']], S.side, v => { S.side = v; render(); }, 'Art des Tests');
+        const c2 = div(box, 'b-ctrls');
+        c2.innerHTML = '<span class="b-ctrl">Signifikanzniveau $\\alpha$:</span>';
+        B.seg(c2, [['0.01', '1 %'], ['0.05', '5 %'], ['0.1', '10 %']], '0.05', v => { S.alpha = +v; render(); }, 'Signifikanzniveau');
+        const rk = B.range(div(box, ''), { label: 'Beobachtete Trefferzahl $k$', min: 0, max: S.n, step: 1, value: S.k, fmt: v => String(v), onInput: v => { S.k = v; render(); } });
+        const c3 = div(box, 'b-ctrls');
+        c3.innerHTML = '<label class="b-ctrl"><input type="checkbox"> Fehler 2. Art zeigen: wahres $p$ =</label>';
+        const pBox = div(c3, '');
+        pBox.style.flex = '1 1 220px';
+        B.range(pBox, { label: '', min: 0.05, max: 0.95, step: 0.05, value: S.p1, fmt: v => fmt(v, 2), onInput: v => { S.p1 = v; render(); } });
+        c3.querySelector('input').addEventListener('change', e => { S.beta = e.target.checked; render(); });
+        const plot = new B.Plot(div(box, ''), { height: 290, yLabel: 'P', xLabel: 'k', aria: 'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich' });
+        const out = div(box, 'b-out');
+        function clamp() { rk.input.max = S.n; S.k = Math.min(S.k, S.n); rk.set(S.k); }
+        // rejection region: right {k ≥ r}, left {k ≤ l}, both: α/2 on each side
+        function region() {
+            const { n, p0, alpha, side } = S;
+            let l = -1, r = n + 1;
+            const a = side === 'z' ? alpha / 2 : alpha;
+            if (side !== 'r') { while (l + 1 <= n && cdf(n, p0, l + 1) <= a) l++; }
+            if (side !== 'l') { while (r - 1 >= 0 && 1 - cdf(n, p0, r - 2) <= a) r--; }
+            return { l, r };
+        }
+        function render() {
+            const { n, p0, k } = S, { l, r } = region();
+            const inA = x => x <= l || x >= r;
+            const acc = [], rej = [], alt = [];
+            let max = 0, x0 = n, x1 = 0;
+            for (let x = 0; x <= n; x++) {
+                const P = pmf(n, p0, x); max = Math.max(max, P);
+                if (P > 1e-4 || (S.beta && pmf(n, S.p1, x) > 1e-4)) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); }
+                (inA(x) ? rej : acc).push([x - 0.4, x + 0.4, P]);
+                if (S.beta) { const Q = pmf(n, S.p1, x); max = Math.max(max, Q); alt.push([x - 0.25, x + 0.25, Q]); }
+            }
+            x0 = Math.min(x0, k); x1 = Math.max(x1, k);
+            plot.view([x0 - 1, x1 + 1], [0, max * 1.2]);
+            plot.draw([{ rects: acc, color: 'cyan' }, { rects: rej, color: 'red' }].concat(S.beta ? [{ rects: alt, color: 'violet' }] : [])
+                .concat([{ pts: [[k, 0]], color: 'lambda', r: 7 }, { text: 'k', at: [k, 0], color: 'lambda', dy: -10 }]));
+            const alphaReal = (l >= 0 ? cdf(n, p0, l) : 0) + (r <= n ? 1 - cdf(n, p0, r - 1) : 0);
+            let beta = 0;
+            if (S.beta) for (let x = l + 1; x < r; x++) beta += pmf(n, S.p1, x);
+            const H1 = S.side === 'l' ? 'p < ' + texNum(p0, 2) : S.side === 'r' ? 'p > ' + texNum(p0, 2) : 'p \\neq ' + texNum(p0, 2);
+            const regTex = S.side === 'l' ? '\\{0, \\ldots, ' + l + '\\}' : S.side === 'r' ? '\\{' + r + ', \\ldots, ' + n + '\\}' : '\\{0, \\ldots, ' + l + '\\} \\cup \\{' + r + ', \\ldots, ' + n + '\\}';
+            const reject = inA(k);
+            out.innerHTML = '<p style="margin:0 0 6px">$H_0\\colon p = ' + texNum(p0, 2) + '$ gegen $H_1\\colon ' + H1 + '$ · $n = ' + n + '$, $\\alpha = ' + texNum(S.alpha * 100, 0) + '\\,\\%$</p>' +
+                '<p style="margin:0 0 6px">Ablehnungsbereich (rot): $\\overline{A} = ' + regTex + '$ · tatsächliche Irrtumswahrscheinlichkeit $\\approx ' + texNum(alphaReal, 4) + '$</p>' +
+                '<p style="margin:0 0 6px">Beobachtet $k = ' + k + '$: ' + (reject ? '<b>$H_0$ wird abgelehnt.</b> Das Ergebnis ist signifikant.' : '<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.') + '</p>' +
+                (S.beta ? '<p style="margin:0">Ist in Wahrheit $p = ' + texNum(S.p1, 2) + '$ (violett), wird $H_0$ mit $\\beta \\approx ' + texNum(beta, 4) + '$ fälschlich beibehalten (Fehler 2. Art).</p>' : '');
+            math(out);
+        }
+        render(); math(sl); math(c2); math(c3);
     });
 })();

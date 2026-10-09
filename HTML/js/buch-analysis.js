@@ -9,6 +9,8 @@
  *   ableiten      derivative trainer: random terms, type f'(x), checked numerically
  *   steckbrief    a function from conditions: draggable points, the system of equations and its solution
  *   optimieren    box from a sheet, tin can, fence at a wall: target function, slider, maximum by f' = 0
+ *   schar         a family f_a with its members, the extreme points and their locus (Klasse 13, Lernbereich 6)
+ *   gewinn        costs, revenue and profit: break-even points and maximum profit for a chosen price
  * Looks: js/buch.css (section "Widgets of the calculus chapters").
  */
 (function () {
@@ -593,4 +595,68 @@
             '<rect x="' + ox + '" y="' + oy + '" width="' + b + '" height="' + a + '" ' + G + '/>' +
             T(ox + b / 2, oy + a + 18, fmt(60 - 2 * x, 1) + ' m') + T(ox + b + 6, oy + a / 2 + 4, 'x = ' + fmt(x, 1) + ' m', 'start') + '</svg>';
     }
+    /* =========================== Klasse 13, Lernbereich 6: families of functions, costs and profit =========================== */
+    /* ---------- a family of functions f_a with the locus of its extreme points ---------- */
+    W('schar', function (box) {
+        const P = {
+            kub: { k: 'fₐ(x) = x³ − a·x', tex: a => 'f_{' + texNum(a, 1) + '}(x) = x^3' + sgx(-a, 'x', 1), f: (a, x) => x ** 3 - a * x, lo: -2, hi: 6, a: 3, y: [-8, 8],
+                ext: a => a > 0 ? [[-Math.sqrt(a / 3), 'H'], [Math.sqrt(a / 3), 'T']] : [], ort: x => -2 * x ** 3, orttex: 'y = -2x^3',
+                note: 'Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.' },
+            par: { k: 'fₐ(x) = −x² + a·x', tex: a => 'f_{' + texNum(a, 1) + '}(x) = -x^2' + sgx(a, 'x', 1), f: (a, x) => -x * x + a * x, lo: -4, hi: 4, a: 2, y: [-4, 5],
+                ext: a => [[a / 2, 'H']], ort: x => x * x, orttex: 'y = x^2', note: 'Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.' }
+        };
+        let G = P.kub, a = G.a, showOrt = true;
+        const ctl = div(box, 'b-ctrls');
+        B.seg(ctl, Object.keys(P).map(k => [k, P[k].k]), 'kub', v => { G = P[v]; a = G.a; build(); }, 'Funktionenschar');
+        const sl = div(box, '');
+        const c2 = div(box, 'b-ctrls');
+        c2.innerHTML = '<label class="b-ctrl"><input type="checkbox" checked> Ortskurve der Extrempunkte zeigen</label>';
+        c2.querySelector('input').addEventListener('change', e => { showOrt = e.target.checked; render(); });
+        const p = new Plot(div(box, ''), { x: [-4, 4], height: 330, aria: 'Funktionenschar mit Ortskurve' });
+        const out = div(box, 'b-out');
+        function build() {
+            sl.innerHTML = '';
+            range(sl, { label: 'Parameter $a$', min: G.lo, max: G.hi, step: 0.5, value: a, fmt: v => fmt(v, 1), onInput: v => { a = v; render(); } });
+            math(sl); render();
+        }
+        function render() {
+            p.view([-4, 4], G.y);
+            const L = [];
+            for (let b = G.lo; b <= G.hi; b += 1) if (Math.abs(b - a) > 1e-9) L.push({ fn: x => G.f(b, x), color: 'dim', width: 1 });
+            if (showOrt) L.push({ fn: G.ort, color: 'violet', dash: true, width: 1.8 });
+            L.push({ fn: x => G.f(a, x), color: 'lambda', label: 'fₐ' });
+            const E = G.ext(a);
+            E.forEach(([x, t]) => L.push({ pts: [[x, G.f(a, x)]], color: t === 'H' ? 'red' : 'phi', r: 6 }, { text: t, at: [x, G.f(a, x)], color: t === 'H' ? 'red' : 'phi' }));
+            p.draw(L);
+            out.innerHTML = '<p style="margin:0 0 6px">$' + G.tex(a) + '$ · ' + (E.length ? E.map(([x, t]) => (t === 'H' ? 'Hochpunkt' : 'Tiefpunkt') + ' $(' + num(x, 3) + ' \\mid ' + num(G.f(a, x), 3) + ')$').join(' · ') : 'keine Extrempunkte') + '</p>' +
+                '<p style="margin:0">Ortskurve aller Extrempunkte (violett): $' + G.orttex + '$. ' + G.note + '</p>';
+            math(out);
+        }
+        build();
+    });
+
+    /* ---------- costs, revenue, profit ---------- */
+    W('gewinn', function (box) {
+        const K = x => 0.02 * x ** 3 - 1.2 * x * x + 30 * x + 200;
+        let price = 30;
+        range(div(box, ''), { label: 'Verkaufspreis $p$ (€ pro Stück)', min: 15, max: 50, step: 1, value: price, fmt: v => v + ' €', onInput: v => { price = v; render(); } });
+        const p = new Plot(div(box, ''), { x: [-1, 62], y: [-400, 3100], height: 320, xLabel: 'x in Stück', yLabel: '€', aria: 'Kosten, Erlös und Gewinn' });
+        const out = div(box, 'b-out');
+        function render() {
+            const E = x => price * x, Gw = x => E(x) - K(x);
+            const z = zeros(Gw, 0, 60, 1200);
+            // G'(x) = p − K'(x) = 0 ⇔ 0,06x² − 2,4x + 30 − p = 0; the larger root is the maximum
+            const D = 5.76 - 0.24 * (30 - price), xm = D >= 0 ? (2.4 + Math.sqrt(D)) / 0.12 : null;
+            const ok = xm != null && xm <= 60 && Gw(xm) > 0;
+            const L = [{ fn: K, color: 'red', label: 'K', domain: [0, 60] }, { fn: E, color: 'phi', label: 'E', domain: [0, 60] }, { fn: Gw, color: 'lambda', label: 'G', domain: [0, 60], labelAt: 50 }, { hline: 0 }];
+            if (z.length) L.push({ pts: z.map(x => [x, 0]), color: 'white', r: 5 });
+            if (ok) L.push({ pts: [[xm, Gw(xm)]], color: 'lambda', r: 6 }, { vline: xm, color: 'lambda' });
+            p.draw(L);
+            out.innerHTML = '<p style="margin:0 0 6px">$K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + 200$ · $E(x) = ' + price + 'x$ · $G(x) = E(x) - K(x)$</p>' +
+                '<p style="margin:0 0 6px">' + (z.length >= 2 ? 'Gewinnschwelle bei $x \\approx ' + num(z[0], 1) + '$, Gewinngrenze bei $x \\approx ' + num(z[z.length - 1], 1) + '$ Stück.' : z.length === 1 ? 'Gewinn ab $x \\approx ' + num(z[0], 1) + '$ Stück.' : 'Bei diesem Preis wird nie Gewinn gemacht.') + '</p>' +
+                '<p style="margin:0">' + (ok ? 'Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ' + num(xm, 1) + '$ Stück, $G \\approx ' + num(Gw(xm), 0) + '$ €.' : 'Kein positives Gewinnmaximum.') + '</p>';
+            math(out);
+        }
+        render();
+    });
 })();

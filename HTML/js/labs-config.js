@@ -46,6 +46,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathe13",
+        "href": "buch/mathe13/index.html",
+        "title": "Mathematik BGY 13",
+        "description": "Unser drittes Buch: das interaktive Lehrbuch Mathematik für das Berufliche Gymnasium, Klasse 13, das Abiturjahr nach dem sächsischen Lehrplan und dem Stoffverteilungsplan des Grundkurses. Elf Kapitel – Stammfunktionen, bestimmtes Integral und Hauptsatz, Flächen, numerische Integration, Stichproben und Signifikanztests, Geraden und Ebenen im Raum mit Lagebeziehungen und Schnittwinkeln, Funktionenscharen, Kosten und Gewinn – und zum Schluss ein ganzes Kapitel „Fit fürs Abitur“ mit Checklisten und Abituraufgaben aus allen drei Jahren. Zum Ausprobieren: ein Wassertank, der sich aus seiner Zuflussrate füllt, Integrale mit ziehbaren Grenzen, tausend Stichproben auf Knopfdruck, ein Signifikanztest mit Fehler 2. Art und Geraden, Ebenen und Pyramiden in echtem 3D.",
+        "tagline": "Buch / Mathematik 13 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe13"],
+        "category": "buecher neu funktionen stochastik geometrie oberstufe",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 13 abitur abiturvorbereitung berufliches gymnasium bgy sachsen lehrplan grundkurs kapitel stammfunktion unbestimmtes integral bestimmtes integral hauptsatz rekonstruierter bestand flaeche flaecheninhalt flaeche zwischen graphen rechteckmethode trapezmethode numerische integration mittelwert grundgesamtheit stichprobe stichprobenvarianz signifikanztest hypothese nullhypothese ablehnungsbereich fehler erster art fehler zweiter art gerade ebene parametergleichung normalenvektor vektorprodukt kreuzprodukt koordinatengleichung spurpunkt lagebeziehung windschief schnittpunkt schnittwinkel prisma pyramide volumen oberflaeche funktionenschar ortskurve parameter lgs kosten erloes gewinn gewinnschwelle 3d aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",

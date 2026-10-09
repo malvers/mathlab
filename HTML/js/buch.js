@@ -406,7 +406,7 @@
             try { solved = Object.keys(JSON.parse(localStorage.getItem('buch:' + folder + c.file) || '{}')).length; } catch (_) { }
             html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>KAPITEL</small></span>' +
                 '<span><span class="b-chap-t">' + c.title + '</span><span class="b-chap-s">' + c.sub + '</span></span>' +
-                '<span class="b-chap-m">' + c.when.toUpperCase() + '<br>' + c.ustd + ' USTD.' +
+                '<span class="b-chap-m">' + c.when.toUpperCase() + (c.ustd ? '<br>' + c.ustd + ' USTD.' : '') +
                 (solved ? '<br><span class="b-done">' + solved + ' GELÖST</span>' : '') + '</span></a>';
         });
         box.innerHTML = html;

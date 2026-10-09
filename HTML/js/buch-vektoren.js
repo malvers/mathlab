@@ -4,6 +4,11 @@
  *   raum3d        points and vectors: position and connecting vector, length, midpoint · sum and difference · multiple
  *   skalarprodukt two vectors from the origin: scalar product, lengths, angle, orthogonal or not
  *   viereck3d     a quadrilateral in space: parallelogram, rectangle, rhombus, square? checked with vectors
+ *   gerade3d      a line in space: parametric equation, moving point, point test, trace points (Klasse 13)
+ *   geradenlage   two lines: identical, parallel, intersecting (with S) or skew (with the shortest distance)
+ *   ebene3d       a plane: parametric form → normal vector (cross product) → coordinate equation, trace triangle;
+ *                 point test; line through the plane with intersection point and angle
+ *   pyramide      pyramid and (oblique) prism: base, volume, lateral surface with cross products
  * Mathematical axes: x towards the viewer, y to the right, z up (as in the school book); in Three.js that is (y, z, x).
  * Labels are sprites inside the scene, so the frozen print picture (js/buch-druck.js) keeps them.
  */
@@ -369,6 +374,207 @@
                     '<p style="margin:0">$ABCD$ ist ' + kind + '</p>';
                 math(out);
                 R.render();
+            });
+        }
+        draw();
+    });
+    /* =========================== Klasse 13: lines and planes (Wahlpflicht 1) =========================== */
+    const near0 = x => Math.abs(x) < 1e-9;
+    const g3 = v => v.map(x => n2(x)).join(' \\mid ');
+    function presetRow(parent, items, onPick) {
+        const row = div(parent, 'b-ctrls');
+        row.innerHTML = '<span class="b-ctrl">Beispiele:</span>' + Object.keys(items).map(k => '<button type="button" class="b-btn" data-p="' + k + '">' + items[k].k + '</button>').join('');
+        row.addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) onPick(items[b.dataset.p]); });
+        return row;
+    }
+
+    /* ---------- a line in space: parametric equation, point test, trace points ---------- */
+    W('gerade3d', function (box) {
+        const S = { P: [1, 2, 1], u: [1, -1, 2], Q: [3, 0, 5], t: 1 };
+        const inBox = div(box, 'vk-inputs');
+        coords(inBox, 'P', S.P, draw, 'cyan'); coords(inBox, 'u', S.u, draw, 'pink'); coords(inBox, 'Q', S.Q, draw, 'violet');
+        math(inBox);
+        B.range(div(box, ''), { label: 'Parameter $t$', min: -3, max: 3, step: 0.25, value: S.t, fmt: v => fmt(v, 2), onInput: v => { S.t = v; draw(); } });
+        const R = new Raum(box, { height: 380 });
+        const out = div(box, 'b-out');
+        R.onScheme = () => draw();
+        function draw() {
+            R.ready.then(() => {
+                R.clear();
+                const { P, u, Q, t } = S;
+                if (len(u) < 1e-9) { out.innerHTML = '<p style="margin:0">Der Richtungsvektor darf nicht der Nullvektor sein.</p>'; R.render(); return; }
+                R.line(add(P, mul(-5, u)), add(P, mul(5, u)), 'lambda');
+                R.arrow(P, add(P, u), 'pink'); R.dot(P, 'cyan'); R.label('P', add(P, [0, 0, 0.45]), 'cyan');
+                const X = add(P, mul(t, u)); R.dot(X, 'lambda', 0.11); R.label('X', add(X, [0, 0.35, 0.4]), 'lambda');
+                // trace points with the coordinate planes
+                const tr = [[2, 'S_{xy}', 'xy'], [1, 'S_{xz}', 'xz'], [0, 'S_{yz}', 'yz']].filter(([i]) => !near0(u[i])).map(([i, tex, nm]) => { const tt = -P[i] / u[i]; return [add(P, mul(tt, u)), tex, nm]; });
+                tr.forEach(([pt, , nm]) => { if (pt.every(v => Math.abs(v) <= 7)) { R.dot(pt, 'red', 0.08); R.label('S' + nm, add(pt, [0, 0.3, -0.35]), 'red', 0.3); } });
+                // point test for Q
+                const ts = [0, 1, 2].filter(i => !near0(u[i])).map(i => (Q[i] - P[i]) / u[i]);
+                const on = ts.length && ts.every(x => Math.abs(x - ts[0]) < 1e-9) && [0, 1, 2].every(i => !near0(u[i]) || near0(Q[i] - P[i]));
+                R.dot(Q, 'violet', 0.1); R.label('Q', add(Q, [0, 0, 0.45]), 'violet');
+                out.innerHTML = '<p style="margin:0 0 6px">$g\\colon \\vec{x} = ' + vtex(P) + ' + t \\cdot ' + vtex(u) + '$ · $t = ' + texNum(t, 2) + '$: $X(' + g3(X) + ')$</p>' +
+                    '<p style="margin:0 0 6px">Punktprobe für $Q(' + g3(Q) + ')$: ' + (on ? 'Alle Zeilen liefern $t = ' + texNum(ts[0], 3) + '$, also <b>$Q \\in g$</b>.' : 'Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.') + '</p>' +
+                    '<p style="margin:0">Spurpunkte: ' + (tr.length ? tr.map(([pt, tex]) => '$' + tex + '(' + g3(pt) + ')$').join(' · ') : 'keine') + '</p>';
+                math(out); R.render();
+            });
+        }
+        draw();
+    });
+
+    /* ---------- two lines: identical, parallel, intersecting or skew ---------- */
+    W('geradenlage', function (box) {
+        const PRE = {
+            sch: { k: 'schneidend', P: [1, 0, 1], u: [1, 1, 0], Q: [2, 3, 0], v: [1, -1, 1] },
+            par: { k: 'parallel', P: [1, 0, 1], u: [1, 1, 0], Q: [0, 2, 3], v: [2, 2, 0] },
+            ide: { k: 'identisch', P: [1, 0, 1], u: [1, 1, 0], Q: [4, 3, 1], v: [-1, -1, 0] },
+            win: { k: 'windschief', P: [1, 0, 1], u: [1, 1, 0], Q: [0, 0, 4], v: [0, 1, -1] }
+        };
+        const S = { P: PRE.sch.P.slice(), u: PRE.sch.u.slice(), Q: PRE.sch.Q.slice(), v: PRE.sch.v.slice() };
+        presetRow(box, PRE, pr => { ['P', 'u', 'Q', 'v'].forEach((k, i) => cs[i].set(pr[k].slice())); draw(); });
+        const inBox = div(box, 'vk-inputs vk-four');
+        const cs = [['P', 'P', 'cyan'], ['u', 'u', 'cyan'], ['Q', 'Q', 'phi'], ['v', 'v', 'phi']].map(([key, nm, c]) => coords(inBox, nm, S[key], draw, c));
+        math(inBox);
+        const R = new Raum(box, { height: 380 });
+        const out = div(box, 'b-out');
+        R.onScheme = () => draw();
+        function draw() {
+            R.ready.then(() => {
+                R.clear();
+                const { P, u, Q, v } = S;
+                if (len(u) < 1e-9 || len(v) < 1e-9) { out.innerHTML = '<p style="margin:0">Richtungsvektoren dürfen nicht der Nullvektor sein.</p>'; R.render(); return; }
+                R.line(add(P, mul(-6 / len(u) * 2, u)), add(P, mul(6 / len(u) * 2, u)), 'cyan');
+                R.line(add(Q, mul(-6 / len(v) * 2, v)), add(Q, mul(6 / len(v) * 2, v)), 'phi');
+                R.dot(P, 'cyan', 0.1); R.label('g', add(P, [0, 0, 0.45]), 'cyan'); R.dot(Q, 'phi', 0.1); R.label('h', add(Q, [0, 0, 0.45]), 'phi');
+                let html;
+                const cr = cross(u, v);
+                if (len(cr) < 1e-9) {
+                    const same = len(cross(sub(Q, P), u)) < 1e-9;
+                    html = 'Die Richtungsvektoren sind parallel ($\\vec{v} = ' + texNum(v.find(x => !near0(x)) / u[v.findIndex(x => !near0(x))], 3) + ' \\cdot \\vec{u}$). ' +
+                        (same ? 'Der Stützpunkt $Q$ liegt auf $g$: <b>identisch</b>.' : 'Der Stützpunkt $Q$ liegt nicht auf $g$: <b>echt parallel</b>.');
+                } else {
+                    const w0 = sub(P, Q), a = dot(u, u), b = dot(u, v), c = dot(v, v), d = dot(u, w0), e = dot(v, w0), den = a * c - b * b;
+                    const t = (b * e - c * d) / den, s2 = (a * e - b * d) / den, Pc = add(P, mul(t, u)), Qc = add(Q, mul(s2, v)), dist = len(sub(Pc, Qc));
+                    if (dist < 1e-7) {
+                        R.dot(Pc, 'lambda', 0.14); R.label('S', add(Pc, [0, 0.3, 0.45]), 'lambda');
+                        html = 'Nicht parallel. Gleichsetzen ergibt $t = ' + texNum(t, 3) + '$, $s = ' + texNum(s2, 3) + '$: <b>schneidend</b> im Punkt $S(' + g3(Pc) + ')$.';
+                    } else {
+                        R.line(Pc, Qc, 'red', { dash: true }); R.dot(Pc, 'red', 0.07); R.dot(Qc, 'red', 0.07);
+                        html = 'Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ' + texNum(dist, 3) + '$.';
+                    }
+                }
+                out.innerHTML = '<p style="margin:0 0 6px">$g\\colon \\vec{x} = ' + vtex(P) + ' + t \\cdot ' + vtex(u) + '$, $\;h\\colon \\vec{x} = ' + vtex(Q) + ' + s \\cdot ' + vtex(v) + '$</p><p style="margin:0">' + html + '</p>';
+                math(out); R.render();
+            });
+        }
+        draw();
+    });
+
+    /* ---------- a plane: parametric form, normal vector, coordinate equation, point test, line through the plane ---------- */
+    function ints(n) {                                         // smallest integer multiple, if the vector has integer ratios
+        const r = n.map(x => Math.round(x * 1e6) / 1e6);
+        if (!r.every(x => Number.isInteger(x))) return n;
+        const g = r.filter(x => x).reduce((a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a; }, 0) || 1;
+        return r.map(x => x / g);
+    }
+    W('ebene3d', function (box) {
+        const S = { mode: box.dataset.mode || 'ebene', A: [4, 0, 0], u: [-4, 3, 0], v: [-4, 0, 2], Q: [2, 1.5, 0], P: [3, 3, 3], w: [-1, -1, -1] };
+        const ctl = div(box, 'b-ctrls');
+        B.seg(ctl, [['ebene', 'Ebene und Normalenvektor'], ['punkt', 'Liegt der Punkt in E?'], ['gerade', 'Gerade schneidet Ebene']], S.mode, v => { S.mode = v; ui(); draw(); }, 'Was wird gezeigt?');
+        const inBox = div(box, 'vk-inputs vk-four');
+        const R = new Raum(box, { height: 400 });
+        const out = div(box, 'b-out');
+        R.onScheme = () => draw();
+        function ui() {
+            inBox.innerHTML = '';
+            coords(inBox, 'A', S.A, draw, 'cyan'); coords(inBox, 'u', S.u, draw, 'violet'); coords(inBox, 'v', S.v, draw, 'violet');
+            if (S.mode === 'punkt') coords(inBox, 'Q', S.Q, draw, 'phi');
+            if (S.mode === 'gerade') { coords(inBox, 'P', S.P, draw, 'phi'); coords(inBox, 'w', S.w, draw, 'phi'); }
+            math(inBox);
+        }
+        function draw() {
+            R.ready.then(() => {
+                R.clear();
+                const { A, u, v } = S, n0 = cross(u, v);
+                if (len(n0) < 1e-9) { out.innerHTML = '<p style="margin:0">$\\vec{u}$ und $\\vec{v}$ sind parallel, sie spannen keine Ebene auf.</p>'; math(out); R.render(); return; }
+                const n = ints(n0), d = dot(n, A);
+                // the patch: the trace triangle if the plane cuts all three axes in the picture, else a parallelogram around A
+                const ax = [0, 1, 2].map(i => near0(n[i]) ? null : d / n[i]);
+                if (ax.every(x => x != null && Math.abs(x) <= 6 && !near0(x))) {
+                    const T = ax.map((x, i) => [0, 1, 2].map(j => (j === i ? x : 0)));
+                    R.face(T, 'violet', 0.28); T.forEach((p, i) => { R.rod(p, T[(i + 1) % 3], 'violet', 0.025); R.dot(p, 'violet', 0.08); });
+                } else {
+                    const c = [add(A, add(mul(-2, u), mul(-2, v))), add(A, add(mul(2, u), mul(-2, v))), add(A, add(mul(2, u), mul(2, v))), add(A, add(mul(-2, u), mul(2, v)))];
+                    R.face(c, 'violet', 0.22);
+                }
+                R.dot(A, 'cyan'); R.label('A', add(A, [0, 0.3, 0.4]), 'cyan');
+                R.arrow(A, add(A, u), 'violet', { r: 0.035 }); R.arrow(A, add(A, v), 'violet', { r: 0.035 });
+                const nu = mul(2 / len(n), n);
+                R.arrow(A, add(A, nu), 'pink'); R.label('n', add(A, mul(1.15, nu)), 'pink');
+                const cf = n.map((x, i) => ({ x, v: 'xyz'[i] })).filter(o => !near0(o.x)).map((o, i) => (i ? (o.x < 0 ? ' - ' : ' + ') : (o.x < 0 ? '-' : '')) + (Math.abs(Math.abs(o.x) - 1) < 1e-9 ? '' : n2(Math.abs(o.x))) + o.v).join('');
+                let html = '<p style="margin:0 0 6px">$E\\colon \\vec{x} = ' + vtex(A) + ' + r \\cdot ' + vtex(u) + ' + s \\cdot ' + vtex(v) + '$</p>' +
+                    '<p style="margin:0 0 6px">Normalenvektor $\\vec{n} = \\vec{u} \\times \\vec{v} = ' + vtex(n0) + (len(sub(n, n0)) > 1e-9 ? ' \\parallel ' + vtex(n) : '') + '$ · Koordinatenform: $' + cf + ' = ' + n2(d) + '$</p>';
+                if (S.mode === 'ebene') html += '<p style="margin:0">Spurpunkte mit den Achsen: ' + ax.map((x, i) => x == null ? '' : '$S_' + 'xyz'[i] + '(' + g3([0, 1, 2].map(j => (j === i ? x : 0))) + ')$').filter(Boolean).join(' · ') + '</p>';
+                if (S.mode === 'punkt') {
+                    const Q = S.Q, val = dot(n, Q), on = Math.abs(val - d) < 1e-9;
+                    R.dot(Q, 'phi', 0.12); R.label('Q', add(Q, [0, 0, 0.45]), 'phi');
+                    html += '<p style="margin:0">Punktprobe: $' + cf.replace(/x/, '(' + n2(Q[0]) + ')').replace(/y/, '(' + n2(Q[1]) + ')').replace(/z/, '(' + n2(Q[2]) + ')') + ' = ' + n2(val) + '$ ' + (on ? '$= ' + n2(d) + '$: <b>$Q$ liegt in $E$</b>.' : '$\\neq ' + n2(d) + '$: <b>$Q$ liegt nicht in $E$</b>. Abstand $\\approx ' + texNum(Math.abs(val - d) / len(n), 3) + '$.') + '</p>';
+                }
+                if (S.mode === 'gerade') {
+                    const P = S.P, w = S.w, nw = dot(n, w);
+                    R.line(add(P, mul(-4, w)), add(P, mul(4, w)), 'phi'); R.dot(P, 'phi', 0.1); R.label('g', add(P, [0, 0, 0.45]), 'phi');
+                    if (near0(nw)) html += '<p style="margin:0">$\\vec{n} \\circ \\vec{w} = 0$: Die Gerade ist parallel zur Ebene ' + (Math.abs(dot(n, P) - d) < 1e-9 ? 'und liegt in ihr.' : 'und schneidet sie nicht.') + '</p>';
+                    else {
+                        const t = (d - dot(n, P)) / nw, Sx = add(P, mul(t, w)), sinp = Math.abs(nw) / (len(n) * len(w));
+                        R.dot(Sx, 'lambda', 0.13); R.label('S', add(Sx, [0, 0.3, 0.4]), 'lambda');
+                        html += '<p style="margin:0">Einsetzen von $g$ in $E$: $t = ' + texNum(t, 3) + '$, Schnittpunkt $S(' + g3(Sx) + ')$ · Schnittwinkel: $\\sin \\varphi = \\dfrac{|\\vec{n} \\circ \\vec{w}|}{|\\vec{n}| \\cdot |\\vec{w}|} \\approx ' + texNum(sinp, 4) + '$, $\\varphi \\approx ' + texNum(Math.asin(sinp) * 180 / Math.PI, 1) + '^\\circ$</p>';
+                    }
+                }
+                out.innerHTML = html; math(out); R.render();
+            });
+        }
+        ui(); draw();
+    });
+
+    /* ---------- pyramid and prism: volume and surface with vectors ---------- */
+    W('pyramide', function (box) {
+        const S = { kind: 'pyr', a: 4, h: 4, sx: 2, sy: 2 };
+        const ctl = div(box, 'b-ctrls');
+        B.seg(ctl, [['pyr', 'Pyramide'], ['pri', 'Prisma (schief möglich)']], S.kind, v => { S.kind = v; draw(); }, 'Körper');
+        const sl = div(box, '');
+        B.range(sl, { label: 'Grundkante $a$', min: 2, max: 5, step: 0.5, value: S.a, fmt: v => fmt(v, 1), onInput: v => { S.a = v; draw(); } });
+        B.range(sl, { label: 'Höhe $h$', min: 1, max: 5, step: 0.5, value: S.h, fmt: v => fmt(v, 1), onInput: v => { S.h = v; draw(); } });
+        B.range(sl, { label: 'Verschiebung der Spitze in $x$', min: 0, max: 4, step: 0.5, value: S.sx, fmt: v => fmt(v, 1), onInput: v => { S.sx = v; draw(); } });
+        math(sl);
+        const R = new Raum(box, { height: 380 });
+        const out = div(box, 'b-out');
+        R.onScheme = () => draw();
+        const tri = (p, q, r) => len(cross(sub(q, p), sub(r, p))) / 2;
+        function draw() {
+            R.ready.then(() => {
+                R.clear();
+                const a = S.a, A = [0, 0, 0], Bp = [a, 0, 0], C = [a, a, 0], D = [0, a, 0], base = [A, Bp, C, D];
+                R.face(base, 'cyan', 0.18); base.forEach((p, i) => R.rod(p, base[(i + 1) % 4], 'cyan', 0.03));
+                let html;
+                const G = len(cross(sub(Bp, A), sub(D, A)));
+                if (S.kind === 'pyr') {
+                    const Sp = [S.sx * a / 4, a / 2, S.h];
+                    base.forEach((p, i) => { R.rod(p, Sp, 'lambda', 0.025); R.face([p, base[(i + 1) % 4], Sp], 'lambda', 0.12); });
+                    R.dot(Sp, 'lambda', 0.1); R.label('S', add(Sp, [0, 0, 0.45]), 'lambda');
+                    R.line(Sp, [Sp[0], Sp[1], 0], 'red', { dash: true });
+                    const M = base.reduce((s2, p, i) => s2 + tri(p, base[(i + 1) % 4], Sp), 0);
+                    html = '<p style="margin:0 0 6px">Grundfläche $G = |\\vec{AB} \\times \\vec{AD}| = ' + n2(G) + '$, Spitze $S(' + g3(Sp) + ')$, Höhe $h = ' + n2(S.h) + '$ (rot)</p>' +
+                        '<p style="margin:0 0 6px">Volumen $V = \\tfrac13 \\cdot G \\cdot h \\approx ' + texNum(G * S.h / 3, 3) + '$ · Mantel (4 Dreiecke, je $\\tfrac12 |\\vec{a} \\times \\vec{b}|$) $\\approx ' + texNum(M, 3) + '$</p>' +
+                        '<p style="margin:0">Oberfläche $O = G + M \\approx ' + texNum(G + M, 3) + '$ · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.</p>';
+                } else {
+                    const w = [S.sx - 2, 0, S.h], top = base.map(p => add(p, w));
+                    R.face(top, 'cyan', 0.18); top.forEach((p, i) => { R.rod(p, top[(i + 1) % 4], 'cyan', 0.03); R.rod(base[i], p, 'lambda', 0.025); R.face([base[i], base[(i + 1) % 4], top[(i + 1) % 4], p], 'lambda', 0.1); });
+                    const M = base.reduce((s2, p, i) => s2 + len(cross(sub(base[(i + 1) % 4], p), w)), 0);
+                    html = '<p style="margin:0 0 6px">Grundfläche $G = ' + n2(G) + '$, Verschiebung der Deckfläche $\\vec{w} = ' + vtex(w) + '$, Höhe $h = ' + n2(S.h) + '$</p>' +
+                        '<p style="margin:0 0 6px">Volumen $V = G \\cdot h = ' + texNum(G * S.h, 3) + '$ (Prinzip von Cavalieri: auch schief) · Mantel (4 Parallelogramme, je $|\\vec{a} \\times \\vec{w}|$) $\\approx ' + texNum(M, 3) + '$</p>' +
+                        '<p style="margin:0">Oberfläche $O = 2G + M \\approx ' + texNum(2 * G + M, 3) + '$</p>';
+                }
+                out.innerHTML = html; math(out); R.render();
             });
         }
         draw();
