@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lineare Approximation und Änderungsraten — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w05-aenderungsraten',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lineare Approximation und Änderungsraten',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 5 (LB 1) · 20 Aufgaben: Tangente als beste lineare Näherung, Sekante, mittlere und lokale Änderungsrate · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 5 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-15 from the Grundkurs sheet (mathegy11/w04), 16-20 linear approximation. */
+  questions: [
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = x^2$ im Intervall $[1;\\,3]$.',
+      opts: ['6', '2', '4', '8'],
+      steps: [
+        'Differenzenquotient: $\\dfrac{f(3) - f(1)}{3 - 1}$',
+        '$\\dfrac{9 - 1}{2} = 4$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Körper fällt nach $s(t) = 5t^2$ ($s$ in m, $t$ in s). Wie groß ist seine mittlere Geschwindigkeit zwischen $t = 1$ und $t = 3$?',
+      opts: ['20 m/s', '40 m/s', '10 m/s', '45 m/s'],
+      steps: [
+        '$s(3) = 45$, $s(1) = 5$',
+        '$\\bar v = \\dfrac{45 - 5}{3 - 1} = \\dfrac{40}{2} = 20$ m/s'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = \\sqrt{x}$ zwischen $x = 1$ und $x = 4$.',
+      opts: ['$\\dfrac{1}{2}$', '1', '$\\dfrac{1}{3}$', '3'],
+      steps: [
+        '$f(4) = 2$, $f(1) = 1$',
+        '$\\dfrac{2 - 1}{4 - 1} = \\dfrac{1}{3}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = \\dfrac{1}{x}$ im Intervall $[1;\\,2]$.',
+      opts: ['−1', '$\\dfrac{1}{2}$', '$-\\dfrac{3}{2}$', '$-\\dfrac{1}{2}$'],
+      steps: [
+        '$f(2) = \\dfrac{1}{2}$, $f(1) = 1$',
+        '$\\dfrac{\\frac{1}{2} - 1}{2 - 1} = -\\dfrac{1}{2}$',
+        'Negativ, denn die Funktion fällt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was gibt der Differenzenquotient $\\dfrac{f(b) - f(a)}{b - a}$ geometrisch an?',
+      opts: ['Den Flächeninhalt unter dem Graphen.', 'Die Länge der Strecke zwischen beiden Punkten.', 'Den Anstieg der Tangente im Punkt $(a \\mid f(a))$.', 'Den Anstieg der Sekante durch $(a \\mid f(a))$ und $(b \\mid f(b))$.'],
+      steps: [
+        'Er ist Höhenunterschied durch Breitenunterschied zweier Kurvenpunkte.',
+        'Das ist der Anstieg der Geraden durch beide Punkte, der Sekante.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was gibt der Differentialquotient $f^{\\prime}(x_0)$ an?',
+      opts: ['Den Anstieg der Tangente im Punkt $(x_0 \\mid f(x_0))$, die lokale Änderungsrate.', 'Den Funktionswert an der Stelle $x_0$.', 'Den Anstieg der Sekante über $[0;\\,x_0]$.', 'Die mittlere Änderungsrate über die ganze Definitionsmenge.'],
+      steps: [
+        'Der Differentialquotient ist der Grenzwert der Differenzenquotienten für $h \\to 0$.',
+        'Aus den Sekanten wird die Tangente, aus der mittleren die lokale Änderungsrate.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Term ist der Differenzenquotient von $f$ an der Stelle $x_0$ mit der Schrittweite $h$?',
+      opts: ['$f(x_0 + h) - f(x_0)$', '$\\dfrac{f(x_0) + f(h)}{h}$', '$\\dfrac{f(x_0 + h) - f(x_0)}{x_0}$', '$\\dfrac{f(x_0 + h) - f(x_0)}{h}$'],
+      steps: [
+        'Die Intervallbreite ist $(x_0 + h) - x_0 = h$.',
+        'Höhenunterschied $f(x_0 + h) - f(x_0)$ durch diese Breite.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Von wem stammt die Schreibweise $\\dfrac{dy}{dx}$ für die Ableitung?',
+      opts: ['Isaac Newton', 'Gottfried Wilhelm Leibniz', 'Carl Friedrich Gauß', 'Leonhard Euler'],
+      steps: [
+        'Leibniz dachte an das Verhältnis „unendlich kleiner“ Differenzen $dy$ und $dx$.',
+        'Newton schrieb $\\dot{y}$ und sprach von Fluxionen. Beide fanden die Differentialrechnung im 17. Jahrhundert unabhängig voneinander.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für $f(x) = x^2$ und $x_0 = 3$ vereinfacht sich der Differenzenquotient zu $6 + h$. Wie groß ist der Anstieg der Tangente bei $x_0 = 3$?',
+      opts: ['6', '$6 + h$', '3', '9'],
+      steps: [
+        '$\\dfrac{(3 + h)^2 - 9}{h} = \\dfrac{6h + h^2}{h} = 6 + h$',
+        'Für $h \\to 0$ bleibt 6.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die lokale Änderungsrate von $f(x) = x^2$ an der Stelle $x_0 = -2$.',
+      opts: ['−2', '−4', '4', '2'],
+      steps: [
+        '$\\dfrac{(-2 + h)^2 - 4}{h} = \\dfrac{-4h + h^2}{h} = -4 + h$',
+        'Für $h \\to 0$: −4. Die Parabel fällt dort.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Körper fällt nach $s(t) = 5t^2$. Wie groß ist seine Momentangeschwindigkeit bei $t = 2$?',
+      opts: ['5 m/s', '10 m/s', '20 m/s', '40 m/s'],
+      steps: [
+        '$\\dfrac{5(2 + h)^2 - 20}{h} = \\dfrac{20h + 5h^2}{h} = 20 + 5h$',
+        'Für $h \\to 0$: 20 m/s.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme mit $h \\to 0$ den Anstieg von $f(x) = x^3$ an der Stelle $x_0 = 1$.',
+      opts: ['0', '1', '3', '$3 + 3h + h^2$'],
+      steps: [
+        '$(1 + h)^3 = 1 + 3h + 3h^2 + h^3$',
+        '$\\dfrac{(1 + h)^3 - 1}{h} = 3 + 3h + h^2$',
+        'Für $h \\to 0$ bleibt 3.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Gleichung der Tangente an $f(x) = x^2$ im Punkt $(1 \\mid 1)$?',
+      opts: ['$y = 2x - 1$', '$y = x$', '$y = 2x$', '$y = 2x + 1$'],
+      steps: [
+        'Anstieg: $\\dfrac{(1 + h)^2 - 1}{h} = 2 + h \\to 2$.',
+        'Ansatz $y = 2x + n$ mit dem Punkt $(1 \\mid 1)$: $1 = 2 + n$, also $n = -1$.',
+        'Tangente $y = 2x - 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Ball fliegt nach $h(t) = 20t - 5t^2$ ($h$ in m, $t$ in s). Wie schnell steigt er bei $t = 1$?',
+      opts: ['5 m/s', '15 m/s', '10 m/s', '20 m/s'],
+      steps: [
+        '$h(1) = 15$, $h(1 + k) = 20 + 20k - 5(1 + 2k + k^2) = 15 + 10k - 5k^2$',
+        'Differenzenquotient: $\\dfrac{10k - 5k^2}{k} = 10 - 5k$',
+        'Für $k \\to 0$: 10 m/s.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die mittlere Änderungsrate von $f$ auf $[a;\\,b]$ ist null. Was folgt daraus?',
+      opts: ['$f$ ist auf $[a;\\,b]$ konstant.', '$f(a) = f(b) = 0$', '$f$ hat in $[a;\\,b]$ eine Nullstelle.', '$f(a) = f(b)$'],
+      steps: [
+        'Der Zähler $f(b) - f(a)$ muss null sein.',
+        'Also $f(a) = f(b)$; dazwischen darf $f$ steigen und fallen, z. B. $x^2$ auf $[-1;\\,1]$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Tangente an $f(x) = \\sqrt{x}$ bei $x_0 = 4$ ist $t(x) = 2 + \\tfrac{1}{4}(x - 4)$. Welchen Näherungswert liefert sie für $\\sqrt{4{,}1}$?',
+      opts: ['2,25', '2,025', '2,1', '2,0025'],
+      steps: [
+        '$t(4{,}1) = 2 + \\tfrac{1}{4} \\cdot 0{,}1 = 2{,}025$.',
+        'Genau ist $\\sqrt{4{,}1} \\approx 2{,}024\\,85$: Nahe bei $x_0$ ist die Tangente eine sehr gute Näherung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Nahe bei 0 wird $e^x$ durch die Tangente $1 + x$ ersetzt. Wie groß ist der Fehler bei $x = 0{,}1$ ungefähr?',
+      opts: ['etwa 0,005', 'etwa 0,05', 'etwa 0,1', '0'],
+      steps: [
+        'Näherung: $1 + 0{,}1 = 1{,}1$.',
+        'Genau: $e^{0{,}1} \\approx 1{,}105\\,17$.',
+        'Fehler $\\approx 0{,}005$: Er wächst mit dem Abstand zu $x_0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit der Näherung $(1 + x)^n \\approx 1 + n x$ für kleine $x$: Wie groß ist etwa $1{,}01^{10}$?',
+      opts: ['etwa 10,1', 'etwa 1,1', 'etwa 2', 'etwa 1,01'],
+      steps: [
+        '$x = 0{,}01$, $n = 10$: $1 + 10 \\cdot 0{,}01 = 1{,}1$.',
+        'Genau: $1{,}01^{10} \\approx 1{,}1046$. Das ist die Tangente an $(1 + x)^{10}$ bei 0.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In der Physik ersetzt man beim Pendel $\\sin x$ für kleine Winkel (Bogenmaß) durch $x$. Warum ist das sinnvoll?',
+      opts: ['Weil die Sinuskurve eine Gerade ist.', 'Weil $\\sin x = x$ für alle $x$ gilt.', 'Weil $\\sin 0 = 1$ ist.', '$y = x$ ist die Tangente an die Sinuskurve im Ursprung.'],
+      steps: [
+        '$\\sin 0 = 0$ und der Anstieg bei 0 ist $\\cos 0 = 1$: Tangente $y = x$.',
+        'Für $x = 0{,}1$: $\\sin 0{,}1 \\approx 0{,}0998$, also fast gleich.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Gerade nähert $f(x) = x^2$ in der Nähe von $x_0 = 3$ am besten an?',
+      opts: ['die Gerade $y = 3x$', 'die Tangente $y = 6x - 9$', 'die waagerechte Gerade $y = 9$', 'die Sekante durch $(2 \\mid 4)$ und $(4 \\mid 16)$: $y = 6x - 8$'],
+      steps: [
+        'Nur die Tangente stimmt in Funktionswert und Anstieg bei $x_0$ überein.',
+        '$f(3) = 9$, $f^{\\prime}(3) = 6$: $t(x) = 6(x - 3) + 9 = 6x - 9$.',
+        'Die Sekante hat zwar denselben Anstieg, liegt aber um 1 zu hoch.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

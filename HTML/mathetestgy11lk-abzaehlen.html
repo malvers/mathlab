@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Abzählverfahren: Fakultät und Binomialkoeffizient — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w32-abzaehlen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Abzählverfahren: Fakultät und Binomialkoeffizient',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 32 (LB 4) · 20 Aufgaben: Produktregel, mit und ohne Reihenfolge, mit und ohne Wiederholung, Fakultät, Binomialkoeffizient, Lotto · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 32 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* New counting questions; factorial and binomial coefficients from the Grundkurs sheet mathegy11/w33. */
+  questions: [
+    {
+      q: 'Wie viele vierstellige Zahlencodes aus den Ziffern 0 bis 9 gibt es?',
+      opts: ['10 000', '40', '210', '5040'],
+      steps: [
+        'Produktregel: Für jede Stelle 10 Möglichkeiten.',
+        '$10 \\cdot 10 \\cdot 10 \\cdot 10 = 10^4$ (mit Reihenfolge, mit Wiederholung)'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Jemand hat 3 Hosen, 4 Shirts und 2 Paar Schuhe. Wie viele verschiedene Outfits gibt es?',
+      opts: ['12', '24', '9', '48'],
+      steps: [
+        'Produktregel: $3 \\cdot 4 \\cdot 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf wie viele Arten lassen sich 6 verschiedene Bücher nebeneinander ins Regal stellen?',
+      opts: ['46 656', '720', '36', '120'],
+      steps: [
+        'Für den ersten Platz 6 Bücher, für den zweiten 5, …',
+        '$6! = 6 \\cdot 5 \\cdot 4 \\cdot 3 \\cdot 2 \\cdot 1 = 720$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $5!$.',
+      opts: ['60', '15', '25', '120'],
+      steps: [
+        '$5! = 5 \\cdot 4 \\cdot 3 \\cdot 2 \\cdot 1 = 120$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Wert hat $0!$?',
+      opts: ['$\\infty$', '1', '0', 'Nicht definiert'],
+      steps: [
+        'Man legt $0! = 1$ fest, damit Formeln wie $\\binom{n}{0} = \\dfrac{n!}{0! \\cdot n!} = 1$ stimmen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei einem Lauf mit 10 Teilnehmenden werden Gold, Silber und Bronze vergeben. Wie viele Siegerlisten sind möglich?',
+      opts: ['720', '1000', '30', '120'],
+      steps: [
+        'Mit Reihenfolge, ohne Wiederholung: $10 \\cdot 9 \\cdot 8$.',
+        'Ohne Reihenfolge wären es $\\dbinom{10}{3} = 120$ Gruppen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Passwörter aus genau 8 Kleinbuchstaben (26 Buchstaben, ohne Umlaute) gibt es?',
+      opts: ['$\\dbinom{26}{8} \\approx 1{,}6 \\cdot 10^{6}$', '$26 \\cdot 8 = 208$', '$26^8 \\approx 2{,}1 \\cdot 10^{11}$', '$8^{26}$'],
+      steps: [
+        'Mit Reihenfolge, mit Wiederholung: Für jede der 8 Stellen 26 Möglichkeiten.',
+        'Ein Rechner, der eine Milliarde Passwörter pro Sekunde probiert, braucht dafür höchstens etwa 3,5 Minuten.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel wird dreimal geworfen und die Augenzahlen werden der Reihe nach notiert. Wie viele Ergebnisse gibt es?',
+      opts: ['216', '120', '18', '20'],
+      steps: [
+        'Mit Reihenfolge, mit Wiederholung: $6^3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Formel gilt für den Binomialkoeffizienten?',
+      opts: ['$\\dbinom{n}{k} = n^k$', '$\\dbinom{n}{k} = \\dfrac{n}{k}$', '$\\dbinom{n}{k} = \\dfrac{n!}{k!}$', '$\\dbinom{n}{k} = \\dfrac{n!}{k! \\cdot (n - k)!}$'],
+      steps: [
+        '$\\dfrac{n!}{(n - k)!}$ zählt die geordneten Auswahlen.',
+        'Jede Auswahl von $k$ Elementen kommt dabei $k!$-mal vor, deshalb teilt man durch $k!$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\dbinom{5}{2}$.',
+      opts: ['2,5', '10', '20', '5'],
+      steps: [
+        '$\\dbinom{5}{2} = \\dfrac{5!}{2! \\cdot 3!} = \\dfrac{5 \\cdot 4}{2 \\cdot 1}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\dbinom{10}{3}$.',
+      opts: ['120', '30', '720', '210'],
+      steps: [
+        '$\\dfrac{10 \\cdot 9 \\cdot 8}{3 \\cdot 2 \\cdot 1} = \\dfrac{720}{6}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\dbinom{20}{18}$.',
+      opts: ['20', '18', '190', '380'],
+      steps: [
+        '$\\dbinom{n}{k} = \\dbinom{n}{n - k}$, also $\\dbinom{20}{18} = \\dbinom{20}{2}$.',
+        '$\\dfrac{20 \\cdot 19}{2} = 190$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Aus 7 Personen wird ein Ausschuss von 3 Personen gewählt. Wie viele Möglichkeiten gibt es?',
+      opts: ['35', '343', '210', '21'],
+      steps: [
+        'Reihenfolge egal, ohne Wiederholung: $\\dbinom{7}{3}$.',
+        '$\\dfrac{7 \\cdot 6 \\cdot 5}{6} = 35$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum gilt $\\dbinom{10}{7} = \\dbinom{10}{3}$?',
+      opts: ['Weil $7 + 3 = 10$ zufällig passt.', 'Das stimmt nicht.', 'Wer 7 auswählt, legt zugleich die 3 nicht Gewählten fest.', 'Weil $7 \\cdot 3 = 21$ ist.'],
+      steps: [
+        'Allgemein: $\\dbinom{n}{k} = \\dbinom{n}{n - k}$.',
+        'Beide sind 120.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Acht Personen begrüßen sich, jede mit jeder genau einmal per Handschlag. Wie viele Handschläge sind das?',
+      opts: ['64', '16', '28', '56'],
+      steps: [
+        'Jeder Handschlag ist eine Auswahl von 2 Personen ohne Reihenfolge.',
+        '$\\dbinom{8}{2} = \\dfrac{8 \\cdot 7}{2} = 28$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele verschiedene Wörter entstehen durch Umstellen der Buchstaben von ANNA?',
+      opts: ['24', '6', '4', '12'],
+      steps: [
+        '$4! = 24$ Anordnungen, aber Vertauschen der beiden A und der beiden N ändert nichts.',
+        '$\\dfrac{4!}{2! \\cdot 2!} = 6$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Möglichkeiten gibt es beim Lotto „6 aus 49“?',
+      opts: ['$49^6$', '$49 \\cdot 6 = 294$', '$\\dfrac{49!}{43!} \\approx 10^{10}$', '$\\dbinom{49}{6} = 13\\,983\\,816$'],
+      steps: [
+        'Ohne Reihenfolge, ohne Wiederholung.',
+        'Die Wahrscheinlichkeit für 6 Richtige ist also $\\tfrac{1}{13\\,983\\,816} \\approx 7{,}2 \\cdot 10^{-8}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie wahrscheinlich sind beim Lotto „6 aus 49“ genau 3 Richtige?',
+      opts: ['$\\dfrac{1}{2}$', '$\\dfrac{\\binom{6}{3}}{\\binom{49}{6}}$', '$\\dfrac{3}{49}$', '$\\dfrac{\\binom{6}{3} \\cdot \\binom{43}{3}}{\\binom{49}{6}} \\approx 0{,}0177$'],
+      steps: [
+        '3 der 6 Gewinnzahlen und 3 der 43 Nieten werden gezogen.',
+        '$\\dfrac{20 \\cdot 12\\,341}{13\\,983\\,816} \\approx 0{,}0177$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Teilmengen hat eine Menge mit 5 Elementen?',
+      opts: ['10', '120', '32', '25'],
+      steps: [
+        'Jedes Element ist dabei oder nicht: $2^5$.',
+        'Ebenso: $\\dbinom{5}{0} + \\dbinom{5}{1} + \\ldots + \\dbinom{5}{5} = 32$, die Summe der fünften Zeile im Pascalschen Dreieck.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie berechnet man $\\dbinom{4}{2}$ mit dem Pascalschen Dreieck?',
+      opts: ['Als $\\dfrac{4}{2} = 2$', 'Als Produkt $4 \\cdot 2 = 8$', 'Als $4 - 2 = 2$', 'Als Summe der beiden Zahlen darüber: $3 + 3 = 6$'],
+      steps: [
+        'Zeile 3 lautet 1, 3, 3, 1; Zeile 4 lautet 1, 4, 6, 4, 1.',
+        '$\\dbinom{n}{k} = \\dbinom{n - 1}{k - 1} + \\dbinom{n - 1}{k}$'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

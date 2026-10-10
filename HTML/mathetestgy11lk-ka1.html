@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Klausur 11/I: Differentialrechnung, Matrizen, numerische Verfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w21-ka1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Klausur 11/I: Differentialrechnung, Matrizen, numerische Verfahren',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 21 (KL 11/I) · 20 Aufgaben: gemischte Aufgaben zu LB 1, LB 2 und WB 2 zur Klausurvorbereitung · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 21 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-16 from the Grundkurs Klausur sheet (mathegy11/w20), 17-20 Leistungskurs and numerical methods. */
+  questions: [
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to \\infty} \\dfrac{4x^2 - x}{2x^2 + 3}$.',
+      opts: ['0', '4', '2', '$\\infty$'],
+      steps: [
+        'Gleicher Grad: Quotient der Leitkoeffizienten.',
+        '$\\dfrac{4}{2} = 2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 5} \\dfrac{x^2 - 25}{x - 5}$.',
+      opts: ['0', 'Der Grenzwert existiert nicht.', '10', '5'],
+      steps: [
+        '$\\dfrac{(x - 5)(x + 5)}{x - 5} = x + 5$ für $x \\neq 5$',
+        'Grenzwert $5 + 5 = 10$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die mittlere Änderungsrate von $f(x) = x^2 + 1$ im Intervall $[1;\\,4]$.',
+      opts: ['5', '8', '3', '15'],
+      steps: [
+        '$f(4) = 17$, $f(1) = 2$',
+        '$\\dfrac{17 - 2}{4 - 1} = 5$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 4x^3 - \\dfrac{2}{x} + \\sqrt{x}$.',
+      opts: ['$f^{\\prime}(x) = 12x^2 + \\dfrac{2}{x^2} + 2\\sqrt{x}$', '$f^{\\prime}(x) = 12x^2 - \\dfrac{2}{x^2} + \\dfrac{1}{2\\sqrt{x}}$', '$f^{\\prime}(x) = 12x^2 + \\dfrac{2}{x^2} + \\dfrac{1}{2\\sqrt{x}}$', '$f^{\\prime}(x) = 12x^2 + 2\\ln x + \\dfrac{1}{2\\sqrt{x}}$'],
+      steps: [
+        '$-\\dfrac{2}{x} = -2x^{-1}$, abgeleitet $2x^{-2}$.',
+        '$\\sqrt{x} = x^{\\frac{1}{2}}$, abgeleitet $\\dfrac{1}{2\\sqrt{x}}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^2 e^x$.',
+      opts: ['$f^{\\prime}(x) = 2x e^{x-1}$', '$f^{\\prime}(x) = (x^2 + 2x)e^x$', '$f^{\\prime}(x) = 2x e^x$', '$f^{\\prime}(x) = x^2 e^x$'],
+      steps: [
+        'Produktregel: $2x \\cdot e^x + x^2 \\cdot e^x$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sin(3x - 1)$.',
+      opts: ['$f^{\\prime}(x) = 3\\cos(3x - 1)$', '$f^{\\prime}(x) = -3\\cos(3x - 1)$', '$f^{\\prime}(x) = 3\\sin(3x - 1)$', '$f^{\\prime}(x) = \\cos(3x - 1)$'],
+      steps: [
+        'Kettenregel: äußere Ableitung $\\cos(3x - 1)$ mal innere Ableitung 3.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\ln(2x + 1)$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{2}{2x + 1}$', '$f^{\\prime}(x) = 2\\ln(2x + 1)$', '$f^{\\prime}(x) = \\dfrac{1}{2x + 1}$', '$f^{\\prime}(x) = \\dfrac{1}{2x}$'],
+      steps: [
+        '$\\dfrac{1}{2x + 1} \\cdot 2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Tangente an $f(x) = x^2 - 3x$ an der Stelle $x_0 = 2$?',
+      opts: ['$y = x - 2$', '$y = 2x - 6$', '$y = -2x + 2$', '$y = x - 4$'],
+      steps: [
+        '$f(2) = 4 - 6 = -2$; $f^{\\prime}(x) = 2x - 3$, $f^{\\prime}(2) = 1$',
+        '$y = 1 \\cdot (x - 2) - 2 = x - 4$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Extrempunkte von $f(x) = x^3 - 6x^2 + 9x$.',
+      opts: ['$H(0 \\mid 0)$ und $T(3 \\mid 0)$', '$H(1 \\mid 4)$ und $T(3 \\mid 0)$', '$H(3 \\mid 0)$ und $T(1 \\mid 4)$', '$H(1 \\mid 4)$ und $T(3 \\mid 4)$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 12x + 9 = 3(x - 1)(x - 3)$',
+        '$f^{\\prime\\prime}(x) = 6x - 12$: $f^{\\prime\\prime}(1) = -6$ (Hochpunkt), $f^{\\prime\\prime}(3) = 6$ (Tiefpunkt).',
+        '$f(1) = 4$, $f(3) = 27 - 54 + 27 = 0$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Wendepunkt von $f(x) = x^3 - 6x^2 + 9x$.',
+      opts: ['$W(1 \\mid 4)$', '$W(0 \\mid 0)$', '$W(2 \\mid 2)$', '$W(2 \\mid 0)$'],
+      steps: [
+        '$f^{\\prime\\prime}(x) = 6x - 12 = 0 \\Rightarrow x = 2$',
+        '$f(2) = 8 - 24 + 18 = 2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Asymptoten hat $f(x) = \\dfrac{3x}{x + 2}$?',
+      opts: ['$x = 2$ und $y = 3$', '$x = -2$ und $y = 0$', '$x = 0$ und $y = 3$', '$x = -2$ und $y = 3$'],
+      steps: [
+        'Polstelle: Nenner null bei $x = -2$.',
+        'Gleicher Grad: $y = \\dfrac{3}{1} = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$f^{\\prime}$ hat bei $x = 2$ eine Nullstelle mit Vorzeichenwechsel von plus nach minus. Was gilt für $f$?',
+      opts: ['$f$ hat bei $x = 2$ eine Nullstelle.', '$f$ hat bei $x = 2$ einen Wendepunkt.', '$f$ hat bei $x = 2$ einen Tiefpunkt.', '$f$ hat bei $x = 2$ einen Hochpunkt.'],
+      steps: [
+        'Vorher steigt $f$, danach fällt $f$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$f(x) = ax^3 + bx$ hat den Tiefpunkt $T(1 \\mid -2)$. Bestimme $a$ und $b$.',
+      opts: ['$a = 1$, $b = 3$', '$a = -1$, $b = 3$', '$a = 2$, $b = -4$', '$a = 1$, $b = -3$'],
+      steps: [
+        '$f(1) = a + b = -2$, $f^{\\prime}(1) = 3a + b = 0$',
+        '$2a = 2 \\Rightarrow a = 1$, $b = -3$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang 36 cm. Wie groß ist sein Flächeninhalt höchstens?',
+      opts: ['81 cm²', '324 cm²', '72 cm²', '36 cm²'],
+      steps: [
+        '$y = 18 - x$, $A(x) = x(18 - x)$',
+        '$A^{\\prime}(x) = 18 - 2x = 0 \\Rightarrow x = 9$; $A = 81$ cm²'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 & -2 \\\\ 3 & 0 \\end{pmatrix} \\cdot \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 0 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 3 \\end{pmatrix}$'],
+      steps: [
+        '$1 \\cdot 2 + (-2) \\cdot 1 = 0$',
+        '$3 \\cdot 2 + 0 \\cdot 1 = 6$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Nach den Umformungen steht in einem 3×3-System die Zeile $(0 \\;\\; 0 \\;\\; 0 \\mid 0)$, die anderen beiden Zeilen sind widerspruchsfrei. Was folgt?',
+      opts: ['Das System hat genau eine Lösung.', 'Alle Unbekannten sind null.', 'Das System hat keine Lösung.', 'Das System hat unendlich viele Lösungen.'],
+      steps: [
+        'Die Zeile $0 = 0$ ist immer wahr und liefert keine Information.',
+        'Es bleiben zwei Gleichungen für drei Unbekannte: eine Unbekannte ist frei.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x\\,e^{-x^2}$.',
+      opts: ['$f^{\\prime}(x) = -2x^2 e^{-x^2}$', '$f^{\\prime}(x) = (1 - 2x^2)\\,e^{-x^2}$', '$f^{\\prime}(x) = e^{-2x}$', '$f^{\\prime}(x) = (1 + 2x^2)\\,e^{-x^2}$'],
+      steps: [
+        'Produktregel und Kettenregel: $(e^{-x^2})^{\\prime} = -2x\\,e^{-x^2}$.',
+        '$1 \\cdot e^{-x^2} + x \\cdot (-2x)\\,e^{-x^2}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Newton-Verfahren für $f(x) = x^2 - 5$ mit $x_0 = 2$. Wie groß ist $x_1$?',
+      opts: ['2,25', '2,236', '1,75', '2,5'],
+      steps: [
+        '$x_1 = x_0 - \\dfrac{f(x_0)}{f^{\\prime}(x_0)} = 2 - \\dfrac{-1}{4}$.',
+        '$x_1 = 2{,}25$; der Grenzwert ist $\\sqrt{5} \\approx 2{,}236$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Bisektionsschritte braucht man mindestens, damit das Startintervall $[1;\\,2]$ kürzer als 0,001 wird?',
+      opts: ['100', '9', '10', '1000'],
+      steps: [
+        'Nach $n$ Schritten ist die Länge $\\tfrac{1}{2^n}$.',
+        '$\\tfrac{1}{2^9} \\approx 0{,}00195$, $\\tfrac{1}{2^{10}} \\approx 0{,}00098$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Iteration $x_{n+1} = 0{,}5\\,x_n + 1$ startet bei $x_0 = 0$. Was passiert?',
+      opts: ['Sie divergiert.', 'Sie konvergiert gegen den Fixpunkt 2, weil $|\\varphi^{\\prime}| = 0{,}5 < 1$.', 'Sie konvergiert gegen 1.', 'Sie springt zwischen 0 und 1 hin und her.'],
+      steps: [
+        'Fixpunkt: $x = 0{,}5x + 1 \\Leftrightarrow x = 2$.',
+        'Folge: 0; 1; 1,5; 1,75; … Der Abstand zu 2 halbiert sich in jedem Schritt.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

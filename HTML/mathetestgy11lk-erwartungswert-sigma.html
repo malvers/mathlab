@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Erwartungswert, Varianz und Standardabweichung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w36-erwartungswert-sigma',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Erwartungswert, Varianz und Standardabweichung',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 36 (LB 4) · 20 Aufgaben: E(X) = n · p, V(X) = n · p · (1 − p), σ, Histogramme, σ-Umgebungen, Mindestanzahl von Versuchen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 36 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-16 from the Grundkurs sheet (mathegy11/w36), 17-20 Leistungskurs. */
+  questions: [
+    {
+      q: '$X$ ist binomialverteilt mit $n = 50$ und $p = 0{,}2$. Bestimme $E(X)$.',
+      opts: ['$E(X) = 0{,}2$', '$E(X) = 8$', '$E(X) = 10$', '$E(X) = 40$'],
+      steps: [
+        '$E(X) = n \\cdot p = 50 \\cdot 0{,}2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Mit denselben Werten: Bestimme die Varianz $V(X)$.',
+      opts: ['$V(X) = 2{,}83$', '$V(X) = 0{,}16$', '$V(X) = 10$', '$V(X) = 8$'],
+      steps: [
+        '$V(X) = n \\cdot p \\cdot (1 - p) = 50 \\cdot 0{,}2 \\cdot 0{,}8$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Mit denselben Werten: Bestimme die Standardabweichung $\\sigma$.',
+      opts: ['$\\sigma = 64$', '$\\sigma \\approx 3{,}16$', '$\\sigma = 8$', '$\\sigma \\approx 2{,}83$'],
+      steps: [
+        '$\\sigma = \\sqrt{V(X)} = \\sqrt{8} \\approx 2{,}83$'
+      ],
+      solution: 3
+    },
+    {
+      q: '$n = 100$, $p = 0{,}5$. Bestimme $E(X)$ und $\\sigma$.',
+      opts: ['$E(X) = 25$, $\\sigma = 5$', '$E(X) = 50$, $\\sigma = 25$', '$E(X) = 50$, $\\sigma = 0{,}5$', '$E(X) = 50$, $\\sigma = 5$'],
+      steps: [
+        '$E(X) = 100 \\cdot 0{,}5 = 50$',
+        '$\\sigma = \\sqrt{100 \\cdot 0{,}5 \\cdot 0{,}5} = \\sqrt{25} = 5$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Erwartungswert hat ein einzelnes Bernoulli-Experiment ($n = 1$)?',
+      opts: ['$E(X) = 1$', '$E(X) = 0{,}5$', '$E(X) = p$', '$E(X) = 1 - p$'],
+      steps: [
+        '$E(X) = 0 \\cdot (1 - p) + 1 \\cdot p = p$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel wird 60-mal geworfen. Wie viele Sechsen erwartet man?',
+      opts: ['6', '10', '1', '60'],
+      steps: [
+        '$60 \\cdot \\dfrac{1}{6} = 10$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist dabei die Standardabweichung der Anzahl der Sechsen?',
+      opts: ['etwa 2,89', 'etwa 8,33', 'etwa 1,67', '10'],
+      steps: [
+        '$V(X) = 60 \\cdot \\dfrac{1}{6} \\cdot \\dfrac{5}{6} = \\dfrac{50}{6} \\approx 8{,}33$',
+        '$\\sigma = \\sqrt{8{,}33} \\approx 2{,}89$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Test hat 20 Fragen mit je 4 Antworten. Wie viele richtige Antworten erwartet man beim Raten?',
+      opts: ['10', '5', '15', '4'],
+      steps: [
+        '$20 \\cdot \\dfrac{1}{4} = 5$'
+      ],
+      solution: 1
+    },
+    {
+      q: '2 % der Bauteile sind fehlerhaft. Wie viele fehlerhafte erwartet man unter 1000?',
+      opts: ['200', '2', '20', '980'],
+      steps: [
+        '$1000 \\cdot 0{,}02 = 20$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist dabei die Standardabweichung?',
+      opts: ['etwa 4,43', 'etwa 19,6', 'etwa 0,14', '20'],
+      steps: [
+        '$\\sigma = \\sqrt{1000 \\cdot 0{,}02 \\cdot 0{,}98} = \\sqrt{19{,}6} \\approx 4{,}43$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine binomialverteilte Zufallsgröße hat $n = 40$ und $E(X) = 12$. Wie groß ist $p$?',
+      opts: ['$p = 0{,}4$', '$p = 0{,}3$', '$p = 3{,}33$', '$p = 0{,}12$'],
+      steps: [
+        '$n \\cdot p = 12 \\Rightarrow p = \\dfrac{12}{40}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Es gilt $E(X) = 6$ und $V(X) = 4{,}2$. Bestimme $p$ und $n$.',
+      opts: ['$p = 0{,}6$, $n = 10$', '$p = 0{,}3$, $n = 20$', '$p = 0{,}7$, $n = 20$', '$p = 0{,}3$, $n = 6$'],
+      steps: [
+        '$\\dfrac{V(X)}{E(X)} = 1 - p = \\dfrac{4{,}2}{6} = 0{,}7$, also $p = 0{,}3$.',
+        '$n = \\dfrac{6}{0{,}3} = 20$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welches Intervall ist die $\\sigma$-Umgebung um den Erwartungswert für $n = 100$, $p = 0{,}5$?',
+      opts: ['$[45;\\,55]$', '$[49;\\,51]$', '$[25;\\,75]$', '$[40;\\,60]$'],
+      steps: [
+        '$E(X) = 50$, $\\sigma = 5$',
+        '$[50 - 5;\\,50 + 5]$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was zeigt eine größere Standardabweichung im Histogramm?',
+      opts: ['Die Balken verteilen sich breiter um den Erwartungswert.', 'Der höchste Balken liegt weiter rechts.', 'Das Histogramm ist symmetrisch.', 'Alle Balken sind höher.'],
+      steps: [
+        '$\\sigma$ misst die Streuung um $E(X)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für festes $n$: Bei welchem $p$ ist die Varianz am größten?',
+      opts: ['Bei $p = 0$', 'Bei $p = 1$', 'Bei $p = 0{,}1$', 'Bei $p = 0{,}5$'],
+      steps: [
+        '$p(1 - p)$ ist eine nach unten geöffnete Parabel mit Scheitel bei $p = 0{,}5$.',
+        'Bei $p = 0$ oder $p = 1$ gibt es gar keine Streuung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was passiert mit $E(X)$ und $\\sigma$, wenn man $n$ vervierfacht (gleiches $p$)?',
+      opts: ['Beide verdoppeln sich.', '$E(X)$ verdoppelt sich, $\\sigma$ vervierfacht sich.', '$E(X)$ vervierfacht sich, $\\sigma$ verdoppelt sich.', 'Beide vervierfachen sich.'],
+      steps: [
+        '$E(X) = n \\cdot p$ wächst linear mit $n$.',
+        '$\\sigma = \\sqrt{n \\cdot p (1 - p)}$ wächst mit $\\sqrt{n}$, also $\\sqrt{4} = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie oft muss man mindestens würfeln, um mit mindestens 99 % Wahrscheinlichkeit wenigstens eine Sechs zu erhalten?',
+      opts: ['13-mal', '99-mal', '26-mal', '25-mal'],
+      steps: [
+        '$1 - \\left(\\tfrac{5}{6}\\right)^n \\geq 0{,}99 \\Leftrightarrow \\left(\\tfrac{5}{6}\\right)^n \\leq 0{,}01$.',
+        '$n \\geq \\dfrac{\\ln 0{,}01}{\\ln \\frac{5}{6}} \\approx 25{,}3$; das Ungleichheitszeichen dreht sich, weil $\\ln \\tfrac{5}{6} < 0$ ist.'
+      ],
+      solution: 2
+    },
+    {
+      q: '2 % der Teile sind defekt. Wie viele Teile muss man mindestens prüfen, um mit mindestens 95 % Wahrscheinlichkeit wenigstens ein defektes zu finden?',
+      opts: ['95', '148', '50', '149'],
+      steps: [
+        '$1 - 0{,}98^n \\geq 0{,}95 \\Leftrightarrow 0{,}98^n \\leq 0{,}05$.',
+        '$n \\geq \\dfrac{\\ln 0{,}05}{\\ln 0{,}98} \\approx 148{,}3$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine binomialverteilte Zufallsgröße hat $E(X) = 20$ und $\\sigma = 4$. Bestimme $n$ und $p$.',
+      opts: ['$n = 100$, $p = 0{,}2$', '$n = 25$, $p = 0{,}8$', '$n = 20$, $p = 1$', '$n = 80$, $p = 0{,}25$'],
+      steps: [
+        '$V(X) = \\sigma^2 = 16 = n p (1 - p) = 20\\,(1 - p)$, also $1 - p = 0{,}8$.',
+        '$p = 0{,}2$ und $n = \\tfrac{20}{0{,}2} = 100$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $n$ ist bei $p = 0{,}5$ die Standardabweichung $\\sigma = 3$?',
+      opts: ['$n = 18$', '$n = 36$', '$n = 12$', '$n = 6$'],
+      steps: [
+        '$\\sigma^2 = n \\cdot 0{,}5 \\cdot 0{,}5 = \\tfrac{n}{4} = 9$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

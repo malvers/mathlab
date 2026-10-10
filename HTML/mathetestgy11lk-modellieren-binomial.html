@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Modellieren mit der Binomialverteilung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w37-modellieren-binomial',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Modellieren mit der Binomialverteilung',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 37 (LB 4) · 20 Aufgaben: Modellannahmen prüfen, Keimraten, Qualitätskontrolle, vermischte Übung zu LB 3 und LB 4 · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 37 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-8 new (modelling), 9-20 mixed practice from the Grundkurs sheets mathegy11/w26, w27, w28, w30, w31, w34, w35. */
+  questions: [
+    {
+      q: 'Aus einer Lieferung von nur 20 Teilen werden 5 ohne Zurücklegen geprüft. Warum ist die Binomialverteilung hier nur eine grobe Näherung?',
+      opts: ['Weil 5 Teile zu viele sind.', 'Sie ist exakt richtig.', 'Weil defekte Teile nicht gezählt werden dürfen.', 'Ohne Zurücklegen ändert sich die Fehlerquote von Zug zu Zug; bei 20 Teilen merklich.'],
+      steps: [
+        'Eine Bernoulli-Kette braucht eine konstante Trefferwahrscheinlichkeit und unabhängige Stufen.',
+        'Ist ein defektes Teil gezogen, sinkt der Anteil der defekten im Rest.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wann darf man Ziehen ohne Zurücklegen näherungsweise als Bernoulli-Kette rechnen?',
+      opts: ['nur bei genau zwei Kugeln', 'wenn die Gesamtzahl sehr groß gegenüber dem Stichprobenumfang ist', 'nie', 'wenn $p = 0{,}5$ ist'],
+      steps: [
+        'Beispiel: 10 Teile aus einer Produktion von 100 000 Stück.',
+        'Die Trefferwahrscheinlichkeit ändert sich dann kaum.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei einer Grippewelle werden 25 Schülerinnen und Schüler derselben Klasse auf Erkrankung untersucht. Warum passt die Binomialverteilung schlecht?',
+      opts: ['Sie passt perfekt.', 'Weil 25 eine ungerade Zahl ist.', 'Weil es mehr als zwei Ergebnisse gibt.', 'Wegen Ansteckung sind die Erkrankungen nicht unabhängig.'],
+      steps: [
+        'Wer neben einer kranken Person sitzt, erkrankt eher.',
+        'Die Unabhängigkeit der Stufen ist verletzt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Saatgut keimt laut Packung mit 85 %. Es werden 20 Samen gesät. Wie viele Keimlinge erwartet man, und wie wahrscheinlich keimen alle?',
+      opts: ['20; etwa 0,039', '17; etwa 0,039', '17; etwa 0,85', '15; etwa 0,15'],
+      steps: [
+        '$E(X) = 20 \\cdot 0{,}85 = 17$.',
+        '$P(X = 20) = 0{,}85^{20} \\approx 0{,}039$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Gärtner braucht mindestens 18 Pflanzen und sät 20 Samen ($p = 0{,}85$). Wie wahrscheinlich reicht das?',
+      opts: ['etwa 0,039', 'etwa 0,85', 'etwa 0,595', 'etwa 0,405'],
+      steps: [
+        '$P(X \\geq 18) = P(X = 18) + P(X = 19) + P(X = 20)$.',
+        '$\\approx 0{,}229 + 0{,}137 + 0{,}039$; sicherer wäre es, mehr Samen zu säen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei einer Produktion sind 5 % der Teile defekt. Eine Stichprobe von 50 Teilen wird abgelehnt, wenn mehr als 4 defekt sind. Wie wahrscheinlich wird eine solche Stichprobe abgelehnt?',
+      opts: ['etwa 0,05', 'etwa 0,25', 'etwa 0,104', 'etwa 0,896'],
+      steps: [
+        '$P(X \\geq 5) = 1 - P(X \\leq 4)$ mit $n = 50$, $p = 0{,}05$.',
+        'Mit dem CAS: $P(X \\leq 4) \\approx 0{,}896$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Von 100 Samen ($p = 0{,}9$ laut Packung) keimen nur 75. Was spricht gegen die Angabe auf der Packung?',
+      opts: ['Man darf nur 10 Samen prüfen.', 'Nichts, Zufall ist Zufall.', 'Erwartet sind 90 mit $\\sigma = 3$; 75 liegt 5 Standardabweichungen darunter und ist dann sehr unwahrscheinlich.', '75 ist mehr als erwartet.'],
+      steps: [
+        '$\\sigma = \\sqrt{100 \\cdot 0{,}9 \\cdot 0{,}1} = 3$.',
+        'Ob man die Angabe ablehnt, entscheidet man in Jahrgangsstufe 12 mit einem Signifikanztest.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bildung für nachhaltige Entwicklung: Warum testen Saatgutbetriebe die Keimrate an Stichproben, statt jedes Korn zu prüfen?',
+      opts: ['Ein Keimtest verbraucht das Korn; aus der Stichprobe schätzt man die Rate der ganzen Partie.', 'Weil jede Stichprobe genau die Packungsangabe liefert.', 'Weil das Gesetz es verbietet.', 'Weil Körner nicht keimen können.'],
+      steps: [
+        'Der statistische Zugang: relative Häufigkeit in einer großen Stichprobe.',
+        'Je größer die Stichprobe, desto verlässlicher die Schätzung (Gesetz der großen Zahlen).'
+      ],
+      solution: 0
+    },
+    {
+      q: '90 % der Samen einer Sorte keimen. Man sät 10 Samen. Was ist die Zufallsgröße $X$ und wie ist sie verteilt?',
+      opts: ['$X$: Anzahl der Samen, immer 10', '$X$: Anteil der Samen, gleichverteilt', '$X$: Keimdauer, binomialverteilt mit $n = 10$', '$X$: Anzahl der keimenden Samen, binomialverteilt mit $n = 10$, $p = 0{,}9$'],
+      steps: [
+        'Jeder Samen ist ein Bernoulli-Experiment: keimt oder keimt nicht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Situation ist NICHT binomialverteilt?',
+      opts: ['Aus einer Urne mit 3 roten und 2 blauen Kugeln dreimal ohne Zurücklegen ziehen, $X$: Anzahl rot', '20 Münzwürfe, $X$: Anzahl Kopf', 'Fünf Fragen raten, $X$: Anzahl richtig', 'Zehnmal würfeln, $X$: Anzahl Sechsen'],
+      steps: [
+        'Ohne Zurücklegen bei so wenigen Kugeln ändert sich $p$ deutlich.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Von 10 Samen ($p = 0{,}9$): Wie wahrscheinlich keimen alle?',
+      opts: ['etwa 0,349', '0,9', 'etwa 0,1', 'etwa 0,387'],
+      steps: [
+        '$0{,}9^{10} \\approx 0{,}349$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Von 10 Samen ($p = 0{,}9$): Wie wahrscheinlich keimen genau 9?',
+      opts: ['etwa 0,387', '0,09', '0,9', 'etwa 0,349'],
+      steps: [
+        '$\\dbinom{10}{9} \\cdot 0{,}9^9 \\cdot 0{,}1 = 0{,}9^9 \\approx 0{,}387$',
+        'Also ist „genau 9“ wahrscheinlicher als „alle 10“.'
+      ],
+      solution: 0
+    },
+    {
+      q: '20 % der Menschen sind Linkshänder. In einer Gruppe von 10: Wie wahrscheinlich ist höchstens ein Linkshänder?',
+      opts: ['etwa 0,376', 'etwa 0,624', 'etwa 0,268', 'etwa 0,107'],
+      steps: [
+        '$P(X = 0) = 0{,}8^{10} \\approx 0{,}107$, $P(X = 1) = 10 \\cdot 0{,}2 \\cdot 0{,}8^9 \\approx 0{,}268$',
+        'Zusammen $\\approx 0{,}376$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie oft muss man mindestens würfeln, um mit mindestens 90 % Wahrscheinlichkeit wenigstens eine Sechs zu haben?',
+      opts: ['9-mal', '60-mal', '13-mal', '6-mal'],
+      steps: [
+        '$1 - \\left(\\dfrac{5}{6}\\right)^n \\geq 0{,}9 \\Leftrightarrow \\left(\\dfrac{5}{6}\\right)^n \\leq 0{,}1$',
+        '$n \\geq \\dfrac{\\ln 0{,}1}{\\ln \\frac{5}{6}} \\approx 12{,}6$, also $n = 13$.',
+        'Beim Teilen durch $\\ln \\frac{5}{6} < 0$ dreht sich das Relationszeichen.'
+      ],
+      solution: 2
+    },
+    {
+      q: '60 % der Schülerinnen und Schüler einer großen Schule kommen mit dem Bus. Zwei werden zufällig gewählt. Wie wahrscheinlich kommen beide mit dem Bus?',
+      opts: ['0,48', '1,2', '0,36', '0,6'],
+      steps: [
+        'Bei einer großen Schule ändert die erste Auswahl den Anteil kaum: wie mit Zurücklegen.',
+        '$0{,}6 \\cdot 0{,}6 = 0{,}36$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Flugzeug ist zur Zeit $t = 0$ in $(0 \\mid 0 \\mid 1)$ und bewegt sich pro Minute um $\\begin{pmatrix} 6 \\\\ 8 \\\\ 0 \\end{pmatrix}$ (in km). Wo ist es nach 5 Minuten?',
+      opts: ['$(11 \\mid 13 \\mid 6)$', '$(30 \\mid 40 \\mid 5)$', '$(30 \\mid 40 \\mid 1)$', '$(6 \\mid 8 \\mid 1)$'],
+      steps: [
+        '$\\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix} + 5 \\cdot \\begin{pmatrix} 6 \\\\ 8 \\\\ 0 \\end{pmatrix}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie schnell fliegt dieses Flugzeug?',
+      opts: ['14 km pro Minute', '10 km pro Minute, also 600 km/h', '100 km pro Minute', '48 km pro Minute'],
+      steps: [
+        'Betrag des Richtungsvektors: $\\sqrt{36 + 64} = 10$.',
+        '10 km/min mal 60 = 600 km/h.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Flugzeuge fliegen auf Bahnen, die sich schneiden. Stoßen sie zusammen?',
+      opts: ['Nur wenn die Bahnen senkrecht sind.', 'Nur wenn beide zur selben Zeit im Schnittpunkt sind.', 'Ja, immer.', 'Nein, nie.'],
+      steps: [
+        'Der Bahnparameter ist die Zeit.',
+        'Kollision nur, wenn im Schnittpunkt $t = s$ gilt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Liegt $D(0 \\mid 2 \\mid 5)$ in der Ebene durch $A(0 \\mid 0 \\mid 3)$, $B(4 \\mid 0 \\mid 3)$, $C(4 \\mid 2 \\mid 5)$?',
+      opts: ['Nein.', 'Ja, für $r = 1$, $s = 1$.', 'Ja, für $r = 0$, $s = 1$.', 'Ja, für $r = -1$, $s = 1$.'],
+      steps: [
+        '$4r + 4s = 0$, $2s = 2$, $3 + 2s = 5$.',
+        '$s = 1$, dann $r = -1$; alle Gleichungen passen. $ABCD$ ist also ein ebenes Viereck.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Flugzeug startet im Ursprung und steigt je Minute um $\\begin{pmatrix} 4 \\\\ 3 \\\\ 1 \\end{pmatrix}$ (in km). Wann erreicht es die Wolkenschicht $z = 2$, und wo?',
+      opts: ['Nie', 'Nach 2 Minuten in $(8 \\mid 6 \\mid 2)$', 'Nach 2 Minuten in $(4 \\mid 3 \\mid 2)$', 'Nach 1 Minute in $(4 \\mid 3 \\mid 1)$'],
+      steps: [
+        '$t = 2$ aus der $z$-Koordinate.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

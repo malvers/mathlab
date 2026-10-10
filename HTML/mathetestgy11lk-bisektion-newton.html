@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Grafisch lösen, Bisektion und Newton-Verfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w18-bisektion-newton',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Grafisch lösen, Bisektion und Newton-Verfahren',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 18 (WB 2) · 20 Aufgaben: Vorzeichenwechsel, Intervallhalbierung und Genauigkeit, Tangentenidee, Konvergenz und Versagen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 18 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-10 from the Grundkurs sheet mathegy11/w21 (bisection), 11-20 from mathegy11/w22 (Newton). */
+  questions: [
+    {
+      q: 'Warum lässt sich $e^x = 3 - x$ nicht mit den bekannten Umformungen nach $x$ auflösen?',
+      opts: ['Man darf $e^x$ nicht logarithmieren.', '$x$ steht einmal im Exponenten und einmal als Summand; Logarithmieren hilft nicht.', 'Die Gleichung hat keine Lösung.', 'Doch, mit $x = \\ln 3$.'],
+      steps: [
+        '$\\ln(3 - x) = x$ hat dasselbe Problem.',
+        'Solche Gleichungen löst man grafisch oder numerisch.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie formt man $e^x = 3 - x$ in eine Nullstellenaufgabe um?',
+      opts: ['$h(x) = e^x + x - 3 = 0$', '$h(x) = e^x - x - 3 = 0$', '$h(x) = e^{3 - x} = 0$', '$h(x) = e^x \\cdot (3 - x) = 0$'],
+      steps: [
+        'Alles auf eine Seite bringen.',
+        'Die Lösung der Gleichung ist die Nullstelle von $h$.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$h(x) = e^x + x - 3$: Es gilt $h(0) = -2$ und $h(1) \\approx 0{,}72$. Was folgt?',
+      opts: ['Die Nullstelle ist genau 0,5.', 'Es folgt nichts.', 'Zwischen 0 und 1 liegt mindestens eine Nullstelle.', 'Zwischen 0 und 1 liegt keine Nullstelle.'],
+      steps: [
+        '$h$ ist stetig und wechselt das Vorzeichen.',
+        'Der Graph muss die $x$-Achse dazwischen kreuzen (Nullstellensatz).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was braucht die Bisektionsmethode am Start?',
+      opts: ['Einen Startwert in der Nähe der Nullstelle, sonst nichts.', 'Die Ableitung der Funktion.', 'Eine Funktion ohne Extrema.', 'Eine stetige Funktion und ein Intervall $[a;\\,b]$ mit $h(a) \\cdot h(b) < 0$.'],
+      steps: [
+        '$h(a) \\cdot h(b) < 0$ heißt: verschiedene Vorzeichen an den Rändern.',
+        'Ableitungen braucht erst das Newton-Verfahren.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bisektion für $h(x) = e^x + x - 3$ auf $[0;\\,1]$: Es ist $h(0{,}5) \\approx -0{,}85$. Wie heißt das neue Intervall?',
+      opts: ['$[0{,}25;\\,0{,}75]$', '$[0;\\,0{,}5]$', '$[0{,}5;\\,1]$', '$[0;\\,1]$'],
+      steps: [
+        '$h(0{,}5) < 0$ und $h(1) > 0$: Der Vorzeichenwechsel liegt rechts.',
+        'Neues Intervall $[0{,}5;\\,1]$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Weiter: $h(0{,}75) \\approx -0{,}13$. Wie heißt das neue Intervall?',
+      opts: ['$[0;\\,0{,}75]$', '$[0{,}625;\\,0{,}875]$', '$[0{,}5;\\,0{,}75]$', '$[0{,}75;\\,1]$'],
+      steps: [
+        '$h(0{,}75) < 0$, $h(1) > 0$.',
+        'Die Nullstelle liegt in $[0{,}75;\\,1]$; tatsächlich bei etwa 0,79.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist nach einem Bisektionsschritt immer garantiert?',
+      opts: ['Der Mittelpunkt ist näher an der Nullstelle als vorher.', 'Das Intervall wird um 0,1 kürzer.', 'Man hat die Nullstelle exakt gefunden.', 'Das Intervall mit der Nullstelle ist halb so lang wie vorher.'],
+      steps: [
+        'Jeder Schritt halbiert die Intervallbreite.',
+        'Ob der neue Mittelpunkt näher liegt, ist nicht garantiert, die Einschachtelung aber schon.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Startintervall hat die Länge 1. Wie lang ist es nach 10 Bisektionsschritten?',
+      opts: ['$\\dfrac{1}{1024}$, also kleiner als 0,001', '$\\dfrac{1}{100}$', '$\\dfrac{1}{20}$', '$\\dfrac{1}{10}$'],
+      steps: [
+        'Jeder Schritt halbiert: $\\left(\\dfrac{1}{2}\\right)^{10} = \\dfrac{1}{1024}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Schritte braucht man mindestens, damit ein Intervall der Länge 1 kürzer als 0,01 wird?',
+      opts: ['100', '5', '7', '10'],
+      steps: [
+        '$2^6 = 64 < 100$, $2^7 = 128 > 100$.',
+        'Nach 7 Schritten ist die Länge $\\dfrac{1}{128} < 0{,}01$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum findet die Bisektion die Nullstelle von $h(x) = (x - 1)^2$ nicht?',
+      opts: ['Weil die Nullstelle eine ganze Zahl ist.', 'Weil $h$ nicht stetig ist.', 'Sie findet sie, nur langsam.', '$h$ hat bei der doppelten Nullstelle keinen Vorzeichenwechsel.'],
+      steps: [
+        '$h(x) \\geq 0$ überall: Es gibt kein Intervall mit verschiedenen Vorzeichen.',
+        'Berührpunkte bleiben der Bisektion verborgen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Idee steckt hinter dem Newton-Verfahren?',
+      opts: ['Man ersetzt den Graphen durch seine Tangente und nimmt deren Nullstelle als neue Näherung.', 'Man halbiert ein Intervall mit Vorzeichenwechsel.', 'Man liest die Nullstelle aus einer Wertetabelle ab.', 'Man ersetzt den Graphen durch eine Sekante durch zwei Randpunkte.'],
+      steps: [
+        'Die Tangente liegt in der Nähe des Berührpunkts dicht am Graphen.',
+        'Ihre Nullstelle ist leicht zu berechnen und meist eine bessere Näherung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Iterationsvorschrift des Newton-Verfahrens?',
+      opts: ['$x_{n+1} = x_n - \\dfrac{f(x_n)}{f^{\\prime}(x_n)}$', '$x_{n+1} = x_n - \\dfrac{f^{\\prime}(x_n)}{f(x_n)}$', '$x_{n+1} = x_n + \\dfrac{f(x_n)}{f^{\\prime}(x_n)}$', '$x_{n+1} = \\dfrac{x_n + f(x_n)}{2}$'],
+      steps: [
+        'Tangente in $x_n$: $y = f(x_n) + f^{\\prime}(x_n)(x - x_n)$.',
+        '$y = 0$ setzen und nach $x$ auflösen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was muss die Funktion für das Newton-Verfahren erfüllen?',
+      opts: ['Sie muss punktsymmetrisch sein.', 'Sie muss ein Polynom sein.', 'Sie muss differenzierbar sein, und $f^{\\prime}(x_n)$ darf nicht null werden.', 'Sie muss an den Intervallrändern verschiedene Vorzeichen haben.'],
+      steps: [
+        'Die Formel braucht $f^{\\prime}(x_n)$ im Nenner.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Newton für $f(x) = x^2 - 2$ mit $x_0 = 1$. Wie groß ist $x_1$?',
+      opts: ['1,5', '2', '1,25', '0,5'],
+      steps: [
+        '$f(1) = -1$, $f^{\\prime}(x) = 2x$, $f^{\\prime}(1) = 2$',
+        '$x_1 = 1 - \\dfrac{-1}{2} = 1{,}5$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Weiter mit $x_1 = 1{,}5$. Wie groß ist $x_2$?',
+      opts: ['1,5', 'etwa 1,4167', 'etwa 1,4142', '1,25'],
+      steps: [
+        '$f(1{,}5) = 0{,}25$, $f^{\\prime}(1{,}5) = 3$',
+        '$x_2 = 1{,}5 - \\dfrac{0{,}25}{3} \\approx 1{,}4167$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegen welche Zahl konvergiert diese Folge?',
+      opts: ['1,5', '$\\sqrt{2}$', '2', '$-\\sqrt{2}$'],
+      steps: [
+        'Die positive Nullstelle von $x^2 - 2$ ist $\\sqrt{2} \\approx 1{,}414\\,21$.',
+        'Schon $x_3 \\approx 1{,}414\\,216$ stimmt auf fünf Stellen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Newton für $f(x) = e^x + x - 3$ mit $x_0 = 1$. Wie groß ist $x_1$ ungefähr?',
+      opts: ['0,72', '0,5', '1,193', '0,807'],
+      steps: [
+        '$f(1) = e - 2 \\approx 0{,}718$, $f^{\\prime}(x) = e^x + 1$, $f^{\\prime}(1) \\approx 3{,}718$',
+        '$x_1 = 1 - \\dfrac{0{,}718}{3{,}718} \\approx 0{,}807$; die Lösung liegt bei 0,792.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was passiert, wenn $f^{\\prime}(x_n) = 0$ ist?',
+      opts: ['Das Verfahren konvergiert besonders schnell.', 'Man setzt $x_{n+1} = 0$.', 'Die Tangente ist waagerecht und hat keine Nullstelle; das Verfahren bricht ab.', 'Man hat die Nullstelle gefunden.'],
+      steps: [
+        'Division durch null in der Formel.',
+        'Geometrisch: Eine waagerechte Tangente schneidet die $x$-Achse nicht (außer sie liegt auf ihr).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Newton für $f(x) = x^3 - 2x + 2$ mit $x_0 = 0$ liefert $x_1 = 1$ und $x_2 = 0$. Was passiert?',
+      opts: ['Das Verfahren bricht wegen $f^{\\prime} = 0$ ab.', 'Die Folge springt immer zwischen 0 und 1 hin und her und konvergiert nicht.', '0 ist eine Nullstelle.', 'Die Folge konvergiert gegen 0,5.'],
+      steps: [
+        '$x_1 = 0 - \\dfrac{2}{-2} = 1$; $x_2 = 1 - \\dfrac{1}{1} = 0$',
+        'Ein Zyklus: Ein anderer Startwert, z. B. $x_0 = -2$, führt zur Nullstelle bei etwa −1,77.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie schnell konvergiert das Newton-Verfahren in der Nähe einer einfachen Nullstelle?',
+      opts: ['Immer genau eine Stelle pro Schritt.', 'Sehr schnell: Die Zahl der richtigen Stellen verdoppelt sich ungefähr pro Schritt.', 'Wie die Bisektion: eine halbe Stelle pro Schritt.', 'Gar nicht.'],
+      steps: [
+        'Beispiel $\\sqrt{2}$: 1,5 → 1,4167 → 1,414216.',
+        'Man spricht von quadratischer Konvergenz.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

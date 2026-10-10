@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zugänge zum Wahrscheinlichkeitsbegriff — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w30-wahrscheinlichkeitsbegriff',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zugänge zum Wahrscheinlichkeitsbegriff',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 30 (LB 4) · 20 Aufgaben: relative Häufigkeit und Gesetz der großen Zahlen, Laplace, Kolmogorow, Simulation · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 30 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* New questions (sources in the steps); questions on simulation from the Grundkurs sheet mathegy11/w31. */
+  questions: [
+    {
+      q: 'Eine Reißzwecke wird 1000-mal geworfen und landet 620-mal mit der Spitze nach oben. Welcher Schätzwert für die Wahrscheinlichkeit folgt?',
+      opts: ['620', '0,38', '0,5', '0,62'],
+      steps: [
+        'Statistischer Zugang: Die relative Häufigkeit $\\tfrac{620}{1000}$ schätzt die Wahrscheinlichkeit.',
+        'Ein exakter Wert lässt sich hier nicht ausrechnen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was besagt das Gesetz der großen Zahlen?',
+      opts: ['Mit wachsender Versuchszahl schwankt die relative Häufigkeit immer weniger um die Wahrscheinlichkeit.', 'Bei vielen Versuchen treten alle Ergebnisse gleich oft auf.', 'Die absolute Häufigkeit wird gleich $n \\cdot p$.', 'Nach vielen Misserfolgen wird ein Erfolg wahrscheinlicher.'],
+      steps: [
+        'Die relative Häufigkeit stabilisiert sich; die absolute Abweichung von $n \\cdot p$ kann dabei sogar wachsen.',
+        'Quelle: Jakob Bernoulli bewies es als Erster streng, Ars Conjectandi, Teil IV, Basel 1713 (nach seinem Tod erschienen).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Roulette kam fünfmal hintereinander Rot. Ist jetzt Schwarz wahrscheinlicher?',
+      opts: ['Ja, Schwarz ist jetzt sicher.', 'Ja, das Gesetz der großen Zahlen gleicht aus.', 'Nein, Rot ist jetzt wahrscheinlicher.', 'Nein, die Drehungen sind unabhängig; die Wahrscheinlichkeit bleibt gleich.'],
+      steps: [
+        'Der Kessel hat kein Gedächtnis.',
+        'Das Gesetz der großen Zahlen wirkt durch Verdünnen, nicht durch Ausgleichen (Spielerfehlschluss).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie definiert P. S. Laplace die Wahrscheinlichkeit eines Ereignisses $A$?',
+      opts: ['$P(A) = \\dfrac{\\text{Anzahl der günstigen Ergebnisse}}{\\text{Anzahl der möglichen Ergebnisse}}$, wenn alle Ergebnisse gleich möglich sind', 'als Zahl, die drei Axiome erfüllt', 'als persönliche Einschätzung', 'als relative Häufigkeit nach 1000 Versuchen'],
+      steps: [
+        'Laplace-Experiment: endlich viele, gleich wahrscheinliche Ergebnisse.',
+        'Quelle: P.-S. Laplace, Essai philosophique sur les probabilités, Paris 1814.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei welchem Experiment darf man NICHT nach Laplace rechnen?',
+      opts: ['eine Kugel aus einer gut gemischten Urne ziehen', 'eine Münze werfen', 'einen fairen Würfel werfen', 'eine Reißzwecke werfen'],
+      steps: [
+        'Die beiden Lagen der Reißzwecke sind nicht gleich wahrscheinlich.',
+        'Hier hilft nur der statistische Zugang.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein fairer Würfel wird geworfen. Wie groß ist die Wahrscheinlichkeit für eine Primzahl?',
+      opts: ['$\\dfrac{1}{6}$', '$\\dfrac{1}{2}$', '$\\dfrac{2}{3}$', '$\\dfrac{1}{3}$'],
+      steps: [
+        'Günstig: 2, 3, 5. Möglich: 6 Ergebnisse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Würfel werden geworfen. Warum nimmt man als Ergebnismenge die 36 Paare und nicht die Augensummen 2 bis 12?',
+      opts: ['Weil die Augensumme 7 nicht vorkommen kann.', 'Weil 36 eine Quadratzahl ist.', 'Nur die 36 Paare sind gleich wahrscheinlich; die Augensummen nicht.', 'Das ist egal, beide Wege sind Laplace-Experimente.'],
+      steps: [
+        'Summe 2 hat ein Paar, Summe 7 hat sechs Paare.',
+        'Nach Laplace darf man nur bei gleich möglichen Ergebnissen zählen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Aus dem Wort MATHEMATIK wird zufällig ein Buchstabe gewählt. Wie wahrscheinlich ist ein M?',
+      opts: ['0,1', '$\\dfrac{1}{8}$', '0,25', '0,2'],
+      steps: [
+        '10 Buchstaben, davon 2 M.',
+        '$\\tfrac{2}{10} = 0{,}2$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Aussage gehört NICHT zu den Axiomen von Kolmogorow?',
+      opts: ['$P(\\Omega) = 1$', '$P(A \\cup B) = P(A) + P(B)$ für unvereinbare $A$, $B$', '$P(A \\cap B) = P(A) \\cdot P(B)$', '$P(A) \\geq 0$'],
+      steps: [
+        'Die Produktformel gilt nur für unabhängige Ereignisse.',
+        'Die Axiome: Nichtnegativität, Normierung, Additivität.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie folgt $P(\\overline{A}) = 1 - P(A)$ aus den Axiomen?',
+      opts: ['Aus der Laplace-Formel.', '$A$ und $\\overline{A}$ sind unvereinbar mit $A \\cup \\overline{A} = \\Omega$, also $P(A) + P(\\overline{A}) = 1$.', 'Es folgt nicht, es ist ein eigenes Axiom.', 'Durch Messen.'],
+      steps: [
+        'Additivität und Normierung zusammen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Zahl kann keine Wahrscheinlichkeit sein?',
+      opts: ['1', '0', '0,999', '1,2'],
+      steps: [
+        'Aus den Axiomen folgt $0 \\leq P(A) \\leq 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was leistete A. N. Kolmogorow 1933?',
+      opts: ['Er begründete die Wahrscheinlichkeitsrechnung axiomatisch: Er legte fest, welche Regeln jede Wahrscheinlichkeit erfüllen muss.', 'Er erfand das Baumdiagramm.', 'Er berechnete als Erster die Wahrscheinlichkeit beim Würfeln.', 'Er bewies, dass es keinen Zufall gibt.'],
+      steps: [
+        'Die Axiome sagen nicht, welchen Wert $P(A)$ hat, sondern wie Wahrscheinlichkeiten zusammenpassen.',
+        'Quelle: A. N. Kolmogorow, Grundbegriffe der Wahrscheinlichkeitsrechnung, Springer, Berlin 1933.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Es gilt $P(A) = 0{,}5$, $P(B) = 0{,}4$ und $P(A \\cap B) = 0{,}2$. Wie groß ist $P(A \\cup B)$?',
+      opts: ['0,2', '1,1', '0,7', '0,9'],
+      steps: [
+        'Allgemeiner Additionssatz: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$.',
+        'Die Schnittmenge würde sonst doppelt gezählt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Zugang liefert einen Wert für $P(\\text{Sechs})$ bei einem gezinkten Würfel?',
+      opts: ['der axiomatische: die Axiome liefern den Wert', 'keiner', 'der statistische: sehr oft werfen und die relative Häufigkeit bestimmen', 'der Laplace-Zugang: $\\tfrac{1}{6}$'],
+      steps: [
+        'Beim gezinkten Würfel sind die Seiten nicht gleich wahrscheinlich.',
+        'Die Axiome sagen nur, dass alle sechs Werte zusammen 1 ergeben.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie simuliert man mit einer Zufallszahl $z$ aus $[0;\\,1)$ ein Ereignis mit der Wahrscheinlichkeit 0,3?',
+      opts: ['Treffer, wenn $z < 0{,}3$', 'Treffer, wenn $z > 0{,}3$', 'Treffer, wenn $z < 0{,}7$', 'Treffer, wenn $z = 0{,}3$'],
+      steps: [
+        'Das Intervall $[0;\\,0{,}3)$ macht 30 % von $[0;\\,1)$ aus.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie simuliert man mit Zufallsziffern 0 bis 9 ein Ereignis mit der Wahrscheinlichkeit 0,3?',
+      opts: ['Die Ziffern 0 bis 3 gelten als Treffer.', 'Die Ziffern 0, 1, 2 gelten als Treffer.', 'Die Ziffer 3 gilt als Treffer.', 'Jede ungerade Ziffer gilt als Treffer.'],
+      steps: [
+        '3 von 10 gleich wahrscheinlichen Ziffern ergeben 0,3.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum führt man eine Simulation sehr oft durch?',
+      opts: ['Damit das Ergebnis exakt wird.', 'Weil wenige Durchgänge verboten sind.', 'Die relative Häufigkeit stabilisiert sich bei vielen Durchgängen und schätzt die Wahrscheinlichkeit.', 'Damit alle Ergebnisse gleich oft vorkommen.'],
+      steps: [
+        'Empirisches Gesetz der großen Zahlen.',
+        'Ein Simulationsergebnis bleibt eine Schätzung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Befehl simuliert in einer Tabellenkalkulation einen Würfelwurf?',
+      opts: ['=RUNDEN(6;0)', '=ZUFALLSBEREICH(1;6)', '=ZUFALLSZAHL()', '=SUMME(1;6)'],
+      steps: [
+        'ZUFALLSBEREICH liefert eine ganze Zufallszahl zwischen den Grenzen.',
+        'ZUFALLSZAHL() liefert eine Dezimalzahl aus $[0;\\,1)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Simulation liefert nach 100 Durchgängen den Anteil 0,47, nach 10 000 Durchgängen 0,491. Welcher Wert ist verlässlicher?',
+      opts: ['0,491, denn bei mehr Durchgängen schwankt die relative Häufigkeit weniger.', 'Keiner, Simulationen sind nie verlässlich.', 'Beide gleich.', '0,47, weil er zuerst kam.'],
+      steps: [
+        'Gesetz der großen Zahlen.',
+        'Der Wert passt zur nächsten Aufgabe.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Chevalier de Méré wettete auf mindestens eine Doppelsechs in 24 Würfen mit zwei Würfeln und verlor auf Dauer. Wie groß ist die Gewinnwahrscheinlichkeit?',
+      opts: ['$\\left(\\tfrac{1}{36}\\right)^{24}$', '$1 - \\left(\\tfrac{35}{36}\\right)^{24} \\approx 0{,}491$', '$\\tfrac{24}{36} \\approx 0{,}667$', 'genau 0,5'],
+      steps: [
+        'Gegenereignis: 24-mal keine Doppelsechs, Wahrscheinlichkeit $\\left(\\tfrac{35}{36}\\right)^{24} \\approx 0{,}509$.',
+        'De Mérés Dreisatz $\\tfrac{4}{6} = \\tfrac{24}{36}$ (eine Sechs in vier Würfen, etwa 0,518) trägt nicht.',
+        'Quelle: Briefwechsel B. Pascal – P. de Fermat, 1654 (Brief Pascals vom 29. Juli 1654); MacTutor History of Mathematics, St Andrews.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

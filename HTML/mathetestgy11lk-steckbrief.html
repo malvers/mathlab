@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ganzrationale Funktionen aus Bedingungen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w15-steckbrief',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ganzrationale Funktionen aus Bedingungen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 15 (LB 1) · 20 Aufgaben: Bedingungen übersetzen, Gleichungssystem aufstellen und lösen, Tangente, Symmetrie, Probe · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 15 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-15 from the Grundkurs sheet (mathegy11/w15), 16-20 Leistungskurs. */
+  questions: [
+    {
+      q: 'Wie viele Bedingungen braucht man, um eine ganzrationale Funktion dritten Grades eindeutig zu bestimmen?',
+      opts: ['4', '3', '6', '2'],
+      steps: [
+        '$f(x) = ax^3 + bx^2 + cx + d$ hat vier Unbekannte.',
+        'Also braucht man vier voneinander unabhängige Bedingungen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Gleichung gehört zu „Der Graph geht durch $P(2 \\mid 5)$“?',
+      opts: ['$f^{\\prime}(2) = 5$', '$f(5) = 2$', '$f(2) = 0$', '$f(2) = 5$'],
+      steps: [
+        'Ein Punkt liegt auf dem Graphen, wenn sein $y$-Wert der Funktionswert an seiner $x$-Stelle ist.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Gleichung gehört zu „Der Graph hat bei $x = 1$ einen Hochpunkt“?',
+      opts: ['$f^{\\prime}(1) = 0$', '$f^{\\prime\\prime}(1) = 0$', '$f(1) = 0$', '$f^{\\prime}(0) = 1$'],
+      steps: [
+        'An einer Extremstelle ist die Tangente waagerecht.',
+        'Liefert nur eine Gleichung; den $y$-Wert kennt man hier nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Gleichung gehört zu „Der Graph hat im Ursprung einen Wendepunkt“? (Nur die Wendebedingung)',
+      opts: ['$f^{\\prime\\prime}(0) = 0$', '$f^{\\prime}(0) = 0$', '$f^{\\prime\\prime}(1) = 0$', '$f(0) = 1$'],
+      steps: [
+        'Notwendige Bedingung für einen Wendepunkt: $f^{\\prime\\prime} = 0$.',
+        '„Im Ursprung“ liefert zusätzlich $f(0) = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Gleichungen gehören zu „Der Graph berührt die $x$-Achse im Ursprung“?',
+      opts: ['$f^{\\prime}(0) = 0$ und $f^{\\prime\\prime}(0) = 0$', '$f(0) = 0$ und $f^{\\prime}(0) = 0$', '$f(0) = 0$', '$f(0) = 0$ und $f^{\\prime\\prime}(0) = 0$'],
+      steps: [
+        'Er geht durch $(0 \\mid 0)$: $f(0) = 0$.',
+        'Berühren heißt: Die $x$-Achse ist dort Tangente, also $f^{\\prime}(0) = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Straßenstücke sollen bei $x_0$ ohne Knick ineinander übergehen. Was muss gelten?',
+      opts: ['Gleiche Nullstellen.', 'Nur gleicher Funktionswert.', 'Gleicher Funktionswert und gleicher Anstieg bei $x_0$.', 'Gleiche zweite Ableitung überall.'],
+      steps: [
+        'Ohne Sprung: gleiche Funktionswerte.',
+        'Ohne Knick: gleiche erste Ableitung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Graph einer Funktion dritten Grades ist punktsymmetrisch zum Ursprung. Welcher Ansatz passt?',
+      opts: ['$f(x) = ax^3 + d$', '$f(x) = ax^3 + cx$', '$f(x) = ax^3 + bx^2$', '$f(x) = ax^3 + bx^2 + cx + d$ mit $a = 0$'],
+      steps: [
+        'Punktsymmetrie zum Ursprung: nur ungerade Exponenten.',
+        'Damit bleiben zwei Unbekannte statt vier.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Graph einer Funktion vierten Grades ist achsensymmetrisch zur $y$-Achse. Welcher Ansatz passt?',
+      opts: ['$f(x) = ax^4 + dx$', '$f(x) = ax^4 + cx^2 + e$', '$f(x) = ax^4 + bx^3$', '$f(x) = ax^4 + bx^3 + cx^2$'],
+      steps: [
+        'Achsensymmetrie: nur gerade Exponenten, die Konstante zählt dazu.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$f(x) = ax^3 + cx$ ist punktsymmetrisch und hat den Hochpunkt $H(1 \\mid 2)$. Wie lautet $f$?',
+      opts: ['$f(x) = -x^3 + 3x$', '$f(x) = 2x^3$', '$f(x) = -x^3 + 2x$', '$f(x) = x^3 - 3x$'],
+      steps: [
+        '$f(1) = a + c = 2$, $f^{\\prime}(1) = 3a + c = 0$',
+        'Subtrahieren: $2a = -2$, also $a = -1$, $c = 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$f(x) = ax^2 + bx + c$ erfüllt $f(0) = 2$, $f^{\\prime}(0) = 3$ und $f(1) = 4$. Bestimme $a$.',
+      opts: ['$a = 2$', '$a = 4$', '$a = -1$', '$a = 1$'],
+      steps: [
+        '$c = 2$ und $b = 3$ (siehe oben).',
+        '$a + 3 + 2 = 4 \\Rightarrow a = -1$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Funktion dritten Grades hat die Nullstellen 0, 1 und 2 und geht durch $(3 \\mid 6)$. Wie lautet sie?',
+      opts: ['$f(x) = 2x(x - 1)(x - 2)$', '$f(x) = x(x + 1)(x + 2)$', '$f(x) = x(x - 1)(x - 2)$', '$f(x) = 6x(x - 1)(x - 2)$'],
+      steps: [
+        'Ansatz über die Linearfaktoren: $f(x) = a \\cdot x(x - 1)(x - 2)$.',
+        '$f(3) = a \\cdot 3 \\cdot 2 \\cdot 1 = 6a = 6 \\Rightarrow a = 1$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welches Gleichungssystem gehört zu einer Parabel durch $(1 \\mid 2)$, $(-1 \\mid 6)$ und $(2 \\mid 3)$?',
+      opts: ['$2a + b + c = 1$, $6a - b + c = -1$, $3a + 2b + c = 2$', '$a + b + c = 2$, $-a - b + c = 6$, $4a + 2b + c = 3$', '$a + b + c = 1$, $a - b + c = -1$, $4a + 2b + c = 2$', '$a + b + c = 2$, $a - b + c = 6$, $4a + 2b + c = 3$'],
+      steps: [
+        'Jeweils $x$ in $ax^2 + bx + c$ einsetzen und gleich $y$ setzen.',
+        'Für $x = -1$: $a \\cdot 1 + b \\cdot (-1) + c$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse dieses System: $a + b + c = 2$, $a - b + c = 6$, $4a + 2b + c = 3$. Wie lautet die Parabel?',
+      opts: ['$f(x) = x^2 - 2x + 3$', '$f(x) = -x^2 - 2x + 5$', '$f(x) = x^2 + 2x - 1$', '$f(x) = 2x^2 - 2x + 2$'],
+      steps: [
+        'Erste minus zweite: $2b = -4$, also $b = -2$ und $a + c = 4$.',
+        'Dritte: $4a - 4 + c = 3$, also $4a + c = 7$; mit $a + c = 4$: $a = 1$, $c = 3$.',
+        'Probe: $f(2) = 4 - 4 + 3 = 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Rutsche beginnt in $(0 \\mid 4)$ und endet in $(4 \\mid 0)$, an beiden Enden waagerecht. Welche Funktion dritten Grades passt?',
+      opts: ['$f(x) = -x + 4$', '$f(x) = \\dfrac{1}{8}x^3 - \\dfrac{3}{4}x^2 + 4$', '$f(x) = \\dfrac{1}{4}x^3 - x^2 + 4$', '$f(x) = -\\dfrac{1}{8}x^3 + \\dfrac{3}{4}x^2 + 4$'],
+      steps: [
+        '$f(0) = 4$ und $f^{\\prime}(0) = 0$ ergeben $d = 4$, $c = 0$.',
+        '$f(4) = 64a + 16b + 4 = 0$ und $f^{\\prime}(4) = 48a + 8b = 0$, also $b = -6a$.',
+        '$64a - 96a + 4 = 0 \\Rightarrow a = \\dfrac{1}{8}$, $b = -\\dfrac{3}{4}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für eine Funktion vierten Grades sind nur vier Bedingungen bekannt. Was folgt?',
+      opts: ['Die Funktion ist dann automatisch symmetrisch.', 'Es gibt unendlich viele passende Funktionen (eine Schar).', 'Es gibt keine passende Funktion.', 'Es gibt genau eine passende Funktion.'],
+      steps: [
+        'Fünf Unbekannte, vier Gleichungen: Eine Unbekannte bleibt frei.',
+        'Erst eine weitere Bedingung legt die Funktion fest.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Graph von $f$ hat bei $x = 1$ die Tangente $y = 2x - 1$. Welche Bedingungen folgen?',
+      opts: ['nur $f^{\\prime}(1) = 2$', '$f(1) = 1$ und $f^{\\prime}(1) = 0$', '$f(1) = 1$ und $f^{\\prime}(1) = 2$', '$f(1) = 2$ und $f^{\\prime}(1) = -1$'],
+      steps: [
+        'Berührpunkt: Die Tangente hat bei $x = 1$ den Wert $2 \\cdot 1 - 1 = 1$.',
+        'Gleicher Anstieg: $f^{\\prime}(1)$ ist der Anstieg der Tangente.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Funktion dritten Grades hat im Ursprung einen Wendepunkt mit waagerechter Tangente (Sattelpunkt). Welcher Ansatz bleibt?',
+      opts: ['$f(x) = ax^3 + cx$', '$f(x) = ax^3 + d$', '$f(x) = ax^3 + bx^2$', '$f(x) = ax^3$'],
+      steps: [
+        '$f(0) = 0 \\Rightarrow d = 0$, $f^{\\prime}(0) = 0 \\Rightarrow c = 0$, $f^{\\prime\\prime}(0) = 0 \\Rightarrow b = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gesucht ist eine Funktion dritten Grades durch den Ursprung mit Wendepunkt $W(1 \\mid 2)$, deren Wendetangente den Anstieg −3 hat. Wie lautet sie?',
+      opts: ['$f(x) = x^3 - 3x^2 + 4x$', '$f(x) = 2x^3 - 6x^2 + 6x$', '$f(x) = -x^3 + 3x^2$', '$f(x) = 5x^3 - 15x^2 + 12x$'],
+      steps: [
+        '$d = 0$; $f(1) = 2$: $a + b + c = 2$; $f^{\\prime\\prime}(1) = 0$: $6a + 2b = 0$; $f^{\\prime}(1) = -3$: $3a + 2b + c = -3$.',
+        'Mit $b = -3a$: $c = 2 + 2a$ und $-a + 2 = -3$, also $a = 5$, $b = -15$, $c = 12$.',
+        'Die anderen Funktionen erfüllen nur einen Teil der Bedingungen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Graph einer Funktion vierten Grades ist achsensymmetrisch zur $y$-Achse, geht durch $(0 \\mid 2)$ und hat den Tiefpunkt $T(1 \\mid 1)$. Wie lautet $f$?',
+      opts: ['$f(x) = 2x^4 - 3x^2 + 2$', '$f(x) = x^4 + 2x^2 + 2$', '$f(x) = x^4 - 2x^2 + 1$', '$f(x) = x^4 - 2x^2 + 2$'],
+      steps: [
+        'Ansatz $f(x) = ax^4 + cx^2 + e$ mit $e = 2$.',
+        '$f(1) = 1$: $a + c = -1$; $f^{\\prime}(1) = 0$: $4a + 2c = 0$. Also $a = 1$, $c = -2$.',
+        'Probe: $f^{\\prime\\prime}(1) = 12 - 4 = 8 > 0$, also wirklich ein Tiefpunkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum prüft man nach dem Lösen des Gleichungssystems, ob der geforderte Hochpunkt wirklich einer ist?',
+      opts: ['Weil Gleichungssysteme nie eindeutig lösbar sind.', 'Das ist nicht nötig.', '$f^{\\prime}(x_0) = 0$ ist nur notwendig; die Lösung kann dort auch einen Tiefpunkt oder Sattelpunkt haben.', 'Weil das CAS sich oft verrechnet.'],
+      steps: [
+        'In das Gleichungssystem geht nur die Bedingung $f^{\\prime}(x_0) = 0$ ein.',
+        'Erst $f^{\\prime\\prime}(x_0) < 0$ oder ein Vorzeichenwechsel von $+$ nach $-$ bestätigt den Hochpunkt.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

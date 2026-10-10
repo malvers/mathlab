@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wendepunkte, Nullstellen und Symmetrie — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w11-wendepunkte-symmetrie',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Wendepunkte, Nullstellen und Symmetrie',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 11 (LB 1) · 20 Aufgaben: Krümmung, Wendepunkte, Nullstellen, Symmetrie zu Achsen und Punkten · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-16 from the Grundkurs sheet (mathegy11/w10), 17-20 Leistungskurs. */
+  questions: [
+    {
+      q: 'Was bedeutet $f^{\\prime\\prime}(x) > 0$ in einem Intervall?',
+      opts: ['Der Graph ist dort rechtsgekrümmt.', 'Der Graph liegt über der $x$-Achse.', 'Der Graph steigt dort.', 'Der Graph ist dort linksgekrümmt.'],
+      steps: [
+        '$f^{\\prime\\prime} > 0$ heißt: $f^{\\prime}$ wächst, die Tangenten werden steiler.',
+        'Fährt man den Graphen entlang, lenkt man nach links.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Bedingung ist notwendig für einen Wendepunkt bei $x_0$?',
+      opts: ['$f^{\\prime\\prime}(x_0) = 0$', '$f^{\\prime}(x_0) = 0$', '$f^{\\prime\\prime\\prime}(x_0) = 0$', '$f(x_0) = 0$'],
+      steps: [
+        'Im Wendepunkt wechselt die Krümmung.',
+        'Dort hat $f^{\\prime\\prime}$ einen Vorzeichenwechsel, also eine Nullstelle.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Wendestelle von $f(x) = x^3 - 3x^2$.',
+      opts: ['$x = 1$', '$x = 2$', '$x = 0$', '$x = 3$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 6x$, $f^{\\prime\\prime}(x) = 6x - 6$',
+        '$6x - 6 = 0 \\Rightarrow x = 1$',
+        '$f^{\\prime\\prime\\prime}(x) = 6 \\neq 0$: tatsächlich Wendestelle.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Punkt ist der Wendepunkt von $f(x) = x^3 - 3x^2$?',
+      opts: ['$W(1 \\mid -2)$', '$W(0 \\mid 0)$', '$W(1 \\mid 2)$', '$W(2 \\mid -4)$'],
+      steps: [
+        'Wendestelle $x = 1$ (siehe vorige Aufgabe).',
+        '$f(1) = 1 - 3 = -2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Wendetangente von $f(x) = x^3 - 3x^2$ im Punkt $W(1 \\mid -2)$?',
+      opts: ['$y = 3x - 5$', '$y = -3x - 2$', '$y = -3x + 1$', '$y = -2$'],
+      steps: [
+        '$f^{\\prime}(1) = 3 - 6 = -3$',
+        '$y = -3(x - 1) - 2 = -3x + 1$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für $f(x) = x^4$ gilt $f^{\\prime\\prime}(0) = 0$. Hat der Graph bei 0 einen Wendepunkt?',
+      opts: ['Das kann man nicht entscheiden.', 'Ja, einen Sattelpunkt.', 'Nein, $f^{\\prime\\prime}(x) = 12x^2$ wechselt das Vorzeichen nicht.', 'Ja, weil $f^{\\prime\\prime}(0) = 0$.'],
+      steps: [
+        '$f^{\\prime\\prime}(x) = 12x^2 \\geq 0$: überall linksgekrümmt.',
+        'Ohne Krümmungswechsel kein Wendepunkt; bei 0 liegt ein Tiefpunkt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist ein Sattelpunkt?',
+      opts: ['Ein Wendepunkt mit waagerechter Tangente, z. B. $(0 \\mid 0)$ bei $f(x) = x^3$.', 'Ein Punkt, in dem $f$ nicht definiert ist.', 'Ein Hochpunkt mit $f^{\\prime\\prime} = 0$.', 'Eine doppelte Nullstelle.'],
+      steps: [
+        'Bei $x^3$ gilt $f^{\\prime}(0) = 0$ und $f^{\\prime\\prime}(0) = 0$ mit Vorzeichenwechsel von $f^{\\prime\\prime}$.',
+        'Die Krümmung wechselt, die Tangente ist waagerecht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Wendestellen von $f(x) = x^4 - 6x^2$.',
+      opts: ['$x = 0$', '$x = -\\sqrt{6}$ und $x = \\sqrt{6}$', '$x = -1$ und $x = 1$', '$x = -\\sqrt{3}$ und $x = \\sqrt{3}$'],
+      steps: [
+        '$f^{\\prime\\prime}(x) = 12x^2 - 12$',
+        '$12x^2 - 12 = 0 \\Rightarrow x = \\pm 1$, jeweils mit Vorzeichenwechsel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Nullstellen von $f(x) = x^3 - 4x$.',
+      opts: ['$x \\in \\{0;\\,2\\}$', '$x \\in \\{-2;\\,0;\\,2\\}$', '$x \\in \\{-2;\\,2\\}$', '$x \\in \\{0;\\,4\\}$'],
+      steps: [
+        '$x$ ausklammern: $x(x^2 - 4) = x(x - 2)(x + 2)$.',
+        'Ein Produkt ist null, wenn ein Faktor null ist.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Nullstellen von $f(x) = x^4 - 5x^2 + 4$.',
+      opts: ['$x \\in \\{-1;\\,1\\}$', '$x \\in \\{-2;\\,-1;\\,1;\\,2\\}$', '$x \\in \\{-4;\\,-1;\\,1;\\,4\\}$', '$x \\in \\{1;\\,4\\}$'],
+      steps: [
+        'Substitution $z = x^2$: $z^2 - 5z + 4 = 0$ mit $z = 1$ oder $z = 4$.',
+        'Rücksubstitution: $x^2 = 1$ oder $x^2 = 4$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was gilt für die Nullstellen von $f(x) = (x - 1)^2 (x + 3)$?',
+      opts: ['Es gibt drei verschiedene Nullstellen.', 'Bei −1 und 3 schneidet der Graph die $x$-Achse.', 'Bei 1 schneidet der Graph die $x$-Achse, bei −3 berührt er sie.', 'Bei 1 berührt der Graph die $x$-Achse, bei −3 schneidet er sie.'],
+      steps: [
+        '$x = 1$ ist doppelte Nullstelle: kein Vorzeichenwechsel, der Graph berührt die Achse.',
+        '$x = -3$ ist einfache Nullstelle: Vorzeichenwechsel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Hat $f(x) = x^2 e^x$ Nullstellen?',
+      opts: ['Ja, $x = 1$.', 'Nein, $e^x$ ist nie null.', 'Ja, nur $x = 0$ (doppelt).', 'Ja, $x = 0$ und $x = -1$.'],
+      steps: [
+        '$e^x > 0$ für alle $x$, nur $x^2$ kann null werden.',
+        'Also $x = 0$; dort berührt der Graph die $x$-Achse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = x^4 - 3x^2 + 1$?',
+      opts: ['Keine', 'Beide', 'Punktsymmetrie zum Ursprung', 'Achsensymmetrie zur $y$-Achse'],
+      steps: [
+        'Nur gerade Exponenten (auch $1 = x^0$).',
+        '$f(-x) = f(x)$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = x^3 - 2x$?',
+      opts: ['Keine', 'Achsensymmetrie zur $y$-Achse', 'Punktsymmetrie zum Ursprung', 'Beide'],
+      steps: [
+        'Nur ungerade Exponenten.',
+        '$f(-x) = -x^3 + 2x = -f(x)$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Zahl der Neuerkrankten wird durch $f(t) = -t^3 + 6t^2$ beschrieben ($t$ in Wochen). Wann nimmt sie am stärksten zu?',
+      opts: ['Bei $t = 6$', 'Bei $t = 4$', 'Bei $t = 0$', 'Bei $t = 2$'],
+      steps: [
+        'Stärkste Zunahme heißt: $f^{\\prime}$ maximal, also Wendestelle.',
+        '$f^{\\prime\\prime}(t) = -6t + 12 = 0 \\Rightarrow t = 2$',
+        '$f^{\\prime\\prime\\prime} = -6 < 0$: Dort ist $f^{\\prime}$ am größten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Wendestelle von $f(x) = x e^x$.',
+      opts: ['$x = -2$', '$x = -1$', '$x = 2$', '$x = 0$'],
+      steps: [
+        '$f^{\\prime}(x) = (x + 1)e^x$, $f^{\\prime\\prime}(x) = (x + 2)e^x$',
+        '$f^{\\prime\\prime}(x) = 0 \\Rightarrow x = -2$ mit Vorzeichenwechsel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Woran erkennt man rechnerisch, dass der Graph von $f(x) = (x - 2)^2 + 1$ symmetrisch zur Geraden $x = 2$ ist?',
+      opts: ['$f(x + 2) = f(x) + 2$', '$f(-x) = f(x)$', '$f(2) = 1$', '$f(2 + h) = f(2 - h)$ für alle $h$'],
+      steps: [
+        'Achsensymmetrie zu $x = a$: gleiche Werte im gleichen Abstand links und rechts von $a$.',
+        '$f(2 \\pm h) = h^2 + 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zu welchem Punkt ist der Graph von $f(x) = x^3 - 3x^2$ punktsymmetrisch?',
+      opts: ['zu keinem Punkt', 'zu seinem Wendepunkt $W(1 \\mid -2)$', 'zum Ursprung', 'zum Tiefpunkt $(2 \\mid -4)$'],
+      steps: [
+        'Jede Funktion dritten Grades ist punktsymmetrisch zu ihrem Wendepunkt.',
+        'Probe: $f(1 + h) + f(1 - h) = -4 = 2 \\cdot f(1)$ für alle $h$.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$f^{\\prime\\prime}(x_0) = 0$ und $f^{\\prime\\prime\\prime}(x_0) \\neq 0$. Was folgt?',
+      opts: ['Es folgt nichts.', 'Bei $x_0$ liegt ein Wendepunkt.', 'Bei $x_0$ liegt eine Nullstelle.', 'Bei $x_0$ liegt ein Hochpunkt.'],
+      steps: [
+        '$f^{\\prime\\prime\\prime}(x_0) \\neq 0$ heißt: $f^{\\prime\\prime}$ wechselt bei $x_0$ das Vorzeichen.',
+        'Das ist eine hinreichende Bedingung für einen Wendepunkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo hat die Glockenkurve $f(x) = e^{-x^2}$ ihre Wendestellen?',
+      opts: ['bei $x = 0$', 'bei $x = \\pm\\dfrac{1}{\\sqrt{2}} \\approx \\pm 0{,}71$', 'Sie hat keine.', 'bei $x = \\pm 1$'],
+      steps: [
+        '$f^{\\prime}(x) = -2x\\,e^{-x^2}$, $f^{\\prime\\prime}(x) = (4x^2 - 2)\\,e^{-x^2}$.',
+        '$4x^2 - 2 = 0 \\Leftrightarrow x = \\pm\\tfrac{1}{\\sqrt{2}}$, jeweils mit Vorzeichenwechsel. Diese Kurve kommt in Jahrgangsstufe 12 bei der Normalverteilung wieder.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

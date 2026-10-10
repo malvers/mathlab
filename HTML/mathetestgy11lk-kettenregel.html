@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Die Kettenregel — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w09-kettenregel',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Die Kettenregel',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 9 (LB 1) · 20 Aufgaben: innere und äußere Funktion, Verkettungen und Verknüpfungen, Beispiele aus dem Lehrplan · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 9 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-16 from the Grundkurs sheet (mathegy11/w08), 17-20 Leistungskurs (Lehrplan examples, double chains). */
+  questions: [
+    {
+      q: 'Was ist bei $f(x) = (x^2 - 3)^5$ die innere Funktion?',
+      opts: ['$v(x) = 5$', '$u(z) = z^5$', '$v(x) = x^2$', '$v(x) = x^2 - 3$'],
+      steps: [
+        'Man rechnet zuerst $x^2 - 3$ aus und potenziert das Ergebnis.',
+        'Innen: $v(x) = x^2 - 3$, außen: $u(z) = z^5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Kettenregel für $f(x) = u\\bigl(v(x)\\bigr)$?',
+      opts: ['$f^{\\prime}(x) = u^{\\prime}\\bigl(v(x)\\bigr) \\cdot v^{\\prime}(x)$', '$f^{\\prime}(x) = u^{\\prime}\\bigl(v^{\\prime}(x)\\bigr)$', '$f^{\\prime}(x) = u^{\\prime}(x) \\cdot v^{\\prime}(x)$', '$f^{\\prime}(x) = u\\bigl(v^{\\prime}(x)\\bigr)$'],
+      steps: [
+        'Äußere Ableitung, an der inneren Funktion ausgewertet,',
+        'mal innere Ableitung („Nachdifferenzieren“).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Mitschüler rechnet $\\bigl(\\sin(3x)\\bigr)^{\\prime} = \\cos(3x)$. Was fehlt?',
+      opts: ['Ein Minuszeichen.', 'Der Faktor 3 aus der inneren Ableitung.', 'Nichts, das ist richtig.', 'Der Faktor $x$.'],
+      steps: [
+        'Die innere Funktion ist $3x$ mit Ableitung 3.',
+        'Richtig: $\\bigl(\\sin(3x)\\bigr)^{\\prime} = 3\\cos(3x)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = e^{2x}$.',
+      opts: ['$f^{\\prime}(x) = e^2$', '$f^{\\prime}(x) = 2x e^{2x-1}$', '$f^{\\prime}(x) = 2e^{2x}$', '$f^{\\prime}(x) = e^{2x}$'],
+      steps: [
+        'Außen $e^z$ mit Ableitung $e^z$, innen $2x$ mit Ableitung 2.',
+        '$f^{\\prime}(x) = e^{2x} \\cdot 2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (3x + 1)^4$.',
+      opts: ['$f^{\\prime}(x) = 12(3x + 1)^4$', '$f^{\\prime}(x) = 4(3x + 1)^3$', '$f^{\\prime}(x) = (3x + 1)^3$', '$f^{\\prime}(x) = 12(3x + 1)^3$'],
+      steps: [
+        'Außen: $4z^3$, innen: Ableitung 3.',
+        '$4(3x + 1)^3 \\cdot 3 = 12(3x + 1)^3$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sin(2x + 1)$.',
+      opts: ['$f^{\\prime}(x) = -2\\cos(2x + 1)$', '$f^{\\prime}(x) = 2\\cos(2x + 1)$', '$f^{\\prime}(x) = \\cos 2$', '$f^{\\prime}(x) = \\cos(2x + 1)$'],
+      steps: [
+        'Außen $\\sin z \\mapsto \\cos z$, innen $2x + 1 \\mapsto 2$.',
+        '$\\cos(2x + 1) \\cdot 2$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\ln(3x - 5)$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{3x - 5}$', '$f^{\\prime}(x) = 3\\ln(3x - 5)$', '$f^{\\prime}(x) = \\dfrac{3}{3x - 5}$', '$f^{\\prime}(x) = \\dfrac{3}{x}$'],
+      steps: [
+        'Außen $\\ln z \\mapsto \\dfrac{1}{z}$, innen $3x - 5 \\mapsto 3$.',
+        '$\\dfrac{1}{3x - 5} \\cdot 3$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = e^{x^2}$.',
+      opts: ['$f^{\\prime}(x) = e^{x^2}$', '$f^{\\prime}(x) = x^2 e^{x^2 - 1}$', '$f^{\\prime}(x) = e^{2x}$', '$f^{\\prime}(x) = 2x e^{x^2}$'],
+      steps: [
+        'Innen $x^2$ mit Ableitung $2x$.',
+        '$e^{x^2} \\cdot 2x$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{1}{2x + 1}$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{2}$', '$f^{\\prime}(x) = -\\dfrac{2}{(2x + 1)^2}$', '$f^{\\prime}(x) = -\\dfrac{1}{(2x + 1)^2}$', '$f^{\\prime}(x) = \\dfrac{2}{(2x + 1)^2}$'],
+      steps: [
+        '$f(x) = (2x + 1)^{-1}$',
+        '$-1 \\cdot (2x + 1)^{-2} \\cdot 2 = -\\dfrac{2}{(2x + 1)^2}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\cos(x^2)$.',
+      opts: ['$f^{\\prime}(x) = -2x\\sin(x^2)$', '$f^{\\prime}(x) = -\\sin(x^2)$', '$f^{\\prime}(x) = 2x\\sin(x^2)$', '$f^{\\prime}(x) = -\\sin(2x)$'],
+      steps: [
+        'Außen $\\cos z \\mapsto -\\sin z$, innen $x^2 \\mapsto 2x$.',
+        '$-\\sin(x^2) \\cdot 2x$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sqrt{4x + 1}$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{2}{\\sqrt{4x + 1}}$', '$f^{\\prime}(x) = 2\\sqrt{4x + 1}$', '$f^{\\prime}(x) = \\dfrac{4}{\\sqrt{4x + 1}}$', '$f^{\\prime}(x) = \\dfrac{1}{2\\sqrt{4x + 1}}$'],
+      steps: [
+        'Außen $\\sqrt{z} \\mapsto \\dfrac{1}{2\\sqrt{z}}$, innen $4x + 1 \\mapsto 4$.',
+        '$\\dfrac{4}{2\\sqrt{4x + 1}} = \\dfrac{2}{\\sqrt{4x + 1}}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^2 \\sin(2x)$.',
+      opts: ['$f^{\\prime}(x) = 2x\\sin(2x) + x^2\\cos(2x)$', '$f^{\\prime}(x) = 2x\\sin(2x) + 2x^2\\cos(2x)$', '$f^{\\prime}(x) = 2x\\cos(2x)$', '$f^{\\prime}(x) = 4x\\cos(2x)$'],
+      steps: [
+        '$u = x^2$, $u^{\\prime} = 2x$; $v = \\sin(2x)$, $v^{\\prime} = 2\\cos(2x)$.',
+        '$2x\\sin(2x) + x^2 \\cdot 2\\cos(2x)$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (x^2 + 1)^2$ und prüfe durch Ausmultiplizieren.',
+      opts: ['$f^{\\prime}(x) = 2(x^2 + 1)$', '$f^{\\prime}(x) = 4x^3$', '$f^{\\prime}(x) = 4x(x^2 + 1)$', '$f^{\\prime}(x) = 2x(x^2 + 1)$'],
+      steps: [
+        'Kettenregel: $2(x^2 + 1) \\cdot 2x = 4x(x^2 + 1)$.',
+        'Probe: $f(x) = x^4 + 2x^2 + 1$, also $f^{\\prime}(x) = 4x^3 + 4x = 4x(x^2 + 1)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Tangente an $f(x) = e^{2x}$ an der Stelle 0?',
+      opts: ['$y = 2x + 1$', '$y = 2x + 2$', '$y = 2x$', '$y = x + 1$'],
+      steps: [
+        '$f(0) = 1$, $f^{\\prime}(x) = 2e^{2x}$, $f^{\\prime}(0) = 2$',
+        '$y = 2x + 1$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\ln(x^2 + 1)$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{2x}{x^2 + 1}$', '$f^{\\prime}(x) = 2x\\ln(x^2 + 1)$', '$f^{\\prime}(x) = \\dfrac{1}{2x}$', '$f^{\\prime}(x) = \\dfrac{1}{x^2 + 1}$'],
+      steps: [
+        'Außen $\\ln z \\mapsto \\dfrac{1}{z}$, innen $x^2 + 1 \\mapsto 2x$.',
+        '$\\dfrac{2x}{x^2 + 1}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Wirkstoff wird nach $A(t) = 100\\,e^{-0{,}2t}$ abgebaut ($A$ in mg, $t$ in h). Wie schnell ändert sich die Menge zu Beginn?',
+      opts: ['Sie nimmt um 20 mg pro Stunde zu.', 'Sie nimmt um 100 mg pro Stunde ab.', 'Sie nimmt um 20 mg pro Stunde ab.', 'Sie nimmt um 0,2 mg pro Stunde ab.'],
+      steps: [
+        '$A^{\\prime}(t) = 100 \\cdot (-0{,}2)\\,e^{-0{,}2t} = -20\\,e^{-0{,}2t}$',
+        '$A^{\\prime}(0) = -20$: Abnahme um 20 mg pro Stunde.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Leite ab (Beispiel aus dem Lehrplan): $f(x) = 3x^2 \\cdot e^{2x - 5}$.',
+      opts: ['$f^{\\prime}(x) = 12x\\,e^{2x - 5}$', '$f^{\\prime}(x) = 6x\\,e^{2}$', '$f^{\\prime}(x) = 6x\\,e^{2x - 5}$', '$f^{\\prime}(x) = 6x(1 + x)\\,e^{2x - 5}$'],
+      steps: [
+        'Produktregel mit $u = 3x^2$ und $v = e^{2x - 5}$, $v^{\\prime} = 2e^{2x - 5}$ (Kettenregel).',
+        '$6x\\,e^{2x - 5} + 6x^2 e^{2x - 5} = 6x(1 + x)\\,e^{2x - 5}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite ab (Beispiel aus dem Lehrplan): $f(x) = \\tfrac{1}{2}x^2 \\sin(2x - 1)$.',
+      opts: ['$f^{\\prime}(x) = 2x \\cos(2x - 1)$', '$f^{\\prime}(x) = x \\sin(2x - 1) + \\tfrac{1}{2}x^2 \\cos(2x - 1)$', '$f^{\\prime}(x) = x \\sin(2x - 1) + x^2 \\cos(2x - 1)$', '$f^{\\prime}(x) = x \\cos(2x - 1)$'],
+      steps: [
+        '$u = \\tfrac{1}{2}x^2$, $u^{\\prime} = x$; $v = \\sin(2x - 1)$, $v^{\\prime} = 2\\cos(2x - 1)$.',
+        '$x \\sin(2x - 1) + \\tfrac{1}{2}x^2 \\cdot 2\\cos(2x - 1)$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Leite ab: $f(x) = e^{\\sin(2x)}$.',
+      opts: ['$f^{\\prime}(x) = 2\\,e^{\\sin(2x)}$', '$f^{\\prime}(x) = 2\\cos(2x)\\,e^{\\sin(2x)}$', '$f^{\\prime}(x) = e^{\\cos(2x)}$', '$f^{\\prime}(x) = \\cos(2x)\\,e^{\\sin(2x)}$'],
+      steps: [
+        'Dreifache Verkettung: außen $e^z$, Mitte $\\sin w$, innen $2x$.',
+        'Kettenregel zweimal: $e^{\\sin(2x)} \\cdot \\cos(2x) \\cdot 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Begründe mit der Kettenregel: $(a^x)^{\\prime} = \\ln a \\cdot a^x$. Welche Umformung ist der Schlüssel?',
+      opts: ['$a^x = e^a \\cdot x$', '$a^x = \\ln(x^a)$', '$a^x = x^a$', '$a^x = e^{x \\ln a}$, dann ist die innere Ableitung $\\ln a$.'],
+      steps: [
+        '$a = e^{\\ln a}$, also $a^x = e^{x \\ln a}$.',
+        'Kettenregel: $e^{x \\ln a} \\cdot \\ln a = \\ln a \\cdot a^x$. Das bestätigt das Ergebnis aus Woche 6.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

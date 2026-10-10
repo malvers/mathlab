@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Monotonie und Extrema — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w10-monotonie-extrema',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Monotonie und Extrema',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 10 (LB 1) · 20 Aufgaben: Monotonie über f′, notwendige und hinreichende Bedingung, globale Extrema, Parameter · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 10 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-16 from the Grundkurs sheet (mathegy11/w09), 17-20 Leistungskurs. */
+  questions: [
+    {
+      q: 'In welchem Intervall ist $f(x) = x^2 - 4x$ streng monoton fallend?',
+      opts: ['$(-\\infty;\\,4]$', '$[0;\\,4]$', '$[2;\\,\\infty)$', '$(-\\infty;\\,2]$'],
+      steps: [
+        '$f^{\\prime}(x) = 2x - 4$',
+        '$f^{\\prime}(x) < 0$ für $x < 2$.',
+        'Am Scheitel $x = 2$ selbst wechselt das Verhalten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Ableitung einer Funktion ist $f^{\\prime}(x) = (x - 1)(x + 2)$. Wo fällt $f$?',
+      opts: ['Zwischen −2 und 1', 'Für $x > 1$', 'Nirgends', 'Für $x < -2$'],
+      steps: [
+        '$f^{\\prime}$ ist eine nach oben geöffnete Parabel mit den Nullstellen −2 und 1.',
+        'Dazwischen ist $f^{\\prime}$ negativ, also fällt $f$ dort.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aussage gilt für $f(x) = x^3 + 3x$?',
+      opts: ['$f$ hat einen Tiefpunkt bei $x = 0$.', '$f$ ist für $x < 0$ fallend.', '$f$ hat einen Hochpunkt bei $x = -1$.', '$f$ ist streng monoton steigend und hat keine Extrema.'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 + 3 \\geq 3 > 0$ für alle $x$.',
+        'Der Graph steigt überall, waagerechte Tangenten gibt es nicht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $f(x) = x^3$ gilt $f^{\\prime}(0) = 0$. Hat $f$ bei 0 ein Extremum?',
+      opts: ['Ja, einen Tiefpunkt.', 'Nein, $f^{\\prime}$ wechselt dort nicht das Vorzeichen (Sattelpunkt).', 'Ja, einen Hochpunkt.', 'Das lässt sich nicht entscheiden.'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 \\geq 0$: links und rechts von 0 steigt $f$.',
+        'Kein Vorzeichenwechsel, also kein Extremum.',
+        'Beispiel dafür, dass $f^{\\prime}(x_0) = 0$ nicht hinreichend ist.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Bedingung ist hinreichend für einen lokalen Hochpunkt bei $x_0$?',
+      opts: ['$f^{\\prime}(x_0) = 0$', '$f^{\\prime}(x_0) = 0$ und $f^{\\prime\\prime}(x_0) > 0$', '$f^{\\prime}(x_0) = 0$ und $f^{\\prime\\prime}(x_0) < 0$', '$f^{\\prime\\prime}(x_0) = 0$'],
+      steps: [
+        '$f^{\\prime\\prime}(x_0) < 0$ heißt: Der Graph ist dort rechtsgekrümmt.',
+        'Waagerechte Tangente plus Rechtskrümmung ergibt einen Hochpunkt.',
+        'Gleichwertig: $f^{\\prime}$ wechselt bei $x_0$ das Vorzeichen von plus nach minus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'An welchen Stellen hat $f(x) = x^3 - 3x$ Extrema?',
+      opts: ['$x = -\\sqrt{3}$, $x = 0$ und $x = \\sqrt{3}$', '$x = 3$', '$x = 0$', '$x = -1$ und $x = 1$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 3 = 0$',
+        '$x^2 = 1$, also $x = \\pm 1$.',
+        '$f^{\\prime\\prime}(x) = 6x$ ist dort ungleich null, beide sind Extremstellen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Hochpunkt von $f(x) = -x^2 + 6x - 5$.',
+      opts: ['$H(-3 \\mid 4)$', '$H(3 \\mid -5)$', '$H(3 \\mid 4)$', '$H(6 \\mid -5)$'],
+      steps: [
+        '$f^{\\prime}(x) = -2x + 6 = 0 \\Rightarrow x = 3$',
+        '$f(3) = -9 + 18 - 5 = 4$',
+        '$f^{\\prime\\prime}(x) = -2 < 0$: Hochpunkt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Extrema hat $f(x) = x^4 - 2x^2$?',
+      opts: ['Tiefpunkt $(0 \\mid 0)$, Hochpunkte $(\\pm 1 \\mid 1)$', 'Hochpunkt $(0 \\mid 0)$, Tiefpunkte $(-1 \\mid -1)$ und $(1 \\mid -1)$', 'Nur den Tiefpunkt $(0 \\mid 0)$', 'Tiefpunkte $(\\pm\\sqrt{2} \\mid 0)$'],
+      steps: [
+        '$f^{\\prime}(x) = 4x^3 - 4x = 4x(x^2 - 1) = 0 \\Rightarrow x \\in \\{-1;\\,0;\\,1\\}$',
+        '$f^{\\prime\\prime}(x) = 12x^2 - 4$: $f^{\\prime\\prime}(0) = -4$ (Hochpunkt), $f^{\\prime\\prime}(\\pm 1) = 8$ (Tiefpunkte).',
+        '$f(0) = 0$, $f(\\pm 1) = 1 - 2 = -1$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Punkt ist ein Extrempunkt von $f(x) = x \\cdot e^{-x}$?',
+      opts: ['Tiefpunkt $(0 \\mid 0)$', 'Hochpunkt $\\left(1 \\mid \\dfrac{1}{e}\\right)$', 'Tiefpunkt $\\left(-1 \\mid -e\\right)$', 'Hochpunkt $(1 \\mid e)$'],
+      steps: [
+        '$f^{\\prime}(x) = e^{-x} - x e^{-x} = (1 - x)e^{-x}$',
+        'Nullstelle $x = 1$; davor ist $f^{\\prime} > 0$, danach $f^{\\prime} < 0$: Hochpunkt.',
+        '$f(1) = e^{-1} = \\dfrac{1}{e}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Extrempunkt hat $f(x) = x - \\ln x$ für $x > 0$?',
+      opts: ['Hochpunkt $(1 \\mid 1)$', 'Tiefpunkt $(1 \\mid 0)$', 'Tiefpunkt $(e \\mid e - 1)$', 'Tiefpunkt $(1 \\mid 1)$'],
+      steps: [
+        '$f^{\\prime}(x) = 1 - \\dfrac{1}{x} = 0 \\Rightarrow x = 1$',
+        '$f^{\\prime\\prime}(x) = \\dfrac{1}{x^2} > 0$: Tiefpunkt.',
+        '$f(1) = 1 - 0 = 1$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo nimmt $f(x) = x^3 - 3x$ auf dem Intervall $[-3;\\,3]$ seinen größten Wert an?',
+      opts: ['Am Rand bei $x = 3$ mit $f(3) = 18$', 'Im Hochpunkt bei $x = -1$ mit $f(-1) = 2$', 'Am Rand bei $x = -3$', 'Bei $x = 0$'],
+      steps: [
+        'Lokale Extrema: $f(-1) = 2$, $f(1) = -2$.',
+        'Ränder: $f(-3) = -27 + 9 = -18$, $f(3) = 27 - 9 = 18$.',
+        'Das globale Maximum liegt am Rand: Randwerte immer mitprüfen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gib den Wertebereich von $f(x) = x^2 - 4x + 7$ an.',
+      opts: ['$[7;\\,\\infty)$', '$\\mathbb{R}$', '$[3;\\,\\infty)$', '$(-\\infty;\\,3]$'],
+      steps: [
+        '$f^{\\prime}(x) = 2x - 4 = 0 \\Rightarrow x = 2$, $f(2) = 4 - 8 + 7 = 3$.',
+        'Nach oben geöffnete Parabel: Tiefpunkt $(2 \\mid 3)$ ist globales Minimum.',
+        '$W = [3;\\,\\infty)$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gib den größtmöglichen Definitionsbereich von $f(x) = \\ln(x - 2)$ an.',
+      opts: ['$\\mathbb{R} \\setminus \\{2\\}$', '$(2;\\,\\infty)$', '$(0;\\,\\infty)$', '$[2;\\,\\infty)$'],
+      steps: [
+        'Der Logarithmus ist nur für positive Argumente definiert.',
+        '$x - 2 > 0 \\Leftrightarrow x > 2$; die 2 selbst gehört nicht dazu (runde Klammer).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Gewinn wird durch $G(x) = -x^2 + 40x - 300$ beschrieben ($x$ in Stück, $G$ in €). Bei welcher Stückzahl ist er am größten und wie groß ist er?',
+      opts: ['Bei 20 Stück: 100 €', 'Bei 20 Stück: 400 €', 'Bei 10 Stück: 0 €', 'Bei 40 Stück: 0 €'],
+      steps: [
+        '$G^{\\prime}(x) = -2x + 40 = 0 \\Rightarrow x = 20$',
+        '$G(20) = -400 + 800 - 300 = 100$',
+        '$G^{\\prime\\prime}(x) = -2 < 0$: Maximum.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was zeigt $f^{\\prime\\prime}(1) = 6 > 0$ für $f(x) = x^3 - 3x$ an der Stelle 1?',
+      opts: ['Bei $x = 1$ liegt ein Wendepunkt.', 'Bei $x = 1$ liegt ein Tiefpunkt.', 'Bei $x = 1$ liegt ein Hochpunkt.', '$f$ steigt bei $x = 1$.'],
+      steps: [
+        '$f^{\\prime}(1) = 0$ und $f^{\\prime\\prime}(1) > 0$: Linkskrümmung mit waagerechter Tangente.',
+        'Also Tiefpunkt $T(1 \\mid -2)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist der Unterschied zwischen einem lokalen und einem globalen Maximum?',
+      opts: ['Lokal: größter Wert in einer Umgebung; global: größter Wert im ganzen Definitionsbereich.', 'Es gibt keinen Unterschied.', 'Ein globales Maximum liegt immer im Hochpunkt.', 'Ein lokales Maximum liegt immer am Rand.'],
+      steps: [
+        'Ein Hochpunkt ist nur in seiner Nähe der höchste Punkt.',
+        'Global kann ein anderer Hochpunkt oder ein Randwert größer sein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welche $a$ hat $f_a(x) = x^3 - a x$ zwei Extrempunkte?',
+      opts: ['für alle $a$', 'für $a = 0$', 'für $a < 0$', 'für $a > 0$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 3x^2 - a = 0 \\Leftrightarrow x^2 = \\tfrac{a}{3}$.',
+        'Zwei Lösungen mit Vorzeichenwechsel nur für $a > 0$: $x = \\pm\\sqrt{\\tfrac{a}{3}}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Hat $f(x) = x^2$ auf dem offenen Intervall $(-1;\\,2)$ ein globales Maximum?',
+      opts: ['Ja, 1 bei $x = -1$.', 'Ja, 4 bei $x = 2$.', 'Nein, die Werte kommen 4 beliebig nahe, erreichen 4 aber nicht.', 'Ja, 0 bei $x = 0$.'],
+      steps: [
+        'Die Randstellen gehören nicht zum Intervall.',
+        'Das globale Minimum 0 bei $x = 0$ existiert, ein Maximum nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Extrempunkte hat $f(x) = x^2 e^{-x}$?',
+      opts: ['$H(1 \\mid e^{-1})$', '$H(0 \\mid 0)$ und $T\\!\\left(2 \\mid \\tfrac{4}{e^2}\\right)$', '$T(0 \\mid 0)$ und $H\\!\\left(2 \\mid \\tfrac{4}{e^2}\\right)$', 'nur $T(0 \\mid 0)$'],
+      steps: [
+        '$f^{\\prime}(x) = 2x e^{-x} - x^2 e^{-x} = x(2 - x)e^{-x}$.',
+        'Vorzeichen: minus vor 0, plus zwischen 0 und 2, minus danach.',
+        '$f(2) = 4e^{-2} \\approx 0{,}54$.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$f(x) = x^3$ hat $f^{\\prime}(0) = 0$. Ist $f$ trotzdem auf ganz $\\mathbb{R}$ streng monoton steigend?',
+      opts: ['Ja, $f^{\\prime}(x) > 0$ bis auf die einzelne Stelle 0 reicht.', 'Nein, weil $f^{\\prime}(0) = 0$ ist.', 'Nein, $f$ fällt für $x < 0$.', 'Nur für $x > 0$.'],
+      steps: [
+        'Für $x_1 < x_2$ ist immer $x_1^3 < x_2^3$.',
+        'Eine isolierte Nullstelle von $f^{\\prime}$ ohne Vorzeichenwechsel stört die strenge Monotonie nicht.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

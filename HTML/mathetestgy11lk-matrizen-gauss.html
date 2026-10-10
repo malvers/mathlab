@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Matrizen und Gauß-Jordan-Verfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w13-matrizen-gauss',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Matrizen und Gauß-Jordan-Verfahren',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 13 (LB 2) · 20 Aufgaben: Gleichungssysteme als A · x = b, Matrizenmultiplikation, Gauß-Jordan, Lösbarkeit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 13 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-10 from the Grundkurs sheet mathegy11/w13 (matrices), 11-20 from mathegy11/w14 (Gauss-Jordan). */
+  questions: [
+    {
+      q: 'Wie schreibt man das Gleichungssystem $x + 2y = 5$, $3x - y = 1$ in der Form $A \\cdot \\vec{x} = \\vec{b}$?',
+      opts: ['$\\begin{pmatrix} 5 & 1 \\\\ 1 & 3 \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 \\\\ 3 & -1 \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 3 \\\\ 2 & -1 \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 \\\\ 3 & 1 \\end{pmatrix} \\cdot \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        'Jede Gleichung liefert eine Zeile der Koeffizientenmatrix.',
+        'Erste Zeile $(1 \\;\\; 2)$, zweite Zeile $(3 \\;\\; -1)$; rechts der Vektor der Absolutglieder.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Typ hat eine Matrix mit 2 Zeilen und 3 Spalten?',
+      opts: ['$(3,2)$', '$(2,3)$', '$(2,2)$', '$(6,1)$'],
+      steps: [
+        'Der Typ $(m,n)$ nennt zuerst die Zeilen, dann die Spalten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie sieht die erweiterte Koeffizientenmatrix von $2x + y = 7$, $x - 3y = 0$ aus?',
+      opts: ['$\\left(\\begin{array}{cc|c} 2 & 7 & 1 \\\\ 1 & 0 & -3 \\end{array}\\right)$', '$\\left(\\begin{array}{cc|c} 2 & 1 & 7 \\\\ 1 & -3 & 0 \\end{array}\\right)$', '$\\left(\\begin{array}{cc|c} 2 & 1 & 0 \\\\ 1 & -3 & 7 \\end{array}\\right)$', '$\\left(\\begin{array}{cc|c} 1 & 2 & 7 \\\\ -3 & 1 & 0 \\end{array}\\right)$'],
+      steps: [
+        'Links die Koeffizienten, rechts vom Strich die Absolutglieder.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix} \\cdot \\begin{pmatrix} 1 \\\\ 1 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 1 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 7 \\end{pmatrix}$'],
+      steps: [
+        'Zeile mal Spalte: $1 \\cdot 1 + 2 \\cdot 1 = 3$',
+        '$3 \\cdot 1 + 4 \\cdot 1 = 7$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 2 & 0 & 1 \\\\ 1 & 3 & -1 \\end{pmatrix} \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} 5 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 6 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 5 \\\\ 10 \\end{pmatrix}$'],
+      steps: [
+        '$2 \\cdot 1 + 0 \\cdot 2 + 1 \\cdot 3 = 5$',
+        '$1 \\cdot 1 + 3 \\cdot 2 + (-1) \\cdot 3 = 4$',
+        'Typ $(2,3)$ mal $(3,1)$ ergibt Typ $(2,1)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Typ hat das Produkt einer $(2,3)$-Matrix mit einer $(3,1)$-Matrix?',
+      opts: ['Das Produkt ist nicht definiert.', '$(2,3)$', '$(2,1)$', '$(3,3)$'],
+      steps: [
+        'Die inneren Zahlen müssen übereinstimmen (3 und 3).',
+        'Die äußeren ergeben den Typ des Produkts: $(2,1)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Kann man eine $(3,2)$-Matrix mit einer $(3,2)$-Matrix multiplizieren?',
+      opts: ['Ja, das Ergebnis hat den Typ $(3,3)$.', 'Ja, man multipliziert elementweise.', 'Nein, die Spaltenzahl der ersten (2) passt nicht zur Zeilenzahl der zweiten (3).', 'Ja, das Ergebnis hat den Typ $(3,2)$.'],
+      steps: [
+        'Für $A \\cdot B$ braucht $A$ so viele Spalten, wie $B$ Zeilen hat.',
+        'Die Matrizen müssen „verkettet“ sein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $A \\cdot B$ für $A = \\begin{pmatrix} 1 & 2 \\\\ 0 & 1 \\end{pmatrix}$ und $B = \\begin{pmatrix} 1 & 0 \\\\ 3 & 1 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 1 & 2 \\\\ 3 & 7 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}$', '$\\begin{pmatrix} 2 & 2 \\\\ 3 & 2 \\end{pmatrix}$', '$\\begin{pmatrix} 7 & 2 \\\\ 3 & 1 \\end{pmatrix}$'],
+      steps: [
+        'Element in Zeile $i$, Spalte $k$: Zeile $i$ von $A$ mal Spalte $k$ von $B$.',
+        'Erste Zeile: $1 \\cdot 1 + 2 \\cdot 3 = 7$ und $1 \\cdot 0 + 2 \\cdot 1 = 2$.',
+        'Zweite Zeile: $0 \\cdot 1 + 1 \\cdot 3 = 3$ und $0 \\cdot 0 + 1 \\cdot 1 = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Mit denselben Matrizen: Berechne $B \\cdot A$.',
+      opts: ['$\\begin{pmatrix} 1 & 2 \\\\ 3 & 7 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 0 \\\\ 3 & 7 \\end{pmatrix}$', '$\\begin{pmatrix} 1 & 2 \\\\ 3 & 1 \\end{pmatrix}$', '$\\begin{pmatrix} 7 & 2 \\\\ 3 & 1 \\end{pmatrix}$'],
+      steps: [
+        'Erste Zeile von $B$: $(1 \\;\\; 0)$, mal die Spalten von $A$: 1 und 2.',
+        'Zweite Zeile $(3 \\;\\; 1)$: $3 \\cdot 1 + 1 \\cdot 0 = 3$ und $3 \\cdot 2 + 1 \\cdot 1 = 7$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was zeigen die beiden letzten Aufgaben?',
+      opts: ['Man darf Matrizen nicht multiplizieren.', '$A \\cdot B$ ist immer die Einheitsmatrix.', 'Die Matrizenmultiplikation ist nicht kommutativ: $A \\cdot B \\neq B \\cdot A$.', 'Die Matrizenmultiplikation ist kommutativ.'],
+      steps: [
+        '$A \\cdot B$ und $B \\cdot A$ haben verschiedene Ergebnisse.',
+        'Ein Gegenbeispiel genügt, um das Kommutativgesetz zu widerlegen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Umformung ist beim Gauß-Jordan-Verfahren NICHT erlaubt?',
+      opts: ['Eine Zeile mit 0 multiplizieren', 'Eine Zeile mit einer Zahl ungleich 0 multiplizieren', 'Ein Vielfaches einer Zeile zu einer anderen addieren', 'Zwei Zeilen vertauschen'],
+      steps: [
+        'Erlaubt sind nur Umformungen, die die Lösungsmenge nicht ändern.',
+        'Mal 0 löscht eine Gleichung und damit Information.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist das Ziel des Gauß-Jordan-Verfahrens?',
+      opts: ['Die Matrix soll symmetrisch werden.', 'Die rechte Seite soll null werden.', 'Links vom Strich soll die Einheitsmatrix stehen; rechts steht dann die Lösung.', 'Alle Einträge sollen null werden.'],
+      steps: [
+        'Gauß bringt die Matrix auf Stufenform, Jordan räumt auch oberhalb der Diagonalen ab.',
+        'Am Ende lautet jede Zeile $x = \\ldots$, $y = \\ldots$, $z = \\ldots$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Zeile entsteht aus $\\left(\\begin{array}{ccc|c} 1 & 1 & 1 & 6 \\\\ 2 & -1 & 1 & 3 \\end{array}\\right)$ durch $Z_2 - 2 \\cdot Z_1$?',
+      opts: ['$(0 \\;\\; -3 \\;\\; -1 \\mid 9)$', '$(0 \\;\\; -3 \\;\\; -1 \\mid -9)$', '$(0 \\;\\; -3 \\;\\; 1 \\mid -9)$', '$(0 \\;\\; 1 \\;\\; -1 \\mid 3)$'],
+      steps: [
+        '$2 - 2 \\cdot 1 = 0$, $-1 - 2 \\cdot 1 = -3$, $1 - 2 \\cdot 1 = -1$',
+        'Rechts: $3 - 2 \\cdot 6 = -9$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Endform lautet $\\left(\\begin{array}{ccc|c} 1 & 0 & 0 & 2 \\\\ 0 & 1 & 0 & -1 \\\\ 0 & 0 & 1 & 4 \\end{array}\\right)$. Wie heißt die Lösung?',
+      opts: ['$x = 4$, $y = -1$, $z = 2$', '$x = 1$, $y = 1$, $z = 1$', 'Keine Lösung', '$x = 2$, $y = -1$, $z = 4$'],
+      steps: [
+        'Jede Zeile ist eine Gleichung: $1x + 0y + 0z = 2$ usw.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse das Stufensystem $x + y + z = 6$, $y + z = 5$, $z = 3$.',
+      opts: ['$x = 3$, $y = 2$, $z = 1$', '$x = 6$, $y = 5$, $z = 3$', '$x = 1$, $y = 2$, $z = 3$', '$x = 1$, $y = 5$, $z = 3$'],
+      steps: [
+        'Von unten nach oben: $z = 3$.',
+        '$y = 5 - 3 = 2$, dann $x = 6 - 2 - 3 = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse $x + y + z = 6$, $2x - y + z = 3$, $x + 2y - z = 2$.',
+      opts: ['$x = 3$, $y = 2$, $z = 1$', '$x = 2$, $y = 1$, $z = 3$', '$x = 0$, $y = 3$, $z = 3$', '$x = 1$, $y = 2$, $z = 3$'],
+      steps: [
+        '$Z_2 - 2Z_1$: $-3y - z = -9$; $Z_3 - Z_1$: $y - 2z = -4$.',
+        'Aus der zweiten: $y = 2z - 4$; eingesetzt: $-6z + 12 - z = -9$, also $z = 3$, $y = 2$.',
+        'Dann $x = 6 - 2 - 3 = 1$. Probe in allen drei Gleichungen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Das CAS zeigt für ein System die reduzierte Form $\\left(\\begin{array}{ccc|c} 1 & 0 & 2 & 3 \\\\ 0 & 1 & -1 & 1 \\end{array}\\right)$ (Variablen $x$, $y$, $z$). Was folgt?',
+      opts: ['Unendlich viele Lösungen: $x = 3 - 2z$, $y = 1 + z$, $z$ beliebig.', '$x = 2$, $y = -1$, $z = 3$.', 'Genau eine Lösung $x = 3$, $y = 1$.', 'Keine Lösung.'],
+      steps: [
+        'Zwei Gleichungen für drei Unbekannte: $z$ bleibt frei.',
+        '$x + 2z = 3$ und $y - z = 1$ nach $x$ bzw. $y$ auflösen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Nach den Umformungen steht die Zeile $(0 \\;\\; 0 \\;\\; 0 \\mid 5)$. Was folgt?',
+      opts: ['Das System hat unendlich viele Lösungen.', '$z = 5$', '$x = y = z = 0$', 'Das System hat keine Lösung.'],
+      steps: [
+        'Die Zeile bedeutet $0x + 0y + 0z = 5$, also $0 = 5$.',
+        'Ein Widerspruch: Die Lösungsmenge ist leer.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Lösungen hat $x + y = 2$, $2x + 2y = 4$?',
+      opts: ['Unendlich viele', 'Keine', 'Genau zwei', 'Genau eine'],
+      steps: [
+        'Die zweite Gleichung ist das Doppelte der ersten.',
+        'Es bleibt nur eine Bedingung für zwei Unbekannte: Gerade aus Lösungen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Lösungen hat $x + y = 2$, $2x + 2y = 5$?',
+      opts: ['Keine', 'Unendlich viele', 'Genau zwei', 'Genau eine'],
+      steps: [
+        '$Z_2 - 2Z_1$: $0 = 1$, Widerspruch.',
+        'Geometrisch: zwei parallele Geraden.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

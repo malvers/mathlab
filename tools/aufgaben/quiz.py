@@ -322,16 +322,18 @@ def fos12(nr, slug, thema, lb, blurb, comment=''):
 
 
 # ------------------------------------------------------ Gymnasium Mathe ----
-def _gy(stufe, nr, slug, thema, lb, blurb, comment):
+def _gy(stufe, nr, slug, thema, lb, blurb, comment, lk=False):
+    # lk=True: Leistungskurs sheets get the suffix "lk" in id, file and plan (mathegy11lk …); Grundkurs output is unchanged
+    tag, kurs = ('lk', 'Leistungskurs') if lk else ('', 'Grundkurs')
     return Quiz(
-        id='mathegy%d-w%02d-%s' % (stufe, nr, slug),
-        file='mathetestgy%d-%s.html' % (stufe, slug),
+        id='mathegy%d%s-w%02d-%s' % (stufe, tag, nr, slug),
+        file='mathetestgy%d%s-%s.html' % (stufe, tag, slug),
         title='Aufgaben · ' + thema,
-        subtitle='Gymnasium · Jahrgangsstufe %d · Grundkurs · Woche %d (%s) · 20 Aufgaben: %s · genau eine Antwort pro Aufgabe'
-                 % (stufe, nr, lb, blurb),
-        dash_sub='Gymnasium · Jahrgangsstufe %d · Woche %d · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe'
-                 % (stufe, nr),
-        back='svp/mathe/mathegy%d.html' % stufe,
+        subtitle='Gymnasium · Jahrgangsstufe %d · %s · Woche %d (%s) · 20 Aufgaben: %s · genau eine Antwort pro Aufgabe'
+                 % (stufe, kurs, nr, lb, blurb),
+        dash_sub=('Gymnasium · Jahrgangsstufe %d · Leistungskurs · Woche %d · ' if lk else 'Gymnasium · Jahrgangsstufe %d · Woche %d · ')
+                 % (stufe, nr) + 'Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+        back='svp/mathe/mathegy%d%s.html' % (stufe, tag),
         comment=comment)
 
 
@@ -343,6 +345,16 @@ def gy11(nr, slug, thema, lb, blurb, comment=''):
 def gy12(nr, slug, thema, lb, blurb, comment=''):
     """Sheet for the Gymnasium-12 Grundkurs Mathematik plan (mathe/mathegy12.html)."""
     return _gy(12, nr, slug, thema, lb, blurb, comment)
+
+
+def gy11lk(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Gymnasium-11 Leistungskurs Mathematik plan (mathe/mathegy11lk.html)."""
+    return _gy(11, nr, slug, thema, lb, blurb, comment, lk=True)
+
+
+def gy12lk(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Gymnasium-12 Leistungskurs Mathematik plan (mathe/mathegy12lk.html)."""
+    return _gy(12, nr, slug, thema, lb, blurb, comment, lk=True)
 
 
 # ------------------------------------------------------------------ wiring ----

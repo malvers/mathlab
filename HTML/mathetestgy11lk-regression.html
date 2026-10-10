@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Funktionsgleichungen durch Regression — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w17-regression',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Funktionsgleichungen durch Regression',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 17 (LB 1) · 20 Aufgaben: Modelltyp begründet wählen, Regression mit CAS, Bestimmtheitsmaß, Residuen, Grenzen des Modells · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 17 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-16 from the Grundkurs sheet (mathegy11/w18), 17-20 Leistungskurs. */
+  questions: [
+    {
+      q: 'Messwerte wachsen in gleichen Zeitschritten immer um denselben Betrag. Welcher Modelltyp passt?',
+      opts: ['Sinusförmig', 'Exponentiell', 'Quadratisch', 'Linear'],
+      steps: [
+        'Konstante Differenzen kennzeichnen lineares Wachstum.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Messwerte wachsen in gleichen Zeitschritten immer um denselben Faktor. Welcher Modelltyp passt?',
+      opts: ['Linear', 'Exponentiell', 'Logarithmisch', 'Quadratisch'],
+      steps: [
+        'Konstante Quotienten kennzeichnen exponentielles Wachstum.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei den Werten 1, 2, 5, 10, 17 sind die Differenzen 1, 3, 5, 7. Welcher Modelltyp passt?',
+      opts: ['Kubisch', 'Quadratisch', 'Exponentiell', 'Linear'],
+      steps: [
+        'Die Differenzen der Differenzen sind konstant (2).',
+        'Das kennzeichnet eine quadratische Funktion.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Tagesverlauf der Wassertiefe in einem Hafen soll modelliert werden. Welcher Typ ist geeignet?',
+      opts: ['$f(t) = at + b$', '$f(t) = at^2 + bt + c$', '$f(t) = a \\cdot e^{kt}$', '$f(t) = a \\sin(b(t - c)) + d$'],
+      steps: [
+        'Ebbe und Flut wiederholen sich periodisch.',
+        'Periodische Vorgänge beschreibt man mit Sinusfunktionen (Kl. 10).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Getränk kühlt auf Raumtemperatur ab. Welcher Modelltyp passt am besten?',
+      opts: ['$T(t) = at + b$', '$T(t) = a \\cdot e^{kt}$ mit $k > 0$', '$T(t) = T_R + a \\cdot e^{-kt}$ mit Raumtemperatur $T_R$', '$T(t) = at^2$'],
+      steps: [
+        'Die Temperatur nähert sich der Raumtemperatur, unterschreitet sie aber nicht.',
+        'Beschränkter Zerfall: Exponentialfunktion mit Asymptote $T_R$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was macht eine Regression?',
+      opts: ['Sie findet immer eine Funktion, die exakt durch alle Punkte geht.', 'Sie bestimmt die Parameter eines gewählten Funktionstyps so, dass er möglichst gut zu den Messpunkten passt.', 'Sie berechnet Nullstellen.', 'Sie wählt den richtigen Funktionstyp selbst aus.'],
+      steps: [
+        'Den Typ wählt man selbst, das CAS passt die Parameter an.',
+        'Gütemaß: Die Summe der quadrierten Abweichungen wird möglichst klein (Methode der kleinsten Quadrate).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche lineare Funktion geht durch $(1 \\mid 3)$, $(2 \\mid 5)$ und $(3 \\mid 7)$?',
+      opts: ['$y = 2x + 1$', '$y = x + 2$', '$y = 2x + 3$', '$y = 3x$'],
+      steps: [
+        'Anstieg: $\\dfrac{5 - 3}{2 - 1} = 2$.',
+        '$3 = 2 \\cdot 1 + n \\Rightarrow n = 1$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Exponentialfunktion passt zu $(0 \\mid 2)$, $(1 \\mid 6)$, $(2 \\mid 18)$?',
+      opts: ['$y = 3 \\cdot 2^x$', '$y = 2 + 4x$', '$y = 6^x$', '$y = 2 \\cdot 3^x$'],
+      steps: [
+        'Startwert $a = 2$.',
+        'Faktor pro Schritt: $\\dfrac{6}{2} = \\dfrac{18}{6} = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Gerade geht durch $(2 \\mid 10)$ und $(6 \\mid 22)$. Wie lautet sie?',
+      opts: ['$y = 3x$', '$y = 2x + 6$', '$y = 3x + 4$', '$y = 4x + 2$'],
+      steps: [
+        '$m = \\dfrac{22 - 10}{6 - 2} = 3$',
+        '$10 = 3 \\cdot 2 + n \\Rightarrow n = 4$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Bestand ist 200, 240, 288 in aufeinanderfolgenden Jahren. Wie groß ist das jährliche Wachstum?',
+      opts: ['20 %', '24 %', '2 %', '40 %'],
+      steps: [
+        '$\\dfrac{240}{200} = \\dfrac{288}{240} = 1{,}2$',
+        'Wachstumsfaktor 1,2 bedeutet 20 % Zunahme pro Jahr.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Das CAS liefert für eine lineare Regression das Bestimmtheitsmaß $r^2 = 0{,}98$. Was bedeutet das?',
+      opts: ['Das lineare Modell beschreibt die Daten sehr gut.', 'Das Modell trifft 98 % der Punkte exakt.', 'Der Anstieg ist 0,98.', 'Das Modell ist ungeeignet.'],
+      steps: [
+        '$r^2$ liegt zwischen 0 und 1.',
+        'Je näher an 1, desto weniger streuen die Punkte um das Modell.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Regression liefert $y = 1{,}5x + 2$. Welchen Wert sagt das Modell für $x = 10$ voraus?',
+      opts: ['3,5', '17', '15', '12'],
+      steps: [
+        '$1{,}5 \\cdot 10 + 2 = 17$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine exponentielle Regression liefert $y = 3 \\cdot 2^x$. Welchen Wert erwartet man für $x = 4$?',
+      opts: ['1296', '14', '24', '48'],
+      steps: [
+        '$2^4 = 16$',
+        '$3 \\cdot 16 = 48$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist ein Residuum?',
+      opts: ['Die Steigung der Regressionsgeraden.', 'Ein Messfehler des Geräts.', 'Die Abweichung zwischen Messwert und Modellwert an einer Stelle.', 'Der Startwert des Modells.'],
+      steps: [
+        'Residuum = gemessen minus berechnet.',
+        'Die Regression macht die Summe der quadrierten Residuen möglichst klein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Durch 5 Messpunkte geht immer genau eine ganzrationale Funktion höchstens vierten Grades. Warum ist sie trotzdem oft kein gutes Modell?',
+      opts: ['Sie folgt auch den Messschwankungen und schwingt zwischen und außerhalb der Punkte stark.', 'Weil ganzrationale Funktionen nie Modelle sein können.', 'Weil sie nicht durch alle Punkte geht.', 'Weil das CAS sie nicht berechnen kann.'],
+      steps: [
+        'Ein gutes Modell gibt den Trend wieder, nicht jede Zufallsschwankung.',
+        'Man spricht von Überanpassung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Modell $y = a \\cdot e^{kx}$ hat $a = 5$ und $k = 0{,}2$. Welchen Wert liefert es für $x = 5$?',
+      opts: ['etwa 27,2', 'etwa 13,6', 'etwa 6,0', 'etwa 5,0'],
+      steps: [
+        '$5 \\cdot e^{0{,}2 \\cdot 5} = 5e$',
+        '$5 \\cdot 2{,}718 \\approx 13{,}6$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was macht die lineare Regression (Methode der kleinsten Quadrate) möglichst klein?',
+      opts: ['die Summe aller Residuen', 'das größte Residuum', 'die Anzahl der Punkte neben der Geraden', 'die Summe der Quadrate aller Residuen'],
+      steps: [
+        'Quadrieren verhindert, dass sich positive und negative Abweichungen aufheben.',
+        'Die Summe der Residuen allein ist bei der Ausgleichsgeraden immer 0.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Exponentielle Messwerte $y = a \\cdot e^{kx}$: Was passiert, wenn man $\\ln y$ gegen $x$ aufträgt?',
+      opts: ['Die Punkte liegen auf einer Parabel.', 'Die Punkte liegen auf einer Geraden durch den Ursprung mit Anstieg $a$.', 'Die Punkte liegen auf einer Geraden mit Anstieg $k$ und Achsenabschnitt $\\ln a$.', 'Es entsteht wieder eine Exponentialkurve.'],
+      steps: [
+        '$\\ln y = \\ln a + kx$ ist linear in $x$.',
+        'So kann man mit einer linearen Regression $k$ und $a$ bestimmen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Residuen einer linearen Regression sind erst positiv, dann negativ, dann wieder positiv (U-förmiges Muster). Was folgt?',
+      opts: ['Die Messwerte sind falsch.', 'Das Modell ist perfekt.', 'Der lineare Modelltyp passt nicht; ein gekrümmtes Modell (z. B. quadratisch) ist besser.', 'Man muss mehr Nachkommastellen angeben.'],
+      steps: [
+        'Bei passendem Modell streuen Residuen zufällig um 0.',
+        'Ein systematisches Muster zeigt, dass die Daten gekrümmt verlaufen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Das Modell lautet $y = 2x + 2$, gemessen wurde der Punkt $(4 \\mid 11)$. Wie groß ist das Residuum?',
+      opts: ['1', '10', '−1', '11'],
+      steps: [
+        'Modellwert: $2 \\cdot 4 + 2 = 10$.',
+        'Residuum = Messwert minus Modellwert: $11 - 10 = 1$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

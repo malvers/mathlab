@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Bernoulli-Ketten: Einzel- und kumulierte Wahrscheinlichkeiten — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w35-bernoulli',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Bernoulli-Ketten: Einzel- und kumulierte Wahrscheinlichkeiten',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 35 (LB 4) · 20 Aufgaben: Bernoulli-Experiment und -Kette, Formel herleiten, Einzelwahrscheinlichkeiten, Summensymbol, Gegenereignis · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 35 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-8 from mathegy11/w33, 9-14 from mathegy11/w34, 15-20 from mathegy11/w35 (Grundkurs). */
+  questions: [
+    {
+      q: 'Was ist ein Bernoulli-Experiment?',
+      opts: ['Ein Zufallsexperiment mit genau zwei Ergebnissen, Treffer und Niete.', 'Ein Experiment mit sechs gleich wahrscheinlichen Ergebnissen.', 'Ein Experiment, das immer einen Treffer liefert.', 'Ein Ziehen ohne Zurücklegen.'],
+      steps: [
+        'Treffer mit Wahrscheinlichkeit $p$, Niete mit $1 - p$.',
+        'Auch ein Würfel wird zum Bernoulli-Experiment, wenn nur „Sechs oder nicht“ zählt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist eine Bernoulli-Kette der Länge $n$?',
+      opts: ['$n$ unabhängige Wiederholungen eines Bernoulli-Experiments mit gleichem $p$.', '$n$ verschiedene Experimente mit verschiedenen $p$.', '$n$ Ziehungen ohne Zurücklegen.', 'Ein Experiment mit $n$ Ergebnissen.'],
+      steps: [
+        'Entscheidend: gleiche Trefferwahrscheinlichkeit und Unabhängigkeit der Stufen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ist das Ziehen von 3 Kugeln ohne Zurücklegen aus einer Urne mit 3 roten und 2 blauen Kugeln eine Bernoulli-Kette?',
+      opts: ['Nur wenn man auf Rot setzt.', 'Ja, immer.', 'Nein, die Trefferwahrscheinlichkeit ändert sich von Zug zu Zug.', 'Ja, es gibt nur zwei Farben.'],
+      steps: [
+        'Ohne Zurücklegen hängt jede Stufe von der vorigen ab.',
+        'Mit Zurücklegen wäre es eine Bernoulli-Kette mit $p = \\dfrac{3}{5}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Wahrscheinlichkeit hat EIN bestimmter Pfad mit $k$ Treffern in einer Bernoulli-Kette der Länge $n$?',
+      opts: ['$p^k \\cdot (1 - p)^{n - k}$', '$p^n$', '$k \\cdot p$', '$\\dbinom{n}{k} \\cdot p^k$'],
+      steps: [
+        'Längs des Pfades: $k$-mal $p$ und $(n - k)$-mal $1 - p$ multiplizieren.',
+        'Alle Pfade mit $k$ Treffern haben dieselbe Wahrscheinlichkeit.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum steht in der Formel für $P(X = k)$ der Faktor $\\dbinom{n}{k}$?',
+      opts: ['Er gibt die Zahl der Nieten an.', 'Er ist ein Korrekturfaktor für das Runden.', 'Er macht die Formel symmetrisch.', 'Er zählt die Pfade mit genau $k$ Treffern; ihre Wahrscheinlichkeiten werden addiert.'],
+      steps: [
+        '2. Pfadregel: gleiche Pfadwahrscheinlichkeit mal Anzahl der Pfade.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Würfel wird dreimal geworfen. Wie wahrscheinlich sind genau zwei Sechsen?',
+      opts: ['$\\dfrac{1}{12}$', '$\\dfrac{5}{216}$', '$\\dfrac{1}{36}$', '$\\dfrac{5}{72}$'],
+      steps: [
+        '$\\dbinom{3}{2} \\cdot \\left(\\dfrac{1}{6}\\right)^2 \\cdot \\dfrac{5}{6} = 3 \\cdot \\dfrac{5}{216}$',
+        '$= \\dfrac{15}{216} = \\dfrac{5}{72}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Test mit 5 Fragen wird geraten ($p = \\dfrac{1}{4}$). Wie wahrscheinlich ist alles falsch?',
+      opts: ['etwa 0,001', 'etwa 0,237', '0,25', 'etwa 0,763'],
+      steps: [
+        '$\\left(\\dfrac{3}{4}\\right)^5 = \\dfrac{243}{1024} \\approx 0{,}237$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie wahrscheinlich ist beim Raten genau eine richtige Antwort?',
+      opts: ['etwa 0,237', '0,25', 'etwa 0,079', 'etwa 0,396'],
+      steps: [
+        '$\\dbinom{5}{1} \\cdot \\dfrac{1}{4} \\cdot \\left(\\dfrac{3}{4}\\right)^4 = 5 \\cdot \\dfrac{81}{1024}$',
+        '$= \\dfrac{405}{1024} \\approx 0{,}396$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Formel für die Einzelwahrscheinlichkeit einer binomialverteilten Zufallsgröße?',
+      opts: ['$P(X = k) = \\dbinom{n}{k} \\cdot p^k \\cdot (1 - p)^{n - k}$', '$P(X = k) = \\dbinom{n}{k} \\cdot p^n$', '$P(X = k) = \\dfrac{k}{n}$', '$P(X = k) = p^k \\cdot (1 - p)^k$'],
+      steps: [
+        'Anzahl der Pfade mal Wahrscheinlichkeit eines Pfades.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was bedeutet die Schreibweise $B_{n;\\,p}(k)$?',
+      opts: ['Die Wahrscheinlichkeit für höchstens $k$ Treffer', 'Den Binomialkoeffizienten $\\dbinom{n}{k}$', 'Die Wahrscheinlichkeit für genau $k$ Treffer bei $n$ Versuchen mit Trefferwahrscheinlichkeit $p$', 'Den Erwartungswert'],
+      steps: [
+        '$B_{n;\\,p}(k) = P(X = k)$ für $X$ binomialverteilt mit $n$ und $p$.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$X$ ist binomialverteilt mit $n = 10$, $p = 0{,}5$. Berechne $P(X = 5)$.',
+      opts: ['etwa 0,377', 'etwa 0,246', '0,5', 'etwa 0,05'],
+      steps: [
+        '$\\dbinom{10}{5} \\cdot 0{,}5^{10} = \\dfrac{252}{1024}$',
+        '$\\approx 0{,}246$: Selbst der wahrscheinlichste Wert tritt nur in einem Viertel der Fälle ein.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$n = 20$, $p = 0{,}1$. Berechne $P(X = 2)$ (gerundet).',
+      opts: ['0,1901', '0,2852', '0,1', '0,01'],
+      steps: [
+        '$\\dbinom{20}{2} \\cdot 0{,}1^2 \\cdot 0{,}9^{18} = 190 \\cdot 0{,}01 \\cdot 0{,}1501$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Würfel wird sechsmal geworfen. Wie wahrscheinlich ist genau eine Sechs?',
+      opts: ['1', 'etwa 0,335', 'etwa 0,402', '$\\dfrac{1}{6}$'],
+      steps: [
+        '$\\dbinom{6}{1} \\cdot \\dfrac{1}{6} \\cdot \\left(\\dfrac{5}{6}\\right)^5 = \\left(\\dfrac{5}{6}\\right)^5$',
+        '$\\approx 0{,}402$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist $P(X = n)$ bei einer Binomialverteilung?',
+      opts: ['$(1 - p)^n$', '$p^n$', '1', '$n \\cdot p$'],
+      steps: [
+        'Nur ein Pfad: alles Treffer.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet „höchstens 3 Treffer“?',
+      opts: ['$X = 3$', '$X \\geq 3$', '$X \\leq 3$', '$X < 3$'],
+      steps: [
+        'Höchstens 3: 0, 1, 2 oder 3 Treffer.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie berechnet man $P(X \\geq 1)$ am schnellsten?',
+      opts: ['$1 - P(X = 0)$', '$1 - P(X = 1)$', '$P(X \\leq 1)$', '$P(X = 1)$'],
+      steps: [
+        'Gegenereignis von „mindestens ein Treffer“ ist „kein Treffer“.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie berechnet man $P(X \\geq k)$ aus einer Tabelle der Werte $P(X \\leq k)$?',
+      opts: ['$P(X \\leq k) - 1$', '$P(X \\leq k + 1)$', '$1 - P(X \\leq k - 1)$', '$1 - P(X \\leq k)$'],
+      steps: [
+        'Gegenereignis von „mindestens $k$“ ist „höchstens $k - 1$“.',
+        'Typischer Fehler: $1 - P(X \\leq k)$ schließt $k$ selbst mit aus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie schreibt man $P(X \\leq 2)$ mit dem Summensymbol?',
+      opts: ['$\\dbinom{n}{2} p^2 (1 - p)^{n - 2}$', '$\\sum\\limits_{k=0}^{2} \\dbinom{n}{k} p^k (1 - p)^{n - k}$', '$\\sum\\limits_{k=2}^{n} \\dbinom{n}{k} p^k (1 - p)^{n - k}$', '$\\sum\\limits_{k=1}^{2} p^k$'],
+      steps: [
+        'Die Einzelwahrscheinlichkeiten für $k = 0$, 1 und 2 werden addiert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie berechnet man „zwischen 2 und 5 Treffer (jeweils einschließlich)“?',
+      opts: ['$P(X = 5) - P(X = 2)$', '$P(X \\leq 5) - P(X \\leq 2)$', '$P(X \\leq 5) + P(X \\leq 2)$', '$P(X \\leq 5) - P(X \\leq 1)$'],
+      steps: [
+        '$P(2 \\leq X \\leq 5)$: Von „bis 5“ wird „bis 1“ abgezogen, damit die 2 dabei bleibt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Fünf Fragen werden geraten ($p = \\dfrac{1}{4}$). Wie wahrscheinlich sind mindestens 3 richtig?',
+      opts: ['etwa 0,25', 'etwa 0,088', 'etwa 0,896', 'etwa 0,104'],
+      steps: [
+        '$\\dbinom{5}{3} \\cdot \\dfrac{9}{1024} + \\dbinom{5}{4} \\cdot \\dfrac{3}{1024} + \\dfrac{1}{1024} = \\dfrac{90 + 15 + 1}{1024}$',
+        '$= \\dfrac{106}{1024} \\approx 0{,}104$: Raten lohnt sich nicht.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Grenzwert an einer Stelle — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w03-grenzwert-stelle',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Grenzwert an einer Stelle',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 3 (LB 1) · 20 Aufgaben: einseitige Grenzwerte, abschnittsweise definierte Funktionen, Grenzwertsätze · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 3 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-11 from the Grundkurs sheet (mathegy11/w03), 12-20 Leistungskurs (piecewise functions, harder limits). */
+  questions: [
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 2} (x^2 + 1)$.',
+      opts: ['4', 'Der Grenzwert existiert nicht.', '5', '3'],
+      steps: [
+        '$x^2 + 1$ ist stetig, man darf einsetzen.',
+        '$2^2 + 1 = 5$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 3} \\dfrac{x^2 - 9}{x - 3}$.',
+      opts: ['6', '0', 'Der Grenzwert existiert nicht, weil man durch null teilt.', '3'],
+      steps: [
+        'Einsetzen ergibt $\\dfrac{0}{0}$, das ist kein Ergebnis.',
+        'Dritte binomische Formel: $\\dfrac{(x - 3)(x + 3)}{x - 3} = x + 3$ für $x \\neq 3$.',
+        '$\\lim\\limits_{x \\to 3} (x + 3) = 6$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 1} \\dfrac{x^2 - 1}{x - 1}$.',
+      opts: ['0', '2', '1', 'Der Grenzwert existiert nicht.'],
+      steps: [
+        '$x^2 - 1 = (x - 1)(x + 1)$',
+        'Für $x \\neq 1$ kürzen: $x + 1$.',
+        '$\\lim\\limits_{x \\to 1} (x + 1) = 2$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 0} \\dfrac{x^2 + 2x}{x}$.',
+      opts: ['$\\infty$', '0', '2', '1'],
+      steps: [
+        '$x$ ausklammern: $\\dfrac{x(x + 2)}{x} = x + 2$ für $x \\neq 0$.',
+        '$\\lim\\limits_{x \\to 0} (x + 2) = 2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was gilt für $f(x) = \\dfrac{1}{x}$, wenn $x$ von rechts gegen null geht?',
+      opts: ['$f(x) \\to 1$', '$f(x) \\to \\infty$', '$f(x) \\to 0$', '$f(x) \\to -\\infty$'],
+      steps: [
+        'Für kleine positive $x$ ist $\\dfrac{1}{x}$ groß und positiv: $f(0{,}01) = 100$.',
+        'Also rechtsseitig $f(x) \\to \\infty$.',
+        'Von links gilt $f(x) \\to -\\infty$; einen Grenzwert an der Stelle 0 gibt es deshalb nicht.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was gilt für $f(x) = \\dfrac{1}{(x - 3)^2}$ in der Nähe von $x_0 = 3$?',
+      opts: ['Links $f(x) \\to -\\infty$, rechts $f(x) \\to \\infty$.', '$f(x) \\to 0$', 'Von beiden Seiten $f(x) \\to \\infty$.', '$f(x) \\to 3$'],
+      steps: [
+        'Der Nenner $(x - 3)^2$ geht gegen null und ist immer positiv.',
+        'Ein Bruch mit positivem Zähler und kleinem positiven Nenner wird beliebig groß.',
+        'Polstelle ohne Vorzeichenwechsel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to -1} \\dfrac{x^3 + 1}{x + 1}$.',
+      opts: ['−1', '3', '1', '0'],
+      steps: [
+        'Polynomdivision oder Faktorisieren: $x^3 + 1 = (x + 1)(x^2 - x + 1)$.',
+        'Für $x \\neq -1$ bleibt $x^2 - x + 1$.',
+        '$(-1)^2 - (-1) + 1 = 3$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Es gilt $\\lim\\limits_{x \\to x_0} f(x) = 3$ und $\\lim\\limits_{x \\to x_0} g(x) = -2$. Bestimme $\\lim\\limits_{x \\to x_0} \\bigl(f(x) \\cdot g(x)\\bigr)$.',
+      opts: ['5', '−6', '−1,5', '1'],
+      steps: [
+        'Grenzwertsatz für Produkte: Der Grenzwert des Produkts ist das Produkt der Grenzwerte.',
+        '$3 \\cdot (-2) = -6$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Mit denselben Grenzwerten ($f \\to 3$, $g \\to -2$): Bestimme $\\lim\\limits_{x \\to x_0} \\bigl(2f(x) - g(x)\\bigr)$.',
+      opts: ['6', '−8', '8', '4'],
+      steps: [
+        'Summen- und Faktorregel für Grenzwerte.',
+        '$2 \\cdot 3 - (-2) = 6 + 2 = 8$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Mit denselben Grenzwerten ($f \\to 3$, $g \\to -2$): Bestimme $\\lim\\limits_{x \\to x_0} \\dfrac{f(x)}{g(x)}$.',
+      opts: ['1', 'Der Grenzwert existiert nicht.', '$-\\dfrac{3}{2}$', '$-\\dfrac{2}{3}$'],
+      steps: [
+        'Quotientenregel für Grenzwerte, erlaubt weil der Grenzwert des Nenners nicht null ist.',
+        '$\\dfrac{3}{-2} = -\\dfrac{3}{2}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Wertetabelle zeigt $\\dfrac{\\sin x}{x}$ für $x = 0{,}1$; 0,01; 0,001: etwa 0,9983; 0,99998; 0,9999998. Was vermutest du für $x \\to 0$?',
+      opts: ['Grenzwert 1', 'Kein Grenzwert, weil man durch null teilt.', 'Grenzwert $\\infty$', 'Grenzwert 0'],
+      steps: [
+        'An der Stelle 0 selbst ist $\\dfrac{\\sin x}{x}$ nicht definiert.',
+        'Die Werte nähern sich aber erkennbar der 1.',
+        'Tatsächlich gilt $\\lim\\limits_{x \\to 0} \\dfrac{\\sin x}{x} = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$f(x) = x^2$ für $x < 1$ und $f(x) = 2x$ für $x \\geq 1$. Was gilt an der Stelle 1?',
+      opts: ['Links Grenzwert 1, rechts 2: kein Grenzwert.', 'Grenzwert 1', 'Grenzwert 1,5', 'Grenzwert 2, weil $f(1) = 2$.'],
+      steps: [
+        'Von links gilt die obere Vorschrift: $x^2 \\to 1$.',
+        'Von rechts die untere: $2x \\to 2$.',
+        'Verschiedene einseitige Grenzwerte: kein Grenzwert an der Stelle 1.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$f(x) = x + 1$ für $x < 2$ und $f(x) = x^2 - 1$ für $x \\geq 2$. Existiert $\\lim\\limits_{x \\to 2} f(x)$?',
+      opts: ['Ja, er ist 2.', 'Nein, links 3 und rechts 4.', 'Nein, weil die Vorschrift wechselt.', 'Ja, beide einseitigen Grenzwerte sind 3.'],
+      steps: [
+        'Links: $2 + 1 = 3$. Rechts: $4 - 1 = 3$.',
+        'Gleiche einseitige Grenzwerte, also Grenzwert 3.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche abschnittsweise Vorschrift beschreibt $f(x) = |x - 2|$?',
+      opts: ['$x - 2$ für $x < 2$, $2 - x$ für $x \\geq 2$', '$2 - x$ für $x < 2$, $x - 2$ für $x \\geq 2$', '$2 - x$ für alle $x$', '$x + 2$ für $x < 2$, $x - 2$ für $x \\geq 2$'],
+      steps: [
+        'Für $x < 2$ ist $x - 2$ negativ, der Betrag dreht das Vorzeichen um: $2 - x$.',
+        'Für $x \\geq 2$ bleibt $x - 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die einseitigen Grenzwerte von $\\dfrac{|x|}{x}$ an der Stelle 0.',
+      opts: ['links −1, rechts 1', 'links $-\\infty$, rechts $\\infty$', 'beide 1', 'beide 0'],
+      steps: [
+        'Für $x < 0$ ist $|x| = -x$, der Bruch ist −1.',
+        'Für $x > 0$ ist der Bruch 1. Kein Grenzwert an der Stelle 0.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die einseitigen Grenzwerte von $f(x) = \\dfrac{x^2 - 4}{|x - 2|}$ an der Stelle 2.',
+      opts: ['links 4, rechts −4', 'beide 4', 'beide 0', 'links −4, rechts 4'],
+      steps: [
+        'Für $x > 2$: $\\dfrac{(x - 2)(x + 2)}{x - 2} = x + 2 \\to 4$.',
+        'Für $x < 2$: $|x - 2| = 2 - x$, also $\\dfrac{(x - 2)(x + 2)}{2 - x} = -(x + 2) \\to -4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Handytarif kostet 10 € bis 1 GB und darüber $10 + 5(x - 1)$ € für $x$ GB. Wie verhält sich der Preis an der Stelle $x = 1$?',
+      opts: ['Links 10 €, rechts 5 €.', 'Der Preis springt von 10 € auf 15 €.', 'Der Preis ist dort nicht definiert.', 'Beide einseitigen Grenzwerte sind 10 €: kein Preissprung.'],
+      steps: [
+        'Links: konstant 10.',
+        'Rechts: $10 + 5 \\cdot 0 = 10$. Kein Sprung, der Tarif ist stetig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Es gilt $\\lim\\limits_{x \\to 0} x^2 = 0$ und $\\lim\\limits_{x \\to 0} x = 0$. Was folgt für $\\lim\\limits_{x \\to 0} \\dfrac{x^2}{x}$?',
+      opts: ['Der Quotientensatz ist nicht anwendbar, der Grenzwert ist trotzdem 0.', 'Der Grenzwert ist $\\infty$.', 'Der Grenzwert existiert nicht.', 'Der Grenzwert ist $\\tfrac{0}{0} = 1$.'],
+      steps: [
+        'Der Grenzwertsatz für Quotienten verlangt einen Nenner-Grenzwert ungleich 0.',
+        'Erst kürzen: $\\dfrac{x^2}{x} = x \\to 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 0} \\dfrac{\\sqrt{x + 4} - 2}{x}$.',
+      opts: ['Der Grenzwert existiert nicht.', '$\\dfrac{1}{2}$', '0', '$\\dfrac{1}{4}$'],
+      steps: [
+        'Mit $\\sqrt{x + 4} + 2$ erweitern: Zähler $(x + 4) - 4 = x$.',
+        '$\\dfrac{x}{x\\,(\\sqrt{x + 4} + 2)} = \\dfrac{1}{\\sqrt{x + 4} + 2} \\to \\dfrac{1}{4}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 3} \\dfrac{x^2 - 5x + 6}{x^2 - 9}$.',
+      opts: ['0', '$\\dfrac{1}{3}$', 'Der Grenzwert existiert nicht.', '$\\dfrac{1}{6}$'],
+      steps: [
+        'Zähler $(x - 2)(x - 3)$, Nenner $(x - 3)(x + 3)$.',
+        'Kürzen: $\\dfrac{x - 2}{x + 3} \\to \\dfrac{1}{6}$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

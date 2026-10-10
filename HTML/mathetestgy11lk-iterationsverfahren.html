@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Allgemeines Iterationsverfahren und Konvergenz — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w19-iterationsverfahren',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Allgemeines Iterationsverfahren und Konvergenz',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 19 (WB 2) · 20 Aufgaben: Fixpunktform, Iteration, Konvergenzbedingung, Banachscher Fixpunktsatz, Verfahren beurteilen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* New questions on fixed-point iteration and Banach (sources in the steps); 7 from mathegy11/w21 and w22. */
+  questions: [
+    {
+      q: 'Was ist ein Fixpunkt einer Funktion $\\varphi$?',
+      opts: ['der Startwert der Iteration', 'eine Stelle $x^{*}$ mit $\\varphi(x^{*}) = x^{*}$, also ein Schnittpunkt des Graphen mit $y = x$', 'eine Stelle mit $\\varphi^{\\prime}(x^{*}) = 0$', 'eine Nullstelle von $\\varphi$'],
+      steps: [
+        'Der Funktionswert ist gleich dem Argument: $\\varphi$ hält $x^{*}$ fest.',
+        'Die Gleichung $f(x) = 0$ wird dazu in die Form $x = \\varphi(x)$ gebracht.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Umformung bringt $x^3 + x - 1 = 0$ korrekt in die Fixpunktform $x = \\varphi(x)$?',
+      opts: ['$x = \\dfrac{1}{x^2 - 1}$', '$x = \\dfrac{1}{x^2 + 1}$', '$x = (1 - x)^3$', '$x = x^3 + 1$'],
+      steps: [
+        '$x^3 + x = 1 \\Leftrightarrow x\\,(x^2 + 1) = 1 \\Leftrightarrow x = \\dfrac{1}{x^2 + 1}$.',
+        'Auch $x = 1 - x^3$ ist eine Fixpunktform. Ob sie taugt, entscheidet die Konvergenzbedingung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Iteration $x_{n+1} = \\cos x_n$ mit $x_0 = 1$ (Bogenmaß). Wie groß ist $x_2$?',
+      opts: ['etwa 0,858', 'etwa 0,654', 'etwa 0,739', 'etwa 0,540'],
+      steps: [
+        '$x_1 = \\cos 1 \\approx 0{,}5403$.',
+        '$x_2 = \\cos 0{,}5403 \\approx 0{,}8576$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gegen welchen Wert konvergiert $x_{n+1} = \\cos x_n$?',
+      opts: ['gegen 0', 'gegen 1', 'gegen die Lösung von $\\cos x = x$, etwa 0,739', 'Sie konvergiert nicht.'],
+      steps: [
+        'Der Grenzwert ist ein Fixpunkt: $x^{*} = \\cos x^{*}$.',
+        'Dort ist $|\\varphi^{\\prime}(x^{*})| = \\sin 0{,}739 \\approx 0{,}67 < 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann konvergiert die Iteration $x_{n+1} = \\varphi(x_n)$ sicher gegen den Fixpunkt $x^{*}$?',
+      opts: ['immer, wenn ein Fixpunkt existiert', 'wenn $\\varphi^{\\prime}(x^{*}) > 1$ ist', 'nur wenn $\\varphi$ eine Gerade ist', 'wenn $|\\varphi^{\\prime}(x)| < 1$ in einer Umgebung von $x^{*}$ gilt und der Startwert dort liegt'],
+      steps: [
+        'Nahe $x^{*}$ gilt $x_{n+1} - x^{*} \\approx \\varphi^{\\prime}(x^{*}) \\cdot (x_n - x^{*})$.',
+        'Der Fehler wird also in jedem Schritt mit etwa $|\\varphi^{\\prime}(x^{*})|$ multipliziert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum versagt die Iteration $x_{n+1} = 1 - x_n^3$ für die Lösung $x^{*} \\approx 0{,}682$ von $x^3 + x - 1 = 0$?',
+      opts: ['$|\\varphi^{\\prime}(x^{*})| = 3\\,(x^{*})^2 \\approx 1{,}40 > 1$: Fehler werden größer.', 'Weil $x^{*}$ kein Fixpunkt von $\\varphi$ ist.', 'Weil $\\varphi$ nicht stetig ist.', 'Sie versagt nicht, sie konvergiert nur langsam.'],
+      steps: [
+        '$\\varphi(x) = 1 - x^3$, $\\varphi^{\\prime}(x) = -3x^2$.',
+        'Mit $x = \\dfrac{1}{x^2 + 1}$ klappt es dagegen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ist $|\\varphi^{\\prime}(x)| \\leq 0{,}5$ nahe dem Fixpunkt, wie entwickelt sich der Fehler?',
+      opts: ['Er verdoppelt sich.', 'Er bleibt gleich.', 'Er wird quadriert.', 'Er wird in jedem Schritt mindestens halbiert.'],
+      steps: [
+        '$|x_{n+1} - x^{*}| \\leq 0{,}5 \\cdot |x_n - x^{*}|$.',
+        'Nach 10 Schritten ist er auf höchstens $\\tfrac{1}{1024}$ geschrumpft.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$\\varphi(x) = x^2$ hat die Fixpunkte 0 und 1. Welcher ist anziehend?',
+      opts: ['keiner', 'beide', '0, denn $\\varphi^{\\prime}(0) = 0$; die 1 stößt ab, denn $\\varphi^{\\prime}(1) = 2$.', '1, denn $\\varphi(1) = 1$.'],
+      steps: [
+        'Start bei 0,9: 0,81; 0,66; 0,43; … läuft zur 0.',
+        'Start bei 1,1: 1,21; 1,46; 2,14; … läuft weg von der 1.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gegen welchen Wert konvergiert $x_{n+1} = \\sqrt{x_n + 2}$ mit $x_0 = 0$?',
+      opts: ['Sie konvergiert nicht.', '2', '−1', '$\\sqrt{2}$'],
+      steps: [
+        'Fixpunkt: $x = \\sqrt{x + 2} \\Leftrightarrow x^2 - x - 2 = 0$ mit $x \\geq 0$, also $x = 2$.',
+        '$\\varphi^{\\prime}(2) = \\tfrac{1}{4} < 1$; die Folge 0; 1,414; 1,848; 1,962; … steigt gegen 2.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Im Spinnwebdiagramm läuft die Iteration spiralförmig um den Fixpunkt herum und nähert sich ihm. Was gilt für $\\varphi^{\\prime}(x^{*})$?',
+      opts: ['$-1 < \\varphi^{\\prime}(x^{*}) < 0$', '$\\varphi^{\\prime}(x^{*}) < -1$', '$\\varphi^{\\prime}(x^{*}) > 1$', '$0 < \\varphi^{\\prime}(x^{*}) < 1$'],
+      steps: [
+        'Negativer Anstieg: Die Folge springt abwechselnd links und rechts vom Fixpunkt.',
+        'Bei $0 < \\varphi^{\\prime}(x^{*}) < 1$ entsteht eine Treppe, die einseitig zum Fixpunkt läuft.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was sagt der Banachsche Fixpunktsatz (anschaulich, für ein Intervall)?',
+      opts: ['Die Iteration konvergiert immer, wenn $\\varphi$ stetig ist.', 'Ein Fixpunkt existiert nur bei Geraden.', 'Bildet $\\varphi$ ein abgeschlossenes Intervall in sich ab und gilt dort $|\\varphi^{\\prime}(x)| \\leq L < 1$, so gibt es genau einen Fixpunkt, und die Iteration konvergiert von jedem Startwert aus.', 'Jede Funktion hat genau einen Fixpunkt.'],
+      steps: [
+        'Die Bedingung $|\\varphi^{\\prime}| \\leq L < 1$ heißt: $\\varphi$ zieht Abstände zusammen (Kontraktion).',
+        'Der Satz liefert Existenz, Eindeutigkeit und ein Verfahren zugleich.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Erfüllt $\\varphi(x) = \\dfrac{1}{x^2 + 1}$ auf $[0;\\,1]$ die Voraussetzungen dieses Satzes?',
+      opts: ['Nein, $\\varphi(0) = 1$ liegt außerhalb.', 'Nein, $\\varphi$ ist auf $[0;\\,1]$ nicht stetig.', 'Ja: $\\varphi$ bildet $[0;\\,1]$ in $[0{,}5;\\,1]$ ab, und $|\\varphi^{\\prime}(x)| \\leq 0{,}65 < 1$.', 'Nein, $|\\varphi^{\\prime}(1)| = 2$.'],
+      steps: [
+        '$\\varphi$ fällt auf $[0;\\,1]$ von 1 auf 0,5.',
+        '$\\varphi^{\\prime}(x) = -\\dfrac{2x}{(x^2 + 1)^2}$ hat den größten Betrag bei $x = \\tfrac{1}{\\sqrt{3}}$: $\\tfrac{3\\sqrt{3}}{8} \\approx 0{,}65$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Würdigung: Stefan Banach (1892–1945) veröffentlichte den Fixpunktsatz 1922. Wofür steht sein Name in der Mathematik noch?',
+      opts: ['Er bewies den Satz des Pythagoras.', 'Er erfand die Differentialrechnung.', 'Er entwickelte das Gauß-Jordan-Verfahren.', 'Er ist ein Begründer der Funktionalanalysis (Banachräume).'],
+      steps: [
+        'Banach, geboren in Krakau, wirkte in Lwów (heute Lwiw); der Satz stammt aus seiner Dissertation von 1920.',
+        'Quelle: S. Banach, Sur les opérations dans les ensembles abstraits et leur application aux équations intégrales, Fundamenta Mathematicae 3 (1922), S. 133–181; Biografie: MacTutor History of Mathematics, St Andrews.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Das Heron-Verfahren $x_{n+1} = \\dfrac{1}{2}\\left(x_n + \\dfrac{a}{x_n}\\right)$ berechnet $\\sqrt{a}$. Wie hängt es mit Newton zusammen?',
+      opts: ['Es ist das Newton-Verfahren für $f(x) = x^2 - a$.', 'Es ist die Bisektion für $x^2 - a$.', 'Es ist das Newton-Verfahren für $f(x) = \\sqrt{x} - a$.', 'Es hat nichts damit zu tun.'],
+      steps: [
+        '$x_n - \\dfrac{x_n^2 - a}{2x_n} = \\dfrac{x_n}{2} + \\dfrac{a}{2x_n}$',
+        'Heron von Alexandria kannte es schon vor etwa 2000 Jahren.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne mit Heron einen Schritt für $\\sqrt{10}$ mit $x_0 = 3$.',
+      opts: ['$x_1 = \\dfrac{10}{3}$', '$x_1 = 3{,}5$', '$x_1 = 3{,}1623$', '$x_1 = \\dfrac{19}{6} \\approx 3{,}1667$'],
+      steps: [
+        '$\\dfrac{1}{2}\\left(3 + \\dfrac{10}{3}\\right) = \\dfrac{1}{2} \\cdot \\dfrac{19}{3} = \\dfrac{19}{6}$',
+        '$\\sqrt{10} \\approx 3{,}1623$: schon nach einem Schritt nah dran.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wann bricht man die Iteration in der Praxis ab?',
+      opts: ['Nach genau drei Schritten.', 'Wenn sich $x_{n+1}$ und $x_n$ um weniger als die gewünschte Genauigkeit unterscheiden.', 'Wenn $f^{\\prime}(x_n) > 0$ ist.', 'Wenn $x_n$ eine ganze Zahl ist.'],
+      steps: [
+        'Abbruchkriterium: $|x_{n+1} - x_n| < \\varepsilon$, z. B. $\\varepsilon = 10^{-6}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Funktion hat zwei Nullstellen. Wovon hängt ab, welche das Newton-Verfahren findet?',
+      opts: ['Von der Abbruchgenauigkeit', 'Davon, wie oft man iteriert', 'Es findet immer die kleinere.', 'Vom Startwert $x_0$'],
+      steps: [
+        'Die Tangente führt meist zur benachbarten Nullstelle.',
+        'Deshalb wählt man den Startwert mithilfe einer Skizze.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was passiert, wenn $x_n$ zufällig genau eine Nullstelle ist?',
+      opts: ['Das Verfahren bricht ab.', 'Dann ist $x_{n+1} = x_n$, die Folge bleibt stehen.', 'Dann springt die Folge weg.', 'Dann ist $x_{n+1} = 0$.'],
+      steps: [
+        '$f(x_n) = 0$, also wird nichts abgezogen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Aussage zum Vergleich der Verfahren ist richtig?',
+      opts: ['Algebraisch: exakt, aber nur für spezielle Gleichungen; numerisch: immer anwendbar, liefert Näherungen.', 'Das Newton-Verfahren funktioniert immer, die Bisektion nie.', 'Grafische Verfahren sind am genauesten.', 'Numerische Verfahren liefern immer exakte Lösungen.'],
+      steps: [
+        'Jedes Verfahren hat seinen Platz: Skizze für den Überblick, Algebra wenn möglich, Numerik sonst.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aussage über grafisches Lösen und Bisektion stimmt?',
+      opts: ['Die Skizze liefert exakte Lösungen.', 'Die Bisektion findet immer alle Lösungen.', 'Die Skizze verschafft den Überblick, die Bisektion liefert beliebig genaue Näherungen.', 'Die Bisektion ist schneller als jedes andere Verfahren.'],
+      steps: [
+        'Aus der Skizze kommen Anzahl und grobe Lage der Lösungen.',
+        'Die Bisektion ist zuverlässig, aber langsam: ein Bit Genauigkeit pro Schritt.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ableitung von e-, ln- und Sinusfunktion; Produktregel — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w08-e-ln-sin-produktregel',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ableitung von e-, ln- und Sinusfunktion; Produktregel',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 8 (LB 1) · 20 Aufgaben: Ableitungen von eˣ, ln x, sin x, cos x, Produktregel und ihr Beweis · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 8 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-16 from the Grundkurs sheet (mathegy11/w07), 17-20 Leistungskurs. */
+  questions: [
+    {
+      q: 'Bestimme die Ableitung von $f(x) = e^x$.',
+      opts: ['$f^{\\prime}(x) = e$', '$f^{\\prime}(x) = x \\cdot e^{x-1}$', '$f^{\\prime}(x) = \\ln x$', '$f^{\\prime}(x) = e^x$'],
+      steps: [
+        'Die natürliche Exponentialfunktion stimmt mit ihrer Ableitung überein.',
+        'Die Potenzregel gilt hier nicht: $x$ steht im Exponenten, nicht in der Basis.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\ln x$ für $x > 0$.',
+      opts: ['$f^{\\prime}(x) = -\\dfrac{1}{x^2}$', '$f^{\\prime}(x) = \\ln x$', '$f^{\\prime}(x) = \\dfrac{1}{x}$', '$f^{\\prime}(x) = e^x$'],
+      steps: [
+        '$(\\ln x)^{\\prime} = \\dfrac{1}{x}$',
+        'Die Ableitung ist positiv: $\\ln x$ steigt, aber immer langsamer.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sin x$.',
+      opts: ['$f^{\\prime}(x) = -\\sin x$', '$f^{\\prime}(x) = \\cos x$', '$f^{\\prime}(x) = \\sin x$', '$f^{\\prime}(x) = -\\cos x$'],
+      steps: [
+        'Im Bogenmaß gilt $(\\sin x)^{\\prime} = \\cos x$.',
+        'Probe: Bei $x = 0$ steigt die Sinuskurve mit Anstieg 1, und $\\cos 0 = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\cos x$.',
+      opts: ['$f^{\\prime}(x) = -\\sin x$', '$f^{\\prime}(x) = \\sin x$', '$f^{\\prime}(x) = \\cos x$', '$f^{\\prime}(x) = -\\cos x$'],
+      steps: [
+        '$(\\cos x)^{\\prime} = -\\sin x$',
+        'Probe: Kurz nach $x = 0$ fällt die Kosinuskurve, und $-\\sin x$ ist dort negativ.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 3e^x - 2\\ln x$.',
+      opts: ['$f^{\\prime}(x) = e^x - \\dfrac{1}{x}$', '$f^{\\prime}(x) = 3e^x - \\dfrac{2}{x}$', '$f^{\\prime}(x) = 3e^x - 2x$', '$f^{\\prime}(x) = 3xe^{x-1} - \\dfrac{2}{x}$'],
+      steps: [
+        'Faktor- und Summenregel.',
+        '$3 \\cdot e^x - 2 \\cdot \\dfrac{1}{x}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x \\cdot e^x$.',
+      opts: ['$f^{\\prime}(x) = (1 + x)e^x$', '$f^{\\prime}(x) = e^x$', '$f^{\\prime}(x) = 1 \\cdot e^x \\cdot x$', '$f^{\\prime}(x) = x e^x$'],
+      steps: [
+        '$u = x$, $u^{\\prime} = 1$; $v = e^x$, $v^{\\prime} = e^x$.',
+        '$f^{\\prime}(x) = 1 \\cdot e^x + x \\cdot e^x = (1 + x)e^x$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^2 \\sin x$.',
+      opts: ['$f^{\\prime}(x) = 2x\\sin x - x^2\\cos x$', '$f^{\\prime}(x) = 2x\\sin x + x^2\\cos x$', '$f^{\\prime}(x) = 2x\\cos x$', '$f^{\\prime}(x) = x^2\\cos x$'],
+      steps: [
+        '$u = x^2$, $u^{\\prime} = 2x$; $v = \\sin x$, $v^{\\prime} = \\cos x$.',
+        '$u^{\\prime} v + u v^{\\prime} = 2x\\sin x + x^2 \\cos x$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x \\ln x$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{x}$', '$f^{\\prime}(x) = \\ln x + 1$', '$f^{\\prime}(x) = \\ln x$', '$f^{\\prime}(x) = x + \\ln x$'],
+      steps: [
+        '$u = x$, $u^{\\prime} = 1$; $v = \\ln x$, $v^{\\prime} = \\dfrac{1}{x}$.',
+        '$1 \\cdot \\ln x + x \\cdot \\dfrac{1}{x} = \\ln x + 1$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 3x^2 e^x$.',
+      opts: ['$f^{\\prime}(x) = (3x^2 + 6x)e^x$', '$f^{\\prime}(x) = 6x e^x$', '$f^{\\prime}(x) = (6x + 3)e^x$', '$f^{\\prime}(x) = 3x^2 e^x$'],
+      steps: [
+        '$u = 3x^2$, $u^{\\prime} = 6x$; $v = e^x$, $v^{\\prime} = e^x$.',
+        '$6x e^x + 3x^2 e^x = (3x^2 + 6x)e^x$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^3 \\ln x$.',
+      opts: ['$f^{\\prime}(x) = 3x^2 \\cdot \\dfrac{1}{x}$', '$f^{\\prime}(x) = 3x \\ln x$', '$f^{\\prime}(x) = 3x^2 \\ln x + x^2$', '$f^{\\prime}(x) = 3x^2 \\ln x + x^3$'],
+      steps: [
+        '$u^{\\prime} v + u v^{\\prime} = 3x^2 \\ln x + x^3 \\cdot \\dfrac{1}{x}$',
+        '$x^3 \\cdot \\dfrac{1}{x} = x^2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Tangente an $f(x) = \\ln x$ im Punkt $(1 \\mid 0)$?',
+      opts: ['$y = x - 1$', '$y = -x + 1$', '$y = \\dfrac{1}{x}$', '$y = x$'],
+      steps: [
+        '$f^{\\prime}(1) = \\dfrac{1}{1} = 1$',
+        '$y = 1 \\cdot (x - 1) + 0 = x - 1$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist der Anstieg der Sinuskurve an der Stelle $x = \\pi$?',
+      opts: ['$\\pi$', '0', '1', '−1'],
+      steps: [
+        '$(\\sin x)^{\\prime} = \\cos x$',
+        '$\\cos \\pi = -1$: Dort fällt die Sinuskurve am steilsten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'An welcher Stelle hat $f(x) = x e^x$ eine waagerechte Tangente?',
+      opts: ['$x = 0$', 'An keiner Stelle.', '$x = -1$', '$x = 1$'],
+      steps: [
+        '$f^{\\prime}(x) = (1 + x)e^x$',
+        '$e^x$ ist nie null, also $1 + x = 0$.',
+        '$x = -1$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'An welcher Stelle hat $f(x) = (x - 2)e^x$ eine waagerechte Tangente?',
+      opts: ['$x = 2$', '$x = 0$', '$x = -2$', '$x = 1$'],
+      steps: [
+        '$f^{\\prime}(x) = 1 \\cdot e^x + (x - 2)e^x = (x - 1)e^x$',
+        '$x - 1 = 0$, also $x = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ohne Quotientenregel: Schreibe $f(x) = \\dfrac{e^x}{x}$ als $e^x \\cdot x^{-1}$. Welche Ableitung ergibt die Produktregel?',
+      opts: ['$f^{\\prime}(x) = \\dfrac{e^x (x - 1)}{x^2}$', '$f^{\\prime}(x) = -\\dfrac{e^x}{x^2}$', '$f^{\\prime}(x) = \\dfrac{e^x (x + 1)}{x^2}$', '$f^{\\prime}(x) = \\dfrac{e^x}{1}$'],
+      steps: [
+        '$e^x \\cdot x^{-1} + e^x \\cdot (-x^{-2})$',
+        '$= \\dfrac{e^x}{x} - \\dfrac{e^x}{x^2} = \\dfrac{e^x (x - 1)}{x^2}$',
+        'Im Unterricht macht man solche Ableitungen mit dem CAS.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sin x \\cdot \\cos x$.',
+      opts: ['$f^{\\prime}(x) = 1$', '$f^{\\prime}(x) = \\cos^2 x + \\sin^2 x$', '$f^{\\prime}(x) = -\\sin x \\cos x$', '$f^{\\prime}(x) = \\cos^2 x - \\sin^2 x$'],
+      steps: [
+        '$u = \\sin x$, $u^{\\prime} = \\cos x$; $v = \\cos x$, $v^{\\prime} = -\\sin x$.',
+        '$\\cos x \\cdot \\cos x + \\sin x \\cdot (-\\sin x) = \\cos^2 x - \\sin^2 x$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Beim Beweis der Produktregel schreibt man $u(x + h)v(x + h) - u(x)v(x)$ geschickt um. Welcher Trick hilft?',
+      opts: ['$h = 0$ einsetzen', 'beide Faktoren getrennt ableiten', '$u(x + h)v(x)$ abziehen und wieder addieren', 'durch $u(x)$ teilen'],
+      steps: [
+        '$u(x + h)\\bigl[v(x + h) - v(x)\\bigr] + v(x)\\bigl[u(x + h) - u(x)\\bigr]$',
+        'Durch $h$ teilen und $h \\to 0$: $u(x)v^{\\prime}(x) + v(x)u^{\\prime}(x)$; dabei braucht man, dass $u$ stetig ist.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie folgt $(\\ln x)^{\\prime} = \\dfrac{1}{x}$ aus $(e^y)^{\\prime} = e^y$?',
+      opts: ['Aus der Potenzregel mit $n = -1$.', 'Durch Einsetzen von $x = 1$.', 'Weil $\\ln x$ und $e^x$ dieselbe Ableitung haben.', '$y = \\ln x$ heißt $x = e^y$; die Anstiege von Funktion und Umkehrfunktion sind Kehrwerte: $\\dfrac{1}{e^y} = \\dfrac{1}{x}$.'],
+      steps: [
+        'Der Graph von $\\ln$ ist der an $y = x$ gespiegelte Graph von $e^x$.',
+        'Beim Spiegeln werden aus Anstiegen $m$ die Anstiege $\\tfrac{1}{m}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist der Anstieg von $f(x) = 10^x$ an der Stelle 0?',
+      opts: ['1', '10', '$\\ln 10 \\approx 2{,}303$', '0'],
+      steps: [
+        '$(a^x)^{\\prime} = \\ln a \\cdot a^x$ (Woche 6).',
+        '$f^{\\prime}(0) = \\ln 10 \\cdot 1 \\approx 2{,}303$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo hat $f(x) = e^x \\sin x$ im Intervall $(0;\\,\\pi)$ eine waagerechte Tangente?',
+      opts: ['bei $x = \\dfrac{\\pi}{4}$', 'bei $x = \\dfrac{3\\pi}{4}$', 'nirgends', 'bei $x = \\dfrac{\\pi}{2}$'],
+      steps: [
+        '$f^{\\prime}(x) = e^x \\sin x + e^x \\cos x = e^x(\\sin x + \\cos x)$.',
+        '$\\sin x + \\cos x = 0 \\Leftrightarrow \\tan x = -1$, in $(0;\\,\\pi)$ also $x = \\tfrac{3\\pi}{4}$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

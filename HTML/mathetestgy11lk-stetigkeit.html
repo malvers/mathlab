@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Stetigkeit — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w04-stetigkeit',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Stetigkeit',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 4 (LB 1) · 20 Aufgaben: an einer Stelle, im Intervall, im Definitionsbereich; Parameter, Unstetigkeitsstellen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-7 from the Grundkurs sheet (mathegy11/w03), 8-20 Leistungskurs. */
+  questions: [
+    {
+      q: 'Was bedeutet: $f$ ist an der Stelle $x_0$ stetig?',
+      opts: ['$\\lim\\limits_{x \\to x_0} f(x)$ existiert und ist gleich $f(x_0)$.', 'Der Graph hat bei $x_0$ eine waagerechte Tangente.', '$f(x_0) = 0$', '$f$ ist an der Stelle $x_0$ definiert.'],
+      steps: [
+        'Anschaulich: Der Graph lässt sich an dieser Stelle ohne Absetzen zeichnen.',
+        'Formal: Grenzwert existiert und stimmt mit dem Funktionswert überein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Funktion ist an der Stelle $x_0 = 0$ unstetig?',
+      opts: ['$f(x) = e^x$', '$f(x) = 1$ für $x < 0$, $f(x) = 2$ für $x \\geq 0$', '$f(x) = |x|$', '$f(x) = x^2$'],
+      steps: [
+        'Die Sprungfunktion hat links den Grenzwert 1, rechts 2.',
+        '$|x|$ hat bei 0 einen Knick, ist aber stetig.',
+        '$x^2$ und $e^x$ sind überall stetig.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$f(x) = \\dfrac{x^2 - 4}{x - 2}$ ist an der Stelle 2 nicht definiert. Welchen Wert muss man $f(2)$ geben, damit die Funktion dort stetig wird?',
+      opts: ['$f(2) = 0$', '$f(2) = 2$', 'Das ist nicht möglich.', '$f(2) = 4$'],
+      steps: [
+        'Für $x \\neq 2$ gilt $f(x) = x + 2$.',
+        '$\\lim\\limits_{x \\to 2} (x + 2) = 4$',
+        'Mit $f(2) = 4$ ist die Lücke geschlossen (behebbare Definitionslücke).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $a$ ist $f(x) = x + a$ für $x < 1$ und $f(x) = 2x$ für $x \\geq 1$ an der Stelle 1 stetig?',
+      opts: ['$a = -1$', '$a = 0$', '$a = 2$', '$a = 1$'],
+      steps: [
+        'Rechts: $f(1) = 2 \\cdot 1 = 2$.',
+        'Links: $\\lim\\limits_{x \\to 1} (x + a) = 1 + a$.',
+        'Stetig, wenn $1 + a = 2$, also $a = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Parkhaus kostet 2 € für jede angefangene Stunde. Was gilt für die Funktion Parkdauer $\\mapsto$ Preis?',
+      opts: ['Sie ist nur bei 0 Stunden unstetig.', 'Sie hat Polstellen.', 'Sie ist an jeder vollen Stunde unstetig.', 'Sie ist überall stetig.'],
+      steps: [
+        'Bei 59 Minuten kostet es 2 €, bei 61 Minuten 4 €.',
+        'An jeder vollen Stunde springt der Preis: Treppenfunktion.',
+        'Sprungstellen sind Unstetigkeitsstellen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to 4} \\sqrt{x}$.',
+      opts: ['16', '2', '$\\sqrt{2}$', '4'],
+      steps: [
+        'Die Wurzelfunktion ist für $x \\geq 0$ stetig.',
+        'Also einsetzen: $\\sqrt{4} = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Aussage ist richtig?',
+      opts: ['Jede Funktion mit einem Knick ist unstetig.', 'Eine Funktion mit Definitionslücke hat dort immer eine Polstelle.', 'Wenn $f$ an $x_0$ stetig ist, gilt $\\lim\\limits_{x \\to x_0} f(x) = f(x_0)$.', 'Wenn $f(x_0)$ existiert, ist $f$ dort stetig.'],
+      steps: [
+        'Die erste Aussage ist genau die Definition der Stetigkeit.',
+        '$|x|$ hat einen Knick und ist stetig.',
+        'Die Sprungfunktion ist bei 0 definiert und trotzdem unstetig; $\\dfrac{x^2 - 4}{x - 2}$ hat eine behebbare Lücke, keinen Pol.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann heißt eine Funktion stetig im Intervall $[a;\\,b]$?',
+      opts: ['Wenn $f(a) = f(b)$ gilt.', 'Wenn sie in $[a;\\,b]$ monoton ist.', 'Wenn sie an jeder inneren Stelle stetig ist und an den Rändern einseitig stetig.', 'Wenn sie in $[a;\\,b]$ eine Nullstelle hat.'],
+      steps: [
+        'Stetigkeit im Intervall heißt: an jeder Stelle des Intervalls.',
+        'An den Rändern zählt nur der einseitige Grenzwert von innen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ist $f(x) = \\dfrac{1}{x}$ eine stetige Funktion?',
+      opts: ['Nein, weil man den Graphen nicht ohne Absetzen zeichnen kann.', 'Nur für $x > 0$.', 'Ja, sie ist an jeder Stelle ihres Definitionsbereichs $\\mathbb{R} \\setminus \\{0\\}$ stetig.', 'Nein, sie hat bei 0 einen Sprung.'],
+      steps: [
+        'Stetigkeit wird nur an Stellen des Definitionsbereichs geprüft; 0 gehört nicht dazu.',
+        'An jeder Stelle $x_0 \\neq 0$ gilt $\\lim\\limits_{x \\to x_0} \\tfrac{1}{x} = \\tfrac{1}{x_0}$.',
+        'Das Absetzen beim Zeichnen passiert an der Definitionslücke, nicht an einer Stelle des Definitionsbereichs.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Unstetigkeitsstellen hat $f(x) = \\dfrac{x - 1}{x^2 - 1}$, wenn man $f$ auf ganz $\\mathbb{R}$ betrachten will?',
+      opts: ['bei $x = 1$ eine behebbare Lücke, bei $x = -1$ eine Polstelle', 'bei $x = 1$ eine Polstelle, bei $x = -1$ eine Lücke', 'bei $\\pm 1$ je eine Polstelle', 'keine'],
+      steps: [
+        '$\\dfrac{x - 1}{(x - 1)(x + 1)} = \\dfrac{1}{x + 1}$ für $x \\neq 1$.',
+        'Bei 1 existiert der Grenzwert $\\tfrac{1}{2}$: behebbar. Bei −1 wachsen die Werte über alle Grenzen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist die Abrundungsfunktion $f(x) = \\lfloor x \\rfloor$ (größte ganze Zahl $\\leq x$) an der Stelle 2?',
+      opts: ['stetig', 'eine Polstelle', 'nicht definiert', 'unstetig, links Grenzwert 1, rechts 2'],
+      steps: [
+        'Kurz vor 2 ist $\\lfloor x \\rfloor = 1$, ab 2 ist es 2.',
+        'Sprungstelle an jeder ganzen Zahl.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $a$ ist $f(x) = a x^2$ für $x \\leq 2$ und $f(x) = 4x - 4$ für $x > 2$ überall stetig?',
+      opts: ['$a = 1$', '$a = 4$', '$a = \\dfrac{1}{2}$', '$a = 2$'],
+      steps: [
+        'Beide Teile sind für sich stetig, kritisch ist nur die Nahtstelle 2.',
+        '$f(2) = 4a$, rechts $4 \\cdot 2 - 4 = 4$.',
+        '$4a = 4 \\Rightarrow a = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$f(x) = x + 1$ für $x < 0$, $f(0) = c$, $f(x) = e^x$ für $x > 0$. Für welches $c$ ist $f$ stetig?',
+      opts: ['Für kein $c$', '$c = e$', '$c = 1$', '$c = 0$'],
+      steps: [
+        'Links: $0 + 1 = 1$. Rechts: $e^0 = 1$.',
+        'Beide einseitigen Grenzwerte sind 1, also muss $f(0) = 1$ sein.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$f(x) = ax + b$ für $x < 1$ und $f(x) = x^2$ für $x \\geq 1$. Welche Bedingung macht $f$ an der Stelle 1 stetig?',
+      opts: ['$a = b$', '$a + b = 1$', '$b = 1$', '$a = 2$ und $b = -1$'],
+      steps: [
+        'Links: $a \\cdot 1 + b$. Rechts und an der Stelle: $1^2 = 1$.',
+        'Stetig genau dann, wenn $a + b = 1$; das sind unendlich viele Paare.',
+        '$a = 2$, $b = -1$ ist eines davon; dann ist $f$ dort sogar knickfrei.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $k$ ist $f(x) = \\dfrac{x^2 - 9}{x - 3}$ für $x \\neq 3$ und $f(3) = k$ stetig?',
+      opts: ['$k = 0$', '$k = 6$', '$k = 3$', '$k = 9$'],
+      steps: [
+        '$\\lim\\limits_{x \\to 3} (x + 3) = 6$.',
+        'Stetige Fortsetzung mit $f(3) = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$f$ ist stetig auf $[1;\\,2]$ mit $f(1) = -3$ und $f(2) = 5$. Was folgt?',
+      opts: ['$f$ hat in $(1;\\,2)$ mindestens eine Nullstelle.', '$f$ hat in $(1;\\,2)$ genau eine Nullstelle.', 'Es folgt nichts.', '$f$ ist in $[1;\\,2]$ steigend.'],
+      steps: [
+        'Ein stetiger Graph kann nicht von −3 nach 5 gelangen, ohne die $x$-Achse zu kreuzen (Zwischenwertsatz).',
+        'Wie viele Nullstellen es sind, bleibt offen. Darauf beruht die Bisektion im Wahlbereich.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$f$ und $g$ sind an der Stelle $x_0$ stetig. Was gilt sicher?',
+      opts: ['$f$ ist dort differenzierbar.', '$f + g$ und $f \\cdot g$ sind dort stetig.', '$\\dfrac{f}{g}$ ist dort immer stetig.', '$f(x_0) = g(x_0)$'],
+      steps: [
+        'Das folgt direkt aus den Grenzwertsätzen.',
+        'Beim Quotienten muss zusätzlich $g(x_0) \\neq 0$ sein.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ist jede stetige Funktion differenzierbar?',
+      opts: ['Nein, aber jede differenzierbare Funktion ist unstetig.', 'Ja, stetig heißt differenzierbar.', 'Ja, außer an Polstellen.', 'Nein, $|x|$ ist bei 0 stetig, aber nicht differenzierbar.'],
+      steps: [
+        'Stetig heißt: kein Sprung. Differenzierbar heißt: kein Knick und kein Sprung.',
+        'Umgekehrt gilt: Jede differenzierbare Funktion ist stetig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Funktion ist im ganzen Definitionsbereich stetig, hat aber einen Graphen aus zwei getrennten Ästen?',
+      opts: ['$f(x) = x^2 - 2$', '$f(x) = \\lfloor x \\rfloor$', '$f(x) = |x - 2|$', '$f(x) = \\dfrac{1}{x - 2}$'],
+      steps: [
+        'Der Definitionsbereich $\\mathbb{R} \\setminus \\{2\\}$ zerfällt in zwei Intervalle.',
+        'Auf jedem ist $f$ stetig; die Lücke bei 2 gehört nicht zum Definitionsbereich.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Art Unstetigkeitsstelle hat die Vorzeichenfunktion (−1 für $x < 0$, 0 bei 0, 1 für $x > 0$) bei 0?',
+      opts: ['eine Sprungstelle', 'eine Polstelle', 'keine, sie ist stetig', 'eine behebbare Lücke'],
+      steps: [
+        'Links Grenzwert −1, rechts 1.',
+        'Verschiedene endliche einseitige Grenzwerte: Sprung.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

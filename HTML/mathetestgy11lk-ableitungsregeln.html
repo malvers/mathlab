@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ableitungsregeln und ihre Beweise — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy11lk-w07-ableitungsregeln',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ableitungsregeln und ihre Beweise',
+  subtitle: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 7 (LB 1) · 20 Aufgaben: Potenz-, Faktor- und Summenregel, Beweisschritte, rationale Exponenten, Umkehrung · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 11 · Leistungskurs · Woche 7 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy11lk.html', /* opened from the plan */
+  /* Questions 1-16 from the Grundkurs sheet (mathegy11/w06), 17-20 proofs of the rules. */
+  questions: [
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^7$.',
+      opts: ['$f^{\\prime}(x) = x^6$', '$f^{\\prime}(x) = 6x^7$', '$f^{\\prime}(x) = 7x^7$', '$f^{\\prime}(x) = 7x^6$'],
+      steps: [
+        'Potenzregel: $(x^n)^{\\prime} = n \\cdot x^{n-1}$.',
+        'Der Exponent 7 wird Faktor, der neue Exponent ist 6.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 5x^4$.',
+      opts: ['$f^{\\prime}(x) = 5x^3$', '$f^{\\prime}(x) = 20x^4$', '$f^{\\prime}(x) = 9x^3$', '$f^{\\prime}(x) = 20x^3$'],
+      steps: [
+        'Faktorregel: Der Faktor 5 bleibt stehen.',
+        '$5 \\cdot 4x^3 = 20x^3$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 2x^3 - 4x^2 + x - 9$.',
+      opts: ['$f^{\\prime}(x) = 6x^2 - 8x + 1$', '$f^{\\prime}(x) = 6x^2 - 8x + 1 - 9$', '$f^{\\prime}(x) = 6x^2 - 4x + 1$', '$f^{\\prime}(x) = 6x^3 - 8x^2 + x$'],
+      steps: [
+        'Summenregel: jeden Summanden einzeln ableiten.',
+        '$6x^2 - 8x + 1$; die Konstante −9 fällt weg.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^2 \\cdot (x + 1)$.',
+      opts: ['$f^{\\prime}(x) = 2x \\cdot 1$', '$f^{\\prime}(x) = 3x^2 + 2x$', '$f^{\\prime}(x) = 2x$', '$f^{\\prime}(x) = 3x^2 + 1$'],
+      steps: [
+        'Erst ausmultiplizieren: $f(x) = x^3 + x^2$.',
+        'Dann summandenweise: $3x^2 + 2x$.',
+        'Falle: Ein Produkt darf man nicht faktorweise ableiten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sqrt{x}$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{\\sqrt{x}}{2}$', '$f^{\\prime}(x) = \\dfrac{1}{\\sqrt{x}}$', '$f^{\\prime}(x) = \\dfrac{1}{2\\sqrt{x}}$', '$f^{\\prime}(x) = 2\\sqrt{x}$'],
+      steps: [
+        '$\\sqrt{x} = x^{\\frac{1}{2}}$',
+        '$\\left(x^{\\frac{1}{2}}\\right)^{\\prime} = \\dfrac{1}{2} x^{-\\frac{1}{2}} = \\dfrac{1}{2\\sqrt{x}}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{1}{x^2}$.',
+      opts: ['$f^{\\prime}(x) = -\\dfrac{1}{2x}$', '$f^{\\prime}(x) = -\\dfrac{2}{x^3}$', '$f^{\\prime}(x) = \\dfrac{1}{2x}$', '$f^{\\prime}(x) = \\dfrac{2}{x^3}$'],
+      steps: [
+        '$\\dfrac{1}{x^2} = x^{-2}$',
+        '$(x^{-2})^{\\prime} = -2x^{-3} = -\\dfrac{2}{x^3}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^{\\frac{2}{3}}$.',
+      opts: ['$f^{\\prime}(x) = x^{-\\frac{1}{3}}$', '$f^{\\prime}(x) = \\dfrac{2}{3} x^{-\\frac{1}{3}}$', '$f^{\\prime}(x) = \\dfrac{2}{3} x^{\\frac{1}{3}}$', '$f^{\\prime}(x) = \\dfrac{2}{3} x^{-\\frac{2}{3}}$'],
+      steps: [
+        'Die Potenzregel gilt auch für rationale Exponenten.',
+        'Neuer Exponent: $\\dfrac{2}{3} - 1 = -\\dfrac{1}{3}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{x^2 + 4}{x}$ ohne Quotientenregel.',
+      opts: ['$f^{\\prime}(x) = 1 - \\dfrac{4}{x^2}$', '$f^{\\prime}(x) = \\dfrac{2x}{1}$', '$f^{\\prime}(x) = 2x$', '$f^{\\prime}(x) = 1 + \\dfrac{4}{x^2}$'],
+      steps: [
+        'Erst aufteilen: $f(x) = x + \\dfrac{4}{x} = x + 4x^{-1}$.',
+        '$f^{\\prime}(x) = 1 - 4x^{-2} = 1 - \\dfrac{4}{x^2}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist der Anstieg von $f(x) = \\sqrt{x}$ an der Stelle $x = 4$?',
+      opts: ['$\\dfrac{1}{2}$', '2', '$\\dfrac{1}{4}$', '4'],
+      steps: [
+        '$f^{\\prime}(x) = \\dfrac{1}{2\\sqrt{x}}$',
+        '$f^{\\prime}(4) = \\dfrac{1}{2 \\cdot 2} = \\dfrac{1}{4}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Tangente an $f(x) = x^3$ an der Stelle $x_0 = 2$?',
+      opts: ['$y = 12x - 16$', '$y = 3x + 2$', '$y = 12x - 24$', '$y = 12x + 8$'],
+      steps: [
+        '$f(2) = 8$, $f^{\\prime}(x) = 3x^2$, $f^{\\prime}(2) = 12$',
+        '$y = 12(x - 2) + 8 = 12x - 16$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'An welchen Stellen hat $f(x) = x^3 - 3x$ eine waagerechte Tangente?',
+      opts: ['$x = \\sqrt{3}$ und $x = -\\sqrt{3}$', '$x = 0$', '$x = 3$', '$x = -1$ und $x = 1$'],
+      steps: [
+        'Waagerecht heißt $f^{\\prime}(x) = 0$.',
+        '$3x^2 - 3 = 0 \\Rightarrow x^2 = 1$',
+        '$\\pm\\sqrt{3}$ sind die Nullstellen von $f$, nicht von $f^{\\prime}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Stein fällt nach $s(t) = 4{,}9t^2$ ($s$ in m, $t$ in s). Wie schnell ist er nach 2 Sekunden?',
+      opts: ['19,6 m', '9,8 m/s', '19,6 m/s', '4,9 m/s'],
+      steps: [
+        'Geschwindigkeit ist die Ableitung des Weges: $v(t) = s^{\\prime}(t) = 9{,}8t$.',
+        '$v(2) = 19{,}6$ m/s'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{1}{\\sqrt{x}}$.',
+      opts: ['$f^{\\prime}(x) = -\\dfrac{1}{2} x^{-\\frac{1}{2}}$', '$f^{\\prime}(x) = -2x^{\\frac{1}{2}}$', '$f^{\\prime}(x) = \\dfrac{1}{2} x^{-\\frac{1}{2}}$', '$f^{\\prime}(x) = -\\dfrac{1}{2} x^{-\\frac{3}{2}}$'],
+      steps: [
+        '$\\dfrac{1}{\\sqrt{x}} = x^{-\\frac{1}{2}}$',
+        '$-\\dfrac{1}{2} x^{-\\frac{1}{2} - 1} = -\\dfrac{1}{2} x^{-\\frac{3}{2}}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Funktion hat die Ableitung $3x^2$?',
+      opts: ['$F(x) = x^2$', '$F(x) = 3x^3$', '$F(x) = x^3 + 5$', '$F(x) = 6x$'],
+      steps: [
+        'Rückwärts denken: Welche Potenz liefert abgeleitet $3x^2$?',
+        '$(x^3)^{\\prime} = 3x^2$, und eine Konstante wie 5 stört nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Funktion hat die Ableitung $x$?',
+      opts: ['$F(x) = 1$', '$F(x) = 2x^2$', '$F(x) = x^2$', '$F(x) = \\dfrac{1}{2} x^2$'],
+      steps: [
+        '$(x^2)^{\\prime} = 2x$ ist doppelt so groß wie gewünscht.',
+        'Also halbieren: $\\left(\\dfrac{1}{2} x^2\\right)^{\\prime} = x$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Geschwindigkeit eines Fahrzeugs ist $v(t) = 2t$ (in m/s). Welche Wegfunktion passt dazu, wenn es bei $t = 0$ startet?',
+      opts: ['$s(t) = 2$', '$s(t) = t^2$', '$s(t) = 2t^2$', '$s(t) = 4t$'],
+      steps: [
+        'Gesucht ist $s$ mit $s^{\\prime}(t) = 2t$.',
+        '$(t^2)^{\\prime} = 2t$ und $s(0) = 0$. In der Physik heißt das: gleichmäßig beschleunigt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beweis der Summenregel: Der Differenzenquotient von $u + v$ zerfällt in $\\dfrac{u(x + h) - u(x)}{h} + \\dfrac{v(x + h) - v(x)}{h}$. Was braucht man für den letzten Schritt $h \\to 0$?',
+      opts: ['den Grenzwertsatz für Summen', 'die Kettenregel', 'den Grenzwertsatz für Quotienten', 'die Stetigkeit von $u \\cdot v$'],
+      steps: [
+        'Beide Differenzenquotienten haben Grenzwerte $u^{\\prime}(x)$ und $v^{\\prime}(x)$.',
+        'Der Grenzwert der Summe ist die Summe der Grenzwerte.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beweis der Potenzregel für $n = 3$: Welcher Differenzenquotient entsteht aus $(x + h)^3 = x^3 + 3x^2 h + 3x h^2 + h^3$?',
+      opts: ['$3x^2 + 3xh + h^2$', '$x^3 + 3x^2 + 3x + 1$', '$3x^2$', '$3x^2 h + 3x h^2 + h^3$'],
+      steps: [
+        '$\\dfrac{(x + h)^3 - x^3}{h} = \\dfrac{3x^2 h + 3xh^2 + h^3}{h}$',
+        'Durch $h$ geteilt: $3x^2 + 3xh + h^2$, für $h \\to 0$ bleibt $3x^2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Allgemein ist $(x + h)^n = x^n + n x^{n-1} h + \\ldots$, wobei jeder weitere Summand mindestens den Faktor $h^2$ enthält. Warum folgt daraus $(x^n)^{\\prime} = n x^{n-1}$?',
+      opts: ['Weil $h^2 = 0$ ist.', 'Nach Teilen durch $h$ enthalten alle anderen Summanden noch $h$ und verschwinden für $h \\to 0$.', 'Weil $x^n$ immer positiv ist.', 'Weil $n$ eine natürliche Zahl ist und sonst nichts gilt.'],
+      steps: [
+        'Differenzenquotient: $n x^{n-1} + h \\cdot (\\ldots)$.',
+        'Der Klammerausdruck bleibt beschränkt, $h \\cdot (\\ldots) \\to 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beweis der Faktorregel: Der Differenzenquotient von $c \\cdot f$ ist $c \\cdot \\dfrac{f(x + h) - f(x)}{h}$. Was ist der Grenzwert für $h \\to 0$?',
+      opts: ['$c^{\\prime} \\cdot f^{\\prime}(x)$', '$c + f^{\\prime}(x)$', '$c \\cdot f^{\\prime}(x)$', '0, weil $c$ konstant ist'],
+      steps: [
+        'Ein konstanter Faktor darf vor den Grenzwert gezogen werden.',
+        'Also $(c \\cdot f)^{\\prime} = c \\cdot f^{\\prime}$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
