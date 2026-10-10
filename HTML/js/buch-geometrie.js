@@ -7,6 +7,7 @@
  *   goldenerschnitt  golden section: divide a segment, golden rectangle with spiral, pentagram (data-mode="strecke|rechteck|pentagramm", data-hero)
  *   spitzkoerper     square pyramid and circular cone in an oblique view: height, slant height, edge by Pythagoras, surface and volume (data-k, data-hero)
  * Looks: js/buch.css (section "Widgets of the Gymnasium 9 chapters").
+ * B.geo exports the SVG helpers for other modules (js/buch-gy7.js and the books of the other grades).
  */
 (function () {
     'use strict';
@@ -515,4 +516,6 @@
         }
         render();
     });
+
+    B.geo = { f1, pts, poly, line, txt, dot, handle, fill, hexFill, add, sub, mul, mid, len, squareOut, rightMark, arc, svgXY, dragSVG, ngon };
 })();

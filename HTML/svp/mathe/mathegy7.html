@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 7 (Gymnasium) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Gymnasium &middot; Klasse 7</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_gy_mathematik.pdf', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Geometrie in der Ebene</div>
+            <div class="vu">24 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Arbeiten mit rationalen Zahlen</div>
+            <div class="vu">56 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Darstellen und Berechnen von Prismen und Pyramiden</div>
+            <div class="vu">20 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Vernetzung: Darstellen von Daten</div>
+            <div class="vu">4 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Platonische Körper</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Die Zeitrichtwerte des Lehrplans (104 Ustd. Pflicht + 8 Ustd. Wahlbereich) sind vollst&auml;ndig abgebildet;
+        die &uuml;brigen Wochen des Schuljahres stehen als &Uuml;bung, Klassenarbeit oder Puffer in eigenen Zeilen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Schuljahresauftakt', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches, Material, Arbeitsweise im Fach',
+                'Wiederholung Klasse 6: Brüche, Dezimalzahlen, Winkel und Dreiecke',
+                'Überblick über das Schuljahr'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/24', topic: 'Kreis und Gerade', ziel: 'Kennen der Lagebeziehungen von Kreis und Gerade', remark: 'Passante, Tangente, Sekante; Konstruktionen mit DGS', details: [
+                'Passante, Tangente und Sekante an Beispielen unterscheiden',
+                'Die Tangente steht senkrecht auf dem Berührungsradius',
+                'Tangente in einem Punkt des Kreises konstruieren, auch mit DGS'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/24', topic: 'Umkreis und Inkreis von Dreiecken', ziel: 'Kennen des Inkreises und Umkreises von Dreiecken', remark: 'Mittelsenkrechte und Winkelhalbierende, Kl. 6, LB 3', details: [
+                'Mittelsenkrechten schneiden sich im Umkreismittelpunkt',
+                'Winkelhalbierende schneiden sich im Inkreismittelpunkt',
+                'Lage der Punkte bei spitz-, recht- und stumpfwinkligen Dreiecken mit DGS untersuchen'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/24', topic: 'Satz des Thales und Beweisen', ziel: 'Kennen ausgewählter Sätze und ihrer Struktur', remark: 'Würdigung Thales von Milet; Satz und Definition', details: [
+                'Satz des Thales mit DGS vermuten und direkt beweisen',
+                'Voraussetzung und Behauptung, Satz und Definition unterscheiden',
+                'Formulierungen „wenn – dann“ und „genau dann, wenn“; Umkehrung des Satzes'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/24', topic: 'Winkel am Kreis', ziel: 'Kennen ausgewählter Sätze und ihrer Struktur', remark: 'vollständige Fallunterscheidung beim Beweisen', details: [
+                'Peripheriewinkelsatz und Zentri-Peripheriewinkelsatz',
+                'Satz über die Gegenwinkel im Sehnenviereck',
+                'Allaussagen durch ein Gegenbeispiel widerlegen, Existenzaussagen durch ein Beispiel bestätigen'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '17–20/24', topic: 'Konstruktionsaufgaben', ziel: 'Anwenden geometrischer Sätze beim Lösen von Konstruktionsaufgaben', remark: 'Konstruktionspläne, Arbeit mit DGS', details: [
+                'Dreiecks- und Viereckskonstruktionen mit Planfigur und Konstruktionsplan',
+                'Tangenten von einem äußeren Punkt an einen Kreis (Thaleskreis)',
+                'Gemeinsame Tangenten an zwei Kreise'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '21–24/24', topic: 'Bestimmungs- und Beweisaufgaben', ziel: 'Einblick gewinnen in die heuristischen Verfahren', remark: 'Vorwärtsarbeiten und Rückwärtsarbeiten', details: [
+                'Analysieren, Skizze anfertigen, Hilfsmittel suchen',
+                'Vorwärts- und Rückwärtsarbeiten an Winkel- und Beweisaufgaben',
+                'Lösung und Lösungsweg dokumentieren, präsentieren und reflektieren'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Geometrie in der Ebene', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 1',
+                'Rückgabe und Auswertung'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb2', u: '1–4/56', topic: 'Negative Zahlen und die Zahlengerade', ziel: 'Beherrschen des Darstellens, Vergleichens und Ordnens rationaler Zahlen', remark: 'Temperatur, Kontostand, Höhe über dem Meer', details: [
+                'Negative Zahlen in der Umwelt: Thermometer, Kontostand, Meereshöhe',
+                'Rationale Zahlen auf der Zahlengerade darstellen',
+                'Gegenzahl und Betrag; Zahlen vergleichen und ordnen'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb2', u: '5–8/56', topic: 'Zahlbereiche und Mengen', ziel: 'Darstellen der Beziehungen zwischen den Zahlbereichen', remark: 'Mengendiagramm; $\\mathbb{N}$, $\\mathbb{Z}$, $\\mathbb{Q}$, $\\mathbb{Q}^+$', details: [
+                'Natürliche, gebrochene, ganze und rationale Zahlen im Mengendiagramm',
+                'Teilmenge, Schnittmenge, Vereinigungsmenge, leere Menge',
+                'Symbolschreibweise $\\in$, $\\notin$, $\\subset$, $\\cap$, $\\cup$, $\\emptyset$'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '9–12/56', topic: 'Addieren und Subtrahieren', ziel: 'Beherrschen des Rechnens mit rationalen Zahlen', remark: 'Vorzeichen und Operationszeichen unterscheiden', details: [
+                'Addieren als Bewegung auf der Zahlengerade',
+                'Subtrahieren als Addieren der Gegenzahl',
+                'Klammern auflösen, Kopfrechnen mit überschaubaren Zahlen'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '13–16/56', topic: 'Multiplizieren und Dividieren', ziel: 'Beherrschen des Rechnens mit rationalen Zahlen', remark: 'Vorzeichenregeln begründen (Permanenzprinzip)', details: [
+                'Vorzeichenregeln aus Zahlenfolgen gewinnen',
+                'Multiplizieren und Dividieren mit Brüchen und Dezimalzahlen',
+                'Kopf, schriftlich, Taschenrechner: die passende Rechenart wählen'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '17–20/56', topic: 'Rechengesetze und Rechenvorteile', ziel: 'Beherrschen des Rechnens unter Beachtung der Rechengesetze', remark: 'Kommutativ-, Assoziativ-, Distributivgesetz', details: [
+                'Vorrangregeln: Klammer, Potenz, Punkt vor Strich',
+                'Rechengesetze für rationale Zahlen und Rechenvorteile',
+                'Komplexere Aufgaben mit dem Taschenrechner, Überschlag'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '21–24/56', topic: 'Potenzieren und Quadratwurzel', ziel: 'Beherrschen des Potenzierens und Quadratwurzelziehens', remark: 'Ausblick auf irrationale Zahlen', details: [
+                'Potenzen mit negativer Basis: Vorzeichen bei geraden und ungeraden Exponenten',
+                'Quadratwurzel als Umkehrung des Quadrierens',
+                'Ausblick: $\\sqrt{2}$ ist keine rationale Zahl'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'ue', u: '', topic: 'Übung: Rechnen mit rationalen Zahlen', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Vermischte Aufgaben im Kopf, schriftlich und mit Taschenrechner',
+                'Typische Vorzeichenfehler finden',
+                'Rechenrallye in Gruppen'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb2', u: '25–28/56', topic: 'Gleichungen im Kopf lösen', ziel: 'Beherrschen des Lösens linearer Gleichungen', remark: 'inhaltlich: Rückwärtsrechnen, Einsetzen', details: [
+                'Einfache Gleichungen mit überschaubarem Zahlenmaterial inhaltlich lösen',
+                'Rückwärtsrechnen und Probieren, Probe durch Einsetzen',
+                'Gleichungen wie $2 \\cdot x - 4 = 8$ oder $x^3 = -8$'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'ue', u: '', topic: 'Zahlenrätsel vor Weihnachten', remark: 'kurze Woche', details: [
+                'Zahlenrätsel und magische Quadrate mit negativen Zahlen',
+                'Rechenketten im Kopf',
+                'Knobelaufgaben'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb2', u: '29–32/56', topic: 'Äquivalenzumformungen', ziel: 'Beherrschen des algorithmisch-kalkülmäßigen Lösens linearer Gleichungen', remark: 'Waagemodell', details: [
+                'Gleichungen als Waage: auf beiden Seiten dasselbe tun',
+                'Gleichungen wie $3a + 4 = 2a - 8$ in wenigen Schritten lösen',
+                'Lösungsmenge angeben, Probe'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb2', u: '33–36/56', topic: 'Gleichungen mit Klammern und Brüchen', ziel: 'Beherrschen des Lösens linearer Gleichungen', remark: 'einfaches Zahlenmaterial', details: [
+                'Klammern auflösen, dann umformen: $3(x - 2) = 18$',
+                'Gleichungen mit Brüchen: $\\tfrac{3}{b} + 4 = 14$',
+                'Sachaufgaben: Text in eine Gleichung übersetzen'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb2', u: '37–40/56', topic: 'Formeln umstellen', ziel: 'Umstellen von Formeln', remark: 'PH, Kl. 8, LB 3', details: [
+                'Formeln aus Geometrie und Physik nach einer Größe umstellen',
+                'Umstellen wie beim Gleichungslösen',
+                'Mit der umgestellten Formel rechnen'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lk', u: '', topic: 'Klassenarbeit 2: Rationale Zahlen und Gleichungen', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 2',
+                'Rückgabe und Auswertung'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb2', u: '41–44/56', topic: 'Prozentbegriff und Grundaufgaben', ziel: 'Anwenden der Prozentrechnung in Sachzusammenhängen', remark: 'Grundwert, Prozentwert, Prozentsatz; Kl. 6, LB 5', details: [
+                'Prozente als Hundertstel, Brüche und Dezimalzahlen',
+                'Prozentwert, Prozentsatz und Grundwert berechnen',
+                'Dreisatz und Formel'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb2', u: '45–48/56', topic: 'Prozentrechnung im Alltag', ziel: 'Anwenden der Prozentrechnung in Sachzusammenhängen', remark: 'Nutzen von TK', details: [
+                'Rabatt, Mehrwertsteuer, Anteile in Umfragen',
+                'Grundaufgaben in Sachzusammenhängen',
+                'Prozentrechnung mit der Tabellenkalkulation'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb2', u: '49–52/56', topic: '„Steigerung um“ und „Steigerung auf“', ziel: 'Anwenden der Prozentrechnung in Sachzusammenhängen', remark: 'vermehrter und verminderter Grundwert', details: [
+                'Steigerung um 20 % ist Steigerung auf 120 %',
+                'Preissenkungen und Preiserhöhungen, Rückrechnen auf den Grundwert',
+                'Zwei Steigerungen hintereinander'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb2', u: '53–56/56', topic: 'Säulen- und Kreisdiagramm', ziel: 'Anwenden der Prozentrechnung in Sachzusammenhängen', remark: 'kritischer Umgang mit Prozentangaben', details: [
+                'Anteile im Säulen- und im Kreisdiagramm darstellen',
+                'Winkel im Kreisdiagramm: 1 % entspricht 3,6°',
+                'Prozentangaben in Veröffentlichungen kritisch lesen'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'ue', u: '', topic: 'Übung: Gleichungen und Prozente', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Vermischte Aufgaben zu Gleichungen und Prozentrechnung',
+                'Sachaufgaben mit Lösungsplan',
+                'Fragestunde vor der Klassenarbeit'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lk', u: '', topic: 'Klassenarbeit 3: Prozentrechnung', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 3',
+                'Rückgabe und Auswertung'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb3', u: '1–4/20', topic: 'Prismen und Pyramiden', ziel: 'Beherrschen des Darstellens von Prismen und Pyramiden', remark: 'Vergleich der Eigenschaften', details: [
+                'Prismen und Pyramiden erkennen, Ecken, Kanten und Flächen zählen',
+                'Netze zeichnen und Körper falten',
+                'Schrägbild: Kavalierperspektive mit 45° und Verkürzung ½'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb3', u: '5–8/20', topic: 'Das Zweitafelbild', ziel: 'Beherrschen des Darstellens im Zweitafelbild', remark: 'Grundriss und Aufriss; Körperdarstellung mit dem PC', details: [
+                'Grundriss und Aufriss zeichnen, Ordnungslinien',
+                'Vom Zweitafelbild zum Körper und zurück',
+                'Vor- und Nachteile von Schrägbild, Zweitafelbild und Netz'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb3', u: '9–12/20', topic: 'Wahre Längen und wahre Größen', ziel: 'Konstruktion der wahren Länge von Strecken und der wahren Größe von Flächen', remark: 'Seitenkante der Pyramide', details: [
+                'Welche Strecken im Bild verkürzt erscheinen und warum',
+                'Wahre Länge der Seitenkante einer Pyramide konstruieren',
+                'Wahre Größe einer Seitenfläche konstruieren'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb3', u: '13–16/20', topic: 'Oberfläche, Volumen und Masse', ziel: 'Beherrschen des Berechnens von Oberflächeninhalt, Volumen und Masse', remark: 'Kl. 5, LB 3; Kl. 6, LB 4', details: [
+                'Prisma: Oberfläche aus dem Netz, Volumen $V = G \\cdot h$',
+                'Pyramide: Oberfläche, Volumen $V = \\tfrac13\\,G \\cdot h$',
+                'Masse über die Dichte'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb3', u: '17–20/20', topic: 'Zusammengesetzte Körper und Pyramidenstumpf', ziel: 'Kennen des Begriffs Pyramidenstumpf', remark: 'Rückführprinzip', details: [
+                'Zusammengesetzte Körper skizzieren und zerlegen',
+                'Pyramidenstumpf als Pyramide minus kleine Pyramide',
+                'Schrägbild, Zweitafelbild und Netz des Pyramidenstumpfes'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'ue', u: '', topic: 'Übung: Prismen und Pyramiden', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Darstellungen zeichnen und lesen',
+                'Berechnungen an zusammengesetzten Körpern',
+                'Modelle bauen und nachmessen'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'lb4', u: '1–4/4', topic: 'Darstellen von Daten', ziel: 'Anwenden von Diagrammen zur Darstellung und Auswertung statistischer Daten', remark: 'TK; aktuelle Daten aus den Medien', details: [
+                'Säulen-, Linien- und Kreisdiagramm: welches passt wozu?',
+                'Diagramme mit der Tabellenkalkulation erstellen',
+                'Ausblick: Diagramme aus den Medien lesen und hinterfragen'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'wb', u: '1–4/8', topic: 'Polyeder und die fünf platonischen Körper', ziel: 'Anwenden der Begriffe Polyeder und reguläres Polyeder', remark: 'Herstellen von Modellen', details: [
+                'Polyeder und reguläre Polyeder: Tetraeder, Würfel, Oktaeder, Dodekaeder, Ikosaeder',
+                'Begründen, warum es genau fünf reguläre Polyeder gibt',
+                'Modelle aus Netzen falten'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'wb', u: '5–8/8', topic: 'Eulers Polyedersatz und Geschichte', ziel: 'Einblick gewinnen in historische Verwendungen regulärer Polyeder', remark: 'Würdigung L. Euler; Platon und Kepler', details: [
+                'Ecken, Kanten, Flächen zählen: $e - k + f = 2$',
+                'Platons Urstoffe und Keplers Modell des Sonnensystems',
+                'Ausblick: ausgewählte reguläre Polyeder im Schrägbild'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'ue', u: '', topic: 'Wiederholung: Jahresstoff', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Jahresstoff systematisch wiederholen',
+                'Gemischte Aufgaben in Gruppen',
+                'Fragestunde'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'lk', u: '', topic: 'Klassenarbeit 4: Prismen, Pyramiden und Jahresstoff', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 4',
+                'Rückgabe und Auswertung'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Vertiefung nach Bedarf', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Schwerpunkte aus der Auswertung der Klassenarbeit',
+                'Differenzierte Übung',
+                'Knobelaufgaben'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Projektwoche Mathematik', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Kleines Projekt oder Wettbewerbsaufgaben',
+                'Präsentation der Ergebnisse',
+                'Ausblick auf Klasse 8'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr',
+                'Mathematische Spiele',
+                'Ausblick auf Klasse 8: Terme, Funktionen, Gleichungssysteme'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_gy_mathematik.pdf where that Lernbereich starts.
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_gy_mathematik.pdf',
+            lb1: {
+                page: 28,
+                bullets: [
+                    'Lagebeziehungen von Kreis und Gerade, Inkreis und Umkreis von Dreiecken',
+                    'Satz des Thales, Peripheriewinkelsatz, Zentri-Peripheriewinkelsatz, Sehnenviereck',
+                    'Satz und Definition, „wenn – dann“ und „genau dann, wenn“, direkter Beweis',
+                    'Konstruktions-, Bestimmungs- und Beweisaufgaben, Tangentenkonstruktionen',
+                    'Heuristik: Vorwärtsarbeiten und Rückwärtsarbeiten',
+                ]
+            },
+            lb2: {
+                page: 29,
+                bullets: [
+                    'Rationale Zahlen darstellen, vergleichen und ordnen, Zahlbereiche im Mengendiagramm',
+                    'Grundrechenarten mit rationalen Zahlen im Kopf, schriftlich und mit Taschenrechner',
+                    'Potenzieren und Quadratwurzelziehen, Ausblick auf irrationale Zahlen',
+                    'Lineare Gleichungen lösen und Formeln umstellen',
+                    'Prozentrechnung: Grundaufgaben, „Steigerung um“ und „Steigerung auf“, Diagramme',
+                ]
+            },
+            lb3: {
+                page: 30,
+                bullets: [
+                    'Prismen und Pyramiden im Schrägbild, Zweitafelbild und Netz',
+                    'Wahre Länge von Strecken und wahre Größe von Flächen',
+                    'Oberflächeninhalt, Volumen und Masse von Prismen, Pyramiden und zusammengesetzten Körpern',
+                    'Der Pyramidenstumpf',
+                ]
+            },
+            lb4: {
+                page: 30,
+                bullets: [
+                    'Säulen-, Linien- und Kreisdiagramme mit Tabellenkalkulation',
+                    'Ausblick auf die Interpretation statistischer Daten aus den Medien',
+                ]
+            },
+            wb: {
+                page: 31,
+                bullets: [
+                    'Wahlbereich 1: Tabellenkalkulation – ein mathematisches Werkzeug',
+                    'Wahlbereich 2: Maßstäbe und ihre Anwendungen',
+                    'Wahlbereich 3: Platonische Körper (gewählt)',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            wb: ['b-green', 'WB 3'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', 'ÜBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>

@@ -92,7 +92,11 @@
         const v = parseAnswer(raw), e = parseAnswer(expected);
         if (isNaN(v) || isNaN(e)) return false;
         if (tol == null) tol = (Number.isInteger(e) && !String(expected).includes('/')) ? 0 : 0.005;
-        return Math.abs(v - e) <= tol + 1e-12;
+        const near = (a, b) => Math.abs(a - b) <= tol + 1e-12;
+        if (near(v, e)) return true;
+        // "25" and "25 %" both mean 25 percent when only one side carries the % sign
+        const rp = /%\s*$/.test(String(raw).trim()), ep = /%\s*$/.test(String(expected).trim());
+        return rp !== ep && (rp ? near(v * 100, e) : near(v, e * 100));
     }
 
     // ---------- storage (never required) ----------
