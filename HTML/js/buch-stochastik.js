@@ -80,6 +80,7 @@
         return '<svg class="st-tree" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" style="min-width:' + minW + 'px" role="img" aria-label="' + esc(opt.aria || 'Baumdiagramm') + '">' +
             edges + labels + nodes + leafG + '</svg>';
     }
+    window.Buch.treeSVG = treeSVG;            // also drawn by js/buch-gy11lk-stoch.js (the inverted tree of Bayes)
 
     /* ---------- chapter opener: a quiet tree with one path lit ---------- */
     W('baum-hero', function (box) {

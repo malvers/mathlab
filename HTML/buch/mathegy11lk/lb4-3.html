@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematik GY 11 LK · Kapitel 4.3 · Die Binomialverteilung | Doc Alvers Mathe-Labor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATIK · GYMNASIUM 11 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Kapitel"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhalt des Kapitels">
+        <p class="b-toc-title">KAPITEL 4.3 · LERNBEREICH 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+<section class="b-sec" id="auftakt" data-toc="Auftakt" data-toc-k="A" data-toc-short="Auftakt" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">KAPITEL 4.3 · LERNBEREICH 4 · MAI · JUNI</p>
+            <h1>Die Binomialverteilung</h1>
+            <p class="b-hero-lead">Zehn Fragen raten, zwanzig Samen säen, hundert Fluggäste erwarten: Immer wird ein Versuch mit zwei Ausgängen oft und unabhängig wiederholt, und gefragt ist die
+                <b>Anzahl der Treffer</b>. Du leitest die Formel für diese Wahrscheinlichkeiten selbst her, rechnest mit <b>kumulierten</b> Wahrscheinlichkeiten und dem Summenzeichen, beweist
+                $E(X) = n \cdot p$ und $V(X) = n \cdot p \cdot (1 - p)$ und prüfst, wann das Modell überhaupt passt.</p>
+            <div class="b-chips"><span class="b-chip">11 USTD.</span><span class="b-chip">3 LERNEINHEITEN</span><span class="b-chip">4 ÜBUNGSSEITEN</span><span class="b-chip">BERNOULLI</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="20" data-p="0.3" data-lo="4" data-hi="8"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DAS LERNST DU IN DIESEM KAPITEL</div>
+            <div class="b-text"><ul>
+                <li><b>Bernoulli-Experimente</b> und <b>Bernoulli-Ketten</b> erkennen und die Annahmen des Modells prüfen</li>
+                <li>die Formel für die <b>Einzelwahrscheinlichkeit</b> $P(X = k)$ herleiten und anwenden</li>
+                <li><b>kumulierte</b> Wahrscheinlichkeiten mit dem Summenzeichen schreiben und „höchstens“, „mindestens“ und „zwischen“ sicher übersetzen</li>
+                <li><b>Erwartungswert</b>, <b>Varianz</b> und <b>Standardabweichung</b> herleiten, berechnen und deuten</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: DAS KANNST DU SCHON?</div>
+            <div class="b-q" data-ans="10" data-ph="Anzahl"><p class="b-q-text">Wie groß ist $\binom52$?</p><div class="b-sol"><p>$\tfrac{5 \cdot 4}{2} = 10$ (Kapitel 4.1)</p></div></div>
+            <div class="b-q" data-ans="0,0625" data-ph="Wert"><p class="b-q-text">Berechne $0{,}5^4$.</p><div class="b-sol"><p>$\tfrac{1}{16} = 0{,}0625$</p></div></div>
+            <div class="b-q" data-ans="3,5" data-ph="E(X) ="><p class="b-q-text">$X$ ist die Augenzahl eines Würfels. Wie groß ist $E(X)$?</p><div class="b-sol"><p>$\tfrac{1 + 2 + \ldots + 6}{6} = 3{,}5$ (Klasse 10)</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Welcher Vorgang ist eine Bernoulli-Kette?</p><div class="b-mc"><button>Würfeln, bis die erste 6 fällt</button><button>Zehnmal würfeln, Treffer ist eine 6</button><button>Drei Lose ohne Zurücklegen aus 30 Losen mit 5 Gewinnen</button></div><div class="b-sol"><p>Feste Länge, zwei Ausgänge, gleiches $p$, unabhängig. Bis zur ersten 6 ist die Länge offen, ohne Zurücklegen ändert sich $p$.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Erkundungen" data-toc-k="E" data-toc-short="Erkundungen">
+    <div class="b-band"><span class="b-band-tag">ERKUNDUNGEN</span><span class="b-band-sub">ZUM EINSTIEG · IN GRUPPEN</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">ANKREUZEN OHNE AHNUNG</div>
+            <div class="b-text"><p>Ein Test hat 10 Fragen mit je 4 Antworten, eine davon richtig. Jemand kreuzt zufällig an.</p>
+                <ul><li>Simuliert es: Ein Würfel, bei dem nur die 1 als „richtig“ zählt und 5 und 6 neu geworfen werden. Wie oft gibt es genau 3 Richtige?</li><li>Wie viele Pfade hat der Baum, und wie viele davon haben genau 3 Treffer?</li></ul></div>
+            <span class="b-pair">→ Lerneinheit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">MINDESTENS EINE SECHS</div>
+            <div class="b-text"><p>Wie oft muss man würfeln, damit mit mindestens $90\,\%$ Wahrscheinlichkeit mindestens eine 6 fällt?</p>
+                <ul><li>Schätzt zuerst. Rechnet dann mit dem Gegenereignis für 10, 12 und 15 Würfe.</li><li>Wie könnt ihr die kleinste passende Zahl direkt ausrechnen?</li></ul></div>
+            <span class="b-pair">→ Lerneinheit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DAS GALTONBRETT</div>
+            <div class="b-text"><p>Eine Kugel fällt durch 8 Nagelreihen und springt an jedem Nagel zufällig nach links oder rechts.</p>
+                <ul><li>In welches Fach fällt sie am häufigsten? Warum landen kaum Kugeln ganz außen?</li><li>Wohin verschiebt sich der Haufen, wenn die Nägel schräg stehen und die Kugel zu $70\,\%$ nach rechts springt?</li></ul></div>
+            <span class="b-pair">→ Lerneinheit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Bernoulli-Ketten und die Formel" data-toc-k="1" data-toc-short="1 Bernoulli">
+    <div class="b-band"><span class="b-band-tag">LERNEINHEIT 1</span><span class="b-band-sub">4 USTD.</span></div>
+    <h2><span class="b-no">1</span>Bernoulli-Ketten und die Formel</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Beim Raten hat jede der 10 Fragen dieselbe Trefferchance $\tfrac14$, und die Fragen beeinflussen sich nicht. Der Baum hätte $2^{10} = 1024$ Pfade. Niemand zeichnet ihn,
+                aber man kann ihn <b>denken</b>: Alle Pfade mit genau 3 Treffern sind gleich wahrscheinlich, und man muss nur zählen, wie viele es sind.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">MERKE · BERNOULLI-KETTE UND BINOMIALVERTEILUNG</div>
+                <div class="b-text">
+                    <p>Ein <b>Bernoulli-Experiment</b> hat genau zwei Ergebnisse: Treffer mit der Wahrscheinlichkeit $p$ und Niete mit $1 - p$.</p>
+                    <p>Wird es $n$-mal <b>unabhängig</b> und mit <b>gleichem</b> $p$ wiederholt, entsteht eine <b>Bernoulli-Kette</b> der Länge $n$.</p>
+                    <p>Für die Anzahl $X$ der Treffer gilt die <b>Formel von Bernoulli</b>: $P(X = k) = \dbinom{n}{k} \cdot p^k \cdot (1 - p)^{n - k}$ für $k = 0, 1, \ldots, n$.</p>
+                    <p>$X$ heißt dann <b>binomialverteilt</b> mit den Parametern $n$ und $p$, kurz $X \sim B(n;\, p)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Herleitung:</b> Ein Pfad mit $k$ Treffern und $n - k$ Nieten hat nach der 1. Pfadregel die Wahrscheinlichkeit $p^k (1 - p)^{n - k}$, egal in welcher Reihenfolge.
+                Es gibt $\binom{n}{k}$ solche Pfade, denn man wählt aus, an welchen $k$ der $n$ Stellen die Treffer stehen. Die 2. Pfadregel addiert sie.</p>
+            <p class="b-note"><b>Woher der Name?</b> Nach dem binomischen Lehrsatz ist $\sum_{k=0}^{n} \binom{n}{k} p^k (1 - p)^{n - k} = \big(p + (1 - p)\big)^n = 1$. Die Wahrscheinlichkeiten sind die Summanden einer binomischen Formel.</p>
+            <p class="b-note"><b>Ohne Zurücklegen?</b> Dann ändert sich $p$, es ist keine Bernoulli-Kette. Ist die Gesamtheit sehr groß gegenüber der Stichprobe, ist der Unterschied aber klein.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERAKTIV · DER BAUM EINER BERNOULLI-KETTE</div>
+        <p class="b-help" style="margin:0 0 12px">Wähle die Länge der Kette und die Trefferzahl $k$. Alle Pfade mit genau $k$ Treffern leuchten auf: Es sind $\binom{n}{k}$ Stück, jeder mit derselben Wahrscheinlichkeit.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 1 · RATEN</div>
+            <div class="b-text"><p>10 Fragen, je 4 Antworten, es wird geraten. Berechne $P(X = 3)$ und $P(X = 0)$.</p></div>
+            <div class="b-sol"><p>$X \sim B(10;\, 0{,}25)$. $P(X = 3) = \binom{10}{3} \cdot 0{,}25^3 \cdot 0{,}75^7 = 120 \cdot 0{,}015625 \cdot 0{,}1335 \approx 0{,}250$.</p>
+                <p><span class="b-res">$P(X = 0) = 0{,}75^{10} \approx 0{,}056$:</span> Etwa jede 18. Person hat beim Raten keine einzige richtige Antwort.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 2 · DIE FORMEL IM KLEINEN</div>
+            <div class="b-text"><p>Ein Würfel wird viermal geworfen, Treffer ist eine 6. Schreibe alle Pfade mit genau zwei Treffern auf und berechne $P(X = 2)$.</p></div>
+            <div class="b-sol"><p>$TTNN$, $TNTN$, $TNNT$, $NTTN$, $NTNT$, $NNTT$: sechs Pfade, und $\binom42 = 6$. Jeder hat $\left(\tfrac16\right)^2 \left(\tfrac56\right)^2 = \tfrac{25}{1296}$.</p>
+                <p><span class="b-res">$P(X = 2) = 6 \cdot \tfrac{25}{1296} = \tfrac{25}{216} \approx 0{,}116$.</span></p></div>
+        </div>
+    </div>
+
+    <h3>AUFGABEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Entscheide, ob eine Bernoulli-Kette vorliegt: (a) 20 Münzwürfe, Treffer ist Wappen; (b) aus 30 Losen mit 5 Gewinnen werden 3 ohne Zurücklegen gezogen; (c) man würfelt, bis die erste 6 fällt.</p></div>
+            <div class="b-sol"><p>(a) Ja, $n = 20$, $p = 0{,}5$. (b) Nein, $p$ ändert sich von Zug zu Zug. (c) Nein, die Länge der Kette steht nicht fest.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Ein Würfel wird fünfmal geworfen. Wie groß ist die Wahrscheinlichkeit für genau zwei Sechsen?</p></div>
+            <div class="b-sol"><p>$\binom52 \cdot \left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^3 = 10 \cdot \tfrac{125}{7776} \approx 0{,}161$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Zeige an $X \sim B(10;\, 0{,}7)$ und $Y \sim B(10;\, 0{,}3)$: $P(X = 8) = P(Y = 2)$. Begründe allgemein, warum $P(X = k) = P(Y = n - k)$ gilt.</p></div>
+            <div class="b-sol"><p>$\binom{10}{8} 0{,}7^8\, 0{,}3^2 = \binom{10}{2} 0{,}3^2\, 0{,}7^8 \approx 0{,}233$, denn $\binom{n}{k} = \binom{n}{n - k}$. Allgemein: $k$ Treffer mit $p$ sind $n - k$ Nieten, also $n - k$ Treffer, wenn man Treffer und Niete vertauscht.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Zeige mit dem binomischen Lehrsatz, dass die Wahrscheinlichkeiten $P(X = 0), \ldots, P(X = n)$ einer Binomialverteilung zusammen $1$ ergeben.</p></div>
+            <div class="b-sol"><p>$(a + b)^n = \sum_{k=0}^{n} \binom{n}{k} a^k b^{n - k}$ mit $a = p$ und $b = 1 - p$ ergibt $\sum_{k=0}^{n} P(X = k) = 1^n = 1$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Für welches $k$ ist $P(X = k)$ am größten? Untersuche den Quotienten $\tfrac{P(X = k + 1)}{P(X = k)}$ und prüfe das Ergebnis an $X \sim B(10;\, 0{,}25)$.</p></div>
+            <div class="b-sol"><p>$\tfrac{P(X = k + 1)}{P(X = k)} = \tfrac{n - k}{k + 1} \cdot \tfrac{p}{1 - p} > 1 \iff k < (n + 1)p - 1$. Die Wahrscheinlichkeiten steigen also bis $k = \lfloor (n + 1)p \rfloor$ und fallen danach.
+                Für $n = 10$, $p = 0{,}25$: $\lfloor 2{,}75 \rfloor = 2$, und tatsächlich ist $P(X = 2) \approx 0{,}282 > P(X = 3) \approx 0{,}250$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE DICH!</div>
+        <div class="b-q" data-ans="15/64" data-ph="P ="><p class="b-q-text">Eine Münze wird sechsmal geworfen. Wie groß ist $P(\text{genau zweimal Wappen})$?</p><div class="b-sol"><p>$\binom62 \cdot 0{,}5^6 = \tfrac{15}{64} \approx 0{,}234$</p></div></div>
+        <div class="b-q" data-ans="0,430" data-ph="P ="><p class="b-q-text">$X \sim B(8;\, 0{,}1)$. Wie groß ist $P(X = 0)$ (drei Nachkommastellen)?</p><div class="b-sol"><p>$0{,}9^8 \approx 0{,}430$</p></div></div>
+        <div class="b-q" data-ans="35" data-ph="Anzahl"><p class="b-q-text">Wie viele Pfade mit genau 3 Treffern hat eine Bernoulli-Kette der Länge 7?</p><div class="b-sol"><p>$\binom73 = 35$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Kumulierte Wahrscheinlichkeiten" data-toc-k="2" data-toc-short="2 Kumuliert">
+    <div class="b-band"><span class="b-band-tag">LERNEINHEIT 2</span><span class="b-band-sub">3 USTD.</span></div>
+    <h2><span class="b-no">2</span>Kumulierte Wahrscheinlichkeiten</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Selten fragt man nach genau 3 Treffern. Zum Bestehen braucht man „mindestens 5“, eine Lieferung ist in Ordnung bei „höchstens 2“ defekten Teilen. Dann muss man
+                viele Einzelwahrscheinlichkeiten addieren. Das <b>Summenzeichen</b> schreibt solche Summen kurz, und Rechner und Tabellen liefern sie direkt.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">MERKE · KUMULIERTE WAHRSCHEINLICHKEITEN</div>
+                <div class="b-text">
+                    <p><b>Kumulierte Wahrscheinlichkeit:</b> $P(X \le k) = \sum\limits_{i=0}^{k} \dbinom{n}{i}\, p^i\, (1 - p)^{n - i}$. Der Index $i$ läuft von $0$ bis $k$.</p>
+                    <p><b>Übersetzen:</b> $P(X \ge k) = 1 - P(X \le k - 1)$, $\ P(X > k) = 1 - P(X \le k)$, $\ P(a \le X \le b) = P(X \le b) - P(X \le a - 1)$.</p>
+                    <p><b>Mindestens einen Treffer</b> mit Wahrscheinlichkeit mindestens $\alpha$: $1 - (1 - p)^n \ge \alpha \iff n \ge \dfrac{\ln(1 - \alpha)}{\ln(1 - p)}$. Beim Teilen durch den negativen Logarithmus kehrt sich das Ungleichheitszeichen um.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Summenzeichen:</b> $\sum_{i=1}^{4} i^2 = 1 + 4 + 9 + 16 = 30$. Ein konstanter Faktor darf vor die Summe, und der Name des Index ist egal: $\sum_{i=1}^{4} i^2 = \sum_{k=1}^{4} k^2$.</p>
+            <p class="b-note"><b>Ganze Zahlen:</b> Weil $X$ nur ganze Werte annimmt, ist $X < 5$ dasselbe wie $X \le 4$ und „mehr als 3“ dasselbe wie $X \ge 4$.</p>
+            <p class="b-note"><b>Rechner:</b> Die kumulierte Verteilung heißt meist <code>binomcdf</code> oder Binomial-Verteilungsfunktion, die Einzelwahrscheinlichkeit <code>binompdf</code>.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERAKTIV · DIE BINOMIALVERTEILUNG</div>
+        <p class="b-help" style="margin:0 0 12px">Stelle $n$ und $p$ ein und wähle „genau“, „höchstens“, „mindestens“ oder „zwischen“. Die zugehörigen Säulen werden markiert, ihre Summe steht darunter.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 3 · HÖCHSTENS, MINDESTENS, ZWISCHEN</div>
+            <div class="b-text"><p>$X \sim B(20;\, 0{,}3)$. Berechne $P(X \le 4)$, $P(X \ge 8)$ und $P(4 \le X \le 8)$.</p></div>
+            <div class="b-sol"><p>$P(X \le 4) \approx 0{,}2375$. $P(X \ge 8) = 1 - P(X \le 7) \approx 1 - 0{,}7723 = 0{,}2277$.</p>
+                <p><span class="b-res">$P(4 \le X \le 8) = P(X \le 8) - P(X \le 3) \approx 0{,}8867 - 0{,}1071 = 0{,}7796$.</span> Die untere Grenze 4 gehört dazu, deshalb wird bis 3 abgezogen.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 4 · MINDESTENS EINE SECHS</div>
+            <div class="b-text"><p>Wie oft muss man mindestens würfeln, damit mit mindestens $90\,\%$ Wahrscheinlichkeit mindestens eine 6 fällt?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^n \ge 0{,}9 \iff \left(\tfrac56\right)^n \le 0{,}1 \iff n \ge \dfrac{\ln 0{,}1}{\ln \frac56} \approx 12{,}63$.</p>
+                <p><span class="b-res">Mindestens 13 Würfe.</span> Probe: $1 - \left(\tfrac56\right)^{12} \approx 0{,}888$ reicht nicht, $1 - \left(\tfrac56\right)^{13} \approx 0{,}907$ reicht.</p></div>
+        </div>
+    </div>
+
+    <h3>AUFGABEN</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Schreibe $P(X \le 3)$ für $X \sim B(10;\, p)$ mit dem Summenzeichen und berechne $\sum_{k=1}^{5} (2k - 1)$.</p></div>
+            <div class="b-sol"><p>$P(X \le 3) = \sum_{i=0}^{3} \binom{10}{i} p^i (1 - p)^{10 - i}$. Und $1 + 3 + 5 + 7 + 9 = 25$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Beim Raten aus Lerneinheit 1 besteht man ab 5 richtigen Antworten. Wie wahrscheinlich besteht man durch Raten?</p></div>
+            <div class="b-sol"><p>$P(X \ge 5) = 1 - P(X \le 4) \approx 1 - 0{,}9219 = 0{,}0781$, also knapp $8\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$2\,\%$ der Lampen einer Fertigung sind defekt. Eine Packung enthält 50 Lampen. Wie wahrscheinlich sind höchstens 2 defekt, wie wahrscheinlich mehr als 3?</p></div>
+            <div class="b-sol"><p>$X \sim B(50;\, 0{,}02)$: $P(X \le 2) \approx 0{,}9216$; $P(X > 3) = 1 - P(X \le 3) \approx 0{,}0178$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$X \sim B(5;\, 0{,}2)$. Berechne $P(X \ge 1)$ ohne Taschenrechner-Summen und begründe den Weg.</p></div>
+            <div class="b-sol"><p>Gegenereignis „kein Treffer“: $P(X \ge 1) = 1 - 0{,}8^5 = 1 - 0{,}32768 = 0{,}67232$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Bei einer Lotterie gewinnt jedes Los mit $5\,\%$. Wie viele Lose muss man mindestens kaufen, um mit mindestens $95\,\%$ Wahrscheinlichkeit mindestens einen Gewinn zu haben? Und für mindestens zwei Gewinne?</p></div>
+            <div class="b-sol"><p>Einen: $n \ge \tfrac{\ln 0{,}05}{\ln 0{,}95} \approx 58{,}4$, also 59 Lose. Für zwei gibt es keine geschlossene Formel: Mit dem Rechner $P(X \ge 2) = 1 - P(X \le 1)$ für wachsendes $n$ prüfen. Ab $n = 93$ ist sie mindestens $0{,}95$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE DICH!</div>
+        <div class="b-q" data-ans="0,055" data-ph="P ="><p class="b-q-text">$X \sim B(10;\, 0{,}5)$. Wie groß ist $P(X \le 2)$ (drei Nachkommastellen)?</p><div class="b-sol"><p>$\tfrac{1 + 10 + 45}{1024} = \tfrac{56}{1024} \approx 0{,}055$</p></div></div>
+        <div class="b-q" data-ans="0,672" data-ph="P ="><p class="b-q-text">$X \sim B(5;\, 0{,}2)$. Wie groß ist $P(X \ge 1)$ (drei Nachkommastellen)?</p><div class="b-sol"><p>$1 - 0{,}8^5 \approx 0{,}672$</p></div></div>
+        <div class="b-q" data-ans="44" data-ph="n ="><p class="b-q-text">Wie oft muss ein Versuch mit $p = 0{,}1$ mindestens wiederholt werden, damit mit mindestens $99\,\%$ mindestens ein Treffer dabei ist?</p><div class="b-sol"><p>$n \ge \tfrac{\ln 0{,}01}{\ln 0{,}9} \approx 43{,}7$, also 44.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Erwartungswert, Varianz und Modellieren" data-toc-k="3" data-toc-short="3 Kenngrößen">
+    <div class="b-band"><span class="b-band-tag">LERNEINHEIT 3</span><span class="b-band-sub">4 USTD.</span></div>
+    <h2><span class="b-no">3</span>Erwartungswert, Varianz und Modellieren</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Im Galtonbrett mit 8 Reihen und $p = 0{,}5$ landen die meisten Kugeln um Fach 4. Das ist kein Zufall: Im Mittel springt eine Kugel bei der Hälfte der Nägel nach rechts.
+                Allgemein erwartet man $n \cdot p$ Treffer. Wie weit die Ergebnisse darum streuen, misst die Standardabweichung, und auch für sie gibt es eine einfache Formel.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">MERKE · KENNGRÖSSEN DER BINOMIALVERTEILUNG</div>
+                <div class="b-text">
+                    <p>Für $X \sim B(n;\, p)$ gilt: $E(X) = \mu = n \cdot p$, $\ V(X) = n \cdot p \cdot (1 - p)$, $\ \sigma = \sqrt{n \cdot p \cdot (1 - p)}$.</p>
+                    <p><b>Herleitung:</b> $X = X_1 + X_2 + \ldots + X_n$, wobei $X_i = 1$ bei einem Treffer im $i$-ten Versuch und sonst $0$ ist. Jedes $X_i$ hat $E(X_i) = p$ und
+                        $V(X_i) = (1 - p)^2 p + (0 - p)^2 (1 - p) = p\,(1 - p)$. Erwartungswerte addieren sich immer, Varianzen hier, weil die $X_i$ unabhängig sind (Kapitel 4.2).</p>
+                    <p><b>Modellieren:</b> Prüfe vor dem Rechnen: feste Anzahl $n$, zwei Ausgänge, gleiches $p$, Unabhängigkeit. Ziehen ohne Zurücklegen aus einer großen Gesamtheit beschreibt $B(n;\, p)$ näherungsweise.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Kein möglicher Wert:</b> Für $B(5;\, 0{,}3)$ ist $E(X) = 1{,}5$. Der Erwartungswert ist ein Mittelwert auf lange Sicht, keine Vorhersage für den einzelnen Versuch.</p>
+            <p class="b-note"><b>Am breitesten bei $p = 0{,}5$:</b> $p\,(1 - p)$ ist eine nach unten geöffnete Parabel mit dem Scheitel $\left(\tfrac12 \mid \tfrac14\right)$, also $V(X) \le \tfrac n4$.</p>
+            <p class="b-note"><b>Ausblick Jahrgangsstufe 12:</b> Für große $\sigma$ ähnelt das Histogramm einer Glockenkurve. Diese Näherung von de Moivre und Laplace ist ein Thema des Leistungskurses 12.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERAKTIV · DAS GALTONBRETT</div>
+        <p class="b-help" style="margin:0 0 12px">Lass Kugeln fallen. Jede trifft $n$ Nägel und springt jedes Mal mit $p$ nach rechts, die Fachnummer ist die Zahl der Treffer. Die Balken nähern sich den Punkten $P(X = k)$, das mittlere Fach dem Erwartungswert $n \cdot p$.</p>
+        <div data-widget="galton" data-n="8" data-p="0.5"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 5 · RATEN IN ZAHLEN</div>
+            <div class="b-text"><p>Berechne für das Raten bei 10 Fragen mit je 4 Antworten Erwartungswert, Varianz und Standardabweichung der Zahl richtiger Antworten.</p></div>
+            <div class="b-sol"><p>$\mu = 10 \cdot 0{,}25 = 2{,}5$, $V(X) = 10 \cdot 0{,}25 \cdot 0{,}75 = 1{,}875$, $\sigma \approx 1{,}37$.</p>
+                <p><span class="b-res">Im Mittel 2,5 richtige Antworten,</span> und Ergebnisse zwischen $2{,}5 - 1{,}37$ und $2{,}5 + 1{,}37$, also 2 oder 3 Richtige, haben zusammen etwa $53\,\%$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 6 · SAMEN MIT GARANTIE</div>
+            <div class="b-text"><p>Ein Hersteller garantiert $95\,\%$ keimfähige Samen. In einer Tüte sind 50 Samen. Wie viele keimen im Mittel? Wie wahrscheinlich keimen höchstens 44? Welche Annahmen stecken im Modell?</p></div>
+            <div class="b-sol"><p>$X \sim B(50;\, 0{,}95)$: $\mu = 47{,}5$, $\sigma = \sqrt{2{,}375} \approx 1{,}54$. $P(X \le 44) \approx 0{,}038$.</p>
+                <p><span class="b-res">Keimen höchstens 44, spricht das gegen die Garantie.</span> Das Modell nimmt an, dass alle Samen dieselbe Chance haben und sich nicht beeinflussen; eine zu feuchte Lagerung träfe aber die ganze Tüte.</p></div>
+        </div>
+    </div>
+
+    <h3>AUFGABEN</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Berechne Erwartungswert und Standardabweichung für $X \sim B(50;\, 0{,}2)$.</p></div>
+            <div class="b-sol"><p>$\mu = 10$, $\sigma = \sqrt{50 \cdot 0{,}2 \cdot 0{,}8} = \sqrt8 \approx 2{,}83$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Für welches $p$ ist die Varianz bei festem $n$ am größten? Wie groß ist sie dann?</p></div>
+            <div class="b-sol"><p>$p\,(1 - p)$ ist bei $p = 0{,}5$ maximal, dann ist $V(X) = \tfrac n4$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Eine Fluggesellschaft verkauft 160 Tickets für 150 Plätze. Jede Person erscheint unabhängig mit $90\,\%$. Berechne $\mu$, $\sigma$ und die Wahrscheinlichkeit, dass mehr als 150 Personen erscheinen.
+            Wo ist die Annahme der Unabhängigkeit fraglich?</p></div>
+            <div class="b-sol"><p>$\mu = 144$, $\sigma = \sqrt{14{,}4} \approx 3{,}79$. $P(X \ge 151) = 1 - P(X \le 150) \approx 0{,}036$. Familien und Reisegruppen erscheinen gemeinsam oder gar nicht, dann sind die Personen nicht unabhängig, und große Abweichungen werden wahrscheinlicher.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Für eine binomialverteilte Zufallsgröße ist $E(X) = 12$ und $V(X) = 7{,}2$. Bestimme $n$ und $p$.</p></div>
+            <div class="b-sol"><p>$\tfrac{V(X)}{E(X)} = 1 - p = 0{,}6$, also $p = 0{,}4$ und $n = \tfrac{12}{0{,}4} = 30$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Beweise $E(X) = n \cdot p$ direkt aus der Formel von Bernoulli. Nutze $k \binom{n}{k} = n \binom{n - 1}{k - 1}$.</p></div>
+            <div class="b-sol"><p>$E(X) = \sum_{k=1}^{n} k \binom{n}{k} p^k (1 - p)^{n - k} = np \sum_{k=1}^{n} \binom{n - 1}{k - 1} p^{k - 1} (1 - p)^{(n - 1) - (k - 1)} = np \cdot \big(p + (1 - p)\big)^{n - 1} = np$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE DICH!</div>
+        <div class="b-q" data-ans="10" data-ph="μ ="><p class="b-q-text">$X \sim B(40;\, 0{,}25)$. Wie groß ist $E(X)$?</p><div class="b-sol"><p>$40 \cdot 0{,}25 = 10$</p></div></div>
+        <div class="b-q" data-ans="2,74" data-ph="σ ="><p class="b-q-text">Wie groß ist $\sigma$ für $X \sim B(40;\, 0{,}25)$ (zwei Nachkommastellen)?</p><div class="b-sol"><p>$\sqrt{40 \cdot 0{,}25 \cdot 0{,}75} = \sqrt{7{,}5} \approx 2{,}74$</p></div></div>
+        <div class="b-q" data-ans="30" data-ph="n ="><p class="b-q-text">$X$ ist binomialverteilt mit $E(X) = 12$ und $V(X) = 7{,}2$. Wie groß ist $n$?</p><div class="b-sol"><p>$1 - p = 0{,}6$, $p = 0{,}4$, $n = 30$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Wiederholen · Vertiefen · Vernetzen" data-toc-k="W" data-toc-short="Üben">
+    <div class="b-band"><span class="b-band-tag">WIEDERHOLEN · VERTIEFEN · VERNETZEN</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Vernetzen mit der Biologie:</b> Bei einer Kreuzung $Aa \times Aa$ zeigt jeder Nachkomme mit $\tfrac34$ das dominante Merkmal. Wie viele von 20 Nachkommen erwartet man damit?
+            Wie wahrscheinlich sind es genau 15?</p></div>
+            <div class="b-sol"><p>$X \sim B(20;\, 0{,}75)$: $\mu = 15$. $P(X = 15) = \binom{20}{15}\, 0{,}75^{15}\, 0{,}25^5 \approx 0{,}202$. Selbst der Erwartungswert tritt nur in jedem fünften Fall genau ein.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In einem Galtonbrett mit 10 Reihen springt jede Kugel mit $p = 0{,}5$ nach rechts. Wie wahrscheinlich landet eine Kugel im mittleren Fach 5?</p></div>
+            <div class="b-sol"><p>$\binom{10}{5} \cdot 0{,}5^{10} = \tfrac{252}{1024} \approx 0{,}246$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Ein Würfel wird 600-mal geworfen und zeigt 120 Sechsen. Liegt dieses Ergebnis in der Umgebung $[\mu - 2\sigma;\, \mu + 2\sigma]$ eines fairen Würfels? Was folgt daraus?</p></div>
+            <div class="b-sol"><p>$\mu = 100$, $\sigma = \sqrt{600 \cdot \tfrac16 \cdot \tfrac56} \approx 9{,}13$, Umgebung $[81{,}7;\, 118{,}3]$. 120 liegt knapp außerhalb: Das spricht gegen einen fairen Würfel, beweist aber nichts.
+                Wie sicher man solche Entscheidungen treffen kann, regelt die beurteilende Statistik der Jahrgangsstufe 12.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Bildung für nachhaltige Entwicklung:</b> Ein Imker rechnet damit, dass jedes seiner 12 Bienenvölker den Winter unabhängig mit $70\,\%$ übersteht. Wie wahrscheinlich überleben mindestens 10?
+            Warum ist die Annahme der Unabhängigkeit hier kritisch?</p></div>
+            <div class="b-sol"><p>$P(X \ge 10) = 1 - P(X \le 9) \approx 0{,}253$. Krankheiten wie die Varroamilbe und ein harter Winter treffen alle Völker eines Standorts zugleich: Die Überlebenschancen hängen voneinander ab.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Exkursion: Die Kunst des Vermutens" data-toc-k="X" data-toc-short="Ars Conjectandi">
+    <div class="b-band"><span class="b-band-tag">EXKURSION</span><span class="b-band-sub">GESCHICHTE</span></div>
+    <h2>Die Kunst des Vermutens</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Jakob Bernoulli, Mathematikprofessor in Basel, arbeitete viele Jahre an einem Buch über das Rechnen mit dem Zufall. Als er 1705 starb, war es nicht ganz fertig.
+                Sein Neffe Nikolaus gab es 1713 heraus: „Ars Conjectandi“, die Kunst des Vermutens. Darin stehen die Bernoulli-Ketten, die Rechnung mit Binomialkoeffizienten und ein Satz, den Bernoulli sein „goldenes Theorem“ nannte.</p>
+            <p>Bernoulli dachte an eine Urne mit 3000 weißen und 2000 schwarzen Steinchen. Man kennt die Füllung nicht und zieht immer wieder eine Kugel mit Zurücklegen. Kann man durch genug Ziehungen praktisch sicher sein,
+                dass der Anteil der weißen Steinchen nahe bei $\tfrac35$ liegt? Sein Satz sagt: Ja, für jede Genauigkeit und jede Sicherheit gibt es eine solche Anzahl. Für die Genauigkeit $\tfrac{1}{50}$ und eine Sicherheit von 1000 zu 1 rechnete er mehr als 25 550 Ziehungen aus.</p>
+            <p>Das ist das erste <b>Gesetz der großen Zahlen</b>: Die relative Häufigkeit nähert sich der Wahrscheinlichkeit. Genau das hast du in Kapitel 4.1 mit der Simulation gesehen, und es ist die Brücke von der Wahrscheinlichkeitsrechnung zur Statistik.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Quelle:</b> Jakob Bernoulli: „Ars Conjectandi“, Basel 1713, Teil IV (posthum herausgegeben von Nikolaus Bernoulli).</p>
+            <p class="b-note"><b>Rechne nach:</b> Mit $\sigma = \sqrt{n p (1 - p)}$ schwankt die relative Häufigkeit um etwa $\sqrt{\tfrac{p(1 - p)}{n}}$. Für $p = 0{,}6$ und $n = 25\,550$ ist das etwa $0{,}003$, also viel weniger als $\tfrac{1}{50} = 0{,}02$.
+                Bernoullis Abschätzung war sehr vorsichtig; heute weiß man, dass schon rund 6500 Ziehungen genügen.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Rückblick" data-toc-k="R" data-toc-short="Rückblick">
+    <div class="b-band"><span class="b-band-tag">RÜCKBLICK</span><span class="b-band-sub">DAS WICHTIGSTE AUF EINEN BLICK</span></div>
+    <div class="b-rueck"><div><h4>BERNOULLI-KETTE</h4><p>Zwei Ausgänge, $n$ unabhängige Wiederholungen mit gleichem $p$; $X$ zählt die Treffer.</p></div>
+        <div><p>Raten bei 10 Fragen: $X \sim B(10;\, 0{,}25)$</p></div></div>
+    <div class="b-rueck"><div><h4>FORMEL VON BERNOULLI</h4><p>$P(X = k) = \binom{n}{k}\, p^k\, (1 - p)^{n - k}$: Anzahl der Pfade mal Wahrscheinlichkeit eines Pfades.</p></div>
+        <div><p>$P(X = 3) = 120 \cdot 0{,}25^3 \cdot 0{,}75^7 \approx 0{,}250$</p></div></div>
+    <div class="b-rueck"><div><h4>KUMULIERT</h4><p>$P(X \le k) = \sum_{i=0}^{k} P(X = i)$; mindestens über das Gegenereignis.</p></div>
+        <div><p>$P(4 \le X \le 8) = P(X \le 8) - P(X \le 3)$</p></div></div>
+    <div class="b-rueck"><div><h4>MINDESTENS EIN TREFFER</h4><p>$n \ge \tfrac{\ln(1 - \alpha)}{\ln(1 - p)}$.</p></div>
+        <div><p>Sechs mit $90\,\%$: 13 Würfe</p></div></div>
+    <div class="b-rueck"><div><h4>KENNGRÖSSEN</h4><p>$\mu = np$, $V(X) = np(1 - p)$, $\sigma = \sqrt{np(1 - p)}$; Herleitung über $X = X_1 + \ldots + X_n$.</p></div>
+        <div><p>Samen: $\mu = 47{,}5$, $\sigma \approx 1{,}54$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">ZWEI RUNDEN · RÜCKMELDUNG SOFORT</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RUNDE 1 · OHNE HILFSMITTEL</div>
+            <div class="b-q" data-ans="5/16" data-ph="P ="><p class="b-q-text">Eine Münze wird fünfmal geworfen. Wie groß ist $P(\text{genau zweimal Wappen})$?</p><div class="b-sol"><p>$\binom52 \cdot 0{,}5^5 = \tfrac{10}{32} = \tfrac{5}{16}$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="μ ="><p class="b-q-text">$X \sim B(30;\, 0{,}2)$. Wie groß ist $E(X)$?</p><div class="b-sol"><p>$30 \cdot 0{,}2 = 6$</p></div></div>
+            <div class="b-q" data-ans="4,8" data-ph="V(X) ="><p class="b-q-text">$X \sim B(30;\, 0{,}2)$. Wie groß ist $V(X)$?</p><div class="b-sol"><p>$30 \cdot 0{,}2 \cdot 0{,}8 = 4{,}8$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RUNDE 2 · MIT HILFSMITTELN</div>
+            <div class="b-q" data-ans="0,4164" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$X \sim B(20;\, 0{,}3)$. Wie groß ist $P(X \le 5)$ (vier Nachkommastellen)?</p><div class="b-sol"><p>Rechner: $P(X \le 5) \approx 0{,}4164$</p></div></div>
+            <div class="b-q" data-ans="0,1133" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$X \sim B(20;\, 0{,}3)$. Wie groß ist $P(X \ge 9)$ (vier Nachkommastellen)?</p><div class="b-sol"><p>$1 - P(X \le 8) \approx 1 - 0{,}8867 = 0{,}1133$</p></div></div>
+            <div class="b-q" data-ans="29" data-ph="n ="><p class="b-q-text">Wie viele Versuche mit $p = 0{,}1$ braucht man mindestens, damit mit mindestens $95\,\%$ mindestens ein Treffer dabei ist?</p><div class="b-sol"><p>$n \ge \tfrac{\ln 0{,}05}{\ln 0{,}9} \approx 28{,}4$, also 29.</p></div></div>
+        </div>
+    </div>
+    <h3>MEHR ÜBEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-bernoulli.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BERNOULLI-KETTEN</span><span class="b-lab-what">20 Aufgaben mit Lösungen</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-erwartungswert-sigma.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ERWARTUNGSWERT UND σ</span><span class="b-lab-what">20 Aufgaben mit Lösungen</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-modellieren-binomial.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MODELLIEREN MIT DER BINOMIALVERTEILUNG</span><span class="b-lab-what">20 Aufgaben mit Lösungen</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-ka2.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KLAUSURTRAINING 11/II</span><span class="b-lab-what">20 Aufgaben mit Lösungen</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTONBRETT</span><span class="b-lab-what">Kugeln, Nägel und die Glockenkurve</span></span></a>
+        <a class="b-lab" data-lab="binomischeslabor" href="../../binomischeslabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BINOMISCHES LABOR</span><span class="b-lab-what">Binomialkoeffizienten erforschen</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematik, Gymnasium Jahrgangsstufe 11, Leistungskurs · Lernbereich 4 nach dem sächsischen Lehrplan Gymnasium Mathematik.</p>
+    <p>Alle Texte, Aufgaben und Abbildungen sind eigene Inhalte.</p>
+</footer>
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-gy11lk-stoch.js"></script>
+</body>
+</html>
