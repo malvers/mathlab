@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 114 labs, 1997 terms, 2026-10-10
+ * 115 labs, 2013 terms, 2026-10-10
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -61,6 +61,7 @@ const LABS_TERMS = {
     "kovarianz": ["ABBILDUNG A", "Ausgewählter Wert", "Basisvektoren", "DREHEN", "homogene Koordinaten", "KOVARIANZ Σ", "Kovarianz-Achsen", "Kreis und Bildellipse", "Parallelen", "Punkte", "Punktwolke", "Raum verbiegen", "VERTEILUNGSWOLKE"],
     "kreisteilung": ["Abspielen", "Allgemeine Lage", "Anhalten", "Anzahl n", "Die Folge", "Flächen", "Flächen färben", "Kreisteilung", "Kreisteilungsproblem", "maximal möglich", "Nummern", "Punkte auf dem Kreis", "Punkte n", "Regelmäßig", "Schnittpunkte", "Sehnen", "weniger als möglich", "Zählwerk"],
     "langley": ["ALLE AN/AUS", "Basis AB", "Diagonale AC", "Diagonale BD", "Geometrie & Trigonometrie", "Linie CD", "Phase 1: Rechtes Dreieck", "Phase 2: Linkes Dreieck", "Phase 3: Innere Winkel", "Phase 4: Das Rätsel", "Phase 5: Lösung", "Punkt P", "Schenkel AD", "Symmetrieachse EP", "Verlängerung zu E", "ΔABC (Sinussatz)", "ΔABD (Sinussatz)", "ΔBCD & Lösung"],
+    "lehrbuch-mathe10": ["Bruttolohn im Monat", "Die Sinusfunktion", "Dreiecke, Vierecke und Trigonometrie", "Ein Mathebuch für das Abschlussjahr", "Exponentialfunktionen", "Flächen in Dreiecken und Vielecken", "Geld im Alltag", "Körper und Stümpfe", "Lohnsteuer (angenommen)", "Mathematik", "Mathematik · Oberschule 10", "Potenzfunktionen", "Probleme lösen", "Sinussatz und Kosinussatz", "Vermessungsprobleme", "Zufallsgrößen und Erwartungswert"],
     "lehrbuch-mathe11": ["Abkühlen", "Bremsweg", "Ein Mathebuch, das mitrechnet", "exponentiell", "Funktionen und ihre Eigenschaften", "Gleichungen, Formeln, Figuren", "Graphen und Parameter", "Kerze", "linear", "Lineare Gleichungssysteme und Matrizen", "Mathematik", "Mathematik · Berufliches Gymnasium 11", "Numerische Verfahren und Simulationen", "Periodische Vorgänge", "Quadratische Funktionen und Gleichungen", "Regression", "sin x", "Tag des Jahres", "Umkehrfunktionen und Logarithmus", "Wachstum und Zerfall", "Weltbevölkerung", "Zeitraum"],
     "lehrbuch-mathe12": ["Ableitungsregeln", "Bedingte Wahrscheinlichkeit", "Die Ableitung", "Die Binomialverteilung", "Ein Mathebuch, das mitrechnet", "Graphen untersuchen", "Grenzwerte", "Mathematik", "Mathematik · Berufliches Gymnasium 12", "Monotonie, Extrema, Wendepunkte", "Skalarprodukt und Winkel", "Steckbriefe und Extremwertprobleme", "Vektoren im Raum", "Verzinsung", "Zufallsgrößen"],
     "lehrbuch-mathe13": ["Das bestimmte Integral", "Ein Mathebuch, das mitrechnet", "Fit fürs Abitur", "Flächeninhalte", "Geraden und Ebenen", "Grundgesamtheit und Stichprobe", "Koordinatengleichung und Lagebeziehungen", "Mathematik", "Mathematik · Berufliches Gymnasium 13", "Numerische Integration und Anwendungen", "Schnittwinkel, Prismen und Pyramiden", "Signifikanztests", "Stammfunktionen", "Weitere Anwendungen"],

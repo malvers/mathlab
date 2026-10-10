@@ -79,6 +79,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathe10",
+        "href": "buch/mathe10/index.html",
+        "title": "Mathematik OS 10",
+        "description": "Das interaktive Lehrbuch Mathematik für die Oberschule, Klasse 10, Realschulbildungsgang, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Elf Kapitel in der Reihenfolge des Schuljahres – Dreiecke, Vierecke und Trigonometrie in Figuren, Sinussatz und Kosinussatz, Flächen mit dem Sinus und regelmäßige Vielecke, Potenzfunktionen mit Parabeln und Hyperbeln, Exponentialfunktionen mit Wachstum, Zerfall und Halbwertszeit, die Sinusfunktion mit Bogenmaß, Amplitude und Periode, Zufallsgrößen und Erwartungswert, Geld im Alltag mit Lohnabrechnung, Zinseszins, Kredit und Schuldenfalle, Körper mit Pyramiden- und Kegelstumpf, Problemlösen für die Abschlussprüfung und als Wahlpflichtbereich Vermessung mit Försterdreieck und Standlinie. Zum Ausprobieren: Sinussatz und Kosinussatz am beweglichen Dreieck, der Einheitskreis, der eine Sinuskurve zeichnet, faire Spiele, eine einfache Lohnabrechnung und Kegelstümpfe mit Masse und Material. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik OS 10 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe10"],
+        "category": "buecher neu funktionen stochastik geometrie grade10",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 10 oberschule realschule realschulbildungsgang abschlusspruefung sachsen lehrplan kapitel dreieck viereck haus der vierecke winkelsumme trigonometrie sinus kosinus tangens sinussatz kosinussatz flaecheninhalt vieleck regelmaessig potenzfunktion parabel hyperbel asymptote umgekehrt proportional exponentialfunktion wachstum zerfall halbwertszeit zinseszins bogenmass einheitskreis sinusfunktion amplitude periode zufallsgroesse erwartungswert faires spiel simulation risiko lohn brutto netto sozialabgaben haushaltsplan kredit ratenkauf dispo schuldenfalle prisma zylinder pyramide kegel kugel pyramidenstumpf kegelstumpf masse dichte problemloesen fermi basiswissen vermessung foersterdreieck messrad daumensprung triangulation aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathegy5",
         "href": "buch/mathegy5/index.html",
         "title": "Mathematik GY 5",

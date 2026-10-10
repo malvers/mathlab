@@ -77,7 +77,7 @@ Q.q(r'Rechtecke sollen alle 24 cm² Fläche haben. Wie breit ist eines, das 8 cm
     [r'3 cm', r'16 cm', r'192 cm', r'32 cm'],
     [r'$b = \dfrac{24}{a}$ – Länge und Breite sind umgekehrt proportional.', r'$b = \dfrac{24}{8} = 3$ cm'])
 
-Q.q(r'Die Lautstärke einer Schallquelle nimmt mit dem Quadrat des Abstands ab. Auf welchen Bruchteil sinkt sie beim dreifachen Abstand?',
+Q.q(r'Die Schallintensität einer Schallquelle nimmt mit dem Quadrat des Abstands ab. Auf welchen Bruchteil sinkt sie beim dreifachen Abstand?',
     [r'auf ein Neuntel', r'auf ein Drittel', r'auf ein Sechstel', r'auf ein Siebenundzwanzigstel'],
     [r'$\dfrac{1}{3^2} = \dfrac{1}{9}$'])
 
