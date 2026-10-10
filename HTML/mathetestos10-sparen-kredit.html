@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Sparen, Kredit, Schuldenfalle — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w21-sparen-kredit',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Sparen, Kredit, Schuldenfalle',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 21 (LB 4) · 20 Aufgaben: Zinsen und Zinseszins, Ratenkauf, Dispokredit, effektiver Jahreszins, Inflation · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 21 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: saving (1-2, 9-11, 16, 20), credit and instalments (3-8, 14-15, 18), debt trap and inflation (12-13, 17, 19). Day interest with 365 days per year. */
+  questions: [
+    {
+      q: '1500 € liegen ein Jahr lang zu 2 % auf dem Sparbuch. Wie viel Zinsen gibt es?',
+      opts: ['30 €', '3 €', '300 €', '1530 €'],
+      steps: [
+        '$1500 \\cdot 0{,}02 = 30$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: '5000 € werden 5 Jahre zu 3 % mit Zinseszins angelegt. Wie hoch ist das Guthaben danach (gerundet)?',
+      opts: ['5750,00 €', '5150,00 €', '5463,64 €', '5796,37 €'],
+      steps: [
+        '$5000 \\cdot 1{,}03^5 \\approx 5000 \\cdot 1{,}15927 \\approx 5796{,}37$ €',
+        'Ohne Zinseszins: $5000 + 5 \\cdot 150 = 5750$ €.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Konto ist mit 1200 € im Dispo, der Zinssatz beträgt 12 % pro Jahr. Wie viel Zinsen kostet ein Monat?',
+      opts: ['1,20 €', '12 €', '144 €', '100 €'],
+      steps: [
+        'Jahreszinsen: $1200 \\cdot 0{,}12 = 144$ €.',
+        'Ein Monat: $144 : 12 = 12$ €'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Fernseher kostet bar 900 €. Alternativ zahlt man 12 Raten zu je 82 €. Wie viel teurer ist der Ratenkauf?',
+      opts: ['82 €', '984 €', '84 €', '18 €'],
+      steps: [
+        'Ratenkauf insgesamt: $12 \\cdot 82 = 984$ €.',
+        'Mehrkosten: $984 - 900 = 84$ €'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viel Prozent des Barpreises (900 €) sind diese 84 € Mehrkosten (gerundet)?',
+      opts: ['8,5 %', '84 %', '0,9 %', '9,3 %'],
+      steps: [
+        '$\\dfrac{84}{900} \\approx 0{,}0933 = 9{,}3\\,\\%$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kredit über 6000 € läuft 2 Jahre, jedes Jahr werden 6 % auf den vollen Betrag berechnet. Wie viel Zinsen sind das insgesamt?',
+      opts: ['741,60 €', '720 €', '360 €', '6720 €'],
+      steps: [
+        'Pro Jahr: $6000 \\cdot 0{,}06 = 360$ €.',
+        'Zwei Jahre: $720$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kredit von 2400 € wird in 24 Monatsraten zu je 110 € zurückgezahlt. Was kostet der Kredit?',
+      opts: ['240 €', '2640 €', '110 €', '10 €'],
+      steps: [
+        'Zurückgezahlt: $24 \\cdot 110 = 2640$ €.',
+        'Kosten: $2640 - 2400 = 240$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Konto ist drei Monate lang mit 500 € überzogen, Dispozins 12 % pro Jahr. Wie viel Zinsen fallen an?',
+      opts: ['5 €', '15 €', '180 €', '60 €'],
+      steps: [
+        'Drei Monate sind ein Viertel Jahr.',
+        '$500 \\cdot 0{,}12 \\cdot \\dfrac{3}{12} = 15$ €'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Tim legt jeden Monat 50 € zur Seite, zwei Jahre lang, ohne Zinsen. Wie viel hat er dann?',
+      opts: ['1200 €', '2400 €', '100 €', '600 €'],
+      steps: [
+        '$24 \\cdot 50 = 1200$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Nach wie vielen Jahren verdoppelt sich ein Guthaben bei 4 % Zinseszins ungefähr?',
+      opts: ['nach 50 Jahren', 'nach etwa 18 Jahren', 'nach 4 Jahren', 'nach 25 Jahren'],
+      steps: [
+        '$1{,}04^{18} \\approx 2{,}03$',
+        'Faustregel: $72 : 4 = 18$ Jahre. Ohne Zinseszins wären es 25 Jahre.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus 2000 € werden in einem Jahr 2060 €. Wie hoch ist der Zinssatz?',
+      opts: ['6 %', '60 %', '3 %', '0,3 %'],
+      steps: [
+        'Zinsen: 60 €.',
+        '$\\dfrac{60}{2000} = 0{,}03 = 3\\,\\%$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Handyvertrag kostet 35 € im Monat und läuft 24 Monate. Wie viel zahlt man insgesamt?',
+      opts: ['59 €', '840 €', '700 €', '420 €'],
+      steps: [
+        '$24 \\cdot 35 = 840$ €',
+        'Ein „kostenloses“ Handy im Vertrag ist meist in diesem Betrag versteckt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welches ist ein Warnzeichen für eine Schuldenfalle?',
+      opts: ['Man legt jeden Monat Geld zurück.', 'Man zahlt einen Kredit vorzeitig zurück.', 'Man vergleicht Kreditangebote.', 'Man nimmt neue Schulden auf, um alte Raten zu bezahlen.'],
+      steps: [
+        'Wer Raten nur mit neuen Krediten bezahlen kann, dessen Schulden wachsen immer weiter.',
+        'Hilfe gibt es bei Schuldnerberatungsstellen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was gibt der effektive Jahreszins eines Kredits an?',
+      opts: ['den Zinssatz für Sparguthaben', 'die Höhe der monatlichen Rate', 'nur die Bearbeitungsgebühr', 'die gesamten jährlichen Kosten des Kredits in Prozent, einschließlich Gebühren'],
+      steps: [
+        'Mit dem effektiven Jahreszins kann man verschiedene Kreditangebote fair vergleichen.'
+      ],
+      solution: 3
+    },
+    {
+      q: '3650 € werden 73 Tage lang mit 2 % pro Jahr verzinst (Jahr mit 365 Tagen). Wie viel Zinsen gibt es?',
+      opts: ['14,60 €', '1,46 €', '5,33 €', '73,00 €'],
+      steps: [
+        'Jahreszinsen: $3650 \\cdot 0{,}02 = 73$ €.',
+        '73 Tage sind $\\dfrac{73}{365} = \\dfrac{1}{5}$ Jahr: $73 : 5 = 14{,}60$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Nach einem Jahr zu 2,5 % sind auf einem Konto 4100 €. Wie hoch war das Anfangskapital?',
+      opts: ['3997,50 €', '4102,50 €', '4000 €', '3900 €'],
+      steps: [
+        '$K_0 \\cdot 1{,}025 = 4100$',
+        '$K_0 = 4100 : 1{,}025 = 4000$ €',
+        'Wer 2,5 % von 4100 € abzieht, bekommt 3997,50 € – falsch, denn die Zinsen beziehen sich auf das Anfangskapital.'
+      ],
+      solution: 2
+    },
+    {
+      q: '1000 € liegen zinslos im Schrank, die Preise steigen um 2 % pro Jahr. Wie viel ist das Geld nach einem Jahr in heutiger Kaufkraft wert (gerundet)?',
+      opts: ['980,00 €', '1020,00 €', '1000,00 €', '980,39 €'],
+      steps: [
+        'Dasselbe kostet jetzt das 1,02-Fache.',
+        '$1000 : 1{,}02 \\approx 980{,}39$ €'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für 2000 € auf ein Jahr: Bank A verlangt 5 % Zinsen, Bank B 4,5 % Zinsen plus 100 € Gebühr. Welches Angebot ist günstiger?',
+      opts: ['Bank A mit 100 € Kosten', 'Bank B mit 190 € Kosten', 'beide gleich', 'Bank B mit 90 € Kosten'],
+      steps: [
+        'A: $2000 \\cdot 0{,}05 = 100$ €.',
+        'B: $2000 \\cdot 0{,}045 + 100 = 90 + 100 = 190$ €. A ist günstiger.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Jemand hat 1000 € Schulden zu 12 % pro Jahr und zahlt jeden Monat 10 € zurück. Was passiert?',
+      opts: ['Die Schulden sind nach 100 Monaten bezahlt.', 'Die Schulden sinken jeden Monat um 10 €.', 'Die Schulden werden nie kleiner.', 'Die Schulden sind nach einem Jahr bezahlt.'],
+      steps: [
+        'Monatszinsen: $1000 \\cdot 0{,}12 : 12 = 10$ €.',
+        'Die Rate deckt nur die Zinsen, von der Schuld selbst wird nichts getilgt.'
+      ],
+      solution: 2
+    },
+    {
+      q: '10 000 € werden 10 Jahre lang zu 1,5 % mit Zinseszins angelegt. Wie hoch ist das Guthaben danach (gerundet)?',
+      opts: ['11 576,25 €', '11 500,00 €', '11 605,41 €', '10 150,00 €'],
+      steps: [
+        '$10\\,000 \\cdot 1{,}015^{10} \\approx 11\\,605{,}41$ €'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

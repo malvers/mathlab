@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Potenzfunktionen mit positiven Exponenten — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w09-potenzfunktionen-positiv',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Potenzfunktionen mit positiven Exponenten',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 9 (LB 2) · 20 Aufgaben: Funktionswerte, Symmetrie, Monotonie, Einfluss des Faktors a, Sachbezüge · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 9 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: values (1-2, 9, 19), symmetry and common points (3-6), the factor a (7-8, 12-13), monotony and range (10-11, 14), context (15-18, 20). */
+  questions: [
+    {
+      q: 'Gegeben ist $f(x) = x^3$. Berechne $f(2)$.',
+      opts: ['8', '6', '5', '9'],
+      steps: [
+        '$f(2) = 2^3 = 2 \\cdot 2 \\cdot 2 = 8$ – nicht $2 \\cdot 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gegeben ist $f(x) = x^3$. Berechne $f(-2)$.',
+      opts: ['6', '8', '$-6$', '$-8$'],
+      steps: [
+        '$(-2)^3 = (-2) \\cdot (-2) \\cdot (-2) = 4 \\cdot (-2) = -8$',
+        'Bei ungeradem Exponenten bleibt das Vorzeichen erhalten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $y = x^2$?',
+      opts: ['achsensymmetrisch zur x-Achse', 'achsensymmetrisch zur y-Achse', 'punktsymmetrisch zum Ursprung', 'keine Symmetrie'],
+      steps: [
+        '$(-x)^2 = x^2$: zu $x$ und $-x$ gehört derselbe y-Wert.',
+        'Die Normalparabel ist spiegelbildlich zur y-Achse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $y = x^3$?',
+      opts: ['achsensymmetrisch zur y-Achse', 'punktsymmetrisch zum Ursprung', 'achsensymmetrisch zur x-Achse', 'keine Symmetrie'],
+      steps: [
+        '$(-x)^3 = -x^3$: zu $-x$ gehört der entgegengesetzte y-Wert.',
+        'Eine halbe Drehung um den Ursprung bildet den Graphen auf sich selbst ab.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In welchen Punkten schneiden sich die Graphen von $y = x^2$ und $y = x^3$?',
+      opts: ['in $(1 \\mid 1)$ und $(-1 \\mid -1)$', 'nur in $(0 \\mid 0)$', 'in $(0 \\mid 0)$, $(1 \\mid 1)$ und $(-1 \\mid 1)$', 'in $(0 \\mid 0)$ und $(1 \\mid 1)$'],
+      steps: [
+        'Gleichsetzen: $x^2 = x^3$, also $x^3 - x^2 = x^2 (x - 1) = 0$.',
+        'Lösungen $x = 0$ und $x = 1$. Bei $x = -1$ ist $x^2 = 1$, aber $x^3 = -1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Punkt liegt auf jedem der Graphen $y = x$, $y = x^2$ und $y = x^3$?',
+      opts: ['$(1 \\mid 1)$', '$(2 \\mid 4)$', '$(0 \\mid 1)$', '$(-1 \\mid 1)$'],
+      steps: [
+        '$1^n = 1$ für jeden Exponenten.',
+        'Auch $(0 \\mid 0)$ liegt auf allen dreien – aber das steht nicht zur Auswahl.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie entsteht der Graph von $y = 2x^2$ aus der Normalparabel $y = x^2$?',
+      opts: ['Er wird in y-Richtung mit dem Faktor 2 gestreckt.', 'Er wird mit dem Faktor 2 gestaucht.', 'Er wird um 2 nach rechts verschoben.', 'Er wird um 2 nach oben verschoben.'],
+      steps: [
+        'Jeder y-Wert wird verdoppelt: aus $(1 \\mid 1)$ wird $(1 \\mid 2)$.',
+        'Die Parabel wird dadurch steiler und wirkt schmaler.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie entsteht der Graph von $y = -x^2$ aus der Normalparabel?',
+      opts: ['durch Spiegelung an der y-Achse', 'durch Spiegelung an der x-Achse', 'durch Verschiebung um 1 nach unten', 'durch Stauchung'],
+      steps: [
+        'Jeder y-Wert wechselt das Vorzeichen.',
+        'Die Parabel ist nach unten geöffnet, der Scheitel bleibt in $(0 \\mid 0)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $f(4)$ für $f(x) = 0{,}5 \\cdot x^3$.',
+      opts: ['6', '12', '32', '64'],
+      steps: [
+        'Erst potenzieren, dann multiplizieren: $4^3 = 64$.',
+        '$0{,}5 \\cdot 64 = 32$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie verhält sich $y = x^3$ beim Durchlaufen der x-Achse von links nach rechts?',
+      opts: ['Die Funktion fällt überall.', 'Sie steigt nur für $x > 0$.', 'Die Funktion steigt überall.', 'Sie fällt für $x < 0$ und steigt für $x > 0$.'],
+      steps: [
+        'Größeres $x$ ergibt immer größeres $x^3$: zum Beispiel $-2 \\to -8$, $-1 \\to -1$, $0 \\to 0$, $1 \\to 1$.',
+        'Die Funktion ist streng monoton steigend.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie verhält sich $y = x^2$?',
+      opts: ['Sie steigt überall.', 'Sie steigt für $x < 0$ und fällt für $x > 0$.', 'Sie fällt für $x < 0$ und steigt für $x > 0$.', 'Sie fällt überall.'],
+      steps: [
+        'Wertetabelle: $-2 \\to 4$, $-1 \\to 1$, $0 \\to 0$, $1 \\to 1$, $2 \\to 4$.',
+        'Links vom Scheitel fallen die Werte, rechts davon steigen sie.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Graph von $y = a \\cdot x^2$ geht durch den Punkt $(3 \\mid 18)$. Bestimme $a$.',
+      opts: ['6', '3', '0,5', '2'],
+      steps: [
+        'Punkt einsetzen: $18 = a \\cdot 3^2 = 9a$.',
+        '$a = 18 : 9 = 2$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Graph von $y = a \\cdot x^3$ geht durch den Punkt $(2 \\mid -4)$. Bestimme $a$.',
+      opts: ['$-0{,}5$', '0,5', '$-2$', '$-1$'],
+      steps: [
+        'Einsetzen: $-4 = a \\cdot 2^3 = 8a$.',
+        '$a = -4 : 8 = -0{,}5$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche y-Werte nimmt $y = x^2$ an?',
+      opts: ['alle reellen Zahlen', 'nur positive ganze Zahlen', 'nur Zahlen zwischen 0 und 1', 'alle Zahlen größer oder gleich null'],
+      steps: [
+        'Ein Quadrat ist nie negativ, und $0^2 = 0$.',
+        'Jede Zahl $y \\geq 0$ wird erreicht, nämlich bei $x = \\sqrt{y}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Flächeninhalt eines Quadrats ist $A = s^2$. Was passiert mit der Fläche, wenn man die Seitenlänge verdoppelt?',
+      opts: ['Sie wird verachtfacht.', 'Sie wird vervierfacht.', 'Sie bleibt gleich.', 'Sie wird verdoppelt.'],
+      steps: [
+        '$(2s)^2 = 4 s^2$',
+        'Beispiel: Seite 3 cm ergibt 9 cm², Seite 6 cm ergibt 36 cm².'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Das Volumen eines Würfels ist $V = a^3$. Wie ändert es sich, wenn man die Kantenlänge verdreifacht?',
+      opts: ['Es wird 27-mal so groß.', 'Es wird neunmal so groß.', 'Es wird dreimal so groß.', 'Es wird sechsmal so groß.'],
+      steps: [
+        '$(3a)^3 = 27 a^3$',
+        'In jede der drei Richtungen passt die Kante dreimal: $3 \\cdot 3 \\cdot 3 = 27$ kleine Würfel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Faustregel für den Bremsweg in Metern: $s = \\left(\\dfrac{v}{10}\\right)^2$, mit $v$ in km/h. Wie lang ist der Bremsweg bei 80 km/h?',
+      opts: ['8 m', '640 m', '64 m', '16 m'],
+      steps: [
+        '$\\dfrac{80}{10} = 8$',
+        '$8^2 = 64$, also 64 m.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Nach dieser Faustregel: Wie ändert sich der Bremsweg, wenn man doppelt so schnell fährt?',
+      opts: ['Er bleibt gleich.', 'Er wird doppelt so lang.', 'Er wird achtmal so lang.', 'Er wird viermal so lang.'],
+      steps: [
+        'Der Bremsweg hängt quadratisch von der Geschwindigkeit ab.',
+        '$\\left(\\dfrac{2v}{10}\\right)^2 = 4 \\cdot \\left(\\dfrac{v}{10}\\right)^2$ – zum Beispiel 25 m bei 50 km/h, 100 m bei 100 km/h.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Punkt liegt auf dem Graphen von $y = x^3$?',
+      opts: ['$(3 \\mid 9)$', '$(-3 \\mid 27)$', '$(-3 \\mid -27)$', '$(-3 \\mid -9)$'],
+      steps: [
+        '$(-3)^3 = -27$',
+        'Bei $(3 \\mid 9)$ wurde quadriert statt hoch drei genommen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Das Volumen einer Kugel ist $V = \\dfrac{4}{3} \\pi r^3$. Berechne es für $r = 3$ cm (gerundet).',
+      opts: ['339,3 cm³', '113,1 cm³', '37,7 cm³', '28,3 cm³'],
+      steps: [
+        '$r^3 = 27$',
+        '$V = \\dfrac{4}{3} \\cdot \\pi \\cdot 27 = 36 \\pi \\approx 113{,}1$ cm³'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

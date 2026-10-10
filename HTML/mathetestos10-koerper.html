@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Körper darstellen und berechnen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w23-koerper',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Körper darstellen und berechnen',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 23 (LB 4) · 20 Aufgaben: Volumen und Oberfläche von Prisma, Zylinder, Pyramide, Kegel und Kugel, zusammengesetzte Körper, Masse · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 23 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: prisms and cylinders (1-5, 12-13), pyramids and cones (6-8, 14, 17-18), spheres (9-10, 19), composite bodies, mass, litres (11, 15-16, 20). Results rounded to one decimal. */
+  questions: [
+    {
+      q: 'Ein Quader ist 5 cm lang, 4 cm breit und 3 cm hoch. Wie groß ist sein Volumen?',
+      opts: ['47 cm³', '94 cm³', '12 cm³', '60 cm³'],
+      steps: [
+        '$V = a \\cdot b \\cdot c = 5 \\cdot 4 \\cdot 3 = 60$ cm³'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Würfel hat die Kantenlänge 4 cm. Wie groß ist seine Oberfläche?',
+      opts: ['16 cm²', '48 cm²', '96 cm²', '64 cm²'],
+      steps: [
+        'Sechs Quadrate mit je $4 \\cdot 4 = 16$ cm².',
+        '$O = 6 \\cdot 16 = 96$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Prisma hat ein Dreieck als Grundfläche (Grundseite 6 cm, Höhe 4 cm) und ist 10 cm hoch. Wie groß ist sein Volumen?',
+      opts: ['120 cm³', '80 cm³', '40 cm³', '240 cm³'],
+      steps: [
+        'Grundfläche: $G = \\dfrac{6 \\cdot 4}{2} = 12$ cm².',
+        '$V = G \\cdot h_K = 12 \\cdot 10 = 120$ cm³'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Zylinder hat den Radius 3 cm und die Höhe 10 cm. Wie groß ist sein Volumen (gerundet)?',
+      opts: ['900 cm³', '188,5 cm³', '94,2 cm³', '282,7 cm³'],
+      steps: [
+        '$V = \\pi r^2 h = \\pi \\cdot 9 \\cdot 10 = 90\\pi \\approx 282{,}7$ cm³'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Mantelfläche dieses Zylinders ($r = 3$ cm, $h = 10$ cm, gerundet)?',
+      opts: ['94,2 cm²', '282,7 cm²', '188,5 cm²', '245,0 cm²'],
+      steps: [
+        'Der Mantel ist abgewickelt ein Rechteck: Umfang mal Höhe.',
+        '$M = 2\\pi r h = 2\\pi \\cdot 3 \\cdot 10 = 60\\pi \\approx 188{,}5$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Pyramide hat eine quadratische Grundfläche mit $a = 6$ cm und die Höhe 8 cm. Wie groß ist ihr Volumen?',
+      opts: ['48 cm³', '288 cm³', '96 cm³', '144 cm³'],
+      steps: [
+        '$V = \\dfrac{1}{3} \\cdot G \\cdot h = \\dfrac{1}{3} \\cdot 36 \\cdot 8 = 96$ cm³',
+        'Ohne den Faktor $\\dfrac{1}{3}$ wäre es das Volumen des Quaders: 288 cm³.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Kegel hat den Radius 3 cm und die Höhe 4 cm. Wie groß ist sein Volumen (gerundet)?',
+      opts: ['113,1 cm³', '37,7 cm³', '12,6 cm³', '50,3 cm³'],
+      steps: [
+        '$V = \\dfrac{1}{3} \\pi r^2 h = \\dfrac{1}{3} \\cdot \\pi \\cdot 9 \\cdot 4 = 12\\pi \\approx 37{,}7$ cm³'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Mantelfläche dieses Kegels ($r = 3$ cm, $h = 4$ cm, gerundet)?',
+      opts: ['75,4 cm²', '37,7 cm²', '28,3 cm²', '47,1 cm²'],
+      steps: [
+        'Mantellinie mit Pythagoras: $s = \\sqrt{3^2 + 4^2} = 5$ cm.',
+        '$M = \\pi r s = \\pi \\cdot 3 \\cdot 5 = 15\\pi \\approx 47{,}1$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Kugel hat den Radius 5 cm. Wie groß ist ihr Volumen (gerundet)?',
+      opts: ['523,6 cm³', '392,7 cm³', '166,7 cm³', '314,2 cm³'],
+      steps: [
+        '$V = \\dfrac{4}{3} \\pi r^3 = \\dfrac{4}{3} \\cdot \\pi \\cdot 125 \\approx 523{,}6$ cm³'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist die Oberfläche dieser Kugel ($r = 5$ cm, gerundet)?',
+      opts: ['157,1 cm²', '314,2 cm²', '78,5 cm²', '523,6 cm²'],
+      steps: [
+        '$O = 4 \\pi r^2 = 4 \\cdot \\pi \\cdot 25 = 100\\pi \\approx 314{,}2$ cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf einem Würfel mit 6 cm Kantenlänge sitzt eine Pyramide mit derselben Grundfläche und der Höhe 4 cm. Wie groß ist das Gesamtvolumen?',
+      opts: ['360 cm³', '264 cm³', '48 cm³', '216 cm³'],
+      steps: [
+        'Würfel: $6^3 = 216$ cm³.',
+        'Pyramide: $\\dfrac{1}{3} \\cdot 36 \\cdot 4 = 48$ cm³.',
+        'Zusammen: $216 + 48 = 264$ cm³ (Zerlegungsprinzip).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Rohr (Hohlzylinder) hat den Außenradius 5 cm, den Innenradius 3 cm und die Länge 10 cm. Wie groß ist das Materialvolumen (gerundet)?',
+      opts: ['502,7 cm³', '62,8 cm³', '785,4 cm³', '125,7 cm³'],
+      steps: [
+        'Großer minus kleiner Zylinder: $V = \\pi (5^2 - 3^2) \\cdot 10 = 160\\pi \\approx 502{,}7$ cm³',
+        'Nicht $\\pi \\cdot (5 - 3)^2 \\cdot 10$ rechnen – die Radien werden einzeln quadriert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zu welchem Körper gehört ein Netz aus zwei Kreisen und einem Rechteck?',
+      opts: ['Kugel', 'Prisma mit dreieckiger Grundfläche', 'Kegel', 'Zylinder'],
+      steps: [
+        'Die Kreise sind Grund- und Deckfläche, das Rechteck ist der abgewickelte Mantel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kegel und ein Zylinder haben dieselbe Grundfläche und dieselbe Höhe. Wie verhalten sich ihre Volumina?',
+      opts: ['Der Kegel hat ein Drittel des Zylindervolumens.', 'Beide sind gleich groß.', 'Der Kegel hat zwei Drittel des Zylindervolumens.', 'Der Kegel hat die Hälfte des Zylindervolumens.'],
+      steps: [
+        '$V_{\\text{Kegel}} = \\dfrac{1}{3} G h$, $V_{\\text{Zylinder}} = G h$',
+        'Man kann einen Zylinder mit drei Kegelfüllungen Wasser füllen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Stahlwürfel hat die Kantenlänge 5 cm, Stahl hat die Dichte 7,85 g/cm³. Wie schwer ist der Würfel (gerundet)?',
+      opts: ['125 g', '981 g', '196 g', '39 g'],
+      steps: [
+        '$V = 5^3 = 125$ cm³',
+        '$m = V \\cdot \\rho = 125 \\cdot 7{,}85 \\approx 981$ g'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Aquarium ist innen 80 cm lang, 40 cm breit und 50 cm hoch. Wie viele Liter passen hinein?',
+      opts: ['160 l', '1600 l', '170 l', '16 l'],
+      steps: [
+        '$V = 80 \\cdot 40 \\cdot 50 = 160\\,000$ cm³',
+        '$1$ l $= 1$ dm³ $= 1000$ cm³, also 160 l.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine quadratische Pyramide hat die Grundkante 6 cm und die Seitenhöhe (Höhe einer Dreiecksfläche) 5 cm. Wie hoch ist die Pyramide?',
+      opts: ['5,8 cm', '5 cm', '3 cm', '4 cm'],
+      steps: [
+        'Rechtwinkliges Dreieck aus Körperhöhe, halber Grundkante (3 cm) und Seitenhöhe (Hypotenuse).',
+        '$h = \\sqrt{5^2 - 3^2} = 4$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Oberfläche dieser Pyramide (Grundkante 6 cm, Seitenhöhe 5 cm)?',
+      opts: ['66 cm²', '156 cm²', '96 cm²', '60 cm²'],
+      steps: [
+        'Grundfläche: $36$ cm². Vier Dreiecke: $4 \\cdot \\dfrac{6 \\cdot 5}{2} = 60$ cm².',
+        '$O = 36 + 60 = 96$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Kugel hat den Durchmesser 12 cm. Wie groß ist ihr Volumen (gerundet)?',
+      opts: ['7238,2 cm³', '904,8 cm³', '452,4 cm³', '113,1 cm³'],
+      steps: [
+        'Radius $= 6$ cm.',
+        '$V = \\dfrac{4}{3} \\pi \\cdot 6^3 = 288\\pi \\approx 904{,}8$ cm³',
+        'Wer mit dem Durchmesser rechnet, bekommt das Achtfache: 7238,2 cm³.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine zylinderförmige Dose soll genau 1 l fassen und hat den Radius 5 cm. Wie hoch muss sie sein (gerundet)?',
+      opts: ['20 cm', '6,4 cm', '12,7 cm', '40 cm'],
+      steps: [
+        '1 l $= 1000$ cm³, Grundfläche $\\pi \\cdot 25 \\approx 78{,}54$ cm².',
+        '$h = \\dfrac{1000}{78{,}54} \\approx 12{,}7$ cm'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

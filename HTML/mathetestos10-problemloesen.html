@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Komplexe Anwendungsaufgaben — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w27-problemloesen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Komplexe Anwendungsaufgaben',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 27 (LB 4) · 20 Aufgaben: Problemlösen in Schritten, Kopfrechnen, Überschlag, Einheiten, Aufgaben aus mehreren Gebieten · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 27 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: mental arithmetic and units without calculator (1-5, 10-12, 16), problem-solving steps and plausibility (6, 20), mixed context tasks (7-9, 13-15, 17-19). */
+  questions: [
+    {
+      q: 'Rechne im Kopf: 15 % von 80.',
+      opts: ['1,2', '8', '15', '12'],
+      steps: [
+        '$10\\,\\%$ von 80 sind 8, $5\\,\\%$ sind 4.',
+        '$8 + 4 = 12$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Überschlag passt am besten zu $398 \\cdot 21$?',
+      opts: ['etwa 800', 'etwa 4000', 'etwa 8000', 'etwa 80 000'],
+      steps: [
+        'Runden: $400 \\cdot 20 = 8000$',
+        'Genau: 8358 – der Überschlag schützt vor Kommafehlern.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele cm² sind 2,5 m²?',
+      opts: ['2500 cm²', '250 000 cm²', '25 000 cm²', '250 cm²'],
+      steps: [
+        '$1$ m² $= 100 \\cdot 100$ cm² $= 10\\,000$ cm²',
+        '$2{,}5 \\cdot 10\\,000 = 25\\,000$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele cm³ sind 3,2 Liter?',
+      opts: ['32 cm³', '320 cm³', '32 000 cm³', '3200 cm³'],
+      steps: [
+        '$1$ l $= 1$ dm³ $= 1000$ cm³',
+        '$3{,}2 \\cdot 1000 = 3200$ cm³'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Minuten sind 0,75 Stunden?',
+      opts: ['75 min', '45 min', '34 min', '7,5 min'],
+      steps: [
+        '$0{,}75 \\cdot 60 = 45$ – eine Dreiviertelstunde.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In welcher Reihenfolge geht man beim Problemlösen sinnvoll vor?',
+      opts: ['planen – antworten – verstehen – rechnen – prüfen', 'rechnen – verstehen – antworten – prüfen – planen', 'verstehen – planen – rechnen – prüfen – antworten', 'antworten – rechnen – prüfen – verstehen – planen'],
+      steps: [
+        'Erst klären, was gegeben und gesucht ist, dann einen Lösungsweg planen.',
+        'Zum Schluss das Ergebnis prüfen und in einem Antwortsatz notieren.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine kreisförmige Rasenfläche hat den Radius 5 m. Pro m² braucht man 30 g Rasensamen. Wie viel Samen braucht man ungefähr (mit $\\pi \\approx 3{,}14$)?',
+      opts: ['etwa 0,9 kg', 'etwa 2,4 kg', 'etwa 24 kg', 'etwa 4,7 kg'],
+      steps: [
+        '$A = \\pi r^2 \\approx 3{,}14 \\cdot 25 = 78{,}5$ m²',
+        '$78{,}5 \\cdot 30 = 2355$ g $\\approx 2{,}4$ kg'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Satteldach hat zwei rechteckige Dachflächen von je 10 m mal 6 m. Pro m² braucht man 15 Ziegel. Wie viele Ziegel sind nötig?',
+      opts: ['900', '240', '960', '1800'],
+      steps: [
+        'Dachfläche: $2 \\cdot 10 \\cdot 6 = 120$ m²',
+        '$120 \\cdot 15 = 1800$ Ziegel'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Rampe soll 0,5 m Höhe überwinden und höchstens 6 % Steigung haben. Wie lang muss sie waagerecht mindestens sein (gerundet)?',
+      opts: ['3 m', '12 m', '0,03 m', '8,33 m'],
+      steps: [
+        '6 % Steigung: 6 cm Höhe auf 100 cm waagerecht.',
+        '$\\dfrac{0{,}5}{0{,}06} \\approx 8{,}33$ m'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Rechne im Kopf: $0{,}2 \\cdot 0{,}3$.',
+      opts: ['0,006', '0,06', '0,6', '6'],
+      steps: [
+        '$2 \\cdot 3 = 6$, und zusammen zwei Nachkommastellen: $0{,}06$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viel sind drei Viertel von 60?',
+      opts: ['15', '80', '45', '40'],
+      steps: [
+        'Ein Viertel: $60 : 4 = 15$.',
+        'Drei Viertel: $3 \\cdot 15 = 45$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist $\\sqrt{144}$?',
+      opts: ['1,2', '14', '72', '12'],
+      steps: [
+        '$12 \\cdot 12 = 144$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Auf einer Karte im Maßstab 1 : 25 000 sind zwei Orte 4 cm voneinander entfernt. Wie weit ist das in Wirklichkeit?',
+      opts: ['1 km', '4 km', '100 m', '10 km'],
+      steps: [
+        '$4 \\cdot 25\\,000 = 100\\,000$ cm',
+        '$100\\,000$ cm $= 1000$ m $= 1$ km'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Zug fährt 150 km in 1 h 30 min. Wie hoch ist seine Durchschnittsgeschwindigkeit?',
+      opts: ['100 km/h', '150 km/h', '225 km/h', '115 km/h'],
+      steps: [
+        '1 h 30 min $= 1{,}5$ h.',
+        '$150 : 1{,}5 = 100$ km/h'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Nach 25 % Rabatt kostet eine Jacke 60 €. Wie viel kostete sie vorher?',
+      opts: ['80 €', '85 €', '75 €', '45 €'],
+      steps: [
+        '60 € sind $75\\,\\%$ des alten Preises.',
+        '$60 : 0{,}75 = 80$ €. (Wer 25 % von 60 € aufschlägt, bekommt fälschlich 75 €.)'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse die Gleichung $3x - 7 = 11$.',
+      opts: ['$x = 6$', '$x = 18$', '$x = 3$', '$x = \\dfrac{4}{3}$'],
+      steps: [
+        '$3x = 18$',
+        '$x = 6$. Probe: $18 - 7 = 11$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Bildschirm ist 48 cm breit und 36 cm hoch. Wie lang ist seine Diagonale?',
+      opts: ['84 cm', '60 cm', '70 cm', '42 cm'],
+      steps: [
+        '$d = \\sqrt{48^2 + 36^2} = \\sqrt{2304 + 1296} = \\sqrt{3600} = 60$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Familie fährt 360 km mit dem Auto. Es braucht 6 l auf 100 km, ein Liter kostet 1,80 €. Wie hoch sind die Spritkosten?',
+      opts: ['21,60 €', '64,80 €', '38,88 €', '10,80 €'],
+      steps: [
+        'Verbrauch: $3{,}6 \\cdot 6 = 21{,}6$ l.',
+        'Kosten: $21{,}6 \\cdot 1{,}80 = 38{,}88$ €'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Holzbalken ist 4 m lang, 10 cm breit und 20 cm hoch. Holz wiegt 0,6 t pro m³. Wie schwer ist der Balken?',
+      opts: ['48 kg', '4,8 kg', '80 kg', '480 kg'],
+      steps: [
+        'Alles in Meter: $V = 4 \\cdot 0{,}1 \\cdot 0{,}2 = 0{,}08$ m³.',
+        '$0{,}08 \\cdot 600$ kg $= 48$ kg'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Rechnung ergibt, dass eine Schülerin mit 45 km/h zur Schule geht. Was ist zu tun?',
+      opts: ['Auf 50 km/h runden.', 'Die Rechnung prüfen – das Ergebnis ist unrealistisch.', 'Das Ergebnis in den Antwortsatz schreiben.', 'Nichts, Rechnungen stimmen immer.'],
+      steps: [
+        'Zu Fuß geht man etwa 4 bis 6 km/h.',
+        'Ein unplausibles Ergebnis deutet auf einen Fehler hin, zum Beispiel bei den Einheiten.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

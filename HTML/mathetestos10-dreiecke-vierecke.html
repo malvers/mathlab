@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Dreiecke und Vierecke systematisieren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w02-dreiecke-vierecke',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Dreiecke und Vierecke systematisieren',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 2 (LB 1) · 20 Aufgaben: Winkelsummen, Dreiecksarten, Haus der Vierecke, Flächeninhalte · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: angle sums and triangle types (1-4), quadrilaterals (5-8), areas (9-12), polygons and side conditions (13-20). */
+  questions: [
+    {
+      q: 'In einem Dreieck ist $\\alpha = 48^\\circ$ und $\\beta = 67^\\circ$. Wie groß ist $\\gamma$?',
+      opts: ['$65^\\circ$', '$75^\\circ$', '$55^\\circ$', '$245^\\circ$'],
+      steps: [
+        'Die Winkelsumme im Dreieck beträgt $180^\\circ$.',
+        '$\\gamma = 180^\\circ - 48^\\circ - 67^\\circ = 65^\\circ$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Dreieck hat einen Innenwinkel von $110^\\circ$. Wie heißt diese Dreiecksart?',
+      opts: ['gleichseitig', 'rechtwinklig', 'stumpfwinklig', 'spitzwinklig'],
+      steps: [
+        'Ein Winkel über $90^\\circ$ heißt stumpf.',
+        'Ein Dreieck mit einem stumpfen Winkel ist stumpfwinklig. Mehr als einen stumpfen Winkel kann es nicht geben, sonst wäre die Summe größer als $180^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einem gleichschenkligen Dreieck ist jeder Basiswinkel $52^\\circ$ groß. Wie groß ist der Winkel an der Spitze?',
+      opts: ['$104^\\circ$', '$128^\\circ$', '$52^\\circ$', '$76^\\circ$'],
+      steps: [
+        'Beide Basiswinkel sind gleich groß: zusammen $104^\\circ$.',
+        'Winkel an der Spitze: $180^\\circ - 104^\\circ = 76^\\circ$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einem Viereck sind drei Winkel bekannt: $95^\\circ$, $80^\\circ$ und $110^\\circ$. Wie groß ist der vierte Winkel?',
+      opts: ['$85^\\circ$', '$75^\\circ$', '$255^\\circ$', '$165^\\circ$'],
+      steps: [
+        'Ein Viereck lässt sich durch eine Diagonale in zwei Dreiecke zerlegen, die Winkelsumme ist also $360^\\circ$.',
+        '$360^\\circ - 95^\\circ - 80^\\circ - 110^\\circ = 75^\\circ$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Aussage ist richtig?',
+      opts: ['Jedes Trapez ist ein Parallelogramm.', 'Jede Raute ist ein Rechteck.', 'Jedes Quadrat ist ein Rechteck.', 'Jedes Rechteck ist ein Quadrat.'],
+      steps: [
+        'Ein Rechteck hat vier rechte Winkel. Das Quadrat hat sie auch – und zusätzlich vier gleich lange Seiten.',
+        'Das Quadrat ist also ein besonderes Rechteck. Umgekehrt gilt das nicht: ein Rechteck mit 3 cm und 5 cm ist kein Quadrat.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie heißt ein Viereck mit genau einem Paar paralleler Seiten?',
+      opts: ['Drachenviereck', 'Raute', 'Parallelogramm', 'Trapez'],
+      steps: [
+        'Parallelogramm und Raute haben zwei Paare paralleler Seiten.',
+        'Ein Viereck mit (mindestens) einem Paar paralleler Seiten heißt Trapez.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In welchem Viereck halbieren sich die Diagonalen und stehen senkrecht aufeinander, ohne dass alle Winkel rechte Winkel sein müssen?',
+      opts: ['Drachenviereck', 'Rechteck', 'Trapez', 'Raute'],
+      steps: [
+        'Im Rechteck halbieren sich die Diagonalen, stehen aber im Allgemeinen nicht senkrecht.',
+        'Im Drachenviereck stehen sie senkrecht, aber nur eine Diagonale wird halbiert.',
+        'Beides zusammen gilt in der Raute (und im Quadrat, das eine besondere Raute ist).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einem Parallelogramm ist $\\alpha = 70^\\circ$. Wie groß ist der benachbarte Winkel $\\beta$?',
+      opts: ['$70^\\circ$', '$110^\\circ$', '$20^\\circ$', '$290^\\circ$'],
+      steps: [
+        'Benachbarte Winkel im Parallelogramm ergänzen sich zu $180^\\circ$.',
+        '$\\beta = 180^\\circ - 70^\\circ = 110^\\circ$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Trapez hat die parallelen Seiten $a = 8$ cm und $c = 4$ cm und die Höhe $h = 5$ cm. Berechne den Flächeninhalt.',
+      opts: ['17 cm²', '160 cm²', '30 cm²', '60 cm²'],
+      steps: [
+        '$A = \\dfrac{a + c}{2} \\cdot h$',
+        '$A = \\dfrac{8 + 4}{2} \\cdot 5 = 6 \\cdot 5 = 30$, also 30 cm².'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Raute hat die Diagonalen $e = 10$ cm und $f = 6$ cm. Berechne den Flächeninhalt.',
+      opts: ['60 cm²', '30 cm²', '16 cm²', '15 cm²'],
+      steps: [
+        'Die Diagonalen teilen die Raute in vier rechtwinklige Dreiecke; zusammen ergeben sie die Hälfte des Rechtecks $e \\cdot f$.',
+        '$A = \\dfrac{e \\cdot f}{2} = \\dfrac{10 \\cdot 6}{2} = 30$, also 30 cm².'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Parallelogramm hat die Grundseite $g = 12$ cm und die Höhe $h = 7$ cm. Berechne den Flächeninhalt.',
+      opts: ['42 cm²', '38 cm²', '19 cm²', '84 cm²'],
+      steps: [
+        'Durch Abschneiden und Ansetzen eines Dreiecks wird aus dem Parallelogramm ein Rechteck.',
+        '$A = g \\cdot h = 12 \\cdot 7 = 84$, also 84 cm².'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Dreieck hat die Grundseite $g = 9$ cm und die zugehörige Höhe $h = 6$ cm. Berechne den Flächeninhalt.',
+      opts: ['54 cm²', '30 cm²', '27 cm²', '15 cm²'],
+      steps: [
+        '$A = \\dfrac{g \\cdot h}{2}$',
+        '$A = \\dfrac{9 \\cdot 6}{2} = 27$, also 27 cm².'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Dreieck hat die Innenwinkel $40^\\circ$ und $75^\\circ$. Wie groß ist der Außenwinkel am dritten Eckpunkt?',
+      opts: ['$115^\\circ$', '$25^\\circ$', '$245^\\circ$', '$65^\\circ$'],
+      steps: [
+        'Der dritte Innenwinkel ist $180^\\circ - 40^\\circ - 75^\\circ = 65^\\circ$.',
+        'Außenwinkel und Innenwinkel ergänzen sich zu $180^\\circ$: $180^\\circ - 65^\\circ = 115^\\circ$.',
+        'Kontrolle: der Außenwinkel ist so groß wie die beiden anderen Innenwinkel zusammen, $40^\\circ + 75^\\circ = 115^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist ein Innenwinkel in einem regelmäßigen Sechseck?',
+      opts: ['$135^\\circ$', '$120^\\circ$', '$60^\\circ$', '$108^\\circ$'],
+      steps: [
+        'Ein Sechseck lässt sich in vier Dreiecke zerlegen: Winkelsumme $4 \\cdot 180^\\circ = 720^\\circ$.',
+        'Im regelmäßigen Sechseck sind alle sechs Winkel gleich: $720^\\circ : 6 = 120^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Winkelsumme in einem Fünfeck?',
+      opts: ['$450^\\circ$', '$360^\\circ$', '$720^\\circ$', '$540^\\circ$'],
+      steps: [
+        'Von einer Ecke aus zerlegen zwei Diagonalen das Fünfeck in drei Dreiecke.',
+        '$3 \\cdot 180^\\circ = 540^\\circ$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ist das Dreieck mit den Seiten 6 cm, 8 cm und 10 cm rechtwinklig?',
+      opts: ['Nein, denn $6 + 8 \\neq 10$.', 'Nein, denn es ist kein Winkel angegeben.', 'Ja, denn $6^2 + 8^2 = 10^2$.', 'Ja, denn alle Seitenlängen sind gerade Zahlen.'],
+      steps: [
+        'Nach der Umkehrung des Satzes des Pythagoras ist ein Dreieck rechtwinklig, wenn die Quadrate der beiden kürzeren Seiten zusammen das Quadrat der längsten Seite ergeben.',
+        '$36 + 64 = 100 = 10^2$ – also rechtwinklig, der rechte Winkel liegt der 10-cm-Seite gegenüber.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Aus welchen drei Strecken lässt sich ein Dreieck bauen?',
+      opts: ['4 cm, 5 cm und 8 cm', '3 cm, 4 cm und 7 cm', '2 cm, 3 cm und 6 cm', '1 cm, 1 cm und 3 cm'],
+      steps: [
+        'Dreiecksungleichung: zwei Seiten zusammen müssen immer länger sein als die dritte.',
+        '$4 + 5 = 9 > 8$ – das passt.',
+        'Bei 3 cm, 4 cm und 7 cm ist $3 + 4 = 7$: die Strecken liegen flach aufeinander, ein Dreieck entsteht nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Angaben legen ein Dreieck eindeutig fest?',
+      opts: ['eine Seite und ein beliebiger Winkel', 'zwei Seiten und der von ihnen eingeschlossene Winkel', 'die drei Winkel', 'zwei Winkel'],
+      steps: [
+        'Das ist der Kongruenzsatz SWS.',
+        'Drei Winkel legen nur die Form fest, nicht die Größe: alle ähnlichen Dreiecke haben dieselben Winkel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was gilt in jedem Drachenviereck?',
+      opts: ['Die Diagonalen stehen senkrecht aufeinander.', 'Die Diagonalen sind gleich lang.', 'Alle vier Seiten sind gleich lang.', 'Gegenüberliegende Seiten sind parallel.'],
+      steps: [
+        'Ein Drachenviereck hat zwei Paare gleich langer benachbarter Seiten und ist achsensymmetrisch.',
+        'Die Symmetrieachse ist eine Diagonale; die andere Diagonale steht senkrecht auf ihr.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Rechteck ist 6 cm breit und 8 cm lang. Wie lang ist seine Diagonale?',
+      opts: ['10 cm', '48 cm', '100 cm', '14 cm'],
+      steps: [
+        'Die Diagonale teilt das Rechteck in zwei rechtwinklige Dreiecke; sie ist die Hypotenuse.',
+        '$d = \\sqrt{6^2 + 8^2} = \\sqrt{100} = 10$, also 10 cm.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

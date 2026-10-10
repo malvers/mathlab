@@ -357,6 +357,48 @@ def gy12lk(nr, slug, thema, lb, blurb, comment=''):
     return _gy(12, nr, slug, thema, lb, blurb, comment, lk=True)
 
 
+# ----------------------------------------------------- Oberschule Mathe ----
+def _os(klasse, nr, slug, thema, lb, blurb, comment):
+    # Plans svp/mathe/mathe<k>.html (like the older mathe5.html); from class 7 on the
+    # Realschulbildungsgang (Doc, 10.10.2026: "Real"), class 6 is common to both tracks.
+    gang = ' · Realschulbildungsgang' if klasse >= 7 else ''
+    return Quiz(
+        id='matheos%d-w%02d-%s' % (klasse, nr, slug),
+        file='mathetestos%d-%s.html' % (klasse, slug),
+        title='Aufgaben · ' + thema,
+        subtitle='Oberschule · Klasse %d%s · Woche %d (%s) · 20 Aufgaben: %s · genau eine Antwort pro Aufgabe'
+                 % (klasse, gang, nr, lb, blurb),
+        dash_sub='Oberschule · Klasse %d · Woche %d · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe'
+                 % (klasse, nr),
+        back='svp/mathe/mathe%d.html' % klasse,
+        comment=comment)
+
+
+def os6(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Oberschule-6 Mathematik plan (mathe/mathe6.html)."""
+    return _os(6, nr, slug, thema, lb, blurb, comment)
+
+
+def os7(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Oberschule-7 Mathematik plan, Realschulbildungsgang (mathe/mathe7.html)."""
+    return _os(7, nr, slug, thema, lb, blurb, comment)
+
+
+def os8(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Oberschule-8 Mathematik plan, Realschulbildungsgang (mathe/mathe8.html)."""
+    return _os(8, nr, slug, thema, lb, blurb, comment)
+
+
+def os9(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Oberschule-9 Mathematik plan, Realschulbildungsgang (mathe/mathe9.html)."""
+    return _os(9, nr, slug, thema, lb, blurb, comment)
+
+
+def os10(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Oberschule-10 Mathematik plan, Realschulbildungsgang (mathe/mathe10.html)."""
+    return _os(10, nr, slug, thema, lb, blurb, comment)
+
+
 # ------------------------------------------------------------------ wiring ----
 def wire(plan, nr, href, label='Aufgaben 1 (20)'):
     """Put quiz: { href, label } into the plan row with nr: <nr> (replacing an old one).

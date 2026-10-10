@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Pyramidenstumpf und Kegelstumpf — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w24-stumpf',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Pyramidenstumpf und Kegelstumpf',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 24 (LB 4) · 20 Aufgaben: Stumpf als Differenz zweier Körper, Volumen- und Mantelformeln, Werkstücke, Masse und Kosten · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 24 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: idea and derivation (1-2, 13, 16-17, 20), cone frustum (3-4, 6-9, 12, 18), pyramid frustum (5, 14-15), mass, cost and profit (10-11, 19). Results rounded to one decimal. */
+  questions: [
+    {
+      q: 'Was ist ein Pyramidenstumpf?',
+      opts: ['eine besonders flache Pyramide', 'eine Pyramide, von der die Spitze parallel zur Grundfläche abgeschnitten wurde', 'zwei aufeinandergestellte Pyramiden', 'eine Pyramide mit dreieckiger Grundfläche'],
+      steps: [
+        'Grund- und Deckfläche sind dann parallel und ähnlich zueinander, die Seitenflächen sind Trapeze.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Pyramide mit quadratischer Grundfläche ($a = 6$ cm, $h = 8$ cm) wird auf halber Höhe parallel zur Grundfläche durchgeschnitten. Wie groß ist das Volumen des Stumpfes?',
+      opts: ['96 cm³', '48 cm³', '72 cm³', '84 cm³'],
+      steps: [
+        'Ganze Pyramide: $\\dfrac{1}{3} \\cdot 36 \\cdot 8 = 96$ cm³.',
+        'Abgeschnittene Spitze: Kante 3 cm, Höhe 4 cm, also $\\dfrac{1}{3} \\cdot 9 \\cdot 4 = 12$ cm³.',
+        'Stumpf: $96 - 12 = 84$ cm³ – nicht die Hälfte, denn die Spitze ist viel kleiner.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Volumenformel des Kegelstumpfs mit den Radien $R$ und $r$ und der Höhe $h$?',
+      opts: ['$V = \\pi h (R^2 + r^2)$', '$V = \\dfrac{\\pi h}{3} (R^2 + R r + r^2)$', '$V = \\dfrac{\\pi h}{2} (R^2 + r^2)$', '$V = \\dfrac{\\pi h}{3} (R + r)^2$'],
+      steps: [
+        'Sie entsteht als Differenz aus großem und abgeschnittenem kleinem Kegel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kegelstumpf hat die Radien $R = 4$ cm und $r = 2$ cm und die Höhe 6 cm. Wie groß ist sein Volumen (gerundet)?',
+      opts: ['125,7 cm³', '226,2 cm³', '301,6 cm³', '175,9 cm³'],
+      steps: [
+        '$V = \\dfrac{\\pi \\cdot 6}{3} (16 + 8 + 4) = 2\\pi \\cdot 28 = 56\\pi \\approx 175{,}9$ cm³'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Pyramidenstumpf hat quadratische Grund- und Deckflächen mit den Kanten 4 cm und 2 cm und die Höhe 3 cm. Wie groß ist sein Volumen?',
+      opts: ['60 cm³', '28 cm³', '20 cm³', '36 cm³'],
+      steps: [
+        '$V = \\dfrac{h}{3} \\left(G_1 + \\sqrt{G_1 G_2} + G_2\\right)$ mit $G_1 = 16$, $G_2 = 4$.',
+        '$V = \\dfrac{3}{3} (16 + 8 + 4) = 28$ cm³'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kegelstumpf hat $R = 5$ cm, $r = 2$ cm und die Höhe 4 cm. Wie lang ist seine Mantellinie $s$?',
+      opts: ['6,4 cm', '4 cm', '7 cm', '5 cm'],
+      steps: [
+        'Im Achsenschnitt: rechtwinkliges Dreieck mit der Höhe 4 cm und dem Radienunterschied $5 - 2 = 3$ cm.',
+        '$s = \\sqrt{4^2 + 3^2} = 5$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist der Mantel dieses Kegelstumpfs ($R = 5$ cm, $r = 2$ cm, $s = 5$ cm, gerundet)?',
+      opts: ['157,1 cm²', '31,4 cm²', '110,0 cm²', '78,5 cm²'],
+      steps: [
+        '$M = \\pi s (R + r) = \\pi \\cdot 5 \\cdot 7 = 35\\pi \\approx 110{,}0$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist das Volumen dieses Kegelstumpfs ($R = 5$ cm, $r = 2$ cm, $h = 4$ cm, gerundet)?',
+      opts: ['163,4 cm³', '104,7 cm³', '364,4 cm³', '205,3 cm³'],
+      steps: [
+        '$V = \\dfrac{\\pi \\cdot 4}{3} (25 + 10 + 4) = \\dfrac{4\\pi}{3} \\cdot 39 = 52\\pi \\approx 163{,}4$ cm³'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Eimer hat oben den Radius 15 cm, unten 12 cm und ist 30 cm hoch. Wie viele Liter passen hinein (gerundet)?',
+      opts: ['172,5 l', '17,2 l', '5,7 l', '21,2 l'],
+      steps: [
+        '$V = \\dfrac{\\pi \\cdot 30}{3} (225 + 180 + 144) = 10\\pi \\cdot 549 \\approx 17\\,247$ cm³',
+        '$17\\,247$ cm³ $\\approx 17{,}2$ l'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Betonsockel ist ein Pyramidenstumpf mit quadratischen Flächen (Kanten 1 m und 0,6 m) und der Höhe 0,5 m. Beton wiegt 2,4 t pro m³. Wie schwer ist der Sockel (gerundet)?',
+      opts: ['327 kg', '544 kg', '784 kg', '1200 kg'],
+      steps: [
+        '$V = \\dfrac{0{,}5}{3} (1 + 0{,}6 + 0{,}36) = \\dfrac{0{,}5}{3} \\cdot 1{,}96 \\approx 0{,}3267$ m³',
+        '$m \\approx 0{,}3267 \\cdot 2{,}4 \\approx 0{,}784$ t $= 784$ kg'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Kubikmeter Beton kostet 150 €. Was kostet der Beton für diesen Sockel (0,3267 m³, gerundet)?',
+      opts: ['459 €', '150 €', '75 €', '49 €'],
+      steps: [
+        '$0{,}3267 \\cdot 150 \\approx 49$ €'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Lampenschirm ist der Mantel eines Kegelstumpfs mit $R = 20$ cm, $r = 10$ cm und der Mantellinie 25 cm. Wie viel Stoff braucht man (gerundet)?',
+      opts: ['2356,2 cm²', '4712,4 cm²', '785,4 cm²', '1570,8 cm²'],
+      steps: [
+        '$M = \\pi \\cdot 25 \\cdot (20 + 10) = 750\\pi \\approx 2356{,}2$ cm²'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kegel wird auf halber Höhe parallel zur Grundfläche durchgeschnitten. Welcher Anteil des Volumens bleibt im Stumpf?',
+      opts: ['$\\dfrac{1}{2}$', '$\\dfrac{1}{8}$', '$\\dfrac{7}{8}$', '$\\dfrac{3}{4}$'],
+      steps: [
+        'Der kleine Kegel ist in allen Längen halb so groß, sein Volumen also $\\left(\\dfrac{1}{2}\\right)^3 = \\dfrac{1}{8}$.',
+        'Im Stumpf bleiben $1 - \\dfrac{1}{8} = \\dfrac{7}{8}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Pyramidenstumpf hat quadratische Flächen mit den Kanten 6 cm und 4 cm, jede Trapezfläche hat die Höhe 5 cm. Wie groß ist die Oberfläche?',
+      opts: ['152 cm²', '252 cm²', '100 cm²', '52 cm²'],
+      steps: [
+        'Grund- und Deckfläche: $36 + 16 = 52$ cm².',
+        'Vier Trapeze: $4 \\cdot \\dfrac{6 + 4}{2} \\cdot 5 = 100$ cm².',
+        '$O = 152$ cm²'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Pyramidenstumpf hat quadratische Flächen mit den Kanten 10 cm und 4 cm, die Trapezhöhe beträgt 5 cm. Wie hoch ist der Stumpf?',
+      opts: ['4 cm', '3 cm', '6 cm', '5 cm'],
+      steps: [
+        'Im Schnitt durch die Mitte: Die Trapezhöhe ist Hypotenuse, eine Kathete ist $\\dfrac{10 - 4}{2} = 3$ cm.',
+        '$h = \\sqrt{5^2 - 3^2} = 4$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ergibt die Kegelstumpf-Formel $V = \\dfrac{\\pi h}{3}(R^2 + R r + r^2)$ für $r = 0$?',
+      opts: ['das Volumen eines Zylinders', 'das Volumen eines Kegels', 'null', 'das Volumen einer Kugel'],
+      steps: [
+        '$V = \\dfrac{\\pi h}{3} R^2 = \\dfrac{1}{3} \\pi R^2 h$ – die Deckfläche schrumpft zur Spitze.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ergibt dieselbe Formel für $r = R$?',
+      opts: ['null', 'das Dreifache eines Zylinders', 'das Volumen eines Zylinders', 'das Volumen eines Kegels'],
+      steps: [
+        '$V = \\dfrac{\\pi h}{3} \\cdot 3R^2 = \\pi R^2 h$ – die Formel passt zu den Grenzfällen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Blumentopf hat oben den Radius 10 cm, unten 7 cm und ist 12 cm hoch. Wie viel Erde passt hinein (gerundet)?',
+      opts: ['3,77 l', '1,85 l', '2,75 l', '27,5 l'],
+      steps: [
+        '$V = \\dfrac{\\pi \\cdot 12}{3} (100 + 70 + 49) = 4\\pi \\cdot 219 = 876\\pi \\approx 2752$ cm³ $\\approx 2{,}75$ l'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Werkstück kostet 12 € Material und 8 € Arbeit und wird für 32 € verkauft. Wie viel Prozent der Kosten beträgt der Gewinn?',
+      opts: ['60 %', '160 %', '12 %', '37,5 %'],
+      steps: [
+        'Kosten: $12 + 8 = 20$ €, Gewinn: $32 - 20 = 12$ €.',
+        '$\\dfrac{12}{20} = 60\\,\\%$ der Kosten. (Bezogen auf den Verkaufspreis wären es $37{,}5\\,\\%$.)'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Pyramide wird auf halber Höhe parallel zur Grundfläche durchgeschnitten. Wie groß ist die Schnittfläche im Vergleich zur Grundfläche?',
+      opts: ['genauso groß', 'ein Achtel', 'die Hälfte', 'ein Viertel'],
+      steps: [
+        'Alle Längen der Schnittfläche sind halb so groß.',
+        'Flächen wachsen mit dem Quadrat: $\\left(\\dfrac{1}{2}\\right)^2 = \\dfrac{1}{4}$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

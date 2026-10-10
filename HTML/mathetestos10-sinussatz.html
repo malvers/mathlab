@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Der Sinussatz — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w04-sinussatz',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Der Sinussatz',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 4 (LB 1) · 20 Aufgaben: Sinussatz aufstellen und umstellen, Seiten und Winkel in beliebigen Dreiecken, Entfernungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: the law (1-4), sides (5-9), angles (10-14), context and number of solutions (15-20). Results rounded to one decimal. */
+  questions: [
+    {
+      q: 'Wie lautet der Sinussatz für ein Dreieck mit den Seiten $a$, $b$, $c$ und den gegenüberliegenden Winkeln $\\alpha$, $\\beta$, $\\gamma$?',
+      opts: ['$\\dfrac{a}{\\sin \\alpha} = \\dfrac{b}{\\sin \\beta} = \\dfrac{c}{\\sin \\gamma}$', '$a^2 = b^2 + c^2 - 2bc \\cdot \\sin \\alpha$', '$a \\cdot \\sin \\alpha = b \\cdot \\sin \\beta = c \\cdot \\sin \\gamma$', '$\\dfrac{a}{\\sin \\beta} = \\dfrac{b}{\\sin \\alpha}$'],
+      steps: [
+        'Jede Seite gehört zu dem Winkel, der ihr gegenüberliegt.',
+        'Das Verhältnis Seite durch Sinus des Gegenwinkels ist in jedem Dreieck für alle drei Paare gleich.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wann hilft der Sinussatz weiter?',
+      opts: ['wenn nur die drei Seiten bekannt sind', 'wenn nur die drei Winkel bekannt sind', 'wenn zwei Seiten und der eingeschlossene Winkel bekannt sind', 'wenn zwei Winkel und eine Seite bekannt sind'],
+      steps: [
+        'Der Sinussatz braucht ein vollständiges Paar aus Seite und Gegenwinkel.',
+        'Bei zwei Winkeln kennt man auch den dritten, damit ist zu jeder bekannten Seite der Gegenwinkel bekannt.',
+        'Für drei Seiten oder für zwei Seiten mit eingeschlossenem Winkel braucht man den Kosinussatz.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Stelle $\\dfrac{a}{\\sin \\alpha} = \\dfrac{b}{\\sin \\beta}$ nach $b$ um.',
+      opts: ['$b = \\dfrac{\\sin \\beta}{a \\cdot \\sin \\alpha}$', '$b = \\dfrac{a \\cdot \\sin \\alpha}{\\sin \\beta}$', '$b = \\dfrac{a \\cdot \\sin \\beta}{\\sin \\alpha}$', '$b = a \\cdot \\sin \\alpha \\cdot \\sin \\beta$'],
+      steps: [
+        'Beide Seiten mit $\\sin \\beta$ multiplizieren.',
+        '$b = \\dfrac{a}{\\sin \\alpha} \\cdot \\sin \\beta = \\dfrac{a \\cdot \\sin \\beta}{\\sin \\alpha}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was liefert der Sinussatz in einem rechtwinkligen Dreieck mit $\\gamma = 90^\\circ$?',
+      opts: ['$a = \\dfrac{\\sin \\alpha}{c}$', '$a = c \\cdot \\cos \\alpha$', '$a = c \\cdot \\sin \\alpha$', '$a = \\dfrac{c}{\\sin \\alpha}$'],
+      steps: [
+        '$\\sin 90^\\circ = 1$, also $\\dfrac{a}{\\sin \\alpha} = \\dfrac{c}{1}$.',
+        'Daraus $a = c \\cdot \\sin \\alpha$ – genau die bekannte Sinus-Beziehung im rechtwinkligen Dreieck.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gegeben: $a = 8$ cm, $\\alpha = 40^\\circ$, $\\beta = 60^\\circ$. Berechne $b$ (gerundet).',
+      opts: ['12 cm', '5,9 cm', '12,3 cm', '10,8 cm'],
+      steps: [
+        '$b = \\dfrac{a \\cdot \\sin \\beta}{\\sin \\alpha} = \\dfrac{8 \\cdot \\sin 60^\\circ}{\\sin 40^\\circ}$',
+        '$b \\approx \\dfrac{8 \\cdot 0{,}866}{0{,}643} \\approx 10{,}8$ cm',
+        'Achtung: Seiten verhalten sich nicht wie die Winkel selbst – $8 \\cdot \\dfrac{60}{40} = 12$ ist falsch.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben: $c = 12$ cm, $\\alpha = 50^\\circ$, $\\gamma = 85^\\circ$. Berechne $a$ (gerundet).',
+      opts: ['9,2 cm', '7,1 cm', '8,5 cm', '15,6 cm'],
+      steps: [
+        '$a = \\dfrac{c \\cdot \\sin \\alpha}{\\sin \\gamma} = \\dfrac{12 \\cdot \\sin 50^\\circ}{\\sin 85^\\circ}$',
+        '$a \\approx \\dfrac{12 \\cdot 0{,}766}{0{,}996} \\approx 9{,}2$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Im selben Dreieck ($c = 12$ cm, $\\alpha = 50^\\circ$, $\\gamma = 85^\\circ$): Berechne $b$ (gerundet).',
+      opts: ['9,2 cm', '8,5 cm', '6,4 cm', '12 cm'],
+      steps: [
+        'Zuerst den dritten Winkel: $\\beta = 180^\\circ - 50^\\circ - 85^\\circ = 45^\\circ$.',
+        '$b = \\dfrac{12 \\cdot \\sin 45^\\circ}{\\sin 85^\\circ} \\approx \\dfrac{12 \\cdot 0{,}707}{0{,}996} \\approx 8{,}5$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Dreieck hat die Seite $c = 10$ cm mit den anliegenden Winkeln $\\alpha = 45^\\circ$ und $\\beta = 75^\\circ$. Wie lang ist $a$ (gerundet)?',
+      opts: ['7,5 cm', '12,2 cm', '8,2 cm', '11,2 cm'],
+      steps: [
+        'Gegenwinkel von $c$: $\\gamma = 180^\\circ - 45^\\circ - 75^\\circ = 60^\\circ$.',
+        '$a = \\dfrac{10 \\cdot \\sin 45^\\circ}{\\sin 60^\\circ} \\approx \\dfrac{7{,}07}{0{,}866} \\approx 8{,}2$ cm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einem Dreieck ist $\\alpha = 30^\\circ$ und $\\beta = 90^\\circ$. In welchem Verhältnis stehen $a$ und $b$?',
+      opts: ['$a : b = 2 : 1$', '$a : b = 1 : 2$', '$a : b = 3 : 1$', '$a : b = 1 : 3$'],
+      steps: [
+        '$\\dfrac{a}{b} = \\dfrac{\\sin 30^\\circ}{\\sin 90^\\circ} = \\dfrac{0{,}5}{1}$',
+        'Also ist $a$ halb so lang wie $b$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben: $a = 7$ cm, $b = 5$ cm, $\\alpha = 70^\\circ$. Berechne $\\beta$ (gerundet).',
+      opts: ['$42{,}2^\\circ$', '$137{,}8^\\circ$', '$47{,}8^\\circ$', '$50{,}0^\\circ$'],
+      steps: [
+        '$\\sin \\beta = \\dfrac{b \\cdot \\sin \\alpha}{a} = \\dfrac{5 \\cdot \\sin 70^\\circ}{7} \\approx 0{,}671$',
+        '$\\beta \\approx 42{,}2^\\circ$. Die zweite Lösung $137{,}8^\\circ$ ist unmöglich: mit $70^\\circ$ wäre die Summe über $180^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Im selben Dreieck ($\\alpha = 70^\\circ$, $\\beta \\approx 42{,}2^\\circ$): Wie groß ist $\\gamma$?',
+      opts: ['$22{,}2^\\circ$', '$112{,}2^\\circ$', '$42{,}2^\\circ$', '$67{,}8^\\circ$'],
+      steps: [
+        'Winkelsumme: $\\gamma = 180^\\circ - 70^\\circ - 42{,}2^\\circ = 67{,}8^\\circ$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Im selben Dreieck ($a = 7$ cm, $\\alpha = 70^\\circ$, $\\gamma \\approx 67{,}8^\\circ$): Wie lang ist $c$ (gerundet)?',
+      opts: ['5,0 cm', '7,1 cm', '6,9 cm', '8,6 cm'],
+      steps: [
+        '$c = \\dfrac{a \\cdot \\sin \\gamma}{\\sin \\alpha} = \\dfrac{7 \\cdot \\sin 67{,}8^\\circ}{\\sin 70^\\circ}$',
+        '$c \\approx \\dfrac{7 \\cdot 0{,}926}{0{,}940} \\approx 6{,}9$ cm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Im Dreieck gilt $\\sin \\beta = 0{,}5$. Welche Winkel kommen für $\\beta$ in Frage?',
+      opts: ['nur $30^\\circ$', '$30^\\circ$ oder $150^\\circ$', '$30^\\circ$ oder $60^\\circ$', '$30^\\circ$ oder $330^\\circ$'],
+      steps: [
+        'Der Sinus ist für Winkel zwischen $0^\\circ$ und $180^\\circ$ positiv und symmetrisch zu $90^\\circ$: $\\sin(180^\\circ - \\beta) = \\sin \\beta$.',
+        'Also $30^\\circ$ oder $150^\\circ$. Welcher passt, entscheidet die Winkelsumme im konkreten Dreieck.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben: $a = 9$ cm, $b = 6$ cm und $\\alpha = 50^\\circ$. Wie viele Dreiecke passen dazu?',
+      opts: ['unendlich viele', 'genau zwei', 'keins', 'genau eins'],
+      steps: [
+        'Der bekannte Winkel liegt der größeren Seite gegenüber (Kongruenzsatz SsW).',
+        'Dann ist $\\beta$ kleiner als $\\alpha$, die stumpfe zweite Lösung scheidet aus: es gibt genau ein Dreieck.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einem Dreieck ist $\\alpha = 40^\\circ$, $\\beta = 75^\\circ$ und $\\gamma = 65^\\circ$. Welche Seite ist am längsten?',
+      opts: ['$c$', '$b$', '$a$', 'Alle drei sind gleich lang.'],
+      steps: [
+        'Nach dem Sinussatz liegt der größten Seite der größte Winkel gegenüber.',
+        'Der größte Winkel ist $\\beta = 75^\\circ$, also ist $b$ am längsten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was folgt aus dem Sinussatz, wenn in einem Dreieck zwei Winkel gleich groß sind?',
+      opts: ['Das Dreieck ist rechtwinklig.', 'Die gegenüberliegenden Seiten sind gleich lang.', 'Alle drei Seiten sind gleich lang.', 'Die dritte Seite ist doppelt so lang.'],
+      steps: [
+        'Aus $\\alpha = \\beta$ folgt $\\sin \\alpha = \\sin \\beta$ und mit dem Sinussatz $a = b$.',
+        'Das Dreieck ist gleichschenklig.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Punkt C liegt jenseits eines Flusses. Von A und B aus (Abstand 100 m) misst man $\\angle CAB = 65^\\circ$ und $\\angle ABC = 70^\\circ$. Wie weit ist C von A entfernt (gerundet)?',
+      opts: ['70,7 m', '128,2 m', '132,9 m', '100 m'],
+      steps: [
+        'Winkel bei C: $180^\\circ - 65^\\circ - 70^\\circ = 45^\\circ$; er liegt der Basis AB gegenüber.',
+        'Die Strecke AC liegt dem Winkel bei B gegenüber: $AC = \\dfrac{100 \\cdot \\sin 70^\\circ}{\\sin 45^\\circ} \\approx 132{,}9$ m.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Personen stehen 60 m voneinander entfernt in A und B. Einen Baum C sehen sie unter $\\angle CAB = 48^\\circ$ und $\\angle ABC = 72^\\circ$. Wie weit ist der Baum von A entfernt (gerundet)?',
+      opts: ['65,9 m', '54,6 m', '51,5 m', '60 m'],
+      steps: [
+        'Winkel beim Baum: $180^\\circ - 48^\\circ - 72^\\circ = 60^\\circ$.',
+        '$AC = \\dfrac{60 \\cdot \\sin 72^\\circ}{\\sin 60^\\circ} \\approx \\dfrac{57{,}06}{0{,}866} \\approx 65{,}9$ m'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Schiff fährt geradeaus. In A sieht es einen Leuchtturm L unter $32^\\circ$ zur Fahrtrichtung, 5 km weiter in B unter $58^\\circ$. Wie weit ist das Schiff in B vom Leuchtturm entfernt (gerundet)?',
+      opts: ['9,7 km', '3,1 km', '5,0 km', '6,0 km'],
+      steps: [
+        'Im Dreieck ABL ist der Innenwinkel bei B: $180^\\circ - 58^\\circ = 122^\\circ$, bei L also $180^\\circ - 32^\\circ - 122^\\circ = 26^\\circ$.',
+        'BL liegt dem Winkel bei A gegenüber: $BL = \\dfrac{5 \\cdot \\sin 32^\\circ}{\\sin 26^\\circ} \\approx \\dfrac{2{,}65}{0{,}438} \\approx 6{,}0$ km.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben: $b = 4$ cm, $c = 6$ cm und $\\beta = 30^\\circ$. Welche Werte kann $\\gamma$ haben (gerundet)?',
+      opts: ['$48{,}6^\\circ$ oder $131{,}4^\\circ$', 'nur $48{,}6^\\circ$', 'nur $131{,}4^\\circ$', '$45^\\circ$ oder $135^\\circ$'],
+      steps: [
+        '$\\sin \\gamma = \\dfrac{6 \\cdot \\sin 30^\\circ}{4} = 0{,}75$, also $\\gamma \\approx 48{,}6^\\circ$ oder $\\gamma \\approx 131{,}4^\\circ$.',
+        'Beide sind möglich, denn $30^\\circ + 131{,}4^\\circ < 180^\\circ$: der Winkel liegt der kleineren Seite gegenüber, es gibt zwei Dreiecke.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

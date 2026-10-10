@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 10 (Oberschule) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Oberschule &middot; Klasse 10</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_os_mathematik.pdf', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Realschulbildungsgang &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Dreiecke und Vielecke</div>
+            <div class="vu">20 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Funktionale Zusammenhänge</div>
+            <div class="vu">20 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Zufallsgrößen</div>
+            <div class="vu">12 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Mathematik im Alltag</div>
+            <div class="vu">28 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Vermessungsprobleme</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Die Zeitrichtwerte des Lehrplans (80 Ustd. Pflicht + 8 Ustd. Wahlbereich) sind vollst&auml;ndig abgebildet;
+        die &uuml;brigen Wochen stehen als &Uuml;bung, Klassenarbeit, Pr&uuml;fungsvorbereitung oder Puffer in eigenen Zeilen.
+        Den Termin der schriftlichen Abschlusspr&uuml;fung legt das S&auml;chsische Staatsministerium f&uuml;r Kultus fest &ndash;
+        die Pr&uuml;fungszeile wird verschoben, sobald er feststeht.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Start ins Abschlussjahr', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches: Hefter, Taschenrechner, Formelsammlung, Arbeitsweise im Abschlussjahr',
+                'Überblick: Realschulabschluss, schriftliche Prüfung Mathematik (240 Minuten), Ablauf des Schuljahres',
+                'Wiederholung Klasse 9: Satz des Pythagoras, Sinus, Kosinus und Tangens im rechtwinkligen Dreieck'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/20', topic: 'Dreiecke und Vierecke systematisieren', ziel: 'Kennen des Systematisierens der Dreiecke und Vierecke', remark: 'Dreiecksarten, Haus der Vierecke, Winkelsummen', quiz: { href: '../../mathetestos10-dreiecke-vierecke.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Dreiecke nach Seiten und Winkeln einteilen, Winkelsumme im Dreieck und im Viereck',
+                'Haus der Vierecke: Quadrat, Rechteck, Raute, Parallelogramm, Trapez, Drachenviereck',
+                'Eigenschaften vergleichen: Diagonalen, Symmetrie, Flächeninhaltsformeln'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/20', topic: 'Trigonometrie in Figuren', ziel: 'Anwenden trigonometrischer Beziehungen auf vielfältige Sachverhalte', remark: 'rechtwinklige Teildreiecke finden, Höhe als Hilfslinie', quiz: { href: '../../mathetestos10-trigonometrie-figuren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Sinus, Kosinus und Tangens im rechtwinkligen Dreieck sicher anwenden',
+                'Gleichschenklige Dreiecke, Trapeze und Rauten über eine Höhe in rechtwinklige Dreiecke zerlegen',
+                'Steigungswinkel und Neigungen: Rampen, Dächer, Straßen'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/20', topic: 'Der Sinussatz', ziel: 'Anwenden trigonometrischer Beziehungen auf vielfältige Sachverhalte', remark: 'zwei Winkel und eine Seite bzw. zwei Seiten und der Gegenwinkel der größeren', quiz: { href: '../../mathetestos10-sinussatz.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Sinussatz über die Höhe herleiten',
+                'Fehlende Seiten und Winkel in beliebigen Dreiecken berechnen',
+                'Sachaufgaben: Entfernungen zu unzugänglichen Punkten'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/20', topic: 'Der Kosinussatz', ziel: 'Anwenden trigonometrischer Beziehungen auf vielfältige Sachverhalte', remark: 'drei Seiten bzw. zwei Seiten und der eingeschlossene Winkel', quiz: { href: '../../mathetestos10-kosinussatz.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Kosinussatz als Erweiterung des Satzes des Pythagoras',
+                'Winkel aus drei Seiten berechnen, dritte Seite aus zwei Seiten und dem eingeschlossenen Winkel',
+                'Entscheiden: Sinussatz oder Kosinussatz?'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '17–20/20', topic: 'Berechnungen in beliebigen Dreiecken und Vielecken', ziel: 'Anwenden trigonometrischer Beziehungen auf vielfältige Sachverhalte', remark: 'Flächeninhalt mit dem Sinus, Vielecke zerlegen', quiz: { href: '../../mathetestos10-beliebige-dreiecke.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Flächeninhalt eines Dreiecks aus zwei Seiten und dem eingeschlossenen Winkel',
+                'Vielecke in Dreiecke zerlegen: Grundstücke, Felder, regelmäßige Vielecke',
+                'Vermessungsaufgaben aus dem Alltag mit Skizze und Lösungsplan'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'ue', u: '', topic: 'Übung: Dreiecke und Vielecke', remark: 'Übung, Vertiefung und Vorbereitung auf die Klassenarbeit', details: [
+                'Gemischte Aufgaben zu Sinussatz, Kosinussatz und Flächeninhalt',
+                'Lösungswege skizzieren, begründen und vergleichen'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Dreiecke und Vielecke', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos10-ka1.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Klassenarbeit: Systematik der Dreiecke und Vierecke, Trigonometrie in beliebigen Dreiecken',
+                'Auswertung und Berichtigung'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb2', u: '1–4/20', topic: 'Potenzfunktionen mit positiven Exponenten', ziel: 'Übertragen der Kenntnisse über Funktionen auf Sachbezüge, speziell auch auf Wachstumsprozesse', remark: 'y = a · x hoch n für n = 1, 2, 3', quiz: { href: '../../mathetestos10-potenzfunktionen-positiv.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Wertetabellen und Graphen von y = x², y = x³ und y = a · xⁿ',
+                'Eigenschaften: Symmetrie, Monotonie, gemeinsame Punkte',
+                'Einfluss des Faktors a: Streckung, Stauchung, Spiegelung'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb2', u: '5–8/20', topic: 'Potenzfunktionen mit negativen Exponenten', ziel: 'Übertragen der Kenntnisse über Funktionen auf Sachbezüge, speziell auch auf Wachstumsprozesse', remark: 'Hyperbeln für n = −1 und n = −2', quiz: { href: '../../mathetestos10-potenzfunktionen-negativ.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Graphen von y = 1/x und y = 1/x², Definitionsbereich ohne null',
+                'Asymptoten anschaulich: Verhalten nahe null und für große x',
+                'Sachbezüge: umgekehrt proportionale Zuordnungen, Lichtstärke und Abstand'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '9–12/20', topic: 'Exponentialfunktionen: Wachstum und Zerfall', ziel: 'Übertragen der Kenntnisse über Funktionen auf Sachbezüge, speziell auch auf Wachstumsprozesse', remark: 'y = c · a hoch x, Wachstumsfaktor, Halbwertszeit', quiz: { href: '../../mathetestos10-exponentialfunktionen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Lineares und exponentielles Wachstum vergleichen',
+                'Wachstumsfaktor und Anfangswert aus Sachsituationen ablesen: Zinseszins, Bakterien, Bevölkerung',
+                'Zerfall und Halbwertszeit, Modelle mit dem Funktionsplotter prüfen'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '13–16/20', topic: 'Die Sinusfunktion', ziel: 'Beherrschen des Umgangs mit der Sinusfunktion in Verbindung mit Sachbezügen unter Verwendung des Grad- und Bogenmaßes', remark: 'Grad- und Bogenmaß, Einheitskreis, Periodizität', quiz: { href: '../../mathetestos10-sinusfunktion.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Bogenmaß: Winkel als Länge des Bogens am Einheitskreis',
+                'Graph von y = sin x aus dem Einheitskreis entwickeln, Periode 2π',
+                'Periodische Vorgänge: Riesenrad, Tageslänge, Gezeiten'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '17–20/20', topic: 'Parameter der Sinusfunktion und Systematik', ziel: 'Beherrschen des Umgangs mit der Sinusfunktion in Verbindung mit Sachbezügen unter Verwendung des Grad- und Bogenmaßes', remark: 'y = a · sin(b · x), Amplitude und Periode', quiz: { href: '../../mathetestos10-sinus-parameter.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Einfluss von a (Amplitude) und b (Periode) am Funktionsplotter untersuchen',
+                'Sachbezüge: Wechselstrom, Schwingungen und Wellen',
+                'Funktionen systematisieren: linear, quadratisch, Potenz-, Exponential- und Sinusfunktion'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'ue', u: '', topic: 'Übung: Funktionale Zusammenhänge', remark: 'Übung, Vertiefung und Vorbereitung auf die Klassenarbeit', details: [
+                'Graphen zuordnen, Eigenschaften beschreiben, Funktionsgleichungen aufstellen',
+                'Wachstumsaufgaben mit Tabelle, Graph und Gleichung'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lk', u: '', topic: 'Klassenarbeit 2: Funktionale Zusammenhänge', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos10-ka2.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Klassenarbeit: Potenz-, Exponential- und Sinusfunktionen in Sachbezügen',
+                'Auswertung und Berichtigung'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb3', u: '1–4/12', topic: 'Zufallsgrößen', ziel: 'Einblick gewinnen in die Verwendung von Zufallsgrößen', remark: 'Gewinn und Verlust bei Spielen als Zufallsgröße', quiz: { href: '../../mathetestos10-zufallsgroessen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Wiederholung: Baumdiagramm, Pfadregeln, Wahrscheinlichkeit als Bruch und in Prozent',
+                'Zufallsgrößen anschaulich: Augensumme, Gewinn bei einem Glücksspiel, Anzahl der Treffer',
+                'Wahrscheinlichkeitsverteilung als Tabelle und Säulendiagramm'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'ue', u: '', topic: 'Weihnachtsknobeln', remark: 'zwei Schultage vor den Ferien', details: [
+                'Knobelaufgaben und Denksportaufgaben in Gruppen',
+                'Mathematische Spiele: Nim, Streichholzrätsel'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb3', u: '5–8/12', topic: 'Der Erwartungswert', ziel: 'Kennen des Erwartungswertes einer Zufallsgröße als Kenngröße zur Beurteilung von Sachsituationen', remark: 'Gewinnchance und Gewinnerwartung unterscheiden', quiz: { href: '../../mathetestos10-erwartungswert.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Erwartungswert als mittlerer Gewinn auf lange Sicht berechnen',
+                'Faire Spiele: Einsatz so wählen, dass der Erwartungswert null ist',
+                'Lotterien, Glücksräder und Würfelspiele beurteilen'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '9–12/12', topic: 'Simulation und Risiko', ziel: 'Kennen der Simulation von Zufallsversuchen, auch unter Nutzung digitaler Medien', remark: 'Zufallszahlen mit Taschenrechner und Computer', quiz: { href: '../../mathetestos10-simulation-risiko.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zufallsversuche mit Zufallszahlen simulieren und auswerten',
+                'Relative Häufigkeit und Wahrscheinlichkeit vergleichen',
+                'Risikoabschätzung: Ausfall technischer Geräte, Garantie und Versicherung'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb4', u: '1–4/28', topic: 'Lohn und Abgaben', ziel: 'Sich positionieren zu Problemen aus Umwelt und Wirtschaft', remark: 'brutto und netto, Abgaben der Arbeitnehmer und Arbeitgeber', quiz: { href: '../../mathetestos10-lohn-abgaben.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Eine Lohnabrechnung lesen: Bruttolohn, Lohnsteuer, Sozialabgaben, Nettolohn',
+                'Prozentsätze der Sozialversicherung anwenden, Arbeitgeberanteil',
+                'Haushaltsplan für den ersten eigenen Haushalt'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb4', u: '5–8/28', topic: 'Sparen, Kredit, Schuldenfalle', ziel: 'Sich positionieren zu Problemen aus Umwelt und Wirtschaft', remark: 'Zinseszins, Ratenkredit, Kosten eines Kredits', quiz: { href: '../../mathetestos10-sparen-kredit.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Sparen mit Zinseszins, Sparpläne vergleichen',
+                'Ratenkredit und Ratenkauf: Was kostet das Geld wirklich?',
+                'Schuldenfalle: Handyvertrag, Dispokredit, Kauf auf Raten – diskutieren und bewerten'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lk', u: '', topic: 'Klassenarbeit 3: Zufallsgrößen und Geld im Alltag', remark: 'mit Vorbereitung und Auswertung, Halbjahresinformation', quiz: { href: '../../mathetestos10-ka3.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Klassenarbeit: Erwartungswert, Simulation, Lohn, Zinsen und Kredit',
+                'Auswertung und Berichtigung'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb4', u: '9–12/28', topic: 'Körper darstellen und berechnen', ziel: 'Anwenden der Schritte des Problemlösens auf vielfältige Sachverhalte', remark: 'Prisma, Zylinder, Pyramide, Kegel, Kugel, Zerlegungsprinzip', quiz: { href: '../../mathetestos10-koerper.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Volumen und Oberfläche der bekannten Körper wiederholen',
+                'Zusammengesetzte Körper zerlegen und berechnen',
+                'Schrägbild und Netz skizzieren'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb4', u: '13–16/28', topic: 'Pyramidenstumpf und Kegelstumpf', ziel: 'Anwenden der Schritte des Problemlösens auf vielfältige Sachverhalte', remark: 'Formeln herleiten, Masse, Werkstücke, Herstellungskosten', quiz: { href: '../../mathetestos10-stumpf.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Stumpf als Differenz zweier Pyramiden bzw. Kegel, Formeln herleiten',
+                'Volumen, Mantel und Oberfläche berechnen',
+                'Werkstücke: Masse aus Volumen und Dichte, Herstellungskosten und Gewinn'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb4', u: '17–20/28', topic: 'Wahrscheinlichkeiten in Sachaufgaben', ziel: 'Anwenden der Schritte des Problemlösens auf vielfältige Sachverhalte', remark: 'Problemlösen mit Baumdiagramm und Erwartungswert', quiz: { href: '../../mathetestos10-wahrscheinlichkeit-sachaufgaben.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Mehrstufige Zufallsversuche in Sachsituationen modellieren',
+                'Wahrscheinlichkeiten und Erwartungswerte bestimmen und deuten',
+                'Ergebnisse in Sätzen beantworten und kritisch prüfen'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb4', u: '21–24/28', topic: 'Funktionale Zusammenhänge im Alltag', ziel: 'Anwenden der Schritte des Problemlösens auf vielfältige Sachverhalte', remark: 'Tarife, Wachstum, Modelle prüfen', quiz: { href: '../../mathetestos10-funktionen-alltag.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Handytarife und Stromtarife als lineare Funktionen vergleichen',
+                'Wachstum und Abnahme modellieren, Prognosen bewerten',
+                'Ist das Modell geeignet? Grenzen von Modellen erkennen'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb4', u: '25–28/28', topic: 'Komplexe Anwendungsaufgaben', ziel: 'Anwenden der Schritte des Problemlösens auf vielfältige Sachverhalte', remark: 'Schritte des Problemlösens, Basiswissen ohne Hilfsmittel', quiz: { href: '../../mathetestos10-problemloesen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Problemlösen in Schritten: verstehen, planen, rechnen, prüfen, antworten',
+                'Basiswissen ohne Taschenrechner: Kopfrechnen, Überschlag, Einheiten',
+                'Aufgaben verbinden Geometrie, Funktionen und Wahrscheinlichkeit'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'ue', u: '', topic: 'Prüfungsvorbereitung 1: Basiswissen', remark: 'Pflichtteil ohne Hilfsmittel', quiz: { href: '../../mathetestos10-pruefung-basiswissen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Basiswissen ohne Taschenrechner: Terme, Gleichungen, Prozent, Einheiten, Flächen und Körper',
+                'Prüfungsaufgaben früherer Jahre bearbeiten und besprechen'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'ue', u: '', topic: 'Prüfungsvorbereitung 2: Geometrie und Funktionen', remark: 'Prüfungsaufgaben früherer Jahre', quiz: { href: '../../mathetestos10-pruefung-geometrie-funktionen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Trigonometrie, Körperberechnung und Ähnlichkeit',
+                'Lineare, quadratische, Exponential- und Sinusfunktionen'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'ue', u: '', topic: 'Prüfungsvorbereitung 3: Probeprüfung', remark: '240 Minuten wie in der Prüfung', quiz: { href: '../../mathetestos10-pruefung-probe.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Probeprüfung unter Prüfungsbedingungen',
+                'Auswertung, persönliche Lücken schließen, Stochastik und Alltag wiederholen'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lk', u: '', topic: 'Schriftliche Abschlussprüfung Mathematik', remark: 'Termin laut Prüfungsplan des SMK – für 2027 noch nicht veröffentlicht (2026: Prüfungsbeginn 04.05.)', details: [
+                'Schriftliche Prüfung, 240 Minuten, zentral gestellt',
+                'Zeile auf den Prüfungstag verschieben, sobald der Termin feststeht'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'ue', u: '', topic: 'Nach der schriftlichen Prüfung', remark: 'Rückblick, mündliche Prüfungen vorbereiten', details: [
+                'Prüfungsaufgaben gemeinsam lösen und besprechen',
+                'Vorbereitung auf mündliche Prüfungen und Zusatzprüfungen'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'wb', u: '1–4/8', topic: 'Vermessungsprobleme: Hilfsmittel', ziel: 'Einblick gewinnen in die Nutzung von Hilfsmitteln zum Vermessen', remark: 'Försterdreieck, Messkeil, Messrad, Strahlensätze', quiz: { href: '../../mathetestos10-vermessung-hilfsmittel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Hilfsmittel zum Vermessen kennenlernen und ein Försterdreieck bauen',
+                'Höhen von Bäumen und Gebäuden mit ähnlichen Dreiecken bestimmen',
+                'Maßstäbliche Zeichnung anfertigen'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'ue', u: '', topic: 'Mündliche Prüfungen', remark: 'Termine legt die Schule fest', details: [
+                'Mündliche Prüfungen und Zusatzprüfungen',
+                'Knobelaufgaben und Wiederholung'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'wb', u: '5–8/8', topic: 'Vermessung rund um die Schule', ziel: 'Anwenden mathematischer Kenntnisse zur Vermessung unter Verwendung geeigneter Hilfsmittel', remark: 'Übungen in der Umgebung der Schule, Präsentation', quiz: { href: '../../mathetestos10-vermessung-schule.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Schulgelände vermessen: Pythagoras und Trigonometrie im Gelände',
+                'Ergebnisse maßstäblich darstellen',
+                'Präsentation der Gruppenergebnisse'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'ue', u: '', topic: 'Mathematik in der Ausbildung', remark: 'Eignungstests, Berufsrechnen', details: [
+                'Typische Aufgaben aus Eignungstests: Kopfrechnen, Dreisatz, Prozent, Logik',
+                'Mathematik im Beruf: Material, Maße und Kosten'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'ue', u: '', topic: 'Brücke zur Oberstufe', remark: 'fit für Fachoberschule und Berufliches Gymnasium', details: [
+                'Gleichungen, Funktionen und Terme sicher beherrschen',
+                'Ein Blick voraus: Was erwartet mich in Klasse 11?'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'ue', u: '', topic: 'Puffer', remark: 'Nachholen, Vertiefen, Projekte', details: [
+                'Freier Puffer für Ausfälle und Vertiefung'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Mathematik-Projekt: Spiele und Strategien', remark: 'Knobeln, Strategiespiele, Wahrscheinlichkeit', details: [
+                'Strategiespiele analysieren und Gewinnstrategien finden',
+                'Wahrscheinlichkeit im Spiel: Ist das Spiel fair?'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Abschlusszeugnisse', remark: 'Termin der Zeugnisübergabe laut Schule', details: [
+                'Rückblick auf zehn Jahre Mathematik',
+                'Zeugnisübergabe und Abschluss'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Ausklang des Schuljahres'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_os_mathematik.pdf where that Lernbereich starts.
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_os_mathematik.pdf',
+            lb1: {
+                page: 53,
+                bullets: [
+                    'Dreiecke und Vierecke systematisieren',
+                    'Trigonometrische Beziehungen auf vielfältige Sachverhalte anwenden',
+                    'Längen, Winkelgrößen und Flächeninhalte in beliebigen Dreiecken und Vielecken',
+                    'Sinussatz und Kosinussatz',
+                ]
+            },
+            lb2: {
+                page: 54,
+                bullets: [
+                    'Potenzfunktionen y = a · xⁿ für n = −2, −1, 1, 2, 3',
+                    'Exponentialfunktionen y = c · aˣ, Wachstumsprozesse',
+                    'Sinusfunktion y = a · sin(b · x) in Grad- und Bogenmaß, Periodizität',
+                    'Funktionen systematisieren',
+                ]
+            },
+            lb3: {
+                page: 54,
+                bullets: [
+                    'Zufallsgrößen anschaulich verwenden',
+                    'Erwartungswert: Gewinnchance und Gewinnerwartung',
+                    'Simulation von Zufallsversuchen, auch mit digitalen Medien',
+                ]
+            },
+            lb4: {
+                page: 54,
+                bullets: [
+                    'Probleme aus Umwelt und Wirtschaft: Abgaben, Sparen, Kredit, Schuldenfalle',
+                    'Körper darstellen und berechnen, auch Pyramiden- und Kegelstumpf',
+                    'Formeln herleiten, Wahrscheinlichkeiten und Erwartungswerte bestimmen',
+                    'Funktionale Zusammenhänge, Basiswissen auch ohne Hilfsmittel',
+                ]
+            },
+            wb: {
+                page: 55,
+                bullets: [
+                    'Wahlpflichtbereich 1: Dynamisieren geometrischer Objekte',
+                    'Wahlpflichtbereich 2: Optimierung',
+                    'Wahlpflichtbereich 3: Vermessungsprobleme (gewählt)',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            wb: ['b-green', 'WB 3'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', '\u00dcBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>

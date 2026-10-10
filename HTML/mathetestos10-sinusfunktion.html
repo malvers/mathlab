@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Die Sinusfunktion — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w12-sinusfunktion',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Die Sinusfunktion',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 12 (LB 2) · 20 Aufgaben: Grad- und Bogenmaß, Einheitskreis, Nullstellen, Extrema, Periode · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 12 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: radian measure (1-4, 16, 19), the unit circle (11-12, 9), properties of y = sin x (5-8, 10, 17, 20), context and calculator (13-15, 18). */
+  questions: [
+    {
+      q: 'Wie viel sind $180^\\circ$ im Bogenmaß?',
+      opts: ['$\\pi$', '$2\\pi$', '$\\dfrac{\\pi}{2}$', '180'],
+      steps: [
+        'Der Vollkreis $360^\\circ$ hat am Einheitskreis den Umfang $2\\pi$.',
+        'Der halbe Kreis ist also $\\pi$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viel sind $90^\\circ$ im Bogenmaß?',
+      opts: ['$2\\pi$', '$\\pi$', '$\\dfrac{\\pi}{4}$', '$\\dfrac{\\pi}{2}$'],
+      steps: [
+        '$90^\\circ$ ist ein Viertel des Vollkreises: $\\dfrac{2\\pi}{4} = \\dfrac{\\pi}{2}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchem Winkel in Grad entspricht $\\dfrac{\\pi}{3}$?',
+      opts: ['$90^\\circ$', '$60^\\circ$', '$120^\\circ$', '$30^\\circ$'],
+      steps: [
+        '$\\pi$ entspricht $180^\\circ$.',
+        '$\\dfrac{180^\\circ}{3} = 60^\\circ$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Etwa wie viel Grad sind 1 im Bogenmaß?',
+      opts: ['$90^\\circ$', '$1^\\circ$', '$57{,}3^\\circ$', '$3{,}14^\\circ$'],
+      steps: [
+        '$1 = \\dfrac{180^\\circ}{\\pi} \\approx 57{,}3^\\circ$',
+        'Ein Bogen so lang wie der Radius gehört zu diesem Winkel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Periode hat $y = \\sin x$ (im Bogenmaß)?',
+      opts: ['1', '360', '$\\pi$', '$2\\pi$'],
+      steps: [
+        'Nach einer vollen Umdrehung am Einheitskreis wiederholen sich alle Werte.',
+        'Im Bogenmaß ist das $2\\pi \\approx 6{,}28$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Nullstellen hat $y = \\sin x$ im Intervall $0 \\leq x \\leq 2\\pi$?',
+      opts: ['$0$ und $2\\pi$', 'nur $0$', '$\\dfrac{\\pi}{2}$ und $\\dfrac{3\\pi}{2}$', '$0$, $\\pi$ und $2\\pi$'],
+      steps: [
+        'Der Sinus ist die y-Koordinate am Einheitskreis.',
+        'Sie ist null bei $0^\\circ$, $180^\\circ$ und $360^\\circ$, also bei $0$, $\\pi$, $2\\pi$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo hat $y = \\sin x$ im Intervall $0 \\leq x \\leq 2\\pi$ ihren größten Wert?',
+      opts: ['bei $x = 2\\pi$ mit $y = 2\\pi$', 'bei $x = \\dfrac{\\pi}{2}$ mit $y = 1$', 'bei $x = \\pi$ mit $y = 1$', 'bei $x = \\dfrac{3\\pi}{2}$ mit $y = 1$'],
+      steps: [
+        'Am Einheitskreis ist der Punkt bei $90^\\circ$ ganz oben: y-Koordinate 1.',
+        '$90^\\circ = \\dfrac{\\pi}{2}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Werte nimmt $y = \\sin x$ an?',
+      opts: ['alle Zahlen von 0 bis 1', 'alle Zahlen von $-1$ bis 1', 'alle Zahlen', 'nur $-1$, 0 und 1'],
+      steps: [
+        'Die y-Koordinate eines Punktes auf dem Einheitskreis liegt zwischen $-1$ und 1.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Wert hat $\\sin 270^\\circ$?',
+      opts: ['1', '$-1$', '0', '$0{,}5$'],
+      steps: [
+        'Bei $270^\\circ$ ist der Punkt am Einheitskreis ganz unten: $(0 \\mid -1)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Gleichung drückt aus, dass die Sinusfunktion periodisch ist?',
+      opts: ['$\\sin(2x) = 2 \\sin x$', '$\\sin(x + 2\\pi) = \\sin x$', '$\\sin(x + \\pi) = \\sin x$', '$\\sin(-x) = \\sin x$'],
+      steps: [
+        'Nach einer vollen Umdrehung landet man am selben Punkt des Einheitskreises.',
+        '$\\sin(x + \\pi) = \\sin x$ stimmt nicht: eine halbe Umdrehung wechselt das Vorzeichen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Punkt liegt auf dem Einheitskreis beim Winkel $\\alpha$. Welche Koordinaten hat er?',
+      opts: ['$(\\alpha \\mid \\sin \\alpha)$', '$(1 \\mid \\alpha)$', '$(\\cos \\alpha \\mid \\sin \\alpha)$', '$(\\sin \\alpha \\mid \\cos \\alpha)$'],
+      steps: [
+        'Im rechtwinkligen Dreieck mit Hypotenuse 1 ist die waagerechte Kathete $\\cos \\alpha$, die senkrechte $\\sin \\alpha$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Wert hat $\\sin 150^\\circ$?',
+      opts: ['$-0{,}5$', '1,5', '0,5', '0,866'],
+      steps: [
+        '$150^\\circ$ und $30^\\circ$ liegen spiegelbildlich zur y-Achse am Einheitskreis: gleiche Höhe.',
+        '$\\sin 150^\\circ = \\sin 30^\\circ = 0{,}5$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Riesenrad hat einen Durchmesser von 36 m, seine Achse liegt 20 m über dem Boden. Wie hoch ist die höchste Gondel?',
+      opts: ['38 m', '56 m', '36 m', '2 m'],
+      steps: [
+        'Radius $36 : 2 = 18$ m.',
+        'Höchster Punkt: $20 + 18 = 38$ m.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie hoch ist bei diesem Riesenrad (Achse 20 m, Durchmesser 36 m) die tiefste Gondel?',
+      opts: ['20 m', '0 m', '2 m', '18 m'],
+      steps: [
+        'Tiefster Punkt: $20 - 18 = 2$ m.',
+        'Die Höhe schwankt sinusförmig zwischen 2 m und 38 m.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Tageslänge schwankt periodisch. Welche Periode hat sie?',
+      opts: ['ein Jahr', 'ein Tag', 'zwölf Stunden', 'ein Monat'],
+      steps: [
+        'Längster Tag im Juni, kürzester im Dezember – im nächsten Jahr wiederholt sich der Verlauf.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lang ist am Einheitskreis der Bogen zu einem Winkel von $90^\\circ$ (gerundet)?',
+      opts: ['1,57', '3,14', '90', '0,79'],
+      steps: [
+        'Bogenlänge $= \\dfrac{90}{360} \\cdot 2\\pi = \\dfrac{\\pi}{2} \\approx 1{,}57$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $y = \\sin x$?',
+      opts: ['achsensymmetrisch zur y-Achse', 'achsensymmetrisch zur x-Achse', 'punktsymmetrisch zum Ursprung', 'keine'],
+      steps: [
+        '$\\sin(-x) = -\\sin x$: ein Winkel im Uhrzeigersinn führt zum gespiegelten Punkt unterhalb der x-Achse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Taschenrechner zeigt $\\sin 30 = -0{,}988$. Woran liegt das?',
+      opts: ['Er rechnet im Bogenmaß (RAD).', 'Man muss erst die Wurzel ziehen.', 'Der Sinus von 30 ist wirklich negativ.', 'Er ist kaputt.'],
+      steps: [
+        'Im Bogenmaß bedeutet 30 einen Winkel von etwa $1719^\\circ$.',
+        'Im Gradmaß (DEG) kommt $\\sin 30^\\circ = 0{,}5$ heraus.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viel Grad sind $2\\pi$?',
+      opts: ['$6{,}28^\\circ$', '$720^\\circ$', '$180^\\circ$', '$360^\\circ$'],
+      steps: [
+        '$2\\pi$ ist der Umfang des Einheitskreises – eine volle Umdrehung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In welchen Bereichen steigt $y = \\sin x$ im Intervall $0 \\leq x \\leq 2\\pi$?',
+      opts: ['überall', 'von $\\dfrac{\\pi}{2}$ bis $\\dfrac{3\\pi}{2}$', 'von 0 bis $\\pi$', 'von 0 bis $\\dfrac{\\pi}{2}$ und von $\\dfrac{3\\pi}{2}$ bis $2\\pi$'],
+      steps: [
+        'Vom Tiefpunkt bei $\\dfrac{3\\pi}{2}$ zum Hochpunkt bei $\\dfrac{\\pi}{2}$ (der nächsten Periode) steigt der Sinus.',
+        'Im Intervall: von 0 bis $\\dfrac{\\pi}{2}$ und von $\\dfrac{3\\pi}{2}$ bis $2\\pi$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

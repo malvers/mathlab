@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Funktionale Zusammenhänge im Alltag — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w26-funktionen-alltag',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Funktionale Zusammenhänge im Alltag',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 26 (LB 4) · 20 Aufgaben: Tarife vergleichen, lineare und exponentielle Modelle, Wurfparabel, Grenzen von Modellen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 26 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: tariffs (1-8), value loss and growth (9-11, 20), limits of models (12, 14), filling, throws, proportions (13, 15-19). */
+  questions: [
+    {
+      q: 'Tarif A kostet 5 € Grundgebühr plus 0,10 € pro Minute, Tarif B 0,15 € pro Minute ohne Grundgebühr. Bei wie vielen Minuten kosten beide gleich viel?',
+      opts: ['bei 100 Minuten', 'bei 50 Minuten', 'bei 20 Minuten', 'bei 200 Minuten'],
+      steps: [
+        '$5 + 0{,}10 t = 0{,}15 t$',
+        '$5 = 0{,}05 t$, also $t = 100$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was kostet Tarif A (5 € + 0,10 € pro Minute) bei 60 Minuten?',
+      opts: ['11 €', '65 €', '6 €', '9 €'],
+      steps: [
+        '$5 + 0{,}10 \\cdot 60 = 5 + 6 = 11$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Tarif ist bei 150 Minuten günstiger (A: 5 € + 0,10 €/min, B: 0,15 €/min)?',
+      opts: ['B mit 22,50 €', 'A mit 20 €', 'B mit 15 €', 'beide gleich'],
+      steps: [
+        'A: $5 + 15 = 20$ €, B: $0{,}15 \\cdot 150 = 22{,}50$ €.',
+        'Ab 100 Minuten ist A günstiger.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Stromtarif kostet 12 € Grundpreis im Monat und 0,35 € pro kWh. Was kosten 200 kWh im Monat?',
+      opts: ['212,35 €', '70 €', '24 €', '82 €'],
+      steps: [
+        '$12 + 0{,}35 \\cdot 200 = 12 + 70 = 82$ €'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Kosten sind $K(x) = 0{,}35 x + 12$ ($x$ in kWh, $K$ in €). Was bedeutet die Zahl 0,35?',
+      opts: ['den monatlichen Grundpreis', 'den Verbrauch', 'die Gesamtkosten', 'den Preis pro kWh'],
+      steps: [
+        '0,35 ist der Anstieg: jede zusätzliche kWh kostet 0,35 € mehr.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was bedeutet in $K(x) = 0{,}35 x + 12$ die Zahl 12?',
+      opts: ['den Preis pro kWh', 'den Verbrauch in kWh', 'die Anzahl der Monate', 'den Grundpreis, den man auch ohne Verbrauch zahlt'],
+      steps: [
+        'Bei $x = 0$ ist $K = 12$: der y-Achsenabschnitt ist der Grundpreis.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Taxi kostet 4 € Grundpreis plus 2,20 € pro km. Was kostet eine Fahrt über 12 km?',
+      opts: ['30,40 €', '18,20 €', '48,00 €', '26,40 €'],
+      steps: [
+        '$4 + 2{,}20 \\cdot 12 = 4 + 26{,}40 = 30{,}40$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit kommt man mit diesem Taxi (4 € + 2,20 € pro km) für 25 € höchstens (gerundet auf eine Stelle)?',
+      opts: ['etwa 6,2 km', 'etwa 9,5 km', 'etwa 13,2 km', 'etwa 11,4 km'],
+      steps: [
+        '$4 + 2{,}20 x = 25$',
+        '$2{,}20 x = 21$, also $x \\approx 9{,}5$ km.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Smartphone für 800 € verliert jedes Jahr 20 % seines Werts. Was ist es nach 2 Jahren noch wert?',
+      opts: ['480 €', '640 €', '400 €', '512 €'],
+      steps: [
+        '$800 \\cdot 0{,}8^2 = 800 \\cdot 0{,}64 = 512$ €',
+        'Nicht $2 \\cdot 20\\,\\% = 40\\,\\%$ abziehen: der zweite Verlust bezieht sich auf 640 €.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Gerät für 800 € wird linear in 4 Jahren abgeschrieben. Wie viel ist es nach 2 Jahren noch wert?',
+      opts: ['200 €', '400 €', '512 €', '600 €'],
+      steps: [
+        'Linear: jedes Jahr gleich viel, $800 : 4 = 200$ € pro Jahr.',
+        'Nach 2 Jahren: $800 - 400 = 400$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Ort hat 10 000 Einwohner, die Zahl wächst jährlich um 1,5 %. Wie viele sind es nach 4 Jahren (gerundet)?',
+      opts: ['16 000', '10 600', '10 150', '10 614'],
+      steps: [
+        '$10\\,000 \\cdot 1{,}015^4 \\approx 10\\,613{,}6$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Kerze ist 20 cm lang und brennt 2 cm pro Stunde ab: $h(t) = 20 - 2t$. Für welche Zeiten ist dieses Modell sinnvoll?',
+      opts: ['für alle $t$', '$t \\geq 10$', '$0 \\leq t \\leq 10$', '$0 \\leq t \\leq 20$'],
+      steps: [
+        'Nach 10 Stunden ist die Kerze abgebrannt: $h(10) = 0$.',
+        'Danach würde das Modell negative Längen liefern – das gibt es nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Becken fasst 1200 l, es fließen 40 l pro Minute zu. Nach wie vielen Minuten ist es voll?',
+      opts: ['48 min', '3 min', '30 min', '1160 min'],
+      steps: [
+        '$1200 : 40 = 30$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Kanal hat 100 Follower, die Zahl verdoppelt sich jeden Monat. Nach diesem Modell wären es nach 12 Monaten 409 600. Wie ist das zu bewerten?',
+      opts: ['Das Modell gilt nur für kurze Zeit, so ein Wachstum hält nicht an.', 'Das ist realistisch, Verdopplung bleibt immer gleich.', 'Es wären genau 2400.', 'Die Rechnung ist falsch, es wären 1200.'],
+      steps: [
+        '$100 \\cdot 2^{12} = 409\\,600$ – die Rechnung stimmt.',
+        'Exponentielles Wachstum stößt in der Wirklichkeit an Grenzen: das Modell muss geprüft werden.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Ball fliegt auf der Bahn $h(x) = -0{,}05 x^2 + x + 1{,}5$ ($x$ und $h$ in m). Wie hoch ist er 4 m nach dem Abwurf?',
+      opts: ['3,9 m', '4,7 m', '6,3 m', '5,5 m'],
+      steps: [
+        '$h(4) = -0{,}05 \\cdot 16 + 4 + 1{,}5 = -0{,}8 + 5{,}5 = 4{,}7$ m'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche größte Höhe erreicht der Ball auf der Bahn $h(x) = -0{,}05 x^2 + x + 1{,}5$?',
+      opts: ['11,5 m bei $x = 10$', '1,5 m bei $x = 0$', '6,5 m bei $x = 10$', '6,5 m bei $x = 20$'],
+      steps: [
+        'Der Scheitel liegt bei $x = -\\dfrac{1}{2 \\cdot (-0{,}05)} = 10$.',
+        '$h(10) = -5 + 10 + 1{,}5 = 6{,}5$ m'
+      ],
+      solution: 2
+    },
+    {
+      q: '3 kg Äpfel kosten 5,40 €. Was kosten 5 kg?',
+      opts: ['9,00 €', '8,10 €', '7,40 €', '10,80 €'],
+      steps: [
+        'Proportional: 1 kg kostet $5{,}40 : 3 = 1{,}80$ €.',
+        '$5 \\cdot 1{,}80 = 9$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Vier Personen streichen einen Zaun in 6 Tagen. Wie lange brauchen drei Personen bei gleichem Tempo?',
+      opts: ['4,5 Tage', '7 Tage', '8 Tage', '5 Tage'],
+      steps: [
+        'Umgekehrt proportional: die Arbeit beträgt $4 \\cdot 6 = 24$ Personentage.',
+        '$24 : 3 = 8$ Tage'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Akku entlädt sich gleichmäßig von 100 % in 10 Stunden auf 0 %. Welcher Graph beschreibt den Ladestand?',
+      opts: ['eine Parabel', 'eine Sinuskurve', 'eine fallende Gerade', 'eine steigende Gerade'],
+      steps: [
+        'Gleichmäßig heißt: pro Stunde immer 10 Prozentpunkte weniger – linear fallend.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Angenommen, Koffein wird im Körper mit einer Halbwertszeit von 5 Stunden abgebaut. Wie viel ist von 200 mg nach 10 Stunden noch vorhanden?',
+      opts: ['0 mg', '50 mg', '150 mg', '100 mg'],
+      steps: [
+        '10 Stunden sind zwei Halbwertszeiten.',
+        '$200 \\to 100 \\to 50$ mg'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

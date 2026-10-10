@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Beliebige Dreiecke und Vielecke — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w06-beliebige-dreiecke',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Beliebige Dreiecke und Vielecke',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 6 (LB 1) · 20 Aufgaben: Flächeninhalt mit dem Sinus, Vielecke zerlegen, Vermessungsaufgaben · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 6 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: area with the sine (1-6), regular polygons (7-10), polygons split into triangles (11-14), mixed surveying tasks (15-20). Results rounded to one decimal. */
+  questions: [
+    {
+      q: 'Mit welcher Formel berechnest du den Flächeninhalt eines Dreiecks aus zwei Seiten $a$, $b$ und dem eingeschlossenen Winkel $\\gamma$?',
+      opts: ['$A = \\dfrac{1}{2} \\cdot a \\cdot b \\cdot \\cos \\gamma$', '$A = a \\cdot b \\cdot \\sin \\gamma$', '$A = \\dfrac{1}{2} \\cdot a \\cdot b \\cdot \\sin \\gamma$', '$A = \\dfrac{1}{2} \\cdot a \\cdot b$'],
+      steps: [
+        'Die Höhe auf $a$ ist $h_a = b \\cdot \\sin \\gamma$ (rechtwinkliges Teildreieck).',
+        '$A = \\dfrac{1}{2} \\cdot a \\cdot h_a = \\dfrac{1}{2} \\cdot a \\cdot b \\cdot \\sin \\gamma$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne den Flächeninhalt: $a = 8$ cm, $b = 5$ cm, $\\gamma = 30^\\circ$.',
+      opts: ['10 cm²', '40 cm²', '20 cm²', '17,3 cm²'],
+      steps: [
+        '$A = \\dfrac{1}{2} \\cdot 8 \\cdot 5 \\cdot \\sin 30^\\circ = 20 \\cdot 0{,}5 = 10$, also 10 cm².'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Flächeninhalt (gerundet): $b = 12$ m, $c = 9$ m, $\\alpha = 75^\\circ$.',
+      opts: ['54 m²', '104,3 m²', '52,2 m²', '14,0 m²'],
+      steps: [
+        '$A = \\dfrac{1}{2} \\cdot 12 \\cdot 9 \\cdot \\sin 75^\\circ \\approx 54 \\cdot 0{,}966 \\approx 52{,}2$ m²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Dreieck hat den Flächeninhalt 24 cm², zwei Seiten sind 8 cm und 12 cm lang. Wie groß ist der eingeschlossene (spitze) Winkel?',
+      opts: ['$45^\\circ$', '$30^\\circ$', '$60^\\circ$', '$15^\\circ$'],
+      steps: [
+        '$24 = \\dfrac{1}{2} \\cdot 8 \\cdot 12 \\cdot \\sin \\gamma = 48 \\cdot \\sin \\gamma$',
+        '$\\sin \\gamma = 0{,}5$, also $\\gamma = 30^\\circ$ (die stumpfe Möglichkeit wäre $150^\\circ$).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welchen eingeschlossenen Winkel wird der Flächeninhalt eines Dreiecks mit zwei festen Seiten am größten?',
+      opts: ['$60^\\circ$', '$45^\\circ$', '$180^\\circ$', '$90^\\circ$'],
+      steps: [
+        'Der Flächeninhalt ist proportional zu $\\sin \\gamma$.',
+        'Der Sinus ist bei $90^\\circ$ am größten (Wert 1). Bei $180^\\circ$ liegt das Dreieck flach, die Fläche ist null.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Flächeninhalt eines Parallelogramms mit den Seiten 10 cm und 6 cm und einem Innenwinkel von $50^\\circ$ (gerundet).',
+      opts: ['46,0 cm²', '60 cm²', '38,6 cm²', '23,0 cm²'],
+      steps: [
+        'Die Diagonale teilt das Parallelogramm in zwei gleich große Dreiecke.',
+        '$A = 2 \\cdot \\dfrac{1}{2} \\cdot 10 \\cdot 6 \\cdot \\sin 50^\\circ = 60 \\cdot 0{,}766 \\approx 46{,}0$ cm²'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein regelmäßiges Sechseck hat die Seitenlänge 4 cm. In wie viele gleichseitige Dreiecke kann man es vom Mittelpunkt aus zerlegen?',
+      opts: ['4', '12', '3', '6'],
+      steps: [
+        'Vom Mittelpunkt zu den sechs Ecken entstehen sechs Dreiecke mit Mittelpunktswinkel $360^\\circ : 6 = 60^\\circ$.',
+        'Die beiden Seiten am Mittelpunkt sind gleich lang, also sind auch die Basiswinkel $60^\\circ$: alle sechs Dreiecke sind gleichseitig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Flächeninhalt dieses regelmäßigen Sechsecks mit der Seite 4 cm (gerundet).',
+      opts: ['6,9 cm²', '41,6 cm²', '96 cm²', '24 cm²'],
+      steps: [
+        'Ein gleichseitiges Dreieck mit Seite 4 cm hat $A = \\dfrac{1}{2} \\cdot 4 \\cdot 4 \\cdot \\sin 60^\\circ \\approx 6{,}93$ cm².',
+        'Sechseck: $6 \\cdot 6{,}93 \\approx 41{,}6$ cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist der Mittelpunktswinkel eines regelmäßigen Achtecks?',
+      opts: ['$60^\\circ$', '$22{,}5^\\circ$', '$135^\\circ$', '$45^\\circ$'],
+      steps: [
+        'Die acht Bestimmungsdreiecke teilen den Vollwinkel gleichmäßig.',
+        '$360^\\circ : 8 = 45^\\circ$. ($135^\\circ$ ist der Innenwinkel des Achtecks.)'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein regelmäßiges Achteck hat den Umkreisradius 5 cm. Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['100 cm²', '8,8 cm²', '70,7 cm²', '78,5 cm²'],
+      steps: [
+        'Acht Dreiecke mit zwei Seiten von 5 cm und dem Winkel $45^\\circ$ dazwischen.',
+        '$A = 8 \\cdot \\dfrac{1}{2} \\cdot 5 \\cdot 5 \\cdot \\sin 45^\\circ = 100 \\cdot 0{,}707 \\approx 70{,}7$ cm²',
+        'Plausibel: etwas weniger als der Kreis mit $\\pi \\cdot 25 \\approx 78{,}5$ cm².'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Viereck ABCD wird durch die Diagonale AC in zwei Dreiecke zerlegt. Die Teildreiecke haben 18 m² und 27 m². Wie groß ist das Viereck?',
+      opts: ['486 m²', '45 m²', '9 m²', '22,5 m²'],
+      steps: [
+        'Die Diagonale zerlegt das Viereck lückenlos und ohne Überlappung.',
+        '$18 + 27 = 45$ m²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Viereck hat die Diagonale $e = 10$ m. Die beiden Ecken neben der Diagonale haben von ihr die Abstände 3 m und 5 m. Wie groß ist der Flächeninhalt?',
+      opts: ['150 m²', '80 m²', '25 m²', '40 m²'],
+      steps: [
+        'Zwei Dreiecke mit der Grundseite 10 m und den Höhen 3 m und 5 m.',
+        '$A = \\dfrac{1}{2} \\cdot 10 \\cdot 3 + \\dfrac{1}{2} \\cdot 10 \\cdot 5 = 15 + 25 = 40$ m²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Grundstück hat die Form eines Vierecks. Die Diagonale AC ist 50 m lang. Das Dreieck ABC hat bei A den Winkel $40^\\circ$ mit AB = 30 m, das Dreieck ACD hat bei A den Winkel $35^\\circ$ mit AD = 40 m. Wie groß ist das Grundstück (gerundet)?',
+      opts: ['1055,7 m²', '2111,4 m²', '1350 m²', '1500 m²'],
+      steps: [
+        '$A_{ABC} = \\dfrac{1}{2} \\cdot 30 \\cdot 50 \\cdot \\sin 40^\\circ \\approx 482{,}1$ m²',
+        '$A_{ACD} = \\dfrac{1}{2} \\cdot 40 \\cdot 50 \\cdot \\sin 35^\\circ \\approx 573{,}6$ m²',
+        'Zusammen $\\approx 1055{,}7$ m²'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Fünfeck soll vermessen werden. In wie viele Dreiecke zerlegt man es mindestens, wenn man alle Diagonalen von einer Ecke aus zieht?',
+      opts: ['3', '2', '5', '4'],
+      steps: [
+        'Von einer Ecke aus kann man zu den beiden nicht benachbarten Ecken Diagonalen ziehen.',
+        'Zwei Diagonalen ergeben drei Dreiecke (allgemein: ein $n$-Eck in $n - 2$ Dreiecke).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Dreieck hat die Seiten $a = 7$ cm und $b = 9$ cm und den eingeschlossenen Winkel $\\gamma = 100^\\circ$. Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['62,0 cm²', '31,5 cm²', '5,5 cm²', '31,0 cm²'],
+      steps: [
+        '$A = \\dfrac{1}{2} \\cdot 7 \\cdot 9 \\cdot \\sin 100^\\circ \\approx 31{,}5 \\cdot 0{,}985 \\approx 31{,}0$ cm²',
+        'Auch für stumpfe Winkel ist der Sinus positiv – die Formel gilt unverändert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Im Dreieck sind alle drei Seiten bekannt: 5 cm, 6 cm, 7 cm. Wie gehst du vor, um den Flächeninhalt zu berechnen?',
+      opts: ['Seiten multiplizieren und halbieren', 'Das geht ohne Winkelangabe nicht.', 'erst mit dem Kosinussatz einen Winkel, dann $A = \\dfrac{1}{2} ab \\sin \\gamma$', 'erst mit dem Sinussatz einen Winkel, dann $A = g \\cdot h$'],
+      steps: [
+        'Für die Sinus-Formel braucht man einen eingeschlossenen Winkel.',
+        'Aus drei Seiten liefert ihn der Kosinussatz, z.B. $\\cos \\gamma = 0{,}2$ und $\\gamma \\approx 78{,}5^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne damit den Flächeninhalt des Dreiecks mit den Seiten 5 cm, 6 cm und 7 cm (gerundet).',
+      opts: ['29,4 cm²', '14,7 cm²', '15 cm²', '105 cm²'],
+      steps: [
+        'Winkel zwischen 5 cm und 6 cm: $\\cos \\gamma = \\dfrac{25 + 36 - 49}{60} = 0{,}2$, $\\gamma \\approx 78{,}46^\\circ$.',
+        '$A = \\dfrac{1}{2} \\cdot 5 \\cdot 6 \\cdot \\sin 78{,}46^\\circ \\approx 15 \\cdot 0{,}980 \\approx 14{,}7$ cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Dreieck hat $c = 10$ cm, $\\alpha = 40^\\circ$ und $\\beta = 60^\\circ$. Wie hoch ist es über der Seite $c$ (gerundet)?',
+      opts: ['10 cm', '6,6 cm', '5,7 cm', '8,8 cm'],
+      steps: [
+        'Mit dem Sinussatz: $\\gamma = 80^\\circ$, $b = \\dfrac{10 \\cdot \\sin 60^\\circ}{\\sin 80^\\circ} \\approx 8{,}79$ cm.',
+        'Die Höhe auf $c$: $h_c = b \\cdot \\sin \\alpha \\approx 8{,}79 \\cdot 0{,}643 \\approx 5{,}7$ cm.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein dreieckiges Beet hat zwei Seiten von 4 m und 6 m mit einem Winkel von $120^\\circ$ dazwischen. Wie viel Fläche hat es (gerundet)?',
+      opts: ['10,4 m²', '20,8 m²', '6 m²', '12 m²'],
+      steps: [
+        '$A = \\dfrac{1}{2} \\cdot 4 \\cdot 6 \\cdot \\sin 120^\\circ = 12 \\cdot 0{,}866 \\approx 10{,}4$ m²',
+        'Zum Vergleich: der Kosinus würde hier ein negatives Ergebnis liefern – für Flächen gehört der Sinus in die Formel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine dreieckige Wiese mit den Seiten 80 m und 60 m und dem eingeschlossenen Winkel $65^\\circ$ soll eingesät werden. Pro m² braucht man 25 g Samen. Wie viel Samen braucht man (gerundet)?',
+      opts: ['60 kg', '54,4 kg', '2,2 kg', '108,8 kg'],
+      steps: [
+        '$A = \\dfrac{1}{2} \\cdot 80 \\cdot 60 \\cdot \\sin 65^\\circ \\approx 2400 \\cdot 0{,}906 \\approx 2175{,}1$ m²',
+        '$2175{,}1 \\cdot 25$ g $\\approx 54\\,378$ g $\\approx 54{,}4$ kg'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Simulation und Risiko — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w19-simulation-risiko',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Simulation und Risiko',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 19 (LB 3) · 20 Aufgaben: Zufallszahlen, relative Häufigkeit, Ausfall technischer Geräte, Versicherung · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: simulating with random numbers (1-2, 5-6, 20), relative frequency (3-4, 7, 15-17), failure of devices (8-13), de Mere and insurance (14, 18-19). Problem of the Chevalier de Mere: Pascal and Fermat, letters of 1654. */
+  questions: [
+    {
+      q: 'Wie simuliert man den Wurf eines Würfels mit dem Taschenrechner?',
+      opts: ['mit der Zahl 6 geteilt durch eine Zufallszahl', 'mit einer ganzzahligen Zufallszahl von 1 bis 6', 'mit einer Zufallszahl von 0 bis 6', 'mit einer Zufallszahl zwischen 0 und 1'],
+      steps: [
+        'Jede der Zahlen 1 bis 6 muss gleich wahrscheinlich vorkommen – sonst nichts.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie simuliert man einen Münzwurf mit Zufallszahlen?',
+      opts: ['Zufallszahl von 1 bis 3: 1 für Kopf', 'Zufallszahl 0 oder 1: 0 für Kopf, 1 für Zahl', 'Zufallszahl von 1 bis 6: 6 für Kopf', 'Zufallszahl von 0 bis 9: 0 für Kopf'],
+      steps: [
+        'Beide Seiten der Münze sind gleich wahrscheinlich, also braucht man zwei gleich wahrscheinliche Zahlen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei 50 Würfen fiel 11-mal eine 6. Wie groß ist die relative Häufigkeit?',
+      opts: ['0,11', '0,22', '11', '0,17'],
+      steps: [
+        'Relative Häufigkeit $= \\dfrac{\\text{Anzahl}}{\\text{Versuche}} = \\dfrac{11}{50} = 0{,}22$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was passiert mit der relativen Häufigkeit einer 6, wenn man sehr oft würfelt?',
+      opts: ['Sie nähert sich der Wahrscheinlichkeit $\\dfrac{1}{6}$.', 'Sie wird immer größer.', 'Sie schwankt immer stärker.', 'Sie wird immer genau $\\dfrac{1}{6}$.'],
+      steps: [
+        'Das ist das Gesetz der großen Zahlen: die Schwankungen werden mit vielen Würfen kleiner.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Ereignis hat die Wahrscheinlichkeit 30 %. Wie simuliert man es mit Zufallsziffern von 0 bis 9?',
+      opts: ['Es tritt ein, wenn eine gerade Ziffer kommt.', 'Es tritt ein, wenn eine der Ziffern 0 bis 7 kommt.', 'Es tritt ein, wenn eine der Ziffern 0, 1 oder 2 kommt.', 'Es tritt ein, wenn die Ziffer 3 kommt.'],
+      steps: [
+        'Drei von zehn gleich wahrscheinlichen Ziffern ergeben $\\dfrac{3}{10} = 30\\,\\%$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum darf man die Augensumme zweier Würfel nicht mit einer Zufallszahl von 2 bis 12 simulieren?',
+      opts: ['Die Zahl 12 kann nicht vorkommen.', 'Man braucht dafür Zufallszahlen mit Komma.', 'Die Summen sind nicht gleich wahrscheinlich.', 'Das geht doch, es ist dasselbe.'],
+      steps: [
+        'Die Summe 7 kommt sechsmal so oft wie die Summe 2.',
+        'Richtig: zwei Zufallszahlen von 1 bis 6 erzeugen und addieren.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Simulation mit 1000 Durchläufen ergibt das Ereignis 412-mal. Welche Wahrscheinlichkeit schätzt man?',
+      opts: ['etwa 4 %', 'genau 41,2 %', 'etwa 41 %', 'etwa 59 %'],
+      steps: [
+        '$\\dfrac{412}{1000} = 0{,}412$',
+        'Eine Simulation liefert nur einen Schätzwert, keinen exakten Wert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Gerät fällt in einem Jahr mit 2 % Wahrscheinlichkeit aus. Wie groß ist die Wahrscheinlichkeit, dass es das Jahr ohne Ausfall übersteht?',
+      opts: ['100 %', '96 %', '2 %', '98 %'],
+      steps: [
+        'Gegenereignis: $1 - 0{,}02 = 0{,}98$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Anlage braucht zwei Bauteile, die unabhängig voneinander je mit 98 % Wahrscheinlichkeit ein Jahr lang funktionieren. Wie groß ist die Wahrscheinlichkeit, dass beide funktionieren?',
+      opts: ['98 %', '96,04 %', '96 %', '99,96 %'],
+      steps: [
+        'Beide müssen funktionieren: Pfadregel.',
+        '$0{,}98 \\cdot 0{,}98 = 0{,}9604 = 96{,}04\\,\\%$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist bei 2 % Ausfallwahrscheinlichkeit pro Jahr die Wahrscheinlichkeit, dass das Gerät drei Jahre ohne Ausfall läuft (gerundet)?',
+      opts: ['6 %', '98 %', '94 %', '94,1 %'],
+      steps: [
+        'Drei Jahre ohne Ausfall: $0{,}98^3 \\approx 0{,}941$.',
+        '94 % käme heraus, wenn man fälschlich $3 \\cdot 2\\,\\%$ abzieht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Mit welcher Wahrscheinlichkeit fällt dieses Gerät (2 % pro Jahr) innerhalb der zwei Jahre Garantie mindestens einmal aus (gerundet)?',
+      opts: ['etwa 4 %', 'etwa 96 %', 'etwa 1 %', 'genau 2 %'],
+      steps: [
+        'Gegenereignis „zwei Jahre ohne Ausfall“: $0{,}98^2 = 0{,}9604$.',
+        '$1 - 0{,}9604 = 0{,}0396 \\approx 4\\,\\%$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Lichterkette hat 20 Lämpchen in Reihe – fällt eines aus, ist alles dunkel. Jedes funktioniert mit 99 % Wahrscheinlichkeit. Wie wahrscheinlich leuchtet die Kette (gerundet)?',
+      opts: ['81,8 %', '19,8 %', '80 %', '99 %'],
+      steps: [
+        'Alle 20 müssen funktionieren: $0{,}99^{20} \\approx 0{,}818$.',
+        'Viele zuverlässige Teile in Reihe ergeben ein deutlich weniger zuverlässiges Ganzes.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Pumpen arbeiten parallel; die Anlage fällt nur aus, wenn beide ausfallen. Jede fällt unabhängig mit 10 % Wahrscheinlichkeit aus. Wie wahrscheinlich ist ein Ausfall der Anlage?',
+      opts: ['1 %', '10 %', '20 %', '0,1 %'],
+      steps: [
+        'Beide müssen ausfallen: $0{,}1 \\cdot 0{,}1 = 0{,}01 = 1\\,\\%$',
+        'Darum baut man wichtige Teile doppelt ein (Redundanz).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Chevalier de Méré wettete im 17. Jahrhundert, bei vier Würfen eines Würfels mindestens eine 6 zu werfen. Wie groß ist seine Gewinnwahrscheinlichkeit (gerundet)?',
+      opts: ['48,2 %', '16,7 %', '66,7 %', '51,8 %'],
+      steps: [
+        'Gegenereignis „keine 6 in vier Würfen“: $\\left(\\dfrac{5}{6}\\right)^4 \\approx 0{,}482$.',
+        '$1 - 0{,}482 = 0{,}518$ – knapp über der Hälfte. Quelle: Briefwechsel zwischen Blaise Pascal und Pierre de Fermat, 1654.',
+        '$4 \\cdot \\dfrac{1}{6} = 66{,}7\\,\\%$ ist falsch: die Fälle mit mehreren Sechsen würden mehrfach gezählt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Nach 10 Würfen sind 4 Sechsen gefallen. Ist der Würfel deshalb unfair?',
+      opts: ['Nein, ein Würfel ist immer fair.', 'Das lässt sich nach so wenigen Würfen nicht sagen.', 'Ja, denn es müssten genau 1 bis 2 Sechsen sein.', 'Ja, denn 40 % ist mehr als $\\dfrac{1}{6}$.'],
+      steps: [
+        'Bei wenigen Würfen schwankt die relative Häufigkeit stark.',
+        'Erst sehr viele Würfe erlauben eine sichere Aussage.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Spiel wird am Computer 10 000-mal simuliert, die Gewinne werden gemittelt. Was erhält man näherungsweise?',
+      opts: ['den höchsten möglichen Gewinn', 'den Einsatz', 'die Gewinnchance', 'den Erwartungswert des Gewinns'],
+      steps: [
+        'Der Mittelwert vieler Gewinne nähert sich dem Erwartungswert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei 200 Simulationsläufen tritt ein Ereignis 38-mal ein. Wie groß ist die relative Häufigkeit?',
+      opts: ['0,038', '0,38', '5,26', '0,19'],
+      steps: [
+        '$\\dfrac{38}{200} = 0{,}19$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Versicherung hat 10 000 Kunden. Jeder hat im Jahr mit 1 % Wahrscheinlichkeit einen Schaden von 500 €. Welchen Beitrag pro Kunde braucht sie mindestens, um die erwarteten Schäden zu decken?',
+      opts: ['500 €', '50 €', '5 €', '1 €'],
+      steps: [
+        'Erwarteter Schaden pro Kunde: $500 \\cdot 0{,}01 = 5$ €.',
+        'Insgesamt $10\\,000 \\cdot 5 = 50\\,000$ €. Dazu kommen in Wirklichkeit noch Kosten und Gewinn.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Risiko A: 1 % Wahrscheinlichkeit für 1000 € Schaden. Risiko B: 10 % für 50 € Schaden. Welches Risiko ist, gemessen am erwarteten Schaden, größer?',
+      opts: ['B mit 5 € erwartetem Schaden', 'beide gleich', 'A mit 10 € erwartetem Schaden', 'B, weil es häufiger eintritt'],
+      steps: [
+        'A: $1000 \\cdot 0{,}01 = 10$ €, B: $50 \\cdot 0{,}1 = 5$ €.',
+        'Seltene, aber teure Schäden können das größere Risiko sein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was liefert eine Simulation?',
+      opts: ['einen Schätzwert für eine Wahrscheinlichkeit', 'immer den exakten Wert der Wahrscheinlichkeit', 'nur bei Würfeln ein Ergebnis', 'einen Beweis'],
+      steps: [
+        'Simulationen helfen, wenn die Rechnung schwer ist. Ihr Ergebnis schwankt aber von Lauf zu Lauf.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

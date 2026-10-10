@@ -25,6 +25,11 @@
     const LINKS = [
         ['index.html', 'Home', 'b-grey', 'Startseite'],
         ['mathe/mathe5.html', 'MA 5', 'b-grey', 'Mathematik Klasse 5'],
+        ['mathe/mathe6.html', 'MA OS 6', 'b-grey', 'Mathematik Klasse 6 (Oberschule)'],
+        ['mathe/mathe7.html', 'MA OS 7', 'b-grey', 'Mathematik Klasse 7 (Oberschule, Realschulbildungsgang)'],
+        ['mathe/mathe8.html', 'MA OS 8', 'b-grey', 'Mathematik Klasse 8 (Oberschule, Realschulbildungsgang)'],
+        ['mathe/mathe9.html', 'MA OS 9', 'b-grey', 'Mathematik Klasse 9 (Oberschule, Realschulbildungsgang)'],
+        ['mathe/mathe10.html', 'MA OS 10', 'b-grey', 'Mathematik Klasse 10 (Oberschule, Realschulbildungsgang)'],
         ['mathe/mathegy5.html', 'MA GY 5', 'b-grey', 'Mathematik Klasse 5 (Gymnasium)'],
         ['mathe/mathegy6.html', 'MA GY 6', 'b-grey', 'Mathematik Klasse 6 (Gymnasium)'],
         ['mathe/mathegy7.html', 'MA GY 7', 'b-grey', 'Mathematik Klasse 7 (Gymnasium)'],
@@ -109,6 +114,11 @@
        "Ueben", which is a tool and not a plan (Doc, 08.09.2026). */
     const SP_HUE = {
         'mathe/mathe5.html': 'b-cyan',
+        'mathe/mathe6.html': 'b-cyan',
+        'mathe/mathe7.html': 'b-cyan',
+        'mathe/mathe8.html': 'b-cyan',
+        'mathe/mathe9.html': 'b-cyan',
+        'mathe/mathe10.html': 'b-cyan',
         'mathe/mathegy5.html': 'b-cyan',
         'mathe/mathegy6.html': 'b-cyan',
         'mathe/mathegy7.html': 'b-cyan',
@@ -144,7 +154,7 @@
     // column?] — a caption groups a subject inside the panel.
     const DROPS = [
         ['Oberschule', [
-            ['Mathematik', ['mathe/mathe5.html']],
+            ['Mathematik', ['mathe/mathe5.html', 'mathe/mathe6.html', 'mathe/mathe7.html', 'mathe/mathe8.html', 'mathe/mathe9.html', 'mathe/mathe10.html']],
             ['Informatik', ['informatik/informatik9.html']]
         ]],
         ['Gymnasium', [

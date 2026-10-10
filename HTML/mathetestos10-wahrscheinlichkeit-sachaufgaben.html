@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wahrscheinlichkeiten in Sachaufgaben — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w25-wahrscheinlichkeit-sachaufgaben',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Wahrscheinlichkeiten in Sachaufgaben',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 25 (LB 4) · 20 Aufgaben: mehrstufige Zufallsversuche modellieren, Gegenereignis, Erwartungswerte, Ergebnisse prüfen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 25 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: independent stages (1-4, 7, 10), guessing and games (5-6, 12-13, 19), without replacement and tables (14-15), expectation (8-9, 16, 18), plausibility and counting (11, 17, 20). */
+  questions: [
+    {
+      q: 'Auf dem Schulweg liegen zwei Ampeln. Die erste ist mit 40 %, die zweite unabhängig davon mit 50 % Wahrscheinlichkeit grün. Wie wahrscheinlich sind beide grün?',
+      opts: ['20 %', '10 %', '45 %', '90 %'],
+      steps: [
+        'Pfadregel: $0{,}4 \\cdot 0{,}5 = 0{,}2 = 20\\,\\%$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie wahrscheinlich muss man an mindestens einer dieser beiden Ampeln halten (also ist mindestens eine nicht grün)?',
+      opts: ['80 %', '110 %', '50 %', '30 %'],
+      steps: [
+        'Gegenereignis: beide grün mit $20\\,\\%$.',
+        '$100\\,\\% - 20\\,\\% = 80\\,\\%$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einer Lieferung sind 5 % der Teile defekt. Man prüft zwei Teile. Wie wahrscheinlich sind beide in Ordnung (gerundet)?',
+      opts: ['90,25 %', '95 %', '90 %', '99,75 %'],
+      steps: [
+        '$0{,}95 \\cdot 0{,}95 = 0{,}9025$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie wahrscheinlich ist bei zwei geprüften Teilen (5 % defekt) genau eines defekt?',
+      opts: ['10 %', '4,75 %', '5 %', '9,5 %'],
+      steps: [
+        'Zwei Pfade: defekt-gut und gut-defekt.',
+        '$2 \\cdot 0{,}05 \\cdot 0{,}95 = 0{,}095 = 9{,}5\\,\\%$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Test hat 3 Fragen mit je 4 Antworten, von denen eine richtig ist. Jemand rät. Wie wahrscheinlich sind alle drei richtig?',
+      opts: ['$\\dfrac{3}{4}$', '$\\dfrac{1}{64}$', '$\\dfrac{1}{12}$', '$\\dfrac{1}{4}$'],
+      steps: [
+        '$\\left(\\dfrac{1}{4}\\right)^3 = \\dfrac{1}{64}$ – also etwa 1,6 %.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele richtige Antworten erwartet man bei diesem Raten (3 Fragen, je 4 Antworten)?',
+      opts: ['0,25', '3', '0,75', '1'],
+      steps: [
+        'Jede Frage trägt im Mittel $\\dfrac{1}{4}$ richtige Antwort bei.',
+        '$3 \\cdot \\dfrac{1}{4} = 0{,}75$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Spielerin verwandelt Elfmeter mit 80 % Wahrscheinlichkeit. Wie wahrscheinlich trifft sie zweimal hintereinander?',
+      opts: ['64 %', '160 %', '80 %', '96 %'],
+      steps: [
+        '$0{,}8 \\cdot 0{,}8 = 0{,}64$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Lieferdienst ist mit 80 % Wahrscheinlichkeit pünktlich. Ist er zu spät, gibt es 5 € Rabatt. Wie hoch ist der erwartete Rabatt pro Bestellung?',
+      opts: ['0,20 €', '4 €', '1 €', '5 €'],
+      steps: [
+        '$E = 0 \\cdot 0{,}8 + 5 \\cdot 0{,}2 = 1$ €'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Treffer erwartet man bei der Spielerin mit 80 % Trefferquote bei zwei Elfmetern?',
+      opts: ['2', '1,28', '1,6', '0,8'],
+      steps: [
+        '$E = 2 \\cdot 0{,}8 = 1{,}6$',
+        'Oder ausführlich: $0 \\cdot 0{,}04 + 1 \\cdot 0{,}32 + 2 \\cdot 0{,}64 = 1{,}6$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Bus ist an jedem Schultag mit 90 % Wahrscheinlichkeit pünktlich. Wie wahrscheinlich ist er an allen fünf Tagen einer Woche pünktlich (gerundet)?',
+      opts: ['45 %', '59 %', '90 %', '50 %'],
+      steps: [
+        '$0{,}9^5 \\approx 0{,}59$',
+        'Auch ein zuverlässiger Bus schafft eine ganze Woche nur in etwa 6 von 10 Wochen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Glücksrad hat drei Sektoren mit den Winkeln $120^\\circ$, $90^\\circ$ und $150^\\circ$. Wie wahrscheinlich bleibt es im $90^\\circ$-Sektor stehen?',
+      opts: ['30 %', '25 %', '33,3 %', '90 %'],
+      steps: [
+        '$\\dfrac{90^\\circ}{360^\\circ} = \\dfrac{1}{4} = 25\\,\\%$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Würfel werden geworfen. Wie wahrscheinlich ist ein Pasch (zwei gleiche Augenzahlen)?',
+      opts: ['$\\dfrac{1}{36}$', '$\\dfrac{1}{3}$', '$\\dfrac{1}{12}$', '$\\dfrac{1}{6}$'],
+      steps: [
+        'Sechs Paschs: (1,1) bis (6,6) – also $\\dfrac{6}{36} = \\dfrac{1}{6}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei einem Brettspiel darf man dreimal würfeln, um eine 6 zu bekommen. Wie wahrscheinlich gelingt das (gerundet)?',
+      opts: ['42,1 %', '16,7 %', '57,9 %', '50 %'],
+      steps: [
+        'Gegenereignis „dreimal keine 6“: $\\left(\\dfrac{5}{6}\\right)^3 \\approx 0{,}579$.',
+        '$1 - 0{,}579 = 0{,}421$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einer Lostrommel liegen 5 Lose, 2 davon sind Gewinne. Man zieht zwei Lose ohne Zurücklegen. Wie wahrscheinlich ist mindestens ein Gewinn dabei?',
+      opts: ['30 %', '40 %', '70 %', '80 %'],
+      steps: [
+        'Gegenereignis „zwei Nieten“: $\\dfrac{3}{5} \\cdot \\dfrac{2}{4} = 0{,}3$.',
+        '$1 - 0{,}3 = 0{,}7$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einer Klasse kommen 18 von 30 Personen mit dem Fahrrad. Wie wahrscheinlich kommt eine zufällig ausgewählte Person mit dem Fahrrad?',
+      opts: ['1,8 %', '60 %', '18 %', '40 %'],
+      steps: [
+        '$\\dfrac{18}{30} = 0{,}6$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Rechnung ergibt eine Wahrscheinlichkeit von 1,2. Was folgt daraus?',
+      opts: ['Das Ereignis tritt 1,2-mal ein.', 'Es steckt ein Fehler in der Rechnung.', 'Das Ereignis ist besonders sicher.', 'Man muss auf 1 runden.'],
+      steps: [
+        'Wahrscheinlichkeiten liegen immer zwischen 0 und 1.',
+        'Häufiger Fehler: Wahrscheinlichkeiten addiert, wo man multiplizieren oder das Gegenereignis nehmen müsste.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Spiel: man gewinnt mit 30 % Wahrscheinlichkeit, der Einsatz beträgt 3 €. Welche Auszahlung macht das Spiel fair?',
+      opts: ['6 €', '3,90 €', '9 €', '10 €'],
+      steps: [
+        '$A \\cdot 0{,}3 = 3$ €',
+        '$A = 3 : 0{,}3 = 10$ €'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Gerät kostet in der Reparatur 120 €. Es geht mit 15 % Wahrscheinlichkeit innerhalb eines Jahres kaputt. Eine Garantieverlängerung kostet 25 €. Lohnt sie sich im Mittel?',
+      opts: ['Ja, der erwartete Schaden ist 25 €.', 'Ja, der erwartete Schaden ist 120 €.', 'Nein, der erwartete Schaden ist nur 18 €.', 'Das kann man nicht berechnen.'],
+      steps: [
+        'Erwarteter Schaden: $120 \\cdot 0{,}15 = 18$ €.',
+        '$18$ € $< 25$ € – im Mittel lohnt sich die Verlängerung nicht. Für jemanden, der eine Reparatur nicht bezahlen könnte, kann sie trotzdem sinnvoll sein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele verschiedene vierstellige PINs gibt es mit den Ziffern 0 bis 9?',
+      opts: ['40', '9999', '5040', '10 000'],
+      steps: [
+        'Für jede der vier Stellen gibt es 10 Möglichkeiten: $10^4 = 10\\,000$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Wahrscheinlichkeit, eine vierstellige PIN mit einem einzigen Versuch zu erraten?',
+      opts: ['0,1 %', '25 %', '1 %', '0,01 %'],
+      steps: [
+        '$\\dfrac{1}{10\\,000} = 0{,}0001 = 0{,}01\\,\\%$'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Klassenarbeit 3: Zufallsgrößen und Geld im Alltag — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w22-ka3',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Klassenarbeit 3: Zufallsgrößen und Geld im Alltag',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 22 (KA 3) · 20 Aufgaben: gemischte Aufgaben zu Wahrscheinlichkeit, Erwartungswert, Simulation, Lohn, Zinsen und Kredit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 22 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: probabilities (1, 9, 19), expectation and fairness (2-5, 16-17, 20), simulation and failure (6-8), money (10-15, 18). European roulette: 18 red of 37 numbers, red pays 1 to 1. */
+  questions: [
+    {
+      q: 'Zwei Würfel werden geworfen. Wie groß ist die Wahrscheinlichkeit für die Augensumme 8?',
+      opts: ['$\\dfrac{4}{36}$', '$\\dfrac{5}{36}$', '$\\dfrac{1}{6}$', '$\\dfrac{8}{36}$'],
+      steps: [
+        'Summe 8: (2,6), (3,5), (4,4), (5,3), (6,2) – fünf von 36 Paaren.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'X hat die Werte 1, 2 und 3 mit den Wahrscheinlichkeiten 0,2, 0,5 und 0,3. Berechne $E(X)$.',
+      opts: ['1,0', '2,1', '6', '2'],
+      steps: [
+        '$E(X) = 1 \\cdot 0{,}2 + 2 \\cdot 0{,}5 + 3 \\cdot 0{,}3 = 0{,}2 + 1 + 0{,}9 = 2{,}1$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Spiel kostet 2 € Einsatz, man gewinnt mit Wahrscheinlichkeit $\\dfrac{1}{4}$. Wie hoch muss die Auszahlung sein, damit es fair ist?',
+      opts: ['6 €', '8 €', '2,50 €', '4 €'],
+      steps: [
+        'Fair: erwartete Auszahlung = Einsatz.',
+        '$A \\cdot \\dfrac{1}{4} = 2$ €, also $A = 8$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Glücksrad-Dreh kostet 1 €. Mit Wahrscheinlichkeit $\\dfrac{1}{5}$ werden 3 € ausgezahlt, sonst nichts. Wie groß ist der erwartete Gewinn?',
+      opts: ['$-0{,}80$ €', '2 €', '$-0{,}40$ €', '0,60 €'],
+      steps: [
+        'Erwartete Auszahlung: $3 \\cdot \\dfrac{1}{5} = 0{,}60$ €.',
+        'Gewinn: $0{,}60 - 1 = -0{,}40$ €'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Aussage ist richtig?',
+      opts: ['Ein Spiel mit hoher Gewinnchance kann trotzdem eine negative Gewinnerwartung haben.', 'Ein Spiel mit 50 % Gewinnchance ist immer fair.', 'Ist der Erwartungswert negativ, verliert man jedes Spiel.', 'Der Erwartungswert ist immer eine ganze Zahl.'],
+      steps: [
+        'Beispiel: 90 % Chance auf 1 € Gewinn, 10 % Risiko von 20 € Verlust: $E = 0{,}9 - 2 = -1{,}10$ €.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie simuliert man ein Ereignis mit 25 % Wahrscheinlichkeit mit Zufallszahlen von 1 bis 4?',
+      opts: ['Es tritt ein, wenn eine 25 kommt.', 'Das geht mit diesen Zahlen nicht.', 'Es tritt ein, wenn die 1 kommt.', 'Es tritt ein, wenn die 1 oder 2 kommt.'],
+      steps: [
+        'Eine von vier gleich wahrscheinlichen Zahlen: $\\dfrac{1}{4} = 25\\,\\%$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bei 300 Simulationen trat ein Ereignis 63-mal ein. Wie groß ist die relative Häufigkeit?',
+      opts: ['0,63', '0,3', '4,76', '0,21'],
+      steps: [
+        '$\\dfrac{63}{300} = 0{,}21$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Drei Bauteile sind hintereinander geschaltet, jedes funktioniert mit 95 % Wahrscheinlichkeit. Wie wahrscheinlich funktioniert das Ganze (gerundet)?',
+      opts: ['85,7 %', '85 %', '99,99 %', '95 %'],
+      steps: [
+        'Alle drei müssen funktionieren: $0{,}95^3 \\approx 0{,}857$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Münze wird dreimal geworfen. Wie groß ist die Wahrscheinlichkeit, mindestens einmal Kopf zu werfen?',
+      opts: ['$\\dfrac{3}{8}$', '$\\dfrac{1}{2}$', '$\\dfrac{7}{8}$', '$\\dfrac{3}{2}$'],
+      steps: [
+        'Gegenereignis „dreimal Zahl“: $\\left(\\dfrac{1}{2}\\right)^3 = \\dfrac{1}{8}$.',
+        '$1 - \\dfrac{1}{8} = \\dfrac{7}{8}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Vom Bruttolohn 2800 € gehen 22 % Abzüge ab. Wie hoch ist der Nettolohn?',
+      opts: ['2184 €', '616 €', '2778 €', '2240 €'],
+      steps: [
+        '$2800 \\cdot 0{,}78 = 2184$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: '3000 € werden 3 Jahre zu 2 % mit Zinseszins angelegt. Wie hoch ist das Guthaben danach (gerundet)?',
+      opts: ['3180,00 €', '3060,00 €', '3120,00 €', '3183,62 €'],
+      steps: [
+        '$3000 \\cdot 1{,}02^3 = 3000 \\cdot 1{,}061208 \\approx 3183{,}62$ €'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Laptop kostet bar 1200 € oder 10 Raten zu 130 €. Wie viel teurer ist der Ratenkauf?',
+      opts: ['100 €', '130 €', '1300 €', '70 €'],
+      steps: [
+        '$10 \\cdot 130 = 1300$ €',
+        '$1300 - 1200 = 100$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Konto ist 2 Monate lang mit 800 € überzogen, Dispozins 13,5 % pro Jahr. Wie viel Zinsen fallen an?',
+      opts: ['216 €', '108 €', '9 €', '18 €'],
+      steps: [
+        '$800 \\cdot 0{,}135 \\cdot \\dfrac{2}{12} = 18$ €'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Lohn steigt um 4 %, die Preise um 3 %. Wie entwickelt sich die Kaufkraft ungefähr?',
+      opts: ['Sie steigt um 7 %.', 'Sie steigt um 4 %.', 'Sie steigt um etwa 1 %.', 'Sie sinkt um 3 %.'],
+      steps: [
+        '$\\dfrac{1{,}04}{1{,}03} \\approx 1{,}0097$ – knapp 1 % mehr.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Gehalt von 2600 € steigt um 2,5 %. Wie hoch ist es danach?',
+      opts: ['2860 €', '2665 €', '2602,50 €', '2625 €'],
+      steps: [
+        '$2600 \\cdot 1{,}025 = 2665$ €'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei einer Tombola mit 500 Losen gibt es einen Gewinn von 100 € und vier Gewinne von 25 €. Wie groß ist die erwartete Auszahlung pro Los?',
+      opts: ['0,20 €', '0,40 €', '125 €', '2,00 €'],
+      steps: [
+        'Gesamtauszahlung: $100 + 4 \\cdot 25 = 200$ €.',
+        '$200 : 500 = 0{,}40$ €'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Schaden von 15 000 € tritt mit 0,2 % Wahrscheinlichkeit pro Jahr ein. Wie hoch ist der erwartete Schaden pro Jahr?',
+      opts: ['3000 €', '3 €', '300 €', '30 €'],
+      steps: [
+        '$15\\,000 \\cdot 0{,}002 = 30$ €'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Nach 2 Jahren zu 2 % Zinseszins sind 5202 € auf dem Konto. Wie hoch war das Anfangskapital?',
+      opts: ['4800 €', '5100 €', '5000 €', '4994 €'],
+      steps: [
+        '$K_0 \\cdot 1{,}02^2 = 5202$',
+        '$K_0 = 5202 : 1{,}0404 = 5000$ €'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einer Urne liegen 4 rote und 6 blaue Kugeln. Man zieht zweimal mit Zurücklegen. Wie groß ist die Wahrscheinlichkeit für genau eine rote Kugel?',
+      opts: ['0,48', '0,16', '0,24', '0,4'],
+      steps: [
+        'Zwei Pfade: rot-blau und blau-rot.',
+        '$0{,}4 \\cdot 0{,}6 + 0{,}6 \\cdot 0{,}4 = 0{,}48$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Roulette mit 37 Zahlen sind 18 rot. Wer 1 € auf Rot setzt und gewinnt, bekommt 2 € (Einsatz plus 1 €). Wie groß ist der erwartete Gewinn (gerundet)?',
+      opts: ['0 €', '$-0{,}50$ €', '0,50 €', '$-0{,}03$ €'],
+      steps: [
+        'Erwartete Auszahlung: $2 \\cdot \\dfrac{18}{37} \\approx 0{,}973$ €.',
+        'Gewinn: $0{,}973 - 1 \\approx -0{,}03$ € – die grüne Null macht das Spiel unfair.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

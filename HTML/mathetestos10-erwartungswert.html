@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Der Erwartungswert — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w18-erwartungswert',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Der Erwartungswert',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 18 (LB 3) · 20 Aufgaben: Erwartungswert berechnen und deuten, faire Spiele, Gewinnchance und Gewinnerwartung · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 18 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: definition and dice (1, 6, 13, 15), games and fairness (2-5, 7-8, 16-17), chance vs expectation (9, 18-20), lotteries and insurance (10-12, 14). Roulette: European wheel with 37 numbers, single number pays 35 to 1. */
+  questions: [
+    {
+      q: 'Wie berechnet man den Erwartungswert einer Zufallsgröße X?',
+      opts: ['Alle Werte addieren und durch ihre Anzahl teilen.', 'Alle Wahrscheinlichkeiten addieren.', 'Jeden Wert mit seiner Wahrscheinlichkeit multiplizieren und alles addieren.', 'Den größten Wert mit seiner Wahrscheinlichkeit multiplizieren.'],
+      steps: [
+        '$E(X) = x_1 \\cdot P(X = x_1) + x_2 \\cdot P(X = x_2) + \\ldots$',
+        'Ein einfacher Mittelwert der Werte ist nur richtig, wenn alle Werte gleich wahrscheinlich sind.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Einsatz 1 €, einmal würfeln. Bei einer 6 werden 4 € ausgezahlt, sonst nichts. Wie groß ist der Erwartungswert des Gewinns (gerundet)?',
+      opts: ['$-1$ €', '$-0{,}33$ €', '3 €', '0,50 €'],
+      steps: [
+        'Gewinn 3 € mit $\\dfrac{1}{6}$, Verlust 1 € mit $\\dfrac{5}{6}$.',
+        '$E = 3 \\cdot \\dfrac{1}{6} + (-1) \\cdot \\dfrac{5}{6} = \\dfrac{3 - 5}{6} = -\\dfrac{1}{3} \\approx -0{,}33$ €'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet ein Erwartungswert des Gewinns von $-0{,}33$ € pro Spiel?',
+      opts: ['Das Spiel ist fair.', 'Auf lange Sicht verliert man im Mittel etwa 33 Cent pro Spiel.', 'Man verliert bei jedem Spiel genau 33 Cent.', 'Man gewinnt in 33 % der Spiele.'],
+      steps: [
+        'Der Erwartungswert ist ein Durchschnitt über sehr viele Spiele.',
+        'Im einzelnen Spiel gewinnt man 3 € oder verliert 1 € – 33 Cent kommen nie genau vor.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wann nennt man ein Glücksspiel fair?',
+      opts: ['wenn man oft gewinnt', 'wenn der Einsatz klein ist', 'wenn die Gewinnchance 50 % beträgt', 'wenn der Erwartungswert des Gewinns null ist'],
+      steps: [
+        'Fair heißt: auf lange Sicht gewinnt weder der Spieler noch der Anbieter.',
+        'Die Gewinnchance allein entscheidet das nicht – es kommt auch auf die Beträge an.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Einsatz 1 €, einmal würfeln, nur bei einer 6 gibt es eine Auszahlung. Wie hoch muss sie sein, damit das Spiel fair ist?',
+      opts: ['5 €', '6 €', '4 €', '7 €'],
+      steps: [
+        'Fair: die erwartete Auszahlung ist gleich dem Einsatz.',
+        '$A \\cdot \\dfrac{1}{6} = 1$ €, also $A = 6$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Erwartungswert hat die Augenzahl beim Wurf eines fairen Würfels?',
+      opts: ['21', '3,5', '6', '3'],
+      steps: [
+        '$E = (1 + 2 + 3 + 4 + 5 + 6) \\cdot \\dfrac{1}{6} = \\dfrac{21}{6} = 3{,}5$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Glücksrad zahlt mit Wahrscheinlichkeit $\\dfrac{1}{2}$ nichts, mit $\\dfrac{1}{4}$ 2 € und mit $\\dfrac{1}{4}$ 4 €. Wie groß ist die erwartete Auszahlung?',
+      opts: ['6,00 €', '2,00 €', '1,50 €', '1,00 €'],
+      steps: [
+        '$E = 0 \\cdot \\dfrac{1}{2} + 2 \\cdot \\dfrac{1}{4} + 4 \\cdot \\dfrac{1}{4} = 0 + 0{,}5 + 1 = 1{,}50$ €'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Dreh an diesem Glücksrad kostet 2 €. Welchen Gewinn erwartet man pro Spiel?',
+      opts: ['$-0{,}50$ €', '1,50 €', '$-2$ €', '0,50 €'],
+      steps: [
+        'Erwarteter Gewinn = erwartete Auszahlung minus Einsatz.',
+        '$1{,}50 - 2 = -0{,}50$ € – das Spiel ist für Spielende ungünstig.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei einem Spiel gewinnt man in 60 % der Fälle 1 € und verliert in 40 % der Fälle 2 €. Lohnt es sich auf lange Sicht?',
+      opts: ['Nein, der Erwartungswert ist $-0{,}20$ €.', 'Ja, weil man meistens gewinnt.', 'Ja, der Erwartungswert ist 0,20 €.', 'Es ist genau fair.'],
+      steps: [
+        '$E = 1 \\cdot 0{,}6 + (-2) \\cdot 0{,}4 = 0{,}6 - 0{,}8 = -0{,}2$ €',
+        'Hohe Gewinnchance, aber negative Gewinnerwartung: die seltenen Verluste sind größer.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei einer Lotterie gibt es 1000 Lose. Ausgezahlt werden einmal 500 €, zehnmal 50 € und hundertmal 5 €. Wie groß ist die erwartete Auszahlung pro Los?',
+      opts: ['5 €', '555 €', '0,50 €', '1,50 €'],
+      steps: [
+        'Gesamte Auszahlung: $500 + 10 \\cdot 50 + 100 \\cdot 5 = 1500$ €.',
+        'Pro Los: $1500 : 1000 = 1{,}50$ €.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Würfel wird 600-mal geworfen. Wie viele Sechsen erwartet man?',
+      opts: ['genau 100', 'etwa 60', 'etwa 6', 'etwa 100'],
+      steps: [
+        '$600 \\cdot \\dfrac{1}{6} = 100$',
+        '„Erwartet“ heißt: ungefähr – genau 100 sind eher selten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Handy ist 400 € wert. Mit 5 % Wahrscheinlichkeit geht es in einem Jahr kaputt. Wie hoch ist der erwartete Schaden pro Jahr?',
+      opts: ['200 €', '380 €', '20 €', '5 €'],
+      steps: [
+        '$400 \\cdot 0{,}05 = 20$ €',
+        'Eine Versicherung, die 60 € im Jahr kostet, ist nach dieser Rechnung für die Kundschaft im Mittel ein Verlustgeschäft.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Erwartungswert der Augenzahl ist 3,5, obwohl man nie 3,5 würfeln kann. Wie passt das zusammen?',
+      opts: ['Man muss auf 4 runden.', '3,5 ist der Mittelwert der Augenzahlen bei sehr vielen Würfen.', 'Der Würfel ist nicht fair.', 'Der Erwartungswert ist falsch berechnet.'],
+      steps: [
+        'Der Erwartungswert ist ein Durchschnitt auf lange Sicht, kein mögliches Einzelergebnis.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'X nimmt die Werte 0, 10 und 20 mit den Wahrscheinlichkeiten 0,5, 0,3 und 0,2 an. Berechne $E(X)$.',
+      opts: ['3', '30', '10', '7'],
+      steps: [
+        '$E(X) = 0 \\cdot 0{,}5 + 10 \\cdot 0{,}3 + 20 \\cdot 0{,}2 = 0 + 3 + 4 = 7$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Münze wird zweimal geworfen, X zählt die Anzahl Kopf. Wie groß ist $E(X)$?',
+      opts: ['2', '0,25', '0,5', '1'],
+      steps: [
+        '$P(X = 0) = \\dfrac{1}{4}$, $P(X = 1) = \\dfrac{1}{2}$, $P(X = 2) = \\dfrac{1}{4}$',
+        '$E = 0 + 1 \\cdot \\dfrac{1}{2} + 2 \\cdot \\dfrac{1}{4} = 1$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Einsatz 1 €, zwei Münzwürfe. Bei zweimal Kopf werden 3 € ausgezahlt. Wie groß ist der erwartete Gewinn?',
+      opts: ['$-0{,}25$ €', '2,00 €', '0 €', '0,75 €'],
+      steps: [
+        'Erwartete Auszahlung: $3 \\cdot \\dfrac{1}{4} = 0{,}75$ €.',
+        'Gewinn: $0{,}75 - 1 = -0{,}25$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie hoch müsste die Auszahlung bei zweimal Kopf sein, damit dieses Spiel (Einsatz 1 €) fair ist?',
+      opts: ['4 €', '3 €', '1 €', '2 €'],
+      steps: [
+        '$A \\cdot \\dfrac{1}{4} = 1$ €, also $A = 4$ €.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Roulette mit 37 Zahlen setzt man 1 € auf eine Zahl. Trifft sie, bekommt man 36 € (Einsatz plus 35 € Gewinn). Wie viel verliert man auf lange Sicht pro Spiel (gerundet)?',
+      opts: ['etwa 2,7 Cent', 'etwa 35 Cent', 'nichts, das Spiel ist fair', 'etwa 1 €'],
+      steps: [
+        'Erwartete Auszahlung: $36 \\cdot \\dfrac{1}{37} \\approx 0{,}973$ €.',
+        'Erwarteter Gewinn: $0{,}973 - 1 \\approx -0{,}027$ €, also etwa 2,7 Cent Verlust pro Euro.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Spiel A hat den Erwartungswert $-0{,}10$ € pro Spiel, Spiel B $-0{,}25$ €. Welches ist für Spielende günstiger?',
+      opts: ['Das kann man nicht sagen.', 'beide gleich', 'Spiel A', 'Spiel B'],
+      steps: [
+        'Bei A verliert man auf lange Sicht im Mittel 10 Cent pro Spiel, bei B 25 Cent.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum verdient eine Spielbank auf lange Sicht Geld?',
+      opts: ['Die Kugel ist manipuliert.', 'Die Gewinnchance ist immer unter 1 %.', 'Der Erwartungswert des Gewinns ist für Spielende negativ.', 'Die Spielenden gewinnen nie.'],
+      steps: [
+        'Einzelne gewinnen durchaus. Über sehr viele Spiele bleibt aber pro Einsatz im Mittel ein fester Anteil bei der Bank.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -195,7 +195,9 @@
     fig.innerHTML = item.fig;
     if (item.figcap) {
       const cap = document.createElement('figcaption');
-      cap.textContent = item.figcap;
+      /* 10.10.2026 (Turing): captions carry $...$ like the questions - textContent showed
+         the LaTeX raw (15 FO 12 sheets, e.g. $\overline{BF}$); quiz.py already checks them with KaTeX. */
+      renderMath(cap, item.figcap);
       fig.appendChild(cap);
     }
     card.appendChild(fig);

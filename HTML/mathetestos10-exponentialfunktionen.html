@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Exponentialfunktionen: Wachstum und Zerfall — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos10-w11-exponentialfunktionen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Exponentialfunktionen: Wachstum und Zerfall',
+  subtitle: 'Oberschule · Klasse 10 · Realschulbildungsgang · Woche 11 (LB 2) · 20 Aufgaben: Wachstumsfaktor, Anfangswert, Zinseszins, Verdopplung und Halbwertszeit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 10 · Woche 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe10.html', /* opened from the plan */
+  /* Blocks: growth factor (1-3, 10, 13-14), values (4-9), graph properties (11-12, 19-20), context (15-18). */
+  questions: [
+    {
+      q: 'Eine Größe wächst jedes Jahr um 5 %. Welche Art von Wachstum ist das?',
+      opts: ['gar kein Wachstum', 'exponentielles Wachstum', 'lineares Wachstum', 'quadratisches Wachstum'],
+      steps: [
+        'Jedes Jahr kommt nicht derselbe Betrag dazu, sondern derselbe Prozentsatz des aktuellen Werts.',
+        'Gleicher Faktor pro Schritt bedeutet exponentielles Wachstum.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie heißt der Wachstumsfaktor bei einer Zunahme um 5 % pro Jahr?',
+      opts: ['1,5', '1,05', '5', '0,05'],
+      steps: [
+        'Neuer Wert $= 100\\,\\% + 5\\,\\% = 105\\,\\%$ des alten Werts.',
+        'Als Faktor: $1{,}05$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Wert nimmt jedes Jahr um 20 % ab. Wie heißt der Faktor?',
+      opts: ['$-0{,}2$', '0,8', '0,2', '1,2'],
+      steps: [
+        'Es bleiben $100\\,\\% - 20\\,\\% = 80\\,\\%$ übrig.',
+        'Faktor $0{,}8$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $f(4)$ für $f(x) = 3 \\cdot 2^x$.',
+      opts: ['14', '24', '1296', '48'],
+      steps: [
+        'Erst die Potenz: $2^4 = 16$.',
+        '$3 \\cdot 16 = 48$ – nicht $(3 \\cdot 2)^4 = 1296$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '1000 € werden zu 3 % Zinsen angelegt, die Zinsen werden mitverzinst. Wie viel Geld ist es nach 2 Jahren?',
+      opts: ['1060,90 €', '1006,00 €', '1090,00 €', '1060,00 €'],
+      steps: [
+        '$1000 \\cdot 1{,}03^2 = 1000 \\cdot 1{,}0609 = 1060{,}90$ €',
+        'Im zweiten Jahr gibt es auch Zinsen auf die 30 € Zinsen des ersten Jahres.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viel Geld ist es bei 3 % Zinseszins nach 10 Jahren (gerundet)?',
+      opts: ['1103,00 €', '1030,00 €', '1300,00 €', '1343,92 €'],
+      steps: [
+        '$1000 \\cdot 1{,}03^{10} \\approx 1343{,}92$ €',
+        'Ohne Zinseszins wären es nur $1000 + 10 \\cdot 30 = 1300$ €.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Bakterienkultur verdoppelt sich jede Stunde. Am Anfang sind es 500 Bakterien. Wie viele sind es nach 5 Stunden?',
+      opts: ['2500', '3000', '16 000', '5000'],
+      steps: [
+        '$N(t) = 500 \\cdot 2^t$',
+        '$N(5) = 500 \\cdot 32 = 16\\,000$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Medikament hat eine Halbwertszeit von 6 Stunden. Wie viel ist von 80 mg nach 18 Stunden noch im Körper?',
+      opts: ['10 mg', '26,7 mg', '40 mg', '20 mg'],
+      steps: [
+        '18 Stunden sind drei Halbwertszeiten.',
+        '$80 \\to 40 \\to 20 \\to 10$ mg, also $80 \\cdot 0{,}5^3 = 10$ mg.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Graph von $y = c \\cdot a^x$ schneidet die y-Achse bei 5. Was folgt daraus?',
+      opts: ['$c = 5$', '$a = 0{,}5$', '$c = 0$', '$a = 5$'],
+      steps: [
+        'Für $x = 0$ ist $a^0 = 1$, also $y = c$.',
+        'Der Schnittpunkt mit der y-Achse liefert den Anfangswert $c$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welchen Wachstumsfaktor $a$ beschreibt $y = c \\cdot a^x$ (mit $c > 0$) eine Abnahme?',
+      opts: ['$a = 1$', '$0 < a < 1$', '$a > 2$', '$a > 1$'],
+      steps: [
+        'Bei einem Faktor kleiner als 1 wird der Wert mit jedem Schritt kleiner.',
+        'Bei $a = 1$ bleibt alles gleich, bei $a > 1$ wächst es.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Punkt liegt auf jedem Graphen $y = a^x$ (mit $a > 0$)?',
+      opts: ['$(1 \\mid 0)$', '$(0 \\mid 1)$', '$(0 \\mid 0)$', '$(1 \\mid 1)$'],
+      steps: [
+        '$a^0 = 1$ für jede Basis $a > 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche y-Werte nimmt $y = 2^x$ an?',
+      opts: ['nur Zahlen größer als 1', 'nur ganze Zahlen', 'nur positive Zahlen', 'alle Zahlen'],
+      steps: [
+        'Für negative $x$ wird der Wert klein, aber nie null oder negativ: $2^{-3} = \\dfrac{1}{8}$.',
+        'Die x-Achse ist eine Asymptote.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Tabelle zeigt: $x = 0, 1, 2$ und $y = 200, 240, 288$. Wie groß ist der Wachstumsfaktor?',
+      opts: ['1,4', '40', '1,2', '0,2'],
+      steps: [
+        '$\\dfrac{240}{200} = 1{,}2$ und $\\dfrac{288}{240} = 1{,}2$.',
+        'Die Quotienten sind gleich: exponentielles Wachstum mit dem Faktor $1{,}2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Bestand beträgt anfangs 50 und nach einem Jahr 75. Welche Gleichung passt bei exponentiellem Wachstum?',
+      opts: ['$y = 50 \\cdot 25^x$', '$y = 75 \\cdot 1{,}5^x$', '$y = 50 + 25x$', '$y = 50 \\cdot 1{,}5^x$'],
+      steps: [
+        'Anfangswert $c = 50$.',
+        'Faktor $a = \\dfrac{75}{50} = 1{,}5$.',
+        '$y = 50 + 25x$ wäre lineares Wachstum.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Stadt hat 80 000 Einwohner, die Zahl sinkt jährlich um 2 %. Wie viele sind es nach 3 Jahren (gerundet)?',
+      opts: ['75 200', '78 400', '74 800', '75 295'],
+      steps: [
+        '$80\\,000 \\cdot 0{,}98^3 \\approx 75\\,295$',
+        'Linear mit 1600 weniger pro Jahr käme man auf 75 200 – aber der Verlust wird jedes Jahr etwas kleiner.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Wertefolge gehört zu exponentiellem Wachstum?',
+      opts: ['3, 4, 6, 9', '3, 6, 9, 12', '3, 6, 12, 24', '3, 5, 7, 9'],
+      steps: [
+        'Exponentiell: gleicher Faktor von Schritt zu Schritt. Bei 3, 6, 12, 24 ist es jedes Mal 2.',
+        '3, 6, 9, 12 und 3, 5, 7, 9 wachsen um gleiche Summanden: linear. Bei 3, 4, 6, 9 sind die Quotienten verschieden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Betrag wächst jährlich um 7 %. Nach etwa wie vielen Jahren hat er sich verdoppelt?',
+      opts: ['nach etwa 7 Jahren', 'nach etwa 20 Jahren', 'nach etwa 10 Jahren', 'nach etwa 14 Jahren'],
+      steps: [
+        '$1{,}07^{10} \\approx 1{,}97$, $1{,}07^{11} \\approx 2{,}10$',
+        'Faustregel: Verdopplungszeit $\\approx \\dfrac{70}{\\text{Prozentsatz}} = \\dfrac{70}{7} = 10$ Jahre.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Medikament wird pro Stunde zu 20 % abgebaut. Wie viel ist von 100 mg nach 3 Stunden noch vorhanden?',
+      opts: ['51,2 mg', '40 mg', '48,8 mg', '60 mg'],
+      steps: [
+        'Faktor $0{,}8$ pro Stunde: $100 \\cdot 0{,}8^3 = 100 \\cdot 0{,}512 = 51{,}2$ mg.',
+        'Nicht $3 \\cdot 20\\,\\% = 60\\,\\%$ abziehen – jede Stunde bezieht sich auf den Rest.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Funktion ist eine Exponentialfunktion?',
+      opts: ['$y = 2x$', '$y = x^2$', '$y = \\dfrac{2}{x}$', '$y = 2^x$'],
+      steps: [
+        'Bei der Exponentialfunktion steht die Variable im Exponenten.',
+        '$y = x^2$ ist eine Potenzfunktion: dort steht die Variable in der Basis.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie verhält sich $y = 0{,}5^x$?',
+      opts: ['Die Funktion fällt.', 'Sie ist konstant 0,5.', 'Die Funktion steigt.', 'Sie fällt erst und steigt dann.'],
+      steps: [
+        '$0{,}5^0 = 1$, $0{,}5^1 = 0{,}5$, $0{,}5^2 = 0{,}25$',
+        'Faktor kleiner als 1: mit jedem Schritt halbiert sich der Wert.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
