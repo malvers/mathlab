@@ -191,6 +191,34 @@ window.svpPlanParts.push(function (P) {
         document.querySelectorAll('.meta-card .vu').forEach(ustdLangIn);
     })();
 
+    /* Doc, 10.10.2026: "mach da immer das Buchcover hin" - a plan with a
+       textbook of the same name (svp/mathe/mathegy5.html <-> buch/mathegy5/)
+       shows its cover at the right end of the head, a click opens the book.
+       The picture is the hub card's JPG (resources/og/buch-<name>-cover.jpg),
+       so a new book brings its cover along; plans without a book find no JPG
+       and nothing is added. */
+    (function buchCover() {
+        const head = document.querySelector('.plan-sticky header.page-head');
+        const m = location.pathname.match(/\/svp\/mathe\/([a-z0-9]+)(?:\.html)?$/);
+        if (!head || !m) return;
+        const name = m[1];
+        const img = new Image();
+        img.alt = 'Lehrbuch';
+        img.decoding = 'async';
+        img.addEventListener('load', function () {
+            const a = document.createElement('a');
+            a.className = 'svp-buch';
+            a.href = '../../buch/' + name + '/';
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.title = 'Das Lehrbuch zu diesem Plan öffnen';
+            a.appendChild(img);
+            head.appendChild(a);
+            head.classList.add('has-buch');
+        });
+        img.src = '../../resources/og/buch-' + name + '-cover.jpg';
+    })();
+
     /* Doc, 19.09.2026: "oben steht Lehrplan. Mach daraus ein drop. wenn offen
        blende diese Zeile ein und zwar direkt unter Stoffverteilungsplan ... mach
        eine zusätzliche Kachel vor die LBs mit gesamter Lehrplan, idealer Weise

@@ -83,6 +83,30 @@
 .page-head .head-survey svg { width: 30px; height: 30px; display: block; }
 @media print { .page-head .head-survey { display: none; } }
 
+/* Doc, 10.10.2026: "mach da immer das Buchcover hin" - the textbook's cover at
+   the right end of a plan head (svp-plan-core.js). It spans title and subtitle;
+   title and subtitle keep clear of it, the Lehrplan fold below runs full width. */
+.page-head.has-buch { position: relative; }
+.page-head.has-buch > .head-row,
+.page-head.has-buch > .subtitle { padding-right: 66px; }
+.page-head .svp-buch {
+    position: absolute;
+    top: -4px;
+    right: 0;
+    line-height: 0;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px -3px var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.page-head .svp-buch:hover { transform: scale(1.06); box-shadow: 0 6px 16px -4px var(--shadow); }
+.page-head .svp-buch img { display: block; height: 72px; width: auto; border-radius: 4px; }
+@media (max-width: 600px) {
+    .page-head.has-buch > .head-row,
+    .page-head.has-buch > .subtitle { padding-right: 52px; }
+    .page-head .svp-buch img { height: 60px; }
+}
+@media print { .page-head .svp-buch { display: none; } }
+
 /* No action buttons on paper - the toolbar has its own print rule. */
 @media print { .page-head button.action { display: none; } }
 
