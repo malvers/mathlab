@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 8 (Gymnasium) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Gymnasium &middot; Klasse 8</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_gy_mathematik.pdf', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Arbeiten mit Termen und Gleichungen</div>
+            <div class="vu">24 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Zufallsversuche</div>
+            <div class="vu">24 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Funktionen und lineare Gleichungssysteme</div>
+            <div class="vu">32 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">&Auml;hnlichkeit</div>
+            <div class="vu">20 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb5">
+            <div class="k c-pink">Lernbereich 5</div>
+            <div class="v">Vernetzung: Heuristische Strategien</div>
+            <div class="vu">4 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Simulation mit Zufallszahlen</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Die Zeitrichtwerte des Lehrplans (104 Ustd. Pflicht + 8 Ustd. Wahlbereich) sind vollst&auml;ndig abgebildet;
+        die &uuml;brigen Wochen des Schuljahres stehen als &Uuml;bung, Klassenarbeit oder Puffer in eigenen Zeilen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | lb5 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Schuljahresauftakt', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches, Material, Arbeitsweise im Fach',
+                'Wiederholung Klasse 7: rationale Zahlen, Terme, einfache Gleichungen',
+                'Überblick über das Schuljahr'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/24', topic: 'Variablen und Terme', ziel: 'Unterscheiden von Name, Wert und Bedeutung einer Variablen', remark: 'Arbeiten mit Variablen im CAS', details: [
+                'Variable als Platzhalter, Unbekannte und Veränderliche',
+                'Name, Wert und Bedeutung einer Variablen auseinanderhalten',
+                'Terme zu Sachsituationen aufstellen, Werte einsetzen, Wertetabellen im CAS'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/24', topic: 'Struktur von Termen', ziel: 'Erkennen der Struktur von Termen', remark: 'Summe, Produkt, Quotient und ihre Verknüpfungen', details: [
+                'Rechenbaum: Welche Rechnung kommt zuletzt?',
+                'Terme nach ihrer Struktur benennen: Summe, Differenz, Produkt, Quotient, Potenz',
+                'Terme in Worte fassen und Worte in Terme übersetzen'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/24', topic: 'Terme umformen ohne Hilfsmittel', ziel: 'Beherrschen des Umformens einfacher Terme ohne Hilfsmittel', remark: 'zusammenfassen, ausmultiplizieren, ausklammern', details: [
+                'Gleichartige Terme zusammenfassen: $19a - b - 17a + c - a + b$',
+                'Klammern auflösen und Summen multiplizieren: $3 \\cdot (4x - 2y)$, $(x + 2)(x + 3)$',
+                'Ausklammern als Umkehrung des Ausmultiplizierens'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/24', topic: 'Binomische Formeln', ziel: 'Beherrschen der binomischen Formeln', remark: 'geometrische Interpretation', details: [
+                'Die drei binomischen Formeln am Quadrat und am Rechteck herleiten',
+                'Vorwärts (ausmultiplizieren) und rückwärts (faktorisieren) anwenden',
+                'Rechenvorteile im Kopf: $49^2$, $51 \\cdot 49$'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '17–20/24', topic: 'Lineare Gleichungen', ziel: 'Beherrschen des Umgangs mit Termen beim Lösen linearer Gleichungen', remark: 'Äquivalenzumformungen und Probe', details: [
+                'Gleichungen mit der Variablen auf beiden Seiten: $3x - 4 = 5x$',
+                'Gleichungen mit Klammern und Produkten: $(x + 2)(x + 3) = x^2$',
+                'Genau eine, keine oder unendlich viele Lösungen'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '21–24/24', topic: 'CAS und Ungleichungen', ziel: 'Kennen der Verwendung von CAS beim Umformen komplexerer Terme; Einblick in das Lösen von Ungleichungen', remark: 'Bruchterme mit CAS, Umkehr des Relationszeichens', details: [
+                'Komplexere Terme und Gleichungen mit CAS umformen und lösen',
+                'Ungleichungen umformen: Was ändert sich beim Multiplizieren mit negativen Zahlen?',
+                'Lösungsmengen am Zahlenstrahl darstellen'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Terme und Gleichungen', remark: 'mit Vorbereitung, Rückgabe nach den Ferien', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 1',
+                'Vermischte Übungen ohne Taschenrechner'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'ue', u: '', topic: 'Übung: Terme und Gleichungen', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Rückgabe und Auswertung der Klassenarbeit',
+                'Typische Fehler beim Umformen gezielt üben',
+                'Einstieg Zufall: Was ist eigentlich „Glück“?'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb2', u: '1–4/24', topic: 'Zufallsversuche und Ereignisse', ziel: 'Kennen von Zufallsversuch, Ergebnis, Ergebnismenge und Ereignis', remark: 'Mengenschreibweise und Elementbegriff', details: [
+                'Zufallsversuche erkennen und durchführen: Münze, Würfel, Glücksrad',
+                'Ergebnismenge $\\Omega$ und Ereignisse als Teilmengen notieren',
+                'Sicheres und unmögliches Ereignis'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '5–8/24', topic: 'Ereignisse verknüpfen', ziel: 'Kennen von Vereinigung, Durchschnitt, Differenz und Gegenereignis', remark: 'Venn-Diagramme, Symbolschreibweise', details: [
+                'Vereinigung $A \\cup B$, Durchschnitt $A \\cap B$, Differenz $A \\setminus B$',
+                'Gegenereignis $\\overline{A}$',
+                'UND, ODER, NICHT: Fachsprache und Umgangssprache'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '9–12/24', topic: 'Häufigkeit und Wahrscheinlichkeit', ziel: 'Kennen absoluter und relativer Häufigkeiten und des Begriffs Wahrscheinlichkeit', remark: 'Realexperimente, Stabilisierung am Computer', details: [
+                'Absolute und relative Häufigkeit bestimmen',
+                'Realexperimente mit asymmetrischen Zufallsgeräten: Reißzwecke, Legostein',
+                'Stabilisierung der relativen Häufigkeit, Begriff Wahrscheinlichkeit'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '13–16/24', topic: 'Laplace-Versuche', ziel: 'Berechnen von Wahrscheinlichkeiten bei Laplace-Versuchen', remark: 'symmetrische Zufallsgeräte', details: [
+                'Gleich wahrscheinliche Ergebnisse: Wann ist ein Versuch ein Laplace-Versuch?',
+                '$P(E) = \\tfrac{\\text{Anzahl günstiger}}{\\text{Anzahl möglicher Ergebnisse}}$',
+                'Wahrscheinlichkeit des Gegenereignisses'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '17–20/24', topic: 'Mehrstufige Zufallsversuche', ziel: 'Anwenden des Modellierens mehrstufiger Zufallsversuche', remark: 'Urnenmodell, Baumdiagramm, Pfadregeln', details: [
+                'Mehrstufige Versuche im Baumdiagramm darstellen',
+                'Produktregel und Summenregel für Pfade',
+                'Abhängige und unabhängige Stufen: Ziehen mit und ohne Zurücklegen'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb2', u: '21–24/24', topic: 'Zählen und Simulieren', ziel: 'Kennen der Produktregel zur Anzahlbestimmung; Einblick in die Simulation', remark: 'Simulation mit Zufallszahlen im CAS', details: [
+                'Produktregel beim Abzählen: Codes, Kleidung, Speisekarte',
+                'Ziehen mit und ohne Zurücklegen, mit und ohne Reihenfolge (inhaltlich)',
+                'Einen Zufallsversuch mit Zufallszahlen simulieren'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lk', u: '', topic: 'Klassenarbeit 2: Zufallsversuche', remark: 'mit Vorbereitung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 2',
+                'Rückgabe nach den Ferien'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'ue', u: '', topic: 'Knobeleien vor Weihnachten', remark: 'zwei Schultage', details: [
+                'Mathematische Rätsel und Spiele',
+                'Würfelspiele auf Fairness prüfen'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'ue', u: '', topic: 'Übung: Zufallsversuche', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Rückgabe und Auswertung der Klassenarbeit',
+                'Baumdiagramme sicher zeichnen und lesen',
+                'Wiederholung: Terme und lineare Gleichungen'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '1–4/32', topic: 'Was ist eine Funktion?', ziel: 'Kennen des Funktionsbegriffs und von Darstellungsformen', remark: 'Klimadiagramm, Weg-Zeit-Gesetz', details: [
+                'Eindeutige Zuordnungen: Funktion oder nicht?',
+                'Darstellungsformen: Worte, Wertetabelle, Graph, Gleichung, Zuordnungsvorschrift $f\\colon x \\mapsto 2x^3 - 4x$',
+                'Funktionen in Printmedien und digitalen Medien lesen'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '5–8/32', topic: 'Eigenschaften von Funktionen', ziel: 'Kennen von Definitions- und Wertebereich, Monotonie, Achsenschnittpunkten, Extrema und Symmetrie', remark: 'inhaltliches Verständnis anhand der Graphen', details: [
+                'Definitions- und Wertebereich bei einfachen ganz- und gebrochen rationalen Funktionen',
+                'Steigen, fallen, Hoch- und Tiefpunkte am Graphen ablesen',
+                'Schnittpunkte mit den Achsen, Symmetrie zur y-Achse und zum Ursprung'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '9–12/32', topic: 'Lineare Funktionen', ziel: 'Anwenden von Gleichung, Graph und Anstieg linearer Funktionen', remark: 'Einfluss der Parameter mit DGS oder CAS', details: [
+                'Gleichung $y = mx + n$ und Graph',
+                'Anstieg und Differenzenquotient, Steigungsdreieck',
+                'Einfluss von $m$ und $n$ auf den Graphen untersuchen'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb3', u: '13–16/32', topic: 'Nullstellen und Geradengleichungen', ziel: 'Ermitteln von Nullstellen und Finden von Gleichungen linearer Funktionen', remark: 'Aufstellen eines CAS-Algorithmus', details: [
+                'Nullstellen grafisch und rechnerisch ermitteln',
+                'Gleichung aus zwei Punkten oder aus Punkt und Anstieg finden',
+                'Den Weg als Algorithmus formulieren und im CAS umsetzen'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '17–20/32', topic: 'Lineare Regression', ziel: 'Finden von Gleichungen für Messreihen mithilfe linearer Regression', remark: 'CAS oder TK, kritisch mit „je – desto“', details: [
+                'Messreihen als Punktwolke darstellen',
+                'Ausgleichsgerade mit CAS oder Tabellenkalkulation bestimmen',
+                'Ergebnisse werten: Wie weit trägt das Modell?'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '21–24/32', topic: 'Lineare Gleichungssysteme grafisch lösen', ziel: 'Anwenden des grafischen Lösens linearer Gleichungssysteme', remark: 'zwei Gleichungen, zwei Unbekannte', details: [
+                'Sachprobleme mit zwei Unbekannten in zwei Gleichungen übersetzen',
+                'Jede Gleichung als Gerade zeichnen, den Schnittpunkt ablesen',
+                'Grenzen der Ablesegenauigkeit'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '25–28/32', topic: 'Lineare Gleichungssysteme rechnerisch lösen', ziel: 'Anwenden des rechnerischen Lösens linearer Gleichungssysteme', remark: 'ein Verfahren genügt; CAS für kompliziertere Koeffizienten', details: [
+                'Gleichsetzungs- und Einsetzungsverfahren ohne Hilfsmittel',
+                'Systeme mit Brüchen und Dezimalzahlen mit CAS',
+                'Probe in beiden Gleichungen'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb3', u: '29–32/32', topic: 'Lösbarkeit und Modellieren', ziel: 'Prinzip der vollständigen Fallunterscheidung; Beurteilen grafischer und rechnerischer Verfahren', remark: 'geometrische Interpretation', details: [
+                'Genau eine, keine oder unendlich viele Lösungen: Lage zweier Geraden',
+                'Vor- und Nachteile grafischer und rechnerischer Lösungsverfahren',
+                'Ausblick auf Systeme mit drei Gleichungen und drei Unbekannten'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lk', u: '', topic: 'Klassenarbeit 3: Funktionen und Gleichungssysteme', remark: 'mit Vorbereitung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 3',
+                'Rückgabe nach den Ferien'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'ue', u: '', topic: 'Übung: Funktionen und Gleichungssysteme', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Rückgabe und Auswertung der Klassenarbeit',
+                'Sachaufgaben mit Gleichungssystemen',
+                'Maßstäbe aus Klasse 7 wiederholen'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb4', u: '1–4/20', topic: 'Zentrische Streckung', ziel: 'Einblick gewinnen in die Konstruktion der zentrischen Streckung', remark: 'DGS', details: [
+                'Streckzentrum und Streckfaktor, Bildpunkte konstruieren',
+                'Vergrößern, Verkleinern, negativer Streckfaktor',
+                'Zentrische Streckung mit dynamischer Geometriesoftware'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb4', u: '5–8/20', topic: 'Eigenschaften der zentrischen Streckung', ziel: 'Kennen von Winkeltreue und Streckenverhältnissen', remark: 'Übereinstimmung der Verhältnisse entsprechender Strecken', details: [
+                'Winkeltreue, Geradentreue, Parallelentreue',
+                'Bildstrecke ist $|k|$-mal so lang wie die Originalstrecke',
+                'Fehlende Längen über Verhältnisgleichungen berechnen'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb4', u: '9–12/20', topic: 'Ähnliche Figuren', ziel: 'Anwenden der Ähnlichkeit; Hauptähnlichkeitssatz', remark: '„ähnlich“ in Fachsprache und Alltag', details: [
+                'Ähnlichkeit als Verkettung von Kongruenzabbildung und zentrischer Streckung',
+                'Hauptähnlichkeitssatz: zwei gleiche Winkel genügen',
+                'Ähnlich, gleich, kongruent: Fachsprache und Alltagssprache'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb4', u: '13–16/20', topic: 'Konstruieren und Beweisen mit Ähnlichkeit', ziel: 'Benutzen von Hilfsfiguren zur Lösung von Konstruktions- und Beweisaufgaben', remark: 'Vorwärts- und Rückwärtsarbeiten', details: [
+                'Erst eine ähnliche Hilfsfigur, dann die richtige Größe',
+                'Ähnliche Dreiecke in Figuren finden und für Beweise nutzen',
+                'Strategien: Vorwärts- und Rückwärtsarbeiten'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lb4', u: '17–20/20', topic: 'Längen, Flächen und Volumina ähnlicher Objekte', ziel: 'Berechnen von Streckenlängen, Flächeninhalten und Volumina ähnlicher Objekte', remark: 'Gullivers Reisen; Abstände, Höhen, Maßstäbe', details: [
+                'Längen mal $k$, Flächen mal $k^2$, Volumina mal $k^3$',
+                'Höhen und Abstände mit ähnlichen Dreiecken messen: Schatten, Försterdreieck',
+                'Gulliver bei den Liliputanern'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'lb5', u: '1–4/4', topic: 'Heuristische Strategien', ziel: 'Kennen der Strategien Vorwärts- und Rückwärtsarbeiten', remark: 'Lösungspläne, Teilziele, heuristische Hilfsmittel', details: [
+                'Vorwärtsarbeiten: Was weiß ich, was folgt daraus?',
+                'Rückwärtsarbeiten: Was brauche ich, um das Ziel zu erreichen?',
+                'Lösungswege dokumentieren und präsentieren'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'wb', u: '1–4/8', topic: 'Zufallszahlen und Monte-Carlo-Methode', ziel: 'Kennen der Simulation mit Zufallszahlen', remark: 'Glücksräder, Würfel, Urnen, Tabellen, Zufallsgeneratoren', details: [
+                'Zufallszahlen erzeugen: von Hand und mit dem Rechner',
+                'Strukturgleiche Zufallsversuche konstruieren, durchführen, auswerten',
+                'Monte-Carlo-Methode: $\\pi$ mit Zufallspunkten schätzen'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'wb', u: '5–8/8', topic: 'Simulationen in der Praxis', ziel: 'Einblick gewinnen in die praktische Nutzung von Computersimulationen', remark: '„Ziegenproblem“, Eingangskontrolle im Stadion', details: [
+                'Das Ziegenproblem simulieren und erklären',
+                'Sammelbilder und Eingangskontrollen: Fragen, die man durch Simulieren beantwortet',
+                'Simulationen heute: Wetter, Ausbreitung von Krankheiten, Flugsimulatoren'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'ue', u: '', topic: 'Wiederholung: Ähnlichkeit und Jahresstoff', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Jahresstoff systematisch wiederholen',
+                'Gemischte Aufgaben in Gruppen',
+                'Fragestunde vor der Klassenarbeit'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'lk', u: '', topic: 'Klassenarbeit 4: Ähnlichkeit und Jahresstoff', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 4',
+                'Rückgabe und Auswertung'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Vertiefung nach Bedarf', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Schwerpunkte aus der Auswertung der Klassenarbeit',
+                'Differenzierte Übung',
+                'Knobelaufgaben'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Projektwoche Mathematik', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Kleines Projekt: Höhen auf dem Schulgelände messen',
+                'Präsentation der Ergebnisse',
+                'Ausblick auf Klasse 9'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr',
+                'Mathematische Spiele',
+                'Ausblick auf Klasse 9: Potenzen, quadratische Funktionen, Pythagoras'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_gy_mathematik.pdf where that Lernbereich starts.
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_gy_mathematik.pdf',
+            lb1: {
+                page: 32,
+                bullets: [
+                    'Variablen: Name, Wert und Bedeutung, Arbeiten mit Variablen im CAS',
+                    'Struktur von Termen: Summe, Produkt, Quotient und ihre Verknüpfungen',
+                    'Terme und Gleichungen ohne Hilfsmittel umformen',
+                    'Binomische Formeln mit geometrischer Interpretation',
+                    'CAS beim Umformen komplexerer Terme, Einblick in Ungleichungen',
+                ]
+            },
+            lb2: {
+                page: 33,
+                bullets: [
+                    'Zufallsversuch, Ergebnis, Ergebnismenge, Ereignis',
+                    'Vereinigung, Durchschnitt, Differenz, Gegenereignis, Venn-Diagramme',
+                    'Absolute und relative Häufigkeit, Begriff Wahrscheinlichkeit, Laplace-Versuche',
+                    'Mehrstufige Zufallsversuche: Urnenmodell, Baumdiagramm, Pfadregeln',
+                    'Produktregel beim Abzählen, Einblick in die Simulation',
+                ]
+            },
+            lb3: {
+                page: 33,
+                bullets: [
+                    'Funktionsbegriff und Darstellungsformen',
+                    'Definitions- und Wertebereich, Monotonie, Achsenschnittpunkte, Extrema, Symmetrie',
+                    'Lineare Funktionen: Gleichung, Graph, Anstieg, Nullstellen, Regression',
+                    'Lineare Gleichungssysteme mit zwei Unbekannten grafisch und rechnerisch',
+                    'Vollständige Fallunterscheidung der Lösbarkeit',
+                ]
+            },
+            lb4: {
+                page: 34,
+                bullets: [
+                    'Zentrische Streckung: Konstruktion, Winkeltreue, Streckenverhältnisse',
+                    'Hauptähnlichkeitssatz, Fachsprache und Alltagssprache',
+                    'Hilfsfiguren bei Konstruktions- und Beweisaufgaben',
+                    'Längen, Flächeninhalte und Volumina ähnlicher Objekte',
+                ]
+            },
+            lb5: {
+                page: 34,
+                bullets: [
+                    'Heuristische Strategien: Vorwärts- und Rückwärtsarbeiten',
+                    'Lösungspläne aufstellen, Hilfsmittel auswählen, Lösungswege präsentieren',
+                ]
+            },
+            wb: {
+                page: 35,
+                bullets: [
+                    'Wahlbereich 1: Programmierung mathematischer Algorithmen',
+                    'Wahlbereich 2: Lineare Optimierung',
+                    'Wahlbereich 3: Simulation mit Zufallszahlen (gewählt)',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            lb5: ['b-pink', 'LB 5'],
+            wb: ['b-green', 'WB 3'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', 'ÜBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
