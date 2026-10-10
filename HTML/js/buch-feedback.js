@@ -56,7 +56,8 @@
         '  <button class="b-meld-mic" type="button" title="Einsprechen" aria-label="Einsprechen">' + MIC + '</button>' +
         '  <textarea class="b-meld-text" id="b-meld-text" rows="4" maxlength="' + TEXT_MAX + '" placeholder="Zum Beispiel: In Aufgabe 3 muss es 12 heißen, nicht 21."></textarea>' +
         '</div>' +
-        '<div class="b-meld-note">Gespeichert wird nur der Text mit der Stelle im Buch, keine Aufnahme und kein Name.</div>' +
+        // honest about the speech: the browser transcribes, Chrome does it on Google's servers (Doc, 10.10.2026: "ja, schadet nicht")
+        '<div class="b-meld-note">Die Spracherkennung macht dein Browser. Gespeichert wird nur der Text mit der Stelle im Buch, keine Aufnahme und kein Name.</div>' +
         '<div class="b-meld-acts"><span class="b-meld-status" role="status" aria-live="polite"></span>' +
         '  <button class="b-meld-send" type="button">Senden</button></div>';
     top.appendChild(fb);
