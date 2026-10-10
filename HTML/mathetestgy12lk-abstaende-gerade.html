@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Abstände von Geraden — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w22-abstaende-gerade',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Abstände von Geraden',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 22 (LB 8) · 20 Aufgaben: Punkt–Gerade mit Lotfußpunkt und Hilfsebene, parallele und windschiefe Geraden, gemeinsames Lot · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 22 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Punkt–Gerade: Lotfußpunkt, Hilfsebene, Beispiele (1-11), parallele Geraden (12, 13), windschiefe Geraden: Lage, Lot, Formel, Beispiele (14-20). Mit Hilfsmitteln erlaubt. */
+  questions: [
+    {
+      q: 'Welche Bedingung erfüllt der Lotfußpunkt $F$ von $P$ auf einer Geraden mit dem Richtungsvektor $\\vec u$?',
+      opts: ['$\\vec{PF} = \\vec u$', '$\\vec{PF} \\cdot \\vec u = 0$', '$|\\vec{PF}| = |\\vec u|$', '$\\vec{PF} \\times \\vec u = \\vec 0$'],
+      steps: [
+        'Die kürzeste Verbindung von $P$ zur Geraden steht senkrecht auf ihr.',
+        'Das liefert eine Gleichung für den Parameter von $F$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie bestimmt man den Abstand eines Punktes $P$ von einer Geraden $g$ im Raum?',
+      opts: ['den Abstand von $P$ zum Stützpunkt von $g$ nehmen', 'Lotfußpunkt $F$ auf $g$ mit $\\vec{PF} \\cdot \\vec u = 0$ suchen, dann $|\\vec{PF}|$ berechnen', '$P$ in die Geradengleichung einsetzen', 'mit der Hesse’schen Normalenform der Geraden'],
+      steps: [
+        'Der kürzeste Weg von $P$ zu $g$ trifft $g$ senkrecht im Lotfußpunkt $F$.',
+        'Der Abstand zum Stützpunkt ist meist größer; eine Hesse’sche Normalenform gibt es für Geraden nur in der Ebene.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum gibt es für eine Gerade im Raum keine Hesse’sche Normalenform?',
+      opts: ['Eine Gleichung $\\vec n \\cdot \\vec x = d$ beschreibt im Raum eine Ebene, keine Gerade.', 'Weil Geraden im Raum keinen Richtungsvektor haben.', 'Weil man im Raum nicht durch $|\\vec n|$ teilen darf.', 'Weil der Abstand eines Punktes von einer Geraden im Raum nicht definiert ist.'],
+      steps: [
+        'Im Raum stehen unendlich viele Richtungen senkrecht auf einer Geraden, es gibt keinen eindeutigen Normalenvektor.',
+        'Die Punkte mit $\\vec n \\cdot \\vec x = d$ bilden eine Ebene. Man braucht den Lotfußpunkt oder eine Hilfsebene.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist der Ursprung von der Geraden $g\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ entfernt?',
+      opts: ['$1$', '$2$', '$\\sqrt5$', '$3$'],
+      steps: [
+        '$d(t)^2 = (1 + t)^2 + 4$ ist für $t = -1$ am kleinsten.',
+        'Lotfußpunkt $F(0 \\mid 2 \\mid 0)$, Abstand $2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist $P(1 \\mid 2 \\mid 3)$ von der Geraden $\\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$ entfernt?',
+      opts: ['$\\sqrt2$', '$1$', '$2\\sqrt3$', '$\\sqrt{14}$'],
+      steps: [
+        '$(t - 1;\\ t - 2;\\ t - 3) \\cdot (1;\\ 1;\\ 1) = 3t - 6 = 0$, $t = 2$, $F(2 \\mid 2 \\mid 2)$.',
+        '$|\\vec{PF}| = |(1;\\ 0;\\ -1)| = \\sqrt2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für $P(1 \\mid 2 \\mid 3)$ und $g\\colon \\vec x = t\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$: Welche Hilfsebene durch $P$ steht senkrecht auf $g$?',
+      opts: ['$x + y + z = 6$', '$x + y + z = 0$', '$x + y + z = 3$', '$x + 2y + 3z = 14$'],
+      steps: [
+        'Der Richtungsvektor von $g$ ist Normalenvektor der Hilfsebene: $x + y + z = d$.',
+        '$P$ einsetzen: $d = 1 + 2 + 3 = 6$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Hilfsebene $x + y + z = 6$ schneidet $g\\colon \\vec x = t\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$ im Lotfußpunkt von $P(1 \\mid 2 \\mid 3)$. Wo liegt er?',
+      opts: ['$F(1 \\mid 1 \\mid 1)$', '$F(6 \\mid 6 \\mid 6)$', '$F(3 \\mid 3 \\mid 3)$', '$F(2 \\mid 2 \\mid 2)$'],
+      steps: [
+        '$g$ in die Ebene einsetzen: $t + t + t = 6$, also $t = 2$.',
+        '$F(2 \\mid 2 \\mid 2)$ und $|\\vec{PF}| = \\left|\\begin{pmatrix} 1 \\\\ 0 \\\\ -1 \\end{pmatrix}\\right| = \\sqrt2$, wie mit dem Skalarprodukt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit ist $P(3 \\mid 0 \\mid 0)$ von der $y$-Achse entfernt?',
+      opts: ['$9$', '$\\sqrt3$', '$3$', '$0$'],
+      steps: [
+        'Lotfußpunkt ist der Ursprung.',
+        'Abstand $3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie weit ist $P(1 \\mid 2 \\mid 0)$ von der Geraden $\\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ entfernt?',
+      opts: ['$\\sqrt2$', '$1$', '$2$', '$\\sqrt5$'],
+      steps: [
+        '$\\vec{PF} = (0;\\ t - 2;\\ t)$, $\\cdot\\ (0;\\ 1;\\ 1) = 2t - 2 = 0$, $t = 1$.',
+        '$F(1 \\mid 1 \\mid 1)$, $|\\vec{PF}| = |(0;\\ -1;\\ 1)| = \\sqrt2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist $P(2 \\mid 3 \\mid 1)$ von der $x$-Achse entfernt?',
+      opts: ['$\\sqrt{10} \\approx 3{,}16$', '$4$', '$2$', '$\\sqrt{14} \\approx 3{,}74$'],
+      steps: [
+        'Lotfußpunkt $(2 \\mid 0 \\mid 0)$.',
+        '$\\sqrt{3^2 + 1^2} = \\sqrt{10}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist $P(4 \\mid 0 \\mid 0)$ von der Geraden durch $O$ mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ entfernt?',
+      opts: ['$4$', '$2$', '$\\sqrt{8} \\cdot 2$', '$2\\sqrt2 \\approx 2{,}83$'],
+      steps: [
+        '$t = \\dfrac{(4;\\ 0;\\ 0) \\cdot (1;\\ 1;\\ 0)}{2} = 2$, $F(2 \\mid 2 \\mid 0)$.',
+        '$|\\vec{PF}| = |(-2;\\ 2;\\ 0)| = 2\\sqrt2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit sind die parallelen Geraden $g\\colon \\vec x = t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec x = \\begin{pmatrix} 0 \\\\ 3 \\\\ 4 \\end{pmatrix} + s\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ voneinander entfernt?',
+      opts: ['$0$', '$3$', '$7$', '$5$'],
+      steps: [
+        'Abstand eines Punktes von $h$, z. B. $(0 \\mid 3 \\mid 4)$, zu $g$: Lotfußpunkt ist der Ursprung.',
+        '$|(0;\\ 3;\\ 4)| = 5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum versagt die Abstandsformel mit $\\vec u \\times \\vec v$ bei parallelen Geraden?',
+      opts: ['Sie versagt nicht, sie gibt immer den Abstand.', 'Weil parallele Geraden immer den Abstand $0$ haben.', 'Weil das Vektorprodukt nur für windschiefe Geraden definiert ist.', 'Dann ist $\\vec u \\times \\vec v = \\vec 0$, und man müsste durch $0$ teilen.'],
+      steps: [
+        'Parallele Richtungsvektoren spannen kein Parallelogramm auf: $|\\vec u \\times \\vec v| = 0$.',
+        'Bei parallelen Geraden nimmt man einen Punkt der einen und bestimmt seinen Abstand von der anderen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie liegen $g\\colon \\vec x = t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix} + s\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$ zueinander?',
+      opts: ['Sie schneiden sich.', 'parallel', 'identisch', 'windschief'],
+      steps: [
+        'Die Richtungsvektoren sind nicht Vielfache voneinander: nicht parallel.',
+        'Auf $g$ ist stets $z = 0$, auf $h$ stets $z = 1$: kein gemeinsamer Punkt. Also windschief.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit sind die windschiefen Geraden $g\\colon \\vec x = t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $h\\colon \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix} + s\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$ voneinander entfernt?',
+      opts: ['$2$', '$1$', '$0$', '$\\sqrt2$'],
+      steps: [
+        '$g$ ist die $x$-Achse, $h$ verläuft parallel zur $y$-Achse in der Höhe $1$ über dem Ursprung.',
+        'Die Verbindung $(0 \\mid 0 \\mid 0)$–$(0 \\mid 0 \\mid 1)$ steht auf beiden senkrecht: Abstand $1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was gilt für die kürzeste Verbindungsstrecke zweier windschiefer Geraden?',
+      opts: ['Sie verbindet die beiden Stützpunkte.', 'Sie ist parallel zu einer der beiden Geraden.', 'Sie steht auf beiden Geraden senkrecht (gemeinsames Lot).', 'Es gibt keine kürzeste Verbindung.'],
+      steps: [
+        'Stünde sie auf einer Geraden schief, könnte man ihren Endpunkt dort verschieben und sie verkürzen.',
+        'Also ist sie das gemeinsame Lot; ihre Richtung ist $\\vec u \\times \\vec v$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Formel gibt den Abstand der windschiefen Geraden $g\\colon \\vec x = \\vec p + t\\,\\vec u$ und $h\\colon \\vec x = \\vec q + s\\,\\vec v$?',
+      opts: ['$d = \\dfrac{|(\\vec q - \\vec p) \\times \\vec u|}{|\\vec u|}$', '$d = \\dfrac{\\left|(\\vec q - \\vec p) \\cdot (\\vec u \\times \\vec v)\\right|}{|\\vec u \\times \\vec v|}$', '$d = |\\vec q - \\vec p|$', '$d = |\\vec u \\times \\vec v|$'],
+      steps: [
+        '$\\vec n = \\vec u \\times \\vec v$ steht auf beiden Geraden senkrecht. Die Ebene durch $g$ mit diesem Normalenvektor ist parallel zu $h$.',
+        'Der Abstand ist die Länge der Projektion von $\\vec q - \\vec p$ auf $\\vec n$: Hesse’sche Normalenform dieser Hilfsebene mit dem Punkt $\\vec q$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Vektor steht auf $\\vec u = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ senkrecht?',
+      opts: ['$\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ -1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} -1 \\\\ -1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 1 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        '$\\vec u \\times \\vec v = \\begin{pmatrix} 0 \\cdot 1 - 1 \\cdot 1 \\\\ 1 \\cdot 0 - 1 \\cdot 1 \\\\ 1 \\cdot 1 - 0 \\cdot 0 \\end{pmatrix} = \\begin{pmatrix} -1 \\\\ -1 \\\\ 1 \\end{pmatrix}$.',
+        'Probe: $-1 + 0 + 1 = 0$ und $0 - 1 + 1 = 0$ ✔. $\\begin{pmatrix} 1 \\\\ 1 \\\\ 2 \\end{pmatrix} = \\vec u + \\vec v$ liegt in der Ebene der beiden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie weit sind $g\\colon \\vec x = t\\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $h\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + s\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ voneinander entfernt?',
+      opts: ['$\\sqrt5$', '$1$', '$\\sqrt3$', '$3$'],
+      steps: [
+        '$\\vec n = \\vec u \\times \\vec v = \\begin{pmatrix} -1 \\\\ -1 \\\\ 1 \\end{pmatrix}$, $|\\vec n| = \\sqrt3$, und $\\vec q - \\vec p = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$.',
+        '$d = \\dfrac{|-1 - 2 + 0|}{\\sqrt3} = \\dfrac{3}{\\sqrt3} = \\sqrt3$. $\\sqrt5$ ist nur der Abstand der Stützpunkte.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei gerade Seile hängen in $10$ m und $12$ m Höhe: $\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 10 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 12 \\end{pmatrix} + s\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$. Wie nah kommen sie sich?',
+      opts: ['$10$ m', '$0$ m, sie kreuzen sich', '$2$ m', '$12$ m'],
+      steps: [
+        '$\\vec u \\times \\vec v = \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$, $\\vec q - \\vec p = \\begin{pmatrix} 0 \\\\ 0 \\\\ 2 \\end{pmatrix}$.',
+        '$d = \\tfrac{|2|}{1} = 2$ m. Von oben gesehen kreuzen sie sich, im Raum sind sie windschief.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

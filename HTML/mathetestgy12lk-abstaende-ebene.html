@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Abstände von einer Ebene — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w21-abstaende-ebene',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Abstände von einer Ebene',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 21 (LB 8) · 20 Aufgaben: Punkt–Punkt, Punkt–Ebene mit Hesse’scher Normalenform und Lotfußpunkt, parallele Gerade und Ebene · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 21 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Punkt–Punkt (1, 2), Punkt–Ebene (3-9), Ebene–Ebene (10), Gerade–Ebene (11, 12 neu), weitere Abstände mit Parameter (13-16), Dach und Kugel (17-20). Mit Hilfsmitteln erlaubt. */
+  questions: [
+    {
+      q: 'Wie weit sind $A(1 \\mid 2 \\mid 3)$ und $B(3 \\mid 4 \\mid 4)$ voneinander entfernt?',
+      opts: ['$9$', '$3$', '$\\sqrt5$', '$5$'],
+      steps: [
+        '$\\vec{AB} = (2;\\ 2;\\ 1)$.',
+        '$|\\vec{AB}| = \\sqrt{4 + 4 + 1} = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist $P(2 \\mid 3 \\mid 6)$ vom Ursprung entfernt?',
+      opts: ['$11$', '$\\sqrt{11}$', '$7$', '$49$'],
+      steps: [
+        '$\\sqrt{4 + 9 + 36} = \\sqrt{49}$.',
+        '$= 7$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Mit welcher Formel berechnet man den Abstand des Punktes $P$ von der Ebene $E\\colon \\vec n \\cdot \\vec x = d$?',
+      opts: ['$\\dfrac{|\\vec n \\cdot \\vec p - d|}{|\\vec n|}$', '$|\\vec p - \\vec n|$', '$\\dfrac{\\vec n \\cdot \\vec p}{d}$', '$|\\vec n \\cdot \\vec p - d|$'],
+      steps: [
+        'Man setzt $P$ in die Hessesche Normalform ein.',
+        'Ohne die Division durch $|\\vec n|$ stimmt das Ergebnis nur für Normalenvektoren der Länge $1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist der Ursprung von der Ebene $2x + y + 2z = 6$ entfernt?',
+      opts: ['$2$', '$6$', '$1{,}2$', '$3$'],
+      steps: [
+        '$|\\vec n| = 3$.',
+        '$d = \\tfrac{|0 - 6|}{3} = 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist $P(1 \\mid 1 \\mid 1)$ von der Ebene $2x - y + 2z = 9$ entfernt?',
+      opts: ['$2$', '$3$', '$\\tfrac{4}{3}$', '$6$'],
+      steps: [
+        'Einsetzen: $2 - 1 + 2 - 9 = -6$.',
+        '$d = \\tfrac{|-6|}{3} = 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist $P(3 \\mid 4 \\mid 5)$ von der Ebene $z = 0$ entfernt?',
+      opts: ['$5$', '$4$', '$\\sqrt{50}$', '$3$'],
+      steps: [
+        'Der Abstand von der $x$-$y$-Ebene ist der Betrag der $z$-Koordinate.',
+        '$d = 5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weit ist $P(1 \\mid 2 \\mid 3)$ von der Ebene $x + y + z = 0$ entfernt?',
+      opts: ['$2\\sqrt3 \\approx 3{,}46$', '$6$', '$2$', '$\\sqrt{14}$'],
+      steps: [
+        '$\\dfrac{|1 + 2 + 3|}{\\sqrt3} = \\dfrac{6}{\\sqrt3}$.',
+        '$= 2\\sqrt3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Punkt der Ebene $2x + y + 2z = 9$ liegt dem Ursprung am nächsten?',
+      opts: ['$(0 \\mid 9 \\mid 0)$', '$(2 \\mid 1 \\mid 2)$', '$(1 \\mid 1 \\mid 1)$', '$(4{,}5 \\mid 0 \\mid 0)$'],
+      steps: [
+        'Lotgerade $\\vec x = t \\cdot (2;\\ 1;\\ 2)$ in $E$ einsetzen: $9t = 9$, $t = 1$.',
+        'Lotfußpunkt $F(2 \\mid 1 \\mid 2)$, Abstand $|\\vec{OF}| = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher ist der Lotfußpunkt von $P(3 \\mid 4 \\mid 5)$ auf der Ebene $z = 0$?',
+      opts: ['$(0 \\mid 0 \\mid 0)$', '$(0 \\mid 0 \\mid 5)$', '$(3 \\mid 4 \\mid -5)$', '$(3 \\mid 4 \\mid 0)$'],
+      steps: [
+        'Die Lotgerade läuft senkrecht nach unten, nur $z$ ändert sich.',
+        '$F(3 \\mid 4 \\mid 0)$. $(3 \\mid 4 \\mid -5)$ wäre der Spiegelpunkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit sind die parallelen Ebenen $2x + y + 2z = 3$ und $2x + y + 2z = 12$ voneinander entfernt?',
+      opts: ['$1$', '$5$', '$9$', '$3$'],
+      steps: [
+        'Gleicher Normalenvektor, Betrag $3$.',
+        '$d = \\tfrac{|12 - 3|}{3} = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit ist die Gerade $g\\colon \\vec x = \\begin{pmatrix} 4 \\\\ 2 \\\\ 1 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ -1 \\end{pmatrix}$ von der Ebene $E\\colon 2x + y + 2z = 6$ entfernt?',
+      opts: ['$0$, sie schneiden sich', '$2$', 'Das hängt von $t$ ab.', '$6$'],
+      steps: [
+        '$\\vec n \\cdot \\vec u = 2 \\cdot 1 + 1 \\cdot 0 + 2 \\cdot (-1) = 0$: $g$ ist parallel zu $E$, jeder Punkt hat denselben Abstand.',
+        'Stützpunkt einsetzen: $\\dfrac{|2 \\cdot 4 + 2 + 2 \\cdot 1 - 6|}{3} = \\dfrac{6}{3} = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Abstand hat die Gerade $g\\colon \\vec x = t\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$ von der Ebene $E\\colon 2x + y + 2z = 6$?',
+      opts: ['$2$, den Abstand des Ursprungs', '$0$, denn $g$ schneidet $E$', 'Er ist nicht definiert.', '$\\tfrac53$'],
+      steps: [
+        '$\\vec n \\cdot \\vec u = 2 + 1 + 2 = 5 \\neq 0$: $g$ ist nicht parallel zu $E$, sondern schneidet sie.',
+        'Im Schnittpunkt $\\left(\\tfrac65 \\mid \\tfrac65 \\mid \\tfrac65\\right)$ ist der Abstand $0$. Nur für parallele Geraden ist der Abstand eines Punktes der Abstand der Geraden.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Punkte der $z$-Achse haben von $E\\colon 2x + y + 2z = 6$ den Abstand $3$?',
+      opts: ['nur $(0 \\mid 0 \\mid 7{,}5)$', '$(0 \\mid 0 \\mid 7{,}5)$ und $(0 \\mid 0 \\mid -1{,}5)$', '$(0 \\mid 0 \\mid 3)$ und $(0 \\mid 0 \\mid -3)$', '$(0 \\mid 0 \\mid 4{,}5)$'],
+      steps: [
+        '$\\tfrac{|2z - 6|}{3} = 3$, also $2z - 6 = 9$ oder $2z - 6 = -9$.',
+        '$z = 7{,}5$ oder $z = -1{,}5$: je ein Punkt auf jeder Seite.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Kugel mit dem Mittelpunkt $M(1 \\mid 2 \\mid 3)$ berührt die Ebene $z = 0$. Wie groß ist ihr Radius?',
+      opts: ['$6$', '$1$', '$3$', '$\\sqrt{14}$'],
+      steps: [
+        'Berühren heißt: Der Radius ist der Abstand des Mittelpunkts von der Ebene.',
+        '$r = 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie weit ist $P(2 \\mid 2 \\mid 2)$ von der Ebene $x + 2y + 2z = 1$ entfernt?',
+      opts: ['$9$', '$1$', '$\\tfrac{10}{3}$', '$3$'],
+      steps: [
+        'Einsetzen: $2 + 4 + 4 - 1 = 9$, $|\\vec n| = 3$.',
+        '$d = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche $d$ hat die Ebene $2x - y + 2z = d$ vom Ursprung den Abstand $2$?',
+      opts: ['$d = \\pm 2$', '$d = 2$', 'nur $d = 6$', '$d = 6$ oder $d = -6$'],
+      steps: [
+        '$\\tfrac{|d|}{3} = 2$.',
+        '$|d| = 6$: zwei parallele Ebenen, je eine auf jeder Seite.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Dachfläche liegt in der Ebene $3y + 4z = 24$ (Einheit m, $z$ nach oben). Wie stark ist das Dach geneigt?',
+      opts: ['$45^\\circ$', '$30^\\circ$', '$\\approx 36{,}9^\\circ$', '$\\approx 53{,}1^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{|(0;\\ 3;\\ 4) \\cdot (0;\\ 0;\\ 1)|}{5} = \\tfrac45$.',
+        '$\\varphi \\approx 36{,}9^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Dachfläche liegt in der Ebene $3y + 4z = 24$ (Einheit m, $z$ nach oben). Wie weit ist die Schornsteinspitze $(2 \\mid 1 \\mid 8)$ von der Dachfläche entfernt?',
+      opts: ['$11$ m', '$8$ m', '$2{,}2$ m', '$2$ m'],
+      steps: [
+        '$\\dfrac{|3 \\cdot 1 + 4 \\cdot 8 - 24|}{5} = \\dfrac{11}{5}$.',
+        '$= 2{,}2$ m.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Dachfläche liegt in der Ebene $3y + 4z = 24$ (Einheit m, $z$ nach oben). Wie hoch liegt das Dach über dem Bodenpunkt $(0 \\mid 4 \\mid 0)$?',
+      opts: ['$1{,}5$ m', '$4$ m', '$3$ m', '$6$ m'],
+      steps: [
+        '$3 \\cdot 4 + 4z = 24$.',
+        '$z = 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berührt die Kugel mit dem Mittelpunkt $M(1 \\mid 1 \\mid 1)$ und dem Radius $1$ die Ebene $2x + y + 2z = 8$?',
+      opts: ['Ja, weil $M$ in der Ebene liegt.', 'Nein, die Ebene liegt weit außerhalb.', 'Nein, die Ebene schneidet die Kugel.', 'Ja, der Abstand von $M$ zur Ebene ist genau $1$.'],
+      steps: [
+        '$\\dfrac{|2 + 1 + 2 - 8|}{3} = 1$.',
+        'Abstand gleich Radius: Die Ebene ist Tangentialebene.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

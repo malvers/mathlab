@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Flächen, Volumina und unbegrenzte Flächen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w25-flaecheninhalte',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Flächen, Volumina und unbegrenzte Flächen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 25 (LB 9) · 20 Aufgaben: Dreiecke und Pyramiden mit Vektoren, unbegrenzte Flächen als Grenzwert, Wahrscheinlichkeit als Fläche · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 25 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Flächen elementargeometrisch und mit Vektorprodukt (1-9), Volumina von Pyramiden (10, 11), unbegrenzte Flächen (12-17), Dichtefunktion, Wahrscheinlichkeit und Flächeninhalt (18-20). Mit Hilfsmitteln erlaubt. */
+  questions: [
+    {
+      q: 'Wie groß ist das Dreieck $A(1 \\mid 0 \\mid 0)$, $B(0 \\mid 1 \\mid 0)$, $C(0 \\mid 0 \\mid 1)$?',
+      opts: ['$\\tfrac12$', '$\\sqrt3 \\approx 1{,}73$', '$1$', '$\\tfrac{\\sqrt3}{2} \\approx 0{,}87$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AC} = (-1;\\ 1;\\ 0) \\times (-1;\\ 0;\\ 1) = (1;\\ 1;\\ 1)$.',
+        '$A = \\tfrac12 \\sqrt3$. $\\sqrt3$ wäre das Parallelogramm.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist das Parallelogramm, das $\\begin{pmatrix} 2 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 3 \\\\ 0 \\end{pmatrix}$ aufspannen?',
+      opts: ['$3$', '$2$', '$6$', '$\\sqrt{10} \\cdot 2$'],
+      steps: [
+        '$\\vec a \\times \\vec b = (0;\\ 0;\\ 6)$.',
+        'Kontrolle: Grundseite $2$, Höhe $3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Formel liefert den Flächeninhalt eines Dreiecks $ABC$ mit dem Winkel $\\alpha$ bei $A$?',
+      opts: ['$\\tfrac12 \\cdot \\vec{AB} \\cdot \\vec{AC}$', '$|\\vec{AB}| \\cdot |\\vec{AC}| \\cdot \\cos\\alpha$', '$|\\vec{AB}| + |\\vec{AC}|$', '$\\tfrac12 \\cdot |\\vec{AB}| \\cdot |\\vec{AC}| \\cdot \\sin\\alpha$'],
+      steps: [
+        'Grundseite $|\\vec{AB}|$, Höhe $|\\vec{AC}| \\sin\\alpha$.',
+        'Das ist genau $\\tfrac12 |\\vec{AB} \\times \\vec{AC}|$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist das Dreieck $A(1 \\mid 1 \\mid 1)$, $B(3 \\mid 1 \\mid 1)$, $C(1 \\mid 4 \\mid 1)$?',
+      opts: ['$6$', '$5$', '$\\sqrt{13}$', '$3$'],
+      steps: [
+        '$\\vec{AB} = (2;\\ 0;\\ 0)$, $\\vec{AC} = (0;\\ 3;\\ 0)$, Kreuzprodukt $(0;\\ 0;\\ 6)$.',
+        '$A = 3$: ein rechtwinkliges Dreieck mit den Katheten $2$ und $3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Ebene $2x + 3y + 6z = 12$ hat die Spurpunkte $(6 \\mid 0 \\mid 0)$, $(0 \\mid 4 \\mid 0)$, $(0 \\mid 0 \\mid 2)$. Wie groß ist das Spurdreieck?',
+      opts: ['$28$', '$24$', '$12$', '$14$'],
+      steps: [
+        '$(-6;\\ 4;\\ 0) \\times (-6;\\ 0;\\ 2) = (8;\\ 12;\\ 24)$ mit Betrag $\\sqrt{784} = 28$.',
+        '$A = 14$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist das Dreieck mit den Ecken $(0 \\mid 0)$, $(4 \\mid 1)$, $(1 \\mid 3)$ in der Ebene?',
+      opts: ['$6$', '$11$', '$6{,}5$', '$5{,}5$'],
+      steps: [
+        'Als Raumvektoren mit $z = 0$: $(4;\\ 1;\\ 0) \\times (1;\\ 3;\\ 0) = (0;\\ 0;\\ 11)$.',
+        '$A = \\tfrac{11}{2} = 5{,}5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die gesamte Oberfläche des Tetraeders mit den Ecken $O$, $(1 \\mid 0 \\mid 0)$, $(0 \\mid 1 \\mid 0)$, $(0 \\mid 0 \\mid 1)$?',
+      opts: ['$\\tfrac32 + \\tfrac{\\sqrt3}{2} \\approx 2{,}37$', '$2$', '$\\tfrac{\\sqrt3}{2} \\approx 0{,}87$', '$2\\sqrt3 \\approx 3{,}46$'],
+      steps: [
+        'Drei rechtwinklige Dreiecke mit je $\\tfrac12$ in den Koordinatenebenen.',
+        'Dazu das schräge Dreieck aus Aufgabe 1: $\\tfrac{\\sqrt3}{2}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Das Parallelogramm $ABCD$ hat $A(1 \\mid 0 \\mid 2)$, $B(3 \\mid 1 \\mid 2)$, $D(1 \\mid 2 \\mid 4)$. Wie groß ist es?',
+      opts: ['$\\sqrt{20}$', '$6$', '$36$', '$3$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AD} = (2;\\ 1;\\ 0) \\times (0;\\ 2;\\ 2) = (2;\\ -4;\\ 4)$.',
+        'Betrag $\\sqrt{4 + 16 + 16} = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Dreieck hat zwei Seiten der Längen $4$ und $5$, die $30^\\circ$ einschließen. Wie groß ist es?',
+      opts: ['$20$', '$5$', '$10$', '$5\\sqrt3 \\approx 8{,}66$'],
+      steps: [
+        '$A = \\tfrac12 \\cdot 4 \\cdot 5 \\cdot \\sin 30^\\circ$.',
+        '$= 10 \\cdot \\tfrac12 = 5$. Mit dem Kosinus käme fälschlich $5\\sqrt3$ heraus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Das Tetraeder hat die Ecken $O$, $A(1 \\mid 0 \\mid 0)$, $B(0 \\mid 1 \\mid 0)$ und $C(0 \\mid 0 \\mid 1)$. Berechne sein Volumen über die schräge Grundfläche $ABC$ (Inhalt $\\tfrac{\\sqrt3}{2}$) und den Abstand von $O$ zur Ebene $x + y + z = 1$.',
+      opts: ['$\\tfrac16$', '$\\tfrac13$', '$\\tfrac{\\sqrt3}{6}$', '$\\tfrac12$'],
+      steps: [
+        'Höhe = Abstand von $O$ zur Ebene: $\\dfrac{|0 + 0 + 0 - 1|}{\\sqrt3} = \\dfrac{1}{\\sqrt3}$.',
+        '$V = \\tfrac13 \\cdot \\tfrac{\\sqrt3}{2} \\cdot \\tfrac{1}{\\sqrt3} = \\tfrac16$. Probe über die Grundfläche $OAB$ mit Inhalt $\\tfrac12$ und Höhe $1$: $\\tfrac13 \\cdot \\tfrac12 \\cdot 1 = \\tfrac16$ ✔'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Pyramide hat die Grundfläche $O$, $(4 \\mid 0 \\mid 0)$, $(0 \\mid 4 \\mid 0)$ und die Spitze $(0 \\mid 0 \\mid 6)$. Welches Volumen hat sie?',
+      opts: ['$48$', '$16$', '$8$', '$32$'],
+      steps: [
+        'Grundfläche: rechtwinkliges Dreieck, $\\tfrac12 \\cdot 4 \\cdot 4 = 8$; Höhe $6$.',
+        '$V = \\tfrac13 \\cdot 8 \\cdot 6 = 16$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Inhalt hat die Fläche unter $f(x) = \\dfrac{1}{x^2}$ über $[1;\\ b]$ für $b \\to \\infty$?',
+      opts: ['$0$', 'unendlich', '$1$', '$\\tfrac12$'],
+      steps: [
+        '$\\int_1^b \\tfrac{1}{x^2}\\,\\mathrm{d}x = \\left[-\\tfrac1x\\right]_1^b = 1 - \\tfrac1b$.',
+        'Für $b \\to \\infty$: $1$. Bei $\\tfrac1x$ dagegen wächst $\\ln b$ über alle Grenzen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Inhalt hat die Fläche unter $f(x) = \\dfrac{1}{x^3}$ über $[1;\\ \\infty)$?',
+      opts: ['Sie ist unendlich groß.', '$\\tfrac12$', '$1$', '$\\tfrac13$'],
+      steps: [
+        '$\\int_1^b x^{-3}\\,\\mathrm{d}x = \\left[-\\tfrac{1}{2x^2}\\right]_1^b = \\tfrac12 - \\tfrac{1}{2b^2}$.',
+        'Für $b \\to \\infty$ strebt das gegen $\\tfrac12$: Die unbegrenzte Fläche hat einen endlichen Inhalt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Hat die Fläche unter $f(x) = \\dfrac{1}{\\sqrt{x}}$ über $[1;\\ \\infty)$ einen endlichen Inhalt?',
+      opts: ['Nein, $\\int_1^b \\tfrac{1}{\\sqrt{x}}\\,\\mathrm{d}x = 2\\sqrt{b} - 2$ wächst über alle Grenzen.', 'Ja, den Inhalt $2$.', 'Ja, den Inhalt $1$.', 'Ja, den Inhalt $\\tfrac12$.'],
+      steps: [
+        'Stammfunktion $2\\sqrt{x}$.',
+        '$2\\sqrt{b} - 2 \\to \\infty$ für $b \\to \\infty$: Der Graph fällt zu langsam. Erst ab $\\tfrac{1}{x^r}$ mit $r > 1$ wird die Fläche endlich.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Inhalt hat die Fläche unter $f(x) = \\mathrm{e}^{-x}$ über $[0;\\ \\infty)$?',
+      opts: ['$\\mathrm{e}$', 'Sie ist unendlich groß.', '$1$', '$0$'],
+      steps: [
+        '$\\int_0^b \\mathrm{e}^{-x}\\,\\mathrm{d}x = 1 - \\mathrm{e}^{-b}$.',
+        'Für $b \\to \\infty$ geht $\\mathrm{e}^{-b} \\to 0$, der Inhalt ist $1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Fläche unter $f(x) = \\dfrac{1}{\\sqrt{x}}$ über $(0;\\ 1]$ ist nach oben unbegrenzt. Welchen Inhalt hat sie?',
+      opts: ['$2$', '$\\tfrac12$', 'Sie ist unendlich groß.', '$1$'],
+      steps: [
+        '$\\int_a^1 \\tfrac{1}{\\sqrt{x}}\\,\\mathrm{d}x = 2 - 2\\sqrt{a}$ für $0 < a < 1$.',
+        'Für $a \\to 0$ strebt das gegen $2$: Auch an einer Polstelle kann die Fläche endlich sein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist die Fläche zwischen $f(x) = \\dfrac{1}{x^2}$ und $g(x) = \\dfrac{1}{x^3}$ über $[1;\\ \\infty)$?',
+      opts: ['$\\tfrac32$', 'Sie ist unendlich groß.', '$\\tfrac12$', '$1$'],
+      steps: [
+        'Für $x \\ge 1$ ist $\\tfrac{1}{x^2} \\ge \\tfrac{1}{x^3}$; $\\int_1^b \\left(x^{-2} - x^{-3}\\right)\\mathrm{d}x = \\left(1 - \\tfrac1b\\right) - \\left(\\tfrac12 - \\tfrac{1}{2b^2}\\right)$.',
+        'Für $b \\to \\infty$: $1 - \\tfrac12 = \\tfrac12$.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$Z$ ist standardnormalverteilt. Was bedeutet der Inhalt der Fläche unter der Glockenkurve $\\varphi$ zwischen $-1$ und $1$?',
+      opts: ['die Wahrscheinlichkeit $P(Z = 1)$', 'die Varianz von $Z$', 'die Wahrscheinlichkeit $P(-1 \\le Z \\le 1) \\approx 0{,}683$', 'den Erwartungswert von $Z$'],
+      steps: [
+        'Bei einer stetigen Zufallsgröße ist jede Wahrscheinlichkeit $P(a \\le Z \\le b)$ eine Fläche unter der Dichte.',
+        '$\\int_{-1}^{1} \\varphi(z)\\,\\mathrm{d}z \\approx 0{,}683$. Die ganze Fläche bis ins Unendliche ist $1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $k$ ist $f(x) = kx$ auf $[0;\\ 2]$ (und $0$ sonst) eine Dichtefunktion?',
+      opts: ['$k = 1$', '$k = \\tfrac12$', '$k = \\tfrac14$', '$k = 2$'],
+      steps: [
+        'Eine Dichte ist nicht negativ, und die Fläche unter ihr ist $1$.',
+        '$\\int_0^2 kx\\,\\mathrm{d}x = 2k = 1$ gibt $k = \\tfrac12$.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$X$ hat die Dichte $f(x) = \\tfrac12 x$ auf $[0;\\ 2]$. Wie groß ist $P(X \\le 1)$?',
+      opts: ['$\\tfrac14$', '$\\tfrac12$', '$\\tfrac34$', '$1$'],
+      steps: [
+        '$P(X \\le 1) = \\int_0^1 \\tfrac12 x\\,\\mathrm{d}x = \\left[\\tfrac14 x^2\\right]_0^1$.',
+        '$= \\tfrac14$. Obwohl $1$ die Mitte von $[0;\\ 2]$ ist, liegt links nur ein Viertel der Fläche; $\\tfrac34$ ist $P(X > 1)$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

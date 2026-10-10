@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Eigenschaften des Integrals und Hauptsatz — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w06-hauptsatz',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Eigenschaften des Integrals und Hauptsatz',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 6 (LB 5) · 20 Aufgaben: Hauptsatz, Linearität, Intervalladditivität, Integralfunktion und Stammfunktion · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 6 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Hauptsatz rechnen (1-3, 12-14, 16), Eigenschaften (4-7, 19, 20), Integralfunktion (8, 9, 10 neu: nicht jede Stammfunktion ist eine Integralfunktion, 17, 18), Hauptsatz verstehen (11), Grenze (15). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Berechne $\\int_1^3 2x\\,\\mathrm{d}x$.',
+      opts: ['$8$', '$4$', '$9$', '$6$'],
+      steps: [
+        'Stammfunktion $F(x) = x^2$, Hauptsatz: $F(3) - F(1)$.',
+        '$9 - 1 = 8$. Wer nur $F(3)$ nimmt, erhält $9$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int_0^2 (3x^2 - 2x)\\,\\mathrm{d}x$.',
+      opts: ['$12$', '$8$', '$0$', '$4$'],
+      steps: [
+        '$F(x) = x^3 - x^2$.',
+        '$F(2) - F(0) = 8 - 4 - 0 = 4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int_{-1}^1 x^3\\,\\mathrm{d}x$.',
+      opts: ['$\\tfrac12$', '$2$', '$\\tfrac14$', '$0$'],
+      steps: [
+        '$\\left[\\tfrac14 x^4\\right]_{-1}^1 = \\tfrac14 - \\tfrac14$.',
+        '$= 0$: $x^3$ ist punktsymmetrisch, die Teile links und rechts heben sich auf.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Wert hat $\\int_2^2 f(x)\\,\\mathrm{d}x$ für jede stetige Funktion $f$?',
+      opts: ['$f(2)$', '$0$', '$2f(2)$', 'Das hängt von $f$ ab.'],
+      steps: [
+        'Hauptsatz: $\\int_a^a f(x)\\,\\mathrm{d}x = F(a) - F(a)$.',
+        '$= 0$: Über ein Intervall der Breite $0$ gibt es keine Fläche.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int_3^1 2x\\,\\mathrm{d}x$.',
+      opts: ['$0$', '$-4$', '$8$', '$-8$'],
+      steps: [
+        'Grenzen vertauschen kehrt das Vorzeichen um: $\\int_3^1 = -\\int_1^3$.',
+        '$\\left[x^2\\right]_3^1 = 1 - 9 = -8$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Es gilt $\\int_0^2 f(x)\\,\\mathrm{d}x = 3$ und $\\int_2^5 f(x)\\,\\mathrm{d}x = 4$. Wie groß ist $\\int_0^5 f(x)\\,\\mathrm{d}x$?',
+      opts: ['Das kann man nicht sagen.', '$12$', '$1$', '$7$'],
+      steps: [
+        'Intervalladditivität: $\\int_a^b + \\int_b^c = \\int_a^c$.',
+        '$3 + 4 = 7$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Es gilt $\\int_0^1 f(x)\\,\\mathrm{d}x = 4$. Wie groß ist $\\int_0^1 \\left(2f(x) + 3\\right)\\mathrm{d}x$?',
+      opts: ['$7$', '$8$', '$11$', '$14$'],
+      steps: [
+        'Linearität: $2\\int_0^1 f(x)\\,\\mathrm{d}x + \\int_0^1 3\\,\\mathrm{d}x$.',
+        '$2 \\cdot 4 + 3 \\cdot 1 = 11$. Die $3$ wird über die Länge $1$ integriert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Integralfunktion $I(x) = \\int_0^x 2t\\,\\mathrm{d}t$.',
+      opts: ['$I(x) = 2$', '$I(x) = 2x$', '$I(x) = x^2$', '$I(x) = x^2 + C$'],
+      steps: [
+        '$I(x) = \\left[t^2\\right]_0^x = x^2 - 0$.',
+        'Die untere Grenze legt die Konstante fest: $I(0) = 0$. Deshalb steht kein $+ C$.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$I(x) = \\int_1^x t^2\\,\\mathrm{d}t$. Was ist $I^{\\prime}(x)$?',
+      opts: ['$\\tfrac13 x^3$', '$x^2$', '$2x$', '$\\tfrac13 x^3 - \\tfrac13$'],
+      steps: [
+        '$I(x) = \\tfrac13 x^3 - \\tfrac13$.',
+        'Ableiten: $I^{\\prime}(x) = x^2$. Die Ableitung einer Integralfunktion ist der Integrand an der oberen Grenze.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gibt es ein $a$, für das $F(x) = x^2 + 1$ die Integralfunktion $I_a(x) = \\int_a^x 2t\\,\\mathrm{d}t$ ist?',
+      opts: ['Ja, mit $a = 1$.', 'Nein: $I_a(x) = x^2 - a^2$ hat bei $x = a$ eine Nullstelle, $x^2 + 1$ hat keine.', 'Ja, mit $a = -1$.', 'Ja, denn jede Stammfunktion ist eine Integralfunktion.'],
+      steps: [
+        '$I_a(x) = \\left[t^2\\right]_a^x = x^2 - a^2$ und $I_a(a) = 0$: Jede Integralfunktion hat an ihrer unteren Grenze eine Nullstelle.',
+        '$x^2 - a^2 = x^2 + 1$ verlangt $a^2 = -1$, das hat keine reelle Lösung. Jede Integralfunktion ist eine Stammfunktion, aber nicht umgekehrt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was sagt der Hauptsatz der Differential- und Integralrechnung?',
+      opts: ['Jede Funktion hat genau eine Stammfunktion.', 'Ist $F$ eine Stammfunktion von $f$, so gilt $\\int_a^b f(x)\\,\\mathrm{d}x = F(b) - F(a)$.', 'Ableiten und Integrieren ergeben immer dieselbe Funktion.', 'Das Integral von $f$ ist gleich $f(b) - f(a)$.'],
+      steps: [
+        'Er verbindet die Flächenberechnung über Summen mit dem Rückwärtsableiten.',
+        'Statt Rechtecksummen genügt eine Stammfunktion: $F(b) - F(a)$, nicht $f(b) - f(a)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int_0^{\\pi} \\cos x\\,\\mathrm{d}x$.',
+      opts: ['$-2$', '$0$', '$1$', '$2$'],
+      steps: [
+        '$\\left[\\sin x\\right]_0^{\\pi} = \\sin\\pi - \\sin 0$.',
+        '$= 0$: Die Fläche über der Achse auf $[0;\\ \\tfrac\\pi2]$ hebt sich mit der darunter auf.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int_1^4 \\dfrac{1}{\\sqrt{x}}\\,\\mathrm{d}x$.',
+      opts: ['$4$', '$\\tfrac32$', '$2$', '$1$'],
+      steps: [
+        'Stammfunktion $2\\sqrt{x}$.',
+        '$2\\sqrt4 - 2\\sqrt1 = 4 - 2 = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\int_0^1 (\\mathrm{e}^x + 1)\\,\\mathrm{d}x$.',
+      opts: ['$2$', '$\\mathrm{e} + 1$', '$\\mathrm{e} - 1$', '$\\mathrm{e}$'],
+      steps: [
+        '$\\left[\\mathrm{e}^x + x\\right]_0^1 = (\\mathrm{e} + 1) - (1 + 0)$.',
+        '$= \\mathrm{e}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $b > 0$ gilt $\\int_0^b 2x\\,\\mathrm{d}x = 16$?',
+      opts: ['$b = 4$', '$b = 8$', '$b = 16$', '$b = 2$'],
+      steps: [
+        '$\\left[x^2\\right]_0^b = b^2 = 16$.',
+        '$b = 4$ (die Lösung $-4$ ist ausgeschlossen).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int_{-2}^2 (x^2 - 1)\\,\\mathrm{d}x$.',
+      opts: ['$-\\tfrac43$', '$0$', '$\\tfrac43$', '$\\tfrac{16}{3}$'],
+      steps: [
+        '$\\left[\\tfrac13 x^3 - x\\right]_{-2}^2 = \\left(\\tfrac83 - 2\\right) - \\left(-\\tfrac83 + 2\\right)$.',
+        '$= \\tfrac23 + \\tfrac23 = \\tfrac43$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo hat die Integralfunktion $I(x) = \\int_0^x (t - 1)\\,\\mathrm{d}t$ einen Tiefpunkt?',
+      opts: ['bei $x = 1$', 'bei $x = 2$', 'bei $x = 0$', 'Sie hat keinen.'],
+      steps: [
+        '$I^{\\prime}(x) = x - 1$ wechselt bei $x = 1$ von $-$ nach $+$.',
+        'Tiefpunkt bei $x = 1$ mit $I(1) = -\\tfrac12$. Bei $x = 0$ und $x = 2$ liegen die Nullstellen von $I$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Nullstellen hat $I(x) = \\int_0^x (t - 2)\\,\\mathrm{d}t$?',
+      opts: ['$x = 0$ und $x = 4$', '$x = 0$ und $x = 2$', 'nur $x = 0$', 'nur $x = 2$'],
+      steps: [
+        '$I(x) = \\tfrac12 x^2 - 2x = x\\left(\\tfrac12 x - 2\\right)$.',
+        'Nullstellen $0$ und $4$. Bei $x = 2$ hat $I$ seinen Tiefpunkt, dort ist der Integrand null.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int_0^2 |x - 1|\\,\\mathrm{d}x$.',
+      opts: ['$1$', '$0$', '$2$', '$\\tfrac12$'],
+      steps: [
+        'Der Graph bildet zwei Dreiecke mit Grundseite $1$ und Höhe $1$.',
+        '$2 \\cdot \\tfrac12 = 1$. Ohne Betrag wäre das Integral $0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum gilt $\\int_{-a}^{a} f(x)\\,\\mathrm{d}x = 0$ für jede punktsymmetrische Funktion $f$?',
+      opts: ['Weil punktsymmetrische Funktionen immer null sind.', 'Weil man über negative $x$ nicht integrieren darf.', 'Die Flächen links und rechts der $y$-Achse sind gleich groß, liegen aber auf verschiedenen Seiten der $x$-Achse.', 'Weil $F(a) = F(-a)$ für jede Stammfunktion gilt.'],
+      steps: [
+        'Punktsymmetrie: $f(-x) = -f(x)$, das Stück links ist das gespiegelte Stück rechts unter der Achse.',
+        'Die orientierten Flächen heben sich auf, siehe $\\int_{-1}^1 x^3\\,\\mathrm{d}x = 0$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

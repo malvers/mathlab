@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Spiegelung im Raum — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w24-spiegelung',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Spiegelung im Raum',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 24 (LB 9) · 20 Aufgaben: Spiegeln an Punkten, Geraden und Ebenen, Reflexion und kürzeste Wege · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 24 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Alle 20 Fragen aus dem Grundkurs-Blatt w23-spiegelung (eine Quelle für beide Kurse). Blocks: Koordinatenebenen und Punkte (1-4, 10), an Ebenen (5-7, 16, 17), an Geraden (8, 9), Geraden und Strahlen (11, 12), Spiegelebene (13-15, 20), kürzester Weg (18, 19). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Wohin wird $P(1 \\mid 2 \\mid 3)$ an der Ebene $z = 0$ gespiegelt?',
+      opts: ['$(-1 \\mid -2 \\mid 3)$', '$(1 \\mid 2 \\mid -3)$', '$(1 \\mid 2 \\mid 0)$', '$(-1 \\mid -2 \\mid -3)$'],
+      steps: [
+        'Nur die Koordinate senkrecht zur Ebene wechselt das Vorzeichen.',
+        '$(1 \\mid 2 \\mid -3)$. $(1 \\mid 2 \\mid 0)$ ist der Lotfußpunkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wohin wird $P(1 \\mid 2 \\mid 3)$ an der Ebene $x = 0$ gespiegelt?',
+      opts: ['$(-1 \\mid 2 \\mid 3)$', '$(1 \\mid -2 \\mid -3)$', '$(0 \\mid 2 \\mid 3)$', '$(1 \\mid 2 \\mid -3)$'],
+      steps: [
+        'Die $y$-$z$-Ebene hat den Normalenvektor $(1;\\ 0;\\ 0)$.',
+        'Die $x$-Koordinate wechselt das Vorzeichen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wohin wird $P(1 \\mid 2 \\mid 3)$ am Ursprung gespiegelt?',
+      opts: ['$(1 \\mid 2 \\mid -3)$', '$(3 \\mid 2 \\mid 1)$', '$(-1 \\mid -2 \\mid -3)$', '$(-1 \\mid 2 \\mid 3)$'],
+      steps: [
+        '$\\vec{OP^\\prime} = -\\vec{OP}$.',
+        'Alle drei Koordinaten wechseln das Vorzeichen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wohin wird $P(1 \\mid 2 \\mid 3)$ am Punkt $Z(2 \\mid 2 \\mid 2)$ gespiegelt?',
+      opts: ['$(-1 \\mid -2 \\mid -3)$', '$(1 \\mid 2 \\mid 1)$', '$(1{,}5 \\mid 2 \\mid 2{,}5)$', '$(3 \\mid 2 \\mid 1)$'],
+      steps: [
+        '$Z$ ist der Mittelpunkt von $P$ und $P^\\prime$: $\\vec{OP^\\prime} = 2\\vec{OZ} - \\vec{OP}$.',
+        '$(4 - 1 \\mid 4 - 2 \\mid 4 - 3) = (3 \\mid 2 \\mid 1)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wohin wird der Ursprung an der Ebene $2x + y + 2z = 9$ gespiegelt?',
+      opts: ['$(-2 \\mid -1 \\mid -2)$', '$(9 \\mid 0 \\mid 0)$', '$(2 \\mid 1 \\mid 2)$', '$(4 \\mid 2 \\mid 4)$'],
+      steps: [
+        'Lotgerade $t \\cdot (2;\\ 1;\\ 2)$ in $E$: $9t = 9$, Lotfußpunkt $F(2 \\mid 1 \\mid 2)$.',
+        '$\\vec{OP^\\prime} = 2\\vec{OF} = (4;\\ 2;\\ 4)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In welcher Reihenfolge spiegelt man einen Punkt $P$ an einer Ebene $E$?',
+      opts: ['$\\vec{OP^\\prime} = \\vec{OP} + \\vec{PF}$', '$P$ in $E$ einsetzen und das Vorzeichen umdrehen', 'Lotgerade durch $P$, Lotfußpunkt $F$ als Schnitt mit $E$, dann $\\vec{OP^\\prime} = \\vec{OP} + 2\\vec{PF}$', 'den Normalenvektor zu $P$ addieren'],
+      steps: [
+        '$F$ ist der Mittelpunkt von $P$ und $P^\\prime$.',
+        'Darum geht man von $P$ aus zweimal den Weg zu $F$. Nur einmal landet man auf $F$ selbst.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wohin wird $P(3 \\mid 4 \\mid 5)$ an der Ebene $x + y + z = 3$ gespiegelt?',
+      opts: ['$(-3 \\mid -4 \\mid -5)$', '$(-3 \\mid -2 \\mid -1)$', '$(1 \\mid 2 \\mid 3)$', '$(0 \\mid 1 \\mid 2)$'],
+      steps: [
+        'Lotgerade $(3 + t \\mid 4 + t \\mid 5 + t)$: $12 + 3t = 3$, $t = -3$, $F(0 \\mid 1 \\mid 2)$.',
+        '$P^\\prime = P + 2\\vec{PF} = (3 - 6 \\mid 4 - 6 \\mid 5 - 6)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wohin wird $P(1 \\mid 1 \\mid 0)$ an der $x$-Achse gespiegelt?',
+      opts: ['$(1 \\mid -1 \\mid 0)$', '$(1 \\mid 0 \\mid 0)$', '$(-1 \\mid 1 \\mid 0)$', '$(-1 \\mid -1 \\mid 0)$'],
+      steps: [
+        'Lotfußpunkt auf der $x$-Achse: $F(1 \\mid 0 \\mid 0)$.',
+        '$P^\\prime = 2F - P = (1 \\mid -1 \\mid 0)$. Allgemein wechseln $y$ und $z$ das Vorzeichen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wohin wird $P(0 \\mid 2 \\mid 0)$ an der Geraden durch $O$ mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ gespiegelt?',
+      opts: ['$(1 \\mid 1 \\mid 0)$', '$(2 \\mid 0 \\mid 0)$', '$(0 \\mid -2 \\mid 0)$', '$(-2 \\mid 0 \\mid 0)$'],
+      steps: [
+        'Lotfußpunkt: $t = \\tfrac{2}{2} = 1$, $F(1 \\mid 1 \\mid 0)$.',
+        '$P^\\prime = 2F - P = (2 \\mid 0 \\mid 0)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wohin wird $P(1 \\mid 3 \\mid 5)$ an der Ebene $x = y$ gespiegelt?',
+      opts: ['$(2 \\mid 2 \\mid 5)$', '$(-1 \\mid -3 \\mid 5)$', '$(1 \\mid 3 \\mid -5)$', '$(3 \\mid 1 \\mid 5)$'],
+      steps: [
+        'Die Spiegelung an $x - y = 0$ vertauscht $x$ und $y$.',
+        '$(3 \\mid 1 \\mid 5)$. $(2 \\mid 2 \\mid 5)$ ist der Lotfußpunkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Gerade $g\\colon \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 2 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ wird an der Ebene $z = 0$ gespiegelt. Wie lautet das Bild?',
+      opts: ['$\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 2 \\end{pmatrix} + t\\begin{pmatrix} -1 \\\\ 0 \\\\ -1 \\end{pmatrix}$', '$\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$', '$\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ -2 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ -2 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ -1 \\end{pmatrix}$'],
+      steps: [
+        'Stützpunkt spiegeln: $(0 \\mid 0 \\mid -2)$; zweiten Punkt $(1 \\mid 0 \\mid 3)$ spiegeln: $(1 \\mid 0 \\mid -3)$.',
+        'Neuer Richtungsvektor $(1;\\ 0;\\ -1)$: Auch beim Richtungsvektor wechselt die $z$-Komponente.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Lichtstrahl mit der Richtung $\\begin{pmatrix} 1 \\\\ 1 \\\\ -1 \\end{pmatrix}$ trifft auf einen Spiegel in der Ebene $z = 0$. In welche Richtung läuft er weiter?',
+      opts: ['$\\begin{pmatrix} -1 \\\\ -1 \\\\ -1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 1 \\\\ -1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} -1 \\\\ -1 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        'Einfallswinkel gleich Ausfallswinkel: Die Komponente senkrecht zum Spiegel kehrt sich um.',
+        '$(1;\\ 1;\\ 1)$. $(-1;\\ -1;\\ 1)$ liefe genau zurück.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'An welcher Ebene muss man $A(1 \\mid 0 \\mid 0)$ spiegeln, um $B(3 \\mid 0 \\mid 0)$ zu erhalten?',
+      opts: ['$y = 2$', '$x = 0$', '$x = 2$', '$x = 3$'],
+      steps: [
+        'Die Spiegelebene steht senkrecht auf $\\vec{AB}$ und geht durch den Mittelpunkt $(2 \\mid 0 \\mid 0)$.',
+        'Also $x = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'An welcher Ebene muss man $A(1 \\mid 2 \\mid 3)$ spiegeln, um $B(3 \\mid 4 \\mid 1)$ zu erhalten?',
+      opts: ['$2x + 2y - 2z = 3$', '$x + y - z = 3$', '$x + y - z = 0$', '$x + y + z = 7$'],
+      steps: [
+        'Normalenvektor $\\vec{AB} = (2;\\ 2;\\ -2)$, kürzer $(1;\\ 1;\\ -1)$; Mittelpunkt $(2 \\mid 3 \\mid 2)$.',
+        '$d = 2 + 3 - 2 = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Punkte bleiben bei der Spiegelung an einer Ebene $E$ an ihrem Platz?',
+      opts: ['nur der Lotfußpunkt des Ursprungs', 'genau die Punkte von $E$', 'kein Punkt', 'alle Punkte'],
+      steps: [
+        'Für $P$ in $E$ ist der Lotfußpunkt $P$ selbst.',
+        'Dann ist auch $P^\\prime = P$. Alle anderen Punkte wechseln die Seite.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Ursprung wird an $E\\colon 2x + y + 2z = 9$ gespiegelt. Wie weit sind $O$ und sein Bild voneinander entfernt?',
+      opts: ['$6$', '$9$', '$4{,}5$', '$3$'],
+      steps: [
+        'Abstand von $O$ zu $E$: $\\tfrac93 = 3$.',
+        'Das Bild liegt genauso weit auf der anderen Seite: $2 \\cdot 3 = 6$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wohin wird $P(2 \\mid 0 \\mid 0)$ an der Ebene $x + y = 0$ gespiegelt?',
+      opts: ['$(1 \\mid -1 \\mid 0)$', '$(0 \\mid 2 \\mid 0)$', '$(-2 \\mid 0 \\mid 0)$', '$(0 \\mid -2 \\mid 0)$'],
+      steps: [
+        'Lotgerade $(2 + t \\mid t \\mid 0)$: $2 + 2t = 0$, $t = -1$, $F(1 \\mid -1 \\mid 0)$.',
+        '$P^\\prime = 2F - P = (0 \\mid -2 \\mid 0)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Von $A(0 \\mid 0 \\mid 1)$ soll ein Weg über einen Punkt der Ebene $z = 0$ nach $B(4 \\mid 0 \\mid 3)$ führen. Wie lang ist der kürzeste?',
+      opts: ['$4\\sqrt2 \\approx 5{,}66$', '$8$', '$\\sqrt{20} \\approx 4{,}47$', '$4$'],
+      steps: [
+        '$A$ an der Ebene spiegeln: $A^\\prime(0 \\mid 0 \\mid -1)$. Jeder Weg über die Ebene ist so lang wie der Weg von $A^\\prime$ nach $B$.',
+        'Am kürzesten ist die Strecke: $|(4;\\ 0;\\ 4)| = 4\\sqrt2$. $\\sqrt{20}$ ist der direkte Weg ohne Ebene.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Über welchen Punkt der Ebene führt der kürzeste Weg aus Aufgabe 18?',
+      opts: ['$(1 \\mid 0 \\mid 0)$', '$(2 \\mid 0 \\mid 0)$', '$(3 \\mid 0 \\mid 0)$', '$(0 \\mid 0 \\mid 0)$'],
+      steps: [
+        'Strecke $A^\\prime B$: $(0;\\ 0;\\ -1) + s(4;\\ 0;\\ 4)$, $z = 0$ bei $s = \\tfrac14$.',
+        '$(1 \\mid 0 \\mid 0)$. Dort gilt Einfallswinkel gleich Ausfallswinkel.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$P$ wird an einer Ebene gespiegelt, das Bild $P^\\prime$ wird noch einmal an derselben Ebene gespiegelt. Was entsteht?',
+      opts: ['ein Punkt im doppelten Abstand', 'der Lotfußpunkt', 'wieder $P$', 'der Ursprung'],
+      steps: [
+        'Die Spiegelung macht sich selbst rückgängig.',
+        'Zweimal angewandt ergibt sie die identische Abbildung.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

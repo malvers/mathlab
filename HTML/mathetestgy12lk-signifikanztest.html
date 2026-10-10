@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Einseitige Signifikanztests — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w15-signifikanztest',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Einseitige Signifikanztests',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 15 (LB 7) · 20 Aufgaben: Nullhypothese, Signifikanzniveau, kritischer Wert, Ablehnungsbereich · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 15 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Alle 20 Fragen aus dem Grundkurs-Blatt w12-signifikanztest (eine Quelle für beide Kurse). Blocks: Hypothese, Testgröße, Richtung (1-4, 19), Ablehnungsbereich rechtsseitig (5, 6, 9, 14-17), linksseitig (10), Entscheidung und Deutung (7, 8, 11-13, 18, 20). Mit CAS/Tabelle der kumulierten Binomialverteilung. */
+  questions: [
+    {
+      q: 'Ein Spieler vermutet, dass ein Würfel zu oft eine Sechs zeigt. Welche Nullhypothese prüft er?',
+      opts: ['$H_0\\colon p > \\tfrac16$', '$H_0\\colon p = 0$', '$H_0\\colon p = \\tfrac12$', '$H_0\\colon p = \\tfrac16$ (der Würfel ist in Ordnung)'],
+      steps: [
+        'Die Nullhypothese beschreibt den Normalfall, den man widerlegen möchte.',
+        'Die Vermutung $p > \\tfrac16$ ist die Gegenhypothese. Nur große Anzahlen von Sechsen sprechen gegen $H_0$: rechtsseitiger Test.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist beim Würfeltest die Testgröße?',
+      opts: ['die Wahrscheinlichkeit $\\tfrac16$', 'die Anzahl $X$ der Sechsen bei $n$ Würfen', 'die Anzahl der Würfe $n$', 'die Augensumme aller Würfe'],
+      steps: [
+        'Die Testgröße ist die Zufallsgröße, deren Wert man in der Stichprobe beobachtet.',
+        'Unter $H_0$ ist $X$ binomialverteilt mit $n$ und $p = \\tfrac16$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet ein Signifikanzniveau von $\\alpha = 5\\,\\%$?',
+      opts: ['$5\\,\\%$ der Würfe zählen nicht.', '$H_0$ ist mit $5\\,\\%$ Wahrscheinlichkeit wahr.', 'Die Wahrscheinlichkeit, $H_0$ abzulehnen, obwohl $H_0$ wahr ist, beträgt höchstens $5\\,\\%$.', 'Der Test ist zu $5\\,\\%$ genau.'],
+      steps: [
+        'Auch bei einem fairen Würfel fallen manchmal zufällig sehr viele Sechsen.',
+        'Den Ablehnungsbereich wählt man so, dass dieser Irrtum höchstens mit $\\alpha$ passiert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Form hat der Ablehnungsbereich eines rechtsseitigen Tests mit $n$ Versuchen?',
+      opts: ['$K = \\{0;\\ n\\}$', '$K = \\{k\\}$', '$K = \\{k;\\ k + 1;\\ \\ldots;\\ n\\}$', '$K = \\{0;\\ 1;\\ \\ldots;\\ k\\}$'],
+      steps: [
+        'Gegen $H_0$ sprechen beim rechtsseitigen Test nur auffällig große Werte.',
+        'Der kleinste Wert $k$ im Ablehnungsbereich heißt kritischer Wert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Würfel wird $60$-mal geworfen, $H_0\\colon p = \\tfrac16$, rechtsseitig, $\\alpha = 5\\,\\%$. Es gilt $P(X \\ge 15) \\approx 0{,}065$ und $P(X \\ge 16) \\approx 0{,}034$. Wie lautet der Ablehnungsbereich?',
+      fig: '<svg viewBox="0 0 480 280" width="480" height="280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Histogramm der Binomialverteilung mit n = 60 und p = 1/6, Ablehnungsbereich ab k = 16 rot"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="420" height="228"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="240.21" x2="458" y2="240.21" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="52.12" y1="246" x2="52.12" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="460" y="256.21" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">k</text><text x="40.12" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">P(X = k)</text><text x="45.12" y="255.21" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="127.84" y1="236.71" x2="127.84" y2="243.71" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="127.84" y="256.21" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">5</text><line x1="203.57" y1="236.71" x2="203.57" y2="243.71" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="203.57" y="256.21" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">10</text><line x1="279.29" y1="236.71" x2="279.29" y2="243.71" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="279.29" y="256.21" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">15</text><line x1="355.01" y1="236.71" x2="355.01" y2="243.71" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="355.01" y="256.21" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">20</text><line x1="430.74" y1="236.71" x2="430.74" y2="243.71" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="430.74" y="256.21" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">25</text><rect x="46.06" y="240.18" width="12.12" height="0.03" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="61.2" y="239.9" width="12.12" height="0.31" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="76.35" y="238.38" width="12.12" height="1.82" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="91.49" y="233.17" width="12.12" height="7.04" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="106.64" y="220.15" width="12.12" height="20.06" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="121.78" y="195.27" width="12.12" height="44.93" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="136.93" y="157.83" width="12.12" height="82.38" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="152.07" y="113.11" width="12.12" height="127.1" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="167.22" y="71.8" width="12.12" height="168.4" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="182.36" y="45.6" width="12.12" height="194.6" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="197.51" y="41.71" width="12.12" height="198.49" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="212.65" y="59.76" width="12.12" height="180.45" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="227.8" y="92.84" width="12.12" height="147.37" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="242.94" y="131.38" width="12.12" height="108.82" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="258.09" y="167.14" width="12.12" height="73.07" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="273.23" y="195.39" width="12.12" height="44.81" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="288.38" y="215" width="12.12" height="25.21" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="303.52" y="227.16" width="12.12" height="13.05" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="318.67" y="233.97" width="12.12" height="6.23" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="333.81" y="237.45" width="12.12" height="2.76" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="348.96" y="239.08" width="12.12" height="1.13" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="364.1" y="239.77" width="12.12" height="0.43" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="379.25" y="240.05" width="12.12" height="0.15" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="394.39" y="240.15" width="12.12" height="0.05" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="409.54" y="240.19" width="12.12" height="0.02" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="424.68" y="240.2" width="12.12" height="0" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/><rect x="439.83" y="240.2" width="12.12" height="0" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.6" opacity="0.8"/></svg>',
+      figcap: 'B(60; 1/6): rot der Ablehnungsbereich ab k = 16',
+      opts: ['$K = \\{0;\\ \\ldots;\\ 15\\}$', '$K = \\{11;\\ \\ldots;\\ 60\\}$', '$K = \\{15;\\ \\ldots;\\ 60\\}$', '$K = \\{16;\\ \\ldots;\\ 60\\}$'],
+      steps: [
+        'Gesucht ist das kleinste $k$ mit $P(X \\ge k) \\le 0{,}05$.',
+        '$P(X \\ge 15) > 0{,}05$, aber $P(X \\ge 16) \\le 0{,}05$: kritischer Wert $16$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Mit welcher Wahrscheinlichkeit lehnt man beim Test aus Aufgabe 5 einen fairen Würfel fälschlich ab?',
+      opts: ['$0\\,\\%$', '$\\approx 6{,}5\\,\\%$', 'genau $5\\,\\%$', '$\\approx 3{,}4\\,\\%$'],
+      steps: [
+        'Fälschlich abgelehnt wird, wenn $X \\in K$ obwohl $p = \\tfrac16$.',
+        '$P(X \\ge 16) \\approx 0{,}034$. Das tatsächliche Niveau liegt unter $5\\,\\%$, weil $X$ nur ganze Werte annimmt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei $60$ Würfen fallen $14$ Sechsen. Wie entscheidet man mit dem Test aus Aufgabe 5?',
+      opts: ['$H_0$ wird abgelehnt.', 'Der Würfel ist bewiesen fair.', '$H_0$ wird nicht abgelehnt.', 'Man kann nicht entscheiden.'],
+      steps: [
+        '$14 \\notin K = \\{16;\\ \\ldots;\\ 60\\}$.',
+        'Die Abweichung vom Erwartungswert $10$ ist nicht auffällig genug. Bewiesen ist damit nichts.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bei $60$ Würfen fallen $18$ Sechsen. Wie entscheidet man mit dem Test aus Aufgabe 5?',
+      opts: ['$H_0$ ist sicher falsch.', '$H_0$ wird nicht abgelehnt.', '$H_0$ wird abgelehnt: Der Würfel zeigt vermutlich zu oft eine Sechs.', 'Man muss noch $60$-mal würfeln.'],
+      steps: [
+        '$18 \\in K$: Das Ergebnis wäre bei einem fairen Würfel sehr unwahrscheinlich.',
+        'Man lehnt $H_0$ ab, irrt sich dabei aber mit höchstens $5\\,\\%$ Wahrscheinlichkeit.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Medikament heilt bisher $60\\,\\%$. Ein neues soll besser sein. Getestet wird an $50$ Personen, $H_0\\colon p = 0{,}6$, rechtsseitig, $\\alpha = 5\\,\\%$. Mit $P(X \\ge 36) \\approx 0{,}054$ und $P(X \\ge 37) \\approx 0{,}028$: Ab wie vielen Heilungen spricht man von einem besseren Medikament?',
+      opts: ['ab $37$', 'ab $30$', 'ab $31$', 'ab $36$'],
+      steps: [
+        'Kleinstes $k$ mit $P(X \\ge k) \\le 0{,}05$.',
+        '$k = 37$. Der Erwartungswert unter $H_0$ ist $30$; erst deutlich mehr Heilungen sind signifikant.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Partei behauptet, mindestens $40\\,\\%$ Zustimmung zu haben. Bei $100$ Befragten soll das linksseitig getestet werden, $\\alpha = 5\\,\\%$. Es gilt $P(X \\le 31) \\approx 0{,}040$ und $P(X \\le 32) \\approx 0{,}062$. Wie lautet der Ablehnungsbereich?',
+      opts: ['$K = \\{0;\\ \\ldots;\\ 40\\}$', '$K = \\{31;\\ \\ldots;\\ 100\\}$', '$K = \\{0;\\ \\ldots;\\ 31\\}$', '$K = \\{0;\\ \\ldots;\\ 32\\}$'],
+      steps: [
+        'Gegen $H_0\\colon p \\ge 0{,}4$ sprechen nur auffällig kleine Werte.',
+        'Größtes $k$ mit $P(X \\le k) \\le 0{,}05$: $k = 31$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie formuliert man die Entscheidungsregel zum Test aus Aufgabe 10?',
+      opts: ['Stimmen höchstens $31$ Befragte zu, wird $H_0$ abgelehnt, sonst nicht.', 'Stimmen weniger als $40$ zu, wird $H_0$ abgelehnt.', 'Stimmen genau $40$ zu, wird $H_0$ angenommen.', 'Stimmen mindestens $31$ zu, wird $H_0$ abgelehnt.'],
+      steps: [
+        'Die Regel nennt den Ablehnungsbereich und die Folge.',
+        '$35$ Zustimmungen etwa liegen unter $40$, sprechen aber noch nicht signifikant gegen die Behauptung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist der kritische Wert eines Tests?',
+      opts: ['der Erwartungswert unter $H_0$', 'das Signifikanzniveau', 'die Anzahl der Versuche', 'die Grenze des Ablehnungsbereichs'],
+      steps: [
+        'Beim rechtsseitigen Test ist es der kleinste, beim linksseitigen der größte Wert des Ablehnungsbereichs.',
+        'Im Würfeltest: $16$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Test lehnt $H_0$ nicht ab. Was folgt daraus?',
+      opts: ['$H_0$ ist mit $95\\,\\%$ Wahrscheinlichkeit wahr.', 'Die Daten sprechen nicht deutlich genug gegen $H_0$; bewiesen ist $H_0$ damit nicht.', 'Die Gegenhypothese ist falsch.', '$H_0$ ist bewiesen.'],
+      steps: [
+        'Ein Signifikanztest kann eine Hypothese nur mit begrenztem Irrtum verwerfen.',
+        'Nicht abgelehnt heißt nur: Das Ergebnis ist mit $H_0$ verträglich.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Man verkleinert das Signifikanzniveau von $5\\,\\%$ auf $1\\,\\%$. Was passiert mit dem Ablehnungsbereich eines rechtsseitigen Tests?',
+      opts: ['Er wird kleiner, der kritische Wert größer.', 'Er verschiebt sich nach links.', 'Er wird größer.', 'Er bleibt gleich.'],
+      steps: [
+        'Für $\\alpha = 1\\,\\%$ muss das Ergebnis noch extremer sein.',
+        'Beim Medikament: kritischer Wert $39$ statt $37$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Medikamententest mit $n = 50$, $H_0\\colon p = 0{,}6$, $\\alpha = 1\\,\\%$: Mit $P(X \\ge 38) \\approx 0{,}013$ und $P(X \\ge 39) \\approx 0{,}006$, wie lautet der Ablehnungsbereich?',
+      opts: ['$K = \\{39;\\ \\ldots;\\ 50\\}$', '$K = \\{38;\\ \\ldots;\\ 50\\}$', '$K = \\{0;\\ \\ldots;\\ 39\\}$', '$K = \\{37;\\ \\ldots;\\ 50\\}$'],
+      steps: [
+        'Kleinstes $k$ mit $P(X \\ge k) \\le 0{,}01$.',
+        '$P(X \\ge 38) > 0{,}01$, $P(X \\ge 39) \\le 0{,}01$: $k = 39$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Münze soll auf zu viel Zahl getestet werden: $n = 20$, $H_0\\colon p = 0{,}5$, rechtsseitig, $\\alpha = 5\\,\\%$. Mit $P(X \\ge 14) \\approx 0{,}058$ und $P(X \\ge 15) \\approx 0{,}021$: Wie lautet der Ablehnungsbereich?',
+      opts: ['$K = \\{0;\\ \\ldots;\\ 5\\}$', '$K = \\{11;\\ \\ldots;\\ 20\\}$', '$K = \\{14;\\ \\ldots;\\ 20\\}$', '$K = \\{15;\\ \\ldots;\\ 20\\}$'],
+      steps: [
+        'Kleinstes $k$ mit $P(X \\ge k) \\le 0{,}05$.',
+        '$k = 15$, tatsächliches Niveau etwa $2{,}1\\,\\%$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie berechnet man $P(X \\ge k)$ mit einem Rechner, der nur $P(X \\le k)$ kennt?',
+      opts: ['$P(X \\ge k) = 1 - P(X \\le k)$', '$P(X \\ge k) = 1 - P(X \\le k - 1)$', '$P(X \\ge k) = P(X \\le n - k)$ immer', '$P(X \\ge k) = P(X \\le k) - P(X = k)$'],
+      steps: [
+        '$X \\ge k$ ist das Gegenereignis zu $X \\le k - 1$.',
+        'Mit $1 - P(X \\le k)$ fehlt die Wahrscheinlichkeit für genau $k$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Wert erwartet man beim Würfeltest ($n = 60$) für die Anzahl der Sechsen, wenn $H_0$ stimmt?',
+      opts: ['$30$', '$10$', '$6$', '$16$'],
+      steps: [
+        'Erwartungswert der Binomialverteilung: $\\mu = n \\cdot p = 60 \\cdot \\tfrac16$.',
+        '$= 10$. Der kritische Wert $16$ liegt deutlich darüber.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Hersteller befürchtet, dass seine Ausschussquote von $5\\,\\%$ gestiegen ist. Welcher Test passt?',
+      opts: ['ein rechtsseitiger Test mit $H_0\\colon p = 0{,}05$', 'ein linksseitiger Test mit $H_0\\colon p = 0{,}05$', 'ein rechtsseitiger Test mit $H_0\\colon p = 0{,}5$', 'gar kein Test'],
+      steps: [
+        'Gegen die Nullhypothese „unverändert“ sprechen viele defekte Teile.',
+        'Also große Werte von $X$: rechtsseitig.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Test der Partei (Aufgabe 10) stimmen $30$ von $100$ zu. Was ist die richtige Schlussfolgerung?',
+      opts: ['Die Partei hat genau $30\\,\\%$.', '$H_0$ wird abgelehnt; die Behauptung von mindestens $40\\,\\%$ ist auf dem $5\\,\\%$-Niveau widerlegt.', 'Die Partei hat sicher weniger als $40\\,\\%$.', '$H_0$ wird nicht abgelehnt.'],
+      steps: [
+        '$30 \\in K = \\{0;\\ \\ldots;\\ 31\\}$.',
+        'Ablehnen heißt: Wäre $p \\ge 0{,}4$, wäre ein so kleines Ergebnis sehr unwahrscheinlich. Sicher ist es trotzdem nicht.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

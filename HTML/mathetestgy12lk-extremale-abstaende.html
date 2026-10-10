@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Minimale und maximale Entfernungen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w23-extremale-abstaende',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Minimale und maximale Entfernungen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 23 (LB 9) · 20 Aufgaben: kürzeste Wege zu Graphen, bewegte Objekte, Abstände und Winkel an einer Pyramide · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 23 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Abstandsfunktionen minimieren (1-12), vernetzte Aufgabe an einer Pyramide (13-20) */
+  questions: [
+    {
+      q: 'Welchen kleinsten Abstand hat ein Punkt $P_t(t \\mid 2 - t \\mid 0)$ vom Ursprung?',
+      opts: ['$1$', '$2$', '$\\sqrt2$', '$0$'],
+      steps: [
+        '$d(t)^2 = t^2 + (2 - t)^2 = 2t^2 - 4t + 4$, Scheitel bei $t = 1$.',
+        '$d(1)^2 = 2$, also $d = \\sqrt2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Punkte der Parabel $y = x^2$ liegen dem Punkt $(0 \\mid 2)$ am nächsten?',
+      opts: ['$(\\pm 1 \\mid 1)$', '$(0 \\mid 0)$', '$(\\pm\\sqrt2 \\mid 2)$', '$(\\pm\\sqrt{1{,}5} \\mid 1{,}5)$'],
+      steps: [
+        '$d(x)^2 = x^2 + (x^2 - 2)^2 = x^4 - 3x^2 + 4$, Ableitung $4x^3 - 6x = 0$.',
+        '$x^2 = 1{,}5$, $d^2 = 1{,}75$, $d \\approx 1{,}32$. Der Scheitel $(0 \\mid 0)$ hat den Abstand $2$, er ist weiter weg.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit ist der Ursprung von der Geraden $y = 2x + 1$ in der Ebene entfernt?',
+      opts: ['$\\tfrac{1}{\\sqrt5} \\approx 0{,}45$', '$1$', '$\\tfrac{2}{\\sqrt5} \\approx 0{,}89$', '$0{,}5$'],
+      steps: [
+        '$d(x)^2 = x^2 + (2x + 1)^2 = 5x^2 + 4x + 1$, Scheitel bei $x = -0{,}4$.',
+        'Lotfußpunkt $(-0{,}4 \\mid 0{,}2)$, $d^2 = 0{,}2$, $d = \\tfrac{1}{\\sqrt5}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Punkt des Graphen von $f(x) = \\sqrt x$ liegt $(2{,}5 \\mid 0)$ am nächsten?',
+      opts: ['$(2{,}5 \\mid \\sqrt{2{,}5})$, Abstand $\\approx 1{,}58$', '$(2 \\mid \\sqrt2)$, Abstand $1{,}5$', '$(1 \\mid 1)$, Abstand $\\approx 1{,}80$', '$(0 \\mid 0)$, Abstand $2{,}5$'],
+      steps: [
+        '$d(x)^2 = (x - 2{,}5)^2 + x = x^2 - 4x + 6{,}25$, Scheitel bei $x = 2$.',
+        '$d^2 = 4 - 8 + 6{,}25 = 2{,}25$, also $d = 1{,}5$. Der Punkt senkrecht darüber ist nicht der nächste.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Punkte bewegen sich: $A_t(t \\mid 0 \\mid 0)$ und $B_t(0 \\mid 6 - t \\mid 0)$. Wie nah kommen sie sich?',
+      opts: ['$3\\sqrt2 \\approx 4{,}24$', '$6$', '$3$', '$0$'],
+      steps: [
+        '$d(t)^2 = t^2 + (6 - t)^2$, Scheitel bei $t = 3$.',
+        '$d(3) = \\sqrt{18} = 3\\sqrt2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Schiff startet in $(0 \\mid 0)$ und fährt je Stunde um $\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$ km. Ein Leuchtturm steht bei $L(10 \\mid 0)$. Wie nah kommt das Schiff ihm?',
+      opts: ['$6$ km', '$10$ km', '$4{,}8$ km', '$8$ km'],
+      steps: [
+        '$t = \\dfrac{\\vec{OL} \\cdot \\vec v}{\\vec v \\cdot \\vec v} = \\dfrac{30}{25} = 1{,}2$: Position $(3{,}6 \\mid 4{,}8)$.',
+        'Abstand $\\sqrt{6{,}4^2 + 4{,}8^2} = \\sqrt{64} = 8$ km.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wann ist das Schiff aus Aufgabe 6 dem Leuchtturm am nächsten?',
+      opts: ['nach $72$ min', 'nach $1{,}2$ min', 'nach $60$ min', 'nach $2$ h'],
+      steps: [
+        '$t = 1{,}2$ h.',
+        '$1{,}2 \\cdot 60 = 72$ min.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum darf man statt $d(t)$ auch $d(t)^2$ minimieren?',
+      opts: ['Weil $d(t)^2$ immer kleiner ist.', 'Weil man nur Quadrate ableiten kann.', 'Weil $d(t)^2 = d(t)$ ist.', 'Die Wurzel ist streng monoton steigend, beide haben dieselbe Minimalstelle.'],
+      steps: [
+        'Ist $d(t_0)^2$ der kleinste Wert, so ist auch $d(t_0) = \\sqrt{d(t_0)^2}$ der kleinste.',
+        '$d^2$ ist ohne Wurzel leichter abzuleiten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Punkt der Hyperbel $y = \\tfrac1x$ mit $x > 0$ liegt dem Ursprung am nächsten?',
+      opts: ['$(2 \\mid 0{,}5)$, Abstand $\\approx 2{,}06$', '$(1 \\mid 1)$, Abstand $\\sqrt2$', '$(0{,}5 \\mid 2)$, Abstand $\\approx 2{,}06$', 'Es gibt keinen nächsten Punkt.'],
+      steps: [
+        '$d(x)^2 = x^2 + \\tfrac{1}{x^2}$, Ableitung $2x - \\tfrac{2}{x^3} = 0$.',
+        '$x^4 = 1$, $x = 1$: $d^2 = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Flugzeuge fliegen auf $A_t(-10 + 2t \\mid 0 \\mid 8)$ und $B_t(0 \\mid -10 + 2t \\mid 9)$ ($t$ in min, km). Wie nah kommen sie sich?',
+      opts: ['$10$ km', '$1$ km', '$0$ km', '$\\sqrt2$ km'],
+      steps: [
+        '$d(t)^2 = 2(2t - 10)^2 + 1$, am kleinsten bei $t = 5$.',
+        '$d = 1$ km: Beide sind dann über dem Ursprung, nur durch die Höhen getrennt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für eine Abstandsfunktion gilt $d(t)^2 = 2t^2 - 8t + 11$. Wie groß ist der kleinste Abstand?',
+      opts: ['$3$', '$\\sqrt{11}$', '$\\sqrt3$', '$2$'],
+      steps: [
+        'Scheitel bei $t = \\tfrac{8}{4} = 2$.',
+        '$d(2)^2 = 8 - 16 + 11 = 3$, $d = \\sqrt3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Punkt des Kreises $x^2 + y^2 = 25$ liegt dem Punkt $(6 \\mid 8)$ am nächsten?',
+      opts: ['$(0 \\mid 5)$, Abstand $\\approx 6{,}71$', '$(4 \\mid 3)$, Abstand $\\approx 5{,}39$', '$(5 \\mid 0)$, Abstand $\\approx 8{,}06$', '$(3 \\mid 4)$, Abstand $5$'],
+      steps: [
+        'Der nächste Punkt liegt auf der Strecke vom Mittelpunkt zu $(6 \\mid 8)$.',
+        '$(6 \\mid 8)$ hat vom Ursprung den Abstand $10$; bei Radius $5$ ist das die Hälfte: $(3 \\mid 4)$, Abstand $5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Pyramide hat die Grundfläche $A(0 \\mid 0 \\mid 0)$, $B(6 \\mid 0 \\mid 0)$, $C(6 \\mid 6 \\mid 0)$, $D(0 \\mid 6 \\mid 0)$ und die Spitze $S(3 \\mid 3 \\mid 4)$. Wie hoch ist sie?',
+      opts: ['$4$', '$3$', '$\\sqrt{34}$', '$5$'],
+      steps: [
+        'Die Grundfläche liegt in $z = 0$.',
+        'Die Höhe ist der Abstand der Spitze von dieser Ebene: $4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Pyramide hat die Grundfläche $A(0 \\mid 0 \\mid 0)$, $B(6 \\mid 0 \\mid 0)$, $C(6 \\mid 6 \\mid 0)$, $D(0 \\mid 6 \\mid 0)$ und die Spitze $S(3 \\mid 3 \\mid 4)$. Wie lang ist die Seitenkante $AS$?',
+      opts: ['$5$', '$\\sqrt{34} \\approx 5{,}83$', '$10$', '$\\sqrt{18} \\approx 4{,}24$'],
+      steps: [
+        '$\\vec{AS} = (3;\\ 3;\\ 4)$.',
+        '$\\sqrt{9 + 9 + 16} = \\sqrt{34}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Pyramide hat die Grundfläche $A(0 \\mid 0 \\mid 0)$, $B(6 \\mid 0 \\mid 0)$, $C(6 \\mid 6 \\mid 0)$, $D(0 \\mid 6 \\mid 0)$ und die Spitze $S(3 \\mid 3 \\mid 4)$. Welches Volumen hat sie?',
+      opts: ['$48$', '$24$', '$144$', '$72$'],
+      steps: [
+        '$V = \\tfrac13 \\cdot G \\cdot h = \\tfrac13 \\cdot 36 \\cdot 4$.',
+        '$= 48$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Pyramide hat die Grundfläche $A(0 \\mid 0 \\mid 0)$, $B(6 \\mid 0 \\mid 0)$, $C(6 \\mid 6 \\mid 0)$, $D(0 \\mid 6 \\mid 0)$ und die Spitze $S(3 \\mid 3 \\mid 4)$. Wie lang ist die Höhe der Seitenfläche $ABS$, gemessen vom Mittelpunkt von $AB$ bis $S$?',
+      opts: ['$\\sqrt{41}$', '$5$', '$\\sqrt{34}$', '$4$'],
+      steps: [
+        'Mittelpunkt $M_{AB}(3 \\mid 0 \\mid 0)$, $\\vec{MS} = (0;\\ 3;\\ 4)$.',
+        '$|\\vec{MS}| = 5$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Pyramide hat die Grundfläche $A(0 \\mid 0 \\mid 0)$, $B(6 \\mid 0 \\mid 0)$, $C(6 \\mid 6 \\mid 0)$, $D(0 \\mid 6 \\mid 0)$ und die Spitze $S(3 \\mid 3 \\mid 4)$. Wie groß ist ihre Mantelfläche?',
+      opts: ['$48$', '$30$', '$96$', '$60$'],
+      steps: [
+        'Vier gleiche Dreiecke mit der Grundseite $6$ und der Höhe $5$.',
+        '$4 \\cdot \\tfrac12 \\cdot 6 \\cdot 5 = 60$. Mit der Grundfläche wären es $96$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Pyramide hat die Grundfläche $A(0 \\mid 0 \\mid 0)$, $B(6 \\mid 0 \\mid 0)$, $C(6 \\mid 6 \\mid 0)$, $D(0 \\mid 6 \\mid 0)$ und die Spitze $S(3 \\mid 3 \\mid 4)$. Welchen Winkel bildet eine Seitenfläche mit der Grundfläche?',
+      opts: ['$\\approx 43{,}3^\\circ$', '$45^\\circ$', '$\\approx 53{,}1^\\circ$', '$\\approx 36{,}9^\\circ$'],
+      steps: [
+        'Im Querschnitt durch $M_{AB}$ und $S$: Höhe $4$ über der halben Seite $3$.',
+        '$\\tan\\varphi = \\tfrac43$, $\\varphi \\approx 53{,}1^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Pyramide hat die Grundfläche $A(0 \\mid 0 \\mid 0)$, $B(6 \\mid 0 \\mid 0)$, $C(6 \\mid 6 \\mid 0)$, $D(0 \\mid 6 \\mid 0)$ und die Spitze $S(3 \\mid 3 \\mid 4)$. Welchen Winkel bildet die Seitenkante $AS$ mit der Grundfläche?',
+      opts: ['$\\approx 46{,}7^\\circ$', '$\\approx 53{,}1^\\circ$', '$\\approx 43{,}3^\\circ$', '$\\approx 36{,}9^\\circ$'],
+      steps: [
+        '$\\sin\\varphi = \\dfrac{|(3;\\ 3;\\ 4) \\cdot (0;\\ 0;\\ 1)|}{\\sqrt{34}} = \\dfrac{4}{\\sqrt{34}}$.',
+        '$\\varphi \\approx 43{,}3^\\circ$: flacher als die Seitenfläche, weil die Kante länger ist.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Pyramide hat die Grundfläche $A(0 \\mid 0 \\mid 0)$, $B(6 \\mid 0 \\mid 0)$, $C(6 \\mid 6 \\mid 0)$, $D(0 \\mid 6 \\mid 0)$ und die Spitze $S(3 \\mid 3 \\mid 4)$. Die Seitenfläche $BCS$ liegt in $4x + 3z = 24$. Wie weit ist $A$ von ihr entfernt?',
+      opts: ['$4$', '$6$', '$4{,}8$', '$24$'],
+      steps: [
+        '$\\dfrac{|4 \\cdot 0 + 3 \\cdot 0 - 24|}{\\sqrt{16 + 9}}$.',
+        '$= \\tfrac{24}{5} = 4{,}8$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

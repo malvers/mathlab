@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wiederholung für Klausur 12/I — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w13-klausur1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Wiederholung für Klausur 12/I',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 13 (Klausur) · 20 Aufgaben: Integrieren, Flächen, Rotationskörper, numerische Verfahren und Normalverteilung gemischt · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 13 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Integrieren (1-6, 13-15), Flächen und Bestand (7-9), Rotationskörper (16), numerische Verfahren (10-12, 17), Normalverteilung (18-20). 1 bis 9 und 15, 16 ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Berechne $\\int (6x^2 + 4x)\\,\\mathrm{d}x$.',
+      opts: ['$3x^3 + 2x^2 + C$', '$6x^3 + 4x^2 + C$', '$2x^3 + 2x^2 + C$', '$12x + 4 + C$'],
+      steps: [
+        '$6 \\cdot \\tfrac{x^3}{3} + 4 \\cdot \\tfrac{x^2}{2}$.',
+        '$= 2x^3 + 2x^2 + C$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\int_0^2 (x^3 - x)\\,\\mathrm{d}x$.',
+      opts: ['$2$', '$4$', '$0$', '$6$'],
+      steps: [
+        '$\\left[\\tfrac14 x^4 - \\tfrac12 x^2\\right]_0^2 = 4 - 2$.',
+        '$= 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int \\mathrm{e}^{3x}\\,\\mathrm{d}x$.',
+      opts: ['$3\\,\\mathrm{e}^{3x} + C$', '$\\tfrac13\\,\\mathrm{e}^{3x} + C$', '$\\mathrm{e}^{3x} + C$', '$\\tfrac{1}{3x}\\,\\mathrm{e}^{3x} + C$'],
+      steps: [
+        'Lineare Verkettung, innere Ableitung $3$.',
+        'Probe: $\\left(\\tfrac13\\,\\mathrm{e}^{3x}\\right)^{\\prime} = \\mathrm{e}^{3x}$ ✔'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int_1^{\\mathrm{e}} \\dfrac2x\\,\\mathrm{d}x$.',
+      opts: ['$2\\mathrm{e} - 2$', '$\\ln 2$', '$1$', '$2$'],
+      steps: [
+        '$\\left[2\\ln x\\right]_1^{\\mathrm{e}} = 2 \\cdot 1 - 2 \\cdot 0$.',
+        '$= 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int_0^{\\pi/2} \\sin x\\,\\mathrm{d}x$.',
+      opts: ['$0$', '$-1$', '$2$', '$1$'],
+      steps: [
+        '$\\left[-\\cos x\\right]_0^{\\pi/2} = -0 - (-1)$.',
+        '$= 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Stammfunktion von $f(x) = 4x^3$ geht durch $(1 \\mid 3)$?',
+      opts: ['$F(x) = x^4 + 2$', '$F(x) = 4x^4 - 1$', '$F(x) = x^4 + 3$', '$F(x) = 12x^2 - 9$'],
+      steps: [
+        '$F(x) = x^4 + C$, $1 + C = 3$.',
+        '$C = 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Flächeninhalt zwischen dem Graphen von $f(x) = x^2 - 9$ und der $x$-Achse.',
+      opts: ['$36$', '$72$', '$18$', '$-36$'],
+      steps: [
+        'Nullstellen $\\pm 3$: $\\int_{-3}^3 (x^2 - 9)\\,\\mathrm{d}x = \\left[\\tfrac13 x^3 - 9x\\right]_{-3}^3 = -18 - 18$.',
+        '$= -36$, die Fläche ist $36$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Inhalt der Fläche zwischen $f(x) = x^2$ und $g(x) = x^3$ über $[0;\\ 1]$.',
+      opts: ['$\\tfrac13$', '$\\tfrac{1}{12}$', '$\\tfrac{7}{12}$', '$\\tfrac14$'],
+      steps: [
+        'Auf $[0;\\ 1]$ liegt $x^2$ oben.',
+        '$\\int_0^1 (x^2 - x^3)\\,\\mathrm{d}x = \\tfrac13 - \\tfrac14 = \\tfrac{1}{12}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Speicher enthält $50$ l. Die Rate ist $r(t) = 8 - 2t$ (l/min). Wie viel enthält er nach $6$ Minuten?',
+      opts: ['$46$ l', '$66$ l', '$62$ l', '$12$ l'],
+      steps: [
+        '$50 + \\int_0^6 (8 - 2t)\\,\\mathrm{d}t = 50 + \\left[8t - t^2\\right]_0^6$.',
+        '$= 50 + 12 = 62$ l. Bis $t = 4$ fließen $16$ l zu, danach $4$ l ab.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne die Mittelpunktsumme für $x^3$ auf $[0;\\ 2]$ mit $n = 2$ Streifen.',
+      opts: ['$9$', '$4$', '$5$', '$3{,}5$'],
+      steps: [
+        '$\\Delta x = 1$, Mittelpunkte $0{,}5$ und $1{,}5$.',
+        '$1 \\cdot (0{,}125 + 3{,}375) = 3{,}5$. Genau ist $4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne die Trapezsumme $T_2$ für $x^3$ auf $[0;\\ 2]$.',
+      opts: ['$4$', '$3{,}5$', '$5$', '$9$'],
+      steps: [
+        '$1 \\cdot \\left(\\tfrac02 + 1 + \\tfrac82\\right)$.',
+        '$= 5$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für $x^3$ auf $[0;\\ 2]$ ist $M_2 = 3{,}5$, $T_2 = 5$, genau $4$. Woran liegt es, dass die Mittelpunktsumme zu klein und die Trapezsumme zu groß ist?',
+      opts: ['$x^3$ hat bei $0$ eine Nullstelle.', '$x^3$ ist punktsymmetrisch.', '$x^3$ ist auf $[0;\\ 2]$ fallend.', '$x^3$ ist auf $[0;\\ 2]$ linksgekrümmt.'],
+      steps: [
+        'Linkskrümmung: Sehnen liegen über, Tangenten unter dem Graphen.',
+        'Trapeze überschätzen, Mittelpunktrechtecke (flächengleich zum Tangententrapez) unterschätzen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Integralfunktion $I(x) = \\int_0^x \\cos t\\,\\mathrm{d}t$.',
+      opts: ['$I(x) = \\sin x + C$', '$I(x) = \\sin x$', '$I(x) = \\cos x - 1$', '$I(x) = -\\sin x$'],
+      steps: [
+        '$I(x) = \\left[\\sin t\\right]_0^x = \\sin x - \\sin 0$.',
+        '$= \\sin x$, die untere Grenze legt die Konstante fest.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist $\\int_{-a}^{a} x^5\\,\\mathrm{d}x$ für jedes $a > 0$?',
+      opts: ['$0$', '$a^5$', '$2a^6$', '$\\tfrac13 a^6$'],
+      steps: [
+        '$x^5$ ist punktsymmetrisch.',
+        '$\\left[\\tfrac16 x^6\\right]_{-a}^a = \\tfrac16 a^6 - \\tfrac16 a^6 = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int (5 - 2x)^4\\,\\mathrm{d}x$.',
+      opts: ['$-\\tfrac{1}{10}\\,(5 - 2x)^5 + C$', '$-\\tfrac25\\,(5 - 2x)^5 + C$', '$-8\\,(5 - 2x)^3 + C$', '$\\tfrac{1}{10}\\,(5 - 2x)^5 + C$'],
+      steps: [
+        'Äußere Stammfunktion $\\tfrac{u^5}{5}$, innere Ableitung $-2$: durch $-2$ teilen.',
+        '$\\tfrac{1}{-2} \\cdot \\tfrac{(5 - 2x)^5}{5} = -\\tfrac{1}{10}\\,(5 - 2x)^5$. $-8\\,(5 - 2x)^3$ ist die Ableitung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Graph von $f(x) = 2\\sqrt{x}$ über $[0;\\ 2]$ rotiert um die $x$-Achse. Wie groß ist das Volumen?',
+      opts: ['$16\\pi$', '$4\\pi$', '$\\tfrac{8\\sqrt2}{3}\\,\\pi$', '$8\\pi$'],
+      steps: [
+        '$\\big(2\\sqrt{x}\\big)^2 = 4x$, also $V = \\pi \\int_0^2 4x\\,\\mathrm{d}x = \\pi \\left[2x^2\\right]_0^2$.',
+        '$= 8\\pi$. Ohne Quadrat: $\\pi \\int_0^2 2\\sqrt{x}\\,\\mathrm{d}x = \\tfrac{8\\sqrt2}{3}\\,\\pi$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int_1^3 \\tfrac1x\\,\\mathrm{d}x$ näherungsweise mit der Kepler’schen Fassregel.',
+      opts: ['$1$', '$\\approx 1{,}111$', '$\\approx 1{,}333$', '$\\approx 1{,}099$'],
+      steps: [
+        '$\\tfrac{3 - 1}{6}\\left(\\tfrac11 + 4 \\cdot \\tfrac12 + \\tfrac13\\right) = \\tfrac13 \\cdot \\tfrac{10}{3}$.',
+        '$= \\tfrac{10}{9} \\approx 1{,}111$. Genau ist $\\ln 3 \\approx 1{,}099$; das Trapez gibt $1{,}333$, die Mittelpunktregel $1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Intelligenztest ist normiert auf $\\mu = 100$ und $\\sigma = 15$. Wie groß ist der Anteil mit einem Wert über $130$ ungefähr?',
+      opts: ['$4{,}6\\,\\%$', '$2{,}3\\,\\%$', '$0{,}1\\,\\%$', '$15{,}9\\,\\%$'],
+      steps: [
+        '$130 = \\mu + 2\\sigma$; außerhalb von $\\mu \\pm 2\\sigma$ liegen $4{,}6\\,\\%$.',
+        'Die Hälfte davon rechts: $\\approx 2{,}3\\,\\%$.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$X \\sim B(400;\\ 0{,}2)$. Schätze $P(X \\le 90)$ mit der Normalverteilung und Stetigkeitskorrektur.',
+      opts: ['$\\approx 0{,}894$', '$\\approx 0{,}841$', '$\\approx 0{,}905$', '$\\approx 0{,}095$'],
+      steps: [
+        '$\\mu = 80$, $\\sigma = \\sqrt{400 \\cdot 0{,}2 \\cdot 0{,}8} = 8 > 3$, die Faustregel ist erfüllt.',
+        '$\\Phi\\!\\left(\\tfrac{90{,}5 - 80}{8}\\right) = \\Phi(1{,}31) \\approx 0{,}905$. Ohne Korrektur: $\\Phi(1{,}25) \\approx 0{,}894$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Glockenkurve hat ihr Maximum bei $x = 60$ und Wendestellen bei $52$ und $68$. Welche Kenngrößen hat die Normalverteilung?',
+      opts: ['$\\mu = 60$, $\\sigma = 64$', '$\\mu = 60$, $\\sigma = 16$', '$\\mu = 60$, $\\sigma = 8$', '$\\mu = 8$, $\\sigma = 60$'],
+      steps: [
+        'Das Maximum liegt bei $\\mu$, die Wendestellen bei $\\mu \\pm \\sigma$.',
+        '$\\mu = 60$ und $\\sigma = 68 - 60 = 8$. $16$ ist der Abstand der Wendestellen, $64 = \\sigma^2$ die Varianz.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

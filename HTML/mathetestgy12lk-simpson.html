@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Fassregel und Simpson-Verfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w10-simpson',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Fassregel und Simpson-Verfahren',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 10 (WB 5) · 20 Aufgaben: Parabel statt Gerade: Kepler’sche Fassregel, Simpson-Summe, Fehler und Konvergenz im Vergleich · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 10 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Fassregel (1-9: Formel, Idee, Kepler, exakt bis Grad 3, e hoch x, Weinfass), Simpson-Summe (10-13), Vergleich mit Mittelpunkt- und Trapezverfahren (14-17), Konvergenz (18-20). Mit Hilfsmitteln, 14, 16 und 19 aus dem Grundkurs. */
+  questions: [
+    {
+      q: 'Wie lautet die Kepler’sche Fassregel für $\\int_a^b f(x)\\,\\mathrm{d}x$ mit der Mitte $m = \\tfrac{a + b}{2}$?',
+      opts: ['$\\dfrac{b - a}{6}\\big(f(a) + 4f(m) + f(b)\\big)$', '$\\dfrac{b - a}{6}\\big(f(a) + 2f(m) + f(b)\\big)$', '$\\dfrac{b - a}{2}\\big(f(a) + f(b)\\big)$', '$\\dfrac{b - a}{3}\\big(f(a) + 4f(m) + f(b)\\big)$'],
+      steps: [
+        'Die Mitte zählt viermal, die Ränder je einmal; die Gewichte $1 + 4 + 1 = 6$ stehen im Nenner.',
+        'So liefert eine Konstante $c$ genau $(b - a) \\cdot c$. $\\tfrac{b - a}{2}\\big(f(a) + f(b)\\big)$ ist das Trapez.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Idee steckt hinter der Fassregel?',
+      opts: ['Man verbindet $\\big(a \\mid f(a)\\big)$ und $\\big(b \\mid f(b)\\big)$ durch eine Gerade.', 'Man nimmt den Funktionswert in der Mitte als Rechteckhöhe.', 'Durch die drei Punkte bei $a$, $m$ und $b$ legt man eine Parabel und integriert sie exakt.', 'Man ersetzt $f$ durch eine Exponentialfunktion durch drei Punkte.'],
+      steps: [
+        'Durch drei Punkte geht genau eine Parabel $p(x) = \\alpha x^2 + \\beta x + \\gamma$.',
+        'Ihr Integral über $[a;\\ b]$ ist genau $\\tfrac{b - a}{6}\\big(p(a) + 4p(m) + p(b)\\big)$. Die Gerade gehört zum Trapez, die Rechteckhöhe zum Mittelpunktverfahren.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Woher hat die Kepler’sche Fassregel ihren Namen?',
+      opts: ['Kepler fand damit das Fallgesetz.', 'Kepler berechnete damit die Flächen, die Planetenbahnen überstreichen.', 'Johannes Kepler bestimmte damit den Inhalt von Weinfässern.', 'Ein Fass hat drei Reifen, wie die drei Stützstellen.'],
+      steps: [
+        'Kepler kaufte 1613 Wein für seine Hochzeit und zweifelte an der Art, wie die Händler den Fassinhalt mit einem Stab schätzten.',
+        'Daraus wurde sein Buch über die Messung von Weinfässern (Quelle: J. Kepler, Nova stereometria doliorum vinariorum, Linz 1615).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\int_0^2 x^2\\,\\mathrm{d}x$ mit der Fassregel.',
+      opts: ['$3$', '$4$', '$\\tfrac83$', '$2$'],
+      steps: [
+        '$\\tfrac{2 - 0}{6}\\big(0^2 + 4 \\cdot 1^2 + 2^2\\big) = \\tfrac13 \\cdot 8$.',
+        '$= \\tfrac83$, genau der Wert des Integrals: Eine Parabel wird exakt integriert. $4$ wäre das Trapez.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was liefert die Fassregel für $\\int_0^2 x^3\\,\\mathrm{d}x$?',
+      opts: ['$\\tfrac{10}{3}$', '$4$, den genauen Wert', '$\\tfrac{14}{3}$', '$5$'],
+      steps: [
+        '$\\tfrac26\\big(0 + 4 \\cdot 1 + 8\\big) = \\tfrac13 \\cdot 12 = 4$.',
+        'Genau: $\\int_0^2 x^3\\,\\mathrm{d}x = \\tfrac{16}{4} = 4$. Das Trapez mit zwei Streifen gibt $5$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welche Funktionen ist die Fassregel immer exakt?',
+      opts: ['nur für lineare Funktionen', 'für alle ganzrationalen Funktionen bis zum Grad $3$', 'nur für ganzrationale Funktionen bis zum Grad $2$', 'für alle stetigen Funktionen'],
+      steps: [
+        'Für Grad $\\le 2$ ist $f$ selbst die Parabel durch die drei Punkte.',
+        'Für $x^3$ heben sich die Fehler symmetrisch zur Mitte auf (siehe die Aufgabe mit $\\int_0^2 x^3\\,\\mathrm{d}x$). Bei $x^4$ gibt es einen Fehler.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\int_0^1 \\mathrm{e}^x\\,\\mathrm{d}x$ mit der Fassregel auf drei Nachkommastellen.',
+      opts: ['$\\approx 1{,}719$', '$\\approx 1{,}859$', '$\\approx 1{,}649$', '$\\approx 3{,}438$'],
+      steps: [
+        '$\\tfrac16\\big(\\mathrm{e}^0 + 4\\,\\mathrm{e}^{0{,}5} + \\mathrm{e}^1\\big) = \\tfrac16\\,(1 + 6{,}595 + 2{,}718)$.',
+        '$\\approx 1{,}719$. Trapez: $1{,}859$, Mittelpunkt: $1{,}649$, mit $\\tfrac13$ statt $\\tfrac16$: $3{,}438$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der genaue Wert ist $\\int_0^1 \\mathrm{e}^x\\,\\mathrm{d}x = \\mathrm{e} - 1 \\approx 1{,}71828$. Wie groß ist der Fehler der Fassregel ungefähr?',
+      opts: ['$0{,}07$', '$0{,}14$', '$0{,}0006$', '$0{,}006$'],
+      steps: [
+        'Fassregel $\\approx 1{,}71886$, also Fehler $\\approx 1{,}71886 - 1{,}71828$.',
+        '$\\approx 0{,}0006$ mit nur drei Funktionswerten. Das Trapez liegt um $0{,}14$ daneben, die Mittelpunktregel um $0{,}07$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Fass ist $8$ dm hoch, der Boden- und der Deckelradius sind $3$ dm, der Radius in der Mitte $4$ dm. Schätze den Inhalt mit der Fassregel, angewandt auf die Querschnittsflächen $A = \\pi r^2$.',
+      opts: ['$\\approx 402$ Liter', '$\\approx 226$ Liter', '$\\approx 308$ Liter', '$\\approx 343$ Liter'],
+      steps: [
+        '$V \\approx \\tfrac86\\big(A_{\\mathrm{Boden}} + 4A_{\\mathrm{Mitte}} + A_{\\mathrm{Deckel}}\\big) = \\tfrac86\\,\\pi\\,(9 + 64 + 9)$.',
+        '$= \\tfrac{8 \\cdot 82}{6}\\,\\pi \\approx 343\\ \\mathrm{dm}^3 \\approx 343$ Liter. Zylinder mit $r = 3$: $226$, mit $r = 4$: $402$, mit $r = 3{,}5$: $308$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Formel ist die Simpson-Summe mit $n = 4$ Streifen der Breite $h$ und $f_k = f(x_k)$?',
+      opts: ['$\\tfrac{h}{3}\\big(f_0 + 2f_1 + 4f_2 + 2f_3 + f_4\\big)$', '$\\tfrac{h}{6}\\big(f_0 + 4f_1 + 2f_2 + 4f_3 + f_4\\big)$', '$\\tfrac{h}{2}\\big(f_0 + 2f_1 + 2f_2 + 2f_3 + f_4\\big)$', '$\\tfrac{h}{3}\\big(f_0 + 4f_1 + 2f_2 + 4f_3 + f_4\\big)$'],
+      steps: [
+        'Fassregel auf $[x_0;\\ x_2]$ und $[x_2;\\ x_4]$, jeweils Breite $2h$: $\\tfrac{2h}{6}(f_0 + 4f_1 + f_2) + \\tfrac{2h}{6}(f_2 + 4f_3 + f_4)$.',
+        'Zusammengefasst $\\tfrac{h}{3}\\big(f_0 + 4f_1 + 2f_2 + 4f_3 + f_4\\big)$: innere Punkte abwechselnd $4$ und $2$. Mit $\\tfrac{h}{2}$ und lauter $2$ ist es das Trapez.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum braucht die Simpson-Summe eine gerade Streifenzahl $n$?',
+      opts: ['Je zwei benachbarte Streifen bilden einen Abschnitt, auf dem die Fassregel mit drei Punkten angewendet wird.', 'Sonst wäre die Schrittweite $h$ keine ganze Zahl.', 'Bei ungeradem $n$ wird das Integral doppelt gezählt.', 'Nur dann ist das Ergebnis positiv.'],
+      steps: [
+        'Jede Parabel braucht drei Stützstellen: Anfang, Mitte, Ende eines Doppelstreifens.',
+        '$n$ Streifen ergeben $\\tfrac{n}{2}$ Doppelstreifen, das geht nur für gerades $n$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne die Simpson-Summe $S_4$ für $\\int_1^2 \\tfrac1x\\,\\mathrm{d}x$ auf vier Nachkommastellen.',
+      opts: ['$\\approx 0{,}7500$', '$\\approx 0{,}6933$', '$\\approx 0{,}6912$', '$\\approx 0{,}6970$'],
+      steps: [
+        '$h = 0{,}25$, $f = 1$; $0{,}8$; $0{,}6667$; $0{,}5714$; $0{,}5$.',
+        '$\\tfrac{0{,}25}{3}\\big(1 + 3{,}2 + 1{,}3333 + 2{,}2857 + 0{,}5\\big) \\approx 0{,}6933$. Das Trapez $T_4$ gibt $0{,}6970$, die Mittelpunktsumme $M_4$ gibt $0{,}6912$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der genaue Wert ist $\\int_1^2 \\tfrac1x\\,\\mathrm{d}x = \\ln 2 \\approx 0{,}69315$. Wie groß ist der Fehler von $S_4$ ungefähr?',
+      opts: ['$0{,}0039$', '$0{,}0019$', '$0{,}01$', '$0{,}0001$'],
+      steps: [
+        '$S_4 \\approx 0{,}69325$, also Fehler $\\approx 0{,}0001$.',
+        'Mit denselben fünf Funktionswerten liegt $T_4$ um $0{,}0039$ daneben, $M_4$ um $0{,}0019$: Simpson ist um eine Größenordnung genauer.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $\\int_0^1 x^2\\,\\mathrm{d}x$ mit $n = 4$ ist $M_4 = 0{,}328125$ und $T_4 = 0{,}34375$. Welches Verfahren ist hier genauer?',
+      opts: ['keines von beiden', 'das Trapezverfahren', 'beide gleich genau', 'das Mittelpunktverfahren'],
+      steps: [
+        'Abweichungen von $\\tfrac13$: $M_4$ etwa $0{,}0052$, $T_4$ etwa $0{,}0104$.',
+        'Der Fehler der Mittelpunktsumme ist hier halb so groß und hat das andere Vorzeichen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $\\int_0^1 x^2\\,\\mathrm{d}x$ ist $M_4 = 0{,}328125$ und $T_4 = 0{,}34375$. Berechne $\\tfrac13\\,(2M_4 + T_4)$.',
+      opts: ['$\\approx 0{,}3359$', '$\\tfrac13$, der genaue Wert', '$\\approx 0{,}6719$', '$\\approx 0{,}3385$'],
+      steps: [
+        '$\\tfrac13\\,(0{,}65625 + 0{,}34375) = \\tfrac13 \\cdot 1 = \\tfrac13$.',
+        'Allgemein gilt $S_{2n} = \\tfrac13\\,(2M_n + T_n)$: Die Simpson-Summe gewichtet die Fehler von Mittelpunkt- und Trapezverfahren so, dass sie sich aufheben. Der einfache Mittelwert gibt $0{,}3359$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $T_4$ für $\\int_0^1 \\mathrm{e}^{-x^2}\\,\\mathrm{d}x$ auf drei Nachkommastellen.',
+      opts: ['$\\approx 0{,}829$', '$\\approx 0{,}747$', '$\\approx 0{,}743$', '$\\approx 0{,}684$'],
+      steps: [
+        'Werte bei $0$; $0{,}25$; $0{,}5$; $0{,}75$; $1$: $1$; $0{,}9394$; $0{,}7788$; $0{,}5698$; $0{,}3679$.',
+        '$0{,}25 \\cdot \\left(\\tfrac12 + 0{,}9394 + 0{,}7788 + 0{,}5698 + \\tfrac{0{,}3679}{2}\\right) \\approx 0{,}743$; genau etwa $0{,}747$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne die Simpson-Summe $S_4$ für $\\int_0^1 \\mathrm{e}^{-x^2}\\,\\mathrm{d}x$ auf drei Nachkommastellen.',
+      opts: ['$\\approx 0{,}747$', '$\\approx 0{,}749$', '$\\approx 0{,}760$', '$\\approx 0{,}743$'],
+      steps: [
+        '$h = 0{,}25$, $f \\approx 1$; $0{,}9394$; $0{,}7788$; $0{,}5698$; $0{,}3679$.',
+        '$\\tfrac{0{,}25}{3}\\big(1 + 3{,}7577 + 1{,}5576 + 2{,}2791 + 0{,}3679\\big) \\approx 0{,}747$. Das Trapez $T_4$ gibt $0{,}743$, $M_4$ gibt $0{,}749$; genau sind es $0{,}7468$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Man halbiert bei der Simpson-Summe für eine glatte Funktion die Streifenbreite $h$. Um welchen Faktor wird der Fehler etwa kleiner?',
+      opts: ['$16$', '$2$', '$4$', '$8$'],
+      steps: [
+        'Der Fehler der Simpson-Summe ist proportional zu $h^4$.',
+        '$\\left(\\tfrac12\\right)^4 = \\tfrac{1}{16}$. Beim Trapez- und Mittelpunktverfahren (Fehler $\\sim h^2$) ist es nur der Faktor $4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für $\\int_0^1 x^2\\,\\mathrm{d}x$ gilt $T_n - \\tfrac13 = \\dfrac{1}{6n^2}$. Ab welcher Streifenzahl ist der Fehler kleiner als $0{,}001$?',
+      opts: ['ab $n = 12$', 'ab $n = 167$', 'ab $n = 4$', 'ab $n = 13$'],
+      steps: [
+        '$\\tfrac{1}{6n^2} < 0{,}001$ gibt $n^2 > 166{,}7$.',
+        '$12^2 = 144$ reicht nicht, $13^2 = 169$ reicht: ab $n = 13$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $\\int_0^1 x^4\\,\\mathrm{d}x$ gilt $S_n - \\tfrac15 = \\dfrac{2}{15\\,n^4}$ ($n$ gerade). Ab welchem geraden $n$ ist der Fehler kleiner als $0{,}0001$?',
+      opts: ['ab $n = 6$', 'ab $n = 8$', 'ab $n = 4$', 'ab $n = 14$'],
+      steps: [
+        '$\\dfrac{2}{15\\,n^4} < 0{,}0001$ heißt $n^4 > 1333{,}3$, also $n > 6{,}04$.',
+        '$n = 6$: $\\tfrac{2}{19\\,440} \\approx 0{,}000103$ ist noch zu groß; das nächste gerade $n$ ist $8$. Zum Vergleich braucht das Trapez schon bei $x^2$ für $0{,}001$ dreizehn Streifen.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

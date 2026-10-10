@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Normalenvektor und Hesse’sche Normalenform — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w19-hesse',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Normalenvektor und Hesse’sche Normalenform',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 19 (LB 8) · 20 Aufgaben: Normalenvektor, Normalen- und Koordinatenform, Hesse’sche Normalenform für Geraden und Ebenen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Normalenvektor und Ebenengleichungen (1-10), Gerade in der Ebene: Normalenform und Hesse’sche Normalenform, Abstände (11-16), Ebene: Einheitsnormalenvektor, Hesse’sche Normalenform, Seiten (17-20). Ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Welcher Vektor ist ein Normalenvektor der Ebene $E\\colon 2x - y + 3z = 5$?',
+      opts: ['$\\begin{pmatrix} -1 \\\\ 3 \\\\ 5 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 1 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 5 \\\\ 0 \\\\ 0 \\end{pmatrix}$'],
+      steps: [
+        'In der Koordinatenform $ax + by + cz = d$ ist $(a;\\ b;\\ c)$ ein Normalenvektor.',
+        'Also $(2;\\ -1;\\ 3)$; jedes Vielfache davon auch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Ebene $E$ wird von $\\vec u = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ aufgespannt. Welcher Vektor ist ein Normalenvektor?',
+      opts: ['$\\begin{pmatrix} 1 \\\\ 1 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} -1 \\\\ -1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        '$\\vec u \\times \\vec v = (0 \\cdot 1 - 1 \\cdot 1;\\ 1 \\cdot 0 - 1 \\cdot 1;\\ 1 \\cdot 1 - 0 \\cdot 0)$.',
+        '$= (-1;\\ -1;\\ 1)$. Probe: $(-1;\\ -1;\\ 1) \\cdot \\vec u = 0$ und $\\cdot\\ \\vec v = 0$ ✔'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Koordinatengleichung der Ebene durch $A(1 \\mid 2 \\mid 0)$ mit dem Normalenvektor $\\begin{pmatrix} 2 \\\\ 1 \\\\ -1 \\end{pmatrix}$?',
+      opts: ['$2x + y - z = 4$', '$2x + y - z = 0$', '$x + 2y = 4$', '$2x + y - z = 2$'],
+      steps: [
+        '$d = \\vec n \\cdot \\vec{OA} = 2 \\cdot 1 + 1 \\cdot 2 - 1 \\cdot 0$.',
+        '$= 4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Normalenform einer Ebene durch $P$ mit Normalenvektor $\\vec n$?',
+      opts: ['$\\vec x \\cdot \\vec p = \\vec n$', '$(\\vec x - \\vec p) \\times \\vec n = 0$', '$\\vec x = \\vec p + t \\cdot \\vec n$', '$(\\vec x - \\vec p) \\cdot \\vec n = 0$'],
+      steps: [
+        'Jeder Verbindungsvektor von $P$ zu einem Punkt $X$ der Ebene steht senkrecht auf $\\vec n$.',
+        'Ausmultipliziert ergibt sich die Koordinatenform. $\\vec p + t\\vec n$ wäre die Lotgerade.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Spurpunkte hat $E\\colon 2x + 3y + 6z = 12$?',
+      opts: ['$(6 \\mid 0 \\mid 0)$, $(0 \\mid 4 \\mid 0)$, $(0 \\mid 0 \\mid 2)$', '$(2 \\mid 0 \\mid 0)$, $(0 \\mid 3 \\mid 0)$, $(0 \\mid 0 \\mid 6)$', '$(12 \\mid 0 \\mid 0)$, $(0 \\mid 12 \\mid 0)$, $(0 \\mid 0 \\mid 12)$', '$(6 \\mid 4 \\mid 2)$'],
+      steps: [
+        'Je zwei Koordinaten null setzen: $2x = 12$, $3y = 12$, $6z = 12$.',
+        'Spurpunkte $(6 \\mid 0 \\mid 0)$, $(0 \\mid 4 \\mid 0)$, $(0 \\mid 0 \\mid 2)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Koordinatengleichung hat die Ebene durch $A(1 \\mid 0 \\mid 0)$, $B(0 \\mid 2 \\mid 0)$, $C(0 \\mid 0 \\mid 3)$?',
+      opts: ['$2x + 3y + 6z = 6$', '$6x + 3y + 2z = 6$', '$x + 2y + 3z = 6$', '$x + y + z = 1$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AC} = (-1;\\ 2;\\ 0) \\times (-1;\\ 0;\\ 3) = (6;\\ 3;\\ 2)$, $d = 6$.',
+        'Probe: $B$: $6$ ✔, $C$: $6$ ✔. Die Kehrwerte der Achsenabschnitte $1;\\ \\tfrac12;\\ \\tfrac13$ mal $6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Vektor steht senkrecht auf der Ebene $x + y + z = 3$?',
+      opts: ['$\\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 1 \\\\ -2 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 0 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 2 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        'Normalenvektor $(1;\\ 1;\\ 1)$; jedes Vielfache steht ebenfalls senkrecht.',
+        '$(1;\\ -1;\\ 0)$ und $(1;\\ 1;\\ -2)$ liegen dagegen parallel zur Ebene.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet eine Koordinatengleichung der Ebene durch $A(1 \\mid 1 \\mid 0)$, $B(3 \\mid 1 \\mid 1)$, $C(1 \\mid 4 \\mid 2)$?',
+      opts: ['$3x + 4y - 6z = 7$', '$2x + 3y + 2z = 5$', '$x + y + z = 2$', '$3x + 4y + 6z = 7$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AC} = (2;\\ 0;\\ 1) \\times (0;\\ 3;\\ 2) = (-3;\\ -4;\\ 6)$, mal $-1$: $(3;\\ 4;\\ -6)$.',
+        '$d = 3 + 4 - 0 = 7$. Probe: $B$: $9 + 4 - 6 = 7$ ✔, $C$: $3 + 16 - 12 = 7$ ✔'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie liegen $E_1\\colon 2x - y + z = 1$ und $E_2\\colon -4x + 2y - 2z = 3$ zueinander?',
+      opts: ['identisch', 'sie schneiden sich in einer Geraden unter $60^\\circ$', 'echt parallel', 'orthogonal'],
+      steps: [
+        '$\\vec n_2 = -2\\,\\vec n_1$: parallele Normalenvektoren.',
+        '$E_1$ mal $-2$ ergibt $-4x + 2y - 2z = -2 \\neq 3$: nicht identisch, also echt parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Stehen $E_1\\colon x + 2y - z = 0$ und $E_2\\colon 3x - y + z = 1$ senkrecht aufeinander?',
+      opts: ['Ja, weil $d_1 = 0$ ist.', 'Nein, sie sind parallel.', 'Ja, $\\vec n_1 \\cdot \\vec n_2 = 3 - 2 - 1 = 0$.', 'Nein, $\\vec n_1 \\cdot \\vec n_2 = 6$.'],
+      steps: [
+        'Zwei Ebenen sind orthogonal, wenn ihre Normalenvektoren orthogonal sind.',
+        '$(1;\\ 2;\\ -1) \\cdot (3;\\ -1;\\ 1) = 0$ ✔'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Gerade $g$ in der Ebene durch $A(1 \\mid 2)$ mit dem Normalenvektor $\\vec n = \\begin{pmatrix} 3 \\\\ -1 \\end{pmatrix}$ in Koordinatenform?',
+      opts: ['$x + 3y = 7$', '$3x - y = 5$', '$3x - y = -1$', '$3x - y = 1$'],
+      steps: [
+        'Normalenform $\\left(\\vec x - \\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}\\right) \\cdot \\begin{pmatrix} 3 \\\\ -1 \\end{pmatrix} = 0$.',
+        'Ausmultipliziert $3x - y - (3 - 2) = 0$, also $3x - y = 1$. Probe: $3 \\cdot 1 - 2 = 1$ ✔. $x + 3y = 7$ hätte $\\vec n$ als Richtungsvektor.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Hesse’sche Normalenform der Geraden $g\\colon 3x + 4y = 10$?',
+      opts: ['$3x + 4y - 10 = 5$', '$\\dfrac{3x + 4y - 10}{5} = 0$', '$\\dfrac{3x + 4y - 10}{25} = 0$', '$\\dfrac{3x + 4y - 10}{7} = 0$'],
+      steps: [
+        'Durch die Länge des Normalenvektors teilen: $\\left|\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}\\right| = \\sqrt{9 + 16} = 5$.',
+        'Dann ist der Normalenvektor $\\tfrac15\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$ ein Einheitsvektor. $7 = 3 + 4$ und $25 = 5^2$ sind falsche Längen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist der Ursprung von der Geraden $3x + 4y = 10$ entfernt?',
+      opts: ['$\\tfrac{10}{7}$', '$10$', '$2{,}5$', '$2$'],
+      steps: [
+        'Hesse’sche Normalenform: $d = \\dfrac{|3 \\cdot 0 + 4 \\cdot 0 - 10|}{5}$.',
+        '$d = \\tfrac{10}{5} = 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit ist $P(4 \\mid 3)$ von der Geraden $3x + 4y = 10$ entfernt?',
+      opts: ['$0{,}56$', '$2$', '$14$', '$2{,}8$'],
+      steps: [
+        '$P$ in die Hesse’sche Normalenform einsetzen: $\\dfrac{|3 \\cdot 4 + 4 \\cdot 3 - 10|}{5} = \\dfrac{14}{5}$.',
+        '$d = 2{,}8$. Ohne Teilen käme $14$ heraus, beim Teilen durch $25$ der Wert $0{,}56$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie weit sind die parallelen Geraden $3x + 4y = 10$ und $3x + 4y = 25$ voneinander entfernt?',
+      opts: ['$7$', '$15$', '$3$', '$0{,}6$'],
+      steps: [
+        'Beide haben den Normalenvektor $\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$ der Länge $5$.',
+        'Ein Punkt der zweiten Geraden, etwa $(0 \\mid 6{,}25)$, hat von der ersten den Abstand $\\tfrac{|25 - 10|}{5} = 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Punkte der $x$-Achse haben von der Geraden $3x + 4y = 10$ den Abstand $2$?',
+      opts: ['$(0 \\mid 0)$ und $\\left(\\tfrac{20}{3} \\mid 0\\right)$', 'nur $\\left(\\tfrac{20}{3} \\mid 0\\right)$', '$\\left(\\tfrac{10}{3} \\mid 0\\right)$ und $\\left(-\\tfrac{10}{3} \\mid 0\\right)$', 'nur $(0 \\mid 0)$'],
+      steps: [
+        'Für $Q(x \\mid 0)$: $\\dfrac{|3x - 10|}{5} = 2$, also $3x - 10 = 10$ oder $3x - 10 = -10$.',
+        '$x = \\tfrac{20}{3}$ oder $x = 0$: Auf jeder Seite der Geraden liegt ein Punkt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Vektor ist ein Einheitsnormalenvektor der Ebene $E\\colon x - 2y + 2z = 3$?',
+      opts: ['$\\tfrac15\\begin{pmatrix} 1 \\\\ -2 \\\\ 2 \\end{pmatrix}$', '$\\tfrac13\\begin{pmatrix} 1 \\\\ -2 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ -2 \\\\ 2 \\end{pmatrix}$', '$\\tfrac13\\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        'Normalenvektor ablesen: $\\begin{pmatrix} 1 \\\\ -2 \\\\ 2 \\end{pmatrix}$ mit der Länge $\\sqrt{1 + 4 + 4} = 3$.',
+        'Durch $3$ teilen ergibt die Länge $1$. $\\tfrac15$ käme vom Addieren $1 + 2 + 2$ statt von der Wurzel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Hessesche Normalform der Ebene $2x + y + 2z = 6$?',
+      opts: ['$\\tfrac15 (2x + y + 2z - 6) = 0$', '$\\tfrac13 (2x + y + 2z - 6) = 0$', '$2x + y + 2z - 6 = 1$', '$\\tfrac16 (2x + y + 2z) = 1$'],
+      steps: [
+        'Durch den Betrag des Normalenvektors teilen, $\\sqrt{4 + 1 + 4} = 3$.',
+        'Setzt man einen Punkt links ein, erhält man seinen Abstand mit Vorzeichen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Liegen $O(0 \\mid 0 \\mid 0)$ und $Q(3 \\mid 3 \\mid 3)$ auf derselben Seite der Ebene $2x + y + 2z = 6$?',
+      opts: ['Ja, beide haben den Abstand $2$.', 'Ja, beide liegen über der Ebene.', 'Nein, die Vorzeichen in der Hesseschen Normalform sind verschieden.', 'Das lässt sich ohne Zeichnung nicht entscheiden.'],
+      steps: [
+        '$O$: $\\tfrac13 (0 - 6) = -2$; $Q$: $\\tfrac13 (6 + 3 + 6 - 6) = 3$.',
+        'Verschiedene Vorzeichen, also verschiedene Seiten: Die Strecke $OQ$ durchstößt $E$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In der Hesse’schen Normalenform $\\dfrac{ax + by + cz - d}{|\\vec n|} = 0$ mit $d > 0$ setzt man einen Punkt $P$ ein. Was sagt das Vorzeichen des Ergebnisses?',
+      opts: ['auf welcher Seite der Ebene $P$ liegt: positiv auf der Seite, in die $\\vec n$ vom Ursprung weg zeigt', 'nichts, nur der Betrag zählt', 'ob der Abstand größer als $1$ ist', 'ob $P$ in der Ebene liegt'],
+      steps: [
+        'Der Betrag des Ergebnisses ist der Abstand von $P$ zur Ebene.',
+        'Das Vorzeichen trennt die beiden Halbräume; mit $d > 0$ liegt der Ursprung auf der negativen Seite. Gleiches Vorzeichen heißt: gleiche Seite.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

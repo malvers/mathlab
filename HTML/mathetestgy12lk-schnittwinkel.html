@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Schnittwinkel — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w20-schnittwinkel',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Schnittwinkel',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 20 (LB 8) · 20 Aufgaben: Gerade–Gerade, Gerade–Ebene, Ebene–Ebene, Dächer und Pyramiden · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 20 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Schnittwinkel Gerade–Gerade und Gerade–Ebene (1-10), Ebene–Ebene (11-20) */
+  questions: [
+    {
+      q: 'Unter welchem Winkel schneiden sich zwei Geraden mit den Richtungsvektoren $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['$60^\\circ$', '$90^\\circ$', '$135^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{|1|}{1 \\cdot \\sqrt2}$.',
+        '$\\varphi = 45^\\circ$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Mit welcher Formel berechnet man den Schnittwinkel zweier Geraden mit den Richtungsvektoren $\\vec u$ und $\\vec v$?',
+      opts: ['$\\sin\\varphi = \\dfrac{|\\vec u \\cdot \\vec v|}{|\\vec u| \\cdot |\\vec v|}$', '$\\cos\\varphi = |\\vec u| \\cdot |\\vec v|$', '$\\cos\\varphi = \\dfrac{|\\vec u \\cdot \\vec v|}{|\\vec u| \\cdot |\\vec v|}$', '$\\cos\\varphi = \\vec u \\times \\vec v$'],
+      steps: [
+        'Der Winkel zwischen den Geraden ist der Winkel zwischen ihren Richtungsvektoren.',
+        'Der Betrag im Zähler sorgt für den spitzen Winkel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum steht in der Formel für den Schnittwinkel zweier Geraden der Betrag $|\\vec u \\cdot \\vec v|$?',
+      opts: ['Damit man den Taschenrechner nicht braucht.', 'Der Schnittwinkel zweier Geraden liegt zwischen $0^\\circ$ und $90^\\circ$.', 'Damit das Ergebnis eine ganze Zahl wird.', 'Weil Skalarprodukte nie negativ sind.'],
+      steps: [
+        'Ein negatives Skalarprodukt liefert einen stumpfen Winkel zwischen den Vektoren.',
+        'Zwei Geraden bilden aber immer zwei Winkel, die sich zu $180^\\circ$ ergänzen; man nimmt den spitzen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Richtungsvektoren zweier sich schneidender Geraden schließen $135^\\circ$ ein. Welchen Schnittwinkel haben die Geraden?',
+      opts: ['$135^\\circ$', '$45^\\circ$', '$67{,}5^\\circ$', '$90^\\circ$'],
+      steps: [
+        'Der Schnittwinkel ist der spitze Winkel.',
+        '$180^\\circ - 135^\\circ = 45^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Mit welcher Formel berechnet man den Winkel zwischen einer Geraden mit Richtungsvektor $\\vec u$ und einer Ebene mit Normalenvektor $\\vec n$?',
+      opts: ['$\\tan\\varphi = \\vec u \\cdot \\vec n$', '$\\sin\\varphi = |\\vec u| \\cdot |\\vec n|$', '$\\cos\\varphi = \\dfrac{|\\vec u \\cdot \\vec n|}{|\\vec u| \\cdot |\\vec n|}$', '$\\sin\\varphi = \\dfrac{|\\vec u \\cdot \\vec n|}{|\\vec u| \\cdot |\\vec n|}$'],
+      steps: [
+        'Der Kosinusansatz liefert den Winkel zwischen $\\vec u$ und dem Normalenvektor.',
+        'Der gesuchte Winkel zur Ebene ergänzt ihn zu $90^\\circ$; daraus wird der Sinus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Richtungsvektor einer Geraden schließt mit dem Normalenvektor einer Ebene $30^\\circ$ ein. Welchen Winkel bildet die Gerade mit der Ebene?',
+      opts: ['$60^\\circ$', '$30^\\circ$', '$120^\\circ$', '$90^\\circ$'],
+      steps: [
+        'Gerade und Normale ergänzen sich zum rechten Winkel.',
+        '$90^\\circ - 30^\\circ = 60^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Winkel bildet eine Gerade mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ mit der Ebene $z = 0$?',
+      opts: ['$90^\\circ$', '$\\approx 35{,}3^\\circ$', '$0^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$(1;\\ 1;\\ 0) \\cdot (0;\\ 0;\\ 1) = 0$, also $\\sin\\varphi = 0$.',
+        'Die Gerade verläuft parallel zur Ebene oder liegt in ihr.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Gerade hat den Richtungsvektor $\\begin{pmatrix} 3 \\\\ 4 \\\\ 5 \\end{pmatrix}$. Wie groß ist ihr Steigungswinkel gegenüber der $x$-$y$-Ebene?',
+      opts: ['$45^\\circ$', '$\\approx 53{,}1^\\circ$', '$60^\\circ$', '$\\approx 36{,}9^\\circ$'],
+      steps: [
+        '$|\\vec u| = \\sqrt{9 + 16 + 25} = \\sqrt{50} = 5\\sqrt2$.',
+        '$\\sin\\varphi = \\tfrac{5}{5\\sqrt2}$, $\\varphi = 45^\\circ$. Waagerecht legt sie $5$ zurück, senkrecht ebenfalls $5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Rampe steigt auf $10$ m waagerechter Strecke um $1$ m an, Richtungsvektor $\\begin{pmatrix} 10 \\\\ 0 \\\\ 1 \\end{pmatrix}$. Welchen Winkel bildet sie mit dem Boden $z = 0$?',
+      opts: ['$\\approx 0{,}1^\\circ$', '$10^\\circ$', '$\\approx 84{,}3^\\circ$', '$\\approx 5{,}7^\\circ$'],
+      steps: [
+        '$\\sin\\varphi = \\dfrac{1}{\\sqrt{101}}$.',
+        '$\\varphi \\approx 5{,}7^\\circ$, also $10\\,\\%$ Steigung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Gerade durch $A(1 \\mid 2 \\mid 3)$ und $B(3 \\mid 2 \\mid 5)$: Welchen Winkel bildet sie mit der Ebene $x = 0$?',
+      opts: ['$60^\\circ$', '$0^\\circ$', '$45^\\circ$', '$90^\\circ$'],
+      steps: [
+        '$\\vec{AB} = (2;\\ 0;\\ 2)$, Normalenvektor $(1;\\ 0;\\ 0)$.',
+        '$\\sin\\varphi = \\tfrac{2}{2\\sqrt2} = \\tfrac{1}{\\sqrt2}$, $\\varphi = 45^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Mit welcher Formel berechnet man den Schnittwinkel zweier Ebenen mit den Normalenvektoren $\\vec n_1$ und $\\vec n_2$?',
+      opts: ['$\\cos\\varphi = \\dfrac{|\\vec n_1 \\cdot \\vec n_2|}{|\\vec n_1| \\cdot |\\vec n_2|}$', '$\\cos\\varphi = \\vec n_1 \\times \\vec n_2$', '$\\tan\\varphi = \\dfrac{|\\vec n_1|}{|\\vec n_2|}$', '$\\sin\\varphi = \\dfrac{|\\vec n_1 \\cdot \\vec n_2|}{|\\vec n_1| \\cdot |\\vec n_2|}$'],
+      steps: [
+        'Die Ebenen schließen denselben Winkel ein wie ihre Normalenvektoren.',
+        'Also der Kosinusansatz, mit Betrag für den spitzen Winkel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Winkel schließen die Ebenen $z = 0$ und $x + z = 1$ ein?',
+      opts: ['$90^\\circ$', '$45^\\circ$', '$60^\\circ$', '$30^\\circ$'],
+      steps: [
+        '$\\vec n_1 = (0;\\ 0;\\ 1)$, $\\vec n_2 = (1;\\ 0;\\ 1)$.',
+        '$\\cos\\varphi = \\tfrac{1}{\\sqrt2}$, $\\varphi = 45^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Winkel schließen $E_1\\colon 2x + y + 2z = 3$ und $E_2\\colon 2x - y + 2z = 1$ ein?',
+      opts: ['$0^\\circ$', '$\\approx 38{,}9^\\circ$', '$90^\\circ$', '$\\approx 51{,}1^\\circ$'],
+      steps: [
+        '$\\vec n_1 \\cdot \\vec n_2 = 4 - 1 + 4 = 7$, beide Beträge $3$.',
+        '$\\cos\\varphi = \\tfrac79$, $\\varphi \\approx 38{,}9^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Dachfläche geht durch $(0 \\mid 0 \\mid 3)$, $(10 \\mid 0 \\mid 3)$ und $(0 \\mid 4 \\mid 6)$. Wie groß ist ihre Neigung gegenüber dem Boden $z = 0$?',
+      opts: ['$45^\\circ$', '$\\approx 53{,}1^\\circ$', '$\\approx 36{,}9^\\circ$', '$\\approx 41{,}4^\\circ$'],
+      steps: [
+        'Spannvektoren $(10;\\ 0;\\ 0)$ und $(0;\\ 4;\\ 3)$, Normalenvektor $(0;\\ -3;\\ 4)$.',
+        '$\\cos\\varphi = \\tfrac45$, $\\varphi \\approx 36{,}9^\\circ$. Kontrolle: $3$ m Anstieg auf $4$ m.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Hang liegt in der Ebene $x + y + z = 10$, die $z$-Achse zeigt nach oben. Wie steil ist er?',
+      opts: ['$\\approx 35{,}3^\\circ$', '$45^\\circ$', '$60^\\circ$', '$\\approx 54{,}7^\\circ$'],
+      steps: [
+        'Winkel zwischen $(1;\\ 1;\\ 1)$ und $(0;\\ 0;\\ 1)$: $\\cos\\varphi = \\tfrac{1}{\\sqrt3}$.',
+        '$\\varphi \\approx 54{,}7^\\circ$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Normalenvektoren zweier Ebenen schließen $120^\\circ$ ein. Welchen Winkel haben die Ebenen?',
+      opts: ['$120^\\circ$', '$90^\\circ$', '$60^\\circ$', '$30^\\circ$'],
+      steps: [
+        'Der Ebenenwinkel ist der spitze Winkel.',
+        '$180^\\circ - 120^\\circ = 60^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Winkel bildet die Ebene $x + 2y + 2z = 5$ mit der $x$-$y$-Ebene?',
+      opts: ['$\\approx 33{,}7^\\circ$', '$\\approx 48{,}2^\\circ$', '$\\approx 41{,}8^\\circ$', '$\\approx 70{,}5^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{|(1;\\ 2;\\ 2) \\cdot (0;\\ 0;\\ 1)|}{3 \\cdot 1} = \\tfrac23$.',
+        '$\\varphi \\approx 48{,}2^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $a$ stehen $x + y + az = 1$ und $x - y + z = 0$ senkrecht aufeinander?',
+      opts: ['$a = 0$', '$a = 2$', '$a = 1$', '$a = -1$'],
+      steps: [
+        '$(1;\\ 1;\\ a) \\cdot (1;\\ -1;\\ 1) = 1 - 1 + a$.',
+        '$a = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Winkel schließen die Ebenen $x = 0$ und $x + y + \\sqrt2\\,z = 0$ ein?',
+      opts: ['$60^\\circ$', '$45^\\circ$', '$90^\\circ$', '$30^\\circ$'],
+      steps: [
+        '$|(1;\\ 1;\\ \\sqrt2)| = \\sqrt{1 + 1 + 2} = 2$.',
+        '$\\cos\\varphi = \\tfrac12$, $\\varphi = 60^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Satteldach hat zwei Dachflächen mit je $40^\\circ$ Neigung. Welchen Winkel schließen die beiden Dachflächen am First ein?',
+      opts: ['$140^\\circ$', '$80^\\circ$', '$40^\\circ$', '$100^\\circ$'],
+      steps: [
+        'Im Querschnitt bilden die Dachflächen mit dem Boden ein Dreieck mit zwei Basiswinkeln von $40^\\circ$.',
+        'Am First: $180^\\circ - 2 \\cdot 40^\\circ = 100^\\circ$. Der Schnittwinkel der Ebenen (spitz) wäre $80^\\circ$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

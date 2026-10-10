@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Schätzen von Parametern — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w14-schaetzen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Schätzen von Parametern',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 14 (LB 7) · 20 Aufgaben: Stichprobe und Grundgesamtheit, Hochrechnung, Stichprobenmittel und -varianz · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 14 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Alle 20 Fragen aus dem Grundkurs-Blatt w11-schaetzen (eine Quelle für beide Kurse). Blocks: Grundbegriffe und Stichprobe (7-9, 12, 19), Anteile schätzen und hochrechnen (1, 2, 13-16, 18), Stichprobenmittel und -varianz (3-6, 10, 11, 17, 20). Stichprobenvarianz mit 1/(n-1). Taschenrechner erlaubt. */
+  questions: [
+    {
+      q: 'Von $1000$ zufällig ausgewählten Wahlberechtigten wollen $420$ Partei A wählen. Welcher Schätzwert ergibt sich für den Anteil $p$ in der Grundgesamtheit?',
+      opts: ['$\\hat p = 0{,}58$', '$\\hat p = 0{,}42$', '$\\hat p = 0{,}042$', '$\\hat p = 4{,}2$'],
+      steps: [
+        'Die relative Häufigkeit in der Stichprobe schätzt den Anteil: $\\hat p = \\tfrac{420}{1000}$.',
+        '$= 0{,}42$, also etwa $42\\,\\%$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Im Wahlkreis aus Aufgabe 1 gibt es $50\\,000$ Wahlberechtigte. Mit wie vielen Stimmen für A ist nach der Hochrechnung zu rechnen?',
+      opts: ['etwa $420$', 'etwa $2\\,100$', 'etwa $21\\,000$', 'etwa $29\\,000$'],
+      steps: [
+        'Hochrechnung: geschätzter Anteil mal Größe der Grundgesamtheit.',
+        '$0{,}42 \\cdot 50\\,000 = 21\\,000$, sofern alle zur Wahl gehen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne das Stichprobenmittel $\\bar x$ der Werte $4$; $6$; $7$; $5$; $8$.',
+      opts: ['$\\bar x = 30$', '$\\bar x = 7$', '$\\bar x = 6$', '$\\bar x = 5$'],
+      steps: [
+        '$\\bar x = \\tfrac15 (4 + 6 + 7 + 5 + 8) = \\tfrac{30}{5}$.',
+        '$= 6$. $7$ wäre ein Wert der Liste, nicht der Mittelwert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne die Stichprobenvarianz $s^2 = \\dfrac{1}{n - 1}\\sum (x_i - \\bar x)^2$ der Werte $4$; $6$; $7$; $5$; $8$.',
+      opts: ['$s^2 = 10$', '$s^2 = 1{,}58$', '$s^2 = 2{,}5$', '$s^2 = 2$'],
+      steps: [
+        'Abweichungen von $\\bar x = 6$: $-2$; $0$; $1$; $-1$; $2$, Quadrate $4$; $0$; $1$; $1$; $4$, Summe $10$.',
+        '$s^2 = \\tfrac{10}{5 - 1} = 2{,}5$. Mit $\\tfrac1n$ käme $2$ heraus, das schätzt die Varianz im Mittel zu klein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Stichprobenstandardabweichung $s$ zu den Werten aus Aufgabe 4?',
+      opts: ['$s \\approx 1{,}58$', '$s = 6{,}25$', '$s \\approx 1{,}41$', '$s = 2{,}5$'],
+      steps: [
+        '$s = \\sqrt{s^2} = \\sqrt{2{,}5}$.',
+        '$\\approx 1{,}58$. $\\sqrt2 \\approx 1{,}41$ gehört zur Varianz mit $\\tfrac1n$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum teilt man bei der Stichprobenvarianz durch $n - 1$ und nicht durch $n$?',
+      opts: ['Weil ein Wert immer falsch gemessen ist.', 'Damit das Ergebnis eine ganze Zahl wird.', 'Weil $\\bar x$ selbst null ist.', 'So schätzt $s^2$ die Varianz der Grundgesamtheit im Mittel richtig.'],
+      steps: [
+        'Die Abweichungen werden vom Stichprobenmittel aus gemessen, nicht vom unbekannten wahren Mittelwert; dadurch fallen sie im Schnitt etwas zu klein aus.',
+        'Der Faktor $\\tfrac{1}{n - 1}$ gleicht das aus: Die Schätzung ist erwartungstreu. Den Beweis lassen wir weg.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist bei einer Umfrage zur Bundestagswahl die Grundgesamtheit?',
+      opts: ['die befragten Personen', 'alle Wahlberechtigten', 'alle Parteien', 'die Wahlergebnisse der letzten Wahl'],
+      steps: [
+        'Die Grundgesamtheit ist die Menge, über die eine Aussage getroffen werden soll.',
+        'Die Befragten bilden die Stichprobe, aus der man auf die Grundgesamtheit schließt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum sollte eine Stichprobe zufällig ausgewählt werden?',
+      opts: ['Damit sie möglichst klein sein kann.', 'Damit jedes Ergebnis gleich wahrscheinlich ist.', 'Damit sie die Grundgesamtheit nicht systematisch verzerrt abbildet.', 'Weil der Zufall immer das richtige Ergebnis liefert.'],
+      steps: [
+        'Nur wenn jedes Element die gleiche Chance hat, gewählt zu werden, lässt sich vom Ergebnis auf die Grundgesamtheit schließen.',
+        'Auch eine Zufallsstichprobe hat Zufallsschwankungen, aber keinen systematischen Fehler.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Zeitung befragt ihre Online-Leserinnen und -Leser zur Nutzung des Internets. Was ist das Problem?',
+      opts: ['Die Stichprobe ist zu groß.', 'Es gibt kein Problem.', 'Online-Umfragen sind immer verboten.', 'Die Stichprobe ist verzerrt: Wer online liest, nutzt das Internet häufiger als der Durchschnitt.'],
+      steps: [
+        'Die Auswahl hängt mit der untersuchten Frage zusammen.',
+        'So entsteht ein systematischer Fehler, den auch eine größere Stichprobe nicht beseitigt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Fünf Messungen der Fallbeschleunigung ergeben $9{,}78$; $9{,}82$; $9{,}80$; $9{,}81$; $9{,}79$ (in m/s²). Welcher Wert wird als Messergebnis angegeben?',
+      opts: ['$9{,}82$ m/s²', '$9{,}81$ m/s²', '$9{,}78$ m/s²', '$9{,}80$ m/s²'],
+      steps: [
+        'Das Stichprobenmittel schätzt den wahren Wert: $\\tfrac15 \\cdot 49{,}00$.',
+        '$= 9{,}80$ m/s².'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Stichprobenstandardabweichung $s$ der fünf Messwerte aus Aufgabe 10?',
+      opts: ['$s \\approx 0{,}016$ m/s²', '$s = 0{,}04$ m/s²', '$s \\approx 0{,}014$ m/s²', '$s = 0{,}001$ m/s²'],
+      steps: [
+        'Abweichungen $-0{,}02$; $0{,}02$; $0$; $0{,}01$; $-0{,}01$, Quadratsumme $0{,}001$.',
+        '$s^2 = \\tfrac{0{,}001}{4} = 0{,}00025$, $s \\approx 0{,}016$. Angabe etwa: $(9{,}80 \\pm 0{,}02)$ m/s².'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie verändert sich die Genauigkeit einer Schätzung, wenn man die Stichprobe vergrößert?',
+      opts: ['Ab $100$ Personen ist sie immer exakt.', 'Die Schätzwerte schwanken weniger um den wahren Wert.', 'Die Schätzung wird ungenauer.', 'Die Genauigkeit bleibt gleich.'],
+      steps: [
+        'Mehr Daten mitteln Zufallsschwankungen besser aus.',
+        'Die Streuung des Schätzwerts $\\hat p$ nimmt mit $\\tfrac{1}{\\sqrt n}$ ab: viermal so groß heißt halb so weit gestreut.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Streuung von $\\hat p$ ist proportional zu $\\tfrac{1}{\\sqrt n}$. Um welchen Faktor muss man $n$ vergrößern, damit sie sich halbiert?',
+      opts: ['um den Faktor $4$', 'um den Faktor $8$', 'um den Faktor $\\sqrt2$', 'um den Faktor $2$'],
+      steps: [
+        '$\\tfrac{1}{\\sqrt{kn}} = \\tfrac12 \\cdot \\tfrac{1}{\\sqrt n}$ heißt $\\sqrt k = 2$.',
+        'Also $k = 4$. Doppelte Genauigkeit kostet die vierfache Stichprobe.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei einer Kontrolle sind $12$ von $300$ Teilen defekt. Schätze den Ausschussanteil.',
+      opts: ['$0{,}4\\,\\%$', '$12\\,\\%$', '$2{,}5\\,\\%$', '$4\\,\\%$'],
+      steps: [
+        '$\\hat p = \\tfrac{12}{300} = 0{,}04$.',
+        'Also etwa $4\\,\\%$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele defekte Teile sind in einer Lieferung von $10\\,000$ Teilen nach Aufgabe 14 zu erwarten?',
+      opts: ['etwa $250$', 'etwa $400$', 'etwa $1\\,200$', 'etwa $40$'],
+      steps: [
+        'Erwartungswert $n \\cdot \\hat p = 10\\,000 \\cdot 0{,}04$.',
+        '$= 400$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Größe ist ein Schätzwert für den Erwartungswert $\\mu$ einer Zufallsgröße?',
+      opts: ['das Stichprobenmittel $\\bar x$', 'die Stichprobenvarianz $s^2$', 'die Anzahl $n$ der Messungen', 'der größte Messwert'],
+      steps: [
+        'Der Erwartungswert ist der Mittelwert auf lange Sicht.',
+        'Er wird durch den Mittelwert der Stichprobe geschätzt; $s^2$ schätzt die Varianz.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einem Teich werden $100$ Fische markiert und wieder ausgesetzt. Später werden $50$ Fische gefangen, $5$ davon sind markiert. Wie viele Fische leben etwa im Teich?',
+      opts: ['etwa $10\\,000$', 'etwa $1\\,000$', 'etwa $500$', 'etwa $250$'],
+      steps: [
+        'Der Anteil markierter Fische im Fang schätzt den Anteil im Teich: $\\tfrac{5}{50} = \\tfrac{100}{N}$.',
+        '$N \\approx \\tfrac{100 \\cdot 50}{5} = 1\\,000$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Umfragen ergeben $30\\,\\%$ für Partei B, eine mit $100$, eine mit $1\\,000$ Befragten. Welche Aussage stimmt?',
+      opts: ['Keine ist verlässlich, weil $30\\,\\%$ unter $50\\,\\%$ liegt.', 'Beide sind gleich verlässlich, weil der Anteil gleich ist.', 'Die kleinere Umfrage ist verlässlicher.', 'Die Umfrage mit $1\\,000$ Befragten ist verlässlicher.'],
+      steps: [
+        'Bei kleinem $n$ schwankt der Anteil stärker von Umfrage zu Umfrage.',
+        'Mit zehnfacher Größe ist die Streuung etwa $\\sqrt{10} \\approx 3$-mal kleiner, sofern beide zufällig ausgewählt sind.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was bedeutet „Schließen von einer Zufallsstichprobe auf die Grundgesamtheit“?',
+      opts: ['Die Stichprobe so lange wiederholen, bis sie stimmt', 'Aus der Grundgesamtheit die Stichprobe berechnen', 'Aus den Ergebnissen der Stichprobe auf unbekannte Kenngrößen der Grundgesamtheit schließen', 'Die Grundgesamtheit vollständig befragen'],
+      steps: [
+        'Das ist das Grundproblem der beurteilenden Statistik.',
+        'Man kennt die Grundgesamtheit nicht vollständig und muss mit Unsicherheit umgehen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einer Stichprobe kommen die Werte $1$, $2$, $3$ mit den Häufigkeiten $5$, $10$, $5$ vor. Berechne $\\bar x$.',
+      opts: ['$\\bar x = 2$', '$\\bar x = 10$', '$\\bar x = 6{,}67$', '$\\bar x = 1{,}5$'],
+      steps: [
+        '$\\bar x = \\tfrac{1 \\cdot 5 + 2 \\cdot 10 + 3 \\cdot 5}{20} = \\tfrac{40}{20}$.',
+        '$= 2$. Geteilt wird durch die Anzahl aller Werte, $20$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Skalarprodukt und Vektorprodukt — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w18-skalar-vektorprodukt',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Skalarprodukt und Vektorprodukt',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 18 (LB 8) · 20 Aufgaben: Winkel, Orthogonalität, Projektion, Flächen mit dem Vektorprodukt · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 18 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Alle 20 Fragen aus dem Grundkurs-Blatt w15-skalar-vektorprodukt (eine Quelle für beide Kurse). Blocks: Skalarprodukt und Winkel (1-4, 12, 13, 18, 20), Orthogonalität (14, 16), Vektorprodukt (5-11, 15, 17), Flächen (7, 8, 19). Taschenrechner erlaubt. */
+  questions: [
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} \\cdot \\begin{pmatrix} 4 \\\\ -1 \\\\ 2 \\end{pmatrix}$.',
+      opts: ['$8$', '$12$', '$2$', '$\\begin{pmatrix} 4 \\\\ -2 \\\\ 6 \\end{pmatrix}$'],
+      steps: [
+        '$1 \\cdot 4 + 2 \\cdot (-1) + 3 \\cdot 2 = 4 - 2 + 6$.',
+        '$= 8$. Das Skalarprodukt ist eine Zahl, kein Vektor.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Winkel schließen $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ ein?',
+      opts: ['$60^\\circ$', '$30^\\circ$', '$90^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{1}{1 \\cdot \\sqrt2}$.',
+        '$\\varphi = 45^\\circ$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Winkel schließen $\\begin{pmatrix} 2 \\\\ 1 \\\\ 2 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 2 \\\\ -2 \\end{pmatrix}$ ein?',
+      opts: ['$45^\\circ$', '$0^\\circ$', '$90^\\circ$', '$63{,}6^\\circ$'],
+      steps: [
+        'Skalarprodukt $2 + 2 - 4 = 0$.',
+        'Die Vektoren stehen senkrecht aufeinander.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Winkel schließen $\\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ und $\\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$ ein?',
+      opts: ['$\\approx 26{,}4^\\circ$', '$90^\\circ$', '$\\approx 116{,}4^\\circ$', '$\\approx 63{,}6^\\circ$'],
+      steps: [
+        'Skalarprodukt $2 - 2 + 4 = 4$, beide Beträge $3$.',
+        '$\\cos\\varphi = \\tfrac49$, $\\varphi \\approx 63{,}6^\\circ$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['$0$', '$\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 0 \\\\ -1 \\end{pmatrix}$'],
+      steps: [
+        '$\\vec a \\times \\vec b = \\begin{pmatrix} a_2 b_3 - a_3 b_2 \\\\ a_3 b_1 - a_1 b_3 \\\\ a_1 b_2 - a_2 b_1 \\end{pmatrix} = \\begin{pmatrix} 0 - 0 \\\\ 0 - 0 \\\\ 1 - 0 \\end{pmatrix}$.',
+        'Die $x$- und die $y$-Richtung spannen die $x$-$y$-Ebene auf, das Produkt zeigt in $z$-Richtung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} \\times \\begin{pmatrix} 4 \\\\ 5 \\\\ 6 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 3 \\\\ -6 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ 10 \\\\ 18 \\end{pmatrix}$', '$\\begin{pmatrix} -3 \\\\ 6 \\\\ -3 \\end{pmatrix}$', '$32$'],
+      steps: [
+        '$\\begin{pmatrix} 2 \\cdot 6 - 3 \\cdot 5 \\\\ 3 \\cdot 4 - 1 \\cdot 6 \\\\ 1 \\cdot 5 - 2 \\cdot 4 \\end{pmatrix} = \\begin{pmatrix} -3 \\\\ 6 \\\\ -3 \\end{pmatrix}$.',
+        '$32$ wäre das Skalarprodukt, $(4;\\ 10;\\ 18)$ das zeilenweise Produkt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist das Parallelogramm, das $\\begin{pmatrix} 3 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 0 \\\\ 4 \\\\ 0 \\end{pmatrix}$ aufspannen?',
+      opts: ['$7$', '$12$', '$6$', '$5$'],
+      steps: [
+        '$\\vec a \\times \\vec b = (0;\\ 0;\\ 12)$, Betrag $12$.',
+        'Probe: ein Rechteck mit den Seiten $3$ und $4$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne den Flächeninhalt des Dreiecks $A(1 \\mid 0 \\mid 0)$, $B(0 \\mid 2 \\mid 0)$, $C(0 \\mid 0 \\mid 3)$.',
+      opts: ['$3{,}5$', '$7$', '$6$', '$3$'],
+      steps: [
+        '$\\vec{AB} \\times \\vec{AC} = (-1;\\ 2;\\ 0) \\times (-1;\\ 0;\\ 3) = (6;\\ 3;\\ 2)$, Betrag $\\sqrt{49} = 7$.',
+        'Dreieck: die Hälfte, $3{,}5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Eigenschaft hat $\\vec a \\times \\vec b$ für nicht parallele Vektoren $\\vec a$, $\\vec b$?',
+      opts: ['Es steht senkrecht auf $\\vec a$ und auf $\\vec b$.', 'Es ist eine Zahl.', 'Es ist parallel zu $\\vec a$.', 'Es halbiert den Winkel zwischen $\\vec a$ und $\\vec b$.'],
+      steps: [
+        'Probe mit Aufgabe 6: $(-3;\\ 6;\\ -3) \\cdot (1;\\ 2;\\ 3) = -3 + 12 - 9 = 0$.',
+        'Darum liefert das Vektorprodukt einen Normalenvektor.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie hängen $\\vec a \\times \\vec b$ und $\\vec b \\times \\vec a$ zusammen?',
+      opts: ['Sie sind gleich.', '$\\vec b \\times \\vec a = 0$', '$\\vec b \\times \\vec a = -(\\vec a \\times \\vec b)$', '$\\vec b \\times \\vec a = 2(\\vec a \\times \\vec b)$'],
+      steps: [
+        'Vertauscht man die Faktoren, wechseln in jeder Zeile beide Produkte die Plätze.',
+        'Gleicher Betrag, entgegengesetzte Richtung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie hängt der Betrag des Vektorprodukts mit dem Winkel $\\varphi$ zwischen $\\vec a$ und $\\vec b$ zusammen?',
+      opts: ['$|\\vec a \\times \\vec b| = |\\vec a| + |\\vec b|$', '$|\\vec a \\times \\vec b| = |\\vec a| \\cdot |\\vec b| \\cdot \\sin\\varphi$', '$|\\vec a \\times \\vec b| = |\\vec a| \\cdot |\\vec b| \\cdot \\cos\\varphi$', '$|\\vec a \\times \\vec b| = \\sin\\varphi$'],
+      steps: [
+        'Grundseite $|\\vec a|$ mal Höhe $|\\vec b|\\sin\\varphi$ ergibt den Flächeninhalt des Parallelogramms.',
+        'Mit dem Kosinus wird das Skalarprodukt berechnet.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Es gilt $|\\vec a| = 3$, $|\\vec b| = 4$ und der Winkel zwischen ihnen ist $60^\\circ$. Berechne $\\vec a \\cdot \\vec b$.',
+      opts: ['$7$', '$6\\sqrt3$', '$12$', '$6$'],
+      steps: [
+        '$\\vec a \\cdot \\vec b = 3 \\cdot 4 \\cdot \\cos 60^\\circ = 12 \\cdot \\tfrac12$.',
+        '$= 6$. $6\\sqrt3$ wäre der Betrag des Vektorprodukts.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lang ist die senkrechte Projektion von $\\vec b = \\begin{pmatrix} 2 \\\\ 1 \\\\ 3 \\end{pmatrix}$ auf die Richtung von $\\vec a = \\begin{pmatrix} 3 \\\\ 0 \\\\ 4 \\end{pmatrix}$?',
+      opts: ['$18$', '$5$', '$3{,}6$', '$\\approx 3{,}74$'],
+      steps: [
+        'Projektionslänge $= \\dfrac{\\vec a \\cdot \\vec b}{|\\vec a|} = \\dfrac{6 + 0 + 12}{5}$.',
+        '$= 3{,}6$. $\\sqrt{14} \\approx 3{,}74$ ist die Länge von $\\vec b$ selbst.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $t$ ist $\\begin{pmatrix} t \\\\ 2 \\\\ 1 \\end{pmatrix}$ orthogonal zu $\\begin{pmatrix} 3 \\\\ -1 \\\\ 4 \\end{pmatrix}$?',
+      opts: ['$t = 2$', '$t = -\\tfrac23$', '$t = \\tfrac23$', '$t = -2$'],
+      steps: [
+        '$3t - 2 + 4 = 0$.',
+        '$3t = -2$, $t = -\\tfrac23$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} \\times \\begin{pmatrix} 2 \\\\ 4 \\\\ 6 \\end{pmatrix}$.',
+      opts: ['$28$', '$\\begin{pmatrix} -1 \\\\ -2 \\\\ -3 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 8 \\\\ 18 \\end{pmatrix}$', '$\\vec 0$'],
+      steps: [
+        'Der zweite Vektor ist das Doppelte des ersten: Die Vektoren sind parallel.',
+        'Parallele Vektoren spannen keine Fläche auf, ihr Vektorprodukt ist der Nullvektor.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Kraft $\\vec F = \\begin{pmatrix} 10 \\\\ 0 \\\\ 5 \\end{pmatrix}$ N verschiebt einen Körper um $\\vec s = \\begin{pmatrix} 4 \\\\ 3 \\\\ 0 \\end{pmatrix}$ m. Wie groß ist die Arbeit $W = \\vec F \\cdot \\vec s$?',
+      opts: ['$40$ J', '$0$ J', '$75$ J', '$55$ J'],
+      steps: [
+        '$10 \\cdot 4 + 0 \\cdot 3 + 5 \\cdot 0$.',
+        '$= 40$ J. Nur der Kraftanteil in Bewegungsrichtung verrichtet Arbeit.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Einheitsvektor steht senkrecht auf $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$?',
+      opts: ['$\\begin{pmatrix} 0 \\\\ -1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\dfrac{1}{\\sqrt2}\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\dfrac{1}{\\sqrt2}\\begin{pmatrix} 0 \\\\ -1 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        'Vektorprodukt: $(1;\\ 0;\\ 0) \\times (0;\\ 1;\\ 1) = (0;\\ -1;\\ 1)$ mit dem Betrag $\\sqrt2$.',
+        'Durch den Betrag teilen: Länge $1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Beziehung gilt für jeden Vektor $\\vec a$?',
+      opts: ['$\\vec a \\cdot \\vec a = |\\vec a|^2$', '$\\vec a \\cdot \\vec a = 0$', '$\\vec a \\times \\vec a = |\\vec a|^2$', '$\\vec a \\cdot \\vec a = |\\vec a|$'],
+      steps: [
+        '$a_1^2 + a_2^2 + a_3^2$ ist das Quadrat des Betrags.',
+        'Das Vektorprodukt $\\vec a \\times \\vec a$ ist dagegen der Nullvektor.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Flächeninhalt des Dreiecks $A(0 \\mid 0 \\mid 0)$, $B(4 \\mid 0 \\mid 0)$, $C(1 \\mid 3 \\mid 0)$.',
+      opts: ['$8$', '$6$', '$12$', '$\\approx 6{,}3$'],
+      steps: [
+        '$(4;\\ 0;\\ 0) \\times (1;\\ 3;\\ 0) = (0;\\ 0;\\ 12)$.',
+        'Hälfte: $6$. Kontrolle: Grundseite $4$, Höhe $3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Das Dreieck $A(0 \\mid 0 \\mid 0)$, $B(2 \\mid 0 \\mid 0)$, $C(1 \\mid 1 \\mid \\sqrt2)$: Welchen Winkel hat es bei $A$?',
+      opts: ['$30^\\circ$', '$60^\\circ$', '$90^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\vec{AB} \\cdot \\vec{AC} = 2$, $|\\vec{AB}| = 2$, $|\\vec{AC}| = \\sqrt{1 + 1 + 2} = 2$.',
+        '$\\cos\\alpha = \\tfrac{2}{4} = \\tfrac12$, also $60^\\circ$. Auch $|\\vec{BC}| = 2$: Das Dreieck ist gleichseitig.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

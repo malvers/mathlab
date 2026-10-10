@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Funktions-, Geraden- und Ebenenscharen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w26-scharen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Funktions-, Geraden- und Ebenenscharen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 26 (LB 9) · 20 Aufgaben: gemeinsame Punkte, Extrem- und Wendepunkte mit Parameter, Ortskurven, Geraden- und Ebenenscharen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 26 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Funktionsscharen mit Ortskurven (1-10), Geradenscharen in Ebene und Raum (11-18), Ebenenscharen (19, 20). Ohne Hilfsmittel, CAS zum Entdecken erlaubt. */
+  questions: [
+    {
+      q: 'Wo liegt der Scheitelpunkt von $f_a(x) = x^2 - 2ax$?',
+      opts: ['$(2a \\mid 0)$', '$(a \\mid a^2)$', '$(a \\mid -a^2)$', '$(-a \\mid a^2)$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 2x - 2a = 0$ gibt $x = a$.',
+        '$f_a(a) = a^2 - 2a^2 = -a^2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Auf welcher Kurve liegen die Scheitelpunkte $(a \\mid -a^2)$ aus Aufgabe 1 für alle $a$?',
+      opts: ['$y = -x^2$', '$y = -2x$', '$y = x^2$', '$y = -x$'],
+      steps: [
+        '$x = a$ setzen, dann $y = -a^2 = -x^2$.',
+        'Diese Kurve heißt Ortskurve der Scheitelpunkte.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Punkt haben alle Graphen von $f_a(x) = ax^2$ mit $a \\neq 0$ gemeinsam?',
+      opts: ['$(0 \\mid 0)$', 'keinen', '$(1 \\mid 1)$', '$(0 \\mid 1)$'],
+      steps: [
+        '$f_a(0) = 0$ für jedes $a$.',
+        'Für $x \\neq 0$ hängt $ax^2$ von $a$ ab; dort schneiden sich zwei Graphen nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welche $a$ hat $f_a(x) = x^3 - ax$ drei verschiedene Nullstellen?',
+      opts: ['$a = 0$', 'für alle $a$', '$a < 0$', '$a > 0$'],
+      steps: [
+        '$x(x^2 - a) = 0$: $x = 0$ oder $x^2 = a$.',
+        'Zwei weitere Nullstellen $\\pm\\sqrt a$ gibt es nur für $a > 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo hat $f_a(x) = x^3 - 3ax$ mit $a > 0$ seine Extremstellen?',
+      opts: ['$x = 0$', '$x = \\pm 3a$', '$x = \\pm\\sqrt a$', '$x = \\pm a$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 3x^2 - 3a = 0$.',
+        '$x^2 = a$, also $x = \\pm\\sqrt a$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo hat $f_a(x) = e^x - ax$ mit $a > 0$ seinen Tiefpunkt?',
+      opts: ['bei $x = a$', 'bei $x = \\ln a$', 'bei $x = e^a$', 'bei $x = 0$'],
+      steps: [
+        '$f_a^{\\prime}(x) = e^x - a = 0$ gibt $x = \\ln a$.',
+        '$f_a^{\\prime\\prime}(x) = e^x > 0$: Tiefpunkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Graph von $f_t(x) = tx - x^2$ mit $t > 0$ schließt mit der $x$-Achse die Fläche $\\tfrac{t^3}{6}$ ein. Wie groß ist sie für $t = 3$?',
+      opts: ['$9$', '$27$', '$1{,}5$', '$4{,}5$'],
+      steps: [
+        '$\\tfrac{27}{6}$.',
+        '$= 4{,}5$. Kontrolle: $\\int_0^3 (3x - x^2)\\,dx = 13{,}5 - 9$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $t$ ist die Fläche aus Aufgabe 7 genau $36$?',
+      opts: ['$t = 6$', '$t = 12$', '$t = 3$', '$t = 216$'],
+      steps: [
+        '$\\tfrac{t^3}{6} = 36$, also $t^3 = 216$.',
+        '$t = 6$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo liegt der Wendepunkt von $f_a(x) = x^3 - 3ax^2$?',
+      opts: ['$(0 \\mid 0)$', '$(a \\mid -a^3)$', '$(a \\mid -2a^3)$', '$(3a \\mid 0)$'],
+      steps: [
+        '$f_a^{\\prime\\prime}(x) = 6x - 6a = 0$ gibt $x = a$; $f_a^{\\prime\\prime\\prime} = 6 \\neq 0$.',
+        '$f_a(a) = a^3 - 3a^3 = -2a^3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Auf welcher Kurve liegen die Wendepunkte aus Aufgabe 9?',
+      opts: ['$y = -2x^3$', '$y = -x^3$', '$y = 2x^3$', '$y = -2x^2$'],
+      steps: [
+        '$x = a$ einsetzen in $y = -2a^3$.',
+        'Ortskurve $y = -2x^3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Gerade der Schar $g_a\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} a \\\\ 1 \\\\ 0 \\end{pmatrix}$ geht durch $P(3 \\mid 1 \\mid 0)$?',
+      opts: ['$a = 1$', 'keine', '$a = 3$', '$a = 2$'],
+      steps: [
+        '$y$-Koordinate: $t = 1$.',
+        '$x$-Koordinate: $1 + a = 3$, $a = 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Punkt haben alle Geraden $y = ax + 1$ gemeinsam?',
+      opts: ['$(1 \\mid 0)$', '$(0 \\mid 0)$', 'keinen', '$(0 \\mid 1)$'],
+      steps: [
+        'Für $x = 0$ ist $y = 1$, unabhängig von $a$.',
+        'Die Schar ist ein Geradenbüschel durch $(0 \\mid 1)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Geraden der Schar $y = ax + 1$ berühren die Parabel $y = x^2 + 2$?',
+      opts: ['keine', '$a = 2$ und $a = -2$', 'nur $a = 2$', '$a = 0$'],
+      steps: [
+        '$x^2 + 2 = ax + 1$, also $x^2 - ax + 1 = 0$ mit genau einer Lösung.',
+        'Diskriminante $a^2 - 4 = 0$: $a = \\pm 2$, zwei Tangenten aus dem Punkt $(0 \\mid 1)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was haben die Geraden $g_a\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ a \\\\ 0 \\end{pmatrix}$ gemeinsam?',
+      opts: ['Sie liegen auf der $z$-Achse.', 'Sie gehen durch den Ursprung.', 'Sie gehen durch $(1 \\mid 2 \\mid 3)$ und liegen in der Ebene $z = 3$.', 'Sie sind parallel.'],
+      steps: [
+        'Gemeinsamer Stützpunkt $(1 \\mid 2 \\mid 3)$.',
+        'Die $z$-Komponente des Richtungsvektors ist $0$: Ein Büschel in der Ebene $z = 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $a$ liegt $g_a\\colon \\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ a \\end{pmatrix}$ in der Ebene $x - y + z = 0$?',
+      opts: ['$a = 1$', 'für jedes $a$', '$a = 0$', '$a = -1$'],
+      steps: [
+        'Der Ursprung liegt in der Ebene.',
+        'Richtungsvektor parallel zur Ebene: $(1;\\ 1;\\ a) \\cdot (1;\\ -1;\\ 1) = a = 0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welche $a$ bildet eine Gerade mit dem Richtungsvektor $\\begin{pmatrix} 1 \\\\ 0 \\\\ a \\end{pmatrix}$ mit der $x$-$y$-Ebene einen Winkel von $45^\\circ$?',
+      opts: ['nur $a = 1$', '$a = 1$ oder $a = -1$', '$a = \\sqrt2$', '$a = 0$'],
+      steps: [
+        '$\\sin\\varphi = \\dfrac{|a|}{\\sqrt{1 + a^2}} = \\tfrac{1}{\\sqrt2}$.',
+        '$2a^2 = 1 + a^2$, $a^2 = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Gerade der Schar $y = ax + 2$ hat vom Ursprung den größten Abstand?',
+      opts: ['$a = 2$, Abstand $\\tfrac{2}{\\sqrt5}$', '$a = 1$, Abstand $\\sqrt2$', 'Der Abstand wächst mit $a$ ohne Grenze.', '$a = 0$, Abstand $2$'],
+      steps: [
+        'Abstand $d(a) = \\dfrac{2}{\\sqrt{1 + a^2}}$.',
+        'Der Nenner ist für $a = 0$ am kleinsten: $d = 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was beschreibt die Schar $g_a\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + t\\begin{pmatrix} a \\\\ 1 - a \\\\ 0 \\end{pmatrix}$?',
+      opts: ['Geraden auf der $z$-Achse', 'ein Geradenbüschel durch $(1 \\mid 1 \\mid 1)$ in der Ebene $z = 1$', 'Geraden durch den Ursprung', 'parallele Geraden'],
+      steps: [
+        'Alle haben den Stützpunkt $(1 \\mid 1 \\mid 1)$.',
+        'Die $z$-Komponente der Richtung ist $0$: Alle liegen in $z = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Gerade liegt in allen Ebenen der Schar $E_a\\colon ax + y - z = a$?',
+      opts: ['$\\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$', '$\\vec x = t\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$', 'Es gibt keine gemeinsame Gerade.'],
+      steps: [
+        'Nach dem Parameter ordnen: $a\\,(x - 1) + (y - z) = 0$.',
+        'Das gilt für jedes $a$ genau dann, wenn $x = 1$ und $y = z$: die Punkte $(1 \\mid t \\mid t)$. Alle Ebenen der Schar drehen sich um diese Gerade (Ebenenbüschel).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $a$ steht die Ebene $E_a\\colon x + ay + z = 4$ senkrecht auf $F\\colon x - y + z = 0$?',
+      opts: ['$a = -2$', '$a = 2$', '$a = 1$', '$a = 0$'],
+      steps: [
+        'Ebenen stehen senkrecht, wenn ihre Normalenvektoren orthogonal sind.',
+        '$\\begin{pmatrix} 1 \\\\ a \\\\ 1 \\end{pmatrix} \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 1 \\end{pmatrix} = 2 - a = 0$, also $a = 2$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zweiseitige Tests und statistische Sicherheit — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w16-zweiseitige-tests',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zweiseitige Tests und statistische Sicherheit',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 16 (LB 7) · 20 Aufgaben: zweiseitiger Ablehnungsbereich, Niveau auf beide Seiten, statistische Sicherheit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 16 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Alle 20 Fragen aus dem Grundkurs-Blatt w13-zweiseitige-tests (eine Quelle für beide Kurse). Blocks: Wann zweiseitig (1, 2, 15, 16), Niveau aufteilen und Bereich bestimmen (3-7, 11, 12, 17), statistische Sicherheit und tatsächliches Niveau (8-10, 18), Entscheidung und Deutung (13, 14, 19, 20). Mit CAS/Tabelle. */
+  questions: [
+    {
+      q: 'Eine Münze soll auf Fairness geprüft werden, ohne Vermutung über die Richtung. Welcher Test passt?',
+      opts: ['ein zweiseitiger Test mit $H_0\\colon p = 0{,}5$', 'ein Test mit $H_0\\colon p \\ne 0{,}5$', 'ein linksseitiger Test mit $H_0\\colon p = 0{,}5$', 'ein rechtsseitiger Test mit $H_0\\colon p = 0{,}5$'],
+      steps: [
+        'Gegen eine faire Münze sprechen auffällig viele und auffällig wenige Zahl-Würfe.',
+        'Darum liegt der Ablehnungsbereich auf beiden Seiten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Form hat der Ablehnungsbereich eines zweiseitigen Tests?',
+      opts: ['$K = \\{\\mu\\}$', '$K = \\{k_2;\\ \\ldots;\\ n\\}$', '$K = \\{k_1;\\ \\ldots;\\ k_2\\}$', '$K = \\{0;\\ \\ldots;\\ k_1\\} \\cup \\{k_2;\\ \\ldots;\\ n\\}$'],
+      steps: [
+        'Zwei Teile: auffällig klein und auffällig groß.',
+        'Der Bereich dazwischen, um den Erwartungswert herum, ist der Annahmebereich.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie teilt man bei einem zweiseitigen Test das Signifikanzniveau $\\alpha = 5\\,\\%$ üblicherweise auf?',
+      opts: ['je höchstens $2{,}5\\,\\%$ auf jede Seite', 'je höchstens $10\\,\\%$ auf jede Seite', '$5\\,\\%$ auf jede Seite', '$5\\,\\%$ nur auf die größere Seite'],
+      steps: [
+        'Beide Teile zusammen dürfen höchstens $\\alpha$ ausmachen.',
+        'Symmetrisch: $P(X \\le k_1) \\le 0{,}025$ und $P(X \\ge k_2) \\le 0{,}025$.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$n = 100$, $H_0\\colon p = 0{,}5$, zweiseitig, $\\alpha = 5\\,\\%$. Es gilt $P(X \\le 39) \\approx 0{,}018$ und $P(X \\le 40) \\approx 0{,}028$. Wo endet der linke Teil des Ablehnungsbereichs?',
+      fig: '<svg viewBox="0 0 480 260" width="480" height="260" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Histogramm von B(100; 0,5), beidseitiger Ablehnungsbereich bis 39 und ab 61 rot"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="420" height="208"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="217.23" x2="458" y2="217.23" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="-169" y1="226" x2="-169" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="460" y="233.23" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">k</text><text x="-181" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">P(X = k)</text><text x="-176" y="232.23" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="81.8" y1="213.73" x2="81.8" y2="220.73" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="81.8" y="233.23" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">30</text><line x1="165.4" y1="213.73" x2="165.4" y2="220.73" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="165.4" y="233.23" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">40</text><line x1="249" y1="213.73" x2="249" y2="220.73" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="249" y="233.23" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">50</text><line x1="332.6" y1="213.73" x2="332.6" y2="220.73" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="332.6" y="233.23" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">60</text><line x1="416.2" y1="213.73" x2="416.2" y2="220.73" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="416.2" y="233.23" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">70</text><rect x="44.85" y="217.23" width="7.02" height="0" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="53.21" y="217.23" width="7.02" height="0" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="61.57" y="217.23" width="7.02" height="0.01" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="69.93" y="217.21" width="7.02" height="0.02" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="78.29" y="217.18" width="7.02" height="0.05" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="86.65" y="217.12" width="7.02" height="0.11" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="95.01" y="216.99" width="7.02" height="0.25" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="103.37" y="216.72" width="7.02" height="0.51" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="111.73" y="216.23" width="7.02" height="1" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="120.09" y="215.34" width="7.02" height="1.89" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="128.45" y="213.82" width="7.02" height="3.42" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="136.81" y="211.32" width="7.02" height="5.91" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="145.17" y="207.43" width="7.02" height="9.8" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="153.53" y="201.65" width="7.02" height="15.58" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="161.89" y="193.47" width="7.02" height="23.76" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="170.25" y="182.46" width="7.02" height="34.78" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="178.61" y="168.38" width="7.02" height="48.85" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="186.97" y="151.34" width="7.02" height="65.9" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="195.33" y="131.87" width="7.02" height="85.36" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="203.69" y="111" width="7.02" height="106.23" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="212.05" y="90.22" width="7.02" height="127.02" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="220.41" y="71.3" width="7.02" height="145.93" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="228.77" y="56.1" width="7.02" height="161.13" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="237.13" y="46.24" width="7.02" height="171" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="245.49" y="42.82" width="7.02" height="174.42" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="253.85" y="46.24" width="7.02" height="171" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="262.21" y="56.1" width="7.02" height="161.13" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="270.57" y="71.3" width="7.02" height="145.93" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="278.93" y="90.22" width="7.02" height="127.02" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="287.29" y="111" width="7.02" height="106.23" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="295.65" y="131.87" width="7.02" height="85.36" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="304.01" y="151.34" width="7.02" height="65.9" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="312.37" y="168.38" width="7.02" height="48.85" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="320.73" y="182.46" width="7.02" height="34.78" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="329.09" y="193.47" width="7.02" height="23.76" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="337.45" y="201.65" width="7.02" height="15.58" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="345.81" y="207.43" width="7.02" height="9.8" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="354.17" y="211.32" width="7.02" height="5.91" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="362.53" y="213.82" width="7.02" height="3.42" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="370.89" y="215.34" width="7.02" height="1.89" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="379.25" y="216.23" width="7.02" height="1" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="387.61" y="216.72" width="7.02" height="0.51" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="395.97" y="216.99" width="7.02" height="0.25" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="404.33" y="217.12" width="7.02" height="0.11" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="412.69" y="217.18" width="7.02" height="0.05" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="421.05" y="217.21" width="7.02" height="0.02" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="429.41" y="217.23" width="7.02" height="0.01" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="437.77" y="217.23" width="7.02" height="0" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/><rect x="446.13" y="217.23" width="7.02" height="0" rx="0" fill="#B02418" stroke="#0E244E" stroke-width="0.4" opacity="0.8"/></svg>',
+      figcap: 'B(100; 0,5): rot der zweiseitige Ablehnungsbereich',
+      opts: ['bei $k_1 = 25$', 'bei $k_1 = 40$', 'bei $k_1 = 39$', 'bei $k_1 = 45$'],
+      steps: [
+        'Größtes $k_1$ mit $P(X \\le k_1) \\le 0{,}025$.',
+        '$P(X \\le 40) > 0{,}025$, also $k_1 = 39$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet der ganze Ablehnungsbereich zu Aufgabe 4? Die Verteilung ist symmetrisch zu $50$.',
+      opts: ['$K = \\{0;\\ \\ldots;\\ 39\\} \\cup \\{60;\\ \\ldots;\\ 100\\}$', '$K = \\{0;\\ \\ldots;\\ 39\\} \\cup \\{61;\\ \\ldots;\\ 100\\}$', '$K = \\{0;\\ \\ldots;\\ 40\\} \\cup \\{60;\\ \\ldots;\\ 100\\}$', '$K = \\{39;\\ \\ldots;\\ 61\\}$'],
+      steps: [
+        'Wegen $p = 0{,}5$ ist $P(X \\ge 61) = P(X \\le 39) \\approx 0{,}018$.',
+        'Die Grenzen liegen symmetrisch: $50 - 11$ und $50 + 11$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei $100$ Würfen der Münze fällt $58$-mal Zahl. Wie entscheidet der Test aus Aufgabe 5?',
+      opts: ['$H_0$ wird nicht abgelehnt.', 'Man kann nicht entscheiden.', '$H_0$ wird abgelehnt.', 'Die Münze ist bewiesen unfair.'],
+      steps: [
+        '$58$ liegt im Annahmebereich $\\{40;\\ \\ldots;\\ 60\\}$.',
+        'Eine Abweichung um $8$ vom Erwartungswert ist bei $100$ Würfen nicht auffällig.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei $100$ Würfen fällt $63$-mal Zahl. Wie entscheidet der Test aus Aufgabe 5?',
+      opts: ['Der Test muss rechtsseitig wiederholt werden.', 'Die Münze zeigt sicher zu oft Zahl.', '$H_0$ wird abgelehnt: Die Münze ist vermutlich nicht fair.', '$H_0$ wird nicht abgelehnt.'],
+      steps: [
+        '$63 \\in \\{61;\\ \\ldots;\\ 100\\}$.',
+        'Ablehnen mit höchstens $5\\,\\%$ Irrtumswahrscheinlichkeit.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was versteht man unter der statistischen Sicherheit eines Tests mit dem Signifikanzniveau $\\alpha$?',
+      opts: ['$1 - \\alpha$: die Wahrscheinlichkeit, eine wahre Nullhypothese nicht abzulehnen', '$\\alpha$ selbst', 'die Größe der Stichprobe', 'die Wahrscheinlichkeit, dass $H_0$ wahr ist'],
+      steps: [
+        'Bei $\\alpha = 5\\,\\%$ ist die statistische Sicherheit $95\\,\\%$.',
+        'So oft trifft man bei wahrer Nullhypothese die richtige Entscheidung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist das tatsächliche Signifikanzniveau des Tests aus Aufgabe 5?',
+      opts: ['$\\approx 5{,}7\\,\\%$', 'genau $5\\,\\%$', '$\\approx 1{,}8\\,\\%$', '$\\approx 3{,}5\\,\\%$'],
+      steps: [
+        '$P(X \\le 39) + P(X \\ge 61) \\approx 0{,}018 + 0{,}018$.',
+        '$\\approx 0{,}035$. Wegen der ganzen Zahlen bleibt man unter den erlaubten $5\\,\\%$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche statistische Sicherheit hat der Test aus Aufgabe 5 tatsächlich?',
+      opts: ['genau $95\\,\\%$', '$\\approx 3{,}5\\,\\%$', '$\\approx 98{,}2\\,\\%$', '$\\approx 96{,}5\\,\\%$'],
+      steps: [
+        '$1 - 0{,}035 = 0{,}965$.',
+        'Mindestens $95\\,\\%$ waren gefordert.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$n = 50$, $H_0\\colon p = 0{,}5$, zweiseitig, $\\alpha = 5\\,\\%$. Es gilt $P(X \\le 17) \\approx 0{,}016$ und $P(X \\le 18) \\approx 0{,}032$. Wie lautet der Ablehnungsbereich?',
+      opts: ['$K = \\{0;\\ \\ldots;\\ 17\\} \\cup \\{33;\\ \\ldots;\\ 50\\}$', '$K = \\{0;\\ \\ldots;\\ 17\\} \\cup \\{32;\\ \\ldots;\\ 50\\}$', '$K = \\{17;\\ \\ldots;\\ 33\\}$', '$K = \\{0;\\ \\ldots;\\ 18\\} \\cup \\{32;\\ \\ldots;\\ 50\\}$'],
+      steps: [
+        'Links: größtes $k_1$ mit $P(X \\le k_1) \\le 0{,}025$, also $17$.',
+        'Rechts symmetrisch: $50 - 17 = 33$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Würfel soll zweiseitig auf die Häufigkeit der Sechs getestet werden: $n = 120$, $\\alpha = 10\\,\\%$. Es gilt $P(X \\le 12) \\approx 0{,}028$, $P(X \\le 13) \\approx 0{,}050$, $P(X \\ge 28) \\approx 0{,}037$, $P(X \\ge 27) \\approx 0{,}060$. Wie lautet der Ablehnungsbereich?',
+      opts: ['$K = \\{0;\\ \\ldots;\\ 12\\} \\cup \\{27;\\ \\ldots;\\ 120\\}$', '$K = \\{12;\\ \\ldots;\\ 28\\}$', '$K = \\{0;\\ \\ldots;\\ 12\\} \\cup \\{28;\\ \\ldots;\\ 120\\}$', '$K = \\{0;\\ \\ldots;\\ 13\\} \\cup \\{27;\\ \\ldots;\\ 120\\}$'],
+      steps: [
+        'Je Seite höchstens $5\\,\\%$: links $P(X \\le 13)$ ist knapp über $0{,}05$, also $k_1 = 12$; rechts $P(X \\ge 27) > 0{,}05$, also $k_2 = 28$.',
+        'Bei $p = \\tfrac16$ ist die Verteilung nicht symmetrisch, man muss beide Seiten getrennt bestimmen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was bedeutet „Das Ergebnis ist signifikant auf dem $5\\,\\%$-Niveau“?',
+      opts: ['Das Ergebnis ist wichtig.', 'Das Ergebnis ist zu $95\\,\\%$ richtig.', 'Die Gegenhypothese ist mit $95\\,\\%$ wahr.', 'Bei wahrer Nullhypothese wäre ein so extremes Ergebnis höchstens mit $5\\,\\%$ Wahrscheinlichkeit aufgetreten.'],
+      steps: [
+        'Signifikant heißt hier nur: unvereinbar genug mit $H_0$.',
+        'Über die Wahrscheinlichkeit der Hypothesen selbst sagt der Test nichts.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Test lehnt $H_0$ ab. Kann man sich dabei irren?',
+      opts: ['Nein, ein abgelehntes $H_0$ ist sicher falsch.', 'Ja, mit höchstens der Wahrscheinlichkeit $\\alpha$, falls $H_0$ wahr ist.', 'Ja, immer mit genau $50\\,\\%$.', 'Nein, wenn $n$ groß genug ist.'],
+      steps: [
+        'Auch unter $H_0$ fallen manchmal Ergebnisse in den Ablehnungsbereich.',
+        'Diese Irrtumswahrscheinlichkeit begrenzt das Signifikanzniveau.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Schokoladenhersteller will prüfen, ob die Füllmaschine den Sollanteil von $20\\,\\%$ Nüssen einhält, zu viel und zu wenig wären schlecht. Welcher Test passt?',
+      opts: ['linksseitig mit $H_0\\colon p = 0{,}2$', 'zweiseitig mit $H_0\\colon p = 0{,}2$', 'zweiseitig mit $H_0\\colon p = 0{,}5$', 'rechtsseitig mit $H_0\\colon p = 0{,}2$'],
+      steps: [
+        'Beide Abweichungen sollen auffallen.',
+        'Darum Ablehnungsbereich auf beiden Seiten von $\\mu = 0{,}2\\,n$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Forscher vermutet nur, dass ein Anteil gestiegen ist. Warum ist dann ein einseitiger Test sinnvoller als ein zweiseitiger?',
+      opts: ['Weil man dann weniger Daten braucht als null.', 'Er konzentriert $\\alpha$ auf die interessante Seite und erkennt eine Erhöhung leichter.', 'Weil einseitige Tests nie irren.', 'Weil zweiseitige Tests nur für $p = 0{,}5$ gelten.'],
+      steps: [
+        'Beim einseitigen Test steht das ganze $\\alpha$ auf einer Seite, der kritische Wert liegt näher am Erwartungswert.',
+        'Die Richtung muss aber vor dem Versuch feststehen, nicht nach einem Blick auf die Daten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Münztest mit $n = 100$ und $\\alpha = 5\\,\\%$: Rechtsseitig wäre der kritische Wert $59$, zweiseitig liegt der rechte Teil erst ab $61$. Warum?',
+      opts: ['Weil die Münze zweiseitig unfair ist.', 'Zweiseitig stehen rechts nur $2{,}5\\,\\%$ zur Verfügung statt $5\\,\\%$.', 'Weil zweiseitige Tests $n$ verdoppeln.', 'Das ist ein Rechenfehler.'],
+      steps: [
+        'Weniger Irrtumswahrscheinlichkeit auf einer Seite heißt: Das Ergebnis muss dort extremer sein.',
+        '$P(X \\ge 59) \\approx 0{,}044 \\le 0{,}05$, aber erst $P(X \\ge 61) \\approx 0{,}018 \\le 0{,}025$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Man erhöht bei gleichem $\\alpha$ den Stichprobenumfang. Was passiert mit dem Annahmebereich relativ zu $n$?',
+      opts: ['Er verschwindet.', 'Er bleibt relativ gleich breit.', 'Er wird relativ schmaler: Schon kleinere relative Abweichungen werden signifikant.', 'Er wird relativ breiter.'],
+      steps: [
+        'Die Standardabweichung wächst nur mit $\\sqrt n$, der Bereich in absoluten Zahlen also langsamer als $n$.',
+        'Darum fallen mit großen Stichproben auch kleine Unterschiede auf.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Umfrage mit $n = 100$ ergibt $45$ Zustimmungen. Der zweiseitige Test von $H_0\\colon p = 0{,}5$ lehnt nicht ab. Welche Aussage ist richtig?',
+      opts: ['Der Anteil ist genau $45\\,\\%$.', 'Der Anteil ist genau $50\\,\\%$.', 'Das Ergebnis ist mit $p = 0{,}5$ verträglich; ein Anteil unter $50\\,\\%$ ist nicht nachgewiesen.', 'Die Umfrage ist wertlos.'],
+      steps: [
+        '$45$ liegt im Annahmebereich $\\{40;\\ \\ldots;\\ 60\\}$.',
+        'Nicht ablehnen ist kein Beweis für $H_0$; die Schätzung $\\hat p = 0{,}45$ bleibt bestehen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein zweiseitiger Test auf $5\\,\\%$-Niveau lehnt ab. Hätte ein zweiseitiger Test auf $1\\,\\%$-Niveau mit denselben Daten auch abgelehnt?',
+      opts: ['Ja, immer.', 'Nein, nie.', 'Nur, wenn $n$ gerade ist.', 'Nicht unbedingt: Der $1\\,\\%$-Ablehnungsbereich ist kleiner.'],
+      steps: [
+        'Ein kleineres $\\alpha$ verlangt ein noch extremeres Ergebnis.',
+        'Ist das Ergebnis nur knapp im $5\\,\\%$-Bereich, liegt es im $1\\,\\%$-Annahmebereich.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

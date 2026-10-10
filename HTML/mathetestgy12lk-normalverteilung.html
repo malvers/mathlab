@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Normalverteilte Zufallsgrößen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy12lk-w11-normalverteilung',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Normalverteilte Zufallsgrößen',
+  subtitle: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 11 (LB 6) · 20 Aufgaben: Glockenkurve, Dichte- und Verteilungsfunktion, Kenngrößen, Sigma-Regeln, Wahrscheinlichkeiten mit dem CAS · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Jahrgangsstufe 12 · Leistungskurs · Woche 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathegy12lk.html', /* opened from the plan */
+  /* Blocks: Dichtefunktion (1-6), Verteilungsfunktion und Flächen (7, 8, 12), Sigma-Regeln (9-11, 13), Rechnen mit dem CAS (14, 16, 18, 19), Kenngrößen und Standardisierung (15, 17), Gauß (20). Mit Hilfsmitteln. */
+  questions: [
+    {
+      q: 'Wie lautet die Dichtefunktion einer normalverteilten Zufallsgröße mit dem Erwartungswert $\\mu$ und der Standardabweichung $\\sigma$?',
+      opts: ['$\\varphi(x) = \\dfrac{1}{\\sigma\\sqrt{2\\pi}}\\,\\mathrm{e}^{-\\frac{(x - \\mu)^2}{2\\sigma^2}}$', '$\\varphi(x) = \\mathrm{e}^{-\\frac{(x - \\mu)^2}{2\\sigma^2}}$', '$\\varphi(x) = \\dfrac{1}{\\sqrt{2\\pi}}\\,\\mathrm{e}^{-\\frac{(x - \\mu)^2}{2}}$', '$\\varphi(x) = \\dfrac{1}{\\sigma\\sqrt{2\\pi}}\\,\\mathrm{e}^{-\\frac{x - \\mu}{2\\sigma}}$'],
+      steps: [
+        'Der Faktor $\\tfrac{1}{\\sigma\\sqrt{2\\pi}}$ sorgt dafür, dass die Fläche unter der Kurve $1$ ist.',
+        'Im Exponenten steht das Quadrat $(x - \\mu)^2$, so ist die Kurve symmetrisch zu $x = \\mu$. Ohne $\\mu$ und $\\sigma$ ist es nur die Standardnormalverteilung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo hat die Dichtefunktion $\\varphi_{\\mu;\\sigma}$ ihr Maximum?',
+      opts: ['bei $x = 0$', 'bei $x = \\mu$', 'bei $x = \\sigma$', 'bei $x = \\mu \\pm \\sigma$'],
+      steps: [
+        'Der Exponent $-\\tfrac{(x - \\mu)^2}{2\\sigma^2}$ ist am größten, nämlich $0$, für $x = \\mu$.',
+        'Dort ist $\\varphi(\\mu) = \\tfrac{1}{\\sigma\\sqrt{2\\pi}}$; nach beiden Seiten fällt die Glocke symmetrisch ab.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo liegen die Wendestellen der Glockenkurve $\\varphi_{\\mu;\\sigma}$?',
+      opts: ['bei $x = \\mu \\pm 2\\sigma$', 'bei $x = \\mu \\pm \\sigma^2$', 'bei $x = \\mu$', 'bei $x = \\mu \\pm \\sigma$'],
+      steps: [
+        '$\\varphi^{\\prime\\prime}(x) = 0$ führt auf $(x - \\mu)^2 = \\sigma^2$.',
+        'Also $x = \\mu \\pm \\sigma$: Die Standardabweichung ist der Abstand der Wendestellen vom Maximum.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Wert hat $\\int_{-\\infty}^{\\infty} \\varphi_{\\mu;\\sigma}(x)\\,\\mathrm{d}x$?',
+      opts: ['$\\mu$', '$1$', '$\\sigma$', '$\\tfrac12$'],
+      steps: [
+        '$\\int_{-\\infty}^{\\infty} \\varphi(x)\\,\\mathrm{d}x = P(-\\infty < X < \\infty)$.',
+        'Das ist die Wahrscheinlichkeit des sicheren Ereignisses, also $1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie ändert sich die Glockenkurve, wenn $\\sigma$ größer wird und $\\mu$ gleich bleibt?',
+      opts: ['Sie bleibt gleich, nur die Fläche wächst.', 'Sie wird breiter und flacher.', 'Sie wird schmaler und höher.', 'Sie verschiebt sich nach rechts.'],
+      steps: [
+        'Die Wendestellen $\\mu \\pm \\sigma$ rücken nach außen, das Maximum $\\tfrac{1}{\\sigma\\sqrt{2\\pi}}$ wird kleiner.',
+        'Die Fläche bleibt $1$; eine Verschiebung bewirkt nur $\\mu$.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$X$ ist normalverteilt. Wie groß ist $P(X = 5)$?',
+      opts: ['$\\tfrac12$', '$F(5)$', '$\\varphi(5)$', '$0$'],
+      steps: [
+        'Bei einer stetigen Zufallsgröße sind Wahrscheinlichkeiten Flächen: $P(X = 5) = \\int_5^5 \\varphi(x)\\,\\mathrm{d}x$.',
+        'Ein Integral über ein Intervall der Breite $0$ ist $0$. $\\varphi(5)$ ist eine Dichte, keine Wahrscheinlichkeit. Deshalb ist auch $P(X \\le 5) = P(X < 5)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was gibt die Verteilungsfunktion $F(x) = \\int_{-\\infty}^{x} \\varphi(t)\\,\\mathrm{d}t$ an?',
+      opts: ['$P(X \\le x)$', '$P(X = x)$', 'die Höhe der Glockenkurve an der Stelle $x$', '$P(X \\ge x)$'],
+      steps: [
+        '$F(x)$ ist die Fläche unter der Glocke links von $x$.',
+        'Das ist die Wahrscheinlichkeit $P(X \\le x)$; $F$ steigt von $0$ bis $1$ und ist eine Stammfunktion von $\\varphi$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie berechnet man $P(a \\le X \\le b)$ mit der Verteilungsfunktion $F$?',
+      opts: ['$F(b) - F(a)$', '$\\varphi(b) - \\varphi(a)$', '$F(b) + F(a)$', '$F(a) - F(b)$'],
+      steps: [
+        '$P(a \\le X \\le b) = \\int_a^b \\varphi(x)\\,\\mathrm{d}x$.',
+        'Nach dem Hauptsatz ist das $F(b) - F(a)$, denn $F$ ist eine Stammfunktion von $\\varphi$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist $P(\\mu - \\sigma \\le X \\le \\mu + \\sigma)$ bei jeder Normalverteilung ungefähr?',
+      opts: ['$99{,}7\\,\\%$', '$95{,}4\\,\\%$', '$68{,}3\\,\\%$', '$50\\,\\%$'],
+      steps: [
+        'Standardisiert: $P(-1 \\le Z \\le 1) = 2\\,\\Phi(1) - 1$.',
+        '$\\approx 0{,}683$, unabhängig von $\\mu$ und $\\sigma$. $95{,}4\\,\\%$ gehört zu $2\\sigma$, $99{,}7\\,\\%$ zu $3\\sigma$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist $P(\\mu - 2\\sigma \\le X \\le \\mu + 2\\sigma)$ ungefähr?',
+      opts: ['$68{,}3\\,\\%$', '$99{,}7\\,\\%$', '$90\\,\\%$', '$95{,}4\\,\\%$'],
+      steps: [
+        '$2\\,\\Phi(2) - 1 \\approx 0{,}954$.',
+        'In der $2\\sigma$-Umgebung liegen also etwa $95\\,\\%$ aller Werte.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Körpergröße erwachsener Männer sei normalverteilt mit $\\mu = 180$ cm und $\\sigma = 7$ cm. Wie groß ist $P(173 \\le X \\le 187)$ ungefähr?',
+      opts: ['$34{,}1\\,\\%$', '$95{,}4\\,\\%$', '$68{,}3\\,\\%$', '$7\\,\\%$'],
+      steps: [
+        '$173 = \\mu - \\sigma$ und $187 = \\mu + \\sigma$.',
+        'Das ist die $1\\sigma$-Umgebung: $\\approx 68{,}3\\,\\%$. $34{,}1\\,\\%$ ist nur eine Hälfte davon.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$X$ ist normalverteilt mit dem Erwartungswert $\\mu$. Wie groß ist $P(X \\le \\mu)$?',
+      opts: ['$0$', '$0{,}683$', '$0{,}5$', 'Das hängt von $\\sigma$ ab.'],
+      steps: [
+        'Die Glockenkurve ist symmetrisch zu $x = \\mu$.',
+        'Links von $\\mu$ liegt genau die halbe Fläche: $F(\\mu) = 0{,}5$ für jedes $\\sigma$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist $P(X > \\mu + 2\\sigma)$ ungefähr?',
+      opts: ['$5\\,\\%$', '$2{,}3\\,\\%$', '$15{,}9\\,\\%$', '$4{,}6\\,\\%$'],
+      steps: [
+        'Außerhalb der $2\\sigma$-Umgebung liegen $1 - 0{,}954 = 0{,}046$.',
+        'Wegen der Symmetrie die Hälfte davon rechts: $\\approx 2{,}3\\,\\%$. $15{,}9\\,\\%$ gehört zu $X > \\mu + \\sigma$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Maschine füllt Packungen mit normalverteiltem Inhalt, $\\mu = 500$ g, $\\sigma = 4$ g. Berechne mit dem CAS $P(X \\le 505)$.',
+      opts: ['$\\approx 89{,}4\\,\\%$', '$\\approx 10{,}6\\,\\%$', '$\\approx 62{,}5\\,\\%$', '$\\approx 78{,}9\\,\\%$'],
+      steps: [
+        'Standardisiert: $z = \\tfrac{505 - 500}{4} = 1{,}25$, also $P(X \\le 505) = \\Phi(1{,}25)$.',
+        '$\\Phi(1{,}25) \\approx 0{,}894$. $10{,}6\\,\\%$ wäre $P(X > 505)$, $78{,}9\\,\\%$ wäre $P(495 \\le X \\le 505)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$X$ ist normalverteilt mit $\\mu$ und $\\sigma$. Welche Verteilung hat $Z = \\dfrac{X - \\mu}{\\sigma}$?',
+      opts: ['die Binomialverteilung', 'die Standardnormalverteilung mit $\\mu = 0$ und $\\sigma = 1$', 'die Normalverteilung mit $\\mu$ und $\\sigma = 1$', 'die Gleichverteilung auf $[0;\\ 1]$'],
+      steps: [
+        'Subtrahieren von $\\mu$ verschiebt die Glocke zur Mitte $0$, Teilen durch $\\sigma$ macht die Breite $1$.',
+        '$Z$ ist standardnormalverteilt; seine Verteilungsfunktion heißt $\\Phi$, und $P(X \\le x) = \\Phi\\!\\left(\\tfrac{x - \\mu}{\\sigma}\\right)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Abfüllen ist $\\mu = 500$ g. Wie groß muss $\\sigma$ sein, damit $P(X \\le 520) = 0{,}9$ gilt?',
+      opts: ['$\\sigma \\approx 10{,}0$ g', '$\\sigma \\approx 7{,}8$ g', '$\\sigma \\approx 15{,}6$ g', '$\\sigma \\approx 25{,}6$ g'],
+      steps: [
+        '$\\Phi\\!\\left(\\tfrac{20}{\\sigma}\\right) = 0{,}9$ gibt $\\tfrac{20}{\\sigma} \\approx 1{,}2816$ (CAS: inverse Normalverteilung).',
+        '$\\sigma \\approx \\tfrac{20}{1{,}2816} \\approx 15{,}6$ g. Mit $\\tfrac{20}{2}$ käme die $2\\sigma$-Regel heraus, die zu $97{,}7\\,\\%$ gehört.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$X$ ist normalverteilt mit $\\mu = 10$ und $\\sigma = 3$. Wie groß ist die Varianz $V(X)$?',
+      opts: ['$10$', '$3$', '$\\sqrt3$', '$9$'],
+      steps: [
+        'Die Varianz ist das Quadrat der Standardabweichung: $V(X) = \\sigma^2$.',
+        '$3^2 = 9$. Der Erwartungswert $E(X) = 10$ ist die Lage der Glocke.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Körpergröße sei normalverteilt mit $\\mu = 180$ cm und $\\sigma = 7$ cm. Ab welcher Größe gehört man zu den größten $5\\,\\%$?',
+      opts: ['$\\approx 194$ cm', '$\\approx 187$ cm', '$\\approx 193{,}7$ cm', '$\\approx 191{,}5$ cm'],
+      steps: [
+        'Gesucht ist $x$ mit $P(X \\le x) = 0{,}95$; das $95\\,\\%$-Quantil von $Z$ ist $\\approx 1{,}645$.',
+        '$x \\approx 180 + 1{,}645 \\cdot 7 \\approx 191{,}5$ cm. $193{,}7$ cm gehört zu $1{,}96\\,\\sigma$, also zu $2{,}5\\,\\%$ auf einer Seite.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$X$ ist normalverteilt mit $\\mu = 180$, und es gilt $P(X \\le 170) = 0{,}08$. Wie groß ist $P(X \\ge 190)$?',
+      opts: ['$0{,}16$', '$0{,}92$', '$0{,}08$', '$0{,}84$'],
+      steps: [
+        '$170$ und $190$ liegen symmetrisch zu $\\mu = 180$.',
+        'Wegen der Symmetrie der Glocke ist $P(X \\ge 190) = P(X \\le 170) = 0{,}08$, ohne $\\sigma$ zu kennen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Geldschein zeigte die Glockenkurve neben dem Bild ihres Namensgebers?',
+      opts: ['der 10-DM-Schein mit Carl Friedrich Gauß', 'der 5-Euro-Schein', 'der 20-DM-Schein mit Annette von Droste-Hülshoff', 'der 100-DM-Schein mit Clara Schumann'],
+      steps: [
+        'Die Normalverteilung heißt nach Carl Friedrich Gauß (1777–1855) auch Gauß-Verteilung.',
+        'Der 10-DM-Schein der letzten Serie (im Umlauf ab 16.04.1991) zeigte Gauß, die Glockenkurve und historische Gebäude Göttingens (Quelle: Planet Wissen, WDR, Geschichte der D-Mark).'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
