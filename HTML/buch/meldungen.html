@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Meldungen | Doc Alvers Mathe-Labor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="../js/buch.css">
+    <script src="../js/farbschema.js"></script>
+    <!-- SVP login: only Doc's account may read the reports (buch_feedback RLS) -->
+    <script src="../svp/svp-gate.js"></script>
+    <script src="../svp/svp-auth.js"></script>
+    <!--
+      buch/meldungen.html — the reports of "Fehler melden" from the textbooks (js/buch-feedback.js), for Doc alone
+      (Doc, 10.10.2026: "eine Seite, wo die Meldungen auflaufen und wo ich sie priorisieren kann. Unten einen button
+      'Fix please' der ruft Dich auf den Plan. Lass uns das täglich 18:10 machen").
+      Priority per report (3 hoch, 2 normal, 1 niedrig, 0 ignorieren); "Fix please" inserts a run into buch_feedback_lauf.
+      Doc's Mac (tools/buch-feedback/ruf.sh, every minute) then calls him - a notification and Solita - and every day at
+      18:10 when reports are open; he says "fix" to Claude, who works them off in front of him
+      (tools/buch-feedback/auftrag.md). No agent fixes anything unattended: the reports are pupils' text.
+      Tables and rules: supabase/migrations/20261010_buch_feedback.sql and 20261010_buch_feedback_job.sql.
+    -->
+    <style>
+        /* plain Raleway here: a list of reports, dates and counts - no LaTeX digits (js/lab-schrift.css) */
+        body.b-book { font-family: 'Raleway', sans-serif; }
+        .m-wrap { max-width: 980px; margin: 0 auto; padding: 26px 22px 120px; }
+        .m-h1 { font-family: 'Orbitron', sans-serif; font-size: 1.25rem; letter-spacing: 1.6px; color: #fff; margin: 0 0 6px; }
+        .m-sub { color: var(--b-dim); margin: 0 0 18px; }
+        .m-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0 0 16px; }
+        .m-bar .m-who { margin-left: auto; color: var(--b-faint); font-size: 0.88rem; }
+        .m-list { display: flex; flex-direction: column; gap: 12px; }
+        .m-card { border-radius: 14px; padding: 14px 18px 14px; background: var(--b-card); border: 0.5px solid var(--b-line); }
+        .m-card.m-p3 { border-left: 3px solid var(--b-ypsilon); }
+        .m-card.m-p0 { opacity: .55; }
+        .m-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; font-size: 0.86rem; color: var(--b-dim); }
+        .m-meta .m-buch { font-family: 'Orbitron', sans-serif; font-size: 0.66rem; letter-spacing: 1.2px; color: var(--b-lambda); text-transform: uppercase; }
+        .m-meta a { color: var(--b-teal); text-decoration: none; }
+        .m-meta a:hover { text-decoration: underline; }
+        .m-meta .m-zeit { margin-left: auto; color: var(--b-faint); }
+        .m-body { margin: 8px 0 8px; font-size: 1.08rem; line-height: 1.45; color: #fff; white-space: pre-wrap; }
+        .m-card details { margin: 0 0 10px; }
+        .m-card summary { cursor: pointer; color: var(--b-faint); font-size: 0.86rem; }
+        .m-stelle { margin: 6px 0 0; padding: 9px 12px; border-radius: 9px; background: rgba(0, 0, 0, 0.25); border: 0.5px solid var(--b-line-soft);
+            color: var(--b-text); font-size: 0.9rem; line-height: 1.4; white-space: pre-wrap; max-height: 16em; overflow: auto; }
+        .m-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+        .m-row .b-seg button { font-family: 'Raleway', sans-serif; font-size: 0.9rem; }
+        .m-seg-p button.on[data-p="3"] { background: rgba(176, 36, 24, 0.22); color: #ef8a80; box-shadow: inset 0 0 0 0.5px rgb(176, 36, 24); }
+        .m-seg-p button.on[data-p="0"] { background: rgba(255, 255, 255, 0.08); color: var(--b-dim); box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.3); }
+        .m-status { font-size: 0.88rem; padding: 3px 10px; border-radius: 999px; border: 0.5px solid var(--b-line-soft); color: var(--b-dim); }
+        .m-status.korrigiert { color: var(--b-phi-lite); border-color: rgba(121, 158, 49, 0.7); }
+        .m-status.abgelehnt { color: var(--b-faint); }
+        .m-status.unklar { color: var(--b-lambda); border-color: rgba(245, 194, 66, 0.6); }
+        .m-notiz { margin: 8px 0 0; font-size: 0.92rem; color: var(--b-text); }
+        .m-notiz a { color: var(--b-teal); }
+        .m-link { background: none; border: 0; padding: 0; cursor: pointer; color: var(--b-teal); font: inherit; font-size: 0.86rem; }
+        .m-link:hover { text-decoration: underline; }
+        .m-leer { padding: 30px 0; color: var(--b-dim); text-align: center; }
+        .m-err { color: #ef8a80; margin: 0 0 14px; }
+        /* the run at the bottom: "Fix please" and what the last run did */
+        .m-fix { margin: 30px 0 0; padding: 18px 20px; border-radius: 14px; background: var(--b-card2); border: 0.5px solid var(--b-line); }
+        .m-fix-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+        .m-fix-btn { cursor: pointer; padding: 13px 26px; border: 0; border-radius: 10px; background: rgb(121, 158, 49); color: #fff;
+            font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 1.4px; }
+        .m-fix-btn:hover { box-shadow: 0 0 0 2px rgba(121, 158, 49, 0.45); }
+        .m-fix-btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
+        .m-fix-info { color: var(--b-dim); font-size: 0.95rem; }
+        .m-bericht { margin: 12px 0 0; padding: 10px 12px; border-radius: 9px; background: rgba(0, 0, 0, 0.25); color: var(--b-text);
+            font-size: 0.9rem; line-height: 1.45; white-space: pre-wrap; }
+        .m-bericht:empty { display: none; }
+        .m-login { margin: 40px auto; max-width: 420px; text-align: center; }
+        @media (max-width: 560px) {
+            .m-wrap { padding: 18px 16px 100px; }
+            .m-meta .m-zeit { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MELDUNGEN AUS DEN BÜCHERN</span>
+</header>
+
+<main class="m-wrap">
+    <h1 class="m-h1">Fehler-Meldungen</h1>
+    <p class="m-sub" id="m-sub">Was Leserinnen und Leser in den Büchern über „Fehler melden“ geschickt haben.</p>
+    <div id="m-app"></div>
+</main>
+
+<script>
+(function () {
+    'use strict';
+    const app = document.getElementById('m-app'), sub = document.getElementById('m-sub');
+    const PRIO = [[3, 'Hoch'], [2, 'Normal'], [1, 'Niedrig'], [0, 'Ignorieren']];
+    const STATUS = { neu: 'neu', korrigiert: 'korrigiert', abgelehnt: 'abgelehnt', unklar: 'unklar' };
+    const COMMIT_URL = 'https://github.com/malvers/mathlab/commit/';
+    let alle = [], filter = 'offen', lauf = null, uhr = null;
+    try { filter = localStorage.getItem('meldungen-filter') || 'offen'; } catch (_) { }
+
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    // "mathegy7" → "GY 7", "mathegy11lk" → "GY 11 LK", "mathefos12" → "FOS 12", "mathe11" → "BGY 11"
+    function buchName(k) {
+        let m = /^mathegy(\d+)(lk)?$/.exec(k); if (m) return 'Mathematik GY ' + m[1] + (m[2] ? ' LK' : '');
+        m = /^mathefos(\d+)$/.exec(k); if (m) return 'Mathematik FOS ' + m[1];
+        m = /^mathe(\d+)$/.exec(k); if (m) return 'Mathematik BGY ' + m[1];
+        return k;
+    }
+    function zeit(t) {
+        const d = new Date(t);
+        return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }) + ', ' +
+            d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    }
+    // the chapter's title, read once from its page (the table keeps only the file)
+    const titel = {};
+    function kapitelTitel(buch, seite) {
+        const k = buch + '/' + seite;
+        if (!titel[k]) titel[k] = fetch(buch + '/' + seite).then(r => r.ok ? r.text() : '').then(h => {
+            const m = /<title>([^<|]*)/.exec(h);
+            return m ? m[1].trim() : '';
+        }).catch(() => '');
+        return titel[k];
+    }
+    // to the spot: the chapter page at the report's section (data-ziel "file|section|n")
+    function stelleUrl(f) {
+        const sec = f.ziel ? f.ziel.split('|')[1] : '';
+        return f.buch + '/' + f.seite + (sec ? '#' + encodeURIComponent(sec) : '');
+    }
+
+    async function api(path, opts) {
+        const r = await svpAuth.api(path, opts);
+        if (!r.ok) throw new Error((await r.text()).slice(0, 200) || ('HTTP ' + r.status));
+        return r.status === 204 ? null : r.json();
+    }
+
+    function anmelden() {
+        sub.textContent = 'Nur für Doc: bitte mit dem SVP-Konto anmelden.';
+        app.innerHTML = '<div class="m-login"><button class="m-fix-btn" type="button">Anmelden</button></div>';
+        app.querySelector('button').addEventListener('click', () => svpAuth.loginDialog(laden, 'Anmelden, um die Meldungen zu sehen'));
+    }
+
+    async function laden() {
+        if (!svpAuth.hasSession()) return anmelden();
+        try {
+            const [f, l] = await Promise.all([
+                api('buch_feedback?select=*&order=created_at.desc&limit=500'),
+                api('buch_feedback_lauf?select=*&order=id.desc&limit=1'),
+            ]);
+            alle = f || []; lauf = (l && l[0]) || null;
+            zeichnen();
+            beobachten();
+        } catch (e) {
+            if (/abgelaufen|nicht angemeldet/.test(e.message)) return anmelden();
+            app.innerHTML = '<p class="m-err">Konnte die Meldungen nicht laden: ' + esc(e.message) + '</p>';
+        }
+    }
+
+    const offen = f => (f.status === 'neu' || f.status === 'unklar') && f.prio > 0;
+    function zeichnen() {
+        const nOffen = alle.filter(offen).length, nFertig = alle.filter(f => f.status === 'korrigiert' || f.status === 'abgelehnt').length;
+        sub.textContent = alle.length ? nOffen + ' offen · ' + nFertig + ' erledigt · ' + alle.length + ' insgesamt'
+            : 'Noch keine Meldungen.';
+        const liste = alle.filter(f => filter === 'alle' ? true : filter === 'offen' ? (f.status === 'neu' || f.status === 'unklar') : !(f.status === 'neu' || f.status === 'unklar'))
+            .sort((a, b) => filter === 'offen' ? (b.prio - a.prio) || (new Date(b.created_at) - new Date(a.created_at))
+                : new Date(b.created_at) - new Date(a.created_at));
+        app.innerHTML =
+            '<div class="m-bar"><div class="b-seg m-seg-f">' +
+            [['offen', 'Offen'], ['fertig', 'Erledigt'], ['alle', 'Alle']].map(([k, t]) =>
+                '<button type="button" data-f="' + k + '"' + (k === filter ? ' class="on"' : '') + '>' + t + '</button>').join('') +
+            '</div><span class="m-who">angemeldet als ' + esc(svpAuth.whoami()) + '</span></div>' +
+            '<div class="m-list">' + (liste.length ? liste.map(karte).join('') : '<div class="m-leer">Hier ist nichts.</div>') + '</div>' +
+            fixBox();
+        app.querySelectorAll('.m-seg-f button').forEach(b => b.addEventListener('click', () => {
+            filter = b.dataset.f;
+            try { localStorage.setItem('meldungen-filter', filter); } catch (_) { }
+            zeichnen();
+        }));
+        app.querySelectorAll('.m-seg-p button').forEach(b => b.addEventListener('click', () => prioSetzen(+b.closest('.m-card').dataset.id, +b.dataset.p)));
+        app.querySelectorAll('[data-wieder]').forEach(b => b.addEventListener('click', () => wiederOeffnen(+b.dataset.wieder)));
+        app.querySelector('.m-fix-btn').addEventListener('click', fixPlease);
+        app.querySelectorAll('[data-titel]').forEach(el => {
+            const [buch, seite] = el.dataset.titel.split('/');
+            kapitelTitel(buch, seite).then(t => { if (t) el.textContent = t; });
+        });
+    }
+
+    function karte(f) {
+        const fertig = !(f.status === 'neu' || f.status === 'unklar');
+        const commit = f.commit_sha ? ' · <a href="' + COMMIT_URL + esc(f.commit_sha) + '" target="_blank" rel="noopener">' + esc(f.commit_sha.slice(0, 8)) + '</a>' : '';
+        return '<article class="m-card m-p' + f.prio + '" data-id="' + f.id + '">' +
+            '<div class="m-meta"><span class="m-buch">' + esc(buchName(f.buch)) + '</span>' +
+            '<a href="' + esc(stelleUrl(f)) + '" target="_blank" rel="noopener" title="Zur Stelle im Buch">' +
+            '<span data-titel="' + esc(f.buch + '/' + f.seite) + '">' + esc(f.seite.replace(/\.html$/, '')) + '</span>' +
+            (f.abschnitt ? ' · ' + esc(f.abschnitt) : '') + ' ↗</a>' +
+            (f.gesprochen ? '<span>eingesprochen</span>' : '') +
+            '<span class="m-zeit">' + esc(zeit(f.created_at)) + '</span></div>' +
+            '<div class="m-body">' + esc(f.body) + '</div>' +
+            (f.stelle ? '<details><summary>Stelle im Buch</summary><div class="m-stelle">' + esc(f.stelle) + '</div></details>' : '') +
+            '<div class="m-row">' +
+            (fertig ? '' : '<div class="b-seg m-seg-p" role="group" aria-label="Priorität">' + PRIO.map(([p, t]) =>
+                '<button type="button" data-p="' + p + '"' + (p === f.prio ? ' class="on"' : '') + '>' + t + '</button>').join('') + '</div>') +
+            '<span class="m-status ' + esc(f.status) + '">' + esc(STATUS[f.status] || f.status) + '</span>' +
+            (fertig ? '<button class="m-link" type="button" data-wieder="' + f.id + '">wieder öffnen</button>' : '') +
+            '</div>' +
+            (f.notiz || commit ? '<div class="m-notiz">' + esc(f.notiz || '') + commit + '</div>' : '') +
+            '</article>';
+    }
+
+    async function prioSetzen(id, p) {
+        const f = alle.find(x => x.id === id);
+        if (!f || f.prio === p) return;
+        const vorher = f.prio;
+        f.prio = p; zeichnen();
+        try { await api('buch_feedback?id=eq.' + id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ prio: p }) }); }
+        catch (e) { f.prio = vorher; zeichnen(); alert('Priorität nicht gespeichert: ' + e.message); }
+    }
+    async function wiederOeffnen(id) {
+        const f = alle.find(x => x.id === id);
+        if (!f) return;
+        try {
+            await api('buch_feedback?id=eq.' + id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'neu' }) });
+            f.status = 'neu'; zeichnen();
+        } catch (e) { alert('Nicht gespeichert: ' + e.message); }
+    }
+
+    // ---------- the run ----------
+    function laufText() {
+        if (!lauf) return 'Noch kein Lauf. Täglich um 18:10 ruft Solita dich, wenn etwas offen ist.';
+        if (!lauf.gestartet_at) return 'Angefordert um ' + zeit(lauf.angefordert_at).split(', ')[1] + ' - Solita ruft dich gleich (wenn dein Mac an ist). Dann sag mir einfach „fix“.';
+        if (!lauf.fertig_at) return 'Ich bin dran, seit ' + zeit(lauf.gestartet_at).split(', ')[1] + ' …';
+        return 'Letzter Lauf (' + (lauf.anlass === '18:10' ? '18:10' : 'Fix please') + '): ' + zeit(lauf.fertig_at) + '. Täglich um 18:10 ruft Solita dich, wenn etwas offen ist.';
+    }
+    function fixBox() {
+        const laeuft = lauf && !lauf.fertig_at;
+        return '<section class="m-fix"><div class="m-fix-row">' +
+            '<button class="m-fix-btn" type="button"' + (laeuft ? ' disabled' : '') + '>Fix please</button>' +
+            '<span class="m-fix-info">' + esc(laufText()) + '</span></div>' +
+            '<div class="m-bericht">' + esc(lauf && lauf.fertig_at ? lauf.bericht || '' : '') + '</div></section>';
+    }
+    async function fixPlease() {
+        const b = app.querySelector('.m-fix-btn');
+        b.disabled = true;
+        try {
+            const r = await api('buch_feedback_lauf', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ anlass: 'knopf' }) });
+            lauf = r && r[0]; zeichnen(); beobachten();
+        } catch (e) { b.disabled = false; alert('Konnte den Lauf nicht anfordern: ' + e.message); }
+    }
+    // while a run waits or runs, look every 10 s; when it is done, the reports come fresh
+    function beobachten() {
+        clearInterval(uhr);
+        if (!lauf || lauf.fertig_at) return;
+        uhr = setInterval(async () => {
+            try {
+                const l = await api('buch_feedback_lauf?select=*&id=eq.' + lauf.id);
+                const neu = l && l[0];
+                if (!neu) return;
+                const fertig = neu.fertig_at && !lauf.fertig_at;
+                lauf = neu;
+                if (fertig) { clearInterval(uhr); laden(); } else zeichnen();
+            } catch (_) { }
+        }, 10000);
+    }
+
+    laden();
+})();
+</script>
+</body>
+</html>

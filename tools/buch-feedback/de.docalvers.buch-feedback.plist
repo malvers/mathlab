@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>de.docalvers.buch-feedback</string>
+
+  <!-- "Fehler melden" (Doc, 10.10.2026): every minute tools/buch-feedback/ruf.sh looks whether a "Fix please" waits
+       (HTML/buch/meldungen.html), and once a day from 18:10 whether reports are open - then a notification and Solita
+       call Doc. It only CALLS; the fixing happens in a Claude session in front of Doc ("fix").
+       Installed copy: ~/Library/LaunchAgents/de.docalvers.buch-feedback.plist (this file is its source). -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/malvers/IdeaProjects/forloop/tools/buch-feedback/ruf.sh</string>
+  </array>
+
+  <key>StartInterval</key><integer>60</integer>
+
+  <!-- Deliberately NOT RunAtLoad: loading this agent should not call anybody. -->
+  <key>StandardOutPath</key><string>/Users/malvers/Library/Logs/buch-feedback.log</string>
+  <key>StandardErrorPath</key><string>/Users/malvers/Library/Logs/buch-feedback.log</string>
+</dict>
+</plist>
