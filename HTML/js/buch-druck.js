@@ -146,24 +146,23 @@
         loes.appendChild(el('h1', 'd-ktitle', 'Lösungen'));
         loes.appendChild(el('p', 'd-loes-intro', 'Lösungen zu den Aufgaben (nach ihrer Nummer im Kapitel) und zu den Selbsttests. Die Lösungswege der Beispiele stehen direkt im Text.'));
 
+        // every chapter is drawn and frozen before the next one is loaded: Chrome keeps only about 16 WebGL contexts
+        // alive and drops the oldest, so a book with many 3D pictures came out with blank first ones (LK 12, 10.10.2026)
+        await document.fonts.ready;
         for (let i = 0; i < B.chapters.length; i++) {
             const c = B.chapters[i];
-            say('Kapitel ' + c.k + ' wird geladen …');
+            say('Kapitel ' + c.k + ' wird geladen und gezeichnet …');
             const sec = await chapter(c, i);
             book.appendChild(sec);
             Buch.render(sec, { print: true });
-        }
-        say('Grafiken werden gezeichnet …');
-        await document.fonts.ready;
-        await Buch.settled();                                              // widgets that load first (Three.js)
-        await wait(900);                                                   // widgets draw, KaTeX settles
-        window.dispatchEvent(new Event('resize'));
-        await wait(400);
-        book.querySelectorAll('.d-chapter').forEach((sec, i) => {
+            await Buch.settled();                                          // widgets that load first (Three.js)
+            await wait(700);                                               // widgets draw, KaTeX settles
+            window.dispatchEvent(new Event('resize'));
+            await wait(300);
             freezeCanvases(sec);
-            const part = harvest(sec, B.chapters[i]);
+            const part = harvest(sec, c);
             if (part) loes.appendChild(part);
-        });
+        }
         book.appendChild(loes);
         say('Seiten werden gesetzt … (das dauert einen Moment)');
         const t0 = performance.now();

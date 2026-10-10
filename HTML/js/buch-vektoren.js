@@ -873,4 +873,7 @@
         }
         draw();
     });
+
+    // shared with other modules (js/buch-gy12lk.js): the coordinate inputs, the example buttons and the vector helpers
+    B.vk = { coords, presetRow, vtex, ptex, add, sub, mul, dot, len, cross, n2 };
 })();

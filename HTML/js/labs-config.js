@@ -123,6 +123,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathegy12lk",
+        "href": "buch/mathegy12lk/index.html",
+        "title": "Mathematik GY 12 LK",
+        "description": "Unser zehntes Buch: das interaktive Lehrbuch Mathematik für das Gymnasium, Jahrgangsstufe 12, Leistungskurs, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Zwölf Kapitel in der Reihenfolge des Schuljahres – Stammfunktionen mit Kettenregel rückwärts, das bestimmte Integral mit Integralfunktion und Beweis des Hauptsatzes, Flächen und Rotationskörper, numerische Integration bis Simpson, normalverteilte Zufallsgrößen mit de Moivre-Laplace, beurteilende Statistik, Skalarprodukt, Vektorprodukt und Hessesche Normalform, Schnittwinkel, alle Abstände bis zu windschiefen Geraden, extremale Entfernungen und Winkel, unbegrenzte Flächen, Dichten, Scharen und Ortskurven und ein Kapitel zur Abiturvorbereitung. Zum Ausprobieren: Rotationskörper in echtem 3D mit Kreisscheiben, die Glockenkurve über dem Binomialhistogramm, die Integralfunktion mit ihrer Tangente, Parabelbögen nach Simpson, Punkt und Gerade und windschiefe Geraden in 3D, Flächen bis ins Unendliche. Mit Druckausgabe, QR-Code je Kapitel, Lösungsanhang und 29 Übungsblättern online.",
+        "tagline": "Buch / Mathematik GY 12 LK / 12 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy12lk"],
+        "category": "buecher neu funktionen stochastik geometrie grade12",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 jahrgangsstufe 12 gymnasium gy leistungskurs lk abitur sachsen lehrplan kapitel stammfunktion unbestimmtes integral grundintegrale lineare substitution kettenregel rueckwaerts cas bestimmtes integral bestand riemann hauptsatz beweis integralfunktion physikalische groesse arbeit flaeche zwischen graphen rotationskoerper volumen kegel kugel numerische integration trapezverfahren keplersche fassregel simpsonregel normalverteilung glockenkurve gauss dichte verteilungsfunktion sigma regeln standardisieren de moivre laplace beurteilende statistik schaetzen signifikanztest zweiseitiger test skalarprodukt vektorprodukt normalenvektor hessesche normalform schnittwinkel abstand punkt gerade windschiefe geraden lotfusspunkt spiegelung extremale entfernung sehwinkel regiomontanus uneigentliches integral unbegrenzte flaeche exponentialverteilung funktionenschar ortskurve ebenenschar aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",

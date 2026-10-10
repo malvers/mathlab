@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 108 labs, 1879 terms, 2026-10-09
+ * 109 labs, 1895 terms, 2026-10-10
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -69,6 +69,7 @@ const LABS_TERMS = {
     "lehrbuch-mathegy10": ["Berechnungen an Dreiecken und Körpern", "Ein Mathebuch, das mitrechnet", "Erwartungswert und faire Spiele", "Funktionen im Überblick", "Komplexe Zahlen", "Mathematik", "Mathematik · Gymnasium 10", "Periodische Vorgänge und die Sinusfunktion", "Sinussatz, Kosinussatz und Flächeninhalt", "Umkehrfunktion und Logarithmus", "Verknüpfen, Verketten und die Tangensfunktion", "Wachstum und Exponentialfunktionen", "Zahlenfolgen und Grenzwerte", "Zinsrechnung", "Zufallsgrößen und Pfadregeln"],
     "lehrbuch-mathegy11": ["Ableitungsregeln", "Änderungsraten und Ableitung", "Die Binomialverteilung", "Ebenen", "Ein Mathebuch, das mitrechnet", "Funktionen nach Maß", "Funktionen untersuchen", "Geraden im Raum", "Grenzwerte und Stetigkeit", "Mathematik", "Mathematik · Gymnasium 11", "Matrizen", "Mehrstufige Zufallsexperimente", "Numerische Verfahren", "Vektoren im Raum"],
     "lehrbuch-mathegy12": ["Abstände", "Beurteilende Statistik", "Das bestimmte Integral", "Ein Mathebuch, das mitrechnet", "Extremale Entfernungen und Spiegelungen", "Fit fürs Abitur", "Flächen und Scharen", "Flächeninhalte", "Mathematik", "Mathematik · Gymnasium 12", "Numerische Integration", "Schnittwinkel", "Skalarprodukt, Vektorprodukt und Normalenform", "Stammfunktionen und Integrieren", "Verzinsung"],
+    "lehrbuch-mathegy12lk": ["Abstände", "Beurteilende Statistik", "Das bestimmte Integral und der Hauptsatz", "Ein Mathebuch, das mitrechnet", "Fit fürs Abitur", "Flächen und Rotationskörper", "Flächen, Dichte, Scharen und Ortskurven", "Grenze", "Mathematik", "Mathematik · Gymnasium 12 · Leistungskurs", "Normalverteilte Zufallsgrößen", "Numerische Integration", "Richtung des Normalenvektors", "Schnittwinkel", "Stammfunktionen und Integrieren", "Verzinsung"],
     "lehrbuch-mathegy9": ["Daten auswerten", "Der goldene Schnitt", "Die Satzgruppe des Pythagoras", "Ein Mathebuch, das mitrechnet", "Kreis, Zylinder und Kugel", "Mathematik", "Mathematik · Gymnasium 9", "Mathematik und moderne Rechentechnik", "Parameter und quadratische Funktionen", "Potenzen und Wurzeln", "Potenzfunktionen", "Pyramide und Kreiskegel", "Quadrate abschneiden", "Quadratische Gleichungen und Extremwerte", "Trigonometrie im rechtwinkligen Dreieck"],
     "lissajous": ["Amplitude A", "Amplitude B", "Kurvenfarbe (Hue)", "LISSAJOUS · PARAMETRISCHE KURVEN", "Pfad-Umfang (× Perioden)", "Phase δ (Grad)", "SIMULATION", "ωₓ (Kreisfrequenz)", "ωᵧ (Kreisfrequenz)"],
     "litchi3d": ["Form-Faktor (Y)", "Frucht-Reife", "SDF KONTROLLE", "Stachel-Intensität"],

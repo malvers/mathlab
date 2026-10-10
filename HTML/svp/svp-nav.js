@@ -29,6 +29,8 @@
         ['mathe/mathegy10.html', 'MA 10', 'b-grey', 'Mathematik Klasse 10 (Gymnasium)'],
         ['mathe/mathegy11.html', 'MA GY 11', 'b-grey', 'Mathematik Jahrgangsstufe 11, Grundkurs (Gymnasium)'],
         ['mathe/mathegy12.html', 'MA GY 12', 'b-grey', 'Mathematik Jahrgangsstufe 12, Grundkurs (Gymnasium)'],
+        ['mathe/mathegy11lk.html', 'MA GY 11 LK', 'b-grey', 'Mathematik Jahrgangsstufe 11, Leistungskurs (Gymnasium)'],
+        ['mathe/mathegy12lk.html', 'MA GY 12 LK', 'b-grey', 'Mathematik Jahrgangsstufe 12, Leistungskurs (Gymnasium)'],
         ['mathe/blf.html', 'BLF MA', 'b-grey', 'Training BLF Mathematik (Gymnasium)'],
         ['mathe/mathe11.html', 'MA 11', 'b-grey', 'Mathematik Klasse 11 (BGY)'],
         ['mathe/mathe12.html', 'MA 12', 'b-grey', 'Mathematik Klasse 12 (BGY)'],
@@ -107,6 +109,8 @@
         'mathe/mathegy10.html': 'b-cyan',
         'mathe/mathegy11.html': 'b-cyan',
         'mathe/mathegy12.html': 'b-cyan',
+        'mathe/mathegy11lk.html': 'b-cyan',
+        'mathe/mathegy12lk.html': 'b-cyan',
         'mathe/mathe11.html': 'b-cyan',
         'mathe/mathe12.html': 'b-cyan',
         'mathe/mathe13.html': 'b-cyan',
@@ -136,7 +140,7 @@
             ['Informatik', ['informatik/informatik9.html']]
         ]],
         ['Gymnasium', [
-            ['Mathematik', ['mathe/mathegy9.html', 'mathe/mathegy10.html', 'mathe/mathegy11.html', 'mathe/mathegy12.html', 'mathe/blf.html']],
+            ['Mathematik', ['mathe/mathegy9.html', 'mathe/mathegy10.html', 'mathe/mathegy11.html', 'mathe/mathegy12.html', 'mathe/mathegy11lk.html', 'mathe/mathegy12lk.html', 'mathe/blf.html']],
             ['Physik', ['physik/phygy10.html']]
         ]],
         /* Doc, 09.09.2026: "nimm BGY und FO raus" - die Kuerzel hinter den
