@@ -25,6 +25,10 @@
     const LINKS = [
         ['index.html', 'Home', 'b-grey', 'Startseite'],
         ['mathe/mathe5.html', 'MA 5', 'b-grey', 'Mathematik Klasse 5'],
+        ['mathe/mathegy5.html', 'MA GY 5', 'b-grey', 'Mathematik Klasse 5 (Gymnasium)'],
+        ['mathe/mathegy6.html', 'MA GY 6', 'b-grey', 'Mathematik Klasse 6 (Gymnasium)'],
+        ['mathe/mathegy7.html', 'MA GY 7', 'b-grey', 'Mathematik Klasse 7 (Gymnasium)'],
+        ['mathe/mathegy8.html', 'MA GY 8', 'b-grey', 'Mathematik Klasse 8 (Gymnasium)'],
         ['mathe/mathegy9.html', 'MA 9', 'b-grey', 'Mathematik Klasse 9 (Gymnasium)'],
         ['mathe/mathegy10.html', 'MA 10', 'b-grey', 'Mathematik Klasse 10 (Gymnasium)'],
         ['mathe/mathegy11.html', 'MA GY 11', 'b-grey', 'Mathematik Jahrgangsstufe 11, Grundkurs (Gymnasium)'],
@@ -105,6 +109,10 @@
        "Ueben", which is a tool and not a plan (Doc, 08.09.2026). */
     const SP_HUE = {
         'mathe/mathe5.html': 'b-cyan',
+        'mathe/mathegy5.html': 'b-cyan',
+        'mathe/mathegy6.html': 'b-cyan',
+        'mathe/mathegy7.html': 'b-cyan',
+        'mathe/mathegy8.html': 'b-cyan',
         'mathe/mathegy9.html': 'b-cyan',
         'mathe/mathegy10.html': 'b-cyan',
         'mathe/mathegy11.html': 'b-cyan',
@@ -140,7 +148,7 @@
             ['Informatik', ['informatik/informatik9.html']]
         ]],
         ['Gymnasium', [
-            ['Mathematik', ['mathe/mathegy9.html', 'mathe/mathegy10.html', 'mathe/mathegy11.html', 'mathe/mathegy12.html', 'mathe/mathegy11lk.html', 'mathe/mathegy12lk.html', 'mathe/blf.html']],
+            ['Mathematik', ['mathe/mathegy5.html', 'mathe/mathegy6.html', 'mathe/mathegy7.html', 'mathe/mathegy8.html', 'mathe/mathegy9.html', 'mathe/mathegy10.html', 'mathe/mathegy11.html', 'mathe/mathegy12.html', 'mathe/mathegy11lk.html', 'mathe/mathegy12lk.html', 'mathe/blf.html']],
             ['Physik', ['physik/phygy10.html']]
         ]],
         /* Doc, 09.09.2026: "nimm BGY und FO raus" - die Kuerzel hinter den

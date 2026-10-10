@@ -79,6 +79,50 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathegy5",
+        "href": "buch/mathegy5/index.html",
+        "title": "Mathematik GY 5",
+        "description": "Das interaktive Lehrbuch Mathematik für das Gymnasium, Klasse 5, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Zwölf Kapitel in der Reihenfolge des Schuljahres – große Zahlen, Runden und Schätzen, Rechengesetze, Potenzen und Dividieren, Teiler und Primzahlen, Brüche, Dezimalzahlen und Prozent, Rechnen mit Dezimalzahlen und der Mittelwert, Koordinaten und Winkel, Symmetrie und Spiegelung, Rechtecke und Quader, Mathematik im Alltag und als Wahlbereich die Zahlen der Ägypter, Römer und Maya mit Adam Ries und dem Zweiersystem. Zum Ausprobieren: eine Stellenwerttafel, die Zahlen ausspricht, Runden auf dem Zahlenstrahl, das Sieb des Eratosthenes, Brüche zum Erweitern, ein Geodreieck zum Schätzen, eine Muster-Werkstatt, Quader aus Würfeln, die Einheitentreppe und das Linienbrett von Adam Ries. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik GY 5 / 12 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy5"],
+        "category": "buecher neu arithmetik geometrie grade5",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 5 gymnasium gy sachsen lehrplan kapitel natuerliche zahlen grosse zahlen million milliarde stellenwerttafel zahlenstrahl runden schaetzen vergleichen ordnen rechengesetze kommutativgesetz assoziativgesetz distributivgesetz ueberschlag potenz quadratzahl zehnerpotenz vorrangregeln dividieren rest probe teiler vielfache teilbarkeitsregeln quersumme primzahl primfaktorzerlegung sieb eratosthenes bruch brueche zaehler nenner kuerzen erweitern gemischte zahl dezimalzahl zehntel hundertstel prozent kommaverschiebung mittelwert durchschnitt koordinatensystem parallel senkrecht winkel geodreieck winkelarten scheitelwinkel nebenwinkel stufenwinkel wechselwinkel symmetrie achsensymmetrie punktsymmetrie spiegelung verschiebung drehung rechteck umfang flaecheninhalt flaecheneinheiten hektar quader wuerfel schraegbild netz volumen liter oberflaeche groessen einheiten fahrplan fermi aegypter roemische zahlen maya adam ries linienbrett rechenpfennig zweiersystem binaer aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
+        "id": "lehrbuch-mathegy6",
+        "href": "buch/mathegy6/index.html",
+        "title": "Mathematik GY 6",
+        "description": "Das interaktive Lehrbuch Mathematik für das Gymnasium, Klasse 6, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Elf Kapitel in der Reihenfolge des Schuljahres – gebrochene Zahlen als Bruch, Dezimalzahl und Prozent, das Rechnen mit ihnen, Rechengesetze, Gleichungen und Sachaufgaben, Zuordnungen, proportionale Zuordnungen und der Dreisatz, Winkelsumme und Kongruenz, Sätze und besondere Linien im Dreieck, Flächeninhalt und das Haus der Vierecke, Prismen, Anteile und als Wahlbereich die Primzahlen. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik GY 6 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy6"],
+        "category": "buecher neu arithmetik geometrie grade6",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 6 gymnasium gy sachsen lehrplan kapitel gebrochene zahlen bruch brueche dezimalzahl periodisch prozent addieren subtrahieren multiplizieren dividieren kehrwert rechengesetze gleichungen sachaufgaben zuordnung proportional dreisatz tabelle diagramm dreieck viereck winkelsumme innenwinkel kongruenz kongruenzsaetze konstruktion basiswinkelsatz mittelsenkrechte winkelhalbierende hoehe seitenhalbierende flaecheninhalt parallelogramm trapez raute drachen haus der vierecke prisma oberflaeche volumen anteile kreisdiagramm primzahlen aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
+        "id": "lehrbuch-mathegy7",
+        "href": "buch/mathegy7/index.html",
+        "title": "Mathematik GY 7",
+        "description": "Das interaktive Lehrbuch Mathematik für das Gymnasium, Klasse 7, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Elf Kapitel in der Reihenfolge des Schuljahres – Kreis und Gerade, Umkreis und Inkreis, der Satz des Thales und die Winkel am Kreis, Konstruieren und Problemlösen, rationale Zahlen und das Rechnen mit ihnen, Gleichungen und Formeln, Prozentrechnung, Prismen und Pyramiden in Schrägbild, Netz und Zweitafelbild, Oberfläche, Volumen und Masse, Daten darstellen und als Wahlbereich die platonischen Körper. Mit Faltnetzen in 3D, Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik GY 7 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy7"],
+        "category": "buecher neu geometrie arithmetik grade7",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 7 gymnasium gy sachsen lehrplan kapitel kreis gerade tangente sekante passante umkreis inkreis thales peripheriewinkel sehnenviereck konstruieren konstruktionsbeschreibung rationale zahlen negative zahlen zahlengerade betrag gegenzahl rechnen potenz quadratwurzel gleichung formel umstellen prozentrechnung grundwert prozentwert prozentsatz saeulendiagramm kreisdiagramm prisma pyramide schraegbild netz zweitafelbild oberflaeche volumen masse dichte pyramidenstumpf daten diagramme platonische koerper tetraeder wuerfel oktaeder dodekaeder ikosaeder euler aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
+        "id": "lehrbuch-mathegy8",
+        "href": "buch/mathegy8/index.html",
+        "title": "Mathematik GY 8",
+        "description": "Das interaktive Lehrbuch Mathematik für das Gymnasium, Klasse 8, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Elf Kapitel in der Reihenfolge des Schuljahres – Variablen und Terme mit Rechenbäumen, binomische Formeln, Gleichungen und Ungleichungen, Zufallsversuche und Wahrscheinlichkeit, mehrstufige Zufallsversuche und Zählen, Funktionen und lineare Funktionen, lineare Gleichungssysteme, zentrische Streckung und Ähnlichkeit, heuristische Strategien und als Wahlbereich die Simulation mit Zufallszahlen. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik GY 8 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy8"],
+        "category": "buecher neu algebra stochastik geometrie grade8",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 8 gymnasium gy sachsen lehrplan kapitel variable term termbaum ausmultiplizieren ausklammern binomische formeln gleichung ungleichung aequivalenzumformung zufallsversuch wahrscheinlichkeit relative haeufigkeit laplace baumdiagramm pfadregel zaehlprinzip funktion lineare funktion steigung y-achsenabschnitt geradengleichung lineares gleichungssystem gleichsetzungsverfahren einsetzungsverfahren additionsverfahren zentrische streckung streckfaktor aehnlichkeit strahlensatz heuristik rueckwaertsarbeiten simulation zufallszahlen monte carlo pi aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathegy9",
         "href": "buch/mathegy9/index.html",
         "title": "Mathematik GY 9",
