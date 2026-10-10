@@ -6,8 +6,18 @@
 const LAB_ICONS = {
     // books show their real cover, a photo among the drawn icons (Doc, 09.10.2026: "Nimm als Logo tatsächlich
     // das Cover ... bei Büchern gut"); the picture is made by tools/og-preview/make-og.mjs from the book's cover page
-    "lehrbuch-mathe11": `<img src="resources/og/buch-mathe11-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    // book 1 also shows its English edition as a second cover; a click on it opens the English book instead of
+    // the card's German one (Doc, 10.10.2026: "ein zweites icon vom cover mit der EN version -> click EN Version")
+    "lehrbuch-mathe11": `<span style="display: flex; gap: 12px; align-items: center;">
+        <img src="resources/og/buch-mathe11-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-en/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-en/index.html'; }">
+            <img src="resources/og/buch-mathe11-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+    </span>`,
     "lehrbuch-mathe12": `<img src="resources/og/buch-mathe12-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     "lehrbuch-mathe13": `<img src="resources/og/buch-mathe13-cover.jpg" alt="" loading="lazy" decoding="async"
