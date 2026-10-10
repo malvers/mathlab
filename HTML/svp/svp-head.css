@@ -84,26 +84,71 @@
 @media print { .page-head .head-survey { display: none; } }
 
 /* Doc, 10.10.2026: "mach da immer das Buchcover hin" - the textbook's cover at
-   the right end of a plan head (svp-plan-core.js). It spans title and subtitle;
-   title and subtitle keep clear of it, the Lehrplan fold below runs full width. */
-.page-head.has-buch { position: relative; }
-.page-head.has-buch > .head-row,
-.page-head.has-buch > .subtitle { padding-right: 66px; }
+   the right end of a plan head (svp-plan-core.js), in its own grid column next
+   to title and subtitle. Then "bissl größer (unten ist mehr Platz)": the cover
+   reaches down into the gap above the toolbar - the negative bottom margin
+   keeps the head as high as before. With the Lehrplan fold open the margin
+   goes, so the fold (full width, row 3) starts below the cover. */
+@media screen {
+    .page-head.has-buch {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        /* only the subtitle row grows for the cover - the title never moves */
+        grid-template-rows: auto 1fr auto;
+        column-gap: 14px;
+    }
+    .page-head.has-buch > .head-row { grid-area: 1 / 1; }
+    .page-head.has-buch > .subtitle { grid-area: 2 / 1; }
+    .page-head.has-buch > .lp-fold { grid-area: 3 / 1 / 4 / -1; }
+    .page-head.has-buch > .svp-buch { grid-area: 1 / 2 / 3 / 3; }
+}
+/* Doc, 10.10.2026: "noch nicht y zentriert" - 92 px lie between the plan search
+   above and the toolbar buttons below (8 px gap + 58 px head + 16 px margin +
+   10 px toolbar padding, measured); the 82 px cover starts 3 px above the head,
+   which leaves 5 px on either side. */
 .page-head .svp-buch {
-    position: absolute;
-    top: -4px;
-    right: 0;
+    position: relative;
+    align-self: start;
+    margin: -3px 0 -24px;
     line-height: 0;
     border-radius: 4px;
     box-shadow: 0 3px 10px -3px var(--shadow);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.page-head .svp-buch:hover { transform: scale(1.06); box-shadow: 0 6px 16px -4px var(--shadow); }
-.page-head .svp-buch img { display: block; height: 72px; width: auto; border-radius: 4px; }
+/* Doc, 10.10.2026: "die LP cards starten tiefer als die Suchzeile" - open, the
+   cards start where the toolbar buttons start when closed: 5 px below the
+   cover, the fold's own 12 px margin minus 7. */
+body.lp-open .page-head .svp-buch { margin-bottom: -7px; }
+.page-head .svp-buch img { display: block; height: 82px; width: auto; border-radius: 4px; }
 @media (max-width: 600px) {
-    .page-head.has-buch > .head-row,
-    .page-head.has-buch > .subtitle { padding-right: 52px; }
-    .page-head .svp-buch img { height: 60px; }
+    .page-head .svp-buch img { height: 68px; }
+}
+/* Doc, 10.10.2026: "zeig beim hover über das cover selbiges groß" - the large
+   copy grows out of the thumbnail (anchored at its top right corner) after a
+   short pause, so a mouse just passing by does not flash it. It lets the mouse
+   through: the hover stays on the thumbnail, a click still opens the book.
+   Touch screens have no hover - there a tap opens the book as before. */
+.page-head .svp-buch img.svp-buch-big { display: none; }
+@media (hover: hover) {
+    .page-head .svp-buch img.svp-buch-big {
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: min(488px, 70vh);   /* the JPG is 690 x 977 - 488 px is its 2x size */
+        border-radius: 10px;
+        box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.55);
+        pointer-events: none;
+        opacity: 0;
+        transform: scale(0.17);
+        transform-origin: top right;
+        transition: opacity 0.18s ease, transform 0.22s ease;
+        z-index: 5;
+    }
+    .page-head .svp-buch:hover img.svp-buch-big {
+        opacity: 1;
+        transform: none;
+        transition-delay: 0.15s;
+    }
 }
 @media print { .page-head .svp-buch { display: none; } }
 

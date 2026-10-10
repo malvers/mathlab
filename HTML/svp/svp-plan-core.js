@@ -211,8 +211,15 @@ window.svpPlanParts.push(function (P) {
             a.href = '../../buch/' + name + '/';
             a.target = '_blank';
             a.rel = 'noopener';
-            a.title = 'Das Lehrbuch zu diesem Plan öffnen';
+            a.title = 'Lehrbuch öffnen';
             a.appendChild(img);
+            /* Doc, 10.10.2026: "zeig beim hover über das cover selbiges groß" -
+               the same JPG once more, shown large on hover (svp-head.css). */
+            const big = new Image();
+            big.className = 'svp-buch-big';
+            big.alt = '';
+            big.src = img.src;
+            a.appendChild(big);
             head.appendChild(a);
             head.classList.add('has-buch');
         });
