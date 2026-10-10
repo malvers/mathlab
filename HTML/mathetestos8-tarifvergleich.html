@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lösbarkeit und Tarifvergleiche — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w14-tarifvergleich',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lösbarkeit und Tarifvergleiche',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 14 (LB 2) · 20 Aufgaben: Eine, keine oder unendlich viele Lösungen, Tarife und Preise vergleichen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 14 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: number of solutions (1-5, 18-19), tariff comparisons (6-17, 20). */
+  questions: [
+    {
+      q: 'Zwei Geraden haben dieselbe Steigung, aber verschiedene $y$-Achsenabschnitte. Wie viele Lösungen hat das zugehörige Gleichungssystem?',
+      opts: ['genau zwei', 'unendlich viele', 'genau eine', 'keine'],
+      steps: [
+        'Gleiche Steigung heißt parallel.',
+        'Verschiedene Achsenabschnitte: Die Geraden liegen nicht aufeinander und schneiden sich nie.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Gleichungssystem hat unendlich viele Lösungen. Was gilt für die beiden Geraden?',
+      opts: ['Sie schneiden sich senkrecht.', 'Sie gehen beide durch den Ursprung.', 'Sie sind parallel und verschieden.', 'Sie sind identisch.'],
+      steps: [
+        'Unendlich viele gemeinsame Punkte gibt es nur, wenn die Geraden aufeinanderliegen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Lösungen hat das System $y = -3x + 2$ und $6x + 2y = 4$?',
+      opts: ['genau eine', 'genau zwei', 'keine', 'unendlich viele'],
+      steps: [
+        'Zweite Gleichung nach $y$: $2y = -6x + 4$, also $y = -3x + 2$.',
+        'Das ist dieselbe Gerade wie die erste.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Lösungen hat das System $y = 0{,}5x + 1$ und $x - 2y = 6$?',
+      opts: ['genau eine', 'genau zwei', 'keine', 'unendlich viele'],
+      steps: [
+        'Zweite Gleichung nach $y$: $-2y = -x + 6$, also $y = 0{,}5x - 3$.',
+        'Gleiche Steigung 0,5, verschiedene Achsenabschnitte 1 und −3: parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Gleichung bildet mit $y = 4x - 1$ ein System mit genau einer Lösung?',
+      opts: ['$y = 4x + 3$', '$y = -4x - 1$', '$y - 4x = 5$', '$2y = 8x - 2$'],
+      steps: [
+        'Genau eine Lösung gibt es, wenn die Steigungen verschieden sind.',
+        '$2y = 8x - 2$ ist dieselbe Gerade, $y = 4x + 3$ und $y = 4x + 5$ sind parallel.',
+        'Nur $y = -4x - 1$ hat eine andere Steigung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Tarif A: 10 € im Monat plus 0,05 € pro Minute. Tarif B: 0,15 € pro Minute ohne Grundgebühr. Bei wie vielen Minuten kosten beide gleich viel?',
+      opts: ['bei 66,7 Minuten', 'bei 50 Minuten', 'bei 100 Minuten', 'bei 200 Minuten'],
+      steps: [
+        'A: $y = 10 + 0{,}05x$, B: $y = 0{,}15x$',
+        '$10 + 0{,}05x = 0{,}15x$, also $10 = 0{,}10x$.',
+        '$x = 100$; darüber ist A günstiger.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was kostet Tarif A aus der vorigen Aufgabe (10 € plus 0,05 € pro Minute) bei 150 Minuten?',
+      opts: ['7,50 €', '10,05 €', '17,50 €', '22,50 €'],
+      steps: [
+        '$10 + 0{,}05 \\cdot 150 = 10 + 7{,}50$',
+        '$= 17{,}50$ €. Tarif B kostet dann $0{,}15 \\cdot 150 = 22{,}50$ €.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Stromanbieter A: 120 € Grundpreis pro Jahr und 0,30 € pro kWh. Anbieter B: 60 € und 0,35 € pro kWh. Bei welchem Verbrauch kosten beide gleich viel?',
+      opts: ['bei 180 kWh', 'bei 1200 kWh', 'bei 600 kWh', 'bei 2400 kWh'],
+      steps: [
+        '$120 + 0{,}30x = 60 + 0{,}35x$',
+        '$60 = 0{,}05x$',
+        '$x = 1200$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Haushalt verbraucht 3000 kWh im Jahr. Welcher Anbieter aus der vorigen Aufgabe ist günstiger, und um wie viel?',
+      opts: ['A, um 90 €', 'A, um 150 €', 'B, um 90 €', 'Beide kosten gleich viel.'],
+      steps: [
+        'A: $120 + 0{,}30 \\cdot 3000 = 120 + 900 = 1020$ €',
+        'B: $60 + 0{,}35 \\cdot 3000 = 60 + 1050 = 1110$ €',
+        'A ist um 90 € günstiger, weil 3000 kWh über dem Gleichstand von 1200 kWh liegen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Fitnessstudio A: 30 € Aufnahmegebühr und 25 € pro Monat. Studio B: keine Aufnahmegebühr, 30 € pro Monat. Nach wie vielen Monaten haben beide gleich viel gekostet?',
+      opts: ['nach 5 Monaten', 'nach 6 Monaten', 'nach 12 Monaten', 'nach 1 Monat'],
+      steps: [
+        '$30 + 25x = 30x$',
+        '$30 = 5x$, also $x = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet der Schnittpunkt zweier Tarifgeraden?',
+      opts: ['Dort sind beide Tarife kostenlos.', 'Dort beginnt die Grundgebühr.', 'Bei dieser Menge kosten beide Tarife gleich viel.', 'Ab dort ist immer der steilere Tarif günstiger.'],
+      steps: [
+        'Im Schnittpunkt haben beide Funktionen denselben $x$-Wert und denselben Preis.',
+        'Links und rechts davon ist jeweils ein anderer Tarif günstiger.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Mietwagen A kostet 40 € pro Tag, Kilometer frei. Mietwagen B kostet 25 € pro Tag und 0,20 € pro km. Ab wie vielen Kilometern an einem Tag ist A günstiger?',
+      opts: ['ab mehr als 200 km', 'ab mehr als 75 km', 'ab mehr als 15 km', 'ab mehr als 125 km'],
+      steps: [
+        'Gleichstand: $25 + 0{,}20x = 40$',
+        '$0{,}20x = 15$, also $x = 75$.',
+        'Fährt man mehr als 75 km, ist A günstiger.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Handwerker A: 50 € Anfahrt und 40 € pro Stunde. Handwerker B: 20 € Anfahrt und 50 € pro Stunde. Bei welcher Arbeitszeit kosten beide gleich viel?',
+      opts: ['bei 3 Stunden', 'bei 0,6 Stunden', 'bei 2 Stunden', 'bei 7 Stunden'],
+      steps: [
+        '$50 + 40x = 20 + 50x$',
+        '$30 = 10x$, also $x = 3$.',
+        'Beide kosten dann 170 €.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Handwerker aus der vorigen Aufgabe ist bei 2 Stunden Arbeit günstiger?',
+      opts: ['A, er kostet 130 €.', 'B, er kostet 100 €.', 'Beide kosten 170 €.', 'B, er kostet 120 €.'],
+      steps: [
+        'A: $50 + 40 \\cdot 2 = 130$ €',
+        'B: $20 + 50 \\cdot 2 = 120$ €',
+        'Unterhalb von 3 Stunden ist B günstiger.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Tarif hat eine höhere Grundgebühr, aber einen niedrigeren Preis pro Einheit als ein anderer. Wann lohnt er sich?',
+      opts: ['immer', 'bei kleiner Nutzung', 'bei großer Nutzung', 'nie'],
+      steps: [
+        'Die Grundgebühr ist ein fester Nachteil.',
+        'Der niedrigere Preis pro Einheit holt diesen Nachteil erst bei vielen Einheiten auf.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine 10er-Karte für das Kino kostet 65 €, eine Einzelkarte 8 €. Ab wie vielen Kinobesuchen lohnt sich die 10er-Karte?',
+      opts: ['ab 7 Besuchen', 'ab 8 Besuchen', 'ab 10 Besuchen', 'ab 9 Besuchen'],
+      steps: [
+        '8 Einzelkarten kosten 64 €, das ist noch weniger als 65 €.',
+        '9 Einzelkarten kosten 72 €, das ist mehr als 65 €.',
+        'Ab 9 Besuchen ist die 10er-Karte günstiger.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Taxi A: 3,90 € Grundpreis und 2 € pro km. Taxi B: 6 € Grundpreis und 1,70 € pro km. Bei welcher Strecke kosten beide gleich viel?',
+      opts: ['bei 7 km', 'bei 2,1 km', 'bei 3 km', 'bei 10 km'],
+      steps: [
+        '$3{,}90 + 2x = 6 + 1{,}70x$',
+        '$0{,}30x = 2{,}10$',
+        '$x = 7$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Lösungen hat das System $2x - y = 1$ und $4x - 2y = 3$?',
+      opts: ['keine', 'genau eine', 'unendlich viele', 'genau zwei'],
+      steps: [
+        'Nach $y$ umgestellt: $y = 2x - 1$ und $y = 2x - 1{,}5$.',
+        'Gleiche Steigung, verschiedene Achsenabschnitte: parallele Geraden.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Lösungen hat das System $3x + y = 7$ und $9x + 3y = 21$?',
+      opts: ['genau drei', 'unendlich viele', 'genau eine', 'keine'],
+      steps: [
+        'Die zweite Gleichung ist das Dreifache der ersten.',
+        'Beide beschreiben die Gerade $y = -3x + 7$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Streamingdienst: monatlich 7,99 € oder ein Jahresabo für 79,90 €. Wie viel spart man im Jahr mit dem Jahresabo?',
+      opts: ['15,98 €', '71,91 €', '0,80 €', '7,99 €'],
+      steps: [
+        'Monatlich über 12 Monate: $12 \\cdot 7{,}99 = 95{,}88$ €',
+        'Ersparnis: $95{,}88 - 79{,}90 = 15{,}98$ €'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

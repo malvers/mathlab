@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Goldener Schnitt in Kunst, Architektur und Natur — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w31-goldener-schnitt-kunst',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Goldener Schnitt in Kunst, Architektur und Natur',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 31 (WB 1) · 20 Aufgaben: Goldenes Rechteck, Pentagramm, Fibonacci-Zahlen, Sonnenblume, Bauwerke und Bilder kritisch prüfen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 31 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Phi = 1.618..., values rounded. Blocks: golden rectangle (1-2, 9-10), pentagon (3-4), Fibonacci and nature (5-8, 19-20), buildings and pictures (11-16), history (17-18). Sources named in the steps. */
+  questions: [
+    {
+      q: 'Ein Bild soll 50 cm breit sein und die Seiten im Goldenen Schnitt haben (Breite ist die lange Seite). Wie hoch wird es (gerundet)?',
+      opts: ['80,9 cm', '33,3 cm', '25 cm', '30,9 cm'],
+      steps: [
+        'Höhe $= 50 : \\Phi \\approx 50 : 1{,}618 \\approx 30{,}9$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Von einem Goldenen Rechteck schneidet man ein Quadrat über der kurzen Seite ab. Was bleibt übrig?',
+      opts: ['wieder ein Goldenes Rechteck', 'ein Dreieck', 'ein Quadrat', 'ein Rechteck mit dem Verhältnis 2 : 1'],
+      steps: [
+        'Seiten $\\Phi$ und 1: Nach dem Abschneiden bleiben 1 und $\\Phi - 1 = \\dfrac{1}{\\Phi}$.',
+        'Verhältnis $1 : \\dfrac{1}{\\Phi} = \\Phi$. So entsteht die Goldene Spirale.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Im regelmäßigen Fünfeck verhält sich die Diagonale zur Seite wie $\\Phi$. Die Seite ist 5 cm lang. Wie lang ist eine Diagonale (gerundet)?',
+      opts: ['3,09 cm', '10 cm', '7,07 cm', '8,09 cm'],
+      steps: [
+        '$5 \\cdot 1{,}618 \\approx 8{,}09$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was gilt für die Diagonalen im Pentagramm (Fünfstern)?',
+      opts: ['Sie halbieren sich.', 'Sie schneiden sich gegenseitig im Goldenen Schnitt.', 'Sie stehen senkrecht aufeinander.', 'Sie sind alle verschieden lang.'],
+      steps: [
+        'Jeder Schnittpunkt teilt eine Diagonale in größeren und kleineren Teil im Verhältnis $\\Phi$.',
+        'Das Pentagramm war deshalb schon bei den Pythagoreern ein Symbol.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf einer Sonnenblume zählt man häufig 34 Spiralen in die eine und 55 in die andere Richtung. Was fällt an diesen Zahlen auf?',
+      opts: ['Es sind Quadratzahlen.', 'Es sind aufeinanderfolgende Fibonacci-Zahlen.', 'Es sind Primzahlen.', 'Ihre Summe ist 100.'],
+      steps: [
+        '1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, …',
+        '$55 : 34 \\approx 1{,}618$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Zahlenreihe besteht nur aus Fibonacci-Zahlen?',
+      opts: ['2, 3, 5, 8, 13, 21', '2, 4, 8, 16, 32', '1, 4, 9, 16, 25', '1, 3, 5, 7, 9, 11'],
+      steps: [
+        'Jede Zahl ist die Summe der beiden vorigen: $2 + 3 = 5$, $3 + 5 = 8$, …'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Nach welcher Regel entsteht die Fibonacci-Folge?',
+      opts: ['Man addiert immer 2.', 'Man multipliziert die beiden vorigen.', 'Jedes Glied ist die Summe der beiden vorhergehenden.', 'Jedes Glied ist das Doppelte des vorigen.'],
+      steps: [
+        'Start mit 1 und 1, dann $1 + 1 = 2$, $1 + 2 = 3$, $2 + 3 = 5$, …'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Leonardo von Pisa (Fibonacci) stellte 1202 in seinem Rechenbuch „Liber abaci“ eine berühmte Aufgabe. Worum ging es?',
+      opts: ['um das Pflastern eines Platzes', 'um die Teilung einer Erbschaft unter Kamelen', 'um die Vermehrung von Kaninchenpaaren', 'um die Höhe einer Pyramide'],
+      steps: [
+        'Jedes Paar bekommt ab dem zweiten Monat jeden Monat ein neues Paar.',
+        'Die Anzahlen der Paare sind 1, 1, 2, 3, 5, 8, … Quelle: Leonardo von Pisa, Liber abaci (1202).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Bankkarte ist 85,6 mm breit und 53,98 mm hoch. Wie groß ist das Seitenverhältnis (gerundet)?',
+      opts: ['2,00', '1,33, das Format 4 : 3', '1,59, nahe beim Goldenen Schnitt', '1,41, das DIN-Verhältnis'],
+      steps: [
+        '$85{,}6 : 53{,}98 \\approx 1{,}59$',
+        'Das liegt nahe bei $\\Phi \\approx 1{,}618$, ist aber nicht genau gleich.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ist ein DIN-A4-Blatt ein Goldenes Rechteck?',
+      opts: ['Ja, genau.', 'Nein, sein Seitenverhältnis ist etwa 1,414.', 'Ja, ungefähr 1,618.', 'Nein, es ist ein Quadrat.'],
+      steps: [
+        '$297 : 210 \\approx 1{,}414 = \\sqrt{2}$',
+        'Das DIN-Format ist so gewählt, dass beim Halbieren dieselbe Form entsteht.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welches Bauwerk in Sachsen wird oft als Beispiel für den Goldenen Schnitt genannt?',
+      opts: ['der Fernsehturm in Dresden', 'das Alte Rathaus in Leipzig', 'die Augustusbrücke', 'die Semperoper in Dresden'],
+      steps: [
+        'Beim Alten Rathaus in Leipzig teilt der Turm die lange Marktfront ungefähr im Goldenen Schnitt.',
+        'Der Lehrplan nennt dieses Beispiel ausdrücklich.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was sollte man bei Behauptungen wie „Der Parthenon ist nach dem Goldenen Schnitt gebaut“ bedenken?',
+      opts: ['Solche Aussagen sind immer exakt bewiesen.', 'Man sollte nachmessen; viele Beispiele passen nur ungefähr, ob Baumeister ihn bewusst nutzten, ist oft umstritten.', 'Man muss nur das Foto ansehen.', 'Der Goldene Schnitt kommt in Bauwerken nie vor.'],
+      steps: [
+        'Je nachdem, wo man die Messpunkte setzt, findet man fast überall ein Verhältnis um 1,6.',
+        'Kritisch prüfen heißt: Messpunkte begründen, genau messen, mit 1,618 vergleichen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Person ist 1,70 m groß. In welcher Höhe läge ihr Bauchnabel, wenn er die Körpergröße genau im Goldenen Schnitt teilt (gerundet)?',
+      opts: ['bei 1,05 m', 'bei 1,10 m', 'bei 0,85 m', 'bei 0,65 m'],
+      steps: [
+        'Größerer Teil von unten: $1{,}70 : 1{,}618 \\approx 1{,}05$ m',
+        'Bei echten Menschen streut das Verhältnis deutlich.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Fassade ist 40 m breit. Wo müsste ein Turm stehen, um sie im Goldenen Schnitt zu teilen (vom einen Ende gemessen, gerundet)?',
+      opts: ['bei 26,7 m', 'bei 20 m', 'bei 15,3 m', 'bei 24,7 m'],
+      steps: [
+        '$40 : 1{,}618 \\approx 24{,}7$ m',
+        'Vom anderen Ende aus sind es 15,3 m.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Foto ist 10 cm hoch. Der Horizont soll die Höhe im Goldenen Schnitt teilen, mit dem Himmel als größerem Teil. In welcher Höhe von unten liegt er (gerundet)?',
+      opts: ['bei 5 cm', 'bei 6,18 cm', 'bei 3,82 cm', 'bei 3,33 cm'],
+      steps: [
+        'Himmel: $10 \\cdot 0{,}618 \\approx 6{,}18$ cm oben',
+        'Horizont von unten: $10 - 6{,}18 = 3{,}82$ cm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Fotografen nutzen oft die Drittelregel. Wie weit liegt sie vom Goldenen Schnitt entfernt?',
+      opts: ['Sie teilt bei 0,333 statt 0,382 der Länge, also ähnlich, aber nicht gleich.', 'Sie ist genau der Goldene Schnitt.', 'Sie hat mit Teilungen nichts zu tun.', 'Sie teilt in der Mitte.'],
+      steps: [
+        '$\\dfrac{1}{3} \\approx 0{,}333$, der kleinere Teil im Goldenen Schnitt ist $\\approx 0{,}382$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welches Buch über den Goldenen Schnitt illustrierte Leonardo da Vinci?',
+      opts: ['die „Elemente“ von Euklid', '„Liber abaci“ von Fibonacci', '„Gullivers Reisen“', '„De divina proportione“ von Luca Pacioli (1509)'],
+      steps: [
+        'Luca Pacioli nannte das Verhältnis „göttliche Proportion“.',
+        'Leonardo zeichnete für das Buch die Körper-Darstellungen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Seit wann ist der Name „Goldener Schnitt“ verbreitet?',
+      opts: ['seit dem 19. Jahrhundert', 'seit Euklid, um 300 v. Chr.', 'seit 1990', 'seit dem Jahr 1202'],
+      steps: [
+        'Euklid sprach von „Teilung im äußeren und mittleren Verhältnis“.',
+        'Die Bezeichnung „goldener Schnitt“ findet sich zuerst bei Martin Ohm (1835).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Goldene Winkel teilt den Vollwinkel im Goldenen Schnitt (kleinerer Teil). Wie groß ist er (gerundet)?',
+      opts: ['$161{,}8^\\circ$', '$120^\\circ$', '$222{,}5^\\circ$', '$137{,}5^\\circ$'],
+      steps: [
+        'Kleinerer Teil: $360^\\circ - \\dfrac{360^\\circ}{\\Phi} \\approx 360^\\circ - 222{,}5^\\circ$',
+        '$\\approx 137{,}5^\\circ$; unter diesem Winkel folgen oft Blätter am Stängel aufeinander.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Quotienten benachbarter Fibonacci-Zahlen liegen am nächsten bei $\\Phi$?',
+      opts: ['keiner', 'die von kleinen Zahlen, z. B. 2 : 1', 'die von großen Zahlen, z. B. 55 : 34', 'alle gleich nahe'],
+      steps: [
+        '$2 : 1 = 2$, $8 : 5 = 1{,}6$, $13 : 8 = 1{,}625$, $55 : 34 \\approx 1{,}6176$',
+        'Die Quotienten pendeln um $\\Phi$ und kommen ihm immer näher.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Kombinatorisches Zählen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w31-kombinatorik',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Kombinatorisches Zählen',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 31 (LB 5) · 20 Aufgaben: Zählprinzip, Anordnungen und n!, Codes und Schlösser, Wahrscheinlichkeiten über Anzahlen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 31 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: counting principle (1, 9-10, 12-13, 19), arrangements and factorial (2-3, 8, 15-16, 20), codes (4-6), places and pairs (7, 14, 18), probabilities (5, 11, 17). */
+  questions: [
+    {
+      q: 'Zu 3 T-Shirts gibt es 4 Hosen. Wie viele verschiedene Kombinationen aus einem T-Shirt und einer Hose gibt es?',
+      opts: ['7', '81', '24', '12'],
+      steps: [
+        'Zu jedem T-Shirt passt jede der 4 Hosen.',
+        'Zählprinzip: $3 \\cdot 4 = 12$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist $4!$ (gesprochen: 4 Fakultät)?',
+      opts: ['4', '24', '16', '10'],
+      steps: [
+        '$4! = 4 \\cdot 3 \\cdot 2 \\cdot 1$',
+        '$= 24$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf wie viele Arten können sich 5 Personen nebeneinander auf 5 Stühle setzen?',
+      opts: ['15', '3125', '25', '120'],
+      steps: [
+        'Für den ersten Stuhl gibt es 5 Möglichkeiten, für den zweiten noch 4 usw.',
+        '$5! = 5 \\cdot 4 \\cdot 3 \\cdot 2 \\cdot 1 = 120$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Zahlenschloss hat 3 Ringe mit den Ziffern 0 bis 9. Wie viele Codes gibt es?',
+      opts: ['999', '720', '1000', '30'],
+      steps: [
+        'Jeder Ring hat 10 Möglichkeiten, Ziffern dürfen sich wiederholen.',
+        '$10 \\cdot 10 \\cdot 10 = 1000$ (000 bis 999)'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Wahrscheinlichkeit, den Code dieses Zahlenschlosses beim ersten Versuch zu erraten?',
+      opts: ['$\\dfrac{1}{30}$', '$\\dfrac{3}{10}$', '$\\dfrac{1}{1000}$', '$\\dfrac{1}{999}$'],
+      steps: [
+        'Genau einer von 1000 gleich wahrscheinlichen Codes ist richtig.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele vierstellige PINs aus den Ziffern 0 bis 9 gibt es?',
+      opts: ['9999', '10 000', '5040', '40'],
+      steps: [
+        '$10 \\cdot 10 \\cdot 10 \\cdot 10 = 10\\,000$ (0000 bis 9999)'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei einem Lauf mit 8 Personen werden Gold, Silber und Bronze vergeben. Wie viele Möglichkeiten gibt es für die ersten drei Plätze?',
+      opts: ['24', '336', '512', '56'],
+      steps: [
+        'Gold: 8 Möglichkeiten, Silber: noch 7, Bronze: noch 6.',
+        '$8 \\cdot 7 \\cdot 6 = 336$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf wie viele Arten kann man die Buchstaben des Wortes MATHE anordnen?',
+      opts: ['25', '120', '5', '60'],
+      steps: [
+        'Fünf verschiedene Buchstaben: $5! = 120$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Menü besteht aus Vorspeise, Hauptgericht und Nachtisch. Zur Wahl stehen 3 Vorspeisen, 4 Hauptgerichte und 2 Nachtische. Wie viele Menüs gibt es?',
+      opts: ['24', '36', '9', '12'],
+      steps: [
+        '$3 \\cdot 4 \\cdot 2 = 24$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Würfel wird dreimal geworfen. Wie viele verschiedene Ergebnisfolgen gibt es?',
+      opts: ['216', '18', '36', '120'],
+      steps: [
+        '$6 \\cdot 6 \\cdot 6 = 216$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Fünf Personen setzen sich zufällig nebeneinander. Wie groß ist die Wahrscheinlichkeit, dass sie genau in alphabetischer Reihenfolge sitzen?',
+      opts: ['$\\dfrac{5}{120}$', '$\\dfrac{1}{5}$', '$\\dfrac{1}{25}$', '$\\dfrac{1}{120}$'],
+      steps: [
+        'Es gibt $5! = 120$ gleich wahrscheinliche Sitzordnungen.',
+        'Genau eine davon ist alphabetisch.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele dreistellige Zahlen kann man aus den Ziffern 1, 2, 3, 4, 5 bilden, wenn jede Ziffer höchstens einmal vorkommt?',
+      opts: ['15', '125', '60', '10'],
+      steps: [
+        'Hunderter: 5, Zehner: noch 4, Einer: noch 3 Möglichkeiten.',
+        '$5 \\cdot 4 \\cdot 3 = 60$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele dreistellige Zahlen aus den Ziffern 1 bis 5 gibt es, wenn Ziffern mehrfach vorkommen dürfen?',
+      opts: ['125', '15', '60', '243'],
+      steps: [
+        'Jede Stelle hat 5 Möglichkeiten.',
+        '$5 \\cdot 5 \\cdot 5 = 125$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Sechs Personen begrüßen sich jeweils mit Handschlag, jede mit jeder genau einmal. Wie viele Handschläge gibt es?',
+      opts: ['12', '30', '15', '36'],
+      steps: [
+        'Jede Person gibt 5 anderen die Hand: $6 \\cdot 5 = 30$.',
+        'Dabei ist jeder Handschlag doppelt gezählt: $30 : 2 = 15$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist $6!$?',
+      opts: ['36', '720', '120', '21'],
+      steps: [
+        '$6! = 6 \\cdot 5! = 6 \\cdot 120 = 720$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf wie viele Arten lassen sich 4 verschiedene Bücher nebeneinander ins Regal stellen?',
+      opts: ['24', '256', '4', '16'],
+      steps: [
+        '$4! = 4 \\cdot 3 \\cdot 2 \\cdot 1 = 24$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die 4 Bücher werden zufällig ins Regal gestellt. Wie groß ist die Wahrscheinlichkeit, dass sie in der richtigen Bandreihenfolge stehen?',
+      opts: ['$\\dfrac{4}{24}$', '$\\dfrac{1}{4}$', '$\\dfrac{1}{24}$', '$\\dfrac{1}{16}$'],
+      steps: [
+        'Eine günstige von 24 gleich wahrscheinlichen Anordnungen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einem Turnier mit 5 Mannschaften spielt jede gegen jede genau einmal. Wie viele Spiele gibt es?',
+      opts: ['5', '25', '20', '10'],
+      steps: [
+        'Jede Mannschaft hat 4 Gegner: $5 \\cdot 4 = 20$.',
+        'Jedes Spiel ist doppelt gezählt: $20 : 2 = 10$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Code besteht aus 2 Buchstaben (A bis Z, 26 Möglichkeiten) und danach 2 Ziffern. Wie viele Codes gibt es?',
+      opts: ['4 760', '2 600', '1 296', '67 600'],
+      steps: [
+        '$26 \\cdot 26 \\cdot 10 \\cdot 10$',
+        '$676 \\cdot 100 = 67\\,600$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist $10!$?',
+      opts: ['3 628 800', '100', '362 880', '55'],
+      steps: [
+        '$10! = 10 \\cdot 9! = 10 \\cdot 362\\,880 = 3\\,628\\,800$',
+        'Fakultäten wachsen sehr schnell.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

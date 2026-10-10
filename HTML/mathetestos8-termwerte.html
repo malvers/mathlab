@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Terme und Termwerte — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w02-termwerte',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Terme und Termwerte',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 2 (LB 1) · 20 Aufgaben: Termwerte mit rationalen Zahlen, Terme aufstellen, Einsetzen in Formeln · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: term values with negative numbers (1-4, 10, 16-17), setting up terms (7-8, 11, 20), formulas (5, 13-15, 18-19), mixed (6, 9, 12). */
+  questions: [
+    {
+      q: 'Berechne den Wert des Terms $3x - 5$ für $x = 4$.',
+      opts: ['−7', '29', '2', '7'],
+      steps: [
+        '$3x$ bedeutet $3 \\cdot x$.',
+        '$3 \\cdot 4 - 5 = 12 - 5 = 7$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Wert des Terms $3x - 5$ für $x = -2$.',
+      opts: ['1', '−11', '−1', '11'],
+      steps: [
+        'Negative Zahlen beim Einsetzen in Klammern setzen: $3 \\cdot (-2) - 5$.',
+        '$3 \\cdot (-2) = -6$, dann $-6 - 5 = -11$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne den Wert von $x^2 + 2x$ für $x = -3$.',
+      opts: ['−15', '15', '3', '−3'],
+      steps: [
+        '$(-3)^2 = 9$, denn minus mal minus ergibt plus.',
+        '$2 \\cdot (-3) = -6$',
+        '$9 + (-6) = 3$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne den Wert von $2 \\cdot (a - b)$ für $a = 5$ und $b = -3$.',
+      opts: ['7', '−16', '4', '16'],
+      steps: [
+        'Zuerst die Klammer: $5 - (-3) = 5 + 3 = 8$.',
+        'Dann $2 \\cdot 8 = 16$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rechteck hat die Seiten $a = 4{,}5$ cm und $b = 2{,}5$ cm. Berechne den Umfang mit $u = 2 \\cdot (a + b)$.',
+      opts: ['11,25 cm', '11,5 cm', '14 cm', '7 cm'],
+      steps: [
+        'Einsetzen: $u = 2 \\cdot (4{,}5 + 2{,}5)$',
+        '$u = 2 \\cdot 7 = 14$, also 14 cm.',
+        '11,25 wäre $a \\cdot b$, der Flächeninhalt in cm².'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welche Zahl $x$ hat der Term $2x + 1$ den Wert 9?',
+      opts: ['19', '4,5', '5', '4'],
+      steps: [
+        'Gesucht ist $x$ mit $2x + 1 = 9$.',
+        '$2x = 8$, also $x = 4$.',
+        'Probe: $2 \\cdot 4 + 1 = 9$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kinoticket kostet 9 €, eine Tüte Popcorn 4 €. Jede Person kauft beides. Welcher Term gibt die Kosten für $x$ Personen an?',
+      opts: ['$9x + 4$', '$13x$', '$36x$', '$9 + 4x$'],
+      steps: [
+        'Eine Person zahlt $9 + 4 = 13$ Euro.',
+        '$x$ Personen zahlen $9x + 4x = 13x$ Euro.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Taxifahrt kostet 3,50 € Grundgebühr und 2,10 € pro Kilometer. Welcher Term gibt den Preis in Euro für $x$ Kilometer an?',
+      opts: ['$5{,}60x$', '$3{,}50x + 2{,}10x$', '$3{,}50 + 2{,}10x$', '$2{,}10 + 3{,}50x$'],
+      steps: [
+        'Die Grundgebühr fällt einmal an, unabhängig von der Strecke.',
+        'Der Kilometerpreis wird mit der Anzahl $x$ der Kilometer multipliziert.',
+        'Preis: $3{,}50 + 2{,}10x$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was kostet die Taxifahrt aus der vorigen Aufgabe (3,50 € Grundgebühr, 2,10 € pro Kilometer) für 12 km?',
+      opts: ['25,20 €', '28,70 €', '44,10 €', '67,20 €'],
+      steps: [
+        '$3{,}50 + 2{,}10 \\cdot 12$',
+        '$2{,}10 \\cdot 12 = 25{,}20$',
+        '$3{,}50 + 25{,}20 = 28{,}70$, also 28,70 €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne den Wert von $\\dfrac{a + b}{2}$ für $a = -7$ und $b = 3$.',
+      opts: ['5', '2', '−2', '−5'],
+      steps: [
+        'Zähler: $-7 + 3 = -4$',
+        '$\\dfrac{-4}{2} = -2$',
+        'Der Term ist der Mittelwert von $a$ und $b$: −2 liegt genau in der Mitte zwischen −7 und 3.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Term hat für jede Zahl $x$ denselben Wert wie $x + x + x$?',
+      opts: ['$3x^2$', '$3x$', '$x + 3$', '$x^3$'],
+      steps: [
+        'Dreimal dieselbe Zahl addieren heißt mit 3 multiplizieren.',
+        '$x + x + x = 3 \\cdot x = 3x$',
+        '$x^3 = x \\cdot x \\cdot x$ ist etwas anderes: für $x = 2$ ist $x^3 = 8$, aber $3x = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $x$ haben die Terme $2x + 3$ und $x + 5$ denselben Wert?',
+      opts: ['2', '8', '3', '−2'],
+      steps: [
+        'Wertetabelle: Für $x = 2$ ist $2 \\cdot 2 + 3 = 7$ und $2 + 5 = 7$.',
+        'Rechnerisch: $2x + 3 = x + 5$, also $x = 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Aquarium ist 2,5 m lang, 4 m breit und 1,2 m hoch. Berechne das Volumen mit $V = a \\cdot b \\cdot c$.',
+      opts: ['7,7 m³', '120 m³', '12 m³', '1,2 m³'],
+      steps: [
+        '$V = 2{,}5 \\cdot 4 \\cdot 1{,}2$',
+        '$2{,}5 \\cdot 4 = 10$, dann $10 \\cdot 1{,}2 = 12$, also 12 m³.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Zug fährt 2,5 Stunden lang mit 80 km pro Stunde. Berechne den Weg mit $s = v \\cdot t$.',
+      opts: ['200 km', '160 km', '82,5 km', '32 km'],
+      steps: [
+        '$s = 80 \\cdot 2{,}5$',
+        '$80 \\cdot 2 = 160$ und $80 \\cdot 0{,}5 = 40$, zusammen 200 km.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Temperatur in Grad Fahrenheit ist $F = 1{,}8 \\cdot C + 32$. Wie viel Grad Fahrenheit sind −10 °C?',
+      opts: ['14', '−14', '50', '−18'],
+      steps: [
+        '$F = 1{,}8 \\cdot (-10) + 32$',
+        '$1{,}8 \\cdot (-10) = -18$',
+        '$-18 + 32 = 14$, also 14 °F.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Wert von $(x - 2)^2$ für $x = -1$.',
+      opts: ['9', '−3', '1', '−9'],
+      steps: [
+        'Zuerst die Klammer: $-1 - 2 = -3$.',
+        '$(-3)^2 = (-3) \\cdot (-3) = 9$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Wert hat $-x^2$ für $x = 3$?',
+      opts: ['−6', '−9', '9', '6'],
+      steps: [
+        'Potenzen werden vor dem Vorzeichen berechnet: $-x^2 = -(x^2)$.',
+        '$x^2 = 9$, also $-x^2 = -9$.',
+        'Anders bei $(-x)^2$: Das wäre $(-3)^2 = 9$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einer Tabellenkalkulation steht in Zelle A2 die Zahl 5. Welchen Wert zeigt eine Zelle mit der Formel =3*A2-4?',
+      opts: ['11', '31', '3', '19'],
+      steps: [
+        'Das Zeichen * bedeutet mal, die Formel rechnet also $3 \\cdot 5 - 4$.',
+        'Punktrechnung vor Strichrechnung: $15 - 4 = 11$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Dreieck hat die Grundseite $g = 7$ cm und die Höhe $h = 4$ cm. Berechne den Flächeninhalt mit $A = \\dfrac{g \\cdot h}{2}$.',
+      opts: ['5,5 cm²', '28 cm²', '11 cm²', '14 cm²'],
+      steps: [
+        '$A = \\dfrac{7 \\cdot 4}{2} = \\dfrac{28}{2}$',
+        '$A = 14$, also 14 cm².'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Legt man $n$ Quadrate aus Streichhölzern in einer Reihe aneinander, braucht man $3n + 1$ Hölzer. Wie viele Hölzer braucht man für 25 Quadrate?',
+      opts: ['100', '78', '75', '76'],
+      steps: [
+        'Das erste Quadrat braucht 4 Hölzer, jedes weitere nur 3, weil eine Seite schon liegt.',
+        '$3 \\cdot 25 + 1 = 75 + 1 = 76$',
+        '100 wäre richtig, wenn jedes Quadrat einzeln läge.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

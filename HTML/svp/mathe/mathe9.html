@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 9 (Oberschule) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Oberschule &middot; Klasse 9</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_os_mathematik.pdf', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Realschulbildungsgang &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Rechtwinklige Dreiecke</div>
+            <div class="vu">28 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Pyramide, Kreiskegel, Kugel</div>
+            <div class="vu">28 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Quadratische Funktionen und quadratische Gleichungen</div>
+            <div class="vu">28 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Beschreibende Statistik</div>
+            <div class="vu">16 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Goldener Schnitt</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Die Zeitrichtwerte des Lehrplans (100 Ustd. Pflicht + 8 Ustd. Wahlpflichtbereich) sind vollst&auml;ndig abgebildet;
+        die &uuml;brigen Wochen des Schuljahres stehen als &Uuml;bung, Klassenarbeit oder Puffer in eigenen Zeilen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Start in Klasse 9', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches: Hefter, Taschenrechner, Formelsammlung, Geodreieck und Zirkel',
+                'Wiederholung Klasse 8: Gleichungen, lineare Funktionen, Kreis und Zylinder',
+                'Quadratzahlen und Quadratwurzeln im Kopf'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/28', topic: 'Der Satz des Pythagoras', ziel: 'Beherrschen des Berechnens von Seitenlängen rechtwinkliger Dreiecke mit dem Satz des Pythagoras', remark: 'Hypotenuse und Katheten, Quadrate über den Seiten', quiz: { href: '../../mathetestos9-pythagoras.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Hypotenuse und Katheten im rechtwinkligen Dreieck benennen',
+                'Den Satz an Quadraten über den Seiten entdecken, ein Ergänzungsbeweis',
+                'Hypotenuse und Kathete berechnen'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/28', topic: 'Pythagoras in Figuren', ziel: 'Beherrschen des Berechnens von Seitenlängen und Höhen rechtwinkliger Dreiecke', remark: 'Höhen, Diagonalen, Abstände im Koordinatensystem', quiz: { href: '../../mathetestos9-pythagoras-figuren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Diagonalen in Rechteck und Quadrat',
+                'Höhe im gleichschenkligen und gleichseitigen Dreieck',
+                'Abstand zweier Punkte im Koordinatensystem'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/28', topic: 'Umkehrung des Satzes des Pythagoras', ziel: 'Kennen der Umkehrung des Satzes des Pythagoras', remark: 'Knotenschnur zum Überprüfen rechter Winkel', quiz: { href: '../../mathetestos9-umkehrung-pythagoras.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Wenn a² + b² = c², dann ist das Dreieck rechtwinklig',
+                'Pythagoreische Zahlentripel, die Zwölfknotenschnur',
+                'Rechte Winkel auf dem Schulhof und am Bau prüfen'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/28', topic: 'Sinus, Kosinus und Tangens', ziel: 'Beherrschen des Berechnens mit Sinus, Kosinus und Tangens eines Winkels im rechtwinkligen Dreieck', remark: 'Gegenkathete, Ankathete, Seitenverhältnisse; dynamische Geometriesoftware', quiz: { href: '../../mathetestos9-sinus-kosinus-tangens.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Ähnliche rechtwinklige Dreiecke haben gleiche Seitenverhältnisse',
+                'Sinus, Kosinus und Tangens als Seitenverhältnisse',
+                'Werte mit dem Taschenrechner bestimmen, Einstellung DEG'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '17–20/28', topic: 'Seiten und Winkel berechnen', ziel: 'Beherrschen des Berechnens von Seitenlängen und Innenwinkelgrößen rechtwinkliger Dreiecke', remark: 'Umkehrfunktion am Taschenrechner', quiz: { href: '../../mathetestos9-seiten-winkel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Fehlende Seiten mit sin, cos und tan berechnen',
+                'Winkel aus zwei Seiten mit sin⁻¹, cos⁻¹ und tan⁻¹',
+                'Das ganze Dreieck berechnen: Seiten, Winkel, Flächeninhalt'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '21–24/28', topic: 'Sachaufgaben: Steigung, Leiter, Dach', ziel: 'Anwenden des Berechnens von Seitenlängen und Innenwinkelgrößen auf das Lösen vielfältiger Sachaufgaben', remark: 'Dachstuhl, Spannseil, Steigung in Prozent', quiz: { href: '../../mathetestos9-sachaufgaben-dreiecke.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Skizze anfertigen, rechtwinkliges Dreieck finden',
+                'Steigung in Prozent und Steigungswinkel',
+                'Leiter, Rampe, Dachneigung, Spannseil'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '25–28/28', topic: 'Zerlegen in Teilprobleme', ziel: 'Anwenden des Berechnens von Seitenlängen und Innenwinkelgrößen auf das Lösen vielfältiger Sachaufgaben', remark: 'Fachwerk, Trapez, Raumdiagonale', quiz: { href: '../../mathetestos9-teilprobleme.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Figuren in rechtwinklige Dreiecke zerlegen',
+                'Gleichschenklige Dreiecke und Trapeze berechnen',
+                'Fachwerk und Raumdiagonale im Quader'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'ue', u: '', topic: 'Übung: Rechtwinklige Dreiecke', remark: 'Übung, Vertiefung und Vorbereitung', details: [
+                'Gemischte Aufgaben zu Pythagoras und Trigonometrie',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Rechtwinklige Dreiecke', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos9-ka1-dreiecke.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Pythagoras und Umkehrung, Sinus, Kosinus und Tangens, Sachaufgaben'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '1–4/28', topic: 'Pyramiden darstellen', ziel: 'Übertragen von Verfahren des Darstellens von Körpern auf Pyramiden', remark: 'gerade Pyramiden mit quadratischer oder rechteckiger Grundfläche', quiz: { href: '../../mathetestos9-pyramide-darstellen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Pyramiden erkennen: Grundfläche, Spitze, Seitenflächen, Kanten',
+                'Netz und Schrägbildskizze',
+                'Senkrechtes Zweitafelbild: Grundriss und Aufriss'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '5–8/28', topic: 'Höhen und Kanten der Pyramide', ziel: 'Beherrschen des Berechnens der Kantenlänge, Körperhöhe und Seitenhöhe einer Pyramide', remark: 'Pythagoras in Stützdreiecken', quiz: { href: '../../mathetestos9-pyramide-hoehen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Körperhöhe, Seitenhöhe und Seitenkante unterscheiden',
+                'Stützdreiecke finden und mit Pythagoras rechnen',
+                'Cheopspyramide: Höhe aus Kante und Grundseite'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '9–12/28', topic: 'Oberfläche und Volumen der Pyramide', ziel: 'Beherrschen des Berechnens des Mantel- und Oberflächeninhalts und des Volumens von Pyramiden', remark: 'V = ⅓ · A_G · h, Umschüttversuch', quiz: { href: '../../mathetestos9-pyramide-volumen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Mantel aus Dreiecken, Oberfläche aus Netz',
+                'Volumen: ein Drittel des Prismas, Umschüttversuch',
+                'Masse mit der Dichte'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '13–16/28', topic: 'Der Kreiskegel', ziel: 'Beherrschen des Berechnens der Mantellinie eines Kreiskegels', remark: 'Netz, Schrägbildskizze, Mantel als Kreisausschnitt', quiz: { href: '../../mathetestos9-kegel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Kegel darstellen: Netz mit Kreisausschnitt, Schrägbildskizze',
+                'Mantellinie mit Pythagoras',
+                'Mantelfläche A_M = π · r · s und Oberfläche'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb2', u: '17–20/28', topic: 'Volumen und Masse von Kegel und Pyramide', ziel: 'Beherrschen des Berechnens des Volumens und der Masse von Pyramiden und Kreiskegeln', remark: 'V = ⅓ · π · r² · h, auch Höhe und Radius berechnen', quiz: { href: '../../mathetestos9-kegel-pyramide-volumen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Kegelvolumen als Drittel des Zylinders',
+                'Masse von Kegeln und Pyramiden aus Volumen und Dichte',
+                'Fehlende Größen berechnen: Höhe, Radius'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb2', u: '21–24/28', topic: 'Die Kugel', ziel: 'Beherrschen des Berechnens des Oberflächeninhalts und Volumens der Kugel', remark: 'O = 4 · π · r², V = 4/3 · π · r³, Kubikwurzel', quiz: { href: '../../mathetestos9-kugel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Oberfläche und Volumen der Kugel',
+                'Radius aus dem Volumen: Kubikwurzel',
+                'Kugeln im Alltag: Bälle, Murmeln, Erde'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'ue', u: '', topic: 'Weihnachtsknobeln', remark: 'zwei Schultage vor den Ferien', details: [
+                'Christbaumkugeln, Kerzen und Tannenbaumkegel',
+                'Knobelaufgaben zu Körpern'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb2', u: '25–28/28', topic: 'Zusammengesetzte Körper', ziel: 'Anwenden des Berechnens und des Darstellens auf zusammengesetzte Körper', remark: 'Bauwerk, Werkstück, Behälter, Materialbedarf', quiz: { href: '../../mathetestos9-zusammengesetzte-koerper.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Körper zerlegen: Turm aus Zylinder und Kegel, Silo, Haus mit Dach',
+                'Oberfläche zusammengesetzter Körper ohne die inneren Flächen',
+                'Materialbedarf und sparsamer Umgang mit Ressourcen'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'ue', u: '', topic: 'Übung: Pyramide, Kegel, Kugel', remark: 'Übung, Vertiefung und Vorbereitung', details: [
+                'Gemischte Aufgaben zu Körpern',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lk', u: '', topic: 'Klassenarbeit 2: Pyramide, Kreiskegel, Kugel', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos9-ka2-koerper.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Darstellen, Höhen und Kanten, Oberfläche, Volumen, Masse, zusammengesetzte Körper'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '1–4/28', topic: 'Die Normalparabel', ziel: 'Übertragen der Kenntnisse über Funktionen auf quadratische Funktionen', remark: 'Funktionsgleichung, Wertetabelle, Graph, Definitions- und Wertebereich', quiz: { href: '../../mathetestos9-normalparabel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Quadratische Zusammenhänge: Fläche eines Quadrats, Bremsweg',
+                'y = x²: Wertetabelle und Graph, Symmetrie, Scheitelpunkt',
+                'Definitionsbereich und Wertebereich'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb3', u: '5–8/28', topic: 'Parabeln der Form y = a · x² + c', ziel: 'Einblick gewinnen in das Monotonieverhalten quadratischer Funktionen', remark: 'Strecken, Stauchen, Spiegeln, Verschieben; Fr 05.02. Halbjahreszeugnis', quiz: { href: '../../mathetestos9-parabel-a-c.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Einfluss von a: gestreckt, gestaucht, nach unten geöffnet',
+                'Verschiebung längs der y-Achse um c',
+                'Monotonie: fallend links, steigend rechts vom Scheitel'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '9–12/28', topic: 'Scheitelpunktform y = (x + d)² + e', ziel: 'Beherrschen der zeichnerischen und rechnerischen Bestimmung des Scheitelpunktes', remark: 'Verschiebung längs der x- und der y-Achse', quiz: { href: '../../mathetestos9-scheitelpunktform.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Verschiebung der Normalparabel in x- und y-Richtung',
+                'Scheitelpunkt S(−d | e) ablesen',
+                'Gleichung aus dem Graphen bestimmen'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '13–16/28', topic: 'Normalform y = x² + p · x + q', ziel: 'Beherrschen der rechnerischen Bestimmung des Scheitelpunktes', remark: 'quadratische Ergänzung, Scheitelpunkt als Minimum oder Maximum', quiz: { href: '../../mathetestos9-normalform.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Scheitelpunktform ausmultiplizieren: Produkt von Summen',
+                'Quadratische Ergänzung: von der Normalform zur Scheitelpunktform',
+                'Scheitelpunkt als Extrempunkt: Minimum, Maximum'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '17–20/28', topic: 'Quadratische Gleichungen inhaltlich lösen', ziel: 'Anwenden des Lösens quadratischer Gleichungen', remark: 'x² − 169 = 0, (x − 3) · (x + 2) = 0, Eindeutigkeit des Wurzelziehens', quiz: { href: '../../mathetestos9-quadratische-gleichungen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Reinquadratische Gleichungen: x² = c',
+                'Ein Produkt ist null, wenn ein Faktor null ist',
+                'Ausklammern: x² − 5x = 0'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb3', u: '21–24/28', topic: 'Die Lösungsformel', ziel: 'Kennen des Prinzips der Fallunterscheidung', remark: 'Lösungsformel für x² + p · x + q = 0, Diskriminante', quiz: { href: '../../mathetestos9-loesungsformel.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Lösungsformel herleiten und anwenden',
+                'Fallunterscheidung: zwei, eine oder keine Lösung',
+                'Gleichungen erst auf Normalform bringen'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb3', u: '25–28/28', topic: 'Nullstellen, Schnittpunkte, Anwendungen', ziel: 'Anwenden des Lösens quadratischer Gleichungen auf das Berechnen von Nullstellen und Schnittpunktkoordinaten', remark: 'Wurfbahnen, Brücken, Flächen; Physik Kl. 9', quiz: { href: '../../mathetestos9-anwendungen-quadratisch.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Nullstellen von Parabeln berechnen',
+                'Schnittpunkte von Parabel und Gerade',
+                'Sachprobleme: Wurf, Brückenbogen, Rechteck mit gegebenem Flächeninhalt'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'ue', u: '', topic: 'Übung: Quadratische Funktionen und Gleichungen', remark: 'Übung, Vertiefung und Vorbereitung', details: [
+                'Gemischte Aufgaben zu Parabeln und quadratischen Gleichungen',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lk', u: '', topic: 'Klassenarbeit 3: Quadratische Funktionen und Gleichungen', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos9-ka3-quadratisch.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Parabeln, Scheitelpunkt, quadratische Gleichungen, Nullstellen, Schnittpunkte'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'wb', u: '1–4/8', topic: 'Goldener Schnitt: Teilungsverhältnis', ziel: 'Kennen des Goldenen Schnittes als Streckenverhältnis', remark: 'Berechnen des Teilungsverhältnisses mit einer quadratischen Gleichung', quiz: { href: '../../mathetestos9-goldener-schnitt.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Eine Strecke so teilen, dass Ganzes zu Major wie Major zu Minor',
+                'Die Gleichung x² + x − 1 = 0 und die Zahl Φ ≈ 1,618',
+                'Konstruktion des Goldenen Schnittes mit Zirkel und Lineal'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'wb', u: '5–8/8', topic: 'Goldener Schnitt in Kunst, Architektur und Natur', ziel: 'Entdecken des Vorkommens des Goldenen Schnittes in Architektur, Kunst und Natur', remark: 'Altes Rathaus Leipzig, Parthenon, Sonnenblume; Recherche', quiz: { href: '../../mathetestos9-goldener-schnitt-kunst.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Goldenes Rechteck, Fibonacci-Zahlen und ihre Quotienten',
+                'Bauwerke und Gemälde vermessen',
+                'Recherche und Präsentation'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb4', u: '1–3/16', topic: 'Daten in den Medien', ziel: 'Sich positionieren zu Darstellungen und Inhalten von Datenerhebungen', remark: 'Medien als Informationsquelle, Einflussfaktor, Verfremdung; kurze Woche', quiz: { href: '../../mathetestos9-daten-medien.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Diagramme aus Zeitungen und Internet lesen',
+                'Abgeschnittene Achsen und verzerrte Bilder erkennen',
+                'Wer hat wie erhoben? Stichprobe und Art der Datenerfassung'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lb4', u: '4–7/16', topic: 'Mittelwerte', ziel: 'Anwenden der Kenntnisse über Häufigkeitsverteilungen und über ihre Aussagekraft', remark: 'arithmetisches Mittel, Zentralwert, Modalwert', quiz: { href: '../../mathetestos9-mittelwerte.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Absolute und relative Häufigkeit, Häufigkeitstabelle',
+                'Arithmetisches Mittel, Zentralwert und Modalwert bestimmen',
+                'Beispiele, bei denen die Mittelwerte stark voneinander abweichen'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'lb4', u: '8–10/16', topic: 'Maximum, Minimum, Spannweite', ziel: 'Anwenden der Kenntnisse über Häufigkeitsverteilungen und über ihre Aussagekraft auf Beispiele aus der Umwelt', remark: 'Streuung, auch mit Tabellenkalkulation; kurze Woche', quiz: { href: '../../mathetestos9-spannweite.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Maximum, Minimum und Spannweite',
+                'Zwei Datenreihen mit gleichem Mittel vergleichen',
+                'Kennwerte mit der Tabellenkalkulation'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'lb4', u: '11–14/16', topic: 'Projekt: Eine statistische Erhebung', ziel: 'Gestalten eines Projekts zu einer statistischen Erhebung aus dem Lebensumfeld', remark: 'regionale und saisonale Produkte, Wahl des Verkehrsmittels', quiz: { href: '../../mathetestos9-statistik-projekt.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Fragebogen entwerfen, Daten erheben',
+                'Daten mit der Tabellenkalkulation auswerten',
+                'Diagramme passend wählen'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'lb4', u: '15–16/16', topic: 'Projekt präsentieren', ziel: 'Gestalten eines Projekts zu einer statistischen Erhebung aus dem Lebensumfeld', remark: 'Präsentation, Nachhaltigkeit; dazu Übung', quiz: { href: '../../mathetestos9-statistik-praesentation.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Ergebnisse präsentieren und kritisch bewerten',
+                'Übung zur beschreibenden Statistik'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'ue', u: '', topic: 'Übung: Statistik und Jahresstoff', remark: 'Übung, Vertiefung und Vorbereitung', details: [
+                'Gemischte Aufgaben zu Statistik, Körpern und Dreiecken',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'lk', u: '', topic: 'Klassenarbeit 4: Beschreibende Statistik und Jahresstoff', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos9-ka4-statistik.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Mittelwerte, Spannweite, Diagramme, dazu Aufgaben aus dem Schuljahr'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Wiederholung: Jahresstoff', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Gemischte Aufgaben aus allen Lernbereichen',
+                'Ausblick auf die Abschlussprüfung in Klasse 10'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Projektwoche Mathematik', remark: 'Knobeln und Modellieren', details: [
+                'Fermi-Aufgaben und Modellierungsprojekte'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr, Ausblick auf Klasse 10'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_os_mathematik.pdf where that Lernbereich starts
+        // (Realschulbildungsgang, Klassenstufe 9: pages 49-52).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_os_mathematik.pdf',
+            lb1: {
+                page: 49,
+                bullets: [
+                    'Satz des Pythagoras: Seitenlängen und Höhen berechnen',
+                    'Umkehrung des Satzes des Pythagoras, Knotenschnur',
+                    'Sinus, Kosinus und Tangens eines Winkels im rechtwinkligen Dreieck',
+                    'Sachaufgaben durch Zerlegen in Teilprobleme: Dachstuhl, Fachwerk, Spannseil',
+                ]
+            },
+            lb2: {
+                page: 50,
+                bullets: [
+                    'Pyramiden und Kreiskegel darstellen: Schrägbildskizze, Netz, Zweitafelbild',
+                    'Kantenlänge, Körperhöhe und Seitenhöhe der Pyramide, Mantellinie des Kegels',
+                    'Mantel- und Oberflächeninhalt, Volumen und Masse von Pyramiden und Kegeln',
+                    'Oberflächeninhalt und Volumen der Kugel, Kubikwurzel',
+                    'Zusammengesetzte Körper: Bauwerk, Werkstück, Behälter, Materialbedarf',
+                ]
+            },
+            lb3: {
+                page: 50,
+                bullets: [
+                    'Quadratische Funktionen: Definitions- und Wertebereich, Gleichung, Wertetabelle, Graph',
+                    'Monotonieverhalten, Nullstellen ablesen',
+                    'Scheitelpunkt aus y = (x + d)² + e, y = x² + p · x + q und y = a · x² + c',
+                    'Scheitelpunkt als Extrempunkt: Minimum, Maximum',
+                    'Quadratische Gleichungen: Nullstellen, Schnittpunkte, Sachprobleme, Lösungsformel',
+                    'Prinzip der Fallunterscheidung',
+                ]
+            },
+            lb4: {
+                page: 51,
+                bullets: [
+                    'Medien als Informationsquelle, Einflussfaktor und Instrument der Verfremdung',
+                    'Arithmetisches Mittel, Zentralwert, Modalwert',
+                    'Maximum, Minimum, Spannweite, auch mit Tabellenkalkulation',
+                    'Projekt zu einer statistischen Erhebung aus dem Lebensumfeld',
+                ]
+            },
+            wb: {
+                page: 51,
+                bullets: [
+                    'Wahlpflichtbereich 1: Goldener Schnitt (gewählt)',
+                    'Wahlpflichtbereich 2: Wahre Größe und Gestalt',
+                    'Wahlpflichtbereich 3: Sportfest',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            wb: ['b-green', 'WB 1'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', 'ÜBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>

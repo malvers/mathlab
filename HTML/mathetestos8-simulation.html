@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zufallsversuche simulieren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w28-simulation',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zufallsversuche simulieren',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 28 (LB 5) · 20 Aufgaben: Ergebnis und Ereignis, relative Häufigkeit, Zufallszahlen, Monte-Carlo-Methode · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 28 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: events and Laplace probabilities (1-3, 11-14, 18-20), relative frequency and the law of large numbers (4-5, 10, 15, 17), simulation (6-9, 16). */
+  questions: [
+    {
+      q: 'Ein Würfel wird geworfen. Welche Ergebnisse gehören zum Ereignis „gerade Augenzahl“?',
+      opts: ['nur 6', '2 und 4', '2, 4 und 6', '1, 3 und 5'],
+      steps: [
+        'Ein Ereignis fasst Ergebnisse zusammen.',
+        'Gerade Augenzahlen sind 2, 4 und 6.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Wahrscheinlichkeit für eine gerade Augenzahl beim Würfeln?',
+      opts: ['$\\dfrac{2}{3}$', '$\\dfrac{1}{3}$', '$\\dfrac{1}{6}$', '$\\dfrac{1}{2}$'],
+      steps: [
+        'Laplace: $P = \\dfrac{\\text{günstige Ergebnisse}}{\\text{mögliche Ergebnisse}}$',
+        '$P = \\dfrac{3}{6} = \\dfrac{1}{2}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Wahrscheinlichkeit, eine Augenzahl größer als 4 zu würfeln?',
+      opts: ['$\\dfrac{1}{3}$', '$\\dfrac{1}{6}$', '$\\dfrac{1}{2}$', '$\\dfrac{2}{3}$'],
+      steps: [
+        'Günstig sind 5 und 6, also 2 von 6 Ergebnissen.',
+        '$P = \\dfrac{2}{6} = \\dfrac{1}{3}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei 50 Würfen fiel 9-mal eine Sechs. Wie groß ist die relative Häufigkeit der Sechs?',
+      opts: ['9', '0,09', '0,18', '0,5'],
+      steps: [
+        'Relative Häufigkeit $= \\dfrac{\\text{absolute Häufigkeit}}{\\text{Anzahl der Versuche}}$',
+        '$\\dfrac{9}{50} = 0{,}18$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was besagt das Gesetz der großen Zahlen?',
+      opts: ['Große Zahlen werden öfter gewürfelt.', 'Nach vielen Würfen ohne Sechs kommt die Sechs bald.', 'Bei sehr vielen Versuchen liegt die relative Häufigkeit meist nahe bei der Wahrscheinlichkeit.', 'Bei vielen Versuchen tritt jedes Ergebnis gleich oft auf.'],
+      steps: [
+        'Die relative Häufigkeit schwankt bei wenigen Versuchen stark.',
+        'Bei vielen Versuchen stabilisiert sie sich in der Nähe der Wahrscheinlichkeit; genau gleich oft muss nichts auftreten.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie kann man einen Münzwurf mit Zufallszahlen simulieren?',
+      opts: ['Zufallszahlen 0 oder 1 erzeugen: 0 steht für Kopf, 1 für Zahl.', 'Nur gerade Zufallszahlen verwenden.', 'Zufallszahlen von 1 bis 6 erzeugen: 1 steht für Kopf, sonst Zahl.', 'Immer abwechselnd Kopf und Zahl aufschreiben.'],
+      steps: [
+        'Beide Ergebnisse müssen dieselbe Wahrscheinlichkeit $\\dfrac{1}{2}$ haben.',
+        'Bei 1 bis 6 hätte Kopf nur $\\dfrac{1}{6}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Taschenrechner liefert mit RanInt(1, 6) ganze Zufallszahlen. Was wird damit simuliert?',
+      opts: ['eine Ziehung aus 1 bis 49', 'ein Würfelwurf', 'ein Glücksrad mit zwei Feldern', 'ein Münzwurf'],
+      steps: [
+        'Die Zahlen 1 bis 6 erscheinen mit gleicher Wahrscheinlichkeit.',
+        'Das entspricht einem fairen Würfel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Monte-Carlo-Methode: In ein Quadrat mit Seitenlänge 1 werden 1000 Zufallspunkte gesetzt, 784 liegen im Viertelkreis mit Radius 1. Welcher Näherungswert für $\\pi$ ergibt sich?',
+      opts: ['3,142', '3,136', '7,84', '0,784'],
+      steps: [
+        'Anteil im Viertelkreis $\\approx \\dfrac{\\pi}{4}$, denn Viertelkreis $\\dfrac{\\pi}{4}$, Quadrat 1.',
+        '$\\dfrac{\\pi}{4} \\approx 0{,}784$, also $\\pi \\approx 4 \\cdot 0{,}784 = 3{,}136$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum simuliert man Zufallsversuche, zum Beispiel beim Sammeln von Sammelbildern?',
+      opts: ['Weil die Simulation immer das genaue Ergebnis liefert.', 'Weil die Rechnung schwierig sein kann und man viele Versuche schnell durchführen kann.', 'Weil man dabei keine Zufallszahlen braucht.', 'Weil echte Zufallsversuche verboten sind.'],
+      steps: [
+        'Eine Simulation ersetzt den echten Versuch durch Zufallszahlen.',
+        'Mit vielen Durchläufen erhält man gute Schätzwerte, aber keine exakten Werte.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Würfel wird 600-mal geworfen. Wie oft erwartet man ungefähr eine Sechs?',
+      opts: ['etwa 300-mal', 'etwa 60-mal', 'etwa 100-mal', 'genau 100-mal'],
+      steps: [
+        '$600 \\cdot \\dfrac{1}{6} = 100$',
+        'Das ist ein Erwartungswert; genau 100-mal muss es nicht sein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Glücksrad hat ein Gewinnfeld mit $90^\\circ$. Wie groß ist die Gewinnwahrscheinlichkeit?',
+      opts: ['$\\dfrac{1}{2}$', '$\\dfrac{1}{90}$', '$\\dfrac{1}{9}$', '$\\dfrac{1}{4}$'],
+      steps: [
+        'Der Anteil am Vollkreis bestimmt die Wahrscheinlichkeit.',
+        '$\\dfrac{90^\\circ}{360^\\circ} = \\dfrac{1}{4}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einer Urne liegen 3 rote und 5 blaue Kugeln. Wie groß ist die Wahrscheinlichkeit, eine rote zu ziehen?',
+      opts: ['$\\dfrac{3}{5}$', '$\\dfrac{1}{3}$', '$\\dfrac{3}{8}$', '$\\dfrac{5}{8}$'],
+      steps: [
+        'Insgesamt 8 Kugeln, davon 3 rot.',
+        '$P = \\dfrac{3}{8}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Wahrscheinlichkeit, beim Würfeln keine Sechs zu werfen?',
+      opts: ['$\\dfrac{5}{6}$', '$\\dfrac{1}{6}$', '$\\dfrac{1}{5}$', '0'],
+      steps: [
+        'Gegenereignis zu „Sechs“: $P = 1 - \\dfrac{1}{6}$',
+        '$P = \\dfrac{5}{6}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Würfel werden geworfen. Wie groß ist die Wahrscheinlichkeit für die Augensumme 7?',
+      opts: ['$\\dfrac{1}{11}$', '$\\dfrac{1}{12}$', '$\\dfrac{7}{36}$', '$\\dfrac{1}{6}$'],
+      steps: [
+        'Es gibt $6 \\cdot 6 = 36$ gleich wahrscheinliche Paare.',
+        'Summe 7: (1|6), (2|5), (3|4), (4|3), (5|2), (6|1), also 6 Paare.',
+        '$P = \\dfrac{6}{36} = \\dfrac{1}{6}$; $\\dfrac{1}{11}$ wäre falsch, weil die 11 Summen nicht gleich wahrscheinlich sind.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Reißzwecke wurde 1000-mal geworfen und landete 620-mal mit der Spitze nach oben. Wie schätzt man die Wahrscheinlichkeit dafür?',
+      opts: ['genau 0,5', 'etwa 0,38', 'Das lässt sich nicht schätzen.', 'etwa 0,62'],
+      steps: [
+        'Eine Reißzwecke ist kein Laplace-Versuch: Die Lagen sind nicht gleich wahrscheinlich.',
+        'Schätzwert ist die relative Häufigkeit nach vielen Würfen: $\\dfrac{620}{1000} = 0{,}62$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Ereignis hat die Wahrscheinlichkeit 0,3. Wie simulierst du es mit Zufallszahlen von 1 bis 10?',
+      opts: ['Die Zahlen 1, 2 und 3 zählen als Treffer, 4 bis 10 nicht.', 'Die Zahlen 1 bis 7 zählen als Treffer.', 'Nur die Zahl 3 zählt als Treffer.', 'Jede gerade Zahl zählt als Treffer.'],
+      steps: [
+        'Drei von zehn gleich wahrscheinlichen Zahlen ergeben $\\dfrac{3}{10} = 0{,}3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Gruppen simulieren je 20 Würfelwürfe. Gruppe A erhält 4 Sechsen, Gruppe B 7 Sechsen. Was stimmt?',
+      opts: ['Der Würfel ist sicher gezinkt.', 'Beides ist möglich, bei wenigen Versuchen schwanken die Ergebnisse.', 'Gruppe A hat falsch gerechnet.', 'Gruppe B hat falsch gerechnet.'],
+      steps: [
+        'Erwartet sind etwa $20 : 6 \\approx 3{,}3$ Sechsen.',
+        'Bei nur 20 Würfen sind 4 oder 7 Sechsen durchaus möglich.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wann heißt ein Zufallsversuch Laplace-Versuch?',
+      opts: ['wenn er mit einem Würfel durchgeführt wird', 'wenn alle Ergebnisse gleich wahrscheinlich sind', 'wenn er genau zwei Ergebnisse hat', 'wenn er sehr oft wiederholt wird'],
+      steps: [
+        'Nur dann gilt $P = \\dfrac{\\text{günstig}}{\\text{möglich}}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Wahrscheinlichkeit, beim Würfeln eine Primzahl zu werfen?',
+      opts: ['$\\dfrac{2}{3}$', '$\\dfrac{1}{3}$', '$\\dfrac{1}{6}$', '$\\dfrac{1}{2}$'],
+      steps: [
+        'Primzahlen bis 6: 2, 3 und 5. Die 1 ist keine Primzahl.',
+        '$P = \\dfrac{3}{6} = \\dfrac{1}{2}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Wahrscheinlichkeit, mit einem normalen Würfel eine 7 zu werfen?',
+      opts: ['0', '$\\dfrac{1}{7}$', '$\\dfrac{1}{6}$', '1'],
+      steps: [
+        'Die 7 ist kein mögliches Ergebnis.',
+        'Ein unmögliches Ereignis hat die Wahrscheinlichkeit 0.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

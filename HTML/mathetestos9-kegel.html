@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Der Kreiskegel — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w14-kegel',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Der Kreiskegel',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 14 (LB 2) · 20 Aufgaben: Netz, Ansichten, Mantellinie s, Mantel π · r · s, Oberfläche, Winkel · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 14 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Values with the calculator key for pi, rounded. Blocks: representation (1, 8-9, 19), slant height (2-4, 17, 20), lateral and total surface (5-6, 10-11, 14, 16, 18), angles and sector (7, 12-13, 15). */
+  questions: [
+    {
+      q: 'Woraus besteht das Netz eines Kreiskegels?',
+      opts: ['aus einem Kreisring', 'aus einem Kreis und einem Dreieck', 'aus einem Kreis und einem Kreisausschnitt', 'aus zwei Kreisen und einem Rechteck'],
+      steps: [
+        'Die Grundfläche ist ein Kreis.',
+        'Der abgewickelte Mantel ist ein Kreisausschnitt mit dem Radius $s$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Kegel hat $r = 3$ cm und $h = 4$ cm. Wie lang ist die Mantellinie $s$?',
+      opts: ['25 cm', '5 cm', '2,65 cm', '7 cm'],
+      steps: [
+        'Radius, Höhe und Mantellinie bilden ein rechtwinkliges Dreieck.',
+        '$s = \\sqrt{9 + 16} = 5$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kegel hat $r = 6$ cm und $h = 8$ cm. Wie lang ist $s$?',
+      opts: ['10 cm', '14 cm', '5,3 cm', '100 cm'],
+      steps: [
+        '$s = \\sqrt{36 + 64} = 10$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kegel hat $s = 13$ cm und $r = 5$ cm. Wie hoch ist er?',
+      opts: ['12 cm', '8 cm', '13,9 cm', '18 cm'],
+      steps: [
+        '$h = \\sqrt{169 - 25} = \\sqrt{144} = 12$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kegel hat $r = 3$ cm und $s = 5$ cm. Wie groß ist sein Mantel (gerundet)?',
+      opts: ['94,25 cm²', '28,27 cm²', '47,12 cm²', '15 cm²'],
+      steps: [
+        '$A_M = \\pi \\cdot r \\cdot s = 15\\pi$',
+        '$A_M \\approx 47{,}12$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Oberfläche dieses Kegels ($r = 3$ cm, $s = 5$ cm, gerundet)?',
+      opts: ['56,55 cm²', '75,40 cm²', '47,12 cm²', '103,67 cm²'],
+      steps: [
+        '$O = \\pi r^2 + \\pi r s = 9\\pi + 15\\pi = 24\\pi$',
+        '$O \\approx 75{,}40$ cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Mantel dieses Kegels ($r = 3$ cm, $s = 5$ cm) wird abgewickelt. Wie groß ist der Mittelpunktswinkel des Kreisausschnitts?',
+      opts: ['$300^\\circ$', '$180^\\circ$', '$216^\\circ$', '$108^\\circ$'],
+      steps: [
+        'Der Bogen des Ausschnitts ist so lang wie der Grundkreis: $2\\pi \\cdot 3$.',
+        'Anteil am Vollkreis mit Radius 5: $\\dfrac{3}{5}$, also $\\dfrac{3}{5} \\cdot 360^\\circ = 216^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie erscheint der Grundkreis eines stehenden Kegels in der Schrägbildskizze?',
+      opts: ['als Rechteck', 'als Kreis', 'als Dreieck', 'als Ellipse'],
+      steps: [
+        'Man sieht den Kreis schräg von oben, er wird gestaucht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie sehen Aufriss und Grundriss eines stehenden Kegels aus?',
+      opts: ['Aufriss: gleichschenkliges Dreieck, Grundriss: Kreis mit Mittelpunkt', 'beide: Kreis', 'Aufriss: Rechteck, Grundriss: Kreis', 'Aufriss: Kreis, Grundriss: Dreieck'],
+      steps: [
+        'Von vorn sieht man den Durchmesser als Grundseite und die Spitze darüber.',
+        'Von oben sieht man den Grundkreis, die Spitze als Punkt in der Mitte.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Eiswaffel ist ein Kegel mit $r = 2{,}5$ cm und $s = 12$ cm. Wie viel Waffel braucht man für den Mantel (gerundet)?',
+      opts: ['30 cm²', '188,50 cm²', '113,10 cm²', '94,25 cm²'],
+      steps: [
+        '$A_M = \\pi \\cdot 2{,}5 \\cdot 12 = 30\\pi \\approx 94{,}25$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Partyhut ist ein Kegel mit $r = 8$ cm und $h = 15$ cm. Wie viel Pappe braucht man für den Mantel (gerundet)?',
+      opts: ['628,32 cm²', '201,06 cm²', '376,99 cm²', '427,26 cm²'],
+      steps: [
+        '$s = \\sqrt{64 + 225} = 17$ cm',
+        '$A_M = \\pi \\cdot 8 \\cdot 17 = 136\\pi \\approx 427{,}26$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kegel hat $r = 5$ cm und $h = 12$ cm. Wie groß ist der Öffnungswinkel an der Spitze (gerundet)?',
+      opts: ['$134{,}76^\\circ$', '$67{,}38^\\circ$', '$45{,}24^\\circ$', '$22{,}62^\\circ$'],
+      steps: [
+        'Halber Öffnungswinkel: $\\tan \\dfrac{\\omega}{2} = \\dfrac{5}{12}$, also $\\dfrac{\\omega}{2} \\approx 22{,}62^\\circ$.',
+        '$\\omega \\approx 45{,}24^\\circ$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Unter welchem Winkel ist die Mantellinie dieses Kegels ($r = 5$ cm, $h = 12$ cm) gegen die Grundfläche geneigt (gerundet)?',
+      opts: ['$67{,}38^\\circ$', '$45{,}24^\\circ$', '$22{,}62^\\circ$', '$73{,}74^\\circ$'],
+      steps: [
+        '$\\tan \\alpha = \\dfrac{h}{r} = \\dfrac{12}{5}$',
+        '$\\alpha \\approx 67{,}38^\\circ$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Zirkuszelt hat ein Kegeldach mit 10 m Radius und 6 m Höhe. Wie viel Zeltstoff braucht das Dach (gerundet)?',
+      opts: ['314,2 m²', '366,4 m²', '188,5 m²', '680,6 m²'],
+      steps: [
+        '$s = \\sqrt{100 + 36} = \\sqrt{136} \\approx 11{,}66$ m',
+        '$A_M = \\pi \\cdot 10 \\cdot 11{,}66 \\approx 366{,}4$ m²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus einem Halbkreis mit 10 cm Radius wird ein Kegelmantel gebogen. Welchen Radius hat der Grundkreis?',
+      opts: ['10 cm', '2,5 cm', '3,14 cm', '5 cm'],
+      steps: [
+        'Der Halbkreisbogen ist $\\dfrac{1}{2} \\cdot 2\\pi \\cdot 10 = 10\\pi$ lang.',
+        'Er wird zum Grundkreis: $2\\pi r = 10\\pi$, also $r = 5$ cm; die Mantellinie ist 10 cm.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum gilt für den Kegelmantel $A_M = \\pi \\cdot r \\cdot s$?',
+      opts: ['Weil $\\pi \\cdot r^2$ die Grundfläche ist.', 'Er ist ein Dreieck mit Grundseite $r$ und Höhe $s$.', 'Er ist ein Kreisausschnitt mit Radius $s$, dessen Bogen $2\\pi r$ lang ist.', 'Er ist ein Rechteck mit den Seiten $r$ und $s$.'],
+      steps: [
+        'Ein Ausschnitt hat denselben Anteil an Fläche wie an Bogen: $\\dfrac{2\\pi r}{2\\pi s}$.',
+        '$A_M = \\dfrac{r}{s} \\cdot \\pi s^2 = \\pi r s$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Lampenschirm ist ein Kegel mit 10 cm Durchmesser und 13 cm Mantellinie. Wie hoch ist er?',
+      opts: ['12 cm', '16,4 cm', '8,3 cm', '3 cm'],
+      steps: [
+        '$r = 5$ cm',
+        '$h = \\sqrt{169 - 25} = 12$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kegel hat 12 cm Durchmesser und 8 cm Höhe. Wie groß ist sein Mantel (gerundet)?',
+      opts: ['377,0 cm²', '150,80 cm²', '301,59 cm²', '188,50 cm²'],
+      steps: [
+        '$r = 6$ cm, $s = \\sqrt{36 + 64} = 10$ cm',
+        '$A_M = 60\\pi \\approx 188{,}50$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Eigenschaft hat ein Kreiskegel nicht?',
+      opts: ['eine Spitze', 'zwei gleich große Grundflächen', 'eine kreisförmige Grundfläche', 'einen gekrümmten Mantel'],
+      steps: [
+        'Zwei Grundflächen hat der Zylinder.',
+        'Der Kegel hat eine Grundfläche und eine Spitze.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Verkehrshütchen hat 15 cm Radius und ist 50 cm hoch. Wie lang ist seine Mantellinie (gerundet)?',
+      opts: ['65 cm', '52,2 cm', '35 cm', '47,7 cm'],
+      steps: [
+        '$s = \\sqrt{225 + 2500} = \\sqrt{2725} \\approx 52{,}2$ cm'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Goldener Schnitt: Teilungsverhältnis — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w30-goldener-schnitt',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Goldener Schnitt: Teilungsverhältnis',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 30 (WB 1) · 20 Aufgaben: Major und Minor, die Gleichung x² + x − 1 = 0, die Zahl Φ, Konstruktion mit Zirkel und Lineal · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 30 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Phi = (1 + sqrt 5)/2 = 1.618..., values rounded. Blocks: definition (1, 19), the number phi (2, 8-9, 16), dividing segments (3-4, 10-12, 20), the quadratic equation (5-7), Fibonacci (13-15), construction after Euclid (17-18). */
+  questions: [
+    {
+      q: 'Eine Strecke ist im Goldenen Schnitt geteilt, wenn …',
+      opts: ['… der kleinere Teil ein Drittel der Strecke ist.', '… der größere Teil doppelt so lang ist wie der kleinere.', '… sich die ganze Strecke zum größeren Teil verhält wie der größere zum kleineren Teil.', '… beide Teile gleich lang sind.'],
+      steps: [
+        'Mit dem größeren Teil $M$ (Major) und dem kleineren $m$ (Minor): $\\dfrac{M + m}{M} = \\dfrac{M}{m}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Goldene Zahl $\\Phi$ ungefähr?',
+      opts: ['1,414', '1,618', '3,142', '0,5'],
+      steps: [
+        '$\\Phi = \\dfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$',
+        '1,414 ist $\\sqrt{2}$, das Seitenverhältnis von DIN-Papier.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine 10 cm lange Strecke wird im Goldenen Schnitt geteilt. Wie lang ist der größere Teil (gerundet)?',
+      opts: ['6,18 cm', '5 cm', '16,18 cm', '3,82 cm'],
+      steps: [
+        'Major $= \\dfrac{10}{\\Phi} \\approx 10 \\cdot 0{,}618 = 6{,}18$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lang ist dann der kleinere Teil (gerundet)?',
+      opts: ['4 cm', '3,82 cm', '6,18 cm', '2,36 cm'],
+      steps: [
+        '$10 - 6{,}18 = 3{,}82$ cm',
+        'Probe: $6{,}18 : 3{,}82 \\approx 1{,}618$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Strecke der Länge 1 wird im Goldenen Schnitt geteilt, der größere Teil heißt $x$. Welche Gleichung gilt?',
+      opts: ['$x^2 + x - 1 = 0$', '$x^2 = 1$', '$x^2 - x - 1 = 0$', '$2x - 1 = 0$'],
+      steps: [
+        '$\\dfrac{1}{x} = \\dfrac{x}{1 - x}$',
+        'Über Kreuz multiplizieren: $1 - x = x^2$, also $x^2 + x - 1 = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $x^2 + x - 1 = 0$. Welche Lösung ist die Länge des größeren Teils (gerundet)?',
+      opts: ['$x \\approx 1{,}618$', '$x \\approx -1{,}618$', '$x = 0{,}5$', '$x \\approx 0{,}618$'],
+      steps: [
+        '$x = -0{,}5 \\pm \\sqrt{0{,}25 + 1} = -0{,}5 \\pm \\sqrt{1{,}25}$',
+        '$x \\approx 0{,}618$ oder $x \\approx -1{,}618$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum gehört die Lösung $x \\approx -1{,}618$ nicht zur geteilten Strecke?',
+      opts: ['Eine Länge kann nicht negativ sein.', 'Weil sie keine Lösung der Gleichung ist.', 'Weil sie größer als 1 ist.', 'Weil man nur ganze Zahlen nimmt.'],
+      steps: [
+        'Beide Zahlen erfüllen die Gleichung.',
+        'Im Sachzusammenhang ist aber nur eine positive Länge sinnvoll.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Beziehung gilt für $\\Phi \\approx 1{,}618$?',
+      opts: ['$\\dfrac{1}{\\Phi} = \\Phi$', '$\\dfrac{1}{\\Phi} = 2\\Phi$', '$\\dfrac{1}{\\Phi} = \\Phi + 1$', '$\\dfrac{1}{\\Phi} = \\Phi - 1$'],
+      steps: [
+        '$\\dfrac{1}{1{,}618} \\approx 0{,}618 = 1{,}618 - 1$',
+        'Das folgt aus $\\Phi^2 = \\Phi + 1$ nach Division durch $\\Phi$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist $\\Phi^2$ ungefähr?',
+      opts: ['2,236', '2,618', '1,272', '3,236'],
+      steps: [
+        '$\\Phi^2 = \\Phi + 1 \\approx 2{,}618$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine 1 m lange Leiste soll im Goldenen Schnitt markiert werden. Wo liegt die Marke vom einen Ende aus (größerer Teil, gerundet)?',
+      opts: ['bei 66,7 cm', 'bei 38,2 cm', 'bei 50 cm', 'bei 61,8 cm'],
+      steps: [
+        '$100 \\cdot 0{,}618 = 61{,}8$ cm',
+        'Vom anderen Ende aus gemessen liegt sie bei 38,2 cm.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der größere Teil einer im Goldenen Schnitt geteilten Strecke ist 8 cm. Wie lang ist die ganze Strecke (gerundet)?',
+      opts: ['16 cm', '4,94 cm', '12,94 cm', '13 cm'],
+      steps: [
+        'Ganze : Major $= \\Phi$',
+        '$8 \\cdot 1{,}618 \\approx 12{,}94$ cm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der kleinere Teil ist 5 cm lang. Wie lang ist der größere Teil (gerundet)?',
+      opts: ['3,09 cm', '7,5 cm', '8,09 cm', '10 cm'],
+      steps: [
+        'Major : Minor $= \\Phi$',
+        '$5 \\cdot 1{,}618 \\approx 8{,}09$ cm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Teilt man zwei aufeinanderfolgende Fibonacci-Zahlen, z. B. 21 : 13, durcheinander, erhält man ungefähr …',
+      opts: ['2', '1,615, nahe bei $\\Phi$', '3,142', '1,5'],
+      steps: [
+        '$21 : 13 \\approx 1{,}6154$',
+        'Je größer die Zahlen, desto näher liegt der Quotient bei $\\Phi$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Fibonacci-Folge beginnt mit 1, 1, 2, 3, 5, 8, 13, 21, 34, 55. Welche Zahl kommt als Nächstes?',
+      opts: ['76', '68', '110', '89'],
+      steps: [
+        'Jede Zahl ist die Summe der beiden vorigen: $34 + 55 = 89$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist $89 : 55$ auf drei Nachkommastellen?',
+      opts: ['1,600', '1,625', '1,618', '0,618'],
+      steps: [
+        '$89 : 55 = 1{,}61818\\ldots$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Term gibt $\\Phi$ genau an?',
+      opts: ['$\\dfrac{1 + \\sqrt{5}}{2}$', '$\\dfrac{1 + \\sqrt{2}}{2}$', '$\\sqrt{5} - 1$', '$\\dfrac{\\sqrt{5}}{2}$'],
+      steps: [
+        'Aus $\\Phi^2 - \\Phi - 1 = 0$ mit der Lösungsformel: $\\Phi = 0{,}5 + \\sqrt{0{,}25 + 1} = \\dfrac{1 + \\sqrt{5}}{2}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Konstruktion nach Euklid: Über $\\overline{AB}$ wird in $B$ eine Senkrechte errichtet. Wie lang wählt man $\\overline{BC}$?',
+      opts: ['so lang wie $\\overline{AB}$', 'doppelt so lang wie $\\overline{AB}$', 'halb so lang wie $\\overline{AB}$', 'ein Drittel von $\\overline{AB}$'],
+      steps: [
+        'Dann zeichnet man den Kreis um $C$ durch $B$ und den Kreis um $A$ durch den Schnittpunkt mit $\\overline{AC}$.',
+        'Dieser zweite Kreis teilt $\\overline{AB}$ im Goldenen Schnitt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bei dieser Konstruktion ist $\\overline{AB} = 10$ cm und $\\overline{BC} = 5$ cm. Wie lang ist $\\overline{AC}$, und wie lang wird der größere Teil (gerundet)?',
+      opts: ['$\\overline{AC} \\approx 11{,}18$ cm, größerer Teil $\\approx 6{,}18$ cm', '$\\overline{AC} = 5$ cm, größerer Teil 5 cm', '$\\overline{AC} = 15$ cm, größerer Teil 10 cm', '$\\overline{AC} \\approx 11{,}18$ cm, größerer Teil $\\approx 5{,}59$ cm'],
+      steps: [
+        'Pythagoras: $\\overline{AC} = \\sqrt{100 + 25} = \\sqrt{125} \\approx 11{,}18$ cm',
+        'Davon wird $\\overline{BC} = 5$ cm abgezogen: $11{,}18 - 5 = 6{,}18$ cm.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie nannte Euklid die Teilung, die wir heute Goldenen Schnitt nennen?',
+      opts: ['göttliche Zahl', 'Teilung im äußeren und mittleren Verhältnis', 'Teilung in der Mitte', 'Drittelung'],
+      steps: [
+        'Quelle: Euklid, Elemente, Buch VI.',
+        'Der Name „Goldener Schnitt“ ist erst im 19. Jahrhundert üblich geworden.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Rechteck hat die kurze Seite 10 cm und ist ein Goldenes Rechteck. Wie lang ist die lange Seite (gerundet)?',
+      opts: ['15 cm', '6,18 cm', '20 cm', '16,18 cm'],
+      steps: [
+        'lang : kurz $= \\Phi$',
+        '$10 \\cdot 1{,}618 \\approx 16{,}18$ cm'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

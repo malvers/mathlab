@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Kreis und Gerade, Kreisornamente — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w16-kreis-gerade',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Kreis und Gerade, Kreisornamente',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 16 (LB 3) · 20 Aufgaben: Radius, Sehne, Sekante, Tangente, Passante, Rosetten und Mandalas · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 16 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: terms at the circle (1-5, 16-17), distance and position of a line (6-8, 20), tangents (9-11, 18), ornaments and angles (12-15, 19). */
+  questions: [
+    {
+      q: 'Ein Kreis hat den Radius 4,5 cm. Wie groß ist sein Durchmesser?',
+      opts: ['4,5 cm', '9 cm', '14,1 cm', '2,25 cm'],
+      steps: [
+        'Der Durchmesser ist doppelt so lang wie der Radius.',
+        '$d = 2 \\cdot 4{,}5 = 9$, also 9 cm.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie heißt eine Strecke, die zwei Punkte eines Kreises verbindet?',
+      opts: ['Tangente', 'Passante', 'Sehne', 'Radius'],
+      steps: [
+        'Eine Sehne verbindet zwei Kreispunkte.',
+        'Die längste Sehne ist der Durchmesser.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie heißt eine Gerade, die einen Kreis in zwei Punkten schneidet?',
+      opts: ['Sehne', 'Tangente', 'Passante', 'Sekante'],
+      steps: [
+        'Lateinisch secare heißt schneiden.',
+        'Das Stück der Sekante innerhalb des Kreises ist eine Sehne.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie heißt eine Gerade, die mit einem Kreis genau einen Punkt gemeinsam hat?',
+      opts: ['Durchmesser', 'Sekante', 'Passante', 'Tangente'],
+      steps: [
+        'Lateinisch tangere heißt berühren.',
+        'Der gemeinsame Punkt heißt Berührungspunkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie heißt eine Gerade, die einen Kreis gar nicht trifft?',
+      opts: ['Passante', 'Tangente', 'Sekante', 'Sehne'],
+      steps: [
+        'Die Passante „geht vorbei“.',
+        'Ihr Abstand vom Mittelpunkt ist größer als der Radius.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kreis hat den Radius 5 cm. Eine Gerade hat vom Mittelpunkt den Abstand 3 cm. Was ist die Gerade?',
+      opts: ['eine Passante', 'ein Durchmesser', 'eine Sekante', 'eine Tangente'],
+      steps: [
+        'Abstand kleiner als der Radius: Die Gerade läuft durch das Kreisinnere.',
+        'Sie schneidet den Kreis in zwei Punkten.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Kreis hat den Radius 5 cm. Eine Gerade hat vom Mittelpunkt den Abstand 5 cm. Was ist die Gerade?',
+      opts: ['eine Sehne', 'eine Sekante', 'eine Passante', 'eine Tangente'],
+      steps: [
+        'Abstand gleich dem Radius: Die Gerade berührt den Kreis in genau einem Punkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kreis hat den Radius 5 cm. Eine Gerade hat vom Mittelpunkt den Abstand 7 cm. Wie viele gemeinsame Punkte gibt es?',
+      opts: ['keinen', 'einen', 'unendlich viele', 'zwei'],
+      steps: [
+        'Abstand größer als der Radius: Die Gerade verläuft ganz außerhalb.',
+        'Sie ist eine Passante.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Winkel bilden eine Tangente und der Radius zum Berührungspunkt?',
+      opts: ['$180^\\circ$', '$90^\\circ$', '$60^\\circ$', '$45^\\circ$'],
+      steps: [
+        'Die Tangente steht senkrecht auf dem Berührungsradius.',
+        'So konstruiert man sie auch: Senkrechte zum Radius im Kreispunkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Tangenten kann man von einem Punkt außerhalb eines Kreises an den Kreis legen?',
+      opts: ['2', 'unendlich viele', '1', '0'],
+      steps: [
+        'Von außen kann man den Kreis links und rechts berühren.',
+        'Es gibt genau zwei Tangenten; ihre Berührungspunkte findet man mit dem Thaleskreis.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Tangenten an einen Kreis sind parallel zu einer vorgegebenen Geraden?',
+      opts: ['1', '2', 'keine', '4'],
+      steps: [
+        'Die beiden Tangenten berühren den Kreis an gegenüberliegenden Enden eines Durchmessers.',
+        'Dieser Durchmesser steht senkrecht auf der vorgegebenen Richtung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Du trägst den Radius mit dem Zirkel immer wieder auf dem Kreis ab. Wie oft passt er genau herum?',
+      opts: ['2-mal', '3-mal', '6-mal', 'etwa 6,28-mal'],
+      steps: [
+        'Mittelpunkt und zwei benachbarte Punkte bilden ein gleichseitiges Dreieck mit Winkel $60^\\circ$ am Mittelpunkt.',
+        '$360^\\circ : 60^\\circ = 6$, so entsteht die sechsblättrige Rosette.',
+        '6,28 wäre der Umfang geteilt durch den Radius, gemessen entlang des Bogens.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für ein regelmäßiges Achteck teilst du den Kreis in gleiche Mittelpunktswinkel. Wie groß ist einer?',
+      opts: ['$40^\\circ$', '$60^\\circ$', '$45^\\circ$', '$135^\\circ$'],
+      steps: [
+        '$360^\\circ : 8 = 45^\\circ$',
+        '$135^\\circ$ ist der Innenwinkel des Achtecks an einer Ecke.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Mandala besteht aus 12 gleichen Kreisausschnitten. Wie groß ist der Winkel eines Ausschnitts?',
+      opts: ['$36^\\circ$', '$12^\\circ$', '$24^\\circ$', '$30^\\circ$'],
+      steps: [
+        '$360^\\circ : 12 = 30^\\circ$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Papierkreis wird dreimal nacheinander mittig gefaltet. In wie viele gleiche Ausschnitte ist er danach eingeteilt?',
+      opts: ['8', '9', '6', '3'],
+      steps: [
+        'Jedes Falten halbiert: $2 \\cdot 2 \\cdot 2 = 8$.',
+        'Ein Faltschnitt wiederholt sich deshalb 8-mal im Kreis.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Punkt $P$ ist 3 cm vom Mittelpunkt eines Kreises mit Radius 4 cm entfernt. Wo liegt $P$?',
+      opts: ['auf dem Kreis', 'innerhalb des Kreises', 'außerhalb des Kreises', 'Das lässt sich nicht sagen.'],
+      steps: [
+        'Alle Kreispunkte haben den Abstand 4 cm vom Mittelpunkt.',
+        '3 cm ist weniger: $P$ liegt innen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Sehne geht durch den Mittelpunkt des Kreises?',
+      opts: ['jede Sekante', 'der Radius', 'die Tangente', 'der Durchmesser'],
+      steps: [
+        'Eine Sehne durch den Mittelpunkt ist ein Durchmesser.',
+        'Der Radius hat nur einen Endpunkt auf dem Kreis.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie konstruierst du die Tangente in einem Kreispunkt $B$?',
+      opts: ['Senkrechte zum Radius $\\overline{MB}$ durch $B$', 'Gerade durch $M$ und $B$', 'Mittelsenkrechte von $\\overline{MB}$', 'Parallele zum Radius $\\overline{MB}$ durch $B$'],
+      steps: [
+        'Die Tangente steht senkrecht auf dem Berührungsradius.',
+        'Also: Radius $\\overline{MB}$ zeichnen, in $B$ die Senkrechte errichten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Fahrradrad hat 36 gleichmäßig verteilte Speichen. Wie groß ist der Winkel zwischen zwei benachbarten Speichen?',
+      opts: ['$5^\\circ$', '$12^\\circ$', '$10^\\circ$', '$36^\\circ$'],
+      steps: [
+        '$360^\\circ : 36 = 10^\\circ$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Rad steht auf einer ebenen Straße. Was ist die Straße, gesehen als Gerade, für den Radkreis?',
+      opts: ['eine Passante', 'eine Tangente', 'ein Durchmesser', 'eine Sekante'],
+      steps: [
+        'Rad und Straße haben genau einen gemeinsamen Punkt, den Aufstandspunkt.',
+        'Die Speiche zum Aufstandspunkt steht senkrecht auf der Straße.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

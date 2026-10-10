@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Mittelwerte — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w33-mittelwerte',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Mittelwerte',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 33 (LB 4) · 20 Aufgaben: Arithmetisches Mittel, Zentralwert, Modalwert, Häufigkeitstabellen, Ausreißer, gewichtetes Mittel · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 33 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Blocks: the three averages (1-6, 16-17), outliers and choice of average (7-8, 15, 18), frequency table (9-12), sums and weights (13-14, 19-20). */
+  questions: [
+    {
+      q: 'Berechne das arithmetische Mittel von 4, 7, 7, 9 und 13.',
+      opts: ['7', '9', '8', '40'],
+      steps: [
+        'Summe: $4 + 7 + 7 + 9 + 13 = 40$',
+        '$40 : 5 = 8$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist der Zentralwert (Median) von 4, 7, 7, 9, 13?',
+      opts: ['6,5', '7', '8', '9'],
+      steps: [
+        'Die Werte sind schon geordnet.',
+        'Bei 5 Werten steht in der Mitte der 3. Wert: 7.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist der Modalwert von 4, 7, 7, 9, 13?',
+      opts: ['4', '7', 'Es gibt keinen.', '8'],
+      steps: [
+        'Der Modalwert ist der häufigste Wert: 7 kommt zweimal vor.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist der Zentralwert von 3, 5, 8, 10?',
+      opts: ['5', '8', '6,5', '6'],
+      steps: [
+        'Bei einer geraden Anzahl nimmt man den Mittelwert der beiden mittleren Werte.',
+        '$(5 + 8) : 2 = 6{,}5$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Noten einer Gruppe sind 2, 3, 3, 1, 4, 2, 3. Wie groß ist der Notendurchschnitt (gerundet)?',
+      opts: ['2,5', '2,33', '3', '2,57'],
+      steps: [
+        'Summe: $2 + 3 + 3 + 1 + 4 + 2 + 3 = 18$',
+        '$18 : 7 \\approx 2{,}57$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist der Zentralwert dieser Noten (2, 3, 3, 1, 4, 2, 3)?',
+      opts: ['2,5', '2', '3', '2,57'],
+      steps: [
+        'Erst ordnen: 1, 2, 2, 3, 3, 3, 4.',
+        'Der 4. von 7 Werten steht in der Mitte: 3.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Monatsgehälter: 2000 €, 2200 €, 2300 €, 2500 €, 15 000 €. Welcher Mittelwert beschreibt die typischen Gehälter besser?',
+      opts: ['das arithmetische Mittel 4800 €', 'der Modalwert 15 000 €', 'der Zentralwert 2300 €', 'das Maximum'],
+      steps: [
+        'Mittel: $24\\,000 : 5 = 4800$ €, durch den Ausreißer stark erhöht.',
+        'Der Zentralwert 2300 € liegt bei den meisten Werten.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Mittelwert verändert sich stark, wenn ein extrem großer Wert hinzukommt?',
+      opts: ['das arithmetische Mittel', 'der Zentralwert', 'keiner', 'der Modalwert'],
+      steps: [
+        'Im arithmetischen Mittel geht jeder Wert mit seiner Größe ein.',
+        'Der Zentralwert verschiebt sich höchstens um eine Position.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Klassenarbeit: Note 1 dreimal, Note 2 fünfmal, Note 3 achtmal, Note 4 dreimal, Note 5 einmal. Wie groß ist der Durchschnitt?',
+      opts: ['3', '4', '2,7', '2,5'],
+      steps: [
+        'Summe: $1 \\cdot 3 + 2 \\cdot 5 + 3 \\cdot 8 + 4 \\cdot 3 + 5 \\cdot 1 = 54$',
+        'Anzahl: 20, Durchschnitt $54 : 20 = 2{,}7$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist der Zentralwert dieser Klassenarbeit (20 Noten)?',
+      opts: ['2,7', '2', '2,5', '3'],
+      steps: [
+        'Gesucht sind der 10. und 11. Wert der geordneten Liste.',
+        'Platz 1 bis 3: Note 1, Platz 4 bis 8: Note 2, Platz 9 bis 16: Note 3. Beide mittleren Werte sind 3.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist der Modalwert dieser Klassenarbeit?',
+      opts: ['3', '2', '1', '8'],
+      steps: [
+        'Die Note 3 kommt am häufigsten vor (8-mal).',
+        '8 ist die Häufigkeit, nicht der Wert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche relative Häufigkeit hat die Note 2 in dieser Klassenarbeit?',
+      opts: ['5 %', '40 %', '20 %', '25 %'],
+      steps: [
+        '$\\dfrac{5}{20} = 0{,}25 = 25$ %'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Fünf Werte haben das arithmetische Mittel 12. Wie groß ist ihre Summe?',
+      opts: ['60', '2,4', '12', '17'],
+      steps: [
+        'Mittel $= \\dfrac{\\text{Summe}}{\\text{Anzahl}}$, also Summe $= 12 \\cdot 5 = 60$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Vier Tests ergaben den Durchschnitt 2,5. Welche Note braucht man im fünften Test für den Durchschnitt 2,4?',
+      opts: ['2,4', '2', '1', '3'],
+      steps: [
+        'Bisherige Summe: $4 \\cdot 2{,}5 = 10$',
+        'Nötige Summe: $5 \\cdot 2{,}4 = 12$, also fehlt eine 2.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei einer Umfrage nach der Lieblingsfarbe: Welcher Mittelwert ist sinnvoll?',
+      opts: ['alle drei', 'nur der Modalwert', 'das arithmetische Mittel', 'der Zentralwert'],
+      steps: [
+        'Farben kann man weder addieren noch der Größe nach ordnen.',
+        'Man kann nur sagen, welche Farbe am häufigsten genannt wurde.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Tiefsttemperaturen einer Woche waren −3 °C, 1 °C, 4 °C, −2 °C und 5 °C. Wie groß ist das Mittel?',
+      opts: ['−1 °C', '3 °C', '1,8 °C', '1 °C'],
+      steps: [
+        'Summe: $-3 + 1 + 4 - 2 + 5 = 5$',
+        '$5 : 5 = 1$ °C'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist der Zentralwert von 12, 15, 9, 20, 11?',
+      opts: ['12', '15', '9', '13,4'],
+      steps: [
+        'Ordnen: 9, 11, 12, 15, 20.',
+        'Der mittlere Wert ist 12.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wann stimmen arithmetisches Mittel und Zentralwert überein?',
+      opts: ['immer', 'nie', 'nur bei genau zwei Werten', 'z. B. wenn die Werte symmetrisch um die Mitte verteilt sind'],
+      steps: [
+        'Beispiel: 2, 4, 6, 8, 10 hat Mittel 6 und Zentralwert 6.',
+        'Ausreißer auf einer Seite ziehen das Mittel vom Zentralwert weg.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Klasse A (20 Personen) hat den Notendurchschnitt 2,4, Klasse B (30 Personen) 2,9. Wie groß ist der Durchschnitt aller 50?',
+      opts: ['2,9', '2,7', '2,65', '2,4'],
+      steps: [
+        'Summen: $20 \\cdot 2{,}4 = 48$ und $30 \\cdot 2{,}9 = 87$',
+        '$(48 + 87) : 50 = 135 : 50 = 2{,}7$; 2,65 wäre falsch, weil die Klassen verschieden groß sind.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Klassenarbeiten zählen doppelt, Tests einfach. Klassenarbeiten: 2 und 3, Tests: 1 und 2. Wie groß ist die Gesamtnote (gerundet)?',
+      opts: ['2,17', '2,5', '2,33', '2,0'],
+      steps: [
+        'Summe: $2 \\cdot 2 + 2 \\cdot 3 + 1 + 2 = 13$',
+        'Gewichte: $2 + 2 + 1 + 1 = 6$, also $13 : 6 \\approx 2{,}17$'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

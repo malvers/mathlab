@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Volumen und Masse von Zylindern — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w21-zylinder-volumen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Volumen und Masse von Zylindern',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 21 (LB 3) · 20 Aufgaben: V = π · r² · h, Hohlzylinder, Liter, Masse mit der Dichte, Höhe und Radius berechnen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 21 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Values with the calculator key for pi, rounded at the end. Blocks: volume (1-4, 7, 9, 18), units and capacity (3, 8, 10, 12-15, 20), mass (5, 11, 16, 19), solving for h and r (6, 17). */
+  questions: [
+    {
+      q: 'Ein Zylinder hat den Radius 3 cm und die Höhe 10 cm. Wie groß ist sein Volumen (gerundet)?',
+      opts: ['848,2 cm³', '94,2 cm³', '282,7 cm³', '188,5 cm³'],
+      steps: [
+        '$V = \\pi r^2 \\cdot h = \\pi \\cdot 9 \\cdot 10$',
+        '$V = 90\\pi \\approx 282{,}7$ cm³'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Zylinder hat den Durchmesser 8 cm und die Höhe 15 cm. Wie groß ist sein Volumen (gerundet)?',
+      opts: ['377,0 cm³', '3015,9 cm³', '188,5 cm³', '754,0 cm³'],
+      steps: [
+        'Radius: 4 cm',
+        '$V = \\pi \\cdot 16 \\cdot 15 = 240\\pi \\approx 754{,}0$ cm³',
+        '3015,9 cm³ erhält man, wenn man den Durchmesser quadriert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Fass hat innen 60 cm Durchmesser und ist 90 cm hoch. Wie viele Liter passen hinein (gerundet)?',
+      opts: ['254,5 l', '25,4 l', '169,6 l', '1017,9 l'],
+      steps: [
+        '$V = \\pi \\cdot 30^2 \\cdot 90 = 81\\,000\\pi \\approx 254\\,469$ cm³',
+        '1 l = 1000 cm³, also etwa 254,5 l.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Hohlzylinder hat den Außenradius 5 cm, den Innenradius 4 cm und die Höhe 20 cm. Wie groß ist sein Volumen (gerundet)?',
+      opts: ['1570,8 cm³', '2576,1 cm³', '565,5 cm³', '62,8 cm³'],
+      steps: [
+        'Grundfläche ist ein Kreisring: $\\pi \\cdot (25 - 16) = 9\\pi$',
+        '$V = 9\\pi \\cdot 20 = 180\\pi \\approx 565{,}5$ cm³'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Eisenstange hat 2 cm Durchmesser und ist 1 m lang. Eisen hat die Dichte 7,8 g/cm³. Wie schwer ist die Stange (gerundet)?',
+      opts: ['24,5 kg', '9,80 kg', '2,45 kg', '0,31 kg'],
+      steps: [
+        '$V = \\pi \\cdot 1^2 \\cdot 100 = 100\\pi \\approx 314{,}16$ cm³',
+        '$m = 7{,}8 \\cdot 314{,}16 \\approx 2450$ g',
+        'Also etwa 2,45 kg.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Zylinder mit dem Radius 5 cm soll 1000 cm³ fassen. Wie hoch muss er sein (gerundet)?',
+      opts: ['31,8 cm', '12,7 cm', '40 cm', '6,4 cm'],
+      steps: [
+        '$V = \\pi r^2 h$, also $h = \\dfrac{V}{\\pi r^2}$',
+        '$h = \\dfrac{1000}{25\\pi} \\approx 12{,}7$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei einem Zylinder wird der Radius verdoppelt, die Höhe bleibt gleich. Wie ändert sich das Volumen?',
+      opts: ['Es bleibt gleich.', 'Es wird 4-mal so groß.', 'Es wird doppelt so groß.', 'Es wird 8-mal so groß.'],
+      steps: [
+        'Der Radius steht im Quadrat: $\\pi \\cdot (2r)^2 \\cdot h = 4 \\cdot \\pi r^2 h$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Regentonne hat 70 cm Durchmesser und ist 1 m hoch. Wie viel Wasser fasst sie ungefähr?',
+      opts: ['etwa 220 l', 'etwa 1539 l', 'etwa 38 l', 'etwa 385 l'],
+      steps: [
+        '$V = \\pi \\cdot 35^2 \\cdot 100 \\approx 384\\,845$ cm³',
+        'Das sind etwa 385 Liter.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum gilt für den Zylinder dieselbe Volumenformel wie für das Prisma?',
+      opts: ['Beide haben eckige Grundflächen.', 'Das gilt nicht, der Zylinder hat eine ganz andere Formel.', 'Ein Zylinder ist ein Würfel.', 'Bei beiden ist das Volumen Grundfläche mal Höhe: $V = A_G \\cdot h$.'],
+      steps: [
+        'Man kann sich den Zylinder aus vielen dünnen Kreisscheiben gestapelt denken.',
+        'Also $V = A_G \\cdot h = \\pi r^2 \\cdot h$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein zylinderförmiges Glas hat innen 3,5 cm Radius und ist 10 cm hoch. Passt eine Flasche mit 0,33 l hinein?',
+      opts: ['Ja, das Glas fasst etwa 1,1 l.', 'Nein, das Glas fasst nur etwa 110 ml.', 'Nein, das Glas fasst nur etwa 220 ml.', 'Ja, das Glas fasst etwa 385 ml.'],
+      steps: [
+        '$V = \\pi \\cdot 3{,}5^2 \\cdot 10 = 122{,}5\\pi \\approx 384{,}8$ cm³',
+        '1 cm³ = 1 ml, also etwa 385 ml; 0,33 l = 330 ml passen hinein.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kupferrohr ist 2 m lang, außen 2,2 cm und innen 2 cm dick. Kupfer hat die Dichte 8,9 g/cm³. Wie schwer ist das Rohr (gerundet)?',
+      opts: ['1,17 kg', '0,13 kg', '6,77 kg', '5,59 kg'],
+      steps: [
+        'Radien: 1,1 cm und 1 cm. $V = \\pi \\cdot (1{,}21 - 1) \\cdot 200 = 42\\pi \\approx 131{,}9$ cm³',
+        '$m = 8{,}9 \\cdot 131{,}9 \\approx 1174$ g, also etwa 1,17 kg.',
+        '6,77 kg wäre ein volles Kupferrohr mit 2,2 cm Durchmesser.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In ein zylinderförmiges Gefäß mit 6 cm Innenradius wird 1 Liter Wasser gefüllt. Wie hoch steht das Wasser (gerundet)?',
+      opts: ['8,8 cm', '53,1 cm', '27,8 cm', '4,4 cm'],
+      steps: [
+        '1 l = 1000 cm³',
+        '$h = \\dfrac{1000}{\\pi \\cdot 36} \\approx 8{,}8$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Umrechnung ist richtig?',
+      opts: ['1 dm³ = 10 l und 1 m³ = 1000 l', '1 dm³ = 1 l und 1 m³ = 1000 l', '1 cm³ = 1 l und 1 m³ = 100 l', '1 m³ = 100 dm³'],
+      steps: [
+        '1 Liter ist ein Würfel mit 10 cm Kantenlänge: 1 dm³ = 1000 cm³.',
+        '1 m³ = 1000 dm³ = 1000 l'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein runder Pool hat 3,6 m Durchmesser, das Wasser steht 0,9 m hoch. Wie viel Wasser ist darin (gerundet)?',
+      opts: ['9,16 m³', '36,64 m³', '2,92 m³', '10,18 m³'],
+      steps: [
+        '$V = \\pi \\cdot 1{,}8^2 \\cdot 0{,}9 = 2{,}916\\pi$',
+        '$V \\approx 9{,}16$ m³, also etwa 9160 Liter.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Pool aus der vorigen Aufgabe (etwa 9160 l) wird mit einem Gartenschlauch gefüllt, der 15 l pro Minute liefert. Wie lange dauert das ungefähr?',
+      opts: ['etwa 37 Stunden', 'etwa 10,2 Stunden', 'etwa 610 Stunden', 'etwa 1,6 Stunden'],
+      steps: [
+        '$9160 : 15 \\approx 611$ Minuten',
+        '$611 : 60 \\approx 10{,}2$ Stunden'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Baumstamm ist 5 m lang und hat 40 cm Durchmesser. Holz hat hier die Dichte 0,7 t/m³. Wie schwer ist der Stamm ungefähr?',
+      opts: ['etwa 440 kg', 'etwa 63 kg', 'etwa 4,4 t', 'etwa 1760 kg'],
+      steps: [
+        'In Metern: $r = 0{,}2$ m, $V = \\pi \\cdot 0{,}04 \\cdot 5 = 0{,}2\\pi \\approx 0{,}628$ m³',
+        '$m = 0{,}7 \\cdot 0{,}628 \\approx 0{,}44$ t, also etwa 440 kg.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein 10 cm hoher Zylinder soll 500 cm³ fassen. Welchen Radius braucht er (gerundet)?',
+      opts: ['2,5 cm', '4,0 cm', '15,9 cm', '8,0 cm'],
+      steps: [
+        '$r^2 = \\dfrac{V}{\\pi h} = \\dfrac{500}{10\\pi} \\approx 15{,}92$',
+        '$r = \\sqrt{15{,}92} \\approx 4{,}0$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Würfel hat 10 cm Kantenlänge. Ein Zylinder passt genau hinein ($r = 5$ cm, $h = 10$ cm). Wie viel Prozent des Würfelvolumens füllt der Zylinder (gerundet)?',
+      opts: ['50 %', '31,4 %', '87,5 %', '78,5 %'],
+      steps: [
+        'Würfel: 1000 cm³, Zylinder: $\\pi \\cdot 25 \\cdot 10 = 250\\pi \\approx 785{,}4$ cm³',
+        'Anteil: $785{,}4 : 1000 \\approx 78{,}5$ %, das ist $\\dfrac{\\pi}{4}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Messingzylinder hat 2 cm Radius und ist 5 cm hoch. Messing hat die Dichte 8,5 g/cm³. Wie schwer ist er (gerundet)?',
+      opts: ['63 g', '1068 g', '534 g', '267 g'],
+      steps: [
+        '$V = \\pi \\cdot 4 \\cdot 5 = 20\\pi \\approx 62{,}83$ cm³',
+        '$m = 8{,}5 \\cdot 62{,}83 \\approx 534$ g'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Wasserrohr ist 10 m lang und hat innen 2 cm Durchmesser. Wie viel Wasser steht darin (gerundet)?',
+      opts: ['etwa 31,4 l', 'etwa 0,3 l', 'etwa 3,1 l', 'etwa 12,6 l'],
+      steps: [
+        '$r = 1$ cm, $h = 1000$ cm',
+        '$V = \\pi \\cdot 1 \\cdot 1000 \\approx 3142$ cm³, also etwa 3,1 l.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

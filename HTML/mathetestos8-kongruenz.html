@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Kongruenz als Spezialfall der Ähnlichkeit — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w27-kongruenz',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Kongruenz als Spezialfall der Ähnlichkeit',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 27 (LB 4) · 20 Aufgaben: Kongruenzsätze, Kongruenz und Ähnlichkeit, Bewegungen, Übung · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 27 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: congruence and similarity (1, 7, 14-17, 20), congruence theorems (2-6, 18), mappings (8-9), triangles (10-13), similarity practice (19). */
+  questions: [
+    {
+      q: 'Was bedeutet „kongruent“?',
+      opts: ['gleicher Flächeninhalt, beliebige Form', 'gleiche Form, beliebige Größe', 'gleicher Umfang', 'deckungsgleich: gleiche Form und gleiche Größe'],
+      steps: [
+        'Kongruente Figuren kann man genau aufeinanderlegen.',
+        'Sie sind ähnlich mit dem Streckfaktor $k = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Angaben legen ein Dreieck nicht bis auf Kongruenz fest?',
+      opts: ['zwei Seiten und der eingeschlossene Winkel', 'drei Winkel', 'eine Seite und die beiden anliegenden Winkel', 'drei Seiten'],
+      steps: [
+        'Mit drei Winkeln liegt nur die Form fest, nicht die Größe.',
+        'Man erhält ähnliche, aber nicht unbedingt kongruente Dreiecke.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Dreieck soll aus $a = 4$ cm, $b = 5$ cm und $c = 6$ cm konstruiert werden. Welcher Kongruenzsatz sagt, dass es eindeutig ist?',
+      opts: ['SsW', 'SSS', 'SWS', 'WSW'],
+      steps: [
+        'Drei Seiten gegeben: Seite-Seite-Seite.',
+        'Die Dreiecksungleichung ist erfüllt: $4 + 5 > 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben sind $a$, $b$ und der Winkel $\\gamma$ zwischen ihnen. Welcher Kongruenzsatz passt?',
+      opts: ['SWS', 'SsW', 'WSW', 'SSS'],
+      steps: [
+        'Zwei Seiten und der von ihnen eingeschlossene Winkel: Seite-Winkel-Seite.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gegeben sind die Seite $c$ und die beiden Winkel $\\alpha$ und $\\beta$ an ihren Enden. Welcher Kongruenzsatz passt?',
+      opts: ['SSS', 'SWS', 'SsW', 'WSW'],
+      steps: [
+        'Eine Seite und die beiden anliegenden Winkel: Winkel-Seite-Winkel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was verlangt der Kongruenzsatz SsW?',
+      opts: ['drei Seiten', 'zwei Seiten und den Winkel gegenüber der kleineren Seite', 'zwei Seiten und den Winkel, der der größeren Seite gegenüberliegt', 'zwei Seiten und den eingeschlossenen Winkel'],
+      steps: [
+        'Das große S steht für die größere Seite.',
+        'Liegt der Winkel der kleineren Seite gegenüber, kann es zwei verschiedene Dreiecke geben.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Aussage ist richtig?',
+      opts: ['Kongruente Figuren sind immer ähnlich, ähnliche nicht immer kongruent.', 'Kongruenz und Ähnlichkeit bedeuten dasselbe.', 'Kongruente Figuren sind nie ähnlich.', 'Ähnliche Figuren sind immer kongruent.'],
+      steps: [
+        'Kongruenz ist der Spezialfall der Ähnlichkeit mit $k = 1$.',
+        'Ein Dreieck und sein doppelt so großes Bild sind ähnlich, aber nicht kongruent.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Abbildungen erzeugen immer ein kongruentes Bild?',
+      opts: ['jede zentrische Streckung', 'Verschiebung, Drehung und Spiegelung', 'nur die Spiegelung', 'keine Abbildung'],
+      steps: [
+        'Diese Bewegungen ändern weder Längen noch Winkel.',
+        'Deshalb sind Original und Bild deckungsgleich.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei welcher Abbildung entsteht im Allgemeinen kein kongruentes Bild?',
+      opts: ['zentrische Streckung mit $k = 2$', 'Spiegelung an einer Geraden', 'Drehung um $90^\\circ$', 'Verschiebung um 3 cm'],
+      steps: [
+        'Bei $k = 2$ werden alle Strecken doppelt so lang.',
+        'Das Bild ist ähnlich, aber nicht kongruent.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Lässt sich aus den Seiten 3 cm, 4 cm und 8 cm ein Dreieck konstruieren?',
+      opts: ['Ja, aus drei Seiten geht es immer.', 'Nein, weil 8 gerade ist.', 'Ja, es wird rechtwinklig.', 'Nein, denn $3 + 4 < 8$.'],
+      steps: [
+        'Dreiecksungleichung: Zwei Seiten zusammen müssen länger sein als die dritte.',
+        '$3 + 4 = 7$ ist kürzer als 8, die Seiten treffen sich nicht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Dreiecke sind kongruent. Im ersten ist $\\alpha = 50^\\circ$ und $\\beta = 60^\\circ$. Wie groß ist der dritte Winkel im zweiten Dreieck?',
+      opts: ['$60^\\circ$', '$50^\\circ$', '$70^\\circ$', '$110^\\circ$'],
+      steps: [
+        'Kongruente Dreiecke stimmen in allen Winkeln überein.',
+        '$180^\\circ - 50^\\circ - 60^\\circ = 70^\\circ$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Höhe zerlegt ein gleichschenkliges Dreieck in zwei Teildreiecke. Was gilt für sie?',
+      opts: ['Sie sind ähnlich mit $k = 2$.', 'Sie sind kongruent.', 'Sie haben verschiedene Flächeninhalte.', 'Sie sind gleichseitig.'],
+      steps: [
+        'Beide haben die Höhe als gemeinsame Seite, gleich lange Schenkel und einen rechten Winkel.',
+        'Nach SsW sind sie kongruent; das Dreieck ist achsensymmetrisch.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Diagonale teilt ein Parallelogramm in zwei Dreiecke. Was gilt?',
+      opts: ['Die Dreiecke sind rechtwinklig.', 'Die beiden Dreiecke sind nur ähnlich.', 'Ein Dreieck ist doppelt so groß.', 'Die beiden Dreiecke sind kongruent.'],
+      steps: [
+        'Gegenüberliegende Seiten des Parallelogramms sind gleich lang.',
+        'Mit der gemeinsamen Diagonale sind alle drei Seiten gleich: SSS.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Plan hat den Maßstab 1 : 1. Was gilt für Plan und Wirklichkeit?',
+      opts: ['Sie sind kongruent.', 'Sie sind nicht ähnlich.', 'Der Plan ist doppelt so groß.', 'Der Plan ist halb so groß.'],
+      steps: [
+        '1 : 1 heißt $k = 1$: alle Längen stimmen überein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei ähnliche Dreiecke haben ein Paar entsprechender Seiten, die gleich lang sind. Was folgt?',
+      opts: ['Die Dreiecke sind nicht ähnlich.', 'Nichts.', 'Die Dreiecke sind kongruent.', 'Die übrigen Seiten sind doppelt so lang.'],
+      steps: [
+        'Aus $a’ = k \\cdot a$ und $a’ = a$ folgt $k = 1$.',
+        'Ähnlich mit $k = 1$ heißt kongruent.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Dreiecke stimmen in allen drei Winkeln überein. Was kann man sicher sagen?',
+      opts: ['Sie sind kongruent.', 'Sie sind ähnlich.', 'Sie sind gleich groß.', 'Sie sind gleichseitig.'],
+      steps: [
+        'Gleiche Winkel bedeuten gleiche Form.',
+        'Über die Größe sagen Winkel nichts aus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Dreieck 1 hat die Seiten 5 cm, 6 cm, 7 cm, Dreieck 2 die Seiten 10 cm, 12 cm, 14 cm. Was gilt?',
+      opts: ['Sie sind kongruent.', 'Sie haben denselben Flächeninhalt.', 'Sie sind weder ähnlich noch kongruent.', 'Sie sind ähnlich, aber nicht kongruent.'],
+      steps: [
+        'Alle Seiten sind verdoppelt: $k = 2$.',
+        'Ähnlich ja, kongruent nein; der Flächeninhalt ist 4-mal so groß.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Dreieck soll aus $b = 5$ cm, $c = 6$ cm und $\\alpha = 50^\\circ$ konstruiert werden. Womit beginnst du sinnvoll?',
+      opts: ['Den Umkreis zeichnen', 'Den Winkel $\\gamma$ berechnen', 'Seite $c = \\overline{AB}$ zeichnen, in $A$ den Winkel $\\alpha$ antragen', 'Die Höhe $h_c$ zeichnen'],
+      steps: [
+        '$\\alpha$ liegt zwischen $b$ und $c$ (SWS).',
+        '$c$ zeichnen, in $A$ den Winkel antragen, auf dem freien Schenkel $b = 5$ cm abtragen, $C$ mit $B$ verbinden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei ähnliche Figuren haben die Flächeninhalte 18 cm² und 50 cm². Wie groß ist der Streckfaktor von der kleinen zur großen?',
+      opts: ['$k = \\dfrac{5}{3}$', '$k = 32$', '$k = \\dfrac{9}{25}$', '$k = \\dfrac{25}{9}$'],
+      steps: [
+        '$k^2 = \\dfrac{50}{18} = \\dfrac{25}{9}$',
+        '$k = \\dfrac{5}{3}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was gilt immer für zwei kongruente Figuren?',
+      opts: ['Sie sind gleichseitig.', 'Sie liegen an derselben Stelle.', 'Sie haben denselben Flächeninhalt und denselben Umfang.', 'Sie haben verschiedene Flächeninhalte.'],
+      steps: [
+        'Deckungsgleiche Figuren stimmen in allen Längen und Winkeln überein.',
+        'Also auch in Umfang und Flächeninhalt.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

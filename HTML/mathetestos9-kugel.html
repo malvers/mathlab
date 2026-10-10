@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Die Kugel — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w16-kugel',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Die Kugel',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 16 (LB 2) · 20 Aufgaben: O = 4 · π · r², V = 4/3 · π · r³, Kubikwurzel, Halbkugel, Kugeln im Alltag · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 16 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Values with the calculator key for pi, rounded. Blocks: surface (1, 4-5, 9, 17), volume (2-3, 10, 13-14, 19), cube root (6-8), mass (11-12), comparisons (15-16, 18, 20). Problem 15 after Archimedes, On the Sphere and Cylinder. */
+  questions: [
+    {
+      q: 'Wie groß ist die Oberfläche einer Kugel mit $r = 5$ cm (gerundet)?',
+      opts: ['523,60 cm²', '314,16 cm²', '100 cm²', '78,54 cm²'],
+      steps: [
+        '$O = 4\\pi r^2 = 4\\pi \\cdot 25 = 100\\pi$',
+        '$O \\approx 314{,}16$ cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist das Volumen einer Kugel mit $r = 3$ cm (gerundet)?',
+      opts: ['37,70 cm³', '84,82 cm³', '113,10 cm³', '36 cm³'],
+      steps: [
+        '$V = \\dfrac{4}{3}\\pi r^3 = \\dfrac{4}{3}\\pi \\cdot 27 = 36\\pi$',
+        '$V \\approx 113{,}10$ cm³'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Kugel hat 10 cm Durchmesser. Wie groß ist ihr Volumen (gerundet)?',
+      opts: ['4188,79 cm³', '314,16 cm³', '130,90 cm³', '523,60 cm³'],
+      steps: [
+        '$r = 5$ cm',
+        '$V = \\dfrac{4}{3}\\pi \\cdot 125 \\approx 523{,}60$ cm³; mit $d$ statt $r$ käme das Achtfache heraus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Fußball hat etwa 22 cm Durchmesser. Wie groß ist seine Oberfläche (gerundet)?',
+      opts: ['5575,3 cm²', '380,1 cm²', '1520,5 cm²', '6082,1 cm²'],
+      steps: [
+        '$r = 11$ cm',
+        '$O = 4\\pi \\cdot 121 = 484\\pi \\approx 1520{,}5$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Erde hat einen mittleren Radius von etwa 6370 km. Wie groß ist ihre Oberfläche ungefähr?',
+      opts: ['etwa 127 Millionen km²', 'etwa 40 000 km²', 'etwa 1 Billion km²', 'etwa 510 Millionen km²'],
+      steps: [
+        '$O = 4\\pi \\cdot 6370^2 \\approx 509\\,900\\,000$ km²',
+        'Davon sind etwa 71 % Wasser.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Kugel soll das Volumen 1000 cm³ haben. Wie groß ist ihr Radius (gerundet)?',
+      opts: ['6,20 cm', '15,45 cm', '8,92 cm', '238,73 cm'],
+      steps: [
+        '$r^3 = \\dfrac{3V}{4\\pi} = \\dfrac{3000}{4\\pi} \\approx 238{,}73$',
+        '$r = \\sqrt[3]{238{,}73} \\approx 6{,}20$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist $\\sqrt[3]{27}$?',
+      opts: ['3', '13,5', '5,2', '9'],
+      steps: [
+        'Gesucht ist die Zahl, deren dritte Potenz 27 ist.',
+        '$3 \\cdot 3 \\cdot 3 = 27$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist $\\sqrt[3]{125}$?',
+      opts: ['11,2', '41,7', '5', '25'],
+      steps: [
+        '$5^3 = 125$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Kugel hat die Oberfläche $100\\pi$ cm². Wie groß ist ihr Radius?',
+      opts: ['2,5 cm', '25 cm', '10 cm', '5 cm'],
+      steps: [
+        '$4\\pi r^2 = 100\\pi$, also $r^2 = 25$.',
+        '$r = 5$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Radius einer Kugel wird verdoppelt. Wie ändert sich ihr Volumen?',
+      opts: ['Es wird 8-mal so groß.', 'Es wird doppelt so groß.', 'Es wird 6-mal so groß.', 'Es wird 4-mal so groß.'],
+      steps: [
+        '$r$ steht in der dritten Potenz: $(2r)^3 = 8r^3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Glasmurmel hat 1,6 cm Durchmesser, Glas hat die Dichte 2,5 g/cm³. Wie schwer ist sie (gerundet)?',
+      opts: ['2,14 g', '5,36 g', '42,9 g', '10,72 g'],
+      steps: [
+        '$V = \\dfrac{4}{3}\\pi \\cdot 0{,}8^3 \\approx 2{,}145$ cm³',
+        '$m = 2{,}5 \\cdot 2{,}145 \\approx 5{,}36$ g'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Eisenkugel hat 5 cm Radius, Eisen hat die Dichte 7,8 g/cm³. Wie schwer ist sie (gerundet)?',
+      opts: ['2,45 kg', '4,08 kg', '32,7 kg', '0,52 kg'],
+      steps: [
+        '$V = \\dfrac{4}{3}\\pi \\cdot 125 \\approx 523{,}6$ cm³',
+        '$m = 7{,}8 \\cdot 523{,}6 \\approx 4084$ g, also etwa 4,08 kg.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist das Volumen einer Halbkugel mit $r = 6$ cm (gerundet)?',
+      opts: ['150,80 cm³', '226,19 cm³', '904,78 cm³', '452,39 cm³'],
+      steps: [
+        'Halbe Kugel: $\\dfrac{1}{2} \\cdot \\dfrac{4}{3}\\pi \\cdot 216 = 144\\pi$',
+        '$V \\approx 452{,}39$ cm³'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die gesamte Oberfläche einer massiven Halbkugel mit $r = 6$ cm (gerundet)?',
+      opts: ['113,10 cm²', '452,39 cm²', '339,29 cm²', '226,19 cm²'],
+      steps: [
+        'Gewölbte Fläche: $\\dfrac{1}{2} \\cdot 4\\pi r^2 = 2\\pi r^2$, dazu der ebene Kreis $\\pi r^2$.',
+        '$O = 3\\pi \\cdot 36 = 108\\pi \\approx 339{,}29$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Archimedes zeigte: Eine Kugel und der Zylinder, der sie genau umschließt, haben ein festes Volumenverhältnis. Welches?',
+      opts: ['1 : 3', '1 : 2', '2 : 3', '3 : 4'],
+      steps: [
+        'Zylinder: $\\pi r^2 \\cdot 2r = 2\\pi r^3$, Kugel: $\\dfrac{4}{3}\\pi r^3$.',
+        '$\\dfrac{4}{3} : 2 = 2 : 3$. Quelle: Archimedes, Über Kugel und Zylinder; die Figur soll auf seinem Grabstein gestanden haben.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Kugel liegt genau in einem Würfel mit 10 cm Kantenlänge. Wie viel Prozent des Würfels füllt sie (gerundet)?',
+      opts: ['66,7 %', '52,4 %', '33,3 %', '78,5 %'],
+      steps: [
+        'Kugel mit $r = 5$ cm: $V \\approx 523{,}6$ cm³; Würfel: 1000 cm³.',
+        'Anteil: $\\dfrac{523{,}6}{1000} \\approx 52{,}4$ %'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Christbaumkugel hat 8 cm Durchmesser. Wie viel Fläche wird bemalt (gerundet)?',
+      opts: ['50,27 cm²', '804,25 cm²', '268,08 cm²', '201,06 cm²'],
+      steps: [
+        '$r = 4$ cm',
+        '$O = 4\\pi \\cdot 16 = 64\\pi \\approx 201{,}06$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Drei Tennisbälle liegen genau übereinander in einer zylinderförmigen Dose. Welcher Anteil der Dose ist mit Bällen gefüllt?',
+      opts: ['zwei Drittel', 'ein Drittel', 'die Hälfte', 'drei Viertel'],
+      steps: [
+        'Ballradius $r$: Dose mit Radius $r$ und Höhe $6r$, also $6\\pi r^3$.',
+        'Drei Bälle: $3 \\cdot \\dfrac{4}{3}\\pi r^3 = 4\\pi r^3$, Anteil $\\dfrac{4}{6} = \\dfrac{2}{3}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Ball wird von 10 cm auf 11 cm Radius aufgepumpt. Um wie viel Prozent wächst sein Volumen (gerundet)?',
+      opts: ['um 33,1 %', 'um 10 %', 'um 3,3 %', 'um 21 %'],
+      steps: [
+        '$\\left(\\dfrac{11}{10}\\right)^3 = 1{,}331$',
+        'Zunahme: 33,1 %'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Erde hat etwa 6371 km Radius, der Mond etwa 1737 km. Wie viele Monde würden ungefähr in die Erde passen (nach Volumen)?',
+      opts: ['etwa 1000', 'etwa 49', 'etwa 4', 'etwa 13'],
+      steps: [
+        'Volumen wachsen mit der dritten Potenz des Radius.',
+        '$\\left(\\dfrac{6371}{1737}\\right)^3 \\approx 3{,}67^3 \\approx 49$'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

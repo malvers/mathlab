@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Satz des Thales — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w18-thales',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Satz des Thales',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 18 (LB 3) · 20 Aufgaben: Satz und Beweis, wenn-dann-Form, Umkehrung, Thaleskreis · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 18 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: statement and wenn-dann form (1, 4-5, 20), proof (6-8), angles (2-3, 13-15, 19), constructions and context (9-12, 16-18). */
+  questions: [
+    {
+      q: 'Was besagt der Satz des Thales?',
+      opts: ['Liegt $C$ auf dem Halbkreis über $\\overline{AB}$, dann ist das Dreieck $ABC$ gleichseitig.', 'Die Winkelsumme im Dreieck beträgt $360^\\circ$.', 'Liegt $C$ auf dem Halbkreis über $\\overline{AB}$, dann hat das Dreieck $ABC$ bei $C$ einen rechten Winkel.', 'Jedes Dreieck hat einen rechten Winkel.'],
+      steps: [
+        '$\\overline{AB}$ ist ein Durchmesser, $C$ ein weiterer Punkt auf dem Kreis.',
+        'Dann ist der Winkel $\\gamma$ bei $C$ immer $90^\\circ$, egal wo $C$ auf dem Kreis liegt.'
+      ],
+      solution: 2
+    },
+    {
+      q: '$\\overline{AB}$ ist ein Durchmesser eines Kreises, $C$ liegt auf dem Kreis. Wie groß ist der Winkel $\\gamma$ bei $C$?',
+      opts: ['Das hängt von der Lage von $C$ ab.', '$90^\\circ$', '$180^\\circ$', '$60^\\circ$'],
+      steps: [
+        'Satz des Thales: Der Winkel im Halbkreis ist ein rechter Winkel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einem Thalesdreieck mit dem rechten Winkel bei $C$ ist $\\alpha = 35^\\circ$. Wie groß ist $\\beta$?',
+      opts: ['$35^\\circ$', '$145^\\circ$', '$55^\\circ$', '$65^\\circ$'],
+      steps: [
+        '$\\gamma = 90^\\circ$',
+        '$\\beta = 180^\\circ - 90^\\circ - 35^\\circ = 55^\\circ$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist im Satz des Thales die Voraussetzung (der „wenn“-Teil)?',
+      opts: ['Der Kreis hat den Radius $\\overline{AB}$.', 'Das Dreieck $ABC$ ist gleichschenklig.', 'Der Winkel bei $C$ ist $90^\\circ$.', '$C$ liegt auf dem Kreis mit dem Durchmesser $\\overline{AB}$.'],
+      steps: [
+        'Wenn $C$ auf dem Kreis mit Durchmesser $\\overline{AB}$ liegt (Voraussetzung),',
+        'dann ist $\\gamma = 90^\\circ$ (Behauptung).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Umkehrung des Satzes des Thales?',
+      opts: ['Wenn $C$ auf dem Kreis liegt, dann ist $\\gamma = 90^\\circ$.', 'Wenn $\\gamma = 90^\\circ$ ist, dann ist $\\alpha = \\beta$.', 'Wenn $C$ nicht auf dem Kreis liegt, dann ist das Dreieck rechtwinklig.', 'Wenn das Dreieck $ABC$ bei $C$ rechtwinklig ist, dann liegt $C$ auf dem Kreis mit Durchmesser $\\overline{AB}$.'],
+      steps: [
+        'Bei der Umkehrung werden „wenn“- und „dann“-Teil vertauscht.',
+        'Die letzte Antwort ist der Satz selbst, nicht seine Umkehrung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Im Beweis zieht man die Strecke vom Mittelpunkt $M$ zu $C$. Warum sind dann die Dreiecke $AMC$ und $MBC$ gleichschenklig?',
+      opts: ['Weil $\\overline{MA}$, $\\overline{MB}$ und $\\overline{MC}$ Radien und damit gleich lang sind.', 'Weil $\\overline{AB}$ doppelt so lang wie $\\overline{MC}$ ist.', 'Weil $\\gamma = 90^\\circ$ ist.', 'Weil jedes Dreieck im Kreis gleichschenklig ist.'],
+      steps: [
+        '$M$ ist der Mittelpunkt, $A$, $B$ und $C$ liegen auf dem Kreis.',
+        'Also sind alle drei Strecken zu $M$ Radien.',
+        'Die letzte Antwort wäre ein Zirkelschluss: $90^\\circ$ soll ja erst bewiesen werden.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Im Teildreieck $AMC$ ist der Basiswinkel bei $A$ gleich $40^\\circ$. Wie groß ist der Winkel bei $C$ in diesem Teildreieck?',
+      opts: ['$40^\\circ$', '$50^\\circ$', '$90^\\circ$', '$100^\\circ$'],
+      steps: [
+        '$AMC$ ist gleichschenklig mit der Basis $\\overline{AC}$.',
+        'Basiswinkel sind gleich groß: auch $40^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Im Beweis nennt man die Basiswinkel $\\alpha$ und $\\beta$. Für das große Dreieck gilt $\\alpha + \\beta + (\\alpha + \\beta) = 180^\\circ$. Was folgt daraus?',
+      opts: ['$\\alpha + \\beta = 90^\\circ$', '$\\alpha = 90^\\circ$', '$\\alpha + \\beta = 180^\\circ$', '$\\alpha = \\beta$'],
+      steps: [
+        'Der Winkel bei $C$ setzt sich aus $\\alpha$ und $\\beta$ zusammen.',
+        '$2 \\cdot (\\alpha + \\beta) = 180^\\circ$, also $\\alpha + \\beta = 90^\\circ$.',
+        'Das ist genau der Winkel bei $C$: Er ist ein rechter Winkel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Strecke $\\overline{AB}$ ist 10 cm lang. Welchen Radius hat der Thaleskreis über $\\overline{AB}$?',
+      opts: ['20 cm', '3,14 cm', '5 cm', '10 cm'],
+      steps: [
+        '$\\overline{AB}$ ist der Durchmesser.',
+        '$r = 10 : 2 = 5$, also 5 cm.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo liegt der Mittelpunkt des Thaleskreises über $\\overline{AB}$?',
+      opts: ['im Mittelpunkt der Strecke $\\overline{AB}$', 'auf der Mittelsenkrechten, 5 cm über $\\overline{AB}$', 'im Punkt $C$', 'im Punkt $A$'],
+      steps: [
+        '$\\overline{AB}$ ist ein Durchmesser, sein Mittelpunkt ist der Kreismittelpunkt.',
+        'Man findet ihn mit der Mittelsenkrechten von $\\overline{AB}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Du sollst ein rechtwinkliges Dreieck mit der Hypotenuse $c = 8$ cm konstruieren. Was hilft?',
+      opts: ['ein Kreis mit Radius 8 cm um $A$', 'die Winkelhalbierende bei $A$', 'ein gleichseitiges Dreieck über $c$', 'ein Halbkreis mit Radius 4 cm über $c$'],
+      steps: [
+        'Die Hypotenuse liegt dem rechten Winkel gegenüber.',
+        'Jeder Punkt $C$ auf dem Thaleskreis über $c$ (Radius 4 cm) liefert einen rechten Winkel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Von einem Punkt $P$ außerhalb eines Kreises mit Mittelpunkt $M$ sollen die Tangenten gezeichnet werden. Welcher Hilfskreis liefert die Berührungspunkte?',
+      opts: ['der Thaleskreis über $\\overline{PM}$', 'ein Kreis um $M$ mit dem Radius $\\overline{PM}$', 'der Thaleskreis über einem Durchmesser des Kreises', 'ein Kreis um $P$ mit dem Radius des Kreises'],
+      steps: [
+        'Im Berührungspunkt $B$ ist der Winkel zwischen Radius $\\overline{MB}$ und Tangente $\\overline{PB}$ ein rechter.',
+        '$B$ liegt also auf dem Thaleskreis über $\\overline{PM}$; er schneidet den Kreis in den zwei Berührungspunkten.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$C$ liegt innerhalb des Thaleskreises über $\\overline{AB}$ (nicht auf $\\overline{AB}$). Wie ist der Winkel bei $C$?',
+      opts: ['spitz, kleiner als $90^\\circ$', 'genau $90^\\circ$', 'genau $180^\\circ$', 'stumpf, größer als $90^\\circ$'],
+      steps: [
+        'Rückt $C$ vom Kreis nach innen, werden die Schenkel des Winkels weiter.',
+        'Der Winkel ist größer als $90^\\circ$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$C$ liegt außerhalb des Thaleskreises über $\\overline{AB}$. Wie ist der Winkel bei $C$?',
+      opts: ['genau $90^\\circ$', 'genau $0^\\circ$', 'stumpf, größer als $90^\\circ$', 'spitz, kleiner als $90^\\circ$'],
+      steps: [
+        'Rückt $C$ vom Kreis nach außen, sieht man $\\overline{AB}$ unter einem kleineren Winkel.',
+        'Der Winkel ist kleiner als $90^\\circ$.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$\\overline{AB}$ ist Durchmesser, $C$ liegt auf dem Kreis und der Winkel bei $A$ ist $62^\\circ$. Wie groß ist der Winkel bei $B$?',
+      opts: ['$118^\\circ$', '$28^\\circ$', '$38^\\circ$', '$62^\\circ$'],
+      steps: [
+        'Thales: $\\gamma = 90^\\circ$',
+        '$\\beta = 180^\\circ - 90^\\circ - 62^\\circ = 28^\\circ$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wann lebte Thales von Milet, nach dem der Satz benannt ist?',
+      opts: ['um 1600 nach Christus', 'um 600 vor Christus', 'um 1900 nach Christus', 'um 300 nach Christus'],
+      steps: [
+        'Thales von Milet war ein griechischer Philosoph und Mathematiker, etwa 624 bis 546 vor Christus.',
+        'Der Satz war schon den Babyloniern bekannt; der Beweis wird traditionell Thales zugeschrieben.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein rechtwinkliges Dreieck hat die Hypotenuse 13 cm. Welchen Radius hat sein Umkreis?',
+      opts: ['26 cm', '6,5 cm', '4,3 cm', '13 cm'],
+      steps: [
+        'Nach der Umkehrung des Thalessatzes ist die Hypotenuse ein Durchmesser des Umkreises.',
+        '$r = 13 : 2 = 6{,}5$, also 6,5 cm.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Rechteck ist so gezeichnet, dass alle Ecken auf einem Kreis liegen. Was sind seine Diagonalen?',
+      opts: ['Radien des Kreises', 'Durchmesser des Kreises', 'Tangenten an den Kreis', 'Passanten'],
+      steps: [
+        'An jeder Ecke ist ein rechter Winkel.',
+        'Nach der Umkehrung des Thalessatzes ist die gegenüberliegende Diagonale ein Durchmesser.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$C$ liegt auf dem Thaleskreis genau über dem Mittelpunkt $M$ von $\\overline{AB}$. Wie groß sind $\\alpha$ und $\\beta$?',
+      opts: ['$30^\\circ$ und $60^\\circ$', 'beide $60^\\circ$', 'beide $45^\\circ$', 'beide $90^\\circ$'],
+      steps: [
+        'Dann ist $\\overline{AC} = \\overline{BC}$, das Dreieck ist gleichschenklig-rechtwinklig.',
+        '$\\alpha = \\beta = (180^\\circ - 90^\\circ) : 2 = 45^\\circ$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Aussage ist falsch?',
+      opts: ['Ein Thaleskreis hat seinen Mittelpunkt in der Mitte der Hypotenuse.', 'Die Hypotenuse eines rechtwinkligen Dreiecks ist ein Durchmesser seines Umkreises.', 'Jedes Dreieck mit allen Ecken auf einem Kreis ist rechtwinklig.', 'Jedes Dreieck, dessen eine Seite ein Durchmesser des Umkreises ist, ist rechtwinklig.'],
+      steps: [
+        'Jedes Dreieck hat einen Umkreis, auf dem alle Ecken liegen, z. B. auch ein gleichseitiges Dreieck.',
+        'Rechtwinklig ist es nur, wenn eine Seite ein Durchmesser ist.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

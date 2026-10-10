@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Nullstellen, Schnittpunkte, Anwendungen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w27-anwendungen-quadratisch',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Nullstellen, Schnittpunkte, Anwendungen',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 27 (LB 3) · 20 Aufgaben: Nullstellen von Parabeln, Schnittpunkte mit Geraden und Parabeln, Wurf, Brücke, Flächen, Gewinn · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 27 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Blocks: zeros (1-2, 16, 20), intersections (3-6, 12), throw and fall (7-8, 15, 17), geometry (9-11, 19), numbers, braking and profit (13-14, 18). Braking rule of thumb from driving school. */
+  questions: [
+    {
+      q: 'Welche Nullstellen hat $y = x^2 - 2x - 3$?',
+      opts: ['keine', '$x = 1 \\pm 3$', '$x = -3$ und $x = 1$', '$x = 3$ und $x = -1$'],
+      steps: [
+        '$x = 1 \\pm \\sqrt{1 + 3} = 1 \\pm 2$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Nullstellen hat $y = x^2 - 4x + 5$?',
+      opts: ['keine', '$x = 1$ und $x = 5$', '$x = -1$ und $x = 5$', '$x = 2$'],
+      steps: [
+        '$D = 4 - 5 = -1 < 0$',
+        'Der Scheitel $(2 \\mid 1)$ liegt über der $x$-Achse.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In welchen Punkten schneiden sich $y = x^2$ und $y = x + 2$?',
+      opts: ['$(2 \\mid 4)$ und $(-1 \\mid 1)$', '$(2 \\mid 4)$', 'Sie schneiden sich nicht.', '$(-2 \\mid 4)$ und $(1 \\mid 1)$'],
+      steps: [
+        'Gleichsetzen: $x^2 = x + 2$, also $x^2 - x - 2 = 0$.',
+        '$x = 2$ oder $x = -1$; $y$ aus der Geraden: 4 und 1.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In welchen Punkten schneiden sich $y = x^2 - 1$ und $y = 2x + 2$?',
+      opts: ['$(3 \\mid 8)$', '$(-3 \\mid 8)$ und $(1 \\mid 0)$', '$(1 \\mid 4)$ und $(0 \\mid 2)$', '$(3 \\mid 8)$ und $(-1 \\mid 0)$'],
+      steps: [
+        '$x^2 - 1 = 2x + 2$, also $x^2 - 2x - 3 = 0$.',
+        '$x = 3$ oder $x = -1$, dazu $y = 8$ und $y = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele gemeinsame Punkte haben $y = x^2$ und $y = 2x - 1$?',
+      opts: ['unendlich viele', 'keinen', 'zwei', 'genau einen, $(1 \\mid 1)$: Die Gerade ist eine Tangente.'],
+      steps: [
+        '$x^2 - 2x + 1 = 0$, also $(x - 1)^2 = 0$.',
+        'Nur $x = 1$: Die Gerade berührt die Parabel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele gemeinsame Punkte haben $y = x^2 + 2$ und $y = x$?',
+      opts: ['drei', 'einen', 'keinen', 'zwei'],
+      steps: [
+        '$x^2 - x + 2 = 0$: $D = 0{,}25 - 2 < 0$',
+        'Die Gerade verläuft unterhalb der Parabel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Ball wird geworfen: $h(t) = -5t^2 + 20t + 1{,}8$ (in m, $t$ in s). Wie hoch fliegt er höchstens?',
+      opts: ['20 m nach 2 s', '1,8 m nach 0 s', '21,8 m nach 2 s', '21,8 m nach 4 s'],
+      steps: [
+        '$h(t) = -5(t^2 - 4t) + 1{,}8 = -5(t - 2)^2 + 20 + 1{,}8$',
+        'Scheitel $(2 \\mid 21{,}8)$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann landet dieser Ball ($h(t) = -5t^2 + 20t + 1{,}8$) auf dem Boden (gerundet)?',
+      opts: ['nach 21,8 s', 'nach 2 s', 'nach 4 s', 'nach 4,09 s'],
+      steps: [
+        '$h(t) = 0$, durch $-5$ teilen: $t^2 - 4t - 0{,}36 = 0$',
+        '$t = 2 + \\sqrt{4 + 0{,}36} \\approx 4{,}09$ s (die negative Lösung entfällt).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Brückenbogen wird durch $y = -0{,}01x^2 + 4$ beschrieben (in m). Wie weit ist er gespannt?',
+      opts: ['20 m', '40 m', '4 m', '400 m'],
+      steps: [
+        '$-0{,}01x^2 + 4 = 0$, also $x^2 = 400$.',
+        '$x = \\pm 20$: Spannweite 40 m.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Mit 40 m Zaun soll an einer Mauer ein Rechteck eingezäunt werden (drei Seiten Zaun). Welche größte Fläche ist möglich?',
+      opts: ['100 m² mit 10 m × 10 m', '200 m² mit 10 m × 20 m', '192 m² mit 12 m × 16 m', '400 m² mit 20 m × 20 m'],
+      steps: [
+        'Seiten $x$, $x$ und $40 - 2x$: $A(x) = x \\cdot (40 - 2x) = -2x^2 + 40x$.',
+        '$A(x) = -2(x - 10)^2 + 200$: Maximum bei $x = 10$ m.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Rechteck hat 48 cm² Flächeninhalt, eine Seite ist 2 cm länger als die andere. Wie lang sind die Seiten?',
+      opts: ['5 cm und 7 cm', '6 cm und 8 cm', '4 cm und 12 cm', '8 cm und 10 cm'],
+      steps: [
+        '$x \\cdot (x + 2) = 48$, also $x^2 + 2x - 48 = 0$.',
+        '$x = -1 \\pm 7$; die positive Lösung ist $x = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In welchen Punkten schneiden sich $y = x^2$ und $y = -x^2 + 2x + 4$?',
+      opts: ['Sie schneiden sich nicht.', '$(-2 \\mid 4)$ und $(1 \\mid 1)$', '$(2 \\mid 4)$ und $(-1 \\mid 1)$', '$(0 \\mid 4)$'],
+      steps: [
+        '$x^2 = -x^2 + 2x + 4$, also $2x^2 - 2x - 4 = 0$ und $x^2 - x - 2 = 0$.',
+        '$x = 2$ oder $x = -1$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Das Quadrat einer Zahl, vermehrt um ihr Dreifaches, ergibt 10. Welche Zahlen kommen in Frage?',
+      opts: ['1 und 10', '2 und −5', '−2 und 5', 'nur 2'],
+      steps: [
+        '$x^2 + 3x - 10 = 0$',
+        '$x = -1{,}5 \\pm \\sqrt{2{,}25 + 10} = -1{,}5 \\pm 3{,}5$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Faustregel der Fahrschule: Anhalteweg $= \\left(\\dfrac{v}{10}\\right)^2 + 3 \\cdot \\dfrac{v}{10}$ (in m, $v$ in km/h). Bei welcher Geschwindigkeit beträgt er 40 m?',
+      opts: ['bei 40 km/h', 'bei 80 km/h', 'bei 50 km/h', 'bei 63 km/h'],
+      steps: [
+        'Mit $u = \\dfrac{v}{10}$: $u^2 + 3u - 40 = 0$',
+        '$u = -1{,}5 + \\sqrt{2{,}25 + 40} = 5$, also $v = 50$ km/h.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Brunnenstrahl folgt $y = -0{,}5x^2 + 2x$ (in m). Wie hoch steigt er, und wo trifft er wieder auf?',
+      opts: ['1 m hoch, trifft bei $x = 4$ m auf', '2 m hoch, trifft bei $x = 4$ m auf', '4 m hoch, trifft bei $x = 2$ m auf', '2 m hoch, trifft bei $x = 2$ m auf'],
+      steps: [
+        'Nullstellen: $x \\cdot (-0{,}5x + 2) = 0$, also $x = 0$ oder $x = 4$.',
+        'Scheitel in der Mitte bei $x = 2$: $y = -2 + 4 = 2$ m'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele gemeinsame Punkte haben $y = x^2 - 4$ und $y = -4$?',
+      opts: ['keinen', 'zwei', 'einen, den Scheitel $(0 \\mid -4)$', 'vier'],
+      steps: [
+        '$x^2 - 4 = -4$, also $x^2 = 0$.',
+        'Die Gerade berührt die Parabel im Scheitel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim freien Fall gilt $s = 4{,}9t^2$ (in m). Wann hat ein Stein 19,6 m zurückgelegt?',
+      opts: ['nach 4 s', 'nach 96 s', 'nach 1,4 s', 'nach 2 s'],
+      steps: [
+        '$t^2 = 19{,}6 : 4{,}9 = 4$',
+        '$t = 2$ s'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Gewinn ist $G(x) = -2x^2 + 24x - 54$. Für welche Stückzahlen $x$ ist der Gewinn null?',
+      opts: ['$x = 3$ und $x = 9$', '$x = 6$', '$x = 12$ und $x = 27$', '$x = -3$ und $x = -9$'],
+      steps: [
+        'Durch $-2$ teilen: $x^2 - 12x + 27 = 0$',
+        '$x = 6 \\pm 3$; dazwischen macht die Firma Gewinn.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Bild ist 20 cm × 30 cm groß. Ein überall gleich breiter Rahmen soll die Gesamtfläche auf 1000 cm² bringen. Wie breit ist der Rahmen (gerundet)?',
+      opts: ['3,51 cm', '2,5 cm', '16 cm', '5 cm'],
+      steps: [
+        '$(20 + 2x)(30 + 2x) = 1000$, also $4x^2 + 100x - 400 = 0$ und $x^2 + 25x - 100 = 0$.',
+        '$x = -12{,}5 + \\sqrt{156{,}25 + 100} \\approx 3{,}51$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo schneidet die Parabel $y = (x - 2)^2 - 1$ die $y$-Achse?',
+      opts: ['bei $(0 \\mid 3)$', 'bei $(2 \\mid -1)$', 'bei $(0 \\mid 4)$', 'bei $(0 \\mid -1)$'],
+      steps: [
+        '$x = 0$: $y = (-2)^2 - 1 = 3$'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

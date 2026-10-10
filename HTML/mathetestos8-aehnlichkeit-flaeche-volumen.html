@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Längen, Flächen und Volumen bei Ähnlichkeit — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w26-aehnlichkeit-flaeche-volumen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Längen, Flächen und Volumen bei Ähnlichkeit',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 26 (LB 4) · 20 Aufgaben: a’ = k · a, A’ = k² · A, V’ = k³ · V, Modelle, Pläne und Gulliver · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 26 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: rules k, k^2, k^3 (1-4, 8-9, 15-16, 18-20), scale drawings and models (5-7, 17), context (10-14). Problem 14 after Swift, Gulliver. */
+  questions: [
+    {
+      q: 'Eine Figur wird mit $k = 3$ vergrößert. Wie ändert sich ihr Flächeninhalt?',
+      opts: ['Er wird 3-mal so groß.', 'Er wird 6-mal so groß.', 'Er wird 9-mal so groß.', 'Er wird 27-mal so groß.'],
+      steps: [
+        'Flächen wachsen mit dem Quadrat des Streckfaktors: $A’ = k^2 \\cdot A$.',
+        '$3^2 = 9$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Körper wird mit $k = 2$ vergrößert. Wie ändert sich sein Volumen?',
+      opts: ['Es wird 8-mal so groß.', 'Es wird 2-mal so groß.', 'Es wird 4-mal so groß.', 'Es wird 6-mal so groß.'],
+      steps: [
+        'Volumen wachsen mit der dritten Potenz: $V’ = k^3 \\cdot V$.',
+        '$2^3 = 8$: In einen doppelt so großen Würfel passen 8 kleine.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Quadrat mit 4 cm² Flächeninhalt wird mit $k = 3$ gestreckt. Wie groß ist der neue Flächeninhalt?',
+      opts: ['7 cm²', '36 cm²', '12 cm²', '108 cm²'],
+      steps: [
+        '$A’ = k^2 \\cdot A = 9 \\cdot 4$',
+        '$A’ = 36$ cm²; Probe: Seite 2 cm wird 6 cm, $6^2 = 36$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Würfel mit 5 cm³ Volumen wird mit $k = 2$ vergrößert. Wie groß ist das neue Volumen?',
+      opts: ['125 cm³', '10 cm³', '20 cm³', '40 cm³'],
+      steps: [
+        '$V’ = k^3 \\cdot V = 8 \\cdot 5 = 40$ cm³'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Stadtplan hat den Maßstab 1 : 10 000. Ein Park bedeckt auf dem Plan 1 cm². Wie groß ist er in Wirklichkeit?',
+      opts: ['100 m²', '1 km²', '10 000 cm²', '10 000 m² (1 ha)'],
+      steps: [
+        '1 cm auf dem Plan sind 10 000 cm = 100 m.',
+        '1 cm² auf dem Plan sind $100 \\text{ m} \\cdot 100 \\text{ m} = 10\\,000$ m².',
+        'Flächenfaktor: $10\\,000^2$, nicht 10 000.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Hausmodell im Maßstab 1 : 20 hat eine Wand mit 150 cm² Fläche. Wie groß ist die echte Wand?',
+      opts: ['3 m²', '6 m²', '60 m²', '0,3 m²'],
+      steps: [
+        'Flächenfaktor: $20^2 = 400$',
+        '$150 \\cdot 400 = 60\\,000$ cm² = 6 m²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Modell eines Tanks im Maßstab 1 : 10 fasst 2 Liter. Wie viel fasst der echte Tank?',
+      opts: ['20 l', '20 000 l', '2000 l', '200 l'],
+      steps: [
+        'Volumenfaktor: $10^3 = 1000$',
+        '$2 \\cdot 1000 = 2000$ l'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Flächeninhalte zweier ähnlicher Figuren verhalten sich wie 1 : 4. Wie verhalten sich entsprechende Längen?',
+      opts: ['1 : 8', '1 : 4', '1 : 16', '1 : 2'],
+      steps: [
+        '$k^2 = 4$',
+        '$k = 2$, also Längen 1 : 2'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein ähnlicher Körper hat das 27-fache Volumen. Wie groß ist der Streckfaktor?',
+      opts: ['$k = 3$', '$k = 9$', '$k = 5{,}2$', '$k = 27$'],
+      steps: [
+        '$k^3 = 27$',
+        '$k = 3$, denn $3 \\cdot 3 \\cdot 3 = 27$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Pizza mit 15 cm Durchmesser kostet 4 €. Welcher Preis wäre für eine gleich dicke Pizza mit 30 cm Durchmesser fair?',
+      opts: ['12 €', '8 €', '16 €', '32 €'],
+      steps: [
+        'Doppelter Durchmesser: $k = 2$.',
+        'Die Fläche wird $2^2 = 4$-mal so groß.',
+        '$4 \\cdot 4 = 16$ €'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für eine Statue braucht man 2 Liter Farbe. Eine ähnliche Statue ist doppelt so hoch. Wie viel Farbe braucht sie?',
+      opts: ['4 Liter', '8 Liter', '16 Liter', '6 Liter'],
+      steps: [
+        'Farbe bedeckt die Oberfläche: Faktor $k^2 = 4$.',
+        '$2 \\cdot 4 = 8$ Liter'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein massiver Schokoladenhase ist 10 cm hoch und wiegt 100 g. Wie schwer ist ein ähnlicher massiver Hase mit 20 cm Höhe?',
+      opts: ['800 g', '400 g', '1000 g', '200 g'],
+      steps: [
+        'Die Masse hängt vom Volumen ab: Faktor $k^3 = 8$.',
+        '$100 \\cdot 8 = 800$ g'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Foto im Format 10 cm × 15 cm wird ähnlich auf 20 cm × 30 cm vergrößert. Wie viel Mal so groß ist die Bildfläche?',
+      opts: ['2-mal', '8-mal', '3-mal', '4-mal'],
+      steps: [
+        '$k = 2$',
+        'Fläche: $150$ cm² wird $600$ cm², also $k^2 = 4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In Swifts „Gullivers Reisen“ ist Gulliver 12-mal so groß wie die Liliputaner. Für wie viele Liliputaner muss er essen, wenn der Bedarf dem Körpervolumen entspricht?',
+      opts: ['144', '1728', '36', '12'],
+      steps: [
+        'Volumenfaktor: $12^3 = 12 \\cdot 12 \\cdot 12 = 1728$',
+        'Quelle: Jonathan Swift, Gullivers Reisen (1726); dort rechnen die Liliputaner genau mit 1728 Portionen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Würfel wird mit $k = 2$ vergrößert. Was gilt für Oberfläche und Volumen?',
+      opts: ['Oberfläche 4-mal, Volumen 8-mal so groß', 'Oberfläche 8-mal, Volumen 4-mal so groß', 'Oberfläche und Volumen jeweils 2-mal so groß', 'Oberfläche und Volumen jeweils 4-mal so groß'],
+      steps: [
+        'Oberfläche: $k^2 = 4$, Volumen: $k^3 = 8$.',
+        'Große Körper haben deshalb im Verhältnis zum Volumen weniger Oberfläche.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Figur hat 50 cm² Flächeninhalt, eine ähnliche Figur 450 cm². Wie groß ist der Streckfaktor?',
+      opts: ['$k = 400$', '$k = 4{,}5$', '$k = 3$', '$k = 9$'],
+      steps: [
+        '$k^2 = 450 : 50 = 9$',
+        '$k = 3$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Zimmer ist im Plan 1 : 100 genau 20 cm² groß. Wie groß ist es in Wirklichkeit?',
+      opts: ['200 m²', '20 m²', '2 m²', '0,2 m²'],
+      steps: [
+        'Flächenfaktor: $100^2 = 10\\,000$',
+        '$20 \\cdot 10\\,000 = 200\\,000$ cm² = 20 m²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Radius eines Balls wird verdoppelt. Wie ändert sich das Volumen?',
+      opts: ['Es wird 8-mal so groß.', 'Es wird 2-mal so groß.', 'Es wird 4-mal so groß.', 'Es wird 16-mal so groß.'],
+      steps: [
+        'Alle Kugeln sind ähnlich, $k = 2$.',
+        '$V’ = 2^3 \\cdot V = 8V$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Würfel mit 2 cm Kantenlänge hat die Oberfläche 24 cm². Wie groß ist die Oberfläche eines Würfels mit 6 cm Kantenlänge?',
+      opts: ['144 cm²', '648 cm²', '72 cm²', '216 cm²'],
+      steps: [
+        '$k = 6 : 2 = 3$, Flächenfaktor $k^2 = 9$',
+        '$24 \\cdot 9 = 216$ cm²; Probe: $6 \\cdot 6^2 = 216$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Das Volumen eines Körpers wird bei einer ähnlichen Vergrößerung 64-mal so groß. Wie viel Mal so lang werden die Kanten?',
+      opts: ['16-mal', '8-mal', '4-mal', '32-mal'],
+      steps: [
+        '$k^3 = 64$',
+        '$k = 4$, denn $4^3 = 64$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

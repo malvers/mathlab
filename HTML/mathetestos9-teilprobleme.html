@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zerlegen in Teilprobleme — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w08-teilprobleme',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zerlegen in Teilprobleme',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 8 (LB 1) · 20 Aufgaben: Gleichschenklige Dreiecke, Trapez, Parallelogramm, Fachwerk, Raumdiagonale, Gelände · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 8 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Calculator in DEG, values rounded. Blocks: isosceles triangle and trapezoid (1-4), space diagonal (5-6, 17-19), truss and roof (7-8, 15), polygons and parallelograms (9-11), terrain (12, 16), strategy (13-14, 20). */
+  questions: [
+    {
+      q: 'Ein gleichschenkliges Dreieck hat die Basis 8 cm und Basiswinkel von $65^\\circ$. Wie hoch ist es (gerundet)?',
+      opts: ['17,16 cm', '3,63 cm', '9,46 cm', '8,58 cm'],
+      steps: [
+        'Die Höhe halbiert die Basis: Ankathete 4 cm.',
+        '$h = 4 \\cdot \\tan 65^\\circ \\approx 8{,}58$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lang sind die Schenkel dieses Dreiecks (halbe Basis 4 cm, Basiswinkel $65^\\circ$, gerundet)?',
+      opts: ['9,46 cm', '8,58 cm', '3,63 cm', '4,41 cm'],
+      steps: [
+        '$\\cos 65^\\circ = \\dfrac{4}{s}$',
+        '$s = \\dfrac{4}{\\cos 65^\\circ} \\approx 9{,}46$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein gleichschenkliges Trapez hat die Grundseiten $a = 12$ cm und $c = 6$ cm und die Höhe 4 cm. Wie lang sind die Schenkel?',
+      opts: ['6 cm', '7,2 cm', '4,47 cm', '5 cm'],
+      steps: [
+        'Überstand auf jeder Seite: $(12 - 6) : 2 = 3$ cm.',
+        'Schenkel: $\\sqrt{3^2 + 4^2} = 5$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß sind die Winkel an der langen Grundseite dieses Trapezes (Überstand 3 cm, Höhe 4 cm, gerundet)?',
+      opts: ['$45^\\circ$', '$71{,}57^\\circ$', '$53{,}13^\\circ$', '$36{,}87^\\circ$'],
+      steps: [
+        '$\\tan \\alpha = \\dfrac{4}{3}$',
+        '$\\alpha \\approx 53{,}13^\\circ$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Quader ist 3 cm, 4 cm und 12 cm lang. Wie lang ist seine Raumdiagonale?',
+      opts: ['12,6 cm', '13 cm', '19 cm', '5 cm'],
+      steps: [
+        'Erst die Diagonale der Grundfläche: $\\sqrt{9 + 16} = 5$ cm.',
+        'Dann mit der Höhe: $\\sqrt{25 + 144} = 13$ cm.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Würfel hat die Kantenlänge 5 cm. Wie lang ist seine Raumdiagonale (gerundet)?',
+      opts: ['8,66 cm', '7,07 cm', '15 cm', '10 cm'],
+      steps: [
+        '$d = \\sqrt{25 + 25 + 25} = \\sqrt{75}$',
+        '$d = 5\\sqrt{3} \\approx 8{,}66$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Dachbinder hat 8 m Spannweite und $30^\\circ$ Dachneigung (symmetrisch). Wie lang ist ein Sparren (gerundet)?',
+      opts: ['4,62 m', '4,00 m', '2,31 m', '9,24 m'],
+      steps: [
+        'Halbe Spannweite: 4 m, sie ist die Ankathete.',
+        '$s = \\dfrac{4}{\\cos 30^\\circ} \\approx 4{,}62$ m'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie hoch ist dieser Dachbinder in der Mitte (gerundet)?',
+      opts: ['2,00 m', '2,31 m', '6,93 m', '4,62 m'],
+      steps: [
+        '$h = 4 \\cdot \\tan 30^\\circ \\approx 2{,}31$ m'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein regelmäßiges Sechseck hat die Seitenlänge 4 cm. Wie weit sind zwei gegenüberliegende Seiten voneinander entfernt (gerundet)?',
+      opts: ['12 cm', '6,93 cm', '8 cm', '3,46 cm'],
+      steps: [
+        'Das Sechseck besteht aus 6 gleichseitigen Dreiecken mit Seite 4 cm.',
+        'Abstand = zwei Dreieckshöhen: $2 \\cdot 4 \\cdot \\sin 60^\\circ \\approx 6{,}93$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Parallelogramm hat die Seiten 8 cm und 5 cm, der Winkel zwischen ihnen ist $60^\\circ$. Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['20 cm²', '34,64 cm²', '4,33 cm²', '40 cm²'],
+      steps: [
+        'Höhe auf die 8-cm-Seite: $h = 5 \\cdot \\sin 60^\\circ \\approx 4{,}33$ cm',
+        '$A = 8 \\cdot 4{,}33 \\approx 34{,}64$ cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Dreieck hat $c = 10$ cm, $b = 7$ cm und $\\alpha = 40^\\circ$ (zwischen $b$ und $c$). Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['35 cm²', '45,00 cm²', '22,50 cm²', '26,81 cm²'],
+      steps: [
+        'Die Höhe $h_c$ zerlegt das Dreieck: $h_c = 7 \\cdot \\sin 40^\\circ \\approx 4{,}50$ cm.',
+        '$A = \\dfrac{10 \\cdot 4{,}50}{2} \\approx 22{,}50$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Von einem 40 m hohen Leuchtturm sieht man ein Schiff unter einem Tiefenwinkel von $8^\\circ$. Wie weit ist das Schiff entfernt (gerundet)?',
+      opts: ['284,6 m', '5,6 m', '287,4 m', '40,4 m'],
+      steps: [
+        'Der Tiefenwinkel ist gleich dem Winkel am Schiff (Wechselwinkel).',
+        '$\\tan 8^\\circ = \\dfrac{40}{x}$, $x = \\dfrac{40}{\\tan 8^\\circ} \\approx 284{,}6$ m'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was hilft, wenn eine Figur kein rechtwinkliges Dreieck enthält?',
+      opts: ['die Figur verdoppeln', 'alle Winkel addieren', 'eine Höhe einzeichnen, die rechtwinklige Teildreiecke erzeugt', 'den Satz des Pythagoras trotzdem anwenden'],
+      steps: [
+        'Höhen stehen senkrecht: So entstehen rechtwinklige Teildreiecke.',
+        'Darin gelten Pythagoras, Sinus, Kosinus und Tangens.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Reihenfolge ist für die Raumdiagonale eines Quaders sinnvoll?',
+      opts: ['alle drei Kanten addieren', 'erst die Höhe halbieren, dann verdoppeln', 'erst die Flächendiagonale der Grundfläche, dann mit der Höhe die Raumdiagonale', 'Länge mal Breite mal Höhe, dann die Wurzel'],
+      steps: [
+        'Flächendiagonale und Höhe stehen senkrecht aufeinander.',
+        'Zweimal Pythagoras: $d = \\sqrt{a^2 + b^2 + c^2}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Satteldach hat zwei Dachflächen, jede 12 m lang mit Sparren von 6,10 m. Wie groß ist die gesamte Dachfläche (gerundet)?',
+      opts: ['292,8 m²', '36,6 m²', '73,2 m²', '146,4 m²'],
+      steps: [
+        'Eine Dachfläche: $12 \\cdot 6{,}10 = 73{,}2$ m²',
+        'Zwei Flächen: $146{,}4$ m²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Auf einer Wanderkarte sind zwei Orte 2,4 km waagerecht entfernt, der Höhenunterschied ist 600 m. Wie lang ist der gerade Weg dazwischen (gerundet)?',
+      opts: ['3,00 km', '2,47 km', '2,33 km', '2,40 km'],
+      steps: [
+        'Alles in Metern: $\\sqrt{2400^2 + 600^2} = \\sqrt{6\\,120\\,000} \\approx 2474$ m',
+        'Also etwa 2,47 km; die mittlere Steigung beträgt $600 : 2400 = 25$ %.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Zimmer ist 5 m lang, 4 m breit und 2,5 m hoch. Wie lang ist die Raumdiagonale (gerundet)?',
+      opts: ['6,87 m', '11,5 m', '6,40 m', '7,50 m'],
+      steps: [
+        '$d = \\sqrt{25 + 16 + 6{,}25} = \\sqrt{47{,}25}$',
+        '$d \\approx 6{,}87$ m'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Passt ein 1,30 m langer Stab in einen Koffer mit den Innenmaßen 1 m × 0,6 m × 0,5 m?',
+      opts: ['Nein, der Koffer ist nur 1 m lang.', 'Ja, die Raumdiagonale ist etwa 2,1 m lang.', 'Nein, die Raumdiagonale ist nur etwa 1,27 m lang.', 'Ja, die Flächendiagonale ist etwa 1,17 m lang.'],
+      steps: [
+        'Die längste Strecke im Koffer ist die Raumdiagonale.',
+        '$\\sqrt{1 + 0{,}36 + 0{,}25} = \\sqrt{1{,}61} \\approx 1{,}27$ m, das ist zu kurz.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Unter welchem Winkel ist die Raumdiagonale eines Würfels gegen die Grundfläche geneigt (gerundet)?',
+      opts: ['$54{,}74^\\circ$', '$45^\\circ$', '$30^\\circ$', '$35{,}26^\\circ$'],
+      steps: [
+        'Gegenkathete: Kante $a$, Ankathete: Flächendiagonale $a\\sqrt{2}$.',
+        '$\\tan \\alpha = \\dfrac{1}{\\sqrt{2}}$, $\\alpha \\approx 35{,}26^\\circ$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Grundstück hat die Form eines rechtwinkligen Trapezes: parallele Seiten 30 m und 18 m, die senkrechte Seite 16 m. Wie lang ist die vierte Seite?',
+      opts: ['12 m', '34 m', '24 m', '20 m'],
+      steps: [
+        'Zerlegen: Rechteck 18 m × 16 m und rechtwinkliges Dreieck mit den Katheten $30 - 18 = 12$ m und 16 m.',
+        '$\\sqrt{144 + 256} = \\sqrt{400} = 20$ m'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

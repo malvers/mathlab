@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Normalform y = x² + p · x + q — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w24-normalform',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Normalform y = x² + p · x + q',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 24 (LB 3) · 20 Aufgaben: Binomische Formeln, quadratische Ergänzung, Scheitelpunkt, Minimum und Maximum, Anwendungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 24 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Blocks: binomials and products (1-2, 10-11), completing the square (3-5, 7, 9, 13), vertex formula and checks (6, 8, 15-17, 19-20), extremum in context (12, 14, 18). */
+  questions: [
+    {
+      q: 'Multipliziere aus: $(x + 3)^2$',
+      opts: ['$x^2 + 3x + 9$', '$x^2 + 6x + 9$', '$x^2 + 6x + 6$', '$x^2 + 9$'],
+      steps: [
+        '1. binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$',
+        '$x^2 + 2 \\cdot 3 \\cdot x + 9 = x^2 + 6x + 9$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Multipliziere aus: $(x - 4)^2$',
+      opts: ['$x^2 - 8x + 16$', '$x^2 - 16$', '$x^2 + 8x + 16$', '$x^2 - 8x - 16$'],
+      steps: [
+        '2. binomische Formel: $(a - b)^2 = a^2 - 2ab + b^2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bringe $y = x^2 + 6x + 5$ in Scheitelpunktform. Welchen Scheitel hat die Parabel?',
+      opts: ['$S(3 \\mid 5)$', '$S(-3 \\mid 5)$', '$S(-3 \\mid -4)$', '$S(-6 \\mid 5)$'],
+      steps: [
+        '$x^2 + 6x = (x + 3)^2 - 9$',
+        '$y = (x + 3)^2 - 9 + 5 = (x + 3)^2 - 4$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Scheitel hat $y = x^2 - 4x + 7$?',
+      opts: ['$S(2 \\mid 3)$', '$S(2 \\mid 7)$', '$S(-2 \\mid 3)$', '$S(4 \\mid 7)$'],
+      steps: [
+        '$x^2 - 4x = (x - 2)^2 - 4$',
+        '$y = (x - 2)^2 + 3$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Scheitel hat $y = x^2 + 2x - 8$?',
+      opts: ['$S(-2 \\mid -8)$', '$S(-1 \\mid -8)$', '$S(-1 \\mid -9)$', '$S(1 \\mid -9)$'],
+      steps: [
+        '$x^2 + 2x = (x + 1)^2 - 1$',
+        '$y = (x + 1)^2 - 9$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für $y = x^2 + px + q$ gilt $S\\left(-\\dfrac{p}{2} \\;\\middle|\\; q - \\dfrac{p^2}{4}\\right)$. Welchen Scheitel hat $y = x^2 - 10x + 21$?',
+      opts: ['$S(-5 \\mid -4)$', '$S(5 \\mid -4)$', '$S(5 \\mid 21)$', '$S(10 \\mid 21)$'],
+      steps: [
+        '$p = -10$: $-\\dfrac{p}{2} = 5$',
+        '$q - \\dfrac{p^2}{4} = 21 - 25 = -4$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Scheitel hat $y = x^2 + 5x + 4$?',
+      opts: ['$S(2{,}5 \\mid -2{,}25)$', '$S(-2{,}5 \\mid 4)$', '$S(-5 \\mid 4)$', '$S(-2{,}5 \\mid -2{,}25)$'],
+      steps: [
+        '$-\\dfrac{p}{2} = -2{,}5$',
+        '$4 - \\dfrac{25}{4} = 4 - 6{,}25 = -2{,}25$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen kleinsten Funktionswert hat $y = x^2 - 6x + 10$?',
+      opts: ['−6', '3', '10', '1'],
+      steps: [
+        '$y = (x - 3)^2 - 9 + 10 = (x - 3)^2 + 1$',
+        'Minimum 1 bei $x = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Zahl ergänzt $x^2 + 8x + \\;\\square$ zu einem vollständigen Quadrat?',
+      opts: ['64', '8', '4', '16'],
+      steps: [
+        '$(x + 4)^2 = x^2 + 8x + 16$',
+        'Man ergänzt das Quadrat der halben Zahl vor $x$: $4^2 = 16$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Multipliziere aus: $(x + 2) \\cdot (x - 5)$',
+      opts: ['$x^2 - 3x + 10$', '$x^2 + 3x - 10$', '$x^2 - 3x - 10$', '$x^2 - 10$'],
+      steps: [
+        'Jedes Glied mit jedem: $x^2 - 5x + 2x - 10$',
+        '$= x^2 - 3x - 10$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Nullstellen hat $y = (x + 2) \\cdot (x - 5)$?',
+      opts: ['$x = 2$ und $x = -5$', '$x = -10$', '$x = -2$ und $x = 5$', '$x = 3$'],
+      steps: [
+        'Ein Produkt ist null, wenn ein Faktor null ist.',
+        '$x + 2 = 0$ oder $x - 5 = 0$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Hat $y = x^2 + px + q$ im Scheitelpunkt immer ein Minimum?',
+      opts: ['Ja, weil der Faktor vor $x^2$ positiv ist.', 'Nein, bei negativem $q$ ein Maximum.', 'Nein, bei negativem $p$ ein Maximum.', 'Es gibt keinen Scheitelpunkt.'],
+      steps: [
+        'Vor $x^2$ steht 1, die Parabel ist nach oben geöffnet.',
+        '$p$ und $q$ verschieben sie nur.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Scheitel hat $y = -x^2 + 4x - 1$?',
+      opts: ['$S(-2 \\mid 3)$, Maximum', '$S(2 \\mid 3)$, Maximum', '$S(2 \\mid 3)$, Minimum', '$S(2 \\mid -1)$, Minimum'],
+      steps: [
+        '$y = -(x^2 - 4x) - 1 = -\\big((x - 2)^2 - 4\\big) - 1$',
+        '$y = -(x - 2)^2 + 3$, nach unten geöffnet.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Rechteck hat 20 m Umfang. Für welche Seitenlänge $x$ ist sein Flächeninhalt am größten?',
+      opts: ['$x = 10$ m, dann ist $A = 0$ m²', '$x = 5$ m, dann ist $A = 25$ m²', '$x = 2$ m, dann ist $A = 16$ m²', '$x = 4$ m, dann ist $A = 24$ m²'],
+      steps: [
+        'Andere Seite: $10 - x$, also $A(x) = x \\cdot (10 - x) = -x^2 + 10x$.',
+        '$A(x) = -(x - 5)^2 + 25$: Maximum bei $x = 5$ – das Quadrat.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo schneidet $y = x^2 - 3x + 7$ die $y$-Achse?',
+      opts: ['bei $(7 \\mid 0)$', 'bei $(1{,}5 \\mid 0)$', 'bei $(0 \\mid 7)$', 'bei $(0 \\mid -3)$'],
+      steps: [
+        'Für $x = 0$ bleibt $y = q = 7$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Symmetrieachse hat $y = x^2 - 8x + 3$?',
+      opts: ['$x = 8$', '$x = -4$', '$x = 3$', '$x = 4$'],
+      steps: [
+        'Die Symmetrieachse geht durch den Scheitel: $x = -\\dfrac{p}{2} = 4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Funktionswert gehört bei $y = x^2 - 8x + 3$ zum Scheitel?',
+      opts: ['−29', '19', '3', '−13'],
+      steps: [
+        '$f(4) = 16 - 32 + 3 = -13$',
+        'Scheitel $S(4 \\mid -13)$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Gewinn einer Firma ist $G(x) = -x^2 + 40x - 300$ (in 1000 €, $x$ in 1000 Stück). Wie groß ist der höchste Gewinn?',
+      opts: ['100 000 € bei 20 000 Stück', '400 000 € bei 20 000 Stück', '300 000 € bei 40 000 Stück', '100 000 € bei 40 000 Stück'],
+      steps: [
+        '$G(x) = -(x^2 - 40x) - 300 = -(x - 20)^2 + 400 - 300$',
+        '$G(x) = -(x - 20)^2 + 100$: Maximum 100 bei $x = 20$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Nullstellen hat $y = x^2 + 4x + 4$?',
+      opts: ['$x = -4$', 'nur $x = -2$', '$x = 2$ und $x = -2$', 'keine'],
+      steps: [
+        '$x^2 + 4x + 4 = (x + 2)^2$',
+        'Der Scheitel $(-2 \\mid 0)$ liegt auf der $x$-Achse: genau eine Nullstelle.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Normalform gehört zur verschobenen Normalparabel mit dem Scheitel $S(1 \\mid -2)$?',
+      opts: ['$y = x^2 - 2x - 1$', '$y = x^2 + 2x - 2$', '$y = x^2 - x - 2$', '$y = x^2 - 2x - 2$'],
+      steps: [
+        '$y = (x - 1)^2 - 2 = x^2 - 2x + 1 - 2$',
+        '$= x^2 - 2x - 1$'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

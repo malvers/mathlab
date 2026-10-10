@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Kreisring und Kreiszylinder — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w20-kreisring-zylinder',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Kreisring und Kreiszylinder',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 20 (LB 3) · 20 Aufgaben: Kreisring, Netz und Ansichten des Zylinders, Mantel- und Oberflächeninhalt · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 20 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Values with the calculator key for pi, rounded at the end. Blocks: ring (1-3, 18), representing cylinders (4-5, 9-11, 19), lateral and total surface (6-8, 12-17, 20). */
+  questions: [
+    {
+      q: 'Ein Kreisring hat den Außenradius 5 cm und den Innenradius 3 cm. Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['50,3 cm²', '12,6 cm²', '6,3 cm²', '78,5 cm²'],
+      steps: [
+        'Großer Kreis minus kleiner Kreis: $A = \\pi \\cdot 5^2 - \\pi \\cdot 3^2$',
+        '$A = \\pi \\cdot (25 - 9) = 16\\pi \\approx 50{,}3$ cm²',
+        '12,6 cm² wäre $\\pi \\cdot (5 - 3)^2$, das ist falsch.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Formel gibt den Flächeninhalt eines Kreisrings mit Außenradius $r_a$ und Innenradius $r_i$ an?',
+      opts: ['$A = \\pi \\cdot (r_a^2 - r_i^2)$', '$A = 2\\pi \\cdot (r_a - r_i)$', '$A = \\pi \\cdot r_a^2 + \\pi \\cdot r_i^2$', '$A = \\pi \\cdot (r_a - r_i)^2$'],
+      steps: [
+        'Vom großen Kreis wird das Loch abgezogen: $\\pi r_a^2 - \\pi r_i^2$.',
+        'Ausklammern: $\\pi \\cdot (r_a^2 - r_i^2)$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Unterlegscheibe hat außen 2 cm und innen 0,8 cm Durchmesser. Wie groß ist ihre Fläche (gerundet)?',
+      opts: ['10,56 cm²', '3,77 cm²', '1,13 cm²', '2,64 cm²'],
+      steps: [
+        'Radien: 1 cm und 0,4 cm.',
+        '$A = \\pi \\cdot (1^2 - 0{,}4^2) = \\pi \\cdot 0{,}84 \\approx 2{,}64$ cm²',
+        '10,56 cm² entsteht, wenn man die Durchmesser statt der Radien einsetzt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Woraus besteht das Netz eines Kreiszylinders?',
+      opts: ['aus drei Kreisen', 'aus zwei Kreisen und einem Rechteck', 'aus zwei Rechtecken und einem Kreis', 'aus einem Kreis und einem Dreieck'],
+      steps: [
+        'Grund- und Deckfläche sind zwei gleich große Kreise.',
+        'Der Mantel lässt sich zu einem Rechteck abrollen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Mantel eines Zylinders wird zu einem Rechteck abgerollt. Wie lang sind die Seiten des Rechtecks?',
+      opts: ['Durchmesser und Höhe', 'Flächeninhalt der Grundfläche und Höhe', 'Umfang der Grundfläche und Höhe', 'Radius und Höhe'],
+      steps: [
+        'Eine Seite ist die Höhe $h$ des Zylinders.',
+        'Die andere Seite läuft einmal um den Grundkreis: $u = 2\\pi r$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Zylinder hat den Radius 4 cm und die Höhe 10 cm. Wie groß ist sein Mantelflächeninhalt (gerundet)?',
+      opts: ['125,7 cm²', '351,9 cm²', '502,7 cm²', '251,3 cm²'],
+      steps: [
+        '$A_M = 2\\pi r \\cdot h = 2\\pi \\cdot 4 \\cdot 10$',
+        '$A_M = 80\\pi \\approx 251{,}3$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist der Oberflächeninhalt des Zylinders aus der vorigen Aufgabe ($r = 4$ cm, $h = 10$ cm, gerundet)?',
+      opts: ['251,3 cm²', '301,6 cm²', '351,9 cm²', '402,1 cm²'],
+      steps: [
+        '$O = 2 \\cdot A_G + A_M$',
+        '$2 \\cdot \\pi \\cdot 16 = 32\\pi$ und $A_M = 80\\pi$',
+        '$O = 112\\pi \\approx 351{,}9$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Zylinder hat den Radius 3 cm. Wie groß ist seine Grundfläche (gerundet)?',
+      opts: ['18,8 cm²', '28,3 cm²', '56,5 cm²', '9,4 cm²'],
+      steps: [
+        'Die Grundfläche ist ein Kreis: $A_G = \\pi r^2$',
+        '$A_G = 9\\pi \\approx 28{,}3$ cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Zylinder steht senkrecht auf dem Tisch. Wie sieht er von vorn und von oben aus?',
+      opts: ['von vorn ein Dreieck, von oben ein Kreis', 'von vorn und von oben ein Kreis', 'von vorn ein Kreis, von oben ein Rechteck', 'von vorn ein Rechteck, von oben ein Kreis'],
+      steps: [
+        'Die Vorderansicht zeigt die Höhe und den Durchmesser: ein Rechteck.',
+        'Die Draufsicht zeigt die Deckfläche: einen Kreis.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie erscheint der Grundkreis eines stehenden Zylinders in einer Schrägbildskizze?',
+      opts: ['als Ellipse (flacher Kreis)', 'als Rechteck', 'als Strecke', 'als Kreis'],
+      steps: [
+        'Im Schrägbild sieht man auf die Grundfläche schräg von oben.',
+        'Der Kreis wird dabei gestaucht und erscheint als Ellipse.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Form haben die beiden Endflächen eines Rohrs (Hohlzylinder)?',
+      opts: ['Rechtecke', 'Halbkreise', 'Kreise', 'Kreisringe'],
+      steps: [
+        'Ein Hohlzylinder ist ein Zylinder mit zylinderförmigem Loch.',
+        'Seine Grund- und Deckfläche sind Kreisringe.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Dose ohne Deckel hat den Radius 5 cm und die Höhe 12 cm. Wie viel Blech braucht man (gerundet)?',
+      opts: ['534,1 cm²', '942,5 cm²', '455,5 cm²', '377,0 cm²'],
+      steps: [
+        'Ohne Deckel: nur Boden und Mantel.',
+        'Boden: $25\\pi$, Mantel: $2\\pi \\cdot 5 \\cdot 12 = 120\\pi$',
+        'Zusammen $145\\pi \\approx 455{,}5$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Dose hat 7,5 cm Durchmesser und ist 11 cm hoch. Wie groß ist das Etikett, das den Mantel genau bedeckt (gerundet)?',
+      opts: ['518,4 cm²', '82,5 cm²', '259,2 cm²', '303,4 cm²'],
+      steps: [
+        '$A_M = \\pi \\cdot d \\cdot h = \\pi \\cdot 7{,}5 \\cdot 11$',
+        '$A_M = 82{,}5\\pi \\approx 259{,}2$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Zylinder hat den Radius 3 cm. Wie breit muss das abgerollte Mantelrechteck sein (gerundet)?',
+      opts: ['18,8 cm', '28,3 cm', '6 cm', '9,4 cm'],
+      steps: [
+        'Die Breite ist der Umfang des Grundkreises.',
+        '$u = 2\\pi \\cdot 3 = 6\\pi \\approx 18{,}8$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Litfaßsäule hat 1,2 m Durchmesser und ist 3 m hoch. Wie groß ist die Werbefläche am Mantel (gerundet)?',
+      opts: ['22,6 m²', '3,4 m²', '11,3 m²', '13,6 m²'],
+      steps: [
+        '$A_M = \\pi \\cdot d \\cdot h = \\pi \\cdot 1{,}2 \\cdot 3$',
+        '$A_M = 3{,}6\\pi \\approx 11{,}3$ m²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zylinder A hat $r = 2$ cm und $h = 6$ cm, Zylinder B hat $r = 3$ cm und $h = 4$ cm. Welcher hat den größeren Mantel?',
+      opts: ['Das hängt von $\\pi$ ab.', 'Beide Mäntel sind gleich groß.', 'B', 'A'],
+      steps: [
+        'A: $2\\pi \\cdot 2 \\cdot 6 = 24\\pi$',
+        'B: $2\\pi \\cdot 3 \\cdot 4 = 24\\pi$',
+        'Gleich groß; die Grundflächen sind aber verschieden.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Formel beschreibt den Oberflächeninhalt eines Zylinders?',
+      opts: ['$O = 2\\pi r \\cdot (r + h)$', '$O = \\pi r \\cdot (r + h)$', '$O = \\pi r^2 \\cdot h$', '$O = 2\\pi r + h$'],
+      steps: [
+        '$O = 2\\pi r^2 + 2\\pi r h$',
+        '$2\\pi r$ ausklammern: $O = 2\\pi r \\cdot (r + h)$',
+        '$\\pi r^2 \\cdot h$ ist das Volumen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kreisring ist 2 cm breit, sein Außenradius beträgt 10 cm. Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['12,6 cm²', '201,1 cm²', '314,2 cm²', '113,1 cm²'],
+      steps: [
+        'Innenradius: $10 - 2 = 8$ cm',
+        '$A = \\pi \\cdot (100 - 64) = 36\\pi \\approx 113{,}1$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rohr soll innen und außen gestrichen werden. Welche Flächen gehören dazu?',
+      opts: ['Außenmantel und die beiden ganzen Kreise an den Enden', 'Außenmantel, Innenmantel und die beiden Kreisringe an den Enden', 'zwei Kreise und ein Mantel', 'nur der Außenmantel'],
+      steps: [
+        'Ein Hohlzylinder hat zwei Mäntel, einen außen und einen innen.',
+        'An den Enden sind die Ränder Kreisringe, keine ganzen Kreise.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Zylinder ist 8 cm hoch und hat einen Mantel von 150,8 cm². Wie groß ist sein Radius (gerundet)?',
+      opts: ['1,5 cm', '3 cm', '6 cm', '9,4 cm'],
+      steps: [
+        '$A_M = 2\\pi r h$, also $r = \\dfrac{A_M}{2\\pi h}$',
+        '$r = \\dfrac{150{,}8}{2\\pi \\cdot 8} = \\dfrac{150{,}8}{50{,}27} \\approx 3$ cm'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

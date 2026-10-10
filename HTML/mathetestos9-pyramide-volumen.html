@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Oberfläche und Volumen der Pyramide — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w13-pyramide-volumen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Oberfläche und Volumen der Pyramide',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 13 (LB 2) · 20 Aufgaben: Mantel aus Dreiecken, Oberfläche, V = ⅓ · A_G · h, Masse, fehlende Größen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 13 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Values rounded. Blocks: lateral surface and total surface (1-2, 7, 13, 16-17), volume (3-6, 14-15, 18, 20), mass and big pyramids (8-9), solving for h and a (10-11), scaling (12, 19). */
+  questions: [
+    {
+      q: 'Eine quadratische Pyramide hat $a = 6$ cm und $h_s = 5$ cm. Wie groß ist ihr Mantel?',
+      opts: ['96 cm²', '60 cm²', '30 cm²', '120 cm²'],
+      steps: [
+        'Der Mantel besteht aus 4 Dreiecken mit Grundseite 6 cm und Höhe 5 cm.',
+        '$A_M = 4 \\cdot \\dfrac{6 \\cdot 5}{2} = 60$ cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Oberfläche dieser Pyramide ($a = 6$ cm, Mantel 60 cm²)?',
+      opts: ['66 cm²', '132 cm²', '60 cm²', '96 cm²'],
+      steps: [
+        '$O = A_G + A_M = 36 + 60 = 96$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine quadratische Pyramide hat $a = 6$ cm und $h = 4$ cm. Wie groß ist ihr Volumen?',
+      opts: ['24 cm³', '72 cm³', '48 cm³', '144 cm³'],
+      steps: [
+        '$V = \\dfrac{1}{3} \\cdot A_G \\cdot h = \\dfrac{1}{3} \\cdot 36 \\cdot 4$',
+        '$V = 48$ cm³'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Formel gilt für das Volumen jeder Pyramide?',
+      opts: ['$V = \\dfrac{1}{3} \\cdot A_G \\cdot h_s$', '$V = \\dfrac{1}{3} \\cdot A_G \\cdot h$', '$V = A_G \\cdot h$', '$V = \\dfrac{1}{2} \\cdot A_G \\cdot h$'],
+      steps: [
+        'Grundfläche mal Körperhöhe, davon ein Drittel.',
+        'Die Seitenhöhe $h_s$ braucht man für den Mantel, nicht für das Volumen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Umschüttversuch füllt man eine Pyramide mit Sand und schüttet in ein Prisma mit gleicher Grundfläche und Höhe. Wie oft muss man schütten?',
+      opts: ['3-mal', '1-mal', '4-mal', '2-mal'],
+      steps: [
+        'Das Prisma fasst genau das Dreifache der Pyramide.',
+        'Daher kommt der Faktor $\\dfrac{1}{3}$ in der Formel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Pyramide hat eine rechteckige Grundfläche mit 8 cm und 6 cm und die Höhe 12 cm. Wie groß ist ihr Volumen?',
+      opts: ['576 cm³', '96 cm³', '192 cm³', '288 cm³'],
+      steps: [
+        '$A_G = 8 \\cdot 6 = 48$ cm²',
+        '$V = \\dfrac{1}{3} \\cdot 48 \\cdot 12 = 192$ cm³'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Diese Pyramide hat die Seitenhöhen 12,37 cm (zur 8-cm-Kante) und 12,65 cm (zur 6-cm-Kante). Wie groß ist ihr Mantel (gerundet)?',
+      opts: ['222,8 cm²', '174,9 cm²', '87,4 cm²', '150,1 cm²'],
+      steps: [
+        'Zwei Dreiecke über 8 cm: $2 \\cdot \\dfrac{8 \\cdot 12{,}37}{2} = 98{,}96$ cm²',
+        'Zwei Dreiecke über 6 cm: $2 \\cdot \\dfrac{6 \\cdot 12{,}65}{2} = 75{,}9$ cm²',
+        'Zusammen $174{,}86$, also etwa 174,9 cm²'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Cheops-Pyramide hatte etwa $a = 230$ m und $h = 146{,}6$ m. Wie groß war ihr Volumen ungefähr?',
+      opts: ['etwa 260 Millionen m³', 'etwa 26 000 m³', 'etwa 7,8 Millionen m³', 'etwa 2,6 Millionen m³'],
+      steps: [
+        '$V = \\dfrac{1}{3} \\cdot 230^2 \\cdot 146{,}6 = \\dfrac{1}{3} \\cdot 52\\,900 \\cdot 146{,}6$',
+        '$V \\approx 2\\,585\\,000$ m³, also etwa 2,6 Millionen m³.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Briefbeschwerer ist eine quadratische Steinpyramide mit $a = 20$ cm und $h = 30$ cm. Der Stein hat die Dichte 2,6 g/cm³. Wie schwer ist er?',
+      opts: ['31,2 kg', '4 kg', '1,04 kg', '10,4 kg'],
+      steps: [
+        '$V = \\dfrac{1}{3} \\cdot 400 \\cdot 30 = 4000$ cm³',
+        '$m = 2{,}6 \\cdot 4000 = 10\\,400$ g = 10,4 kg'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine quadratische Pyramide mit $a = 5$ cm hat das Volumen 100 cm³. Wie hoch ist sie?',
+      opts: ['12 cm', '20 cm', '1,33 cm', '4 cm'],
+      steps: [
+        '$h = \\dfrac{3 \\cdot V}{A_G} = \\dfrac{300}{25}$',
+        '$h = 12$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine quadratische Pyramide ist 9 cm hoch und hat das Volumen 75 cm³. Wie lang ist die Grundkante?',
+      opts: ['8,3 cm', '2,9 cm', '5 cm', '25 cm'],
+      steps: [
+        '$A_G = \\dfrac{3 \\cdot 75}{9} = 25$ cm²',
+        '$a = \\sqrt{25} = 5$ cm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Höhe einer Pyramide wird halbiert, die Grundfläche bleibt gleich. Wie ändert sich das Volumen?',
+      opts: ['Es wird ein Viertel.', 'Es wird ein Achtel.', 'Es bleibt gleich.', 'Es halbiert sich.'],
+      steps: [
+        '$V$ ist proportional zu $h$, wenn $A_G$ fest bleibt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist die Oberfläche eines Tetraeders mit 4 cm Kantenlänge (gerundet)?',
+      opts: ['32 cm²', '16 cm²', '6,93 cm²', '27,71 cm²'],
+      steps: [
+        'Ein gleichseitiges Dreieck mit $a = 4$ cm hat $A = \\dfrac{\\sqrt{3}}{4} \\cdot 16 \\approx 6{,}93$ cm².',
+        'Vier Flächen: $16\\sqrt{3} \\approx 27{,}71$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine dreiseitige Pyramide hat die Grundfläche 12 cm² und die Höhe 10 cm. Wie groß ist ihr Volumen?',
+      opts: ['40 cm³', '60 cm³', '22 cm³', '120 cm³'],
+      steps: [
+        '$V = \\dfrac{1}{3} \\cdot 12 \\cdot 10 = 40$ cm³'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Würfel und eine Pyramide haben dieselbe Grundfläche und dieselbe Höhe. Welcher Anteil des Würfelvolumens ist die Pyramide?',
+      opts: ['ein Viertel', 'zwei Drittel', 'ein Drittel', 'die Hälfte'],
+      steps: [
+        'Würfel: $A_G \\cdot h$, Pyramide: $\\dfrac{1}{3} \\cdot A_G \\cdot h$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein quadratisches Turmdach hat 4 m Grundkante und 5 m Seitenhöhe. Wie viel Dachfläche wird gedeckt?',
+      opts: ['40 m²', '20 m²', '80 m²', '56 m²'],
+      steps: [
+        'Nur der Mantel wird gedeckt: $4 \\cdot \\dfrac{4 \\cdot 5}{2} = 40$ m²'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine quadratische Pyramide hat $a = 10$ cm und $h = 12$ cm. Wie groß ist ihre Oberfläche?',
+      opts: ['360 cm²', '580 cm²', '260 cm²', '340 cm²'],
+      steps: [
+        'Seitenhöhe: $h_s = \\sqrt{144 + 25} = 13$ cm',
+        'Mantel: $4 \\cdot \\dfrac{10 \\cdot 13}{2} = 260$ cm², Grundfläche 100 cm²',
+        '$O = 360$ cm²'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist das Volumen dieser Pyramide ($a = 10$ cm, $h = 12$ cm)?',
+      opts: ['1200 cm³', '400 cm³', '433 cm³', '600 cm³'],
+      steps: [
+        '$V = \\dfrac{1}{3} \\cdot 100 \\cdot 12 = 400$ cm³'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Grundkante einer quadratischen Pyramide wird verdoppelt, die Höhe bleibt gleich. Wie ändert sich das Volumen?',
+      opts: ['Es bleibt gleich.', 'Es wird 4-mal so groß.', 'Es wird 8-mal so groß.', 'Es wird doppelt so groß.'],
+      steps: [
+        'Die Grundfläche $a^2$ wird 4-mal so groß.',
+        'Bei gleicher Höhe wird auch $V$ 4-mal so groß.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Dachraum hat die Form einer quadratischen Pyramide mit 8 m Grundkante und 3 m Höhe. Wie groß ist der Dachraum?',
+      opts: ['32 m³', '24 m³', '64 m³', '192 m³'],
+      steps: [
+        '$V = \\dfrac{1}{3} \\cdot 64 \\cdot 3 = 64$ m³'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

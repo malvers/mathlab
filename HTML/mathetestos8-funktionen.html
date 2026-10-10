@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Funktionen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w08-funktionen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Funktionen',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 8 (LB 2) · 20 Aufgaben: Eindeutige Zuordnung, Argument und Funktionswert, Definitions- und Wertebereich · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 8 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: function or not (1-3, 11, 20), terms argument and value (4-6, 12-14), domain and range (7-10, 19), context (15-18). */
+  questions: [
+    {
+      q: 'Welche Zuordnung ist eine Funktion?',
+      opts: ['Jedem Geburtsjahr werden die Personen zugeordnet, die in diesem Jahr geboren sind.', 'Jeder Postleitzahl werden die Straßen mit dieser Postleitzahl zugeordnet.', 'Jeder Person wird ihr Geburtsjahr zugeordnet.', 'Jeder natürlichen Zahl werden ihre Teiler zugeordnet.'],
+      steps: [
+        'Eine Funktion ordnet jedem Element genau ein Element zu.',
+        'Jede Person hat genau ein Geburtsjahr.',
+        'Zu einem Jahr gehören viele Personen, zu 12 gehören die Teiler 1, 2, 3, 4, 6 und 12, zu einer Postleitzahl viele Straßen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was bedeutet „eindeutig“ bei einer Funktion?',
+      opts: ['Jedem Argument wird genau ein Funktionswert zugeordnet.', 'Alle Funktionswerte sind positiv.', 'Der Graph ist eine Gerade.', 'Jeder Funktionswert kommt genau einmal vor.'],
+      steps: [
+        'Eindeutig heißt: Zu jedem $x$ gibt es genau ein $y$.',
+        'Derselbe Funktionswert darf aber mehrmals vorkommen, z. B. bei $f(x) = x^2$: $f(-2) = f(2) = 4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Wertetabelle gehört zu keiner Funktion?',
+      opts: ['x: 1, 2, 3, 4 und y: 2, 4, 6, 8', 'x: −1, 0, 1, 2 und y: 1, 0, 1, 4', 'x: 1, 2, 3, 2 und y: 4, 5, 6, 7', 'x: 1, 2, 3, 4 und y: 5, 5, 5, 5'],
+      steps: [
+        'In der ersten Tabelle gehören zu $x = 2$ die beiden Werte 5 und 7, das ist nicht eindeutig.',
+        'Gleiche $y$-Werte für verschiedene $x$ sind erlaubt, z. B. immer 5.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für $f(x) = 2x + 1$ gilt $f(3) = 7$. Wie heißen die Zahlen 3 und 7?',
+      opts: ['3 ist die Steigung, 7 ist der Achsenabschnitt.', 'Beide heißen Funktionswerte.', '3 ist der Funktionswert, 7 ist das Argument.', '3 ist das Argument, 7 ist der Funktionswert.'],
+      steps: [
+        'Das Argument ist die Zahl, die man für $x$ einsetzt.',
+        'Der Funktionswert ist das Ergebnis $f(x)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $f(-2)$ für $f(x) = x^2 - 1$.',
+      opts: ['−5', '3', '5', '−3'],
+      steps: [
+        '$f(-2) = (-2)^2 - 1$',
+        '$(-2)^2 = 4$, also $f(-2) = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches Argument hat $f(x) = 3x - 2$ den Funktionswert 10?',
+      opts: ['$\\dfrac{8}{3}$', '4', '28', '12'],
+      steps: [
+        'Gesucht: $3x - 2 = 10$',
+        '$3x = 12$, also $x = 4$.',
+        '28 wäre $f(10)$, also der Funktionswert zum Argument 10.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Zahl gehört nicht zum Definitionsbereich von $f(x) = \\dfrac{1}{x}$?',
+      opts: ['−1', '0,5', '1', '0'],
+      steps: [
+        'Durch 0 kann man nicht teilen.',
+        'Für alle anderen Zahlen ist $\\dfrac{1}{x}$ berechenbar, z. B. $\\dfrac{1}{0{,}5} = 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Funktion $f(x) = x^2$ ist für alle Zahlen $x$ definiert. Welche Zahlen bilden den Wertebereich?',
+      opts: ['alle Zahlen', 'alle $y$ mit $y > 0$', 'alle $y$ mit $y \\geq 0$', 'nur natürliche Zahlen'],
+      steps: [
+        'Ein Quadrat ist nie negativ: $(-3)^2 = 9$, $3^2 = 9$.',
+        'Der Wert 0 wird bei $x = 0$ angenommen.',
+        'Wertebereich: alle Zahlen $y \\geq 0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Parkhaus kostet 2 € pro angefangene Stunde. Man darf höchstens 10 Stunden parken. Welcher Definitionsbereich ist für die Anzahl der Stunden sinnvoll?',
+      opts: ['die Zahlen von −10 bis 10', 'die Zahlen 1 bis 10', 'die Zahlen 2, 4, 6, …, 20', 'alle rationalen Zahlen'],
+      steps: [
+        'Argumente sind die angefangenen Stunden: mindestens 1, höchstens 10.',
+        'Negative Stunden oder mehr als 10 Stunden sind nicht möglich.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Wertebereich gehört zum Parkhaus aus der vorigen Aufgabe (2 € pro angefangene Stunde, 1 bis 10 Stunden)?',
+      opts: ['alle Beträge von 0 € bis 20 €', 'die Zahlen 1 bis 10', 'die Beträge 2 € bis 10 €', 'die Beträge 2 €, 4 €, 6 €, …, 20 €'],
+      steps: [
+        'Funktionswerte sind die Preise: $2 \\cdot 1 = 2$ bis $2 \\cdot 10 = 20$.',
+        'Es kommen nur Vielfache von 2 € vor.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Graph enthält die Punkte $A(2 \\mid 1)$ und $B(2 \\mid 5)$. Kann er zu einer Funktion gehören?',
+      opts: ['Nein, weil 5 größer als 1 ist.', 'Nein, dem Argument 2 wären zwei Funktionswerte zugeordnet.', 'Ja, weil die Punkte verschieden sind.', 'Ja, wenn der Graph eine Gerade ist.'],
+      steps: [
+        'Beide Punkte haben dieselbe $x$-Koordinate 2.',
+        'Eine senkrechte Linie bei $x = 2$ trifft den Graphen zweimal, das ist bei einer Funktion nicht erlaubt.'
+      ],
+      solution: 1
+    },
+    {
+      q: '„Jeder Zahl wird ihr Dreifaches, vermindert um 4, zugeordnet.“ Welche Funktionsgleichung passt?',
+      opts: ['$f(x) = 3 \\cdot (x - 4)$', '$f(x) = 3x - 4$', '$f(x) = x^3 - 4$', '$f(x) = 4 - 3x$'],
+      steps: [
+        'Das Dreifache von $x$: $3x$',
+        'vermindert um 4: $3x - 4$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben ist $f(x) = -2x + 3$. Welcher Funktionswert gehört zu $x = 4$?',
+      opts: ['−11', '5', '11', '−5'],
+      steps: [
+        '$f(4) = -2 \\cdot 4 + 3$',
+        '$f(4) = -8 + 3 = -5$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Punkt liegt auf dem Graphen von $f(x) = 2x + 1$?',
+      opts: ['$P(3 \\mid 7)$', '$R(2 \\mid 4)$', '$Q(7 \\mid 3)$', '$S(-1 \\mid 1)$'],
+      steps: [
+        'Prüfen: $f(3) = 7$, der Punkt $P(3 \\mid 7)$ liegt also auf dem Graphen.',
+        '$f(7) = 15$, $f(2) = 5$, $f(-1) = -1$: die anderen Punkte passen nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Füllen eines Beckens gilt für die Wasserhöhe $h(t) = 5t + 20$ (in cm, $t$ in Minuten). Wie hoch steht das Wasser nach 6 Minuten?',
+      opts: ['50 cm', '25 cm', '31 cm', '150 cm'],
+      steps: [
+        '$h(6) = 5 \\cdot 6 + 20$',
+        '$h(6) = 30 + 20 = 50$, also 50 cm.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Brötchen kostet 0,45 €. Wie heißt die Zuordnung Anzahl der Brötchen → Preis?',
+      opts: ['weder steigend noch fallend', 'keine Funktion', 'proportional', 'antiproportional'],
+      steps: [
+        'Doppelt so viele Brötchen kosten doppelt so viel.',
+        'Der Quotient Preis durch Anzahl ist immer 0,45 €: Die Zuordnung ist proportional.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Vier Personen brauchen für eine Arbeit 6 Tage. Wie lange brauchen drei Personen bei gleichem Tempo?',
+      opts: ['8 Tage', '4,5 Tage', '7 Tage', '5 Tage'],
+      steps: [
+        'Weniger Personen brauchen länger: antiproportional.',
+        'Das Produkt bleibt gleich: $4 \\cdot 6 = 24$ Personentage.',
+        '$24 : 3 = 8$ Tage.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine 24 cm lange Kerze brennt pro Stunde 3 cm ab. Welche Funktion beschreibt die Höhe nach $x$ Stunden?',
+      opts: ['$h(x) = 24 - 3x$', '$h(x) = 24 + 3x$', '$h(x) = 24 - x$', '$h(x) = 3x - 24$'],
+      steps: [
+        'Start: 24 cm.',
+        'Pro Stunde werden 3 cm weniger: $-3x$.',
+        '$h(x) = 24 - 3x$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welche Zeiten $x$ (in Stunden) ist die Kerzenfunktion $h(x) = 24 - 3x$ sinnvoll?',
+      opts: ['$x \\geq 0$', '$0 \\leq x \\leq 3$', '$0 \\leq x \\leq 8$', '$0 \\leq x \\leq 24$'],
+      steps: [
+        'Die Kerze ist abgebrannt, wenn $h(x) = 0$ ist: $24 - 3x = 0$, also $x = 8$.',
+        'Sinnvoll sind also die Zeiten von 0 bis 8 Stunden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Manche Personen haben zwei Handynummern. Ist die Zuordnung Person → Handynummer dann eine Funktion?',
+      opts: ['Ja, jede Nummer gehört zu einer Person.', 'Ja, Zuordnungen sind immer Funktionen.', 'Nein, weil Handynummern keine Zahlen sind.', 'Nein, einer Person wären zwei Werte zugeordnet.'],
+      steps: [
+        'Bei einer Funktion bekommt jedes Argument genau einen Wert.',
+        'Eine Person mit zwei Nummern verletzt die Eindeutigkeit.',
+        'Umgekehrt (Nummer → Person) wäre es eindeutig.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

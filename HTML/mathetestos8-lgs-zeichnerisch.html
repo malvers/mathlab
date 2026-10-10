@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gleichungssysteme zeichnerisch lösen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w12-lgs-zeichnerisch',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Gleichungssysteme zeichnerisch lösen',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 12 (LB 2) · 20 Aufgaben: Schnittpunkt zweier Geraden, Umstellen nach y, Probe, Sachaufgaben · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 12 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: meaning of the solution (1, 11), intersections (2-3, 6, 12, 16-17, 19), solving for y (4-5), special cases (7-8, 18), context (9-10, 13-15, 20). Problem 9/10 after Sunzi Suanjing. */
+  questions: [
+    {
+      q: 'Was ist beim zeichnerischen Lösen die Lösung eines linearen Gleichungssystems?',
+      opts: ['die Koordinaten des Schnittpunkts der beiden Geraden', 'die beiden Steigungen', 'die Schnittpunkte mit der $y$-Achse', 'die beiden Nullstellen'],
+      steps: [
+        'Jede Gleichung gehört zu einer Geraden.',
+        'Ein Punkt erfüllt beide Gleichungen genau dann, wenn er auf beiden Geraden liegt: im Schnittpunkt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In welchem Punkt schneiden sich $y = x + 1$ und $y = -x + 5$?',
+      opts: ['$(3 \\mid 2)$', '$(2 \\mid 3)$', '$(0 \\mid 1)$', '$(1 \\mid 5)$'],
+      steps: [
+        'Gleichsetzen oder zeichnen: $x + 1 = -x + 5$, also $2x = 4$ und $x = 2$.',
+        '$y = 2 + 1 = 3$',
+        'Probe in der zweiten Gleichung: $-2 + 5 = 3$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welches Zahlenpaar löst beide Gleichungen $y = 2x + 1$ und $y = x + 2$?',
+      opts: ['$x = 2$, $y = 5$', '$x = 0$, $y = 2$', '$x = 3$, $y = 1$', '$x = 1$, $y = 3$'],
+      steps: [
+        'Probe mit $(1 \\mid 3)$: $2 \\cdot 1 + 1 = 3$ und $1 + 2 = 3$, beide stimmen.',
+        '$(0 \\mid 2)$ erfüllt nur die zweite, $(2 \\mid 5)$ nur die erste Gleichung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Stelle $2x + y = 6$ nach $y$ um.',
+      opts: ['$y = 3 - x$', '$y = -2x + 6$', '$y = 6 - x$', '$y = 2x + 6$'],
+      steps: [
+        'Auf beiden Seiten $2x$ subtrahieren.',
+        '$y = 6 - 2x = -2x + 6$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Stelle $3x - y = 2$ nach $y$ um.',
+      opts: ['$y = 3x + 2$', '$y = 2 - 3x$', '$y = 3x - 2$', '$y = -3x + 2$'],
+      steps: [
+        '$-3x$ auf beiden Seiten: $-y = -3x + 2$',
+        'Mit $-1$ multiplizieren: $y = 3x - 2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In welchem Punkt schneiden sich $y = 2x - 1$ und $y = 3$?',
+      opts: ['$(3 \\mid 2)$', '$(2 \\mid 3)$', '$(0 \\mid 3)$', '$(3 \\mid 5)$'],
+      steps: [
+        '$y = 3$ ist eine waagerechte Gerade.',
+        '$2x - 1 = 3$, also $x = 2$.',
+        'Schnittpunkt $(2 \\mid 3)$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Lösungen hat das System $y = 2x + 1$ und $y = 2x - 3$?',
+      opts: ['genau eine', 'unendlich viele', 'genau zwei', 'keine'],
+      steps: [
+        'Beide Geraden haben die Steigung 2, aber verschiedene $y$-Achsenabschnitte.',
+        'Sie sind parallel und schneiden sich nie.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Lösungen hat das System $y = x + 2$ und $2y = 2x + 4$?',
+      opts: ['genau zwei', 'keine', 'unendlich viele', 'genau eine'],
+      steps: [
+        'Die zweite Gleichung durch 2 geteilt: $y = x + 2$.',
+        'Beide Gleichungen beschreiben dieselbe Gerade; jeder Punkt der Geraden ist Lösung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einem Käfig sitzen Fasane und Kaninchen, zusammen 35 Köpfe und 94 Beine (nach dem chinesischen Rechenbuch Sunzi Suanjing). Welches System passt? ($f$: Fasane, $k$: Kaninchen)',
+      opts: ['$f + k = 35$ und $2f + 4k = 94$', '$f + k = 35$ und $4f + 2k = 94$', '$2f + 4k = 35$ und $f + k = 94$', '$f + k = 94$ und $2f + 4k = 35$'],
+      steps: [
+        'Jedes Tier hat einen Kopf: $f + k = 35$.',
+        'Fasane haben 2 Beine, Kaninchen 4: $2f + 4k = 94$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse das Fasanen-Kaninchen-Rätsel: $f + k = 35$ und $2f + 4k = 94$.',
+      opts: ['20 Fasane und 15 Kaninchen', '23 Fasane und 12 Kaninchen', '12 Fasane und 23 Kaninchen', '17 Fasane und 18 Kaninchen'],
+      steps: [
+        'Nach $f$ umstellen: $f = 35 - k$, einsetzen: $2 \\cdot (35 - k) + 4k = 94$.',
+        '$70 + 2k = 94$, also $k = 12$ und $f = 23$.',
+        'Probe: $2 \\cdot 23 + 4 \\cdot 12 = 46 + 48 = 94$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum macht man nach dem Ablesen des Schnittpunkts eine Probe durch Einsetzen?',
+      opts: ['Weil der Schnittpunkt immer falsch ist.', 'Weil man sonst die Steigung nicht kennt.', 'Weil das Ablesen aus der Zeichnung ungenau sein kann.', 'Eine Probe ist nicht nötig.'],
+      steps: [
+        'Liegt der Schnittpunkt nicht genau auf Gitterpunkten, kann man sich leicht verschätzen.',
+        'Einsetzen in beide Gleichungen zeigt, ob das Paar wirklich passt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In welchem Punkt schneiden sich $y = -0{,}5x + 4$ und $y = x - 2$?',
+      opts: ['$(2 \\mid 4)$', '$(4 \\mid 2)$', '$(4 \\mid 6)$', '$(6 \\mid 4)$'],
+      steps: [
+        '$-0{,}5x + 4 = x - 2$, also $6 = 1{,}5x$.',
+        '$x = 4$, $y = 4 - 2 = 2$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Erwachsene und drei Jugendliche zahlen im Kino 41 €, ein Erwachsener und zwei Jugendliche 24 €. Was kostet eine Karte für Erwachsene?',
+      opts: ['8,20 €', '7 €', '12 €', '10 €'],
+      steps: [
+        '$2e + 3j = 41$ und $e + 2j = 24$',
+        'Aus der zweiten: $e = 24 - 2j$; eingesetzt: $48 - 4j + 3j = 41$, also $j = 7$.',
+        '$e = 24 - 14 = 10$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Zahlen haben die Summe 12 und die Differenz 4. Welches System passt?',
+      opts: ['$x + y = 12$ und $x - y = 4$', '$x + y = 12$ und $x + 4 = y + 12$', '$x \\cdot y = 12$ und $x - y = 4$', '$x + y = 4$ und $x - y = 12$'],
+      steps: [
+        'Summe: $x + y = 12$',
+        'Differenz: $x - y = 4$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $x + y = 12$ und $x - y = 4$.',
+      opts: ['$x = 16$, $y = -4$', '$x = 4$, $y = 8$', '$x = 6$, $y = 6$', '$x = 8$, $y = 4$'],
+      steps: [
+        'Addieren: $2x = 16$, also $x = 8$.',
+        '$y = 12 - 8 = 4$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Lösungen hat das System $y = 3x + 1$ und $y = -x + 1$?',
+      opts: ['genau eine', 'keine', 'genau zwei', 'unendlich viele'],
+      steps: [
+        'Die Steigungen 3 und −1 sind verschieden, die Geraden schneiden sich also genau einmal.',
+        'Hier liegt der Schnittpunkt auf der $y$-Achse.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo schneiden sich die Geraden $y = 3x + 1$ und $y = -x + 1$?',
+      opts: ['$(1 \\mid 4)$', '$(-1 \\mid 2)$', '$(1 \\mid 0)$', '$(0 \\mid 1)$'],
+      steps: [
+        'Beide haben den $y$-Achsenabschnitt 1.',
+        '$3x + 1 = -x + 1$ ergibt $x = 0$, also $(0 \\mid 1)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Gerade hat mit $y = 2x + 1$ keinen gemeinsamen Punkt?',
+      opts: ['$y = 0{,}5x - 5$', '$y = -2x + 1$', '$y = 2x - 5$', '$y = x + 1$'],
+      steps: [
+        'Keinen gemeinsamen Punkt haben nur parallele, verschiedene Geraden.',
+        'Gleiche Steigung 2, anderes $n$: $y = 2x - 5$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In welchem Punkt schneiden sich $y = x$ und $y = -2x + 6$?',
+      opts: ['$(3 \\mid 3)$', '$(6 \\mid 6)$', '$(2 \\mid 2)$', '$(2 \\mid 4)$'],
+      steps: [
+        '$x = -2x + 6$, also $3x = 6$ und $x = 2$.',
+        '$y = x = 2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Kerze A ist 20 cm hoch und brennt 2 cm pro Stunde ab, Kerze B ist 15 cm hoch und brennt 1 cm pro Stunde ab. Wann sind beide gleich hoch?',
+      opts: ['nach 5 Stunden, beide 10 cm', 'nach 35 Stunden', 'nie', 'nach 5 Stunden, beide 5 cm'],
+      steps: [
+        'A: $h = 20 - 2t$, B: $h = 15 - t$',
+        '$20 - 2t = 15 - t$, also $t = 5$.',
+        'Höhe: $15 - 5 = 10$ cm'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

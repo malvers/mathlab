@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Umfang und Flächeninhalt des Kreises — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w19-kreis-umfang-flaeche',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Umfang und Flächeninhalt des Kreises',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 19 (LB 3) · 20 Aufgaben: Die Zahl π, u = π · d, A = π · r², Radius zurückrechnen, Sachaufgaben · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* All values with the calculator key for pi, rounded at the end. Blocks: pi (1, 8-9), circumference (2-3, 6, 12, 17-18, 20), area (4-5, 7, 15-16), comparisons and parts (10-11, 13-14, 19). */
+  questions: [
+    {
+      q: 'Was erhält man, wenn man bei jedem Kreis den Umfang durch den Durchmesser teilt?',
+      opts: ['immer 2', 'immer den Radius', 'je nach Kreis eine andere Zahl', 'immer dieselbe Zahl $\\pi \\approx 3{,}14$'],
+      steps: [
+        'Das Verhältnis $\\dfrac{u}{d}$ ist bei allen Kreisen gleich.',
+        'Diese Kreiszahl heißt $\\pi$, $\\pi = 3{,}14159\\ldots$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kreis hat den Durchmesser 10 cm. Wie groß ist sein Umfang (gerundet)?',
+      opts: ['31,4 cm', '15,7 cm', '78,5 cm', '62,8 cm'],
+      steps: [
+        '$u = \\pi \\cdot d = \\pi \\cdot 10$',
+        '$u \\approx 31{,}4$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kreis hat den Radius 6 cm. Wie groß ist sein Umfang (gerundet)?',
+      opts: ['37,7 cm', '36 cm', '113,1 cm', '18,8 cm'],
+      steps: [
+        '$u = 2 \\cdot \\pi \\cdot r = 2 \\cdot \\pi \\cdot 6$',
+        '$u = 12\\pi \\approx 37{,}7$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kreis hat den Radius 5 cm. Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['15,7 cm²', '25 cm²', '78,5 cm²', '31,4 cm²'],
+      steps: [
+        '$A = \\pi \\cdot r^2 = \\pi \\cdot 25$',
+        '$A \\approx 78{,}5$ cm²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Kreis hat den Durchmesser 12 cm. Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['144 cm²', '113,1 cm²', '452,4 cm²', '37,7 cm²'],
+      steps: [
+        'Erst den Radius bestimmen: $r = 6$ cm.',
+        '$A = \\pi \\cdot 6^2 = 36\\pi \\approx 113{,}1$ cm²',
+        '452,4 cm² erhält man, wenn man fälschlich $d$ statt $r$ quadriert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kreis hat den Umfang 50 cm. Wie groß ist sein Radius (gerundet)?',
+      opts: ['15,9 cm', '4,0 cm', '25 cm', '8,0 cm'],
+      steps: [
+        '$u = 2\\pi r$, also $r = \\dfrac{u}{2\\pi}$',
+        '$r = \\dfrac{50}{2\\pi} \\approx 7{,}96$, also etwa 8,0 cm.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kreis hat den Flächeninhalt 200 cm². Wie groß ist sein Radius (gerundet)?',
+      opts: ['31,8 cm', '8,0 cm', '63,7 cm', '14,1 cm'],
+      steps: [
+        '$A = \\pi r^2$, also $r^2 = \\dfrac{A}{\\pi} = \\dfrac{200}{\\pi} \\approx 63{,}66$',
+        '$r = \\sqrt{63{,}66} \\approx 7{,}98$, also etwa 8,0 cm.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum kann man $\\pi$ nicht genau als Bruch oder als abbrechende Dezimalzahl schreiben?',
+      opts: ['$\\pi$ ist keine rationale Zahl; seine Ziffern enden nie und werden nicht periodisch.', '$\\pi$ ist genau 3,14.', '$\\pi$ ist genau $\\dfrac{22}{7}$, das kann man nur schlecht ausrechnen.', '$\\pi$ ist eine negative Zahl.'],
+      steps: [
+        'Rationale Zahlen haben abbrechende oder periodische Dezimaldarstellungen.',
+        '$\\pi = 3{,}14159265\\ldots$ hat keine Periode: $\\pi$ ist nichtrational.',
+        'Brüche wie $\\dfrac{22}{7}$ sind nur Näherungswerte.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Archimedes zeigte um 250 vor Christus, dass $\\pi$ etwas kleiner als $\\dfrac{22}{7}$ ist. Wie groß ist $\\dfrac{22}{7}$ auf drei Nachkommastellen?',
+      opts: ['3,141', '3,714', '3,143', '3,142'],
+      steps: [
+        '$22 : 7 = 3{,}142857\\ldots$',
+        'Gerundet: 3,143. Zum Vergleich: $\\pi \\approx 3{,}142$.',
+        'Quelle: Archimedes, Kreismessung; er fand $3\\tfrac{10}{71} < \\pi < 3\\tfrac{1}{7}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Radius eines Kreises wird verdoppelt. Wie ändert sich der Flächeninhalt?',
+      opts: ['Er wird 8-mal so groß.', 'Er wird doppelt so groß.', 'Er bleibt gleich.', 'Er wird 4-mal so groß.'],
+      steps: [
+        '$A = \\pi r^2$: Der Radius steht im Quadrat.',
+        '$\\pi \\cdot (2r)^2 = 4 \\cdot \\pi r^2$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Radius eines Kreises wird verdoppelt. Wie ändert sich der Umfang?',
+      opts: ['Er bleibt gleich.', 'Er wird doppelt so groß.', 'Er wird 4-mal so groß.', 'Er wächst um 2 cm.'],
+      steps: [
+        '$u = 2\\pi r$: Der Umfang ist proportional zum Radius.',
+        '$2\\pi \\cdot 2r = 2 \\cdot 2\\pi r$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Riesenrad hat den Durchmesser 60 m. Welchen Weg legt eine Gondel bei einer Umdrehung zurück (gerundet)?',
+      opts: ['377,0 m', '94,2 m', '2827,4 m', '188,5 m'],
+      steps: [
+        '$u = \\pi \\cdot 60$',
+        '$u \\approx 188{,}5$ m'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist mehr Pizza: eine Pizza mit 30 cm Durchmesser oder zwei Pizzen mit je 20 cm Durchmesser?',
+      opts: ['die zwei Pizzen mit 20 cm', 'die eine Pizza mit 30 cm', 'Das kann man ohne Gewicht nicht sagen.', 'beides gleich viel'],
+      steps: [
+        '30 cm: $A = \\pi \\cdot 15^2 \\approx 706{,}9$ cm²',
+        '20 cm: $A = \\pi \\cdot 10^2 \\approx 314{,}2$ cm², zwei davon $\\approx 628{,}3$ cm²',
+        'Die große Pizza hat mehr Fläche.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Halbkreis hat den Durchmesser 8 cm. Wie groß ist der Umfang der ganzen Halbkreisfigur (Bogen und Durchmesser, gerundet)?',
+      opts: ['33,1 cm', '12,6 cm', '20,6 cm', '25,1 cm'],
+      steps: [
+        'Bogen: $\\dfrac{1}{2} \\cdot \\pi \\cdot 8 \\approx 12{,}57$ cm',
+        'Dazu der Durchmesser: $12{,}57 + 8 \\approx 20{,}6$ cm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Viertelkreis hat den Radius 4 cm. Wie groß ist sein Flächeninhalt (gerundet)?',
+      opts: ['12,6 cm²', '6,3 cm²', '50,3 cm²', '4 cm²'],
+      steps: [
+        'Ganzer Kreis: $\\pi \\cdot 4^2 = 16\\pi \\approx 50{,}27$ cm²',
+        'Ein Viertel: $4\\pi \\approx 12{,}6$ cm²'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Rasensprenger dreht sich im Kreis und spritzt 6 m weit. Wie groß ist die bewässerte Fläche (gerundet)?',
+      opts: ['36 m²', '37,7 m²', '113,1 m²', '452,4 m²'],
+      steps: [
+        '$r = 6$ m',
+        '$A = \\pi \\cdot 36 \\approx 113{,}1$ m²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Minutenzeiger einer Turmuhr ist 1,5 m lang. Welchen Weg legt seine Spitze in einer Stunde zurück (gerundet)?',
+      opts: ['9,4 m', '7,1 m', '4,7 m', '1,5 m'],
+      steps: [
+        'In einer Stunde läuft die Spitze einmal ganz herum.',
+        '$u = 2 \\cdot \\pi \\cdot 1{,}5 = 3\\pi \\approx 9{,}4$ m'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Erde hat am Äquator einen Radius von etwa 6378 km. Wie lang ist der Äquator ungefähr?',
+      opts: ['etwa 20 000 km', 'etwa 40 000 km', 'etwa 128 000 km', 'etwa 4000 km'],
+      steps: [
+        '$u = 2 \\cdot \\pi \\cdot 6378 \\approx 40\\,074$ km',
+        'Also rund 40 000 km.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In ein Quadrat ist ein Kreis gezeichnet, der alle vier Seiten berührt. Welchen Anteil des Quadrats bedeckt der Kreis ungefähr?',
+      opts: ['etwa 91 %', 'etwa 50 %', 'etwa 79 %', 'etwa 64 %'],
+      steps: [
+        'Ist der Radius $r$, so hat das Quadrat die Seitenlänge $2r$ und den Flächeninhalt $4r^2$.',
+        'Anteil: $\\dfrac{\\pi r^2}{4r^2} = \\dfrac{\\pi}{4} \\approx 0{,}785$, also etwa 79 %.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'An einem runden Tisch sollen 8 Personen mit je 60 cm Platz am Rand sitzen. Welchen Durchmesser braucht der Tisch mindestens (gerundet)?',
+      opts: ['4,80 m', '3,06 m', '0,76 m', '1,53 m'],
+      steps: [
+        'Benötigter Umfang: $8 \\cdot 60 = 480$ cm',
+        '$d = \\dfrac{u}{\\pi} = \\dfrac{480}{\\pi} \\approx 152{,}8$ cm, also etwa 1,53 m.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

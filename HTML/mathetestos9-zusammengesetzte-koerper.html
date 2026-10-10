@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zusammengesetzte Körper — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w18-zusammengesetzte-koerper',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zusammengesetzte Körper',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 18 (LB 2) · 20 Aufgaben: Türme, Silos, Werkstücke mit Bohrung, Kapseln, Behälter, Materialbedarf und Oberfläche · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 18 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Values with the calculator key for pi, rounded. Blocks: buildings (1-4, 11, 18), workpieces and mass (5-6, 9), small bodies (7-8, 12-14, 20), containers (15, 19), surfaces and saving material (10, 16-17). */
+  questions: [
+    {
+      q: 'Ein Turm besteht aus einem Zylinder ($r = 3$ m, $h = 10$ m) mit einem Kegeldach ($h = 4$ m). Wie groß ist sein Volumen (gerundet)?',
+      opts: ['37,7 m³', '282,7 m³', '320,4 m³', '395,8 m³'],
+      steps: [
+        'Zylinder: $\\pi \\cdot 9 \\cdot 10 = 90\\pi$',
+        'Kegel: $\\dfrac{1}{3}\\pi \\cdot 9 \\cdot 4 = 12\\pi$',
+        'Zusammen $102\\pi \\approx 320{,}4$ m³'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist die Außenfläche dieses Turms ohne Boden (Zylindermantel und Kegelmantel, gerundet)?',
+      opts: ['292,2 m²', '263,9 m²', '235,6 m²', '188,5 m²'],
+      steps: [
+        'Zylindermantel: $2\\pi \\cdot 3 \\cdot 10 = 60\\pi$',
+        'Kegel: $s = \\sqrt{9 + 16} = 5$ m, Mantel $\\pi \\cdot 3 \\cdot 5 = 15\\pi$',
+        'Die Kreisfläche zwischen Zylinder und Dach ist innen und zählt nicht: $75\\pi \\approx 235{,}6$ m²'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Silo besteht aus einem Zylinder ($r = 2$ m, $h = 8$ m) mit einer Halbkugel obendrauf. Wie viel fasst es (gerundet)?',
+      opts: ['117,3 m³', '33,5 m³', '134,0 m³', '100,5 m³'],
+      steps: [
+        'Zylinder: $\\pi \\cdot 4 \\cdot 8 = 32\\pi$',
+        'Halbkugel: $\\dfrac{2}{3}\\pi \\cdot 8 = \\dfrac{16}{3}\\pi$',
+        'Zusammen $\\approx 117{,}3$ m³'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Haus ist ein Quader (10 m × 8 m × 6 m) mit Satteldach (Prisma, Giebeldreieck mit 8 m Grundseite und 3 m Höhe, 10 m lang). Wie groß ist der umbaute Raum?',
+      opts: ['480 m³', '720 m³', '600 m³', '540 m³'],
+      steps: [
+        'Quader: $10 \\cdot 8 \\cdot 6 = 480$ m³',
+        'Dach: $\\dfrac{8 \\cdot 3}{2} \\cdot 10 = 120$ m³',
+        'Zusammen 600 m³'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Durch einen Stahlwürfel mit 10 cm Kantenlänge wird ein Loch mit 4 cm Durchmesser gebohrt (ganz durch). Wie groß ist das Restvolumen (gerundet)?',
+      opts: ['125,7 cm³', '960 cm³', '497,3 cm³', '874,3 cm³'],
+      steps: [
+        'Bohrung: Zylinder mit $r = 2$ cm, $h = 10$ cm: $40\\pi \\approx 125{,}7$ cm³',
+        '$1000 - 125{,}7 \\approx 874{,}3$ cm³'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie schwer ist dieses Werkstück aus Stahl (Dichte 7,8 g/cm³, gerundet)?',
+      opts: ['68,2 kg', '6,82 kg', '7,80 kg', '0,98 kg'],
+      steps: [
+        '$m = 7{,}8 \\cdot 874{,}3 \\approx 6820$ g, also etwa 6,82 kg.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Eistüte ist ein Kegel ($r = 3$ cm, $h = 10$ cm), oben liegt eine Halbkugel Eis mit demselben Radius. Wie viel Eis ist es insgesamt, wenn auch die Waffel gefüllt ist (gerundet)?',
+      opts: ['94,2 cm³', '150,8 cm³', '207,3 cm³', '56,5 cm³'],
+      steps: [
+        'Kegel: $\\dfrac{1}{3}\\pi \\cdot 9 \\cdot 10 = 30\\pi$',
+        'Halbkugel: $\\dfrac{2}{3}\\pi \\cdot 27 = 18\\pi$',
+        'Zusammen $48\\pi \\approx 150{,}8$ cm³'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf einem Würfel mit 4 cm Kantenlänge sitzt eine quadratische Pyramide mit gleicher Grundfläche und 3 cm Höhe. Wie groß ist die Oberfläche des ganzen Körpers (gerundet)?',
+      opts: ['124,8 cm²', '96 cm²', '80 cm²', '108,8 cm²'],
+      steps: [
+        'Würfel ohne Deckfläche: $5 \\cdot 16 = 80$ cm²',
+        'Pyramide: $h_s = \\sqrt{9 + 4} \\approx 3{,}606$ cm, Mantel $4 \\cdot \\dfrac{4 \\cdot 3{,}606}{2} \\approx 28{,}8$ cm²',
+        'Zusammen etwa 108,8 cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rohrstück ist 1 m lang, außen 10 cm und innen 8 cm dick. Wie viel Material hat es (gerundet)?',
+      opts: ['2827,4 cm³', '5026,5 cm³', '7854,0 cm³', '282,7 cm³'],
+      steps: [
+        'Radien 5 cm und 4 cm, Länge 100 cm.',
+        '$V = \\pi \\cdot (25 - 16) \\cdot 100 = 900\\pi \\approx 2827{,}4$ cm³'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Flächen zählen bei einem zusammengesetzten Körper nicht zur Oberfläche?',
+      opts: ['die Flächen der Spitzen', 'die Flächen, an denen die Teilkörper aneinanderstoßen', 'die gekrümmten Flächen', 'die Grundflächen'],
+      steps: [
+        'Berührflächen liegen innen und sind von außen nicht sichtbar.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Außenfläche des Turms aus Aufgabe 2 (etwa 235,6 m²) wird gestrichen. Man braucht 0,2 Liter Farbe pro m². Wie viel Farbe braucht man (gerundet)?',
+      opts: ['4,7 l', '23,6 l', '1178 l', '47,1 l'],
+      steps: [
+        '$235{,}6 \\cdot 0{,}2 \\approx 47{,}1$ l'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Kapsel besteht aus einem Zylinder ($r = 1$ cm, $h = 4$ cm) mit je einer Halbkugel an beiden Enden. Wie groß ist ihr Volumen (gerundet)?',
+      opts: ['12,57 cm³', '16,76 cm³', '20,94 cm³', '14,66 cm³'],
+      steps: [
+        'Zwei Halbkugeln ergeben eine Kugel: $\\dfrac{4}{3}\\pi$',
+        'Zylinder: $4\\pi$, zusammen $\\dfrac{16}{3}\\pi \\approx 16{,}76$ cm³'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Oberfläche dieser Kapsel (gerundet)?',
+      opts: ['25,13 cm²', '43,98 cm²', '31,42 cm²', '37,70 cm²'],
+      steps: [
+        'Zylindermantel: $2\\pi \\cdot 1 \\cdot 4 = 8\\pi$, Kugeloberfläche: $4\\pi$',
+        'Zusammen $12\\pi \\approx 37{,}70$ cm²'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Spielfigur besteht aus einem Kegel ($r = 1$ cm, $h = 3$ cm) und einer Kugel ($r = 0{,}8$ cm) als Kopf. Wie groß ist ihr Volumen (gerundet)?',
+      opts: ['3,14 cm³', '11,57 cm³', '2,14 cm³', '5,29 cm³'],
+      steps: [
+        'Kegel: $\\dfrac{1}{3}\\pi \\cdot 1 \\cdot 3 = \\pi \\approx 3{,}14$ cm³',
+        'Kugel: $\\dfrac{4}{3}\\pi \\cdot 0{,}512 \\approx 2{,}14$ cm³',
+        'Zusammen etwa 5,29 cm³'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Behälter besteht aus einem Quader (2 m × 1 m × 1 m) mit einem liegenden Halbzylinder obendrauf ($r = 0{,}5$ m, 2 m lang). Wie viele Liter fasst er (gerundet)?',
+      opts: ['2785 l', '3571 l', '2393 l', '2000 l'],
+      steps: [
+        'Quader: 2 m³',
+        'Halbzylinder: $\\dfrac{1}{2}\\pi \\cdot 0{,}25 \\cdot 2 \\approx 0{,}785$ m³',
+        'Zusammen $\\approx 2{,}785$ m³ = 2785 l'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Körper hat bei gleichem Volumen die kleinste Oberfläche?',
+      opts: ['die Kugel', 'die Pyramide', 'der Würfel', 'der Zylinder'],
+      steps: [
+        'Die Kugel umschließt ein Volumen mit der geringsten Hülle.',
+        'Deshalb sind Seifenblasen und Wassertropfen rund.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum sind viele Konservendosen etwa so hoch wie breit?',
+      opts: ['Weil sie dann mehr Volumen haben als jede andere Dose.', 'Weil sie so besser rollen.', 'Bei Höhe gleich Durchmesser braucht ein Zylinder für sein Volumen am wenigsten Blech.', 'Weil Kugeldosen verboten sind.'],
+      steps: [
+        'Für ein festes Volumen ist die Oberfläche eines Zylinders bei $h = 2r$ am kleinsten.',
+        'Das spart Material und Ressourcen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Kirchturm besteht aus einem Quader (6 m × 6 m × 20 m) und einer quadratischen Pyramide (6 m Grundkante, 9 m hoch). Wie groß ist der umbaute Raum?',
+      opts: ['936 m³', '1044 m³', '828 m³', '720 m³'],
+      steps: [
+        'Quader: $36 \\cdot 20 = 720$ m³',
+        'Pyramide: $\\dfrac{1}{3} \\cdot 36 \\cdot 9 = 108$ m³',
+        'Zusammen 828 m³'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Schüssel ist innen eine Halbkugel mit 12 cm Radius. Wie viel passt hinein (gerundet)?',
+      opts: ['etwa 1,8 l', 'etwa 3,6 l', 'etwa 7,2 l', 'etwa 36 l'],
+      steps: [
+        '$V = \\dfrac{2}{3}\\pi \\cdot 1728 = 1152\\pi \\approx 3619$ cm³',
+        'Also etwa 3,6 l.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Trichter besteht aus einem Kegel ($r = 6$ cm, $h = 8$ cm) und einem Auslaufrohr ($r = 0{,}5$ cm, 10 cm lang). Wie viel Wasser fasst er (gerundet)?',
+      opts: ['309,4 cm³', '7,9 cm³', '912,6 cm³', '301,6 cm³'],
+      steps: [
+        'Kegel: $\\dfrac{1}{3}\\pi \\cdot 36 \\cdot 8 = 96\\pi$',
+        'Rohr: $\\pi \\cdot 0{,}25 \\cdot 10 = 2{,}5\\pi$',
+        'Zusammen $98{,}5\\pi \\approx 309{,}4$ cm³'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Höhen und Kanten der Pyramide — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w12-pyramide-hoehen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Höhen und Kanten der Pyramide',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 12 (LB 2) · 20 Aufgaben: Körperhöhe h, Seitenhöhe h_s, Seitenkante s, Stützdreiecke, Neigungswinkel · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 12 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Square pyramid with base edge a unless stated, values rounded. Blocks: support triangles (5-6, 18), side height (1, 3, 9, 14, 16-17, 19), lateral edge (2, 4, 8, 15), totals and angles (10-13, 20), famous pyramids (7-8, 14). */
+  questions: [
+    {
+      q: 'Eine quadratische Pyramide hat $a = 6$ cm und $h = 4$ cm. Wie groß ist die Seitenhöhe $h_s$?',
+      opts: ['4,5 cm', '5 cm', '7,2 cm', '10 cm'],
+      steps: [
+        'Stützdreieck aus $h$, $\\dfrac{a}{2}$ und $h_s$.',
+        '$h_s = \\sqrt{4^2 + 3^2} = \\sqrt{25} = 5$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lang ist bei derselben Pyramide ($a = 6$ cm, $h = 4$ cm) eine Seitenkante $s$ (gerundet)?',
+      opts: ['5,83 cm', '8,49 cm', '5 cm', '7,21 cm'],
+      steps: [
+        'Halbe Diagonale der Grundfläche: $\\dfrac{6\\sqrt{2}}{2} \\approx 4{,}24$ cm, also $\\left(\\dfrac{d}{2}\\right)^2 = 18$.',
+        '$s = \\sqrt{16 + 18} = \\sqrt{34} \\approx 5{,}83$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine quadratische Pyramide hat $a = 12$ cm und $h_s = 10$ cm. Wie hoch ist sie?',
+      opts: ['11,7 cm', '6 cm', '15,6 cm', '8 cm'],
+      steps: [
+        '$h = \\sqrt{h_s^2 - \\left(\\dfrac{a}{2}\\right)^2} = \\sqrt{100 - 36} = 8$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lang ist eine Seitenkante dieser Pyramide ($a = 12$ cm, $h_s = 10$ cm, gerundet)?',
+      opts: ['10 cm', '11,66 cm', '13,42 cm', '8 cm'],
+      steps: [
+        'Im Seitendreieck: $s = \\sqrt{h_s^2 + \\left(\\dfrac{a}{2}\\right)^2} = \\sqrt{100 + 36}$',
+        '$s = \\sqrt{136} \\approx 11{,}66$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus welchen Strecken besteht das Stützdreieck für die Seitenhöhe $h_s$?',
+      opts: ['$h_s$, $s$ und die Diagonale', 'Grundkante $a$, Seitenkante $s$ und $h$', 'Körperhöhe $h$, halbe Grundkante $\\dfrac{a}{2}$ und $h_s$', 'Körperhöhe $h$, halbe Diagonale und $s$'],
+      steps: [
+        'Die Höhe trifft die Mitte der Grundfläche, $h_s$ die Mitte einer Grundkante.',
+        'Der Abstand dieser beiden Punkte ist $\\dfrac{a}{2}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Aus welchen Strecken besteht das Stützdreieck für die Seitenkante $s$?',
+      opts: ['$a$, $d$ und $h$', 'Körperhöhe $h$, halbe Grundkante und $s$', '$h_s$, $a$ und $s$', 'Körperhöhe $h$, halbe Diagonale $\\dfrac{d}{2}$ und $s$'],
+      steps: [
+        'Die Seitenkante läuft von einer Ecke zur Spitze.',
+        'Von der Ecke bis zur Mitte der Grundfläche ist es eine halbe Diagonale.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Cheops-Pyramide hatte ursprünglich etwa $a = 230$ m und $h = 146{,}6$ m. Wie groß war ihre Seitenhöhe (gerundet)?',
+      opts: ['186,3 m', '219,0 m', '261,0 m', '115,0 m'],
+      steps: [
+        '$h_s = \\sqrt{146{,}6^2 + 115^2}$',
+        '$h_s = \\sqrt{34\\,716{,}56} \\approx 186{,}3$ m'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lang war eine Seitenkante der Cheops-Pyramide ($a = 230$ m, $h = 146{,}6$ m, gerundet)?',
+      opts: ['275,7 m', '219,0 m', '162,6 m', '186,3 m'],
+      steps: [
+        '$\\left(\\dfrac{d}{2}\\right)^2 = \\dfrac{a^2}{2} = 26\\,450$',
+        '$s = \\sqrt{146{,}6^2 + 26\\,450} \\approx 219{,}0$ m'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine rechteckige Pyramide hat die Grundkanten 8 cm und 6 cm und die Höhe 12 cm. Wie groß ist die Seitenhöhe auf die 8-cm-Kante (gerundet)?',
+      opts: ['13 cm', '14,42 cm', '12,37 cm', '12,65 cm'],
+      steps: [
+        'Zur Mitte der 8-cm-Kante ist es von der Grundflächenmitte die halbe andere Kante: 3 cm.',
+        '$h_a = \\sqrt{144 + 9} = \\sqrt{153} \\approx 12{,}37$ cm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine quadratische Pyramide hat $a = 6$ cm und $s = 5$ cm. Wie lang sind alle Kanten zusammen?',
+      opts: ['24 cm', '20 cm', '30 cm', '44 cm'],
+      steps: [
+        '4 Grundkanten: 24 cm, 4 Seitenkanten: 20 cm.',
+        'Zusammen 44 cm.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Tetraeder hat 6 cm Kantenlänge. Wie hoch ist eine seiner Seitenflächen (gerundet)?',
+      opts: ['6 cm', '5,20 cm', '3 cm', '4,90 cm'],
+      steps: [
+        'Jede Seitenfläche ist ein gleichseitiges Dreieck.',
+        '$h = \\sqrt{36 - 9} = \\sqrt{27} \\approx 5{,}20$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie stark ist eine Seitenfläche der Pyramide mit $a = 6$ cm und $h = 4$ cm gegen die Grundfläche geneigt (gerundet)?',
+      opts: ['$53{,}13^\\circ$', '$33{,}69^\\circ$', '$43{,}31^\\circ$', '$36{,}87^\\circ$'],
+      steps: [
+        'Im Stützdreieck: $\\tan \\varepsilon = \\dfrac{h}{a/2} = \\dfrac{4}{3}$',
+        '$\\varepsilon \\approx 53{,}13^\\circ$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie stark ist eine Seitenkante dieser Pyramide ($a = 6$ cm, $h = 4$ cm) gegen die Grundfläche geneigt (gerundet)?',
+      opts: ['$46{,}69^\\circ$', '$33{,}69^\\circ$', '$43{,}31^\\circ$', '$53{,}13^\\circ$'],
+      steps: [
+        '$\\tan \\varphi = \\dfrac{h}{d/2} = \\dfrac{4}{4{,}243}$',
+        '$\\varphi \\approx 43{,}31^\\circ$; Kanten sind flacher geneigt als Flächen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Glaspyramide am Louvre in Paris hat etwa 35 m Grundkante und 21,6 m Höhe. Wie groß ist ihre Seitenhöhe ungefähr?',
+      opts: ['etwa 41,1 m', 'etwa 17,5 m', 'etwa 27,8 m', 'etwa 33,2 m'],
+      steps: [
+        '$h_s = \\sqrt{21{,}6^2 + 17{,}5^2} = \\sqrt{772{,}81}$',
+        '$h_s \\approx 27{,}8$ m'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine quadratische Pyramide hat $a = 8$ cm und $s = 9$ cm. Wie hoch ist sie?',
+      opts: ['9,85 cm', '7 cm', '8,06 cm', '5 cm'],
+      steps: [
+        '$\\left(\\dfrac{d}{2}\\right)^2 = \\dfrac{64}{2} = 32$',
+        '$h = \\sqrt{81 - 32} = \\sqrt{49} = 7$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein quadratisches Zelt hat 2 m Grundkante, die Seitenhöhe ist 2,2 m. Wie hoch ist das Zelt in der Mitte (gerundet)?',
+      opts: ['1,96 m', '2,42 m', '2,20 m', '1,20 m'],
+      steps: [
+        '$h = \\sqrt{2{,}2^2 - 1^2} = \\sqrt{3{,}84}$',
+        '$h \\approx 1{,}96$ m'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine quadratische Pyramide hat $a = 6$ cm und $s = 5$ cm. Wie groß ist die Seitenhöhe?',
+      opts: ['3,32 cm', '2 cm', '5,83 cm', '4 cm'],
+      steps: [
+        'Im Seitendreieck: $h_s = \\sqrt{s^2 - \\left(\\dfrac{a}{2}\\right)^2} = \\sqrt{25 - 9} = 4$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Du kennst $a$ und $h$ einer quadratischen Pyramide und suchst die Seitenkante. Was berechnest du zuerst?',
+      opts: ['den Umfang der Grundfläche', 'das Volumen', 'die halbe Diagonale der Grundfläche', 'die Seitenhöhe'],
+      steps: [
+        'Das Stützdreieck für $s$ braucht $h$ und $\\dfrac{d}{2}$.',
+        '$\\dfrac{d}{2} = \\dfrac{a\\sqrt{2}}{2}$, danach $s = \\sqrt{h^2 + \\left(\\dfrac{d}{2}\\right)^2}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine quadratische Pyramide hat $a = 10$ cm und $h = 12$ cm. Wie groß ist $h_s$?',
+      opts: ['11 cm', '15,6 cm', '17 cm', '13 cm'],
+      steps: [
+        '$h_s = \\sqrt{144 + 25} = \\sqrt{169} = 13$ cm'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Seitendreieck einer Pyramide hat die Grundkante 6 cm und die Seitenhöhe 5 cm. Wie groß ist der Winkel an der Spitze dieses Dreiecks (gerundet)?',
+      opts: ['$61{,}93^\\circ$', '$73{,}74^\\circ$', '$100{,}39^\\circ$', '$30{,}96^\\circ$'],
+      steps: [
+        'Halber Winkel: $\\tan \\dfrac{\\omega}{2} = \\dfrac{3}{5}$, also $\\dfrac{\\omega}{2} \\approx 30{,}96^\\circ$.',
+        '$\\omega \\approx 61{,}93^\\circ$'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

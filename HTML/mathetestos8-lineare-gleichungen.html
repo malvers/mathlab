@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lineare Gleichungen lösen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos8-w04-lineare-gleichungen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lineare Gleichungen lösen',
+  subtitle: 'Oberschule · Klasse 8 · Realschulbildungsgang · Woche 4 (LB 1) · 20 Aufgaben: Äquivalenzumformungen, Klammern, Probe, keine oder unendlich viele Lösungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 8 · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe8.html', /* opened from the plan */
+  /* Blocks: one and two steps (1-4, 13-14), variable on both sides and brackets (5-7, 15, 19), special cases (8-9), method and errors (10-12), word problems (16-18, 20). */
+  questions: [
+    {
+      q: 'Löse: $x + 7 = 3$',
+      opts: ['$x = 10$', '$x = 4$', '$x = -10$', '$x = -4$'],
+      steps: [
+        'Auf beiden Seiten 7 subtrahieren: $x = 3 - 7$',
+        '$x = -4$',
+        'Probe: $-4 + 7 = 3$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $4x = -20$',
+      opts: ['$x = 5$', '$x = -16$', '$x = -80$', '$x = -5$'],
+      steps: [
+        'Beide Seiten durch 4 teilen.',
+        '$x = -20 : 4 = -5$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $3x - 5 = 16$',
+      opts: ['$x = 7$', '$x = \\dfrac{11}{3}$', '$x = 63$', '$x = -7$'],
+      steps: [
+        '$+5$ auf beiden Seiten: $3x = 21$',
+        '$:3$ auf beiden Seiten: $x = 7$',
+        'Probe: $3 \\cdot 7 - 5 = 16$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $\\dfrac{x}{4} = 2{,}5$',
+      opts: ['$x = 6{,}5$', '$x = 10$', '$x = -1{,}5$', '$x = 0{,}625$'],
+      steps: [
+        'Die Umkehrung von „durch 4“ ist „mal 4“.',
+        '$x = 2{,}5 \\cdot 4 = 10$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $5x + 12 = 2x + 27$',
+      opts: ['$x = 5$', '$x = 13$', '$x = 3$', '$x = -5$'],
+      steps: [
+        '$-2x$: $3x + 12 = 27$',
+        '$-12$: $3x = 15$',
+        '$:3$: $x = 5$. Probe: $25 + 12 = 37$ und $10 + 27 = 37$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $7 - 2x = 3x - 8$',
+      opts: ['$x = 1$', '$x = 15$', '$x = 3$', '$x = -3$'],
+      steps: [
+        '$+2x$: $7 = 5x - 8$',
+        '$+8$: $15 = 5x$',
+        '$:5$: $x = 3$. Probe: $7 - 6 = 1$ und $9 - 8 = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $3 \\cdot (x - 4) = 2x + 1$',
+      opts: ['$x = 5$', '$x = 13$', '$x = 11$', '$x = -11$'],
+      steps: [
+        'Klammer ausmultiplizieren: $3x - 12 = 2x + 1$',
+        '$-2x$: $x - 12 = 1$',
+        '$+12$: $x = 13$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $3x + 45 = 1{,}5 \\cdot (2x + 16)$',
+      opts: ['Jede Zahl ist Lösung.', 'Es gibt keine Lösung.', '$x = 0$', '$x = 7$'],
+      steps: [
+        'Rechte Seite ausmultiplizieren: $1{,}5 \\cdot 2x + 1{,}5 \\cdot 16 = 3x + 24$.',
+        '$3x + 45 = 3x + 24$, nach $-3x$ bleibt $45 = 24$.',
+        'Das ist falsch, egal welches $x$ man einsetzt. Die Gleichung hat keine Lösung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $2 \\cdot (x + 3) = 2x + 6$',
+      opts: ['Jede Zahl ist Lösung.', 'Es gibt keine Lösung.', 'Nur $x = 3$', 'Nur $x = 0$'],
+      steps: [
+        'Links ausmultiplizieren: $2x + 6 = 2x + 6$.',
+        'Nach $-2x$ bleibt $6 = 6$, das ist immer wahr.',
+        'Die Gleichung hat unendlich viele Lösungen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Umformung führt von $5x - 3 = 2x + 9$ zu $3x - 3 = 9$?',
+      opts: ['auf beiden Seiten $2x$ subtrahieren', 'beide Seiten durch 5 teilen', 'auf beiden Seiten $5x$ subtrahieren', 'auf beiden Seiten 3 addieren'],
+      steps: [
+        'Links wurde aus $5x$ jetzt $3x$, rechts ist $2x$ verschwunden.',
+        'Also wurde auf beiden Seiten $2x$ subtrahiert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Tom rechnet: $4x + 6 = 18 \\;\\;|\\; :4$ ergibt $x + 6 = 4{,}5$. Was ist falsch?',
+      opts: ['Man darf nie durch 4 teilen.', 'Nichts, die Umformung ist richtig.', '18 : 4 ist nicht 4,5.', 'Er hat nur $4x$ durch 4 geteilt, nicht auch die 6.'],
+      steps: [
+        'Beim Teilen muss die ganze linke Seite geteilt werden: $(4x + 6) : 4 = x + 1{,}5$.',
+        'Besser zuerst 6 subtrahieren: $4x = 12$, dann $x = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Zahl löst die Gleichung $5 - 3x = 11$?',
+      opts: ['$x = -6$', '$x = -2$', '$x = 2$', '$x = 6$'],
+      steps: [
+        '$-5$: $-3x = 6$',
+        '$:(-3)$: $x = -2$',
+        'Probe: $5 - 3 \\cdot (-2) = 5 + 6 = 11$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $0{,}4x + 1{,}2 = 3$',
+      opts: ['$x = 7{,}5$', '$x = 0{,}72$', '$x = 4{,}5$', '$x = 10{,}5$'],
+      steps: [
+        '$-1{,}2$: $0{,}4x = 1{,}8$',
+        '$:0{,}4$: $x = 4{,}5$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $\\dfrac{x}{3} + 2 = 5$',
+      opts: ['$x = 21$', '$x = 3$', '$x = 9$', '$x = 1$'],
+      steps: [
+        '$-2$: $\\dfrac{x}{3} = 3$',
+        '$\\cdot 3$: $x = 9$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $-(x - 5) = 2x - 4$',
+      opts: ['$x = -3$', '$x = 1$', '$x = 9$', '$x = 3$'],
+      steps: [
+        'Minusklammer auflösen: $-x + 5 = 2x - 4$',
+        '$+x$ und $+4$: $9 = 3x$',
+        '$x = 3$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Seil von 14 m Länge wird so geteilt, dass ein Stück 4 m länger ist als das andere. Wie lang ist das kürzere Stück?',
+      opts: ['9 m', '5 m', '10 m', '7 m'],
+      steps: [
+        'Kürzeres Stück $x$, längeres Stück $x + 4$.',
+        '$x + x + 4 = 14$, also $2x = 10$ und $x = 5$.',
+        'Die Stücke sind 5 m und 9 m lang.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Gleichung passt zu: „Das Dreifache einer Zahl, vermindert um 7, ist 20.“?',
+      opts: ['$7 - 3x = 20$', '$3 \\cdot (x - 7) = 20$', '$3x = 20 - 7$', '$3x - 7 = 20$'],
+      steps: [
+        'Das Dreifache einer Zahl: $3x$',
+        'vermindert um 7: $3x - 7$',
+        'ist 20: $3x - 7 = 20$, also $x = 9$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Das Doppelte einer Zahl, vermehrt um 9, ergibt 1. Wie heißt die Zahl?',
+      opts: ['−4', '−5', '4', '5'],
+      steps: [
+        '$2x + 9 = 1$',
+        '$2x = -8$, also $x = -4$.',
+        'Probe: $2 \\cdot (-4) + 9 = 1$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $2 \\cdot (3x - 1) - (x + 4) = 9$',
+      opts: ['$x = 1$', '$x = 2{,}2$', '$x = 3$', '$x = -3$'],
+      steps: [
+        'Ausmultiplizieren und Minusklammer auflösen: $6x - 2 - x - 4 = 9$',
+        'Zusammenfassen: $5x - 6 = 9$',
+        '$5x = 15$, also $x = 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Mutter ist heute dreimal so alt wie ihre Tochter. In 12 Jahren wird sie doppelt so alt sein. Wie alt ist die Tochter heute?',
+      opts: ['6 Jahre', '36 Jahre', '12 Jahre', '24 Jahre'],
+      steps: [
+        'Tochter heute $x$, Mutter heute $3x$.',
+        'In 12 Jahren: $3x + 12 = 2 \\cdot (x + 12)$',
+        '$3x + 12 = 2x + 24$, also $x = 12$. Probe: 36 und 12 heute, 48 und 24 in 12 Jahren.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

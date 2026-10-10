@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Maximum, Minimum, Spannweite — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos9-w34-spannweite',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Maximum, Minimum, Spannweite',
+  subtitle: 'Oberschule · Klasse 9 · Realschulbildungsgang · Woche 34 (LB 4) · 20 Aufgaben: Spannweite als Streumaß, Datenreihen vergleichen, Kennwerte mit der Tabellenkalkulation · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 9 · Woche 34 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe9.html', /* opened from the plan */
+  /* Blocks: range (1-2, 13-15, 19), comparing spread (3-5, 12, 16-17), spreadsheet functions (6-8), long jump and prices (9-11, 18, 20). */
+  questions: [
+    {
+      q: 'Wie groß ist die Spannweite von 4, 7, 7, 9, 13?',
+      opts: ['13', '9', '8', '4'],
+      steps: [
+        'Spannweite = Maximum − Minimum',
+        '$13 - 4 = 9$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Tiefsttemperaturen einer Woche lagen zwischen −3 °C und 5 °C. Wie groß ist die Spannweite?',
+      opts: ['8 K (8 Grad)', '5 K (5 Grad)', '−8 K (−8 Grad)', '2 K (2 Grad)'],
+      steps: [
+        '$5 - (-3) = 8$',
+        'Temperaturunterschiede gibt man in Kelvin oder Grad an.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Datenreihe A: 5, 5, 5, 5, 5. Datenreihe B: 1, 3, 5, 7, 9. Was gilt?',
+      opts: ['Gleiche Spannweite, verschiedene Mittel.', 'Beide Reihen sind gleich.', 'Gleiches Mittel 5, aber Spannweite 0 und 8.', 'B hat das größere Mittel.'],
+      steps: [
+        'Beide Mittelwerte sind 5.',
+        'Die Spannweite zeigt den Unterschied: A streut gar nicht, B stark.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Kennwert beschreibt, wie weit die Daten streuen?',
+      opts: ['der Modalwert', 'das arithmetische Mittel', 'die Spannweite', 'der Zentralwert'],
+      steps: [
+        'Mittelwerte beschreiben die Lage, die Spannweite die Streuung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Schwäche hat die Spannweite?',
+      opts: ['Ein einziger Ausreißer kann sie stark vergrößern.', 'Sie hängt von allen Werten gleich stark ab.', 'Sie ist schwer zu berechnen.', 'Sie ist immer null.'],
+      steps: [
+        'Sie benutzt nur den größten und den kleinsten Wert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Funktion liefert in einer Tabellenkalkulation den Zentralwert der Zellen A1 bis A10?',
+      opts: ['=MAX(A1:A10)', '=MITTELWERT(A1:A10)', '=MEDIAN(A1:A10)', '=SUMME(A1:A10)'],
+      steps: [
+        'Median ist ein anderes Wort für Zentralwert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Funktion liefert das arithmetische Mittel der Zellen B2 bis B21?',
+      opts: ['=MITTELWERT(B2:B21)', '=MEDIAN(B2:B21)', '=MODALWERT(B2:B21)', '=ANZAHL(B2:B21)'],
+      steps: [
+        'MITTELWERT addiert und teilt durch die Anzahl.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie berechnet man die Spannweite der Zellen C1 bis C30?',
+      opts: ['=MITTELWERT(C1:C30)', '=MAX(C1:C30)+MIN(C1:C30)', '=C30-C1', '=MAX(C1:C30)-MIN(C1:C30)'],
+      steps: [
+        'Größter minus kleinster Wert.',
+        'C30 minus C1 stimmt nur, wenn die Werte sortiert sind.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Weitsprungergebnisse: 3,85 m, 4,10 m, 4,32 m, 3,96 m, 4,02 m. Wie groß ist die Spannweite?',
+      opts: ['4,32 m', '0,47 m', '0,37 m', '8,17 m'],
+      steps: [
+        'Maximum 4,32 m, Minimum 3,85 m',
+        '$4{,}32 - 3{,}85 = 0{,}47$ m'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist das arithmetische Mittel dieser Weiten?',
+      opts: ['4,10 m', '4,05 m', '4,02 m', '20,25 m'],
+      steps: [
+        'Summe: $20{,}25$ m',
+        '$20{,}25 : 5 = 4{,}05$ m'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist der Zentralwert dieser Weiten?',
+      opts: ['4,32 m', '3,96 m', '4,05 m', '4,02 m'],
+      steps: [
+        'Geordnet: 3,85; 3,96; 4,02; 4,10; 4,32',
+        'Der mittlere Wert ist 4,02 m.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Läuferin A: 13,1 s, 13,4 s, 13,2 s. Läuferin B: 12,8 s, 13,9 s, 13,0 s. Wer läuft beständiger?',
+      opts: ['B, sie hat die beste Zeit.', 'B, ihre Spannweite ist größer.', 'Beide gleich, die Mittel sind gleich.', 'A, ihre Spannweite ist 0,3 s statt 1,1 s.'],
+      steps: [
+        'Beide Mittel: $39{,}7 : 3 \\approx 13{,}23$ s.',
+        'Spannweite A: $13{,}4 - 13{,}1 = 0{,}3$ s, B: $13{,}9 - 12{,}8 = 1{,}1$ s'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einer Klasse ist die kleinste Person 1,52 m groß, die Spannweite beträgt 0,31 m. Wie groß ist die größte Person?',
+      opts: ['1,83 m', '1,21 m', '1,52 m', '1,67 m'],
+      steps: [
+        'Maximum = Minimum + Spannweite = $1{,}52 + 0{,}31 = 1{,}83$ m'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Niederschlag lag in einem Jahr zwischen 22 mm (Monatsminimum) und 85 mm (Monatsmaximum). Wie groß ist die Spannweite?',
+      opts: ['53,5 mm', '85 mm', '63 mm', '107 mm'],
+      steps: [
+        '$85 - 22 = 63$ mm'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Spannweite hat eine Datenreihe, in der alle Werte gleich sind?',
+      opts: ['der Wert selbst', '1', 'Sie ist nicht definiert.', '0'],
+      steps: [
+        'Maximum und Minimum sind gleich, ihre Differenz ist 0.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zu einer Datenreihe mit Minimum 10 und Maximum 30 kommt der Wert 25 hinzu. Was passiert mit der Spannweite?',
+      opts: ['Sie wird 15.', 'Sie wird 45.', 'Sie bleibt 20.', 'Sie wird 25.'],
+      steps: [
+        '25 liegt zwischen Minimum und Maximum.',
+        'Die Spannweite ändert sich nur, wenn ein neuer Wert außerhalb liegt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was kann die Spannweite nicht zeigen?',
+      opts: ['ob alle Werte gleich sind', 'wie die Werte zwischen Minimum und Maximum verteilt sind', 'den Abstand zwischen größtem und kleinstem Wert', 'die Einheit der Daten'],
+      steps: [
+        'Die Reihen 1, 5, 5, 5, 9 und 1, 1, 5, 9, 9 haben beide die Spannweite 8, sind aber verschieden verteilt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Liter Milch kostet in fünf Läden 1,29 €, 1,49 €, 1,19 €, 1,39 € und 1,59 €. Wie groß sind Spannweite und Mittel?',
+      opts: ['Spannweite 0,40 €, Mittel 1,39 €', 'Spannweite 0,30 €, Mittel 1,39 €', 'Spannweite 1,59 €, Mittel 1,19 €', 'Spannweite 0,40 €, Mittel 1,49 €'],
+      steps: [
+        '$1{,}59 - 1{,}19 = 0{,}40$ €',
+        'Summe 6,95 €, Mittel $6{,}95 : 5 = 1{,}39$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'An einem Tag war es höchstens 24 °C warm, die Spannweite der Temperatur betrug 11 K. Wie kalt war es am kältesten?',
+      opts: ['35 °C', '13 °C', '11 °C', '2,2 °C'],
+      steps: [
+        'Minimum = Maximum − Spannweite = $24 - 11 = 13$ °C'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Um wie viel Prozent liegt der teuerste Milchpreis (1,59 €) über dem Mittel von 1,39 € (gerundet)?',
+      opts: ['um 20 %', 'um 0,2 %', 'um 12,6 %', 'um 14,4 %'],
+      steps: [
+        '$\\dfrac{1{,}59 - 1{,}39}{1{,}39} = \\dfrac{0{,}20}{1{,}39} \\approx 0{,}144$'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

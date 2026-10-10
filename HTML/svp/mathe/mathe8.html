@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 8 (Oberschule) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Oberschule &middot; Klasse 8</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_os_mathematik.pdf', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Realschulbildungsgang &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Lineare Gleichungen</div>
+            <div class="vu">16 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Lineare Funktionen und Gleichungssysteme</div>
+            <div class="vu">26 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Kreis und Kreiszylinder</div>
+            <div class="vu">18 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Ähnlichkeit</div>
+            <div class="vu">14 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb5">
+            <div class="k c-pink">Lernbereich 5</div>
+            <div class="v">Zufällige Ereignisse</div>
+            <div class="vu">14 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb6">
+            <div class="k c-red">Lernbereich 6</div>
+            <div class="v">Mathematik im Alltag</div>
+            <div class="vu">12 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Das Fahrrad</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Die Zeitrichtwerte des Lehrplans (100 Ustd. Pflicht + 8 Ustd. Wahlpflichtbereich) sind vollst&auml;ndig abgebildet;
+        die &uuml;brigen Wochen des Schuljahres stehen als &Uuml;bung, Klassenarbeit oder Puffer in eigenen Zeilen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | lb5 | lb6 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Start in Klasse 8', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches: Hefter, Taschenrechner, Formelsammlung, Geodreieck und Zirkel',
+                'Wiederholung Klasse 7: rationale Zahlen, Prozentrechnung, Terme',
+                'Kopfrechnen: Rechnen mit negativen Zahlen'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/16', topic: 'Terme und Termwerte', ziel: 'Beherrschen des Rechnens mit rationalen Zahlen beim Arbeiten mit Termen', remark: 'Einsetzen in Formeln, auch mit Tabellenkalkulation', quiz: { href: '../../mathetestos8-termwerte.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Terme mit Variablen aufstellen und lesen',
+                'Termwerte für positive und negative Zahlen berechnen, Wertetabellen',
+                'Werte in Formeln einsetzen: Umfang, Flächeninhalt, Preise'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/16', topic: 'Termumformungen', ziel: 'Beherrschen des Rechnens mit rationalen Zahlen beim Arbeiten mit Termen', remark: 'Summen addieren und subtrahieren, Faktor mal Summe, Ausklammern', quiz: { href: '../../mathetestos8-termumformungen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Gleichartige Glieder zusammenfassen',
+                'Klammern auflösen: Plus- und Minusklammern',
+                'Ausmultiplizieren und Ausklammern eines gemeinsamen Faktors'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/16', topic: 'Lineare Gleichungen lösen', ziel: 'Anwenden der Termumformungen beim Problemlösen', remark: 'kalkülmäßiges Lösen, Probe', quiz: { href: '../../mathetestos8-lineare-gleichungen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Äquivalenzumformungen: auf beiden Seiten dasselbe tun',
+                'Gleichungen mit Variablen auf beiden Seiten und mit Klammern, z. B. 3x + 45 = 12x − 30',
+                'Probe durch Einsetzen, Gleichungen ohne und mit unendlich vielen Lösungen'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/16', topic: 'Formeln umstellen und Sachprobleme', ziel: 'Anwenden der Termumformungen beim Problemlösen', remark: 'inner- und außermathematische Sachverhalte, z. B. u = 2 · (a + b) nach b', quiz: { href: '../../mathetestos8-formeln-umstellen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Formeln nach einer gesuchten Größe umstellen',
+                'Sachaufgaben mit einer Gleichung lösen: Modell bilden, lösen, deuten',
+                'Zahlenrätsel, Alters- und Preisaufgaben'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'ue', u: '', topic: 'Übung: Terme und Gleichungen', remark: 'Übung, Vertiefung und Vorbereitung', details: [
+                'Gemischte Aufgaben zu Termen, Gleichungen und Formeln',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Lineare Gleichungen', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos8-ka1-gleichungen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Termwerte, Termumformungen, lineare Gleichungen, Formeln umstellen, Sachaufgaben'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb2', u: '1–4/26', topic: 'Funktionen', ziel: 'Übertragen der Kenntnisse über Zuordnungen auf Funktionen', remark: 'Argument, Funktionswert, Definitions- und Wertebereich', quiz: { href: '../../mathetestos8-funktionen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zuordnungen aus Klasse 6 und 7: Tabelle, Graph, Gleichung',
+                'Funktion als eindeutige Zuordnung, Gegenbeispiele',
+                'Argument und Funktionswert, Definitionsbereich und Wertebereich'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb2', u: '5–8/26', topic: 'Proportionale Funktionen y = m · x', ziel: 'Beherrschen des grafischen Darstellens linearer Funktionen', remark: 'Steigung m, Steigungsdreieck', quiz: { href: '../../mathetestos8-proportionale-funktionen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Graph als Gerade durch den Ursprung',
+                'Steigung m am Steigungsdreieck ablesen und zeichnen',
+                'Positive und negative Steigung, Sachbeispiele: Preis pro Liter, Geschwindigkeit'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb2', u: '9–12/26', topic: 'Lineare Funktionen y = m · x + n', ziel: 'Beherrschen des grafischen Darstellens linearer Funktionen unter Beachtung der Parameter m und n', remark: 'Absolutglied n als Schnittpunkt mit der y-Achse', quiz: { href: '../../mathetestos8-lineare-funktionen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Graph mit Steigung und y-Achsenabschnitt zeichnen',
+                'Einfluss von m und n am Graphen erkunden, auch mit dynamischer Software',
+                'Parallele Geraden, Grundgebühr plus Preis pro Einheit'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '13–16/26', topic: 'Nullstellen und Funktionsgleichungen', ziel: 'Beherrschen des zeichnerischen und rechnerischen Ermittelns von Nullstellen', remark: 'Gleichung aus zwei Punkten oder aus Punkt und Steigung', quiz: { href: '../../mathetestos8-nullstellen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Nullstelle am Graphen ablesen und mit 0 = m · x + n berechnen',
+                'Prüfen, ob ein Punkt auf der Geraden liegt',
+                'Funktionsgleichung aus zwei Punkten aufstellen'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '17–20/26', topic: 'Gleichungssysteme zeichnerisch lösen', ziel: 'Anwenden des zeichnerischen Lösens linearer Gleichungssysteme', remark: 'Schnittpunkt zweier Geraden', quiz: { href: '../../mathetestos8-lgs-zeichnerisch.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zwei Bedingungen, zwei Unbekannte: Sachsituationen',
+                'Beide Gleichungen nach y umstellen und als Geraden zeichnen',
+                'Schnittpunkt ablesen und durch Einsetzen prüfen'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '21–24/26', topic: 'Gleichungssysteme rechnerisch lösen', ziel: 'Anwenden des rechnerischen Lösens linearer Gleichungssysteme', remark: 'Gleichsetzungs-, Einsetzungs- und Additionsverfahren', quiz: { href: '../../mathetestos8-lgs-rechnerisch.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Gleichsetzungsverfahren und Einsetzungsverfahren',
+                'Additionsverfahren',
+                'Geschicktes Verfahren wählen, Probe'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '25–26/26', topic: 'Lösbarkeit und Tarifvergleiche', ziel: 'Anwenden des Lösens linearer Gleichungssysteme auf verschiedene Sachverhalte', remark: 'genau eine, keine, unendlich viele Lösungen; dazu Übung', quiz: { href: '../../mathetestos8-tarifvergleich.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Parallele und identische Geraden: keine oder unendlich viele Lösungen',
+                'Tarif- und Preisvergleiche: Ab wann lohnt sich welcher Tarif?',
+                'Übung und Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lk', u: '', topic: 'Klassenarbeit 2: Lineare Funktionen und Gleichungssysteme', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos8-ka2-funktionen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Funktionsbegriff, lineare Funktionen, Nullstellen, Gleichungssysteme zeichnerisch und rechnerisch, Tarifvergleich'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb3', u: '1–4/18', topic: 'Kreis und Gerade, Kreisornamente', ziel: 'Kennen der Lagebeziehungen von Kreis und Gerade', remark: 'Sehne, Sekante, Tangente; Rosette, Faltschnitt, Mandala', quiz: { href: '../../mathetestos8-kreis-gerade.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Mittelpunkt, Radius, Durchmesser, Sehne',
+                'Passante, Tangente und Sekante, Tangente senkrecht zum Radius',
+                'Regelmäßige Kreisornamente konstruieren'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'ue', u: '', topic: 'Weihnachtsknobeln', remark: 'zwei Schultage vor den Ferien', details: [
+                'Knobelaufgaben zu Gleichungen und Kreisen',
+                'Sterne und Rosetten mit dem Zirkel'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb3', u: '5–8/18', topic: 'Satz des Thales', ziel: 'Kennen eines Beweises zum Satz des Thales', remark: '„wenn-dann“-Form des Satzes, Umkehrung', quiz: { href: '../../mathetestos8-thales.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Rechte Winkel im Halbkreis entdecken',
+                'Beweis mit gleichschenkligen Dreiecken und dem Innenwinkelsatz',
+                'Thaleskreis: rechtwinklige Dreiecke und Tangenten konstruieren'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '9–12/18', topic: 'Umfang und Flächeninhalt des Kreises', ziel: 'Anwenden der Flächeninhalts- und Umfangsberechnung am Kreis', remark: 'Kreiszahl π als nichtrationale Zahl, historische Näherungen', quiz: { href: '../../mathetestos8-kreis-umfang-flaeche.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Umfang messen und durch den Durchmesser teilen: die Zahl π',
+                'Formeln u = π · d und A = π · r² anschaulich gewinnen',
+                'Radius aus Umfang oder Flächeninhalt zurückrechnen'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '13–16/18', topic: 'Kreisring und Kreiszylinder', ziel: 'Übertragen von Verfahren des Darstellens von Körpern auf Kreis- und Hohlzylinder', remark: 'Netz, Ansichten, Schrägbildskizze; Grund-, Mantel- und Oberfläche', quiz: { href: '../../mathetestos8-kreisring-zylinder.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Flächeninhalt des Kreisrings',
+                'Kreiszylinder und Hohlzylinder: Netz, Ansichten, Schrägbildskizze',
+                'Mantel als Rechteck, Oberflächeninhalt des Zylinders'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '17–18/18', topic: 'Volumen und Masse von Zylindern', ziel: 'Anwenden der Volumen- und Masseberechnung von Kreis- und Hohlzylindern auf vielfältige Sachverhalte', remark: 'auch Radius und Höhe berechnen; dazu Übung', quiz: { href: '../../mathetestos8-zylinder-volumen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Volumenformel V = π · r² · h anschaulich gewinnen',
+                'Hohlzylinder: Rohre, Dosen, Masse mit der Dichte',
+                'Übung zu Kreis und Zylinder'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'ue', u: '', topic: 'Übung: Kreis und Zylinder', remark: 'Fr 05.02. Halbjahreszeugnis', details: [
+                'Gemischte Aufgaben zu Kreis, Kreisring und Zylinder',
+                'Vorbereitung auf die Klassenarbeit nach den Ferien'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lk', u: '', topic: 'Klassenarbeit 3: Kreis und Kreiszylinder', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos8-ka3-kreis-zylinder.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Kreis und Gerade, Thales, Umfang und Fläche, Kreisring, Zylinder: Oberfläche, Volumen, Masse'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb4', u: '1–4/14', topic: 'Zentrische Streckung', ziel: 'Anwenden des zentrischen Streckens zum maßstäblichen Vergrößern und Verkleinern', remark: 'Streckzentrum, Streckfaktor k, Maßstab', quiz: { href: '../../mathetestos8-zentrische-streckung.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Figuren von einem Zentrum aus vergrößern und verkleinern',
+                'Streckfaktor k > 1, k < 1, Bildstrecken sind parallel',
+                'Maßstab bei Karten und Plänen'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb4', u: '5–8/14', topic: 'Ähnliche Figuren', ziel: 'Anwenden des Hauptähnlichkeitssatzes auf innermathematische Sachverhalte und zum Begründen', remark: 'Hauptähnlichkeitssatz in „wenn-dann“-Form', quiz: { href: '../../mathetestos8-aehnliche-figuren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Ähnlichkeit: gleiche Winkel, gleiches Seitenverhältnis',
+                'Hauptähnlichkeitssatz: zwei gleiche Winkel genügen',
+                'Fehlende Seiten über Verhältnisse berechnen, Höhen über Schatten'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb4', u: '9–12/14', topic: 'Längen, Flächen und Volumen bei Ähnlichkeit', ziel: 'Anwenden der Beziehungen für Längen, Flächen und Volumen bei zueinander ähnlichen Figuren', remark: 'a’ = k · a, A’ = k² · A, V’ = k³ · V', quiz: { href: '../../mathetestos8-aehnlichkeit-flaeche-volumen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Doppelte Länge, vierfache Fläche, achtfaches Volumen',
+                'Modelle und Originale vergleichen',
+                'Sachaufgaben: Farbe, Material, Gewicht'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb4', u: '13–14/14', topic: 'Kongruenz als Spezialfall', ziel: 'Kennen der Kongruenz als Spezialfall der Ähnlichkeit', remark: 'Streckfaktor 1; dazu Übung', quiz: { href: '../../mathetestos8-kongruenz.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Kongruente Figuren als ähnliche Figuren mit k = 1',
+                'Kongruenzsätze aus Klasse 7 wiederholen',
+                'Übung zur Ähnlichkeit'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb5', u: '1–4/14', topic: 'Zufallsversuche simulieren', ziel: 'Einblick gewinnen in die Simulation von Zufallsversuchen', remark: 'Monte-Carlo-Methode, Zufallszahlen mit Taschenrechner und Computer', quiz: { href: '../../mathetestos8-simulation.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Ergebnis, Ereignis, Wahrscheinlichkeit wiederholen',
+                'Relative Häufigkeit und Gesetz der großen Zahlen',
+                'Simulation mit Zufallszahlen: Münze, Würfel, Sammelbilder'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb5', u: '5–8/14', topic: 'Baumdiagramm und Pfadregeln', ziel: 'Beherrschen des Ermittelns von Wahrscheinlichkeiten bei mehrstufigen Zufallsversuchen mit Baumdiagramm und Pfadregeln', remark: 'Produktregel und Summenregel, Galtonbrett', quiz: { href: '../../mathetestos8-baumdiagramm.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Mehrstufige Zufallsversuche im Baumdiagramm darstellen',
+                'Pfadmultiplikationsregel und Pfadadditionsregel',
+                'Galtonbrett: Wege zählen'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb5', u: '9–12/14', topic: 'Abhängige und unabhängige Ereignisse', ziel: 'Kennen abhängiger und unabhängiger Ereignisse', remark: 'Ziehen mit und ohne Zurücklegen', quiz: { href: '../../mathetestos8-abhaengige-ereignisse.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Ziehen mit Zurücklegen: Wahrscheinlichkeiten bleiben gleich',
+                'Ziehen ohne Zurücklegen: Wahrscheinlichkeiten ändern sich',
+                'Gegenereignis: mindestens einmal'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb5', u: '13–14/14', topic: 'Kombinatorisches Zählen', ziel: 'Übertragen des kombinatorischen Zählens auf das Ermitteln von Wahrscheinlichkeiten', remark: 'Schreibweise n!; dazu Übung', quiz: { href: '../../mathetestos8-kombinatorik.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zählprinzip: Möglichkeiten multiplizieren',
+                'Anordnungen und Fakultät n!',
+                'Wahrscheinlichkeiten über Anzahlen: Zahlenschloss, Sitzordnung'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'ue', u: '', topic: 'Übung: Ähnlichkeit und Zufall', remark: 'kurze Woche (Himmelfahrt), Vorbereitung', details: [
+                'Gemischte Aufgaben zu Ähnlichkeit und Wahrscheinlichkeit',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lk', u: '', topic: 'Klassenarbeit 4: Ähnlichkeit und zufällige Ereignisse', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos8-ka4-aehnlichkeit-zufall.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zentrische Streckung, Ähnlichkeit, k, k² und k³, Baumdiagramm, Pfadregeln, Zählen'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'ue', u: '', topic: 'Auffrischen: Prozent- und Zinsrechnung', remark: 'kurze Woche, Vorbereitung auf Lernbereich 6', details: [
+                'Grundwert, Prozentwert, Prozentsatz aus Klasse 7',
+                'Zinsen für ein Jahr und für Monate'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'lb6', u: '1–4/12', topic: 'Lebenshaltungskosten', ziel: 'Übertragen des Rechnens mit rationalen Zahlen und der Prozentrechnung auf das Berechnen von Lebenshaltungskosten', remark: 'Miete, Betriebskosten, Wasser- und Energieabrechnung mit Abschlägen', quiz: { href: '../../mathetestos8-lebenshaltungskosten.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Kaltmiete, Nebenkosten, Warmmiete',
+                'Strom- und Wasserabrechnung: Grundpreis, Arbeitspreis, Abschläge, Nachzahlung',
+                'Rechnungen lesen und prüfen, Mehrwertsteuer'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'lb6', u: '5–8/12', topic: 'Baukosten', ziel: 'Übertragen der Berechnung von Flächeninhalten und Volumen auf das Berechnen von Baukosten', remark: 'umbauter Raum, Materialbedarf, Fassungsvermögen von Behältern', quiz: { href: '../../mathetestos8-baukosten.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Wohnfläche und Bodenbelag mit Verschnitt',
+                'Wände streichen, Fliesen, Estrich: Materialbedarf und Kosten',
+                'Umbauter Raum, Regentonne und Pool: Fassungsvermögen'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'lb6', u: '9–12/12', topic: 'Angebote vergleichen', ziel: 'Übertragen der Prozent- und Zinsrechnung und funktionaler Zusammenhänge auf das Vergleichen von Angeboten', remark: 'Sparanlagen, Preise, Tarife, Ratenzahlungen; Projektmethode', quiz: { href: '../../mathetestos8-angebote.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Rabatt, Skonto und Mehrwertsteuer im Preisvergleich',
+                'Ratenkauf gegen Barkauf: Was kostet der Kredit?',
+                'Sparanlagen mit Zins und Zinseszins vergleichen'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'wb', u: '1–4/8', topic: 'Das Fahrrad: Kenndaten und Radumfang', ziel: 'Beurteilen der Kenndaten von Fahrrädern', remark: 'Einheit Zoll, Zusammenarbeit mit WTH', quiz: { href: '../../mathetestos8-fahrrad-radumfang.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Reifengröße in Zoll und Zentimeter, Rahmenhöhe',
+                'Radumfang und zurückgelegter Weg pro Umdrehung',
+                'Kenndaten verschiedener Fahrräder vergleichen'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'wb', u: '5–8/8', topic: 'Das Fahrrad: Übersetzung und Geschwindigkeit', ziel: 'Kennen des Berechnens von Wegstrecken und Geschwindigkeiten unter Verwendung von Übersetzungsverhältnissen, Radumfang und Trittfrequenz', remark: 'Zusammenarbeit mit Physik, Präsentation', quiz: { href: '../../mathetestos8-fahrrad-uebersetzung.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Übersetzungsverhältnis aus Kettenblatt und Ritzel',
+                'Weg pro Kurbelumdrehung, Geschwindigkeit aus der Trittfrequenz',
+                'Präsentation der Ergebnisse'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Wiederholung: Jahresstoff', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Gemischte Aufgaben aus allen Lernbereichen',
+                'Kopfrechentraining'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr, Ausblick auf Klasse 9'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_os_mathematik.pdf where that Lernbereich starts
+        // (Realschulbildungsgang, Klassenstufe 8: pages 45-48).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_os_mathematik.pdf',
+            lb1: {
+                page: 46,
+                bullets: [
+                    'Termwerte berechnen, Einsetzen in Formeln',
+                    'Termumformungen: Summen addieren und subtrahieren, Faktor mal Summe, Ausklammern',
+                    'Lineare Gleichungen kalkülmäßig lösen',
+                    'Formeln umstellen, inner- und außermathematische Sachverhalte',
+                ]
+            },
+            lb2: {
+                page: 46,
+                bullets: [
+                    'Funktion als eindeutige Zuordnung, verschiedene Darstellungen',
+                    'Argument, Funktionswert, Definitionsbereich und Wertebereich',
+                    'y = m · x und y = m · x + n grafisch darstellen, Parameter m und n',
+                    'Nullstellen zeichnerisch und rechnerisch ermitteln',
+                    'Lineare Gleichungssysteme zeichnerisch und rechnerisch lösen, Tarif- und Preisvergleiche',
+                ]
+            },
+            lb3: {
+                page: 46,
+                bullets: [
+                    'Regelmäßige Kreisornamente: Rosette, Faltschnitt, Mandala',
+                    'Kreis und Gerade: Sehne, Sekante, Tangente',
+                    'Satz des Thales mit Beweis, „wenn-dann“-Form',
+                    'Umfang und Flächeninhalt des Kreises, Kreiszahl π, Kreisring',
+                    'Kreis- und Hohlzylinder: Netz, Ansichten, Schrägbildskizze',
+                    'Oberflächeninhalt, Volumen und Masse von Kreis- und Hohlzylindern',
+                ]
+            },
+            lb4: {
+                page: 47,
+                bullets: [
+                    'Zentrisches Strecken zum maßstäblichen Vergrößern und Verkleinern',
+                    'Hauptähnlichkeitssatz anwenden und zum Begründen nutzen',
+                    'Längen, Flächen und Volumen ähnlicher Figuren: k, k² und k³',
+                    'Kongruenz als Spezialfall der Ähnlichkeit',
+                ]
+            },
+            lb5: {
+                page: 47,
+                bullets: [
+                    'Simulation von Zufallsversuchen, Monte-Carlo-Methode',
+                    'Abhängige und unabhängige Ereignisse',
+                    'Kombinatorisches Zählen, Schreibweise n!',
+                    'Mehrstufige Zufallsversuche mit Baumdiagramm und Pfadregeln, Galtonbrett',
+                ]
+            },
+            lb6: {
+                page: 48,
+                bullets: [
+                    'Lebenshaltungskosten: Miete, Betriebskosten, Wasser- und Energieabrechnung, Rechnungen prüfen',
+                    'Baukosten: umbauter Raum, Materialbedarf, Fassungsvermögen von Behältern',
+                    'Angebote vergleichen: Sparanlagen, Preise, Tarife, Ratenzahlungen, Mieten',
+                ]
+            },
+            wb: {
+                page: 48,
+                bullets: [
+                    'Wahlpflichtbereich 1: Das Fahrrad (gewählt)',
+                    'Wahlpflichtbereich 2: Modellbau',
+                    'Wahlpflichtbereich 3: Polyeder',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            lb5: ['b-pink', 'LB 5'],
+            lb6: ['b-red', 'LB 6'],
+            wb: ['b-green', 'WB 1'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', 'ÜBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
