@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 5 (Gymnasium) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Gymnasium &middot; Klasse 5</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_gy_mathematik.pdf', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Arbeiten mit natürlichen Zahlen</div>
+            <div class="vu">23 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Gemeine Brüche und Dezimalzahlen</div>
+            <div class="vu">27 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Lagebeziehungen geometrischer Objekte</div>
+            <div class="vu">22 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Rechtecke und Quader</div>
+            <div class="vu">22 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb5">
+            <div class="k c-pink">Lernbereich 5</div>
+            <div class="v">Vernetzung: Mathematik im Alltag</div>
+            <div class="vu">10 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Zählen und Rechnen – einst und jetzt</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Die Zeitrichtwerte des Lehrplans (104 Ustd. Pflicht + 8 Ustd. Wahlbereich) sind vollst&auml;ndig abgebildet;
+        die &uuml;brigen Wochen des Schuljahres stehen als &Uuml;bung, Klassenarbeit oder Puffer in eigenen Zeilen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | lb5 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Willkommen am Gymnasium', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches: Hefter, Geodreieck, Zirkel, Arbeitsweise im Fach',
+                'Wiederholung Grundschule: Grundrechenarten, Einmaleins, schriftliche Verfahren',
+                'Kopfrechnen spielerisch: Rechen-Rallye'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/23', topic: 'Große Zahlen darstellen', ziel: 'Beherrschen des Veranschaulichens natürlicher Zahlen', remark: 'Null als kleinste natürliche Zahl, Zahlenstrahl, Stellenwerttafel', details: [
+                'Große Zahlen lesen und schreiben: Tausend, Million, Milliarde',
+                'Stellenwerttafel bis zu den Milliarden',
+                'Zahlenstrahl mit passender Einteilung zeichnen und ablesen'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/23', topic: 'Schätzen, Runden, Vergleichen, Ordnen', ziel: 'Beherrschen des Schätzens, Rundens, Vergleichens und Ordnens', remark: 'Rundungsregel, sinnvolle Genauigkeit', details: [
+                'Anzahlen schätzen mit dem Rasterverfahren',
+                'Runden auf Zehner, Hunderter, Tausender und Millionen',
+                'Vergleichen und Ordnen mit den Zeichen < und >'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/23', topic: 'Rechengesetze und Rechenvorteile', ziel: 'Beherrschen der Grundrechenarten für natürliche Zahlen', remark: 'Vertauschungs-, Verbindungs- und Verteilungsgesetz, Überschlag', details: [
+                'Fachbegriffe: Summe, Differenz, Produkt, Quotient',
+                'Rechengesetze an Beispielen entdecken und zum geschickten Rechnen nutzen',
+                'Überschlag vor dem Rechnen, einfache Gleichungen wie b + 27 = 64 inhaltlich lösen'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/23', topic: 'Potenzen', ziel: 'Kennen des Potenzierens als Anwendung der Multiplikation', remark: 'Zehnerpotenzen, Quadratzahlen bis 20 hoch 2', details: [
+                'Potenz als kurze Schreibweise für ein Produkt gleicher Faktoren: Basis und Exponent',
+                'Zehnerpotenzen und große Zahlen',
+                'Quadratzahlen bis 400, Vorrangregeln: Klammer, Potenz, Punkt, Strich'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '17–20/23', topic: 'Dividieren', ziel: 'Beherrschen der Division als Umkehrung der Multiplikation', remark: 'Probe, schriftlich bis dreistellig durch einstellig, auch mit Rest', details: [
+                'Division im Kopf: zweistellige durch einstellige Zahlen',
+                'Schriftliche Division mit und ohne Rest (Lab Schriftliche Division)',
+                'Probe durch Multiplikation, warum man durch 0 nicht teilen kann'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '21–23/23', topic: 'Teiler und Primzahlen', ziel: 'Kennen von Teiler, Primzahl und Teilbarkeitsregeln', remark: 'Teilbarkeitsregeln für 2, 3, 4, 5, 6 und 10, einfache Primfaktorzerlegungen', details: [
+                'Teiler und Vielfache, Teilermengen',
+                'Teilbarkeitsregeln begründen und anwenden',
+                'Primzahlen mit dem Sieb des Eratosthenes, Primfaktorzerlegung'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'ue', u: '', topic: 'Übung: Natürliche Zahlen', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Kopfrechentraining, gemischte Aufgaben zu Runden, Rechengesetzen und Teilbarkeit',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Natürliche Zahlen', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Große Zahlen, Runden, Rechengesetze, Potenzen, Division, Teilbarkeit'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb2', u: '1–4/27', topic: 'Brüche erkennen und darstellen', ziel: 'Beherrschen von Grundlagen im Bereich der gemeinen Brüche', remark: 'Anteile wie zwei Drittel von 27, Figuren und Körper', details: [
+                'Brüche als Anteile an Kreisen, Rechtecken und Körpern',
+                'Zähler und Nenner, Anteile von Größen und Mengen',
+                'Erfahrungswelt: Pizza, Schokolade, Klassenumfragen'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '5–8/27', topic: 'Kürzen und Erweitern', ziel: 'Kennen des Kürzens und Erweiterns', remark: 'echte und unechte Brüche, gemischte Zahlen', details: [
+                'Kürzen und Erweitern am Bild und am Bruch',
+                'Echte und unechte Brüche, gemischte Schreibweise',
+                'Gleichwertige Brüche finden'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '9–12/27', topic: 'Brüche am Zahlenstrahl und Vergleichen', ziel: 'Vergleichen und Ordnen von Brüchen', remark: 'verschiedene Strategien: gleiche Nenner, gleiche Zähler, Vergleich mit einem Halben', details: [
+                'Brüche am Zahlenstrahl darstellen',
+                'Vergleichen durch Gleichnamigmachen und andere Strategien',
+                'Brüche der Größe nach ordnen'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '13–16/27', topic: 'Dezimalzahlen', ziel: 'Kennen der Erweiterung der Stellenwerttafel', remark: 'Zehntel, Hundertstel, Tausendstel, Bruch und Dezimalzahl umwandeln', details: [
+                'Stellenwerttafel nach rechts erweitern',
+                'Zehnerbrüche als Dezimalzahlen schreiben und umgekehrt',
+                'Dezimalzahlen bei Größen: Euro und Cent, Meter und Zentimeter'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '17–20/27', topic: 'Prozent, Vergleichen und Runden', ziel: 'Wechselseitiges Umwandeln von Brüchen, Dezimalzahlen und Prozentangaben', remark: 'Prozentschreibweise für ausgewählte Anteile', details: [
+                'Prozent als Hundertstel: halb, Viertel, Fünftel, Zehntel',
+                'Dezimalzahlen vergleichen, ordnen und runden',
+                'Abschätzen, Darstellung am Zahlenstrahl'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb2', u: '21–24/27', topic: 'Addieren und Subtrahieren von Dezimalzahlen', ziel: 'Übertragen des Rechnens auf Dezimalzahlen', remark: 'Komma unter Komma, Überschlag', details: [
+                'Im Kopf und schriftlich addieren und subtrahieren',
+                'Überschlag zur Kontrolle',
+                'Sachaufgaben mit Geld und Längen'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb2', u: '25–27/27', topic: 'Multiplizieren und Dividieren, Mittelwert', ziel: 'Übertragen des Rechnens auf Dezimalzahlen', remark: 'mit einstelligen Zahlen und Zehnerpotenzen, arithmetisches Mittel', details: [
+                'Kommaverschiebung bei Zehnerpotenzen',
+                'Multiplizieren und Dividieren mit einstelligen Zahlen',
+                'Arithmetisches Mittel berechnen und deuten'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'ue', u: '', topic: 'Weihnachtsknobeln', remark: 'zwei Schultage vor den Ferien', details: [
+                'Knobelaufgaben zu Brüchen und Dezimalzahlen',
+                'Zahlen-Puzzle im Lab'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'ue', u: '', topic: 'Übung: Brüche und Dezimalzahlen', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Gemischte Aufgaben, Umwandeln zwischen Bruch, Dezimalzahl und Prozent',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lk', u: '', topic: 'Klassenarbeit 2: Brüche und Dezimalzahlen', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Brüche darstellen, kürzen, erweitern, vergleichen, Dezimalzahlen, Prozent, Rechnen'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '1–4/22', topic: 'Koordinatensystem', ziel: 'Beherrschen der Darstellung von Punkten und Strecken im Koordinatensystem', remark: 'auch parallele und senkrechte Geraden', details: [
+                'Punkte eintragen und ablesen, auch mit Brüchen und Dezimalzahlen',
+                'Strecken, Strahlen, Geraden',
+                'Zueinander parallele und senkrechte Geraden mit dem Geodreieck'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '5–8/22', topic: 'Winkel zeichnen und messen', ziel: 'Beherrschen des Arbeitens mit Winkeln', remark: 'Umgang mit dem Geodreieck, Orientierung beachten', details: [
+                'Winkel bezeichnen: Scheitel, Schenkel, griechische Buchstaben',
+                'Winkel messen und zeichnen bis 360°',
+                'Winkelarten: spitz, recht, stumpf, gestreckt, überstumpf, voll'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb3', u: '9–12/22', topic: 'Winkel an Geraden', ziel: 'Kennen von Winkelpaaren und ihren Eigenschaften', remark: 'Scheitel-, Neben-, Stufen- und Wechselwinkel, Vermutungen begründen', details: [
+                'Scheitelwinkel und Nebenwinkel an zwei sich schneidenden Geraden',
+                'Stufen- und Wechselwinkel an geschnittenen Parallelen',
+                'Vermutungen aufstellen und begründen, dynamische Geometrie'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '13–16/22', topic: 'Symmetrie im Alltag', ziel: 'Kennen von Symmetrie im Alltag', remark: 'Muster, Achsen- und Punktsymmetrie', details: [
+                'Symmetrie in Kirchenfenstern, Verkehrszeichen, Spielkarten, Blättern',
+                'Achsensymmetrie und Punktsymmetrie erkennen',
+                'Sich wiederholende Muster und Parkettierungen'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '17–20/22', topic: 'Verschiebung, Drehung, Spiegelung', ziel: 'Unterscheiden der Bewegungen', remark: '„Um welche Bewegung handelt es sich?“', details: [
+                'Bild und Original vergleichen',
+                'Verschiebung, Drehung und Spiegelung unterscheiden',
+                'Identifikationsaufgaben'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '21–22/22', topic: 'Geradenspiegelung', ziel: 'Beherrschen der Geradenspiegelung', remark: 'Zeichenschritte beschreiben, Maßgleichheit; dazu Übung', details: [
+                'Figuren an einer Geraden spiegeln, auf Karopapier und unliniertem Papier',
+                'Zeichenschritte beschreiben',
+                'Entsprechende Seiten und Winkel sind gleich groß'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lk', u: '', topic: 'Klassenarbeit 3: Koordinaten, Winkel, Symmetrie', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Koordinatensystem, Winkel, Winkelpaare, Symmetrie, Spiegelung'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb4', u: '1–4/22', topic: 'Umfang und Flächeninhalt des Rechtecks', ziel: 'Anwenden des Bestimmens von Umfang und Flächeninhalt', remark: 'Formeln gewinnen, Messen mit Lineal und Bandmaß', details: [
+                'Flächen vergleichen durch Auslegen mit Einheitsquadraten',
+                'Formeln für Umfang und Flächeninhalt des Rechtecks gewinnen',
+                'Schulhof, Klassenraum, Sportplatz vermessen'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb4', u: '5–8/22', topic: 'Flächeneinheiten und zusammengesetzte Figuren', ziel: 'Anwenden des Bestimmens von Flächeninhalten', remark: 'Umrechnungszahl 100, Zerlegen und Ergänzen', details: [
+                'Flächeneinheiten mm², cm², dm², m², a, ha, km²',
+                'Figuren aus Rechtecken: zerlegen oder ergänzen',
+                'Methodenbewusstsein: mehrere Wege vergleichen'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb4', u: '9–12/22', topic: 'Quader darstellen', ziel: 'Beherrschen des Darstellens von Quadern', remark: 'Grundriss, Seitenansichten, Schrägbild, Körpernetz', details: [
+                'Quader und Würfel: Ecken, Kanten, Flächen',
+                'Schrägbild auf Karopapier, Netze falten',
+                'Körper aus Quadern in verschiedenen Ansichten'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb4', u: '13–16/22', topic: 'Volumen des Quaders', ziel: 'Anwenden des Bestimmens des Volumens von Quadern', remark: 'Volumeneinheiten, Hohlmaße', details: [
+                'Volumen durch Auslegen mit Einheitswürfeln',
+                'Formel für das Volumen gewinnen',
+                'mm³, cm³, dm³, m³, Liter und Milliliter'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb4', u: '17–20/22', topic: 'Oberflächeninhalt und zusammengesetzte Körper', ziel: 'Anwenden des Bestimmens von Oberflächeninhalt und Volumen', remark: 'Netz und Oberfläche, Zurückführen auf Quader', details: [
+                'Oberflächeninhalt aus dem Netz',
+                'Körper aus Quadern: zerlegen und ergänzen',
+                'Methodenbewusstsein'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb4', u: '21–22/22', topic: 'Projekt „Verpackungen“', ziel: 'Anwenden beim Projekt', remark: 'Bildung für nachhaltige Entwicklung', details: [
+                'Verpackungen vermessen: Volumen, Oberfläche, Materialverbrauch',
+                'Welche Schachtel spart Material?'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lk', u: '', topic: 'Klassenarbeit 4: Rechtecke und Quader', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Umfang, Flächeninhalt, Einheiten, Darstellen, Volumen und Oberfläche von Quadern'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'lb5', u: '1–3/10', topic: 'Größen und Einheiten', ziel: 'Anwenden des Arbeitens mit Größen beim Lösen von Sachaufgaben', remark: 'Zeit, Masse, Länge, Fläche, Volumen umrechnen', details: [
+                'Umrechnungszahlen der Größenbereiche',
+                'Einheitentreppe für Länge, Masse, Zeit, Fläche und Volumen'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'lb5', u: '4–7/10', topic: 'Sachaufgaben und Näherungswerte', ziel: 'Vernünftiger Umgang mit Näherungswerten und Größen', remark: 'Fahrpläne, Fermi-Aufgaben, sinnvolle Genauigkeit', details: [
+                'Fahrpläne lesen und Fahrzeiten berechnen',
+                'Fermi-Aufgaben: Wie viele Haare hat ein Mensch?',
+                'Sinnvolle Genauigkeit bei Ergebnissen'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'lb5', u: '8–10/10', topic: 'Projekt: Mathematik beim Schulsportfest', ziel: 'Einblick in realitätsnahe Problemlöseprozesse', remark: 'Informationen suchen, Teilprobleme, Lösungsplan', details: [
+                'Ein Problem in Teilprobleme zerlegen',
+                'Lösungsplan aufstellen und Ergebnisse präsentieren'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'wb', u: '1–4/8', topic: 'Zahlen einst: Ägypter, Römer, Maya', ziel: 'Einblick in die Schreibweise von Zahlen in verschiedenen Epochen und Kulturkreisen', remark: 'Additionssysteme und Stellenwertsysteme', details: [
+                'Ägyptische Hieroglyphen und römische Zahlzeichen',
+                'Das Zwanzigersystem der Maya mit der Null',
+                'Warum ein Stellenwertsystem so praktisch ist'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'wb', u: '5–8/8', topic: 'Adam Ries und das Zweiersystem', ziel: 'Kennen der Addition und Subtraktion in einem nichtdekadischen Positionssystem', remark: 'regionale Geschichte: Annaberg im Erzgebirge', details: [
+                'Adam Ries und das Rechnen auf den Linien',
+                'Das Zweiersystem: Zählen und Addieren wie ein Computer',
+                'Addieren und Subtrahieren im Fünfer- und Zweiersystem'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Wiederholung: Jahresstoff', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Gemischte Aufgaben aus allen Lernbereichen',
+                'Kopfrechentraining'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Projektwoche Mathematik: Spiele und Knobeleien', remark: 'Tangram, Turm von Hanoi, Nimm-Spiele', details: [
+                'Mathematische Spiele erforschen und Gewinnstrategien finden'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr, Ausblick auf Klasse 6'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_gy_mathematik.pdf where that Lernbereich starts.
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_gy_mathematik.pdf',
+            lb1: {
+                page: 19,
+                bullets: [
+                    'Natürliche Zahlen veranschaulichen, schätzen, runden, vergleichen und ordnen',
+                    'Zahlenstrahl und Stellenwerttafel, Null als kleinste natürliche Zahl',
+                    'Rechengesetze, Rechenvorteile und Überschlag',
+                    'Potenzieren: Zehnerpotenzen, Quadratzahlen bis 20 hoch 2',
+                    'Division als Umkehrung der Multiplikation, im Kopf und schriftlich',
+                    'Teiler, Primzahlen, Teilbarkeitsregeln für 3, 4 und 6, Primfaktorzerlegung',
+                ]
+            },
+            lb2: {
+                page: 20,
+                bullets: [
+                    'Brüche erkennen und darstellen: Figuren, Körper, Zahlenstrahl',
+                    'Kürzen und Erweitern, echte und unechte Brüche',
+                    'Erweiterung der Stellenwerttafel, Prozentschreibweise für ausgewählte Anteile',
+                    'Brüche, Dezimalzahlen und Prozentangaben ineinander umwandeln',
+                    'Vergleichen, Ordnen, Abschätzen und Runden',
+                    'Rechnen mit Dezimalzahlen, arithmetisches Mittel',
+                ]
+            },
+            lb3: {
+                page: 20,
+                bullets: [
+                    'Punkte und Strecken im Koordinatensystem, parallele und senkrechte Geraden',
+                    'Winkel zeichnen, messen und bezeichnen, Winkelarten',
+                    'Scheitel-, Neben-, Stufen- und Wechselwinkel',
+                    'Symmetrie im Alltag: Muster, Achsen- und Punktsymmetrie',
+                    'Verschiebung, Drehung und Spiegelung unterscheiden',
+                    'Geradenspiegelung zeichnen und beschreiben',
+                ]
+            },
+            lb4: {
+                page: 21,
+                bullets: [
+                    'Umfang und Flächeninhalt von Rechtecken, Flächeneinheiten',
+                    'Figuren, die sich auf Rechtecke zurückführen lassen',
+                    'Quader darstellen: Grundriss, Seitenansichten, Schrägbild, Körpernetz',
+                    'Oberflächeninhalt und Volumen von Quadern, Volumeneinheiten und Hohlmaße',
+                    'Projekt „Verpackungen“',
+                ]
+            },
+            lb5: {
+                page: 22,
+                bullets: [
+                    'Größen umrechnen: Zeit, Masse, Länge, Flächeninhalt, Volumen',
+                    'Vernünftiger Umgang mit Näherungswerten, Fahrpläne, Fermi-Aufgaben',
+                    'Projekt: Informationen suchen, Teilprobleme, Lösungsplan',
+                ]
+            },
+            wb: {
+                page: 23,
+                bullets: [
+                    'Wahlbereich 1: Dynamisieren geometrischer Objekte',
+                    'Wahlbereich 2: Mathematische Puzzles und Spiele',
+                    'Wahlbereich 3: Zählen und Rechnen – einst und jetzt (gewählt)',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            lb5: ['b-pink', 'LB 5'],
+            wb: ['b-green', 'WB 3'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', '\u00dcBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
