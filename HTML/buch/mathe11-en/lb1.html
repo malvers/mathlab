@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 11 · Chapter 1 · Probabilities of multi-stage random experiments | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Tree diagrams, two-way tables, simulation. Chapter 1 of the interactive textbook Mathematics · Vocational Grammar School 11: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<!-- ================================================================ OPENER -->
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1 · LEARNING AREA 1 · APRIL</p>
+            <h1>Probabilities of multi-stage random experiments</h1>
+            <p class="b-hero-lead">Draw twice, roll three times, test first and then check: many random experiments happen in stages.
+                In this chapter you learn to see through such experiments with <b>tree diagrams</b> and <b>two-way tables</b> –
+                and to <b>replay</b> them a thousand times on the computer.</p>
+            <div class="b-chips">
+                <span class="b-chip">15 LESSONS</span>
+                <span class="b-chip">3 UNITS</span>
+                <span class="b-chip">4 LABS</span>
+                <span class="b-chip">INTERACTIVE</span>
+            </div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text">
+                <ul>
+                    <li>draw tree diagrams and calculate probabilities with the <b>path rules</b></li>
+                    <li>distinguish drawing <b>with and without replacement</b></li>
+                    <li>set up, complete and evaluate <b>two-way tables</b></li>
+                    <li><b>simulate</b> random experiments with digital tools and compare simulation and calculation</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="1/3">
+                <p class="b-q-text">A dice is rolled once. How likely is a score greater than 4?</p>
+                <div class="b-sol"><p>Favourable are 5 and 6, so $\tfrac26 = \tfrac13 \approx 0.33$.</p></div>
+            </div>
+            <div class="b-q" data-ans="3/10">
+                <p class="b-q-text">Calculate $\tfrac34 \cdot \tfrac25$.</p>
+                <div class="b-sol"><p>Numerator times numerator, denominator times denominator: $\tfrac{3 \cdot 2}{4 \cdot 5} = \tfrac{6}{20} = \tfrac{3}{10}$.</p></div>
+            </div>
+            <div class="b-q" data-ans="0.65">
+                <p class="b-q-text">$P(A) = 0.35$. What is the probability of the complementary event $\overline{A}$?</p>
+                <div class="b-sol"><p>$P(\overline{A}) = 1 - P(A) = 1 - 0.35 = 0.65$.</p></div>
+            </div>
+            <div class="b-q" data-ans="0.12" data-tol="0.0001">
+                <p class="b-q-text">Write 12% as a decimal.</p>
+                <div class="b-sol"><p>Percent means “out of a hundred”: $12\% = \tfrac{12}{100} = 0.12$.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ EXPLORATIONS -->
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-text"><p>Before there are any rules: estimate, try things out, argue. You need no prior knowledge for the explorations.
+        The labs help you to experiment, and the margin tells you in which unit the answer can be found.</p></div>
+
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LENA'S DICE</div>
+            <div class="b-text">
+                <p>Lena plays with two dice she has labelled herself: whoever rolls the higher number wins, a tie is a draw.</p>
+                <ul>
+                    <li>Look at the nets of the dice in the lab. Who has the better chances? Estimate first.</li>
+                    <li>Play 20 rounds and count the wins.</li>
+                    <li>How can you determine the chance of winning <b>exactly</b> without playing?</li>
+                </ul>
+            </div>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">THE DICE GAME</span><span class="b-lab-what">Label the dice, the tree and the result are calculated at once</span></span></a>
+            <span class="b-pair">→ Unit 1</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">TWO BALLS FROM THE BAG</div>
+            <div class="b-text">
+                <p>A bag contains <span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
+                    – three red and two blue balls. Without looking you draw two balls one after the other and do <b>not</b> put the first one back.</p>
+                <ul>
+                    <li>Which is more likely: two of the same colour or two different ones? Take a vote.</li>
+                    <li>Play it 20 times with scraps of paper and count.</li>
+                    <li>Draw all the possibilities. How can you calculate the chances?</li>
+                </ul>
+            </div>
+            <span class="b-pair">→ Unit 1, example 2</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">THE BEAN MACHINE</div>
+            <div class="b-text">
+                <p>A ball falls through several rows of nails. At every nail it bounces left or right with equal chance.</p>
+                <ul>
+                    <li>Let many balls fall in the lab. Why do most of them land in the middle?</li>
+                    <li>How many paths lead to the slot on the far left, how many to a slot in the middle?</li>
+                </ul>
+            </div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Bean machine with histogram – the bell curve appears live</span></span></a>
+            <span class="b-pair">→ Units 1 and 3</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">POSITIVE – AND STILL HEALTHY?</div>
+            <div class="b-text">
+                <p>A rapid test correctly identifies 95% of the ill and 95% of the healthy. Of 10,000 people, 200 are ill.</p>
+                <ul>
+                    <li>Your test is positive. How sure can you be that you are ill: 95%? 50%? Less? Estimate.</li>
+                    <li>Work it out: how many ill and how many healthy people get a positive result? A table helps.</li>
+                </ul>
+            </div>
+            <span class="b-pair">→ Unit 2</span>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ UNIT 1 -->
+<section class="b-sec" id="le1" data-kind="le" data-toc="Tree diagrams and path rules" data-toc-k="1" data-toc-short="1 Tree diagrams">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Tree diagrams and path rules</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Lea spins a spinner with three equal sectors twice: two are red, one is blue.
+                    She wins if <b>red</b> comes up both times. Does she win in more than half of all games?</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>A random experiment that consists of several sub-experiments carried out one after the other is called a <b>multi-stage random experiment</b>.
+                    It is represented in a <b>tree diagram</b>: every stage is a branching, and on every branch stands the probability
+                    of that outcome.</p>
+                <p>Every outcome of the whole experiment corresponds to exactly one <b>path</b> from the start to an end.
+                    An <b>event</b> combines several outcomes, i.e. several paths.</p>
+                <p>For Lea, $P(\text{red}) = \tfrac23$ at every stage. In $\tfrac23$ of all games red comes first, and of these games
+                    red comes again in $\tfrac23$ of the cases. So
+                    $$P(\text{RR}) = \tfrac23 \cdot \tfrac23 = \tfrac49 \approx 0.44.$$
+                    So Lea wins in <b>less</b> than half of the games.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · PATH RULES</div>
+                <div class="b-text">
+                    <p>At every branching the probabilities add up to $1$.</p>
+                    <p><b>1st path rule (product rule):</b> the probability of an outcome is the <b>product</b> of the
+                        probabilities along its path.</p>
+                    <p><b>2nd path rule (sum rule):</b> the probability of an event is the <b>sum</b> of the
+                        probabilities of all paths that belong to the event.</p>
+                </div>
+            </div>
+
+            <div class="b-text">
+                <p>When drawing from an urn it matters whether the ball drawn is put back.
+                    <b>With replacement</b> the probabilities stay the same at every stage.
+                    <b>Without replacement</b> the contents of the urn change, and with them the probabilities of the next stage.</p>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notation:</b> R stands for red, B for blue. RB means: first red, then blue.</p>
+            <p class="b-note"><b>Check:</b> the probabilities of all the ends of the paths add up to $1$.</p>
+            <p class="b-note"><b>Lab:</b> in the dice game you build the tree for two dice yourself, stage by stage.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · TREE DIAGRAM WORKSHOP</div>
+        <p class="b-help" style="margin:0 0 12px">Set up the urn, choose with or without replacement and click on the ends of the paths on the right.
+            The workshop works out both path rules for you.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-bsp">
+                <div class="b-box-title">EXAMPLE 1 · AT LEAST ONCE</div>
+                <div class="b-text">
+                    <p>Lea spins her spinner twice again. How likely is red <b>at least once</b>?</p>
+                </div>
+                <div class="b-sol">
+                        <p>“At least once red” consists of the three paths RR, RB and BR. It is quicker via the <b>complementary event</b>
+                            “never red”, which is only the path BB:</p>
+                        <p>$$P(\text{BB}) = \tfrac13 \cdot \tfrac13 = \tfrac19, \qquad P(\text{at least once red}) = 1 - \tfrac19 = \tfrac89 \approx 0.89.$$</p>
+                    </div>
+            </div>
+
+            <div class="b-box b-bsp">
+                <div class="b-box-title">EXAMPLE 2 · WITHOUT REPLACEMENT</div>
+                <div class="b-text">
+                    <p>Two balls are drawn without replacement from the bag with three red and two blue balls.
+                        Calculate the probability of a) two red balls, b) two different colours.</p>
+                </div>
+                <div class="b-sol">
+                        <p>After a red ball there are still 2 red and 2 blue in the bag, after a blue one 3 red and 1 blue.</p>
+                        <p>a) $P(\text{RR}) = \tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p>
+                        <p>b) $P(\text{RB}) + P(\text{BR}) = \tfrac35 \cdot \tfrac24 + \tfrac25 \cdot \tfrac34 = \tfrac{6}{20} + \tfrac{6}{20} = \tfrac35$</p>
+                        <p>So two different colours are more likely ($\tfrac35$) than two of the same ($\tfrac25$). That is the answer to the exploration.</p>
+                    </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Tip:</b> “at least once” is almost always calculated via the complementary event “never”:
+                $P(E) = 1 - P(\overline{E})$.</p>
+        </aside>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>A coin is tossed three times. Draw the tree diagram and calculate the probability of
+                a) three tails, b) exactly two heads.</p></div>
+            <div class="b-sol"><p>The tree has 8 paths, each has the probability $\left(\tfrac12\right)^3 = \tfrac18$.</p>
+                <p>a) $P(\text{TTT}) = \tfrac18$ &nbsp; b) paths HHT, HTH, THH: $3 \cdot \tfrac18 = \tfrac38$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>A spinner shows red with $\tfrac12$, yellow with $\tfrac13$ and blue with $\tfrac16$. It is spun twice.
+                How likely is a) the same colour twice, b) two different colours?</p></div>
+            <div class="b-sol"><p>a) $\tfrac12 \cdot \tfrac12 + \tfrac13 \cdot \tfrac13 + \tfrac16 \cdot \tfrac16 = \tfrac{9}{36} + \tfrac{4}{36} + \tfrac{1}{36} = \tfrac{14}{36} = \tfrac{7}{18} \approx 0.389$</p>
+                <p>b) Complementary event: $1 - \tfrac{7}{18} = \tfrac{11}{18} \approx 0.611$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>An urn contains 4 red and 6 white balls. Two balls are drawn without replacement.</p>
+                <p>a) Calculate the probability that both are white. b) Calculate the probability of at least one red ball.
+                    c) Compare a) with drawing with replacement and explain the difference.</p></div>
+            <div class="b-hint"><p>For b): what is the complementary event of “at least one red”?</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{10} \cdot \tfrac59 = \tfrac{30}{90} = \tfrac13$ &nbsp; b) $1 - \tfrac13 = \tfrac23$</p>
+                <p>c) With replacement: $0.6 \cdot 0.6 = 0.36 > \tfrac13$. Without replacement there is one white ball fewer in the urn after a white one,
+                    so the chance of a second white one goes down.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A component is checked in two independent tests. Test 1 detects an existing fault with
+                90%, test 2 with 80%. A component is faulty.</p>
+                <p>a) How likely is the fault detected? b) How likely is it detected only by test 2?</p></div>
+            <div class="b-hint"><p>The fault only goes undetected if <b>both</b> tests miss it.</p></div>
+            <div class="b-sol"><p>a) $1 - 0.1 \cdot 0.2 = 1 - 0.02 = 0.98$ &nbsp; b) $0.1 \cdot 0.8 = 0.08$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>How often do you have to roll a dice at least so that with a probability of at least 90%
+                at least one six comes up?</p></div>
+            <div class="b-hint"><p>Complementary event: $n$ times no six, i.e. $\left(\tfrac56\right)^n$. Try with a calculator or a table of values.</p></div>
+            <div class="b-sol"><p>We want the smallest $n$ with $1 - \left(\tfrac56\right)^n \geq 0.9$, i.e. $\left(\tfrac56\right)^n \leq 0.1$.</p>
+                <p>$\left(\tfrac56\right)^{12} \approx 0.112$ is still too large, $\left(\tfrac56\right)^{13} \approx 0.093$ is enough.
+                    <span class="b-res">You need at least 13 rolls.</span></p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Tim calculates for example 2: “Both balls red: $\tfrac35 \cdot \tfrac35 = \tfrac{9}{25}$.”
+                Find the mistake and explain it to a classmate.</p></div>
+            <div class="b-sol"><p>Tim calculates as if the first ball were put back. Without replacement there are only
+                4 balls left in the bag for the second draw, 2 of them red: $\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1/36">
+            <p class="b-q-text">A dice is rolled twice. How likely is a six both times?</p>
+            <div class="b-sol"><p>$\tfrac16 \cdot \tfrac16 = \tfrac{1}{36} \approx 0.028$</p></div>
+        </div>
+        <div class="b-q" data-ans="3/10">
+            <p class="b-q-text">An urn contains 2 red and 3 blue balls. Two are drawn without replacement. How likely are both blue?</p>
+            <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p></div>
+        </div>
+        <div class="b-q" data-ans="0.488">
+            <p class="b-q-text">In a game of chance you win with probability $0.2$. You play three times.
+                How likely do you win at least once?</p>
+            <div class="b-sol"><p>$1 - 0.8^3 = 1 - 0.512 = 0.488$</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ UNIT 2 -->
+<section class="b-sec" id="le2" data-kind="le" data-toc="Two-way tables" data-toc-k="2" data-toc-short="2 Two-way tables">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Two-way tables</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>At the vocational grammar school 200 students were asked: 80 do sport in a club,
+                    70 cycle to school, 35 do both. Do club athletes cycle more often than the others?</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>If two characteristics with two values each are recorded for every person, the counts are arranged in a
+                    <b>two-way table</b> (2 × 2 contingency table). The four inner cells contain the combinations, the totals are in the margins.
+                    Here $S$ is “does club sport” and $F$ “cycles”:</p>
+            </div>
+            <div class="b-table-wrap" style="margin:0 0 14px">
+                <table class="b-table" style="max-width:520px;min-width:0">
+                    <thead><tr><th></th><th>$F$</th><th>$\overline{F}$</th><th class="b-sum">Total</th></tr></thead>
+                    <tbody>
+                        <tr><th>$S$</th><td class="b-hot">35</td><td>45</td><td class="b-sum">80</td></tr>
+                        <tr><th>$\overline{S}$</th><td>35</td><td>85</td><td class="b-sum">120</td></tr>
+                        <tr><th class="b-sum">Total</th><td class="b-sum">70</td><td class="b-sum">130</td><td class="b-sum">200</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="b-text">
+                <p>If you divide all entries by 200, you get probabilities: a randomly chosen person does club sport <b>and</b> cycles with
+                    probability $\tfrac{35}{200} = 0.175$.</p>
+                <p>On the question: of the 80 athletes, 35 cycle, that is $\tfrac{35}{80} \approx 44\%$. Of the 120 others it is only
+                    $\tfrac{35}{120} \approx 29\%$. So club athletes cycle considerably more often.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · TWO-WAY TABLE</div>
+                <div class="b-table-wrap" style="margin:0 0 12px">
+                    <table class="b-table" style="min-width:0">
+                        <thead><tr><th></th><th>$B$</th><th>$\overline{B}$</th><th class="b-sum">Total</th></tr></thead>
+                        <tbody>
+                            <tr><th>$A$</th><td>$P(A \cap B)$</td><td>$P(A \cap \overline{B})$</td><td class="b-sum">$P(A)$</td></tr>
+                            <tr><th>$\overline{A}$</th><td>$P(\overline{A} \cap B)$</td><td>$P(\overline{A} \cap \overline{B})$</td><td class="b-sum">$P(\overline{A})$</td></tr>
+                            <tr><th class="b-sum">Total</th><td class="b-sum">$P(B)$</td><td class="b-sum">$P(\overline{B})$</td><td class="b-sum">$1$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="b-text">
+                    <p>Every row and every column adds up to its marginal value. The four inner cells add up to $1$
+                        (with counts, to the total number).</p>
+                    <p>$A \cap B$ means “$A$ and $B$”. $\overline{A}$ is the complementary event “not $A$”.</p>
+                </div>
+            </div>
+
+            <div class="b-text">
+                <p>Every two-way table belongs to two tree diagrams, depending on which characteristic you look at first.
+                    The probabilities at the ends of the paths are exactly the four inner cells of the table.</p>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Check:</b> add the marginal values once along the rows and once along the columns. At the bottom right
+                you must get the same both times.</p>
+            <p class="b-note"><b>How to say it:</b> $A \cap B$ is read “$A$ intersection $B$” or simply “$A$ and $B$”.</p>
+            <p class="b-note"><b>Careful:</b> $P(S \cap F) = 0.175$ is not the proportion of cyclists among the athletes. That is
+                $\tfrac{35}{80}$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EXAMPLE 3 · COMPLETING A TABLE</div>
+        <div class="b-text">
+            <p>In a bike shop 30% of customers buy an e-bike ($A$), 60% pay by card ($B$), and 12% do both.
+                Complete the two-way table. What percentage do not buy an e-bike and pay cash?</p>
+        </div>
+        <div class="b-sol">
+                <p>Given are $P(A) = 0.3$, $P(B) = 0.6$ and $P(A \cap B) = 0.12$. First the margins, then the inner cells:</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <thead><tr><th></th><th>$B$</th><th>$\overline{B}$</th><th class="b-sum">Total</th></tr></thead>
+                    <tbody>
+                        <tr><th>$A$</th><td>0.12</td><td>0.18</td><td class="b-sum">0.3</td></tr>
+                        <tr><th>$\overline{A}$</th><td>0.48</td><td class="b-hot">0.22</td><td class="b-sum">0.7</td></tr>
+                        <tr><th class="b-sum">Total</th><td class="b-sum">0.6</td><td class="b-sum">0.4</td><td class="b-sum">1</td></tr>
+                    </tbody>
+                </table></div>
+                <p>$P(\overline{A} \cap \overline{B}) = 0.4 - 0.18 = 0.22$: <span class="b-res">22% do not buy an e-bike and pay cash.</span></p>
+            </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE RAPID TEST</div>
+        <p class="b-help" style="margin:0 0 12px">10,000 people take a rapid test. Move the sliders and watch the yellow cells:
+            how many of those who test positive are really ill? That resolves the exploration.</p>
+        <div data-widget="schnelltest"></div>
+    </div>
+
+    <div class="b-box b-ausblick">
+        <div class="b-box-title">OUTLOOK · CONDITIONAL PROBABILITY</div>
+        <div class="b-text">
+            <p>With the rapid test you do not ask for “ill <b>and</b> positive”, but for “ill, <b>given</b> positive”.
+                You write $P_{T^+}(D)$ ($D$ for disease) and speak of a <b>conditional probability</b>. It can be read off the two-way table:</p>
+            <p>$$P_{T^+}(D) = \frac{P(D \cap T^+)}{P(T^+)}$$</p>
+            <p>If $P(A \cap B) = P(A) \cdot P(B)$, $A$ and $B$ are called <b>stochastically independent</b>, otherwise dependent.
+                In the bike shop $0.3 \cdot 0.6 = 0.18 \neq 0.12$: buying an e-bike and paying by card are dependent.
+                You will work with both ideas in more detail later.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · TWO-WAY TABLE TRAINER</div>
+        <p class="b-help" style="margin:0 0 12px">Four cells are given (yellow). Fill in the others and check. “New table” rolls a new task.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>500 students were asked: 220 are in Year 11, the others in Year 12.
+                150 go by bus or train, 90 of them from Year 11.</p>
+                <p>a) Set up the two-way table. b) How likely is a randomly chosen person from Year 11
+                    and does <b>not</b> go by bus or train? c) Compare the proportions of bus and train users in the two years.</p></div>
+            <div class="b-sol">
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <thead><tr><th></th><th>bus/train</th><th>not</th><th class="b-sum">Total</th></tr></thead>
+                    <tbody>
+                        <tr><th>Year 11</th><td>90</td><td>130</td><td class="b-sum">220</td></tr>
+                        <tr><th>Year 12</th><td>60</td><td>220</td><td class="b-sum">280</td></tr>
+                        <tr><th class="b-sum">Total</th><td class="b-sum">150</td><td class="b-sum">350</td><td class="b-sum">500</td></tr>
+                    </tbody>
+                </table></div>
+                <p>b) $\tfrac{130}{500} = 0.26$ &nbsp; c) Year 11: $\tfrac{90}{220} \approx 41\%$, Year 12: $\tfrac{60}{280} \approx 21\%$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$P(A) = 0.45$, $P(A \cap B) = 0.15$ and $P(\overline{A} \cap \overline{B}) = 0.35$.
+                Complete the two-way table.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0.30$, $P(\overline{A}) = 0.55$, $P(\overline{A} \cap B) = 0.20$,
+                $P(B) = 0.35$, $P(\overline{B}) = 0.65$. Check: $0.35 + 0.65 = 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>In a tree diagram $P(A) = 0.4$. Of the cases with $A$, 75% also have the characteristic $B$,
+                of the cases without $A$ only 25%. Draw the tree, set up the two-way table and find $P(B)$.</p></div>
+            <div class="b-hint"><p>The ends of the paths of the tree are the inner cells of the table, for example $P(A \cap B) = 0.4 \cdot 0.75$.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0.3$, $P(A \cap \overline{B}) = 0.1$, $P(\overline{A} \cap B) = 0.6 \cdot 0.25 = 0.15$,
+                $P(\overline{A} \cap \overline{B}) = 0.45$.</p>
+                <p><span class="b-res">$P(B) = 0.3 + 0.15 = 0.45$</span></p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A test correctly identifies 90% of the ill and 90% of the healthy. 1% of the population is ill.
+                What percentage of those who test positive are ill? Work with 10,000 people and check with the rapid test above.</p></div>
+            <div class="b-sol"><p>100 ill, 90 of them positive. 9,900 healthy, 990 of them positive. 1,080 positive altogether.</p>
+                <p><span class="b-res">$\tfrac{90}{1080} \approx 8.3\%$</span>. The test is good, but the disease is rare. Most positive results are false alarms.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$P(A) = 0.5$ and $P(B) = 0.4$. What is the largest value $P(A \cap B)$ can take, what the smallest?
+                Give reasons with the two-way table.</p></div>
+            <div class="b-hint"><p>Put $P(A \cap B) = x$ and express the other three inner cells in terms of $x$. None of them may become negative.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0.5 - x$, $P(\overline{A} \cap B) = 0.4 - x$, $P(\overline{A} \cap \overline{B}) = 0.1 + x$.
+                All must be $\geq 0$, so $0 \leq x \leq 0.4$.</p>
+                <p><span class="b-res">At most $0.4$</span> (then every $B$ also belongs to $A$), <span class="b-res">at least $0$</span>.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="130" data-ph="how many">
+            <p class="b-q-text">Of 300 people, 120 have characteristic $A$, 90 characteristic $B$, 40 both. How many have neither?</p>
+            <div class="b-sol"><p>$300 - 120 - 90 + 40 = 130$. The 40 were counted in $A$ and in $B$, so they were subtracted once too often.</p></div>
+        </div>
+        <div class="b-q" data-ans="0.25">
+            <p class="b-q-text">$P(A) = 0.6$, $P(B) = 0.5$ and $P(A \cap B) = 0.35$. Calculate $P(\overline{A} \cap \overline{B})$.</p>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0.25$, so $P(\overline{A} \cap \overline{B}) = P(\overline{B}) - 0.25 = 0.5 - 0.25 = 0.25$.</p></div>
+        </div>
+        <div class="b-q" data-ans="40" data-ph="how many">
+            <p class="b-q-text">1,000 people are tested, 5% are ill. The test identifies 80% of the ill.
+                How many ill people test positive?</p>
+            <div class="b-sol"><p>50 ill, 80% of them: $50 \cdot 0.8 = 40$.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ UNIT 3 -->
+<section class="b-sec" id="le3" data-kind="le" data-toc="Simulation" data-toc-k="3" data-toc-short="3 Simulation">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Simulating random experiments</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>At the school fête two dice are rolled. Beforehand you bet on a total score.
+                    Is it worth betting on 7 instead of 6 or 8? You have no time to roll 1,000 times.</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>If a random experiment is carried out $n$ times and an event $E$ occurs $k$ times,
+                    $$h_n(E) = \frac{k}{n}$$ is called the <b>relative frequency</b> of $E$.</p>
+                <p>With few trials $h_n$ varies a lot. The more trials you make, the less it varies: it settles down
+                    near the probability $P(E)$. This is called the <b>empirical law of large numbers</b>.</p>
+                <p>Instead of really rolling 1,000 times, you let the computer generate random numbers and replay the experiment.
+                    That is a <b>simulation</b>.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SIMULATING IN THREE STEPS</div>
+                <div class="b-text">
+                    <p><b>1. Model:</b> assign random numbers to the outcomes of the experiment, e.g. score ↔ random number from 1 to 6.</p>
+                    <p><b>2. Carry out:</b> repeat the experiment very often on the computer.</p>
+                    <p><b>3. Evaluate:</b> find the relative frequency. It is an <b>estimate</b> of $P(E)$.
+                        Every new simulation gives a slightly different estimate.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>School fête:</b> 6 of the 36 possibilities give 7, only 5 each give 6 and 8.
+                Try it in the simulator under “Two dice”.</p>
+            <p class="b-note"><b>History:</b> Antoine Gombaud, Chevalier de Méré, knew from experience that the bet on “at least one six
+                in four rolls” wins in the long run. His questions about games of chance set off the correspondence between Blaise Pascal and
+                Pierre de Fermat in 1654. It is regarded as the beginning of probability theory.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · SIMULATOR</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a random experiment and let it run 1, 10, 100 or 1,000 times.
+            The blue curve is the relative frequency, the yellow line the probability.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">METHOD · SIMULATING WITH A SPREADSHEET AND GEOGEBRA</div>
+        <div class="b-text">
+            <p><b>Spreadsheet</b> (Excel, LibreOffice): two dice, total score 7, 1,000 trials.</p>
+            <p><code class="b-codeline">A1:  =RANDBETWEEN(1,6)+RANDBETWEEN(1,6)</code>
+                Drag the formula down to A1000. Count the hits and divide by the number of trials:
+                <code class="b-codeline">B1:  =COUNTIF(A1:A1000,7)/1000</code>
+                <code>F9</code> (Excel) rolls again.</p>
+            <p><b>GeoGebra:</b>
+                <code class="b-codeline">L = Sequence(RandomBetween(1, 6) + RandomBetween(1, 6), i, 1, 1000)</code>
+                <code class="b-codeline">CountIf(x == 7, L) / 1000</code></p>
+        </div>
+    </div>
+
+    <div class="b-box b-warn">
+        <div class="b-box-title">AWARENESS OF METHOD · CALCULATE OR SIMULATE?</div>
+        <div class="b-text">
+            <p><b>Calculating</b> with a tree or a table gives the exact value, but needs a manageable model.</p>
+            <p><b>Simulating</b> also works for experiments that are too complicated to calculate, such as queues or the spread
+                of a disease. But a simulation only gives estimates, and they only get more accurate slowly: for one more digit of
+                accuracy you need about a hundred times as many trials.</p>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Monte Carlo: random hits estimate the number $\pi$</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Many balls, many stages – the histogram grows</span></span></a>
+        <a class="b-lab" data-lab="infektionssimulation" href="../../infektionssimulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INFECTION SIMULATION</span><span class="b-lab-what">Too complicated to calculate, so simulate</span></span></a>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="12">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>In the simulator, run 100 rolls of “Dice: six” five times in a row (reset in between) and note $h_{100}$ each time.
+                Do the same with 1,000 rolls. What do you notice?</p></div>
+            <div class="b-sol"><p>With 100 rolls the values usually lie somewhere between about $0.10$ and $0.24$. With 1,000 rolls they lie
+                much closer around $\tfrac16 \approx 0.167$. More trials, less variation.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>How can you simulate with a dice: a) a coin toss, b) a spinner with $P(\text{red}) = \tfrac13$,
+                c) a spinner with $P(\text{red}) = \tfrac14$?</p></div>
+            <div class="b-hint"><p>For c): you may also declare rolls invalid and simply roll again.</p></div>
+            <div class="b-sol"><p>a) even number ↔ heads &nbsp; b) 1 or 2 ↔ red &nbsp; c) roll again on 5 or 6. Of 1 to 4, the 1 means red.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Simulate “De Méré” in the simulator at least 2,000 times and estimate the probability of at least one six in
+                four rolls. Then calculate it with the complementary event and compare.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 = 1 - \tfrac{625}{1296} = \tfrac{671}{1296} \approx 0.518$.
+                The simulation ends up close to this. Because the value is just above $\tfrac12$, de Méré won in the long run.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Use a spreadsheet to simulate 1,000 rolls of two dice. Find the relative frequencies of the
+                total scores 6, 7 and 8 and compare with the probabilities.</p></div>
+            <div class="b-sol"><p>Column A as in the method box. Then <code>=COUNTIF(A1:A1000,6)/1000</code>, likewise for 7 and 8.</p>
+                <p>You can expect about $\tfrac{5}{36} \approx 0.139$, $\tfrac{6}{36} \approx 0.167$ and $\tfrac{5}{36} \approx 0.139$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Mia has rolled 20 times and got five sixes. She says: “The probability of a six with
+                this dice is $0.25$. The dice is loaded.” Comment.</p></div>
+            <div class="b-sol"><p>$h_{20} = 0.25$ is only a rough estimate. With 20 rolls the relative frequency varies a lot.
+                Even with a fair dice, five or more sixes occur in about 23% of all runs of 20 rolls.
+                To judge the dice, Mia needs many more rolls.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="112/600" data-tol="0.002">
+            <p class="b-q-text">In 600 rolls a six came up 112 times. What is the relative frequency?</p>
+            <div class="b-sol"><p>$h_{600} = \tfrac{112}{600} \approx 0.187$, not far from $\tfrac16 \approx 0.167$.</p></div>
+        </div>
+        <div class="b-q" data-mc="1">
+            <p class="b-q-text">Which simulation fits a spinner with $P(\text{red}) = 0.3$?</p>
+            <div class="b-mc">
+                <button>RANDBETWEEN(1,3), red on 1</button>
+                <button>RANDBETWEEN(1,10), red on 1, 2 or 3</button>
+                <button>RANDBETWEEN(1,6), red on 1 or 2</button>
+            </div>
+            <div class="b-sol"><p>Of ten equally likely numbers, three stand for red: $\tfrac{3}{10} = 0.3$. The other two give $\tfrac13$.</p></div>
+        </div>
+        <div class="b-q" data-ans="200" data-ph="how many">
+            <p class="b-q-text">Two dice are rolled 1,200 times. About how often do you expect the total score 7?</p>
+            <div class="b-sol"><p>$1200 \cdot \tfrac16 = 200$. In a simulation you usually get values close to 200, rarely exactly 200.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ REVIEW -->
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="17">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>A combination lock has three wheels with the digits 0 to 9. How likely do you open it with one random attempt?
+                How does the probability change if you know the first digit?</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{10} \cdot \tfrac{1}{10} \cdot \tfrac{1}{10} = \tfrac{1}{1000}$. With the first digit known: $\tfrac{1}{100}$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>A dice is rolled twice. Calculate the probability of a) a double, b) the total score 10,
+                c) at least one 1.</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{36} = \tfrac16$ &nbsp; b) (4, 6), (5, 5), (6, 4): $\tfrac{3}{36} = \tfrac{1}{12}$ &nbsp;
+                c) $1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A company buys 30% of its components from supplier A and 70% from supplier B. 4% of A's are faulty, 2% of B's.</p>
+                <p>a) Draw the tree and set up the two-way table. b) What percentage of all components are faulty?
+                    c) A component is faulty. Is it more likely to come from A or from B?</p></div>
+            <div class="b-sol"><p>a) A and faulty: $0.3 \cdot 0.04 = 0.012$, A and fine: $0.288$,
+                B and faulty: $0.7 \cdot 0.02 = 0.014$, B and fine: $0.686$.</p>
+                <p>b) $0.012 + 0.014 = 0.026$, i.e. 2.6%.</p>
+                <p>c) Slightly more likely from B ($0.014 > 0.012$), although parts from A are faulty twice as often: B supplies many more parts.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Three people meet. How likely do all three have their birthdays on different days
+                (365 days, all equally likely)? How likely do at least two have their birthday on the same day?</p></div>
+            <div class="b-sol"><p>$\tfrac{365}{365} \cdot \tfrac{364}{365} \cdot \tfrac{363}{365} \approx 0.9918$, so at least two the same: $\approx 0.0082$.</p>
+                <p>Thinking further: from 23 people on, a shared birthday is more likely than none. This is the <b>birthday paradox</b>.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>A basketball player scores a free throw with 70%. She throws until she scores, but at most three times.</p>
+                <p>a) How likely does she score at all? b) How likely does she need exactly two throws? c) How likely does she throw three times?</p></div>
+            <div class="b-hint"><p>The tree is not complete: after a hit the path ends.</p></div>
+            <div class="b-sol"><p>a) $1 - 0.3^3 = 0.973$ &nbsp; b) $0.3 \cdot 0.7 = 0.21$ &nbsp;
+                c) The third throw only comes after two misses: $0.3 \cdot 0.3 = 0.09$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Connecting with learning area 3:</b> the function $f(n) = 1 - \left(\tfrac56\right)^n$ gives the probability
+                of at least one six in $n$ rolls.</p>
+                <p>a) Calculate $f(1)$, $f(4)$ and $f(10)$. b) From which $n$ on is $f(n) > 0.5$? c) What kind of function is
+                    $n \mapsto \left(\tfrac56\right)^n$? What happens to $f(n)$ for very large $n$?</p></div>
+            <div class="b-sol"><p>a) $f(1) = \tfrac16 \approx 0.167$, $f(4) \approx 0.518$, $f(10) \approx 0.838$ &nbsp; b) from $n = 4$, because $f(3) \approx 0.421$.</p>
+                <p>c) An exponential function with the factor $\tfrac56$, i.e. exponential decrease. $f(n)$ gets as close to $1$ as you like, but never reaches it.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ EXCURSION -->
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: the Monty Hall problem" data-toc-k="X" data-toc-short="Monty Hall">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">FOOD FOR THOUGHT</span></div>
+    <h2>The Monty Hall problem</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In a game show there are three doors. Behind one there is a car, behind each of the other two a goat. You choose a door.
+                The host knows where the car is. He opens one of the other two doors, and always one with a goat. Then he asks:
+                “Do you want to switch?”</p>
+            <p>In 1990 Marilyn vos Savant answered this question in her column “Ask Marilyn” in the US magazine <i>Parade</i>:
+                switching doubles the chance of winning from $\tfrac13$ to $\tfrac23$. She then received more than 10,000 letters from readers.
+                Most writers were sure she was wrong, many of them with doctorates.</p>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sources:</b> Steve Selvin, letter in <i>The American Statistician</i> 29 (1975), p. 67.
+                Marilyn vos Savant, “Ask Marilyn”, <i>Parade</i>, 9 September 1990.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · PLAY IT YOURSELF</div>
+        <div data-widget="ziegen"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">WHY SWITCHING WINS</div>
+        <div class="b-text"><p>Explain with a two-stage tree: first stage your choice, second stage your strategy.</p></div>
+            <div class="b-sol">
+                <p>Your first choice hits the car with $\tfrac13$ and a goat with $\tfrac23$.</p>
+                <p><b>Staying</b> only wins if the first choice was already right: $\tfrac13$.</p>
+                <p><b>Switching</b> wins exactly when the first choice was a goat. The host has already shown the other goat,
+                    so the car must be behind the last door: $\tfrac23$.</p>
+                <p>What matters is that the host <b>knows</b> where the car is and never opens the car door.</p>
+            </div>
+    </div>
+</section>
+
+<!-- ================================================================ LOOKING BACK -->
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+
+    <div class="b-rueck">
+        <div><h4>MULTI-STAGE RANDOM EXPERIMENT</h4>
+            <p>Several sub-experiments one after the other. In the tree diagram every stage is a branching, every outcome a path.
+                At every branching the probabilities add up to $1$.</p></div>
+        <div><p>Two balls from <span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
+            without replacement: paths RR, RB, BR, BB.</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>1ST PATH RULE</h4><p>Probability of an outcome = <b>product</b> along the path.</p></div>
+        <div><p>$P(\text{RB}) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>2ND PATH RULE</h4><p>Probability of an event = <b>sum</b> of the paths that belong to it.</p></div>
+        <div><p>$P(\text{different colours}) = \tfrac{3}{10} + \tfrac{3}{10} = \tfrac35$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>COMPLEMENTARY EVENT</h4><p>$P(E) = 1 - P(\overline{E})$. Especially useful for “at least once”.</p></div>
+        <div><p>Spinner twice, $P(\text{red}) = \tfrac23$: $P(\text{at least once red}) = 1 - \tfrac19 = \tfrac89$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>WITH / WITHOUT REPLACEMENT</h4><p>With replacement the probabilities stay the same, without replacement they change from stage to stage.</p></div>
+        <div><p>with: $\tfrac35 \cdot \tfrac35 = \tfrac{9}{25}$ &nbsp; without: $\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>TWO-WAY TABLE</h4><p>Two characteristics with two values each. Four inner cells, totals in the margins, bottom right $1$ or the total number.
+            The inner cells are the ends of the paths of the matching tree.</p></div>
+        <div><p>$P(\overline{A} \cap \overline{B}) = 1 - P(A) - P(B) + P(A \cap B)$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>RELATIVE FREQUENCY</h4><p>$h_n(E) = \tfrac{k}{n}$. As $n$ grows it settles down near $P(E)$
+            (empirical law of large numbers).</p></div>
+        <div><p>600 rolls, 112 sixes: $h_{600} \approx 0.187$, close to $\tfrac16$.</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>SIMULATION</h4><p>Model with random numbers, carry out very often, relative frequency as an estimate. Gives estimates, not exact values.</p></div>
+        <div><p><code>=RANDBETWEEN(1,6)</code> simulates one roll of a dice.</p></div>
+    </div>
+</section>
+
+<!-- ================================================================ TEST -->
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1</div>
+            <div class="b-q" data-ans="1/8">
+                <p class="b-q-text">A coin is tossed three times. How likely are three heads?</p>
+                <div class="b-sol"><p>$\left(\tfrac12\right)^3 = \tfrac18$</p></div>
+            </div>
+            <div class="b-q" data-ans="16/25">
+                <p class="b-q-text">Two balls are drawn with replacement from an urn with 4 red balls and 1 blue ball. How likely are both red?</p>
+                <div class="b-sol"><p>$\tfrac45 \cdot \tfrac45 = \tfrac{16}{25} = 0.64$</p></div>
+            </div>
+            <div class="b-q" data-ans="0.2">
+                <p class="b-q-text">$P(A) = 0.7$, $P(B) = 0.4$ and $P(A \cap B) = 0.3$. Calculate $P(\overline{A} \cap \overline{B})$.</p>
+                <div class="b-sol"><p>$1 - 0.7 - 0.4 + 0.3 = 0.2$</p></div>
+            </div>
+            <div class="b-q" data-mc="1">
+                <p class="b-q-text">In 50 rolls a six came up 12 times. Which statement is true?</p>
+                <div class="b-mc">
+                    <button>The dice is certainly loaded.</button>
+                    <button>$h_{50} = 0.24$ is only an estimate. Such deviations from $\tfrac16$ are normal with 50 rolls.</button>
+                    <button>In the next 50 rolls the six will come up less often so that it evens out.</button>
+                </div>
+                <div class="b-sol"><p>The dice has no memory. With few rolls $h_n$ varies a lot, only with many rolls does the estimate become reliable.</p></div>
+            </div>
+        </div>
+
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2</div>
+            <div class="b-q" data-ans="1/10">
+                <p class="b-q-text">Three balls are drawn without replacement from an urn with 2 red and 3 blue balls. How likely are all blue?</p>
+                <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 \cdot \tfrac13 = \tfrac{6}{60} = \tfrac{1}{10}$</p></div>
+            </div>
+            <div class="b-q" data-ans="0.40951">
+                <p class="b-q-text">A ticket wins with $0.1$. You buy five tickets. How likely does at least one win? (to two decimal places)</p>
+                <div class="b-sol"><p>$1 - 0.9^5 = 1 - 0.59049 \approx 0.41$</p></div>
+            </div>
+            <div class="b-q" data-ans="540" data-ph="how many">
+                <p class="b-q-text">2,000 people are tested, 10% are ill. The test correctly identifies 90% of the ill and 80% of the healthy.
+                    How many people test positive altogether?</p>
+                <div class="b-sol"><p>200 ill: 180 positive. 1,800 healthy: 20% false positive, i.e. 360. 540 altogether.</p></div>
+            </div>
+            <div class="b-q" data-ans="0.25">
+                <p class="b-q-text">$P(B) = 0.45$ and $P(A \cap B) = 0.2$. Calculate $P(\overline{A} \cap B)$.</p>
+                <div class="b-sol"><p>The column $B$ adds up to $P(B)$: $0.45 - 0.2 = 0.25$.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-baumdiagramme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TREE DIAGRAMS</span><span class="b-lab-what">20 exercises with feedback</span></span></a>
+        <a class="b-lab" href="../../mathetest11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TWO-WAY TABLES</span><span class="b-lab-what">20 exercises with feedback</span></span></a>
+        <a class="b-lab" href="../../mathetest11-simulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULATION</span><span class="b-lab-what">20 exercises with feedback</span></span></a>
+        <a class="b-lab" href="../../mathetest11-stochastik-uebung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBABILITY MIXED</span><span class="b-lab-what">Monty Hall, birthdays and more</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 11 · Learning area 1 of the Saxon curriculum for mathematics
+        at the Berufliches Gymnasium.</p>
+    <p>All texts, exercises and figures are original content. Emoji: Apple, via emoji-data by iamcal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+</body>
+</html>

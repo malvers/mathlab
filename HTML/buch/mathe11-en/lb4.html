@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 11 · Chapter 4 · Systems of linear equations and matrices | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Gaussian elimination, solution sets, matrix operations. Chapter 4 of the interactive textbook Mathematics · Vocational Grammar School 11: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 4 · LEARNING AREA 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 4 · LEARNING AREA 4 · MARCH · APRIL</p>
+            <h1>Systems of linear equations and matrices</h1>
+            <p class="b-hero-lead">How many tickets of each kind did the cinema sell? How much does a factory have to produce so that all raw materials are used up?
+                Several unknowns, several conditions: a <b>system of linear equations</b>. With <b>matrices</b> you write it down compactly and solve it step by step
+                with Gaussian elimination, for large systems with a CAS.</p>
+            <div class="b-chips"><span class="b-chip">20 LESSONS</span><span class="b-chip">4 UNITS</span><span class="b-chip">BUSINESS AND TECHNOLOGY</span><span class="b-chip">COMPUTER SCIENCE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["4-x","x","(6-x)/2"]' data-labels='["","",""]' data-x="-2,6" data-y="-2,6" data-pts="[[2,2]]" data-equal data-h="240" data-aria="Three lines with one common point"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>write linear systems in <b>matrix form</b> $A \cdot \vec{x} = \vec{b}$ and recognise <b>special matrices</b></li>
+                <li>solve systems with 3 equations and 3 unknowns <b>without a calculator</b> by <b>Gaussian elimination</b></li>
+                <li>discuss <b>solution sets</b>: no, one, infinitely many solutions</li>
+                <li>solve large systems with a <b>CAS</b> and <b>calculate</b> with matrices: add, multiply by a number, transpose</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">We have $x + y = 5$ and $x - y = 1$. What is $x$?</p><div class="b-sol"><p>Add: $2x = 6$, so $x = 3$ and $y = 2$.</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="number"><p class="b-q-text">Calculate $2 \cdot 3 + (-1) \cdot 7$.</p><div class="b-sol"><p>$6 - 7 = -1$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">How many points do two different parallel lines have in common?</p><div class="b-mc"><button>none</button><button>exactly one</button><button>infinitely many</button></div><div class="b-sol"><p>None.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE CINEMA EVENING</div>
+            <div class="b-text"><p>Standard €8, concession €6, children €4. One evening 200 tickets are sold for €1,280 in total, twice as many concession tickets as children's tickets.</p>
+                <ul><li>Set up three equations. How many tickets of each kind were there?</li><li>Which strategy did you use? Does it always work?</li></ul></div>
+            <span class="b-pair">→ Units 1 and 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">CALCULATING WITH TABLES</div>
+            <div class="b-text"><p>Two branches record their monthly sales of three products in a table.</p>
+                <ul><li>How do you get the total sales for January and February? How the sales after an increase of 10%?</li><li>What happens if you swap the rows and columns of the table?</li></ul></div>
+            <span class="b-pair">→ Unit 4</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THREE LINES</div>
+            <div class="b-text"><p>Draw the lines $x + y = 4$, $x - y = 0$ and $x + 2y = 6$.</p>
+                <ul><li>Do all three have a point in common? Change one equation so that there is none.</li></ul></div>
+            <a class="b-lab" data-lab="gleichungssysteme" href="../../gleichungssysteme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LINEAR SYSTEMS</span><span class="b-lab-what">Points of intersection and linear algebra</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Matrices" data-toc-k="1" data-toc-short="1 Matrices">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Matrices and the matrix form of a linear system</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>For the cinema evening, with $x$ standard, $y$ concession and $z$ children's tickets:</p>
+                <p>$$\begin{array}{rcrcrcl} x &+& y &+& z &=& 200 \\ 8x &+& 6y &+& 4z &=& 1280 \\ && y &-& 2z &=& 0 \end{array}$$</p>
+                <p>Really only the numbers matter. The letters always stand in the same places.</p></div></div>
+            <div class="b-text"><p>If you write only the numbers in a rectangular array, you get a <b>matrix</b>. The system then reads $A \cdot \vec{x} = \vec{b}$:</p>
+                <p>$$\underbrace{\begin{pmatrix} 1 & 1 & 1 \\ 8 & 6 & 4 \\ 0 & 1 & -2 \end{pmatrix}}_{A} \cdot \underbrace{\begin{pmatrix} x \\ y \\ z \end{pmatrix}}_{\vec{x}} = \underbrace{\begin{pmatrix} 200 \\ 1280 \\ 0 \end{pmatrix}}_{\vec{b}}
+                    \qquad \text{in short:} \qquad \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)$$</p>
+                <p>The form on the right is called the <b>augmented matrix</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · MATRICES</div>
+                <div class="b-text">
+                    <p>An <b>$m \times n$ matrix</b> has $m$ rows and $n$ columns. The element in row $i$ and column $j$ is called $a_{ij}$.</p>
+                    <p><b>Special matrices:</b> <b>square</b> ($m = n$) · <b>upper triangular matrix</b> (only zeros below the diagonal) · <b>diagonal matrix</b> (non-zero only on the diagonal) ·
+                        <b>identity matrix</b> $I$ (a diagonal of ones) · <b>zero matrix</b> (only zeros) · <b>column matrix</b> ($m \times 1$) · <b>row matrix</b> ($1 \times n$)</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Examples:</b> $I = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$ · upper triangular matrix $\begin{pmatrix} 2 & 1 & 4 \\ 0 & 3 & 1 \\ 0 & 0 & 5 \end{pmatrix}$</p>
+            <p class="b-note"><b>Computer science:</b> a greyscale image is a matrix: every element is the brightness of a pixel.</p>
+        </aside>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>State the size and the element $a_{23}$: $A = \begin{pmatrix} 4 & -1 & 0 & 2 \\ 3 & 5 & 7 & -2 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>$2 \times 4$ matrix, $a_{23} = 7$ (2nd row, 3rd column)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Which special matrices are these? a) $\begin{pmatrix} 3 & 0 \\ 0 & -1 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 1 \\ 4 \\ 2 \end{pmatrix}$ &nbsp; c) $\begin{pmatrix} 1 & 5 \\ 0 & 2 \end{pmatrix}$ &nbsp; d) $\begin{pmatrix} 0 & 0 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) diagonal matrix (also square, also triangular) &nbsp; b) column matrix &nbsp; c) upper triangular matrix &nbsp; d) zero matrix and row matrix</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Write as an augmented matrix: $\;2x - z = 4$, $\;x + 3y = 7$, $\;y + z = 1$</p></div>
+            <div class="b-hint"><p>Missing variables have the coefficient 0.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{rrr|r} 2 & 0 & -1 & 4 \\ 1 & 3 & 0 & 7 \\ 0 & 1 & 1 & 1 \end{array}\right)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A factory makes three products P1, P2, P3 from three raw materials. Per item it needs (in kg):
+                R1: 1, 2, 1 · R2: 2, 1, 3 · R3: 1, 1, 1. In stock are 90 kg of R1, 110 kg of R2, 60 kg of R3. Set up the system in matrix form so that all stocks are used up.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 1 & 2 & 1 \\ 2 & 1 & 3 \\ 1 & 1 & 1 \end{pmatrix} \cdot \begin{pmatrix} x_1 \\ x_2 \\ x_3 \end{pmatrix} = \begin{pmatrix} 90 \\ 110 \\ 60 \end{pmatrix}$. It is solved in unit 2.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="6" data-ph="how many"><p class="b-q-text">How many elements does a $2 \times 3$ matrix have?</p><div class="b-sol"><p>$2 \cdot 3 = 6$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Which matrix is the identity matrix?</p><div class="b-mc"><button>$\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}$</button><button>$\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</button><button>$\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$</button></div><div class="b-sol"><p>Ones on the diagonal, zeros elsewhere.</p></div></div>
+        <div class="b-q" data-ans="-2" data-ph="number"><p class="b-q-text">In the cinema system: what is the element $a_{33}$ of the matrix $A$?</p><div class="b-sol"><p>3rd row, 3rd column: $-2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Gaussian elimination" data-toc-k="2" data-toc-short="2 Gauss">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">WITHOUT A CALCULATOR · 5 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Gaussian elimination</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>An upper triangular matrix is easy: for $\;x + y + z = 6$, $\;y + z = 5$, $\;z = 3$ you read off $z = 3$, substitute into the second row ($y = 2$) and then into the first ($x = 1$).
+                Gauss's idea: transform every system so that it has this <b>echelon form</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · GAUSSIAN ELIMINATION</div>
+                <div class="b-text">
+                    <p>The solution set does not change if you</p>
+                    <ul><li><b>swap</b> two rows,</li><li><b>multiply</b> a row by a number <b>other than zero</b>,</li><li><b>add a multiple of one row to another</b>.</li></ul>
+                    <p><b>Gauss:</b> with these operations produce zeros below the diagonal, first in column 1, then in column 2 (echelon form), then substitute from the bottom upwards.</p>
+                    <p><b>Gauss-Jordan:</b> carry on until the identity matrix stands on the left. Then the solution stands directly on the right.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notation:</b> “$\text{II} - 8 \cdot \text{I}$” means: replace row II by row II minus 8 times row I.</p>
+            <p class="b-note"><b>Check:</b> always substitute into all the <b>original</b> equations.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EXAMPLE 1 · THE CINEMA EVENING</div>
+        <div class="b-text"><p>Solve the cinema system by Gaussian elimination.</p></div>
+        <div class="b-sol">
+            <p>$$\left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)
+                \xrightarrow{\;\text{II} - 8 \cdot \text{I}\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & -2 & -4 & -320 \\ 0 & 1 & -2 & 0 \end{array}\right)
+                \xrightarrow{\;\text{II} : (-2)\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & 1 & 2 & 160 \\ 0 & 1 & -2 & 0 \end{array}\right)$$</p>
+            <p>$$\xrightarrow{\;\text{III} - \text{II}\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & 1 & 2 & 160 \\ 0 & 0 & -4 & -160 \end{array}\right)$$</p>
+            <p>Backwards: $z = 40$, $y = 160 - 80 = 80$, $x = 200 - 80 - 40 = 80$. <span class="b-res">80 standard, 80 concession, 40 children's tickets.</span></p>
+            <p>Check: $80 + 80 + 40 = 200$ · $640 + 480 + 160 = 1280$ · $80 = 2 \cdot 40$.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · GAUSS WORKSHOP</div>
+        <p class="b-help" style="margin:0 0 12px">Choose an operation, a target row, a second row and the factor $k$, then “Apply”. Or let “Next step” show you the next Gauss step.
+            “New system” rolls a system with a whole-number solution.</p>
+        <div data-widget="gauss"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Solve: $\;x + y + z = 6$, $\;2x - y + z = 3$, $\;x + 2y - z = 2$</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $-3y - z = -9$ · $\text{III} - \text{I}$: $y - 2z = -4$ · then $3 \cdot \text{III} + \text{II}$: $-7z = -21$.
+                <span class="b-res">$z = 3$, $y = 2$, $x = 1$</span></p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Solve: $\;2x + y - z = 1$, $\;x - y + 2z = 5$, $\;3x + 2y + z = 10$</p></div>
+            <div class="b-hint"><p>First swap I and II so that there is a 1 at the top left.</p></div>
+            <div class="b-sol"><p><span class="b-res">$x = 1$, $y = 2$, $z = 3$</span>. Check: $2 + 2 - 3 = 1$ · $1 - 2 + 6 = 5$ · $3 + 4 + 3 = 10$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Solve the raw-materials system from unit 1. How many items of P1, P2 and P3 are produced?</p></div>
+            <div class="b-hint"><p>$\text{I} - \text{III}$ gives $x_2$ at once.</p></div>
+            <div class="b-sol"><p>$\text{I} - \text{III}$: $x_2 = 30$. Then $x_1 + x_3 = 30$ and $2x_1 + 3x_3 = 80$, so $x_3 = 20$, $x_1 = 10$.
+                <span class="b-res">10 items of P1, 30 items of P2, 20 items of P3.</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A parabola $f(x) = ax^2 + bx + c$ passes through $(0, 1)$, $(1, 4)$ and $(2, 9)$. Set up a system and find $a$, $b$, $c$.</p></div>
+            <div class="b-sol"><p>$c = 1$, $a + b + c = 4$, $4a + 2b + c = 9$ $\Rightarrow$ $a + b = 3$, $4a + 2b = 8$ $\Rightarrow$ $a = 1$, $b = 2$. <span class="b-res">$f(x) = x^2 + 2x + 1 = (x + 1)^2$</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">Find $x$ from the echelon form $\;x + y + z = 6$, $\;y + z = 5$, $\;z = 3$.</p><div class="b-sol"><p>$y = 2$, $x = 6 - 2 - 3 = 1$</p></div></div>
+        <div class="b-q" data-ans="40" data-ph="how many"><p class="b-q-text">How many children's tickets were sold on the cinema evening?</p><div class="b-sol"><p>$z = 40$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Which operation is <b>not</b> allowed?</p><div class="b-mc"><button>swapping rows</button><button>multiplying a row by $-3$</button><button>multiplying a row by $0$</button></div><div class="b-sol"><p>Multiplying by 0 destroys the equation.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Solution sets" data-toc-k="3" data-toc-short="3 Solution sets">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">3</span>No, one or infinitely many solutions</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Not every system works out. At the end of Gaussian elimination there may be a row with only zeros on the left.
+                Then it depends on the right-hand side.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SOLUTION SETS</div>
+                <div class="b-text">
+                    <p><b>Exactly one solution:</b> the echelon form has a pivot (first non-zero element) in every row.</p>
+                    <p><b>No solution:</b> a row $(0 \;\; 0 \;\; 0 \mid c)$ with $c \neq 0$ appears, i.e. the contradiction $0 = c$.</p>
+                    <p><b>Infinitely many solutions:</b> a zero row $(0 \;\; 0 \;\; 0 \mid 0)$ appears and no contradiction. One variable stays free, you set it as a parameter $t$.</p>
+                    <p><b>Geometrically</b> (two unknowns): two lines meet in one point, are parallel or lie on top of each other.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Outlook:</b> with three unknowns every equation describes a plane in space. Three planes can meet in a point, in a line or not at all. More on this in vector geometry.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · TWO LINES</div>
+        <div data-widget="geraden"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · INFINITELY MANY</div>
+            <div class="b-text"><p>Solve $\;x + y + z = 3$, $\;x - y + z = 1$, $\;2x + 2z = 4$.</p></div>
+            <div class="b-sol"><p>$\text{II} - \text{I}$: $-2y = -2$ · $\text{III} - 2\,\text{I}$: $-2y = -2$ · then $\text{III} - \text{II}$: $0 = 0$, a zero row.</p>
+                <p>$y = 1$, $z = t$ free, $x = 2 - t$: <span class="b-res">$L = \{(2 - t,\ 1,\ t) \mid t \in \mathbb{R}\}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · NO SOLUTION</div>
+            <div class="b-text"><p>Solve $\;x + 2y = 3$, $\;2x + 4y = 5$.</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $0 = -1$. A contradiction: <span class="b-res">$L = \{\,\}$</span>. The two lines are parallel.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How many solutions does the system with this echelon form have? a) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 0 & 5 \end{array}\right)$ &nbsp; b) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 0 & 0 \end{array}\right)$ &nbsp; c) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 2 & 2 \end{array}\right)$</p></div>
+            <div class="b-sol"><p>a) none ($0 = 5$) &nbsp; b) infinitely many &nbsp; c) exactly one: $z = 1$, $y = -1$, $x = 5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For which $a$ does $\;x + y = 1$, $\;2x + ay = 2$ have infinitely many solutions? What holds for all other $a$?</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $(a - 2)y = 0$. For $a = 2$ this is $0 = 0$: infinitely many solutions. Otherwise $y = 0$, $x = 1$: exactly one solution.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For which $b$ does $\;x + 2y = 3$, $\;2x + 4y = b$ have no solution?</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $0 = b - 6$. For $b \neq 6$ no solution, for $b = 6$ infinitely many.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A dealer mixes two kinds of coffee at €8/kg and €12/kg to make 10 kg of a blend for €100. At which total price would there be no sensible solution? Give reasons.</p></div>
+            <div class="b-sol"><p>$x + y = 10$, $8x + 12y = P$ always has exactly one solution $y = \tfrac{P - 80}{4}$. But it only makes sense for $0 \leq y \leq 10$, i.e. $80 \leq P \leq 120$.
+                For $P = 100$: 5 kg of each. For $P$ outside this range amounts would be negative. Mathematically solvable does not always mean sensible in context.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">At the end of Gaussian elimination there is the row $(0 \;\; 0 \;\; 0 \mid 7)$. The system has …</p><div class="b-mc"><button>no solution</button><button>exactly one solution</button><button>infinitely many solutions</button></div><div class="b-sol"><p>$0 = 7$ is a contradiction.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">For which $a$ does $\;x + y = 1$, $\;2x + ay = 2$ have infinitely many solutions?</p><div class="b-sol"><p>$a = 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="CAS and matrix operations" data-toc-k="4" data-toc-short="4 CAS &amp; operations">
+    <div class="b-band"><span class="b-band-tag">UNIT 4</span><span class="b-band-sub">WITH DIGITAL TOOLS · 5 LESSONS</span></div>
+    <h2><span class="b-no">4</span>Large systems with a CAS, calculating with matrices</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>In practice linear systems often have dozens or thousands of unknowns, for example in the structural analysis of a bridge or in image processing.
+                For these you use digital tools. In class a CAS or GeoGebra is enough.</p></div></div>
+            <div class="b-text"><p>In GeoGebra:<code class="b-codeline">Solve({w+x+y+z=10, w-x+y-z=-2, 2w+x-y+z=5, w+2x+3y-z=10}, {w,x,y,z})</code></p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · MATRIX OPERATIONS</div>
+                <div class="b-text">
+                    <p><b>Addition and subtraction:</b> only for matrices of the same size, element by element: $(A + B)_{ij} = a_{ij} + b_{ij}$.</p>
+                    <p><b>Scalar multiplication:</b> every element is multiplied by the number $r$: $(r \cdot A)_{ij} = r \cdot a_{ij}$.</p>
+                    <p><b>Transposing:</b> rows become columns: $(A^T)_{ij} = a_{ji}$. An $m \times n$ matrix becomes an $n \times m$ matrix.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Computer science:</b> spreadsheets, databases and image formats store data as matrices. Rotating an image by 90° basically means transposing and reflecting.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · MATRIX CALCULATOR</div>
+        <div data-widget="matrizen"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EXAMPLE 4 · TWO BRANCHES</div>
+        <div class="b-text"><p>Sales (rows: branch 1 and 2, columns: products X, Y, Z) in January $A = \begin{pmatrix} 12 & 8 & 5 \\ 7 & 10 & 4 \end{pmatrix}$ and in February $B = \begin{pmatrix} 10 & 9 & 6 \\ 8 & 12 & 3 \end{pmatrix}$.
+            Calculate the total sales and the targets for March if 10% more than in January are to be sold.</p></div>
+        <div class="b-sol"><p>$A + B = \begin{pmatrix} 22 & 17 & 11 \\ 15 & 22 & 7 \end{pmatrix}$ · $1.1 \cdot A = \begin{pmatrix} 13.2 & 8.8 & 5.5 \\ 7.7 & 11 & 4.4 \end{pmatrix}$</p>
+            <p>$A^T = \begin{pmatrix} 12 & 7 \\ 8 & 10 \\ 5 & 4 \end{pmatrix}$ shows the same numbers, now with the products as rows.</p></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="13">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Solve the system from the GeoGebra command above with a CAS.</p></div>
+            <div class="b-sol"><p>$w = 1$, $x = 2$, $y = 3$, $z = 4$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Using $A$ and $B$ from example 4, calculate $B - A$, $3B$ and $B^T$. What does $B - A$ mean?</p></div>
+            <div class="b-sol"><p>$B - A = \begin{pmatrix} -2 & 1 & 1 \\ 1 & 2 & -1 \end{pmatrix}$: the change from January to February. $3B = \begin{pmatrix} 30 & 27 & 18 \\ 24 & 36 & 9 \end{pmatrix}$, $B^T = \begin{pmatrix} 10 & 8 \\ 9 & 12 \\ 6 & 3 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Why can a $2 \times 3$ matrix not be added to a $3 \times 2$ matrix? What would you have to do first?</p></div>
+            <div class="b-sol"><p>The elements have no partners in the same position. You could transpose one of the two, if that makes sense in context.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Show with an example: $(A + B)^T = A^T + B^T$ and $(r \cdot A)^T = r \cdot A^T$.</p></div>
+            <div class="b-sol"><p>With example 4: $(A + B)^T = \begin{pmatrix} 22 & 15 \\ 17 & 22 \\ 11 & 7 \end{pmatrix} = A^T + B^T$. When transposing, every element moves to the same new position, so the sums go along with it.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3" data-ph="how many"><p class="b-q-text">$A$ is a $2 \times 3$ matrix. How many rows does $A^T$ have?</p><div class="b-sol"><p>3</p></div></div>
+        <div class="b-q" data-ans="22" data-ph="number"><p class="b-q-text">In example 4, which number stands in row 2, column 2 of $A + B$?</p><div class="b-sol"><p>$10 + 12 = 22$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="17">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Three friends buy drinks. Anna: 2 colas, 1 juice, 1 water for €8. Ben: 1 cola, 2 juices for €6.50. Cem: 1 juice, 3 waters for €5. What does each drink cost?</p></div>
+            <div class="b-sol"><p>$2c + s + w = 8$, $c + 2s = 6.5$, $s + 3w = 5$ gives <span class="b-res">cola €2.50, juice €2, water €1</span>.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with chapter 3.3:</b> find the parabola through $(-1, 6)$, $(1, 2)$ and $(2, 3)$.</p></div>
+            <div class="b-sol"><p>$a - b + c = 6$, $a + b + c = 2$, $4a + 2b + c = 3$. From I and II: $b = -2$, $a + c = 4$; from III: $4a + c = 7$, so $a = 1$, $c = 3$. <span class="b-res">$f(x) = x^2 - 2x + 3$</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A system of 3 equations has the solutions $(1,\,2,\,3)$ and $(3,\,2,\,1)$. Explain why it then has infinitely many solutions.</p></div>
+            <div class="b-sol"><p>If it had exactly one solution, there would be no second one. With linear equations, if there are two solutions, every point on the line through them is a solution too, for example $(2,\,2,\,2)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: PageRank" data-toc-k="X" data-toc-short="PageRank">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">COMPUTER SCIENCE</span></div>
+    <h2>How a search engine sorts pages</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>At the end of the 1990s Sergey Brin and Larry Page had an idea: a web page is important if important pages link to it. A “random surfer” clicks through the web:
+                with probability 85% they follow a link on the current page, with 15% they jump to any page. How often they end up on a page in the long run is its <b>PageRank</b>.</p>
+            <p>Mathematically this is a matrix by which you multiply a vector again and again. After a few steps the vector hardly changes any more.
+                In the example below A is almost level with C, although only a single page links to A: that one link comes from C, the most important page.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> S. Brin, L. Page, “The Anatomy of a Large-Scale Hypertextual Web Search Engine”, Computer Networks 30 (1998).</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · FOUR PAGES</div>
+        <p class="b-help" style="margin:0 0 12px">Links: A → B, A → C, B → C, C → A, D → C. The size of each circle shows the current rank. Click “1 step” until nothing changes any more.</p>
+        <div data-widget="pagerank"></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>MATRIX FORM</h4><p>$A \cdot \vec{x} = \vec{b}$ · augmented matrix $(A \mid \vec{b})$</p></div><div><p>Cinema: $\left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)$</p></div></div>
+    <div class="b-rueck"><div><h4>SPECIAL MATRICES</h4><p>square, triangular, diagonal, identity, zero, column, row matrix</p></div><div><p>$I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</p></div></div>
+    <div class="b-rueck"><div><h4>GAUSS</h4><p>Swap rows, multiply by a number $\neq 0$, add multiples · echelon form · substitute backwards</p></div><div><p>Cinema: $z = 40$, $y = 80$, $x = 80$</p></div></div>
+    <div class="b-rueck"><div><h4>SOLUTION SETS</h4><p>Contradiction row: none · zero row: infinitely many (parameter) · otherwise exactly one</p></div><div><p>$L = \{(2 - t,\ 1,\ t)\}$</p></div></div>
+    <div class="b-rueck"><div><h4>OPERATIONS</h4><p>$A \pm B$ element by element (same size) · $r \cdot A$ · $A^T$: rows ↔ columns</p></div><div><p>Branches: January + February</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT A CALCULATOR</div>
+            <div class="b-q" data-ans="2" data-ph="z ="><p class="b-q-text">Solve $\;x + y + z = 4$, $\;y - z = -1$, $\;3z = 6$. What is $z$?</p><div class="b-sol"><p>$z = 2$ (then $y = 1$, $x = 1$)</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">What is $x$ in the same system?</p><div class="b-sol"><p>$y = 1$, $x = 4 - 1 - 2 = 1$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$\;x + y = 2$, $\;3x + 3y = 6$ has …</p><div class="b-mc"><button>no solution</button><button>exactly one solution</button><button>infinitely many solutions</button></div><div class="b-sol"><p>The second equation is three times the first.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH DIGITAL TOOLS</div>
+            <div class="b-q" data-ans="30" data-ph="items"><p class="b-q-text">How many items of P2 does the raw-materials factory from unit 1 produce?</p><div class="b-sol"><p>$x_2 = 30$</p></div></div>
+            <div class="b-q" data-ans="2.5" data-tol="0.001" data-ph="euros"><p class="b-q-text">What does a cola cost in exercise 17?</p><div class="b-sol"><p>€2.50</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="z ="><p class="b-q-text">What is the value of $z$ in the system from unit 4 (CAS)?</p><div class="b-sol"><p>$z = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-matrizen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MATRICES</span><span class="b-lab-what">The idea, special matrices</span></span></a>
+        <a class="b-lab" href="../../mathetest11-gauss.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GAUSS</span><span class="b-lab-what">3 × 3 without a calculator</span></span></a>
+        <a class="b-lab" href="../../mathetest11-loesungsmengen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SOLUTION SETS</span><span class="b-lab-what">none, one, infinitely many</span></span></a>
+        <a class="b-lab" href="../../mathetest11-cas-lgs.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CAS AND OPERATIONS</span><span class="b-lab-what">large systems, calculating with matrices</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 11 · Learning area 4 of the Saxon curriculum for mathematics at the Berufliches Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-lgs.js"></script>
+</body>
+</html>

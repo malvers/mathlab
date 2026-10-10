@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 11 · Chapter E · Numerical methods and simulations | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Bisection, approximating areas, the Monte Carlo method. Chapter E of the interactive textbook Mathematics · Vocational Grammar School 11: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">ELECTIVE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER E · ELECTIVE 3 · MAY · JUNE</p>
+            <h1>Numerical methods and simulations</h1>
+            <p class="b-hero-lead">Many equations cannot be solved exactly, many areas cannot be calculated exactly. So computers calculate <b>numerically</b>:
+                they approach the solution in small steps, as accurately as needed. Here you meet three methods that are inside every calculator,
+                every simulation and every engineering office, and you write small programs for them yourself.</p>
+            <div class="b-chips"><span class="b-chip">10 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">PROGRAMMING</span><span class="b-chip">COMPUTER SCIENCE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3-x-2"]' data-labels='["f"]' data-lat="[1.9]" data-x="-0.5,2.5" data-y="-3,5" data-pts="[[1.5214,0]]" data-h="240" data-aria="Function with a zero at about 1.52"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>find zeros as accurately as you like with the <b>bisection method</b></li>
+                <li>approximate areas under graphs with <b>rectangles and trapeziums</b></li>
+                <li>estimate areas by chance with the <b>Monte Carlo method</b></li>
+                <li>turn these methods into small <b>programs</b> or spreadsheets</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="-2" data-ph="number"><p class="b-q-text">Calculate $f(1)$ for $f(x) = x^3 - x - 2$.</p><div class="b-sol"><p>$1 - 1 - 2 = -2$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="number"><p class="b-q-text">Calculate $f(2)$ for $f(x) = x^3 - x - 2$.</p><div class="b-sol"><p>$8 - 2 - 2 = 4$</p></div></div>
+            <div class="b-q" data-ans="1.5" data-tol="0.001" data-ph="number"><p class="b-q-text">What is the midpoint of the interval $[1, 2]$?</p><div class="b-sol"><p>$\tfrac{1 + 2}{2} = 1.5$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="area"><p class="b-q-text">A trapezium has parallel sides 4 and 8 and height 2. What is its area?</p><div class="b-sol"><p>$\tfrac{4 + 8}{2} \cdot 2 = 12$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">GUESS THE NUMBER</div>
+            <div class="b-text"><p>One person thinks of a whole number between 1 and 1,000. The others guess, the person only answers “higher” or “lower”.</p>
+                <ul><li>Which strategy needs the fewest guesses? What is the most you need?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COUNTING SQUARES</div>
+            <div class="b-text"><p>Draw $y = x^2$ from $x = 0$ to $x = 2$ on squared paper (1 cm = 2 squares).</p>
+                <ul><li>Estimate the area under the curve by counting squares. How can you get more accurate?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THROWING RICE</div>
+            <div class="b-text"><p>Draw a square with a quarter circle in it. Throw a handful of rice evenly onto it and count the grains inside and outside.</p>
+                <ul><li>What does the ratio have to do with $\pi$?</li></ul></div>
+            <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Darts rain into the square and estimate π</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Zeros: bisection" data-toc-k="1" data-toc-short="1 Bisection">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Zeros by halving</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>For $f(x) = x^3 - x - 2$ there is no simple solution formula. But: $f(1) = -2 < 0$ and $f(2) = 4 > 0$.
+                The graph is an unbroken line, so it must cross the $x$-axis between 1 and 2.</p></div></div>
+            <div class="b-text"><p>You check the midpoint: $f(1.5) = 3.375 - 1.5 - 2 = -0.125 < 0$. So the change of sign lies between 1.5 and 2. Halve again, check again, and so on.
+                With every step the interval becomes half as wide.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · BISECTION METHOD</div>
+                <div class="b-text">
+                    <p>If $f$ is continuous (without a jump) and $f(a)$ and $f(b)$ have different signs, there is at least one zero in the interval $[a, b]$.</p>
+                    <ol><li>Calculate the midpoint $m = \tfrac{a + b}{2}$.</li>
+                        <li>If $f(m)$ has the same sign as $f(a)$, set $a := m$, otherwise $b := m$.</li>
+                        <li>Repeat until $b - a$ is small enough.</li></ol>
+                    <p>After $n$ steps the interval is only $\tfrac{b - a}{2^n}$ wide. So ten steps make it over a thousand times smaller.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Guess the number:</b> by halving you find any number from 1 to 1,000 in at most 10 guesses, because $2^{10} = 1024$.</p>
+            <p class="b-note"><b>Outlook:</b> Newton's method is much faster, but needs the derivative, a topic of Year 12.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · BISECTION</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a function and halve the interval step by step. The blue lines bound the interval, the white point is the midpoint.</p>
+        <div data-widget="bisektion"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">METHOD · THE PROGRAM</div>
+        <div class="b-text"><p>In JavaScript (runs in the console of any browser, F12):</p></div>
+<pre class="b-pre"><code>const f = x => x ** 3 - x - 2;
+let a = 1, b = 2;
+while (b - a > 1e-6) {
+  const m = (a + b) / 2;
+  if (Math.sign(f(m)) === Math.sign(f(a))) a = m; else b = m;
+}
+console.log((a + b) / 2);   // 1.5213797…</code></pre>
+        <div class="b-text"><p>In a spreadsheet: columns for $a$, $b$, $m$ and $f(m)$. In the next row use <code>=IF(…)</code> to decide which bound is replaced, then drag down.</p></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Carry out three steps of bisection by hand for $f(x) = x^2 - 2$ on $[1, 2]$. Which number is being approximated?</p></div>
+            <div class="b-sol"><p>$m = 1.5$: $f > 0$ → $[1, 1.5]$ · $m = 1.25$: $f < 0$ → $[1.25, 1.5]$ · $m = 1.375$: $f < 0$ → $[1.375, 1.5]$. It approximates $\sqrt2 \approx 1.414$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How many steps are needed to pin down a zero in $[0, 1]$ to within $0.001$?</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{2^n} \leq 0.001 \Rightarrow 2^n \geq 1000 \Rightarrow n = 10$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Use the widget to find the solution of $\cos x = x$ to three decimal places.</p></div>
+            <div class="b-sol"><p>Zero of $\cos x - x$: $x \approx 0.739$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>The function $2^x - 3x$ has two zeros. Find intervals for both and determine the second one numerically.</p></div>
+            <div class="b-sol"><p>$f(0) = 1$, $f(1) = -1$: the first in $[0, 1]$ ($\approx 0.458$). $f(3) = -1$, $f(4) = 4$: the second in $[3, 4]$, about $3.31$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Why does bisection fail for $f(x) = \tfrac1x$ on $[-1, 1]$, although $f(-1) < 0 < f(1)$? And why for $f(x) = x^2$ on $[-1, 1]$?</p></div>
+            <div class="b-sol"><p>$\tfrac1x$ jumps at $0$ and has no zero at all, the condition “continuous” is missing. $x^2$ does have a zero, but no change of sign: $f(-1) = f(1) = 1 > 0$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1.521" data-tol="0.002" data-ph="x ≈"><p class="b-q-text">Zero of $x^3 - x - 2$ to three decimal places?</p><div class="b-sol"><p>$x \approx 1.521$</p></div></div>
+        <div class="b-q" data-ans="10" data-ph="steps"><p class="b-q-text">After how many halvings is an interval of width 1 narrower than 0.001?</p><div class="b-sol"><p>$2^{10} = 1024 > 1000$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Areas numerically" data-toc-k="2" data-toc-short="2 Areas">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Approximating areas with strips</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>How big is the area under $y = x^2$ between $x = 0$ and $x = 2$? There is no area formula for a curve like this.
+                So you cut the area into narrow <b>strips</b> and replace every strip by a rectangle or a trapezium.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · STRIP METHODS</div>
+                <div class="b-text">
+                    <p>Divide $[a, b]$ into $n$ strips of equal width $h = \tfrac{b - a}{n}$.</p>
+                    <p><b>Rectangles:</b> height = function value at the left edge (or in the middle) of each strip. Add up all the rectangle areas.</p>
+                    <p><b>Trapeziums:</b> every strip becomes a trapezium with the function values at both edges: $A \approx \tfrac{h}{2}\big(f(x_0) + 2f(x_1) + \ldots + 2f(x_{n-1}) + f(x_n)\big)$.</p>
+                    <p>The more strips, the more accurate. Midpoint rectangles and trapeziums are much more accurate than rectangles at the edge.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Outlook:</b> the exact value is called the integral, $\int_0^2 x^2\,dx = \tfrac83$. Integral calculus is a big topic of Year 13.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · STRIP WORKSHOP</div>
+        <p class="b-help" style="margin:0 0 12px">Choose the function, the method and the number of strips. Below you see the approximation, the exact value and the error.</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EXAMPLE 1 · FOUR STRIPS</div>
+        <div class="b-text"><p>Calculate the area under $y = x^2$ on $[0, 2]$ with $n = 4$ strips: with left rectangles, midpoint rectangles and trapeziums.</p></div>
+        <div class="b-sol"><p>$h = 0.5$. Left: $0.5 \cdot (0 + 0.25 + 1 + 2.25) = 1.75$.
+            Midpoint: $0.5 \cdot (0.0625 + 0.5625 + 1.5625 + 3.0625) = 2.625$.
+            Trapeziums: $0.25 \cdot (0 + 2 \cdot 0.25 + 2 \cdot 1 + 2 \cdot 2.25 + 4) = 2.75$.</p>
+            <p>Exact: $\tfrac83 \approx 2.667$. Errors: $-0.917$ · $-0.042$ · $+0.083$.</p></div>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INTEGRAL REACTOR</span><span class="b-lab-what">Riemann sums and approximation methods</span></span></a></div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Use the picture to explain why for $y = x^2$ the left rectangles always give too little area.</p></div>
+            <div class="b-sol"><p>The function is increasing. It is lowest at the left edge, so every rectangle lies completely under the curve.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>How many strips does the trapezium rule need for $x^2$ on $[0, 2]$ so that the error is below 0.01? Try it with the widget.</p></div>
+            <div class="b-sol"><p>At $n = 10$ the error is $0.013$, from $n = 12$ on it is below $0.01$. The error falls roughly like $\tfrac{1}{n^2}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Use the widget to find the area under one arch of the sine curve ($0$ to $\pi$). Which exact value does it give?</p></div>
+            <div class="b-sol"><p>The approximations approach the number 2. The arch of the sine curve has an area of exactly 2.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Write a small program (spreadsheet or JavaScript) for the trapezium rule and use it to calculate the area under $y = \sqrt{x}$ on $[0, 4]$ with $n = 100$.</p></div>
+            <div class="b-sol"><p>Result about $5.33$, exact value $\tfrac{16}{3} \approx 5.333$. In JavaScript: <code>let s = 0; for (let i = 0; i &lt; n; i++) s += (f(a+i*h) + f(a+(i+1)*h)) / 2 * h;</code></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="2.75" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">Trapezium rule for $x^2$ on $[0, 2]$ with 4 strips?</p><div class="b-sol"><p>$2.75$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Which method is usually the least accurate for the same number of strips?</p><div class="b-mc"><button>midpoint rectangles</button><button>rectangles at the edge</button><button>trapeziums</button></div><div class="b-sol"><p>Rectangles at the edge.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Monte Carlo method" data-toc-k="3" data-toc-short="3 Monte Carlo">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Areas by chance: the Monte Carlo method</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Throw random points into a rectangle that contains the area you want. The proportion of hits inside the area roughly equals the proportion of the rectangle that the area takes up.
+                That sounds like gambling and works surprisingly well.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · MONTE CARLO METHOD</div>
+                <div class="b-text">
+                    <p>$$A \approx \frac{\text{number of hits}}{\text{number of all points}} \cdot A_{\text{rectangle}}$$</p>
+                    <p>The result is an <b>estimate</b>, as with every simulation (see chapter 1). The accuracy only grows slowly: for one more digit you need about a hundred times as many points.</p>
+                    <p>The method is strong for complicated shapes and in many dimensions, where strip methods hardly work any more.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Name:</b> the method was developed in the 1940s at Los Alamos and was named after the casino of Monte Carlo.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · AREA UNDER THE PARABOLA</div>
+        <p class="b-help" style="margin:0 0 12px">Random points in the rectangle $2 \times 4$: yellow below $y = x^2$, grey above.</p>
+        <div data-widget="mc-flaeche"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">METHOD · ESTIMATING $\pi$ IN EIGHT LINES</div>
+<pre class="b-pre"><code>const n = 1000000;
+let hits = 0;
+for (let i = 0; i &lt; n; i++) {
+  const x = Math.random(), y = Math.random();
+  if (x * x + y * y &lt; 1) hits++;          // inside the quarter circle
+}
+console.log(4 * hits / n);                 // about 3.14…</code></pre>
+        <div class="b-text"><p>The quarter circle has the area $\tfrac{\pi}{4}$, the unit square the area 1. So the proportion of hits estimates $\tfrac{\pi}{4}$.</p></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Of 1,000 random points in the rectangle $2 \times 4$, 338 lie below $y = x^2$. Which area is estimated? How big is the error?</p></div>
+            <div class="b-sol"><p>$\tfrac{338}{1000} \cdot 8 = 2.704$. Exact $\tfrac83 \approx 2.667$, error about $0.04$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Run the $\pi$ program with $n = 100$, $10{,}000$ and $1{,}000{,}000$. Roughly how many digits are right each time?</p></div>
+            <div class="b-sol"><p>With 100 points often only the 3, with 10,000 usually $3.1$, with a million usually $3.14$. A hundred times as many points give about one digit.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Compare Monte Carlo and the trapezium rule for the area under $x^2$: which is more accurate with 100 steps of calculation? When would you still choose Monte Carlo?</p></div>
+            <div class="b-sol"><p>Trapeziums with $n = 100$: error about $0.0001$. Monte Carlo with 100 points: error typically $0.2$ to $0.4$. Monte Carlo is worth it for shapes that are hard to cut into strips, or for volumes in many dimensions.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3.2" data-tol="0.001" data-ph="π ≈"><p class="b-q-text">Of 1,000 points in the unit square, 800 lie in the quarter circle. Which estimate of $\pi$ do you get?</p><div class="b-sol"><p>$4 \cdot 0.8 = 3.2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Roughly how many points do you need for one more digit of accuracy?</p><div class="b-mc"><button>a hundred times as many</button><button>twice as many</button><button>ten times as many</button></div><div class="b-sol"><p>The error falls like $\tfrac{1}{\sqrt{n}}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Hilbert's hotel" data-toc-k="X" data-toc-short="Hilbert's hotel">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">THE INFINITELY LARGE</span></div>
+    <h2>Hilbert's hotel</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>A hotel has infinitely many rooms, numbered 1, 2, 3, … All of them are occupied. A new guest arrives. The porter asks every guest to move from room $n$ to room $n + 1$.
+                Room 1 becomes free, although everything was full before.</p>
+            <p>Then a coach with infinitely many guests arrives. Now every guest moves from room $n$ to room $2n$. All the odd-numbered rooms become free, infinitely many.</p>
+            <p>So you cannot count infinite sets like finite ones: there are just as many even numbers as natural numbers, because $n \mapsto 2n$ pairs them off one to one.
+                But Georg Cantor also showed: there are <b>more</b> real numbers than natural numbers. Infinity is not the same as infinity.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> David Hilbert presented the thought experiment in a lecture in 1924. It became famous through George Gamow's book “One Two Three … Infinity” (1947).</p></aside>
+    </div>
+    <div class="b-box b-check" data-check="hilbert">
+        <div class="b-box-title">THINK ALONG</div>
+        <div class="b-q" data-ans="7" data-ph="room"><p class="b-q-text">The full hotel gets 3 new guests. Into which room does the guest from room 4 move?</p><div class="b-sol"><p>Everyone moves up by 3: from $n$ to $n + 3$, so room 7.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>BISECTION</h4><p>Look for a change of sign, halve the interval, keep the half with the change of sign. Width after $n$ steps: $\tfrac{b - a}{2^n}$.</p></div><div><p>$x^3 - x - 2 = 0$: $x \approx 1.5214$</p></div></div>
+    <div class="b-rueck"><div><h4>STRIP METHODS</h4><p>Rectangles (edge or middle) or trapeziums, width $h = \tfrac{b - a}{n}$. More strips, more accuracy.</p></div><div><p>$x^2$ on $[0, 2]$, $n = 4$: 1.75 · 2.625 · 2.75 (exactly 2.667)</p></div></div>
+    <div class="b-rueck"><div><h4>MONTE CARLO</h4><p>Proportion of hits · area of the rectangle. An estimate, error about $\tfrac{1}{\sqrt{n}}$.</p></div><div><p>$\pi \approx 4 \cdot \tfrac{\text{hits}}{n}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">INSTANT FEEDBACK</span></div>
+    <div class="b-box b-check" data-check="test1">
+        <div class="b-box-title">TEST</div>
+        <div class="b-q" data-ans="1.25" data-tol="0.001" data-ph="m ="><p class="b-q-text">Bisection for $x^2 - 2$: after the first step the interval is $[1, 1.5]$. Which midpoint is checked next?</p><div class="b-sol"><p>$1.25$</p></div></div>
+        <div class="b-q" data-ans="1.75" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">Left rectangles for $x^2$ on $[0, 2]$ with 4 strips?</p><div class="b-sol"><p>$0.5 \cdot (0 + 0.25 + 1 + 2.25) = 1.75$</p></div></div>
+        <div class="b-q" data-ans="2.4" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">300 of 1,000 random points in a rectangle of area 8 are hits. Which area is estimated?</p><div class="b-sol"><p>$0.3 \cdot 8 = 2.4$</p></div></div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-numerik.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">NUMERICAL METHODS</span><span class="b-lab-what">Bisection and areas</span></span></a>
+        <a class="b-lab" href="../../mathetest11-montecarlo.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MONTE CARLO</span><span class="b-lab-what">Areas and π by chance</span></span></a>
+        <a class="b-lab" href="../../mathetest11-unendlich.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">THE INFINITELY LARGE</span><span class="b-lab-what">Hilbert's hotel, Cantor</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 11 · Elective 3 of the Saxon curriculum for mathematics at the Berufliches Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+</body>
+</html>

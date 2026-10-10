@@ -9,9 +9,15 @@
  * Maths: $…$ and $$…$$ via KaTeX auto-render (loaded by the page, fires 'katex-ready').
  * Solved self-checks are remembered per browser (localStorage, wrapped - the page works without it).
  * Debug window (js/debug-window.js) only with ?debug in the address.
+ * English editions (buch/<book>-en/, <html lang="en">): t(de, en) picks the words of this file, numbers get a decimal
+ * point; the widget modules are translated by js/buch-en.js, which those pages load before this file.
  */
 (function () {
     'use strict';
+
+    // the language of the page: German books as before, English editions (Doc, 10.10.2026: "übersetz unser 1. Buch ins EN")
+    const EN = /^en/i.test(document.documentElement.lang || '');
+    const t = (de, en) => EN ? en : de;
 
     // The debug window only on request: ?debug in the address (Doc, 09.10.2026: "im Moment brauchen wir es ja nicht").
     // Loaded from beside this file; its own autostart (DOMContentLoaded) may already be past, so start it here.
@@ -45,12 +51,12 @@
         texBig() { return this.d === 1 ? String(this.n) : '\\dfrac{' + this.n + '}{' + this.d + '}'; }
     }
 
-    // German number: comma, up to `digits` decimals, trailing zeros dropped
+    // German number: comma, up to `digits` decimals, trailing zeros dropped (English editions: decimal point)
     function fmt(x, digits = 4) {
         if (!isFinite(x)) return '–';
         let s = Number(x).toFixed(digits);
         if (s.indexOf('.') >= 0) s = s.replace(/0+$/, '').replace(/\.$/, '');
-        return s.replace('.', ',');
+        return EN ? s : s.replace('.', ',');
     }
     // the same inside TeX: the comma must not add space ({,})
     function texNum(x, digits = 4) { return fmt(x, digits).replace(',', '{,}'); }
@@ -71,7 +77,7 @@
         // eslint-disable-next-line no-new-func
         return new Function('x', 'with (Math) { return (' + e + '); }');
     }
-    function pct(x, digits = 1) { return fmt(x * 100, digits) + ' %'; }
+    function pct(x, digits = 1) { return fmt(x * 100, digits) + (EN ? '%' : ' %'); }
 
     // what a student types: "1/36", "0,25", "25 %", "≈ 0.49", "1 / 3"
     function parseAnswer(raw) {
@@ -80,6 +86,7 @@
         if (!s) return NaN;
         let percent = false;
         if (s.endsWith('%')) { percent = true; s = s.slice(0, -1); }
+        if (EN && /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, '');   // English "1,500" is fifteen hundred
         s = s.replace(/,/g, '.');
         let v;
         const m = s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
@@ -143,8 +150,8 @@
                 head.appendChild(num);
                 const lvl = document.createElement('span');
                 lvl.className = 'b-lvl'; lvl.dataset.lvl = task.dataset.lvl || '1';
-                lvl.title = ['', 'Grundlage', 'Mittel', 'Anspruchsvoll'][+lvl.dataset.lvl] || '';
-                lvl.setAttribute('aria-label', 'Niveau: ' + lvl.title);
+                lvl.title = (EN ? ['', 'Basic', 'Intermediate', 'Advanced'] : ['', 'Grundlage', 'Mittel', 'Anspruchsvoll'])[+lvl.dataset.lvl] || '';
+                lvl.setAttribute('aria-label', t('Niveau: ', 'Level: ') + lvl.title);
                 head.appendChild(lvl);
                 task.insertBefore(head, q);
                 if (q) head.appendChild(q);
@@ -152,7 +159,7 @@
                 const acts = document.createElement('div');
                 acts.className = 'b-acts';
                 task.insertBefore(acts, hint || sol);
-                [[hint, 'Tipp', 'b-hintbtn'], [sol, 'Lösung', '']].forEach(([box, label, cls]) => {
+                [[hint, t('Tipp', 'Hint'), 'b-hintbtn'], [sol, t('Lösung', 'Solution'), '']].forEach(([box, label, cls]) => {
                     if (!box) return;
                     box.classList.add('b-reveal');
                     const b = document.createElement('button');
@@ -187,7 +194,7 @@
             const isHint = box.classList.contains('b-hint');
             const b = document.createElement('button');
             b.type = 'button'; b.className = 'b-btn' + (isHint ? ' b-hintbtn' : '');
-            b.textContent = isHint ? 'Tipp' : 'Lösung zeigen';
+            b.textContent = isHint ? t('Tipp', 'Hint') : t('Lösung zeigen', 'Show solution');
             b.addEventListener('click', () => b.classList.toggle('open', box.classList.toggle('open')));
             acts.appendChild(b);
         });
@@ -241,7 +248,7 @@
                 if (q.dataset.ans == null) return;
                 if (PRINT) {                                                       // paper: a line to write on
                     const line = document.createElement('div');
-                    line.className = 'b-answer'; line.textContent = (q.dataset.label || 'Ergebnis') + ':';
+                    line.className = 'b-answer'; line.textContent = (q.dataset.label || t('Ergebnis', 'Answer')) + ':';
                     q.insertBefore(line, sol || null);
                     return;
                 }
@@ -249,9 +256,9 @@
                 row.className = 'b-ask';
                 const inId = 'b-in-' + id + '-' + i;
                 row.innerHTML =
-                    '<label for="' + inId + '">' + (q.dataset.label || 'Ergebnis') + '</label>' +
-                    '<input class="b-in" id="' + inId + '" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="' + (q.dataset.ph || 'z. B. 3/10') + '">' +
-                    '<button type="button" class="b-btn">Prüfen</button>' +
+                    '<label for="' + inId + '">' + (q.dataset.label || t('Ergebnis', 'Answer')) + '</label>' +
+                    '<input class="b-in" id="' + inId + '" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="' + (q.dataset.ph || t('z. B. 3/10', 'e.g. 3/10')) + '">' +
+                    '<button type="button" class="b-btn">' + t('Prüfen', 'Check') + '</button>' +
                     '<span class="b-fb" aria-live="polite"></span>';
                 q.insertBefore(row, sol || null);
                 const input = row.querySelector('input'), btn = row.querySelector('button'), fb = row.querySelector('.b-fb');
@@ -260,16 +267,16 @@
                     const ok = matches(input.value, q.dataset.ans, q.dataset.tol != null ? parseFloat(q.dataset.tol) : null);
                     input.classList.toggle('ok', ok); input.classList.toggle('bad', !ok);
                     fb.className = 'b-fb ' + (ok ? 'ok' : 'bad');
-                    if (ok) { fb.innerHTML = ICON.ok + ' richtig'; solved(input.value); dbg('check ' + sk + ' ok'); return; }
+                    if (ok) { fb.innerHTML = ICON.ok + t(' richtig', ' correct'); solved(input.value); dbg('check ' + sk + ' ok'); return; }
                     tries++;
-                    fb.innerHTML = ICON.bad + (tries >= 2 && sol ? ' noch nicht – schau dir die Lösung an' : ' noch nicht – versuch es noch einmal');
+                    fb.innerHTML = ICON.bad + (tries >= 2 && sol ? t(' noch nicht – schau dir die Lösung an', ' not yet – have a look at the solution') : t(' noch nicht – versuch es noch einmal', ' not yet – try again'));
                     if (tries >= 2) showSol();
                 }
                 btn.addEventListener('click', check);
                 input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
                 if (state[sk]) {
                     input.value = typeof state[sk] === 'string' ? state[sk] : '';
-                    input.classList.add('ok'); fb.className = 'b-fb ok'; fb.innerHTML = ICON.ok + ' richtig'; showSol();
+                    input.classList.add('ok'); fb.className = 'b-fb ok'; fb.innerHTML = ICON.ok + t(' richtig', ' correct'); showSol();
                 }
             });
             updateScore();
@@ -381,18 +388,18 @@
         if (top && top.tagName !== 'A') {
             const a = document.createElement('a');
             a.className = 'b-top-book'; a.href = 'index.html'; a.textContent = top.textContent;
-            a.title = 'Inhaltsverzeichnis des Buches';
+            a.title = t('Inhaltsverzeichnis des Buches', 'Contents of the book');
             top.replaceWith(a);
         }
         if (i < 0) return;
         const prev = B.chapters[i - 1], next = B.chapters[i + 1];
         const nav = document.createElement('nav');
-        nav.className = 'b-chapnav'; nav.setAttribute('aria-label', 'Blättern');
+        nav.className = 'b-chapnav'; nav.setAttribute('aria-label', t('Blättern', 'Turn the page'));
         const card = (c, dir) => c
-            ? '<a class="b-chapcard ' + dir + '" href="' + c.file + '"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ZURÜCK' : 'WEITER →') +
-              ' · KAPITEL ' + c.k + '</span><span class="b-chapcard-t">' + c.title + '</span></a>'
-            : '<a class="b-chapcard ' + dir + '" href="index.html"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ' : '') + 'INHALT' + (dir === 'next' ? ' →' : '') +
-              '</span><span class="b-chapcard-t">Alle Kapitel</span></a>';
+            ? '<a class="b-chapcard ' + dir + '" href="' + c.file + '"><span class="b-chapcard-k">' + (dir === 'prev' ? t('← ZURÜCK', '← BACK') : t('WEITER →', 'NEXT →')) +
+              t(' · KAPITEL ', ' · CHAPTER ') + c.k + '</span><span class="b-chapcard-t">' + c.title + '</span></a>'
+            : '<a class="b-chapcard ' + dir + '" href="index.html"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ' : '') + t('INHALT', 'CONTENTS') + (dir === 'next' ? ' →' : '') +
+              '</span><span class="b-chapcard-t">' + t('Alle Kapitel', 'All chapters') + '</span></a>';
         nav.innerHTML = card(prev, 'prev') + card(next, 'next');
         const foot = document.querySelector('.b-foot');
         if (foot) foot.parentNode.insertBefore(nav, foot); else document.querySelector('.b-main').appendChild(nav);
@@ -408,10 +415,10 @@
             if (c.lb !== last) { html += '<p class="b-lbhead">' + c.lb.toUpperCase() + '</p>'; last = c.lb; }
             let solved = 0;
             try { solved = Object.keys(JSON.parse(localStorage.getItem('buch:' + folder + c.file) || '{}')).length; } catch (_) { }
-            html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>KAPITEL</small></span>' +
+            html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>' + t('KAPITEL', 'CHAPTER') + '</small></span>' +
                 '<span><span class="b-chap-t">' + c.title + '</span><span class="b-chap-s">' + c.sub + '</span></span>' +
-                '<span class="b-chap-m">' + c.when.toUpperCase() + (c.ustd ? '<br>' + c.ustd + ' USTD.' : '') +
-                (solved ? '<br><span class="b-done">' + solved + ' GELÖST</span>' : '') + '</span></a>';
+                '<span class="b-chap-m">' + c.when.toUpperCase() + (c.ustd ? '<br>' + c.ustd + t(' USTD.', ' LESSONS') : '') +
+                (solved ? '<br><span class="b-done">' + solved + t(' GELÖST', ' SOLVED') + '</span>' : '') + '</span></a>';
         });
         box.innerHTML = html;
     }
@@ -457,7 +464,7 @@
             ov = document.createElement('div');
             ov.className = 'b-ov';
             frame = document.createElement('iframe');
-            frame.title = 'Alle Seiten der Druckausgabe';
+            frame.title = t('Alle Seiten der Druckausgabe', 'All pages of the print edition');
             frame.src = 'druck.html?uebersicht';
             ov.appendChild(frame);
             document.body.appendChild(ov);
@@ -476,14 +483,15 @@
     }
     function buildOverview() {
         const top = document.querySelector('.b-top');
-        if (!top || !window.BUCH) return;
+        // a book without its print edition yet (kapitel.js: druck: false, e.g. the English edition) has no overview
+        if (!top || !window.BUCH || window.BUCH.druck === false) return;
         ovBtn = document.createElement('button');
         ovBtn.type = 'button'; ovBtn.className = 'b-ovbtn';
-        ovBtn.title = 'Alle Seiten der Druckausgabe (O)';
-        ovBtn.setAttribute('aria-label', 'Alle Seiten der Druckausgabe');
+        ovBtn.title = t('Alle Seiten der Druckausgabe (O)', 'All pages of the print edition (O)');
+        ovBtn.setAttribute('aria-label', t('Alle Seiten der Druckausgabe', 'All pages of the print edition'));
         ovBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
             '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="1.2"/>' +
-            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">Seiten</span>';
+            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">' + t('Seiten', 'Pages') + '</span>';
         const book = top.querySelector('.b-top-book');
         if (book) book.after(ovBtn); else top.appendChild(ovBtn);
         ovBtn.addEventListener('click', () => { if (ov && !ov.hidden) zu(); else auf(); });
@@ -563,5 +571,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 
-    window.Buch = { widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile };
+    window.Buch = { en: EN, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile };
 })();
