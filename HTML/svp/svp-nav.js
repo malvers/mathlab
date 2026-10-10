@@ -61,12 +61,14 @@
         ['mathe/mathefos11.html', 'FO MA 11', 'b-grey', 'Mathematik Fachoberschule Klasse 11 (FO)'],
         ['mathe/mathefos12.html', 'FO MA 12', 'b-grey', 'Mathematik Fachoberschule Klasse 12 (FO)'],
         ['mathe/uebung.html', 'Üben', 'b-grey', 'Übung macht den Meister'],
-        /* Doc, 09.10.2026: the filler detector (HTML/aehm.html), first in MRA, never a card */
+        /* Doc, 09.10.2026: the filler detector (HTML/aehm.html), in MRA (first until 10.10., now after Meldungen), never a card */
         ['../aehm.html', 'Ähm-Detektor', 'b-grey', 'Ähm-Detektor - blitzt bei jedem Äh'],
         ['notes.html', 'Notizen', 'b-grey', 'Notizen'],
         /* Doc, 24.09.2026: the run of every lesson of the week, across all plans -
            read on the phone during the lesson, not in the plan page. */
         ['fahrplan.html', 'Fahrplan', 'b-grey', 'Fahrplan der Woche'],
+        /* Doc, 10.10.2026: the reports of "Fehler melden" from the textbooks, in MRA, with the number of open ones */
+        ['../buch/meldungen.html', 'Meldungen', 'b-grey', 'Fehler-Meldungen aus den Büchern'],
         /* Doc, 05.10.2026: the school's year plan from Teams, sorted and corrected - login only (LOGIN_ONLY) */
         ['schuljahr.html', 'Schuljahr', 'b-grey', 'Schuljahresablauf BGY - Termine der Schule'],
         ['konzepte.html', 'Konzepte', 'b-grey', 'Konzepte'],
@@ -145,7 +147,7 @@
     // These open in a new tab so the current plan stays put.
     // The Stundenplan no longer does (Doc, 10.09.2026: "auf click SP unter dem
     // Header wie alles sonst") - it opens in place, below this nav band.
-    const NEW_TAB = new Set(['../aehm.html', 'notes.html', 'fahrplan.html', 'schuljahr.html', 'konzepte.html', 'operatoren.html',
+    const NEW_TAB = new Set(['../aehm.html', 'notes.html', 'fahrplan.html', '../buch/meldungen.html', 'schuljahr.html', 'konzepte.html', 'operatoren.html',
         'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', 'notenvergabe-fos.html',
         'notenvergabe-osgy.html', '../fokus.html']);
 
@@ -185,7 +187,9 @@
                The grade sub-menu is just "Noten" (Doc, 29.09.2026). */
             /* Doc, 05.10.2026: Doc's own tools fold into one sub-menu "MRA" (Michael R. Alvers) at the
                top, so the menu gets shorter - the demo class used to close the menu below a divider. */
-            [null, [{ sub: 'MRA', hrefs: ['../aehm.html', 'notes.html', 'fahrplan.html', '../vote.html?host', 'genii.html'] },
+            /* Doc, 10.10.2026: "mach MRA nur sichtbar, wenn ich eingeloggt bin" - login: the sub-menu alone goes
+               (not LOGIN_ONLY: the pages and their cards stay as they were); "mach Meld. als ersten eintrag" */
+            [null, [{ sub: 'MRA', login: true, hrefs: ['../buch/meldungen.html', '../aehm.html', 'notes.html', 'fahrplan.html', '../vote.html?host', 'genii.html'] },
                     'schuljahr.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Noten', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
                                                   'bewertungen.html', 'notenvergabe-fos.html',
@@ -271,6 +275,7 @@
     nav.appendChild(navRight);
 
     const pills = {}; // href -> nav pill element, for live show/hide from the panel
+    let mraHead = null; // the head of the sub-menu MRA - the number of open reports goes on it, too
     for (const [href, label, cls] of LINKS) {
         const a = document.createElement('a');
         a.className = 'badge ' + cls;
@@ -403,12 +408,15 @@
                     line.appendChild(a);
                     return;
                 }
+                if (entry.login && !hasSession()) return;
                 const subItems = entry.hrefs.map(h => pills[h]).filter(Boolean);
                 if (!subItems.length) return;
                 names.push(entry.sub);
                 if (subItems.some(a => a.classList.contains('active'))) active = true;
                 items.push(...subItems);
-                line.appendChild(makeSub(entry.sub, subItems));
+                const sub = makeSub(entry.sub, subItems);
+                if (entry.sub === 'MRA') mraHead = sub.querySelector('.nd-sub-head');
+                line.appendChild(sub);
             });
             if (!items.length) return;
             if (row[0]) {
@@ -1138,6 +1146,30 @@
     if (hasSession()) {
         if (document.readyState === 'complete') pullPrefs();
         else window.addEventListener('load', pullPrefs);
+        if (document.readyState === 'complete') zaehleMeldungen();
+        else window.addEventListener('load', zaehleMeldungen);
+    }
+
+    /* Doc, 10.10.2026: "Meldungen" in MRA "mit Zahl" - how many reports of "Fehler melden" (HTML/buch/meldungen.html)
+       are open, on the entry and on MRA; only with Doc's session (RLS on buch_feedback: his uid alone). Open = new or
+       unclear, not set to "ignorieren" (prio 0) - the same as the page counts. */
+    async function zaehleMeldungen() {
+        const auth = await withAuth();
+        if (!auth || !auth.hasSession()) return;
+        let res;
+        try { res = await auth.api('buch_feedback?select=id&status=in.(neu,unklar)&prio=gt.0', { method: 'GET' }); }
+        catch (e) { return; }                       // offline: no number
+        if (!res.ok) return;                        // another account: RLS answers 0 rows anyway
+        const n = (await res.json().catch(() => [])).length;
+        if (!n) return;
+        [pills['../buch/meldungen.html'], mraHead].forEach(function (el) {
+            if (!el) return;
+            const c = document.createElement('span');
+            c.className = 'nav-count';
+            c.textContent = n;
+            c.title = n === 1 ? 'eine offene Meldung' : n + ' offene Meldungen';
+            el.insertBefore(c, el.querySelector('.nd-caret'));   // before MRA's caret; on the entry at the end
+        });
     }
 
     function closePanel() { editWrap.classList.remove('open'); }
