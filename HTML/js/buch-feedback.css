@@ -1,0 +1,60 @@
+/* js/buch-feedback.css — "Fehler melden": the red button at the right end of Solita's line in the textbook's header and
+   its card under the header (js/buch-feedback.js, Doc 09./10.10.2026). Drawn for the book's dark scheme like js/buch.css;
+   js/farbschema.js translates it for Grau and Hell. js/buch-feedback.js loads this file with a version. */
+
+/* the red button itself: js/buch-feedback-knopf.css (never translated by js/farbschema.js) */
+/* the word only where her line is wide (the header on a large screen); narrow, and in her card on the phone, the flag */
+.b-solita-line { container-type: inline-size; }
+.b-meld-rot .b-meld-l { display: none; }
+@container (min-width: 340px) { .b-meld-rot .b-meld-l { display: inline-block; } }
+
+/* the card: placed in the header (js/buch-feedback.js sets left and width), opaque - the page must not shine through */
+.b-meld {
+    position: absolute; top: calc(100% + 8px); z-index: 3; box-sizing: border-box;
+    display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 15px;
+    border-radius: 12px; background: rgb(10, 21, 38); border: 0.5px solid rgba(143, 163, 189, 0.3);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45); color: #cfd8e6;
+    /* plain Raleway: the card is controls, not running text - no LaTeX digits (js/lab-schrift.css: "buttons keep their own fonts") */
+    font-family: 'Raleway', sans-serif;
+}
+.b-meld[hidden] { display: none; }
+.b-meld-x {
+    position: absolute; top: 9px; right: 9px; width: 24px; height: 24px; padding: 0; display: grid; place-items: center;
+    border: 0; border-radius: 6px; background: none; color: #8fa3bd; cursor: pointer;
+}
+.b-meld-x:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.b-meld-x svg { width: 16px; height: 16px; }
+.b-meld-title { font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.6px; text-transform: uppercase; color: #fff; }   /* white like the button (Doc, 10.10.2026: "Fehler melden in weiß") */
+.b-meld-wo { margin-top: -4px; padding-right: 26px; font-size: 0.86rem; color: #8fa3bd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.b-meld-label { font-size: 0.95rem; color: #fff; }
+.b-meld-row { display: flex; align-items: flex-start; gap: 10px; }
+.b-meld-mic {
+    flex: none; width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(2, 100, 123, 0.65); background: rgba(2, 100, 123, 0.18); color: #7fd8ee;
+    transition: background .15s, color .15s, border-color .15s;
+}
+.b-meld-mic:hover { background: rgba(2, 100, 123, 0.4); color: #fff; }
+.b-meld-mic svg { width: 20px; height: 20px; }
+.b-meld-mic[hidden] { display: none; }
+/* listening: red and breathing, like the mic of Solita's box (js/solita-frage.css .sf-mic.on) */
+.b-meld-mic.on { color: rgb(236, 120, 104); border-color: rgb(176, 36, 24); background: rgba(176, 36, 24, 0.12); animation: bmeldmic 1.2s ease-in-out infinite; }
+@keyframes bmeldmic { 50% { box-shadow: 0 0 0 6px rgba(176, 36, 24, 0.2); } }
+/* 1rem: a smaller field makes the phone zoom in on focus */
+.b-meld-text {
+    flex: 1; min-width: 0; min-height: 96px; box-sizing: border-box; resize: vertical; padding: 9px 11px; border-radius: 9px;
+    background: rgba(0, 0, 0, 0.3); border: 0.5px solid rgba(2, 100, 123, 0.65); color: #fff; outline: none;
+    font: inherit; font-size: 1rem; line-height: 1.4;
+}
+.b-meld-text:focus { border-color: rgb(245, 194, 66); }
+.b-meld-text::placeholder { color: #6d8199; }
+.b-meld-note { font-size: 0.8rem; line-height: 1.35; color: #6d8199; }
+.b-meld-acts { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.b-meld-status { flex: 1; min-width: 0; font-size: 0.88rem; color: #8fa3bd; }
+.b-meld-status[data-art="ok"] { color: rgb(160, 200, 90); }
+.b-meld-status:is([data-art="fehler"], [data-art="hoert"]) { color: rgb(236, 120, 104); }
+.b-meld-send {
+    flex: none; cursor: pointer; padding: 10px 20px; border: 0; border-radius: 9px; background: rgb(121, 158, 49); color: #fff;
+    font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.2px; text-transform: uppercase;
+}
+.b-meld-send:hover { filter: brightness(1.1); }
+.b-meld-send:disabled { opacity: .5; cursor: default; }

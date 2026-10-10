@@ -511,6 +511,13 @@
         sc.src = ME.replace(/buch\.js(\?.*)?$/, 'buch-solita.js');
         document.head.appendChild(sc);
     }
+    // ---------- "Fehler melden", the red button in Solita's line (Doc, 09./10.10.2026): js/buch-feedback.js, spoken reports into the database ----------
+    function buildFeedback() {
+        if (!ME || !document.querySelector('.b-top') || document.querySelector('script[src*="buch-feedback.js"]')) return;
+        const sc = document.createElement('script');
+        sc.src = ME.replace(/buch\.js(\?.*)?$/, 'buch-feedback.js');
+        document.head.appendChild(sc);
+    }
 
     // ---------- widgets ----------
     const widgets = {};
@@ -550,6 +557,7 @@
         buildIndex();
         buildOverview();
         buildSolita();
+        buildFeedback();
         dbg('ready ' + KEY);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

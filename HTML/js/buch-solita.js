@@ -49,6 +49,10 @@
     const inner = ask.querySelector('.b-solita-in'), btn = ask.querySelector('.b-solita-btn'), face = btn.querySelector('img');
     const line = ask.querySelector('.b-solita-line'), panel = ask.querySelector('.b-solita-panel');
     let offen = false;
+    // Doc, 10.10.2026: "lass in den Büchern die Zeile immer sichtbar!" - where the line fits beside her picture it
+    // stands always; on a narrow screen (the phone) it would be a card over the book, so there her picture opens it
+    const IMMER = true;
+    let vonSelbst = false;                            // the line stands because it fits, not because it was clicked open
     function zeigeWer() {
         face.src = istDoc ? DOC_PIC : SOLITA_PIC;
         face.alt = istDoc ? 'Doc Alvers' : 'Solita';
@@ -195,6 +199,8 @@
         return lines.join('\n');
     }
     window.buchSolitaKontext = zusammenstellen;
+    // the same reading of the page for the feedback button (js/buch-feedback.js): one place for "where is the reader"
+    window.BuchStelle = { headOffset, sichtbar, text, aktuell };
 
     // ---------- the box ----------
     if (!document.querySelector('link[href*="solita-frage.css"]')) css('solita-frage.css');
@@ -245,8 +251,10 @@
         }
         function layout() {
             const a = ask.getBoundingClientRect(), AV = btn.offsetWidth || 34;
-            const room = a.width - AV - GAP - 8;
-            inline = offen && room >= LINE_MIN;
+            const room = a.width - AV - GAP - 8, passt = room >= LINE_MIN;
+            if (IMMER && passt && !offen) { offen = vonSelbst = true; zeigeWer(); sf.auffrischen(); }
+            else if (vonSelbst && !passt) { offen = vonSelbst = false; sf.stop(); zeigeWer(); }
+            inline = offen && passt;
             const lw = inline ? Math.min(LINE_MAX, Math.floor(room)) : 0;
             line.style.width = lw + 'px';
             move(inline ? line : sfRoot);
@@ -274,7 +282,7 @@
             }
         }
         function oeffnen() {
-            offen = true;
+            offen = true; vonSelbst = false;
             zeigeWer();
             sf.auffrischen();                             // the password once, then the question
             layout();
@@ -282,11 +290,16 @@
             sf.aufwaermen();
         }
         function schliessen() {
-            offen = false;
             sf.stop();
+            if (vonSelbst) out.classList.add('sf-zu');    // the line stays ("immer sichtbar"), only the answers fold away
+            else offen = false;
             zeigeWer();
             layout();
         }
+        // the report card of js/buch-feedback.js opens: her answers make room (on the phone her card closes)
+        document.addEventListener('buch-solita-zu', () => { if (offen) schliessen(); });
+        // a line that stands by itself is not warmed up on every page view - only once the reader goes into her field
+        ask.addEventListener('focusin', e => { if (e.target === sf.feld()) sf.aufwaermen(); });
         // the field has its width once the line has grown: then the invitation that fits
         line.addEventListener('transitionend', e => { if (e.propertyName === 'width') sf.auffrischen(); });
         panel.querySelector('.b-solita-x').addEventListener('click', () => { schliessen(); btn.focus({ preventScroll: true }); });
@@ -294,8 +307,9 @@
         // The mouse gives the picture no focus: in the sticky header that alone scrolled the book by 500 px (Doc, 09.10.2026)
         btn.addEventListener('mousedown', e => e.preventDefault());
         sf.bild(btn, { offen: () => offen, oeffnen: oeffnen });
-        // Space is her mic while the line is open; closed, it scrolls the book as always
-        sf.sprechtaste({ offen: () => offen, oeffnen: oeffnen, innen: ask, wenn: () => offen });
+        // Space is her mic while the line is open; closed, it scrolls the book as always - and a line that stands by
+        // itself (IMMER) leaves the page's Space to the book: there Space is her mic only in her field
+        sf.sprechtaste({ offen: () => offen, oeffnen: oeffnen, innen: ask, wenn: () => offen && !vonSelbst });
         addEventListener('keydown', e => {
             if (e.key !== 'Escape' || !offen || document.documentElement.classList.contains('b-ov-open')) return;
             if (e.target && e.target.closest && e.target.closest('.sf-menu')) return;
