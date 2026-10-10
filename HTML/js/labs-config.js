@@ -123,6 +123,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathegy11lk",
+        "href": "buch/mathegy11lk/index.html",
+        "title": "Mathematik GY 11 LK",
+        "description": "Unser elftes Buch: das interaktive Lehrbuch Mathematik für das Gymnasium, Jahrgangsstufe 11, Leistungskurs, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Dreizehn Kapitel in der Reihenfolge des Schuljahres – Grenzwerte und Stetigkeit, Änderungsraten und Ableitung nach Definition, Ableitungsregeln mit Beweis, Funktionsuntersuchung mit Polstellen und Asymptoten, Matrizen mit Drehungen und Verflechtungen, Steckbriefe, Extremwerte und Regression, numerische Verfahren bis zum Fixpunktsatz, Raum und Vektoren, lineare Abhängigkeit und Geraden, Ebenen und Lagebeziehungen, Wahrscheinlichkeit und Abzählen, bedingte Wahrscheinlichkeit mit dem Satz von Bayes und die Binomialverteilung. Zum Ausprobieren: der Epsilon-Schlauch, die Rettungsschwimmerin und das Brechungsgesetz, Drehungen in echtem 3D, ein Gozinto-Graph, das Spinnennetz der Fixpunktiteration, Ebenen und Geraden in 3D, das Geburtstagsproblem, umgekehrte Bäume nach Bayes und ein Galtonbrett. Mit Druckausgabe, QR-Code je Kapitel, Lösungsanhang und 35 Übungsblättern online.",
+        "tagline": "Buch / Mathematik GY 11 LK / 13 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathegy11lk"],
+        "category": "buecher neu funktionen stochastik geometrie grade11",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 11 jahrgangsstufe 11 gymnasium gy leistungskurs lk sachsen lehrplan kapitel grenzwert grenzwertsaetze stetigkeit epsilon delta abschnittsweise definierte funktion aenderungsrate lineare approximation differenzenquotient differentialquotient ableitung nach definition ableitungsregeln beweis produktregel kettenregel e-funktion logarithmus sinus funktionsuntersuchung monotonie extrema wendepunkte polstellen asymptoten matrizen matrixprodukt gauss jordan drehung verflechtung gozinto steckbrief extremwertproblem regression numerische verfahren bisektion newton verfahren iteration fixpunkt banach vektoren raum lineare abhaengigkeit geraden ebenen parameterform koordinatenform lagebeziehungen schnittgerade wahrscheinlichkeit laplace kolmogorow abzaehlen binomialkoeffizient vierfeldertafel bedingte wahrscheinlichkeit satz von bayes unabhaengigkeit bernoulli binomialverteilung erwartungswert standardabweichung galtonbrett aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathegy12lk",
         "href": "buch/mathegy12lk/index.html",
         "title": "Mathematik GY 12 LK",
