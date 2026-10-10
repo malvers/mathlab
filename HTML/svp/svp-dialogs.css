@@ -3,13 +3,31 @@
 .export-drop { position: relative; display: inline-flex; }
 /* Doc, 09.09.2026: "chevi groesser" - der Pfeil war mit 0.85em kleiner als die
    Beschriftung; line-height:1 haelt die Knopfhoehe trotzdem bei 34.4 px. */
+/* Doc, 10.10.2026: "dreieck zentrieren" - the ▾ glyph came from a fallback font
+   whose ink sits below the middle by a different amount in every font (measured
+   1 to 2.5 px), so no em shift fitted everywhere. Now a drawn SVG triangle in the
+   text colour, centred in its own box (Icons always SVG); the glyph stays in the
+   markup of the seven buttons but is pushed out of the box. Turning it (Lehrplan
+   open) keeps it in place, since the triangle sits in the middle of the box. */
 .export-caret {
+    display: inline-block;
     margin-left: 5px;
     font-size: 1.25em;
+    width: 0.62em;
+    height: 0.62em;
     /* line-height:0 haelt die Zeilenbox des Knopfes flach - sonst waere er mit
        dem groesseren Pfeil 2 px hoeher als seine Nachbarn (gemessen). */
     line-height: 0;
-    vertical-align: -0.06em;
+    /* on the baseline, the triangle's middle (0.31em up) meets the middle of
+       Orbitron's capitals: 17.1 / 17.2 px against 17.2 px in the 34.4 px
+       Lehrplan button, closed / open (measured 10.10.2026; "middle" was 0.9 low) */
+    vertical-align: baseline;
+    overflow: hidden;
+    text-indent: 200%;
+    white-space: nowrap;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 2.5h8L5 7.5z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 2.5h8L5 7.5z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .export-menu {
     display: flex;
