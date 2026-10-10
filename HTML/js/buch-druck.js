@@ -78,7 +78,10 @@
                 img.className = 'd-frozen';
                 img.alt = cv.getAttribute('aria-label') || 'Grafik';
                 const box = cv.closest('.b-canvasbox') || cv;
-                img.style.width = '100%';
+                // an equal-axes plot may be narrower than its box (js/buch-plot.js): keep its share of the width, centred
+                const share = box === cv ? 1 : cv.getBoundingClientRect().width / (box.getBoundingClientRect().width || 1);
+                img.style.width = share < 0.995 ? (share * 100).toFixed(2) + '%' : '100%';
+                if (share < 0.995) img.style.margin = '0 auto';
                 box.replaceWith(img);
             } catch (e) { /* a tainted canvas stays as it is */ }
         });

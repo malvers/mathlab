@@ -75,9 +75,25 @@
         ix(px) { const f = this.f; return f.x0 + px / f.w * (f.x1 - f.x0); }
         iy(py) { const f = this.f; return f.y0 + (f.h - py) / f.h * (f.y1 - f.y0); }
 
+        // equal units in a box wider than the view needs: the drawing area keeps the given x- and y-range,
+        // takes the width height · (x-span / y-span) and sits in the middle (in narrower boxes it fills the box as before)
+        _fitEqual() {
+            const cv = this.canvas, st = cv.style;
+            if (this.opt.equal) {
+                const bw = this.box.clientWidth, bh = this.box.clientHeight, [x0, x1] = this.opt.x, [y0, y1] = this.opt.y;
+                const need = Math.floor(bh * (x1 - x0) / (y1 - y0));
+                if (bw && bh && need < bw - 1) {                       // a pixel of slack: rounding alone changes nothing
+                    st.width = need + 'px'; st.left = Math.floor((bw - need) / 2) + 'px'; st.right = 'auto';
+                    return;
+                }
+            }
+            if (st.width) { st.width = ''; st.left = ''; st.right = ''; }
+        }
+
         draw(layers) {
             if (layers) this.layers = layers;
             const dpr = window.devicePixelRatio || 1, cv = this.canvas, ctx = this.ctx;
+            this._fitEqual();
             const fr = this._frame();
             if (!fr.w || !fr.h) return;
             cv.width = Math.round(fr.w * dpr); cv.height = Math.round(fr.h * dpr);

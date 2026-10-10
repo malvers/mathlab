@@ -1082,12 +1082,11 @@
             for (let k = 0; k < 60; k++) { const m1 = hi - g * (hi - lo), m2 = lo + g * (hi - lo); if (d(m1) < d(m2)) hi = m2; else lo = m1; }
             return (lo + hi) / 2;
         }
-        // equal units on both axes: the height follows the width; where it is capped, the x-range widens, so the whole y-range stays in the picture
+        // equal units on both axes: the height follows the width (the plot itself keeps the whole view visible)
         function fit() {
             const w = h1.clientWidth; if (!w) return;
-            const xs = G.x[1] - G.x[0], ys = G.y[1] - G.y[0], h = Math.max(230, Math.min(440, w * ys / xs)), xw = Math.max(xs, ys * w / h), xm = (G.x[0] + G.x[1]) / 2;
-            p1.box.style.height = Math.round(h) + 'px';
-            p1.view([xm - xw / 2, xm + xw / 2], G.y);
+            p1.box.style.height = Math.round(Math.max(230, Math.min(440, w * (G.y[1] - G.y[0]) / (G.x[1] - G.x[0])))) + 'px';
+            p1.view(G.x, G.y);
             p1.draw();
         }
         if (window.ResizeObserver) new ResizeObserver(fit).observe(h1);
