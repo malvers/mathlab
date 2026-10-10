@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Multiplizieren, Dividieren und Potenzieren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos7-w18-multiplizieren-dividieren',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Multiplizieren, Dividieren und Potenzieren',
+  subtitle: 'Oberschule · Klasse 7 · Realschulbildungsgang · Woche 18 (LB 3) · 20 Aufgaben: Vorzeichenregeln, Potenzen negativer Zahlen, Brüche und Dezimalzahlen, Sachaufgaben · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 7 · Woche 18 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe7.html', /* opened from the plan */
+  /* Blocks: sign rules (1-5, 10, 14-15, 19-20), powers (6-9, 11), fractions (12-13), contexts (16-18). */
+  questions: [
+    {
+      q: 'Berechne $(-4) \\cdot 3$.',
+      opts: ['−12', '−7', '−1', '12'],
+      steps: [
+        '$(-4) \\cdot 3 = (-4) + (-4) + (-4)$',
+        '$= -12$',
+        'Minus mal Plus ergibt Minus.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $(-5) \\cdot (-6)$.',
+      opts: ['−30', '−11', '30', '11'],
+      steps: [
+        'Erst ohne Vorzeichen: $5 \\cdot 6 = 30$.',
+        'Minus mal Minus ergibt Plus.',
+        '$(-5) \\cdot (-6) = 30$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Rechne im Kopf: $5{,}2 \\cdot (-3)$',
+      opts: ['−15,6', '−2,2', '−8,2', '15,6'],
+      steps: [
+        'Ohne Vorzeichen: $5{,}2 \\cdot 3 = 15{,}6$.',
+        'Plus mal Minus ergibt Minus.',
+        '$= -15{,}6$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Rechne im Kopf: $3{,}6 : (-3)$',
+      opts: ['0,6', '−1,2', '1,2', '−10,8'],
+      steps: [
+        'Ohne Vorzeichen: $3{,}6 : 3 = 1{,}2$.',
+        'Plus durch Minus ergibt Minus.',
+        '$= -1{,}2$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $(-24) : (-8)$.',
+      opts: ['−32', '3', '16', '−3'],
+      steps: [
+        'Ohne Vorzeichen: $24 : 8 = 3$.',
+        'Minus durch Minus ergibt Plus.',
+        '$= 3$. Probe: $3 \\cdot (-8) = -24$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Produkt hat drei negative Faktoren und sonst nur positive. Welches Vorzeichen hat es?',
+      opts: ['positiv', 'Es ist 0.', 'Das kann man nicht sagen.', 'negativ'],
+      steps: [
+        'Je zwei negative Faktoren ergeben zusammen etwas Positives.',
+        'Bei drei negativen bleibt ein Minus übrig.',
+        'Ungerade Anzahl negativer Faktoren: negatives Produkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $(-1{,}5) \\cdot (-4)$.',
+      opts: ['2,5', '−5,5', '6', '−6'],
+      steps: [
+        '$1{,}5 \\cdot 4 = 6$',
+        'Minus mal Minus: Plus.',
+        '$= 6$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $0 \\cdot (-7)$.',
+      opts: ['7', '0', '−1', '−7'],
+      steps: [
+        'Null mal irgendeine Zahl ist null.',
+        'Das gilt auch für negative Zahlen.',
+        '$0 \\cdot (-7) = 0$ – null hat kein Vorzeichen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Zahl gehört in die Lücke? $(-6) \\cdot \\square = 42$',
+      opts: ['48', '7', '−7', '−36'],
+      steps: [
+        'Ohne Vorzeichen: $6 \\cdot 7 = 42$.',
+        'Das Ergebnis ist positiv, ein Faktor ist negativ.',
+        'Dann muss der andere auch negativ sein: −7.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $(-3) \\cdot (-2) \\cdot (-1) \\cdot (-5)$.',
+      opts: ['30', '11', '−11', '−30'],
+      steps: [
+        'Ohne Vorzeichen: $3 \\cdot 2 \\cdot 1 \\cdot 5 = 30$.',
+        'Vier negative Faktoren: gerade Anzahl.',
+        'Das Produkt ist positiv: 30.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $(-2)^3$.',
+      opts: ['8', '−8', '−6', '6'],
+      steps: [
+        '$(-2)^3 = (-2) \\cdot (-2) \\cdot (-2)$',
+        '$= 4 \\cdot (-2)$',
+        '$= -8$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $(-2)^4$.',
+      opts: ['−8', '−16', '16', '8'],
+      steps: [
+        '$(-2) \\cdot (-2) \\cdot (-2) \\cdot (-2)$',
+        'Vier Faktoren mit Minus: gerade Anzahl.',
+        '$= 16$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $-2^4$ (ohne Klammer).',
+      opts: ['8', '16', '−8', '−16'],
+      steps: [
+        'Ohne Klammer gehört die Hochzahl nur zur 2.',
+        '$-2^4 = -(2 \\cdot 2 \\cdot 2 \\cdot 2)$',
+        '$= -16$ – Vorsicht, nicht dasselbe wie $(-2)^4 = 16$!'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $(-1)^7$.',
+      opts: ['7', '1', '−1', '−7'],
+      steps: [
+        '$(-1) \\cdot (-1) = 1$, dann wieder $\\cdot (-1) = -1$ usw.',
+        'Bei ungerader Hochzahl bleibt −1.',
+        '$(-1)^7 = -1$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $(-0{,}5)^2$.',
+      opts: ['−0,25', '0,25', '−1', '1'],
+      steps: [
+        '$(-0{,}5) \\cdot (-0{,}5)$',
+        'Minus mal Minus: Plus.',
+        '$= 0{,}25$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\left(-\\dfrac{3}{4}\\right) \\cdot \\dfrac{2}{3}$.',
+      opts: ['$-\\dfrac{5}{7}$', '$\\dfrac{1}{2}$', '$-\\dfrac{9}{8}$', '$-\\dfrac{1}{2}$'],
+      steps: [
+        '$\\dfrac{3 \\cdot 2}{4 \\cdot 3} = \\dfrac{6}{12} = \\dfrac{1}{2}$',
+        'Minus mal Plus: Minus.',
+        '$= -\\dfrac{1}{2}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\left(-\\dfrac{2}{5}\\right) : \\left(-\\dfrac{4}{5}\\right)$.',
+      opts: ['$\\dfrac{8}{25}$', '2', '$-\\dfrac{1}{2}$', '$\\dfrac{1}{2}$'],
+      steps: [
+        'Mit dem Kehrwert malnehmen: $\\dfrac{2}{5} \\cdot \\dfrac{5}{4} = \\dfrac{10}{20}$',
+        '$= \\dfrac{1}{2}$',
+        'Minus durch Minus: Plus. Ergebnis $\\dfrac{1}{2}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Temperatur fällt 5 Stunden lang jede Stunde um 2 Grad. Um wie viel ändert sie sich insgesamt?',
+      opts: ['um −2,5 Grad', 'um −7 Grad', 'um 10 Grad', 'um −10 Grad'],
+      steps: [
+        'Jede Stunde: −2 Grad.',
+        '$5 \\cdot (-2)$',
+        '$= -10$, es wird 10 Grad kälter.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Vier Personen haben zusammen 60 € Schulden und teilen sie gerecht auf. Wie hoch ist der Kontostand jeder Person dafür?',
+      opts: ['−15 €', '−56 €', '15 €', '−240 €'],
+      steps: [
+        'Schulden schreibt man negativ: −60 €.',
+        '$(-60) : 4$',
+        '$= -15$ € für jede Person.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'An vier Tagen wurden −4 °C, −1 °C, 2 °C und −5 °C gemessen. Wie groß ist der Mittelwert?',
+      opts: ['−2 °C', '−8 °C', '2 °C', '−3 °C'],
+      steps: [
+        'Summe: $-4 + (-1) + 2 + (-5) = -8$',
+        'Durch die Anzahl teilen: $-8 : 4$',
+        '$= -2$ °C'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

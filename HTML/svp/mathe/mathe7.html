@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 7 (Oberschule) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Oberschule &middot; Klasse 7</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_os_mathematik.pdf', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Realschulbildungsgang &middot; 4 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Prozent- und Zinsrechnung</div>
+            <div class="vu">28 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Elemente der Stochastik</div>
+            <div class="vu">12 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Rationale Zahlen und Gleichungen</div>
+            <div class="vu">28 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Vielecke und Prismen</div>
+            <div class="vu">32 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Parkettierungen</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Die Zeitrichtwerte des Lehrplans (100 Ustd. Pflicht + 8 Ustd. Wahlbereich) sind vollst&auml;ndig abgebildet;
+        die &uuml;brigen Wochen des Schuljahres stehen als &Uuml;bung, Klassenarbeit oder Puffer in eigenen Zeilen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Willkommen in Klasse 7', remark: 'Erster Schultag Mo 17.08.; Realschulbildungsgang', details: [
+                'Organisatorisches: Hefter, Geodreieck, Zirkel, Taschenrechner, Formelsammlung',
+                'Wiederholung Klasse 6: Brüche, Dezimalzahlen, Dreisatz',
+                'Kopfrechnen spielerisch: Rechen-Rallye'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/28', topic: 'Prozent: bequeme Prozentsätze', ziel: 'Beherrschen der bequemen Prozentsätze', remark: 'Prozent als Hundertstel; Anschluss an Kl. 6, LB 2', quiz: { href: '../../mathetestos7-bequeme-prozentsaetze.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Prozent heißt Hundertstel: 1 % = 1/100',
+                '50 %, 25 %, 20 %, 10 % und 1 % als Bruch und als Dezimalzahl',
+                'Anteile vergleichen: 7 von 20 oder 8 von 25?'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/28', topic: 'Grundwert, Prozentwert, Prozentsatz', ziel: 'Kennen der Begriffe Prozent, Prozentwert, Prozentsatz und Grundwert', remark: 'Prozentwert mit dem Dreisatz', quiz: { href: '../../mathetestos7-grundwert-prozentwert.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Die drei Größen im Text finden',
+                'Prozentwert berechnen: mit dem Dreisatz und mit W = G · p %',
+                'Der Prozentstreifen als Hilfe'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/28', topic: 'Prozentsatz und Grundwert berechnen', ziel: 'Übertragen des Dreisatzes auf Grundaufgaben der Prozentrechnung', remark: 'die drei Grundaufgaben', quiz: { href: '../../mathetestos7-prozentsatz-grundwert.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Prozentsatz: Wie viel Prozent sind 12 von 48?',
+                'Grundwert: 30 % sind 18 €, wie viel sind 100 %?',
+                'Welche Grundaufgabe liegt vor? Sortieren und lösen'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/28', topic: 'Kreisdiagramme', ziel: 'Beherrschen der Darstellung im Kreisdiagramm', remark: '1 % entspricht 3,6°', quiz: { href: '../../mathetestos7-kreisdiagramme.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Prozentsätze in Winkel umrechnen',
+                'Kreisdiagramme zeichnen und lesen',
+                'Kreis-, Balken- und Streifendiagramm vergleichen'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '17–20/28', topic: 'Preiserhöhung und Preissenkung', ziel: 'Anwenden der Prozentrechnung auf Preiserhöhung und Preissenkung', remark: 'vermehrter und verminderter Grundwert, Rabatt, Mehrwertsteuer', quiz: { href: '../../mathetestos7-preisaenderungen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Rabatt und Skonto',
+                'Preiserhöhung, Mehrwertsteuer 19 %',
+                'Rückwärts rechnen: Was kostete es vorher?'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '21–24/28', topic: 'Zinsen', ziel: 'Anwenden der Prozentrechnung auf Zinssatz, Zinsen und Kapital', remark: 'Jahreszinsen, Tageszinsen; ein Zinsjahr hat 360 Tage', quiz: { href: '../../mathetestos7-zinsen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zinsrechnung ist Prozentrechnung: Kapital, Zinssatz, Zinsen',
+                'Jahreszinsen und Tageszinsen',
+                'Sparen und Kredit im Vergleich'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '25–28/28', topic: 'Zinseszins und Tabellenkalkulation', ziel: 'Anwenden der Prozentrechnung auch unter Nutzung der Tabellenkalkulation, Bewerten von Lösungswegen', remark: 'Informatik Kl. 7, LB 2', quiz: { href: '../../mathetestos7-zinseszins.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zinseszins: Jahr für Jahr mit dem neuen Kapital rechnen',
+                'Ein Sparplan in der Tabellenkalkulation',
+                'Lösungswege und Rechenhilfsmittel vergleichen und bewerten'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'ue', u: '', topic: 'Übung: Prozent- und Zinsrechnung', remark: 'Wiederholung nach den Ferien', details: [
+                'Gemischte Aufgaben zu den drei Grundaufgaben, Preisen und Zinsen',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Prozent- und Zinsrechnung', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos7-ka1.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Bequeme Prozentsätze, Grundaufgaben, Kreisdiagramm, Preisänderungen, Zinsen'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '1–4/12', topic: 'Zufallsversuche', ziel: 'Beherrschen des Durchführens und Auswertens von Zufallsversuchen', remark: 'Ergebnis, Ergebnismenge, Ereignis; nicht nur Laplace-Versuche', quiz: { href: '../../mathetestos7-zufallsversuche.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Würfel, Münze, Glücksrad, Reißzwecke',
+                'Die Ergebnismenge aufschreiben',
+                'Ereignisse: „gerade Zahl“, „mehr als 4“'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '5–8/12', topic: 'Häufigkeiten', ziel: 'Einblick gewinnen in die Stabilisierung relativer Häufigkeiten', remark: 'Urliste, Strichliste; Simulation mit Taschenrechner und Computer', quiz: { href: '../../mathetestos7-haeufigkeiten.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Urliste und Strichliste führen',
+                'Absolute und relative Häufigkeit',
+                'Viele Würfe: Die relative Häufigkeit pendelt sich ein'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '9–12/12', topic: 'Wahrscheinlichkeit, Statistik kritisch lesen', ziel: 'Kennen des Begriffs Wahrscheinlichkeit, Beurteilen von Darstellungen zu statistischen Erhebungen', remark: 'Medienbildung: Diagramme bilden die Wirklichkeit nicht exakt ab', quiz: { href: '../../mathetestos7-wahrscheinlichkeit.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Wahrscheinlichkeit schätzen und bei gleich wahrscheinlichen Ergebnissen berechnen',
+                'Abgeschnittene Achsen und verzerrte Bilder erkennen',
+                'Umfragen: Wer wurde gefragt?'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb3', u: '1–4/28', topic: 'Negative Zahlen', ziel: 'Übertragen des Veranschaulichens sowie des Vergleichens und Ordnens auf rationale Zahlen', remark: 'Zahlengerade, Gegenzahl, Betrag; Zusammenarbeit mit Geografie, Geschichte, Physik', quiz: { href: '../../mathetestos7-negative-zahlen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Temperaturen, Kontostand, Meereshöhe, Jahre vor Christus',
+                'Zahlengerade, Gegenzahl und Betrag',
+                'Vergleichen und Ordnen'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb3', u: '5–8/28', topic: 'Zahlbereiche und vier Quadranten', ziel: 'Kennen des Systematisierens von Zahlbereichen, Anwenden auf Punktkoordinaten im Koordinatensystem', remark: 'Teilmengenbeziehungen, Venn-Diagramm', quiz: { href: '../../mathetestos7-zahlbereiche-koordinaten.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Natürliche, ganze, gebrochene und rationale Zahlen',
+                'Venn-Diagramm der Zahlbereiche',
+                'Punkte in allen vier Quadranten eintragen und ablesen'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb3', u: '9–12/28', topic: 'Addieren und Subtrahieren rationaler Zahlen', ziel: 'Beherrschen des Addierens und Subtrahierens rationaler Zahlen', remark: 'anschauliches Gewinnen der Regeln', quiz: { href: '../../mathetestos7-addieren-subtrahieren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Addieren am Zahlenstrahl: Pfeile nach rechts und nach links',
+                'Subtrahieren heißt die Gegenzahl addieren',
+                'Klammern auflösen, Kopfrechnen'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'ue', u: '', topic: 'Weihnachtsknobeln', remark: 'zwei Schultage vor den Ferien', details: [
+                'Knobelaufgaben zu Prozenten und negativen Zahlen',
+                'Rechenspiele in Gruppen'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb3', u: '13–16/28', topic: 'Multiplizieren, Dividieren und Potenzieren', ziel: 'Beherrschen des Multiplizierens, Dividierens und Potenzierens rationaler Zahlen', remark: 'Vorzeichenregeln', quiz: { href: '../../mathetestos7-multiplizieren-dividieren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Vorzeichenregeln für Mal und Geteilt',
+                'Potenzen negativer Zahlen: (−2)³ und (−2)⁴',
+                'Kopfrechnen mit Dezimalzahlen und Brüchen'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '17–20/28', topic: 'Rechengesetze und Vorrangregeln', ziel: 'Übertragen der Rechengesetze einschließlich der Vorrangregeln auf rationale Zahlen', remark: 'Rechenstrategien, Rechenvorteile', quiz: { href: '../../mathetestos7-rechengesetze.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Vertauschen, Verbinden und Verteilen auch mit negativen Zahlen',
+                'Klammer vor Potenz vor Punkt vor Strich',
+                'Geschickt rechnen'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '21–24/28', topic: 'Terme und Gleichungen', ziel: 'Kennen von Variable, Variablengrundbereich, Term, Aussage, Lösung und Lösungsmenge', remark: 'Termwerte berechnen, Gleichungen aufstellen', quiz: { href: '../../mathetestos7-terme-gleichungen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Terme mit Variablen, Termwerte in Tabellen',
+                'Aussagen, Lösung und Lösungsmenge',
+                'Gleichungen aus Texten und Zahlenrätseln aufstellen'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '25–28/28', topic: 'Gleichungen lösen und Formeln umstellen', ziel: 'Anwenden des kalkülmäßigen Lösens von Gleichungen der Form a · x + b = c · x + d', remark: 'Verhältnisgleichungen; weiterhin auch inhaltliches Lösen; Zusammenarbeit mit Physik', quiz: { href: '../../mathetestos7-gleichungen-loesen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Auf beiden Seiten dasselbe tun: das Waage-Modell',
+                'Verhältnisgleichungen lösen',
+                'Formeln umstellen und Sachaufgaben lösen'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lk', u: '', topic: 'Klassenarbeit 2: Stochastik und rationale Zahlen', remark: 'mit Wiederholung und Auswertung', quiz: { href: '../../mathetestos7-ka2.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Zufallsversuche, Häufigkeiten, rationale Zahlen, Rechnen, Gleichungen'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb4', u: '1–4/32', topic: 'Vierecke in der Umwelt', ziel: 'Beherrschen des Beschreibens von Realobjekten mit Hilfe geometrischer Begriffe', remark: 'Fachwerk, Dachform, Fenster, Treppengeländer', quiz: { href: '../../mathetestos7-vierecke.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Parallelogramm, Raute, Drachenviereck und Trapez: Eigenschaften',
+                'Das Haus der Vierecke',
+                'Bauwerke beschreiben (Zusammenarbeit mit Deutsch)'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb4', u: '5–8/32', topic: 'Vierecke konstruieren', ziel: 'Beherrschen der Konstruktion von Parallelogramm, Drachenviereck und Trapez', remark: 'Planfigur, Konstruktionsbeschreibung', quiz: { href: '../../mathetestos7-vierecke-konstruieren.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Planfigur zeichnen und gegebene Stücke markieren',
+                'Parallelogramm, Drachenviereck und Trapez mit Zirkel und Geodreieck',
+                'Konstruktionsbeschreibung'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb4', u: '9–12/32', topic: 'Flächeninhalt und Umfang von Vierecken', ziel: 'Beherrschen der Flächeninhalts- und Umfangsberechnung von Parallelogramm, Drachenviereck und Trapez', remark: 'Anschluss an Kl. 6, LB 3', quiz: { href: '../../mathetestos7-flaeche-vierecke.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Formeln für Parallelogramm, Trapez und Drachenviereck anwenden',
+                'Fehlende Stücke berechnen: die Höhe aus dem Flächeninhalt',
+                'Sachaufgaben: Grundstücke, Beete, Dachflächen'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb4', u: '13–16/32', topic: 'Vielecke', ziel: 'Beherrschen der Flächeninhalts- und Umfangsberechnung von Vielecken', remark: 'Erkennen inhaltsgleicher Figuren, Tangram', quiz: { href: '../../mathetestos7-vielecke.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Vielecke in Dreiecke und Vierecke zerlegen',
+                'Inhaltsgleiche Figuren mit dem Tangram',
+                'Regelmäßige Vielecke'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'ue', u: '', topic: 'Übung: Vierecke und Vielecke', remark: 'vier Schultage vor den Osterferien', details: [
+                'Konstruieren, Flächeninhalt und Umfang',
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lk', u: '', topic: 'Klassenarbeit 3: Vielecke', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos7-ka3.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Vierecke beschreiben und konstruieren, Flächeninhalt und Umfang von Vielecken'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb4', u: '17–20/32', topic: 'Prismen darstellen', ziel: 'Anwenden der Kenntnisse über Prismen auf das Zeichnen von Körpernetzen, Schrägbildern, senkrechten Zweitafelbildern und Seitenansichten', remark: 'Anschluss an Kl. 6, LB 4', quiz: { href: '../../mathetestos7-prismen-darstellen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Gerade Prismen erkennen: Grundfläche, Deckfläche, Mantel',
+                'Körpernetz und Schrägbild',
+                'Zweitafelbild: Grundriss und Aufriss'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb4', u: '21–24/32', topic: 'Oberfläche und Volumen von Prismen', ziel: 'Anwenden der Kenntnisse über Prismen auf das Berechnen von Oberflächeninhalten und Volumen', remark: 'Abhängigkeiten untersuchen, auch am Computer', quiz: { href: '../../mathetestos7-prismen-berechnen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Oberfläche: zwei Grundflächen und der Mantel',
+                'Volumen: Grundfläche mal Höhe',
+                'Was passiert, wenn die Höhe verdoppelt wird?'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb4', u: '25–28/32', topic: 'Masse und Dichte', ziel: 'Berechnen von Massen unter Einbeziehung der Dichte', remark: 'Physik Kl. 6, LB 2', quiz: { href: '../../mathetestos7-masse-dichte.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Dichte: Masse pro Volumen',
+                'Masse aus Volumen und Dichte berechnen',
+                'Werkstücke aus Holz, Stahl und Beton'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'ue', u: '', topic: 'Übung: Prismen', remark: 'kurze Woche (Himmelfahrt)', details: [
+                'Netze, Oberfläche, Volumen und Masse gemischt'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lb4', u: '29–32/32', topic: 'Zusammengesetzte Körper und Verpackungen', ziel: 'Anwenden auf zusammengesetzte Körper, Beurteilen des angemessenen Materialverbrauchs bei Verpackungen', remark: 'Bildung für nachhaltige Entwicklung; WTH Kl. 7, LB 2', quiz: { href: '../../mathetestos7-zusammengesetzte-koerper.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Körper zerlegen und ergänzen',
+                'Verpackungen vermessen: Volumen und Materialverbrauch',
+                'Welche Verpackung spart Material?'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'ue', u: '', topic: 'Übung: Körperberechnungen', remark: 'kurze Woche nach Pfingsten', details: [
+                'Vorbereitung auf die Klassenarbeit'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'lk', u: '', topic: 'Klassenarbeit 4: Prismen', remark: 'mit Vorbereitung und Auswertung', quiz: { href: '../../mathetestos7-ka4.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Prismen darstellen, Oberfläche, Volumen, Masse, zusammengesetzte Körper'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'wb', u: '1–4/8', topic: 'Parkettierungen aus Vielecken', ziel: 'Kennen der Parkettierung als lückenlose Auslegung der Ebene mit unterschiedlichen bzw. deckungsgleichen Figuren', remark: 'Überlegungen zu Figuren, die keine Parkettierung ergeben', quiz: { href: '../../mathetestos7-parkettierungen.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Fliesen, Pflaster und Bienenwaben',
+                'Welche regelmäßigen Vielecke passen lückenlos zusammen?',
+                'Fliesen für einen Raum berechnen'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'wb', u: '5–8/8', topic: 'Parkette nach M. C. Escher', ziel: 'Gestalten einer Parkettierung mit bildhaften Motiven', remark: 'Arbeiten mit Schablonen; für Interessierte: Kaleidozyklen', quiz: { href: '../../mathetestos7-escher.html', label: 'Aufgaben 1 (20)' }, details: [
+                'Escher-Parkette: aus einem Quadrat wird ein Vogel',
+                'Schablone ausschneiden, verschieben, drehen',
+                'Ein eigenes Parkett gestalten'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'ue', u: '', topic: 'Wiederholung: Prozente und rationale Zahlen', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Gemischte Aufgaben aus LB 1 bis LB 3'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Wiederholung: Geometrie', remark: 'Übung und Vertiefung', details: [
+                'Gemischte Aufgaben zu Vielecken und Prismen'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Projektwoche Mathematik', remark: 'Parkett-Ausstellung', details: [
+                'Die eigenen Parkette ausstellen und erklären'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr, Ausblick auf Klasse 8'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_os_mathematik.pdf where that Lernbereich starts.
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_os_mathematik.pdf',
+            lb1: {
+                page: 42,
+                bullets: [
+                    'Dreisatz auf die Grundaufgaben der Prozentrechnung übertragen',
+                    'Bequeme Prozentsätze, Darstellung im Kreisdiagramm',
+                    'Prozent, Prozentwert, Prozentsatz und Grundwert',
+                    'Preiserhöhung und Preissenkung, Zinssatz, Zinsen, Kapital, Tageszins, Zinseszins',
+                    'Tabellenkalkulation, Lösungswege und Rechenhilfsmittel bewerten',
+                ]
+            },
+            lb2: {
+                page: 42,
+                bullets: [
+                    'Zufallsversuche: Ergebnis, Ergebnismenge, Ereignis',
+                    'Urliste, Strichliste, absolute und relative Häufigkeit',
+                    'Stabilisierung relativer Häufigkeiten, Begriff Wahrscheinlichkeit',
+                    'Darstellungen zu statistischen Erhebungen beurteilen',
+                ]
+            },
+            lb3: {
+                page: 42,
+                bullets: [
+                    'Rationale Zahlen veranschaulichen, vergleichen und ordnen',
+                    'Zahlbereiche systematisieren, Koordinatensystem mit vier Quadranten',
+                    'Addieren, Subtrahieren, Multiplizieren, Dividieren und Potenzieren',
+                    'Rechengesetze und Vorrangregeln für rationale Zahlen',
+                    'Variable, Term, Gleichung, Lösungsmenge; Gleichungen a · x + b = c · x + d lösen',
+                    'Verhältnisgleichungen, Formeln umstellen, Sachaufgaben',
+                ]
+            },
+            lb4: {
+                page: 43,
+                bullets: [
+                    'Realobjekte mit geometrischen Begriffen beschreiben',
+                    'Parallelogramm, Drachenviereck und Trapez konstruieren und berechnen',
+                    'Flächeninhalt und Umfang von Vielecken',
+                    'Prismen: Netz, Schrägbild, Zweitafelbild, Oberfläche, Volumen, Masse',
+                    'Zusammengesetzte Körper, Materialverbrauch bei Verpackungen',
+                ]
+            },
+            wb: {
+                page: 43,
+                bullets: [
+                    'Wahlpflichtbereich 1: Technisches Zeichnen',
+                    'Wahlpflichtbereich 2: Unterhaltungsmathematik und Rechenverfahren',
+                    'Wahlpflichtbereich 3: Parkettierungen (gewählt)',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            wb: ['b-green', 'WB 3'],
+            lk: ['b-grey', 'ORGA'],
+            ue: ['b-grey', 'ÜBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>

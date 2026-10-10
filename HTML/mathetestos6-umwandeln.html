@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Brüche und Dezimalzahlen umwandeln — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w04-umwandeln',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Brüche und Dezimalzahlen umwandeln',
+  subtitle: 'Oberschule · Klasse 6 · Woche 4 (LB 1) · 20 Aufgaben: Bruch in Dezimalzahl, endliche und periodische Dezimalzahlen, Dezimalzahl in Bruch · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: finite decimals (1-4), repeating decimals (5-10), decimal to fraction (11-15), everyday (16-20). */
+  questions: [
+    {
+      q: 'Schreibe $\\dfrac{3}{4}$ als Dezimalzahl.',
+      opts: ['3,4', '0,43', '0,75', '0,34'],
+      steps: [
+        'Auf Hundertstel erweitern: $\\dfrac{3}{4} = \\dfrac{3 \\cdot 25}{4 \\cdot 25} = \\dfrac{75}{100}$',
+        '75 Hundertstel schreibt man 0,75.',
+        'Oder: $3 : 4 = 0{,}75$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Schreibe $\\dfrac{2}{5}$ als Dezimalzahl.',
+      opts: ['0,4', '0,52', '2,5', '0,25'],
+      steps: [
+        'Auf Zehntel erweitern: $\\dfrac{2 \\cdot 2}{5 \\cdot 2} = \\dfrac{4}{10}$',
+        '4 Zehntel sind 0,4.',
+        'Probe: $2 : 5 = 0{,}4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Schreibe $\\dfrac{7}{20}$ als Dezimalzahl.',
+      opts: ['0,35', '3,5', '0,72', '0,7'],
+      steps: [
+        'Von 20 auf 100: mit 5 erweitern.',
+        '$\\dfrac{7 \\cdot 5}{20 \\cdot 5} = \\dfrac{35}{100}$',
+        'Also 0,35.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Schreibe $\\dfrac{3}{8}$ als Dezimalzahl.',
+      opts: ['0,375', '0,325', '0,38', '0,83'],
+      steps: [
+        '8 lässt sich auf 1000 erweitern: $8 \\cdot 125 = 1000$.',
+        '$\\dfrac{3 \\cdot 125}{8 \\cdot 125} = \\dfrac{375}{1000}$',
+        'Also 0,375. Schriftlich: $3 : 8 = 0{,}375$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Schreibe $\\dfrac{1}{3}$ als Dezimalzahl.',
+      opts: ['$0{,}3$', '$0{,}\\overline{13}$', '$0{,}\\overline{3}$', '$3{,}\\overline{3}$'],
+      steps: [
+        'Schriftlich: $1 : 3 = 0{,}333\\ldots$ – es bleibt immer der Rest 1.',
+        'Die 3 wiederholt sich ohne Ende: Sie ist die Periode.',
+        'Man schreibt $0{,}\\overline{3}$ (lies: null Komma Periode drei).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Schreibe $\\dfrac{2}{3}$ als Dezimalzahl.',
+      opts: ['$0{,}\\overline{23}$', '$0{,}\\overline{3}$', '$0{,}\\overline{6}$', '$0{,}67$'],
+      steps: [
+        '$2 : 3 = 0{,}666\\ldots$ – es bleibt immer der Rest 2.',
+        'Periode 6: $0{,}\\overline{6}$.',
+        '0,67 ist nur ein gerundeter Wert, nicht genau $\\dfrac{2}{3}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Schreibe $\\dfrac{5}{6}$ als Dezimalzahl.',
+      opts: ['$0{,}56$', '$0{,}\\overline{5}$', '$0{,}\\overline{83}$', '$0{,}8\\overline{3}$'],
+      steps: [
+        '$5 : 6$: erst 50 : 6 = 8 Rest 2, dann 20 : 6 = 3 Rest 2, dann wieder 20 : 6 …',
+        '$0{,}8333\\ldots$ – nur die 3 wiederholt sich.',
+        'Man schreibt $0{,}8\\overline{3}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Schreibe $\\dfrac{4}{11}$ als Dezimalzahl.',
+      opts: ['$0{,}\\overline{36}$', '$0{,}\\overline{4}$', '$0{,}411$', '$0{,}3\\overline{6}$'],
+      steps: [
+        '$40 : 11 = 3$ Rest 7, $70 : 11 = 6$ Rest 4, dann wieder $40 : 11$ …',
+        'Die Ziffern 3 und 6 wiederholen sich: $0{,}363636\\ldots$',
+        'Die Periode hat zwei Stellen: $0{,}\\overline{36}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Bruch ergibt eine endliche Dezimalzahl?',
+      opts: ['$\\dfrac{7}{25}$', '$\\dfrac{1}{3}$', '$\\dfrac{2}{7}$', '$\\dfrac{5}{6}$'],
+      steps: [
+        'Ein Bruch wird endlich, wenn man ihn auf 10, 100, 1000 … erweitern kann.',
+        '$\\dfrac{7}{25} = \\dfrac{28}{100} = 0{,}28$',
+        'Nenner 3, 6 oder 7 passen in keine Stufenzahl: Diese Brüche werden periodisch.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Bruch ergibt eine periodische Dezimalzahl?',
+      opts: ['$\\dfrac{6}{15}$', '$\\dfrac{3}{8}$', '$\\dfrac{1}{7}$', '$\\dfrac{9}{20}$'],
+      steps: [
+        'Zuerst kürzen: $\\dfrac{6}{15} = \\dfrac{2}{5} = 0{,}4$ ist endlich.',
+        '$\\dfrac{3}{8} = 0{,}375$ und $\\dfrac{9}{20} = 0{,}45$ sind endlich.',
+        '$\\dfrac{1}{7} = 0{,}\\overline{142857}$ ist periodisch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Schreibe 0,6 als vollständig gekürzten Bruch.',
+      opts: ['$\\dfrac{6}{5}$', '$\\dfrac{3}{5}$', '$\\dfrac{1}{6}$', '$\\dfrac{6}{100}$'],
+      steps: [
+        '0,6 sind 6 Zehntel: $\\dfrac{6}{10}$',
+        'Mit 2 kürzen: $\\dfrac{3}{5}$',
+        '$\\dfrac{6}{100}$ wäre 0,06.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Schreibe 0,25 als vollständig gekürzten Bruch.',
+      opts: ['$\\dfrac{2}{5}$', '$\\dfrac{1}{25}$', '$\\dfrac{1}{4}$', '$\\dfrac{25}{10}$'],
+      steps: [
+        '0,25 sind 25 Hundertstel: $\\dfrac{25}{100}$',
+        'Mit 25 kürzen: $\\dfrac{1}{4}$',
+        'Ein Viertel – wie 25 Cent von einem Euro.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Schreibe 0,125 als vollständig gekürzten Bruch.',
+      opts: ['$\\dfrac{1}{125}$', '$\\dfrac{1}{8}$', '$\\dfrac{125}{100}$', '$\\dfrac{1}{12}$'],
+      steps: [
+        'Drei Nachkommastellen: Tausendstel. $0{,}125 = \\dfrac{125}{1000}$',
+        'Mit 125 kürzen: $1000 : 125 = 8$.',
+        'Also $\\dfrac{1}{8}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Schreibe 2,4 als gemischte Zahl.',
+      opts: ['$\\dfrac{24}{100}$', '$2\\tfrac{1}{4}$', '$2\\tfrac{4}{5}$', '$2\\tfrac{2}{5}$'],
+      steps: [
+        '2 Ganze und 4 Zehntel: $2\\tfrac{4}{10}$',
+        '$\\dfrac{4}{10}$ mit 2 kürzen: $\\dfrac{2}{5}$',
+        '$2{,}4 = 2\\tfrac{2}{5}$'
+      ],
+      solution: 3
+    },
+    {
+      q: '$\\dfrac{1}{7} = 0{,}142857142857\\ldots$ Wie viele Ziffern hat die Periode?',
+      opts: ['7', '6', '1', '3'],
+      steps: [
+        'Suche, ab wo sich die Ziffern wiederholen.',
+        '142857 | 142857 | …',
+        'Die Periode ist 142857, sie hat 6 Ziffern.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Rezept braucht $\\dfrac{3}{4}$ kg Mehl. Was muss die Küchenwaage anzeigen?',
+      opts: ['0,34 kg', '0,75 kg', '0,7 kg', '1,33 kg'],
+      steps: [
+        '$\\dfrac{3}{4} = \\dfrac{75}{100} = 0{,}75$',
+        'Die Waage muss 0,75 kg anzeigen.',
+        'Das sind 750 g.'
+      ],
+      solution: 1
+    },
+    {
+      q: '1 € soll auf 3 Personen verteilt werden. Der Taschenrechner zeigt 0,3333333. Was ist sinnvoll?',
+      opts: ['Jede Person bekommt 0,34 €.', 'Jede Person bekommt 0,30 €.', 'Jede Person bekommt 0,3333 €.', 'Jede Person bekommt 0,33 €, 1 Cent bleibt übrig.'],
+      steps: [
+        '$1 : 3 = 0{,}\\overline{3}$ – das lässt sich in Cent nicht genau auszahlen.',
+        'Auf Cent gerundet: 0,33 €. Drei Personen bekommen $3 \\cdot 0{,}33 = 0{,}99$ €.',
+        '1 Cent bleibt übrig. Mit 0,34 € bräuchte man 1,02 €.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Bruch ist gleich 0,5?',
+      opts: ['$\\dfrac{5}{100}$', '$\\dfrac{1}{5}$', '$\\dfrac{2}{5}$', '$\\dfrac{4}{8}$'],
+      steps: [
+        '0,5 ist ein Halb.',
+        '$\\dfrac{4}{8}$ mit 4 gekürzt ergibt $\\dfrac{1}{2}$.',
+        '$\\dfrac{1}{5} = 0{,}2$, $\\dfrac{5}{100} = 0{,}05$, $\\dfrac{2}{5} = 0{,}4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Es gilt $\\dfrac{1}{9} = 0{,}\\overline{1}$. Welche Dezimalzahl ist dann $\\dfrac{4}{9}$?',
+      opts: ['$0{,}\\overline{49}$', '$0{,}\\overline{4}$', '$0{,}4$', '$0{,}\\overline{14}$'],
+      steps: [
+        '$\\dfrac{4}{9}$ ist viermal so viel wie $\\dfrac{1}{9}$.',
+        '$4 \\cdot 0{,}111\\ldots = 0{,}444\\ldots$',
+        'Also $0{,}\\overline{4}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Schreibe $1\\tfrac{1}{4}$ als Dezimalzahl.',
+      opts: ['0,125', '1,4', '1,14', '1,25'],
+      steps: [
+        '1 Ganzes bleibt vor dem Komma.',
+        '$\\dfrac{1}{4} = 0{,}25$',
+        '$1 + 0{,}25 = 1{,}25$'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

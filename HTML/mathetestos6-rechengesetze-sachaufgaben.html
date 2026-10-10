@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Rechengesetze, Mittelwert und Sachaufgaben — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w08-rechengesetze-sachaufgaben',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Rechengesetze, Mittelwert und Sachaufgaben',
+  subtitle: 'Oberschule · Klasse 6 · Woche 8 (LB 1) · 20 Aufgaben: Vorrangregeln, Rechenvorteile, arithmetisches Mittel, Verhältnisgleichungen, Sachaufgaben · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 8 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: order and laws (1-6), mean (7-9), proportions and equations (10-15), word problems (16-20). */
+  questions: [
+    {
+      q: 'Berechne $2{,}5 + 1{,}5 \\cdot 4$.',
+      opts: ['16', '7', '10', '8,5'],
+      steps: [
+        'Punktrechnung vor Strichrechnung.',
+        '$1{,}5 \\cdot 4 = 6$',
+        '$2{,}5 + 6 = 8{,}5$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\left(\\dfrac{3}{4} - \\dfrac{1}{4}\\right) \\cdot 6$.',
+      opts: ['1,5', '12', '3', '$6\\tfrac{1}{2}$'],
+      steps: [
+        'Die Klammer zuerst: $\\dfrac{3}{4} - \\dfrac{1}{4} = \\dfrac{2}{4} = \\dfrac{1}{2}$',
+        '$\\dfrac{1}{2} \\cdot 6 = 3$',
+        'Ohne Klammer wäre es eine ganz andere Aufgabe.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Rechne geschickt: $0{,}25 \\cdot 7{,}3 \\cdot 4$',
+      opts: ['7,3', '29,2', '73', '1,825'],
+      steps: [
+        'Vertauschen: $0{,}25 \\cdot 4 \\cdot 7{,}3$',
+        '$0{,}25 \\cdot 4 = 1$',
+        '$1 \\cdot 7{,}3 = 7{,}3$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Rechne geschickt: $8 \\cdot 1{,}25 + 8 \\cdot 0{,}75$',
+      opts: ['10', '20', '8,2', '16'],
+      steps: [
+        'Verteilungsgesetz rückwärts: Die 8 ausklammern.',
+        '$8 \\cdot (1{,}25 + 0{,}75) = 8 \\cdot 2$',
+        '$= 16$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\dfrac{1}{2} \\cdot \\left(6 + \\dfrac{4}{5}\\right)$.',
+      opts: ['2,4', '6,4', '3,4', '3,8'],
+      steps: [
+        'Verteilungsgesetz: $\\dfrac{1}{2} \\cdot 6 + \\dfrac{1}{2} \\cdot \\dfrac{4}{5}$',
+        '$= 3 + \\dfrac{2}{5}$',
+        '$= 3{,}4$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $12 - (2{,}4 + 3{,}6) : 2$.',
+      opts: ['7,8', '9', '3', '12,6'],
+      steps: [
+        'Klammer zuerst: $2{,}4 + 3{,}6 = 6$',
+        'Punkt vor Strich: $6 : 2 = 3$',
+        '$12 - 3 = 9$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Jonas hat die Noten 2, 3, 1, 2, 4 und 3. Wie groß ist der Durchschnitt (das arithmetische Mittel)?',
+      opts: ['2,0', '2,5', '3,0', '15'],
+      steps: [
+        'Alle Werte addieren: $2 + 3 + 1 + 2 + 4 + 3 = 15$',
+        'Durch die Anzahl der Werte teilen: $15 : 6$',
+        '$= 2{,}5$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einer Woche wurden mittags 18,5 °C, 21 °C, 19,5 °C, 22 °C und 24 °C gemessen. Wie groß ist das arithmetische Mittel?',
+      opts: ['105 °C', '21 °C', '20,5 °C', '22 °C'],
+      steps: [
+        'Summe: $18{,}5 + 21 + 19{,}5 + 22 + 24 = 105$',
+        'Fünf Werte: $105 : 5 = 21$',
+        'Das Mittel ist 21 °C.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Mittelwert von fünf Zahlen ist 8. Vier der Zahlen sind 6, 9, 7 und 10. Wie heißt die fünfte Zahl?',
+      opts: ['7', '9', '40', '8'],
+      steps: [
+        'Mittelwert 8 bei fünf Zahlen heißt: Die Summe ist $5 \\cdot 8 = 40$.',
+        'Die vier bekannten Zahlen ergeben $6 + 9 + 7 + 10 = 32$.',
+        'Die fünfte Zahl ist $40 - 32 = 8$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Zahl gehört in die Lücke? $2 : 5 = \\square : 20$',
+      opts: ['50', '17', '4', '8'],
+      steps: [
+        'Von 5 auf 20 wurde mit 4 malgenommen.',
+        'Dann auch auf der anderen Seite: $2 \\cdot 4 = 8$',
+        '$2 : 5 = 8 : 20$, beide Verhältnisse sind 0,4.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse inhaltlich: $\\dfrac{3}{4} = \\dfrac{12}{x}$',
+      opts: ['$x = 48$', '$x = 13$', '$x = 16$', '$x = 9$'],
+      steps: [
+        'Vom Zähler 3 zum Zähler 12: mal 4.',
+        'Also auch beim Nenner: $4 \\cdot 4 = 16$',
+        '$\\dfrac{3}{4} = \\dfrac{12}{16}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für 4 Personen braucht man 300 g Nudeln. Wie viel braucht man für 6 Personen?',
+      opts: ['450 g', '500 g', '200 g', '302 g'],
+      steps: [
+        'Für 1 Person: $300 : 4 = 75$ g',
+        'Für 6 Personen: $6 \\cdot 75 = 450$ g',
+        'Probe: 6 Personen sind anderthalbmal so viele wie 4, $1{,}5 \\cdot 300 = 450$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $x + 2{,}7 = 5$',
+      opts: ['$x = 3{,}3$', '$x = 7{,}7$', '$x = 2{,}7$', '$x = 2{,}3$'],
+      steps: [
+        'Welche Zahl muss man zu 2,7 addieren, um 5 zu erhalten?',
+        'Umkehraufgabe: $5 - 2{,}7 = 2{,}3$',
+        'Probe: $2{,}3 + 2{,}7 = 5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $3 \\cdot x = 4{,}5$',
+      opts: ['$x = 1{,}5$', '$x = 1{,}2$', '$x = 13{,}5$', '$x = 7{,}5$'],
+      steps: [
+        'Welche Zahl ergibt mal 3 genau 4,5?',
+        'Umkehraufgabe: $4{,}5 : 3 = 1{,}5$',
+        'Probe: $3 \\cdot 1{,}5 = 4{,}5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche natürliche Zahl ist die größte Lösung von $x \\cdot 0{,}5 < 3$?',
+      opts: ['5', '2', '3', '6'],
+      steps: [
+        '$x \\cdot 0{,}5$ ist die Hälfte von $x$.',
+        'Die Hälfte muss kleiner als 3 sein, also $x < 6$.',
+        'Die größte natürliche Zahl kleiner als 6 ist 5. (Bei 6 wäre es genau 3.)'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Paket wiegt 2,4 kg. Darin sind 6 gleich schwere Bücher, die Verpackung wiegt 0,3 kg. Wie schwer ist ein Buch?',
+      opts: ['2,1 kg', '0,4 kg', '0,35 kg', '0,45 kg'],
+      steps: [
+        'Erst die Verpackung abziehen: $2{,}4 - 0{,}3 = 2{,}1$ kg',
+        'Dann auf 6 Bücher verteilen: $2{,}1 : 6 = 0{,}35$ kg',
+        'Ein Buch wiegt 350 g.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Max hat 50 €. Er gibt zuerst ein Fünftel davon aus und danach noch 12,50 €. Wie viel Geld bleibt ihm?',
+      opts: ['30 €', '27,50 €', '37,50 €', '10 €'],
+      steps: [
+        'Ein Fünftel von 50 € sind $50 : 5 = 10$ €.',
+        'Ausgegeben: $10 + 12{,}50 = 22{,}50$ €',
+        'Übrig: $50 - 22{,}50 = 27{,}50$ €'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zu welcher Frage passt die Rechnung $3 \\cdot 1{,}20 + 2 \\cdot 0{,}80$?',
+      opts: ['Was kosten 3 Brötchen zu je 1,20 € und 2 Brezeln zu je 0,80 €?', 'Was kosten 5 Brötchen zu je 2 €?', 'Wie viel Rückgeld gibt es auf 5 €, wenn man 3 Brötchen kauft?', 'Was kosten 3 Brötchen und 2 Brezeln zu je 1,20 €?'],
+      steps: [
+        '$3 \\cdot 1{,}20$: drei Dinge zu je 1,20 €.',
+        '$2 \\cdot 0{,}80$: zwei Dinge zu je 0,80 €.',
+        'Das Pluszeichen fasst beide Einkäufe zusammen: $3{,}60 + 1{,}60 = 5{,}20$ €.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Zeitung schreibt: „Ein Drittel der 600 Personen unserer Schule kommt mit dem Bus.“ Wie viele Personen sind das?',
+      opts: ['180', '200', '33', '300'],
+      steps: [
+        'Ein Drittel heißt: durch 3 teilen.',
+        '$600 : 3 = 200$',
+        '200 Personen kommen mit dem Bus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Rechne geschickt: $4{,}7 + 3{,}8 + 5{,}3 + 6{,}2$',
+      opts: ['19', '21', '20', '20,2'],
+      steps: [
+        'Passende Partner suchen: $4{,}7 + 5{,}3 = 10$',
+        'und $3{,}8 + 6{,}2 = 10$',
+        '$10 + 10 = 20$'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

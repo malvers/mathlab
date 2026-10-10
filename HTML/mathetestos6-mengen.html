@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Mengen und Teilmengen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w02-mengen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Mengen und Teilmengen',
+  subtitle: 'Oberschule · Klasse 6 · Woche 2 (LB 1) · 20 Aufgaben: Mengen angeben, Elemente, Teilmengen, natürliche und gebrochene Zahlen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: sets and elements (1-6), subsets and common elements (7-12), why fractions are needed (13-20). */
+  questions: [
+    {
+      q: 'Welche Menge enthält genau alle Teiler von 12?',
+      opts: ['$\\{1;\\ 2;\\ 3;\\ 4;\\ 6\\}$', '$\\{2;\\ 3;\\ 4;\\ 6\\}$', '$\\{1;\\ 2;\\ 3;\\ 4;\\ 6;\\ 12\\}$', '$\\{12;\\ 24;\\ 36;\\ 48\\}$'],
+      steps: [
+        'Ein Teiler von 12 teilt 12 ohne Rest.',
+        '$12 = 1 \\cdot 12 = 2 \\cdot 6 = 3 \\cdot 4$',
+        'Auch 1 und 12 selbst sind Teiler: $\\{1;\\ 2;\\ 3;\\ 4;\\ 6;\\ 12\\}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Elemente hat die Menge $M = \\{2;\\ 4;\\ 6;\\ 8;\\ 10\\}$?',
+      opts: ['5', '6', '10', '4'],
+      steps: [
+        'Die Elemente sind die Zahlen in der Mengenklammer.',
+        'Abzählen: 2, 4, 6, 8, 10.',
+        'Die Menge hat 5 Elemente; die 10 ist nur das größte Element.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Menge $U$ enthält alle ungeraden Zahlen zwischen 10 und 20. Welche Zahl gehört NICHT zu $U$?',
+      opts: ['19', '13', '15', '16'],
+      steps: [
+        'Ungerade Zahlen lassen beim Teilen durch 2 den Rest 1.',
+        '$U = \\{11;\\ 13;\\ 15;\\ 17;\\ 19\\}$',
+        '16 ist gerade, also kein Element von $U$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Beschreibung passt zur Menge $\\{5;\\ 10;\\ 15;\\ 20\\}$?',
+      opts: ['die Vielfachen von 5, die größer als 0 und kleiner als 25 sind', 'die Teiler von 20', 'die ungeraden Zahlen bis 20', 'die Vielfachen von 10 bis 20'],
+      steps: [
+        'Alle vier Zahlen sind durch 5 teilbar: $5 \\cdot 1$, $5 \\cdot 2$, $5 \\cdot 3$, $5 \\cdot 4$.',
+        'Die Teiler von 20 wären $\\{1;\\ 2;\\ 4;\\ 5;\\ 10;\\ 20\\}$ – 15 gehört nicht dazu.',
+        'Also: die Vielfachen von 5 zwischen 0 und 25.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Menge enthält alle natürlichen Zahlen, die kleiner als 4 sind?',
+      opts: ['$\\{1;\\ 2;\\ 3\\}$', '$\\{1;\\ 2;\\ 3;\\ 4\\}$', '$\\{0;\\ 1;\\ 2;\\ 3;\\ 4\\}$', '$\\{0;\\ 1;\\ 2;\\ 3\\}$'],
+      steps: [
+        'Die Null ist die kleinste natürliche Zahl.',
+        '„Kleiner als 4“ heißt: Die 4 selbst gehört nicht dazu.',
+        'Also $\\{0;\\ 1;\\ 2;\\ 3\\}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Menge ist leer, hat also kein einziges Element?',
+      opts: ['die Teiler von 7', 'die natürlichen Zahlen zwischen 5 und 6', 'die natürlichen Zahlen zwischen 5 und 7', 'die geraden natürlichen Zahlen kleiner als 3'],
+      steps: [
+        'Teiler von 7: $\\{1;\\ 7\\}$. Gerade Zahlen kleiner als 3: $\\{0;\\ 2\\}$. Zwischen 5 und 7 liegt die 6.',
+        'Zwischen 5 und 6 liegt keine natürliche Zahl.',
+        'Diese Menge ist leer. (Gebrochene Zahlen wie $5\\tfrac{1}{2}$ gibt es dort aber schon!)'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben sind $A = \\{2;\\ 4\\}$ und $B = \\{1;\\ 2;\\ 3;\\ 4\\}$. Welche Aussage stimmt?',
+      opts: ['$A$ ist eine Teilmenge von $B$.', '$A$ und $B$ haben kein gemeinsames Element.', '$A$ und $B$ sind gleich.', '$B$ ist eine Teilmenge von $A$.'],
+      steps: [
+        '$A$ ist Teilmenge von $B$, wenn jedes Element von $A$ auch in $B$ liegt.',
+        '2 und 4 liegen beide in $B$.',
+        'Umgekehrt nicht: 1 liegt in $B$, aber nicht in $A$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Teiler von 18 sind $\\{1;\\ 2;\\ 3;\\ 6;\\ 9;\\ 18\\}$. Welche Menge ist eine Teilmenge davon?',
+      opts: ['$\\{2;\\ 3;\\ 9\\}$', '$\\{2;\\ 4;\\ 6\\}$', '$\\{3;\\ 6;\\ 12\\}$', '$\\{1;\\ 5;\\ 9\\}$'],
+      steps: [
+        'Jedes Element muss ein Teiler von 18 sein.',
+        '4, 12 und 5 teilen 18 nicht.',
+        'Nur $\\{2;\\ 3;\\ 9\\}$ liegt ganz in der Teilermenge.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Zahlen liegen sowohl in der Menge der Teiler von 12 als auch in der Menge der Teiler von 18?',
+      opts: ['$\\{2;\\ 3\\}$', '$\\{6;\\ 12;\\ 18\\}$', '$\\{1;\\ 2;\\ 3;\\ 6\\}$', '$\\{1;\\ 2;\\ 3;\\ 4;\\ 6\\}$'],
+      steps: [
+        'Teiler von 12: $\\{1;\\ 2;\\ 3;\\ 4;\\ 6;\\ 12\\}$',
+        'Teiler von 18: $\\{1;\\ 2;\\ 3;\\ 6;\\ 9;\\ 18\\}$',
+        'Gemeinsam: $\\{1;\\ 2;\\ 3;\\ 6\\}$. Die größte davon, 6, heißt größter gemeinsamer Teiler.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Menge aller Quadrate ist eine Teilmenge der Menge aller …',
+      opts: ['Kreise', 'Rechtecke', 'Würfel', 'Dreiecke'],
+      steps: [
+        'Ein Quadrat hat vier rechte Winkel und gegenüberliegende Seiten gleich lang.',
+        'Das sind genau die Eigenschaften eines Rechtecks.',
+        'Jedes Quadrat ist ein Rechteck (mit vier gleich langen Seiten).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Lisa sagt: „Die Menge $\\{2;\\ 3;\\ 5;\\ 7\\}$ ist eine Teilmenge der Primzahlen.“ Hat sie recht?',
+      opts: ['Nein, eine Teilmenge muss unendlich viele Elemente haben.', 'Nein, die 1 fehlt.', 'Ja, alle vier Zahlen sind Primzahlen.', 'Nein, 2 ist gerade und deshalb keine Primzahl.'],
+      steps: [
+        'Eine Primzahl hat genau zwei Teiler: 1 und sich selbst.',
+        '2, 3, 5 und 7 haben jeweils genau zwei Teiler; die 2 ist die einzige gerade Primzahl.',
+        '1 ist keine Primzahl (nur ein Teiler). Lisa hat recht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In der Klasse 6a sind 26 Personen. 15 spielen Fußball, 9 spielen Handball, 4 davon spielen beides. Wie viele spielen keins von beiden?',
+      opts: ['10', '4', '2', '6'],
+      steps: [
+        'Wer beides spielt, wurde zweimal gezählt: $15 + 9 - 4 = 20$ Personen spielen mindestens eins.',
+        '$26 - 20 = 6$',
+        'Eine Skizze mit zwei sich überschneidenden Kreisen hilft beim Zählen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Aufgabe hat KEIN Ergebnis in den natürlichen Zahlen?',
+      opts: ['$9 - 4$', '$3 : 4$', '$7 + 5$', '$12 : 4$'],
+      steps: [
+        '$12 : 4 = 3$, $7 + 5 = 12$, $9 - 4 = 5$ sind natürliche Zahlen.',
+        '3 lässt sich nicht ohne Rest durch 4 teilen.',
+        'Das Ergebnis ist der Bruch $\\dfrac{3}{4}$ – dafür brauchen wir die gebrochenen Zahlen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Drei Pizzen werden gerecht auf vier Personen verteilt. Wie viel bekommt jede Person?',
+      opts: ['$\\dfrac{4}{3}$ Pizza', '$\\dfrac{1}{3}$ Pizza', '$\\dfrac{1}{4}$ Pizza', '$\\dfrac{3}{4}$ Pizza'],
+      steps: [
+        'Jede Pizza wird geviertelt: Jede Person bekommt aus jeder Pizza ein Viertel.',
+        'Aus drei Pizzen sind das drei Viertel.',
+        '$3 : 4 = \\dfrac{3}{4}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Zahl ist eine gebrochene Zahl, aber keine natürliche Zahl?',
+      opts: ['$\\dfrac{2}{5}$', '$\\dfrac{6}{3}$', '7', '0'],
+      steps: [
+        '$\\dfrac{6}{3} = 6 : 3 = 2$ ist eine natürliche Zahl.',
+        '0 und 7 sind natürliche Zahlen.',
+        '$\\dfrac{2}{5}$ liegt zwischen 0 und 1 – keine natürliche Zahl.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aussage ist richtig?',
+      opts: ['0 ist keine gebrochene Zahl.', 'Ein Bruch mit dem Zähler 1 ist immer eine natürliche Zahl.', 'Jede gebrochene Zahl ist auch eine natürliche Zahl.', 'Jede natürliche Zahl ist auch eine gebrochene Zahl.'],
+      steps: [
+        'Jede natürliche Zahl lässt sich als Bruch schreiben, zum Beispiel $5 = \\dfrac{5}{1}$ und $0 = \\dfrac{0}{1}$.',
+        '$\\dfrac{1}{2}$ ist gebrochen, aber nicht natürlich.',
+        'Die natürlichen Zahlen sind eine Teilmenge der gebrochenen Zahlen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie schreibt man die Zahl 5 als Bruch mit dem Nenner 3?',
+      opts: ['$\\dfrac{8}{3}$', '$\\dfrac{5}{3}$', '$\\dfrac{15}{3}$', '$\\dfrac{3}{5}$'],
+      steps: [
+        '$5 = \\dfrac{5}{1}$',
+        'Mit 3 erweitern: $\\dfrac{5 \\cdot 3}{1 \\cdot 3} = \\dfrac{15}{3}$',
+        'Probe: $15 : 3 = 5$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Zahl liegt zwischen 2 und 3?',
+      opts: ['$\\dfrac{7}{2}$', '$\\dfrac{5}{2}$', '$\\dfrac{4}{2}$', '$\\dfrac{3}{2}$'],
+      steps: [
+        'In Halben: $2 = \\dfrac{4}{2}$ und $3 = \\dfrac{6}{2}$.',
+        'Dazwischen liegt $\\dfrac{5}{2}$, also zweieinhalb.',
+        '$\\dfrac{4}{2}$ ist genau 2 und liegt nicht dazwischen.'
+      ],
+      solution: 1
+    },
+    {
+      q: '7 Liter Apfelsaft werden gleichmäßig auf 2 Kannen verteilt. Wie viel kommt in jede Kanne?',
+      opts: ['4 Liter', '2,7 Liter', '3,5 Liter', '3 Liter'],
+      steps: [
+        '$7 : 2 = \\dfrac{7}{2}$',
+        '$\\dfrac{7}{2} = 3\\tfrac{1}{2}$',
+        'Jede Kanne bekommt 3,5 Liter.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Vielfache von 4 liegen zwischen 1 und 30?',
+      opts: ['26', '7', '6', '8'],
+      steps: [
+        'Vielfache von 4: $\\{4;\\ 8;\\ 12;\\ 16;\\ 20;\\ 24;\\ 28\\}$',
+        'Das nächste, 32, ist schon größer als 30.',
+        'Abzählen: 7 Elemente.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

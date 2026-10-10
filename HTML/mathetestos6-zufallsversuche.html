@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zufallsversuche — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w33-zufallsversuche',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zufallsversuche',
+  subtitle: 'Oberschule · Klasse 6 · Woche 33 (LB 5) · 20 Aufgaben: Ergebnisse, Strichliste, absolute und relative Häufigkeit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 33 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: experiments and outcomes (1-5, 18-20), tally and absolute frequency (6-7, 12), relative frequency (8-11, 13-17). */
+  questions: [
+    {
+      q: 'Welche Ergebnisse sind beim Werfen eines normalen Spielwürfels möglich?',
+      opts: ['1 bis 12', '1, 2, 3, 4, 5 und 6', 'nur 6', '0 bis 6'],
+      steps: [
+        'Ein Spielwürfel hat sechs Seiten.',
+        'Sie tragen die Augenzahlen 1 bis 6.',
+        'Jede davon kann oben liegen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist ein Zufallsversuch?',
+      opts: ['ein Versuch, der immer gleich ausgeht', 'ein Versuch, dessen Ergebnis man vorher nicht sicher sagen kann', 'eine Rechenaufgabe mit großen Zahlen', 'ein Versuch, den man nur einmal machen darf'],
+      steps: [
+        'Man kennt die möglichen Ergebnisse, aber nicht, welches eintritt.',
+        'Beispiele: Würfeln, Münzwurf, Glücksrad.',
+        'Man kann ihn beliebig oft wiederholen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Vorgang ist KEIN Zufallsversuch?',
+      opts: ['Eine Zahl wird mit 2 multipliziert.', 'Aus einem Beutel wird ohne Hinsehen eine Kugel gezogen.', 'Ein Glücksrad wird gedreht.', 'Eine Münze wird geworfen.'],
+      steps: [
+        'Bei $7 \\cdot 2$ kommt immer 14 heraus.',
+        'Das Ergebnis steht vorher fest.',
+        'Also ist das kein Zufallsversuch.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele verschiedene Ergebnisse hat das Glücksrad?',
+      fig: '<svg viewBox="0 0 260 276" width="260" height="276" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Glücksrad"><path d="M 130 144 L 130 30 A 114 114 0 0 1 210.61 63.39 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="159.67" y="76.38" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text><path d="M 130 144 L 210.61 63.39 A 114 114 0 0 1 244 144 Z" fill="#2E6BC6" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="201.62" y="118.33" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><path d="M 130 144 L 244 144 A 114 114 0 0 1 210.61 224.61 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="201.62" y="177.67" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text><path d="M 130 144 L 210.61 224.61 A 114 114 0 0 1 130 258 Z" fill="#799E31" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="159.67" y="219.62" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">G</text><path d="M 130 144 L 130 258 A 114 114 0 0 1 49.39 224.61 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="100.33" y="219.62" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text><path d="M 130 144 L 49.39 224.61 A 114 114 0 0 1 16 144 Z" fill="#2E6BC6" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="58.38" y="177.67" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><path d="M 130 144 L 16 144 A 114 114 0 0 1 49.39 63.39 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="58.38" y="118.33" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text><path d="M 130 144 L 49.39 63.39 A 114 114 0 0 1 130 30 Z" fill="#2E6BC6" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="100.33" y="76.38" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="130.0" cy="144.0" r="114.0" fill="none" stroke="#0E244E" stroke-width="1.6"/><circle cx="130" cy="144" r="5" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><path d="M 121 4 L 139 4 L 130 22 Z" fill="#0E244E" stroke="#0E244E" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/></svg>',
+      figcap: 'Glücksrad mit 8 gleich großen Feldern: R rot, B blau, G grün',
+      opts: ['4', '8', '2', '3'],
+      steps: [
+        'Das Rad hat 8 Felder.',
+        'Es gibt aber nur drei Farben: rot, blau und grün.',
+        'Die Ergebnisse sind die Farben: 3 Ergebnisse.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Farbe wird bei vielen Drehungen vermutlich am häufigsten angezeigt?',
+      fig: '<svg viewBox="0 0 260 276" width="260" height="276" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Glücksrad"><path d="M 130 144 L 130 30 A 114 114 0 0 1 210.61 63.39 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="159.67" y="76.38" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text><path d="M 130 144 L 210.61 63.39 A 114 114 0 0 1 244 144 Z" fill="#2E6BC6" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="201.62" y="118.33" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><path d="M 130 144 L 244 144 A 114 114 0 0 1 210.61 224.61 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="201.62" y="177.67" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text><path d="M 130 144 L 210.61 224.61 A 114 114 0 0 1 130 258 Z" fill="#799E31" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="159.67" y="219.62" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">G</text><path d="M 130 144 L 130 258 A 114 114 0 0 1 49.39 224.61 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="100.33" y="219.62" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text><path d="M 130 144 L 49.39 224.61 A 114 114 0 0 1 16 144 Z" fill="#2E6BC6" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="58.38" y="177.67" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><path d="M 130 144 L 16 144 A 114 114 0 0 1 49.39 63.39 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="58.38" y="118.33" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text><path d="M 130 144 L 49.39 63.39 A 114 114 0 0 1 130 30 Z" fill="#2E6BC6" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="100.33" y="76.38" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="130.0" cy="144.0" r="114.0" fill="none" stroke="#0E244E" stroke-width="1.6"/><circle cx="130" cy="144" r="5" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><path d="M 121 4 L 139 4 L 130 22 Z" fill="#0E244E" stroke="#0E244E" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/></svg>',
+      figcap: 'Glücksrad mit 8 gleich großen Feldern: R rot, B blau, G grün',
+      opts: ['rot', 'grün', 'Alle gleich oft.', 'blau'],
+      steps: [
+        'Rot hat 4 Felder, blau 3, grün 1.',
+        'Je mehr Felder eine Farbe hat, desto häufiger bleibt der Zeiger dort stehen.',
+        'Vermutlich ist rot am häufigsten – sicher ist das aber nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Münzen werden gleichzeitig geworfen (K = Kopf, Z = Zahl). Wie viele verschiedene Ergebnisse gibt es, wenn man die Münzen unterscheidet?',
+      opts: ['3', '2', '4', '6'],
+      steps: [
+        'Erste Münze K oder Z, zweite Münze K oder Z.',
+        'KK, KZ, ZK, ZZ',
+        'Das sind 4 Ergebnisse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Würfel werden geworfen und die Augenzahlen addiert. Wie viele verschiedene Augensummen sind möglich?',
+      opts: ['6', '36', '12', '11'],
+      steps: [
+        'Die kleinste Summe ist $1 + 1 = 2$.',
+        'Die größte Summe ist $6 + 6 = 12$.',
+        'Von 2 bis 12 sind es 11 verschiedene Summen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei einer Reißzwecke kann man nicht ausrechnen, wie oft sie auf den Kopf fällt. Warum?',
+      opts: ['Weil man Reißzwecken nicht werfen darf.', 'Die beiden Ergebnisse sind nicht gleich wahrscheinlich; man muss es ausprobieren.', 'Weil sie immer auf den Kopf fällt.', 'Weil eine Reißzwecke nur ein Ergebnis hat.'],
+      steps: [
+        'Kopf oder Seite – die Form ist nicht gleichmäßig.',
+        'Anders als beim Würfel gibt es keinen Grund, dass beide Ergebnisse gleich oft vorkommen.',
+        'Deshalb wirft man oft und bestimmt die relative Häufigkeit.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Strichliste zeigt zwei volle Fünferbündel und 3 einzelne Striche. Wie oft ist das Ergebnis eingetreten?',
+      opts: ['13', '5', '23', '8'],
+      steps: [
+        'Ein Fünferbündel sind 4 Striche und ein Querstrich: 5.',
+        'Zwei Bündel: 10.',
+        '$10 + 3 = 13$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei 50 Würfen fiel 9-mal die Sechs. Wie groß ist die absolute Häufigkeit der Sechs?',
+      opts: ['41', '0,18', '50', '9'],
+      steps: [
+        'Die absolute Häufigkeit ist die Anzahl, wie oft ein Ergebnis eintritt.',
+        'Die Sechs fiel 9-mal.',
+        'Also 9.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Würfel wird 60-mal geworfen: 1 fiel 8-mal, 2 fiel 11-mal, 3 fiel 9-mal, 4 fiel 12-mal und 5 fiel 10-mal. Wie oft fiel die 6?',
+      opts: ['50', '12', '10', '8'],
+      steps: [
+        'Alle absoluten Häufigkeiten zusammen sind 60.',
+        '$8 + 11 + 9 + 12 + 10 = 50$',
+        '$60 - 50 = 10$-mal die 6.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bei 50 Würfen fiel 9-mal die Sechs. Wie groß ist die relative Häufigkeit der Sechs?',
+      opts: ['0,9', '0,5', '9', '0,18'],
+      steps: [
+        'Relative Häufigkeit = absolute Häufigkeit : Anzahl der Versuche.',
+        '$\\dfrac{9}{50} = \\dfrac{18}{100}$',
+        '$= 0{,}18$, also 18 %.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Reißzwecke fällt bei 40 Würfen 24-mal auf den Kopf. Wie groß ist die relative Häufigkeit als vollständig gekürzter Bruch?',
+      opts: ['$\\dfrac{5}{3}$', '$\\dfrac{24}{40}$', '$\\dfrac{2}{5}$', '$\\dfrac{3}{5}$'],
+      steps: [
+        '$\\dfrac{24}{40}$',
+        'Mit 8 kürzen.',
+        '$= \\dfrac{3}{5}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die relative Häufigkeit ist $\\dfrac{3}{5}$. Wie viel Prozent sind das?',
+      opts: ['53 %', '60 %', '3,5 %', '35 %'],
+      steps: [
+        'Auf Hundertstel erweitern: $\\dfrac{3}{5} = \\dfrac{60}{100}$',
+        'Hundertstel sind Prozent.',
+        '60 %'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Summe aller relativen Häufigkeiten eines Zufallsversuchs?',
+      opts: ['1', 'Das hängt von der Anzahl der Versuche ab.', '100', '0'],
+      steps: [
+        'Alle absoluten Häufigkeiten zusammen ergeben die Anzahl der Versuche $n$.',
+        'Teilt man alles durch $n$, ergibt sich $\\dfrac{n}{n}$.',
+        'Die Summe ist immer 1, also 100 %.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Würfel wird 60-mal geworfen, die 4 fiel 12-mal. Wie groß ist die relative Häufigkeit der 4?',
+      opts: ['0,12', '0,4', '0,2', '12'],
+      steps: [
+        '$\\dfrac{12}{60}$',
+        'Mit 12 kürzen: $\\dfrac{1}{5}$',
+        '$= 0{,}2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Lena wirft 30-mal und hat 6 Sechsen, Tim wirft 50-mal und hat 9 Sechsen. Wer hatte im Verhältnis mehr Sechsen?',
+      opts: ['Lena', 'Beide gleich.', 'Tim', 'Das kann man nicht vergleichen.'],
+      steps: [
+        'Absolute Häufigkeiten kann man bei verschieden vielen Würfen nicht direkt vergleichen.',
+        'Lena: $\\dfrac{6}{30} = 0{,}2$, Tim: $\\dfrac{9}{50} = 0{,}18$',
+        'Lenas relative Häufigkeit ist größer.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei 12 Würfen ist keine einzige Sechs gefallen. Ist der Würfel deshalb sicher unfair?',
+      opts: ['Ja, die Sechs muss alle 6 Würfe kommen.', 'Nein, weil eine Sechs nie fällt.', 'Nein, bei so wenigen Würfen kann das gut passieren.', 'Ja, er hat bestimmt keine Sechs.'],
+      steps: [
+        'Zufall heißt: Es gibt keine Regel, wann die Sechs kommt.',
+        'Auch bei einem fairen Würfel sind 12 Würfe ohne Sechs möglich.',
+        'Erst bei sehr vielen Würfen kann man die Fairness beurteilen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Münze wird sehr oft geworfen. Was passiert mit der relativen Häufigkeit für Kopf?',
+      opts: ['Sie springt immer zwischen 0 und 1.', 'Sie wird immer größer.', 'Sie pendelt sich in der Nähe von 0,5 ein.', 'Sie wird genau 0,5 nach 10 Würfen.'],
+      steps: [
+        'Nach wenigen Würfen schwankt sie noch stark.',
+        'Je mehr Würfe, desto weniger ändert sie sich.',
+        'Sie stabilisiert sich bei etwa 0,5 – mehr dazu in Klasse 7.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Zuordnung „Augenzahl → absolute Häufigkeit“ aus einem Würfelversuch ist …',
+      opts: ['direkt proportional.', 'eindeutig: Zu jeder Augenzahl gehört genau eine Häufigkeit.', 'mehrdeutig: Eine Augenzahl hat mehrere Häufigkeiten.', 'gar keine Zuordnung.'],
+      steps: [
+        'Für jede Augenzahl zählt man, wie oft sie fiel.',
+        'Daraus ergibt sich genau eine Zahl.',
+        'Zwei Augenzahlen können aber gleich oft gefallen sein: eindeutig, nicht eineindeutig.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

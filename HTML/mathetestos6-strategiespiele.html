@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Strategie- und Zufallsspiele — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w38-strategiespiele',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Strategie- und Zufallsspiele',
+  subtitle: 'Oberschule · Klasse 6 · Woche 38 (WB 2) · 20 Aufgaben: Turm von Hanoi, Nim-Spiele, Würfelspiele, faire und unfaire Spiele · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 38 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: Tower of Hanoi (1-5), Nim (6-8), dice and roulette (9-15), Mastermind (16-17), strategy, chance and fairness (18-20). Sources in the texts. */
+  questions: [
+    {
+      q: 'Beim Turm von Hanoi soll ein Turm aus 3 Scheiben auf einen anderen Stab umgesetzt werden. Wie viele Züge braucht man mindestens?',
+      opts: ['6', '7', '3', '9'],
+      steps: [
+        'Erst die oberen 2 Scheiben weg: 3 Züge.',
+        'Dann die größte Scheibe: 1 Zug. Dann die 2 Scheiben wieder darauf: 3 Züge.',
+        '$3 + 1 + 3 = 7$ Züge.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Züge braucht man beim Turm von Hanoi mit 4 Scheiben mindestens?',
+      opts: ['16', '8', '12', '15'],
+      steps: [
+        'Die oberen 3 Scheiben brauchen 7 Züge, dann die größte 1 Zug, dann wieder 7.',
+        '$7 + 1 + 7 = 15$',
+        'Mit jeder Scheibe mehr verdoppelt sich die Zugzahl ungefähr.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Regel gilt beim Turm von Hanoi?',
+      opts: ['Man bewegt immer nur eine Scheibe und legt nie eine größere auf eine kleinere.', 'Man darf zwei Scheiben gleichzeitig bewegen.', 'Man darf eine Scheibe neben die Stäbe legen.', 'Große Scheiben müssen oben liegen.'],
+      steps: [
+        'Es gibt drei Stäbe.',
+        'In jedem Zug wird die oberste Scheibe eines Stabes bewegt.',
+        'Eine größere Scheibe darf nie auf einer kleineren liegen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wer hat das Spiel „Turm von Hanoi“ 1883 erfunden?',
+      opts: ['Carl Friedrich Gauß', 'der französische Mathematiker Édouard Lucas', 'Charles Bouton', 'Piet Hein'],
+      steps: [
+        'Édouard Lucas veröffentlichte es 1883 unter dem Fantasienamen „N. Claus de Siam“.',
+        'Dazu erfand er eine Legende von Mönchen, die einen Turm aus 64 goldenen Scheiben umsetzen.',
+        'Die Legende ist also selbst Teil der Erfindung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Nach der Legende von Lucas setzen Mönche einen Turm aus 64 Scheiben um. Wie viele Züge sind das mindestens?',
+      opts: ['$64 \\cdot 2$', '$64^2$', '$2^{64} - 1$', '$2 \\cdot 64 - 1$'],
+      steps: [
+        '1 Scheibe: 1 Zug, 2 Scheiben: 3, 3 Scheiben: 7, 4 Scheiben: 15.',
+        'Das ist immer eins weniger als eine Zweierpotenz: $2^n - 1$.',
+        'Bei 64 Scheiben: $2^{64} - 1$, über 18 Trillionen Züge – mehr als 500 Milliarden Jahre bei einem Zug pro Sekunde.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Nim-Spiel: Auf dem Tisch liegen 21 Hölzchen. Abwechselnd nimmt man 1, 2 oder 3 weg; wer das letzte nimmt, gewinnt. Du beginnst. Wie viele nimmst du?',
+      opts: ['2', '3', 'Es ist egal.', '1'],
+      steps: [
+        'Lass deinem Gegner immer ein Vielfaches von 4 übrig.',
+        '21 − 1 = 20. Nimmt er dann $x$, nimmst du $4 - x$: Es bleiben 16, 12, 8, 4, 0.',
+        'So nimmst du immer das letzte Hölzchen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Beim Nim-Spiel „nimm 1, 2 oder 3, wer das letzte nimmt, gewinnt“: Welche Anzahl solltest du deinem Gegner immer übrig lassen?',
+      opts: ['ein Vielfaches von 3', 'ein Vielfaches von 4', 'eine Primzahl', 'eine gerade Zahl'],
+      steps: [
+        'Bei 4 Hölzchen kann der Gegner nicht gewinnen: Er nimmt 1 bis 3, du nimmst den Rest.',
+        'Das gilt genauso bei 8, 12, 16, …',
+        'Also immer ein Vielfaches von 4 übrig lassen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wer hat 1901 die vollständige Gewinnstrategie für Nim-Spiele aufgeschrieben und dem Spiel seinen Namen gegeben?',
+      opts: ['Édouard Lucas', 'der amerikanische Mathematiker Charles L. Bouton', 'Alkuin von York', 'Adam Ries'],
+      steps: [
+        'Nim-Spiele sind sehr alt.',
+        'Charles L. Bouton beschrieb 1901 in einer Fachzeitschrift, wie man immer gewinnt.',
+        'Der Name „Nim“ stammt von ihm.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Würfel werden geworfen und die Augenzahlen addiert. Welche Summe kommt am häufigsten vor?',
+      opts: ['7', '12', 'Alle Summen gleich oft.', '6'],
+      steps: [
+        'Es gibt $6 \\cdot 6 = 36$ gleich wahrscheinliche Würfelpaare.',
+        'Summe 7: (1|6), (2|5), (3|4), (4|3), (5|2), (6|1) – 6 Paare.',
+        'Keine andere Summe hat so viele Paare.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Würfel: Wie viele der 36 Würfelpaare ergeben die Summe 2?',
+      opts: ['1', '6', '0', '2'],
+      steps: [
+        'Die Summe 2 gibt es nur mit zwei Einsen.',
+        '(1|1)',
+        'Also nur 1 Paar – darum ist die 2 so selten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Spiel mit einem Würfel: Anna gewinnt bei einer geraden Augenzahl, Ben bei einer ungeraden. Ist das Spiel fair?',
+      opts: ['Ja, beide haben 3 von 6 Möglichkeiten.', 'Das kann man nicht sagen.', 'Nein, Ben ist im Vorteil.', 'Nein, Anna ist im Vorteil.'],
+      steps: [
+        'Gerade: 2, 4, 6. Ungerade: 1, 3, 5.',
+        'Beide haben 3 Ergebnisse.',
+        'Die Gewinnchancen sind gleich: Das Spiel ist fair.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Spiel mit zwei Würfeln: Anna gewinnt bei der Summe 6, 7 oder 8, Ben bei jeder anderen Summe. Wer hat die besseren Chancen?',
+      opts: ['Ben, mit 20 von 36 Paaren', 'Anna, mit 20 von 36 Paaren', 'Anna, mit 3 von 11 Summen', 'Beide gleich.'],
+      steps: [
+        'Summe 6: 5 Paare, Summe 7: 6 Paare, Summe 8: 5 Paare. Anna: 16 Paare.',
+        'Ben: $36 - 16 = 20$ Paare.',
+        'Ben ist etwas im Vorteil, obwohl Anna die häufigsten Summen hat.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein europäisches Roulette hat die Zahlen 0 bis 36. Wie viele Felder sind das?',
+      opts: ['35', '38', '37', '36'],
+      steps: [
+        'Die Zahlen 1 bis 36: 36 Felder.',
+        'Dazu kommt die Null.',
+        'Zusammen 37 Felder.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim Roulette sind 18 der 37 Felder rot. Welche Aussage über „Rot“ stimmt?',
+      opts: ['Die Chance ist genau die Hälfte.', 'Die Chance ist etwas kleiner als die Hälfte.', 'Rot kommt nie.', 'Die Chance ist größer als die Hälfte.'],
+      steps: [
+        'Die Hälfte von 37 wäre 18,5.',
+        '18 ist etwas weniger.',
+        'Wegen der grünen Null ist die Chance knapp unter der Hälfte – davon lebt die Spielbank.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welches Spiel ist ein reines Zufallsspiel?',
+      opts: ['Turm von Hanoi', 'Schach', 'Roulette', 'Nim'],
+      steps: [
+        'Bei Schach, Nim und dem Turm von Hanoi entscheidet allein das Nachdenken.',
+        'Beim Roulette kann man gar nichts beeinflussen.',
+        'Roulette ist ein reines Zufallsspiel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Das Spiel „Mastermind“ wurde 1970 von Mordecai Meirowitz erfunden. Ein Geheimcode hat 4 Plätze und 6 Farben, Farben dürfen sich wiederholen. Wie viele verschiedene Codes gibt es?',
+      opts: ['10', '24', '1296', '360'],
+      steps: [
+        'Für jeden der 4 Plätze gibt es 6 Möglichkeiten.',
+        '$6 \\cdot 6 \\cdot 6 \\cdot 6$',
+        '$= 1296$ Codes.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim Mastermind dürfen sich die Farben jetzt NICHT wiederholen (4 Plätze, 6 Farben). Wie viele Codes gibt es?',
+      opts: ['24', '1296', '720', '360'],
+      steps: [
+        'Erster Platz: 6 Farben, zweiter: 5, dritter: 4, vierter: 3.',
+        '$6 \\cdot 5 \\cdot 4 \\cdot 3$',
+        '$= 360$ Codes.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Du gestaltest ein eigenes Würfelspiel für zwei Personen. Was ist für ein faires Spiel wichtig?',
+      opts: ['Wer anfängt, gewinnt immer.', 'Die Regeln werden erst nach dem Spiel festgelegt.', 'Eine Person darf zweimal würfeln.', 'Beide haben gleich große Gewinnchancen.'],
+      steps: [
+        'Fair heißt: Niemand ist durch die Regeln im Vorteil.',
+        'Man zählt die günstigen Ergebnisse für beide.',
+        'Ein Testspiel mit vielen Runden zeigt, ob es passt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Mit 5 Scheiben beim Turm von Hanoi: Wie viele Züge braucht man mindestens?',
+      opts: ['16', '25', '31', '32'],
+      steps: [
+        '4 Scheiben brauchen 15 Züge.',
+        '5 Scheiben: $15 + 1 + 15 = 31$',
+        'Oder mit der Regel: $2^5 - 1 = 31$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Nim-Spiel mit 18 Hölzchen (nimm 1, 2 oder 3; wer das letzte nimmt, gewinnt). Du bist dran. Wie viele nimmst du?',
+      opts: ['1', 'Du kannst nicht mehr sicher gewinnen.', '3', '2'],
+      steps: [
+        'Das nächste Vielfache von 4 unter 18 ist 16.',
+        '$18 - 16 = 2$',
+        'Nimm 2 – dann bleiben deinem Gegner 16.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zuordnungen aus der Erfahrungswelt — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w11-zuordnungen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zuordnungen aus der Erfahrungswelt',
+  subtitle: 'Oberschule · Klasse 6 · Woche 11 (LB 2) · 20 Aufgaben: eindeutig, eineindeutig, mehrdeutig, Pfeildarstellung, Wortform und Tabelle · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: kinds of assignments (1-7, 10-12), arrow diagrams (8-9), tables and rules (13-20). */
+  questions: [
+    {
+      q: 'Welche Art von Zuordnung ist „Person → Geburtstag (Tag und Monat)“?',
+      opts: ['eineindeutig', 'eindeutig, aber nicht eineindeutig', 'gar keine Zuordnung', 'mehrdeutig'],
+      steps: [
+        'Jede Person hat genau einen Geburtstag: Die Zuordnung ist eindeutig.',
+        'Zwei Personen können aber am selben Tag Geburtstag haben.',
+        'Deshalb ist sie nicht eineindeutig.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Art von Zuordnung ist „Auto → amtliches Kennzeichen“?',
+      opts: ['mehrdeutig', 'gar keine Zuordnung', 'eindeutig, aber nicht eineindeutig', 'eineindeutig'],
+      steps: [
+        'Jedes Auto hat genau ein Kennzeichen.',
+        'Jedes Kennzeichen gehört zu genau einem Auto.',
+        'In beide Richtungen eindeutig: eineindeutig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Art von Zuordnung ist „Lehrkraft → Fächer, die sie unterrichtet“?',
+      opts: ['eineindeutig', 'gar keine Zuordnung', 'eindeutig, aber nicht eineindeutig', 'mehrdeutig'],
+      steps: [
+        'Viele Lehrkräfte unterrichten zwei oder mehr Fächer.',
+        'Einer Lehrkraft werden dann mehrere Fächer zugeordnet.',
+        'Die Zuordnung ist mehrdeutig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Art von Zuordnung ist „natürliche Zahl → ihr Doppeltes“?',
+      opts: ['eindeutig, aber nicht eineindeutig', 'eineindeutig', 'gar keine Zuordnung', 'mehrdeutig'],
+      steps: [
+        'Jede Zahl hat genau ein Doppeltes: $3 \\to 6$, $7 \\to 14$.',
+        'Zu jedem Doppelten gehört genau eine Zahl: $14 \\to 7$.',
+        'Also eineindeutig.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Art von Zuordnung ist „natürliche Zahl → ihre Teiler“?',
+      opts: ['eindeutig, aber nicht eineindeutig', 'eineindeutig', 'mehrdeutig', 'gar keine Zuordnung'],
+      steps: [
+        'Die 12 hat die Teiler 1, 2, 3, 4, 6 und 12.',
+        'Einer Zahl werden mehrere Zahlen zugeordnet.',
+        'Also mehrdeutig.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Art von Zuordnung ist „Ware im Supermarkt → Preis“?',
+      opts: ['mehrdeutig', 'eindeutig, aber nicht eineindeutig', 'eineindeutig', 'gar keine Zuordnung'],
+      steps: [
+        'Jede Ware hat genau einen Preis.',
+        'Verschiedene Waren können gleich viel kosten, etwa 1,99 €.',
+        'Also eindeutig, aber nicht eineindeutig.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Zuordnung ist mehrdeutig?',
+      opts: ['Person → ihre Hobbys', 'Person → Schuhgröße', 'Zahl → ihr Quadrat', 'natürliche Zahl → ihr Nachfolger'],
+      steps: [
+        'Eine Person hat genau eine Schuhgröße; eine Zahl hat genau einen Nachfolger und genau ein Quadrat.',
+        'Eine Person kann aber mehrere Hobbys haben.',
+        '„Person → ihre Hobbys“ ist mehrdeutig.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Art von Zuordnung zeigt die Pfeildarstellung?',
+      fig: '<svg viewBox="0 0 360 174" width="360" height="174" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pfeildarstellung"><defs><marker id="f1-ar-B02418" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#B02418"/></marker></defs><ellipse cx="86.4" cy="99.0" rx="54.0" ry="67.0" fill="#EEF2F8" stroke="#6E7E9F" stroke-width="1.2"/><text x="86.4" y="18" font-family="Raleway, system-ui, sans-serif" font-size="14" fill="#2C3C60" text-anchor="middle" font-weight="600">Ware</text><ellipse cx="273.6" cy="99.0" rx="54.0" ry="67.0" fill="#EEF2F8" stroke="#6E7E9F" stroke-width="1.2"/><text x="273.6" y="18" font-family="Raleway, system-ui, sans-serif" font-size="14" fill="#2C3C60" text-anchor="middle" font-weight="600">Preis</text><text x="86.4" y="61" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Brötchen</text><text x="86.4" y="99" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Brezel</text><text x="86.4" y="137" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Kuchen</text><text x="273.6" y="61" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">1 €</text><text x="273.6" y="99" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">2 €</text><text x="273.6" y="137" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">3 €</text><line x1="118.8" y1="56" x2="225" y2="56" stroke="#B02418" stroke-width="1.5" marker-end="url(#f1-ar-B02418)"/><line x1="118.8" y1="94" x2="225" y2="56" stroke="#B02418" stroke-width="1.5" marker-end="url(#f1-ar-B02418)"/><line x1="118.8" y1="132" x2="225" y2="132" stroke="#B02418" stroke-width="1.5" marker-end="url(#f1-ar-B02418)"/></svg>',
+      figcap: 'Ware → Preis beim Bäcker',
+      opts: ['mehrdeutig', 'eineindeutig', 'gar keine Zuordnung', 'eindeutig, aber nicht eineindeutig'],
+      steps: [
+        'Von jedem Element links geht genau ein Pfeil aus: eindeutig.',
+        'Bei 1 € kommen aber zwei Pfeile an (Brötchen und Brezel).',
+        'Also nicht eineindeutig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Art von Zuordnung zeigt die Pfeildarstellung?',
+      fig: '<svg viewBox="0 0 360 174" width="360" height="174" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pfeildarstellung"><defs><marker id="f2-ar-B02418" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#B02418"/></marker></defs><ellipse cx="86.4" cy="99.0" rx="54.0" ry="67.0" fill="#EEF2F8" stroke="#6E7E9F" stroke-width="1.2"/><text x="86.4" y="18" font-family="Raleway, system-ui, sans-serif" font-size="14" fill="#2C3C60" text-anchor="middle" font-weight="600">Person</text><ellipse cx="273.6" cy="99.0" rx="54.0" ry="67.0" fill="#EEF2F8" stroke="#6E7E9F" stroke-width="1.2"/><text x="273.6" y="18" font-family="Raleway, system-ui, sans-serif" font-size="14" fill="#2C3C60" text-anchor="middle" font-weight="600">Hobby</text><text x="86.4" y="61" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Lea</text><text x="86.4" y="99" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Tom</text><text x="86.4" y="137" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Ali</text><text x="273.6" y="61" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Fußball</text><text x="273.6" y="99" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Gitarre</text><text x="273.6" y="137" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle">Schach</text><line x1="118.8" y1="56" x2="225" y2="56" stroke="#B02418" stroke-width="1.5" marker-end="url(#f2-ar-B02418)"/><line x1="118.8" y1="56" x2="225" y2="94" stroke="#B02418" stroke-width="1.5" marker-end="url(#f2-ar-B02418)"/><line x1="118.8" y1="94" x2="225" y2="132" stroke="#B02418" stroke-width="1.5" marker-end="url(#f2-ar-B02418)"/><line x1="118.8" y1="132" x2="225" y2="56" stroke="#B02418" stroke-width="1.5" marker-end="url(#f2-ar-B02418)"/></svg>',
+      figcap: 'Person → Hobby',
+      opts: ['eineindeutig', 'gar keine Zuordnung', 'eindeutig, aber nicht eineindeutig', 'mehrdeutig'],
+      steps: [
+        'Von Lea gehen zwei Pfeile aus: Sie spielt Fußball und Gitarre.',
+        'Ein Element links hat mehrere Partner rechts.',
+        'Also mehrdeutig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Zuordnung ist eineindeutig?',
+      opts: ['Person → Lieblingsfarbe', 'Schulfach → Lehrkräfte der Schule', 'natürliche Zahl → ihr Nachfolger', 'Monat → Anzahl seiner Tage'],
+      steps: [
+        'Lieblingsfarben teilen sich viele, ein Fach haben oft mehrere Lehrkräfte, 30 Tage haben mehrere Monate.',
+        'Jede natürliche Zahl hat genau einen Nachfolger: $5 \\to 6$.',
+        'Und jeder Nachfolger hat genau einen Vorgänger: $6 \\to 5$. Also eineindeutig.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Zuordnung „Person → Sitzplatz im Klassenraum“ ist eineindeutig. Was bedeutet das?',
+      opts: ['Jede Person hat genau einen Platz, und jeder Platz gehört genau einer Person.', 'Zwei Personen teilen sich immer einen Platz.', 'Jede Person hat mehrere Plätze.', 'Jeder Platz gehört zu mehreren Personen.'],
+      steps: [
+        'Eindeutig: Jede Person bekommt genau einen Platz.',
+        'Ein-eindeutig: auch rückwärts – jeder Platz gehört genau einer Person.',
+        'Man kann also vom Sitzplan auf die Person schließen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ist „Alter in Jahren → Körpergröße“ für alle Personen einer Schule eine eindeutige Zuordnung?',
+      opts: ['Ja, das Alter bestimmt die Größe genau.', 'Ja, ältere Personen sind immer größer.', 'Nein, weil man Größen nicht messen kann.', 'Nein, zu 12 Jahren gehören viele verschiedene Größen.'],
+      steps: [
+        'In einer Schule gibt es viele Zwölfjährige.',
+        'Sie sind nicht alle gleich groß: 1,45 m, 1,52 m, 1,61 m …',
+        'Einem Alter werden mehrere Größen zugeordnet: mehrdeutig, nicht eindeutig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'An einem Tag wird gemessen: 8 Uhr: 12 °C, 10 Uhr: 15 °C, 12 Uhr: 19 °C, 14 Uhr: 21 °C. Zu welcher Uhrzeit war es 15 °C?',
+      opts: ['14 Uhr', '8 Uhr', '10 Uhr', '12 Uhr'],
+      steps: [
+        'Die Zuordnung ist Uhrzeit → Temperatur.',
+        'Gesucht ist rückwärts die Uhrzeit zum Wert 15 °C.',
+        'In der Tabelle steht 15 °C bei 10 Uhr.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Kinokarte kostet 8 €. Was kosten 5 Karten?',
+      opts: ['45 €', '40 €', '35 €', '13 €'],
+      steps: [
+        'Zuordnung: Anzahl Karten → Preis.',
+        'Jede Karte kostet 8 €.',
+        '$5 \\cdot 8 = 40$ €'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Brötchen kostet 0,40 €. Was steht in der Tabelle bei 6 Brötchen?',
+      opts: ['6,40 €', '2,40 €', '1,60 €', '2,00 €'],
+      steps: [
+        '1 Brötchen: 0,40 €, 2 Brötchen: 0,80 €, 4 Brötchen: 1,60 €',
+        '6 Brötchen: $6 \\cdot 0{,}40$',
+        '$= 2{,}40$ €'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Liter Benzin kostet 1,80 €. Welcher Tabelleneintrag „Liter → Preis“ ist falsch?',
+      opts: ['20 Liter → 36 €', '40 Liter → 72 €', '30 Liter → 52 €', '10 Liter → 18 €'],
+      steps: [
+        '$10 \\cdot 1{,}80 = 18$, $20 \\cdot 1{,}80 = 36$, $40 \\cdot 1{,}80 = 72$',
+        '$30 \\cdot 1{,}80 = 54$',
+        'Der Eintrag 52 € ist falsch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Jeder Seitenlänge eines Quadrats wird sein Umfang zugeordnet. Was gehört zu 7 cm?',
+      opts: ['21 cm', '14 cm', '28 cm', '49 cm'],
+      steps: [
+        'Ein Quadrat hat vier gleich lange Seiten.',
+        'Umfang: $4 \\cdot 7$ cm',
+        '$= 28$ cm. (49 cm² wäre der Flächeninhalt.)'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Bus fährt um 7:12 Uhr, 7:32 Uhr und 7:52 Uhr ab, immer im gleichen Takt. Wann fährt der übernächste Bus nach 7:52 Uhr?',
+      opts: ['8:32 Uhr', '8:52 Uhr', '8:02 Uhr', '8:12 Uhr'],
+      steps: [
+        'Der Takt beträgt 20 Minuten.',
+        'Der nächste Bus fährt um 8:12 Uhr.',
+        'Der übernächste um 8:32 Uhr.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Jeder Zahl wird ihr Dreifaches plus 1 zugeordnet. Was wird der 4 zugeordnet?',
+      opts: ['13', '7', '12', '15'],
+      steps: [
+        'Das Dreifache von 4: $3 \\cdot 4 = 12$',
+        'Plus 1: $12 + 1 = 13$',
+        '$4 \\to 13$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Jeder Zahl wird ihr Dreifaches plus 1 zugeordnet. Welche Zahl hat den Partner 22?',
+      opts: ['7', '66', '8', '21'],
+      steps: [
+        'Rückwärts rechnen: erst minus 1, dann durch 3.',
+        '$22 - 1 = 21$, $21 : 3 = 7$',
+        'Probe: $3 \\cdot 7 + 1 = 22$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

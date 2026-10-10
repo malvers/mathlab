@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wahrscheinlichkeit, Statistik kritisch lesen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos7-w13-wahrscheinlichkeit',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Wahrscheinlichkeit, Statistik kritisch lesen',
+  subtitle: 'Oberschule · Klasse 7 · Realschulbildungsgang · Woche 13 (LB 2) · 20 Aufgaben: Wahrscheinlichkeit berechnen und schätzen, Diagramme und Umfragen kritisch beurteilen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 7 · Woche 13 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe7.html', /* opened from the plan */
+  /* Blocks: Laplace probability (1-8, 10, 19-20), estimating and expecting (9, 18), critical reading (11-17). */
+  questions: [
+    {
+      q: 'Wie groß ist beim fairen Würfel die Wahrscheinlichkeit für eine Sechs?',
+      opts: ['$\\dfrac{1}{5}$', '$\\dfrac{1}{2}$', '$\\dfrac{6}{1}$', '$\\dfrac{1}{6}$'],
+      steps: [
+        'Alle 6 Ergebnisse sind gleich wahrscheinlich.',
+        'Günstig ist nur 1 Ergebnis.',
+        '$P(6) = \\dfrac{1}{6}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist beim fairen Würfel die Wahrscheinlichkeit für eine gerade Augenzahl?',
+      opts: ['$\\dfrac{1}{3}$', '$\\dfrac{2}{6}$', '$\\dfrac{1}{6}$', '$\\dfrac{1}{2}$'],
+      steps: [
+        'Günstig: 2, 4, 6 – das sind 3 von 6.',
+        '$\\dfrac{3}{6}$',
+        '$= \\dfrac{1}{2}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist beim fairen Würfel die Wahrscheinlichkeit für „mehr als 4“?',
+      opts: ['$\\dfrac{4}{6}$', '$\\dfrac{1}{2}$', '$\\dfrac{1}{3}$', '$\\dfrac{2}{3}$'],
+      steps: [
+        'Günstig: 5 und 6.',
+        '$\\dfrac{2}{6}$',
+        '$= \\dfrac{1}{3}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einem Beutel sind 3 rote und 2 blaue Kugeln. Wie groß ist die Wahrscheinlichkeit, ohne Hinsehen eine rote zu ziehen?',
+      opts: ['$\\dfrac{2}{5}$', '$\\dfrac{1}{2}$', '$\\dfrac{3}{2}$', '$\\dfrac{3}{5}$'],
+      steps: [
+        'Jede Kugel hat dieselbe Chance: 5 mögliche.',
+        'Günstig: 3 rote.',
+        '$P(\\text{rot}) = \\dfrac{3}{5}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Glücksrad hat 8 gleich große Felder, 3 davon sind rot. Wie groß ist die Wahrscheinlichkeit für Rot?',
+      opts: ['$\\dfrac{3}{5}$', '$\\dfrac{1}{3}$', '$\\dfrac{3}{8}$', '$\\dfrac{5}{8}$'],
+      steps: [
+        '8 gleich wahrscheinliche Felder.',
+        '3 davon sind günstig.',
+        '$P(\\text{rot}) = \\dfrac{3}{8}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Aussage über Wahrscheinlichkeiten stimmt?',
+      opts: ['Sie liegen immer zwischen 0 und 1; ein sicheres Ereignis hat 1.', 'Sie können größer als 1 sein.', 'Ein unmögliches Ereignis hat 1.', 'Sie sind immer $\\dfrac{1}{2}$.'],
+      steps: [
+        '0 heißt: tritt nie ein (unmöglich).',
+        '1 heißt: tritt immer ein (sicher).',
+        'Alles andere liegt dazwischen, auch in Prozent: 0 % bis 100 %.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist beim fairen Würfel die Wahrscheinlichkeit, KEINE Sechs zu würfeln?',
+      opts: ['$\\dfrac{5}{6}$', '$\\dfrac{1}{6}$', '0', '$\\dfrac{6}{5}$'],
+      steps: [
+        'Gegenereignis von „Sechs“.',
+        '$1 - \\dfrac{1}{6}$',
+        '$= \\dfrac{5}{6}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie berechnet man bei einem Laplace-Versuch die Wahrscheinlichkeit eines Ereignisses?',
+      opts: ['Anzahl aller Ergebnisse durch Anzahl der günstigen', 'Anzahl der günstigen Ergebnisse durch Anzahl aller Ergebnisse', 'immer 1 durch 2', 'günstige Ergebnisse mal alle Ergebnisse'],
+      steps: [
+        'Laplace-Versuch: Alle Ergebnisse sind gleich wahrscheinlich.',
+        '$P(E) = \\dfrac{\\text{Anzahl günstige Ergebnisse}}{\\text{Anzahl mögliche Ergebnisse}}$',
+        'Benannt nach Pierre-Simon Laplace (1749–1827).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei faire Würfel werden geworfen. Wie groß ist die Wahrscheinlichkeit für die Augensumme 7?',
+      opts: ['$\\dfrac{7}{36}$', '$\\dfrac{1}{12}$', '$\\dfrac{1}{11}$', '$\\dfrac{1}{6}$'],
+      steps: [
+        'Es gibt $6 \\cdot 6 = 36$ gleich wahrscheinliche Paare.',
+        'Summe 7: (1|6), (2|5), (3|4), (4|3), (5|2), (6|1) – 6 Paare.',
+        '$\\dfrac{6}{36} = \\dfrac{1}{6}$. (11 Summen sind nicht gleich wahrscheinlich!)'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Beutel A: 2 rote und 3 blaue Kugeln. Beutel B: 3 rote und 5 blaue. Aus welchem Beutel zieht man eher eine rote Kugel?',
+      opts: ['aus beiden gleich wahrscheinlich', 'aus A (0,4 statt 0,375)', 'aus B (0,6 statt 0,4)', 'aus B, weil er mehr rote Kugeln hat'],
+      steps: [
+        'A: $\\dfrac{2}{5} = 0{,}4$',
+        'B: $\\dfrac{3}{8} = 0{,}375$',
+        'Entscheidend ist der Anteil, nicht die Anzahl.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viel Prozent sind die Wahrscheinlichkeit $\\dfrac{1}{4}$?',
+      opts: ['4 %', '40 %', '14 %', '25 %'],
+      steps: [
+        '$\\dfrac{1}{4} = \\dfrac{25}{100}$',
+        'Hundertstel sind Prozent.',
+        '25 %'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie bestimmt man die Wahrscheinlichkeit, dass eine Reißzwecke auf dem Kopf landet?',
+      opts: ['Man wirft einmal und schaut nach.', 'Das geht überhaupt nicht.', 'Man wirft sehr oft und nimmt die relative Häufigkeit als Schätzwert.', 'Man rechnet $\\dfrac{1}{2}$.'],
+      steps: [
+        'Die Reißzwecke ist kein Laplace-Versuch.',
+        'Bei vielen Würfen stabilisiert sich die relative Häufigkeit.',
+        'Dieser Wert ist eine gute Schätzung der Wahrscheinlichkeit.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Ereignis hat die Wahrscheinlichkeit 0,25. Wie oft erwartet man es bei 80 Versuchen ungefähr?',
+      opts: ['etwa 20-mal', 'etwa 4-mal', 'genau 20-mal', 'etwa 25-mal'],
+      steps: [
+        'Erwartete Anzahl = Wahrscheinlichkeit · Anzahl der Versuche',
+        '$0{,}25 \\cdot 80 = 20$',
+        'Etwa 20-mal – es kann auch etwas mehr oder weniger sein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Das Diagramm zeigt die Stimmen von zwei Parteien. Was ist daran irreführend?',
+      fig: '<svg viewBox="0 0 300 250" width="300" height="250" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Säulendiagramm mit abgeschnittener Achse"><line x1="40" y1="210" x2="286" y2="210" stroke="#DCE4F0" stroke-width="1" stroke-linecap="round"/><text x="33" y="214.5" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="end">46</text><line x1="40" y1="164" x2="286" y2="164" stroke="#DCE4F0" stroke-width="1" stroke-linecap="round"/><text x="33" y="168.5" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="end">47</text><line x1="40" y1="118" x2="286" y2="118" stroke="#DCE4F0" stroke-width="1" stroke-linecap="round"/><text x="33" y="122.5" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="end">48</text><line x1="40" y1="72" x2="286" y2="72" stroke="#DCE4F0" stroke-width="1" stroke-linecap="round"/><text x="33" y="76.5" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="end">49</text><line x1="40" y1="26" x2="286" y2="26" stroke="#DCE4F0" stroke-width="1" stroke-linecap="round"/><text x="33" y="30.5" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="end">50</text><rect x="62.14" y="164" width="78.72" height="46" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="1"/><text x="101.5" y="228" font-family="Raleway, system-ui, sans-serif" font-size="13.5" fill="#0E244E" text-anchor="middle">A</text><rect x="185.14" y="72" width="78.72" height="138" rx="0" fill="#F5C242" stroke="#0E244E" stroke-width="1"/><text x="224.5" y="228" font-family="Raleway, system-ui, sans-serif" font-size="13.5" fill="#0E244E" text-anchor="middle">B</text><line x1="40" y1="210" x2="286" y2="210" stroke="#0E244E" stroke-width="1.4" stroke-linecap="round"/><line x1="40" y1="210" x2="40" y2="20" stroke="#0E244E" stroke-width="1.4" stroke-linecap="round"/><text x="40" y="14" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#0E244E" text-anchor="middle">Stimmen in %</text><text x="163" y="244" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#0E244E" text-anchor="middle">Partei</text></svg>',
+      figcap: 'Werbe-Diagramm einer Partei',
+      opts: ['Nichts, B hat dreimal so viele Stimmen.', 'Es fehlt eine dritte Partei.', 'Die Achse beginnt bei 46 %; B sieht dreimal so groß aus, obwohl der Unterschied nur 2 Prozentpunkte ist.', 'Die Säulen sind zu breit.'],
+      steps: [
+        'Auf der Hochachse steht unten nicht 0, sondern 46.',
+        'Ab 46 % gemessen ist A 1 Kästchen hoch, B 3 Kästchen – dabei unterscheiden sich 47 % und 49 % kaum.',
+        'Durch die abgeschnittene Achse wirkt der Unterschied riesig.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einem Bilddiagramm wird ein Würfel doppelt so lang, breit und hoch gezeichnet, um „doppelt so viel“ zu zeigen. Was ist das Problem?',
+      opts: ['Er wirkt achtmal so groß, weil sein Volumen achtmal so groß ist.', 'Es gibt kein Problem.', 'Würfel darf man in Diagrammen nicht zeichnen.', 'Er wirkt nur halb so groß.'],
+      steps: [
+        'Doppelte Kantenlänge: $2 \\cdot 2 \\cdot 2 = 8$-faches Volumen.',
+        'Unser Auge vergleicht die Größe des ganzen Bildes.',
+        'So wird „doppelt so viel“ stark übertrieben dargestellt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Umfrage im Fitnessstudio ergibt: „90 % der Befragten treiben jede Woche Sport.“ Gilt das für alle Menschen in Deutschland?',
+      opts: ['Nein, wer im Fitnessstudio gefragt wird, treibt meistens ohnehin Sport.', 'Nein, weil man nie Sport treiben sollte.', 'Ja, 90 % sind sehr viele.', 'Ja, wenn mindestens 10 Personen gefragt wurden.'],
+      steps: [
+        'Wichtig ist, wer gefragt wurde.',
+        'Die Befragten sind nicht typisch für alle Menschen.',
+        'Man sagt: Die Stichprobe ist nicht repräsentativ.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Werbung sagt: „4 von 5 Befragten empfehlen unser Produkt!“ Was sollte man zuerst fragen?',
+      opts: ['Warum nicht 5 von 5?', 'Gar nichts, 80 % sind überzeugend.', 'Wie viele Personen wurden befragt, und wer?', 'Welche Farbe hat das Produkt?'],
+      steps: [
+        'Vielleicht wurden nur 5 Personen gefragt.',
+        'Vielleicht arbeiten sie alle für die Firma.',
+        'Ohne Angaben zur Umfrage ist die Zahl wenig wert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Laden meldet: „Unser Verkauf ist um 100 % gestiegen!“ Er hat statt einem Fahrrad jetzt zwei verkauft. Was zeigt das?',
+      opts: ['100 % bedeutet immer viel.', 'Prozentangaben ohne Grundwert können täuschen.', 'Der Laden ist jetzt sehr erfolgreich.', 'Die Rechnung ist falsch.'],
+      steps: [
+        'Von 1 auf 2 ist tatsächlich eine Steigerung um 100 %.',
+        'Bei einem Grundwert von 1 ist das aber nur 1 Fahrrad mehr.',
+        'Immer nach dem Grundwert fragen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einem Kreisdiagramm einer Zeitung ergeben die Anteile zusammen 110 %. Was folgt daraus?',
+      opts: ['Alles in Ordnung.', 'Das Diagramm ist fehlerhaft oder Mehrfachantworten wurden zusammengezählt.', 'Ein Kreis hat 110 %.', 'Die Zeitung hat besonders genau gerechnet.'],
+      steps: [
+        'Ein Kreisdiagramm zeigt Teile eines Ganzen: zusammen 100 %.',
+        '110 % passen nicht in einen Kreis.',
+        'Bei Mehrfachantworten ist ein Säulendiagramm die bessere Wahl.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Roulette kam fünfmal hintereinander Rot. Ist beim nächsten Mal Schwarz wahrscheinlicher?',
+      opts: ['Nein, Rot ist jetzt wahrscheinlicher.', 'Nein, die Kugel hat kein Gedächtnis; die Chance bleibt gleich.', 'Ja, Schwarz ist jetzt fällig.', 'Ja, nach fünfmal Rot kommt immer Schwarz.'],
+      steps: [
+        'Jede Drehung ist unabhängig von den vorherigen.',
+        'Die Chance für Schwarz ist wieder $\\dfrac{18}{37}$.',
+        'Der Irrtum „jetzt ist es fällig“ heißt Spielerfehlschluss.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

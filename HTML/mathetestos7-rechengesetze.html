@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Rechengesetze und Vorrangregeln — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos7-w19-rechengesetze',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Rechengesetze und Vorrangregeln',
+  subtitle: 'Oberschule · Klasse 7 · Realschulbildungsgang · Woche 19 (LB 3) · 20 Aufgaben: Klammer, Potenz, Punkt vor Strich, Vertauschen, Verbinden, Verteilen, geschickt rechnen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 7 · Woche 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe7.html', /* opened from the plan */
+  /* Blocks: order of operations (1-5, 10-13, 15, 19), laws and clever calculating (6-9, 14, 16-17), context (18, 20). */
+  questions: [
+    {
+      q: 'Berechne $-3 + 4 \\cdot (-2)$.',
+      opts: ['−5', '−11', '5', '−2'],
+      steps: [
+        'Punkt vor Strich: $4 \\cdot (-2) = -8$',
+        '$-3 + (-8)$',
+        '$= -11$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $(-3 + 4) \\cdot (-2)$.',
+      opts: ['−2', '2', '14', '−11'],
+      steps: [
+        'Klammer zuerst: $-3 + 4 = 1$',
+        '$1 \\cdot (-2)$',
+        '$= -2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $12 : (-3) - 5$.',
+      opts: ['−9', '9', '−6', '−1'],
+      steps: [
+        'Punkt vor Strich: $12 : (-3) = -4$',
+        '$-4 - 5$',
+        '$= -9$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $-2 \\cdot 3^2$.',
+      opts: ['−36', '18', '−18', '36'],
+      steps: [
+        'Potenz vor Punkt: $3^2 = 9$',
+        '$-2 \\cdot 9$',
+        '$= -18$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $(-2 \\cdot 3)^2$.',
+      opts: ['−36', '36', '−18', '12'],
+      steps: [
+        'Klammer zuerst: $-2 \\cdot 3 = -6$',
+        '$(-6)^2 = (-6) \\cdot (-6)$',
+        '$= 36$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $5 - (-2)^2$.',
+      opts: ['−9', '1', '9', '7'],
+      steps: [
+        'Potenz zuerst: $(-2)^2 = 4$',
+        '$5 - 4$',
+        '$= 1$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In welcher Reihenfolge rechnet man?',
+      opts: ['immer von links nach rechts, egal was kommt', 'Strich vor Punkt', 'Klammer, dann Potenz, dann Punkt, dann Strich', 'Potenz zuletzt'],
+      steps: [
+        'Zuerst wird ausgerechnet, was in Klammern steht.',
+        'Dann Potenzen, dann Mal und Geteilt.',
+        'Zum Schluss Plus und Minus – bei Gleichrangigem von links nach rechts.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $(-1)^{100}$.',
+      opts: ['1', '−1', '100', '−100'],
+      steps: [
+        'Je zwei Faktoren $(-1) \\cdot (-1)$ ergeben 1.',
+        '100 ist gerade: 50 solche Paare.',
+        '$(-1)^{100} = 1$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $6 - 2 \\cdot (-3 + 5)$.',
+      opts: ['8', '10', '2', '−4'],
+      steps: [
+        'Klammer: $-3 + 5 = 2$',
+        'Punkt vor Strich: $2 \\cdot 2 = 4$',
+        '$6 - 4 = 2$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Tim schreibt: $-3^2 = 9$. Was stimmt?',
+      opts: ['Richtig, minus mal minus ist plus.', 'Falsch, $-3^2 = 6$.', 'Falsch, $-3^2 = -6$.', 'Falsch, $-3^2 = -9$; nur $(-3)^2 = 9$.'],
+      steps: [
+        'Ohne Klammer gehört das Quadrat nur zur 3.',
+        '$-3^2 = -(3 \\cdot 3) = -9$',
+        'Mit Klammer: $(-3)^2 = (-3) \\cdot (-3) = 9$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $(-18) : (2 - 5)$.',
+      opts: ['−11', '−14', '−6', '6'],
+      steps: [
+        'Klammer zuerst: $2 - 5 = -3$',
+        '$(-18) : (-3)$',
+        '$= 6$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Rechne geschickt: $(-25) \\cdot 7 \\cdot 4$',
+      opts: ['700', '−700', '−175', '−28'],
+      steps: [
+        'Vertauschen: $(-25) \\cdot 4 \\cdot 7$',
+        '$(-25) \\cdot 4 = -100$',
+        '$-100 \\cdot 7 = -700$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Rechne geschickt: $-8{,}7 + 3{,}4 + 8{,}7$',
+      opts: ['−3,4', '20,8', '−14', '3,4'],
+      steps: [
+        'Vertauschen: $-8{,}7 + 8{,}7 + 3{,}4$',
+        '$-8{,}7 + 8{,}7 = 0$',
+        '$0 + 3{,}4 = 3{,}4$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne mit dem Verteilungsgesetz: $-3 \\cdot (4 - 10)$.',
+      opts: ['−42', '2', '18', '−18'],
+      steps: [
+        '$-3 \\cdot 4 + (-3) \\cdot (-10)$',
+        '$= -12 + 30$',
+        '$= 18$ (oder Klammer zuerst: $-3 \\cdot (-6) = 18$).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Rechne geschickt: $7 \\cdot (-13) + 7 \\cdot 3$',
+      opts: ['−112', '−91', '70', '−70'],
+      steps: [
+        'Die 7 ausklammern: $7 \\cdot (-13 + 3)$',
+        '$= 7 \\cdot (-10)$',
+        '$= -70$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Rechne geschickt: $0{,}25 \\cdot (-17) \\cdot (-4)$',
+      opts: ['4,25', '−17', '−68', '17'],
+      steps: [
+        'Vertauschen: $0{,}25 \\cdot (-4) \\cdot (-17)$',
+        '$0{,}25 \\cdot (-4) = -1$',
+        '$(-1) \\cdot (-17) = 17$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Rechne geschickt: $-47 + 98 - 53$',
+      opts: ['−2', '2', '−198', '4'],
+      steps: [
+        'Die negativen Zahlen zusammenfassen: $-47 - 53 = -100$',
+        '$-100 + 98$',
+        '$= -2$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $-\\dfrac{1}{2} \\cdot (6 - 4)$.',
+      opts: ['−1', '1', '−5', '−2'],
+      steps: [
+        'Klammer: $6 - 4 = 2$',
+        '$-\\dfrac{1}{2} \\cdot 2$',
+        '$= -1$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Klassenkasse hat vier Ausgaben von je 7,50 € und eine Einnahme von 40 €. Wie ändert sich der Kassenstand insgesamt?',
+      opts: ['um −70 €', 'um +10 €', 'um +70 €', 'um −10 €'],
+      steps: [
+        'Ausgaben negativ: $4 \\cdot (-7{,}50) = -30$ €',
+        'Einnahme positiv: $+40$ €',
+        '$-30 + 40 = 10$: Es sind 10 € mehr in der Kasse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Taucher ist auf −12 m. Er taucht dreimal je 2 m tiefer und dann 5 m nach oben. Wo ist er dann?',
+      opts: ['bei −1 m', 'bei −23 m', 'bei −13 m', 'bei −11 m'],
+      steps: [
+        'Tiefer: $3 \\cdot (-2) = -6$',
+        '$-12 + (-6) + 5$',
+        '$= -13$ m'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

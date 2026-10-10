@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Problemlösestrategien — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w31-problemloesen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Problemlösestrategien',
+  subtitle: 'Oberschule · Klasse 6 · Woche 31 (LB 5) · 20 Aufgaben: systematisches Probieren, Rückwärtsarbeiten, Muster finden, Zurückführen auf Bekanntes · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 31 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: classic puzzles with sources (1-5), systematic trying (6-10, 18, 20), patterns (11-15), reducing to the known (16-17, 19). */
+  questions: [
+    {
+      q: 'Aus einem chinesischen Rechenbuch, dem „Sunzi Suanjing“ (etwa 4. Jahrhundert): In einem Käfig sind Fasane und Kaninchen, zusammen 35 Köpfe und 94 Beine. Wie viele Kaninchen sind es?',
+      opts: ['24', '17', '12', '23'],
+      steps: [
+        'Probieren mit Überlegung: Wären alle 35 Tiere Fasane, gäbe es $35 \\cdot 2 = 70$ Beine.',
+        'Es sind aber $94 - 70 = 24$ Beine mehr. Jedes Kaninchen bringt 2 Beine mehr als ein Fasan.',
+        '$24 : 2 = 12$ Kaninchen und 23 Fasane. Probe: $12 \\cdot 4 + 23 \\cdot 2 = 48 + 46 = 94$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Rätsel von Alkuin von York (um 800): Ein Bauer will Wolf, Ziege und Kohlkopf über einen Fluss bringen. Im Boot hat nur eines davon Platz. Allein darf er Wolf und Ziege nicht lassen, auch nicht Ziege und Kohl. Was bringt er zuerst hinüber?',
+      opts: ['den Wolf', 'den Kohl', 'nichts, er fährt erst leer', 'die Ziege'],
+      steps: [
+        'Nimmt er den Wolf, frisst die Ziege den Kohl.',
+        'Nimmt er den Kohl, frisst der Wolf die Ziege.',
+        'Nur mit der Ziege im Boot bleiben Wolf und Kohl sicher zurück.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Alkuins Rätsel weiter: Wie viele Fahrten über den Fluss braucht der Bauer mindestens (hin und zurück einzeln gezählt)?',
+      opts: ['3', '9', '5', '7'],
+      steps: [
+        'Ziege hin, leer zurück, Wolf hin, Ziege zurück,',
+        'Kohl hin, leer zurück, Ziege hin.',
+        'Das sind 7 Fahrten – der Trick ist, die Ziege einmal zurückzubringen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der junge Carl Friedrich Gauß soll in der Schule die Zahlen von 1 bis 100 blitzschnell addiert haben (so berichtet von seinem Biografen Sartorius von Waltershausen, 1856). Wie groß ist die Summe?',
+      opts: ['4950', '5000', '5050', '10 100'],
+      steps: [
+        'Paare bilden: $1 + 100 = 101$, $2 + 99 = 101$, …, $50 + 51 = 101$.',
+        'Das sind 50 Paare.',
+        '$50 \\cdot 101 = 5050$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gauß’ Trick für 1 + 2 + … + 100: Wie viele Paare mit der Summe 101 bildet man?',
+      opts: ['101', '100', '49', '50'],
+      steps: [
+        'Jedes Paar besteht aus einer kleinen und einer großen Zahl.',
+        'Die kleinen Zahlen sind 1 bis 50.',
+        'Also 50 Paare.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei natürliche Zahlen haben die Summe 20 und das Produkt 96. Welche sind es?',
+      opts: ['8 und 12', '10 und 10', '6 und 14', '4 und 16'],
+      steps: [
+        'Systematisch probieren mit einer Tabelle: $10 \\cdot 10 = 100$, $9 \\cdot 11 = 99$, $8 \\cdot 12 = 96$.',
+        'Probe: $8 + 12 = 20$ ✓',
+        '$6 \\cdot 14 = 84$ und $4 \\cdot 16 = 64$ sind zu klein.'
+      ],
+      solution: 0
+    },
+    {
+      q: '6 Personen begrüßen sich, jede gibt jeder anderen genau einmal die Hand. Wie oft werden Hände geschüttelt?',
+      opts: ['15', '30', '12', '36'],
+      steps: [
+        'Die erste Person gibt 5 anderen die Hand, die zweite noch 4 neuen, dann 3, 2, 1.',
+        '$5 + 4 + 3 + 2 + 1 = 15$',
+        '$6 \\cdot 5 = 30$ zählt jeden Handschlag doppelt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ich denke mir eine Zahl, verdopple sie und addiere 7. Ich erhalte 31. Welche Zahl habe ich mir gedacht?',
+      opts: ['24', '12', '15', '19'],
+      steps: [
+        'Rückwärts arbeiten: Aus „plus 7“ wird „minus 7“: $31 - 7 = 24$.',
+        'Aus „verdoppeln“ wird „halbieren“: $24 : 2 = 12$.',
+        'Probe: $2 \\cdot 12 + 7 = 31$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf wie viele Arten kann man genau 5 € nur mit 1-€- und 2-€-Münzen bezahlen (die Reihenfolge zählt nicht)?',
+      opts: ['3', '4', '2', '5'],
+      steps: [
+        'Systematisch nach der Zahl der 2-€-Münzen ordnen: keine, eine oder zwei.',
+        '0 · 2 € + 5 · 1 €, 1 · 2 € + 3 · 1 €, 2 · 2 € + 1 · 1 €',
+        'Drei 2-€-Münzen wären schon 6 €. Also 3 Möglichkeiten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele zweistellige Zahlen haben die Quersumme 5?',
+      opts: ['4', '10', '5', '6'],
+      steps: [
+        'Systematisch nach der Zehnerziffer: 14, 23, 32, 41, 50.',
+        'Die Zehnerziffer kann nicht 0 sein.',
+        'Also 5 Zahlen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Strategie ist das: Man schreibt alle Möglichkeiten geordnet in eine Tabelle und prüft sie nacheinander.',
+      opts: ['Rückwärtsarbeiten', 'systematisches Probieren', 'Raten', 'Zurückführen auf Bekanntes'],
+      steps: [
+        'Beim Raten probiert man ungeordnet.',
+        'Systematisch heißt: nach einer Ordnung, ohne etwas zu vergessen.',
+        'Das ist systematisches Probieren.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'An einen quadratischen Tisch passen 4 Personen. Schiebt man Tische in einer Reihe zusammen, passen an 2 Tische 6 und an 3 Tische 8 Personen. Wie viele passen an 10 Tische?',
+      opts: ['22', '20', '40', '24'],
+      steps: [
+        'Jeder neue Tisch bringt 2 Plätze dazu.',
+        'Regel: $2 \\cdot (\\text{Anzahl Tische}) + 2$',
+        '$2 \\cdot 10 + 2 = 22$ Plätze'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Aus Streichhölzern werden Quadrate in einer Reihe gelegt: 1 Quadrat braucht 4 Hölzer, 2 Quadrate 7, 3 Quadrate 10. Wie viele Hölzer braucht man für 10 Quadrate?',
+      opts: ['40', '31', '30', '34'],
+      steps: [
+        'Jedes weitere Quadrat braucht nur 3 Hölzer, weil es eine Seite teilt.',
+        'Regel: $1 + 3 \\cdot (\\text{Anzahl Quadrate})$',
+        '$1 + 3 \\cdot 10 = 31$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Seerosen auf einem Teich verdoppeln ihre Fläche jeden Tag. Nach 30 Tagen ist der Teich ganz bedeckt. Nach wie vielen Tagen war er halb bedeckt?',
+      opts: ['nach 25 Tagen', 'nach 20 Tagen', 'nach 29 Tagen', 'nach 15 Tagen'],
+      steps: [
+        'Rückwärts denken: Am 30. Tag ist der Teich voll.',
+        'Am Tag davor war es genau halb so viel.',
+        'Also nach 29 Tagen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Schnecke sitzt am Grund eines 10 m tiefen Brunnens. Tagsüber kriecht sie 3 m hoch, nachts rutscht sie 2 m zurück. An welchem Tag kommt sie oben an?',
+      opts: ['am 7. Tag', 'am 5. Tag', 'am 8. Tag', 'am 10. Tag'],
+      steps: [
+        'Nach jedem Tag und jeder Nacht ist sie 1 m höher: nach 7 Nächten bei 7 m.',
+        'Am 8. Tag kriecht sie von 7 m aus 3 m hoch.',
+        'Sie erreicht 10 m und ist oben – nachts rutscht sie dann nicht mehr zurück.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Ziegelstein wiegt 1 kg und einen halben Ziegelstein. Wie schwer ist ein Ziegelstein?',
+      opts: ['1 kg', '3 kg', '1,5 kg', '2 kg'],
+      steps: [
+        'Ein halber Ziegelstein ist das, was zu 1 kg noch fehlt.',
+        'Ganzer Stein = 1 kg + halber Stein, also ist der halbe Stein 1 kg.',
+        'Der ganze Stein wiegt 2 kg.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Prisma hat ein 20-Eck als Grundfläche. Wie viele Ecken hat es?',
+      opts: ['60', '40', '22', '20'],
+      steps: [
+        'Zurückführen auf Bekanntes: Ein Dreiecksprisma hat $2 \\cdot 3 = 6$ Ecken, ein Quader $2 \\cdot 4 = 8$.',
+        'Unten und oben liegt je ein 20-Eck.',
+        '$2 \\cdot 20 = 40$ Ecken'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Mutter ist heute dreimal so alt wie ihre Tochter. In 10 Jahren ist sie doppelt so alt. Wie alt ist die Tochter heute?',
+      opts: ['10 Jahre', '5 Jahre', '15 Jahre', '20 Jahre'],
+      steps: [
+        'Probieren: Tochter 5, Mutter 15 – in 10 Jahren 15 und 25, nicht doppelt.',
+        'Tochter 10, Mutter 30 – in 10 Jahren 20 und 40. Passt!',
+        'Die Tochter ist heute 10 Jahre alt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Diagonalen hat ein Sechseck?',
+      opts: ['18', '6', '12', '9'],
+      steps: [
+        'Von jeder Ecke gehen Diagonalen zu allen Ecken außer sich selbst und den zwei Nachbarn: 3.',
+        '$6 \\cdot 3 = 18$, aber so ist jede Diagonale doppelt gezählt.',
+        '$18 : 2 = 9$ – wie beim Händeschütteln.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einem Gitter aus 2 × 2 Kästchen geht man von der linken unteren zur rechten oberen Ecke, immer nur nach rechts oder nach oben auf den Linien. Wie viele Wege gibt es?',
+      opts: ['4', '6', '8', '2'],
+      steps: [
+        'Jeder Weg besteht aus 2 Schritten nach rechts (R) und 2 nach oben (O).',
+        'Systematisch: RROO, RORO, ROOR, ORRO, OROR, OORR.',
+        'Das sind 6 Wege.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

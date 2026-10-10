@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Parkettierungen aus Vielecken — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos7-w36-parkettierungen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Parkettierungen aus Vielecken',
+  subtitle: 'Oberschule · Klasse 7 · Realschulbildungsgang · Woche 36 (WB 3) · 20 Aufgaben: lückenlos auslegen, Winkel an einer Ecke, regelmäßige Vielecke, Fliesen berechnen · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 7 · Woche 36 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe7.html', /* opened from the plan */
+  /* Blocks: idea (1-2, 18), regular polygons (3-9, 12), any triangle and quadrilateral (10-11), tiling a room (13-15), research and history (16-17, 19-20). */
+  questions: [
+    {
+      q: 'Was ist eine Parkettierung?',
+      opts: ['eine lückenlose Auslegung der Ebene mit Figuren, die sich nicht überlappen', 'eine Zeichnung mit dem Lineal', 'ein Muster aus Kreisen', 'ein Holzfußboden aus Brettern verschiedener Länge'],
+      steps: [
+        'Die Figuren bedecken die Fläche vollständig.',
+        'Es gibt keine Lücken.',
+        'Und keine Figur liegt auf einer anderen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Bedingung muss an jeder Ecke einer Parkettierung erfüllt sein?',
+      opts: ['Die Winkel ergeben 180°.', 'Alle Winkel sind rechte Winkel.', 'Es treffen sich genau 4 Ecken.', 'Die Winkel, die dort zusammenkommen, ergeben genau 360°.'],
+      steps: [
+        'Um einen Punkt herum ist ein Vollwinkel: 360°.',
+        'Weniger: Es bleibt eine Lücke. Mehr: Die Figuren überlappen.',
+        'Also genau 360°.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum kann man mit Kreisen keine Parkettierung legen?',
+      opts: ['Doch, das geht.', 'Zwischen den Kreisen bleiben immer Lücken.', 'Kreise sind zu groß.', 'Kreise haben zu viele Ecken.'],
+      steps: [
+        'Kreise berühren sich höchstens in einzelnen Punkten.',
+        'Dazwischen bleiben gebogene Dreiecke frei.',
+        'Das ist keine lückenlose Auslegung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele gleichseitige Dreiecke treffen in einem Dreiecksparkett an einer Ecke zusammen?',
+      opts: ['4', '8', '6', '3'],
+      steps: [
+        'Jeder Winkel im gleichseitigen Dreieck ist 60°.',
+        '$360° : 60° = 6$',
+        'Sechs Dreiecke an jeder Ecke.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Quadrate treffen in einem Quadratparkett an einer Ecke zusammen?',
+      opts: ['6', '4', '3', '2'],
+      steps: [
+        'Jeder Winkel im Quadrat ist 90°.',
+        '$360° : 90° = 4$',
+        'Wie beim Karopapier.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele regelmäßige Sechsecke treffen sich an jeder Ecke des Parketts?',
+      fig: '<svg viewBox="0 0 320 220" width="320" height="220" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Parkett aus regelmäßigen Sechsecken"><defs><clipPath id="f1-hc"><rect x="0" y="0" width="320" height="220" rx="8"/></clipPath></defs><g clip-path="url(#f1-hc)"><path d="M -45.03 26 L -67.55 13 L -67.55 -13 L -45.03 -26 L -22.52 -13 L -22.52 13 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 0 26 L -22.52 13 L -22.52 -13 L -0 -26 L 22.52 -13 L 22.52 13 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 45.03 26 L 22.52 13 L 22.52 -13 L 45.03 -26 L 67.55 -13 L 67.55 13 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 90.07 26 L 67.55 13 L 67.55 -13 L 90.07 -26 L 112.58 -13 L 112.58 13 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 135.1 26 L 112.58 13 L 112.58 -13 L 135.1 -26 L 157.62 -13 L 157.62 13 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 180.13 26 L 157.62 13 L 157.62 -13 L 180.13 -26 L 202.65 -13 L 202.65 13 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 225.17 26 L 202.65 13 L 202.65 -13 L 225.17 -26 L 247.68 -13 L 247.68 13 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 270.2 26 L 247.68 13 L 247.68 -13 L 270.2 -26 L 292.72 -13 L 292.72 13 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 315.23 26 L 292.72 13 L 292.72 -13 L 315.23 -26 L 337.75 -13 L 337.75 13 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 360.27 26 L 337.75 13 L 337.75 -13 L 360.27 -26 L 382.78 -13 L 382.78 13 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M -22.52 65 L -45.03 52 L -45.03 26 L -22.52 13 L -0 26 L 0 52 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 22.52 65 L -0 52 L 0 26 L 22.52 13 L 45.03 26 L 45.03 52 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 67.55 65 L 45.03 52 L 45.03 26 L 67.55 13 L 90.07 26 L 90.07 52 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 112.58 65 L 90.07 52 L 90.07 26 L 112.58 13 L 135.1 26 L 135.1 52 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 157.62 65 L 135.1 52 L 135.1 26 L 157.62 13 L 180.13 26 L 180.13 52 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 202.65 65 L 180.13 52 L 180.13 26 L 202.65 13 L 225.17 26 L 225.17 52 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 247.68 65 L 225.17 52 L 225.17 26 L 247.68 13 L 270.2 26 L 270.2 52 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 292.72 65 L 270.2 52 L 270.2 26 L 292.72 13 L 315.23 26 L 315.23 52 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 337.75 65 L 315.23 52 L 315.23 26 L 337.75 13 L 360.27 26 L 360.27 52 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M -45.03 104 L -67.55 91 L -67.55 65 L -45.03 52 L -22.52 65 L -22.52 91 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 0 104 L -22.52 91 L -22.52 65 L -0 52 L 22.52 65 L 22.52 91 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 45.03 104 L 22.52 91 L 22.52 65 L 45.03 52 L 67.55 65 L 67.55 91 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 90.07 104 L 67.55 91 L 67.55 65 L 90.07 52 L 112.58 65 L 112.58 91 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 135.1 104 L 112.58 91 L 112.58 65 L 135.1 52 L 157.62 65 L 157.62 91 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 180.13 104 L 157.62 91 L 157.62 65 L 180.13 52 L 202.65 65 L 202.65 91 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 225.17 104 L 202.65 91 L 202.65 65 L 225.17 52 L 247.68 65 L 247.68 91 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 270.2 104 L 247.68 91 L 247.68 65 L 270.2 52 L 292.72 65 L 292.72 91 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 315.23 104 L 292.72 91 L 292.72 65 L 315.23 52 L 337.75 65 L 337.75 91 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 360.27 104 L 337.75 91 L 337.75 65 L 360.27 52 L 382.78 65 L 382.78 91 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M -22.52 143 L -45.03 130 L -45.03 104 L -22.52 91 L -0 104 L 0 130 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 22.52 143 L -0 130 L 0 104 L 22.52 91 L 45.03 104 L 45.03 130 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 67.55 143 L 45.03 130 L 45.03 104 L 67.55 91 L 90.07 104 L 90.07 130 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 112.58 143 L 90.07 130 L 90.07 104 L 112.58 91 L 135.1 104 L 135.1 130 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 157.62 143 L 135.1 130 L 135.1 104 L 157.62 91 L 180.13 104 L 180.13 130 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 202.65 143 L 180.13 130 L 180.13 104 L 202.65 91 L 225.17 104 L 225.17 130 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 247.68 143 L 225.17 130 L 225.17 104 L 247.68 91 L 270.2 104 L 270.2 130 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 292.72 143 L 270.2 130 L 270.2 104 L 292.72 91 L 315.23 104 L 315.23 130 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 337.75 143 L 315.23 130 L 315.23 104 L 337.75 91 L 360.27 104 L 360.27 130 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M -45.03 182 L -67.55 169 L -67.55 143 L -45.03 130 L -22.52 143 L -22.52 169 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 0 182 L -22.52 169 L -22.52 143 L -0 130 L 22.52 143 L 22.52 169 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 45.03 182 L 22.52 169 L 22.52 143 L 45.03 130 L 67.55 143 L 67.55 169 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 90.07 182 L 67.55 169 L 67.55 143 L 90.07 130 L 112.58 143 L 112.58 169 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 135.1 182 L 112.58 169 L 112.58 143 L 135.1 130 L 157.62 143 L 157.62 169 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 180.13 182 L 157.62 169 L 157.62 143 L 180.13 130 L 202.65 143 L 202.65 169 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 225.17 182 L 202.65 169 L 202.65 143 L 225.17 130 L 247.68 143 L 247.68 169 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 270.2 182 L 247.68 169 L 247.68 143 L 270.2 130 L 292.72 143 L 292.72 169 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 315.23 182 L 292.72 169 L 292.72 143 L 315.23 130 L 337.75 143 L 337.75 169 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 360.27 182 L 337.75 169 L 337.75 143 L 360.27 130 L 382.78 143 L 382.78 169 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M -22.52 221 L -45.03 208 L -45.03 182 L -22.52 169 L -0 182 L 0 208 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 22.52 221 L -0 208 L 0 182 L 22.52 169 L 45.03 182 L 45.03 208 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 67.55 221 L 45.03 208 L 45.03 182 L 67.55 169 L 90.07 182 L 90.07 208 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 112.58 221 L 90.07 208 L 90.07 182 L 112.58 169 L 135.1 182 L 135.1 208 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 157.62 221 L 135.1 208 L 135.1 182 L 157.62 169 L 180.13 182 L 180.13 208 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 202.65 221 L 180.13 208 L 180.13 182 L 202.65 169 L 225.17 182 L 225.17 208 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 247.68 221 L 225.17 208 L 225.17 182 L 247.68 169 L 270.2 182 L 270.2 208 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 292.72 221 L 270.2 208 L 270.2 182 L 292.72 169 L 315.23 182 L 315.23 208 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 337.75 221 L 315.23 208 L 315.23 182 L 337.75 169 L 360.27 182 L 360.27 208 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M -45.03 260 L -67.55 247 L -67.55 221 L -45.03 208 L -22.52 221 L -22.52 247 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 0 260 L -22.52 247 L -22.52 221 L -0 208 L 22.52 221 L 22.52 247 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 45.03 260 L 22.52 247 L 22.52 221 L 45.03 208 L 67.55 221 L 67.55 247 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 90.07 260 L 67.55 247 L 67.55 221 L 90.07 208 L 112.58 221 L 112.58 247 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 135.1 260 L 112.58 247 L 112.58 221 L 135.1 208 L 157.62 221 L 157.62 247 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 180.13 260 L 157.62 247 L 157.62 221 L 180.13 208 L 202.65 221 L 202.65 247 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 225.17 260 L 202.65 247 L 202.65 221 L 225.17 208 L 247.68 221 L 247.68 247 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 270.2 260 L 247.68 247 L 247.68 221 L 270.2 208 L 292.72 221 L 292.72 247 Z" fill="#FCEFC7" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 315.23 260 L 292.72 247 L 292.72 221 L 315.23 208 L 337.75 221 L 337.75 247 Z" fill="#F8DA8A" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><path d="M 360.27 260 L 337.75 247 L 337.75 221 L 360.27 208 L 382.78 221 L 382.78 247 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/></g><circle cx="112.58" cy="91" r="5" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/></svg>',
+      figcap: 'Parkett aus regelmäßigen Sechsecken',
+      opts: ['6', '4', '3', '2'],
+      steps: [
+        'Jeder Innenwinkel des regelmäßigen Sechsecks ist 120°.',
+        '$360° : 120° = 3$',
+        'Drei Sechsecke an jeder Ecke – wie bei Bienenwaben.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Kann man mit regelmäßigen Fünfecken allein lückenlos parkettieren?',
+      opts: ['Nein, 108° passen nicht in 360°.', 'Ja, wenn man sie dreht.', 'Nur auf runden Flächen.', 'Ja, wie mit Sechsecken.'],
+      steps: [
+        'Innenwinkel des regelmäßigen Fünfecks: $(5 - 2) \\cdot 180° : 5 = 108°$.',
+        '$3 \\cdot 108° = 324°$ (Lücke), $4 \\cdot 108° = 432°$ (Überlappung).',
+        '360 ist kein Vielfaches von 108: Es geht nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Kann man mit regelmäßigen Achtecken allein parkettieren?',
+      opts: ['Nur mit sehr kleinen Achtecken.', 'Ja.', 'Nein, 135° passen nicht in 360°.', 'Ja, mit 4 Achtecken an jeder Ecke.'],
+      steps: [
+        'Innenwinkel des regelmäßigen Achtecks: 135°.',
+        '$2 \\cdot 135° = 270°$, $3 \\cdot 135° = 405°$.',
+        'Es bleibt immer eine Lücke oder es überlappt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein beliebtes Fliesenmuster besteht aus regelmäßigen Achtecken und Quadraten. Was trifft an jeder Ecke zusammen?',
+      opts: ['zwei Achtecke und ein Quadrat', 'ein Achteck und zwei Quadrate', 'drei Quadrate', 'vier Achtecke'],
+      steps: [
+        '$135° + 135° + 90° = 360°$',
+        'Zwei Achtecke lassen eine 90°-Lücke.',
+        'Genau dort passt ein Quadrat hinein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit welchen regelmäßigen Vielecken allein kann man lückenlos parkettieren?',
+      opts: ['nur mit gleichseitigen Dreiecken, Quadraten und regelmäßigen Sechsecken', 'mit Dreiecken, Quadraten, Fünfecken und Sechsecken', 'nur mit Quadraten', 'mit allen regelmäßigen Vielecken'],
+      steps: [
+        'Der Innenwinkel muss ein Teiler von 360° sein.',
+        '60°, 90° und 120° passen; 108°, 135°, 140° … nicht.',
+        'Ab dem Siebeneck ist der Winkel größer als 120° und kleiner als 180°: Es passen weniger als 3, aber mehr als 2.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum füllen Bienen ihre Waben mit Sechsecken und nicht mit Quadraten?',
+      opts: ['Sechsecke sind größer.', 'Sechsecke brauchen bei gleicher Fläche weniger Wand (Wachs).', 'Bienen können keine Quadrate bauen.', 'Quadrate lassen Lücken.'],
+      steps: [
+        'Auch Quadrate und Dreiecke parkettieren lückenlos.',
+        'Von diesen drei hat das Sechseck bei gleicher Fläche den kleinsten Umfang.',
+        'So sparen die Bienen Wachs (bewiesen von Thomas Hales 1999).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Kann man mit jedem beliebigen, gleichen Dreieck parkettieren?',
+      opts: ['Nur mit gleichschenkligen.', 'Nein, nur mit gleichseitigen.', 'Ja, zwei Dreiecke ergeben ein Parallelogramm, und Parallelogramme parkettieren.', 'Nein, nur mit rechtwinkligen.'],
+      steps: [
+        'Ein Dreieck und seine gedrehte Kopie bilden ein Parallelogramm.',
+        'Parallelogramme lassen sich in Streifen lückenlos legen.',
+        'An jeder Ecke liegen $\\alpha$, $\\beta$, $\\gamma$ je zweimal: $2 \\cdot 180° = 360°$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Kann man mit jedem beliebigen, gleichen Viereck parkettieren?',
+      opts: ['Nein, nur mit Quadraten.', 'Ja, an jeder Ecke kommen alle vier Winkel einmal zusammen: 360°.', 'Nur mit Trapezen.', 'Nein, nur mit Rechtecken.'],
+      steps: [
+        'Die Winkelsumme im Viereck ist 360°.',
+        'Man dreht das Viereck abwechselnd um die Seitenmitten.',
+        'So liegen an jeder Ecke $\\alpha + \\beta + \\gamma + \\delta = 360°$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Bad ist 3 m lang und 2 m breit. Wie viele quadratische Fliesen mit 20 cm Seitenlänge braucht man für den Boden?',
+      opts: ['150', '30', '600', '15'],
+      steps: [
+        'Längs: $300 : 20 = 15$ Fliesen, quer: $200 : 20 = 10$ Fliesen.',
+        '$15 \\cdot 10 = 150$',
+        'Oder: $6 \\text{ m}^2 : 0{,}04 \\text{ m}^2 = 150$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für Verschnitt plant man 10 % mehr Fliesen ein. Wie viele kauft man statt 150?',
+      opts: ['160', '150', '15', '165'],
+      steps: [
+        '10 % von 150 sind 15.',
+        '$150 + 15 = 165$',
+        'Man kauft 165 Fliesen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Flur hat 4,5 m². Sechseckige Fliesen haben je 0,05 m². Wie viele Fliesen braucht man mindestens (ohne Verschnitt)?',
+      opts: ['225', '9', '90', '45'],
+      steps: [
+        'Fläche durch Fläche einer Fliese.',
+        '$4{,}5 : 0{,}05$',
+        '$= 90$ Fliesen'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Johannes Kepler beschrieb 1619 Parkette aus verschiedenen regelmäßigen Vielecken, bei denen jede Ecke gleich aussieht. Wie viele solche „archimedischen“ Parkette gibt es?',
+      opts: ['unendlich viele', '3', '11', '8'],
+      steps: [
+        'Neben den 3 regelmäßigen Parketten (nur eine Sorte) gibt es Mischungen.',
+        'Beispiel: Achteck, Achteck, Quadrat oder Sechseck, Dreieck, Sechseck, Dreieck.',
+        'Kepler fand in „Harmonices Mundi“ alle 8 solche Parkette.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gibt es überhaupt Fünfecke, mit denen man lückenlos parkettieren kann?',
+      opts: ['Nur das regelmäßige Fünfeck.', 'Ja, jedes Fünfeck parkettiert.', 'Nein, mit Fünfecken geht es nie.', 'Ja, aber keine regelmäßigen; man kennt genau 15 Arten (vollständig bewiesen 2017).'],
+      steps: [
+        'Regelmäßige Fünfecke scheitern an den 108°-Winkeln.',
+        'Mit unregelmäßigen, gleichen Fünfecken geht es manchmal – zum Beispiel mit „Hausfünfecken“.',
+        'Die 15. Art wurde 2015 gefunden; 2017 bewies Michaël Rao, dass es keine weitere gibt.'
+      ],
+      solution: 3
+    },
+    {
+      q: '2023 stellten der Hobby-Forscher David Smith und drei Mathematiker die „Hut“-Kachel vor. Was ist besonders an ihr?',
+      opts: ['Sie ist ein Kreis.', 'Sie füllt die Ebene lückenlos, aber das Muster wiederholt sich nie.', 'Sie kann keine Parkettierung bilden.', 'Sie ist das erste Quadrat mit fünf Ecken.'],
+      steps: [
+        'Normale Parkette wiederholen sich: Man kann sie verschieben und sie passen wieder.',
+        'Mit der „Hut“-Kachel allein entsteht ein Parkett ohne jede Wiederholung.',
+        'Mathematiker hatten lange nach so einer „Einstein“-Kachel (ein Stein) gesucht.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Anordnung von regelmäßigen Vielecken passt NICHT lückenlos um eine Ecke?',
+      opts: ['drei Dreiecke und zwei Quadrate', 'zwei Dreiecke und zwei Sechsecke', 'zwei Achtecke und ein Quadrat', 'ein Quadrat, ein Sechseck und ein Achteck'],
+      steps: [
+        'Winkel addieren: $90° + 120° + 135° = 345°$ – es bleibt eine Lücke.',
+        '$3 \\cdot 60° + 2 \\cdot 90° = 360°$, $2 \\cdot 135° + 90° = 360°$, $2 \\cdot 60° + 2 \\cdot 120° = 360°$',
+        'Nur die erste Anordnung passt nicht.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

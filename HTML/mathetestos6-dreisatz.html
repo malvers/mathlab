@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Der Dreisatz — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w14-dreisatz',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Der Dreisatz',
+  subtitle: 'Oberschule · Klasse 6 · Woche 14 (LB 2) · 20 Aufgaben: Dreisatz bei direkter und indirekter Proportionalität, Schluss über die Einheit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 14 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: direct rule of three (1-2, 5, 9-11, 16-17, 19), inverse (3-4, 6, 12, 14, 18), method (7-8, 13, 15, 20). */
+  questions: [
+    {
+      q: '3 Hefte kosten 2,40 €. Was kosten 7 Hefte?',
+      opts: ['5,60 €', '16,80 €', '4,80 €', '6,40 €'],
+      steps: [
+        '3 Hefte → 2,40 €',
+        '1 Heft → $2{,}40 : 3 = 0{,}80$ €',
+        '7 Hefte → $7 \\cdot 0{,}80 = 5{,}60$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: '5 kg Kartoffeln kosten 4,50 €. Was kosten 2 kg?',
+      opts: ['2,25 €', '1,50 €', '9,00 €', '1,80 €'],
+      steps: [
+        '5 kg → 4,50 €',
+        '1 kg → $4{,}50 : 5 = 0{,}90$ €',
+        '2 kg → $2 \\cdot 0{,}90 = 1{,}80$ €'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Auto braucht auf 100 km 7 Liter Benzin. Wie viel braucht es für 350 km?',
+      opts: ['24,5 Liter', '35 Liter', '21 Liter', '2 Liter'],
+      steps: [
+        '100 km → 7 Liter',
+        '50 km → 3,5 Liter (die Hälfte)',
+        '350 km sind 3-mal 100 km plus 50 km: $21 + 3{,}5 = 24{,}5$ Liter'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für 4 Portionen Pfannkuchen braucht man 250 g Mehl. Wie viel Mehl braucht man für 10 Portionen?',
+      opts: ['625 g', '1000 g', '500 g', '260 g'],
+      steps: [
+        '4 Portionen → 250 g',
+        '2 Portionen → 125 g',
+        '10 Portionen → $5 \\cdot 125 = 625$ g'
+      ],
+      solution: 0
+    },
+    {
+      q: '12 Pakete Kopierpapier wiegen zusammen 30 kg. Wie viel wiegen 5 Pakete?',
+      opts: ['15 kg', '72 kg', '10 kg', '12,5 kg'],
+      steps: [
+        '12 Pakete → 30 kg',
+        '1 Paket → $30 : 12 = 2{,}5$ kg',
+        '5 Pakete → $5 \\cdot 2{,}5 = 12{,}5$ kg'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Wasserhahn füllt einen 10-Liter-Eimer in 40 Sekunden. Wie lange braucht er für 25 Liter?',
+      opts: ['80 Sekunden', '100 Sekunden', '16 Sekunden', '65 Sekunden'],
+      steps: [
+        '10 Liter → 40 s',
+        '1 Liter → 4 s',
+        '25 Liter → $25 \\cdot 4 = 100$ s, also 1 Minute und 40 Sekunden'
+      ],
+      solution: 1
+    },
+    {
+      q: '6 Kugeln Eis kosten 7,20 €. Was kosten 9 Kugeln?',
+      opts: ['12,00 €', '4,80 €', '10,80 €', '10,20 €'],
+      steps: [
+        'Ohne Einheit geht es auch: 9 ist das 1,5-Fache von 6.',
+        '$1{,}5 \\cdot 7{,}20 = 10{,}80$ €',
+        'Mit Einheit: eine Kugel kostet 1,20 €, $9 \\cdot 1{,}20 = 10{,}80$ €.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Angenommen, 1 € entspricht 1,10 US-Dollar. Wie viele Dollar bekommt man für 50 €?',
+      opts: ['51,10 Dollar', '45,45 Dollar', '55 Dollar', '5,50 Dollar'],
+      steps: [
+        '1 € → 1,10 Dollar',
+        '50 € → $50 \\cdot 1{,}10$ Dollar',
+        '$= 55$ Dollar'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Drucker druckt 45 Seiten in 3 Minuten. Wie viele Seiten schafft er in 2 Minuten?',
+      opts: ['30', '90', '44', '15'],
+      steps: [
+        '3 Minuten → 45 Seiten',
+        '1 Minute → 15 Seiten',
+        '2 Minuten → 30 Seiten'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Vorrat reicht für 6 Personen 8 Tage. Wie lange reicht er für 4 Personen?',
+      opts: ['10 Tage', '6 Tage', '5,3 Tage', '12 Tage'],
+      steps: [
+        'Weniger Personen, längere Zeit: indirekt proportional.',
+        '1 Person → $6 \\cdot 8 = 48$ Tage',
+        '4 Personen → $48 : 4 = 12$ Tage'
+      ],
+      solution: 3
+    },
+    {
+      q: '3 Bagger brauchen für eine Baugrube 12 Tage. Wie lange brauchen 4 gleiche Bagger?',
+      opts: ['11 Tage', '9 Tage', '16 Tage', '3 Tage'],
+      steps: [
+        'Mehr Bagger, weniger Zeit: indirekt.',
+        '1 Bagger → $3 \\cdot 12 = 36$ Tage',
+        '4 Bagger → $36 : 4 = 9$ Tage'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Mit 80 km/h dauert eine Fahrt 3 Stunden. Wie lange dauert sie mit 120 km/h?',
+      opts: ['4,5 Stunden', '2 Stunden', '1,5 Stunden', '2,5 Stunden'],
+      steps: [
+        'Schneller fahren heißt kürzer fahren: indirekt.',
+        'Die Strecke ist $80 \\cdot 3 = 240$ km.',
+        '$240 : 120 = 2$ Stunden'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kuchen wird in 12 Stücke zu je 80 g geteilt. Wie schwer ist ein Stück, wenn man ihn in 16 gleich große Stücke teilt?',
+      opts: ['64 g', '100 g', '107 g', '60 g'],
+      steps: [
+        'Der ganze Kuchen wiegt $12 \\cdot 80 = 960$ g.',
+        'Mehr Stücke, kleinere Stücke: indirekt.',
+        '$960 : 16 = 60$ g'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Wanderung besteht aus 15 Etappen zu je 8 km. Wie lang wäre jede Etappe, wenn man den gleichen Weg in 12 gleich lange Etappen teilt?',
+      opts: ['6,4 km', '10 km', '9 km', '12 km'],
+      steps: [
+        'Gesamter Weg: $15 \\cdot 8 = 120$ km',
+        'Weniger Etappen, längere Etappen.',
+        '$120 : 12 = 10$ km'
+      ],
+      solution: 1
+    },
+    {
+      q: '24 Stühle stehen in 4 Reihen zu je 6 Stühlen. Wie viele Stühle stehen in jeder Reihe, wenn man sie in 3 gleich lange Reihen stellt?',
+      opts: ['4,5', '8', '7', '9'],
+      steps: [
+        'Die Anzahl der Stühle bleibt 24.',
+        '$24 : 3 = 8$',
+        'Weniger Reihen, mehr Stühle pro Reihe.'
+      ],
+      solution: 1
+    },
+    {
+      q: '2 Personen mähen einen Rasen in 90 Minuten. Wie lange brauchen 3 Personen, wenn alle gleich schnell arbeiten?',
+      opts: ['45 Minuten', '135 Minuten', '60 Minuten', '30 Minuten'],
+      steps: [
+        'Mehr Personen, weniger Zeit: indirekt.',
+        '1 Person → $2 \\cdot 90 = 180$ Minuten',
+        '3 Personen → $180 : 3 = 60$ Minuten, also eine Stunde'
+      ],
+      solution: 2
+    },
+    {
+      q: '4 Brötchen kosten 1,60 €. Was rechnet man beim Dreisatz im zweiten Schritt?',
+      opts: ['$1{,}60 + 4$', '$4 : 1{,}60$', 'den Preis für 8 Brötchen: $1{,}60 \\cdot 2$', 'den Preis für 1 Brötchen: $1{,}60 : 4 = 0{,}40$ €'],
+      steps: [
+        'Schritt 1: Was ist gegeben? 4 Brötchen → 1,60 €',
+        'Schritt 2: Schluss auf die Einheit, also auf 1 Brötchen.',
+        'Schritt 3: Schluss auf die gesuchte Anzahl.'
+      ],
+      solution: 3
+    },
+    {
+      q: '8 Personen schaffen eine Arbeit in 3 Stunden. Welcher Zwischenschritt ist beim Dreisatz richtig?',
+      opts: ['1 Person bräuchte $3 : 8$ Stunden.', '1 Person bräuchte $8 : 3$ Stunden.', '1 Person bräuchte $8 \\cdot 3 = 24$ Stunden.', '1 Person bräuchte 3 Stunden.'],
+      steps: [
+        'Indirekt: Eine Person allein braucht länger, nicht kürzer.',
+        'Deshalb wird malgenommen: $8 \\cdot 3 = 24$ Stunden.',
+        'Danach teilt man durch die neue Anzahl der Personen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Aufgabe löst man mit dem indirekten Dreisatz?',
+      opts: ['Wie lange reicht das Futter, wenn statt 5 Pferden nur 4 Pferde gefüttert werden?', 'Wie viel wiegen 6 Bücher, wenn 2 Bücher 900 g wiegen?', 'Wie weit fährt ein Zug in 4 Stunden, wenn er 2 Stunden für 300 km braucht?', 'Was kosten 8 Äpfel, wenn 3 Äpfel 1,20 € kosten?'],
+      steps: [
+        'Äpfel, Zug und Bücher: doppelt so viel, doppelt so viel – direkt.',
+        'Beim Futter gilt: weniger Pferde, längere Zeit.',
+        'Das ist indirekt proportional.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ben rechnet: „3 Pumpen brauchen 8 Stunden, also brauchen 6 Pumpen 16 Stunden.“ Was stimmt?',
+      opts: ['Richtig wären 8 Stunden.', 'Richtig wären 11 Stunden.', 'Ben hat direkt statt indirekt gerechnet; richtig sind 4 Stunden.', 'Ben hat recht.'],
+      steps: [
+        'Doppelt so viele Pumpen schaffen die Arbeit in der halben Zeit.',
+        'Ben hat die Zeit verdoppelt – das wäre direkt proportional.',
+        'Richtig: $8 : 2 = 4$ Stunden.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

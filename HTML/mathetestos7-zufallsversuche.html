@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zufallsversuche — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos7-w11-zufallsversuche',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zufallsversuche',
+  subtitle: 'Oberschule · Klasse 7 · Realschulbildungsgang · Woche 11 (LB 2) · 20 Aufgaben: Ergebnis, Ergebnismenge, Ereignis, sicheres und unmögliches Ereignis · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 7 · Woche 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe7.html', /* opened from the plan */
+  /* Blocks: sample spaces (1-2, 8-9, 15, 18), events (3-7, 12-14, 16-17, 20), kinds of experiments (10-11, 19). */
+  questions: [
+    {
+      q: 'Ein Würfel wird einmal geworfen. Wie lautet die Ergebnismenge?',
+      opts: ['$S = \\{6\\}$', '$S = \\{1;\\ 2;\\ 3;\\ 4;\\ 5;\\ 6\\}$', '$S = \\{1;\\ 6\\}$', '$S = \\{0;\\ 1;\\ 2;\\ 3;\\ 4;\\ 5;\\ 6\\}$'],
+      steps: [
+        'Die Ergebnismenge enthält alle möglichen Ergebnisse.',
+        'Ein Würfel zeigt 1 bis 6 Augen.',
+        '$S = \\{1;\\ 2;\\ 3;\\ 4;\\ 5;\\ 6\\}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Münze wird einmal geworfen. Wie lautet die Ergebnismenge?',
+      opts: ['$S = \\{\\text{Kopf};\\ \\text{Zahl}\\}$', '$S = \\{\\text{Kopf}\\}$', '$S = \\{1;\\ 2\\}$', '$S = \\{\\text{Kopf};\\ \\text{Zahl};\\ \\text{Rand}\\}$'],
+      steps: [
+        'Eine Münze kann Kopf oder Zahl zeigen.',
+        'Das Liegenbleiben auf dem Rand schließt man aus.',
+        '$S = \\{\\text{Kopf};\\ \\text{Zahl}\\}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Münzen werden nacheinander geworfen. Wie viele Elemente hat die Ergebnismenge?',
+      opts: ['2', '8', '3', '4'],
+      steps: [
+        'Erste Münze K oder Z, zweite Münze K oder Z.',
+        '$S = \\{KK;\\ KZ;\\ ZK;\\ ZZ\\}$',
+        '4 Ergebnisse.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Ergebnismenge für das Glücksrad?',
+      fig: '<svg viewBox="0 0 260 276" width="260" height="276" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Glücksrad"><path d="M 130 144 L 130 30 A 114 114 0 0 1 228.73 87 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="168.76" y="80.87" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">rot</text><path d="M 130 144 L 228.73 87 A 114 114 0 0 1 228.73 201 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="207.52" y="148" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">rot</text><path d="M 130 144 L 228.73 201 A 114 114 0 0 1 130 258 Z" fill="#2E6BC6" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="168.76" y="215.13" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">blau</text><path d="M 130 144 L 130 258 A 114 114 0 0 1 31.27 201 Z" fill="#799E31" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="91.24" y="215.13" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">grün</text><path d="M 130 144 L 31.27 201 A 114 114 0 0 1 31.27 87 Z" fill="#B02418" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="52.48" y="148" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">rot</text><path d="M 130 144 L 31.27 87 A 114 114 0 0 1 130 30 Z" fill="#2E6BC6" opacity="0.85" stroke="#FFFFFF" stroke-width="2"/><text x="91.24" y="80.87" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">blau</text><circle cx="130.0" cy="144.0" r="114.0" fill="none" stroke="#0E244E" stroke-width="1.6"/><circle cx="130" cy="144" r="5" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><path d="M 121 4 L 139 4 L 130 22 Z" fill="#0E244E" stroke="#0E244E" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/></svg>',
+      figcap: 'Glücksrad mit 6 gleich großen Feldern',
+      opts: ['$S = \\{\\text{rot};\\ \\text{rot};\\ \\text{rot};\\ \\text{blau};\\ \\text{blau};\\ \\text{grün}\\}$', '$S = \\{\\text{rot};\\ \\text{blau};\\ \\text{grün}\\}$', '$S = \\{\\text{rot}\\}$', '$S = \\{1;\\ 2;\\ 3;\\ 4;\\ 5;\\ 6\\}$'],
+      steps: [
+        'Beobachtet wird die Farbe, auf der der Zeiger stehen bleibt.',
+        'Jedes Ergebnis kommt in der Menge nur einmal vor.',
+        '$S = \\{\\text{rot};\\ \\text{blau};\\ \\text{grün}\\}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus einem Beutel mit 3 roten und 2 blauen Kugeln wird ohne Hinsehen eine Kugel gezogen. Man beobachtet die Farbe. Wie lautet die Ergebnismenge?',
+      opts: ['$S = \\{1;\\ 2;\\ 3;\\ 4;\\ 5\\}$', '$S = \\{\\text{rot}\\}$', '$S = \\{\\text{rot};\\ \\text{blau}\\}$', '$S = \\{3;\\ 2\\}$'],
+      steps: [
+        'Man beobachtet nur die Farbe.',
+        'Möglich sind rot und blau.',
+        '$S = \\{\\text{rot};\\ \\text{blau}\\}$ – rot ist aber wahrscheinlicher.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Man beobachtet, an welchem Wochentag die nächste Person Geburtstag hat. Wie viele Elemente hat die Ergebnismenge?',
+      opts: ['365', '12', '31', '7'],
+      steps: [
+        'Beobachtet wird der Wochentag.',
+        'Montag bis Sonntag.',
+        '7 Ergebnisse.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Würfeln: Welche Menge beschreibt das Ereignis „gerade Augenzahl“?',
+      opts: ['$\\{2;\\ 4\\}$', '$\\{2;\\ 4;\\ 6\\}$', '$\\{1;\\ 3;\\ 5\\}$', '$\\{0;\\ 2;\\ 4;\\ 6\\}$'],
+      steps: [
+        'Ein Ereignis fasst Ergebnisse zusammen.',
+        'Gerade Augenzahlen sind 2, 4 und 6.',
+        'Ereignis $E = \\{2;\\ 4;\\ 6\\}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Würfeln: Welche Menge beschreibt das Ereignis „mehr als 4“?',
+      opts: ['$\\{1;\\ 2;\\ 3;\\ 4\\}$', '$\\{4;\\ 5;\\ 6\\}$', '$\\{6\\}$', '$\\{5;\\ 6\\}$'],
+      steps: [
+        '„Mehr als 4“ heißt: größer als 4.',
+        'Die 4 selbst gehört nicht dazu.',
+        '$E = \\{5;\\ 6\\}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Würfeln: Welche Menge beschreibt das Ereignis „Primzahl“?',
+      opts: ['$\\{1;\\ 2;\\ 3;\\ 5\\}$', '$\\{2;\\ 3;\\ 5\\}$', '$\\{3;\\ 5\\}$', '$\\{2;\\ 3;\\ 5;\\ 6\\}$'],
+      steps: [
+        'Primzahlen haben genau zwei Teiler.',
+        '1 ist keine Primzahl, 6 auch nicht.',
+        '$E = \\{2;\\ 3;\\ 5\\}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist ein Ereignis?',
+      opts: ['die Anzahl der Würfe', 'immer genau ein Ergebnis', 'eine Teilmenge der Ergebnismenge', 'ein besonders seltenes Ergebnis'],
+      steps: [
+        'Ein Ereignis kann aus einem, mehreren oder gar keinem Ergebnis bestehen.',
+        'Beispiel: „gerade Zahl“ = $\\{2;\\ 4;\\ 6\\}$.',
+        'Es ist also eine Teilmenge der Ergebnismenge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim Würfeln fällt eine 3. Welches Ereignis ist dann eingetreten?',
+      opts: ['„ungerade Augenzahl“', '„gerade Augenzahl“', '„mehr als 4“', '„Augenzahl 6“'],
+      steps: [
+        'Ein Ereignis tritt ein, wenn das Ergebnis darin liegt.',
+        '$3 \\in \\{1;\\ 3;\\ 5\\}$',
+        'Also ist „ungerade Augenzahl“ eingetreten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welches Ereignis ist beim Würfeln sicher?',
+      opts: ['„Augenzahl größer als 1“', '„Augenzahl 6“', '„Augenzahl kleiner als 7“', '„gerade Augenzahl“'],
+      steps: [
+        'Ein sicheres Ereignis tritt bei jedem Wurf ein.',
+        'Jede Augenzahl von 1 bis 6 ist kleiner als 7.',
+        'Das Ereignis ist die ganze Ergebnismenge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welches Ereignis ist beim Würfeln unmöglich?',
+      opts: ['„Augenzahl 7“', '„Augenzahl 1“', '„ungerade Augenzahl“', '„Augenzahl kleiner als 3“'],
+      steps: [
+        'Ein unmögliches Ereignis tritt nie ein.',
+        'Kein Würfelergebnis ist 7.',
+        'Es ist die leere Menge.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist beim Würfeln das Gegenereignis von „gerade Augenzahl“?',
+      opts: ['„Augenzahl 6“', '„gerade Augenzahl“', '„ungerade Augenzahl“, also $\\{1;\\ 3;\\ 5\\}$', '„Augenzahl 0“'],
+      steps: [
+        'Das Gegenereignis enthält alle Ergebnisse, die nicht im Ereignis liegen.',
+        '$S$ ohne $\\{2;\\ 4;\\ 6\\}$',
+        '$= \\{1;\\ 3;\\ 5\\}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Würfel werden geworfen. Wie viele der 36 Würfelpaare gehören zum Ereignis „Augensumme 10“?',
+      opts: ['2', '10', '1', '3'],
+      steps: [
+        'Mögliche Paare: (4|6), (5|5), (6|4).',
+        '(4|6) und (6|4) sind verschieden, weil die Würfel verschieden sind.',
+        '3 Paare.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Aus den Buchstaben des Wortes MATHE wird zufällig einer gezogen. Welche Menge beschreibt das Ereignis „Vokal“?',
+      opts: ['$\\{\\text{A}\\}$', '$\\{\\text{M};\\ \\text{T};\\ \\text{H}\\}$', '$\\{\\text{A};\\ \\text{E};\\ \\text{H}\\}$', '$\\{\\text{A};\\ \\text{E}\\}$'],
+      steps: [
+        'Vokale sind A, E, I, O, U.',
+        'Im Wort MATHE kommen A und E vor.',
+        '$E = \\{\\text{A};\\ \\text{E}\\}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Würfeln: Welche Menge beschreibt das Ereignis „höchstens 2“?',
+      opts: ['$\\{2\\}$', '$\\{1;\\ 2\\}$', '$\\{2;\\ 3;\\ 4;\\ 5;\\ 6\\}$', '$\\{1\\}$'],
+      steps: [
+        '„Höchstens 2“ heißt: 2 oder weniger.',
+        'Die 2 gehört dazu.',
+        '$E = \\{1;\\ 2\\}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei welchem Zufallsversuch sind alle Ergebnisse gleich wahrscheinlich?',
+      opts: ['beim Werfen eines fairen Würfels', 'beim Ziehen aus einem Beutel mit 3 roten und 1 blauen Kugel', 'beim Werfen einer Reißzwecke', 'beim Glücksrad mit 4 roten und 2 blauen Feldern'],
+      steps: [
+        'Solche Versuche heißen Laplace-Versuche (nach Pierre-Simon Laplace).',
+        'Beim fairen Würfel hat jede Seite dieselbe Chance.',
+        'Reißzwecke, ungleiches Glücksrad und ungleicher Beutel sind keine Laplace-Versuche.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Reißzwecke wird geworfen. Was gilt für die Ergebnisse „Kopf“ und „Seite“?',
+      opts: ['Sie sind nicht gleich wahrscheinlich; man muss es durch viele Würfe herausfinden.', 'Es gibt nur ein Ergebnis.', 'Sie sind gleich wahrscheinlich.', '„Kopf“ ist unmöglich.'],
+      steps: [
+        'Die Reißzwecke ist ungleichmäßig geformt.',
+        'Es gibt keinen Grund, warum beide Lagen gleich oft vorkommen sollten.',
+        'Kein Laplace-Versuch: Die Chancen bestimmt man durch Versuche.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was gehört zur genauen Beschreibung eines Zufallsversuchs?',
+      opts: ['nur die Anzahl der Würfe', 'das Datum des Versuchs', 'was gemacht wird und was beobachtet wird', 'nur das Ergebnis'],
+      steps: [
+        'Beispiel: Ein Würfel wird geworfen (was gemacht wird).',
+        'Man notiert die Augenzahl (was beobachtet wird).',
+        'Daraus ergibt sich die Ergebnismenge.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

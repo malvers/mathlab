@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Dreiecke konstruieren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'matheos6-w20-dreiecke-konstruieren',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Dreiecke konstruieren',
+  subtitle: 'Oberschule · Klasse 6 · Woche 20 (LB 3) · 20 Aufgaben: Kongruenzsätze, Dreiecksungleichung, Seiten-Winkel-Beziehung, Lösbarkeit · genau eine Antwort pro Aufgabe',
+  dashSub: 'Oberschule · Klasse 6 · Woche 20 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe6.html', /* opened from the plan */
+  /* Blocks: triangle inequality (1-3, 18-19), congruence theorems (4-8, 13-17, 20), side-angle relation and existence (9-12). */
+  questions: [
+    {
+      q: 'Mit welchen drei Seitenlängen lässt sich ein Dreieck zeichnen?',
+      opts: ['2 cm, 3 cm und 6 cm', '3 cm, 4 cm und 7 cm', '4 cm, 5 cm und 8 cm', '1 cm, 1 cm und 3 cm'],
+      steps: [
+        'Dreiecksungleichung: Zwei Seiten zusammen müssen länger sein als die dritte.',
+        '$4 + 5 = 9 > 8$ – das klappt.',
+        '$2 + 3 < 6$, $3 + 4 = 7$ (nur eine flache Strecke) und $1 + 1 < 3$ klappen nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bei welchen Seitenlängen gibt es KEIN Dreieck?',
+      opts: ['6 cm, 7 cm und 8 cm', '4 cm, 4 cm und 4 cm', '3 cm, 5 cm und 9 cm', '5 cm, 5 cm und 9 cm'],
+      steps: [
+        'Prüfe immer die beiden kürzeren Seiten gegen die längste.',
+        '$3 + 5 = 8$, das ist kürzer als 9.',
+        'Die beiden kurzen Seiten reichen nicht bis zueinander.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Seiten eines Dreiecks sind 5 cm und 8 cm lang. Welche Länge kann die dritte Seite haben?',
+      opts: ['10 cm', '14 cm', '2 cm', '13 cm'],
+      steps: [
+        'Die dritte Seite muss länger sein als $8 - 5 = 3$ cm.',
+        'Und kürzer als $8 + 5 = 13$ cm.',
+        'Von den Angeboten passt nur 10 cm.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Von zu Hause zur Schule sind es 3 km Luftlinie, von der Schule zum Sportplatz 2 km. Wie weit ist es höchstens von zu Hause zum Sportplatz (Luftlinie)?',
+      opts: ['5 km', '6 km', '1 km', '2,5 km'],
+      steps: [
+        'Zu Hause, Schule und Sportplatz bilden ein Dreieck oder liegen auf einer Linie.',
+        'Die dritte Strecke ist höchstens so lang wie die beiden anderen zusammen.',
+        'Höchstens $3 + 2 = 5$ km, mindestens $3 - 2 = 1$ km.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein gleichschenkliges Dreieck hat eine Basis von 10 cm. Wie lang muss jeder Schenkel sein?',
+      opts: ['beliebig lang', 'genau 10 cm', 'länger als 5 cm', 'länger als 10 cm'],
+      steps: [
+        'Die beiden Schenkel zusammen müssen länger als die Basis sein.',
+        '$2 \\cdot s > 10$ cm',
+        'Also $s > 5$ cm.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Von einem Dreieck kennt man alle drei Seiten. Nach welchem Kongruenzsatz ist es eindeutig konstruierbar?',
+      opts: ['SsW', 'sws', 'wsw', 'sss'],
+      steps: [
+        'Gegeben sind drei Seiten: s, s, s.',
+        'Wenn die Dreiecksungleichung erfüllt ist, gibt es genau ein Dreieck (bis auf die Lage).',
+        'Kongruenzsatz sss.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben sind zwei Seiten und der Winkel, den sie einschließen. Welcher Kongruenzsatz passt?',
+      opts: ['sss', 'wsw', 'SsW', 'sws'],
+      steps: [
+        'Der Winkel liegt zwischen den beiden Seiten.',
+        'Seite – Winkel – Seite.',
+        'Kongruenzsatz sws.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben sind eine Seite und die beiden Winkel, die an ihr anliegen. Welcher Kongruenzsatz passt?',
+      opts: ['sss', 'wsw', 'SsW', 'sws'],
+      steps: [
+        'Die Seite liegt zwischen den beiden Winkeln.',
+        'Winkel – Seite – Winkel.',
+        'Kongruenzsatz wsw.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben sind zwei Seiten und der Winkel, der der längeren Seite gegenüberliegt. Welcher Kongruenzsatz passt?',
+      opts: ['sws', 'sss', 'SsW', 'wsw'],
+      steps: [
+        'Der Winkel liegt nicht zwischen den Seiten, sondern einer Seite gegenüber.',
+        'Das große S zeigt: Es muss die größere Seite sein.',
+        'Kongruenzsatz SsW.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gegeben sind nur die drei Winkel 50°, 60° und 70°. Ist das Dreieck eindeutig bestimmt?',
+      opts: ['Nein, solche Winkel gibt es in keinem Dreieck.', 'Nein, die Form steht fest, die Größe aber nicht.', 'Ja, weil die Winkelsumme 180° ist.', 'Ja, nach dem Satz www.'],
+      steps: [
+        'Es gibt kleine und große Dreiecke mit genau diesen Winkeln.',
+        'Sie sehen gleich aus, sind aber nicht deckungsgleich.',
+        '„www“ ist kein Kongruenzsatz – es fehlt mindestens eine Seite.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet es, dass zwei Dreiecke kongruent sind?',
+      opts: ['Sie sind deckungsgleich: Man kann das eine genau auf das andere legen.', 'Sie haben nur denselben Flächeninhalt.', 'Sie liegen nebeneinander.', 'Sie haben nur dieselben Winkel.'],
+      steps: [
+        'Kongruent heißt deckungsgleich.',
+        'Alle Seiten und alle Winkel stimmen überein.',
+        'Ausschneiden und auflegen – sie passen genau.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Dreieck soll nach sss mit $a = 4$ cm, $b = 5$ cm und $c = 6$ cm konstruiert werden. Wie geht es nach dem Zeichnen von $c = \\overline{AB}$ weiter?',
+      opts: ['Die Mitte von $\\overline{AB}$ suchen.', 'An $A$ einen Winkel von 60° antragen.', 'Kreis um $A$ mit 4 cm und Kreis um $B$ mit 5 cm; der Schnittpunkt ist $C$.', 'Kreis um $A$ mit 5 cm und Kreis um $B$ mit 4 cm; der Schnittpunkt ist $C$.'],
+      steps: [
+        '$b = \\overline{AC}$ ist die Seite gegenüber von $B$; sie geht von $A$ aus.',
+        '$a = \\overline{BC}$ geht von $B$ aus.',
+        'Also Kreis um $A$ mit $r = 5$ cm und um $B$ mit $r = 4$ cm.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Dreieck mit $a = 4$ cm, $b = 6$ cm und $\\gamma = 50°$ soll konstruiert werden. Womit beginnt man sinnvoll?',
+      opts: ['mit der Seite $c$', 'mit dem Winkel $\\gamma$ am Punkt $C$, dann $a$ und $b$ auf seinen Schenkeln abtragen', 'mit einem Kreis um $A$ mit 50 mm', 'mit dem Winkel $\\alpha$'],
+      steps: [
+        '$\\gamma$ liegt bei $C$, zwischen den Seiten $a$ und $b$: Kongruenzsatz sws.',
+        'Zuerst den Winkel zeichnen, dann auf den Schenkeln 4 cm und 6 cm abmessen.',
+        'Die Endpunkte $B$ und $A$ verbinden: Das ist die Seite $c$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben sind $b = 4$ cm, $c = 6$ cm und $\\gamma = 70°$. Wie viele verschiedene Dreiecke gibt es (bis auf die Lage)?',
+      opts: ['zwei', 'unendlich viele', 'genau eins', 'keins'],
+      steps: [
+        '$\\gamma$ liegt der Seite $c$ gegenüber.',
+        '$c = 6$ cm ist die größere der beiden Seiten.',
+        'Nach SsW ist das Dreieck eindeutig: genau eins.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum gilt SsW nur, wenn der Winkel der größeren Seite gegenüberliegt?',
+      opts: ['Weil sonst die Winkelsumme größer als 180° wäre.', 'Liegt er der kleineren Seite gegenüber, kann es zwei verschiedene Dreiecke geben.', 'Weil man kleinere Seiten nicht messen kann.', 'Das stimmt nicht, SsW gilt immer.'],
+      steps: [
+        'Beim Konstruieren schneidet der Kreis den freien Schenkel dann manchmal zweimal.',
+        'Beide Schnittpunkte ergeben ein passendes Dreieck.',
+        'Das Dreieck ist dann nicht eindeutig bestimmt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Nach welchem Kongruenzsatz ist das Dreieck durch die markierten Stücke bestimmt?',
+      fig: '<svg viewBox="0 0 340 240" width="340" height="240" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vieleck"><path d="M 34 196.88 L 306 196.88 L 217.23 43.12 Z" fill="#FDF3D6" stroke="#0E244E" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><text x="170" y="219.88" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">c = 5 cm</text><path d="M 56 196.88 A 22 22 0 0 0 50.85 182.73" fill="none" stroke="#B02418" stroke-width="1.5"/><text x="67.83" y="189.56" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#B02418" text-anchor="middle" font-weight="600" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">40°</text><path d="M 295 177.82 A 22 22 0 0 0 284 196.88" fill="none" stroke="#B02418" stroke-width="1.5"/><text x="274.82" y="183.88" font-family="Raleway, system-ui, sans-serif" font-size="15" fill="#B02418" text-anchor="middle" font-weight="600" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">60°</text><text x="19.79" y="206.67" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" font-weight="600">A</text><text x="319.8" y="207.76" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" font-weight="600">B</text><text x="221.64" y="33.79" font-family="Raleway, system-ui, sans-serif" font-size="16" fill="#0E244E" text-anchor="middle" font-weight="600">C</text></svg>',
+      figcap: 'Gegebene Stücke eines Dreiecks',
+      opts: ['wsw', 'sws', 'SsW', 'sss'],
+      steps: [
+        'Gegeben: die Seite $c = 5$ cm und die Winkel 40° und 60° an ihren Enden.',
+        'Die Seite liegt zwischen den beiden Winkeln.',
+        'Winkel – Seite – Winkel: wsw.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einem Dreieck ist $a = 7$ cm, $b = 5$ cm und $c = 4$ cm. Welcher Winkel ist am größten?',
+      opts: ['$\\gamma$', 'Alle sind gleich groß.', '$\\beta$', '$\\alpha$'],
+      steps: [
+        'Der längeren Seite liegt der größere Winkel gegenüber.',
+        'Die längste Seite ist $a = 7$ cm.',
+        'Ihr gegenüber liegt $\\alpha$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einem Dreieck ist $\\beta = 80°$ und $\\gamma = 40°$. Welche Seite ist am kürzesten?',
+      opts: ['$b$', '$a$', 'Alle sind gleich lang.', '$c$'],
+      steps: [
+        '$\\alpha = 180° - 80° - 40° = 60°$',
+        'Der kleinste Winkel ist $\\gamma = 40°$.',
+        'Ihm gegenüber liegt die kürzeste Seite $c$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben sind $c = 5$ cm, $\\alpha = 95°$ und $\\beta = 85°$. Was ergibt die Konstruktion?',
+      opts: ['ein gleichschenkliges Dreieck', 'kein Dreieck, die Schenkel treffen sich nicht', 'genau ein Dreieck', 'zwei Dreiecke'],
+      steps: [
+        '$\\alpha + \\beta = 180°$',
+        'Für $\\gamma$ bleibt nichts übrig.',
+        'Die freien Schenkel laufen parallel: kein Dreieck.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Dreieck wird nach sws mit $a = 6$ cm, $b = 6$ cm und $\\gamma = 60°$ konstruiert. Was für ein Dreieck entsteht?',
+      opts: ['ein gleichseitiges Dreieck', 'ein rechtwinkliges Dreieck', 'kein Dreieck', 'ein stumpfwinkliges Dreieck'],
+      steps: [
+        '$a = b$: Das Dreieck ist gleichschenklig, $\\alpha$ und $\\beta$ sind gleich groß.',
+        '$\\alpha = \\beta = (180° - 60°) : 2 = 60°$',
+        'Alle Winkel sind 60°, also sind auch alle Seiten gleich lang: gleichseitig.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
