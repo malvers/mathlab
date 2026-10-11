@@ -44,6 +44,22 @@ window.BuchEN && BuchEN.add('funktionen', {
         'Grundfunktion': 'Basic function', 'Grundfunktion und veränderte Funktion': 'Basic function and transformed function',
         'Das ist die Grundfunktion selbst.': 'That is the basic function itself.',
         'Graph, zu dem der Term gesucht ist': 'Graph whose term is wanted', 'Nächster Graph': 'Next graph',
+        // book 4 mathefos11-en: funktion, lage, parabelschar, ganzrational
+        'Parabel': 'Parabola', 'Liegende Spitze': 'Sideways V', 'Liegende Parabel': 'Sideways parabola', 'Wurzel': 'Square root', 'Hyperbel': 'Hyperbola',
+        'Betrag': 'Absolute value', 'Kurve': 'Curve', 'Kurve mit verschiebbarer senkrechter Gerade': 'Curve with a draggable vertical line',
+        'Zieh den türkisen Punkt unten: Die senkrechte Gerade wandert mit. Wie oft trifft sie die Kurve?':
+            'Drag the turquoise point at the bottom: the vertical line moves with it. How often does it meet the curve?',
+        'Ist die Kurve der Graph einer Funktion?': 'Is the curve the graph of a function?', 'keine Funktion': 'not a function',
+        'Richtig.': 'Correct.', 'Nicht ganz.': 'Not quite.',
+        'Entscheide mit den Knöpfen. Danach siehst du Definitions- und Wertebereich.': 'Decide with the buttons. Then you will see the domain and range.',
+        'schneidend': 'intersecting', 'identisch': 'identical',
+        '$g$: Anstieg $m_1$': '$g$: gradient $m_1$', '$g$: Achsenabschnitt $n_1$': '$g$: intercept $n_1$',
+        '$h$: Anstieg $m_2$': '$h$: gradient $m_2$', '$h$: Achsenabschnitt $n_2$': '$h$: intercept $n_2$',
+        'Zwei Geraden und ihre Lage zueinander': 'Two lines and their relative position',
+        'Funktionenschar': 'Family of functions', 'Schar von Parabeln mit einem hervorgehobenen Mitglied': 'Family of parabolas with one highlighted member',
+        'Vielfachheit': 'Multiplicity', 'Vielfachheit kleiner': 'Lower multiplicity', 'Vielfachheit größer': 'Higher multiplicity', 'Faktor $a$': 'Factor $a$',
+        'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Drag the zeros along the $x$-axis. Multiplicity 0 removes the linear factor.',
+        'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Polynomial function with draggable zeros',
     },
     phrase: [
         // detektiv
@@ -91,6 +107,43 @@ window.BuchEN && BuchEN.add('funktionen', {
         [': stauchen in $x$-Richtung', ': compress in the $x$-direction'], [': verschieben in $x$-Richtung', ': shift in the $x$-direction'],
         ['gespiegelt an der $x$-Achse', 'reflected in the $x$-axis'], ['gespiegelt an der $y$-Achse', 'reflected in the $y$-axis'],
         [', in $x$-Richtung mit Faktor ', ', scaled in the $x$-direction by factor '], ['Der Graph ist ', 'The graph is '],
+        // book 4 mathefos11-en: funktion
+        ['$ · Bei $x = ', '$ · At $x = '], ['$ trifft die Senkrechte die Kurve <b>', '$ the vertical line meets the curve <b>'],
+        ['gar nicht', 'not at all'], ['genau einmal', 'exactly once'], ['$ und $y = ', '$ and $y = '],
+        ['Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. ', 'Every vertical line meets the curve at most once: a function. '],
+        ['Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: Zu $x = 1$ gehören $y = 2$ und $y = -2$.',
+            'To the right of $x = -1$ every vertical line meets the curve twice: $x = 1$ has both $y = 2$ and $y = -2$.'],
+        ['Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.',
+            '$x = 2$ has both $y = 2$ and $y = -2$. But a function assigns exactly one $y$ to every $x$.'],
+        // book 4 mathefos11-en: lage
+        ['Gleicher Anstieg und gleicher Achsenabschnitt: <b>identisch</b>. Jeder Punkt ist gemeinsam.', 'Same gradient and same intercept: <b>identical</b>. Every point is shared.'],
+        ['Gleicher Anstieg $m_1 = m_2$, verschiedene Achsenabschnitte: <b>parallel</b>. Es gibt keinen Schnittpunkt.',
+            'Same gradient $m_1 = m_2$, different intercepts: <b>parallel</b>. There is no point of intersection.'],
+        ['$: Die Geraden sind <b>orthogonal</b> (senkrecht zueinander).', '$: the lines are <b>orthogonal</b> (perpendicular to each other).'],
+        ['Verschiedene Anstiege: Die Geraden <b>schneiden</b> sich.', 'Different gradients: the lines <b>intersect</b>.'],
+        ['Gleichsetzen: $', 'Setting equal: $'], ['$ ergibt $x = ', '$ gives $x = '], ['$, also ', '$, so '], [' · Schnittwinkel $', ' · angle of intersection $'],
+        ['parallel zur $x$-Achse', 'parallel to the $x$-axis'],
+        // book 4 mathefos11-en: parabelschar
+        ['$ für $', '$ for $'], ['Nullstellen: $', 'Zeros: $'], ['keine Nullstelle', 'no zero'], [' · Scheitel $(', ' · vertex $('],
+        ['zwei Nullstellen $x = 0$ und $x = -a$', 'two zeros $x = 0$ and $x = -a$'], ['zwei Nullstellen ', 'two zeros '],
+        ['eine (doppelte) Nullstelle ', 'one (double) zero '], ['eine doppelte Nullstelle ', 'one double zero '],
+        ['keine Parabel, sondern die Gerade $y = -4$: keine Nullstelle', 'not a parabola but the line $y = -4$: no zero'],
+        ['nach unten geöffnet mit dem Scheitel ', 'opens downwards with the vertex '], [': keine Nullstelle', ': no zero'],
+        ['Diskriminante: $', 'Discriminant: $'], ['$ hat $D = ', '$ has $D = '], ['Ausklammern: $', 'Factoring out: $'],
+        ['$. Die Scheitel $S\\left(-\\tfrac{a}{2} \\mid -\\tfrac{a^2}{4}\\right)$ liegen alle auf der Parabel $y = -x^2$ (gestrichelt).',
+            '$. The vertices $S\\left(-\\tfrac{a}{2}, -\\tfrac{a^2}{4}\\right)$ all lie on the parabola $y = -x^2$ (dashed).'],
+        ['$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.',
+            '$kx^2 = 4$ only has solutions for $k > 0$. The case $k = 0$ has to be looked at separately, because then the $x^2$ disappears.'],
+        // book 4 mathefos11-en: ganzrational
+        [': einfach → ', ': single → '], [': doppelt → ', ': double → '], [': dreifach → ', ': triple → '], [': vierfach → ', ': fourfold → '],
+        [': fünffach → ', ': fivefold → '], [': sechsfach → ', ': sixfold → '], [': siebenfach → ', ': sevenfold → '], [': achtfach → ', ': eightfold → '],
+        [': neunfach → ', ': ninefold → '],
+        ['Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse', 'change of sign, the graph <b>cuts</b> the $x$-axis'],
+        ['Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)', 'change of sign, the graph cuts the $x$-axis <b>flat</b> (saddle point)'],
+        ['kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse', 'no change of sign, the graph <b>touches</b> the $x$-axis'],
+        ['$ · Grad $', '$ · degree $'], ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'For $x \\to +\\infty$, $f(x) \\to '],
+        ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$, for $x \\to -\\infty$, $f(x) \\to '],
+        ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Only the term with the highest power decides: $'],
     ],
     rule: [
         // dates of the day-length widget: "21. Mär" → "21 Mar"
@@ -106,5 +159,7 @@ window.BuchEN && BuchEN.add('funktionen', {
         [/ und mit \$([^$]+)\$ gestreckt/g, (m, f) => ' and stretched by factor $' + f + '$'],
         [/um \$([^$]+)\$ nach (links|rechts|oben|unten) verschoben/g,
             (m, c, d) => 'shifted $' + c + '$ ' + { links: 'to the left', rechts: 'to the right', oben: 'up', unten: 'down' }[d]],
+        // book 4 mathefos11-en: funktion, "die Kurve <b>2-mal</b>"
+        [/<b>(\d+)-mal<\/b>/g, '<b>$1 times</b>'],
     ]
 });

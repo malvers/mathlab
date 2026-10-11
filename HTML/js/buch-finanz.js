@@ -22,8 +22,8 @@
     W('zins', function (box) {
         const S = { k: 5000, p: 3, n: 20 };
         const sl = div(box, '');
-        range(sl, { label: 'Startkapital $K_0$ in €', min: 500, max: 20000, step: 500, value: S.k, fmt: v => v.toLocaleString('de-DE'), onInput: v => { S.k = v; render(); } });
-        range(sl, { label: 'Zinssatz $p$', min: 0.5, max: 10, step: 0.25, value: S.p, fmt: v => fmt(v, 2) + ' %', onInput: v => { S.p = v; render(); } });
+        range(sl, { label: 'Startkapital $K_0$ in €', min: 500, max: 20000, step: 500, value: S.k, fmt: v => v.toLocaleString(B.en ? 'en-GB' : 'de-DE'), onInput: v => { S.k = v; render(); } });
+        range(sl, { label: 'Zinssatz $p$', min: 0.5, max: 10, step: 0.25, value: S.p, fmt: v => fmt(v, 2) + (B.en ? '%' : ' %'), onInput: v => { S.p = v; render(); } });
         range(sl, { label: 'Laufzeit $n$', min: 1, max: 40, step: 1, value: S.n, fmt: v => v + ' J.', onInput: v => { S.n = v; render(); } });
         math(sl);
         const p = new Plot(div(box, ''), { x: [-0.8, 20.8], y: [0, 10000], height: 300, xLabel: 'Jahre', yLabel: 'Kapital in €', aria: 'Kapital Jahr für Jahr: Zinseszins und einfache Verzinsung' });
@@ -53,9 +53,9 @@
         const ctl = div(box, 'b-ctrls');
         seg(ctl, [['ann', 'Annuitätendarlehen'], ['rate', 'Ratentilgung'], ['spar', 'Sparplan']], S.mode, v => { S.mode = v; setup(); render(); }, 'Modell');
         const sl = div(box, '');
-        const rs = range(sl, { label: 'Kredit $S_0$ in €', min: 1000, max: 50000, step: 500, value: S.s, fmt: v => v.toLocaleString('de-DE'), onInput: v => { S.s = v; render(); } });
-        const rr = range(sl, { label: 'Sparrate je Jahr $R$ in €', min: 100, max: 6000, step: 100, value: S.r, fmt: v => v.toLocaleString('de-DE'), onInput: v => { S.r = v; render(); } });
-        range(sl, { label: 'Zinssatz $p$', min: 0.5, max: 12, step: 0.25, value: S.p, fmt: v => fmt(v, 2) + ' %', onInput: v => { S.p = v; render(); } });
+        const rs = range(sl, { label: 'Kredit $S_0$ in €', min: 1000, max: 50000, step: 500, value: S.s, fmt: v => v.toLocaleString(B.en ? 'en-GB' : 'de-DE'), onInput: v => { S.s = v; render(); } });
+        const rr = range(sl, { label: 'Sparrate je Jahr $R$ in €', min: 100, max: 6000, step: 100, value: S.r, fmt: v => v.toLocaleString(B.en ? 'en-GB' : 'de-DE'), onInput: v => { S.r = v; render(); } });
+        range(sl, { label: 'Zinssatz $p$', min: 0.5, max: 12, step: 0.25, value: S.p, fmt: v => fmt(v, 2) + (B.en ? '%' : ' %'), onInput: v => { S.p = v; render(); } });
         range(sl, { label: 'Laufzeit $n$', min: 1, max: 30, step: 1, value: S.n, fmt: v => v + ' J.', onInput: v => { S.n = v; render(); } });
         math(sl);
         const p = new Plot(div(box, ''), { x: [0, 6], y: [0, 3000], height: 260, xLabel: 'Jahr', yLabel: '€', aria: 'Zahlungen Jahr für Jahr als gestapelte Säulen' });

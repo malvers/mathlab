@@ -12,6 +12,10 @@ window.BuchEN && BuchEN.add('gleichungen', {
         'z. B. −3 oder :4 oder −2x': 'e.g. −3 or :4 or −2x', 'Anwenden': 'Apply', 'Neue Gleichung': 'New equation',
         'Länge $a$': 'Length $a$', 'Länge $b$': 'Length $b$', 'Quadrat mit Seitenlänge a + b': 'Square with side length a + b',
         'Zylinder': 'Cylinder', 'Kegel': 'Cone', 'Kugel': 'Sphere', 'Körper': 'Solid', 'Höhe $h$ in cm': 'Height $h$ in cm', 'Skizze des Körpers': 'Sketch of the solid',
+        // book 4 mathefos11-en: ungleichung
+        'Relationszeichen': 'Relation sign', '$a$ (Zahl vor dem $x$)': '$a$ (number in front of $x$)', '$c$ (rechte Seite)': '$c$ (right-hand side)',
+        'durch eine negative Zahl: Das Zeichen dreht sich um!': 'divided by a negative number: the sign is reversed!',
+        'Zahlenstrahl mit der Lösungsmenge': 'Number line with the solution set', 'Probe': 'Test', 'wahr': 'true', 'falsch': 'false',
     },
     phrase: [
         // waage
@@ -28,6 +32,10 @@ window.BuchEN && BuchEN.add('gleichungen', {
         // binom, koerper
         ['Der häufigste Fehler: ', 'The most common mistake: '], ['. Im Bild fehlen dann die beiden blauen Rechtecke, hier ', '. In the picture the two blue rectangles are then missing, here '],
         ['$M = 2\\pi r h', '$L = 2\\pi r h'], ['$O = ', '$S = '], ['Mantellinie $s = ', 'Slant height $s = '],
+        // book 4 mathefos11-en: ungleichung
+        ['heißt $', 'means $'], ['Das stimmt für jede Zahl: ', 'That is true for every number: '], ['Das stimmt für keine Zahl: ', 'That is true for no number: '],
+        ['Zieh die <b>Probe</b> über den Zahlenstrahl. $x = ', 'Drag the <b>test point</b> along the number line. $x = '], ['$ ist ', '$ is '],
+        [': Die Zahl gehört zur Lösungsmenge.', ': the number belongs to the solution set.'], [': Die Zahl gehört nicht dazu.', ': the number does not belong to it.'],
     ],
     rule: []
 });

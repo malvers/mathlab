@@ -53,6 +53,16 @@ window.BuchEN && BuchEN.add('stochastik', {
         'Art des Tests': 'Type of test', 'Signifikanzniveau $\\alpha$:': 'Significance level $\\alpha$:', 'Signifikanzniveau': 'Significance level',
         'Beobachtete Trefferzahl $k$': 'Observed number of hits $k$', 'Fehler 2. Art zeigen: wahres $p$ =': 'Show type II error: true $p$ =',
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Binomial distribution under the null hypothesis with rejection region',
+        // book 4 mathefos11-en: venn, urne, pascal
+        'Ein Glücksrad hat 12 gleich große Felder: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Wähle eine Vorlage oder stell $A$ und $B$ selbst zusammen: Ereignis wählen, dann Zahlen antippen.':
+            'A spinner has 12 equal sectors: $\\Omega = \\{1, 2, \\ldots, 12\\}$. Choose a template or put $A$ and $B$ together yourself: choose the event, then tap the numbers.',
+        'gerade · Vielfaches von 3': 'even · multiple of 3', 'Primzahl · größer als 6': 'prime · greater than 6', 'unvereinbar': 'mutually exclusive',
+        'Vorlage': 'Template', '$A$ bearbeiten': 'Edit $A$', '$B$ bearbeiten': 'Edit $B$', 'Ereignis bearbeiten': 'Edit event',
+        'Verknüpfung:': 'Combination:', 'Verknüpfung': 'Combination', 'Mengendiagramm der Ereignisse A und B': 'Venn diagram of the events A and B',
+        'Kugeln $n$': 'Balls $n$', 'Ziehungen $k$': 'Draws $k$', 'n kleiner': 'n smaller', 'n größer': 'n larger', 'k kleiner': 'k smaller', 'k größer': 'k larger',
+        'mit Reihenfolge': 'with order', 'ohne Reihenfolge': 'without order', 'Reihenfolge': 'Order',
+        'ohne Zurücklegen': 'without replacement', 'mit Zurücklegen': 'with replacement', 'Zurücklegen': 'Replacement', 'Einmal ziehen': 'Draw once', 'URNE': 'URN',
+        '$n$ (Zeile)': '$n$ (row)', '$k$ (Stelle)': '$k$ (position)', 'Pascalsches Dreieck bis zur Zeile 10': 'Pascal’s triangle up to row 10',
     },
     phrase: [
         // stochastics
@@ -100,6 +110,25 @@ window.BuchEN && BuchEN.add('stochastik', {
         ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>$H_0$ is not rejected.</b> But that does not prove that $H_0$ is true.'],
         ['Ist in Wahrheit $p = ', 'If in truth $p = '], ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (violet), $H_0$ is wrongly kept with $\\beta \\approx '],
         ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (type II error).'],
+        // book 4 mathefos11-en: venn
+        ['($A$ oder $B$ (oder beide))', '($A$ or $B$ (or both))'], ['($A$ und $B$)', '($A$ and $B$)'], ['(nicht $A$)', '(not $A$)'],
+        ['(weder $A$ noch $B$)', '(neither $A$ nor $B$)'], ['(nicht $A$ und nicht $B$)', '(not $A$ and not $B$)'], ['(nicht beide)', '(not both)'],
+        ['(nicht $A$ oder nicht $B$)', '(not $A$ or not $B$)'], ['Additionssatz: $', 'Addition rule: $'],
+        [' · $A$ und $B$ sind <b>unvereinbar</b> ($A \\cap B = \\emptyset$), es wird nichts doppelt gezählt.', ' · $A$ and $B$ are <b>mutually exclusive</b> ($A \\cap B = \\emptyset$), nothing is counted twice.'],
+        ['Gegenereignis: $', 'Complementary event: $'], ['Die Zahlen, die in beiden Ereignissen liegen.', 'The numbers that lie in both events.'],
+        ['$A \\cap B = \\emptyset$: Die Ereignisse sind <b>unvereinbar</b>, sie können nicht zusammen eintreten.', '$A \\cap B = \\emptyset$: the events are <b>mutually exclusive</b>, they cannot occur together.'],
+        ['Regel von de Morgan: $', 'De Morgan’s law: $'], ['$. Wähle die andere Seite und vergleiche: Es ist dieselbe Menge.', '$. Choose the other side and compare: it is the same set.'],
+        // book 4 mathefos11-en: urne
+        ['Variation mit Wiederholung', 'Variation with repetition'], ['Permutation (alle Kugeln, mit Reihenfolge)', 'Permutation (all balls, with order)'],
+        ['Variation ohne Wiederholung', 'Variation without repetition'], ['Kombination ohne Wiederholung', 'Combination without repetition'],
+        ['Kombination mit Wiederholung', 'Combination with repetition'], ['</b> · Beispiel: ', '</b> · example: '], ['Anzahl der Möglichkeiten: ', 'Number of possibilities: '],
+        ['Gezogen: <b>', 'Drawn: <b>'], ['Ergebnisse als Tupel $(\\ldots)$: Die Reihenfolge zählt.', 'Outcomes as tuples $(\\ldots)$: the order counts.'],
+        ['Ergebnisse als Mengen $\\{\\ldots\\}$: Die Reihenfolge zählt nicht.', 'Outcomes as sets $\\{\\ldots\\}$: the order does not count.'],
+        [' Genau dafür gibt es die Formel.', ' That is exactly what the formula is for.'],
+        // book 4 mathefos11-en: pascal
+        [': So viele Möglichkeiten gibt es, $', ': that is how many ways there are to choose $'], ['$ aus $', '$ from $'], ['$ auszuwählen.', '$.'],
+        ['Summenregel (grün umrandet): $', 'Sum rule (outlined in green): $'], ['Symmetrie (gestrichelt): $', 'Symmetry (dashed): $'],
+        ['Die Mitte der Zeile: $', 'The middle of the row: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ is its own mirror image here.'],
     ],
     rule: [
         // bernoulli-baum: the paths are labelled T (Treffer) and N (Niete) → H (hit) and M (miss)
@@ -115,5 +144,16 @@ window.BuchEN && BuchEN.add('stochastik', {
         [/Der Moderator weiß, wo das Auto steht, und öffnet Tür (\d): eine Ziege\. Bleibst du oder wechselst du\?/g,
             'The host knows where the car is and opens door $1: a goat. Do you stay or switch?'],
         [/Bei Tür (\d) bleiben/g, 'Stay with door $1'], [/Zu Tür (\d) wechseln/g, 'Switch to door $1'],
+        // book 4 mathefos11-en: venn, sets in TeX "\{2;\,4\}" → "\{2,\,4\}"; urne, outcomes "(1; 2)" and "{1; 2}" → "(1, 2)"
+        [/(\d);\\,(?=\d)/g, '$1,\\,'], [/[({]\d+(?:; \d+)+[)}]/g, m => m.replace(/; /g, ', ')],
+        // book 4 mathefos11-en: urne, the examples and the count
+        [/ein Zahlenschloss mit (\d+) Rädern zu je (\d+) Ziffern/g, 'a combination lock with $1 wheels of $2 digits each'],
+        [/(\d+) Personen stellen sich in eine Reihe/g, '$1 people stand in a row'],
+        [/ein Siegerpodest: (\d+) von (\d+) Startern auf die Plätze 1 bis (\d+)/g, 'a podium: $1 of $2 starters on places 1 to $3'],
+        [/Lotto: (\d+) aus (\d+) Zahlen, die Reihenfolge der Ziehung zählt nicht/g, 'Lottery: $1 from $2 numbers, the order of the draw does not count'],
+        [/(\d+) Kugeln Eis aus (\d+) Sorten, eine Sorte darf mehrfach vorkommen/g, '$1 scoops of ice cream from $2 flavours, a flavour may occur more than once'],
+        [/(\d{1,3}(?:\.\d{3})*) Möglichkeiten sind zu viele zum Auflisten\./g, (m, c) => c.replace(/\./g, ',') + ' possibilities are too many to list.'],
+        // book 4 mathefos11-en: pascal, "$, denn $2$ auswählen heißt $3$ weglassen."
+        [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, because choosing $' + k + '$ means leaving out $' + r + '$.'],
     ]
 });

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics FOS 11 · Chapter 2.3 · Counting, the urn model and Bernoulli chains | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Counting principle, permutations, variations, combinations, Bernoulli’s formula. Chapter 2.3 of the interactive textbook Mathematics · Technical College 11: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · TECHNICAL COLLEGE 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 2.3 · LEARNING AREA 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 2.3 · LEARNING AREA 2 · APRIL</p>
+            <h1>Counting, the urn model and Bernoulli chains</h1>
+            <p class="b-hero-lead">Almost 14 million tickets in the lottery, a thousand codes on a bike lock, 336 possible podiums with eight starters:
+                in Laplace experiments you have to count, and count cleverly. You learn the <b>counting principle</b>, distinguish <b>permutation</b>, <b>variation</b>
+                and <b>combination</b>, reduce problems to an <b>urn model</b> and calculate with <b>Bernoulli’s formula</b>.</p>
+            <div class="b-chips"><span class="b-chip">12 LESSONS</span><span class="b-chip">4 UNITS</span><span class="b-chip">CALCULATOR: nPr, nCr, binompdf</span><span class="b-chip">END OF LEARNING AREA 2</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="10" data-p="0.3" data-lo="3" data-hi="3" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>determine numbers with the <b>general counting principle</b>, count <b>permutations</b> with and without repetition</li>
+                <li>distinguish <b>variation</b> and <b>combination</b> and use the <b>binomial coefficient</b></li>
+                <li>reduce real problems to one of the four <b>urn models</b></li>
+                <li>recognise <b>Bernoulli chains</b> and calculate probabilities with Bernoulli’s formula</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="24" data-ph="number"><p class="b-q-text">Calculate $4 \cdot 3 \cdot 2 \cdot 1$.</p><div class="b-sol"><p>$24$</p></div></div>
+            <div class="b-q" data-ans="3/8" data-ph="fraction"><p class="b-q-text">Coin three times: how likely are exactly two heads?</p><div class="b-sol"><p>$\tfrac38$, from chapter 2.2</p></div></div>
+            <div class="b-q" data-ans="0.09" data-ph="decimal"><p class="b-q-text">Calculate $0.3^2$.</p><div class="b-sol"><p>$0.09$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Drawing <b>with</b> replacement means …</p><div class="b-mc"><button>the probabilities stay the same</button><button>there are fewer and fewer balls</button><button>the order does not matter</button></div><div class="b-sol"><p>The urn is complete again before every draw.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">WHO SITS WHERE?</div>
+            <div class="b-text"><p>Four friends go to the cinema and sit in a row.</p>
+                <ul><li>In how many ways can they sit down? Write down the possibilities systematically.</li><li>How many would there be for five, for ten friends?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">PODIUM OR FINAL?</div>
+            <div class="b-text"><p>Eight runners start. a) Gold, silver and bronze are awarded. b) The three fastest reach the final.</p>
+                <ul><li>Are there as many possibilities in a) as in b)? Which question has more, and by what factor?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">GUESSING IN A TEST</div>
+            <div class="b-text"><p>A test has 5 questions with 4 answers each, one of which is correct. Someone ticks purely at random.</p>
+                <ul><li>How likely are exactly 2 answers correct? How many paths belong to this?</li></ul></div>
+            <span class="b-pair">→ Unit 4</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Counting principle and permutations" data-toc-k="1" data-toc-short="1 Counting">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">1</span>The counting principle and permutations</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A canteen offers 3 starters, 4 main courses and 2 desserts. Each starter goes with 4 main courses, each of these combinations with 2 desserts:
+                $3 \cdot 4 \cdot 2 = 24$ different menus. You do not have to write them down to count them.</p></div></div>
+            <div class="b-text"><p>The same principle is behind the tree diagram: the number of paths is the product of the branchings. At the cinema from the exploration the first seat has 4 possibilities,
+                the second 3 more, the third 2, the last 1: $4 \cdot 3 \cdot 2 \cdot 1 = 24$ seating arrangements.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · COUNTING PRINCIPLE AND PERMUTATIONS</div>
+                <div class="b-text">
+                    <p><b>General counting principle:</b> if a process has $k$ stages with $n_1, n_2, \ldots, n_k$ possibilities, there are $n_1 \cdot n_2 \cdot \ldots \cdot n_k$ possibilities altogether.</p>
+                    <p><b>Permutation:</b> $n$ different objects can be arranged in $n! = n \cdot (n - 1) \cdot \ldots \cdot 2 \cdot 1$ ways ($n$ <b>factorial</b>, $0! = 1$).</p>
+                    <p><b>Permutation with repetition:</b> if among the $n$ objects there are $k_1$, $k_2$, … identical ones, there are $\dfrac{n!}{k_1! \cdot k_2! \cdot \ldots}$ arrangements.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Factorials grow fast:</b> $10! = 3\,628\,800$, and $70!$ is already greater than $10^{100}$.</p>
+            <p class="b-note"><b>Graphing calculator:</b> the symbol $!$ is usually in the menu for probability (PRB or PROB).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ALL ARRANGEMENTS</div>
+        <p class="b-help" style="margin:0 0 12px">4 balls, all are drawn, with order, without replacement: these are exactly the permutations. Change $n$ and $k$ and watch the list grow.</p>
+        <div data-widget="urne" data-n="4" data-k="4" data-ord="1" data-rep="0"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · CODES</div>
+            <div class="b-text"><p>An access code consists of 2 letters (26 possibilities) followed by 3 digits. How many codes are there?</p></div>
+            <div class="b-sol"><p>Five stages: $26 \cdot 26 \cdot 10 \cdot 10 \cdot 10 = 26^2 \cdot 10^3$.</p>
+                <p><span class="b-res">$676\,000$ codes</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · ANAGRAMS</div>
+            <div class="b-text"><p>How many different “words” can be made from the letters of OTTO and of BANANA?</p></div>
+            <div class="b-sol"><p>OTTO: $\dfrac{4!}{2! \cdot 2!} = \dfrac{24}{4} = 6$ (O twice, T twice).</p>
+                <p>BANANA: $\dfrac{6!}{3! \cdot 2!} = \dfrac{720}{12} = $ <span class="b-res">$60$</span> (A three times, N twice).</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How many four-digit PINs with the digits 0 to 9 are there? How many if the first digit must not be 0?</p></div>
+            <div class="b-sol"><p>$10^4 = 10\,000$ · $9 \cdot 10^3 = 9\,000$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate: a) $5!$ &nbsp; b) $7!$ &nbsp; c) $\dfrac{10!}{8!}$</p></div>
+            <div class="b-sol"><p>a) $120$ &nbsp; b) $5040$ &nbsp; c) $10 \cdot 9 = 90$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Six people sit down on six chairs in a row. How many seating arrangements are there? How many if two particular people want to sit next to each other?</p></div>
+            <div class="b-hint"><p>Treat the two as one block. Within the block there are two orders.</p></div>
+            <div class="b-sol"><p>$6! = 720$ · block plus 4 people: $5! \cdot 2 = 240$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>How many arrangements are there of the letters of the word MISSISSIPPI?</p></div>
+            <div class="b-sol"><p>11 letters, I four times, S four times, P twice: $\dfrac{11!}{4! \cdot 4! \cdot 2!} = 34\,650$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>How many four-digit numbers with all different digits are there? The first digit must not be 0.</p></div>
+            <div class="b-sol"><p>First place 9 possibilities (1 to 9), then 9, 8, 7: $9 \cdot 9 \cdot 8 \cdot 7 = 4536$</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="24" data-ph="how many"><p class="b-q-text">3 starters, 4 main courses, 2 desserts: how many menus?</p><div class="b-sol"><p>$3 \cdot 4 \cdot 2$</p></div></div>
+        <div class="b-q" data-ans="720" data-ph="how many"><p class="b-q-text">How many seating arrangements are there for 6 people on 6 chairs?</p><div class="b-sol"><p>$6!$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="how many"><p class="b-q-text">How many different arrangements does OTTO have?</p><div class="b-sol"><p>$\tfrac{24}{4}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Variation and combination" data-toc-k="2" data-toc-short="2 Selection">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Variation and combination</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Gold, silver, bronze with eight runners: $8 \cdot 7 \cdot 6 = 336$ possibilities. For the final, on the other hand, only <b>who</b> is in it counts, not in what order.
+                Every group of three was counted $3! = 6$ times for the podium. So there are $\tfrac{336}{6} = 56$ possible finals.</p></div></div>
+            <div class="b-text"><p>The decisive question for every selection is: <b>Does the order matter?</b> If yes, it is called a variation; if no, a combination.
+                The number of combinations has a name of its own: the binomial coefficient.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · CHOOSING $k$ FROM $n$</div>
+                <div class="b-text">
+                    <p><b>Variation</b> (order matters), without repetition: $\dfrac{n!}{(n - k)!} = n \cdot (n - 1) \cdot \ldots \cdot (n - k + 1)$ · with repetition: $n^k$</p>
+                    <p><b>Combination</b> (order does not matter), without repetition: $\dbinom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$, read “$n$ choose $k$”</p>
+                    <p>$\binom{n}{0} = \binom{n}{n} = 1$ · $\binom{n}{k} = \binom{n}{n - k}$ · $\binom{n}{k} = \binom{n - 1}{k - 1} + \binom{n - 1}{k}$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Graphing calculator:</b> variations without repetition with nPr, combinations with nCr. $8$ nPr $3 = 336$, $8$ nCr $3 = 56$.</p>
+            <p class="b-note"><b>Rule of thumb:</b> roles, places, codes → order matters. Groups, teams, lottery numbers → order does not matter.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · PASCAL’S TRIANGLE</div>
+        <p class="b-help" style="margin:0 0 12px">Every number is the sum of the two above it. Tap a number or use the sliders: it is the binomial coefficient $\binom{n}{k}$.</p>
+        <div data-widget="pascal"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · LOTTERY 6 FROM 49</div>
+            <div class="b-text"><p>How many tickets are there in the German lottery “6 from 49”? How likely are six correct numbers with one ticket?</p></div>
+            <div class="b-sol"><p>Order does not matter, no number twice: $\binom{49}{6} = 13\,983\,816$.</p>
+                <p>$P(\text{6 correct}) = $ <span class="b-res">$\tfrac{1}{13\,983\,816}$</span>, without the bonus number.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · TEAM OR COMMITTEE?</div>
+            <div class="b-text"><p>From 12 people a) a team of 3 people, b) a chair, a deputy and a treasurer are chosen. How many possibilities are there in each case?</p></div>
+            <div class="b-sol"><p>a) Combination: $\binom{12}{3} = 220$.</p>
+                <p>b) Variation: $12 \cdot 11 \cdot 10 = $ <span class="b-res">$1320$</span>, i.e. $3! = 6$ times as many.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate: a) $\binom{5}{2}$ &nbsp; b) $\binom{6}{3}$ &nbsp; c) $\binom{10}{1}$ &nbsp; d) $\binom{10}{10}$</p></div>
+            <div class="b-sol"><p>a) $10$ &nbsp; b) $20$ &nbsp; c) $10$ &nbsp; d) $1$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Does the order matter? a) lottery draw &nbsp; b) PIN &nbsp; c) places 1 to 3 in a league table &nbsp; d) 4 pizza toppings out of 10</p></div>
+            <div class="b-sol"><p>a) no &nbsp; b) yes &nbsp; c) yes &nbsp; d) no</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Ten people greet each other with a handshake. How many handshakes are there?</p></div>
+            <div class="b-sol"><p>Every handshake is a pair, the order does not matter: $\binom{10}{2} = 45$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A class has 7 girls and 5 boys. A committee is to consist of 2 girls and 2 boys. How many possibilities are there?</p></div>
+            <div class="b-sol"><p>Counting principle: $\binom{7}{2} \cdot \binom{5}{2} = 21 \cdot 10 = 210$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Show with $n = 8$, $k = 3$ that $\binom{n}{k} = \binom{n}{n - k}$ holds, and explain the rule in words.</p></div>
+            <div class="b-sol"><p>$\binom{8}{3} = \binom{8}{5} = 56$. Whoever chooses 3 out of 8 thereby also decides which 5 are not chosen.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="336" data-ph="how many"><p class="b-q-text">How many podiums (gold, silver, bronze) are there with 8 starters?</p><div class="b-sol"><p>$8 \cdot 7 \cdot 6$</p></div></div>
+        <div class="b-q" data-ans="45" data-ph="how many"><p class="b-q-text">How many handshakes are there among 10 people?</p><div class="b-sol"><p>$\binom{10}{2}$</p></div></div>
+        <div class="b-q" data-ans="13983816" data-ph="how many"><p class="b-q-text">How many tickets are there in the lottery “6 from 49”?</p><div class="b-sol"><p>$\binom{49}{6}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="The urn model" data-toc-k="3" data-toc-short="3 Urn">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">3</span>The urn model</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The lottery is like drawing 6 balls out of 49 without replacement, the order does not count. A combination lock with 4 wheels is like 4 draws from 10 balls
+                with replacement, the order counts. A great many counting problems turn into a question about an urn in this way.</p></div></div>
+            <div class="b-text"><p>Two questions decide the case: does the <b>order</b> matter? Is there <b>replacement</b>, i.e. may something be repeated?
+                This gives four basic cases.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · THE FOUR BASIC CASES ($k$ DRAWS FROM $n$ BALLS)</div>
+                <div class="b-text">
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th></th><th>with replacement</th><th>without replacement</th></tr>
+                        <tr><th>with order</th><td>$n^k$</td><td>$\dfrac{n!}{(n - k)!}$</td></tr>
+                        <tr><th>without order</th><td>$\dbinom{n + k - 1}{k}$</td><td>$\dbinom{n}{k}$</td></tr>
+                    </table></div>
+                    <p style="margin-top:10px"><b>Drawing without replacement with two kinds:</b> if $M$ of $N$ balls are red, the probability of exactly $r$ red ones among $n$ drawn is
+                        $\dfrac{\binom{M}{r} \cdot \binom{N - M}{n - r}}{\binom{N}{n}}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Laplace with counting:</b> $P = \tfrac{\text{favourable}}{\text{possible}}$, count both with the same urn model.</p>
+            <p class="b-note"><b>The rare case</b> “without order, with replacement” describes, for example, scoops of ice cream from several flavours.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE URN</div>
+        <p class="b-help" style="margin:0 0 12px">Set $n$, $k$, order and replacement. You see the basic case, the formula, an example and, as long as there are not too many, all the outcomes. “Draw once” marks a random one.</p>
+        <div data-widget="urne"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · THREE CORRECT</div>
+            <div class="b-text"><p>How likely are exactly three correct numbers in the lottery “6 from 49”?</p></div>
+            <div class="b-sol"><p>3 of the 6 winning numbers and 3 of the 43 others: $\binom{6}{3} \cdot \binom{43}{3} = 20 \cdot 12\,341 = 246\,820$ favourable tickets.</p>
+                <p>$P = \tfrac{246\,820}{13\,983\,816} \approx$ <span class="b-res">$0.0177$</span>, i.e. about 1.8%.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · A SAMPLE FROM A DELIVERY</div>
+            <div class="b-text"><p>A delivery contains 20 parts, 3 of them faulty. 4 parts are checked without replacement. How likely is none of them faulty?</p></div>
+            <div class="b-sol"><p>$P = \dfrac{\binom{17}{4}}{\binom{20}{4}} = \dfrac{2380}{4845} \approx 0.491$.</p>
+                <p>So with probability <span class="b-res">$\approx 0.509$</span> at least one faulty part is noticed.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Which basic case is it? a) combination lock with 4 wheels &nbsp; b) 3 of 20 tickets are drawn, all prizes the same &nbsp; c) seating arrangement for 5 people &nbsp; d) 3 scoops of ice cream from 8 flavours, flavours may be repeated</p></div>
+            <div class="b-sol"><p>a) with order, with replacement &nbsp; b) without order, without replacement &nbsp; c) with order, without replacement, $k = n$ &nbsp; d) without order, with replacement</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate the numbers for exercise 11.</p></div>
+            <div class="b-sol"><p>a) $10^4 = 10\,000$ &nbsp; b) $\binom{20}{3} = 1140$ &nbsp; c) $5! = 120$ &nbsp; d) $\binom{10}{3} = 120$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>From an urn with 5 red and 3 blue balls, 3 are drawn without replacement. How likely are exactly 2 red ones among them?</p></div>
+            <div class="b-sol"><p>$\dfrac{\binom{5}{2} \cdot \binom{3}{1}}{\binom{8}{3}} = \dfrac{10 \cdot 3}{56} = \dfrac{15}{28} \approx 0.536$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>How likely are exactly four correct numbers in the lottery “6 from 49”?</p></div>
+            <div class="b-sol"><p>$\dfrac{\binom{6}{4} \cdot \binom{43}{2}}{\binom{49}{6}} = \dfrac{15 \cdot 903}{13\,983\,816} \approx 0.00097$, i.e. just under 0.1%.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Recalculate example 6 with a tree (path “good four times”) and compare.</p></div>
+            <div class="b-sol"><p>$\tfrac{17}{20} \cdot \tfrac{16}{19} \cdot \tfrac{15}{18} \cdot \tfrac{14}{17} \approx 0.491$. Both ways give the same result.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1140" data-ph="how many"><p class="b-q-text">In how many ways can you draw 3 of 20 tickets (order does not matter)?</p><div class="b-sol"><p>$\binom{20}{3}$</p></div></div>
+        <div class="b-q" data-ans="15/28" data-ph="fraction"><p class="b-q-text">5 red, 3 blue balls, 3 without replacement: how likely are exactly 2 red?</p><div class="b-sol"><p>$\tfrac{30}{56}$</p></div></div>
+        <div class="b-q" data-ans="0.491" data-tol="0.001" data-ph="decimal"><p class="b-q-text">20 parts, 3 faulty, 4 are checked: how likely is none of them faulty (three decimal places)?</p><div class="b-sol"><p>$\tfrac{2380}{4845}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Bernoulli chains" data-toc-k="4" data-toc-short="4 Bernoulli">
+    <div class="b-band"><span class="b-band-tag">UNIT 4</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">4</span>Bernoulli chains</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>When guessing in the test, each question is correct with $p = 0.25$. A path with exactly 2 correct and 3 wrong answers has the probability $0.25^2 \cdot 0.75^3$.
+                How many such paths are there? You choose which 2 of the 5 questions are correct: $\binom{5}{2} = 10$. So $P = 10 \cdot 0.25^2 \cdot 0.75^3 \approx 0.264$.</p></div></div>
+            <div class="b-text"><p>Whenever a trial has only two results and is repeated independently with the same probability, this calculation works.
+                It is so important that it has a name.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · BERNOULLI’S FORMULA</div>
+                <div class="b-text">
+                    <p>A <b>Bernoulli experiment</b> has exactly two results: a <b>hit</b> with probability $p$ and a <b>miss</b> with $1 - p$.</p>
+                    <p>If it is repeated $n$ times <b>independently</b> and with the same $p$, the result is a <b>Bernoulli chain</b> of length $n$.</p>
+                    <p>For the number $X$ of hits: $$P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k}$$</p>
+                    <p>$\binom{n}{k}$ counts the paths with exactly $k$ hits. For “at least one hit”: $P(X \geq 1) = 1 - (1 - p)^n$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Graphing calculator:</b> $P(X = k)$ with binompdf$(n, p, k)$, $P(X \leq k)$ with binomcdf$(n, p, k)$. The names may differ a little depending on the calculator.</p>
+            <p class="b-note"><b>Not a Bernoulli chain:</b> drawing without replacement from a small urn, because then $p$ changes from draw to draw.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE TREE OF A BERNOULLI CHAIN</div>
+        <p class="b-help" style="margin:0 0 12px">All paths with exactly $k$ hits light up. Count them and compare with $\binom{n}{k}$.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">OUTLOOK · ALL NUMBERS OF HITS AT A GLANCE</div>
+        <p class="b-help" style="margin:0 0 12px">The bar chart shows $P(X = k)$ for all $k$. It is called the binomial distribution and comes back in Year 12.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 7 · GUESSING IN A TEST</div>
+            <div class="b-text"><p>5 questions, 4 answers each, pure guessing. How likely are exactly 2 correct?</p></div>
+            <div class="b-sol"><p>$n = 5$, $p = 0.25$, $k = 2$: $\binom{5}{2} \cdot 0.25^2 \cdot 0.75^3 = 10 \cdot 0.0625 \cdot 0.421875$.</p>
+                <p><span class="b-res">$\approx 0.264$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 8 · TWO SIXES</div>
+            <div class="b-text"><p>A dice is rolled 10 times. How likely are exactly two sixes?</p></div>
+            <div class="b-sol"><p>$\binom{10}{2} \cdot \left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^8 = 45 \cdot \tfrac{1}{36} \cdot 0.2326\ldots$</p>
+                <p><span class="b-res">$\approx 0.291$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Is this a Bernoulli chain? If so, state $n$ and $p$. a) a coin 10 times, hit: heads &nbsp; b) 3 balls from an urn with 4 red and 2 blue without replacement, hit: red &nbsp; c) 20 parts from a large production with 3% rejects, hit: faulty</p></div>
+            <div class="b-sol"><p>a) yes, $n = 10$, $p = 0.5$ &nbsp; b) no, $p$ changes &nbsp; c) approximately yes, $n = 20$, $p = 0.03$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A coin is tossed 4 times. How likely are exactly two heads?</p></div>
+            <div class="b-sol"><p>$\binom{4}{2} \cdot 0.5^4 = \tfrac{6}{16} = 0.375$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A machine has 5% rejects. 10 parts are checked. How likely is none faulty, exactly one, at least two?</p></div>
+            <div class="b-sol"><p>$0.95^{10} \approx 0.599$ · $10 \cdot 0.05 \cdot 0.95^9 \approx 0.315$ · $1 - 0.599 - 0.315 \approx 0.086$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A basketball player scores with 70%. How likely does she score exactly four times in 5 throws?</p></div>
+            <div class="b-sol"><p>$\binom{5}{4} \cdot 0.7^4 \cdot 0.3 \approx 0.360$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>At least how many parts from the production with 5% rejects must be checked so that with a probability of more than 95% at least one faulty part is among them?</p></div>
+            <div class="b-sol"><p>$1 - 0.95^n > 0.95$, i.e. $0.95^n < 0.05$. Calculator table: $n = 58$ gives $0.949$, $n = 59$ gives $0.952$. <span class="b-res">At least 59 parts.</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.375" data-ph="decimal"><p class="b-q-text">Four coin tosses: how likely are exactly two heads?</p><div class="b-sol"><p>$\tfrac{6}{16}$</p></div></div>
+        <div class="b-q" data-ans="0.599" data-tol="0.001" data-ph="decimal"><p class="b-q-text">5% rejects, 10 parts: how likely is none of them faulty (three decimal places)?</p><div class="b-sol"><p>$0.95^{10}$</p></div></div>
+        <div class="b-q" data-ans="0.264" data-tol="0.001" data-ph="decimal"><p class="b-q-text">5 questions, 4 answers each, guessing: how likely are exactly 2 correct (three decimal places)?</p><div class="b-sol"><p>$\approx 0.264$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="21">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $\binom{8}{3}$ and $\dfrac{8!}{5!}$. By what factor do they differ, and why?</p></div>
+            <div class="b-sol"><p>$56$ and $336$. Factor $3! = 6$: that is how many orders each group of three has.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with chapter 2.2:</b> a spinner shows red with $p = 0.2$ and is spun three times. Calculate $P(\text{red exactly once})$ with the tree and with Bernoulli’s formula.</p></div>
+            <div class="b-sol"><p>Three paths with $0.2 \cdot 0.8^2 = 0.128$ each, together $0.384$. Formula: $\binom31 \cdot 0.2 \cdot 0.8^2 = 0.384$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A spinner with $P(\text{red}) = \tfrac13$ is spun 6 times. How likely is red at most once?</p></div>
+            <div class="b-sol"><p>$\left(\tfrac23\right)^6 + 6 \cdot \tfrac13 \cdot \left(\tfrac23\right)^5 = \tfrac{64}{729} + \tfrac{192}{729} = \tfrac{256}{729} \approx 0.351$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A password has 8 characters from 26 lower-case letters, 26 capital letters and 10 digits. A computer tries 10 billion passwords per second. What is the longest it needs?</p></div>
+            <div class="b-sol"><p>$62^8 \approx 2.18 \cdot 10^{14}$ passwords. $\tfrac{2.18 \cdot 10^{14}}{10^{10}} \approx 21\,800$ s, i.e. just over 6 hours. Longer passwords help enormously: with 12 characters it would take thousands of years.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: a triangle with many names" data-toc-k="X" data-toc-short="Triangle">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>A triangle with many names</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In Europe the triangle of numbers from the widget is named after Blaise Pascal, who wrote a whole treatise on it in 1654 and used it for probabilities.
+                But it was known much earlier: in China it is named after Yang Hui, and in 1303 Zhu Shijie showed it in his book “Jade Mirror of the Four Unknowns”, for the powers up to the eighth.
+                Persian and Indian mathematicians knew it too.</p>
+            <p>The rows give the numbers $\binom{n}{k}$, i.e. the number of paths with $k$ hits in a Bernoulli chain. And they are hidden in the binomial formulas:
+                $(a + b)^3 = 1a^3 + 3a^2b + 3ab^2 + 1b^3$, exactly the third row $1, 3, 3, 1$.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources:</b> Blaise Pascal, “Traité du triangle arithmétique” (written 1654, printed 1665). · Zhu Shijie, “Siyuan yujian” (Jade Mirror of the Four Unknowns), 1303.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>COUNTING PRINCIPLE</h4><p>Multiply the possibilities of the stages.</p></div>
+        <div><p>Menu: $3 \cdot 4 \cdot 2 = 24$</p></div></div>
+    <div class="b-rueck"><div><h4>PERMUTATION</h4><p>$n!$ arrangements; for identical objects divide by their factorials.</p></div>
+        <div><p>BANANA: $\tfrac{6!}{3! \cdot 2!} = 60$</p></div></div>
+    <div class="b-rueck"><div><h4>VARIATION AND COMBINATION</h4><p>Order matters: $\tfrac{n!}{(n - k)!}$ or $n^k$. Order does not matter: $\binom{n}{k}$.</p></div>
+        <div><p>Podium: 336 · final: 56</p></div></div>
+    <div class="b-rueck"><div><h4>URN MODEL</h4><p>Order? Replacement? Four basic cases. Two kinds without replacement: product of binomial coefficients divided by $\binom{N}{n}$.</p></div>
+        <div><p>3 correct: $\tfrac{20 \cdot 12\,341}{13\,983\,816} \approx 0.018$</p></div></div>
+    <div class="b-rueck"><div><h4>BERNOULLI</h4><p>$P(X = k) = \binom{n}{k} p^k (1 - p)^{n - k}$ · $P(X \geq 1) = 1 - (1 - p)^n$</p></div>
+        <div><p>Guessing: $10 \cdot 0.25^2 \cdot 0.75^3 \approx 0.264$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="120" data-ph="number"><p class="b-q-text">Calculate $5!$.</p><div class="b-sol"><p>$120$</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="number"><p class="b-q-text">Calculate $\binom{5}{2}$.</p><div class="b-sol"><p>$\tfrac{5 \cdot 4}{2}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">The lottery “6 from 49” corresponds to drawing …</p><div class="b-mc"><button>with order, with replacement</button><button>without order, without replacement</button><button>with order, without replacement</button></div><div class="b-sol"><p>No number twice, order does not matter.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="0.0177" data-tol="0.0002" data-ph="decimal"><p class="b-q-text">How likely are exactly three correct numbers in the lottery (four decimal places)?</p><div class="b-sol"><p>$\approx 0.0177$</p></div></div>
+            <div class="b-q" data-ans="59" data-ph="parts"><p class="b-q-text">5% rejects: how many parts must be checked so that with over 95% at least one faulty part is among them?</p><div class="b-sol"><p>59</p></div></div>
+            <div class="b-q" data-ans="0.360" data-tol="0.001" data-ph="decimal"><p class="b-q-text">Scoring rate 70%, 5 throws: how likely are exactly 4 hits?</p><div class="b-sol"><p>$5 \cdot 0.7^4 \cdot 0.3$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos11-zaehlprinzip.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COUNTING PRINCIPLE</span><span class="b-lab-what">Permutations, factorial</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-kombination-variation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COMBINATION AND VARIATION</span><span class="b-lab-what">Binomial coefficient, lottery</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-urnenmodell.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">URN MODEL</span><span class="b-lab-what">The four basic cases</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-bernoulli.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BERNOULLI CHAINS</span><span class="b-lab-what">Bernoulli’s formula</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-ka3.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">READY FOR TEST 3</span><span class="b-lab-what">The whole of learning area 2</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-uebung-stochastik.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRACTICE: PROBABILITY</span><span class="b-lab-what">Mixed exercises</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Technical College Year 11 · Learning area 2 of the Saxon curriculum for mathematics at the Fachoberschule.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+</body>
+</html>
