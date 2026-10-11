@@ -41,6 +41,10 @@ window.BuchEN && BuchEN.add('analysis', {
         'Lösung mit der Ableitung': 'Solution with the derivative', 'Mauer': 'wall',
         'Karton mit ausgeschnittenen Ecken': 'Card with the corners cut out', 'Zylindrische Dose': 'Cylindrical can', 'Gehege an einer Mauer': 'Enclosure against a wall',
         'O in cm²': 'S in cm²',
+        // book 3 mathe13-en: schar, gewinn
+        'Funktionenschar': 'Family of functions', 'Ortskurve der Extrempunkte zeigen': 'Show the locus of the turning points',
+        'Funktionenschar mit Ortskurve': 'Family of functions with locus', 'Hochpunkt': 'Maximum', 'Tiefpunkt': 'Minimum',
+        'Verkaufspreis $p$ (€ pro Stück)': 'Selling price $p$ (€ per item)', 'x in Stück': 'x in items', 'Kosten, Erlös und Gewinn': 'Costs, revenue and profit',
     },
     phrase: [
         // grenzwert
@@ -94,6 +98,16 @@ window.BuchEN && BuchEN.add('analysis', {
         [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' The side parallel to the wall is then $60 - 2 \\cdot 15 = 30\\,\\text{m}$ long.'],
         // the surface of the can is S in the English chapter
         ['O(r) = ', 'S(r) = '], ['O\'(r) = ', 'S\'(r) = '], ['$O \\approx', '$S \\approx'],
+        // book 3 mathe13-en: schar
+        ['keine Extrempunkte', 'no turning points'], ['Ortskurve aller Extrempunkte (violett): $', 'Locus of all turning points (violet): $'],
+        ['Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
+            'For $a \\le 0$ there are no turning points: $f_a\'(x) = 3x^2 - a$ then has no zero with a change of sign.'],
+        ['Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.', 'Every parabola of the family passes through the origin, because $f_a(0) = 0$ for all $a$.'],
+        // book 3 mathe13-en: gewinn
+        ['Gewinnschwelle bei $x \\approx ', 'Break-even point at $x \\approx '], ['$, Gewinngrenze bei $x \\approx ', '$, profit limit at $x \\approx '],
+        ['$ Stück.', '$ items.'], ['Gewinn ab $x \\approx ', 'Profit from $x \\approx '], ['Bei diesem Preis wird nie Gewinn gemacht.', 'At this price there is never a profit.'],
+        ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Maximum profit: $G\'(x) = 0$ at $x \\approx '], ['$ Stück, $G \\approx ', '$ items, $G \\approx '],
+        ['Kein positives Gewinnmaximum.', 'No positive maximum profit.'],
     ],
     rule: [
         // ableiten: "3 von 5 gelöst"

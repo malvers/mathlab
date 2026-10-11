@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 13 · Chapter 4.2 · Significance tests | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Hypotheses, rejection region, type I and type II errors. Chapter 4.2 of the interactive textbook Mathematics · Vocational Grammar School 13: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 13</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 4.2 · LEARNING AREA 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 4.2 · LEARNING AREA 4 · NOVEMBER · DECEMBER</p>
+            <h1>Significance tests</h1>
+            <p class="b-hero-lead">A coin shows heads 33 times in 50 tosses. Is it biased, or was it chance? In a study a drug cures 72 out of 100 patients, the old one only 60%.
+                Does it really work better? A <b>significance test</b> makes such decisions by a fixed rule and tells you exactly how often you will be wrong.</p>
+            <div class="b-chips"><span class="b-chip">8 LESSONS</span><span class="b-chip">2 UNITS</span><span class="b-chip">DECIDING UNDER UNCERTAINTY</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="50" data-p="0.5" data-lo="32" data-hi="50" data-step="10"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>formulate the <b>null hypothesis</b> and the <b>alternative hypothesis</b>, fix the test statistic and the <b>significance level</b></li>
+                <li>find the <b>rejection region</b> and the <b>critical value</b> and set up a <b>decision rule</b></li>
+                <li>carry out <b>one-tailed</b> and <b>two-tailed</b> tests, also with a CAS</li>
+                <li>tell <b>type I and type II errors</b> apart and interpret them</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="25" data-ph="μ ="><p class="b-q-text">Expected value of the number of heads in 50 tosses of a fair coin?</p><div class="b-sol"><p>25</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$P(X \ge 32)$ is equal to …</p>
+                <div class="b-mc"><button>$1 - P(X \le 32)$</button><button>$P(X \le 31)$</button><button>$1 - P(X \le 31)$</button></div>
+                <div class="b-sol"><p>The complement of “at least 32” is “at most 31”.</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="per cent"><p class="b-q-text">What percentage is 0.05?</p><div class="b-sol"><p>5%</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">FROM WHEN ON IS IT BIASED?</div>
+            <div class="b-text"><p>A coin is tossed 50 times. You want to decide whether it favours heads.</p>
+                <ul><li>From how many heads on would you say “biased”? Agree on a number.</li><li>How often would you wrongly accuse a fair coin with it?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">TWO WAYS OF BEING WRONG</div>
+            <div class="b-text"><p>A Covid test, a smoke alarm, a court: all of them can be wrong in two different ways.</p>
+                <ul><li>Describe both errors for each example. Which one is worse in each case?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">THE FAIR DICE</div>
+            <div class="b-text"><p>A dice is rolled 120 times, the six comes up 28 times.</p>
+                <ul><li>How many sixes do you expect? Is 28 suspicious?</li><li>Would 8 be suspicious too?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="One-tailed tests" data-toc-k="1" data-toc-short="1 One-tailed">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Hypotheses, rejection region, decision rule</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>We first assume that the coin is fair: $p = 0.5$. Under this assumption $X$, the number of heads in 50 tosses, is binomially distributed with $n = 50$ and $p = 0.5$.
+                Very large values are then rare: $P(X \ge 32) \approx 0.032$, $P(X \ge 31) \approx 0.059$.</p></div></div>
+            <div class="b-text"><p>We decide: if 32 or more heads come up, we no longer believe in a fair coin. We would then wrongly suspect a fair coin in only about 3.2% of cases.
+                You fix this boundary <b>before</b> you toss.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SIGNIFICANCE TEST</div>
+                <div class="b-text">
+                    <p><b>Null hypothesis</b> $H_0\colon p = p_0$ (the status quo), <b>alternative hypothesis</b> $H_1$, for example $p > p_0$ (right-tailed) or $p < p_0$ (left-tailed).</p>
+                    <p><b>Test statistic</b> $X$: number of hits in the sample, under $H_0$ binomially distributed with $n$ and $p_0$. <b>Significance level</b> $\alpha$, usually 5%.</p>
+                    <p><b>Rejection region</b> $\overline{A}$: the extreme values that together have at most the probability $\alpha$ under $H_0$. Right-tailed $\overline{A} = \{k, \ldots, n\}$ with the smallest $k$
+                        for which $P(X \ge k) \le \alpha$. $k$ is called the <b>critical value</b>.</p>
+                    <p><b>Decision rule:</b> if the result lies in $\overline{A}$, $H_0$ is rejected: the result is <b>significant</b>. Otherwise $H_0$ is not rejected.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>What you want to show belongs in $H_1$.</b> Because only rejecting $H_0$ is a strong statement with a known probability of error.</p>
+            <p class="b-note"><b>Not rejected</b> does not mean proved. It only means: the data are not enough to refute $H_0$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE SIGNIFICANCE TEST</div>
+        <p class="b-help" style="margin:0 0 12px">Set $n$, $p_0$, the type of test and $\alpha$. Red is the rejection region. Move the observed number of hits $k$ and read off the decision.</p>
+        <div data-widget="signifikanztest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · THE NEW DRUG</div>
+            <div class="b-text"><p>An old drug cures 60%. The manufacturer of a new one claims it works better. In a study with 100 patients, 72 are cured. Test with $\alpha = 5\%$.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0.6$, $H_1\colon p > 0.6$, $X \sim B(100, 0.6)$. $P(X \ge 69) \approx 0.040 \le 0.05$, but $P(X \ge 68) \approx 0.062$. So $\overline{A} = \{69, \ldots, 100\}$.</p>
+                <p>72 lies in the rejection region: <span class="b-res">$H_0$ is rejected.</span> The better effect is significant at the 5% level.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · LEFT-TAILED</div>
+            <div class="b-text"><p>A party claims to have 40% support. An opponent suspects less and asks 200 people. Find the rejection region for $\alpha = 5\%$.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0.4$, $H_1\colon p < 0.4$. We need the largest $k$ with $P(X \le k) \le 0.05$: $P(X \le 68) \approx 0.047$.
+                <span class="b-res">$\overline{A} = \{0, \ldots, 68\}$</span>. Only with 68 or fewer people in favour is the suspicion supported.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Formulate $H_0$ and $H_1$: a) A supplier guarantees at most 10% rejects, the buyer has doubts. b) A teacher suspects that more than half of the class copies their homework.</p></div>
+            <div class="b-sol"><p>a) $H_0\colon p = 0.1$, $H_1\colon p > 0.1$ &nbsp; b) $H_0\colon p = 0.5$, $H_1\colon p > 0.5$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>For exercise a): the buyer checks 50 parts. Use the widget to find the rejection region for $\alpha = 5\%$. How does he decide with 7 faulty parts?</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{10, \ldots, 50\}$ ($P(X \ge 10) \approx 0.025$, $P(X \ge 9) > 0.05$). With 7, $H_0$ is not rejected.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>How does the rejection region of the coin test ($n = 50$, right-tailed) change if you choose $\alpha = 1\%$ instead of $5\%$? What does that mean for the decision with 33 heads?</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{34, \ldots, 50\}$ instead of $\{32, \ldots\}$. With 33 heads: significant at the 5% level, but not at the 1% level.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Why should you fix $\alpha$ and the rejection region <b>before</b> you know the data?</p></div>
+            <div class="b-sol"><p>Otherwise you can put the boundary where the desired result comes out. The stated probability of error is then no longer correct.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="32" data-ph="k ="><p class="b-q-text">Coin test $n = 50$, $p_0 = 0.5$, right-tailed, $\alpha = 5\%$: smallest value of the rejection region?</p><div class="b-sol"><p>32</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">The result does not lie in the rejection region. Then …</p>
+            <div class="b-mc"><button>$H_0$ is proved</button><button>$H_0$ is not rejected</button><button>$H_1$ is proved</button></div>
+            <div class="b-sol"><p>The data are not enough to refute $H_0$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Two-tailed tests, type I and II errors" data-toc-k="2" data-toc-short="2 Errors">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Two-tailed tests, type I and type II errors</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Is a dice fair? <b>Too many</b> and <b>too few</b> sixes would be suspicious. So you split $\alpha$ between both sides, $\tfrac{\alpha}{2}$ each.</p></div></div>
+            <div class="b-text"><p>Every decision can be wrong. If you reject $H_0$ although it is true, that is a <b>type I error</b>. Its probability is at most $\alpha$.
+                If you keep $H_0$ although in reality a different $p$ holds, that is a <b>type II error</b>. Its probability $\beta$ depends on the true $p$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · TWO-TAILED, TYPE I AND TYPE II ERRORS</div>
+                <div class="b-text">
+                    <p><b>Two-tailed test</b> $H_0\colon p = p_0$ against $H_1\colon p \neq p_0$: $\overline{A} = \{0, \ldots, l\} \cup \{r, \ldots, n\}$ with $P(X \le l) \le \tfrac{\alpha}{2}$ and $P(X \ge r) \le \tfrac{\alpha}{2}$.</p>
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th></th><th>$H_0$ is true</th><th>$H_1$ is true</th></tr>
+                        <tr><th>$H_0$ rejected</th><td><b>type I error</b> (at most $\alpha$)</td><td>correct</td></tr>
+                        <tr><th>$H_0$ not rejected</th><td>correct</td><td><b>type II error</b> ($\beta$)</td></tr></table></div>
+                    <p>A smaller $\alpha$ makes the type I error rarer, but the type II error more frequent. Only a larger sample size makes both smaller.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In court:</b> $H_0$ = innocent. Type I error: convicting the innocent. Type II error: acquitting the guilty. The first one is deliberately kept small.</p>
+            <p class="b-note"><b>In the widget:</b> tick “show type II error” and choose a true $p$. Violet is then the true distribution.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · THE DICE, TWO-TAILED</div>
+            <div class="b-text"><p>A dice is rolled 120 times. Test $H_0\colon p = \tfrac16$ (six) against $H_1\colon p \neq \tfrac16$ with $\alpha = 5\%$.</p></div>
+            <div class="b-sol"><p>$2.5\%$ on each side: $P(X \le 11) \approx 0.014$, $P(X \ge 29) \approx 0.022$. <span class="b-res">$\overline{A} = \{0, \ldots, 11\} \cup \{29, \ldots, 120\}$.</span>
+                So 28 sixes are not yet significant, 8 sixes are.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · TYPE II ERROR</div>
+            <div class="b-text"><p>In the drug test (example 1) the new drug really cures 70%. How likely is it that the test misses this?</p></div>
+            <div class="b-sol"><p>Type II error: $H_0$ is not rejected, so $X \le 68$, although $p = 0.7$. $\beta = P(X \le 68) \approx 0.367$.
+                <span class="b-res">In more than one case in three</span> the improvement would go unnoticed. With $p = 0.75$ it would only be about 7%.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Describe the type I and the type II error in the context of the drug test.</p></div>
+            <div class="b-sol"><p>Type I: you think the new drug is better although it is not better. Type II: you think it is not better although it is better.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>A coin is tossed 20 times. Use the widget to find the rejection region for a two-tailed test with $\alpha = 5\%$.</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{0, \ldots, 5\} \cup \{15, \ldots, 20\}$, $\approx 2.1\%$ on each side.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>For the party from example 2 the true support is 35%. What is the probability that the opponent still cannot support her suspicion?</p></div>
+            <div class="b-sol"><p>$\beta = P(X \ge 69)$ with $p = 0.35$, $n = 200$: $\approx 0.585$. The test is too weak for such small differences, you would need more people.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Try it in the widget: how does $\beta$ change in the drug test (true $p = 0.7$) if you increase $n$ from 100 to 200? Explain.</p></div>
+            <div class="b-sol"><p>$\beta$ falls clearly (to about 0.1). With more data the distributions become relatively narrower and overlap less, the test separates better.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$H_0$ is true, but is rejected. That is …</p>
+            <div class="b-mc"><button>a type I error</button><button>a type II error</button><button>a correct decision</button></div>
+            <div class="b-sol"><p>Type I error, probability at most $\alpha$.</p></div></div>
+        <div class="b-q" data-ans="29" data-ph="r ="><p class="b-q-text">Dice test from example 3: smallest value of the right-hand rejection region?</p><div class="b-sol"><p>29</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>A company claims that 20% of its raffle tickets win. You suspect more blanks, that is fewer than 20% winners. Formulate the hypotheses.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0.2$, $H_1\colon p < 0.2$ (left-tailed).</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A coin shows heads 9 times in 10 tosses. Test right-tailed with $\alpha = 5\%$.</p></div>
+            <div class="b-sol"><p>$P(X \ge 9) = \tfrac{11}{1024} \approx 0.011$, $P(X \ge 8) \approx 0.055$. $\overline{A} = \{9, 10\}$: $H_0$ is rejected.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Connecting with chapter 1.1 of Year 12:</b> explain why “the result is significant, so $H_0$ is false with 95%” is a wrong statement.</p></div>
+            <div class="b-sol"><p>$\alpha$ is $P_{H_0}(\text{rejection})$, a conditional probability given that $H_0$ holds. The statement confuses it with $P_{\text{rejection}}(H_0 \text{ false})$,
+                as with the positive rapid test $P_D(+)$ and $P_+(D)$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: the lady tasting tea" data-toc-k="X" data-toc-short="Tea">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">THE MOST FAMOUS TEST IN STATISTICS</span></div>
+    <h2>The lady tasting tea</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In his book on the design of experiments, the English statistician Ronald A. Fisher tells of a lady who claimed she could tell by the taste
+                whether the milk or the tea had been poured into the cup first.</p>
+            <p>Fisher planned the test like this: eight cups, four of each kind, in random order. The lady is to pick out the four cups “milk first”. If she is only guessing, there are
+                $\binom84 = 70$ equally likely choices, so all four correct only with probability $\tfrac{1}{70} \approx 1.4\%$.
+                If she succeeds, you reject the null hypothesis “she is only guessing”. Fisher turned this into the basic pattern of every significance test.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Ronald A. Fisher: The Design of Experiments. Oliver and Boyd, Edinburgh 1935, chapter 2.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>HYPOTHESES</h4><p>$H_0\colon p = p_0$, what you want to show goes in $H_1$.</p></div>
+        <div><p>Drug: $H_1\colon p > 0.6$</p></div></div>
+    <div class="b-rueck"><div><h4>REJECTION REGION</h4><p>Extreme values with probability at most $\alpha$ under $H_0$.</p></div>
+        <div><p>Coin $n = 50$: $\{32, \ldots, 50\}$</p></div></div>
+    <div class="b-rueck"><div><h4>TWO-TAILED</h4><p>$\tfrac{\alpha}{2}$ on each side.</p></div>
+        <div><p>Dice $n = 120$: $\{0, \ldots, 11\} \cup \{29, \ldots, 120\}$</p></div></div>
+    <div class="b-rueck"><div><h4>TYPE I AND TYPE II ERRORS</h4><p>Type I: $H_0$ wrongly rejected ($\le \alpha$). Type II: $H_0$ wrongly kept ($\beta$).</p></div>
+        <div><p>Drug, true $p = 0.7$: $\beta \approx 0.37$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1</div>
+            <div class="b-q" data-ans="69" data-ph="k ="><p class="b-q-text">Drug test $n = 100$, $p_0 = 0.6$, right-tailed, $\alpha = 5\%$: critical value?</p><div class="b-sol"><p>69</p></div></div>
+            <div class="b-q" data-ans="68" data-ph="k ="><p class="b-q-text">Party test $n = 200$, $p_0 = 0.4$, left-tailed, $\alpha = 5\%$: largest value of the rejection region?</p><div class="b-sol"><p>68</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$H_1$ is true, but $H_0$ is not rejected. That is …</p>
+                <div class="b-mc"><button>a type I error</button><button>a type II error</button><button>correct</button></div>
+                <div class="b-sol"><p>Type II error</p></div></div>
+            <div class="b-q" data-ans="1/70" data-tol="0.0005" data-ph="P ="><p class="b-q-text">How likely is it that the tea lady picks all four correct cups by guessing?</p><div class="b-sol"><p>$\tfrac{1}{70}$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">The binomial distribution behind every test</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 13 · Learning area 4 of the Saxon curriculum for mathematics at the Berufliches Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+</body>
+</html>

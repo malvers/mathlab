@@ -45,6 +45,14 @@ window.BuchEN && BuchEN.add('stochastik', {
         'Was wird berechnet?': 'What is calculated?', 'Histogramm der Binomialverteilung': 'Histogram of the binomial distribution',
         'Stufen $n$:': 'Stages $n$:', 'Anzahl der Stufen': 'Number of stages', 'Genau $k$ Treffer:': 'Exactly $k$ hits:',
         'Anzahl der Treffer': 'Number of hits', 'Baumdiagramm einer Bernoulli-Kette': 'Tree diagram of a Bernoulli chain',
+        // book 3 mathe13-en: stichprobe, signifikanztest
+        'Anteil in der Grundgesamtheit $p$': 'Proportion in the population $p$', 'Stichprobenumfang $n$': 'Sample size $n$',
+        'Stichproben ziehen:': 'Draw samples:', 'Verteilung der relativen Häufigkeiten vieler Stichproben': 'Distribution of the relative frequencies of many samples',
+        'Noch keine Stichprobe gezogen.': 'No sample drawn yet.',
+        'Nullhypothese $p_0$': 'Null hypothesis $p_0$', 'linksseitig': 'left-tailed', 'rechtsseitig': 'right-tailed', 'zweiseitig': 'two-tailed',
+        'Art des Tests': 'Type of test', 'Signifikanzniveau $\\alpha$:': 'Significance level $\\alpha$:', 'Signifikanzniveau': 'Significance level',
+        'Beobachtete Trefferzahl $k$': 'Observed number of hits $k$', 'Fehler 2. Art zeigen: wahres $p$ =': 'Show type II error: true $p$ =',
+        'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Binomial distribution under the null hypothesis with rejection region',
     },
     phrase: [
         // stochastics
@@ -81,6 +89,17 @@ window.BuchEN && BuchEN.add('stochastik', {
         // bernoulli-baum
         ['Pfade mit genau ', 'Paths with exactly '], [' Treffern: $', ' hits: $'], ['$ · jeder hat die Wahrscheinlichkeit $', '$ · each has the probability $'],
         ['Formel von Bernoulli: $P(X = ', "Bernoulli's formula: $P(X = "],
+        // book 3 mathe13-en: stichprobe
+        [' Stichproben vom Umfang ', ' samples of size '], [' · letzte: $h = ', ' · latest: $h = '],
+        ['Mittelwert der $h$: $', 'Mean of the $h$: $'], ['$ · Standardabweichung der $h$: $', '$ · standard deviation of the $h$: $'],
+        ['Theorie: $', 'Theory: $'], ['$. Viermal so großes $n$ halbiert die Streuung.', '$. An $n$ four times as large halves the spread.'],
+        // book 3 mathe13-en: signifikanztest
+        ['$ gegen $H_1\\colon ', '$ against $H_1\\colon '], ['Ablehnungsbereich (rot): $', 'Rejection region (red): $'],
+        ['$ · tatsächliche Irrtumswahrscheinlichkeit $\\approx ', '$ · actual probability of error $\\approx '], ['Beobachtet $k = ', 'Observed $k = '],
+        ['<b>$H_0$ wird abgelehnt.</b> Das Ergebnis ist signifikant.', '<b>$H_0$ is rejected.</b> The result is significant.'],
+        ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>$H_0$ is not rejected.</b> But that does not prove that $H_0$ is true.'],
+        ['Ist in Wahrheit $p = ', 'If in truth $p = '], ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (violet), $H_0$ is wrongly kept with $\\beta \\approx '],
+        ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (type II error).'],
     ],
     rule: [
         // bernoulli-baum: the paths are labelled T (Treffer) and N (Niete) → H (hit) and M (miss)

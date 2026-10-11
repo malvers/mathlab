@@ -29,8 +29,17 @@ const LAB_ICONS = {
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
-    "lehrbuch-mathe13": `<img src="resources/og/buch-mathe13-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    // book 3 as well (Doc, 11.10.2026: "das nächste parallel mit Einstein")
+    "lehrbuch-mathe13": `<span style="display: flex; gap: 12px; align-items: center;">
+        <img src="resources/og/buch-mathe13-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-en/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-en/index.html'; }">
+            <img src="resources/og/buch-mathe13-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+    </span>`,
     "lehrbuch-mathefos11": `<img src="resources/og/buch-mathefos11-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     "lehrbuch-mathefos12": `<img src="resources/og/buch-mathefos12-cover.jpg" alt="" loading="lazy" decoding="async"
