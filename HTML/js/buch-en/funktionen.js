@@ -86,6 +86,8 @@ window.BuchEN && BuchEN.add('funktionen', {
         'Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$': 'Vertex form: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$',
         'Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.': 'Maximum: the square with side length $6\\,\\text{cm}$, $A = 36\\,\\text{cm}^2$.',
         'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': 'Which rectangle with perimeter $24\\,\\text{cm}$ has the largest area?',
+        // book 10 mathegy10-en: cover
+        'Graphen der Grundfunktionen': 'Graphs of the basic functions',
     },
     phrase: [
         // detektiv

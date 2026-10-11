@@ -221,7 +221,7 @@
         const sl = div(box, '');
         const p = new Plot(div(box, ''), { height: 280, aria: 'Wachstums- oder Zerfallskurve mit Zielwert' });
         const out = div(box, 'b-out');
-        const big = v => (v >= 10000 ? Math.round(v).toLocaleString('de-DE') : fmt(v, 2));
+        const big = v => (v >= 10000 ? Math.round(v).toLocaleString(B.en ? 'en-GB' : 'de-DE') : fmt(v, 2));   // English editions: 100,000
         const bigT = v => (v >= 10000 ? Math.round(v).toLocaleString('de-DE').replace(/\./g, '\\,') : texNum(v, 2));
         function build() {
             help.textContent = A.say;

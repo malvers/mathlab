@@ -471,7 +471,7 @@
                         steps.push(['Sinussatz', '\\beta' + tag + ' \\approx ' + Dg(be) + ',\\; \\gamma' + tag + ' \\approx ' + Dg(ga) + ',\\; c' + tag + ' = \\dfrac{a \\cdot \\sin\\gamma' + tag + '}{\\sin\\alpha} \\approx ' + T(c)]);
                         sols.push({ b, c, al });
                     });
-                    msg = sols.length === 2 ? '<b>Zwei Dreiecke</b> passen zu den Angaben: Die Seite $a$ schneidet die Schenkellinie zweimal. Das ist der mehrdeutige Fall von SSW (die gegebene Winkel liegt der <b>kürzeren</b> Seite gegenüber).'
+                    msg = sols.length === 2 ? '<b>Zwei Dreiecke</b> passen zu den Angaben: Die Seite $a$ schneidet die Schenkellinie zweimal. Das ist der mehrdeutige Fall von SSW (der gegebene Winkel liegt der <b>kürzeren</b> Seite gegenüber).'
                         : sols.length === 1 ? (a >= b ? 'Genau <b>ein</b> Dreieck: Der Winkel liegt der <b>längeren</b> (oder gleich langen) Seite gegenüber, dann ist SSW eindeutig.' : 'Genau <b>ein</b> Dreieck: Hier berührt $a$ die Schenkellinie nur, das Dreieck ist rechtwinklig.') : '';
                 }
             }
