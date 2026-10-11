@@ -76,8 +76,17 @@ const LAB_ICONS = {
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     "lehrbuch-mathegy10": `<img src="resources/og/buch-mathegy10-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
-    "lehrbuch-mathegy11": `<img src="resources/og/buch-mathegy11-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    // book 8 in English as well (Doc, 11.10.2026: "ok, go on all agents")
+    "lehrbuch-mathegy11": `<span style="display: flex; gap: 12px; align-items: center;">
+        <img src="resources/og/buch-mathegy11-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy11-en/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy11-en/index.html'; }">
+            <img src="resources/og/buch-mathegy11-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+    </span>`,
     // book 6 as well (Doc, 11.10.2026: "macht gemeinsam noch 2 Bücher")
     "lehrbuch-mathegy12": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathegy12-cover.jpg" alt="" loading="lazy" decoding="async"
