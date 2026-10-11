@@ -43,7 +43,10 @@
         'Frage sprechen': 'Speak your question', 'Passwort zeigen': 'Show password', 'Passwort verbergen': 'Hide password',
         'Stimme anhalten': 'Stop the voice', 'Frage senden': 'Send question', 'Passwort': 'Password',
         'Passwort – wird auf diesem Gerät gemerkt': 'Password – remembered on this device', 'Passwort bestätigen': 'Confirm password',
-        'Das Passwort gilt nicht mehr.': 'The password is no longer valid.'
+        'Das Passwort gilt nicht mehr.': 'The password is no longer valid.',
+        // the colour scheme button in the header (js/farbschema.js): its label names the next scheme
+        'Blau': 'Blue', 'Grau': 'Grey', 'Hell': 'Light', 'Farbschema Blau einschalten': 'Switch to the blue colour scheme',
+        'Farbschema Grau einschalten': 'Switch to the grey colour scheme', 'Farbschema Hell einschalten': 'Switch to the light colour scheme'
     };
 
     // ---------- pieces of sentences, shared ----------
@@ -69,7 +72,9 @@
     const RULE_LAST = [
         // header
         [/^Zu (?=\S)/, 'About '], [/\bFrag (Solita|Doc)\b/g, 'Ask $1'], [/Klick: zu (Solita|Doc) wechseln/g, 'Click: switch to $1'],
-        [/Einmal das Passwort, dann kann (Solita|Doc) antworten\./g, 'Enter the password once, then $1 can answer.']
+        [/Einmal das Passwort, dann kann (Solita|Doc) antworten\./g, 'Enter the password once, then $1 can answer.'],
+        // the AI marks in Solita's field (js/solita-frage.js): "Es antwortet Claude Haiku und DeepSeek"
+        [/^Es antwortet (.+)$/, (m, w) => 'Answered by ' + w.replace(/ und /g, ' and ')]
     ];
     // after the pieces: English typography for percent ("30 %" → "30%", "30\,\%" → "30\%")
     const POST = [[/(\d) %/g, '$1%'], [/\\,\\%/g, '\\%']];
