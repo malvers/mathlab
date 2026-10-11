@@ -119,10 +119,12 @@
     const TAG = /<(?=[A-Za-z\/!])(?!\/?(?:b|i|br)>)[^>]*>/g;
     const ATTR = /(\s(?:title|aria-label|placeholder|alt)=")([^"]*)(")/g;
     const SPLIT = /(<[A-Za-z\/!][^>]*>)/;
+    const SPLIT_LABEL = /(<(?=[A-Za-z\/!])(?!\/?(?:b|i|br)>)[^>]*>)/;
     function html(s) {
-        // whole labels between two tags first, before a piece ("und" → "and") can change a sentence that has its own English
+        // whole labels between two tags first, before a piece ("und" → "and") can change a sentence that has its own English;
+        // <b>, <i> and <br> belong to the sentence ("ist ein <b>Quadrat</b>"), so they do not cut it into labels here
         const done = [];
-        s = s.split(SPLIT).map(part => {
+        s = s.split(SPLIT_LABEL).map(part => {
             if (part[0] === '<') return part;
             const w = word(part); return w == null ? part : '\u0003' + (done.push(w) - 1) + '\u0004';
         }).join('');

@@ -34,6 +34,17 @@ window.BuchEN && BuchEN.add('stochastik', {
         'Neues Spiel': 'New game', '1000 Spiele vom Rechner spielen lassen': 'Let the computer play 1,000 games',
         'Strategie': 'Strategy', 'Spiele': 'Games', 'Autos': 'Cars', 'Gewinnquote': 'Win rate',
         'du: bleiben': 'you: stay', 'du: wechseln': 'you: switch', 'Rechner: bleiben': 'computer: stay', 'Rechner: wechseln': 'computer: switch',
+        // histo-hero, unabhaengig, zufallsgroesse, binomial, bernoulli-baum (book 2, mathe12-en)
+        'Histogramm einer Binomialverteilung': 'Histogram of a binomial distribution',
+        'Unabhängig machen': 'Make independent', 'Unvereinbar machen': 'Make mutually exclusive',
+        'Einheitsquadrat: Anteil von A in B und in nicht B': 'Unit square: share of A in B and in not B',
+        'Drei Münzen': 'Three coins', 'Augensumme': 'Total score', 'Glücksrad': 'Wheel of fortune', 'Zufallsgröße': 'Random variable',
+        'Einsatz': 'Stake', 'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Probability distribution as a bar chart',
+        'Spielen:': 'Play:', 'SPIELE n': 'GAMES n', 'MITTELWERT': 'MEAN', 'ERWARTUNGSWERT': 'EXPECTED VALUE', 'LETZTE': 'LATEST',
+        'Anzahl der Versuche $n$': 'Number of trials $n$', 'Trefferwahrscheinlichkeit $p$': 'Probability of a hit $p$',
+        'Was wird berechnet?': 'What is calculated?', 'Histogramm der Binomialverteilung': 'Histogram of the binomial distribution',
+        'Stufen $n$:': 'Stages $n$:', 'Anzahl der Stufen': 'Number of stages', 'Genau $k$ Treffer:': 'Exactly $k$ hits:',
+        'Anzahl der Treffer': 'Number of hits', 'Baumdiagramm einer Bernoulli-Kette': 'Tree diagram of a Bernoulli chain',
     },
     phrase: [
         // stochastics
@@ -46,8 +57,34 @@ window.BuchEN && BuchEN.add('stochastik', {
         [' alles richtig', ' all correct'], ['Ereignis: <b>', 'Event: <b>'], ['Zuletzt: ', 'Latest: '],
         ['TÜR', 'DOOR'], ['Tür', 'Door'], ['Gewonnen – das Auto! ', 'You won – the car! '], ['Leider eine Ziege. ', 'Sorry, a goat. '],
         ['Du hast gewechselt.', 'You switched.'], ['Du bist geblieben.', 'You stayed.'],
+        // unabhaengig
+        ['$ und $P(A \\cap B) = ', '$ and $P(A \\cap B) = '],
+        ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.',
+            '<b>Independent:</b> whether $B$ happens or not, the share of $A$ stays the same. In the square the boundary is at the same height in both columns.'],
+        ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
+            '<b>Mutually exclusive</b> ($A \\cap B = \\emptyset$) and therefore <b>dependent</b>: if $B$ happens, $A$ can no longer happen.'],
+        ['<b>Abhängig:</b> $B$ verändert die Wahrscheinlichkeit von $A$ ', '<b>Dependent:</b> $B$ changes the probability of $A$ '],
+        ['nach oben.', 'upwards.'], ['nach unten.', 'downwards.'],
+        // zufallsgroesse
+        ['Augensumme zweier Würfel', 'total score of two dice'], ['Anzahl Wappen', 'number of heads'], ['Augenzahl', 'score'],
+        ['Gewinn = Auszahlung − Einsatz', 'gain = payout − stake'], ['Gewinn bei 1 € Einsatz', 'gain with a stake of €1'],
+        [' Auszahlungen 0 €, 1 €, 2 €, 10 € mit den Wahrscheinlichkeiten ', ' Payouts €0, €1, €2, €10 with the probabilities '],
+        [' Du setzt 1 € auf eine Zahl, dann werden drei Würfel geworfen. Für jeden Würfel mit deiner Zahl bekommst du 1 € Gewinn, sonst ist der Einsatz weg.',
+            ' You bet €1 on a number, then three dice are rolled. For every dice showing your number you win €1, otherwise your stake is lost.'],
+        ['Erwartungswert: $E(X)', 'Expected value: $E(X)'], [' · Das Spiel ist <b>fair</b>.', ' · The game is <b>fair</b>.'],
+        [' · Auf lange Sicht <b>verlierst</b> du im Mittel ', ' · In the long run you <b>lose</b> on average '],
+        [' · Auf lange Sicht <b>gewinnst</b> du im Mittel ', ' · In the long run you <b>win</b> on average '], [' € pro Spiel.', ' € per game.'],
+        ['Varianz: $V(X)', 'Variance: $V(X)'], ['$ · Standardabweichung: $', '$ · standard deviation: $'],
+        // binomial
+        ['$X$ ist binomialverteilt mit $n = ', '$X$ is binomially distributed with $n = '], ['$ und $p = ', '$ and $p = '],
+        ['Erwartungswert $\\mu', 'Expected value $\\mu'], ['$ · Standardabweichung $', '$ · standard deviation $'],
+        // bernoulli-baum
+        ['Pfade mit genau ', 'Paths with exactly '], [' Treffern: $', ' hits: $'], ['$ · jeder hat die Wahrscheinlichkeit $', '$ · each has the probability $'],
+        ['Formel von Bernoulli: $P(X = ', "Bernoulli's formula: $P(X = "],
     ],
     rule: [
+        // bernoulli-baum: the paths are labelled T (Treffer) and N (Niete) → H (hit) and M (miss)
+        [/(<text\b[^>]*>)([TN]{1,4})(<\/text>)/g, (m, a, k, b) => a + k.replace(/T/g, 'H').replace(/N/g, 'M') + b],
         // four-field trainer: "3 von 5 richtig"
         [/(\d+) von (\d+) richtig/g, '$1 of $2 correct'],
         // rapid test

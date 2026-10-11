@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 12 · Chapter 1.1 · Conditional probability | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Tree diagrams, two-way tables, stochastic independence. Chapter 1.1 of the interactive textbook Mathematics · Vocational Grammar School 12: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1.1 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1.1 · LEARNING AREA 1 · AUGUST · SEPTEMBER</p>
+            <h1>Conditional probability</h1>
+            <p class="b-hero-lead">A medical test is positive. How certain is the disease? People who come by bus are late more often. Is that chance?
+                As soon as you <b>know something</b>, probabilities change. In this chapter you calculate with this knowledge and check
+                when two events really have <b>nothing to do with each other</b>.</p>
+            <div class="b-chips"><span class="b-chip">8 LESSONS</span><span class="b-chip">2 UNITS</span><span class="b-chip">FOLLOWS ON FROM YEAR 11</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>determine <b>conditional probabilities</b> $P_B(A)$ from tree diagrams and two-way tables</li>
+                <li><b>reverse</b> trees: from $P_A(B)$ to $P_B(A)$</li>
+                <li>check <b>stochastic independence</b> and tell it apart from <b>mutual exclusivity</b></li>
+                <li><b>interpret</b> results in context, for example in medical tests</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="1/36" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Two dice are rolled. What is the probability of two sixes?</p><div class="b-sol"><p>Path rule: $\tfrac16 \cdot \tfrac16 = \tfrac{1}{36}$</p></div></div>
+            <div class="b-q" data-ans="0.65" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0.35$. What is $P(\overline{A})$?</p><div class="b-sol"><p>$1 - 0.35 = 0.65$</p></div></div>
+            <div class="b-q" data-ans="3/10" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Two balls are drawn without replacement from an urn with 3 red and 2 blue balls. How likely is it that both are red?</p><div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p></div></div>
+            <div class="b-q" data-ans="0.6" data-tol="0.0001" data-ph="proportion"><p class="b-q-text">120 of 200 people asked have a certain feature. What is the proportion as a decimal?</p><div class="b-sol"><p>$\tfrac{120}{200} = 0.6$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">THE POSITIVE TEST</div>
+            <div class="b-text"><p>2% of the population have a disease. A test detects 90% of those who are ill, but it also reacts in 5% of the healthy.</p>
+                <ul><li>Estimate: how likely is it that someone with a positive test is really ill?</li><li>Work it out with 10,000 people. Does the result surprise you?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">BUS AND BEING LATE</div>
+            <div class="b-text"><p>Ask in your class: who comes by bus? Who was late at least once this week?</p>
+                <ul><li>Enter the answers in a two-way table.</li><li>Are bus riders late more often than the others? How can you back this up with numbers?</li></ul></div>
+            <span class="b-pair">→ Units 1 and 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DOES THE DICE NOTICE ANYTHING?</div>
+            <div class="b-text"><p>Two dice are rolled. $A$: the first shows a six. $B$: the total score is 7.</p>
+                <ul><li>Does $B$ become more likely if you already know that $A$ has happened?</li><li>And with a total of 8 instead of 7?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Conditional probability" data-toc-k="1" data-toc-short="1 Conditional">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Probability under a condition</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>At a school, 250 students were asked: do you come by bus ($B$)? Were you late this week ($L$)?</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:420px">
+                    <tr><th></th><th>$L$</th><th>$\overline{L}$</th><th>Total</th></tr>
+                    <tr><th>$B$</th><td>30</td><td>120</td><td>150</td></tr>
+                    <tr><th>$\overline{B}$</th><td>10</td><td>90</td><td>100</td></tr>
+                    <tr><th>Total</th><td>40</td><td>210</td><td>250</td></tr></table></div></div></div>
+            <div class="b-text">
+                <p>Altogether $\tfrac{40}{250} = 16\%$ were late. If you look <b>only at the bus riders</b>, it is $\tfrac{30}{150} = 20\%$,
+                    among the others only $\tfrac{10}{100} = 10\%$. The condition “comes by bus” shrinks the population to 150 people.</p>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · CONDITIONAL PROBABILITY</div>
+                <div class="b-text">
+                    <p>The probability of $A$ <b>given</b> $B$ (with $P(B) > 0$) is
+                        $$P_B(A) = \frac{P(A \cap B)}{P(B)}.$$</p>
+                    <p>Rearranged, this gives the <b>multiplication rule</b> $P(A \cap B) = P(B) \cdot P_B(A)$. In a tree diagram, exactly these conditional probabilities are on the second stage.</p>
+                    <p>Careful: $P_B(A)$ and $P_A(B)$ are in general <b>different</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notation:</b> instead of $P_B(A)$ you will also find $P(A \mid B)$, read “P of A given B”.</p>
+            <p class="b-note"><b>Reversed tree:</b> from one two-way table you can draw two trees, one with $B$ first and one with $L$ first. Both describe the same four probabilities of the intersections.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE RAPID TEST</div>
+        <p class="b-help" style="margin:0 0 12px">Set how common the disease is and how well the test works. Watch how many of those who test positive are really ill.</p>
+        <div data-widget="schnelltest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · BUS AND BEING LATE</div>
+            <div class="b-text"><p>Use the table above to find $P_B(L)$ and $P_L(B)$. Interpret both numbers.</p></div>
+            <div class="b-sol"><p>$P_B(L) = \tfrac{30}{150} = 0.2$: of the bus riders, 20% were late.</p>
+                <p>$P_L(B) = \tfrac{30}{40} = 0.75$: of those who were late, 75% came by bus. <span class="b-res">Two different questions, two different answers.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · THE POSITIVE TEST</div>
+            <div class="b-text"><p>2% are ill ($D$). The test detects 90% of the ill and is wrongly positive in 5% of the healthy. What is $P_+(D)$?</p></div>
+            <div class="b-sol"><p>$P(D \cap +) = 0.02 \cdot 0.9 = 0.018$ and $P(\overline{D} \cap +) = 0.98 \cdot 0.05 = 0.049$, so $P(+) = 0.067$.</p>
+                <p>$P_+(D) = \dfrac{0.018}{0.067} \approx 0.269$. <span class="b-res">Only just over one in four people with a positive test is ill.</span> The reason: there are many more healthy people than ill ones.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Of 300 people asked, 120 wear glasses ($G$). 45 people with glasses and 54 people without glasses read every day ($R$). Draw up the two-way table and calculate $P(R)$, $P_G(R)$ and $P_R(G)$.</p></div>
+            <div class="b-sol"><p>$G$: 45 | 75 | 120 · $\overline{G}$: 54 | 126 | 180 · Total: 99 | 201 | 300.</p>
+                <p>$P(R) = \tfrac{99}{300} = 0.33$, $P_G(R) = \tfrac{45}{120} = 0.375$, $P_R(G) = \tfrac{45}{99} \approx 0.455$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>In the tree, $P(A) = 0.6$, $P_A(B) = 0.3$ and $P_{\overline{A}}(B) = 0.5$. Calculate $P(B)$ and $P_B(A)$.</p></div>
+            <div class="b-sol"><p>$P(B) = 0.6 \cdot 0.3 + 0.4 \cdot 0.5 = 0.18 + 0.2 = 0.38$, $P_B(A) = \tfrac{0.18}{0.38} \approx 0.474$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Machine M1 makes 70% of all parts, 2% of them are faulty. Machine M2 makes 30%, 5% of them are faulty. A part is faulty. What is the probability that it comes from M2?</p></div>
+            <div class="b-sol"><p>$P(F) = 0.7 \cdot 0.02 + 0.3 \cdot 0.05 = 0.014 + 0.015 = 0.029$, $P_F(M_2) = \tfrac{0.015}{0.029} \approx 0.517$.
+                Although M2 makes fewer parts, more than half of the faulty parts come from there.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>You are given $P(A) = 0.4$, $P_A(B) = 0.25$ and $P(B) = 0.3$. Complete the two-way table and draw the reversed tree ($B$ first). What are $P_B(A)$ and $P_{\overline{B}}(A)$?</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0.1$, $P(A \cap \overline{B}) = 0.3$, $P(\overline{A} \cap B) = 0.2$, $P(\overline{A} \cap \overline{B}) = 0.4$.</p>
+                <p>$P_B(A) = \tfrac{0.1}{0.3} = \tfrac13$, $P_{\overline{B}}(A) = \tfrac{0.3}{0.7} \approx 0.429$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>According to example 2, someone with a positive test is only ill with a probability of about 26.9%. The person takes a second, independent test of the same kind, which is positive again. How likely is it now that the person is ill?</p></div>
+            <div class="b-hint"><p>Take 0.269 as the new starting probability for $D$ and calculate as in example 2.</p></div>
+            <div class="b-sol"><p>$\dfrac{0.269 \cdot 0.9}{0.269 \cdot 0.9 + 0.731 \cdot 0.05} = \dfrac{0.2421}{0.2421 + 0.03655} \approx 0.869$.
+                <span class="b-res">After two positive tests about 87%.</span> That is why a positive rapid test is usually confirmed by a second test.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.6" data-tol="0.0001" data-ph="P ="><p class="b-q-text">Of 50 people, 20 have a dog. 12 of the dog owners go jogging every day. What is the probability that a dog owner goes jogging every day?</p><div class="b-sol"><p>$\tfrac{12}{20} = 0.6$</p></div></div>
+        <div class="b-q" data-ans="0.4" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0.5$ and $P(A \cap B) = 0.2$. What is $P_A(B)$?</p><div class="b-sol"><p>$\tfrac{0.2}{0.5} = 0.4$</p></div></div>
+        <div class="b-q" data-ans="0.29" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0.3$, $P_A(B) = 0.5$, $P_{\overline{A}}(B) = 0.2$. What is $P(B)$?</p><div class="b-sol"><p>$0.3 \cdot 0.5 + 0.7 \cdot 0.2 = 0.15 + 0.14 = 0.29$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Stochastic independence" data-toc-k="2" data-toc-short="2 Independent">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Stochastic independence</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A dice is rolled. $A$: an even number. $B$: at most 2. Does the chance of an even number change if you know that at most 2 was rolled?</p></div></div>
+            <div class="b-text"><p>$P(A) = \tfrac12$. Given $B = \{1, 2\}$, only the 2 is even, so $P_B(A) = \tfrac12$. Knowing about $B$ changes nothing about $A$.
+                Such events are called <b>independent</b>. With bus and being late it was different: $P_B(L) = 0.2$, but $P(L) = 0.16$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · INDEPENDENCE</div>
+                <div class="b-text">
+                    <p>Two events $A$ and $B$ are called <b>stochastically independent</b> if $$P(A \cap B) = P(A) \cdot P(B).$$</p>
+                    <p>For $P(B) > 0$ this is equivalent to $P_B(A) = P(A)$. Otherwise $A$ and $B$ are called <b>dependent</b>.</p>
+                    <p><b>Mutually exclusive</b> means something else: $A \cap B = \emptyset$, the events cannot happen together. Mutually exclusive events with $P(A) > 0$ and $P(B) > 0$ are always <b>dependent</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In the tree:</b> $A$ and $B$ are independent if both branches of the second stage carry the same probability for $B$: $P_A(B) = P_{\overline{A}}(B)$.</p>
+            <p class="b-note"><b>Dependent does not mean causal:</b> dependence shows a connection, but not what the cause is.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · INDEPENDENT OR NOT?</div>
+        <p class="b-help" style="margin:0 0 12px">Change $P(A)$, $P(B)$ and $P(A \cap B)$. In the unit square the left column is $B$, the right one $\overline{B}$. Gold is the share of $A$ in each.</p>
+        <div data-widget="unabhaengig"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · BUS AND BEING LATE</div>
+            <div class="b-text"><p>Are $B$ (bus) and $L$ (late) from unit 1 independent?</p></div>
+            <div class="b-sol"><p>$P(B) \cdot P(L) = 0.6 \cdot 0.16 = 0.096$, but $P(B \cap L) = \tfrac{30}{250} = 0.12$. <span class="b-res">Dependent.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · A TOTAL OF 7</div>
+            <div class="b-text"><p>Two dice. $A$: the first shows a six. $B$: the total score is 7. Independent?</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac16$, $P(B) = \tfrac{6}{36} = \tfrac16$, $P(A \cap B) = P(\{(6, 1)\}) = \tfrac{1}{36} = \tfrac16 \cdot \tfrac16$. <span class="b-res">Independent.</span>
+                Whatever the first dice shows: exactly one number on the second makes it up to 7.</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">THE DICE GAME</span><span class="b-lab-what">Tree diagrams and path rules</span></span></a>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$P(A) = 0.4$ and $P(B) = 0.5$. Are $A$ and $B$ independent if a) $P(A \cap B) = 0.2$ &nbsp; b) $P(A \cap B) = 0.25$?</p></div>
+            <div class="b-sol"><p>$P(A) \cdot P(B) = 0.2$. a) independent &nbsp; b) dependent</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>One dice: $A$ = “1”, $B$ = “6”. Are the events mutually exclusive? Are they independent?</p></div>
+            <div class="b-sol"><p>Mutually exclusive, because both at once is impossible. $P(A \cap B) = 0 \neq \tfrac16 \cdot \tfrac16$, so dependent: if you know that a 6 was rolled, you know for sure that no 1 was rolled.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$A$ and $B$ are independent with $P(A) = 0.3$ and $P(B) = 0.6$. Complete the two-way table with probabilities.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0.18$, $P(A \cap \overline{B}) = 0.12$, $P(\overline{A} \cap B) = 0.42$, $P(\overline{A} \cap \overline{B}) = 0.28$. Every cell is the product of its marginal values.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Two dice: $A$ = “total score 8”, $B$ = “first dice shows 6”. Check for independence and compare with example 4.</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac{5}{36}$, $P(B) = \tfrac16$, $P(A \cap B) = P(\{(6, 2)\}) = \tfrac{1}{36} = \tfrac{6}{216}$, but $P(A) \cdot P(B) = \tfrac{5}{216}$.
+                Dependent: with a 1 on the first roll a total of 8 is impossible, with a 6 it is not.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Two pumps fail independently of each other, each with a probability of 5%. How likely is a failure of the system if a) one pump is enough, b) both have to run? Why is the assumption of independence questionable here?</p></div>
+            <div class="b-sol"><p>a) both fail: $0.05^2 = 0.0025$ &nbsp; b) at least one fails: $1 - 0.95^2 = 0.0975$.</p>
+                <p>A common cause (power cut, flood) often stops both at the same time. Then the failures are dependent and a) is far too optimistic.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.2" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$ and $B$ are independent, $P(A) = 0.5$, $P(B) = 0.4$. What is $P(A \cap B)$?</p><div class="b-sol"><p>$0.5 \cdot 0.4 = 0.2$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$P(A) = 0.2$, $P(B) = 0.3$ and $P(A \cap B) = 0.1$. Then $A$ and $B$ are …</p>
+            <div class="b-mc"><button>independent</button><button>dependent</button><button>mutually exclusive</button></div>
+            <div class="b-sol"><p>$0.2 \cdot 0.3 = 0.06 \neq 0.1$</p></div></div>
+        <div class="b-q" data-ans="0.05" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$ and $B$ are independent with $P(A) = 0.25$ and $P(B) = 0.8$. What is $P(A \cap \overline{B})$?</p><div class="b-sol"><p>$A$ and $\overline{B}$ are independent too: $0.25 \cdot 0.2 = 0.05$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">TRAINING · COMPLETING TWO-WAY TABLES</div>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>In a year group of 120 students, 48 take computer science ($C$), 30 of them are also in the drama club ($T$). Altogether 50 are in the drama club. Calculate $P_C(T)$ and $P_T(C)$. Are $C$ and $T$ independent?</p></div>
+            <div class="b-sol"><p>$P_C(T) = \tfrac{30}{48} = 0.625$, $P_T(C) = \tfrac{30}{50} = 0.6$. $P(C) \cdot P(T) = 0.4 \cdot \tfrac{5}{12} \approx 0.167$, but $P(C \cap T) = 0.25$: dependent.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>40% of all emails are spam. The word “prize” appears in 30% of spam emails, but only in 2% of the others. An email contains “prize”. How likely is it to be spam?</p></div>
+            <div class="b-sol"><p>$\dfrac{0.4 \cdot 0.3}{0.4 \cdot 0.3 + 0.6 \cdot 0.02} = \dfrac{0.12}{0.132} \approx 0.909$. This is how simple spam filters work.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Connecting with Year 11:</b> in the Monty Hall problem you choose door 1, the host opens door 3 with a goat. Use conditional probabilities to explain why switching wins with $\tfrac23$.</p></div>
+            <div class="b-sol"><p>If the car is behind door 2 (probability $\tfrac13$), the host has to open door 3. If it is behind door 1 ($\tfrac13$), he opens door 3 only with $\tfrac12$.
+                $P_{\text{opens 3}}(\text{car behind 2}) = \dfrac{\frac13 \cdot 1}{\frac13 \cdot 1 + \frac13 \cdot \frac12} = \tfrac23$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Prove: if $A$ and $B$ are independent, then $A$ and $\overline{B}$ are independent too.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = P(A) - P(A \cap B) = P(A) - P(A) \cdot P(B) = P(A) \cdot (1 - P(B)) = P(A) \cdot P(\overline{B})$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: the Sally Clark case" data-toc-k="X" data-toc-short="Sally Clark">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">WHEN INDEPENDENCE IS WRONGLY ASSUMED</span></div>
+    <h2>The Sally Clark case</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In 1999 the solicitor Sally Clark was convicted in England because her two sons had died shortly after birth. A paediatrician testified as an expert witness
+                that in a family like hers the probability of a sudden infant death was about 1 in 8,543. For two cases he multiplied:
+                $\left(\tfrac{1}{8543}\right)^2 \approx \tfrac{1}{73{,}000{,}000}$.</p>
+            <p>Multiplying assumes that the two deaths are <b>independent</b>. Shared genetic or domestic causes, however, make a second case
+                much more likely. There was a second mistake as well: even a small probability of the data under the assumption of innocence is not the
+                probability of innocence. $P_{\text{innocent}}(\text{data})$ and $P_{\text{data}}(\text{innocent})$ are different things, like $P_B(L)$ and $P_L(B)$.</p>
+            <p>In 2001 the Royal Statistical Society publicly pointed out these mistakes. In 2003 the conviction was quashed.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources:</b> Royal Statistical Society, statement on the Sally Clark case of 23 October 2001; Court of Appeal, R v Clark [2003] EWCA Crim 1020.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>CONDITIONAL PROBABILITY</h4><p>$P_B(A) = \dfrac{P(A \cap B)}{P(B)}$, the population shrinks to $B$.</p></div>
+        <div><p>Bus: $P_B(L) = \tfrac{30}{150} = 0.2$ · $P_L(B) = \tfrac{30}{40} = 0.75$</p></div></div>
+    <div class="b-rueck"><div><h4>MULTIPLICATION RULE AND TREE</h4><p>$P(A \cap B) = P(A) \cdot P_A(B)$. Second stage of the tree: conditional probabilities.</p></div>
+        <div><p>Reversed tree from the same two-way table</p></div></div>
+    <div class="b-rueck"><div><h4>INDEPENDENCE</h4><p>$P(A \cap B) = P(A) \cdot P(B)$, equivalent to $P_B(A) = P(A)$.</p></div>
+        <div><p>First dice 6 and total score 7: independent</p></div></div>
+    <div class="b-rueck"><div><h4>MUTUALLY EXCLUSIVE ≠ INDEPENDENT</h4><p>$A \cap B = \emptyset$. With positive probabilities always dependent.</p></div>
+        <div><p>“1” and “6” with one dice</p></div></div>
+    <div class="b-rueck"><div><h4>INTERPRETING</h4><p>Positive tests for rare diseases are often false positives.</p></div>
+        <div><p>2% ill, 90% / 5%: $P_+(D) \approx 27\%$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1</div>
+            <div class="b-q" data-ans="0.3" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A \cap B) = 0.12$ and $P(B) = 0.4$. What is $P_B(A)$?</p><div class="b-sol"><p>$\tfrac{0.12}{0.4} = 0.3$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$A$ and $B$ are mutually exclusive, both have a positive probability. Then they are …</p>
+                <div class="b-mc"><button>independent</button><button>dependent</button><button>it depends on the numbers</button></div>
+                <div class="b-sol"><p>$P(A \cap B) = 0$, but $P(A) \cdot P(B) > 0$.</p></div></div>
+            <div class="b-q" data-ans="0.75" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0.5$, $P_A(B) = 0.6$, $P_{\overline{A}}(B) = 0.2$. What is $P_B(A)$?</p><div class="b-sol"><p>$P(B) = 0.3 + 0.1 = 0.4$, $P_B(A) = \tfrac{0.3}{0.4} = 0.75$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2</div>
+            <div class="b-q" data-ans="0.8" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$, $B$ independent, $P(A) = 0.6$, $P(B) = 0.5$. What is $P(A \cup B)$?</p><div class="b-sol"><p>$0.6 + 0.5 - 0.6 \cdot 0.5 = 0.8$</p></div></div>
+            <div class="b-q" data-ans="0.4706" data-tol="0.005" data-ph="P ="><p class="b-q-text">10% are ill. A test detects 80% of the ill and is falsely positive in 10% of the healthy. What is $P_+(D)$?</p><div class="b-sol"><p>$\dfrac{0.08}{0.08 + 0.09} = \tfrac{8}{17} \approx 0.471$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$P(A) = 0.3$ and $P_B(A) = 0.3$. Then $A$ and $B$ are …</p>
+                <div class="b-mc"><button>independent</button><button>dependent</button><button>mutually exclusive</button></div>
+                <div class="b-sol"><p>The condition $B$ does not change the probability of $A$.</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TWO-WAY TABLES</span><span class="b-lab-what">Conditional probability</span></span></a>
+        <a class="b-lab" href="../../mathetest11-baumdiagramme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TREE DIAGRAMS</span><span class="b-lab-what">Multi-stage random experiments</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 12 · Learning area 1 of the Saxon curriculum for mathematics at the Berufliches Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+</body>
+</html>

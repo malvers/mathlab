@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 12 · Chapter 1.3 · The binomial distribution | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Bernoulli chains, binomial coefficient, cumulative probabilities. Chapter 1.3 of the interactive textbook Mathematics · Vocational Grammar School 12: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1.3 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1.3 · LEARNING AREA 1 · OCTOBER · NOVEMBER</p>
+            <h1>The binomial distribution</h1>
+            <p class="b-hero-lead">Hit or miss, again and again, independently of each other: a multiple-choice test where you guess. An airline that sells more tickets than it has seats.
+                A delivery in which a few parts are faulty. Behind all of this is <b>the same</b> distribution. With a single formula and a histogram
+                you answer questions like “How likely are at most two errors?”.</p>
+            <div class="b-chips"><span class="b-chip">20 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">1 LAB</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="20" data-p="0.35" data-lo="5" data-hi="9"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>recognise <b>Bernoulli trials</b> and <b>Bernoulli chains</b></li>
+                <li>count paths with the <b>factorial</b> and the <b>binomial coefficient</b></li>
+                <li>calculate single and <b>cumulative</b> probabilities with <b>Bernoulli's formula</b>, also with a table and a calculator</li>
+                <li>use the <b>expected value</b> $n \cdot p$ and the <b>standard deviation</b> and interpret histograms</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="1/8" data-tol="0.0005" data-ph="P ="><p class="b-q-text">A coin is tossed three times. How likely are three heads?</p><div class="b-sol"><p>$\left(\tfrac12\right)^3 = \tfrac18$</p></div></div>
+            <div class="b-q" data-ans="0.5177" data-tol="0.002" data-ph="P ="><p class="b-q-text">How likely is at least one six in four rolls?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 0.518$</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="number"><p class="b-q-text">In how many ways can you put four books next to each other?</p><div class="b-sol"><p>$4 \cdot 3 \cdot 2 \cdot 1 = 24$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="μ ="><p class="b-q-text">What is the expected value if $X$ takes the values 4 and 8, each with probability 0.5?</p><div class="b-sol"><p>$2 + 4 = 6$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">THE GUESSING TEST</div>
+            <div class="b-text"><p>A test has 10 questions with 4 answers each, exactly one is correct. You tick everything at random.</p>
+                <ul><li>How many correct answers do you expect? How likely are 5 or more?</li><li>Simulate it: everyone rolls a tetrahedron or draws cards.</li></ul></div>
+            <span class="b-pair">→ Units 1 and 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">OVERBOOKED</div>
+            <div class="b-text"><p>A plane has 100 seats. Experience shows that 95% of those who booked turn up. The airline sells 103 tickets.</p>
+                <ul><li>What speaks for this, what against it?</li><li>How could you calculate how often passengers are turned away?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">THE GALTON BOARD</div>
+            <div class="b-text"><p>Balls fall through rows of pins and bounce on to the left or to the right each time.</p>
+                <ul><li>Which slots do most of them land in?</li><li>How many paths lead into each slot?</li></ul></div>
+            <span class="b-pair">→ Units 1 and 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Bernoulli chains" data-toc-k="1" data-toc-short="1 Bernoulli">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">6 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Bernoulli chains and Bernoulli's formula</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A dice is rolled five times. How likely is a six <b>exactly twice</b>?</p></div></div>
+            <div class="b-text">
+                <p>A path with exactly two sixes, for example 66NNN, has the probability $\left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^3$.
+                    How many such paths are there? You have to choose 2 of the 5 rolls for the sixes: 66NNN, 6N6NN, …, NNN66. That is 10 possibilities.
+                    So $P(X = 2) = 10 \cdot \tfrac{1}{36} \cdot \tfrac{125}{216} \approx 0.161$.</p>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · BERNOULLI CHAIN AND BINOMIAL DISTRIBUTION</div>
+                <div class="b-text">
+                    <p>A <b>Bernoulli trial</b> has exactly two outcomes: hit (probability $p$) and miss ($1 - p$).
+                        A <b>Bernoulli chain</b> of length $n$ consists of $n$ independent repetitions with the same $p$.</p>
+                    <p>The <b>binomial coefficient</b> $\binom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$ counts the paths with exactly $k$ hits, with $n! = 1 \cdot 2 \cdot \ldots \cdot n$ and $0! = 1$.</p>
+                    <p><b>Bernoulli's formula:</b> for the number $X$ of hits $$P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k}.$$
+                        $X$ is then called <b>binomially distributed</b> with the parameters $n$ and $p$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculator:</b> there $\binom{n}{k}$ is usually called nCr, the binomial distribution binompdf (single) and binomcdf (cumulative).</p>
+            <p class="b-note"><b>Drawing without replacement</b> is not a Bernoulli chain, because $p$ changes from draw to draw. With large numbers, though, it almost is one.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ALL PATHS WITH EXACTLY k HITS</div>
+        <p class="b-help" style="margin:0 0 12px">Choose the length of the chain, the number of hits $k$ and $p$. The glowing paths are counted: that is $\binom{n}{k}$.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · THE GUESSING TEST</div>
+            <div class="b-text"><p>10 questions, 4 answers each, one correct, everything guessed. How likely are exactly 3 correct answers? How likely is none?</p></div>
+            <div class="b-sol"><p>$n = 10$, $p = 0.25$: $P(X = 3) = \binom{10}{3} \cdot 0.25^3 \cdot 0.75^7 = 120 \cdot 0.015625 \cdot 0.1335 \approx 0.250$</p>
+                <p>$P(X = 0) = 0.75^{10} \approx 0.056$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · BINOMIAL COEFFICIENTS</div>
+            <div class="b-text"><p>Calculate $\binom{5}{2}$, $\binom{7}{3}$ and $\binom{49}{6}$. What does the last one count?</p></div>
+            <div class="b-sol"><p>$\binom52 = \tfrac{5 \cdot 4}{2 \cdot 1} = 10$, $\binom73 = \tfrac{7 \cdot 6 \cdot 5}{3 \cdot 2 \cdot 1} = 35$, $\binom{49}{6} = 13{,}983{,}816$:
+                the number of possible tickets in the German lottery “6 out of 49”.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Is this a Bernoulli chain? If so, give $n$ and $p$. a) roll a dice 20 times, hit: six &nbsp; b) draw 3 of 5 raffle tickets without replacement &nbsp; c) check 50 parts, 2% rejects</p></div>
+            <div class="b-sol"><p>a) yes, $n = 20$, $p = \tfrac16$ &nbsp; b) no, $p$ changes &nbsp; c) yes (approximately, for a large production), $n = 50$, $p = 0.02$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calculate $\binom{6}{2}$, $\binom{8}{4}$ and $\binom{10}{0}$.</p></div>
+            <div class="b-sol"><p>15, 70, 1</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A coin is tossed 10 times. How likely are exactly five heads? Why is that not so likely after all?</p></div>
+            <div class="b-sol"><p>$\binom{10}{5} \cdot 0.5^{10} = \tfrac{252}{1024} \approx 0.246$. “Exactly 5” is only one of 11 possible values, the neighbours 4 and 6 are almost as likely.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Roll a dice 12 times. How likely are exactly two sixes?</p></div>
+            <div class="b-sol"><p>$\binom{12}{2} \cdot \left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^{10} = 66 \cdot \tfrac{1}{36} \cdot 0.1615 \approx 0.296$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Use paths to explain why $\binom{n}{k} = \binom{n}{n - k}$. What does this mean for the binomial distribution with $p = 0.5$?</p></div>
+            <div class="b-sol"><p>Choosing the $k$ places for the hits also fixes the $n - k$ places for the misses. With $p = 0.5$ therefore $P(X = k) = P(X = n - k)$: the histogram is symmetric.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="35" data-ph="number"><p class="b-q-text">Calculate $\binom{7}{3}$.</p><div class="b-sol"><p>$\tfrac{7 \cdot 6 \cdot 5}{6} = 35$</p></div></div>
+        <div class="b-q" data-ans="0.441" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 3$, $p = 0.3$. Calculate $P(X = 1)$.</p><div class="b-sol"><p>$3 \cdot 0.3 \cdot 0.7^2 = 0.441$</p></div></div>
+        <div class="b-q" data-ans="0.1536" data-tol="0.0005" data-ph="P ="><p class="b-q-text">$n = 4$, $p = 0.2$. Calculate $P(X = 2)$.</p><div class="b-sol"><p>$6 \cdot 0.04 \cdot 0.64 = 0.1536$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Cumulative probabilities" data-toc-k="2" data-toc-short="2 Cumulative">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">8 LESSONS</span></div>
+    <h2><span class="b-no">2</span>At most, at least, between</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A delivery of 50 components is accepted if <b>at most 2</b> are faulty. The machine produces 2% rejects. How often is a delivery accepted?</p></div></div>
+            <div class="b-text"><p>We need $P(X \le 2) = P(X = 0) + P(X = 1) + P(X = 2)$ with $n = 50$, $p = 0.02$. Such sums are called <b>cumulative</b> probabilities.
+                You calculate them with the calculator (binomcdf) or read them from a table.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · CUMULATIVE PROBABILITIES</div>
+                <div class="b-text">
+                    <p>$P(X \le k) = \sum\limits_{i=0}^{k} \binom{n}{i} \cdot p^i \cdot (1 - p)^{n - i}$</p>
+                    <p>“at least $k$”: $P(X \ge k) = 1 - P(X \le k - 1)$ · “more than $k$”: $P(X > k) = 1 - P(X \le k)$ · “fewer than $k$”: $P(X < k) = P(X \le k - 1)$</p>
+                    <p>“between $a$ and $b$” (inclusive): $P(a \le X \le b) = P(X \le b) - P(X \le a - 1)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Careful with “at least”:</b> $P(X \ge 3) = 1 - P(X \le 2)$, not $1 - P(X \le 3)$. The 3 belongs to “at least 3”.</p>
+            <p class="b-note"><b>Check:</b> draw the bars that are meant. The widget below colours them gold.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE BINOMIAL DISTRIBUTION</div>
+        <p class="b-help" style="margin:0 0 12px">Set $n$ and $p$ and choose what is to be calculated. Gold are the bars that are added up. Red: the expected value, dashed: $\mu \pm \sigma$.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · THE DELIVERY</div>
+            <div class="b-text"><p>$n = 50$, $p = 0.02$. How likely is the delivery to be accepted? How likely is it to be completely free of faults?</p></div>
+            <div class="b-sol"><p>$P(X \le 2) \approx 0.922$. About 92% of the deliveries are accepted.</p>
+                <p>$P(X = 0) = 0.98^{50} \approx 0.364$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · OVERBOOKED</div>
+            <div class="b-text"><p>103 tickets, 100 seats, every person turns up independently with 95%. How likely is it that there are not enough seats?</p></div>
+            <div class="b-sol"><p>$X$: number of people who turn up, $n = 103$, $p = 0.95$. $P(X > 100) = 1 - P(X \le 100) \approx 0.106$.
+                <span class="b-res">On about every tenth flight</span> someone has to be rebooked. With 102 tickets it would only be just over 3%.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ is binomially distributed with $n = 20$ and $p = 0.3$. Use the widget or the calculator to find $P(X = 6)$, $P(X \le 6)$, $P(X \ge 8)$ and $P(4 \le X \le 8)$.</p></div>
+            <div class="b-sol"><p>$0.192$; $0.608$; $0.228$; $0.780$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Translate into a probability with $X \le$: a) “at least 4” &nbsp; b) “more than 4” &nbsp; c) “fewer than 4” &nbsp; d) “at most 4”</p></div>
+            <div class="b-sol"><p>a) $1 - P(X \le 3)$ &nbsp; b) $1 - P(X \le 4)$ &nbsp; c) $P(X \le 3)$ &nbsp; d) $P(X \le 4)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>In the guessing test from example 1 you need at least 5 correct answers to pass. How likely is it to pass by guessing?</p></div>
+            <div class="b-sol"><p>$P(X \ge 5) = 1 - P(X \le 4) \approx 0.078$. About 8% would get through.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>10% of all smartphones of one model have a battery fault. In a class, 20 people have this model. How likely is it that none has the fault? At least one? At most two?</p></div>
+            <div class="b-sol"><p>$0.9^{20} \approx 0.122$; $1 - 0.122 = 0.878$; $P(X \le 2) \approx 0.677$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>How many times do you have to roll a dice at least so that at least one six comes up with a probability of at least 90%?</p></div>
+            <div class="b-hint"><p>Solve $1 - \left(\tfrac56\right)^n \ge 0.9$, with the logarithm from Year 11 or by trial and error.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac56\right)^n \le 0.1 \Rightarrow n \ge \dfrac{\ln 0.1}{\ln \frac56} \approx 12.6$. <span class="b-res">At least 13 rolls.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.1719" data-tol="0.0005" data-ph="P ="><p class="b-q-text">$n = 10$, $p = 0.5$. Calculate $P(X \le 3)$.</p><div class="b-sol"><p>$\tfrac{1 + 10 + 45 + 120}{1024} = \tfrac{176}{1024} \approx 0.1719$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">“At least 7 hits” is equal to …</p>
+            <div class="b-mc"><button>$1 - P(X \le 7)$</button><button>$P(X \le 7)$</button><button>$1 - P(X \le 6)$</button></div>
+            <div class="b-sol"><p>The complement of “at least 7” is “at most 6”.</p></div></div>
+        <div class="b-q" data-ans="0.8784" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 20$, $p = 0.1$. What is $P(X \ge 1)$?</p><div class="b-sol"><p>$1 - 0.9^{20} \approx 0.878$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Expected value and histogram" data-toc-k="3" data-toc-short="3 μ and σ">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">6 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Expected value, standard deviation and the shape of the histogram</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>If you roll a dice 60 times, you expect about 10 sixes. But how far may the result be from that before you become suspicious?</p></div></div>
+            <div class="b-text"><p>For the binomial distribution you do not have to calculate the expected value and the variance via the long sum: every single stage contributes $p$ to the expected value
+                and $p(1 - p)$ to the variance. With $n$ stages this gives simple formulas.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · KEY FIGURES OF THE BINOMIAL DISTRIBUTION</div>
+                <div class="b-text">
+                    <p>$\mu = E(X) = n \cdot p$ &nbsp; · &nbsp; $V(X) = n \cdot p \cdot (1 - p)$ &nbsp; · &nbsp; $\sigma = \sqrt{n \cdot p \cdot (1 - p)}$</p>
+                    <p>The histogram has its maximum at or next to $\mu$. The larger $n$, the wider and flatter it becomes, but in relation to $n$ ever narrower.
+                        With $p = 0.5$ it is symmetric, with small $p$ skewed to the right, with large $p$ to the left.</p>
+                    <p>Rule of thumb: if $\sigma > 3$, about 68% of the values lie in the interval $[\mu - \sigma, \mu + \sigma]$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Square root law:</b> four times as many trials double $\sigma$. The <b>relative</b> spread $\tfrac{\sigma}{n}$ halves at the same time.</p>
+            <p class="b-note"><b>In the widget above</b> the dashed lines show $\mu - \sigma$ and $\mu + \sigma$. Change $n$ and watch.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · ROLLING 60 TIMES</div>
+            <div class="b-text"><p>$X$: number of sixes in 60 rolls. Calculate $\mu$ and $\sigma$.</p></div>
+            <div class="b-sol"><p>$\mu = 60 \cdot \tfrac16 = 10$, $\sigma = \sqrt{60 \cdot \tfrac16 \cdot \tfrac56} = \sqrt{8.33} \approx 2.89$. Values between about 7 and 13 are completely normal.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · 100 COIN TOSSES</div>
+            <div class="b-text"><p>$X$: number of heads in 100 tosses. Calculate $\mu$, $\sigma$ and $P(45 \le X \le 55)$.</p></div>
+            <div class="b-sol"><p>$\mu = 50$, $\sigma = \sqrt{25} = 5$, $P(45 \le X \le 55) \approx 0.729$. That fits the rule of thumb well.</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">The binomial distribution falls from the sky</span></span></a>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calculate $\mu$ and $\sigma$ for a) $n = 50$, $p = 0.1$ &nbsp; b) $n = 20$, $p = 0.3$ &nbsp; c) $n = 400$, $p = 0.5$.</p></div>
+            <div class="b-sol"><p>a) $5$; $\sqrt{4.5} \approx 2.12$ &nbsp; b) $6$; $\sqrt{4.2} \approx 2.05$ &nbsp; c) $200$; $10$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Set $n = 20$ in the widget and compare the histograms for $p = 0.1$, $p = 0.5$ and $p = 0.9$. Describe position and shape.</p></div>
+            <div class="b-sol"><p>$p = 0.1$: maximum at 2, skewed to the right. $p = 0.5$: symmetric about 10. $p = 0.9$: mirror image of $p = 0.1$, maximum at 18, skewed to the left.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A coin is supposed to be fair. In 100 tosses it shows heads 62 times. Is that still in the range $[\mu - 2\sigma, \mu + 2\sigma]$? What do you conclude?</p></div>
+            <div class="b-sol"><p>$[50 - 10, 50 + 10] = [40, 60]$. 62 lies outside. That is unusual for a fair coin, it should be checked more closely. This alone does not prove anything yet.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>For which $p$ is the variance $n \cdot p \cdot (1 - p)$ largest for fixed $n$? Explain without a derivative.</p></div>
+            <div class="b-sol"><p>$p(1 - p) = p - p^2$ is a parabola opening downwards with zeros 0 and 1, its vertex is at $p = 0.5$. That is where the uncertainty is greatest.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="12" data-ph="μ ="><p class="b-q-text">$n = 40$, $p = 0.3$. What is $\mu$?</p><div class="b-sol"><p>$40 \cdot 0.3 = 12$</p></div></div>
+        <div class="b-q" data-ans="3" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">$n = 100$, $p = 0.1$. What is $\sigma$?</p><div class="b-sol"><p>$\sqrt{100 \cdot 0.1 \cdot 0.9} = \sqrt9 = 3$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">What does the histogram for $n = 30$, $p = 0.5$ look like?</p>
+            <div class="b-mc"><button>symmetric about 15</button><button>skewed to the right</button><button>skewed to the left</button></div>
+            <div class="b-sol"><p>With $p = 0.5$, $P(X = k) = P(X = 30 - k)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>A basketball player scores 70% of his free throws. He takes 10 shots. How many hits are to be expected? How likely is it that he scores with all of them?</p></div>
+            <div class="b-sol"><p>$\mu = 7$; $0.7^{10} \approx 0.028$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>15 people are asked, 40% of the population know a certain product. Calculate $P(X = 6)$, $P(X \le 4)$ and $P(X \ge 9)$.</p></div>
+            <div class="b-sol"><p>$0.207$; $0.217$; $0.095$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Connecting with chapter 1.2:</b> in the guessing test you get 1 point for every correct answer, for every wrong one $\tfrac13$ point is deducted. What score do you expect when guessing?</p></div>
+            <div class="b-sol"><p>Per question: $1 \cdot 0.25 - \tfrac13 \cdot 0.75 = 0$. Guessing gains nothing on average, that is exactly why there is this deduction.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>An airline has 100 seats and expects 95% to turn up. It wants to have too few seats on at most 5% of the flights. How many tickets may it sell? Use the widget.</p></div>
+            <div class="b-sol"><p>With 102 tickets: $P(X > 100) \approx 0.034$, with 103 already $\approx 0.106$. <span class="b-res">At most 102 tickets.</span></p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: the Galton board" data-toc-k="X" data-toc-short="Galton">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">THE BINOMIAL DISTRIBUTION TO TOUCH</span></div>
+    <h2>The Galton board</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>The English naturalist Francis Galton built a board with many rows of pins. Balls falling from the top bounce randomly to the left
+                or to the right at every pin. At the bottom they collect in slots, and the same bell shape appears again and again.</p>
+            <p>Explained with the binomial distribution: with $n$ rows of pins every ball is a Bernoulli chain of length $n$ with $p = 0.5$, “right” is a hit.
+                Slot $k$ is reached via $\binom{n}{k}$ paths. With 10 rows about $\binom{10}{5} \cdot 0.5^{10} \approx 24.6\%$ of the balls land in the middle slot,
+                in each of the two outermost ones only just under 0.1%.</p>
+            <p>Galton called his board the “quincunx” and used it to explain why many features in nature are distributed in a similar way.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Francis Galton: Natural Inheritance. Macmillan, London 1889.</p></aside>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Drop balls and count them</span></span></a></div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>BERNOULLI CHAIN</h4><p>$n$ independent repetitions, each a hit with probability $p$.</p></div>
+        <div><p>Roll a dice 20 times, hit: six</p></div></div>
+    <div class="b-rueck"><div><h4>BINOMIAL COEFFICIENT</h4><p>$\binom{n}{k} = \dfrac{n!}{k!\,(n - k)!}$ paths with exactly $k$ hits.</p></div>
+        <div><p>$\binom52 = 10$ · $\binom{49}{6} = 13{,}983{,}816$</p></div></div>
+    <div class="b-rueck"><div><h4>BERNOULLI'S FORMULA</h4><p>$P(X = k) = \binom{n}{k}\, p^k\, (1 - p)^{n - k}$</p></div>
+        <div><p>Guessing test: $P(X = 3) \approx 0.250$</p></div></div>
+    <div class="b-rueck"><div><h4>CUMULATIVE</h4><p>$P(X \ge k) = 1 - P(X \le k - 1)$ · $P(a \le X \le b) = P(X \le b) - P(X \le a - 1)$</p></div>
+        <div><p>Delivery: $P(X \le 2) \approx 0.922$</p></div></div>
+    <div class="b-rueck"><div><h4>KEY FIGURES</h4><p>$\mu = np$, $\sigma = \sqrt{np(1 - p)}$</p></div>
+        <div><p>Rolling 60 times: $\mu = 10$, $\sigma \approx 2.89$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1</div>
+            <div class="b-q" data-ans="10" data-ph="number"><p class="b-q-text">Calculate $\binom{5}{3}$.</p><div class="b-sol"><p>$\binom53 = \binom52 = 10$</p></div></div>
+            <div class="b-q" data-ans="0.2734" data-tol="0.0005" data-ph="P ="><p class="b-q-text">A coin is tossed 8 times. How likely are exactly four heads?</p><div class="b-sol"><p>$70 \cdot 0.5^8 = \tfrac{70}{256} \approx 0.2734$</p></div></div>
+            <div class="b-q" data-ans="15" data-ph="μ ="><p class="b-q-text">$n = 60$, $p = 0.25$. What is the expected value?</p><div class="b-sol"><p>$60 \cdot 0.25 = 15$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2</div>
+            <div class="b-q" data-ans="0.0781" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 10$, $p = 0.25$. What is $P(X \ge 5)$?</p><div class="b-sol"><p>$1 - P(X \le 4) \approx 0.078$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Which situation is <b>not</b> a Bernoulli chain?</p>
+                <div class="b-mc"><button>tossing a coin 10 times</button><button>drawing 3 cards from a pack without replacement, hit: ace</button><button>rolling a dice 20 times, hit: even number</button></div>
+                <div class="b-sol"><p>Without replacement, $p$ changes after every draw.</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="σ ="><p class="b-q-text">$n = 64$, $p = 0.5$. What is $\sigma$?</p><div class="b-sol"><p>$\sqrt{64 \cdot 0.25} = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos11-bernoulli.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BERNOULLI CHAINS</span><span class="b-lab-what">Bernoulli's formula, cumulative</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-kombination-variation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COMBINATORICS</span><span class="b-lab-what">Factorial and binomial coefficient</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 12 · Learning area 1 of the Saxon curriculum for mathematics at the Berufliches Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+</body>
+</html>
