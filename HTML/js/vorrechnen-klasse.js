@@ -439,7 +439,14 @@ function pillenZeichnen(neuTempo, neuText) {
             zeit.textContent = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
             const text = document.createElement('span');
             text.className = 'tx-text';
-            text.textContent = x.text;
+            // the name before the words, when the phone gave one (Doc, 11.10.: "ein Namensfeld (wenn kids das wollen)")
+            if (x.name) {
+                const name = document.createElement('span');
+                name.className = 'tx-name';
+                name.textContent = x.name + ': ';
+                text.appendChild(name);
+            }
+            text.appendChild(document.createTextNode(x.text));
             d.append(zeit, text);
             box.appendChild(d);
         });

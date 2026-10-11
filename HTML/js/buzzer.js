@@ -146,13 +146,14 @@
     // ---- written feedback (Doc, 01.10.2026: "ein Feld. Für Feedback. Wo die mir also tatsächlich irgendwas schreiben
     // können ... bei mir im Mission Control"): rows of buzzer_text, today's of this code. Only a signed-in teacher may
     // read them (svpAuth - the page brings it along), so without a session there is nothing to show.
-    let texteMelde = null, texteMitSchluessel = false, texte = new Map();  // id -> {id, text, t}
+    let texteMelde = null, texteMitSchluessel = false, texte = new Map();  // id -> {id, text, name, t}
     function texteDazu(zeilen) {
         const zeiten = zeitenAus(zeilen);
         let neu = false;
         zeilen.forEach(r => {
             if (!r || texte.has(r.id)) return;
-            texte.set(r.id, { id: r.id, text: String(r.text || ''), t: zeiten[r.id] || Date.now() });
+            // name: only if the phone gave one (Doc, 11.10.2026: "ein Namensfeld (wenn kids das wollen)"), else ''
+            texte.set(r.id, { id: r.id, text: String(r.text || ''), name: String(r.name || ''), t: zeiten[r.id] || Date.now() });
             neu = true;
         });
         texteMelde({ texte: [...texte.values()], angemeldet: true, neu });
@@ -168,7 +169,7 @@
         try {
             const heute0 = new Date(); heute0.setHours(0, 0, 0, 0);
             const res = await auth.api('buzzer_text?code=eq.' + code() + '&created_at=gt.' + encodeURIComponent(heute0.toISOString()) +
-                '&select=id,text,created_at&order=id');
+                '&select=id,text,name,created_at&order=id');
             if (res.ok) texteDazu(await res.json());
         } catch (_) { /* offline for a moment - the next look catches up */ }
     }
@@ -385,7 +386,7 @@
         // minutes), neu = the kind just come; tempoJetzt(): count again now (the page's ab() moved on)
         tempo: (cb, ab) => { tempoMelde = cb; tempoAb = ab || null; if (laeuft && cb) cb(tempoStand()); },
         tempoJetzt: () => { if (tempoMelde) tempoMelde(tempoStand()); },
-        // texte(onTexte, {schluessel}): onTexte({texte: [{id, text, t}], angemeldet, neu}) - today's written feedback
+        // texte(onTexte, {schluessel}): onTexte({texte: [{id, text, name, t}], angemeldet, neu}) - today's written feedback
         // of this code; schluessel: true reads them without a session, with the code claimed by this device
         texte: (cb, opts) => { texteMelde = cb; texteMitSchluessel = !!(opts && opts.schluessel); if (laeuft && cb) texteNachsehen(); },
         aktiv: () => laeuft };

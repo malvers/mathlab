@@ -110,6 +110,7 @@
         .rm-tx:last-child { border-bottom: none; }
         .rm-tx-zeit { flex: none; padding-top: 3px; font: 400 0.75rem/1.4 'Orbitron', sans-serif; letter-spacing: 0.06em; color: var(--rm-leise); }
         .rm-tx-text { font: 400 1rem/1.5 'Outfit', sans-serif; color: #eaf0f7; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .rm-tx-name { font-weight: 600; color: var(--rm-orange); }
         .rm-leer { margin: 6px 0 10px; font: 400 0.95rem/1.5 'Outfit', sans-serif; color: var(--rm-leise); text-align: center; }
     </style>
     <script src="js/farbschema.js"></script>
@@ -305,7 +306,14 @@
                     const t = new Date(x.t);
                     zeit.textContent = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
                     text.className = 'rm-tx-text';
-                    text.textContent = x.text;
+                    // the name before the words, when the phone gave one (buzzer.html, Doc 11.10.2026)
+                    if (x.name) {
+                        const name = document.createElement('span');
+                        name.className = 'rm-tx-name';
+                        name.textContent = x.name + ': ';
+                        text.appendChild(name);
+                    }
+                    text.appendChild(document.createTextNode(x.text));
                     d.append(zeit, text);
                     liste.appendChild(d);
                 });
