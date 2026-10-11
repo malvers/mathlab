@@ -79,8 +79,17 @@ const LAB_ICONS = {
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
-    "lehrbuch-mathegy8": `<img src="resources/og/buch-mathegy8-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    // book 12 as well (Doc, 11.10.2026: "Dann fangt an")
+    "lehrbuch-mathegy8": `<span style="display: flex; gap: 12px; align-items: center;">
+        <img src="resources/og/buch-mathegy8-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy8-en/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy8-en/index.html'; }">
+            <img src="resources/og/buch-mathegy8-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+    </span>`,
     // book 11 as well (Doc, 11.10.2026: "Dann fangt an")
     "lehrbuch-mathegy9": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathegy9-cover.jpg" alt="" loading="lazy" decoding="async"

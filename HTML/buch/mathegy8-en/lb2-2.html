@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 8 · Chapter 2.2 · Multi-stage random experiments and counting | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Urn model, tree diagram, path rules, product rule, simulation. Chapter 2.2 of the interactive textbook Mathematics · Grammar School 8: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 8</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 2.2 · LEARNING AREA 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 2.2 · LEARNING AREA 2 · DECEMBER</p>
+            <h1>Multi-stage random experiments and counting</h1>
+            <p class="b-hero-lead">Rolling a dice twice, taking three gumballs from the machine, cracking a combination lock: many random experiments take place in several stages.
+                With the <b>tree diagram</b> you keep track, with the <b>path rules</b> you calculate, with the <b>product rule</b> you count without writing everything down,
+                and with <b>random numbers</b> you let the computer roll the dice for you.</p>
+            <div class="b-chips"><span class="b-chip">8 LESSONS</span><span class="b-chip">2 UNITS</span><span class="b-chip">TREE DIAGRAM</span><span class="b-chip">SIMULATION</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>describe multi-stage random experiments with the <b>urn model</b> and show them in a <b>tree diagram</b></li>
+                <li>calculate with the <b>product rule</b> and the <b>sum rule</b> for paths, also with the complementary event</li>
+                <li>distinguish drawing <b>with</b> and <b>without replacement</b></li>
+                <li>count possibilities with the <b>product rule</b> and simulate a random experiment with <b>random numbers</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="1/6" data-ph="Fraction"><p class="b-q-text">Calculate $\tfrac12 \cdot \tfrac13$.</p><div class="b-sol"><p>Numerator times numerator, denominator times denominator.</p></div></div>
+            <div class="b-q" data-ans="7/12" data-ph="Fraction"><p class="b-q-text">Calculate $\tfrac14 + \tfrac13$.</p><div class="b-sol"><p>$\tfrac{3}{12} + \tfrac{4}{12}$</p></div></div>
+            <div class="b-q" data-ans="2/5" data-ph="Fraction"><p class="b-q-text">An urn contains 2 red and 3 blue balls. $P(\text{red})$?</p><div class="b-sol"><p>2 out of 5 balls</p></div></div>
+            <div class="b-q" data-ans="3/4" data-ph="Fraction"><p class="b-q-text">$P(\text{red}) = \tfrac14$. What is $P(\text{not red})$?</p><div class="b-sol"><p>$1 - \tfrac14$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">TWO GUMBALLS</div>
+            <div class="b-text"><p>A bag contains 3 red and 2 blue gumballs. Without looking, you take two one after the other and do not put the first one back.</p>
+                <ul><li>Which is more likely: two of the same colour or two different ones? First estimate, then try it 20 times.</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE COMBINATION LOCK</div>
+            <div class="b-text"><p>A bicycle lock has 4 wheels with the digits 0 to 9.</p>
+                <ul><li>How many codes are there? How long would someone need who takes 2 seconds for each code?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE OUTFIT</div>
+            <div class="b-text"><p>Lena has 3 T-shirts, 2 pairs of trousers and 2 pairs of shoes.</p>
+                <ul><li>How many different outfits can she put on? Draw a picture in which you can see them all.</li></ul></div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">A tree diagram made of pins</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Tree diagram and path rules" data-toc-k="1" data-toc-short="1 Tree diagram">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Tree diagram and path rules</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>On the first reach into the bag, $P(\text{red}) = \tfrac35$. If the first ball was red, there are still 2 red and 2 blue ones in the bag:
+                on the second reach, $P(\text{red}) = \tfrac24$. The <b>tree diagram</b> shows all possibilities stage by stage, and each branch carries its probability.</p></div></div>
+            <div class="b-text"><p>Many random experiments can be acted out as drawing from an <b>urn</b>. If you put the ball back, the probabilities stay the same at every stage,
+                the stages are <b>independent</b>. If you do not put it back, the first draw changes the contents of the urn, the stages are <b>dependent</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · PATH RULES</div>
+                <div class="b-text">
+                    <p><b>Product rule:</b> the probability of a path is the product of the probabilities on its branches: $P(\text{red, red}) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$.</p>
+                    <p><b>Sum rule:</b> the probability of an event is the sum of the probabilities of its paths: $P(\text{same colour}) = \tfrac{3}{10} + \tfrac{1}{10} = \tfrac25$.</p>
+                    <p>At every branching point the branches add up to $1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>The dice remembers nothing:</b> even after five rolls without a six, a six is not more likely on the sixth roll. Rolls are independent.</p>
+            <p class="b-note"><b>Shortcut:</b> for “at least once”, the complementary event “not at all” helps. It often has just a single path.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE TREE DIAGRAM WORKSHOP</div>
+        <p class="b-help" style="margin:0 0 12px">Set the balls in the urn, choose with or without replacement and an event. The matching paths light up, the calculation is shown below.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · WITHOUT REPLACEMENT</div>
+            <div class="b-text"><p>Bag with 3 red and 2 blue gumballs, two are drawn without replacement. Calculate $P(\text{red, red})$, $P(\text{blue, blue})$ and $P(\text{different colours})$.</p></div>
+            <div class="b-sol"><p>$P(\text{red, red}) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$, $\;P(\text{blue, blue}) = \tfrac25 \cdot \tfrac14 = \tfrac{1}{10}$</p>
+                <p>Same colours: $\tfrac{4}{10}$. So <span class="b-res">$P(\text{different}) = 1 - \tfrac25 = \tfrac35$</span>. Different colours are more likely.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · AT LEAST ONE SIX</div>
+            <div class="b-text"><p>A dice is rolled twice. What is the probability of at least one six?</p></div>
+            <div class="b-sol"><p>Complementary event “no six”: only one path, $\tfrac56 \cdot \tfrac56 = \tfrac{25}{36}$.</p>
+                <p><span class="b-res">$P(\text{at least one six}) = 1 - \tfrac{25}{36} = \tfrac{11}{36}$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A coin is tossed three times. Draw the tree diagram. Calculate $P(\text{three heads})$ and $P(\text{exactly two heads})$.</p></div>
+            <div class="b-sol"><p>Each of the 8 paths has $\tfrac18$. Three heads: $\tfrac18$. Exactly two: $HHT$, $HTH$, $THH$, so $\tfrac38$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>An urn contains 4 red balls and 1 white ball. Two balls are drawn <b>with</b> replacement. Calculate $P(\text{red, red})$, $P(\text{both white})$ and $P(\text{exactly one white})$.</p></div>
+            <div class="b-sol"><p>$\tfrac45 \cdot \tfrac45 = \tfrac{16}{25}$, $\;\tfrac15 \cdot \tfrac15 = \tfrac{1}{25}$, $\;2 \cdot \tfrac45 \cdot \tfrac15 = \tfrac{8}{25}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>The same urn, but <b>without</b> replacement. Calculate the three probabilities again. Why is $P(\text{both white})$ now $0$?</p></div>
+            <div class="b-sol"><p>$\tfrac45 \cdot \tfrac34 = \tfrac35$; both white is impossible, there is only one white ball; exactly one white: $\tfrac45 \cdot \tfrac14 + \tfrac15 \cdot \tfrac44 = \tfrac25$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In a game you spin a spinner twice; on each spin you win with probability $\tfrac14$. What is the probability of at least one win?</p></div>
+            <div class="b-sol"><p>$1 - \tfrac34 \cdot \tfrac34 = 1 - \tfrac{9}{16} = \tfrac{7}{16}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A basketball player scores 70% of her free throws. She shoots three times. Calculate $P(\text{three hits})$ and $P(\text{at least one hit})$. Which assumption is hidden in your calculation?</p></div>
+            <div class="b-sol"><p>$0.7^3 = 0.343$ and $1 - 0.3^3 = 0.973$. Assumption: the throws are independent, nerves or tiredness play no part.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3/10" data-ph="Fraction"><p class="b-q-text">$P(\text{red, red})$ in example 1?</p><div class="b-sol"><p>$\tfrac35 \cdot \tfrac24$</p></div></div>
+        <div class="b-q" data-ans="11/36" data-ph="Fraction"><p class="b-q-text">$P(\text{at least one six})$ in two rolls?</p><div class="b-sol"><p>$1 - \tfrac{25}{36}$</p></div></div>
+        <div class="b-q" data-ans="0.343" data-ph="Decimal"><p class="b-q-text">$P(\text{three hits})$ in exercise 5?</p><div class="b-sol"><p>$0.7^3$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Counting and simulating" data-toc-k="2" data-toc-short="2 Counting">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">CAS · 4 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Counting and simulating</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>With the combination lock there are 10 possibilities for the first wheel and another 10 for each further one. Together that makes $10 \cdot 10 \cdot 10 \cdot 10 = 10{,}000$ codes.
+                At 2 seconds per attempt, trying them all takes up to $20{,}000$ seconds, more than five and a half hours. You do not have to write the codes down, you multiply.</p></div></div>
+            <div class="b-text"><p>When drawing from an urn it matters whether you put the balls back and whether the order counts. Without replacement the choice gets smaller with every draw.
+                If the order does not count, outcomes that differ only in their order merge into one.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · COUNTING WITH THE PRODUCT RULE</div>
+                <div class="b-text">
+                    <p>If a process has $k$ stages with $n_1, n_2, \ldots, n_k$ possibilities, there are $n_1 \cdot n_2 \cdot \ldots \cdot n_k$ possibilities altogether.</p>
+                    <p><b>With replacement</b>, order counts: $k$ times from $n$ balls gives $n \cdot n \cdot \ldots \cdot n = n^k$.</p>
+                    <p><b>Without replacement</b>, order counts: $n \cdot (n - 1) \cdot (n - 2) \cdot \ldots$ with $k$ factors.</p>
+                    <p>If the <b>order does not count</b>, you divide by the number of possible orders: 2 out of 5 without order gives $\tfrac{5 \cdot 4}{2} = 10$.</p>
+                </div>
+            </div>
+            <div class="b-box b-methode">
+                <div class="b-box-title">METHOD · SIMULATING WITH RANDOM NUMBERS</div>
+                <div class="b-text"><p>A random experiment can be acted out with random numbers: dice → random number from 1 to 6, coin → 0 or 1.
+                    In the CAS, for example, <code>randInt(1,6)</code>, in a spreadsheet <code>=RANDBETWEEN(1,6)</code>.
+                    Many runs give a relative frequency that estimates the probability you are looking for.</p></div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Orders:</b> 3 things can be arranged in $3 \cdot 2 \cdot 1 = 6$ ways, 4 things in $4 \cdot 3 \cdot 2 \cdot 1 = 24$ ways. For short you write $4!$, read “4 factorial”.</p>
+            <p class="b-note"><b>Looking ahead:</b> the tool below also shows names and formulae that you will only need later. For now, the list of all possibilities is what counts.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE URN MODEL</div>
+        <p class="b-help" style="margin:0 0 12px">Set the balls and draws and compare with and without replacement, with and without order. Count the list and check with the product rule.</p>
+        <div data-widget="urne" data-n="4" data-k="2" data-ord="1" data-rep="0"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ROLLING DICE WITH RANDOM DIGITS</div>
+        <p class="b-help" style="margin:0 0 12px">Every digit in the table is random. Read them as a coin or as a dice and compare the frequencies with the probabilities.</p>
+        <div data-widget="ziffern8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · COUNTING</div>
+            <div class="b-text"><p>a) How many three-digit numbers can be made from the digits 1, 2, 3, 4, 5 if digits may appear more than once? b) if each digit appears at most once?
+                c) How many teams of two can be formed from 5 people?</p></div>
+            <div class="b-sol"><p>a) $5 \cdot 5 \cdot 5 =$ <span class="b-res">$125$</span> &nbsp; b) $5 \cdot 4 \cdot 3 =$ <span class="b-res">$60$</span></p>
+                <p>c) $5 \cdot 4 = 20$ pairs with order, but Lena with Tom is the same team as Tom with Lena: $\tfrac{20}{2} =$ <span class="b-res">$10$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · SIMULATING</div>
+            <div class="b-text"><p>On average, how often do you have to roll until the first six comes up? Simulate with the random digits above.</p></div>
+            <div class="b-sol"><p>Read the digits in order, skip 0, 7, 8 and 9 and count the rolls up to the first 6. Then start again.</p>
+                <p>Many runs give, on average, <span class="b-res">about 6 rolls</span>. Single runs can take much longer, though.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>An ice-cream parlour has 8 flavours. How many possibilities are there for a cone with 2 scoops, a) if the order counts and flavours may be repeated, b) if they are to be two different flavours and the order does not matter?</p></div>
+            <div class="b-sol"><p>a) $8 \cdot 8 = 64$ &nbsp; b) $\tfrac{8 \cdot 7}{2} = 28$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A password consists of 4 lower-case letters (26 letters). How many passwords are there? How many if the 10 digits are allowed as well?</p></div>
+            <div class="b-sol"><p>$26^4 = 456{,}976$ and $36^4 = 1{,}679{,}616$. Even one more character makes a big difference: $26^5 = 11{,}881{,}376$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In a race with 8 runners, gold, silver and bronze are awarded. How many different podiums are there?</p></div>
+            <div class="b-sol"><p>$8 \cdot 7 \cdot 6 = 336$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><span class="g-cas">CAS</span> In the German lottery “6 aus 49” (6 from 49), 6 numbers are drawn without replacement. How many possibilities are there if the order counts? When you fill in a ticket it does not count. Which number do you have to divide by?</p></div>
+            <div class="b-sol"><p>$49 \cdot 48 \cdot 47 \cdot 46 \cdot 45 \cdot 44 = 10{,}068{,}347{,}520$. The 6 numbers drawn can be ordered in $6! = 720$ ways: $\tfrac{10{,}068{,}347{,}520}{720} = 13{,}983{,}816$ tickets.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Simulate with random digits: how likely is it that in a group of 5 people at least two have their birthday in the same month? Read pairs of digits and use only 01 to 12.
+            Compare with the calculation $1 - \tfrac{12 \cdot 11 \cdot 10 \cdot 9 \cdot 8}{12^5}$.</p></div>
+            <div class="b-hint"><p>The fraction is the probability that all five have their birthdays in different months.</p></div>
+            <div class="b-sol"><p>Calculation: $1 - \tfrac{95{,}040}{248{,}832} \approx 0.62$. With 20 to 30 runs the simulation is usually already close. So more than every second group of five shares a birth month.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="10000" data-ph="Number"><p class="b-q-text">How many codes does a lock with 4 wheels from 0 to 9 have?</p><div class="b-sol"><p>$10^4$</p></div></div>
+        <div class="b-q" data-ans="336" data-ph="Number"><p class="b-q-text">Podiums in exercise 8?</p><div class="b-sol"><p>$8 \cdot 7 \cdot 6$</p></div></div>
+        <div class="b-q" data-ans="28" data-ph="Number"><p class="b-q-text">Cones with two different flavours in exercise 6 b)?</p><div class="b-sol"><p>$\tfrac{8 \cdot 7}{2}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>An urn contains 2 red and 3 green balls. Three balls are drawn with replacement. Calculate $P(\text{three times green})$ and $P(\text{at least once red})$.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac35\right)^3 = \tfrac{27}{125}$ and $1 - \tfrac{27}{125} = \tfrac{98}{125}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Lena’s outfits from the explorations: 3 T-shirts, 2 pairs of trousers, 2 pairs of shoes. How many outfits are there? How many if the yellow T-shirt does not go with the red trousers?</p></div>
+            <div class="b-sol"><p>$3 \cdot 2 \cdot 2 = 12$. The combination yellow with red exists with both pairs of shoes, so 2 drop out: 10 outfits.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><span class="g-cas">CAS</span> The Chevalier de Méré’s bet (excursion): calculate the probability of at least one six in 4 rolls and that of at least one double six in 24 rolls of two dice.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 0.518$ and $1 - \left(\tfrac{35}{36}\right)^{24} \approx 0.491$. The first bet wins in the long run, the second narrowly loses.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Lena and Tom play “rock, paper, scissors”, and both choose at random. Draw a tree diagram with two stages. What is the probability that Lena wins, and that it is a draw?</p></div>
+            <div class="b-sol"><p>9 equally likely paths with $\tfrac19$ each. Lena wins on 3 paths: $\tfrac13$. A draw on 3 paths: $\tfrac13$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: the Chevalier de Méré’s bet" data-toc-k="X" data-toc-short="De Méré">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>The Chevalier de Méré’s bet</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In 17th-century Paris, the Chevalier de Méré liked to bet on dice. His favourite bet: in four rolls of one dice, at least one six comes up.
+                With it he won money in the long run. Then he tried it with two dice. A double six is six times rarer than a six, so he thought: six times as many rolls,
+                24 instead of 4, give the same chance. But now he lost.</p>
+            <p>He asked the mathematician <b>Blaise Pascal</b>, who wrote about it to <b>Pierre de Fermat</b> in the summer of 1654. In their letters the two worked out
+                what you calculated in exercise 13: the first bet wins with about $0.518$, the second only with about $0.491$. De Méré’s rule of thumb was wrong.
+                The exchange of letters is regarded as the birth of probability theory.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Correspondence between B. Pascal and P. de Fermat, July to October 1654, among others Pascal to Fermat of 29 July 1654.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>URN MODEL</h4><p>drawing balls, with or without replacement</p></div>
+        <div><p>3 red, 2 blue gumballs</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUCT RULE FOR PATHS</h4><p>multiply along a path</p></div>
+        <div><p>$\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div></div>
+    <div class="b-rueck"><div><h4>SUM RULE</h4><p>add the probabilities of the matching paths</p></div>
+        <div><p>$\tfrac{3}{10} + \tfrac{1}{10} = \tfrac25$</p></div></div>
+    <div class="b-rueck"><div><h4>COMPLEMENTARY EVENT</h4><p>“at least once” $= 1 - $ “not at all”</p></div>
+        <div><p>$1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>COUNTING</h4><p>$n^k$ with replacement, $n(n - 1)\ldots$ without, without order divide by the number of orders</p></div>
+        <div><p>Combination lock: $10^4 = 10{,}000$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="1/8" data-ph="Fraction"><p class="b-q-text">$P(\text{three heads})$ in three coin tosses?</p><div class="b-sol"><p>$\left(\tfrac12\right)^3$</p></div></div>
+            <div class="b-q" data-ans="60" data-ph="Number"><p class="b-q-text">Three-digit numbers from the digits 1 to 5, each digit at most once?</p><div class="b-sol"><p>$5 \cdot 4 \cdot 3$</p></div></div>
+            <div class="b-q" data-ans="7/16" data-ph="Fraction"><p class="b-q-text">$P(\text{at least one win})$ in exercise 4?</p><div class="b-sol"><p>$1 - \tfrac{9}{16}$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · APPLYING</div>
+            <div class="b-q" data-ans="98/125" data-ph="Fraction"><p class="b-q-text">$P(\text{at least once red})$ in exercise 11?</p><div class="b-sol"><p>$1 - \tfrac{27}{125}$</p></div></div>
+            <div class="b-q" data-ans="13983816" data-ph="Number"><p class="b-q-text">How many tickets are there in the lottery “6 from 49” (exercise 9)?</p><div class="b-sol"><p>$\tfrac{10{,}068{,}347{,}520}{720}$</p></div></div>
+            <div class="b-q" data-ans="0.518" data-ph="Decimal"><p class="b-q-text">Probability of at least one six in 4 rolls, to three decimal places?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE TO TRY (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Left or right at every pin</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">THE DICE GAME</span><span class="b-lab-what">Who wins with two special dice?</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 8 · Learning area 2 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-en/geometrie.js"></script>
+<script src="../../js/buch-gy8.js"></script>
+<script src="../../js/buch-en/gy8.js"></script>
+</body>
+</html>

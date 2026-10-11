@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 8 · Chapter E · Simulation with random numbers | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Random numbers, the Monte Carlo method, the Monty Hall problem, collecting stickers. Chapter E of the interactive textbook Mathematics · Grammar School 8: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 8</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER E · ELECTIVE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER E · ELECTIVE 3 · MAY · JUNE</p>
+            <h1>Simulation with random numbers</h1>
+            <p class="b-hero-lead">How many packets do you have to buy until a sticker album is full? Should you switch doors in the Monty Hall problem? How big is $\pi$?
+                Some questions are hard to calculate but easy to try out, a thousand times in one second. You will learn to generate <b>random numbers</b>,
+                to build <b>structurally equivalent</b> random experiments and to simulate with the <b>Monte Carlo method</b>.</p>
+            <div class="b-chips"><span class="b-chip">8 LESSONS</span><span class="b-chip">2 UNITS</span><span class="b-chip">MONTE CARLO</span><span class="b-chip">MONTY HALL</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="mcpi8" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>generate <b>random numbers</b> with dice, spinners, urns, tables and the computer</li>
+                <li>construct, carry out and evaluate <b>structurally equivalent</b> random experiments</li>
+                <li>use simulations to answer questions that are hard to calculate: $\pi$, the Monty Hall problem, the sticker album</li>
+                <li>gain an <b>insight</b> into where simulations are used everywhere today</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="1/6" data-ph="Fraction"><p class="b-q-text">$P(6)$ with a dice?</p><div class="b-sol"><p>One of six numbers.</p></div></div>
+            <div class="b-q" data-ans="0.25" data-ph="Decimal"><p class="b-q-text">What share is 250 out of 1000?</p><div class="b-sol"><p>$\tfrac{250}{1000}$</p></div></div>
+            <div class="b-q" data-ans="3.14" data-ph="Decimal"><p class="b-q-text">Give $\pi$ to two decimal places.</p><div class="b-sol"><p>$\pi = 3.14159\ldots$</p></div></div>
+            <div class="b-q" data-ans="1/3" data-ph="Fraction"><p class="b-q-text">There is a prize behind one of three doors. How likely are you to pick the right door if you choose at random?</p><div class="b-sol"><p>One of three.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">RAINDROPS</div>
+            <div class="b-text"><p>Draw a square and inside it a quarter circle around one corner. Throw grains of rice at random onto the sheet and count how many land in the quarter circle and how many in the square.</p>
+                <ul><li>What does the ratio have to do with $\pi$?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COLLECTING FEVER</div>
+            <div class="b-text"><p>An album has 6 stickers, each packet contains one. Act it out with a dice: how often do you have to roll until every number has come up once?</p>
+                <ul><li>Collect the results of the whole class. How many rolls is it on average?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THREE CUPS</div>
+            <div class="b-text"><p>There is a coin under one of three cups. One person knows where. You choose a cup, then they lift another, empty one. Do you stay with your choice or do you switch?</p>
+                <ul><li>Play 20 rounds with switching and 20 without. What do you notice?</li></ul></div>
+            <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Points rain into a square</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Random numbers and Monte Carlo" data-toc-k="1" data-toc-short="1 Monte Carlo">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">CAS · 4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Random numbers and structurally equivalent experiments</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A dice is a random number generator for the numbers 1 to 6. A spinner with 10 sectors gives the digits 0 to 9.
+                The computer generates such numbers in seconds. With them you can act out any random experiment that has the same <b>structure</b>:
+                a coin behaves like “the random digit is even”.</p></div></div>
+            <div class="b-text"><p>Even $\pi$ can be estimated in this way. A quarter circle with radius 1 has the area $\tfrac{\pi}{4} \approx 0.785$, the square around it the area 1.
+                If a great many points fall into the square at random, about $\tfrac{\pi}{4}$ of them land in the quarter circle. Multiplied by 4, this gives an estimate for $\pi$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SIMULATING</div>
+                <div class="b-text">
+                    <p>For a random experiment you build a <b>structurally equivalent</b> experiment: the same number of outcomes with the same probabilities, but easier to carry out.</p>
+                    <p><b>Random numbers</b> come from dice, spinners, urns, tables and computers, in the CAS for example <code>randInt(1,6)</code>, in a spreadsheet <code>=RANDBETWEEN(1,6)</code>.</p>
+                    <p>Many runs give a <b>relative frequency</b> that estimates the probability you are looking for. This is called the <b>Monte Carlo method</b>.</p>
+                    <p>More runs make the estimate more reliable, but never completely exact.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Pseudo-randomness:</b> a computer cannot roll dice. It calculates numbers from a formula that look so jumbled that they seem random.</p>
+            <p class="b-note"><b>Area of a circle:</b> a circle with radius $r$ has the area $\pi r^2$. More on this in Year 9.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · RANDOM DIGITS AS A COIN AND A DICE</div>
+        <p class="b-help" style="margin:0 0 12px">Read the table as a coin or as a dice. “New table” gives you new random digits.</p>
+        <div data-widget="ziffern8"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · π FROM THE RAIN</div>
+        <p class="b-help" style="margin:0 0 12px">Let points fall into the square at random. Yellow points lie in the quarter circle. How many points do you need for two correct decimal places?</p>
+        <div data-widget="mcpi8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · STRUCTURALLY EQUIVALENT</div>
+            <div class="b-text"><p>Use the random digits 0 to 9 to build structurally equivalent experiments: a) a coin &nbsp; b) a dice &nbsp; c) a basketball shot that scores 70% of the time</p></div>
+            <div class="b-sol"><p>a) even digit: heads, odd: tails &nbsp; b) use the digits 1 to 6, skip 0, 7, 8, 9</p>
+                <p>c) <span class="b-res">digits 0 to 6: a hit, 7 to 9: a miss</span>, because 7 of the 10 digits are 70%.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · ESTIMATING π</div>
+            <div class="b-text"><p>Of 1000 random points in the square, 791 lie in the quarter circle. Which approximation for $\pi$ do you get?</p></div>
+            <div class="b-sol"><p>Share $\tfrac{791}{1000} = 0.791 \approx \tfrac{\pi}{4}$, so <span class="b-res">$\pi \approx 4 \cdot 0.791 = 3.164$</span>.</p>
+                <p>Even the second decimal place is not right yet. For more accuracy you need a great many points.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How do you simulate with random digits a) a spinner with 5 equal sectors, b) the month of birth of a person, c) a penalty that scores with probability $\tfrac34$?</p></div>
+            <div class="b-sol"><p>a) digits 0 to 4, skip the rest (or two digits per sector) &nbsp; b) pairs of digits 01 to 12, skip the rest &nbsp; c) digits 1, 2, 3: a goal, 4: a miss, skip all the others</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Use the table above to simulate 50 coin tosses. How often does heads come up? Compare the results of the whole class.</p></div>
+            <div class="b-sol"><p>Usually between 20 and 30. All the results together lie much closer to $0.5$ than the individual ones.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In the π rain, first let 100, then 10,000 points fall and note the approximation each time. Repeat this three times. About how many digits of $\pi$ are right?</p></div>
+            <div class="b-sol"><p>With 100 points often only the 3 is right, with 10,000 points usually 3.1. The Monte Carlo method is simple, but slow.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A marksman hits 40% of the time. Use random digits to simulate 5 shots 20 times and count how often he hits at least twice. Compare with the result of the calculation, about $0.66$.</p></div>
+            <div class="b-sol"><p>Digits 0 to 3: a hit, 4 to 9: a miss. In 20 runs about 13 are successful, but the values fluctuate noticeably.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><span class="g-cas">CAS</span> Write a program that rolls two dice 1000 times and counts how often the total is 7. Compare with the Laplace probability from chapter 2.1.</p></div>
+            <div class="b-sol"><p>A loop 1000 times: <code>a:=randInt(1,6)</code>, <code>b:=randInt(1,6)</code>, if <code>a+b=7</code>, increase the counter by 1. The result is usually between 140 and 190, expected about $\tfrac16 \cdot 1000 \approx 167$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3.164" data-ph="Decimal"><p class="b-q-text">Which approximation for $\pi$ do you get in example 2?</p><div class="b-sol"><p>$4 \cdot 0.791$</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="Number"><p class="b-q-text">How many of the digits 0 to 9 mean “a hit” for a player who scores 70% of the time?</p><div class="b-sol"><p>70% of 10</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">The random digits 0 to 9 are to act out a fair coin. Which rule is structurally equivalent?</p><div class="b-mc"><button>0 to 3: heads, otherwise tails</button><button>even: heads, odd: tails</button><button>0: heads, otherwise tails</button></div><div class="b-sol"><p>Five digits for each side.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Simulations in practice" data-toc-k="2" data-toc-short="2 Practice">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Simulations in practice</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Three doors, behind one there is a car, behind each of the other two a goat. You choose a door. The host, who knows where the car is,
+                opens another door with a goat and asks: “Do you want to switch?” Most people say: “It doesn’t matter, now it is fifty-fifty.” A simulation shows something quite different.</p></div></div>
+            <div class="b-text"><p>If you switch, you win exactly when your first choice was <b>wrong</b>. That happens in two out of three cases. If you stay, you only win if your first choice was right:
+                in one case out of three. So switching doubles your chance of winning.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · WHY WE SIMULATE</div>
+                <div class="b-text">
+                    <p>If an experiment is too expensive, too dangerous, too slow or too hard to calculate, it is acted out on the computer.</p>
+                    <p>A <b>model</b> lays down what matters and which probabilities hold. The result is only as good as the model.</p>
+                    <p>Simulations give <b>estimates</b>. More runs make them more precise.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Simulations today:</b> weather forecasts, the spread of diseases, flight simulators for pilot training, disaster control and traffic planning.</p>
+            <p class="b-note"><b>At the stadium:</b> how long will the queues at the entrance get if every tenth person is checked thoroughly? Things like this are tried out beforehand in a simulation.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE MONTY HALL PROBLEM</div>
+        <p class="b-help" style="margin:0 0 12px">Play a few rounds yourself, with and without switching. Then let the computer play a thousand games.</p>
+        <div data-widget="ziegen"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE STICKER ALBUM</div>
+        <p class="b-help" style="margin:0 0 12px">Open packet after packet or fill a thousand albums at once. How many packets do you need on average, and how much does that vary?</p>
+        <div data-widget="sammel8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · MONTY HALL WITH A DICE</div>
+            <div class="b-text"><p>Simulate with a dice: 1 or 2 means “car behind door 1”, 3 or 4 “behind door 2”, 5 or 6 “behind door 3”. You always choose door 1. When do you win if you switch?</p></div>
+            <div class="b-sol"><p>If the car is behind door 2 or 3 (the dice shows 3 to 6), the host opens the other goat door, and switching wins.</p>
+                <p><span class="b-res">$P(\text{win by switching}) = \tfrac46 = \tfrac23$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · STICKER ALBUM</div>
+            <div class="b-text"><p>An album has 10 stickers. The simulation with 1000 albums gives about 29 packets on average. What does that mean for someone who buys 10 packets?</p></div>
+            <div class="b-sol"><p>With 10 packets the album is almost never full. On average you need almost three times as many packets as stickers, and about one time in twenty even more than 50.</p>
+                <p><span class="b-res">Swapping pays off.</span> Towards the end only a few stickers are missing, and almost every packet brings a duplicate.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Play the Monty Hall problem in the book 30 times with and 30 times without switching. Compare your relative frequencies with $\tfrac23$ and $\tfrac13$.</p></div>
+            <div class="b-sol"><p>With switching you usually get something around $0.67$, without switching around $0.33$. With only 30 games it still fluctuates noticeably.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Name three areas in which computer simulations are used today, and for one of them describe what is simulated.</p></div>
+            <div class="b-sol"><p>For example the weather (how air, heat and moisture move), medicine (how a disease spreads from person to person), a flight simulator (how an aircraft reacts to control inputs), traffic, climate, crash tests.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>An album has 6 stickers. Simulate 10 full albums with a dice or in the book. Which mean do you get? Compare with the theoretical value, $6 \cdot \left(1 + \tfrac12 + \tfrac13 + \tfrac14 + \tfrac15 + \tfrac16\right) = 14.7$.</p></div>
+            <div class="b-sol"><p>With 10 albums the mean is usually between 11 and 19. The more albums, the closer to 14.7.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>At the stadium entrance each person is checked thoroughly with probability 10% (2 minutes), otherwise briefly (20 seconds). How long does a steward need per person on average?
+            How could you use random digits to simulate how long the queue gets?</p></div>
+            <div class="b-sol"><p>$0.1 \cdot 120 + 0.9 \cdot 20 = 12 + 18 = 30$ seconds. Simulation: digit 0 means thorough, 1 to 9 brief. In addition you decide at random how many people arrive per minute and keep track of the queue.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A variant with 4 doors and one car: after your choice the host opens a goat door. You may switch to one of the two other closed doors, chosen at random. Is it worth it? Simulate or calculate.</p></div>
+            <div class="b-sol"><p>Without switching: $\tfrac14$. With switching: the first choice is wrong with $\tfrac34$, then the car is behind one of the two other doors, and you hit it with $\tfrac12$: $\tfrac34 \cdot \tfrac12 = \tfrac38$. Switching is worth it.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="2/3" data-ph="Fraction"><p class="b-q-text">What is the probability of winning in the Monty Hall problem if you switch?</p><div class="b-sol"><p>If the first choice was wrong.</p></div></div>
+        <div class="b-q" data-ans="30" data-ph="Seconds"><p class="b-q-text">Mean checking time per person in exercise 9?</p><div class="b-sol"><p>$12 + 18$</p></div></div>
+        <div class="b-q" data-ans="3/8" data-ph="Fraction"><p class="b-q-text">Probability of winning by switching with 4 doors (exercise 10)?</p><div class="b-sol"><p>$\tfrac34 \cdot \tfrac12$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A test has 10 yes-no questions, and someone just guesses. How do you use random digits to simulate how often at least 7 answers are right?</p></div>
+            <div class="b-sol"><p>Even digit: right, odd: wrong. Every 10 digits are one test. Play through many tests and count how often there are at least 7 even digits.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>When rolling a dice with random digits, 0, 7, 8 and 9 are skipped. On average, how many digits do you need for 100 rolls? Why?</p></div>
+            <div class="b-sol"><p>Only 6 of 10 digits can be used, so you need about $\tfrac{100}{0.6} \approx 167$ digits.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Explain the $\tfrac23$ to someone who does not believe the Monty Hall problem, with 100 doors: you choose one, the host opens 98 goat doors. Do you switch?</p></div>
+            <div class="b-sol"><p>Your door has the probability $\tfrac{1}{100}$. The one door that the host has left out of 99 has $\tfrac{99}{100}$. Switch!</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: a casino gives its name" data-toc-k="X" data-toc-short="Monte Carlo">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>Monte Carlo: a casino gives its name</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In the 1940s the mathematician <b>Stanisław Ulam</b> and his colleagues in Los Alamos in the USA were working on problems that nobody could calculate.
+                Ulam had an idea while playing patience: instead of laboriously calculating the chance of winning a game of patience, you could simply play it very often and count,
+                ideally on one of the new computing machines.</p>
+            <p>Because the method plays with chance, it was given the name of the famous casino of Monaco. In 1949 <b>Nicholas Metropolis</b> and Ulam published
+                the article “The Monte Carlo Method”. Today Monte Carlo simulations are found in weather forecasts, in medicine and in the pictures of animated films.</p>
+            <p>The Monty Hall problem also became famous through simulations. When the columnist Marilyn vos Savant advised switching in an American magazine in 1990,
+                she received thousands of indignant letters, many of them from people with doctorates. Only recalculating and acting it out convinced most of them.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> N. Metropolis, S. Ulam: The Monte Carlo Method. Journal of the American Statistical Association 44 (1949), pp. 335–341.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>RANDOM NUMBERS</h4><p>dice, spinner, urn, table, computer</p></div>
+        <div><p><code>randInt(1,6)</code></p></div></div>
+    <div class="b-rueck"><div><h4>STRUCTURALLY EQUIVALENT</h4><p>the same number of outcomes with the same probabilities</p></div>
+        <div><p>Coin: digit even or odd</p></div></div>
+    <div class="b-rueck"><div><h4>MONTE CARLO</h4><p>repeat very often, the relative frequency estimates the probability</p></div>
+        <div><p>$\pi \approx 4 \cdot$ share in the quarter circle</p></div></div>
+    <div class="b-rueck"><div><h4>MONTY HALL</h4><p>switching wins with $\tfrac23$</p></div>
+        <div><p>100 doors: $\tfrac{99}{100}$</p></div></div>
+    <div class="b-rueck"><div><h4>MODELS</h4><p>only as good as their assumptions</p></div>
+        <div><p>Album with 10 stickers: about 29 packets</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="1/3" data-ph="Fraction"><p class="b-q-text">Probability of winning in the Monty Hall problem if you stay?</p><div class="b-sol"><p>The first choice was right.</p></div></div>
+            <div class="b-q" data-ans="0.785" data-tol="0.002" data-ph="Decimal"><p class="b-q-text">What share of the points do you expect in the quarter circle? Three decimal places.</p><div class="b-sol"><p>$\tfrac{\pi}{4}$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Which experiment is structurally equivalent to tossing a fair coin?</p><div class="b-mc"><button>random digit even or odd</button><button>a dice shows 6 or not</button><button>drawing pin on its back or side</button></div><div class="b-sol"><p>Two outcomes with $\tfrac12$ each.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · APPLYING</div>
+            <div class="b-q" data-ans="167" data-tol="1" data-ph="Digits"><p class="b-q-text">On average, how many random digits do you need for 100 rolls (exercise 12)?</p><div class="b-sol"><p>$\tfrac{100}{0.6}$</p></div></div>
+            <div class="b-q" data-ans="14.7" data-tol="0.05" data-ph="Packets"><p class="b-q-text">Theoretical mean for the album with 6 stickers (exercise 8)?</p><div class="b-sol"><p>$6 \cdot 2.45$</p></div></div>
+            <div class="b-q" data-ans="99/100" data-ph="Fraction"><p class="b-q-text">Probability of winning by switching with 100 doors?</p><div class="b-sol"><p>The first choice is almost certainly wrong.</p></div></div>
+        </div>
+    </div>
+    <h3>MORE TO TRY (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">π from thousands of random points</span></span></a>
+        <a class="b-lab" data-lab="infektionssimulation" href="../../infektionssimulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INFECTION SIMULATION</span><span class="b-lab-what">How a disease spreads</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Chance on a large scale</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 8 · Elective 3 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-en/geometrie.js"></script>
+<script src="../../js/buch-gy8.js"></script>
+<script src="../../js/buch-en/gy8.js"></script>
+</body>
+</html>
