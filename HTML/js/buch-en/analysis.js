@@ -45,6 +45,20 @@ window.BuchEN && BuchEN.add('analysis', {
         'Funktionenschar': 'Family of functions', 'Ortskurve der Extrempunkte zeigen': 'Show the locus of the turning points',
         'Funktionenschar mit Ortskurve': 'Family of functions with locus', 'Hochpunkt': 'Maximum', 'Tiefpunkt': 'Minimum',
         'Verkaufspreis $p$ (€ pro Stück)': 'Selling price $p$ (€ per item)', 'x in Stück': 'x in items', 'Kosten, Erlös und Gewinn': 'Costs, revenue and profit',
+        // book 5 mathefos12-en: titelbildfos12
+        'Titelbild: Exponentialkurve mit Hochpunkt, Wendetangente und Rechtecken darunter, eine Hyperbel mit Asymptoten und ein Parallelogramm im Raum mit seinem Vektorprodukt':
+            'Cover picture: exponential curve with maximum, inflectional tangent and rectangles below it, a hyperbola with asymptotes and a parallelogram in space with its cross product',
+        // book 5 mathefos12-en: efunktion
+        'Welche Basis?': 'Which base?', 'Zinseszins': 'Compound interest', 'Was wird gezeigt?': 'What is shown?',
+        'Exponentialfunktionen und die Eulersche Zahl e': 'Exponential functions and Euler’s number e', 'Basis $a$': 'Base $a$', 'a = e setzen': 'Set a = e',
+        'Faktor $a$': 'Factor $a$', 'im Exponenten $b$': 'in the exponent $b$', 'Verschiebung $c$': 'Shift $c$', 'Verzinsung': 'Interest added',
+        'jährlich': 'yearly', 'halbjährlich': 'half-yearly', 'vierteljährlich': 'quarterly', 'monatlich': 'monthly', 'wöchentlich': 'weekly',
+        'täglich': 'daily', 'stündlich': 'hourly', 'minütlich': 'every minute',
+        // book 5 mathefos12-en: bruchfunktion
+        'Polstelle': 'Pole', 'Lücke': 'Hole', 'ohne Vorzeichenwechsel': 'No change of sign', 'schiefe Asymptote': 'Oblique asymptote', 'Beispiele:': 'Examples:',
+        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Graph of a rational function with poles, holes and asymptotes',
+        'Zähler:': 'Numerator:', 'Nenner:': 'Denominator:', 'Grad des Zählers': 'Degree of the numerator', 'Grad des Nenners': 'Degree of the denominator',
+        'Grad 0': 'Degree 0', 'Grad 1': 'Degree 1', 'Grad 2': 'Degree 2', 'Faktor $k$': 'Factor $k$',
         // book 6 mathegy12-en: titelbildgy12, integrieren, abstandmin
         'Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor':
             'Cover picture: an area under a curve with trapezia, a histogram with a red rejection region, a line through a plane with its angle of intersection and the normal vector',
@@ -156,11 +170,46 @@ window.BuchEN && BuchEN.add('analysis', {
         ['zwei Schnittpunkte.', 'two points of intersection.'], ['kein gemeinsamer Punkt.', 'no common point.'],
         ['genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', 'exactly one point, the line <b>touches</b> the parabola at $x = '],
         ['$. Das passiert für $a = \\pm 2$.', '$. This happens for $a = \\pm 2$.'],
+        // book 5 mathefos12-en: efunktion (numbers and points are already English here: the number rules run first)
+        [' · Steigung in $(0, 1)$: $', ' · gradient at $(0, 1)$: $'],
+        ['<b>Treffer:</b> Bei $a = \\mathrm{e} \\approx 2.71828$ ist die Steigung genau $1$ und $f\'(x) = f(x)$: Die Graphen von $f$ und $f\'$ liegen aufeinander.',
+            '<b>Hit:</b> at $a = \\mathrm{e} \\approx 2.71828$ the gradient is exactly $1$ and $f\'(x) = f(x)$: the graphs of $f$ and $f\'$ lie on top of each other.'],
+        ['Die Ableitung ist $f\'(x) = ', 'The derivative is $f\'(x) = '],
+        [' \\cdot f(x)$, ein Vielfaches von $f$. Für welche Basis ist der Faktor genau $1$?', ' \\cdot f(x)$, a multiple of $f$. For which base is the factor exactly $1$?'],
+        [' · Mit $a = 0$ oder $b = 0$ ist $f$ konstant.', ' · With $a = 0$ or $b = 0$, $f$ is constant.'],
+        ['Schnittpunkt mit der $y$-Achse: $', 'Point of intersection with the $y$-axis: $'], [' · Nullstelle: ', ' · zero: '], ['$, also $x = ', '$, so $x = '],
+        ['keine, denn $\\mathrm{e}^{bx} > 0$ kann nicht $', 'none, because $\\mathrm{e}^{bx} > 0$ cannot be $'], ['$ sein', '$'],
+        ['Für $', 'For $'], ['$ geht $f(x) \\to ', '$, $f(x) \\to '], ['$: waagerechte Asymptote $y = ', '$: horizontal asymptote $y = '], ['$. Für $', '$. For $'],
+        ['$f$ ist überall streng monoton ', '$f$ is everywhere strictly '], ['steigend', 'increasing'], ['fallend', 'decreasing'],
+        [', weil $f\'(x)$ immer ', ', because $f\'(x)$ is always '], ['positiv ist.', 'positive.'], ['negativ ist.', 'negative.'],
+        ['Ein Euro, 100 % Zinsen im Jahr, ', 'One euro, 100 % interest a year, added '], [' verzinst: ', ': '], ['-mal $\\tfrac{100\\,\\%}{', ' times $\\tfrac{100\\,\\%}{'],
+        ['$, also $\\left(1 + \\tfrac{1}{', '$, so $\\left(1 + \\tfrac{1}{'],
+        ['jährlich', 'yearly'], ['halbjährlich', 'half-yearly'], ['vierteljährlich', 'quarterly'], ['monatlich', 'monthly'], ['wöchentlich', 'weekly'],
+        ['täglich', 'daily'], ['stündlich', 'hourly'], ['minütlich', 'every minute'],
+        ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2.718281\\ldots$ heran, aber nie darüber: $',
+            'The more often interest is added, the closer the balance gets to $\\mathrm{e} = 2.718281\\ldots$, but never beyond it: $'],
+        // book 5 mathefos12-en: bruchfunktion
+        ['Nullstelle des Zählers $', 'Zero of the numerator $'], ['Nullstelle des Nenners $', 'Zero of the denominator $'],
+        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'After cancelling there is no $x$ left in the denominator: the graph is '],
+        ['eine waagerechte Gerade', 'a horizontal straight line'], ['eine Gerade', 'a straight line'], ['Löchern', 'holes'], ['einem Loch', 'a hole'],
+        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Degree of the numerator less than degree of the denominator: horizontal asymptote $y = 0$, the $x$-axis.'],
+        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Degree of the numerator equal to degree of the denominator: horizontal asymptote $y = '],
+        ['$ (Quotient der Leitkoeffizienten).', '$ (quotient of the leading coefficients).'],
+        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Degree of the numerator 1 higher: polynomial division gives $f(x) = '],
+        ['$, schiefe Asymptote $y = ', '$, oblique asymptote $y = '],
+        ['Kürzen: $f(x) = ', 'Cancelling: $f(x) = '], ['$ · hebbare Lücken', '$ · removable holes'], ['$ · hebbare Lücke', '$ · removable hole'],
+        ['Nullstellen: ', 'Zeros: '], [' · Polstellen: ', ' · poles: '],
+        [' mit Vorzeichenwechsel', ' with a change of sign'], [' ohne Vorzeichenwechsel', ' without a change of sign'], [' (senkrechte Asymptote)', ' (vertical asymptote)'],
     ],
     rule: [
         // ableiten: "3 von 5 gelöst"
         [/(\d+) von (\d+) gelöst/g, '$1 of $2 solved'],
         // book 6 mathegy12-en: abstandmin, the general point Q(x | f(x))
         [/\$Q\(x \\mid f\(x\)\)\$/g, '$Q(x, f(x))$'],
+        // book 5 mathefos12-en: efunktion, "525.600-mal" (toLocaleString('de-DE')) → "525,600 times"
+        [/(\d{1,3})\.(\d{3})(?=-mal )/g, '$1,$2'],
+        // book 5 mathefos12-en: bruchfunktion, "… mit einem Loch." and "Nullstellen: keine" (the pieces alone are in tools/buch-en/known.json)
+        [/ mit (Löchern|einem Loch)\./g, (m, w) => ' with ' + (w === 'Löchern' ? 'holes' : 'a hole') + '.'],
+        [/(Nullstellen|Polstellen): keine(?![a-zäöüß])/g, '$1: none'],
     ]
 });

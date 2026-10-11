@@ -22,6 +22,12 @@ window.BuchEN && BuchEN.add('vektoren', {
         'Ebene und Normalenvektor': 'Plane and normal vector', 'Liegt der Punkt in E?': 'Does the point lie in E?', 'Gerade schneidet Ebene': 'Line meets plane',
         'Pyramide': 'Pyramid', 'Prisma (schief möglich)': 'Prism (may be oblique)', 'Körper': 'Solid', 'Grundkante $a$': 'Base edge $a$',
         'Höhe $h$': 'Height $h$', 'Verschiebung der Spitze in $x$': 'Shift of the apex in $x$',
+        // book 5 mathefos12-en: kreuzprodukt
+        'zwei Vektoren': 'two vectors', 'Dachfläche': 'roof surface', 'in der x-y-Ebene': 'in the x-y-plane', 'Dreieck': 'Triangle', 'Welche Fläche?': 'Which area?',
+        // book 5 mathefos12-en: zentralprojektion
+        'Abstand des Auges $a$': 'Distance of the eye $a$', 'Fluchtlinien zeigen': 'Show vanishing lines', 'Horizont': 'Horizon',
+        'Zieh den Fluchtpunkt V. Er liegt auf dem Horizont in Augenhöhe.': 'Drag the vanishing point V. It lies on the horizon at eye level.',
+        'Zentralprojektion eines Quaders und einer Pfostenreihe mit Fluchtpunkt': 'Central projection of a cuboid and a row of posts with a vanishing point',
         // book 6 mathegy12-en: lot3d, winkel3d
         'Punkt über E': 'Point above E', 'Ursprung': 'Origin', 'Punkt unter E': 'Point below E', 'Punkt in E': 'Point in E',
         'Spiegelpunkt P′ zeigen': 'Show mirror point P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Constant $d$ in $\\vec{n} \\circ \\vec{x} = d$',
@@ -75,6 +81,19 @@ window.BuchEN && BuchEN.add('vektoren', {
         ['Oberfläche $O = ', 'Surface area $O = '], [' (Prinzip von Cavalieri: auch schief)', " (Cavalieri's principle: oblique as well)"],
         [' · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', ' · If you move the apex horizontally, the volume stays the same, the lateral surface does not.'],
         ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, shift of the top face $\\vec{w} = '],
+        // book 5 mathefos12-en: kreuzprodukt
+        ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
+            '$\\vec{u}$ and $\\vec{v}$ are parallel: the cross product is the zero vector, they do not span an area.'],
+        ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$: the cross product is perpendicular to both vectors'],
+        [' (im Bild verkürzt gezeichnet)', ' (drawn shortened in the picture)'], ['Dreieck: $A = ', 'Triangle: $A = '], ['Parallelogramm: $A = ', 'Parallelogram: $A = '],
+        [' Flächeneinheiten', ' square units'], ['$ und $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = ', '$ and $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = '],
+        // book 5 mathefos12-en: zentralprojektion
+        ['Fluchtpunkt $V(', 'Vanishing point $V('], [')$ · Bildebene vor dem Quader, Auge im Abstand $a = ', ')$ · picture plane in front of the cuboid, eye at a distance $a = '],
+        ['$ davor', '$ in front of it'],
+        ['Alle Kanten, die in die Tiefe laufen, treffen sich in $V$. Kanten parallel zur Bildebene bleiben parallel und behalten ihr Verhältnis.',
+            'All edges that run into the depth meet at $V$. Edges parallel to the picture plane stay parallel and keep their ratio.'],
+        ['Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{', 'A post at depth $z$ appears with the factor $\\dfrac{a}{a + z}$: at $z = 8$ that is $\\dfrac{'],
+        ['$ so hoch wie vorn.', '$ times as high as at the front.'],
         // book 6 mathegy12-en: lot3d
         ['Der Normalenvektor darf nicht der Nullvektor sein.', 'The normal vector must not be the zero vector.'],
         ['$ · Lotgerade $l\\colon', '$ · perpendicular line $l\\colon'], ['$l$ in $E$ einsetzen: $', 'Substitute $l$ into $E$: $'], ['$ · Lotfußpunkt $F(', '$ · foot of the perpendicular $F('],

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics FOS 12 · Chapter 3 · Integral calculus | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Antiderivatives, the definite integral, the fundamental theorem, areas between graphs. Chapter 3 of the interactive textbook Mathematics · Technical College 12: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · TECHNICAL COLLEGE 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 3 · LEARNING AREA 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 3 · LEARNING AREA 3 · FEBRUARY · MARCH</p>
+            <h1>Integral calculus</h1>
+            <p class="b-hero-lead">The distance from the speed, the amount of water from the rate of inflow, the area under a curve from the curve itself: <b>integral calculus</b> retraces the path of the derivative.
+                You learn to find <b>antiderivatives</b>, to approximate areas with rectangles and to calculate them exactly with the <b>fundamental theorem</b>, also between two graphs.</p>
+            <div class="b-chips"><span class="b-chip">10 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">4 WIDGETS</span><span class="b-chip">1 LAB</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["4-x^2"]' data-labels='["f"]' data-lat="[1.4]" data-x="-3,3" data-y="-1,4.8" data-pts="[[-2,0],[2,0],[0,4]]" data-h="240" data-aria="Parabolic arc above the x-axis with its zeros and its vertex"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>find <b>antiderivatives</b> and calculate the indefinite integral with the rules of integration</li>
+                <li>approximate areas with <b>sums of rectangles</b> and interpret the <b>definite integral</b></li>
+                <li>apply the <b>fundamental theorem of calculus</b></li>
+                <li>calculate <b>areas</b> between a graph and the $x$-axis and between two graphs, also with an unknown limit</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="12" data-ph="f′(2) ="><p class="b-q-text">$f(x) = x^3$: what is $f'(2)$?</p><div class="b-sol"><p>$3 \cdot 2^2 = 12$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="area"><p class="b-q-text">A triangle has base 4 and height 3. What is its area?</p><div class="b-sol"><p>$\tfrac12 \cdot 4 \cdot 3$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">What is the positive zero of $x^2 - 4$?</p><div class="b-sol"><p>$x = 2$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Which function has the derivative $2x$?</p><div class="b-mc"><button>$x^2$</button><button>$x^2 + 5$</button><button>both</button></div><div class="b-sol"><p>The constant disappears when you differentiate.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DIFFERENTIATING BACKWARDS</div>
+            <div class="b-text"><p>Look for functions whose derivative is $3x^2$, $2x$, $5$ and $x$.</p>
+                <ul><li>Do you find more than one each time? How do they differ?</li><li>Which rule for $x^n$ lies behind this?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">WATER IN THE TANK</div>
+            <div class="b-text"><p>For ten minutes, 2 litres per minute flow into a tank. Then it is rebuilt: the inflow starts at 0 and rises steadily to 5 litres per minute after ten minutes.</p>
+                <ul><li>Draw both rates of inflow against time. How much water flows in each time?</li><li>Which area in the diagram corresponds to the amount of water?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COUNTING SQUARES</div>
+            <div class="b-text"><p>Draw the arc above, $f(x) = 4 - x^2$, on squared paper with 1 cm per unit.</p>
+                <ul><li>Estimate the area between the arc and the $x$-axis by counting squares.</li><li>Compare with the triangle formed by the three marked points. What factor do you get?</li></ul></div>
+            <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INTEGRALS</span><span class="b-lab-what">Areas under curves</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Antiderivatives" data-toc-k="1" data-toc-short="1 Antiderivative">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Antiderivative and indefinite integral</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Which function has the derivative $2x$? $F(x) = x^2$, but also $x^2 + 1$ and $x^2 - 7$. When you differentiate, every constant disappears; when you work backwards, you do not know it.
+                All the solutions have the form $x^2 + C$; their graphs are shifted up and down relative to each other.</p></div></div>
+            <div class="b-text"><p>A function $F$ with $F' = f$ is called an <b>antiderivative</b> of $f$. You find it by applying the rules of differentiation backwards: increase the exponent by 1, divide by the new exponent.
+                The set of all antiderivatives is written as the <b>indefinite integral</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · ANTIDERIVATIVES</div>
+                <div class="b-text">
+                    <p>$F$ is an antiderivative of $f$ if $F'(x) = f(x)$. All antiderivatives: $F(x) + C$ with the <b>constant of integration</b> $C$.</p>
+                    <p><b>Indefinite integral:</b> $\displaystyle\int f(x)\,\mathrm{d}x = F(x) + C$</p>
+                    <p><b>Basic integral:</b> $\displaystyle\int x^n\,\mathrm{d}x = \frac{x^{n+1}}{n+1} + C$ for $n \neq -1$ · <b>constant factor and sum rule</b> as for differentiating</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Check:</b> Differentiate the antiderivative; you must get $f$. That is always quick.</p>
+            <p class="b-note"><b>Negative exponents too:</b> $\int \tfrac{1}{x^2}\,\mathrm{d}x = \int x^{-2}\,\mathrm{d}x = \tfrac{x^{-1}}{-1} + C = -\tfrac1x + C$. Only $\tfrac1x$ itself does not work this way.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · F AND ITS ANTIDERIVATIVES</div>
+        <p class="b-help" style="margin:0 0 12px">At the top an antiderivative $F$ with a movable constant $C$ and its tangent, below $f$. The gradient of $F$ at every point is the value of $f$ there, however large $C$ is.</p>
+        <div data-widget="stammfunktion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · TERM BY TERM</div>
+            <div class="b-text"><p>Calculate $\displaystyle\int \left(6x^2 - 4x + 3\right)\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$6 \cdot \tfrac{x^3}{3} - 4 \cdot \tfrac{x^2}{2} + 3x + C$</p>
+                <p><span class="b-res">$2x^3 - 2x^2 + 3x + C$</span>. Check: $(2x^3 - 2x^2 + 3x)' = 6x^2 - 4x + 3$ ✔</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · THROUGH A POINT</div>
+            <div class="b-text"><p>Find the antiderivative of $f(x) = x^2 - 1$ whose graph passes through $P(3, 5)$.</p></div>
+            <div class="b-sol"><p>$F(x) = \tfrac13 x^3 - x + C$, $F(3) = 9 - 3 + C = 5$, so $C = -1$.</p>
+                <p><span class="b-res">$F(x) = \tfrac13 x^3 - x - 1$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate: a) $\int x^4\,\mathrm{d}x$ &nbsp; b) $\int 3\,\mathrm{d}x$ &nbsp; c) $\int (2x + 1)\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac15 x^5 + C$ &nbsp; b) $3x + C$ &nbsp; c) $x^2 + x + C$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate: a) $\int (x^3 - 6x)\,\mathrm{d}x$ &nbsp; b) $\int \tfrac{1}{x^2}\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac14 x^4 - 3x^2 + C$ &nbsp; b) $-\tfrac1x + C$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Check by differentiating: is $F(x) = \tfrac13 (x - 1)^3$ an antiderivative of $f(x) = x^2 - 2x + 1$?</p></div>
+            <div class="b-sol"><p>Chain rule: $F'(x) = (x - 1)^2 = x^2 - 2x + 1$ ✔, yes.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find the antiderivative of $f(x) = 2x - 4$ whose graph passes through $(1, 0)$.</p></div>
+            <div class="b-sol"><p>$F(x) = x^2 - 4x + C$, $F(1) = -3 + C = 0$: $F(x) = x^2 - 4x + 3$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A body starts from rest at position 0 and has the velocity $v(t) = 2t + 1$ (in m/s). Find its position $s(t)$. How far does it get in 5 seconds?</p></div>
+            <div class="b-hint"><p>The position is an antiderivative of the velocity, because $s'(t) = v(t)$.</p></div>
+            <div class="b-sol"><p>$s(t) = t^2 + t + C$ with $s(0) = 0$: $s(t) = t^2 + t$. After 5 s: <span class="b-res">30 m</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3" data-ph="F(1) ="><p class="b-q-text">The antiderivative $F$ of $3x^2$ passes through $(0, 2)$. What is $F(1)$?</p><div class="b-sol"><p>$F(x) = x^3 + 2$</p></div></div>
+        <div class="b-q" data-ans="0.2" data-ph="factor"><p class="b-q-text">$\int x^4\,\mathrm{d}x = k \cdot x^5 + C$. What is $k$?</p><div class="b-sol"><p>$\tfrac15$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">If $F'(x) = f(x)$, then $F$ is …</p><div class="b-mc"><button>the derivative of $f$.</button><button>an antiderivative of $f$.</button><button>the constant of integration.</button></div><div class="b-sol"><p>definition of the antiderivative</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Definite integral and fundamental theorem" data-toc-k="2" data-toc-short="2 Fundamental theorem">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">2</span>The definite integral and the fundamental theorem</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>If the inflow rises steadily according to $r(t) = 0.5t$ (in l/min), then in ten minutes as many litres flow in as the area of the triangle under the graph: $\tfrac12 \cdot 10 \cdot 5 = 25$.
+                Remarkably, $R(t) = 0.25t^2$ is an antiderivative of $r$, and $R(10) - R(0) = 25$. The area comes from the antiderivative.</p></div></div>
+            <div class="b-text"><p>For curved graphs you approximate the area with narrow rectangles: the <b>lower sum</b> lies below, the <b>upper sum</b> above. The narrower the strips,
+                the closer both come to the same limit, the <b>definite integral</b>. The <b>fundamental theorem</b> tells you how to calculate it without strips.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · FUNDAMENTAL THEOREM OF CALCULUS</div>
+                <div class="b-text">
+                    <p>$$\int_a^b f(x)\,\mathrm{d}x = \Big[F(x)\Big]_a^b = F(b) - F(a)$$ for every antiderivative $F$ of $f$</p>
+                    <p>The integral is a <b>signed area</b>: areas above the $x$-axis count as positive, areas below as negative.</p>
+                    <p>$\int_a^a f(x)\,\mathrm{d}x = 0$ · $\int_a^b + \int_b^c = \int_a^c$ · $\int_b^a f(x)\,\mathrm{d}x = -\int_a^b f(x)\,\mathrm{d}x$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>The sign:</b> Leibniz wrote $\int$ as an elongated S for “sum”. $\mathrm{d}x$ is a reminder of the width of the infinitely narrow strips.</p>
+            <p class="b-note"><b>On the graphing calculator:</b> let the integral command (fnInt) do the calculation. The constant $C$ always cancels out in $F(b) - F(a)$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · STRIPS UNDER THE CURVE</div>
+        <p class="b-help" style="margin:0 0 12px">Increase the number of strips and switch between rectangles on the left, in the middle and trapezia. How quickly does the sum approach the exact value?</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · LOWER SUM, UPPER SUM, FUNDAMENTAL THEOREM</div>
+            <div class="b-text"><p>Approximate $\int_0^2 x^2\,\mathrm{d}x$ with four strips of width 0.5 and calculate the exact value.</p></div>
+            <div class="b-sol"><p>Lower sum $0.5(0 + 0.25 + 1 + 2.25) = 1.75$, upper sum $0.5(0.25 + 1 + 2.25 + 4) = 3.75$.</p>
+                <p>Exact: $\left[\tfrac13 x^3\right]_0^2 = \tfrac83$, <span class="b-res">about 2.67</span>, in between.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · WHEN AREAS CANCEL OUT</div>
+            <div class="b-text"><p>Calculate $\int_{-1}^{2} (x^2 - 1)\,\mathrm{d}x$ and interpret the result.</p></div>
+            <div class="b-sol"><p>$\left[\tfrac13 x^3 - x\right]_{-1}^{2} = \tfrac23 - \tfrac23 = 0$</p>
+                <p>Below the axis on $[-1, 1]$ there is a piece of size $\tfrac43$, above it on $[1, 2]$ also $\tfrac43$. <span class="b-res">They cancel each other out.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate: a) $\int_1^3 2x\,\mathrm{d}x$ &nbsp; b) $\int_0^1 (3x^2 + 1)\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $9 - 1 = 8$ &nbsp; b) $\left[x^3 + x\right]_0^1 = 2$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $\int_0^4 (4 - x)\,\mathrm{d}x$ and check with the area of a triangle.</p></div>
+            <div class="b-sol"><p>$\left[4x - \tfrac12 x^2\right]_0^4 = 8$, triangle $\tfrac12 \cdot 4 \cdot 4 = 8$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calculate the lower and upper sum of $f(x) = x$ on $[0, 1]$ with four strips and compare with the integral.</p></div>
+            <div class="b-sol"><p>Lower sum 0.375, upper sum 0.625, integral $\tfrac12$ exactly in the middle.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Justify without calculating that $\int_{-2}^{2} x^3\,\mathrm{d}x = 0$.</p></div>
+            <div class="b-sol"><p>The graph is symmetric about the origin: the piece below the axis on the left is exactly as large as the piece above it on the right.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Water flows into a tank at the rate $r(t) = -0.5t^2 + 3t$ (in l/min). How much flows in during the first 6 minutes? What happens after that up to $t = 8$?</p></div>
+            <div class="b-sol"><p>$\int_0^6 r(t)\,\mathrm{d}t = \left[-\tfrac16 t^3 + 1.5t^2\right]_0^6 = 18$ l. From $t = 6$ on, $r < 0$: water flows out, about 7.3 l up to $t = 8$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="8/3" data-tol="0.01" data-ph="value"><p class="b-q-text">Calculate $\int_0^2 x^2\,\mathrm{d}x$.</p><div class="b-sol"><p>$\tfrac83$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="value"><p class="b-q-text">Calculate $\int_1^3 2x\,\mathrm{d}x$.</p><div class="b-sol"><p>$9 - 1$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$\int_{-1}^{2}(x^2 - 1)\,\mathrm{d}x = 0$ means …</p><div class="b-mc"><button>There is no area.</button><button>The areas above and below the axis are the same size.</button><button>The calculation is wrong.</button></div><div class="b-sol"><p>signed area</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Calculating areas" data-toc-k="3" data-toc-short="3 Areas">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">2 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Areas between a graph and the axis and between two graphs</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The integral of $x^2 - 1$ over $[-1, 2]$ is 0, but the area between the graph and the axis is $\tfrac43 + \tfrac43 = \tfrac83$.
+                If you want to calculate areas, you have to split at the <b>zeros</b> and add the pieces with their absolute values.</p></div></div>
+            <div class="b-text"><p>Between two graphs you calculate with the difference function $f - g$. Its zeros are the intersection points of the graphs, and they form the limits.
+                If an area is given and a limit is wanted, the fundamental theorem turns into an equation for the limit.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · CALCULATING AREAS</div>
+                <div class="b-text">
+                    <p><b>Graph and $x$-axis:</b> find the zeros in the interval, integrate over each piece separately, add the <b>absolute values</b>.</p>
+                    <p><b>Between two graphs:</b> intersection points $x_1 < x_2$ from $f(x) = g(x)$, then $A = \left|\displaystyle\int_{x_1}^{x_2} \big(f(x) - g(x)\big)\,\mathrm{d}x\right|$. With more intersection points, piece by piece.</p>
+                    <p><b>Limit wanted:</b> solve $F(b) - F(a) = A$ for $b$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sketch first:</b> A rough graph shows which pieces lie above and which below the axis, and which graph is on top.</p>
+            <p class="b-note"><b>On the graphing calculator:</b> integrate the absolute value straight away, $\int |f(x) - g(x)|\,\mathrm{d}x$; then you do not have to split.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · SIGNED AREA</div>
+        <p class="b-help" style="margin:0 0 12px">Drag the limits $a$ and $b$. Yellow pieces lie above the axis and count as positive, red ones below and count as negative. Compare the integral and the area.</p>
+        <div data-widget="integral"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · AREA BETWEEN TWO GRAPHS</div>
+        <p class="b-help" style="margin:0 0 12px">The widget finds the intersection points and integrates the difference function from one intersection point to the next.</p>
+        <div data-widget="zwischenflaeche"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · BELOW THE AXIS</div>
+            <div class="b-text"><p>Calculate the area between the graph of $f(x) = x^2 - 4$ and the $x$-axis.</p></div>
+            <div class="b-sol"><p>Zeros $\pm 2$: $\left[\tfrac13 x^3 - 4x\right]_{-2}^{2} = -\tfrac{32}{3}$; the area lies entirely below the axis.</p>
+                <p><span class="b-res">$A = \tfrac{32}{3} \approx 10.67$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · PARABOLA AND LINE</div>
+            <div class="b-text"><p>Calculate the area between $f(x) = -x^2 + 4$ and $g(x) = x + 2$.</p></div>
+            <div class="b-sol"><p>$-x^2 + 4 = x + 2$: $x^2 + x - 2 = 0$, so $x_1 = -2$, $x_2 = 1$.</p>
+                <p>$\int_{-2}^{1} \left(-x^2 - x + 2\right)\mathrm{d}x = \left[-\tfrac13 x^3 - \tfrac12 x^2 + 2x\right]_{-2}^{1} = \tfrac76 + \tfrac{10}{3}$: <span class="b-res">$A = 4.5$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate the area under $f(x) = x^2 + 1$ over $[0, 3]$.</p></div>
+            <div class="b-sol"><p>$\left[\tfrac13 x^3 + x\right]_0^3 = 9 + 3 = 12$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate the area between $f(x) = 3x - x^2$ and the $x$-axis.</p></div>
+            <div class="b-sol"><p>Zeros 0 and 3: $\left[1.5x^2 - \tfrac13 x^3\right]_0^3 = 13.5 - 9 = 4.5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calculate the area between $f(x) = x^3 - x$ and the $x$-axis on $[-1, 1]$. Why is the integral over $[-1, 1]$ zero?</p></div>
+            <div class="b-sol"><p>Split at 0: $\int_0^1 (x^3 - x)\,\mathrm{d}x = -\tfrac14$, and on the left likewise $\tfrac14$ above the axis. Area $\tfrac12$, integral 0 because of the symmetry about the origin.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calculate the area between $f(x) = x^2$ and $g(x) = 2x$.</p></div>
+            <div class="b-sol"><p>Intersection points 0 and 2: $\int_0^2 (2x - x^2)\,\mathrm{d}x = 4 - \tfrac83 = \tfrac43$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>a) For which $b > 0$ is $\int_0^b x^2\,\mathrm{d}x = 9$? &nbsp; b) The vertical line $x = k$ is to halve the area under $f(x) = x^2$ over $[0, 3]$. Find $k$.</p></div>
+            <div class="b-sol"><p>a) $\tfrac{b^3}{3} = 9$: $b = 3$. &nbsp; b) Total area 9, so $\tfrac{k^3}{3} = 4.5$: <span class="b-res">$k = \sqrt[3]{13.5} \approx 2.38$</span>. Not 1.5, because the curve is higher on the right.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="10.67" data-tol="0.01" data-ph="area"><p class="b-q-text">Area between $x^2 - 4$ and the $x$-axis, to two decimal places?</p><div class="b-sol"><p>$\tfrac{32}{3}$</p></div></div>
+        <div class="b-q" data-ans="4.5" data-ph="area"><p class="b-q-text">Area between $3x - x^2$ and the $x$-axis?</p><div class="b-sol"><p>$13.5 - 9$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="b ="><p class="b-q-text">For which $b > 0$ is $\int_0^b x^2\,\mathrm{d}x = 9$?</p><div class="b-sol"><p>$b^3 = 27$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $\int_1^2 \left(4x^3 - 2x\right)\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\left[x^4 - x^2\right]_1^2 = 12 - 0 = 12$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with Chapter 2.2:</b> The car brakes with $v(t) = 20 - 4t$ (in m/s) until it stops. Calculate the braking distance as an integral and compare with the result from Chapter 2.2.</p></div>
+            <div class="b-sol"><p>Stops at $t = 5$: $\int_0^5 (20 - 4t)\,\mathrm{d}t = \left[20t - 2t^2\right]_0^5 = 50$ m, the same as there.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Justify: for an increasing function the lower sum with left rectangles is always too small. What holds for a decreasing one?</p></div>
+            <div class="b-sol"><p>Increasing: the left edge of each strip is the smallest value in it, so the rectangle stays below the graph. Decreasing: the other way round, the left rectangles are too large.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>The tangent to $f(x) = -x^2 + 4$ at the point $(1, 3)$, the graph of $f$ and the $y$-axis enclose an area. Calculate it.</p></div>
+            <div class="b-sol"><p>Tangent $y = -2x + 5$. It lies above the parabola: $\int_0^1 \left(-2x + 5 + x^2 - 4\right)\mathrm{d}x = \int_0^1 (x - 1)^2\,\mathrm{d}x = \tfrac13$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Archimedes" data-toc-k="X" data-toc-short="Archimedes">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>Archimedes and the parabolic arc</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>As early as the 3rd century BC, Archimedes calculated the area under a parabolic arc, entirely without an integral. He put a triangle inside it, then two smaller triangles into the two gaps,
+                which together are only a quarter as large, then four even smaller ones, and so on. The sum $1 + \tfrac14 + \tfrac{1}{16} + \ldots$ is $\tfrac43$.</p>
+            <p>His result: a parabolic segment is $\tfrac43$ the size of the triangle with the same base and height. For the arc $4 - x^2$ above: triangle $\tfrac12 \cdot 4 \cdot 4 = 8$,
+                segment $\tfrac43 \cdot 8 = \tfrac{32}{3}$. With the fundamental theorem: $\int_{-2}^{2}(4 - x^2)\,\mathrm{d}x = \tfrac{32}{3}$. Two thousand years lie between the two calculations.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Archimedes, “Quadrature of the Parabola”, Proposition 24. Explanation: MacTutor History of Mathematics, “Archimedes: Quadrature of the parabola”, University of St Andrews.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>ANTIDERIVATIVE</h4><p>$F' = f$, all antiderivatives $F + C$</p></div>
+        <div><p>$\int (6x^2 - 4x + 3)\,\mathrm{d}x = 2x^3 - 2x^2 + 3x + C$</p></div></div>
+    <div class="b-rueck"><div><h4>BASIC INTEGRAL</h4><p>$\int x^n\,\mathrm{d}x = \tfrac{x^{n+1}}{n+1} + C$, $n \neq -1$</p></div>
+        <div><p>$\int x^{-2}\,\mathrm{d}x = -\tfrac1x + C$</p></div></div>
+    <div class="b-rueck"><div><h4>FUNDAMENTAL THEOREM</h4><p>$\int_a^b f(x)\,\mathrm{d}x = F(b) - F(a)$, signed</p></div>
+        <div><p>$\int_0^2 x^2\,\mathrm{d}x = \tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>AREA WITH THE AXIS</h4><p>Split at the zeros, add the absolute values.</p></div>
+        <div><p>$x^2 - 1$ on $[-1, 2]$: integral 0, area $\tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>BETWEEN TWO GRAPHS</h4><p>$\left|\int_{x_1}^{x_2} (f - g)\,\mathrm{d}x\right|$ between the intersection points</p></div>
+        <div><p>$-x^2 + 4$ and $x + 2$: $A = 4.5$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="9" data-ph="value"><p class="b-q-text">Calculate $\int_0^3 2x\,\mathrm{d}x$.</p><div class="b-sol"><p>$\left[x^2\right]_0^3 = 9$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="F(0) ="><p class="b-q-text">$F$ is the antiderivative of $2x - 4$ through $(1, 0)$. What is $F(0)$?</p><div class="b-sol"><p>$F(x) = x^2 - 4x + 3$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$\int_{-2}^{2} x^3\,\mathrm{d}x = \ldots$</p><div class="b-mc"><button>$0$</button><button>$8$</button><button>$4$</button></div><div class="b-sol"><p>symmetry about the origin</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="4.5" data-ph="area"><p class="b-q-text">Area between $-x^2 + 4$ and $x + 2$?</p><div class="b-sol"><p>limits $-2$ and $1$</p></div></div>
+            <div class="b-q" data-ans="2.38" data-tol="0.01" data-ph="k ="><p class="b-q-text">At which $k$ does $x = k$ halve the area under $x^2$ over $[0, 3]$, to two decimal places?</p><div class="b-sol"><p>$k^3 = 13.5$</p></div></div>
+            <div class="b-q" data-ans="18" data-ph="litres"><p class="b-q-text">Rate of inflow $-0.5t^2 + 3t$: how many litres flow in during the first 6 minutes?</p><div class="b-sol"><p>$-36 + 54$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-stammfunktion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ANTIDERIVATIVE</span><span class="b-lab-what">Indefinite integral, rules of integration</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-hauptsatz.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FUNDAMENTAL THEOREM</span><span class="b-lab-what">Upper and lower sum, definite integral</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-flaechen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">AREAS</span><span class="b-lab-what">Graph and axis, two graphs, limits</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Technical College (Fachoberschule) Year 12 · Learning area 3 of the Saxon curriculum for mathematics at the Fachoberschule.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-en/integral.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-en/numerik.js"></script>
+</body>
+</html>
