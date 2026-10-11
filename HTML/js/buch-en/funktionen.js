@@ -60,6 +60,32 @@ window.BuchEN && BuchEN.add('funktionen', {
         'Vielfachheit': 'Multiplicity', 'Vielfachheit kleiner': 'Lower multiplicity', 'Vielfachheit größer': 'Higher multiplicity', 'Faktor $a$': 'Factor $a$',
         'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Drag the zeros along the $x$-axis. Multiplicity 0 removes the linear factor.',
         'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Polynomial function with draggable zeros',
+        // book 11 mathegy9-en: potenzfunktion
+        'Verwandte zeigen': 'Show relatives', 'Graph einer Potenzfunktion': 'Graph of a power function', 'Exponent': 'Exponent',
+        'Nullstelle': 'Zero', 'Polstelle': 'Pole', 'Gemeinsame Punkte': 'Common points',
+        'keine, $f$ ist nur für $x \\geq 0$ definiert': 'none, $f$ is only defined for $x \\geq 0$',
+        'achsensymmetrisch zur $y$-Achse, denn $f(-x) = f(x)$': 'symmetric about the $y$-axis, because $f(-x) = f(x)$',
+        'punktsymmetrisch zum Ursprung, denn $f(-x) = -f(x)$': 'symmetric about the origin, because $f(-x) = -f(x)$',
+        'steigt für $x \\geq 0$': 'increasing for $x \\geq 0$', 'steigt überall': 'increasing everywhere',
+        'fällt für $x < 0$, steigt für $x > 0$': 'decreasing for $x < 0$, increasing for $x > 0$',
+        'steigt für $x < 0$, fällt für $x > 0$': 'increasing for $x < 0$, decreasing for $x > 0$',
+        'fällt für $x < 0$ und fällt für $x > 0$': 'decreasing for $x < 0$ and decreasing for $x > 0$',
+        '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, without a change of sign', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, with a change of sign',
+        'senkrecht $x = 0$, waagerecht $y = 0$': 'vertical $x = 0$, horizontal $y = 0$',
+        // book 11 mathegy9-en: extremwert
+        'Zaun an der Mauer': 'Fence against a wall', 'Rechteck mit Umfang 24 cm': 'Rectangle with perimeter 24 cm', 'Aufgabe': 'Problem',
+        'Seite $x$': 'Side $x$', 'Flächeninhalt in Abhängigkeit von x': 'Area as a function of x', 'MAUER': 'WALL',
+        'Rechteckiges Gehege an einer Mauer mit 40 m Zaun': 'Rectangular pen against a wall with 40 m of fencing',
+        'Rechteck mit festem Umfang 24 cm': 'Rectangle with a fixed perimeter of 24 cm',
+        'Zielgröße $A = x \\cdot (40 - 2x)$, Nebenbedingung: Zaunlänge $x + (40 - 2x) + x = 40$.':
+            'Target quantity $A = x \\cdot (40 - 2x)$, constraint: length of fence $x + (40 - 2x) + x = 40$.',
+        'Scheitelpunktform: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$': 'Vertex form: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$',
+        'Maximum: $x = 10\\,\\text{m}$, Breite $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.': 'Maximum: $x = 10\\,\\text{m}$, width $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.',
+        'Such die größte Fläche. Sie liegt am Scheitel der Parabel.': 'Find the largest area. It is at the vertex of the parabola.',
+        'Zielgröße $A = x \\cdot y$, Nebenbedingung $2x + 2y = 24$, also $y = 12 - x$.': 'Target quantity $A = x \\cdot y$, constraint $2x + 2y = 24$, so $y = 12 - x$.',
+        'Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$': 'Vertex form: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$',
+        'Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.': 'Maximum: the square with side length $6\\,\\text{cm}$, $A = 36\\,\\text{cm}^2$.',
+        'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': 'Which rectangle with perimeter $24\\,\\text{cm}$ has the largest area?',
     },
     phrase: [
         // detektiv
@@ -144,6 +170,8 @@ window.BuchEN && BuchEN.add('funktionen', {
         ['$ · Grad $', '$ · degree $'], ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'For $x \\to +\\infty$, $f(x) \\to '],
         ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$, for $x \\to -\\infty$, $f(x) \\to '],
         ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Only the term with the highest power decides: $'],
+        // book 11 mathegy9-en: extremwert
+        ['Jetzt: $A(', 'Now: $A('],
     ],
     rule: [
         // dates of the day-length widget: "21. Mär" → "21 Mar"
