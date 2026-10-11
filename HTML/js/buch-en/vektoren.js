@@ -22,6 +22,11 @@ window.BuchEN && BuchEN.add('vektoren', {
         'Ebene und Normalenvektor': 'Plane and normal vector', 'Liegt der Punkt in E?': 'Does the point lie in E?', 'Gerade schneidet Ebene': 'Line meets plane',
         'Pyramide': 'Pyramid', 'Prisma (schief möglich)': 'Prism (may be oblique)', 'Körper': 'Solid', 'Grundkante $a$': 'Base edge $a$',
         'Höhe $h$': 'Height $h$', 'Verschiebung der Spitze in $x$': 'Shift of the apex in $x$',
+        // book 6 mathegy12-en: lot3d, winkel3d
+        'Punkt über E': 'Point above E', 'Ursprung': 'Origin', 'Punkt unter E': 'Point below E', 'Punkt in E': 'Point in E',
+        'Spiegelpunkt P′ zeigen': 'Show mirror point P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Constant $d$ in $\\vec{n} \\circ \\vec{x} = d$',
+        'Gerade – Gerade': 'line – line', 'Gerade – Ebene': 'line – plane', 'Ebene – Ebene': 'plane – plane', 'Welcher Winkel?': 'Which angle?',
+        'spitz': 'acute', 'stumpfe Vektoren': 'obtuse vectors', 'senkrecht': 'perpendicular', 'schräg': 'oblique', 'Dach und Boden': 'roof and floor',
     },
     phrase: [
         // raum3d
@@ -70,6 +75,30 @@ window.BuchEN && BuchEN.add('vektoren', {
         ['Oberfläche $O = ', 'Surface area $O = '], [' (Prinzip von Cavalieri: auch schief)', " (Cavalieri's principle: oblique as well)"],
         [' · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', ' · If you move the apex horizontally, the volume stays the same, the lateral surface does not.'],
         ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, shift of the top face $\\vec{w} = '],
+        // book 6 mathegy12-en: lot3d
+        ['Der Normalenvektor darf nicht der Nullvektor sein.', 'The normal vector must not be the zero vector.'],
+        ['$ · Lotgerade $l\\colon', '$ · perpendicular line $l\\colon'], ['$l$ in $E$ einsetzen: $', 'Substitute $l$ into $E$: $'], ['$ · Lotfußpunkt $F(', '$ · foot of the perpendicular $F('],
+        ['$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.', '$t = 0$: the point $P$ itself lies in the plane, its distance is $0$.'],
+        ['Abstand: $|', 'Distance: $|'], ['$ · ohne Lotfußpunkt: $', '$ · without the foot of the perpendicular: $'],
+        ['Spiegelpunkt: $t$ verdoppeln, $', 'Mirror point: double $t$, $'], ['$, also $P\'(', '$, so $P\'('],
+        // book 6 mathegy12-en: winkel3d
+        ['Der Nullvektor hat keine Richtung, er liefert keinen Winkel.', 'The zero vector has no direction, it gives no angle.'],
+        ['$, also $\\varphi \\approx ', '$, so $\\varphi \\approx '],
+        ['Die Richtungsvektoren sind parallel: Die Geraden sind parallel oder identisch, sie schneiden sich nicht unter einem Winkel.',
+            'The direction vectors are parallel: the lines are parallel or identical, they do not intersect at an angle.'],
+        ['Die Vektoren selbst schließen $', 'The vectors themselves enclose $'],
+        ['$ ein, also einen stumpfen Winkel. Die Geraden bilden den spitzen Nebenwinkel $180^\\circ - ', '$, an obtuse angle. The lines form the acute supplementary angle $180^\\circ - '],
+        ['$; dafür steht der Betrag im Zähler.', '$; that is what the absolute value in the numerator is for.'],
+        ['Das Skalarprodukt ist $0$: Die Geraden schneiden sich senkrecht.', 'The scalar product is $0$: the lines intersect at right angles.'],
+        ['Das Skalarprodukt ist positiv, der Winkel zwischen den Vektoren ist schon spitz.', 'The scalar product is positive, the angle between the vectors is already acute.'],
+        ['Winkel zwischen $\\vec{u}$ und dem Normalenvektor: $\\cos\\alpha = ', 'Angle between $\\vec{u}$ and the normal vector: $\\cos\\alpha = '],
+        ['Der Winkel zur Ebene ergänzt ihn zu $90^\\circ$: $', 'The angle with the plane makes it up to $90^\\circ$: $'],
+        ['. Das Skalarprodukt ist $0$: $g$ ist parallel zu $E$ oder liegt in $E$.', '. The scalar product is $0$: $g$ is parallel to $E$ or lies in $E$.'],
+        ['. $\\vec{u}$ ist ein Vielfaches von $\\vec{n}$: $g$ steht senkrecht auf $E$.', '. $\\vec{u}$ is a multiple of $\\vec{n}$: $g$ is perpendicular to $E$.'],
+        ['. Gelb gestrichelt: die Projektion von $g$ in die Ebene.', '. Yellow, dashed: the projection of $g$ onto the plane.'],
+        ['Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.', 'The normal vectors are parallel: the planes are parallel or identical.'],
+        ['Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $', 'White: the line of intersection $s$ with the direction vector $'],
+        ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. The angle is measured perpendicular to it, between the two coloured lines in the planes.'],
     ],
     rule: [
         // the inputs: "Vektor a, x-Koordinate", "Punkt A, y-Koordinate"

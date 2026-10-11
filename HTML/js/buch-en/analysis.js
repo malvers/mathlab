@@ -45,6 +45,22 @@ window.BuchEN && BuchEN.add('analysis', {
         'Funktionenschar': 'Family of functions', 'Ortskurve der Extrempunkte zeigen': 'Show the locus of the turning points',
         'Funktionenschar mit Ortskurve': 'Family of functions with locus', 'Hochpunkt': 'Maximum', 'Tiefpunkt': 'Minimum',
         'Verkaufspreis $p$ (€ pro Stück)': 'Selling price $p$ (€ per item)', 'x in Stück': 'x in items', 'Kosten, Erlös und Gewinn': 'Costs, revenue and profit',
+        // book 6 mathegy12-en: titelbildgy12, integrieren, abstandmin
+        'Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor':
+            'Cover picture: an area under a curve with trapezia, a histogram with a red rejection region, a line through a plane with its angle of intersection and the normal vector',
+        'Lineare Verkettung': 'Linear substitution', 'z. B. x^3/3 - 2x oder -cos(2x)/2': 'e.g. x^3/3 - 2x or -cos(2x)/2',
+        'Gerade': 'Line', 'Parabel': 'Parabola', 'Wurzelkurve': 'Square root curve', 'Kurve:': 'Curve:',
+        'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).':
+            'Drag the point P. The slider moves Q along the curve; below, the distance d(x) grows and shrinks.',
+        'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Curve, point P and the point Q on the curve with their distance',
+        'Abstandsfunktion d(x) mit ihrem Minimum': 'Distance function d(x) with its minimum', '$x$-Koordinate von $Q$': '$x$-coordinate of $Q$',
+        // book 6 mathegy12-en: geradenschar
+        'Büschel': 'Pencil', 'Parallelen': 'Parallels', 'Gerade und Parabel': 'Line and parabola', 'Geradenschar': 'Family of lines',
+        'Geradenschar mit der hervorgehobenen Geraden für den gewählten Parameter': 'Family of lines with the line for the chosen parameter highlighted',
+        'Alle Geraden gehen durch $(2 \\mid 1)$: Für $x = 2$ fällt $a$ heraus. Der Parameter ist die Steigung, eine Gerade fehlt aber: die senkrechte $x = 2$.':
+            'All the lines pass through $(2, 1)$: for $x = 2$, $a$ drops out. The parameter is the gradient, but one line is missing: the vertical line $x = 2$.',
+        'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
+            'The gradient is always $0.5$: the lines are parallel and have no common point. The parameter shifts them.',
     },
     phrase: [
         // grenzwert
@@ -108,9 +124,43 @@ window.BuchEN && BuchEN.add('analysis', {
         ['$ Stück.', '$ items.'], ['Gewinn ab $x \\approx ', 'Profit from $x \\approx '], ['Bei diesem Preis wird nie Gewinn gemacht.', 'At this price there is never a profit.'],
         ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Maximum profit: $G\'(x) = 0$ at $x \\approx '], ['$ Stück, $G \\approx ', '$ items, $G \\approx '],
         ['Kein positives Gewinnmaximum.', 'No positive maximum profit.'],
+        // book 6 mathegy12-en: integrieren
+        ['Bestimme eine Stammfunktion: $f(x) = ', 'Find an antiderivative: $f(x) = '],
+        ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Not yet. Differentiate your solution to check it. Hint: '],
+        ['Potenzregel rückwärts: Exponent um 1 erhöhen, durch den neuen Exponenten teilen, $\\int x^n\\,\\mathrm{d}x = \\dfrac{x^{n+1}}{n+1} + C$.',
+            'Power rule backwards: raise the exponent by 1, divide by the new exponent, $\\int x^n\\,\\mathrm{d}x = \\dfrac{x^{n+1}}{n+1} + C$.'],
+        ['Summen- und Faktorregel: Jeder Summand wird einzeln integriert, ein Faktor bleibt stehen. Eine Konstante $a$ hat die Stammfunktion $ax$.',
+            'Sum and constant multiple rules: every term is integrated separately, a factor stays. A constant $a$ has the antiderivative $ax$.'],
+        ['$: Exponent $\\tfrac12 + 1 = \\tfrac32$, durch $\\tfrac32$ teilen heißt mit $\\tfrac23$ malnehmen.', '$: exponent $\\tfrac12 + 1 = \\tfrac32$, dividing by $\\tfrac32$ means multiplying by $\\tfrac23$.'],
+        ['$: Exponent $-1$, durch $-1$ teilen, also $-x^{-1} = -\\tfrac1x$.', '$: exponent $-1$, divide by $-1$, so $-x^{-1} = -\\tfrac1x$.'],
+        ['$: Exponent $\\tfrac12$, durch $\\tfrac12$ teilen heißt verdoppeln.', '$: exponent $\\tfrac12$, dividing by $\\tfrac12$ means doubling.'],
+        ['Die Potenzregel gilt für jeden Exponenten $r \\neq -1$: $\\int x^r\\,\\mathrm{d}x = \\dfrac{x^{r+1}}{r+1} + C$.',
+            'The power rule holds for every exponent $r \\neq -1$: $\\int x^r\\,\\mathrm{d}x = \\dfrac{x^{r+1}}{r+1} + C$.'],
+        ['$ ist seine eigene Ableitung, also auch seine eigene Stammfunktion.', '$ is its own derivative, so it is also its own antiderivative.'],
+        ['Die Lücke der Potenzregel: $\\int \\tfrac1x\\,\\mathrm{d}x = \\ln|x| + C$. Für $x > 0$ reicht $\\ln x$.',
+            'The gap in the power rule: $\\int \\tfrac1x\\,\\mathrm{d}x = \\ln|x| + C$. For $x > 0$, $\\ln x$ is enough.'],
+        ['$, also $\\int \\sin x\\,\\mathrm{d}x = -\\cos x + C$.', '$, so $\\int \\sin x\\,\\mathrm{d}x = -\\cos x + C$.'],
+        ['$, also $\\int \\cos x\\,\\mathrm{d}x = \\sin x + C$.', '$, so $\\int \\cos x\\,\\mathrm{d}x = \\sin x + C$.'],
+        ['Lineare Verkettung: $\\int \\mathrm{e}^{ax+b}\\,\\mathrm{d}x = \\tfrac1a\\,\\mathrm{e}^{ax+b} + C$. Probe: Die Kettenregel liefert den Faktor $a$, $\\tfrac1a$ hebt ihn auf.',
+            'Linear substitution: $\\int \\mathrm{e}^{ax+b}\\,\\mathrm{d}x = \\tfrac1a\\,\\mathrm{e}^{ax+b} + C$. Check: the chain rule gives the factor $a$, $\\tfrac1a$ cancels it.'],
+        ['$: erst die Stammfunktion von $\\sin$, dann durch die innere Ableitung $a$ teilen.', '$: first the antiderivative of $\\sin$, then divide by the inner derivative $a$.'],
+        ['$: Potenzregel für die Klammer, dann durch die innere Ableitung teilen.', '$: power rule for the bracket, then divide by the inner derivative.'],
+        // book 6 mathegy12-en: abstandmin
+        ['Jetzt: $x = ', 'Now: $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · smallest at $x \\approx '], ['$P$ liegt auf der Kurve, der Abstand ist $0$.', '$P$ lies on the curve, the distance is $0$.'],
+        ['Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ', 'The shortest segment (green) is perpendicular to the tangent: angle $\\approx '],
+        ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. That is why the point is also called the foot of the perpendicular.'],
+        ['Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.',
+            'The minimum lies at the edge of the domain; there the segment does not have to be perpendicular to the tangent.'],
+        // book 6 mathegy12-en: geradenschar
+        ['Schnitt mit $y = x^2 + 2$: $x^2 - ', 'Intersection with $y = x^2 + 2$: $x^2 - '], ['x + 1 = 0$, Diskriminante $a^2 - 4 = ', 'x + 1 = 0$, discriminant $a^2 - 4 = '],
+        ['zwei Schnittpunkte.', 'two points of intersection.'], ['kein gemeinsamer Punkt.', 'no common point.'],
+        ['genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', 'exactly one point, the line <b>touches</b> the parabola at $x = '],
+        ['$. Das passiert für $a = \\pm 2$.', '$. This happens for $a = \\pm 2$.'],
     ],
     rule: [
         // ableiten: "3 von 5 gelöst"
         [/(\d+) von (\d+) gelöst/g, '$1 of $2 solved'],
+        // book 6 mathegy12-en: abstandmin, the general point Q(x | f(x))
+        [/\$Q\(x \\mid f\(x\)\)\$/g, '$Q(x, f(x))$'],
     ]
 });
