@@ -713,6 +713,7 @@
             task.innerHTML = Q.task; math(task);
             sl.innerHTML = '';
             range(sl, { label: '$' + Q.v + '$', min: Q.lo, max: Q.hi, step: Q.step, value: x, fmt: v => fmt(v, 2) + ' ' + Q.unit, onInput: v => { x = v; render(); } });
+            math(sl);
             p.view([0, Q.hi + Q.lo], Q.y); p.opt.xLabel = Q.xl; p.opt.yLabel = Q.yl;
             render();
         }
