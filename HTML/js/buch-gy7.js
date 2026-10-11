@@ -296,7 +296,7 @@
         const spot = p => '<circle cx="' + f1(p[0]) + '" cy="' + f1(p[1]) + '" r="6" fill="#fff"/><circle cx="' + f1(p[0]) + '" cy="' + f1(p[1]) + '" r="12" fill="#fff" fill-opacity="0.12"/>';
         let art = '';
         // a pie chart behind everything
-        const PM = [112, 392], pr = 56;
+        const PM = [100, 398], pr = 42;   // below the author line of the cover, clear of the Thales triangle
         let th = 90 * DEG;
         [[0.45, '#F5C242'], [0.3, '#7fd8ee'], [0.25, '#A0C85A']].forEach(([s, c]) => {
             const w = s * 2 * Math.PI;
@@ -1005,7 +1005,8 @@
             const f = F[S.f], keys = Object.keys(f.t);
             if (!S.t || !f.t[S.t]) S.t = keys[0];
             tRow.innerHTML = '';
-            const ts = seg(tRow, keys.map(k => [k, 'nach $' + k + '$']), S.t, v => { S.t = v; S.k = 1; render(); }, 'umstellen nach');
+            // a button of an earlier formula (already out of the DOM) must not pick a variable the current formula lacks
+            const ts = seg(tRow, keys.map(k => [k, 'nach $' + k + '$']), S.t, v => { if (!F[S.f].t[v]) return; S.t = v; S.k = 1; render(); }, 'umstellen nach');
             math(ts.el);
             if (B.printing()) S.k = f.t[S.t].length;
             render();
