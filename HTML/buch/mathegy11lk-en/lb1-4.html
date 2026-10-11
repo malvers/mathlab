@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 11 Advanced · Chapter 1.4 · Investigating functions | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Monotonicity, extrema, curvature and points of inflection, symmetry, poles, oblique asymptotes. Chapter 1.4 of the interactive textbook Mathematics · Grammar School 11 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 11 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1.4 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1.4 · LEARNING AREA 1 · NOVEMBER</p>
+            <h1>Investigating functions</h1>
+            <p class="b-hero-lead">With the first and the second derivative you read off the graph of a function without drawing it: where it rises and falls, where it has its
+                maxima and minima, how it bends and where it changes its curvature. In the advanced course you distinguish carefully between <b>necessary</b> and
+                <b>sufficient</b> conditions, also find the <b>global</b> extrema at the ends and investigate rational functions with poles and <b>oblique asymptotes</b>.</p>
+            <div class="b-chips"><span class="b-chip">14 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">3 PRACTICE SHEETS</span><span class="b-chip">CURVE SKETCHING</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3-3*x^2+4","-3*x+5"]' data-labels='["f","inflectional tangent"]' data-lat="[3.05,-0.7]" data-x="-1.6,3.4" data-y="-1.2,5.8" data-pts="[[0,4],[2,0],[1,2],[-1,0]]" data-h="240" data-aria="Graph of a cubic function with a maximum, a minimum, a point of inflection and the inflectional tangent"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>justify <b>monotonicity</b> with the first derivative and give it in interval or set notation</li>
+                <li>find local and <b>global extrema</b>, also at the end of an interval, and distinguish necessary from sufficient conditions</li>
+                <li>investigate <b>curvature</b>, points of inflection, zeros and symmetry, and prove a symmetry</li>
+                <li>find poles, holes and <b>asymptotes</b> of rational functions, oblique asymptotes by polynomial division</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="-2" data-ph="f'(1) ="><p class="b-q-text">$f(x) = x^2 - 4x$. What is $f'(1)$?</p><div class="b-sol"><p>$f'(x) = 2x - 4$, so $f'(1) = -2$ (chapter 1.3)</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">The derivative is positive everywhere on an interval. What does the graph do there?</p><div class="b-mc"><button>It rises.</button><button>It falls.</button><button>It is horizontal.</button></div><div class="b-sol"><p>The tangents have a positive gradient: the graph rises.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Solve $3x^2 - 12 = 0$. Give the positive solution.</p><div class="b-sol"><p>$x^2 = 4$, so $x = \pm 2$.</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">What is $\tfrac{x^2 - 1}{x - 1}$ equal to for $x \neq 1$?</p><div class="b-mc"><button>$x + 1$</button><button>$x - 1$</button><button>$x$</button></div><div class="b-sol"><p>$x^2 - 1 = (x - 1)(x + 1)$, then cancel.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE HIGHEST POINT, BUT WHERE?</div>
+            <div class="b-text"><p>Draw $f(x) = x^3 - 3x$ for $-2 \le x \le 3$ with the CAS.</p>
+                <ul><li>Where does the graph have a horizontal tangent? Is that the highest point of the picture?</li><li>What changes if you only look at $-2 \le x \le 1.5$?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">WHERE DOES THE CURVE TIP OVER?</div>
+            <div class="b-text"><p>You ride a bike through an S-bend. First you steer to the left, then to the right.</p>
+                <ul><li>At which point are the handlebars straight for a moment?</li><li>What does that have to do with the change of the gradient, that is with $f''$?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">ALMOST A STRAIGHT LINE</div>
+            <div class="b-text"><p>$f(x) = \tfrac{x^2 + 1}{x}$.</p>
+                <ul><li>Calculate $f(10)$, $f(100)$ and $f(1000)$. Which straight line does the graph get closer and closer to?</li><li>Write $f(x)$ as the sum of two fractions. Why is that no coincidence? What happens at $x = 0$?</li></ul></div>
+            <span class="b-pair">→ Unit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Monotonicity and extrema" data-toc-k="1" data-toc-short="1 Extrema">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Monotonicity and extrema</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The graph of $f(x) = x^3 - 3x$ has a horizontal tangent at $x = -1$ and there a maximum with $f(-1) = 2$. In its <b>neighbourhood</b> this is the highest point.
+                On the whole interval $[-2, 3]$, however, the right-hand end with $f(3) = 18$ is much higher. So you have to distinguish <b>local</b> and <b>global</b> extrema, and at an end
+                the tangent does not have to be horizontal at all.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · MONOTONICITY AND EXTREMA</div>
+                <div class="b-text">
+                    <p><b>Monotonicity theorem:</b> if $f'(x) > 0$ for all $x$ in an interval $I$, then $f$ is <b>strictly increasing</b> on $I$. If $f'(x) < 0$, then $f$ is <b>strictly decreasing</b>.</p>
+                    <p><b>Necessary condition:</b> if the differentiable function $f$ has a local extremum at an interior point $x_E$, then $f'(x_E) = 0$.</p>
+                    <p><b>Sufficient conditions:</b> $f'(x_E) = 0$ and $f'$ changes sign at $x_E$, from $+$ to $-$: maximum, from $-$ to $+$: minimum.
+                        Or: $f'(x_E) = 0$ and $f''(x_E) < 0$: maximum; $f''(x_E) > 0$: minimum.</p>
+                    <p><b>Global extrema</b> on $[a, b]$: compare the function values at all local extreme points <b>and at the ends</b> $a$ and $b$. On $\mathbb{R}$, instead of the ends you investigate the behaviour for $x \to \pm\infty$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Why necessary?</b> At a maximum, $f(x_E + h) - f(x_E) \le 0$. So the difference quotient is $\le 0$ for $h > 0$ and $\ge 0$ for $h < 0$. Both limits are $f'(x_E)$, so $f'(x_E) = 0$.</p>
+            <p class="b-note"><b>Not sufficient:</b> $f(x) = x^3$ has $f'(0) = 0$, but no extremum, because $f'$ does not change sign. This is a <b>saddle point</b>.</p>
+            <p class="b-note"><b>Notations:</b> $(-\infty, 1]$ is the same as $\{x \in \mathbb{R} \mid x \le 1\}$. A round bracket means: the end does not belong to the interval.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · LOCAL OR GLOBAL?</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a function and move the ends of the interval. The table compares all candidates: local extreme points and the two ends.</p>
+        <div data-widget="randextrema"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · LOCAL AND GLOBAL</div>
+            <div class="b-text"><p>Find the local and global extrema of $f(x) = x^3 - 3x$ on the interval $[-2, 3]$ and describe its monotonicity.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 3 = 3(x - 1)(x + 1)$ has the zeros −1 and 1. With $f''(x) = 6x$: $f''(-1) = -6 < 0$, so a maximum $H(-1, 2)$; $f''(1) = 6 > 0$, so a minimum $T(1, -2)$.</p>
+                <p>$f$ increases on $[-2, -1]$, decreases on $[-1, 1]$ and increases on $[1, 3]$.</p>
+                <p>Ends: $f(-2) = -2$, $f(3) = 18$. <span class="b-res">Global maximum 18 at $x = 3$, global minimum −2 at $x = -2$ and $x = 1$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · MONOTONICITY WITH THE e-FUNCTION</div>
+            <div class="b-text"><p>Investigate $f(x) = x \cdot e^{-x}$ for monotonicity and global extrema in $\mathbb{R}$.</p></div>
+            <div class="b-sol"><p>Product and chain rule: $f'(x) = e^{-x} - x e^{-x} = (1 - x)\,e^{-x}$. Because $e^{-x} > 0$, $f'$ has the same sign as $1 - x$.</p>
+                <p>$f$ is strictly increasing on $(-\infty, 1]$ and strictly decreasing on $[1, \infty)$. Change of sign from $+$ to $-$: maximum $H\left(1, \tfrac1e\right)$.</p>
+                <p><span class="b-res">$\tfrac1e \approx 0.368$ is the global maximum.</span> There is no global minimum, because $f(x) \to -\infty$ for $x \to -\infty$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Describe the monotonicity and give the turning points of $f(x) = x^3 - 12x$, in interval notation.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 12 = 0$ at $x = \pm 2$. $f$ increases on $(-\infty, -2]$, decreases on $[-2, 2]$, increases on $[2, \infty)$. $H(-2, 16)$, $T(2, -16)$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>For $f(x) = x^4$ and $g(x) = x^3$, $f'(0) = g'(0) = 0$ and $f''(0) = g''(0) = 0$. Decide with the change of sign which one has an extremum at 0.</p></div>
+            <div class="b-sol"><p>$f'(x) = 4x^3$ changes from $-$ to $+$ at 0: minimum $(0, 0)$. $g'(x) = 3x^2 \ge 0$ does not change sign: no extremum, a saddle point. With $f'' = 0$ the $f''$ criterion decides nothing.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find the global extrema of $f(x) = x^3 - 3x^2$ on $[-1, 4]$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x(x - 2)$: candidates 0 and 2 in the interior, plus the ends. $f(-1) = -4$, $f(0) = 0$, $f(2) = -4$, $f(4) = 16$.
+                Global maximum 16 at $x = 4$, global minimum −4 at $x = -1$ and at $x = 2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Investigate $f(x) = x^2 e^{-x}$ for monotonicity and for local and global extrema in $\mathbb{R}$.</p></div>
+            <div class="b-sol"><p>$f'(x) = (2x - x^2)\,e^{-x} = x(2 - x)\,e^{-x}$. $f$ decreases on $(-\infty, 0]$, increases on $[0, 2]$, decreases on $[2, \infty)$. $T(0, 0)$, $H(2, 4e^{-2}) \approx (2, 0.541)$.
+                Because $f(x) \ge 0$, 0 is the global minimum. There is no global maximum: $f(x) \to \infty$ for $x \to -\infty$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Given is the family $f_a(x) = x^3 - a x$ with $a \in \mathbb{R}$. For which $a$ does $f_a$ have turning points? Calculate them and show that all turning points lie on the graph of $y = -2x^3$.</p></div>
+            <div class="b-sol"><p>$f_a'(x) = 3x^2 - a = 0 \iff x^2 = \tfrac a3$. Only for $a > 0$ are there two solutions with a change of sign; for $a = 0$, $(0, 0)$ is a saddle point, for $a < 0$, $f_a$ is strictly increasing.</p>
+                <p>$x_E = \pm\sqrt{a/3}$, $f_a(x_E) = x_E^3 - a x_E$. With $a = 3x_E^2$ this becomes $f_a(x_E) = x_E^3 - 3x_E^3 = -2x_E^3$. This is the <b>locus</b> of the turning points.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">$f(x) = x^3 - 27x$. At which point is the minimum?</p><div class="b-sol"><p>$f'(x) = 3x^2 - 27 = 0$ at $\pm 3$; $f''(3) = 18 > 0$.</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="value"><p class="b-q-text">$f(x) = x^2 - 4x$ on $[0, 5]$. What is the global maximum?</p><div class="b-sol"><p>$f(0) = 0$, $f(2) = -4$ (minimum), $f(5) = 5$: maximum 5 at the end.</p></div></div>
+        <div class="b-q" data-ans="0.5" data-ph="x ="><p class="b-q-text">At which point does $f(x) = x\,e^{-2x}$ have its maximum?</p><div class="b-sol"><p>$f'(x) = (1 - 2x)\,e^{-2x} = 0$ at $x = \tfrac12$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Curvature, points of inflection and symmetry" data-toc-k="2" data-toc-short="2 Curvature">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Curvature, points of inflection and symmetry</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>In the S-bend you first steer to the left, then to the right. In the left bend the gradient of the tangent increases, $f'$ rises, so $f'' > 0$.
+                In the right bend it decreases, $f'' < 0$. The moment the handlebars are straight is the <b>point of inflection</b>: there $f''$ changes sign, and the tangent is at its steepest or at its flattest.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · CURVATURE, POINTS OF INFLECTION, SYMMETRY</div>
+                <div class="b-text">
+                    <p><b>Curvature:</b> if $f''(x) > 0$ on $I$, the graph is <b>convex</b> there (a left bend); if $f''(x) < 0$, it is <b>concave</b> (a right bend).</p>
+                    <p><b>Point of inflection</b> $x_W$: there the curvature changes. Necessary is $f''(x_W) = 0$. Sufficient is $f''(x_W) = 0$ with a change of sign of $f''$, or $f''(x_W) = 0$ and $f'''(x_W) \neq 0$.
+                        A point of inflection with a horizontal tangent is called a <b>saddle point</b>.</p>
+                    <p><b>Symmetry:</b> if $f(-x) = f(x)$ for all $x$, the graph is symmetric about the $y$-axis; if $f(-x) = -f(x)$, it is point-symmetric about the origin.
+                        It is point-symmetric about $P(a, b)$ if $f(a + h) + f(a - h) = 2b$ for all $h$.</p>
+                    <p><b>Zeros:</b> factor out, substitute, guess a zero and split it off by polynomial division, or use the CAS.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Polynomial functions:</b> only even exponents: symmetric about the $y$-axis. Only odd exponents: point-symmetric about the origin.</p>
+            <p class="b-note"><b>Careful:</b> $f(x) = x^4$ has $f''(0) = 0$, but no point of inflection, because $f''(x) = 12x^2$ does not change sign.</p>
+            <p class="b-note"><b>Multiplicity:</b> at a double zero the graph touches the $x$-axis, at a single or triple zero it crosses it.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · CURVE SKETCHING</div>
+        <p class="b-help" style="margin:0 0 12px">Set the coefficients of the cubic function and show $f'$ and $f''$. Look where $f'$ has a zero and where $f''$ has one.</p>
+        <div data-widget="kurve"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · A COMPLETE INVESTIGATION</div>
+            <div class="b-text"><p>Investigate $f(x) = x^3 - 3x^2 + 4$: symmetry, zeros, extrema, point of inflection, curvature and inflectional tangent.</p></div>
+            <div class="b-sol"><p><b>Symmetry:</b> even and odd exponents, so no symmetry about the $y$-axis or the origin.</p>
+                <p><b>Zeros:</b> $f(-1) = 0$. Polynomial division: $f(x) = (x + 1)(x^2 - 4x + 4) = (x + 1)(x - 2)^2$. Single zero −1, double zero 2.</p>
+                <p><b>Extrema:</b> $f'(x) = 3x^2 - 6x = 3x(x - 2)$, $f''(x) = 6x - 6$. $f''(0) = -6$: $H(0, 4)$; $f''(2) = 6$: $T(2, 0)$.</p>
+                <p><b>Point of inflection:</b> $f''(x) = 0$ at $x = 1$, $f'''(x) = 6 \neq 0$: $W(1, 2)$. Concave on $(-\infty, 1]$, convex on $[1, \infty)$.</p>
+                <p><b>Inflectional tangent:</b> $f'(1) = -3$, so <span class="b-res">$y = -3(x - 1) + 2 = -3x + 5$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · PROOF: SYMMETRY ABOUT THE POINT OF INFLECTION</div>
+            <div class="b-text"><p>Prove: every function $f(x) = ax^3 + bx^2 + cx + d$ with $a \neq 0$ has exactly one point of inflection, and its graph is point-symmetric about it.</p></div>
+            <div class="b-sol"><p>$f''(x) = 6ax + 2b = 0$ only at $x_W = -\tfrac{b}{3a}$, and $f'''(x) = 6a \neq 0$. So there is exactly one point of inflection.</p>
+                <p>For every $x$ and $h$ the binomial formulas give:</p>
+                <p>$f(x + h) + f(x - h)$<br>$= a(2x^3 + 6xh^2) + b(2x^2 + 2h^2) + 2cx + 2d$<br>$= 2f(x) + h^2\,(6ax + 2b) = 2f(x) + h^2 f''(x)$.</p>
+                <p>At the point $x_W$, $f''(x_W) = 0$, so <span class="b-res">$f(x_W + h) + f(x_W - h) = 2f(x_W)$</span>: point symmetry about $W$. In example 3: $f(1 + h) + f(1 - h) = 4$.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ZEROS AND MULTIPLICITY</div>
+        <p class="b-help" style="margin:0 0 12px">Drag the zeros and change their multiplicity. Where does the graph touch the axis, where does it cross it?</p>
+        <div data-widget="ganzrational"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Find the point of inflection of $f(x) = x^3 + 3x^2 - 1$ and the equation of the inflectional tangent.</p></div>
+            <div class="b-sol"><p>$f''(x) = 6x + 6 = 0$ at $x = -1$, $f'''(x) = 6 \neq 0$. $W(-1, 1)$. $f'(-1) = 3 - 6 = -3$: $y = -3(x + 1) + 1 = -3x - 2$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>What symmetry does the graph have? Justify with $f(-x)$. a) $x^4 - 3x^2 + 1$ &nbsp; b) $x^3 - 2x$ &nbsp; c) $x^3 + x^2$ &nbsp; d) $x \sin x$ &nbsp; e) $\tfrac{x}{x^2 + 1}$</p></div>
+            <div class="b-sol"><p>a) $f(-x) = f(x)$: symmetric about the $y$-axis &nbsp; b) $f(-x) = -f(x)$: point-symmetric &nbsp; c) $f(-x) = -x^3 + x^2$, neither &nbsp;
+                d) $(-x)\sin(-x) = x \sin x$: symmetric about the $y$-axis &nbsp; e) $\tfrac{-x}{x^2 + 1} = -f(x)$: point-symmetric</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Where is the graph of $f(x) = x^4 - 6x^2$ convex, where is it concave? Give the points of inflection.</p></div>
+            <div class="b-sol"><p>$f''(x) = 12x^2 - 12 = 12(x - 1)(x + 1)$. Concave on $[-1, 1]$, convex on $(-\infty, -1]$ and $[1, \infty)$. Points of inflection $(-1, -5)$ and $(1, -5)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find all zeros of $f(x) = x^3 - 2x^2 - 5x + 6$ without aids.</p></div>
+            <div class="b-sol"><p>Guess among the divisors of 6: $f(1) = 0$. Polynomial division: $f(x) = (x - 1)(x^2 - x - 6) = (x - 1)(x - 3)(x + 2)$. Zeros −2, 1 and 3.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$f_a(x) = x^4 + a x^3$ with $a \neq 0$. Show that the graph has a saddle point at the origin and exactly one further point of inflection. On which curve do these further points of inflection lie?</p></div>
+            <div class="b-sol"><p>$f_a'(x) = 4x^3 + 3ax^2$, $f_a''(x) = 12x^2 + 6ax = 6x(2x + a)$. At 0, $f_a' = 0$ and $f_a''$ changes sign (single zero): saddle point.
+                Second point of inflection at $x_W = -\tfrac a2$. With $a = -2x_W$: $f_a(x_W) = x_W^4 - 2x_W^4 = -x_W^4$. Locus $y = -x^4$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">$f(x) = x^3 - 6x^2 + 1$. At which point is the point of inflection?</p><div class="b-sol"><p>$f''(x) = 6x - 12 = 0$ at 2.</p></div></div>
+        <div class="b-q" data-ans="-12" data-ph="m ="><p class="b-q-text">What is the gradient of the inflectional tangent there?</p><div class="b-sol"><p>$f'(x) = 3x^2 - 12x$, $f'(2) = 12 - 24 = -12$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="number"><p class="b-q-text">How many points of inflection does $f(x) = x^4$ have?</p><div class="b-sol"><p>None: $f''(x) = 12x^2 \ge 0$ never changes sign.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Poles and asymptotes" data-toc-k="3" data-toc-short="3 Asymptotes">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Poles and asymptotes</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = \tfrac{x^2 + 1}{x} = x + \tfrac1x$. For large $|x|$, $\tfrac1x$ becomes tiny, and the graph nestles up to the line $y = x$, an <b>oblique asymptote</b>.
+                At $x = 0$ the denominator becomes zero, but the numerator does not: the function values grow beyond all bounds, there is a <b>pole</b> there.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · POLES AND ASYMPTOTES</div>
+                <div class="b-text">
+                    <p>For $f(x) = \tfrac{p(x)}{q(x)}$ with polynomial functions $p$ and $q$, $D = \{x \in \mathbb{R} \mid q(x) \neq 0\}$.</p>
+                    <p><b>Pole:</b> $q(x_0) = 0$ and $p(x_0) \neq 0$ (after cancelling). The graph has the vertical asymptote $x = x_0$. If $x_0$ is a zero of the denominator of odd multiplicity, $f$ changes sign there, if of even multiplicity, it does not.</p>
+                    <p><b>Removable hole:</b> $p(x_0) = q(x_0) = 0$, and after cancelling $x_0$ is no longer a zero of the denominator.</p>
+                    <p><b>Behaviour for $x \to \pm\infty$:</b> degree of the numerator less than degree of the denominator: asymptote $y = 0$. Equal degrees: $y = \tfrac{a_n}{b_n}$ (quotient of the leading coefficients).
+                        Degree of the numerator larger by 1: <b>polynomial division</b> $f(x) = mx + n + \tfrac{r(x)}{q(x)}$ gives the oblique asymptote $y = mx + n$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>With the CAS:</b> polynomial division with remainder is done, for example, by the command <code>propFrac</code> (TI-Nspire). <code>factor</code> does the cancelling.</p>
+            <p class="b-note"><b>Position relative to the asymptote:</b> the sign of the remaining fraction $\tfrac{r(x)}{q(x)}$ tells you whether the graph lies above or below the asymptote.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · RATIONAL FUNCTIONS</div>
+        <p class="b-help" style="margin:0 0 12px">Choose an example and change the zeros of the numerator and the denominator. The asymptotes are drawn dashed, in the example “oblique asymptote” the oblique one as well.</p>
+        <div data-widget="bruchfunktion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · OBLIQUE ASYMPTOTE</div>
+            <div class="b-text"><p>Investigate $f(x) = \tfrac{x^2 - x - 2}{x - 3}$: domain, zeros, pole, asymptotes and extrema.</p></div>
+            <div class="b-sol"><p>$D = \mathbb{R} \setminus \{3\}$. Numerator $(x - 2)(x + 1)$: zeros −1 and 2. At 3 the numerator equals $4 \neq 0$: pole with a change of sign, asymptote $x = 3$.</p>
+                <p>Polynomial division: $(x^2 - x - 2) : (x - 3) = x + 2$ remainder 4, so $f(x) = x + 2 + \tfrac{4}{x - 3}$. <span class="b-res">Oblique asymptote $y = x + 2$</span>; for $x > 3$ the graph lies above it, for $x < 3$ below it.</p>
+                <p>$f'(x) = 1 - \tfrac{4}{(x - 3)^2} = 0 \iff (x - 3)^2 = 4$: $H(1, 1)$ and $T(5, 9)$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · HOLE OR POLE?</div>
+            <div class="b-text"><p>Investigate $g(x) = \tfrac{x^2 - 1}{x^2 - 3x + 2}$ at the zeros of the denominator and for $x \to \pm\infty$.</p></div>
+            <div class="b-sol"><p>Factorise: $g(x) = \tfrac{(x - 1)(x + 1)}{(x - 1)(x - 2)}$, $D = \mathbb{R} \setminus \{1, 2\}$. For $x \neq 1$, $g(x) = \tfrac{x + 1}{x - 2}$.</p>
+                <p>At $x = 1$: <span class="b-res">removable hole</span>, the graph has a gap at $\left(1, \tfrac{2}{-1}\right) = (1, -2)$. At $x = 2$: pole with a change of sign.</p>
+                <p>Equal degrees, leading coefficients 1 and 1: horizontal asymptote $y = 1$. Zero: $x = -1$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$f(x) = \tfrac{x + 1}{x^2 - 4}$. Give $D$, the zeros, the poles and the asymptotes.</p></div>
+            <div class="b-sol"><p>$D = \mathbb{R} \setminus \{-2, 2\}$. Zero −1. Poles $\pm 2$, both with a change of sign. Degree of the numerator 1 &lt; degree of the denominator 2: asymptote $y = 0$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Carry out the polynomial division $(2x^2 + 3x - 1) : (x + 2)$ and give the oblique asymptote of $f(x) = \tfrac{2x^2 + 3x - 1}{x + 2}$.</p></div>
+            <div class="b-sol"><p>$2x^2 + 3x - 1 = (2x - 1)(x + 2) + 1$, so $f(x) = 2x - 1 + \tfrac{1}{x + 2}$. Oblique asymptote $y = 2x - 1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$f(x) = \tfrac{x^2 - 9}{x^2 - x - 6}$. Where is a hole, where a pole? With which value can the hole be filled?</p></div>
+            <div class="b-sol"><p>$f(x) = \tfrac{(x - 3)(x + 3)}{(x - 3)(x + 2)}$. Hole at 3, value $\tfrac{6}{5} = 1.2$. Pole at −2 with a change of sign, asymptote $y = 1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Show that $f(x) = \tfrac{x + 1}{(x - 1)^2}$ has a pole without a change of sign at 1. How does $f$ behave to the left and to the right of it?</p></div>
+            <div class="b-sol"><p>Double zero of the denominator, numerator at 1 equal to $2 > 0$. The denominator is positive on the left and on the right: $f(x) \to +\infty$ for $x \to 1$ from both sides.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>We are looking for a function $f(x) = x + \tfrac{c}{x - 2}$ with the zero −1. Find $c$, write $f$ as a single fraction and give all zeros, the pole and the asymptotes.</p></div>
+            <div class="b-sol"><p>$f(-1) = -1 + \tfrac{c}{-3} = 0$, so $c = -3$. $f(x) = \tfrac{x(x - 2) - 3}{x - 2} = \tfrac{x^2 - 2x - 3}{x - 2} = \tfrac{(x - 3)(x + 1)}{x - 2}$.
+                Zeros −1 and 3, pole 2 with a change of sign, asymptotes $x = 2$ and $y = x$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1" data-ph="n ="><p class="b-q-text">$h(x) = \tfrac{x^2 + 1}{x - 1}$ has the oblique asymptote $y = x + n$. What is $n$?</p><div class="b-sol"><p>$x^2 + 1 = (x - 1)(x + 1) + 2$, so $h(x) = x + 1 + \tfrac{2}{x - 1}$.</p></div></div>
+        <div class="b-q" data-ans="0.8" data-ph="value"><p class="b-q-text">$k(x) = \tfrac{x^2 - 4}{x^2 + x - 6}$. With which value do you fill the hole at 2?</p><div class="b-sol"><p>$\tfrac{(x - 2)(x + 2)}{(x - 2)(x + 3)} = \tfrac{x + 2}{x + 3}$, at 2: $\tfrac45 = 0.8$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="number"><p class="b-q-text">How many vertical asymptotes does $\tfrac{x + 3}{x^3 - x}$ have?</p><div class="b-sol"><p>$x^3 - x = x(x - 1)(x + 1)$, and the numerator is zero at none of these points: three poles.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Investigate $f(x) = \tfrac14 x^4 - 2x^2$ completely: symmetry, zeros, extrema, points of inflection. Sketch the graph.</p></div>
+            <div class="b-sol"><p>Only even exponents: symmetric about the $y$-axis. $f(x) = x^2\left(\tfrac14 x^2 - 2\right)$: double zero 0, and also $\pm 2\sqrt2 \approx \pm 2.83$.
+                $f'(x) = x^3 - 4x = x(x - 2)(x + 2)$: $H(0, 0)$, $T(\pm 2, -4)$. $f''(x) = 3x^2 - 4 = 0$ at $\pm\tfrac{2}{\sqrt3} \approx \pm 1.15$: points of inflection $\left(\pm\tfrac{2}{\sqrt3}, -\tfrac{20}{9}\right)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Connecting with economics:</b> the costs of a company are $K(x) = x^3 - 6x^2 + 15x + 10$ (in €1000, $x$ in tonnes). Show that $K$ is strictly increasing.
+                At which quantity do the costs grow most slowly? What does the point of inflection mean?</p></div>
+            <div class="b-sol"><p>$K'(x) = 3x^2 - 12x + 15 = 3\left((x - 2)^2 + 1\right) > 0$: strictly increasing. $K''(x) = 6x - 12 = 0$ at $x = 2$, point of inflection $(2, 24)$.
+                There the marginal costs $K'(2) = 3$ are smallest: up to 2 t every further tonne gets cheaper, after that more expensive.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find the global extrema of $f(x) = \tfrac{x}{x^2 + 1}$ in $\mathbb{R}$. Use the symmetry and the behaviour for $x \to \pm\infty$.</p></div>
+            <div class="b-sol"><p>$f'(x) = \tfrac{(x^2 + 1) - 2x^2}{(x^2 + 1)^2} = \tfrac{1 - x^2}{(x^2 + 1)^2}$: $H\left(1, \tfrac12\right)$, $T\left(-1, -\tfrac12\right)$ (point-symmetric). For $x \to \pm\infty$, $f(x) \to 0$.
+                So $\tfrac12$ is the global maximum and $-\tfrac12$ the global minimum.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Prove: a function $f(x) = ax^3 + bx^2 + cx + d$ with $a \neq 0$ has two turning points if $b^2 > 3ac$, a saddle point if $b^2 = 3ac$, and otherwise no horizontal tangent.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3ax^2 + 2bx + c$ has the discriminant $4b^2 - 12ac = 4(b^2 - 3ac)$. Positive: two single zeros of $f'$ with a change of sign, so two extrema.
+                Zero: one double zero, $f'$ does not change sign, and there $f'' = 0$: saddle point. Negative: $f'$ has no zero.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Kepler’s wine barrels" data-toc-k="X" data-toc-short="Wine barrels">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>Kepler’s wine barrels</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>For his second wedding Johannes Kepler bought wine in Linz in the autumn of 1613. The merchant determined the content of each barrel with a single measurement: he pushed a rod
+                diagonally through the bunghole in the middle down to the opposite lower edge and read off the length $d$. How the barrel was built otherwise made no difference to the price.
+                Kepler found that suspicious and wrote a whole book about it.</p>
+            <p>Let us calculate with a cylindrical barrel of height $h$ and radius $r$. By Pythagoras, $d^2 = \left(\tfrac h2\right)^2 + (2r)^2$, so $r^2 = \tfrac14\left(d^2 - \tfrac{h^2}{4}\right)$ and
+                $V(h) = \pi r^2 h = \tfrac{\pi}{4}\left(d^2 h - \tfrac{h^3}{4}\right)$. From $V'(h) = \tfrac{\pi}{4}\left(d^2 - \tfrac{3h^2}{4}\right) = 0$ it follows that $h = \tfrac{2d}{\sqrt3}$:
+                for a fixed $d$ the barrel holds the most when its height is $\sqrt2$ times its diameter.</p>
+            <p>Kepler noticed that the Austrian barrels were built roughly like this, and above all: <b>near the maximum the volume hardly changes.</b> If the barrel is 10 % taller or shorter
+                than ideal, it loses only about 1.5 % of its content. That is exactly the horizontal tangent, $V'(h) = 0$, more than 50 years before Newton and Leibniz invented the derivative.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Johannes Kepler: “Nova stereometria doliorum vinariorum” (New solid geometry of wine barrels), Linz 1615.</p>
+            <p class="b-note"><b>Check it:</b> with $d = 1$, $V(h_{\max}) \approx 0.605$ and $V(1.1\,h_{\max}) \approx 0.595$.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>MONOTONICITY</h4><p>$f' > 0$ on $I$: strictly increasing; $f' < 0$: strictly decreasing.</p></div>
+        <div><p>$x\,e^{-x}$ increases on $(-\infty, 1]$, decreases on $[1, \infty)$</p></div></div>
+    <div class="b-rueck"><div><h4>EXTREMA</h4><p>Necessary $f'(x_E) = 0$; sufficient a change of sign of $f'$ or $f''(x_E) \neq 0$. Global: compare the ends as well.</p></div>
+        <div><p>$x^3 - 3x$ on $[-2, 3]$: maximum at the end $f(3) = 18$</p></div></div>
+    <div class="b-rueck"><div><h4>CURVATURE AND POINT OF INFLECTION</h4><p>$f'' > 0$: convex; point of inflection: $f''(x_W) = 0$ with a change of sign or $f'''(x_W) \neq 0$.</p></div>
+        <div><p>$x^3 - 3x^2 + 4$: $W(1, 2)$, inflectional tangent $y = -3x + 5$</p></div></div>
+    <div class="b-rueck"><div><h4>SYMMETRY AND ZEROS</h4><p>$f(-x) = f(x)$: symmetric about the $y$-axis; $f(-x) = -f(x)$: point-symmetric. Guessing and polynomial division.</p></div>
+        <div><p>Every cubic function is point-symmetric about its point of inflection.</p></div></div>
+    <div class="b-rueck"><div><h4>POLES AND ASYMPTOTES</h4><p>Pole, removable hole; asymptote from the degrees, oblique by polynomial division.</p></div>
+        <div><p>$\tfrac{x^2 - x - 2}{x - 3} = x + 2 + \tfrac{4}{x - 3}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="3" data-ph="y ="><p class="b-q-text">$f(x) = x^3 - 3x + 1$. What is the $y$-coordinate of the maximum?</p><div class="b-sol"><p>$f'(x) = 3x^2 - 3$, maximum at −1: $f(-1) = -1 + 3 + 1 = 3$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">At which point does $f(x) = x^3 - 9x^2 + 2$ have its point of inflection?</p><div class="b-sol"><p>$f''(x) = 6x - 18 = 0$ at 3.</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="n ="><p class="b-q-text">$f(x) = \tfrac{x^2 + 3x}{x - 1}$ has the oblique asymptote $y = x + n$. What is $n$?</p><div class="b-sol"><p>$x^2 + 3x = (x - 1)(x + 4) + 4$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="-0.184" data-tol="0.001" data-ph="value"><p class="b-q-text">What is the global minimum of $f(x) = x^2 \ln x$ for $x > 0$ (three decimal places)?</p><div class="b-sol"><p>$f'(x) = x(2\ln x + 1) = 0$ at $x = e^{-1/2}$, $f = -\tfrac{1}{2e} \approx -0.184$</p></div></div>
+            <div class="b-q" data-ans="0.707" data-tol="0.001" data-ph="x ="><p class="b-q-text">At which positive point does $e^{-x^2}$ have a point of inflection (three decimal places)?</p><div class="b-sol"><p>$f''(x) = (4x^2 - 2)\,e^{-x^2} = 0$ at $x = \tfrac{1}{\sqrt2} \approx 0.707$</p></div></div>
+            <div class="b-q" data-ans="1.732" data-tol="0.001" data-ph="x ="><p class="b-q-text">At which point does $f(x) = \tfrac{x^3}{x^2 - 1}$ have its minimum for $x > 1$ (three decimal places)?</p><div class="b-sol"><p>$f'(x) = \tfrac{x^2(x^2 - 3)}{(x^2 - 1)^2} = 0$ at $x = \sqrt3 \approx 1.732$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-monotonie-extrema.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MONOTONICITY AND EXTREMA</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-wendepunkte-symmetrie.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">POINTS OF INFLECTION AND SYMMETRY</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-polstellen-asymptoten.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">POLES AND ASYMPTOTES</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIFFERENTIAL LAB</span><span class="b-lab-what">Derivatives and tangents</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 11, advanced course · Learning area 1 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-en/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-en/gy11lk.js"></script>
+</body>
+</html>

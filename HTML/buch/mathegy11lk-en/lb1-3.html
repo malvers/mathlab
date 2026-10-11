@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 11 Advanced · Chapter 1.3 · Rules of differentiation | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Rules with proofs, eˣ, ln x and sin x, product and chain rules, reversing differentiation. Chapter 1.3 of the interactive textbook Mathematics · Grammar School 11 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 11 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1.3 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1.3 · LEARNING AREA 1 · OCTOBER</p>
+            <h1>Rules of differentiation</h1>
+            <p class="b-hero-lead">Working out every derivative from the limit of the difference quotient would be laborious. A few <b>rules</b> are enough to differentiate almost any function:
+                powers, sums, products and compositions, plus $e^x$, $\ln x$ and $\sin x$. In the advanced course you <b>prove</b> rules instead of just using them,
+                and you learn the way back: finding the function that belongs to a derivative.</p>
+            <div class="b-chips"><span class="b-chip">15 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">3 PRACTICE PAGES</span><span class="b-chip">PROOFS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["sin(x)","cos(x)"]' data-labels='["sin x","cos x = (sin x)′"]' data-lat="[1.2,3.6]" data-pi data-x="-0.3,6.6" data-y="-1.6,1.9" data-h="240" data-aria="The sine function and its derivative, the cosine function"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>apply the power, constant multiple and sum rules, also for rational exponents, and <b>prove</b> a rule</li>
+                <li>differentiate $e^x$, $\ln x$, $\sin x$ and $\cos x$ without aids</li>
+                <li>differentiate combinations and compositions with the <b>product rule</b> and the <b>chain rule</b></li>
+                <li><b>reverse</b> differentiation for power functions: find a function $F$ with $F' = f$ for a given $f$</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="6" data-ph="f'(3) ="><p class="b-q-text">$f(x) = x^2$. What is $f'(3)$?</p><div class="b-sol"><p>$2 \cdot 3 = 6$ (chapter 1.2)</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">How do you write $\sqrt{x}$ as a power?</p><div class="b-mc"><button>$x^2$</button><button>$x^{1/2}$</button><button>$x^{-2}$</button></div><div class="b-sol"><p>$\sqrt{x} = x^{\frac12}$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">How do you write $\tfrac{1}{x^3}$ as a power?</p><div class="b-mc"><button>$x^{-3}$</button><button>$x^{1/3}$</button><button>$-x^3$</button></div><div class="b-sol"><p>Negative exponent.</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="number"><p class="b-q-text">Which number does $\tfrac{e^h - 1}{h}$ tend to for $h \to 0$?</p><div class="b-sol"><p>$\ln e = 1$ (chapter 1.2)</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE PATTERN OF THE POWERS</div>
+            <div class="b-text"><p>You know $(x^2)' = 2x$, $(x^3)' = 3x^2$ and $\left(\tfrac1x\right)' = -\tfrac{1}{x^2}$.</p>
+                <ul><li>Write all three as powers of $x$. Which rule lies behind them? What does it predict for $x^{10}$ and $\sqrt{x}$?</li><li>How could you prove the rule for $x^n$?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">IS THE DERIVATIVE OF A PRODUCT THE PRODUCT OF THE DERIVATIVES?</div>
+            <div class="b-text"><p>Check with $f(x) = x \cdot x^2 = x^3$: what does “derivative times derivative” give, and what is correct?</p>
+                <ul><li>A rectangle has the sides $u$ and $v$. Both grow a little. By which parts does the area grow?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">INSIDE FIRST, THEN OUTSIDE</div>
+            <div class="b-text"><p>$f(x) = (3x + 1)^2$.</p>
+                <ul><li>Differentiate, once after multiplying out and once “by feel”. Where does the factor 3 come from?</li><li>What happens with $(3x + 1)^{20}$, where multiplying out is no fun any more?</li></ul></div>
+            <span class="b-pair">→ Unit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Powers, sums and the reversal" data-toc-k="1" data-toc-short="1 Powers">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Powers, sums and the reversal</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Written as powers: $(x^2)' = 2x^1$, $(x^3)' = 3x^2$, $(x^{-1})' = -1 \cdot x^{-2}$. The exponent moves to the front as a factor, the new exponent is 1 smaller.
+                For $x^{10}$ this predicts $10x^9$, for $\sqrt{x} = x^{1/2}$ the value $\tfrac12 x^{-1/2} = \tfrac{1}{2\sqrt{x}}$, exactly the result from chapter 1.2.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · POWER, CONSTANT MULTIPLE AND SUM RULES</div>
+                <div class="b-text">
+                    <p><b>Power rule:</b> $\left(x^r\right)' = r \cdot x^{r - 1}$ for every rational number $r$ (for $x > 0$ if $x^r$ is not defined otherwise).</p>
+                    <p><b>Constant multiple rule:</b> $(c \cdot f)' = c \cdot f'$ · <b>sum rule:</b> $(f + g)' = f' + g'$. Constants drop out when differentiating.</p>
+                    <p><b>Reversal:</b> a function $F$ with $F' = f$ is called an <b>antiderivative</b> of $f$. For $f(x) = x^n$ ($n \neq -1$) it is $F(x) = \tfrac{1}{n + 1} x^{n + 1} + C$ with any constant $C$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Proof of the sum rule:</b> $\tfrac{(f + g)(x + h) - (f + g)(x)}{h} = \tfrac{f(x + h) - f(x)}{h} + \tfrac{g(x + h) - g(x)}{h}$, and by the limit theorem for sums this tends to $f'(x) + g'(x)$.</p>
+            <p class="b-note"><b>Check:</b> you always check an antiderivative by differentiating.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · DIFFERENTIATION TRAINER</div>
+        <p class="b-help" style="margin:0 0 12px">New exercises at the touch of a button. Type in $f'(x)$; it is checked at many points.</p>
+        <div data-widget="ableiten"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · PROOF OF THE POWER RULE FOR n ∈ ℕ</div>
+            <div class="b-text"><p>Prove $\left(x^n\right)' = n x^{n - 1}$ for natural numbers $n$.</p></div>
+            <div class="b-sol"><p>By the binomial theorem, $(x + h)^n = x^n + n x^{n - 1} h + h^2 \cdot R(x, h)$, where $R$ is a polynomial in $x$ and $h$.</p>
+                <p>So $\tfrac{(x + h)^n - x^n}{h} = n x^{n - 1} + h \cdot R(x, h) \to$ <span class="b-res">$n x^{n - 1}$</span> for $h \to 0$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · DIFFERENTIATING AND REVERSING</div>
+            <div class="b-text"><p>a) Differentiate $f(x) = 4x^3 - 2\sqrt{x} + \tfrac{5}{x}$. &nbsp; b) Give all $F$ with $F'(x) = 3x^2 + 4x$ and the one with $F(1) = 5$.</p></div>
+            <div class="b-sol"><p>a) $f'(x) = 12x^2 - \tfrac{1}{\sqrt{x}} - \tfrac{5}{x^2}$</p>
+                <p>b) $F(x) = x^3 + 2x^2 + C$. $F(1) = 3 + C = 5$: <span class="b-res">$F(x) = x^3 + 2x^2 + 2$</span></p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ANTIDERIVATIVES</div>
+        <p class="b-help" style="margin:0 0 12px">At the top the antiderivatives $F + C$, at the bottom $f$. The gradient of $F$ at the dragged point is exactly the function value of $f$.</p>
+        <div data-widget="stammfunktion"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Differentiate: a) $x^5$ &nbsp; b) $3x^{-2}$ &nbsp; c) $\sqrt[3]{x}$ &nbsp; d) $\tfrac{2}{\sqrt{x}}$ &nbsp; e) $\pi^2$</p></div>
+            <div class="b-sol"><p>a) $5x^4$ &nbsp; b) $-6x^{-3}$ &nbsp; c) $\tfrac13 x^{-2/3}$ &nbsp; d) $2 \cdot \left(-\tfrac12\right) x^{-3/2} = -x^{-3/2}$ &nbsp; e) 0, a constant</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Differentiate: a) $f(x) = 2x^4 - 3x^2 + 7x - 1$ &nbsp; b) $g(t) = \tfrac12 t^2 + \tfrac{1}{t}$</p></div>
+            <div class="b-sol"><p>a) $8x^3 - 6x + 7$ &nbsp; b) $t - \tfrac{1}{t^2}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Give an antiderivative and check it: a) $f(x) = x^4 - 6x$ &nbsp; b) $f(x) = \tfrac{1}{x^2}$ &nbsp; c) $f(x) = \sqrt{x}$</p></div>
+            <div class="b-sol"><p>a) $\tfrac15 x^5 - 3x^2$ &nbsp; b) $-\tfrac1x$ &nbsp; c) $\tfrac23 x^{3/2}$ (each $+ C$)</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Prove the constant multiple rule $(c \cdot f)' = c \cdot f'$ with the difference quotient.</p></div>
+            <div class="b-sol"><p>$\tfrac{c f(x + h) - c f(x)}{h} = c \cdot \tfrac{f(x + h) - f(x)}{h} \to c \cdot f'(x)$, because by the limit theorem for products you may take constant factors out of the limit.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A body moves according to $s(t) = 2t^3 - 3t^2$ (metres, seconds). Find the velocity $v = s'$ and the acceleration $a = v'$. When does it stand still for a moment? How fast is it after 2 s?</p></div>
+            <div class="b-sol"><p>$v(t) = 6t^2 - 6t$, $a(t) = 12t - 6$. Standstill at $t = 0$ and $t = 1$ s. $v(2) = 12$ m/s, $a(2) = 18$ m/s².</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="6" data-ph="f'(1) ="><p class="b-q-text">$f(x) = 4x^3 - 2\sqrt{x} + \tfrac{5}{x}$. Calculate $f'(1)$.</p><div class="b-sol"><p>$12 - 1 - 5 = 6$</p></div></div>
+        <div class="b-q" data-ans="1/4" data-ph="fraction"><p class="b-q-text">Calculate the derivative of $\sqrt{x}$ at the point 4.</p><div class="b-sol"><p>$\tfrac{1}{2\sqrt4} = \tfrac14$</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="F(2) ="><p class="b-q-text">$F'(x) = 2x$ and $F(0) = 3$. Calculate $F(2)$.</p><div class="b-sol"><p>$F(x) = x^2 + 3$, $F(2) = 7$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="eˣ, ln x, sin x and the product rule" data-toc-k="2" data-toc-short="2 Product rule">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">2</span>eˣ, ln x, sin x and the product rule</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>For $x \cdot x^2$, “derivative times derivative” gives the term $1 \cdot 2x = 2x$, but $3x^2$ is correct. For the rectangle the area grows by two strips,
+                $u \cdot \Delta v$ and $v \cdot \Delta u$, and a tiny corner. The corner disappears in the limit, the strips give $u v' + u' v$: for $x \cdot x^2$ exactly $x \cdot 2x + 1 \cdot x^2 = 3x^2$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SPECIAL FUNCTIONS AND THE PRODUCT RULE</div>
+                <div class="b-text">
+                    <p>$\left(e^x\right)' = e^x$ · $\left(a^x\right)' = \ln a \cdot a^x$ · $(\ln x)' = \tfrac{1}{x}$ for $x > 0$ · $(\sin x)' = \cos x$ · $(\cos x)' = -\sin x$</p>
+                    <p><b>Product rule:</b> $(u \cdot v)' = u' \cdot v + u \cdot v'$</p>
+                    <p><b>Proof:</b> $\tfrac{u(x + h)v(x + h) - u(x)v(x)}{h} = \tfrac{u(x + h) - u(x)}{h} \cdot v(x + h) + u(x) \cdot \tfrac{v(x + h) - v(x)}{h}$. Because $v$ is continuous, $v(x + h) \to v(x)$, and the expression tends to $u'v + uv'$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Why $(\ln x)' = \tfrac1x$?</b> $\ln$ is the inverse function of $e^x$. At the point $(\ln a, a)$, $e^x$ has the gradient $a$; reflected in $y = x$, this becomes the gradient $\tfrac1a$ at the point $(a, \ln a)$.</p>
+            <p class="b-note"><b>Without aids</b>, according to the curriculum, you must master all the derivatives of this unit. You do not need the quotient rule without aids.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE PRODUCT RULE AS A RECTANGLE</div>
+        <p class="b-help" style="margin:0 0 12px">Make $h$ smaller. The red corner $\Delta u \cdot \Delta v$ shrinks much faster than the two strips.</p>
+        <div data-widget="produktregel"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · PRODUCT WITH eˣ</div>
+            <div class="b-text"><p>Differentiate $f(x) = x^2 e^x$.</p></div>
+            <div class="b-sol"><p>$u = x^2$, $v = e^x$: $f'(x) = 2x \cdot e^x + x^2 \cdot e^x$.</p>
+                <p><span class="b-res">$f'(x) = (x^2 + 2x)\,e^x$</span>. Factorising pays off: $f'(x) = 0 \iff x = 0$ or $x = -2$, because $e^x$ is never 0.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · PRODUCT WITH ln x</div>
+            <div class="b-text"><p>Differentiate $g(x) = x \ln x$ and find where the graph has a horizontal tangent.</p></div>
+            <div class="b-sol"><p>$g'(x) = 1 \cdot \ln x + x \cdot \tfrac1x = \ln x + 1$.</p>
+                <p>$\ln x + 1 = 0 \iff x = e^{-1}$: <span class="b-res">horizontal tangent at $x = \tfrac1e \approx 0.368$</span>.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · TANGENT AND NORMAL</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a function and drag the point: tangent and normal with their equations.</p>
+        <div data-widget="tangente"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Differentiate: a) $3e^x - 2\sin x$ &nbsp; b) $5\ln x + \cos x$ &nbsp; c) $2^x + x^2$ &nbsp; d) $e^2 + \ln 3$</p></div>
+            <div class="b-sol"><p>a) $3e^x - 2\cos x$ &nbsp; b) $\tfrac{5}{x} - \sin x$ &nbsp; c) $\ln 2 \cdot 2^x + 2x$ &nbsp; d) 0, only constants</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Differentiate with the product rule: a) $x^3 \sin x$ &nbsp; b) $e^x \cos x$ &nbsp; c) $\sqrt{x}\,\ln x$</p></div>
+            <div class="b-sol"><p>a) $3x^2 \sin x + x^3 \cos x$ &nbsp; b) $e^x(\cos x - \sin x)$ &nbsp; c) $\tfrac{\ln x}{2\sqrt{x}} + \tfrac{1}{\sqrt{x}}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find the tangents a) to $\ln x$ at the point $(1, 0)$ &nbsp; b) to $\sin x$ at the origin &nbsp; c) to $e^x$ at the point $(0, 1)$.</p></div>
+            <div class="b-sol"><p>a) $y = x - 1$ &nbsp; b) $y = x$ &nbsp; c) $y = x + 1$. All three are tangents with gradient 1.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Justify $(\ln x)' = \tfrac1x$ in detail with the inverse function: which points correspond, which gradients?</p></div>
+            <div class="b-sol"><p>The point $(a, \ln a)$ on $\ln$ corresponds to the mirror point $(\ln a, a)$ on $e^x$. There the gradient is $e^{\ln a} = a$. Reflecting in $y = x$ swaps $\Delta x$ and $\Delta y$, so the gradient becomes its reciprocal: $\tfrac1a$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$f(x) = x e^x$. Find $f'$, $f''$ and $f'''$. Conjecture a formula for the $n$-th derivative and justify it with the product rule (induction from $n$ to $n + 1$).</p></div>
+            <div class="b-sol"><p>$f' = (x + 1)e^x$, $f'' = (x + 2)e^x$, $f''' = (x + 3)e^x$. Conjecture $f^{(n)}(x) = (x + n)e^x$. If it holds for $n$, then $f^{(n+1)} = 1 \cdot e^x + (x + n)e^x = (x + n + 1)e^x$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0" data-ph="f'(0) ="><p class="b-q-text">$f(x) = x^2 e^x$. Calculate $f'(0)$.</p><div class="b-sol"><p>$(0 + 0)\,e^0 = 0$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="g'(e) ="><p class="b-q-text">$g(x) = x \ln x$. Calculate $g'(e)$.</p><div class="b-sol"><p>$\ln e + 1 = 2$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">What is $(\cos x)'$?</p><div class="b-mc"><button>$\sin x$</button><button>$\cos x$</button><button>$-\sin x$</button></div><div class="b-sol"><p>At $\tfrac{\pi}{2}$ the cosine falls with gradient −1.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="The chain rule" data-toc-k="3" data-toc-short="3 Chain rule">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">3</span>The chain rule</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$(3x + 1)^2 = 9x^2 + 6x + 1$ has the derivative $18x + 6 = 2(3x + 1) \cdot 3$. The outer function “square” gives $2(3x + 1)$,
+                and because the inside $3x + 1$ grows three times as fast as $x$, the factor 3 is added. For $(3x + 1)^{20}$ you get $20(3x + 1)^{19} \cdot 3$ without any calculation.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · CHAIN RULE</div>
+                <div class="b-text">
+                    <p>If $f(x) = u(v(x))$ with a differentiable inner function $v$ and outer function $u$, then $$f'(x) = u'(v(x)) \cdot v'(x)$$ “outer derivative times inner derivative”.</p>
+                    <p><b>Linear composition:</b> $\left(g(ax + b)\right)' = a \cdot g'(ax + b)$, for example $\left(e^{2x - 5}\right)' = 2e^{2x - 5}$ and $\left(\ln(3x - 5)\right)' = \tfrac{3}{3x - 5}$.</p>
+                    <p>For products of compositions use the product rule first, and inside it the chain rule for each factor.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In Leibniz’s notation</b> the rule looks like calculating with fractions: $\tfrac{\mathrm{d}u}{\mathrm{d}x} = \tfrac{\mathrm{d}u}{\mathrm{d}v} \cdot \tfrac{\mathrm{d}v}{\mathrm{d}x}$. That is not a proof, but it is a good memory aid.</p>
+            <p class="b-note"><b>Common mistake:</b> forgetting the inner derivative. $\left(\sin(2x)\right)' = 2\cos(2x)$, not $\cos(2x)$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · OUTER TIMES INNER DERIVATIVE</div>
+        <p class="b-help" style="margin:0 0 12px">Choose an outer and an inner function. The tangent at the dragged point has exactly the gradient $u'(v(x)) \cdot v'(x)$.</p>
+        <div data-widget="kettenregel"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · THREE EXAMPLES FROM THE CURRICULUM</div>
+            <div class="b-text"><p>Differentiate: a) $f(x) = 3x^2 e^{2x - 5}$ &nbsp; b) $g(x) = \ln(3x - 5)$ &nbsp; c) $k(x) = \tfrac12 x^2 \sin(2x - 1)$</p></div>
+            <div class="b-sol"><p>a) $6x\,e^{2x - 5} + 3x^2 \cdot 2e^{2x - 5} = 6x(1 + x)\,e^{2x - 5}$ &nbsp; b) $\tfrac{3}{3x - 5}$ for $x > \tfrac53$</p>
+                <p>c) <span class="b-res">$x \sin(2x - 1) + \tfrac12 x^2 \cdot 2\cos(2x - 1) = x\sin(2x - 1) + x^2 \cos(2x - 1)$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · aˣ ONCE MORE</div>
+            <div class="b-text"><p>Differentiate $a^x$ with the chain rule by writing $a = e^{\ln a}$.</p></div>
+            <div class="b-sol"><p>$a^x = \left(e^{\ln a}\right)^x = e^{x \ln a}$, inner function $x \ln a$ with the derivative $\ln a$.</p>
+                <p><span class="b-res">$\left(a^x\right)' = e^{x \ln a} \cdot \ln a = \ln a \cdot a^x$</span>, the same as from the definition in chapter 1.2.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Differentiate: a) $e^{3x}$ &nbsp; b) $\sin(2x + 1)$ &nbsp; c) $\sqrt{4x + 1}$ &nbsp; d) $(1 - x)^7$ &nbsp; e) $\ln(x^2 + 1)$</p></div>
+            <div class="b-sol"><p>a) $3e^{3x}$ &nbsp; b) $2\cos(2x + 1)$ &nbsp; c) $\tfrac{2}{\sqrt{4x + 1}}$ &nbsp; d) $-7(1 - x)^6$ &nbsp; e) $\tfrac{2x}{x^2 + 1}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Differentiate: a) $(x^2 + 1)^5$ &nbsp; b) $e^{-x^2}$ &nbsp; c) $\cos(\pi x)$</p></div>
+            <div class="b-sol"><p>a) $10x(x^2 + 1)^4$ &nbsp; b) $-2x\,e^{-x^2}$ &nbsp; c) $-\pi\sin(\pi x)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Differentiate and simplify: a) $x^2 e^{-x}$ &nbsp; b) $x\sqrt{2x + 1}$ &nbsp; c) $e^{2x}\sin(3x)$</p></div>
+            <div class="b-sol"><p>a) $(2x - x^2)e^{-x}$ &nbsp; b) $\sqrt{2x + 1} + \tfrac{x}{\sqrt{2x + 1}} = \tfrac{3x + 1}{\sqrt{2x + 1}}$ &nbsp; c) $e^{2x}\left(2\sin(3x) + 3\cos(3x)\right)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find the tangent to $f(x) = e^{-x^2}$ at the point $x = 1$.</p></div>
+            <div class="b-sol"><p>$f(1) = e^{-1}$, $f'(x) = -2x e^{-x^2}$, $f'(1) = -2e^{-1}$. $t(x) = e^{-1} - 2e^{-1}(x - 1) = \tfrac{3 - 2x}{e} \approx 1.104 - 0.736x$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Derive the quotient rule by writing $\tfrac{u}{v} = u \cdot v^{-1}$ and applying the product and chain rules. (The curriculum does not require it without aids; the derivation is a nice exercise.)</p></div>
+            <div class="b-sol"><p>$\left(u \cdot v^{-1}\right)' = u' v^{-1} + u \cdot (-1)v^{-2} \cdot v' = \tfrac{u'}{v} - \tfrac{uv'}{v^2} = \tfrac{u'v - uv'}{v^2}$</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3" data-ph="f'(0) ="><p class="b-q-text">$f(x) = e^{3x}$. Calculate $f'(0)$.</p><div class="b-sol"><p>$3e^0 = 3$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="g'(2) ="><p class="b-q-text">$g(x) = \ln(3x - 5)$. Calculate $g'(2)$.</p><div class="b-sol"><p>$\tfrac{3}{6 - 5} = 3$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">What is $\left(\sin(2x)\right)'$?</p><div class="b-mc"><button>$\cos(2x)$</button><button>$2\cos(2x)$</button><button>$2\cos x$</button></div><div class="b-sol"><p>Do not forget the inner derivative 2.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Differentiate without aids: a) $\tfrac{x^3}{3} - 4\sqrt{x}$ &nbsp; b) $x\,e^{2x}$ &nbsp; c) $\ln(5x)$ &nbsp; d) $\sin^2 x$</p></div>
+            <div class="b-sol"><p>a) $x^2 - \tfrac{2}{\sqrt{x}}$ &nbsp; b) $(1 + 2x)e^{2x}$ &nbsp; c) $\tfrac{5}{5x} = \tfrac1x$ &nbsp; d) $2\sin x \cos x$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with physics:</b> a spring oscillates according to $s(t) = 2\sin(3t)$. Find $v(t)$ and $a(t)$ and show that $a(t) = -9\,s(t)$.</p></div>
+            <div class="b-sol"><p>$v(t) = 6\cos(3t)$, $a(t) = -18\sin(3t) = -9 \cdot 2\sin(3t) = -9s(t)$. The acceleration points opposite to the displacement and is proportional to it: a harmonic oscillation.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Use $\ln(5x) = \ln 5 + \ln x$ to show that $\ln(5x)$ and $\ln x$ have the same derivative. What does that mean for the graphs?</p></div>
+            <div class="b-sol"><p>$\ln 5$ is a constant, its derivative is 0. The graphs arise from each other by shifting up by $\ln 5$; at every point they have the same gradient.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Find all points in the interval $[0, 2\pi]$ at which $f(x) = e^{x}\sin x$ has a horizontal tangent.</p></div>
+            <div class="b-sol"><p>$f'(x) = e^x(\sin x + \cos x) = 0 \iff \sin x = -\cos x \iff \tan x = -1$: $x = \tfrac{3\pi}{4}$ and $x = \tfrac{7\pi}{4}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: How the number e got its name" data-toc-k="X" data-toc-short="The number e">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>How the number e got its name</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Around 1685 Jakob Bernoulli asked a question about compound interest: a deposit earns 100 % interest a year. If it is credited every half year, the deposit grows to $1.5^2 = 2.25$,
+                quarterly to $1.25^4 \approx 2.44$, monthly to $\left(1 + \tfrac{1}{12}\right)^{12} \approx 2.61$. How far do you get if interest is added more and more often? The answer is
+                a limit, the number $2.718\,28\ldots$ (exercise 17 in Review · Deepen · Connect of chapter 1.1).</p>
+            <p>Leonhard Euler gave it the name $e$. He was already using the letter in 1727 or 1728 in a manuscript on cannon shots; it appeared in print for the first time in 1736 in his textbook
+                on mechanics. Euler never revealed why he chose $e$ of all letters. That $e^x$, of all functions, is its own derivative makes the number the most important constant of analysis after $\pi$.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Leonhard Euler: “Mechanica sive motus scientia analytice exposita”, volume 1, St Petersburg 1736 (the first printed use of the letter $e$ for the number).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>POWER, CONSTANT MULTIPLE, SUM</h4><p>$(x^r)' = r x^{r - 1}$, $(cf)' = cf'$, $(f + g)' = f' + g'$</p></div>
+        <div><p>$\left(4x^3 - 2\sqrt{x}\right)' = 12x^2 - \tfrac{1}{\sqrt{x}}$</p></div></div>
+    <div class="b-rueck"><div><h4>SPECIAL FUNCTIONS</h4><p>$(e^x)' = e^x$, $(\ln x)' = \tfrac1x$, $(\sin x)' = \cos x$, $(\cos x)' = -\sin x$</p></div>
+        <div><p>$(a^x)' = \ln a \cdot a^x$</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUCT RULE</h4><p>$(uv)' = u'v + uv'$, proved with the difference quotient.</p></div>
+        <div><p>$(x^2 e^x)' = (x^2 + 2x)e^x$</p></div></div>
+    <div class="b-rueck"><div><h4>CHAIN RULE</h4><p>$\left(u(v(x))\right)' = u'(v(x)) \cdot v'(x)$</p></div>
+        <div><p>$\left(\ln(3x - 5)\right)' = \tfrac{3}{3x - 5}$</p></div></div>
+    <div class="b-rueck"><div><h4>REVERSAL</h4><p>Antiderivative $F' = f$; for $x^n$: $\tfrac{x^{n + 1}}{n + 1} + C$ ($n \neq -1$).</p></div>
+        <div><p>$F' = 3x^2 + 4x$, $F(1) = 5$: $F = x^3 + 2x^2 + 2$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="5" data-ph="f'(1) ="><p class="b-q-text">$f(x) = x^5$. Calculate $f'(1)$.</p><div class="b-sol"><p>$5x^4$ at 1: 5</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="number"><p class="b-q-text">What is the derivative of $\sin x$ at the point 0?</p><div class="b-sol"><p>$\cos 0 = 1$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="number"><p class="b-q-text">What is the derivative of $\sin(2x)$ at the point 0?</p><div class="b-sol"><p>$2\cos 0 = 2$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="0.368" data-tol="0.001" data-ph="x ="><p class="b-q-text">Where does $x \ln x$ have a horizontal tangent (three decimal places)?</p><div class="b-sol"><p>$x = e^{-1} \approx 0.368$</p></div></div>
+            <div class="b-q" data-ans="-0.736" data-tol="0.001" data-ph="m ="><p class="b-q-text">What is the gradient of $e^{-x^2}$ at the point 1 (three decimal places)?</p><div class="b-sol"><p>$-2e^{-1} \approx -0.736$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="m/s"><p class="b-q-text">$s(t) = 2t^3 - 3t^2$. Calculate $v(2)$.</p><div class="b-sol"><p>$6 \cdot 4 - 12 = 12$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-ableitungsregeln.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RULES OF DIFFERENTIATION</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-e-ln-sin-produktregel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">eˣ, ln x, sin x, PRODUCT RULE</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-kettenregel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CHAIN RULE</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIFFERENTIAL LAB</span><span class="b-lab-what">Derivatives and tangents</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 11, advanced course · Learning area 1 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-en/analysis.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-en/gy11.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-en/integral.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-en/gy11lk.js"></script>
+</body>
+</html>

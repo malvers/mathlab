@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 11 Advanced · Chapter 4.1 · Probability and counting | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Statistical, Laplace, Kolmogorov, simulation, urn model, path rules, two-way table, counting methods. Chapter 4.1 of the interactive textbook Mathematics · Grammar School 11 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 11 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 4.1 · LEARNING AREA 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 4.1 · LEARNING AREA 4 · APRIL · MAY</p>
+            <h1>Probability and counting</h1>
+            <p class="b-hero-lead">What does “probable” actually mean? You meet three answers: the <b>statistical</b> one through long series of trials, the one by <b>Laplace</b> through equally
+                likely outcomes and the one by <b>Kolmogorov</b> through three axioms from which all the rules of calculation can be proved. Then you break multi-stage random experiments down
+                with urn, tree and two-way table and count large sets of outcomes cleverly, with the <b>factorial</b> and the <b>binomial coefficient</b>.</p>
+            <div class="b-chips"><span class="b-chip">13 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">3 PRACTICE PAGES</span><span class="b-chip">COUNTING</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>to distinguish the <b>statistical</b>, <b>Laplace’s</b> and the <b>axiomatic</b> notion of probability and to prove rules of calculation from the axioms</li>
+                <li>to <b>simulate</b> random experiments and to judge how accurate a simulation is</li>
+                <li>to represent multi-stage random experiments with the <b>urn model</b>, the <b>tree diagram</b> and the <b>two-way table</b> and to calculate with the path rules</li>
+                <li>to count outcomes with the product rule, the <b>factorial</b> and the <b>binomial coefficient</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="1/3" data-ph="P ="><p class="b-q-text">A dice is rolled. What is the probability of a score greater than 4?</p><div class="b-sol"><p>Two favourable out of six equally likely outcomes: $\tfrac26 = \tfrac13$ (Year 10).</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">A dice is rolled twice. What is the complementary event of “at least one 6”?</p><div class="b-mc"><button>exactly one 6</button><button>no 6</button><button>two sixes</button></div><div class="b-sol"><p>“At least one” is false exactly when no 6 is rolled at all.</p></div></div>
+            <div class="b-q" data-ans="0.3" data-ph="Value"><p class="b-q-text">Work out $\tfrac35 \cdot \tfrac24$ as a decimal.</p><div class="b-sol"><p>$\tfrac{6}{20} = 0.3$</p></div></div>
+            <div class="b-q" data-ans="0.25" data-ph="P ="><p class="b-q-text">A coin is tossed twice. What is the probability of heads twice?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12 = \tfrac14$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE DRAWING PIN</div>
+            <div class="b-text"><p>Throw a drawing pin (or a bottle cap) 50 times and count how often it lands on its back. Collect the results of all groups.</p>
+                <ul><li>How does the proportion change as you add up more and more throws?</li><li>Why can the probability not simply be calculated here, as with a dice?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TWO BALLS</div>
+            <div class="b-text"><p>An urn holds three red and two blue balls. You draw two balls.</p>
+                <ul><li>Is “two different colours” more likely if you put the first ball back, or if you do not? Guess first, then calculate.</li><li>How can you write down all the possibilities clearly?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE SAME BIRTHDAY</div>
+            <div class="b-text"><p>How many people must be in a room so that, with a probability of more than $50\%$, two of them share a birthday?</p>
+                <ul><li>First estimate, each person on their own, and compare.</li><li>Check your class. How many pairs of birthdays are there at all?</li></ul></div>
+            <span class="b-pair">→ Unit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Approaches to probability" data-toc-k="1" data-toc-short="1 Approaches">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Approaches to the notion of probability</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>With a dice everyone says at once: the probability of a 6 is $\tfrac16$, because no face is favoured. A drawing pin does not have
+                this symmetry. Here only trying helps: if you throw it very often, the proportion of landings on its back settles down at a fixed value. And what <b>is</b> a probability,
+                really? Mathematics has an astonishingly short answer: three rules.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · THREE APPROACHES</div>
+                <div class="b-text">
+                    <p><b>Statistical:</b> if an event $E$ occurs $H_n(E)$ times in $n$ trials, then $h_n(E) = \tfrac{H_n(E)}{n}$ is its <b>relative frequency</b>. For large $n$
+                        it settles down (empirical law of large numbers). It is an <b>estimate</b> of $P(E)$.</p>
+                    <p><b>Laplace:</b> if a random experiment has finitely many <b>equally likely</b> outcomes, then $P(E) = \dfrac{|E|}{|\Omega|} = \dfrac{\text{number of favourable outcomes}}{\text{number of possible outcomes}}$.</p>
+                    <p><b>Kolmogorov (axiomatic):</b> a probability assigns to every event $E \subseteq \Omega$ a number $P(E)$ with<br>
+                        (K1) $P(E) \ge 0$, (K2) $P(\Omega) = 1$, (K3) $P(A \cup B) = P(A) + P(B)$ if $A \cap B = \emptyset$ (mutually exclusive events).</p>
+                    <p><b>Consequences:</b> $P(\overline{E}) = 1 - P(E)$, $P(\emptyset) = 0$ and the <b>addition rule</b> $P(A \cup B) = P(A) + P(B) - P(A \cap B)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Proof for the complementary event:</b> $E$ and $\overline{E}$ are mutually exclusive, and $E \cup \overline{E} = \Omega$. With (K3) and (K2): $P(E) + P(\overline{E}) = 1$.</p>
+            <p class="b-note"><b>Laplace only with symmetry:</b> the totals $2, 3, \ldots, 12$ of two dice are <b>not</b> equally likely. Equally likely are the 36 pairs $(1, 1), \ldots, (6, 6)$.</p>
+            <p class="b-note"><b>Source:</b> Andrei N. Kolmogorov: “Grundbegriffe der Wahrscheinlichkeitsrechnung” (Foundations of the Theory of Probability), Springer, Berlin 1933. In about 60 pages he turned probability into a theory built on axioms, like geometry.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE LAW OF LARGE NUMBERS</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a random experiment and let it run 10, 100 or 1000 times. The relative frequency fluctuates strongly at first and then approaches the probability.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · TWO DICE</div>
+            <div class="b-text"><p>Two dice are rolled. Calculate the probabilities of the total 7 and of a total of at least 10.</p></div>
+            <div class="b-sol"><p>Laplace model with the 36 equally likely pairs. Total 7: $(1, 6), (2, 5), \ldots, (6, 1)$, so 6 pairs and $P = \tfrac{6}{36} = \tfrac16$.</p>
+                <p>Total at least 10: total 10 has 3 pairs, 11 has 2 and 12 has 1. <span class="b-res">$P = \tfrac{6}{36} = \tfrac16$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · THE ADDITION RULE FROM THE AXIOMS</div>
+            <div class="b-text"><p>Prove $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ and use it to calculate, for one card from a skat deck (32 cards), the probability of “hearts or jack”.</p></div>
+            <div class="b-sol"><p>$A \cup B$ splits into the mutually exclusive parts $A$ and $B \setminus A$; likewise $B$ into $A \cap B$ and $B \setminus A$. By (K3), $P(A \cup B) = P(A) + P(B \setminus A)$ and $P(B) = P(A \cap B) + P(B \setminus A)$.
+                Substituting $P(B \setminus A) = P(B) - P(A \cap B)$ gives the rule.</p>
+                <p>8 hearts, 4 jacks, 1 jack of hearts: <span class="b-res">$P = \tfrac{8}{32} + \tfrac{4}{32} - \tfrac{1}{32} = \tfrac{11}{32} \approx 0.344$.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>In 400 throws a drawing pin landed on its back 248 times. Estimate the probability of this and explain why no Laplace model fits here.</p></div>
+            <div class="b-sol"><p>$h_{400} = \tfrac{248}{400} = 0.62$ is the estimate. Landing on the back and on the side are not symmetrical, so they are not equally likely.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Two dice: calculate the probability of a double and of at least one 6.</p></div>
+            <div class="b-sol"><p>Double: 6 of 36 pairs, $P = \tfrac16$. At least one 6: via the complementary event, $1 - \tfrac{25}{36} = \tfrac{11}{36} \approx 0.306$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Prove with the axioms: $A \subseteq B$ implies $P(A) \le P(B)$.</p></div>
+            <div class="b-sol"><p>$B = A \cup (B \setminus A)$ with mutually exclusive parts. By (K3), $P(B) = P(A) + P(B \setminus A)$, and by (K1), $P(B \setminus A) \ge 0$. So $P(B) \ge P(A)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>We have $P(A) = 0.5$, $P(B) = 0.4$ and $P(A \cup B) = 0.7$. Calculate $P(A \cap B)$ and the probability that only $A$ occurs.</p></div>
+            <div class="b-sol"><p>Addition rule: $P(A \cap B) = 0.5 + 0.4 - 0.7 = 0.2$. Only $A$: $P(A \setminus B) = 0.5 - 0.2 = 0.3$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A spreadsheet gives uniformly distributed random numbers $z$ from $[0, 1)$. How do you simulate a dice with them? Roughly how many simulations do you need
+            so that the relative frequency of a probability around $0.5$ is usually correct to $\pm 0.01$?</p></div>
+            <div class="b-sol"><p>Score $\lfloor 6z \rfloor + 1$, for example with <code>=INT(6*RAND())+1</code>. The relative frequency fluctuates around $P$ with the standard deviation $\sqrt{\tfrac{P(1 - P)}{n}} \le \tfrac{0.5}{\sqrt n}$.
+                For about $95\%$ certainty, twice the fluctuation should be at most $0.01$: $\tfrac{1}{\sqrt n} \le 0.01$, so $n \ge 10{,}000$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1/9" data-ph="P ="><p class="b-q-text">Two dice: what is the probability of the total 9?</p><div class="b-sol"><p>$(3, 6), (4, 5), (5, 4), (6, 3)$: $\tfrac{4}{36} = \tfrac19$</p></div></div>
+        <div class="b-q" data-ans="0.8" data-ph="P ="><p class="b-q-text">$A$ and $B$ are mutually exclusive, $P(A) = 0.3$ and $P(B) = 0.5$. What is $P(A \cup B)$?</p><div class="b-sol"><p>(K3): $0.3 + 0.5 = 0.8$</p></div></div>
+        <div class="b-q" data-ans="0.19" data-ph="h ="><p class="b-q-text">In 2000 rolls a dice showed the 6 a total of 380 times. What is the relative frequency?</p><div class="b-sol"><p>$\tfrac{380}{2000} = 0.19$, clearly above $\tfrac16 \approx 0.167$: the dice is suspicious.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Multi-stage random experiments" data-toc-k="2" data-toc-short="2 Multi-stage">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Multi-stage random experiments</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Two balls are drawn from the urn with three red and two blue balls. If the first is not put back, the urn changes for the second draw.
+                A <b>tree diagram</b> records this: it branches at every stage, and on the branches you write the probabilities <b>given what happened before</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · PATH RULES AND TWO-WAY TABLE</div>
+                <div class="b-text">
+                    <p><b>1st path rule (product rule):</b> the probability of a path is the product of the probabilities along the path.</p>
+                    <p><b>2nd path rule (sum rule):</b> the probability of an event is the sum of the probabilities of all the paths that belong to it.</p>
+                    <p><b>Urn model:</b> when drawing <b>with replacement</b> the probabilities stay the same at every stage, when drawing <b>without replacement</b> they change from stage to stage.</p>
+                    <p><b>Two-way table:</b> for two characteristics $A$ and $B$ the four cells hold $P(A \cap B)$, $P(A \cap \overline{B})$, $P(\overline{A} \cap B)$, $P(\overline{A} \cap \overline{B})$,
+                        the margins hold the sums $P(A)$, $P(\overline{A})$, $P(B)$, $P(\overline{B})$ and the bottom right holds $1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Check:</b> the probabilities of all the path ends add up to $1$, and so do the branches leaving each node.</p>
+            <p class="b-note"><b>The complementary event saves paths:</b> at least one 6 in four rolls: $1 - \left(\tfrac56\right)^4 \approx 0.518$. Without the complementary event it would be 15 paths.</p>
+            <p class="b-note"><b>Table or tree?</b> Both contain the same four intersection probabilities. The table shows all the sums at a glance, the tree the order of the stages.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · TREE DIAGRAM WORKSHOP</div>
+        <p class="b-help" style="margin:0 0 12px">Set up the urn, choose with or without replacement and click on the path ends or an event. The path rules calculate along.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · WITH OR WITHOUT REPLACEMENT</div>
+            <div class="b-text"><p>Two balls are drawn from the urn with three red and two blue balls. Calculate $P(\text{two different colours})$ without and with replacement.</p></div>
+            <div class="b-sol"><p>Without replacement, paths $rb$ and $br$: $\tfrac35 \cdot \tfrac24 + \tfrac25 \cdot \tfrac34 = \tfrac{6}{20} + \tfrac{6}{20} = \tfrac35 = 0.6$.</p>
+                <p>With replacement: $2 \cdot \tfrac35 \cdot \tfrac25 = \tfrac{12}{25} = 0.48$. <span class="b-res">Without replacement “different” is more likely.</span> The first ball is then missing from the urn, and the other colour becomes relatively more frequent.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · TWO-WAY TABLE</div>
+            <div class="b-text"><p>Of 200 students, 80 live outside the town ($A$); of these, 60 go by bus ($B$). Of the others, 30 go by bus.
+                Set up the two-way table and find $P(B)$ and $P(\overline{A} \cap \overline{B})$ for a student chosen at random.</p></div>
+            <div class="b-sol"><div class="b-table-wrap"><table class="b-table" style="min-width:0"><tr><th></th><th>$B$</th><th>$\overline{B}$</th><th>$\Sigma$</th></tr>
+                <tr><th>$A$</th><td>60</td><td>20</td><td>80</td></tr><tr><th>$\overline{A}$</th><td>30</td><td>90</td><td>120</td></tr><tr><th>$\Sigma$</th><td>90</td><td>110</td><td>200</td></tr></table></div>
+                <p><span class="b-res">$P(B) = \tfrac{90}{200} = 0.45$ and $P(\overline{A} \cap \overline{B}) = \tfrac{90}{200} = 0.45$.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · COMPLETING TWO-WAY TABLES</div>
+        <p class="b-help" style="margin:0 0 12px">Three values are given; fill in the missing cells with the row and column sums. “New table” rolls a new task.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A coin is tossed and a dice is rolled. What is the probability of heads and an even score?</p></div>
+            <div class="b-sol"><p>Path heads, even: $\tfrac12 \cdot \tfrac12 = \tfrac14$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>An urn contains 4 red and 6 white balls. Two are drawn without replacement. Calculate $P(\text{two red})$ and $P(\text{at least one white})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{4}{10} \cdot \tfrac39 = \tfrac{12}{90} = \tfrac{2}{15} \approx 0.133$. At least one white is the complementary event: $1 - \tfrac{2}{15} = \tfrac{13}{15} \approx 0.867$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>From an urn with 2 red and 3 blue balls, three balls are drawn with replacement. What is the probability of exactly two red balls?</p></div>
+            <div class="b-sol"><p>Three paths $rrb$, $rbr$, $brr$, each with $\left(\tfrac25\right)^2 \cdot \tfrac35 = \tfrac{12}{125}$. Together $\tfrac{36}{125} = 0.288$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Complete the two-way table with $P(A) = 0.4$, $P(B) = 0.3$ and $P(A \cap B) = 0.1$.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0.3$, $P(\overline{A} \cap B) = 0.2$, $P(\overline{A} \cap \overline{B}) = 0.6 - 0.2 = 0.4$; margins $P(\overline{A}) = 0.6$, $P(\overline{B}) = 0.7$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>From the urn with three red and two blue balls you draw without replacement until the first blue ball appears. How likely is it that you draw exactly three times?
+            With what probability do you need at most two draws?</p></div>
+            <div class="b-sol"><p>Exactly three draws means $rrb$: $\tfrac35 \cdot \tfrac24 \cdot \tfrac23 = \tfrac{12}{60} = \tfrac15$. At most two: $b$ or $rb$, so $\tfrac25 + \tfrac35 \cdot \tfrac24 = \tfrac25 + \tfrac{3}{10} = \tfrac{7}{10}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="4/9" data-ph="P ="><p class="b-q-text">Two balls are drawn without replacement from 5 red and 5 blue balls. What is $P(\text{two of the same colour})$?</p><div class="b-sol"><p>$2 \cdot \tfrac{5}{10} \cdot \tfrac49 = \tfrac{40}{90} = \tfrac49 \approx 0.444$</p></div></div>
+        <div class="b-q" data-ans="0.579" data-ph="P ="><p class="b-q-text">A dice is rolled three times. What is the probability that no 6 appears (three decimal places)?</p><div class="b-sol"><p>$\left(\tfrac56\right)^3 = \tfrac{125}{216} \approx 0.579$</p></div></div>
+        <div class="b-q" data-ans="0.35" data-ph="P ="><p class="b-q-text">$P(A) = 0.6$, $P(B) = 0.5$, $P(A \cap B) = 0.45$. What is $P(\overline{A} \cap \overline{B})$?</p><div class="b-sol"><p>$P(A \cup B) = 0.65$, so $P(\overline{A} \cap \overline{B}) = 1 - 0.65 = 0.35$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Counting methods" data-toc-k="3" data-toc-short="3 Counting">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Counting methods</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A bike lock has three rings with ten digits each: $10 \cdot 10 \cdot 10 = 1000$ settings. For the lottery “6 from 49” nobody would draw a tree with 49 branches at the first node
+                any more. But for Laplace probabilities you only have to <b>count</b>, and that works with a few rules.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · COUNTING IN THE URN MODEL</div>
+                <div class="b-text">
+                    <p><b>Product rule:</b> if a process has $k$ stages with $n_1, n_2, \ldots, n_k$ possibilities, there are $n_1 \cdot n_2 \cdot \ldots \cdot n_k$ outcomes.</p>
+                    <p>From an urn with $n$ distinguishable balls, $k$ balls are drawn:</p>
+                    <ul>
+                        <li>with replacement, order matters: $n^k$</li>
+                        <li>without replacement, order matters: $n \cdot (n - 1) \cdot \ldots \cdot (n - k + 1) = \dfrac{n!}{(n - k)!}$</li>
+                        <li>without replacement, order does not matter: $\dbinom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$ (binomial coefficient, read “$n$ choose $k$”)</li>
+                    </ul>
+                    <p><b>Factorial:</b> $n! = 1 \cdot 2 \cdot \ldots \cdot n$ is the number of arrangements of $n$ things; $0! = 1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Why divide by $k!$?</b> Every selection of $k$ balls appears exactly $k!$ times among the ordered draws, in every possible order.</p>
+            <p class="b-note"><b>Symmetry:</b> $\binom{n}{k} = \binom{n}{n - k}$, because whoever chooses $k$ balls fixes the $n - k$ remaining ones at the same time.</p>
+            <p class="b-note"><b>Calculator:</b> the binomial coefficient is usually called <code>nCr</code>, the factorial <code>n!</code>. Even $70!$ is greater than $10^{100}$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE URN</div>
+        <p class="b-help" style="margin:0 0 12px">Choose the number of balls and draws, with or without order and replacement. The widget shows the formula, the number and, for small numbers, all the outcomes.</p>
+        <div data-widget="urne" data-n="5" data-k="3" data-ord="0" data-rep="0"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · LOTTERY 6 FROM 49</div>
+            <div class="b-text"><p>How many tickets are there? How likely are six correct numbers, and how likely exactly three?</p></div>
+            <div class="b-sol"><p>Without replacement, order does not matter: $\binom{49}{6} = 13{,}983{,}816$ equally likely tickets, so $P(6\ \text{correct}) = \tfrac{1}{13{,}983{,}816} \approx 7.2 \cdot 10^{-8}$.</p>
+                <p>Exactly three correct: 3 of the 6 winning numbers and 3 of the 43 others, $\binom63 \cdot \binom{43}{3} = 20 \cdot 12{,}341 = 246{,}820$ tickets.
+                    <span class="b-res">$P = \tfrac{246{,}820}{13{,}983{,}816} \approx 0.0177$, so about every 57th ticket.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · THE BIRTHDAY PROBLEM</div>
+            <div class="b-text"><p>There are 23 people in a class. What is the probability that at least two of them share a birthday? Work with 365 equally likely days.</p></div>
+            <div class="b-sol"><p>Complementary event “all different”: ordered without replacement, $365 \cdot 364 \cdot \ldots \cdot 343$ favourable out of $365^{23}$ possible outcomes.</p>
+                <p>$P(\text{all different}) = \dfrac{365!}{342! \cdot 365^{23}} \approx 0.4927$, so <span class="b-res">$P(\text{at least two the same}) \approx 0.5073$.</span> As few as 23 people are enough for more than $50\%$, because there are $\binom{23}{2} = 253$ pairs.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE BIRTHDAY PROBLEM</div>
+        <p class="b-help" style="margin:0 0 12px">Set the number of people. The curve shows the probability of at least one shared birthday, and the simulation checks it on a thousand classes.</p>
+        <div data-widget="geburtstag" data-n="23"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How many four-digit PINs are there? How many of them have four different digits?</p></div>
+            <div class="b-sol"><p>$10^4 = 10{,}000$; with different digits $10 \cdot 9 \cdot 8 \cdot 7 = 5040$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>In how many ways can six people stand in a row?</p></div>
+            <div class="b-sol"><p>$6! = 720$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A team of three is chosen from 20 people. How many teams are there? How many possibilities are there if the three take on the roles of chair, deputy and treasurer?</p></div>
+            <div class="b-sol"><p>Without order $\binom{20}{3} = 1140$; with roles the order matters: $20 \cdot 19 \cdot 18 = 6840 = 3! \cdot 1140$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In skat each player gets 10 of the 32 cards. What is the probability of getting all four jacks?</p></div>
+            <div class="b-sol"><p>$\dfrac{\binom44 \cdot \binom{28}{6}}{\binom{32}{10}} = \dfrac{376{,}740}{64{,}512{,}240} \approx 0.0058$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Prove by counting: $\binom{n}{k} = \binom{n - 1}{k - 1} + \binom{n - 1}{k}$ for $1 \le k \le n - 1$. What does this have to do with Pascal’s triangle?</p></div>
+            <div class="b-sol"><p>Mark one of the $n$ balls. The selections of $k$ balls either contain it (then $k - 1$ are still missing from the other $n - 1$: $\binom{n - 1}{k - 1}$) or not (all $k$ from the others: $\binom{n - 1}{k}$).
+                In Pascal’s triangle this is the rule: every number is the sum of the two above it.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="35" data-ph="Number"><p class="b-q-text">What is $\binom73$?</p><div class="b-sol"><p>$\tfrac{7 \cdot 6 \cdot 5}{3!} = 35$</p></div></div>
+        <div class="b-q" data-ans="336" data-ph="Number"><p class="b-q-text">In how many ways can you hang 3 of 8 pictures side by side on a wall?</p><div class="b-sol"><p>With order, without repetition: $8 \cdot 7 \cdot 6 = 336$</p></div></div>
+        <div class="b-q" data-ans="15/28" data-ph="P ="><p class="b-q-text">From 5 red and 3 blue balls, 3 are drawn without replacement. What is $P(\text{exactly two red})$?</p><div class="b-sol"><p>$\dfrac{\binom52 \cdot \binom31}{\binom83} = \dfrac{30}{56} = \dfrac{15}{28} \approx 0.536$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A test has 5 questions with 4 answers each, exactly one of which is right. How likely is it to get everything right by pure guessing? How likely is at least one right answer?</p></div>
+            <div class="b-sol"><p>$\left(\tfrac14\right)^5 = \tfrac{1}{1024} \approx 0.001$. At least one right: $1 - \left(\tfrac34\right)^5 = 1 - \tfrac{243}{1024} = \tfrac{781}{1024} \approx 0.763$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Connecting with biology:</b> two parents are heterozygous $Aa$ for a recessively inherited trait. Each child receives the allele $a$ from each parent with probability $\tfrac12$.
+            How likely is a child with $aa$? How likely is it that at least one of three children has $aa$?</p></div>
+            <div class="b-sol"><p>$P(aa) = \tfrac12 \cdot \tfrac12 = \tfrac14$. For three children via the complementary event: $1 - \left(\tfrac34\right)^3 = \tfrac{37}{64} \approx 0.578$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>How many different outcomes does rolling three distinguishable dice have? What is the probability that all three scores are different?</p></div>
+            <div class="b-sol"><p>$6^3 = 216$ outcomes; different: $6 \cdot 5 \cdot 4 = 120$, so $\tfrac{120}{216} = \tfrac59 \approx 0.556$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A supplier claims that at most 2 of the 20 devices in a box are faulty. You test 4 devices chosen at random and find none faulty.
+            How likely is this result if exactly 2 really are faulty? What does that say about the claim?</p></div>
+            <div class="b-sol"><p>Without replacement: $\dfrac{\binom{18}{4}}{\binom{20}{4}} = \dfrac{3060}{4845} \approx 0.632$. So the result fits the claim well, but it does not prove it.
+                You will learn how to make such decisions properly in the inferential statistics of Year 12.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: The interrupted game" data-toc-k="X" data-toc-short="Pascal and Fermat">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>The interrupted game</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In the summer of 1654 two Frenchmen wrote each other letters about a question gamblers had argued about for centuries: two players each stake 32 pistoles (gold coins). Whoever
+                first wins three rounds gets all 64. At a score of $2:1$ the game has to be stopped. How is the stake divided fairly?</p>
+            <p>Older proposals, for example by Luca Pacioli in 1494, divided according to the rounds already won, that is $2:1$. Blaise Pascal and Pierre de Fermat looked <b>forward</b> instead:
+                if the leader wins the next round, he has all 64; if he loses, it is $2:2$ and each has the same chance, so 32. With $\tfrac12$ each, he is entitled to $\tfrac12 \cdot 64 + \tfrac12 \cdot 32 = 48$ pistoles, the other to 16.</p>
+            <p>Fermat calculated differently and counted: after at most two more rounds everything is decided. The four equally likely continuations are $AA$, $AB$, $BA$, $BB$; only with $BB$ does the player behind win.
+                So the leader gets $\tfrac34$ of the stake. Both ways lead to $48:16$. With this exchange of letters probability theory begins as mathematics.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> letter from Blaise Pascal to Pierre de Fermat of 29 July 1654, with exactly this example (32 pistoles, three winning rounds).</p>
+            <p class="b-note"><b>Work it out:</b> score $2:0$ with three winning rounds. Show with Fermat’s counting (up to three more rounds) that the leader is entitled to $\tfrac78$.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>THREE APPROACHES</h4><p>Relative frequency as an estimate; Laplace $\tfrac{|E|}{|\Omega|}$ for equally likely outcomes; axioms (K1) to (K3) after Kolmogorov.</p></div>
+        <div><p>Drawing pin: $h_{400} = 0.62$; total 7: $\tfrac{6}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>RULES OF CALCULATION</h4><p>$P(\overline{E}) = 1 - P(E)$; addition rule $P(A \cup B) = P(A) + P(B) - P(A \cap B)$.</p></div>
+        <div><p>Hearts or jack: $\tfrac{8 + 4 - 1}{32} = \tfrac{11}{32}$</p></div></div>
+    <div class="b-rueck"><div><h4>PATH RULES</h4><p>Multiply along a path, add the paths of an event; without replacement the branches change.</p></div>
+        <div><p>Two different colours: $\tfrac35 \cdot \tfrac24 + \tfrac25 \cdot \tfrac34 = \tfrac35$</p></div></div>
+    <div class="b-rueck"><div><h4>TWO-WAY TABLE</h4><p>Four intersection probabilities, margin sums, $1$ at the bottom right.</p></div>
+        <div><p>$P(\overline{A} \cap \overline{B}) = 1 - P(A \cup B)$</p></div></div>
+    <div class="b-rueck"><div><h4>COUNTING</h4><p>$n^k$; $\tfrac{n!}{(n - k)!}$; $\binom{n}{k} = \tfrac{n!}{k!\,(n - k)!}$; $n!$ arrangements.</p></div>
+        <div><p>Lottery: $\binom{49}{6} = 13{,}983{,}816$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="1/12" data-ph="P ="><p class="b-q-text">Two dice: what is the probability of the total 4?</p><div class="b-sol"><p>$(1, 3), (2, 2), (3, 1)$: $\tfrac{3}{36} = \tfrac{1}{12}$</p></div></div>
+            <div class="b-q" data-ans="15" data-ph="Number"><p class="b-q-text">What is $\binom62$?</p><div class="b-sol"><p>$\tfrac{6 \cdot 5}{2} = 15$</p></div></div>
+            <div class="b-q" data-ans="0.8" data-ph="P ="><p class="b-q-text">$P(A) = 0.7$, $P(B) = 0.4$, $P(A \cap B) = 0.3$. What is $P(A \cup B)$?</p><div class="b-sol"><p>$0.7 + 0.4 - 0.3 = 0.8$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="8/15" data-ph="P ="><p class="b-q-text">Two balls are drawn without replacement from 7 red and 3 blue balls. What is $P(\text{at least one blue})$?</p><div class="b-sol"><p>$1 - \tfrac{7}{10} \cdot \tfrac69 = 1 - \tfrac{42}{90} = \tfrac{8}{15} \approx 0.533$</p></div></div>
+            <div class="b-q" data-ans="0.706" data-tol="0.001" data-ph="P ="><p class="b-q-text">What is the probability of at least one shared birthday among 30 people (three decimal places)?</p><div class="b-sol"><p>$1 - \tfrac{365 \cdot 364 \cdot \ldots \cdot 336}{365^{30}} \approx 1 - 0.294 = 0.706$</p></div></div>
+            <div class="b-q" data-ans="0.0177" data-tol="0.0001" data-ph="P ="><p class="b-q-text">In the lottery “6 from 49”, what is the probability of exactly three correct numbers (four decimal places)?</p><div class="b-sol"><p>$\tfrac{20 \cdot 12{,}341}{13{,}983{,}816} \approx 0.0177$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-wahrscheinlichkeitsbegriff.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">APPROACHES TO PROBABILITY</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-mehrstufig.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MULTI-STAGE RANDOM EXPERIMENTS</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-abzaehlen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COUNTING METHODS</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">THE DICE GAME</span><span class="b-lab-what">Tree diagram and path rules</span></span></a>
+        <a class="b-lab" data-lab="binomischeslabor" href="../../binomischeslabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BINOMIAL LAB</span><span class="b-lab-what">Exploring binomial coefficients</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 11, advanced course · Learning area 4 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+<script src="../../js/buch-gy11lk-stoch.js"></script>
+<script src="../../js/buch-en/gy11lk-stoch.js"></script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 11 Advanced · Chapter 1.2 · Rates of change and the derivative | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Linear approximation, difference and differential quotient, derivative from the definition, differentiability. Chapter 1.2 of the interactive textbook Mathematics · Grammar School 11 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 11 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1.2 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1.2 · LEARNING AREA 1 · SEPTEMBER</p>
+            <h1>Rates of change and the derivative</h1>
+            <p class="b-hero-lead">How fast is a stone falling at exactly this instant? How strongly is a bacterial culture growing right now? The answer is a
+                <b>local rate of change</b>: the limit of the average rates of change. On the graph it is the gradient of the <b>tangent</b>, and the tangent is
+                the best line that can hug the curve. In the advanced course you derive derivatives directly <b>from the definition</b>,
+                including that of $a^x$, and in doing so you come across the number $e$.</p>
+            <div class="b-chips"><span class="b-chip">10 LESSONS</span><span class="b-chip">2 UNITS</span><span class="b-chip">4 LABS AND EXERCISES</span><span class="b-chip">HISTORY</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["0.25*x^3-x+1","2*x-3"]' data-labels='["f","Tangent"]' data-lat="[2.2,-2.6]" data-x="-3,3.5" data-y="-3,4" data-pts="[[2,1]]" data-h="240" data-aria="A graph with its tangent at the point (2, 1)"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>interpret the <b>difference quotient</b> as the gradient of the secant and as the average rate of change</li>
+                <li>understand the <b>differential quotient</b> as the gradient of the tangent and as the local rate of change</li>
+                <li>approximate a function near a point by its tangent: <b>linear approximation</b></li>
+                <li>find derivatives <b>from the definition</b>, for $x^2$ and for $a^x$, sketch the derivative function and its graph and check <b>differentiability</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="3" data-ph="m ="><p class="b-q-text">What is the gradient of the line through $(1, 2)$ and $(3, 8)$?</p><div class="b-sol"><p>$\tfrac{8 - 2}{3 - 1} = 3$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{h \to 0} (6 + h)$.</p><div class="b-sol"><p>6</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">What is $(2 + h)^2$?</p><div class="b-mc"><button>$4 + h^2$</button><button>$4 + 2h + h^2$</button><button>$4 + 4h + h^2$</button></div><div class="b-sol"><p>First binomial formula.</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to 3} \tfrac{x^2 - 9}{x - 3} + 1$.</p><div class="b-sol"><p>$6 + 1 = 7$ (chapter 1.1)</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE FALLING STONE</div>
+            <div class="b-text"><p>In $t$ seconds a stone falls about $s(t) = 5t^2$ metres.</p>
+                <ul><li>How fast is it on average between 1 and 2 seconds, between 1.9 and 2 seconds, between 1.99 and 2 seconds?</li><li>How fast is it after exactly 2 seconds?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">ZOOMING INTO THE GRAPH</div>
+            <div class="b-text"><p>Draw $y = x^2$ on the graphing calculator and zoom further and further into the point $(1, 1)$.</p>
+                <ul><li>What do you see after a few zoom steps? What is the gradient of what you see?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span>
+            <a class="b-lab" data-lab="steigung" href="../../steigung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GRADIENT LAB</span><span class="b-lab-what">Gradient and tangent</span></span></a></div>
+        <div class="b-box b-erk"><div class="b-box-title">HOW STEEP IS 2ˣ AT 0?</div>
+            <div class="b-text"><p>Calculate $\tfrac{2^h - 1}{h}$ for $h = 0.1$; 0.01; 0.001 and the same for $3^h$.</p>
+                <ul><li>Which numbers do the quotients tend to? Is there a base for which exactly 1 comes out?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="From the secant to the tangent" data-toc-k="1" data-toc-short="1 Tangent">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">1</span>From the secant to the tangent</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Between 1 and 2 seconds the stone falls $s(2) - s(1) = 15$ m, so 15 m/s on average. Between 2 and $2 + h$ it is
+                $\tfrac{5(2 + h)^2 - 20}{h} = 20 + 5h$ metres per second. As the time interval gets shorter and shorter, this number approaches the <b>instantaneous speed</b> of 20 m/s.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · DIFFERENCE AND DIFFERENTIAL QUOTIENT</div>
+                <div class="b-text">
+                    <p>The <b>difference quotient</b> $\dfrac{f(x_0 + h) - f(x_0)}{h}$ is the gradient of the secant through $(x_0, f(x_0))$ and $(x_0 + h, f(x_0 + h))$, the <b>average rate of change</b>.</p>
+                    <p>If its limit for $h \to 0$ exists, $f$ is called <b>differentiable</b> at the point $x_0$, and $$f'(x_0) = \lim_{h \to 0} \frac{f(x_0 + h) - f(x_0)}{h}$$ is the <b>differential quotient</b>: the gradient of the tangent and the <b>local rate of change</b>.</p>
+                    <p>The tangent $t(x) = f(x_0) + f'(x_0)(x - x_0)$ is the best <b>linear approximation</b>: $f(x_0 + h) \approx f(x_0) + f'(x_0) \cdot h$, and the error becomes small faster than $h$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notations:</b> $f'(x_0)$ (Lagrange) and $\tfrac{\mathrm{d}f}{\mathrm{d}x}$ (Leibniz). For derivatives with respect to time, physicists write a dot: $\dot{s}$ (Newton).</p>
+            <p class="b-note"><b>Units:</b> the rate of change has the unit “$y$-unit per $x$-unit”: metres per second, degrees per minute, euros per item.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE SECANT BECOMES THE TANGENT</div>
+        <p class="b-help" style="margin:0 0 12px">Drag the second point towards the first. The difference quotient approaches the gradient of the tangent.</p>
+        <div data-widget="sekante"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · INSTANTANEOUS SPEED</div>
+            <div class="b-text"><p>Find the speed of the stone with $s(t) = 5t^2$ after 2 seconds.</p></div>
+            <div class="b-sol"><p>$\dfrac{s(2 + h) - s(2)}{h} = \dfrac{20 + 20h + 5h^2 - 20}{h} = 20 + 5h$.</p>
+                <p>Limit for $h \to 0$: <span class="b-res">$s'(2) = 20$ m/s</span>, that is 72 km/h.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · LINEAR APPROXIMATION</div>
+            <div class="b-text"><p>Approximate $\sqrt{4.1}$ with the tangent to $f(x) = \sqrt{x}$ at $x_0 = 4$. We have $f'(4) = \tfrac14$.</p></div>
+            <div class="b-sol"><p>$\sqrt{4 + h} \approx 2 + \tfrac14 h$, with $h = 0.1$: $\sqrt{4.1} \approx 2.025$.</p>
+                <p>Exact value $2.024\,846$: <span class="b-res">error only about $0.000\,15$</span>.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ZOOMED IN, EVERY CURVE IS STRAIGHT</div>
+        <p class="b-help" style="margin:0 0 12px">Make the window smaller. Curve and tangent become indistinguishable, the error shrinks faster than $h$.</p>
+        <div data-widget="linapprox"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate the average rate of change of $f(x) = x^3$ on $[1, 3]$ and on $[1, 2]$.</p></div>
+            <div class="b-sol"><p>$\tfrac{27 - 1}{2} = 13$ and $\tfrac{8 - 1}{1} = 7$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A tank is being filled: after 0, 2, 5 and 10 minutes it holds 0, 120, 270 and 420 litres. Calculate the average inflow rates in the three time intervals. What do you notice?</p></div>
+            <div class="b-sol"><p>60 l/min, 50 l/min, 30 l/min. The inflow is getting weaker.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find the local rate of change of $f(x) = \tfrac1x$ at the point $x_0 = 2$ with the limit of the difference quotient.</p></div>
+            <div class="b-sol"><p>$\dfrac{\frac{1}{2 + h} - \frac12}{h} = \dfrac{2 - (2 + h)}{2(2 + h)h} = \dfrac{-1}{2(2 + h)} \to -\dfrac14$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Approximate linearly and compare with the calculator: a) $e^{0.1}$ with the tangent to $e^x$ at 0 &nbsp; b) $\sin 0.2$ with the tangent to $\sin x$ at 0. Give the relative errors.</p></div>
+            <div class="b-sol"><p>a) 1.1 instead of $1.105\,17$, relative error about $0.47\,\%$ &nbsp; b) 0.2 instead of $0.198\,67$, relative error about $0.67\,\%$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Show for $f(x) = x^2$ and $x_0 = 1$: the error $f(1 + h) - t(1 + h)$ of the tangent is $h^2$. What does $\lim\limits_{h \to 0} \tfrac{h^2}{h} = 0$ mean for the quality of the approximation?</p></div>
+            <div class="b-sol"><p>$t(x) = 1 + 2(x - 1)$, so $f(1 + h) - t(1 + h) = 1 + 2h + h^2 - 1 - 2h = h^2$. Relative to $h$ the error is arbitrarily small: no other line through $(1, 1)$ has this property, the tangent is the best linear approximation.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="4" data-ph="m ="><p class="b-q-text">What is the gradient of the secant to $f(x) = x^2$ through the points at $x = 1$ and $x = 3$?</p><div class="b-sol"><p>$\tfrac{9 - 1}{2} = 4$</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="m/s"><p class="b-q-text">$s(t) = 5t^2$. How large is $s'(2)$ in m/s?</p><div class="b-sol"><p>$20 + 5h \to 20$</p></div></div>
+        <div class="b-q" data-ans="2.025" data-tol="0.0005" data-ph="number"><p class="b-q-text">Which approximate value for $\sqrt{4.1}$ does the tangent at $x_0 = 4$ give?</p><div class="b-sol"><p>$2 + \tfrac14 \cdot 0.1 = 2.025$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="The derivative from the definition" data-toc-k="2" data-toc-short="2 Definition">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">2</span>The derivative from the definition</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The quotients from the exploration tend to about 0.693 for the base 2 and to 1.099 for the base 3. In between there must be a base
+                for which the limit is exactly 1: Euler’s number $e \approx 2.718$. The numbers 0.693 and 1.099 are $\ln 2$ and $\ln 3$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · DERIVATIVE FUNCTION FROM THE DEFINITION</div>
+                <div class="b-text">
+                    <p>If you assign the number $f'(x)$ to every point $x$ at which $f$ is differentiable, you get the <b>derivative function</b> $f'$ with $$f'(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h}$$</p>
+                    <p>$f(x) = x^2$: $\dfrac{(x + h)^2 - x^2}{h} = 2x + h \to 2x$, so $f'(x) = 2x$.</p>
+                    <p>$f(x) = a^x$: $\dfrac{a^{x + h} - a^x}{h} = a^x \cdot \dfrac{a^h - 1}{h} \to a^x \cdot \ln a$, so $\left(a^x\right)' = \ln a \cdot a^x$ and $\left(e^x\right)' = e^x$.</p>
+                    <p><b>Differentiable ⇒ continuous</b>, but not the other way round: $|x|$ is continuous at 0, but there the difference quotient is −1 on the left and 1 on the right.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sketching the graph of $f'$:</b> where $f$ increases, $f' > 0$; where $f$ decreases, $f' < 0$. Maxima and minima of $f$ become zeros of $f'$, the steepest points become extreme points of $f'$.</p>
+            <p class="b-note"><b>Why $e$?</b> Only for the base $e$ is the exponential function its own derivative. That is why $e^x$ is the natural choice in science and engineering.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE DERIVATIVE OF aˣ</div>
+        <p class="b-help" style="margin:0 0 12px">Change the base and make $h$ smaller. Green is the secant through $(0, 1)$, dashed is the tangent.</p>
+        <div data-widget="ablnachdef"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · FROM THE DEFINITION</div>
+            <div class="b-text"><p>Find the derivative function of $f(x) = \tfrac1x$ from the definition.</p></div>
+            <div class="b-sol"><p>$\dfrac{\frac{1}{x + h} - \frac1x}{h} = \dfrac{x - (x + h)}{x(x + h)h} = \dfrac{-1}{x(x + h)}$</p>
+                <p>Limit for $h \to 0$: <span class="b-res">$f'(x) = -\dfrac{1}{x^2}$</span> for all $x \neq 0$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · NOT DIFFERENTIABLE</div>
+            <div class="b-text"><p>Is $f(x) = |x|$ differentiable at the point 0?</p></div>
+            <div class="b-sol"><p>Right: $\tfrac{|h|}{h} = 1$ for $h > 0$. Left: $\tfrac{|h|}{h} = -1$ for $h < 0$.</p>
+                <p>The one-sided limits are different: <span class="b-res">not differentiable</span>. The graph has a kink at 0, but no jump.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE GRAPH OF THE DERIVATIVE APPEARS</div>
+        <p class="b-help" style="margin:0 0 12px">Drag the point along the curve. The gradient of its tangent draws the graph of $f'$ point by point.</p>
+        <div data-widget="ableitungsgraph"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Find the derivative function from the definition: a) $f(x) = 3x^2$ &nbsp; b) $f(x) = x^3$ &nbsp; c) $f(x) = 5x - 2$</p></div>
+            <div class="b-sol"><p>a) $\tfrac{3(2xh + h^2)}{h} = 6x + 3h \to 6x$ &nbsp; b) $\tfrac{3x^2 h + 3xh^2 + h^3}{h} \to 3x^2$ &nbsp; c) $\tfrac{5h}{h} = 5$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $\tfrac{10^h - 1}{h}$ for $h = 0.001$ and compare with $\ln 10$. Give the derivative of $10^x$.</p></div>
+            <div class="b-sol"><p>$\approx 2.3052$, $\ln 10 \approx 2.3026$. $\left(10^x\right)' = \ln 10 \cdot 10^x$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Differentiate $f(x) = \sqrt{x}$ from the definition.</p></div>
+            <div class="b-hint"><p>Multiply numerator and denominator by $\sqrt{x + h} + \sqrt{x}$ as in chapter 1.1.</p></div>
+            <div class="b-sol"><p>$\dfrac{\sqrt{x + h} - \sqrt{x}}{h} = \dfrac{1}{\sqrt{x + h} + \sqrt{x}} \to \dfrac{1}{2\sqrt{x}}$ for $x > 0$. At 0, $\sqrt{x}$ is not differentiable.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For $f(x) = x^3 - 3x$, sketch the graph of $f'$ without calculating $f'$. Then check with $f'(x) = 3x^2 - 3$.</p></div>
+            <div class="b-sol"><p>$f$ has a maximum at $x = -1$ and a minimum at $x = 1$: $f'$ has zeros there, is positive outside and negative in between, with its minimum at 0. That is the parabola $3x^2 - 3$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$f(x) = x^2$ for $x \leq 1$ and $g(x) = 3x - 2$ for $x > 1$ together form a function $F$. Is $F$ continuous at the point 1? Is it differentiable? What changes if you take $g(x) = 2x - 1$?</p></div>
+            <div class="b-sol"><p>Continuous: both pieces give 1. On the left the gradient is $2 \cdot 1 = 2$, on the right 3: a kink, so not differentiable. With $2x - 1$ value and gradient match: continuous and differentiable, the line is the tangent to the parabola.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="6" data-ph="f'(3) ="><p class="b-q-text">$f(x) = x^2$. Calculate $f'(3)$.</p><div class="b-sol"><p>$2 \cdot 3 = 6$</p></div></div>
+        <div class="b-q" data-ans="0.693" data-tol="0.001" data-ph="number"><p class="b-q-text">Which number does $\tfrac{2^h - 1}{h}$ tend to for $h \to 0$ (three decimal places)?</p><div class="b-sol"><p>$\ln 2 \approx 0.693$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Which statement is correct?</p><div class="b-mc"><button>Every continuous function is differentiable.</button><button>Every differentiable function is continuous.</button><button>$|x|$ is differentiable at 0.</button></div><div class="b-sol"><p>Counterexample to the first statement: $|x|$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Find the equation of the tangent to $f(x) = x^2$ at the point $(3, 9)$.</p></div>
+            <div class="b-sol"><p>$f'(3) = 6$: $t(x) = 9 + 6(x - 3) = 6x - 9$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with chapter 1.1:</b> explain why: if $f$ is differentiable at the point $x_0$, then $f$ is continuous there.</p></div>
+            <div class="b-hint"><p>Write $f(x_0 + h) - f(x_0) = \dfrac{f(x_0 + h) - f(x_0)}{h} \cdot h$ and use the limit theorems.</p></div>
+            <div class="b-sol"><p>For $h \to 0$ the first factor tends to $f'(x_0)$, the second to 0. By the product theorem, $f(x_0 + h) - f(x_0) \to f'(x_0) \cdot 0 = 0$, so $f(x_0 + h) \to f(x_0)$: continuous.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A bacterial culture grows according to $N(t) = 1000 \cdot 2^t$ ($t$ in hours). How fast is it growing after 3 hours? Give the result with $\ln 2$ and as a decimal.</p></div>
+            <div class="b-sol"><p>$N'(t) = 1000 \cdot \ln 2 \cdot 2^t$, $N'(3) = 8000 \ln 2 \approx 5545$ bacteria per hour.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>For which $a$ and $b$ is $F(x) = ax^2$ for $x \leq 1$ and $F(x) = 2x + b$ for $x > 1$ continuous and differentiable at the point 1?</p></div>
+            <div class="b-sol"><p>Gradient: $2a = 2$, so $a = 1$. Value: $a = 2 + b$, so $b = -1$. Then $F(x) = x^2$ and $2x - 1$ respectively.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Who invented differential calculus?" data-toc-k="X" data-toc-short="Newton and Leibniz">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>Who invented differential calculus?</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Isaac Newton developed his “method of fluxions” in the 1660s. His treatise “The Method of Fluxions” was finished in 1671, but he did not publish it.
+                Gottfried Wilhelm Leibniz found differential calculus independently and published it in 1684 in the Leipzig journal “Acta Eruditorum”,
+                with the symbols $\mathrm{d}x$ and $\tfrac{\mathrm{d}y}{\mathrm{d}x}$ that we still use today.</p>
+            <p>This led to one of the most bitter priority disputes in science. In 1712 the Royal Society, whose president was Newton, investigated the question. Its report, the
+                “Commercium epistolicum”, credited Newton with the invention and accused Leibniz of copying; Newton had helped to write it himself. Today the view is: Newton was
+                earlier, Leibniz found it independently and published first. Newton’s fluxions only appeared in 1736, nine years after his death.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources:</b> G. W. Leibniz: “Nova methodus pro maximis et minimis”, Acta Eruditorum, October 1684, pp. 467–473 · I. Newton: “The Method of Fluxions and Infinite Series”, London 1736 (written 1671) · Royal Society: “Commercium epistolicum D. Johannis Collins et aliorum de analysi promota”, London 1712.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>DIFFERENCE QUOTIENT</h4><p>$\tfrac{f(x_0 + h) - f(x_0)}{h}$: gradient of the secant, average rate of change.</p></div>
+        <div><p>$x^3$ on $[1, 3]$: 13</p></div></div>
+    <div class="b-rueck"><div><h4>DIFFERENTIAL QUOTIENT</h4><p>$f'(x_0) = \lim\limits_{h \to 0} \tfrac{f(x_0 + h) - f(x_0)}{h}$: gradient of the tangent, local rate of change.</p></div>
+        <div><p>$s(t) = 5t^2$: $s'(2) = 20$ m/s</p></div></div>
+    <div class="b-rueck"><div><h4>LINEAR APPROXIMATION</h4><p>$f(x_0 + h) \approx f(x_0) + f'(x_0) h$, the error becomes small faster than $h$.</p></div>
+        <div><p>$\sqrt{4.1} \approx 2.025$</p></div></div>
+    <div class="b-rueck"><div><h4>FROM THE DEFINITION</h4><p>$(x^2)' = 2x$, $\left(\tfrac1x\right)' = -\tfrac{1}{x^2}$, $(a^x)' = \ln a \cdot a^x$, $(e^x)' = e^x$</p></div>
+        <div><p>$\tfrac{2^h - 1}{h} \to \ln 2 \approx 0.693$</p></div></div>
+    <div class="b-rueck"><div><h4>DIFFERENTIABILITY</h4><p>One-sided limits of the difference quotient equal. Differentiable ⇒ continuous, not the other way round.</p></div>
+        <div><p>$|x|$ at 0: kink, not differentiable</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="7" data-ph="m ="><p class="b-q-text">Average rate of change of $x^3$ on $[1, 2]$?</p><div class="b-sol"><p>$8 - 1 = 7$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="f'(2) ="><p class="b-q-text">$f(x) = 3x^2$. Calculate $f'(2)$.</p><div class="b-sol"><p>$6 \cdot 2 = 12$</p></div></div>
+            <div class="b-q" data-ans="-1/4" data-ph="fraction"><p class="b-q-text">$f(x) = \tfrac1x$. Calculate $f'(2)$.</p><div class="b-sol"><p>$-\tfrac{1}{4}$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="2.303" data-tol="0.001" data-ph="number"><p class="b-q-text">Which number does $\tfrac{10^h - 1}{h}$ tend to (three decimal places)?</p><div class="b-sol"><p>$\ln 10 \approx 2.303$</p></div></div>
+            <div class="b-q" data-ans="5545" data-tol="1" data-ph="per hour"><p class="b-q-text">$N(t) = 1000 \cdot 2^t$. Calculate $N'(3)$ (whole number).</p><div class="b-sol"><p>$8000 \ln 2 \approx 5545$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="b ="><p class="b-q-text">$ax^2$ for $x \leq 1$, $2x + b$ for $x > 1$, continuous and differentiable. What is $b$?</p><div class="b-sol"><p>$a = 1$, $b = -1$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-aenderungsraten.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RATES OF CHANGE</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-ableitung-definition.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">THE DERIVATIVE FROM THE DEFINITION</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIFFERENTIAL LAB</span><span class="b-lab-what">Derivatives and tangents</span></span></a>
+        <a class="b-lab" data-lab="steigung" href="../../steigung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GRADIENT LAB</span><span class="b-lab-what">Gradient and tangent</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 11, advanced course · Learning area 1 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-en/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-en/gy11lk.js"></script>
+</body>
+</html>

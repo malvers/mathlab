@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 11 Advanced · Chapter 4.2 · Conditional probability and Bayes | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Conditional probability, Bayes’ theorem with tree and two-way table, stochastic independence. Chapter 4.2 of the interactive textbook Mathematics · Grammar School 11 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 11 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 4.2 · LEARNING AREA 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 4.2 · LEARNING AREA 4 · MAY</p>
+            <h1>Conditional probability and Bayes</h1>
+            <p class="b-hero-lead">A rapid test is positive. How likely are you really to be ill? The answer is often surprisingly small, and to understand it you have to keep two things
+                apart: the probability of a positive result <b>given</b> that you are ill and the probability of being ill <b>given</b> a positive result.
+                With <b>Bayes’ theorem</b> you turn a tree diagram round, and with the notion of <b>independence</b> you check whether two characteristics have anything to do with each other at all.</p>
+            <div class="b-chips"><span class="b-chip">8 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">2 PRACTICE PAGES</span><span class="b-chip">BAYES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>to define <b>conditional probabilities</b>, read them off a tree and a two-way table and tell $P_A(B)$ from $P_B(A)$</li>
+                <li>to derive and apply the law of <b>total probability</b> and <b>Bayes’ theorem</b>, also with natural frequencies</li>
+                <li>to <b>invert</b> a tree diagram and to interpret test results critically</li>
+                <li>to check and justify the <b>stochastic independence</b> of events and of random variables</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="0.18" data-ph="P ="><p class="b-q-text">In a two-way table $P(A) = 0.3$ and $P(A \cap B) = 0.12$. What is $P(A \cap \overline{B})$?</p><div class="b-sol"><p>Row sum: $0.3 - 0.12 = 0.18$ (chapter 4.1)</p></div></div>
+            <div class="b-q" data-ans="0.5" data-ph="P ="><p class="b-q-text">Urn with 3 red and 2 blue balls, without replacement. The first ball was red. What is the probability that the second is red too?</p><div class="b-sol"><p>Still 2 red out of 4 balls: $\tfrac24 = 0.5$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">In the tree “first $A$, then $B$”: how do you calculate $P(A \cap B)$?</p><div class="b-mc"><button>$P(A) + P(B)$</button><button>$P(A) \cdot P(B)$, always</button><button>$P(A)$ times the branch to $B$ after $A$</button></div><div class="b-sol"><p>1st path rule: multiply along the path. The second branch holds given $A$.</p></div></div>
+            <div class="b-q" data-ans="1/36" data-ph="P ="><p class="b-q-text">Two dice: what is the probability of two sixes?</p><div class="b-sol"><p>$\tfrac16 \cdot \tfrac16 = \tfrac{1}{36}$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">AT LEAST ONE HEAD</div>
+            <div class="b-text"><p>Two coins are tossed out of sight. Someone looks and says: “At least one shows heads.”</p>
+                <ul><li>How likely is it now that both show heads? Vote: $\tfrac12$, $\tfrac13$ or $\tfrac14$?</li><li>Check it with 40 double tosses. Which tosses do you count at all?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE POSITIVE TEST</div>
+            <div class="b-text"><p>1 in 100 people has a disease. A test detects 90% of those who are ill, but also reacts in 9% of the healthy. A person tests positive.</p>
+                <ul><li>Estimate: how likely is that person to be ill?</li><li>Work with 1000 people: how many are ill, how many of them positive, how many healthy people positive?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">IS THERE A CONNECTION?</div>
+            <div class="b-text"><p>A dice is rolled. $E$: the score is even. $H$: it is at least 4. $L$: it is at most 2.</p>
+                <ul><li>Does knowing “$E$ has occurred” change the probability of $H$? And that of $L$?</li><li>Compare $P(E \cap H)$ with $P(E) \cdot P(H)$ each time.</li></ul></div>
+            <span class="b-pair">→ Unit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Conditional probability" data-toc-k="1" data-toc-short="1 Conditional">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Conditional probability</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Of 200 students, 90 go by bus, that is $45\%$. But of the 80 who live outside the town, it is 60, that is $75\%$.
+                The extra information “lives outside” turns the 200 into a smaller basic set of 80. The probability calculated within it is called <b>conditional</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · CONDITIONAL PROBABILITY</div>
+                <div class="b-text">
+                    <p>For $P(A) > 0$, $P_A(B) = \dfrac{P(A \cap B)}{P(A)}$ is called the <b>probability of $B$ given $A$</b> (also written $P(B \mid A)$).</p>
+                    <p><b>Multiplication rule:</b> $P(A \cap B) = P(A) \cdot P_A(B)$. This is the 1st path rule: the branches of the second stage carry conditional probabilities.</p>
+                    <p><b>Two-way table:</b> $P_A(B)$ is the cell $A \cap B$ divided by the <b>row sum</b> $P(A)$; $P_B(A)$ is the same cell divided by the <b>column sum</b> $P(B)$.</p>
+                    <p>Under a fixed condition all the rules still hold, for example $P_A(B) + P_A(\overline{B}) = 1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Do not mix them up:</b> $P_{\text{ill}}(\text{positive})$ describes the test, $P_{\text{positive}}(\text{ill})$ is what the person tested wants to know. The two can be very different.</p>
+            <p class="b-note"><b>Laplace with a condition:</b> with equally likely outcomes $P_A(B) = \tfrac{|A \cap B|}{|A|}$: you only count within $A$.</p>
+            <p class="b-note"><b>The Monty Hall problem:</b> first posed in 1975 by Steve Selvin in the journal The American Statistician, made famous by Marilyn vos Savant’s column in Parade of 9 September 1990. Thousands of readers’ letters thought her correct answer was wrong.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE MONTY HALL PROBLEM</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a door. The host knows where the car is and opens another door with a goat. Do you stay or switch? Then let the computer play a thousand times.</p>
+        <div data-widget="ziegen"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · ROW AND COLUMN</div>
+            <div class="b-text"><p>Two-way table from chapter 4.1, example 4: $A$ lives outside, $B$ goes by bus; $|A \cap B| = 60$, $|A| = 80$, $|B| = 90$, $|\overline{A} \cap B| = 30$, $|\overline{A}| = 120$ out of 200.
+                Calculate $P_A(B)$, $P_B(A)$ and $P_{\overline{A}}(B)$.</p></div>
+            <div class="b-sol"><p>$P_A(B) = \tfrac{60}{80} = 0.75$ (row $A$), $P_B(A) = \tfrac{60}{90} \approx 0.667$ (column $B$), $P_{\overline{A}}(B) = \tfrac{30}{120} = 0.25$.</p>
+                <p><span class="b-res">Those who live outside go by bus three times as often as the others.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · A DOUBLE UNDER A CONDITION</div>
+            <div class="b-text"><p>Two dice show a total of 8. How likely is a double? Conversely, how likely is the total 8 if you know that a double has been rolled?</p></div>
+            <div class="b-sol"><p>Total 8: $(2, 6), (3, 5), (4, 4), (5, 3), (6, 2)$. Among them one double: $P_{\text{total 8}}(\text{double}) = \tfrac15$.</p>
+                <p>Of the 6 doubles only $(4, 4)$ has the total 8: <span class="b-res">$P_{\text{double}}(\text{total 8}) = \tfrac16$.</span> Swapping condition and event changes the result.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>We have $P(A) = 0.4$ and $P(A \cap B) = 0.1$. Calculate $P_A(B)$ and $P_A(\overline{B})$.</p></div>
+            <div class="b-sol"><p>$P_A(B) = \tfrac{0.1}{0.4} = 0.25$ and $P_A(\overline{B}) = 1 - 0.25 = 0.75$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Two balls are drawn without replacement from an urn with 4 red and 6 white balls. Give the conditional probability “second red, given first red” and calculate $P(\text{both red})$.</p></div>
+            <div class="b-sol"><p>$P_{R_1}(R_2) = \tfrac39 = \tfrac13$, so $P(R_1 \cap R_2) = \tfrac{4}{10} \cdot \tfrac13 = \tfrac{2}{15}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Solve the exploration “At least one head” with the definition. Why is the answer not $\tfrac12$?</p></div>
+            <div class="b-sol"><p>$A$: at least one head $= \{HH, HT, TH\}$ with $P(A) = \tfrac34$; $P(A \cap \{HH\}) = \tfrac14$. So $P_A(HH) = \tfrac{1/4}{3/4} = \tfrac13$.
+                $\tfrac12$ would be right if you knew that one <b>particular</b> coin shows heads.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In a survey $60\%$ use a streaming service ($S$), $45\%$ listen to podcasts ($Q$), $30\%$ do both. Calculate $P_S(Q)$, $P_Q(S)$ and $P_{\overline{S}}(Q)$ and interpret the result.</p></div>
+            <div class="b-sol"><p>$P_S(Q) = \tfrac{0.3}{0.6} = 0.5$, $P_Q(S) = \tfrac{0.3}{0.45} = \tfrac23$, $P_{\overline{S}}(Q) = \tfrac{0.15}{0.4} = 0.375$.
+                Those who stream are more likely to listen to podcasts than those who do not.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Prove: for $P(A) > 0$, $P_A(B) + P_A(\overline{B}) = 1$. Also show that $P_A$ itself satisfies Kolmogorov’s three axioms if you only consider events within $A$.</p></div>
+            <div class="b-sol"><p>$A \cap B$ and $A \cap \overline{B}$ are mutually exclusive with union $A$, so $P(A \cap B) + P(A \cap \overline{B}) = P(A)$; divide by $P(A)$.
+                (K1): a quotient of non-negative numbers. (K2): $P_A(A) = 1$. (K3): for mutually exclusive $B$, $C$, the events $A \cap B$ and $A \cap C$ are mutually exclusive too; the sum carries over to the quotient.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.4" data-ph="P ="><p class="b-q-text">$P(A) = 0.5$ and $P(A \cap B) = 0.2$. What is $P_A(B)$?</p><div class="b-sol"><p>$\tfrac{0.2}{0.5} = 0.4$</p></div></div>
+        <div class="b-q" data-ans="1/3" data-ph="P ="><p class="b-q-text">A dice shows an even number. How likely is it to be a 6?</p><div class="b-sol"><p>Basic set $\{2, 4, 6\}$: $\tfrac13$</p></div></div>
+        <div class="b-q" data-ans="0.25" data-ph="P ="><p class="b-q-text">$P(B) = 0.4$ and $P(A \cap B) = 0.1$. What is $P_B(A)$?</p><div class="b-sol"><p>$\tfrac{0.1}{0.4} = 0.25$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Bayes’ theorem" data-toc-k="2" data-toc-short="2 Bayes">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Bayes’ theorem</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A rapid test detects $95\%$ of those who are ill and wrongly reacts in $5\%$ of the healthy; $2\%$ of the people tested are ill. So $P(D)$, $P_D(+)$ and $P_{\overline{D}}(+)$ are known.
+                But the person tested wants to know $P_+(D)$. For that the tree has to be <b>turned round</b>: first the test result, then ill or healthy.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · TOTAL PROBABILITY AND BAYES’ THEOREM</div>
+                <div class="b-text">
+                    <p><b>Total probability:</b> $P(B) = P(A) \cdot P_A(B) + P(\overline{A}) \cdot P_{\overline{A}}(B)$, the sum of the two paths that end in $B$.</p>
+                    <p><b>Bayes’ theorem:</b> $P_B(A) = \dfrac{P(A) \cdot P_A(B)}{P(A) \cdot P_A(B) + P(\overline{A}) \cdot P_{\overline{A}}(B)}$.</p>
+                    <p><b>Inverted tree:</b> the four path probabilities $P(A \cap B), \ldots$ stay the same. First stage $P(B)$ and $P(\overline{B})$, second stage the conditional probabilities $P_B(A) = \tfrac{P(A \cap B)}{P(B)}$ and so on.</p>
+                    <p><b>Natural frequencies:</b> if you work with 10,000 people instead of percentages, the theorem turns into counting: positive ill people divided by all positives.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>The base rate counts:</b> if a disease is rare, there are far more healthy than ill people. Then most positive results come from healthy people, even with a good test.</p>
+            <p class="b-note"><b>Doctors put to the test:</b> Gerd Gigerenzer gave 160 gynaecologists such a task about mammography. The most frequent answer was $90\%$, correct is about $10\%$. With natural frequencies the most frequent answer was exactly right.
+                Source: G. Gigerenzer et al.: “Helping Doctors and Patients Make Sense of Health Statistics”, Psychological Science in the Public Interest 8 (2007), pp. 53–96.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · TURNING THE TREE ROUND</div>
+        <p class="b-help" style="margin:0 0 12px">The first tree shows “first $A$, then $B$”, the second the same chance experiment the other way round: “first $B$, then $A$”. The two-way table links both. Change the three probabilities or choose an example.</p>
+        <div data-widget="umkehrbaum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · THE RAPID TEST</div>
+            <div class="b-text"><p>$P(D) = 0.02$, $P_D(+) = 0.95$, $P_{\overline{D}}(+) = 0.05$. Calculate $P_+(D)$ with Bayes’ theorem and with 10,000 people.</p></div>
+            <div class="b-sol"><p>$P(+) = 0.02 \cdot 0.95 + 0.98 \cdot 0.05 = 0.019 + 0.049 = 0.068$, so $P_+(D) = \tfrac{0.019}{0.068} \approx 0.279$.</p>
+                <p>With 10,000 people: 200 ill, 190 of them positive; 9800 healthy, 490 of them positive. <span class="b-res">Of 680 positives only 190 are ill, about $28\%$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · TWO MACHINES</div>
+            <div class="b-text"><p>Machine 1 makes $60\%$ of the parts with $3\%$ rejects, machine 2 the rest with $6\%$ rejects. A part is defective. Which machine is it more likely to come from?</p></div>
+            <div class="b-sol"><p>$P(D) = 0.6 \cdot 0.03 + 0.4 \cdot 0.06 = 0.018 + 0.024 = 0.042$.</p>
+                <p>$P_D(M_1) = \tfrac{0.018}{0.042} = \tfrac37 \approx 0.43$. <span class="b-res">The defective part more likely comes from machine 2 ($\tfrac47 \approx 0.57$),</span> although machine 2 produces less.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Urn $U_1$ contains 3 red and 1 blue ball, urn $U_2$ 1 red and 3 blue. A coin chooses the urn, then a ball is drawn. Calculate $P(\text{red})$ and $P_{\text{red}}(U_1)$.</p></div>
+            <div class="b-sol"><p>$P(\text{red}) = \tfrac12 \cdot \tfrac34 + \tfrac12 \cdot \tfrac14 = \tfrac12$ and $P_{\text{red}}(U_1) = \tfrac{3/8}{1/2} = \tfrac34$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Solve the exploration “The positive test”: $1\%$ ill, the test detects $90\%$ of the ill and is positive in $9\%$ of the healthy. Calculate $P_+(D)$.</p></div>
+            <div class="b-sol"><p>$P(+) = 0.01 \cdot 0.9 + 0.99 \cdot 0.09 = 0.009 + 0.0891 = 0.0981$, so $P_+(D) = \tfrac{0.009}{0.0981} \approx 0.092$. Of 1000 people: 9 positive ill people, about 89 positive healthy people.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>The person who tested positive in the previous exercise takes a second, independent test of the same kind, which is positive again. How likely is the person to be ill now?</p></div>
+            <div class="b-sol"><p>New starting probability $P(D) \approx 0.0917$. Then $P_+(D) = \tfrac{0.0917 \cdot 0.9}{0.0917 \cdot 0.9 + 0.9083 \cdot 0.09} \approx \tfrac{0.0826}{0.1643} \approx 0.50$.
+                Bayes can be repeated: today’s result is tomorrow’s starting probability.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A spam filter knows: $30\%$ of e-mails are spam. The word “free” appears in $40\%$ of spam e-mails and in $1\%$ of the others. An e-mail contains “free”. How likely is it to be spam?</p></div>
+            <div class="b-sol"><p>$P(F) = 0.3 \cdot 0.4 + 0.7 \cdot 0.01 = 0.12 + 0.007 = 0.127$, so $P_F(S) = \tfrac{0.12}{0.127} \approx 0.945$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Prove Bayes’ theorem from the definition of conditional probability and the multiplication rule.</p></div>
+            <div class="b-sol"><p>$P_B(A) = \tfrac{P(A \cap B)}{P(B)}$. In the numerator $P(A \cap B) = P(A) \cdot P_A(B)$. In the denominator $B$ splits into the mutually exclusive parts $A \cap B$ and $\overline{A} \cap B$,
+                so $P(B) = P(A) \cdot P_A(B) + P(\overline{A}) \cdot P_{\overline{A}}(B)$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.26" data-ph="P(B) ="><p class="b-q-text">$P(A) = 0.1$, $P_A(B) = 0.8$, $P_{\overline{A}}(B) = 0.2$. What is $P(B)$?</p><div class="b-sol"><p>$0.08 + 0.9 \cdot 0.2 = 0.26$</p></div></div>
+        <div class="b-q" data-ans="0.308" data-ph="P ="><p class="b-q-text">With the same numbers: what is $P_B(A)$ (three decimal places)?</p><div class="b-sol"><p>$\tfrac{0.08}{0.26} \approx 0.308$</p></div></div>
+        <div class="b-q" data-ans="0.517" data-ph="P ="><p class="b-q-text">Machine 1 makes $70\%$ of the parts with $2\%$ rejects, machine 2 the rest with $5\%$. How likely does a defective part come from machine 2?</p><div class="b-sol"><p>$\tfrac{0.3 \cdot 0.05}{0.7 \cdot 0.02 + 0.3 \cdot 0.05} = \tfrac{0.015}{0.029} \approx 0.517$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Stochastic independence" data-toc-k="3" data-toc-short="3 Independent">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">2 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Stochastic independence</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>With a dice $P(H) = P(\text{at least 4}) = \tfrac12$. If you know that an even number has come up, 4 and 6 remain of 2, 4, 6: $P_E(H) = \tfrac23$. Knowing about $E$ changes the chance of $H$.
+                For $L = \{1, 2\}$, on the other hand, $P(L) = \tfrac13$ and $P_E(L) = \tfrac13$. Here $E$ tells you nothing about $L$: the two events are <b>independent</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · INDEPENDENCE</div>
+                <div class="b-text">
+                    <p>Two events $A$ and $B$ are called <b>stochastically independent</b> if $P(A \cap B) = P(A) \cdot P(B)$. For $P(A) > 0$ this is equivalent to $P_A(B) = P(B)$.</p>
+                    <p>If $A$ and $B$ are independent, then so are $A$ and $\overline{B}$, $\overline{A}$ and $B$, and $\overline{A}$ and $\overline{B}$.</p>
+                    <p>Two <b>random variables</b> $X$ and $Y$ are called independent if $P(X = x \text{ and } Y = y) = P(X = x) \cdot P(Y = y)$ holds for <b>all</b> values $x$ and $y$.</p>
+                    <p>For independent random variables $E(X \cdot Y) = E(X) \cdot E(Y)$ and $V(X + Y) = V(X) + V(Y)$. Chapter 4.3 uses this for the binomial distribution.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Independent is not mutually exclusive:</b> mutually exclusive events with $P(A), P(B) > 0$ are always dependent, because $P(A \cap B) = 0 \neq P(A) \cdot P(B)$. If you know that $A$ has occurred, you know for sure: $B$ has not.</p>
+            <p class="b-note"><b>In the tree:</b> independent means that the second stage after $A$ and after $\overline{A}$ carries the same probabilities.</p>
+            <p class="b-note"><b>Modelling assumption:</b> rolls of a dice or draws with replacement are assumed to be independent. In real data you have to check it, and small deviations are normal there.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · INDEPENDENT OR NOT?</div>
+        <p class="b-help" style="margin:0 0 12px">Set $P(A)$, $P(B)$ and $P(A \cap B)$. The two-way table and the unit square show when $P(A \cap B) = P(A) \cdot P(B)$ holds.</p>
+        <div data-widget="unabhaengig"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · CHECKING A TWO-WAY TABLE</div>
+            <div class="b-text"><p>Of 200 people, 50 wear glasses ($G$), 20 are left-handed ($L$), 5 both. Are “glasses” and “left-handed” independent in this group?</p></div>
+            <div class="b-sol"><p>$P(G \cap L) = \tfrac{5}{200} = 0.025$ and $P(G) \cdot P(L) = 0.25 \cdot 0.1 = 0.025$.</p>
+                <p><span class="b-res">Equal, so independent:</span> among those who wear glasses the proportion of left-handers, $\tfrac{5}{50} = 10\%$, is just as large as overall.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · INDEPENDENT RANDOM VARIABLES</div>
+            <div class="b-text"><p>Two coins are tossed. $X_1$ and $X_2$ count the heads of the first and of the second coin, $Y = X_1 + X_2$. Are $X_1$ and $X_2$ independent? And $X_1$ and $Y$?</p></div>
+            <div class="b-sol"><p>For all four pairs $(a, b)$, $P(X_1 = a, X_2 = b) = \tfrac14 = \tfrac12 \cdot \tfrac12$: independent.</p>
+                <p>But $P(X_1 = 1, Y = 0) = 0$, while $P(X_1 = 1) \cdot P(Y = 0) = \tfrac12 \cdot \tfrac14 = \tfrac18$. <span class="b-res">$X_1$ and $Y$ are dependent:</span> the sum contains the first coin.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>We have $P(A) = 0.5$, $P(B) = 0.3$ and $P(A \cap B) = 0.15$. Are $A$ and $B$ independent?</p></div>
+            <div class="b-sol"><p>Yes, $0.5 \cdot 0.3 = 0.15$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Two components fail independently of each other; they work with probabilities $0.95$ and $0.9$. How reliable is a series circuit (both needed) and a parallel circuit (one is enough)?</p></div>
+            <div class="b-sol"><p>Series: $0.95 \cdot 0.9 = 0.855$. Parallel: $1 - 0.05 \cdot 0.1 = 0.995$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Prove: if $A$ and $B$ are independent, then $A$ and $\overline{B}$ are independent too.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = P(A) - P(A \cap B) = P(A) - P(A) \cdot P(B) = P(A)\,\big(1 - P(B)\big) = P(A) \cdot P(\overline{B})$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A dice is rolled twice. $X$ is the first score, $Y$ the total. Show that $X$ and $Y$ are dependent.</p></div>
+            <div class="b-sol"><p>$P(X = 1, Y = 12) = 0$, but $P(X = 1) \cdot P(Y = 12) = \tfrac16 \cdot \tfrac{1}{36} \neq 0$. A single counterexample is enough.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Two coins: $A$ “first shows heads”, $B$ “second shows heads”, $C$ “both show the same”. Show: any two of the three events are independent, but $P(A \cap B \cap C) \neq P(A) \cdot P(B) \cdot P(C)$.</p></div>
+            <div class="b-sol"><p>All three have the probability $\tfrac12$, and every pairwise intersection is $\{HH\}$: $P(A \cap B) = P(A \cap C) = P(B \cap C) = \tfrac14 = \tfrac12 \cdot \tfrac12$. But $A \cap B \cap C = \{HH\}$ also has $\tfrac14 \neq \tfrac18$.
+                So pairwise independent does not yet mean that all three together are independent.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.2" data-ph="P ="><p class="b-q-text">$A$ and $B$ are independent with $P(A) = 0.4$ and $P(B) = 0.5$. What is $P(A \cap B)$?</p><div class="b-sol"><p>$0.4 \cdot 0.5 = 0.2$</p></div></div>
+        <div class="b-q" data-ans="0.72" data-ph="P ="><p class="b-q-text">$A$ and $B$ are independent with $P(A) = 0.3$ and $P(B) = 0.6$. What is $P(A \cup B)$?</p><div class="b-sol"><p>$0.3 + 0.6 - 0.18 = 0.72$</p></div></div>
+        <div class="b-q" data-ans="0.25" data-ph="P(B) ="><p class="b-q-text">$P(A) = 0.4$ and $P(A \cap B) = 0.1$. For which $P(B)$ are $A$ and $B$ independent?</p><div class="b-sol"><p>$0.4 \cdot P(B) = 0.1$, so $P(B) = 0.25$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A burglar alarm goes off with $99\%$ in the case of a burglary, and with $0.5\%$ on a night without a burglary. The probability of a burglary on a given night is $0.01\%$.
+            The alarm goes off. How likely is a burglary?</p></div>
+            <div class="b-sol"><p>$\dfrac{0.0001 \cdot 0.99}{0.0001 \cdot 0.99 + 0.9999 \cdot 0.005} = \dfrac{0.000099}{0.0050985} \approx 0.019$. Almost every alarm is a false alarm, because burglaries are so rare.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Solve the Monty Hall problem with Bayes’ theorem: you choose door 1, the host opens door 3 with a goat. He chooses at random if he has two goat doors to choose from.
+            How likely is the car behind door 2?</p></div>
+            <div class="b-sol"><p>$A_i$: car behind door $i$, $\tfrac13$ each. $M_3$: the host opens door 3. $P_{A_1}(M_3) = \tfrac12$, $P_{A_2}(M_3) = 1$, $P_{A_3}(M_3) = 0$, so $P(M_3) = \tfrac16 + \tfrac13 = \tfrac12$.
+                $P_{M_3}(A_2) = \tfrac{1/3}{1/2} = \tfrac23$: switching doubles the chance of winning.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Two dice: $X$ and $Y$ are the scores. Confirm $E(X \cdot Y) = E(X) \cdot E(Y)$ by calculation and explain why this does not hold for $X$ and $X$.</p></div>
+            <div class="b-sol"><p>$E(X \cdot Y) = \tfrac{1}{36}\sum_{x, y} x y = \tfrac{1}{36} \cdot 21 \cdot 21 = 12.25 = 3.5^2$. For $X \cdot X$: $E(X^2) = \tfrac{91}{6} \approx 15.17 \neq 12.25$, because $X$ is not independent of itself.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>In a two-way table $P(A) = 0.5$ and $P(B) = 0.4$. In which range can $P(A \cap B)$ lie? For which value are $A$ and $B$ independent?</p></div>
+            <div class="b-sol"><p>All cells are at least 0: $P(A \cap B) \le 0.4$, and $P(\overline{A} \cap \overline{B}) = 1 - 0.9 + P(A \cap B) \ge 0$ always holds. So $0 \le P(A \cap B) \le 0.4$; independent for $0.2$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Bayes’ legacy" data-toc-k="X" data-toc-short="Bayes">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>A theorem from the papers he left behind</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Thomas Bayes was a minister in Tunbridge Wells in England and died in April 1761. He never published his famous idea. Among his papers his friend Richard Price found an essay,
+                edited it, wrote an introduction and an appendix and presented it to the Royal Society in London in December 1763.</p>
+            <p>Bayes asked the question that nobody had answered cleanly until then: you only observe the <b>effects</b>, for instance how often an event occurs. What can be said from this about the unknown <b>cause</b>,
+                about the probability itself? He thought of balls rolling onto a table and calculated back from the result. This “inverse probability” is exactly the turning round of the tree from unit 2.</p>
+            <p>Independently of him, Pierre-Simon Laplace arrived at the same idea a few years later and made it widely known. Today the theorem is at work in spam filters, in medical diagnosis and in machine learning.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Thomas Bayes, Richard Price: “An Essay towards Solving a Problem in the Doctrine of Chances”, Philosophical Transactions of the Royal Society 53 (1763), pp. 370–418.</p>
+            <p class="b-note"><b>Work it out:</b> with the numbers of the rapid test from example 3, a second, independent positive test raises the probability of being ill from about $28\%$ to about $88\%$.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>CONDITIONAL PROBABILITY</h4><p>$P_A(B) = \tfrac{P(A \cap B)}{P(A)}$; in the table, cell divided by the row or column sum.</p></div>
+        <div><p>Bus given “outside”: $\tfrac{60}{80} = 0.75$</p></div></div>
+    <div class="b-rueck"><div><h4>MULTIPLICATION RULE</h4><p>$P(A \cap B) = P(A) \cdot P_A(B)$: the 1st path rule.</p></div>
+        <div><p>Two red without replacement: $\tfrac{4}{10} \cdot \tfrac39$</p></div></div>
+    <div class="b-rueck"><div><h4>TOTAL PROBABILITY</h4><p>$P(B) = P(A)\,P_A(B) + P(\overline{A})\,P_{\overline{A}}(B)$.</p></div>
+        <div><p>Positive: $0.019 + 0.049 = 0.068$</p></div></div>
+    <div class="b-rueck"><div><h4>BAYES’ THEOREM</h4><p>$P_B(A) = \tfrac{P(A)\,P_A(B)}{P(B)}$; inverted tree, natural frequencies.</p></div>
+        <div><p>$P_+(D) \approx 0.279$: 190 of 680 positives</p></div></div>
+    <div class="b-rueck"><div><h4>INDEPENDENCE</h4><p>$P(A \cap B) = P(A) \cdot P(B)$; random variables: for all pairs of values.</p></div>
+        <div><p>Even and at most 2: $\tfrac16 = \tfrac12 \cdot \tfrac13$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="0.6" data-ph="P ="><p class="b-q-text">$P(A) = 0.5$ and $P(A \cap B) = 0.3$. What is $P_A(B)$?</p><div class="b-sol"><p>$\tfrac{0.3}{0.5} = 0.6$</p></div></div>
+            <div class="b-q" data-ans="0.5" data-ph="P(B) ="><p class="b-q-text">$P(A) = 0.5$, $P_A(B) = 0.8$, $P_{\overline{A}}(B) = 0.2$. What is $P(B)$?</p><div class="b-sol"><p>$0.4 + 0.1 = 0.5$</p></div></div>
+            <div class="b-q" data-ans="0.8" data-ph="P ="><p class="b-q-text">With the same numbers: what is $P_B(A)$?</p><div class="b-sol"><p>$\tfrac{0.4}{0.5} = 0.8$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="0.165" data-tol="0.001" data-ph="P ="><p class="b-q-text">$0.5\%$ of a population are ill; a test detects $98\%$ of the ill and is positive in $2.5\%$ of the healthy. What is $P_+(D)$ (three decimal places)?</p><div class="b-sol"><p>$\tfrac{0.005 \cdot 0.98}{0.005 \cdot 0.98 + 0.995 \cdot 0.025} = \tfrac{0.0049}{0.029775} \approx 0.165$</p></div></div>
+            <div class="b-q" data-ans="0.0298" data-tol="0.0001" data-ph="P(+) ="><p class="b-q-text">With the same numbers: what proportion of all the people tested is positive (four decimal places)?</p><div class="b-sol"><p>$P(+) = 0.005 \cdot 0.98 + 0.995 \cdot 0.025 = 0.029775 \approx 0.0298$</p></div></div>
+            <div class="b-q" data-ans="0.12" data-ph="P ="><p class="b-q-text">$A$ and $B$ are independent, $P(A) = 0.4$ and $P(\overline{B}) = 0.7$. What is $P(A \cap B)$?</p><div class="b-sol"><p>$P(B) = 0.3$, so $0.4 \cdot 0.3 = 0.12$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-bedingt-bayes.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CONDITIONAL PROBABILITY AND BAYES</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-unabhaengigkeit.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INDEPENDENCE</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 11, advanced course · Learning area 4 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+<script src="../../js/buch-gy11lk-stoch.js"></script>
+<script src="../../js/buch-en/gy11lk-stoch.js"></script>
+</body>
+</html>

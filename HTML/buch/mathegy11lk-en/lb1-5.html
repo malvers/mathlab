@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 11 Advanced · Chapter 1.5 · Functions from conditions, extrema, regression | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Functions from conditions, optimisation problems, equations of functions by regression. Chapter 1.5 of the interactive textbook Mathematics · Grammar School 11 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 11 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1.5 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1.5 · LEARNING AREA 1 · DECEMBER</p>
+            <h1>Functions from conditions, extrema, regression</h1>
+            <p class="b-hero-lead">Now you turn the tables: instead of investigating a function, you <b>build</b> it from its properties, for example a change of lane on a road
+                in which the steering wheel does not jerk. You find the best that is possible under given conditions, from the largest cylinder in a cone to the fastest route of a lifeguard.
+                And you let the CAS find the function that fits measured values best, and ask critically how far you can trust it.</p>
+            <div class="b-chips"><span class="b-chip">12 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">3 PRACTICE SHEETS</span><span class="b-chip">CAS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x&lt;0?0:(x&gt;2?1:0.1875*x^5-0.9375*x^4+1.25*x^3)","x&lt;0?0:(x&gt;2?1:0.75*x^2-0.25*x^3)"]' data-labels='["no jolt","kink-free only"]' data-lat="[2.6,-1.1]" data-x="-1.5,3.5" data-y="-0.5,1.6" data-pts="[[0,0],[2,1]]" data-h="240" data-aria="Two transition curves between two parallel roads: one only without a kink, one also without a jump in curvature"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>set up equations of <b>polynomial functions</b> from conditions, without aids up to three unknowns, with the CAS more as well</li>
+                <li>check whether the function you found really satisfies the conditions, and recognise when there is none</li>
+                <li>solve <b>optimisation problems</b>: objective function, constraint, domain, values at the ends</li>
+                <li>carry out a <b>regression</b> with the CAS, choose the model with reasons and judge the result critically</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="12" data-ph="f'(2) ="><p class="b-q-text">$f(x) = x^3$. What is $f'(2)$?</p><div class="b-sol"><p>$3 \cdot 4 = 12$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">The graph of $f$ has a maximum at $H(2, 5)$. Which equations follow from this?</p><div class="b-mc"><button>only $f(2) = 5$</button><button>$f(2) = 5$ and $f'(2) = 0$</button><button>$f'(5) = 2$</button></div><div class="b-sol"><p>The point lies on the graph, and the tangent is horizontal there.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">Solve $a + b = 1$, $a - b = 3$. What is $a$?</p><div class="b-sol"><p>Add: $2a = 4$ (chapter 2)</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="x ="><p class="b-q-text">Where does $A(x) = 20x - x^2$ have its maximum?</p><div class="b-sol"><p>$A'(x) = 20 - 2x = 0$ at $x = 10$ (chapter 1.4)</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE CHANGE OF LANE</div>
+            <div class="b-text"><p>A road runs along the line $y = 0$ and from $x = 2$ on is to continue along $y = 1$ (unit 100 m). In between you need a transition curve.</p>
+                <ul><li>Which conditions must it satisfy at its two ends so that there is no kink?</li><li>How many conditions is that, what degree does the function need?</li><li>What do you feel in the car if the curvature changes abruptly at the join?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE FASTEST ROUTE</div>
+            <div class="b-text"><p>A lifeguard is standing 30 m from the water. A swimmer is 20 m from the shore and 50 m further along it. She runs at 6 m/s and swims at 2 m/s.</p>
+                <ul><li>Is the straight route the fastest? Or should she run until she is opposite the swimmer?</li><li>Estimate where she should go into the water, and work out two routes.</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">HOW FAR DOES THE CAR TAKE TO STOP?</div>
+            <div class="b-text"><p>Measured braking distances: 30 km/h: 9.5 m, 50 km/h: 24 m, 70 km/h: 50 m, 90 km/h: 80 m, 110 km/h: 122 m, 130 km/h: 168 m.</p>
+                <ul><li>Plot the values. Which type of function fits?</li><li>What do you predict for 150 km/h? How sure are you?</li></ul></div>
+            <span class="b-pair">→ Unit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Functions from conditions" data-toc-k="1" data-toc-short="1 Conditions">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Functions from conditions</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The transition curve starts at $(0, 0)$ and ends at $(2, 1)$. Without a kink means: the gradient fits at both ends, so $f'(0) = 0$ and $f'(2) = 0$.
+                Those are four conditions, and a cubic function has four coefficients. If the curvature is not to change abruptly either, $f''(0) = 0$ and $f''(2) = 0$ are added:
+                six conditions, so a function of degree five. You solve for that many unknowns with the CAS.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · FUNCTIONS FROM CONDITIONS</div>
+                <div class="b-text">
+                    <p>A polynomial function of degree $n$ has $n + 1$ coefficients. You need $n + 1$ conditions that are independent of each other.</p>
+                    <p><b>Translating:</b> point $P(x_0, y_0)$ on the graph: $f(x_0) = y_0$. Extremum at $x_0$: $f'(x_0) = 0$. Point of inflection at $x_0$: $f''(x_0) = 0$.
+                        Tangent with gradient $m$ at $x_0$: $f'(x_0) = m$. Symmetry about the $y$-axis: only even exponents; point symmetry about the origin: only odd ones.</p>
+                    <p>Joining <b>without a kink</b>: function value and derivative agree. <b>Without a jump in curvature</b>: the second derivative as well.</p>
+                    <p><b>Check:</b> $f'(x_0) = 0$ is only necessary. Check the result to see whether there really is a maximum, a minimum or a point of inflection.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Without aids</b> the Abitur only has systems with simple coefficients and at most three unknowns. More unknowns are solved by the CAS, for example with <code>solve</code> or <code>rref</code>.</p>
+            <p class="b-note"><b>Symmetry saves work:</b> a quartic function that is symmetric about the $y$-axis has only three coefficients: $f(x) = ax^4 + bx^2 + c$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · FUNCTION FROM CONDITIONS</div>
+        <p class="b-help" style="margin:0 0 12px">Choose the type of conditions and drag the points. The widget sets up the system of equations and shows the function that satisfies all the conditions.</p>
+        <div data-widget="steckbrief"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · WITHOUT AIDS</div>
+            <div class="b-text"><p>The graph of a cubic function has the maximum $H(0, 4)$ and the minimum $T(2, 0)$. Find its equation.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^3 + bx^2 + cx + d$, $f'(x) = 3ax^2 + 2bx + c$. Conditions: $f(0) = 4$: $d = 4$; $f'(0) = 0$: $c = 0$; $f(2) = 0$: $8a + 4b + 4 = 0$; $f'(2) = 0$: $12a + 4b = 0$.</p>
+                <p>Subtract: $4a - 4 = 0$, so $a = 1$, $b = -3$: <span class="b-res">$f(x) = x^3 - 3x^2 + 4$</span>.</p>
+                <p>Check: $f''(x) = 6x - 6$, $f''(0) = -6 < 0$ (maximum), $f''(2) = 6 > 0$ (minimum). This is the function from chapter 1.4, example 3.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · THE CHANGE OF LANE WITH THE CAS</div>
+            <div class="b-text"><p>Find the transition curve from $(0, 0)$ to $(2, 1)$ that joins the lines $y = 0$ and $y = 1$ at both ends without a kink and without a jump in curvature.</p></div>
+            <div class="b-sol"><p>Six conditions: $f(0) = 0$, $f'(0) = 0$, $f''(0) = 0$, $f(2) = 1$, $f'(2) = 0$, $f''(2) = 0$. With $f(x) = a_5 x^5 + \ldots + a_0$ the CAS gives:</p>
+                <p><span class="b-res">$f(x) = \tfrac{3}{16}x^5 - \tfrac{15}{16}x^4 + \tfrac54 x^3$</span>.</p>
+                <p>For comparison, the curve that is only kink-free, $g(x) = \tfrac34 x^2 - \tfrac14 x^3$, has $g''(0) = \tfrac32 \neq 0$. At the join the curvature jumps, and you would have to turn the steering wheel with a jerk (picture above).</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A parabola is symmetric about the $y$-axis and passes through $(0, 4)$ and $(2, 0)$. Find its equation.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^2 + c$. $c = 4$, $4a + 4 = 0$, so $a = -1$: $f(x) = 4 - x^2$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>The graph of a cubic function passes through the origin, has an extremum at $x = 1$ and a point of inflection at $W(2, -2)$. Set up the conditions and solve.</p></div>
+            <div class="b-sol"><p>$f(0) = 0$: $d = 0$; $f'(1) = 0$: $3a + 2b + c = 0$; $f(2) = -2$: $8a + 4b + 2c = -2$; $f''(2) = 0$: $12a + 2b = 0$. Solution: $f(x) = -x^3 + 6x^2 - 9x$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A quartic function that is symmetric about the $y$-axis has the maximum $H(0, 2)$ and the minimum $T(1, 1)$. Find it and check.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^4 + bx^2 + c$: $c = 2$, $a + b + 2 = 1$, $f'(1) = 4a + 2b = 0$. So $a = 1$, $b = -2$: $f(x) = x^4 - 2x^2 + 2$. Check: $f''(0) = -4 < 0$, $f''(1) = 8 > 0$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Is there a cubic function with the minimum $T(0, 0)$ and the maximum $H(2, 0)$? Justify with the system of equations and graphically.</p></div>
+            <div class="b-sol"><p>$d = 0$, $c = 0$, $8a + 4b = 0$, $12a + 4b = 0$ give $a = b = 0$: only the zero function, which does not have degree 3. Graphically: there would be double zeros at 0 and at 2,
+                four in all, but a cubic function has at most three. Without a check this would easily have been overlooked.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Use the CAS to find the quartic function whose graph touches the $x$-axis at the origin, has the maximum $H(2, 4)$ and passes through $(4, 0)$.
+                Use the result to explain why the graph is symmetric about the line $x = 2$.</p></div>
+            <div class="b-sol"><p>The conditions $f(0) = 0$, $f'(0) = 0$, $f(2) = 4$, $f'(2) = 0$, $f(4) = 0$ give $f(x) = \tfrac14 x^4 - 2x^3 + 4x^2 = \tfrac14 x^2 (x - 4)^2$.
+                With $x = 2 + h$: $f = \tfrac14 (2 + h)^2 (h - 2)^2 = \tfrac14 (h^2 - 4)^2$, and this does not change if you replace $h$ by $-h$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="5" data-ph="number"><p class="b-q-text">How many conditions do you need for a quartic function?</p><div class="b-sol"><p>Five coefficients, so five conditions.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + bx + c$ passes through $(0, 1)$, $(1, 2)$ and $(-1, 4)$. What is $a$?</p><div class="b-sol"><p>$c = 1$, $a + b = 1$, $a - b = 3$: $a = 2$, $b = -1$.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="f(1) ="><p class="b-q-text">For the function from example 1: what is $f(1)$?</p><div class="b-sol"><p>$1 - 3 + 4 = 2$, the point of inflection.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Optimisation problems" data-toc-k="2" data-toc-short="2 Optimum">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Optimisation problems</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The lifeguard’s time depends on the point $x$ at which she goes into the water. If she takes the straight route, she needs 21.2 s;
+                if she runs until she is opposite the swimmer, 19.7 s. In between there is a best point. To find it, you write the time as a <b>function of a single variable</b> and look for its minimum.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SOLVING OPTIMISATION PROBLEMS</div>
+                <div class="b-text"><ol>
+                    <li>Name the <b>quantity</b> that is to become extremal and write it down as a term, often with several variables at first.</li>
+                    <li>Use the <b>constraint</b> to replace all variables but one: this gives the <b>objective function</b>.</li>
+                    <li>Give the sensible <b>domain</b>.</li>
+                    <li>Find the local extrema with the derivative and compare them with the <b>values at the ends</b>: you are looking for the global extremum.</li>
+                    <li>Answer the question <b>in context</b>.</li>
+                </ol></div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Trick:</b> instead of a distance $d = \sqrt{\ldots}$ you minimise $d^2$. The square root is strictly increasing, so both have their minimum at the same point, but $d^2$ is easier to differentiate.</p>
+            <p class="b-note"><b>With the CAS:</b> if the equation $Z'(x) = 0$ is hard, you solve it numerically or read off the minimum from the graph.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE FASTEST ROUTE</div>
+        <p class="b-help" style="margin:0 0 12px">Drag the point $P$ along the water line. On the right you see the time $T(x)$. Change the speeds and watch how the minimum moves.</p>
+        <div data-widget="rettung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · THE SHORTEST DISTANCE</div>
+            <div class="b-text"><p>Which point of the parabola $y = x^2$ is closest to the point $P(3, 0)$? How large is the distance?</p></div>
+            <div class="b-sol"><p>A point on the parabola is $Q(x, x^2)$. Objective function: $d^2(x) = (x - 3)^2 + x^4$, $D = \mathbb{R}$.</p>
+                <p>$\left(d^2\right)'(x) = 2(x - 3) + 4x^3 = 0 \iff 2x^3 + x - 3 = 0$. Guess: $x = 1$. Polynomial division: $(x - 1)(2x^2 + 2x + 3)$, and the second factor has no zero.</p>
+                <p>$\left(d^2\right)'$ changes from $-$ to $+$ at 1: <span class="b-res">$Q(1, 1)$, distance $d = \sqrt{4 + 1} = \sqrt5 \approx 2.24$</span>. For $x \to \pm\infty$, $d^2$ grows beyond all bounds, so the minimum is global.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · THE LIFEGUARD</div>
+            <div class="b-text"><p>She is standing at $A(0, 30)$, the swimmer is at $B(50, -20)$, and the water line is the $x$-axis. She runs at 6 m/s and swims at 2 m/s. Where should she go into the water?</p></div>
+            <div class="b-sol"><p>Running distance $\sqrt{30^2 + x^2}$, swimming distance $\sqrt{20^2 + (50 - x)^2}$. Objective function $T(x) = \tfrac{\sqrt{900 + x^2}}{6} + \tfrac{\sqrt{400 + (50 - x)^2}}{2}$ on $D = [0, 50]$.</p>
+                <p>The CAS solves $T'(x) = 0$: $x \approx 44.3$, $T \approx 19.3$ s. Values at the ends: $T(0) \approx 31.9$ s, $T(50) \approx 19.7$ s.</p>
+                <p><span class="b-res">She should go into the water about 44 m along the shore</span> and saves almost 2 s compared with the straight route.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · OPTIMISING IN EVERYDAY LIFE</div>
+        <p class="b-help" style="margin:0 0 12px">Three classic problems: move the slider and look for the optimum first with your eyes, then with the derivative.</p>
+        <div data-widget="optimieren"></div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Two positive numbers have the sum 20. When is their product largest?</p></div>
+            <div class="b-sol"><p>$P(x) = x(20 - x)$, $D = (0, 20)$. $P'(x) = 20 - 2x = 0$ at $x = 10$: both numbers 10, product 100.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A rectangular garden is to have an area of 400 m². For which dimensions do you need the least fence?</p></div>
+            <div class="b-sol"><p>$xy = 400$, $U(x) = 2x + \tfrac{800}{x}$ for $x > 0$. $U'(x) = 2 - \tfrac{800}{x^2} = 0$ at $x = 20$: a square with sides of 20 m, 80 m of fence.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A box that is open at the top with a square base is to hold 32 dm³. For which dimensions do you need the least material?</p></div>
+            <div class="b-sol"><p>$a^2 h = 32$, $O = a^2 + 4ah = a^2 + \tfrac{128}{a}$. $O'(a) = 2a - \tfrac{128}{a^2} = 0 \iff a^3 = 64$: $a = 4$ dm, $h = 2$ dm, $O = 48$ dm².</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A rectangle in the first quadrant has one corner at the origin and the opposite corner on the graph of $f(x) = e^{-x}$. When is its area largest?</p></div>
+            <div class="b-sol"><p>$A(u) = u\,e^{-u}$ for $u > 0$. $A'(u) = (1 - u)\,e^{-u} = 0$ at $u = 1$, change of sign from $+$ to $-$: $A = \tfrac1e \approx 0.368$ (compare chapter 1.4, example 2).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A cylinder is placed in a cone with radius 6 cm and height 12 cm so that the circle at its top touches the curved surface of the cone. How large can the cylinder be at most?
+                What fraction of the cone is that?</p></div>
+            <div class="b-sol"><p>Intercept theorem: $\tfrac{12 - h}{r} = \tfrac{12}{6}$, so $h = 12 - 2r$. $V(r) = \pi r^2 (12 - 2r)$ on $[0, 6]$. $V'(r) = \pi(24r - 6r^2) = 0$ at $r = 4$, $h = 4$:
+                $V = 64\pi \approx 201$ cm³. At the ends $V = 0$. The cone holds $144\pi$ cm³, and the cylinder fills $\tfrac49$ of it.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="40" data-ph="m"><p class="b-q-text">A rectangle has the area 100 m². What is the smallest possible perimeter?</p><div class="b-sol"><p>A square with sides of 10 m: 40 m</p></div></div>
+        <div class="b-q" data-ans="36" data-ph="value"><p class="b-q-text">What is the largest value that $x(12 - x)$ takes?</p><div class="b-sol"><p>At $x = 6$: 36</p></div></div>
+        <div class="b-q" data-ans="1.155" data-tol="0.001" data-ph="u ="><p class="b-q-text">A rectangle stands symmetrically on the $x$-axis below $y = 4 - x^2$ with the corners $(\pm u, 0)$. For which $u$ is its area largest (three decimal places)?</p><div class="b-sol"><p>$A(u) = 2u(4 - u^2)$, $A'(u) = 8 - 6u^2 = 0$: $u = \sqrt{4/3} \approx 1.155$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Regression" data-toc-k="3" data-toc-short="3 Regression">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Regression</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The braking distances do not lie exactly on a curve; measured values always scatter. What you want is the function of a chosen type that fits best <b>overall</b>.
+                For this the CAS takes the function for which the sum of the squares of the vertical deviations is smallest: the <b>method of least squares</b>.
+                Why squares? Because then positive and negative deviations do not cancel out, and you can find the minimum with the derivative (example 6).</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · REGRESSION</div>
+                <div class="b-text">
+                    <p>In a <b>regression</b> the CAS finds, for measured points $(x_i, y_i)$, the function of a given type for which $\sum (y_i - f(x_i))^2$ is minimal.</p>
+                    <p>You choose the <b>type</b> with reasons: from the context (for example $s \sim v^2$ for the braking distance) and from the picture of the points, not just by the key figure.</p>
+                    <p>The <b>coefficient of determination</b> $r^2$ lies between 0 and 1. Close to 1 means: the points lie close to the curve. It does not prove that the model is right.</p>
+                    <p>Predictions outside the measured values (<b>extrapolation</b>) are uncertain, all the more so the further away you go.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In the CAS:</b> <code>LinReg</code>, <code>QuadReg</code>, <code>CubicReg</code>, <code>ExpReg</code>, <code>PowerReg</code>. The values are in two lists.</p>
+            <p class="b-note"><b>Stay critical:</b> a polynomial of high degree passes through almost every point, $r^2 \approx 1$, and still predicts nonsense.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE BEST CURVE</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a series of measurements and a type of model. Compare $r^2$ and the prediction. You can move the points.</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · LINEAR OR QUADRATIC?</div>
+            <div class="b-text"><p>Investigate the braking distances from the exploration with linear and quadratic regression. Which is the better prediction for 150 km/h?</p></div>
+            <div class="b-sol"><p>Linear: $y \approx 1.595x - 52.0$ with $r^2 \approx 0.968$, prediction 187 m. Quadratic: $y \approx 0.00989x^2 + 0.0129x - 0.27$ with $r^2 \approx 0.9997$, prediction 224 m.</p>
+                <p>0.968 sounds good too, but the points lie first above, then below, then above the line again: they curve. Physically, the kinetic energy grows with $v^2$.
+                    <span class="b-res">The quadratic model is justified, about 224 m.</span> A straight line would even predict a negative braking distance at 30 km/h.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · WHY LEAST SQUARES?</div>
+            <div class="b-text"><p>We are looking for the line through the origin $y = mx$ that fits the points $(1, 2)$, $(2, 3)$, $(3, 7)$ best. Derive the formula for $m$.</p></div>
+            <div class="b-sol"><p>$S(m) = \sum (y_i - m x_i)^2$. By the chain rule: $S'(m) = -2 \sum x_i (y_i - m x_i) = 0 \iff m = \dfrac{\sum x_i y_i}{\sum x_i^2}$. Because $S''(m) = 2 \sum x_i^2 > 0$, this is a minimum.</p>
+                <p>Here: <span class="b-res">$m = \dfrac{2 + 6 + 21}{1 + 4 + 9} = \dfrac{29}{14} \approx 2.07$</span>. So regression is an optimisation problem.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Which type of function fits? Justify from the context. a) a candle burns down &nbsp; b) a braking distance &nbsp; c) hot tea cools down to room temperature &nbsp; d) a loan with a fixed rate of interest</p></div>
+            <div class="b-sol"><p>a) linear, the same amount of wax per hour &nbsp; b) quadratic, $s \sim v^2$ &nbsp; c) exponential for the difference in temperature, which decreases by the same factor every minute &nbsp; d) exponential, growth by a fixed factor</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Use the CAS to find the regression line for $(1, 2.1)$, $(2, 3.9)$, $(3, 6.2)$, $(4, 7.8)$ and $r^2$. What does it predict for $x = 10$?</p></div>
+            <div class="b-sol"><p>$y = 1.94x + 0.15$, $r^2 \approx 0.996$. For $x = 10$: 19.55, with caution, because 10 lies far outside the measured values.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>World population (billions): 1950: 2.5; 1970: 3.7; 1990: 5.32; 2010: 6.99; 2020: 7.84, and the years in between in the widget. With $x$ = years since 1950, find an exponential and a linear regression.
+                Compare their predictions for 2050 with the United Nations forecast of about 9.7 billion.</p></div>
+            <div class="b-sol"><p>Exponential (with all eight values): $y \approx 2.61 \cdot 1.0167^x$, for 2050 about 13.7 billion. Linear: $y \approx 0.078x + 2.27$, for 2050 about 10.1 billion.
+                The growth rate has been falling for decades, and the exponential function overestimates strongly. None of the curves knows the reasons for the development.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A parabola through the origin $y = ax^2$ also fits the braking distances. Find $a$ with the formula from example 6, adapted to $y = a \cdot x^2$, and compare the prediction for 150 km/h.</p></div>
+            <div class="b-sol"><p>With $u_i = x_i^2$ this is a line through the origin in $u$: $a = \tfrac{\sum x_i^2 y_i}{\sum x_i^4} \approx 0.00998$. Prediction $0.00998 \cdot 150^2 \approx 225$ m, almost the same as the full quadratic regression.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Which constant $c$ fits the measured values $y_1, \ldots, y_n$ best in the sense of least squares? Prove it with the derivative of $S(c) = \sum (y_i - c)^2$.</p></div>
+            <div class="b-sol"><p>$S'(c) = -2 \sum (y_i - c) = -2\left(\sum y_i - nc\right) = 0 \iff c = \tfrac1n \sum y_i = \bar{y}$, and $S''(c) = 2n > 0$. The mean is the best constant.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="2.214" data-tol="0.001" data-ph="m ="><p class="b-q-text">Find $m$ of the best line through the origin for $(1, 2)$, $(2, 4)$, $(3, 7)$ (three decimal places).</p><div class="b-sol"><p>$\tfrac{2 + 8 + 21}{14} = \tfrac{31}{14} \approx 2.214$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="c ="><p class="b-q-text">Which constant fits the values 3, 5 and 10 best in the sense of least squares?</p><div class="b-sol"><p>The mean: 6</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">A regression gives $r^2 = 0.99$. What follows from this?</p><div class="b-mc"><button>The model is certainly right.</button><button>The points lie close to the curve.</button><button>Predictions far outside are reliable.</button></div><div class="b-sol"><p>Only that the points are close to the curve. $r^2$ says nothing about the model or about extrapolation.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with chapter 2:</b> set up the system of equations for a cubic function through $(0, 1)$, $(1, 0)$, $(-1, 4)$ and $(2, 7)$ as a matrix and solve it with the Gauss-Jordan method.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{cccc|c} 0 & 0 & 0 & 1 & 1 \\ 1 & 1 & 1 & 1 & 0 \\ -1 & 1 & -1 & 1 & 4 \\ 8 & 4 & 2 & 1 & 7 \end{array}\right)$ for $(a, b, c, d)$. Solution $f(x) = x^3 + x^2 - 3x + 1$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Connecting with physics:</b> show in general for the lifeguard: from $T'(x) = 0$ it follows that $\tfrac{\sin\alpha}{v_1} = \tfrac{\sin\beta}{v_2}$, where $\alpha$ and $\beta$ are the angles of the two paths to the normal to the water line.</p></div>
+            <div class="b-sol"><p>With $A(0, a)$, $B(b, -c)$: $T(x) = \tfrac{\sqrt{a^2 + x^2}}{v_1} + \tfrac{\sqrt{c^2 + (b - x)^2}}{v_2}$. $T'(x) = \tfrac{x}{v_1\sqrt{a^2 + x^2}} - \tfrac{b - x}{v_2\sqrt{c^2 + (b - x)^2}}$.
+                The fractions $\tfrac{x}{\sqrt{a^2 + x^2}}$ and $\tfrac{b - x}{\sqrt{c^2 + (b - x)^2}}$ are exactly $\sin\alpha$ and $\sin\beta$. This is the law of refraction of light.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A cubic function is point-symmetric about the origin, has an extremum at $x = 1$ and passes through $(2, 4)$. Find it and state what kind of extremum there is at $x = 1$.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^3 + cx$: $3a + c = 0$, $8a + 2c = 4$, so $2a = 4$, $a = 2$, $c = -6$: $f(x) = 2x^3 - 6x$. $f''(1) = 12 > 0$: minimum $T(1, -4)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A beam with a rectangular cross-section is cut from a tree trunk with a circular cross-section (diameter 40 cm). Its strength is proportional to $b \cdot h^2$.
+                For which dimensions does it carry the most?</p></div>
+            <div class="b-sol"><p>$b^2 + h^2 = 40^2$, so $T(b) = b(1600 - b^2)$ on $(0, 40)$. $T'(b) = 1600 - 3b^2 = 0$: $b = \tfrac{40}{\sqrt3} \approx 23.1$ cm, $h = 40\sqrt{\tfrac23} \approx 32.7$ cm. The ratio is $h : b = \sqrt2$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Light takes the fastest route" data-toc-k="X" data-toc-short="Fermat">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY AND PHYSICS</span></div>
+    <h2>Light takes the fastest route</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>A stick in water looks bent, because light changes its direction at the surface of the water. Willebrord Snellius and René Descartes had found the law for this:
+                the ratio of the sines of the two angles to the normal is fixed. But why the sines, of all things?</p>
+            <p>Pierre de Fermat answered this in 1662 in two papers that he enclosed with a letter to the physician Marin Cureau de la Chambre. His assumption: nature does not choose the shortest
+                route, but the <b>fastest</b> one, and light is slower in water than in air. With his method for maxima and minima he worked through exactly the lifeguard’s problem
+                and, to his own surprise, obtained the law of sines (exercise 17).</p>
+            <p>The followers of Descartes held this against him, because Descartes had assumed that light was faster in water. Fermat was right: in 1850 Léon Foucault measured that light is slower in water.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Pierre de Fermat: “Analysis ad refractiones” and “Synthesis ad refractiones”, enclosures to a letter to Marin Cureau de la Chambre, 1662.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>FUNCTIONS FROM CONDITIONS</h4><p>Degree $n$: translate $n + 1$ conditions and solve the system of equations, from four unknowns on with the CAS.</p></div>
+        <div><p>$H(0, 4)$, $T(2, 0)$: $f(x) = x^3 - 3x^2 + 4$</p></div></div>
+    <div class="b-rueck"><div><h4>CHECK</h4><p>$f'(x_0) = 0$ is only necessary. Check the result to see whether it is the required kind of point and whether the function exists at all.</p></div>
+        <div><p>Cubic with $T(0, 0)$ and $H(2, 0)$: does not exist</p></div></div>
+    <div class="b-rueck"><div><h4>TRANSITIONS</h4><p>Without a kink: $f$ and $f'$ fit. Without a jump in curvature: $f''$ as well.</p></div>
+        <div><p>Change of lane: $\tfrac{3}{16}x^5 - \tfrac{15}{16}x^4 + \tfrac54 x^3$</p></div></div>
+    <div class="b-rueck"><div><h4>OPTIMISATION PROBLEMS</h4><p>Quantity, constraint, objective function in one variable, domain, derivative and values at the ends, answer in words.</p></div>
+        <div><p>Cylinder in a cone: $r = 4$, $h = 4$, $V = 64\pi$</p></div></div>
+    <div class="b-rueck"><div><h4>REGRESSION</h4><p>Least squares; choose the type with reasons; $r^2$ close to 1 does not mean “right”; extrapolation is uncertain.</p></div>
+        <div><p>Braking distance quadratic: $s(150) \approx 224$ m</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="-1" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + c$ passes through $(0, 9)$ and $(3, 0)$. What is $a$?</p><div class="b-sol"><p>$c = 9$, $9a + 9 = 0$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="number"><p class="b-q-text">How many coefficients does a function of degree five that is point-symmetric about the origin have?</p><div class="b-sol"><p>$ax^5 + bx^3 + cx$: three</p></div></div>
+            <div class="b-q" data-ans="25" data-ph="value"><p class="b-q-text">Two numbers have the sum 10. What is the largest their product can be?</p><div class="b-sol"><p>$5 \cdot 5 = 25$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="44.3" data-tol="0.1" data-ph="x ="><p class="b-q-text">Where should the lifeguard from example 4 go into the water if she runs at 6 m/s and swims at 2 m/s (one decimal place)?</p><div class="b-sol"><p>$x \approx 44.3$ m</p></div></div>
+            <div class="b-q" data-ans="201.1" data-tol="0.1" data-ph="cm³"><p class="b-q-text">What is the volume of the largest cylinder in the cone from exercise 10 in cm³ (one decimal place)?</p><div class="b-sol"><p>$64\pi \approx 201.1$</p></div></div>
+            <div class="b-q" data-ans="2.236" data-tol="0.001" data-ph="d ="><p class="b-q-text">What is the shortest distance of the point $(3, 0)$ from the parabola $y = x^2$ (three decimal places)?</p><div class="b-sol"><p>$\sqrt5 \approx 2.236$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-steckbrief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FUNCTIONS FROM CONDITIONS</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-extremwertprobleme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">OPTIMISATION PROBLEMS</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-regression.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGRESSION</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-ka1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CLASS TEST 11/I</span><span class="b-lab-what">Practice class test with solutions</span></span></a>
+        <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LINE OF BEST FIT</span><span class="b-lab-what">Regression to get your hands on</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 11, advanced course · Learning area 1 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-en/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-en/gy11lk.js"></script>
+</body>
+</html>

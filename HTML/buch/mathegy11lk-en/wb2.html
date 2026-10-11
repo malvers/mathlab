@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 11 Advanced · Chapter E · Numerical methods | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Graphical solution, bisection, Newton’s method, fixed-point iteration, Banach’s theorem. Chapter E of the interactive textbook Mathematics · Grammar School 11 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 11 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER E · ELECTIVE AREA 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER E · ELECTIVE AREA 2 · JANUARY</p>
+            <h1>Numerical methods</h1>
+            <p class="b-hero-lead">The equation $\cos x = x$ has exactly one solution, but no formula gives it. You can only <b>approximate</b> it, but as accurately as you like:
+                by halving an interval, with tangents following Newton, or by pressing $\cos$ again and again. In the advanced course you ask <b>why</b> a method
+                converges, how fast, and when it fails, up to a theorem that Stefan Banach proved in 1922.</p>
+            <div class="b-chips"><span class="b-chip">10 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">3 PRACTICE SHEETS</span><span class="b-chip">CAS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["cos(x)","x"]' data-labels='["cos x","y = x"]' data-lat="[2.2,1.25]" data-x="-0.5,2.6" data-y="-0.6,1.5" data-pts="[[0.739,0.739]]" data-h="240" data-aria="The graphs of cos x and y = x intersect at about 0.739"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>solve equations <b>graphically</b> and find starting values</li>
+                <li>apply the <b>bisection method</b> and <b>Newton’s method</b> confidently, also with recursion or lists in the CAS</li>
+                <li>know the general <b>iteration method</b> $x_{n+1} = \varphi(x_n)$ and its condition for convergence $|\varphi'| < 1$</li>
+                <li>judge when an algebraic, a graphical or a numerical method is suitable</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="1" data-ph="number"><p class="b-q-text">$f(x) = x^3 + x - 1$. What is $f(1)$?</p><div class="b-sol"><p>$1 + 1 - 1 = 1$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$f$ is continuous, $f(0) < 0$ and $f(1) > 0$. What follows?</p><div class="b-mc"><button>$f$ has a zero in $(0, 1)$.</button><button>$f$ has exactly two zeros there.</button><button>Nothing.</button></div><div class="b-sol"><p>The graph has to cross the $x$-axis (chapter 1.1, continuity).</p></div></div>
+            <div class="b-q" data-ans="-2" data-ph="m ="><p class="b-q-text">What is the gradient of the tangent to $y = x^2 - 3$ at $x = -1$?</p><div class="b-sol"><p>$f'(x) = 2x$, so −2.</p></div></div>
+            <div class="b-q" data-ans="0.5" data-ph="x ="><p class="b-q-text">Where does the line $y = 2x - 1$ cut the $x$-axis?</p><div class="b-sol"><p>$2x - 1 = 0$, $x = \tfrac12$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">GUESS THE NUMBER</div>
+            <div class="b-text"><p>Someone thinks of a number between 1 and 1000 and only says “greater” or “smaller”.</p>
+                <ul><li>With which strategy do you find it fastest? What is the largest number of questions you need?</li><li>How does the same idea help with $x^3 + x - 1 = 0$?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE CALCULATOR TRICK</div>
+            <div class="b-text"><p>Set the calculator to radians, type in any number and press <code>cos</code> again and again.</p>
+                <ul><li>What happens? Does the result depend on where you start?</li><li>Try the same with <code>x²</code> instead of <code>cos</code>, once starting with 0.9 and once with 1.1.</li></ul></div>
+            <span class="b-pair">→ Unit 3</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TANGENTS AS SIGNPOSTS</div>
+            <div class="b-text"><p>Draw $y = x^2 - 2$ large. Draw the tangent at $x = 2$ and find where it cuts the $x$-axis.</p>
+                <ul><li>Repeat this at the new point. How close are you to $\sqrt2$?</li><li>When could this procedure go wrong?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Solving graphically and bisection" data-toc-k="1" data-toc-short="1 Bisection">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Solving graphically and bisection</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>When guessing the number, every question halves the range: after 10 questions only one of 1000 numbers is left, because $2^{10} = 1024$.
+                It is the same with $f(x) = x^3 + x - 1$: $f(0) = -1 < 0$ and $f(1) = 1 > 0$, so there is a zero in between. You check the midpoint and keep the half at whose ends $f$ has different signs.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SOLVING GRAPHICALLY AND BISECTION</div>
+                <div class="b-text">
+                    <p><b>Graphically:</b> the solutions of $g(x) = h(x)$ are the $x$-coordinates of the points of intersection of the graphs of $g$ and $h$, or the zeros of $f = g - h$. This gives their number and starting values.</p>
+                    <p><b>Intermediate value theorem:</b> if $f$ is continuous on $[a, b]$ and $f(a)$ and $f(b)$ have different signs, then $f$ has a zero in $(a, b)$.</p>
+                    <p><b>Bisection:</b> calculate $m = \tfrac{a + b}{2}$. If $f(a)$ and $f(m)$ have different signs, $[a, m]$ is the new interval, otherwise $[m, b]$.
+                        After $n$ steps the interval has length $\tfrac{b - a}{2^n}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Slow but sure:</b> bisection always converges if the conditions are met. But it gains only one binary digit per step, so about ten steps for three decimal places.</p>
+            <p class="b-note"><b>In the CAS:</b> a table has $a$, $b$, $m$ and $f(m)$ side by side. With conditions (<code>when</code>) you build the next row.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · HALVING INTERVALS</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a function and halve step by step. The table shows how the interval around the zero shrinks.</p>
+        <div data-widget="bisektion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · THREE STEPS</div>
+            <div class="b-text"><p>Carry out three steps of bisection for $f(x) = x^3 + x - 1$ on $[0, 1]$.</p></div>
+            <div class="b-sol"><p>$m = 0.5$: $f(0.5) = -0.375 < 0$, new interval $[0.5, 1]$.</p>
+                <p>$m = 0.75$: $f(0.75) \approx 0.172 > 0$, new interval $[0.5, 0.75]$.</p>
+                <p>$m = 0.625$: $f(0.625) \approx -0.131 < 0$, <span class="b-res">new interval $[0.625, 0.75]$</span>. The zero is $0.6823\ldots$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · WHERE BISECTION FAILS</div>
+            <div class="b-text"><p>Apply bisection: a) $f(x) = (x - 1)^2$ on $[0, 3]$ &nbsp; b) $g(x) = \tfrac{1}{x - 1}$ on $[0, 3]$. What goes wrong?</p></div>
+            <div class="b-sol"><p>a) $f(0) = 1 > 0$ and $f(3) = 4 > 0$: no change of sign, so the method does not even start, although there is a (double) zero at 1.</p>
+                <p>b) $g(0) = -1 < 0$, $g(3) = \tfrac12 > 0$. Bisection runs and ends up at 1, but there is a <b>pole</b> there, not a zero.
+                    <span class="b-res">The condition “continuous on $[a, b]$” is violated.</span> Think first, then let the machine calculate.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Solve $e^x = 3 - x$ graphically. How many solutions are there, and in which interval of length 1 does it lie? Give it to three places with the CAS.</p></div>
+            <div class="b-sol"><p>$e^x$ increases, $3 - x$ decreases: exactly one point of intersection. $f(x) = e^x + x - 3$: $f(0) = -2$, $f(1) \approx 0.72$. Solution $x \approx 0.792$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Carry out three steps of bisection for $f(x) = x^3 - 2x - 5$ on $[2, 3]$.</p></div>
+            <div class="b-sol"><p>$f(2) = -1$, $f(3) = 16$. $f(2.5) = 5.625$: $[2, 2.5]$. $f(2.25) \approx 1.89$: $[2, 2.25]$. $f(2.125) \approx 0.35$: $[2, 2.125]$. The zero is $2.0946\ldots$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>How many steps of bisection do you need at least on $[1, 2]$ for the interval to be shorter than 0.001? And for $10^{-6}$?</p></div>
+            <div class="b-sol"><p>$2^{-n} < 0.001 \iff 2^n > 1000$: $n = 10$. For $10^{-6}$: $2^n > 10^6$, $n > \tfrac{6}{\lg 2} \approx 19.9$, so 20 steps.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$f(x) = x^3 - 3x + 1$. Find graphically how many zeros $f$ has, and give a starting interval of length 1 with a change of sign for each of them.</p></div>
+            <div class="b-sol"><p>Three zeros. $f(-2) = -1$, $f(-1) = 3$, $f(0) = 1$, $f(1) = -1$, $f(2) = 3$: intervals $[-2, -1]$, $[0, 1]$ and $[1, 2]$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Prove: if after $n$ steps of bisection you take the midpoint of the interval as the approximation, the error is at most $\tfrac{b - a}{2^{n + 1}}$.</p></div>
+            <div class="b-sol"><p>By the intermediate value theorem every interval $[a_n, b_n]$ contains a zero $x^*$, and $b_n - a_n = \tfrac{b - a}{2^n}$. The midpoint is at most half the length away from every point of the interval: $|m_n - x^*| \le \tfrac{b - a}{2^{n + 1}}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1.5" data-ph="a ="><p class="b-q-text">Bisection for $x^2 - 3$ on $[1, 2]$: where does the interval start after the first step?</p><div class="b-sol"><p>$f(1.5) = -0.75 < 0$, so $[1.5, 2]$.</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="steps"><p class="b-q-text">How many steps do you need to shrink an interval of length 1 to less than 0.01?</p><div class="b-sol"><p>$2^7 = 128 > 100$; $2^6 = 64$ is not enough.</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">What does bisection on $[a, b]$ need?</p><div class="b-mc"><button>only a change of sign</button><button>only continuity</button><button>continuity and a change of sign</button></div><div class="b-sol"><p>Both, otherwise, as in example 2, you end up at a pole or do not even start.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Newton’s method" data-toc-k="2" data-toc-short="2 Newton">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Newton’s method</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Close to a zero the graph looks like its tangent (chapter 1.2). So instead of the curve you take the tangent and calculate its zero, which can be done with a formula.
+                The tangent at $x_n$ is $y = f(x_n) + f'(x_n)(x - x_n)$. It cuts the $x$-axis at $x = x_n - \tfrac{f(x_n)}{f'(x_n)}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · NEWTON’S METHOD</div>
+                <div class="b-text">
+                    <p>Starting from a starting value $x_0$: $\displaystyle x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$.</p>
+                    <p>If you start close enough to a simple zero, it converges very fast: the number of correct places roughly <b>doubles</b> with every step (quadratic convergence).</p>
+                    <p><b>It can fail:</b> if $f'(x_n) = 0$ (horizontal tangent), or with a bad starting value (the sequence jumps to another zero, runs away or gets caught in a cycle).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In the CAS:</b> enter the recursion $x_{n+1} = x_n - f(x_n)/f'(x_n)$ with a starting value and display the sequence as a table.</p>
+            <p class="b-note"><b>Stopping:</b> you stop when two approximations no longer differ in the places you want, and check that $f(x_n) \approx 0$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · TANGENTS TO THE ZERO</div>
+        <p class="b-help" style="margin:0 0 12px">Drag the starting value and go step by step. For $x^3 - 2x + 2$ try the starting value 0.</p>
+        <div data-widget="newton"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · THE PLACES DOUBLE</div>
+            <div class="b-text"><p>Calculate $\sqrt2$ with Newton’s method for $f(x) = x^2 - 2$, starting with $x_0 = 1$.</p></div>
+            <div class="b-sol"><p>$x_{n+1} = x_n - \tfrac{x_n^2 - 2}{2x_n} = \tfrac12\left(x_n + \tfrac{2}{x_n}\right)$, the ancient method of Heron.</p>
+                <p>$x_1 = 1.5$; $x_2 = 1.41\underline{6}\,667$; $x_3 = 1.41421\underline{5}\,686$; $x_4 = 1.41421356237\underline{4}\,69$.</p>
+                <p><span class="b-res">Correct places: 1, 3, 6, 12</span>. Compared with $\sqrt2 = 1.414\,213\,562\,373\,095\ldots$ they double with every step.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · A CYCLE</div>
+            <div class="b-text"><p>Apply Newton’s method to $f(x) = x^3 - 2x + 2$, once with $x_0 = 0$ and once with $x_0 = -2$.</p></div>
+            <div class="b-sol"><p>$x_{n+1} = x_n - \tfrac{x_n^3 - 2x_n + 2}{3x_n^2 - 2}$. Start 0: $x_1 = 0 - \tfrac{2}{-2} = 1$, $x_2 = 1 - \tfrac{1}{1} = 0$, and so on: a <b>cycle</b> $0, 1, 0, 1, \ldots$</p>
+                <p>Start −2: $x_1 = -1.8$, $x_2 \approx -1.76995$, $x_3 \approx -1.769293$. <span class="b-res">The zero is −1.7693.</span> The starting value decides.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Use Newton’s method to calculate two approximations of $\sqrt5$ with $f(x) = x^2 - 5$ and $x_0 = 2$, without aids, as fractions.</p></div>
+            <div class="b-sol"><p>$x_1 = 2 - \tfrac{-1}{4} = \tfrac94 = 2.25$; $x_2 = \tfrac94 - \tfrac{1/16}{9/2} = \tfrac94 - \tfrac{1}{72} = \tfrac{161}{72} \approx 2.23611$. Exact: 2.23607.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Solve $x^3 - 2x - 5 = 0$ with Newton’s method, starting with $x_0 = 2$. Compare with exercise 2.</p></div>
+            <div class="b-sol"><p>$x_1 = 2 - \tfrac{-1}{10} = 2.1$; $x_2 \approx 2.094568$; $x_3 \approx 2.094551$. After two steps Newton is more accurate than three steps of bisection.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Solve $\cos x = x$ with Newton’s method, starting with $x_0 = 1$. How many steps do you need for six decimal places?</p></div>
+            <div class="b-sol"><p>$f(x) = \cos x - x$, $f'(x) = -\sin x - 1$. $x_1 \approx 0.750364$, $x_2 \approx 0.739113$, $x_3 \approx 0.739085$: three steps.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For which starting values does Newton’s method stop immediately for $f(x) = x^3 - 3x$? What happens at $x_0 = 1$?</p></div>
+            <div class="b-sol"><p>If $f'(x_0) = 3x_0^2 - 3 = 0$, so $x_0 = \pm 1$: the tangent is horizontal and does not cut the $x$-axis. $x_0 = 1$ is exactly such a starting value.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Show: Newton’s method for $f(x) = \tfrac1x - a$ ($a > 0$) is $x_{n+1} = x_n(2 - a x_n)$. Why is this practical for a computer? Use it to calculate $\tfrac17$ with $x_0 = 0.1$.</p></div>
+            <div class="b-sol"><p>$f'(x) = -\tfrac{1}{x^2}$: $x - \tfrac{1/x - a}{-1/x^2} = x + x^2\left(\tfrac1x - a\right) = 2x - ax^2$. There is no division, only multiplications: this is how some processors divide.
+                $x_1 = 0.13$, $x_2 = 0.1417$, $x_3 \approx 0.142848$, $\tfrac17 = 0.142857\ldots$</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1.75" data-ph="x₁ ="><p class="b-q-text">Newton for $x^2 - 3$ with $x_0 = 2$: what is $x_1$?</p><div class="b-sol"><p>$2 - \tfrac14 = 1.75$</p></div></div>
+        <div class="b-q" data-ans="10/3" data-ph="x₁ ="><p class="b-q-text">Newton for $x^3 - 8$ with $x_0 = 1$: what is $x_1$?</p><div class="b-sol"><p>$1 - \tfrac{-7}{3} = \tfrac{10}{3}$. Way off: the start is unfavourable, but the sequence still arrives at 2.</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">When does Newton’s method break down?</p><div class="b-mc"><button>if $f(x_n) = 1$</button><button>if $f'(x_n) = 0$</button><button>if $x_n$ is negative</button></div><div class="b-sol"><p>Then the tangent is horizontal, and you would have to divide by 0.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Fixed points and Banach’s theorem" data-toc-k="3" data-toc-short="3 Fixed points">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Fixed points and Banach’s theorem</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>If you press <code>cos</code> again and again, you end up at $0.739085\ldots$, no matter what you start with. This number no longer changes: $\cos(0.739085) = 0.739085$.
+                It is a <b>fixed point</b> of $\cos$ and the solution of $\cos x = x$. With $x^2$, on the other hand, 0.9 soon becomes 0 and 1.1 something enormous, although 1 is a fixed point. Why is that?</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · FIXED-POINT ITERATION</div>
+                <div class="b-text">
+                    <p>You write the equation as $x = \varphi(x)$ and calculate $x_{n+1} = \varphi(x_n)$. If the sequence converges, it converges to a <b>fixed point</b> $x^* = \varphi(x^*)$.</p>
+                    <p><b>Condition for convergence:</b> if $\varphi$ maps the interval $I = [a, b]$ into itself and $|\varphi'(x)| \le L < 1$ for all $x \in I$, then $\varphi$ has exactly one fixed point in $I$,
+                        and the sequence converges to it for every starting value in $I$. In addition, $|x_n - x^*| \le \tfrac{L^n}{1 - L}\,|x_1 - x_0|$.</p>
+                    <p>If $|\varphi'(x^*)| > 1$, the fixed point is <b>repelling</b>, and the iteration does not find it.</p>
+                    <p>This is a special case of <b>Banach’s fixed-point theorem</b> (1922) on contraction mappings.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Why $|\varphi'| < 1$?</b> Close to $x^*$, $x_{n+1} - x^* = \varphi(x_n) - \varphi(x^*) \approx \varphi'(x^*)\,(x_n - x^*)$. With every step the error is multiplied by roughly $\varphi'(x^*)$.</p>
+            <p class="b-note"><b>Newton is a fixed-point iteration too:</b> $\varphi(x) = x - \tfrac{f(x)}{f'(x)}$. At a simple zero, $\varphi'(x^*) = 0$, which is why it is so fast.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE COBWEB</div>
+        <p class="b-help" style="margin:0 0 12px">Up to the graph of $\varphi$, across to the line $y = x$, vertically to the graph again: this is what $x_{n+1} = \varphi(x_n)$ looks like. Drag the starting value and compare the six functions.</p>
+        <div data-widget="fixpunkt"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · cos x = x</div>
+            <div class="b-text"><p>Use the condition for convergence to show that $x_{n+1} = \cos x_n$ converges for every start in $[0, 1]$. How many steps does the error estimate guarantee for three places?</p></div>
+            <div class="b-sol"><p>On $[0, 1]$, $\cos$ falls from 1 to $\cos 1 \approx 0.540$: $[0, 1]$ is mapped into itself. $|\varphi'(x)| = \sin x \le \sin 1 \approx 0.841 = L < 1$.</p>
+                <p>With $x_0 = 1$, $x_1 \approx 0.540$: $\tfrac{0.841^n}{0.159} \cdot 0.460 \le 0.001$ from <span class="b-res">$n = 47$</span> on.
+                    In fact 15 steps are enough: the estimate is cautious because it uses the worst $L$ everywhere, while close to $x^*$, $|\varphi'| \approx 0.67$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · THREE WAYS TO √2</div>
+            <div class="b-text"><p>The equation $x^2 = 2$ can be written as $x = \varphi(x)$ in different ways. Compare $\varphi_1(x) = \tfrac2x$, $\varphi_2(x) = x - \tfrac{x^2 - 2}{4}$ and $\varphi_3(x) = \tfrac12\left(x + \tfrac2x\right)$.</p></div>
+            <div class="b-sol"><p>$\varphi_1'(\sqrt2) = -\tfrac{2}{2} = -1$: no verdict, and in fact the cycle $1, 2, 1, 2, \ldots$</p>
+                <p>$\varphi_2'(\sqrt2) = 1 - \tfrac{\sqrt2}{2} \approx 0.29$: convergence, the error shrinks to about a third with every step (1.25; 1.359; 1.397; 1.409; …).</p>
+                <p>$\varphi_3'(\sqrt2) = \tfrac12 - \tfrac{1}{2} = 0$: <span class="b-res">Newton’s method, by far the fastest.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Iterate $\varphi(x) = \sqrt{x + 2}$ four times with $x_0 = 0$. Which fixed point does the sequence approach? Confirm it algebraically.</p></div>
+            <div class="b-sol"><p>1.414; 1.848; 1.962; 1.990. $x = \sqrt{x + 2} \Rightarrow x^2 - x - 2 = 0 \Rightarrow x = 2$ (the solution −1 is ruled out, because the square root is not negative).</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Find the fixed points of $\varphi(x) = x^2 - 2$ and decide whether they are attracting or repelling.</p></div>
+            <div class="b-sol"><p>$x^2 - x - 2 = 0$: $x = 2$ and $x = -1$. $\varphi'(2) = 4$, $\varphi'(-1) = -2$: both repelling.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>The equation $x^3 + x - 1 = 0$ (solution 0.6823) can be written as $x = \tfrac{1}{1 + x^2}$ or as $x = 1 - x^3$. Which form is suitable for the iteration? Justify with $\varphi'$.</p></div>
+            <div class="b-sol"><p>$\varphi_1(x) = \tfrac{1}{1 + x^2}$: $\varphi_1'(x^*) = -\tfrac{2x^*}{(1 + x^{*2})^2} \approx -0.64$, attracting. $\varphi_2(x) = 1 - x^3$: $\varphi_2'(x^*) = -3x^{*2} \approx -1.40$, repelling. So the first form.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Decide which method you would choose, and justify: a) $x^2 - 5x + 6 = 0$ &nbsp; b) $x^5 - x - 1 = 0$ &nbsp; c) $e^{-x} = x$ &nbsp; d) $\sin x = \tfrac{x}{2}$, all solutions</p></div>
+            <div class="b-sol"><p>a) algebraically, with the quadratic formula: 2 and 3 exactly. &nbsp; b) no formula, numerically (Newton). &nbsp; c) fixed-point iteration with $\varphi(x) = e^{-x}$, because $|\varphi'| < 1$ close to the solution 0.567. &nbsp;
+                d) graphically first: three solutions, 0 and $\pm 1.8955$; then Newton with starting values from the picture.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Prove: if $|\varphi(x) - \varphi(y)| \le L\,|x - y|$ with $L < 1$ for all $x, y \in I$, then $\varphi$ has at most one fixed point in $I$. (This inequality follows from $|\varphi'| \le L$ by the mean value theorem.)</p></div>
+            <div class="b-sol"><p>If $x^*$ and $y^*$ are fixed points, then $|x^* - y^*| = |\varphi(x^*) - \varphi(y^*)| \le L\,|x^* - y^*|$. If $x^* \neq y^*$, you could divide by $|x^* - y^*| > 0$ and would get $1 \le L$, a contradiction. So $x^* = y^*$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="6" data-ph="x* ="><p class="b-q-text">What fixed point does $\varphi(x) = \tfrac12 x + 3$ have?</p><div class="b-sol"><p>$x = \tfrac12 x + 3 \iff x = 6$</p></div></div>
+        <div class="b-q" data-ans="0.25" data-ph="φ′(2) ="><p class="b-q-text">What is $\varphi'(x^*)$ for $\varphi(x) = \sqrt{x + 2}$ at the fixed point $x^* = 2$?</p><div class="b-sol"><p>$\tfrac{1}{2\sqrt{4}} = \tfrac14$, attracting.</p></div></div>
+        <div class="b-q" data-ans="0.540" data-tol="0.001" data-ph="x₂ ="><p class="b-q-text">$x_{n+1} = \cos x_n$ with $x_0 = 0$. What is $x_2$ (three decimal places)?</p><div class="b-sol"><p>$x_1 = \cos 0 = 1$, $x_2 = \cos 1 \approx 0.540$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with chapter 1.5:</b> the lifeguard has to solve $T'(x) = 0$. Find the solution with Newton’s method in the CAS, starting with $x_0 = 40$.</p></div>
+            <div class="b-sol"><p>With $T'(x) = \tfrac{x}{6\sqrt{900 + x^2}} - \tfrac{50 - x}{2\sqrt{400 + (50 - x)^2}}$ and the derivative $T''$ from the CAS, the sequence converges to $x \approx 44.26$ in a few steps.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>For Newton, $\varphi(x) = x - \tfrac{f(x)}{f'(x)}$. Use the quotient rule $\left(\tfrac uv\right)' = \tfrac{u'v - uv'}{v^2}$ to show that $\varphi'(x) = \tfrac{f(x)\,f''(x)}{f'(x)^2}$, and conclude that $\varphi'(x^*) = 0$ at a simple zero.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac{f}{f'}\right)' = \tfrac{f'^2 - f f''}{f'^2} = 1 - \tfrac{f f''}{f'^2}$, so $\varphi' = 1 - 1 + \tfrac{f f''}{f'^2}$. At a simple zero, $f(x^*) = 0$ and $f'(x^*) \neq 0$, so $\varphi'(x^*) = 0$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Solve $e^{-x} = x$ in three ways: graphically, with three steps of bisection on $[0, 1]$, and with the fixed-point iteration $x_{n+1} = e^{-x_n}$ from $x_0 = 0.5$. Compare the effort.</p></div>
+            <div class="b-sol"><p>Point of intersection at about 0.57. Bisection with $f(x) = e^{-x} - x$: $[0.5, 1]$, $[0.5, 0.75]$, $[0.5, 0.625]$. Iteration: 0.607; 0.545; 0.580; 0.560; … towards 0.5671,
+                attracting because $|\varphi'(x^*)| = e^{-x^*} = x^* \approx 0.57$. Both gain at about the same speed; Newton would be much faster.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>For which $c > 0$ does $x_{n+1} = x_n - c\,(x_n^2 - 2)$ converge to $\sqrt2$ if you start close enough? For which $c$ is it fastest?</p></div>
+            <div class="b-sol"><p>$\varphi'(x) = 1 - 2cx$, $\varphi'(\sqrt2) = 1 - 2\sqrt2\,c$. Condition $|1 - 2\sqrt2\,c| < 1 \iff 0 < c < \tfrac{1}{\sqrt2} \approx 0.707$. Fastest when $\varphi'(\sqrt2) = 0$: $c = \tfrac{1}{2\sqrt2} \approx 0.354$. Example 6 had $c = 0.25$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Stefan Banach and the Scottish Café" data-toc-k="X" data-toc-short="Banach">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>Stefan Banach and the Scottish Café</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Stefan Banach, born in Kraków in 1892, learnt mathematics largely on his own. In 1916 the mathematician Hugo Steinhaus happened to overhear two young men in a park talking about the Lebesgue integral,
+                and spoke to them. One of them was Banach. Steinhaus supported him, and in 1920 Banach submitted his doctoral thesis in Lwów (today Lviv) without ever having completed a degree.</p>
+            <p>The theorem that you met in unit 3 comes from this thesis, in a much more general form: a mapping that shrinks all distances by a fixed factor $L < 1$
+                has exactly one fixed point, and the iteration finds it from any start. Today it is used to show that differential equations have a solution, that search engines can calculate their rankings, and much more.</p>
+            <p>Banach and his colleagues liked best to work in the Scottish Café in Lwów. They wrote their open problems in a thick notebook, the “Scottish Book”, and offered prizes,
+                from a bottle of wine to a live goose. Banach survived the German occupation as a lice feeder at an institute producing typhus vaccine, and died in August 1945.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Stefan Banach: “Sur les opérations dans les ensembles abstraits et leur application aux équations intégrales”, Fundamenta Mathematicae 3 (1922), pp. 133–181.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>GRAPHICALLY</h4><p>Points of intersection of $g$ and $h$, or zeros of $g - h$: their number and starting values.</p></div>
+        <div><p>$e^x = 3 - x$: one solution at 0.79</p></div></div>
+    <div class="b-rueck"><div><h4>BISECTION</h4><p>Continuous and a change of sign; after $n$ steps length $\tfrac{b - a}{2^n}$. Sure but slow.</p></div>
+        <div><p>Accuracy $10^{-6}$ on $[1, 2]$: 20 steps</p></div></div>
+    <div class="b-rueck"><div><h4>NEWTON</h4><p>$x_{n+1} = x_n - \tfrac{f(x_n)}{f'(x_n)}$; the places double; fails for $f' = 0$, in cycles, with a bad start.</p></div>
+        <div><p>$\sqrt2$: 1, 3, 6, 12 correct places</p></div></div>
+    <div class="b-rueck"><div><h4>FIXED-POINT ITERATION</h4><p>$x_{n+1} = \varphi(x_n)$; $I$ into itself and $|\varphi'| \le L < 1$: exactly one fixed point, convergence from every start (Banach).</p></div>
+        <div><p>$\cos$ on $[0, 1]$: $L = \sin 1 \approx 0.84$, $x^* = 0.739$</p></div></div>
+    <div class="b-rueck"><div><h4>CHOOSING A METHOD</h4><p>Exactly if there is a formula; otherwise an overview graphically, then numerically.</p></div>
+        <div><p>$|\varphi'(x^*)| > 1$: repelling, rearrange</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="0.125" data-ph="length"><p class="b-q-text">An interval of length 4 is halved five times. How long is it then?</p><div class="b-sol"><p>$\tfrac{4}{32} = 0.125$</p></div></div>
+            <div class="b-q" data-ans="19/6" data-ph="x₁ ="><p class="b-q-text">Newton for $x^2 - 10$ with $x_0 = 3$: what is $x_1$ (as a fraction)?</p><div class="b-sol"><p>$3 - \tfrac{-1}{6} = \tfrac{19}{6}$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="x* ="><p class="b-q-text">What fixed point does $\varphi(x) = \tfrac14 x + 3$ have?</p><div class="b-sol"><p>$\tfrac34 x = 3$, $x = 4$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="0.682" data-tol="0.001" data-ph="x ="><p class="b-q-text">Solve $x^3 + x - 1 = 0$ (three decimal places).</p><div class="b-sol"><p>$x \approx 0.682$</p></div></div>
+            <div class="b-q" data-ans="0.567" data-tol="0.001" data-ph="x ="><p class="b-q-text">Solve $e^{-x} = x$ (three decimal places).</p><div class="b-sol"><p>$x \approx 0.567$</p></div></div>
+            <div class="b-q" data-ans="1.895" data-tol="0.001" data-ph="x ="><p class="b-q-text">What is the positive solution of $\sin x = \tfrac{x}{2}$ (three decimal places)?</p><div class="b-sol"><p>Newton starting with 2: $x \approx 1.895$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-bisektion-newton.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BISECTION AND NEWTON</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-iterationsverfahren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ITERATION METHODS</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 11, advanced course · Elective area 2 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-en/numerik.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-en/gy11.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-en/gy11lk.js"></script>
+</body>
+</html>

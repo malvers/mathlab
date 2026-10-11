@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 11 Advanced · Chapter 1.1 · Limits and continuity | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Behaviour at infinity, limit at a point, limit theorems, piecewise-defined functions, continuity. Chapter 1.1 of the interactive textbook Mathematics · Grammar School 11 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 11 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1.1 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1.1 · LEARNING AREA 1 · AUGUST · SEPTEMBER</p>
+            <h1>Limits and continuity</h1>
+            <p class="b-hero-lead">A cup of tea cools down, but never below room temperature. A function has a hole, and still you know exactly which value belongs in it.
+                A taxi fare changes its price per kilometre at 5 km without the bill jumping. In the advanced course “comes arbitrarily close” becomes an
+                <b>exact concept</b>: you learn the ε definition of the <b>limit</b>, calculate with the limit theorems and investigate <b>continuity</b>,
+                also for functions that are defined piecewise.</p>
+            <div class="b-chips"><span class="b-chip">15 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">3 PRACTICE PAGES</span><span class="b-chip">PROOFS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["(2*x+1)/(x-1)","2"]' data-labels='["f(x) = (2x + 1)/(x − 1)","y = 2"]' data-lat="[3.2,-5.4]" data-x="-6,8" data-y="-6,9" data-h="240" data-aria="A rational function with a pole at 1 and the horizontal asymptote y = 2"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>find the behaviour of functions at infinity, also with the ε definition, and give horizontal and oblique asymptotes</li>
+                <li>calculate limits at a point with the h-method, by transforming terms and with the <b>limit theorems</b></li>
+                <li>understand the ε-δ definition of the limit and apply it in simple cases</li>
+                <li>investigate <b>continuity</b> at a point, on an interval and on the domain, also for piecewise-defined functions, and write intervals correctly</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="0.001" data-ph="number"><p class="b-q-text">Write $\tfrac{1}{1000}$ as a decimal.</p><div class="b-sol"><p>0.001</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">What is $x^2 - 9$ as a product?</p><div class="b-mc"><button>$(x - 3)^2$</button><button>$(x - 3)(x + 3)$</button><button>$(x - 9)(x + 1)$</button></div><div class="b-sol"><p>Difference of two squares.</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="number"><p class="b-q-text">Which number does the sequence $a_n = 20 + \tfrac{70}{n}$ approach for large $n$?</p><div class="b-sol"><p>20, because $\tfrac{70}{n}$ becomes arbitrarily small (Year 10).</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">What is true of $2^{-x}$ as $x$ gets larger and larger?</p><div class="b-mc"><button>It becomes arbitrarily small, but stays positive.</button><button>It becomes negative.</button><button>It grows beyond all bounds.</button></div><div class="b-sol"><p>$2^{-x} = \tfrac{1}{2^x}$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">HOW COLD DOES THE TEA GET?</div>
+            <div class="b-text"><p>A cup of tea is at 90 °C, the room at 20 °C. A model is $T(t) = 20 + 70 \cdot e^{-0.1t}$ ($t$ in minutes).</p>
+                <ul><li>Calculate $T(10)$, $T(30)$, $T(60)$ and $T(120)$.</li><li>From when on does the temperature differ from 20 °C by less than 0.1 degrees? And by less than 0.001 degrees?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE HOLE IN THE GRAPH</div>
+            <div class="b-text"><p>$f(x) = \tfrac{x^2 - 4}{x - 2}$ is not defined at $x = 2$.</p>
+                <ul><li>Calculate $f(1.9)$, $f(1.99)$, $f(1.999)$ and $f(2.1)$, $f(2.01)$, $f(2.001)$.</li><li>How close to 2 must $x$ be for $f(x)$ to differ from 4 by less than 0.01?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TAXI AND CAR PARK</div>
+            <div class="b-text"><p>A taxi costs a basic fare of €4 and €2.20 per km for the first 5 km, after that €1.80 per km. A multi-storey car park costs €2 for every hour or part of an hour.</p>
+                <ul><li>Draw both prices as a function of the distance or of the parking time.</li><li>Where does the price jump, where not? How can you tell from the term?</li></ul></div>
+            <span class="b-pair">→ Unit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Behaviour at infinity" data-toc-k="1" data-toc-short="1 Infinity">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Behaviour at infinity</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>After 10 minutes the tea is at about 45.8 °C, after an hour at 20.2 °C, after two hours at 20.0004 °C. The distance from 20 is $70 \cdot e^{-0.1t}$.
+                It becomes smaller than 0.1 as soon as $t > 10 \ln 700 \approx 65.5$, and smaller than 0.001 from $t \approx 111.6$ on. For <b>every</b> bound, however small, there is such a point in time.
+                Exactly that is what makes a limit.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · LIMIT FOR x → ∞</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to \infty} f(x) = g$ means: for <b>every</b> $\varepsilon > 0$ there is a point $x_\varepsilon$ such that $|f(x) - g| < \varepsilon$ for all $x > x_\varepsilon$.
+                        The line $y = g$ is then a horizontal <b>asymptote</b>. Likewise for $x \to -\infty$.</p>
+                    <p><b>Limit theorems:</b> if $\lim f = a$ and $\lim h = b$ exist, then $\lim (f \pm h) = a \pm b$, $\lim (f \cdot h) = a \cdot b$ and $\lim \tfrac{f}{h} = \tfrac{a}{b}$ for $b \neq 0$.</p>
+                    <p><b>Who wins?</b> Polynomial: the term with the highest power. Rational: compare the degrees of numerator and denominator.
+                        $e^x$ grows faster than every power $x^n$, and every power $x^r$ with $r > 0$ faster than $\ln x$: $\;x^n e^{-x} \to 0$, $\;\tfrac{\ln x}{x^r} \to 0$.</p>
+                    <p><b>Oblique asymptote:</b> if $f(x) - (mx + n) \to 0$, then $y = mx + n$ is an asymptote. For rational functions with degree of the numerator = degree of the denominator + 1, polynomial division gives it.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculation trick:</b> divide numerator and denominator by the highest power of the denominator, then apply the limit theorems: $\tfrac{3x^2 - x}{x^2 + 4} = \tfrac{3 - \frac1x}{1 + \frac{4}{x^2}} \to 3$.</p>
+            <p class="b-note"><b>“→ ∞” is not a limit:</b> if $f(x)$ grows beyond every bound, you write $f(x) \to \infty$, but the function then <b>diverges to infinity</b>. $\sin x$ has no limit at all for $x \to \infty$.</p>
+            <p class="b-note"><b>Polynomial division with the CAS:</b> the command <code>propFrac</code> or <code>expand</code>, depending on the calculator.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ON THE TRAIL OF LIMITS</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a function and a direction. With the slider you move further out or closer to the point.</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · PROOF WITH ε</div>
+            <div class="b-text"><p>Show $\lim\limits_{x \to \infty} \tfrac{2x + 1}{x} = 2$ with the definition. From which $x$ on is the distance smaller than 0.001?</p></div>
+            <div class="b-sol"><p>$\left|\tfrac{2x + 1}{x} - 2\right| = \tfrac{1}{x}$ for $x > 0$. For any $\varepsilon > 0$ choose $x_\varepsilon = \tfrac{1}{\varepsilon}$: for $x > x_\varepsilon$ we have $\tfrac1x < \varepsilon$.</p>
+                <p>For $\varepsilon = 0.001$: <span class="b-res">from $x > 1000$ on</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · OBLIQUE ASYMPTOTE</div>
+            <div class="b-text"><p>Find the behaviour of $f(x) = \tfrac{x^2 + 1}{x}$ for $x \to \pm\infty$.</p></div>
+            <div class="b-sol"><p>$f(x) = x + \tfrac1x$. The term $\tfrac1x$ tends to 0, so $f(x) - x \to 0$.</p>
+                <p><span class="b-res">Oblique asymptote $y = x$</span>; $f(x) \to \infty$ for $x \to \infty$ and $f(x) \to -\infty$ for $x \to -\infty$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Find the limit for $x \to \infty$: a) $\tfrac{3x + 1}{x}$ &nbsp; b) $\tfrac{4x}{x^2 + 1}$ &nbsp; c) $\tfrac{2x^2 - 5}{x^2 + 1}$ &nbsp; d) $5 - 2e^{-x}$ &nbsp; e) $\tfrac{\ln x}{x}$</p></div>
+            <div class="b-sol"><p>a) 3 &nbsp; b) 0 &nbsp; c) 2 &nbsp; d) 5 &nbsp; e) 0, the power beats the logarithm</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How do the functions behave for $x \to \infty$ and $x \to -\infty$? a) $x^3 - 100x^2$ &nbsp; b) $-2x^4 + x$ &nbsp; c) $x^2 e^{x}$</p></div>
+            <div class="b-sol"><p>a) $\infty$ and $-\infty$ respectively &nbsp; b) $-\infty$ both times &nbsp; c) $\infty$ and limit 0 respectively (for $x \to -\infty$, $e^x \to 0$ wins)</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Prove $\lim\limits_{x \to \infty} \left(3 - \tfrac{2}{x^2}\right) = 3$ with the definition. Give $x_\varepsilon$ for $\varepsilon = 0.01$.</p></div>
+            <div class="b-sol"><p>$\left|3 - \tfrac{2}{x^2} - 3\right| = \tfrac{2}{x^2} < \varepsilon \iff x^2 > \tfrac{2}{\varepsilon} \iff x > \sqrt{\tfrac{2}{\varepsilon}}$ (for $x > 0$). For $\varepsilon = 0.01$: $x_\varepsilon = \sqrt{200} \approx 14.14$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Use polynomial division to find the oblique asymptote of $f(x) = \tfrac{2x^2 + 3x - 1}{x + 1}$.</p></div>
+            <div class="b-sol"><p>$(2x^2 + 3x - 1) : (x + 1) = 2x + 1 - \tfrac{2}{x + 1}$. Asymptote $y = 2x + 1$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>“The exponential function beats every power” – even $1.1^x$ against $x^{10}$? Use the CAS to find the whole number $x \geq 2$ from which on $1.1^x > x^{10}$. Justify the limit $\lim\limits_{x \to \infty} \tfrac{x^{10}}{1.1^x}$.</p></div>
+            <div class="b-hint"><p>Compare $\ln(1.1^x) = x \ln 1.1$ with $\ln(x^{10}) = 10 \ln x$.</p></div>
+            <div class="b-sol"><p>From $x = 686$ on. Reason: $x \ln 1.1$ grows linearly, $10 \ln x$ only logarithmically, their difference tends to $\infty$. So $\tfrac{x^{10}}{1.1^x} = e^{10\ln x - x \ln 1.1} \to 0$. The exponential function takes a long time here, but it wins for sure.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to \infty} \tfrac{6x + 1}{2x - 3}$.</p><div class="b-sol"><p>$\tfrac{6}{2} = 3$</p></div></div>
+        <div class="b-q" data-ans="1000" data-ph="x ="><p class="b-q-text">$\left|\tfrac{2x + 1}{x} - 2\right| < 0.001$ for all $x > x_\varepsilon$. What is the smallest possible $x_\varepsilon$?</p><div class="b-sol"><p>$\tfrac{1}{x} < 0.001 \iff x > 1000$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Which asymptote does $f(x) = \tfrac{x^2 + 1}{x}$ have for $x \to \infty$?</p><div class="b-mc"><button>$y = 1$</button><button>$y = 0$</button><button>$y = x$</button></div><div class="b-sol"><p>$f(x) = x + \tfrac1x$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Limit at a point" data-toc-k="2" data-toc-short="2 At a point">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Limit at a point</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>For $x \neq 2$, $\tfrac{x^2 - 4}{x - 2} = x + 2$. The graph is the line $y = x + 2$ with a hole at $(2, 4)$.
+                For $f(x)$ to differ from 4 by less than 0.01, we need $|x + 2 - 4| = |x - 2| < 0.01$. So here every $\varepsilon$ comes with $\delta = \varepsilon$.
+                The function value at the point itself does not matter, only the values nearby.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · LIMIT AT A POINT</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to x_0} f(x) = g$ means: for every $\varepsilon > 0$ there is a $\delta > 0$ such that $|f(x) - g| < \varepsilon$ for all $x$ with $0 < |x - x_0| < \delta$.</p>
+                    <p><b>One-sided limits:</b> $\lim\limits_{x \to x_0^-} f(x)$ (from the left) and $\lim\limits_{x \to x_0^+} f(x)$ (from the right). The limit exists if and only if both exist and are equal.</p>
+                    <p><b>h-method:</b> calculate $\lim\limits_{h \to 0^+} f(x_0 - h)$ and $\lim\limits_{h \to 0^+} f(x_0 + h)$. The <b>limit theorems</b> hold at a point just as at infinity.</p>
+                    <p><b>Tools for “$\tfrac00$”:</b> factorise and cancel, multiply by the conjugate root term, use known limits such as $\lim\limits_{x \to 0} \tfrac{\sin x}{x} = 1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Piecewise-defined functions:</b> to the left and to the right of the joining point different terms apply. Then you have to calculate one-sidedly, each time with the matching term.</p>
+            <p class="b-note"><b>No limit:</b> $\tfrac{|x|}{x}$ has the limit −1 on the left of 0 and 1 on the right. $\sin\tfrac1x$ oscillates infinitely often between −1 and 1 near 0.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · A δ FOR EVERY ε</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a function and make the orange strip narrower. The widget looks for the largest $\delta$ for which the blue strip fits completely into the orange one.</p>
+        <div data-widget="epsdelta"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · h-METHOD</div>
+            <div class="b-text"><p>Find $\lim\limits_{x \to 3} \tfrac{x^2 - 9}{x - 3}$ with the h-method.</p></div>
+            <div class="b-sol"><p>$f(3 + h) = \tfrac{(3 + h)^2 - 9}{h} = \tfrac{6h + h^2}{h} = 6 + h \to 6$ for $h \to 0$, from the left with $3 - h$ likewise: $6 - h \to 6$.</p>
+                <p><span class="b-res">Limit 6</span>, although $f(3)$ is not defined.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · MULTIPLYING BY THE ROOT</div>
+            <div class="b-text"><p>Find $\lim\limits_{x \to 0} \tfrac{\sqrt{x + 4} - 2}{x}$.</p></div>
+            <div class="b-sol"><p>Multiply numerator and denominator by $\sqrt{x + 4} + 2$: $\tfrac{(x + 4) - 4}{x(\sqrt{x + 4} + 2)} = \tfrac{1}{\sqrt{x + 4} + 2}$.</p>
+                <p>Now substitute (limit theorems): <span class="b-res">$\tfrac{1}{2 + 2} = \tfrac14$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Find the limit: a) $\lim\limits_{x \to 1} \tfrac{x^2 - 1}{x - 1}$ &nbsp; b) $\lim\limits_{x \to 2} \tfrac{x^3 - 8}{x - 2}$ &nbsp; c) $\lim\limits_{x \to -3} \tfrac{x^2 + 3x}{x + 3}$</p></div>
+            <div class="b-hint"><p>b) $x^3 - 8 = (x - 2)(x^2 + 2x + 4)$</p></div>
+            <div class="b-sol"><p>a) $x + 1 \to 2$ &nbsp; b) $x^2 + 2x + 4 \to 12$ &nbsp; c) $x \to -3$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Find the one-sided limits at $x_0 = 0$: a) $\tfrac{1}{x}$ &nbsp; b) $\tfrac{|x|}{x}$ &nbsp; c) $f(x) = x + 1$ for $x < 0$ and $f(x) = e^x$ for $x \geq 0$</p></div>
+            <div class="b-sol"><p>a) $-\infty$ and $\infty$ (no limit) &nbsp; b) −1 and 1 (no limit) &nbsp; c) both 1, the limit is 1</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find $\lim\limits_{x \to 9} \tfrac{\sqrt{x} - 3}{x - 9}$.</p></div>
+            <div class="b-sol"><p>$x - 9 = (\sqrt{x} - 3)(\sqrt{x} + 3)$, so $\tfrac{1}{\sqrt{x} + 3} \to \tfrac16$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For $f(x) = x^3$, calculate the limit $\lim\limits_{h \to 0} \tfrac{f(2 + h) - f(2)}{h}$. What does it mean for the graph? (A look ahead to chapter 1.2)</p></div>
+            <div class="b-sol"><p>$\tfrac{(2 + h)^3 - 8}{h} = \tfrac{12h + 6h^2 + h^3}{h} = 12 + 6h + h^2 \to 12$. That is the gradient of the tangent to the graph at the point $(2, 8)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Prove with the ε-δ definition: $\lim\limits_{x \to 2} (3x + 1) = 7$. Give a suitable $\delta$ for $\varepsilon$.</p></div>
+            <div class="b-sol"><p>$|3x + 1 - 7| = 3|x - 2|$. This number is smaller than $\varepsilon$ as soon as $|x - 2| < \tfrac{\varepsilon}{3}$. So $\delta = \tfrac{\varepsilon}{3}$ does what is required, and it does so for every $\varepsilon > 0$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="6" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to 3} \tfrac{x^2 - 9}{x - 3}$.</p><div class="b-sol"><p>$x + 3 \to 6$</p></div></div>
+        <div class="b-q" data-ans="1/4" data-ph="fraction"><p class="b-q-text">Find $\lim\limits_{x \to 0} \tfrac{\sqrt{x + 4} - 2}{x}$.</p><div class="b-sol"><p>$\tfrac14$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">When does $\lim\limits_{x \to x_0} f(x)$ exist?</p><div class="b-mc"><button>if $f(x_0)$ is defined</button><button>if both one-sided limits exist and are equal</button><button>if $f$ has no gap at $x_0$</button></div><div class="b-sol"><p>The function value at the point plays no role.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Continuity" data-toc-k="3" data-toc-short="3 Continuity">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Continuity</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>For the taxi the price up to 5 km is $4 + 2.2x$, after that $15 + 1.8(x - 5)$. At $x = 5$ both terms give €15: the price does not jump, it only changes its gradient.
+                The car park, on the other hand, jumps by €2 at every full hour. The difference has a name: the taxi function is <b>continuous</b>, the car park function is not.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · CONTINUITY</div>
+                <div class="b-text">
+                    <p>$f$ is called <b>continuous at the point</b> $x_0 \in D_f$ if $\lim\limits_{x \to x_0} f(x)$ exists and is equal to $f(x_0)$. Otherwise $x_0$ is a point of discontinuity.</p>
+                    <p>$f$ is called <b>continuous on an interval</b> if it is continuous at every point of the interval (one-sidedly at closed end points), and <b>continuous</b> if it is continuous at every point of its domain.</p>
+                    <p>Sums, products, quotients (where the denominator is not zero) and compositions of continuous functions are continuous. Hence all polynomial functions, $e^x$, $\sin x$, $\cos x$, $\sqrt{x}$ on $[0, \infty)$, $\ln x$ on $(0, \infty)$ and rational functions on their domain are continuous.</p>
+                    <p><b>Intervals:</b> $[a, b]$ with, $(a, b)$ without end points, $[a, \infty)$, and $\mathbb{R} \setminus \{0\}$ for “all real numbers except 0”.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Careful:</b> $\tfrac1x$ is continuous, because it is continuous at every point of its domain. The point 0 does not belong to it at all.</p>
+            <p class="b-note"><b>Intermediate value theorem:</b> if $f$ is continuous on $[a, b]$ and $f(a)$ and $f(b)$ have different signs, then $f$ has a zero in between. The bisection method in the elective area builds on this.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · MAKING IT CONTINUOUS PIECE BY PIECE</div>
+        <p class="b-help" style="margin:0 0 12px">Change the parameter until the two pieces fit together. Open circles do not belong to the graph, the white dot is the function value.</p>
+        <div data-widget="stetigkeit"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · FINDING THE PARAMETER</div>
+            <div class="b-text"><p>For which $a$ is $f(x) = x^2 + 1$ for $x \leq 1$ and $f(x) = ax - 1$ for $x > 1$ continuous?</p></div>
+            <div class="b-sol"><p>Left: $\lim\limits_{x \to 1^-} f(x) = f(1) = 2$. Right: $\lim\limits_{x \to 1^+} (ax - 1) = a - 1$.</p>
+                <p>Continuous if and only if $a - 1 = 2$: <span class="b-res">$a = 3$</span>. At all other points $f$ is continuous anyway.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · KINDS OF DISCONTINUITY</div>
+            <div class="b-text"><p>Investigate $g(x) = \tfrac{x^2 - 1}{x - 1}$ for $x \neq 1$ and $g(1) = 3$ at the point 1.</p></div>
+            <div class="b-sol"><p>$\lim\limits_{x \to 1} g(x) = \lim\limits_{x \to 1} (x + 1) = 2 \neq 3 = g(1)$.</p>
+                <p><span class="b-res">Removable discontinuity</span>: with $g(1) = 2$, $g$ would be continuous. Other kinds: jump (one-sided limits differ) and pole.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Continuous or not? If discontinuous, give the kind. a) $\tfrac{x^2 - 4}{x - 2}$ with $f(2) = 0$ &nbsp; b) $\tfrac{1}{(x - 1)^2}$ with $f(1) = 0$ &nbsp; c) $|x|$ at 0 &nbsp; d) car park price at 1 h</p></div>
+            <div class="b-sol"><p>a) removable (limit 4) &nbsp; b) pole &nbsp; c) continuous, a kink is allowed &nbsp; d) jump (€2 to €4)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Give the domain in interval or set notation: a) $\sqrt{x - 2}$ &nbsp; b) $\tfrac1x$ &nbsp; c) $\ln(x + 1)$ &nbsp; d) $\tfrac{1}{x^2 - 9}$</p></div>
+            <div class="b-sol"><p>a) $[2, \infty)$ &nbsp; b) $\mathbb{R} \setminus \{0\}$ &nbsp; c) $(-1, \infty)$ &nbsp; d) $\mathbb{R} \setminus \{-3, 3\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find $a$ and $b$ such that $f$ is continuous everywhere: $f(x) = x + a$ for $x < 0$, $\;f(x) = x^2 + 1$ for $0 \leq x \leq 2$, $\;f(x) = bx - 1$ for $x > 2$.</p></div>
+            <div class="b-sol"><p>At 0: $a = 1$. At 2: $5 = 2b - 1$, so $b = 3$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Use the intermediate value theorem to show that $f(x) = x^3 + x - 1$ has a zero in $[0, 1]$. Halve the interval twice.</p></div>
+            <div class="b-sol"><p>$f(0) = -1 < 0 < 1 = f(1)$, $f$ is continuous. $f(0.5) = -0.375$: zero in $[0.5, 1]$. $f(0.75) \approx 0.172$: zero in $[0.5, 0.75]$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Is $f(x) = x \cdot \sin\tfrac1x$ for $x \neq 0$ and $f(0) = 0$ continuous at the point 0? Justify without a calculator.</p></div>
+            <div class="b-hint"><p>How large can $|\sin\tfrac1x|$ be at most?</p></div>
+            <div class="b-sol"><p>Yes. $|f(x)| = |x| \cdot |\sin\tfrac1x| \leq |x|$, so $f(x)$ lies between $-|x|$ and $|x|$, and both tend to 0. Hence $\lim\limits_{x \to 0} f(x) = 0 = f(0)$ (squeeze theorem). With $\delta = \varepsilon$ the definition works too.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3" data-ph="a ="><p class="b-q-text">$f(x) = x^2 + 1$ for $x \leq 1$, $f(x) = ax - 1$ for $x > 1$. For which $a$ is $f$ continuous?</p><div class="b-sol"><p>$a - 1 = 2$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="number"><p class="b-q-text">What value must $g(1)$ have for $g(x) = \tfrac{x^2 - 1}{x - 1}$ to become continuous at 1?</p><div class="b-sol"><p>Limit $1 + 1 = 2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Is $f(x) = \tfrac1x$ a continuous function?</p><div class="b-mc"><button>Yes, it is continuous at every point of its domain.</button><button>No, it has a point of discontinuity at 0.</button><button>Only for $x > 0$.</button></div><div class="b-sol"><p>0 does not belong to the domain.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A population grows according to $N(t) = \tfrac{500}{1 + 9e^{-0.5t}}$. Give $N(0)$, the limit for $t \to \infty$ and the asymptote.</p></div>
+            <div class="b-sol"><p>$N(0) = 50$. $e^{-0.5t} \to 0$, so $N(t) \to 500$: asymptote $N = 500$, the carrying capacity.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with Year 10:</b> calculate $\left(1 + \tfrac1n\right)^n$ for $n = 10$, 100, 1000 and $10^6$. Which number does the sequence approach?</p></div>
+            <div class="b-sol"><p>2.594; 2.705; 2.717; $2.718\,28$. The limit is Euler’s number $e \approx 2.718\,28$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Electricity costs €0.40 per kWh up to 1000 kWh a year. Above that a tariff with a standing charge $G$ and €0.30 per kWh for the whole consumption applies. For which $G$ is the annual price as a function of consumption continuous?</p></div>
+            <div class="b-sol"><p>At 1000 kWh: $0.40 \cdot 1000 = G + 0.30 \cdot 1000$, so $G = €100$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Find $\lim\limits_{x \to \infty} \left(\sqrt{x^2 + ax} - x\right)$ in terms of $a$.</p></div>
+            <div class="b-hint"><p>Multiply numerator and denominator by $\sqrt{x^2 + ax} + x$ and then divide by $x$.</p></div>
+            <div class="b-sol"><p>$\tfrac{x^2 + ax - x^2}{\sqrt{x^2 + ax} + x} = \tfrac{a}{\sqrt{1 + \frac{a}{x}} + 1} \to \tfrac{a}{2}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: How ε came into analysis" data-toc-k="X" data-toc-short="ε and δ">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>How ε came into analysis</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>At the end of the 17th century Newton and Leibniz calculated with “infinitely small” quantities that were sometimes zero and sometimes not. This worked astonishingly well,
+                but it was logically open to attack. In 1821, in his textbook for the École polytechnique in Paris, Augustin-Louis Cauchy explained limit and continuity in words:
+                a quantity has a limit if it comes “as close to it as one wishes”.</p>
+            <p>Today’s version with $\varepsilon$ and $\delta$ goes back to Karl Weierstrass. In his Berlin lectures around 1861, which are known only from his students’ notes,
+                he defined continuity like this: for every number $\varepsilon$, however small, there is a bound $\delta$ for the change in the argument. His student Eduard Heine published
+                the ideas in 1872. Since then analysis no longer needs infinitely small quantities, only inequalities.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources:</b> Augustin-Louis Cauchy: “Cours d'analyse de l'École royale polytechnique”, Paris 1821 · Eduard Heine: “Die Elemente der Functionenlehre”, Journal für die reine und angewandte Mathematik 74 (1872).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>LIMIT FOR x → ∞</h4><p>For every $\varepsilon > 0$ an $x_\varepsilon$ with $|f(x) - g| < \varepsilon$ for $x > x_\varepsilon$. Asymptote $y = g$.</p></div>
+        <div><p>$\tfrac{2x + 1}{x} \to 2$, $x_\varepsilon = \tfrac1\varepsilon$</p></div></div>
+    <div class="b-rueck"><div><h4>COMPARING GROWTH</h4><p>$\ln x$ against $x^r$ against $e^x$: the one on the right wins. Oblique asymptote by polynomial division.</p></div>
+        <div><p>$\tfrac{2x^2 + 3x - 1}{x + 1} = 2x + 1 - \tfrac{2}{x + 1}$</p></div></div>
+    <div class="b-rueck"><div><h4>LIMIT AT A POINT</h4><p>For every $\varepsilon > 0$ a $\delta > 0$. One-sided, h-method, limit theorems.</p></div>
+        <div><p>$\lim\limits_{x \to 0} \tfrac{\sqrt{x + 4} - 2}{x} = \tfrac14$</p></div></div>
+    <div class="b-rueck"><div><h4>CONTINUITY</h4><p>$\lim\limits_{x \to x_0} f(x) = f(x_0)$. Discontinuous: jump, pole, removable gap.</p></div>
+        <div><p>$x^2 + 1$ and $ax - 1$ at the joining point 1: $a = 3$</p></div></div>
+    <div class="b-rueck"><div><h4>INTERVALS</h4><p>$[a, b]$, $(a, b)$, $[a, \infty)$, $\mathbb{R} \setminus \{0\}$. Intermediate value theorem for continuous functions.</p></div>
+        <div><p>$D$ of $\ln(x + 1)$: $(-1, \infty)$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="2" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to \infty} \tfrac{2x^2 - 5}{x^2 + 1}$.</p><div class="b-sol"><p>$\tfrac21 = 2$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to 2} \tfrac{x^3 - 8}{x - 2}$.</p><div class="b-sol"><p>$x^2 + 2x + 4 \to 12$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">At 0, $f(x) = \tfrac{|x|}{x}$ has …</p><div class="b-mc"><button>the limit 0.</button><button>the limit 1.</button><button>no limit.</button></div><div class="b-sol"><p>Left −1, right 1.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="14.14" data-tol="0.01" data-ph="x ="><p class="b-q-text">From which $x$ on is $\tfrac{2}{x^2} < 0.01$ (two decimal places)?</p><div class="b-sol"><p>$\sqrt{200} \approx 14.14$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="b ="><p class="b-q-text">$f(x) = x^2 + 1$ for $0 \leq x \leq 2$ and $f(x) = bx - 1$ for $x > 2$. For which $b$ is $f$ continuous at 2?</p><div class="b-sol"><p>$5 = 2b - 1$</p></div></div>
+            <div class="b-q" data-ans="100" data-ph="euros"><p class="b-q-text">Electricity tariff from exercise 18: how large must the standing charge be?</p><div class="b-sol"><p>$400 = G + 300$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-grenzwerte-unendlich.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMITS AT INFINITY</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-grenzwert-stelle.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMIT AT A POINT</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-stetigkeit.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CONTINUITY</span><span class="b-lab-what">20 exercises with solutions</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 11, advanced course · Learning area 1 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-en/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-en/gy11lk.js"></script>
+</body>
+</html>
