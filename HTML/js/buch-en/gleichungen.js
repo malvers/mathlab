@@ -9,7 +9,7 @@
 window.BuchEN && BuchEN.add('gleichungen', {
     word: {
         // waage, binom, koerper
-        'z. B. −3 oder :4 oder −2x': 'e.g. −3 or :4 or −2x', 'Anwenden': 'Apply', 'Neue Gleichung': 'New equation',
+        'z. B. −3 oder :4 oder −2x': 'e.g. −3 or ÷4 or −2x', 'Anwenden': 'Apply', 'Neue Gleichung': 'New equation',
         'Länge $a$': 'Length $a$', 'Länge $b$': 'Length $b$', 'Quadrat mit Seitenlänge a + b': 'Square with side length a + b',
         'Zylinder': 'Cylinder', 'Kegel': 'Cone', 'Kugel': 'Sphere', 'Körper': 'Solid', 'Höhe $h$ in cm': 'Height $h$ in cm', 'Skizze des Körpers': 'Sketch of the solid',
         // book 4 mathefos11-en: ungleichung
@@ -37,5 +37,8 @@ window.BuchEN && BuchEN.add('gleichungen', {
         ['Zieh die <b>Probe</b> über den Zahlenstrahl. $x = ', 'Drag the <b>test point</b> along the number line. $x = '], ['$ ist ', '$ is '],
         [': Die Zahl gehört zur Lösungsmenge.', ': the number belongs to the solution set.'], [': Die Zahl gehört nicht dazu.', ': the number does not belong to it.'],
     ],
-    rule: []
+    rule: [
+        // waage, ungleichung: the division step "| :a" as "| ÷ a", as English books write it (like umstellen7 in gy7.js)
+        [/\\big\|\\; :\s?/g, '\\big|\\; \\div ']
+    ]
 });
