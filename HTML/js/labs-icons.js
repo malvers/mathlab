@@ -91,8 +91,17 @@ const LAB_ICONS = {
     </span>`,
     "lehrbuch-mathegy11lk": `<img src="resources/og/buch-mathegy11lk-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
-    "lehrbuch-mathegy12lk": `<img src="resources/og/buch-mathegy12lk-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    // book 7 as well (Doc, 11.10.2026: "ok, go on all agents")
+    "lehrbuch-mathegy12lk": `<span style="display: flex; gap: 12px; align-items: center;">
+        <img src="resources/og/buch-mathegy12lk-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy12lk-en/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy12lk-en/index.html'; }">
+            <img src="resources/og/buch-mathegy12lk-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+    </span>`,
     "ziffernraetsel": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- the MONEY stack itself (Doc, 29.09.2026: "icon -> MONEY stack"): SEND over MORE, a rule, MONEY in gold -
                  one letter per column, so the columns stand as on paper -->

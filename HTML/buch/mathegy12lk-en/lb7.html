@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 12 Advanced · Chapter 7 · Inferential statistics | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Samples, estimating proportions, mean and variance, one- and two-tailed significance tests, statistical certainty. Chapter 7 of the interactive textbook Mathematics · Grammar School 12 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 12 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 7 · LEARNING AREA 7</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 7 · LEARNING AREA 7 · DECEMBER</p>
+            <h1>Inferential statistics</h1>
+            <p class="b-hero-lead">On election night a forecast is fixed at 6 pm, although only a few thousand votes have been counted. A baker is said to bake too many rolls that are too small,
+                a coin is said to be biased. In this chapter you draw conclusions from a <b>sample</b> about the whole: you <b>estimate</b> proportions, means and variances and
+                decide with <b>significance tests</b> whether a result is still chance or already evidence.</p>
+            <div class="b-chips"><span class="b-chip">15 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">4 WIDGETS</span><span class="b-chip">1 LAB</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["5*exp(-((x-5)^2)/2)/2.5066"]' data-labels='["P"]' data-lat="[7.4]" data-x="0,10" data-y="-0.2,2.4" data-pts="[[5,1.995]]" data-h="240" data-aria="Bell-shaped distribution of the numbers of hits around their expected value"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>the <b>basic problems</b> of inferential statistics: drawing conclusions from the sample about the population</li>
+                <li>calculate proportions, the <b>sample mean</b> and the <b>sample variance</b> and extrapolate them</li>
+                <li>set up and carry out <b>one-tailed significance tests</b> for binomially distributed random variables</li>
+                <li>carry out <b>two-tailed tests</b> and interpret what “significant” means and what it does not</li>
+                <li>for large $n$, approximate rejection regions with the <b>normal distribution</b> and check them with exact values</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="10" data-ph="E(X) ="><p class="b-q-text">$X$ is binomially distributed with $n = 50$ and $p = 0.2$. What is $E(X)$?</p><div class="b-sol"><p>$n \cdot p$</p></div></div>
+            <div class="b-q" data-ans="0.125" data-ph="P ="><p class="b-q-text">A fair coin is tossed three times. What is $P(\text{three tails})$?</p><div class="b-sol"><p>$0.5^3$</p></div></div>
+            <div class="b-q" data-ans="0.7" data-ph="P ="><p class="b-q-text">We know $P(X \le 4) = 0.3$. What is $P(X \ge 5)$?</p><div class="b-sol"><p>Complementary event</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">The mean of $2$, $4$ and $9$ is …</p><div class="b-mc"><button>$4$</button><button>$5$</button><button>$15$</button></div><div class="b-sol"><p>$\tfrac{15}{3}$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">HOW MANY RED ONES?</div>
+            <div class="b-text"><p>An opaque bag contains many red and blue balls. Each group draws $20$ balls with replacement and notes the number of red ones.</p>
+                <ul><li>Estimate the proportion of red balls. Compare the groups' estimates.</li><li>How could you estimate more accurately?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">IS THE DICE LOADED?</div>
+            <div class="b-text"><p>A player rolls a dice $60$ times and gets $16$ sixes. You would have expected $10$.</p>
+                <ul><li>Simulate with dice or on the computer how often a fair dice shows at least $16$ sixes in $60$ rolls.</li><li>From how many sixes on would you suspect the dice? Agree on a rule before you roll.</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TOO OFTEN OR TOO RARELY</div>
+            <div class="b-text"><p>A coin is tossed $100$ times. You want to check whether it is fair, without knowing in which direction it might be biased.</p>
+                <ul><li>Which results would you regard as suspicious? Is there a lower and an upper limit?</li><li>Look at the distribution on the Galton board.</li></ul></div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Pin board with a histogram – the bell curve appears live</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Estimating parameters" data-toc-k="1" data-toc-short="1 Estimating">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Basic problems and estimating parameters</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Of $1200$ randomly chosen voters, $444$ want to vote for party A, that is $37\%$. Nobody knows whether it will be exactly $37\%$ in the election:
+                another sample would have given a slightly different result. Inferential statistics asks what you can nevertheless say reliably from the sample.</p></div></div>
+            <div class="b-text"><p>The <b>population</b> is all voters, the <b>sample</b> is the part asked at random. Unknown key figures of the population
+                (its <b>parameters</b>) are estimated by the corresponding key figures of the sample: the proportion $p$ by the relative frequency $h$, the mean $\mu$
+                by the <b>sample mean</b> $\bar x$, the variance $\sigma^2$ by the <b>sample variance</b> $s^2$. So that $s^2$ is right on average, you divide by $n - 1$.</p>
+                <p>Estimates vary from sample to sample. For proportions, $h$ spreads by about $\sqrt{\tfrac{p(1 - p)}{n}}$: you need <b>four times</b> the sample size for <b>half</b> the spread.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · ESTIMATING FROM A SAMPLE</div>
+                <div class="b-text">
+                    <p><b>Proportion:</b> $p \approx h = \tfrac{k}{n}$ ($k$ hits among $n$) · <b>Extrapolation:</b> number in the population $\approx N \cdot h$</p>
+                    <p><b>Sample mean:</b> $\bar x = \dfrac{x_1 + x_2 + \ldots + x_n}{n}$ · <b>Sample variance:</b> $s^2 = \dfrac{1}{n - 1} \sum\limits_{i=1}^{n} (x_i - \bar x)^2$, $s = \sqrt{s^2}$</p>
+                    <p>The sample must be drawn <b>at random</b>, otherwise its estimates are systematically wrong.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Why $n - 1$?</b> The values always spread a little less about their own mean $\bar x$ than about the true mean $\mu$. The factor $\tfrac{1}{n-1}$ makes up for this. The widget shows it with a thousand samples.</p>
+            <p class="b-note"><b>On election night</b> the institutes extrapolate from the first polling districts counted. Choosing these districts well is the real art.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ESTIMATING MEAN AND VARIANCE</div>
+        <p class="b-help" style="margin:0 0 12px">A machine fills bottles. Draw samples and compare $\bar x$ with the target value. With “+1000” you see that $s^2$ with $\tfrac{1}{n-1}$ hits the true variance on average, but with $\tfrac1n$ comes out too small.</p>
+        <div data-widget="schaetzen"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · PROPORTIONS VARY</div>
+        <p class="b-help" style="margin:0 0 12px">Many samples from the same population: the relative frequencies spread around the true proportion $p$. Multiply $n$ by four and watch the width.</p>
+        <div data-widget="stichprobe"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · FILL QUANTITIES</div>
+            <div class="b-text"><p>Five bottles contain $498$, $503$, $501$, $497$ and $501$ ml. Estimate the mean and the standard deviation of the filling.</p></div>
+            <div class="b-sol"><p>$\bar x = \tfrac{2500}{5} = 500$ ml. Deviations $-2$, $3$, $1$, $-3$, $1$, squares $4 + 9 + 1 + 9 + 1 = 24$.</p>
+                <p>$s^2 = \tfrac{24}{4} = 6$: <span class="b-res">$s \approx 2.45$ ml</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · EXTRAPOLATION</div>
+            <div class="b-text"><p>Of $500$ parts tested, $12$ are faulty. How many faulty parts can be expected in a day's production of $20{,}000$ pieces?</p></div>
+            <div class="b-sol"><p>$h = \tfrac{12}{500} = 0.024$, so $20{,}000 \cdot 0.024 = 480$.</p>
+                <p><span class="b-res">About $480$ parts.</span> The estimate spreads by about $\sqrt{\tfrac{0.024 \cdot 0.976}{500}} \approx 0.007$, that is by roughly $140$ parts.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $\bar x$, $s^2$ and $s$ for the sample $3$, $7$, $5$, $9$, $6$.</p></div>
+            <div class="b-sol"><p>$\bar x = 6$; deviations $-3$, $1$, $-1$, $3$, $0$, sum of squares $20$: $s^2 = \tfrac{20}{4} = 5$, $s \approx 2.24$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Of $1200$ people asked, $444$ want to vote for party A. Estimate the proportion and extrapolate to $60{,}000$ voters.</p></div>
+            <div class="b-sol"><p>$h = 0.37$; about $22{,}200$ votes.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For a survey on satisfaction with buses and trains, only people at a bus stop are asked. Why is this not a good sample?</p></div>
+            <div class="b-sol"><p>The sample is not random: almost everyone at the bus stop takes the bus. Anyone who finds the service so bad that they take the car is hardly ever asked.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For the values $1$ and $3$, calculate the variance once with the factor $\tfrac1n$ and once with $\tfrac{1}{n-1}$. Which estimate is meant for a sample?</p></div>
+            <div class="b-sol"><p>$\bar x = 2$, sum of squares $2$: with $\tfrac1n$ you get $1$, with $\tfrac{1}{n-1}$ you get $2$. For samples you use $\tfrac{1}{n-1}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>How large must a survey be at least so that the spread $\sqrt{\tfrac{p(1-p)}{n}}$ of the estimated proportion is at most one percentage point for $p \approx 0.5$?</p></div>
+            <div class="b-sol"><p>$\sqrt{\tfrac{0.25}{n}} \le 0.01$, so $\tfrac{0.25}{n} \le 0.0001$: <span class="b-res">$n \ge 2500$</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="6" data-ph="s² ="><p class="b-q-text">Sample variance of $498$, $503$, $501$, $497$, $501$?</p><div class="b-sol"><p>$\tfrac{24}{4}$</p></div></div>
+        <div class="b-q" data-ans="480" data-ph="Number"><p class="b-q-text">$12$ out of $500$ faulty: extrapolation to $20{,}000$ pieces?</p><div class="b-sol"><p>$20{,}000 \cdot 0.024$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">How does the spread of an estimated proportion change if you multiply $n$ by four?</p><div class="b-mc"><button>It is quartered.</button><button>It stays the same.</button><button>It is halved.</button></div><div class="b-sol"><p>$\sqrt{4} = 2$ in the denominator</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="One-tailed significance tests" data-toc-k="2" data-toc-short="2 One-tailed">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">2</span>One-tailed significance tests</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A baker says: at most $10\%$ of my rolls are too small. A customer suspects more and weighs $50$ rolls.
+                Even if the baker is right, there may be more than $5$ rolls that are too small, by chance. From how many on may she contradict him without being wrong too often?
+                She has to fix the rule for this <b>before</b> she weighs.</p></div></div>
+            <div class="b-text"><p>You test the <b>null hypothesis</b> $H_0\colon p = 0.1$ against the suspicion $H_1\colon p > 0.1$. The <b>test statistic</b> $X$ counts the rolls that are too small.
+                If $H_0$ is true, $X$ is binomially distributed with $n = 50$ and $p = 0.1$. Large values of $X$ speak against $H_0$: the <b>rejection region</b> lies on the right.
+                You choose it so that, if $H_0$ is true, it is hit with a probability of at most $\alpha$, the <b>significance level</b>.</p>
+                <p>A test can go wrong in two ways: $H_0$ is rejected although it is true (<b>type I error</b>, at most $\alpha$), or $H_0$ is kept although it is false (<b>type II error</b>).</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · ONE-TAILED SIGNIFICANCE TEST</div>
+                <div class="b-text">
+                    <p>1. Fix $H_0\colon p = p_0$ and the direction. 2. Test statistic $X$, under $H_0$ binomially distributed with $n$ and $p_0$. 3. Choose the significance level $\alpha$.</p>
+                    <p>4. <b>Right-tailed:</b> $K = \{k, \ldots, n\}$ with the smallest $k$ for which $P(X \ge k) \le \alpha$. <b>Left-tailed:</b> $K = \{0, \ldots, k\}$ with the largest $k$ for which $P(X \le k) \le \alpha$. $k$ is called the <b>critical value</b>.</p>
+                    <p>5. <b>Decision rule:</b> if the sample result lies in $K$, $H_0$ is rejected, otherwise not.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Not rejected does not mean proved:</b> if the result is not in $K$, the data are simply not enough to refute $H_0$.</p>
+            <p class="b-note"><b>On the calculator:</b> many devices only know $P(X \le k)$. Then $P(X \ge k) = 1 - P(X \le k - 1)$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE SIGNIFICANCE TEST</div>
+        <p class="b-help" style="margin:0 0 12px">Set $n$, $p_0$, the direction and $\alpha$. Red is the rejection region. Switch on the type II error and change the true $p$: how often does the test miss that $H_0$ is false?</p>
+        <div data-widget="signifikanztest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · RIGHT-TAILED: THE BAKER</div>
+            <div class="b-text"><p>$n = 50$, $H_0\colon p = 0.1$, $H_1\colon p > 0.1$, $\alpha = 5\%$. We have $P(X \ge 9) \approx 0.058$ and $P(X \ge 10) \approx 0.025$. The customer finds $9$ rolls that are too small.</p></div>
+            <div class="b-sol"><p>$k = 9$ is too small ($0.058 > 0.05$), $k = 10$ works: <span class="b-res">$K = \{10, \ldots, 50\}$</span>.</p>
+                <p>$9$ is not in $K$: $H_0$ is not rejected. The data are not enough to contradict the baker.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · LEFT-TAILED: THE SEEDS</div>
+            <div class="b-text"><p>A dealer promises that at least $90\%$ of the seeds germinate. A gardener sows $100$ seeds. $H_0\colon p = 0.9$, $H_1\colon p < 0.9$, $\alpha = 5\%$, with $P(X \le 84) \approx 0.040$ and $P(X \le 85) \approx 0.073$.</p></div>
+            <div class="b-sol"><p>The rejection region lies on the left: the largest $k$ with $P(X \le k) \le 0.05$ is $84$.</p>
+                <p><span class="b-res">$K = \{0, \ldots, 84\}$</span>: if at most $84$ seeds germinate, the gardener contradicts the dealer.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>State $H_0$, $H_1$ and the type of test. a) A new medicine is supposed to work better than the old one with a cure rate of $70\%$. b) A supplier guarantees at most $3\%$ defective parts, the buyer has doubts. c) A party claims to have at least $30\%$ support.</p></div>
+            <div class="b-sol"><p>a) $H_0\colon p = 0.7$, $H_1\colon p > 0.7$, right-tailed &nbsp; b) $H_0\colon p = 0.03$, $H_1\colon p > 0.03$, right-tailed &nbsp; c) $H_0\colon p = 0.3$, $H_1\colon p < 0.3$, left-tailed</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A coin is tossed $30$ times. A right-tailed test checks whether it shows tails too often: $H_0\colon p = 0.5$, $\alpha = 5\%$. We have $P(X \ge 19) \approx 0.100$ and $P(X \ge 20) \approx 0.049$. Find $K$.</p></div>
+            <div class="b-sol"><p>$K = \{20, \ldots, 30\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In the baker's test ($K = \{10, \ldots, 50\}$), in truth $20\%$ of the rolls are too small. With what probability does the customer not notice? We have $P(X \le 9) \approx 0.444$ for $n = 50$, $p = 0.2$.</p></div>
+            <div class="b-sol"><p>Type II error: the result is not in $K$, so $P(X \le 9) \approx 44\%$. Almost every second check misses the bad baker.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In the seed test, a) $86$ seeds, b) $83$ seeds germinate. State the decision in words each time.</p></div>
+            <div class="b-sol"><p>a) $86 \notin K$: the dealer's claim is not rejected. b) $83 \in K$: at the $5\%$ level the result speaks significantly against a germination rate of $90\%$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>The customer now weighs $100$ rolls. For $n = 100$, $p = 0.1$ we have $P(X \ge 15) \approx 0.073$ and $P(X \ge 16) \approx 0.040$; for $p = 0.2$, $P(X \le 15) \approx 0.129$. Find $K$ and the type II error for $p = 0.2$. What does the larger sample size achieve?</p></div>
+            <div class="b-sol"><p>$K = \{16, \ldots, 100\}$, type II error $\approx 13\%$ instead of $44\%$. <span class="b-res">More data make the test sharper</span>, with the same $\alpha$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="10" data-ph="k ="><p class="b-q-text">Critical value in the baker's test ($n = 50$, $\alpha = 5\%$)?</p><div class="b-sol"><p>$P(X \ge 10) \approx 0.025$</p></div></div>
+        <div class="b-q" data-ans="84" data-ph="k ="><p class="b-q-text">Largest number in the rejection region of the seed test?</p><div class="b-sol"><p>$P(X \le 84) \approx 0.040$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">A type I error means …</p><div class="b-mc"><button>$H_0$ is kept although it is false.</button><button>$H_0$ is rejected although it is true.</button><button>a calculation mistake.</button></div><div class="b-sol"><p>Its probability is at most $\alpha$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Two-tailed tests" data-toc-k="3" data-toc-short="3 Two-tailed">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">5 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Two-tailed tests and statistical certainty</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Is a coin fair? <b>Too many</b> tails are suspicious, but so are <b>too few</b>. The rejection region therefore consists of two parts,
+                one on the left and one on the right. So that the test as a whole is wrong with a probability of at most $\alpha$, each side gets at most $\tfrac{\alpha}{2}$.</p></div></div>
+            <div class="b-text"><p>If $H_0$ is rejected, you say: the result is <b>significant</b> at the level $\alpha$. That only means: if $H_0$ were true, such an extreme result would rarely occur.
+                It does <b>not</b> mean that $H_0$ is false with probability $1 - \alpha$, nor that the difference is large or important.
+                How well a test detects a false hypothesis depends on the true $p$ and on the sample size.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · TWO-TAILED TEST</div>
+                <div class="b-text">
+                    <p>$H_0\colon p = p_0$, $H_1\colon p \neq p_0$. Rejection region $K = \{0, \ldots, k_l\} \cup \{k_r, \ldots, n\}$ with</p>
+                    <p>the largest $k_l$ for which $P(X \le k_l) \le \tfrac{\alpha}{2}$, and the smallest $k_r$ for which $P(X \ge k_r) \le \tfrac{\alpha}{2}$.</p>
+                    <p><b>Significant</b> means: if $H_0$ were true, the result would have landed in $K$ with a probability of at most $\alpha$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>The direction matters:</b> if you know beforehand in which direction you are looking, you test one-tailed and detect deviations in this direction more easily.</p>
+            <p class="b-note"><b>With the CAS:</b> call up the table of the cumulative binomial distribution and read off the limits $k_l$ and $k_r$; the widget below calculates the same.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · CUMULATIVE BINOMIAL DISTRIBUTION</div>
+        <p class="b-help" style="margin:0 0 12px">Set $n = 100$ and $p = 0.5$ and choose $P(X \le k)$. Look for the largest $k$ for which the probability is at most $0.025$.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · IS THE COIN FAIR?</div>
+            <div class="b-text"><p>$n = 100$, $H_0\colon p = 0.5$, $H_1\colon p \neq 0.5$, $\alpha = 5\%$. We have $P(X \le 39) \approx 0.018$ and $P(X \le 40) \approx 0.028$.</p></div>
+            <div class="b-sol"><p>Left: $k_l = 39$. Because of the symmetry, on the right $k_r = 61$.</p>
+                <p><span class="b-res">$K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$</span>. The type I error is even only $2 \cdot 0.018 \approx 3.5\%$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · IF THE COIN IS BIASED</div>
+            <div class="b-text"><p>In truth the coin shows tails with $p = 0.6$. How likely is it that the test does not detect this?</p></div>
+            <div class="b-sol"><p>Type II error: $P(40 \le X \le 60)$ for $p = 0.6$ $\approx 0.54$.</p>
+                <p><span class="b-res">In more than half of the cases the coin goes undetected.</span> For $p = 0.7$ it is only about $2\%$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Explain why the fairness of a coin is tested two-tailed, but the effectiveness of a new medicine one-tailed.</p></div>
+            <div class="b-sol"><p>With the coin, deviations in both directions are suspicious. With the medicine, all that matters is whether it is better.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$n = 50$, $H_0\colon p = 0.5$, two-tailed, $\alpha = 5\%$. We have $P(X \le 17) \approx 0.016$ and $P(X \le 18) \approx 0.033$. Find $K$.</p></div>
+            <div class="b-sol"><p>$k_l = 17$, by symmetry $k_r = 33$: $K = \{0, \ldots, 17\} \cup \{33, \ldots, 50\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A dice is rolled $120$ times and tested two-tailed for the probability of a six, $\alpha = 5\%$. We have $P(X \le 11) \approx 0.014$, $P(X \le 12) \approx 0.028$, $P(X \ge 28) \approx 0.037$, $P(X \ge 29) \approx 0.022$. Find $K$. What is the decision with $27$ sixes?</p></div>
+            <div class="b-sol"><p>$K = \{0, \ldots, 11\} \cup \{29, \ldots, 120\}$. $27 \notin K$: $H_0$ is not rejected.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>True or false? a) The result is significant, so $H_0$ is false with a probability of $95\%$. b) If $H_0$ is not rejected, it is proved. c) A smaller $\alpha$ makes the type II error larger.</p></div>
+            <div class="b-sol"><p>a) false: $\alpha$ describes the behaviour of the test if $H_0$ is true, not a probability for $H_0$. b) false. c) true, the rejection region gets smaller.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A coin in truth has $p = 0.55$. In the two-tailed test with $\alpha = 5\%$ the type II error is about $0.86$ for $n = 100$ and about $0.52$ for $n = 400$. Interpret the numbers. What follows for planning a test?</p></div>
+            <div class="b-sol"><p>Small deviations almost always go undetected with $100$ tosses, and even with $400$ in every second case. <span class="b-res">If you want to find small differences, you need very large samples</span>; this has to be planned before the test.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="61" data-ph="k_r ="><p class="b-q-text">Coin, $n = 100$, two-tailed, $\alpha = 5\%$: from which number on is $H_0$ rejected on the right?</p><div class="b-sol"><p>Symmetric to $39$</p></div></div>
+        <div class="b-q" data-ans="0.025" data-ph="each side"><p class="b-q-text">With $\alpha = 5\%$, what is the largest probability each side of a two-tailed test may have?</p><div class="b-sol"><p>$\tfrac{\alpha}{2}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">A larger sample size …</p><div class="b-mc"><button>reduces the type II error for the same $\alpha$.</button><button>increases the type I error.</button><button>changes nothing.</button></div><div class="b-sol"><p>Exercise 15</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A dice test with $60$ rolls has $K = \{16, \ldots, 60\}$. How many sixes do you expect with a fair dice? What is the decision with $14$ and with $18$ sixes?</p></div>
+            <div class="b-sol"><p>Expected $10$. With $14$ do not reject, with $18$ reject: the dice shows a six significantly too often.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with Year 11:</b> use Bernoulli's formula to calculate $P(X \ge 9)$ for $n = 10$ and $p = 0.5$. Would you consider a coin biased with $9$ hits out of $10$ ($\alpha = 5\%$, right-tailed)?</p></div>
+            <div class="b-sol"><p>$P(X = 9) + P(X = 10) = \tfrac{10 + 1}{1024} \approx 0.011 \le 0.05$: yes, significant at the $5\%$ level.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Explain why the rejection region has to be fixed <b>before</b> the sample is drawn.</p></div>
+            <div class="b-sol"><p>If you only set the limit after seeing the result, you can place it so that the verdict you want comes out. Then the statement about the type I error no longer holds.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A party used to have $40\%$. After a scandal, $200$ people are asked. Plan a test with which the party can check at $\alpha = 5\%$ whether its share has fallen. For $n = 200$, $p = 0.4$ the CAS gives $P(X \le 68) \approx 0.048$ and $P(X \le 69) \approx 0.064$.</p></div>
+            <div class="b-sol"><p>Left-tailed, $H_0\colon p = 0.4$, $H_1\colon p < 0.4$, $K = \{0, \ldots, 68\}$. If at most $68$ of the $200$ people asked want to vote for the party, the fall is significant.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with chapter 6:</b> a coin is tossed $1000$ times and tested two-tailed at $\alpha = 5\%$. Find the range in which $H_0\colon p = 0.5$ is kept, using $\mu \pm 1.96\sigma$. Check it with the CAS values $P(X \le 468) \approx 0.0231$ and $P(X \le 469) \approx 0.0268$.</p></div>
+            <div class="b-sol"><p>$\mu = 500$, $\sigma \approx 15.81$, $1.96\sigma \approx 31$: kept for $469$ to $531$. Check: $P(X \le 468) \le 0.025$, but $P(X \le 469) > 0.025$, so $K = \{0, \ldots, 468\} \cup \{532, \ldots, 1000\}$ ✔ The approximation is spot on.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A bakery claims that at most $10\%$ of its rolls are too light. An inspector weighs $400$ rolls ($\alpha = 5\%$, right-tailed). Find the smallest number $k$ of rolls that are too light from which on she contradicts, first with the approximation $k \ge \mu + 1.645\,\sigma + 0.5$, then with $P(X \ge 50) \approx 0.060$ and $P(X \ge 51) \approx 0.044$.</p></div>
+            <div class="b-sol"><p>$\mu = 40$, $\sigma = 6$: $k \ge 40 + 9.87 + 0.5 = 50.37$, so $k = 51$. Exactly: $P(X \ge 51) \le 0.05 &lt; P(X \ge 50)$, <span class="b-res">$K = \{51, \ldots, 400\}$</span>.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: the lady and the tea" data-toc-k="X" data-toc-short="Tea test">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>The lady tasting tea</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In 1935, in his book <i>The Design of Experiments</i>, the statistician Ronald A. Fisher described a famous experiment: a lady claims she can taste
+                whether the milk or the tea was poured into the cup first. Eight cups are prepared, four of each kind, in random order. She has to pick out the four cups with the milk first.</p>
+            <p>If she only guesses, there are $\binom{8}{4} = 70$ equally likely choices, and only one is completely right: probability $\tfrac{1}{70} \approx 1.4\%$. So a faultless result is significant at the $5\%$ level.
+                With just one mistake it would no longer be: you guess at least that well with a probability of $\tfrac{17}{70} \approx 24\%$. Incidentally, the lady is said to have really existed:
+                according to a later report, the botanist Muriel Bristol identified all eight cups correctly.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources:</b> R. A. Fisher, <i>The Design of Experiments</i>, 1935, chapter 2. The report on Muriel Bristol comes from H. Fairfield Smith, quoted in D. Salsburg, <i>The Lady Tasting Tea</i>, 2001.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>ESTIMATING</h4><p>$p \approx h$, $\mu \approx \bar x$, $\sigma^2 \approx s^2 = \tfrac{1}{n-1} \sum (x_i - \bar x)^2$</p></div>
+        <div><p>Fill quantities: $\bar x = 500$ ml, $s^2 = 6$</p></div></div>
+    <div class="b-rueck"><div><h4>HYPOTHESES</h4><p>$H_0\colon p = p_0$; $H_1$ gives the direction.</p></div>
+        <div><p>Baker: $H_0\colon p = 0.1$, $H_1\colon p > 0.1$</p></div></div>
+    <div class="b-rueck"><div><h4>ONE-TAILED</h4><p>$K$ on the right or on the left with $P(X \in K) \le \alpha$</p></div>
+        <div><p>$n = 50$: $K = \{10, \ldots, 50\}$</p></div></div>
+    <div class="b-rueck"><div><h4>TWO-TAILED</h4><p>at most $\tfrac{\alpha}{2}$ on each side</p></div>
+        <div><p>Coin, $n = 100$: $K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$</p></div></div>
+    <div class="b-rueck"><div><h4>ERRORS</h4><p>Type I: $H_0$ wrongly rejected, at most $\alpha$; type II: $H_0$ wrongly kept</p></div>
+        <div><p>Coin with $p = 0.6$: type II error $\approx 54\%$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="5" data-ph="s² ="><p class="b-q-text">Sample variance of $3$, $7$, $5$, $9$, $6$?</p><div class="b-sol"><p>$\tfrac{20}{4}$</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="k ="><p class="b-q-text">$n = 30$, $H_0\colon p = 0.5$, right-tailed, $\alpha = 5\%$, $P(X \ge 20) \approx 0.049$, $P(X \ge 19) \approx 0.100$: critical value?</p><div class="b-sol"><p>Smallest $k$ with $P(X \ge k) \le 0.05$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">“$H_0$ is not rejected” means …</p><div class="b-mc"><button>$H_0$ is proved.</button><button>$H_0$ is false.</button><button>the data are not enough against $H_0$.</button></div><div class="b-sol"><p>No proof</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="2500" data-ph="n ≥"><p class="b-q-text">Smallest sample size for which the spread of a proportion around $0.5$ is at most $0.01$?</p><div class="b-sol"><p>$\tfrac{0.25}{n} \le 0.0001$</p></div></div>
+            <div class="b-q" data-ans="0.54" data-tol="0.01" data-ph="β ≈"><p class="b-q-text">Coin test, $n = 100$, $K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$: type II error for $p = 0.6$?</p><div class="b-sol"><p>$P(40 \le X \le 60)$</p></div></div>
+            <div class="b-q" data-ans="1/70" data-tol="0.001" data-ph="P ="><p class="b-q-text">Tea test: probability of sorting all eight cups correctly by guessing?</p><div class="b-sol"><p>$\binom84 = 70$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-schaetzen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESTIMATING</span><span class="b-lab-what">Sample mean and sample variance</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-signifikanztest.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ONE-TAILED TESTS</span><span class="b-lab-what">Hypotheses, rejection region, errors</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-zweiseitige-tests.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TWO-TAILED TESTS</span><span class="b-lab-what">Statistical certainty</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-jahresausklang.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">END OF YEAR</span><span class="b-lab-what">Mixed exercises before Christmas</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 12, advanced course · Learning area 7 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-en/gy12.js"></script>
+</body>
+</html>

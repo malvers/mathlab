@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 12 Advanced · Chapter 9.1 · Extremal distances, angles and reflections | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Distance function, point and curve, largest angle of view, reflection in a point and a plane, shortest paths. Chapter 9.1 of the interactive textbook Mathematics · Grammar School 12 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 12 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 9.1 · LEARNING AREA 9</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 9.1 · LEARNING AREA 9 · FEBRUARY · MARCH</p>
+            <h1>Extremal distances, angles and reflections</h1>
+            <p class="b-hero-lead">This is where calculus and geometry meet. How close does a ship come to the lighthouse? Which point of a curve is nearest to a given point?
+                You set up a <b>distance function</b> and find its minimum with the derivative. After that you <b>reflect</b> points in planes, redirect rays of light
+                and find shortest paths with a reflection trick.</p>
+            <div class="b-chips"><span class="b-chip">10 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">3 WIDGETS</span><span class="b-chip">1 LAB</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^2"]' data-labels='["f"]' data-lat="[1.7]" data-x="-2.6,2.6" data-y="-0.6,4" data-pts="[[0,2],[1.2247,1.5],[-1.2247,1.5]]" data-h="240" data-aria="Standard parabola, a point on the y-axis and the two points of the curve nearest to it"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>set up a <b>distance function</b> and find its minimum with the derivative</li>
+                <li>calculate the distance from a point to a <b>line</b> and to a <b>curve</b> and interpret the result as a perpendicular</li>
+                <li><b>reflect</b> points in <b>planes</b>, points and lines and find the plane of reflection for two points</li>
+                <li>use reflections for <b>rays of light</b> and <b>shortest paths</b></li>
+                <li>find <b>extremal angles</b> such as the largest angle of view</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">Where does $h(t) = 3t^2 - 12t + 14$ have its minimum point?</p><div class="b-sol"><p>$h'(t) = 6t - 12 = 0$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="d ="><p class="b-q-text">How far apart are $(1, 1)$ and $(4, 5)$?</p><div class="b-sol"><p>$\sqrt{9 + 16}$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="t ="><p class="b-q-text">Perpendicular from $P(4, 3, 2)$ to $2x + y + 2z = 6$: which parameter belongs to the foot of the perpendicular?</p><div class="b-sol"><p>$15 + 9t = 6$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">A function has a minimum at $x_0$. Then it is certain that …</p><div class="b-mc"><button>$f(x_0) = 0$</button><button>$f''(x_0) = 0$</button><button>$f'(x_0) = 0$ (if $x_0$ lies inside the domain)</button></div><div class="b-sol"><p>necessary condition</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">CLOSEST OF ALL</div>
+            <div class="b-text"><p>The point $P(0, 2)$ lies above the vertex of the standard parabola $y = x^2$.</p>
+                <ul><li>Is the vertex the point of the curve nearest to $P$? Try out a few points $(x, x^2)$.</li><li>Set up a function $d(x)$ for the distance and sketch it.</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE SHIP'S COURSE</div>
+            <div class="b-text"><p>A ship starts at $(0, 0)$ and travels $3$ km east and $4$ km north every hour. A lighthouse stands at $(10, 0)$.</p>
+                <ul><li>Where is the ship after $t$ hours? How far is it from the lighthouse then?</li><li>When is it closest to it?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE REFLECTION TRICK</div>
+            <div class="b-text"><p>A dog at $A$ is to run first to the river, which runs in a straight line, and then to its food bowl at $B$, both on the same side of the river.</p>
+                <ul><li>Where on the bank should it drink so that its path is as short as possible? Try it out on paper.</li><li>Reflect $A$ in the bank. What do you notice?</li></ul></div>
+            <a class="b-lab" data-lab="vektoren" href="../../vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTORS</span><span class="b-lab-what">Vector calculus in 11 chapters</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Extremal distances" data-toc-k="1" data-toc-short="1 Shortest distances">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Minimal distances in the plane and in space</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Is the vertex of the parabola $y = x^2$ nearest to the point $P(0, 2)$? It is $2$ away. But the point $(1, 1)$ on the curve is only at distance $\sqrt{1 + 1} \approx 1.41$.
+                To find the point that really is nearest, you write the distance as a function of the position $x$ and look for its minimum.</p></div></div>
+            <div class="b-text"><p>For a point $Q(x, f(x))$ on the curve, $d(x) = \sqrt{(x - x_P)^2 + (f(x) - y_P)^2}$. Because the square root is strictly increasing, $d(x)^2$ has the same minimum point,
+                and without the root it is much easier to differentiate. It works the same for a line in space: every point of the line belongs to a parameter $t$, and the distance becomes a function of $t$.</p>
+                <p>At the minimum the connecting segment is <b>perpendicular</b> to the line or to the tangent of the curve: the nearest point is the <b>foot of the perpendicular</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · EXTREMAL DISTANCES</div>
+                <div class="b-text">
+                    <p>1. Set up the <b>distance function</b>: $d(t)^2 = |\vec{PQ_t}|^2$ for the point $Q_t$ of the line or curve.</p>
+                    <p>2. Differentiate $d^2$, solve $\big(d^2\big)' = 0$, check for a minimum (at the end points too).</p>
+                    <p>3. $d_{\min} = \sqrt{d(t_0)^2}$. Check: $\vec{PQ}_{t_0}$ is perpendicular to the direction vector or to the tangent.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Quadratic distance function:</b> For lines, $d(t)^2$ is a parabola in $t$ that opens upwards. Its vertex is the minimum; you do not even need the derivative.</p>
+            <p class="b-note"><b>Moving objects:</b> If both points depend on time, $d(t)$ is the distance at time $t$. The minimum tells you how close they come and when.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE NEAREST POINT</div>
+        <p class="b-help" style="margin:0 0 12px">At the top the curve and the point $P$, below the distance function $d(x)$. Move $Q$ with the slider, drag $P$ somewhere else and switch the curve. The shortest segment is dashed in green.</p>
+        <div data-widget="abstandmin"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · POINT AND LINE IN SPACE</div>
+            <div class="b-text"><p>How far is $P(1, 2, 3)$ from the line $g\colon \vec x = t \cdot (1, 1, 1)$?</p></div>
+            <div class="b-sol"><p>$d(t)^2 = (t - 1)^2 + (t - 2)^2 + (t - 3)^2 = 3t^2 - 12t + 14$, vertex at $t = 2$: $d^2 = 2$.</p>
+                <p><span class="b-res">$d = \sqrt2$</span>, foot of the perpendicular $F(2, 2, 2)$. Check: $\vec{PF} = (1, 0, -1)$, $\circ\,(1, 1, 1) = 0$ ✔</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · POINT AND PARABOLA</div>
+            <div class="b-text"><p>Which points of the parabola $y = x^2$ are nearest to $P(0, 2)$?</p></div>
+            <div class="b-sol"><p>$d(x)^2 = x^2 + (x^2 - 2)^2 = x^4 - 3x^2 + 4$, derivative $4x^3 - 6x = 0$: $x = 0$ or $x^2 = 1.5$.</p>
+                <p>$d(0)^2 = 4$, $d(\pm\sqrt{1.5})^2 = 1.75$: <span class="b-res">$(\pm\sqrt{1.5}, 1.5)$ with $d \approx 1.32$</span>. The vertex is a local maximum of $d$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How far is the origin from the line $y = 2x + 1$? Also give the foot of the perpendicular.</p></div>
+            <div class="b-sol"><p>$d(x)^2 = x^2 + (2x + 1)^2 = 5x^2 + 4x + 1$, vertex at $x = -0.4$: $F(-0.4, 0.2)$, $d = \tfrac{1}{\sqrt5} \approx 0.45$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How far is a) $P(3, 0, 0)$ from the $y$-axis, b) $Q(2, 3, 1)$ from the $x$-axis?</p></div>
+            <div class="b-sol"><p>a) $3$ &nbsp; b) foot of the perpendicular $(2, 0, 0)$, $d = \sqrt{9 + 1} = \sqrt{10} \approx 3.16$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Two points are moving: $A_t(t, 0, 0)$ and $B_t(0, 6 - t, 0)$. When and how close do they come to each other?</p></div>
+            <div class="b-sol"><p>$d(t)^2 = t^2 + (6 - t)^2$, minimum at $t = 3$: $d = \sqrt{18} = 3\sqrt2 \approx 4.24$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A ship starts at $(0, 0)$ and moves on by $(3, 4)$ km every hour. When is it closest to the lighthouse $L(10, 0)$, and how close?</p></div>
+            <div class="b-sol"><p>$d(t)^2 = (3t - 10)^2 + (4t)^2 = 25t^2 - 60t + 100$, vertex at $t = 1.2$: after $72$ min, $d = \sqrt{64} = 8$ km.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Which point of the graph of $f(x) = \sqrt{x}$ is nearest to $(2.5, 0)$? Show that the connecting segment is perpendicular to the tangent there.</p></div>
+            <div class="b-sol"><p>$d(x)^2 = (x - 2.5)^2 + x = x^2 - 4x + 6.25$, minimum at $x = 2$: $(2, \sqrt2)$, $d = 1.5$. Gradient of the tangent $\tfrac{1}{2\sqrt2}$, gradient of the segment $\tfrac{\sqrt2}{-0.5} = -2\sqrt2$; product $-1$ ✔</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1.41" data-tol="0.01" data-ph="d ≈"><p class="b-q-text">Distance from $(1, 2, 3)$ to the line $t \cdot (1, 1, 1)$, to two decimal places?</p><div class="b-sol"><p>$\sqrt2$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="km"><p class="b-q-text">How close does the ship from exercise 4 come to the lighthouse?</p><div class="b-sol"><p>$d^2 = 64$</p></div></div>
+        <div class="b-q" data-ans="1.5" data-ph="d ="><p class="b-q-text">Smallest distance from $(2.5, 0)$ to the graph of $\sqrt{x}$?</p><div class="b-sol"><p>$d^2 = 2.25$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Reflections" data-toc-k="2" data-toc-short="2 Reflecting">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Reflecting points in planes</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Your mirror image stands just as far behind the mirror as you stand in front of it, and the line connecting you and your image is perpendicular to the mirror.
+                This is exactly how you reflect a point $P$ in a plane $E$: the foot of the perpendicular $F$ is the <b>midpoint</b> between $P$ and its image $P'$.</p></div></div>
+            <div class="b-text"><p>So, as in Chapter 8.3, you find the foot of the perpendicular with the perpendicular line and go the way from $P$ to $F$ twice. In terms of the parameter of the perpendicular line this means:
+                $F$ belongs to $t_0$, $P'$ to $2t_0$. A ray of light is redirected by a mirror in such a way that the part of its direction perpendicular to the mirror changes sign.
+                And anyone looking for the shortest path from $A$ via a plane to $B$ reflects $A$: the straight segment from $A'$ to $B$ shows the way.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · REFLECTING IN A PLANE</div>
+                <div class="b-text">
+                    <p>1. Intersect the perpendicular line $\vec x = \vec p + t \cdot \vec n$ with $E$: parameter $t_0$, foot of the perpendicular $F$.</p>
+                    <p>2. <b>Mirror point:</b> $\vec{OP'} = \vec{OP} + 2\,\vec{PF} = \vec p + 2t_0 \cdot \vec n$. Check: $F$ is the midpoint of $PP'$.</p>
+                    <p><b>In the point $Z$:</b> $\vec{OP'} = 2\,\vec{OZ} - \vec{OP}$ · <b>Plane of reflection</b> for $A$ and $B$: normal vector $\vec{AB}$, through the midpoint of $AB$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Coordinate planes:</b> In $z = 0$ only $z$ changes sign: $(x, y, z) \to (x, y, -z)$. In $x = y$ the coordinates $x$ and $y$ are swapped.</p>
+            <p class="b-note"><b>Reflecting twice</b> in the same plane leads back to the starting point. Points of the plane stay where they are.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · PERPENDICULAR AND MIRROR POINT</div>
+        <p class="b-help" style="margin:0 0 12px">Switch on the mirror point $P'$. Change the point and the plane: $F$ always stays the midpoint between $P$ and $P'$.</p>
+        <div data-widget="lot3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · MIRROR POINT</div>
+            <div class="b-text"><p>Reflect $P(3, 4, 5)$ in the plane $E\colon x + y + z = 3$.</p></div>
+            <div class="b-sol"><p>Perpendicular line $(3 + t, 4 + t, 5 + t)$: $12 + 3t = 3$, $t_0 = -3$, so $F(0, 1, 2)$.</p>
+                <p>$P' = P + 2t_0 \cdot \vec n$: <span class="b-res">$P'(-3, -2, -1)$</span>. Check: the midpoint of $P$ and $P'$ is $(0, 1, 2) = F$ ✔</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · SHORTEST PATH VIA A PLANE</div>
+            <div class="b-text"><p>A ray of light is to travel from $A(0, 0, 1)$ via a mirror in the plane $z = 0$ to $B(4, 0, 3)$. Where does it hit the mirror, and how long is its path?</p></div>
+            <div class="b-sol"><p>Mirror point $A'(0, 0, -1)$. Every path via the mirror is as long as the path from $A'$ to $B$; the shortest is the straight segment.</p>
+                <p>$A'B\colon (0, 0, -1) + s(4, 0, 4)$ meets $z = 0$ at $s = \tfrac14$: <span class="b-res">$(1, 0, 0)$, path $|\vec{A'B}| = 4\sqrt2 \approx 5.66$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Reflect $P(1, 2, 3)$ a) in the plane $z = 0$ &nbsp; b) in the plane $x = 0$ &nbsp; c) in the origin &nbsp; d) in the point $Z(2, 2, 2)$.</p></div>
+            <div class="b-sol"><p>a) $(1, 2, -3)$ &nbsp; b) $(-1, 2, 3)$ &nbsp; c) $(-1, -2, -3)$ &nbsp; d) $(3, 2, 1)$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Reflect the origin in the plane $2x + y + 2z = 9$.</p></div>
+            <div class="b-sol"><p>Perpendicular line $t \cdot (2, 1, 2)$: $9t = 9$, $t_0 = 1$, $F(2, 1, 2)$, $P'(4, 2, 4)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In which plane must you reflect $A(1, 2, 3)$ to get $B(3, 4, 1)$?</p></div>
+            <div class="b-sol"><p>Normal vector $\vec{AB} = (2, 2, -2)$, shorter $(1, 1, -1)$, midpoint $(2, 3, 2)$: $x + y - z = 3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A ray of light in the direction $(1, 0, 0)$ hits a mirror in the plane $x + y = 2$. In which direction does it continue?</p></div>
+            <div class="b-hint"><p>Subtract twice the part of the direction vector $\vec v$ in the direction of the unit normal vector $\vec n_0$: $\vec v' = \vec v - 2(\vec v \circ \vec n_0)\,\vec n_0$.</p></div>
+            <div class="b-sol"><p>$\vec n_0 = \tfrac{1}{\sqrt2}(1, 1, 0)$, $\vec v \circ \vec n_0 = \tfrac{1}{\sqrt2}$: $\vec v' = (1, 0, 0) - (1, 1, 0) = (0, -1, 0)$. The ray is turned through $90^\circ$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A billiard ball lies at $A(1, 2)$ and is to hit the ball at $B(5, 3)$ off the cushion $y = 0$. Where must it hit the cushion, and how long is its path?</p></div>
+            <div class="b-sol"><p>$A'(1, -2)$; the segment $A'B$ meets $y = 0$ at $(2.6, 0)$. Path $|\vec{A'B}| = \sqrt{16 + 25} = \sqrt{41} \approx 6.40$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="-3" data-ph="x ="><p class="b-q-text">$P(3, 4, 5)$ is reflected in $x + y + z = 3$. What is the $x$-coordinate of $P'$?</p><div class="b-sol"><p>$3 + 2 \cdot (-3)$</p></div></div>
+        <div class="b-q" data-ans="5.66" data-tol="0.01" data-ph="length"><p class="b-q-text">Length of the shortest light path from Example 4, to two decimal places?</p><div class="b-sol"><p>$4\sqrt2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">When reflecting in a plane, the foot of the perpendicular $F$ is …</p><div class="b-mc"><button>the midpoint of $P$ and $P'$.</button><button>equal to $P'$.</button><button>the origin.</button></div><div class="b-sol"><p>$\vec{OP'} = \vec{OP} + 2\vec{PF}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Extremal angles" data-toc-k="3" data-toc-short="3 Angles">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">2 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Extremal angles: where do you see the most?</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A painting is $2$ m high, and its lower edge hangs $1$ m above your eye level. If you stand right in front of it, you see it steeply from below; if you stand far away, it becomes small.
+                Somewhere in between it appears at the <b>largest angle of view</b>. The same question arises for a shot at goal from the side of the pitch and for the camera at a racetrack.</p></div></div>
+            <div class="b-text"><p>If you stand at distance $x$ from the wall, you see the upper edge at $\beta$ with $\tan\beta = \tfrac{a + h}{x}$ and the lower edge at $\alpha$ with $\tan\alpha = \tfrac ax$.
+                The angle of view is $\varphi = \beta - \alpha$. Because the tangent increases on $(0^\circ, 90^\circ)$, $\varphi$ is largest exactly where $\tan\varphi$ is largest. With the addition theorem
+                $\tan(\beta - \alpha) = \tfrac{\tan\beta - \tan\alpha}{1 + \tan\beta \tan\alpha}$ this becomes a rational function whose maximum you find with the derivative.
+                In space you calculate the angle with the scalar product and look for the extremum with the CAS.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · LARGEST ANGLE OF VIEW</div>
+                <div class="b-text">
+                    <p>A segment of length $h$ starting at height $a$ above eye level: $\tan\varphi(x) = \dfrac{h\,x}{x^2 + a(a + h)}$.</p>
+                    <p>$\big(\tan\varphi\big)'(x) = \dfrac{h\,\big(a(a + h) - x^2\big)}{\big(x^2 + a(a + h)\big)^2} = 0$ gives the best distance $x = \sqrt{a\,(a + h)}$, the geometric mean of the heights.</p>
+                    <p>In general: set up the <b>angle</b> as a function of a parameter (tangent or scalar product), then find the extremum as in Unit 1 and check the end values.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Regiomontanus</b> asked in 1471, in a letter to the Erfurt professor Christian Roder, at which point on the ground a vertically suspended rod appears largest. It is regarded as the first optimisation problem since antiquity. Source: Mathematical Association of America, Convergence; MacTutor, “Regiomontanus”.</p>
+            <p class="b-note"><b>Geometrically:</b> The best position is the point at which a circle through both ends of the segment touches the ground.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURE · THE ANGLE OF VIEW AS A FUNCTION OF THE DISTANCE</div>
+        <p class="b-help" style="margin:0 0 12px">Painting with $h = 2$ m, lower edge $a = 1$ m above eye level: angle of view $\varphi$ in degrees against the distance $x$ in m. The maximum is at $x = \sqrt3 \approx 1.73$ m with $\varphi = 30^\circ$.</p>
+        <div data-widget="graph" data-fns='["(atan(3/x)-atan(1/x))*180/PI"]' data-labels='["φ"]' data-lat="[5.5]" data-x="-0.4,8" data-y="-3,36" data-pts="[[1.732,30]]" data-xl="x" data-yl="φ" data-h="240" data-aria="Angle of view in degrees against the distance from the wall: rises quickly to 30 degrees at 1.73 metres and then falls slowly"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · THE PAINTING</div>
+            <div class="b-text"><p>$a = 1$, $h = 2$. Find the best distance and the largest angle of view.</p></div>
+            <div class="b-sol"><p>$\tan\varphi = \dfrac{2x}{x^2 + 3}$, derivative zero for $x^2 = 3$: $x = \sqrt3 \approx 1.73$ m. Change of sign from $+$ to $-$: maximum.</p>
+                <p>$\tan\varphi = \tfrac{2\sqrt3}{6} = \tfrac{1}{\sqrt3}$: <span class="b-res">$\varphi = 30^\circ$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · THE STATUE ON THE PLINTH</div>
+            <div class="b-text"><p>A statue $3$ m high stands on a plinth $4$ m high; the eyes are at $1.6$ m. Where is the best place to stand?</p></div>
+            <div class="b-sol"><p>$a = 4 - 1.6 = 2.4$, $h = 3$: $x = \sqrt{2.4 \cdot 5.4} = \sqrt{12.96} = 3.6$ m.</p>
+                <p><span class="b-res">$3.6$ m in front of the plinth</span>, angle of view $\arctan\tfrac{5.4}{3.6} - \arctan\tfrac{2.4}{3.6} \approx 56.3^\circ - 33.7^\circ = 22.6^\circ$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A scoreboard is $1$ m high, and its lower edge hangs $3$ m above eye level. Find the best distance.</p></div>
+            <div class="b-sol"><p>$x = \sqrt{3 \cdot 4} = \sqrt{12} \approx 3.46$ m</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Derive the formula $\tan\varphi(x) = \tfrac{h x}{x^2 + a(a + h)}$ with the addition theorem and confirm the derivative in the key point box with the quotient rule.</p></div>
+            <div class="b-sol"><p>$\tfrac{\frac{a + h}{x} - \frac ax}{1 + \frac{a(a + h)}{x^2}} = \tfrac{h/x}{(x^2 + a(a + h))/x^2} = \tfrac{hx}{x^2 + a(a + h)}$. Quotient rule: $\tfrac{h(x^2 + a(a + h)) - hx \cdot 2x}{(\ldots)^2} = \tfrac{h(a(a + h) - x^2)}{(\ldots)^2}$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Rugby:</b> After a try, the kicker may go back along a line perpendicular to the goal line. The line runs $15$ m to the side of the centre of the goal, and the posts are $5.6$ m apart. From what distance does he see the goal at the largest angle?</p></div>
+            <div class="b-sol"><p>The posts are $15 - 2.8 = 12.2$ m and $17.8$ m to the side: $a = 12.2$, $a + h = 17.8$. $x = \sqrt{12.2 \cdot 17.8} \approx 14.7$ m, angle about $10.8^\circ$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A camera moves along the $x$-axis: $P(t, 0, 0)$. At what angle $\varphi(t)$ does it see the segment from $A(0, 2, 1)$ to $B(0, 2, 5)$? For which $t$ is the angle largest?</p></div>
+            <div class="b-hint"><p>$\cos\varphi = \tfrac{\vec{PA} \circ \vec{PB}}{|\vec{PA}| \cdot |\vec{PB}|}$. The angle is largest where $\cos^2\varphi$ is smallest. Set $u = t^2$.</p></div>
+            <div class="b-sol"><p>$\cos^2\varphi = \tfrac{(t^2 + 9)^2}{(t^2 + 5)(t^2 + 29)}$. With $u = t^2$ and the quotient rule (or CAS): minimum at $u = 1$, so <span class="b-res">$t = \pm 1$</span>, $\cos^2\varphi = \tfrac59$, $\varphi \approx 41.8^\circ$. At $t = 0$ it is $41.6^\circ$: the maximum is flat.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3.6" data-ph="x ="><p class="b-q-text">Best distance in front of the statue from Example 6, in m?</p><div class="b-sol"><p>$\sqrt{2.4 \cdot 5.4}$</p></div></div>
+        <div class="b-q" data-ans="3.46" data-tol="0.01" data-ph="x ≈"><p class="b-q-text">Best distance for $a = 3$, $h = 1$? Two decimal places.</p><div class="b-sol"><p>$\sqrt{12}$</p></div></div>
+        <div class="b-q" data-ans="30" data-ph="φ in °"><p class="b-q-text">Largest angle of view for $a = 1$, $h = 2$, in degrees?</p><div class="b-sol"><p>$\tan\varphi = \tfrac{1}{\sqrt3}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Reflect $P(1, 3, 5)$ in the plane $x = y$.</p></div>
+            <div class="b-sol"><p>Swap $x$ and $y$: $(3, 1, 5)$. Foot of the perpendicular $(2, 2, 5)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with Chapter 8.3:</b> The origin is at distance $3$ from $2x + y + 2z = 9$. How far is it from its mirror image? Check with exercise 7.</p></div>
+            <div class="b-sol"><p>Twice the distance: $6$. $|(4, 2, 4)| = \sqrt{36} = 6$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Reflect the line $g\colon \vec x = (0, 0, 2) + t(1, 0, 1)$ in the plane $z = 0$.</p></div>
+            <div class="b-sol"><p>Reflect two points, $(0, 0, 2) \to (0, 0, -2)$ and $(1, 0, 3) \to (1, 0, -3)$: $g'\colon \vec x = (0, 0, -2) + t(1, 0, -1)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>How far is $P(4, 0, 0)$ from the line through $O$ with the direction vector $(1, 1, 0)$? Reflect $P$ in this line.</p></div>
+            <div class="b-sol"><p>$d(t)^2 = (t - 4)^2 + t^2$, minimum at $t = 2$: $F(2, 2, 0)$, $d = 2\sqrt2$. Mirror point $2F - P = (0, 4, 0)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Light takes the shortest path" data-toc-k="X" data-toc-short="Heron">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>Light takes the shortest path</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Why does “angle of incidence equals angle of reflection” hold for a mirror? Heron of Alexandria gave an answer as early as the 1st century, one you have recalculated in Example 4:
+                in his <i>Catoptrics</i>, a book about mirrors, he showed that the law of reflection follows from a single assumption. The path of light from the object via the mirror
+                to the eye is <b>as short as possible</b>. The reflection trick makes this visible at once: the shortest path from $A'$ to $B$ is the straight line, and there the two angles are equal.</p>
+            <p>More than 1500 years later Pierre de Fermat generalised the idea. In a letter of 1 January 1662 he assumed that light chooses the path of <b>least time</b>.
+                In this way he also explained the refraction of light when it passes from air into water. This principle of Fermat's is still one of the foundations of optics today.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Wikipedia (English), article “Fermat's principle”; on Heron's lifetime and Catoptrics: MacTutor History of Mathematics, biography “Heron of Alexandria”.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>DISTANCE FUNCTION</h4><p>minimise $d(t)^2$, take the root only at the end</p></div>
+        <div><p>$P(1, 2, 3)$, $g\colon t(1, 1, 1)$: $d = \sqrt2$</p></div></div>
+    <div class="b-rueck"><div><h4>POINT AND CURVE</h4><p>$d(x)^2 = (x - x_P)^2 + (f(x) - y_P)^2$</p></div>
+        <div><p>$P(0, 2)$, $y = x^2$: $d \approx 1.32$</p></div></div>
+    <div class="b-rueck"><div><h4>PERPENDICULAR</h4><p>At the minimum $PQ$ is perpendicular to the line or tangent.</p></div>
+        <div><p>$\sqrt{x}$ and $(2.5, 0)$: gradients $\tfrac{1}{2\sqrt2}$ and $-2\sqrt2$</p></div></div>
+    <div class="b-rueck"><div><h4>REFLECTING</h4><p>$\vec{OP'} = \vec p + 2t_0 \vec n$, $F$ is the midpoint</p></div>
+        <div><p>$(3, 4, 5)$ in $x + y + z = 3$: $(-3, -2, -1)$</p></div></div>
+    <div class="b-rueck"><div><h4>SHORTEST PATH</h4><p>reflect $A$, segment $A'B$</p></div>
+        <div><p>via $z = 0$: path $4\sqrt2$, point $(1, 0, 0)$</p></div></div>
+    <div class="b-rueck"><div><h4>LARGEST ANGLE OF VIEW</h4><p>maximise $\tan\varphi = \tfrac{hx}{x^2 + a(a + h)}$</p></div>
+        <div><p>best distance $x = \sqrt{a(a + h)}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT A CALCULATOR</div>
+            <div class="b-q" data-ans="3" data-ph="t ="><p class="b-q-text">When do $A_t(t, 0, 0)$ and $B_t(0, 6 - t, 0)$ come closest to each other?</p><div class="b-sol"><p>vertex of $2t^2 - 12t + 36$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="z ="><p class="b-q-text">$O$ reflected in $2x + y + 2z = 9$: $z$-coordinate of the image?</p><div class="b-sol"><p>$P'(4, 2, 4)$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Why do you minimise $d^2$ instead of $d$?</p><div class="b-mc"><button>$d^2$ is always smaller.</button><button>Same minimum point, but easier to differentiate.</button><button>Because $d$ can be negative.</button></div><div class="b-sol"><p>The square root is strictly increasing.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH DIGITAL TOOLS</div>
+            <div class="b-q" data-ans="1.32" data-tol="0.01" data-ph="d ≈"><p class="b-q-text">Smallest distance from $P(0, 2)$ to the parabola $y = x^2$?</p><div class="b-sol"><p>$\sqrt{1.75}$</p></div></div>
+            <div class="b-q" data-ans="2.6" data-ph="x ="><p class="b-q-text">Billiards from exercise 10: at which $x$ does the ball hit the cushion?</p><div class="b-sol"><p>intersect the segment $A'B$ with $y = 0$</p></div></div>
+            <div class="b-q" data-ans="2.83" data-tol="0.01" data-ph="d ≈"><p class="b-q-text">Distance from $(4, 0, 0)$ to the line $t(1, 1, 0)$?</p><div class="b-sol"><p>$2\sqrt2$</p></div></div>
+            <div class="b-q" data-ans="14.7" data-tol="0.05" data-ph="x ≈"><p class="b-q-text">Rugby: posts $12.2$ m and $17.8$ m to the side. Best distance in m, one decimal place?</p><div class="b-sol"><p>$\sqrt{12.2 \cdot 17.8}$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-extremale-abstaende.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXTREMAL DISTANCES</span><span class="b-lab-what">Minimal and maximal distances and angles</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-spiegelung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REFLECTION</span><span class="b-lab-what">Point in a plane, shortest paths</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 12, advanced course · Learning area 9 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-en/analysis.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-en/vektoren.js"></script>
+</body>
+</html>

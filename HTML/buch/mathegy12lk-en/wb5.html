@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics GY 12 Advanced · Chapter E · Numerical integration | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="History of integral calculus, rectangle and trapezium rules, Kepler's barrel rule, Simpson, comparing the rules. Chapter E of the interactive textbook Mathematics · Grammar School 12 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · GRAMMAR SCHOOL 12 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">ELECTIVE AREA 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">ELECTIVE AREA 5 · NOVEMBER</p>
+            <h1>Numerical integration</h1>
+            <p class="b-hero-lead">The bell curve $\mathrm{e}^{-x^2}$ is one of the most important functions in statistics, but it has no antiderivative you could write down.
+                Measurements from an experiment come without a function term too. Then only <b>calculating with strips</b> helps: you get to know the <b>rectangle</b> and the
+                <b>trapezium rule</b>, fit parabolas instead of lines with <b>Kepler and Simpson</b>, judge the accuracy and retrace the path that integral calculus took from Archimedes to Riemann.</p>
+            <div class="b-chips"><span class="b-chip">10 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">3 WIDGETS</span><span class="b-chip">1 LAB</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["exp(-(x^2))"]' data-labels='["f"]' data-lat="[1.3]" data-x="-2.4,2.4" data-y="-0.25,1.25" data-pts="[[0,1]]" data-h="240" data-aria="The bell curve e to the power of minus x squared"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>milestones in the <b>history of integral calculus</b>: Archimedes, Kepler, Newton and Leibniz, Riemann</li>
+                <li>approximate integrals with the <b>rectangle rule</b>: left, right and middle sample points</li>
+                <li>derive and apply the <b>trapezium rule</b>, also to measurements</li>
+                <li>judge the <b>accuracy</b>: the error when the number of strips is doubled, integrals without an antiderivative</li>
+                <li>derive <b>Kepler's barrel rule</b> and <b>Simpson's rule</b>, compare rules by convergence and effort, use stopping conditions</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="8" data-ph="Area"><p class="b-q-text">A trapezium has the parallel sides $3$ and $5$ and the height $2$. What is its area?</p><div class="b-sol"><p>$\tfrac{3 + 5}{2} \cdot 2$</p></div></div>
+            <div class="b-q" data-ans="8/3" data-tol="0.01" data-ph="Value"><p class="b-q-text">Calculate $\int_0^2 x^2\,\mathrm{d}x$.</p><div class="b-sol"><p>$\tfrac83$</p></div></div>
+            <div class="b-q" data-ans="1.25" data-ph="Midpoint"><p class="b-q-text">Where is the midpoint of the interval $[1, 1.5]$?</p><div class="b-sol"><p>$\tfrac{1 + 1.5}{2}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">For an increasing $f$, the sum with the right rectangles is …</p><div class="b-mc"><button>too small.</button><button>too large.</button><button>exact.</button></div><div class="b-sol"><p>The largest value is on the right.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LIKE ARCHIMEDES</div>
+            <div class="b-text"><p>The arch $y = 4 - x^2$ over $[-2, 2]$ encloses a parabolic segment with the axis. Put the triangle $(-2, 0)$, $(2, 0)$, $(0, 4)$ inside it.</p>
+                <ul><li>How large is the triangle, how large the segment (with the fundamental theorem)? Which factor do you get?</li><li>Archimedes found this factor without an integral. How might he have gone about it?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">IN THE SPREADSHEET</div>
+            <div class="b-text"><p>In a spreadsheet, make a column with $x = 0, 0.2, 0.4, \ldots, 2$ and next to it $f(x) = x^2$.</p>
+                <ul><li>Use a sum formula to calculate the sums of strips with left and with right rectangles.</li><li>Halve the step size. How does the distance from the exact value $\tfrac83$ change?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">SLANTED INSTEAD OF STEPS</div>
+            <div class="b-text"><p>Join the points of the graph of $x^2$ at $x = 0, 1, 2$ with line segments instead of steps.</p>
+                <ul><li>Which shapes appear under the segments? Calculate their area.</li><li>Is the result above or below $\tfrac83$? Why?</li></ul></div>
+            <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INTEGRALS</span><span class="b-lab-what">Areas under curves</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="History and the rectangle rule" data-toc-k="1" data-toc-short="1 Rectangles">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>From history, and the rectangle rule</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Long before antiderivatives existed, mathematicians calculated areas with curved boundaries using shapes they knew. In the 3rd century BC, Archimedes filled
+                a parabolic segment with smaller and smaller triangles and found that it is $\tfrac43$ of the largest triangle inside it. Today we use rectangles, and a computer calculates thousands of them in seconds.</p></div></div>
+            <div class="b-text"><p>You divide $[a, b]$ into $n$ strips of equal width $h = \tfrac{b - a}{n}$ with the sample points $x_0 = a$, $x_1 = a + h$, …, $x_n = b$.
+                Above each strip stands a rectangle. Its height is the function value at the left edge, at the right edge or in the middle of the strip.
+                The more strips, the more accurate. The midpoint rule is usually much more accurate than the other two, because within each strip too much and too little almost cancel out.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · RECTANGLE RULE</div>
+                <div class="b-text">
+                    <p>With $h = \tfrac{b - a}{n}$ and $x_i = a + i \cdot h$:</p>
+                    <p><b>left:</b> $L_n = h \cdot \big(f(x_0) + f(x_1) + \ldots + f(x_{n-1})\big)$ · <b>right:</b> $R_n = h \cdot \big(f(x_1) + \ldots + f(x_n)\big)$</p>
+                    <p><b>Midpoint rule:</b> $M_n = h \cdot \Big(f\big(x_0 + \tfrac h2\big) + f\big(x_1 + \tfrac h2\big) + \ldots + f\big(x_{n-1} + \tfrac h2\big)\Big)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Timeline:</b> Archimedes, 3rd century BC · Kepler, barrel rule 1615 · Leibniz first writes $\int$ in 1675 · in the 19th century Riemann clarifies what an integral is.</p>
+            <p class="b-note"><b>Spreadsheet:</b> column A the sample points, column B the function values, then $h$ times the sum of the right cells.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · RECTANGLES AND TRAPEZIA</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a function and a rule and increase the number of strips. How fast does the sum approach the exact value?</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · THREE RULES COMPARED</div>
+            <div class="b-text"><p>Approximate $\int_0^2 x^2\,\mathrm{d}x = \tfrac83 \approx 2.667$ with four strips.</p></div>
+            <div class="b-sol"><p>$h = 0.5$: $L_4 = 0.5 \cdot (0 + 0.25 + 1 + 2.25) = 1.75$, $R_4 = 0.5 \cdot (0.25 + 1 + 2.25 + 4) = 3.75$.</p>
+                <p>$M_4 = 0.5 \cdot (0.0625 + 0.5625 + 1.5625 + 3.0625) = 2.625$: <span class="b-res">errors $-0.92$, $+1.08$, only $-0.04$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · MEASUREMENTS INSTEAD OF A TERM</div>
+            <div class="b-text"><p>A cyclist reads the speedometer every $10$ s: $4$, $6$, $7$, $7$, $5$ m/s at $t = 0, 10, \ldots, 40$ s. Estimate the distance.</p></div>
+            <div class="b-sol"><p>Left: $10 \cdot (4 + 6 + 7 + 7) = 240$ m. Right: $10 \cdot (6 + 7 + 7 + 5) = 250$ m.</p>
+                <p><span class="b-res">Between $240$ and $250$ m.</span> For the midpoint rule the values in the middle are missing; unit 2 shows what helps then.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $L_2$ and $R_2$ for $\int_0^2 x\,\mathrm{d}x$ and compare with the exact value.</p></div>
+            <div class="b-sol"><p>$h = 1$: $L_2 = 0 + 1 = 1$, $R_2 = 1 + 2 = 3$, exactly $2$ (triangle), exactly in the middle.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $M_4$ for $\int_0^1 x^2\,\mathrm{d}x$ and the error.</p></div>
+            <div class="b-sol"><p>Midpoints $0.125$, $0.375$, $0.625$, $0.875$: $M_4 = 0.25 \cdot 1.3125 = 0.328125$. Error $-0.0052$ compared with $\tfrac13$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calculate $L_4$ and $R_4$ for $\int_1^2 \tfrac1x\,\mathrm{d}x = \ln 2 \approx 0.6931$. Which sum is too large? Why?</p></div>
+            <div class="b-sol"><p>$L_4 \approx 0.7595$, $R_4 \approx 0.6345$. $\tfrac1x$ decreases: the largest value in each strip is on the left, so $L_4$ is too large.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Show for an increasing function: $L_n \le \int_a^b f(x)\,\mathrm{d}x \le R_n$ and $R_n - L_n = h \cdot \big(f(b) - f(a)\big)$.</p></div>
+            <div class="b-sol"><p>Both sums contain $f(x_1)$ to $f(x_{n-1})$. What remains is $R_n - L_n = h \cdot (f(x_n) - f(x_0))$. Increasing: the left rectangles lie below the graph, the right ones above it.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>For $\int_0^1 x^2\,\mathrm{d}x$, $\tfrac13 - L_n = \dfrac{3n - 1}{6n^2}$. What is the smallest number of strips for which the error of $L_n$ is less than $0.01$?</p></div>
+            <div class="b-sol"><p>$n = 49$: $0.01013$; $n = 50$: $0.00993$. <span class="b-res">At least $50$ strips.</span> The error only falls roughly like $\tfrac{1}{2n}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1.75" data-ph="L₄ ="><p class="b-q-text">$L_4$ for $\int_0^2 x^2\,\mathrm{d}x$?</p><div class="b-sol"><p>$0.5 \cdot 3.5$</p></div></div>
+        <div class="b-q" data-ans="0.328" data-tol="0.001" data-ph="M₄ ≈"><p class="b-q-text">$M_4$ for $\int_0^1 x^2\,\mathrm{d}x$, to three decimal places?</p><div class="b-sol"><p>$0.328125$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Which rectangle rule is usually the most accurate?</p><div class="b-mc"><button>left</button><button>right</button><button>midpoint</button></div><div class="b-sol"><p>Too much and too little almost cancel out.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Trapezium rule and accuracy" data-toc-k="2" data-toc-short="2 Trapezia">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>The trapezium rule and accuracy</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>If you join neighbouring points of the graph with line segments, you get <b>trapezia</b> instead of rectangles. Each has the area $h \cdot \tfrac{f(x_{i}) + f(x_{i+1})}{2}$.
+                When you add them up, every inner function value counts fully, because it belongs to two trapezia. The two end values count only half.</p></div></div>
+            <div class="b-text"><p>The trapezium sum is exactly the mean of the left and right rectangle sums. It only needs the values at the sample points, which suits series of measurements perfectly.
+                How accurate is it? If you double the number of strips, the error of the trapezium and the midpoint rule falls to about a <b>quarter</b>,
+                that of the left and right rectangles only to about a <b>half</b>. If the graph is convex, the chords lie above it: the trapezia are then too large.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · TRAPEZIUM RULE</div>
+                <div class="b-text">
+                    <p>$$T_n = h \cdot \Big(\tfrac12 f(x_0) + f(x_1) + \ldots + f(x_{n-1}) + \tfrac12 f(x_n)\Big) = \frac{L_n + R_n}{2}$$</p>
+                    <p><b>Error when $n$ is doubled:</b> left and right rectangles roughly halved, midpoint and trapezium roughly quartered.</p>
+                    <p><b>Curvature:</b> convex: $T_n$ too large, $M_n$ too small · concave: the other way round.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Without an antiderivative:</b> $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x \approx 0.746824$ can only be calculated numerically. The bell curve is part of the normal distribution, which you will meet in chapter 6.</p>
+            <p class="b-note"><b>A trick:</b> because the error roughly quarters when you double, $T_{2n} + \tfrac13 (T_{2n} - T_n)$ gives an even much better value.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · FOUR RULES, ONE ERROR</div>
+        <p class="b-help" style="margin:0 0 12px">The table shows the approximation for $n$, $2n$ and $4n$ strips and its error. Compare by which factor the error shrinks when you double. For $\mathrm{e}^{-x^2}$ there is no exact value from an antiderivative.</p>
+        <div data-widget="summen" data-mode="verfahren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · DOUBLING</div>
+            <div class="b-text"><p>Calculate $T_4$ and $T_8$ for $\int_0^2 x^2\,\mathrm{d}x$ and compare the errors.</p></div>
+            <div class="b-sol"><p>$T_4 = \tfrac{1.75 + 3.75}{2} = 2.75$, error $+0.0833$. $T_8 = 2.6875$, error $+0.0208$.</p>
+                <p><span class="b-res">The error has shrunk to a quarter.</span> Both values are too large; $x^2$ is convex.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · THE BELL CURVE</div>
+            <div class="b-text"><p>Approximate $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$ with the trapezium rule and four strips.</p></div>
+            <div class="b-sol"><p>Values at $0, 0.25, 0.5, 0.75, 1$: $1$, $0.9394$, $0.7788$, $0.5698$, $0.3679$.</p>
+                <p>$T_4 = 0.25 \cdot (0.5 + 0.9394 + 0.7788 + 0.5698 + 0.1839) \approx$ <span class="b-res">$0.7430$</span>, only $0.004$ below the exact value.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Estimate the cyclist's distance from example 2 with the trapezium rule.</p></div>
+            <div class="b-sol"><p>$10 \cdot (2 + 6 + 7 + 7 + 2.5) = 245$ m, exactly the mean of $240$ and $250$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $T_2$ for $\int_0^2 x^3\,\mathrm{d}x$ and the error.</p></div>
+            <div class="b-sol"><p>$h = 1$: $T_2 = \tfrac12 \cdot 0 + 1 + \tfrac12 \cdot 8 = 5$, exactly $4$: error $+1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calculate $T_4$ for $\int_1^2 \tfrac1x\,\mathrm{d}x$ with the results of exercise 3, and the error compared with $\ln 2$.</p></div>
+            <div class="b-sol"><p>$T_4 = \tfrac{0.7595 + 0.6345}{2} \approx 0.6970$, error $\approx +0.0039$; $\tfrac1x$ is convex.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Explain with a sketch: for a concave graph the trapezium rule gives values that are too small.</p></div>
+            <div class="b-sol"><p>Concave means: the chord between two points runs below the graph. Every trapezium is smaller than the strip under the curve.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>For $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$, $T_4 \approx 0.742984$ and $T_8 \approx 0.745866$. Use $T_8 + \tfrac13 (T_8 - T_4)$ to estimate a better value and compare it with $0.746824$.</p></div>
+            <div class="b-sol"><p>$0.745866 + \tfrac13 \cdot 0.002882 \approx 0.746826$. <span class="b-res">Only $0.000002$ out</span>, with the same function values.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="245" data-ph="metres"><p class="b-q-text">Cyclist, trapezium rule: how many metres?</p><div class="b-sol"><p>Mean of $240$ and $250$</p></div></div>
+        <div class="b-q" data-ans="2.75" data-ph="T₄ ="><p class="b-q-text">$T_4$ for $\int_0^2 x^2\,\mathrm{d}x$?</p><div class="b-sol"><p>$\tfrac{L_4 + R_4}{2}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">If you double $n$, the error of the trapezium rule is roughly …</p><div class="b-mc"><button>quartered.</button><button>halved.</button><button>doubled.</button></div><div class="b-sol"><p>Example 3</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Barrel rule and Simpson" data-toc-k="3" data-toc-short="3 Simpson">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Parabolas instead of chords: the barrel rule and Simpson</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The trapezium rule joins two points of the graph with a <b>straight line</b>. With curved graphs a piece is always left over.
+                But a parabola fits through <b>three</b> points, and it follows the curvature. Over two strips of width $h$ its area is surprisingly simple:
+                $\tfrac h3 (y_0 + 4y_1 + y_2)$. For $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$ this gives $0.74718$ with only three function values, more accurate than four trapeziums.</p></div></div>
+            <div class="b-text"><p>Why the weights $1$, $4$, $1$? Put the midpoint at the origin, so $p(x) = \alpha x^2 + \beta x + \gamma$ on $[-h, h]$. Then
+                $\int_{-h}^{h} p(x)\,\mathrm{d}x = \tfrac23 \alpha h^3 + 2\gamma h$. On the other hand, $p(-h) + 4p(0) + p(h) = 2\alpha h^2 + 6\gamma$, and times $\tfrac h3$ this gives exactly the same.
+                If you divide $[a, b]$ into an <b>even</b> number of strips and put a parabola over each pair, you get <b>Simpson's rule</b>. When $h$ is halved, its error shrinks
+                to about a sixteenth, the trapezium rule's only to a quarter.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · KEPLER'S BARREL RULE AND SIMPSON'S RULE</div>
+                <div class="b-text">
+                    <p><b>Barrel rule</b> (one parabolic arc, midpoint $m$): $\displaystyle\int_a^b f(x)\,\mathrm{d}x \approx \frac{b - a}{6}\big(f(a) + 4f(m) + f(b)\big)$</p>
+                    <p><b>Simpson</b> ($n$ even, $h = \tfrac{b - a}{n}$): $S_n = \dfrac h3 \big(f_0 + 4f_1 + 2f_2 + 4f_3 + \ldots + 2f_{n-2} + 4f_{n-1} + f_n\big)$</p>
+                    <p>Exact for all polynomials up to <b>degree 3</b>. <b>Stopping rule:</b> double $n$ until $|S_{2n} - S_n|$ is smaller than the accuracy you want.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Names:</b> Thomas Simpson published the rule in 1743, but it was known before him. The barrel rule is its special case with $n = 2$.</p>
+            <p class="b-note"><b>Speed:</b> for six correct decimal places of $\ln 2 = \int_1^2 \tfrac1x\,\mathrm{d}x$, Simpson needs $16$ strips, the trapezium rule over $200$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · PARABOLIC ARCS</div>
+        <p class="b-help" style="margin:0 0 12px">Over every two strips there is a parabola through three white points. The table compares the trapezium rule and Simpson for $n$, $2n$ and $4n$ strips. For the square root graph Simpson converges more slowly: at $0$ it is vertical.</p>
+        <div data-widget="simpson"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · THE LOGARITHM OF 2</div>
+            <div class="b-text"><p>Approximate $\ln 2 = \int_1^2 \tfrac1x\,\mathrm{d}x$ with $T_4$ and $S_4$ and compare the errors.</p></div>
+            <div class="b-sol"><p>$h = 0.25$, values $1$, $0.8$, $\tfrac23$, $\tfrac47$, $0.5$. $T_4 \approx 0.69702$, $S_4 = \tfrac{0.25}{3}\left(1 + 3.2 + \tfrac43 + \tfrac{16}{7} + 0.5\right) \approx 0.69325$.</p>
+                <p>$\ln 2 \approx 0.69315$: <span class="b-res">error trapezium $0.0039$, Simpson $0.0001$</span>, with the same five function values.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · EXACT FOR CUBIC POLYNOMIALS</div>
+            <div class="b-text"><p>Show that the barrel rule gives $\int_0^2 x^3\,\mathrm{d}x$ exactly, but not $\int_0^2 x^4\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\tfrac26 (0 + 4 \cdot 1 + 8) = 4 = \left[\tfrac14 x^4\right]_0^2$ ✔ For $x^4$: $\tfrac26 (0 + 4 + 16) = \tfrac{20}{3} \approx 6.67$, exactly it is $\tfrac{32}{5} = 6.4$.</p>
+                <p><span class="b-res">Degree $3$ exact, degree $4$ not</span>: the cubic part has point symmetry about the midpoint and cancels out.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $\int_0^\pi \sin x\,\mathrm{d}x$ with the barrel rule and with $S_4$. The exact value is $2$.</p></div>
+            <div class="b-sol"><p>Barrel rule: $\tfrac{\pi}{6}(0 + 4 + 0) \approx 2.094$. $S_4$: $h = \tfrac{\pi}{4}$, $\tfrac{\pi}{12}\big(0 + 4 \cdot 0.7071 + 2 \cdot 1 + 4 \cdot 0.7071 + 0\big) \approx 2.0046$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A river is $12$ m wide. At intervals of $2$ m the depths $0$, $1.2$, $2.0$, $2.3$, $1.6$, $0.8$, $0$ m are measured. Calculate the cross-section with the trapezium rule and with Simpson.</p></div>
+            <div class="b-sol"><p>Trapezium: $2 \cdot (1.2 + 2.0 + 2.3 + 1.6 + 0.8) = 15.8$ m². Simpson: $\tfrac23 (0 + 4.8 + 4.0 + 9.2 + 3.2 + 3.2 + 0) \approx 16.3$ m².</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Show: $S_{2n} = \tfrac13 (4\,T_{2n} - T_n)$. Test the formula on $\int_1^2 \tfrac1x\,\mathrm{d}x$ with $T_2 \approx 0.70833$ and $T_4 \approx 0.69702$.</p></div>
+            <div class="b-sol"><p>In $4T_{2n} - T_n$ the new midpoints get the weight $4 \cdot \tfrac h2 \cdot 1 = 2h$, the old inner points $4 \cdot \tfrac h2 - h = h$, the ends $\tfrac h2$. Dividing by $3$: the Simpson weights $\tfrac{h'}{3}(1, 4, 2, \ldots)$ with $h' = \tfrac h2$. Numbers: $\tfrac13 (2.78810 - 0.70833) \approx 0.69325 = S_4$ ✔</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>With the trapezium rule the error is divided by about $4$ when $n$ is doubled, with Simpson by $16$. Roughly how many strips does each rule need for $\ln 2$ with an error below $10^{-6}$? Start from the errors for $n = 4$: trapezium $0.0039$, Simpson $0.00011$.</p></div>
+            <div class="b-sol"><p>Trapezium: $0.0039 / 4^k &lt; 10^{-6}$ from $k = 6$, so $n = 4 \cdot 2^6 = 256$. Simpson: $0.00011 / 16^k &lt; 10^{-6}$ from $k = 2$, so $n = 16$. <span class="b-res">Here Simpson is sixteen times more economical.</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.7472" data-tol="0.0002" data-ph="≈"><p class="b-q-text">Barrel rule for $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$, four decimal places?</p><div class="b-sol"><p>$\tfrac16 (1 + 4\mathrm{e}^{-0.25} + \mathrm{e}^{-1})$</p></div></div>
+        <div class="b-q" data-ans="16" data-ph="Factor"><p class="b-q-text">By about which factor does Simpson's error fall when you double $n$?</p><div class="b-sol"><p>Error $\sim h^4$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">For which function does the barrel rule give the exact value?</p><div class="b-mc"><button>$x^4$</button><button>$x^3 - 2x$</button><button>$\mathrm{e}^x$</button></div><div class="b-sol"><p>Polynomials up to degree 3</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $M_2$ and $T_2$ for $\int_0^\pi \sin x\,\mathrm{d}x = 2$. Which rule is closer?</p></div>
+            <div class="b-sol"><p>$h = \tfrac{\pi}{2}$: $M_2 = \tfrac{\pi}{2} \cdot (\sin\tfrac{\pi}{4} + \sin\tfrac{3\pi}{4}) \approx 2.221$, $T_2 = \tfrac{\pi}{2} \cdot 1 \approx 1.571$. The midpoint rule is closer.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with unit 1:</b> show by rearranging that $T_n = \tfrac12 (L_n + R_n)$.</p></div>
+            <div class="b-sol"><p>$L_n + R_n = h \cdot \big(f(x_0) + 2f(x_1) + \ldots + 2f(x_{n-1}) + f(x_n)\big)$. Halving gives exactly the trapezium formula.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Describe how you calculate $T_{10}$ for $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$ in a spreadsheet: which columns, which formula?</p></div>
+            <div class="b-sol"><p>Column A: $0, 0.1, \ldots, 1$. Column B: $=\mathrm{EXP}(-A2^2)$. Then $T_{10} = 0.1 \cdot \big(\tfrac12 B_2 + B_3 + \ldots + B_{11} + \tfrac12 B_{12}\big)$, that is $0.1 \cdot (\mathrm{SUM}(B2{:}B12) - \tfrac12 (B2 + B12))$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Connecting with chapter 5.3:</b> Kepler wanted to measure barrels. A barrel has the profile $f(x) = 2 - 0.08x^2$ on $[-2.5, 2.5]$ (in dm). Calculate its volume $\pi \int f(x)^2\,\mathrm{d}x$ with the barrel rule and compare with the exact value $\tfrac{203}{12}\pi$.</p></div>
+            <div class="b-sol"><p>$f(-2.5)^2 = f(2.5)^2 = 1.5^2 = 2.25$, $f(0)^2 = 4$. Barrel rule: $\pi \cdot \tfrac56 (2.25 + 16 + 2.25) = \pi \cdot \tfrac{205}{12} \approx 53.67$ dm³. Exactly $\approx 53.15$ dm³: only $1\%$ out, because $f^2$ has degree $4$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Kepler and the wine barrels" data-toc-k="X" data-toc-short="Kepler">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>Kepler and the wine barrels</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Johannes Kepler (1571–1630) is known above all as an astronomer. In 1613 he married for the second time. At the wedding celebrations he noticed how the wine in the barrel
+                was measured: a rod was pushed diagonally through the bung hole, and the volume was inferred from the wetted length, however the barrel was curved.</p>
+            <p>He could not let it go. He studied the volumes of solids formed by rotation and, much like Archimedes, cut them into infinitely many
+                thin slices. In 1615 his book <i>Nova stereometria doliorum vinariorum</i>, a “new measurement of the volume of wine barrels”, appeared in Linz.
+                The approximation from unit 3 is named after him: <b>Kepler's barrel rule</b>. It takes the cross-section at the bottom, at the top and four times the one in the middle.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> MacTutor History of Mathematics, University of St Andrews: biography “Johannes Kepler”.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>STRIPS</h4><p>$h = \tfrac{b - a}{n}$, sample points $x_i = a + i \cdot h$</p></div>
+        <div><p>$[0, 2]$, $n = 4$: $h = 0.5$</p></div></div>
+    <div class="b-rueck"><div><h4>RECTANGLES</h4><p>Height on the left, on the right or in the middle; the middle is usually the most accurate</p></div>
+        <div><p>$\int_0^2 x^2$: $L_4 = 1.75$, $R_4 = 3.75$, $M_4 = 2.625$</p></div></div>
+    <div class="b-rueck"><div><h4>TRAPEZIA</h4><p>$T_n = \tfrac{L_n + R_n}{2}$, end values count half</p></div>
+        <div><p>Cyclist: $245$ m</p></div></div>
+    <div class="b-rueck"><div><h4>ACCURACY</h4><p>Doubling $n$: left and right rectangles $\tfrac12$, midpoint and trapezium $\tfrac14$</p></div>
+        <div><p>$T_4 = 2.75$, $T_8 = 2.6875$ for $\tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>WITHOUT AN ANTIDERIVATIVE</h4><p>calculate numerically</p></div>
+        <div><p>$\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x \approx 0.7468$</p></div></div>
+    <div class="b-rueck"><div><h4>SIMPSON</h4><p>$S_n = \tfrac h3 (f_0 + 4f_1 + 2f_2 + \ldots + 4f_{n-1} + f_n)$, exact up to degree $3$</p></div>
+        <div><p>Error when doubling: divided by about $16$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="3" data-ph="R₂ ="><p class="b-q-text">$R_2$ for $\int_0^2 x\,\mathrm{d}x$?</p><div class="b-sol"><p>$1 \cdot (1 + 2)$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="T₂ ="><p class="b-q-text">$T_2$ for $\int_0^2 x^3\,\mathrm{d}x$?</p><div class="b-sol"><p>$\tfrac12 \cdot 0 + 1 + \tfrac12 \cdot 8$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$x^2$ is convex. The trapezium rule then gives …</p><div class="b-mc"><button>values that are too small.</button><button>values that are too large.</button><button>exact values.</button></div><div class="b-sol"><p>The chords lie above the graph.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="0.743" data-tol="0.001" data-ph="T₄ ≈"><p class="b-q-text">$T_4$ for $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$, to three decimal places?</p><div class="b-sol"><p>$0.742984$</p></div></div>
+            <div class="b-q" data-ans="50" data-ph="n ="><p class="b-q-text">Smallest number of strips for which $L_n$ for $\int_0^1 x^2\,\mathrm{d}x$ is less than $0.01$ out?</p><div class="b-sol"><p>$\tfrac{3n - 1}{6n^2} < 0.01$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="Value"><p class="b-q-text">Kepler's barrel rule for $\int_0^2 x^3\,\mathrm{d}x$?</p><div class="b-sol"><p>$\tfrac26 (0 + 4 + 8)$</p></div></div>
+            <div class="b-q" data-ans="0.6933" data-tol="0.0002" data-ph="S₄ ≈"><p class="b-q-text">$S_4$ for $\int_1^2 \tfrac1x\,\mathrm{d}x$, four decimal places?</p><div class="b-sol"><p>$\tfrac{0.25}{3}(1 + 3.2 + \tfrac43 + \tfrac{16}{7} + 0.5)$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-rechteck-trapez.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RECTANGLE AND TRAPEZIUM</span><span class="b-lab-what">Strip rules and accuracy</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-simpson.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BARREL RULE AND SIMPSON</span><span class="b-lab-what">Parabolic arcs and comparing the rules</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Grammar School Year 12, advanced course · Elective area 5 of the Saxon curriculum for mathematics at the Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-en/numerik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-en/gy12.js"></script>
+<script src="../../js/buch-gy12lk.js"></script>
+<script src="../../js/buch-en/gy12lk.js"></script>
+</body>
+</html>
