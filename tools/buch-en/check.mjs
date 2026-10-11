@@ -14,7 +14,7 @@
 //   4. conflicts  two dictionaries that translate the same German differently
 //
 // usage: node tools/buch-en/check.mjs [book-en …]     (no books: every HTML/buch/*-en/)
-//        node tools/buch-en/check.mjs --accept        writes known.json anew: strings that look German but are fine
+//        node tools/buch-en/check.mjs [book-en] --accept   stores the strings that look German but are fine
 //                                                     (keys, parts of a rule, never shown). Only after
 //                                                     node tools/buch-en/encheck.mjs <book-en> --poke shows no German.
 import fs from 'fs';
@@ -260,8 +260,12 @@ for (const book of BOOKS) {
 }
 
 if (accept) {
+    // with books named, the strings of these books are added to known.json and everything else stays (two agents
+    // translating two books at the same time must not delete each other's entries); without, known.json is written anew
     const out = {};
-    Object.keys(found).sort().forEach(m => { out[m] = [...found[m]].sort(); });
+    const base = books.length ? known : {};
+    [...new Set([...Object.keys(base), ...Object.keys(found)])].sort()
+        .forEach(m => { out[m] = [...new Set([...(base[m] || []), ...(found[m] || [])])].sort(); });
     fs.writeFileSync(KNOWN, JSON.stringify(out, null, 1) + '\n');
     console.log('known.json: ' + Object.entries(out).map(([m, l]) => m + ' ' + l.length).join(', '));
     const rest = problems.filter(p => !/still German/.test(p));

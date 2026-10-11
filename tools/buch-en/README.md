@@ -28,6 +28,13 @@ The German book stays the single source. An English edition lives next to it in 
 
 Fix: add the phrase to `js/buch-en/<module>.js`, or bring the answer over to the other edition.
 
+## Two agents, two books at the same time
+
+- New entries in a shared dictionary go into their own block at the end of each section, with a comment naming the book (`// book 3 mathe13-en: …`).
+- Never push a shared file (dictionaries, `labs-icons.js`, `known.json`) by replacing it with your copy. Merge it three-way against the current `origin/main`: `git show <your base>:<path> > base`, `git show origin/main:<path> > theirs`, `git merge-file -p <your file> base theirs > merged`, and commit `merged`.
+- `node tools/buch-en/check.mjs <your-book>-en --accept` only adds your book's strings to `known.json`, it keeps everything else.
+- Change the engine `js/buch-en.js` only after agreeing on it.
+
 ## Not yet
 
 OG preview cards (`tools/og-preview/make-og.mjs` has German templates), print edition, Solita answering in English.
