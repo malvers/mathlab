@@ -77,16 +77,16 @@
 
 /* The lines of the working come as on the board of vorrechnen.html (Doc, 30.09.2026: "die gelbe Box weg und die
    Gleichungen wie in Vorrechnen kommen lassen"): a line is not there before its click, then it glides up from the
-   bottom left onto its place (kommen, below) and stands in ink - no triangle, no box, nothing dimmed. What was done
-   to a line ("| -5") comes with the line it leads to, once that has landed, never in advance; the result's "| 😊"
-   a second after its landing, fading in over a second. Only on a live slide: the overview, editing and paper show
-   the whole working. */
-.slide .tf-zeile.step{opacity:1;transition:none}
+   bottom left onto its place (kommen, below) and stands in ink - no triangle, no box, nothing dimmed. What is done
+   to a line ("| -5") comes with a click of its own between that line and the next (Doc, 06.10.2026: "in den eigenen
+   Klick"), never by itself in advance; the result's "| 😊" a second after its landing, fading in over a second. Only
+   on a live slide: the overview, editing and paper show the whole working. */
+.slide .tf-zeile.step,.slide .tf-op.step{opacity:1;transition:none}
 @media screen{
   html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step:not(.on){visibility:hidden}
-  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step.now::after{content:none}
-  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile:not(:has(+ .tf-zeile.on)) > .tf-op:not(.tf-smiley),
-  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile:has(+ .tf-fliegt) > .tf-op,
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step.now::after,
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-op.step.now::after{content:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-op.step:not(.on),
   #deck .tf-fliegt > .tf-nr, #deck .tf-fliegt > .tf-op{visibility:hidden}
   html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.on:not(.tf-fliegt) > .tf-smiley{animation:tf-smiley-ein 1s ease 1s both}
   /* the line between two columns comes with the first line of the second one */
@@ -312,12 +312,21 @@
       zeilen.push({ el: el, links: links, rechts: rechts, schritt: schritt, ergebnis: ergebnis, aufgabe: schritt < 0 });
     });
     /* the step's number, and the operation that leads on (or the result's smiley), with the element the line comes
-       with - the number shows with its line, the operation with the next one (the CSS above) */
+       with - the number shows with its line, the operation with a click of its own (below, and the CSS above) */
     zeilen.forEach(function (z) {
       if (z.schritt >= 0) z.nr = zelle(z.el, '(' + (z.schritt + 1) + ')', 'tf-nr');
       const op = ops[z.schritt + 1];
       if (z.ergebnis) z.op = opZelle(z.el, null);
       else if (op) z.op = opZelle(z.el, op);
+    });
+    /* Doc, 06.10.2026: "es kommt der Doppelbruch und ich frage, was ist der nächste Schritt? Genau. Und dann steht er als
+       Division, dann kommt die nächste Zeile" - "in den eigenen Klick. Und das machen wir überall so": the clicks in
+       order - a line, then what is done to it, then the next line. The groups are counted afresh (deck.js counts
+       data-g); the result's smiley comes with its line, by itself */
+    let g = 0;
+    zeilen.forEach(function (z) {
+      if (z.schritt >= 0) z.el.dataset.g = g++;
+      if (z.op && !z.ergebnis) { z.op.classList.add('step'); z.op.dataset.g = g++; }
     });
     rechnung._zeilen = zeilen;
     sl.appendChild(rechnung);

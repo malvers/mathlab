@@ -223,7 +223,35 @@ function umformungen() {
         }
         vorher = j >= 0 ? j : null;                // a row off the solution: the next one has no "before"
     });
+    // the newest row's next operation, once its own ↑ has shown it (opsVorweg)
+    const vor = naechsteUmformung();
+    if (vor && opsVorweg.has(opSchluessel(vor.zeile)) && !ops.has(vor.zeile)) ops.set(vor.zeile, vor.op);
     return ops;
+}
+// Doc, 06.10.2026: "es kommt der Doppelbruch und ich frage, was ist der nächste Schritt? Genau. Und dann steht er als
+// Division, dann kommt die nächste Zeile" - "in den eigenen Klick. Und das machen wir überall so": what is done to the
+// newest row comes with a ↑ of its own, before the next step. Still never by itself (30.09.: "| -5 darf erst kommen,
+// wenn ein Schritt gelöst ist") - the class has said it, then it stands. A row that comes without it (written by hand)
+// brings it along on landing, as before. Keyed by task, row and the row's formula; ↓ takes it back before the row.
+const opsVorweg = new Set();
+function opSchluessel(zeile) {
+    const latex = zeile === 'aufgabe' ? AUFGABEN[aufgabeIdx][1] : rechenweg[zeile] ? rechenweg[zeile].latex : '';
+    return aufgabeIdx + '|' + zeile + '|' + latex;
+}
+// the newest row (the task before any) and the operation the solution's next step brings - none for a row off the
+// solution, and none where the first step goes beside the task (that line's operation is the step's, the task's own
+// gives way, zeigeRechenweg)
+function naechsteUmformung() {
+    const loesung = aufgabenModus && LOESUNGEN[AUFGABEN[aufgabeIdx][0]];
+    if (!loesung) return null;
+    const zeile = rechenweg.length ? rechenweg.length - 1 : 'aufgabe';
+    let i = 0;
+    if (zeile !== 'aufgabe') {
+        i = loesung.map(([st]) => schrittNorm(st)).lastIndexOf(schrittNorm(rechenweg[zeile].latex)) + 1;
+        if (i === 0) return null;
+    } else if (!amGleich(AUFGABEN[aufgabeIdx][1])[1] && loesung.length && !amGleich(loesung[0][0])[0]) return null;
+    const op = i < loesung.length ? (loesung[i][1] || '').replace(/^\s*:/, '{:}') : '';
+    return op ? { zeile, op } : null;
 }
 // Doc, 30.09.2026: "lass in der letzten Zeile hinter | immer einen freundlichen Smiley kommen" - the result's row gets
 // one in the operations' column: Apple's 😊 ("Bitte bitte schöne Smileys die von Apple, die wir sonst auch verwenden"),
@@ -347,14 +375,16 @@ function zeigeRechenweg(verborgenAb) {
         z.nummer = d;
     });
     // the operations (umformungen), green like the deck's, in a column of their own between the rows and the
-    // numbers; each shows with the row it made, once that has landed (data-mit: flugLandet, schritteLanden) - never
-    // in advance (Doc, 30.09.: "alle & immer später"); the result's smiley with the result's own row
+    // numbers; each shows with its own ↑ before the next row (opsVorweg, Doc 06.10.2026), else with the row it made,
+    // once that has landed (data-mit: flugLandet, schritteLanden) - never by itself in advance (Doc, 30.09.: "alle &
+    // immer später"); the result's smiley with the result's own row
     const ops = umformungen();
     zeilen.forEach(z => {
         const op = z.ergebnis ? '' : ops.get(z.schritt);     // the result's row: the smiley (smileyIcon)
         if (!op && !z.ergebnis) return;
         const mit = z.ergebnis ? z.schritt : z.schritt === 'aufgabe' ? 0 : z.schritt + 1;
-        const weg = (verborgenAb !== undefined && mit >= verborgenAb) || imFlug.has(mit);
+        const weg = !(!z.ergebnis && opsVorweg.has(opSchluessel(z.schritt))) &&
+            ((verborgenAb !== undefined && mit >= verborgenAb) || imFlug.has(mit));
         const d = zelle('\\textstyle\\vert\\;\\; ' + op, mit, weg, null);
         if (z.ergebnis) d.insertBefore(smileyIcon(), d.lastChild);
         delete d.dataset.schritt;

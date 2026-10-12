@@ -239,6 +239,13 @@ function rechenwegHoch() {
 function vorschauHoch() {
     const naechster = vorschau && naechsterSchritt();          // P off: nothing grey, nothing to send
     if (!naechster || fluege.length) return;
+    // Doc, 06.10.2026: "in den eigenen Klick" - first what is done to the newest row, then, with the next ↑, the step
+    const vor = naechsteUmformung();
+    if (vor && !opsVorweg.has(opSchluessel(vor.zeile))) {
+        opsVorweg.add(opSchluessel(vor.zeile));
+        zeigeRechenweg();
+        return;
+    }
     verlaufZurueck();
     merkeVerlauf();
     const c = container.getBoundingClientRect();
@@ -255,7 +262,11 @@ function vorschauHoch() {
 // comes off the board again (and is the next grey step once more, where it was one); undo brings it back. Not
 // while lines are in the air, as with ↑.
 function vorschauRunter() {
-    if (!rechenweg.length || fluege.length) return;
+    if (fluege.length) return;
+    // an operation shown ahead with its own ↑ goes first, the row after it (Doc, 06.10.2026)
+    const vor = naechsteUmformung();
+    if (vor && opsVorweg.delete(opSchluessel(vor.zeile))) { zeigeRechenweg(); return; }
+    if (!rechenweg.length) return;
     verlaufZurueck();
     merkeVerlauf();
     rechenweg.pop();

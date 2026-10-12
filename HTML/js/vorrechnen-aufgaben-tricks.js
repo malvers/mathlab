@@ -156,6 +156,11 @@
 // numbers) and x! = x^3 - x (ausklammern, the third one, then trying). Checked with sympy: every step holds in all four
 // real solutions of LOVE, x = 5 is the only natural solution (x = 0 to 199). No source: the pictures circulate without
 // one (searched 01.10.2026).
+// Doc, 06.10.2026 (a picture: "bau die mal sinnvoll in vorrechnen"): (81÷9)/(3÷9) = 27 after 123123/1001, the other
+// fraction that falls apart. The working is the proof that the two ÷9 may go (Doc, the same day: "erst einen
+// Doppelbruch, dann ... mit einem Bruchzeichen, dann machen wir den Kehrwert, dann rechnen wir aus ... als Beweis, dass
+// man die Neunen tatsächlich kürzen kann"): double fraction, division (÷ - Solita reads a ":" in a formula as
+// nothing), times the reciprocal, one fraction bar, cancel the 9. Checked with exact fractions.
 (function () {
     const ab = AUFGABEN.length;
     AUFGABEN.push(
@@ -166,7 +171,8 @@
         ['d-65quadrat', '65^2',                                                                                           ''],
         ['d-wurzel',    '\\sqrt{16\\cdot 25\\cdot 36}',                                                                   ''],
         ['d-123123',    '\\frac{123123}{1001}',                                                                           ''],
-        ['d-basis',     '\\frac{4^5}{2^9}',                                                                               ''],
+        ['d-neuntel',   '\\frac{81\\div 9}{3\\div 9}',                                                                   ''],
+        ['d-basis',    '\\frac{4^5}{2^9}',                                                                               ''],
         ['d-8hoch',     '\\frac{8^{10}}{4^{15}}',                                                                         ''],
         ['d-50hoch',    '\\frac{50^{50}}{25^{25}}',                                                                       ''],
         ['d-achthoch',  '8^x=4^{2026}+4^{2026}',                                                                          'x'],
@@ -205,7 +211,13 @@
                         ['=120', '\\text{ausrechnen}']],
         'd-123123':    [['=\\frac{123\\cdot 1001}{1001}', '\\text{zerlegen}'],
                         ['=123', '\\text{kürzen}']],
-        'd-basis':     [['=\\frac{(2^2)^5}{2^9}', '\\text{zerlegen}'],
+        'd-neuntel':   [['=\\frac{\\frac{81}{9}}{\\frac{3}{9}}', '\\text{Doppelbruch}'],
+                        ['=\\frac{81}{9}\\div\\frac{3}{9}', '\\text{als Division}'],
+                        ['=\\frac{81}{9}\\cdot\\frac{9}{3}', '\\text{mal Kehrwert}'],
+                        ['=\\frac{81\\cdot 9}{9\\cdot 3}', '\\text{zusammenfassen}'],
+                        ['=\\frac{81}{3}', '\\text{kürzen mit }9'],
+                        ['=27', '\\text{ausrechnen}']],
+        'd-basis':    [['=\\frac{(2^2)^5}{2^9}', '\\text{zerlegen}'],
                         ['=\\frac{2^{10}}{2^9}', '\\text{Potenzgesetz}'],
                         ['=2', '\\text{Potenzgesetz}']],
         'd-8hoch':     [['=\\frac{(2^3)^{10}}{(2^2)^{15}}', '\\text{zerlegen}'],
@@ -284,6 +296,14 @@
         'd-123123':
             'Es ist $1001=1000+1$, also $123\\cdot 1001=123000+123=123123$ – jede dreistellige Zahl zweimal ' +
             'hintereinander ist durch 1001 teilbar. Und weil $1001=7\\cdot 11\\cdot 13$, auch durch 7, 11 und 13.',
+        'd-neuntel':
+            'Unten steht $3\\div 9$ – das geht nicht glatt auf. Muss es auch nicht. Jedes $\\div 9$ wird ein Bruch, ' +
+            'der Doppelbruch eine Division – und durch einen Bruch teilt man, indem man mit seinem Kehrwert malnimmt:' +
+            '$$\\frac{81}{9}\\div\\frac{3}{9}=\\frac{81}{9}\\cdot\\frac{9}{3}=\\frac{81\\cdot 9}{9\\cdot 3}$$' +
+            'Jetzt steht die 9 oben und unten als Faktor und kürzt sich weg: $\\frac{81}{3}=27$.' +
+            '\n\nDas ist der Beweis für die Abkürzung: Teilt man Zähler und Nenner durch dieselbe Zahl, ändert sich ' +
+            'der Bruch nicht – die beiden $\\div 9$ darf man gleich wegstreichen. Bei einer Summe ginge das nicht: ' +
+            '$\\frac{81+9}{3+9}=\\frac{90}{12}=7{,}5$, nicht 27.',
         'd-basis':
             'Verschiedene Grundzahlen, aber $4=2^2$. Dann ist $4^5=(2^2)^5=2^{10}$ – beim Potenzieren einer Potenz werden ' +
             'die Hochzahlen malgenommen. Und $2^{10}$ durch $2^9$ ist 2.',
