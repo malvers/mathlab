@@ -31,7 +31,7 @@ def _rechter_winkel(c, x, y, dx, dy, size=15):
 
 
 def dreieck_katheten(a, b, ca, cb, ch, gesucht="c"):
-    """Rechtwinkliges Dreieck, rechter Winkel unten links bei A. gesucht faerbt
+    """Rechtwinkliges Dreieck, rechter Winkel unten links bei C. gesucht faerbt
     die gesuchte Groesse rot - alles andere neutral, sonst liest sich die
     Zeichnung falsch herum."""
     px = min(200.0 / max(a, 1e-9), 150.0 / max(b, 1e-9))
@@ -46,9 +46,9 @@ def dreieck_katheten(a, b, ca, cb, ch, gesucht="c"):
     _rechter_winkel(c, x0, y0, 1, -1)
     for (x, y) in ((x0, y0), (x1, y1), (x2, y2)):
         c.circle(x, y, 3.4, fill=S.INK, stroke=S.PAPER)
-    c.text(x0 - 14, y0 + 18, "A", 13, S.INK)
+    c.text(x0 - 14, y0 + 18, "C", 13, S.INK)
     c.text(x1 + 12, y1 + 18, "B", 13, S.INK)
-    c.text(x2 - 14, y2 - 8, "C", 13, S.INK)
+    c.text(x2 - 14, y2 - 8, "A", 13, S.INK)
 
     def lbl(x, y, t, key):
         rot = key == gesucht
@@ -338,7 +338,7 @@ q(r'Ein Rechteck ist $12$ cm breit und $9$ cm hoch. Wie lang ist seine Diagonale
 q(r'Ist ein Dreieck mit $a = 5$ cm, $b = 6$ cm und $c = 8$ cm rechtwinklig?',
   [r'ja, der rechte Winkel liegt bei $C$', r'ja, der rechte Winkel liegt bei $B$',
    r'das hängt von der Zeichnung ab', r'nein'],
-  [r'Geprueft wird immer mit der längsten Seite, hier $c = 8$ cm.',
+  [r'Geprüft wird immer mit der längsten Seite, hier $c = 8$ cm.',
    r'$5^2 + 6^2 = 25 + 36 = 61$, aber $8^2 = 64$.',
    r'Wegen $61 \neq 64$ ist das Dreieck nicht rechtwinklig. Es gibt also keinen rechten Winkel anzugeben.'],
   3)
@@ -356,7 +356,7 @@ q(r'Ein Rechteck ist $12$ cm breit und $5$ cm hoch. Ein Punkt auf der oberen Kan
   [r'$20\ \mathrm{cm^2}$', r'$40\ \mathrm{cm^2}$', r'$30\ \mathrm{cm^2}$', r'$10\ \mathrm{cm^2}$'],
   [r'$A_1$ hat die Grundseite $8$ cm auf der oberen Kante; seine Höhe ist die volle Rechteckhöhe $5$ cm.',
    r'$A_1 = \dfrac{8\ \mathrm{cm} \cdot 5\ \mathrm{cm}}{2} = 20\ \mathrm{cm^2}$',
-   r'Probe am Ende: alle drei Dreiecke zusammen muessen $12 \cdot 5 = 60\ \mathrm{cm^2}$ ergeben.'],
+   r'Probe am Ende: alle drei Dreiecke zusammen müssen $12 \cdot 5 = 60\ \mathrm{cm^2}$ ergeben.'],
   0,
   fig=rechteck_zerlegt(12, 5, 8),
   figcap='Alle drei Dreiecke haben die Rechteckhöhe als Höhe.')
@@ -374,7 +374,7 @@ q(r'Ein Rechteck hat den Flächeninhalt $72\ \mathrm{cm^2}$ und ist $8$ cm breit
   [r'$17$ cm', r'$80$ cm', r'$26$ cm', r'$34$ cm'],
   [r'Aus $A = a \cdot b$ folgt die zweite Seite: $a = \dfrac{72}{8} = 9$ cm.',
    r'Der Umfang zählt jede Seite doppelt: $U = 2 \cdot (9 + 8)$',
-   r'$U = 2 \cdot 17 = 34$ cm. Wer $9 + 8$ stehen laesst, gibt nur den halben Umfang an.'],
+   r'$U = 2 \cdot 17 = 34$ cm. Wer $9 + 8$ stehen lässt, gibt nur den halben Umfang an.'],
   3)
 
 q(r'Ein Dreieck hat den Flächeninhalt $54\ \mathrm{cm^2}$ und die Grundseite $g = 12$ cm. Wie hoch ist es?',
