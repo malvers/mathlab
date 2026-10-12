@@ -33,7 +33,7 @@ Q.q(r'Stelle $2x + y = 6$ nach $y$ um.',
      r'$y = 6 - 2x = -2x + 6$'])
 
 Q.q(r'Stelle $3x - y = 2$ nach $y$ um.',
-    [r'$y = 3x - 2$', r'$y = -3x + 2$', r'$y = 3x + 2$', r'$y = 2 - 3x$'],
+    [r'$y = 3x - 2$', r'$y = -3x + 2$', r'$y = 3x + 2$', r'$y = -3x - 2$'],
     [r'$-3x$ auf beiden Seiten: $-y = -3x + 2$',
      r'Mit $-1$ multiplizieren: $y = 3x - 2$'])
 

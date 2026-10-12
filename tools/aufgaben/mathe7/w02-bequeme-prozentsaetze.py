@@ -69,7 +69,7 @@ Q.q(r'Welcher Bruch ist 12,5 %?',
      r'Die Hälfte von $\dfrac{1}{4}$ ist $\dfrac{1}{8}$.',
      r'Probe: $1 : 8 = 0{,}125 = 12{,}5\,\%$.'])
 
-Q.q(r'Welcher Bruch ist ungefähr $33\tfrac{1}{3}$ %?',
+Q.q(r'Welcher Bruch ist $33\tfrac{1}{3}$ %?',
     [r'$\dfrac{1}{3}$', r'$\dfrac{1}{33}$', r'$\dfrac{3}{10}$', r'$\dfrac{1}{4}$'],
     [r'$\dfrac{1}{3} = 0{,}333\ldots$',
      r'Das sind $33{,}3\ldots\,\%$.',

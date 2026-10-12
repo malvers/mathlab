@@ -51,7 +51,7 @@ Q.q(r'Ein Kinoticket kostet 9 €, eine Tüte Popcorn 4 €. Jede Person kauft b
      r'$x$ Personen zahlen $9x + 4x = 13x$ Euro.'])
 
 Q.q(r'Eine Taxifahrt kostet 3,50 € Grundgebühr und 2,10 € pro Kilometer. Welcher Term gibt den Preis in Euro für $x$ Kilometer an?',
-    [r'$3{,}50 + 2{,}10x$', r'$2{,}10 + 3{,}50x$', r'$5{,}60x$', r'$3{,}50x + 2{,}10x$'],
+    [r'$3{,}50 + 2{,}10x$', r'$2{,}10 + 3{,}50x$', r'$5{,}60x$', r'$3{,}50x + 2{,}10$'],
     [r'Die Grundgebühr fällt einmal an, unabhängig von der Strecke.',
      r'Der Kilometerpreis wird mit der Anzahl $x$ der Kilometer multipliziert.',
      r'Preis: $3{,}50 + 2{,}10x$'])

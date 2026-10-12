@@ -77,7 +77,7 @@ Q.q(r'Beutel A: 2 rote und 3 blaue Kugeln. Beutel B: 3 rote und 5 blaue. Aus wel
      r'B: $\dfrac{3}{8} = 0{,}375$',
      r'Entscheidend ist der Anteil, nicht die Anzahl.'])
 
-Q.q(r'Wie viel Prozent sind die Wahrscheinlichkeit $\dfrac{1}{4}$?',
+Q.q(r'Wie viel Prozent entspricht die Wahrscheinlichkeit $\dfrac{1}{4}$?',
     [r'25 %', r'14 %', r'4 %', r'40 %'],
     [r'$\dfrac{1}{4} = \dfrac{25}{100}$',
      r'Hundertstel sind Prozent.',

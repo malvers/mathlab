@@ -114,7 +114,7 @@ Q.q(r'Für $n$ Personen beim Schulfest werden je 3 Brötchen zu 0,40 € gekauft
      r'Kosten: $1{,}20n$ Euro, also 1,20 € pro Person.'])
 
 Q.q(r'Klammere $-2$ aus: $-4x - 10$',
-    [r'$-2 \cdot (2x + 5)$', r'$-2 \cdot (2x - 5)$', r'$2 \cdot (-2x + 5)$', r'$-2 \cdot (4x + 10)$'],
+    [r'$-2 \cdot (2x + 5)$', r'$-2 \cdot (2x - 5)$', r'$2 \cdot (2x + 5)$', r'$-2 \cdot (4x + 10)$'],
     [r'$-4x : (-2) = 2x$ und $-10 : (-2) = 5$',
      r'Ergebnis: $-2 \cdot (2x + 5)$',
      r'Probe: $-2 \cdot 2x = -4x$ und $-2 \cdot 5 = -10$.'])

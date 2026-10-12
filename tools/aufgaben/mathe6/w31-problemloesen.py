@@ -31,7 +31,7 @@ Q.q(r'Alkuins Rätsel weiter: Wie viele Fahrten über den Fluss braucht der Baue
      r'Kohl hin, leer zurück, Ziege hin.',
      r'Das sind 7 Fahrten – der Trick ist, die Ziege einmal zurückzubringen.'])
 
-Q.q(r'Der junge Carl Friedrich Gauß soll in der Schule die Zahlen von 1 bis 100 blitzschnell addiert haben (so berichtet von seinem Biografen Sartorius von Waltershausen, 1856). Wie groß ist die Summe?',
+Q.q(r'Der junge Carl Friedrich Gauß soll in der Schule die Zahlen von 1 bis 100 blitzschnell addiert haben (die Anekdote geht auf seinen Biografen Sartorius von Waltershausen, 1856, zurück). Wie groß ist die Summe?',
     [r'5050', r'5000', r'10 100', r'4950'],
     [r'Paare bilden: $1 + 100 = 101$, $2 + 99 = 101$, …, $50 + 51 = 101$.',
      r'Das sind 50 Paare.',

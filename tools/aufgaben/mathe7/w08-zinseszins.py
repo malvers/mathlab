@@ -115,7 +115,7 @@ Q.q(r'1000 € liegen zu 10 % mit Zinseszins. Nach wie vielen Jahren ist das Kap
     [r'nach 8 Jahren', r'nach 10 Jahren', r'nach 5 Jahren', r'nach 20 Jahren'],
     [r'Jahr für Jahr mit 1,1 malnehmen: 1100, 1210, 1331, 1464,10, 1610,51 …',
      r'Nach 7 Jahren: etwa 1948,72 €, nach 8 Jahren: etwa 2143,59 €.',
-     r'Ohne Zinseszins bräuchte man 10 Jahre.'])
+     r'Ohne Zinseszins wäre es nach 10 Jahren genau doppelt so groß, mehr als doppelt erst nach 11 Jahren.'])
 
 Q.q(r'Eine alte Faustregel (sie steht schon bei Luca Pacioli, 1494): „72 durch den Zinssatz ergibt etwa die Jahre bis zur Verdopplung.“ Wie lange dauert es bei 6 %?',
     [r'etwa 12 Jahre', r'etwa 6 Jahre', r'etwa 72 Jahre', r'etwa 17 Jahre'],

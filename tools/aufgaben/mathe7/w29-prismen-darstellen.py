@@ -137,7 +137,7 @@ Q.q(r'Ein Prisma mit einem regelmäßigen Sechseck als Grundfläche steht aufrec
 Q.q(r'Wie sieht das abgebildete liegende Dreiecksprisma von rechts aus?',
     [r'wie ein Rechteck', r'wie ein Dreieck', r'wie ein Trapez', r'wie ein Kreis'],
     [r'Von rechts schaut man auf die rechte Dachfläche.',
-     r'Sie ist so lang wie das Prisma und so hoch wie die schräge Dreiecksseite.',
+     r'Sie ist so lang wie das Prisma und so hoch wie das Dreieck (die schräge Fläche erscheint verkürzt).',
      r'Man sieht ein Rechteck.'],
     fig=fig_dach, figcap=cap_dach)
 

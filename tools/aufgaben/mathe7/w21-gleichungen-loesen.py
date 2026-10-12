@@ -56,7 +56,7 @@ Q.q(r'Löse: $4 \cdot (x - 2) = 2x + 6$',
      r'$x = 7$'])
 
 Q.q(r'Was darf man beim Lösen einer Gleichung tun, damit die Lösung gleich bleibt?',
-    [r'auf beiden Seiten dasselbe addieren, subtrahieren, multiplizieren oder durch dieselbe Zahl (nicht 0) teilen',
+    [r'auf beiden Seiten dasselbe addieren oder subtrahieren, mit derselben Zahl (nicht 0) multiplizieren oder durch sie teilen',
      r'nur auf der linken Seite etwas verändern', r'beide Seiten vertauschen und das Vorzeichen ändern',
      r'auf beiden Seiten verschiedene Zahlen addieren'],
     [r'Denke an eine Waage im Gleichgewicht.',

@@ -133,11 +133,11 @@ Q.q(r'Johannes Kepler beschrieb 1619 Parkette aus verschiedenen regelmäßigen V
      r'Kepler fand in „Harmonices Mundi“ alle 8 solche Parkette.'])
 
 Q.q(r'Gibt es überhaupt Fünfecke, mit denen man lückenlos parkettieren kann?',
-    [r'Ja, aber keine regelmäßigen; man kennt genau 15 Arten (vollständig bewiesen 2017).', r'Nein, mit Fünfecken geht es nie.',
+    [r'Ja, aber keine regelmäßigen; bei konvexen Fünfecken gibt es genau 15 Arten (vollständig bewiesen 2017).', r'Nein, mit Fünfecken geht es nie.',
      r'Ja, jedes Fünfeck parkettiert.', r'Nur das regelmäßige Fünfeck.'],
     [r'Regelmäßige Fünfecke scheitern an den 108°-Winkeln.',
      r'Mit unregelmäßigen, gleichen Fünfecken geht es manchmal – zum Beispiel mit „Hausfünfecken“.',
-     r'Die 15. Art wurde 2015 gefunden; 2017 bewies Michaël Rao, dass es keine weitere gibt.'])
+     r'Die 15. Art wurde 2015 gefunden; 2017 bewies Michaël Rao, dass es keine weitere konvexe gibt.'])
 
 Q.q(r'2023 stellten der Hobby-Forscher David Smith und drei Mathematiker die „Hut“-Kachel vor. Was ist besonders an ihr?',
     [r'Sie füllt die Ebene lückenlos, aber das Muster wiederholt sich nie.', r'Sie ist ein Kreis.',
