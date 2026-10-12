@@ -12,7 +12,7 @@ Q = gy11(nr=10, slug='wendepunkte-symmetrie', thema='Wendepunkte, Nullstellen un
 # ------------------------------------------ curvature and inflection points ----
 Q.q(r'Was bedeutet $f^{\prime\prime}(x) > 0$ in einem Intervall?',
     [r'Der Graph ist dort linksgekrümmt.', r'Der Graph ist dort rechtsgekrümmt.', r'Der Graph steigt dort.', r'Der Graph liegt über der $x$-Achse.'],
-    [r'$f^{\prime\prime} > 0$ heißt: $f^{\prime}$ wächst, die Tangenten werden steiler.',
+    [r'$f^{\prime\prime} > 0$ heißt: $f^{\prime}$ wächst, die Steigung der Tangenten nimmt zu.',
      r'Fährt man den Graphen entlang, lenkt man nach links.'])
 
 Q.q(r'Welche Bedingung ist notwendig für einen Wendepunkt bei $x_0$?',

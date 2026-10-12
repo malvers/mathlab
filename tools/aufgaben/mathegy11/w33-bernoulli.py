@@ -88,7 +88,7 @@ Q.q(r'Eine Münze wird viermal geworfen. Wie wahrscheinlich ist genau zweimal Ko
     [r'$\dbinom{4}{2} \cdot \left(\dfrac{1}{2}\right)^4 = \dfrac{6}{16}$'])
 
 Q.q(r'Wie wahrscheinlich sind bei $p = 0{,}5$ vier Treffer in vier Versuchen?',
-    [r'$\dfrac{1}{16}$', r'$\dfrac{1}{4}$', r'$\dfrac{1}{2}$', r'$\dfrac{4}{16}$'],
+    [r'$\dfrac{1}{16}$', r'$\dfrac{1}{4}$', r'$\dfrac{1}{2}$', r'$\dfrac{1}{8}$'],
     [r'Nur ein Pfad: $0{,}5^4 = \dfrac{1}{16}$.'])
 
 Q.q(r'Der Test mit 5 Fragen wird geraten ($p = \dfrac{1}{4}$). Wie wahrscheinlich ist alles falsch?',

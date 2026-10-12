@@ -76,7 +76,7 @@ Q.q(r'Unter welchem Winkel ist die Mantellinie dieses Kegels ($r = 5$ cm, $h = 1
 Q.q(r'Ein Zirkuszelt hat ein Kegeldach mit 10 m Radius und 6 m Höhe. Wie viel Zeltstoff braucht das Dach (gerundet)?',
     [r'366,4 m²', r'188,5 m²', r'680,6 m²', r'314,2 m²'],
     [r'$s = \sqrt{100 + 36} = \sqrt{136} \approx 11{,}66$ m',
-     r'$A_M = \pi \cdot 10 \cdot 11{,}66 \approx 366{,}4$ m²'])
+     r'$A_M = \pi \cdot 10 \cdot \sqrt{136} \approx 366{,}4$ m²'])
 
 Q.q(r'Aus einem Halbkreis mit 10 cm Radius wird ein Kegelmantel gebogen. Welchen Radius hat der Grundkreis?',
     [r'5 cm', r'10 cm', r'3,14 cm', r'2,5 cm'],

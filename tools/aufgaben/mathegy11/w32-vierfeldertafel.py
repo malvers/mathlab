@@ -87,7 +87,7 @@ Q.q(r'Sind in dieser Gruppe „Frau“ und „Brille“ unabhängig?',
      r'Streng genommen abhängig; bei Umfragedaten zeigen sich fast nie exakt gleiche Werte.'])
 
 Q.q(r'Woran erkennt man Unabhängigkeit auch ohne Formel in einer Tabelle mit absoluten Zahlen?',
-    [r'Der Anteil von $B$ ist in der Gruppe $A$ genauso groß wie in der Gruppe $\overline{A}$.', r'Alle vier Felder sind gleich groß.',
+    [r'Der Anteil von $B$ ist in der Gruppe $A$ genauso groß wie in der Gruppe $\overline{A}$.', r'Die beiden Diagonalfelder sind gleich groß.',
      r'Die Randsummen sind gleich.', r'Ein Feld ist null.'],
     [r'Beispiel: Brillenträger sind unter Frauen und Männern gleich häufig.'])
 

@@ -56,7 +56,7 @@ Q.q(r'Auf einem Würfel mit 4 cm Kantenlänge sitzt eine quadratische Pyramide m
      r'Pyramide: $h_s = \sqrt{9 + 4} \approx 3{,}606$ cm, Mantel $4 \cdot \dfrac{4 \cdot 3{,}606}{2} \approx 28{,}8$ cm²',
      r'Zusammen etwa 108,8 cm²'])
 
-Q.q(r'Ein Rohrstück ist 1 m lang, außen 10 cm und innen 8 cm dick. Wie viel Material hat es (gerundet)?',
+Q.q(r'Ein Rohrstück ist 1 m lang, hat außen 10 cm und innen 8 cm Durchmesser. Wie viel Material hat es (gerundet)?',
     [r'2827,4 cm³', r'7854,0 cm³', r'5026,5 cm³', r'282,7 cm³'],
     [r'Radien 5 cm und 4 cm, Länge 100 cm.',
      r'$V = \pi \cdot (25 - 16) \cdot 100 = 900\pi \approx 2827{,}4$ cm³'])

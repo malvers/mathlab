@@ -50,7 +50,7 @@ Q.q(r'Eine Anlage braucht zwei Bauteile, die unabhängig voneinander je mit 98 %
     [r'96,04 %', r'98 %', r'96 %', r'99,96 %'],
     [r'Beide müssen funktionieren: Pfadregel.', r'$0{,}98 \cdot 0{,}98 = 0{,}9604 = 96{,}04\,\%$'])
 
-Q.q(r'Wie groß ist bei 2 % Ausfallwahrscheinlichkeit pro Jahr die Wahrscheinlichkeit, dass das Gerät drei Jahre ohne Ausfall läuft (gerundet)?',
+Q.q(r'Wie groß ist bei 2 % Ausfallwahrscheinlichkeit pro Jahr die Wahrscheinlichkeit, dass das Gerät drei Jahre ohne Ausfall läuft (auf eine Nachkommastelle gerundet)?',
     [r'94,1 %', r'94 %', r'98 %', r'6 %'],
     [r'Drei Jahre ohne Ausfall: $0{,}98^3 \approx 0{,}941$.', r'94 % käme heraus, wenn man fälschlich $3 \cdot 2\,\%$ abzieht.'])
 

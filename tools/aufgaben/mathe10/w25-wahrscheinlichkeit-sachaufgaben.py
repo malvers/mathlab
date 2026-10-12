@@ -17,7 +17,7 @@ Q.q(r'Wie wahrscheinlich muss man an mindestens einer dieser beiden Ampeln halte
     [r'80 %', r'50 %', r'30 %', r'110 %'],
     [r'Gegenereignis: beide grün mit $20\,\%$.', r'$100\,\% - 20\,\% = 80\,\%$'])
 
-Q.q(r'In einer Lieferung sind 5 % der Teile defekt. Man prüft zwei Teile. Wie wahrscheinlich sind beide in Ordnung (gerundet)?',
+Q.q(r'In einer Lieferung sind 5 % der Teile defekt. Man prüft zwei Teile. Wie wahrscheinlich sind beide in Ordnung?',
     [r'90,25 %', r'95 %', r'90 %', r'99,75 %'],
     [r'$0{,}95 \cdot 0{,}95 = 0{,}9025$'])
 

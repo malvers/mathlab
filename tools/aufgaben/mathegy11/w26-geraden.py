@@ -25,7 +25,7 @@ Q.q(r'Welcher Richtungsvektor passt zur Geraden durch $A(1 \mid 0 \mid 2)$ und $
 Q.q(r'Welcher Vektor ist ebenfalls ein Richtungsvektor der Geraden durch $(2 \mid 1 \mid 0)$ und $(4 \mid 5 \mid 2)$?',
     [r'$' + vec(1, 2, 1) + '$', r'$' + vec(2, 1, 0) + '$', r'$' + vec(6, 6, 2) + '$', r'$' + vec(1, 1, 1) + '$'],
     [r'$\overrightarrow{AB} = ' + vec(2, 4, 2) + '$',
-     r'Jedes Vielfaches ungleich null ist auch Richtungsvektor, z. B. die Hälfte.'])
+     r'Jedes Vielfache ungleich null ist auch Richtungsvektor, z. B. die Hälfte.'])
 
 Q.q(r'Wie lautet eine Gleichung der $z$-Achse?',
     [r'$\vec{x} = t \cdot ' + vec(0, 0, 1) + '$', r'$\vec{x} = t \cdot ' + vec(1, 1, 0) + '$', r'$\vec{x} = ' + vec(0, 0, 1) + '$', r'$z = 0$'],

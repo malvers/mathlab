@@ -100,7 +100,7 @@ Q.q(r'Eine lineare Regression beschreibt das Wachstum eines Kindes von 2 bis 10 
     [r'Menschen wachsen nicht lebenslang gleichmäßig.',
      r'Vorhersagen weit außerhalb der Messdaten sind riskant.'])
 
-Q.q(r'Durch 5 Messpunkte geht immer genau eine ganzrationale Funktion höchstens vierten Grades. Warum ist sie trotzdem oft kein gutes Modell?',
+Q.q(r'Durch 5 Messpunkte mit verschiedenen $x$-Werten geht immer genau eine ganzrationale Funktion höchstens vierten Grades. Warum ist sie trotzdem oft kein gutes Modell?',
     [r'Sie folgt auch den Messschwankungen und schwingt zwischen und außerhalb der Punkte stark.', r'Weil sie nicht durch alle Punkte geht.',
      r'Weil ganzrationale Funktionen nie Modelle sein können.', r'Weil das CAS sie nicht berechnen kann.'],
     [r'Ein gutes Modell gibt den Trend wieder, nicht jede Zufallsschwankung.',
