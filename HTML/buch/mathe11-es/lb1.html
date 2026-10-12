@@ -161,10 +161,10 @@
 
             <div class="b-text">
                 <p>Un experimento aleatorio formado por varios experimentos parciales que se realizan uno tras otro se llama <b>experimento aleatorio de varias etapas</b>.
-                    Se representa en un <b>diagrama de árbol</b>: cada etapa es una ramificación, y en cada rama se escribe la probabilidad
+                    Se representa en un <b>diagrama de árbol</b>: cada etapa es una ramificación, y en cada segmento se escribe la probabilidad
                     de ese resultado parcial.</p>
-                <p>Cada resultado del experimento completo corresponde exactamente a un <b>camino</b> desde el inicio hasta un extremo.
-                    Un <b>suceso</b> reúne varios resultados, es decir, varios caminos.</p>
+                <p>Cada resultado del experimento completo corresponde exactamente a una <b>rama</b> desde el inicio hasta un extremo.
+                    Un <b>suceso</b> reúne varios resultados, es decir, varias ramas.</p>
                 <p>En el caso de Lea, en cada etapa $P(\text{rojo}) = \tfrac23$. En $\tfrac23$ de todas las partidas sale primero rojo, y de esas partidas
                     vuelve a salir rojo en $\tfrac23$ de los casos. Por tanto,
                     $$P(\text{RR}) = \tfrac23 \cdot \tfrac23 = \tfrac49 \approx 0{,}44.$$
@@ -176,9 +176,9 @@
                 <div class="b-text">
                     <p>En cada ramificación, la suma de las probabilidades es $1$.</p>
                     <p><b>1.ª regla de las ramas (regla del producto):</b> la probabilidad de un resultado es el <b>producto</b> de las
-                        probabilidades a lo largo de su camino.</p>
+                        probabilidades a lo largo de su rama.</p>
                     <p><b>2.ª regla de las ramas (regla de la suma):</b> la probabilidad de un suceso es la <b>suma</b> de las
-                        probabilidades de todos los caminos que pertenecen a ese suceso.</p>
+                        probabilidades de todas las ramas que pertenecen a ese suceso.</p>
                 </div>
             </div>
 
@@ -190,14 +190,14 @@
         </div>
         <aside class="b-aside">
             <p class="b-note"><b>Notación:</b> R significa rojo y A, azul. RA quiere decir: primero rojo, después azul.</p>
-            <p class="b-note"><b>Comprobación:</b> las probabilidades de todos los extremos de los caminos suman $1$.</p>
+            <p class="b-note"><b>Comprobación:</b> las probabilidades de todos los extremos de las ramas suman $1$.</p>
             <p class="b-note"><b>Laboratorio:</b> en el juego de dados construyes tú mismo, etapa por etapa, el árbol para dos dados.</p>
         </aside>
     </div>
 
     <div class="b-box b-widget">
         <div class="b-box-title">INTERACTIVO · TALLER DE DIAGRAMAS DE ÁRBOL</div>
-        <p class="b-help" style="margin:0 0 12px">Configura la urna, elige con o sin reemplazamiento y haz clic, a la derecha, en los extremos de los caminos.
+        <p class="b-help" style="margin:0 0 12px">Configura la urna, elige con o sin reemplazamiento y haz clic, a la derecha, en los extremos de las ramas.
             El taller te muestra el cálculo con las dos reglas de las ramas.</p>
         <div data-widget="baum"></div>
     </div>
@@ -210,8 +210,8 @@
                     <p>Lea vuelve a girar su ruleta dos veces. ¿Qué probabilidad hay de que salga rojo <b>al menos una vez</b>?</p>
                 </div>
                 <div class="b-sol">
-                        <p>A «al menos una vez rojo» pertenecen los tres caminos RR, RA y AR. Es más rápido usar el <b>suceso contrario</b>
-                            «ninguna vez rojo», que es solo el camino AA:</p>
+                        <p>A «al menos una vez rojo» pertenecen las tres ramas RR, RA y AR. Es más rápido usar el <b>suceso contrario</b>
+                            «ninguna vez rojo», que es solo la rama AA:</p>
                         <p>$$P(\text{AA}) = \tfrac13 \cdot \tfrac13 = \tfrac19, \qquad P(\text{al menos una vez rojo}) = 1 - \tfrac19 = \tfrac89 \approx 0{,}89.$$</p>
                     </div>
             </div>
@@ -241,8 +241,8 @@
         <div class="b-task" data-lvl="1">
             <div class="b-task-q"><p>Se lanza una moneda tres veces. Dibuja el diagrama de árbol y calcula la probabilidad de
                 a) tres cruces, b) exactamente dos caras.</p></div>
-            <div class="b-sol"><p>El árbol tiene 8 caminos, y cada uno tiene probabilidad $\left(\tfrac12\right)^3 = \tfrac18$ (C = cara, X = cruz).</p>
-                <p>a) $P(\text{XXX}) = \tfrac18$ &nbsp; b) caminos CCX, CXC, XCC: $3 \cdot \tfrac18 = \tfrac38$</p></div>
+            <div class="b-sol"><p>El árbol tiene 8 ramas, y cada una tiene probabilidad $\left(\tfrac12\right)^3 = \tfrac18$ (C = cara, X = cruz).</p>
+                <p>a) $P(\text{XXX}) = \tfrac18$ &nbsp; b) ramas CCX, CXC, XCC: $3 \cdot \tfrac18 = \tfrac38$</p></div>
         </div>
         <div class="b-task" data-lvl="1">
             <div class="b-task-q"><p>Una ruleta da rojo con probabilidad $\tfrac12$, amarillo con $\tfrac13$ y azul con $\tfrac16$. Se gira dos veces.
@@ -355,7 +355,7 @@
 
             <div class="b-text">
                 <p>A cada tabla de contingencia le corresponden dos diagramas de árbol, según qué característica se considere primero.
-                    Las probabilidades de los extremos de los caminos son exactamente las cuatro casillas interiores de la tabla.</p>
+                    Las probabilidades de los extremos de las ramas son exactamente las cuatro casillas interiores de la tabla.</p>
             </div>
         </div>
         <aside class="b-aside">
@@ -398,7 +398,7 @@
         <div class="b-box-title">PERSPECTIVA · PROBABILIDAD CONDICIONADA</div>
         <div class="b-text">
             <p>En el test rápido no se pregunta por «enfermo <b>y</b> positivo», sino por «enfermo, <b>si</b> da positivo».
-                Se escribe $P_{T^+}(E)$ (aquí $E$ de enfermo y $S$ de sano, no un suceso cualquiera) y se habla de <b>probabilidad condicionada</b>. Se puede leer en la tabla de contingencia:</p>
+                Se escribe $P_{T^+}(E)$ ($E$ de enfermo, $S$ de sano, como en el test rápido; aquí $E$ no es un suceso cualquiera) y se habla de <b>probabilidad condicionada</b>. Se puede leer en la tabla de contingencia:</p>
             <p>$$P_{T^+}(E) = \frac{P(E \cap T^+)}{P(T^+)}$$</p>
             <p>Si $P(A \cap B) = P(A) \cdot P(B)$, se dice que $A$ y $B$ son <b>independientes</b>; si no, son dependientes.
                 En la tienda de bicicletas, $0{,}3 \cdot 0{,}6 = 0{,}18 \neq 0{,}12$: comprar una bici eléctrica y pagar con tarjeta son dependientes.
@@ -440,7 +440,7 @@
         <div class="b-task" data-lvl="2">
             <div class="b-task-q"><p>En un diagrama de árbol, $P(A) = 0{,}4$. De los casos con $A$, el 75 % tiene también la característica $B$;
                 de los casos sin $A$, solo el 25 %. Dibuja el árbol, construye la tabla de contingencia y determina $P(B)$.</p></div>
-            <div class="b-hint"><p>Los extremos de los caminos del árbol son las casillas interiores de la tabla, por ejemplo $P(A \cap B) = 0{,}4 \cdot 0{,}75$.</p></div>
+            <div class="b-hint"><p>Los extremos de las ramas del árbol son las casillas interiores de la tabla, por ejemplo $P(A \cap B) = 0{,}4 \cdot 0{,}75$.</p></div>
             <div class="b-sol"><p>$P(A \cap B) = 0{,}3$, $P(A \cap \overline{B}) = 0{,}1$, $P(\overline{A} \cap B) = 0{,}6 \cdot 0{,}25 = 0{,}15$,
                 $P(\overline{A} \cap \overline{B}) = 0{,}45$.</p>
                 <p><span class="b-res">$P(B) = 0{,}3 + 0{,}15 = 0{,}45$</span></p></div>
@@ -646,7 +646,7 @@
         <div class="b-task" data-lvl="3">
             <div class="b-task-q"><p>Una jugadora de baloncesto encesta el 70 % de sus tiros libres. Lanza hasta que encesta, pero como máximo tres veces.</p>
                 <p>a) ¿Qué probabilidad hay de que enceste alguna vez? b) ¿Qué probabilidad hay de que necesite exactamente dos tiros? c) ¿Qué probabilidad hay de que lance tres veces?</p></div>
-            <div class="b-hint"><p>El árbol no está completo: tras un acierto, el camino termina.</p></div>
+            <div class="b-hint"><p>El árbol no está completo: tras un acierto, la rama termina.</p></div>
             <div class="b-sol"><p>a) $1 - 0{,}3^3 = 0{,}973$ &nbsp; b) $0{,}3 \cdot 0{,}7 = 0{,}21$ &nbsp;
                 c) El tercer tiro solo llega tras dos fallos: $0{,}3 \cdot 0{,}3 = 0{,}09$</p></div>
         </div>
@@ -704,17 +704,17 @@
 
     <div class="b-rueck">
         <div><h4>EXPERIMENTO ALEATORIO DE VARIAS ETAPAS</h4>
-            <p>Varios experimentos parciales uno tras otro. En el diagrama de árbol, cada etapa es una ramificación y cada resultado, un camino.
+            <p>Varios experimentos parciales uno tras otro. En el diagrama de árbol, cada etapa es una ramificación y cada resultado, una rama.
                 En cada ramificación, las probabilidades suman $1$.</p></div>
         <div><p>Dos bolas de <span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
-            sin reemplazamiento: caminos RR, RA, AR, AA.</p></div>
+            sin reemplazamiento: ramas RR, RA, AR, AA.</p></div>
     </div>
     <div class="b-rueck">
-        <div><h4>1.ª REGLA DE LAS RAMAS</h4><p>Probabilidad de un resultado = <b>producto</b> a lo largo del camino.</p></div>
+        <div><h4>1.ª REGLA DE LAS RAMAS</h4><p>Probabilidad de un resultado = <b>producto</b> a lo largo de la rama.</p></div>
         <div><p>$P(\text{RA}) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
     </div>
     <div class="b-rueck">
-        <div><h4>2.ª REGLA DE LAS RAMAS</h4><p>Probabilidad de un suceso = <b>suma</b> de los caminos correspondientes.</p></div>
+        <div><h4>2.ª REGLA DE LAS RAMAS</h4><p>Probabilidad de un suceso = <b>suma</b> de las ramas correspondientes.</p></div>
         <div><p>$P(\text{colores distintos}) = \tfrac{3}{10} + \tfrac{3}{10} = \tfrac35$</p></div>
     </div>
     <div class="b-rueck">
@@ -727,7 +727,7 @@
     </div>
     <div class="b-rueck">
         <div><h4>TABLA DE CONTINGENCIA</h4><p>Dos características con dos valores cada una. Cuatro casillas interiores, sumas en el margen y, abajo a la derecha, $1$ o el número total.
-            Las casillas interiores son los extremos de los caminos del árbol correspondiente.</p></div>
+            Las casillas interiores son los extremos de las ramas del árbol correspondiente.</p></div>
         <div><p>$P(\overline{A} \cap \overline{B}) = 1 - P(A) - P(B) + P(A \cap B)$</p></div>
     </div>
     <div class="b-rueck">

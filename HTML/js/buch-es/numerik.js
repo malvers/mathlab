@@ -13,7 +13,7 @@ window.BuchES && BuchES.add('numerik', {
         'Bisektionsverfahren': 'Método de bisección', 'Intervall halbieren': 'Partir el intervalo', '5 Schritte': '5 pasos',
         'Schritt': 'Paso', 'Mitte $m$': 'Punto medio $m$', 'Breite': 'Anchura',
         'x² auf [0; 2]': 'x² en [0, 2]', '√x auf [0; 4]': '√x en [0, 4]', 'sin x auf [0; π]': 'sin x en [0, π]',
-        'Rechtecke links': 'Rectángulos izq.', 'Rechtecke Mitte': 'Rectángulos centro', 'Trapeze': 'Trapecios', 'Verfahren': 'Método',
+        'Rechtecke links': 'Rect. por la izquierda', 'Rechtecke Mitte': 'Rect. del punto medio', 'Trapeze': 'Trapecios', 'Verfahren': 'Método',
         'Anzahl der Streifen $n$': 'Número de franjas $n$', 'Flächeninhalt mit Streifen angenähert': 'Área aproximada con franjas',
         '+100 Punkte': '+100 puntos', '+1\u202f000 Punkte': '+1\u202f000 puntos', '+10\u202f000 Punkte': '+10\u202f000 puntos',   // narrow space as the widget writes it
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Puntos aleatorios en el rectángulo y los que quedan bajo la parábola',
