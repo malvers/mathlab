@@ -136,7 +136,7 @@
             'Zerlegen und verschieben': 'Cut and move', 'Grundseite $g$': 'Base $g$', 'Höhe $h$': 'Height $h$',
             'Diagonale $e$': 'Diagonal $e$', 'Diagonale $f$': 'Diagonal $f$',
             // book 14 mathegy6-en: vierecke6
-            'Quadrat': 'Square', 'Rechteck': 'Rectangle', 'Raute': 'Rhombus', 'Viereck': 'Quadrilateral', 'gleichschenkliges': 'isosceles',
+            'Quadrat': 'Square', 'Rechteck': 'Rectangle', 'Raute': 'Rhombus', 'Viereck': 'Quadrilateral', 'gleichschenkliges': 'Isosceles',
             'gleichschenkliges Trapez': 'Isosceles trapezium', 'Haus der Vierecke': 'House of quadrilaterals',
             'parallele Seiten': 'parallel sides', 'gleich lange Seiten': 'equal sides', 'rechte Winkel': 'right angles', 'Symmetrieachsen': 'lines of symmetry',
             'Diagonalen halbieren sich': 'diagonals bisect each other', 'Diagonalen senkrecht': 'diagonals perpendicular', 'Diagonalen gleich lang': 'diagonals equal',
@@ -375,8 +375,6 @@
             // vierecke6: "Jedes <b>Quadrat</b> ist auch ein Rechteck, eine Raute, …."
             [/Jede[s]? <b>([^<]+)<\/b> ist auch ([^<]+)\.<\/p>/g, (m, s, list) => 'Every <b>' + (SHAPE[s] || s) + '</b> is also ' +
                 list.split(', ').map(x => { const k = x.replace(/^eine? /, ''); return SHAPE[k] ? an(SHAPE[k]) : x; }).join(', ') + '.</p>'],
-            // vierecke6: "Quadrilateral" is twice as long as "Viereck" - the box at the bottom of the house gets wider
-            [/(<g class="g6-node" data-n="V"[^>]*><rect x=")([\d.]+)(" y="[\d.]+" width=")([\d.]+)/, (m, a, x, b, w) => a + (+x - 14).toFixed(1) + b + (+w + 28).toFixed(1)],
             // prisma6
             [/^(Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma) im Schrägbild: Grundfläche vorn in wahrer Größe, Tiefe unter 45 Grad und halb so lang$/,
                 (m, s) => cap(SHAPE[s]) + ' as an oblique drawing: base at the front in true size, depth at 45 degrees and half as long'],

@@ -1114,13 +1114,15 @@
         const shape = div(right, 'b-svgbox g-svg'), out = div(right, 'b-out');
         pic.addEventListener('click', e => { const g = e.target.closest('[data-n]'); if (g) { S.n = g.dataset.n; render(); } });
         pic.addEventListener('keydown', e => { const g = e.target.closest('[data-n]'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); S.n = g.dataset.n; render(); } });
+        // the box fits the label as the page shows it (English editions: "Quadrilateral" is longer than "Viereck")
+        const shown = t => (B.en && window.BuchEN ? BuchEN.plain(t) : t);
         const ancestors = n => { const set = new Set([n]); const go = m => VK[m].up.forEach(u => { if (!set.has(u)) { set.add(u); go(u); } }); go(n); return set; };
         function render() {
             const anc = ancestors(S.n);
             let s = '';
             Object.keys(VK).forEach(n => VK[n].up.forEach(u => { s += line(VK[n].p, VK[u].p, 'stroke:' + (anc.has(n) && anc.has(u) ? LAM : DIM) + ';stroke-width:' + (anc.has(n) && anc.has(u) ? 2.4 : 1.2) + ';opacity:' + (anc.has(n) && anc.has(u) ? 1 : 0.5)); }));
             Object.keys(VK).forEach(n => {
-                const N = VK[n], on = anc.has(n), me = n === S.n, w = Math.max(...N.l.map(t => t.length)) * 6.8 + 18, h = N.l.length * 16 + 12;
+                const N = VK[n], on = anc.has(n), me = n === S.n, w = Math.max(...N.l.map(t => shown(t).length)) * 6.8 + 18, h = N.l.length * 16 + 12;
                 s += '<g class="g6-node" data-n="' + n + '" tabindex="0" role="button" aria-label="' + N.l.join(' ') + '"><rect x="' + f1(N.p[0] - w / 2) + '" y="' + f1(N.p[1] - h / 2) + '" width="' + f1(w) + '" height="' + h + '" rx="8" style="' +
                     (me ? fill(LAM, 0.35) : on ? fill(LAM, 0.12) : 'fill:#0d1a30;stroke:' + DIM + ';stroke-width:1') + '"/>';
                 N.l.forEach((t, i) => { s += '<text class="g6-nodetxt" x="' + N.p[0] + '" y="' + f1(N.p[1] - h / 2 + 20 + i * 16) + '" text-anchor="middle">' + t + '</text>'; });
