@@ -180,7 +180,7 @@
             const rows = [0, 1, 2, 5, 10, 20].filter(t => t <= S.T);
             out.innerHTML =
                 '<p style="margin:0 0 6px"><span style="color:#7fd8ee">' + P.lin + ':</span> $f(t) = ' + texNum(S.a, 2) + sg(S.m, 2) + '\\cdot t$ — in jedem Schritt ' +
-                    (S.m < 0 ? 'geht <b>gleich viel</b> weg' + (t0 <= S.T ? '. Nach $' + texNum(t0, 2) + '$ ' + P.t + ' wäre alles verbraucht.' : '.') : 'kommt <b>gleich viel</b> hinzu.') + '</p>' +
+                    (S.m < 0 ? 'geht <b>gleich viel</b> weg' + (t0 <= S.T ? '. Nach $' + texNum(t0, 2) + '$ ' + P.t + 'n wäre alles verbraucht.' : '.') : 'kommt <b>gleich viel</b> hinzu.') + '</p>' +
                 '<p style="margin:0 0 8px"><span style="color:rgb(245,194,66)">' + P.exp + ':</span> $g(t) = ' + texNum(S.a, 2) + '\\cdot ' + texNum(S.q, 3) + '^{\\,t}$ — in jedem Schritt wird mit <b>demselben Faktor</b> multipliziert' +
                 (Math.abs(S.q - 1) > 1e-9 ? ', das sind ' + (pq > 0 ? '+' : '−') + fmt(Math.abs(pq), 2) + ' % pro Schritt. ' +
                     (S.q > 1 ? 'Verdopplungszeit' : 'Halbwertszeit') + ': $' + texNum(hz, 2) + '$ ' + P.t + '.' : '.') + '</p>' +

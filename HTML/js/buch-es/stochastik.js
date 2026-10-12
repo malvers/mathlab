@@ -49,6 +49,10 @@ window.BuchES && BuchES.add('stochastik', {
         [' alles richtig', ' todo correcto'], ['Ereignis: <b>', 'Suceso: <b>'], ['Zuletzt: ', 'Últimos: '],
         ['TÜR', 'PUERTA'], ['Tür', 'Puerta'], ['Gewonnen – das Auto! ', '¡Has ganado el coche! '], ['Leider eine Ziege. ', 'Lo siento, una cabra. '],
         ['Du hast gewechselt.', 'Has cambiado.'], ['Du bist geblieben.', 'Te has quedado.'],
+        // book es-1 mathe11-es: the module-level constants of venn (not on a BGY 11 page, but check.mjs reads them for every page)
+        ['$A$ oder $B$ (oder beide)', '$A$ o $B$ (o ambos)'], ['$A$ und $B$', '$A$ y $B$'], ['nicht $A$ und nicht $B$', 'no $A$ y no $B$'],
+        ['nicht $A$ oder nicht $B$', 'no $A$ o no $B$'], ['weder $A$ noch $B$', 'ni $A$ ni $B$'], ['nicht beide', 'no ambos'], ['nicht $A$', 'no $A$'],
+        ['gerade · Vielfaches von 3', 'par · múltiplo de 3'], ['Primzahl · größer als 6', 'primo · mayor que 6'], ['unvereinbar', 'incompatibles'],
     ],
     rule: [
         // book es-1 mathe11-es

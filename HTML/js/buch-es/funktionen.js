@@ -73,7 +73,7 @@ window.BuchES && BuchES.add('funktionen', {
         [' wäre alles verbraucht.', ' se habría agotado todo.'], ['kommt <b>gleich viel</b> hinzu.', 'se suma <b>la misma cantidad</b>.'],
         ['. Nach $', '. Después de $'], [', das sind ', ', es decir, '], [' % pro Schritt. ', ' % por paso. '],
         ['linear', 'lineal'], ['exponentiell', 'exponencial'], ['Verdopplungszeit', 'Tiempo de duplicación'], ['Halbwertszeit', 'Período de semidesintegración'],
-        ['Jahre', 'años'], ['Tage', 'días'], ['Schritte', 'pasos'],
+        ['Jahre', 'años'], ['Tage', 'días'], ['Schritte', 'pasos'], ['Jahren', 'años'], ['Tagen', 'días'], ['Schritten', 'pasos'],
         // gerade
         ['Beide Punkte liegen senkrecht übereinander. Die Gerade $x = ', 'Los dos puntos están en la misma vertical. La recta $x = '],
         ['$ ist <b>kein</b> Funktionsgraph.', '$ <b>no</b> es la gráfica de una función.'],
