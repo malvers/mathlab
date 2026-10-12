@@ -180,7 +180,8 @@ function looksGerman(r, s) {
     const v = visible(r);
     if (GERMAN.test(v)) return true;
     if (!ENGLISH || CODE.test(v)) return false;
-    const words = v.match(/[A-Za-zÄÖÜäöüß]{3,}/g) || [];
+    // Spanish: accented letters belong to the word ("están" is not "est" + "n", and "est" is found in "gestrichelt")
+    const words = v.match(LANG === 'es' ? /[A-Za-zÄÖÜäöüßÁÉÍÓÚÑáéíóúñ]{3,}/g : /[A-Za-zÄÖÜäöüß]{3,}/g) || [];
     // one lowercase word on its own is a key, a class or a value inside the widget ("wurf", "b-ctrls", "oben"), not text
     if (words.length < 2 && !/[A-ZÄÖÜ]/.test(v)) return false;
     // one identifier: "baum-hero", "AnB", "b_go"
