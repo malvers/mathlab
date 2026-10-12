@@ -19,7 +19,7 @@ s.task("Grad Celsius und Grad Fahrenheit", 1,
         r"Ansatz $y = 1{,}8c + 32$, nach $c$ auflösen: $y - 32 = 1{,}8c$, also $c = \dfrac{y - 32}{1{,}8}$. Nach dem Umbenennen der Variablen: $F^{-1}(x) = \dfrac{x - 32}{1{,}8}$.",
         r"$F^{-1}(95) = \dfrac{95 - 32}{1{,}8} = \dfrac{63}{1{,}8} = 35\ ^\circ$C. $F^{-1}(32) = \dfrac{0}{1{,}8} = 0\ ^\circ$C — der Gefrierpunkt. Probe: $F(35) = 63 + 32 = 95$ und $F(0) = 32$.",
         r"Gesucht ist $c$ mit $F(c) = c$: $1{,}8c + 32 = c$ ergibt $0{,}8c = -32$ und damit $c = -40$. Bei $-40$ zeigen beide Skalen dieselbe Zahl. Grafisch ist das der Schnittpunkt mit der Winkelhalbierenden $y = x$, und weil $F^{-1}$ die Spiegelung von $F$ an dieser Geraden ist, liegt der Punkt $(-40 \mid -40)$ auf **beiden** Graphen."],
-       falle=r"Beim Auflösen wird zuerst die $32$ abgezogen und **danach** durch $1{,}8$ geteilt. Wer zuerst teilt, erhält $\dfrac{x}{1{,}8} - 32$ und liegt bei $95\ ^\circ$F um mehr als $17$ Grad daneben.")
+       falle=r"Beim Auflösen wird zuerst die $32$ abgezogen und **danach** durch $1{,}8$ geteilt. Wer zuerst teilt, erhält $\dfrac{x}{1{,}8} - 32$ und liegt bei $95\ ^\circ$F um mehr als $14$ Grad daneben.")
 
 # --------------------------------------------------------------- AFB II ----
 s.task("Wie lange fällt der Stein?", 2,

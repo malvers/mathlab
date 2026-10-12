@@ -19,7 +19,7 @@ s.task("Die Taxifahrt", 1,
         r"$K(5) = 11 + 3{,}90 = 14{,}90$ € und $K(15) = 33 + 3{,}90 = 36{,}90$ €. Anstieg: $m = \dfrac{36{,}90 - 14{,}90}{15 - 5} = \dfrac{22}{10} = 2{,}20$ — das ist der Preis je Kilometer.",
         r"Aus $y = 2{,}20x + 3{,}90$ folgt $x = \dfrac{y - 3{,}90}{2{,}20}$, also $K^{-1}(x) = \dfrac{x - 3{,}90}{2{,}20}$. Sie beantwortet die umgekehrte Frage: **wie viele Kilometer** bekommt man für einen gegebenen Betrag?",
         r"$K^{-1}(25) = \dfrac{25 - 3{,}90}{2{,}20} = \dfrac{21{,}10}{2{,}20} \approx 9{,}59$ km. Probe: $K(9{,}59) = 21{,}098 + 3{,}90 \approx 25{,}00$ €. Bezahlen kann man also knapp $9{,}6$ Kilometer."],
-       falle=r"Der Grundpreis wird zuerst abgezogen und **danach** geteilt. $\dfrac{25}{2{,}20} - 3{,}90 \approx 7{,}47$ km wäre um mehr als zwei Kilometer zu wenig.")
+       falle=r"Der Grundpreis wird zuerst abgezogen und **danach** geteilt. $\dfrac{25}{2{,}20} - 3{,}90 \approx 7{,}46$ km wäre um mehr als zwei Kilometer zu wenig.")
 
 # --------------------------------------------------------------- AFB II ----
 s.task("Vier Familien, vier Fragen", 2,

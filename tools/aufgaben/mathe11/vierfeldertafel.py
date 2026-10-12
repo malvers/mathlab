@@ -33,7 +33,7 @@ s.task("Zwei Maschinen, ein Ausschussteil", 2,
         r"$\dfrac{320}{10\,000} = 0{,}032$, also **$3{,}2\,\%$**. Das liegt zwischen den $2\,\%$ und den $5\,\%$ der einzelnen Maschinen, näher an A, weil A den größeren Anteil fertigt.",
         r"$P(A \mid \text{Ausschuss}) = \dfrac{120}{320} = 0{,}375$, also **$37{,}5\,\%$**. Von den Ausschussteilen stammt die Mehrheit von der kleineren Maschine B.",
         r"$P(\text{Ausschuss} \mid A) = \dfrac{120}{6\,000} = 0{,}02$, also nur $2\,\%$ — gegenüber $37{,}5\,\%$ in c). Die beiden Fragen haben verschiedene **Bezugsgruppen**: einmal wird innerhalb der Produktion von A gerechnet, einmal innerhalb aller Ausschussteile. Die Nenner sind $6\,000$ und $320$, deshalb können die Werte weit auseinanderliegen. Die Reihenfolge in $P(X \mid Y)$ ist nicht vertauschbar."],
-       falle=r"$2\,\%$ Ausschuss bei A heißt nicht, dass $2\,\%$ der Ausschussteile von A stammen. Wer die Bedingung vertauscht, verwechselt $37{,}5\,\%$ mit $2\,\%$ — Faktor $18$.")
+       falle=r"$2\,\%$ Ausschuss bei A heißt nicht, dass $2\,\%$ der Ausschussteile von A stammen. Wer die Bedingung vertauscht, verwechselt $37{,}5\,\%$ mit $2\,\%$ — Faktor $18{,}75$.")
 
 # -------------------------------------------------------------- AFB III ----
 s.task("Der Test ist zu 99 Prozent sicher", 3,
