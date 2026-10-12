@@ -404,7 +404,7 @@
             lines.push('<p>' + (z === 0 ? 'Null Teile: der Bruch hat den Wert 0.' : z < n ? 'Ein <b>echter Bruch</b>: weniger als ein Ganzes.' : z === n ? 'Genau <b>ein Ganzes</b>.' :
                 'Ein <b>unechter Bruch</b>: mehr als ein Ganzes' + (z % n ? ', als gemischte Zahl $' + Math.floor(z / n) + '\\tfrac{' + (z % n) + '}{' + n + '}$' : ', genau ' + z / n + ' Ganze') + '.') + '</p>');
             lines.push('<p>' + (g > 1 ? 'Kürzen mit ' + g + ' ergibt $\\tfrac{' + zr + '}{' + nr + '}$.' : 'Der Bruch lässt sich nicht weiter kürzen.') + '</p>');
-            lines.push('<p>' + (exact ? 'Als Dezimalzahl: <b>' + fmt(v, 4) + '</b>' + (Math.abs(v * 100 - Math.round(v * 100)) < 1e-9 ? ' · in Prozent: <b>' + fmt(v * 100, 2) + ' %</b>' : '') :
+            lines.push('<p>' + (exact ? 'Als Dezimalzahl: <b>' + fmt(v, 6) + '</b>' + (Math.abs(v * 100 - Math.round(v * 100)) < 1e-9 ? ' · in Prozent: <b>' + fmt(v * 100, 2) + ' %</b>' : '') :
                 'Als Dezimalzahl ungefähr ' + fmt(v, 3) + '. Der Nenner hat einen anderen Primfaktor als 2 und 5, deshalb hört die Dezimalzahl nicht auf.') + '</p>');
             out.innerHTML = lines.join('');
             math(out);
@@ -667,7 +667,11 @@
         const turn = (p, a, Z) => { const c = Math.cos(a * DEG), s = Math.sin(a * DEG), d = sub(p, Z); return [Z[0] + c * d[0] - s * d[1], Z[1] + s * d[0] + c * d[1]]; };
         function newQuiz() {
             const t = rnd(0, 2);
-            const base = [[1, 1], [4, 1], [4, 3], [2, 5]].map(p => add(p, [rnd(0, 1), rnd(0, 1)]));
+            // a symmetric shape would make two answers right: draw again until mirror, half turn and quarter turn all look different
+            const key = F => { const mx = Math.min(...F.map(p => p[0])), my = Math.min(...F.map(p => p[1])); return F.map(p => Math.round(p[0] - mx) + ',' + Math.round(p[1] - my)).sort().join(' '); };
+            let base;
+            do base = [[1, 1], [4, 1], [4, 3], [2, 5]].map(p => add(p, [rnd(0, 1), rnd(0, 1)]));
+            while (new Set([base, base.map(p => [-p[0], p[1]]), base.map(p => [-p[0], -p[1]]), base.map(p => [-p[1], p[0]])].map(key)).size < 4);
             let img;
             if (t === 0) { const k = rnd(6, 7) + 0.5; img = base.map(p => [2 * k - p[0], p[1]]); }
             else if (t === 1) { const v = [rnd(5, 7), rnd(-1, 2)]; img = base.map(p => add(p, v)); }
@@ -895,8 +899,8 @@
             if (i1 > i0) for (let i = i0; i < i1; i++) { r *= K.f[i]; steps.push('· ' + K.f[i]); }
             else for (let i = i0 - 1; i >= i1; i--) { r /= K.f[i]; steps.push(': ' + K.f[i]); }
             const unit = i => K.u[i].split(' ')[0];
-            out.innerHTML = '<p class="g5-big">' + dec(v, 6) + ' ' + unit(i0) + ' = ' + dec(r, 6) + ' ' + unit(i1) + '</p>' +
-                (steps.length ? '<p>Rechnung: ' + dec(v, 6) + ' ' + steps.join(' ') + ' = ' + dec(r, 6) + '</p><p class="g5-dim">' +
+            out.innerHTML = '<p class="g5-big">' + dec(v, 6) + ' ' + unit(i0) + ' = ' + dec(r, 10) + ' ' + unit(i1) + '</p>' +
+                (steps.length ? '<p>Rechnung: ' + dec(v, 6) + ' ' + steps.join(' ') + ' = ' + dec(r, 10) + '</p><p class="g5-dim">' +
                     (i1 > i0 ? 'Treppe hinunter zur kleineren Einheit: Die Maßzahl wird größer, man <b>multipliziert</b>.' : 'Treppe hinauf zur größeren Einheit: Die Maßzahl wird kleiner, man <b>dividiert</b>.') + '</p>' : '<p>Gleiche Einheit, nichts zu tun.</p>') +
                 (S.kind === 'flaeche' ? '<p class="g5-dim">Bei Flächen ist die Umrechnungszahl immer 100.</p>' : S.kind === 'volumen' ? '<p class="g5-dim">Bei Volumen ist die Umrechnungszahl immer 1000.</p>' : S.kind === 'zeit' ? '<p class="g5-dim">Achtung: Bei der Zeit gibt es keine Zehnerschritte.</p>' : '');
         }
