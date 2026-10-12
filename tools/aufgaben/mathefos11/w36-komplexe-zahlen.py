@@ -148,14 +148,14 @@ Q.q(r'Wie lauten die Lösungen von $x^2 + 1 = 0$ in $\mathbb{C}$?',
     [r'$x = i$ und $x = -i$', r'nur $x = i$', r'$x = 1$ und $x = -1$', r'keine Lösung'],
     [r'$x^2 = -1$',
      r'Sowohl $i$ als auch $-i$ haben das Quadrat $-1$, denn $(-i)^2 = i^2 = -1$.',
-     r'Also zwei Lösungen — im Komplexen hat jede quadratische Gleichung zwei.'])
+     r'Also zwei Lösungen — im Komplexen hat jede quadratische Gleichung zwei, wenn man eine doppelte Lösung doppelt zählt.'])
 
 Q.q(r'Wie lauten die Lösungen von $x^2 - 2x + 5 = 0$ in $\mathbb{C}$?',
     [r'$x = 1 + 2i$ und $x = 1 - 2i$', r'$x = 2 + i$ und $x = 2 - i$',
      r'$x = 1 + 4i$ und $x = 1 - 4i$', r'keine Lösung'],
     [r'Lösungsformel: $x = \dfrac{2 \pm \sqrt{4 - 20}}{2} = \dfrac{2 \pm \sqrt{-16}}{2}$',
      r'$\sqrt{-16} = 4i$, also $x = \dfrac{2 \pm 4i}{2}$',
-     r'$= 1 \pm 2i$. Die beiden Lösungen sind zueinander konjugiert komplex — das gilt bei reellen Koeffizienten immer.'])
+     r'$= 1 \pm 2i$. Die beiden Lösungen sind zueinander konjugiert komplex — das gilt bei reellen Koeffizienten und negativer Diskriminante immer.'])
 
 
 def check():

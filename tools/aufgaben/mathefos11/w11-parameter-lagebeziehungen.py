@@ -11,7 +11,7 @@ Q = fos11(nr=11, slug='parameter-lagebeziehungen', thema='Parameter und Lagebezi
           comment='Blocks: Einfluss der Parameter (1-7), Lagebeziehungen (8-14), Schnittpunkte und Bedingungen (15-20).')
 
 # ---------------------------------------------------- Einfluss der Parameter ----
-Q.q(r'Was bewirkt ein größerer Wert von $m$ in $y = mx + n$?',
+Q.q(r'Was bewirkt ein größerer Wert von $m > 0$ in $y = mx + n$?',
     [r'Die Gerade wird steiler.', r'Die Gerade wird flacher.',
      r'Die Gerade wandert nach oben.', r'Die Gerade wandert nach rechts.'],
     [r'$m$ ist der Anstieg: er gibt an, um wie viel $y$ wächst, wenn $x$ um $1$ zunimmt.',

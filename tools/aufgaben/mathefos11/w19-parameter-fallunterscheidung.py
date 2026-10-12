@@ -71,7 +71,7 @@ Q.q(r'Was ist das Besondere an $f_a(x) = x^2 - 2a\,x + a^2$?',
      r'Es gibt zwei getrennte Nullstellen bei $\pm a$.',
      r'Es gibt keine Nullstelle.',
      r'Der Graph ist nach unten geöffnet.'],
-    [r'Erste binomische Formel rückwärts: $x^2 - 2ax + a^2 = (x-a)^2$.',
+    [r'Zweite binomische Formel rückwärts: $x^2 - 2ax + a^2 = (x-a)^2$.',
      r'Die Nullstelle $a$ tritt doppelt auf.',
      r'Der Graph berührt die $x$-Achse im Punkt $(a|0)$.'])
 

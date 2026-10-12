@@ -121,7 +121,7 @@ Q.q(r'Der Wert einer Maschine sinkt nach $W(t) = 20\,000 \cdot e^{-0{,}2t}$ (in 
     [r'$t = 5 \ln 2 \approx 3{,}47$ Jahre', r'$t = 5$ Jahre', r'$t = 2{,}5$ Jahre', r'$t = 10 \ln 2 \approx 6{,}93$ Jahre'],
     [r'Ansatz: $20\,000 \cdot e^{-0{,}2t} = 10\,000 \Rightarrow e^{-0{,}2t} = 0{,}5$',
      r'Logarithmieren: $-0{,}2t = \ln 0{,}5 = -\ln 2 \Rightarrow t = \dfrac{\ln 2}{0{,}2} = 5 \ln 2 \approx 3{,}47$',
-     r'Probe mit dem GTR: $20\,000 \cdot e^{-0{,}2 \cdot 3{,}47} \approx 9\,996$.'])
+     r'Probe mit dem GTR: $20\,000 \cdot e^{-0{,}2 \cdot 3{,}47} \approx 9\,991$.'])
 
 Q.q(r'Bestimme die Ableitung von $f(x) = x \cdot e^{-x}$.',
     [r'$f^{\prime}(x) = (1 - x)\,e^{-x}$', r'$f^{\prime}(x) = -e^{-x}$', r'$f^{\prime}(x) = (1 + x)\,e^{-x}$', r'$f^{\prime}(x) = -x\,e^{-x}$'],
@@ -194,7 +194,7 @@ def check():
     assert sp.solveset(3 * sp.exp(2*x - 1) - 3, x, domain=sp.S.Reals) == {sp.Rational(1, 2)} and abs((1 + math.log(3)) / 2 - 1.05) < 0.005
     # 16 Halbwertszeit
     assert abs(5 * math.log(2) - 3.47) < 0.005 and abs(10 * math.log(2) - 6.93) < 0.005
-    assert abs(20000 * math.exp(-0.2 * 3.47) - 9996) < 5
+    assert abs(20000 * math.exp(-0.2 * 3.47) - 9991) < 1
     # 17 Produktregel
     f17 = x * sp.exp(-x)
     assert sp.simplify(sp.diff(f17, x) - (1 - x) * sp.exp(-x)) == 0

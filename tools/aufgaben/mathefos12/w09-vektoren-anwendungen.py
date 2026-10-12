@@ -66,7 +66,7 @@ Q.q(QUADER + r'Unter welchem Winkel ist die Raumdiagonale $\overline{AG}$ gegen 
     [r'Der Winkel liegt zwischen $\overrightarrow{AG} = ' + vec(6, 4, 3) + r'$ und seiner Projektion $\overrightarrow{AC} = ' + vec(6, 4, 0) + r'$ in der Grundfläche.',
      r'$\cos\varphi = \dfrac{\overrightarrow{AG} \cdot \overrightarrow{AC}}{|\overrightarrow{AG}| \cdot |\overrightarrow{AC}|} = \dfrac{36 + 16}{\sqrt{61} \cdot \sqrt{52}} = \dfrac{52}{\sqrt{3172}} \approx 0{,}9233$',
      r'$\varphi \approx 22{,}6^\circ$; Probe im rechtwinkligen Dreieck $ACG$: $\tan\varphi = \dfrac{3}{\sqrt{52}} \approx 0{,}416$.',
-     r'Falle: $\tan\varphi = \dfrac{3}{6}$ ($26{,}6^\circ$) wäre der Winkel zur Kante $\overline{AB}$, nicht zur Grundfläche.'])
+     r'Falle: $\tan\varphi = \dfrac{3}{6}$ ($26{,}6^\circ$) wäre der Winkel der Flächendiagonale $\overline{AF}$ gegen $\overline{AB}$, nicht der von $\overline{AG}$ gegen die Grundfläche.'])
 
 Q.q(QUADER + r'Wie lautet eine Koordinatengleichung der Ebene durch $B$, $D$ und $E$?',
     [r'$2x + 3y + 4z = 12$', r'$2x + 3y + 4z = 0$', r'$6x + 4y + 3z = 12$', r'$2x - 3y + 4z = 12$'],

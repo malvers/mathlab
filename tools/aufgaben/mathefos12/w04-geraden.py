@@ -138,7 +138,7 @@ Q.q(r'Bestimme den Spurpunkt von $g: ' + g((2, 4, 1), (1, -2, 3)) + r'$ mit der 
     [r'$S_{xz}(4|0|7)$', r'$S_{xz}(0|0|-5)$', r'$S_{xz}(2|0|1)$', r'$S_{xz}(3|2|4)$'],
     [r'In der $x$-$z$-Ebene ist $y = 0$: $4 - 2t = 0$, also $t = 2$.',
      r'$x = 2 + 2 = 4$, $z = 1 + 6 = 7$ - Spurpunkt $S_{xz}(4|0|7)$.',
-     r'$(0|0|-5)$ gehört zu $t = -2$ - Vorzeichenfehler beim Auflösen.'])
+     r'$(0|0|-5)$ entsteht mit $t = -2$ (Vorzeichenfehler beim Auflösen) - dort ist aber $y = 8$, nicht $0$.'])
 
 Q.q(r'Bestimme den Spurpunkt von $g: ' + g((3, 1, -2), (-1, 2, 1)) + r'$ mit der $y$-$z$-Ebene.',
     [r'$S_{yz}(0|7|1)$', r'$S_{yz}(0|1|-2)$', r'$S_{yz}(0|-5|-5)$', r'$S_{yz}(0|7|-1)$'],

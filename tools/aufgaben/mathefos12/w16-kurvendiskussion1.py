@@ -131,7 +131,7 @@ Q.q(r'Welche Bedingungen sichern einen Hochpunkt an der Stelle $x_0$?',
     [r'$f^{\prime}(x_0) = 0$ und $f^{\prime\prime}(x_0) < 0$', r'$f^{\prime}(x_0) = 0$ und $f^{\prime\prime}(x_0) > 0$',
      r'$f(x_0) = 0$ und $f^{\prime}(x_0) < 0$', r'$f^{\prime\prime}(x_0) = 0$ und $f^{\prime}(x_0) < 0$'],
     [r'Notwendig ist eine waagerechte Tangente: $f^{\prime}(x_0) = 0$.',
-     r'Hinreichend wird es durch $f^{\prime\prime}(x_0) < 0$ - oder gleichwertig durch den Vorzeichenwechsel von $f^{\prime}$ von $+$ nach $-$.',
+     r'Hinreichend wird es durch $f^{\prime\prime}(x_0) < 0$ - oder alternativ durch den Vorzeichenwechsel von $f^{\prime}$ von $+$ nach $-$.',
      r'Falle: $f^{\prime\prime}(x_0) > 0$ gehört zum Tiefpunkt.'])
 
 Q.q(r'Bestimme den Extrempunkt von $f(x) = x^2 + 6x + 5$ und seine Art.',

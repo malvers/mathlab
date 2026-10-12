@@ -165,7 +165,7 @@ Q.q(r'Aus einem quadratischen Karton mit der Kantenlänge $12\,\mathrm{cm}$ wird
 
 Q.q(r'Eine zylindrische Dose mit gegebenem Volumen $V$ soll möglichst wenig Blech verbrauchen (Boden und Deckel zählen mit). Welcher Zusammenhang gilt dann zwischen Höhe $h$ und Radius $r$?',
     [r'$h = 2r$ - die Höhe ist so groß wie der Durchmesser.', r'$h = r$ - die Höhe ist so groß wie der Radius.',
-     r'$h = \dfrac{r}{2}$ - die Dose ist doppelt so breit wie hoch.', r'$h = 4r$ - eine schlanke, hohe Dose.'],
+     r'$h = \dfrac{r}{2}$ - die Dose ist viermal so breit wie hoch.', r'$h = 4r$ - eine schlanke, hohe Dose.'],
     [r'Nebenbedingung $V = \pi r^2 h \Rightarrow h = \dfrac{V}{\pi r^2}$; Zielfunktion $O = 2\pi r^2 + 2\pi r h = 2\pi r^2 + \dfrac{2V}{r}$',
      r'$O^{\prime}(r) = 4\pi r - \dfrac{2V}{r^2} = 0 \Leftrightarrow r^3 = \dfrac{V}{2\pi}$, also $V = 2\pi r^3$.',
      r'Einsetzen: $h = \dfrac{2\pi r^3}{\pi r^2} = 2r$.',
@@ -176,7 +176,7 @@ Q.q(r'Eine Dose soll $1$ Liter $= 1000\,\mathrm{cm}^3$ fassen und dabei möglich
      r'$r \approx 6{,}2\,\mathrm{cm}$ und $h \approx 8{,}3\,\mathrm{cm}$', r'$r \approx 5{,}0\,\mathrm{cm}$ und $h \approx 12{,}7\,\mathrm{cm}$'],
     [r'Aus $r^3 = \dfrac{V}{2\pi}$ folgt $r = \sqrt[3]{\dfrac{1000}{2\pi}} = \sqrt[3]{159{,}15} \approx 5{,}42$',
      r'Höhe: $h = 2r \approx 10{,}84$, also $r \approx 5{,}4\,\mathrm{cm}$ und $h \approx 10{,}8\,\mathrm{cm}$.',
-     r'Probe: $\pi \cdot 5{,}42^2 \cdot 10{,}84 \approx 1000$. Die anderen Dosen fassen zwar auch $1$ Liter, brauchen aber mehr Blech.'])
+     r'Probe: $\pi \cdot 5{,}42^2 \cdot 10{,}84 \approx 1000$. Die Dosen mit $r \approx 6{,}2$ und $r \approx 5{,}0$ fassen zwar auch etwa $1$ Liter, brauchen aber mehr Blech; die mit $r \approx 10{,}8$ fasst fast $2$ Liter.'])
 
 Q.q(r'Eine oben offene Schachtel mit quadratischer Grundfläche soll $32\,\mathrm{cm}^3$ fassen. Für welche Grundkante $x$ wird der Materialverbrauch minimal?',
     [r'$x = 4\,\mathrm{cm}$, $h = 2\,\mathrm{cm}$, $O_{\min} = 48\,\mathrm{cm}^2$',
@@ -204,7 +204,7 @@ Q.q(r'Ein Betrieb setzt $x$ Stück zum Preis $p(x) = 30 - 0{,}5x$ (in €) ab; d
     [r'Erlös: $E(x) = x \cdot p(x) = 30x - 0{,}5x^2$; Gewinn: $G(x) = E(x) - K(x) = -0{,}5x^2 + 24x - 100$',
      r'$G^{\prime}(x) = -x + 24 = 0 \Leftrightarrow x = 24$, $G^{\prime\prime}(x) = -1 < 0$: Maximum.',
      r'$G(24) = -288 + 576 - 100 = 188$ €.',
-     r'Falle: $x = 30$ ist die Nullstelle von $p^{\prime}$-Überlegungen ohne Kosten; bei $x = 48$ ist der Erlös gerade so hoch wie die variablen Kosten.'])
+     r'Falle: $x = 30$ maximiert nur den Erlös ($E^{\prime}(x) = 30 - x = 0$), die Kosten fehlen dort; bei $x = 48$ ist der Erlös gerade so hoch wie die variablen Kosten.'])
 
 Q.q(r'Eine oben offene Kiste mit quadratischer Grundfläche soll $8\,\mathrm{dm}^3$ fassen. Der Boden kostet $2$ € pro $\mathrm{dm}^2$, die Seitenwände $1$ € pro $\mathrm{dm}^2$. Welche Grundkante $x$ ist am günstigsten?',
     [r'$x = 2\,\mathrm{dm}$ mit Kosten von $24$ €', r'$x = 4\,\mathrm{dm}$ mit Kosten von $40$ €',
@@ -213,7 +213,7 @@ Q.q(r'Eine oben offene Kiste mit quadratischer Grundfläche soll $8\,\mathrm{dm}
      r'$K^{\prime}(x) = 4x - \dfrac{32}{x^2} = 0 \Leftrightarrow x^3 = 8 \Leftrightarrow x = 2$, also $h = 2$.',
      r'$K(2) = 8 + 16 = 24$ €. Falle: $16$ € sind nur die Wände, der teurere Boden fehlt.'])
 
-Q.q(r'Ein rechteckiges Gehege wird mit $24\,\mathrm{m}$ Zaun eingefasst und durch einen Zaun parallel zur Seite $y$ in zwei gleich große Teile geteilt. Wie groß kann die Gesamtfläche höchstens werden?',
+Q.q(r'Ein rechteckiges Gehege wird mit $24\,\mathrm{m}$ Zaun eingefasst und durch einen Zaun parallel zur Seite $x$ in zwei gleich große Teile geteilt. Wie groß kann die Gesamtfläche höchstens werden?',
     [r'$A_{\max} = 24\,\mathrm{m}^2$ bei $x = 4\,\mathrm{m}$ und $y = 6\,\mathrm{m}$',
      r'$A_{\max} = 36\,\mathrm{m}^2$ bei $x = 6\,\mathrm{m}$ und $y = 6\,\mathrm{m}$',
      r'$A_{\max} = 22{,}5\,\mathrm{m}^2$ bei $x = 3\,\mathrm{m}$ und $y = 7{,}5\,\mathrm{m}$',

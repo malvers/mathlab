@@ -12,7 +12,7 @@ Q = fos11(nr=22, slug='zufallsexperimente', thema='Zufallsexperimente und Ereign
 
 # ------------------------------------------------------------ Grundbegriffe ----
 Q.q(r'Was kennzeichnet ein Zufallsexperiment?',
-    [r'Es ist beliebig oft wiederholbar, und sein Ausgang steht vorher nicht fest, ist aber bekannt.',
+    [r'Es ist beliebig oft wiederholbar, und sein Ausgang steht vorher nicht fest; die möglichen Ausgänge sind aber bekannt.',
      r'Sein Ausgang lässt sich vorher berechnen.',
      r'Es kann nur einmal durchgeführt werden.',
      r'Es hat immer genau zwei mögliche Ausgänge.'],
