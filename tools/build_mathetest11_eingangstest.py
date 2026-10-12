@@ -31,7 +31,7 @@ def _rechter_winkel(c, x, y, dx, dy, size=15):
 
 
 def dreieck_katheten(a, b, ca, cb, ch, gesucht="c"):
-    """Rechtwinkliges Dreieck, rechter Winkel unten links bei A. gesucht faerbt
+    """Rechtwinkliges Dreieck, rechter Winkel unten links bei C. gesucht faerbt
     die gesuchte Groesse rot - alles andere neutral, sonst liest sich die
     Zeichnung falsch herum."""
     px = min(200.0 / max(a, 1e-9), 150.0 / max(b, 1e-9))
@@ -46,9 +46,9 @@ def dreieck_katheten(a, b, ca, cb, ch, gesucht="c"):
     _rechter_winkel(c, x0, y0, 1, -1)
     for (x, y) in ((x0, y0), (x1, y1), (x2, y2)):
         c.circle(x, y, 3.4, fill=S.INK, stroke=S.PAPER)
-    c.text(x0 - 14, y0 + 18, "A", 13, S.INK)
+    c.text(x0 - 14, y0 + 18, "C", 13, S.INK)
     c.text(x1 + 12, y1 + 18, "B", 13, S.INK)
-    c.text(x2 - 14, y2 - 8, "C", 13, S.INK)
+    c.text(x2 - 14, y2 - 8, "A", 13, S.INK)
 
     def lbl(x, y, t, key):
         rot = key == gesucht
