@@ -65,7 +65,7 @@ Q.q(r'Ein tropfender Wasserhahn verliert 0,5 Liter pro Stunde. Wie viel Wasser i
     [r'84 Liter', r'3,5 Liter', r'12 Liter', r'168 Liter'],
     [r'Eine Woche hat $7 \cdot 24 = 168$ Stunden.',
      r'$168 \cdot 0{,}5 = 84$',
-     r'Das sind 84 Liter – fast eine volle Badewanne.'])
+     r'Das sind 84 Liter – etwa eine halbe Badewanne.'])
 
 Q.q(r'Ein Auto braucht 6 Liter auf 100 km, ein Liter kostet 1,80 €. Was kostet das Benzin für 250 km?',
     [r'27,00 €', r'15,00 €', r'45,00 €', r'10,80 €'],

@@ -82,7 +82,7 @@ Q.q(r'Bei einem Parallelogramm werden Grundseite und Höhe verdoppelt. Was passi
      r'$= 4 \cdot g \cdot h$',
      r'Viermal so groß.'])
 
-Q.q(r'Tom rechnet bei einem Parallelogramm mit den Seiten 6 cm und 5 cm: $A = 6 \cdot 5 = 30$ cm². Was ist falsch?',
+Q.q(r'Tom rechnet bei einem Parallelogramm (kein Rechteck) mit den Seiten 6 cm und 5 cm: $A = 6 \cdot 5 = 30$ cm². Was ist falsch?',
     [r'Er hat die schräge Seite statt der Höhe genommen.', r'Nichts, das stimmt.',
      r'Er hätte noch durch 2 teilen müssen.', r'Er hätte die Seiten addieren müssen.'],
     [r'Die Formel braucht die Höhe, also den senkrechten Abstand.',

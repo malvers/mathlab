@@ -135,7 +135,7 @@ Q.q(r'Bei einem Trapez wird nur die Höhe verdoppelt. Was passiert mit dem Fläc
      r'Mit $2h$ wird der ganze Term doppelt so groß.',
      r'Der Flächeninhalt verdoppelt sich.'])
 
-Q.q(r'Tom rechnet bei einem Parallelogramm mit den Seiten 6 cm und 5 cm: $A = 6 \cdot 5 = 30$ cm². Was stimmt?',
+Q.q(r'Tom rechnet bei einem Parallelogramm (kein Rechteck) mit den Seiten 6 cm und 5 cm: $A = 6 \cdot 5 = 30$ cm². Was stimmt?',
     [r'Falsch: Man braucht die Höhe, nicht die schräge Seite; die Fläche ist kleiner als 30 cm².', r'Richtig.',
      r'Falsch: Man muss noch durch 2 teilen.', r'Falsch: Man muss die Seiten addieren.'],
     [r'$A = g \cdot h$ – die Höhe steht senkrecht auf $g$.',
