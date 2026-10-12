@@ -33,8 +33,8 @@
     /* ---------- numbers ---------- */
     // digits in groups of three with a narrow no-break space: 4 738 216
     const grp = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    // decimal with comma and grouped integer part
-    const dec = (x, d = 3) => { const s = fmt(x, d); const [i, f] = s.split(','); return grp(i) + (f ? ',' + f : ''); };
+    // decimal with comma and grouped integer part (English editions: fmt writes a decimal point, so split there)
+    const dec = (x, d = 3) => { const p = B.en ? '.' : ','; const s = fmt(x, d); const [i, f] = s.split(p); return grp(i) + (f ? p + f : ''); };
     const gcd = B.gcd;
     const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
     // German number words up to 999 999 999 999
