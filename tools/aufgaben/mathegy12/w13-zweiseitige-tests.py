@@ -10,7 +10,7 @@ from math import comb
 
 Q = gy12(nr=13, slug='zweiseitige-tests', thema='Zweiseitige Tests und statistische Sicherheit', lb='LB 6',
          blurb='zweiseitiger Ablehnungsbereich, Niveau auf beide Seiten, statistische Sicherheit',
-         comment='Blocks: Wann zweiseitig (1, 2, 15, 16), Niveau aufteilen und Bereich bestimmen (3-7, 11, 12, 17), statistische Sicherheit und tatsächliches Niveau (8-10, 18), Entscheidung und Deutung (13, 14, 19, 20). Mit CAS/Tabelle.')
+         comment='Blocks: Wann zweiseitig (1, 2, 15, 16), Niveau aufteilen und Bereich bestimmen (3-5, 11, 12, 17), statistische Sicherheit und tatsächliches Niveau (8-10, 18), Entscheidung und Deutung (6, 7, 13, 14, 19, 20). Mit CAS/Tabelle.')
 
 
 def B(n, p, k):
@@ -94,7 +94,7 @@ Q.q(r'$n = 50$, $H_0\colon p = 0{,}5$, zweiseitig, $\alpha = 5\,\%$. Es gilt $P(
     [r'Links: größtes $k_1$ mit $P(X \le k_1) \le 0{,}025$, also $17$.',
      r'Rechts symmetrisch: $50 - 17 = 33$.'])
 
-Q.q(r'Ein Würfel soll zweiseitig auf die Häufigkeit der Sechs getestet werden: $n = 120$, $\alpha = 10\,\%$. Es gilt $P(X \le 12) \approx 0{,}028$, $P(X \le 13) \approx 0{,}050$, $P(X \ge 28) \approx 0{,}037$, $P(X \ge 27) \approx 0{,}060$. Wie lautet der Ablehnungsbereich?',
+Q.q(r'Ein Würfel soll zweiseitig auf die Häufigkeit der Sechs getestet werden: $n = 120$, $\alpha = 10\,\%$. Es gilt $P(X \le 12) \approx 0{,}028$, $P(X \le 13) \approx 0{,}0501$, $P(X \ge 28) \approx 0{,}037$, $P(X \ge 27) \approx 0{,}060$. Wie lautet der Ablehnungsbereich?',
     [r'$K = \{0;\ \ldots;\ 12\} \cup \{28;\ \ldots;\ 120\}$', r'$K = \{0;\ \ldots;\ 13\} \cup \{27;\ \ldots;\ 120\}$', r'$K = \{0;\ \ldots;\ 12\} \cup \{27;\ \ldots;\ 120\}$', r'$K = \{12;\ \ldots;\ 28\}$'],
     [r'Je Seite höchstens $5\,\%$: links $P(X \le 13)$ ist knapp über $0{,}05$, also $k_1 = 12$; rechts $P(X \ge 27) > 0{,}05$, also $k_2 = 28$.',
      r'Bei $p = \tfrac16$ ist die Verteilung nicht symmetrisch, man muss beide Seiten getrennt bestimmen.'])

@@ -77,7 +77,7 @@ Q.q(r'Bei $60$ Würfen fallen $14$ Sechsen. Wie entscheidet man mit dem Test aus
 Q.q(r'Bei $60$ Würfen fallen $18$ Sechsen. Wie entscheidet man mit dem Test aus Aufgabe 5?',
     [r'$H_0$ wird abgelehnt: Der Würfel zeigt vermutlich zu oft eine Sechs.', r'$H_0$ wird nicht abgelehnt.', r'$H_0$ ist sicher falsch.', r'Man muss noch $60$-mal würfeln.'],
     [r'$18 \in K$: Das Ergebnis wäre bei einem fairen Würfel sehr unwahrscheinlich.',
-     r'Man lehnt $H_0$ ab, irrt sich dabei aber mit höchstens $5\,\%$ Wahrscheinlichkeit.'])
+     r'Man lehnt $H_0$ ab. Wäre der Würfel fair, käme es dazu nur mit höchstens $5\,\%$ Wahrscheinlichkeit.'])
 
 Q.q(r'Ein Medikament heilt bisher $60\,\%$. Ein neues soll besser sein. Getestet wird an $50$ Personen, $H_0\colon p = 0{,}6$, rechtsseitig, $\alpha = 5\,\%$. Mit $P(X \ge 36) \approx 0{,}054$ und $P(X \ge 37) \approx 0{,}028$: Ab wie vielen Heilungen spricht man von einem besseren Medikament?',
     [r'ab $37$', r'ab $36$', r'ab $30$', r'ab $31$'],
