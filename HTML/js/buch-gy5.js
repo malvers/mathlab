@@ -899,8 +899,10 @@
             if (i1 > i0) for (let i = i0; i < i1; i++) { r *= K.f[i]; steps.push('· ' + K.f[i]); }
             else for (let i = i0 - 1; i >= i1; i--) { r /= K.f[i]; steps.push(': ' + K.f[i]); }
             const unit = i => K.u[i].split(' ')[0];
-            out.innerHTML = '<p class="g5-big">' + dec(v, 6) + ' ' + unit(i0) + ' = ' + dec(r, 10) + ' ' + unit(i1) + '</p>' +
-                (steps.length ? '<p>Rechnung: ' + dec(v, 6) + ' ' + steps.join(' ') + ' = ' + dec(r, 10) + '</p><p class="g5-dim">' +
+            // "=" only when the shown digits are the exact result (100 min = 1,6666666667 h is not; second check 12.10.2026)
+            const eq = Math.abs(r * 1e10 - Math.round(r * 1e10)) < 1e-6 ? ' = ' : ' ≈ ';
+            out.innerHTML = '<p class="g5-big">' + dec(v, 6) + ' ' + unit(i0) + eq + dec(r, 10) + ' ' + unit(i1) + '</p>' +
+                (steps.length ? '<p>Rechnung: ' + dec(v, 6) + ' ' + steps.join(' ') + eq + dec(r, 10) + '</p><p class="g5-dim">' +
                     (i1 > i0 ? 'Treppe hinunter zur kleineren Einheit: Die Maßzahl wird größer, man <b>multipliziert</b>.' : 'Treppe hinauf zur größeren Einheit: Die Maßzahl wird kleiner, man <b>dividiert</b>.') + '</p>' : '<p>Gleiche Einheit, nichts zu tun.</p>') +
                 (S.kind === 'flaeche' ? '<p class="g5-dim">Bei Flächen ist die Umrechnungszahl immer 100.</p>' : S.kind === 'volumen' ? '<p class="g5-dim">Bei Volumen ist die Umrechnungszahl immer 1000.</p>' : S.kind === 'zeit' ? '<p class="g5-dim">Achtung: Bei der Zeit gibt es keine Zehnerschritte.</p>' : '');
         }

@@ -282,7 +282,7 @@
             ['. Für $\\gamma$ bleibt nichts übrig, die Schenkel laufen auseinander.', '. Nothing is left for $\\gamma$, the arms move apart.'],
             ['$ ist schon $', '$ is already $'],
             ['Die beiden kürzeren Seiten sind zusammen ', 'The two shorter sides together are '], [' cm lang, die längste ', ' cm long, the longest is '],
-            [' cm. Die Kreise treffen sich nicht.', ' cm. The circles do not meet.'], ['Konstruktion aus ', 'Construction from '],
+            [' cm. Die Kreise treffen sich nicht.', ' cm. The circles do not meet.'], ['Die Kreise treffen sich nicht.', 'The circles do not meet.'], ['Die Kreise berühren sich nur auf der längsten Seite.', 'The circles only touch on the longest side.'], ['Konstruktion aus ', 'Construction from '],
             // book 14 mathegy6-en: seitenwinkel6
             ['Alle Seiten gleich lang: alle Winkel $60^\\circ$. ', 'All sides equal: all angles $60^\\circ$. '],
             ['Zwei Seiten sind gleich lang: Das Dreieck ist gleichschenklig, und die Basiswinkel sind gleich groß.',

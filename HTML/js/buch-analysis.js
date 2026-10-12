@@ -303,7 +303,7 @@
     W('kurve', function (box) {
         const S = { a: 0.25, b: 0, c: -3, d: 1, show: 'f' };
         const sl = div(box, '');
-        range(sl, { label: '$a$ (vor $x^3$)', min: -1, max: 1, step: 0.05, value: S.a, onInput: v => { S.a = v; render(); } });
+        range(sl, { label: '$a$ (vor $x^3$)', min: -1, max: 1, step: 0.025, value: S.a, fmt: v => fmt(v, 3), onInput: v => { S.a = v; render(); } });
         range(sl, { label: '$b$ (vor $x^2$)', min: -3, max: 3, step: 0.25, value: S.b, onInput: v => { S.b = v; render(); } });
         range(sl, { label: '$c$ (vor $x$)', min: -5, max: 5, step: 0.25, value: S.c, onInput: v => { S.c = v; render(); } });
         range(sl, { label: '$d$', min: -5, max: 5, step: 0.5, value: S.d, onInput: v => { S.d = v; render(); } });

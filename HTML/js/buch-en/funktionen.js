@@ -90,6 +90,8 @@ window.BuchEN && BuchEN.add('funktionen', {
         'Graphen der Grundfunktionen': 'Graphs of the basic functions',
     },
     phrase: [
+        // parameter: c = 0 in f(c·x) (second check, 12.10.2026)
+        ['mit $c = 0$ ist $g(x) = f(0)$ konstant', 'with $c = 0$, $g(x) = f(0)$ is constant'],
         // detektiv
         [' (doppelt)', ' (double)'], ['fallend für ', 'decreasing for '], ['steigend für ', 'increasing for '],
         ['achsensymmetrisch zur $y$-Achse', 'symmetric about the $y$-axis'], ['punktsymmetrisch zum Ursprung', 'symmetric about the origin'],

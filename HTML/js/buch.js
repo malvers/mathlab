@@ -89,8 +89,13 @@
         if (raw == null) return NaN;
         let s = String(raw).trim().replace(/[≈~\s]/g, '').replace(/−/g, '-');
         if (!s) return NaN;
+        // what pupils write around the number: "x = 5", "+24", "€40", "60°", "40 €", "12 cm²", "80 km/h" - the number
+        // counts, not its unit (second check of 12.10.2026, note X1: correct answers with a unit were marked wrong)
+        s = s.replace(/^[a-zA-Z][a-zA-Z0-9_]*=/, '').replace(/^\+/, '').replace(/^€/, '');
         let percent = false;
         if (s.endsWith('%')) { percent = true; s = s.slice(0, -1); }
+        const unit = s.match(/^(.*\d)([a-zA-ZäöüÄÖÜß°€²³µ\/.]{1,12})$/);
+        if (unit && !/^e-?\d/i.test(unit[2])) s = unit[1];
         if (EN && /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, '');   // English "1,500" is fifteen hundred
         s = s.replace(/,/g, '.');
         let v;

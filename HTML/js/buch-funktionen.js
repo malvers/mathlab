@@ -150,7 +150,7 @@
             zerfall: { a: 100, m: -6.25, q: 0.917, T: 40, unit: '%', t: 'Tage', lin: 'linear: jeden Tag 6,25 Prozentpunkte weniger', exp: 'Jod-131: Halbwertszeit 8 Tage',
                       ra: [10, 200, 5], rm: [-20, 5, 0.25], rq: [0.5, 1, 0.001] },
             eigen: { a: 10, m: 2, q: 1.2, T: 20, unit: '', t: 'Schritte', lin: 'linear', exp: 'exponentiell',
-                      ra: [1, 100, 1], rm: [-10, 10, 0.5], rq: [0.3, 2, 0.01] }
+                      ra: [1, 1000, 1], rm: [-50, 50, 0.5], rq: [0.3, 2, 0.01] }   // wide enough for the tasks (start 600, +20, 1.03; second check 12.10.2026)
         };
         let P = PRE.sparen, S = {};
         const ctr = div(box, 'b-ctrls');
@@ -558,8 +558,10 @@
             const inner = (Math.abs(b - 1) < 1e-9 ? '' : texNum(b, 2) + '\\,') + (Math.abs(c) < 1e-9 ? 'x' : '(x' + sg(c, 2) + ')');
             const core = F.t.replace('\\ldots', inner);
             const text = [];
-            if (Math.abs(a - 1) > 1e-9) text.push(a < 0 ? 'gespiegelt an der $x$-Achse' + (Math.abs(a) !== 1 ? ' und mit $' + texNum(Math.abs(a), 2) + '$ gestreckt' : '') : 'in $y$-Richtung mit Faktor $' + texNum(a, 2) + '$ ' + (a > 1 ? 'gestreckt' : 'gestaucht'));
-            if (Math.abs(b - 1) > 1e-9) text.push(b < 0 ? 'gespiegelt an der $y$-Achse' + (Math.abs(b) !== 1 ? ', in $x$-Richtung mit Faktor $\\tfrac{1}{' + texNum(Math.abs(b), 2) + '}$' : '') : 'in $x$-Richtung mit Faktor $\\tfrac{1}{' + texNum(b, 2) + '}$ ' + (b > 1 ? 'gestaucht' : 'gestreckt'));
+            if (Math.abs(a - 1) > 1e-9) text.push(a < 0 ? 'gespiegelt an der $x$-Achse' + (Math.abs(a) !== 1 ? ' und mit $' + texNum(Math.abs(a), 2) + '$ ' + (Math.abs(a) > 1 ? 'gestreckt' : 'gestaucht') : '') : 'in $y$-Richtung mit Faktor $' + texNum(a, 2) + '$ ' + (a > 1 ? 'gestreckt' : 'gestaucht'));
+            // c = 0 in f(c·x): no factor 1/0 - the graph collapses to the constant f(0) (second check 12.10.2026)
+            if (Math.abs(b) < 1e-9) text.push('mit $c = 0$ ist $g(x) = f(0)$ konstant');
+            else if (Math.abs(b - 1) > 1e-9) text.push(b < 0 ? 'gespiegelt an der $y$-Achse' + (Math.abs(b) !== 1 ? ', in $x$-Richtung mit Faktor $\\tfrac{1}{' + texNum(Math.abs(b), 2) + '}$' : '') : 'in $x$-Richtung mit Faktor $\\tfrac{1}{' + texNum(b, 2) + '}$ ' + (b > 1 ? 'gestaucht' : 'gestreckt'));
             if (Math.abs(c) > 1e-9) text.push('um $' + texNum(Math.abs(c), 2) + '$ nach ' + (c > 0 ? 'links' : 'rechts') + ' verschoben');
             if (Math.abs(d) > 1e-9) text.push('um $' + texNum(Math.abs(d), 2) + '$ nach ' + (d > 0 ? 'oben' : 'unten') + ' verschoben');
             out.innerHTML = '<p style="margin:0 0 6px">$g(x) = ' + (Math.abs(a - 1) < 1e-9 ? '' : texNum(a, 2) + '\\cdot ') + core + sg(d, 2) + '$</p>' +

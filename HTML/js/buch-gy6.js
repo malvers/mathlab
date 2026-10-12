@@ -833,7 +833,7 @@
                 else s += line(P(A), P(Bv), 'stroke:' + TXT + ';stroke-width:2.2');
                 const big = Math.max(v.a, v.b, v.c), rest = v.a + v.b + v.c - big;
                 o = n ? '<p style="margin:0"><span class="g-ok">Genau ein Dreieck.</span> Die Kreise um $A$ mit $r = b$ und um $B$ mit $r = a$ schneiden sich oberhalb von $c$ in genau einem Punkt.</p>' :
-                    '<p style="margin:0"><span class="g-warn">Kein Dreieck.</span> Die beiden kürzeren Seiten sind zusammen ' + fmt(rest, 1) + ' cm lang, die längste ' + fmt(big, 1) + ' cm. Die Kreise treffen sich nicht.</p>';
+                    '<p style="margin:0"><span class="g-warn">Kein Dreieck.</span> Die beiden kürzeren Seiten sind zusammen ' + fmt(rest, 1) + ' cm lang, die längste ' + fmt(big, 1) + ' cm. ' + (Math.abs(rest - big) < 1e-9 ? 'Die Kreise berühren sich nur auf der längsten Seite.' : 'Die Kreise treffen sich nicht.') + '</p>';
                 o += '<p class="b-help" style="margin:8px 0 0"><b>Kongruenzsatz sss:</b> Wenn zwei Dreiecke in allen drei Seiten übereinstimmen, dann sind sie kongruent.</p>';
             } else if (S.k === 'sws') {
                 const A = [0, 0], Bv = [v.c, 0], C = pol(v.b, v.al);

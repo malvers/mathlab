@@ -67,6 +67,8 @@ window.BuchES && BuchES.add('funktionen', {
         'Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.': 'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.'
     },
     phrase: [
+        // parameter: c = 0 in f(c·x) (second check, 12.10.2026)
+        ['mit $c = 0$ ist $g(x) = f(0)$ konstant', 'con $c = 0$, $g(x) = f(0)$ es constante'],
         // book es-1 mathe11-es
         // detektiv
         [' (doppelt)', ' (doble)'], ['fallend für ', 'decreciente para '], ['steigend für ', 'creciente para '],

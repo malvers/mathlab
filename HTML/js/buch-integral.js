@@ -158,7 +158,7 @@
     /* ---------- rate of change → reconstructed stock ---------- */
     W('bestand', function (box) {
         const P = {
-            tank: { k: 'Wassertank', T: 9, r: t => -0.5 * t * t + 3 * t, R: t => -(t ** 3) / 6 + 1.5 * t * t, B0: 20, ry: [-8, 6], by: [0, 50],
+            tank: { k: 'Wassertank', T: 9, r: t => -0.5 * t * t + 3 * t, R: t => -(t ** 3) / 6 + 1.5 * t * t, B0: 20, ry: [-14, 6], by: [0, 50],
                 rl: 'Zuflussrate in l/min', bl: 'Wasser in l', rtex: 'r(t) = -0{,}5t^2 + 3t', unit: 'l', tunit: 'min',
                 note: 'Bis $t = 6$ fließt Wasser zu, danach läuft es ab (negative Änderungsrate). Der Bestand ist bei $t = 6$ am größten.' },
             fahrt: { k: 'Autofahrt', T: 12, r: t => 1.2 * t * t - 0.1 * t ** 3, R: t => 0.4 * t ** 3 - 0.025 * t ** 4, B0: 0, ry: [-2, 30], by: [0, 190],
