@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 11 · Capítulo 3.5 · Regresión | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Analizar series de medidas con herramientas digitales. Capítulo 3.5 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 11: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 3.5 · ÁREA DE APRENDIZAJE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 3.5 · ÁREA DE APRENDIZAJE 3 · DICIEMBRE</p>
+            <h1>Regresión: funciones a partir de medidas</h1>
+            <p class="b-hero-lead">En el laboratorio, en la economía, en el deporte: se miden valores y se busca la función que mejor se ajusta a ellos.
+                Eso se llama <b>regresión</b>. El ordenador encuentra la curva en segundos. El trabajo de verdad sigue siendo tuyo:
+                elegir el modelo adecuado y comprobar con espíritu crítico lo que dice.</p>
+            <div class="b-chips"><span class="b-chip">5 SESIONES</span><span class="b-chip">2 LECCIONES</span><span class="b-chip">2 LABORATORIOS</span><span class="b-chip">CON HERRAMIENTAS DIGITALES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["0.00989*x^2+0.0129*x-0.267"]' data-labels='["regresión"]' data-lat="[120]" data-x="0,160" data-y="0,260" data-pts="[[30,9.5],[50,24],[70,50],[90,80],[110,122],[130,168]]" data-xl="km/h" data-yl="m" data-h="240" data-aria="Distancias de frenado y curva de regresión cuadrática"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>determinar con herramientas digitales una función de regresión <b>lineal</b>, <b>cuadrática</b> o <b>exponencial</b> para una serie de medidas</li>
+                <li><b>elegir de forma razonada</b> el modelo adecuado</li>
+                <li>hacer previsiones y reconocer sus límites (<b>crítica del modelo</b>)</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Los valores $2,\ 6,\ 18,\ 54$ crecen de forma …</p><div class="b-mc"><button>lineal</button><button>exponencial</button><button>cuadrática</button></div><div class="b-sol"><p>Siempre el mismo factor 3.</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="número"><p class="b-q-text">¿Cuál es la media de $3$, $5$ y $7$?</p><div class="b-sol"><p>$15 : 3 = 5$</p></div></div>
+            <div class="b-q" data-ans="-1,5" data-tol="0.001" data-ph="m ="><p class="b-q-text">Una vela mide al principio 20 cm y, al cabo de 2 h, 17 cm. ¿Cuál es la pendiente (cm por h)?</p><div class="b-sol"><p>$\tfrac{17 - 20}{2} = -1{,}5$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA RECTA CON LA REGLA</div>
+            <div class="b-text"><p>Representad las medidas de la vela de la lección 1 en un sistema de coordenadas y trazad con la regla la recta que mejor se ajuste. Los laboratorios están en alemán.</p>
+                <ul><li>Comparad vuestras rectas. ¿Quién tiene «razón»? ¿Cómo se podría definir con precisión qué es «la mejor»?</li></ul></div>
+            <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RECTA DE AJUSTE</span><span class="b-lab-what">La recta que mejor se ajusta</span></span></a></div>
+        <div class="b-box b-erk"><div class="b-box-title">MEDIR EL ENFRIAMIENTO</div>
+            <div class="b-text"><p>Medid con un termómetro la temperatura de una taza de té cada 5 minutos durante media hora. Anotad también la temperatura ambiente.</p>
+                <ul><li>¿Qué modelo se ajusta: lineal, cuadrático, exponencial? ¿Cuál seguiría siendo razonable al cabo de una hora?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Calcular una regresión" data-toc-k="1" data-toc-short="1 Regresión">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">CON HERRAMIENTAS DIGITALES · 3 SESIONES</span></div>
+    <h2><span class="b-no">1</span>La función que mejor se ajusta</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Se mide una vela cada hora: 20 · 18,4 · 16,9 · 15,2 · 13,8 · 12,1 · 10,6 cm. Los puntos están casi, pero no exactamente, sobre una recta.
+                ¿Qué recta es la mejor?</p></div></div>
+            <div class="b-text"><p>El ordenador elige la función para la que la suma de los <b>cuadrados de las distancias</b> entre los puntos medidos y la curva es mínima
+                (método de los mínimos cuadrados). Para la vela da $f(t) \approx -1{,}568\,t + 19{,}99$. Se habrá consumido al cabo de unas $12{,}7$ horas.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · REGRESIÓN</div>
+                <div class="b-text">
+                    <p>Una <b>función de regresión</b> es la función de un tipo elegido que mejor se ajusta a las medidas.</p>
+                    <p><b>Lineal</b> $f(x) = mx + n$ · <b>cuadrática</b> $f(x) = ax^2 + bx + c$ · <b>exponencial</b> $f(x) = a \cdot q^x$</p>
+                    <p>El <b>coeficiente de determinación</b> $R^2$ está entre 0 y 1. Cuanto más cerca de 1, mejor describe la función las medidas.</p>
+                    <p><b>Procedimiento:</b> introducir las medidas · observar la nube de puntos · elegir el tipo de función de forma razonada · calcular la regresión · interpretar y comprobar el resultado.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>GeoGebra:</b> los puntos como lista <code>L = {(0,20), (1,18.4), …}</code>, después <code>AjusteLineal(L)</code>, <code>AjustePolinómico(L, 2)</code> o <code>AjusteExponencial(L)</code>.</p>
+            <p class="b-note"><b>Calculadora gráfica:</b> introduce los valores en listas y elige LinReg, QuadReg o ExpReg en el menú de estadística.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LABORATORIO DE REGRESIÓN</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una serie de medidas y un modelo. Puedes mover los puntos medidos y la curva se recalcula al instante. La línea discontinua marca el punto de la previsión.</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EJEMPLO 1 · DISTANCIA DE FRENADO</div>
+        <div class="b-text"><p>Distancias de frenado medidas: 30 km/h: 9,5 m · 50: 24 m · 70: 50 m · 90: 80 m · 110: 122 m · 130: 168 m. ¿Qué modelo se ajusta? ¿Cuál es la distancia de frenado a 150 km/h?</p></div>
+        <div class="b-sol">
+            <p>Lineal: $R^2 \approx 0{,}968$, pero se ve claramente que los puntos están sobre una curva. Cuadrático: $f(v) \approx 0{,}00989\,v^2 + 0{,}013\,v - 0{,}27$ con $R^2 \approx 0{,}9997$.
+                Esto encaja también con la física: la energía cinética crece con el cuadrado de la velocidad.</p>
+            <p>Previsión: $f(150) \approx 224$ m. La regla práctica de las autoescuelas alemanas $\left(\tfrac{v}{10}\right)^2 = 225$ m da casi lo mismo.</p>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina en el laboratorio de regresión la regresión lineal para la vela. Interpreta la pendiente y la ordenada en el origen.</p></div>
+            <div class="b-sol"><p>$f(t) \approx -1{,}568t + 19{,}99$: longitud inicial de unos 20 cm; la vela se consume unos 1,57 cm por hora.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Qué tipo de regresión tiene sentido en cada caso? a) Saldo de una cuenta con un tipo de interés fijo &nbsp; b) Costes con una cuota fija y un precio por unidad &nbsp; c) Altura de una pelota lanzada en función del tiempo</p></div>
+            <div class="b-sol"><p>a) exponencial &nbsp; b) lineal &nbsp; c) cuadrática</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En el laboratorio, desplaza un solo punto de la vela muy hacia arriba (un «error de medida»). ¿Cómo cambian la recta y $R^2$?</p></div>
+            <div class="b-sol"><p>La recta se inclina hacia el valor atípico y $R^2$ baja claramente. Los valores atípicos tienen mucha influencia porque las distancias se elevan al cuadrado. Por eso hay que revisar siempre los errores de medida.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Introduce las medidas de la vela en GeoGebra o en una calculadora gráfica y compara el resultado con el del laboratorio. Calcula con la ecuación cuándo medirá la vela 5 cm.</p></div>
+            <div class="b-sol"><p>El resultado es el mismo. $-1{,}568t + 19{,}99 = 5 \Rightarrow t \approx 9{,}6$ h.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué coeficiente de determinación indica el mejor ajuste?</p><div class="b-mc"><button>$R^2 = 0{,}62$</button><button>$R^2 = 0{,}93$</button><button>$R^2 = 0{,}998$</button></div><div class="b-sol"><p>Cuanto más cerca de 1, mejor.</p></div></div>
+        <div class="b-q" data-ans="224" data-tol="2" data-ph="metros"><p class="b-q-text">¿Cuál es la distancia de frenado a 150 km/h según el modelo cuadrático del ejemplo 1 (en metros enteros)?</p><div class="b-sol"><p>$f(150) \approx 224$ m</p></div></div>
+        <div class="b-q" data-ans="12,7" data-tol="0.1" data-ph="horas"><p class="b-q-text">¿Al cabo de cuántas horas se habrá consumido la vela según $f(t) = -1{,}568t + 19{,}99$ (con un decimal)?</p><div class="b-sol"><p>$t = 19{,}99 : 1{,}568 \approx 12{,}7$ h</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Revisar los modelos con espíritu crítico" data-toc-k="2" data-toc-short="2 Crítica del modelo">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Revisar los modelos con espíritu crítico</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Para el té que se enfría, el modelo cuadrático y el exponencial se ajustan igual de bien: ambos con $R^2 \approx 0{,}9995$.
+                A los 45 minutos, el modelo exponencial predice una diferencia de 6,8 °C con la temperatura ambiente; el cuadrático, de 17,6 °C. ¿Quién tiene razón?</p></div></div>
+            <div class="b-text"><p>La curva cuadrática tiene un mínimo hacia los 36 minutos y después vuelve a subir: el té se calentaría solo. Físicamente, eso es absurdo.
+                Por tanto, un $R^2$ alto no basta por sí solo. Un modelo también tiene que encajar con el <b>contexto</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · CRÍTICA DEL MODELO</div>
+                <div class="b-text">
+                    <p>La <b>interpolación</b> (previsión dentro del rango de las medidas) suele ser fiable. La <b>extrapolación</b> (muy fuera de él) es insegura.</p>
+                    <p>Preguntas para cualquier modelo: ¿encaja el tipo de función con la situación? ¿Qué ocurre para $x$ muy grandes o muy pequeños? ¿Hay valores atípicos? ¿Se ha medido solo durante un periodo corto?</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Perspectiva:</b> hay otros modelos, por ejemplo funciones potenciales, el crecimiento logístico con un límite de saturación o la regresión sinusoidal para datos periódicos.</p></aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EJEMPLO 2 · POBLACIÓN MUNDIAL</div>
+        <div class="b-text"><p>La población mundial (en miles de millones): 1950: 2,50 · 1960: 3,02 · 1970: 3,70 · 1980: 4,44 · 1990: 5,32 · 2000: 6,15 · 2010: 6,99 · 2020: 7,84.
+            Compara los modelos en el laboratorio de regresión (serie «Población mundial»). ¿Qué predicen para 2050?</p></div>
+        <div class="b-sol">
+            <p>Exponencial: $R^2 \approx 0{,}986$, previsión para 2050 de unos <b>13,7</b> mil millones · lineal: $R^2 \approx 0{,}995$, unos <b>10,1</b> mil millones · cuadrático: $R^2 \approx 0{,}999$, unos <b>11,0</b> mil millones.</p>
+            <p>Sorprendente: desde 1970, más o menos, la población crece de forma más bien lineal que exponencial, y la tasa de crecimiento disminuye. Las Naciones Unidas calculan unos 9,7 mil millones para 2050.
+                Ningún modelo sencillo puede prever la natalidad, la educación y el bienestar.</p>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Explica la diferencia entre interpolación y extrapolación con el ejemplo de la vela.</p></div>
+            <div class="b-sol"><p>Longitud a las 2,5 h (entre dos medidas): interpolación, fiable. Longitud a las 20 h: extrapolación; el modelo da una longitud negativa, es decir, un absurdo.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Prueba en el laboratorio los tres modelos para el té. ¿Cuál es el más adecuado para una previsión al cabo de una hora? Razona tu respuesta.</p></div>
+            <div class="b-sol"><p>El exponencial: la diferencia de temperatura disminuye cada vez más despacio y se acerca a 0. El lineal bajaría de 0 y el cuadrático volvería a subir.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Una empresa ha aumentado su facturación un 30 % cada año durante los últimos 4 años y prolonga el modelo exponencial 20 años hacia el futuro. Valóralo.</p></div>
+            <div class="b-sol"><p>$1{,}3^{20} \approx 190$: la facturación se multiplicaría casi por doscientos. Los mercados son limitados y surge la competencia. Cuatro años de datos no sostienen una previsión a 20 años.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Una previsión muy fuera del rango de las medidas se llama …</p><div class="b-mc"><button>extrapolación</button><button>interpolación</button><button>regresión</button></div><div class="b-sol"><p>Extrapolación, y es insegura.</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Dos modelos tienen casi el mismo $R^2$. ¿Cómo decides?</p><div class="b-mc"><button>por la cifra más alta tras la coma</button><button>según qué modelo encaja con la situación</button><button>por el cálculo más sencillo</button></div><div class="b-sol"><p>Decide el contexto.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el cuarteto de Anscombe" data-toc-k="X" data-toc-short="Anscombe">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">MIRA SIEMPRE PRIMERO</span></div>
+    <h2>Cuatro conjuntos de datos, una recta</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En 1973, el estadístico Francis Anscombe presentó cuatro conjuntos de datos que tienen casi la misma recta de regresión $y \approx 3 + 0{,}5x$ y el mismo $R^2 \approx 0{,}67$.
+                Si los miras, son completamente distintos: uno es una nube de puntos; otro, una curva; otro, una recta con un valor atípico; y el último, casi un único valor de $x$.</p>
+            <p>La lección: números como $R^2$ nunca sustituyen a mirar los datos.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> F. J. Anscombe, «Graphs in Statistical Analysis», The American Statistician 27 (1973), págs. 17–21.</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · EL CUARTETO DE ANSCOMBE</div>
+        <div data-widget="anscombe"></div>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="kovarianz" href="../../kovarianz.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COVARIANZA</span><span class="b-lab-what">Cómo se relacionan las nubes de puntos</span></span></a></div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>REGRESIÓN</h4><p>La función de un tipo elegido que mejor se ajusta a las medidas (mínimos cuadrados).</p></div><div><p>Vela: $f(t) \approx -1{,}568t + 19{,}99$</p></div></div>
+    <div class="b-rueck"><div><h4>ELEGIR EL MODELO</h4><p>Mismo incremento: lineal · mismo factor: exponencial · movimiento, área, energía: a menudo cuadrático</p></div><div><p>Distancia de frenado cuadrática, enfriamiento exponencial</p></div></div>
+    <div class="b-rueck"><div><h4>COEFICIENTE DE DETERMINACIÓN</h4><p>$0 \leq R^2 \leq 1$; cerca de 1 significa un buen ajuste. Pero no demuestra que el modelo sea el correcto.</p></div><div><p>Anscombe: cuatro imágenes, un solo $R^2$</p></div></div>
+    <div class="b-rueck"><div><h4>CRÍTICA DEL MODELO</h4><p>Interpolación, por lo general fiable; extrapolación, insegura. Pregúntate siempre: ¿encaja el modelo con la situación?</p></div><div><p>Población mundial en 2050: de 10 a 14 mil millones según el modelo</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">RESPUESTA INMEDIATA</span></div>
+    <div class="b-box b-check" data-check="test1">
+        <div class="b-box-title">TEST · CON HERRAMIENTAS DIGITALES</div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Las medidas $100;\ 80;\ 64;\ 51{,}2$, tomadas a intervalos iguales, se ajustan mejor a un modelo …</p><div class="b-mc"><button>lineal</button><button>exponencial</button><button>cuadrático</button></div><div class="b-sol"><p>Siempre el mismo factor 0,8.</p></div></div>
+        <div class="b-q" data-ans="6,8" data-tol="0.1" data-ph="°C"><p class="b-q-text">El modelo exponencial para el té es $f(t) \approx 70{,}7 \cdot 0{,}9494^t$. ¿Qué diferencia de temperatura predice a los 45 minutos?</p><div class="b-sol"><p>$70{,}7 \cdot 0{,}9494^{45} \approx 6{,}8$ °C</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Un modelo con $R^2 = 0{,}999$ predice una longitud negativa para la vela. ¿Qué pasa?</p><div class="b-mc"><button>un error de cálculo</button><button>La vela está rota.</button><button>extrapolación más allá del rango de validez</button></div><div class="b-sol"><p>El modelo solo vale mientras exista la vela.</p></div></div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs"><a class="b-lab" href="../../mathetest11-regression.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGRESIÓN</span><span class="b-lab-what">20 ejercicios con corrección</span></span></a></div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 11.º curso · Área de aprendizaje 3 según el plan de estudios de Sajonia para Matemáticas en el Berufliches Gymnasium.</p>
+    <p>Población mundial: valores redondeados según las Naciones Unidas (World Population Prospects 2022). La vela, la distancia de frenado y el té son datos de ejemplo. Todos los textos, ejercicios e ilustraciones son contenido propio.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+</body>
+</html>

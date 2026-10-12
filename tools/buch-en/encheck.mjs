@@ -14,7 +14,7 @@ const files = given.length ? given : fs.readdirSync(new URL('../../HTML/buch/' +
 const browser = await pw.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--mute-audio'] });
 const LANG = book.endsWith('-es') ? 'es' : 'en';
 // Spanish: the names of the other editions, and Spanish words with ü (pingüino, bilingüe), are not German
-const ALLOW_ES = /Doc Alvers Mathe-Labor|Edición alemana|English edition|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller|[a-záéíóúñ]*gü[ei][a-záéíóúñ]*/g;
+const ALLOW_ES = /Doc Alvers Mathe-Labor|Edición alemana|English edition|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller|[a-záéíóúñ]*gü[ei][a-záéíóúñ]*|[A-ZÁÉÍÓÚÑ]*GÜ[EI][A-ZÁÉÍÓÚÑ]*/g;
 const ALLOW = LANG === 'es' ? ALLOW_ES : /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Möbius|Schütz|Müller/g;
 const GERMAN = /[äöüÄÖÜß]|\b(der|die|das|und|nicht|ist|mit|von|für|auf|eine?|einer|wird|sind|oder|zum|zur|bei|wie|auch|noch|nach|aus|Lösung|Aufgabe|Ergebnis|Zeile|Schritt|Funktion|Gerade|Seite|Zurück|Neue|keine|Anzahl|Summe|Wahrscheinlichkeit)\b/;
 for (const f of files) {
