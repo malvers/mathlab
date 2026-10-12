@@ -92,7 +92,7 @@ Q.q(r'$X$ ist normalverteilt mit $\mu$ und $\sigma$. Welche Verteilung hat $Z = 
 Q.q(r'Beim Abfüllen ist $\mu = 500$ g. Wie groß muss $\sigma$ sein, damit $P(X \le 520) = 0{,}9$ gilt?',
     [r'$\sigma \approx 15{,}6$ g', r'$\sigma \approx 25{,}6$ g', r'$\sigma \approx 10{,}0$ g', r'$\sigma \approx 7{,}8$ g'],
     [r'$\Phi\!\left(\tfrac{20}{\sigma}\right) = 0{,}9$ gibt $\tfrac{20}{\sigma} \approx 1{,}2816$ (CAS: inverse Normalverteilung).',
-     r'$\sigma \approx \tfrac{20}{1{,}2816} \approx 15{,}6$ g. Mit $\tfrac{20}{2}$ käme die $2\sigma$-Regel heraus, die zu $97{,}7\,\%$ gehört.'])
+     r'$\sigma \approx \tfrac{20}{1{,}2816} \approx 15{,}6$ g. Mit $\sigma = 10$ wäre $520 = \mu + 2\sigma$ und $P(X \le 520) = \Phi(2) \approx 97{,}7\,\%$.'])
 
 Q.q(r'$X$ ist normalverteilt mit $\mu = 10$ und $\sigma = 3$. Wie groß ist die Varianz $V(X)$?',
     [r'$9$', r'$3$', r'$10$', r'$\sqrt3$'],

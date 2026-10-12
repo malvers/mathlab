@@ -10,7 +10,7 @@ import math
 
 Q = gy12(nr=15, slug='skalar-vektorprodukt', thema='Skalarprodukt und Vektorprodukt', lb='LB 7',
          blurb='Winkel, Orthogonalität, Projektion, Flächen mit dem Vektorprodukt',
-         comment='Blocks: Skalarprodukt und Winkel (1-4, 12, 13, 18, 20), Orthogonalität (14, 16), Vektorprodukt (5-11, 15, 17), Flächen (7, 8, 19). Taschenrechner erlaubt.')
+         comment='Blocks: Skalarprodukt und Winkel (1-4, 12, 13, 16, 18, 20), Orthogonalität (3, 14), Vektorprodukt (5-11, 15, 17), Flächen (7, 8, 19). Taschenrechner erlaubt.')
 
 Q.q(r'Berechne $' + vec(1, 2, 3) + r' \cdot ' + vec(4, -1, 2) + r'$.',
     [r'$8$', r'$12$', r'$' + vec(4, -2, 6) + r'$', r'$2$'],

@@ -10,7 +10,7 @@ import math
 
 Q = gy12(nr=17, slug='jahresausklang', thema='Knobeleien im Raum', lb='Puffer',
          blurb='Würfel, Diagonalen, Tetraeder, Schnitte und kürzeste Wege',
-         comment='Blocks: Winkel am Würfel (1-3, 20), Längen und Wege (4, 9), Körper im Würfel (5-8, 18), Vierecke und Punkte (11-16, 19). Ohne Hilfsmittel, Taschenrechner für Winkel.')
+         comment='Blocks: Winkel am Würfel (1-3, 20), Längen und Wege (4, 9, 18), Körper im Würfel (5-8), Vierecke und Punkte (10-17, 19). Ohne Hilfsmittel, Taschenrechner für Winkel.')
 
 Q.q(r'Welchen Winkel bildet die Raumdiagonale eines Würfels mit einer Kante, die von derselben Ecke ausgeht?',
     [r'$\approx 54{,}7^\circ$', r'$45^\circ$', r'$\approx 35{,}3^\circ$', r'$60^\circ$'],

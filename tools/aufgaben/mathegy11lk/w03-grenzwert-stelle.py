@@ -18,8 +18,8 @@ for a, k in qs:
 # ------------------------------------------------- piecewise defined functions ----
 Q.q(r'$f(x) = x^2$ für $x < 1$ und $f(x) = 2x$ für $x \geq 1$. Was gilt an der Stelle 1?',
     [r'Links Grenzwert 1, rechts 2: kein Grenzwert.', r'Grenzwert 2, weil $f(1) = 2$.', r'Grenzwert 1,5', r'Grenzwert 1'],
-    [r'Von links gilt die obere Vorschrift: $x^2 \to 1$.',
-     r'Von rechts die untere: $2x \to 2$.',
+    [r'Von links gilt die erste Vorschrift: $x^2 \to 1$.',
+     r'Von rechts die zweite: $2x \to 2$.',
      r'Verschiedene einseitige Grenzwerte: kein Grenzwert an der Stelle 1.'])
 
 Q.q(r'$f(x) = x + 1$ für $x < 2$ und $f(x) = x^2 - 1$ für $x \geq 2$. Existiert $\lim\limits_{x \to 2} f(x)$?',

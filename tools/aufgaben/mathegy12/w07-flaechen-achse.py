@@ -10,7 +10,7 @@ import sympy as sp
 
 Q = gy12(nr=7, slug='flaechen-achse', thema='Flächen zwischen Graph und x-Achse', lb='LB 5',
          blurb='Nullstellen als Grenzen, Teilflächen, unbekannte Grenze',
-         comment='Blocks: eine Fläche über oder unter der Achse (1-3, 6, 7, 13, 15), Teilflächen mit Vorzeichenwechsel (4, 5, 8, 11, 12, 17), Grenze oder Parameter gesucht (9, 10, 16), unbegrenzte Flächen (18, 19), Anwendung (20), Begründung (14). Ohne Hilfsmittel, Aufgabe 20 mit.')
+         comment='Blocks: eine Fläche über oder unter der Achse (1-3, 6, 7, 12, 13), Teilflächen mit Vorzeichenwechsel (4, 5, 8, 11, 15, 17), Grenze oder Parameter gesucht (9, 10, 16), unbegrenzte Flächen (18, 19), Anwendung (20), Begründung (14). Ohne Hilfsmittel, Aufgabe 20 mit.')
 
 
 def fig_x2m1():

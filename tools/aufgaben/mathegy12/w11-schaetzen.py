@@ -10,7 +10,7 @@ import math
 
 Q = gy12(nr=11, slug='schaetzen', thema='Schätzen von Parametern', lb='LB 6',
          blurb='Stichprobe und Grundgesamtheit, Hochrechnung, Stichprobenmittel und -varianz',
-         comment='Blocks: Grundbegriffe und Stichprobe (7-9, 12, 19), Anteile schätzen und hochrechnen (1, 2, 13-16, 18), Stichprobenmittel und -varianz (3-6, 10, 11, 17, 20). Stichprobenvarianz mit 1/(n-1). Taschenrechner erlaubt.')
+         comment='Blocks: Grundbegriffe und Stichprobe (7-9, 12, 19), Anteile schätzen und hochrechnen (1, 2, 13-15, 17, 18), Stichprobenmittel und -varianz (3-6, 10, 11, 16, 20). Stichprobenvarianz mit 1/(n-1). Taschenrechner erlaubt.')
 
 Q.q(r'Von $1000$ zufällig ausgewählten Wahlberechtigten wollen $420$ Partei A wählen. Welcher Schätzwert ergibt sich für den Anteil $p$ in der Grundgesamtheit?',
     [r'$\hat p = 0{,}42$', r'$\hat p = 0{,}58$', r'$\hat p = 4{,}2$', r'$\hat p = 0{,}042$'],

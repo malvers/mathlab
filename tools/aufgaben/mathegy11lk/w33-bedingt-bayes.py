@@ -84,7 +84,7 @@ Q.q(r'Eine Krankheit hat 1 % der Bevölkerung. Ein Test erkennt 99 % der Kranken
 Q.q(r'Welche bedingte Wahrscheinlichkeit beschreibt die Angabe „Der Test erkennt 99 % der Kranken“ ($K$: krank, $T$: Test positiv)?',
     [r'$P_K(T) = 0{,}99$', r'$P_T(K) = 0{,}99$', r'$P(K \cap T) = 0{,}99$', r'$P(T) = 0{,}99$'],
     [r'Bezugsgruppe sind die Kranken; unter ihnen ist der Test zu 99 % positiv (Sensitivität).',
-     r'$P_T(K)$ ist die Frage der übernächsten Aufgabe, und die Antwort ist eine ganz andere Zahl.'])
+     r'$P_T(K)$ ist die Frage der nächsten Aufgabe, und die Antwort ist eine ganz andere Zahl.'])
 
 Q.q(r'Derselbe Test fällt positiv aus. Wie wahrscheinlich ist die Person wirklich krank?',
     [r'etwa 17 %', r'99 %', r'95 %', r'50 %'],

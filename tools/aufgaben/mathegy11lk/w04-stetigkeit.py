@@ -52,7 +52,7 @@ Q.q(r'$f(x) = x + 1$ für $x < 0$, $f(0) = c$, $f(x) = e^x$ für $x > 0$. Für w
     [r'Links: $0 + 1 = 1$. Rechts: $e^0 = 1$.',
      r'Beide einseitigen Grenzwerte sind 1, also muss $f(0) = 1$ sein.'])
 
-Q.q(r'$f(x) = ax + b$ für $x < 1$ und $f(x) = x^2$ für $x \geq 1$. Welche Bedingung macht $f$ an der Stelle 1 stetig?',
+Q.q(r'$f(x) = ax + b$ für $x < 1$ und $f(x) = x^2$ für $x \geq 1$. Welche Bedingung ist gleichwertig dazu, dass $f$ an der Stelle 1 stetig ist?',
     [r'$a + b = 1$', r'$a = 2$ und $b = -1$', r'$a = b$', r'$b = 1$'],
     [r'Links: $a \cdot 1 + b$. Rechts und an der Stelle: $1^2 = 1$.',
      r'Stetig genau dann, wenn $a + b = 1$; das sind unendlich viele Paare.',

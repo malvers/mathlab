@@ -108,7 +108,7 @@ Q.q(r'Wie groß ist der Mittelwert von $f(x) = x^2$ auf $[0;\ 3]$, also $\dfrac{
      r'Mittelwert $\tfrac93 = 3$. Ein Rechteck der Höhe $3$ über $[0;\ 3]$ hat dieselbe Fläche.'])
 
 Q.q(r'Warum gilt $\int_{-a}^{a} f(x)\,\mathrm{d}x = 0$ für jede punktsymmetrische Funktion $f$?',
-    [r'Die Flächen links und rechts der $y$-Achse sind gleich groß, liegen aber auf verschiedenen Seiten der $x$-Achse.', r'Weil punktsymmetrische Funktionen immer null sind.', r'Weil $F(a) = F(-a)$ für jede Stammfunktion gilt.', r'Weil man über negative $x$ nicht integrieren darf.'],
+    [r'Die Flächen links und rechts der $y$-Achse sind gleich groß, liegen aber auf verschiedenen Seiten der $x$-Achse.', r'Weil punktsymmetrische Funktionen immer null sind.', r'Weil $F(a) = -F(-a)$ für jede Stammfunktion gilt.', r'Weil man über negative $x$ nicht integrieren darf.'],
     [r'Punktsymmetrie: $f(-x) = -f(x)$, das Stück links ist das gespiegelte Stück rechts unter der Achse.',
      r'Die orientierten Flächen heben sich auf, siehe $\int_{-1}^1 x^3\,\mathrm{d}x = 0$.'])
 

@@ -25,7 +25,7 @@ Q.q(r'Leite $f(x) = e^{2x}$ ab.',
      r'$f^{\prime}(x) = 2e^{2x}$.'])
 
 Q.q(r'Leite $f(x) = x \cdot e^x$ ab.',
-    [r'$f^{\prime}(x) = (1 + x)\,e^x$', r'$f^{\prime}(x) = e^x$', r'$f^{\prime}(x) = x\,e^x$', r'$f^{\prime}(x) = 1 \cdot e^x$'],
+    [r'$f^{\prime}(x) = (1 + x)\,e^x$', r'$f^{\prime}(x) = e^x$', r'$f^{\prime}(x) = x\,e^x$', r'$f^{\prime}(x) = e^x + x$'],
     [r'Produktregel: $1 \cdot e^x + x \cdot e^x$.',
      r'$= (1 + x)\,e^x$.'])
 
