@@ -105,7 +105,7 @@ Q.q(r'„Bestimmen Sie $\lim\limits_{x \to \infty} \dfrac{3x^2 - 1}{x^2 + 4}$ un
     [r'$3$', r'$0$', r'$+\infty$', r'$-\dfrac{1}{4}$'],
     [r'Zähler und Nenner durch die höchste Potenz $x^2$ teilen: $\dfrac{3 - \frac{1}{x^2}}{1 + \frac{4}{x^2}}$.',
      r'Für $x \to \infty$ gehen $\frac{1}{x^2}$ und $\frac{4}{x^2}$ gegen $0$, es bleibt $\dfrac{3}{1} = 3$.',
-     r'Probe mit dem GTR: $f(100) \approx 2{,}9988$. $-\dfrac{1}{4}$ ist $f(0)$, nicht der Grenzwert.'])
+     r'Probe mit dem GTR: $f(100) \approx 2{,}9987$. $-\dfrac{1}{4}$ ist $f(0)$, nicht der Grenzwert.'])
 
 Q.q(r'„Lösen Sie die Gleichung $2 \cdot e^{3x} = 10$.“',
     [r'$x = \dfrac{\ln 5}{3} \approx 0{,}536$',
@@ -229,10 +229,10 @@ def check():
     # 10: line parallel to plane, support point not in it
     nrm, d = sp.Matrix([1, 1, -2]), sp.Matrix([1, 1, 1])
     assert nrm.dot(d) == 0 and 1 + 2 - 2 * 0 == 3 and 3 != 5
-    # 11: limit 3; f(0) = -1/4; f(100) ~ 2.9988
+    # 11: limit 3; f(0) = -1/4; f(100) ~ 2.9987
     g = (3 * x ** 2 - 1) / (x ** 2 + 4)
     assert sp.limit(g, x, sp.oo) == 3 and g.subs(x, 0) == -sp.Rational(1, 4)
-    assert abs(float(g.subs(x, 100)) - 2.9988) < 0.0001
+    assert abs(float(g.subs(x, 100)) - 2.9987) < 0.0001
     # 12: 2e^{3x} = 10
     assert abs(math.log(5) / 3 - 0.536) < 0.0005 and abs(math.log(10) / 3 - 0.768) < 0.0005
     assert abs(math.log(5) - 1.609) < 0.0005 and abs(5 / 3 - 1.667) < 0.0005

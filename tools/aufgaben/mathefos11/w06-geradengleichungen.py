@@ -115,11 +115,11 @@ Q.q(r'Welchen Anstieg hat eine Gerade, die die $x$-Achse unter $30^\circ$ schnei
      r'$\tan 30^\circ = \dfrac{1}{\sqrt{3}} \approx 0{,}577$',
      r'$\sqrt{3}$ gehört zu $60^\circ$ — die beiden Werte werden gern verwechselt.'])
 
-Q.q(r'Eine Gerade hat den Anstieg $m = -1$. Welchen Winkel schließt sie mit der positiven $x$-Achse ein?',
+Q.q(r'Eine Gerade hat den Anstieg $m = -1$. Welchen Winkel schließt sie mit der positiven $x$-Achse ein, gemessen gegen den Uhrzeigersinn?',
     [r'$135^\circ$', r'$-45^\circ$ und damit keinen sinnvollen Winkel', r'$45^\circ$', r'$90^\circ$'],
     [r'$\tan\alpha = -1$ liefert zunächst $-45^\circ$.',
      r'Winkel zur positiven $x$-Achse werden gegen den Uhrzeigersinn gemessen: $180^\circ - 45^\circ = 135^\circ$.',
-     r'Die Gerade fällt also unter $45^\circ$ — der Neigungswinkel selbst ist $45^\circ$.'])
+     r'Die Gerade fällt also; ihr spitzer Schnittwinkel mit der $x$-Achse beträgt $45^\circ$, ihr Neigungswinkel $135^\circ$.'])
 
 # --------------------------------------------------------- Anwendungen ----
 Q.q(r'Eine Rampe hat eine Steigung von $6\,\%$. Unter welchem Winkel steigt sie an?',

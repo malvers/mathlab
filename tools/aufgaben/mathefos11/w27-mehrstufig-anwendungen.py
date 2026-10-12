@@ -45,7 +45,7 @@ Q.q(r'Wie groß ist in der vorigen Aufgabe die Wahrscheinlichkeit, dass ein zuf�
     [r'$1{,}2\,\%$', r'$2\,\%$', r'$3{,}2\,\%$', r'$60\,\%$'],
     [r'Das ist genau ein Pfad im Baumdiagramm.',
      r'$P = 0{,}60 \cdot 0{,}02 = 0{,}012$',
-     r'Also $1{,}2\,\%$ — das ist der größere der beiden Ausschuss-Pfade.'])
+     r'Also $1{,}2\,\%$ — das ist der kleinere der beiden Ausschuss-Pfade.'])
 
 # ------------------------------------------------------- Lose und Auswahl ----
 Q.q(r'Unter $100$ Losen sind $10$ Gewinne. Zwei Lose werden nacheinander OHNE Zurücklegen gezogen. Wie groß ist die Wahrscheinlichkeit für zwei Gewinne?',

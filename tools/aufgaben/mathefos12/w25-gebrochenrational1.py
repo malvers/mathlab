@@ -122,7 +122,7 @@ Q.q(r'Welchem Wert nähert sich $f(x) = \dfrac{3x}{x^2+1}$ für $x \to \pm\infty
 Q.q(r'Wie verhält sich $f(x) = \dfrac{x^2+1}{x-1}$ für $x \to +\infty$?',
     [r'$f(x) \to +\infty$ - es gibt keine waagerechte Asymptote', r'$f(x) \to 1$', r'$f(x) \to 0$', r'$f(x) \to -\infty$'],
     [r'Der Zählergrad $2$ ist größer als der Nennergrad $1$: Der Zähler gewinnt.',
-     r'$f(100) = \dfrac{10001}{99} \approx 101$ und $f(1000) \approx 1002$ - die Werte wachsen über alle Grenzen.',
+     r'$f(100) = \dfrac{10001}{99} \approx 101$ und $f(1000) \approx 1001$ - die Werte wachsen über alle Grenzen.',
      r'Eine waagerechte Asymptote gibt es nur, wenn der Zählergrad höchstens so groß ist wie der Nennergrad.'])
 
 Q.q(r'Welche dieser Funktionen hat die waagerechte Asymptote $y = 0$?',
@@ -221,7 +221,7 @@ def check():
     # Q13: (x^2+1)/(x-1) -> unendlich
     c = (x**2 + 1) / (x - 1)
     assert sp.limit(c, x, sp.oo) == sp.oo and c.subs(x, 100) == F(10001, 99)
-    assert abs(float(c.subs(x, 100)) - 101) < 1 and abs(float(c.subs(x, 1000)) - 1002) < 1
+    assert abs(float(c.subs(x, 100)) - 101) < 1 and abs(float(c.subs(x, 1000)) - 1001) < 0.01
     # Q14: nur 5/(x^2+3) hat den Grenzwert 0
     assert sp.limit(5 / (x**2 + 3), x, sp.oo) == 0
     assert sp.limit(3 * x**2 / (x**2 + 1), x, sp.oo) == 3

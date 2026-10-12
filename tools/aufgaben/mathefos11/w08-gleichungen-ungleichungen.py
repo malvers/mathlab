@@ -27,7 +27,7 @@ Q.q(r'Löse: $\dfrac{x}{3} + 2 = 5$.',
     [r'$x = 9$', r'$x = 21$', r'$x = 1$', r'$x = 15$'],
     [r'Zuerst $-2$: $\dfrac{x}{3} = 3$.',
      r'Dann mit $3$ multiplizieren: $x = 9$.',
-     r'$21$ käme heraus, wenn man gleich mit $3$ multipliziert, ohne die $2$ mitzunehmen.'])
+     r'$21$ käme heraus, wenn man die $2$ addiert statt abzieht: $(5 + 2) \cdot 3 = 21$.'])
 
 Q.q(r'Löse: $\dfrac{2x - 1}{5} = 3$.',
     [r'$x = 8$', r'$x = 7$', r'$x = 15$', r'$x = 2$'],

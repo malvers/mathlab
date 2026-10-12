@@ -18,7 +18,7 @@ Q.q(r'Stelle die Gleichung der Lotgeraden $l$ durch $P(1|2|3)$ auf die Ebene $E\
      r'$l\colon \vec x = ' + vec(2, -1, 2) + r' + t \cdot ' + vec(1, 2, 3) + r'$'],
     [r'Die Lotgerade steht senkrecht auf $E$, ihr Richtungsvektor ist also der Normalenvektor $\vec n = ' + vec(2, -1, 2) + r'$.',
      r'Stützpunkt ist $P$: $l\colon \vec x = ' + vec(1, 2, 3) + r' + t \cdot ' + vec(2, -1, 2) + r'$',
-     r'Falle: $' + vec(1, 2, 0) + r'$ liegt in $E$ ($2 - 2 + 0 = 0$), das wäre kein Lot.'])
+     r'Falle: $' + vec(1, 2, 0) + r'$ ist parallel zu $E$ ($\vec n \cdot \vec v = 2 - 2 + 0 = 0$), das wäre kein Lot.'])
 
 Q.q(r'Die Ebene $E\colon \vec x = ' + vec(1, 0, 0) + r' + r \cdot ' + vec(1, 1, 0) + r' + s \cdot ' + vec(0, 1, 1) + r'$ ist in Parameterform gegeben. Welcher Vektor ist ein Richtungsvektor der Lotgeraden auf $E$?',
     [r'$' + vec(1, -1, 1) + r'$', r'$' + vec(1, 1, 0) + r'$', r'$' + vec(0, 1, 1) + r'$', r'$' + vec(1, 1, 1) + r'$'],

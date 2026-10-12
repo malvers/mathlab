@@ -28,7 +28,7 @@ Q.q(r'Zwei Würfel werden geworfen. Wie groß ist die Wahrscheinlichkeit für zw
     [r'$\dfrac{1}{36}$', r'$\dfrac{1}{12}$', r'$\dfrac{1}{6}$', r'$\dfrac{2}{6}$'],
     [r'$P = \dfrac{1}{6} \cdot \dfrac{1}{6}$',
      r'$= \dfrac{1}{36}$',
-     r'$\dfrac{1}{12}$ wäre das Ergebnis der falschen Addition $\dfrac{1}{6} + \dfrac{1}{6}$ geteilt durch zwei.'])
+     r'$\dfrac{2}{6}$ wäre das Ergebnis der falschen Addition $\dfrac{1}{6} + \dfrac{1}{6}$.'])
 
 Q.q(r'Ein Würfel und eine Münze werden geworfen. Wie groß ist die Wahrscheinlichkeit für „Sechs und Kopf“?',
     [r'$\dfrac{1}{12}$', r'$\dfrac{1}{8}$', r'$\dfrac{2}{3}$', r'$\dfrac{1}{6}$'],
@@ -116,7 +116,7 @@ Q.q(r'Was ist der Unterschied zwischen „unvereinbar“ und „unabhängig“?'
      r'Unabhängig heißt, dass die Ereignisse nie zusammen eintreten.'],
     [r'Unvereinbarkeit ist eine Aussage über die Mengen: sie überschneiden sich nicht.',
      r'Unabhängigkeit ist eine Aussage über die Wahrscheinlichkeiten.',
-     r'Die Begriffe werden oft verwechselt, sie haben aber nichts miteinander zu tun.'])
+     r'Die Begriffe werden oft verwechselt, sie bedeuten aber Verschiedenes.'])
 
 Q.q(r'$A$ und $B$ seien unvereinbar mit $P(A) = 0{,}3$ und $P(B) = 0{,}4$. Sind sie unabhängig?',
     [r'Nein, denn $P(A \cap B) = 0$, aber $P(A) \cdot P(B) = 0{,}12$.',

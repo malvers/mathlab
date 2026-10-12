@@ -87,7 +87,7 @@ Q.q(r'Berechne $\int_{0}^{2} (x^3 - 4x)\,dx$ und deute das Ergebnis.',
      r'$-8$: der Graph verläuft unterhalb der $x$-Achse.'],
     [r'Stammfunktion: $F(x) = \dfrac{x^4}{4} - 2x^2$',
      r'$F(2) - F(0) = (4 - 8) - 0 = -4$',
-     r'Ein negatives Integral bedeutet: der Graph liegt im ganzen Intervall unter der $x$-Achse. Der Flächeninhalt wäre $4$.'])
+     r'Hier liegt der Graph im ganzen Intervall unter der $x$-Achse (keine Nullstelle zwischen $0$ und $2$), deshalb ist das Integral negativ. Der Flächeninhalt wäre $4$.'])
 
 Q.q(r'Wie groß ist der Inhalt der Fläche, die der Graph von $f(x) = x^3 - 4x$ im Intervall $[0\,;\,3]$ mit der $x$-Achse einschließt?',
     [r'$A = 10{,}25$', r'$A = 2{,}25$', r'$A = 6{,}25$', r'$A = 4$'],
@@ -121,7 +121,7 @@ Q.q(r'Ein Bauteil ist unabhängig von den anderen mit der Wahrscheinlichkeit $5\
     [r'$\approx 14{,}3\,\%$', r'$15\,\%$', r'$\approx 85{,}7\,\%$', r'$0{,}0125\,\%$'],
     [r'Gegenereignis: kein Bauteil defekt, $P = 0{,}95^3 = 0{,}857375$',
      r'$P(\text{mindestens eines defekt}) = 1 - 0{,}857375 = 0{,}142625 \approx 14{,}3\,\%$',
-     r'$3 \cdot 5\,\% = 15\,\%$ ist nur eine grobe Näherung: Wahrscheinlichkeiten addiert man nicht über Pfade hinweg.'])
+     r'$3 \cdot 5\,\% = 15\,\%$ ist nur eine grobe Näherung: die Ereignisse „Bauteil 1 defekt“, „Bauteil 2 defekt“, … schließen sich nicht aus, deshalb darf man ihre Wahrscheinlichkeiten nicht einfach addieren.'])
 
 Q.q(r'In einem Betrieb arbeiten $250$ Personen, davon $100$ im Außendienst. $60$ Personen fahren einen Dienstwagen, darunter $45$ aus dem Außendienst. Wie viele Personen im Innendienst haben keinen Dienstwagen?',
     [r'$135$', r'$150$', r'$105$', r'$190$'],

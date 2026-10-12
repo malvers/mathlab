@@ -89,7 +89,7 @@ Q.q(r'Warum gibt es ohne Beachtung der Reihenfolge immer weniger Möglichkeiten?
      r'Mit Reihenfolge werden sie getrennt gezählt, ohne Reihenfolge nur einmal.',
      r'Deshalb wird durch $k!$ geteilt.'])
 
-Q.q(r'Um welchen Faktor unterscheiden sich die Anzahlen mit und ohne Beachtung der Reihenfolge beim Ziehen von $4$ Kugeln?',
+Q.q(r'Um welchen Faktor unterscheiden sich die Anzahlen mit und ohne Beachtung der Reihenfolge beim Ziehen von $4$ Kugeln ohne Zurücklegen?',
     [r'um den Faktor $24$', r'um den Faktor $4$', r'um den Faktor $16$', r'um den Faktor $12$'],
     [r'Jede Auswahl von $4$ Elementen lässt sich auf $4!$ Arten anordnen.',
      r'$4! = 24$',
