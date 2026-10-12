@@ -18,6 +18,8 @@ You are a cloud session with your own branch. You get **one package** (table bel
 | B6 | books BGY 11 + BGY 12 | `mathe11`, `mathe12` (+ `-en`) |
 | B7 | books BGY 13 + OS 10 | `mathe13`, `mathe10` (+ `-en`), `buch-os10.js` |
 | B8 | books FOS 11 + FOS 12 | `mathefos11`, `mathefos12` (+ `-en`) |
+| B9 | books OS 6 + OS 7 (German only, no English edition yet) | `mathe6`, `mathe7`, `HTML/js/buch-os6.js`, `buch-os7.js` |
+| B10 | books OS 8 + OS 9 (German only; OS 9 has chapters 1.1 and 1.2 so far) | `mathe8`, `mathe9`, `buch-os8.js`, `buch-os9.js` |
 | Q1 | weekly quizzes OS 6, 7, 8 | sources `tools/aufgaben/mathe6`, `mathe7`, `mathe8` → `HTML/mathetestos6-*.html` … |
 | Q2 | weekly quizzes OS 9, OS 10, GY 11 | `tools/aufgaben/mathe9`, `mathe10`, `mathegy11` |
 | Q3 | weekly quizzes GY 11 LK, GY 12, GY 12 LK | `tools/aufgaben/mathegy11lk`, `mathegy12`, `mathegy12lk` |
@@ -25,7 +27,7 @@ You are a cloud session with your own branch. You get **one package** (table bel
 | Q5 | weekly quizzes BGY 11 (`HTML/mathetest11-*.html`, `mathetest12.html`, `mathetest13.html`) | `tools/aufgaben/mathe11` |
 | A1 | worksheets: Abitur, BLF, BGY 11 word problems | `HTML/aufgaben/*.html`, sources `tools/aufgaben/abi`, `blf`, `textaufgaben.py` |
 
-The German Oberschule books OS 6–9 are not finished and not on `main`. They are not part of any package.
+OS 9 is unfinished: check only the chapters that exist, and do not report the missing ones.
 
 ## 2. What to check
 
