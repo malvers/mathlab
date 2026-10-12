@@ -105,6 +105,7 @@ window.BuchEN && BuchEN.add('funktionen', {
         [' wäre alles verbraucht.', ' everything would be used up.'], ['kommt <b>gleich viel</b> hinzu.', '<b>the same amount</b> is added.'],
         ['. Nach $', '. After $'], [', das sind ', ', that is '], [' % pro Schritt. ', '% per step. '],
         ['exponentiell', 'exponential'], ['Verdopplungszeit', 'Doubling time'], ['Halbwertszeit', 'Half-life'], ['Jahre', 'years'], ['Tage', 'days'], ['Schritte', 'steps'],
+        ['Jahren', 'years'], ['Tagen', 'days'], ['Schritten', 'steps'],  // dative after "Nach" (12.10.2026)
         // gerade
         ['Beide Punkte liegen senkrecht übereinander. Die Gerade $x = ', 'Both points lie vertically above each other. The line $x = '],
         ['$ ist <b>kein</b> Funktionsgraph.', '$ is <b>not</b> the graph of a function.'],
