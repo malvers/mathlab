@@ -19,7 +19,7 @@
     const LINE = { 'Mittelsenkrechten': 'perpendicular bisectors', 'Winkelhalbierende': 'angle bisectors', 'Höhen': 'altitudes', 'Seitenhalbierende': 'medians' };
     // the shapes (flaeche6, vierecke6, prisma6, konstruktion6)
     const SHAPE = {
-        'Quadrat': 'square', 'Rechteck': 'rectangle', 'Raute': 'rhombus', 'Parallelogramm': 'parallelogram', 'gleichschenkliges Trapez': 'isosceles trapezium',
+        'Quadrat': 'square', 'Rechteck': 'rectangle', 'Raute': 'rhombus', 'Parallelogramm': 'parallelogram', 'gleichschenkliges Trapez': 'isosceles trapezium', 'gleichschenklige Trapez': 'isosceles trapezium',
         'Drachenviereck': 'kite', 'Trapez': 'trapezium', 'Viereck': 'quadrilateral', 'Dreieck': 'triangle',
         'Dreiecksprisma': 'triangular prism', 'Quader': 'cuboid', 'Trapezprisma': 'trapezium prism', 'Sechseckprisma': 'hexagonal prism'
     };

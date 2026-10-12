@@ -905,7 +905,7 @@
                 const A = [36, 214], Bv = [36 + c * k, 214], C = [36 + x * k, 214 - y * k];
                 const minX = Math.min(A[0], C[0]); if (minX < 20) { const dx = 20 - minX; A[0] += dx; Bv[0] += dx; C[0] += dx; }
                 const al = ang(A, Bv, C), be = ang(Bv, C, A), ga = 180 - al - be, ws = [al, be, ga];
-                const iMax = ws.indexOf(Math.max(...ws)), iMin = ws.indexOf(Math.min(...ws));
+                const wr = ws.map(x => Math.round(x * 1e6)), iMax = wr.indexOf(Math.max(...wr)), iMin = wr.indexOf(Math.min(...wr));
                 const iso = Math.abs(a - b) < 1e-9 || Math.abs(b - c) < 1e-9 || Math.abs(a - c) < 1e-9;
                 const col = i => i === iMax ? LAM : i === iMin ? CY : DIM;
                 const V = [A, Bv, C], opp = [[Bv, C], [C, A], [A, Bv]];
@@ -1032,7 +1032,7 @@
         function shapes(t) {
             const v = S.v, out = { fix: [], mov: [], ghost: [] };
             if (S.m === 'para') {
-                const s = 2, g = v.g, h = v.h, F = [s, 0];
+                const g = v.g, s = Math.min(2, g / 2), h = v.h, F = [s, 0];
                 out.fix.push([[s, 0], [g, 0], [g + s, h], [s, h]]);
                 out.mov.push([[0, 0], F, [s, h]].map(p => add(p, [t * g, 0])));
                 out.ghost.push([[0, 0], [g, 0], [g + s, h], [s, h]]);
@@ -1097,7 +1097,7 @@
               pr: ['2 Paare', 'alle vier', 'keine nötig', '2', 'ja', 'ja', 'nein'] },
         P: { l: ['Parallelogramm'], p: [170, 140], up: ['T'], f: [[0, 0], [1.4, 0], [1.9, 0.8], [0.5, 0.8]],
              pr: ['2 Paare', 'je zwei gegenüber', 'keine nötig', '0', 'ja', 'nein', 'nein'] },
-        GT: { l: ['gleichschenkliges', 'Trapez'], p: [72, 196], up: ['T'], f: [[0, 0], [1.8, 0], [1.3, 0.8], [0.5, 0.8]],
+        GT: { l: ['gleichschenkliges', 'Trapez'], nom: 'gleichschenklige Trapez', p: [72, 196], up: ['T'], f: [[0, 0], [1.8, 0], [1.3, 0.8], [0.5, 0.8]],
               pr: ['1 Paar', 'die beiden Schenkel', 'keine nötig', '1', 'nein', 'nein', 'ja'] },
         D: { l: ['Drachenviereck'], p: [272, 196], up: ['V'], f: [[0.6, 0], [1.2, 0.45], [0.6, 1.4], [0, 0.45]],
              pr: ['keins nötig', 'je zwei benachbarte', 'keine nötig', '1', 'nur eine die andere', 'ja', 'nein'] },
@@ -1139,7 +1139,7 @@
             let tab = '<div class="b-table-wrap"><table class="b-table g-tab g-props g6-props">';
             VK_PROPS.forEach((p, i) => { tab += '<tr><th>' + p + '</th><td>' + N.pr[i] + '</td></tr>'; });
             tab += '</table></div>';
-            out.innerHTML = '<p style="margin:0">' + (also.length ? (N.fem ? 'Jede' : 'Jedes') + ' <b>' + N.l.join(' ') + '</b> ist auch ' + also.join(', ') + '.' :
+            out.innerHTML = '<p style="margin:0">' + (also.length ? (N.fem ? 'Jede' : 'Jedes') + ' <b>' + (N.nom || N.l.join(' ')) + '</b> ist auch ' + also.join(', ') + '.' :
                 'Das <b>Viereck</b> steht ganz unten: Es braucht nur vier Ecken und vier Seiten, sonst nichts.') + '</p>' + tab +
                 '<p class="b-help" style="margin:8px 0 0">Tipp auf ein Viereck im Haus. Was weiter unten steht, ist allgemeiner, was weiter oben steht, hat mehr Eigenschaften.</p>';
         }
@@ -1151,8 +1151,8 @@
         drei: { l: 'Dreiecksprisma', base: a => [[0, 0], [a, 0], [0, 0.75 * a]], G: a => 0.375 * a * a },
         quader: { l: 'Quader', base: a => [[0, 0], [a, 0], [a, 0.5 * a], [0, 0.5 * a]], G: a => 0.5 * a * a },
         trapez: { l: 'Trapezprisma', base: a => [[0, 0], [a, 0], [0.75 * a, 0.5 * a], [0.25 * a, 0.5 * a]], G: a => 0.375 * a * a },
-        // regular hexagon with side a / 2, flat at the bottom
-        sechs: { l: 'Sechseckprisma', base: a => { const s = a / 2, r3 = Math.sqrt(3); return [[0.5 * s, 0], [1.5 * s, 0], [2 * s, r3 / 2 * s], [1.5 * s, r3 * s], [0.5 * s, r3 * s], [0, r3 / 2 * s]]; }, G: a => 3 * Math.sqrt(3) / 2 * (a / 2) * (a / 2) }
+        // regular hexagon with side a, flat at the bottom
+        sechs: { l: 'Sechseckprisma', base: a => { const s = a, r3 = Math.sqrt(3); return [[0.5 * s, 0], [1.5 * s, 0], [2 * s, r3 / 2 * s], [1.5 * s, r3 * s], [0.5 * s, r3 * s], [0, r3 / 2 * s]]; }, G: a => 3 * Math.sqrt(3) / 2 * a * a }
     };
     W('prisma6', function (box) {
         const S = { b: box.dataset.start || 'drei', view: box.dataset.view || 'schraeg', a: +(box.dataset.a || 4), h: +(box.dataset.h || 6) };
