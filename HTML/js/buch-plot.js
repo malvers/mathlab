@@ -30,7 +30,7 @@
     }
     function num(v) {
         const r = Math.round(v * 1e6) / 1e6;
-        return (window.Buch.en ? String(r) : String(r).replace('.', ',')).replace('-', '−');   // English editions: decimal point
+        return (window.Buch.en ? String(r) : String(r).replace('.', ',')).replace('-', '−');   // English editions: decimal point, Spanish: comma
     }
     function piLabel(k) {   // k = multiple of π/2
         if (k === 0) return '0';

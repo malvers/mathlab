@@ -17,17 +17,25 @@
 //        node tools/buch-en/check.mjs [book-en] --accept   stores the strings that look German but are fine
 //                                                     (keys, parts of a rule, never shown). Only after
 //                                                     node tools/buch-en/encheck.mjs <book-en> --poke shows no German.
+//        node tools/buch-en/check.mjs --lang es [book-es …]   the same for the Spanish editions (HTML/buch/*-es/,
+//                                                     js/buch-es.js, js/buch-es/<module>.js, tools/buch-es/known.json);
+//                                                     unknown words are measured against /usr/share/dict/spanish if there
+//                                                     is one, else against the words of the Spanish dictionaries only
 import fs from 'fs';
 import vm from 'vm';
 import path from 'path';
 
 // BUCH_EN_ROOT: another HTML/ tree, for testing the check itself on a copy
 const ROOT = process.env.BUCH_EN_ROOT ? path.resolve(process.env.BUCH_EN_ROOT) + '/' : new URL('../../HTML/', import.meta.url).pathname;
-const KNOWN = new URL('known.json', import.meta.url).pathname;
 const args = process.argv.slice(2);
+// the language of the editions: en (default) or es (package ES0, 12.10.2026)
+const LANG = args.includes('--lang') ? args.splice(args.indexOf('--lang'), 2)[1] : 'en';
+if (!['en', 'es'].includes(LANG)) { console.log('✗ unknown language ' + LANG); process.exit(1); }
+const NAME = { en: 'English', es: 'Spanish' }[LANG];
+const KNOWN = new URL(LANG === 'en' ? 'known.json' : '../buch-' + LANG + '/known.json', import.meta.url).pathname;
 const accept = args.includes('--accept');
 const books = args.filter(a => !a.startsWith('--'));
-const all = fs.readdirSync(ROOT + 'buch').filter(d => /-en$/.test(d) && fs.statSync(ROOT + 'buch/' + d).isDirectory()).sort();
+const all = fs.readdirSync(ROOT + 'buch').filter(d => d.endsWith('-' + LANG) && fs.statSync(ROOT + 'buch/' + d).isDirectory()).sort();
 const BOOKS = books.length ? books : all;
 const read = p => fs.readFileSync(p, 'utf8');
 const problems = [];
@@ -47,8 +55,8 @@ function attrs(src) {
     return out;
 }
 const MODULE = /<script src="\.\.\/\.\.\/js\/buch-([a-z0-9-]+)\.js"><\/script>/g;
-const DICT = /<script src="\.\.\/\.\.\/js\/buch-en\/([a-z0-9-]+)\.js"><\/script>/g;
-const NOT_WIDGETS = new Set(['en', 'druck']);
+const DICT = new RegExp('<script src="\\.\\./\\.\\./js/buch-' + LANG + '/([a-z0-9-]+)\\.js"></script>', 'g');
+const NOT_WIDGETS = new Set(['en', 'es', 'druck']);
 
 // the widgets of every module: W('name', …) up to its closing bracket; everything outside them are the helpers
 const modules = {};
@@ -133,16 +141,16 @@ function engine(dicts) {
     if (engines[key]) return engines[key];
     class Node { } class Element extends Node { } class HTMLElement extends Element { }
     class HTMLInputElement extends HTMLElement { } class HTMLTextAreaElement extends HTMLElement { } class CanvasRenderingContext2D { }
-    const ctx = { document: { documentElement: { lang: 'en' } }, location: { search: '' }, console, URLSearchParams,
+    const ctx = { document: { documentElement: { lang: LANG } }, location: { search: '' }, console, URLSearchParams,
         Node, Element, HTMLElement, HTMLInputElement, HTMLTextAreaElement, CanvasRenderingContext2D };
     ctx.window = ctx;
     vm.createContext(ctx);
-    vm.runInContext(read(ROOT + 'js/buch-en.js'), ctx, { filename: 'buch-en.js' });
+    vm.runInContext(read(ROOT + 'js/buch-' + LANG + '.js'), ctx, { filename: 'buch-' + LANG + '.js' });
     for (const d of dicts) {
-        const f = ROOT + 'js/buch-en/' + d + '.js';
-        if (fs.existsSync(f)) vm.runInContext(read(f), ctx, { filename: 'buch-en/' + d + '.js' });
+        const f = ROOT + 'js/buch-' + LANG + '/' + d + '.js';
+        if (fs.existsSync(f)) vm.runInContext(read(f), ctx, { filename: 'buch-' + LANG + '/' + d + '.js' });
     }
-    return (engines[key] = ctx.BuchEN);
+    return (engines[key] = LANG === 'en' ? ctx.BuchEN : ctx.BuchES);
 }
 
 // what counts as German: umlauts, frequent small words, typical words of the widgets - outside of tags and maths
@@ -155,11 +163,13 @@ const visible = s => s.replace(/<[^>]*>/g, t => ' ' + [...t.matchAll(/\s(?:title
 // a word the translation left as it was and that is no English word (macOS /usr/share/dict/words) is German as well:
 // "richtig – weiter so" → "correct – weiter so". Names and code words that stay are English enough: SAFE, and every
 // word of the English dictionaries.
-const ENGLISH = fs.existsSync('/usr/share/dict/words') ? new Set(read('/usr/share/dict/words').toLowerCase().split('\n')) : null;
-const SAFE = new Set('orbitron raleway rgba hsla svg viewbox katex px em rem nbsp xmidymid pagerank anscombe dresden gauss jordan monty hall'.split(' '));
+// Spanish: the words of /usr/share/dict/spanish if there is one; else none, and only the Spanish dictionaries count
+const WORDLIST = LANG === 'en' ? '/usr/share/dict/words' : '/usr/share/dict/spanish';
+const ENGLISH = fs.existsSync(WORDLIST) ? new Set(read(WORDLIST).toLowerCase().split('\n')) : LANG === 'en' ? null : new Set();
+const SAFE = new Set('orbitron raleway rgba hsla svg viewbox katex px em rem nbsp xmidymid pagerank anscombe dresden gauss jordan monty hall use strict'.split(' '));
 function englishWords(B) {
     const set = new Set();
-    const add = v => String(v).toLowerCase().split(/[^a-zäöüß]+/).forEach(w => w && set.add(w));
+    const add = v => String(v).toLowerCase().split(/[^a-zäöüßáéíóúñ]+/).forEach(w => w && set.add(w));
     for (const d of B.dicts) { Object.values(d.word).forEach(add); d.phrase.forEach(([, en]) => add(en)); }
     return set;
 }
@@ -188,16 +198,16 @@ let nPages = 0, nWidgets = 0;
 const reported = new Set();
 const usedDicts = new Set();
 
-EN_WORDS = englishWords(engine(fs.readdirSync(ROOT + 'js/buch-en').filter(f => f.endsWith('.js')).map(f => f.slice(0, -3)).sort()));
+EN_WORDS = englishWords(engine(fs.readdirSync(ROOT + 'js/buch-' + LANG).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3)).sort()));
 for (const book of BOOKS) {
-    const enDir = ROOT + 'buch/' + book + '/', deDir = ROOT + 'buch/' + book.replace(/-en$/, '') + '/';
+    const enDir = ROOT + 'buch/' + book + '/', deDir = ROOT + 'buch/' + book.replace(new RegExp('-' + LANG + '$'), '') + '/';
     if (!fs.existsSync(enDir)) { bad(book, 'no such book'); continue; }
     const pages = fs.readdirSync(enDir).filter(f => f.endsWith('.html')).sort();
     for (const page of pages) {
         nPages++;
         const where = book + '/' + page;
         const en = read(enDir + page);
-        if (!/<html lang="en"/.test(en)) bad(where, 'is not <html lang="en">');
+        if (!en.includes('<html lang="' + LANG + '"')) bad(where, 'is not <html lang="' + LANG + '">');
         // 1. answers and structure
         if (!fs.existsSync(deDir + page)) bad(where, 'has no German twin ' + path.relative(ROOT, deDir + page));
         else {
@@ -205,8 +215,8 @@ for (const book of BOOKS) {
             const a = attrs(de), b = attrs(en);
             for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
                 const x = a[k] || [], y = b[k] || [];
-                if (x.length !== y.length) { bad(where, k + ': ' + x.length + ' in German, ' + y.length + ' in English'); continue; }
-                x.forEach((v, i) => { if (v !== y[i]) bad(where, k + ' #' + (i + 1) + ': German "' + v + '" · English "' + y[i] + '"'); });
+                if (x.length !== y.length) { bad(where, k + ': ' + x.length + ' in German, ' + y.length + ' in ' + NAME); continue; }
+                x.forEach((v, i) => { if (v !== y[i]) bad(where, k + ' #' + (i + 1) + ': German "' + v + '" · ' + NAME + ' "' + y[i] + '"'); });
             }
             // 2. scripts
             const mods = s => [...s.matchAll(MODULE)].map(m => m[1]).filter(m => !NOT_WIDGETS.has(m));
@@ -214,15 +224,15 @@ for (const book of BOOKS) {
             dm.filter(m => !em.includes(m)).forEach(m => bad(where, 'loads no js/buch-' + m + '.js (the German page does)'));
             em.filter(m => !dm.includes(m)).forEach(m => bad(where, 'loads js/buch-' + m + '.js, the German page does not'));
         }
-        if (!/js\/buch-en\.js"><\/script>\s*<script src="\.\.\/\.\.\/js\/buch\.js">/.test(en) && /js\/buch\.js"/.test(en))
-            bad(where, 'js/buch-en.js must come right before js/buch.js');
+        if (!new RegExp('js/buch-' + LANG + '\\.js"></script>\\s*<script src="\\.\\./\\.\\./js/buch\\.js">').test(en) && /js\/buch\.js"/.test(en))
+            bad(where, 'js/buch-' + LANG + '.js must come right before js/buch.js');
         const em = [...en.matchAll(MODULE)].map(m => m[1]).filter(m => !NOT_WIDGETS.has(m));
         const dicts = [...en.matchAll(DICT)].map(m => m[1]);
         for (const m of em) {
             if (!Object.keys(moduleOf(m).widgets).length) continue;          // no widgets, nothing to translate (buch-plot.js)
-            if (!fs.existsSync(ROOT + 'js/buch-en/' + m + '.js')) { bad(where, 'there is no dictionary js/buch-en/' + m + '.js'); continue; }
-            if (!new RegExp('js/buch-' + m + '\\.js"></script>\\s*<script src="\\.\\./\\.\\./js/buch-en/' + m + '\\.js">').test(en))
-                bad(where, 'js/buch-en/' + m + '.js must come right after js/buch-' + m + '.js');
+            if (!fs.existsSync(ROOT + 'js/buch-' + LANG + '/' + m + '.js')) { bad(where, 'there is no dictionary js/buch-' + LANG + '/' + m + '.js'); continue; }
+            if (!new RegExp('js/buch-' + m + '\\.js"></script>\\s*<script src="\\.\\./\\.\\./js/buch-' + LANG + '/' + m + '\\.js">').test(en))
+                bad(where, 'js/buch-' + LANG + '/' + m + '.js must come right after js/buch-' + m + '.js');
         }
         dicts.forEach(d => usedDicts.add(d));
         // 3. sentences of the widgets on this page
@@ -248,14 +258,14 @@ for (const book of BOOKS) {
     }
 }
 
-// 4. two dictionaries, one German word, two different English ones
+// 4. two dictionaries, one German word, two different translations
 {
-    const files = fs.readdirSync(ROOT + 'js/buch-en').filter(f => f.endsWith('.js')).map(f => f.slice(0, -3)).sort();
+    const files = fs.readdirSync(ROOT + 'js/buch-' + LANG).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3)).sort();
     const B = engine(files);
     const word = {}, phrase = {};
     for (const d of B.dicts) {
-        for (const [k, v] of Object.entries(d.word)) { if (k in word && word[k][1] !== v) bad('js/buch-en/' + d.name + '.js', 'word "' + k + '": "' + v + '", but ' + word[k][0] + ' says "' + word[k][1] + '"'); else word[k] = [d.name, v]; }
-        for (const [k, v] of d.phrase) { if (k in phrase && phrase[k][1] !== v) bad('js/buch-en/' + d.name + '.js', 'phrase "' + k + '": "' + v + '", but ' + phrase[k][0] + ' says "' + phrase[k][1] + '"'); else phrase[k] = [d.name, v]; }
+        for (const [k, v] of Object.entries(d.word)) { if (k in word && word[k][1] !== v) bad('js/buch-' + LANG + '/' + d.name + '.js', 'word "' + k + '": "' + v + '", but ' + word[k][0] + ' says "' + word[k][1] + '"'); else word[k] = [d.name, v]; }
+        for (const [k, v] of d.phrase) { if (k in phrase && phrase[k][1] !== v) bad('js/buch-' + LANG + '/' + d.name + '.js', 'phrase "' + k + '": "' + v + '", but ' + phrase[k][0] + ' says "' + phrase[k][1] + '"'); else phrase[k] = [d.name, v]; }
     }
 }
 

@@ -2,6 +2,7 @@
 // (1280 + 390), and German left over - in the visible text, in title/aria-label/placeholder, and on the canvases.
 // With --poke every widget button is clicked once and every slider moved.
 // usage: node tools/buch-en/encheck.mjs <book> [--poke] [file1.html …]   (no files: every page of the book)
+// A Spanish edition (<book>-es, package ES0) is checked the same way; there a decimal comma on a canvas is right.
 // needs the local server (python3 serve.py, http://localhost:8765)
 import pw from '../../videopipeline/node_modules/playwright/index.js';
 import fs from 'fs';
@@ -11,7 +12,10 @@ const poke = args.includes('--poke');
 const given = args.filter(a => !a.startsWith('--'));
 const files = given.length ? given : fs.readdirSync(new URL('../../HTML/buch/' + book + '/', import.meta.url)).filter(f => f.endsWith('.html') && f !== 'druck.html').sort();
 const browser = await pw.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--mute-audio'] });
-const ALLOW = /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Möbius|Schütz|Müller/g;
+const LANG = book.endsWith('-es') ? 'es' : 'en';
+// Spanish: the names of the other editions, and Spanish words with ü (pingüino, bilingüe), are not German
+const ALLOW_ES = /Doc Alvers Mathe-Labor|Edición alemana|English edition|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller|[a-záéíóúñ]*gü[ei][a-záéíóúñ]*/g;
+const ALLOW = LANG === 'es' ? ALLOW_ES : /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Möbius|Schütz|Müller/g;
 const GERMAN = /[äöüÄÖÜß]|\b(der|die|das|und|nicht|ist|mit|von|für|auf|eine?|einer|wird|sind|oder|zum|zur|bei|wie|auch|noch|nach|aus|Lösung|Aufgabe|Ergebnis|Zeile|Schritt|Funktion|Gerade|Seite|Zurück|Neue|keine|Anzahl|Summe|Wahrscheinlichkeit)\b/;
 for (const f of files) {
   for (const w of [1280, 390]) {
@@ -49,9 +53,9 @@ for (const f of files) {
       const de = [...new Set(lines.filter(l => GERMAN.test(l.replace(ALLOW, ''))))];
       const attrs = [...document.querySelectorAll('[title],[aria-label],[placeholder],[alt]')].flatMap(e => ['title', 'aria-label', 'placeholder', 'alt'].map(a => e.getAttribute(a)).filter(Boolean))
         .filter(v => GERMAN.test(v.replace(ALLOW, '')));
-      const cv = [...window.__cv].filter(v => GERMAN.test(v) || /\d,\d/.test(v));
+      const cv = [...window.__cv].filter(v => GERMAN.test(v) || (src.en && /\d,\d/.test(v)));
       return { kerr: document.querySelectorAll('.katex-error').length, raw$: (document.querySelector('.b-main')?.innerText.match(/\$[^$\n]{1,40}\$/g) || []).slice(0, 2), empty, sw: document.documentElement.scrollWidth, wide, de, attrs: [...new Set(attrs)], cv };
-    }, { g: GERMAN.source, a: ALLOW.source });
+    }, { g: GERMAN.source, a: ALLOW.source, en: LANG === 'en' });
     const bad = r.kerr || r.raw$.length || r.empty.length || r.sw > w + 1 || errs.length;
     console.log((bad ? 'XX ' : 'ok ') + f + ' @' + w, JSON.stringify({ kerr: r.kerr, raw$: r.raw$, empty: r.empty, sw: r.sw, wide: r.wide }), errs.slice(0, 3).join(' | ').slice(0, 300));
     if (w === 1280) {

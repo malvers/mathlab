@@ -224,7 +224,9 @@
             if (!ohr) {
                 // a report wants a moment's thought: 3.5 s of quiet end it (Solita's questions: 2 s), or "bin fertig"
                 ohr = window.SolitaListen({
-                    lang: Buch.en ? 'en-GB' : 'de-DE', silenceMs: 3500, finishWord: Buch.en ? 'I am done' : 'bin fertig',
+                    // the language of the edition (Spanish editions: es-ES, package ES0)
+                    lang: Buch.en ? 'en-GB' : Buch.lang === 'es' ? 'es-ES' : 'de-DE', silenceMs: 3500,
+                    finishWord: Buch.en ? 'I am done' : Buch.lang === 'es' ? 'he terminado' : 'bin fertig',
                     onState: zustand,
                     // what is heard goes behind what stood in the field before, live, as with dictation
                     onPartial: t => { feld.value = (basis + ' ' + t).trim(); },
