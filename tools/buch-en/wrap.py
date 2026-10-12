@@ -92,7 +92,7 @@ def dictionary(m):
             " *   word    a whole label → its Spanish\n"
             " *   phrase  German sentence pieces exactly as the widget source writes them → Spanish\n"
             " *   rule    word order and notation (after the point rules of js/buch-es.js, before its header rules)\n"
-            " * Numbers keep their German form (0,5 · 10.000 · 30 %); never write a rule that can match digits around a comma or a\n"
+            " * Numbers keep their German form (0,5 · 10.000 · 30 %%); never write a rule that can match digits around a comma or a\n"
             " * point without German words around them - SVG coordinates are written \"x,y\" (tools/buch-es/auftrag.md, section 5).\n"
             " * After changing a German widget sentence: node tools/buch-en/check.mjs --lang es\n"
             " */\n"
