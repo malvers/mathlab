@@ -17,7 +17,7 @@
 (function () {
     'use strict';
     const B = window.Buch;
-    const { fmt, math, range, seg, div } = B;
+    const { fmt, math, range, seg, div, texNum } = B;
     const { f1, poly, line, txt, hexFill, handle, dragSVG, ngon } = B.geo;
     const W = B.widget;
     const LAM = '#F5C242', CY = '#7fd8ee', PHI = '#A0C85A', RED = '#e2665a', VIO = '#b8a4f2', TXT = '#e8edf5', DIM = '#8fa3bd';
@@ -107,7 +107,7 @@
         const hero = heroOnly(box, pic, [ctr, out], 320);
         range(ctr, { label: 'Kapital $K$', min: 100, max: 10000, step: 100, value: S.k, fmt: v => fmt(v) + ' €', onInput: v => { S.k = v; render(); } });
         range(ctr, { label: 'Zinssatz $p\\,\\%$', min: 0.5, max: 8, step: 0.25, value: S.p, fmt: v => fmt(v, 2) + ' %', onInput: v => { S.p = v; render(); } });
-        range(ctr, { label: 'Tage $t$', min: 1, max: 360, step: 1, value: S.t, fmt: v => v + ' Tage', onInput: v => { S.t = v; render(); } });
+        range(ctr, { label: 'Tage $t$', min: 1, max: 360, step: 1, value: S.t, fmt: v => v + (v === 1 ? ' Tag' : ' Tage'), onInput: v => { S.t = v; render(); } });
         math(ctr);
         function render() {
             const Zj = S.k * S.p / 100, Zt = Zj * S.t / 360;
@@ -116,18 +116,18 @@
             s += '<rect x="' + x0 + '" y="' + y + '" width="' + f1(X(S.t) - x0) + '" height="' + h + '" rx="6" style="' + fill(LAM, 0.45) + '"/>';
             for (let m = 1; m < 12; m++) s += line([X(30 * m), y + h - 8], [X(30 * m), y + h], 'stroke:' + DIM + ';stroke-width:1.2');
             s += txt([x0, y - 10], '0', 'd-num', 'start') + txt([x0 + w, y - 10], '360 Tage', 'd-num', 'end');
-            s += txt([X(S.t), y + h + 22], S.t + ' Tage', 'd-num', S.t < 40 ? 'start' : S.t > 320 ? 'end' : 'middle');
+            s += txt([X(S.t), y + h + 22], S.t + (S.t === 1 ? ' Tag' : ' Tage'), 'd-num', S.t < 40 ? 'start' : S.t > 320 ? 'end' : 'middle');
             // the coins: interest of the whole year against the part for t days
             const bh = 80, by = 212, full = Zj > 0 ? bh : 0, part = Zj > 0 ? bh * S.t / 360 : 0;
             s += '<rect x="70" y="' + (by - full) + '" width="60" height="' + full + '" rx="5" style="' + fill(CY, 0.2) + '"/>' +
                 '<rect x="200" y="' + f1(by - part) + '" width="60" height="' + f1(part) + '" rx="5" style="' + fill(LAM, 0.5) + '"/>';
             s += line([40, by], [300, by], 'stroke:' + TXT + ';stroke-width:1.6');
-            s += txt([100, by + 20], 'Jahr', 'd-num') + txt([230, by + 20], S.t + ' Tage', 'd-num');
+            s += txt([100, by + 20], 'Jahr', 'd-num') + txt([230, by + 20], S.t + (S.t === 1 ? ' Tag' : ' Tage'), 'd-num');
             s += txt([100, by - full - 8], euro(Zj), 'd-num') + txt([230, by - part - 8], euro(Zt), 'd-num');
             pic.innerHTML = svg(340, 240, 'Zinsjahr mit 360 Tagen, davon ' + S.t + ' Tage; Jahreszinsen und Tageszinsen als Säulen', s);
             if (hero) return;
-            out.innerHTML = '<p style="margin:0">Jahreszinsen: $Z = K \\cdot \\dfrac{p}{100} = ' + fmt(S.k) + ' \\cdot \\dfrac{' + fmt(S.p, 2) + '}{100} = ' + fmt(Zj, 2) + '$ €</p>' +
-                '<p style="margin:8px 0 0">für $' + S.t + '$ Tage: $Z = ' + fmt(Zj, 2) + ' \\cdot \\dfrac{' + S.t + '}{360} \\approx ' + fmt(Zt, 2) + '$ €</p>' +
+            out.innerHTML = '<p style="margin:0">Jahreszinsen: $Z = K \\cdot \\dfrac{p}{100} = ' + fmt(S.k) + ' \\cdot \\dfrac{' + texNum(S.p, 2) + '}{100} = ' + texNum(Zj, 2) + '$ €</p>' +
+                '<p style="margin:8px 0 0">für $' + S.t + '$ ' + (S.t === 1 ? 'Tag' : 'Tage') + ': $Z = ' + texNum(Zj, 2) + ' \\cdot \\dfrac{' + S.t + '}{360} \\approx ' + texNum(Zt, 2) + '$ €</p>' +
                 '<p class="b-help" style="margin:8px 0 0">Bei Banken hat ein Zinsjahr meist 360 Tage und jeder Monat 30 Tage. Gerundet wird erst am Ende auf ganze Cent.</p>';
             math(out);
         }
@@ -162,10 +162,10 @@
             s += txt([(fr[0][0] + fr[1][0]) / 2, o[1] + 20], S.a + ' cm', 'd-num') + txt([fr[0][0] - 6, (fr[0][1] + fr[3][1]) / 2 + 5], S.c + ' cm', 'd-num', 'end');
             s += txt([(rt[0][0] + rt[1][0]) / 2 + 12, (rt[0][1] + rt[1][1]) / 2 + 12], S.b + ' cm', 'd-num', 'start');
             pic.innerHTML = svg(340, 230, 'Quader aus ' + St.l + ', ' + S.a + ' cm mal ' + S.b + ' cm mal ' + S.c + ' cm', s);
-            const mk = m >= 1000 ? ' = ' + fmt(m / 1000, 2) + '\\text{ kg}' : '';
+            const mk = m >= 1000 ? ' = ' + texNum(m / 1000, 5) + '\\text{ kg}' : '';
             out.innerHTML = '<p style="margin:0">Volumen: $V = ' + S.a + ' \\cdot ' + S.b + ' \\cdot ' + S.c + ' = ' + V + '\\text{ cm}^3$</p>' +
-                '<p style="margin:8px 0 0">Dichte von ' + St.say + ': $\\varrho ' + (St.about ? '\\approx' : '=') + ' ' + fmt(St.r, 2) + '\\,\\tfrac{\\text{g}}{\\text{cm}^3}$</p>' +
-                '<p style="margin:8px 0 0">Masse: $m = \\varrho \\cdot V = ' + fmt(St.r, 2) + ' \\cdot ' + V + ' = ' + fmt(m, 1) + '\\text{ g}' + mk + '$</p>' +
+                '<p style="margin:8px 0 0">Dichte von ' + St.say + ': $\\varrho ' + (St.about ? '\\approx' : '=') + ' ' + texNum(St.r, 2) + '\\,\\tfrac{\\text{g}}{\\text{cm}^3}$</p>' +
+                '<p style="margin:8px 0 0">Masse: $m = \\varrho \\cdot V = ' + texNum(St.r, 2) + ' \\cdot ' + V + ' = ' + texNum(m, 2) + '\\text{ g}' + mk + '$</p>' +
                 '<p class="b-help" style="margin:8px 0 0">' + (St.r < 1 ? 'Die Dichte ist kleiner als die von Wasser ($1\\,\\tfrac{\\text{g}}{\\text{cm}^3}$): Der Körper schwimmt.' : 'Die Dichte ist größer als die von Wasser ($1\\,\\tfrac{\\text{g}}{\\text{cm}^3}$): Der Körper geht unter.') + '</p>';
             math(out);
         }

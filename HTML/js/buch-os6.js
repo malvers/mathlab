@@ -17,7 +17,7 @@
 (function () {
     'use strict';
     const B = window.Buch;
-    const { fmt, math, seg, div, gcd } = B;
+    const { fmt, math, seg, div, gcd, texNum } = B;
     const { f1, poly, line, txt, hexFill } = B.geo;
     const W = B.widget;
     const LAM = '#F5C242', CY = '#7fd8ee', PHI = '#A0C85A', RED = '#e2665a', VIO = '#b8a4f2', TXT = '#e8edf5', DIM = '#8fa3bd';
@@ -410,8 +410,8 @@
             bars.innerHTML = svg(330, 222, 'Säulendiagramm: relative Häufigkeiten der Augensummen', t);
             const k = S.c[S.sel] || 0, w = ways(S.sel);
             out.innerHTML = '<p style="margin:0">' + S.n + ' Würfe' + (S.last ? ' · zuletzt ' + S.last[0] + ' + ' + S.last[1] + ' = ' + (S.last[0] + S.last[1]) : '') + '</p>' +
-                '<p style="margin:6px 0 0">Augensumme <b>' + S.sel + '</b>: ' + k + '-mal' + (S.n ? ', relativ $' + fr(k, S.n) + ' \\approx ' + fmt(100 * k / S.n, 1) + '\\,\\%$' : '') +
-                ' · im Gitter ' + w + ' von 36 Feldern, also $' + fr(w, 36) + ' \\approx ' + fmt(100 * w / 36, 1) + '\\,\\%$</p>' +
+                '<p style="margin:6px 0 0">Augensumme <b>' + S.sel + '</b>: ' + k + '-mal' + (S.n ? ', relativ $' + fr(k, S.n) + ' \\approx ' + texNum(100 * k / S.n, 1) + '\\,\\%$' : '') +
+                ' · im Gitter ' + w + ' von 36 Feldern, also $' + fr(w, 36) + ' \\approx ' + texNum(100 * w / 36, 1) + '\\,\\%$</p>' +
                 '<p class="b-help" style="margin:8px 0 0">Tippe auf ein Feld oder eine Säule. Die gestrichelte Linie zeigt den Anteil der Felder. Die 7 hat die meisten Felder (' + [[1, 6], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1]].map(q => q[0] + '&nbsp;+&nbsp;' + q[1]).join(', ') + '), die 2 und die 12 nur eins.</p>';
             math(out);
         }
