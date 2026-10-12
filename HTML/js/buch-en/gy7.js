@@ -209,7 +209,7 @@
         ['Danach ', 'Then '], ['\\,\\%$ senken', '\\,\\%$ down'], ['\\,\\%$ erhöhen', '\\,\\%$ up'],
         [' der alte Wert! Die zweiten $', ' the old value! The second $'], ['\\,\\%$ beziehen sich auf einen anderen Grundwert.', '\\,\\%$ refer to a different base value.'],
         // diagramm7
-        [' als ', ' as a '], ['Zusammen: ', 'Together: '], ['Antworten', 'answers'], ['Stimmen', 'votes'],
+        [' als ', ' as a '], ['Klassensprecherwahl: Stimmen', 'Election of the class representative: votes'], ['Zusammen: ', 'Together: '], ['Antworten', 'answers'], ['Stimmen', 'votes'],
         [' = 100 % = 360°. Im Kreisdiagramm gehören zu 1 % genau 3,6°.', ' = 100% = 360°. In a pie chart, 1% corresponds to exactly 3.6°.'],
         ['Ein Liniendiagramm passt hier nicht: Die Kategorien haben keine Reihenfolge, und zwischen ihnen gibt es keine Zwischenwerte.',
             'A line graph does not fit here: the categories have no order, and there are no values in between them.'],
