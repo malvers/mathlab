@@ -66,7 +66,28 @@ const EXTRA = [{
     title: 'Doc Alvers Mathe-Labore',
     tagline: 'Mathematik zum Anfassen',
     description: 'Interaktive Labore fuer Mathematik, Physik und Informatik — von der Grundrechenart bis zum Quantenschluesselaustausch. Alles im Browser, ohne Installation, kostenlos.',
+}, {
+    // the page about the second check of all teaching material, for the pupils (Doc, 12.10.2026)
+    id: 'buch-zweite-pruefung',
+    href: 'buch/zweite-pruefung.html',
+    title: 'Die zweite Prüfung',
+    tagline: '241 Fehler gefunden und korrigiert',
+    description: 'Wie KI-Agentinnen alle Lehrbücher, Wochen-Quizze und Arbeitsblätter des Doc Alvers Mathe-Labors ein zweites Mal nachgerechnet und 241 Fehler gefunden haben - mit zehn echten Fehlern zum Selbersuchen.',
+    alt: 'Die zweite Prüfung \u2014 Vorschaubild',
 }];
+
+// The words of the book cards per language; the chapter description is the one tools/buch-en/wrap.py writes into the page.
+const BOOK_WORDS = {
+    de: { tagline: (n) => `Interaktives Lehrbuch / ${n} Kapitel`, coverAlt: 'Titelseite des interaktiven Lehrbuchs', chapter: 'Kapitel',
+        chapterAlt: 'Vorschaubild aus dem interaktiven Lehrbuch', locale: 'de_DE',
+        desc: (c, B) => `${c.sub}. Kapitel ${c.k} des interaktiven Lehrbuchs ${B.title}: Erklärungen, Beispiele, Aufgaben in drei Stufen, Selbsttests und Labs zum Ausprobieren.` },
+    en: { tagline: (n) => `Interactive textbook / ${n} chapters`, coverAlt: 'cover of the interactive textbook', chapter: 'Chapter',
+        chapterAlt: 'preview from the interactive textbook', locale: 'en_GB',
+        desc: (c, B) => `${c.sub}. Chapter ${c.k} of the interactive textbook ${B.title}: explanations, examples, exercises at three levels, self-checks and labs to try out.` },
+    es: { tagline: (n) => `Libro de texto interactivo / ${n} capítulos`, coverAlt: 'portada del libro de texto interactivo', chapter: 'Capítulo',
+        chapterAlt: 'vista previa del libro de texto interactivo', locale: 'es_ES',
+        desc: (c, B) => `${c.sub}. Capítulo ${c.k} del libro de texto interactivo ${B.title}: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.` },
+};
 
 // The textbooks (HTML/buch/<book>/): a card for the cover page and one per chapter. The texts come from the
 // book's own kapitel.js (window.BUCH) - the single list of chapters - never from labs-config.js.
@@ -80,13 +101,16 @@ function readBooks() {
         new Function('window', fs.readFileSync(k, 'utf8'))(win);
         const B = win.BUCH;
         if (!B || !B.chapters) continue;
-        out.push({ id: 'buch-' + b, href: `buch/${b}/index.html`, cover: true, title: B.title, tagline: `Interaktives Lehrbuch / ${B.chapters.length} Kapitel`,
-            description: B.description || B.title, alt: B.title + ' \u2014 Titelseite des interaktiven Lehrbuchs' });
+        // the English and Spanish editions (kapitel.js lang: 'en' / 'es') get their card texts in their own language
+        // (Doc, 12.10.2026: "Bitte stell sicher, dass alle Bücher auch eine Vorschau haben")
+        const lang = B.lang || 'de';
+        const W = BOOK_WORDS[lang] || BOOK_WORDS.de;
+        out.push({ id: 'buch-' + b, href: `buch/${b}/index.html`, cover: true, lang, title: B.title, tagline: W.tagline(B.chapters.length),
+            description: B.description || B.title, alt: B.title + ' \u2014 ' + W.coverAlt });
         for (const c of B.chapters) {
-            out.push({ id: `buch-${b}-${c.file.replace(/\.html$/, '')}`, href: `buch/${b}/${c.file}`,
-                title: `Kapitel ${c.k}: ${c.title}`, tagline: `${B.short || B.title} / ${c.lb}`,
-                description: `${c.sub}. Kapitel ${c.k} des interaktiven Lehrbuchs ${B.title}: Erklärungen, Beispiele, Aufgaben in drei Stufen, Selbsttests und Labs zum Ausprobieren.`,
-                alt: `Kapitel ${c.k}: ${c.title} \u2014 Vorschaubild aus dem interaktiven Lehrbuch` });
+            out.push({ id: `buch-${b}-${c.file.replace(/\.html$/, '')}`, href: `buch/${b}/${c.file}`, lang,
+                title: `${W.chapter} ${c.k}: ${c.title}`, tagline: `${B.short || B.title} / ${c.lb}`,
+                description: W.desc(c, B), alt: `${W.chapter} ${c.k}: ${c.title} \u2014 ${W.chapterAlt}` });
         }
     }
     return out;
@@ -164,6 +188,13 @@ async function shootLab(browser, lab, port) {
         // The card carries the wordmark itself — hide the lab's own overlay.
         await page.addStyleTag({ content: '.canvas-branding{display:none!important}' }).catch(() => {});
         await page.waitForTimeout(3500);          // let intros, fonts and canvases settle
+        // a book page: Solita's box closed and no "Fehler melden" in the head, as on the first book cards - a password field
+        // has no place on a preview (Doc, 12.10.2026: "alle Bücher auch eine Vorschau")
+        if (lab.href.startsWith('buch/')) {
+            await page.evaluate(() => document.querySelectorAll('.b-solita.offen').forEach((e) => e.classList.remove('offen'))).catch(() => {});
+            await page.addStyleTag({ content: '.b-meld-rot,.b-solita .sf-in,.b-solita .sf-eye,.b-solita .sf-mic,.b-solita .sf-stop,.b-solita .sf-send,.b-solita-x{display:none!important}' }).catch(() => {});
+            await page.waitForTimeout(300);
+        }
         await page.screenshot({ path: dest });
         // a book's cover page: its cover also as a picture of its own - the book's card on the hub shows it
         // (Doc, 09.10.2026: "Nimm als Logo tatsächlich das Cover")
@@ -215,7 +246,7 @@ function metaBlock(lab) {
         `<meta name="description" content="${esc(desc)}">`,
         `<meta property="og:type" content="website">`,
         `<meta property="og:site_name" content="Doc Alvers Mathe-Labore">`,
-        `<meta property="og:locale" content="de_DE">`,
+        `<meta property="og:locale" content="${(BOOK_WORDS[lab.lang] || BOOK_WORDS.de).locale}">`,
         `<meta property="og:title" content="${esc(title)}">`,
         `<meta property="og:description" content="${esc(desc)}">`,
         `<meta property="og:url" content="${url}">`,

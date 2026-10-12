@@ -35,6 +35,12 @@ Fix: add the phrase to `js/buch-en/<module>.js`, or bring the answer over to the
 - `node tools/buch-en/check.mjs <your-book>-en --accept` only adds your book's strings to `known.json`, it keeps everything else.
 - Change the engine `js/buch-en.js` only after agreeing on it.
 
+## Preview cards
+
+`tools/og-preview/make-og.mjs` makes the link previews (og:image card and meta block) of every page, in the language of
+the book's `kapitel.js` (`lang: 'en'` / `'es'`). `wrap.py` drops the OG block when it rebuilds a page, so run make-og for
+that page again afterwards: `node tools/og-preview/make-og.mjs --only buch-<book>-en-<chapter>`.
+
 ## Not yet
 
-OG preview cards (`tools/og-preview/make-og.mjs` has German templates), print edition, Solita answering in English.
+Print edition, Solita answering in English.
