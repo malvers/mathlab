@@ -454,7 +454,7 @@
                 s += circ(I, rho, 'fill:rgba(160,200,90,0.08);stroke:' + PHI + ';stroke-width:2.4');
                 [[A, Bv, C, b, c], [Bv, C, A, c, a], [C, A, Bv, a, b]].forEach(([V, P, Q, lp, lq]) => {
                     // the bisector from V meets PQ in the point that divides PQ in the ratio of the adjacent sides
-                    const Dp = mul(add(mul(P, lq), mul(Q, lp)), 1 / (lp + lq));
+                    const Dp = mul(add(mul(P, lp), mul(Q, lq)), 1 / (lp + lq));
                     s += line(V, Dp, sty(CY, 1.4, DASH));
                     s += arc(V, P, I, 24, 'fill:rgba(127,216,238,0.14);stroke:' + CY + ';stroke-width:1') + arc(V, I, Q, 30, 'fill:rgba(127,216,238,0.08);stroke:' + CY + ';stroke-width:1');
                 });
@@ -1228,7 +1228,7 @@
                 }
                 // the 45° mark at A between the front edge and the edge to the back
                 const A = Q[0], Bq = Q[1], back = Q[body.n - 1];
-                if (!hero) s += arc(A, Bq, back, 26, 'fill:rgba(245,194,66,0.18);stroke:' + LAM + ';stroke-width:1') + colTxt(add(A, [34, -6]), '45°', 'g-lab', LAM, 'start');
+                if (!hero && body.n === 4) s += arc(A, Bq, back, 26, 'fill:rgba(245,194,66,0.18);stroke:' + LAM + ';stroke-width:1') + colTxt(add(A, [34, -6]), '45°', 'g-lab', LAM, 'start');
                 const c2 = mul(Q.reduce((a, p) => add(a, p), [0, 0]), 1 / Q.length);
                 if (!hero) Q.forEach((p, i) => { s += labelAway(p, c2, lab(i), 16, 'g-lab'); });
                 pic.innerHTML = svgTag(Wd, Ht, BODY[S.k] + ' im Schrägbild', s);
