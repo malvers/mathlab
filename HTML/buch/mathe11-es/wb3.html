@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 11 · Capítulo OP · Métodos numéricos y simulaciones | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Bisección, áreas aproximadas, el método de Montecarlo. Capítulo OP del libro de texto interactivo Matemáticas · Berufliches Gymnasium 11: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">OPTATIVA 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO OP · OPTATIVA 3 · MAYO · JUNIO</p>
+            <h1>Métodos numéricos y simulaciones</h1>
+            <p class="b-hero-lead">Muchas ecuaciones no se pueden resolver de forma exacta y muchas áreas no se pueden calcular con exactitud. Por eso los ordenadores calculan de forma <b>numérica</b>:
+                se acercan a la solución en pequeños pasos, con la precisión que haga falta. Aquí conocerás tres métodos que están dentro de cualquier calculadora,
+                de cualquier simulación y de cualquier oficina de ingeniería, y tú mismo escribirás pequeños programas para ellos.</p>
+            <div class="b-chips"><span class="b-chip">10 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">PROGRAMACIÓN</span><span class="b-chip">INFORMÁTICA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3-x-2"]' data-labels='["f"]' data-lat="[1.9]" data-x="-0.5,2.5" data-y="-3,5" data-pts="[[1.5214,0]]" data-h="240" data-aria="Función con un cero en aproximadamente 1,52"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>determinar ceros con la precisión que quieras mediante el <b>método de bisección</b></li>
+                <li>calcular de forma aproximada áreas bajo gráficas con <b>rectángulos y trapecios</b></li>
+                <li>estimar áreas al azar con el <b>método de Montecarlo</b></li>
+                <li>convertir estos métodos en pequeños <b>programas</b> o en hojas de cálculo</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="-2" data-ph="número"><p class="b-q-text">Calcula $f(1)$ para $f(x) = x^3 - x - 2$.</p><div class="b-sol"><p>$1 - 1 - 2 = -2$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="número"><p class="b-q-text">Calcula $f(2)$ para $f(x) = x^3 - x - 2$.</p><div class="b-sol"><p>$8 - 2 - 2 = 4$</p></div></div>
+            <div class="b-q" data-ans="1,5" data-tol="0.001" data-ph="número"><p class="b-q-text">¿Cuál es el punto medio del intervalo $[1, 2]$?</p><div class="b-sol"><p>$\tfrac{1 + 2}{2} = 1{,}5$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="área"><p class="b-q-text">Un trapecio tiene lados paralelos de 4 y 8 y altura 2. ¿Cuál es su área?</p><div class="b-sol"><p>$\tfrac{4 + 8}{2} \cdot 2 = 12$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">ADIVINA EL NÚMERO</div>
+            <div class="b-text"><p>Una persona piensa un número entero entre 1 y 1000. Los demás intentan adivinarlo y ella solo responde «mayor» o «menor».</p>
+                <ul><li>¿Con qué estrategia necesitáis menos intentos? ¿Cuántos son como máximo?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">CONTAR CUADRADITOS</div>
+            <div class="b-text"><p>Dibujad $y = x^2$ desde $x = 0$ hasta $x = 2$ en papel cuadriculado (1 cm = 2 cuadraditos).</p>
+                <ul><li>Estimad el área bajo la curva contando cuadraditos. ¿Cómo podéis ser más precisos?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LANZAR ARROZ</div>
+            <div class="b-text"><p>Dibujad un cuadrado con un cuarto de círculo dentro. Lanzad un puñado de arroz de manera uniforme sobre él y contad los granos que caen dentro y fuera.</p>
+                <ul><li>¿Qué tiene que ver la proporción con $\pi$?</li></ul></div>
+            <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Dardos que llueven sobre el cuadrado y estiman π (laboratorio en alemán)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Ceros: bisección" data-toc-k="1" data-toc-short="1 Bisección">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Ceros partiendo por la mitad</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Para $f(x) = x^3 - x - 2$ no existe una fórmula sencilla de resolución. Pero $f(1) = -2 < 0$ y $f(2) = 4 > 0$.
+                La gráfica es una línea continua, así que tiene que cortar el eje $x$ entre 1 y 2.</p></div></div>
+            <div class="b-text"><p>Se comprueba el punto medio: $f(1{,}5) = 3{,}375 - 1{,}5 - 2 = -0{,}125 < 0$. Por tanto, el cambio de signo está entre 1,5 y 2. Se vuelve a partir por la mitad, se vuelve a comprobar, y así sucesivamente.
+                Con cada paso, el intervalo se reduce a la mitad de su anchura.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MÉTODO DE BISECCIÓN</div>
+                <div class="b-text">
+                    <p>Si $f$ es continua (sin saltos) y $f(a)$ y $f(b)$ tienen signos distintos, en el intervalo $[a, b]$ hay al menos un cero.</p>
+                    <ol><li>Calcula el punto medio $m = \tfrac{a + b}{2}$.</li>
+                        <li>Si $f(m)$ tiene el mismo signo que $f(a)$, toma $a := m$; si no, $b := m$.</li>
+                        <li>Repite hasta que $b - a$ sea lo bastante pequeño.</li></ol>
+                    <p>Después de $n$ pasos, el intervalo solo mide $\tfrac{b - a}{2^n}$ de ancho. Así que diez pasos lo hacen algo más de mil veces más pequeño.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Adivina el número:</b> partiendo por la mitad encuentras cualquier número del 1 al 1000 en 10 intentos como máximo, porque $2^{10} = 1024$.</p>
+            <p class="b-note"><b>Perspectiva:</b> el método de Newton es mucho más rápido, pero necesita la derivada, un tema de 12.º curso.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · BISECCIÓN</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una función y parte el intervalo por la mitad paso a paso. Las líneas azules delimitan el intervalo; el punto blanco es el punto medio.</p>
+        <div data-widget="bisektion"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">MÉTODO · EL PROGRAMA</div>
+        <div class="b-text"><p>En JavaScript (funciona en la consola de cualquier navegador, F12):</p></div>
+<pre class="b-pre"><code>const f = x => x ** 3 - x - 2;
+let a = 1, b = 2;
+while (b - a > 1e-6) {
+  const m = (a + b) / 2;
+  if (Math.sign(f(m)) === Math.sign(f(a))) a = m; else b = m;
+}
+console.log((a + b) / 2);   // 1.5213797…</code></pre>
+        <div class="b-text"><p>En una hoja de cálculo: columnas para $a$, $b$, $m$ y $f(m)$. En la fila siguiente decides con <code>=SI(…)</code> qué extremo se sustituye y después arrastras la fórmula hacia abajo.</p></div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Realiza a mano tres pasos de la bisección para $f(x) = x^2 - 2$ en $[1, 2]$. ¿Qué número se aproxima así?</p></div>
+            <div class="b-sol"><p>$m = 1{,}5$: $f > 0$ → $[1;\,1{,}5]$ · $m = 1{,}25$: $f < 0$ → $[1{,}25;\,1{,}5]$ · $m = 1{,}375$: $f < 0$ → $[1{,}375;\,1{,}5]$. Se aproxima $\sqrt2 \approx 1{,}414$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Cuántos pasos hacen falta para acotar un cero en $[0, 1]$ con una precisión de $0{,}001$?</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{2^n} \leq 0{,}001 \Rightarrow 2^n \geq 1000 \Rightarrow n = 10$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina con el widget la solución de $\cos x = x$ con tres decimales.</p></div>
+            <div class="b-sol"><p>Cero de $\cos x - x$: $x \approx 0{,}739$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>La función $2^x - 3x$ tiene dos ceros. Encuentra intervalos para ambos y determina el segundo numéricamente.</p></div>
+            <div class="b-sol"><p>$f(0) = 1$, $f(1) = -1$: el primero está en $[0, 1]$ ($\approx 0{,}458$). $f(3) = -1$, $f(4) = 4$: el segundo está en $[3, 4]$, aproximadamente $3{,}31$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Por qué falla la bisección con $f(x) = \tfrac1x$ en $[-1, 1]$, aunque $f(-1) < 0 < f(1)$? ¿Y por qué con $f(x) = x^2$ en $[-1, 1]$?</p></div>
+            <div class="b-sol"><p>$\tfrac1x$ da un salto en $0$ y no tiene ningún cero: falta la condición de ser «continua». $x^2$ sí tiene un cero, pero no hay cambio de signo: $f(-1) = f(1) = 1 > 0$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1,521" data-tol="0.002" data-ph="x ≈"><p class="b-q-text">¿Cero de $x^3 - x - 2$ con tres decimales?</p><div class="b-sol"><p>$x \approx 1{,}521$</p></div></div>
+        <div class="b-q" data-ans="10" data-ph="pasos"><p class="b-q-text">¿Después de cuántas divisiones por la mitad es un intervalo de anchura 1 más estrecho que 0,001?</p><div class="b-sol"><p>$2^{10} = 1024 > 1000$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Áreas numéricas" data-toc-k="2" data-toc-short="2 Áreas">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Aproximar áreas con franjas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>¿Cuánto mide el área bajo $y = x^2$ entre $x = 0$ y $x = 2$? No hay ninguna fórmula de áreas para una curva así.
+                Por eso se divide el área en <b>franjas</b> estrechas y cada franja se sustituye por un rectángulo o un trapecio.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MÉTODOS DE FRANJAS</div>
+                <div class="b-text">
+                    <p>Divide $[a, b]$ en $n$ franjas de la misma anchura $h = \tfrac{b - a}{n}$.</p>
+                    <p><b>Rectángulos:</b> altura = valor de la función en el borde izquierdo (o en el centro) de cada franja. Se suman las áreas de todos los rectángulos.</p>
+                    <p><b>Trapecios:</b> cada franja se convierte en un trapecio con los valores de la función en sus dos bordes: $A \approx \tfrac{h}{2}\big(f(x_0) + 2f(x_1) + \ldots + 2f(x_{n-1}) + f(x_n)\big)$.</p>
+                    <p>Cuantas más franjas, mayor precisión. Los rectángulos del punto medio y los trapecios son mucho más precisos que los rectángulos en el borde.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Perspectiva:</b> el valor exacto se llama integral, $\int_0^2 x^2\,dx = \tfrac83$. El cálculo integral es un gran tema de 13.º curso.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · TALLER DE FRANJAS</div>
+        <p class="b-help" style="margin:0 0 12px">Elige la función, el método y el número de franjas. Al lado ves la aproximación, el valor exacto y el error.</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EJEMPLO 1 · CUATRO FRANJAS</div>
+        <div class="b-text"><p>Calcula el área bajo $y = x^2$ en $[0, 2]$ con $n = 4$ franjas: con rectángulos por la izquierda, rectángulos del punto medio y trapecios.</p></div>
+        <div class="b-sol"><p>$h = 0{,}5$. Izquierda: $0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$.
+            Punto medio: $0{,}5 \cdot (0{,}0625 + 0{,}5625 + 1{,}5625 + 3{,}0625) = 2{,}625$.
+            Trapecios: $0{,}25 \cdot (0 + 2 \cdot 0{,}25 + 2 \cdot 1 + 2 \cdot 2{,}25 + 4) = 2{,}75$.</p>
+            <p>Exacto: $\tfrac83 \approx 2{,}667$. Errores: $-0{,}917$ · $-0{,}042$ · $+0{,}083$.</p></div>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REACTOR DE INTEGRALES</span><span class="b-lab-what">Sumas de Riemann y métodos de aproximación</span></span></a></div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Explica con el dibujo por qué en $y = x^2$ los rectángulos por la izquierda siempre dan un área demasiado pequeña.</p></div>
+            <div class="b-sol"><p>La función es creciente. En el borde izquierdo toma su valor más bajo, así que cada rectángulo queda por completo debajo de la curva.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Cuántas franjas necesita el método de los trapecios para $x^2$ en $[0, 2]$ para que el error sea menor que 0,01? Pruébalo con el widget.</p></div>
+            <div class="b-sol"><p>Con $n = 10$ el error es $0{,}013$; a partir de $n = 12$ es menor que $0{,}01$. El error disminuye aproximadamente como $\tfrac{1}{n^2}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina con el widget el área bajo un arco de la función seno (de $0$ a $\pi$). ¿Qué valor exacto se obtiene?</p></div>
+            <div class="b-sol"><p>Las aproximaciones se acercan al número 2. El arco de la función seno tiene un área de exactamente 2.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Escribe un pequeño programa (hoja de cálculo o JavaScript) para el método de los trapecios y calcula con él el área bajo $y = \sqrt{x}$ en $[0, 4]$ con $n = 100$.</p></div>
+            <div class="b-sol"><p>Resultado aproximado $5{,}33$; valor exacto $\tfrac{16}{3} \approx 5{,}333$. En JavaScript: <code>let s = 0; for (let i = 0; i &lt; n; i++) s += (f(a+i*h) + f(a+(i+1)*h)) / 2 * h;</code></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2,75" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">¿Método de los trapecios para $x^2$ en $[0, 2]$ con 4 franjas?</p><div class="b-sol"><p>$2{,}75$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">¿Qué método suele ser el menos preciso con el mismo número de franjas?</p><div class="b-mc"><button>rectángulos del punto medio</button><button>rectángulos en el borde</button><button>trapecios</button></div><div class="b-sol"><p>Los rectángulos en el borde.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Método de Montecarlo" data-toc-k="3" data-toc-short="3 Montecarlo">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Áreas al azar: el método de Montecarlo</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Lanza puntos aleatorios dentro de un rectángulo que contenga el área buscada. La proporción de aciertos dentro del área corresponde aproximadamente a la parte del rectángulo que ocupa el área.
+                Suena a juego de azar y funciona sorprendentemente bien.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MÉTODO DE MONTECARLO</div>
+                <div class="b-text">
+                    <p>$$A \approx \frac{\text{número de aciertos}}{\text{número total de puntos}} \cdot A_{\text{rectángulo}}$$</p>
+                    <p>El resultado es una <b>estimación</b>, como en cualquier simulación (véase el capítulo 1). La precisión crece muy despacio: para una cifra más se necesitan unas cien veces más puntos.</p>
+                    <p>El método es fuerte con formas complicadas y en muchas dimensiones, donde los métodos de franjas apenas funcionan.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Nombre:</b> el método surgió en los años cuarenta del siglo XX en Los Álamos y recibió su nombre por el casino de Montecarlo.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ÁREA BAJO LA PARÁBOLA</div>
+        <p class="b-help" style="margin:0 0 12px">Puntos aleatorios en el rectángulo $2 \times 4$: amarillos debajo de $y = x^2$, grises por encima.</p>
+        <div data-widget="mc-flaeche"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">MÉTODO · ESTIMAR $\pi$ EN OCHO LÍNEAS</div>
+<pre class="b-pre"><code>const n = 1000000;
+let aciertos = 0;
+for (let i = 0; i &lt; n; i++) {
+  const x = Math.random(), y = Math.random();
+  if (x * x + y * y &lt; 1) aciertos++;     // dentro del cuarto de círculo
+}
+console.log(4 * aciertos / n);             // aproximadamente 3.14…</code></pre>
+        <div class="b-text"><p>El cuarto de círculo tiene área $\tfrac{\pi}{4}$ y el cuadrado unidad, área 1. Por tanto, la proporción de aciertos estima $\tfrac{\pi}{4}$.</p></div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>De 1000 puntos aleatorios en el rectángulo $2 \times 4$, 338 quedan debajo de $y = x^2$. ¿Qué área se estima? ¿Cuál es el error?</p></div>
+            <div class="b-sol"><p>$\tfrac{338}{1000} \cdot 8 = 2{,}704$. Exacto: $\tfrac83 \approx 2{,}667$; error de aproximadamente $0{,}04$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Ejecuta el programa de $\pi$ con $n = 100$, $10\,000$ y $1\,000\,000$. ¿Cuántas cifras son correctas, más o menos, en cada caso?</p></div>
+            <div class="b-sol"><p>Con 100 puntos a menudo solo el 3, con 10.000 normalmente $3{,}1$ y con un millón normalmente $3{,}14$. Cien veces más puntos aportan aproximadamente una cifra.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Compara Montecarlo y el método de los trapecios para el área bajo $x^2$: ¿cuál es más preciso con 100 pasos de cálculo? ¿Cuándo elegirías aun así Montecarlo?</p></div>
+            <div class="b-sol"><p>Trapecios con $n = 100$: error de aproximadamente $0{,}0001$. Montecarlo con 100 puntos: error típico de $0{,}2$ a $0{,}4$. Montecarlo merece la pena con formas difíciles de dividir en franjas o con volúmenes en muchas dimensiones.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="3,2" data-tol="0.001" data-ph="π ≈"><p class="b-q-text">De 1000 puntos en el cuadrado unidad, 800 quedan dentro del cuarto de círculo. ¿Qué estimación de $\pi$ se obtiene?</p><div class="b-sol"><p>$4 \cdot 0{,}8 = 3{,}2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">¿Cuántos puntos se necesitan aproximadamente para ganar una cifra de precisión?</p><div class="b-mc"><button>cien veces más</button><button>el doble</button><button>diez veces más</button></div><div class="b-sol"><p>El error disminuye como $\tfrac{1}{\sqrt{n}}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el hotel de Hilbert" data-toc-k="X" data-toc-short="Hotel de Hilbert">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">LO INFINITAMENTE GRANDE</span></div>
+    <h2>El hotel de Hilbert</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Un hotel tiene infinitas habitaciones, numeradas 1, 2, 3, … Todas están ocupadas. Llega un huésped nuevo. El recepcionista pide a cada huésped que se cambie de la habitación $n$ a la habitación $n + 1$.
+                La habitación 1 queda libre, aunque antes todo estaba lleno.</p>
+            <p>Después llega un autobús con infinitos huéspedes. Ahora cada huésped se cambia de la habitación $n$ a la habitación $2n$. Todas las habitaciones impares quedan libres: infinitas.</p>
+            <p>Así que con los conjuntos infinitos no se puede contar como con los finitos: hay tantos números pares como números naturales, porque $n \mapsto 2n$ los empareja uno a uno.
+                Pero Georg Cantor demostró también que hay <b>más</b> números reales que naturales. No todos los infinitos son iguales.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> David Hilbert presentó este experimento mental en una clase en 1924. Se hizo famoso gracias al libro de George Gamow «One Two Three … Infinity» (1947).</p></aside>
+    </div>
+    <div class="b-box b-check" data-check="hilbert">
+        <div class="b-box-title">PIENSA CON NOSOTROS</div>
+        <div class="b-q" data-ans="7" data-ph="habitación"><p class="b-q-text">Al hotel lleno llegan 3 huéspedes nuevos. ¿A qué habitación se cambia el huésped de la habitación 4?</p><div class="b-sol"><p>Todos avanzan 3: de $n$ a $n + 3$, es decir, a la habitación 7.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO ESENCIAL DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>BISECCIÓN</h4><p>Busca un cambio de signo, parte el intervalo por la mitad y quédate con la mitad que tiene el cambio de signo. Anchura después de $n$ pasos: $\tfrac{b - a}{2^n}$.</p></div><div><p>$x^3 - x - 2 = 0$: $x \approx 1{,}5214$</p></div></div>
+    <div class="b-rueck"><div><h4>MÉTODOS DE FRANJAS</h4><p>Rectángulos (en el borde o en el centro) o trapecios, anchura $h = \tfrac{b - a}{n}$. Más franjas, más precisión.</p></div><div><p>$x^2$ en $[0, 2]$, $n = 4$: 1,75 · 2,625 · 2,75 (exacto: 2,667)</p></div></div>
+    <div class="b-rueck"><div><h4>MONTECARLO</h4><p>Proporción de aciertos · área del rectángulo. Es una estimación, con un error de aproximadamente $\tfrac{1}{\sqrt{n}}$.</p></div><div><p>$\pi \approx 4 \cdot \tfrac{\text{aciertos}}{n}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">RESPUESTA INMEDIATA</span></div>
+    <div class="b-box b-check" data-check="test1">
+        <div class="b-box-title">TEST</div>
+        <div class="b-q" data-ans="1,25" data-tol="0.001" data-ph="m ="><p class="b-q-text">Bisección para $x^2 - 2$: después del primer paso el intervalo es $[1;\,1{,}5]$. ¿Qué punto medio se comprueba a continuación?</p><div class="b-sol"><p>$1{,}25$</p></div></div>
+        <div class="b-q" data-ans="1,75" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">¿Rectángulos por la izquierda para $x^2$ en $[0, 2]$ con 4 franjas?</p><div class="b-sol"><p>$0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$</p></div></div>
+        <div class="b-q" data-ans="2,4" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">300 de 1000 puntos aleatorios en un rectángulo de área 8 son aciertos. ¿Qué área se estima?</p><div class="b-sol"><p>$0{,}3 \cdot 8 = 2{,}4$</p></div></div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-numerik.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MÉTODOS NUMÉRICOS</span><span class="b-lab-what">Bisección y áreas</span></span></a>
+        <a class="b-lab" href="../../mathetest11-montecarlo.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MONTECARLO</span><span class="b-lab-what">Áreas y π al azar</span></span></a>
+        <a class="b-lab" href="../../mathetest11-unendlich.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LO INFINITAMENTE GRANDE</span><span class="b-lab-what">El hotel de Hilbert, Cantor</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 11.º curso · Optativa 3 según el plan de estudios de Sajonia para Matemáticas en el Berufliches Gymnasium.</p>
+    <p>Todos los textos, ejercicios e ilustraciones son contenido propio.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-es/numerik.js"></script>
+</body>
+</html>
