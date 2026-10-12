@@ -9,8 +9,28 @@
  */
 window.BuchES && BuchES.add('gleichungen', {
     word: {
+        // book es-1 mathe11-es: waage, binom, koerper
+        'z. B. −3 oder :4 oder −2x': 'p. ej. −3 o :4 o −2x', 'Anwenden': 'Aplicar', 'Neue Gleichung': 'Nueva ecuación',
+        'Länge $a$': 'Longitud $a$', 'Länge $b$': 'Longitud $b$', 'Quadrat mit Seitenlänge a + b': 'Cuadrado de lado a + b',
+        'Zylinder': 'Cilindro', 'Kegel': 'Cono', 'Kugel': 'Esfera', 'Körper': 'Cuerpo', 'Radius $r$ in cm': 'Radio $r$ en cm',
+        'Höhe $h$ in cm': 'Altura $h$ en cm', 'Skizze des Körpers': 'Esquema del cuerpo',
     },
     phrase: [
+        // book es-1 mathe11-es: waage
+        ['Gelöst: $x = ', 'Resuelto: $x = '], ['$. Mach die Probe: Setz den Wert in die erste Zeile ein.', '$. Haz la comprobación: sustituye el valor en la primera línea.'],
+        ['Beide Seiten sind gleich: Jede Zahl ist Lösung, ', 'Los dos lados son iguales: todo número es solución, '],
+        ['Widerspruch: Es gibt keine Lösung, ', 'Contradicción: no hay solución, '],
+        ['Schreib die Umformung, die du auf <b>beide</b> Seiten anwenden willst.', 'Escribe la transformación que quieres aplicar a <b>los dos</b> lados.'],
+        ['Das verstehe ich nicht. Beispiele: ', 'No lo entiendo. Ejemplos: '], ['Hinter dem Rechenzeichen fehlt eine Zahl.', 'Falta un número detrás del signo de operación.'],
+        ['Mit $x$ multiplizieren oder durch $x$ teilen ist keine sichere Umformung, $x$ könnte $0$ sein.', 'Multiplicar por $x$ o dividir entre $x$ no es una transformación segura: $x$ podría ser $0$.'],
+        ['Durch $0$ darf man nicht teilen.', 'No se puede dividir entre $0$.'],
+        ['Mit $0$ multiplizieren macht aus jeder Gleichung $0 = 0$, dabei geht die Information verloren.', 'Multiplicar por $0$ convierte cualquier ecuación en $0 = 0$ y se pierde la información.'],
+        ['Bring alle $x$ auf eine Seite: ', 'Pasa todas las $x$ a un lado: '], ['Bring die Zahl auf die andere Seite: ', 'Pasa el número al otro lado: '],
+        ['Teile durch die Zahl vor dem $x$: ', 'Divide entre el número que multiplica a $x$: '],
+        // book es-1 mathe11-es: binom, koerper (lateral area A_L and total area A_T, as Spanish books write M and O)
+        ['Der häufigste Fehler: ', 'El error más frecuente: '], ['. Im Bild fehlen dann die beiden blauen Rechtecke, hier ', '. En la figura faltan entonces los dos rectángulos azules, aquí '],
+        ['$M = 2\\pi r h', '$A_L = 2\\pi r h'], ['$O = ', '$A_T = '], ['Mantellinie $s = ', 'Generatriz $s = '],
     ],
-    rule: []
+    rule: [
+    ]
 });
