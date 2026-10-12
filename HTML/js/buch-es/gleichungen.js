@@ -27,9 +27,9 @@ window.BuchES && BuchES.add('gleichungen', {
         ['Mit $0$ multiplizieren macht aus jeder Gleichung $0 = 0$, dabei geht die Information verloren.', 'Multiplicar por $0$ convierte cualquier ecuación en $0 = 0$ y se pierde la información.'],
         ['Bring alle $x$ auf eine Seite: ', 'Pasa todas las $x$ a un lado: '], ['Bring die Zahl auf die andere Seite: ', 'Pasa el número al otro lado: '],
         ['Teile durch die Zahl vor dem $x$: ', 'Divide entre el número que multiplica a $x$: '],
-        // book es-1 mathe11-es: binom, koerper (lateral area A_L and total area A_T, as Spanish books write M and O)
+        // book es-1 mathe11-es: binom, koerper ($M$ and $O$ stay as in the chapter text of lb2)
         ['Der häufigste Fehler: ', 'El error más frecuente: '], ['. Im Bild fehlen dann die beiden blauen Rechtecke, hier ', '. En la figura faltan entonces los dos rectángulos azules, aquí '],
-        ['$M = 2\\pi r h', '$A_L = 2\\pi r h'], ['$O = ', '$A_T = '], ['Mantellinie $s = ', 'Generatriz $s = '],
+        ['Mantellinie $s = ', 'Generatriz $s = '],
     ],
     rule: [
     ]
