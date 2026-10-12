@@ -37,7 +37,7 @@ window.BuchEN && BuchEN.add('gy11lk-vek', {
         ['$ als Gleichungssystem: $', '$ as a system of equations: $'],
         ['Das Gauß-Verfahren führt auf die Einheitsmatrix: Nur $r = s = t = 0$ löst das System. Die Vektoren sind <b>linear unabhängig</b>, sie liegen nicht in einer Ebene.',
             'Gaussian elimination leads to the identity matrix: only $r = s = t = 0$ solves the system. The vectors are <b>linearly independent</b>; they do not lie in one plane.'],
-        ['Das System hat auch Lösungen mit Zahlen ungleich null', 'The system also has solutions with numbers that are not all zero'], [', denn $', ', because $'],
+        ['Das System hat auch Lösungen mit Zahlen, die nicht alle null sind', 'The system also has solutions with numbers that are not all zero'], [', denn $', ', because $'],
         ['. Die Vektoren sind <b>linear abhängig</b>: ', '. The vectors are <b>linearly dependent</b>: '],
         ['$\\vec{c}$ liegt in der Ebene von $\\vec{a}$ und $\\vec{b}$ (komplanar).', '$\\vec{c}$ lies in the plane of $\\vec{a}$ and $\\vec{b}$ (coplanar).'],
         ['$\\vec{a}$ und $\\vec{b}$ sind parallel (kollinear).', '$\\vec{a}$ and $\\vec{b}$ are parallel (collinear).'],
