@@ -31,7 +31,7 @@ window.BuchES && BuchES.add('funktionen', {
         'Abwurfhöhe $h_0$': 'Altura de lanzamiento $h_0$', 'Abwurfgeschwindigkeit $v_0$': 'Velocidad de lanzamiento $v_0$',
         'Höhe beim senkrechten Wurf': 'Altura en el lanzamiento vertical', 't in s': 't en s', 'h in m': 'h en m',
         // einheitskreis, sinus, tageslaenge
-        'Abspielen': 'Reproducir', 'Anhalten': 'Pausa', 'Winkel $\\alpha$': 'Ángulo $\\alpha$', 'Einheitskreis und Sinuskurve': 'Circunferencia unidad y curva seno',
+        'Abspielen': 'Reproducir', 'Anhalten': 'Pausa', 'Winkel $\\alpha$': 'Ángulo $\\alpha$', 'Einheitskreis und Sinuskurve': 'Circunferencia goniométrica y curva seno',
         'Amplitude $a$': 'Amplitud $a$', 'Faktor $b$ (Periode $\\tfrac{2\\pi}{b}$)': 'Factor $b$ (período $\\tfrac{2\\pi}{b}$)',
         'Verschiebung $c$ nach rechts': 'Desplazamiento $c$ a la derecha', 'Verschiebung $d$ nach oben': 'Desplazamiento $d$ hacia arriba',
         'Sinusfunktion mit Parametern': 'Función seno con parámetros',

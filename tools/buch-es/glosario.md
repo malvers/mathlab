@@ -212,3 +212,114 @@ Abitur.* Gymnasium, Fachoberschule, Oberschule the same way where they appear.
 | Gewinnschwelle, Gewinngrenze | umbral de rentabilidad, límite de beneficio |
 | gleichmäßig beschleunigte Bewegung | movimiento uniformemente acelerado |
 | Abstand | distancia |
+
+## Added by es-1 mathe11-es
+
+Package ES1, 12.10.2026: the terms BGY 11 needed that the tables above do not have. No existing line was changed.
+Two decisions differ in wording from a line above, see the notes ("Sin calculadora", "rama/segmento").
+
+### Navigation and recurring headings
+
+| German | Spanish | Note |
+|---|---|---|
+| data-toc-k (letters of the section list) | I · E · 1–4 · P · X · R · T | Introducción, Exploraciones, lecciones, Repasar · Profundizar · Relacionar, Excursión, Repaso final, Test; P also for "Projekt" (3.7) |
+| Üben (data-toc-short) | Práctica | |
+| OHNE HILFSMITTEL (chip, band, test round) | SIN CALCULADORA | used throughout BGY 11, in line with "Ronda 1 · sin calculadora"; the line "Ohne Hilfsmittel (box) → Sin herramientas" above was not needed |
+| MIT HILFSMITTELN | CON HERRAMIENTAS DIGITALES | |
+| Zwei Runden · Rückmeldung sofort | DOS RONDAS · RESPUESTA INMEDIATA | |
+| Mehr üben online | MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN) | the weekly quizzes are German |
+| Das Wichtigste auf einen Blick | LO MÁS IMPORTANTE DE UN VISTAZO | |
+| Zum Weiterdenken | PARA SEGUIR PENSANDO | |
+| Ausblick | PERSPECTIVA | |
+| Methode, Methodenbewusstsein | MÉTODO, CONCIENCIA DEL MÉTODO | |
+| Denk mit | PIENSA CON NOSOTROS | |
+| Projekt | Proyecto | |
+| BNE (Bildung für nachhaltige Entwicklung) | EDUCACIÓN PARA EL DESARROLLO SOSTENIBLE | chip |
+| Klasse 12, Jahrgangsstufe 13 | 12.º curso, 13.º curso | |
+| GTR | calculadora gráfica | CAS stays CAS |
+| GeoGebra / Excel commands | Spanish names: Resuelve, NResuelve, Raíz, Si, AjusteLineal, AjusteExponencial, AjustePolinómico, Secuencia, AleatorioEntre, ContarSi; =SI, ALEATORIO.ENTRE, CONTAR.SI (with `;`) | |
+| Lab and quiz names | translated on the card, "(en alemán)" once | e.g. Potenzlabor → LABORATORIO DE POTENCIAS |
+
+### Functions
+
+| German | Spanish | Note |
+|---|---|---|
+| Wertetabelle, Funktionswert | tabla de valores, valor de la función | |
+| Wortvorschrift | descripción verbal | |
+| Senkrechtentest | prueba de la recta vertical | |
+| streng monoton fallend | estrictamente decreciente | |
+| Periodizität, Nullfunktion | periodicidad, función nula | |
+| Grundfunktion | función básica | |
+| Steckbrief (einer Funktion) | ficha de identidad | 3.7; not the Steckbriefaufgabe of BGY 12 |
+| markante Punkte | puntos característicos | |
+| Streckung, Stauchung, Spiegelung an der x-Achse, Verschiebung | estiramiento, compresión, reflexión respecto al eje x, desplazamiento | |
+| Term | expresión | |
+| modellieren, Modellierungskreislauf | modelizar, ciclo de modelización | |
+| Wachstumsfaktor | factor de crecimiento | |
+| Halbwertszeit | período de semidesintegración | short form *semivida* after it was introduced once (3.2) |
+| Verdopplungszeit | tiempo de duplicación | |
+| Zinseszins | interés compuesto | |
+| lineare Abschreibung, Buchwert | amortización lineal, valor contable | |
+| Grundgebühr, Flatrate | cuota fija, tarifa plana | |
+| Scheitelpunktform, Normalform | forma canónica, forma general | the vertex keeps the letter S |
+| Lösungsformel | fórmula general | |
+| Satz von Vieta | fórmulas de Vieta | |
+| quadratische Ergänzung | completar el cuadrado | |
+| ausmultiplizieren, ausklammern | desarrollar, sacar factor común | |
+| Diskriminante | discriminante | |
+| Produkt-Null-Regel | regla del producto nulo | |
+| Anhalteweg, Bremsweg | distancia de detención, distancia de frenado | |
+| Einheitskreis | circunferencia goniométrica | |
+| Bogenmaß | radianes | |
+| Mittellinie | línea media | |
+| Schieberegler | deslizador | |
+| Wurzelfunktion | función raíz cuadrada | |
+| Basiswechsel | cambio de base | |
+| Zehnerlogarithmus, natürlicher Logarithmus | logaritmo decimal, logaritmo neperiano | |
+| logarithmieren | tomar logaritmos | |
+| Probe | comprobación | |
+| Regression: Bestimmtheitsmaß, Methode der kleinsten Quadrate | coeficiente de determinación, método de los mínimos cuadrados | |
+| Messwerte, Punktwolke, Ausreißer | medidas, nube de puntos, valor atípico | |
+| Interpolation, Extrapolation, Prognose | interpolación, extrapolación, previsión | |
+| Modellkritik | crítica del modelo | |
+| Ausgleichsgerade | recta de ajuste | |
+| Faustregel | regla práctica | |
+
+### Equations, figures, matrices
+
+| German | Spanish | Note |
+|---|---|---|
+| binomische Formeln | identidades notables | "cuadrado de una diferencia" for the second |
+| Äquivalenzumformung | transformación equivalente | |
+| inhaltliches Lösen | resolver razonando | |
+| Hauptnenner | mínimo común denominador | |
+| antiproportional | inversamente proporcional | |
+| Kathete | cateto | |
+| Mantel, Mantellinie | superficie lateral, generatriz | |
+| Umfang | perímetro | |
+| Kugel, Kegel | esfera, cono | |
+| erweiterte Koeffizientenmatrix | matriz ampliada | |
+| Format (einer Matrix) | dimensión | |
+| Stufenform, Pivot, Nullzeile | forma escalonada, pivote, fila nula | |
+| transponieren | trasponer (traspuesta) | |
+| skalare Multiplikation | producto por un escalar | |
+| Einheitsmatrix $E$ | matriz identidad $I$ | |
+| Lösungsmenge $L$ | conjunto solución $S$ | |
+
+### Probability and numerics
+
+| German | Spanish | Note |
+|---|---|---|
+| Ereignis | suceso | |
+| Versuch | ensayo | |
+| Pfad | rama | as in "regla de las ramas"; a single branch of the tree drawing (Ast) is *segmento* |
+| Wappen / Zahl | cara / cruz | letters C / X |
+| Farben rot / blau in Urnen | rojo / azul | letters R / A |
+| krank / gesund (Schnelltest) | enfermo / sano | letters E / S |
+| Pasch, Augenzahl, Augensumme | dobles, puntuación, suma de puntos | |
+| Ziegenproblem | el problema de Monty Hall | |
+| Galtonbrett | tablero de Galton | |
+| empirisches Gesetz der großen Zahlen | ley empírica de los grandes números | |
+| Treffer (Monte-Carlo) | aciertos | Bernoulli: éxito |
+| Streifen, Streifenverfahren | franjas, métodos de franjas | |
+| linke / Mittelpunkt- Rechtecke | rectángulos por la izquierda / del punto medio | |
