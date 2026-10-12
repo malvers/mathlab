@@ -266,3 +266,7 @@ Abitur.* Gymnasium, Fachoberschule, Oberschule the same way where they appear.
 | spitzer / stumpfer / rechter Winkel | ángulo agudo / obtuso / recto | |
 | gleichseitig, gleichschenklig | equilátero, isósceles | |
 | Satz des Pythagoras / des Thales | teorema de Pitágoras / de Tales | |
+| krank K / gesund (Schnelltest) | enfermo E / sano $\overline{E}$ | tree letters E/S in the widget |
+| Treffer T / Niete N (Pfade) | éxito E / fracaso F | |
+| innere Ableitung, Summand | derivada interior, sumando | |
+| Oberfläche O(r) (Dose) | O(r) stays | as in the German book |
