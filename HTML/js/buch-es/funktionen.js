@@ -62,7 +62,9 @@ window.BuchES && BuchES.add('funktionen', {
         'Hyperbel': 'Hipérbola',
         'Betrag': 'Valor absoluto',
         'Zaun an der Mauer': 'Valla junto al muro',
-        'Rechteck mit Umfang 24 cm': 'Rectángulo de perímetro 24 cm'
+        'Rechteck mit Umfang 24 cm': 'Rectángulo de perímetro 24 cm',
+        // book es-2 mathe12-es: helpers (entries the dictionary did not have yet; a German key already above keeps its Spanish)
+        'Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.': 'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.'
     },
     phrase: [
         // book es-1 mathe11-es
@@ -135,7 +137,10 @@ window.BuchES && BuchES.add('funktionen', {
         ['Diskriminante: $', 'Discriminante: $'],
         ['$ hat $D = ', '$ tiene $D = '],
         ['Ausklammern: $x^2 + ax = x(x + a) = 0$. Die Scheitel $S\\left(-\\tfrac{a}{2} \\mid -\\tfrac{a^2}{4}\\right)$ liegen alle auf der Parabel $y = -x^2$ (gestrichelt).', 'Sacando factor común: $x^2 + ax = x(x + a) = 0$. Los vértices $S\\left(-\\tfrac{a}{2}, -\\tfrac{a^2}{4}\\right)$ están todos sobre la parábola $y = -x^2$ (discontinua).'],
-        ['$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.', '$kx^2 = 4$ solo tiene soluciones para $k > 0$. El caso $k = 0$ hay que estudiarlo aparte, porque entonces desaparece el $x^2$.']
+        ['$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.', '$kx^2 = 4$ solo tiene soluciones para $k > 0$. El caso $k = 0$ hay que estudiarlo aparte, porque entonces desaparece el $x^2$.'],
+        // book es-2 mathe12-es: helpers (entries the dictionary did not have yet; a German key already above keeps its Spanish)
+        ['Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: Zu $x = 1$ gehören $y = 2$ und $y = -2$.', 'A la derecha de $x = -1$, cada recta vertical corta la curva dos veces: a $x = 1$ le corresponden $y = 2$ e $y = -2$.'],
+        ['Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.', 'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.']
     ],
     rule: [
         // book es-1 mathe11-es

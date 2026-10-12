@@ -383,3 +383,61 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Treffer (Monte-Carlo) | aciertos | Bernoulli: éxito |
 | Streifen, Streifenverfahren | franjas, métodos de franjas | |
 | linke / Mittelpunkt- Rechtecke | rectángulos por la izquierda / del punto medio | |
+
+## Added by es-2 mathe12-es
+
+| German | Spanish | Note |
+|---|---|---|
+| Üben (data-toc-short), Wiederholen-Abschnitt | Practicar | section letter P; Auftakt has the letter I (Introducción) |
+| Klasse 12 (running text, footer) | 12.º curso | |
+| Mehr üben online | Más práctica en línea (en alemán) | heading above the lab and test links |
+| Polstelle, (Definitions-)Lücke | polo, hueco | |
+| ganzrationale / gebrochenrationale Funktion | función polinómica / función racional | |
+| Zählergrad, Nennergrad | grado del numerador, grado del denominador | |
+| einseitige Grenzwerte, links-/rechtsseitig | límites laterales, por la izquierda / por la derecha | |
+| waagerechte / senkrechte Asymptote | asíntota horizontal / vertical | |
+| stetig, stetige Ergänzung | continua, extensión continua | |
+| Vorzeichenwechsel, Vorzeichentabelle | cambio de signo, tabla de signos | |
+| Differenzenquotient, Differenzialquotient | cociente incremental, cociente diferencial | |
+| differenzierbar, Ableitungsfunktion | derivable, función derivada | |
+| Momentan-, Durchschnittsgeschwindigkeit | velocidad instantánea, velocidad media | |
+| Steigungsdreieck | triángulo de pendiente | |
+| Quotientenregel | regla del cociente | |
+| Bogenmaß | radianes | |
+| e-Funktion, eulersche Zahl | función exponencial, número e | |
+| sin x | sen x in running text; `\sin` in TeX stays (renders "sin") | open: Doc may prefer `\operatorname{sen}` in TeX |
+| Monotoniesatz, streng monoton | teorema de monotonía, estrictamente creciente/decreciente | |
+| notwendige / hinreichende Bedingung | condición necesaria / suficiente | |
+| lokales / globales Extremum, Randwerte | extremo local / global, valores en los extremos del intervalo | |
+| Kurvendiskussion | estudio de funciones | the chapter title 2.5 stays "Estudio de gráficas" (ES0) |
+| Wendetangente, Berührpunkt | tangente de inflexión, punto de tangencia | |
+| Zielfunktion, Nebenbedingung, Randextremum | función objetivo, condición de ligadura, extremo en la frontera | |
+| Ansatz, Probe | planteamiento, comprobación | |
+| Grenzkosten | coste marginal | |
+| Hochpunkt H, Tiefpunkt T, Wendepunkt W (letters) | the letters H, T, W stay in formulas | same answers as the German book |
+| unvereinbar, Unvereinbarkeit | incompatibles, incompatibilidad | |
+| Multiplikationssatz | regla de la multiplicación | |
+| falsch positiv | falso positivo | |
+| Gegenereignis | suceso contrario | |
+| Ziegenproblem | problema de Monty Hall | |
+| Wappen / Zahl (Münze) | cara / cruz | outcome letters C / X (WWZ → CCX) |
+| Augensumme, Augenzahl | suma de puntos, puntuación | as in the es-1 block |
+| Einsatz, Auszahlung, Gewinn (Spiel) | apuesta, premio, ganancia | |
+| Stabdiagramm | diagrama de barras | |
+| Streuung | dispersión | |
+| Bernoulli-Experiment, Niete | experimento de Bernoulli, fracaso | |
+| Fakultät | factorial | |
+| Galtonbrett | tablero de Galton | |
+| rechtsschief / linksschief | asimétrica hacia la derecha / hacia la izquierda | |
+| Kenngrößen, Faustregel | parámetros, regla práctica | |
+| Einheitsvektor, Nullvektor, Verbindungsvektor | vector unitario, vector nulo, vector que une dos puntos | |
+| Linearkombination, kollinear | combinación lineal, colineales | |
+| Quader, Raumdiagonale | ortoedro, diagonal del ortoedro | |
+| Schwerpunkt (Dreieck), Seitenhalbierende | baricentro, mediana | |
+| spitzer / stumpfer / rechter Winkel | ángulo agudo / obtuso / recto | |
+| gleichseitig, gleichschenklig | equilátero, isósceles | |
+| Satz des Pythagoras / des Thales | teorema de Pitágoras / de Tales | |
+| krank K / gesund (Schnelltest) | enfermo E / sano $\overline{E}$ | tree letters E/S in the widget |
+| Treffer T / Niete N (Pfade) | éxito E / fracaso F | |
+| innere Ableitung, Summand | derivada interior, sumando | |
+| Oberfläche O(r) (Dose) | O(r) stays | as in the German book |

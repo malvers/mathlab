@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 12 · Capítulo 2.6 · Buscar la función y problemas de optimización | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Funciones a partir de condiciones, encontrar lo mejor. Capítulo 2.6 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 12: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 2.6 · ÁREA DE APRENDIZAJE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 2.6 · ÁREA DE APRENDIZAJE 2 · ABRIL · MAYO</p>
+            <h1>Buscar la función y problemas de optimización</h1>
+            <p class="b-hero-lead">Ahora el cálculo diferencial se convierte en una herramienta. Una carretera debe enlazar con otra sin formar un ángulo: ¿qué función describe el tramo de unión?
+                De un cartón debe salir una caja con el mayor volumen posible, y una lata debe necesitar la menor cantidad posible de chapa.
+                Aprenderás a construir funciones a partir de <b>condiciones</b> y a encontrar la <b>mejor</b> entre muchas posibilidades.</p>
+            <div class="b-chips"><span class="b-chip">20 SESIONES</span><span class="b-chip">2 LECCIONES</span><span class="b-chip">APLICAR · MODELIZAR</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x*(30-2*x)*(20-2*x)"]' data-labels='["V"]' data-lat="[7.6]" data-pts="[[3.92,1056.3]]" data-x="-0.5,10.5" data-y="-100,1250" data-xl="x" data-yl="V" data-h="240" data-aria="Función volumen de la caja con su máximo"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>traducir propiedades de una gráfica a <b>ecuaciones</b> y determinar funciones polinómicas a partir de condiciones (<b>problemas de reconstrucción</b>)</li>
+                <li>resolver los <b>sistemas de ecuaciones</b> que resultan, también con herramientas digitales</li>
+                <li>en los <b>problemas de optimización</b>, plantear la función objetivo, la condición de ligadura y el dominio</li>
+                <li>tener en cuenta los <b>extremos en la frontera</b> y <b>valorar críticamente</b> los modelos</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Resuelve el sistema $x + y = 5$, $x - y = -1$. ¿Cuánto vale $x$?</p><div class="b-sol"><p>Sumando: $2x = 4$, $x = 2$ (y $y = 3$)</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="número"><p class="b-q-text">$f(x) = ax^2 + bx + c$ con $a = 1$, $b = 2$, $c = 2$. ¿Cuánto vale $f(1)$?</p><div class="b-sol"><p>$1 + 2 + 2 = 5$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">¿En qué valor de $x$ tiene $f(x) = -x^2 + 6x$ su máximo?</p><div class="b-sol"><p>$-2x + 6 = 0$</p></div></div>
+            <div class="b-q" data-ans="18" data-ph="cm²"><p class="b-q-text">Un rectángulo mide 6 cm de largo y su anchura es la mitad de su longitud. ¿Cuál es su área?</p><div class="b-sol"><p>$6 \cdot 3 = 18$ cm²</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">CERRAR EL HUECO</div>
+            <div class="b-text"><p>Dos carreteras rectas terminan desplazadas: una en $(0, 0)$ en la dirección del eje $x$, la otra en $(4, 2)$, también horizontal.</p>
+                <ul><li>Esbozad un tramo de unión sin ángulos. ¿Qué condiciones debe cumplir?</li><li>¿Cuántas condiciones son? ¿Qué tipo de función encaja?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA CAJA</div>
+            <div class="b-text"><p>Recortad cuadrados iguales en las cuatro esquinas de una hoja DIN A4 y doblad una caja abierta.</p>
+                <ul><li>Probad distintos tamaños de cuadrado. ¿Qué caja tiene más capacidad?</li><li>¿De qué depende el volumen? Estableced una fórmula.</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA LATA DEL SUPERMERCADO</div>
+            <div class="b-text"><p>Medid el diámetro y la altura de tres latas de conserva y calculad su volumen.</p>
+                <ul><li>Con el mismo volumen, ¿otras medidas ahorrarían material?</li><li>¿Por qué las latas reales suelen ser distintas de todos modos?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Problemas de reconstrucción" data-toc-k="1" data-toc-short="1 Reconstrucción">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">8 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Problemas de reconstrucción: funciones a partir de condiciones</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Se busca una parábola que pase por los puntos $(0, 1)$, $(1, 0)$ y $(3, 4)$. Planteamiento: $f(x) = ax^2 + bx + c$ con tres números desconocidos.</p></div></div>
+            <div class="b-text"><p>Cada punto da una ecuación: $f(0) = 1 \Rightarrow c = 1$; $f(1) = 0 \Rightarrow a + b + c = 0$; $f(3) = 4 \Rightarrow 9a + 3b + c = 4$.
+                El sistema de ecuaciones (método de Gauss de 11.º curso) da $a = 1$, $b = -2$, $c = 1$, es decir, $f(x) = x^2 - 2x + 1 = (x - 1)^2$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · DE LAS CONDICIONES A LAS ECUACIONES</div>
+                <div class="b-text">
+                    <p>Una función polinómica de grado $n$ tiene $n + 1$ coeficientes. Para ello se necesitan $n + 1$ condiciones.</p>
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th>Propiedad</th><th>Ecuación</th></tr>
+                        <tr><td>El punto $P(x_0, y_0)$ está en la gráfica</td><td>$f(x_0) = y_0$</td></tr>
+                        <tr><td>Extremo (tangente horizontal) en $x_0$</td><td>$f'(x_0) = 0$</td></tr>
+                        <tr><td>Punto de inflexión en $x_0$</td><td>$f''(x_0) = 0$</td></tr>
+                        <tr><td>Pendiente $m$ (tangente) en $x_0$</td><td>$f'(x_0) = m$</td></tr>
+                        <tr><td>simétrica respecto al eje y / al origen</td><td>solo exponentes pares / impares en el planteamiento</td></tr></table></div>
+                    <p>Procedimiento: planteamiento con $f$, $f'$, $f''$ · traducir las condiciones · resolver el sistema de ecuaciones · <b>comprobar</b> que se cumplen todas las condiciones.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Un máximo son dos condiciones:</b> $H(2, 4)$ significa $f(2) = 4$ <b>y</b> $f'(2) = 0$.</p>
+            <p class="b-note"><b>Herramientas digitales:</b> a partir de cuatro incógnitas compensa usar la calculadora (función de sistemas de ecuaciones o de matrices).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · FUNCIÓN A PARTIR DE CONDICIONES</div>
+        <p class="b-help" style="margin:0 0 12px">Elige un conjunto de condiciones y arrastra los puntos. El sistema de ecuaciones y la solución se ajustan al instante.</p>
+        <div data-widget="steckbrief"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · MÁXIMO Y MÍNIMO</div>
+            <div class="b-text"><p>Una función de tercer grado pasa por el origen, tiene el máximo $H(1, 2)$ y un extremo en $x = 3$. Determina $f$.</p></div>
+            <div class="b-sol"><p>$f(0) = 0 \Rightarrow d = 0$ · $f(1) = 2$: $a + b + c = 2$ · $f'(1) = 0$: $3a + 2b + c = 0$ · $f'(3) = 0$: $27a + 6b + c = 0$.</p>
+                <p>Solución: $a = 0{,}5$, $b = -3$, $c = 4{,}5$. <span class="b-res">$f(x) = 0{,}5x^3 - 3x^2 + 4{,}5x$</span>. Comprobación: $f'(x) = 1{,}5(x - 1)(x - 3)$, $f''(1) = -3 < 0$. ✓</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · CON SIMETRÍA</div>
+            <div class="b-text"><p>Una función de cuarto grado simétrica respecto al eje $y$ corta el eje $y$ en 2 y tiene un mínimo en $(1, 0)$.</p></div>
+            <div class="b-sol"><p>Planteamiento $f(x) = ax^4 + bx^2 + c$. $c = 2$, $f(1) = a + b + 2 = 0$, $f'(1) = 4a + 2b = 0$. Así, $b = -2a$, $a = 2$, $b = -4$.
+                <span class="b-res">$f(x) = 2x^4 - 4x^2 + 2 = 2(x^2 - 1)^2$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Traduce a ecuaciones: la gráfica de una función de tercer grado tiene el punto de inflexión $W(1, 3)$ y corta el eje $y$ en $-1$.</p></div>
+            <div class="b-sol"><p>$f(1) = 3$, $f''(1) = 0$, $f(0) = -1$. Son tres condiciones; para grado 3 falta todavía una.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina la parábola que pasa por $(0, 3)$, $(1, 2)$ y $(2, 3)$.</p></div>
+            <div class="b-sol"><p>$c = 3$, $a + b = -1$, $4a + 2b = 0$: $a = 1$, $b = -2$. $f(x) = x^2 - 2x + 3$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Resuelve la exploración «Cerrar el hueco»: determina una función de tercer grado con $f(0) = 0$, $f'(0) = 0$, $f(4) = 2$, $f'(4) = 0$.</p></div>
+            <div class="b-sol"><p>$d = 0$, $c = 0$; $64a + 16b = 2$, $48a + 8b = 0$ ⇒ $b = -6a$, $64a - 96a = 2$, $a = -\tfrac{1}{16}$, $b = \tfrac38$.
+                <span class="b-res">$f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</span>; el punto de inflexión está justo en el centro, en $(2, 1)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Una función de tercer grado simétrica respecto al origen tiene un mínimo en $(1, -2)$. Determínala.</p></div>
+            <div class="b-sol"><p>Planteamiento $f(x) = ax^3 + cx$. $a + c = -2$, $3a + c = 0$: $a = 1$, $c = -3$. $f(x) = x^3 - 3x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un puente debe cruzar un río de 40 m de ancho con forma de arco parabólico, de 8 m de altura en el centro. Determina una ecuación si el origen está en el centro, a la altura del agua. ¿Con qué pendiente sube el arco en la orilla?</p></div>
+            <div class="b-sol"><p>Simétrica: $f(x) = ax^2 + 8$, $f(20) = 0 \Rightarrow a = -0{,}02$. $f'(x) = -0{,}04x$, $f'(-20) = 0{,}8$: pendiente del 80 %, ángulo $\arctan 0{,}8 \approx 38{,}7°$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="4" data-ph="número"><p class="b-q-text">¿Cuántas condiciones se necesitan para una función de tercer grado?</p><div class="b-sol"><p>Cuatro coeficientes $a, b, c, d$.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="número"><p class="b-q-text">¿Cuántas ecuaciones da «máximo $H(2, 5)$»?</p><div class="b-sol"><p>$f(2) = 5$ y $f'(2) = 0$</p></div></div>
+        <div class="b-q" data-ans="-0,02" data-tol="0.0001" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + 8$ debe pasar por $(20, 0)$. ¿Cuánto vale $a$?</p><div class="b-sol"><p>$400a = -8$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Problemas de optimización" data-toc-k="2" data-toc-short="2 Optimizar">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">12 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Problemas de optimización</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>De un cartón de 30 cm × 20 cm se recortan en las esquinas cuadrados de lado $x$. ¿Para qué $x$ tiene la caja la mayor capacidad?</p></div></div>
+            <div class="b-text"><p>La caja mide $30 - 2x$ de largo, $20 - 2x$ de ancho y $x$ de alto. Su volumen es la <b>función objetivo</b> $V(x) = x(30 - 2x)(20 - 2x) = 4x^3 - 100x^2 + 600x$
+                con el dominio $0 < x < 10$. $V'(x) = 12x^2 - 200x + 600 = 0$ da $x \approx 3{,}92$ cm (la segunda solución, 12,74, queda fuera). El volumen es entonces de unos 1 056 cm³.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · RESOLVER PROBLEMAS DE OPTIMIZACIÓN</div>
+                <div class="b-text">
+                    <p><b>1. Función objetivo:</b> ¿qué magnitud debe ser máxima o mínima? Plantea una fórmula para ella, a menudo con dos variables.</p>
+                    <p><b>2. Condición de ligadura:</b> ¿qué está fijado (perímetro, volumen, material)? Úsala para sustituir una variable, de modo que la función objetivo dependa solo de una.</p>
+                    <p><b>3. Dominio:</b> fíjalo a partir del contexto.</p>
+                    <p><b>4. Extremo:</b> determínalo con $f' = 0$ y la condición suficiente. Compara los <b>valores en la frontera</b>.</p>
+                    <p><b>5. Respuesta</b> en el contexto, con unidad, y revisa el modelo de forma crítica.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Extremo en la frontera:</b> si el valor con $f' = 0$ queda fuera del dominio, el óptimo puede estar en la frontera.</p>
+            <p class="b-note"><b>Sin derivada:</b> cuando una función objetivo es demasiado complicada, los ordenadores buscan el óptimo probando de forma ingeniosa, por ejemplo con enjambres de partículas.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · OPTIMIZAR</div>
+        <p class="b-help" style="margin:0 0 12px">Elige un problema y busca el óptimo con el deslizador. Después compáralo con la solución mediante la derivada.</p>
+        <div data-widget="optimieren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · RECTÁNGULO BAJO UNA PARÁBOLA</div>
+            <div class="b-text"><p>Bajo la parábola $f(x) = 9 - x^2$ hay un rectángulo con un lado sobre el eje $x$ y dos vértices sobre la parábola. ¿Cuándo es máxima su área?</p></div>
+            <div class="b-sol"><p>Vértices en $\pm u$: anchura $2u$, altura $9 - u^2$. $A(u) = 2u(9 - u^2) = 18u - 2u^3$, $0 < u < 3$.</p>
+                <p>$A'(u) = 18 - 6u^2 = 0 \Rightarrow u = \sqrt3 \approx 1{,}73$, $A''(u) = -12u < 0$. <span class="b-res">$A_{\max} = 12\sqrt3 \approx 20{,}8$</span> unidades de área.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · LA LATA</div>
+            <div class="b-text"><p>Una lata debe contener 1 litro. ¿Qué medidas necesitan la menor cantidad de chapa?</p></div>
+            <div class="b-sol"><p>Condición de ligadura $\pi r^2 h = 1000 \Rightarrow h = \tfrac{1000}{\pi r^2}$. Función objetivo $O(r) = 2\pi r^2 + 2\pi r h = 2\pi r^2 + \tfrac{2000}{r}$.</p>
+                <p>$O'(r) = 4\pi r - \tfrac{2000}{r^2} = 0 \Rightarrow r^3 = \tfrac{500}{\pi}$, $r \approx 5{,}42$ cm, $h \approx 10{,}84$ cm. <span class="b-res">La lata más económica es tan alta como ancha.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="particleswarm" href="../../particleswarm.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENJAMBRE DE PARTÍCULAS</span><span class="b-lab-what">Optimizar sin derivada (laboratorio en alemán)</span></span></a>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dos números suman 20. ¿Cuándo es máximo su producto?</p></div>
+            <div class="b-sol"><p>$P(x) = x(20 - x)$, $P'(x) = 20 - 2x = 0$: $x = 10$; ambos números valen 10, producto 100.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Con 60 m de valla se delimita un rectángulo junto a un muro (el muro hace de un lado). Determina el área máxima.</p></div>
+            <div class="b-sol"><p>$A(x) = x(60 - 2x)$, $A'(x) = 60 - 4x = 0$: $x = 15$ m, lado junto al muro 30 m, $A = 450$ m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Como el ejercicio 7, pero el muro mide solo 20 m. ¿Qué cambia?</p></div>
+            <div class="b-sol"><p>Ahora debe cumplirse $60 - 2x \le 20$, es decir, $x \ge 20$. En $[20, 30)$ $A$ es decreciente; el óptimo está en la <b>frontera</b> $x = 20$: $A = 20 \cdot 20 = 400$ m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>El beneficio de una empresa es $G(x) = -x^3 + 6x^2 + 15x - 20$ (en miles de €, $x$ en centenares de unidades, $0 \le x \le 8$). ¿Con qué cantidad es máximo?</p></div>
+            <div class="b-sol"><p>$G'(x) = -3x^2 + 12x + 15 = 0 \Rightarrow x^2 - 4x - 5 = 0 \Rightarrow x = 5$. $G''(5) = -18 < 0$. $G(5) = 80$, es decir, 80 000 € con 500 unidades. Fronteras: $G(0) = -20$, $G(8) = -28$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Una ventana está formada por un rectángulo con un semicírculo encima. El perímetro es de 6 m. ¿Con qué radio deja pasar más luz?</p></div>
+            <div class="b-hint"><p>Anchura $2r$, altura del rectángulo $h$. Perímetro $2r + 2h + \pi r = 6$. Área $A = 2rh + \tfrac{\pi}{2} r^2$.</p></div>
+            <div class="b-sol"><p>$h = 3 - r - \tfrac{\pi}{2} r$, $A(r) = 6r - 2r^2 - \tfrac{\pi}{2} r^2$, $A'(r) = 6 - (4 + \pi) r = 0$: $r = \tfrac{6}{4 + \pi} \approx 0{,}84$ m.
+                Entonces también $h \approx 0{,}84$ m: la altura del rectángulo es igual al radio.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="450" data-ph="m²"><p class="b-q-text">¿Área máxima de la valla junto al muro (60 m de valla)?</p><div class="b-sol"><p>$15 \cdot 30 = 450$ m²</p></div></div>
+        <div class="b-q" data-ans="25" data-ph="producto"><p class="b-q-text">Dos números positivos suman 10. ¿Cuál es, como máximo, su producto?</p><div class="b-sol"><p>$5 \cdot 5 = 25$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">La solución de $f'(x) = 0$ queda fuera del dominio. ¿Dónde está el óptimo?</p>
+            <div class="b-mc"><button>no hay ninguno</button><button>en una frontera del dominio</button><button>aun así, en la solución de $f'(x) = 0$</button></div>
+            <div class="b-sol"><p>Entonces hay que comparar los valores en la frontera.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina la función de segundo grado con vértice $S(2, -1)$ que pasa por $(0, 3)$.</p></div>
+            <div class="b-sol"><p>$f(x) = a(x - 2)^2 - 1$, $f(0) = 4a - 1 = 3 \Rightarrow a = 1$. $f(x) = (x - 2)^2 - 1 = x^2 - 4x + 3$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Resuelve la exploración «La caja» para una hoja DIN A4 (29,7 cm × 21 cm). ¿Qué $x$ es óptimo?</p></div>
+            <div class="b-sol"><p>$V(x) = x(29{,}7 - 2x)(21 - 2x)$, $V'(x) = 12x^2 - 202{,}8x + 623{,}7 = 0$. Solución en $0 < x < 10{,}5$: $x \approx 4{,}04$ cm, $V \approx 1128$ cm³.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relacionar con el capítulo 2.4:</b> justifica que en la caja hay de verdad un máximo, y además sin segunda derivada.</p></div>
+            <div class="b-sol"><p>En las fronteras $x = 0$ y $x = 10$ es $V = 0$; entre ellas, $V > 0$. El único punto con $V' = 0$ en el interior tiene que ser el máximo.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Crítica del modelo de la lata: las latas de conserva reales suelen ser más altas de lo que propone el cálculo $h = 2r$. Da razones por las que el modelo solo refleja la realidad en parte.</p></div>
+            <div class="b-sol"><p>Por ejemplo: la tapa y el fondo son más gruesos que la pared lateral o tienen un reborde que cuesta material. Las latas tienen que caber en la estantería, en la mano y en las máquinas.
+                El precio de la chapa es solo una parte de los costes. También influyen la etiqueta y el apilado.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el problema de Dido" data-toc-k="X" data-toc-short="Dido">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">EL PROBLEMA DE OPTIMIZACIÓN MÁS ANTIGUO</span></div>
+    <h2>El problema de Dido</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Según la leyenda, la princesa fenicia Dido huyó a la costa del norte de África. Allí se le permitió comprar tanta tierra como pudiera abarcar con una piel de buey.
+                Cortó la piel en una tira larga y fina y la extendió de modo que encerrara la mayor cantidad posible de tierra. Así nació Cartago.</p>
+            <p>¿Qué forma encierra la mayor área con una longitud dada? Para un rectángulo, el cálculo de este capítulo muestra que es el cuadrado. Entre todas las formas es el <b>círculo</b>,
+                y junto a una costa recta, un <b>semicírculo</b>. Este «problema isoperimétrico» no se demostró por completo hasta el siglo XIX.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Virgilio: Eneida, libro I, versos 365–368.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>BUSCAR LA FUNCIÓN</h4><p>Grado $n$: $n + 1$ condiciones. Punto → $f(x_0) = y_0$, extremo → $f'(x_0) = 0$, punto de inflexión → $f''(x_0) = 0$.</p></div>
+        <div><p>Cerrar el hueco: $f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</p></div></div>
+    <div class="b-rueck"><div><h4>COMPROBACIÓN</h4><p>Comprueba todas las condiciones, también el tipo de extremo.</p></div>
+        <div><p>$f''(1) = -3 < 0$: es realmente un máximo</p></div></div>
+    <div class="b-rueck"><div><h4>PROBLEMA DE OPTIMIZACIÓN</h4><p>Función objetivo, condición de ligadura, dominio, $f' = 0$, fronteras, respuesta.</p></div>
+        <div><p>Caja: $x \approx 3{,}92$ cm · Lata: $h = 2r$</p></div></div>
+    <div class="b-rueck"><div><h4>EXTREMO EN LA FRONTERA</h4><p>Si $f' = 0$ queda fuera, decide la frontera.</p></div>
+        <div><p>Valla junto a un muro de 20 m: 400 m²</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="3" data-ph="número"><p class="b-q-text">¿Cuántas condiciones se necesitan para una parábola?</p><div class="b-sol"><p>$a$, $b$, $c$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="a ="><p class="b-q-text">Una parábola $f(x) = ax^2 + bx + c$ pasa por $(0, 0)$, $(1, 1)$ y $(2, 4)$. ¿Cuánto vale $a$?</p><div class="b-sol"><p>Es la parábola normal: $a = 1$, $b = c = 0$.</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="x ="><p class="b-q-text">¿Para qué $x$ es máximo $x(20 - x)$?</p><div class="b-sol"><p>$20 - 2x = 0$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="1,732" data-tol="0.005" data-ph="u ="><p class="b-q-text">Rectángulo bajo $f(x) = 9 - x^2$: ¿para qué $u$ es máxima $A(u) = 18u - 2u^3$?</p><div class="b-sol"><p>$u = \sqrt3 \approx 1{,}732$</p></div></div>
+            <div class="b-q" data-ans="80" data-ph="miles de €"><p class="b-q-text">$G(x) = -x^3 + 6x^2 + 15x - 20$. ¿Beneficio máximo en miles de euros?</p><div class="b-sol"><p>$G(5) = 80$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">En la lata más económica se cumple …</p>
+                <div class="b-mc"><button>$h = 2r$</button><button>$h = r$</button><button>$h = \pi r$</button></div>
+                <div class="b-sol"><p>Altura igual al diámetro.</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-extremalaufgaben.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBLEMAS DE OPTIMIZACIÓN</span><span class="b-lab-what">Función objetivo y condición de ligadura (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 12.º curso · Área de aprendizaje 2 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-es/analysis.js"></script>
+</body>
+</html>

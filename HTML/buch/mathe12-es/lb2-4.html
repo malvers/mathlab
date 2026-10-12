@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 12 · Capítulo 2.4 · Monotonía, extremos, puntos de inflexión | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Lo que f′ y f″ revelan sobre la gráfica. Capítulo 2.4 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 12: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 2.4 · ÁREA DE APRENDIZAJE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 2.4 · ÁREA DE APRENDIZAJE 2 · ENERO · MARZO</p>
+            <h1>Monotonía, extremos, puntos de inflexión</h1>
+            <p class="b-hero-lead">¿Cuándo son más altas las ventas? ¿A partir de cuándo crecen más despacio? ¿Dónde es más empinada una carretera? La derivada te dice dónde una gráfica
+                <b>crece</b> y <b>decrece</b>, dónde tiene sus <b>máximos y mínimos</b> y dónde pasa de una curva a la izquierda a una curva a la derecha.
+                Con $f'$ y $f''$ lees una gráfica sin dibujarla.</p>
+            <div class="b-chips"><span class="b-chip">12 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">2 LABORATORIOS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["0.25*x^3-3*x+1"]' data-labels='["f"]' data-lat="[4.1]" data-pts="[[-2,5],[2,-3],[0,1]]" data-x="-5,5" data-y="-6,8" data-h="240" data-aria="Curva con un máximo, un mínimo y un punto de inflexión"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>determinar la <b>monotonía</b> a partir del signo de $f'$</li>
+                <li>calcular <b>puntos extremos</b> con la condición necesaria y la suficiente, y distinguir entre <b>locales</b> y <b>globales</b></li>
+                <li>estudiar la <b>curvatura</b> con $f''$ y determinar <b>puntos de inflexión</b></li>
+                <li>emparejar las gráficas de $f$, $f'$ y $f''$</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="6" data-ph="f'(2) ="><p class="b-q-text">$f(x) = 3x^2 - 6x$. ¿Cuánto vale $f'(2)$?</p><div class="b-sol"><p>$f'(x) = 6x - 6$, $f'(2) = 6$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Resuelve $4x - 8 = 0$.</p><div class="b-sol"><p>$x = 2$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">La ecuación $x^2 - 9 = 0$ tiene dos soluciones. Indica la positiva.</p><div class="b-sol"><p>$x = \pm 3$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$f'(x) > 0$ en un intervalo significa que la gráfica de $f$ …</p>
+                <div class="b-mc"><button>crece ahí</button><button>decrece ahí</button><button>está por encima del eje $x$</button></div>
+                <div class="b-sol"><p>La pendiente de la tangente es positiva.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA MONTAÑA RUSA</div>
+            <div class="b-text"><p>Dibujad el perfil de una montaña rusa como una curva.</p>
+                <ul><li>Marcad todos los máximos y mínimos. ¿Cómo es ahí la pendiente?</li><li>¿Dónde pasa la vía de una curva a la izquierda a una curva a la derecha si se recorre de izquierda a derecha?</li></ul></div>
+            <span class="b-pair">→ Lecciones 2 y 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">HORIZONTAL, PERO SIN CUMBRE</div>
+            <div class="b-text"><p>Dibujad $f(x) = x^3$ cerca de 0.</p>
+                <ul><li>¿Cómo es la tangente en $x = 0$?</li><li>¿Tiene $f$ ahí un máximo o un mínimo? ¿Qué se deduce de ello para la condición $f'(x) = 0$?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL ÉXITO DE VENTAS</div>
+            <div class="b-text"><p>Un juego nuevo se vende durante los primeros 12 meses aproximadamente según $V(t) = -t^3 + 12t^2$ (en centenares de unidades en total).</p>
+                <ul><li>¿En qué mes se sumaron más compradores nuevos?</li><li>¿Cuándo es mayor el número total?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Monotonía" data-toc-k="1" data-toc-short="1 Monotonía">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Monotonía y la primera derivada</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = x^3 - 3x^2$ tiene la derivada $f'(x) = 3x^2 - 6x = 3x(x - 2)$. Para $x < 0$ y $x > 2$ es $f'(x) > 0$; entre ambos valores es $f'(x) < 0$.</p></div></div>
+            <div class="b-text"><p>Donde todas las tangentes apuntan hacia arriba, la gráfica crece. Por tanto, $f$ crece para $x \le 0$, decrece para $0 \le x \le 2$ y vuelve a crecer para $x \ge 2$.
+                Los ceros de $f'$ son los extremos de los intervalos de monotonía.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · TEOREMA DE MONOTONÍA</div>
+                <div class="b-text">
+                    <p>Si $f'(x) > 0$ para todos los $x$ de un intervalo, $f$ es <b>estrictamente creciente</b> en él.</p>
+                    <p>Si $f'(x) < 0$ para todos los $x$ de un intervalo, $f$ es <b>estrictamente decreciente</b> en él.</p>
+                    <p>Procedimiento: determina los ceros de $f'$ y luego, en cada subintervalo, comprueba el signo de $f'$ en un punto.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>El recíproco no es del todo cierto:</b> $f(x) = x^3$ es estrictamente creciente en todas partes, aunque $f'(0) = 0$. Los ceros aislados de $f'$ no molestan.</p>
+            <p class="b-note"><b>Tabla de signos:</b> ordena los intervalos de forma clara, como en el widget de la siguiente lección.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · INTERVALOS DE MONOTONÍA</div>
+            <div class="b-text"><p>Estudia la monotonía de $f(x) = x^2 - 6x + 5$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 2x - 6$, cero en $x = 3$. Para $x < 3$: $f' < 0$, $f$ decrece. Para $x > 3$: $f' > 0$, $f$ crece.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · SIEMPRE CRECIENTE</div>
+            <div class="b-text"><p>Demuestra que $f(x) = x^3 + x$ es estrictamente creciente en todas partes.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 + 1 \ge 1 > 0$ para todo $x$. <span class="b-res">Estrictamente creciente.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina los intervalos de monotonía: a) $f(x) = x^2 + 4x$ &nbsp; b) $f(x) = -x^2 + 2x + 3$</p></div>
+            <div class="b-sol"><p>a) $f'(x) = 2x + 4$: decrece para $x \le -2$, crece para $x \ge -2$ &nbsp; b) $f'(x) = -2x + 2$: crece para $x \le 1$, decrece para $x \ge 1$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina los intervalos de monotonía de $f(x) = x^3 - 12x$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 12 = 3(x - 2)(x + 2)$: crece para $x \le -2$, decrece para $-2 \le x \le 2$, crece para $x \ge 2$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Demuestra que $f(x) = \mathrm{e}^x - x$ crece para $x > 0$ y decrece para $x < 0$.</p></div>
+            <div class="b-sol"><p>$f'(x) = \mathrm{e}^x - 1$. Para $x > 0$ es $\mathrm{e}^x > 1$, luego $f' > 0$. Para $x < 0$ es $\mathrm{e}^x < 1$, luego $f' < 0$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>¿Para qué valores de $a$ es $f(x) = x^3 + ax$ estrictamente creciente en todas partes?</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 + a$. Para $a \ge 0$ es $f' \ge 0$ con como mucho un cero en 0: creciente. Para $a < 0$ es $f'(0) = a < 0$: no es creciente en todas partes. Por tanto, $a \ge 0$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">$f(x) = x^2 - 8x$. ¿A partir de qué $x$ crece $f$?</p><div class="b-sol"><p>$2x - 8 \ge 0 \Rightarrow x \ge 4$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$f'(x) = -(x - 1)^2 - 2$. Entonces $f$ es …</p>
+            <div class="b-mc"><button>creciente en todas partes</button><button>decreciente en todas partes</button><button>primero creciente, luego decreciente</button></div>
+            <div class="b-sol"><p>$f'(x) \le -2 < 0$ para todo $x$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Puntos extremos" data-toc-k="2" data-toc-short="2 Extremos">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Calcular puntos extremos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En $f(x) = x^3 - 3x^2$, $f'$ cambia de $+$ a $-$ en $x = 0$ y de $-$ a $+$ en $x = 2$. ¿Qué significa esto para la gráfica?</p></div></div>
+            <div class="b-text"><p>En $x = 0$ la gráfica deja de crecer y empieza a decrecer: un <b>máximo</b> $H(0, 0)$. En $x = 2$ es al revés: un <b>mínimo</b> $T(2, -4)$.
+                En ambos la tangente es horizontal. Pero no toda tangente horizontal corresponde a un punto extremo: en $x^3$, en el punto 0, la gráfica crece antes y después.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PUNTOS EXTREMOS</div>
+                <div class="b-text">
+                    <p><b>Condición necesaria:</b> si $f$ tiene un extremo local en $x_0$, entonces $f'(x_0) = 0$.</p>
+                    <p><b>Condición suficiente:</b> si $f'(x_0) = 0$ y $f''(x_0) < 0$, hay un <b>máximo</b>; si $f'(x_0) = 0$ y $f''(x_0) > 0$, un <b>mínimo</b>.
+                        Equivalente: $f'$ cambia de signo en $x_0$ (de $+$ a $-$: máximo).</p>
+                    <p><b>Local y global:</b> un extremo local es el mayor o el menor valor en su entorno. El mayor o el menor valor en todo el intervalo se encuentra
+                        comparando los extremos locales con los <b>valores en los extremos del intervalo</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Segunda derivada:</b> $f''$ es la derivada de $f'$. En $f(x) = x^3 - 3x^2$: $f'(x) = 3x^2 - 6x$, $f''(x) = 6x - 6$.</p>
+            <p class="b-note"><b>Si $f''(x_0) = 0$:</b> entonces solo sirve el cambio de signo de $f'$. Sin cambio: punto de silla.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ESTUDIAR CURVAS DE TERCER GRADO</div>
+        <p class="b-help" style="margin:0 0 12px">Cambia los coeficientes. Rojo: máximo, verde: mínimo, blanco: punto de inflexión. Muestra $f'$ y $f''$ y compara sus ceros con los puntos marcados.</p>
+        <div data-widget="kurve"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · MÁXIMO Y MÍNIMO</div>
+            <div class="b-text"><p>Determina los puntos extremos de $f(x) = -x^3 + 3x + 2$.</p></div>
+            <div class="b-sol"><p>$f'(x) = -3x^2 + 3 = 0 \Rightarrow x = \pm 1$. $f''(x) = -6x$.</p>
+                <p>$f''(1) = -6 < 0$: máximo $H(1, 4)$. $f''(-1) = 6 > 0$: mínimo $T(-1, 0)$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · GLOBAL CON EXTREMOS DEL INTERVALO</div>
+            <div class="b-text"><p>Determina el mayor y el menor valor de $f(x) = x^3 - 3x$ en el intervalo $[-2, 3]$.</p></div>
+            <div class="b-sol"><p>Locales: $H(-1, 2)$, $T(1, -2)$. Extremos del intervalo: $f(-2) = -2$, $f(3) = 18$.</p>
+                <p><span class="b-res">Máximo global 18 en $x = 3$</span> (en el extremo del intervalo), mínimo global $-2$ en $x = 1$ y $x = -2$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DIFERENCIAL</span><span class="b-lab-what">Estudio de funciones para experimentar (en alemán)</span></span></a>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina los puntos extremos: a) $f(x) = x^2 - 4x + 1$ &nbsp; b) $f(x) = x^3 - 3x^2$</p></div>
+            <div class="b-sol"><p>a) $f'(x) = 2x - 4 = 0$ en $x = 2$, $f'' = 2 > 0$: $T(2, -3)$ &nbsp; b) $H(0, 0)$, $T(2, -4)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina los puntos extremos de $f(x) = \tfrac12 x^3 - \tfrac32 x$.</p></div>
+            <div class="b-sol"><p>$f'(x) = \tfrac32 x^2 - \tfrac32 = 0 \Rightarrow x = \pm 1$, $f''(x) = 3x$: $T(1, -1)$, $H(-1, 1)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Demuestra que $f(x) = x^4 - 2x^2$ tiene dos mínimos y un máximo.</p></div>
+            <div class="b-sol"><p>$f'(x) = 4x^3 - 4x = 4x(x^2 - 1)$, ceros $-1$, $0$, $1$. $f''(x) = 12x^2 - 4$: $f''(\pm1) = 8 > 0$, $f''(0) = -4 < 0$.
+                $T(-1, -1)$, $H(0, 0)$, $T(1, -1)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Determina el mínimo de $f(x) = x \cdot \mathrm{e}^x$ (del capítulo 2.3: $f'(x) = (1 + x)\,\mathrm{e}^x$).</p></div>
+            <div class="b-sol"><p>$f'(x) = 0$ solo en $x = -1$; ahí $f'$ cambia de $-$ a $+$. $T\left(-1, -\tfrac{1}{\mathrm{e}}\right) \approx T(-1;\, -0{,}368)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Estudia $f(x) = x^4$ y $g(x) = x^3$ en el punto 0. Ambas cumplen $f'(0) = f''(0) = 0$. ¿Cuál tiene ahí un extremo? Justifícalo con el cambio de signo de $f'$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 4x^3$ cambia en 0 de $-$ a $+$: mínimo. $g'(x) = 3x^2 \ge 0$ no cambia de signo: no hay extremo, sino un punto de silla.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">¿En qué punto tiene $f(x) = x^2 - 6x + 2$ su mínimo?</p><div class="b-sol"><p>$2x - 6 = 0 \Rightarrow x = 3$</p></div></div>
+        <div class="b-q" data-ans="16" data-ph="y ="><p class="b-q-text">$f(x) = -x^2 + 8x$. ¿Qué valor de $y$ tiene el máximo?</p><div class="b-sol"><p>$x = 4$, $f(4) = -16 + 32 = 16$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$f'(2) = 0$ y $f''(2) = -3$. Entonces $f$ tiene en $x = 2$ …</p>
+            <div class="b-mc"><button>un mínimo</button><button>un máximo</button><button>un punto de inflexión</button></div>
+            <div class="b-sol"><p>$f'' < 0$: curva a la derecha, luego máximo.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Curvatura y puntos de inflexión" data-toc-k="3" data-toc-short="3 Inflexión">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Curvatura y puntos de inflexión</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En el éxito de ventas $V(t) = -t^3 + 12t^2$, $V'(t) = -3t^2 + 24t$ es el número de compradores nuevos por mes. ¿Cuándo es máximo?</p></div></div>
+            <div class="b-text"><p>$V'$ es máximo donde $V''(t) = -6t + 24 = 0$, es decir, en $t = 4$. Ahí las ventas suben con más fuerza: $V'(4) = 48$, es decir, 4 800 unidades por mes.
+                Hasta $t = 4$ la subida se hace más empinada (curva a la izquierda); después, más suave (curva a la derecha). El punto $W(4, 128)$ es un <b>punto de inflexión</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · CURVATURA Y PUNTO DE INFLEXIÓN</div>
+                <div class="b-text">
+                    <p>$f''(x) > 0$: la gráfica es <b>cóncava hacia arriba</b> (curva a la izquierda, la pendiente aumenta). $f''(x) < 0$: <b>cóncava hacia abajo</b> (curva a la derecha, la pendiente disminuye).</p>
+                    <p>En un <b>punto de inflexión</b> cambia la curvatura. Condición: $f''(x_0) = 0$ y $f''$ cambia ahí de signo (o $f'''(x_0) \neq 0$).</p>
+                    <p>Un punto de inflexión es un punto de <b>pendiente extrema</b>: ahí la tasa de variación instantánea es máxima o mínima.
+                        Un punto de inflexión con tangente horizontal se llama <b>punto de silla</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Truco para recordarlo:</b> si recorres la gráfica en bicicleta de izquierda a derecha, en una curva a la izquierda giras el manillar hacia la izquierda.</p>
+            <p class="b-note"><b>En el widget de arriba</b> el punto de inflexión de una curva de tercer grado está siempre justo en el medio entre el máximo y el mínimo.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · PUNTO DE INFLEXIÓN</div>
+            <div class="b-text"><p>Determina los puntos extremos y de inflexión de $f(x) = x^3 - 6x^2 + 9x + 1$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 12x + 9 = 3(x - 1)(x - 3)$, $f''(x) = 6x - 12$.</p>
+                <p>$H(1, 5)$, $T(3, 1)$. $f''(x) = 0$ en $x = 2$ con cambio de signo: <span class="b-res">$W(2, 3)$</span>; ahí la gráfica decrece con más pendiente, $f'(2) = -3$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · PUNTO DE SILLA</div>
+            <div class="b-text"><p>Estudia $f(x) = x^3$ en el punto 0.</p></div>
+            <div class="b-sol"><p>$f'(0) = 0$, $f''(x) = 6x$ cambia de signo en 0. <span class="b-res">Punto de silla $S(0, 0)$</span>: punto de inflexión con tangente horizontal.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina los puntos de inflexión: a) $f(x) = x^3 - 3x^2 + 1$ &nbsp; b) $f(x) = -2x^3 + 6x$</p></div>
+            <div class="b-sol"><p>a) $f''(x) = 6x - 6 = 0$ en $x = 1$: $W(1, -1)$ &nbsp; b) $f''(x) = -12x = 0$ en $x = 0$: $W(0, 0)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>¿Dónde es $f(x) = x^3 - 3x^2 + 1$ cóncava hacia arriba y dónde cóncava hacia abajo?</p></div>
+            <div class="b-sol"><p>$f''(x) = 6x - 6$: cóncava hacia abajo para $x < 1$, cóncava hacia arriba para $x > 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Determina los puntos de inflexión de $f(x) = x^4 - 2x^2$.</p></div>
+            <div class="b-sol"><p>$f''(x) = 12x^2 - 4 = 0 \Rightarrow x = \pm\tfrac{1}{\sqrt3} \approx \pm 0{,}577$, con cambio de signo. $f\left(\pm\tfrac{1}{\sqrt3}\right) = \tfrac19 - \tfrac23 = -\tfrac59$.
+                $W_{1,2}\left(\pm 0{,}577;\, -0{,}556\right)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Resuelve por completo la exploración «El éxito de ventas»: ¿cuándo es mayor el número total y cuánto vale? ¿Por qué termina el modelo después?</p></div>
+            <div class="b-sol"><p>$V'(t) = 3t(8 - t) = 0$ en $t = 8$, $V''(8) = -24 < 0$: máximo $V(8) = 256$, es decir, 25 600 unidades. Después $V$ decrecería, pero los juegos vendidos no desaparecen: el modelo solo vale hasta $t = 8$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra que toda función $f(x) = ax^3 + bx^2 + cx + d$ con $a \neq 0$ tiene exactamente un punto de inflexión, y que está en $x = -\tfrac{b}{3a}$.</p></div>
+            <div class="b-sol"><p>$f''(x) = 6ax + 2b = 0 \Rightarrow x = -\tfrac{b}{3a}$. $f''$ es una recta de pendiente $6a \neq 0$, así que ahí cambia de signo.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">¿En qué punto tiene $f(x) = x^3 - 6x^2 + 5$ su punto de inflexión?</p><div class="b-sol"><p>$f''(x) = 6x - 12 = 0 \Rightarrow x = 2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$f''(x) > 0$ en un intervalo significa …</p>
+            <div class="b-mc"><button>curva a la izquierda, la pendiente aumenta</button><button>curva a la derecha, la pendiente disminuye</button><button>la gráfica crece</button></div>
+            <div class="b-sol"><p>$f''$ es la tasa de variación de la pendiente.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina los puntos extremos y de inflexión de $f(x) = \tfrac14 x^3 - 3x + 1$ y compara con el widget (valores iniciales).</p></div>
+            <div class="b-sol"><p>$f'(x) = \tfrac34 x^2 - 3 = 0 \Rightarrow x = \pm 2$; $H(-2, 5)$, $T(2, -3)$; $f''(x) = \tfrac32 x$: $W(0, 1)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La temperatura a lo largo del día se describe para $0 \le t \le 24$ mediante $T(t) = -0{,}01t^3 + 0{,}3t^2 - 1{,}5t + 10$ (°C, $t$ en horas). ¿Cuándo hace más frío y cuándo más calor? ¿Cuándo sube la temperatura más deprisa?</p></div>
+            <div class="b-sol"><p>$T'(t) = -0{,}03t^2 + 0{,}6t - 1{,}5 = 0 \Rightarrow t^2 - 20t + 50 = 0 \Rightarrow t = 10 \pm \sqrt{50}$, es decir, $t \approx 2{,}93$ o $t \approx 17{,}07$.
+                Mínimo hacia las 2:56 h ($T \approx 7{,}9$ °C), máximo hacia las 17:04 h ($T \approx 22{,}1$ °C). Los valores en los extremos del intervalo, $T(0) = 10$ y $T(24) \approx 8{,}6$ °C, están entre ambos, así que los extremos también son globales.
+                Subida más rápida donde $T''(t) = -0{,}06t + 0{,}6 = 0$: a las 10 h, con $T'(10) = 1{,}5$ °C por hora.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relacionar con el capítulo 2.2:</b> para $f(x) = x^3 - 3x$, esboza las gráficas de $f'$ y $f''$ una debajo de otra. Marca qué puntos se corresponden.</p></div>
+            <div class="b-sol"><p>Puntos extremos de $f$ ($x = \pm1$) ↔ ceros de $f'$. Punto de inflexión de $f$ ($x = 0$) ↔ mínimo de $f'$ ↔ cero de $f''$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Da una función de tercer grado que tenga un punto de silla en $x = 1$.</p></div>
+            <div class="b-sol"><p>Por ejemplo, $f(x) = (x - 1)^3$: $f'(x) = 3(x - 1)^2$ tiene en 1 un cero doble sin cambio de signo, $f''(1) = 0$ con cambio de signo.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el método de Fermat" data-toc-k="X" data-toc-short="Fermat">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">EXTREMOS ANTES DE LA DERIVADA</span></div>
+    <h2>El método de Fermat de máximos y mínimos</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Unos 50 años antes de Newton y Leibniz, el jurista y matemático francés Pierre de Fermat ya buscaba valores extremos. Su idea: cerca de un máximo,
+                el valor de la función apenas cambia si se desplaza $x$ un trocito diminuto $e$. Se igualan «aproximadamente» $f(x + e)$ y $f(x)$, se divide entre $e$ y después se suprime $e$.</p>
+            <p>Su ejemplo: un segmento de longitud $a$ debe dividirse en dos partes $x$ y $a - x$ de modo que su producto sea lo mayor posible.
+                De $(x + e)(a - x - e) \approx x(a - x)$ se obtiene, tras desarrollar y dividir entre $e$: $a - 2x - e \approx 0$; suprimiendo $e$, $x = \tfrac{a}{2}$.</p>
+            <p>En el fondo es exactamente nuestra condición $f'(x) = 0$. Fermat describió el método hacia 1636 en cartas; no se imprimió hasta después de su muerte.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Pierre de Fermat: Methodus ad disquirendam maximam et minimam. En: Varia Opera Mathematica, Toulouse 1679.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>MONOTONÍA</h4><p>$f' > 0$: creciente · $f' < 0$: decreciente.</p></div>
+        <div><p>$x^3 - 3x^2$: crece, decrece en $[0, 2]$, crece</p></div></div>
+    <div class="b-rueck"><div><h4>PUNTOS EXTREMOS</h4><p>$f'(x_0) = 0$ y $f''(x_0) < 0$: máximo; $f''(x_0) > 0$: mínimo. O bien cambio de signo de $f'$.</p></div>
+        <div><p>$-x^3 + 3x + 2$: $H(1, 4)$, $T(-1, 0)$</p></div></div>
+    <div class="b-rueck"><div><h4>GLOBAL</h4><p>Comparar los extremos locales con los valores en los extremos del intervalo.</p></div>
+        <div><p>$x^3 - 3x$ en $[-2, 3]$: máximo 18 en el extremo del intervalo</p></div></div>
+    <div class="b-rueck"><div><h4>CURVATURA</h4><p>$f'' > 0$: curva a la izquierda · $f'' < 0$: curva a la derecha.</p></div>
+        <div><p>Regla de la bicicleta</p></div></div>
+    <div class="b-rueck"><div><h4>PUNTO DE INFLEXIÓN</h4><p>$f''(x_0) = 0$ con cambio de signo: punto de pendiente extrema. Punto de silla: además $f'(x_0) = 0$.</p></div>
+        <div><p>$x^3 - 6x^2 + 9x + 1$: $W(2, 3)$ · $x^3$: punto de silla</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="-1" data-ph="x ="><p class="b-q-text">$f(x) = x^3 - 3x$. ¿En qué punto está el máximo?</p><div class="b-sol"><p>$3x^2 - 3 = 0 \Rightarrow x = \pm1$, $f''(-1) = -6 < 0$</p></div></div>
+            <div class="b-q" data-ans="-2" data-ph="y ="><p class="b-q-text">¿Qué valor de $y$ tiene el mínimo de $f(x) = x^3 - 3x$?</p><div class="b-sol"><p>$f(1) = -2$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">¿En qué punto tiene $f(x) = 2x^3 - 6x^2 + 1$ su punto de inflexión?</p><div class="b-sol"><p>$f''(x) = 12x - 12 = 0$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$f'(x_0) = 0$ y $f''(x_0) = 0$. ¿Qué se deduce con seguridad?</p>
+                <div class="b-mc"><button>un máximo</button><button>un punto de silla</button><button>nada seguro, hay que seguir comprobando</button></div>
+                <div class="b-sol"><p>$x^4$ tiene en 0 un mínimo; $x^3$, un punto de silla.</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="máximo"><p class="b-q-text">¿Mayor valor de $f(x) = x^2$ en el intervalo $[-2, 2\sqrt3]$?</p><div class="b-sol"><p>Valor en el extremo del intervalo $f(2\sqrt3) = 12$</p></div></div>
+            <div class="b-q" data-ans="48" data-ph="f'(4) ="><p class="b-q-text">$V(t) = -t^3 + 12t^2$. ¿Cuánto vale la pendiente en el punto de inflexión?</p><div class="b-sol"><p>$W$ en $t = 4$, $V'(4) = -48 + 96 = 48$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-kurvendiskussion1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESTUDIO DE FUNCIONES I</span><span class="b-lab-what">Puntos extremos y de inflexión (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="potenzlabor" href="../../potenzlabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DE POTENCIAS</span><span class="b-lab-what">Estudio de funciones de funciones potencia (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 12.º curso · Área de aprendizaje 2 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-es/analysis.js"></script>
+</body>
+</html>

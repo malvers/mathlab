@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 12 · Capítulo 5.1 · Vectores en el espacio | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Puntos y vectores, operaciones con vectores, módulo, punto medio. Capítulo 5.1 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 12: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 5.1 · ÁREA DE APRENDIZAJE 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 5.1 · ÁREA DE APRENDIZAJE 5 · MAYO · JUNIO</p>
+            <h1>Vectores en el espacio</h1>
+            <p class="b-hero-lead">Un avión en el cielo, un dron en el aula, la esquina de la estructura de un tejado: en el espacio se necesitan <b>tres</b> coordenadas.
+                Y para desplazamientos, fuerzas y velocidades se necesitan flechas con dirección, sentido y longitud: los <b>vectores</b>.
+                En este capítulo giras con el ratón un auténtico sistema de coordenadas tridimensional y calculas con vectores como con números.</p>
+            <div class="b-chips"><span class="b-chip">12 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">3D DE VERDAD</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>representar puntos en el <b>sistema de coordenadas espacial</b> y leer sus coordenadas</li>
+                <li>determinar <b>vectores de posición y vectores que unen dos puntos</b> e interpretar los vectores física y geométricamente</li>
+                <li><b>sumar</b>, <b>restar</b> y <b>multiplicar por un número</b> vectores, formar combinaciones lineales</li>
+                <li>calcular el <b>módulo</b> de un vector, distancias, <b>puntos medios</b> y <b>baricentros</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="5" data-ph="longitud"><p class="b-q-text">Un triángulo rectángulo tiene catetos 3 y 4. ¿Cuánto mide la hipotenusa?</p><div class="b-sol"><p>$\sqrt{9 + 16} = 5$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="distancia"><p class="b-q-text">¿A qué distancia están los puntos $(1, 1)$ y $(4, 5)$ del plano?</p><div class="b-sol"><p>$\sqrt{3^2 + 4^2} = 5$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">¿Qué coordenada $x$ tiene el punto medio del segmento de $(1, 2)$ a $(5, 8)$?</p><div class="b-sol"><p>$\tfrac{1 + 5}{2} = 3$</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="N"><p class="b-q-text">Dos fuerzas de 6 N y 8 N tiran de un punto formando un ángulo recto. ¿Cuánto vale la fuerza total?</p><div class="b-sol"><p>$\sqrt{36 + 64} = 10$ N</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL AULA COMO SISTEMA DE COORDENADAS</div>
+            <div class="b-text"><p>Fijad una esquina del aula como origen, las aristas del suelo como ejes $x$ e $y$ y la arista vertical como eje $z$.</p>
+                <ul><li>Dad las coordenadas de la lámpara, del tablero de vuestra mesa y de la pizarra (en metros).</li><li>¿Cuánto mide la diagonal del aula?</li></ul></div>
+            <span class="b-pair">→ Lecciones 1 y 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL DRON</div>
+            <div class="b-text"><p>Un dron despega en $(0, 0, 0)$ y vuela sucesivamente 3 m hacia delante, 4 m hacia la derecha y 2 m hacia arriba.</p>
+                <ul><li>¿Dónde está entonces? ¿Importa el orden?</li><li>¿Cuánto mide el camino directo de vuelta?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DOS CUERDAS, UNA CARGA</div>
+            <div class="b-text"><p>Una lámpara cuelga de dos cuerdas. Cada cuerda tira con una fuerza en su dirección.</p>
+                <ul><li>Dibujad las dos fuerzas como flechas. ¿Qué relación tienen con el peso?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Puntos y vectores" data-toc-k="1" data-toc-short="1 Vectores">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Puntos en el espacio, vectores de posición y vectores que unen dos puntos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El punto $P(3, 2, 3)$ está 3 unidades en la dirección $x$ (hacia delante), 2 en la dirección $y$ (hacia la derecha) y 3 en la dirección $z$ (hacia arriba).
+                Las líneas discontinuas de la figura de arriba muestran el camino hasta él.</p></div></div>
+            <div class="b-text"><p>Un <b>vector</b> describe un desplazamiento: cuánto en la dirección $x$, $y$ y $z$. Se escribe como columna.
+                Todas las flechas con la misma longitud, la misma dirección y el mismo sentido representan el mismo vector, empiecen donde empiecen.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · VECTORES EN EL ESPACIO</div>
+                <div class="b-text">
+                    <p>Un <b>vector</b> $\vec{a} = \begin{pmatrix} a_1 \\ a_2 \\ a_3 \end{pmatrix}$ describe un desplazamiento en el espacio. Sus flechas tienen la misma longitud, son paralelas y tienen el mismo sentido.</p>
+                    <p>El <b>vector de posición</b> $\vec{OP}$ de un punto $P(p_1, p_2, p_3)$ desplaza el origen $O$ hasta $P$: $\vec{OP} = \begin{pmatrix} p_1 \\ p_2 \\ p_3 \end{pmatrix}$.</p>
+                    <p>El <b>vector</b> de $A$ a $B$ es $$\vec{AB} = \vec{OB} - \vec{OA} = \begin{pmatrix} b_1 - a_1 \\ b_2 - a_2 \\ b_3 - a_3 \end{pmatrix}$$ («extremo menos origen»).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Física (11.º curso):</b> las fuerzas, las velocidades y los desplazamientos son vectores: tienen un módulo y una dirección. La masa o la temperatura, no.</p>
+            <p class="b-note"><b>Ejes:</b> aquí el eje $x$ apunta hacia delante a la izquierda, el eje $y$ hacia la derecha y el eje $z$ hacia arriba, como en la mayoría de los libros de texto.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · PUNTOS Y VECTORES EN EL ESPACIO</div>
+        <p class="b-help" style="margin:0 0 12px">Introduce las coordenadas de $A$ y $B$ y gira el sistema de coordenadas con el ratón (o con el dedo). En dorado está el vector $\vec{AB}$.</p>
+        <div data-widget="raum3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · VECTOR QUE UNE DOS PUNTOS</div>
+            <div class="b-text"><p>Determina $\vec{AB}$ para $A(2, -1, 1)$ y $B(-1, 3, 4)$.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = \begin{pmatrix} -1 - 2 \\ 3 - (-1) \\ 4 - 1 \end{pmatrix} = \begin{pmatrix} -3 \\ 4 \\ 3 \end{pmatrix}$. Comprobación en el widget: son los valores iniciales.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · EL ORTOEDRO</div>
+            <div class="b-text"><p>Un ortoedro tiene un vértice en el origen; sus aristas están sobre los ejes y miden 4, 3 y 2. Da sus vértices.</p></div>
+            <div class="b-sol"><p>Abajo: $(0, 0, 0)$, $(4, 0, 0)$, $(4, 3, 0)$, $(0, 3, 0)$. Arriba, los mismos con $z = 2$.
+                La diagonal del ortoedro desde el origen hasta el vértice opuesto es $\begin{pmatrix} 4 \\ 3 \\ 2 \end{pmatrix}$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina $\vec{AB}$ y $\vec{BA}$ para $A(1, 2, 3)$ y $B(4, 0, 5)$. ¿Qué observas?</p></div>
+            <div class="b-sol"><p>$\vec{AB} = \begin{pmatrix} 3 \\ -2 \\ 2 \end{pmatrix}$, $\vec{BA} = \begin{pmatrix} -3 \\ 2 \\ -2 \end{pmatrix} = -\vec{AB}$: misma longitud, sentido opuesto.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>El punto $A(2, 1, 0)$ se desplaza según $\vec{v} = \begin{pmatrix} 1 \\ -3 \\ 4 \end{pmatrix}$. ¿Dónde acaba?</p></div>
+            <div class="b-sol"><p>$A'(3, -2, 4)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿En qué eje o en qué plano están los puntos $P(0, 3, 0)$, $Q(2, 0, 5)$, $R(0, 0, -1)$, $S(1, 4, 0)$?</p></div>
+            <div class="b-sol"><p>$P$ en el eje $y$, $Q$ en el plano $xz$, $R$ en el eje $z$, $S$ en el plano $xy$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$ABCD$ es un paralelogramo con $A(1, 0, 2)$, $B(4, 1, 2)$, $C(5, 3, 4)$. Determina $D$.</p></div>
+            <div class="b-hint"><p>En el paralelogramo se cumple $\vec{AD} = \vec{BC}$.</p></div>
+            <div class="b-sol"><p>$\vec{BC} = \begin{pmatrix} 1 \\ 2 \\ 2 \end{pmatrix}$, así que $D = A + \vec{BC} = (2, 2, 4)$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="-3" data-ph="número"><p class="b-q-text">$A(5, 1, 2)$, $B(2, 1, 7)$. ¿Qué componente $x$ tiene $\vec{AB}$?</p><div class="b-sol"><p>$2 - 5 = -3$</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="número"><p class="b-q-text">¿Qué componente $z$ tiene $\vec{AB}$ para los mismos puntos?</p><div class="b-sol"><p>$7 - 2 = 5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Operaciones con vectores" data-toc-k="2" data-toc-short="2 Operaciones">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Sumar, restar, multiplicar por un número</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El dron vuela $\vec{a} = \begin{pmatrix} 3 \\ 0 \\ 0 \end{pmatrix}$, después $\vec{b} = \begin{pmatrix} 0 \\ 4 \\ 0 \end{pmatrix}$ y después $\vec{c} = \begin{pmatrix} 0 \\ 0 \\ 2 \end{pmatrix}$.
+                En total es un único desplazamiento según $\begin{pmatrix} 3 \\ 4 \\ 2 \end{pmatrix}$.</p></div></div>
+            <div class="b-text"><p>Dos desplazamientos seguidos dan de nuevo un desplazamiento: la <b>suma</b>. Se coloca la segunda flecha en el extremo de la primera.
+                El orden no importa: los dos caminos forman los lados de un paralelogramo y la suma es su diagonal.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · OPERACIONES CON VECTORES</div>
+                <div class="b-text">
+                    <p>$\vec{a} + \vec{b} = \begin{pmatrix} a_1 + b_1 \\ a_2 + b_2 \\ a_3 + b_3 \end{pmatrix}$ &nbsp; · &nbsp; $\vec{a} - \vec{b} = \vec{a} + (-\vec{b})$ &nbsp; · &nbsp; $r \cdot \vec{a} = \begin{pmatrix} r a_1 \\ r a_2 \\ r a_3 \end{pmatrix}$</p>
+                    <p>$r \cdot \vec{a}$ es $|r|$ veces tan largo como $\vec{a}$; para $r < 0$ tiene sentido opuesto. Dos vectores con $\vec{b} = r \cdot \vec{a}$ se llaman <b>paralelos</b> (colineales).</p>
+                    <p>Una suma de múltiplos como $2\vec{a} - 3\vec{b}$ se llama <b>combinación lineal</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Vector nulo:</b> $\vec{0} = \begin{pmatrix} 0 \\ 0 \\ 0 \end{pmatrix}$ no desplaza nada. $\vec{a} + (-\vec{a}) = \vec{0}$.</p>
+            <p class="b-note"><b>Fuerzas:</b> si varias fuerzas actúan sobre un punto, el efecto es el de su suma vectorial, la fuerza resultante.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · SUMA, DIFERENCIA, MÚLTIPLO</div>
+        <p class="b-help" style="margin:0 0 12px">Elige arriba qué se muestra y modifica los vectores. En dorado está siempre el resultado.</p>
+        <div data-widget="raum3d" data-mode="summe"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · COMBINACIÓN LINEAL</div>
+            <div class="b-text"><p>Calcula $2\vec{a} - 3\vec{b}$ para $\vec{a} = \begin{pmatrix} 3 \\ 1 \\ 1 \end{pmatrix}$ y $\vec{b} = \begin{pmatrix} -1 \\ 2 \\ 2 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 6 \\ 2 \\ 2 \end{pmatrix} - \begin{pmatrix} -3 \\ 6 \\ 6 \end{pmatrix} = \begin{pmatrix} 9 \\ -4 \\ -4 \end{pmatrix}$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · ¿PARALELOS?</div>
+            <div class="b-text"><p>¿Son paralelos $\vec{a} = \begin{pmatrix} 1 \\ 2 \\ -1 \end{pmatrix}$ y $\vec{b} = \begin{pmatrix} -2 \\ -4 \\ 2 \end{pmatrix}$? ¿Y $\vec{c} = \begin{pmatrix} 2 \\ 4 \\ 1 \end{pmatrix}$?</p></div>
+            <div class="b-sol"><p>$\vec{b} = -2\vec{a}$: paralelos, de sentido opuesto. Para $\vec{c} = r\vec{a}$ tendría que ser $r = 2$ (por la primera fila) y $r = -1$ (por la tercera): <span class="b-res">no son paralelos</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcula con $\vec{a} = \begin{pmatrix} 2 \\ 0 \\ -1 \end{pmatrix}$, $\vec{b} = \begin{pmatrix} 1 \\ 3 \\ 2 \end{pmatrix}$: a) $\vec{a} + \vec{b}$ &nbsp; b) $\vec{a} - \vec{b}$ &nbsp; c) $3\vec{a}$ &nbsp; d) $\vec{a} + 2\vec{b}$</p></div>
+            <div class="b-sol"><p>a) $(3, 3, 1)$ &nbsp; b) $(1, -3, -3)$ &nbsp; c) $(6, 0, -3)$ &nbsp; d) $(4, 6, 3)$, cada uno como vector columna.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Tres fuerzas (en N) actúan sobre un punto: $\vec{F_1} = \begin{pmatrix} 3 \\ 0 \\ 4 \end{pmatrix}$, $\vec{F_2} = \begin{pmatrix} 0 \\ 4 \\ -4 \end{pmatrix}$, $\vec{F_3} = \begin{pmatrix} -3 \\ -4 \\ 0 \end{pmatrix}$. ¿Cuánto vale la fuerza resultante?</p></div>
+            <div class="b-sol"><p>$\vec{F_1} + \vec{F_2} + \vec{F_3} = \vec{0}$: las fuerzas se anulan y el punto permanece en reposo.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿Para qué $t$ son paralelos $\vec{a} = \begin{pmatrix} 2 \\ t \\ 6 \end{pmatrix}$ y $\vec{b} = \begin{pmatrix} 1 \\ 3 \\ 3 \end{pmatrix}$?</p></div>
+            <div class="b-sol"><p>$\vec{a} = 2\vec{b}$ exige $t = 6$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Escribe $\vec{v} = \begin{pmatrix} 5 \\ 4 \\ 1 \end{pmatrix}$ como combinación lineal $r\vec{a} + s\vec{b}$ con $\vec{a} = \begin{pmatrix} 1 \\ 2 \\ 1 \end{pmatrix}$ y $\vec{b} = \begin{pmatrix} 2 \\ 1 \\ 0 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>Tercera fila: $r = 1$. Primera fila: $1 + 2s = 5 \Rightarrow s = 2$. Comprobación con la segunda fila: $2 + 2 = 4$. ✓ $\vec{v} = \vec{a} + 2\vec{b}$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="9" data-ph="número"><p class="b-q-text">¿Qué primera componente tiene $2\vec{a} - 3\vec{b}$ para $\vec{a} = (3, 1, 1)$ y $\vec{b} = (-1, 2, 2)$?</p><div class="b-sol"><p>$6 + 3 = 9$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">¿Son paralelos $\vec{a} = (2, -4, 6)$ y $\vec{b} = (-1, 2, -3)$?</p>
+            <div class="b-mc"><button>no</button><button>sí, $\vec{a} = -2\vec{b}$</button><button>sí, $\vec{a} = 2\vec{b}$</button></div>
+            <div class="b-sol"><p>Cada componente de $\vec{a}$ es $-2$ veces la de $\vec{b}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Módulo, punto medio, baricentro" data-toc-k="3" data-toc-short="3 Módulo">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Módulo, punto medio y baricentro</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>¿Cuánto mide la diagonal del ortoedro de aristas 4, 3, 2? La diagonal de la base mide $\sqrt{4^2 + 3^2} = 5$ y encima está la altura 2.</p></div></div>
+            <div class="b-text"><p>Dos veces Pitágoras: la diagonal del ortoedro mide $\sqrt{5^2 + 2^2} = \sqrt{4^2 + 3^2 + 2^2} = \sqrt{29} \approx 5{,}39$. Así se calcula la longitud de cualquier vector en el espacio.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MÓDULO, PUNTO MEDIO, BARICENTRO</div>
+                <div class="b-text">
+                    <p><b>Módulo</b> (longitud): $|\vec{a}| = \sqrt{a_1^2 + a_2^2 + a_3^2}$. La <b>distancia</b> entre dos puntos es $|\vec{AB}|$.</p>
+                    <p><b>Punto medio</b> del segmento $AB$: $\vec{OM} = \tfrac12 \left(\vec{OA} + \vec{OB}\right)$, es decir, la media de las coordenadas.</p>
+                    <p><b>Baricentro</b> del triángulo $ABC$: $\vec{OS} = \tfrac13 \left(\vec{OA} + \vec{OB} + \vec{OC}\right)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Vector unitario:</b> $\tfrac{1}{|\vec{a}|} \cdot \vec{a}$ tiene longitud 1 y la misma dirección y sentido que $\vec{a}$.</p>
+            <p class="b-note"><b>Baricentro:</b> divide cada mediana en la razón 2 : 1. Un triángulo de cartón se mantiene en equilibrio justo sobre este punto.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · LONGITUD Y VECTOR UNITARIO</div>
+            <div class="b-text"><p>Determina $|\vec{a}|$ y el vector unitario de $\vec{a} = \begin{pmatrix} 2 \\ -1 \\ 2 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$|\vec{a}| = \sqrt{4 + 1 + 4} = 3$, vector unitario $\tfrac13 \vec{a} = \begin{pmatrix} 2/3 \\ -1/3 \\ 2/3 \end{pmatrix}$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · BARICENTRO</div>
+            <div class="b-text"><p>Determina el baricentro del triángulo con $A(1, 0, 2)$, $B(3, 4, 0)$, $C(5, 2, 4)$.</p></div>
+            <div class="b-sol"><p>$S\left(\tfrac{1 + 3 + 5}{3},\; \tfrac{0 + 4 + 2}{3},\; \tfrac{2 + 0 + 4}{3}\right) = $ <span class="b-res">$S(3, 2, 2)$</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="vektoren" href="../../vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTORES</span><span class="b-lab-what">Cálculo vectorial en 11 capítulos (en alemán)</span></span></a>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcula los módulos: a) $\begin{pmatrix} 3 \\ 4 \\ 0 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 1 \\ 2 \\ 2 \end{pmatrix}$ &nbsp; c) $\begin{pmatrix} -2 \\ 3 \\ 6 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) 5 &nbsp; b) 3 &nbsp; c) 7</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina la distancia y el punto medio de $P(1, 2, 3)$ y $Q(4, 6, 3)$.</p></div>
+            <div class="b-sol"><p>$|\vec{PQ}| = \sqrt{9 + 16 + 0} = 5$, $M(2{,}5;\, 4;\, 3)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿Es isósceles el triángulo $A(1, 1, 1)$, $B(3, 2, 3)$, $C(2, 3, -1)$?</p></div>
+            <div class="b-sol"><p>$|\vec{AB}| = \sqrt{4 + 1 + 4} = 3$, $|\vec{AC}| = \sqrt{1 + 4 + 4} = 3$, $|\vec{BC}| = \sqrt{1 + 1 + 16} = \sqrt{18}$. Sí, con el vértice principal en $A$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$M(2, 1, 4)$ es el punto medio de $AB$ con $A(0, 3, 5)$. Determina $B$.</p></div>
+            <div class="b-sol"><p>$\vec{OB} = 2\vec{OM} - \vec{OA}$, así que $B(4, -1, 3)$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="7" data-ph="longitud"><p class="b-q-text">¿Cuánto mide el vector $(2, 3, 6)$?</p><div class="b-sol"><p>$\sqrt{4 + 9 + 36} = 7$</p></div></div>
+        <div class="b-q" data-ans="5,385" data-tol="0.002" data-ph="longitud"><p class="b-q-text">¿Cuánto mide la diagonal de un ortoedro de aristas 4, 3 y 2?</p><div class="b-sol"><p>$\sqrt{29} \approx 5{,}385$</p></div></div>
+        <div class="b-q" data-ans="2,5" data-tol="0.0001" data-ph="z ="><p class="b-q-text">¿Qué coordenada $z$ tiene el punto medio de $A(2, -1, 1)$ y $B(-1, 3, 4)$?</p><div class="b-sol"><p>$\tfrac{1 + 4}{2} = 2{,}5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="13">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Un cubo de arista 2 tiene un vértice en el origen y las aristas sobre los semiejes positivos. Da todos sus vértices y calcula la longitud de la diagonal del cubo.</p></div>
+            <div class="b-sol"><p>Todos los puntos con coordenadas de $\{0, 2\}$, por ejemplo $(2, 0, 2)$. Diagonal: $\sqrt{4 + 4 + 4} = 2\sqrt3 \approx 3{,}46$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Un avión vuela con $\vec{v} = \begin{pmatrix} 200 \\ 150 \\ 0 \end{pmatrix}$ km/h (velocidad propia) y el viento sopla con $\vec{w} = \begin{pmatrix} -20 \\ 30 \\ 0 \end{pmatrix}$ km/h. ¿A qué velocidad se mueve respecto al suelo?</p></div>
+            <div class="b-sol"><p>$\vec{v} + \vec{w} = \begin{pmatrix} 180 \\ 180 \\ 0 \end{pmatrix}$, módulo $180\sqrt2 \approx 254{,}6$ km/h.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relacionar con la física:</b> una carga de 100 N cuelga de dos cuerdas. La cuerda 1 tira con $\vec{F_1} = \begin{pmatrix} -30 \\ 0 \\ 50 \end{pmatrix}$ N. ¿Con qué fuerza tira la cuerda 2 si todo está en reposo?</p></div>
+            <div class="b-sol"><p>Peso $\vec{G} = \begin{pmatrix} 0 \\ 0 \\ -100 \end{pmatrix}$. Equilibrio: $\vec{F_2} = -\vec{F_1} - \vec{G} = \begin{pmatrix} 30 \\ 0 \\ 50 \end{pmatrix}$ N, módulo $\approx 58{,}3$ N.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra con vectores: en todo paralelogramo las diagonales se cortan en su punto medio.</p></div>
+            <div class="b-sol"><p>Con $\vec{OD} = \vec{OA} + \vec{OC} - \vec{OB}$ (paralelogramo), el punto medio de $AC$ es $\tfrac12(\vec{OA} + \vec{OC})$ y el de $BD$ es $\tfrac12(\vec{OB} + \vec{OD}) = \tfrac12(\vec{OA} + \vec{OC})$. Los dos son el mismo punto.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: un profesor inventa los vectores" data-toc-k="X" data-toc-short="Graßmann">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">INCOMPRENDIDO Y ADELANTADO A SU TIEMPO</span></div>
+    <h2>Un profesor de Gymnasium inventa el cálculo vectorial</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Hermann Graßmann enseñaba matemáticas en un Gymnasium de Stettin (hoy Szczecin). En 1844 publicó un libro titulado «Die lineale Ausdehnungslehre» («La teoría lineal de la extensión»).
+                En él calculaba con segmentos orientados: los sumaba, los multiplicaba por números, y todo ello en un número cualquiera de dimensiones. En esencia es el cálculo vectorial que aprendes aquí.</p>
+            <p>Casi nadie entendió el libro. Era difícil de leer y estaba muy adelantado a su tiempo. Graßmann nunca obtuvo una cátedra de matemáticas y se dedicó a la lingüística,
+                donde se hizo famoso con sus trabajos sobre el sánscrito. Solo décadas más tarde reconocieron matemáticos y físicos lo que había creado.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Hermann Graßmann: Die lineale Ausdehnungslehre, ein neuer Zweig der Mathematik. Leipzig 1844.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO ESENCIAL DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>VECTOR QUE UNE DOS PUNTOS</h4><p>$\vec{AB} = \vec{OB} - \vec{OA}$: extremo menos origen.</p></div>
+        <div><p>$A(2, -1, 1)$, $B(-1, 3, 4)$: $\vec{AB} = (-3, 4, 3)$</p></div></div>
+    <div class="b-rueck"><div><h4>OPERACIONES</h4><p>Sumar, restar y multiplicar por un número componente a componente. Paralelos: $\vec{b} = r\vec{a}$.</p></div>
+        <div><p>$2\vec{a} - 3\vec{b}$: combinación lineal</p></div></div>
+    <div class="b-rueck"><div><h4>MÓDULO</h4><p>$|\vec{a}| = \sqrt{a_1^2 + a_2^2 + a_3^2}$, distancia $= |\vec{AB}|$.</p></div>
+        <div><p>$|(2, -1, 2)| = 3$</p></div></div>
+    <div class="b-rueck"><div><h4>PUNTO MEDIO Y BARICENTRO</h4><p>$\tfrac12(\vec{OA} + \vec{OB})$ · $\tfrac13(\vec{OA} + \vec{OB} + \vec{OC})$</p></div>
+        <div><p>$S(3, 2, 2)$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · CORRECCIÓN INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="4" data-ph="número"><p class="b-q-text">$A(1, 0, 2)$, $B(3, 4, 0)$. ¿Qué componente $y$ tiene $\vec{AB}$?</p><div class="b-sol"><p>$4 - 0 = 4$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="longitud"><p class="b-q-text">¿Cuánto mide $(1, 2, 2)$?</p><div class="b-sol"><p>$\sqrt9 = 3$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">¿Qué coordenada $x$ tiene el punto medio de $(1, 0, 2)$ y $(3, 4, 0)$?</p><div class="b-sol"><p>$\tfrac{1 + 3}{2} = 2$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="6" data-ph="t ="><p class="b-q-text">¿Para qué $t$ son paralelos $(2, t, 6)$ y $(1, 3, 3)$?</p><div class="b-sol"><p>Factor 2: $t = 6$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="distancia"><p class="b-q-text">¿Distancia entre $P(1, 2, 3)$ y $Q(4, 6, 3)$?</p><div class="b-sol"><p>$\sqrt{9 + 16} = 5$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Baricentro de $A(1, 0, 2)$, $B(3, 4, 0)$, $C(5, 2, 4)$: ¿qué coordenada $x$?</p><div class="b-sol"><p>$\tfrac{9}{3} = 3$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTORES EN EL ESPACIO</span><span class="b-lab-what">Puntos, vectores, módulos (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="vektoren" href="../../vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTORES</span><span class="b-lab-what">El gran laboratorio de cálculo vectorial</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 12.º curso · Área de aprendizaje 5 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-es/vektoren.js"></script>
+</body>
+</html>

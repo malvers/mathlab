@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 12 · Capítulo 1.3 · La distribución binomial | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Procesos de Bernoulli, coeficiente binomial, probabilidades acumuladas. Capítulo 1.3 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 12: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.3 · ÁREA DE APRENDIZAJE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.3 · ÁREA DE APRENDIZAJE 1 · OCTUBRE · NOVIEMBRE</p>
+            <h1>La distribución binomial</h1>
+            <p class="b-hero-lead">Éxito o fracaso, una y otra vez, de forma independiente: un test de opción múltiple en el que se responde al azar. Una aerolínea que vende más billetes de los asientos que tiene.
+                Un envío en el que algunas piezas son defectuosas. Detrás de todo ello está <b>la misma</b> distribución. Con una sola fórmula y un histograma
+                respondes a preguntas como «¿Qué probabilidad hay de cometer como máximo dos errores?».</p>
+            <div class="b-chips"><span class="b-chip">20 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">1 LABORATORIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="20" data-p="0.35" data-lo="5" data-hi="9"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>reconocer <b>experimentos de Bernoulli</b> y <b>procesos de Bernoulli</b></li>
+                <li>contar ramas con el <b>factorial</b> y el <b>coeficiente binomial</b></li>
+                <li>calcular probabilidades puntuales y <b>acumuladas</b> con la <b>fórmula de Bernoulli</b>, también con tabla y calculadora</li>
+                <li>usar la <b>esperanza</b> $n \cdot p$ y la <b>desviación típica</b> e interpretar histogramas</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="1/8" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Se lanza una moneda tres veces. ¿Qué probabilidad hay de obtener tres caras?</p><div class="b-sol"><p>$\left(\tfrac12\right)^3 = \tfrac18$</p></div></div>
+            <div class="b-q" data-ans="0,5177" data-tol="0.002" data-ph="P ="><p class="b-q-text">¿Qué probabilidad hay de sacar al menos un seis en cuatro lanzamientos?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 0{,}518$</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="número"><p class="b-q-text">¿De cuántas maneras se pueden colocar cuatro libros uno al lado del otro?</p><div class="b-sol"><p>$4 \cdot 3 \cdot 2 \cdot 1 = 24$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="μ ="><p class="b-q-text">¿Cuál es la esperanza si $X$ toma los valores 4 y 8, cada uno con probabilidad 0,5?</p><div class="b-sol"><p>$2 + 4 = 6$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL TEST AL AZAR</div>
+            <div class="b-text"><p>Un test tiene 10 preguntas con 4 respuestas cada una; exactamente una es correcta. Marcáis todo al azar.</p>
+                <ul><li>¿Cuántas respuestas correctas esperáis? ¿Qué probabilidad hay de acertar 5 o más?</li><li>Simuladlo: cada uno lanza un tetraedro o saca cartas.</li></ul></div>
+            <span class="b-pair">→ Lecciones 1 y 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">SOBREVENTA</div>
+            <div class="b-text"><p>Un avión tiene 100 asientos. La experiencia muestra que se presenta el 95 % de quienes han reservado. La aerolínea vende 103 billetes.</p>
+                <ul><li>¿Qué argumentos hay a favor y cuáles en contra?</li><li>¿Cómo se podría calcular con qué frecuencia hay que dejar en tierra a pasajeros?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL TABLERO DE GALTON</div>
+            <div class="b-text"><p>Unas bolas caen a través de filas de clavos y en cada uno rebotan hacia la izquierda o hacia la derecha.</p>
+                <ul><li>¿En qué casillas cae la mayoría?</li><li>¿Cuántos caminos llevan a cada casilla?</li></ul></div>
+            <span class="b-pair">→ Lecciones 1 y 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Procesos de Bernoulli" data-toc-k="1" data-toc-short="1 Bernoulli">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">6 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Procesos de Bernoulli y la fórmula de Bernoulli</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Se lanza un dado cinco veces. ¿Qué probabilidad hay de sacar un seis <b>exactamente dos veces</b>?</p></div></div>
+            <div class="b-text">
+                <p>Una rama con exactamente dos seises, por ejemplo 66NNN (N: no seis), tiene la probabilidad $\left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^3$.
+                    ¿Cuántas ramas así hay? Hay que elegir 2 de los 5 lanzamientos para los seises: 66NNN, 6N6NN, …, NNN66. Son 10 posibilidades.
+                    Así pues, $P(X = 2) = 10 \cdot \tfrac{1}{36} \cdot \tfrac{125}{216} \approx 0{,}161$.</p>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PROCESO DE BERNOULLI Y DISTRIBUCIÓN BINOMIAL</div>
+                <div class="b-text">
+                    <p>Un <b>experimento de Bernoulli</b> tiene exactamente dos resultados: éxito (probabilidad $p$) y fracaso ($1 - p$).
+                        Un <b>proceso de Bernoulli</b> de longitud $n$ consta de $n$ repeticiones independientes con la misma $p$.</p>
+                    <p>El <b>coeficiente binomial</b> $\binom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$ cuenta las ramas con exactamente $k$ éxitos, siendo $n! = 1 \cdot 2 \cdot \ldots \cdot n$ y $0! = 1$.</p>
+                    <p><b>Fórmula de Bernoulli:</b> para el número $X$ de éxitos se cumple $$P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k}.$$
+                        Se dice entonces que $X$ sigue una <b>distribución binomial</b> de parámetros $n$ y $p$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculadora:</b> allí $\binom{n}{k}$ se suele llamar nCr, y la distribución binomial binompdf (puntual) y binomcdf (acumulada).</p>
+            <p class="b-note"><b>La extracción sin reemplazamiento</b> no es un proceso de Bernoulli, porque $p$ cambia de una extracción a otra. Sin embargo, con poblaciones grandes casi lo es.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · TODAS LAS RAMAS CON EXACTAMENTE k ÉXITOS</div>
+        <p class="b-help" style="margin:0 0 12px">Elige la longitud del proceso, el número de éxitos $k$ y $p$. Se cuentan las ramas iluminadas: eso es $\binom{n}{k}$.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · EL TEST AL AZAR</div>
+            <div class="b-text"><p>10 preguntas, 4 respuestas cada una, una correcta, todo al azar. ¿Qué probabilidad hay de acertar exactamente 3? ¿Y de no acertar ninguna?</p></div>
+            <div class="b-sol"><p>$n = 10$, $p = 0{,}25$: $P(X = 3) = \binom{10}{3} \cdot 0{,}25^3 \cdot 0{,}75^7 = 120 \cdot 0{,}015625 \cdot 0{,}1335 \approx 0{,}250$</p>
+                <p>$P(X = 0) = 0{,}75^{10} \approx 0{,}056$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · COEFICIENTES BINOMIALES</div>
+            <div class="b-text"><p>Calcula $\binom{5}{2}$, $\binom{7}{3}$ y $\binom{49}{6}$. ¿Qué cuenta el último?</p></div>
+            <div class="b-sol"><p>$\binom52 = \tfrac{5 \cdot 4}{2 \cdot 1} = 10$, $\binom73 = \tfrac{7 \cdot 6 \cdot 5}{3 \cdot 2 \cdot 1} = 35$, $\binom{49}{6} = 13\,983\,816$:
+                el número de apuestas posibles en la lotería alemana «6 de 49».</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>¿Es un proceso de Bernoulli? En caso afirmativo, indica $n$ y $p$. a) lanzar un dado 20 veces, éxito: seis &nbsp; b) sacar 3 de 5 papeletas sin reemplazamiento &nbsp; c) revisar 50 piezas, 2 % de piezas defectuosas</p></div>
+            <div class="b-sol"><p>a) sí, $n = 20$, $p = \tfrac16$ &nbsp; b) no, $p$ cambia &nbsp; c) sí (aproximadamente, en una producción grande), $n = 50$, $p = 0{,}02$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcula $\binom{6}{2}$, $\binom{8}{4}$ y $\binom{10}{0}$.</p></div>
+            <div class="b-sol"><p>15, 70, 1</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Se lanza una moneda 10 veces. ¿Qué probabilidad hay de obtener exactamente cinco caras? ¿Por qué no es tan probable como parece?</p></div>
+            <div class="b-sol"><p>$\binom{10}{5} \cdot 0{,}5^{10} = \tfrac{252}{1024} \approx 0{,}246$. «Exactamente 5» es solo uno de los 11 valores posibles; sus vecinos 4 y 6 son casi igual de probables.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Lanzas un dado 12 veces. ¿Qué probabilidad hay de sacar exactamente dos seises?</p></div>
+            <div class="b-sol"><p>$\binom{12}{2} \cdot \left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^{10} = 66 \cdot \tfrac{1}{36} \cdot 0{,}1615 \approx 0{,}296$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Justifica con ramas por qué se cumple $\binom{n}{k} = \binom{n}{n - k}$. ¿Qué significa esto para la distribución binomial con $p = 0{,}5$?</p></div>
+            <div class="b-sol"><p>Quien elige los $k$ lugares de los éxitos fija también los $n - k$ lugares de los fracasos. Por eso, con $p = 0{,}5$ se cumple $P(X = k) = P(X = n - k)$: el histograma es simétrico.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="35" data-ph="número"><p class="b-q-text">Calcula $\binom{7}{3}$.</p><div class="b-sol"><p>$\tfrac{7 \cdot 6 \cdot 5}{6} = 35$</p></div></div>
+        <div class="b-q" data-ans="0,441" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 3$, $p = 0{,}3$. Calcula $P(X = 1)$.</p><div class="b-sol"><p>$3 \cdot 0{,}3 \cdot 0{,}7^2 = 0{,}441$</p></div></div>
+        <div class="b-q" data-ans="0,1536" data-tol="0.0005" data-ph="P ="><p class="b-q-text">$n = 4$, $p = 0{,}2$. Calcula $P(X = 2)$.</p><div class="b-sol"><p>$6 \cdot 0{,}04 \cdot 0{,}64 = 0{,}1536$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Probabilidades acumuladas" data-toc-k="2" data-toc-short="2 Acumuladas">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">8 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Como máximo, como mínimo, entre</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un envío de 50 componentes se acepta si <b>como máximo 2</b> son defectuosos. La máquina produce un 2 % de piezas defectuosas. ¿Con qué frecuencia se acepta un envío?</p></div></div>
+            <div class="b-text"><p>Se busca $P(X \le 2) = P(X = 0) + P(X = 1) + P(X = 2)$ con $n = 50$, $p = 0{,}02$. Estas sumas se llaman probabilidades <b>acumuladas</b>.
+                Se calculan con la calculadora (binomcdf) o se leen en una tabla.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PROBABILIDADES ACUMULADAS</div>
+                <div class="b-text">
+                    <p>$P(X \le k) = \sum\limits_{i=0}^{k} \binom{n}{i} \cdot p^i \cdot (1 - p)^{n - i}$</p>
+                    <p>«como mínimo $k$»: $P(X \ge k) = 1 - P(X \le k - 1)$ · «más de $k$»: $P(X > k) = 1 - P(X \le k)$ · «menos de $k$»: $P(X < k) = P(X \le k - 1)$</p>
+                    <p>«entre $a$ y $b$» (ambos incluidos): $P(a \le X \le b) = P(X \le b) - P(X \le a - 1)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Cuidado con «como mínimo»:</b> $P(X \ge 3) = 1 - P(X \le 2)$, no $1 - P(X \le 3)$. El 3 forma parte de «como mínimo 3».</p>
+            <p class="b-note"><b>Comprobación:</b> dibuja las barras a las que se refiere. El widget de abajo las colorea de dorado.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA DISTRIBUCIÓN BINOMIAL</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta $n$ y $p$ y elige qué se debe calcular. En dorado, las barras que se suman. En rojo, la esperanza; en discontinua, $\mu \pm \sigma$.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · EL ENVÍO</div>
+            <div class="b-text"><p>$n = 50$, $p = 0{,}02$. ¿Qué probabilidad hay de que se acepte el envío? ¿Y de que no tenga ningún defecto?</p></div>
+            <div class="b-sol"><p>$P(X \le 2) \approx 0{,}922$. Se acepta aproximadamente el 92 % de los envíos.</p>
+                <p>$P(X = 0) = 0{,}98^{50} \approx 0{,}364$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · SOBREVENTA</div>
+            <div class="b-text"><p>103 billetes, 100 asientos; cada persona se presenta de forma independiente con un 95 %. ¿Qué probabilidad hay de que no haya asientos suficientes?</p></div>
+            <div class="b-sol"><p>$X$: número de personas que se presentan, $n = 103$, $p = 0{,}95$. $P(X > 100) = 1 - P(X \le 100) \approx 0{,}106$.
+                <span class="b-res">Aproximadamente en uno de cada diez vuelos</span> hay que reubicar a alguien en otro vuelo. Con 102 billetes sería solo algo más del 3 %.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ sigue una distribución binomial con $n = 20$ y $p = 0{,}3$. Calcula con el widget o con la calculadora $P(X = 6)$, $P(X \le 6)$, $P(X \ge 8)$ y $P(4 \le X \le 8)$.</p></div>
+            <div class="b-sol"><p>$0{,}192$; $0{,}608$; $0{,}228$; $0{,}780$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Expresa como probabilidad con $X \le$: a) «como mínimo 4» &nbsp; b) «más de 4» &nbsp; c) «menos de 4» &nbsp; d) «como máximo 4»</p></div>
+            <div class="b-sol"><p>a) $1 - P(X \le 3)$ &nbsp; b) $1 - P(X \le 4)$ &nbsp; c) $P(X \le 3)$ &nbsp; d) $P(X \le 4)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>En el test al azar del ejemplo 1 se necesitan como mínimo 5 respuestas correctas para aprobar. ¿Qué probabilidad hay de aprobar respondiendo al azar?</p></div>
+            <div class="b-sol"><p>$P(X \ge 5) = 1 - P(X \le 4) \approx 0{,}078$. Aprobaría aproximadamente un 8 %.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>El 10 % de todos los smartphones de un modelo tiene un fallo de batería. En una clase, 20 personas tienen este modelo. ¿Qué probabilidad hay de que ninguno tenga el fallo? ¿Y al menos uno? ¿Y como máximo dos?</p></div>
+            <div class="b-sol"><p>$0{,}9^{20} \approx 0{,}122$; $1 - 0{,}122 = 0{,}878$; $P(X \le 2) \approx 0{,}677$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>¿Cuántas veces hay que lanzar un dado como mínimo para que, con una probabilidad de al menos el 90 %, salga al menos un seis?</p></div>
+            <div class="b-hint"><p>Resuelve $1 - \left(\tfrac56\right)^n \ge 0{,}9$, con el logaritmo de 11.º curso o probando.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac56\right)^n \le 0{,}1 \Rightarrow n \ge \dfrac{\ln 0{,}1}{\ln \frac56} \approx 12{,}6$. <span class="b-res">Como mínimo 13 lanzamientos.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,1719" data-tol="0.0005" data-ph="P ="><p class="b-q-text">$n = 10$, $p = 0{,}5$. Calcula $P(X \le 3)$.</p><div class="b-sol"><p>$\tfrac{1 + 10 + 45 + 120}{1024} = \tfrac{176}{1024} \approx 0{,}1719$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">«Como mínimo 7 éxitos» es igual a …</p>
+            <div class="b-mc"><button>$1 - P(X \le 7)$</button><button>$P(X \le 7)$</button><button>$1 - P(X \le 6)$</button></div>
+            <div class="b-sol"><p>El suceso contrario de «como mínimo 7» es «como máximo 6».</p></div></div>
+        <div class="b-q" data-ans="0,8784" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 20$, $p = 0{,}1$. ¿Cuánto vale $P(X \ge 1)$?</p><div class="b-sol"><p>$1 - 0{,}9^{20} \approx 0{,}878$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Esperanza e histograma" data-toc-k="3" data-toc-short="3 μ y σ">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">6 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Esperanza, desviación típica y la forma del histograma</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quien lanza un dado 60 veces espera unos 10 seises. Pero ¿cuánto se puede desviar el resultado antes de empezar a sospechar?</p></div></div>
+            <div class="b-text"><p>Para la distribución binomial no hace falta calcular la esperanza y la varianza mediante la larga suma: cada etapa aporta $p$ a la esperanza
+                y $p(1 - p)$ a la varianza. Con $n$ etapas resultan fórmulas sencillas.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PARÁMETROS DE LA DISTRIBUCIÓN BINOMIAL</div>
+                <div class="b-text">
+                    <p>$\mu = E(X) = n \cdot p$ &nbsp; · &nbsp; $V(X) = n \cdot p \cdot (1 - p)$ &nbsp; · &nbsp; $\sigma = \sqrt{n \cdot p \cdot (1 - p)}$</p>
+                    <p>El histograma tiene su máximo en $\mu$ o junto a $\mu$. Cuanto mayor es $n$, más ancho y más plano se vuelve, pero en relación con $n$ cada vez más estrecho.
+                        Con $p = 0{,}5$ es simétrico; con $p$ pequeña, asimétrico hacia la derecha; con $p$ grande, hacia la izquierda.</p>
+                    <p>Regla práctica: si $\sigma > 3$, aproximadamente el 68 % de los valores está en el intervalo $[\mu - \sigma, \mu + \sigma]$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Ley de la raíz de n:</b> cuatro veces más ensayos duplican $\sigma$. La dispersión <b>relativa</b> $\tfrac{\sigma}{n}$ se reduce a la mitad.</p>
+            <p class="b-note"><b>En el widget de arriba</b> las líneas discontinuas muestran $\mu - \sigma$ y $\mu + \sigma$. Cambia $n$ y observa.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · LANZAR UN DADO 60 VECES</div>
+            <div class="b-text"><p>$X$: número de seises en 60 lanzamientos. Calcula $\mu$ y $\sigma$.</p></div>
+            <div class="b-sol"><p>$\mu = 60 \cdot \tfrac16 = 10$, $\sigma = \sqrt{60 \cdot \tfrac16 \cdot \tfrac56} = \sqrt{8{,}33} \approx 2{,}89$. Valores entre aproximadamente 7 y 13 son completamente normales.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · 100 LANZAMIENTOS DE MONEDA</div>
+            <div class="b-text"><p>$X$: número de caras en 100 lanzamientos. Calcula $\mu$, $\sigma$ y $P(45 \le X \le 55)$.</p></div>
+            <div class="b-sol"><p>$\mu = 50$, $\sigma = \sqrt{25} = 5$, $P(45 \le X \le 55) \approx 0{,}729$. Encaja bien con la regla práctica.</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">La distribución binomial cae del cielo (en alemán)</span></span></a>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcula $\mu$ y $\sigma$ para a) $n = 50$, $p = 0{,}1$ &nbsp; b) $n = 20$, $p = 0{,}3$ &nbsp; c) $n = 400$, $p = 0{,}5$.</p></div>
+            <div class="b-sol"><p>a) $5$; $\sqrt{4{,}5} \approx 2{,}12$ &nbsp; b) $6$; $\sqrt{4{,}2} \approx 2{,}05$ &nbsp; c) $200$; $10$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Ajusta $n = 20$ en el widget y compara los histogramas para $p = 0{,}1$, $p = 0{,}5$ y $p = 0{,}9$. Describe su posición y su forma.</p></div>
+            <div class="b-sol"><p>$p = 0{,}1$: máximo en 2, asimétrico hacia la derecha. $p = 0{,}5$: simétrico respecto a 10. $p = 0{,}9$: imagen especular de $p = 0{,}1$, máximo en 18, asimétrico hacia la izquierda.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Una moneda debería ser equilibrada. En 100 lanzamientos sale cara 62 veces. ¿Está eso todavía en el intervalo $[\mu - 2\sigma, \mu + 2\sigma]$? ¿Qué concluyes?</p></div>
+            <div class="b-sol"><p>$[50 - 10, 50 + 10] = [40, 60]$. 62 queda fuera. Eso es poco habitual para una moneda equilibrada; habría que examinarla con más detalle. Pero esto solo no demuestra nada todavía.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>¿Para qué $p$ es máxima la varianza $n \cdot p \cdot (1 - p)$ con $n$ fijo? Justifícalo sin derivadas.</p></div>
+            <div class="b-sol"><p>$p(1 - p) = p - p^2$ es una parábola abierta hacia abajo con ceros 0 y 1; su vértice está en $p = 0{,}5$. Ahí la incertidumbre es máxima.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="12" data-ph="μ ="><p class="b-q-text">$n = 40$, $p = 0{,}3$. ¿Cuánto vale $\mu$?</p><div class="b-sol"><p>$40 \cdot 0{,}3 = 12$</p></div></div>
+        <div class="b-q" data-ans="3" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">$n = 100$, $p = 0{,}1$. ¿Cuánto vale $\sigma$?</p><div class="b-sol"><p>$\sqrt{100 \cdot 0{,}1 \cdot 0{,}9} = \sqrt9 = 3$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">¿Qué forma tiene el histograma para $n = 30$, $p = 0{,}5$?</p>
+            <div class="b-mc"><button>simétrico respecto a 15</button><button>asimétrico hacia la derecha</button><button>asimétrico hacia la izquierda</button></div>
+            <div class="b-sol"><p>Con $p = 0{,}5$ se cumple $P(X = k) = P(X = 30 - k)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Un jugador de baloncesto encesta el 70 % de sus tiros libres. Lanza 10 veces. ¿Cuántos aciertos cabe esperar? ¿Qué probabilidad hay de que los enceste todos?</p></div>
+            <div class="b-sol"><p>$\mu = 7$; $0{,}7^{10} \approx 0{,}028$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Se encuesta a 15 personas; el 40 % de la población conoce un determinado producto. Calcula $P(X = 6)$, $P(X \le 4)$ y $P(X \ge 9)$.</p></div>
+            <div class="b-sol"><p>$0{,}207$; $0{,}217$; $0{,}095$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relación con el capítulo 1.2:</b> en el test al azar se obtiene 1 punto por cada respuesta correcta y se resta $\tfrac13$ de punto por cada respuesta incorrecta. ¿Qué puntuación se espera respondiendo al azar?</p></div>
+            <div class="b-sol"><p>Por pregunta: $1 \cdot 0{,}25 - \tfrac13 \cdot 0{,}75 = 0$. Responder al azar no aporta nada de media; precisamente por eso existe esta penalización.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Una aerolínea tiene 100 asientos y cuenta con que se presente el 95 %. Quiere que, como máximo en el 5 % de los vuelos, falten asientos. ¿Cuántos billetes puede vender? Usa el widget.</p></div>
+            <div class="b-sol"><p>Con 102 billetes: $P(X > 100) \approx 0{,}034$; con 103 ya $\approx 0{,}106$. <span class="b-res">Como máximo 102 billetes.</span></p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el tablero de Galton" data-toc-k="X" data-toc-short="Galton">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">LA DISTRIBUCIÓN BINOMIAL AL ALCANCE DE LA MANO</span></div>
+    <h2>El tablero de Galton</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>El naturalista inglés Francis Galton construyó un tablero con muchas filas de clavos. Las bolas que caen desde arriba rebotan en cada clavo al azar hacia la izquierda
+                o hacia la derecha. Abajo se acumulan en casillas, y una y otra vez aparece la misma forma de campana.</p>
+            <p>Explicado con la distribución binomial: con $n$ filas de clavos, cada bola es un proceso de Bernoulli de longitud $n$ con $p = 0{,}5$; «derecha» es un éxito.
+                A la casilla $k$ se llega por $\binom{n}{k}$ caminos. Con 10 filas, en la casilla central cae aproximadamente el $\binom{10}{5} \cdot 0{,}5^{10} \approx 24{,}6\,\%$ de las bolas;
+                en cada una de las dos casillas extremas, apenas un 0,1 %.</p>
+            <p>Galton llamó a su tablero «quincunx» y lo utilizó para explicar por qué muchas características de la naturaleza se distribuyen de forma parecida.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Francis Galton: Natural Inheritance. Macmillan, Londres 1889.</p></aside>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Dejar caer bolas y contarlas</span></span></a></div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>PROCESO DE BERNOULLI</h4><p>$n$ repeticiones independientes, cada una con éxito de probabilidad $p$.</p></div>
+        <div><p>Lanzar un dado 20 veces, éxito: seis</p></div></div>
+    <div class="b-rueck"><div><h4>COEFICIENTE BINOMIAL</h4><p>$\binom{n}{k} = \dfrac{n!}{k!\,(n - k)!}$ ramas con exactamente $k$ éxitos.</p></div>
+        <div><p>$\binom52 = 10$ · $\binom{49}{6} = 13\,983\,816$</p></div></div>
+    <div class="b-rueck"><div><h4>FÓRMULA DE BERNOULLI</h4><p>$P(X = k) = \binom{n}{k}\, p^k\, (1 - p)^{n - k}$</p></div>
+        <div><p>Test al azar: $P(X = 3) \approx 0{,}250$</p></div></div>
+    <div class="b-rueck"><div><h4>ACUMULADA</h4><p>$P(X \ge k) = 1 - P(X \le k - 1)$ · $P(a \le X \le b) = P(X \le b) - P(X \le a - 1)$</p></div>
+        <div><p>Envío: $P(X \le 2) \approx 0{,}922$</p></div></div>
+    <div class="b-rueck"><div><h4>PARÁMETROS</h4><p>$\mu = np$, $\sigma = \sqrt{np(1 - p)}$</p></div>
+        <div><p>Lanzar un dado 60 veces: $\mu = 10$, $\sigma \approx 2{,}89$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="10" data-ph="número"><p class="b-q-text">Calcula $\binom{5}{3}$.</p><div class="b-sol"><p>$\binom53 = \binom52 = 10$</p></div></div>
+            <div class="b-q" data-ans="0,2734" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Se lanza una moneda 8 veces. ¿Qué probabilidad hay de obtener exactamente cuatro caras?</p><div class="b-sol"><p>$70 \cdot 0{,}5^8 = \tfrac{70}{256} \approx 0{,}2734$</p></div></div>
+            <div class="b-q" data-ans="15" data-ph="μ ="><p class="b-q-text">$n = 60$, $p = 0{,}25$. ¿Cuál es la esperanza?</p><div class="b-sol"><p>$60 \cdot 0{,}25 = 15$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="0,0781" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 10$, $p = 0{,}25$. ¿Cuánto vale $P(X \ge 5)$?</p><div class="b-sol"><p>$1 - P(X \le 4) \approx 0{,}078$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Qué situación <b>no</b> es un proceso de Bernoulli?</p>
+                <div class="b-mc"><button>lanzar una moneda 10 veces</button><button>sacar 3 cartas de una baraja de skat (32 cartas) sin reemplazamiento, éxito: as</button><button>lanzar un dado 20 veces, éxito: número par</button></div>
+                <div class="b-sol"><p>Sin reemplazamiento, $p$ cambia después de cada extracción.</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="σ ="><p class="b-q-text">$n = 64$, $p = 0{,}5$. ¿Cuánto vale $\sigma$?</p><div class="b-sol"><p>$\sqrt{64 \cdot 0{,}25} = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos11-bernoulli.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROCESOS DE BERNOULLI</span><span class="b-lab-what">Fórmula de Bernoulli, acumulada</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-kombination-variation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COMBINATORIA</span><span class="b-lab-what">Factorial y coeficiente binomial</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 12.º curso · Área de aprendizaje 1 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-es/stochastik.js"></script>
+</body>
+</html>

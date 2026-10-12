@@ -50,7 +50,28 @@ window.BuchES && BuchES.add('stochastik', {
         'Nullhypothese $p_0$': 'Hipótesis nula $p_0$', 'linksseitig': 'por la izquierda', 'rechtsseitig': 'por la derecha', 'zweiseitig': 'bilateral',
         'Test:': 'Contraste:', 'Art des Tests': 'Tipo de contraste', 'Signifikanzniveau $\\alpha$:': 'Nivel de significación $\\alpha$:', 'Signifikanzniveau': 'Nivel de significación',
         'Beobachtete Trefferzahl $k$': 'Número de éxitos observado $k$', 'Fehler 2. Art zeigen: wahres $p$ =': 'Mostrar error de tipo II: $p$ verdadero =',
-        'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribución binomial bajo la hipótesis nula con la región de rechazo'
+        'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribución binomial bajo la hipótesis nula con la región de rechazo',
+        // book es-2 mathe12-es: treeSVG, venn, baum-hero, schnelltest, vierfeld-trainer, histo-hero, unabhaengig, zufallsgroesse, binomial, bernoulli-baum (entries the dictionary did not have yet; a German key already above keeps its Spanish)
+        'unvereinbar': 'incompatibles',
+        'Unabhängig machen': 'Hacer independientes',
+        'Unvereinbar machen': 'Hacer incompatibles',
+        'Einheitsquadrat: Anteil von A in B und in nicht B': 'Cuadrado unidad: proporción de A en B y en no B',
+        'Drei Münzen': 'Tres monedas',
+        'Augensumme': 'Suma de puntos',
+        'Glücksrad': 'Ruleta',
+        'Zufallsgröße': 'Variable aleatoria',
+        'Einsatz': 'Apuesta',
+        'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Distribución de probabilidad como diagrama de barras',
+        'Spielen:': 'Jugar:',
+        'SPIELE n': 'PARTIDAS n',
+        'MITTELWERT': 'MEDIA',
+        'ERWARTUNGSWERT': 'ESPERANZA',
+        'LETZTE': 'ÚLTIMAS',
+        'Stufen $n$:': 'Etapas $n$:',
+        'Anzahl der Stufen': 'Número de etapas',
+        'Genau $k$ Treffer:': 'Exactamente $k$ éxitos:',
+        'Anzahl der Treffer': 'Número de éxitos',
+        'Baumdiagramm einer Bernoulli-Kette': 'Diagrama de árbol de un proceso de Bernoulli'
     },
     phrase: [
         // book es-1 mathe11-es: baum, schnelltest, vierfeld-trainer, simulation, ziegen
@@ -81,7 +102,35 @@ window.BuchES && BuchES.add('stochastik', {
         ['<b>$H_0$ wird abgelehnt.</b> Das Ergebnis ist signifikant.', '<b>Se rechaza $H_0$.</b> El resultado es significativo.'],
         ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>No se rechaza $H_0$.</b> Pero eso no demuestra que $H_0$ sea cierta.'],
         ['Ist in Wahrheit $p = ', 'Si en realidad $p = '], ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (violeta), se mantiene $H_0$ por error con $\\beta \\approx '],
-        ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (error de tipo II).']
+        ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (error de tipo II).'],
+        // book es-2 mathe12-es: treeSVG, venn, baum-hero, schnelltest, vierfeld-trainer, histo-hero, unabhaengig, zufallsgroesse, binomial, bernoulli-baum (entries the dictionary did not have yet; a German key already above keeps its Spanish)
+        ['Positiv getestet werden <b>', 'Dan positivo <b>'],
+        ['</b> von 10 000 Personen – ', '</b> de 10 000 personas – '],
+        ['Histogramm einer Binomialverteilung', 'Histograma de una distribución binomial'],
+        ['$ und $P(A \\cap B) = ', '$ y $P(A \\cap B) = '],
+        ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.', '<b>Independientes:</b> ocurra $B$ o no, la proporción de $A$ es la misma. En el cuadrado, el límite está a la misma altura en las dos columnas.'],
+        ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.', '<b>Incompatibles</b> ($A \\cap B = \\emptyset$) y, por tanto, <b>dependientes</b>: si ocurre $B$, $A$ ya no puede ocurrir.'],
+        ['<b>Abhängig:</b> $B$ verändert die Wahrscheinlichkeit von $A$ ', '<b>Dependientes:</b> $B$ modifica la probabilidad de $A$ '],
+        ['nach oben', 'hacia arriba'],
+        ['nach unten', 'hacia abajo'],
+        ['Augensumme zweier Würfel', 'suma de puntos de dos dados'],
+        ['Anzahl Wappen', 'número de caras'],
+        ['Augenzahl', 'número de puntos'],
+        ['Gewinn = Auszahlung − Einsatz', 'ganancia = premio − apuesta'],
+        ['Gewinn bei 1 € Einsatz', 'ganancia con una apuesta de 1 €'],
+        [' Auszahlungen 0 €, 1 €, 2 €, 10 € mit den Wahrscheinlichkeiten ', ' Premios de 0 €, 1 €, 2 € y 10 € con las probabilidades '],
+        [' Du setzt 1 € auf eine Zahl, dann werden drei Würfel geworfen. Für jeden Würfel mit deiner Zahl bekommst du 1 € Gewinn, sonst ist der Einsatz weg.', ' Apuestas 1 € a un número y se lanzan tres dados. Por cada dado que muestra tu número ganas 1 €; si no sale ninguno, pierdes la apuesta.'],
+        ['Erwartungswert: $E(X)', 'Esperanza: $E(X)'],
+        [' · Das Spiel ist <b>fair</b>.', ' · El juego es <b>justo</b>.'],
+        [' · Auf lange Sicht <b>verlierst</b> du im Mittel ', ' · A la larga <b>pierdes</b> de media '],
+        [' · Auf lange Sicht <b>gewinnst</b> du im Mittel ', ' · A la larga <b>ganas</b> de media '],
+        [' € pro Spiel.', ' € por partida.'],
+        ['Varianz: $V(X)', 'Varianza: $V(X)'],
+        ['$ · Standardabweichung: $', '$ · desviación típica: $'],
+        ['Pfade mit genau ', 'Ramas con exactamente '],
+        [' Treffern: $', ' éxitos: $'],
+        ['$ · jeder hat die Wahrscheinlichkeit $', '$ · cada una tiene la probabilidad $'],
+        ['Formel von Bernoulli: $P(X = ', 'Fórmula de Bernoulli: $P(X = ']
     ],
     rule: [
         // book es-1 mathe11-es
@@ -103,5 +152,9 @@ window.BuchES && BuchES.add('stochastik', {
         [/Der Moderator weiß, wo das Auto steht, und öffnet Tür (\d): eine Ziege\. Bleibst du oder wechselst du\?/g,
             'El presentador sabe dónde está el coche y abre la puerta $1: una cabra. ¿Te quedas o cambias?'],
         [/Bei Tür (\d) bleiben/g, 'Quedarme con la puerta $1'], [/Zu Tür (\d) wechseln/g, 'Cambiar a la puerta $1'],
+        // book es-2 mathe12-es: treeSVG, venn, baum-hero, schnelltest, vierfeld-trainer, histo-hero, unabhaengig, zufallsgroesse, binomial, bernoulli-baum (entries the dictionary did not have yet; a German key already above keeps its Spanish)
+        [/(<button type="button" data-v="wuerfel">)Würfel(<\/button>)/g, '$1Dado$2'],
+        [/(<text\b[^>]*>)([TN]{1,4})(<\/text>)/g, (m, a, k, b) => a + k.replace(/T/g, 'E').replace(/N/g, 'F') + b],
+        [/Pfade mit genau 1 Treffern: \$/g, 'Ramas con exactamente 1 éxito: $']
     ]
 });
