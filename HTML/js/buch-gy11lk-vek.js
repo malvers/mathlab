@@ -219,7 +219,7 @@
                     let rel;
                     if (len(ab) > 1e-9) { const x = two(a, b, c); rel = x && '\\vec{c} = ' + lin(0, [[x[0], 'a'], [x[1], 'b']]).replace(/([ab])/g, '\\vec{$1}'); }
                     else if (len(a) > 1e-9) { const i = [0, 1, 2].find(k => !near0(a[k])); rel = '\\vec{b} = ' + lin(0, [[b[i] / a[i], 'a']]).replace(/a/g, '\\vec{a}'); }
-                    html += '<p style="margin:0">Das System hat auch Lösungen mit Zahlen ungleich null' + (rel ? ', denn $' + rel + '$' : '') + '. Die Vektoren sind <b>linear abhängig</b>: ' +
+                    html += '<p style="margin:0">Das System hat auch Lösungen mit Zahlen, die nicht alle null sind' + (rel ? ', denn $' + rel + '$' : '') + '. Die Vektoren sind <b>linear abhängig</b>: ' +
                         (len(ab) > 1e-9 ? '$\\vec{c}$ liegt in der Ebene von $\\vec{a}$ und $\\vec{b}$ (komplanar).' : '$\\vec{a}$ und $\\vec{b}$ sind parallel (kollinear).') + '</p>';
                 }
                 out.innerHTML = html; math(out);
