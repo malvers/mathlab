@@ -53,7 +53,16 @@ window.BuchES && BuchES.add('funktionen', {
         'Graph, zu dem der Term gesucht ist': 'Gráfica de la que se busca la expresión', 'Nächster Graph': 'Siguiente gráfica',
         // helpers outside the widgets (CURVES, SCHAREN, EXT of funktion, parabelschar, extremwert): check.mjs reads them for every page
         'Parabel': 'Parábola', 'Liegende Spitze': 'V tumbada', 'Liegende Parabel': 'Parábola tumbada', 'Wurzel': 'Raíz cuadrada',
-        'Hyperbel': 'Hipérbola', 'Betrag': 'Valor absoluto', 'Zaun an der Mauer': 'Valla junto al muro', 'Rechteck mit Umfang 24 cm': 'Rectángulo de perímetro 24 cm'
+        'Hyperbel': 'Hipérbola', 'Betrag': 'Valor absoluto', 'Zaun an der Mauer': 'Valla junto al muro', 'Rechteck mit Umfang 24 cm': 'Rectángulo de perímetro 24 cm',
+        // book es-3 mathe13-es: helpers of the module (curves of the vertical line test, families of parabolas, extreme values), reported for every page that loads it
+        'Parabel': 'Parábola',
+        'Liegende Spitze': 'V tumbada',
+        'Liegende Parabel': 'Parábola tumbada',
+        'Wurzel': 'Raíz cuadrada',
+        'Hyperbel': 'Hipérbola',
+        'Betrag': 'Valor absoluto',
+        'Zaun an der Mauer': 'Valla junto al muro',
+        'Rechteck mit Umfang 24 cm': 'Rectángulo de perímetro 24 cm'
     },
     phrase: [
         // book es-1 mathe11-es
@@ -112,7 +121,21 @@ window.BuchES && BuchES.add('funktionen', {
         ['keine Parabel, sondern die Gerade $y = -4$', 'no es una parábola, sino la recta $y = -4$'],
         ['nach unten geöffnet mit dem Scheitel ', 'abierta hacia abajo con el vértice '],
         ['$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.',
-            '$kx^2 = 4$ solo tiene soluciones para $k > 0$. El caso $k = 0$ hay que estudiarlo aparte, porque entonces desaparece el $x^2$.']
+            '$kx^2 = 4$ solo tiene soluciones para $k > 0$. El caso $k = 0$ hay que estudiarlo aparte, porque entonces desaparece el $x^2$.'],
+        // book es-3 mathe13-es: helpers of the module (curves of the vertical line test, families of parabolas, extreme values), reported for every page that loads it
+        ['Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: ', 'A la derecha de $x = -1$, cada recta vertical corta la curva dos veces: '],
+        ['Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.', 'Pero una función asigna a cada $x$ exactamente un $y$.'],
+        ['zwei Nullstellen $x = 0$ und $x = -a$', 'dos ceros $x = 0$ y $x = -a$'],
+        ['zwei Nullstellen ', 'dos ceros '],
+        ['eine (doppelte) Nullstelle ', 'un cero (doble) '],
+        ['eine doppelte Nullstelle ', 'un cero doble '],
+        ['keine Parabel, sondern die Gerade $y = -4$: keine Nullstelle', 'no es una parábola, sino la recta $y = -4$: ningún cero'],
+        [': keine Nullstelle', ': ningún cero'],
+        ['keine Nullstelle', 'ningún cero'],
+        ['Diskriminante: $', 'Discriminante: $'],
+        ['$ hat $D = ', '$ tiene $D = '],
+        ['Ausklammern: $x^2 + ax = x(x + a) = 0$. Die Scheitel $S\\left(-\\tfrac{a}{2} \\mid -\\tfrac{a^2}{4}\\right)$ liegen alle auf der Parabel $y = -x^2$ (gestrichelt).', 'Sacando factor común: $x^2 + ax = x(x + a) = 0$. Los vértices $S\\left(-\\tfrac{a}{2}, -\\tfrac{a^2}{4}\\right)$ están todos sobre la parábola $y = -x^2$ (discontinua).'],
+        ['$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.', '$kx^2 = 4$ solo tiene soluciones para $k > 0$. El caso $k = 0$ hay que estudiarlo aparte, porque entonces desaparece el $x^2$.']
     ],
     rule: [
         // book es-1 mathe11-es
@@ -137,6 +160,8 @@ window.BuchES && BuchES.add('funktionen', {
         [/Rechts von \$x = -1\$ trifft jede senkrechte Gerade die Kurve zweimal: Zu \$x = 1\$ gehören \$y = 2\$ und \$y = -2\$\./g,
             'A la derecha de $x = -1$, cada recta vertical corta la curva dos veces: a $x = 1$ le corresponden $y = 2$ e $y = -2$.'],
         [/Zu \$x = 2\$ gehören \$y = 2\$ und \$y = -2\$\. Eine Funktion ordnet jedem \$x\$ aber genau ein \$y\$ zu\./g,
-            'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.']
+            'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.'],
+        // book es-3 mathe13-es: "Zu $x = 2$ gehören $y = 2$ und $y = -2$." - before the header rule "Zu …" → "Sobre …" of js/buch-es.js
+        [/(: )?\bZu (\$x = [^$]+\$) gehören (\$y = [^$]+\$) und (\$y = [^$]+\$)\./g, (m, c, x, y1, y2) => (c ? ': a ' : 'A ') + x + ' le corresponden ' + y1 + ' e ' + y2 + '.']
     ]
 });

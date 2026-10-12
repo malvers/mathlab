@@ -17,6 +17,10 @@ window.BuchES && BuchES.add('numerik', {
         'Anzahl der Streifen $n$': 'Número de franjas $n$', 'Flächeninhalt mit Streifen angenähert': 'Área aproximada con franjas',
         '+100 Punkte': '+100 puntos', '+1\u202f000 Punkte': '+1\u202f000 puntos', '+10\u202f000 Punkte': '+10\u202f000 puntos',   // narrow space as the widget writes it
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Puntos aleatorios en el rectángulo y los que quedan bajo la parábola',
+        // book es-3 mathe13-es: flaeche
+        'x² auf [0; 2]': 'x² en [0, 2]', '√x auf [0; 4]': '√x en [0, 4]', 'sin x auf [0; π]': 'sen x en [0, π]',
+        'Rechtecke links': 'Rect. por la izquierda', 'Rechtecke Mitte': 'Rect. del punto medio', 'Trapeze': 'Trapecios', 'Verfahren': 'Método',
+        'Anzahl der Streifen $n$': 'Número de franjas $n$', 'Flächeninhalt mit Streifen angenähert': 'Área aproximada con franjas'
     },
     phrase: [
         // book es-1 mathe11-es: bisektion, flaeche, mc-flaeche
@@ -25,6 +29,8 @@ window.BuchES && BuchES.add('numerik', {
         ['$ unter der Parabel. Rechteck: ', '$ quedan bajo la parábola. Rectángulo: '],
         ['Schätzwert: $A', 'Estimación: $A'], [' · genau: $', ' · exacto: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Lanza puntos aleatorios en el rectángulo '],
         ['. Der Anteil der Treffer unter ', '. La proporción de puntos bajo '], [' schätzt den Anteil der Fläche.', ' estima la proporción del área.'],
+        // book es-3 mathe13-es: flaeche
+        ['Näherung mit $n = ', 'Aproximación con $n = '], ['$ · genauer Wert $', '$ · valor exacto $'], ['$ · Fehler $', '$ · error $']
     ],
     rule: [
         // book es-1 mathe11-es: mc-flaeche "Von $500$ Punkten liegen $160$ unter …" → "De $500$ puntos, $160$ quedan bajo …"
