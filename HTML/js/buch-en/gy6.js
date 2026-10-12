@@ -352,7 +352,7 @@
             [/Von „([^“]+)“ gehen (\d+) Pfeile aus\./g, '$2 arrows start at “$1”.'],
             [/Bei „([^“]+)“ kommen aber (\d+) Pfeile an, rückwärts ist die Zuordnung also nicht eindeutig\./g,
                 'But $2 arrows arrive at “$1”, so backwards the assignment is not single-valued.'],
-            // zufall6: the spinner (other books: wheel of fortune)
+            // zufall6: the spinner, as everywhere
             [/>(\d+) Versuche</g, '>$1 trials<'], [/>Glücksrad</g, '>Spinner<'],
             // kreisdiagramm6: the column of the table (other books: proportion)
             [/>Anteil</g, '>Part<'],

@@ -38,7 +38,7 @@ window.BuchEN && BuchEN.add('stochastik', {
         'Histogramm einer Binomialverteilung': 'Histogram of a binomial distribution',
         'Unabhängig machen': 'Make independent', 'Unvereinbar machen': 'Make mutually exclusive',
         'Einheitsquadrat: Anteil von A in B und in nicht B': 'Unit square: share of A in B and in not B',
-        'Drei Münzen': 'Three coins', 'Augensumme': 'Total score', 'Glücksrad': 'Wheel of fortune', 'Zufallsgröße': 'Random variable',
+        'Drei Münzen': 'Three coins', 'Augensumme': 'Total score', 'Glücksrad': 'Spinner', 'Zufallsgröße': 'Random variable',
         'Einsatz': 'Stake', 'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Probability distribution as a bar chart',
         'Spielen:': 'Play:', 'SPIELE n': 'GAMES n', 'MITTELWERT': 'MEAN', 'ERWARTUNGSWERT': 'EXPECTED VALUE', 'LETZTE': 'LATEST',
         'Anzahl der Versuche $n$': 'Number of trials $n$', 'Trefferwahrscheinlichkeit $p$': 'Probability of a hit $p$',

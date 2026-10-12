@@ -13,7 +13,7 @@ window.BuchEN && BuchEN.add('spiele', {
         'Die 36 Ergebnisse zweier Würfel mit dem Wert der Zufallsgröße': 'The 36 outcomes of two dice with the value of the random variable',
         '2. Würfel →': '2nd dice →',
         // spielstreuung
-        'Münzwette': 'Coin bet', 'Glücksrad': 'Wheel of fortune', 'Los': 'Ticket', 'Spiel': 'Game', 'Noch einmal spielen': 'Play again',
+        'Münzwette': 'Coin bet', 'Glücksrad': 'Spinner', 'Los': 'Ticket', 'Spiel': 'Game', 'Noch einmal spielen': 'Play again',
         'Einsatz 1 €. Wappen: 2 € zurück, Zahl: nichts.': 'Stake €1. Heads: €2 back, tails: nothing.',
         'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{10}$ gibt es 10 € zurück, sonst nichts.': 'Stake €1. With probability $\\tfrac{1}{10}$ you get €10 back, otherwise nothing.',
         'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{100}$ gibt es 100 € zurück, sonst nichts.': 'Stake €1. With probability $\\tfrac{1}{100}$ you get €100 back, otherwise nothing.',
