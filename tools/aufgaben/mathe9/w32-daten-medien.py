@@ -15,7 +15,7 @@ Q.q(r'Ein Säulendiagramm beginnt auf der Hochachse bei 90 statt bei 0. Welche W
     [r'Man sieht nur die Spitzen der Säulen.',
      r'Kleine Unterschiede erscheinen dadurch riesig.'])
 
-Q.q(r'In diesem Diagramm (Achse ab 90) sind die Werte 92 und 96 dargestellt. Die zweite Säule ist dreimal so hoch. Um wie viel Prozent ist 96 tatsächlich größer als 92 (gerundet)?',
+Q.q(r'In diesem Diagramm (Achse ab 90) sind die Werte 92 und 96 dargestellt. Die zweite Säule ist dreimal so hoch. Um wie viel Prozent ist 96 tatsächlich größer als 92 (auf eine Nachkommastelle gerundet)?',
     [r'um 4,3 %', r'um 200 %', r'um 4 %', r'um 300 %'],
     [r'Sichtbar sind nur $92 - 90 = 2$ und $96 - 90 = 6$.',
      r'Tatsächlich: $\dfrac{96 - 92}{92} \approx 0{,}043 = 4{,}3$ %'])
@@ -75,7 +75,7 @@ Q.q(r'In einem Liniendiagramm liegen die Jahre 2000, 2010, 2020, 2021, 2022, 202
     [r'Zehn Jahre und ein Jahr nehmen gleich viel Platz ein.',
      r'Eine langsame Entwicklung kann so wie ein plötzlicher Sprung aussehen.'])
 
-Q.q(r'In heißen Monaten werden mehr Eis verkauft und es gibt mehr Sonnenbrände. Folgt daraus, dass Eis Sonnenbrand verursacht?',
+Q.q(r'In heißen Monaten wird mehr Eis verkauft und es gibt mehr Sonnenbrände. Folgt daraus, dass Eis Sonnenbrand verursacht?',
     [r'Nein, beides hängt am sonnigen Wetter; ein Zusammenhang ist keine Ursache.', r'Ja, das zeigen die Zahlen.',
      r'Ja, aber nur bei Schokoladeneis.', r'Nein, weil Eis kalt ist.'],
     [r'Beide Größen steigen gemeinsam mit einer dritten Größe, dem Sonnenschein.'])

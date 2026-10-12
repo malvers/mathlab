@@ -60,7 +60,7 @@ Q.q(r'Die Katheten eines rechtwinkligen Dreiecks sind 8 cm und 15 cm lang. Wie l
     [r'17 cm', r'23 cm', r'12,7 cm', r'289 cm'],
     [r'$\sqrt{64 + 225} = \sqrt{289} = 17$ cm'])
 
-Q.q(r'Eine Leiter ist 5 m lang und lehnt unter $65^\circ$ an einer Wand. Wie hoch reicht sie (gerundet)?',
+Q.q(r'Eine Leiter ist 5 m lang und lehnt an einer Wand, mit dem Boden bildet sie einen Winkel von $65^\circ$. Wie hoch reicht sie (gerundet)?',
     [r'4,53 m', r'2,11 m', r'10,72 m', r'5,52 m'],
     [r'$h = 5 \cdot \sin 65^\circ \approx 4{,}53$ m'])
 

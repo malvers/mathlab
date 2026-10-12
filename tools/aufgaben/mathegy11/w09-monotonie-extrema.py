@@ -46,7 +46,7 @@ Q.q(r'Welche Bedingung ist hinreichend für einen lokalen Hochpunkt bei $x_0$?',
      r'$f^{\prime}(x_0) = 0$', r'$f^{\prime\prime}(x_0) = 0$'],
     [r'$f^{\prime\prime}(x_0) < 0$ heißt: Der Graph ist dort rechtsgekrümmt.',
      r'Waagerechte Tangente plus Rechtskrümmung ergibt einen Hochpunkt.',
-     r'Gleichwertig: $f^{\prime}$ wechselt bei $x_0$ das Vorzeichen von plus nach minus.'])
+     r'Ebenfalls hinreichend: $f^{\prime}$ wechselt bei $x_0$ das Vorzeichen von plus nach minus.'])
 
 # ------------------------------------------------------ computing extrema ----
 Q.q(r'An welchen Stellen hat $f(x) = x^3 - 3x$ Extrema?',

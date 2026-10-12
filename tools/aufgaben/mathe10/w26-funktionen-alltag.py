@@ -19,7 +19,7 @@ Q.q(r'Was kostet Tarif A (5 € + 0,10 € pro Minute) bei 60 Minuten?',
 
 Q.q(r'Welcher Tarif ist bei 150 Minuten günstiger (A: 5 € + 0,10 €/min, B: 0,15 €/min)?',
     [r'A mit 20 €', r'B mit 22,50 €', r'beide gleich', r'B mit 15 €'],
-    [r'A: $5 + 15 = 20$ €, B: $0{,}15 \cdot 150 = 22{,}50$ €.', r'Ab 100 Minuten ist A günstiger.'])
+    [r'A: $5 + 15 = 20$ €, B: $0{,}15 \cdot 150 = 22{,}50$ €.', r'Über 100 Minuten ist A günstiger.'])
 
 Q.q(r'Ein Stromtarif kostet 12 € Grundpreis im Monat und 0,35 € pro kWh. Was kosten 200 kWh im Monat?',
     [r'82 €', r'70 €', r'212,35 €', r'24 €'],
@@ -49,7 +49,7 @@ Q.q(r'Ein Gerät für 800 € wird linear in 4 Jahren abgeschrieben. Wie viel is
     [r'400 €', r'512 €', r'200 €', r'600 €'],
     [r'Linear: jedes Jahr gleich viel, $800 : 4 = 200$ € pro Jahr.', r'Nach 2 Jahren: $800 - 400 = 400$ €.'])
 
-Q.q(r'Ein Ort hat 10 000 Einwohner, die Zahl wächst jährlich um 1,5 %. Wie viele sind es nach 4 Jahren (gerundet)?',
+Q.q(r'Ein Ort hat 10 000 Einwohner, die Zahl wächst jährlich um 1,5 %. Wie viele sind es nach 4 Jahren (auf ganze Einwohner gerundet)?',
     [r'10 614', r'10 600', r'10 150', r'16 000'],
     [r'$10\,000 \cdot 1{,}015^4 \approx 10\,613{,}6$'])
 

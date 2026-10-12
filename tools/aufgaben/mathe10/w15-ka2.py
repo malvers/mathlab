@@ -16,7 +16,7 @@ Q.q(r'Berechne $f(-3)$ für $f(x) = x^3$.',
 
 Q.q(r'Berechne $f(0{,}5)$ für $f(x) = \dfrac{1}{x}$.',
     [r'2', r'0,5', r'0,2', r'5'],
-    [r'$\dfrac{1}{0{,}5} = 2$ – durch einen halben teilen heißt verdoppeln.'])
+    [r'$\dfrac{1}{0{,}5} = 2$ – durch einhalb teilen heißt verdoppeln.'])
 
 Q.q(r'Welche Funktion ist achsensymmetrisch zur y-Achse?',
     [r'$y = \dfrac{1}{x^2}$', r'$y = x^3$', r'$y = \dfrac{1}{x}$', r'$y = 2^x$'],

@@ -61,7 +61,7 @@ Q.q(r'Eine 1 m lange Leiste soll im Goldenen Schnitt markiert werden. Wo liegt d
     [r'$100 \cdot 0{,}618 = 61{,}8$ cm',
      r'Vom anderen Ende aus gemessen liegt sie bei 38,2 cm.'])
 
-Q.q(r'Der größere Teil einer im Goldenen Schnitt geteilten Strecke ist 8 cm. Wie lang ist die ganze Strecke (gerundet)?',
+Q.q(r'Der größere Teil einer im Goldenen Schnitt geteilten Strecke ist 8 cm. Wie lang ist die ganze Strecke (auf zwei Nachkommastellen gerundet)?',
     [r'12,94 cm', r'13 cm', r'4,94 cm', r'16 cm'],
     [r'Ganze : Major $= \Phi$',
      r'$8 \cdot 1{,}618 \approx 12{,}94$ cm'])

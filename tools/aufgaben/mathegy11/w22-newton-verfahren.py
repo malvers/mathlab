@@ -88,7 +88,7 @@ Q.q(r'Eine Funktion hat zwei Nullstellen. Wovon hängt ab, welche das Newton-Ver
      r'Deshalb wählt man den Startwert mithilfe einer Skizze.'])
 
 Q.q(r'Was passiert, wenn $x_n$ zufällig genau eine Nullstelle ist?',
-    [r'Dann ist $x_{n+1} = x_n$, die Folge bleibt stehen.', r'Das Verfahren bricht ab.', r'Dann springt die Folge weg.', r'Dann ist $x_{n+1} = 0$.'],
+    [r'Dann ist $x_{n+1} = x_n$, die Folge bleibt stehen.', r'Das Verfahren bricht wegen Division durch null ab.', r'Dann springt die Folge weg.', r'Dann ist $x_{n+1} = 0$.'],
     [r'$f(x_n) = 0$, also wird nichts abgezogen.'])
 
 Q.q(r'Wie schnell konvergiert das Newton-Verfahren in der Nähe einer einfachen Nullstelle?',

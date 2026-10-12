@@ -32,7 +32,7 @@ Q.q(r'Gibt es windschiefe Geraden in der Ebene?',
 
 Q.q(r'Am Würfel: Welche zwei Kanten sind windschief?',
     [r'Eine Kante der Grundfläche und eine nicht parallele Kante der Deckfläche', r'Zwei gegenüberliegende Kanten der Grundfläche',
-     r'Zwei Kanten mit gemeinsamer Ecke', r'Zwei senkrechte Kanten'],
+     r'Zwei Kanten mit gemeinsamer Ecke', r'Zwei senkrechte Seitenkanten'],
     [r'Kanten der Grund- und der Deckfläche liegen in parallelen Ebenen und treffen sich nie.',
      r'Sind sie nicht parallel, sind sie windschief.'])
 

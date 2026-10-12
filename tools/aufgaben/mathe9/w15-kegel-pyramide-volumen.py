@@ -50,7 +50,7 @@ Q.q(r'Ein Messingkegel hat $r = 2$ cm und $h = 6$ cm. Messing hat die Dichte 8,5
 Q.q(r'Eine quadratische Granitpyramide hat $a = 0{,}5$ m und $h = 0{,}8$ m. Granit hat die Dichte 2,7 t/m³. Wie schwer ist sie?',
     [r'180 kg', r'540 kg', r'67 kg', r'1,08 t'],
     [r'$V = \dfrac{1}{3} \cdot 0{,}25 \cdot 0{,}8 \approx 0{,}0667$ m³',
-     r'$m = 2{,}7 \cdot 0{,}0667 = 0{,}18$ t = 180 kg'])
+     r'$m = 2{,}7 \cdot 0{,}0667 \approx 0{,}18$ t = 180 kg'])
 
 Q.q(r'Ein kegelförmiger Trichter hat innen $r = 5$ cm und $h = 10$ cm. Wie viel Wasser fasst er (gerundet)?',
     [r'261,8 cm³', r'785,4 cm³', r'523,6 cm³', r'83,3 cm³'],
@@ -92,7 +92,7 @@ Q.q(r'Eine quadratische Pyramide hat $a = 6$ cm und $h = 8$ cm. Wie groß ist ih
 Q.q(r'Ein Holzkegel hat $r = 10$ cm und $h = 30$ cm. Das Holz hat die Dichte 0,6 g/cm³. Wie schwer ist der Kegel (gerundet)?',
     [r'1,88 kg', r'5,65 kg', r'3,14 kg', r'0,63 kg'],
     [r'$V = \dfrac{1}{3} \cdot \pi \cdot 100 \cdot 30 = 1000\pi \approx 3141{,}6$ cm³',
-     r'$m = 0{,}6 \cdot 3141{,}6 \approx 1885$ g, also etwa 1,88 kg.'])
+     r'$m = 0{,}6 \cdot 3141{,}6 \approx 1884{,}96$ g, also etwa 1,88 kg.'])
 
 Q.q(r'Wie viele Liter sind 1 dm³ und wie viele cm³ ist ein Liter?',
     [r'1 dm³ = 1 l = 1000 cm³', r'1 dm³ = 10 l = 100 cm³', r'1 dm³ = 1 l = 100 cm³', r'1 dm³ = 1000 l = 1 cm³'],
