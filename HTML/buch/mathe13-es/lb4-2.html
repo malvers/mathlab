@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 13 · Capítulo 4.2 · Contrastes de hipótesis | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Hipótesis, región de rechazo, errores de tipo I y de tipo II. Capítulo 4.2 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 13: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 13</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 4.2 · ÁREA DE APRENDIZAJE 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="A" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 4.2 · ÁREA DE APRENDIZAJE 4 · NOVIEMBRE · DICIEMBRE</p>
+            <h1>Contrastes de hipótesis</h1>
+            <p class="b-hero-lead">Una moneda sale cara 33 veces en 50 lanzamientos. ¿Está trucada o ha sido casualidad? Un medicamento cura en un estudio a 72 de 100 enfermos; el antiguo, solo al 60 %.
+                ¿Funciona de verdad mejor? Un <b>contraste de hipótesis</b> toma estas decisiones según una regla fija y te dice exactamente con qué frecuencia uno se equivoca al hacerlo.</p>
+            <div class="b-chips"><span class="b-chip">8 SESIONES</span><span class="b-chip">2 LECCIONES</span><span class="b-chip">DECIDIR CON INCERTIDUMBRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="50" data-p="0.5" data-lo="32" data-hi="50" data-step="10"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>formular la <b>hipótesis nula</b> y la <b>hipótesis alternativa</b>, y fijar el estadístico de contraste y el <b>nivel de significación</b></li>
+                <li>determinar la <b>región de rechazo</b> y el <b>valor crítico</b> y establecer una <b>regla de decisión</b></li>
+                <li>realizar contrastes <b>unilaterales</b> y <b>bilaterales</b>, también con CAS</li>
+                <li>distinguir e interpretar los <b>errores de tipo I y de tipo II</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="25" data-ph="μ ="><p class="b-q-text">¿Esperanza del número de caras en 50 lanzamientos de una moneda equilibrada?</p><div class="b-sol"><p>25</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$P(X \ge 32)$ es igual a …</p>
+                <div class="b-mc"><button>$1 - P(X \le 32)$</button><button>$P(X \le 31)$</button><button>$1 - P(X \le 31)$</button></div>
+                <div class="b-sol"><p>El suceso contrario de «al menos 32» es «como máximo 31».</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="porcentaje"><p class="b-q-text">¿Qué porcentaje es 0,05?</p><div class="b-sol"><p>5 %</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">¿A PARTIR DE CUÁNDO ESTÁ TRUCADA?</div>
+            <div class="b-text"><p>Se lanza una moneda 50 veces. Queréis decidir si favorece la cara.</p>
+                <ul><li>¿A partir de cuántas caras diríais «trucada»? Poneos de acuerdo en un número.</li><li>¿Con qué frecuencia acusaríais así injustamente a una moneda equilibrada?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DOS MANERAS DE EQUIVOCARSE</div>
+            <div class="b-text"><p>Un test de covid, un detector de humo, un tribunal: todos pueden equivocarse de dos maneras distintas.</p>
+                <ul><li>Describid ambos errores en cada ejemplo. ¿Cuál es peor en cada caso?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL DADO JUSTO</div>
+            <div class="b-text"><p>Se lanza un dado 120 veces y el seis sale 28 veces.</p>
+                <ul><li>¿Cuántos seises esperáis? ¿Es sospechoso 28?</li><li>¿Sería sospechoso también 8?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Contrastes unilaterales" data-toc-k="1" data-toc-short="1 Unilateral">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Hipótesis, región de rechazo, regla de decisión</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Supongamos de entrada que la moneda está equilibrada: $p = 0{,}5$. Con esta suposición, $X$, el número de caras en 50 lanzamientos, sigue una distribución binomial con $n = 50$ y $p = 0{,}5$.
+                Los valores muy grandes son entonces poco frecuentes: $P(X \ge 32) \approx 0{,}032$, $P(X \ge 31) \approx 0{,}059$.</p></div></div>
+            <div class="b-text"><p>Decidimos: si salen 32 caras o más, dejamos de creer que la moneda está equilibrada. Así solo sospecharíamos injustamente de una moneda equilibrada en un 3,2 % de los casos, aproximadamente.
+                Este límite se fija <b>antes</b> de lanzar.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · CONTRASTE DE HIPÓTESIS</div>
+                <div class="b-text">
+                    <p><b>Hipótesis nula</b> $H_0\colon p = p_0$ (la situación conocida hasta ahora), <b>hipótesis alternativa</b> $H_1$, por ejemplo $p > p_0$ (por la derecha) o $p < p_0$ (por la izquierda).</p>
+                    <p><b>Estadístico de contraste</b> $X$: número de éxitos en la muestra; bajo $H_0$ sigue una distribución binomial con $n$ y $p_0$. <b>Nivel de significación</b> $\alpha$, normalmente 5 %.</p>
+                    <p><b>Región de rechazo</b> $\overline{A}$: los valores extremos que bajo $H_0$ tienen en conjunto como máximo la probabilidad $\alpha$. Por la derecha, $\overline{A} = \{k, \ldots, n\}$ con el menor $k$
+                        para el que se cumple $P(X \ge k) \le \alpha$. $k$ se llama <b>valor crítico</b>.</p>
+                    <p><b>Regla de decisión:</b> si el resultado está en $\overline{A}$, se rechaza $H_0$: el resultado es <b>significativo</b>. Si no, no se rechaza $H_0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Lo que se quiere demostrar va en $H_1$.</b> Porque solo el rechazo de $H_0$ es una afirmación fuerte con una probabilidad de error conocida.</p>
+            <p class="b-note"><b>No rechazada</b> no significa demostrada. Solo significa que los datos no bastan para refutar $H_0$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · EL CONTRASTE DE HIPÓTESIS</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta $n$, $p_0$, el tipo de contraste y $\alpha$. En rojo está la región de rechazo. Desplaza el número de éxitos observado $k$ y lee la decisión.</p>
+        <div data-widget="signifikanztest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · EL NUEVO MEDICAMENTO</div>
+            <div class="b-text"><p>Un medicamento antiguo cura al 60 %. El fabricante de uno nuevo afirma que funciona mejor. En un estudio con 100 enfermos se curan 72. Contrasta con $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}6$, $H_1\colon p > 0{,}6$, $X \sim B(100;\, 0{,}6)$. $P(X \ge 69) \approx 0{,}040 \le 0{,}05$, pero $P(X \ge 68) \approx 0{,}062$. Por tanto, $\overline{A} = \{69, \ldots, 100\}$.</p>
+                <p>72 está en la región de rechazo: <span class="b-res">se rechaza $H_0$.</span> La mejor eficacia es significativa al nivel del 5 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · POR LA IZQUIERDA</div>
+            <div class="b-text"><p>Un partido afirma tener un 40 % de apoyo. Una rival sospecha que tiene menos y encuesta a 200 personas. Determina la región de rechazo para $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}4$, $H_1\colon p < 0{,}4$. Se busca el mayor $k$ con $P(X \le k) \le 0{,}05$: $P(X \le 68) \approx 0{,}047$.
+                <span class="b-res">$\overline{A} = \{0, \ldots, 68\}$</span>. Solo con 68 apoyos o menos queda respaldada la sospecha.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Formula $H_0$ y $H_1$: a) Un proveedor garantiza como máximo un 10 % de piezas defectuosas; el comprador lo duda. b) Un profesor sospecha que más de la mitad de la clase copia los deberes.</p></div>
+            <div class="b-sol"><p>a) $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$ &nbsp; b) $H_0\colon p = 0{,}5$, $H_1\colon p > 0{,}5$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Sobre el ejercicio 1 a): el comprador revisa 50 piezas. Determina con el widget la región de rechazo para $\alpha = 5\,\%$. ¿Qué decide si hay 7 piezas defectuosas?</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{10, \ldots, 50\}$ ($P(X \ge 10) \approx 0{,}025$, $P(X \ge 9) > 0{,}05$). Con 7 no se rechaza $H_0$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿Cómo cambia la región de rechazo en el contraste de la moneda ($n = 50$, por la derecha) si se elige $\alpha = 1\,\%$ en lugar de $5\,\%$? ¿Qué significa esto para la decisión con 33 caras?</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{34, \ldots, 50\}$ en lugar de $\{32, \ldots\}$. Con 33 caras: significativo al nivel del 5 %, pero no al nivel del 1 %.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>¿Por qué hay que fijar $\alpha$ y la región de rechazo <b>antes</b> de conocer los datos?</p></div>
+            <div class="b-sol"><p>De lo contrario, se puede colocar el límite de modo que salga el resultado deseado. La probabilidad de error indicada ya no sería correcta.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="32" data-ph="k ="><p class="b-q-text">Contraste de la moneda $n = 50$, $p_0 = 0{,}5$, por la derecha, $\alpha = 5\,\%$: ¿menor valor de la región de rechazo?</p><div class="b-sol"><p>32</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">El resultado no está en la región de rechazo. Entonces …</p>
+            <div class="b-mc"><button>$H_0$ queda demostrada</button><button>no se rechaza $H_0$</button><button>$H_1$ queda demostrada</button></div>
+            <div class="b-sol"><p>Los datos no bastan para refutar $H_0$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Contrastes bilaterales, errores de tipo I y II" data-toc-k="2" data-toc-short="2 Errores">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Contrastes bilaterales, errores de tipo I y de tipo II</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>¿Es justo un dado? Serían sospechosos <b>demasiados</b> y <b>demasiado pocos</b> seises. Por eso se reparte $\alpha$ entre ambos lados, $\tfrac{\alpha}{2}$ en cada uno.</p></div></div>
+            <div class="b-text"><p>Toda decisión puede ser errónea. Si se rechaza $H_0$ aunque sea cierta, se comete un <b>error de tipo I</b>. Su probabilidad es como máximo $\alpha$.
+                Si se mantiene $H_0$ aunque en realidad rija otro $p$, se comete un <b>error de tipo II</b>. Su probabilidad $\beta$ depende del $p$ verdadero.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · BILATERAL, ERRORES DE TIPO I Y II</div>
+                <div class="b-text">
+                    <p><b>Contraste bilateral</b> $H_0\colon p = p_0$ frente a $H_1\colon p \neq p_0$: $\overline{A} = \{0, \ldots, l\} \cup \{r, \ldots, n\}$ con el mayor $l$ para el que $P(X \le l) \le \tfrac{\alpha}{2}$ y el menor $r$ para el que se cumple $P(X \ge r) \le \tfrac{\alpha}{2}$.</p>
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th></th><th>$H_0$ es cierta</th><th>$H_1$ es cierta</th></tr>
+                        <tr><th>$H_0$ rechazada</th><td><b>error de tipo I</b> (como máximo $\alpha$)</td><td>correcto</td></tr>
+                        <tr><th>$H_0$ no rechazada</th><td>correcto</td><td><b>error de tipo II</b> ($\beta$)</td></tr></table></div>
+                    <p>Un $\alpha$ menor hace menos frecuente el error de tipo I, pero más frecuente el de tipo II. Solo un tamaño de muestra mayor reduce ambos.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>En un juicio:</b> $H_0$ = inocente. Error de tipo I: condenar a un inocente. Error de tipo II: absolver a un culpable. El primero se mantiene pequeño a propósito.</p>
+            <p class="b-note"><b>En el widget:</b> marca «Mostrar error de tipo II» y elige un $p$ verdadero. En violeta aparece entonces la distribución verdadera.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · EL DADO, BILATERAL</div>
+            <div class="b-text"><p>Se lanza un dado 120 veces. Contrasta $H_0\colon p = \tfrac16$ (seis) frente a $H_1\colon p \neq \tfrac16$ con $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>En cada lado $2{,}5\,\%$: $P(X \le 11) \approx 0{,}014$, $P(X \ge 29) \approx 0{,}022$. <span class="b-res">$\overline{A} = \{0, \ldots, 11\} \cup \{29, \ldots, 120\}$.</span>
+                Así que 28 seises todavía no son significativos, pero 8 seises sí.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · ERROR DE TIPO II</div>
+            <div class="b-text"><p>En el contraste del medicamento (ejemplo 1), el nuevo fármaco cura en realidad al 70 %. ¿Con qué probabilidad el contraste no lo detecta?</p></div>
+            <div class="b-sol"><p>Error de tipo II: no se rechaza $H_0$, es decir, $X \le 68$, aunque $p = 0{,}7$. $\beta = P(X \le 68) \approx 0{,}367$.
+                <span class="b-res">En más de uno de cada tres casos</span> la mejora pasaría desapercibida. Con $p = 0{,}75$ solo sería ya un 7 %, aproximadamente.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Describe en el contexto del problema los errores de tipo I y de tipo II en el contraste del medicamento.</p></div>
+            <div class="b-sol"><p>Tipo I: se considera mejor el nuevo fármaco, aunque no lo es. Tipo II: se considera que no es mejor, aunque sí lo es.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Se lanza una moneda 20 veces. Determina con el widget la región de rechazo de un contraste bilateral con $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{0, \ldots, 5\} \cup \{15, \ldots, 20\}$, en cada lado $\approx 2{,}1\,\%$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Para el partido del ejemplo 2, el apoyo real es del 35 %. ¿Qué probabilidad hay de que la rival, aun así, no pueda respaldar su sospecha?</p></div>
+            <div class="b-sol"><p>$\beta = P(X \ge 69)$ con $p = 0{,}35$, $n = 200$: $\approx 0{,}585$. El contraste es demasiado débil para diferencias tan pequeñas; harían falta más encuestados.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Prueba en el widget: ¿cómo cambia $\beta$ en el contraste del medicamento ($p$ verdadero $= 0{,}7$) si se aumenta $n$ de 100 a 200? Explícalo.</p></div>
+            <div class="b-sol"><p>$\beta$ baja claramente (hasta aproximadamente 0,1). Con más datos, las distribuciones son relativamente más estrechas y se solapan menos; el contraste distingue mejor.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$H_0$ es cierta, pero se rechaza. Eso es …</p>
+            <div class="b-mc"><button>un error de tipo I</button><button>un error de tipo II</button><button>una decisión correcta</button></div>
+            <div class="b-sol"><p>Error de tipo I, con probabilidad como máximo $\alpha$.</p></div></div>
+        <div class="b-q" data-ans="29" data-ph="r ="><p class="b-q-text">Contraste del dado del ejemplo 3: ¿menor valor de la parte derecha de la región de rechazo?</p><div class="b-sol"><p>29</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="W" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Una empresa afirma que el 20 % de sus boletos tienen premio. Tú sospechas que hay más boletos sin premio, es decir, menos de un 20 % premiados. Formula las hipótesis.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}2$, $H_1\colon p < 0{,}2$ (por la izquierda).</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Una moneda sale cara 9 veces en 10 lanzamientos. Contrasta por la derecha con $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$P(X \ge 9) = \tfrac{11}{1024} \approx 0{,}011$, $P(X \ge 8) \approx 0{,}055$. $\overline{A} = \{9, 10\}$: se rechaza $H_0$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Relacionar con el capítulo 1.1 de 12.º curso:</b> explica por qué «El resultado es significativo, así que $H_0$ es falsa con un 95 %» es una afirmación incorrecta.</p></div>
+            <div class="b-sol"><p>$\alpha$ es $P_{H_0}(\text{rechazo})$, una probabilidad condicionada bajo la condición de que $H_0$ sea cierta. La afirmación la confunde con $P_{\text{rechazo}}(H_0 \text{ falsa})$,
+                como con el test rápido positivo $P_K(+)$ y $P_+(K)$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: la dama que cataba el té" data-toc-k="X" data-toc-short="Té">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">EL CONTRASTE MÁS FAMOSO DE LA ESTADÍSTICA</span></div>
+    <h2>La dama que cataba el té</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>El estadístico inglés Ronald A. Fisher cuenta en su libro sobre el diseño de experimentos la historia de una dama que afirmaba reconocer por el sabor
+                si en la taza se había echado primero la leche o primero el té.</p>
+            <p>Fisher planificó la prueba así: ocho tazas, cuatro de cada tipo, en orden aleatorio. La dama debe identificar las cuatro tazas de «primero la leche». Si solo adivina, hay
+                $\binom84 = 70$ selecciones igual de probables, así que acertar las cuatro solo tiene una probabilidad de $\tfrac{1}{70} \approx 1{,}4\,\%$.
+                Si lo consigue, se rechaza la hipótesis nula «solo adivina». Fisher convirtió esto en el esquema básico de todo contraste de hipótesis.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Ronald A. Fisher: The Design of Experiments. Oliver and Boyd, Edimburgo 1935, capítulo 2.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>HIPÓTESIS</h4><p>$H_0\colon p = p_0$; lo que se quiere demostrar va en $H_1$.</p></div>
+        <div><p>Medicamento: $H_1\colon p > 0{,}6$</p></div></div>
+    <div class="b-rueck"><div><h4>REGIÓN DE RECHAZO</h4><p>Valores extremos con probabilidad como máximo $\alpha$ bajo $H_0$.</p></div>
+        <div><p>Moneda $n = 50$: $\{32, \ldots, 50\}$</p></div></div>
+    <div class="b-rueck"><div><h4>BILATERAL</h4><p>$\tfrac{\alpha}{2}$ en cada lado.</p></div>
+        <div><p>Dado $n = 120$: $\{0, \ldots, 11\} \cup \{29, \ldots, 120\}$</p></div></div>
+    <div class="b-rueck"><div><h4>ERRORES DE TIPO I Y II</h4><p>Tipo I: $H_0$ rechazada injustamente ($\le \alpha$). Tipo II: $H_0$ mantenida injustamente ($\beta$).</p></div>
+        <div><p>Medicamento, $p$ verdadero $= 0{,}7$: $\beta \approx 0{,}37$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="69" data-ph="k ="><p class="b-q-text">Contraste del medicamento $n = 100$, $p_0 = 0{,}6$, por la derecha, $\alpha = 5\,\%$: ¿valor crítico?</p><div class="b-sol"><p>69</p></div></div>
+            <div class="b-q" data-ans="68" data-ph="k ="><p class="b-q-text">Contraste del partido $n = 200$, $p_0 = 0{,}4$, por la izquierda, $\alpha = 5\,\%$: ¿mayor valor de la región de rechazo?</p><div class="b-sol"><p>68</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$H_1$ es cierta, pero no se rechaza $H_0$. Eso es …</p>
+                <div class="b-mc"><button>un error de tipo I</button><button>un error de tipo II</button><button>correcto</button></div>
+                <div class="b-sol"><p>Error de tipo II</p></div></div>
+            <div class="b-q" data-ans="1/70" data-tol="0.0005" data-ph="P ="><p class="b-q-text">¿Con qué probabilidad la dama del té elige adivinando las cuatro tazas correctas?</p><div class="b-sol"><p>$\tfrac{1}{70}$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLERO DE GALTON</span><span class="b-lab-what">La distribución binomial detrás de cada contraste</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 13.º curso · Área de aprendizaje 4 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios e ilustraciones son contenido propio.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-es/stochastik.js"></script>
+</body>
+</html>

@@ -212,3 +212,63 @@ Abitur.* Gymnasium, Fachoberschule, Oberschule the same way where they appear.
 | Gewinnschwelle, Gewinngrenze | umbral de rentabilidad, límite de beneficio |
 | gleichmäßig beschleunigte Bewegung | movimiento uniformemente acelerado |
 | Abstand | distancia |
+
+## Added by es-3 mathe13-es
+
+Terms BGY 13 needed that were missing above (12.10.2026). Nothing above was changed.
+
+| German | Spanish | Note |
+|---|---|---|
+| Mehr üben online | MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN) | heading of the online-practice box; the linked material stays German |
+| Üben (data-toc-short) | Practicar | |
+| Rückmeldung sofort | respuesta inmediata | "DOS RONDAS · RESPUESTA INMEDIATA" |
+| Das Wichtigste auf einen Blick | Lo esencial de un vistazo | |
+| Anschluss an … | Enlaza con … | |
+| Eingangstest | test de entrada | |
+| Checkliste, Abituraufgabe, Abschlusstest | lista de control, problema de Abitur, test final | |
+| Operatoren (berechne, begründe …) | verbos de la consigna («calcula», «justifica» …) | |
+| Folgefehler | errores arrastrados | |
+| Integrationsregeln | reglas de integración | |
+| ganzrationale Funktion, Potenzfunktion | función polinómica, función potencia | |
+| Probe (durch Ableiten) | comprobación (comprueba derivando) | |
+| Anfangsbedingung | condición inicial | |
+| Bestand, Anfangsbestand, Gesamtänderung | cantidad, cantidad inicial, variación total | with "cantidad reconstruida" above |
+| Zuflussrate | caudal de entrada | not "tasa de entrada"; outflow: salida |
+| Intervalladditivität, Linearität | aditividad respecto al intervalo, linealidad | |
+| Flächenfunktion | función área | |
+| Grenzen (des Integrals) | límites de integración | |
+| Schnittstelle | abscisa del punto de intersección | "se cortan en …"; in widgets: puntos de intersección |
+| Differenzfunktion | función diferencia | |
+| Teilfläche, Teilintegral | área parcial, integral parcial | |
+| Streifen (numerical integration) | franja | |
+| Stützstellen | nodos | |
+| Rechtecke links / Mitte | rectángulos por la izquierda / por el punto medio | |
+| Keplersche Fassregel | regla de los toneles de Kepler | |
+| Mittelwert einer Funktion | valor medio | |
+| Grenzkosten, Fixkosten, Stückkosten | coste marginal, costes fijos, coste unitario | |
+| Erlös (Funktion), Grenzerlös | ingresos, ingreso marginal | |
+| Gewinnzone, Gewinnmaximum | zona de beneficio, beneficio máximo | |
+| Betriebsoptimum, langfristige Preisuntergrenze | óptimo de explotación, precio mínimo a largo plazo | |
+| Cournotscher Punkt | punto de Cournot | |
+| Stück (unit) | unidades | "€ por unidad" |
+| Ortskurve | lugar geométrico | |
+| beurteilende Statistik | estadística inferencial | |
+| Stichprobenumfang, Stichprobenanteil | tamaño de la muestra, proporción muestral | |
+| Gegenhypothese | hipótesis alternativa | |
+| Testgröße, kritischer Wert, Entscheidungsregel | estadístico de contraste, valor crítico, regla de decisión | |
+| rechtsseitig / linksseitig (Test) | por la derecha / por la izquierda | "contraste por la derecha"; zweiseitig: bilateral |
+| Irrtumswahrscheinlichkeit | probabilidad de error | |
+| Wappen (Münze) | cara | |
+| Richtungsvektor, Spannvektoren | vector director, vectores directores (of a plane) | |
+| Stützpunkt, Stützvektor | punto base, vector de posición | |
+| Punktprobe | prueba de pertenencia | |
+| Parameterform, Achsenabschnittsform | forma paramétrica, ecuación segmentaria | Koordinatenform: ecuación general (above) |
+| Koordinatenebenen, Koordinatenachsen | planos coordenados, ejes de coordenadas | |
+| Spurdreieck | triángulo de trazas | |
+| Lage zweier Geraden: identisch, (echt) parallel, schneidend, windschief | coincidentes, paralelas (y distintas), secantes, se cruzan | "se cruzan" only for skew lines; to intersect = cortarse |
+| liegt in der Ebene | está contenida en el plano | |
+| Mantel(fläche), Grundfläche, Deckfläche | superficie lateral, (área de la) base, base superior | Oberfläche: área total (above) |
+| Grundkante, Seitenfläche, Spitze (Pyramide) | arista de la base, cara lateral, vértice | |
+| Pyramidenstumpf | tronco de pirámide | |
+| Lotfußpunkt | pie de la perpendicular | |
+| Stufenform | forma escalonada | |
