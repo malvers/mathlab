@@ -79,6 +79,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathe8",
+        "href": "buch/mathe8/index.html",
+        "title": "Mathematik OS 8",
+        "description": "Das interaktive Lehrbuch Mathematik für die Oberschule, Klasse 8, Realschulbildungsgang, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Elf Kapitel in der Reihenfolge des Schuljahres – Terme und Termumformungen, lineare Gleichungen und Formeln, Funktionen, lineare Funktionen, lineare Gleichungssysteme, der Kreis, der Kreiszylinder, Ähnlichkeit, zufällige Ereignisse, Mathematik im Alltag und als Wahlpflichtbereich das Fahrrad. Zum Ausprobieren: die Kreisfläche aus Sektoren, Voll- und Hohlzylinder mit Netz und Masse, Tarife als Geraden, Gleichungssysteme grafisch lösen, die Stromrechnung, Zimmer renovieren, Reifengrößen und Gangschaltungen am Fahrrad. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik OS 8 / 11 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe8"],
+        "category": "buecher neu algebra funktionen geometrie stochastik grade8",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 8 oberschule realschule realschulbildungsgang sachsen lehrplan kapitel terme termumformungen ausmultiplizieren ausklammern lineare gleichungen formeln umstellen funktionen lineare funktion anstieg steigungsdreieck y-achsenabschnitt nullstelle gleichungssystem grafisch einsetzungsverfahren gleichsetzungsverfahren additionsverfahren kreis kreisumfang kreisflaeche pi kreiszylinder hohlzylinder oberflaeche volumen masse aehnlichkeit zentrische streckung massstab zufall wahrscheinlichkeit baumdiagramm zaehlen tarif stromrechnung renovieren fahrrad uebersetzung reifen etrto aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathe10",
         "href": "buch/mathe10/index.html",
         "title": "Mathematik OS 10",
