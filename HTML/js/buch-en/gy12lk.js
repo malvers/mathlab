@@ -36,7 +36,7 @@ window.BuchEN && BuchEN.add('gy12lk', {
         'Anzahl der Streifen $n$ (gerade)': 'Number of strips $n$ (even)', 'Graph mit Parabelbögen über je zwei Streifen': 'Graph with parabolic arcs over every two strips',
         'Trapez': 'Trapezium',
         // abstand3d
-        'Das 3D-Modul fehlt.': 'The 3D module is missing.', 'Beispiel 1': 'Example 1', 'Beispiel 2': 'Example 2', 'P auf g': 'P on g',
+        'Das 3D-Modul fehlt.': 'The 3D module is missing.', 'Beispiel 3': 'Example 3', 'Ursprungsgerade': 'Line through O', 'P auf g': 'P on g',
     },
     phrase: [
         // normalverteilung

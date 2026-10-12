@@ -432,7 +432,7 @@
         const mode = box.dataset.mode === 'gg' ? 'gg' : 'pg';
         const g3 = v => v.map(x => n2(x)).join(' \\mid ');
         const PRE = mode === 'pg'
-            ? { a: { k: 'Beispiel 1', A: [1, 0, 1], u: [1, 2, 2], P: [4, 0, 4] }, b: { k: 'Beispiel 2', A: [0, 0, 0], u: [1, 1, 0], P: [2, 0, 3] }, c: { k: 'P auf g', A: [1, 0, 1], u: [1, 2, 2], P: [2, 2, 3] } }
+            ? { a: { k: 'Beispiel 3', A: [1, 0, 1], u: [1, 2, 2], P: [4, 0, 4] }, b: { k: 'Ursprungsgerade', A: [0, 0, 0], u: [1, 1, 0], P: [2, 0, 3] }, c: { k: 'P auf g', A: [1, 0, 1], u: [1, 2, 2], P: [2, 2, 3] } }
             : { a: { k: 'windschief', P: [-1, -1, -1], u: [2, 2, 1], Q: [2, 0, 3], v: [0, 1, 1] }, b: { k: 'schneidend', P: [1, 0, 1], u: [1, 1, 0], Q: [2, 3, 0], v: [1, -1, 1] }, c: { k: 'parallel', P: [1, 0, 1], u: [1, 1, 0], Q: [0, 2, 3], v: [2, 2, 0] } };
         const S = JSON.parse(JSON.stringify(PRE.a));
         const keys = mode === 'pg' ? [['A', 'A', 'cyan'], ['u', 'u', 'cyan'], ['P', 'P', 'lambda']] : [['P', 'P', 'cyan'], ['u', 'u', 'cyan'], ['Q', 'Q', 'phi'], ['v', 'v', 'phi']];
