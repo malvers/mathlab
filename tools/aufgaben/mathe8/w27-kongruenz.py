@@ -71,7 +71,7 @@ Q.q(r'Zwei Dreiecke sind kongruent. Im ersten ist $\alpha = 50^\circ$ und $\beta
     [r'Kongruente Dreiecke stimmen in allen Winkeln überein.',
      r'$180^\circ - 50^\circ - 60^\circ = 70^\circ$'])
 
-Q.q(r'Die Höhe zerlegt ein gleichschenkliges Dreieck in zwei Teildreiecke. Was gilt für sie?',
+Q.q(r'Die Höhe auf die Basis zerlegt ein gleichschenkliges Dreieck in zwei Teildreiecke. Was gilt für sie?',
     [r'Sie sind kongruent.', r'Sie sind ähnlich mit $k = 2$.', r'Sie haben verschiedene Flächeninhalte.', r'Sie sind gleichseitig.'],
     [r'Beide haben die Höhe als gemeinsame Seite, gleich lange Schenkel und einen rechten Winkel.',
      r'Nach SsW sind sie kongruent; das Dreieck ist achsensymmetrisch.'])

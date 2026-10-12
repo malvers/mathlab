@@ -57,7 +57,7 @@ Q.q(r'Zwei ähnliche Figuren mit $k = 1$ – wie nennt man sie?',
     [r'Ähnlich mit gleicher Größe heißt deckungsgleich, also kongruent.'])
 
 # ------------------------------------------------------------------- Zufall ----
-Q.q(r'Wie groß ist die Wahrscheinlichkeit, mit einem Würfel mindestens eine 5 zu werfen?',
+Q.q(r'Wie groß ist die Wahrscheinlichkeit, mit einem Würfel eine Augenzahl von mindestens 5 zu werfen?',
     [r'$\dfrac{1}{3}$', r'$\dfrac{1}{6}$', r'$\dfrac{5}{6}$', r'$\dfrac{1}{2}$'],
     [r'Günstig: 5 und 6.',
      r'$P = \dfrac{2}{6} = \dfrac{1}{3}$'])
@@ -73,7 +73,7 @@ Q.q(r'Eine Münze wird zweimal geworfen. Wie groß ist die Wahrscheinlichkeit f�
 
 Q.q(r'Zwei Würfel werden geworfen. Wie groß ist die Wahrscheinlichkeit für einen Pasch (zwei gleiche Augenzahlen)?',
     [r'$\dfrac{1}{6}$', r'$\dfrac{1}{36}$', r'$\dfrac{1}{12}$', r'$\dfrac{1}{3}$'],
-    [r'Paschs: (1|1) bis (6|6), also 6 von 36 Paaren.',
+    [r'Pasche: (1|1) bis (6|6), also 6 von 36 Paaren.',
      r'$\dfrac{6}{36} = \dfrac{1}{6}$'])
 
 Q.q(r'Aus der Urne mit 4 roten und 6 grünen Kugeln werden zwei ohne Zurücklegen gezogen. Wie groß ist P(rot, rot)?',
@@ -81,7 +81,7 @@ Q.q(r'Aus der Urne mit 4 roten und 6 grünen Kugeln werden zwei ohne Zurücklege
     [r'$\dfrac{4}{10} \cdot \dfrac{3}{9} = \dfrac{12}{90} = \dfrac{2}{15}$'])
 
 Q.q(r'Dieselbe Urne, aber mit Zurücklegen. Wie groß ist jetzt P(rot, rot)?',
-    [r'$\dfrac{4}{25}$', r'$\dfrac{2}{15}$', r'$\dfrac{4}{5}$', r'$\dfrac{8}{10}$'],
+    [r'$\dfrac{4}{25}$', r'$\dfrac{2}{15}$', r'$\dfrac{4}{5}$', r'$\dfrac{8}{25}$'],
     [r'$\dfrac{4}{10} \cdot \dfrac{4}{10} = \dfrac{16}{100} = \dfrac{4}{25}$'])
 
 Q.q(r'Ein Spieler trifft mit Wahrscheinlichkeit 0,7. Er wirft zweimal. Wie groß ist die Wahrscheinlichkeit für keinen Treffer?',

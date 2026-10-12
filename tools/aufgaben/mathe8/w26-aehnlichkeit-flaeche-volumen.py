@@ -80,7 +80,7 @@ Q.q(r'Ein Foto im Format 10 cm × 15 cm wird ähnlich auf 20 cm × 30 cm vergrö
 Q.q(r'In Swifts „Gullivers Reisen“ ist Gulliver 12-mal so groß wie die Liliputaner. Für wie viele Liliputaner muss er essen, wenn der Bedarf dem Körpervolumen entspricht?',
     [r'1728', r'144', r'12', r'36'],
     [r'Volumenfaktor: $12^3 = 12 \cdot 12 \cdot 12 = 1728$',
-     r'Quelle: Jonathan Swift, Gullivers Reisen (1726); dort rechnen die Liliputaner genau mit 1728 Portionen.'])
+     r'Quelle: Jonathan Swift, Gullivers Reisen (1726); dort steht 1724 – ein Rechenfehler, richtig ist $12^3 = 1728$.'])
 
 Q.q(r'Ein Würfel wird mit $k = 2$ vergrößert. Was gilt für Oberfläche und Volumen?',
     [r'Oberfläche 4-mal, Volumen 8-mal so groß', r'Oberfläche und Volumen jeweils 2-mal so groß',
