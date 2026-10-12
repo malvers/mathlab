@@ -354,7 +354,7 @@ s.task(
     falle=r"Die kleinste Periode von $\sin\!\left(\frac{x}{b}\right)$ ist "
           r"$2\pi \cdot b$, **nicht** $\frac{2\pi}{b}$: Das Argument wächst langsamer "
           r"als $x$, die Welle wird also breiter statt schmaler. Wer hier mit $\pi$ statt "
-          r"$4\pi$ rechnet, halbiert in d) die Fläche gleich mit.",
+          r"$4\pi$ rechnet, viertelt in d) die Fläche gleich mit.",
     figs=[(fig_welle(),
            "Der Graph von w über einer vollen Periode. Links fehlt gegenüber dem "
            "Rechteck der Höhe 3 ein Stück, rechts kommt eines dazu.")],

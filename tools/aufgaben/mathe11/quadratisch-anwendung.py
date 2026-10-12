@@ -33,7 +33,7 @@ s.task("Ab wann lohnt die Produktion?", 2,
         r"$x_S = -\dfrac{30}{2 \cdot (-0{,}5)} = \dfrac{30}{1} = 30$. Gewinn dort: $G(30) = -0{,}5 \cdot 900 + 900 - 300 = -450 + 600 = 150$. Das Maximum liegt bei **$30$ Stück mit $150$ € Gewinn**.",
         r"Nullstellen von $G$: $-0{,}5x^2 + 30x - 300 = 0$, mal $-2$ gibt $x^2 - 60x + 600 = 0$. pq-Formel: $x_{1,2} = 30 \pm \sqrt{900 - 600} = 30 \pm \sqrt{300} \approx 30 \pm 17{,}32$. Also $x \approx 12{,}68$ und $x \approx 47{,}32$. Gewinn wird von **$13$ bis $47$ Stück** gemacht.",
         r"$G(12) = -72 + 360 - 300 = -12$ €, also noch Verlust. $G(13) = -84{,}5 + 390 - 300 = 5{,}5$ €, also Gewinn. $G(47) = -1\,104{,}5 + 1\,410 - 300 = 5{,}5$ €, noch Gewinn. $G(48) = -1\,152 + 1\,440 - 300 = -12$ €, wieder Verlust. Die Randwerte bestätigen den Bereich — und sie sind paarweise gleich, weil die Parabel symmetrisch zu $x = 30$ liegt."],
-       falle=r"Die Nullstellen sind nicht die Antwort auf „ab wann Gewinn“, solange nicht gerundet wurde — und hier wird **nach innen** gerundet: $12{,}68$ wird zu $13$, $47{,}32$ zu $47$. Wer wie gewohnt kaufmännisch rundet, macht bei $48$ Stück Verlust.")
+       falle=r"Die Nullstellen sind nicht die Antwort auf „ab wann Gewinn“, solange nicht gerundet wurde — und hier wird **nach innen** gerundet: $12{,}68$ wird zu $13$, $47{,}32$ zu $47$. Wer beide Werte aufrundet, macht bei $48$ Stück Verlust.")
 
 # -------------------------------------------------------------- AFB III ----
 s.task("Der Scheitel ist immer die Antwort?", 3,

@@ -23,7 +23,7 @@ s.task("Vier Messreihen aus dem Betrieb", 1,
 
 # --------------------------------------------------------------- AFB II ----
 s.task("Vom Text zum Modell", 2,
-       r"Drei Situationen sollen als Funktion beschrieben werden. **(1)** Ein Vertrag kostet $5$ € Grundgebühr im Monat und zusätzlich $12$ € je Monat für das Datenpaket. **(2)** Eine Bakterienkultur startet mit $500$ Bakterien und verdoppelt sich alle $3$ Stunden. **(3)** Ein quadratisches Bild wird vergrößert; gefragt ist die Bildfläche in Abhängigkeit von der Seitenlänge.",
+       r"Drei Situationen sollen als Funktion beschrieben werden. **(1)** Ein Vertrag kostet einmalig $5$ € Grundgebühr und zusätzlich $12$ € je Monat für das Datenpaket. **(2)** Eine Bakterienkultur startet mit $500$ Bakterien und verdoppelt sich alle $3$ Stunden. **(3)** Ein quadratisches Bild wird vergrößert; gefragt ist die Bildfläche in Abhängigkeit von der Seitenlänge.",
        [r"Ordne jeder Situation den Funktionstyp zu und nenne das Signalwort im Text, das ihn verrät.",
         r"Stelle für alle drei Situationen die Funktionsgleichung auf.",
         r"Wie viele Bakterien sind nach $12$ Stunden da?",
@@ -33,7 +33,7 @@ s.task("Vom Text zum Modell", 2,
         r"(1) $K(m) = 12m + 5$ mit $m$ in Monaten. (2) $B(t) = 500 \cdot 2^{\frac{t}{3}}$ mit $t$ in Stunden; der Exponent $\dfrac{t}{3}$ zählt die Verdopplungsschritte. (3) $A(a) = a^2$ mit $a$ als Seitenlänge.",
         r"In $12$ Stunden liegen $\dfrac{12}{3} = 4$ Verdopplungen: $B(12) = 500 \cdot 2^4 = 500 \cdot 16 = 8\,000$ Bakterien.",
         r"In $24$ Stunden liegen $8$ Verdopplungen: $B(24) = 500 \cdot 2^8 = 500 \cdot 256 = 128\,000$. Das lineare Modell ergibt $500 + 8 \cdot 500 = 4\,500$. Der Unterschied ist mehr als das $28$-fache. Grund: linear kommt achtmal derselbe Betrag dazu, exponentiell wird achtmal **verdoppelt** — der Zuwachs wächst dort mit dem Bestand mit."],
-       falle=r"„Verdoppelt sich alle $3$ Stunden“ heißt $2^{t/3}$, nicht $2^{3t}$. Eine Probe bei $t = 3$ muss genau $1\,000$ ergeben; $2^{9}$ läge um das Fünfhundertfache daneben.")
+       falle=r"„Verdoppelt sich alle $3$ Stunden“ heißt $2^{t/3}$, nicht $2^{3t}$. Eine Probe bei $t = 3$ muss genau $1\,000$ ergeben; $2^{9}$ läge um das $256$-fache daneben.")
 
 # -------------------------------------------------------------- AFB III ----
 s.task("Passt genau, also stimmt es?", 3,
@@ -74,6 +74,7 @@ def check():
     lin = 500 + 8 * 500
     assert lin == 4500 and 128000 / 4500 > 28 and 128000 / 4500 < 29
     assert 500 * 2 ** 9 == 256000                     # the 2^(3t) blunder at t=3
+    assert 500 * 2 ** 9 // Bk(3) == 256               # off by the factor 256
     # two models, three points
     e = lambda x: 2 ** x
     q = lambda x: x ** 2 - x + 2

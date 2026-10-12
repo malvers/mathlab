@@ -273,8 +273,8 @@ s.task(
     [
         r"Richtig ist **(B)**. Produktregel mit dem inneren Faktor $-2$: "
         r"$f'(x) = 1 \cdot e^{-2x} + x \cdot (-2) \cdot e^{-2x} = e^{-2x} \cdot (1 - 2x)$. "
-        r"In (A) fehlt der erste Summand, in (C) ist das Vorzeichen der inneren Ableitung "
-        r"falsch, (D) ist das Produkt der beiden Einzelableitungen — die Produktregel "
+        r"In (D) fehlt der erste Summand, in (C) ist das Vorzeichen der inneren Ableitung "
+        r"falsch, (A) ist das Produkt der beiden Einzelableitungen — die Produktregel "
         r"lautet aber nicht so — und (E) entsteht, wenn man den Faktor $x$ ableitet und "
         r"gleichzeitig die $-2$ in die Klammer schreibt. Probe: $f'(0) = 1$, und nur (B) "
         r"liefert an der Stelle $0$ den Wert $1$.",

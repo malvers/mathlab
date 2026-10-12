@@ -31,7 +31,7 @@ s.task("Wie lang ist der Tag?", 2,
        solution=[
         r"Amplitude $a = 4$ Stunden: so weit weicht die Tageslänge höchstens vom Mittel ab. Mittellage $d = 12$ Stunden: das ist die mittlere Tageslänge über das Jahr. Periode $T = \dfrac{2\pi}{2\pi/365} = 365$ Tage — der Verlauf wiederholt sich jährlich.",
         r"Der Sinus wird höchstens $1$ und mindestens $-1$. Längster Tag: $12 + 4 = 16$ Stunden. Kürzester Tag: $12 - 4 = 8$ Stunden.",
-        r"$L(t) = 12$ verlangt $\sin\left(\dfrac{2\pi}{365}(t - 80)\right) = 0$, also $\dfrac{2\pi}{365}(t - 80) = 0$ oder $= \pi$. Daraus $t = 80$ und $t - 80 = 182{,}5$, also $t = 262{,}5$. Der Tag $80$ ist der $21$. März, der Tag $262$ bis $263$ der $20$. bis $21$. September — die beiden **Tagundnachtgleichen**.",
+        r"$L(t) = 12$ verlangt $\sin\left(\dfrac{2\pi}{365}(t - 80)\right) = 0$, also $\dfrac{2\pi}{365}(t - 80) = 0$ oder $= \pi$. Daraus $t = 80$ und $t - 80 = 182{,}5$, also $t = 262{,}5$. Der Tag $80$ ist der $21$. März, der Tag $262$ bis $263$ der $19$. bis $20$. September — die beiden **Tagundnachtgleichen**.",
         r"$\dfrac{2\pi}{365}(172 - 80) = \dfrac{2\pi \cdot 92}{365} \approx 1{,}5837$. Der Sinus davon ist $\approx 0{,}9999$, also $L(172) \approx 4 \cdot 0{,}9999 + 12 \approx 16{,}0$ Stunden. Das passt zu b): der $21$. Juni ist praktisch genau der längste Tag, denn $80 + \dfrac{365}{4} \approx 171$."],
        falle=r"Die $80$ steht im Term mit Minus und verschiebt nach **rechts**, also in den März. Wer sie als Verschiebung nach links liest, legt den längsten Tag in den Winter.")
 

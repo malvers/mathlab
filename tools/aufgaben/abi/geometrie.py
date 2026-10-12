@@ -228,7 +228,7 @@ s.task(
         r"Die Aussage ist **falsch**. Hier ist der Schatten mit $22$ m² **kleiner** als die "
         r"Dachfläche mit $6\sqrt{17} \approx 24{,}7$ m². Der Grund: Die Sonne steht so, dass "
         r"das Dach schräg getroffen wird — projiziert wird nur der Anteil senkrecht zur "
-        r"Strahlrichtung. Erst wenn die Strahlen fast parallel zur Dachfläche einfallen, "
+        r"Strahlrichtung. Erst wenn die Strahlen fast parallel zum Untergrund einfallen, "
         r"wird der Schatten sehr groß.",
     ],
     falle=r"$\vec{s}$ zeigt **von der Sonne weg**, also nach unten ($z$-Komponente negativ). "

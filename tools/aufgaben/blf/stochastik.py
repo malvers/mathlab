@@ -89,7 +89,7 @@ def fig_wuerfel():
             d.text(x0 + cc * cw + cw / 2.0, y0 + r * cw + cw / 2.0, cells[r][cc], 13,
                    S.INK if head else S.BODY, baseline="middle", italic=head and cc + r == 0)
     return d.svg("Tabelle aller 36 Ergebnisse zweier Wuerfel mit den Augensummen; die "
-                 "sechs Paschs sind orange, die sechs Summen 7 gruen markiert")
+                 "sechs Pasche sind orange, die sechs Summen 7 gruen markiert")
 
 
 # ------------------------------------------------------------------- sheet ---
@@ -132,7 +132,7 @@ s.task(
         r"Die relativen Häufigkeiten aller möglichen Antworten müssen zusammen $1$ ergeben. "
         r"Lenas Werte ergeben $0{,}50 + 0{,}35 + 0{,}18 + 0{,}07 = 1{,}10$. Das Runden "
         r"erklärt das nicht: Vier auf zwei Stellen gerundete Werte weichen zusammen um "
-        r"weniger als $4 \cdot 0{,}005 = 0{,}02$ von $1$ ab. Der Fehler steckt beim Bus: "
+        r"höchstens $4 \cdot 0{,}005 = 0{,}02$ von $1$ ab. Der Fehler steckt beim Bus: "
         r"$\frac{7}{28} = 0{,}25$ und nicht $0{,}35$.",
 
         r"Der Term ist das **arithmetische Mittel** der Schulwegzeiten der ganzen Klasse: "
@@ -199,7 +199,7 @@ s.task(
         r"für einen Pasch soll geändert werden. Berechnen Sie die neue Auszahlung.",
     ],
     [
-        r"Von den $36$ gleich wahrscheinlichen Ergebnissen sind $6$ Paschs und $6$ haben "
+        r"Von den $36$ gleich wahrscheinlichen Ergebnissen sind $6$ Pasche und $6$ haben "
         r"die Summe $7$ (siehe Tabelle): je $\frac{6}{36} = \frac{1}{6}$. Beide Ereignisse "
         r"schließen sich aus, denn ein Pasch hat immer eine gerade Summe.",
 
