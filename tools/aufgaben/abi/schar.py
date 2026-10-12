@@ -121,8 +121,8 @@ def fig_schar():
         p.point(t, f(t, t), None, color=col, size=3.6)
     legend(p, [(S.RED, "t = 1", None), (S.GREEN, "t = 1,5", None), (S.INK, "t = 2", None)],
            1.15, 1.75, (-22, -26, -30))
-    return p.svg("Drei Kurven der Schar; je groesser t, desto weiter aussen und desto "
-                 "hoeher liegen Hochpunkt und Tiefpunkt")
+    return p.svg("Drei Kurven der Schar; je groesser t, desto weiter aussen liegen "
+                 "Hochpunkt und Tiefpunkt, der Hochpunkt hoeher, der Tiefpunkt tiefer")
 
 
 def fig_extrempunkte():
