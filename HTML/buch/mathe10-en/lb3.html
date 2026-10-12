@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics OS 10 · Chapter 3 · Random variables and expected value | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Probability distribution, expected value, fair games, simulation and risk. Chapter 3 of the interactive textbook Mathematics · Secondary School 10: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · SECONDARY SCHOOL 10</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 3 · LEARNING AREA 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="A" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 3 · LEARNING AREA 3 · DECEMBER · JANUARY</p>
+            <h1>Random variables and expected value</h1>
+            <p class="b-hero-lead">Is the spinner at the Christmas market worth it? Is an extended warranty worth its money? In random experiments you are often interested in a <b>number</b>:
+                the total score, the win in euros, the number of hits. Such numbers are called <b>random variables</b>. Their <b>expected value</b> tells you
+                what you can count on in the long run.</p>
+            <div class="b-chips"><span class="b-chip">12 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">EXPECTED VALUE</span><span class="b-chip">SIMULATION</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>describe random variables and give their <b>probability distribution</b> as a table and a chart</li>
+                <li>calculate and interpret the <b>expected value</b></li>
+                <li>distinguish the <b>chance of winning</b> from the <b>expected win</b>, recognise fair games</li>
+                <li><b>simulate</b> random experiments and estimate risks</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="1/6" data-ph="P ="><p class="b-q-text">Probability of a 6 with one dice?</p><div class="b-sol"><p>One out of six.</p></div></div>
+            <div class="b-q" data-ans="1/4" data-ph="P ="><p class="b-q-text">Heads twice in two coin tosses?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12$</p></div></div>
+            <div class="b-q" data-ans="36" data-ph="Number"><p class="b-q-text">How many outcomes are there when you roll two dice?</p><div class="b-sol"><p>$6 \cdot 6$</p></div></div>
+            <div class="b-q" data-ans="12.5" data-ph="%"><p class="b-q-text">$\tfrac18$ as a percentage?</p><div class="b-sol"><p>$1 \div 8 = 0.125$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE TOTAL SCORE</div>
+            <div class="b-text"><p>Roll two dice 50 times and note the total score.</p>
+                <ul><li>Which total comes up most often? Give a reason with a table of all 36 pairs of dice.</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">THE SPINNER</div>
+            <div class="b-text"><p>One spin costs €1. The spinner has six equal sectors: one pays €4, the others nothing.</p>
+                <ul><li>Play 30 rounds (with a dice). How much have you won or lost? What do you expect for 600 rounds?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Random variables and distributions" data-toc-k="1" data-toc-short="1 Distribution">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Random variables and their distribution</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>When you roll two dice there are 36 equally likely pairs. The total score assigns a number to every pair: $(3, 4)$ gets the 7.
+                The 7 comes from six pairs, the 2 from only one. That is why $P(\text{total } 7) = \tfrac{6}{36}$ and $P(\text{total } 2) = \tfrac{1}{36}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · RANDOM VARIABLE</div>
+                <div class="b-text">
+                    <p>A <b>random variable</b> $X$ assigns a number to every outcome of a random experiment: the total score, the number of hits, the win in euros.</p>
+                    <p>Its <b>probability distribution</b> states with which probability $X$ takes each value – as a table or a bar chart.
+                        All the probabilities together add up to 1.</p>
+                    <p>Multi-stage experiments: <b>path rule</b> (multiply along a path), <b>sum rule</b> (add the paths that lead to the same value).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Complementary event:</b> “at least once” is often quickest to calculate as 1 minus “not at all”.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · DISTRIBUTIONS WHEN ROLLING TWO DICE</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a random variable. Tap a cell of the table or a bar: the matching pairs of dice light up.</p>
+        <div data-widget="verteilung" data-start="sum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · THE NUMBER OF SIXES</div>
+            <div class="b-text"><p>A dice is rolled twice, $X$ counts the sixes. Give the distribution.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac{25}{36}$, $\;P(X = 1) = 2 \cdot \tfrac16 \cdot \tfrac56 = \tfrac{10}{36}$, $\;P(X = 2) = \tfrac{1}{36}$. <span class="b-res">Sum 1</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · WITHOUT REPLACEMENT</div>
+            <div class="b-text"><p>An urn contains 3 red and 2 blue balls. Two are drawn without replacement. How likely is it that both are red?</p></div>
+            <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 =$ <span class="b-res">$\tfrac{3}{10}$</span>. With replacement it would be $\tfrac{9}{25}$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Two dice: calculate $P(\text{total } 8)$ and $P(\text{double})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{5}{36}$ and $\tfrac{6}{36} = \tfrac16$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ takes the values 0, 1, 2 with $P(X = 0) = 0.2$ and $P(X = 1) = 0.5$. What is $P(X = 2)$?</p></div>
+            <div class="b-sol"><p>$1 - 0.2 - 0.5 = 0.3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A coin is tossed three times, $X$ counts heads. Give the distribution.</p></div>
+            <div class="b-sol"><p>$\tfrac18$, $\tfrac38$, $\tfrac38$, $\tfrac18$ for 0, 1, 2, 3.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>How likely is at least one 6 in two rolls?</p></div>
+            <div class="b-sol"><p>$1 - \tfrac{25}{36} = \tfrac{11}{36}$. Not $\tfrac16 + \tfrac16$, or the double six is counted twice.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>When rolling two dice, $Y$ is the larger score. Find $P(Y = 6)$ and $P(Y = 1)$.</p></div>
+            <div class="b-sol"><p>$P(Y = 6) = 1 - \tfrac{25}{36} = \tfrac{11}{36}$, $P(Y = 1) = \tfrac{1}{36}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="5/36" data-ph="P ="><p class="b-q-text">Total score 8 with two dice?</p><div class="b-sol"><p>Five pairs.</p></div></div>
+        <div class="b-q" data-ans="10/36" data-ph="P ="><p class="b-q-text">Exactly one six in two rolls?</p><div class="b-sol"><p>Two paths.</p></div></div>
+        <div class="b-q" data-ans="3/8" data-ph="P ="><p class="b-q-text">Exactly two heads in three coin tosses?</p><div class="b-sol"><p>Three paths with $\tfrac18$ each.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Expected value and fair games" data-toc-k="2" data-toc-short="2 Expected value">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Expected value and fair games</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>With the spinner you win €3 in one case out of six (€4 payout minus €1 stake), otherwise you lose €1.
+                In 600 rounds that is about 100 wins and 500 losses: $100 \cdot 3 - 500 \cdot 1 = -200$ euros. So per round you lose about 33 cents on average.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · EXPECTED VALUE</div>
+                <div class="b-text">
+                    <p>$E(X) = x_1 \cdot P(X = x_1) + x_2 \cdot P(X = x_2) + \ldots$ – every value times its probability, all added up.</p>
+                    <p>The expected value is the <b>mean in the long run</b>. In a single trial it often does not occur at all.</p>
+                    <p>A game is <b>fair</b> if the expected value of the win is zero: expected payout = stake.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Chance is not expectation:</b> a 90% chance of winning €1, but a 10% risk of losing €20: $E = 0.9 - 2 = -1.10$ euros.</p>
+            <p class="b-note"><b>Roulette:</b> 37 numbers, one number pays €36. $E = \tfrac{36}{37} - 1 \approx -2.7$ cents per euro.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · BUILDING A FAIR GAME</div>
+        <p class="b-help" style="margin:0 0 12px">Change the stake and the payouts until the expected value of the win is zero.</p>
+        <div data-widget="fairesspiel"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · THE SPINNER</div>
+            <div class="b-text"><p>A spinner pays nothing with $\tfrac12$, €2 with $\tfrac14$ and €4 with $\tfrac14$. A spin costs €2. Is the game fair?</p></div>
+            <div class="b-sol"><p>Expected payout $0 + 0.5 + 1 = 1.50$ euros, win <span class="b-res">$-0.50$ euros per spin</span>: not fair.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · MAKING IT FAIR</div>
+            <div class="b-text"><p>Stake €1, roll once, there is money only for a 6. How high must the payout be for the game to be fair?</p></div>
+            <div class="b-sol"><p>$A \cdot \tfrac16 = 1$ euro, so <span class="b-res">$A = 6$ euros</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate the expected value of the score of a fair dice.</p></div>
+            <div class="b-sol"><p>$\tfrac{1 + 2 + \ldots + 6}{6} = 3.5$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ takes the values 0, 10 and 20 with the probabilities 0.5, 0.3 and 0.2. Calculate $E(X)$.</p></div>
+            <div class="b-sol"><p>$0 + 3 + 4 = 7$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In a raffle with 1000 tickets at €2 each there is one prize of €500, ten of €50 and a hundred of €5. Calculate the expected payout and the win per ticket.</p></div>
+            <div class="b-sol"><p>$1500 \div 1000 = 1.50$ euros, win $-0.50$ euros per ticket.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Stake €1, two coin tosses, a payout of €3 for two heads. Calculate the expected win. Which payout would be fair?</p></div>
+            <div class="b-sol"><p>$3 \cdot \tfrac14 - 1 = -0.25$ euros. Fair at €4.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Game A: a 60% chance of winning €1, otherwise a loss of €2. Game B: a 10% chance of winning €15, otherwise a loss of €2. Which game is better, which is riskier?</p></div>
+            <div class="b-sol"><p>A: $0.6 - 0.8 = -0.20$ euros. B: $1.5 - 1.8 = -0.30$ euros. A is better value in the long run, B fluctuates more.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3.5" data-ph="E ="><p class="b-q-text">Expected score of a dice?</p><div class="b-sol"><p>$21 \div 6$</p></div></div>
+        <div class="b-q" data-ans="-0.5" data-ph="€"><p class="b-q-text">Expected win in example 3 in €?</p><div class="b-sol"><p>$1.50 - 2$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="€"><p class="b-q-text">Fair payout in exercise 9 in €?</p><div class="b-sol"><p>$A \cdot \tfrac14 = 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Simulation and risk" data-toc-k="3" data-toc-short="3 Simulation">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Simulation and risk</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Not every random experiment is easy to calculate. Then a <b>simulation</b> helps: the computer generates random numbers,
+                plays the experiment through thousands of times, and the relative frequencies give <b>estimates</b> of the probabilities.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SIMULATION AND RISK</div>
+                <div class="b-text">
+                    <p><b>Simulating:</b> choose random numbers so that each outcome has the right probability – e.g. the digits 0, 1, 2 for an event with 30%.</p>
+                    <p><b>Law of large numbers:</b> over many runs the relative frequency approaches the probability.</p>
+                    <p><b>Risk</b> of damage: probability times the amount of the damage, that is the expected damage.</p>
+                    <p><b>Components:</b> in series they all have to work ($p^n$). In parallel the system only fails when all of them fail.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Simulating two dice:</b> add two random numbers from 1 to 6 – not one random number from 2 to 12, because the totals are not equally likely.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE SAME EXPECTED VALUE, A DIFFERENT RISK</div>
+        <p class="b-help" style="margin:0 0 12px">Two games with the same expected value: simulate many rounds and compare how strongly the wins fluctuate.</p>
+        <div data-widget="spielstreuung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · THE STRING OF LIGHTS</div>
+            <div class="b-text"><p>20 bulbs are connected in series, each works with a probability of 99%. How likely is it that the string lights up?</p></div>
+            <div class="b-sol"><p>$0.99^{20} \approx$ <span class="b-res">0.818</span>, so only in about 82% of cases.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · INSURE OR NOT?</div>
+            <div class="b-text"><p>A mobile phone is worth €400 and breaks with a probability of 5% per year. Insurance costs €60 a year.</p></div>
+            <div class="b-sol"><p>Expected damage $400 \cdot 0.05 =$ <span class="b-res">€20</span>. On average the insurance is not worth it – but if you could not pay for a repair, you are buying security.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>In 200 simulations an event occurred 38 times. Give the relative frequency. Is that the probability?</p></div>
+            <div class="b-sol"><p>$0.19$ – an estimate, not an exact probability.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>How do you use random digits 0 to 9 to simulate an event with a probability of 70%?</p></div>
+            <div class="b-sol"><p>It occurs for seven of the ten digits, e.g. 0 to 6.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Two pumps work in parallel, each fails with 10%. How likely is it that the system fails? How likely if they were connected in series?</p></div>
+            <div class="b-sol"><p>Parallel: $0.1^2 = 1\%$. In series: $1 - 0.9^2 = 19\%$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A device fails with 2% per year. How likely is it to survive three years? How likely is it to fail at least once in two years?</p></div>
+            <div class="b-sol"><p>$0.98^3 \approx 94.1\%$. $1 - 0.98^2 \approx 4\%$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>The Chevalier de Méré bet that he would throw at least one 6 in four rolls. Calculate his probability of winning. Why is $4 \cdot \tfrac16$ wrong?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 51.8\%$. With $4 \cdot \tfrac16$, rolls with several sixes would be counted more than once.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.19" data-ph="h ="><p class="b-q-text">Relative frequency from exercise 11?</p><div class="b-sol"><p>$38 \div 200$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="%"><p class="b-q-text">Failure of the parallel system in exercise 13 in %?</p><div class="b-sol"><p>$0.1 \cdot 0.1$</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="€"><p class="b-q-text">Expected damage in example 6 in €?</p><div class="b-sol"><p>$400 \cdot 0.05$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="W" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A dice is rolled 600 times. How many sixes do you expect? Why is exactly 100 rather rare?</p></div>
+            <div class="b-sol"><p>About 100. The number fluctuates randomly around 100, exactly 100 is just one value among many.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In roulette with 37 numbers, 18 are red. If you bet €1 on red and win, you get €2. Calculate the expected win.</p></div>
+            <div class="b-sol"><p>$2 \cdot \tfrac{18}{37} - 1 \approx -0.027$ euros: the green zero makes the difference.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Repair damage of €120 occurs with 15%, the extended warranty costs €25. Is it worth it on average?</p></div>
+            <div class="b-sol"><p>Expected damage €18 &lt; €25: on average, no.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Connecting with learning area 4:</b> an insurance company has 10,000 customers, each has damage of €500 with 1%. What premium does it need at least? Why does it charge more?</p></div>
+            <div class="b-sol"><p>Expected damage €5 per customer, €50,000 in total. On top of that come administration, fluctuations and profit.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Pascal and Fermat" data-toc-k="X" data-toc-short="Pascal">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>A gambler and two letters</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>The French nobleman <b>Antoine Gombaud</b>, known as the Chevalier de Méré, was a passionate gambler. Among other things he asked the mathematician <b>Blaise Pascal</b>
+                how to divide the stakes fairly if a game has to be broken off early.</p>
+            <p>In 1654 Pascal exchanged letters about it with <b>Pierre de Fermat</b>. Their idea: you work out what each player would have won on average if the game had continued.
+                This exchange of letters is regarded as the birth of probability theory – and the expected value was there from the very beginning.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> correspondence between Pascal and Fermat, 1654; after K. Devlin: The Unfinished Game. Basic Books 2008.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="R" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>RANDOM VARIABLE</h4><p>a number for every outcome, the distribution adds up to 1</p></div>
+        <div><p>Total score 7: $\tfrac{6}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>EXPECTED VALUE</h4><p>values times probabilities, added up</p></div>
+        <div><p>Dice: 3.5</p></div></div>
+    <div class="b-rueck"><div><h4>FAIR</h4><p>expected win zero</p></div>
+        <div><p>Stake €1, $P = \tfrac16$: payout €6</p></div></div>
+    <div class="b-rueck"><div><h4>SIMULATION, RISK</h4><p>the relative frequency estimates $P$, risk = $P$ times damage</p></div>
+        <div><p>Series: $0.99^{20} \approx 0.82$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="11/36" data-ph="P ="><p class="b-q-text">At least one 6 in two rolls?</p><div class="b-sol"><p>$1 - \tfrac{25}{36}$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="E ="><p class="b-q-text">$E(X)$ in exercise 7?</p><div class="b-sol"><p>$3 + 4$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">When is a game fair?</p><div class="b-mc"><button>when you win in 50% of cases</button><button>when the stake is small</button><button>when the expected win is zero</button></div><div class="b-sol"><p>In the long run nobody wins.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH A CALCULATOR</div>
+            <div class="b-q" data-ans="-0.33" data-tol="0.005" data-ph="€"><p class="b-q-text">Expected win with the spinner from the starter (stake €1, $\tfrac16$ for €4), to two decimal places?</p><div class="b-sol"><p>$3 \cdot \tfrac16 - \tfrac56$</p></div></div>
+            <div class="b-q" data-ans="51.8" data-tol="0.05" data-ph="%"><p class="b-q-text">De Méré’s probability of winning in %, to one decimal place?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4$</p></div></div>
+            <div class="b-q" data-ans="94.1" data-tol="0.05" data-ph="%"><p class="b-q-text">Three years without failure at 2% per year, in % to one decimal place?</p><div class="b-sol"><p>$0.98^3$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE TO TRY (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">THE DICE GAME</span><span class="b-lab-what">Roll, count, estimate probabilities</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Balls fall at random – and form a pattern</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Secondary School (Oberschule) Year 10, intermediate track · Learning area 3 of the Saxon curriculum for mathematics at the Oberschule.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+<script src="../../js/buch-spiele.js"></script>
+<script src="../../js/buch-en/spiele.js"></script>
+</body>
+</html>

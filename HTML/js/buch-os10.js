@@ -15,15 +15,15 @@
     const W = B.widget;
     const LAM = 'rgb(245,194,66)', CY = '#7fd8ee', PHI = 'rgb(160,200,90)', RED = '#e2665a', VIO = '#b8a4f2', TXT = '#e8edf5', DIM = '#8fa3bd';
     const f1 = v => (Math.round(v * 10) / 10).toString();
-    // numbers in the German way: comma, thin space from five digits on
+    // numbers in the German way: comma, thin space from five digits on (English editions: decimal point, js/buch-en.js makes the rest)
     const de = (v, n) => {
         const s = Math.abs(v).toFixed(n == null ? 1 : n).split('.');
         const int = s[0].length > 4 ? s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f') : s[0];
-        return (v < 0 ? '−' : '') + int + (s[1] ? ',' + s[1] : '');
+        return (v < 0 ? '−' : '') + int + (s[1] ? (B.en ? '.' : ',') + s[1] : '');
     };
     const tex = (v, n) => de(v, n).replace(/\u202f/g, '\\,').replace(',', '{,}').replace('−', '-');
     // the same without trailing zeros: 25 instead of 25,00, 6,25 stays
-    const texs = (v, n) => tex(v, n).replace(/\{,\}(\d*?)0+$/, (m, d) => d ? '{,}' + d : '');
+    const texs = (v, n) => tex(v, n).replace(/(\{,\}|\.)(\d*?)0+$/, (m, c, d) => d ? c + d : '');
     const txt = (x, y, s, st, anchor) => '<text x="' + f1(x) + '" y="' + f1(y) + '" text-anchor="' + (anchor || 'middle') + '" dominant-baseline="middle" style="' + (st || '') + '">' + s + '</text>';
     const line = (p, q, st) => '<line x1="' + f1(p[0]) + '" y1="' + f1(p[1]) + '" x2="' + f1(q[0]) + '" y2="' + f1(q[1]) + '" style="' + st + '"/>';
     const poly = (pts, st) => '<polygon points="' + pts.map(p => f1(p[0]) + ',' + f1(p[1])).join(' ') + '" style="' + st + '"/>';
@@ -143,7 +143,7 @@
             }
             if (tip != null) {
                 const Vb = (k ? Math.PI * R * R : R * R) * tip / 3, Vs = (k ? Math.PI * r * r : r * r) * (tip - h) / 3;
-                html += '<p>Als Differenz: ganze ' + (k ? 'Kegel' : 'Pyramide') + ' (Höhe $' + tex(tip, 2) + '$ cm) $\\approx ' + tex(Vb, 1) + '$ cm³ minus abgeschnittene Spitze $\\approx ' + tex(Vs, 1) + '$ cm³ $= ' + tex(Vb - Vs, 1) + '$ cm³</p>';
+                html += '<p>Als Differenz: ' + (k ? 'ganzer Kegel' : 'ganze Pyramide') + ' (Höhe $' + tex(tip, 2) + '$ cm) $\\approx ' + tex(Vb, 1) + '$ cm³ minus abgeschnittene Spitze $\\approx ' + tex(Vs, 1) + '$ cm³ $= ' + tex(Vb - Vs, 1) + '$ cm³</p>';
             } else {
                 html += '<p>Oben und unten gleich groß: das ist ein ' + (k ? 'Zylinder' : 'Quader mit quadratischer Grundfläche') + ', $V = G \\cdot h$.</p>';
             }
@@ -163,8 +163,8 @@
     W('lohnos10', function (box) {
         const S = { brutto: 2400, st: 10 };
         const sl = div(box, '');
-        range(sl, { label: 'Bruttolohn im Monat', min: 600, max: 5000, step: 50, value: S.brutto, fmt: v => de(v, 0) + ' €', onInput: v => { S.brutto = v; render(); } });
-        range(sl, { label: 'Lohnsteuer (angenommen)', min: 0, max: 25, step: 0.5, value: S.st, fmt: v => de(v, 1) + ' %', onInput: v => { S.st = v; render(); } });
+        range(sl, { label: 'Bruttolohn im Monat', min: 600, max: 5000, step: 50, value: S.brutto, fmt: v => (B.en ? '€' + de(v, 0) : de(v, 0) + ' €'), onInput: v => { S.brutto = v; render(); } });
+        range(sl, { label: 'Lohnsteuer (angenommen)', min: 0, max: 25, step: 0.5, value: S.st, fmt: v => de(v, 1) + (B.en ? '%' : ' %'), onInput: v => { S.st = v; render(); } });
         const pic = div(box, 'b-svgbox');
         // the amounts as an HTML legend under the bar: SVG text would shrink to 7 px on a phone
         const leg = div(box, '');
@@ -182,7 +182,7 @@
             pic.innerHTML = '<svg viewBox="0 0 600 46" role="img" aria-label="Bruttolohn aufgeteilt in Netto, Lohnsteuer und Sozialabgaben, rechts der gestrichelten Linie der Anteil des Arbeitgebers">' + g + '</svg>';
             leg.innerHTML = parts.map(([n, v, c]) => '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + c + '"></span>' + n + '\u00a0' + de(v, 0) + '\u00a0€</span>').join('') +
                 '<span style="color:' + DIM + '">gestrichelt: Ende des Bruttolohns ' + de(b, 0) + ' €</span>';
-            tab.innerHTML = '<table class="b-table"><tr><th>Posten</th><th>Satz</th><th>Betrag</th></tr>' +
+            tab.innerHTML = '<table class="b-table"><tr><th>Posten</th><th>Prozentsatz</th><th>Betrag im Monat</th></tr>' +
                 sv.map(([n, p, v]) => '<tr><td>' + n + '</td><td>' + de(p, 1) + '\u00a0%</td><td>' + de(v, 2) + '\u00a0€</td></tr>').join('') +
                 '<tr><td>Lohnsteuer</td><td>' + de(S.st, 1) + '\u00a0%</td><td>' + de(st, 2) + '\u00a0€</td></tr>' +
                 '<tr><th>Nettolohn</th><td></td><th>' + de(netto, 2) + '\u00a0€</th></tr></table>';
