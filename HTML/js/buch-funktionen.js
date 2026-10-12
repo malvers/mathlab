@@ -368,7 +368,7 @@
         const out = div(box, 'b-out');
         function render() {
             p.draw([{ fn: f, color: 'lambda' }, { hline: 12.27 }, { pts: [[day, f(day)]], color: 'cyan', r: 6 }]);
-            const hh = Math.floor(f(day)), mm = Math.round((f(day) - hh) * 60);
+            const tm = Math.round(f(day) * 60), hh = Math.floor(tm / 60), mm = tm % 60;   // round total minutes, never "10 h 60 min"
             out.innerHTML = '$T(t) = 12{,}27 + 4{,}28 \\cdot \\sin\\!\\big(\\tfrac{2\\pi}{365}(t - 80)\\big)$ · am ' + date(day) + ': <b>' + hh + ' h ' + mm + ' min</b> Tageslicht';
             math(out);
         }
