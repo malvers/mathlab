@@ -421,7 +421,7 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Gegenereignis | suceso contrario | |
 | Ziegenproblem | problema de Monty Hall | |
 | Wappen / Zahl (Münze) | cara / cruz | outcome letters C / X (WWZ → CCX) |
-| Augensumme, Augenzahl | suma de puntos, número de puntos | |
+| Augensumme, Augenzahl | suma de puntos, puntuación | as in the es-1 block |
 | Einsatz, Auszahlung, Gewinn (Spiel) | apuesta, premio, ganancia | |
 | Stabdiagramm | diagrama de barras | |
 | Streuung | dispersión | |
