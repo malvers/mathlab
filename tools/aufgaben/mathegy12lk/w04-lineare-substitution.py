@@ -12,7 +12,7 @@ import sympy as sp
 
 Q = gy12lk(nr=4, slug='lineare-substitution', thema='Lineare Substitution', lb='LB 5',
            blurb='∫ f(ax + b) dx ohne Hilfsmittel, Integrieren mit dem CAS und Probe durch Ableiten',
-           comment='Blocks: lineare Substitution ohne Hilfsmittel (1-6 Grundkurs, 7-14 neu: Regel, Wurzel, Potenz im Nenner, cos, e, Fehler finden, bestimmte Integrale), CAS und Probe (15-20 Grundkurs).')
+           comment='Blocks: lineare Substitution ohne Hilfsmittel (1-6 Grundkurs, 7-14 neu: Regel, Wurzel, Potenz im Nenner, cos, e, Fehler finden, bestimmte Integrale; 15, 16 Grundkurs: bestimmte Integrale), CAS und Probe (17-20 Grundkurs).')
 
 N = new()
 

@@ -11,7 +11,7 @@ import sympy as sp
 
 Q = gy12lk(nr=21, slug='abstaende-ebene', thema='Abstände von einer Ebene', lb='LB 8',
            blurb='Punkt–Punkt, Punkt–Ebene mit Hesse’scher Normalenform und Lotfußpunkt, parallele Gerade und Ebene',
-           comment='Blocks: Punkt–Punkt (1, 2), Punkt–Ebene (3-9), Ebene–Ebene (10), Gerade–Ebene (11, 12 neu), weitere Abstände mit Parameter (13-16), Dach und Kugel (17-20). Mit Hilfsmitteln erlaubt.')
+           comment='Blocks: Punkt–Punkt (1, 2), Punkt–Ebene (3-9), Ebene–Ebene (10), Gerade–Ebene (11, 12 neu), Punkte mit Parameter (13, 16), Kugel und Punkt–Ebene (14, 15), Dach und Kugel (17-20). Mit Hilfsmitteln erlaubt.')
 
 N = new()
 

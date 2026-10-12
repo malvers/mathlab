@@ -12,7 +12,7 @@ from _reuse import gk, put, gk_checks
 
 Q = gy12lk(nr=14, slug='schaetzen', thema='Schätzen von Parametern', lb='LB 7',
            blurb='Stichprobe und Grundgesamtheit, Hochrechnung, Stichprobenmittel und -varianz',
-           comment='Alle 20 Fragen aus dem Grundkurs-Blatt w11-schaetzen (eine Quelle für beide Kurse). Blocks: Grundbegriffe und Stichprobe (7-9, 12, 19), Anteile schätzen und hochrechnen (1, 2, 13-16, 18), Stichprobenmittel und -varianz (3-6, 10, 11, 17, 20). Stichprobenvarianz mit 1/(n-1). Taschenrechner erlaubt.')
+           comment='Alle 20 Fragen aus dem Grundkurs-Blatt w11-schaetzen (eine Quelle für beide Kurse). Blocks: Grundbegriffe und Stichprobe (7-9, 12, 19), Anteile schätzen und hochrechnen (1, 2, 13-15, 17, 18), Stichprobenmittel und -varianz (3-6, 10, 11, 16, 20). Stichprobenvarianz mit 1/(n-1). Taschenrechner erlaubt.')
 
 put(Q, [gk('w11-schaetzen.py')])
 

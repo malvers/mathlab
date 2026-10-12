@@ -12,7 +12,7 @@ from _reuse import gk, put, gk_checks
 
 Q = gy12lk(nr=18, slug='skalar-vektorprodukt', thema='Skalarprodukt und Vektorprodukt', lb='LB 8',
            blurb='Winkel, Orthogonalität, Projektion, Flächen mit dem Vektorprodukt',
-           comment='Alle 20 Fragen aus dem Grundkurs-Blatt w15-skalar-vektorprodukt (eine Quelle für beide Kurse). Blocks: Skalarprodukt und Winkel (1-4, 12, 13, 18, 20), Orthogonalität (14, 16), Vektorprodukt (5-11, 15, 17), Flächen (7, 8, 19). Taschenrechner erlaubt.')
+           comment='Alle 20 Fragen aus dem Grundkurs-Blatt w15-skalar-vektorprodukt (eine Quelle für beide Kurse). Blocks: Skalarprodukt und Winkel (1-4, 12, 13, 16, 18, 20), Orthogonalität (3, 14), Vektorprodukt (5-11, 15, 17), Flächen (7, 8, 19). Taschenrechner erlaubt.')
 
 put(Q, [gk('w15-skalar-vektorprodukt.py')])
 

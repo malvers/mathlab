@@ -31,7 +31,7 @@ Q.q(r'$X$ ist binomialverteilt mit $n = 200$ und $p = 0{,}3$. Wie groß ist $\si
 Q.q(r'Welche Faustregel (Laplace-Bedingung) sagt, wann die Normalverteilung eine Binomialverteilung gut annähert?',
     [r'$\sigma = \sqrt{np(1 - p)} > 3$', r'$n > 30$', r'$p = 0{,}5$', r'$np > 1$'],
     [r'Die Glocke braucht genug Säulen in der Breite und darf nicht an den Rand $0$ oder $n$ stoßen.',
-     r'Beides sichert $\sigma > 3$; dann liegen in $\mu \pm 3\sigma$ mindestens $19$ Werte von $X$.'])
+     r'Beides sichert $\sigma > 3$; dann liegen in $\mu \pm 3\sigma$ mindestens $18$ Werte von $X$.'])
 
 Q.q(r'Ist die Näherung für $B(50;\ 0{,}1)$ nach der Faustregel geeignet?',
     [r'Nein, $\sigma \approx 2{,}12$ ist zu klein.', r'Ja, $n = 50 > 30$.', r'Ja, $\mu = 5 > 3$.', r'Nein, $p$ muss genau $0{,}5$ sein.'],

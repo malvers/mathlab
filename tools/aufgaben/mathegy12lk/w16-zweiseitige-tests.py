@@ -12,7 +12,7 @@ from _reuse import gk, put, gk_checks
 
 Q = gy12lk(nr=16, slug='zweiseitige-tests', thema='Zweiseitige Tests und statistische Sicherheit', lb='LB 7',
            blurb='zweiseitiger Ablehnungsbereich, Niveau auf beide Seiten, statistische Sicherheit',
-           comment='Alle 20 Fragen aus dem Grundkurs-Blatt w13-zweiseitige-tests (eine Quelle für beide Kurse). Blocks: Wann zweiseitig (1, 2, 15, 16), Niveau aufteilen und Bereich bestimmen (3-7, 11, 12, 17), statistische Sicherheit und tatsächliches Niveau (8-10, 18), Entscheidung und Deutung (13, 14, 19, 20). Mit CAS/Tabelle.')
+           comment='Alle 20 Fragen aus dem Grundkurs-Blatt w13-zweiseitige-tests (eine Quelle für beide Kurse). Blocks: Wann zweiseitig (1, 2, 15, 16), Niveau aufteilen und Bereich bestimmen (3-5, 11, 12, 17), statistische Sicherheit und tatsächliches Niveau (8-10, 18), Entscheidung und Deutung (6, 7, 13, 14, 19, 20). Mit CAS/Tabelle.')
 
 put(Q, [gk('w13-zweiseitige-tests.py')])
 
