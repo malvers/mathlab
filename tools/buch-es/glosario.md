@@ -523,6 +523,41 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Gymnasium · Grundkurs / Leistungskurs | Gymnasium · curso básico / curso avanzado | start page: "el bachillerato alemán de orientación académica: en Sajonia va del 5.º al 12.º curso" |
+| Jahrgangsstufe 11 | 11.º curso | |
+| Grenzwertsätze | propiedades de los límites | |
+| Unstetigkeitsstelle, Sprungstelle, behebbare Lücke | discontinuidad, salto, discontinuidad evitable | Lücke alone: hueco (es-2) |
+| Sättigungsgrenze | límite de saturación | |
+| Leitkoeffizient | coeficiente principal | |
+| h-Methode | método de h | |
+| äußere / innere Funktion, nachdifferenzieren | función exterior / interior, multiplicar por la derivada interior | |
+| Vielfachheit (Nullstelle) | multiplicidad | einfach, doppelt … → simple, doble, triple, cuádruple … |
+| Pol mit / ohne Vorzeichenwechsel | polo con / sin cambio de signo | |
+| Typ (m,n) einer Matrix | dimensión $(m,n)$ | as "Format" in the es-1 block |
+| verkettete Matrizen | matrices compatibles | |
+| Koeffizientenmatrix | matriz de coeficientes | erweiterte: matriz ampliada (es-1) |
+| Zeilenumformung, Zeile $Z_1$ | transformación de filas, fila $F_1$ | $Z_1 - 2Z_2$ → $F_1 - 2F_2$ in the text |
+| Drehmatrix, Drehwinkel | matriz de giro, ángulo de giro | |
+| Verflechtung (Rohstoffe → Zwischenprodukte) | producción encadenada | |
+| Gauß-Jordan-Verfahren | método de Gauss-Jordan | |
+| Residuum, Überanpassung | residuo, sobreajuste | |
+| Newton-Verfahren, Startwert, Heron-Verfahren | método de Newton, valor inicial, regla de Herón | |
+| Schrägbild | perspectiva caballera | |
+| kollinear, komplanar | colineales, coplanarios | |
+| Teilungspunkt, Verhältnis $m : n$ | punto de división, razón $m : n$ | |
+| Gegenvektor | vector opuesto | |
+| parameterfreie Form | forma sin parámetros | = ecuación general |
+| Durchstoßpunkt | punto de intersección | recta y plano |
+| windschief (Geraden) | se cruzan | "dos rectas que se cruzan", as in the es-3 block; to intersect: cortarse |
+| Halbkreisflugregel, Flugfläche | regla semicircular, nivel de vuelo | |
+| Kopf (Münze) | cara | as Wappen |
+| Sechserpasch | doble seis | |
+| linkssteil | asimétrica hacia la derecha | = rechtsschief (es-2) |
+| $\sigma$-Umgebung | entorno $\sigma$ | |
+| Pascalsches Dreieck | triángulo de Pascal | widget: fila, posición |
+| Bernoullis goldener Satz | teorema áureo de Bernoulli | |
+| Einheitsquadrat | cuadrado unidad | |
+| Ratetest | test a ciegas | |
 
 ## Added by mathegy11lk-es (Turing)
 
