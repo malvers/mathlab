@@ -37,6 +37,18 @@ window.BuchES && BuchES.add('geometrie', {
         'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circunferencia con $r = 1$, por tanto $u = 2\\pi$. Perímetro dividido entre $2$:',
 
         // book es mathegy9-es (Curie)
+        // goldenerschnitt
+        'Ansicht': 'Vista',
+        'Strecke teilen': 'Dividir el segmento', 'Goldenes Rechteck': 'Rectángulo áureo', 'Pentagramm': 'Pentagrama',
+        'Golden teilen': 'Proporción áurea', 'Quadrate abschneiden': 'Cortar cuadrados',
+        'Ganzes : größerer Teil': 'todo : parte mayor', 'größerer : kleinerer Teil': 'parte mayor : parte menor',
+        'Strecke AB mit Teilungspunkt T': 'Segmento AB con el punto de división T',
+        'Beide Verhältnisse sind gleich: goldener Schnitt, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.':
+            'Las dos razones son iguales: proporción áurea, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.',
+        'Zieh den Punkt $T$, bis beide Verhältnisse gleich sind.': 'Arrastra el punto $T$ hasta que las dos razones sean iguales.',
+        'Goldenes Rechteck, in Quadrate zerlegt, mit Spirale': 'Rectángulo áureo dividido en cuadrados, con una espiral',
+        'Regelmäßiges Fünfeck mit Pentagramm': 'Pentágono regular con pentagrama', 'Seite': 'Lado',
+        'größerer Teil': 'parte mayor', 'kleinerer Teil': 'parte menor',
         // pythagoras
         'Pythagoras': 'Pitágoras', 'Kathetensatz': 'Teorema del cateto', 'Höhensatz': 'Teorema de la altura', 'Satz': 'Teorema', 'gleichschenklig': 'isósceles',
         'Zieh am Punkt $C$. Er bleibt auf dem Thaleskreis über $\\overline{AB}$, deshalb ist der Winkel bei $C$ immer ein rechter.':
@@ -72,6 +84,16 @@ window.BuchES && BuchES.add('geometrie', {
         ['Also $', 'Por tanto $'], ['$, Abstand $', '$, diferencia $'],
 
         // book es mathegy9-es (Curie)
+        // goldenerschnitt
+        ['$ · größerer Teil $', '$ · parte mayor $'], ['$ · kleinerer Teil $', '$ · parte menor $'],
+        ['\\text{Ganzes}', '\\text{todo}'], ['\\text{größerer Teil}', '\\text{parte mayor}'], ['\\text{kleinerer Teil}', '\\text{parte menor}'],
+        ['Seiten $', 'Lados $'],
+        [' : 1$. Schneidet man das Quadrat über der kurzen Seite ab, bleibt wieder ein goldenes Rechteck übrig, um den Faktor $\\Phi$ verkleinert.',
+            ' : 1$. Si se corta el cuadrado sobre el lado corto, queda otra vez un rectángulo áureo, reducido por el factor $\\Phi$.'],
+        ['\\,\\%$ so lang. Die Viertelkreise bilden die <b>goldene Spirale</b>.', '\\,\\%$ de su longitud inicial. Los cuartos de circunferencia forman la <b>espiral áurea</b>.'],
+        [' $s$ und Diagonale $d$ des regelmäßigen Fünfecks: $', ' $s$ y diagonal $d$ del pentágono regular: $'],
+        ['Jede Diagonale wird von einer anderen im goldenen Schnitt geteilt: ', 'Cada diagonal queda dividida por otra en la proporción áurea: '],
+        ['$= \\Phi$, und der größere Teil ist genau so lang wie die Seite.', '$= \\Phi$, y la parte mayor mide exactamente lo mismo que el lado.'],
         // pythagoras
         ['$ und $', '$ y $'],
         // kreisteil
@@ -91,6 +113,8 @@ window.BuchES && BuchES.add('geometrie', {
         // book es mathe10-es (Curie)
 
         // book es mathegy9-es (Curie)
+        // goldenerschnitt "Nach 5 Schnitten ist die lange Seite nur noch $…$ so lang."
+        [/Nach (\d+) Schnitt(?:en)? ist die lange Seite nur noch \$/g, (m, n) => 'Después de ' + n + (+n > 1 ? ' cortes' : ' corte') + ', el lado largo solo mide el $'],
 
     ]
 });
