@@ -106,3 +106,33 @@ One pull request per package, titled `es <package>: <book or "architecture">`, w
 changes, the check results (all six checks), the German errors fixed on the way (with recomputation), and what is
 still open. The orchestrator (a local session) reviews, recomputes samples, adds the hub card with the Spanish cover
 and merges.
+
+## 7. Round 2 (13.10.2026): the remaining 13 books, four local agents
+
+Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische … Arbeitet bitte parallel. Im
+Team." Lovelace orchestrates; Einstein, Curie and Turing each take books. Sections 1, 4 and 5 hold as they are.
+
+| Agent | Books, in this order |
+|---|---|
+| Einstein | GY 5 `mathegy5`, GY 6 `mathegy6`, GY 7 `mathegy7` |
+| Curie | GY 8 `mathegy8`, OS 10 `mathe10`, GY 9 `mathegy9` |
+| Turing | GY 11 `mathegy11`, GY 11 LK `mathegy11lk`, GY 12 `mathegy12`, GY 12 LK `mathegy12lk` |
+| Lovelace | FOS 11 `mathefos11`, FOS 12 `mathefos12`, the hub cards, merging |
+| whoever is free first | GY 10 `mathegy10` (ask Lovelace) |
+
+1. **Own worktree, never the main checkout** (other agents' uncommitted work lives there):
+   `.claude/worktrees/es-<agent>`, with `videopipeline/node_modules` linked. One branch per book from the current
+   `origin/main`, in your own worktree only: `git fetch origin && git switch -c es-<book> origin/main`.
+2. **Own server** from your worktree: `python3 -m http.server <port> -d HTML` (Einstein 8771, Curie 8772, Turing 8773,
+   Lovelace 8774); every browser tool with `PORT=<port>` (`encheck`, `dump`, `geo`, `fit`).
+3. **Shared files have a block per book already:** every `js/buch-es/<module>.js` (word, phrase, rule) and
+   `glosario.md`. Write only right below your book's comment line, every entry ending with a comma - then four books
+   merge without a conflict. A term that another book already translated: use that one (`check.mjs` flags two
+   translations of one German string). `js/buch-es.js`, `js/buch.js`, `js/buch-titel.css`: only after asking Lovelace.
+   A German widget fix in a shared module (`geometrie`, `funktionen`, …): smallest change, tell Lovelace.
+4. **Before reporting:** `git fetch origin && git rebase origin/main`; a conflict in `known.json`: take the version of
+   `origin/main` and run `node tools/buch-en/check.mjs --lang es <book>-es --accept` again. Then the checks of section 4
+   once more, and the link previews of your pages: `node tools/og-preview/make-og.mjs --only <ids>`.
+5. **Report to Lovelace** (SendMessage): branch, commit, check results, German errors fixed on the way. Do not push
+   `main` yourself - the worktrees share one repository, Lovelace sees your branch, checks samples, pushes it and adds
+   the hub card with the Spanish cover. Then the next book on a new branch from the new `origin/main`.

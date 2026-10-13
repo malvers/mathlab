@@ -85,7 +85,20 @@ window.BuchES && BuchES.add('analysis', {
         'r in cm': 'r en cm',
         'O in cm²': 'O en cm²',
         'x in m': 'x en m',
-        'A in m²': 'A en m²'
+        'A in m²': 'A en m²',
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
     },
     phrase: [
         // book es-3 mathe13-es: kurve
@@ -175,12 +188,38 @@ window.BuchES && BuchES.add('analysis', {
         ['$ liegt außerhalb von $0 < x < 10$.', '$ está fuera de $0 < x < 10$.'],
         [' Dann ist $h = ', ' Entonces $h = '],
         ['$: Die beste Dose ist so hoch wie breit.', '$: la mejor lata es tan alta como ancha.'],
-        [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' El lado paralelo al muro mide entonces $60 - 2 \\cdot 15 = 30\\,\\text{m}$.']
+        [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' El lado paralelo al muro mide entonces $60 - 2 \\cdot 15 = 30\\,\\text{m}$.'],
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
     ],
     rule: [
         // book es-3 mathe13-es: kurve, the sliders "$a$ (vor $x^3$)" → "$a$ (coeficiente de $x^3$)"
         [/\(vor (\$x(?:\^\d)?\$)\)/g, '(coeficiente de $1)'],
         // book es-2 mathe12-es: grenzwert, sekante, ableitungsgraph, kurve, tangente, ableiten, steckbrief, optimieren (entries the dictionary did not have yet; a German key already above keeps its Spanish)
-        [/(\d+) von (\d+) gelöst/g, '$1 de $2 resueltos']
+        [/(\d+) von (\d+) gelöst/g, '$1 de $2 resueltos'],
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
     ]
 });

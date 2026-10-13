@@ -64,7 +64,28 @@ window.BuchES && BuchES.add('funktionen', {
         'Zaun an der Mauer': 'Valla junto al muro',
         'Rechteck mit Umfang 24 cm': 'Rectángulo de perímetro 24 cm',
         // book es-2 mathe12-es: helpers (entries the dictionary did not have yet; a German key already above keeps its Spanish)
-        'Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.': 'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.'
+        'Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.': 'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.',
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathe10-es (Curie)
+
+        // book es mathegy9-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
+        // book es mathegy10-es (offen)
+
     },
     phrase: [
         // parameter: c = 0 in f(c·x) (second check, 12.10.2026)
@@ -142,7 +163,28 @@ window.BuchES && BuchES.add('funktionen', {
         ['$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.', '$kx^2 = 4$ solo tiene soluciones para $k > 0$. El caso $k = 0$ hay que estudiarlo aparte, porque entonces desaparece el $x^2$.'],
         // book es-2 mathe12-es: helpers (entries the dictionary did not have yet; a German key already above keeps its Spanish)
         ['Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: Zu $x = 1$ gehören $y = 2$ und $y = -2$.', 'A la derecha de $x = -1$, cada recta vertical corta la curva dos veces: a $x = 1$ le corresponden $y = 2$ e $y = -2$.'],
-        ['Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.', 'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.']
+        ['Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.', 'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.'],
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathe10-es (Curie)
+
+        // book es mathegy9-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
+        // book es mathegy10-es (offen)
+
     ],
     rule: [
         // book es-1 mathe11-es
@@ -169,6 +211,27 @@ window.BuchES && BuchES.add('funktionen', {
         [/Zu \$x = 2\$ gehören \$y = 2\$ und \$y = -2\$\. Eine Funktion ordnet jedem \$x\$ aber genau ein \$y\$ zu\./g,
             'A $x = 2$ le corresponden $y = 2$ e $y = -2$. Pero una función asigna a cada $x$ exactamente un $y$.'],
         // book es-3 mathe13-es: "Zu $x = 2$ gehören $y = 2$ und $y = -2$." - before the header rule "Zu …" → "Sobre …" of js/buch-es.js
-        [/(: )?\bZu (\$x = [^$]+\$) gehören (\$y = [^$]+\$) und (\$y = [^$]+\$)\./g, (m, c, x, y1, y2) => (c ? ': a ' : 'A ') + x + ' le corresponden ' + y1 + ' e ' + y2 + '.']
+        [/(: )?\bZu (\$x = [^$]+\$) gehören (\$y = [^$]+\$) und (\$y = [^$]+\$)\./g, (m, c, x, y1, y2) => (c ? ': a ' : 'A ') + x + ' le corresponden ' + y1 + ' e ' + y2 + '.'],
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathe10-es (Curie)
+
+        // book es mathegy9-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
+        // book es mathegy10-es (offen)
+
     ]
 });

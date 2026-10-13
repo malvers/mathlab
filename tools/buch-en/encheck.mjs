@@ -3,9 +3,10 @@
 // With --poke every widget button is clicked once and every slider moved.
 // usage: node tools/buch-en/encheck.mjs <book> [--poke] [file1.html …]   (no files: every page of the book)
 // A Spanish edition (<book>-es, package ES0) is checked the same way; there a decimal comma on a canvas is right.
-// needs the local server (python3 serve.py, http://localhost:8765)
+// needs the local server (python3 serve.py, http://localhost:8765; PORT=… to change)
 import pw from '../../videopipeline/node_modules/playwright/index.js';
 import fs from 'fs';
+const PORT = process.env.PORT || 8765;
 const args = process.argv.slice(2);
 const book = args.shift();
 const poke = args.includes('--poke');
@@ -28,7 +29,7 @@ for (const f of files) {
     });
     const page = await ctx.newPage();
     const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error' && !/favicon|404|ERR_/.test(m.text())) errs.push(m.text()); });
-    await page.goto('http://localhost:8765/buch/' + book + '/' + f, { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:' + PORT + '/buch/' + book + '/' + f, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
     if (poke && w === 1280) {
       await page.evaluate(async () => {

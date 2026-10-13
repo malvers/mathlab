@@ -14,6 +14,15 @@ window.BuchES && BuchES.add('gleichungen', {
         'Länge $a$': 'Longitud $a$', 'Länge $b$': 'Longitud $b$', 'Quadrat mit Seitenlänge a + b': 'Cuadrado de lado a + b',
         'Zylinder': 'Cilindro', 'Kegel': 'Cono', 'Kugel': 'Esfera', 'Körper': 'Cuerpo', 'Radius $r$ in cm': 'Radio $r$ en cm',
         'Höhe $h$ in cm': 'Altura $h$ en cm', 'Skizze des Körpers': 'Esquema del cuerpo',
+
+        // book es mathegy7-es (Einstein)
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathegy9-es (Curie)
+
+        // book es mathefos11-es (Lovelace)
+
     },
     phrase: [
         // book es-1 mathe11-es: waage
@@ -30,7 +39,25 @@ window.BuchES && BuchES.add('gleichungen', {
         // book es-1 mathe11-es: binom, koerper ($M$ and $O$ stay as in the chapter text of lb2)
         ['Der häufigste Fehler: ', 'El error más frecuente: '], ['. Im Bild fehlen dann die beiden blauen Rechtecke, hier ', '. En la figura faltan entonces los dos rectángulos azules, aquí '],
         ['Mantellinie $s = ', 'Generatriz $s = '],
+
+        // book es mathegy7-es (Einstein)
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathegy9-es (Curie)
+
+        // book es mathefos11-es (Lovelace)
+
     ],
     rule: [
+
+        // book es mathegy7-es (Einstein)
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathegy9-es (Curie)
+
+        // book es mathefos11-es (Lovelace)
+
     ]
 });

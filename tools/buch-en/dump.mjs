@@ -1,9 +1,10 @@
 // dump.mjs - what every widget of an English (or German) book page shows after clicking through: widget text,
 // text attributes and canvas texts, page by page. Math.random is seeded, so two runs can be compared with diff.
 // usage: node tools/buch-en/dump.mjs <book> [file1.html …]   (no files: every page of the book)
-// needs the local server (python3 serve.py, http://localhost:8765)
+// needs the local server (python3 serve.py, http://localhost:8765; PORT=… to change)
 import pw from '../../videopipeline/node_modules/playwright/index.js';
 import fs from 'fs';
+const PORT = process.env.PORT || 8765;
 const [book, ...given] = process.argv.slice(2);
 const dir = new URL('../../HTML/buch/' + book + '/', import.meta.url);
 const files = given.length ? given : fs.readdirSync(dir).filter(f => f.endsWith('.html') && f !== 'druck.html').sort();
@@ -16,7 +17,7 @@ for (const f of files) {
     C.fillText = function (t, ...r) { window.__cv.add(String(t)); return o.call(this, t, ...r); };
   });
   const p = await ctx.newPage();
-  await p.goto('http://localhost:8765/buch/' + book + '/' + f, { waitUntil: 'networkidle' }); await p.waitForTimeout(1000);
+  await p.goto('http://localhost:' + PORT + '/buch/' + book + '/' + f, { waitUntil: 'networkidle' }); await p.waitForTimeout(1000);
   const out = await p.evaluate(async () => {
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     const seen = new Set(), lines = [];

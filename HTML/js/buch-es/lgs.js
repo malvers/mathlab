@@ -16,6 +16,17 @@ window.BuchES && BuchES.add('lgs', {
         'eine Lösung': 'una solución', 'keine Lösung': 'ninguna solución', 'unendlich viele': 'infinitas', 'Zwei Geraden': 'Dos rectas',
         'mit $r =$': 'con $r =$', 'Neue Matrizen': 'Nuevas matrices', 'Wähle eine Rechnung.': 'Elige una operación.',
         '1 Schritt': '1 paso', '10 Schritte': '10 pasos', 'Vier Webseiten und ihre Links': 'Cuatro páginas web y sus enlaces',
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
     },
     phrase: [
         // book es-1 mathe11-es: gauss, geraden, matrizen, pagerank
@@ -36,11 +47,33 @@ window.BuchES && BuchES.add('lgs', {
         ['Jeder Eintrag wird mit $r$ multipliziert.', 'Cada entrada se multiplica por $r$.'],
         ['Aus Zeilen werden Spalten: aus einer $2 \\times 3$- wird eine $3 \\times 2$-Matrix.', 'Las filas pasan a ser columnas: una matriz $2 \\times 3$ se convierte en una $3 \\times 2$.'],
         ['Summe: $', 'Suma: $'],
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
     ],
     rule: [
         // book es-1 mathe11-es: gauss, pagerank
         [/In Spalte (\d) gibt es keinen Pivot mehr: Das LGS hat keine oder unendlich viele Lösungen\./g,
             'En la columna $1 ya no hay pivote: el sistema no tiene solución o tiene infinitas.'],
         [/Schritt (\d+):/g, 'Paso $1:'],
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
     ]
 });

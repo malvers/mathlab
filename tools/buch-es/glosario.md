@@ -1,8 +1,8 @@
-# Glosario — the Spanish editions (BGY 11, 12, 13)
+# Glosario — the Spanish editions (all books)
 
 Package ES0, 12.10.2026. Every recurring term once, decided for `mathe11-es`, `mathe12-es` and `mathe13-es`.
 Spanish of Spain, the pupil is **tú**. A book package that needs a missing term adds it in its own block at the end
-(`## Added by es-1 mathe11-es` …); an existing line is never changed without saying so in the PR.
+(`## Added by es-1 mathe11-es` …; round 2, 13.10.2026: the blocks `## Added by <book>-es` are already there, write only in yours); an existing line is never changed without saying so in the PR.
 
 Columns: German · Spanish · note. In headings (`b-band-tag`, `b-box-title`, kickers) the Spanish goes in capitals with
 the accents kept (`CAPÍTULO`, `LECCIÓN`), as Orbitron draws them.
@@ -441,3 +441,68 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Treffer T / Niete N (Pfade) | éxito E / fracaso F | |
 | innere Ableitung, Summand | derivada interior, sumando | |
 | Oberfläche O(r) (Dose) | O(r) stays | as in the German book |
+
+## Added by mathegy5-es (Einstein)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy6-es (Einstein)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy7-es (Einstein)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy8-es (Curie)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathe10-es (Curie)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy9-es (Curie)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy11-es (Turing)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy11lk-es (Turing)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy12-es (Turing)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy12lk-es (Turing)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathefos11-es (Lovelace)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathefos12-es (Lovelace)
+
+| Deutsch | Español | Note |
+|---|---|---|
+
+## Added by mathegy10-es (offen)
+
+| Deutsch | Español | Note |
+|---|---|---|

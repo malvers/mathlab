@@ -71,7 +71,26 @@ window.BuchES && BuchES.add('stochastik', {
         'Anzahl der Stufen': 'Número de etapas',
         'Genau $k$ Treffer:': 'Exactamente $k$ éxitos:',
         'Anzahl der Treffer': 'Número de éxitos',
-        'Baumdiagramm einer Bernoulli-Kette': 'Diagrama de árbol de un proceso de Bernoulli'
+        'Baumdiagramm einer Bernoulli-Kette': 'Diagrama de árbol de un proceso de Bernoulli',
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathe10-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
+        // book es mathegy10-es (offen)
+
     },
     phrase: [
         // book es-1 mathe11-es: baum, schnelltest, vierfeld-trainer, simulation, ziegen
@@ -130,7 +149,26 @@ window.BuchES && BuchES.add('stochastik', {
         ['Pfade mit genau ', 'Ramas con exactamente '],
         [' Treffern: $', ' éxitos: $'],
         ['$ · jeder hat die Wahrscheinlichkeit $', '$ · cada una tiene la probabilidad $'],
-        ['Formel von Bernoulli: $P(X = ', 'Fórmula de Bernoulli: $P(X = ']
+        ['Formel von Bernoulli: $P(X = ', 'Fórmula de Bernoulli: $P(X = '],
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathe10-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
+        // book es mathegy10-es (offen)
+
     ],
     rule: [
         // book es-1 mathe11-es
@@ -155,6 +193,25 @@ window.BuchES && BuchES.add('stochastik', {
         // book es-2 mathe12-es: treeSVG, venn, baum-hero, schnelltest, vierfeld-trainer, histo-hero, unabhaengig, zufallsgroesse, binomial, bernoulli-baum (entries the dictionary did not have yet; a German key already above keeps its Spanish)
         [/(<button type="button" data-v="wuerfel">)Würfel(<\/button>)/g, '$1Dado$2'],
         [/(<text\b[^>]*>)([TN]{1,4})(<\/text>)/g, (m, a, k, b) => a + k.replace(/T/g, 'E').replace(/N/g, 'F') + b],
-        [/Pfade mit genau 1 Treffern: \$/g, 'Ramas con exactamente 1 éxito: $']
+        [/Pfade mit genau 1 Treffern: \$/g, 'Ramas con exactamente 1 éxito: $'],
+
+        // book es mathegy8-es (Curie)
+
+        // book es mathe10-es (Curie)
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos11-es (Lovelace)
+
+        // book es mathefos12-es (Lovelace)
+
+        // book es mathegy10-es (offen)
+
     ]
 });

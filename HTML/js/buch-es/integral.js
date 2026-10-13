@@ -28,7 +28,16 @@ window.BuchES && BuchES.add('integral', {
         // book es-3 mathe13-es: zwischenflaeche
         'Parabel und Gerade': 'Parábola y recta', 'Kubik und Parabel': 'Cúbica y parábola', 'Sinus und Kosinus': 'Seno y coseno',
         'Funktionen': 'Funciones', 'Fläche zwischen zwei Graphen': 'Área entre dos gráficas',
-        'Zu wenige Schnittstellen im Bild.': 'Hay muy pocos puntos de intersección en la imagen.'
+        'Zu wenige Schnittstellen im Bild.': 'Hay muy pocos puntos de intersección en la imagen.',
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
     },
     phrase: [
         // book es-3 mathe13-es: stammfunktion
@@ -42,7 +51,26 @@ window.BuchES && BuchES.add('integral', {
         [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · La integral es menor porque las áreas bajo el eje (rojo) cuentan como negativas.'],
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Atención: $a > b$ cambia el signo.'],
         // book es-3 mathe13-es: zwischenflaeche
-        ['$ · Schnittstellen: ', '$ · puntos de intersección: ']
+        ['$ · Schnittstellen: ', '$ · puntos de intersección: '],
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
     ],
-    rule: []
+    rule: [
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
+    ]
 });

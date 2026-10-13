@@ -20,7 +20,18 @@ window.BuchES && BuchES.add('numerik', {
         // book es-3 mathe13-es: flaeche
         'x² auf [0; 2]': 'x² en [0, 2]', '√x auf [0; 4]': '√x en [0, 4]', 'sin x auf [0; π]': 'sen x en [0, π]',
         'Rechtecke links': 'Rect. por la izquierda', 'Rechtecke Mitte': 'Rect. del punto medio', 'Trapeze': 'Trapecios', 'Verfahren': 'Método',
-        'Anzahl der Streifen $n$': 'Número de franjas $n$', 'Flächeninhalt mit Streifen angenähert': 'Área aproximada con franjas'
+        'Anzahl der Streifen $n$': 'Número de franjas $n$', 'Flächeninhalt mit Streifen angenähert': 'Área aproximada con franjas',
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
     },
     phrase: [
         // book es-1 mathe11-es: bisektion, flaeche, mc-flaeche
@@ -30,10 +41,32 @@ window.BuchES && BuchES.add('numerik', {
         ['Schätzwert: $A', 'Estimación: $A'], [' · genau: $', ' · exacto: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Lanza puntos aleatorios en el rectángulo '],
         ['. Der Anteil der Treffer unter ', '. La proporción de puntos bajo '], [' schätzt den Anteil der Fläche.', ' estima la proporción del área.'],
         // book es-3 mathe13-es: flaeche
-        ['Näherung mit $n = ', 'Aproximación con $n = '], ['$ · genauer Wert $', '$ · valor exacto $'], ['$ · Fehler $', '$ · error $']
+        ['Näherung mit $n = ', 'Aproximación con $n = '], ['$ · genauer Wert $', '$ · valor exacto $'], ['$ · Fehler $', '$ · error $'],
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
     ],
     rule: [
         // book es-1 mathe11-es: mc-flaeche "Von $500$ Punkten liegen $160$ unter …" → "De $500$ puntos, $160$ quedan bajo …"
         [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'De $' + n + '$ puntos, $'],
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
     ]
 });

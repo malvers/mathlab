@@ -32,7 +32,18 @@ window.BuchES && BuchES.add('vektoren', {
         'Rechteck': 'Rectángulo',
         'Raute': 'Rombo',
         'Quadrat': 'Cuadrado',
-        'Trapez': 'Trapecio'
+        'Trapez': 'Trapecio',
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
     },
     phrase: [
         // book es-3 mathe13-es: gerade3d
@@ -94,7 +105,18 @@ window.BuchES && BuchES.add('vektoren', {
         ['$: benachbarte Seiten gleich lang', '$: lados contiguos de igual longitud'],
         ['$: Diagonalen senkrecht zueinander', '$: diagonales perpendiculares entre sí'],
         ['$ und $|', '$ y $|'],
-        ['$ABCD$ ist ', '$ABCD$ es ']
+        ['$ABCD$ ist ', '$ABCD$ es '],
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
     ],
     rule: [
         // book es-3 mathe13-es: the inputs "Vektor a, x-Koordinate" → "Vector a, coordenada x"; between the coordinate inputs
@@ -105,6 +127,17 @@ window.BuchES && BuchES.add('vektoren', {
         [/(data-p="par">)parallel</g, '$1paralelas<'],
         // book es-2 mathe12-es: the 3D stage, raum3d, skalarprodukt, viereck3d (entries the dictionary did not have yet; a German key already above keeps its Spanish)
         // skalarprodukt: the preset "parallel" means two vectors (paralelos), next to the rule of geradenlage above
-        [/(data-p="para">)parallel</g, '$1paralelos<']
+        [/(data-p="para">)parallel</g, '$1paralelos<'],
+
+        // book es mathegy11-es (Turing)
+
+        // book es mathegy11lk-es (Turing)
+
+        // book es mathegy12-es (Turing)
+
+        // book es mathegy12lk-es (Turing)
+
+        // book es mathefos12-es (Lovelace)
+
     ]
 });
