@@ -13,7 +13,7 @@ window.BuchES && BuchES.add('gy12', {
     word: {
         // book es mathegy12-es (Turing)
         // schaetzen
-        'Stichprobenumfang $n$': 'Tamaño de la muestra $n$', 'Neue Stichprobe': 'Nueva muestra', '+1000 Stichproben': '+1000 muestras', 'Anzahl': 'Número',
+        'Stichprobenumfang $n$': 'Tamaño de la muestra $n$', 'Neue Stichprobe': 'Nueva muestra', '+1000 Stichproben': '+1000 muestras', 'Anzahl': 'Cantidad',
         'Füllmengen der Stichprobe als Punktdiagramm mit ihrem Mittelwert und dem Sollwert': 'Cantidades de llenado de la muestra como diagrama de puntos, con su media y el valor nominal',
         'Sollwert': 'valor nominal',
         // summen: the same words as js/buch-es/numerik.js (widget flaeche)
