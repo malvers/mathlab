@@ -5,6 +5,7 @@
  *   parabelos9     quadratic functions with sliders: y = a·x² + c, vertex form y = (x + d)² + e, normal form y = x² + p·x + q with
  *                  completing the square; vertex, range, monotony, zeros (data-mode="ac|de|pq", data-hero)
  *   quadglos9      x² + p·x + q = 0 with the formula: discriminant, two, one or no solution, the parabola and its zeros
+ *                  (data-hero: three parabolas with two, one and no zero)
  *   kugelos9       the sphere: surface and volume, the radius back from the volume with the cube root, sphere in a cylinder (2 : 3)
  *   turmos9        composite solids: tower = cylinder + cone, silo = cylinder + hemisphere; volume and outer surface without inner faces
  *   abstandos9     two draggable points: their distance as the hypotenuse of a right triangle with legs parallel to the axes
@@ -175,6 +176,13 @@
 
     /* ---------- x² + p·x + q = 0 with the formula ---------- */
     W('quadglos9', function (box) {
+        if (isHero(box)) {
+            // three parabolas: two zeros, one zero, no zero
+            const hp = new B.Plot(div(box, ''), { x: [-5, 5], y: [-5, 7], height: 260, aria: 'Drei Parabeln mit zwei, einer und keiner Nullstelle' });
+            hp.draw([{ fn: x => (x + 2.5) * (x + 2.5) - 2.25, color: 'lambda' }, { fn: x => (x - 1) * (x - 1), color: 'cyan' }, { fn: x => (x - 3.5) * (x - 3.5) + 1, color: 'phi' },
+                { pts: [[-4, 0], [-1, 0], [1, 0]], color: 'white' }]);
+            return;
+        }
         const S = { p: -2, q: -8 };
         const sl = div(box, '');
         range(sl, { label: '$p$', min: -10, max: 10, step: 1, value: S.p, fmt: v => String(v), onInput: v => { S.p = v; render(); } });
