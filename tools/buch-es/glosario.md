@@ -682,6 +682,35 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Wahlbereich | Optativa, chapter OP | kicker «CAPÍTULO OP · OPTATIVA · MAYO · JUNIO» |
+| Wurzelgleichung, Scheinlösung | ecuación con radicales, solución extraña | |
+| Permanenzprinzip, rationale Exponenten | principio de permanencia, exponentes racionales | |
+| Potenzfunktion, Grad, Polstelle, Asymptote | función potencia, grado, polo, asíntota (vertical / horizontal) | |
+| Definitionsbereich, Wertebereich | dominio, recorrido | |
+| Quadrat-Würfel-Gesetz | ley del cuadrado y el cubo | |
+| Kettenlinie | catenaria | |
+| quadratische Ergänzung | completar el cuadrado | |
+| Zielgröße, Extremwertproblem | magnitud objetivo, problema de optimización | |
+| Kreisring, Kreisausschnitt, Kreisbogen | corona circular, sector circular, arco | |
+| Satzgruppe des Pythagoras | grupo de teoremas de Pitágoras | |
+| pythagoreische Tripel | ternas pitagóricas | |
+| Voraussetzung, Behauptung | hipótesis, tesis | |
+| Raumdiagonale, Quader | diagonal del espacio, ortoedro | |
+| Höhenwinkel, Tiefenwinkel | ángulo de elevación, ángulo de depresión | |
+| Mantellinie | generatriz | |
+| Spannweite, Ausreißer | rango, valores atípicos | |
+| Nominal-, Ordinal-, metrische Skala | escala nominal, ordinal, métrica | |
+| Mittelwert, Varianz, Standardabweichung | media aritmética, varianza, desviación típica | spreadsheet functions PROMEDIO, VAR.P, DESVEST.P, DESVEST.M |
+| abgeschnittene Achse, Bild statt Balken | eje recortado, imagen en lugar de barra | achsentrick widget: Einstein's GY 7 block |
+| Tabellenkalkulation, absoluter Bezug | hoja de cálculo, referencia absoluta | formulas keep the comma: `=B2*1,03` |
+| Kaltmiete, Nebenkosten, WG | alquiler sin gastos, gastos de comunidad y suministros, piso compartido | |
+| Mietspiegel, Mietpreisbremse | índice de alquileres, freno al alquiler (alemán) | |
+| goldener Schnitt, goldene Zahl $\Phi$ | proporción áurea, número áureo $\Phi$ | |
+| goldenes Rechteck, goldenes Dreieck, goldene Spirale | rectángulo áureo, triángulo áureo, espiral áurea | |
+| äußere Teilung; „äußeres und mittleres Verhältnis“ (Euklid) | división exterior; «extrema y media razón» | |
+| Zirkel und Lineal, Lot errichten | regla y compás, levantar la perpendicular | |
+| Drittel-Regel | regla de los tercios | |
+| Runde 2 · mit Tabelle und CAS | RONDA 2 · CON TABLA Y CAS | |
 
 ## Added by mathegy11-es (Turing)
 
