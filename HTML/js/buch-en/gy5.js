@@ -221,6 +221,7 @@
                 return a + n + b + 'Read aloud: ' + words(+i) + (f ? ' point ' + [...f].map(d => DIGIT[+d]).join(' ') : '');
             }],
             [/Das sind (\d+) Stellen\./, 'The number has $1 digits.'],
+            [/Das ist 1 Stelle\./, 'The number has 1 digit.'],
             // zahlenstrahl5
             [/Gerundet auf (Zehner|Hunderter|Tausender|Zehntausender|Hunderttausender|Millionen)\. Entscheidend ist die Ziffer rechts davon: /,
                 (m, p) => 'Rounded to the nearest ' + ROUND[p] + '. What matters is the digit to the right of that place: '],
@@ -258,6 +259,7 @@
             // rechteck5
             [/^Rechteck aus (\d+) Einheitsquadraten$/, 'Rectangle made of $1 unit squares'],
             [/Das sind (\d+) Reihen mit je (\d+) Kästchen\./, 'That is $1 rows of $2 squares each.'],
+            [/Das ist 1 Reihe mit (\d+) Kästchen\./, 'That is 1 row of $1 squares.'],
             [/<p>Zusammen (\d+) cm²/, '<p>Together $1 cm²'],
             // quader5
             [/^Quader (\d+) mal (\d+) mal (\d+)$/, 'Cuboid $1 by $2 by $3'],

@@ -212,7 +212,7 @@
                     '<p class="g5-dim">Gesprochen: ' + wort(ip) + (fd ? ' Komma ' + [...fd].map(c => c === '0' ? 'null' : (c === '1' ? 'eins' : ONES[+c])).join(' ') : '') + '</p>';
             } else {
                 out.innerHTML = '<p class="g5-big">' + grp(v) + '</p><p class="g5-word">' + wort(v).replace(/(tausend|hundert|und)(?=[a-zäöüß])/g, '$1\u00ad') + '</p>' +
-                    '<p class="g5-dim">' + (v ? 'Das sind ' + String(v).length + ' Stellen.' : '') + '</p>';
+                    '<p class="g5-dim">' + (v ? (v < 10 ? 'Das ist 1 Stelle.' : 'Das sind ' + String(v).length + ' Stellen.') : '') + '</p>';
             }
             math(out);
         }
@@ -771,7 +771,7 @@
                 s += handle([X(a), Y(b)], 0, LAM);
                 pic.innerHTML = svg(12 * U + 110, 7 * U + 50, s, 'Rechteck aus ' + a * b + ' Einheitsquadraten');
                 out.innerHTML = '<p class="g5-big">A = ' + a * b + ' cm²</p><p>$A = a \\cdot b = ' + a + ' \\text{ cm} \\cdot ' + b + ' \\text{ cm} = ' + a * b + ' \\text{ cm}^2$</p>' +
-                    '<p>Das sind ' + b + ' Reihen mit je ' + a + ' Kästchen.</p><hr class="g5-hr"><p class="g5-big">u = ' + (2 * a + 2 * b) + ' cm</p>' +
+                    '<p>' + (b === 1 ? 'Das ist 1 Reihe mit ' : 'Das sind ' + b + ' Reihen mit je ') + a + ' Kästchen.</p><hr class="g5-hr"><p class="g5-big">u = ' + (2 * a + 2 * b) + ' cm</p>' +
                     '<p>$u = 2 \\cdot a + 2 \\cdot b = 2 \\cdot ' + a + ' \\text{ cm} + 2 \\cdot ' + b + ' \\text{ cm} = ' + (2 * a + 2 * b) + ' \\text{ cm}$</p>' +
                     (a === b ? '<p class="g-ok">Ein Quadrat: alle vier Seiten gleich lang.</p>' : '');
             } else {

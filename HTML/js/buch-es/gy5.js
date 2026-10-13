@@ -241,6 +241,7 @@
                 return a + n + b + 'Se lee: ' + words(num(i)) + (f ? ' coma ' + [...f].map(d => DIGIT[+d]).join(' ') : '');
             }],
             [/Das sind (\d+) Stellen\./, (m, n) => 'El número tiene ' + n + ' ' + pl(n, 'cifra', 'cifras') + '.'],
+            [/Das ist 1 Stelle\./, 'El número tiene 1 cifra.'],
             // zahlenstrahl5
             [/Gerundet auf (Zehner|Hunderter|Tausender|Zehntausender|Hunderttausender|Millionen)\. Entscheidend ist die Ziffer rechts davon: /,
                 (m, p) => 'Redondeado a ' + ROUND[p] + '. Lo que decide es la cifra de su derecha: '],
@@ -276,6 +277,7 @@
                 (m, p, k) => (p[0] === 'R' ? 'Correcto, es ' : 'No exactamente. Es ') + MOVE[k] + '.'],
             // rechteck5
             [/^Rechteck aus (\d+) Einheitsquadraten$/, 'Rectángulo formado por $1 cuadrados unidad'],
+            [/Das ist 1 Reihe mit (\d+) Kästchen\./, (m, k) => 'Es 1 fila de ' + k + ' ' + pl(k, 'cuadradito', 'cuadraditos') + '.'],
             [/Das sind (\d+) Reihen mit je (\d+) Kästchen\./, (m, r, k) => pl(r, 'Es 1 fila', 'Son ' + r + ' filas') + ' de ' + k + ' ' + pl(k, 'cuadradito', 'cuadraditos') + '.'],
             [/<p>Zusammen (\d+) cm²/, '<p>En total $1 cm²'],
             // quader5
