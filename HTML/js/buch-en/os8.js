@@ -81,8 +81,9 @@ window.BuchEN && BuchEN.add('os8', {
     },
     phrase: [
         // kreisflaecheos8
-        ['\\,\\%$ von $r$), seine Länge ist der halbe Umfang $\\dfrac{u}{2} = \\pi \\cdot r$. Je mehr Stücke, desto genauer stimmt es:',
-            '\\,\\%$ of $r$), its length is half the circumference $\\dfrac{u}{2} = \\pi \\cdot r$. The more pieces, the more exactly it fits:'],
+        ['\\,\\%$ von $r$), ', '\\,\\%$ of $r$), '],
+        ['seine Länge ist der halbe Umfang $\\dfrac{u}{2} = \\pi \\cdot r$. Je mehr Stücke, desto genauer stimmt es:',
+            'its length is half the circumference $\\dfrac{u}{2} = \\pi \\cdot r$. The more pieces, the more exactly it fits:'],
         // zylinderos8: the mass row
         ['Masse (Holz, $', 'Mass (wood, $'], ['Masse (Aluminium, $', 'Mass (aluminium, $'], ['Masse (Stahl, $', 'Mass (steel, $'],
         // stromos8
