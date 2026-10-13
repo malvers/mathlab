@@ -39,6 +39,13 @@ window.BuchES && BuchES.add('vektoren', {
         // book es mathegy11lk-es (Turing)
 
         // book es mathegy12-es (Turing)
+        // kreuzprodukt (also for FOS 12, Lovelace 13.10.), lot3d, winkel3d
+        'zwei Vektoren': 'dos vectores', 'Dachfläche': 'superficie del tejado', 'in der x-y-Ebene': 'en el plano x-y', 'Dreieck': 'Triángulo', 'Welche Fläche?': '¿Qué área?',
+        'Punkt über E': 'Punto por encima de E', 'Ursprung': 'Origen', 'Punkt unter E': 'Punto por debajo de E', 'Punkt in E': 'Punto en E',
+        'Spiegelpunkt P′ zeigen': 'Mostrar el punto simétrico P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Constante $d$ en $\\vec{n} \\circ \\vec{x} = d$',
+        'Gerade – Gerade': 'recta – recta', 'Gerade – Ebene': 'recta – plano', 'Ebene – Ebene': 'plano – plano', 'Welcher Winkel?': '¿Qué ángulo?',
+        'spitz': 'agudo', 'stumpfe Vektoren': 'vectores con ángulo obtuso', 'senkrecht': 'perpendicular', 'schräg': 'oblicuo', 'Dach und Boden': 'tejado y suelo',
+        'parallel': 'paralelos',   // presets of kreuzprodukt (u, v) and winkel3d (line and plane)
 
         // book es mathegy12lk-es (Turing)
 
@@ -112,6 +119,37 @@ window.BuchES && BuchES.add('vektoren', {
         // book es mathegy11lk-es (Turing)
 
         // book es mathegy12-es (Turing)
+        // kreuzprodukt
+        ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
+            '$\\vec{u}$ y $\\vec{v}$ son paralelos: el producto vectorial es el vector nulo y no generan ningún área.'],
+        ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$: el producto vectorial es perpendicular a los dos vectores'],
+        [' (im Bild verkürzt gezeichnet)', ' (en la figura, dibujado más corto)'], ['Dreieck: $A = ', 'Triángulo: $A = '], ['Parallelogramm: $A = ', 'Paralelogramo: $A = '],
+        [' Flächeneinheiten', ' unidades de área'], ['$ und $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = ', '$ y $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = '],
+        // lot3d
+        ['Der Normalenvektor darf nicht der Nullvektor sein.', 'El vector normal no puede ser el vector nulo.'],
+        ['$ · Lotgerade $l\\colon', '$ · recta perpendicular $l\\colon'], ['$l$ in $E$ einsetzen: $', 'Sustituir $l$ en $E$: $'], ['$ · Lotfußpunkt $F(', '$ · pie de la perpendicular $F('],
+        ['$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.', '$t = 0$: el propio punto $P$ está en el plano; su distancia es $0$.'],
+        ['Abstand: $|', 'Distancia: $|'], ['$ · ohne Lotfußpunkt: $', '$ · sin el pie de la perpendicular: $'],
+        ['Spiegelpunkt: $t$ verdoppeln, $', 'Punto simétrico: duplicar $t$, $'], ['$, also $P\'(', '$, es decir, $P\'('],
+        // winkel3d
+        ['Der Nullvektor hat keine Richtung, er liefert keinen Winkel.', 'El vector nulo no tiene dirección; no da ningún ángulo.'],
+        ['$, also $\\varphi \\approx ', '$, es decir, $\\varphi \\approx '],
+        ['Die Richtungsvektoren sind parallel: Die Geraden sind parallel oder identisch, sie schneiden sich nicht unter einem Winkel.',
+            'Los vectores directores son paralelos: las rectas son paralelas o coincidentes y no se cortan formando un ángulo.'],
+        ['Die Vektoren selbst schließen $', 'Los propios vectores forman $'],
+        ['$ ein, also einen stumpfen Winkel. Die Geraden bilden den spitzen Nebenwinkel $180^\\circ - ', '$, es decir, un ángulo obtuso. Las rectas forman el ángulo agudo suplementario $180^\\circ - '],
+        ['$; dafür steht der Betrag im Zähler.', '$; para eso está el valor absoluto en el numerador.'],
+        ['Das Skalarprodukt ist $0$: Die Geraden schneiden sich senkrecht.', 'El producto escalar es $0$: las rectas se cortan perpendicularmente.'],
+        ['Das Skalarprodukt ist positiv, der Winkel zwischen den Vektoren ist schon spitz.', 'El producto escalar es positivo: el ángulo entre los vectores ya es agudo.'],
+        ['Winkel zwischen $\\vec{u}$ und dem Normalenvektor: $\\cos\\alpha = ', 'Ángulo entre $\\vec{u}$ y el vector normal: $\\cos\\alpha = '],
+        ['Der Winkel zur Ebene ergänzt ihn zu $90^\\circ$: $', 'El ángulo con el plano es su complementario hasta $90^\\circ$: $'],
+        ['. Das Skalarprodukt ist $0$: $g$ ist parallel zu $E$ oder liegt in $E$.', '. El producto escalar es $0$: $g$ es paralela a $E$ o está contenida en $E$.'],
+        ['. $\\vec{u}$ ist ein Vielfaches von $\\vec{n}$: $g$ steht senkrecht auf $E$.', '. $\\vec{u}$ es múltiplo de $\\vec{n}$: $g$ es perpendicular a $E$.'],
+        ['. Gelb gestrichelt: die Projektion von $g$ in die Ebene.', '. En amarillo discontinuo: la proyección de $g$ sobre el plano.'],
+        ['Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.', 'Los vectores normales son paralelos: los planos son paralelos o coincidentes.'],
+        ['Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $', 'En blanco: la recta de intersección $s$ con el vector director $'],
+        ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. El ángulo se mide perpendicularmente a ella, entre las dos líneas de color de los planos.'],
+        ['Probe: $(\\vec{u} \\times \\vec{v}) \\circ \\vec{u} = ', 'Comprobación: $(\\vec{u} \\times \\vec{v}) \\circ \\vec{u} = '],
 
         // book es mathegy12lk-es (Turing)
 
@@ -134,6 +172,9 @@ window.BuchES && BuchES.add('vektoren', {
         // book es mathegy11lk-es (Turing)
 
         // book es mathegy12-es (Turing)
+        // geradenlage: "parallel" between lines is feminine (rectas paralelas); the other widgets keep the word "paralelos" (vectors, planes)
+        // (the whole labels are parked as \u0003n\u0004 by the engine before the rules run, so the rule writes the word itself)
+        [/(data-p="par">)\u0003\d+\u0004(<\/button><button type="button" class="b-btn" data-p="ide">[^<]*<\/button><button type="button" class="b-btn" data-p="win">)/g, '$1paralelas$2'],
 
         // book es mathegy12lk-es (Turing)
 
