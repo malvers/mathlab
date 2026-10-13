@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas OS 10 · Capítulo 3 · Variables aleatorias y esperanza | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Distribución de probabilidad, esperanza, juegos justos, simulación y riesgo. Capítulo 3 del libro de texto interactivo Matemáticas · Oberschule 10: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · OBERSCHULE 10</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 3 · ÁREA DE APRENDIZAJE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 3 · ÁREA DE APRENDIZAJE 3 · DICIEMBRE · ENERO</p>
+            <h1>Variables aleatorias y esperanza</h1>
+            <p class="b-hero-lead">¿Merece la pena la ruleta del mercadillo navideño? ¿Vale lo que cuesta una ampliación de garantía? En los experimentos aleatorios a menudo interesa un <b>número</b>:
+                la suma de puntos, la ganancia en euros, el número de éxitos. Estos números se llaman <b>variables aleatorias</b>. Su <b>esperanza</b> te dice
+                con qué puedes contar a largo plazo.</p>
+            <div class="b-chips"><span class="b-chip">12 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">ESPERANZA</span><span class="b-chip">SIMULACIÓN</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>describir variables aleatorias y dar su <b>distribución de probabilidad</b> como tabla y como diagrama</li>
+                <li>calcular e interpretar la <b>esperanza</b></li>
+                <li>distinguir la <b>probabilidad de ganar</b> y la <b>ganancia esperada</b>, y reconocer juegos justos</li>
+                <li><b>simular</b> experimentos aleatorios y estimar riesgos</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="1/6" data-ph="P ="><p class="b-q-text">¿Probabilidad de sacar un 6 con un dado?</p><div class="b-sol"><p>Uno de seis.</p></div></div>
+            <div class="b-q" data-ans="1/4" data-ph="P ="><p class="b-q-text">¿Dos caras al lanzar dos veces una moneda?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12$</p></div></div>
+            <div class="b-q" data-ans="36" data-ph="cantidad"><p class="b-q-text">¿Cuántos resultados hay al lanzar dos dados?</p><div class="b-sol"><p>$6 \cdot 6$</p></div></div>
+            <div class="b-q" data-ans="12,5" data-ph="%"><p class="b-q-text">¿$\tfrac18$ en porcentaje?</p><div class="b-sol"><p>$1 : 8 = 0{,}125$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA SUMA DE PUNTOS</div>
+            <div class="b-text"><p>Lanzad 50 veces dos dados y anotad la suma de puntos.</p>
+                <ul><li>¿Qué suma sale más a menudo? Justificadlo con una tabla de los 36 pares de dados.</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA RULETA</div>
+            <div class="b-text"><p>Una tirada cuesta 1 €. La ruleta tiene seis sectores iguales: en uno hay 4 € de premio, en los demás nada.</p>
+                <ul><li>Jugad 30 rondas (con un dado). ¿Cuánto habéis ganado o perdido? ¿Qué esperáis con 600 rondas?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Variables aleatorias y distribuciones" data-toc-k="1" data-toc-short="1 Distribución">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Variables aleatorias y su distribución</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Al lanzar dos dados hay 36 pares igual de probables. La suma de puntos asigna a cada par un número: a $(3, 4)$ le corresponde el 7.
+                El 7 sale de seis pares, el 2 solo de uno. Por eso $P(\text{suma } 7) = \tfrac{6}{36}$ y $P(\text{suma } 2) = \tfrac{1}{36}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · VARIABLE ALEATORIA</div>
+                <div class="b-text">
+                    <p>Una <b>variable aleatoria</b> $X$ asigna a cada resultado de un experimento aleatorio un número: suma de puntos, número de éxitos, ganancia en euros.</p>
+                    <p>Su <b>distribución de probabilidad</b> indica con qué probabilidad toma $X$ cada valor, como tabla o como diagrama de barras.
+                        Todas las probabilidades juntas suman 1.</p>
+                    <p>Experimentos de varias etapas: <b>regla del producto</b> (multiplicar a lo largo de una rama), <b>regla de la suma</b> (sumar las ramas que llevan al mismo valor).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Suceso contrario:</b> «al menos una vez» se calcula a menudo más rápido como 1 menos «ninguna vez».</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · DISTRIBUCIONES AL LANZAR DOS DADOS</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una variable aleatoria. Toca una casilla de la tabla o una barra: se iluminan los pares de dados correspondientes.</p>
+        <div data-widget="verteilung" data-start="sum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · NÚMERO DE SEISES</div>
+            <div class="b-text"><p>Se lanza un dado dos veces y $X$ cuenta los seises. Da la distribución.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac{25}{36}$, $\;P(X = 1) = 2 \cdot \tfrac16 \cdot \tfrac56 = \tfrac{10}{36}$, $\;P(X = 2) = \tfrac{1}{36}$. <span class="b-res">Suma 1</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · SIN REEMPLAZAMIENTO</div>
+            <div class="b-text"><p>En una urna hay 3 bolas rojas y 2 azules. Se extraen dos sin reemplazamiento. ¿Qué probabilidad hay de que las dos sean rojas?</p></div>
+            <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 =$ <span class="b-res">$\tfrac{3}{10}$</span>. Con reemplazamiento sería $\tfrac{9}{25}$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dos dados: calcula $P(\text{suma } 8)$ y $P(\text{dobles})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{5}{36}$ y $\tfrac{6}{36} = \tfrac16$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ toma los valores 0, 1, 2 con $P(X = 0) = 0{,}2$ y $P(X = 1) = 0{,}5$. ¿Cuánto vale $P(X = 2)$?</p></div>
+            <div class="b-sol"><p>$1 - 0{,}2 - 0{,}5 = 0{,}3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Se lanza una moneda tres veces y $X$ cuenta las caras. Da la distribución.</p></div>
+            <div class="b-sol"><p>$\tfrac18$, $\tfrac38$, $\tfrac38$, $\tfrac18$ para 0, 1, 2, 3.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Qué probabilidad hay de sacar al menos un 6 en dos lanzamientos?</p></div>
+            <div class="b-sol"><p>$1 - \tfrac{25}{36} = \tfrac{11}{36}$. No $\tfrac16 + \tfrac16$, porque el doble seis contaría dos veces.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Al lanzar dos dados, $Y$ es la puntuación mayor. Halla $P(Y = 6)$ y $P(Y = 1)$.</p></div>
+            <div class="b-sol"><p>$P(Y = 6) = 1 - \tfrac{25}{36} = \tfrac{11}{36}$, $P(Y = 1) = \tfrac{1}{36}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="5/36" data-ph="P ="><p class="b-q-text">¿Suma de puntos 8 con dos dados?</p><div class="b-sol"><p>Cinco pares.</p></div></div>
+        <div class="b-q" data-ans="10/36" data-ph="P ="><p class="b-q-text">¿Exactamente un seis en dos lanzamientos?</p><div class="b-sol"><p>Dos ramas.</p></div></div>
+        <div class="b-q" data-ans="3/8" data-ph="P ="><p class="b-q-text">¿Exactamente dos caras en tres lanzamientos de moneda?</p><div class="b-sol"><p>Tres ramas de $\tfrac18$ cada una.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Esperanza y juegos justos" data-toc-k="2" data-toc-short="2 Esperanza">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Esperanza y juegos justos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En la ruleta ganas 3 € en uno de cada seis casos (4 € de premio menos 1 € de apuesta); si no, pierdes 1 €.
+                En 600 rondas son unas 100 ganancias y 500 pérdidas: $100 \cdot 3 - 500 \cdot 1 = -200$ €. Por ronda pierdes, por tanto, unos 33 céntimos de media.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · ESPERANZA</div>
+                <div class="b-text">
+                    <p>$E(X) = x_1 \cdot P(X = x_1) + x_2 \cdot P(X = x_2) + \ldots$: cada valor por su probabilidad, y todo sumado.</p>
+                    <p>La esperanza es la <b>media a largo plazo</b>. En un único experimento a menudo ni siquiera aparece.</p>
+                    <p>Un juego es <b>justo</b> si la esperanza de la ganancia es cero: premio esperado = apuesta.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Probabilidad no es esperanza:</b> un 90 % de probabilidad de ganar 1 €, pero un 10 % de riesgo de perder 20 €: $E = 0{,}9 - 2 = -1{,}10$ €.</p>
+            <p class="b-note"><b>Ruleta de casino:</b> 37 números, un número paga 36 €. $E = \tfrac{36}{37} - 1 \approx -2{,}7$ céntimos por euro.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · CONSTRUIR UN JUEGO JUSTO</div>
+        <p class="b-help" style="margin:0 0 12px">Cambia la apuesta y los premios hasta que la esperanza de la ganancia sea cero.</p>
+        <div data-widget="fairesspiel"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · LA RULETA</div>
+            <div class="b-text"><p>Una ruleta no paga nada con probabilidad $\tfrac12$, paga 2 € con $\tfrac14$ y 4 € con $\tfrac14$. Una tirada cuesta 2 €. ¿Es justo el juego?</p></div>
+            <div class="b-sol"><p>Premio esperado $0 + 0{,}5 + 1 = 1{,}50$ €, ganancia <span class="b-res">$-0{,}50$ € por tirada</span>: no es justo.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · HACERLO JUSTO</div>
+            <div class="b-text"><p>Apuesta 1 €, se lanza un dado una vez y solo con un 6 hay dinero. ¿Qué premio hace falta para que el juego sea justo?</p></div>
+            <div class="b-sol"><p>$A \cdot \tfrac16 = 1$ €, por tanto <span class="b-res">$A = 6$ €</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula la esperanza de la puntuación de un dado equilibrado.</p></div>
+            <div class="b-sol"><p>$\tfrac{1 + 2 + \ldots + 6}{6} = 3{,}5$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ toma los valores 0, 10 y 20 con las probabilidades 0,5, 0,3 y 0,2. Calcula $E(X)$.</p></div>
+            <div class="b-sol"><p>$0 + 3 + 4 = 7$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En una lotería con 1000 boletos de 2 € cada uno hay un premio de 500 €, diez de 50 € y cien de 5 €. Calcula el premio esperado y la ganancia por boleto.</p></div>
+            <div class="b-sol"><p>$1500 : 1000 = 1{,}50$ €, ganancia $-0{,}50$ € por boleto.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Apuesta 1 €, dos lanzamientos de moneda; con dos caras, 3 € de premio. Calcula la ganancia esperada. ¿Qué premio sería justo?</p></div>
+            <div class="b-sol"><p>$3 \cdot \tfrac14 - 1 = -0{,}25$ €. Justo con 4 €.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Juego A: 60 % de probabilidad de ganar 1 €; si no, se pierden 2 €. Juego B: 10 % de probabilidad de ganar 15 €; si no, se pierden 2 €. ¿Qué juego es mejor y cuál más arriesgado?</p></div>
+            <div class="b-sol"><p>A: $0{,}6 - 0{,}8 = -0{,}20$ €. B: $1{,}5 - 1{,}8 = -0{,}30$ €. A es más favorable a largo plazo; B oscila más.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="3,5" data-ph="E ="><p class="b-q-text">¿Puntuación esperada de un dado?</p><div class="b-sol"><p>$21 : 6$</p></div></div>
+        <div class="b-q" data-ans="-0,5" data-ph="€"><p class="b-q-text">¿Ganancia esperada del ejemplo 3, en €?</p><div class="b-sol"><p>$1{,}50 - 2$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="€"><p class="b-q-text">¿Premio justo del ejercicio 9, en €?</p><div class="b-sol"><p>$A \cdot \tfrac14 = 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Simulación y riesgo" data-toc-k="3" data-toc-short="3 Simulación">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Simulación y riesgo</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>No todos los experimentos aleatorios se pueden calcular con facilidad. Entonces ayuda una <b>simulación</b>: el ordenador genera números aleatorios,
+                repite el experimento miles de veces, y las frecuencias relativas dan <b>valores estimados</b> de las probabilidades.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · SIMULACIÓN Y RIESGO</div>
+                <div class="b-text">
+                    <p><b>Simular:</b> elegir los números aleatorios de modo que cada resultado tenga la probabilidad correcta, p. ej. las cifras 0, 1, 2 para un suceso del 30 %.</p>
+                    <p><b>Ley de los grandes números:</b> con muchas repeticiones, la frecuencia relativa se acerca a la probabilidad.</p>
+                    <p><b>Riesgo</b> de un daño: probabilidad por cuantía del daño, es decir, el daño esperado.</p>
+                    <p><b>Componentes:</b> en serie tienen que funcionar todos ($p^n$). En paralelo, el sistema solo falla cuando fallan todos.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Simular dos dados:</b> sumar dos números aleatorios del 1 al 6, no tomar un número aleatorio del 2 al 12, porque las sumas no son igual de probables.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA MISMA ESPERANZA, OTRO RIESGO</div>
+        <p class="b-help" style="margin:0 0 12px">Dos juegos con la misma esperanza: simula muchas rondas y compara cuánto oscilan las ganancias.</p>
+        <div data-widget="spielstreuung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · LA GUIRNALDA DE LUCES</div>
+            <div class="b-text"><p>20 bombillas están conectadas en serie, y cada una funciona con un 99 % de probabilidad. ¿Qué probabilidad hay de que la guirnalda se encienda?</p></div>
+            <div class="b-sol"><p>$0{,}99^{20} \approx$ <span class="b-res">0,818</span>, es decir, solo en un 82 % de los casos.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · ¿ASEGURAR O NO?</div>
+            <div class="b-text"><p>Un móvil vale 400 € y se estropea con un 5 % de probabilidad al año. Un seguro cuesta 60 € al año.</p></div>
+            <div class="b-sol"><p>Daño esperado $400 \cdot 0{,}05 =$ <span class="b-res">20 €</span>. De media el seguro no compensa, pero quien no podría pagar una reparación compra seguridad.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>En 200 simulaciones un suceso ocurrió 38 veces. Da la frecuencia relativa. ¿Es esa la probabilidad?</p></div>
+            <div class="b-sol"><p>$0{,}19$: un valor estimado, no una probabilidad exacta.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Cómo simulas con cifras aleatorias del 0 al 9 un suceso con un 70 % de probabilidad?</p></div>
+            <div class="b-sol"><p>Ocurre con siete de las diez cifras, p. ej. de 0 a 6.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dos bombas trabajan en paralelo, y cada una falla con un 10 %. ¿Qué probabilidad hay de que falle la instalación? ¿Y si estuvieran en serie?</p></div>
+            <div class="b-sol"><p>En paralelo: $0{,}1^2 = 1\,\%$. En serie: $1 - 0{,}9^2 = 19\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un aparato falla un 2 % de las veces al año. ¿Qué probabilidad hay de que aguante tres años? ¿Y de que falle al menos una vez en dos años?</p></div>
+            <div class="b-sol"><p>$0{,}98^3 \approx 94{,}1\,\%$. $1 - 0{,}98^2 \approx 4\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>El caballero de Méré apostaba a sacar al menos un 6 en cuatro lanzamientos. Calcula su probabilidad de ganar. ¿Por qué es incorrecto $4 \cdot \tfrac16$?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 51{,}8\,\%$. Con $4 \cdot \tfrac16$ los lanzamientos con varios seises se contarían varias veces.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,19" data-ph="h ="><p class="b-q-text">¿Frecuencia relativa del ejercicio 11?</p><div class="b-sol"><p>$38 : 200$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="%"><p class="b-q-text">¿Fallo del montaje en paralelo del ejercicio 13, en %?</p><div class="b-sol"><p>$0{,}1 \cdot 0{,}1$</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="€"><p class="b-q-text">¿Daño esperado del ejemplo 6, en €?</p><div class="b-sol"><p>$400 \cdot 0{,}05$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Se lanza un dado 600 veces. ¿Cuántos seises esperas? ¿Por qué es más bien raro que salgan exactamente 100?</p></div>
+            <div class="b-sol"><p>Unos 100. El número oscila al azar alrededor de 100; exactamente 100 es solo uno de muchos valores.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En la ruleta con 37 números, 18 son rojos. Quien apuesta 1 € al rojo y gana recibe 2 €. Calcula la ganancia esperada.</p></div>
+            <div class="b-sol"><p>$2 \cdot \tfrac{18}{37} - 1 \approx -0{,}027$ €: el cero verde marca la diferencia.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una avería de 120 € se produce con un 15 %, y la ampliación de garantía cuesta 25 €. ¿Compensa de media?</p></div>
+            <div class="b-sol"><p>Daño esperado 18 € &lt; 25 €: de media, no.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Relacionar con el área de aprendizaje 4:</b> una aseguradora tiene 10 000 clientes, y cada uno tiene con un 1 % un daño de 500 €. ¿Qué cuota necesita como mínimo? ¿Por qué cobra más?</p></div>
+            <div class="b-sol"><p>Daño esperado 5 € por cliente, 50 000 € en total. A eso se suman la administración, las oscilaciones y el beneficio.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Pascal y Fermat" data-toc-k="X" data-toc-short="Pascal">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Un jugador y dos cartas</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>El noble francés <b>Antoine Gombaud</b>, llamado caballero de Méré, era un jugador apasionado. Entre otras cosas, preguntó al matemático <b>Blaise Pascal</b>
+                cómo repartir de forma justa las apuestas si una partida tiene que interrumpirse antes de tiempo.</p>
+            <p>En 1654 Pascal se escribió sobre ello con <b>Pierre de Fermat</b>. Su idea: se calcula lo que cada jugador habría ganado de media si la partida hubiera continuado.
+                Esta correspondencia se considera el nacimiento del cálculo de probabilidades, y la esperanza estuvo presente desde el principio.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> correspondencia Pascal–Fermat de 1654; según K. Devlin: The Unfinished Game. Basic Books 2008.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>VARIABLE ALEATORIA</h4><p>un número para cada resultado; la distribución suma 1</p></div>
+        <div><p>Suma de puntos 7: $\tfrac{6}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>ESPERANZA</h4><p>valores por probabilidades, sumados</p></div>
+        <div><p>Dado: 3,5</p></div></div>
+    <div class="b-rueck"><div><h4>JUSTO</h4><p>ganancia esperada cero</p></div>
+        <div><p>Apuesta 1 €, $P = \tfrac16$: premio 6 €</p></div></div>
+    <div class="b-rueck"><div><h4>SIMULACIÓN, RIESGO</h4><p>la frecuencia relativa estima $P$; riesgo = $P$ por daño</p></div>
+        <div><p>Serie: $0{,}99^{20} \approx 0{,}82$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="11/36" data-ph="P ="><p class="b-q-text">¿Al menos un 6 en dos lanzamientos?</p><div class="b-sol"><p>$1 - \tfrac{25}{36}$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="E ="><p class="b-q-text">¿$E(X)$ del ejercicio 7?</p><div class="b-sol"><p>$3 + 4$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">¿Cuándo es justo un juego?</p><div class="b-mc"><button>cuando se gana en el 50 % de los casos</button><button>cuando la apuesta es pequeña</button><button>cuando la ganancia esperada es cero</button></div><div class="b-sol"><p>A largo plazo no gana nadie.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON CALCULADORA</div>
+            <div class="b-q" data-ans="-0,33" data-tol="0.005" data-ph="€"><p class="b-q-text">¿Ganancia esperada en la ruleta del principio (apuesta 1 €, $\tfrac16$ de ganar 4 €), con dos decimales?</p><div class="b-sol"><p>$3 \cdot \tfrac16 - \tfrac56$</p></div></div>
+            <div class="b-q" data-ans="51,8" data-tol="0.05" data-ph="%"><p class="b-q-text">¿Probabilidad de ganar de De Méré en %, con un decimal?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4$</p></div></div>
+            <div class="b-q" data-ans="94,1" data-tol="0.05" data-ph="%"><p class="b-q-text">¿Tres años sin fallo con un 2 % al año, en % con un decimal?</p><div class="b-sol"><p>$0{,}98^3$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PARA EXPERIMENTAR</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EL JUEGO DE DADOS</span><span class="b-lab-what">Lanzar, contar, estimar probabilidades (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLERO DE GALTON</span><span class="b-lab-what">Las bolas caen al azar y forman un patrón (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Oberschule, 10.º curso (itinerario de Realschule) · Área de aprendizaje 3 según el plan de estudios de matemáticas de la Oberschule de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-es/stochastik.js"></script>
+<script src="../../js/buch-spiele.js"></script>
+<script src="../../js/buch-es/spiele.js"></script>
+</body>
+</html>

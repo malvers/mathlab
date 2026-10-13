@@ -23,6 +23,16 @@ window.BuchES && BuchES.add('spiele', {
         'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{100}$ gibt es 100 € zurück, sonst nichts.': 'Apuesta 1 €. Con probabilidad $\\tfrac{1}{100}$ te devuelven 100 €; si no, nada.',
 
         // book es mathe10-es (Curie)
+        // spielstreuung
+        'Spiel': 'Juego', 'Noch einmal spielen': 'Jugar otra vez', 'Runde': 'Ronda', 'Kontostand in €': 'Saldo en €',
+        'Kontostände von acht Spielern über hundert Runden': 'Saldos de ocho jugadores a lo largo de cien rondas',
+        // fairesspiel
+        'Beim Schulfest wirft man zwei Würfel. Ein <b>Pasch</b> (zwei gleiche Augenzahlen) bringt den ersten Preis, die <b>Augensumme 7</b> den zweiten, alles andere nichts. Der Einsatz ist in jedem Fall weg.':
+            'En la fiesta del colegio se lanzan dos dados. Unos <b>dobles</b> (dos puntuaciones iguales) dan el primer premio, la <b>suma de puntos 7</b> el segundo, y todo lo demás nada. La apuesta se pierde en cualquier caso.',
+        'Einsatz $e$': 'Apuesta $e$', 'Auszahlung bei Pasch': 'Premio con dobles', 'Auszahlung bei Summe 7': 'Premio con suma 7',
+        'Fairen Einsatz einstellen': 'Poner la apuesta justa', '1000 Spiele': '1000 partidas',
+        'Ergebnis': 'Resultado', 'Pasch': 'Dobles', 'Summe 7': 'Suma 7', 'sonst': 'resto', 'Gewinn $x_i$ in €': 'Ganancia $x_i$ en €',
+        'Lass das Spiel 1000-mal laufen und vergleiche den mittleren Gewinn mit dem Erwartungswert.': 'Deja que el juego se repita 1000 veces y compara la ganancia media con la esperanza.',
 
         // book es mathegy10-es (offen)
 
@@ -36,6 +46,19 @@ window.BuchES && BuchES.add('spiele', {
         [' der 36 gleich wahrscheinlichen Ergebnisse gehören dazu. Alle Wahrscheinlichkeiten zusammen ergeben $1$.', ' de los 36 resultados igual de probables pertenecen a él. Todas las probabilidades juntas suman $1$.'],
 
         // book es mathe10-es (Curie)
+        // spielstreuung
+        ['Gewinn $X$ pro Spiel: $', 'Ganancia $X$ por partida: $'], ['$ € mit $', '$ € con $'], [' = 0$: Das Spiel ist <b>fair</b>.', ' = 0$: el juego es <b>justo</b>.'],
+        ['Standardabweichung $\\sigma = \\sqrt{V(X)} \\approx ', 'Desviación típica $\\sigma = \\sqrt{V(X)} \\approx '],
+        ['$ € · gestrichelt: $\\pm\\sigma\\sqrt{n}$, nach 100 Runden $\\pm ', '$ € · discontinua: $\\pm\\sigma\\sqrt{n}$, después de 100 rondas $\\pm '],
+        ['Kontostände nach 100 Runden: ', 'Saldos después de 100 rondas: '],
+        [' €. Gleicher Erwartungswert, aber je größer $\\sigma$, desto weiter liegen Gewinner und Verlierer auseinander: <b>$\\sigma$ misst das Risiko.</b>',
+            ' €. La misma esperanza, pero cuanto mayor es $\\sigma$, más separados quedan ganadores y perdedores: <b>$\\sigma$ mide el riesgo.</b>'],
+        // fairesspiel
+        ['Das Spiel ist <b>fair</b>.', 'El juego es <b>justo</b>.'],
+        ['Für die Spielerin oder den Spieler <b>ungünstig</b>: Die Klasse verdient im Mittel ', '<b>Desfavorable</b> para la jugadora o el jugador: la clase gana de media '],
+        ['Für die Spielerin oder den Spieler <b>günstig</b>: Die Klasse verliert im Mittel ', '<b>Favorable</b> para la jugadora o el jugador: la clase pierde de media '],
+        [' € pro Spiel.', ' € por partida.'], [' Fair wäre der Einsatz $e = \\tfrac{', ' La apuesta justa sería $e = \\tfrac{'],
+        ['Gespielt: ', 'Jugadas: '], [' Spiele, mittlerer Gewinn <b>', ' partidas, ganancia media <b>'], [' €</b> pro Spiel (Erwartungswert ', ' €</b> por partida (esperanza '],
 
         // book es mathegy10-es (offen)
 
