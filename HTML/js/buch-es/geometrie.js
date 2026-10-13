@@ -37,6 +37,9 @@ window.BuchES && BuchES.add('geometrie', {
         'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circunferencia con $r = 1$, por tanto $u = 2\\pi$. Perímetro dividido entre $2$:',
 
         // book es mathegy9-es (Curie)
+        // titelbildgy9
+        'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
+            'Portada: un triángulo rectángulo con los cuadrados sobre sus lados, un rectángulo áureo con espiral, una circunferencia entre dos hexágonos y una parábola',
 
     },
     phrase: [
