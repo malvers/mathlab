@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 5 · Capítulo 1.3 · Divisores y números primos | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Divisores y múltiplos, criterios de divisibilidad, la criba de Eratóstenes, factores primos. Capítulo 1.3 del libro de texto interactivo Matemáticas · Gymnasium 5: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 5</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.3 · ÁREA DE APRENDIZAJE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.3 · ÁREA DE APRENDIZAJE 1 · SEPTIEMBRE · OCTUBRE</p>
+            <h1>Divisores y números primos</h1>
+            <p class="b-hero-lead">¿Se pueden repartir 24 magdalenas a partes iguales entre 5 personas? ¿Y entre 6? ¿Y entre 8? Qué números <b>dividen</b> a un número sin resto lo delatan a menudo sus cifras.
+                Algunos números no se pueden descomponer: solo se pueden dividir entre 1 y entre sí mismos. Estos <b>números primos</b> son las piezas con las que se construyen,
+                multiplicando, todos los demás números.</p>
+            <div class="b-chips"><span class="b-chip">3 SESIONES</span><span class="b-chip">2 LECCIONES</span><span class="b-chip">1 LABORATORIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="sieb5" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>encontrar los <b>divisores</b> y los <b>múltiplos</b> de un número</li>
+                <li>aplicar los <b>criterios de divisibilidad</b> del 2, 3, 4, 5, 6 y 10</li>
+                <li>reconocer los <b>números primos</b> y encontrarlos con la <b>criba de Eratóstenes</b></li>
+                <li>descomponer números en <b>factores primos</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="8" data-ph="número"><p class="b-q-text">Calcula $48 : 6$.</p><div class="b-sol"><p>$6 \cdot 8 = 48$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="resto"><p class="b-q-text">¿Qué resto queda en $23 : 7$?</p><div class="b-sol"><p>$3 \cdot 7 = 21$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Es 36 un número par?</p><div class="b-mc"><button>sí</button><button>no</button></div><div class="b-sol"><p>La última cifra, 6, es par.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">FORMAR RECTÁNGULOS</div>
+            <div class="b-text"><p>Con 12 cuadrados iguales (fichas, cuadritos de papel) formad todos los rectángulos posibles. Haced lo mismo con 7, con 16 y con 13 cuadrados.</p>
+                <ul><li>¿Con qué números sale un único rectángulo, largo y estrecho?</li><li>¿Qué tienen que ver las longitudes de los lados con dividir?</li></ul></div>
+            <span class="b-pair">→ Lecciones 1 y 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA SUMA DE LAS CIFRAS</div>
+            <div class="b-text"><p>La suma de las cifras de un número es la suma de todas sus cifras; en 471, $4 + 7 + 1 = 12$.</p>
+                <ul><li>Calculad la suma de las cifras de 12, 27, 111, 471, 1002 y 3333. Dividid los números entre 3.</li><li>¿Notáis alguna relación?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Divisores y divisibilidad" data-toc-k="1" data-toc-short="1 Divisores">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Divisores, múltiplos y criterios de divisibilidad</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con 12 cuadrados se pueden formar tres rectángulos: $1 \times 12$, $2 \times 6$ y $3 \times 4$. Las longitudes de los lados 1, 2, 3, 4, 6, 12 son exactamente los números
+                entre los que se puede dividir 12 sin resto. Con 7 o con 13 cuadrados solo sale la tira larga.</p></div></div>
+            <div class="b-text"><p>Si una división es exacta, se dice: 3 es un <b>divisor</b> de 12, y 12 es un <b>múltiplo</b> de 3. Se escribe $3 \mid 12$ y se lee «3 divide a 12».
+                Todos los divisores de un número forman su <b>conjunto de divisores</b>: $D_{12} = \{1, 2, 3, 4, 6, 12\}$. Los divisores se encuentran mejor por parejas: $1 \cdot 12$, $2 \cdot 6$, $3 \cdot 4$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · CRITERIOS DE DIVISIBILIDAD</div>
+                <div class="b-text">
+                    <p>Un número es divisible</p>
+                    <ul><li>entre <b>2</b> si su última cifra es 0, 2, 4, 6 u 8,</li>
+                        <li>entre <b>5</b> si su última cifra es 0 o 5; entre <b>10</b> si es 0,</li>
+                        <li>entre <b>4</b> si el número formado por sus <b>dos últimas cifras</b> es divisible entre 4,</li>
+                        <li>entre <b>3</b> si la <b>suma de sus cifras</b> es divisible entre 3,</li>
+                        <li>entre <b>6</b> si es divisible entre 2 <b>y</b> entre 3.</li></ul>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Por qué funciona el criterio del 4:</b> cada centena completa es divisible entre 4, porque $100 = 4 \cdot 25$. Así que solo importa lo que queda después de las centenas.</p>
+            <p class="b-note"><b>Extra:</b> un número es divisible entre 9 si la suma de sus cifras es divisible entre 9.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · TODOS LOS DIVISORES</div>
+            <div class="b-text"><p>Halla el conjunto de divisores de 36.</p></div>
+            <div class="b-sol"><p>Buscar parejas: $1 \cdot 36$, $2 \cdot 18$, $3 \cdot 12$, $4 \cdot 9$, $6 \cdot 6$. En el 6 las parejas se encuentran; se puede parar.</p>
+                <p><span class="b-res">$D_{36} = \{1, 2, 3, 4, 6, 9, 12, 18, 36\}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · APLICAR LOS CRITERIOS</div>
+            <div class="b-text"><p>¿Es 5 724 divisible entre 3, entre 4 y entre 6?</p></div>
+            <div class="b-sol"><p>Suma de las cifras $5 + 7 + 2 + 4 = 18$: divisible entre 3. Dos últimas cifras 24: divisible entre 4. Par y divisible entre 3: divisible entre 6.</p>
+                <p><span class="b-res">divisible entre 3, 4 y 6</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Halla los conjuntos de divisores: a) $D_{18}$ &nbsp; b) $D_{30}$ &nbsp; c) $D_{17}$ &nbsp; d) $D_{64}$</p></div>
+            <div class="b-sol"><p>a) {1, 2, 3, 6, 9, 18} &nbsp; b) {1, 2, 3, 5, 6, 10, 15, 30} &nbsp; c) {1, 17} &nbsp; d) {1, 2, 4, 8, 16, 32, 64}</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Escribe los seis primeros múltiplos: a) de 7 &nbsp; b) de 12 &nbsp; c) de 25</p></div>
+            <div class="b-sol"><p>a) 7, 14, 21, 28, 35, 42 &nbsp; b) 12, 24, 36, 48, 60, 72 &nbsp; c) 25, 50, 75, 100, 125, 150</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Comprueba con los criterios entre cuáles de los números 2, 3, 4, 5, 6, 10 es divisible el número: a) 120 &nbsp; b) 4 515 &nbsp; c) 2 316 &nbsp; d) 7 777</p></div>
+            <div class="b-sol"><p>a) entre los seis &nbsp; b) entre 3 y 5 (suma de las cifras 15) &nbsp; c) entre 2, 3, 4 y 6 (suma de las cifras 12, termina en 16) &nbsp; d) entre ninguno</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pon una cifra en ▢ de modo que el número sea divisible entre 3. Encuentra todas las posibilidades: a) 5▢1 &nbsp; b) 2 0▢4</p></div>
+            <div class="b-sol"><p>a) Suma de las cifras $6 + ▢$: ▢ = 0, 3, 6, 9 &nbsp; b) Suma de las cifras $6 + ▢$: ▢ = 0, 3, 6, 9</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Hay que repartir 24 magdalenas a partes iguales sin partir ninguna. ¿Entre cuántas personas se puede? Di todas las posibilidades.</p></div>
+            <div class="b-sol"><p>Entre 1, 2, 3, 4, 6, 8, 12 o 24 personas: los divisores de 24.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Qué número menor que 100 tiene más divisores? Pista: prueba con números que tengan muchos factores pequeños, como 60, 72, 84, 90 y 96.</p></div>
+            <div class="b-sol"><p>60, 72, 84, 90 y 96 tienen 12 divisores cada uno; ningún número menor que 100 tiene más. Por ejemplo, $D_{60} = \{1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60\}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="6" data-ph="cantidad"><p class="b-q-text">¿Cuántos divisores tiene 12?</p><div class="b-sol"><p>1, 2, 3, 4, 6, 12</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">¿Es 7 314 divisible entre 4?</p><div class="b-mc"><button>sí</button><button>no</button></div><div class="b-sol"><p>Las dos últimas cifras forman 14, y 14 no es divisible entre 4.</p></div></div>
+        <div class="b-q" data-ans="21" data-ph="suma de las cifras"><p class="b-q-text">¿Cuánto vale la suma de las cifras de 8 571?</p><div class="b-sol"><p>$8 + 5 + 7 + 1 = 21$; por tanto, el número es divisible entre 3.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Números primos" data-toc-k="2" data-toc-short="2 Primos">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">1 SESIÓN</span></div>
+    <h2><span class="b-no">2</span>Números primos y factores primos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con 7 o con 13 cuadrados solo hay un rectángulo: la tira larga. Estos números tienen exactamente dos divisores: el 1 y ellos mismos.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · NÚMEROS PRIMOS</div>
+                <div class="b-text">
+                    <p>Un número natural con <b>exactamente dos divisores</b> se llama <b>número primo</b>. Los más pequeños son 2, 3, 5, 7, 11, 13, 17, 19, 23, 29.</p>
+                    <p>El 1 no es primo: solo tiene un divisor. El 2 es el único número primo par.</p>
+                    <p>Todo número mayor que 1 que no es primo se puede escribir como producto de números primos, su <b>descomposición en factores primos</b>: $60 = 2 \cdot 2 \cdot 3 \cdot 5$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Descomponer por pasos:</b> $60 = 6 \cdot 10 = (2 \cdot 3) \cdot (2 \cdot 5)$. Empieces como empieces, al final salen siempre los mismos factores primos.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA CRIBA DE ERATÓSTENES</div>
+        <div data-widget="sieb5"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · ¿PRIMO O NO?</div>
+            <div class="b-text"><p>¿Es 91 un número primo?</p></div>
+            <div class="b-sol"><p>91 es impar, la suma de sus cifras es 10 y no termina en 0 ni en 5. Pero $91 = 7 \cdot 13$.</p>
+                <p><span class="b-res">no es primo</span>. Buena trampa: 91 parece un número primo.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · FACTORES PRIMOS</div>
+            <div class="b-text"><p>Descompón 84 en factores primos.</p></div>
+            <div class="b-sol"><p>$84 = 2 \cdot 42 = 2 \cdot 2 \cdot 21 = 2 \cdot 2 \cdot 3 \cdot 7$</p>
+                <p><span class="b-res">$84 = 2 \cdot 2 \cdot 3 \cdot 7$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Qué números son primos? 21, 23, 27, 29, 31, 33, 37, 39, 41, 51</p></div>
+            <div class="b-sol"><p>23, 29, 31, 37, 41. No son primos: $21 = 3 \cdot 7$, $27 = 3 \cdot 9$, $33 = 3 \cdot 11$, $39 = 3 \cdot 13$, $51 = 3 \cdot 17$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Descompón en factores primos: a) 20 &nbsp; b) 45 &nbsp; c) 100 &nbsp; d) 96</p></div>
+            <div class="b-sol"><p>a) $2 \cdot 2 \cdot 5$ &nbsp; b) $3 \cdot 3 \cdot 5$ &nbsp; c) $2 \cdot 2 \cdot 5 \cdot 5$ &nbsp; d) $2 \cdot 2 \cdot 2 \cdot 2 \cdot 2 \cdot 3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Qué número tiene la descomposición en factores primos a) $2 \cdot 3 \cdot 3 \cdot 5$ &nbsp; b) $2 \cdot 2 \cdot 2 \cdot 7$ &nbsp; c) $3 \cdot 5 \cdot 7$?</p></div>
+            <div class="b-sol"><p>a) 90 &nbsp; b) 56 &nbsp; c) 105</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Los <b>números primos gemelos</b> son primos que se diferencian en 2, por ejemplo 11 y 13. Encuentra con la criba todos los gemelos menores que 100.</p></div>
+            <div class="b-sol"><p>3 y 5, 5 y 7, 11 y 13, 17 y 19, 29 y 31, 41 y 43, 59 y 61, 71 y 73: ocho parejas.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="25" data-ph="cantidad"><p class="b-q-text">¿Cuántos números primos hay entre 1 y 100?</p><div class="b-sol"><p>La criba deja 25 números.</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué número es primo?</p><div class="b-mc"><button>1</button><button>51</button><button>53</button></div><div class="b-sol"><p>$51 = 3 \cdot 17$, y el 1 solo tiene un divisor.</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="factor primo"><p class="b-q-text">$84 = 2 \cdot 2 \cdot 3 \cdot ▢$. ¿Qué factor primo falta?</p><div class="b-sol"><p>$84 : 12 = 7$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>En un patio de colegio se van a plantar 60 árboles en filas igual de largas, con al menos 3 árboles por fila y al menos 3 filas. ¿Qué posibilidades hay?</p></div>
+            <div class="b-sol"><p>$3 \cdot 20$, $4 \cdot 15$, $5 \cdot 12$, $6 \cdot 10$, $10 \cdot 6$, $12 \cdot 5$, $15 \cdot 4$, $20 \cdot 3$: ocho posibilidades (filas por árboles en cada fila).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 1.2:</b> escribe la descomposición en factores primos con potencias: a) $72$ &nbsp; b) $1000$ &nbsp; c) $1024$</p></div>
+            <div class="b-sol"><p>a) $2^3 \cdot 3^2$ &nbsp; b) $2^3 \cdot 5^3$ &nbsp; c) $2^{10}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dos campanas suenan a la vez. Una toca cada 6 minutos y la otra cada 8 minutos. ¿Al cabo de cuántos minutos vuelven a sonar a la vez por primera vez?</p></div>
+            <div class="b-sol"><p>Múltiplos de 6: 6, 12, 18, 24, … Múltiplos de 8: 8, 16, 24, … El menor común es <span class="b-res">24</span>.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Por qué un número con más de una cifra cuyas cifras suman 3 nunca es primo?</p></div>
+            <div class="b-sol"><p>La suma de sus cifras es divisible entre 3, así que el número es divisible entre 3. Como es mayor que 3, tiene al menos tres divisores: 1, 3 y él mismo.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el mayor número primo" data-toc-k="X" data-toc-short="Récord">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA Y ACTUALIDAD</span></div>
+    <h2>¿Existe un número primo mayor que todos?</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>El sabio griego <b>Eratóstenes de Cirene</b> vivió en el siglo III antes de Cristo y dirigió la famosa biblioteca de Alejandría. El método con el que cribas los números primos
+                lleva su nombre. Nos lo transmitió Nicómaco de Gerasa, unos 300 años después.</p>
+            <p>Ya antes, <b>Euclides</b> había demostrado que hay <b>infinitos números primos</b>. Su idea: toma unos cuantos números primos, multiplícalos y suma 1, por ejemplo $2 \cdot 3 \cdot 5 + 1 = 31$.
+                Este número nuevo deja resto 1 al dividirlo entre cada uno de esos primos. Así que en él se esconde un número primo que todavía no estaba en la lista. Por tanto, la lista nunca puede estar completa.</p>
+            <p>Hoy, ordenadores de todo el mundo buscan números primos récord. El mayor conocido se encontró en octubre de 2024: $2^{136\,279\,841} - 1$. Escrito con todas sus cifras tiene
+                41 024 320 cifras. Impreso en este libro llenaría muchos miles de páginas.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuentes:</b> Euclides, Elementos IX, 20. Nicómaco de Gerasa, Introducción a la aritmética I, 13. Great Internet Mersenne Prime Search (mersenne.org), 52.º primo de Mersenne, encontrado por L. Durant y anunciado el 21.10.2024.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>DIVISORES Y MÚLTIPLOS</h4><p>$3 \mid 12$: 3 es divisor de 12, 12 es múltiplo de 3. Buscar los divisores por parejas.</p></div>
+        <div><p>$D_{36} = \{1, 2, 3, 4, 6, 9, 12, 18, 36\}$</p></div></div>
+    <div class="b-rueck"><div><h4>CRITERIOS DE DIVISIBILIDAD</h4><p>2, 5, 10: última cifra · 4: dos últimas cifras · 3: suma de las cifras · 6: entre 2 y entre 3</p></div>
+        <div><p>5 724: divisible entre 3, 4 y 6</p></div></div>
+    <div class="b-rueck"><div><h4>NÚMEROS PRIMOS</h4><p>exactamente dos divisores; el 1 no es primo</p></div>
+        <div><p>2, 3, 5, 7, 11, 13, 17, 19, 23, 29, …</p></div></div>
+    <div class="b-rueck"><div><h4>FACTORES PRIMOS</h4><p>Todo número mayor que 1 es un producto de números primos.</p></div>
+        <div><p>$84 = 2 \cdot 2 \cdot 3 \cdot 7$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · CÁLCULO MENTAL</div>
+            <div class="b-q" data-ans="8" data-ph="cantidad"><p class="b-q-text">¿Cuántos divisores tiene 30?</p><div class="b-sol"><p>1, 2, 3, 5, 6, 10, 15, 30</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Es 2 352 divisible entre 6?</p><div class="b-mc"><button>sí</button><button>no</button></div><div class="b-sol"><p>Par, suma de las cifras 12</p></div></div>
+            <div class="b-q" data-ans="97" data-ph="número"><p class="b-q-text">¿Cuál es el mayor número primo menor que 100?</p><div class="b-sol"><p>99 y 98 no son primos; 97, sí.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON LÁPIZ Y PAPEL</div>
+            <div class="b-q" data-ans="5" data-ph="factor primo"><p class="b-q-text">$150 = 2 \cdot 3 \cdot 5 \cdot ▢$. ¿Qué número primo falta?</p><div class="b-sol"><p>$150 : 30 = 5$</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="minutos"><p class="b-q-text">¿Cuándo vuelven a coincidir por primera vez una campanada cada 6 minutos y otra cada 8 minutos?</p><div class="b-sol"><p>mínimo común múltiplo</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="cantidad"><p class="b-q-text">¿Cuántos divisores tiene 60?</p><div class="b-sol"><p>1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PARA PROBAR (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="glocken" href="../../glocken/glocken.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LAS CAMPANAS DE BAGDAD</span><span class="b-lab-what">¿Cuándo suenan todas a la vez?</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 5.º curso · área de aprendizaje 1 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-es/geometrie.js"></script>
+<script src="../../js/buch-gy5.js"></script>
+<script src="../../js/buch-es/gy5.js"></script>
+</body>
+</html>
