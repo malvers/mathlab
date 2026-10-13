@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 8 · Capítulo 3.2 · Funciones lineales | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Pendiente y cociente incremental, ceros, ecuaciones de la recta, regresión lineal. Capítulo 3.2 del libro de texto interactivo Matemáticas · Gymnasium 8: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 8</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 3.2 · ÁREA DE APRENDIZAJE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 3.2 · ÁREA DE APRENDIZAJE 3 · ENERO · FEBRERO</p>
+            <h1>Funciones lineales</h1>
+            <p class="b-hero-lead">Un taxi cuesta 4 € de bajada de bandera y 2 € por kilómetro. Una vela se acorta unos 1,6 cm cada hora. Cuando una magnitud crece o disminuye de manera uniforme,
+                su gráfica es una <b>recta</b>. Aprenderás cómo la <b>pendiente</b> y la <b>ordenada en el origen</b> determinan la recta, cómo se hallan los <b>ceros</b> y las
+                <b>ecuaciones de la recta</b> y cómo la calculadora traza una <b>recta de regresión</b> entre puntos medidos.</p>
+            <div class="b-chips"><span class="b-chip">12 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">CAS</span><span class="b-chip">REGRESIÓN</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["0.5*x+1","2*x-3","-x+4"]' data-labels='["f","g","h"]' data-lat="[4.5,3.2,-1.5]" data-x="-3,6" data-y="-3,6" data-pts="[[0,1],[0,-3],[0,4]]" data-h="240" data-aria="Tres rectas con distinta pendiente y distinta ordenada en el origen"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>relacionar la ecuación $y = mx + n$ y la gráfica de una <b>función lineal</b></li>
+                <li>calcular la <b>pendiente</b> con el cociente incremental y describir el efecto de $m$ y $n$</li>
+                <li>hallar los <b>ceros</b> gráfica y algebraicamente y encontrar <b>ecuaciones de la recta</b>, también con un algoritmo en el CAS</li>
+                <li>obtener una <b>recta de regresión</b> para valores medidos y valorarla con sentido crítico</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="7" data-ph="f(3) ="><p class="b-q-text">$f(x) = 2x + 1$. Calcula $f(3)$.</p><div class="b-sol"><p>$6 + 1$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Resuelve $3x - 6 = 0$.</p><div class="b-sol"><p>$3x = 6$</p></div></div>
+            <div class="b-q" data-ans="-1,5" data-ph="x ="><p class="b-q-text">Resuelve $2x + 3 = 0$.</p><div class="b-sol"><p>$2x = -3$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="número"><p class="b-q-text">Calcula $\tfrac{9 - 3}{4 - 2}$.</p><div class="b-sol"><p>$\tfrac62$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DOS TAXIS</div>
+            <div class="b-text"><p>Taxi A: 4 € de bajada de bandera y 2 € por km. Taxi B: sin bajada de bandera, 2,50 € por km.</p>
+                <ul><li>Dibujad el coste de los dos taxis en un sistema de coordenadas. ¿Qué significan los números en el dibujo? ¿Cuándo cogéis cada taxi?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA SEÑAL DE PENDIENTE</div>
+            <div class="b-text"><p>En una señal de tráfico pone «12 %».</p>
+                <ul><li>¿Qué significa? ¿Cuántos metros de desnivel se suben en 1 km medido en horizontal?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA VELA</div>
+            <div class="b-text"><p>Encended una vela y medid su longitud cada 10 minutos.</p>
+                <ul><li>¿Están los puntos sobre una recta? ¿Cuándo se habrá consumido la vela?</li></ul></div>
+            <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DE ESTADÍSTICA</span><span class="b-lab-what">Una recta entre puntos medidos (en alemán)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Ecuación, gráfica y pendiente" data-toc-k="1" data-toc-short="1 Pendiente">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Ecuación, gráfica y pendiente</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El taxi A cuesta $k(x) = 2x + 4$ euros por $x$ kilómetros. Cada kilómetro cuesta 2 € más: si en la gráfica avanzas 1 a la derecha, subes 2.
+                Esa es la <b>pendiente</b> $m = 2$. Con 0 km ya pagas 4 €: ahí la recta corta el eje y, $n = 4$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · FUNCIONES LINEALES</div>
+                <div class="b-text">
+                    <p>$f(x) = mx + n$ se llama <b>función lineal</b>; su gráfica es una <b>recta</b>.</p>
+                    <p>$m$ es la <b>pendiente</b>: si avanzas $1$ a la derecha, subes $m$; con $m &lt; 0$, bajas.</p>
+                    <p>Entre dos puntos $P_1(x_1, y_1)$ y $P_2(x_2, y_2)$ se cumple $m = \dfrac{y_2 - y_1}{x_2 - x_1} = \dfrac{\Delta y}{\Delta x}$ (<b>cociente incremental</b>, triángulo de pendiente).</p>
+                    <p>$n$ es la <b>ordenada en el origen</b>: la recta pasa por $(0, n)$.</p>
+                    <p>$m &gt; 0$: creciente · $m &lt; 0$: decreciente · $m = 0$: horizontal. Cuanto mayor es el valor absoluto de $m$, más empinada.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Porcentajes en las señales:</b> una pendiente del 12 % significa $m = 0{,}12$: 12 m de altura por cada 100 m en horizontal, es decir, 120 m en 1 km.</p>
+            <p class="b-note"><b>Proporcional:</b> si $n = 0$, la recta pasa por el origen. El doble de kilómetros, el doble de caro, como en el taxi B.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA PENDIENTE A PARTIR DE DOS PUNTOS</div>
+        <p class="b-help" style="margin:0 0 12px">Arrastra los dos puntos. El triángulo de pendiente verde muestra $\Delta x$ y $\Delta y$; debajo aparecen la pendiente, la ecuación y el cero.</p>
+        <div data-widget="gerade"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · DIBUJAR</div>
+            <div class="b-text"><p>Dibuja la gráfica de $f(x) = -\tfrac12 x + 3$.</p></div>
+            <div class="b-sol"><p>Empieza en $(0, 3)$ sobre el eje y. $m = -\tfrac12$: 2 a la derecha, 1 hacia abajo. Eso da $(2, 2)$, $(4, 1)$ y $(6, 0)$.</p>
+                <p><span class="b-res">Recta que pasa por $(0, 3)$ y $(6, 0)$</span>, decreciente, con el cero en 6.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · CALCULAR LA PENDIENTE</div>
+            <div class="b-text"><p>Una recta pasa por $A(1, 2)$ y $B(5, 8)$. Calcula su pendiente.</p></div>
+            <div class="b-sol"><p>$m = \dfrac{8 - 2}{5 - 1} = \dfrac{6}{4} =$ <span class="b-res">$1{,}5$</span></p>
+                <p>Por cada 4 pasos a la derecha se suben 6; por un paso, 1,5.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da la pendiente y la ordenada en el origen y dibuja: a) $y = 3x - 2$ &nbsp; b) $y = -2x + 1$ &nbsp; c) $y = \tfrac14 x$ &nbsp; d) $y = 4$</p></div>
+            <div class="b-sol"><p>a) $m = 3$, $n = -2$ &nbsp; b) $m = -2$, $n = 1$ &nbsp; c) $m = \tfrac14$, $n = 0$ &nbsp; d) $m = 0$, $n = 4$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula la pendiente de la recta que pasa por a) $P(0, 1)$, $Q(2, 7)$ &nbsp; b) $P(-1, 4)$, $Q(3, -4)$ &nbsp; c) $P(2, 5)$, $Q(6, 5)$</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{2} = 3$ &nbsp; b) $\tfrac{-8}{4} = -2$ &nbsp; c) $0$, la recta es horizontal</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Plantea las ecuaciones de los dos taxis de las exploraciones. ¿Con cuántos kilómetros cuestan lo mismo? ¿Qué taxi coges para 5 km y cuál para 12 km?</p></div>
+            <div class="b-sol"><p>$a(x) = 2x + 4$ y $b(x) = 2{,}5x$. Igual de caros: $0{,}5x = 4$, es decir, con 8 km (20 €). Para 5 km es más barato B (12,50 € en lugar de 14 €); para 12 km, A (28 € en lugar de 30 €).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Cómo cambia la gráfica de $y = 2x + 1$ si a) aumentas $n$ a 4, b) cambias $m$ a $-2$, c) reduces $m$ a $0{,}5$?</p></div>
+            <div class="b-sol"><p>a) se desplaza en paralelo 3 hacia arriba &nbsp; b) se refleja respecto al eje y, ahora es decreciente &nbsp; c) más plana; el punto de corte $(0, 1)$ se mantiene</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Una señal indica una pendiente descendente del 8 %. Un carril bici baja 2,5 km (medidos en horizontal). ¿Cuántos metros de desnivel se pierden? Da una función para la altura si el camino empieza a 420 m de altitud.</p></div>
+            <div class="b-sol"><p>$0{,}08 \cdot 2500\,\text{m} = 200$ m. Altura tras $x$ metros: $h(x) = 420 - 0{,}08x$. Al final del camino estás a 220 m.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1,5" data-ph="m ="><p class="b-q-text">¿Pendiente de la recta que pasa por $A(1, 2)$ y $B(5, 8)$?</p><div class="b-sol"><p>$\tfrac64$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="km"><p class="b-q-text">¿Con cuántos kilómetros cuestan lo mismo los taxis A y B?</p><div class="b-sol"><p>$2x + 4 = 2{,}5x$</p></div></div>
+        <div class="b-q" data-ans="-2" data-ph="m ="><p class="b-q-text">¿Pendiente de la recta que pasa por $P(-1, 4)$ y $Q(3, -4)$?</p><div class="b-sol"><p>$\tfrac{-8}{4}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Ceros y ecuaciones de la recta" data-toc-k="2" data-toc-short="2 Ecuaciones">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">CAS · 4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Ceros y ecuaciones de la recta</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Una vela mide 20 cm y se consume 1,6 cm cada hora: $\ell(t) = 20 - 1{,}6t$. ¿Cuándo se habrá consumido?
+                Se busca el <b>cero</b>: $20 - 1{,}6t = 0$, es decir, $t = 12{,}5$ horas. En la figura es el punto en el que la recta toca el eje horizontal.</p></div></div>
+            <div data-widget="graph" data-fns='["20-1.6*x"]' data-labels='["ℓ"]' data-lat="[3]" data-x="0,14" data-y="0,22" data-pts="[[0,20],[12.5,0]]" data-xl="t en h" data-yl="ℓ en cm" data-h="220" data-aria="La longitud de la vela baja uniformemente de 20 cm a 0 en 12,5 horas"></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · CERO Y ECUACIÓN DE LA RECTA</div>
+                <div class="b-text">
+                    <p><b>Cero:</b> $mx + n = 0$ da $x_0 = -\dfrac{n}{m}$ (para $m \neq 0$).</p>
+                    <p><b>Punto y pendiente:</b> si se conocen $P(x_1, y_1)$ y $m$, entonces $n = y_1 - m \cdot x_1$.</p>
+                    <p><b>Dos puntos:</b> primero se calcula $m = \dfrac{y_2 - y_1}{x_2 - x_1}$ y después $n$ como arriba.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Comprobación:</b> sustituye los dos puntos en la ecuación obtenida. Los dos tienen que cumplirla.</p>
+            <p class="b-note"><b>Gráficamente:</b> el cero se puede leer en la gráfica, pero solo de forma aproximada. Calcular es más exacto.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">MÉTODO · UN ALGORITMO PARA LA RECTA QUE PASA POR DOS PUNTOS</div>
+        <div class="b-text"><p>Un algoritmo es una sucesión de pasos que puede ejecutar un ordenador. En palabras:</p></div>
+        <pre class="b-pre"><code>Entrada: x1, y1, x2, y2
+Si x1 = x2:
+    Salida "recta vertical, no es una función"
+Si no:
+    m := (y2 - y1) / (x2 - x1)
+    n := y1 - m * x1
+    Salida "y = m*x + n"</code></pre>
+        <div class="b-text"><p>En el CAS lo escribes como un pequeño programa con una instrucción condicional. Pruébalo con puntos cuya recta ya conozcas.</p></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · CERO</div>
+            <div class="b-text"><p>Halla algebraicamente el cero de $f(x) = 3x - 4{,}5$ y haz la comprobación.</p></div>
+            <div class="b-sol"><p>$3x - 4{,}5 = 0$, $\;3x = 4{,}5$, <span class="b-res">$x_0 = 1{,}5$</span>. Comprobación: $f(1{,}5) = 4{,}5 - 4{,}5 = 0$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · RECTA QUE PASA POR DOS PUNTOS</div>
+            <div class="b-text"><p>Una recta pasa por $A(2, 1)$ y $B(6, 7)$. Halla su ecuación.</p></div>
+            <div class="b-sol"><p>$m = \tfrac{7 - 1}{6 - 2} = 1{,}5$ y $n = 1 - 1{,}5 \cdot 2 = -2$, así que <span class="b-res">$y = 1{,}5x - 2$</span>.</p>
+                <p>Comprobación con $B$: $1{,}5 \cdot 6 - 2 = 7$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula los ceros: a) $f(x) = 4x - 8$ &nbsp; b) $g(x) = -3x + 6$ &nbsp; c) $h(x) = \tfrac12 x + 2$ &nbsp; d) $k(x) = 5$</p></div>
+            <div class="b-sol"><p>a) $2$ &nbsp; b) $2$ &nbsp; c) $-4$ &nbsp; d) ninguno, la recta es horizontal y está por encima del eje x</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Halla la ecuación de la recta a) con $m = 2$ que pasa por $P(1, 5)$ &nbsp; b) con $m = -3$ que pasa por $P(2, -1)$ &nbsp; c) que pasa por $A(0, 4)$ y $B(2, 0)$</p></div>
+            <div class="b-sol"><p>a) $n = 5 - 2 = 3$: $y = 2x + 3$ &nbsp; b) $n = -1 + 6 = 5$: $y = -3x + 5$ &nbsp; c) $m = -2$, $n = 4$: $y = -2x + 4$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>La batería de un móvil marca 100 % a las 8 h y 64 % a las 11 h. Supón que se descarga de manera uniforme. Plantea una función. ¿Cuándo estará vacía?</p></div>
+            <div class="b-sol"><p>$t$ en horas desde las 8 h: $m = \tfrac{64 - 100}{3} = -12$, así que $a(t) = 100 - 12t$. Vacía en $t = \tfrac{100}{12} \approx 8{,}3$, es decir, hacia las 16:20 h.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><span class="g-cas">CAS</span> Escribe el algoritmo del recuadro de método como programa para tu CAS. Pruébalo con $A(2, 1)$, $B(6, 7)$ y con $A(3, 1)$, $B(3, 5)$.</p></div>
+            <div class="b-sol"><p>Primera prueba: $y = 1{,}5x - 2$. Segunda prueba: los dos puntos están uno encima del otro en vertical y el programa avisa: «recta vertical, no es una función».</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Están los puntos $A(-2, -7)$, $B(1, -1)$ y $C(4, 5)$ sobre una recta? Justifícalo de dos maneras distintas.</p></div>
+            <div class="b-sol"><p>Manera 1: la pendiente de $A$ a $B$ es $\tfrac63 = 2$, y de $B$ a $C$ también $\tfrac63 = 2$. Manera 2: la recta que pasa por $A$ y $B$ es $y = 2x - 3$, y $C$ la cumple: $2 \cdot 4 - 3 = 5$. Sí.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="12,5" data-ph="horas"><p class="b-q-text">¿Después de cuántas horas se ha consumido la vela del principio?</p><div class="b-sol"><p>$20 : 1{,}6$</p></div></div>
+        <div class="b-q" data-ans="-2" data-ph="n ="><p class="b-q-text">¿Ordenada en el origen de la recta que pasa por $A(2, 1)$ y $B(6, 7)$?</p><div class="b-sol"><p>$1 - 1{,}5 \cdot 2$</p></div></div>
+        <div class="b-q" data-ans="-4" data-ph="x ="><p class="b-q-text">¿Cero de $h(x) = \tfrac12 x + 2$?</p><div class="b-sol"><p>$\tfrac12 x = -2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Regresión lineal" data-toc-k="3" data-toc-short="3 Regresión">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">CAS · HOJA DE CÁLCULO · 4 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Regresión lineal</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Los valores medidos de verdad casi nunca están exactamente sobre una recta: nunca se mide con total exactitud, y la realidad no es del todo uniforme.
+                Aun así, a menudo se ve que los puntos están <b>aproximadamente</b> sobre una recta. La recta que mejor encaja se llama <b>recta de regresión</b>.</p></div></div>
+            <div class="b-text"><p>La calculadora la determina de modo que las distancias verticales de los puntos a la recta sean en conjunto lo más pequeñas posible. Más exactamente: la suma de los
+                <b>cuadrados</b> de esas distancias se hace lo más pequeña posible. El procedimiento se llama método de los mínimos cuadrados.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · REGRESIÓN LINEAL</div>
+                <div class="b-text">
+                    <p>Si los puntos medidos están aproximadamente sobre una recta, la calculadora determina la <b>recta de regresión</b> $y = mx + n$.</p>
+                    <p>Las previsiones <b>entre</b> los valores medidos suelen ser buenas; muy <b>fuera</b> de ellos, a menudo falsas.</p>
+                    <p>Una relación «cuanto más …, más …» no demuestra todavía una <b>causa</b>.</p>
+                </div>
+            </div>
+            <div class="b-box b-methode">
+                <div class="b-box-title">MÉTODO · REGRESIÓN EN LA CALCULADORA</div>
+                <div class="b-text"><p><b>Hoja de cálculo:</b> los valores medidos en dos columnas, insertar un gráfico de dispersión, elegir «Agregar línea de tendencia» y «Presentar ecuación en el gráfico».
+                    O con fórmulas: <code>=PENDIENTE(B2:B8;A2:A8)</code> e <code>=INTERSECCION.EJE(B2:B8;A2:A8)</code>.</p>
+                    <p><b>CAS:</b> se introducen los valores en dos listas y se elige la regresión lineal, que a menudo se llama <code>LinRegMx</code>. La calculadora da $m$ y $n$.</p></div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>¿Por qué cuadrados?</b> Las distancias hacia arriba y hacia abajo se anularían al sumarlas. Los cuadrados nunca son negativos, y las desviaciones grandes cuentan especialmente.</p>
+            <p class="b-note"><b>¿Encaja bien?</b> Mira siempre la figura. Si los puntos están sobre un arco en lugar de sobre una recta, el modelo lineal no encaja.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · UNA RECTA ENTRE PUNTOS MEDIDOS</div>
+        <p class="b-help" style="margin:0 0 12px">Elige la serie de medidas «vela» y el modelo «lineal». Arrastra puntos sueltos y observa cómo reacciona la recta. Los demás modelos los conocerás en 9.º y 10.º curso.</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · LA VELA</div>
+            <div class="b-text"><p>Longitudes medidas de una vela, en cm, después de 0 a 6 horas: 20; 18,4; 16,9; 15,2; 13,8; 12,1; 10,6. Halla la recta de regresión. Según este modelo, ¿cuándo se habrá consumido la vela?</p></div>
+            <div class="b-sol"><p>La calculadora da <span class="b-res">$\ell(t) \approx -1{,}57t + 20{,}0$</span>.</p>
+                <p>Cero: $t \approx \tfrac{20{,}0}{1{,}57} \approx 12{,}7$ horas. La previsión es bastante segura, porque los puntos están muy bien alineados sobre la recta.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · ¿CUANTO MÁS, MÁS …?</div>
+            <div class="b-text"><p>En una ciudad, en verano suben las ventas de helados y el número de accidentes en el agua. Una recta de regresión encaja bien. ¿Significa eso que comer helado es peligroso?</p></div>
+            <div class="b-sol"><p><span class="b-res">No.</span> Las dos cosas dependen de la temperatura: los días de calor se comen más helados y se baña más gente.</p>
+                <p>Una recta que encaja bien muestra una relación, pero no una causa.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un dinamómetro de muelle se carga con pesas. Masa en g: 0; 50; 100; 150; 200. Longitud en cm: 10,0; 12,1; 13,9; 16,0; 18,1.
+            Dibuja los puntos, traza a ojo una recta entre ellos y da su ecuación.</p></div>
+            <div class="b-sol"><p>Aproximadamente $\ell = 0{,}04m + 10$ con $m$ en gramos: el muelle se alarga unos 4 cm por cada 100 g.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><span class="g-cas">CAS</span> Halla con el CAS o con la hoja de cálculo la recta de regresión del ejercicio 11. ¿Qué longitud esperas con 120 g y cuál con 2 kg? ¿Qué fiabilidad tienen las dos previsiones?</p></div>
+            <div class="b-sol"><p>$\ell \approx 0{,}0402m + 10{,}0$. Con 120 g, unos 14,8 cm: entre los valores medidos, bien. Con 2 kg saldrían 90,4 cm: muy fuera de ellos; el muelle se habría deformado hace mucho.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Para la estatura $h$ (en cm) y la talla de calzado $s$ de diez jóvenes se obtiene la recta de regresión $s = 0{,}3h - 13$. ¿Qué talla esperas con 170 cm? ¿Qué dice la recta de un bebé de 50 cm?</p></div>
+            <div class="b-sol"><p>$0{,}3 \cdot 170 - 13 = 38$. Para 50 cm saldría la talla 2. Es un disparate: 50 cm está muy fuera de los valores medidos.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>«Cuantos más bomberos intervienen en un incendio, mayores son los daños». ¿Qué falla en la conclusión «los bomberos causan daños»?</p></div>
+            <div class="b-sol"><p>Los incendios grandes provocan más intervenciones y más daños. El tamaño del incendio es la causa común.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><span class="g-cas">CAS</span> Algunos récords mundiales de los 100 m masculinos: 1968, 9,95 s; 1983, 9,93 s; 1991, 9,86 s; 1999, 9,79 s; 2008, 9,69 s; 2009, 9,58 s.
+            Halla la recta de regresión con $x$ = año. Según este modelo, ¿en qué año el récord sería de 0 segundos? ¿Qué aprendes de ello?</p></div>
+            <div class="b-sol"><p>Aproximadamente $y \approx -0{,}00835x + 26{,}43$: unos 0,08 s más rápido por década. Los 0 segundos se alcanzarían hacia el año 3167. Es un disparate: un modelo solo vale cerca de los datos.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="12,7" data-tol="0.1" data-ph="horas"><p class="b-q-text">Según la recta de regresión, ¿después de cuántas horas se ha consumido la vela del ejemplo 5? Con un decimal.</p><div class="b-sol"><p>$\tfrac{20{,}0}{1{,}57}$</p></div></div>
+        <div class="b-q" data-ans="38" data-ph="talla"><p class="b-q-text">¿Talla de calzado con 170 cm en el ejercicio 13?</p><div class="b-sol"><p>$51 - 13$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">¿Se puede usar la recta del muelle del ejercicio 12 para 2 kg?</p><div class="b-mc"><button>sí</button><button>no</button></div><div class="b-sol"><p>Está muy fuera de los valores medidos.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Relaciona: $y = 2x - 1$, $\;y = -x + 2$, $\;y = 0{,}5x$, $\;y = 3$ y las descripciones «horizontal», «pasa por el origen», «decreciente», «sube 2 por cada paso a la derecha».</p></div>
+            <div class="b-sol"><p>$2x - 1$: sube 2 · $-x + 2$: decreciente · $0{,}5x$: pasa por el origen · $3$: horizontal</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una bañera se vacía de manera uniforme. Después de 2 minutos aún contiene 140 l; después de 5 minutos, 80 l. ¿Cuánto contenía al principio y cuándo estará vacía?</p></div>
+            <div class="b-sol"><p>$m = \tfrac{80 - 140}{3} = -20$ litros por minuto, $V(t) = 180 - 20t$. Al principio 180 l; vacía tras 9 minutos.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Comprueba si $P(4, 9)$ está sobre la recta que pasa por $A(-1, -1)$ y $B(2, 5)$.</p></div>
+            <div class="b-sol"><p>$m = \tfrac63 = 2$, $n = -1 + 2 = 1$, así que $y = 2x + 1$. Para $x = 4$: $y = 9$. Sí, $P$ está sobre la recta.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Relacionar con el capítulo 1.2:</b> ¿para qué $x$ está la recta $y = 3x - 4$ por encima de la recta $y = x + 2$? Resuélvelo como inecuación e interpreta el resultado en la figura.</p></div>
+            <div class="b-sol"><p>$3x - 4 &gt; x + 2$ da $x &gt; 3$. Las rectas se cortan en $S(3, 5)$; a su derecha está arriba la recta con más pendiente.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Gauss y el planeta perdido" data-toc-k="X" data-toc-short="Gauss">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Gauss y el planeta perdido</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>El 1 de enero de 1801, el astrónomo <b>Giuseppe Piazzi</b> descubrió en Palermo un nuevo cuerpo celeste, <b>Ceres</b>. Solo pudo observarlo unas pocas semanas;
+                después desapareció en la luz del Sol. ¿Dónde volvería a aparecer? Con las pocas medidas, poco precisas, nadie podía decirlo.</p>
+            <p>El joven de 24 años <b>Carl Friedrich Gauss</b>, de Brunswick, calculó su órbita. El 31 de diciembre de 1801, el astrónomo Franz Xaver von Zach volvió a encontrar Ceres en Gotha
+                casi exactamente donde Gauss lo había predicho, y un día después también Heinrich Olbers en Bremen. Gauss se hizo famoso de la noche a la mañana.</p>
+            <p>Una herramienta de aquella época está hoy en cada calculadora: el <b>método de los mínimos cuadrados</b>. Adrien-Marie Legendre lo publicó en 1805,
+                y Gauss lo describió con detalle en 1809 en su libro sobre el movimiento de los cuerpos celestes. Exactamente así determina tu calculadora la recta de regresión.
+                Por cierto, hoy Ceres se cuenta entre los planetas enanos.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> C. F. Gauß: Theoria motus corporum coelestium in sectionibus conicis solem ambientium. Hamburgo 1809.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>RECTA</h4><p>$f(x) = mx + n$: $m$ pendiente, $n$ ordenada en el origen</p></div>
+        <div><p>Taxi: $k(x) = 2x + 4$</p></div></div>
+    <div class="b-rueck"><div><h4>COCIENTE INCREMENTAL</h4><p>$m = \tfrac{\Delta y}{\Delta x} = \tfrac{y_2 - y_1}{x_2 - x_1}$</p></div>
+        <div><p>$A(1, 2)$, $B(5, 8)$: $m = 1{,}5$</p></div></div>
+    <div class="b-rueck"><div><h4>CERO</h4><p>$mx + n = 0$, $\;x_0 = -\tfrac{n}{m}$</p></div>
+        <div><p>Vela $20 - 1{,}6t$: 12,5 h</p></div></div>
+    <div class="b-rueck"><div><h4>HALLAR LA ECUACIÓN</h4><p>$m$ a partir de dos puntos, después $n = y_1 - m x_1$</p></div>
+        <div><p>$y = 1{,}5x - 2$</p></div></div>
+    <div class="b-rueck"><div><h4>REGRESIÓN</h4><p>la mejor recta entre puntos medidos, no mucho más allá de los datos</p></div>
+        <div><p>Muelle con 2 kg: un disparate</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="-0,5" data-ph="m ="><p class="b-q-text">¿Pendiente de $y = -\tfrac12 x + 3$?</p><div class="b-sol"><p>El número que multiplica a $x$.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="x ="><p class="b-q-text">¿Cero de $y = -\tfrac12 x + 3$?</p><div class="b-sol"><p>$\tfrac12 x = 3$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="n ="><p class="b-q-text">¿Ordenada en el origen de la recta con $m = -3$ que pasa por $P(2, -1)$?</p><div class="b-sol"><p>$-1 + 6$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · APLICAR</div>
+            <div class="b-q" data-ans="9" data-ph="minutos"><p class="b-q-text">¿Después de cuántos minutos está vacía la bañera del ejercicio 17?</p><div class="b-sol"><p>$180 : 20$</p></div></div>
+            <div class="b-q" data-ans="200" data-ph="metros"><p class="b-q-text">¿Cuántos metros de desnivel se pierden en el ejercicio 5?</p><div class="b-sol"><p>$0{,}08 \cdot 2500$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">¿A partir de qué $x$ está $y = 3x - 4$ por encima de $y = x + 2$ (ejercicio 19)?</p><div class="b-sol"><p>$2x &gt; 6$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PARA EXPERIMENTAR</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DE ESTADÍSTICA</span><span class="b-lab-what">Traza tú mismo rectas de regresión (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="steigung" href="../../steigung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DE PENDIENTES</span><span class="b-lab-what">Perspectiva: la pendiente de una curva (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 8.º curso · Área de aprendizaje 3 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-es/geometrie.js"></script>
+<script src="../../js/buch-gy8.js"></script>
+<script src="../../js/buch-es/gy8.js"></script>
+</body>
+</html>
