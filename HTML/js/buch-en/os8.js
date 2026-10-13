@@ -146,8 +146,11 @@ window.BuchEN && BuchEN.add('os8', {
         ['Aufschrift auf dem Reifen: ', 'Marking on the tyre: '], [' (Breite in mm, dann Felgendurchmesser in mm)', ' (width in mm, then rim diameter in mm)']
     ],
     rule: [
-        // money: "12.5 €" (fmt writes the decimal point on English pages and drops the trailing zero) → "€12.50"; in TeX "12.5\,\text{€}" → "\text{€}12.50"
-        [/(?<![\d.,])(\d+)(?:\.(\d+))?[  ]€/g, (m, i, f) => '€' + i + (f ? '.' + (f.length === 1 ? f + '0' : f) : '')],
+        // money: "12.5 €" (fmt writes the decimal point on English pages and drops the trailing zero) → "€12.50"; in TeX "12.5\,\text{€}" → "\text{€}12.50".
+        // Whole numbers only when the string is just the amount (slider values "70 €"): sentences of gy6 and stochastik
+        // ("Taxi: 3 € Grundgebühr …") are pieces in their own files, which must still find "3 €"
+        [/^(\d+)(?:\.(\d+))?[  ]€$/, (m, i, f) => '€' + i + (f ? '.' + (f.length === 1 ? f + '0' : f) : '')],
+        [/(?<![\d.,])(\d+)\.(\d+)[  ]€/g, (m, i, f) => '€' + i + '.' + (f.length === 1 ? f + '0' : f)],
         [/(?<![\d.])(\d+)(?:\.(\d+))?\\,\\text\{€\}/g, (m, i, f) => '\\text{€}' + i + (f ? '.' + (f.length === 1 ? f + '0' : f) : '')],
         // TeX thousands with a thin space: 1\,000\,000 → 1{,}000{,}000 (after the decimal rule of js/buch-en.js)
         [/(?<=\d)\\,(?=\d{3}(?!\d))/g, '{,}'],
