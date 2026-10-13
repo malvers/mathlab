@@ -37,8 +37,8 @@
     // half of an ellipse: the front (lower) half or the back (upper) half
     const halfEll = (cx, cy, rx, ry, front, st) => '<path d="M' + f1(cx - rx) + ' ' + f1(cy) + ' A' + f1(rx) + ' ' + f1(ry) + ' 0 0 ' + (front ? 0 : 1) + ' ' + f1(cx + rx) + ' ' + f1(cy) + '" style="' + st + '"/>';
     const cm = (v, d) => texNum(v, d == null ? 2 : d) + '\\,\\text{cm}';
-    const euro = v => fmt(v, 2).replace(/,(\d)$/, ',$10') + ' €';
-    const euroT = v => texNum(v, 2).replace(/\{,\}(\d)$/, '{,}$10') + '\\,\\text{€}';
+    const euro = v => fmt(v, 2).replace(/(?<=[,.]\d)$/, '0') + ' €';
+    const euroT = v => texNum(v, 2).replace(/(?<=(?:\{,\}|\.)\d)$/, '0') + '\\,\\text{€}';
 
     /* ---------- the cover ---------- */
     W('titelbildos8', function (box) {
@@ -571,7 +571,7 @@
             T = TARIFE[S.k];
             S.A = T.A.slice(); S.B = T.B.slice();
             sl.innerHTML = '';
-            const e = v => fmt(v, 2).replace(/,(\d)$/, ',$10') + ' €';
+            const e = v => fmt(v, 2).replace(/(?<=[,.]\d)$/, '0') + ' €';
             R = [
                 range(sl, { label: 'Tarif A: Grundgebühr', min: 0, max: T.A[0] * 2 + T.step[0] * 20, step: T.step[0], value: S.A[0], fmt: e, onInput: v => { S.A[0] = v; render(); } }),
                 range(sl, { label: 'Tarif A: ' + T.per, min: T.step[1], max: 0.6, step: T.step[1], value: S.A[1], fmt: e, onInput: v => { S.A[1] = v; render(); } }),
@@ -585,7 +585,7 @@
         function render() {
             const [nA, mA] = S.A, [nB, mB] = S.B, fA = x => nA + mA * x, fB = x => nB + mB * x;
             const L = [{ fn: fA, color: 'lambda', label: 'A' }, { fn: fB, color: 'cyan', label: 'B', labelAt: T.xmax * 0.15 }];
-            const E = v => texNum(v, 2).replace(/\{,\}(\d)$/, '{,}$10');
+            const E = v => texNum(v, 2).replace(/(?<=(?:\{,\}|\.)\d)$/, '0');
             let t = '<p style="margin:0 0 6px">Tarif A: $y = ' + E(mA) + 'x + ' + E(nA) + '$ &nbsp;·&nbsp; Tarif B: $y = ' + E(mB) + 'x + ' + E(nB) + '$ &nbsp; ($x$ in ' + T.unit + ', $y$ in €)</p>';
             if (Math.abs(mA - mB) < 1e-9) {
                 t += '<p style="margin:0">Beide Tarife kosten gleich viel pro Einheit, die Geraden sind parallel. ' + (Math.abs(nA - nB) < 1e-9 ? 'Die Tarife sind gleich teuer.' : 'Tarif ' + (nA < nB ? 'A' : 'B') + ' ist immer günstiger.') + '</p>';
@@ -751,7 +751,7 @@
             if (!out) return;
             const A = a * b, Av = A * (1 + v / 100), pak = Math.ceil(Av / RAUM.pak - 1e-9), kBoden = pak * RAUM.pakPreis;
             const Aw = per * h - t * RAUM.tuer - f * RAUM.fenster, liter = Aw * RAUM.anstriche / RAUM.deckt, eimer = Math.ceil(liter / RAUM.eimer - 1e-9), kFarbe = eimer * RAUM.eimerPreis;
-            const E = v2 => texNum(v2, 2).replace(/\{,\}(\d)$/, '{,}$10') + '\\,\\text{€}';
+            const E = v2 => texNum(v2, 2).replace(/(?<=(?:\{,\}|\.)\d)$/, '0') + '\\,\\text{€}';
             out.innerHTML = '<div class="b-table-wrap"><table class="b-table g-tab">' +
                 '<tr><td>Bodenfläche</td><td>$' + texNum(a, 1) + ' \\cdot ' + texNum(b, 1) + ' = ' + texNum(A, 2) + '\\,\\text{m}^2$</td></tr>' +
                 '<tr><td>mit ' + v + ' % Verschnitt</td><td>$' + texNum(Av, 2) + '\\,\\text{m}^2$ → ' + pak + ' Pakete zu $' + texNum(RAUM.pak, 2) + '\\,\\text{m}^2$ → $' + E(kBoden) + '$</td></tr>' +
