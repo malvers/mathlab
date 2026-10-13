@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 11 avanzado · Capítulo 1.1 · Límites y continuidad | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Comportamiento en el infinito, límite en un punto, propiedades de los límites, funciones definidas a trozos, continuidad. Capítulo 1.1 del libro de texto interactivo Matemáticas · Gymnasium 11 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 11 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.1 · ÁREA DE APRENDIZAJE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.1 · ÁREA DE APRENDIZAJE 1 · AGOSTO · SEPTIEMBRE</p>
+            <h1>Límites y continuidad</h1>
+            <p class="b-hero-lead">Un té se enfría, pero nunca por debajo de la temperatura ambiente. Una función tiene un agujero y, aun así, se sabe exactamente qué valor le corresponde.
+                Una tarifa cambia el precio por kilómetro a los 5 km sin que la factura dé un salto. En el curso avanzado, «se acerca tanto como se quiera» se convierte en un
+                <b>concepto exacto</b>: aprendes la definición ε del <b>límite</b>, calculas con las propiedades de los límites y estudias la <b>continuidad</b>,
+                también en funciones definidas a trozos.</p>
+            <div class="b-chips"><span class="b-chip">15 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">3 PÁGINAS DE PRÁCTICA</span><span class="b-chip">DEMOSTRAR</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["(2*x+1)/(x-1)","2"]' data-labels='["f(x) = (2x + 1)/(x − 1)","y = 2"]' data-lat="[3.2,-5.4]" data-x="-6,8" data-y="-6,9" data-h="240" data-aria="Una función racional con un polo en 1 y la asíntota horizontal y = 2"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>determinar el comportamiento de funciones en el infinito, también con la definición ε, y dar asíntotas horizontales y oblicuas</li>
+                <li>calcular límites en un punto con el método de h, transformando expresiones y con las <b>propiedades de los límites</b></li>
+                <li>entender la definición ε-δ del límite y aplicarla en casos sencillos</li>
+                <li>estudiar la <b>continuidad</b> en un punto, en un intervalo y en el dominio, también en funciones definidas a trozos, y escribir correctamente los intervalos</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="0,001" data-ph="Número"><p class="b-q-text">Escribe $\tfrac{1}{1000}$ como número decimal.</p><div class="b-sol"><p>0,001</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Cómo se escribe $x^2 - 9$ como producto?</p><div class="b-mc"><button>$(x - 3)^2$</button><button>$(x - 3)(x + 3)$</button><button>$(x - 9)(x + 1)$</button></div><div class="b-sol"><p>Suma por diferencia (tercera identidad notable).</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="Número"><p class="b-q-text">¿A qué número se acerca la sucesión $a_n = 20 + \tfrac{70}{n}$ para $n$ grande?</p><div class="b-sol"><p>A 20, porque $\tfrac{70}{n}$ se hace tan pequeño como se quiera (10.º curso).</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Qué ocurre con $2^{-x}$ cuando $x$ se hace cada vez mayor?</p><div class="b-mc"><button>Se hace tan pequeño como se quiera, pero sigue siendo positivo.</button><button>Se hace negativo.</button><button>Crece sin límite.</button></div><div class="b-sol"><p>$2^{-x} = \tfrac{1}{2^x}$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">¿CUÁNTO SE ENFRÍA EL TÉ?</div>
+            <div class="b-text"><p>Un té está a 90 °C y la habitación a 20 °C. Un modelo es $T(t) = 20 + 70 \cdot e^{-0{,}1t}$ ($t$ en minutos).</p>
+                <ul><li>Calculad $T(10)$, $T(30)$, $T(60)$ y $T(120)$.</li><li>¿A partir de cuándo se desvía la temperatura menos de 0,1 grados de 20 °C? ¿Y menos de 0,001 grados?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">EL AGUJERO EN LA GRÁFICA</div>
+            <div class="b-text"><p>$f(x) = \tfrac{x^2 - 4}{x - 2}$ no está definida en $x = 2$.</p>
+                <ul><li>Calculad $f(1{,}9)$, $f(1{,}99)$, $f(1{,}999)$ y $f(2{,}1)$, $f(2{,}01)$, $f(2{,}001)$.</li><li>¿Cómo de cerca de 2 tiene que estar $x$ para que $f(x)$ se desvíe menos de 0,01 de 4?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TAXI Y APARCAMIENTO</div>
+            <div class="b-text"><p>Un taxi cuesta 4 € de bajada de bandera y 2,20 € por kilómetro en los primeros 5 km; después, 1,80 € por kilómetro. Un aparcamiento cuesta 2 € por cada hora o fracción.</p>
+                <ul><li>Dibujad los dos precios como función de la distancia y del tiempo de aparcamiento, respectivamente.</li><li>¿Dónde salta el precio y dónde no? ¿Cómo se reconoce en la expresión?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Comportamiento en el infinito" data-toc-k="1" data-toc-short="1 Infinito">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">5 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Comportamiento en el infinito</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A los 10 minutos el té está a unos 45,8 °C, al cabo de una hora a 20,2 °C y al cabo de dos horas a 20,0004 °C. La distancia a 20 es $70 \cdot e^{-0{,}1t}$.
+                Se hace menor que 0,1 en cuanto $t > 10 \ln 700 \approx 65{,}5$, y menor que 0,001 a partir de $t \approx 111{,}6$. Para <b>cualquier</b> cota, por pequeña que sea, hay un instante así.
+                Eso es exactamente lo que define el límite.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · LÍMITE PARA x → ∞</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to \infty} f(x) = g$ significa: para <b>todo</b> $\varepsilon > 0$ existe un punto $x_\varepsilon$ tal que $|f(x) - g| < \varepsilon$ para todo $x > x_\varepsilon$.
+                        Entonces la recta $y = g$ es una <b>asíntota</b> horizontal. Para $x \to -\infty$, análogamente.</p>
+                    <p><b>Propiedades de los límites:</b> si existen $\lim f = a$ y $\lim h = b$, entonces $\lim (f \pm h) = a \pm b$, $\lim (f \cdot h) = a \cdot b$ y $\lim \tfrac{f}{h} = \tfrac{a}{b}$ para $b \neq 0$.</p>
+                    <p><b>¿Quién gana?</b> Polinómica: el sumando de mayor potencia. Racional: comparar los grados del numerador y del denominador.
+                        $e^x$ crece más deprisa que cualquier potencia $x^n$, y cualquier potencia $x^r$ con $r > 0$, más deprisa que $\ln x$: $\;x^n e^{-x} \to 0$, $\;\tfrac{\ln x}{x^r} \to 0$.</p>
+                    <p><b>Asíntota oblicua:</b> si $f(x) - (mx + n) \to 0$, entonces $y = mx + n$ es una asíntota. En las funciones racionales con grado del numerador = grado del denominador + 1, la da la división de polinomios.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Truco de cálculo:</b> dividir numerador y denominador entre la mayor potencia del denominador y aplicar después las propiedades de los límites: $\tfrac{3x^2 - x}{x^2 + 4} = \tfrac{3 - \frac1x}{1 + \frac{4}{x^2}} \to 3$.</p>
+            <p class="b-note"><b>«→ ∞» no es un límite:</b> si $f(x)$ supera cualquier cota, se escribe $f(x) \to \infty$, pero entonces la función es <b>divergente a infinito</b>. $\sin x$ no tiene ningún límite para $x \to \infty$.</p>
+            <p class="b-note"><b>División de polinomios con el CAS:</b> orden <code>propFrac</code> o <code>expand</code>, según la calculadora.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · TRAS LA PISTA DE LOS LÍMITES</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una función y una dirección. Con el deslizador te alejas hacia fuera o te acercas al punto.</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · DEMOSTRACIÓN CON ε</div>
+            <div class="b-text"><p>Demuestra $\lim\limits_{x \to \infty} \tfrac{2x + 1}{x} = 2$ con la definición. ¿A partir de qué $x$ es la distancia menor que 0,001?</p></div>
+            <div class="b-sol"><p>$\left|\tfrac{2x + 1}{x} - 2\right| = \tfrac{1}{x}$ para $x > 0$. Para un $\varepsilon > 0$ cualquiera se elige $x_\varepsilon = \tfrac{1}{\varepsilon}$: para $x > x_\varepsilon$ es $\tfrac1x < \varepsilon$.</p>
+                <p>Para $\varepsilon = 0{,}001$: <span class="b-res">a partir de $x > 1000$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · ASÍNTOTA OBLICUA</div>
+            <div class="b-text"><p>Determina el comportamiento de $f(x) = \tfrac{x^2 + 1}{x}$ para $x \to \pm\infty$.</p></div>
+            <div class="b-sol"><p>$f(x) = x + \tfrac1x$. El sumando $\tfrac1x$ tiende a 0, así que $f(x) - x \to 0$.</p>
+                <p><span class="b-res">Asíntota oblicua $y = x$</span>; $f(x) \to \infty$ para $x \to \infty$ y $f(x) \to -\infty$ para $x \to -\infty$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula el límite para $x \to \infty$: a) $\tfrac{3x + 1}{x}$ &nbsp; b) $\tfrac{4x}{x^2 + 1}$ &nbsp; c) $\tfrac{2x^2 - 5}{x^2 + 1}$ &nbsp; d) $5 - 2e^{-x}$ &nbsp; e) $\tfrac{\ln x}{x}$</p></div>
+            <div class="b-sol"><p>a) 3 &nbsp; b) 0 &nbsp; c) 2 &nbsp; d) 5 &nbsp; e) 0, la potencia le gana al logaritmo</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Cómo se comportan las funciones para $x \to \infty$ y $x \to -\infty$? a) $x^3 - 100x^2$ &nbsp; b) $-2x^4 + x$ &nbsp; c) $x^2 e^{x}$</p></div>
+            <div class="b-sol"><p>a) $\infty$ y $-\infty$, respectivamente &nbsp; b) las dos veces $-\infty$ &nbsp; c) $\infty$ y límite 0, respectivamente (para $x \to -\infty$ gana $e^x \to 0$)</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Demuestra $\lim\limits_{x \to \infty} \left(3 - \tfrac{2}{x^2}\right) = 3$ con la definición. Da $x_\varepsilon$ para $\varepsilon = 0{,}01$.</p></div>
+            <div class="b-sol"><p>$\left|3 - \tfrac{2}{x^2} - 3\right| = \tfrac{2}{x^2} < \varepsilon \iff x^2 > \tfrac{2}{\varepsilon} \iff x > \sqrt{\tfrac{2}{\varepsilon}}$ (para $x > 0$). Para $\varepsilon = 0{,}01$: $x_\varepsilon = \sqrt{200} \approx 14{,}14$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina con la división de polinomios la asíntota oblicua de $f(x) = \tfrac{2x^2 + 3x - 1}{x + 1}$.</p></div>
+            <div class="b-sol"><p>$(2x^2 + 3x - 1) : (x + 1) = 2x + 1 - \tfrac{2}{x + 1}$. Asíntota $y = 2x + 1$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>«La función exponencial le gana a cualquier potencia»: ¿también $1{,}1^x$ a $x^{10}$? Determina con el CAS a partir de qué número entero $x \geq 2$ se cumple $1{,}1^x > x^{10}$. Justifica el límite $\lim\limits_{x \to \infty} \tfrac{x^{10}}{1{,}1^x}$.</p></div>
+            <div class="b-hint"><p>Compara $\ln(1{,}1^x) = x \ln 1{,}1$ con $\ln(x^{10}) = 10 \ln x$.</p></div>
+            <div class="b-sol"><p>A partir de $x = 686$. Motivo: $x \ln 1{,}1$ crece linealmente y $10 \ln x$ solo logarítmicamente; su diferencia tiende a $\infty$. Por tanto, $\tfrac{x^{10}}{1{,}1^x} = e^{10\ln x - x \ln 1{,}1} \to 0$. La función exponencial tarda mucho aquí, pero gana seguro.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="3" data-ph="Límite"><p class="b-q-text">Calcula $\lim\limits_{x \to \infty} \tfrac{6x + 1}{2x - 3}$.</p><div class="b-sol"><p>$\tfrac{6}{2} = 3$</p></div></div>
+        <div class="b-q" data-ans="1000" data-ph="x ="><p class="b-q-text">$\left|\tfrac{2x + 1}{x} - 2\right| < 0{,}001$ para todo $x > x_\varepsilon$. ¿Cuál es el menor $x_\varepsilon$ posible?</p><div class="b-sol"><p>$\tfrac{1}{x} < 0{,}001 \iff x > 1000$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué asíntota tiene $f(x) = \tfrac{x^2 + 1}{x}$ para $x \to \infty$?</p><div class="b-mc"><button>$y = 1$</button><button>$y = 0$</button><button>$y = x$</button></div><div class="b-sol"><p>$f(x) = x + \tfrac1x$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Límite en un punto" data-toc-k="2" data-toc-short="2 En un punto">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">5 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Límite en un punto</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Para $x \neq 2$ es $\tfrac{x^2 - 4}{x - 2} = x + 2$. La gráfica es la recta $y = x + 2$ con un agujero en $(2, 4)$.
+                Para que $f(x)$ se desvíe menos de 0,01 de 4, tiene que ser $|x + 2 - 4| = |x - 2| < 0{,}01$. Así que aquí a cada $\varepsilon$ le corresponde $\delta = \varepsilon$.
+                No importa el valor de la función en el propio punto, solo los valores cercanos.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · LÍMITE EN UN PUNTO</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to x_0} f(x) = g$ significa: para todo $\varepsilon > 0$ existe un $\delta > 0$ tal que $|f(x) - g| < \varepsilon$ para todo $x$ con $0 < |x - x_0| < \delta$.</p>
+                    <p><b>Límites laterales:</b> $\lim\limits_{x \to x_0^-} f(x)$ (por la izquierda) y $\lim\limits_{x \to x_0^+} f(x)$ (por la derecha). El límite existe si y solo si existen los dos y son iguales.</p>
+                    <p><b>Método de h:</b> calcular $\lim\limits_{h \to 0^+} f(x_0 - h)$ y $\lim\limits_{h \to 0^+} f(x_0 + h)$. Las <b>propiedades de los límites</b> valen en un punto igual que en el infinito.</p>
+                    <p><b>Herramientas ante «$\tfrac00$»:</b> factorizar y simplificar, multiplicar por la expresión conjugada de la raíz, usar límites conocidos como $\lim\limits_{x \to 0} \tfrac{\sin x}{x} = 1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Funciones definidas a trozos:</b> a la izquierda y a la derecha del punto de unión valen expresiones distintas. Entonces hay que calcular por cada lado, con la expresión que corresponda.</p>
+            <p class="b-note"><b>Sin límite:</b> $\tfrac{|x|}{x}$ tiene en 0 límite −1 por la izquierda y 1 por la derecha. $\sin\tfrac1x$ oscila cerca de 0 infinitas veces entre −1 y 1.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · PARA CADA ε, UN δ</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una función y estrecha la franja naranja. El widget busca el mayor $\delta$ para el que la franja azul cabe entera dentro de la naranja.</p>
+        <div data-widget="epsdelta"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · MÉTODO DE h</div>
+            <div class="b-text"><p>Calcula $\lim\limits_{x \to 3} \tfrac{x^2 - 9}{x - 3}$ con el método de h.</p></div>
+            <div class="b-sol"><p>$f(3 + h) = \tfrac{(3 + h)^2 - 9}{h} = \tfrac{6h + h^2}{h} = 6 + h \to 6$ para $h \to 0$; por la izquierda, con $3 - h$, igual: $6 - h \to 6$.</p>
+                <p><span class="b-res">Límite 6</span>, aunque $f(3)$ no está definido.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · MULTIPLICAR POR EL CONJUGADO</div>
+            <div class="b-text"><p>Calcula $\lim\limits_{x \to 0} \tfrac{\sqrt{x + 4} - 2}{x}$.</p></div>
+            <div class="b-sol"><p>Multiplicar numerador y denominador por $\sqrt{x + 4} + 2$: $\tfrac{(x + 4) - 4}{x(\sqrt{x + 4} + 2)} = \tfrac{1}{\sqrt{x + 4} + 2}$.</p>
+                <p>Ahora sustituir (propiedades de los límites): <span class="b-res">$\tfrac{1}{2 + 2} = \tfrac14$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula el límite: a) $\lim\limits_{x \to 1} \tfrac{x^2 - 1}{x - 1}$ &nbsp; b) $\lim\limits_{x \to 2} \tfrac{x^3 - 8}{x - 2}$ &nbsp; c) $\lim\limits_{x \to -3} \tfrac{x^2 + 3x}{x + 3}$</p></div>
+            <div class="b-hint"><p>b) $x^3 - 8 = (x - 2)(x^2 + 2x + 4)$</p></div>
+            <div class="b-sol"><p>a) $x + 1 \to 2$ &nbsp; b) $x^2 + 2x + 4 \to 12$ &nbsp; c) $x \to -3$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula los límites laterales en $x_0 = 0$: a) $\tfrac{1}{x}$ &nbsp; b) $\tfrac{|x|}{x}$ &nbsp; c) $f(x) = x + 1$ para $x < 0$ y $f(x) = e^x$ para $x \geq 0$</p></div>
+            <div class="b-sol"><p>a) $-\infty$ e $\infty$ (no hay límite) &nbsp; b) −1 y 1 (no hay límite) &nbsp; c) los dos valen 1; el límite es 1</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula $\lim\limits_{x \to 9} \tfrac{\sqrt{x} - 3}{x - 9}$.</p></div>
+            <div class="b-sol"><p>$x - 9 = (\sqrt{x} - 3)(\sqrt{x} + 3)$, así que $\tfrac{1}{\sqrt{x} + 3} \to \tfrac16$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula para $f(x) = x^3$ el límite $\lim\limits_{h \to 0} \tfrac{f(2 + h) - f(2)}{h}$. ¿Qué significa en la gráfica? (Adelanto del capítulo 1.2)</p></div>
+            <div class="b-sol"><p>$\tfrac{(2 + h)^3 - 8}{h} = \tfrac{12h + 6h^2 + h^3}{h} = 12 + 6h + h^2 \to 12$. Es la pendiente de la tangente a la gráfica en el punto $(2, 8)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Demuestra con la definición ε-δ: $\lim\limits_{x \to 2} (3x + 1) = 7$. Da un $\delta$ adecuado para cada $\varepsilon$.</p></div>
+            <div class="b-sol"><p>$|3x + 1 - 7| = 3|x - 2|$. Este número es menor que $\varepsilon$ en cuanto $|x - 2| < \tfrac{\varepsilon}{3}$. Por tanto, $\delta = \tfrac{\varepsilon}{3}$ cumple lo pedido, y además para todo $\varepsilon > 0$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="6" data-ph="Límite"><p class="b-q-text">Calcula $\lim\limits_{x \to 3} \tfrac{x^2 - 9}{x - 3}$.</p><div class="b-sol"><p>$x + 3 \to 6$</p></div></div>
+        <div class="b-q" data-ans="1/4" data-ph="Fracción"><p class="b-q-text">Calcula $\lim\limits_{x \to 0} \tfrac{\sqrt{x + 4} - 2}{x}$.</p><div class="b-sol"><p>$\tfrac14$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">¿Cuándo existe $\lim\limits_{x \to x_0} f(x)$?</p><div class="b-mc"><button>cuando $f(x_0)$ está definido</button><button>cuando existen los dos límites laterales y son iguales</button><button>cuando $f$ no tiene ningún hueco en $x_0$</button></div><div class="b-sol"><p>El valor de la función en el punto no influye.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Continuidad" data-toc-k="3" data-toc-short="3 Continuidad">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">5 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Continuidad</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En el taxi, el precio hasta 5 km es $4 + 2{,}2x$ y después $15 + 1{,}8(x - 5)$. En $x = 5$, las dos expresiones dan 15 €: el precio no salta, solo cambia su pendiente.
+                El aparcamiento, en cambio, salta 2 € en cada hora completa. La diferencia tiene nombre: la función del taxi es <b>continua</b> y la del aparcamiento no.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · CONTINUIDAD</div>
+                <div class="b-text">
+                    <p>$f$ es <b>continua en el punto</b> $x_0 \in D_f$ si $\lim\limits_{x \to x_0} f(x)$ existe y es igual a $f(x_0)$. Si no, $x_0$ es una discontinuidad.</p>
+                    <p>$f$ es <b>continua en un intervalo</b> si es continua en cada punto del intervalo (en los extremos cerrados, lateralmente), y es <b>continua</b> si es continua en cada punto de su dominio.</p>
+                    <p>Las sumas, productos, cocientes (donde el denominador no se anula) y composiciones de funciones continuas son continuos. Por eso son continuas todas las funciones polinómicas, $e^x$, $\sin x$, $\cos x$, $\sqrt{x}$ en $[0, \infty)$, $\ln x$ en $(0, \infty)$ y las funciones racionales en su dominio.</p>
+                    <p><b>Intervalos:</b> $[a, b]$ con los extremos, $(a, b)$ sin ellos, $[a, \infty)$, y $\mathbb{R} \setminus \{0\}$ para «todos los números reales menos el 0».</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Atención:</b> $\tfrac1x$ es continua, porque es continua en cada punto de su dominio. El punto 0 ni siquiera pertenece a él.</p>
+            <p class="b-note"><b>Teorema de los valores intermedios:</b> si $f$ es continua en $[a, b]$ y $f(a)$ y $f(b)$ tienen signos distintos, entonces $f$ tiene un cero entre ellos. En él se basa la bisección de la optativa.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · HACERLA CONTINUA TROZO A TROZO</div>
+        <p class="b-help" style="margin:0 0 12px">Cambia el parámetro hasta que los dos trozos encajen. Los círculos abiertos no pertenecen a la gráfica; el punto blanco es el valor de la función.</p>
+        <div data-widget="stetigkeit"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · DETERMINAR UN PARÁMETRO</div>
+            <div class="b-text"><p>¿Para qué $a$ es continua $f(x) = x^2 + 1$ para $x \leq 1$ y $f(x) = ax - 1$ para $x > 1$?</p></div>
+            <div class="b-sol"><p>Por la izquierda: $\lim\limits_{x \to 1^-} f(x) = f(1) = 2$. Por la derecha: $\lim\limits_{x \to 1^+} (ax - 1) = a - 1$.</p>
+                <p>Es continua si y solo si $a - 1 = 2$: <span class="b-res">$a = 3$</span>. En todos los demás puntos, $f$ es continua de todos modos.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · TIPOS DE DISCONTINUIDAD</div>
+            <div class="b-text"><p>Estudia $g(x) = \tfrac{x^2 - 1}{x - 1}$ para $x \neq 1$ y $g(1) = 3$ en el punto 1.</p></div>
+            <div class="b-sol"><p>$\lim\limits_{x \to 1} g(x) = \lim\limits_{x \to 1} (x + 1) = 2 \neq 3 = g(1)$.</p>
+                <p><span class="b-res">Discontinuidad evitable</span>: con $g(1) = 2$, $g$ sería continua. Otros tipos: salto (límites laterales distintos) y polo.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Continua o no? Si es discontinua, indica el tipo. a) $\tfrac{x^2 - 4}{x - 2}$ con $f(2) = 0$ &nbsp; b) $\tfrac{1}{(x - 1)^2}$ con $f(1) = 0$ &nbsp; c) $|x|$ en 0 &nbsp; d) precio del aparcamiento en 1 h</p></div>
+            <div class="b-sol"><p>a) evitable (límite 4) &nbsp; b) polo &nbsp; c) continua; un pico está permitido &nbsp; d) salto (de 2 € a 4 €)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da el dominio con intervalos o conjuntos: a) $\sqrt{x - 2}$ &nbsp; b) $\tfrac1x$ &nbsp; c) $\ln(x + 1)$ &nbsp; d) $\tfrac{1}{x^2 - 9}$</p></div>
+            <div class="b-sol"><p>a) $[2, \infty)$ &nbsp; b) $\mathbb{R} \setminus \{0\}$ &nbsp; c) $(-1, \infty)$ &nbsp; d) $\mathbb{R} \setminus \{-3, 3\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina $a$ y $b$ de modo que $f$ sea continua en todo $\mathbb{R}$: $f(x) = x + a$ para $x < 0$, $\;f(x) = x^2 + 1$ para $0 \leq x \leq 2$, $\;f(x) = bx - 1$ para $x > 2$.</p></div>
+            <div class="b-sol"><p>En 0: $a = 1$. En 2: $5 = 2b - 1$, así que $b = 3$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Demuestra con el teorema de los valores intermedios que $f(x) = x^3 + x - 1$ tiene un cero en $[0, 1]$. Divide el intervalo por la mitad dos veces.</p></div>
+            <div class="b-sol"><p>$f(0) = -1 < 0 < 1 = f(1)$ y $f$ es continua. $f(0{,}5) = -0{,}375$: cero en $[0{,}5;\, 1]$. $f(0{,}75) \approx 0{,}172$: cero en $[0{,}5;\, 0{,}75]$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Es continua en 0 la función $f(x) = x \cdot \sin\tfrac1x$ para $x \neq 0$ y $f(0) = 0$? Justifícalo sin calculadora.</p></div>
+            <div class="b-hint"><p>¿Cuánto puede valer como máximo $|\sin\tfrac1x|$?</p></div>
+            <div class="b-sol"><p>Sí. $|f(x)| = |x| \cdot |\sin\tfrac1x| \leq |x|$, así que $f(x)$ está entre $-|x|$ y $|x|$, y ambos tienden a 0. Por tanto, $\lim\limits_{x \to 0} f(x) = 0 = f(0)$ (acotación). Con $\delta = \varepsilon$ funciona también la definición.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="3" data-ph="a ="><p class="b-q-text">$f(x) = x^2 + 1$ para $x \leq 1$, $f(x) = ax - 1$ para $x > 1$. ¿Para qué $a$ es continua $f$?</p><div class="b-sol"><p>$a - 1 = 2$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="Número"><p class="b-q-text">¿Qué valor tiene que tener $g(1)$ para que $g(x) = \tfrac{x^2 - 1}{x - 1}$ sea continua en 1?</p><div class="b-sol"><p>Límite $1 + 1 = 2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">¿Es $f(x) = \tfrac1x$ una función continua?</p><div class="b-mc"><button>Sí, es continua en cada punto de su dominio.</button><button>No, tiene una discontinuidad en 0.</button><button>Solo para $x > 0$.</button></div><div class="b-sol"><p>El 0 no pertenece al dominio.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una población crece según $N(t) = \tfrac{500}{1 + 9e^{-0{,}5t}}$. Da $N(0)$, el límite para $t \to \infty$ y la asíntota.</p></div>
+            <div class="b-sol"><p>$N(0) = 50$. $e^{-0{,}5t} \to 0$, así que $N(t) \to 500$: asíntota $N = 500$, el límite de saturación.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con 10.º curso:</b> calcula $\left(1 + \tfrac1n\right)^n$ para $n = 10$, 100, 1000 y $10^6$. ¿A qué número se acerca la sucesión?</p></div>
+            <div class="b-sol"><p>2,594; 2,705; 2,717; $2{,}718\,28$. El límite es el número de Euler $e \approx 2{,}718\,28$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>La electricidad cuesta 0,40 € por kWh hasta 1000 kWh al año. Por encima vale una tarifa con cuota fija $G$ y 0,30 € por kWh para todo el consumo. ¿Para qué $G$ es continuo el precio anual como función del consumo?</p></div>
+            <div class="b-sol"><p>En 1000 kWh: $0{,}40 \cdot 1000 = G + 0{,}30 \cdot 1000$, así que $G = 100$ €.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Calcula $\lim\limits_{x \to \infty} \left(\sqrt{x^2 + ax} - x\right)$ en función de $a$.</p></div>
+            <div class="b-hint"><p>Multiplica y divide por $\sqrt{x^2 + ax} + x$ y después divide entre $x$.</p></div>
+            <div class="b-sol"><p>$\tfrac{x^2 + ax - x^2}{\sqrt{x^2 + ax} + x} = \tfrac{a}{\sqrt{1 + \frac{a}{x}} + 1} \to \tfrac{a}{2}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Cómo llegó la ε al análisis" data-toc-k="X" data-toc-short="ε y δ">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Cómo llegó la ε al análisis</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>A finales del siglo XVII, Newton y Leibniz calculaban con magnitudes «infinitamente pequeñas» que unas veces eran cero y otras no. Funcionaba sorprendentemente bien,
+                pero era lógicamente atacable. Augustin-Louis Cauchy explicó en 1821, en su libro de texto para la École polytechnique de París, el límite y la continuidad con palabras:
+                una magnitud tiene un límite si se acerca a él «tanto como se quiera».</p>
+            <p>La formulación actual con $\varepsilon$ y $\delta$ se debe a Karl Weierstrass. En sus lecciones de Berlín hacia 1861, que solo se conocen por los apuntes de sus estudiantes,
+                definió la continuidad así: para cualquier número $\varepsilon$, por pequeño que sea, existe una cota $\delta$ para la variación del argumento. Eduard Heine publicó
+                las ideas en 1872. Desde entonces, el análisis ya no necesita magnitudes infinitamente pequeñas, solo desigualdades.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuentes:</b> Augustin-Louis Cauchy: «Cours d'analyse de l'École royale polytechnique», París 1821 · Eduard Heine: «Die Elemente der Functionenlehre», Journal für die reine und angewandte Mathematik 74 (1872).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>LÍMITE PARA x → ∞</h4><p>Para todo $\varepsilon > 0$, un $x_\varepsilon$ con $|f(x) - g| < \varepsilon$ para $x > x_\varepsilon$. Asíntota $y = g$.</p></div>
+        <div><p>$\tfrac{2x + 1}{x} \to 2$, $x_\varepsilon = \tfrac1\varepsilon$</p></div></div>
+    <div class="b-rueck"><div><h4>COMPARAR CRECIMIENTOS</h4><p>$\ln x$ frente a $x^r$ frente a $e^x$: gana el de la derecha. Asíntota oblicua por división de polinomios.</p></div>
+        <div><p>$\tfrac{2x^2 + 3x - 1}{x + 1} = 2x + 1 - \tfrac{2}{x + 1}$</p></div></div>
+    <div class="b-rueck"><div><h4>LÍMITE EN UN PUNTO</h4><p>Para todo $\varepsilon > 0$, un $\delta > 0$. Lateralmente, método de h, propiedades de los límites.</p></div>
+        <div><p>$\lim\limits_{x \to 0} \tfrac{\sqrt{x + 4} - 2}{x} = \tfrac14$</p></div></div>
+    <div class="b-rueck"><div><h4>CONTINUIDAD</h4><p>$\lim\limits_{x \to x_0} f(x) = f(x_0)$. Discontinua: salto, polo, discontinuidad evitable.</p></div>
+        <div><p>$x^2 + 1$ y $ax - 1$ en la unión 1: $a = 3$</p></div></div>
+    <div class="b-rueck"><div><h4>INTERVALOS</h4><p>$[a, b]$, $(a, b)$, $[a, \infty)$, $\mathbb{R} \setminus \{0\}$. Teorema de los valores intermedios para funciones continuas.</p></div>
+        <div><p>$D$ de $\ln(x + 1)$: $(-1, \infty)$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="2" data-ph="Límite"><p class="b-q-text">Calcula $\lim\limits_{x \to \infty} \tfrac{2x^2 - 5}{x^2 + 1}$.</p><div class="b-sol"><p>$\tfrac21 = 2$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="Límite"><p class="b-q-text">Calcula $\lim\limits_{x \to 2} \tfrac{x^3 - 8}{x - 2}$.</p><div class="b-sol"><p>$x^2 + 2x + 4 \to 12$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$f(x) = \tfrac{|x|}{x}$ tiene en 0 …</p><div class="b-mc"><button>límite 0.</button><button>límite 1.</button><button>ningún límite.</button></div><div class="b-sol"><p>Por la izquierda −1, por la derecha 1.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="14,14" data-tol="0.01" data-ph="x ="><p class="b-q-text">¿A partir de qué $x$ se cumple $\tfrac{2}{x^2} < 0{,}01$ (con dos decimales)?</p><div class="b-sol"><p>$\sqrt{200} \approx 14{,}14$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="b ="><p class="b-q-text">$f(x) = x^2 + 1$ para $0 \leq x \leq 2$ y $f(x) = bx - 1$ para $x > 2$. ¿Para qué $b$ es $f$ continua en 2?</p><div class="b-sol"><p>$5 = 2b - 1$</p></div></div>
+            <div class="b-q" data-ans="100" data-ph="Euros"><p class="b-q-text">Tarifa eléctrica del ejercicio 18: ¿cuánto tiene que valer la cuota fija?</p><div class="b-sol"><p>$400 = G + 300$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-grenzwerte-unendlich.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LÍMITES EN EL INFINITO</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-grenzwert-stelle.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LÍMITE EN UN PUNTO</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-stetigkeit.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CONTINUIDAD</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 11.º curso, curso avanzado · Área de aprendizaje 1 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-es/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-es/gy11lk.js"></script>
+</body>
+</html>
