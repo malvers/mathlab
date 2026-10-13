@@ -826,6 +826,22 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Leistungskurs, Grundkurs | curso avanzado, curso básico | start page once: "curso avanzado (Leistungskurs)"; title "Matemáticas · Gymnasium 12 · Curso avanzado" |
+| Rotationskörper, Kreisscheibe | cuerpo de revolución, disco | volume $\pi\int f(x)^2\,\mathrm{d}x$ |
+| Torricellis Trompete, Gabriels Horn | cuerpo de Torricelli, trompeta de Gabriel | |
+| unbegrenzte Fläche, uneigentliches Integral | región no acotada, área como límite | the book avoids "integral impropia" as the German avoids the term; widget uneigentlich: "límite superior b", "límite inferior a" |
+| stetige Zufallsgröße, Dichtefunktion, Verteilungsfunktion | variable aleatoria continua, función de densidad, función de distribución | |
+| Glockenkurve (Gauß) | campana de Gauss | |
+| standardisieren | tipificar | $Z = \tfrac{X - \mu}{\sigma}$ |
+| Stetigkeitskorrektur, Laplace-Bedingung | corrección por continuidad, condición de Laplace | $\sigma > 3$ |
+| Satz von de Moivre-Laplace | de Moivre-Laplace | |
+| Normalverteilung $N(\mu; \sigma^2)$ | distribución normal $N(\mu, \sigma^2)$ | comma, as $\varphi_{\mu,\sigma}$; rule in js/buch-es/gy12lk.js; $B(n;\ p)$ keeps the semicolon |
+| Simpsonregel | regla de Simpson | |
+| Hilfsebene | plano auxiliar | |
+| maximaler Sehwinkel | ángulo de visión máximo | Regiomontanus, chapter 9.1 |
+| Ebenenschar, Trägergerade, Ebenenbüschel | familia de planos, recta soporte, haz de planos | |
+| Polstelle, Asymptote | polo, asíntota | |
+| Intervalle $[0; 2]$ in widget labels | $[0, 2]$ | rule in js/buch-es/gy12lk.js |
 
 ## Added by mathefos11-es (Lovelace)
 
