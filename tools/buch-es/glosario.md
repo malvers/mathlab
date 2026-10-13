@@ -446,6 +446,53 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Gymnasium (Klasse 5–12) | Gymnasium | start page: «el centro de secundaria alemán que lleva al Abitur; en Sajonia va del 5.º al 12.º curso» |
+| Wahlbereich, Kapitel W | Optativa, capítulo OP | as in mathe11-es |
+| Runde 1 · Kopfrechnen / Runde 2 · mit Stift und Papier | RONDA 1 · CÁLCULO MENTAL / RONDA 2 · CON LÁPIZ Y PAPEL | GY 5 test rounds |
+| Mehr ausprobieren | MÁS PARA PROBAR (EN ALEMÁN) | heading above the lab cards |
+| data-ph Zahl, Anzahl | número, cantidad | |
+| Stellenwerttafel, Stelle, Ziffer | tabla de valores posicionales, posición, cifra | column heads U, D, C, UM, DM, CM, UMi, DMi, CMi, MMi; d, c, m |
+| Einer, Zehner, Hunderter, Tausender, Zehntausender | unidades, decenas, centenas, unidades de millar, decenas de millar | "redondear a las centenas" |
+| Milliarde, Billion | mil millones, billón | the long scale, as in German |
+| Zahlenstrahl, Einteilung | recta numérica, escala | |
+| Vorgänger, Nachfolger | anterior, siguiente | |
+| Überschlag | estimación | |
+| Rechengesetze: Vertauschungs-, Verbindungs-, Verteilungsgesetz | propiedades conmutativa, asociativa, distributiva | |
+| Vorrangregeln, Punkt vor Strich | jerarquía de las operaciones, multiplicar y dividir antes que sumar y restar | |
+| Summand, Minuend, Subtrahend, Dividend, Quotient | sumando, minuendo, sustraendo, dividendo, cociente | |
+| Potenz, Basis, Exponent, Quadratzahl | potencia, base, exponente, cuadrado | "dos elevado a cinco" |
+| Probe (Division) | comprobación | |
+| Teiler, Vielfaches, Teilermenge $T_{12}$ | divisor, múltiplo, conjunto de divisores $D_{12}$ | the letter changes with the word |
+| Teilbarkeitsregeln, Quersumme | criterios de divisibilidad, suma de las cifras | |
+| Sieb des Eratosthenes, Primfaktorzerlegung, Primzahlzwillinge | criba de Eratóstenes, descomposición en factores primos, números primos gemelos | |
+| ggT, kgV | máximo común divisor, mínimo común múltiplo | |
+| Zähler, Nenner, Stammbruch | numerador, denominador, fracción unitaria | |
+| echter / unechter Bruch, gemischte Zahl | fracción propia / impropia, número mixto | |
+| kürzen, erweitern, vollständig gekürzt | simplificar, amplificar, fracción irreducible | |
+| Zehnerbruch, Zehntel, Hundertstel, Tausendstel | fracción decimal, décimas, centésimas, milésimas | |
+| Kommaverschiebung | desplazar la coma | |
+| arithmetisches Mittel, Mittelwert | media aritmética, media | |
+| Koordinatensystem, Ursprung, Strecke, Strahl | sistema de coordenadas, origen, segmento, semirrecta | |
+| Schenkel, Scheitel | lados, vértice | the widget letter S becomes V |
+| spitz, recht, stumpf, gestreckt, überstumpf, Voll-, Nullwinkel | agudo, recto, obtuso, llano, cóncavo, completo, nulo | |
+| Neben-, Scheitel-, Stufen-, Wechselwinkel | adyacentes, opuestos por el vértice, correspondientes, alternos | |
+| Geodreieck | escuadra con transportador | |
+| achsensymmetrisch, punktsymmetrisch | con simetría axial, con simetría central | eje / centro de simetría |
+| Verschiebung, Drehung, Spiegelung, Bildfigur, A′ | traslación, giro, reflexión, figura imagen, «A prima» | |
+| Umlaufsinn | sentido de recorrido | |
+| Flächeninhalt, Umfang $u$ | área, perímetro $u$ | the letter u stays (same answers, widgets); explained once in 4.1 |
+| Ar, Hektar | área (a), hectárea (ha) | |
+| Quader, Würfel (Körper), Ecken, Kanten, Flächen | ortoedro, cubo, vértices, aristas, caras | |
+| Schrägbild, Körpernetz | perspectiva caballera, desarrollo plano | |
+| Grundriss, Vorderansicht, Seitenansicht | planta, alzado, perfil | |
+| Oberflächeninhalt $O$, Hohlmaße | área total $O$, unidades de capacidad | |
+| Einheitentreppe, Umrechnungszahl, Maßzahl | escalera de unidades, factor de conversión, número | |
+| Fermi-Aufgabe | problema de Fermi | |
+| Additionssystem, Stellenwertsystem | sistema aditivo, sistema posicional | |
+| Zweier-, Fünfer-, Zwanzigersystem | sistema binario, sistema de base cinco, sistema vigesimal | |
+| Maya: Punkt, Strich, Muschel | punto, raya, concha | |
+| Ägypter: Strich, Fessel, Seil, Lotusblüte | trazo, asa, cuerda, flor de loto | |
+| Linienbrett, Rechenpfennige, bündeln, Übertrag | tablero de líneas, fichas, agrupar, llevada | |
 
 ## Added by mathegy6-es (Einstein)
 
