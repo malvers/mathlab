@@ -81,7 +81,7 @@
             'Zuordnung': 'Correspondencia', 'Platz 1': 'Asiento 1', 'Platz 2': 'Asiento 2', 'Platz 3': 'Asiento 3', 'Platz 4': 'Asiento 4',
             'Welche Art von Zuordnung ist das?': '¿Qué tipo de correspondencia es?',
             'mehrdeutig': 'no unívoca', 'eindeutig': 'unívoca', 'eineindeutig': 'biunívoca', 'eindeutig, aber nicht eineindeutig': 'unívoca, pero no biunívoca',
-            'Richtig:': 'Correcto:', 'Nicht ganz.': 'No exactamente.',
+            'Richtig:': 'Correcto:', 'Nicht ganz.': 'No del todo.',
             // zufall6
             'Münze': 'Moneda', 'Würfel': 'Dado', 'Versuch': 'Experimento',
             'Kopf': 'Cara', 'Zahl': 'Cruz', 'Rot': 'Rojo',
