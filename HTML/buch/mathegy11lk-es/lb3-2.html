@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 11 avanzado · Capítulo 3.2 · Dependencia lineal y rectas | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Dependencia e independencia lineal, rectas en forma paramétrica, posición relativa de dos rectas. Capítulo 3.2 del libro de texto interactivo Matemáticas · Gymnasium 11 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 11 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 3.2 · ÁREA DE APRENDIZAJE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 3.2 · ÁREA DE APRENDIZAJE 3 · MARZO</p>
+            <h1>Dependencia lineal y rectas</h1>
+            <p class="b-hero-lead">¿Cuándo apuntan tres flechas en direcciones «realmente distintas» y cuándo están en un mismo plano? Esta pregunta sobre la <b>dependencia lineal</b> la respondes con un sistema de ecuaciones.
+                Con la misma idea <b>demuestras</b> teoremas de geometría, por ejemplo que los puntos medios de los lados de cualquier cuadrilátero forman un paralelogramo, incluso en el espacio.
+                Después describes <b>rectas</b> con un punto y una dirección y decides cuál es la posición relativa de dos rectas. En el espacio hay para ello un caso más que en el plano.</p>
+            <div class="b-chips"><span class="b-chip">10 SESIONES</span><span class="b-chip">4 LECCIONES</span><span class="b-chip">3D</span><span class="b-chip">DEMOSTRACIONES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>comprobar si unos vectores son <b>linealmente dependientes</b> o independientes con el método de Gauss e interpretar el resultado geométricamente</li>
+                <li>calcular puntos de división y baricentros y demostrar teoremas con una <b>cadena cerrada de vectores</b></li>
+                <li>escribir rectas en <b>forma paramétrica</b>, hacer la prueba de pertenencia y hallar los puntos de traza; en el plano, también en <b>forma sin parámetros</b></li>
+                <li>determinar la <b>posición relativa</b> de dos rectas y calcular puntos de corte, también con parámetros en las ecuaciones</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Cuánto vale $\overrightarrow{AB}$ para $A(1, 0, 2)$ y $B(3, 4, 2)$?</p><div class="b-mc"><button>$(2, 4, 0)$</button><button>$(4, 4, 4)$</button><button>$(-2, -4, 0)$</button></div><div class="b-sol"><p>Punta menos origen.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">Resuelve $1 + 2t = 5$.</p><div class="b-sol"><p>$t = 2$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Resuelve $x + y = 3$ y $x - y = 1$. ¿Cuánto vale $x$?</p><div class="b-sol"><p>Sumando: $2x = 4$, así que $x = 2$, $y = 1$.</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Son paralelos $(2, -4, 6)$ y $(-1, 2, -3)$?</p><div class="b-mc"><button>no</button><button>sí</button><button>solo si tienen la misma longitud</button></div><div class="b-sol"><p>El primero es $(-2)$ veces el segundo.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">¿A TODAS PARTES CON DOS FLECHAS?</div>
+            <div class="b-text"><p>En el plano solo se pueden encadenar múltiplos de $(1, 2)$ y $(1, -1)$.</p>
+                <ul><li>¿Llegáis al punto $(5, 1)$? ¿A cualquier punto?</li><li>¿Qué cambia si en lugar de $(1, -1)$ tomáis la flecha $(2, 4)$? ¿Cuántas flechas hacen falta en el espacio?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">PUNTOS MEDIOS DE LOS LADOS</div>
+            <div class="b-text"><p>Dibujad un cuadrilátero cualquiera, también uno torcido o con una esquina hacia dentro, y unid los puntos medios de lados contiguos.</p>
+                <ul><li>¿Qué tipo de cuadrilátero sale? Probadlo con un cuadrilátero de alambre cuyos vértices no estén en un mismo plano.</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LÁPICES EN EL ESPACIO</div>
+            <div class="b-text"><p>Sostened dos lápices en el aire como modelos de rectas.</p>
+                <ul><li>Encontrad todas las posiciones posibles. ¿Cuál existe solo en el espacio y no sobre la mesa?</li></ul></div>
+            <a class="b-lab" data-lab="koerper" href="../../koerper.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CUERPOS</span><span class="b-lab-what">Comparar aristas del cubo (en alemán)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Dependencia lineal" data-toc-k="1" data-toc-short="1 Dependencia">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Dependencia e independencia lineal</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con $\vec{a} = (1, 2)$ y $\vec{b} = (1, -1)$ se llega a cualquier punto del plano, por ejemplo $(5, 1) = 2\vec{a} + 3\vec{b}$.
+                Con $\vec{a}$ y $2\vec{a}$, en cambio, solo a los puntos de una recta, porque la segunda flecha no aporta ninguna dirección nueva: las dos son <b>linealmente dependientes</b>.
+                En el espacio hacen falta tres vectores que no estén en un mismo plano para llegar a cualquier punto. Un cuarto ya no aporta nada nuevo.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · DEPENDENCIA LINEAL</div>
+                <div class="b-text">
+                    <p>Una <b>combinación lineal</b> de $\vec{a}$, $\vec{b}$, $\vec{c}$ es un vector $r\vec{a} + s\vec{b} + t\vec{c}$ con números reales $r$, $s$, $t$.</p>
+                    <p>Los vectores se llaman <b>linealmente independientes</b> si $r\vec{a} + s\vec{b} + t\vec{c} = \vec{o}$ se cumple <b>solo</b> para $r = s = t = 0$. Si no, se llaman <b>linealmente dependientes</b>; entonces al menos uno se puede escribir como combinación lineal de los demás.</p>
+                    <p><b>Comprobar:</b> $r\vec{a} + s\vec{b} + t\vec{c} = \vec{o}$ es un sistema de ecuaciones homogéneo. Si el método de Gauss lleva a la matriz identidad, los vectores son independientes.</p>
+                    <p><b>Geométricamente:</b> dos vectores dependientes ⟺ paralelos (colineales); tres vectores dependientes ⟺ están en un mismo plano (coplanarios). Cuatro vectores del espacio son siempre dependientes.</p>
+                    <p>Tres vectores independientes forman una <b>base</b> del espacio: cualquier vector se puede escribir de una única manera como combinación lineal de ellos.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Prueba rápida para dos vectores:</b> ¿es cada coordenada de uno el mismo múltiplo de la del otro? $(2, 4, -6) = 2 \cdot (1, 2, -3)$: paralelos.</p>
+            <p class="b-note"><b>¿Tres puntos en una recta?</b> Comprueba si $\overrightarrow{AB}$ y $\overrightarrow{AC}$ son colineales.</p>
+            <p class="b-note"><b>¿Por qué única?</b> Si hubiera dos representaciones, su diferencia sería una combinación lineal igual a $\vec{o}$ con números que no son todos cero. Eso contradice la independencia.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · TRES VECTORES</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta tres vectores o elige un ejemplo. El widget muestra el sistema de ecuaciones, decide sobre la dependencia y colorea con más intensidad el plano de $\vec{a}$ y $\vec{b}$ cuando $\vec{c}$ está en él.</p>
+        <div data-widget="linabh3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · TRES VECTORES CON GAUSS</div>
+            <div class="b-text"><p>¿Son linealmente independientes $\begin{pmatrix} 1 \\ 1 \\ 0 \end{pmatrix}$, $\begin{pmatrix} 0 \\ 1 \\ 1 \end{pmatrix}$, $\begin{pmatrix} 1 \\ 0 \\ 1 \end{pmatrix}$?</p></div>
+            <div class="b-sol"><p>$r + t = 0$, $r + s = 0$, $s + t = 0$. De las dos primeras, $t = -r$ y $s = -r$; después, $-2r = 0$.</p>
+                <p>Solo $r = s = t = 0$: <span class="b-res">linealmente independientes</span>, una base del espacio.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · CON PARÁMETRO</div>
+            <div class="b-text"><p>¿Para qué $t$ son linealmente dependientes $\begin{pmatrix} 1 \\ 0 \\ 1 \end{pmatrix}$, $\begin{pmatrix} 0 \\ 1 \\ 1 \end{pmatrix}$, $\begin{pmatrix} 1 \\ 1 \\ t \end{pmatrix}$?</p></div>
+            <div class="b-sol"><p>Los dos primeros no son paralelos. Son dependientes si el tercero es combinación lineal de ellos: $r = 1$ de la primera fila, $s = 1$ de la segunda, y entonces $t = r + s = 2$.</p>
+                <p><span class="b-res">$t = 2$</span>; para cualquier otro $t$, los tres son independientes.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Son paralelos los vectores? a) $(2, 4, -6)$ y $(1, 2, -3)$ &nbsp; b) $(1, 2, 3)$ y $(2, 4, 5)$ &nbsp; c) $(2, -4, 6)$ y $(-1, 2, -3)$</p></div>
+            <div class="b-sol"><p>a) sí &nbsp; b) no, $2 \cdot 3 \neq 5$ &nbsp; c) sí, de sentido contrario</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Están $A(1, 2, 3)$, $B(2, 4, 5)$ y $C(4, 8, 9)$ en una recta? ¿Para qué $r$ es $(3, r, 6)$ paralelo a $(1, 2, 2)$?</p></div>
+            <div class="b-sol"><p>$\overrightarrow{AB} = (1, 2, 2)$, $\overrightarrow{AC} = (3, 6, 6) = 3\overrightarrow{AB}$: sí. $r = 6$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Escribe $(4, 5, 6)$ como combinación lineal de la base del ejemplo 1.</p></div>
+            <div class="b-sol"><p>$r + t = 4$, $r + s = 5$, $s + t = 6$; sumando: $r + s + t = 7{,}5$. Así que $s = 3{,}5$, $t = 2{,}5$, $r = 1{,}5$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Son linealmente dependientes $(1, 2, 0)$, $(0, 1, 3)$ y $(2, 5, 3)$? Si lo son, da una combinación lineal igual a $\vec{o}$ en la que no todos los números sean cero.</p></div>
+            <div class="b-sol"><p>Sí: $2 \cdot (1, 2, 0) + (0, 1, 3) = (2, 5, 3)$, así que $2\vec{a} + \vec{b} - \vec{c} = \vec{o}$. Ningún par de vectores es paralelo y, sin embargo, los tres están en un mismo plano.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Justifica: cuatro vectores del espacio son siempre linealmente dependientes. Pista: escribe $r\vec{a} + s\vec{b} + t\vec{c} + u\vec{d} = \vec{o}$ como sistema de ecuaciones.</p></div>
+            <div class="b-sol"><p>Son tres ecuaciones con cuatro incógnitas. El método de Gauss deja al menos una incógnita libre; si se elige distinta de cero, se obtiene una solución en la que no todos los números son cero.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="6" data-ph="r ="><p class="b-q-text">¿Para qué $r$ es $(3, r, 6)$ paralelo a $(1, 2, 2)$?</p><div class="b-sol"><p>Factor 3: $r = 6$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">¿Para qué $t$ son linealmente dependientes $(1, 0, 1)$, $(0, 1, 1)$ y $(1, 1, t)$?</p><div class="b-sol"><p>$t = 2$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Tres vectores del espacio son linealmente dependientes. ¿Qué significa eso geométricamente?</p><div class="b-mc"><button>Tienen la misma longitud.</button><button>Están en un mismo plano.</button><button>Son perpendiculares entre sí.</button></div><div class="b-sol"><p>Son coplanarios.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Razones de división y demostraciones" data-toc-k="2" data-toc-short="2 Demostraciones">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Razones de división y demostraciones con vectores</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Los puntos medios de los lados de un cuadrilátero $ABCD$ forman siempre un paralelogramo. Con vectores se demuestra enseguida: del punto medio de $AB$ al punto medio de $BC$ lleva
+                $\tfrac{1}{2}(\vec{b} + \vec{c}) - \tfrac{1}{2}(\vec{a} + \vec{b})$, es decir, $\tfrac{1}{2}(\vec{c} - \vec{a})$, y exactamente el mismo vector lleva del punto medio de $DA$ al punto medio de $CD$.
+                En ningún momento se ha usado que los cuatro vértices estén en un mismo plano. Así que el teorema vale también para cuadriláteros en el espacio.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PUNTOS DE DIVISIÓN Y DEMOSTRACIONES</div>
+                <div class="b-text">
+                    <p><b>Punto de división:</b> $T$ divide $AB$ en la razón $m : n$ si $\vec{t} = \vec{a} + \tfrac{m}{m + n}\overrightarrow{AB}$. <b>Punto medio:</b> $\vec{m} = \tfrac{1}{2}(\vec{a} + \vec{b})$.</p>
+                    <p><b>Baricentro</b> de un triángulo: $\vec{s} = \tfrac{1}{3}(\vec{a} + \vec{b} + \vec{c})$. Divide cada mediana en la razón $2 : 1$, contando desde el vértice.</p>
+                    <p><b>Cadena cerrada de vectores:</b> expresa el mismo vector por dos caminos mediante dos vectores linealmente independientes $\vec{a}$, $\vec{b}$. Como la representación es única, los coeficientes coinciden (<b>comparación de coeficientes</b>). Eso da un sistema de ecuaciones para las razones de división desconocidas.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Teorema de Varignon:</b> lleva el nombre de Pierre Varignon (1654–1722); su demostración apareció en 1731 en los «Élémens de mathématique», después de su muerte (fuente: MacTutor History of Mathematics, St Andrews).</p>
+            <p class="b-note"><b>Demostrar en lugar de medir:</b> un dibujo muestra un caso; una demostración con vectores vale para todos los cuadriláteros a la vez.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · PUNTOS MEDIOS EN EL ESPACIO</div>
+        <p class="b-help" style="margin:0 0 12px">Mueve los vértices, también fuera del plano, o elige un ejemplo. Las dos flechas rosas entre los puntos medios son siempre el mismo vector $\tfrac{1}{2}(\vec{c} - \vec{a})$.</p>
+        <div data-widget="varignon3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · PUNTO DE DIVISIÓN Y BARICENTRO</div>
+            <div class="b-text"><p>$A(1, 0, 0)$, $B(0, 3, 0)$, $C(2, 0, 6)$. Determina el baricentro y el punto $T$ que divide $AB$, desde $A$, en la razón $1 : 2$.</p></div>
+            <div class="b-sol"><p>$\vec{s} = \tfrac{1}{3}\begin{pmatrix} 3 \\ 3 \\ 6 \end{pmatrix}$, así que $S(1, 1, 2)$.</p>
+                <p>$\vec{t} = \vec{a} + \tfrac{1}{3}\overrightarrow{AB} = \begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix} + \tfrac{1}{3}\begin{pmatrix} -1 \\ 3 \\ 0 \end{pmatrix}$, <span class="b-res">$T\!\left(\tfrac{2}{3}, 1, 0\right)$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · EL BARICENTRO DIVIDE 2 : 1</div>
+            <div class="b-text"><p>Demuestra con una cadena cerrada de vectores: las medianas desde $A$ y desde $B$ se cortan en un punto $S$ que divide a las dos en la razón $2 : 1$.</p></div>
+            <div class="b-sol"><p>Con $\vec{a} = \overrightarrow{AB}$, $\vec{b} = \overrightarrow{AC}$: $\overrightarrow{AS} = r \cdot \tfrac{1}{2}(\vec{a} + \vec{b})$ y también $\overrightarrow{AS} = \vec{a} + s\left(\tfrac{1}{2}\vec{b} - \vec{a}\right)$.</p>
+                <p>Comparando en $\vec{a}$: $\tfrac{r}{2} = 1 - s$; en $\vec{b}$: $\tfrac{r}{2} = \tfrac{s}{2}$. Así que $r = s$ y $\tfrac{3r}{2} = 1$: <span class="b-res">$r = s = \tfrac{2}{3}$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$M(1, 1, 1)$ es el punto medio de $A(3, 0, -1)$ y $B$. Determina $B$. ¿Qué punto divide $AB$, desde $A$, en la razón $3 : 1$?</p></div>
+            <div class="b-sol"><p>$\vec{b} = 2\vec{m} - \vec{a} = (-1, 2, 3)$. $\vec{t} = \vec{a} + \tfrac{3}{4}\overrightarrow{AB} = (3, 0, -1) + \tfrac{3}{4}(-4, 2, 4) = (0;\, 1{,}5;\, 2)$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Los vértices de un cuadrilátero alabeado son $A(0, 0, 0)$, $B(4, 0, 0)$, $C(4, 4, 2)$, $D(0, 4, -2)$. Determina los cuatro puntos medios de los lados y demuestra que forman un paralelogramo.</p></div>
+            <div class="b-sol"><p>$(2, 0, 0)$, $(4, 2, 1)$, $(2, 4, 0)$, $(0, 2, -1)$. Del primero al segundo y del cuarto al tercero hay en ambos casos $(2, 2, 1)$. Los dos lados miden 3, y los otros también: es incluso un rombo, porque las diagonales $AC$ y $BD$ tienen la misma longitud.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Demuestra con vectores: el segmento que une los puntos medios de dos lados de un triángulo es paralelo al tercer lado y mide la mitad.</p></div>
+            <div class="b-sol"><p>Puntos medios de $AC$ y $BC$: $\tfrac{1}{2}(\vec{b} + \vec{c}) - \tfrac{1}{2}(\vec{a} + \vec{c}) = \tfrac{1}{2}(\vec{b} - \vec{a}) = \tfrac{1}{2}\overrightarrow{AB}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Demuestra con una cadena cerrada de vectores: las diagonales de un paralelogramo se cortan en su punto medio.</p></div>
+            <div class="b-hint"><p>Toma $\vec{a} = \overrightarrow{AB}$, $\vec{b} = \overrightarrow{AD}$ y ve por dos caminos de $A$ al punto de corte $S$.</p></div>
+            <div class="b-sol"><p>$\overrightarrow{AS} = r(\vec{a} + \vec{b})$ y $\overrightarrow{AS} = \vec{a} + s(\vec{b} - \vec{a})$. Comparando: $r = 1 - s$ y $r = s$, así que $r = s = \tfrac{1}{2}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>En el triángulo $ABC$, $P$ divide el lado $BC$ en la razón $1 : 1$ y $Q$ divide el lado $AC$ en la razón $2 : 1$ (desde $A$). ¿En qué razón se dividen mutuamente $AP$ y $BQ$?</p></div>
+            <div class="b-sol"><p>$\overrightarrow{AX} = r \cdot \tfrac{1}{2}(\vec{a} + \vec{b}) = \vec{a} + s\left(\tfrac{2}{3}\vec{b} - \vec{a}\right)$. Comparando: $\tfrac{r}{2} = 1 - s$, $\tfrac{r}{2} = \tfrac{2s}{3}$. De ahí, $s = \tfrac{3}{5}$, $r = \tfrac{4}{5}$: $AP$ queda dividido en la razón $4 : 1$ y $BQ$ en la razón $3 : 2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2" data-ph="z ="><p class="b-q-text">¿Qué coordenada $z$ tiene el baricentro de $A(1, 0, 0)$, $B(0, 3, 0)$, $C(2, 0, 6)$?</p><div class="b-sol"><p>$S(1, 1, 2)$</p></div></div>
+        <div class="b-q" data-ans="2/3" data-ph="r ="><p class="b-q-text">¿Con qué factor $r$ se cumple $\overrightarrow{AS} = r \cdot \overrightarrow{AM_a}$ para el baricentro $S$ y el punto medio $M_a$ de $BC$? Da una fracción.</p><div class="b-sol"><p>$r = \tfrac{2}{3}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">¿Qué aprovecha la comparación de coeficientes en la cadena cerrada de vectores?</p><div class="b-mc"><button>La representación mediante dos vectores linealmente independientes es única.</button><button>Todos los vectores tienen la misma longitud.</button><button>Los vectores son perpendiculares.</button></div><div class="b-sol"><p>La unicidad de la combinación lineal.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Rectas en forma paramétrica" data-toc-k="3" data-toc-short="3 Recta">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Rectas en forma paramétrica</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un avión está en el instante $t = 0$ en $(0, 0, 1)$ (datos en km) y recorre cada minuto $(6;\, 8;\, 0{,}5)$. Al cabo de $t$ minutos está en el punto con vector de posición
+                $\vec{x} = \begin{pmatrix} 0 \\ 0 \\ 1 \end{pmatrix} + t \cdot \begin{pmatrix} 6 \\ 8 \\ 0{,}5 \end{pmatrix}$; al cabo de 2 minutos, en $(12, 16, 2)$, y al cabo de 6 minutos, a 4 km de altura.
+                Si $t$ recorre todos los números reales, se obtienen todos los puntos de una recta.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · RECTAS</div>
+                <div class="b-text">
+                    <p><b>Forma paramétrica:</b> $g\colon \vec{x} = \vec{p} + t \cdot \vec{u}$ con el <b>vector de posición</b> $\vec{p}$ de un punto base y el <b>vector director</b> $\vec{u} \neq \vec{o}$, $t \in \mathbb{R}$. Por $A$ y $B$: $\vec{x} = \vec{a} + t \cdot \overrightarrow{AB}$; el segmento $AB$ corresponde a $0 \leq t \leq 1$.</p>
+                    <p><b>Prueba de pertenencia:</b> si las tres ecuaciones de las coordenadas dan el mismo $t$, el punto está en la recta. <b>Puntos de traza:</b> puntos de corte con los planos coordenados, p. ej., con el plano $xy$ a partir de $z = 0$.</p>
+                    <p><b>Forma sin parámetros en el plano:</b> eliminar $t$ de las dos ecuaciones de las coordenadas; queda $ax + by = c$. En el espacio, una ecuación así con $z$ describe un plano; allí una recta necesita <b>dos</b> ecuaciones (capítulo 3.3).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Muchas ecuaciones, una recta:</b> cualquier punto de la recta sirve como punto base, y cualquier múltiplo no nulo del vector director sirve como dirección.</p>
+            <p class="b-note"><b>Movimiento:</b> si $t$ es el tiempo, $|\vec{u}|$ es la velocidad. En el ascenso, $\sqrt{36 + 64 + 0{,}25} \approx 10{,}01$ km por minuto, es decir, unos 601 km/h.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · UNA RECTA EN EL ESPACIO</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta el punto base y el vector director, mueve el punto con el parámetro y haz la prueba de pertenencia para $Q$. El widget muestra también los puntos de traza.</p>
+        <div data-widget="gerade3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · PRUEBA DE PERTENENCIA Y PUNTO DE TRAZA</div>
+            <div class="b-text"><p>$g\colon \vec{x} = \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix} + t \begin{pmatrix} 2 \\ 0 \\ -1 \end{pmatrix}$. ¿Está $P(5, 2, 1)$ en $g$? ¿Dónde atraviesa $g$ el plano $xy$?</p></div>
+            <div class="b-sol"><p>$P$: $1 + 2t = 5$, $2 = 2$, $3 - t = 1$ dan siempre $t = 2$, así que sí.</p>
+                <p>$z = 3 - t = 0$ da $t = 3$: <span class="b-res">$S_{xy}(7, 2, 0)$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · SIN PARÁMETROS EN EL PLANO</div>
+            <div class="b-text"><p>Da $g\colon \vec{x} = \begin{pmatrix} 1 \\ 2 \end{pmatrix} + t \begin{pmatrix} 2 \\ 1 \end{pmatrix}$ en el plano sin parámetros.</p></div>
+            <div class="b-sol"><p>$x = 1 + 2t$, $y = 2 + t$. De la segunda, $t = y - 2$; en la primera: $x = 1 + 2(y - 2)$.</p>
+                <p><span class="b-res">$x - 2y = -3$</span>; como función, $y = \tfrac{1}{2}x + \tfrac{3}{2}$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Escribe una ecuación de la recta: a) por $A(1, 0, 2)$ y $B(3, 4, 2)$ &nbsp; b) el eje $z$ &nbsp; c) por $(0, 2, 3)$, paralela al eje $x$</p></div>
+            <div class="b-sol"><p>a) $\vec{x} = (1, 0, 2) + t(2, 4, 0)$ &nbsp; b) $\vec{x} = t(0, 0, 1)$ &nbsp; c) $\vec{x} = (0, 2, 3) + t(1, 0, 0)$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula todos los puntos de traza de $\vec{x} = (2, 1, 4) + t(1, 1, -2)$.</p></div>
+            <div class="b-sol"><p>$xy$: $t = 2$, $(4, 3, 0)$; $xz$: $t = -1$, $(1, 0, 6)$; $yz$: $t = -2$, $(0, -1, 8)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>El ascenso de la introducción: ¿dónde está el avión al cabo de 5 minutos? ¿Cuándo alcanza 4 km de altura? ¿Qué parte de la recta recorre en los 10 primeros minutos?</p></div>
+            <div class="b-sol"><p>$(30;\, 40;\, 3{,}5)$; $1 + 0{,}5t = 4$ da $t = 6$ min; el segmento correspondiente a $0 \leq t \leq 10$, de $(0, 0, 1)$ a $(60, 80, 6)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En el plano: da $3x + 2y = 6$ en forma paramétrica y $\vec{x} = (0, 1) + t(1, -2)$ sin parámetros.</p></div>
+            <div class="b-sol"><p>Por ejemplo, con los puntos $(2, 0)$ y $(0, 3)$: $\vec{x} = (2, 0) + t(-2, 3)$. Al revés, $x = t$, $y = 1 - 2t$, así que $2x + y = 1$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="7" data-ph="x ="><p class="b-q-text">¿Qué coordenada $x$ tiene el punto de traza de $g$ en el ejemplo 5?</p><div class="b-sol"><p>$S_{xy}(7, 2, 0)$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="min"><p class="b-q-text">¿Cuándo alcanza el avión en ascenso 4 km de altura?</p><div class="b-sol"><p>Al cabo de 6 minutos</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué parámetros describen el segmento $AB$ en $\vec{x} = \vec{a} + t\,\overrightarrow{AB}$?</p><div class="b-mc"><button>$t \geq 0$</button><button>$-1 \leq t \leq 1$</button><button>$0 \leq t \leq 1$</button></div><div class="b-sol"><p>$t = 0$: $A$, $t = 1$: $B$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Posición de dos rectas" data-toc-k="4" data-toc-short="4 Posición">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 4</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">4</span>Posición relativa de dos rectas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dos lápices sobre la mesa se cortan, son paralelos o están uno encima del otro. Si se sostienen en el aire, hay un cuarto caso:
+                no son paralelos y, sin embargo, no se tocan, como una arista de la base y una arista oblicua opuesta de la cara superior de un cubo.
+                Se dice que esas rectas <b>se cruzan</b>. Dicho con dependencia lineal: dos rectas están en un mismo plano exactamente cuando sus vectores directores y el vector entre los puntos base son coplanarios.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · POSICIÓN DE DOS RECTAS</div>
+                <div class="b-text">
+                    <p><b>1. ¿Vectores directores colineales?</b> Sí: prueba de pertenencia del punto base de una en la otra. Si está en ella: <b>coincidentes</b>; si no, <b>paralelas</b> y distintas.</p>
+                    <p><b>2. No colineales:</b> igualar las ecuaciones de las rectas. Son tres ecuaciones con dos parámetros: con dos de ellas se determinan $t$ y $s$, y con la tercera se comprueba.</p>
+                    <p>Si la tercera se cumple: <b>secantes</b>; el punto de corte se halla sustituyendo. Si no se cumple: <b>se cruzan</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>¿Colisión?</b> En los movimientos, el parámetro es el tiempo. Dos aviones solo chocan si están en el punto de corte en el <b>mismo</b> instante, es decir, con $t = s$.</p>
+            <p class="b-note"><b>Perspectiva:</b> el widget ya indica a qué distancia están dos rectas que se cruzan. Las distancias las calcularás en 12.º curso.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿CÓMO ESTÁN DOS RECTAS?</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta dos rectas y gira el espacio. El widget decide: coincidentes, paralelas, secantes (con punto de corte) o que se cruzan.</p>
+        <div data-widget="geradenlage"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 7 · SECANTES</div>
+            <div class="b-text"><p>$g\colon \vec{x} = t(1, 2, 3)$ y $h\colon \vec{x} = (2, 0, 0) + s(-1, 2, 3)$.</p></div>
+            <div class="b-sol"><p>No colineales. $t = 2 - s$, $2t = 2s$, $3t = 3s$: de la segunda, $t = s$; después, $t = s = 1$; la tercera se cumple.</p>
+                <p><span class="b-res">Punto de corte $S(1, 2, 3)$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 8 · CON PARÁMETRO</div>
+            <div class="b-text"><p>¿Para qué $a$ se cortan $g\colon \vec{x} = t(1, 1, 0)$ y $h_a\colon \vec{x} = (2, 0, a) + s(0, 1, 0)$? Y si no, ¿cómo están?</p></div>
+            <div class="b-sol"><p>No colineales. $t = 2$, $t = s$, $0 = a$. La tercera ecuación solo se cumple para $a = 0$.</p>
+                <p><span class="b-res">$a = 0$: punto de corte $(2, 2, 0)$; si no, se cruzan</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Decide: a) $(1, 0, 0) + t(1, 1, 0)$ y $(0, 1, 0) + s(2, 2, 0)$ &nbsp; b) $(1, 0, 2) + t(2, 1, 0)$ y $(3, 1, 2) + s(4, 2, 0)$</p></div>
+            <div class="b-sol"><p>a) paralelas y distintas &nbsp; b) coincidentes</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Demuestra que $g\colon \vec{x} = (1, 2, 0) + t(1, 0, 1)$ y $h\colon \vec{x} = (3, 0, 4) + s(0, 1, 1)$ se cruzan.</p></div>
+            <div class="b-sol"><p>No colineales. $1 + t = 3$, $2 = s$, $t = 4 + s$: de las dos primeras, $t = 2$, $s = 2$; la tercera: $2 = 6$, falso. Así que se cruzan.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dos aviones vuelan sobre $\vec{x} = (0, 0, 8) + t(6, 8, 0)$ y $\vec{x} = (60, 0, 8) + s(-6, 8, 0)$ ($t$, $s$ en minutos desde el mismo instante de salida, datos en km). ¿Se cortan las trayectorias? ¿Hay peligro de colisión?</p></div>
+            <div class="b-sol"><p>$6t = 60 - 6s$, $8t = 8s$: $t = s = 5$, punto de corte $(30, 40, 8)$. Los dos están allí al cabo de 5 minutos: rumbo de colisión, el control aéreo tiene que intervenir.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Para qué $b$ es $h_b\colon \vec{x} = (0, 1, 1) + s(1, b, 1)$ paralela a $g\colon \vec{x} = t(2, 4, 2)$? ¿Para qué $b$ se cortan $g$ y $h_b$?</p></div>
+            <div class="b-sol"><p>Paralelas para $b = 2$ (entonces $(0, 1, 1)$ no es un punto de $g$, así que son paralelas y distintas). Igualando: $2t = s$, $4t = 1 + bs$, $2t = 1 + s$. De la primera y la tercera, $s = 1 + s$: contradicción. Así que para $b \neq 2$ las rectas se cruzan y nunca se cortan.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Para $g\colon \vec{x} = (1, 2, 3) + t(1, 0, 0)$, da una recta paralela, una que corte a $g$ y una que se cruce con $g$. Justifica la posición con la dependencia lineal.</p></div>
+            <div class="b-sol"><p>Por ejemplo, paralela: $s(1, 0, 0)$; secante: $(0, 2, 3) + s(0, 1, 0)$; que se cruza: $s(0, 1, 0)$. En la que se cruza, $(1, 0, 0)$, $(0, 1, 0)$ y el vector $(1, 2, 3)$ entre los puntos base son linealmente independientes.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="3" data-ph="z ="><p class="b-q-text">¿Qué coordenada $z$ tiene el punto de corte del ejemplo 7?</p><div class="b-sol"><p>$S(1, 2, 3)$</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="min"><p class="b-q-text">¿Al cabo de cuántos minutos se encuentran los dos aviones del ejercicio 17?</p><div class="b-sol"><p>5</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">No colineales, sistema de ecuaciones sin solución. ¿Cómo están las rectas?</p><div class="b-mc"><button>paralelas</button><button>se cruzan</button><button>coincidentes</button></div><div class="b-sol"><p>Ni paralelas ni con un punto en común.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="20">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>En un cubo $ABCDEFGH$ (base $ABCD$ y, encima, $EFGH$): ¿cómo están las aristas $AB$ y $GH$, $AB$ y $BF$, $AB$ y $CG$?</p></div>
+            <div class="b-sol"><p>$AB$ y $GH$, paralelas; $AB$ y $BF$ se cortan en $B$; $AB$ y $CG$ se cruzan.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 2:</b> escribe el sistema de ecuaciones del ejercicio 16 como matriz ampliada para $t$ y $s$ y demuestra con el método de Gauss que no tiene solución.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{cc|c} 1 & 0 & 2 \\ 0 & -1 & -2 \\ 1 & -1 & 4 \end{array}\right)$; $F_3 - F_1 - F_2$ da $(0 \;\; 0 \mid 4)$: contradicción.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Tres rectas pasan por el mismo punto $P$ y tienen las direcciones $(1, 0, 1)$, $(0, 1, 1)$ y $(1, 1, 2)$. ¿Están en un mismo plano?</p></div>
+            <div class="b-sol"><p>Sí: la tercera dirección es la suma de las otras dos; los tres vectores directores son coplanarios.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Demuestra: si en un tetraedro $ABCD$ se unen los puntos medios de dos aristas opuestas ($AB$ y $CD$), y lo mismo para $AC$ y $BD$ y para $AD$ y $BC$, los tres segmentos se cortan en un punto y allí se dividen mutuamente por la mitad.</p></div>
+            <div class="b-sol"><p>Los tres segmentos tienen el punto medio $\tfrac{1}{4}(\vec{a} + \vec{b} + \vec{c} + \vec{d})$, por ejemplo $\tfrac{1}{2}\left(\tfrac{\vec{a} + \vec{b}}{2} + \tfrac{\vec{c} + \vec{d}}{2}\right)$. Es el baricentro del tetraedro.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: El profesor que inventó la dimensión" data-toc-k="X" data-toc-short="Grassmann">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>El profesor que inventó la dimensión</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Hermann Grassmann (1809–1877) fue profesor de instituto en Stettin durante casi toda su vida profesional. En 1844 publicó «Die lineale Ausdehnungslehre» (La teoría de la extensión lineal).
+                En ella calcula con segmentos orientados en un número cualquiera de dimensiones y usa conceptos que hoy se llaman <b>independencia lineal</b>, <b>base</b> y <b>dimensión</b>:
+                un espacio tiene dimensión $n$ si hay $n$ vectores independientes con los que se puede componer cualquier otro. El número tres no tiene ahí ningún papel especial.</p>
+            <p>Los especialistas encontraron el libro demasiado abstracto, y Grassmann nunca consiguió un puesto en una universidad. Se dedicó a la lingüística; su diccionario del Rigveda se sigue considerando útil hoy en día.
+                Solo en 1888 Giuseppe Peano, basándose expresamente en Grassmann, formuló como axiomas las reglas para operar con vectores. Las propiedades de las operaciones del capítulo 3.1 son exactamente esas reglas.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuentes:</b> H. Grassmann, «Die lineale Ausdehnungslehre», Leipzig 1844. G. Peano, «Calcolo geometrico secondo l'Ausdehnungslehre di H. Grassmann», Turín 1888. Biografía: MacTutor History of Mathematics, St Andrews. Los datos sobre el comienzo y el desarrollo de su labor docente en Stettin varían según la fuente.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>DEPENDENCIA LINEAL</h4><p>¿$r\vec{a} + s\vec{b} + t\vec{c} = \vec{o}$ solo tiene la solución trivial? Entonces son independientes. Dos: paralelos; tres: coplanarios.</p></div>
+        <div><p>$(1, 0, 1)$, $(0, 1, 1)$, $(1, 1, t)$: dependientes para $t = 2$</p></div></div>
+    <div class="b-rueck"><div><h4>PUNTOS DE DIVISIÓN</h4><p>$\vec{t} = \vec{a} + \tfrac{m}{m + n}\overrightarrow{AB}$; baricentro $\tfrac{1}{3}(\vec{a} + \vec{b} + \vec{c})$.</p></div>
+        <div><p>$S(1, 1, 2)$</p></div></div>
+    <div class="b-rueck"><div><h4>DEMOSTRACIONES</h4><p>Cadena cerrada de vectores y comparación de coeficientes.</p></div>
+        <div><p>El baricentro divide $2 : 1$</p></div></div>
+    <div class="b-rueck"><div><h4>RECTAS</h4><p>$\vec{x} = \vec{p} + t\vec{u}$; prueba de pertenencia; puntos de traza; en el plano, $ax + by = c$.</p></div>
+        <div><p>$S_{xy}(7, 2, 0)$</p></div></div>
+    <div class="b-rueck"><div><h4>POSICIONES RELATIVAS</h4><p>¿Colineales? → coincidentes/paralelas. Si no, igualar → secantes/se cruzan.</p></div>
+        <div><p>Ejemplo 7: $S(1, 2, 3)$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">¿Para qué $t$ está $(4, 4, 1)$ en $(2, 2, 3) + t(1, 1, -1)$?</p><div class="b-sol"><p>$t = 2$</p></div></div>
+            <div class="b-q" data-ans="3,5" data-ph="s ="><p class="b-q-text">$(4, 5, 6) = r(1, 1, 0) + s(0, 1, 1) + t(1, 0, 1)$. ¿Cuánto vale $s$?</p><div class="b-sol"><p>$s = 3{,}5$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Hay rectas que se cruzan en el plano?</p><div class="b-mc"><button>no</button><button>sí</button><button>solo perpendiculares</button></div><div class="b-sol"><p>Para eso hace falta la tercera dimensión.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">Punto de traza de $(2, 1, 4) + t(1, 1, -2)$ con el plano $xy$: ¿coordenada $x$?</p><div class="b-sol"><p>$(4, 3, 0)$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="Número"><p class="b-q-text">En el ejercicio 10, $AP$ queda dividido en la razón $k : 1$. ¿Cuánto vale $k$?</p><div class="b-sol"><p>$r = \tfrac{4}{5}$, es decir, $4 : 1$</p></div></div>
+            <div class="b-q" data-ans="601" data-tol="1" data-ph="km/h"><p class="b-q-text">¿Velocidad en el ascenso $(6;\, 8;\, 0{,}5)$ km por minuto, en km/h (número entero)?</p><div class="b-sol"><p>$\sqrt{100{,}25} \cdot 60 \approx 601$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-lineare-abhaengigkeit.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DEPENDENCIA LINEAL</span><span class="b-lab-what">Colineales, coplanarios, demostraciones, 20 ejercicios (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-geraden.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RECTAS Y SU POSICIÓN</span><span class="b-lab-what">Forma paramétrica, prueba de pertenencia, rectas que se cruzan, 20 ejercicios (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="koerper" href="../../koerper.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CUERPOS</span><span class="b-lab-what">Aristas y diagonales en el espacio (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 11.º curso, curso avanzado · Área de aprendizaje 3 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-es/vektoren.js"></script>
+<script src="../../js/buch-gy11lk-vek.js"></script>
+<script src="../../js/buch-es/gy11lk-vek.js"></script>
+</body>
+</html>
