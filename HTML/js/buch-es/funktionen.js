@@ -69,6 +69,18 @@ window.BuchES && BuchES.add('funktionen', {
         // book es mathegy8-es (Curie)
 
         // book es mathe10-es (Curie)
+        // potenzfunktion
+        'Verwandte zeigen': 'Mostrar parientes', 'Graph einer Potenzfunktion': 'Gráfica de una función potencia', 'Exponent': 'Exponente',
+        'Nullstelle': 'Cero', 'Polstelle': 'Polo', 'Gemeinsame Punkte': 'Puntos comunes',
+        'keine, $f$ ist nur für $x \\geq 0$ definiert': 'ninguna, $f$ solo está definida para $x \\geq 0$',
+        'achsensymmetrisch zur $y$-Achse, denn $f(-x) = f(x)$': 'simétrica respecto al eje $y$, porque $f(-x) = f(x)$',
+        'punktsymmetrisch zum Ursprung, denn $f(-x) = -f(x)$': 'simétrica respecto al origen, porque $f(-x) = -f(x)$',
+        'steigt für $x \\geq 0$': 'creciente para $x \\geq 0$', 'steigt überall': 'creciente en todo su dominio',
+        'fällt für $x < 0$, steigt für $x > 0$': 'decreciente para $x < 0$, creciente para $x > 0$',
+        'steigt für $x < 0$, fällt für $x > 0$': 'creciente para $x < 0$, decreciente para $x > 0$',
+        'fällt für $x < 0$ und fällt für $x > 0$': 'decreciente para $x < 0$ y decreciente para $x > 0$',
+        '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, sin cambio de signo', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, con cambio de signo',
+        'senkrecht $x = 0$, waagerecht $y = 0$': 'vertical $x = 0$, horizontal $y = 0$',
 
         // book es mathegy9-es (Curie)
 
