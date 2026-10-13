@@ -105,6 +105,7 @@ window.BuchES && BuchES.add('gy8', {
         ['Der Graph verläuft waagerecht: Die Zeit läuft, der Weg bleibt gleich.', 'La gráfica es horizontal: el tiempo pasa y la distancia no cambia.'],
         ['Hier steigt der Graph am steilsten.', 'Aquí la gráfica sube con más pendiente.'], ['Der Graph steigt flacher als beim ersten Fußweg.', 'La gráfica sube menos que en el primer tramo a pie.'],
         ['Nach $t = ', 'Tras $t = '], ['$ min ist Mia ', '$ min, Mia está a '], [' von zu Hause entfernt.', ' de casa.'],
+        ['$ m pro Minute. ', '$ m por minuto. '],
         // streckung8
         ['Zentrische Streckung des Dreiecks ABC am Zentrum Z mit dem Faktor ', 'Homotecia del triángulo ABC con centro Z y razón '],
         ['Mit $k = 0$ fallen alle Bildpunkte auf $Z$: Das Bild ist nur noch ein Punkt.', 'Con $k = 0$ todos los puntos imagen caen en $Z$: la imagen es solo un punto.'],
