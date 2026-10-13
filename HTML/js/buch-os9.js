@@ -13,6 +13,7 @@
  *   rwdreieckos9   a right triangle solved step by step from a side and an angle or from two sides (sin, cos, tan and their inverses)
  *   dachos9        a gable roof: width and pitch → ridge height, rafter length, roof area (two right triangles)
  *   fibonaccios9   Fibonacci numbers and the quotients of neighbours approaching Φ ≈ 1,618
+ *   spannweiteos9  range: two groups of long jumps with the same mean, the spread of B adjustable, an outlier for A
  * Looks: inline styles only, no own block in js/buch.css.
  */
 (function () {
@@ -319,6 +320,58 @@
                 '<tr><th>Wert</th>' + last.map(q => '<td>$' + texNum(q[1], 4) + '$</td>').join('') + '</tr></table></div>' +
                 '<p class="b-help" style="margin:8px 0 0">Jede Zahl ist die Summe der beiden davor. Die Quotienten springen abwechselnd über und unter die grüne Linie $\\Phi \\approx 1{,}618$ und kommen ihr immer näher.</p>';
             math(out);
+        }
+        render();
+    });
+
+    /* ---------- range: two groups with the same mean ---------- */
+    // long jump in m of two groups of seven (invented values, both add up to 26,2 m)
+    const SPRUNG_A = [3.2, 3.5, 3.6, 3.8, 3.9, 4.0, 4.2], SPRUNG_B = [2.6, 3.0, 3.4, 3.8, 4.2, 4.5, 4.7], SPRUNG_OUT = 5.8;
+    W('spannweiteos9', function (box) {
+        const S = { f: 1, out: false };
+        const ctr = div(box, 'b-ctrls');
+        ctr.innerHTML = '<button type="button" class="b-btn b-hintbtn">Ausreißer zu A (5,8 m)</button>';
+        const btn = ctr.querySelector('button');
+        btn.addEventListener('click', () => { S.out = !S.out; btn.textContent = S.out ? 'Ausreißer weg' : 'Ausreißer zu A (5,8 m)'; render(); });
+        const sl = div(box, '');
+        range(sl, { label: 'Streuung von B', min: 0, max: 1.5, step: 0.05, value: 1, fmt: v => fmt(v * 100, 0) + ' %', onInput: v => { S.f = v; render(); } });
+        const pic = div(box, 'b-svgbox g-svg');
+        const out = div(box, 'b-out');
+        const nw = narrowWatch(pic, () => render());
+        const mean = xs => xs.reduce((a, x) => a + x, 0) / xs.length;
+        const median = xs => { const o = xs.slice().sort((a, b) => a - b), n = o.length; return n % 2 ? o[(n - 1) / 2] : (o[n / 2 - 1] + o[n / 2]) / 2; };
+        function render() {
+            const mB = mean(SPRUNG_B);
+            const sets = [['A', S.out ? SPRUNG_A.concat(SPRUNG_OUT) : SPRUNG_A.slice(), CY], ['B', SPRUNG_B.map(x => Math.round((mB + S.f * (x - mB)) * 100) / 100), LAM]];
+            const w = nw.narrow ? 400 : 640, x0 = 24, x1 = w - 24, lo0 = 1.5, hi0 = 6.5, X = v => x0 + (v - lo0) / (hi0 - lo0) * (x1 - x0), r = nw.narrow ? 4.5 : 6;
+            let s = G.line([x0, 226], [x1, 226], 'stroke:' + DIM + ';stroke-width:1.4');
+            for (let v = 2; v <= 6; v += 0.5) {
+                s += G.line([X(v), 222], [X(v), 230], 'stroke:' + DIM + ';stroke-width:1.2');
+                if (Number.isInteger(v)) s += G.txt([X(v), 250], v + ' m', 'g-small');
+            }
+            sets.forEach(([k, xs, col], i) => {
+                const y = 66 + i * 86, lo = Math.min(...xs), hi = Math.max(...xs), m = mean(xs);
+                s += '<rect x="' + f1(X(lo) - r) + '" y="' + (y - 30) + '" width="' + f1(X(hi) - X(lo) + 2 * r) + '" height="44" rx="6" style="fill:' + col + ';opacity:0.12"/>';
+                // the range as a bracket below the dots
+                const st = 'stroke:' + col + ';stroke-width:2;stroke-linecap:round';
+                s += G.line([X(lo), y + 24], [X(hi), y + 24], st) + G.line([X(lo), y + 18], [X(lo), y + 30], st) + G.line([X(hi), y + 18], [X(hi), y + 30], st);
+                const level = new Map();
+                xs.forEach(v => {
+                    const key = Math.round(v * 10), l = level.get(key) || 0; level.set(key, l + 1);
+                    s += '<circle cx="' + f1(X(v)) + '" cy="' + (y - l * 2.2 * r) + '" r="' + r + '" style="fill:' + col + ';opacity:0.9"/>';
+                });
+                s += G.line([X(m), y - 30], [X(m), y + 14], 'stroke:#fff;stroke-width:2');
+                s += G.txt([x0, y - 38], 'GRUPPE ' + k, 'g-small', 'start');
+            });
+            pic.innerHTML = '<svg viewBox="0 0 ' + w + ' 262" role="img" aria-label="Weitsprungweiten zweier Gruppen mit Mittelwert und Spannweite">' + s + '</svg>';
+            // one row per measure, one column per group: fits a phone
+            const rows = [['kleinster Wert', xs => Math.min(...xs)], ['größter Wert', xs => Math.max(...xs)], ['Spannweite', xs => Math.max(...xs) - Math.min(...xs)], ['Mittelwert', mean], ['Zentralwert', median]];
+            let t = '<div class="b-table-wrap"><table class="b-table g-tab"><tr><th></th>' + sets.map(([k, , col]) => '<th style="color:' + col + '">' + k + '</th>').join('') + '</tr>';
+            rows.forEach(([name, f], i) => {
+                const b = i === 2 ? ['<b>', '</b>'] : ['', ''];
+                t += '<tr><td>' + b[0] + name + b[1] + '</td>' + sets.map(([, xs]) => '<td>' + b[0] + fmt(f(xs), 2) + ' m' + b[1] + '</td>').join('') + '</tr>';
+            });
+            out.innerHTML = t + '</table></div><p class="b-help" style="margin:8px 0 0">Weiße Linie: Mittelwert. Die Klammer unter den Punkten reicht vom kleinsten bis zum größten Wert, ihre Länge ist die Spannweite. Ausgedachte Werte.</p>';
         }
         render();
     });
