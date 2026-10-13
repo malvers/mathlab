@@ -50,6 +50,10 @@ window.BuchES && BuchES.add('vektoren', {
         // book es mathegy12lk-es (Turing)
 
         // book es mathefos12-es (Lovelace)
+        // zentralprojektion
+        'Abstand des Auges $a$': 'Distancia del ojo $a$', 'Fluchtlinien zeigen': 'Mostrar las líneas de fuga', 'Horizont': 'Horizonte',
+        'Zieh den Fluchtpunkt V. Er liegt auf dem Horizont in Augenhöhe.': 'Arrastra el punto de fuga V. Está en el horizonte, a la altura de los ojos.',
+        'Zentralprojektion eines Quaders und einer Pfostenreihe mit Fluchtpunkt': 'Proyección central de un ortoedro y de una hilera de postes con su punto de fuga',
 
     },
     phrase: [
@@ -154,6 +158,13 @@ window.BuchES && BuchES.add('vektoren', {
         // book es mathegy12lk-es (Turing)
 
         // book es mathefos12-es (Lovelace)
+        // zentralprojektion
+        ['Fluchtpunkt $V(', 'Punto de fuga $V('], [')$ · Bildebene vor dem Quader, Auge im Abstand $a = ', ')$ · plano del cuadro delante del ortoedro, ojo a la distancia $a = '],
+        ['$ davor', '$ delante de él'],
+        ['Alle Kanten, die in die Tiefe laufen, treffen sich in $V$. Kanten parallel zur Bildebene bleiben parallel und behalten ihr Verhältnis.',
+            'Todas las aristas que van hacia el fondo se encuentran en $V$. Las aristas paralelas al plano del cuadro siguen siendo paralelas y conservan su proporción.'],
+        ['Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{', 'Un poste a la profundidad $z$ aparece con el factor $\\dfrac{a}{a + z}$: con $z = 8$, $\\dfrac{'],
+        ['$ so hoch wie vorn.', '$ veces la altura que tendría delante.'],
 
     ],
     rule: [

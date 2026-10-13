@@ -118,6 +118,14 @@ window.BuchES && BuchES.add('analysis', {
         // book es mathefos11-es (Lovelace)
 
         // book es mathefos12-es (Lovelace)
+        // titelbildfos12, efunktion
+        'Titelbild: Exponentialkurve mit Hochpunkt, Wendetangente und Rechtecken darunter, eine Hyperbel mit Asymptoten und ein Parallelogramm im Raum mit seinem Vektorprodukt':
+            'Portada: curva exponencial con máximo, tangente de inflexión y rectángulos debajo, una hipérbola con asíntotas y un paralelogramo en el espacio con su producto vectorial',
+        'Welche Basis?': '¿Qué base?', 'Zinseszins': 'Interés compuesto', 'Was wird gezeigt?': '¿Qué se muestra?', 'a = e setzen': 'Poner a = e',
+        'Exponentialfunktionen und die Eulersche Zahl e': 'Funciones exponenciales y el número e', 'im Exponenten $b$': 'En el exponente $b$',
+        'Verschiebung $c$': 'Desplazamiento $c$', 'Verzinsung': 'Abono de intereses',
+        'jährlich': 'anualmente', 'halbjährlich': 'semestralmente', 'vierteljährlich': 'trimestralmente', 'monatlich': 'mensualmente', 'wöchentlich': 'semanalmente',
+        'täglich': 'a diario', 'stündlich': 'cada hora', 'minütlich': 'cada minuto',
 
     },
     phrase: [
@@ -247,6 +255,24 @@ window.BuchES && BuchES.add('analysis', {
         // book es mathefos11-es (Lovelace)
 
         // book es mathefos12-es (Lovelace)
+        // efunktion (the engine has already written the point (0 \mid 1) as (0, 1) here: the rules run before the pieces)
+        [' · Steigung in $(0, 1)$: $', ' · pendiente en $(0, 1)$: $'],
+        ['<b>Treffer:</b> Bei $a = \\mathrm{e} \\approx 2{,}71828$ ist die Steigung genau $1$ und $f\'(x) = f(x)$: Die Graphen von $f$ und $f\'$ liegen aufeinander.',
+            '<b>¡Acierto!</b> Con $a = \\mathrm{e} \\approx 2{,}71828$ la pendiente es exactamente $1$ y $f\'(x) = f(x)$: las gráficas de $f$ y $f\'$ coinciden.'],
+        ['Die Ableitung ist $f\'(x) = ', 'La derivada es $f\'(x) = '],
+        [' \\cdot f(x)$, ein Vielfaches von $f$. Für welche Basis ist der Faktor genau $1$?', ' \\cdot f(x)$, un múltiplo de $f$. ¿Con qué base es el factor exactamente $1$?'],
+        [' · Mit $a = 0$ oder $b = 0$ ist $f$ konstant.', ' · Con $a = 0$ o $b = 0$, $f$ es constante.'],
+        ['Schnittpunkt mit der $y$-Achse: $', 'Punto de corte con el eje $y$: $'], [' · Nullstelle: ', ' · cero: '], ['$, also $x = ', '$, es decir, $x = '],
+        ['keine, denn $\\mathrm{e}^{bx} > 0$ kann nicht $', 'ninguno, porque $\\mathrm{e}^{bx} > 0$ no puede valer $'], ['$ sein</p>', '$</p>'],
+        ['Für $', 'Para $'], ['$ geht $f(x) \\to ', '$, $f(x) \\to '], ['$: waagerechte Asymptote $y = ', '$: asíntota horizontal $y = '], ['$. Für $', '$. Para $'],
+        ['$f$ ist überall streng monoton ', '$f$ es en todas partes estrictamente '], ['steigend', 'creciente'], ['fallend', 'decreciente'],
+        [', weil $f\'(x)$ immer ', ', porque $f\'(x)$ es siempre '], ['positiv ist.', 'positiva.'], ['negativ ist.', 'negativa.'],
+        ['Ein Euro, 100 % Zinsen im Jahr, ', 'Un euro, un 100 % de interés al año, abonado '], [' verzinst: ', ': '], ['-mal $\\tfrac{100\\,\\%}{', ' veces $\\tfrac{100\\,\\%}{'],
+        ['$, also $\\left(1 + \\tfrac{1}{', '$, es decir, $\\left(1 + \\tfrac{1}{'],
+        ['jährlich', 'anualmente'], ['halbjährlich', 'semestralmente'], ['vierteljährlich', 'trimestralmente'], ['monatlich', 'mensualmente'], ['wöchentlich', 'semanalmente'],
+        ['täglich', 'a diario'], ['stündlich', 'cada hora'], ['minütlich', 'cada minuto'],
+        ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
+            'Cuanto más a menudo se abonan los intereses, más se acerca el saldo a $\\mathrm{e} = 2{,}718281\\ldots$, pero nunca lo supera: $'],
 
     ],
     rule: [
@@ -272,6 +298,8 @@ window.BuchES && BuchES.add('analysis', {
         // book es mathefos11-es (Lovelace)
 
         // book es mathefos12-es (Lovelace)
+        // efunktion: "1-mal $\tfrac…" is "1 vez" (the pieces make "veces" of every other number)
+        [/(?<![\d.])1-mal \$/g, '1 vez $$'],
 
     ]
 });

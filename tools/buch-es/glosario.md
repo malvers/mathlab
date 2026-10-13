@@ -792,6 +792,27 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Schrägbild | perspectiva caballera | as in mathe12-es |
+| Lotgerade, Lotfußpunkt, Spiegelpunkt | recta perpendicular, pie de la perpendicular, punto simétrico | "halla el simétrico de $P$ respecto a $E$" |
+| Flächeneinheiten | unidades de área | |
+| Durchstoßpunkt (Gerade–Ebene) | punto de intersección | verb: la recta atraviesa el plano |
+| Linkskurve, Rechtskurve (linksgekrümmt) | curva a la izquierda, curva a la derecha | once with "(convexa, la pendiente aumenta)", as in mathe12-es |
+| Hauptbedingung | condición principal | with condición de ligadura, función objetivo |
+| Steckbrief (Bedingungen) | ficha (de la función) | the task type stays "problema de reconstrucción" |
+| Untersumme, Obersumme | suma inferior, suma superior | |
+| orientierter Flächeninhalt | área orientada | |
+| Integrationskonstante, Grundintegral | constante de integración, integral inmediata | |
+| Definitionslücke, hebbare Lücke | punto excluido del dominio, hueco (discontinuidad evitable) | "hueco" as in mathe12-es |
+| Leitkoeffizient | coeficiente principal | |
+| Eulersche Zahl, natürlicher Logarithmus | número e (número de Euler), logaritmo neperiano | |
+| begrenztes Wachstum, Schranke | crecimiento limitado, cota | |
+| Gebiet (Prüfungskapitel) | bloque | "BLOQUE 1" |
+| FHR, Fachhochschulreife | examen de la Fachhochschulreife (FHR) | explained on the start page |
+| Knick, knickfrei, Übergangsstelle | pico, sin pico, punto de unión | piecewise functions |
+| Mengenrabatt | descuento por cantidad | |
+| Bestimmtheitsmaß | coeficiente de determinación | |
+| Zentralprojektion, Fluchtpunkt, Bildebene | proyección central, punto de fuga, plano del cuadro | |
+| GeoGebra CAS commands | Derivada, Integral, Resuelve, Factoriza, Numérico, Si, AjustePolinómico, AjusteExponencial | Spanish GeoGebra names, as in mathe11-es |
 
 ## Added by mathegy10-es (offen)
 
