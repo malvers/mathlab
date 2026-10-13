@@ -90,9 +90,6 @@ window.BuchES && BuchES.add('stochastik', {
         '$n$ (Zeile)': '$n$ (fila)', '$k$ (Stelle)': '$k$ (posición)', 'Pascalsches Dreieck bis zur Zeile 10': 'Triángulo de Pascal hasta la fila 10',
 
         // book es mathegy11lk-es (Turing)
-        // urne
-        'Kugeln $n$': 'Bolas $n$', 'Ziehungen $k$': 'Extracciones $k$', 'n kleiner': 'n menor', 'n größer': 'n mayor', 'k kleiner': 'k menor', 'k größer': 'k mayor',
-        'mit Reihenfolge': 'con orden', 'ohne Reihenfolge': 'sin orden', 'Reihenfolge': 'Orden', 'Zurücklegen': 'Reemplazamiento', 'Einmal ziehen': 'Extraer una vez', 'URNE': 'URNA',
 
         // book es mathegy12-es (Turing)
 
@@ -193,13 +190,6 @@ window.BuchES && BuchES.add('stochastik', {
         ['Die Mitte der Zeile: $', 'El centro de la fila: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ es aquí su propia imagen especular.'],
 
         // book es mathegy11lk-es (Turing)
-        // urne
-        ['Variation mit Wiederholung', 'Variación con repetición'], ['Permutation (alle Kugeln, mit Reihenfolge)', 'Permutación (todas las bolas, con orden)'],
-        ['Variation ohne Wiederholung', 'Variación sin repetición'], ['Kombination ohne Wiederholung', 'Combinación sin repetición'],
-        ['Kombination mit Wiederholung', 'Combinación con repetición'], ['</b> · Beispiel: ', '</b> · ejemplo: '], ['Anzahl der Möglichkeiten: ', 'Número de posibilidades: '],
-        ['Gezogen: <b>', 'Extraído: <b>'], ['Ergebnisse als Tupel $(\\ldots)$: Die Reihenfolge zählt.', 'Resultados como tuplas $(\\ldots)$: el orden cuenta.'],
-        ['Ergebnisse als Mengen $\\{\\ldots\\}$: Die Reihenfolge zählt nicht.', 'Resultados como conjuntos $\\{\\ldots\\}$: el orden no cuenta.'],
-        [' Genau dafür gibt es die Formel.', ' Precisamente para eso está la fórmula.'],
 
         // book es mathegy12-es (Turing)
 
@@ -256,15 +246,6 @@ window.BuchES && BuchES.add('stochastik', {
         [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, porque elegir $' + k + '$ es lo mismo que dejar fuera $' + r + '$.'],
 
         // book es mathegy11lk-es (Turing)
-        // urne: outcomes "(1; 2)" and "{1; 2}" → "(1, 2)", "{1, 2}"
-        [/[({]\d+(?:; \d+)+[)}]/g, m => m.replace(/; /g, ', ')],
-        // urne: the examples and the count
-        [/ein Zahlenschloss mit (\d+) Rädern zu je (\d+) Ziffern/g, (m, k, n) => 'un candado de combinación con ' + (k === '1' ? 'una rueda' : k + ' ruedas') + ' de ' + n + ' cifras cada una'],
-        [/(\d+) Personen stellen sich in eine Reihe/g, '$1 personas se ponen en fila'],
-        [/ein Siegerpodest: (\d+) von (\d+) Startern auf die Plätze 1 bis (\d+)/g, 'un podio: $1 de $2 participantes en los puestos 1 a $3'],
-        [/Lotto: (\d+) aus (\d+) Zahlen, die Reihenfolge der Ziehung zählt nicht/g, 'lotería: $1 de $2 números, el orden del sorteo no cuenta'],
-        [/(\d+) Kugeln Eis aus (\d+) Sorten, eine Sorte darf mehrfach vorkommen/g, (m, k, n) => k + (k === '1' ? ' bola' : ' bolas') + ' de helado de ' + n + ' sabores, un sabor puede repetirse'],
-        [/(\d{1,3}(?:\.\d{3})*) Möglichkeiten sind zu viele zum Auflisten\./g, '$1 posibilidades son demasiadas para enumerarlas.'],
 
         // book es mathegy12-es (Turing)
 

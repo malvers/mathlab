@@ -641,7 +641,6 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Reißzwecke, Rückenlage | chincheta, con la punta hacia arriba | |
 | Skatblatt, Herz, Bube | baraja de skat, corazones, jota | |
 | Lotto „6 aus 49“, Richtige, Tipp | lotería «6 de 49», aciertos, apuesta | |
-| Variation / Kombination mit / ohne Wiederholung | variación / combinación con / sin repetición | widget urne |
 | bedingte Wahrscheinlichkeit, Satz von Bayes, totale Wahrscheinlichkeit | probabilidad condicionada, teorema de Bayes, probabilidad total | |
 | Basisrate, natürliche Häufigkeiten, umgekehrter Baum | tasa base, frecuencias naturales, árbol invertido | |
 | Ziegenproblem, Moderator | problema de Monty Hall, presentador | |
