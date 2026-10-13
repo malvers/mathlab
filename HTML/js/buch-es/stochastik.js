@@ -74,6 +74,11 @@ window.BuchES && BuchES.add('stochastik', {
         'Baumdiagramm einer Bernoulli-Kette': 'Diagrama de árbol de un proceso de Bernoulli',
 
         // book es mathegy8-es (Curie)
+        // venn
+        'Ein Glücksrad hat 12 gleich große Felder: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Wähle eine Vorlage oder stell $A$ und $B$ selbst zusammen: Ereignis wählen, dann Zahlen antippen.':
+            'Una ruleta tiene 12 sectores iguales: $\\Omega = \\{1, 2, \\ldots, 12\\}$. Elige un modelo o forma $A$ y $B$ tú mismo: elige el suceso y después toca los números.',
+        'Vorlage': 'Modelo', '$A$ bearbeiten': 'Editar $A$', '$B$ bearbeiten': 'Editar $B$', 'Ereignis bearbeiten': 'Suceso que se edita',
+        'Verknüpfung:': 'Combinación:', 'Verknüpfung': 'Combinación', 'Mengendiagramm der Ereignisse A und B': 'Diagrama de Venn de los sucesos A y B',
 
         // book es mathe10-es (Curie)
 
@@ -154,6 +159,12 @@ window.BuchES && BuchES.add('stochastik', {
         ['Formel von Bernoulli: $P(X = ', 'Fórmula de Bernoulli: $P(X = '],
 
         // book es mathegy8-es (Curie)
+        // venn
+        ['Additionssatz: $', 'Regla de la suma: $'], ['Gegenereignis: $', 'Suceso contrario: $'],
+        [' · $A$ und $B$ sind <b>unvereinbar</b> ($A \\cap B = \\emptyset$), es wird nichts doppelt gezählt.', ' · $A$ y $B$ son <b>incompatibles</b> ($A \\cap B = \\emptyset$): no se cuenta nada dos veces.'],
+        ['Die Zahlen, die in beiden Ereignissen liegen.', 'Los números que están en los dos sucesos.'],
+        ['$A \\cap B = \\emptyset$: Die Ereignisse sind <b>unvereinbar</b>, sie können nicht zusammen eintreten.', '$A \\cap B = \\emptyset$: los sucesos son <b>incompatibles</b>, no pueden ocurrir a la vez.'],
+        ['Regel von de Morgan: $', 'Leyes de De Morgan: $'], ['$. Wähle die andere Seite und vergleiche: Es ist dieselbe Menge.', '$. Elige el otro miembro y compara: es el mismo conjunto.'],
 
         // book es mathe10-es (Curie)
 
@@ -202,6 +213,8 @@ window.BuchES && BuchES.add('stochastik', {
         [/Pfade mit genau 1 Treffern: \$/g, 'Ramas con exactamente 1 éxito: $'],
 
         // book es mathegy8-es (Curie)
+        // venn: sets of whole numbers in TeX, \{2;\,4\} → \{2, 4\} (with a decimal comma the semicolon stays)
+        [/\\\{([^$]*?)\\\}/g, (m, s) => /\d(?:,|\{,\})\d/.test(s) ? m : '\\{' + s.replace(/;\\,|; /g, ', ') + '\\}'],
 
         // book es mathe10-es (Curie)
 
