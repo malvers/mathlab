@@ -37,6 +37,9 @@ window.BuchES && BuchES.add('geometrie', {
         'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circunferencia con $r = 1$, por tanto $u = 2\\pi$. Perímetro dividido entre $2$:',
 
         // book es mathegy9-es (Curie)
+        // kreisteil
+        'Mittelpunktswinkel $\\alpha$': 'Ángulo central $\\alpha$', 'Kreis mit Kreisausschnitt und Kreisbogen': 'Círculo con un sector circular y un arco',
+        'Kreisbogen': 'Arco', 'Kreisausschnitt': 'Sector circular',
         // titelbildgy9
         'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
             'Portada: un triángulo rectángulo con los cuadrados sobre sus lados, un rectángulo áureo con espiral, una circunferencia entre dos hexágonos y una parábola',
@@ -60,6 +63,9 @@ window.BuchES && BuchES.add('geometrie', {
         ['Also $', 'Por tanto $'], ['$, Abstand $', '$, diferencia $'],
 
         // book es mathegy9-es (Curie)
+        // kreisteil
+        ['Anteil am Vollkreis: $', 'Fracción del círculo completo: $'],
+        ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $', 'Arrastra el extremo del arco. Para comparar, el círculo entero: $'],
 
     ],
     rule: [
