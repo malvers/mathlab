@@ -48,7 +48,7 @@ window.BuchES && BuchES.add('gy8', {
         'Addiere die beiden Gleichungen: $y$ fällt weg.': 'Suma las dos ecuaciones: $y$ desaparece.',
         'Nach $x$ auflösen.': 'Despeja $x$.', 'Nach $y$ auflösen.': 'Despeja $y$.',
         // streckung8
-        'Streckfaktor $k$': 'Razón de homotecia $k$', 'Original': 'Original', 'Bild': 'Imagen', 'Verhältnis': 'Razón', 'Winkel bei $A$': 'Ángulo en $A$', 'gleich': 'igual', 'Fläche': 'Área',
+        'Streckfaktor $k$': 'Razón de homotecia $k$', 'Original': 'Original', 'Verhältnis': 'Razón', 'Winkel bei $A$': 'Ángulo en $A$', 'gleich': 'igual',
         'Zieh an $Z$, $A$, $B$ und $C$. Die gestrichelten Strahlen beginnen in $Z$ und gehen durch Punkt und Bildpunkt.':
             'Arrastra $Z$, $A$, $B$ y $C$. Las semirrectas discontinuas parten de $Z$ y pasan por cada punto y su imagen.',
         // aehnlich8
@@ -58,7 +58,7 @@ window.BuchES && BuchES.add('gy8', {
         'Zieh die gelben Ecken auf die Gitterpunkte. Schaffst du ein Dreieck, das ähnlich zum gegebenen ist, aber anders liegt?':
             'Arrastra los vértices amarillos a los puntos de la cuadrícula. ¿Consigues un triángulo semejante al dado, pero en otra posición?',
         // gulliver8
-        'k = 12 (Gulliver)': 'k = 12 (Gulliver)', 'Streckfaktor': 'Razón', 'Einheitswürfel': 'Cubo unidad', 'großer Würfel': 'Cubo grande', 'Faktor': 'Factor',
+        'k = 12 (Gulliver)': 'k = 12 (Gulliver)', 'Streckfaktor': 'Razón', 'großer Würfel': 'Cubo grande', 'Faktor': 'Factor',
         'Kantenlänge': 'Arista', 'Oberfläche': 'Área total', 'Volumen': 'Volumen',
         'Gulliver ist 12-mal so groß wie ein Liliputaner. Seine Haut hat also die $144$-fache Fläche, sein Körper das $1728$-fache Volumen. Bei Jonathan Swift rechnen die Mathematiker des Kaisers genau so und geben ihm jeden Tag Essen für 1724 Liliputaner, vier weniger als $12^3$.':
             'Gulliver es 12 veces más alto que un liliputiense. Por eso su piel tiene $144$ veces más superficie y su cuerpo $1728$ veces más volumen. En el libro de Jonathan Swift, los matemáticos del emperador calculan exactamente así y le dan cada día comida para 1724 liliputienses, cuatro menos que $12^3$.',
@@ -69,7 +69,7 @@ window.BuchES && BuchES.add('gy8', {
         'Die Sonnenstrahlen fallen parallel ein. Das blaue und das gelbe Dreieck sind deshalb ähnlich: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.':
             'Los rayos del sol llegan paralelos. Por eso el triángulo azul y el amarillo son semejantes: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.',
         // rueckwaerts8
-        'Rückwärts: ein Schritt': 'Hacia atrás: un paso', 'Neues Rätsel': 'Nuevo acertijo', 'Startzahl': 'Número inicial',
+        'Rückwärts: ein Schritt': 'Hacia atrás: un paso', 'Neues Rätsel': 'Acertijo nuevo', 'Startzahl': 'Número inicial',
         'Probier eine Zahl im ersten Kästchen, oder rechne rückwärts: Jede Rechnung wird durch ihre Umkehrung ersetzt, plus durch minus, mal durch geteilt.':
             'Prueba un número en la primera casilla o calcula hacia atrás: cada operación se sustituye por su inversa, sumar por restar, multiplicar por dividir.',
         // sammel8
@@ -184,6 +184,8 @@ window.BuchES && BuchES.add('gy8', {
     ],
     rule: [
         // book es mathegy8-es (Curie)
+        // streckung8, gulliver8: "Bild", "Fläche", "Einheitswürfel" by their place (gy5 has them as words in another sense: Figura, Superficie)
+        [/<th>Bild<\/th>/g, '<th>Imagen</th>'], [/<td>Fläche<\/td>/g, '<td>Área</td>'], [/>Einheitswürfel</g, '>Cubo unidad<'],
         // lgs8: the solution set is S in the Spanish books (glosario, also in the widget sentences): $L = \{…\}$, $L = \mathbb{R}$ → $S = …$
         [/\$L = (?=\\mathbb\{R\}|\\\{)/g, '$S = '],
         // sets of whole numbers: \{1; 2; 3\} → \{1, 2, 3\} (with a decimal comma the semicolon stays)
