@@ -600,6 +600,23 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Oberschule, Realschulbildungsgang | Oberschule, itinerario de Realschule | start page: «la escuela secundaria sajona del 5.º al 10.º curso … termina con un examen final y el título de Realschule» |
+| Wahlpflichtbereich 3 | Optativa obligatoria 3, chapter OP | |
+| Runde 2 · mit Taschenrechner | RONDA 2 · CON CALCULADORA | |
+| Haus der Vierecke | casa de los cuadriláteros | |
+| Drachenviereck, Drachen | deltoide | |
+| unregelmäßig / gleichschenklig / gleichseitig (Dreieck) | escaleno / isósceles / equilátero | |
+| spitzwinklig / rechtwinklig / stumpfwinklig | acutángulo / rectángulo / obtusángulo | |
+| Schenkel (Trapez), Basiswinkel | lado no paralelo, ángulos de la base | |
+| $n$-Eck, Zehneck, Zwölfeck | polígono de $n$ lados, decágono, dodecágono | |
+| Hypotenuse, Ankathete, Gegenkathete (GK : HY …) | hipotenusa, cateto contiguo, cateto opuesto (CO : H, CC : H, CO : CC) | |
+| Hilfslinie | línea auxiliar | |
+| Satteldach, Giebel, First, Traufe, Sparren | tejado a dos aguas, hastial, cumbrera, alero, cabio | |
+| Steigung in % (Straße, Rampe), Neigungswinkel | pendiente, ángulo de inclinación | |
+| Sinussatz, Kosinussatz | teorema del seno, teorema del coseno | |
+| SSS, SWS, WSW, SSW | LLL, LAL, ALA, LLA | widget dreieckloeser; S = lado, W = ángulo |
+| eingeschlossener Winkel, Schenkellinie | ángulo comprendido, semirrecta del ángulo | |
+| Umkreis | circunferencia circunscrita | |
 
 ## Added by mathegy9-es (Curie)
 

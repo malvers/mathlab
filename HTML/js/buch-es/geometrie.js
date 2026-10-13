@@ -20,6 +20,16 @@ window.BuchES && BuchES.add('geometrie', {
         // book es mathegy8-es (Curie)
 
         // book es mathe10-es (Curie)
+        // trigo
+        'Sinus': 'Seno', 'Kosinus': 'Coseno', 'Tangens': 'Tangente', 'Verhältnis': 'Razón', 'Winkel $\\alpha$': 'Ángulo $\\alpha$', 'Hypotenuse $c$': 'Hipotenusa $c$',
+        'Gegenkathete a': 'cateto opuesto a', 'Ankathete b': 'cateto contiguo b', 'Hypotenuse c': 'hipotenusa c',
+        'Rechtwinkliges Dreieck mit Winkel alpha': 'Triángulo rectángulo con el ángulo alfa',
+        'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.':
+            'Cambia $c$: el triángulo se hace más grande o más pequeño, pero las tres razones no cambian. Solo dependen del ángulo.',
+        // vieleck
+        'Ecken verdoppeln': 'Duplicar los vértices', 'Zurück auf 6': 'Volver a 6', 'Anzahl der Ecken $n$': 'Número de vértices $n$',
+        'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Circunferencia con un polígono inscrito y otro circunscrito', 'innen': 'inscrito', 'außen': 'circunscrito',
+        'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circunferencia con $r = 1$, por tanto $u = 2\\pi$. Perímetro dividido entre $2$:',
 
         // book es mathegy9-es (Curie)
 
@@ -34,6 +44,10 @@ window.BuchES && BuchES.add('geometrie', {
         // book es mathegy8-es (Curie)
 
         // book es mathe10-es (Curie)
+        // trigo
+        ['\\text{Gegenkathete}', '\\text{cateto opuesto}'], ['\\text{Ankathete}', '\\text{cateto contiguo}'], ['\\text{Hypotenuse}', '\\text{hipotenusa}'],
+        // vieleck
+        ['Also $', 'Por tanto $'], ['$, Abstand $', '$, diferencia $'],
 
         // book es mathegy9-es (Curie)
 
