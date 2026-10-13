@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 11 · Capítulo 3.2 · Rectas en el espacio | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Forma paramétrica, prueba de pertenencia, puntos de traza, posición relativa de dos rectas. Capítulo 3.2 del libro de texto interactivo Matemáticas · Gymnasium 11: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 3.2 · ÁREA DE APRENDIZAJE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 3.2 · ÁREA DE APRENDIZAJE 3 · MARZO</p>
+            <h1>Rectas en el espacio</h1>
+            <p class="b-hero-lead">Un avión asciende tras el despegue con rumbo recto, un rayo láser atraviesa la habitación, dos barras de una estructura de juegos se cruzan sin tocarse.
+                Con un punto y un vector director describes cualquier recta del espacio. Después compruebas si un punto está en ella, dónde atraviesa un plano coordenado
+                y qué posición relativa tienen dos rectas: en el espacio hay un caso más que en el plano.</p>
+            <div class="b-chips"><span class="b-chip">8 SESIONES</span><span class="b-chip">2 LECCIONES</span><span class="b-chip">3D</span><span class="b-chip">AVIACIÓN</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>plantear ecuaciones de rectas en <b>forma paramétrica</b> a partir de un punto y una dirección o de dos puntos</li>
+                <li>hacer la <b>prueba de pertenencia</b> y describir segmentos mediante el intervalo del parámetro</li>
+                <li>calcular los <b>puntos de traza</b> con los planos coordenados</li>
+                <li>determinar la <b>posición relativa</b> de dos rectas: coincidentes, paralelas, secantes o que se cruzan</li>
+                <li>calcular <b>puntos de intersección</b> y describir movimientos con rectas</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Cuánto es $\overrightarrow{AB}$ para $A(1, 0, 2)$ y $B(3, 4, 2)$?</p><div class="b-mc"><button>$(2, 4, 0)$</button><button>$(4, 4, 4)$</button><button>$(-2, -4, 0)$</button></div><div class="b-sol"><p>Punta menos origen.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">Resuelve $1 + 2t = 5$.</p><div class="b-sol"><p>$t = 2$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="s ="><p class="b-q-text">Resuelve $t = 2 - s$ y $2t = 2s$. ¿Cuánto vale $s$?</p><div class="b-sol"><p>$t = s = 1$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Son paralelos $(2, -4, 6)$ y $(-1, 2, -3)$?</p><div class="b-mc"><button>no</button><button>sí</button><button>solo si tienen la misma longitud</button></div><div class="b-sol"><p>Factor $-2$.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">EL ASCENSO</div>
+            <div class="b-text"><p>En el instante $t = 0$, un avión está en el punto $(0, 0, 1)$ (datos en km) y cada minuto se desplaza $(6;\, 8;\, 0{,}5)$.</p>
+                <ul><li>¿Dónde está al cabo de 1, 2 y 5 minutos? ¿A qué velocidad vuela? ¿Cuándo alcanza 4 km de altura?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">BOLÍGRAFOS SOBRE LA MESA</div>
+            <div class="b-text"><p>Sostened en el aire dos bolígrafos como modelos de rectas.</p>
+                <ul><li>Encontrad todas las posiciones posibles. ¿Cuál solo existe en el espacio y no sobre la mesa?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">ARISTAS DEL CUBO</div>
+            <div class="b-text"><p>Elegid una arista de un cubo. Clasificad las otras once aristas según su posición respecto a ella.</p></div>
+            <a class="b-lab" data-lab="koerper" href="../../koerper.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CUERPOS</span><span class="b-lab-what">Girar cubos y otros cuerpos (en alemán)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Rectas en forma paramétrica" data-toc-k="1" data-toc-short="1 Recta">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Rectas en forma paramétrica</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Al cabo de $t$ minutos, el avión está en el punto con vector de posición $\vec{x} = \begin{pmatrix} 0 \\ 0 \\ 1 \end{pmatrix} + t \cdot \begin{pmatrix} 6 \\ 8 \\ 0{,}5 \end{pmatrix}$.
+                A los 2 minutos, en $(12, 16, 2)$; a los 6 minutos, a 4 km de altura. Si $t$ recorre todos los números reales, también los negativos,
+                se obtienen todos los puntos de una recta: el despegue, el pasado y el futuro del rumbo.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · RECTAS EN EL ESPACIO</div>
+                <div class="b-text">
+                    <p><b>Forma paramétrica:</b> $g\colon \vec{x} = \vec{p} + t \cdot \vec{u}$ con el <b>vector de posición</b> $\vec{p}$ de un punto base y el <b>vector director</b> $\vec{u} \neq \vec{o}$, $t \in \mathbb{R}$.</p>
+                    <p>Recta que pasa por $A$ y $B$: $\vec{x} = \vec{a} + t \cdot \overrightarrow{AB}$. Al <b>segmento</b> $AB$ le corresponde $0 \leq t \leq 1$, y al punto medio, $t = \tfrac{1}{2}$.</p>
+                    <p><b>Prueba de pertenencia:</b> sustituir el punto; si las tres ecuaciones de coordenadas dan el mismo $t$, el punto está en la recta.</p>
+                    <p><b>Puntos de traza:</b> puntos de intersección con los planos coordenados, p. ej. con el plano $xy$ mediante $z = 0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Muchas ecuaciones, una recta:</b> cualquier punto de la recta sirve como punto base, y cualquier múltiplo no nulo del vector director sirve como dirección.</p>
+            <p class="b-note"><b>Movimiento:</b> si $t$ es el tiempo, $|\vec{u}|$ es la velocidad. En el ascenso: $|\vec{u}| = \sqrt{36 + 64 + 0{,}25} \approx 10{,}01$ km por minuto.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · UNA RECTA EN EL ESPACIO</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta el punto base y el vector director, haz que el punto recorra la recta y haz la prueba de pertenencia. El widget muestra también los puntos de traza.</p>
+        <div data-widget="gerade3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · PRUEBA DE PERTENENCIA</div>
+            <div class="b-text"><p>$g\colon \vec{x} = \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix} + t \begin{pmatrix} 2 \\ 0 \\ -1 \end{pmatrix}$. ¿Están $P(5, 2, 1)$ y $Q(3, 1, 2)$ en $g$?</p></div>
+            <div class="b-sol"><p>$P$: $1 + 2t = 5$, $2 = 2$, $3 - t = 1$: siempre $t = 2$, así que sí.</p>
+                <p>$Q$: la coordenada $y$ vale siempre 2 en $g$: <span class="b-res">$Q$ no está en $g$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · PUNTO DE TRAZA</div>
+            <div class="b-text"><p>¿Dónde atraviesa la misma recta $g$ el plano $xy$?</p></div>
+            <div class="b-sol"><p>$z = 3 - t = 0 \Rightarrow t = 3$.</p>
+                <p><span class="b-res">$S_{xy}(7, 2, 0)$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Plantea una ecuación de la recta: a) que pasa por $A(1, 0, 2)$ y $B(3, 4, 2)$ &nbsp; b) el eje $z$ &nbsp; c) que pasa por $(0, 2, 3)$ y es paralela al eje $x$</p></div>
+            <div class="b-sol"><p>a) $\vec{x} = (1, 0, 2) + t(2, 4, 0)$ &nbsp; b) $\vec{x} = t(0, 0, 1)$ &nbsp; c) $\vec{x} = (0, 2, 3) + t(1, 0, 0)$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Para qué valor del parámetro está $(4, 4, 1)$ en $\vec{x} = (2, 2, 3) + t(1, 1, -1)$? ¿Qué punto corresponde a $t = -1$?</p></div>
+            <div class="b-sol"><p>$t = 2$; $(1, 1, 4)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula todos los puntos de traza de $\vec{x} = (2, 1, 4) + t(1, 1, -2)$.</p></div>
+            <div class="b-sol"><p>$xy$: $t = 2$, $(4, 3, 0)$ · $xz$: $t = -1$, $(1, 0, 6)$ · $yz$: $t = -2$, $(0, -1, 8)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Resuelve la exploración «El ascenso»: posición a los 5 minutos, velocidad en km/h, instante en que alcanza 4 km de altura.</p></div>
+            <div class="b-sol"><p>$(30;\, 40;\, 3{,}5)$; $|\vec{u}| \approx 10{,}01$ km/min, es decir, unos 601 km/h; $1 + 0{,}5t = 4 \Rightarrow t = 6$ min.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Demuestra que $\vec{x} = (1, 0, 0) + t(1, 1, 0)$ y $\vec{x} = (3, 2, 0) + s(-2, -2, 0)$ describen la misma recta.</p></div>
+            <div class="b-sol"><p>Las direcciones son múltiplos (factor $-2$) y $(3, 2, 0)$ está en la primera recta para $t = 2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="7" data-ph="x ="><p class="b-q-text">¿Qué coordenada $x$ tiene el punto de traza de $g$ del ejemplo 2?</p><div class="b-sol"><p>$S_{xy}(7, 2, 0)$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="min"><p class="b-q-text">¿Cuándo alcanza el avión en ascenso 4 km de altura?</p><div class="b-sol"><p>A los 6 minutos</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué valores del parámetro describen el segmento $AB$ en $\vec{x} = \vec{a} + t\,\overrightarrow{AB}$?</p><div class="b-mc"><button>$t \geq 0$</button><button>$-1 \leq t \leq 1$</button><button>$0 \leq t \leq 1$</button></div><div class="b-sol"><p>$t = 0$: $A$; $t = 1$: $B$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Posición relativa de rectas" data-toc-k="2" data-toc-short="2 Posición">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Posición relativa de dos rectas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dos bolígrafos sobre la mesa se cortan, son paralelos o están uno encima del otro. Si se sostienen en el aire, hay un cuarto caso:
+                no son paralelos y aun así no se tocan, como las barras de una estructura de juegos o una arista de la base y una arista de la cara superior de un cubo situada oblicuamente enfrente.
+                De esas rectas se dice que <b>se cruzan</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · POSICIÓN DE DOS RECTAS</div>
+                <div class="b-text">
+                    <p><b>1. ¿Vectores directores colineales?</b> Sí: prueba de pertenencia del punto base de una en la otra. Si está en ella: <b>coincidentes</b>; si no, <b>paralelas</b> (y distintas).</p>
+                    <p><b>2. No colineales:</b> igualar las ecuaciones de las rectas. El sistema tiene 3 ecuaciones para 2 parámetros: con dos de ellas se determinan $t$ y $s$, y con la tercera se comprueba.</p>
+                    <p>Si la tercera se cumple: <b>secantes</b>; el <b>punto de intersección</b> se obtiene sustituyendo. Si no se cumple: <b>se cruzan</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>¿Colisión?</b> En los movimientos, el parámetro es el tiempo. Dos aviones solo chocan si están en el punto de intersección en el <b>mismo</b> instante: $t = s$.</p>
+            <p class="b-note"><b>Perspectiva:</b> el widget ya muestra a qué distancia están dos rectas que se cruzan; a calcular distancias aprenderás en 12.º curso.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿QUÉ POSICIÓN TIENEN DOS RECTAS?</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta dos rectas y gira el espacio. El widget decide: coincidentes, paralelas, secantes (con punto de intersección) o se cruzan.</p>
+        <div data-widget="geradenlage"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · SECANTES</div>
+            <div class="b-text"><p>$g\colon \vec{x} = (0, 0, 0) + t(1, 2, 3)$ y $h\colon \vec{x} = (2, 0, 0) + s(-1, 2, 3)$.</p></div>
+            <div class="b-sol"><p>No colineales. $t = 2 - s$, $2t = 2s$, $3t = 3s$: de la segunda, $t = s$, y entonces $t = s = 1$; la tercera se cumple.</p>
+                <p><span class="b-res">Punto de intersección $S(1, 2, 3)$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · SE CRUZAN</div>
+            <div class="b-text"><p>$g\colon \vec{x} = (1, 2, 0) + t(1, 0, 1)$ y $h\colon \vec{x} = (3, 0, 4) + s(0, 1, 1)$.</p></div>
+            <div class="b-sol"><p>No colineales. $1 + t = 3$, $2 = s$, $t = 4 + s$: de las dos primeras, $t = 2$, $s = 2$; la tercera: $2 = 6$, falso.</p>
+                <p><span class="b-res">Se cruzan</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Decide: a) $(1, 0, 0) + t(1, 1, 0)$ y $(0, 1, 0) + s(2, 2, 0)$ &nbsp; b) $(1, 0, 2) + t(2, 1, 0)$ y $(3, 1, 2) + s(4, 2, 0)$</p></div>
+            <div class="b-sol"><p>a) paralelas y distintas &nbsp; b) coincidentes</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Halla el punto de intersección de $(1, 1, 0) + t(1, 0, 1)$ y $(2, 0, 1) + s(0, 1, 0)$.</p></div>
+            <div class="b-sol"><p>$t = 1$, $s = 1$: $S(2, 1, 1)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Para qué $a$ se cortan $\vec{x} = t(1, 1, 0)$ y $\vec{x} = (2, 0, a) + s(0, 1, 0)$? ¿Qué posición tienen para los demás valores de $a$?</p></div>
+            <div class="b-sol"><p>Solo para $a = 0$ (punto de intersección $(2, 2, 0)$); en los demás casos se cruzan.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dos aviones vuelan según $\vec{x} = (0, 0, 8) + t(6, 8, 0)$ y $\vec{x} = (60, 0, 8) + s(-6, 8, 0)$ ($t$, $s$ en minutos, datos en km; los dos salen a la vez). ¿Se cortan las trayectorias? ¿Hay colisión?</p></div>
+            <div class="b-sol"><p>$6t = 60 - 6s$, $8t = 8s$: $t = s = 5$, punto de intersección $(30, 40, 8)$. Los dos llegan ahí a los 5 minutos: ¡rumbo de colisión! El control aéreo tiene que intervenir.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Para $g\colon \vec{x} = (1, 2, 3) + t(1, 0, 0)$, da una recta paralela, una que corte a $g$ y una que se cruce con $g$.</p></div>
+            <div class="b-sol"><p>Por ejemplo, paralela: $(0, 0, 0) + s(1, 0, 0)$; secante: $(0, 2, 3) + s(0, 1, 0)$; que se cruza: $(0, 0, 0) + s(0, 1, 0)$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="3" data-ph="z ="><p class="b-q-text">¿Qué coordenada $z$ tiene el punto de intersección del ejemplo 3?</p><div class="b-sol"><p>$S(1, 2, 3)$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="a ="><p class="b-q-text">¿Para qué $a$ se cortan $t(1, 1, 0)$ y $(2, 0, a) + s(0, 1, 0)$?</p><div class="b-sol"><p>$a = 0$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">No colineales y sistema sin solución. ¿Qué posición tienen las rectas?</p><div class="b-mc"><button>paralelas</button><button>se cruzan</button><button>coincidentes</button></div><div class="b-sol"><p>Ni paralelas ni con un punto en común.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>En un cubo $ABCDEFGH$ (base $ABCD$, encima $EFGH$): ¿qué posición tienen las aristas $AB$ y $GH$, $AB$ y $BF$, $AB$ y $CG$?</p></div>
+            <div class="b-sol"><p>$AB$ y $GH$, paralelas; $AB$ y $BF$ se cortan en $B$; $AB$ y $CG$ se cruzan.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 2:</b> escribe el sistema de ecuaciones del ejemplo 4 como matriz ampliada para $t$ y $s$ y demuestra con Gauss que no tiene solución.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{cc|c} 1 & 0 & 2 \\ 0 & -1 & -2 \\ 1 & -1 & 4 \end{array}\right)$; $F_3 - F_1 - F_2$ da $(0 \; 0 \mid 4)$: contradicción.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un globo asciende desde $(2, 3, 0)$ en línea recta según $\vec{x} = (2, 3, 0) + t(1, 0, 2)$ ($t$ en min, datos en centenares de metros). ¿Cuándo alcanza 1000 m y dónde está entonces?</p></div>
+            <div class="b-sol"><p>$2t = 10 \Rightarrow t = 5$ min, punto $(7, 3, 10)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Tres rectas pasan por un mismo punto $P$ y tienen las direcciones $(1, 0, 0)$, $(0, 1, 0)$, $(1, 1, 0)$. ¿Están en un mismo plano? Justifícalo con el capítulo 3.1.</p></div>
+            <div class="b-sol"><p>Sí: los tres vectores directores son linealmente dependientes (coplanarios), así que las tres rectas están en el plano que pasa por $P$ paralelo al plano $xy$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Por qué los aviones vuelan en rectas que se cruzan" data-toc-k="X" data-toc-short="Altitudes">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">AVIACIÓN</span></div>
+    <h2>Por qué los aviones vuelan en rectas que se cruzan</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Dos aviones en la misma aerovía, uno hacia el este y otro hacia el oeste, se encontrarían de frente sobre la misma recta. Para que eso no ocurra existe la
+                <b>regla semicircular</b>: quien vuela un rumbo entre 0° y 179°, es decir, más o menos hacia el este, elige un nivel de vuelo impar (p. ej. nivel de vuelo 350, es decir, 35 000 pies);
+                quien vuela entre 180° y 359°, uno par (p. ej. nivel de vuelo 360).</p>
+            <p>Geométricamente esto significa: las trayectorias de aviones que vienen de frente están en planos horizontales distintos, al menos a 1000 pies (unos 300 m) una sobre otra.
+                Si van en paralelo, son rectas paralelas; si vistas desde arriba se cruzan, son rectas que <b>se cruzan</b> en el espacio. Un punto de intersección queda descartado incluso antes de que calcule el control aéreo.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> OACI, Anexo 2 «Reglamento del aire», apéndice 3 (tabla de niveles de crucero). La referencia es la derrota magnética; en algunos espacios aéreos, las aerovías fijan sus propios niveles, que tienen preferencia.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>FORMA PARAMÉTRICA</h4><p>$\vec{x} = \vec{p} + t\vec{u}$; por $A$ y $B$: dirección $\overrightarrow{AB}$.</p></div>
+        <div><p>$(1, 0, 2) + t(2, 4, 0)$</p></div></div>
+    <div class="b-rueck"><div><h4>PRUEBA DE PERTENENCIA</h4><p>¿El mismo $t$ en las tres ecuaciones?</p></div>
+        <div><p>$P(5, 2, 1)$: $t = 2$</p></div></div>
+    <div class="b-rueck"><div><h4>PUNTOS DE TRAZA</h4><p>Igualar a cero una coordenada.</p></div>
+        <div><p>$S_{xy}(7, 2, 0)$</p></div></div>
+    <div class="b-rueck"><div><h4>POSICIÓN RELATIVA</h4><p>¿Colineales? → coincidentes/paralelas. Si no, igualar → secantes/se cruzan.</p></div>
+        <div><p>Ejemplo 3: $S(1, 2, 3)$; ejemplo 4: se cruzan</p></div></div>
+    <div class="b-rueck"><div><h4>MOVIMIENTO</h4><p>Parámetro = tiempo, $|\vec{u}|$ = velocidad; colisión solo si $t = s$.</p></div>
+        <div><p>Los aviones se encuentran a los 5 min</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">¿Para qué $t$ está $(4, 4, 1)$ en $(2, 2, 3) + t(1, 1, -1)$?</p><div class="b-sol"><p>$t = 2$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">¿Qué coordenada $x$ tiene el punto de intersección de $(1, 1, 0) + t(1, 0, 1)$ y $(2, 0, 1) + s(0, 1, 0)$?</p><div class="b-sol"><p>$S(2, 1, 1)$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Hay rectas que se cruzan en el plano?</p><div class="b-mc"><button>no</button><button>sí</button><button>solo perpendiculares</button></div><div class="b-sol"><p>Para eso hace falta la tercera dimensión.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">Punto de traza de $(2, 1, 4) + t(1, 1, -2)$ con el plano $xy$: ¿coordenada $x$?</p><div class="b-sol"><p>$(4, 3, 0)$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="min"><p class="b-q-text">¿Al cabo de cuántos minutos se encuentran los dos aviones del ejercicio 9?</p><div class="b-sol"><p>5</p></div></div>
+            <div class="b-q" data-ans="601" data-tol="1" data-ph="km/h"><p class="b-q-text">¿Velocidad en el ascenso $(6;\, 8;\, 0{,}5)$ km por minuto, en km/h (número entero)?</p><div class="b-sol"><p>$\sqrt{100{,}25} \cdot 60 \approx 601$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-geraden.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RECTAS EN FORMA PARAMÉTRICA</span><span class="b-lab-what">plantear, prueba de pertenencia, puntos de traza, 20 ejercicios (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-lage-geraden.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">POSICIÓN RELATIVA</span><span class="b-lab-what">paralelas, secantes, se cruzan, 20 ejercicios (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 11.º curso, curso básico · Área de aprendizaje 3 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-es/vektoren.js"></script>
+</body>
+</html>
