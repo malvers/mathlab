@@ -45,7 +45,6 @@ window.BuchES && BuchES.add('vektoren', {
         'Spiegelpunkt P′ zeigen': 'Mostrar el punto simétrico P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Constante $d$ en $\\vec{n} \\circ \\vec{x} = d$',
         'Gerade – Gerade': 'recta – recta', 'Gerade – Ebene': 'recta – plano', 'Ebene – Ebene': 'plano – plano', 'Welcher Winkel?': '¿Qué ángulo?',
         'spitz': 'agudo', 'stumpfe Vektoren': 'vectores con ángulo obtuso', 'senkrecht': 'perpendicular', 'schräg': 'oblicuo', 'Dach und Boden': 'tejado y suelo',
-        'parallel': 'paralelos',   // presets of kreuzprodukt (u, v) and winkel3d (line and plane)
 
         // book es mathegy12lk-es (Turing)
 
@@ -183,9 +182,11 @@ window.BuchES && BuchES.add('vektoren', {
         // book es mathegy11lk-es (Turing)
 
         // book es mathegy12-es (Turing)
-        // geradenlage: "parallel" between lines is feminine (rectas paralelas); the other widgets keep the word "paralelos" (vectors, planes)
-        // (the whole labels are parked as \u0003n\u0004 by the engine before the rules run, so the rule writes the word itself)
-        [/(data-p="par">)\u0003\d+\u0004(<\/button><button type="button" class="b-btn" data-p="ide">[^<]*<\/button><button type="button" class="b-btn" data-p="win">)/g, '$1paralelas$2'],
+        // the preset "parallel" of the other widgets, next to the two rules of es-2 above (no global word: a whole label would be
+        // parked by the engine before the rules and the rules would not see it): winkel3d line and plane (paralelos),
+        // abstand3d two lines (paralelas), ebenenlage two planes (paralelos; the rule of geradenlage above has already made it paralelas)
+        [/(data-p="flach">)parallel</g, '$1paralelos<'], [/(data-p="c">)parallel</g, '$1paralelas<'],
+        [/(data-p="spur">[^<]*<\/button><button type="button" class="b-btn" data-p="par">)paralelas</g, '$1paralelos<'],
 
         // book es mathegy12lk-es (Turing)
 

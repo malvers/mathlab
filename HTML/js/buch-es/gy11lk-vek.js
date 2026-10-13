@@ -27,7 +27,7 @@ window.BuchES && BuchES.add('gy11lk-vek', {
         'Koordinatenform': 'Ecuación general', 'Gerade und Ebene': 'Recta y plano',
         'Eine Ebene im Raum mit ihrem Spurdreieck': 'Un plano en el espacio con su triángulo de trazas',
         // ebenenlage
-        'Dach': 'Tejado', 'Spurgerade': 'Recta de traza', 'parallel': 'paralelos', 'Zwei Ebenen im Raum und ihre Schnittgerade': 'Dos planos en el espacio y su recta de intersección',
+        'Dach': 'Tejado', 'Spurgerade': 'Recta de traza', 'Zwei Ebenen im Raum und ihre Schnittgerade': 'Dos planos en el espacio y su recta de intersección',
 
     },
     phrase: [

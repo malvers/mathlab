@@ -818,7 +818,7 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Hüllkurve, Fadenbild | envolvente, dibujo de hilos | |
 | Gebiet 1 (Kapitel A), Prüfungsaufgabe | bloque 1, problema de examen | box "OHNE HILFSMITTEL" in chapter A: SIN HERRAMIENTAS (as BGY 13); test rounds: SIN CALCULADORA |
 | Widget (chip, running text) | ELEMENTOS INTERACTIVOS, el elemento interactivo | "3 WIDGETS" → "3 ELEMENTOS INTERACTIVOS" |
-| parallel (preset of geradenlage, ebenenlage, skalarprodukt, kreuzprodukt, winkel3d) | paralelos; between two lines (geradenlage) paralelas | word and rule in js/buch-es/vektoren.js, block mathegy12-es |
+| parallel (preset of geradenlage, abstand3d, ebenenlage, skalarprodukt, kreuzprodukt, winkel3d) | two lines (geradenlage, abstand3d): paralelas; vectors, planes, line and plane: paralelos | only rules in js/buch-es/vektoren.js (es-2 and block mathegy12-es), never a word: a whole label is parked before the rules run |
 | Vektoren und Punkte im Raum | $(1, 2, 3)$; with a decimal comma $(0{,}75;\ 1{,}5;\ 1{,}5)$ | as in BGY 13 |
 | Königselle, Handbreit, Seked | codo real, palmo, seked | Cheops, chapter 7.2 |
 
