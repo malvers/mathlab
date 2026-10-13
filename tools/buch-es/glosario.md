@@ -542,6 +542,39 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Passante, Tangente, Sekante, Sehne | recta exterior, tangente, secante, cuerda | the kind of line in bold inside a widget sentence is a rule in gy7.js |
+| Berührungspunkt, Lot, Lotfußpunkt | punto de tangencia, perpendicular, pie de la perpendicular | |
+| Umkreis(mittelpunkt), Inkreis(mittelpunkt) | circunferencia circunscrita (circuncentro), circunferencia inscrita (incentro) | widget buttons "Circunscrita / Inscrita" under the heading "Circunferencia" |
+| Satz des Thales, Thaleskreis, Umkehrung | teorema de Tales, circunferencia de Tales, recíproco | |
+| Peripheriewinkel, Zentriwinkel, Sehnenviereck | ángulo inscrito, ángulo central, cuadrilátero inscrito | |
+| genau dann, wenn | si y solo si | |
+| Allaussage, Existenzaussage, Gegenbeispiel | afirmación universal, afirmación de existencia, contraejemplo | |
+| Planfigur, Konstruktionsplan | figura de análisis, plan de construcción | |
+| Bestimmungsaufgabe, Beweisaufgabe | problema de cálculo, problema de demostración | |
+| Vorwärts-, Rückwärtsarbeiten | trabajar hacia delante, hacia atrás | |
+| Gegenzahl, Betrag | opuesto, valor absoluto | |
+| natürliche, ganze, gebrochene, rationale Zahlen | números naturales, enteros, fraccionarios, racionales | |
+| Teilmenge, Schnittmenge, Vereinigungsmenge, leere Menge | subconjunto, intersección, unión, conjunto vacío | sets of whole numbers with commas: $\{-1, 0, 1\}$ |
+| Vorzeichen, Rechenzeichen, Vorzeichenregeln | signo, signo de operación, reglas de los signos | |
+| Kommutativ-, Assoziativ-, Distributivgesetz | propiedad conmutativa, asociativa, distributiva | |
+| Überschlag | estimación | |
+| Quadratwurzel, irrational | raíz cuadrada, irracional | |
+| Äquivalenzumformung, Formel umstellen nach $b$ | transformación equivalente, despejar $b$ | umstellen7: "Despeja $b$ en la fórmula …"; buttons only "$b$" under "despejar" |
+| Grundwert $G$, Prozentwert $W$, Prozentsatz $p\,\%$ | valor base $G$, valor porcentual $W$, tanto por ciento $p\,\%$ | the letters stay (same answers), explained once in 2.4 |
+| Rabatt, Skonto, Mehrwertsteuer, netto, brutto | descuento, descuento por pronto pago, IVA, neto, bruto | German rates 19 % / 7 % "en Alemania" |
+| Steigerung um / auf | aumentar en / aumentar hasta | widget: "Un aumento del 20 % significa pasar al 120 %" |
+| Prozentpunkte | puntos porcentuales | |
+| Tabellenkalkulation | hoja de cálculo | formulas `=B2*C2` stay |
+| Säulen-, Balken-, Linien-, Kreisdiagramm | diagrama de barras, de barras horizontales, de líneas, de sectores | |
+| Netz (Körpernetz), Schrägbild | desarrollo plano, perspectiva caballera | as in GY 6 |
+| Zweitafelbild, Aufriss, Grundriss | representación en dos vistas, alzado, planta | widget button "Dos vistas"; "en España, sistema diédrico" in 3.1 |
+| Rissachse $x_{12}$, Ordnungslinie | línea de tierra $x_{12}$, línea de referencia | |
+| wahre Länge, wahre Größe | verdadera magnitud (of a segment and of a face) | |
+| Pyramidenstumpf, Deckkante, $h_s$ | tronco de pirámide, arista superior, $h_s$ (altura del triángulo lateral, apotema) | |
+| Polyeder, reguläres Polyeder, platonische Körper | poliedro, poliedro regular, sólidos platónicos | |
+| Eulerscher Polyedersatz $e - k + f = 2$ | fórmula de Euler para poliedros $e - k + f = 2$ | the letters e, k, f stay (widgets, answers) and are explained once in OP |
+| Hexaeder, Tetraeder, Oktaeder, Dodekaeder, Ikosaeder | hexaedro, tetraedro, octaedro, dodecaedro, icosaedro | |
+| Würfel (solid) | cubo | rules /^Würfel$/ and />Würfel</ in gy7.js, not a word: in stochastics it is a die |
 
 ## Added by mathegy8-es (Curie)
 
