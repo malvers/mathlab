@@ -97,6 +97,21 @@ window.BuchES && BuchES.add('analysis', {
         // book es mathegy11lk-es (Turing)
 
         // book es mathegy12-es (Turing)
+        // titelbildgy12, integrieren, abstandmin, geradenschar
+        'Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor':
+            'Portada: un área bajo una curva con trapecios, un histograma con la región de rechazo en rojo, una recta que atraviesa un plano con su ángulo de intersección y el vector normal',
+        'Lineare Verkettung': 'Composición lineal', 'z. B. x^3/3 - 2x oder -cos(2x)/2': 'p. ej. x^3/3 - 2x o -cos(2x)/2',
+        'Gerade': 'Recta', 'Parabel': 'Parábola', 'Wurzelkurve': 'Curva raíz', 'Kurve:': 'Curva:',
+        'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).':
+            'Arrastra el punto P. El deslizador mueve Q por la curva; abajo, la distancia d(x) crece y decrece.',
+        'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Curva, punto P y el punto Q de la curva con su distancia',
+        'Abstandsfunktion d(x) mit ihrem Minimum': 'Función distancia d(x) con su mínimo', '$x$-Koordinate von $Q$': 'Coordenada $x$ de $Q$',
+        'Büschel': 'Haz', 'Parallelen': 'Paralelas', 'Gerade und Parabel': 'Recta y parábola', 'Geradenschar': 'Familia de rectas',
+        'Geradenschar mit der hervorgehobenen Geraden für den gewählten Parameter': 'Familia de rectas con la recta del parámetro elegido resaltada',
+        'Alle Geraden gehen durch $(2 \\mid 1)$: Für $x = 2$ fällt $a$ heraus. Der Parameter ist die Steigung, eine Gerade fehlt aber: die senkrechte $x = 2$.':
+            'Todas las rectas pasan por $(2, 1)$: para $x = 2$, $a$ desaparece. El parámetro es la pendiente, pero falta una recta: la vertical $x = 2$.',
+        'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
+            'La pendiente es siempre $0{,}5$: las rectas son paralelas y no tienen ningún punto en común. El parámetro las desplaza.',
 
         // book es mathegy12lk-es (Turing)
 
@@ -212,6 +227,20 @@ window.BuchES && BuchES.add('analysis', {
         // book es mathegy11lk-es (Turing)
 
         // book es mathegy12-es (Turing)
+        // integrieren
+        ['Bestimme eine Stammfunktion: $f(x) = ', 'Halla una primitiva: $f(x) = '],
+        ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Todavía no. Deriva tu solución para comprobarla. Pista: '],
+        // abstandmin
+        ['Jetzt: $x = ', 'Ahora: $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · mínima en $x \\approx '], ['$P$ liegt auf der Kurve, der Abstand ist $0$.', '$P$ está en la curva, la distancia es $0$.'],
+        ['Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ', 'El segmento más corto (verde) es perpendicular a la tangente: ángulo $\\approx '],
+        ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. Por eso el punto se llama también pie de la perpendicular.'],
+        ['Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.',
+            'El mínimo está en el borde del intervalo; allí el segmento no tiene por qué ser perpendicular a la tangente.'],
+        // geradenschar
+        ['Schnitt mit $y = x^2 + 2$: $x^2 - ', 'Intersección con $y = x^2 + 2$: $x^2 - '], ['x + 1 = 0$, Diskriminante $a^2 - 4 = ', 'x + 1 = 0$, discriminante $a^2 - 4 = '],
+        ['zwei Schnittpunkte.', 'dos puntos de intersección.'], ['kein gemeinsamer Punkt.', 'ningún punto en común.'],
+        ['genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', 'exactamente un punto: la recta es <b>tangente</b> a la parábola en $x = '],
+        ['$. Das passiert für $a = \\pm 2$.', '$. Esto ocurre para $a = \\pm 2$.'],
 
         // book es mathegy12lk-es (Turing)
 
@@ -235,6 +264,8 @@ window.BuchES && BuchES.add('analysis', {
         // book es mathegy11lk-es (Turing)
 
         // book es mathegy12-es (Turing)
+        // abstandmin: the general point Q(x | f(x))
+        [/\$Q\(x \\mid f\(x\)\)\$/g, '$Q(x, f(x))$'],
 
         // book es mathegy12lk-es (Turing)
 
