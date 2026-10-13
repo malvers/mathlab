@@ -192,6 +192,8 @@ window.BuchES && BuchES.add('stochastik', {
         // book es mathegy11lk-es (Turing)
 
         // book es mathegy12-es (Turing)
+        // stichprobe: the singular after one sample (German widget fixed 13.10., "1 Stichprobe vom Umfang 50")
+        [' Stichprobe vom Umfang ', ' muestra de tamaño '],
 
         // book es mathegy12lk-es (Turing)
 

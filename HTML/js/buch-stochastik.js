@@ -790,7 +790,7 @@
             plot.draw([{ rects, color: 'cyan' }, { vline: S.p, color: 'red' }, { text: 'p', at: [S.p, 1.05], color: 'red' }].concat(S.last != null ? [{ pts: [[S.last, 0]], color: 'lambda', r: 6 }] : []));
             const mean = m ? S.shares.reduce((a, b) => a + b, 0) / m : NaN;
             const sd = m > 1 ? Math.sqrt(S.shares.reduce((a, h) => a + (h - mean) ** 2, 0) / (m - 1)) : NaN;
-            out.innerHTML = '<p style="margin:0 0 6px">' + (m ? int(m) + ' Stichproben vom Umfang ' + S.n + ' · letzte: $h = ' + texNum(S.last, 3) + '$ (gold)' : 'Noch keine Stichprobe gezogen.') + '</p>' +
+            out.innerHTML = '<p style="margin:0 0 6px">' + (m ? int(m) + (m === 1 ? ' Stichprobe vom Umfang ' : ' Stichproben vom Umfang ') + S.n + ' · letzte: $h = ' + texNum(S.last, 3) + '$ (gold)' : 'Noch keine Stichprobe gezogen.') + '</p>' +
                 '<p style="margin:0">' + (m > 1 ? 'Mittelwert der $h$: $' + texNum(mean, 3) + '$ · Standardabweichung der $h$: $' + texNum(sd, 4) + '$ · ' : '') +
                 'Theorie: $\\sqrt{\\tfrac{p(1-p)}{n}} \\approx ' + texNum(sdT, 4) + '$. Viermal so großes $n$ halbiert die Streuung.</p>';
             math(out);

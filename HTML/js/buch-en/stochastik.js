@@ -100,7 +100,7 @@ window.BuchEN && BuchEN.add('stochastik', {
         ['Pfade mit genau ', 'Paths with exactly '], [' Treffern: $', ' hits: $'], ['$ · jeder hat die Wahrscheinlichkeit $', '$ · each has the probability $'],
         ['Formel von Bernoulli: $P(X = ', "Bernoulli's formula: $P(X = "],
         // book 3 mathe13-en: stichprobe
-        [' Stichproben vom Umfang ', ' samples of size '], [' · letzte: $h = ', ' · latest: $h = '],
+        [' Stichproben vom Umfang ', ' samples of size '], [' Stichprobe vom Umfang ', ' sample of size '], [' · letzte: $h = ', ' · latest: $h = '],
         ['Mittelwert der $h$: $', 'Mean of the $h$: $'], ['$ · Standardabweichung der $h$: $', '$ · standard deviation of the $h$: $'],
         ['Theorie: $', 'Theory: $'], ['$. Viermal so großes $n$ halbiert die Streuung.', '$. An $n$ four times as large halves the spread.'],
         // book 3 mathe13-en: signifikanztest
