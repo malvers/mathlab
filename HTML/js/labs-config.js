@@ -79,6 +79,28 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathe6",
+        "href": "buch/mathe6/index.html",
+        "title": "Mathematik OS 6",
+        "description": "Das interaktive Lehrbuch Mathematik für die Oberschule, Klasse 6, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Zehn Kapitel in der Reihenfolge des Schuljahres – gebrochene Zahlen darstellen, Rechnen mit gebrochenen Zahlen, Rechengesetze, Mittelwert und Sachaufgaben, Zuordnungen, Proportionalität und Dreisatz, Winkel und Dreiecke, Flächeninhalt und Umfang, geometrische Körper, Mathematik im Alltag und als Wahlbereich mathematische Spiele. Zum Ausprobieren: Würfelbauten aus ihrem Bauplan mit Ansichten von vorn und von der Seite, der Turm von Hanoi, Nim gegen den Computer, das Tangram, das Schiebepuzzle und die Augensumme zweier Würfel. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik OS 6 / 10 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe6"],
+        "category": "buecher neu arithmetik geometrie grade6",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 6 oberschule sachsen lehrplan kapitel brueche bruch gebrochene zahlen dezimalzahlen erweitern kuerzen vergleichen addieren multiplizieren dividieren rechengesetze mittelwert sachaufgaben zuordnung proportional dreisatz winkel dreieck flaecheninhalt umfang koerper netz wuerfel quader wuerfelbau ansichten alltag spiele hanoi nim tangram schiebepuzzle augensumme wuerfel aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
+        "id": "lehrbuch-mathe7",
+        "href": "buch/mathe7/index.html",
+        "title": "Mathematik OS 7",
+        "description": "Das interaktive Lehrbuch Mathematik für die Oberschule, Klasse 7, Realschulbildungsgang, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Neun Kapitel in der Reihenfolge des Schuljahres – Prozentrechnung, Prozente im Alltag und Zinsen, Elemente der Stochastik, rationale Zahlen, Rechnen mit rationalen Zahlen, Terme und Gleichungen, Vierecke und Vielecke, Prismen mit Masse und Dichte und als Wahlbereich Parkettierungen. Zum Ausprobieren: Tageszinsen mit dem Bankjahr, Masse und Dichte eines Quaders, der schwimmt oder sinkt, das Koordinatensystem mit vier Quadranten, Parkette aus regelmäßigen Vielecken und eine Escher-Kachel zum Selbstbauen. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik OS 7 / 9 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe7"],
+        "category": "buecher neu arithmetik algebra geometrie stochastik grade7",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 7 oberschule realschule realschulbildungsgang sachsen lehrplan kapitel prozent prozentrechnung grundwert prozentwert prozentsatz zinsen tageszinsen zinsrechnung rabatt mehrwertsteuer stochastik zufall haeufigkeit wahrscheinlichkeit diagramm rationale zahlen negative zahlen koordinatensystem quadranten terme gleichungen viereck vielecke prisma volumen oberflaeche masse dichte parkettierung parkett escher aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathe8",
         "href": "buch/mathe8/index.html",
         "title": "Mathematik OS 8",

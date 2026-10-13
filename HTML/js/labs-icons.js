@@ -97,6 +97,11 @@ const LAB_ICONS = {
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
+    // the Oberschule books 6 and 7 get their hub cards (Doc, 13.10.2026: "nicht vergessen")
+    "lehrbuch-mathe6": `<img src="resources/og/buch-mathe6-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    "lehrbuch-mathe7": `<img src="resources/og/buch-mathe7-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     // book 16 as well (Doc, 11.10.2026: "Dann fangt an")
     "lehrbuch-mathe8": `<img src="resources/og/buch-mathe8-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
