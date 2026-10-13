@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 12 · Capítulo OP · Integración numérica | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Historia del cálculo integral, método de los rectángulos y de los trapecios, precisión. Capítulo OP del libro de texto interactivo Matemáticas · Gymnasium 12: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">OPTATIVA 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">OPTATIVA 5 · OCTUBRE · NOVIEMBRE</p>
+            <h1>Integración numérica</h1>
+            <p class="b-hero-lead">La campana $\mathrm{e}^{-x^2}$ es una de las funciones más importantes de la estadística, pero no tiene una primitiva que se pueda escribir.
+                Tampoco las medidas de un experimento vienen con una expresión de la función. Entonces solo ayuda <b>calcular con franjas</b>: conoces el <b>método de los rectángulos</b> y el
+                <b>de los trapecios</b>, valoras su precisión y recorres el camino que siguió el cálculo integral desde Arquímedes hasta Riemann.</p>
+            <div class="b-chips"><span class="b-chip">8 SESIONES</span><span class="b-chip">2 LECCIONES</span><span class="b-chip">2 ELEMENTOS INTERACTIVOS</span><span class="b-chip">1 LABORATORIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["exp(-(x^2))"]' data-labels='["f"]' data-lat="[1.3]" data-x="-2.4,2.4" data-y="-0.25,1.25" data-pts="[[0,1]]" data-h="240" data-aria="La campana e elevado a menos x al cuadrado"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>etapas de la <b>historia del cálculo integral</b>: Arquímedes, Kepler, Newton y Leibniz, Riemann</li>
+                <li>aproximar integrales con el <b>método de los rectángulos</b>: nodos por la izquierda, por la derecha y en el punto medio</li>
+                <li>deducir y aplicar el <b>método de los trapecios</b>, también con medidas</li>
+                <li>valorar la <b>precisión</b>: el error al duplicar el número de franjas, integrales sin primitiva</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="8" data-ph="Área"><p class="b-q-text">Un trapecio tiene los lados paralelos $3$ y $5$ y la altura $2$. ¿Cuál es su área?</p><div class="b-sol"><p>$\tfrac{3 + 5}{2} \cdot 2$</p></div></div>
+            <div class="b-q" data-ans="8/3" data-tol="0.01" data-ph="Valor"><p class="b-q-text">Calcula $\int_0^2 x^2\,\mathrm{d}x$.</p><div class="b-sol"><p>$\tfrac83$</p></div></div>
+            <div class="b-q" data-ans="1,25" data-ph="Punto medio"><p class="b-q-text">¿Dónde está el punto medio del intervalo $[1; 1{,}5]$?</p><div class="b-sol"><p>$\tfrac{1 + 1{,}5}{2}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Para $f$ creciente, la suma con rectángulos por la derecha es …</p><div class="b-mc"><button>demasiado pequeña.</button><button>demasiado grande.</button><button>exacta.</button></div><div class="b-sol"><p>A la derecha está el mayor valor.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">COMO ARQUÍMEDES</div>
+            <div class="b-text"><p>El arco $y = 4 - x^2$ en $[-2, 2]$ encierra con el eje un segmento parabólico. Colocad dentro el triángulo $(-2, 0)$, $(2, 0)$, $(0, 4)$.</p>
+                <ul><li>¿Cuál es el área del triángulo y cuál la del segmento (con el teorema fundamental)? ¿Qué factor sale?</li><li>Arquímedes encontró ese factor sin integrales. ¿Cómo pudo hacerlo?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">EN LA HOJA DE CÁLCULO</div>
+            <div class="b-text"><p>Cread en una hoja de cálculo una columna con $x = 0;\ 0{,}2;\ 0{,}4;\ \ldots;\ 2$ y al lado $f(x) = x^2$.</p>
+                <ul><li>Calculad con una fórmula de suma las sumas de franjas con rectángulos por la izquierda y por la derecha.</li><li>Reducid el paso a la mitad. ¿Cómo cambia la distancia al valor exacto $\tfrac83$?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">INCLINADO EN VEZ DE ESCALONES</div>
+            <div class="b-text"><p>Unid los puntos de la gráfica de $x^2$ en $x = 0;\ 1;\ 2$ con segmentos en lugar de escalones.</p>
+                <ul><li>¿Qué figuras quedan bajo los segmentos? Calculad su área.</li><li>¿El resultado queda por encima o por debajo de $\tfrac83$? ¿Por qué?</li></ul></div>
+            <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REACTOR DE INTEGRALES</span><span class="b-lab-what">Áreas bajo curvas (en alemán)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Historia y método de los rectángulos" data-toc-k="1" data-toc-short="1 Rectángulos">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Un poco de historia y el método de los rectángulos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Mucho antes de que existieran las primitivas, los matemáticos calculaban áreas de contorno curvo con figuras que conocían. Arquímedes, en el siglo III a. C.,
+                llenó un segmento parabólico con triángulos cada vez más pequeños y descubrió que mide $\tfrac43$ del triángulo más grande inscrito. Hoy se usan rectángulos, y un ordenador calcula miles en segundos.</p></div></div>
+            <div class="b-text"><p>Se divide $[a, b]$ en $n$ franjas iguales de anchura $h = \tfrac{b - a}{n}$ con los nodos $x_0 = a$, $x_1 = a + h$, …, $x_n = b$.
+                Sobre cada franja hay un rectángulo. Su altura es el valor de la función en el borde izquierdo, en el derecho o en el punto medio de la franja.
+                Cuantas más franjas, más precisión. La regla del punto medio suele ser mucho más precisa que las otras dos, porque dentro de la franja lo que sobra y lo que falta casi se compensan.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MÉTODO DE LOS RECTÁNGULOS</div>
+                <div class="b-text">
+                    <p>Con $h = \tfrac{b - a}{n}$ y $x_i = a + i \cdot h$:</p>
+                    <p><b>por la izquierda:</b> $L_n = h \cdot \big(f(x_0) + f(x_1) + \ldots + f(x_{n-1})\big)$ · <b>por la derecha:</b> $R_n = h \cdot \big(f(x_1) + \ldots + f(x_n)\big)$</p>
+                    <p><b>Regla del punto medio:</b> $M_n = h \cdot \Big(f\big(x_0 + \tfrac h2\big) + f\big(x_1 + \tfrac h2\big) + \ldots + f\big(x_{n-1} + \tfrac h2\big)\Big)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Cronología:</b> Arquímedes, siglo III a. C. · Kepler, regla de los toneles, 1615 · Leibniz escribe por primera vez $\int$ en 1675 · Riemann aclara en el siglo XIX qué es una integral.</p>
+            <p class="b-note"><b>Hoja de cálculo:</b> en la columna A, los nodos; en la columna B, los valores de la función; después, $h$ por la suma de las celdas adecuadas.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · RECTÁNGULOS Y TRAPECIOS</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una función y un método y aumenta el número de franjas. ¿Con qué rapidez se acerca la suma al valor exacto?</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · TRES REGLAS COMPARADAS</div>
+            <div class="b-text"><p>Aproxima $\int_0^2 x^2\,\mathrm{d}x = \tfrac83 \approx 2{,}667$ con cuatro franjas.</p></div>
+            <div class="b-sol"><p>$h = 0{,}5$: $L_4 = 0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$, $R_4 = 0{,}5 \cdot (0{,}25 + 1 + 2{,}25 + 4) = 3{,}75$.</p>
+                <p>$M_4 = 0{,}5 \cdot (0{,}0625 + 0{,}5625 + 1{,}5625 + 3{,}0625) = 2{,}625$: <span class="b-res">errores $-0{,}92$, $+1{,}08$ y solo $-0{,}04$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · MEDIDAS EN LUGAR DE UNA EXPRESIÓN</div>
+            <div class="b-text"><p>Un ciclista lee el velocímetro cada $10$ s: $4$; $6$; $7$; $7$; $5$ m/s en $t = 0;\ 10;\ \ldots;\ 40$ s. Estima el recorrido.</p></div>
+            <div class="b-sol"><p>Por la izquierda: $10 \cdot (4 + 6 + 7 + 7) = 240$ m. Por la derecha: $10 \cdot (6 + 7 + 7 + 5) = 250$ m.</p>
+                <p><span class="b-res">Entre $240$ y $250$ m.</span> Para la regla del punto medio faltan los valores del centro; lo que ayuda entonces lo muestra la lección 2.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula $L_2$ y $R_2$ para $\int_0^2 x\,\mathrm{d}x$ y compara con el valor exacto.</p></div>
+            <div class="b-sol"><p>$h = 1$: $L_2 = 0 + 1 = 1$, $R_2 = 1 + 2 = 3$; exacto $2$ (triángulo), justo en el medio.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula $M_4$ para $\int_0^1 x^2\,\mathrm{d}x$ y el error.</p></div>
+            <div class="b-sol"><p>Puntos medios $0{,}125$; $0{,}375$; $0{,}625$; $0{,}875$: $M_4 = 0{,}25 \cdot 1{,}3125 = 0{,}328125$. Error $-0{,}0052$ respecto a $\tfrac13$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula $L_4$ y $R_4$ para $\int_1^2 \tfrac1x\,\mathrm{d}x = \ln 2 \approx 0{,}6931$. ¿Qué suma es demasiado grande? ¿Por qué?</p></div>
+            <div class="b-sol"><p>$L_4 \approx 0{,}7595$, $R_4 \approx 0{,}6345$. $\tfrac1x$ decrece: a la izquierda está el mayor valor de la franja, así que $L_4$ es demasiado grande.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Demuestra para una función creciente: $L_n \le \int_a^b f(x)\,\mathrm{d}x \le R_n$ y $R_n - L_n = h \cdot \big(f(b) - f(a)\big)$.</p></div>
+            <div class="b-sol"><p>En las dos sumas aparecen $f(x_1)$ hasta $f(x_{n-1})$. Queda $R_n - L_n = h \cdot (f(x_n) - f(x_0))$. Creciente: los rectángulos por la izquierda quedan bajo la gráfica; los de la derecha, por encima.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Para $\int_0^1 x^2\,\mathrm{d}x$ se cumple $\tfrac13 - L_n = \dfrac{3n - 1}{6n^2}$. ¿Cuántas franjas hacen falta como mínimo para que el error de $L_n$ sea menor que $0{,}01$?</p></div>
+            <div class="b-sol"><p>$n = 49$: $0{,}01013$; $n = 50$: $0{,}00993$. <span class="b-res">Como mínimo $50$ franjas.</span> El error solo baja más o menos como $\tfrac{1}{2n}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1,75" data-ph="L₄ ="><p class="b-q-text">¿$L_4$ para $\int_0^2 x^2\,\mathrm{d}x$?</p><div class="b-sol"><p>$0{,}5 \cdot 3{,}5$</p></div></div>
+        <div class="b-q" data-ans="0,328" data-tol="0.001" data-ph="M₄ ≈"><p class="b-q-text">¿$M_4$ para $\int_0^1 x^2\,\mathrm{d}x$, con tres decimales?</p><div class="b-sol"><p>$0{,}328125$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué regla de los rectángulos suele ser la más precisa?</p><div class="b-mc"><button>por la izquierda</button><button>por la derecha</button><button>punto medio</button></div><div class="b-sol"><p>Lo que sobra y lo que falta casi se compensan.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Método de los trapecios y precisión" data-toc-k="2" data-toc-short="2 Trapecios">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>El método de los trapecios y la precisión</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si se unen puntos vecinos de la gráfica con segmentos, en lugar de rectángulos aparecen <b>trapecios</b>. Cada uno tiene el área $h \cdot \tfrac{f(x_{i}) + f(x_{i+1})}{2}$.
+                Al sumarlos, cada valor interior cuenta entero, porque pertenece a dos trapecios. Los dos valores de los extremos cuentan solo la mitad.</p></div></div>
+            <div class="b-text"><p>La suma de los trapecios es exactamente la media de la suma de rectángulos por la izquierda y la de la derecha. Solo necesita los valores en los nodos, y eso encaja perfectamente con las series de medidas.
+                ¿Qué precisión tiene? Si se duplica el número de franjas, el error de los métodos de los trapecios y del punto medio baja más o menos a la <b>cuarta parte</b>;
+                con los rectángulos por la izquierda y por la derecha, solo a la <b>mitad</b>. Si la gráfica es cóncava hacia arriba, las cuerdas quedan por encima de ella: entonces los trapecios son demasiado grandes.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MÉTODO DE LOS TRAPECIOS</div>
+                <div class="b-text">
+                    <p>$$T_n = h \cdot \Big(\tfrac12 f(x_0) + f(x_1) + \ldots + f(x_{n-1}) + \tfrac12 f(x_n)\Big) = \frac{L_n + R_n}{2}$$</p>
+                    <p><b>Error al duplicar $n$:</b> rectángulos por la izquierda y por la derecha, más o menos a la mitad; punto medio y trapecios, más o menos a la cuarta parte.</p>
+                    <p><b>Curvatura:</b> cóncava hacia arriba: $T_n$ demasiado grande, $M_n$ demasiado pequeña · cóncava hacia abajo: al revés.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sin primitiva:</b> $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x \approx 0{,}746824$ solo se puede calcular numéricamente. La campana está en la distribución normal, que conocerás en el capítulo 6.</p>
+            <p class="b-note"><b>Un truco:</b> como el error se divide más o menos entre cuatro al duplicar, $T_{2n} + \tfrac13 (T_{2n} - T_n)$ da un valor todavía mucho mejor.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · CUATRO MÉTODOS, UN ERROR</div>
+        <p class="b-help" style="margin:0 0 12px">La tabla muestra la aproximación para $n$, $2n$ y $4n$ franjas y su error. Compara en qué factor se reduce el error al duplicar. Para $\mathrm{e}^{-x^2}$ no hay un valor exacto a partir de una primitiva.</p>
+        <div data-widget="summen" data-mode="verfahren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · DUPLICAR</div>
+            <div class="b-text"><p>Calcula $T_4$ y $T_8$ para $\int_0^2 x^2\,\mathrm{d}x$ y compara los errores.</p></div>
+            <div class="b-sol"><p>$T_4 = \tfrac{1{,}75 + 3{,}75}{2} = 2{,}75$, error $+0{,}0833$. $T_8 = 2{,}6875$, error $+0{,}0208$.</p>
+                <p><span class="b-res">El error se ha reducido a la cuarta parte.</span> Los dos valores son demasiado grandes: $x^2$ es cóncava hacia arriba.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · LA CAMPANA</div>
+            <div class="b-text"><p>Aproxima $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$ con el método de los trapecios y cuatro franjas.</p></div>
+            <div class="b-sol"><p>Valores en $0;\ 0{,}25;\ 0{,}5;\ 0{,}75;\ 1$: $1$; $0{,}9394$; $0{,}7788$; $0{,}5698$; $0{,}3679$.</p>
+                <p>$T_4 = 0{,}25 \cdot (0{,}5 + 0{,}9394 + 0{,}7788 + 0{,}5698 + 0{,}1839) \approx$ <span class="b-res">$0{,}7430$</span>, solo $0{,}004$ por debajo del valor exacto.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Estima el recorrido del ciclista del ejemplo 2 con el método de los trapecios.</p></div>
+            <div class="b-sol"><p>$10 \cdot (2 + 6 + 7 + 7 + 2{,}5) = 245$ m, justo la media de $240$ y $250$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula $T_2$ para $\int_0^2 x^3\,\mathrm{d}x$ y el error.</p></div>
+            <div class="b-sol"><p>$h = 1$: $T_2 = \tfrac12 \cdot 0 + 1 + \tfrac12 \cdot 8 = 5$; exacto $4$: error $+1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula $T_4$ para $\int_1^2 \tfrac1x\,\mathrm{d}x$ con los resultados del ejercicio 3 y el error respecto a $\ln 2$.</p></div>
+            <div class="b-sol"><p>$T_4 = \tfrac{0{,}7595 + 0{,}6345}{2} \approx 0{,}6970$, error $\approx +0{,}0039$; $\tfrac1x$ es cóncava hacia arriba.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Justifica con un esbozo: con una gráfica cóncava hacia abajo, el método de los trapecios da valores demasiado pequeños.</p></div>
+            <div class="b-sol"><p>Cóncava hacia abajo significa: la cuerda entre dos puntos va por debajo de la gráfica. Cada trapecio es menor que la franja bajo la curva.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Para $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$ es $T_4 \approx 0{,}742984$ y $T_8 \approx 0{,}745866$. Estima con $T_8 + \tfrac13 (T_8 - T_4)$ un valor mejor y compara con $0{,}746824$.</p></div>
+            <div class="b-sol"><p>$0{,}745866 + \tfrac13 \cdot 0{,}002882 \approx 0{,}746826$. <span class="b-res">Solo $0{,}000002$ de diferencia</span>, con los mismos valores de la función.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="245" data-ph="Metros"><p class="b-q-text">Ciclista, método de los trapecios: ¿cuántos metros?</p><div class="b-sol"><p>Media de $240$ y $250$</p></div></div>
+        <div class="b-q" data-ans="2,75" data-ph="T₄ ="><p class="b-q-text">¿$T_4$ para $\int_0^2 x^2\,\mathrm{d}x$?</p><div class="b-sol"><p>$\tfrac{L_4 + R_4}{2}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Si se duplica $n$, el error del método de los trapecios se …</p><div class="b-mc"><button>divide más o menos entre cuatro.</button><button>reduce más o menos a la mitad.</button><button>duplica.</button></div><div class="b-sol"><p>Ejemplo 3</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula $M_2$ y $T_2$ para $\int_0^\pi \sin x\,\mathrm{d}x = 2$. ¿Qué método se acerca más?</p></div>
+            <div class="b-sol"><p>$h = \tfrac{\pi}{2}$: $M_2 = \tfrac{\pi}{2} \cdot (\sin\tfrac{\pi}{4} + \sin\tfrac{3\pi}{4}) \approx 2{,}221$, $T_2 = \tfrac{\pi}{2} \cdot 1 \approx 1{,}571$. El punto medio se acerca más.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con la lección 1:</b> demuestra transformando que $T_n = \tfrac12 (L_n + R_n)$.</p></div>
+            <div class="b-sol"><p>$L_n + R_n = h \cdot \big(f(x_0) + 2f(x_1) + \ldots + 2f(x_{n-1}) + f(x_n)\big)$. Dividiendo entre dos se obtiene exactamente la fórmula de los trapecios.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Describe cómo calculas en una hoja de cálculo $T_{10}$ para $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$: ¿qué columnas, qué fórmula?</p></div>
+            <div class="b-sol"><p>Columna A: $0;\ 0{,}1;\ \ldots;\ 1$. Columna B: $=\mathrm{EXP}(-(A2^2))$. Después $T_{10} = 0{,}1 \cdot \big(\tfrac12 B_2 + B_3 + \ldots + B_{11} + \tfrac12 B_{12}\big)$, es decir, $0{,}1 \cdot (\mathrm{SUMA}(B2{:}B12) - \tfrac12 (B2 + B12))$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>La <b>regla de los toneles de Kepler</b> aproxima con solo tres valores: $\int_a^b f(x)\,\mathrm{d}x \approx \tfrac{b - a}{6} \big(f(a) + 4f(m) + f(b)\big)$ con el punto medio $m$. Compruébala con $\int_0^2 x^3\,\mathrm{d}x$ y con $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\tfrac26 (0 + 4 + 8) = 4$, exactamente correcto. Para $\mathrm{e}^{-x^2}$: $\tfrac16 (1 + 4\mathrm{e}^{-0{,}25} + \mathrm{e}^{-1}) \approx 0{,}74718$, solo $0{,}0004$ de diferencia. La regla es exacta para todos los polinomios hasta grado $3$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Kepler y los toneles de vino" data-toc-k="X" data-toc-short="Kepler">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Kepler y los toneles de vino</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Johannes Kepler (1571–1630) es conocido sobre todo como astrónomo. En 1613 se casó por segunda vez. Durante las celebraciones de la boda le llamó la atención cómo se medía
+                el vino del tonel: se introducía una vara inclinada por el agujero de llenado y, a partir de la longitud mojada, se deducía el volumen, sin importar lo abombado que fuera el tonel.</p>
+            <p>Aquello no se le fue de la cabeza. Estudió los volúmenes de los cuerpos que se obtienen por rotación y, para ello, los descompuso, de forma parecida a Arquímedes, en infinitas
+                rodajas finas. En 1615 apareció en Linz su libro <i>Nova stereometria doliorum vinariorum</i>, una «nueva medición del contenido de los toneles de vino».
+                De él toma su nombre la aproximación del ejercicio 14: la <b>regla de los toneles de Kepler</b>. Toma la sección de abajo, la de arriba y cuatro veces la del medio.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> MacTutor History of Mathematics, University of St Andrews: biografía «Johannes Kepler».</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>FRANJAS</h4><p>$h = \tfrac{b - a}{n}$, nodos $x_i = a + i \cdot h$</p></div>
+        <div><p>$[0, 2]$, $n = 4$: $h = 0{,}5$</p></div></div>
+    <div class="b-rueck"><div><h4>RECTÁNGULOS</h4><p>Altura a la izquierda, a la derecha o en el punto medio; el punto medio suele ser el más preciso</p></div>
+        <div><p>$\int_0^2 x^2$: $L_4 = 1{,}75$, $R_4 = 3{,}75$, $M_4 = 2{,}625$</p></div></div>
+    <div class="b-rueck"><div><h4>TRAPECIOS</h4><p>$T_n = \tfrac{L_n + R_n}{2}$, los valores de los extremos cuentan la mitad</p></div>
+        <div><p>Ciclista: $245$ m</p></div></div>
+    <div class="b-rueck"><div><h4>PRECISIÓN</h4><p>Duplicar $n$: rectángulos por la izquierda y por la derecha $\tfrac12$, punto medio y trapecios $\tfrac14$</p></div>
+        <div><p>$T_4 = 2{,}75$, $T_8 = 2{,}6875$ para $\tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>SIN PRIMITIVA</h4><p>calcular numéricamente</p></div>
+        <div><p>$\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x \approx 0{,}7468$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="3" data-ph="R₂ ="><p class="b-q-text">¿$R_2$ para $\int_0^2 x\,\mathrm{d}x$?</p><div class="b-sol"><p>$1 \cdot (1 + 2)$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="T₂ ="><p class="b-q-text">¿$T_2$ para $\int_0^2 x^3\,\mathrm{d}x$?</p><div class="b-sol"><p>$\tfrac12 \cdot 0 + 1 + \tfrac12 \cdot 8$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$x^2$ es cóncava hacia arriba. Entonces el método de los trapecios da …</p><div class="b-mc"><button>valores demasiado pequeños.</button><button>valores demasiado grandes.</button><button>valores exactos.</button></div><div class="b-sol"><p>Las cuerdas quedan por encima de la gráfica.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="0,743" data-tol="0.001" data-ph="T₄ ≈"><p class="b-q-text">¿$T_4$ para $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$, con tres decimales?</p><div class="b-sol"><p>$0{,}742984$</p></div></div>
+            <div class="b-q" data-ans="50" data-ph="n ="><p class="b-q-text">¿Número mínimo de franjas para que $L_n$ para $\int_0^1 x^2\,\mathrm{d}x$ se aleje menos de $0{,}01$?</p><div class="b-sol"><p>$\tfrac{3n - 1}{6n^2} < 0{,}01$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="Valor"><p class="b-q-text">¿Regla de los toneles de Kepler para $\int_0^2 x^3\,\mathrm{d}x$?</p><div class="b-sol"><p>$\tfrac26 (0 + 4 + 8)$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12-rechteckverfahren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MÉTODO DE LOS RECTÁNGULOS</span><span class="b-lab-what">Historia, rectángulos por la izquierda, por la derecha y en el punto medio (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12-trapezverfahren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MÉTODO DE LOS TRAPECIOS</span><span class="b-lab-what">Trapecios, precisión, integrales sin primitiva (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 12.º curso, curso básico · Optativa 5 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-es/numerik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-es/gy12.js"></script>
+</body>
+</html>
