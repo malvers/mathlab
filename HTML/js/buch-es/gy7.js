@@ -196,6 +196,9 @@ window.BuchES && BuchES.add('gy7', {
         [' der alte Wert! Die zweiten $', ' es el valor anterior. El segundo $'], ['\\,\\%$ beziehen sich auf einen anderen Grundwert.', '\\,\\%$ se refiere a otro valor base.'],
         // diagramm7 (the aria "<title> als Säulendiagramm" is a rule)
         ['Zusammen: ', 'En total: '], ['Antworten', 'respuestas'], ['Stimmen', 'votos'],
+        // the chart titles also stand in bold inside a sentence block, where they are not whole labels
+        ['Wie kommst du zur Schule? Umfrage in einer Klasse', '¿Cómo vienes al instituto? Encuesta en una clase'], ['Klassensprecherwahl: Stimmen', 'Elección de delegado de clase: votos'],
+        ['Höhe einer Sonnenblume, jede Woche gemessen', 'Altura de un girasol, medida cada semana'],
         [' = 100 % = 360°. Im Kreisdiagramm gehören zu 1 % genau 3,6°.', ' = 100 % = 360°. En el diagrama de sectores, al 1 % le corresponden exactamente 3,6°.'],
         ['Ein Liniendiagramm passt hier nicht: Die Kategorien haben keine Reihenfolge, und zwischen ihnen gibt es keine Zwischenwerte.',
             'Un diagrama de líneas no encaja aquí: las categorías no tienen orden y entre ellas no hay valores intermedios.'],
