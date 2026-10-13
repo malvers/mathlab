@@ -626,6 +626,24 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Fachoberschule | Fachoberschule | explained on the start page: escuela técnica superior, 11.º y 12.º curso, Fachhochschulreife |
+| Ausblicke (Kapitel E) | Perspectivas (E) | chapter letter stays E |
+| Mehrwertsteuer, brutto / netto | IVA, con IVA / sin IVA | |
+| Gleichsetzungs-, Einsetzungs-, Additionsverfahren | igualación, sustitución, reducción | |
+| Lage zweier Geraden (Ebene): parallel, identisch, schneidend, orthogonal | paralelas, coincidentes, secantes, perpendiculares | |
+| Scheinlösung, Bruchgleichung | solución falsa, ecuación con fracciones | |
+| Grundmenge | conjunto de referencia | |
+| Linearfaktorform, Vielfachheit | forma factorizada, multiplicidad | |
+| Funktionenschar, Fallunterscheidung | familia de funciones, distinción de casos | |
+| Ergebnismenge, Ereignismenge | espacio muestral, conjunto de sucesos | |
+| Zählprinzip, Variation, Kombination | principio de multiplicación, variación, combinación | |
+| Pfadmultiplikation, Pfadaddition | regla del producto, regla de la suma (de las ramas) | |
+| natürliche Häufigkeiten | frecuencias naturales | |
+| Zinseszins, Barwert, Aufzinsungsfaktor | interés compuesto, valor actual, factor de capitalización | |
+| Ratentilgung, Annuitätentilgung, Tilgungsplan | amortización con cuotas de capital constantes, amortización por anualidades, cuadro de amortización | |
+| Sparplan, Restschuld, Rate | plan de ahorro, deuda pendiente, cuota | |
+| Schaltalgebra, Wahrheitstafel, Reihen-/Parallelschaltung | álgebra de circuitos, tabla de verdad, conexión en serie / en paralelo | |
+| Lotto „6 aus 49“ | lotería «6 de 49» | |
 
 ## Added by mathefos12-es (Lovelace)
 

@@ -85,6 +85,17 @@ window.BuchES && BuchES.add('funktionen', {
         // book es mathegy12lk-es (Turing)
 
         // book es mathefos11-es (Lovelace)
+        // funktion, lage, parabelschar
+        'Kurve': 'Curva', 'Kurve mit verschiebbarer senkrechter Gerade': 'Curva con una recta vertical desplazable',
+        'Zieh den türkisen Punkt unten: Die senkrechte Gerade wandert mit. Wie oft trifft sie die Kurve?':
+            'Arrastra el punto turquesa de abajo: la recta vertical se mueve con él. ¿Cuántas veces corta la curva?',
+        'Ist die Kurve der Graph einer Funktion?': '¿Es la curva la gráfica de una función?', 'keine Funktion': 'no es una función',
+        'Richtig.': 'Correcto.', 'Nicht ganz.': 'No del todo.',
+        'Entscheide mit den Knöpfen. Danach siehst du Definitions- und Wertebereich.': 'Decide con los botones. Después verás el dominio y el recorrido.',
+        '$g$: Anstieg $m_1$': '$g$: pendiente $m_1$', '$g$: Achsenabschnitt $n_1$': '$g$: ordenada en el origen $n_1$',
+        '$h$: Anstieg $m_2$': '$h$: pendiente $m_2$', '$h$: Achsenabschnitt $n_2$': '$h$: ordenada en el origen $n_2$',
+        'Zwei Geraden und ihre Lage zueinander': 'Dos rectas y su posición relativa',
+        'Funktionenschar': 'Familia de funciones', 'Parameter': 'Parámetro', 'Schar von Parabeln mit einem hervorgehobenen Mitglied': 'Familia de parábolas con un miembro resaltado',
 
         // book es mathefos12-es (Lovelace)
 
@@ -194,6 +205,20 @@ window.BuchES && BuchES.add('funktionen', {
         // book es mathegy12lk-es (Turing)
 
         // book es mathefos11-es (Lovelace)
+        // funktion
+        ['$ · Bei $x = ', '$ · En $x = '], ['$ trifft die Senkrechte die Kurve <b>', '$ la recta vertical corta la curva <b>'],
+        ['gar nicht', 'ninguna vez'], ['genau einmal', 'exactamente una vez'], ['$ und $y = ', '$ e $y = '],
+        ['Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. ', 'Cada recta vertical corta la curva como mucho una vez: es una función. '],
+        // lage
+        ['Gleicher Anstieg und gleicher Achsenabschnitt: <b>identisch</b>. Jeder Punkt ist gemeinsam.', 'Misma pendiente y misma ordenada en el origen: <b>coincidentes</b>. Todos los puntos son comunes.'],
+        ['Gleicher Anstieg $m_1 = m_2$, verschiedene Achsenabschnitte: <b>parallel</b>. Es gibt keinen Schnittpunkt.',
+            'Misma pendiente $m_1 = m_2$, ordenadas en el origen distintas: <b>paralelas</b>. No hay punto de intersección.'],
+        ['$: Die Geraden sind <b>orthogonal</b> (senkrecht zueinander).', '$: las rectas son <b>perpendiculares</b> (ortogonales).'],
+        ['Verschiedene Anstiege: Die Geraden <b>schneiden</b> sich.', 'Pendientes distintas: las rectas <b>se cortan</b>.'],
+        ['Gleichsetzen: $', 'Igualando: $'], ['$ ergibt $x = ', '$ da $x = '], ['$, also ', '$, así que '], [' · Schnittwinkel $', ' · ángulo de intersección $'],
+        ['parallel zur $x$-Achse', 'paralela al eje $x$'],
+        // parabelschar
+        ['$ für $', '$ para $'], ['Nullstellen: $', 'Ceros: $'], [' · Scheitel $(', ' · vértice $('],
 
         // book es mathefos12-es (Lovelace)
 
@@ -244,6 +269,8 @@ window.BuchES && BuchES.add('funktionen', {
         // book es mathegy12lk-es (Turing)
 
         // book es mathefos11-es (Lovelace)
+        // funktion: "die Kurve <b>2-mal</b>"
+        [/<b>(\d+)-mal<\/b>/g, '<b>$1 veces</b>'],
 
         // book es mathefos12-es (Lovelace)
 

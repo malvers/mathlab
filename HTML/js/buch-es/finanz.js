@@ -14,6 +14,19 @@ window.BuchES && BuchES.add('finanz', {
         // book es mathe10-es (Curie)
 
         // book es mathefos11-es (Lovelace)
+        // zins
+        'Startkapital $K_0$ in €': 'Capital inicial $K_0$ en €', 'Zinssatz $p$': 'Tipo de interés $p$', 'Laufzeit $n$': 'Plazo $n$',
+        'Jahre': 'años', 'Kapital in €': 'Capital en €', 'Kapital Jahr für Jahr: Zinseszins und einfache Verzinsung': 'Capital año a año: interés compuesto e interés simple',
+        'mit Zinseszins &nbsp;': 'con interés compuesto &nbsp;', 'einfache Verzinsung (die Zinsen werden nicht mitverzinst)': 'interés simple (los intereses no producen intereses)',
+        'doppeltes Startkapital': 'doble del capital inicial',
+        // tilgung
+        'Annuitätendarlehen': 'Préstamo por anualidades', 'Ratentilgung': 'Cuotas de capital constantes', 'Sparplan': 'Plan de ahorro',
+        'Kredit $S_0$ in €': 'Préstamo $S_0$ en €', 'Sparrate je Jahr $R$ in €': 'Aportación anual $R$ en €', 'Jahr': 'Año',
+        'Zahlungen Jahr für Jahr als gestapelte Säulen': 'Pagos año a año como barras apiladas',
+        'Kapital am Anfang': 'Capital al principio', 'Zinsen': 'Intereses', 'Einzahlung': 'Aportación', 'Kapital am Ende': 'Capital al final',
+        'Restschuld am Anfang': 'Deuda pendiente al principio', 'Tilgung': 'Amortización', 'Rate': 'Cuota', 'Restschuld am Ende': 'Deuda pendiente al final',
+        'eingezahlt &nbsp;': 'aportado &nbsp;', 'Zinsen (Kapital am Jahresende)': 'intereses (capital al final del año)',
+        'Zinsen &nbsp;': 'intereses &nbsp;', 'Tilgung (zusammen: die Rate)': 'amortización (juntas: la cuota)',
 
         // book es mathegy10-es (offen)
 
@@ -22,6 +35,18 @@ window.BuchES && BuchES.add('finanz', {
         // book es mathe10-es (Curie)
 
         // book es mathefos11-es (Lovelace)
+        // zins
+        ['Zinseszins: $', 'Interés compuesto: $'], ['Einfache Verzinsung: $', 'Interés simple: $'],
+        ['$ € · Zinseszins bringt <b>', '$ € · el interés compuesto aporta <b>'], ['</b> mehr', '</b> más'],
+        ['Verdopplung nach $n = ', 'Se duplica tras $n = '], ['$ Jahren (Faustregel $', '$ años (regla práctica $'],
+        // tilgung
+        ['Endkapital: $', 'Capital final: $'], ['Eingezahlt: ', 'Aportado: '], [' · Zinsen: <b>', ' · intereses: <b>'],
+        ['</b> (Einzahlung jeweils am Jahresende)', '</b> (cada aportación al final del año)'],
+        ['Annuität (jedes Jahr gleich): $', 'Anualidad (igual cada año): $'],
+        ['Die Zinsen werden jedes Jahr kleiner, die Tilgung wächst. Zinsen insgesamt: <b>', 'Los intereses bajan cada año y la amortización crece. Intereses en total: <b>'],
+        ['Tilgung (jedes Jahr gleich): $', 'Amortización (igual cada año): $'], ['$ € · erste Rate ', '$ € · primera cuota '], [', letzte Rate ', ', última cuota '],
+        ['Die Rate sinkt, weil die Restschuld und damit die Zinsen sinken. Zinsen insgesamt: <b>',
+            'La cuota baja porque bajan la deuda pendiente y, con ella, los intereses. Intereses en total: <b>'],
 
         // book es mathegy10-es (offen)
 
@@ -30,6 +55,8 @@ window.BuchES && BuchES.add('finanz', {
         // book es mathe10-es (Curie)
 
         // book es mathefos11-es (Lovelace)
+        // slider values: "20 J." → "20 años"
+        [/^(\d+) J\.$/, '$1 años'],
 
         // book es mathegy10-es (offen)
 
