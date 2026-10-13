@@ -84,8 +84,8 @@ window.BuchES && BuchES.add('gy11lk-vek', {
         [/(Die Zeilen mit [^<$]*?) und /g, '$1 y '],
         // ebenelim: "$g\colon \vec{x} = …$ in $x + y = 2$ einsetzen: " → "Sustituimos $g\colon …$ en $x + y = 2$: "
         [/(\$g\\colon \\vec\{x\} = [^$]*\$) in (\$[^$]*\$) einsetzen: /g, 'Sustituimos $1 en $2: '],
-        // ebenenlage: "übrig bleibt für $x$ und $y$"
-        [/(übrig bleibt für \$[xyz]\$) und \$/g, '$1 y $'],
+        // ebenenlage: "übrig bleibt für $x$ und $y$" → "x e y" (Spanish "e" before the sound i)
+        [/(übrig bleibt für \$[xyz]\$) und \$([xyz])\$/g, (m, a, v) => a + (v === 'y' ? ' e $' : ' y $') + v + '$'],
 
     ]
 });
