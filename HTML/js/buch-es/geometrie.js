@@ -37,6 +37,15 @@ window.BuchES && BuchES.add('geometrie', {
         'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circunferencia con $r = 1$, por tanto $u = 2\\pi$. Perímetro dividido entre $2$:',
 
         // book es mathegy9-es (Curie)
+        // pythagoras
+        'Pythagoras': 'Pitágoras', 'Kathetensatz': 'Teorema del cateto', 'Höhensatz': 'Teorema de la altura', 'Satz': 'Teorema', 'gleichschenklig': 'isósceles',
+        'Zieh am Punkt $C$. Er bleibt auf dem Thaleskreis über $\\overline{AB}$, deshalb ist der Winkel bei $C$ immer ein rechter.':
+            'Arrastra el punto $C$. Se queda sobre la circunferencia de Tales de $\\overline{AB}$; por eso el ángulo en $C$ siempre es recto.',
+        'Rechtwinkliges Dreieck mit Quadraten über den Seiten': 'Triángulo rectángulo con cuadrados sobre los lados',
+        'Die beiden Kathetenquadrate haben zusammen genau den Flächeninhalt des Hypotenusenquadrats.':
+            'Los dos cuadrados de los catetos tienen juntos exactamente el área del cuadrado de la hipotenusa.',
+        'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Cada cuadrado de un cateto es igual al rectángulo que tiene debajo.',
+        'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.': 'El cuadrado de la altura es igual al rectángulo formado por las dos proyecciones.',
         // kreisteil
         'Mittelpunktswinkel $\\alpha$': 'Ángulo central $\\alpha$', 'Kreis mit Kreisausschnitt und Kreisbogen': 'Círculo con un sector circular y un arco',
         'Kreisbogen': 'Arco', 'Kreisausschnitt': 'Sector circular',
@@ -63,6 +72,8 @@ window.BuchES && BuchES.add('geometrie', {
         ['Also $', 'Por tanto $'], ['$, Abstand $', '$, diferencia $'],
 
         // book es mathegy9-es (Curie)
+        // pythagoras
+        ['$ und $', '$ y $'],
         // kreisteil
         ['Anteil am Vollkreis: $', 'Fracción del círculo completo: $'],
         ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $', 'Arrastra el extremo del arco. Para comparar, el círculo entero: $'],
