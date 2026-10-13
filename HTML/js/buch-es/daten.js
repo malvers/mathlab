@@ -12,12 +12,27 @@
 window.BuchES && BuchES.add('daten', {
     word: {
         // book es mathegy7-es (Einstein)
+        // achsentrick (also used by GY 9)
+        'Abgeschnittene Achse': 'Eje cortado', 'Bild statt Balken': 'Dibujo en vez de barra', 'Achse beginnt bei': 'El eje empieza en', 'Trick': 'Truco',
+        'Säulendiagramm Mitglieder eines Sportvereins': 'Diagrama de barras: socios de un club deportivo',
+        'Die Achse beginnt nicht bei null. Bei Säulen täuscht das immer, denn das Auge vergleicht ihre Höhen. In Liniendiagrammen ist ein späterer Achsenbeginn üblich, dann aber mit deutlichem Bruchzeichen.':
+            'El eje no empieza en cero. Con barras eso siempre engaña, porque el ojo compara sus alturas. En los diagramas de líneas es habitual que el eje empiece más arriba, pero entonces con un signo de corte bien visible.',
+        'Achse ab null: Die Höhen sind ehrlich vergleichbar.': 'Eje desde cero: las alturas se pueden comparar con honestidad.',
+        '2020: 100 Mio. €': '2020: 100 mill. €', '2025: 200 Mio. €': '2025: 200 mill. €',
+        'Zwei Geldsymbole, das zweite doppelt so hoch und doppelt so breit': 'Dos símbolos de dinero; el segundo, el doble de alto y el doble de ancho',
+        'Der Umsatz hat sich <b>verdoppelt</b>. Das rechte Bild ist doppelt so hoch, aber auch doppelt so breit.':
+            'La facturación se ha <b>duplicado</b>. El dibujo de la derecha es el doble de alto, pero también el doble de ancho.',
+        'Das Auge vergleicht Flächen: $2 \\cdot 2 = 4$, das Bild wirkt <b>viermal</b> so groß. Als Körper gezeichnet sogar $2^3 = 8$-mal.':
+            'El ojo compara áreas: $2 \\cdot 2 = 4$, el dibujo parece <b>cuatro veces</b> más grande. Dibujado como cuerpo, incluso $2^3 = 8$ veces.',
 
         // book es mathegy9-es (Curie)
 
     },
     phrase: [
         // book es mathegy7-es (Einstein)
+        // achsentrick
+        ['Mitglieder eines Sportvereins. Die letzte Säule <b>wirkt</b> ', 'Socios de un club deportivo. La última barra <b>parece</b> '],
+        ['-mal so hoch wie die erste.', ' veces más alta que la primera.'], ['Tatsächlich: $', 'En realidad: $'], ['$, also ein Plus von ', '$, es decir, un aumento del '],
 
         // book es mathegy9-es (Curie)
 
