@@ -83,6 +83,20 @@ window.BuchES && BuchES.add('funktionen', {
         'senkrecht $x = 0$, waagerecht $y = 0$': 'vertical $x = 0$, horizontal $y = 0$',
 
         // book es mathegy9-es (Curie)
+        // extremwert
+        'Aufgabe': 'Ejercicio', 'Seite $x$': 'Lado $x$', 'Flächeninhalt in Abhängigkeit von x': 'Área en función de x', 'MAUER': 'MURO',
+        'x in m': 'x en m', 'x in cm': 'x en cm', 'A in m²': 'A en m²', 'A in cm²': 'A en cm²',
+        'Rechteckiges Gehege an einer Mauer mit 40 m Zaun': 'Corral rectangular junto a un muro con 40 m de valla',
+        'Rechteck mit festem Umfang 24 cm': 'Rectángulo de perímetro fijo 24 cm',
+        'Zielgröße $A = x \\cdot (40 - 2x)$, Nebenbedingung: Zaunlänge $x + (40 - 2x) + x = 40$.':
+            'Magnitud objetivo $A = x \\cdot (40 - 2x)$; condición: longitud de la valla $x + (40 - 2x) + x = 40$.',
+        'Scheitelpunktform: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$': 'Forma canónica: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$',
+        'Maximum: $x = 10\\,\\text{m}$, Breite $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.': 'Máximo: $x = 10\\,\\text{m}$, anchura $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.',
+        'Such die größte Fläche. Sie liegt am Scheitel der Parabel.': 'Busca el área mayor. Está en el vértice de la parábola.',
+        'Zielgröße $A = x \\cdot y$, Nebenbedingung $2x + 2y = 24$, also $y = 12 - x$.': 'Magnitud objetivo $A = x \\cdot y$; condición $2x + 2y = 24$, es decir, $y = 12 - x$.',
+        'Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$': 'Forma canónica: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$',
+        'Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.': 'Máximo: el cuadrado de $6\\,\\text{cm}$ de lado, $A = 36\\,\\text{cm}^2$.',
+        'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': '¿Qué rectángulo de perímetro $24\\,\\text{cm}$ tiene el área mayor?',
 
         // book es mathegy11-es (Turing)
         // ganzrational
@@ -197,6 +211,8 @@ window.BuchES && BuchES.add('funktionen', {
         // book es mathe10-es (Curie)
 
         // book es mathegy9-es (Curie)
+        // extremwert
+        ['Jetzt: $A(', 'Ahora: $A('],
 
         // book es mathegy11-es (Turing)
         // ganzrational
