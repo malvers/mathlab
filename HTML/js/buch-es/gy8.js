@@ -185,8 +185,6 @@ window.BuchES && BuchES.add('gy8', {
         // book es mathegy8-es (Curie)
         // sets of whole numbers: \{1; 2; 3\} → \{1, 2, 3\} (with a decimal comma the semicolon stays)
         [/\\\{([^$]*?)\\\}/g, (m, s) => /\d(?:,|\{,\})\d/.test(s) ? m : '\\{' + s.replace(/; /g, ', ') + '\\}'],
-        // lgs8: the solution set is S in the Spanish books (glosario: conjunto solución S)
-        [/L = \\\{\(/g, 'S = \\{('],
         // termbaum8: "Der Term $3x + 4$ ist eine <b>Summe</b>: Zuletzt wird addiert. Summanden: $3x$ und $4$."
         [/Der Term \$([^$]*)\$ ist eine? <b>(Summe|Differenz|Produkt|Quotient|Potenz)<\/b>: Zuletzt wird (?:addiert|subtrahiert|multipliziert|dividiert|potenziert)\. /g,
             (m, t, k) => 'La expresión $' + t + '$ es ' + ({ Summe: 'una <b>suma</b>', Differenz: 'una <b>diferencia</b>', Produkt: 'un <b>producto</b>', Quotient: 'un <b>cociente</b>', Potenz: 'una <b>potencia</b>' })[k] +

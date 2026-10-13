@@ -18,6 +18,10 @@ window.BuchES && BuchES.add('gleichungen', {
         // book es mathegy7-es (Einstein)
 
         // book es mathegy8-es (Curie)
+        // ungleichung
+        'Relationszeichen': 'Signo de desigualdad', '$a$ (Zahl vor dem $x$)': '$a$ (número delante de $x$)', '$c$ (rechte Seite)': '$c$ (segundo miembro)',
+        'durch eine negative Zahl: Das Zeichen dreht sich um!': 'entre un número negativo: ¡el signo se invierte!',
+        'Zahlenstrahl mit der Lösungsmenge': 'Recta numérica con el conjunto solución', 'Probe': 'Prueba', 'wahr': 'verdadero', 'falsch': 'falso',
 
         // book es mathegy9-es (Curie)
 
@@ -43,6 +47,10 @@ window.BuchES && BuchES.add('gleichungen', {
         // book es mathegy7-es (Einstein)
 
         // book es mathegy8-es (Curie)
+        // ungleichung
+        ['heißt $', 'significa $'], ['Das stimmt für jede Zahl: ', 'Se cumple para todo número: '], ['Das stimmt für keine Zahl: ', 'No se cumple para ningún número: '],
+        ['Zieh die <b>Probe</b> über den Zahlenstrahl. $x = ', 'Arrastra la <b>prueba</b> por la recta numérica. $x = '], ['$ ist ', '$ es '],
+        [': Die Zahl gehört zur Lösungsmenge.', ': el número pertenece al conjunto solución.'], [': Die Zahl gehört nicht dazu.', ': el número no pertenece a él.'],
 
         // book es mathegy9-es (Curie)
 
