@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 11 avanzado · Capítulo 1.5 · Condiciones, optimización, regresión | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Funciones a partir de condiciones, problemas de optimización, ecuaciones de funciones por regresión. Capítulo 1.5 del libro de texto interactivo Matemáticas · Gymnasium 11 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 11 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.5 · ÁREA DE APRENDIZAJE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.5 · ÁREA DE APRENDIZAJE 1 · DICIEMBRE</p>
+            <h1>Condiciones, optimización, regresión</h1>
+            <p class="b-hero-lead">Ahora cambias de perspectiva: en lugar de estudiar una función, la <b>construyes</b> a partir de sus propiedades, por ejemplo un cambio de carril en la carretera
+                en el que el volante no dé tirones. Encuentras lo mejor que es posible bajo ciertas condiciones, desde el mayor cilindro dentro de un cono hasta el camino más rápido de una socorrista.
+                Y dejas que el CAS busque la función que mejor se ajusta a unas medidas, preguntándote con sentido crítico hasta dónde puedes fiarte de ella.</p>
+            <div class="b-chips"><span class="b-chip">12 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">3 PÁGINAS DE PRÁCTICA</span><span class="b-chip">CAS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x&lt;0?0:(x&gt;2?1:0.1875*x^5-0.9375*x^4+1.25*x^3)","x&lt;0?0:(x&gt;2?1:0.75*x^2-0.25*x^3)"]' data-labels='["sin tirones","solo sin picos"]' data-lat="[2.6,-1.1]" data-x="-1.5,3.5" data-y="-0.5,1.6" data-pts="[[0,0],[2,1]]" data-h="240" data-aria="Dos curvas de transición entre dos carreteras paralelas: una solo sin picos, otra también sin saltos de curvatura"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>plantear ecuaciones de <b>funciones polinómicas</b> a partir de condiciones, sin calculadora hasta tres incógnitas y con el CAS también más</li>
+                <li>comprobar si la función encontrada cumple de verdad las condiciones y reconocer cuándo no existe ninguna</li>
+                <li>resolver <b>problemas de optimización</b>: función objetivo, condición de ligadura, dominio, valores en los extremos</li>
+                <li>hacer una <b>regresión</b> con el CAS, elegir el modelo de forma justificada y valorar el resultado con sentido crítico</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="12" data-ph="f'(2) ="><p class="b-q-text">$f(x) = x^3$. ¿Cuánto vale $f'(2)$?</p><div class="b-sol"><p>$3 \cdot 4 = 12$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">La gráfica de $f$ tiene un máximo en $H(2, 5)$. ¿Qué ecuaciones se deducen?</p><div class="b-mc"><button>solo $f(2) = 5$</button><button>$f(2) = 5$ y $f'(2) = 0$</button><button>$f'(5) = 2$</button></div><div class="b-sol"><p>El punto está en la gráfica y la tangente es horizontal en él.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">Resuelve $a + b = 1$, $a - b = 3$. ¿Cuánto vale $a$?</p><div class="b-sol"><p>Sumando: $2a = 4$ (capítulo 2)</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="x ="><p class="b-q-text">¿Dónde tiene $A(x) = 20x - x^2$ su máximo?</p><div class="b-sol"><p>$A'(x) = 20 - 2x = 0$ en $x = 10$ (capítulo 1.4)</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">EL CAMBIO DE CARRIL</div>
+            <div class="b-text"><p>Una carretera va por la recta $y = 0$ y a partir de $x = 2$ debe seguir por $y = 1$ (unidad: 100 m). Entre medias necesitáis una curva de transición.</p>
+                <ul><li>¿Qué condiciones tiene que cumplir en los dos extremos para que no haya ningún pico?</li><li>¿Cuántas condiciones son y qué grado necesita la función?</li><li>¿Qué se nota en el coche si la curvatura cambia de golpe en el punto de unión?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">EL CAMINO MÁS RÁPIDO</div>
+            <div class="b-text"><p>Una socorrista está a 30 m del agua. Un bañista está a 20 m de la orilla y desplazado 50 m hacia un lado. Ella corre a 6 m/s y nada a 2 m/s.</p>
+                <ul><li>¿Es el camino recto el más rápido? ¿O debería correr hasta quedar enfrente?</li><li>Estimad dónde debería entrar en el agua y calculad dos caminos.</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">¿CUÁNTO FRENA EL COCHE?</div>
+            <div class="b-text"><p>Distancias de frenado medidas: 30 km/h: 9,5 m; 50 km/h: 24 m; 70 km/h: 50 m; 90 km/h: 80 m; 110 km/h: 122 m; 130 km/h: 168 m.</p>
+                <ul><li>Representad los valores. ¿Qué tipo de función encaja?</li><li>¿Qué predecís para 150 km/h? ¿Con qué seguridad?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Funciones a partir de sus propiedades" data-toc-k="1" data-toc-short="1 Condiciones">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">5 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Funciones a partir de sus propiedades</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La curva de transición empieza en $(0, 0)$ y termina en $(2, 1)$. Sin picos quiere decir que la pendiente encaja en los dos extremos, es decir, $f'(0) = 0$ y $f'(2) = 0$.
+                Son cuatro condiciones, y una función de tercer grado tiene cuatro coeficientes. Si además la curvatura no debe cambiar de golpe, se añaden $f''(0) = 0$ y $f''(2) = 0$:
+                seis condiciones, es decir, una función de quinto grado. Tantas incógnitas se resuelven con el CAS.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · FUNCIONES A PARTIR DE CONDICIONES</div>
+                <div class="b-text">
+                    <p>Una función polinómica de grado $n$ tiene $n + 1$ coeficientes. Hacen falta $n + 1$ condiciones independientes entre sí.</p>
+                    <p><b>Traducir:</b> punto $P(x_0, y_0)$ de la gráfica: $f(x_0) = y_0$. Extremo en $x_0$: $f'(x_0) = 0$. Abscisa de inflexión $x_0$: $f''(x_0) = 0$.
+                        Tangente de pendiente $m$ en $x_0$: $f'(x_0) = m$. Simetría respecto al eje $y$: solo exponentes pares; simetría respecto al origen: solo impares.</p>
+                    <p>Unir <b>sin picos</b>: coinciden el valor de la función y la derivada. <b>Sin saltos de curvatura</b>: además, la segunda derivada.</p>
+                    <p><b>Comprobación:</b> $f'(x_0) = 0$ es solo necesaria. Comprueba en el resultado si hay de verdad un máximo, un mínimo o un punto de inflexión.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sin calculadora</b>, en el Abitur aparecen sistemas con coeficientes sencillos y como mucho tres incógnitas. Más incógnitas las resuelve el CAS, por ejemplo con <code>solve</code> o <code>rref</code>.</p>
+            <p class="b-note"><b>La simetría ahorra trabajo:</b> una función de cuarto grado simétrica respecto al eje $y$ solo tiene tres coeficientes: $f(x) = ax^4 + bx^2 + c$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · FUNCIÓN A PARTIR DE CONDICIONES</div>
+        <p class="b-help" style="margin:0 0 12px">Elige el tipo de condiciones y arrastra los puntos. El widget plantea el sistema de ecuaciones y muestra la función que cumple todas las condiciones.</p>
+        <div data-widget="steckbrief"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · SIN CALCULADORA</div>
+            <div class="b-text"><p>La gráfica de una función de tercer grado tiene el máximo $H(0, 4)$ y el mínimo $T(2, 0)$. Determina su ecuación.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^3 + bx^2 + cx + d$, $f'(x) = 3ax^2 + 2bx + c$. Condiciones: $f(0) = 4$: $d = 4$; $f'(0) = 0$: $c = 0$; $f(2) = 0$: $8a + 4b + 4 = 0$; $f'(2) = 0$: $12a + 4b = 0$.</p>
+                <p>Restando: $4a - 4 = 0$, así que $a = 1$, $b = -3$: <span class="b-res">$f(x) = x^3 - 3x^2 + 4$</span>.</p>
+                <p>Comprobación: $f''(x) = 6x - 6$, $f''(0) = -6 < 0$ (máximo), $f''(2) = 6 > 0$ (mínimo). Es la función del capítulo 1.4, ejemplo 3.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · EL CAMBIO DE CARRIL CON CAS</div>
+            <div class="b-text"><p>Determina la curva de transición de $(0, 0)$ a $(2, 1)$ que se une en ambos extremos sin picos y sin saltos de curvatura a las rectas $y = 0$ e $y = 1$.</p></div>
+            <div class="b-sol"><p>Seis condiciones: $f(0) = 0$, $f'(0) = 0$, $f''(0) = 0$, $f(2) = 1$, $f'(2) = 0$, $f''(2) = 0$. Con $f(x) = a_5 x^5 + \ldots + a_0$, el CAS da:</p>
+                <p><span class="b-res">$f(x) = \tfrac{3}{16}x^5 - \tfrac{15}{16}x^4 + \tfrac54 x^3$</span>.</p>
+                <p>Para comparar, la curva solo sin picos $g(x) = \tfrac34 x^2 - \tfrac14 x^3$: tiene $g''(0) = \tfrac32 \neq 0$. En el punto de unión la curvatura salta; habría que girar el volante de golpe (imagen de arriba).</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una parábola es simétrica respecto al eje $y$ y pasa por $(0, 4)$ y $(2, 0)$. Determina su ecuación.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^2 + c$. $c = 4$, $4a + 4 = 0$, así que $a = -1$: $f(x) = 4 - x^2$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>La gráfica de una función de tercer grado pasa por el origen, tiene un extremo en $x = 1$ y un punto de inflexión en $W(2, -2)$. Plantea las condiciones y resuelve.</p></div>
+            <div class="b-sol"><p>$f(0) = 0$: $d = 0$; $f'(1) = 0$: $3a + 2b + c = 0$; $f(2) = -2$: $8a + 4b + 2c = -2$; $f''(2) = 0$: $12a + 2b = 0$. Solución: $f(x) = -x^3 + 6x^2 - 9x$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una función de cuarto grado simétrica respecto al eje $y$ tiene el máximo $H(0, 2)$ y el mínimo $T(1, 1)$. Determínala y haz la comprobación.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^4 + bx^2 + c$: $c = 2$, $a + b + 2 = 1$, $f'(1) = 4a + 2b = 0$. Así que $a = 1$, $b = -2$: $f(x) = x^4 - 2x^2 + 2$. Comprobación: $f''(0) = -4 < 0$, $f''(1) = 8 > 0$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Existe una función de tercer grado con el mínimo $T(0, 0)$ y el máximo $H(2, 0)$? Justifícalo con el sistema de ecuaciones e intuitivamente.</p></div>
+            <div class="b-sol"><p>$d = 0$, $c = 0$, $8a + 4b = 0$, $12a + 4b = 0$ da $a = b = 0$: solo la función nula, que no tiene grado 3. Intuitivamente: en 0 y en 2 habría ceros dobles,
+                cuatro en total, pero una función de tercer grado tiene como mucho tres. Sin comprobación, esto se habría pasado por alto fácilmente.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Determina con el CAS la función de cuarto grado cuya gráfica toca el eje $x$ en el origen, tiene el máximo $H(2, 4)$ y pasa por $(4, 0)$.
+                Justifica con el resultado por qué la gráfica es simétrica respecto a la recta $x = 2$.</p></div>
+            <div class="b-sol"><p>Las condiciones $f(0) = 0$, $f'(0) = 0$, $f(2) = 4$, $f'(2) = 0$, $f(4) = 0$ dan $f(x) = \tfrac14 x^4 - 2x^3 + 4x^2 = \tfrac14 x^2 (x - 4)^2$.
+                Con $x = 2 + h$: $f = \tfrac14 (2 + h)^2 (h - 2)^2 = \tfrac14 (h^2 - 4)^2$, y eso no cambia si se sustituye $h$ por $-h$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="5" data-ph="Número"><p class="b-q-text">¿Cuántas condiciones hacen falta para una función de cuarto grado?</p><div class="b-sol"><p>Cinco coeficientes, así que cinco condiciones.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + bx + c$ pasa por $(0, 1)$, $(1, 2)$ y $(-1, 4)$. ¿Cuánto vale $a$?</p><div class="b-sol"><p>$c = 1$, $a + b = 1$, $a - b = 3$: $a = 2$, $b = -1$.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="f(1) ="><p class="b-q-text">Para la función del ejemplo 1: ¿cuánto vale $f(1)$?</p><div class="b-sol"><p>$1 - 3 + 4 = 2$, el punto de inflexión.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Problemas de optimización" data-toc-k="2" data-toc-short="2 Optimización">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Problemas de optimización</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El tiempo de la socorrista depende del punto $x$ en el que entra en el agua. Si sigue el camino recto, tarda 21,2 s;
+                si corre hasta quedar enfrente, 19,7 s. Entre medias hay un punto óptimo. Para encontrarlo, se escribe el tiempo como <b>función de una sola variable</b> y se busca su mínimo.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · RESOLVER PROBLEMAS DE OPTIMIZACIÓN</div>
+                <div class="b-text"><ol>
+                    <li>Nombrar la <b>magnitud objetivo</b> que debe ser máxima o mínima y escribirla como expresión, a menudo primero con varias variables.</li>
+                    <li>Con la <b>condición de ligadura</b>, sustituir todas las variables menos una: así se obtiene la <b>función objetivo</b>.</li>
+                    <li>Dar el <b>dominio</b> que tiene sentido.</li>
+                    <li>Hallar los extremos locales con la derivada y compararlos con los <b>valores en los extremos del intervalo</b>: se busca el extremo global.</li>
+                    <li>Responder en el <b>contexto</b>.</li>
+                </ol></div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Truco:</b> en lugar de una distancia $d = \sqrt{\ldots}$ se minimiza $d^2$. La raíz es estrictamente creciente, así que ambas tienen el mínimo en el mismo punto, pero $d^2$ se deriva más fácilmente.</p>
+            <p class="b-note"><b>Con el CAS:</b> si la ecuación $Z'(x) = 0$ es difícil, se resuelve numéricamente o se lee el mínimo en la gráfica.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · EL CAMINO MÁS RÁPIDO</div>
+        <p class="b-help" style="margin:0 0 12px">Arrastra el punto $P$ por la orilla. A la derecha ves el tiempo $T(x)$. Cambia las velocidades y observa cómo se desplaza el mínimo.</p>
+        <div data-widget="rettung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · LA DISTANCIA MÍNIMA</div>
+            <div class="b-text"><p>¿Qué punto de la parábola $y = x^2$ está más cerca del punto $P(3, 0)$? ¿Cuánto vale la distancia?</p></div>
+            <div class="b-sol"><p>Un punto de la parábola es $Q(x, x^2)$. Función objetivo: $d^2(x) = (x - 3)^2 + x^4$, $D = \mathbb{R}$.</p>
+                <p>$\left(d^2\right)'(x) = 2(x - 3) + 4x^3 = 0 \iff 2x^3 + x - 3 = 0$. Probando: $x = 1$. División de polinomios: $(x - 1)(2x^2 + 2x + 3)$; el segundo factor no tiene ceros.</p>
+                <p>$\left(d^2\right)'$ cambia en 1 de $-$ a $+$: <span class="b-res">$Q(1, 1)$, distancia $d = \sqrt{4 + 1} = \sqrt5 \approx 2{,}24$</span>. Para $x \to \pm\infty$, $d^2$ crece sin límite; por tanto, el mínimo es global.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · LA SOCORRISTA</div>
+            <div class="b-text"><p>Está en $A(0, 30)$, el bañista está en $B(50, -20)$ y la orilla es el eje $x$. Ella corre a 6 m/s y nada a 2 m/s. ¿Dónde debería entrar en el agua?</p></div>
+            <div class="b-sol"><p>Tramo corriendo $\sqrt{30^2 + x^2}$, tramo nadando $\sqrt{20^2 + (50 - x)^2}$. Función objetivo $T(x) = \tfrac{\sqrt{900 + x^2}}{6} + \tfrac{\sqrt{400 + (50 - x)^2}}{2}$ en $D = [0, 50]$.</p>
+                <p>El CAS resuelve $T'(x) = 0$: $x \approx 44{,}3$, $T \approx 19{,}3$ s. Valores en los extremos: $T(0) \approx 31{,}9$ s, $T(50) \approx 19{,}7$ s.</p>
+                <p><span class="b-res">Debería entrar en el agua unos 44 m hacia un lado</span>, y ahorra casi 2 s respecto al camino recto.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · OPTIMIZAR EN LA VIDA DIARIA</div>
+        <p class="b-help" style="margin:0 0 12px">Tres problemas clásicos: mueve el deslizador y busca el óptimo primero a ojo y después con la derivada.</p>
+        <div data-widget="optimieren"></div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dos números positivos suman 20. ¿Cuándo es máximo su producto?</p></div>
+            <div class="b-sol"><p>$P(x) = x(20 - x)$, $D = (0, 20)$. $P'(x) = 20 - 2x = 0$ en $x = 10$: los dos números valen 10 y el producto, 100.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un jardín rectangular debe tener 400 m². ¿Con qué medidas se necesita menos valla?</p></div>
+            <div class="b-sol"><p>$xy = 400$, $U(x) = 2x + \tfrac{800}{x}$ para $x > 0$. $U'(x) = 2 - \tfrac{800}{x^2} = 0$ en $x = 20$: un cuadrado de 20 m de lado, 80 m de valla.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una caja abierta por arriba y de base cuadrada debe contener 32 dm³. ¿Con qué medidas se necesita menos material?</p></div>
+            <div class="b-sol"><p>$a^2 h = 32$, $O = a^2 + 4ah = a^2 + \tfrac{128}{a}$. $O'(a) = 2a - \tfrac{128}{a^2} = 0 \iff a^3 = 64$: $a = 4$ dm, $h = 2$ dm, $O = 48$ dm².</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un rectángulo del primer cuadrante tiene un vértice en el origen y el vértice opuesto en la gráfica de $f(x) = e^{-x}$. ¿Cuándo es máxima su área?</p></div>
+            <div class="b-sol"><p>$A(u) = u\,e^{-u}$ para $u > 0$. $A'(u) = (1 - u)\,e^{-u} = 0$ en $u = 1$, cambio de signo de $+$ a $-$: $A = \tfrac1e \approx 0{,}368$ (compara con el capítulo 1.4, ejemplo 2).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dentro de un cono de radio 6 cm y altura 12 cm se coloca un cilindro cuya circunferencia superior toca la superficie lateral. ¿Qué tamaño puede tener como máximo el cilindro?
+                ¿Qué fracción del cono es?</p></div>
+            <div class="b-sol"><p>Teorema de Tales: $\tfrac{12 - h}{r} = \tfrac{12}{6}$, así que $h = 12 - 2r$. $V(r) = \pi r^2 (12 - 2r)$ en $[0, 6]$. $V'(r) = \pi(24r - 6r^2) = 0$ en $r = 4$, $h = 4$:
+                $V = 64\pi \approx 201$ cm³. En los extremos del intervalo, $V = 0$. El cono tiene $144\pi$ cm³; el cilindro ocupa $\tfrac49$ de él.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="40" data-ph="m"><p class="b-q-text">Un rectángulo tiene un área de 100 m². ¿Cuál es, como mínimo, su perímetro?</p><div class="b-sol"><p>Cuadrado de 10 m de lado: 40 m</p></div></div>
+        <div class="b-q" data-ans="36" data-ph="Valor"><p class="b-q-text">¿Qué valor máximo toma $x(12 - x)$?</p><div class="b-sol"><p>En $x = 6$: 36</p></div></div>
+        <div class="b-q" data-ans="1,155" data-tol="0.001" data-ph="u ="><p class="b-q-text">Un rectángulo está apoyado simétricamente en el eje $x$ bajo $y = 4 - x^2$, con los vértices $(\pm u, 0)$. ¿Para qué $u$ es máxima el área (con tres decimales)?</p><div class="b-sol"><p>$A(u) = 2u(4 - u^2)$, $A'(u) = 8 - 6u^2 = 0$: $u = \sqrt{4/3} \approx 1{,}155$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Regresión" data-toc-k="3" data-toc-short="3 Regresión">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Regresión</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Las distancias de frenado no están exactamente sobre una curva: las medidas siempre se dispersan. Se busca la función de un tipo elegido que se ajuste <b>en conjunto</b> lo mejor posible.
+                Para ello, el CAS toma la función con la que la suma de los cuadrados de las desviaciones verticales es mínima: el <b>método de los mínimos cuadrados</b>.
+                ¿Por qué precisamente cuadrados? Porque así las desviaciones positivas y negativas no se anulan, y el mínimo se encuentra con la derivada (ejemplo 6).</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · REGRESIÓN</div>
+                <div class="b-text">
+                    <p>En la <b>regresión</b>, el CAS determina para unos puntos medidos $(x_i, y_i)$ la función de un tipo dado para la que $\sum (y_i - f(x_i))^2$ es mínima.</p>
+                    <p>El <b>tipo</b> lo eliges de forma justificada: a partir del contexto (por ejemplo, $s \sim v^2$ en la distancia de frenado) y de la imagen de los puntos, no solo por el parámetro.</p>
+                    <p>El <b>coeficiente de determinación</b> $r^2$ está entre 0 y 1. Cerca de 1 significa: los puntos están muy cerca de la curva. No demuestra que el modelo sea correcto.</p>
+                    <p>Las previsiones fuera del rango de las medidas (<b>extrapolación</b>) son inseguras, tanto más cuanto más se aleja uno.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>En el CAS:</b> <code>LinReg</code>, <code>QuadReg</code>, <code>CubicReg</code>, <code>ExpReg</code>, <code>PowerReg</code>. Los valores van en dos listas.</p>
+            <p class="b-note"><b>Mantén el sentido crítico:</b> un polinomio de grado alto pasa casi por cualquier punto, $r^2 \approx 1$, y aun así predice disparates.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA MEJOR CURVA</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una serie de medidas y un tipo de modelo. Compara $r^2$ y la previsión. Puedes desplazar los puntos.</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · ¿LINEAL O CUADRÁTICA?</div>
+            <div class="b-text"><p>Estudia las distancias de frenado de la exploración con regresión lineal y cuadrática. ¿Cuál es la mejor previsión para 150 km/h?</p></div>
+            <div class="b-sol"><p>Lineal: $y \approx 1{,}595x - 52{,}0$ con $r^2 \approx 0{,}968$, previsión 187 m. Cuadrática: $y \approx 0{,}00989x^2 + 0{,}0129x - 0{,}27$ con $r^2 \approx 0{,}9997$, previsión 224 m.</p>
+                <p>También 0,968 suena bien, pero los puntos están primero por encima, después por debajo y luego otra vez por encima de la recta: se curvan. Físicamente, la energía cinética crece con $v^2$.
+                    <span class="b-res">El modelo cuadrático está justificado: unos 224 m.</span> Una recta predeciría incluso una distancia de frenado negativa a 30 km/h.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · ¿POR QUÉ LOS MÍNIMOS CUADRADOS?</div>
+            <div class="b-text"><p>Se busca la recta por el origen $y = mx$ que mejor se ajusta a los puntos $(1, 2)$, $(2, 3)$, $(3, 7)$. Deduce la fórmula para $m$.</p></div>
+            <div class="b-sol"><p>$S(m) = \sum (y_i - m x_i)^2$. Por la regla de la cadena: $S'(m) = -2 \sum x_i (y_i - m x_i) = 0 \iff m = \dfrac{\sum x_i y_i}{\sum x_i^2}$. Como $S''(m) = 2 \sum x_i^2 > 0$, es un mínimo.</p>
+                <p>Aquí: <span class="b-res">$m = \dfrac{2 + 6 + 21}{1 + 4 + 9} = \dfrac{29}{14} \approx 2{,}07$</span>. Así que la regresión es un problema de optimización.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Qué tipo de función encaja? Justifícalo a partir del contexto. a) una vela que se consume &nbsp; b) una distancia de frenado &nbsp; c) un té caliente que se enfría hasta la temperatura ambiente &nbsp; d) un crédito con tipo de interés fijo</p></div>
+            <div class="b-sol"><p>a) lineal, la misma cantidad de cera por hora &nbsp; b) cuadrática, $s \sim v^2$ &nbsp; c) exponencial para la diferencia de temperatura, que disminuye cada minuto en el mismo factor &nbsp; d) exponencial, crecimiento en un factor fijo</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina con el CAS la recta de regresión de $(1;\, 2{,}1)$, $(2;\, 3{,}9)$, $(3;\, 6{,}2)$, $(4;\, 7{,}8)$ y $r^2$. ¿Qué predice para $x = 10$?</p></div>
+            <div class="b-sol"><p>$y = 1{,}94x + 0{,}15$, $r^2 \approx 0{,}996$. Para $x = 10$: 19,55, con cautela, porque 10 está muy fuera del rango de las medidas.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Población mundial (miles de millones): 1950: 2,5; 1970: 3,7; 1990: 5,32; 2010: 6,99; 2020: 7,84, y los años intermedios del widget. Con $x$ = años desde 1950, determina una regresión exponencial y una lineal.
+                Compara sus previsiones para 2050 con la proyección de las Naciones Unidas, de unos 9,7 mil millones.</p></div>
+            <div class="b-sol"><p>Exponencial (con los ocho valores): $y \approx 2{,}61 \cdot 1{,}0167^x$, para 2050 unos 13,7 mil millones. Lineal: $y \approx 0{,}078x + 2{,}27$, para 2050 unos 10,1 mil millones.
+                La tasa de crecimiento lleva décadas bajando; la función exponencial sobrestima mucho. Ninguna de las curvas conoce las causas de la evolución.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Para las distancias de frenado también sirve una parábola por el origen $y = ax^2$. Determina $a$ con la fórmula del ejemplo 6, adaptada a $y = a \cdot x^2$, y compara la previsión para 150 km/h.</p></div>
+            <div class="b-sol"><p>Con $u_i = x_i^2$ es una recta por el origen en $u$: $a = \tfrac{\sum x_i^2 y_i}{\sum x_i^4} \approx 0{,}00998$. Previsión $0{,}00998 \cdot 150^2 \approx 225$ m, casi como la regresión cuadrática completa.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Qué constante $c$ se ajusta mejor, en el sentido de los mínimos cuadrados, a unas medidas $y_1, \ldots, y_n$? Demuéstralo con la derivada de $S(c) = \sum (y_i - c)^2$.</p></div>
+            <div class="b-sol"><p>$S'(c) = -2 \sum (y_i - c) = -2\left(\sum y_i - nc\right) = 0 \iff c = \tfrac1n \sum y_i = \bar{y}$, y $S''(c) = 2n > 0$. La media es la mejor constante.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2,214" data-tol="0.001" data-ph="m ="><p class="b-q-text">Halla $m$ de la mejor recta por el origen para $(1, 2)$, $(2, 4)$, $(3, 7)$ (con tres decimales).</p><div class="b-sol"><p>$\tfrac{2 + 8 + 21}{14} = \tfrac{31}{14} \approx 2{,}214$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="c ="><p class="b-q-text">¿Qué constante se ajusta mejor, en el sentido de los mínimos cuadrados, a los valores 3, 5 y 10?</p><div class="b-sol"><p>La media: 6</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Una regresión da $r^2 = 0{,}99$. ¿Qué se deduce?</p><div class="b-mc"><button>El modelo es correcto seguro.</button><button>Los puntos están muy cerca de la curva.</button><button>Las previsiones muy fuera del rango son fiables.</button></div><div class="b-sol"><p>Solo la cercanía de los puntos a la curva. Sobre el modelo y la extrapolación, $r^2$ no dice nada.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 2:</b> plantea como matriz el sistema de ecuaciones de una función de tercer grado que pasa por $(0, 1)$, $(1, 0)$, $(-1, 4)$ y $(2, 7)$, y resuélvelo con el método de Gauss-Jordan.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{cccc|c} 0 & 0 & 0 & 1 & 1 \\ 1 & 1 & 1 & 1 & 0 \\ -1 & 1 & -1 & 1 & 4 \\ 8 & 4 & 2 & 1 & 7 \end{array}\right)$ para $(a, b, c, d)$. Solución $f(x) = x^3 + x^2 - 3x + 1$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Relacionar con la física:</b> demuestra en general para la socorrista: de $T'(x) = 0$ se deduce $\tfrac{\sin\alpha}{v_1} = \tfrac{\sin\beta}{v_2}$, donde $\alpha$ y $\beta$ son los ángulos de los caminos con la normal a la orilla.</p></div>
+            <div class="b-sol"><p>Con $A(0, a)$, $B(b, -c)$: $T(x) = \tfrac{\sqrt{a^2 + x^2}}{v_1} + \tfrac{\sqrt{c^2 + (b - x)^2}}{v_2}$. $T'(x) = \tfrac{x}{v_1\sqrt{a^2 + x^2}} - \tfrac{b - x}{v_2\sqrt{c^2 + (b - x)^2}}$.
+                Las fracciones $\tfrac{x}{\sqrt{a^2 + x^2}}$ y $\tfrac{b - x}{\sqrt{c^2 + (b - x)^2}}$ son exactamente $\sin\alpha$ y $\sin\beta$. Es la ley de la refracción de la luz.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una función de tercer grado es simétrica respecto al origen, tiene un extremo en $x = 1$ y pasa por $(2, 4)$. Determínala e indica el tipo de extremo en $x = 1$.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^3 + cx$: $3a + c = 0$, $8a + 2c = 4$, así que $2a = 4$, $a = 2$, $c = -6$: $f(x) = 2x^3 - 6x$. $f''(1) = 12 > 0$: mínimo $T(1, -4)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>De un tronco de sección circular (diámetro 40 cm) se corta una viga de sección rectangular. Su resistencia es proporcional a $b \cdot h^2$.
+                ¿Con qué medidas resiste más?</p></div>
+            <div class="b-sol"><p>$b^2 + h^2 = 40^2$, así que $T(b) = b(1600 - b^2)$ en $(0, 40)$. $T'(b) = 1600 - 3b^2 = 0$: $b = \tfrac{40}{\sqrt3} \approx 23{,}1$ cm, $h = 40\sqrt{\tfrac23} \approx 32{,}7$ cm. La razón es $h : b = \sqrt2$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: La luz elige el camino más rápido" data-toc-k="X" data-toc-short="Fermat">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA Y FÍSICA</span></div>
+    <h2>La luz elige el camino más rápido</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Una vara dentro del agua parece doblada, porque la luz cambia de dirección en la superficie del agua. La ley la habían encontrado Willebrord Snellius y René Descartes:
+                la razón entre los senos de los dos ángulos con la normal es fija. Pero ¿por qué precisamente los senos?</p>
+            <p>Pierre de Fermat lo respondió en 1662 en dos escritos que adjuntó a una carta al médico Marin Cureau de la Chambre. Su hipótesis: la naturaleza no elige el camino más corto,
+                sino el <b>más rápido</b>, y en el agua la luz es más lenta que en el aire. Con su método para máximos y mínimos calculó exactamente el problema de la socorrista
+                y obtuvo, para su propia sorpresa, la ley de los senos (ejercicio 17 de «Repasar · Profundizar · Relacionar»).</p>
+            <p>Los partidarios de Descartes se lo tomaron a mal, porque Descartes había supuesto que la luz era más rápida en el agua. Fermat tenía razón: en 1850, Léon Foucault midió que la luz es más lenta en el agua.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Pierre de Fermat: «Analysis ad refractiones» y «Synthesis ad refractiones», anexos a una carta a Marin Cureau de la Chambre, 1662.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>CONDICIONES</h4><p>Grado $n$: traducir $n + 1$ condiciones y resolver el sistema de ecuaciones; a partir de cuatro incógnitas, con el CAS.</p></div>
+        <div><p>$H(0, 4)$, $T(2, 0)$: $f(x) = x^3 - 3x^2 + 4$</p></div></div>
+    <div class="b-rueck"><div><h4>COMPROBACIÓN</h4><p>$f'(x_0) = 0$ es solo necesaria. Comprobar en el resultado si es el tipo de punto pedido y si la función existe siquiera.</p></div>
+        <div><p>Cúbica con $T(0, 0)$ y $H(2, 0)$: no existe</p></div></div>
+    <div class="b-rueck"><div><h4>TRANSICIONES</h4><p>Sin picos: encajan $f$ y $f'$. Sin saltos de curvatura: también $f''$.</p></div>
+        <div><p>Cambio de carril: $\tfrac{3}{16}x^5 - \tfrac{15}{16}x^4 + \tfrac54 x^3$</p></div></div>
+    <div class="b-rueck"><div><h4>PROBLEMAS DE OPTIMIZACIÓN</h4><p>Magnitud objetivo, condición de ligadura, función objetivo de una variable, dominio, derivada y valores en los extremos, respuesta.</p></div>
+        <div><p>Cilindro en el cono: $r = 4$, $h = 4$, $V = 64\pi$</p></div></div>
+    <div class="b-rueck"><div><h4>REGRESIÓN</h4><p>Mínimos cuadrados; elegir el tipo de forma justificada; $r^2$ cerca de 1 no significa «correcto»; la extrapolación es insegura.</p></div>
+        <div><p>Distancia de frenado cuadrática: $s(150) \approx 224$ m</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="-1" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + c$ pasa por $(0, 9)$ y $(3, 0)$. ¿Cuánto vale $a$?</p><div class="b-sol"><p>$c = 9$, $9a + 9 = 0$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="Número"><p class="b-q-text">¿Cuántos coeficientes tiene una función de quinto grado simétrica respecto al origen?</p><div class="b-sol"><p>$ax^5 + bx^3 + cx$: tres</p></div></div>
+            <div class="b-q" data-ans="25" data-ph="Valor"><p class="b-q-text">Dos números suman 10. ¿Cuál es, como máximo, su producto?</p><div class="b-sol"><p>$5 \cdot 5 = 25$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="44,3" data-tol="0.1" data-ph="x ="><p class="b-q-text">¿Dónde debería entrar en el agua la socorrista del ejemplo 4 si corre a 6 m/s y nada a 2 m/s (con un decimal)?</p><div class="b-sol"><p>$x \approx 44{,}3$ m</p></div></div>
+            <div class="b-q" data-ans="201,1" data-tol="0.1" data-ph="cm³"><p class="b-q-text">¿Cuánto vale el volumen del mayor cilindro dentro del cono del ejercicio 10, en cm³ (con un decimal)?</p><div class="b-sol"><p>$64\pi \approx 201{,}1$</p></div></div>
+            <div class="b-q" data-ans="2,236" data-tol="0.001" data-ph="d ="><p class="b-q-text">¿Cuánto vale la menor distancia del punto $(3, 0)$ a la parábola $y = x^2$ (con tres decimales)?</p><div class="b-sol"><p>$\sqrt5 \approx 2{,}236$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-steckbrief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FUNCIONES A PARTIR DE CONDICIONES</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-extremwertprobleme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBLEMAS DE OPTIMIZACIÓN</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-regression.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGRESIÓN</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-ka1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXAMEN 11/I</span><span class="b-lab-what">Examen de prueba con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RECTA DE AJUSTE</span><span class="b-lab-what">La regresión al alcance de la mano (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 11.º curso, curso avanzado · Área de aprendizaje 1 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-es/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-es/gy11lk.js"></script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 11 avanzado · Capítulo 2 · Matrices | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Ax = b, producto de matrices compatibles, método de Gauss-Jordan, giros, producción encadenada. Capítulo 2 del libro de texto interactivo Matemáticas · Gymnasium 11 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 11 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 2 · ÁREA DE APRENDIZAJE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 2 · ÁREA DE APRENDIZAJE 2 · NOVIEMBRE · DICIEMBRE</p>
+            <h1>Matrices</h1>
+            <p class="b-hero-lead">Por tres puntos con valores de $x$ distintos que no están alineados pasa exactamente una parábola. Para encontrarla se resuelve un sistema de ecuaciones con tres incógnitas. Si solo se escriben sus números en un
+                esquema rectangular, una <b>matriz</b>, se obtiene un procedimiento que sabe hacer cualquier ordenador. Además, las matrices se pueden multiplicar, y al hacerlo ocurre algo
+                que no conoces de los números: $A \cdot B$ suele ser distinto de $B \cdot A$. Con matrices giras figuras en el plano y en el espacio y
+                calculas cuánta materia prima necesita una fábrica.</p>
+            <div class="b-chips"><span class="b-chip">6 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">3 PÁGINAS DE PRÁCTICA</span><span class="b-chip">3D</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^2-2*x+3"]' data-labels='["f"]' data-lat="[3.4]" data-x="-2,4.2" data-y="-0.5,8" data-pts="[[-1,6],[1,2],[3,6]]" data-h="240" data-aria="Una parábola que pasa por los tres puntos (−1, 6), (1, 2) y (3, 6)"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>representar sistemas de ecuaciones lineales en <b>notación matricial</b> $A \cdot \vec{x} = \vec{b}$</li>
+                <li>multiplicar <b>matrices compatibles</b>, de dimensiones $(m,n) \cdot (n,1)$ y $(m,n) \cdot (n,k)$, y mostrar que la <b>propiedad conmutativa</b> no se cumple</li>
+                <li>resolver sistemas de ecuaciones con el <b>método de Gauss-Jordan</b> y reconocer si tienen solución, también con un parámetro</li>
+                <li>girar figuras con <b>matrices de giro</b> en el plano y en el espacio y calcular <b>procesos de producción encadenados</b> con el producto de matrices</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Resuelve $x + y = 5$, $x - y = 1$. ¿Cuánto vale $x$?</p><div class="b-sol"><p>Sumando: $2x = 6$, así que $x = 3$ e $y = 2$.</p></div></div>
+            <div class="b-q" data-ans="11" data-ph="Número"><p class="b-q-text">Calcula $2 \cdot 4 + 1 \cdot (-3) + 3 \cdot 2$.</p><div class="b-sol"><p>$8 - 3 + 6 = 11$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Cuánto vale $\cos 90°$?</p><div class="b-mc"><button>1</button><button>0</button><button>−1</button></div><div class="b-sol"><p>$\cos 90° = 0$ y $\sin 90° = 1$.</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="c ="><p class="b-q-text">$f(x) = ax^2 + bx + c$ pasa por $(0, 5)$. ¿Cuánto vale $c$?</p><div class="b-sol"><p>$f(0) = c = 5$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">SOLO CUENTAN LOS NÚMEROS</div>
+            <div class="b-text"><p>La parábola $y = ax^2 + bx + c$ debe pasar por $(-1, 6)$, $(1, 2)$ y $(3, 6)$.</p>
+                <ul><li>Plantead las tres ecuaciones para $a$, $b$ y $c$.</li><li>Escribid solo los números en un esquema de tres filas. ¿Qué se puede omitir sin perder información?</li></ul></div>
+            <span class="b-pair">→ Lecciones 1 y 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">¿PRIMERO GIRAR, DESPUÉS VOLCAR?</div>
+            <div class="b-text"><p>Coged un libro y ponedlo delante de vosotros.</p>
+                <ul><li>Giradlo 90° hacia la izquierda y después volcadlo hacia delante alrededor del eje transversal. Fijaos en cómo queda.</li><li>Empezad de nuevo y hacedlo al revés. ¿Queda igual?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">¿CUÁNTO CACAO?</div>
+            <div class="b-text"><p>Para una tableta «Classic» hacen falta 2 kg de masa de chocolate negro y 1 kg de masa de chocolate con leche. Para 1 kg de masa de chocolate negro hacen falta 3 kg de cacao, y para 1 kg de masa de chocolate con leche, 1 kg de cacao.</p>
+                <ul><li>¿Cuánto cacao hay en una tableta? ¿Y en 10 tabletas?</li><li>¿Cómo se podría escribir esto de forma clara para muchos productos y materias primas?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Las matrices y su producto" data-toc-k="1" data-toc-short="1 Producto">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Las matrices y su producto</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La parábola por los tres puntos da $a - b + c = 6$, $a + b + c = 2$ y $9a + 3b + c = 6$. Los nombres $a$, $b$, $c$ ocupan en cada fila el mismo lugar.
+                Bastan los coeficientes y los segundos miembros:</p>
+                <p>$\begin{pmatrix} 1 & -1 & 1 \\ 1 & 1 & 1 \\ 9 & 3 & 1 \end{pmatrix} \cdot \begin{pmatrix} a \\ b \\ c \end{pmatrix} = \begin{pmatrix} 6 \\ 2 \\ 6 \end{pmatrix}$</p>
+                <p>Para que esto sea correcto, «matriz por vector» tiene que definirse así: cada fila de la matriz por el vector, multiplicando posición a posición y sumando.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · LAS MATRICES Y SU PRODUCTO</div>
+                <div class="b-text">
+                    <p>Una <b>matriz</b> de <b>dimensión</b> $(m,n)$ tiene $m$ filas y $n$ columnas. El elemento $a_{ij}$ está en la fila $i$ y la columna $j$.</p>
+                    <p><b>Notación matricial</b> de un sistema de ecuaciones: $A \cdot \vec{x} = \vec{b}$ con la matriz de coeficientes $A$, el vector $\vec{x}$ de las incógnitas y el segundo miembro $\vec{b}$.</p>
+                    <p><b>Producto:</b> $A \cdot B$ solo está definido si $A$ tiene tantas columnas como filas tiene $B$ (matrices <b>compatibles</b>): $(m,n) \cdot (n,k)$ da la dimensión $(m,k)$.
+                        El elemento $c_{ij}$ es «fila $i$ de $A$ por columna $j$ de $B$»: $c_{ij} = a_{i1} b_{1j} + a_{i2} b_{2j} + \ldots + a_{in} b_{nj}$.</p>
+                    <p>En general, $A \cdot B \neq B \cdot A$: la <b>propiedad conmutativa no se cumple</b>. En cambio, la propiedad asociativa $(A \cdot B) \cdot C = A \cdot (B \cdot C)$ sí se cumple.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Variable que falta:</b> en $2x - z = 1$ falta $y$. En la matriz, en ese lugar va un 0.</p>
+            <p class="b-note"><b>Matriz identidad:</b> $I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$ se comporta como el número 1: $A \cdot I = I \cdot A = A$.</p>
+            <p class="b-note"><b>Para recordarlo:</b> fila por columna. El factor de la izquierda marca las filas; el de la derecha, las columnas.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · FILA POR COLUMNA</div>
+        <p class="b-help" style="margin:0 0 12px">Elige las dimensiones y haz clic en una casilla del resultado: la fila y la columna correspondientes se iluminan. Cambia el orden y compara.</p>
+        <div data-widget="matrixprodukt"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · COMPROBAR UNA SOLUCIÓN</div>
+            <div class="b-text"><p>Comprueba con la notación matricial si $a = 1$, $b = -2$, $c = 3$ resuelve el sistema de ecuaciones de la parábola.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 1 & -1 & 1 \\ 1 & 1 & 1 \\ 9 & 3 & 1 \end{pmatrix} \cdot \begin{pmatrix} 1 \\ -2 \\ 3 \end{pmatrix} = \begin{pmatrix} 1 + 2 + 3 \\ 1 - 2 + 3 \\ 9 - 6 + 3 \end{pmatrix} = \begin{pmatrix} 6 \\ 2 \\ 6 \end{pmatrix}$</p>
+                <p>Es el segundo miembro. <span class="b-res">La parábola es $y = x^2 - 2x + 3$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · A · B Y B · A</div>
+            <div class="b-text"><p>$A = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$, $B = \begin{pmatrix} 1 & 0 \\ 3 & 1 \end{pmatrix}$. Calcula $A \cdot B$ y $B \cdot A$.</p></div>
+            <div class="b-sol"><p>$A \cdot B = \begin{pmatrix} 1 + 6 & 0 + 2 \\ 0 + 3 & 0 + 1 \end{pmatrix} = \begin{pmatrix} 7 & 2 \\ 3 & 1 \end{pmatrix}$, &nbsp;
+                $B \cdot A = \begin{pmatrix} 1 + 0 & 2 + 0 \\ 3 + 0 & 6 + 1 \end{pmatrix} = \begin{pmatrix} 1 & 2 \\ 3 & 7 \end{pmatrix}$</p>
+                <p><span class="b-res">$A \cdot B \neq B \cdot A$</span>; basta un solo contraejemplo para mostrar que la propiedad conmutativa no se cumple en general.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Escribe en notación matricial: $x + 2y - z = 3$, $2x - y = 4$, $y + 3z = -1$.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 1 & 2 & -1 \\ 2 & -1 & 0 \\ 0 & 1 & 3 \end{pmatrix} \cdot \begin{pmatrix} x \\ y \\ z \end{pmatrix} = \begin{pmatrix} 3 \\ 4 \\ -1 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da la dimensión del producto y calcúlalo: $\begin{pmatrix} 2 & -1 & 0 \\ 1 & 3 & 2 \end{pmatrix} \cdot \begin{pmatrix} 1 \\ 2 \\ -1 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>$(2,3) \cdot (3,1)$ da la dimensión $(2,1)$: $\begin{pmatrix} 2 - 2 + 0 \\ 1 + 6 - 2 \end{pmatrix} = \begin{pmatrix} 0 \\ 5 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$A = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}$, $P = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$. Calcula $A \cdot P$ y $P \cdot A$. ¿Qué hace $P$ por la derecha y qué por la izquierda?</p></div>
+            <div class="b-sol"><p>$A \cdot P = \begin{pmatrix} 2 & 1 \\ 4 & 3 \end{pmatrix}$: por la derecha, $P$ intercambia las columnas. $P \cdot A = \begin{pmatrix} 3 & 4 \\ 1 & 2 \end{pmatrix}$: por la izquierda, $P$ intercambia las filas.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$A$ tiene dimensión $(2,3)$, $B$ dimensión $(3,3)$ y $C$ dimensión $(3,1)$. ¿Cuáles de los productos $AB$, $BA$, $BC$, $CB$, $AC$, $ABC$ están definidos? Da en cada caso la dimensión.</p></div>
+            <div class="b-sol"><p>$AB$: $(2,3)$; $BC$: $(3,1)$; $AC$: $(2,1)$; $ABC$: $(2,1)$. No están definidos $BA$ (3 columnas, pero 2 filas) ni $CB$ (1 columna, pero 3 filas).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Halla todas las matrices $B = \begin{pmatrix} p & q \\ r & s \end{pmatrix}$ que conmutan con $A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}$, es decir, para las que se cumple $A \cdot B = B \cdot A$.</p></div>
+            <div class="b-sol"><p>$A \cdot B = \begin{pmatrix} p + r & q + s \\ r & s \end{pmatrix}$, $B \cdot A = \begin{pmatrix} p & p + q \\ r & r + s \end{pmatrix}$. Igualando: $r = 0$ y $s = p$.
+                Por tanto, $B = \begin{pmatrix} p & q \\ 0 & p \end{pmatrix}$ con $p$ y $q$ cualesquiera.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="12" data-ph="Número"><p class="b-q-text">¿Cuántos elementos tiene el producto de una matriz $(3,2)$ por una matriz $(2,4)$?</p><div class="b-sol"><p>Dimensión $(3,4)$: 12 elementos.</p></div></div>
+        <div class="b-q" data-ans="10" data-ph="Número"><p class="b-q-text">$\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \cdot \begin{pmatrix} 2 \\ 1 \end{pmatrix}$. ¿Cuál es la segunda componente?</p><div class="b-sol"><p>$3 \cdot 2 + 4 \cdot 1 = 10$</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="c₁₂ ="><p class="b-q-text">Calcula $c_{12}$ de $\begin{pmatrix} 2 & 1 \\ 0 & 3 \end{pmatrix} \cdot \begin{pmatrix} 1 & 4 \\ 2 & -1 \end{pmatrix}$.</p><div class="b-sol"><p>Fila 1 por columna 2: $2 \cdot 4 + 1 \cdot (-1) = 7$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="El método de Gauss-Jordan" data-toc-k="2" data-toc-short="2 Gauss-Jordan">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">2</span>El método de Gauss-Jordan</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Se pueden sumar dos ecuaciones, multiplicar una ecuación por un número $k \neq 0$ e intercambiar ecuaciones: el conjunto solución sigue siendo el mismo.
+                Con la matriz va más rápido, porque solo se transforman filas de números. El objetivo: a la izquierda, la <b>matriz identidad</b>; a la derecha se puede leer entonces la solución.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MÉTODO DE GAUSS-JORDAN</div>
+                <div class="b-text">
+                    <p>Se escribe la <b>matriz ampliada</b> $(A \mid \vec{b})$ y se transforma con <b>transformaciones elementales de filas</b>: intercambiar filas, multiplicar una fila por $k \neq 0$,
+                        sumar a una fila $k$ veces otra.</p>
+                    <p><b>Gauss:</b> hacer ceros por debajo de la diagonal (forma escalonada). <b>Jordan:</b> hacer ceros también por encima y llevar la diagonal a 1.</p>
+                    <p><b>¿Hay solución?</b> Si aparece una fila $(0 \; 0 \; 0 \mid c)$ con $c \neq 0$, <b>no hay solución</b>. Si aparece una fila nula $(0 \; 0 \; 0 \mid 0)$, de modo que quedan menos
+                        escalones que incógnitas, hay <b>infinitas</b> soluciones con un parámetro. Si no, la solución es <b>única</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notación:</b> $\text{II} - 2 \cdot \text{I}$ significa: a la fila II se le resta el doble de la fila I, y el resultado sustituye a la fila II.</p>
+            <p class="b-note"><b>Con el CAS:</b> la orden <code>rref</code> da en un solo paso la matriz final del método de Gauss-Jordan.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · TRANSFORMACIONES DE FILAS</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una transformación, la fila de destino y el factor $k$, y aplícala. «Siguiente paso» propone una transformación adecuada.</p>
+        <div data-widget="gauss"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · LA PARÁBOLA POR TRES PUNTOS</div>
+            <div class="b-text"><p>Resuelve el sistema de ecuaciones de la parábola con el método de Gauss-Jordan.</p></div>
+            <div class="b-sol"><p>$$\left(\begin{array}{ccc|c} 1 & -1 & 1 & 6 \\ 1 & 1 & 1 & 2 \\ 9 & 3 & 1 & 6 \end{array}\right) \xrightarrow{\text{II} - \text{I},\ \text{III} - 9 \cdot \text{I}} \left(\begin{array}{ccc|c} 1 & -1 & 1 & 6 \\ 0 & 2 & 0 & -4 \\ 0 & 12 & -8 & -48 \end{array}\right)$$</p>
+                <p>$$\xrightarrow{\frac12 \cdot \text{II},\ \text{III} - 12 \cdot \text{II}} \left(\begin{array}{ccc|c} 1 & -1 & 1 & 6 \\ 0 & 1 & 0 & -2 \\ 0 & 0 & -8 & -24 \end{array}\right) \xrightarrow{-\frac18 \cdot \text{III},\ \text{I} + \text{II} - \text{III}} \left(\begin{array}{ccc|c} 1 & 0 & 0 & 1 \\ 0 & 1 & 0 & -2 \\ 0 & 0 & 1 & 3 \end{array}\right)$$</p>
+                <p><span class="b-res">$a = 1$, $b = -2$, $c = 3$</span>, como en el ejemplo 1.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · SOLUCIONES CON UN PARÁMETRO</div>
+            <div class="b-text"><p>¿Para qué $t$ tiene solución el sistema $x + y + z = 2$, $x + 2y + 3z = 3$, $2x + 3y + 4z = t$? Da entonces todas las soluciones.</p></div>
+            <div class="b-sol"><p>$\text{II} - \text{I}$: $(0 \; 1 \; 2 \mid 1)$; $\text{III} - 2 \cdot \text{I}$: $(0 \; 1 \; 2 \mid t - 4)$; después $\text{III} - \text{II}$: $(0 \; 0 \; 0 \mid t - 5)$.</p>
+                <p>Para $t \neq 5$ es una contradicción: no hay solución. Para <span class="b-res">$t = 5$</span> queda una fila nula. Con $z = s$ resulta $y = 1 - 2s$ y $x = 2 - y - z = 1 + s$:
+                    infinitas soluciones $(1 + s, 1 - 2s, s)$, $s \in \mathbb{R}$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Resuelve con el método de Gauss-Jordan: $x + y + z = 6$, $2x - y + z = 3$, $x + 2y - z = 2$.</p></div>
+            <div class="b-sol"><p>$\text{II} - 2 \cdot \text{I}$: $(0 \; -3 \; -1 \mid -9)$, $\text{III} - \text{I}$: $(0 \; 1 \; -2 \mid -4)$. Intercambiar filas y después $(0 \; 0 \; -7 \mid -21)$: $z = 3$, $y = 2$, $x = 1$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Lee el conjunto solución: a) $\left(\begin{array}{ccc|c} 1 & 0 & 0 & 2 \\ 0 & 1 & 0 & -1 \\ 0 & 0 & 1 & 4 \end{array}\right)$<br>
+                b) $\left(\begin{array}{ccc|c} 1 & 0 & 2 & 3 \\ 0 & 1 & -1 & 1 \\ 0 & 0 & 0 & 0 \end{array}\right)$<br>c) $\left(\begin{array}{ccc|c} 1 & 2 & 0 & 1 \\ 0 & 0 & 1 & 2 \\ 0 & 0 & 0 & 5 \end{array}\right)$</p></div>
+            <div class="b-sol"><p>a) única, $(2, -1, 4)$ &nbsp; b) infinitas: $z = t$, $x = 3 - 2t$, $y = 1 + t$ &nbsp; c) ninguna solución; la última fila dice $0 = 5$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Halla la parábola $y = ax^2 + bx + c$ que pasa por $(0, 1)$, $(1, 0)$ y $(2, 3)$.</p></div>
+            <div class="b-sol"><p>$c = 1$, $a + b + c = 0$, $4a + 2b + c = 3$. Así que $a + b = -1$ y $4a + 2b = 2$, de donde $a = 2$, $b = -3$: $y = 2x^2 - 3x + 1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Para qué $a$ no tiene solución el sistema $x + 2y + z = 1$, $2x + 4y + az = 3$, $y + z = 0$? Resuélvelo para los demás valores de $a$.</p></div>
+            <div class="b-sol"><p>$\text{II} - 2 \cdot \text{I}$: $(0 \; 0 \; a - 2 \mid 1)$. Para $a = 2$ eso dice $0 = 1$: no hay solución. Para $a \neq 2$: $z = \tfrac{1}{a - 2}$, $y = -z$, $x = 1 - 2y - z = 1 + \tfrac{1}{a - 2}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un cine vende entradas a 6 €, 8 € y 10 €. Una noche se vendieron 200 entradas por 1640 €, y de las de 8 € el doble que de las de 10 €. Plantea el sistema como matriz y resuélvelo.</p></div>
+            <div class="b-sol"><p>$x + y + z = 200$, $6x + 8y + 10z = 1640$, $y - 2z = 0$. Gauss-Jordan da $x = 35$, $y = 110$, $z = 55$. Comprobación: $210 + 880 + 550 = 1640$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">$x + y + z = 3$, $y + z = 2$, $z = 4$. ¿Cuánto vale $x$?</p><div class="b-sol"><p>Sustituyendo hacia atrás: $z = 4$, $y = -2$, $x = 1$.</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="Número"><p class="b-q-text">La matriz final contiene la fila $(0 \; 0 \; 0 \mid 5)$. ¿Cuántas soluciones tiene el sistema?</p><div class="b-sol"><p>Ninguna: la fila dice $0 = 5$.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">¿Para qué $t$ tiene $x + y = 1$, $2x + 2y = t$ infinitas soluciones?</p><div class="b-sol"><p>$\text{II} - 2 \cdot \text{I}$: $(0 \; 0 \mid t - 2)$, así que $t = 2$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Giros y producción encadenada" data-toc-k="3" data-toc-short="3 Aplicaciones">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Giros y producción encadenada</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si se gira el punto $(1, 0)$ un ángulo $\varphi$ alrededor del origen, llega a $(\cos\varphi, \sin\varphi)$; el punto $(0, 1)$ llega a $(-\sin\varphi, \cos\varphi)$.
+                Estas dos imágenes son exactamente las columnas de la <b>matriz de giro</b>. Cualquier otro punto es una combinación de ambos, así que basta una multiplicación «matriz por vector».</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · GIROS Y PRODUCCIÓN ENCADENADA</div>
+                <div class="b-text">
+                    <p><b>Giro en el plano</b> alrededor del origen un ángulo $\varphi$ (en sentido antihorario): $\vec{p}\,{}' = D \cdot \vec{p}$ con $D = \begin{pmatrix} \cos\varphi & -\sin\varphi \\ \sin\varphi & \cos\varphi \end{pmatrix}$.</p>
+                    <p><b>Giro en el espacio</b> alrededor del eje $z$: $D_z = \begin{pmatrix} \cos\varphi & -\sin\varphi & 0 \\ \sin\varphi & \cos\varphi & 0 \\ 0 & 0 & 1 \end{pmatrix}$, y análogamente alrededor de los ejes $x$ e $y$.
+                        Dos giros seguidos: primero $D_1$ y después $D_2$ da $D_2 \cdot D_1$.</p>
+                    <p><b>Producción encadenada:</b> si $A$ indica cuánta materia prima hay en cada producto intermedio y $B$ cuánto producto intermedio hay en cada producto final, entonces $C = A \cdot B$ da las
+                        materias primas necesarias por producto final. Para el pedido $\vec{e}$ hacen falta las materias primas $\vec{r} = C \cdot \vec{e}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Orden:</b> en $D_2 \cdot D_1 \cdot \vec{p}$ actúa primero la matriz de la derecha, igual que en la composición $f(g(x))$.</p>
+            <p class="b-note"><b>Grafo de Gozinto:</b> las flechas muestran qué entra en qué (en inglés, «goes into»). Los números de las flechas son los elementos de las matrices.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · GIRAR EN EL PLANO</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta el ángulo de giro. La matriz de giro transforma la bandera amarilla en la azul; debajo, el cálculo para el punto $P(3, 1)$.</p>
+        <div data-widget="drehmatrix"></div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · GIRAR EN EL ESPACIO</div>
+        <p class="b-help" style="margin:0 0 12px">Elige el eje de giro (en rojo discontinuo) y el ángulo. La casa amarilla se transforma en la azul. Arrastra la imagen para girar el sistema de coordenadas.</p>
+        <div data-widget="drehraum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · GIRAR UN TRIÁNGULO</div>
+            <div class="b-text"><p>Gira el triángulo $A(1, 0)$, $B(4, 0)$, $C(4, 2)$ $90°$ alrededor del origen. Demuestra que dos giros de $90°$ dan un giro de $180°$.</p></div>
+            <div class="b-sol"><p>$D_{90°} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$, así que $\begin{pmatrix} x \\ y \end{pmatrix} \mapsto \begin{pmatrix} -y \\ x \end{pmatrix}$: $A'(0, 1)$, $B'(0, 4)$, $C'(-2, 4)$.</p>
+                <p>$D_{90°} \cdot D_{90°} = \begin{pmatrix} -1 & 0 \\ 0 & -1 \end{pmatrix} = D_{180°}$: <span class="b-res">cada punto se refleja respecto al origen.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · LA FÁBRICA DE CHOCOLATE</div>
+            <div class="b-text"><p>Una fábrica elabora con cacao, azúcar y leche dos masas y, con ellas, tabletas «Classic» y cajas «Mix» (imagen de abajo). ¿Cuánta materia prima necesita para 10 tabletas y 5 cajas?</p></div>
+            <div class="b-sol"><p>$C = A \cdot B = \begin{pmatrix} 3 & 1 \\ 1 & 2 \\ 0 & 2 \end{pmatrix} \cdot \begin{pmatrix} 2 & 1 \\ 1 & 3 \end{pmatrix} = \begin{pmatrix} 7 & 6 \\ 4 & 7 \\ 2 & 6 \end{pmatrix}$</p>
+                <p>$C \cdot \begin{pmatrix} 10 \\ 5 \end{pmatrix} = \begin{pmatrix} 70 + 30 \\ 40 + 35 \\ 20 + 30 \end{pmatrix}$: <span class="b-res">100 unidades de cacao, 75 de azúcar y 50 de leche.</span></p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · PRODUCCIÓN ENCADENADA</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta el pedido. Bajo cada recuadro aparece cuántas unidades (u.) hacen falta. El cálculo a través de los productos intermedios y el cálculo con $C = A \cdot B$ dan lo mismo.</p>
+        <div data-widget="verflechtung"></div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Gira $P(4, 2)$ alrededor del origen $90°$ y $180°$.</p></div>
+            <div class="b-sol"><p>$D_{90°} \cdot \vec{p} = \begin{pmatrix} -2 \\ 4 \end{pmatrix}$, $D_{180°} \cdot \vec{p} = \begin{pmatrix} -4 \\ -2 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da $D_{45°}$ de forma exacta y gira $P(2, 0)$. Comprueba que la distancia al origen no cambia.</p></div>
+            <div class="b-sol"><p>$D_{45°} = \tfrac{\sqrt2}{2}\begin{pmatrix} 1 & -1 \\ 1 & 1 \end{pmatrix}$, $P'(\sqrt2, \sqrt2)$. Distancia $\sqrt{2 + 2} = 2$, como antes.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Gira $P(1, 2, 3)$ $90°$ a) alrededor del eje $z$, b) alrededor del eje $x$.</p></div>
+            <div class="b-sol"><p>a) $D_z = \begin{pmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{pmatrix}$: $P'(-2, 1, 3)$ &nbsp; b) $D_x = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{pmatrix}$: $P'(1, -3, 2)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dos materias primas entran en dos productos intermedios, $A = \begin{pmatrix} 1 & 2 \\ 3 & 1 \end{pmatrix}$, y estos en dos productos finales, $B = \begin{pmatrix} 2 & 0 \\ 1 & 1 \end{pmatrix}$.
+                Calcula $C = A \cdot B$ y las materias primas necesarias para 5 unidades de $E_1$ y 10 de $E_2$. Dibuja el grafo de Gozinto.</p></div>
+            <div class="b-sol"><p>$C = \begin{pmatrix} 4 & 2 \\ 7 & 1 \end{pmatrix}$, $C \cdot \begin{pmatrix} 5 \\ 10 \end{pmatrix} = \begin{pmatrix} 40 \\ 45 \end{pmatrix}$: 40 unidades de $R_1$ y 45 de $R_2$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Demuestra con las fórmulas de adición $\cos(\alpha + \beta) = \cos\alpha\cos\beta - \sin\alpha\sin\beta$ y $\sin(\alpha + \beta) = \sin\alpha\cos\beta + \cos\alpha\sin\beta$
+                que se cumple $D_\alpha \cdot D_\beta = D_{\alpha + \beta}$. Deduce que los giros en el plano conmutan.</p></div>
+            <div class="b-sol"><p>$$D_\alpha \cdot D_\beta = \begin{pmatrix} \cos\alpha\cos\beta - \sin\alpha\sin\beta & -(\cos\alpha\sin\beta + \sin\alpha\cos\beta) \\ \sin\alpha\cos\beta + \cos\alpha\sin\beta & \cos\alpha\cos\beta - \sin\alpha\sin\beta \end{pmatrix} = D_{\alpha + \beta}$$</p>
+                <p>Como $\alpha + \beta = \beta + \alpha$, es $D_\alpha D_\beta = D_\beta D_\alpha$: en los giros alrededor de un mismo punto se cumple la propiedad conmutativa.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="-1" data-ph="x′ ="><p class="b-q-text">$P(3, 1)$ se gira $90°$ alrededor del origen. ¿Cuál es la coordenada $x$ de $P'$?</p><div class="b-sol"><p>$(x, y) \mapsto (-y, x)$: $P'(-1, 3)$</p></div></div>
+        <div class="b-q" data-ans="-2" data-ph="x′ ="><p class="b-q-text">$P(1, 2, 3)$ se gira $90°$ alrededor del eje $z$. ¿Cuál es la coordenada $x$ de $P'$?</p><div class="b-sol"><p>$P'(-2, 1, 3)$</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="c₂₂ ="><p class="b-q-text">$A = \begin{pmatrix} 2 & 1 \\ 1 & 3 \end{pmatrix}$, $B = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$. Calcula $c_{22}$ de $C = A \cdot B$.</p><div class="b-sol"><p>$1 \cdot 2 + 3 \cdot 1 = 5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 1.5:</b> determina con el método de Gauss-Jordan la función de tercer grado que pasa por $(0, 1)$, $(1, 0)$, $(-1, 4)$ y $(2, 7)$.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^3 + bx^2 + cx + d$: $d = 1$; $a + b + c = -1$; $-a + b - c = 3$; $8a + 4b + 2c = 6$. Solución $a = 1$, $b = 1$, $c = -3$: $f(x) = x^3 + x^2 - 3x + 1$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Gira el punto $P(1, 0, 0)$ primero $90°$ alrededor del eje $z$ y después $90°$ alrededor del eje $x$. Hazlo después en el orden inverso. ¿Qué muestra el resultado sobre $D_x \cdot D_z$ y $D_z \cdot D_x$?</p></div>
+            <div class="b-sol"><p>Primero $D_z$: $(0, 1, 0)$; después $D_x$: $(0, 0, 1)$. Primero $D_x$: $(1, 0, 0)$ se queda donde está; después $D_z$: $(0, 1, 0)$.
+                Imágenes distintas, así que $D_x D_z \neq D_z D_x$: los giros en el espacio no conmutan en general (exploración con el libro).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En la fábrica de chocolate del ejemplo 6 hay 134 unidades de cacao, 98 de azúcar y 64 de leche. ¿Cuántas tabletas y cajas puede producir si se debe gastar todo?</p></div>
+            <div class="b-sol"><p>$C \cdot \vec{e} = \vec{r}$: $7e_1 + 6e_2 = 134$, $4e_1 + 7e_2 = 98$, $2e_1 + 6e_2 = 64$. Tres ecuaciones, dos incógnitas. Gauss-Jordan da una solución sin contradicciones: $e_1 = 14$, $e_2 = 6$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$S = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}$ refleja respecto al eje $x$. Demuestra que $S \cdot D_{90°} \neq D_{90°} \cdot S$ y que, en general, se cumple $S \cdot D_\varphi \cdot S = D_{-\varphi}$. Interpreta el resultado.</p></div>
+            <div class="b-sol"><p>$S D_{90°} = \begin{pmatrix} 0 & -1 \\ -1 & 0 \end{pmatrix}$, $D_{90°} S = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$. $S D_\varphi S = \begin{pmatrix} \cos\varphi & \sin\varphi \\ -\sin\varphi & \cos\varphi \end{pmatrix} = D_{-\varphi}$:
+                reflejar, girar y volver a reflejar es un giro en sentido contrario.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Cayley calcula con tablas" data-toc-k="X" data-toc-short="Cayley">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Cayley calcula con tablas</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En enero de 1858 se leyó ante la Royal Society de Londres un trabajo del matemático inglés Arthur Cayley que fundó el cálculo con matrices. Cayley era entonces
+                abogado de profesión. Escribió que el concepto de matriz surge de forma totalmente natural de una notación abreviada para un sistema de ecuaciones lineales, exactamente como en la lección 1.</p>
+            <p>Lo nuevo era que Cayley calculaba con estas tablas como con números: definió la suma y el producto, mostró que el producto es asociativo y estudió cuándo dos matrices
+                conmutan. Durante mucho tiempo se consideró un juego. En 1925, Max Born se dio cuenta de que las extrañas reglas de cálculo con las que Werner Heisenberg acababa de fundar la mecánica cuántica
+                eran exactamente la multiplicación de matrices de Cayley. Que $A \cdot B \neq B \cdot A$ está hoy en el principio de incertidumbre de la física.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Arthur Cayley: «A Memoir on the Theory of Matrices», Philosophical Transactions of the Royal Society of London 148 (1858), pp. 17–37.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>NOTACIÓN MATRICIAL</h4><p>Dimensión $(m,n)$: $m$ filas, $n$ columnas. Sistema de ecuaciones como $A \cdot \vec{x} = \vec{b}$.</p></div>
+        <div><p>$a - b + c = 6, \ldots$ se convierte en $\begin{pmatrix} 1 & -1 & 1 \\ \ldots \end{pmatrix} \cdot \vec{x} = \vec{b}$</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUCTO</h4><p>$(m,n) \cdot (n,k) = (m,k)$; $c_{ij}$ = fila $i$ por columna $j$.</p></div>
+        <div><p>$A \cdot B \neq B \cdot A$ en general, pero $(AB)C = A(BC)$</p></div></div>
+    <div class="b-rueck"><div><h4>GAUSS-JORDAN</h4><p>Transformaciones elementales de filas hasta la matriz identidad a la izquierda; a la derecha queda la solución.</p></div>
+        <div><p>$(0 \; 0 \; 0 \mid c \neq 0)$: ninguna solución; fila nula: infinitas</p></div></div>
+    <div class="b-rueck"><div><h4>GIROS</h4><p>$D = \begin{pmatrix} \cos\varphi & -\sin\varphi \\ \sin\varphi & \cos\varphi \end{pmatrix}$; en el espacio, la coordenada del eje de giro no cambia.</p></div>
+        <div><p>$D_{90°}$: $(x, y) \mapsto (-y, x)$</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUCCIÓN ENCADENADA</h4><p>Materia prima por producto final $C = A \cdot B$, necesidades $\vec{r} = C \cdot \vec{e}$.</p></div>
+        <div><p>10 tabletas, 5 cajas: 100 unidades de cacao</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="4" data-ph="Número"><p class="b-q-text">$\begin{pmatrix} 1 & 0 & 2 \\ 3 & 1 & 0 \end{pmatrix} \cdot \begin{pmatrix} 2 \\ 1 \\ 1 \end{pmatrix}$. ¿Cuál es la primera componente?</p><div class="b-sol"><p>$2 + 0 + 2 = 4$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="Filas"><p class="b-q-text">¿Cuántas filas tiene el producto de una matriz $(3,4)$ por una matriz $(4,2)$?</p><div class="b-sol"><p>Dimensión $(3,2)$</p></div></div>
+            <div class="b-q" data-ans="-4" data-ph="y′ ="><p class="b-q-text">$P(2, 4)$ se gira $180°$ alrededor del origen. ¿Cuál es la coordenada $y$ de $P'$?</p><div class="b-sol"><p>$P'(-2, -4)$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="3" data-ph="z ="><p class="b-q-text">Resuelve $x + y + z = 6$, $x - y + 2z = 5$, $2x + y - z = 1$. ¿Cuánto vale $z$?</p><div class="b-sol"><p>$x = 1$, $y = 2$, $z = 3$</p></div></div>
+            <div class="b-q" data-ans="0,866" data-tol="0.001" data-ph="y′ ="><p class="b-q-text">$P(1, 0)$ se gira $60°$. ¿Cuál es la coordenada $y$ de $P'$ (con tres decimales)?</p><div class="b-sol"><p>$\sin 60° = \tfrac{\sqrt3}{2} \approx 0{,}866$</p></div></div>
+            <div class="b-q" data-ans="160" data-ph="u."><p class="b-q-text">¿Cuántas unidades de cacao necesita la fábrica de chocolate del ejemplo 6 para 10 tabletas y 15 cajas?</p><div class="b-sol"><p>$7 \cdot 10 + 6 \cdot 15 = 160$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-matrizen-gauss.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MATRICES Y GAUSS-JORDAN</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-drehung-verflechtung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GIROS Y PRODUCCIÓN ENCADENADA</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 11.º curso, curso avanzado · Área de aprendizaje 2 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-lgs.js"></script>
+<script src="../../js/buch-es/lgs.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-es/gy11.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-es/vektoren.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-es/gy11lk.js"></script>
+</body>
+</html>
