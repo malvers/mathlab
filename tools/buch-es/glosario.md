@@ -498,6 +498,45 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Zuordnung; mehrdeutig, eindeutig, eineindeutig | correspondencia; no unívoca, unívoca, biunívoca | |
+| Dreisatz | regla de tres | |
+| direkt / indirekt proportional, Quotientengleichheit, Produktgleichheit | directamente / inversamente proporcional, igualdad de cocientes, igualdad de productos | |
+| gebrochene Zahlen | números fraccionarios | |
+| Kehrwert | inversa | |
+| Hauptnenner, gleichnamig machen | mínimo común denominador, pasar a común denominador | |
+| Teilermenge $D_n$ | conjunto de divisores $D_n$ | as in GY 5 |
+| ggT, kgV (short forms in widgets and tasks) | m.c.d., m.c.m. | written out once per chapter |
+| TR (Taschenrechner, chip) | CALC | |
+| Definition, Satz, Wenn-dann-Form | definición, teorema, forma «si …, entonces …» | |
+| Voraussetzung, Behauptung, direkter Beweis | hipótesis, tesis, demostración directa | |
+| Innenwinkelsatz, Außenwinkel | teorema de los ángulos interiores, ángulo exterior | |
+| Kongruenzsätze sss, sws, wsw, SsW (www, ssW) | criterios de congruencia LLL, LAL, ALA, LlA (AAA, llA) | L = lado, A = ángulo; capital L = the longer side; the widget konstruktion6 uses the same letters |
+| kongruent (deckungsgleich) | congruentes (iguales) | |
+| Planfigur, Konstruktionsbeschreibung, Lösbarkeit | figura de análisis, descripción de la construcción, existencia de solución | |
+| Schenkel (eines Winkels) | lado del ángulo | "el lado libre del ángulo" |
+| Basiswinkelsatz, Basis, Schenkel (gleichschenklig) | teorema de los ángulos de la base, base, lados laterales | |
+| Seiten-Winkel-Beziehung, Dreiecksungleichung | relación entre lados y ángulos, desigualdad triangular | |
+| Mittelsenkrechte, Winkelhalbierende, Höhe, Seitenhalbierende | mediatriz, bisectriz, altura, mediana | |
+| Umkreis(mittelpunkt) $U$, Inkreis(mittelpunkt) $I$, Höhenschnittpunkt $H$, Schwerpunkt $S$ | circunferencia circunscrita / circuncentro $U$, circunferencia inscrita / incentro $I$, ortocentro $H$, baricentro $S$ | the letters stay |
+| Lot fällen, Mittelsenkrechte errichten | bajar la perpendicular, trazar la mediatriz | |
+| Euler-Gerade | recta de Euler | |
+| spitz-, recht-, stumpfwinklig; unregelmäßig (Dreieck) | acutángulo, rectángulo, obtusángulo; escaleno | |
+| Grundseite $g$, Höhe $h$ | base $g$, altura $h$ | letters stay |
+| Drachenviereck | deltoide | |
+| Haus der Vierecke | casa de los cuadriláteros | |
+| Rückführprinzip, zerlegen, ergänzen | principio de reducción, descomponer, completar | |
+| Satz von Pick | teorema de Pick | letters $I$, $R$ stay |
+| Prisma (gerade), Deckfläche, Mantel(fläche) $M$ | prisma (recto), base superior, superficie lateral / área lateral $M$ | |
+| Kavalierperspektive, Schrägbild | perspectiva caballera, dibujo en perspectiva | widget button "Perspectiva" |
+| umbauter Raum | volumen construido | |
+| Anteil, Flächenanteil, Volumenanteil | parte, parte de la superficie, parte del volumen | |
+| Kreisdiagramm, Säulendiagramm | diagrama de sectores, diagrama de barras | |
+| Primzahl, zusammengesetzte Zahl, Faktorbaum | número primo, número compuesto, árbol de factores | |
+| Primzahlzwillinge, vollkommene / befreundete Zahlen | números primos gemelos, números perfectos / amigos | |
+| euklidischer Algorithmus, Mersenne-Zahlen | algoritmo de Euclides, números de Mersenne | |
+| Wahlbereich 3 (kicker) | OPTATIVA 3 | chapter letter OP |
+| Runde 1 · ohne Taschenrechner / Runde 2 (GY 6 tests) | RONDA 1 · SIN CALCULADORA / RONDA 2 · PENSAR, PROBLEMAS | the round titles of 3.1–OP name the topic: RONDA 1 · ÁNGULOS … |
+| Glücksrad, Kopf / Zahl | ruleta, cara / cruz | |
 
 ## Added by mathegy7-es (Einstein)
 
