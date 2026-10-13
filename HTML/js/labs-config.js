@@ -112,6 +112,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathe9",
+        "href": "buch/mathe9/index.html",
+        "title": "Mathematik OS 9",
+        "description": "Das interaktive Lehrbuch Mathematik für die Oberschule, Klasse 9, Realschulbildungsgang, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Zehn Kapitel in der Reihenfolge des Schuljahres – der Satz des Pythagoras und seine Umkehrung, Sinus, Kosinus und Tangens, rechtwinklige Dreiecke im Alltag, die Pyramide, Kreiskegel und Kugel, zusammengesetzte Körper, quadratische Funktionen, quadratische Gleichungen mit der Lösungsformel, beschreibende Statistik mit einem eigenen Projekt und als Wahlpflichtbereich der Goldene Schnitt. Zum Ausprobieren: Steigung in Prozent und Steigungswinkel, Dach und Leiter, Kegel und Kugel mit der Kubikwurzel, Türme und Silos aus Teilkörpern, Parabeln in Scheitelpunktform, quadratische Gleichungen mit zwei, einer oder keiner Lösung, der Goldene Schnitt mit den Fibonacci-Zahlen und zwei Gruppen mit gleichem Mittelwert, aber verschiedener Spannweite. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik OS 9 / 10 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe9"],
+        "category": "buecher neu algebra funktionen geometrie stochastik grade9",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 9 oberschule realschule realschulbildungsgang sachsen lehrplan kapitel pythagoras satz des pythagoras hypotenuse kathete umkehrung knotenschnur abstand koordinatensystem sinus kosinus tangens rechtwinkliges dreieck steigung prozent steigungswinkel leiter dach spannseil hoehenwinkel tiefenwinkel pyramide netz schraegbild zweitafelbild koerperhoehe seitenhoehe seitenkante kegel kreiskegel mantellinie kreisausschnitt kugel kubikwurzel oberflaeche volumen masse zusammengesetzte koerper turm silo quadratische funktion normalparabel scheitelpunkt scheitelpunktform normalform quadratische ergaenzung quadratische gleichung loesungsformel diskriminante nullstellen goldener schnitt phi fibonacci pentagramm statistik mittelwert zentralwert median modalwert spannweite ausreisser diagramm umfrage aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathe10",
         "href": "buch/mathe10/index.html",
         "title": "Mathematik OS 10",

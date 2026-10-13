@@ -105,6 +105,9 @@ const LAB_ICONS = {
     // book 16 as well (Doc, 11.10.2026: "Dann fangt an")
     "lehrbuch-mathe8": `<img src="resources/og/buch-mathe8-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    // the Oberschule book 9 (Einstein, 13.10.2026)
+    "lehrbuch-mathe9": `<img src="resources/og/buch-mathe9-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
     "lehrbuch-mathe10": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathe10-cover.jpg" alt="" loading="lazy" decoding="async"
