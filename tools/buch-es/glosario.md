@@ -611,6 +611,42 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Leistungskurs | curso avanzado | title "Matemáticas · Gymnasium 11 · Curso avanzado" |
+| Epsilon-Delta-Definition | definición ε-δ | |
+| abschnittsweise definierte Funktion | función definida a trozos | |
+| Zwischenwertsatz | teorema de los valores intermedios | |
+| lineare Näherung | aproximación lineal | |
+| Stammfunktion | primitiva | |
+| Ortskurve | lugar geométrico | |
+| Wendetangente | tangente de inflexión | |
+| linksgekrümmt / rechtsgekrümmt | cóncava hacia arriba / hacia abajo | |
+| Randextrema | extremos en los extremos del intervalo | globales / locales as usual |
+| Polynomdivision | división de polinomios | |
+| knickfrei, ruckfrei (Übergang) | sin picos, sin saltos de curvatura | |
+| Gozinto-Graph, Mengeneinheit (ME) | grafo de Gozinto, unidad (u.) | "60 ME Kakao" → "60 unidades de cacao" |
+| Fixpunktiteration, anziehend / abstoßend | iteración de punto fijo, atractivo / repulsivo | |
+| Spinnwebdiagramm, Fixpunktsatz von Banach, kontrahierend | diagrama de telaraña, teorema del punto fijo de Banach, contractiva | |
+| Zylinderkoordinaten, Kugelkoordinaten | coordenadas cilíndricas, coordenadas esféricas | $(r, \varphi, z)$; with a decimal comma $(3;\, 50^\circ;\, 2{,}5)$ |
+| geografische Länge / Breite, Breitenkreis, Nullmeridian | longitud / latitud, paralelo, meridiano cero | |
+| Zylindermantel, Halbebene | superficie cilíndrica, semiplano | |
+| Spannvektoren (Ebene) | vectores directores | |
+| Spurgerade, Spurdreieck | recta de traza, triángulo de trazas | |
+| Achsenabschnittsform | ecuación segmentaria | |
+| geschlossener Vektorzug, Koeffizientenvergleich | cadena cerrada de vectores, comparación de coeficientes | |
+| Teilverhältnis, Schwerpunkt | razón de división, baricentro | |
+| räumliches Viereck | cuadrilátero alabeado | |
+| Satteldach, First | tejado a dos aguas, cumbrera | |
+| Streichen / Einfallen (Geologie) | rumbo / buzamiento (la capa buza) | |
+| Kolmogorow-Axiome, Additionssatz | axiomas de Kolmogórov, fórmula de la adición | |
+| Reißzwecke, Rückenlage | chincheta, con la punta hacia arriba | |
+| Skatblatt, Herz, Bube | baraja de skat, corazones, jota | |
+| Lotto „6 aus 49“, Richtige, Tipp | lotería «6 de 49», aciertos, apuesta | |
+| Variation / Kombination mit / ohne Wiederholung | variación / combinación con / sin repetición | widget urne |
+| bedingte Wahrscheinlichkeit, Satz von Bayes, totale Wahrscheinlichkeit | probabilidad condicionada, teorema de Bayes, probabilidad total | |
+| Basisrate, natürliche Häufigkeiten, umgekehrter Baum | tasa base, frecuencias naturales, árbol invertido | |
+| Ziegenproblem, Moderator | problema de Monty Hall, presentador | |
+| Einzelwahrscheinlichkeit, Summenzeichen, binomischer Lehrsatz | probabilidad puntual, símbolo de sumatorio, teorema del binomio | |
+| Reihen- / Parallelschaltung | montaje en serie / en paralelo | |
 
 ## Added by mathegy12-es (Turing)
 
