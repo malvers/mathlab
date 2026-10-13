@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 11 avanzado · Capítulo 1.4 · Estudio de funciones | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Monotonía, extremos, curvatura y puntos de inflexión, simetría, polos, asíntotas oblicuas. Capítulo 1.4 del libro de texto interactivo Matemáticas · Gymnasium 11 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 11 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.4 · ÁREA DE APRENDIZAJE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.4 · ÁREA DE APRENDIZAJE 1 · NOVIEMBRE</p>
+            <h1>Estudio de funciones</h1>
+            <p class="b-hero-lead">Con la primera y la segunda derivada lees en una función su gráfica sin dibujarla: dónde crece y decrece, dónde tiene sus
+                máximos y mínimos, cómo se curva y dónde cambia de curvatura. En el curso avanzado distingues con precisión entre condiciones <b>necesarias</b> y
+                <b>suficientes</b>, encuentras también los extremos <b>globales</b> en los extremos del intervalo y estudias funciones racionales con polos y <b>asíntotas oblicuas</b>.</p>
+            <div class="b-chips"><span class="b-chip">14 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">3 PÁGINAS DE PRÁCTICA</span><span class="b-chip">ESTUDIO DE FUNCIONES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3-3*x^2+4","-3*x+5"]' data-labels='["f","Tangente de inflexión"]' data-lat="[3.05,-0.7]" data-x="-1.6,3.4" data-y="-1.2,5.8" data-pts="[[0,4],[2,0],[1,2],[-1,0]]" data-h="240" data-aria="Gráfica de una función de tercer grado con un máximo, un mínimo, un punto de inflexión y la tangente de inflexión"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>justificar la <b>monotonía</b> con la primera derivada y escribirla con intervalos o conjuntos</li>
+                <li>determinar extremos locales y <b>globales</b>, también en los extremos de un intervalo, y distinguir las condiciones necesarias de las suficientes</li>
+                <li>estudiar la <b>curvatura</b>, los puntos de inflexión, los ceros y la simetría, y demostrar una simetría</li>
+                <li>determinar polos, huecos y <b>asíntotas</b> de funciones racionales, las oblicuas con la división de polinomios</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="-2" data-ph="f'(1) ="><p class="b-q-text">$f(x) = x^2 - 4x$. ¿Cuánto vale $f'(1)$?</p><div class="b-sol"><p>$f'(x) = 2x - 4$, así que $f'(1) = -2$ (capítulo 1.3)</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">La derivada es positiva en todo un intervalo. ¿Qué hace ahí la gráfica?</p><div class="b-mc"><button>Crece.</button><button>Decrece.</button><button>Es horizontal.</button></div><div class="b-sol"><p>Pendiente positiva de las tangentes: la gráfica crece.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Resuelve $3x^2 - 12 = 0$. Da la solución positiva.</p><div class="b-sol"><p>$x^2 = 4$, así que $x = \pm 2$.</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Con qué coincide $\tfrac{x^2 - 1}{x - 1}$ para $x \neq 1$?</p><div class="b-mc"><button>$x + 1$</button><button>$x - 1$</button><button>$x$</button></div><div class="b-sol"><p>$x^2 - 1 = (x - 1)(x + 1)$, y después simplificar.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">EL PUNTO MÁS ALTO, PERO ¿DÓNDE?</div>
+            <div class="b-text"><p>Dibujad $f(x) = x^3 - 3x$ para $-2 \le x \le 3$ con el CAS.</p>
+                <ul><li>¿Dónde tiene la gráfica una tangente horizontal? ¿Está ahí el punto más alto de la imagen?</li><li>¿Qué cambia si solo consideráis $-2 \le x \le 1{,}5$?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">¿DÓNDE CAMBIA LA CURVA?</div>
+            <div class="b-text"><p>Vais en bici por una curva en S. Primero giráis el manillar a la izquierda y después a la derecha.</p>
+                <ul><li>¿En qué punto está el manillar un instante recto?</li><li>¿Qué tiene eso que ver con la variación de la pendiente, es decir, con $f''$?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">CASI UNA RECTA</div>
+            <div class="b-text"><p>$f(x) = \tfrac{x^2 + 1}{x}$.</p>
+                <ul><li>Calculad $f(10)$, $f(100)$ y $f(1000)$. ¿A qué recta se acerca cada vez más la gráfica?</li><li>Escribid $f(x)$ como suma de dos fracciones. ¿Por qué no es casualidad? ¿Qué pasa en $x = 0$?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Monotonía y extremos" data-toc-k="1" data-toc-short="1 Extremos">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">5 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Monotonía y extremos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La gráfica de $f(x) = x^3 - 3x$ tiene en $x = -1$ una tangente horizontal y ahí un máximo con $f(-1) = 2$. En su <b>entorno</b>, es el punto más alto.
+                Pero en todo el intervalo $[-2, 3]$, el extremo derecho, con $f(3) = 18$, está mucho más arriba. Por tanto, hay que distinguir entre extremos <b>locales</b> y <b>globales</b>, y en los extremos del intervalo
+                la tangente no tiene por qué ser horizontal.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MONOTONÍA Y EXTREMOS</div>
+                <div class="b-text">
+                    <p><b>Teorema de monotonía:</b> si $f'(x) > 0$ para todos los $x$ de un intervalo $I$, entonces $f$ es <b>estrictamente creciente</b> en $I$. Si $f'(x) < 0$, $f$ es <b>estrictamente decreciente</b>.</p>
+                    <p><b>Condición necesaria:</b> si la función derivable $f$ tiene en un punto interior $x_E$ un extremo local, entonces $f'(x_E) = 0$.</p>
+                    <p><b>Condiciones suficientes:</b> $f'(x_E) = 0$ y $f'$ cambia de signo en $x_E$: de $+$ a $-$, máximo; de $-$ a $+$, mínimo.
+                        O bien: $f'(x_E) = 0$ y $f''(x_E) < 0$: máximo; $f''(x_E) > 0$: mínimo.</p>
+                    <p><b>Extremos globales</b> en $[a, b]$: compara los valores de la función en todos los extremos locales <b>y en los extremos del intervalo</b> $a$ y $b$. En $\mathbb{R}$, en lugar de los extremos del intervalo estudias el comportamiento para $x \to \pm\infty$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>¿Por qué es necesaria?</b> En un máximo es $f(x_E + h) - f(x_E) \le 0$. Así que el cociente incremental es $\le 0$ para $h > 0$ y $\ge 0$ para $h < 0$. Los dos límites son $f'(x_E)$, luego $f'(x_E) = 0$.</p>
+            <p class="b-note"><b>No es suficiente:</b> $f(x) = x^3$ tiene $f'(0) = 0$, pero ningún extremo, porque $f'$ no cambia de signo. Es un <b>punto de silla</b>.</p>
+            <p class="b-note"><b>Notaciones:</b> $(-\infty, 1]$ es lo mismo que $\{x \in \mathbb{R} \mid x \le 1\}$. Un paréntesis indica que el extremo no pertenece al intervalo.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿LOCAL O GLOBAL?</div>
+        <p class="b-help" style="margin:0 0 12px">Elige una función y desplaza los extremos del intervalo. La tabla compara todos los candidatos: los extremos locales y los dos extremos del intervalo.</p>
+        <div data-widget="randextrema"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · LOCAL Y GLOBAL</div>
+            <div class="b-text"><p>Halla los extremos locales y globales de $f(x) = x^3 - 3x$ en el intervalo $[-2, 3]$ y da su monotonía.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 3 = 3(x - 1)(x + 1)$ tiene los ceros −1 y 1. Con $f''(x) = 6x$: $f''(-1) = -6 < 0$, así que máximo $H(-1, 2)$; $f''(1) = 6 > 0$, así que mínimo $T(1, -2)$.</p>
+                <p>$f$ crece en $[-2, -1]$, decrece en $[-1, 1]$ y crece en $[1, 3]$.</p>
+                <p>Extremos del intervalo: $f(-2) = -2$, $f(3) = 18$. <span class="b-res">Máximo global 18 en $x = 3$, mínimo global −2 en $x = -2$ y en $x = 1$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · MONOTONÍA CON LA FUNCIÓN EXPONENCIAL</div>
+            <div class="b-text"><p>Estudia la monotonía y los extremos globales de $f(x) = x \cdot e^{-x}$ en $\mathbb{R}$.</p></div>
+            <div class="b-sol"><p>Reglas del producto y de la cadena: $f'(x) = e^{-x} - x e^{-x} = (1 - x)\,e^{-x}$. Como $e^{-x} > 0$, $f'$ tiene el mismo signo que $1 - x$.</p>
+                <p>$f$ es estrictamente creciente en $(-\infty, 1]$ y estrictamente decreciente en $[1, \infty)$. Cambio de signo de $+$ a $-$: máximo $H\left(1, \tfrac1e\right)$.</p>
+                <p><span class="b-res">$\tfrac1e \approx 0{,}368$ es el máximo global.</span> No hay mínimo global, porque $f(x) \to -\infty$ para $x \to -\infty$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da la monotonía y los extremos de $f(x) = x^3 - 12x$, con intervalos.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 12 = 0$ en $x = \pm 2$. $f$ crece en $(-\infty, -2]$, decrece en $[-2, 2]$ y crece en $[2, \infty)$. $H(-2, 16)$, $T(2, -16)$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Para $f(x) = x^4$ y $g(x) = x^3$ se cumple $f'(0) = g'(0) = 0$ y $f''(0) = g''(0) = 0$. Decide con el cambio de signo cuál tiene un extremo en 0.</p></div>
+            <div class="b-sol"><p>$f'(x) = 4x^3$ cambia en 0 de $-$ a $+$: mínimo $(0, 0)$. $g'(x) = 3x^2 \ge 0$ no cambia: no hay extremo, punto de silla. Con $f'' = 0$, el criterio de $f''$ no decide nada.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Halla los extremos globales de $f(x) = x^3 - 3x^2$ en $[-1, 4]$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x(x - 2)$: candidatos 0 y 2 en el interior, más los extremos del intervalo. $f(-1) = -4$, $f(0) = 0$, $f(2) = -4$, $f(4) = 16$.
+                Máximo global 16 en $x = 4$, mínimo global −4 en $x = -1$ y en $x = 2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Estudia la monotonía y los extremos locales y globales de $f(x) = x^2 e^{-x}$ en $\mathbb{R}$.</p></div>
+            <div class="b-sol"><p>$f'(x) = (2x - x^2)\,e^{-x} = x(2 - x)\,e^{-x}$. $f$ decrece en $(-\infty, 0]$, crece en $[0, 2]$ y decrece en $[2, \infty)$. $T(0, 0)$, $H(2, 4e^{-2}) \approx (2;\, 0{,}541)$.
+                Como $f(x) \ge 0$, 0 es el mínimo global. No hay máximo global: $f(x) \to \infty$ para $x \to -\infty$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Se da la familia $f_a(x) = x^3 - a x$ con $a \in \mathbb{R}$. ¿Para qué $a$ tiene $f_a$ extremos? Calcúlalos y demuestra que todos los extremos están en la gráfica de $y = -2x^3$.</p></div>
+            <div class="b-sol"><p>$f_a'(x) = 3x^2 - a = 0 \iff x^2 = \tfrac a3$. Solo para $a > 0$ hay dos soluciones con cambio de signo; para $a = 0$, $(0, 0)$ es un punto de silla; para $a < 0$, $f_a$ es estrictamente creciente.</p>
+                <p>$x_E = \pm\sqrt{a/3}$, $f_a(x_E) = x_E^3 - a x_E$. Con $a = 3x_E^2$ queda $f_a(x_E) = x_E^3 - 3x_E^3 = -2x_E^3$. Es el <b>lugar geométrico</b> de los extremos.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">$f(x) = x^3 - 27x$. ¿En qué punto está el mínimo?</p><div class="b-sol"><p>$f'(x) = 3x^2 - 27 = 0$ en $\pm 3$; $f''(3) = 18 > 0$.</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="Valor"><p class="b-q-text">$f(x) = x^2 - 4x$ en $[0, 5]$. ¿Cuánto vale el máximo global?</p><div class="b-sol"><p>$f(0) = 0$, $f(2) = -4$ (mínimo), $f(5) = 5$: máximo 5 en el extremo del intervalo.</p></div></div>
+        <div class="b-q" data-ans="0,5" data-ph="x ="><p class="b-q-text">¿En qué punto tiene $f(x) = x\,e^{-2x}$ su máximo?</p><div class="b-sol"><p>$f'(x) = (1 - 2x)\,e^{-2x} = 0$ en $x = \tfrac12$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Curvatura, puntos de inflexión y simetría" data-toc-k="2" data-toc-short="2 Curvatura">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">5 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Curvatura, puntos de inflexión y simetría</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En la curva en S giras primero a la izquierda y después a la derecha. En la curva a la izquierda, la pendiente de la tangente aumenta: $f'$ crece, así que $f'' > 0$.
+                En la curva a la derecha disminuye: $f'' < 0$. El momento en que el manillar está recto es el <b>punto de inflexión</b>: ahí $f''$ cambia de signo, y la tangente tiene la pendiente máxima o mínima.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · CURVATURA, PUNTOS DE INFLEXIÓN, SIMETRÍA</div>
+                <div class="b-text">
+                    <p><b>Curvatura:</b> si $f''(x) > 0$ en $I$, la gráfica es ahí <b>cóncava hacia arriba</b>; si $f''(x) < 0$, es <b>cóncava hacia abajo</b>.</p>
+                    <p><b>Abscisa de inflexión</b> $x_W$: ahí cambia la curvatura. Es necesario que $f''(x_W) = 0$. Es suficiente $f''(x_W) = 0$ con cambio de signo de $f''$, o bien $f''(x_W) = 0$ y $f'''(x_W) \neq 0$.
+                        Un punto de inflexión con tangente horizontal se llama <b>punto de silla</b>.</p>
+                    <p><b>Simetría:</b> si $f(-x) = f(x)$ para todo $x$, la gráfica es simétrica respecto al eje $y$; si $f(-x) = -f(x)$, es simétrica respecto al origen.
+                        Es simétrica respecto a $P(a, b)$ si $f(a + h) + f(a - h) = 2b$ para todo $h$.</p>
+                    <p><b>Ceros:</b> sacar factor común, cambiar de variable, adivinar un cero y separarlo con la división de polinomios, o con el CAS.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Funciones polinómicas:</b> solo exponentes pares: simétrica respecto al eje $y$. Solo exponentes impares: simétrica respecto al origen.</p>
+            <p class="b-note"><b>Cuidado:</b> $f(x) = x^4$ tiene $f''(0) = 0$, pero ningún punto de inflexión, porque $f''(x) = 12x^2$ no cambia de signo.</p>
+            <p class="b-note"><b>Multiplicidad:</b> en un cero doble, la gráfica toca el eje $x$; en uno simple o triple, lo corta.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ESTUDIO DE FUNCIONES</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta los coeficientes de la función de tercer grado y muestra $f'$ y $f''$. Observa dónde tiene un cero $f'$ y dónde $f''$.</p>
+        <div data-widget="kurve"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · UN ESTUDIO COMPLETO</div>
+            <div class="b-text"><p>Estudia $f(x) = x^3 - 3x^2 + 4$: simetría, ceros, extremos, punto de inflexión, curvatura y tangente de inflexión.</p></div>
+            <div class="b-sol"><p><b>Simetría:</b> exponentes pares e impares, así que no es simétrica respecto al eje $y$ ni respecto al origen.</p>
+                <p><b>Ceros:</b> $f(-1) = 0$. División de polinomios: $f(x) = (x + 1)(x^2 - 4x + 4) = (x + 1)(x - 2)^2$. Cero simple −1, cero doble 2.</p>
+                <p><b>Extremos:</b> $f'(x) = 3x^2 - 6x = 3x(x - 2)$, $f''(x) = 6x - 6$. $f''(0) = -6$: $H(0, 4)$; $f''(2) = 6$: $T(2, 0)$.</p>
+                <p><b>Punto de inflexión:</b> $f''(x) = 0$ en $x = 1$, $f'''(x) = 6 \neq 0$: $W(1, 2)$. Cóncava hacia abajo en $(-\infty, 1]$, cóncava hacia arriba en $[1, \infty)$.</p>
+                <p><b>Tangente de inflexión:</b> $f'(1) = -3$, así que <span class="b-res">$y = -3(x - 1) + 2 = -3x + 5$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · DEMOSTRACIÓN: SIMETRÍA RESPECTO AL PUNTO DE INFLEXIÓN</div>
+            <div class="b-text"><p>Demuestra: toda función $f(x) = ax^3 + bx^2 + cx + d$ con $a \neq 0$ tiene exactamente un punto de inflexión, y su gráfica es simétrica respecto a él.</p></div>
+            <div class="b-sol"><p>$f''(x) = 6ax + 2b = 0$ solo en $x_W = -\tfrac{b}{3a}$, y $f'''(x) = 6a \neq 0$. Así que hay exactamente un punto de inflexión.</p>
+                <p>Para todo $x$ y $h$ se cumple, por las identidades notables:</p>
+                <p>$f(x + h) + f(x - h)$<br>$= a(2x^3 + 6xh^2) + b(2x^2 + 2h^2) + 2cx + 2d$<br>$= 2f(x) + h^2\,(6ax + 2b) = 2f(x) + h^2 f''(x)$.</p>
+                <p>En el punto $x_W$ es $f''(x_W) = 0$, así que <span class="b-res">$f(x_W + h) + f(x_W - h) = 2f(x_W)$</span>: simetría respecto a $W$. En el ejemplo 3: $f(1 + h) + f(1 - h) = 4$.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · CEROS Y MULTIPLICIDAD</div>
+        <p class="b-help" style="margin:0 0 12px">Arrastra los ceros y cambia su multiplicidad. ¿Dónde toca la gráfica el eje y dónde lo corta?</p>
+        <div data-widget="ganzrational"></div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Halla el punto de inflexión de $f(x) = x^3 + 3x^2 - 1$ y la ecuación de la tangente de inflexión.</p></div>
+            <div class="b-sol"><p>$f''(x) = 6x + 6 = 0$ en $x = -1$, $f'''(x) = 6 \neq 0$. $W(-1, 1)$. $f'(-1) = 3 - 6 = -3$: $y = -3(x + 1) + 1 = -3x - 2$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Qué simetría tiene la gráfica? Justifícalo con $f(-x)$. a) $x^4 - 3x^2 + 1$ &nbsp; b) $x^3 - 2x$ &nbsp; c) $x^3 + x^2$ &nbsp; d) $x \sin x$ &nbsp; e) $\tfrac{x}{x^2 + 1}$</p></div>
+            <div class="b-sol"><p>a) $f(-x) = f(x)$: simétrica respecto al eje $y$ &nbsp; b) $f(-x) = -f(x)$: simétrica respecto al origen &nbsp; c) $f(-x) = -x^3 + x^2$, ninguna de las dos &nbsp;
+                d) $(-x)\sin(-x) = x \sin x$: simétrica respecto al eje $y$ &nbsp; e) $\tfrac{-x}{x^2 + 1} = -f(x)$: simétrica respecto al origen</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Dónde es la gráfica de $f(x) = x^4 - 6x^2$ cóncava hacia arriba y dónde cóncava hacia abajo? Da los puntos de inflexión.</p></div>
+            <div class="b-sol"><p>$f''(x) = 12x^2 - 12 = 12(x - 1)(x + 1)$. Cóncava hacia abajo en $[-1, 1]$, cóncava hacia arriba en $(-\infty, -1]$ y en $[1, \infty)$. Puntos de inflexión $(-1, -5)$ y $(1, -5)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Halla todos los ceros de $f(x) = x^3 - 2x^2 - 5x + 6$ sin calculadora.</p></div>
+            <div class="b-sol"><p>Probando entre los divisores de 6: $f(1) = 0$. División de polinomios: $f(x) = (x - 1)(x^2 - x - 6) = (x - 1)(x - 3)(x + 2)$. Ceros −2, 1 y 3.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$f_a(x) = x^4 + a x^3$ con $a \neq 0$. Demuestra que la gráfica tiene un punto de silla en el origen y exactamente un punto de inflexión más. ¿En qué curva están estos otros puntos de inflexión?</p></div>
+            <div class="b-sol"><p>$f_a'(x) = 4x^3 + 3ax^2$, $f_a''(x) = 12x^2 + 6ax = 6x(2x + a)$. En 0 es $f_a' = 0$ y $f_a''$ cambia de signo (cero simple): punto de silla.
+                Segunda abscisa de inflexión $x_W = -\tfrac a2$. Con $a = -2x_W$: $f_a(x_W) = x_W^4 - 2x_W^4 = -x_W^4$. Lugar geométrico $y = -x^4$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">$f(x) = x^3 - 6x^2 + 1$. ¿En qué punto está el punto de inflexión?</p><div class="b-sol"><p>$f''(x) = 6x - 12 = 0$ en 2.</p></div></div>
+        <div class="b-q" data-ans="-12" data-ph="m ="><p class="b-q-text">¿Qué pendiente tiene ahí la tangente de inflexión?</p><div class="b-sol"><p>$f'(x) = 3x^2 - 12x$, $f'(2) = 12 - 24 = -12$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="Número"><p class="b-q-text">¿Cuántos puntos de inflexión tiene $f(x) = x^4$?</p><div class="b-sol"><p>Ninguno: $f''(x) = 12x^2 \ge 0$ nunca cambia de signo.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Polos y asíntotas" data-toc-k="3" data-toc-short="3 Asíntotas">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Polos y asíntotas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = \tfrac{x^2 + 1}{x} = x + \tfrac1x$. Para $|x|$ grande, $\tfrac1x$ se hace diminuto y la gráfica se pega a la recta $y = x$, una <b>asíntota oblicua</b>.
+                En $x = 0$ el denominador se anula, pero el numerador no: los valores de la función crecen sin límite; ahí hay un <b>polo</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · POLOS Y ASÍNTOTAS</div>
+                <div class="b-text">
+                    <p>Para $f(x) = \tfrac{p(x)}{q(x)}$ con funciones polinómicas $p$ y $q$ es $D = \{x \in \mathbb{R} \mid q(x) \neq 0\}$.</p>
+                    <p><b>Polo:</b> $q(x_0) = 0$ y $p(x_0) \neq 0$ (después de simplificar). La gráfica tiene la asíntota vertical $x = x_0$. Si $x_0$ es un cero del denominador de multiplicidad impar, $f$ cambia ahí de signo; si es par, no.</p>
+                    <p><b>Hueco (discontinuidad evitable):</b> $p(x_0) = q(x_0) = 0$ y, tras simplificar, $x_0$ ya no es un cero del denominador.</p>
+                    <p><b>Comportamiento para $x \to \pm\infty$:</b> grado del numerador menor que el del denominador: asíntota $y = 0$. Grados iguales: $y = \tfrac{a_n}{b_n}$ (cociente de los coeficientes principales).
+                        Grado del numerador mayor en 1: la <b>división de polinomios</b> $f(x) = mx + n + \tfrac{r(x)}{q(x)}$ da la asíntota oblicua $y = mx + n$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Con el CAS:</b> la división de polinomios con resto la da, por ejemplo, la orden <code>propFrac</code> (TI-Nspire). Simplificar lo hace <code>factor</code>.</p>
+            <p class="b-note"><b>Posición respecto a la asíntota:</b> el signo de la fracción resto $\tfrac{r(x)}{q(x)}$ indica si la gráfica está por encima o por debajo de la asíntota.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · FUNCIONES RACIONALES</div>
+        <p class="b-help" style="margin:0 0 12px">Elige un ejemplo y cambia los ceros del numerador y del denominador. Las asíntotas se dibujan en discontinua; en el ejemplo «asíntota oblicua», también la oblicua.</p>
+        <div data-widget="bruchfunktion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · ASÍNTOTA OBLICUA</div>
+            <div class="b-text"><p>Estudia $f(x) = \tfrac{x^2 - x - 2}{x - 3}$: dominio, ceros, polo, asíntotas y extremos.</p></div>
+            <div class="b-sol"><p>$D = \mathbb{R} \setminus \{3\}$. Numerador $(x - 2)(x + 1)$: ceros −1 y 2. En 3 el numerador vale $4 \neq 0$: polo con cambio de signo, asíntota $x = 3$.</p>
+                <p>División de polinomios: $(x^2 - x - 2) : (x - 3) = x + 2$, resto 4, así que $f(x) = x + 2 + \tfrac{4}{x - 3}$. <span class="b-res">Asíntota oblicua $y = x + 2$</span>; para $x > 3$ la gráfica está por encima, para $x < 3$ por debajo.</p>
+                <p>$f'(x) = 1 - \tfrac{4}{(x - 3)^2} = 0 \iff (x - 3)^2 = 4$: $H(1, 1)$ y $T(5, 9)$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · ¿HUECO O POLO?</div>
+            <div class="b-text"><p>Estudia $g(x) = \tfrac{x^2 - 1}{x^2 - 3x + 2}$ en los ceros del denominador y para $x \to \pm\infty$.</p></div>
+            <div class="b-sol"><p>Factorizar: $g(x) = \tfrac{(x - 1)(x + 1)}{(x - 1)(x - 2)}$, $D = \mathbb{R} \setminus \{1, 2\}$. Para $x \neq 1$ es $g(x) = \tfrac{x + 1}{x - 2}$.</p>
+                <p>En $x = 1$: <span class="b-res">discontinuidad evitable</span>, la gráfica tiene un agujero en $\left(1, \tfrac{2}{-1}\right) = (1, -2)$. En $x = 2$: polo con cambio de signo.</p>
+                <p>Grados iguales, coeficientes principales 1 y 1: asíntota horizontal $y = 1$. Cero: $x = -1$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$f(x) = \tfrac{x + 1}{x^2 - 4}$. Da $D$, los ceros, los polos y las asíntotas.</p></div>
+            <div class="b-sol"><p>$D = \mathbb{R} \setminus \{-2, 2\}$. Cero −1. Polos $\pm 2$, ambos con cambio de signo. Grado del numerador 1 &lt; grado del denominador 2: asíntota $y = 0$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Haz la división de polinomios $(2x^2 + 3x - 1) : (x + 2)$ y da la asíntota oblicua de $f(x) = \tfrac{2x^2 + 3x - 1}{x + 2}$.</p></div>
+            <div class="b-sol"><p>$2x^2 + 3x - 1 = (2x - 1)(x + 2) + 1$, así que $f(x) = 2x - 1 + \tfrac{1}{x + 2}$. Asíntota oblicua $y = 2x - 1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$f(x) = \tfrac{x^2 - 9}{x^2 - x - 6}$. ¿Dónde hay un hueco y dónde un polo? ¿Con qué valor se puede cerrar el hueco?</p></div>
+            <div class="b-sol"><p>$f(x) = \tfrac{(x - 3)(x + 3)}{(x - 3)(x + 2)}$. Hueco en 3, valor $\tfrac{6}{5} = 1{,}2$. Polo en −2 con cambio de signo, asíntota $y = 1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Demuestra que $f(x) = \tfrac{x + 1}{(x - 1)^2}$ tiene en 1 un polo sin cambio de signo. ¿Cómo se comporta $f$ a la izquierda y a la derecha?</p></div>
+            <div class="b-sol"><p>Cero doble del denominador; el numerador vale en 1 $2 > 0$. El denominador es positivo a la izquierda y a la derecha: $f(x) \to +\infty$ para $x \to 1$ por ambos lados.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Se busca una función $f(x) = x + \tfrac{c}{x - 2}$ con el cero −1. Determina $c$, escribe $f$ como una sola fracción y da todos los ceros, el polo y las asíntotas.</p></div>
+            <div class="b-sol"><p>$f(-1) = -1 + \tfrac{c}{-3} = 0$, así que $c = -3$. $f(x) = \tfrac{x(x - 2) - 3}{x - 2} = \tfrac{x^2 - 2x - 3}{x - 2} = \tfrac{(x - 3)(x + 1)}{x - 2}$.
+                Ceros −1 y 3, polo 2 con cambio de signo, asíntotas $x = 2$ e $y = x$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1" data-ph="n ="><p class="b-q-text">$h(x) = \tfrac{x^2 + 1}{x - 1}$ tiene la asíntota oblicua $y = x + n$. ¿Cuánto vale $n$?</p><div class="b-sol"><p>$x^2 + 1 = (x - 1)(x + 1) + 2$, así que $h(x) = x + 1 + \tfrac{2}{x - 1}$.</p></div></div>
+        <div class="b-q" data-ans="0,8" data-ph="Valor"><p class="b-q-text">$k(x) = \tfrac{x^2 - 4}{x^2 + x - 6}$. ¿Con qué valor se cierra el hueco en 2?</p><div class="b-sol"><p>$\tfrac{(x - 2)(x + 2)}{(x - 2)(x + 3)} = \tfrac{x + 2}{x + 3}$; en 2: $\tfrac45 = 0{,}8$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="Número"><p class="b-q-text">¿Cuántas asíntotas verticales tiene $\tfrac{x + 3}{x^3 - x}$?</p><div class="b-sol"><p>$x^3 - x = x(x - 1)(x + 1)$; el numerador no se anula en ninguno de esos puntos: tres polos.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Estudia por completo $f(x) = \tfrac14 x^4 - 2x^2$: simetría, ceros, extremos, puntos de inflexión. Esboza la gráfica.</p></div>
+            <div class="b-sol"><p>Solo exponentes pares: simétrica respecto al eje $y$. $f(x) = x^2\left(\tfrac14 x^2 - 2\right)$: cero doble 0, además de $\pm 2\sqrt2 \approx \pm 2{,}83$.
+                $f'(x) = x^3 - 4x = x(x - 2)(x + 2)$: $H(0, 0)$, $T(\pm 2, -4)$. $f''(x) = 3x^2 - 4 = 0$ en $\pm\tfrac{2}{\sqrt3} \approx \pm 1{,}15$: puntos de inflexión $\left(\pm\tfrac{2}{\sqrt3}, -\tfrac{20}{9}\right)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Relacionar con la economía:</b> los costes de una empresa son $K(x) = x^3 - 6x^2 + 15x + 10$ (en miles de €, $x$ en toneladas). Demuestra que $K$ es estrictamente creciente.
+                ¿Con qué cantidad crecen más despacio los costes? ¿Qué significa el punto de inflexión?</p></div>
+            <div class="b-sol"><p>$K'(x) = 3x^2 - 12x + 15 = 3\left((x - 2)^2 + 1\right) > 0$: estrictamente creciente. $K''(x) = 6x - 12 = 0$ en $x = 2$, punto de inflexión $(2, 24)$.
+                Ahí el coste marginal $K'(2) = 3$ es mínimo: hasta 2 t, cada tonelada adicional es más barata; después, más cara.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Halla los extremos globales de $f(x) = \tfrac{x}{x^2 + 1}$ en $\mathbb{R}$. Usa la simetría y el comportamiento para $x \to \pm\infty$.</p></div>
+            <div class="b-sol"><p>$f'(x) = \tfrac{(x^2 + 1) - 2x^2}{(x^2 + 1)^2} = \tfrac{1 - x^2}{(x^2 + 1)^2}$: $H\left(1, \tfrac12\right)$, $T\left(-1, -\tfrac12\right)$ (simétrica respecto al origen). Para $x \to \pm\infty$, $f(x) \to 0$.
+                Por tanto, $\tfrac12$ es el máximo global y $-\tfrac12$ el mínimo global.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Demuestra: una función $f(x) = ax^3 + bx^2 + cx + d$ con $a \neq 0$ tiene dos extremos si $b^2 > 3ac$, un punto de silla si $b^2 = 3ac$ y, en otro caso, ninguna tangente horizontal.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3ax^2 + 2bx + c$ tiene el discriminante $4b^2 - 12ac = 4(b^2 - 3ac)$. Positivo: dos ceros simples de $f'$ con cambio de signo, así que dos extremos.
+                Cero: un cero doble; $f'$ no cambia de signo y ahí $f'' = 0$: punto de silla. Negativo: $f'$ no tiene ceros.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Los toneles de vino de Kepler" data-toc-k="X" data-toc-short="Toneles">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Los toneles de vino de Kepler</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Para su segunda boda, Johannes Kepler compró vino en Linz en otoño de 1613. El comerciante determinaba el contenido de cada tonel con una sola medida: introducía una vara
+                en diagonal por el agujero del centro hasta el borde inferior opuesto y leía la longitud $d$. Cómo estuviera construido el tonel no influía en el precio.
+                A Kepler le pareció sospechoso y escribió todo un libro sobre ello.</p>
+            <p>Calculemos con un tonel cilíndrico de altura $h$ y radio $r$. Por Pitágoras, $d^2 = \left(\tfrac h2\right)^2 + (2r)^2$, así que $r^2 = \tfrac14\left(d^2 - \tfrac{h^2}{4}\right)$ y
+                $V(h) = \pi r^2 h = \tfrac{\pi}{4}\left(d^2 h - \tfrac{h^3}{4}\right)$. De $V'(h) = \tfrac{\pi}{4}\left(d^2 - \tfrac{3h^2}{4}\right) = 0$ se obtiene $h = \tfrac{2d}{\sqrt3}$:
+                con $d$ fijo, el tonel contiene más cuando la altura es $\sqrt2$ veces el diámetro.</p>
+            <p>Kepler observó que los toneles austriacos estaban construidos más o menos así y, sobre todo: <b>cerca del máximo, el volumen apenas cambia.</b> Si el tonel es un 10 % más alto o más bajo
+                que el ideal, pierde solo un 1,5 % de contenido. Es exactamente la tangente horizontal, $V'(h) = 0$, más de 50 años antes de que Newton y Leibniz inventaran la derivada.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Johannes Kepler: «Nova stereometria doliorum vinariorum» (Nueva estereometría de los toneles de vino), Linz 1615.</p>
+            <p class="b-note"><b>Compruébalo:</b> con $d = 1$ es $V(h_{\max}) \approx 0{,}605$ y $V(1{,}1\,h_{\max}) \approx 0{,}595$.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>MONOTONÍA</h4><p>$f' > 0$ en $I$: estrictamente creciente; $f' < 0$: estrictamente decreciente.</p></div>
+        <div><p>$x\,e^{-x}$ crece en $(-\infty, 1]$ y decrece en $[1, \infty)$</p></div></div>
+    <div class="b-rueck"><div><h4>EXTREMOS</h4><p>Necesaria $f'(x_E) = 0$; suficiente, cambio de signo de $f'$ o $f''(x_E) \neq 0$. Global: comparar también los extremos del intervalo.</p></div>
+        <div><p>$x^3 - 3x$ en $[-2, 3]$: máximo en el extremo, $f(3) = 18$</p></div></div>
+    <div class="b-rueck"><div><h4>CURVATURA Y PUNTO DE INFLEXIÓN</h4><p>$f'' > 0$: cóncava hacia arriba; abscisa de inflexión: $f''(x_W) = 0$ con cambio de signo o $f'''(x_W) \neq 0$.</p></div>
+        <div><p>$x^3 - 3x^2 + 4$: $W(1, 2)$, tangente de inflexión $y = -3x + 5$</p></div></div>
+    <div class="b-rueck"><div><h4>SIMETRÍA Y CEROS</h4><p>$f(-x) = f(x)$: respecto al eje $y$; $f(-x) = -f(x)$: respecto al origen. Adivinar y división de polinomios.</p></div>
+        <div><p>Toda función de tercer grado es simétrica respecto a su punto de inflexión.</p></div></div>
+    <div class="b-rueck"><div><h4>POLOS Y ASÍNTOTAS</h4><p>Polo, discontinuidad evitable; asíntota a partir de los grados, oblicua por división de polinomios.</p></div>
+        <div><p>$\tfrac{x^2 - x - 2}{x - 3} = x + 2 + \tfrac{4}{x - 3}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="3" data-ph="y ="><p class="b-q-text">$f(x) = x^3 - 3x + 1$. ¿Qué valor de $y$ tiene el máximo?</p><div class="b-sol"><p>$f'(x) = 3x^2 - 3$, máximo en −1: $f(-1) = -1 + 3 + 1 = 3$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">¿En qué punto tiene $f(x) = x^3 - 9x^2 + 2$ su punto de inflexión?</p><div class="b-sol"><p>$f''(x) = 6x - 18 = 0$ en 3.</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="n ="><p class="b-q-text">$f(x) = \tfrac{x^2 + 3x}{x - 1}$ tiene la asíntota oblicua $y = x + n$. ¿Cuánto vale $n$?</p><div class="b-sol"><p>$x^2 + 3x = (x - 1)(x + 4) + 4$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="-0,184" data-tol="0.001" data-ph="Valor"><p class="b-q-text">¿Cuánto vale el mínimo global de $f(x) = x^2 \ln x$ para $x > 0$ (con tres decimales)?</p><div class="b-sol"><p>$f'(x) = x(2\ln x + 1) = 0$ en $x = e^{-1/2}$, $f = -\tfrac{1}{2e} \approx -0{,}184$</p></div></div>
+            <div class="b-q" data-ans="0,707" data-tol="0.001" data-ph="x ="><p class="b-q-text">¿En qué punto positivo tiene $e^{-x^2}$ un punto de inflexión (con tres decimales)?</p><div class="b-sol"><p>$f''(x) = (4x^2 - 2)\,e^{-x^2} = 0$ en $x = \tfrac{1}{\sqrt2} \approx 0{,}707$</p></div></div>
+            <div class="b-q" data-ans="1,732" data-tol="0.001" data-ph="x ="><p class="b-q-text">¿En qué punto tiene $f(x) = \tfrac{x^3}{x^2 - 1}$ su mínimo para $x > 1$ (con tres decimales)?</p><div class="b-sol"><p>$f'(x) = \tfrac{x^2(x^2 - 3)}{(x^2 - 1)^2} = 0$ en $x = \sqrt3 \approx 1{,}732$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-monotonie-extrema.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MONOTONÍA Y EXTREMOS</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-wendepunkte-symmetrie.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PUNTOS DE INFLEXIÓN Y SIMETRÍA</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-polstellen-asymptoten.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">POLOS Y ASÍNTOTAS</span><span class="b-lab-what">20 ejercicios con soluciones (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DE DERIVADAS</span><span class="b-lab-what">Derivadas y tangentes (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 11.º curso, curso avanzado · Área de aprendizaje 1 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-es/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-es/gy11lk.js"></script>
+</body>
+</html>
