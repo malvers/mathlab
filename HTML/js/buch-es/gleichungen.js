@@ -62,6 +62,8 @@ window.BuchES && BuchES.add('gleichungen', {
         // book es mathegy7-es (Einstein)
 
         // book es mathegy8-es (Curie)
+        // the solution set is S in the Spanish books (glosario, also in the widget sentences): $L = \{…\}$, $L = \mathbb{R}$ → $S = …$
+        [/\$L = (?=\\mathbb\{R\}|\\\{)/g, '$S = '],
 
         // book es mathegy9-es (Curie)
 

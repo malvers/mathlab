@@ -183,6 +183,8 @@ window.BuchES && BuchES.add('gy8', {
     ],
     rule: [
         // book es mathegy8-es (Curie)
+        // lgs8: the solution set is S in the Spanish books (glosario, also in the widget sentences): $L = \{…\}$, $L = \mathbb{R}$ → $S = …$
+        [/\$L = (?=\\mathbb\{R\}|\\\{)/g, '$S = '],
         // sets of whole numbers: \{1; 2; 3\} → \{1, 2, 3\} (with a decimal comma the semicolon stays)
         [/\\\{([^$]*?)\\\}/g, (m, s) => /\d(?:,|\{,\})\d/.test(s) ? m : '\\{' + s.replace(/;\\,|; /g, ', ') + '\\}'],
         // termbaum8: "Der Term $3x + 4$ ist eine <b>Summe</b>: Zuletzt wird addiert. Summanden: $3x$ und $4$."

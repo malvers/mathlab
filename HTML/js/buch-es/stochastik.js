@@ -79,6 +79,9 @@ window.BuchES && BuchES.add('stochastik', {
             'Una ruleta tiene 12 sectores iguales: $\\Omega = \\{1, 2, \\ldots, 12\\}$. Elige un modelo o forma $A$ y $B$ tú mismo: elige el suceso y después toca los números.',
         'Vorlage': 'Modelo', '$A$ bearbeiten': 'Editar $A$', '$B$ bearbeiten': 'Editar $B$', 'Ereignis bearbeiten': 'Suceso que se edita',
         'Verknüpfung:': 'Combinación:', 'Verknüpfung': 'Combinación', 'Mengendiagramm der Ereignisse A und B': 'Diagrama de Venn de los sucesos A y B',
+        // urne
+        'Kugeln $n$': 'Bolas $n$', 'Ziehungen $k$': 'Extracciones $k$', 'n kleiner': 'n menor', 'n größer': 'n mayor', 'k kleiner': 'k menor', 'k größer': 'k mayor',
+        'mit Reihenfolge': 'con orden', 'ohne Reihenfolge': 'sin orden', 'Reihenfolge': 'Orden', 'Zurücklegen': 'Reemplazamiento', 'Einmal ziehen': 'Extraer una vez', 'URNE': 'URNA',
 
         // book es mathe10-es (Curie)
 
@@ -165,6 +168,18 @@ window.BuchES && BuchES.add('stochastik', {
         ['Die Zahlen, die in beiden Ereignissen liegen.', 'Los números que están en los dos sucesos.'],
         ['$A \\cap B = \\emptyset$: Die Ereignisse sind <b>unvereinbar</b>, sie können nicht zusammen eintreten.', '$A \\cap B = \\emptyset$: los sucesos son <b>incompatibles</b>, no pueden ocurrir a la vez.'],
         ['Regel von de Morgan: $', 'Leyes de De Morgan: $'], ['$. Wähle die andere Seite und vergleiche: Es ist dieselbe Menge.', '$. Elige el otro miembro y compara: es el mismo conjunto.'],
+        // urne
+        ['Variation mit Wiederholung', 'Variación con repetición'], ['Permutation (alle Kugeln, mit Reihenfolge)', 'Permutación (todas las bolas, con orden)'],
+        ['Variation ohne Wiederholung', 'Variación sin repetición'], ['Kombination ohne Wiederholung', 'Combinación sin repetición'],
+        ['Kombination mit Wiederholung', 'Combinación con repetición'], ['</b> · Beispiel: ', '</b> · ejemplo: '], ['Anzahl der Möglichkeiten: ', 'Número de posibilidades: '],
+        ['Gezogen: <b>', 'Extraído: <b>'], ['Ergebnisse als Tupel $(\\ldots)$: Die Reihenfolge zählt.', 'Resultados como tuplas $(\\ldots)$: el orden cuenta.'],
+        ['Ergebnisse als Mengen $\\{\\ldots\\}$: Die Reihenfolge zählt nicht.', 'Resultados como conjuntos $\\{\\ldots\\}$: el orden no cuenta.'],
+        [' Genau dafür gibt es die Formel.', ' Justo para eso está la fórmula.'],
+        // urne: the pieces of the examples that the rules below translate as a whole (for tools/buch-en/check.mjs)
+        ['ein Zahlenschloss mit ', 'un candado de números con '], [' Rädern zu je ', ' ruedas de '], [' Personen stellen sich in eine Reihe', ' personas se ponen en fila'],
+        ['ein Siegerpodest: ', 'un podio: '], [' Startern auf die Plätze 1 bis ', ' participantes en los puestos del 1 al '], ['Lotto: ', 'lotería: '],
+        [' Zahlen, die Reihenfolge der Ziehung zählt nicht', ' números, el orden de la extracción no cuenta'], [' Kugeln Eis aus ', ' bolas de helado de '],
+        [' Sorten, eine Sorte darf mehrfach vorkommen', ' sabores, un sabor puede repetirse'], [' Möglichkeiten sind zu viele zum Auflisten.', ' posibilidades son demasiadas para listarlas.'],
 
         // book es mathe10-es (Curie)
 
@@ -215,6 +230,14 @@ window.BuchES && BuchES.add('stochastik', {
         // book es mathegy8-es (Curie)
         // venn: sets of whole numbers in TeX, \{2;\,4\} → \{2, 4\} (with a decimal comma the semicolon stays)
         [/\\\{([^$]*?)\\\}/g, (m, s) => /\d(?:,|\{,\})\d/.test(s) ? m : '\\{' + s.replace(/;\\,|; /g, ', ') + '\\}'],
+        // urne: outcomes "(1; 2)" and "{1; 2}" → "(1, 2)", "{1, 2}"; the examples with their numbers (singular for 1)
+        [/[({]\d+(?:; \d+)+[)}]/g, m => m.replace(/; /g, ', ')],
+        [/ein Zahlenschloss mit (\d+) Rädern zu je (\d+) Ziffern/g, (m, k, n) => 'un candado de números con ' + k + (k === '1' ? ' rueda' : ' ruedas') + ' de ' + n + ' cifras'],
+        [/(\d+) Personen stellen sich in eine Reihe/g, '$1 personas se ponen en fila'],
+        [/ein Siegerpodest: (\d+) von (\d+) Startern auf die Plätze 1 bis (\d+)/g, (m, k, n, p) => 'un podio: ' + k + ' de ' + n + ' participantes ' + (p === '1' ? 'en el puesto 1' : 'en los puestos del 1 al ' + p)],
+        [/Lotto: (\d+) aus (\d+) Zahlen, die Reihenfolge der Ziehung zählt nicht/g, 'lotería: $1 de $2 números, el orden de la extracción no cuenta'],
+        [/(\d+) Kugeln Eis aus (\d+) Sorten, eine Sorte darf mehrfach vorkommen/g, (m, k, n) => k + (k === '1' ? ' bola' : ' bolas') + ' de helado de ' + n + ' sabores, un sabor puede repetirse'],
+        [/(\d{1,3}(?:\.\d{3})*) Möglichkeiten sind zu viele zum Auflisten\./g, '$1 posibilidades son demasiadas para listarlas.'],
 
         // book es mathe10-es (Curie)
 
