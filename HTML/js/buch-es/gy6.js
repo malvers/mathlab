@@ -87,7 +87,7 @@
             'Kopf': 'Cara', 'Zahl': 'Cruz', 'Rot': 'Rojo',
             '1-mal': '1 vez', '10-mal': '10 veces', '100-mal': '100 veces', 'Löschen': 'Borrar',
             'Säulendiagramm der relativen Häufigkeiten': 'Diagrama de barras de las frecuencias relativas',
-            'absolut': 'absoluta', 'relativ': 'relativa',
+            'absolut': 'absoluta', 'relativ': 'relativa', 'in %': 'en %',
             // darstellung6
             'Kerze': 'Vela', 'Temperatur': 'Temperatura', 'Fahrradverleih': 'Alquiler de bicis', 'Zeile wählen': 'Elegir un valor',
             'Zeit in h': 'Tiempo en h', 'Höhe in cm': 'Altura en cm', 'Uhrzeit': 'Hora', 'Temperatur in °C': 'Temperatura en °C',
