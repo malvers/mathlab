@@ -1114,8 +1114,8 @@
         const shape = div(right, 'b-svgbox g-svg'), out = div(right, 'b-out');
         pic.addEventListener('click', e => { const g = e.target.closest('[data-n]'); if (g) { S.n = g.dataset.n; render(); } });
         pic.addEventListener('keydown', e => { const g = e.target.closest('[data-n]'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); S.n = g.dataset.n; render(); } });
-        // the box fits the label as the page shows it (English editions: "Quadrilateral" is longer than "Viereck")
-        const shown = t => (B.en && window.BuchEN ? BuchEN.plain(t) : t);
+        // the box fits the label as the page shows it (English editions: "Quadrilateral" is longer than "Viereck", Spanish: "Cuadrilátero")
+        const shown = t => (B.en && window.BuchEN ? BuchEN.plain(t) : B.lang === 'es' && window.BuchES ? BuchES.plain(t) : t);
         const ancestors = n => { const set = new Set([n]); const go = m => VK[m].up.forEach(u => { if (!set.has(u)) { set.add(u); go(u); } }); go(n); return set; };
         function render() {
             const anc = ancestors(S.n);
