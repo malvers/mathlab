@@ -88,6 +88,11 @@ window.BuchES && BuchES.add('analysis', {
         'A in m²': 'A en m²',
 
         // book es mathegy11-es (Turing)
+        // bruchfunktion
+        'Polstelle': 'Polo', 'Lücke': 'Hueco', 'ohne Vorzeichenwechsel': 'Sin cambio de signo', 'schiefe Asymptote': 'Asíntota oblicua',
+        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Gráfica de una función racional con polos, huecos y asíntotas',
+        'Zähler:': 'Numerador:', 'Nenner:': 'Denominador:', 'Grad des Zählers': 'Grado del numerador', 'Grad des Nenners': 'Grado del denominador',
+        'Grad 0': 'Grado 0', 'Grad 1': 'Grado 1', 'Grad 2': 'Grado 2', 'Faktor $k$': 'Factor $k$', 'Beispiele:': 'Ejemplos:',
 
         // book es mathegy11lk-es (Turing)
 
@@ -191,6 +196,18 @@ window.BuchES && BuchES.add('analysis', {
         [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' El lado paralelo al muro mide entonces $60 - 2 \\cdot 15 = 30\\,\\text{m}$.'],
 
         // book es mathegy11-es (Turing)
+        // bruchfunktion
+        ['Nullstelle des Zählers $', 'Cero del numerador $'], ['Nullstelle des Nenners $', 'Cero del denominador $'],
+        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Tras simplificar ya no queda $x$ en el denominador: la gráfica es '],
+        ['eine waagerechte Gerade', 'una recta horizontal'], ['eine Gerade', 'una recta'],
+        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grado del numerador menor que el del denominador: asíntota horizontal $y = 0$, el eje $x$.'],
+        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Grado del numerador igual al del denominador: asíntota horizontal $y = '],
+        ['$ (Quotient der Leitkoeffizienten).', '$ (cociente de los coeficientes principales).'],
+        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grado del numerador mayor en 1: la división de polinomios da $f(x) = '],
+        ['$, schiefe Asymptote $y = ', '$, asíntota oblicua $y = '],
+        ['Kürzen: $f(x) = ', 'Simplificando: $f(x) = '], ['$ · hebbare Lücken', '$ · huecos (discontinuidades evitables)'], ['$ · hebbare Lücke', '$ · hueco (discontinuidad evitable)'],
+        ['Nullstellen: ', 'Ceros: '], [' · Polstellen: ', ' · polos: '],
+        [' mit Vorzeichenwechsel', ' con cambio de signo'], [' ohne Vorzeichenwechsel', ' sin cambio de signo'], [' (senkrechte Asymptote)', ' (asíntota vertical)'],
 
         // book es mathegy11lk-es (Turing)
 
@@ -210,6 +227,10 @@ window.BuchES && BuchES.add('analysis', {
         [/(\d+) von (\d+) gelöst/g, '$1 de $2 resueltos'],
 
         // book es mathegy11-es (Turing)
+        // bruchfunktion: "… mit einem Loch.", "Nullstellen: keine", and the set of the domain "\{1; -2\}" → "\{1, -2\}" when no number has a decimal comma
+        [/ mit (Löchern|einem Loch)\./g, (m, w) => ' con ' + (w === 'Löchern' ? 'huecos' : 'un hueco') + '.'],
+        [/Nullstellen: keine(?![a-zäöüß])/g, 'Ceros: ninguno'], [/Polstellen: keine(?![a-zäöüß])/g, 'polos: ninguno'],
+        [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => /,/.test(b) ? m : a + b.replace(/; /g, ', ') + c],
 
         // book es mathegy11lk-es (Turing)
 

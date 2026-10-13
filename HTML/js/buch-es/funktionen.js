@@ -73,6 +73,10 @@ window.BuchES && BuchES.add('funktionen', {
         // book es mathegy9-es (Curie)
 
         // book es mathegy11-es (Turing)
+        // ganzrational
+        'Vielfachheit': 'Multiplicidad', 'Vielfachheit kleiner': 'Menor multiplicidad', 'Vielfachheit größer': 'Mayor multiplicidad', 'Faktor $a$': 'Factor $a$',
+        'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Arrastra los ceros por el eje $x$. La multiplicidad 0 quita el factor lineal.',
+        'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Función polinómica con ceros desplazables',
 
         // book es mathegy11lk-es (Turing)
 
@@ -172,6 +176,16 @@ window.BuchES && BuchES.add('funktionen', {
         // book es mathegy9-es (Curie)
 
         // book es mathegy11-es (Turing)
+        // ganzrational
+        [': einfach → ', ': simple → '], [': doppelt → ', ': doble → '], [': dreifach → ', ': triple → '], [': vierfach → ', ': cuádruple → '],
+        [': fünffach → ', ': quíntuple → '], [': sechsfach → ', ': séxtuple → '], [': siebenfach → ', ': séptuple → '], [': achtfach → ', ': óctuple → '],
+        [': neunfach → ', ': nónuple → '],
+        ['Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse', 'cambio de signo, la gráfica <b>corta</b> el eje $x$'],
+        ['Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)', 'cambio de signo, la gráfica corta el eje $x$ <b>de forma plana</b> (punto de silla)'],
+        ['kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse', 'sin cambio de signo, la gráfica <b>toca</b> el eje $x$'],
+        ['$ · Grad $', '$ · grado $'], ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'Para $x \\to +\\infty$, $f(x) \\to '],
+        ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$; para $x \\to -\\infty$, $f(x) \\to '],
+        ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Solo decide el sumando de mayor potencia: $'],
 
         // book es mathegy11lk-es (Turing)
 
