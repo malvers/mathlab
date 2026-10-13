@@ -106,7 +106,7 @@ window.BuchES && BuchES.add('gy11lk', {
         ['$. Die Koordinate längs der Drehachse bleibt gleich, ', '$. La coordenada a lo largo del eje de giro no cambia; '],
         ['die beiden anderen werden wie in der Ebene gedreht.', 'las otras dos giran como en el plano.'],
         // verflechtung
-        ['Zwischenprodukte: $', 'Productos intermedios: $'], ['Rohstoffe: $', 'Materias primas: $'], ['In einem Schritt: $', 'En un solo paso: $'],
+        ['Zwischenprodukte: $', 'Productos intermedios: $'], ['Rohstoffe: $', 'materias primas: $'], ['In einem Schritt: $', 'En un solo paso: $'],
         ['$ gibt den Rohstoffbedarf je Endprodukt an, und $', '$ da las materias primas necesarias por producto final, y $'],
         ['Für ', 'Para '], [' Tafeln und ', ' tabletas y '], [' Boxen braucht man ', ' cajas hacen falta '],
         [' ME Kakao, ', ' unidades de cacao, '], [' ME Zucker und ', ' unidades de azúcar y '], [' ME Milch', ' unidades de leche'], [' ME', ' u.'],
