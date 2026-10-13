@@ -123,8 +123,8 @@ Team." Lovelace orchestrates; Einstein, Curie and Turing each take books. Sectio
 1. **Own worktree, never the main checkout** (other agents' uncommitted work lives there):
    `.claude/worktrees/es-<agent>`, with `videopipeline/node_modules` linked. One branch per book from the current
    `origin/main`, in your own worktree only: `git fetch origin && git switch -c es-<book> origin/main`.
-2. **Own server** from your worktree: `python3 -m http.server <port> -d HTML` (Einstein 8771, Curie 8772, Turing 8773,
-   Lovelace 8774); every browser tool with `PORT=<port>` (`encheck`, `dump`, `geo`, `fit`).
+2. **Own server** from your worktree: `python3 -m http.server <port> -d HTML` (Einstein 8781, Curie 8782, Turing 8783,
+   Lovelace 8784); every browser tool with `PORT=<port>` (`encheck`, `dump`, `geo`, `fit`).
 3. **Shared files have a block per book already:** every `js/buch-es/<module>.js` (word, phrase, rule) and
    `glosario.md`. Write only right below your book's comment line, every entry ending with a comma - then four books
    merge without a conflict. A term that another book already translated: use that one (`check.mjs` flags two
