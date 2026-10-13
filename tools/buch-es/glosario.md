@@ -617,6 +617,33 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | SSS, SWS, WSW, SSW | LLL, LAL, ALA, LLA | widget dreieckloeser; S = lado, W = ángulo |
 | eingeschlossener Winkel, Schenkellinie | ángulo comprendido, semirrecta del ángulo | |
 | Umkreis | circunferencia circunscrita | |
+| Mittelpunktswinkel, Bestimmungsdreieck (regelmäßiges Vieleck) | ángulo central, triángulo (desde el centro) | |
+| Potenzfunktion, Parabel, Hyperbel, Asymptote | función potencia, parábola, hipérbola, asíntota | |
+| umgekehrt proportional | inversamente proporcional | |
+| Anfangswert, Wachstumsfaktor | valor inicial, factor de crecimiento | |
+| Halbwertszeit | período de semidesintegración, then semivida | as in the es-1 block |
+| Amplitude, Periode, Sinuskurve | amplitud, período, sinusoide | |
+| Funktionsklassen (ganzrational, gebrochenrational …) | tipos de funciones (polinómica, racional …) | widget funktionsklassen |
+| Gewinnchance, Gewinnerwartung | probabilidad de ganar, ganancia esperada | |
+| Gesetz der großen Zahlen | ley de los grandes números | |
+| in Reihe / parallel (Bauteile) | en serie / en paralelo | |
+| Lohnabrechnung, brutto, netto | nómina, bruto, neto | |
+| Lohnsteuer, Sozialabgaben, Arbeitgeberanteil | impuesto sobre la renta, cotizaciones sociales, cuota empresarial | German context explained once ("en Alemania") |
+| Renten-, Kranken-, Pflege-, Arbeitslosenversicherung | seguro de pensiones, de enfermedad, de dependencia, de desempleo | widget lohnos10 |
+| Haushaltsplan, Kaufkraft | presupuesto doméstico, poder adquisitivo | |
+| Ratenkauf, Rate, Dispokredit | compra a plazos, cuota, descubierto (en Alemania, «Dispo») | |
+| effektiver Jahreszins | tasa anual equivalente (TAE) | |
+| Schuldenfalle | trampa de las deudas | |
+| Annuitätendarlehen, Ratentilgung, Sparplan, Tilgung, Restschuld | préstamo de cuota fija, amortización constante, plan de ahorro, amortización, deuda pendiente | widget tilgung |
+| Pyramiden-, Kegelstumpf | tronco de pirámide, tronco de cono | |
+| Spitzkörper | cuerpos con vértice (pirámides y conos) | |
+| Seitenhöhe, Seitenkante, Grundkante | apotema, arista lateral, arista de la base | "arista de la base" as in vektoren |
+| Zerlegungsprinzip | principio de descomposición | |
+| Abschlussprüfung | examen final | |
+| Problemlösen: verstehen, planen, rechnen, prüfen, antworten | comprender, planificar, calcular, comprobar, responder | |
+| Prozentpunkte | puntos porcentuales | |
+| Messrad, Peilstab, Höhenwinkel, Standlinie | rueda de medir, jalón de mira, ángulo de elevación, base | elective chapter |
+| Nivellieren, Messlatte | nivelar, mira | |
 
 ## Added by mathegy9-es (Curie)
 
