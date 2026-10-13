@@ -12,18 +12,55 @@
 window.BuchES && BuchES.add('gy11', {
     word: {
         // book es mathegy11-es (Turing)
+        // titelbildgy11
+        'Titelbild: Sekanten, die sich einer Tangente nähern, Tangenten des Newton-Verfahrens auf dem Weg zu einer Nullstelle, eine Ebene, die von einer Geraden durchstoßen wird, und die Balken einer Binomialverteilung':
+            'Portada: secantes que se acercan a una tangente, tangentes del método de Newton camino de un cero, un plano atravesado por una recta y las barras de una distribución binomial',
+        // kettenregel
+        'Äußere Funktion u(z)': 'Función exterior u(z)', 'Innere Funktion v(x)': 'Función interior v(x)',
+        'Verkettete Funktion mit Tangente an einem verschiebbaren Punkt': 'Función compuesta con la tangente en un punto desplazable',
+        // matrixprodukt
+        'Typen der Matrizen': 'Dimensiones de las matrices', 'Reihenfolge': 'Orden', 'Neue Zahlen': 'Números nuevos', 'nicht definiert': 'no definido',
+        // drehmatrix
+        'Eine Figur wird mit einer Drehmatrix um den Ursprung gedreht': 'Una figura gira alrededor del origen con una matriz de giro',
+        'Drehwinkel $\\varphi$': 'Ángulo de giro $\\varphi$',
+        // newton
+        'Newton-Verfahren: Tangenten führen zur Nullstelle': 'Método de Newton: las tangentes llevan al cero',
+        'Nächster Schritt': 'Siguiente paso', '5 Schritte': '5 pasos',
 
         // book es mathegy11lk-es (Turing)
 
     },
     phrase: [
         // book es mathegy11-es (Turing)
+        // kettenregel
+        ['$ &nbsp;·&nbsp; außen $u(z) = ', '$ &nbsp;·&nbsp; exterior $u(z) = '], ['$, innen $v(x) = ', '$, interior $v(x) = '],
+        ['An der Stelle $x_0 = ', 'En el punto $x_0 = '], ['$ ist $v(x_0) = ', '$ es $v(x_0) = '],
+        ['$: Dort ist $f$ nicht definiert oder nicht differenzierbar. Zieh den Punkt weiter.', '$: ahí $f$ no está definida o no es derivable. Arrastra el punto un poco más.'],
+        ['$, also $f\'(x_0) \\approx ', '$, así que $f\'(x_0) \\approx '],
+        ['$. Kontrolle mit dem Differenzenquotienten ($h = 0{,}0001$): $', '$. Comprobación con el cociente incremental ($h = 0{,}0001$): $'],
+        // matrixprodukt
+        ['$ hat den Typ $', '$ tiene la dimensión $'], ['$ den Typ $', '$ la dimensión $'],
+        [' Zeilen: Die Matrizen sind in dieser Reihenfolge nicht verkettet, das Produkt gibt es nicht.', ' filas: en este orden las matrices no son compatibles, el producto no existe.'],
+        ['Typen: $', 'Dimensiones: $'], ['$ · Klick auf ein Feld des Ergebnisses.', '$ · Haz clic en una casilla del resultado.'],
+        ['$ ist nicht definiert.', '$ no está definido.'], ['$, ist also etwas ganz anderes.', '$, así que es algo completamente distinto.'],
+        ['$ ergibt ', '$ da '], ['hier zufällig dasselbe', 'aquí, por casualidad, lo mismo'], ['andere Zahlen', 'otros números'],
+        ['Andersherum: ', 'Al revés: '], [' Das Kommutativgesetz gilt für Matrizen im Allgemeinen nicht.', ' Para las matrices, la propiedad conmutativa no se cumple en general.'],
+        // drehmatrix
+        ['$ · Gedreht wird um den Ursprung gegen den Uhrzeigersinn.', '$ · El giro es alrededor del origen, en sentido antihorario.'],
+        // newton
+        ['Bei $x_{', 'En $x_{'], ['}$ ist $f\'(x) = 0$: Die Tangente ist waagerecht, das Verfahren bricht ab.', '}$ es $f\'(x) = 0$: la tangente es horizontal, el método se detiene.'],
+        ['Die Folge läuft weg: anderer Startwert.', 'La sucesión se escapa: prueba otro valor inicial.'], ['$ und $f\'(x) = ', '$ y $f\'(x) = '],
+        ['$. Iteration: $x_{n+1}', '$. Iteración: $x_{n+1}'],
+        ['$. Den Startwert verschiebst du mit dem weißen Punkt auf der $x$-Achse.', '$. El valor inicial lo desplazas con el punto blanco del eje $x$.'],
 
         // book es mathegy11lk-es (Turing)
 
     ],
     rule: [
         // book es mathegy11-es (Turing)
+        // matrixprodukt: "A hat 2 Spalten, B aber 3 Zeilen: …" and "Zeile 1 von $A$ mal Spalte 2 von $B$"
+        [/ ([AB]) hat (\d+) Spalten, ([AB]) aber (\d+) Zeilen: /g, ' $1 tiene $2 columnas, pero $3 tiene $4 filas: '],
+        [/Zeile (\d+) von \$([AB])\$ mal Spalte (\d+) von \$([AB])\$/g, (m, i, p, j, q) => 'Fila ' + i + ' de $' + p + '$ por columna ' + j + ' de $' + q + '$'],
 
         // book es mathegy11lk-es (Turing)
 
