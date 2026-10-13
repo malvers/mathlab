@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 11 · Capítulo 4.1 · Experimentos aleatorios de varias etapas | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Modelo de urna, reglas de las ramas, tabla de contingencia, independencia, simulación. Capítulo 4.1 del libro de texto interactivo Matemáticas · Gymnasium 11: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 4.1 · ÁREA DE APRENDIZAJE 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 4.1 · ÁREA DE APRENDIZAJE 4 · ABRIL · MAYO</p>
+            <h1>Experimentos aleatorios de varias etapas</h1>
+            <p class="b-hero-lead">Sacar dos veces, tirar un dado tres veces, una encuesta con dos preguntas: muchos experimentos aleatorios se desarrollan por etapas. Con el <b>diagrama de árbol</b> y las
+                <b>reglas de las ramas</b> no pierdes la visión de conjunto; con la <b>tabla de contingencia</b> ordenas dos características; y con la <b>independencia</b> aclaras
+                si dos sucesos tienen algo que ver entre sí. Y donde calcular resulta difícil, ayuda la <b>simulación</b>.</p>
+            <div class="b-chips"><span class="b-chip">6 SESIONES</span><span class="b-chip">2 LECCIONES</span><span class="b-chip">SIMULACIÓN</span><span class="b-chip">HISTORIA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>describir experimentos aleatorios de varias etapas con el <b>modelo de urna</b>, con y sin reemplazamiento</li>
+                <li>calcular probabilidades con el <b>diagrama de árbol</b> y las <b>reglas de las ramas</b>, y estimarlas con el suceso contrario</li>
+                <li><b>simular</b> experimentos aleatorios</li>
+                <li>construir y leer <b>tablas de contingencia</b></li>
+                <li>comprobar si dos sucesos son <b>independientes</b> y discutir distintos caminos de resolución</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="1/6" data-ph="Fracción"><p class="b-q-text">¿Qué probabilidad hay de sacar un seis con un dado?</p><div class="b-sol"><p>$\tfrac{1}{6}$</p></div></div>
+            <div class="b-q" data-ans="0,6" data-ph="Número"><p class="b-q-text">En una urna hay 3 bolas rojas y 2 azules. ¿Qué probabilidad tiene el rojo?</p><div class="b-sol"><p>$\tfrac{3}{5} = 0{,}6$</p></div></div>
+            <div class="b-q" data-ans="0,3" data-ph="Número"><p class="b-q-text">$P(A) = 0{,}7$. ¿Cuánto vale $P(\overline{A})$?</p><div class="b-sol"><p>0,3</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Cuánto es $\tfrac{3}{5} \cdot \tfrac{1}{2}$?</p><div class="b-mc"><button>$\tfrac{4}{7}$</button><button>$\tfrac{3}{10}$</button><button>$\tfrac{3}{7}$</button></div><div class="b-sol"><p>Numerador por numerador, denominador por denominador.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">¿CON O SIN REEMPLAZAMIENTO?</div>
+            <div class="b-text"><p>En una urna hay 3 bolas rojas y 2 azules. Sacáis dos veces.</p>
+                <ul><li>Jugadlo 50 veces con reemplazamiento y 50 sin él. ¿Cuántas veces salen dos bolas rojas? Explicad la diferencia.</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DEPORTE Y MÚSICA</div>
+            <div class="b-text"><p>Preguntad en vuestro curso: ¿quién hace deporte con regularidad y quién toca música?</p>
+                <ul><li>Ordenad las respuestas en una tabla de cuatro casillas. ¿Tocan música los deportistas con menos frecuencia que los demás?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DADOS EN EL LABORATORIO</div>
+            <div class="b-text"><p>Haced que el ordenador tire el dado mil veces y observad la frecuencia relativa.</p></div>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">JUEGO DE DADOS</span><span class="b-lab-what">Azar y frecuencia (en alemán)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Modelo de urna y reglas de las ramas" data-toc-k="1" data-toc-short="1 Árbol">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Modelo de urna, diagrama de árbol y reglas de las ramas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con reemplazamiento, la probabilidad de rojo en cada extracción es $\tfrac{3}{5}$; por tanto, la de dos rojas es $\tfrac{3}{5} \cdot \tfrac{3}{5} = \tfrac{9}{25} = 0{,}36$.
+                Sin reemplazamiento, tras la primera bola roja solo quedan 2 rojas entre 4 bolas: $\tfrac{3}{5} \cdot \tfrac{2}{4} = \tfrac{3}{10} = 0{,}3$.
+                En el diagrama de árbol, en cada segmento se escribe la probabilidad de esa etapa, y un camino a través del árbol se llama <b>rama</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · REGLAS DE LAS RAMAS</div>
+                <div class="b-text">
+                    <p><b>1.ª regla de las ramas (regla del producto):</b> la probabilidad de una rama es el producto de las probabilidades a lo largo de la rama.</p>
+                    <p><b>2.ª regla de las ramas (regla de la suma):</b> la probabilidad de un suceso es la suma de las probabilidades de sus ramas.</p>
+                    <p><b>Modelo de urna:</b> con reemplazamiento, las probabilidades se mantienen; sin reemplazamiento, cambian de una etapa a otra.</p>
+                    <p><b>Suceso contrario:</b> $P(\text{al menos una vez}) = 1 - P(\text{ninguna vez})$, a menudo el camino más corto.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Comprobación:</b> la suma de las probabilidades de todas las ramas es 1, igual que la suma de los segmentos en cada bifurcación.</p>
+            <p class="b-note"><b>Simulación:</b> con dígitos aleatorios del 0 al 9 se simula $p = 0{,}3$ contando 0, 1 y 2 como aciertos. Muchas repeticiones estiman la probabilidad.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · TALLER DE DIAGRAMAS DE ÁRBOL</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta la urna, elige con o sin reemplazamiento y haz clic en los extremos de las ramas para formar un suceso.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · EXACTAMENTE UNA ROJA</div>
+            <div class="b-text"><p>Dos extracciones sin reemplazamiento de 3 bolas rojas y 2 azules. ¿Qué probabilidad hay de exactamente una bola roja?</p></div>
+            <div class="b-sol"><p>Dos ramas: roja–azul $\tfrac{3}{5} \cdot \tfrac{2}{4}$ y azul–roja $\tfrac{2}{5} \cdot \tfrac{3}{4}$.</p>
+                <p>$\tfrac{6}{20} + \tfrac{6}{20} =$ <span class="b-res">$\tfrac{3}{5}$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · AL MENOS UN SEIS</div>
+            <div class="b-text"><p>Se tira un dado cuatro veces. ¿Qué probabilidad hay de al menos un seis?</p></div>
+            <div class="b-sol"><p>Suceso contrario «ningún seis»: $\left(\tfrac{5}{6}\right)^4 \approx 0{,}482$.</p>
+                <p><span class="b-res">$1 - 0{,}482 \approx 0{,}518$</span>: algo más de la mitad.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Urna con 3 bolas rojas y 2 azules. Calcula para dos extracciones: a) con reemplazamiento, dos colores distintos &nbsp; b) con reemplazamiento, al menos una azul &nbsp; c) con tres extracciones sin reemplazamiento, tres veces rojo</p></div>
+            <div class="b-sol"><p>a) $\tfrac{12}{25}$ &nbsp; b) $\tfrac{16}{25}$ &nbsp; c) $\tfrac{3}{5} \cdot \tfrac{2}{4} \cdot \tfrac{1}{3} = \tfrac{1}{10}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dos dados: ¿qué probabilidad hay de que la suma de puntos sea 7 y qué probabilidad de sacar dobles?</p></div>
+            <div class="b-sol"><p>Las dos, $\tfrac{6}{36} = \tfrac{1}{6}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>El 60 % de los alumnos de un instituto grande viene en autobús. Se eligen dos al azar. ¿Qué probabilidad hay de que exactamente uno de ellos venga en autobús? ¿Por qué se puede calcular aquí como si fuera con reemplazamiento?</p></div>
+            <div class="b-sol"><p>$2 \cdot 0{,}6 \cdot 0{,}4 = 0{,}48$. Con muchas personas, una elección apenas cambia la proporción.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Cuántas veces hay que tirar el dado como mínimo para que con una probabilidad de al menos el 90 % salga algún seis? Pruébalo con el CAS.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac{5}{6}\right)^n \geq 0{,}9$: $n = 13$ (con $n = 12$ solo unos 0,888).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Planifica una simulación con dígitos aleatorios para: «Una ruleta muestra rojo con un 30 %; ¿qué probabilidad hay de al menos dos rojos en 5 giros?». Haz 20 repeticiones y compáralo con el cálculo $1 - 0{,}7^5 - 5 \cdot 0{,}3 \cdot 0{,}7^4 \approx 0{,}47$.</p></div>
+            <div class="b-sol"><p>Cinco dígitos cada vez, acierto con 0, 1 y 2; contar cuántas veces hay al menos dos aciertos. Con 20 repeticiones, el resultado se dispersa claramente alrededor de 0,47.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,3" data-ph="Probabilidad"><p class="b-q-text">Dos extracciones sin reemplazamiento de 3 rojas y 2 azules: ¿$P(\text{dos rojas})$?</p><div class="b-sol"><p>$\tfrac{3}{10}$</p></div></div>
+        <div class="b-q" data-ans="7/8" data-ph="Fracción"><p class="b-q-text">Tres lanzamientos de una moneda: ¿$P(\text{al menos una cara})$?</p><div class="b-sol"><p>$1 - \tfrac{1}{8}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">¿Qué dice la 1.ª regla de las ramas?</p><div class="b-mc"><button>Multiplicar a lo largo de una rama.</button><button>Sumar a lo largo de una rama.</button><button>Multiplicar todas las ramas.</button></div><div class="b-sol"><p>Regla del producto.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Tabla de contingencia e independencia" data-toc-k="2" data-toc-short="2 Independencia">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Tabla de contingencia e independencia</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>De 100 encuestados, 60 hacen deporte ($S$), 40 tocan música ($M$) y 30 hacen las dos cosas. En la tabla de contingencia están las cuatro combinaciones y, en los márgenes, las sumas.
+                Si deporte y música fueran independientes, de los 60 deportistas tendría que tocar música el 40 %, es decir, 24. Pero son 30.
+                Por tanto, en este grupo las dos características están relacionadas: $P(S \cap M) = 0{,}3 \neq 0{,}6 \cdot 0{,}4 = 0{,}24$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · TABLA DE CONTINGENCIA E INDEPENDENCIA</div>
+                <div class="b-text">
+                    <p>La <b>tabla de contingencia</b> contiene $P(A \cap B)$, $P(A \cap \overline{B})$, $P(\overline{A} \cap B)$, $P(\overline{A} \cap \overline{B})$; las sumas de filas y columnas dan $P(A)$, $P(\overline{A})$, $P(B)$, $P(\overline{B})$, y la suma total, 1.</p>
+                    <p>$A$ y $B$ son <b>independientes</b> si se cumple $P(A \cap B) = P(A) \cdot P(B)$; si no, son <b>dependientes</b>. Entonces también $\overline{A}$ y $B$, etc., son independientes.</p>
+                    <p>Intuitivamente: la proporción de $B$ en el grupo $A$ es igual que en el grupo $\overline{A}$.</p>
+                    <p><b>Incompatibles</b> ($A \cap B = \emptyset$) es otra cosa: con probabilidades positivas, los sucesos incompatibles son incluso dependientes.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Árbol ↔ tabla:</b> $P(A \cap B)$ es en el árbol el producto a lo largo de la rama $A$, después $B$; en la tabla aparece directamente en la casilla.</p>
+            <p class="b-note"><b>Dependiente no quiere decir causal:</b> una relación en los datos no dice cuál es la causa. Quizá los deportistas simplemente tienen más tiempo por la tarde.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿INDEPENDIENTES O NO?</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta $P(A)$, $P(B)$ y $P(A \cap B)$. La tabla de contingencia y el cuadrado unidad muestran cuándo los sucesos son independientes.</p>
+        <div data-widget="unabhaengig"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · COMPLETAR LA TABLA</div>
+            <div class="b-text"><p>$P(A) = 0{,}4$, $P(B) = 0{,}5$, $P(A \cap B) = 0{,}2$. Completa la tabla y comprueba si son independientes.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}2$, $P(\overline{A} \cap B) = 0{,}3$, $P(\overline{A} \cap \overline{B}) = 0{,}3$.</p>
+                <p>$0{,}4 \cdot 0{,}5 = 0{,}2 = P(A \cap B)$: <span class="b-res">independientes</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · CALCULAR CON LA INDEPENDENCIA</div>
+            <div class="b-text"><p>$A$ y $B$ son independientes con $P(A) = 0{,}3$ y $P(B) = 0{,}5$. Halla $P(A \cap B)$, $P(A \cup B)$ y $P(\overline{A} \cap \overline{B})$.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}15$, $P(A \cup B) = 0{,}3 + 0{,}5 - 0{,}15 = 0{,}65$.</p>
+                <p><span class="b-res">$P(\overline{A} \cap \overline{B}) = 0{,}7 \cdot 0{,}5 = 0{,}35$</span> $= 1 - 0{,}65$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ENTRENAMIENTO · COMPLETAR TABLAS DE CONTINGENCIA</div>
+        <p class="b-help" style="margin:0 0 12px">Rellena las casillas que faltan. Si quieres, hay una tabla nueva.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>De 200 personas, 80 llevan gafas, 120 son mujeres y 50 mujeres llevan gafas. Construye la tabla de contingencia con números absolutos.</p></div>
+            <div class="b-sol"><p>Mujer/gafas 50, mujer/sin gafas 70, hombre/gafas 30, hombre/sin gafas 50; sumas 120, 80, 80, 120, 200.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Son independientes «mujer» y «gafas» en este grupo? Compara las proporciones de personas con gafas entre mujeres y hombres.</p></div>
+            <div class="b-sol"><p>Mujeres $\tfrac{50}{120} \approx 41{,}7\,\%$, hombres $\tfrac{30}{80} = 37{,}5\,\%$; $0{,}6 \cdot 0{,}4 = 0{,}24 \neq 0{,}25$: ligeramente dependientes.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dos dados: $A$ «el primer dado muestra 6», $B$ «suma de puntos 7». ¿Son independientes $A$ y $B$?</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac{1}{6}$, $P(B) = \tfrac{1}{6}$, $P(A \cap B) = P(\{(6,1)\}) = \tfrac{1}{36}$: independientes, aunque no se sospeche.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$A$ y $B$ son incompatibles con $P(A) = 0{,}3$ y $P(B) = 0{,}4$. Halla $P(A \cup B)$ y demuestra que son dependientes.</p></div>
+            <div class="b-sol"><p>$P(A \cup B) = 0{,}7$; $P(A \cap B) = 0 \neq 0{,}12$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Resuelve el ejemplo 4 de dos maneras: con la regla de la suma de probabilidades y con el suceso contrario. Discute qué camino es más rápido.</p></div>
+            <div class="b-sol"><p>Regla de la suma: $0{,}3 + 0{,}5 - 0{,}15 = 0{,}65$. Suceso contrario: $1 - 0{,}7 \cdot 0{,}5 = 0{,}65$. Con sucesos independientes, el segundo camino suele ser más corto.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,24" data-ph="Producto"><p class="b-q-text">Deporte 60 %, música 40 %: ¿qué proporción de «ambas cosas» cabría esperar si fueran independientes?</p><div class="b-sol"><p>0,24</p></div></div>
+        <div class="b-q" data-ans="0,65" data-ph="P(A ∪ B)"><p class="b-q-text">Independientes, $P(A) = 0{,}3$, $P(B) = 0{,}5$: ¿$P(A \cup B)$?</p><div class="b-sol"><p>0,65</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$A$, $B$ incompatibles con probabilidades positivas. ¿Qué se cumple?</p><div class="b-mc"><button>independientes</button><button>dependientes</button><button>No se puede decir.</button></div><div class="b-sol"><p>$0 \neq P(A) \cdot P(B)$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una ruleta muestra rojo con probabilidad $\tfrac{1}{4}$ y, si no, verde. Se gira dos veces. Da todas las ramas con sus probabilidades.</p></div>
+            <div class="b-sol"><p>RR $\tfrac{1}{16}$, RV $\tfrac{3}{16}$, VR $\tfrac{3}{16}$, VV $\tfrac{9}{16}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con 10.º curso:</b> la variable aleatoria $X$ cuenta las bolas rojas en dos extracciones con reemplazamiento de 3 rojas y 2 azules. Da la distribución y $E(X)$.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = 0{,}16$, $P(X = 1) = 0{,}48$, $P(X = 2) = 0{,}36$; $E(X) = 0{,}48 + 0{,}72 = 1{,}2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Se tira un dado diez veces. Primero estima y después calcula: ¿qué probabilidad hay de al menos un seis?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac{5}{6}\right)^{10} \approx 0{,}84$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Educación para el desarrollo sostenible: en una ciudad, el 30 % va al trabajo en bicicleta. Entre los menores de 30 años es el 45 %, y ellos son el 20 % de la población activa. Haz una tabla de contingencia y comprueba si la edad y el uso de la bicicleta son independientes.</p></div>
+            <div class="b-sol"><p>Joven y bici: $0{,}2 \cdot 0{,}45 = 0{,}09$; joven sin bici 0,11; mayor con bici $0{,}3 - 0{,}09 = 0{,}21$; mayor sin bici 0,59. $0{,}2 \cdot 0{,}3 = 0{,}06 \neq 0{,}09$: dependientes.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: La apuesta del caballero de Méré" data-toc-k="X" data-toc-short="de Méré">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>La apuesta del caballero de Méré</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>El escritor y jugador francés Antoine Gombaud, llamado caballero de Méré, conocía una buena apuesta: en cuatro tiradas de un dado sale al menos un seis.
+                Pensaba que una segunda apuesta era igual de buena: en 24 tiradas con dos dados sale al menos un doble seis. El razonamiento: $\tfrac{4}{6} = \tfrac{24}{36}$.
+                Pero con ella perdía a la larga.</p>
+            <p>En 1654 planteó sus preguntas a Blaise Pascal, que se carteó sobre ellas con Pierre de Fermat. Esta correspondencia se considera el comienzo del cálculo de probabilidades.
+                Con el suceso contrario es fácil: $1 - \left(\tfrac{5}{6}\right)^4 \approx 51{,}8\,\%$, pero $1 - \left(\tfrac{35}{36}\right)^{24} \approx 49{,}1\,\%$. La primera apuesta es favorable; la segunda, ligeramente desfavorable.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> D. R. Bellhouse, C. Genest, «Antoine Gombaud, Chevalier de Méré», Statistical Science 39 (2024), número 3. La correspondencia entre Pascal y Fermat es del año 1654.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>MODELO DE URNA</h4><p>Con reemplazamiento, constante; sin reemplazamiento, variable.</p></div>
+        <div><p>Dos rojas: $\tfrac{9}{25}$ y $\tfrac{3}{10}$, respectivamente</p></div></div>
+    <div class="b-rueck"><div><h4>REGLAS DE LAS RAMAS</h4><p>Multiplicar a lo largo, sumar las ramas.</p></div>
+        <div><p>Exactamente una roja: $\tfrac{3}{5}$</p></div></div>
+    <div class="b-rueck"><div><h4>SUCESO CONTRARIO</h4><p>«Al menos una vez» = 1 − «ninguna vez».</p></div>
+        <div><p>$1 - \left(\tfrac{5}{6}\right)^4 \approx 0{,}518$</p></div></div>
+    <div class="b-rueck"><div><h4>TABLA DE CONTINGENCIA</h4><p>Cuatro casillas, sumas marginales, suma total 1.</p></div>
+        <div><p>Deporte/música: 0,3 · 0,3 · 0,1 · 0,3</p></div></div>
+    <div class="b-rueck"><div><h4>INDEPENDENCIA</h4><p>$P(A \cap B) = P(A) \cdot P(B)$; incompatibles es otra cosa.</p></div>
+        <div><p>$0{,}4 \cdot 0{,}5 = 0{,}2$: independientes</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="16/25" data-ph="Fracción"><p class="b-q-text">Dos extracciones con reemplazamiento de 3 rojas y 2 azules: ¿al menos una azul?</p><div class="b-sol"><p>$1 - \tfrac{9}{25}$</p></div></div>
+            <div class="b-q" data-ans="0,15" data-ph="P(A ∩ B)"><p class="b-q-text">Independientes, $P(A) = 0{,}3$, $P(B) = 0{,}5$: ¿$P(A \cap B)$?</p><div class="b-sol"><p>0,15</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué simulación corresponde a $p = 0{,}3$ con dígitos aleatorios?</p><div class="b-mc"><button>el dígito 3 es acierto</button><button>los dígitos del 0 al 3 son aciertos</button><button>los dígitos 0, 1 y 2 son aciertos</button></div><div class="b-sol"><p>3 de 10 dígitos.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="13" data-ph="Tiradas"><p class="b-q-text">¿Número mínimo de tiradas para tener al menos un 90 % de probabilidad de un seis?</p><div class="b-sol"><p>13</p></div></div>
+            <div class="b-q" data-ans="49,1" data-tol="0.1" data-ph="%"><p class="b-q-text">Segunda apuesta de De Méré: ¿$1 - \left(\tfrac{35}{36}\right)^{24}$ en porcentaje (con un decimal)?</p><div class="b-sol"><p>49,1 %</p></div></div>
+            <div class="b-q" data-ans="1,2" data-ph="E(X)"><p class="b-q-text">¿Número esperado de bolas rojas en dos extracciones con reemplazamiento (3 rojas, 2 azules)?</p><div class="b-sol"><p>1,2</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-mehrstufig.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXPERIMENTOS ALEATORIOS DE VARIAS ETAPAS</span><span class="b-lab-what">Urna, árbol, reglas de las ramas, 20 ejercicios (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLA DE CONTINGENCIA</span><span class="b-lab-what">Tablas e independencia, 20 ejercicios (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 11.º curso, curso básico · Área de aprendizaje 4 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-es/stochastik.js"></script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 11 · Capítulo 3.3 · Planos | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Forma paramétrica, ecuación general, posición relativa de una recta y un plano. Capítulo 3.3 del libro de texto interactivo Matemáticas · Gymnasium 11: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 3.3 · ÁREA DE APRENDIZAJE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 3.3 · ÁREA DE APRENDIZAJE 3 · ABRIL</p>
+            <h1>Planos</h1>
+            <p class="b-hero-lead">Un faldón de tejado, una fachada de cristal, una rampa, el propio suelo: los planos están en todas partes. Los describes de dos maneras: con un punto base y dos direcciones
+                (<b>forma paramétrica</b>) o con una sola ecuación $ax + by + cz = d$ (<b>ecuación general</b>). Y averiguas dónde atraviesa una recta un plano:
+                así calcula un ordenador dónde cae un rayo de sol sobre un tejado y dónde acaba una sombra.</p>
+            <div class="b-chips"><span class="b-chip">12 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">3D</span><span class="b-chip">GRÁFICOS POR ORDENADOR</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>plantear ecuaciones de planos en <b>forma paramétrica</b> a partir de tres puntos o de una recta y un punto</li>
+                <li>hacer la <b>prueba de pertenencia</b> y comprobar si cuatro puntos están en un mismo plano</li>
+                <li>dar planos en <b>forma sin parámetros</b> (ecuación general), reconocer los cortes con los ejes y las posiciones especiales</li>
+                <li>pasar de la forma paramétrica a la ecuación general y viceversa</li>
+                <li>estudiar la <b>posición relativa de una recta y un plano</b> y calcular puntos de intersección</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Qué ecuación describe el plano $xy$?</p><div class="b-mc"><button>$x = 0$</button><button>$z = 0$</button><button>$x = y$</button></div><div class="b-sol"><p>Altura cero.</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="x ="><p class="b-q-text">¿Dónde atraviesa $(1, 2, 3) + t(2, 0, -1)$ el plano $xy$? Da $x$.</p><div class="b-sol"><p>$t = 3$: $(7, 2, 0)$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="Número"><p class="b-q-text">Calcula $2 \cdot 1 - 2 + 1$.</p><div class="b-sol"><p>1</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Son linealmente independientes $(1, 2, 3)$ y $(2, 4, 6)$?</p><div class="b-mc"><button>no</button><button>sí</button><button>solo en el espacio</button></div><div class="b-sol"><p>El segundo es el doble del primero.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA MESA QUE COJEA</div>
+            <div class="b-text"><p>Un taburete de tres patas nunca cojea; una mesa de cuatro patas, a menudo sí.</p>
+                <ul><li>¿Cuántos puntos determinan un plano? ¿Cuándo no lo hacen tres puntos?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">UNA ECUACIÓN PARA EL PLANO</div>
+            <div class="b-text"><p>Los puntos $(2, 0, 0)$, $(0, 2, 0)$ y $(0, 0, 2)$ determinan un plano.</p>
+                <ul><li>Comprobad para algunos puntos del plano: ¿cuánto vale $x + y + z$? Encontrad una ecuación que cumplan exactamente los puntos del plano.</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA SOMBRA DEL MÁSTIL</div>
+            <div class="b-text"><p>La punta de un mástil de 6 m de altura está en $(0, 0, 6)$, y los rayos del sol tienen la dirección $(2, 1, -3)$.</p>
+                <ul><li>¿Dónde cae en el suelo la sombra de la punta? ¿Y sobre una rampa inclinada?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Planos en forma paramétrica" data-toc-k="1" data-toc-short="1 Paramétrica">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Planos en forma paramétrica</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Tres patas de taburete que no están en línea recta determinan exactamente un plano. Desde el primer pie $A$ se llega a cualquier punto del suelo
+                avanzando un tramo en la dirección $\overrightarrow{AB}$ y otro en la dirección $\overrightarrow{AC}$: $\vec{x} = \vec{a} + r \cdot \overrightarrow{AB} + s \cdot \overrightarrow{AC}$.
+                Dos parámetros, porque un plano tiene dos direcciones.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · FORMA PARAMÉTRICA DE UN PLANO</div>
+                <div class="b-text">
+                    <p>$E\colon \vec{x} = \vec{p} + r \cdot \vec{u} + s \cdot \vec{v}$ con el vector de posición $\vec{p}$ y dos vectores directores <b>linealmente independientes</b> $\vec{u}$, $\vec{v}$; $r, s \in \mathbb{R}$.</p>
+                    <p>Un plano queda determinado por tres puntos que no están alineados, por una recta y un punto exterior a ella, o por dos rectas secantes o dos rectas paralelas distintas.</p>
+                    <p><b>Prueba de pertenencia:</b> $\vec{p} + r\vec{u} + s\vec{v} = \vec{q}$ es un sistema de tres ecuaciones para $r$ y $s$. Con dos se determinan, con la tercera se comprueba.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Con rectas que se cruzan no se puede:</b> dos rectas que se cruzan nunca están en un mismo plano.</p>
+            <p class="b-note"><b>¿Cuadrilátero plano?</b> Plano por tres vértices, prueba de pertenencia con el cuarto. Así se comprueba si un tejado de cristal puede ser de una sola placa.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿ESTÁ EL PUNTO EN EL PLANO?</div>
+        <p class="b-help" style="margin:0 0 12px">Desplaza el punto $Q$ y gira la vista. El widget hace la prueba de pertenencia. El vector normal, que también aparece, es un adelanto de 12.º curso.</p>
+        <div data-widget="ebene3d" data-mode="punkt"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · A PARTIR DE TRES PUNTOS</div>
+            <div class="b-text"><p>Plantea el plano que pasa por $A(1, 0, 0)$, $B(0, 1, 0)$, $C(0, 0, 1)$. ¿Está $Q(1, 1, 1)$ en él?</p></div>
+            <div class="b-sol"><p>$E\colon \vec{x} = (1, 0, 0) + r(-1, 1, 0) + s(-1, 0, 1)$.</p>
+                <p>$Q$: $r = 1$, $s = 1$ a partir de $y$ y $z$; entonces $x = 1 - 1 - 1 = -1 \neq 1$: <span class="b-res">$Q$ no está en $E$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · ¿TEJADO PLANO?</div>
+            <div class="b-text"><p>¿Están $A(0, 0, 3)$, $B(4, 0, 3)$, $C(4, 2, 5)$ y $D(0, 2, 5)$ en un mismo plano?</p></div>
+            <div class="b-sol"><p>$\vec{x} = (0, 0, 3) + r(4, 0, 0) + s(4, 2, 2)$; para $D$: $2s = 2$, así que $s = 1$; $3 + 2 = 5$ se cumple; $4r + 4 = 0$, así que $r = -1$.</p>
+                <p><span class="b-res">Sí, $ABCD$ es plano</span>, e incluso un rectángulo.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da una forma paramétrica: a) del plano $xy$ &nbsp; b) del plano que pasa por $(0, 3, 0)$ paralelo al plano $xz$ &nbsp; c) del plano que contiene el eje $x$ y el punto $(0, 1, 1)$</p></div>
+            <div class="b-sol"><p>a) $r(1, 0, 0) + s(0, 1, 0)$ &nbsp; b) $(0, 3, 0) + r(1, 0, 0) + s(0, 0, 1)$ &nbsp; c) $r(1, 0, 0) + s(0, 1, 1)$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Qué punto del plano del ejemplo 1 corresponde a $r = 1$, $s = 2$? ¿Está $\left(\tfrac{1}{3}, \tfrac{1}{3}, \tfrac{1}{3}\right)$ en él?</p></div>
+            <div class="b-sol"><p>$(-2, 1, 2)$; sí, para $r = s = \tfrac{1}{3}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Plantea el plano que contiene la recta $g\colon \vec{x} = (1, 2, 0) + t(1, 0, 1)$ y el punto $P(0, 0, 1)$.</p></div>
+            <div class="b-sol"><p>$\vec{x} = (1, 2, 0) + r(1, 0, 1) + s(-1, -2, 1)$; segundo vector director $\overrightarrow{AP}$ con $A(1, 2, 0)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Por qué $A(1, 2, 3)$, $B(2, 4, 5)$ y $C(4, 8, 9)$ no determinan un plano?</p></div>
+            <div class="b-sol"><p>$\overrightarrow{AC} = 3\overrightarrow{AB}$: los puntos están en una recta, y por ella pasan infinitos planos.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Demuestra que $\vec{x} = r(1, 0, -1) + s(0, 1, -1)$ y $\vec{x} = (1, 1, -2) + r(1, -1, 0) + s(2, 1, -3)$ describen el mismo plano.</p></div>
+            <div class="b-sol"><p>El punto base $(1, 1, -2)$ está en el primero ($r = s = 1$), y los dos vectores directores del segundo son combinaciones lineales: $(1, -1, 0) = u - v$, $(2, 1, -3) = 2u + v$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="-1" data-ph="r ="><p class="b-q-text">¿Para qué $r$ está $D$ en el plano del ejemplo 2?</p><div class="b-sol"><p>$r = -1$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="Número"><p class="b-q-text">¿Cuántos parámetros tiene la forma paramétrica de un plano?</p><div class="b-sol"><p>2</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué pareja NO puede ser la de los vectores directores de un plano?</p><div class="b-mc"><button>$(1, 0, 0)$ y $(0, 1, 0)$</button><button>$(1, 1, 0)$ y $(0, 1, 1)$</button><button>$(1, 2, 3)$ y $(2, 4, 6)$</button></div><div class="b-sol"><p>Son paralelos, es decir, linealmente dependientes.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Planos en forma sin parámetros" data-toc-k="2" data-toc-short="2 Ec. general">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Planos en forma sin parámetros</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Para el plano que pasa por $(2, 0, 0)$, $(0, 2, 0)$, $(0, 0, 2)$, en todos los puntos comprobados se cumple $x + y + z = 2$. Calculándolo:
+                $\vec{x} = (0, 0, 2) + r(1, 0, -1) + s(0, 1, -1)$ significa $x = r$, $y = s$, $z = 2 - r - s$. Si se sustituyen las dos primeras en la tercera, los parámetros desaparecen:
+                $z = 2 - x - y$, es decir, $x + y + z = 2$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · ECUACIÓN GENERAL</div>
+                <div class="b-text">
+                    <p>Todo plano se puede escribir como $E\colon ax + by + cz = d$ (con $a$, $b$, $c$ no todos nulos). Un punto está en $E$ si sus coordenadas cumplen la ecuación.</p>
+                    <p><b>Cortes con los ejes (puntos de traza):</b> igualar a cero dos coordenadas. <b>Ecuación segmentaria:</b> $\dfrac{x}{p} + \dfrac{y}{q} + \dfrac{z}{r} = 1$ (para $p, q, r \neq 0$) con los puntos de corte $(p, 0, 0)$, $(0, q, 0)$, $(0, 0, r)$.</p>
+                    <p><b>Eliminar los parámetros:</b> escribir la forma paramétrica coordenada a coordenada, despejar $r$ y $s$ de dos ecuaciones y sustituir en la tercera. <b>Al revés:</b> despejar una variable y elegir libremente las otras dos.</p>
+                    <p><b>Posiciones especiales:</b> si falta una variable, el plano es paralelo a ese eje ($3x + 2y = 6$ ∥ eje $z$); $d = 0$: pasa por el origen; $y = 4$: paralelo al plano $xz$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Muchas ecuaciones, un plano:</b> $2x - y + z = 3$ y $4x - 2y + 2z = 6$ describen el mismo plano. $4x - 2y + 2z = 10$ es paralelo a él.</p>
+            <p class="b-note"><b>Perspectiva:</b> los números $a$, $b$, $c$ forman un vector perpendicular al plano. Este <b>vector normal</b> lo usarás en 12.º curso para ángulos y distancias.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · PLANO Y TRIÁNGULO DE TRAZAS</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta el plano en forma paramétrica. El widget muestra la ecuación general y el triángulo de trazas con los ejes.</p>
+        <div data-widget="ebene3d" data-mode="ebene"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · CORTES CON LOS EJES</div>
+            <div class="b-text"><p>Halla los puntos de traza de $E\colon 2x + 3y + 6z = 12$.</p></div>
+            <div class="b-sol"><p>$y = z = 0$: $2x = 12$, $x = 6$; igualmente $y = 4$ y $z = 2$.</p>
+                <p><span class="b-res">$(6, 0, 0)$, $(0, 4, 0)$, $(0, 0, 2)$</span>; ecuación segmentaria $\tfrac{x}{6} + \tfrac{y}{4} + \tfrac{z}{2} = 1$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · ELIMINAR</div>
+            <div class="b-text"><p>Halla la ecuación general de $\vec{x} = (1, 1, 1) + r(1, 0, 0) + s(0, 1, 1)$.</p></div>
+            <div class="b-sol"><p>$x = 1 + r$, $y = 1 + s$, $z = 1 + s$. $r$ solo aparece en $x$: $x$ es libre.</p>
+                <p>De $y$ y $z$: $y = z$, así que <span class="b-res">$y - z = 0$</span>, un plano que contiene la dirección $x$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Están los puntos en el plano? a) $(1, 2, 3)$ en $2x - y + z = 3$ &nbsp; b) $(3, 2, 0)$ en $2x + 3y + 6z = 12$ &nbsp; c) $(1, 1, 1)$ en $3x + 2y + z = 5$</p></div>
+            <div class="b-sol"><p>a) sí &nbsp; b) sí &nbsp; c) no ($6 \neq 5$)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da en ecuación general el plano que pasa por $(2, 0, 0)$, $(0, 3, 0)$, $(0, 0, 6)$.</p></div>
+            <div class="b-sol"><p>$\tfrac{x}{2} + \tfrac{y}{3} + \tfrac{z}{6} = 1$; multiplicando por 6: $3x + 2y + z = 6$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Halla la ecuación general de $\vec{x} = (0, 0, 3) + r(1, 0, -1) + s(0, 1, -1)$ y da una forma paramétrica de $x + 2y + z = 4$.</p></div>
+            <div class="b-sol"><p>$x + y + z = 3$; $\vec{x} = (4, 0, 0) + r(-2, 1, 0) + s(-1, 0, 1)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Describe la posición: a) $z = 0$ &nbsp; b) $y = 4$ &nbsp; c) $3x + 2y = 6$ &nbsp; d) $x - y = 0$</p></div>
+            <div class="b-sol"><p>a) plano $xy$ &nbsp; b) paralelo al plano $xz$ a distancia 4 &nbsp; c) paralelo al eje $z$ &nbsp; d) contiene el eje $z$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Qué posición relativa tienen $2x - y + z = 3$ y $4x - 2y + 2z = 10$? ¿Y $2x - y + z = 3$ y $x + y + z = 3$?</p></div>
+            <div class="b-sol"><p>Primeros: paralelos y distintos (primer miembro duplicado, segundo no). Segundos: se cortan en una recta, porque los coeficientes no son proporcionales.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="4" data-ph="y ="><p class="b-q-text">¿Dónde corta $2x + 3y + 6z = 12$ el eje $y$?</p><div class="b-sol"><p>$(0, 4, 0)$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="z ="><p class="b-q-text">¿Qué valor de $z$ tiene el punto del plano $3x + 2y + z = 6$ con $x = y = 1$?</p><div class="b-sol"><p>$z = 1$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">¿Qué plano pasa por el origen?</p><div class="b-mc"><button>$2x - y + 3z = 0$</button><button>$x = 1$</button><button>$x + y + z = 2$</button></div><div class="b-sol"><p>$d = 0$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Recta y plano" data-toc-k="3" data-toc-short="3 Intersección">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Posición relativa de una recta y un plano</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El rayo de sol que pasa por la punta del mástil es la recta $\vec{x} = (0, 0, 6) + t(2, 1, -3)$. En el suelo, $z = 0$: $6 - 3t = 0$, así que $t = 2$,
+                punto de sombra $(4, 2, 0)$. Si en esa dirección hay una rampa con el plano $x - 2z = 0$, se sustituyen los puntos de la recta en su ecuación: $2t - 2(6 - 3t) = 0$, así que $t = 1{,}5$.
+                Eso es antes del suelo ($t = 2$): la sombra cae sobre la rampa, en el punto $(3;\, 1{,}5;\, 1{,}5)$. Siempre se procede así: sustituir, hallar $t$, comprobar con la situación.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · RECTA Y PLANO</div>
+                <div class="b-text">
+                    <p>Una recta puede <b>cortar</b> un plano (exactamente un punto de intersección), ser <b>paralela</b> a él (ningún punto en común) o estar <b>contenida</b> en él.</p>
+                    <p><b>Con la ecuación general:</b> sustituir las coordenadas de la recta $x(t)$, $y(t)$, $z(t)$ en $ax + by + cz = d$.
+                        Una solución $t$: punto de intersección · contradicción como $0 = 5$: paralela · siempre verdadero, como $2 = 2$: la recta está contenida en el plano.</p>
+                    <p><b>Con la forma paramétrica:</b> igualar; tres ecuaciones para $t$, $r$, $s$, resueltas con el método de Gauss.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Consejo:</b> si el plano ya está en ecuación general, sustituir es casi siempre más rápido que igualar.</p>
+            <p class="b-note"><b>Sombras y espejos:</b> proyección de sombras, rayos láser, trayectorias que atraviesan capas de nubes: todo es «recta que corta a un plano».</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · RECTA QUE ATRAVIESA UN PLANO</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta una recta y gira la escena. El widget calcula el punto de intersección o indica que la recta es paralela al plano o que está contenida en él. El ángulo de intersección es un adelanto de 12.º curso.</p>
+        <div data-widget="ebene3d" data-mode="gerade"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · PUNTO DE INTERSECCIÓN</div>
+            <div class="b-text"><p>$g\colon \vec{x} = (1, 0, 0) + t(1, 1, 1)$ y $E\colon x + y + z = 7$.</p></div>
+            <div class="b-sol"><p>$(1 + t) + t + t = 7 \Rightarrow 3t = 6 \Rightarrow t = 2$.</p>
+                <p><span class="b-res">$S(3, 2, 2)$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · ¿PARALELA O CONTENIDA?</div>
+            <div class="b-text"><p>$g\colon \vec{x} = (0, 1, 2) + t(1, 0, -1)$ con $E\colon x + z = 2$ y con $F\colon x + z = 5$.</p></div>
+            <div class="b-sol"><p>$E$: $t + 2 - t = 2$ es siempre verdadero: $g$ está contenida en $E$.</p>
+                <p>$F$: $2 = 5$ es falso: <span class="b-res">$g$ es paralela a $F$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina la posición y, en su caso, el punto de intersección: a) $(2, 0, 1) + t(1, 2, -1)$ y $2x - y + z = 5$ &nbsp; b) $t(1, -1, 0)$ y $x + y + z = 5$</p></div>
+            <div class="b-sol"><p>a) $5 - t = 5$: $t = 0$, $S(2, 0, 1)$ &nbsp; b) $0 = 5$: paralela</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Dónde atraviesa el eje $z$ el plano $2x + 3y + 6z = 12$? ¿Dónde atraviesa $(0, 1, 1) + t(2, 1, 0)$ el plano $x = 4$?</p></div>
+            <div class="b-sol"><p>$(0, 0, 2)$; $t = 2$, $(4, 3, 1)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un rayo láser sale de $(0, 0, 10)$ con dirección $(1, 2, -5)$. ¿Dónde alcanza el suelo $z = 0$ y dónde la pared $x = 1$?</p></div>
+            <div class="b-sol"><p>Suelo: $t = 2$, $(2, 4, 0)$. Pared: $t = 1$, $(1, 2, 5)$: alcanza primero la pared.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un avión despega en el origen y cada minuto se desplaza $(4, 3, 1)$ (km). Una capa de nubes está entre 2 km y 3 km de altura. ¿Cuándo y dónde entra en ella y cuándo sale?</p></div>
+            <div class="b-sol"><p>Entra en $t = 2$ en $(8, 6, 2)$; sale en $t = 3$ en $(12, 9, 3)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Halla el punto de intersección de $g\colon \vec{x} = (1, 2, 3) + t(0, 0, 1)$ con $E\colon \vec{x} = r(1, 0, 0) + s(0, 1, 0)$ con los dos métodos: igualando y mediante la ecuación general $z = 0$.</p></div>
+            <div class="b-sol"><p>Igualando: $1 = r$, $2 = s$, $3 + t = 0$, así que $t = -3$. Ecuación general: $3 + t = 0$. Los dos dan $(1, 2, 0)$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">¿Dónde cae en el suelo la sombra de la punta del mástil? Da $x$.</p><div class="b-sol"><p>$(4, 2, 0)$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Punto de intersección del ejemplo 5: ¿coordenada $x$?</p><div class="b-sol"><p>$S(3, 2, 2)$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Al sustituir sale $0 = 5$. ¿Qué se deduce?</p><div class="b-mc"><button>La recta está contenida en el plano.</button><button>La recta es paralela al plano.</button><button>Punto de intersección en $t = 5$.</button></div><div class="b-sol"><p>Ningún punto en común.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Para el plano $x + y + z = 2$, da un punto, los tres puntos de traza y un plano paralelo que pase por el origen.</p></div>
+            <div class="b-sol"><p>Por ejemplo $(1, 1, 0)$; $(2, 0, 0)$, $(0, 2, 0)$, $(0, 0, 2)$; $x + y + z = 0$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 3.2:</b> la recta $g\colon \vec{x} = (1, 2, 3) + t(2, 1, 0)$ va a altura 3. ¿Qué posición tiene respecto a $z = 3$ y respecto a $z = 0$? ¿Qué puntos de traza tiene?</p></div>
+            <div class="b-sol"><p>Está contenida en $z = 3$ y es paralela a $z = 0$. Puntos de traza: con el plano $xz$ en $t = -2$: $(-3, 0, 3)$; con el plano $yz$ en $t = -\tfrac{1}{2}$: $(0;\, 1{,}5;\, 3)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una tienda de campaña tiene forma de pirámide con base $(\pm 2, \pm 2, 0)$ y vértice $(0, 0, 3)$. Da en ecuación general el plano de la cara lateral situada sobre la arista en $x = 2$.</p></div>
+            <div class="b-sol"><p>Por $(2, 2, 0)$, $(2, -2, 0)$, $(0, 0, 3)$: $3x + 2z = 6$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un rayo de sol con dirección $(-1, -1, -1)$ pasa por $(4, 3, 5)$. ¿Alcanza la pared de la tienda $3x + 2z = 6$ del ejercicio anterior y, si es así, dentro de la cara de la tienda?</p></div>
+            <div class="b-sol"><p>$3(4 - t) + 2(5 - t) = 6 \Rightarrow 22 - 5t = 6 \Rightarrow t = 3{,}2$: punto $(0{,}8;\, -0{,}2;\, 1{,}8)$. Visto desde arriba se cumple $0 \leq x \leq 2$ y $|y| \leq x$: está en el triángulo de la pared de la tienda.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Cómo calcula imágenes un ordenador" data-toc-k="X" data-toc-short="Ray casting">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">GRÁFICOS POR ORDENADOR</span></div>
+    <h2>Cómo calcula imágenes un ordenador</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Cada imagen de un videojuego o de una película de animación está formada por millones de pequeños triángulos planos. Para decidir qué color recibe un píxel,
+                el ordenador lanza desde el ojo del observador una recta que pasa por ese píxel y entra en la escena, y determina qué triángulo atraviesa primero:
+                «recta que corta a un plano», y después la comprobación de si el punto de intersección está dentro del triángulo. Para la sombra, sigue una segunda recta desde el punto de intersección hasta la lámpara.</p>
+            <p>Este <b>ray casting</b> lo describió el investigador de IBM Arthur Appel en 1968. Entonces, una imagen sencilla tardaba mucho; hoy las tarjetas gráficas calculan miles de millones de estos puntos de intersección por segundo.
+                Las matemáticas son las mismas que en este capítulo.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> A. Appel, «Some techniques for shading machine renderings of solids», AFIPS Spring Joint Computer Conference 1968, vol. 32, pp. 37–45.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>FORMA PARAMÉTRICA</h4><p>$\vec{x} = \vec{p} + r\vec{u} + s\vec{v}$, vectores directores independientes.</p></div>
+        <div><p>$(1, 0, 0) + r(-1, 1, 0) + s(-1, 0, 1)$</p></div></div>
+    <div class="b-rueck"><div><h4>PRUEBA DE PERTENENCIA</h4><p>Resolver dos ecuaciones, comprobar la tercera; cuarto punto de un cuadrilátero plano.</p></div>
+        <div><p>Tejado $ABCD$: $r = -1$, $s = 1$</p></div></div>
+    <div class="b-rueck"><div><h4>ECUACIÓN GENERAL</h4><p>$ax + by + cz = d$; cortes con los ejes; eliminar los parámetros.</p></div>
+        <div><p>$2x + 3y + 6z = 12$: 6, 4, 2</p></div></div>
+    <div class="b-rueck"><div><h4>POSICIONES ESPECIALES</h4><p>Falta una variable: paralelo a ese eje; $d = 0$: pasa por el origen.</p></div>
+        <div><p>$3x + 2y = 6$ ∥ eje $z$</p></div></div>
+    <div class="b-rueck"><div><h4>RECTA Y PLANO</h4><p>Sustituir: una solución, contradicción, siempre verdadero.</p></div>
+        <div><p>Sombra $(4, 2, 0)$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="2" data-ph="z ="><p class="b-q-text">¿Dónde corta $2x + 3y + 6z = 12$ el eje $z$?</p><div class="b-sol"><p>$(0, 0, 2)$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">$(1, 0, 0) + t(1, 1, 1)$ y $x + y + z = 7$: ¿para qué $t$ está el punto de intersección?</p><div class="b-sol"><p>$t = 2$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Qué posición tiene $g\colon (0, 1, 2) + t(1, 0, -1)$ respecto a $x + z = 2$?</p><div class="b-mc"><button>Está contenida en el plano.</button><button>paralela</button><button>secante</button></div><div class="b-sol"><p>$2 = 2$ es siempre verdadero.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="3,2" data-tol="0.01" data-ph="t ="><p class="b-q-text">Rayo de sol sobre la pared de la tienda: ¿para qué $t$ la alcanza?</p><div class="b-sol"><p>3,2</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="min"><p class="b-q-text">¿Cuándo sale el avión de la capa de nubes (ejercicio 14)?</p><div class="b-sol"><p>A los 3 minutos</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="z ="><p class="b-q-text">El láser del ejercicio 13 alcanza la pared $x = 1$. ¿A qué altura?</p><div class="b-sol"><p>$(1, 2, 5)$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-ebenen-parameterform.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANOS EN FORMA PARAMÉTRICA</span><span class="b-lab-what">plantear, prueba de pertenencia, puntos de traza, 20 ejercicios (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-ebenen-koordinatenform.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ECUACIÓN GENERAL</span><span class="b-lab-what">Cortes con los ejes, eliminar, posiciones, 20 ejercicios (en alemán)</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-gerade-ebene.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RECTA Y PLANO</span><span class="b-lab-what">Puntos de intersección y aplicaciones, 20 ejercicios (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 11.º curso, curso básico · Área de aprendizaje 3 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-es/vektoren.js"></script>
+</body>
+</html>

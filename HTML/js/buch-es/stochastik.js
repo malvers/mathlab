@@ -78,6 +78,8 @@ window.BuchES && BuchES.add('stochastik', {
         // book es mathe10-es (Curie)
 
         // book es mathegy11-es (Turing)
+        // pascal (also in FOS 11)
+        '$n$ (Zeile)': '$n$ (fila)', '$k$ (Stelle)': '$k$ (posición)', 'Pascalsches Dreieck bis zur Zeile 10': 'Triángulo de Pascal hasta la fila 10',
 
         // book es mathegy11lk-es (Turing)
 
@@ -156,6 +158,10 @@ window.BuchES && BuchES.add('stochastik', {
         // book es mathe10-es (Curie)
 
         // book es mathegy11-es (Turing)
+        // pascal
+        [': So viele Möglichkeiten gibt es, $', ': hay tantas maneras de elegir $'], ['$ aus $', '$ de entre $'], ['$ auszuwählen.', '$.'],
+        ['Summenregel (grün umrandet): $', 'Regla de la suma (recuadro verde): $'], ['Symmetrie (gestrichelt): $', 'Simetría (discontinua): $'],
+        ['Die Mitte der Zeile: $', 'El centro de la fila: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ es aquí su propia imagen especular.'],
 
         // book es mathegy11lk-es (Turing)
 
@@ -200,6 +206,8 @@ window.BuchES && BuchES.add('stochastik', {
         // book es mathe10-es (Curie)
 
         // book es mathegy11-es (Turing)
+        // pascal: "$, denn $2$ auswählen heißt $3$ weglassen."
+        [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, porque elegir $' + k + '$ es lo mismo que dejar fuera $' + r + '$.'],
 
         // book es mathegy11lk-es (Turing)
 
