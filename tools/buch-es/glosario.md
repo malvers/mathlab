@@ -734,6 +734,31 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Grundintegrale, Integrationskonstante | integrales inmediatas, constante de integración | |
+| lineare Verkettung | composición lineal | widget integrieren: "Composición lineal" |
+| Untersumme $U_n$, Obersumme $O_n$ | suma inferior, suma superior | the letters $U_n$, $O_n$ stay as in the German book |
+| orientierter Flächeninhalt | área orientada | |
+| Integralfunktion $I_a$ | función integral | Flächenfunktion: función área (es-3) |
+| Integrand, untere / obere Integrationsgrenze | integrando, límite de integración inferior / superior | |
+| Rechteckverfahren links / rechts / Mitte, Mittelpunktsregel | método de los rectángulos por la izquierda / por la derecha / del punto medio, regla del punto medio | widget buttons as in numerik: "Rect. por la izquierda" … |
+| Trapezverfahren | método de los trapecios | |
+| Glockenkurve | campana | |
+| Hochrechnung | extrapolación | |
+| Sollwert (Abfüllung) | valor nominal | |
+| Normalenform, Hessesche Normalform | forma normal, forma normal de Hesse | Koordinatenform: ecuación general |
+| Orthogonalitätsbedingung, Projektion | condición de ortogonalidad, proyección | |
+| Lotgerade | recta perpendicular | Lotfußpunkt: pie de la perpendicular (es-3) |
+| Abstandsformel, Abstandsfunktion | fórmula de la distancia, función distancia | |
+| Spiegelpunkt, an $E$ spiegeln, Spiegelebene | punto simétrico, hallar el simétrico respecto a $E$ (reflejar), plano de simetría | |
+| Innenwinkel, Neigungswinkel, Steigungswinkel | ángulo interior, ángulo de inclinación | |
+| Satteldach, First, Dachfläche | tejado a dos aguas, cumbrera, faldón (superficie del tejado) | |
+| Geradenbüschel, Parallelenschar, Geradenschar | haz de rectas, familia de paralelas, familia de rectas | |
+| Hüllkurve, Fadenbild | envolvente, dibujo de hilos | |
+| Gebiet 1 (Kapitel A), Prüfungsaufgabe | bloque 1, problema de examen | box "OHNE HILFSMITTEL" in chapter A: SIN HERRAMIENTAS (as BGY 13); test rounds: SIN CALCULADORA |
+| Widget (chip, running text) | ELEMENTOS INTERACTIVOS, el elemento interactivo | "3 WIDGETS" → "3 ELEMENTOS INTERACTIVOS" |
+| parallel (preset of geradenlage, ebenenlage, skalarprodukt, kreuzprodukt, winkel3d) | paralelos; between two lines (geradenlage) paralelas | word and rule in js/buch-es/vektoren.js, block mathegy12-es |
+| Vektoren und Punkte im Raum | $(1, 2, 3)$; with a decimal comma $(0{,}75;\ 1{,}5;\ 1{,}5)$ | as in BGY 13 |
+| Königselle, Handbreit, Seked | codo real, palmo, seked | Cheops, chapter 7.2 |
 
 ## Added by mathegy12lk-es (Turing)
 
