@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas GY 9 · Capítulo 4 · Análisis de datos | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Moda, mediana, media, dispersión, histogramas, trucos estadísticos. Capítulo 4 del libro de texto interactivo Matemáticas · Gymnasium 9: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · GYMNASIUM 9</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 4 · ÁREA DE APRENDIZAJE 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 4 · ÁREA DE APRENDIZAJE 4 · ABRIL</p>
+            <h1>Análisis de datos</h1>
+            <p class="b-hero-lead">«De media», «la mayoría», «un aumento del 50 %»: los números sobre datos te salen al paso cada día, y no todos tienen buena intención.
+                Aprenderás qué <b>medida de centralización</b> encaja con qué datos, cómo se mide la <b>dispersión</b>, cómo se construyen los <b>histogramas</b>
+                y con qué <b>trucos</b> los gráficos prometen más de lo que dan los datos.</p>
+            <div class="b-chips"><span class="b-chip">12 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">PROYECTO</span><span class="b-chip">HOJA DE CÁLCULO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histogramm" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>hallar la <b>moda</b>, la <b>mediana</b> y la <b>media aritmética</b> y elegirlas según la escala</li>
+                <li>calcular el <b>rango</b>, la <b>varianza</b> y la <b>desviación típica</b>, también con la hoja de cálculo</li>
+                <li>agrupar datos en <b>clases</b> y dibujar <b>histogramas</b></li>
+                <li>reconocer <b>manipulaciones</b> típicas en gráficos y afirmaciones</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="6" data-ph="número"><p class="b-q-text">Calcula la media de 4, 5, 6, 9.</p><div class="b-sol"><p>$\tfrac{24}{4} = 6$</p></div></div>
+            <div class="b-q" data-ans="25" data-ph="porcentaje"><p class="b-q-text">¿Qué porcentaje son 10 de 40?</p><div class="b-sol"><p>$\tfrac{10}{40} = 25\,\%$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="número"><p class="b-q-text">¿Qué número está en el centro de 2, 3, 7, 8, 11?</p><div class="b-sol"><p>El tercero de cinco: $7$</p></div></div>
+            <div class="b-q" data-ans="9" data-ph="número"><p class="b-q-text">Calcula $(-3)^2$.</p><div class="b-sol"><p>$9$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">NUESTRA CLASE EN NÚMEROS</div>
+            <div class="b-text"><p>Recoged en la clase, de forma anónima: tiempo del camino al colegio en minutos, número de hermanos, asignatura favorita, número de calzado.</p>
+                <ul><li>¿Qué es «típico» de vuestra clase en cada caso? ¿Se puede calcular una media en cada característica?</li><li>¿Qué pasa con la media del camino al colegio si alguien tarda 75 minutos?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">¿IGUAL DE CÁLIDAS?</div>
+            <div class="b-text"><p>Dos ciudades tienen la misma temperatura media anual, algo más de 11 °C. En una, enero está a 6 °C y julio a 17 °C; en la otra, a −1 °C y 23 °C.</p>
+                <ul><li>¿Dónde preferiríais vivir? ¿Qué no revela la media?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DETECTIVES DE GRÁFICOS</div>
+            <div class="b-text"><p>Buscad en periódicos, publicidad o redes sociales un gráfico que os parezca raro.</p>
+                <ul><li>¿Qué quiere mostrar el gráfico? ¿Qué muestran de verdad los números? ¿Cómo se habría dibujado de forma honesta?</li></ul></div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLERO DE GALTON</span><span class="b-lab-what">Cómo las frecuencias toman forma (en alemán)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Medidas de centralización" data-toc-k="1" data-toc-short="1 Centralización">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Moda, mediana y media aritmética</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Nueve caminos al colegio en minutos: 8, 12, 15, 15, 15, 18, 20, 25, 30. El más frecuente es 15, en el centro está 15, y la media es $\tfrac{158}{9} \approx 17{,}6$.
+                Si se añade una décima persona con 75 minutos, la media salta a 23,3. El valor central apenas cambia: 16,5.</p></div></div>
+            <div class="b-text"><p>Qué medida de centralización tiene sentido depende del tipo de datos. En una <b>escala nominal</b> (asignatura favorita, color de ojos) solo se puede contar.
+                En una <b>escala ordinal</b> (puesto en una clasificación, de «muy bien» a «mal») se puede ordenar. En una <b>escala métrica</b> (tiempo, longitud, dinero) también se puede calcular.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · TRES MEDIDAS DE CENTRALIZACIÓN</div>
+                <div class="b-text">
+                    <p><b>Moda:</b> el valor más frecuente. Para cualquier escala, también la nominal.</p>
+                    <p><b>Mediana</b> (valor central): el valor que está en el centro de la lista ordenada; con un número par de datos, la media de los dos valores centrales. A partir de la escala ordinal.</p>
+                    <p><b>Media aritmética:</b> $\bar{x} = \dfrac{x_1 + x_2 + \ldots + x_n}{n}$. Solo para datos métricos.</p>
+                    <p>Los <b>valores atípicos</b> desplazan mucho la media aritmética y apenas la mediana.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Tabla de frecuencias:</b> si el valor $x_i$ aparece exactamente $h_i$ veces, $\bar{x} = \dfrac{h_1 x_1 + h_2 x_2 + \ldots}{n}$.</p>
+            <p class="b-note"><b>Las notas escolares</b> son, en sentido estricto, ordinales: la distancia de 1 a 2 no es la misma que de 4 a 5. La nota media es habitual de todos modos, pero hay que leerla con cuidado.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · TRES MEDIDAS DE CENTRALIZACIÓN</div>
+        <div data-widget="mittelwerte"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · A PARTIR DE UNA TABLA</div>
+            <div class="b-text"><p>Notas de un examen (en Alemania, del 1, la mejor, al 6): 3 veces el 1, 7 veces el 2, 8 veces el 3, 5 veces el 4, 2 veces el 5. Halla la moda, la mediana y la media.</p></div>
+            <div class="b-sol"><p>$n = 25$. Moda 3. Mediana: el valor 13. Hasta el 2 hay 10 valores, hasta el 3 hay 18: mediana 3.</p>
+                <p>$\bar{x} = \tfrac{3 + 14 + 24 + 20 + 10}{25} = \tfrac{71}{25} =$ <span class="b-res">$2{,}84$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · ¿QUÉ MEDIDA?</div>
+            <div class="b-text"><p>¿Qué medida de centralización encaja con a) la asignatura favorita, b) la satisfacción de «muy bien» a «mal», c) la paga en euros?</p></div>
+            <div class="b-sol"><p>a) nominal: solo la <span class="b-res">moda</span> &nbsp; b) ordinal: <span class="b-res">mediana</span> y moda &nbsp; c) métrica: las tres; con valores atípicos, mejor la mediana.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Halla la moda, la mediana y la media aritmética: a) 3, 5, 5, 6, 8, 9 &nbsp; b) 12, 7, 9, 12, 15, 10, 12</p></div>
+            <div class="b-sol"><p>a) 5; $\tfrac{5 + 6}{2} = 5{,}5$; $\tfrac{36}{6} = 6$ &nbsp; b) ordenados 7, 9, 10, 12, 12, 12, 15: 12; 12; $\tfrac{77}{7} = 11$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Qué escala hay y qué medidas de centralización tienen sentido? a) código postal &nbsp; b) puesto en la fiesta deportiva &nbsp; c) salto de longitud en m &nbsp; d) música favorita</p></div>
+            <div class="b-sol"><p>a) nominal (números como nombres): moda &nbsp; b) ordinal: mediana, moda &nbsp; c) métrica: todas &nbsp; d) nominal: moda</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En una pequeña empresa, nueve empleados ganan 3000 € al mes cada uno y la jefa 30 000 €. Calcula la mediana y la media. ¿Con qué valor haría publicidad la empresa en un anuncio?</p></div>
+            <div class="b-sol"><p>Mediana 3000 €, media $\tfrac{9 \cdot 3000 + 30\,000}{10} = 5700$ €. El anuncio daría la media, pero lo típico es la mediana.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Cinco números tienen la media 8. Cuatro de ellos son 6, 7, 9 y 10. ¿Cuál es el quinto? ¿Cómo cambia la media si se suma 3 a cada número?</p></div>
+            <div class="b-sol"><p>Suma $5 \cdot 8 = 40$, por tanto $40 - 32 = 8$. La media pasa a ser $11$: también crece 3.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Da una lista de cinco números enteros cuya moda sea 4, cuya mediana sea 5 y cuya media aritmética sea 6.</p></div>
+            <div class="b-sol"><p>Por ejemplo, 4, 4, 5, 8, 9: suma 30, media 6, mediana 5, moda 4. Hay muchas soluciones.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="5,5" data-ph="mediana"><p class="b-q-text">¿Mediana de 3, 5, 5, 6, 8, 9?</p><div class="b-sol"><p>$\tfrac{5 + 6}{2}$</p></div></div>
+        <div class="b-q" data-ans="2,84" data-ph="media"><p class="b-q-text">¿Nota media del ejemplo 1?</p><div class="b-sol"><p>$\tfrac{71}{25}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">¿Qué medida de centralización tiene sentido para el color de ojos?</p><div class="b-mc"><button>moda</button><button>mediana</button><button>media aritmética</button></div><div class="b-sol"><p>Escala nominal</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Medidas de dispersión" data-toc-k="2" data-toc-short="2 Dispersión">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">HOJA DE CÁLCULO · 4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Rango, varianza y desviación típica</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Las dos ciudades tienen una media de 11,25 °C. En la ciudad junto al mar, los valores mensuales solo oscilan entre 6 °C y 17 °C; en la del interior, entre −1 °C y 23 °C.
+                Una media sola no describe los datos. Hay que saber también cuánto se <b>dispersan</b> a su alrededor.</p></div></div>
+            <div class="b-text"><p>La magnitud más sencilla es el <b>rango</b>, la distancia entre el valor mayor y el menor. Pero depende solo de dos valores.
+                Es más preciso mirar todas las distancias a la media. Como las distancias positivas y negativas se anularían, se elevan al cuadrado y se hace la media de los cuadrados.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MEDIDAS DE DISPERSIÓN</div>
+                <div class="b-text">
+                    <p><b>Rango:</b> $R = x_{\max} - x_{\min}$</p>
+                    <p><b>Varianza:</b> $s^2 = \dfrac{(x_1 - \bar{x})^2 + (x_2 - \bar{x})^2 + \ldots + (x_n - \bar{x})^2}{n}$, la desviación cuadrática media respecto a la media</p>
+                    <p><b>Desviación típica:</b> $s = \sqrt{s^2}$. Tiene la misma unidad que los datos.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Hoja de cálculo:</b> <code>=PROMEDIO(A1:A12)</code>, <code>=VAR.P(A1:A12)</code> y <code>=DESVEST.P(A1:A12)</code> dividen entre $n$, como aquí. <code>=DESVEST.M</code> divide entre $n - 1$ y da valores algo mayores.</p>
+            <p class="b-note"><b>Unidades:</b> las diferencias de temperatura se dan en kelvin (K). 1 K es la misma distancia que 1 °C.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA MISMA MEDIA, OTRA DISPERSIÓN</div>
+        <p class="b-help" style="margin:0 0 12px">Reduce o aumenta con el deslizador la dispersión de la ciudad B. La media se mantiene; el rango y la desviación típica cambian.</p>
+        <div data-widget="streuung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · A MANO</div>
+            <div class="b-text"><p>Calcula el rango, la varianza y la desviación típica de 4, 7, 7, 8, 9.</p></div>
+            <div class="b-sol"><div class="b-table-wrap"><table class="b-table" style="min-width:0"><tr><th>$x_i$</th><td>4</td><td>7</td><td>7</td><td>8</td><td>9</td></tr>
+                <tr><th>$x_i - \bar{x}$</th><td>−3</td><td>0</td><td>0</td><td>1</td><td>2</td></tr><tr><th>$(x_i - \bar{x})^2$</th><td>9</td><td>0</td><td>0</td><td>1</td><td>4</td></tr></table></div>
+                <p>$\bar{x} = 7$, $R = 5$, $s^2 = \tfrac{14}{5} = 2{,}8$, <span class="b-res">$s \approx 1{,}67$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · INTERPRETAR</div>
+            <div class="b-text"><p>Dos arqueras consiguen de media 8 anillos cada una, Anna con $s = 0{,}6$ y Bea con $s = 2{,}1$. ¿A quién llevarías al equipo?</p></div>
+            <div class="b-sol"><p>La misma media, pero Anna acierta de forma mucho más regular.</p>
+                <p><span class="b-res">Anna es más previsible.</span> Bea a veces acierta mejor, pero a menudo también claramente peor.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula el rango, la varianza y la desviación típica: a) 2, 4, 6, 8 &nbsp; b) 5, 5, 5, 5 &nbsp; c) 1, 2, 3, 4, 10</p></div>
+            <div class="b-sol"><p>a) $\bar{x} = 5$, $R = 6$, $s^2 = \tfrac{9 + 1 + 1 + 9}{4} = 5$, $s \approx 2{,}24$ &nbsp; b) todo $0$ &nbsp; c) $\bar{x} = 4$, $R = 9$, $s^2 = \tfrac{9 + 4 + 1 + 0 + 36}{5} = 10$, $s \approx 3{,}16$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da las fórmulas con las que una hoja de cálculo calcula la media, el rango y la desviación típica de los valores de B2 a B13.</p></div>
+            <div class="b-sol"><p><code>=PROMEDIO(B2:B13)</code> · <code>=MAX(B2:B13)-MIN(B2:B13)</code> · <code>=DESVEST.P(B2:B13)</code></p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><span class="g-cas">CAS</span> Calcula para las temperaturas de las dos ciudades (junto al mar: 6, 6, 8, 10, 13, 15, 17, 17, 15, 12, 9, 7 · interior: −1, 1, 6, 11, 16, 20, 23, 22, 17, 12, 6, 2) la media, el rango y la desviación típica.</p></div>
+            <div class="b-sol"><p>Las dos $\bar{x} = 11{,}25$ °C. Mar: $R = 11$ K, $s \approx 3{,}96$ K. Interior: $R = 24$ K, $s \approx 8{,}07$ K.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una lista tiene $\bar{x} = 20$ y $s = 4$. ¿Qué cambia si a) se suma 5 a cada valor, b) se duplica cada valor?</p></div>
+            <div class="b-sol"><p>a) $\bar{x} = 25$, $s = 4$ no cambia: todas las distancias siguen igual. &nbsp; b) $\bar{x} = 40$, $s = 8$: todas las distancias se duplican y la varianza se cuadruplica.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Por qué se elevan al cuadrado las desviaciones en lugar de sumarlas sin más? Muestra con 4, 7, 7, 8, 9 que la suma de las desviaciones $x_i - \bar{x}$ es cero y justifica que siempre es así.</p></div>
+            <div class="b-sol"><p>$-3 + 0 + 0 + 1 + 2 = 0$. En general: $\sum (x_i - \bar{x}) = \sum x_i - n\bar{x} = n\bar{x} - n\bar{x} = 0$. Los cuadrados nunca son negativos; por eso no se anulan.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2,8" data-ph="varianza"><p class="b-q-text">¿Varianza de 4, 7, 7, 8, 9?</p><div class="b-sol"><p>$\tfrac{14}{5}$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="rango"><p class="b-q-text">¿Rango de 2, 4, 6, 8?</p><div class="b-sol"><p>$8 - 2$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="s ="><p class="b-q-text">Una lista tiene $s = 4$. Se duplica cada valor. ¿Nueva desviación típica?</p><div class="b-sol"><p>$2 \cdot 4$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Histogramas y manipulación" data-toc-k="3" data-toc-short="3 Histogramas">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">PROYECTO · 4 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Histogramas y manipulaciones estadísticas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con 40 estaturas, casi cada valor aparece una sola vez. Un diagrama de barras con 40 barras no muestra nada.
+                Si se agrupan los valores en <b>clases</b>, por ejemplo de 150 a menos de 155 cm, de 155 a menos de 160 cm, etc., se ve la forma de la distribución:
+                muchos en el centro y pocos en los extremos.</p></div></div>
+            <div class="b-text"><p>Un <b>histograma</b> dibuja una barra sobre cada clase. Las barras se tocan, porque las clases van seguidas sin huecos.
+                La elección de las clases cambia la imagen. Y algunos gráficos cambian la imagen a propósito.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · HISTOGRAMAS Y TRUCOS TÍPICOS</div>
+                <div class="b-text">
+                    <p>Elegir las <b>clases</b> sin huecos ni solapamientos, casi siempre de la misma anchura: $[150, 155)$ significa de 150 a menos de 155. La <b>frecuencia relativa</b> es la fracción respecto a todos los valores.</p>
+                    <p><b>Eje recortado:</b> si el eje no empieza en cero, las diferencias pequeñas parecen enormes.</p>
+                    <p><b>Imagen en lugar de barra:</b> si una imagen crece en altura y anchura, su área crece con el cuadrado.</p>
+                    <p><b>Referencia equivocada:</b> del 4 % al 6 % son 2 <b>puntos porcentuales</b>, pero un aumento del 50 %. Los números absolutos sin referencia («el doble de casos») dicen poco.</p>
+                    <p><b>Tendencias y causas:</b> dos puntos todavía no son una tendencia, y lo que sube a la vez no se causa mutuamente.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Regla práctica:</b> con $n$ valores, unas $\sqrt{n}$ clases son un buen comienzo; con 40 valores, de 6 a 7.</p>
+            <p class="b-note"><b>Cigüeñas y bebés:</b> en los países europeos, el número de parejas de cigüeñas y el de nacimientos están relacionados. Los dos crecen con la superficie del país. Fuente: R. Matthews, Storks Deliver Babies (p = 0.008), Teaching Statistics 22 (2000), págs. 36–38.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ELEGIR LAS CLASES</div>
+        <p class="b-help" style="margin:0 0 12px">40 estaturas de una clase de 9.º curso (valores inventados). Cambia la anchura de las clases y el comienzo de la primera clase.</p>
+        <div data-widget="histogramm"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · DOS TRUCOS</div>
+        <p class="b-help" style="margin:0 0 12px">Sube el comienzo del eje y observa cómo un pequeño aumento se convierte en un gran salto. Después cambia a «Imagen en lugar de barra».</p>
+        <div data-widget="achsentrick"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · UNA TABLA DE FRECUENCIAS</div>
+            <div class="b-text"><p>Las 40 estaturas del histograma se agrupan en clases de 10 cm a partir de 150 cm. Da las frecuencias absolutas y relativas.</p></div>
+            <div class="b-sol"><div class="b-table-wrap"><table class="b-table" style="min-width:0"><tr><th>Clase en cm</th><td>$[150, 160)$</td><td>$[160, 170)$</td><td>$[170, 180)$</td><td>$[180, 190)$</td><td>$[190, 200)$</td></tr>
+                <tr><th>absoluta</th><td>5</td><td>17</td><td>13</td><td>4</td><td>1</td></tr><tr><th>relativa</th><td>12,5 %</td><td class="b-hot">42,5 %</td><td>32,5 %</td><td>10 %</td><td>2,5 %</td></tr></table></div>
+                <p>Comprobación: la suma es 40 y 100 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · ¿PORCENTAJE O PUNTOS PORCENTUALES?</div>
+            <div class="b-text"><p>Un partido sube en una encuesta del 4 % al 6 %. Un periódico escribe «+2 %» y otro «+50 %». ¿Quién tiene razón?</p></div>
+            <div class="b-sol"><p>La proporción sube <span class="b-res">2 puntos porcentuales</span>. Respecto al 4 % anterior, es un crecimiento de $\tfrac{2}{4} =$ <span class="b-res">50 %</span>.</p>
+                <p>«+2 %» es falso; «+50 %» es correcto, pero engañoso sin el valor de partida.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Agrupa las marcas de salto de longitud (en m) en clases de 0,5 m de anchura a partir de 3,0 m y dibuja un histograma: 3,2 · 3,8 · 4,1 · 3,5 · 4,6 · 4,0 · 3,9 · 4,4 · 3,1 · 4,2 · 3,7 · 4,9</p></div>
+            <div class="b-sol"><p>$[3{,}0;\,3{,}5)$: 2 · $[3{,}5;\,4{,}0)$: 4 · $[4{,}0;\,4{,}5)$: 4 · $[4{,}5;\,5{,}0)$: 2</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un diagrama de barras muestra la facturación de dos años, 98 millones de € y 103 millones de €. El eje y empieza en 95. ¿Cuántas veces más alta parece la segunda barra? ¿En qué porcentaje ha subido la facturación?</p></div>
+            <div class="b-sol"><p>Alturas visibles 3 y 8: la barra parece casi tres veces más alta. En realidad, $\tfrac{103}{98} \approx 1{,}051$, es decir, solo algo más de un 5 % más.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>«En la ciudad A hubo 300 robos de bicicletas y en la ciudad B solo 150. A es el doble de peligrosa.» ¿Qué dato falta para valorarlo? A tiene 600 000 habitantes y B 150 000.</p></div>
+            <div class="b-sol"><p>Falta la referencia. Por cada 1000 habitantes: A $0{,}5$, B $1{,}0$. Respecto a los habitantes, B está el doble de afectada.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un cartel publicitario muestra un cubo para «nuestros clientes en 2020» y un cubo el doble de alto, ancho y profundo para «2025». ¿Cómo ha cambiado el número de clientes y qué efecto produce la imagen?</p></div>
+            <div class="b-sol"><p>Lo que se quiere decir es que se ha duplicado. Pero el segundo cubo tiene ocho veces el volumen, $2^3 = 8$, y parece mucho mayor.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Proyecto «Manipulaciones estadísticas»:</b> buscad en grupos un gráfico o una estadística de los medios. Examinad los ejes, las referencias, las áreas, el periodo y la fuente.
+            Volved a dibujar el gráfico de forma honesta y presentad los dos en cinco minutos.</p></div>
+            <div class="b-sol"><p>Una lista de comprobación: ¿empieza el eje en cero? ¿Se indica la referencia? ¿Son las áreas proporcionales a los valores? ¿Se ha elegido el periodo con intención? ¿Quién recogió los datos y por qué?</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2" data-ph="puntos porcentuales"><p class="b-q-text">Del 4 % al 6 %: ¿cuántos puntos porcentuales ha subido la proporción?</p><div class="b-sol"><p>$6 - 4$</p></div></div>
+        <div class="b-q" data-ans="50" data-ph="porcentaje"><p class="b-q-text">¿Y en qué porcentaje?</p><div class="b-sol"><p>$\tfrac{2}{4}$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="factor"><p class="b-q-text">Una imagen se dibuja el doble de alta y el doble de ancha. ¿Cuántas veces mayor es su área?</p><div class="b-sol"><p>$2 \cdot 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Halla para 169, 172, 165, 180, 174 la mediana, la media aritmética y el rango.</p></div>
+            <div class="b-sol"><p>Ordenados 165, 169, 172, 174, 180: mediana 172, $\bar{x} = \tfrac{860}{5} = 172$, $R = 15$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dos clases hacen el mismo examen. 9.º A: media 2,8, $s = 0{,}5$. 9.º B: media 2,8, $s = 1{,}3$. Describe en qué se diferencian las dos clases.</p></div>
+            <div class="b-sol"><p>La misma media, pero en el 9.º A las notas están muy juntas, y en el 9.º B hay muchos exámenes muy buenos y muchos flojos.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 1.4:</b> ¿para qué número $m$ es mínima la suma de las distancias al cuadrado $(4 - m)^2 + (7 - m)^2 + (7 - m)^2 + (8 - m)^2 + (9 - m)^2$?</p></div>
+            <div class="b-hint"><p>Desarrollada, es una parábola en $m$ abierta hacia arriba. ¿Dónde está su vértice?</p></div>
+            <div class="b-sol"><p>$5m^2 - 70m + 259 = 5(m - 7)^2 + 14$: mínima para $m = 7 = \bar{x}$. La media es el punto con la menor suma de distancias al cuadrado, y el valor $14$ es justo $n \cdot s^2$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Una empresa afirma: «Desde que vendemos nuestro producto, los accidentes han bajado un 30 %». Da tres razones por las que eso todavía no demuestra que el producto funcione.</p></div>
+            <div class="b-sol"><p>Por ejemplo: otras causas han cambiado al mismo tiempo (tiempo, leyes, tráfico). El periodo puede haberse elegido con intención. Faltan las cifras de partida y la referencia. Una relación todavía no es una causa.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: las rosas de Florence Nightingale" data-toc-k="X" data-toc-short="Nightingale">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Las rosas de Florence Nightingale</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En la guerra de Crimea, de 1854 a 1856, la enfermera británica Florence Nightingale dirigió los cuidados en un hospital militar cerca de Constantinopla. Contaba con exactitud:
+                morían muchos más soldados por enfermedades evitables, como el cólera y el tifus, que por sus heridas.</p>
+            <p>Para convencer a políticos que no leían tablas, inventó un gráfico especial: cada mes es un sector circular, y el <b>área</b> muestra el número de muertos,
+                separado por colores según las causas. Se veía enseguida lo enorme que era la parte de las enfermedades y cómo se reducía al mejorar las condiciones higiénicas.
+                Sus diagramas ayudaron a reformar la sanidad del ejército. En 1858 se convirtió en la primera mujer miembro de la Statistical Society of London, la actual Royal Statistical Society.</p>
+            <p>Una estadística puede engañar, pero también puede salvar vidas.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> F. Nightingale: Notes on Matters Affecting the Health, Efficiency, and Hospital Administration of the British Army. Londres 1858.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>MEDIDAS DE CENTRALIZACIÓN</h4><p>Moda (cualquier escala) · mediana (a partir de la ordinal) · media aritmética (métrica)</p></div>
+        <div><p>8, 12, 15, 15, 15, 18, 20, 25, 30: 15; 15; 17,6</p></div></div>
+    <div class="b-rueck"><div><h4>VALORES ATÍPICOS</h4><p>desplazan mucho la media aritmética y apenas la mediana</p></div>
+        <div><p>añadiendo 75: media 23,3, mediana 16,5</p></div></div>
+    <div class="b-rueck"><div><h4>DISPERSIÓN</h4><p>$R = x_{\max} - x_{\min}$ · $s^2 = \tfrac1n \sum (x_i - \bar{x})^2$ · $s = \sqrt{s^2}$</p></div>
+        <div><p>4, 7, 7, 8, 9: $s^2 = 2{,}8$</p></div></div>
+    <div class="b-rueck"><div><h4>HISTOGRAMA</h4><p>Clases sin huecos, barras que se tocan, frecuencia relativa = fracción</p></div>
+        <div><p>$[160, 170)$: 17 de 40 = 42,5 %</p></div></div>
+    <div class="b-rueck"><div><h4>RECONOCER TRUCOS</h4><p>¿Eje desde cero? ¿Áreas proporcionales? ¿Referencia? ¿Porcentaje o puntos porcentuales?</p></div>
+        <div><p>4 % → 6 %: 2 puntos porcentuales, +50 %</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="12" data-ph="mediana"><p class="b-q-text">¿Mediana de 12, 7, 9, 12, 15, 10, 12?</p><div class="b-sol"><p>ordenados: 7, 9, 10, <b>12</b>, 12, 12, 15</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="varianza"><p class="b-q-text">¿Varianza de 2, 4, 6, 8?</p><div class="b-sol"><p>$\tfrac{9 + 1 + 1 + 9}{4}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Qué valor reacciona más a un valor atípico?</p><div class="b-mc"><button>la mediana</button><button>la media aritmética</button></div><div class="b-sol"><p>El valor atípico entra con todo su valor en la suma.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HOJA DE CÁLCULO</div>
+            <div class="b-q" data-ans="8,07" data-tol="0.01" data-ph="K"><p class="b-q-text">¿Desviación típica de las temperaturas del interior (ejercicio 8)?</p><div class="b-sol"><p>$\approx 8{,}07$ K</p></div></div>
+            <div class="b-q" data-ans="5700" data-ph="euros"><p class="b-q-text">¿Sueldo medio de la empresa del ejercicio 3?</p><div class="b-sol"><p>$\tfrac{57\,000}{10}$</p></div></div>
+            <div class="b-q" data-ans="42,5" data-ph="porcentaje"><p class="b-q-text">¿Frecuencia relativa de la clase $[160, 170)$ en el ejemplo 5?</p><div class="b-sol"><p>$\tfrac{17}{40}$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PARA EXPERIMENTAR</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLERO DE GALTON</span><span class="b-lab-what">Un histograma que crece solo (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RECTA DE REGRESIÓN</span><span class="b-lab-what">Avance: relaciones en nubes de puntos (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Gymnasium, 9.º curso · Área de aprendizaje 4 según el plan de estudios de matemáticas del Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-daten.js"></script>
+<script src="../../js/buch-es/daten.js"></script>
+</body>
+</html>
