@@ -508,6 +508,54 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Gymnasium (start page) | El Gymnasium es el tipo de escuela secundaria alemana que lleva al Abitur; en Sajonia va del 5.º al 12.º curso. | once on the start page, like the BGY explanation |
+| Klasse 8 | 8.º curso | |
+| Wahlbereich (GY 8) | Optativa, chapter OP | kicker "CAPÍTULO OP · OPTATIVA 3" |
+| Mehr ausprobieren (lab box) | MÁS PARA EXPERIMENTAR | each lab "(en alemán)" |
+| Lösungsmenge $L$ | conjunto solución $S$, also in the widget sentences | Lovelace 13.10.: a rule in js/buch-es/gleichungen.js and gy8.js writes $S = …$ for waage, ungleichung, lgs8 |
+| Mengen ganzer Zahlen $\{1; 2; 3\}$ | $\{1, 2, 3\}$ | with a decimal comma the semicolon stays; rule in js/buch-es/stochastik.js and gy8.js |
+| Term, Rechenbaum | expresión (algebraica), árbol de cálculo | "subexpresión" for Teilterm |
+| Variable als Platzhalter, Unbekannte, Veränderliche | comodín, incógnita, cantidad que cambia | |
+| Name, Wert, Bedeutung (einer Variablen) | nombre, valor, significado | |
+| Art des Terms: Summe, Differenz, Produkt, Quotient, Potenz | suma, diferencia, producto, cociente, potencia | minuendo/sustraendo, dividendo/divisor, base/exponente |
+| Punktrechnung vor Strichrechnung | multiplicaciones y divisiones antes que sumas y restas | |
+| gleichartige Glieder zusammenfassen | simplificar (agrupar términos semejantes) | |
+| binomische Formeln 1./2./3. | identidades notables: 1.ª (cuadrado de una suma), 2.ª (cuadrado de una diferencia), 3.ª (suma por diferencia) | widget: "1.ª identidad" |
+| Binom | binomio | |
+| Ungleichung, Zahlenstrahl, Relationszeichen | inecuación, recta numérica, signo de desigualdad | |
+| Probe (am Zahlenstrahl) | prueba | test point of the widget ungleichung |
+| Ergebnismenge $\Omega$ | espacio muestral | |
+| sicheres / unmögliches Ereignis | suceso seguro / imposible | |
+| Vereinigung, Durchschnitt, Differenz (Ereignisse) | unión, intersección, diferencia | |
+| Laplace-Versuch, Laplace-Regel | experimento de Laplace, regla de Laplace | |
+| Glücksrad: Feld | ruleta: sector | |
+| Urnenmodell | modelo de urna | |
+| Pfadregeln: Produktregel, Summenregel | reglas de las ramas: regla del producto, regla de la suma | segmento for Ast (es-1) |
+| Variation / Permutation / Kombination mit / ohne Wiederholung | variación / permutación / combinación con / sin repetición | widget urne |
+| Zufallsgröße (zwei Würfel) | variable aleatoria | |
+| eindeutige Zuordnung | correspondencia unívoca | |
+| Anstieg | pendiente | |
+| Regressionsgerade | recta de regresión | |
+| Einsetzungs-, Gleichsetzungs-, Additionsverfahren | método de sustitución, de igualación, de reducción | widget buttons: Sustitución, Igualación, Reducción |
+| Lösbarkeit, vollständige Fallunterscheidung | resolubilidad, distinción de casos completa | |
+| zentrische Streckung | homotecia | |
+| Streckzentrum, Streckfaktor | centro de homotecia, razón de homotecia | |
+| Vergrößerung, Verkleinerung | ampliación, reducción | |
+| Bildpunkt, Bildstrecke | punto imagen, segmento imagen | |
+| winkeltreu, geradentreu, parallelentreu | conserva los ángulos, transforma rectas en rectas, conserva el paralelismo | |
+| Punktspiegelung | simetría central | |
+| Strahlensätze | teorema de Tales (in Spain) | the page says once: en Alemania, «teoremas de los rayos» |
+| Ähnlichkeit, ähnlich | semejanza, semejante | |
+| Hauptähnlichkeitssatz | criterio principal de semejanza | two equal angles |
+| Hilfsfigur | figura auxiliar | |
+| Försterdreieck, Schattenmethode, Daumensprung | triángulo del guardabosques, método de la sombra, salto del pulgar | |
+| Maßstab 1 : 50 | escala 1 : 50 | |
+| Vorwärts-, Rückwärtsarbeiten | trabajar hacia delante, hacia atrás | |
+| Lösungsplan, Teilziel | plan de resolución, objetivo parcial | |
+| strukturgleicher Zufallsversuch | experimento de la misma estructura | |
+| Zufallsziffern | cifras aleatorias | |
+| Sammelalbum, Tüte, Bild | álbum de cromos, sobre, cromo | |
+| GeoGebra / Tabellenkalkulation | Homotecia(Polígono, k, Z); =ALEATORIO.ENTRE(1;6), =PENDIENTE, =INTERSECCION.EJE | |
 
 ## Added by mathe10-es (Curie)
 
