@@ -39,14 +39,14 @@ window.BuchES && BuchES.add('gy7', {
         'Sehnenviereck mit seinen vier Winkeln': 'Cuadrilátero inscrito con sus cuatro ángulos',
         // konstruktion7
         'Tangenten von P': 'Tangentes desde P', 'Dreieck aus c, α, β': 'Triángulo con c, α, β', 'Tangenten an zwei Kreise': 'Tangentes a dos circunferencias', 'Konstruktion': 'Construcción',
-        '◀ Zurück': '◀ Atrás', 'Weiter ▶': 'Siguiente ▶', 'Winkel $\\alpha$': 'Ángulo $\\alpha$', 'Winkel $\\beta$': 'Ángulo $\\beta$',
+        '◀ Zurück': '◀ Atrás', 'Weiter ▶': 'Seguir ▶', 'Winkel $\\alpha$': 'Ángulo $\\alpha$', 'Winkel $\\beta$': 'Ángulo $\\beta$',
         'Konstruktion der Tangenten von einem Punkt an einen Kreis': 'Construcción de las tangentes desde un punto a una circunferencia',
         'Konstruktion eines Dreiecks aus einer Seite und zwei Winkeln': 'Construcción de un triángulo a partir de un lado y dos ángulos',
         'Konstruktion der gemeinsamen Tangenten an zwei Kreise': 'Construcción de las tangentes comunes a dos circunferencias',
         // zahlengerade7
         'Addieren': 'Sumar', 'Subtrahieren': 'Restar', 'Rechenart': 'Operación', 'erste Zahl $a$': 'primer número $a$', 'zweite Zahl $b$': 'segundo número $b$',
         'Zieh die Punkte $a$ und $b$ auf der Zahlengeraden. Sie rasten in halben Schritten ein.': 'Arrastra los puntos $a$ y $b$ por la recta numérica. Se ajustan de medio en medio.',
-        'Gegenzahlen': 'Opuestos', 'Zahlengerade mit rationalen Zahlen': 'Recta numérica con números racionales',
+        'Gegenzahlen': 'Opuestos', 'Start': 'Inicio', 'Zahlengerade mit rationalen Zahlen': 'Recta numérica con números racionales',
         'Rechnen als Bewegung auf der Zahlengeraden': 'Calcular como un movimiento por la recta numérica',
         // zahlbereiche7
         'Wohin gehört die Zahl?': '¿Dónde va el número?', 'Nächste Zahl': 'Siguiente número', 'DIE ZAHL': 'EL NÚMERO',
@@ -175,7 +175,7 @@ window.BuchES && BuchES.add('gy7', {
             '<b>Intersección:</b> $\\mathbb{Z} \\cap \\mathbb{Q}^+ = \\mathbb{N}$. Son los números que están en los dos conjuntos: enteros <b>y</b> sin signo menos.'],
         ['<b>Vereinigungsmenge:</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ enthält alle Zahlen, die in mindestens einer der beiden Mengen liegen. Das ist noch nicht ganz $\\mathbb{Q}$: $-\\tfrac12$ liegt in keiner von beiden.',
             '<b>Unión:</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ contiene todos los números que están en al menos uno de los dos conjuntos. Todavía no es todo $\\mathbb{Q}$: $-\\tfrac12$ no está en ninguno de los dos.'],
-        ['<b>Richtig!</b> $', '<b>¡Correcto!</b> $'],
+        ['<b>Richtig!</b> $', '<b>¡Correcto!</b> $'], ['Noch nicht. Tipp: ', 'Todavía no. Pista: '],
         ['Hat die Zahl ein Minuszeichen, wenn du sie ausrechnest?', '¿Tiene el número un signo menos cuando lo calculas?'],
         ['Rechne die Zahl zuerst aus. Ist sie ganz?', 'Calcula primero el número. ¿Es entero?'],
         // vorzeichen7 ("Von Zeile zu Zeile … kleiner/größer" is a rule)
