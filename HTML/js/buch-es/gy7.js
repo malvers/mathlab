@@ -27,7 +27,7 @@ window.BuchES && BuchES.add('gy7', {
         'Ein Kreis mit einer Passante, einer Sekante und einer Tangente': 'Una circunferencia con una recta exterior, una secante y una tangente',
         'Kreis mit einer verschiebbaren Geraden': 'Circunferencia con una recta que se puede mover',
         // dreieckkreise7
-        'Umkreis': 'Circunscrita', 'Inkreis': 'Inscrita', 'Mittelsenkrechten': 'mediatrices', 'Winkelhalbierenden': 'bisectrices',
+        'Mittelsenkrechten': 'mediatrices', 'Winkelhalbierenden': 'bisectrices',
         'Zieh an den Ecken. In der Nähe von $90^\\circ$ rastet der Winkel an der gezogenen Ecke als rechter Winkel ein.':
             'Arrastra los vértices. Cerca de $90^\\circ$, el ángulo del vértice que arrastras se ajusta como ángulo recto.',
         'Dreieck mit Umkreis': 'Triángulo con su circunferencia circunscrita', 'Dreieck mit Inkreis': 'Triángulo con su circunferencia inscrita',
@@ -248,6 +248,8 @@ window.BuchES && BuchES.add('gy7', {
         [/>(Passante|Tangente|Sekante)<\/b>/g, (m, w) => '>' + { Passante: 'recta exterior', Tangente: 'tangente', Sekante: 'secante' }[w] + '</b>'],
         // dreieckkreise7: the heading over "Umkreis | Inkreis" (gy5 and gy6 have "Kreis" as a fraction shape: Círculo)
         [/^Kreis$/, () => 'Circunferencia'], [/>Kreis</g, () => '>Circunferencia<'],
+        // its two buttons, short (trigonometrie has the words Umkreis/Inkreis in full: circunferencia circunscrita/inscrita)
+        [/^(Umkreis|Inkreis)$/, (m, w) => w === 'Umkreis' ? 'Circunscrita' : 'Inscrita'], [/>(Umkreis|Inkreis)</g, (m, w) => '>' + (w === 'Umkreis' ? 'Circunscrita' : 'Inscrita') + '<'],
         // zahlbereiche7: "Richtig: 3 von 5"
         [/Richtig: (\d+) von (\d+)/g, (m, a, b) => 'Aciertos: ' + a + ' de ' + b],
         // vorzeichen7: "Von Zeile zu Zeile wird das Ergebnis um 3 kleiner."
