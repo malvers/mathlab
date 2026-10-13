@@ -228,6 +228,8 @@ window.BuchES && BuchES.add('funktionen', {
         [/(: )?\bZu (\$x = [^$]+\$) gehören (\$y = [^$]+\$) und (\$y = [^$]+\$)\./g, (m, c, x, y1, y2) => (c ? ': a ' : 'A ') + x + ' le corresponden ' + y1 + ' e ' + y2 + '.'],
 
         // book es mathegy8-es (Curie)
+        // lage: the example buttons carry their German key as label (plural, the two lines; "orthogonal" is "ortogonal" in vektoren)
+        [/(data-v="(schneidend|orthogonal|parallel|identisch)">)\2</g, (m, a, k) => a + ({ schneidend: 'secantes', orthogonal: 'perpendiculares', parallel: 'paralelas', identisch: 'coincidentes' })[k] + '<'],
 
         // book es mathe10-es (Curie)
 
