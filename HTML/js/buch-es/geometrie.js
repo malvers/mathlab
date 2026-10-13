@@ -20,6 +20,11 @@ window.BuchES && BuchES.add('geometrie', {
         // book es mathegy8-es (Curie)
 
         // book es mathe10-es (Curie)
+        // spitzkoerper
+        'Quadratische Pyramide': 'Pirámide cuadrangular', 'Kreiskegel': 'Cono', 'Körper': 'Cuerpo', 'Seitenhöhe': 'Apotema', 'Seitenkante': 'Arista lateral',
+        'Hilfsdreieck': 'Triángulo auxiliar', 'Grundkante $a$': 'Arista de la base $a$', 'Höhe $h$': 'Altura $h$', 'Radius $r$': 'Radio $r$',
+        'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Pirámide cuadrangular en perspectiva caballera con triángulo auxiliar',
+        'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cono en perspectiva caballera con triángulo auxiliar',
         // trigo
         'Sinus': 'Seno', 'Kosinus': 'Coseno', 'Tangens': 'Tangente', 'Verhältnis': 'Razón', 'Winkel $\\alpha$': 'Ángulo $\\alpha$', 'Hypotenuse $c$': 'Hipotenusa $c$',
         'Gegenkathete a': 'cateto opuesto a', 'Ankathete b': 'cateto contiguo b', 'Hypotenuse c': 'hipotenusa c',
@@ -44,6 +49,8 @@ window.BuchES && BuchES.add('geometrie', {
         // book es mathegy8-es (Curie)
 
         // book es mathe10-es (Curie)
+        // spitzkoerper
+        [' im Schrägbild mit Hilfsdreieck', ' en perspectiva caballera con triángulo auxiliar'],
         // trigo
         ['\\text{Gegenkathete}', '\\text{cateto opuesto}'], ['\\text{Ankathete}', '\\text{cateto contiguo}'], ['\\text{Hypotenuse}', '\\text{hipotenusa}'],
         // vieleck

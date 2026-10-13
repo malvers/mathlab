@@ -12,6 +12,8 @@
 window.BuchES && BuchES.add('os10', {
     word: {
         // book es mathe10-es (Curie)
+        // stumpfos10: segment labels
+        'Körper': 'Cuerpo', 'Material': 'Material', 'Zylinder': 'Cilindro',
         // titelbildos10
         'Titelbild: ein Dreieck mit den Winkeln α, β und γ, eine Sinuskurve, eine Exponentialkurve, ein Kegelstumpf und ein Würfel':
             'Portada: un triángulo con los ángulos α, β y γ, una sinusoide, una curva exponencial, un tronco de cono y un dado',
@@ -34,6 +36,8 @@ window.BuchES && BuchES.add('os10', {
     },
     phrase: [
         // book es mathe10-es (Curie)
+        // stumpfos10: the pieces of "Oben und unten gleich groß: das ist ein Zylinder, …"
+        ['Oben und unten gleich groß: das ist ein ', 'Arriba y abajo del mismo tamaño: es un '], ['Zylinder', 'cilindro'], ['Quader mit quadratischer Grundfläche', 'ortoedro de base cuadrada'],
         // stumpfos10: the segment button and the sentences under the drawing
         ['Pyramidenstumpf', 'Tronco de pirámide'],
         ['Als Differenz: ', 'Como diferencia: '], ['ganzer Kegel', 'cono entero'], ['ganze Pyramide', 'pirámide entera'], [' (Höhe $', ' (altura $'],
