@@ -41,6 +41,7 @@ window.BuchES && BuchES.add('gy11', {
         // matrixprodukt
         ['$ hat den Typ $', '$ tiene la dimensión $'], ['$ den Typ $', '$ la dimensión $'],
         [' Zeilen: Die Matrizen sind in dieser Reihenfolge nicht verkettet, das Produkt gibt es nicht.', ' filas: en este orden las matrices no son compatibles, el producto no existe.'],
+        ['Die Matrizen sind in dieser Reihenfolge nicht verkettet, das Produkt gibt es nicht.', 'en este orden las matrices no son compatibles, el producto no existe.'],
         ['Typen: $', 'Dimensiones: $'], ['$ · Klick auf ein Feld des Ergebnisses.', '$ · Haz clic en una casilla del resultado.'],
         ['$ ist nicht definiert.', '$ no está definido.'], ['$, ist also etwas ganz anderes.', '$, así que es algo completamente distinto.'],
         ['$ ergibt ', '$ da '], ['hier zufällig dasselbe', 'aquí, por casualidad, lo mismo'], ['andere Zahlen', 'otros números'],
@@ -59,7 +60,7 @@ window.BuchES && BuchES.add('gy11', {
     rule: [
         // book es mathegy11-es (Turing)
         // matrixprodukt: "A hat 2 Spalten, B aber 3 Zeilen: …" and "Zeile 1 von $A$ mal Spalte 2 von $B$"
-        [/ ([AB]) hat (\d+) Spalten, ([AB]) aber (\d+) Zeilen: /g, ' $1 tiene $2 columnas, pero $3 tiene $4 filas: '],
+        [/ ([AB]) hat (\d+) Spalten, ([AB]) aber (\d+) Zeilen: /g, (m, p, i, q, j) => ' ' + p + ' tiene ' + i + (i === '1' ? ' columna' : ' columnas') + ', pero ' + q + ' tiene ' + j + (j === '1' ? ' fila: ' : ' filas: ')],
         [/Zeile (\d+) von \$([AB])\$ mal Spalte (\d+) von \$([AB])\$/g, (m, i, p, j, q) => 'Fila ' + i + ' de $' + p + '$ por columna ' + j + ' de $' + q + '$'],
 
         // book es mathegy11lk-es (Turing)
