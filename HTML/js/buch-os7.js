@@ -34,7 +34,8 @@
         pic.style.maxWidth = (maxW || 280) + 'px'; pic.style.margin = '0 auto';
         return true;
     }
-    const euro = v => fmt(v, 2).replace(/,(\d)$/, ',$10') + ' €';
+    // two decimal places also on English pages, where fmt writes a decimal point
+    const euro = v => fmt(v, 2).replace(/(?<=[,.]\d)$/, '0') + ' €';
 
     /* ---------- the cover ---------- */
     W('titelbildos7', function (box) {
@@ -91,11 +92,13 @@
             a0 = a1;
         });
         const id = 'to7' + (++uid);
-        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Titelbild: ein Hunderterfeld mit 25 hellen Feldern, ein Parkett aus Sechsecken, ein Zahlenstrahl von minus 3 bis 3, ein Prisma und ein Kreisdiagramm">' +
+        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" preserveAspectRatio="xMidYMid slice" role="img">' +
             '<defs><linearGradient id="' + id + '-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.42" stop-color="#fff" stop-opacity="1"/>' +
             '<stop offset="0.86" stop-color="#fff" stop-opacity="1"/><stop offset="0.96" stop-color="#fff" stop-opacity="0.12"/></linearGradient>' +
             '<mask id="' + id + '-mask"><rect width="' + Wd + '" height="' + Ht + '" fill="url(#' + id + '-fade)"/></mask></defs>' +
             '<g mask="url(#' + id + '-mask)"><g stroke="#7fd8ee" stroke-opacity="0.07" stroke-width="1">' + grid + '</g>' + art + '</g></svg>';
+        // the label on its own: the hundred square makes the markup longer than js/buch-en.js and js/buch-es.js translate in one piece
+        box.firstChild.setAttribute('aria-label', 'Titelbild: ein Hunderterfeld mit 25 hellen Feldern, ein Parkett aus Sechsecken, ein Zahlenstrahl von minus 3 bis 3, ein Prisma und ein Kreisdiagramm');
     });
 
     /* ---------- interest for some days ---------- */
