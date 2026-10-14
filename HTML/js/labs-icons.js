@@ -119,6 +119,7 @@ const LAB_ICONS = {
         </span>
     </span>`,
     // book 16 as well (Doc, 11.10.2026: "Dann fangt an")
+    // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
     "lehrbuch-mathe8": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathe8-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
@@ -126,6 +127,12 @@ const LAB_ICONS = {
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe8-en/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe8-en/index.html'; }">
             <img src="resources/og/buch-mathe8-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Edición española" aria-label="Edición española" lang="es" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe8-es/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe8-es/index.html'; }">
+            <img src="resources/og/buch-mathe8-es-cover.jpg" alt="" loading="lazy" decoding="async"
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
