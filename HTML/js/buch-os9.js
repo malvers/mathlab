@@ -86,7 +86,7 @@
     W('steigungos9', function (box) {
         const S = { p: 12 };
         const sl = div(box, '');
-        range(sl, { label: 'Steigung in Prozent', min: 0, max: 120, step: 1, value: S.p, fmt: v => v + ' %', onInput: v => { S.p = v; render(); } });
+        range(sl, { label: 'Steigung in Prozent', min: 0, max: 120, step: 1, value: S.p, fmt: v => v + (B.en ? '%' : ' %'), onInput: v => { S.p = v; render(); } });
         const pic = div(box, 'b-svgbox g-svg');
         const out = div(box, 'b-out');
         const nw = narrowWatch(pic, () => render());
@@ -334,7 +334,7 @@
         const btn = ctr.querySelector('button');
         btn.addEventListener('click', () => { S.out = !S.out; btn.textContent = S.out ? 'Ausreißer weg' : 'Ausreißer zu A (5,8 m)'; render(); });
         const sl = div(box, '');
-        range(sl, { label: 'Streuung von B', min: 0, max: 1.5, step: 0.05, value: 1, fmt: v => fmt(v * 100, 0) + ' %', onInput: v => { S.f = v; render(); } });
+        range(sl, { label: 'Streuung von B', min: 0, max: 1.5, step: 0.05, value: 1, fmt: v => fmt(v * 100, 0) + (B.en ? '%' : ' %'), onInput: v => { S.f = v; render(); } });
         const pic = div(box, 'b-svgbox g-svg');
         const out = div(box, 'b-out');
         const nw = narrowWatch(pic, () => render());
