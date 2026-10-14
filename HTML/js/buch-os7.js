@@ -295,8 +295,10 @@
                 pts.forEach(p => { const d = (p[0] - cx) ** 2 + (p[1] - cy) ** 2; if (d < bd) { bd = d; best = p; } });
                 s += '<circle cx="' + f1(best[0]) + '" cy="' + f1(best[1]) + '" r="13" style="fill:' + TXT + ';fill-opacity:0.15"/><circle cx="' + f1(best[0]) + '" cy="' + f1(best[1]) + '" r="5" style="fill:' + TXT + '"/>';
             }
-            pic.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" role="img" aria-label="Parkett: ' + PARK[S.k].l + '"><defs><clipPath id="pk' + (++uid) + '"><rect width="' + Wd + '" height="' + Ht + '" rx="10"/></clipPath></defs>' +
+            pic.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" role="img"><defs><clipPath id="pk' + (++uid) + '"><rect width="' + Wd + '" height="' + Ht + '" rx="10"/></clipPath></defs>' +
                 '<g clip-path="url(#pk' + uid + ')">' + s + '</g></svg>';
+            // the label on its own: the triangle tilings are longer than js/buch-en.js and js/buch-es.js translate in one piece
+            pic.firstChild.setAttribute('aria-label', 'Parkett: ' + PARK[S.k].l);
             if (hero) return;
             out.innerHTML = '<p style="margin:0"><b>' + PARK[S.k].l + '</b></p><p style="margin:8px 0 0">An einer Ecke: ' + PARK[S.k].vx + '</p>' +
                 '<p class="b-help" style="margin:8px 0 0">Ein Parkett bedeckt die Ebene ohne Lücken und ohne Überlappung. Das geht nur, wenn die Winkel an jeder Ecke zusammen genau $360^\\circ$ ergeben. ' +
