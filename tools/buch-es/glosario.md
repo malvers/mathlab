@@ -945,3 +945,28 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Strichliste, Urliste, Häufigkeitstabelle | recuento con palotes, lista de datos, tabla de frecuencias | |
 | Suggestivfrage | pregunta sesgada | |
 | Schulnoten 1–6 | «en la escala alemana del 1, la mejor, al 6» | said once where marks are averaged (chapter 4) |
+
+## Added by mathe8-es (Curie)
+
+| Deutsch | Español | Note |
+|---|---|---|
+| Oberschule, Realschulbildungsgang | Oberschule, itinerario de Realschule | school names stay German, as in mathe10-es |
+| Wahlpflichtbereich | optativa obligatoria | chapter code OP |
+| Termwert, ausmultiplizieren, ausklammern | valor del término, desarrollar, sacar factor común | |
+| Formel umstellen, Sachaufgaben mit Gleichungen | despejar fórmulas, problemas con ecuaciones | |
+| Definitionsbereich, Wertebereich | dominio, recorrido | |
+| lineares Gleichungssystem, Gleichsetzungs-, Einsetzungs-, Additionsverfahren | sistema de ecuaciones lineales, método de igualación, de sustitución, de reducción | |
+| Tarifvergleich, Grundgebühr | comparación de tarifas, cuota fija | |
+| Rosette, Satz des Thales | roseta, teorema de Tales | |
+| Kreisring, Hohlzylinder, Mantel, Netz | corona circular, cilindro hueco, superficie lateral, desarrollo | |
+| zentrische Streckung, Streckzentrum, Streckfaktor, Hauptähnlichkeitssatz | homotecia, centro de homotecia, razón de homotecia, criterio principal de semejanza | |
+| mit / ohne Zurücklegen, Gegenereignis | con / sin reemplazamiento, suceso contrario | |
+| Kaltmiete, Nebenkosten, Warmmiete | alquiler sin gastos, gastos de comunidad y suministros, alquiler con gastos | |
+| Abschlag, Nachzahlung, Guthaben, Arbeitspreis, Grundpreis | pago a cuenta, pago pendiente, saldo a favor, precio de la energía, término fijo | |
+| Mehrwertsteuer, netto, brutto | IVA, sin IVA, con IVA | |
+| Verschnitt, Wandfläche, Estrich | recortes, superficie de las paredes, solado | |
+| Rabatt, Skonto, Ratenkauf, Anzahlung | descuento, descuento por pronto pago, compra a plazos, entrada | |
+| Zoll, Felge, Reifenbreite, Radumfang | pulgada, llanta, anchura del neumático, perímetro de la rueda | |
+| Kettenblatt, Ritzel, Übersetzungsverhältnis, Gang | plato, piñón, relación de transmisión, marcha | |
+| Trittfrequenz, Kurbelumdrehung, Rahmenhöhe, Schrittlänge | cadencia, pedalada, altura del cuadro, altura de entrepierna | |
+| Laufmaschine, Hochrad | máquina andante, biciclo | |
