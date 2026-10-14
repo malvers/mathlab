@@ -125,7 +125,9 @@ window.BuchES && BuchES.add('funktionen', {
 
         // book es mathefos12-es (Lovelace)
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
+        // cover
+        'Graphen der Grundfunktionen': 'Gráficas de las funciones básicas',
 
     },
     phrase: [
@@ -250,7 +252,7 @@ window.BuchES && BuchES.add('funktionen', {
 
         // book es mathefos12-es (Lovelace)
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ],
     rule: [
@@ -302,7 +304,7 @@ window.BuchES && BuchES.add('funktionen', {
 
         // book es mathefos12-es (Lovelace)
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ]
 });

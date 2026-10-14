@@ -34,7 +34,7 @@ window.BuchES && BuchES.add('zahlen', {
         'Treppenhaus: Jeder der beiden Schalter kann die Lampe ein- und ausschalten. Sie leuchtet, wenn beide Schalter <b>gleich</b> stehen.':
             'Escalera: cualquiera de los dos interruptores puede encender y apagar la lámpara. Se enciende si los dos interruptores están en la <b>misma</b> posición.',
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     },
     phrase: [
@@ -61,7 +61,7 @@ window.BuchES && BuchES.add('zahlen', {
         // schaltung: L is the lamp
         ['Term: $L = ', 'Expresión: $L = '], ['$ · jetzt: $a = ', '$ · ahora: $a = '], ['$ → Lampe <b>', '$ → lámpara <b>'],
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ],
     rule: [
@@ -73,7 +73,7 @@ window.BuchES && BuchES.add('zahlen', {
         // schaltung: "Lampe <b>an</b>" / "<b>aus</b>" (the rules run before the pieces)
         [/Lampe <b>an<\/b>/g, 'Lampe <b>encendida</b>'], [/Lampe <b>aus<\/b>/g, 'Lampe <b>apagada</b>'],
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ]
 });

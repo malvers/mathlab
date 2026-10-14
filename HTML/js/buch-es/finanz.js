@@ -29,7 +29,7 @@ window.BuchES && BuchES.add('finanz', {
         'eingezahlt &nbsp;': 'aportado &nbsp;', 'Zinsen (Kapital am Jahresende)': 'intereses (capital al final del año)',
         'Zinsen &nbsp;': 'intereses &nbsp;', 'Tilgung (zusammen: die Rate)': 'amortización (juntas: la cuota)',
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     },
     phrase: [
@@ -50,7 +50,7 @@ window.BuchES && BuchES.add('finanz', {
         ['Die Rate sinkt, weil die Restschuld und damit die Zinsen sinken. Zinsen insgesamt: <b>',
             'La cuota baja porque bajan la deuda pendiente y, con ella, los intereses. Intereses en total: <b>'],
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ],
     rule: [
@@ -61,7 +61,7 @@ window.BuchES && BuchES.add('finanz', {
         // slider values: "20 J." → "20 años"
         [/^(\d+) J\.$/, '$1 años'],
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ]
 });

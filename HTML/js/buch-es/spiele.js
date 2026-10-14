@@ -34,7 +34,7 @@ window.BuchES && BuchES.add('spiele', {
         'Ergebnis': 'Resultado', 'Pasch': 'Dobles', 'Summe 7': 'Suma 7', 'sonst': 'resto', 'Gewinn $x_i$ in €': 'Ganancia $x_i$ en €',
         'Lass das Spiel 1000-mal laufen und vergleiche den mittleren Gewinn mit dem Erwartungswert.': 'Deja que el juego se repita 1000 veces y compara la ganancia media con la esperanza.',
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     },
     phrase: [
@@ -60,7 +60,7 @@ window.BuchES && BuchES.add('spiele', {
         [' € pro Spiel.', ' € por partida.'], [' Fair wäre der Einsatz $e = \\tfrac{', ' La apuesta justa sería $e = \\tfrac{'],
         ['Gespielt: ', 'Jugadas: '], [' Spiele, mittlerer Gewinn <b>', ' partidas, ganancia media <b>'], [' €</b> pro Spiel (Erwartungswert ', ' €</b> por partida (esperanza '],
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ],
     rule: [
@@ -70,7 +70,7 @@ window.BuchES && BuchES.add('spiele', {
 
         // book es mathe10-es (Curie)
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ]
 });

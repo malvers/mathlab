@@ -892,7 +892,28 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Zentralprojektion, Fluchtpunkt, Bildebene | proyección central, punto de fuga, plano del cuadro | |
 | GeoGebra CAS commands | Derivada, Integral, Resuelve, Factoriza, Numérico, Si, AjustePolinómico, AjusteExponencial | Spanish GeoGebra names, as in mathe11-es |
 
-## Added by mathegy10-es (offen)
+## Added by mathegy10-es (Lovelace)
 
 | Deutsch | Español | Note |
 |---|---|---|
+| Lösungsplan (SSS, SWS, WSW, SWW, SSW, WWW) | plan de resolución (LLL, LAL, ALA, LAA, LLA, AAA) | as the dreieckloeser widget |
+| Seitenhöhe, Seitenkante, Grundkante (Pyramide) | apotema, arista lateral, arista de la base | as above; widget "Pirámide cuadrangular" as in gy7 |
+| Neigungswinkel der Seitenfläche / Seitenkante, Öffnungswinkel | ángulo de inclinación de la cara lateral / de la arista lateral, ángulo de abertura | |
+| umkehrbar, Umkehrfunktion, Winkelhalbierende | invertible, función inversa, bisectriz | "Prueba de la recta horizontal" for the Waagerechten-Test |
+| Logarithmengesetze, Basiswechsel, Zehnerlogarithmus, natürlicher Logarithmus | propiedades de los logaritmos, cambio de base, logaritmo decimal, logaritmo neperiano | |
+| Rechenschieber, Zunge, Läufer | regla de cálculo, reglilla, cursor | |
+| Logarithmusfunktion, logarithmische Skala | función logarítmica, escala logarítmica | |
+| Verdopplungszeit, Faustregel 72 | tiempo de duplicación, regla del 72 | |
+| Verknüpfen (f + g, f · g …), Verkettung, innere / äußere Funktion | operar con funciones, composición, función interior / exterior | widget label "Combinación" as in stochastik |
+| Tangensfunktion, Polstelle, Steigungswinkel | función tangente, polo, ángulo de inclinación | |
+| Funktionsklasse, Steckbrief, Grundfunktion | tipo de función, ficha, función básica | "Tipo de función" as Curie's funktionsklassen |
+| ganzrational, gebrochenrational | polinómica, racional | as in the funktionsklassen widget |
+| Zahlenfolge, Glied, explizit, rekursiv | sucesión, término, explícita, recurrente | |
+| arithmetische / geometrische Folge | progresión aritmética / geométrica | |
+| monoton steigend / fallend, beschränkt, Schranke | monótona creciente / decreciente, acotada, cota | |
+| Grenzwert, konvergent, divergent, Nullfolge, ε-Schlauch | límite, convergente, divergente, sucesión nula, franja ε | |
+| Parameterdarstellung, Halbachse | forma paramétrica, semieje | |
+| Tilgungsplan, Annuität, Barwert, Dispositionskredit | cuadro de amortización, anualidad, valor actual, descubierto en cuenta | |
+| komplexe Zahl, imaginäre Einheit, Realteil, Imaginärteil | número complejo, unidad imaginaria, parte real, parte imaginaria | |
+| Gaußsche Zahlenebene, reelle / imaginäre Achse, Betrag, Argument, konjugiert | plano de Gauss, eje real / imaginario, módulo, argumento, conjugado | Betrag of a complex number: módulo |
+| Zahlbereichserweiterung | ampliación del conjunto numérico | |

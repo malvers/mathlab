@@ -45,7 +45,15 @@ window.BuchES && BuchES.add('trigonometrie', {
         // dreiecksflaeche
         'eingeschlossener Winkel $\\gamma$': 'ángulo comprendido $\\gamma$', 'Dreieck aus zwei Seiten und dem eingeschlossenen Winkel': 'Triángulo a partir de dos lados y el ángulo comprendido',
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
+        // titelbildgy10
+        'Titelbild: eine Sinuswelle, eine Exponentialkurve, ein allgemeines Dreieck mit Umkreis und eine Zahlenfolge, die sich ihrem Grenzwert nähert':
+            'Portada: una onda senoidal, una curva exponencial, un triángulo cualquiera con su circunferencia circunscrita y una sucesión que se acerca a su límite',
+        // tangensfunktion
+        'Einheitskreis mit Tangente an der Stelle 1': 'Circunferencia unidad con la recta tangente en el punto 1', 'Graph der Tangensfunktion mit Polstellen': 'Gráfica de la función tangente con polos',
+        // pyramidekegel
+        'Quadratische Pyramide': 'Pirámide cuadrangular', 'Kegel': 'Cono', 'Körper': 'Cuerpo', 'Höhe – Seitenhöhe': 'Altura – apotema', 'Höhe – Seitenkante': 'Altura – arista lateral',
+        'Höhe – Mantellinie': 'Altura – generatriz', 'Rechtwinkliges Dreieck': 'Triángulo rectángulo', 'Grundkante $a$': 'Arista de la base $a$', 'Radius $r$': 'Radio $r$', 'Höhe $h$': 'Altura $h$',
 
     },
     phrase: [
@@ -80,7 +88,18 @@ window.BuchES && BuchES.add('trigonometrie', {
         [' · Bei $90^\\circ$ ist die Fläche am größten.', ' · Con $90^\\circ$ el área es máxima.'], [' · Derselbe Flächeninhalt bei $', ' · La misma área con $'],
         ['^\\circ$, denn $\\sin(180^\\circ - \\gamma) = \\sin\\gamma$.', '^\\circ$, porque $\\sin(180^\\circ - \\gamma) = \\sin\\gamma$.'],
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
+        // tangensfunktion
+        ['$: Hier ist $\\cos\\alpha = 0$. Der Radius läuft parallel zur Tangente, $\\tan\\alpha$ ist <b>nicht definiert</b>. Der Graph hat eine <b>Polstelle</b>.',
+            '$: aquí $\\cos\\alpha = 0$. El radio es paralelo a la recta tangente y $\\tan\\alpha$ <b>no está definida</b>. La gráfica tiene un <b>polo</b>.'],
+        ['$ · Am Kreis: die Länge des Abschnitts auf der Tangente bei $x = 1$', '$ · En la circunferencia: la longitud del segmento sobre la recta tangente en $x = 1$'],
+        [' (nach unten, also negativ)', ' (hacia abajo, es decir, negativa)'],
+        // pyramidekegel
+        ['Schrägbild einer quadratischen Pyramide', 'Perspectiva caballera de una pirámide cuadrada'], ['Schrägbild eines Kegels', 'Perspectiva caballera de un cono'], [' mit einem rechtwinkligen Dreieck', ' con un triángulo rectángulo'],
+        ['Seitenhöhe $h_a', 'Apotema $h_a'], ['Neigungswinkel der Seitenfläche:', 'Ángulo de inclinación de la cara lateral:'],
+        ['Seitenkante $s', 'Arista lateral $s'], ['$ mit der Diagonale $d', '$ con la diagonal $d'], ['Neigungswinkel der Seitenkante:', 'Ángulo de inclinación de la arista lateral:'],
+        ['$ · Oberfläche $O', '$ · área total $O'], ['Mantellinie $s', 'Generatriz $s'],
+        ['halber Öffnungswinkel:', 'mitad del ángulo de abertura:'], ['$ · Öffnungswinkel $2', '$ · ángulo de abertura $2'], ['$ · Mantel $M', '$ · superficie lateral $M'],
 
     ],
     rule: [
@@ -88,7 +107,7 @@ window.BuchES && BuchES.add('trigonometrie', {
         // messkurve: the unit after the distance of the markers ("$11,0$ Jahre</b>")
         [/\$ Jahre<\/b>/g, '$ años</b>'],
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ]
 });

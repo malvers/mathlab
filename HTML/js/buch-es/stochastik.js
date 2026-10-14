@@ -99,7 +99,7 @@ window.BuchES && BuchES.add('stochastik', {
 
         // book es mathefos12-es (Lovelace)
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     },
     phrase: [
@@ -201,7 +201,7 @@ window.BuchES && BuchES.add('stochastik', {
 
         // book es mathefos12-es (Lovelace)
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ],
     rule: [
@@ -257,7 +257,7 @@ window.BuchES && BuchES.add('stochastik', {
 
         // book es mathefos12-es (Lovelace)
 
-        // book es mathegy10-es (offen)
+        // book es mathegy10-es (Lovelace)
 
     ]
 });
