@@ -917,3 +917,31 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | komplexe Zahl, imaginäre Einheit, Realteil, Imaginärteil | número complejo, unidad imaginaria, parte real, parte imaginaria | |
 | Gaußsche Zahlenebene, reelle / imaginäre Achse, Betrag, Argument, konjugiert | plano de Gauss, eje real / imaginario, módulo, argumento, conjugado | Betrag of a complex number: módulo |
 | Zahlbereichserweiterung | ampliación del conjunto numérico | |
+
+## Added by mathe9-es (Einstein)
+
+| Deutsch | Español | Note |
+|---|---|---|
+| Oberschule 9, Realschulbildungsgang | Oberschule, 9.º curso, itinerario de Realschule | start page explains the Oberschule as in mathe10-es |
+| Wahlpflichtbereich 1 | Optativa obligatoria 1, chapter OP | kicker «OPTATIVA OBLIGATORIA 1 · ABRIL» |
+| Runde 1 · im Kopf / Runde 2 · mit Rechnung | RONDA 1 · CÁLCULO MENTAL / RONDA 2 · CALCULANDO | «con calculadora» where the German says Taschenrechner |
+| Mehr ausprobieren (labs) | MÁS PARA EXPERIMENTAR, lab text ending «(en alemán)» | as in mathe10-es |
+| Satz des Pythagoras, Umkehrung, Zwölfknotenschnur, Seilspanner | teorema de Pitágoras, recíproco, cuerda de doce nudos, tensadores de cuerda | |
+| Stützdreieck, Hilfslinie | triángulo auxiliar, línea auxiliar | |
+| Gegenkathete, Ankathete (G durch H …) | cateto opuesto, cateto contiguo (CO entre H, CC entre H, CO entre CC) | as in mathe10-es |
+| Spannseil, Zeltstange, Hering | cable tensor (viento), mástil, piqueta | |
+| Damm, Böschung | dique, talud | |
+| Satteldach, Giebel, First, Traufe, Sparren | tejado a dos aguas, hastial, cumbrera, alero, cabio | as in mathe10-es; widget dachos9 |
+| Körperhöhe, Seitenhöhe, Seitenkante (Pyramide) | altura, apotema, arista lateral | |
+| Kreiskegel, Mantellinie, Kreisausschnitt, Mittelpunktswinkel | cono circular, generatriz, sector circular, ángulo central | |
+| Kubikwurzel, Halbkugel | raíz cúbica, semiesfera | |
+| zerlegen, ergänzen, Bohrung | descomponer, completar, taladro | composite solids, widget turmos9 |
+| Streckfaktor, gestreckt, gestaucht | factor de estiramiento, estirada, comprimida | as the funktionen dictionary |
+| quadratische Gleichung, inhaltlich lösen | ecuación de segundo grado, resolver razonando | |
+| Ausklammern, Produkt gleich null, Lösungsmenge $L$ | sacar factor común, producto igual a cero, conjunto solución $L$ | |
+| Lösungsformel ($p$-$q$-Formel), Diskriminante, Fallunterscheidung | fórmula general, discriminante, número de soluciones | |
+| Berührpunkt | punto de tangencia | |
+| Zentralwert, Modalwert, Ausreißer | mediana, moda, valor atípico | |
+| Strichliste, Urliste, Häufigkeitstabelle | recuento con palotes, lista de datos, tabla de frecuencias | |
+| Suggestivfrage | pregunta sesgada | |
+| Schulnoten 1–6 | «en la escala alemana del 1, la mejor, al 6» | said once where marks are averaged (chapter 4) |
