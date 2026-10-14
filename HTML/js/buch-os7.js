@@ -108,8 +108,9 @@
         const two = div(box, 'b-two');
         const pic = div(two, 'b-svgbox g-svg'), out = div(two, 'b-out');
         const hero = heroOnly(box, pic, [ctr, out], 320);
-        range(ctr, { label: 'Kapital $K$', min: 100, max: 10000, step: 100, value: S.k, fmt: v => fmt(v) + ' €', onInput: v => { S.k = v; render(); } });
-        range(ctr, { label: 'Zinssatz $p\\,\\%$', min: 0.5, max: 8, step: 0.25, value: S.p, fmt: v => fmt(v, 2) + ' %', onInput: v => { S.p = v; render(); } });
+        // slider values have no letters, js/buch-en.js leaves them alone: the English order is written here
+        range(ctr, { label: 'Kapital $K$', min: 100, max: 10000, step: 100, value: S.k, fmt: v => B.en ? '€' + fmt(v) : fmt(v) + ' €', onInput: v => { S.k = v; render(); } });
+        range(ctr, { label: 'Zinssatz $p\\,\\%$', min: 0.5, max: 8, step: 0.25, value: S.p, fmt: v => fmt(v, 2) + (B.en ? '%' : ' %'), onInput: v => { S.p = v; render(); } });
         range(ctr, { label: 'Tage $t$', min: 1, max: 360, step: 1, value: S.t, fmt: v => v + (v === 1 ? ' Tag' : ' Tage'), onInput: v => { S.t = v; render(); } });
         math(ctr);
         function render() {
