@@ -122,8 +122,16 @@ const LAB_ICONS = {
         </span>
     </span>`,
     // the Oberschule book 9 (Einstein, 13.10.2026)
-    "lehrbuch-mathe9": `<img src="resources/og/buch-mathe9-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    "lehrbuch-mathe9": `<span style="display: flex; gap: 12px; align-items: center;">
+        <img src="resources/og/buch-mathe9-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe9-en/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe9-en/index.html'; }">
+            <img src="resources/og/buch-mathe9-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+    </span>`,
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
     "lehrbuch-mathe10": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathe10-cover.jpg" alt="" loading="lazy" decoding="async"
