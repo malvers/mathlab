@@ -18,7 +18,7 @@ window.BUCH = {
         { file: 'lb1-3.html', lb: 'Learning area 1', k: '1.3', title: 'Laws of arithmetic, mean and word problems',
           sub: 'Order of operations and shortcuts, arithmetic mean, solving equations by thinking', when: 'October', ustd: 5 },
         { file: 'lb2-1.html', lb: 'Learning area 2', k: '2.1', title: 'Representing assignments',
-          sub: 'Unique, one-to-one, many-valued, in words, table, arrows, graph and equation', when: 'November', ustd: 10 },
+          sub: 'Single-valued, one-to-one, many-valued, in words, table, arrows, graph and equation', when: 'November', ustd: 10 },
         { file: 'lb2-2.html', lb: 'Learning area 2', k: '2.2', title: 'Proportionality and the rule of three',
           sub: 'Directly and inversely proportional, quotient and product, rule of three, word problems', when: 'November · December', ustd: 15 },
         { file: 'lb3-1.html', lb: 'Learning area 3', k: '3.1', title: 'Angles and triangles',
