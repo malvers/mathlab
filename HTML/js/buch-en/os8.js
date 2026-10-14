@@ -142,6 +142,9 @@ window.BuchEN && BuchEN.add('os8', {
         ['Annahmen: Laminat im Paket zu ', 'Assumptions: laminate in packs of '],
         [' m² für 21,90 €, Tür 1,8 m², Fenster 1,56 m², 1 ℓ Farbe reicht für 7 m², Eimer zu 5 ℓ für 24,95 €. Pakete und Eimer gibt es nur ganz: Es wird aufgerundet.',
             ' m² for €21.90, door 1.8 m², window 1.56 m², 1 ℓ of paint covers 7 m², tins of 5 ℓ for €24.95. Packs and tins only come whole: round up.'],
+        // the same after the money rule of finanz (js/buch-en/finanz.js turns "21,90 €" into "€21.90" first; lb6 loads both)
+        [' m² für €21.90, Tür 1,8 m², Fenster 1,56 m², 1 ℓ Farbe reicht für 7 m², Eimer zu 5 ℓ für €24.95. Pakete und Eimer gibt es nur ganz: Es wird aufgerundet.',
+            ' m² for €21.90, door 1.8 m², window 1.56 m², 1 ℓ of paint covers 7 m², tins of 5 ℓ for €24.95. Packs and tins only come whole: round up.'],
         // reifenos8
         ['Aufschrift auf dem Reifen: ', 'Marking on the tyre: '], [' (Breite in mm, dann Felgendurchmesser in mm)', ' (width in mm, then rim diameter in mm)']
     ],
