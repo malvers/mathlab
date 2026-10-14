@@ -4,6 +4,8 @@
  */
 
 const LAB_ICONS = {
+    // the one "Bücher" tile in the "Neu" view, same icon as the "Bücher" tile on the hub
+    "buecher": "📚",
     // books show their real cover, a photo among the drawn icons (Doc, 09.10.2026: "Nimm als Logo tatsächlich
     // das Cover ... bei Büchern gut"); the picture is made by tools/og-preview/make-og.mjs from the book's cover page
     // book 1 also shows its English edition as a second cover; a click on it opens the English book instead of

@@ -53,7 +53,8 @@ function readLabs() {
     const fn = new Function('LAB_ICONS', src + '\nreturn LABS_DATA;');
     const labs = fn(new Proxy({}, { get: () => '' }));
     // books (buch/…) get their cards from their own kapitel.js, see readBooks()
-    const local = labs.filter((l) => l.href && !/^https?:\/\//i.test(l.href) && !l.href.startsWith('buch/'));
+    // links into a hub view (index.html#buecher) are no page of their own
+    const local = labs.filter((l) => l.href && !/^https?:\/\//i.test(l.href) && !l.href.startsWith('buch/') && !l.href.includes('#'));
     const dead = local.filter((l) => !fs.existsSync(path.join(HTML, l.href)));
     for (const l of dead) console.log(`!! ${l.id}: ${l.href} gibt es nicht — uebersprungen (Eintrag in labs-config.js pruefen)`);
     return local.filter((l) => fs.existsSync(path.join(HTML, l.href)));
