@@ -334,7 +334,12 @@
             ['Der ggT besteht aus den Primfaktoren, die in <b>beiden</b> Zerlegungen vorkommen. Das kgV enthält jeden Primfaktor so oft, wie er <b>höchstens</b> vorkommt. ',
                 'The HCF consists of the prime factors that occur in <b>both</b> factorisations. The LCM contains each prime factor as often as it occurs <b>at most</b>. '],
             ['Damit kürzt man: $', 'This is how you simplify: $'],
-            ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'The two numbers have no common factor except 1.']
+            ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'The two numbers have no common factor except 1.'],
+            // book en mathe7-en (Turing): on pages that also load finanz, its rule turns "2,50 €" into "€2.50" before the pieces,
+            // so proportional6 and dreisatz6 need their euro sentences a second time in that form
+            ['Äpfel: 1 kg kostet €2.50', 'Apples: 1 kg costs €2.50'],
+            ['3 kg Äpfel kosten €7.50. Wie viel kosten 5 kg?', '3 kg of apples cost €7.50. How much do 5 kg cost?'],
+            ['5 kg Äpfel kosten €12.50.', '5 kg of apples cost €12.50.'], ['8 Hefte kosten €6.40.', '8 exercise books cost €6.40.']
         ],
         rule: [
             // book 14 mathegy6-en: a recurring decimal written by hand in TeX: 0{,}\overline{3} → 0.\overline{3}

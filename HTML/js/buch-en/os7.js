@@ -63,8 +63,9 @@
             [/für \$(\d+)\$ (Tag|Tage): /, (m, t, w) => 'for $' + t + '$ ' + (w === 'Tag' ? 'day' : 'days') + ': '],
             [/Zinsjahr mit 360 Tagen, davon (\d+) Tage; Jahreszinsen und Tageszinsen als Säulen/,
                 (m, t) => 'Interest year of 360 days, ' + t + (t === '1' ? ' day' : ' days') + ' of it; interest for the year and for the days as bars'],
-            // money: "72.00 €" (fmt writes the decimal point on English pages) → "€72.00", as in os10
-            [/(?<![\d.,])(\d+(?:\.\d{2})?)[  ]€/g, '€$1'],
+            // money in the picture of tageszinsos7: "<text …>72.00 €</text>" (fmt writes the decimal point on English pages) → "€72.00";
+            // only a whole text element, so the euro sentences of other modules ("3 € pro Stunde") keep their phrases
+            [/>(\d+(?:\.\d{2})?)[  ]€</g, '>€$1<'],
             // dichteos7: the label of the picture and the density sentence
             [/Quader aus (\S+), (\d+) cm mal (\d+) cm mal (\d+) cm/, (m, s, a, b, c) => 'Cuboid of ' + (MATERIAL[s] || s) + ', ' + a + ' cm by ' + b + ' cm by ' + c + ' cm'],
             [/Dichte von (Fichtenholz|Eis|Aluminium|Eisen|Gold): /, (m, s) => 'Density of ' + MATERIAL[s] + ': '],
