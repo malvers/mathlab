@@ -2428,7 +2428,7 @@
                 'sonst': 'Sonst noch …',
                 'neu': 'Die neuen Werkzeuge',
                 'touren': CyberI18n.getOr('index.ui.touren', 'Touren'),
-                'buecher': 'Bücher\u00a0· Books\u00a0· Libros',
+                'buecher': countLabsInCategory('buecher') + ' Bücher\u00a0· Books\u00a0· Libros',   /* "20 BÜCHER · …" - number of book cards */
                 'fraktale': CyberI18n.get('index.ui.fraktale'),
                 'uni': CyberI18n.get('index.ui.university'),
                 'university': CyberI18n.get('index.ui.university')
@@ -2874,7 +2874,8 @@
         
         // Views
         if (document.getElementById('view-btn-back')) document.getElementById('view-btn-back').title = CyberI18n.get('index.view.back_title');
-        if (document.getElementById('view-title')) document.getElementById('view-title').innerHTML = CyberI18n.get('index.view.title');
+        /* Only without a hash: a view opened before 'load' (#buecher, #grade7 …) keeps its own title instead of "LABOR-ANSICHT" */
+        if (document.getElementById('view-title') && !window.location.hash.substring(1)) document.getElementById('view-title').innerHTML = CyberI18n.get('index.view.title');
         if (document.getElementById('btn-universe')) document.getElementById('btn-universe').title = CyberI18n.get('index.ui.universe_tip');
         if (document.getElementById('grade-btn-back')) document.getElementById('grade-btn-back').title = CyberI18n.get('index.ui.grade_back_tip');
         if (document.getElementById('txt-grade')) document.getElementById('txt-grade').innerHTML = CyberI18n.get('index.ui.grade_title');
