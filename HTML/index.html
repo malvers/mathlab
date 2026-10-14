@@ -1589,6 +1589,11 @@
             }
         }
 
+        /* Books view: only the three book languages (Doc, 14.10.2026: "nur hier") */
+        body.view-buecher .index-lang-switcher .lang-flag:not([data-lang="de"]):not([data-lang="es"]):not([data-lang="en"]) {
+            display: none;
+        }
+
         .index-lang-switcher::-webkit-scrollbar {
             height: 3px;
         }
@@ -2371,6 +2376,7 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.toggle('hidden', !visible);
             });
+            document.body.classList.remove('view-buecher');
         }
 
         function showEducationJahrgang(updateHash = true) {
@@ -2449,6 +2455,7 @@
 
             document.getElementById('grade-view').classList.add('hidden');
             setLabToolLayerVisible(true);
+            document.body.classList.toggle('view-buecher', filter === 'buecher');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             if (updateHash) {
