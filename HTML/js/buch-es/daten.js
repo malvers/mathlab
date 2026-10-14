@@ -64,7 +64,8 @@ window.BuchES && BuchES.add('daten', {
 
         // book es mathegy9-es (Curie)
         // mittelwerte: several modes "15 und 18 min"
-        [/(\d) und (?=\d)/g, '$1 y '],
+        // not after "zwischen": "liegt zwischen 2 und 3." has its own phrases in gy6 and gy7, which this rule would break on pages loading both (OS 7)
+        [/(?<!zwischen [-−]?\d*)(\d) und (?=\d)/g, '$1 y '],
         // histogramm: "8 Klassen der Breite 5 cm · häufigste Klasse $[165;\,170)$ mit 10 von 40 Werten (25,0 %)"
         [/(\d+) Klassen der Breite (\d+) cm · häufigste Klasse \$\[(\d+)(?:;\\,|, )(\d+)\)\$ mit (\d+) von (\d+) Werten \(/g,
             '$1 clases de anchura $2 cm · clase más frecuente $[$3, $4)$ con $5 de $6 valores ('],
