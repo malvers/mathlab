@@ -129,7 +129,6 @@ window.BuchEN && BuchEN.add('os8', {
         // rosetteos8
         ['Jedes Blatt besteht aus zwei Kreisbögen mit dem Radius $r$ vom Mittelpunkt zu einem Punkt auf der Kreislinie. Die Punkte teilen den Kreis in ',
             'Each petal consists of two circular arcs with the radius $r$ from the centre to a point on the circle. The points divide the circle into '],
-        [' gleiche Teile von je $', ' equal parts of $'], ['^\\circ$. ', '^\\circ$ each. '],
         ['Weil jedes Blatt $60^\\circ$ breit ist, bleiben bei weniger als 6 Blättern Lücken.', 'Because every petal is $60^\\circ$ wide, there are gaps with fewer than 6 petals.'],
         ['Weil jedes Blatt $60^\\circ$ breit ist, überlappen sich die Blätter bei mehr als 6.', 'Because every petal is $60^\\circ$ wide, the petals overlap with more than 6.'],
         // zaehlenos8
@@ -177,6 +176,7 @@ window.BuchEN && BuchEN.add('os8', {
         [/Bis etwa ([\d.]+) (min|kWh|km) ist Tarif ([AB]) günstiger, darüber Tarif ([AB])\./g, 'Up to about $1 $2, tariff $3 is cheaper, above that tariff $4.'],
         // rosetteos8
         [/Rosette mit (\d+) Blättern, mit dem Zirkel konstruiert/g, 'Rosette with $1 petals, constructed with compasses'],
+        [/ gleiche Teile von je \$([\d.]+)\^\\circ\$\. /g, (m, d) => ' equal parts of $' + d + '^\\circ$ each. '],
         // zaehlenos8
         [/(\d+) Personen auf (\d+) Plätzen: Für den ersten Platz gibt es (\d+) Möglichkeiten, für den zweiten noch (\d+), und so weiter bis zum letzten Platz\./g,
             '$1 people on $2 seats: for the first seat there are $3 options, for the second $4 more, and so on up to the last seat.'],
