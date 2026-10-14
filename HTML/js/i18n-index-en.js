@@ -40,6 +40,8 @@
                 arithmetic: "Basic Arithmetic",
                 hot_stuff: "Hot stuff",
                 neu: "New",
+                buecher: "Books",
+                buecher_tip: "Books: our interactive textbooks in German, English and Spanish",
                 touren: "Tours",
                 apps: "Apps",
                 fun: "Fun",
@@ -86,6 +88,7 @@
                 exit: "Exit"
             },
             labs: {
+                "buecher": { title: "{n} books in 3 languages", description: "All our interactive textbooks in one place: mathematics from grade 5 to the Abitur, following the Saxon curriculum, for Gymnasium, Oberschule, vocational Gymnasium and Fachoberschule — every book in German, English and Spanish. With explorations, self-tests, labs to try out and a print edition." },
                 "fourier": { title: "Fourier Transform", description: "The music of mathematics. Decompose complex shapes into harmonic circular oscillations." },
                 "mandelbrot-deep": { title: "Fractals", description: "Mandelbrot and Julia sets in the complex plane: escape-time dynamics of z↦z²+c via GPU fragment-shader iteration; parametric exploration of c with adaptive iteration depth along the fractal boundary." },
                 "atomorbitale": { title: "Atomic Orbitals", description: "Spherical harmonics Y_ℓ^m in 3D: probability clouds and quantum numbers." },

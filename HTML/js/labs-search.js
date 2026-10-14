@@ -63,7 +63,11 @@ const LabSearch = (() => {
             ? CyberI18n.getOr(key, fallback)
             : fallback;
 
-    const labTitle = lab => loc('index.labs.' + lab.id + '.title', lab.title || lab.id);
+    /** Card title in the display language; "{n}" becomes the lab's count (the "Bücher" tile: number of books). */
+    const labTitle = lab => {
+        const title = loc('index.labs.' + lab.id + '.title', lab.title || lab.id);
+        return lab.count === undefined ? title : title.replace('{n}', lab.count);
+    };
     const labDesc = lab => loc('index.labs.' + lab.id + '.description', lab.description || '');
 
     // Haystacks are rebuilt when the display language changes.
@@ -264,7 +268,7 @@ const LabSearch = (() => {
         document.addEventListener('click', e => { if (!e.target.closest('#' + mountId)) close(); });
     }
 
-    return { fold, tokens, matchesLab, matchingIds, termHits, attach };
+    return { fold, tokens, title: labTitle, matchesLab, matchingIds, termHits, attach };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { LabSearch };

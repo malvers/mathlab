@@ -757,8 +757,8 @@
             const intro = filteredData.find(lab => lab.id === 'cinematic-intro');
             const otherLabs = filteredData.filter(lab => lab.id !== 'cinematic-intro')
                                           .sort((a, b) => {
-                                              const titleA = CyberI18n.getOr('index.labs.' + a.id + '.title', a.title || "");
-                                              const titleB = CyberI18n.getOr('index.labs.' + b.id + '.title', b.title || "");
+                                              const titleA = LabSearch.title(a);
+                                              const titleB = LabSearch.title(b);
                                               return titleA.localeCompare(titleB, CyberI18n.current || undefined, {
                                                   sensitivity: 'base'
                                               });
@@ -768,7 +768,7 @@
 
             grid.innerHTML = sortedLabs.map(lab => {
                 const muteChrome = lab.id === 'mandelbrot-deep' ? ' tool-button--mute-chrome' : '';
-                const locTitle = CyberI18n.getOr('index.labs.' + lab.id + '.title', lab.title);
+                const locTitle = LabSearch.title(lab);
                 const toolHref = withLang(lab.href);
                 return `
                 <a href="${toolHref}" target="_blank" class="tool-button color-${lab.color || 'blue'}${muteChrome}">

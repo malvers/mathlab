@@ -41,6 +41,8 @@
                 arithmetic: "Grundrechenarten",
                 hot_stuff: "Hot stuff",
                 neu: "Neu",
+                buecher: "Bücher",
+                buecher_tip: "Bücher: unsere interaktiven Lehrbücher auf Deutsch, Englisch und Spanisch",
                 touren: "Touren",
                 apps: "Apps",
                 fun: "Fun",
@@ -87,6 +89,7 @@
                 exit: "Beenden"
             },
             labs: {
+                "buecher": { title: "{n} Bücher in 3 Sprachen", description: "Alle unsere interaktiven Lehrbücher an einem Ort: Mathematik von Klasse 5 bis zum Abitur, für Gymnasium, Oberschule, Berufliches Gymnasium und Fachoberschule — jedes Buch auch auf Englisch und Spanisch. Mit Erkundungen, Selbsttests, Labs zum Ausprobieren und einer Druckausgabe." },
                 "fourier": { title: "Fourier-Transformation", description: "Die Musik der Mathematik. Zerlege komplexe Formen in harmonische Kreisschwingungen." },
                 "mandelbrot-deep": { title: "Fraktale", description: "Mandelbrot- und Julia-Mengen in der komplexen Ebene: Escapingzeit-Dynamik der Abbildung z↦z²+c als GPU-gestützte Iteration im Fragment-Shader; parametrisierte Exploration von c mit adaptiver Iterationstiefe entlang der fraktalen Randstruktur." },
                 "atomorbitale": { title: "Atomorbitale", description: "Kugelflächenfunktionen Y_ℓ^m in 3D: Wahrscheinlichkeitswolken und Quantenzahlen." },

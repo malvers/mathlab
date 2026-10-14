@@ -2286,12 +2286,10 @@
                 const ext = /^https?:\/\//i.test(lab.href);
                 const linkAttrs = ext ? ' target="_blank" rel="noopener noreferrer"' : '';
                 
-                // Localization
-                const titleKey = `index.labs.${lab.id}.title`;
+                // Localization (the title via LabSearch.title, which also puts in a count such as the number of books)
                 const descKey = `index.labs.${lab.id}.description`;
                 
-                let title = CyberI18n.get(titleKey);
-                if (title === titleKey) title = lab.title; // Fallback if key not found
+                const title = LabSearch.title(lab);
                 
                 let description = CyberI18n.get(descKey);
                 if (description === descKey) description = lab.description; // Fallback if key not found
@@ -2898,6 +2896,11 @@
         if (document.getElementById('txt-arithmetic')) document.getElementById('txt-arithmetic').innerHTML = CyberI18n.get('index.ui.arithmetic');
         if (document.getElementById('txt-hot')) document.getElementById('txt-hot').innerHTML = CyberI18n.get('index.ui.hot_stuff');
         if (document.getElementById('txt-neu')) document.getElementById('txt-neu').innerHTML = CyberI18n.get('index.ui.neu');
+        if (document.getElementById('txt-buecher')) document.getElementById('txt-buecher').innerHTML = CyberI18n.get('index.ui.buecher');
+        if (document.getElementById('themes-tile-buecher')) {
+            document.getElementById('themes-tile-buecher').title = CyberI18n.get('index.ui.buecher_tip');
+            document.getElementById('themes-tile-buecher').setAttribute('aria-label', CyberI18n.get('index.ui.buecher_tip'));
+        }
         if (document.getElementById('txt-touren')) document.getElementById('txt-touren').innerHTML = CyberI18n.get('index.ui.touren');
         if (document.getElementById('txt-apps')) document.getElementById('txt-apps').innerHTML = CyberI18n.get('index.ui.apps');
         if (document.getElementById('txt-fun')) document.getElementById('txt-fun').innerHTML = CyberI18n.get('index.ui.fun');

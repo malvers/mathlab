@@ -40,6 +40,8 @@
                 arithmetic: "Aritmetica di Base",
                 hot_stuff: "In evidenza",
                 neu: "Novità",
+                buecher: "Libri",
+                buecher_tip: "Libri: i nostri libri di testo interattivi in tedesco, inglese e spagnolo",
                 touren: "Tour",
                 apps: "App",
                 fun: "Divertimento",
@@ -86,6 +88,7 @@
                 exit: "Esci"
             },
             labs: {
+                "buecher": { title: "{n} libri in 3 lingue", description: "Tutti i nostri libri di testo interattivi in un unico posto: matematica dalla quinta classe fino all'Abitur, secondo il programma della Sassonia, per Gymnasium, Oberschule, Gymnasium professionale e Fachoberschule — ogni libro in tedesco, inglese e spagnolo. Con esplorazioni, autoverifiche, laboratori da provare e un'edizione da stampare." },
                 "fourier": { title: "Trasformata di Fourier", description: "La musica della matematica. Scomponi forme complesse in oscillazioni circolari armoniche." },
                 "mandelbrot-deep": { title: "Frattali", description: "Insiemi di Mandelbrot e Julia nel piano complesso: dinamica del tempo di fuga di z↦z²+c tramite iterazione su GPU nel fragment shader; esplorazione parametrica di c con profondità di iterazione adattiva lungo il contorno frattale." },
                 "atomorbitale": { title: "Orbitali Atomici", description: "Armoniche sferiche Y_ℓ^m in 3D: nuvole di probabilità e numeri quantici." },

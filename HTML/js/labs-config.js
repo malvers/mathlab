@@ -28,7 +28,7 @@ const LABS_DATA = [
     {
         "id": "buecher",
         "href": "index.html#buecher",
-        "title": "Bücher",
+        "title": "{n} Bücher in 3 Sprachen",
         "description": "Alle unsere interaktiven Lehrbücher an einem Ort: Mathematik von Klasse 5 bis zum Abitur, für Gymnasium, Oberschule, Berufliches Gymnasium und Fachoberschule — jedes Buch auch auf Englisch und Spanisch. Mit Erkundungen, Selbsttests, Labs zum Ausprobieren und einer Druckausgabe.",
         "tagline": "Bücher / Books / Libros",
         "icon": LAB_ICONS["buecher"],
@@ -1430,9 +1430,9 @@ const LABS_DATA = [
 ];
 
 // the "Bücher" tile in the "Neu" view counts the book cards, like the title of the books view
-// (Doc, 14.10.2026: "davor 20 und hinter Bücher in 3 Sprachen")
+// (Doc, 14.10.2026: "davor 20 und hinter Bücher in 3 Sprachen"); LabSearch.title() puts the count
+// in for "{n}", in every language
 (function () {
     const tile = LABS_DATA.find((lab) => lab.id === 'buecher');
-    const books = LABS_DATA.filter((lab) => String(lab.category || '').split(/\s+/).includes('buecher')).length;
-    if (tile) tile.title = books + ' Bücher in 3 Sprachen';
+    if (tile) tile.count = LABS_DATA.filter((lab) => String(lab.category || '').split(/\s+/).includes('buecher')).length;
 })();
