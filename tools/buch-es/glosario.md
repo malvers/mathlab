@@ -997,3 +997,32 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Schiebepuzzle, Stein | rompecabezas deslizante, ficha | |
 | Nim-Spiel, Holz / Hölzer | juego de Nim, palillo / palillos | «Computer» is «ordenador» |
 | Augensumme, fair | suma de puntos, justo | |
+
+## Added by mathe7-es (Einstein)
+
+| Deutsch | Español | Note |
+|---|---|---|
+| Oberschule 7, Realschulbildungsgang | Oberschule, 7.º curso, itinerario de Realschule | start page as in mathe9-es |
+| Wahlbereich 3 | Optativa 3, chapter OP | kicker «OPTATIVA 3 · JUNIO»; not «obligatoria» (that is Wahlpflicht) |
+| Grundwert, Prozentwert, Prozentsatz, Promille | valor base, valor porcentual, tanto por ciento, tanto por mil | as in GY 7 |
+| vermehrter / verminderter Grundwert | valor base aumentado / disminuido | |
+| Jahreszinsen, Tageszinsen, Zinsjahr (360 Tage) | intereses anuales, interés por días, año comercial / año de intereses (360 días) | widget tageszinsos7 |
+| Kontoüberziehung (Dispo) | descubierto en cuenta | |
+| absolute / relative Häufigkeit, Strichliste, Urliste | frecuencia absoluta / relativa, recuento con palotes, lista de datos | |
+| Zufallsexperiment, Ergebnis, Ereignis, Gegenereignis, Ergebnismenge | experimento aleatorio, resultado, suceso, suceso contrario, espacio muestral | |
+| Gegenzahl, Betrag | opuesto, valor absoluto | as in GY 7 |
+| natürliche / ganze / gebrochene / rationale Zahlen | números naturales / enteros / fraccionarios / racionales | as in GY 7 |
+| vier Quadranten, Spiegelpunkt | cuatro cuadrantes (numerados en sentido contrario a las agujas del reloj), punto imagen | widget quadrantos7 |
+| Vorzeichenregeln, Rechengesetze, Vorrangregeln | reglas de los signos, propiedades de las operaciones, jerarquía de las operaciones | |
+| Vertauschungs-, Verbindungs-, Verteilungsgesetz | propiedad conmutativa, asociativa, distributiva | |
+| Term, Termwert, Variable | expresión algebraica, valor numérico, variable | |
+| Äquivalenzumformung, Probe, Verhältnisgleichung, Formel umstellen | transformación equivalente, comprobación, proporción, despejar una fórmula | |
+| Planfigur, Konstruktionsbeschreibung | figura de análisis, descripción de la construcción | as in GY 6 |
+| Drachenviereck, Raute, Haus der Vierecke | deltoide (cometa only for the paper kite), rombo, casa de los cuadriláteros | |
+| inhaltsgleich, zerlegungsgleich | de igual área (equivalentes), equidescomponibles | |
+| Hausgiebel | hastial | as in mathe9-es |
+| Zweitafelbild, Grundriss, Aufriss, Ordnungslinie | representación en dos vistas, planta, alzado, línea de referencia | as in GY 7 |
+| Mantel, Oberfläche, Grundfläche, Deckfläche | superficie lateral, área total, base, base superior | |
+| Dichte, umbauter Raum, Hohlkörper | densidad (ρ, «ro»), volumen construido, cuerpo hueco | widget dichteos7 |
+| Parkett, Parkettierung, Kachel, parkettieren | teselación, teselación, tesela, teselar | GY 7 eckenwinkel7 says «embaldosado» in one sentence |
+| Escher: Verschiebung, Drehung, Schablone | traslación, giro, plantilla | widget escheros7 |
