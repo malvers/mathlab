@@ -970,3 +970,30 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Kettenblatt, Ritzel, Übersetzungsverhältnis, Gang | plato, piñón, relación de transmisión, marcha | |
 | Trittfrequenz, Kurbelumdrehung, Rahmenhöhe, Schrittlänge | cadencia, pedalada, altura del cuadro, altura de entrepierna | |
 | Laufmaschine, Hochrad | máquina andante, biciclo | |
+
+## Added by mathe6-es (Turing)
+
+| Deutsch | Español | Note |
+|---|---|---|
+| Oberschule Klasse 6 | Oberschule, 6.º curso | start page: «la escuela secundaria sajona del 5.º al 10.º curso; a partir del 7.º curso se divide en el itinerario de Realschule y el de Hauptschule» |
+| Wahlbereich 2, Kapitel W | Optativa 2, capítulo OP | kicker «OPTATIVA 2 · JUNIO», as in mathegy6-es |
+| gleichnamig / ungleichnamig (Brüche) | (fracciones) homogéneas / heterogéneas | «gleichnamig machen» stays «pasar a común denominador» |
+| Ausgangsmenge, Zielmenge, Pfeildarstellung | conjunto inicial, conjunto final, diagrama de flechas | |
+| Wertetabelle | tabla de valores | |
+| Umkehraufgabe, Umkehroperation | operación inversa | |
+| Verhältnis, Verhältnisgleichung | razón, proporción | |
+| Rechenvorteile | trucos de cálculo | |
+| Grundgebühr (Taxi), Anfahrt (Handwerker) | bajada de bandera, desplazamiento | a fixed fee in general: tarifa fija |
+| Raute, Schenkel (Trapez) | rombo, lados no paralelos | |
+| zerlegen, ergänzen | descomponer, completar | |
+| Vielflächner, Seitenansichten | poliedros, vistas laterales | |
+| Bauplan (Würfelkörper) | plano de construcción | widget wuerfelbauos6 |
+| Zufallsversuch, Strichliste | experimento aleatorio, tabla de recuento | |
+| absolute / relative Häufigkeit | frecuencia absoluta / relativa | |
+| Umkehrung (eines Wenn-dann-Satzes) | recíproco | |
+| wenn – dann, je – desto | si – entonces, cuanto más – más | «je mehr – desto weniger»: cuanto más – menos |
+| Tangram, Soma-Würfel, zerlegungsgleich | tangram, cubo Soma, equidescomponibles | all tangram piece names are masculine: triángulo, cuadrado, paralelogramo |
+| Turm von Hanoi, Scheibe, Stab, Zug | torre de Hanói, disco, varilla, movimiento | |
+| Schiebepuzzle, Stein | rompecabezas deslizante, ficha | |
+| Nim-Spiel, Holz / Hölzer | juego de Nim, palillo / palillos | «Computer» is «ordenador» |
+| Augensumme, fair | suma de puntos, justo | |
