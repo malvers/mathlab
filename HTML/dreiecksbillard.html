@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- what the lab does, read by "Frag Solita" when a deck slide embeds this lab -->
+    <meta name="solita-about" content="Ein Laser wird in einem Dreieck immer wieder gespiegelt. Farbige Fenster auf dem Rand zählen die Treffer; außen hat jedes Fenster einen Balken (Treffer durch erwartete Treffer), zwischen den Fenstern zeigt eine durchgezogene Kurve dasselbe für den ganzen Rand. Die gestrichelte Linie zeigt, wo es hinläuft: Ein Vorlauf rechnet denselben Schuss 2 Millionen Treffer voraus. Im irrationalen Dreieck ist sie gerade, beim 30-60-90-Dreieck hat sie Stufen. Balken und Kurve schwanken anfangs um die Linie und legen sich mit der Zeit darauf: ziehen verschiebt ein Fenster, die Enden ziehen ändert seine Breite, das Mausrad auch. Das Verhältnis Treffer durch erwartete Treffer geht gegen 1, wenn der Rand gleichmäßig getroffen wird. Satz (OpenAI-Preprint vom 25.09.2026): Ist ein Winkel ein irrationales Vielfaches von 180 Grad, ist das Billard ergodisch, die Treffer verteilen sich für fast jeden Startschuss gleichmäßig über den Rand. Ins Dreieck tippen und ziehen setzt einen neuen Laserschuss.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Dreiecks-Billard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script defer src="morpheus/vendor/katex/katex.min.js"></script>
+    <style>
+        /* lab-specific bits only - buttons, cards and sliders come from the central files */
+        #canvas { touch-action: none; }
+        .db-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 4px 0 10px; }
+        .db-btn-grid.two { grid-template-columns: repeat(2, 1fr); }
+        .db-info { font-size: 0.9rem; line-height: 1.55; color: rgba(255, 255, 255, 0.75); margin-top: 6px; }
+        .db-info b { color: #fff; font-weight: 600; }
+        .db-info .db-irr { color: rgb(121, 158, 49); }
+        .db-info .db-rat { color: rgb(245, 194, 66); }
+        .db-count { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: rgba(255, 255, 255, 0.75); margin: 6px 0 2px; }
+        .db-count b { color: #00d2ff; font-weight: 700; }
+        .db-wins { width: 100%; border-collapse: collapse; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; margin: 2px 0 8px; }
+        .db-wins th { font-weight: 400; color: rgba(255, 255, 255, 0.5); text-align: right; padding: 3px 4px; font-size: 0.62rem; letter-spacing: 0.5px; }
+        .db-wins th:first-child, .db-wins td:first-child { text-align: left; }
+        .db-wins td { text-align: right; padding: 5px 4px; color: rgba(255, 255, 255, 0.85); border-top: 1px solid rgba(255, 255, 255, 0.08); white-space: nowrap; }
+        .db-wins tr.db-win { cursor: pointer; }
+        .db-wins tr.db-win.sel td { background: rgba(0, 210, 255, 0.10); }
+        .db-wins .db-sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+        .db-wins .db-ratio { font-weight: 700; }
+        #coach-content .db-f { white-space: nowrap; }
+        /* numbers in the digits widget (js/cyber-clock.js): fixed slots, the columns never jump (Doc, 14.10.2026) -
+           here small and without glow, the lab default is the big telemetry look */
+        .db-wins .cyber-digits, .db-count .cyber-digits {
+            display: inline-flex; min-height: 0; --cc-size: 0.8rem; --cc-dw: 0.78em; --cc-sw: 0.38em; --cc-h: 1.3em;
+            --cc-digit: rgba(255, 255, 255, 0.9); --cc-shadow: none; vertical-align: middle;
+        }
+        .db-count .cyber-digits { --cc-size: 0.85rem; --cc-digit: #00d2ff; }
+    </style>
+    <script src="js/farbschema.js"></script>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box" class="visible">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
+    <script src="js/coach-box.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Dreiecks-Billard',
+        });
+        // responsive: the triangle fits any screen, so only a genuinely tiny one gets the warning
+        CyberUI.init({ screenWarning: false });
+        CyberUI.ensureScreenWarning({
+            minWidth: 360, minHeight: 480,
+            message: 'Für das Dreiecks-Billard ist der Bildschirm sehr klein – quer halten hilft.',
+        });
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+        // on a narrow screen the triangle needs the room more than the controls do (0 is no screen, see trigonometrie)
+        if (window.innerWidth > 0 && window.innerWidth < 900) document.getElementById('side-panel').classList.add('collapsed');
+    </script>
+    <script src="js/dreiecksbillard.js"></script>
+</body>
+
+</html>
