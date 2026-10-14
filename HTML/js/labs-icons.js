@@ -367,6 +367,14 @@ const LAB_ICONS = {
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
+    "dreiecksbillard": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a laser bouncing in a triangle, one window on the rim (dreiecksbillard.html) - every bend lies on a side -->
+            <path d="M10 86 L90 86 L62 14 Z" fill="none" stroke="#F5C242" stroke-width="3.5" stroke-linejoin="round" />
+            <polyline points="34,86 76,50 26.8,62.7 58,86 69,32 49.5,31.3" fill="none" stroke="#D73728" stroke-width="2.6"
+                stroke-linejoin="round" stroke-linecap="round" />
+            <circle cx="49.5" cy="31.3" r="3.6" fill="#D73728" />
+            <path d="M40 86 H52" stroke="#799E31" stroke-width="7" stroke-linecap="round" />
+        </svg>`,
     "ziffernraetsel": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- the MONEY stack itself (Doc, 29.09.2026: "icon -> MONEY stack"): SEND over MORE, a rule, MONEY in gold -
                  one letter per column, so the columns stand as on paper -->

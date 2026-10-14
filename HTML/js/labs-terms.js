@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 119 labs, 2086 terms, 2026-10-13
+ * 120 labs, 2103 terms, 2026-10-14
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -32,6 +32,7 @@ const LABS_TERMS = {
     "differentiallabor": ["Cosinus-Welle", "DIFFERENTIALRECHNUNG", "Exponentialfunktion", "FUNKTIONALITÄT", "Kubische Funktion", "Logarithmus", "Normalparabel", "Punkt Reset (x₀)", "Punkt-Position (x₀)", "Sinus-Welle", "VISUALISIERUNG"],
     "dividieren": ["Dividend", "Divisor", "SCHRIFTLICHE DIVISION"],
     "docpad": ["AES-GCM", "DOCPAD", "ÖFFNEN", "Passwort"],
+    "dreiecksbillard": ["armenian", "brahmic", "Breite von A", "cjk", "cyrillic", "Dreieck", "Fenster", "georgian", "Gleich breit", "Gleichseitig (60°, 60°, 60°)", "hangul", "Laser", "latin", "Reflexionen pro Sekunde", "Spur", "Winkel α", "Winkel β"],
     "einsundeins": ["ABSPIELEN", "add", "Befehl", "Bit-Spannung (Ebene 5)", "Hex", "KI-Prolog (Ebene 0)", "mov", "Was er tut"],
     "equationocr": ["Bestimmtes Integral", "Binomialkoeffizient", "Bruch", "Cauchy-Integral", "CLEAR", "Dirac", "Druck", "Einstein", "Einstein-Feldgleichungen", "ERKENNEN", "Eulersche Identität", "FORMELN", "Gauss-Integral", "GOOGLE GEMINI API", "KOMPLEX", "KOSTENKONTROLLE", "Maxwell (Ampère)", "Maxwell (Gauß)", "Navier–Stokes", "Newton Gravitation", "Outline (off → KaTeX HTML)", "Potenzregel", "Pythagoras", "Quadratische Formel", "RELOAD", "Riemann ζ", "Scale", "Schrödinger", "Stift", "Taylor e^x", "Thinking (default on)", "VERSTANDEN", "ZEICHNEN"],
     "eulergerade": ["Euler-Gerade", "Eulergerade", "Fermat / Napoleon", "Feuerbach-Kreis", "HILFSLINIEN", "Höhen (H)", "Inkreis", "Inkreis-R", "KONSTRUKTION", "Konstruktion Reset", "Seitenhalb. (S)", "Umkreis", "Verhältnis HS / SU", "Winkelhalb. (I)"],

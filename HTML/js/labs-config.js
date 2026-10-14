@@ -257,6 +257,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "dreiecksbillard",
+        "href": "dreiecksbillard.html",
+        "title": "Dreiecks-Billard",
+        "description": "Ein Laser wird in einem Dreieck immer wieder gespiegelt. Ist ein Winkel ein irrationales Vielfaches von 180°, verteilen sich die Treffer auf lange Sicht gleichmäßig über den ganzen Rand – bewiesen erst 2026 in einem Preprint von OpenAI. Sechs verschiebbare Fenster zählen die Treffer, eine Kurve zeigt die Dichte am ganzen Rand, und ein Vorlauf rechnet den Schuss zwei Millionen Treffer voraus. Zum Vergleich rationale Dreiecke: Im gleichseitigen fliegt der Laser nur in sechs Richtungen, im 30-60-90-Dreieck bekommen die Seiten verschieden viel ab. Die Spur des Lasers wird zum Muster, in das man scharf hineinzoomen kann.",
+        "tagline": "Ergodik / Laser im Dreieck / Billard",
+        "icon": LAB_ICONS["dreiecksbillard"],
+        "category": "geometrie dreiecke neu uni",
+        "keywords": "dreiecksbillard billard dreieck laser reflexion spiegelung einfallswinkel ausfallswinkel ergodisch ergodizitaet ergodentheorie irrational irrationaler winkel rational gleichverteilung trefferdichte fenster openai beweis preprint 2026 dynamisches system gleichseitig rechtwinklig muster spur zoom",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",
@@ -1151,6 +1162,7 @@ const LABS_DATA = [
         "keywords": "solita ai ki assistent sprache voice chat claude vorlesen weckwort",
         "color": "blue"
     },
+    /* Doc, 14.10.2026: "nimm das lab von index raus (link & card)" - commented, not deleted; the page stays reachable
     {
         "id": "solita-avatar",
         "href": "solita-avatar.html",
@@ -1162,6 +1174,7 @@ const LABS_DATA = [
         "keywords": "solita avatar kopf 3d lippen mund viseme sprechen stimmung ansicht sprachsynthese browserstimme lokal",
         "color": "gold"
     },
+    */
     {
         "id": "gameoflife",
         "href": "gameoflife/gameoflife.html",
