@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas OS 8 · Capítulo 5 · Sucesos aleatorios | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Simular, diagrama de árbol y reglas de las ramas, con y sin reemplazamiento, recuento. Capítulo 5 del libro de texto interactivo Matemáticas · Oberschule 8: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · OBERSCHULE 8</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 5 · ÁREA DE APRENDIZAJE 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 5 · ÁREA DE APRENDIZAJE 5 · ABRIL</p>
+            <h1>Sucesos aleatorios</h1>
+            <p class="b-hero-lead">¿Cuántos sobres de cromos hay que comprar hasta completar el álbum? ¿Qué probabilidad hay de ganar dos veces seguidas en la ruleta?
+                ¿Cuántas posibilidades tiene un candado de combinación? Algunas preguntas se calculan; otras se resuelven antes probándolas mil veces con el ordenador.
+                Aprendes las dos cosas: <b>simular</b> experimentos aleatorios y hallar probabilidades con el <b>diagrama de árbol</b>, las <b>reglas de las ramas</b> y un <b>recuento</b> ingenioso.</p>
+            <div class="b-chips"><span class="b-chip">14 SESIONES</span><span class="b-chip">4 LECCIONES</span><span class="b-chip">2 LABS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="gluecksrad8" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li><b>simular</b> experimentos aleatorios con números aleatorios e interpretar frecuencias relativas</li>
+                <li>representar experimentos de varias etapas en un <b>diagrama de árbol</b> y calcular con las <b>reglas de las ramas</b></li>
+                <li>distinguir la extracción <b>con y sin reemplazamiento</b> y usar el <b>suceso contrario</b></li>
+                <li>contar posibilidades con el <b>principio de multiplicación</b> y con $n!$</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="1/2" data-ph="fracción"><p class="b-q-text">¿Qué probabilidad hay de sacar un número par con un dado?</p><div class="b-sol"><p>$\tfrac{3}{6} = \tfrac{1}{2}$</p></div></div>
+            <div class="b-q" data-ans="75" data-ph="%"><p class="b-q-text">¿Qué porcentaje es $\tfrac{3}{4}$?</p><div class="b-sol"><p>75 %</p></div></div>
+            <div class="b-q" data-ans="1/6" data-ph="fracción"><p class="b-q-text">Calcula $\tfrac{1}{2} \cdot \tfrac{1}{3}$.</p><div class="b-sol"><p>$\tfrac{1}{6}$</p></div></div>
+            <div class="b-q" data-ans="0,46" data-ph="decimal"><p class="b-q-text">En 50 lanzamientos de moneda salió cara 23 veces. ¿Cuál es la frecuencia relativa?</p><div class="b-sol"><p>$\tfrac{23}{50} = 0{,}46$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">EL ÁLBUM DE CROMOS</div>
+            <div class="b-text"><p>Un álbum pequeño tiene 6 cromos y cada sobre contiene uno de ellos al azar. Simuladlo con un dado: tirad hasta que cada número haya salido al menos una vez.</p>
+                <ul><li>¿Cuántas veces habéis tenido que tirar? Reunid los resultados de toda la clase y calculad la media.</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">SACAR DOS BOLAS</div>
+            <div class="b-text"><p>En una bolsa hay 3 bolas rojas y 2 azules. Sacad dos bolas una tras otra sin devolver la primera.</p>
+                <ul><li>¿Cuántas veces son las dos rojas? Haced 50 intentos por grupo. ¿Y si devolvéis la primera bola?</li></ul></div>
+            <span class="b-pair">→ Lecciones 2 y 3</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">EL BANCO</div>
+            <div class="b-text"><p>¿De cuántas maneras pueden sentarse dos, tres o cuatro personas en un banco?</p>
+                <ul><li>Escribid todas las posibilidades. ¿Encontráis un patrón sin escribirlo todo?</li></ul></div>
+            <span class="b-pair">→ Lección 4</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Simular experimentos aleatorios" data-toc-k="1" data-toc-short="1 Simular">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Simular experimentos aleatorios</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Cuántos sobres hacen falta para el álbum de cromos es difícil de calcular. Pero se puede representar: un dado sustituye a los sobres.
+                Quien lo hace muchísimas veces obtiene una buena estimación. Esto se llama <b>simulación</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · FRECUENCIA Y SIMULACIÓN</div>
+                <div class="b-text">
+                    <p>En un <b>experimento aleatorio</b> son posibles varios resultados, y no se puede predecir cuál saldrá. Un <b>suceso</b> agrupa resultados, por ejemplo «número par».</p>
+                    <p><b>Frecuencia relativa</b> = número de aciertos : número de intentos</p>
+                    <p><b>Ley de los grandes números:</b> con muchísimos intentos, la frecuencia relativa se estabiliza cerca de la probabilidad.</p>
+                    <p><b>Simulación:</b> se sustituye el experimento por un dispositivo aleatorio sencillo, por ejemplo un dado, una moneda o números aleatorios, y se realiza muchísimas veces.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Números aleatorios:</b> con la tecla Ran# de la calculadora o en una hoja de cálculo con =ALEATORIO.ENTRE(1;6).</p>
+            <p class="b-note"><b>Experimento de Laplace:</b> si todos los resultados son igual de probables, $P(E) = \dfrac{\text{número de resultados favorables}}{\text{número de resultados posibles}}$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA LEY DE LOS GRANDES NÚMEROS</div>
+        <p class="b-help" style="margin:0 0 12px">Elige un experimento y realízalo 10, 100 y 1000 veces. La frecuencia relativa primero oscila mucho y luego se estabiliza.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿CUÁNDO ESTÁ LLENO EL ÁLBUM?</div>
+        <p class="b-help" style="margin:0 0 12px">Compra sobre tras sobre o simula mil álbumes de una vez.</p>
+        <div data-widget="sammel8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · FRECUENCIA RELATIVA</div>
+            <div class="b-text"><p>Un dado se lanza 600 veces y sale el seis 94 veces. Compara la frecuencia relativa con la probabilidad.</p></div>
+            <div class="b-sol"><p>$\tfrac{94}{600} \approx 0{,}157 = 15{,}7\,\%$. La probabilidad es $\tfrac{1}{6} \approx 16{,}7\,\%$.</p>
+                <p><span class="b-res">Los valores están cerca; casi nunca son exactamente iguales.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · PLANIFICAR UNA SIMULACIÓN</div>
+            <div class="b-text"><p>En una tómbola gana una de cada cinco papeletas. ¿Con qué frecuencia se consiguen al menos dos premios con 10 papeletas? Planifica una simulación.</p></div>
+            <div class="b-sol"><p>Generar números aleatorios del 1 al 5; el 1 significa premio. Cada 10 números son una tanda. Contar si el 1 aparece al menos dos veces. Repetirlo 1000 veces.</p>
+                <p><span class="b-res">La proporción de tandas con al menos dos premios estima la probabilidad.</span> Está en torno al 62 %.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una moneda se lanza 200 veces y sale cara 108 veces. Calcula la frecuencia relativa y compárala con la probabilidad.</p></div>
+            <div class="b-sol"><p>$\tfrac{108}{200} = 0{,}54$. La probabilidad es $0{,}5$. Una diferencia de 4 puntos porcentuales es muy normal con 200 lanzamientos.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Cómo puedes simular con un dado: a) un lanzamiento de moneda &nbsp; b) un suceso de probabilidad $\tfrac{1}{3}$ &nbsp; c) un suceso de probabilidad $\tfrac{1}{4}$?</p></div>
+            <div class="b-sol"><p>a) número par = cara &nbsp; b) 1 o 2 = acierto &nbsp; c) con 5 o 6 volver a tirar; si no, el 1 es acierto (1 de 4 números igual de probables).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una clase ha repetido muchas veces un experimento aleatorio: tras 10 intentos, 4 aciertos; tras 100, 31; tras 1000, 334. ¿Qué probabilidad supones? ¿Por qué no bastan 10 intentos?</p></div>
+            <div class="b-sol"><p>0,4; luego 0,31; luego 0,334: probablemente $\tfrac{1}{3}$. Con 10 intentos la frecuencia relativa todavía oscila mucho.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Para un álbum de 6 cromos, una simulación dio de media 14,6 sobres. Se puede demostrar que de media hacen falta $6 \cdot \left(1 + \tfrac{1}{2} + \tfrac{1}{3} + \tfrac{1}{4} + \tfrac{1}{5} + \tfrac{1}{6}\right)$ sobres. Calcúlalo y compara.</p></div>
+            <div class="b-sol"><p>El paréntesis da 2,45; por 6 son 14,7. La simulación está muy cerca.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>En un cuadrado de lado 1 caen 1000 puntos al azar. 786 de ellos están en el cuarto de círculo de radio 1 con centro en una esquina. Estima $\pi$ a partir de eso y explica por qué funciona.</p></div>
+            <div class="b-sol"><p>El cuarto de círculo tiene el área $\tfrac{\pi}{4}$ y el cuadrado, el área 1. Así que la proporción de aciertos es más o menos $\tfrac{\pi}{4}$: $\pi \approx 4 \cdot 0{,}786 = 3{,}144$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,18" data-ph="decimal"><p class="b-q-text">En 50 lanzamientos sale el seis 9 veces. ¿Cuál es la frecuencia relativa?</p><div class="b-sol"><p>$\tfrac{9}{50} = 0{,}18$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">¿Qué dice la ley de los grandes números?</p><div class="b-mc"><button>Después de seis lanzamientos sale seguro un seis.</button><button>Con muchos intentos, la frecuencia relativa está cerca de la probabilidad.</button><button>Después de muchas papeletas sin premio, un premio es más probable.</button></div><div class="b-sol"><p>El dado no tiene memoria. Solo con muchísimos intentos se estabiliza la frecuencia relativa.</p></div></div>
+        <div class="b-q" data-ans="3,16" data-ph="π ≈"><p class="b-q-text">De 1000 puntos al azar en el cuadrado, 790 están en el cuarto de círculo. ¿Qué estimación de $\pi$ da eso?</p><div class="b-sol"><p>$4 \cdot 0{,}79 = 3{,}16$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Diagrama de árbol y reglas de las ramas" data-toc-k="2" data-toc-short="2 Reglas de las ramas">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Diagrama de árbol y reglas de las ramas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Una ruleta se gira dos veces. En la primera etapa hay dos o tres resultados, y en la segunda, para cada uno de ellos, otra vez los mismos.
+                Un <b>diagrama de árbol</b> muestra todos los caminos con claridad, y en cada segmento está su probabilidad.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · REGLAS DE LAS RAMAS</div>
+                <div class="b-text">
+                    <p>Un <b>experimento aleatorio de varias etapas</b> consta de varios experimentos aleatorios seguidos. En el diagrama de árbol, los segmentos que salen de un punto suman 1.</p>
+                    <p><b>Regla del producto (1.ª regla de las ramas):</b> la probabilidad de una rama es el producto de las probabilidades a lo largo de la rama.</p>
+                    <p><b>Regla de la suma (2.ª regla de las ramas):</b> la probabilidad de un suceso es la suma de las probabilidades de todas las ramas que le corresponden.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Comprobación:</b> las probabilidades de todas las ramas suman 1.</p>
+            <p class="b-note"><b>Tablero de Galton:</b> en cada clavo, una bola cae a la izquierda o a la derecha con probabilidad $\tfrac{1}{2}$. Cada fila es una etapa.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · EL TALLER DEL DIAGRAMA DE ÁRBOL</div>
+        <p class="b-help" style="margin:0 0 12px">Elige primero «con reemplazamiento». Elige un suceso o toca los extremos de las ramas: las probabilidades se multiplican y se suman.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · DOS LANZAMIENTOS DE DADO</div>
+            <div class="b-text"><p>Un dado se lanza dos veces. ¿Qué probabilidad tienen dos seises? ¿Y exactamente un seis?</p></div>
+            <div class="b-sol"><p>Etapas: seis con $\tfrac{1}{6}$, ningún seis con $\tfrac{5}{6}$. Dos seises: $\tfrac{1}{6} \cdot \tfrac{1}{6} = \tfrac{1}{36}$.</p>
+                <p>Exactamente un seis: dos ramas, $\tfrac{1}{6} \cdot \tfrac{5}{6} + \tfrac{5}{6} \cdot \tfrac{1}{6} = \tfrac{10}{36} = \tfrac{5}{18}$.</p>
+                <p><span class="b-res">$P(\text{dos seises}) = \tfrac{1}{36} \approx 2{,}8\,\%$, $\;P(\text{exactamente uno}) = \tfrac{5}{18} \approx 27{,}8\,\%$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · LA RULETA</div>
+            <div class="b-text"><p>Una ruleta muestra rojo con $\tfrac{1}{2}$, azul con $\tfrac{1}{3}$ y amarillo con $\tfrac{1}{6}$. Se gira dos veces. ¿Qué probabilidad hay de sacar dos veces el mismo color?</p></div>
+            <div class="b-sol"><p>Tres ramas: $\tfrac{1}{2} \cdot \tfrac{1}{2} + \tfrac{1}{3} \cdot \tfrac{1}{3} + \tfrac{1}{6} \cdot \tfrac{1}{6} = \tfrac{9}{36} + \tfrac{4}{36} + \tfrac{1}{36} = \tfrac{14}{36}$</p>
+                <p><span class="b-res">$P = \tfrac{7}{18} \approx 38{,}9\,\%$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una moneda se lanza tres veces. Dibuja el diagrama de árbol. ¿Qué probabilidad hay de tres caras y de exactamente dos caras?</p></div>
+            <div class="b-sol"><p>8 ramas igual de probables. Tres caras: $\tfrac{1}{8}$. Exactamente dos (CCX, CXC, XCC): $\tfrac{3}{8}$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>En una urna hay 4 bolas rojas y 1 azul. Se extraen dos con reemplazamiento. Calcula $P(\text{las dos rojas})$, $P(\text{las dos azules})$ y $P(\text{colores distintos})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{16}{25}$, $\tfrac{1}{25}$ y $\tfrac{4}{25} + \tfrac{4}{25} = \tfrac{8}{25}$. Comprobación: $16 + 1 + 8 = 25$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En el muro de tiro, Lea acierta cada tiro con probabilidad 0,3. Tira dos veces. ¿Qué probabilidad hay de que acierte dos veces y de que acierte al menos una?</p></div>
+            <div class="b-sol"><p>Dos veces: $0{,}3 \cdot 0{,}3 = 0{,}09$. Al menos una: $0{,}09 + 0{,}21 + 0{,}21 = 0{,}51$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un tablero de Galton tiene 3 filas de clavos y 4 casillas debajo. ¿Qué probabilidad hay de que una bola caiga en la casilla de la izquierda del todo y en la segunda por la izquierda?</p></div>
+            <div class="b-sol"><p>A la izquierda del todo solo por la rama III: $\tfrac{1}{8}$. Segunda casilla: una vez a la derecha, tres ramas (DII, IDI, IID): $\tfrac{3}{8}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>En una ruleta, la probabilidad de sacar dos veces rojo en dos giros debe ser 0,36. ¿Qué parte tiene que ser roja? ¿Qué ángulo tiene el sector rojo?</p></div>
+            <div class="b-sol"><p>$p \cdot p = 0{,}36$, es decir, $p = 0{,}6$. Ángulo: $0{,}6 \cdot 360^\circ = 216^\circ$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1/36" data-ph="fracción"><p class="b-q-text">¿Qué probabilidad hay de sacar dos seises en dos lanzamientos?</p><div class="b-sol"><p>$\tfrac{1}{6} \cdot \tfrac{1}{6} = \tfrac{1}{36}$</p></div></div>
+        <div class="b-q" data-ans="0,36" data-ph="decimal"><p class="b-q-text">Urna con 3 bolas rojas y 2 azules, dos extracciones con reemplazamiento. ¿Qué probabilidad hay de que las dos sean rojas? Da un decimal.</p><div class="b-sol"><p>$\tfrac{3}{5} \cdot \tfrac{3}{5} = \tfrac{9}{25} = 0{,}36$</p></div></div>
+        <div class="b-q" data-ans="0,5" data-ph="decimal"><p class="b-q-text">Una moneda se lanza dos veces. ¿Qué probabilidad hay de exactamente una cara?</p><div class="b-sol"><p>$\tfrac{1}{4} + \tfrac{1}{4} = 0{,}5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Con y sin reemplazamiento" data-toc-k="3" data-toc-short="3 Reemplazamiento">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Dependientes o independientes: con y sin reemplazamiento</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En la bolsa hay 3 bolas rojas y 2 azules. Si la primera bola roja no se devuelve, en la segunda extracción solo quedan 2 rojas entre 4 bolas.
+                Las probabilidades de la segunda etapa dependen de la primera extracción.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · REEMPLAZAMIENTO Y SUCESO CONTRARIO</div>
+                <div class="b-text">
+                    <p><b>Con reemplazamiento:</b> en cada etapa valen las mismas probabilidades. Las extracciones son <b>independientes</b> entre sí.</p>
+                    <p><b>Sin reemplazamiento:</b> después de cada extracción cambian el número y la composición. Las probabilidades de la etapa siguiente <b>dependen</b> del resultado anterior.</p>
+                    <p><b>Suceso contrario:</b> $P(\overline{E}) = 1 - P(E)$. Muy práctico para «al menos una vez»: $P(\text{al menos una vez}) = 1 - P(\text{ninguna vez})$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sin reemplazamiento</b> son, por ejemplo, los juegos de cartas, la lotería y las papeletas de un cubo.</p>
+            <p class="b-note"><b>Sin memoria:</b> un dado no sabe lo que salió antes. Los lanzamientos son siempre independientes.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · SIN REEMPLAZAMIENTO</div>
+        <p class="b-help" style="margin:0 0 12px">Compara los números de los segmentos de la segunda etapa: sin reemplazamiento y con reemplazamiento. Cambia también el número de bolas.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · DOS BOLAS ROJAS</div>
+            <div class="b-text"><p>3 bolas rojas y 2 azules; se sacan dos sin reemplazamiento. ¿Qué probabilidad hay de que las dos sean rojas? Compara con reemplazamiento.</p></div>
+            <div class="b-sol"><p>Sin reemplazamiento: $\tfrac{3}{5} \cdot \tfrac{2}{4} = \tfrac{6}{20} = \tfrac{3}{10} = 0{,}3$. Con reemplazamiento: $\tfrac{3}{5} \cdot \tfrac{3}{5} = \tfrac{9}{25} = 0{,}36$.</p>
+                <p><span class="b-res">Sin reemplazamiento, «las dos rojas» es menos probable: 30 % en lugar de 36 %.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · AL MENOS UN SEIS</div>
+            <div class="b-text"><p>¿Qué probabilidad hay de sacar al menos un seis en cuatro lanzamientos?</p></div>
+            <div class="b-sol"><p>Suceso contrario: ningún seis, $\left(\tfrac{5}{6}\right)^4 = \tfrac{625}{1296}$. Por tanto $1 - \tfrac{625}{1296} = \tfrac{671}{1296} \approx 0{,}518$.</p>
+                <p><span class="b-res">Algo más del 50 %. Sin el suceso contrario habría que sumar 15 ramas.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>En una bolsa hay 2 bolas rojas y 3 verdes. Se sacan dos sin reemplazamiento. Calcula $P(\text{las dos rojas})$, $P(\text{las dos verdes})$ y $P(\text{colores distintos})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{2}{5} \cdot \tfrac{1}{4} = \tfrac{1}{10}$, $\;\tfrac{3}{5} \cdot \tfrac{2}{4} = \tfrac{3}{10}$, $\;1 - \tfrac{1}{10} - \tfrac{3}{10} = \tfrac{6}{10}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da la probabilidad del suceso contrario. a) sacar un seis &nbsp; b) sacar una papeleta premiada en una tómbola con un 20 % de premios &nbsp; c) un suceso con $P(E) = 0{,}07$</p></div>
+            <div class="b-sol"><p>a) $\tfrac{5}{6}$ (ningún seis) &nbsp; b) $0{,}8$ (sin premio) &nbsp; c) $0{,}93$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En un cubo hay 4 papeletas premiadas y 16 sin premio. Sacas dos papeletas. ¿Qué probabilidad hay de que las dos tengan premio? ¿Y de al menos un premio?</p></div>
+            <div class="b-sol"><p>$\tfrac{4}{20} \cdot \tfrac{3}{19} = \tfrac{12}{380} \approx 0{,}032$. Al menos un premio: $1 - \tfrac{16}{20} \cdot \tfrac{15}{19} = 1 - \tfrac{240}{380} = \tfrac{140}{380} \approx 0{,}368$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Qué probabilidad hay de sacar al menos un seis en tres lanzamientos?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac{5}{6}\right)^3 = 1 - \tfrac{125}{216} = \tfrac{91}{216} \approx 0{,}421$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Cuántas veces hay que tirar como mínimo para que la probabilidad de al menos un seis supere el 90 %? Prueba con la calculadora.</p></div>
+            <div class="b-sol"><p>Se busca $\left(\tfrac{5}{6}\right)^n &lt; 0{,}1$. $\left(\tfrac{5}{6}\right)^{12} \approx 0{,}112$, $\left(\tfrac{5}{6}\right)^{13} \approx 0{,}093$. Por tanto, al menos 13 veces.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,1" data-ph="decimal"><p class="b-q-text">3 bolas rojas y 2 azules, dos sin reemplazamiento. ¿Qué probabilidad hay de que las dos sean azules?</p><div class="b-sol"><p>$\tfrac{2}{5} \cdot \tfrac{1}{4} = \tfrac{1}{10}$</p></div></div>
+        <div class="b-q" data-ans="0,65" data-ph="decimal"><p class="b-q-text">$P(E) = 0{,}35$. ¿Cuál es la probabilidad del suceso contrario?</p><div class="b-sol"><p>$1 - 0{,}35 = 0{,}65$</p></div></div>
+        <div class="b-q" data-ans="0,875" data-ph="decimal"><p class="b-q-text">Una moneda se lanza tres veces. ¿Qué probabilidad hay de al menos una cara?</p><div class="b-sol"><p>$1 - \tfrac{1}{8} = \tfrac{7}{8} = 0{,}875$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Recuento" data-toc-k="4" data-toc-short="4 Contar">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 4</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">4</span>Recuento</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un candado de bicicleta tiene tres anillos con las cifras del 0 al 9. Para cada cifra del primer anillo hay 10 en el segundo, y para cada uno de esos pares, otras 10 en el tercero.
+                Son $10 \cdot 10 \cdot 10 = 1000$ posibilidades. Quien adivina tiene en el primer intento una probabilidad de $\tfrac{1}{1000}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PRINCIPIO DE MULTIPLICACIÓN Y FACTORIAL</div>
+                <div class="b-text">
+                    <p><b>Principio de multiplicación:</b> si una elección tiene varios pasos con $n_1$, $n_2$, $n_3$, … posibilidades, en total hay $n_1 \cdot n_2 \cdot n_3 \cdot \ldots$ posibilidades.</p>
+                    <p><b>Ordenaciones:</b> $n$ objetos distintos se pueden ordenar de $n! = n \cdot (n - 1) \cdot \ldots \cdot 2 \cdot 1$ maneras; se lee «factorial de $n$». Por ejemplo $3! = 6$, $4! = 24$, $5! = 120$.</p>
+                    <p>Si todas las posibilidades son igual de probables, una determinada tiene la probabilidad $\dfrac{1}{\text{número de posibilidades}}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculadora:</b> la tecla $x!$ calcula el factorial.</p>
+            <p class="b-note"><b>Los factoriales crecen deprisa:</b> $10! = 3\,628\,800$. Esa cantidad de órdenes de asientos ya existe para diez personas.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ORDENAR Y CONTAR</div>
+        <p class="b-help" style="margin:0 0 12px">En «Ordenaciones» ves todos los órdenes de asientos para hasta cuatro personas. En «Principio de multiplicación» cambias el número de posibilidades de cada paso.</p>
+        <div data-widget="zaehlenos8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 7 · EL PIN</div>
+            <div class="b-text"><p>Un PIN tiene cuatro cifras del 0 al 9. ¿Cuántos PIN hay? ¿Qué probabilidad hay de adivinarlo con tres intentos?</p></div>
+            <div class="b-sol"><p>$10 \cdot 10 \cdot 10 \cdot 10 = 10\,000$. Tres intentos distintos aciertan con la probabilidad $\tfrac{3}{10\,000} = 0{,}03\,\%$.</p>
+                <p><span class="b-res">10 000 PIN; la probabilidad de adivinarlo es mínima.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 8 · EL ORDEN DE ASIENTOS</div>
+            <div class="b-text"><p>Cinco personas se sientan al azar en cinco sillas. ¿Cuántos órdenes de asientos hay? ¿Qué probabilidad hay de que se sienten exactamente en orden alfabético?</p></div>
+            <div class="b-sol"><p>Primera silla, 5 posibilidades; segunda, 4; después 3, 2, 1: $5! = 120$.</p>
+                <p><span class="b-res">120 órdenes; el alfabético tiene la probabilidad $\tfrac{1}{120}$.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un comedor ofrece 3 primeros platos, 4 segundos y 2 postres. ¿Cuántos menús distintos de un plato de cada hay?</p></div>
+            <div class="b-sol"><p>$3 \cdot 4 \cdot 2 = 24$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula $4!$, $6!$ y $7!$.</p></div>
+            <div class="b-sol"><p>$24$, $720$, $5040$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Cuatro corredoras llegan a la meta. ¿Cuántos órdenes son posibles? ¿Cuántas posibilidades hay solo para el oro y la plata?</p></div>
+            <div class="b-sol"><p>$4! = 24$ órdenes. Oro y plata: $4 \cdot 3 = 12$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un candado de maleta tiene 4 anillos con las cifras del 0 al 9. ¿Cuánto se tarda como mucho en probar todas las combinaciones si cada una lleva 2 segundos?</p></div>
+            <div class="b-sol"><p>$10\,000 \cdot 2\,\text{s} = 20\,000\,\text{s} \approx 5{,}6$ horas.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Con las letras M, A, T, H se forma al azar una «palabra», usando cada letra exactamente una vez. ¿Cuántas palabras hay? ¿Qué probabilidad hay de que empiece por M? ¿Y de que sea MATH?</p></div>
+            <div class="b-sol"><p>$4! = 24$ palabras. Empiezan por M $3! = 6$ de ellas: $\tfrac{6}{24} = \tfrac{1}{4}$. MATH: $\tfrac{1}{24}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="120" data-ph="número"><p class="b-q-text">Calcula $5!$.</p><div class="b-sol"><p>$5 \cdot 4 \cdot 3 \cdot 2 \cdot 1 = 120$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="conjuntos"><p class="b-q-text">¿Cuántos conjuntos de ropa salen con 3 camisetas y 2 pantalones?</p><div class="b-sol"><p>$3 \cdot 2 = 6$</p></div></div>
+        <div class="b-q" data-ans="0,001" data-ph="decimal"><p class="b-q-text">Un candado tiene 3 anillos con 10 cifras cada uno. ¿Qué probabilidad hay de adivinar la combinación en el primer intento?</p><div class="b-sol"><p>$\tfrac{1}{1000} = 0{,}001$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="21">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Se lanzan dos dados. ¿Qué probabilidad hay de que la suma sea 12 y de que sea 7?</p></div>
+            <div class="b-sol"><p>Suma 12 solo con 6 y 6: $\tfrac{1}{36}$. Suma 7 con 1+6, 2+5, 3+4, 4+3, 5+2, 6+1: $\tfrac{6}{36} = \tfrac{1}{6}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con los porcentajes:</b> en dos días llueve cada día con un 20 % de probabilidad, independientemente. ¿Qué probabilidad hay de que los dos días estén secos?</p></div>
+            <div class="b-sol"><p>$0{,}8 \cdot 0{,}8 = 0{,}64 = 64\,\%$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un tablero de Galton tiene 4 filas y 5 casillas. ¿Qué probabilidad hay de que una bola caiga a la derecha del todo? ¿Y en el centro (dos veces a la izquierda, dos a la derecha)?</p></div>
+            <div class="b-sol"><p>A la derecha del todo: $\left(\tfrac{1}{2}\right)^4 = \tfrac{1}{16}$. Centro: 6 ramas (IIDD, IDID, IDDI, DIID, DIDI, DDII): $\tfrac{6}{16} = \tfrac{3}{8}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Se encuentran tres personas. ¿Qué probabilidad hay de que todas cumplan años en días distintos? Calcula con 365 días.</p></div>
+            <div class="b-sol"><p>La segunda persona tiene con $\tfrac{364}{365}$ un día distinto al de la primera, y la tercera con $\tfrac{363}{365}$ uno distinto al de las dos: $\tfrac{364}{365} \cdot \tfrac{363}{365} \approx 0{,}992$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: una apuesta de 1654" data-toc-k="X" data-toc-short="De Méré">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Una apuesta de 1654</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Al noble francés <b>caballero de Méré</b> le gustaba apostar a los dados. Su primera apuesta: en cuatro lanzamientos sale al menos un seis.
+                Con ella ganaba a la larga, porque la probabilidad es $1 - \left(\tfrac{5}{6}\right)^4 \approx 51{,}8\,\%$.</p>
+            <p>Su segunda apuesta: en 24 lanzamientos con dos dados sale al menos una vez un doble seis. Pensaba que era igual de favorable. Pero a la larga perdía:
+                $1 - \left(\tfrac{35}{36}\right)^{24} \approx 49{,}1\,\%$. Se lo preguntó al matemático <b>Blaise Pascal</b>. Este se escribió cartas sobre ello en 1654 con <b>Pierre de Fermat</b>,
+                y de esas cartas nació el cálculo de probabilidades.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuentes:</b> correspondencia entre B. Pascal y P. de Fermat, verano de 1654 (Œuvres de Fermat, tomo 2). Las cifras están recalculadas con el suceso contrario.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>SIMULACIÓN</h4><p>un dispositivo aleatorio en lugar del experimento, repetir muchísimas veces; la frecuencia relativa se acerca a la probabilidad</p></div>
+        <div><p>94 seises en 600 lanzamientos: 15,7 %</p></div></div>
+    <div class="b-rueck"><div><h4>REGLAS DE LAS RAMAS</h4><p>multiplicar a lo largo de una rama, sumar las ramas de un suceso</p></div>
+        <div><p>exactamente un seis en dos lanzamientos: $\tfrac{10}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>REEMPLAZAMIENTO · SUCESO CONTRARIO</h4><p>sin reemplazamiento cambian las probabilidades; $P(\overline{E}) = 1 - P(E)$</p></div>
+        <div><p>$\tfrac{3}{5} \cdot \tfrac{2}{4} = 0{,}3$</p></div></div>
+    <div class="b-rueck"><div><h4>CONTAR</h4><p>multiplicar los números de cada paso; ordenar $n$ objetos: $n!$</p></div>
+        <div><p>candado: 1000, $5! = 120$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · CÁLCULO MENTAL</div>
+            <div class="b-q" data-ans="1/4" data-ph="fracción"><p class="b-q-text">Una moneda se lanza dos veces. ¿Qué probabilidad hay de sacar dos cruces?</p><div class="b-sol"><p>$\tfrac{1}{2} \cdot \tfrac{1}{2} = \tfrac{1}{4}$</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="número"><p class="b-q-text">¿De cuántas maneras pueden ponerse 4 personas en fila?</p><div class="b-sol"><p>$4! = 24$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿En qué tipo de extracción cambian las probabilidades de una extracción a otra?</p><div class="b-mc"><button>sin reemplazamiento</button><button>con reemplazamiento</button></div><div class="b-sol"><p>Sin reemplazamiento cambia el contenido de la urna.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · PENSANDO</div>
+            <div class="b-q" data-ans="0,6" data-ph="decimal"><p class="b-q-text">Una bolsa tiene 2 bolas rojas y 3 azules. Se sacan dos sin reemplazamiento. ¿Qué probabilidad hay de que sean de colores distintos?</p><div class="b-sol"><p>$\tfrac{2}{5} \cdot \tfrac{3}{4} + \tfrac{3}{5} \cdot \tfrac{2}{4} = \tfrac{6}{20} + \tfrac{6}{20} = 0{,}6$</p></div></div>
+            <div class="b-q" data-ans="0,75" data-ph="decimal"><p class="b-q-text">¿Qué probabilidad hay de al menos una cara en dos lanzamientos de moneda?</p><div class="b-sol"><p>$1 - \tfrac{1}{4} = 0{,}75$</p></div></div>
+            <div class="b-q" data-ans="60" data-ph="número"><p class="b-q-text">Entre 5 personas se eligen un delegado o una delegada de clase, un suplente y un tesorero, y cada persona ocupa como mucho un cargo. ¿Cuántas posibilidades hay?</p><div class="b-sol"><p>$5 \cdot 4 \cdot 3 = 60$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PARA EXPERIMENTAR</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLERO DE GALTON</span><span class="b-lab-what">Cientos de bolas: las reglas de las ramas en acción (en alemán)</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EL JUEGO DE DADOS</span><span class="b-lab-what">Dos dados que rotulas tú: ¿cuál gana más veces? (en alemán)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Oberschule, 8.º curso (itinerario de Realschule) · Área de aprendizaje 5 según el plan de estudios de matemáticas de la Oberschule de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original. Emoji: Apple, a través de emoji-data de iamcal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-es/stochastik.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-es/geometrie.js"></script>
+<script src="../../js/buch-gy8.js"></script>
+<script src="../../js/buch-es/gy8.js"></script>
+<script src="../../js/buch-os8.js"></script>
+<script src="../../js/buch-es/os8.js"></script>
+</body>
+</html>
