@@ -534,7 +534,7 @@
                     L.push({ pts: [[x, y]], color: 'white', r: 6 });
                     const par = v => v < 0 ? '(' + texNum(v, 2) + ')' : texNum(v, 2);
                     t += '<p style="margin:0 0 6px"><b>Schritt 3:</b> Schnittpunkt ablesen: $S(' + texNum(x, 2) + ' \\mid ' + texNum(y, 2) + ')$. Probe: $\\text{I: } ' +
-                        B.co(a1, 2) + (Math.abs(a1) === 1 ? '' : ' \\cdot ') + par(x) + (b1 < 0 ? ' - ' : ' + ') + (Math.abs(b1) === 1 ? '' : Math.abs(b1) + ' \\cdot ') + par(y) + ' = ' + c1 + '$ ✓, $\;\\text{II: } ' +
+                        B.co(a1, 2) + (Math.abs(a1) === 1 ? '' : ' \\cdot ') + par(x) + (b1 < 0 ? ' - ' : ' + ') + (Math.abs(b1) === 1 ? '' : Math.abs(b1) + ' \\cdot ') + par(y) + ' = ' + c1 + '$ ✓, $\\;\\text{II: } ' +
                         B.co(a2, 2) + (Math.abs(a2) === 1 ? '' : ' \\cdot ') + par(x) + (b2 < 0 ? ' - ' : ' + ') + (Math.abs(b2) === 1 ? '' : Math.abs(b2) + ' \\cdot ') + par(y) + ' = ' + c2 + '$ ✓</p>' +
                         '<p style="margin:0" class="b-res">Genau eine Lösung: $L = \\{(' + texNum(x, 2) + ' \\mid ' + texNum(y, 2) + ')\\}$</p>';
                 } else if (n1.n * n2.d === n2.n * n1.d) {
