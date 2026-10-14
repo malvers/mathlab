@@ -12,7 +12,7 @@ window.BuchEN && BuchEN.add('os6', {
             'Cover: a tangram square of seven pieces, a circle with three coloured quarters, a number line, the Tower of Hanoi and a solid made of cubes',
         // wuerfelbauos6 ("Mauer" is a rule below: analysis has the word "wall" in lower case)
         'Treppe': 'Stairs', 'Turm': 'Tower', 'Selbst bauen': 'Build your own', 'Körper': 'Solid', 'vorne': 'front',
-        'Körper aus Würfeln im Schrägbild': 'Solid made of cubes in oblique view',
+        'Körper aus Würfeln im Schrägbild': 'Solid made of cubes in an oblique drawing',
         'Bauplan: Draufsicht mit den Höhen': 'Building plan: top view with the heights', 'Bauplan': 'Building plan',
         'von vorn': 'from the front', 'von rechts': 'from the right',
         'Tippe im Bauplan auf ein Feld: Die Zahl sagt, wie viele Würfel dort übereinander stehen (bis 3, dann wieder 0). Kantenlänge 1 cm.':
