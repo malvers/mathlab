@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Hörbuch</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#08142a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Audiobook with karaoke: the sentence Solita is reading lights up. One page, two builds:
+   - local (build_karaoke.py): text + sentence times inlined, MP3s next to the page - works opened as a file.
+   - sealed (pack_hoerbuch.mjs, docalvers.de/hoerbuch/): no book content in the page at all. Text and sound come
+     AES-GCM encrypted from the R2 bucket; the key is unwrapped with Doc's password and remembered on the device;
+     "Offline laden" keeps every chapter (still encrypted) in this browser for the plane. */
+:root {
+  --bg: rgb(8, 20, 42);            /* nearly black navy - never pure black */
+  --panel: rgba(14, 36, 78, 0.55);
+  --line: rgba(120, 150, 200, 0.18);
+  --ink: rgba(232, 238, 248, 0.92);
+  --muted: rgba(190, 205, 230, 0.62);
+  --orange: rgb(245, 194, 66);     /* forloop palette, exact */
+  --red: rgb(176, 36, 24);
+  --green: rgb(121, 158, 49);
+  --bar-h: 132px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: Raleway, "Helvetica Neue", Arial, sans-serif; font-size: 18px; line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.orb { font-family: Orbitron, "Helvetica Neue", Arial, sans-serif; letter-spacing: .04em; }
+.dots { font-family: "Times New Roman", Times, serif; }   /* Raleway draws the ellipsis as squares */
+[hidden] { display: none !important; }
+
+/* slim dark scrollbars like index.html - webkit and Firefox kept apart */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: rgba(40, 48, 68, .72); border-radius: 999px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(rgba(78, 92, 118, 1), rgba(52, 64, 86, 1)); border-radius: 999px; border: 2px solid rgba(20, 26, 40, .9); }
+@supports (-moz-appearance: none) { * { scrollbar-width: thin; scrollbar-color: rgba(78, 92, 118, 1) rgba(40, 48, 68, .72); } }
+
+header {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px; background: rgba(8, 20, 42, .94); border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+}
+header h1 { margin: 0; font-size: 19px; font-weight: 700; color: var(--orange); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+header .by { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+header .grow { flex: 1; min-width: 0; }
+.iconbtn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; min-width: 44px; padding: 0 14px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 600 13px Orbitron, Arial, sans-serif;
+}
+.iconbtn:hover { border-color: rgba(245, 194, 66, .5); }
+.iconbtn:disabled { opacity: .5; cursor: default; }
+.iconbtn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+#offline.done { color: var(--green); border-color: rgba(121, 158, 49, .55); }
+#tocBtn { display: none; }
+
+.wrap { display: grid; grid-template-columns: 320px 1fr; height: calc(100% - 73px); }
+nav {
+  overflow-y: auto; border-right: 1px solid var(--line); padding: 14px 10px calc(var(--bar-h) + 20px);
+}
+nav button {
+  display: block; width: 100%; text-align: left; margin: 0 0 6px; padding: 10px 12px; border-radius: 12px;
+  border: 1px solid transparent; background: transparent; color: var(--ink); cursor: pointer; font: 500 15px/1.35 Raleway, Arial, sans-serif;
+}
+nav button:hover { background: var(--panel); }
+nav button.on { background: var(--panel); border-color: rgba(245, 194, 66, .45); }
+nav .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; color: var(--muted); }
+nav .meta svg { width: 15px; height: 15px; fill: currentColor; vertical-align: -3px; }
+nav .meta .have { color: var(--green); }
+nav .prog { height: 3px; margin-top: 6px; border-radius: 3px; background: rgba(120, 150, 200, .15); overflow: hidden; }
+nav .prog i { display: block; height: 100%; width: 0; background: var(--green); }
+
+main { overflow-y: auto; padding: 28px 24px calc(var(--bar-h) + 40px); scroll-behavior: smooth; }
+article { max-width: 760px; margin: 0 auto; }
+article h2 { font: 700 22px/1.4 Orbitron, Arial, sans-serif; color: var(--orange); margin: 0 0 26px; letter-spacing: .03em; }
+article h3 { font: 600 17px/1.5 Orbitron, Arial, sans-serif; color: var(--ink); margin: 34px 0 12px; letter-spacing: .03em; }
+article p { margin: 0 0 18px; color: var(--ink); }
+.s { cursor: pointer; border-radius: 6px; padding: 1px 2px; transition: background .25s, color .25s; }
+.s:hover { background: rgba(120, 150, 200, .12); }
+.s.on { background: rgba(245, 194, 66, .22); color: #fff; box-shadow: 0 0 0 1px rgba(245, 194, 66, .35); }
+h3 .s.on, h2 .s.on { color: var(--orange); }
+
+#follow {
+  position: fixed; right: 22px; bottom: calc(var(--bar-h) + 16px); z-index: 6; display: none;
+  border-color: rgba(245, 194, 66, .6);
+}
+
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 7;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); background: rgba(10, 24, 52, .97);
+  border-top: 1px solid var(--line); backdrop-filter: blur(8px);
+}
+.bar .now { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
+.bar .now b { color: var(--ink); font: 600 13px Orbitron, Arial, sans-serif; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.bar input[type=range] { width: 100%; margin: 8px 0 6px; accent-color: var(--orange); height: 22px; }
+.ctrls { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.ctrls .play { height: 58px; width: 58px; border-radius: 50%; background: var(--orange); color: var(--bg); border: none; }
+.ctrls .play svg { width: 28px; height: 28px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* the lock (sealed build only) */
+#lock { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: var(--bg); }
+#lock form { width: min(360px, 100%); padding: 28px 26px 22px; border-radius: 16px; background: rgba(14, 36, 78, .7);
+  border: 1px solid var(--line); box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }
+#lock h2 { margin: 0 0 18px; font: 700 26px Orbitron, Arial, sans-serif; letter-spacing: .12em; color: var(--orange); }
+#lock label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+#lock input { width: 100%; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(120, 150, 200, .35);
+  background: rgba(8, 20, 42, .9); color: #fff; font: 600 16px Raleway, Arial, sans-serif; outline: none; }
+#lock input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(245, 194, 66, .18); }
+#lock button { margin-top: 14px; width: 100%; height: 48px; border: 0; border-radius: 10px; background: var(--orange); color: var(--bg);
+  font: 700 14px Orbitron, Arial, sans-serif; letter-spacing: .14em; cursor: pointer; }
+#lock button:disabled { opacity: .6; cursor: default; }
+#lock .msg { min-height: 20px; margin-top: 12px; font-size: 14px; color: var(--muted); }
+#lock .msg.err { color: #ff8a80; }
+
+@media (max-width: 860px) {
+  body { font-size: 17px; }
+  .wrap { grid-template-columns: 1fr; }
+  #tocBtn { display: inline-flex; }
+  nav {
+    position: fixed; z-index: 8; top: 0; bottom: 0; left: 0; width: min(86vw, 340px); background: rgb(10, 24, 52);
+    transform: translateX(-105%); transition: transform .25s; padding-top: 18px; border-right: 1px solid var(--line);
+  }
+  nav.open { transform: none; box-shadow: 12px 0 40px rgba(0, 0, 0, .45); }
+  main { padding: 20px 16px calc(var(--bar-h) + 40px); }
+  header { padding: 10px 16px; gap: 10px; }
+  header .by { display: none; }
+  #offline span { display: none; }
+  .ctrls { gap: 6px; }
+  .ctrls .hide-s { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="lock" hidden>
+  <form id="lockForm" autocomplete="on">
+    <h2>HÖRBUCH</h2>
+    <input name="username" autocomplete="username" value="hoerbuch" hidden>   <!-- for the password manager -->
+    <label for="pw">Passwort</label>
+    <input id="pw" name="password" type="password" autocomplete="current-password" required>
+    <button id="go" type="submit">ÖFFNEN</button>
+    <div id="msg" class="msg"></div>
+  </form>
+</div>
+<header>
+  <button class="iconbtn" id="tocBtn" aria-label="Kapitel"><svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg></button>
+  <div class="grow">
+    <h1 class="orb" id="bookTitle">Hörbuch</h1>
+    <div class="by" id="bookBy"></div>
+  </div>
+  <button class="iconbtn" id="offline" hidden><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5zm7-3 5-5h-3V4h-4v8H7z"/></svg><span>Offline laden</span></button>
+</header>
+<div class="wrap">
+  <nav id="toc" aria-label="Kapitel"></nav>
+  <main id="main"><article id="text"></article></main>
+</div>
+<button class="iconbtn" id="follow"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 3h-2.07A7 7 0 0 0 13 5.07V3h-2v2.07A7 7 0 0 0 5.07 11H3v2h2.07A7 7 0 0 0 11 18.93V21h2v-2.07A7 7 0 0 0 18.93 13H21z"/></svg>Zur Stelle</button>
+
+<div class="bar">
+  <div class="now"><b id="nowTitle">–</b><span id="nowTime">0:00 / 0:00</span></div>
+  <label class="sr" for="seek">Position im Kapitel</label>
+  <input type="range" id="seek" min="0" max="1000" value="0" step="1">
+  <div class="ctrls">
+    <button class="iconbtn hide-s" id="prevCh" aria-label="Vorheriges Kapitel"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+    <button class="iconbtn" id="prevS" aria-label="Satz zurück"><svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6zm.5-6 8.5 6V6z"/></svg></button>
+    <button class="iconbtn play" id="play" aria-label="Abspielen"><svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg></button>
+    <button class="iconbtn" id="nextS" aria-label="Satz vor"><svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6zm9-12v12l8.5-6z"/></svg></button>
+    <button class="iconbtn hide-s" id="nextCh" aria-label="Nächstes Kapitel"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zM16 6v12h2V6z"/></svg></button>
+    <button class="iconbtn" id="speed" aria-label="Tempo">1,0×</button>
+  </div>
+</div>
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
+const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '49b43dddd42cca191f2f1b9e';           // sealed build: the R2 bucket and the name of the encrypted data
+const SEALED = !!STORE;
+const $ = id => document.getElementById(id);
+const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
+const SPEEDS = [1, 1.1, 1.25, 1.5, 0.9];
+const ICON = { have: '<svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>',
+               cloud: '<svg viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 5.35 8.04 6 6 0 0 0 6 20h13a5 5 0 0 0 .35-9.96zM17 13l-5 5-5-5h3V9h4v4z"/></svg>' };
+const store = {   // per-viewer convenience only; the page works without it
+  get(k, d) { try { const v = localStorage.getItem('cn.' + k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } },
+  set(k, v) { try { localStorage.setItem('cn.' + k, JSON.stringify(v)); } catch (_) {} }
+};
+let BOOK = [], ch = -1, starts = [], spans = [], cur = -1, follow = true, userScrollUntil = 0, seeking = false;
+let KEY = null, AUTHOR = '', audioUrlNow = '', loadToken = 0, have = new Set();
+
+const fmt = s => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); };
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(/…/g, '<span class="dots">…</span>');
+const mb = n => (n / 1e6).toFixed(0) + ' MB';
+
+// ---------- sealed build: encrypted files, the key, offline ----------
+const FILES = 'hoerbuch-files', fileUrl = h => STORE + 'f/' + h + '.bin';
+async function unseal(key, bin) {     // "DPF1" | iv 12 | AES-GCM ciphertext
+  if (String.fromCharCode(...bin.subarray(0, 4)) !== 'DPF1') throw new Error('Datei beschädigt');
+  try { return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bin.subarray(4, 16) }, key, bin.subarray(16))); }
+  catch (e) { const x = new Error('Schlüssel passt nicht'); x.key = true; throw x; }
+}
+const gunzip = async u8 => new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+function idb(mode, fn) {              // the key remembered on this device: IndexedDB "hoerbuch", store "keys", 'data'
+  return new Promise((res, rej) => {
+    const rq = indexedDB.open('hoerbuch', 1);
+    rq.onupgradeneeded = () => rq.result.createObjectStore('keys');
+    rq.onerror = () => rej(rq.error);
+    rq.onsuccess = () => { const db = rq.result, tx = db.transaction('keys', mode), r = fn(tx.objectStore('keys'));
+      tx.oncomplete = () => { db.close(); res(r.result); }; tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); }; };
+  });
+}
+const loadKey = () => idb('readonly', s => s.get('data')).catch(() => null);
+const saveKey = k => idb('readwrite', s => s.put(k, 'data')).catch(() => {});
+const dropKey = () => idb('readwrite', s => s.delete('data')).catch(() => {});
+
+// an encrypted file: from this browser's cache, else from the bucket (and then kept for offline)
+async function getSealed(h, progress) {
+  const c = await caches.open(FILES), hit = await c.match(fileUrl(h));
+  if (hit) return new Uint8Array(await hit.arrayBuffer());
+  let res;
+  try { res = await fetch(fileUrl(h)); } catch (e) { throw new Error('Kein Netz - dieses Kapitel ist noch nicht offline gespeichert'); }
+  if (!res.ok) throw new Error('Datei fehlt (' + res.status + ')');
+  const total = +res.headers.get('content-length') || 0, reader = res.body.getReader(), parts = [];
+  let got = 0;
+  for (;;) { const { done, value } = await reader.read(); if (done) break; parts.push(value); got += value.length; if (progress && total) progress(got / total); }
+  const bytes = new Uint8Array(got); let o = 0; for (const p of parts) { bytes.set(p, o); o += p.length; }
+  await c.put(fileUrl(h), new Response(bytes, { headers: { 'Content-Type': 'application/octet-stream' } }));
+  have.add(h);
+  return bytes;
+}
+async function keyFromPassword(pw) {   // lock.bin: the data key wrapped with PBKDF2(password)
+  let L;
+  try { L = await (await fetch(STORE + 'lock.bin', { cache: 'no-store' })).json(); }
+  catch (e) { throw new Error('Kein Netz - zum ersten Entsperren bitte online sein'); }
+  const b = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  const kek = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b(L.salt), iterations: L.it, hash: 'SHA-256' }, base,
+    { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  let raw;
+  try { raw = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b(L.iv) }, kek, b(L.ct)); }
+  catch (e) { const x = new Error('Passwort falsch'); x.pw = true; throw x; }
+  return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);   // non-extractable
+}
+async function openBook(key) {
+  const data = JSON.parse(new TextDecoder().decode(await gunzip(await unseal(key, await getSealed(DATA)))));
+  KEY = key; AUTHOR = data.author;
+  $('bookTitle').textContent = data.title;
+  $('bookBy').textContent = data.author + ' · Hörbuch, gelesen von Solita';
+  document.title = data.title;
+  return data.chapters;
+}
+function rememberInChrome(pw) {       // the page moves on by script, so Chrome would not offer to save by itself
+  if (!window.PasswordCredential || !navigator.credentials) return;
+  navigator.credentials.store(new PasswordCredential({ id: 'hoerbuch', name: 'Hörbuch', password: pw })).catch(() => {});
+}
+function askPassword(note) {
+  return new Promise(resolve => {
+    $('lock').hidden = false; $('pw').focus();
+    const say = (t, err) => { $('msg').textContent = t || ''; $('msg').className = 'msg' + (err ? ' err' : ''); };
+    say(note);
+    $('lockForm').onsubmit = async ev => {
+      ev.preventDefault(); $('go').disabled = true;
+      try {
+        say('Prüfe …');
+        const pw = $('pw').value, key = await keyFromPassword(pw);
+        say('Öffne …');
+        const chapters = await openBook(key);
+        await saveKey(key); rememberInChrome(pw);
+        $('lock').hidden = true; resolve(chapters);
+      } catch (e) { say(e.message || 'Fehler', true); if (e.pw) $('pw').select(); }
+      $('go').disabled = false;
+    };
+  });
+}
+async function offlineAll() {
+  const btn = $('offline'), label = btn.querySelector('span');
+  btn.disabled = true;
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (_) {}
+  const todo = BOOK.filter(c => !have.has(c.audio.h)), total = todo.reduce((s, c) => s + c.audio.n, 0);
+  let done = 0;
+  try {
+    for (const c of todo) {
+      await getSealed(c.audio.h, f => { label.textContent = 'Lade ' + Math.round((done + f * c.audio.n) / total * 100) + ' %'; btn.title = mb(total); });
+      done += c.audio.n; buildToc();
+    }
+    offlineState();
+  } catch (e) { label.textContent = 'Fehler - nochmal'; btn.title = e.message; btn.disabled = false; }
+}
+function offlineState() {
+  if (!SEALED) return;
+  const btn = $('offline'), label = btn.querySelector('span'), all = BOOK.every(c => have.has(c.audio.h));
+  btn.hidden = false; btn.disabled = all; btn.classList.toggle('done', all);
+  label.textContent = all ? 'Offline bereit' : 'Offline laden';
+  btn.title = all ? 'Alle Kapitel sind auf diesem Gerät' : mb(BOOK.filter(c => !have.has(c.audio.h)).reduce((s, c) => s + c.audio.n, 0)) + ' laden';
+}
+// the sound of a chapter: the file next to the page, or decrypted into a blob
+async function audioSrc(c, progress) {
+  if (!SEALED) return encodeURI(c.file);
+  return URL.createObjectURL(new Blob([await unseal(KEY, await getSealed(c.audio.h, progress))], { type: c.audio.t }));
+}
+
+// ---------- the player ----------
+function buildToc() {
+  toc.innerHTML = '';
+  BOOK.forEach((c, i) => {
+    const b = document.createElement('button');
+    const pos = store.get('pos.' + c.key, 0), badge = SEALED ? (have.has(c.audio.h) ? `<span class="have" title="offline gespeichert">${ICON.have}</span>`
+      : `<span title="noch nicht offline">${ICON.cloud}</span>`) : '';
+    b.innerHTML = `<div>${esc(c.short)}</div><div class="meta"><span>${fmt(c.dur)} ${badge}</span><span class="pos">${pos > 5 ? fmt(pos) : ''}</span></div>
+      <div class="prog"><i style="width:${Math.min(100, pos / c.dur * 100)}%"></i></div>`;
+    b.classList.toggle('on', i === ch);
+    b.onclick = () => { load(i, store.get('pos.' + c.key, 0), true); toc.classList.remove('open'); };
+    toc.appendChild(b);
+  });
+}
+
+async function load(i, at = 0, play = false) {
+  if (i < 0 || i >= BOOK.length) return;
+  const c = BOOK[i], token = ++loadToken;
+  ch = i; cur = -1; starts = []; spans = [];
+  let html = '', n = 0;
+  c.paras.forEach((p, pi) => {
+    const parts = p.s.map(([t, s]) => { starts.push(t); return `<span class="s" data-i="${n++}">${esc(s)}</span>`; }).join(' ');
+    if (p.h) html += pi === 0 || /^(Chapter \d+\.|Foreword|Preface|Introduction)/.test(p.s[0][1]) ? `<h2>${parts}</h2>` : `<h3>${parts}</h3>`;
+    else html += `<p>${parts}</p>`;
+  });
+  text.innerHTML = html;
+  spans = [...text.querySelectorAll('.s')];
+  [...toc.children].forEach((b, k) => b.classList.toggle('on', k === i));
+  $('nowTitle').textContent = c.short;
+  main.scrollTop = 0;
+  store.set('ch', c.key);
+  audio.pause();
+  $('play').disabled = true;
+  $('nowTime').textContent = 'Lade …';
+  let src;
+  try { src = await audioSrc(c, f => { if (token === loadToken) $('nowTime').textContent = 'Lade ' + Math.round(f * 100) + ' %'; }); }
+  catch (e) { if (token === loadToken) $('nowTime').textContent = e.message; return; }
+  if (token !== loadToken) { if (src.startsWith('blob:')) URL.revokeObjectURL(src); return; }
+  if (audioUrlNow.startsWith('blob:')) URL.revokeObjectURL(audioUrlNow);
+  audioUrlNow = src; audio.src = src; $('play').disabled = false;
+  if (SEALED) { buildToc(); offlineState(); }
+  const go = () => { audio.currentTime = Math.min(at, c.dur - 1); if (play) audio.play().catch(() => {}); tick(true); };
+  if (audio.readyState >= 1) go(); else audio.addEventListener('loadedmetadata', go, { once: true });
+  if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({
+    title: c.short, artist: AUTHOR + ' · gelesen von Solita', album: $('bookTitle').textContent });
+}
+
+function indexAt(t) {   // last sentence whose start is <= t
+  let lo = 0, hi = starts.length - 1, r = 0;
+  while (lo <= hi) { const m = (lo + hi) >> 1; if (starts[m] <= t + 0.05) { r = m; lo = m + 1; } else hi = m - 1; }
+  return r;
+}
+
+function tick(force) {
+  const t = audio.currentTime, c = BOOK[ch];
+  if (!c || !audio.src) return;
+  if (!seeking) seek.value = Math.round(t / c.dur * 1000) || 0;
+  $('nowTime').textContent = fmt(t) + ' / ' + fmt(c.dur);
+  const i = indexAt(t);
+  if (i !== cur || force) {
+    if (spans[cur]) spans[cur].classList.remove('on');
+    cur = i;
+    const el = spans[cur];
+    if (el) {
+      el.classList.add('on');
+      if (follow && Date.now() > userScrollUntil) el.scrollIntoView({ block: 'center', behavior: force ? 'auto' : 'smooth' });
+    }
+  }
+}
+
+let lastSave = 0;
+function save() {
+  const c = BOOK[ch]; if (!c || !audio.src) return;
+  store.set('pos.' + c.key, Math.floor(audio.currentTime));
+  const b = toc.children[ch];
+  if (b) { b.querySelector('.prog i').style.width = Math.min(100, audio.currentTime / c.dur * 100) + '%';
+           b.querySelector('.pos').textContent = fmt(audio.currentTime); }
+}
+
+audio.addEventListener('timeupdate', () => { tick(false); if (Date.now() - lastSave > 5000) { lastSave = Date.now(); save(); } });
+audio.addEventListener('pause', () => { save(); setPlayIcon(); });
+audio.addEventListener('play', setPlayIcon);
+audio.addEventListener('ended', () => { store.set('pos.' + BOOK[ch].key, 0); save(); if (ch + 1 < BOOK.length) load(ch + 1, 0, true); });
+audio.addEventListener('loadedmetadata', () => { audio.playbackRate = store.get('speed', 1); });
+
+function setPlayIcon() {
+  $('playIcon').innerHTML = audio.paused ? '<path d="M8 5v14l11-7z"/>' : '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+  $('play').setAttribute('aria-label', audio.paused ? 'Abspielen' : 'Pause');
+}
+const toggle = () => { if (!audio.src) return; audio.paused ? audio.play().catch(() => {}) : audio.pause(); };
+const jumpS = d => { if (!starts.length) return; const i = Math.max(0, Math.min(starts.length - 1, cur + d)); audio.currentTime = starts[i]; follow = true; userScrollUntil = 0; tick(true); };
+const speedLabel = v => v.toFixed(v * 10 % 1 ? 2 : 1).replace('.', ',') + '×';
+
+$('play').onclick = toggle;
+$('prevS').onclick = () => jumpS(audio.currentTime - starts[cur] > 2 ? 0 : -1);
+$('nextS').onclick = () => jumpS(1);
+$('prevCh').onclick = () => load(ch - 1, 0, !audio.paused);
+$('nextCh').onclick = () => load(ch + 1, 0, !audio.paused);
+$('tocBtn').onclick = () => toc.classList.toggle('open');
+$('offline').onclick = offlineAll;
+$('speed').onclick = () => {
+  const k = (SPEEDS.indexOf(audio.playbackRate) + 1) % SPEEDS.length;
+  audio.playbackRate = SPEEDS[k]; store.set('speed', SPEEDS[k]); $('speed').textContent = speedLabel(SPEEDS[k]);
+};
+seek.addEventListener('input', () => { seeking = true; const c = BOOK[ch]; if (c) $('nowTime').textContent = fmt(seek.value / 1000 * c.dur) + ' / ' + fmt(c.dur); });
+seek.addEventListener('change', () => { seeking = false; if (!audio.src) return; audio.currentTime = seek.value / 1000 * BOOK[ch].dur; follow = true; userScrollUntil = 0; tick(true); });
+text.addEventListener('click', e => {
+  const el = e.target.closest('.s'); if (!el || !audio.src) return;
+  audio.currentTime = starts[+el.dataset.i]; follow = true; userScrollUntil = 0; tick(true);
+  if (audio.paused) audio.play().catch(() => {});
+});
+
+// reading ahead by hand pauses the auto-scroll; "Zur Stelle" brings it back
+const userScroll = () => { userScrollUntil = Date.now() + 8000; $('follow').style.display = 'inline-flex'; };
+main.addEventListener('wheel', userScroll, { passive: true });
+main.addEventListener('touchmove', userScroll, { passive: true });
+$('follow').onclick = () => { userScrollUntil = 0; follow = true; $('follow').style.display = 'none'; tick(true); };
+setInterval(() => { if (userScrollUntil && Date.now() > userScrollUntil) { userScrollUntil = 0; $('follow').style.display = 'none'; } }, 1000);
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); toggle(); }
+  else if (e.code === 'ArrowRight') jumpS(1);
+  else if (e.code === 'ArrowLeft') jumpS(-1);
+});
+if ('mediaSession' in navigator) {
+  const ms = navigator.mediaSession;
+  ms.setActionHandler('play', () => audio.play());
+  ms.setActionHandler('pause', () => audio.pause());
+  ms.setActionHandler('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
+  ms.setActionHandler('seekforward', () => { audio.currentTime += 15; });
+  ms.setActionHandler('previoustrack', () => load(ch - 1, 0, true));
+  ms.setActionHandler('nexttrack', () => load(ch + 1, 0, true));
+}
+
+(async function start() {
+  const sp = store.get('speed', 1);
+  if (SPEEDS.includes(sp)) { audio.playbackRate = audio.defaultPlaybackRate = sp; $('speed').textContent = speedLabel(sp); }
+  if (!SEALED) {
+    BOOK = LOCAL;
+    AUTHOR = LOCALMETA.author; document.title = $('bookTitle').textContent = LOCALMETA.title;
+    $('bookBy').textContent = AUTHOR + ' · Hörbuch, gelesen von Solita';
+  } else {
+    if (!window.crypto || !crypto.subtle || !window.caches || !window.DecompressionStream) {
+      $('lock').hidden = false; $('msg').textContent = 'Dieser Browser kann das Hörbuch nicht öffnen (bitte aktuelles Chrome).'; $('go').disabled = true; return;
+    }
+    navigator.serviceWorker && navigator.serviceWorker.register('sw.js').catch(() => {});
+    try { have = new Set((await (await caches.open(FILES)).keys()).map(r => r.url.replace(/^.*\/f\/|\.bin$/g, ''))); } catch (_) {}
+    const key = await loadKey();
+    try { BOOK = key ? await openBook(key) : await askPassword(''); }
+    catch (e) {
+      if (e.key) await dropKey();
+      BOOK = await askPassword(e.key ? 'Neuer Schlüssel - bitte einmal das Passwort eingeben' : e.message);
+    }
+  }
+  buildToc();
+  offlineState();
+  const startKey = store.get('ch', BOOK[0] && BOOK[0].key);
+  const si = Math.max(0, BOOK.findIndex(c => c.key === startKey));
+  if (BOOK[si]) load(si, store.get('pos.' + BOOK[si].key, 0), false);
+})();
+</script>
+</body>
+</html>
