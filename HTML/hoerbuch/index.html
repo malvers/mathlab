@@ -19,15 +19,75 @@
      AES-GCM encrypted from the R2 bucket; the key is unwrapped with Doc's password and remembered on the device;
      "Offline laden" keeps every chapter (still encrypted) in this browser for the plane. */
 :root {
-  --bg: rgb(8, 20, 42);            /* nearly black navy - never pure black */
+  /* the three schemes of the Stoffverteilungsplan, values exactly as in HTML/svp/svp-tokens.css
+     (Doc 15.10.2026: "wie beim Stoffverteilungsplan das graue Scheme und auch das helle") */
+  --bg: rgb(8, 20, 42);            /* Blau (dark): nearly black navy - never pure black */
+  --card: rgb(14, 36, 78);
   --panel: rgba(14, 36, 78, 0.55);
-  --line: rgba(120, 150, 200, 0.18);
-  --ink: rgba(232, 238, 248, 0.92);
-  --muted: rgba(190, 205, 230, 0.62);
-  --orange: rgb(245, 194, 66);     /* forloop palette, exact */
-  --red: rgb(176, 36, 24);
+  --bar-bg: rgba(12, 30, 64, 0.97);
+  --head-bg: rgba(8, 20, 42, 0.94);
+  --drawer: rgb(12, 30, 64);
+  --line: rgba(120, 160, 220, 0.22);
+  --ink: rgba(225, 235, 250, 0.92);
+  --muted: rgba(170, 190, 220, 0.65);
+  --head: rgb(248, 251, 255);
+  --accent: rgb(245, 194, 66);     /* lambda: forloop orange */
+  --tint: 120, 160, 220;
+  --input-bg: rgba(8, 20, 42, 0.7);
+  --trough: rgba(8, 20, 42, 0.9);
+  --thumb: rgba(120, 160, 220, 0.35);
+  --shadow: rgba(0, 0, 0, 0.45);
   --green: rgb(121, 158, 49);
+  --hl: 245, 194, 66;              /* karaoke: the group or sentence being read */
+  --hl-a: 0.22;
+  --hl-ink: rgb(255, 255, 255);
+  --orange: rgb(245, 194, 66);     /* the word being read, play button: filled orange, navy ink - in every scheme */
+  --navy: rgb(14, 36, 78);
   --bar-h: 132px;
+}
+html.theme-grey {
+  --bg: rgb(26, 26, 28);
+  --card: rgb(37, 37, 40);
+  --panel: rgba(37, 37, 40, 0.55);
+  --bar-bg: rgba(31, 31, 34, 0.97);
+  --head-bg: rgba(26, 26, 28, 0.94);
+  --drawer: rgb(31, 31, 34);
+  --line: rgba(205, 210, 220, 0.18);
+  --ink: rgb(212, 212, 216);
+  --muted: rgba(212, 212, 216, 0.62);
+  --head: rgb(161, 161, 170);
+  --accent: rgb(254, 215, 170);    /* --g-orange of the grey scheme (orange-200) */
+  --tint: 190, 194, 202;
+  --input-bg: rgba(18, 18, 20, 0.7);
+  --trough: rgba(18, 18, 20, 0.9);
+  --thumb: rgba(205, 210, 220, 0.3);
+  --shadow: rgba(0, 0, 0, 0.4);
+  --green: rgb(217, 249, 157);     /* --g-green (lime-200) */
+  --hl: 254, 215, 170;
+  --hl-a: 0.2;
+  --hl-ink: rgb(244, 244, 245);
+}
+html.theme-light {
+  --bg: rgb(246, 248, 252);
+  --card: rgb(255, 255, 255);
+  --panel: rgba(255, 255, 255, 0.85);
+  --bar-bg: rgba(232, 238, 248, 0.97);
+  --head-bg: rgba(246, 248, 252, 0.94);
+  --drawer: rgb(232, 238, 248);
+  --line: rgba(40, 70, 120, 0.22);
+  --ink: rgb(24, 34, 52);
+  --muted: rgb(96, 112, 140);
+  --head: rgb(96, 120, 160);
+  --accent: rgb(30, 60, 120);      /* lambda of the light scheme: the blue */
+  --tint: 40, 70, 120;
+  --input-bg: rgb(255, 255, 255);
+  --trough: rgba(220, 228, 240, 0.9);
+  --thumb: rgba(60, 100, 160, 0.35);
+  --shadow: rgba(30, 50, 90, 0.18);
+  --green: rgb(92, 122, 32);       /* phi of the light scheme */
+  --hl: 245, 194, 66;              /* pale amber on white needs more body (svp --edit-fill) */
+  --hl-a: 0.38;
+  --hl-ink: rgb(24, 34, 52);
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
@@ -42,16 +102,16 @@ body {
 
 /* slim dark scrollbars like index.html - webkit and Firefox kept apart */
 ::-webkit-scrollbar { width: 11px; height: 11px; }
-::-webkit-scrollbar-track { background: rgba(40, 48, 68, .72); border-radius: 999px; }
-::-webkit-scrollbar-thumb { background: linear-gradient(rgba(78, 92, 118, 1), rgba(52, 64, 86, 1)); border-radius: 999px; border: 2px solid rgba(20, 26, 40, .9); }
-@supports (-moz-appearance: none) { * { scrollbar-width: thin; scrollbar-color: rgba(78, 92, 118, 1) rgba(40, 48, 68, .72); } }
+::-webkit-scrollbar-track { background: var(--trough); border-radius: 999px; }
+::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 999px; border: 2px solid var(--trough); }
+@supports (-moz-appearance: none) { * { scrollbar-width: thin; scrollbar-color: var(--thumb) var(--trough); } }
 
 header {
   position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px;
-  padding: 14px 20px; background: rgba(8, 20, 42, .94); border-bottom: 1px solid var(--line);
+  padding: 14px 20px; background: var(--head-bg); border-bottom: 1px solid var(--line);
   backdrop-filter: blur(8px);
 }
-header h1 { margin: 0; font-size: 19px; font-weight: 700; color: var(--orange); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+header h1 { margin: 0; font-size: 19px; font-weight: 700; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 header .by { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 header .grow { flex: 1; min-width: 0; }
 .iconbtn {
@@ -59,10 +119,10 @@ header .grow { flex: 1; min-width: 0; }
   height: 44px; min-width: 44px; padding: 0 14px; border-radius: 12px; cursor: pointer;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 600 13px Orbitron, Arial, sans-serif;
 }
-.iconbtn:hover { border-color: rgba(245, 194, 66, .5); }
+.iconbtn:hover { border-color: rgba(var(--hl), .6); }
 .iconbtn:disabled { opacity: .5; cursor: default; }
 .iconbtn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
-#offline.done { color: var(--green); border-color: rgba(121, 158, 49, .55); }
+#offline.done { color: var(--green); border-color: var(--green); }
 #tocBtn { display: none; }
 
 .wrap { display: grid; grid-template-columns: 320px 1fr; height: calc(100% - 73px); }
@@ -74,51 +134,56 @@ nav button {
   border: 1px solid transparent; background: transparent; color: var(--ink); cursor: pointer; font: 500 15px/1.35 Raleway, Arial, sans-serif;
 }
 nav button:hover { background: var(--panel); }
-nav button.on { background: var(--panel); border-color: rgba(245, 194, 66, .45); }
+nav button.on { background: var(--panel); border-color: rgba(var(--hl), .55); }
 nav .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; color: var(--muted); }
 nav .meta svg { width: 15px; height: 15px; fill: currentColor; vertical-align: -3px; }
 nav .meta .have { color: var(--green); }
-nav .prog { height: 3px; margin-top: 6px; border-radius: 3px; background: rgba(120, 150, 200, .15); overflow: hidden; }
+nav .prog { height: 3px; margin-top: 6px; border-radius: 3px; background: rgba(var(--tint), .15); overflow: hidden; }
 nav .prog i { display: block; height: 100%; width: 0; background: var(--green); }
 
 main { overflow-y: auto; padding: 28px 24px calc(var(--bar-h) + 40px); scroll-behavior: smooth; }
 article { max-width: 760px; margin: 0 auto; }
-article h2 { font: 700 22px/1.4 Orbitron, Arial, sans-serif; color: var(--orange); margin: 0 0 26px; letter-spacing: .03em; }
-article h3 { font: 600 17px/1.5 Orbitron, Arial, sans-serif; color: var(--ink); margin: 34px 0 12px; letter-spacing: .03em; }
+article h2 { font: 700 22px/1.4 Orbitron, Arial, sans-serif; color: var(--accent); margin: 0 0 26px; letter-spacing: .03em; }
+article h3 { font: 600 17px/1.5 Orbitron, Arial, sans-serif; color: var(--head); margin: 34px 0 12px; letter-spacing: .03em; }
 article p { margin: 0 0 18px; color: var(--ink); }
-.s { cursor: pointer; border-radius: 6px; padding: 1px 2px; transition: background .25s, color .25s; }
-.s:hover { background: rgba(120, 150, 200, .12); }
-.s.on { background: rgba(245, 194, 66, .22); color: #fff; box-shadow: 0 0 0 1px rgba(245, 194, 66, .35); }
-h3 .s.on, h2 .s.on { color: var(--orange); }
+/* karaoke: sentence .s > word group .g > word .w; "on" = being read, "cur" = the frame around it */
+.s, .g, .w { cursor: pointer; border-radius: 5px; transition: background .15s, color .15s; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.w { transition: none; }                  /* a word must switch at once, not fade */
+.w:hover { background: rgba(var(--tint), .14); }
+.s.on, .g.on { background: rgba(var(--hl), var(--hl-a)); color: var(--hl-ink); box-shadow: 0 0 0 1px rgba(var(--hl), .4); }
+.s.cur, .g.cur { background: rgba(var(--hl), calc(var(--hl-a) * .45)); }
+.w.on { background: var(--orange); color: var(--navy); box-shadow: 0 0 0 2px var(--orange); }
+h3 .on, h2 .on { color: var(--accent); }
+h3 .w.on, h2 .w.on { color: var(--navy); }
 
 #follow {
   position: fixed; right: 22px; bottom: calc(var(--bar-h) + 16px); z-index: 6; display: none;
-  border-color: rgba(245, 194, 66, .6);
+  border-color: rgba(var(--hl), .7);
 }
 
 .bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 7;
-  padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); background: rgba(10, 24, 52, .97);
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); background: var(--bar-bg);
   border-top: 1px solid var(--line); backdrop-filter: blur(8px);
 }
 .bar .now { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
 .bar .now b { color: var(--ink); font: 600 13px Orbitron, Arial, sans-serif; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.bar input[type=range] { width: 100%; margin: 8px 0 6px; accent-color: var(--orange); height: 22px; }
+.bar input[type=range] { width: 100%; margin: 8px 0 6px; accent-color: var(--accent); height: 22px; }
 .ctrls { display: flex; align-items: center; justify-content: center; gap: 10px; }
-.ctrls .play { height: 58px; width: 58px; border-radius: 50%; background: var(--orange); color: var(--bg); border: none; }
+.ctrls .play { height: 58px; width: 58px; border-radius: 50%; background: var(--orange); color: var(--navy); border: none; }
 .ctrls .play svg { width: 28px; height: 28px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 /* the lock (sealed build only) */
 #lock { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: var(--bg); }
-#lock form { width: min(360px, 100%); padding: 28px 26px 22px; border-radius: 16px; background: rgba(14, 36, 78, .7);
-  border: 1px solid var(--line); box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }
-#lock h2 { margin: 0 0 18px; font: 700 26px Orbitron, Arial, sans-serif; letter-spacing: .12em; color: var(--orange); }
+#lock form { width: min(360px, 100%); padding: 28px 26px 22px; border-radius: 16px; background: var(--card);
+  border: 1px solid var(--line); box-shadow: 0 18px 40px var(--shadow); }
+#lock h2 { margin: 0 0 18px; font: 700 26px Orbitron, Arial, sans-serif; letter-spacing: .12em; color: var(--accent); }
 #lock label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-#lock input { width: 100%; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(120, 150, 200, .35);
-  background: rgba(8, 20, 42, .9); color: #fff; font: 600 16px Raleway, Arial, sans-serif; outline: none; }
-#lock input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(245, 194, 66, .18); }
-#lock button { margin-top: 14px; width: 100%; height: 48px; border: 0; border-radius: 10px; background: var(--orange); color: var(--bg);
+#lock input { width: 100%; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(var(--tint), .4);
+  background: var(--input-bg); color: var(--ink); font: 600 16px Raleway, Arial, sans-serif; outline: none; }
+#lock input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--hl), .2); }
+#lock button { margin-top: 14px; width: 100%; height: 48px; border: 0; border-radius: 10px; background: var(--orange); color: var(--navy);
   font: 700 14px Orbitron, Arial, sans-serif; letter-spacing: .14em; cursor: pointer; }
 #lock button:disabled { opacity: .6; cursor: default; }
 #lock .msg { min-height: 20px; margin-top: 12px; font-size: 14px; color: var(--muted); }
@@ -129,20 +194,25 @@ h3 .s.on, h2 .s.on { color: var(--orange); }
   .wrap { grid-template-columns: 1fr; }
   #tocBtn { display: inline-flex; }
   nav {
-    position: fixed; z-index: 8; top: 0; bottom: 0; left: 0; width: min(86vw, 340px); background: rgb(10, 24, 52);
+    position: fixed; z-index: 8; top: 0; bottom: 0; left: 0; width: min(86vw, 340px); background: var(--drawer);
     transform: translateX(-105%); transition: transform .25s; padding-top: 18px; border-right: 1px solid var(--line);
   }
-  nav.open { transform: none; box-shadow: 12px 0 40px rgba(0, 0, 0, .45); }
+  nav.open { transform: none; box-shadow: 12px 0 40px var(--shadow); }
   main { padding: 20px 16px calc(var(--bar-h) + 40px); }
   header { padding: 10px 16px; gap: 10px; }
   header .by { display: none; }
   #offline span { display: none; }
+  #mode, #theme { padding: 0 10px; font-size: 12px; }
   .ctrls { gap: 6px; }
   .ctrls .hide-s { display: none; }
 }
 </style>
 </head>
 <body>
+<script>
+  // the colour scheme before the first paint (Blau / Hell / Grau like the Stoffverteilungsplan)
+  try { const t = JSON.parse(localStorage.getItem('cn.theme')); if (t === 'light' || t === 'grey') document.documentElement.classList.add('theme-' + t); } catch (_) {}
+</script>
 <div id="lock" hidden>
   <form id="lockForm" autocomplete="on">
     <h2>HÖRBUCH</h2>
@@ -159,6 +229,8 @@ h3 .s.on, h2 .s.on { color: var(--orange); }
     <h1 class="orb" id="bookTitle">Hörbuch</h1>
     <div class="by" id="bookBy"></div>
   </div>
+  <button class="iconbtn" id="mode" title="Karaoke: was mitleuchtet - Satz, Wortgruppe oder Wort">Gruppe</button>
+  <button class="iconbtn" id="theme" role="switch">Hell</button>
   <button class="iconbtn" id="offline" hidden><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5zm7-3 5-5h-3V4h-4v8H7z"/></svg><span>Offline laden</span></button>
 </header>
 <div class="wrap">
@@ -185,7 +257,7 @@ h3 .s.on, h2 .s.on { color: var(--orange); }
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '49b43dddd42cca191f2f1b9e';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '7a672612a03a403b643ecf02';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -196,7 +268,7 @@ const store = {   // per-viewer convenience only; the page works without it
   get(k, d) { try { const v = localStorage.getItem('cn.' + k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } },
   set(k, v) { try { localStorage.setItem('cn.' + k, JSON.stringify(v)); } catch (_) {} }
 };
-let BOOK = [], ch = -1, starts = [], spans = [], cur = -1, follow = true, userScrollUntil = 0, seeking = false;
+let BOOK = [], ch = -1, starts = [], spans = [], follow = true, userScrollUntil = 0, seeking = false;
 let KEY = null, AUTHOR = '', audioUrlNow = '', loadToken = 0, have = new Set();
 
 const fmt = s => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60;
@@ -326,18 +398,50 @@ function buildToc() {
   });
 }
 
+// karaoke data of the open chapter: sentences > word groups > words, each with its start time
+// (a sentence: [start, text, end of speech, [[offset, start] of its 2nd, 3rd ... group]]; word times are spread over
+// their group by length - inside a group Solita speaks evenly)
+let S = [], si = -1, gi = -1, wi = -1;
+const MODES = ['gruppe', 'wort', 'satz'], MODE_LABEL = { gruppe: 'Gruppe', wort: 'Wort', satz: 'Satz' };
+let mode = MODES.includes(store.get('mode', 'gruppe')) ? store.get('mode', 'gruppe') : 'gruppe';
+
+function sentenceHtml(sent, idx) {
+  const [t, txt, e0, g0] = sent, e = e0 == null ? t + txt.length / 17 : e0, gs = [[0, t]].concat(g0 || []);
+  const out = { t, e, groups: [] };
+  let html = '';
+  gs.forEach(([o, gt], k) => {
+    const end = k + 1 < gs.length ? gs[k + 1][0] : txt.length, gte = k + 1 < gs.length ? gs[k + 1][1] : e;
+    const piece = txt.slice(o, end), parts = piece.split(/(\s+)/), words = [];
+    let total = 0;
+    parts.forEach(w => { if (w && !/^\s+$/.test(w)) total += w.length + 1 + (/[,;:.!?…]$/.test(w) ? 3 : 0); });
+    let acc = 0, wh = '';
+    parts.forEach(w => {
+      if (!w) return;
+      if (/^\s+$/.test(w)) { wh += w; return; }
+      words.push(gt + (gte - gt) * acc / (total || 1));
+      acc += w.length + 1 + (/[,;:.!?…]$/.test(w) ? 3 : 0);
+      wh += `<span class="w" data-w="${words.length - 1}">${esc(w)}</span>`;
+    });
+    out.groups.push({ t: gt, words });
+    html += `<span class="g" data-g="${k}">${wh}</span>`;
+  });
+  S[idx] = out;
+  return `<span class="s" data-i="${idx}">${html}</span>`;
+}
+
 async function load(i, at = 0, play = false) {
   if (i < 0 || i >= BOOK.length) return;
   const c = BOOK[i], token = ++loadToken;
-  ch = i; cur = -1; starts = []; spans = [];
+  ch = i; si = gi = wi = -1; starts = []; S = [];
   let html = '', n = 0;
   c.paras.forEach((p, pi) => {
-    const parts = p.s.map(([t, s]) => { starts.push(t); return `<span class="s" data-i="${n++}">${esc(s)}</span>`; }).join(' ');
+    const parts = p.s.map(sent => { starts.push(sent[0]); return sentenceHtml(sent, n++); }).join(' ');
     if (p.h) html += pi === 0 || /^(Chapter \d+\.|Foreword|Preface|Introduction)/.test(p.s[0][1]) ? `<h2>${parts}</h2>` : `<h3>${parts}</h3>`;
     else html += `<p>${parts}</p>`;
   });
   text.innerHTML = html;
   spans = [...text.querySelectorAll('.s')];
+  S.forEach((x, k) => { x.el = spans[k]; x.gEls = [...spans[k].querySelectorAll('.g')]; x.groups.forEach((g, j) => { g.wEls = [...x.gEls[j].querySelectorAll('.w')]; }); });
   [...toc.children].forEach((b, k) => b.classList.toggle('on', k === i));
   $('nowTitle').textContent = c.short;
   main.scrollTop = 0;
@@ -363,23 +467,34 @@ function indexAt(t) {   // last sentence whose start is <= t
   while (lo <= hi) { const m = (lo + hi) >> 1; if (starts[m] <= t + 0.05) { r = m; lo = m + 1; } else hi = m - 1; }
   return r;
 }
+const lastAt = (arr, t, key) => { let r = 0; for (let k = 0; k < arr.length; k++) { if ((key ? arr[k][key] : arr[k]) <= t + 0.03) r = k; else break; } return r; };
+
+function paint() {        // the classes for the current sentence / group / word in the chosen mode
+  text.querySelectorAll('.on, .cur').forEach(el => el.classList.remove('on', 'cur'));
+  const x = S[si]; if (!x) return;
+  const gEl = x.gEls[gi], wEl = x.groups[gi] && x.groups[gi].wEls[wi];
+  if (mode === 'satz') x.el.classList.add('on');
+  else if (mode === 'gruppe') { x.el.classList.add('cur'); if (gEl) gEl.classList.add('on'); }
+  else { if (gEl) gEl.classList.add('cur'); if (wEl) wEl.classList.add('on'); }
+}
 
 function tick(force) {
   const t = audio.currentTime, c = BOOK[ch];
   if (!c || !audio.src) return;
   if (!seeking) seek.value = Math.round(t / c.dur * 1000) || 0;
   $('nowTime').textContent = fmt(t) + ' / ' + fmt(c.dur);
-  const i = indexAt(t);
-  if (i !== cur || force) {
-    if (spans[cur]) spans[cur].classList.remove('on');
-    cur = i;
-    const el = spans[cur];
-    if (el) {
-      el.classList.add('on');
-      if (follow && Date.now() > userScrollUntil) el.scrollIntoView({ block: 'center', behavior: force ? 'auto' : 'smooth' });
-    }
+  const s = indexAt(t), x = S[s];
+  if (!x) return;
+  const g = lastAt(x.groups, t, 't'), w = lastAt(x.groups[g].words, t);
+  const newS = s !== si;
+  if (newS || g !== gi || w !== wi || force) {
+    si = s; gi = g; wi = w;
+    paint();
+    if ((newS || force) && follow && Date.now() > userScrollUntil) x.el.scrollIntoView({ block: 'center', behavior: force ? 'auto' : 'smooth' });
   }
 }
+// words change faster than 'timeupdate' (4 per second) - while playing, every frame
+(function frame() { if (!audio.paused) tick(false); requestAnimationFrame(frame); })();
 
 let lastSave = 0;
 function save() {
@@ -401,16 +516,34 @@ function setPlayIcon() {
   $('play').setAttribute('aria-label', audio.paused ? 'Abspielen' : 'Pause');
 }
 const toggle = () => { if (!audio.src) return; audio.paused ? audio.play().catch(() => {}) : audio.pause(); };
-const jumpS = d => { if (!starts.length) return; const i = Math.max(0, Math.min(starts.length - 1, cur + d)); audio.currentTime = starts[i]; follow = true; userScrollUntil = 0; tick(true); };
+const jumpS = d => { if (!starts.length) return; const i = Math.max(0, Math.min(starts.length - 1, si + d)); audio.currentTime = starts[i]; follow = true; userScrollUntil = 0; tick(true); };
 const speedLabel = v => v.toFixed(v * 10 % 1 ? 2 : 1).replace('.', ',') + '×';
 
 $('play').onclick = toggle;
-$('prevS').onclick = () => jumpS(audio.currentTime - starts[cur] > 2 ? 0 : -1);
+$('prevS').onclick = () => jumpS(audio.currentTime - starts[si] > 2 ? 0 : -1);
 $('nextS').onclick = () => jumpS(1);
 $('prevCh').onclick = () => load(ch - 1, 0, !audio.paused);
 $('nextCh').onclick = () => load(ch + 1, 0, !audio.paused);
 $('tocBtn').onclick = () => toc.classList.toggle('open');
 $('offline').onclick = offlineAll;
+// Blau / Hell / Grau, cycling like the Stoffverteilungsplan (svp-nav.js); the button names the scheme it switches to
+const THEME_LABEL = { dark: 'Blau', light: 'Hell', grey: 'Grau' }, THEME_NEXT = { light: 'dark', dark: 'grey', grey: 'light' };
+let theme = ['light', 'grey'].includes(store.get('theme', 'dark')) ? store.get('theme', 'dark') : 'dark';
+function applyTheme(t) {
+  theme = t;
+  document.documentElement.classList.toggle('theme-light', t === 'light');
+  document.documentElement.classList.toggle('theme-grey', t === 'grey');
+  $('theme').textContent = THEME_LABEL[THEME_NEXT[t]];
+  $('theme').title = 'Farbschema ' + THEME_LABEL[THEME_NEXT[t]] + ' einschalten';
+  $('theme').setAttribute('aria-checked', t === 'light' ? 'true' : 'false');
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = getComputedStyle(document.body).backgroundColor;
+  store.set('theme', t);
+}
+$('theme').onclick = () => applyTheme(THEME_NEXT[theme]);
+applyTheme(theme);
+function applyMode(m) { mode = m; $('mode').textContent = MODE_LABEL[m]; store.set('mode', m); paint(); }
+$('mode').onclick = () => applyMode(MODES[(MODES.indexOf(mode) + 1) % MODES.length]);
+applyMode(mode);
 $('speed').onclick = () => {
   const k = (SPEEDS.indexOf(audio.playbackRate) + 1) % SPEEDS.length;
   audio.playbackRate = SPEEDS[k]; store.set('speed', SPEEDS[k]); $('speed').textContent = speedLabel(SPEEDS[k]);
@@ -418,8 +551,11 @@ $('speed').onclick = () => {
 seek.addEventListener('input', () => { seeking = true; const c = BOOK[ch]; if (c) $('nowTime').textContent = fmt(seek.value / 1000 * c.dur) + ' / ' + fmt(c.dur); });
 seek.addEventListener('change', () => { seeking = false; if (!audio.src) return; audio.currentTime = seek.value / 1000 * BOOK[ch].dur; follow = true; userScrollUntil = 0; tick(true); });
 text.addEventListener('click', e => {
-  const el = e.target.closest('.s'); if (!el || !audio.src) return;
-  audio.currentTime = starts[+el.dataset.i]; follow = true; userScrollUntil = 0; tick(true);
+  const sEl = e.target.closest('.s'); if (!sEl || !audio.src) return;
+  const x = S[+sEl.dataset.i], gEl = e.target.closest('.g'), wEl = e.target.closest('.w');
+  let t = x.t;
+  if (mode !== 'satz' && gEl) { const g = x.groups[+gEl.dataset.g]; t = mode === 'wort' && wEl ? g.words[+wEl.dataset.w] : g.t; }
+  audio.currentTime = t; follow = true; userScrollUntil = 0; tick(true);
   if (audio.paused) audio.play().catch(() => {});
 });
 
