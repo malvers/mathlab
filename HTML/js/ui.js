@@ -11,9 +11,9 @@ class CyberUI {
         console.log("⚛️ Cyber-UI Engine v5.3.8 initialized.");
         this.installResourceGuard();
         this.injectStyles();
-        // Opt-out: pass { screenWarning: false } to skip the small-screen banner (e.g. the chat app,
-        // which is fine on phones). Default behavior is unchanged for every other lab.
-        if (options.screenWarning !== false) {
+        // Opt-in: pass { screenWarning: true } for a lab that really needs a large screen. Off by default -
+        // 980 × 620 CSS px fails on every phone (largest iPhone: 440 × 956), and the labs are responsive now.
+        if (options.screenWarning === true) {
             this.ensureScreenWarning({
                 minWidth: 980,
                 minHeight: 620,
