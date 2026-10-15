@@ -1,8 +1,11 @@
-// Dreiecks-Billard (dreiecksbillard.html): a laser bounces inside a triangle, windows on the rim count its hits.
+// Dreiecks-Billard (dreiecksbillard.html): a laser bounces inside a triangle, a curve on the rim shows its hits.
 // Doc, 14.10.2026: OpenAI's preprint "Ergodicity of triangular billiards with an irrational angle" (25.09.2026) -
 // if one angle is an irrational multiple of pi, the billiard flow is ergodic, so the hits spread evenly over the rim:
 // equal windows get equal counts in the long run. The windows can be dragged and resized ("verschiebbar und in ihrer
-// Größe veränderbar"); bars outside the rim show the hit density, the dashed line is the even spread.
+// Größe veränderbar"); bars outside the rim show the hit density. Since 15.10.2026 the windows are off at first and
+// switched on in their card, and the curve counts the hits themselves: it grows outward from the rim until the run
+// reaches its goal and stops - an even spread then stands equally high all round. A rose beside the triangle shows the
+// directions the laser flies in: that is where rational and irrational really differ (spikes or a round ring).
 (function () {
     'use strict';
 
@@ -19,37 +22,45 @@
     // The preset triangles. A tag marks an irrational angle; the others are shown as a fraction of 180°.
     const PRESETS = [
         { id: 'irr', label: 'α = 1 rad, β = √2 rad', a: 1, b: Math.SQRT2, tags: ['1 rad', '√2 rad', 'π − 1 − √2 rad'],
-            hint: 'Alle drei Winkel irrational: Die Balken werden schnell flach, gleich breite Fenster zählen gleich viel.' },
+            hint: 'Alle drei Winkel irrational: Die Kurve wächst überall gleich hoch, die Rose wird ein runder Ring – der Laser ' +
+                'fliegt in alle Richtungen.' },
         { id: 'right', label: 'Rechtwinklig, α = 1 rad', a: 1, b: Math.PI / 2, tags: ['1 rad', null, 'π/2 − 1 rad'],
-            hint: 'Vom Satz gedeckt (zwei Winkel irrational) – aber die Balken werden quälend langsam flach. ' +
+            hint: 'Vom Satz gedeckt (zwei Winkel irrational) – aber die Kurve wird quälend langsam flach. ' +
                 'Genau solche Dreiecke hatten in Simulationen Zweifel geweckt.' },
         { id: 'equi', label: 'Gleichseitig (60°, 60°, 60°)', a: 60 * DEG, b: 60 * DEG, tags: [null, null, null],
             hint: 'Rational und trotzdem flach: Der Laser kennt nur 6 Richtungen, die Symmetrie verteilt sie gleich ' +
-                'auf alle Seiten. Die Spur zeigt nur 3 Linienrichtungen.' },
+                'auf alle Seiten. Die Rose zeigt sie als 6 Stacheln.' },
         { id: 'r30', label: '30°, 60°, 90°', a: 30 * DEG, b: 60 * DEG, tags: [null, null, null],
             hint: 'Rational: Jede Seite für sich wird gleichmäßig getroffen, aber die Seiten unterscheiden sich – ' +
-                'je nach Startrichtung. Fenster auf verschiedenen Seiten zählen ungleich.' },
+                'je nach Startrichtung. Die Kurve hat Stufen, die Rose 12 Stacheln.' },
         { id: 'r45', label: '45°, 45°, 90°', a: 45 * DEG, b: 45 * DEG, tags: [null, null, null],
             hint: 'Rational: Jede Seite für sich gleichmäßig, die Seiten untereinander nicht. Ein neuer Schuss ' +
-                'verschiebt die Stufen.' },
+                'verschiebt die Stufen. Die Rose zeigt 8 Stacheln.' },
     ];
     const CUSTOM_HINT = 'Eigene Winkel. Im Rechner ist jede Zahl ein Bruch – „irrational“ heißt hier: kein Bruch ' +
         'mit kleinem Nenner.';
 
     const NB = 1 << 18;                     // fine bins along the whole rim: the windows count from these
     const NB_MIN = 16, NB_MAX = Math.round(0.3 * NB);
-    const CURVE_BINS = 512;                 // the rim curve: at most this many bins all round
-    const PER_BIN = 20;                     // ... and only as fine as gives every bin 20 hits on average
-    // the run-ahead (Doc, 14.10.2026: "im Hintergrund vorher ... schnell simulieren und gucken, wo das hinläuft"):
-    // this many hits of the same shot, this many per frame - it only draws the dashed line, the laser never stops
-    const PRE_N = 2e6, PRE_BUDGET = 250000;
+    const CURVE_MIN = 16, CURVE_BINS = 512; // the rim curve: at least / at most this many pieces all round
+    const PER_BIN = 400;                    // ... and only as fine as gives every piece 400 hits at the end of a run
+    // a run ends at its goal (Doc, 15.10.2026: "wir rechnen hunderttausend Schritte ... und dann stopp") - the goal
+    // sets the scale, so the curve grows from the rim and stands at full height when the run is done
+    const GOALS = [1e3, 2e3, 5e3, 1e4, 2e4, 5e4, 1e5, 2e5, 5e5, 1e6, 2e6, 5e6, 1e7];
     const TRAIL = 28;                       // laser segments shown fading
     const TRACE_CAP = 300000;               // the trace shows the first flights of a shot - redrawn on every zoom
     const TRACE_BUDGET = 12000;             // trace segments painted per frame
     const ZOOM_MAX = 1000;
-    // ONE yardstick for window bars, rim curve and dashed line: LINE_H px out from the rim is an even spread (hits as
-    // expected), R_CAP times that the cap. Zero is the rim itself, so an empty stretch lies under the triangle's edge.
+    // ONE yardstick for window bars and rim curve: LINE_H px out from the rim is an even spread at the end of a run,
+    // R_CAP times that the cap. Zero is the rim itself, so an empty stretch lies under the triangle's edge.
     const LINE_H = 36, R_CAP = 2;
+    // the direction rose (Doc, 15.10.2026: "der Unterschied zwischen irrational und rational ist kaum sichtbar"): where
+    // the laser hits the rim barely tells them apart, the directions it flies in do - a rational triangle knows only a
+    // few (12, 8 or 6 spikes), an irrational one all of them (a round ring). Every flight adds its length to its
+    // direction (time spent per direction, the flow's own measure), so an even spread is a circle.
+    const DIR_BINS = 180;                   // 2° each
+    const ROSE_CAP = 2.5;                   // spikes cut at 2.5 times the ring an even spread makes at the goal
+    const ROSE_MIN = 180, ROSE_MAX = 120;   // room the corner beside the coach box needs; the rose's radius at most
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -68,7 +79,10 @@
     const SPEEDS = [];
     for (let d = 1; d <= 1e6; d *= 10) for (let m = 1; m <= 9; m++) SPEEDS.push(m * d);
     let running = false, speedI = SPEEDS.indexOf(5), traceOn = true;
+    let goalI = GOALS.indexOf(1e5);
     let wins = [], sel = 0, winsTouched = false;
+    // the windows only when switched on (Doc, 15.10.2026: "herausnehmen vielleicht nicht, aber einschaltbar machen")
+    let winsOn = false;
     let linked = true;                      // all windows equally wide (Doc, 14.10.2026: A breiter ziehen, B geht mit)
     let drag = null, aim = null, pan = null, pinch = null;
     const pointers = new Map();
@@ -76,11 +90,9 @@
     let fitK = 1, fitX = 0, fitY = 0;       // scale and screen centre of the free area at zoom 1
 
     const fine = new Uint32Array(NB);
-    // the run-ahead: the same shot computed far ahead - deterministic, so it is this very run's own future
-    const preFine = new Uint32Array(NB);
-    const pre = { x: 0, y: 0, vx: 1, vy: 0, side: -1, u: 0, n: 0, dead: false };
-    const preBins = new Float64Array(CURVE_BINS), liveBins = new Float64Array(CURVE_BINS);
-    let preBinsN = -1;                      // the run-ahead count preBins was made from
+    const liveBins = new Float64Array(CURVE_BINS);
+    const dirLen = new Float64Array(DIR_BINS);   // flight length per direction, for the rose
+    let rose = null;                        // the rose on screen: { x, y, r }
     const sim = { x: 0, y: 0, vx: 1, vy: 0, side: -1, u: 0, hits: 0, steps: 0 };
     // a second cursor replays the shot from its start for the trace: the path is deterministic, so a zoom redraws it
     // sharp instead of blowing up pixels (Doc, 14.10.2026: "cooles Muster ... zoombar machen")
@@ -104,7 +116,7 @@
             sides.push({ p, dx, dy, L, nx: dy / L, ny: -dx / L, off });
             off += L;
         }
-        return { a, b, g, V, sides, P: off };
+        return { a, b, g, V, sides, P: off, A: 0.5 * V[2][1] };
     }
 
     const mod = (x, m) => ((x % m) + m) % m;
@@ -160,7 +172,9 @@
     // ---------------- simulation ----------------
     function resetCounts() {
         fine.fill(0);
+        dirLen.fill(0);
         sim.hits = 0;
+        syncRunButton();
     }
 
     function pushTrail(x, y) {
@@ -177,25 +191,6 @@
         pushTrail(x, y);
         preview = null;
         restartTrace();
-        startPreRun();
-    }
-
-    function startPreRun() {
-        Object.assign(pre, shot0, { side: -1, u: 0, n: 0, dead: false });
-        preFine.fill(0);
-        preBinsN = -1;
-    }
-
-    function stepPreRun() {
-        for (let i = 0; i < PRE_BUDGET && pre.n < PRE_N && !pre.dead; i++) {
-            const bi = fly(pre);
-            if (bi < 0) { pre.dead = true; dbg('Vorlauf: Ecke nach ' + pre.n + ' Treffern'); break; }
-            const sd = G.sides[bi];
-            let k = Math.floor((sd.off + pre.u * sd.L) / G.P * NB);
-            if (k >= NB) k = NB - 1;
-            preFine[k]++;
-            pre.n++;
-        }
     }
 
     function randomShot() {
@@ -233,6 +228,7 @@
 
     // one flight of the laser, counted; false if it ran into a corner
     function step() {
+        const x0 = sim.x, y0 = sim.y, vx = sim.vx, vy = sim.vy;
         const bi = fly(sim);
         if (bi < 0) {
             // a corner has no reflection (a measure-zero event) - start a new shot
@@ -247,6 +243,9 @@
         if (k >= NB) k = NB - 1;
         fine[k]++;
         sim.hits++;
+        // the flight's length to its direction
+        const d = Math.floor((Math.atan2(vy, vx) / (2 * Math.PI) + 1) * DIR_BINS) % DIR_BINS;
+        dirLen[d] += Math.hypot(sim.x - x0, sim.y - y0);
         return true;
     }
 
@@ -266,6 +265,7 @@
     }
 
     function inWindow(s) {
+        if (!winsOn) return -1;
         const b = s / G.P * NB;
         for (let i = 0; i < wins.length; i++) {
             if (mod(b - wins[i].b0, NB) < wins[i].nb) return i;
@@ -334,11 +334,24 @@
 
         // the free area: beside the coach box or below it, whichever is bigger
         let L = 0, T = 0, AW = W, AH = H;
+        rose = null;
         if (coach && coach.classList.contains('visible')) {
             const br = coach.getBoundingClientRect();
             const right = br.right - rect.left, bottom = br.bottom - rect.top;
             if ((W - right) * H >= W * (H - bottom)) { L = right; AW = W - right; } else { T = bottom; AH = H - bottom; }
+            // the rose in the corner the coach box leaves: below it when the triangle sits beside it, else beside it
+            const cw = L ? right : W - right, ch = L ? H - bottom : bottom;
+            if (Math.min(cw, ch) >= ROSE_MIN) {
+                rose = { x: (L ? 0 : right) + cw / 2, y: (L ? bottom : 0) + ch / 2, r: Math.min(ROSE_MAX, Math.min(cw, ch) / 2 - 30) };
+            }
         }
+        if (!rose) {
+            // else a strip of the free area: on the right when it is wide, at the bottom when it is tall
+            const sz = Math.min(2 * ROSE_MAX + 60, 0.3 * Math.max(AW, AH), Math.min(AW, AH));
+            if (AW >= AH) { rose = { x: L + AW - sz / 2, y: T + AH / 2, r: sz / 2 - 30 }; AW -= sz; }
+            else { rose = { x: L + AW / 2, y: T + AH - sz / 2, r: sz / 2 - 30 }; AH -= sz; }
+        }
+        if (rose.r < 30) rose = null;
         const M = R_CAP * LINE_H + 32;              // bars and curve up to the cap, the window letters beyond
         const xs = G.V.map(v => v[0]), ys = G.V.map(v => v[1]);
         const xmin = Math.min(...xs), xmax = Math.max(...xs), ymin = Math.min(...ys), ymax = Math.max(...ys);
@@ -440,7 +453,7 @@
         if (preview && (tr.n >= preview.n || tr.n >= target || tr.dead)) preview = null;
     }
 
-    // a bar standing outward on side sd from u0 to u1, f = its height in dashed lines (1 = the average, cut at R_CAP);
+    // a bar standing outward on side sd from u0 to u1, f = its height in LINE_H (1 = an even spread at the goal, cut at R_CAP);
     // every bar starts right at the rim - no thin gap, the same for all (Doc, 14.10.2026: "einheitlich")
     function bar(sd, u0, u1, f, fill) {
         const nx = sd.nx, ny = -sd.ny;                       // outward normal on screen
@@ -467,73 +480,49 @@
         return out;
     }
 
-    // ---------------- window bars, rim curve, dashed line ----------------
-    // Everything as hits against expected hits (1 = the line at LINE_H): the window bars and the solid curve between the
-    // windows are the run so far and settle down in the long run; the dashed line is where the run-ahead says they end
-    // up - straight for an irrational triangle (a little wavy, the run-ahead is finite), in steps for 30°, 60°, 90°.
-    // It appears once the laser has hit something (Doc, 14.10.2026: "das Target am Anfang gar nicht zeigen").
-    const preReady = () => pre.n >= 20000;                           // before that the target is the even spread
+    // ---------------- window bars and rim curve ----------------
+    // The hits themselves, growing outward from the rim (Doc, 15.10.2026: "warum wachsen die denn nie von unten") - on
+    // the scale of the run's end: at the goal an even spread stands LINE_H high all round, a 30-60-90 triangle shows
+    // steps. No target line and no run-ahead any more (Doc: "die würde ich nicht zeigen").
+    const goal = () => GOALS[goalI];
 
-    function preProfile() {
-        if (preBinsN === pre.n) return;
-        preBinsN = pre.n;
-        const per = NB / CURVE_BINS, mean = pre.n / CURVE_BINS;
-        for (let b = 0; b < CURVE_BINS; b++) {
-            let sum = 0;
-            for (let i = b * per, e = i + per; i < e; i++) sum += preFine[i];
-            preBins[b] = mean > 0 ? sum / mean : 1;
-        }
-    }
-
-    // where a window's bar ends up, by the run-ahead
-    function winTarget(w) {
-        if (!preReady()) return 1;
-        let sum = 0;
-        for (let i = 0; i < w.nb; i++) sum += preFine[(w.b0 + i) & (NB - 1)];
-        return sum / (pre.n * w.nb / NB);
+    // as many pieces of the rim as give each about PER_BIN hits at the end of the run - fixed for a run, so the curve
+    // only grows and never jumps
+    function curveBins() {
+        let B = CURVE_MIN;
+        while (B < CURVE_BINS && goal() / (2 * B) >= PER_BIN) B <<= 1;
+        return B;
     }
 
     // one window, one bar (Doc, 14.10.2026: "ich will doch wissen, wie häufig treffe ich das Fenster A, B und C"):
-    // hits / expected hits - the number in the table
+    // its hits per length, on the same scale as the curve
     function drawWindowBars() {
         if (!sim.hits) return;
         wins.forEach(w => {
-            const r = winCount(w) / (sim.hits * w.nb / NB);
+            const r = winCount(w) / (goal() * w.nb / NB);
             winPieces(w).forEach(pc => bar(pc.sd, pc.u0, pc.u1, r, rgba(w.color, 0.85)));
         });
     }
 
-    // the solid curve of the run so far between the windows - its bins grow finer with the hits (20 per bin on average,
-    // up to CURVE_BINS), so the start is a rough curve, not a comb of single-hit spikes - and the dashed target all round
+    // the rim curve - between the windows, or all round when they are off
     function drawRimLine() {
         if (!sim.hits) return;
-        preProfile();
-        let B = CURVE_BINS;
-        while (B > 8 && sim.hits / B < PER_BIN) B >>= 1;
-        const per = NB / B, mean = sim.hits / B;
+        const B = curveBins(), per = NB / B, full = goal() / B;
         for (let b = 0; b < B; b++) {
             let sum = 0;
             for (let i = b * per, e = i + per; i < e; i++) sum += fine[i];
-            liveBins[b] = sum / mean;
+            liveBins[b] = sum / full;
         }
-        const wt = wins.map(winTarget);
-        const target = s => {
-            const wi = inWindow(s);
-            return Math.min(R_CAP, wi >= 0 ? wt[wi]
-                : (preReady() ? preBins[Math.min(CURVE_BINS - 1, Math.floor(s / G.P * CURVE_BINS))] : 1));
-        };
-        const solid = new Path2D(), dashed = new Path2D();
+        const solid = new Path2D();
         G.sides.forEach(sd => {
             const nx = sd.nx, ny = -sd.ny;                           // outward normal on screen
-            const n = 2 * Math.max(2, Math.ceil(sd.L / G.P * CURVE_BINS));   // two points per bin
+            const n = 2 * Math.max(2, Math.ceil(sd.L / G.P * B));    // two points per piece
             let inRun = false;
             for (let j = 0; j <= n; j++) {
                 const u = j / n, s = sd.off + Math.min(1 - 1e-9, Math.max(1e-9, u)) * sd.L;
-                const bx = SX(sd.p[0] + u * sd.dx), by = SY(sd.p[1] + u * sd.dy);
-                const ht = target(s) * LINE_H;
-                if (j) dashed.lineTo(bx + nx * ht, by + ny * ht); else dashed.moveTo(bx + nx * ht, by + ny * ht);
-                // the solid curve only outside the windows - inside, the bar shows it
+                // the curve only outside the windows - inside, the bar shows it
                 if (inWindow(s) < 0) {
+                    const bx = SX(sd.p[0] + u * sd.dx), by = SY(sd.p[1] + u * sd.dy);
                     const hn = Math.min(R_CAP, liveBins[Math.min(B - 1, Math.floor(s / G.P * B))]) * LINE_H;
                     if (inRun) solid.lineTo(bx + nx * hn, by + ny * hn); else solid.moveTo(bx + nx * hn, by + ny * hn);
                     inRun = true;
@@ -545,9 +534,6 @@
         ctx.lineJoin = 'round';
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
         ctx.stroke(solid);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
-        ctx.setLineDash([5, 5]);
-        ctx.stroke(dashed);
         ctx.restore();
     }
 
@@ -666,6 +652,52 @@
         return { x: SX(q.x) + sd.nx * off, y: SY(q.y) - sd.ny * off };
     }
 
+    // ---------------- direction rose ----------------
+    function drawRose() {
+        if (!rose) return;
+        const { x, y, r } = rose, r0 = 0.42 * r, h = (r - r0) / ROSE_CAP;
+        // what an even spread puts into one direction at the goal: goal flights of the mean free path pi A / P (Santaló)
+        const full = goal() * Math.PI * G.A / G.P / DIR_BINS;
+        ctx.save();
+        ctx.fillStyle = 'rgba(8, 20, 42, 0.88)';
+        ctx.beginPath();
+        ctx.arc(x, y, r + 6, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x, y, r0, 0, 2 * Math.PI);
+        ctx.stroke();
+        if (sim.hits) {
+            const line = new Path2D();
+            for (let b = 0; b < DIR_BINS; b++) {
+                const th = (b + 0.5) / DIR_BINS * 2 * Math.PI;
+                const rr = r0 + Math.min(ROSE_CAP, dirLen[b] / full) * h;
+                const px = x + rr * Math.cos(th), py = y - rr * Math.sin(th);
+                if (b) line.lineTo(px, py); else line.moveTo(px, py);
+            }
+            line.closePath();
+            // the ring between base circle and line, lightly filled
+            const ring = new Path2D(line);
+            ring.moveTo(x + r0, y);
+            ring.arc(x, y, r0, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+            ctx.fill(ring, 'evenodd');
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.lineJoin = 'round';
+            ctx.stroke(line);
+        }
+        // where the laser flies right now
+        if (!aim) {
+            ctx.fillStyle = rgba(YPSILON, 1);
+            ctx.beginPath();
+            ctx.arc(x + r0 * sim.vx, y - r0 * sim.vy, 3.5, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        ctx.restore();
+        plate('RICHTUNGEN', x, y + r + 16, 'rgba(255, 255, 255, 0.75)', '700 10px Orbitron, sans-serif');
+    }
+
     function drawLaser() {
         // while a new shot is aimed the old laser is gone - dot, trail and arrow (Doc, 14.10.2026)
         if (trailLen < 1 || aim) return;
@@ -750,13 +782,14 @@
                 ctx.drawImage(prev, view.ox - sc * preview.ox, view.oy - sc * preview.oy, prev.width / dpr * sc, prev.height / dpr * sc);
             } else ctx.drawImage(trace, 0, 0, view.w, view.h);
         }
-        drawWindowBars();
+        if (winsOn) drawWindowBars();
         drawRimLine();
         drawTriangle();
-        drawWindows();
+        if (winsOn) drawWindows();
         drawLaser();
         drawAim();
         drawAngles();
+        drawRose();
     }
 
     // ---------------- loop ----------------
@@ -764,17 +797,18 @@
     function frame(now) {
         const dt = lastT ? Math.min(0.1, (now - lastT) / 1000) : 0;
         lastT = now;
-        if (G && pre.n < PRE_N && !pre.dead) stepPreRun();
         if (running && G && !aim) {
             // reflections per second, the fraction carried to the next frame (a slow laser moves every few frames)
             carry += SPEEDS[speedI] * dt;
-            const n = Math.min(200000, Math.floor(carry));
+            const n = Math.min(200000, Math.floor(carry), Math.max(0, goal() - sim.hits));
             carry -= n;
             for (let i = 0; i < n; i++) {
                 const x0 = sim.x, y0 = sim.y;
                 if (!step()) break;
                 if (n - i <= TRAIL) pushTrail(x0, y0);
             }
+            // the goal reached: the run is done
+            if (sim.hits >= goal()) { setRunning(false); carry = 0; dbg('Ziel erreicht: ' + fmtInt(sim.hits) + ' Treffer'); }
         }
         paintTrace();
         draw();
@@ -792,6 +826,7 @@
     }
 
     function hitWindow(mx, my) {
+        if (!winsOn) return null;
         const order = wins.map((w, i) => i).sort((a, b) => (b === sel) - (a === sel));
         for (const i of order) {
             const t = tagPos(wins[i]);
@@ -970,7 +1005,7 @@
         return (p >= 1 ? fmt(p, 1) : String(Number(p.toPrecision(2))).replace('.', ',')) + ' %';
     }
     // from a million on in words: 1 Million, 6 Millionen, 10 Millionen
-    function fmtSpeed(v) { return v >= 1e6 ? (v === 1e6 ? '1 Million' : v / 1e6 + ' Millionen') : fmtInt(v); }
+    function fmtBig(v) { return v >= 1e6 ? (v === 1e6 ? '1 Million' : v / 1e6 + ' Millionen') : fmtInt(v); }
     function gcd(a, b) { while (b) { [a, b] = [b, a % b]; } return a; }
 
     // an angle in words: a tag for the known irrational ones, else the fraction of 180°
@@ -1004,8 +1039,22 @@
     }
 
     function setRunning(on) {
+        // a finished run starts over, the laser flies on from where it is
+        if (on && sim.hits >= goal()) resetCounts();
         running = on;
-        if (speedRun) speedRun.textContent = running ? 'PAUSE' : 'START';
+        syncRunButton();
+    }
+
+    function syncRunButton() {
+        if (speedRun) speedRun.textContent = running ? 'PAUSE' : (sim.hits && sim.hits >= goal() ? 'NOCHMAL' : 'START');
+    }
+
+    function onGoal(i) {
+        goalI = Math.min(GOALS.length - 1, Math.max(0, Math.round(i)));
+        const el = document.getElementById('db-goal-n');
+        if (el) el.textContent = fmtInt(goal());
+        if (running && sim.hits >= goal()) setRunning(false);
+        syncRunButton();
     }
 
     function syncWidthSlider() {
@@ -1064,7 +1113,7 @@
         CyberClock.digits('db-hits-n', sim.hits, { thousands: true });
         CyberClock.digits('db-zoom-n', fmt(zoom, 1), { minDigits: 3 });
         const t = document.getElementById('db-wintable');
-        if (!t) return;
+        if (!t || !winsOn) return;
         // the rows are rebuilt only when they change; the numbers go into the digits widget, one fixed slot per digit
         // (Doc, 14.10.2026: "damit die gleich breit bleiben. Sonst springt das alles viel zu sehr")
         const key = wins.length + ':' + sel;
@@ -1101,8 +1150,8 @@
             '<div class="db-btn-grid"><button type="button" class="cyber-btn" id="db-run">START</button>' +
             '<button type="button" class="cyber-btn" id="db-shot">NEUER SCHUSS</button>' +
             '<button type="button" class="cyber-btn" id="db-zero">ZÄHLER 0</button></div>' +
-            '<div id="db-speed"></div><div id="db-checks"></div>' +
-            '<div class="db-count">Treffer am Rand: <span id="db-hits-n"></span></div>' +
+            '<div id="db-speed"></div><div id="db-goal"></div><div id="db-checks"></div>' +
+            '<div class="db-count">Treffer am Rand: <span id="db-hits-n"></span> von <b id="db-goal-n"></b></div>' +
             '<div class="db-info">Ins Dreieck tippen und ziehen: Startpunkt und Richtung. Leertaste = Start / Pause, N = neuer Schuss.</div>',
             '#f5c242');
         speedRun = document.getElementById('db-run');
@@ -1112,7 +1161,10 @@
         CyberUI.createSlider('db-speed', 'Reflexionen pro Sekunde', 0, SPEEDS.length - 1, speedI, 1, v => {
             speedI = Math.min(SPEEDS.length - 1, Math.max(0, Math.round(v)));
         },
-            'var(--neon-blue)', v => fmtSpeed(SPEEDS[Math.min(SPEEDS.length - 1, Math.max(0, Math.round(v)))]));
+            'var(--neon-blue)', v => fmtBig(SPEEDS[Math.min(SPEEDS.length - 1, Math.max(0, Math.round(v)))]));
+        CyberUI.createSlider('db-goal', 'Treffer bis Stopp', 0, GOALS.length - 1, goalI, 1, onGoal,
+            'var(--neon-blue)', v => fmtBig(GOALS[Math.min(GOALS.length - 1, Math.max(0, Math.round(v)))]));
+        onGoal(goalI);
         CyberUI.createCheckbox('db-checks', 'Spur', traceOn, on => {
             traceOn = on;
             preview = null;
@@ -1134,12 +1186,21 @@
         document.getElementById('db-zfit').addEventListener('click', fitView);
 
         CyberUI.createCard('ui-container', 'Fenster',
+            '<div id="db-winon"></div><div id="db-winbody"' + (winsOn ? '' : ' hidden') + '>' +
             '<table class="db-wins" id="db-wintable"></table><div id="db-link"></div><div id="db-sw"></div>' +
             '<div class="db-btn-grid two"><button type="button" class="cyber-btn" id="db-add">' + PLUS + '&nbsp;FENSTER</button>' +
             '<button type="button" class="cyber-btn" id="db-del">' + MINUS + '&nbsp;FENSTER</button></div>' +
             '<div class="db-info">Fenster ziehen = verschieben, die Enden ziehen oder darüber scrollen = Breite. ' +
-            'Kleine Fenster am Buchstaben greifen.</div>',
+            'Kleine Fenster am Buchstaben greifen.</div></div>',
             '#f5c242');
+        // off: only the rim curve - on: the windows, their bars, the table and the width controls
+        CyberUI.createCheckbox('db-winon', 'Fenster zeigen', winsOn, on => {
+            winsOn = on;
+            drag = null; wheelLock = null;
+            document.getElementById('db-winbody').hidden = !on;
+            buildCoach();
+            updatePanel();
+        });
         CyberUI.createSlider('db-sw', 'Breite von A', -4.2, Math.log10(0.3), Math.log10(0.03), 0.01, v => {
             const w = wins[sel];
             if (!w) return;
@@ -1175,12 +1236,15 @@
         body.innerHTML =
             '<p><b>Satz</b> (OpenAI-Preprint, 25.09.2026): Ist ein Winkel ein irrationales Vielfaches von 180°, ' +
             'verteilen sich die Treffer des Lasers auf lange Sicht gleichmäßig über den Rand – für fast jeden Startschuss.</p>' +
-            '<p>Ein Fenster der Breite <span class="db-f" data-tex="b"></span> sollte dann ' +
+            '<p>Ein Stück des Randes der Länge <span class="db-f" data-tex="b"></span> sollte dann ' +
             '<span class="db-f" data-tex="N\\cdot\\frac{b}{U}"></span> Treffer bekommen (<span class="db-f" data-tex="N"></span> ' +
             'alle Treffer, <span class="db-f" data-tex="U"></span> Umfang). Das Verhältnis geht gegen 1.</p>' +
-            '<p>Die gestrichelte Linie zeigt, wo es hinläuft: Ein Vorlauf rechnet diesen Schuss 2 Millionen Treffer ' +
-            'voraus. Die Fensterbalken und die Kurve zwischen den Fenstern schwanken anfangs um sie herum und legen ' +
-            'sich mit der Zeit darauf.</p>';
+            '<p>Die Kurve außen am Rand zählt die Treffer: Jeder Treffer legt seinem Stück des Randes etwas drauf, ' +
+            'alles wächst nach außen' + (winsOn ? ', die Fensterbalken genauso' : '') + '. Der Lauf hält bei der ' +
+            'eingestellten Zahl von Treffern an – ist die Verteilung gleichmäßig, steht die Kurve dann überall gleich hoch.</p>' +
+            '<p>Die Rose zeigt die Flugrichtungen: Jeder Flug legt bei seiner Richtung etwas drauf, je länger, desto mehr. ' +
+            'Im rationalen Dreieck kennt der Laser nur wenige Richtungen – Stacheln. Im irrationalen kommen alle vor – ein ' +
+            'runder Ring. Das ist der eigentliche Unterschied: Der Satz sagt, Ort und Richtung werden gleichmäßig durchmischt.</p>';
         renderTex();
     }
 
@@ -1194,15 +1258,15 @@
 
     // ---------------- settings, kept on this device ----------------
     // everything one can set survives a reload (Doc, 14.10.2026: "alles persistieren, was man da einstellen kann") -
-    // the triangle, speed, trace, bars, windows, linked widths, zoom and the last shot; not the run state, the lab
+    // the triangle, speed, goal, trace, bars, windows (on or off), linked widths, zoom and the last shot; not the run state, the lab
     // always starts paused
     const SAVE_KEY = 'dreiecksbillard';
     let lastSaved = '';
 
     function snapshot() {
         return JSON.stringify({
-            v: 1, preset: preset ? preset.id : null, a: angA, b: angB, speedI, trace: traceOn,
-            linked, winsTouched, sel, wins: wins.map(w => ({ b0: w.b0, nb: w.nb })), zoom, midX, midY,
+            v: 1, preset: preset ? preset.id : null, a: angA, b: angB, speedI, goalI, trace: traceOn,
+            linked, winsOn, winsTouched, sel, wins: wins.map(w => ({ b0: w.b0, nb: w.nb })), zoom, midX, midY,
             shot: { x: shot0.x, y: shot0.y, th: Math.atan2(shot0.vy, shot0.vx) }
         });
     }
@@ -1223,8 +1287,10 @@
         if (p) { preset = p; angA = p.a; angB = p.b; }
         else if (st.preset === null && st.a > 0 && st.b > 0 && st.a + st.b < Math.PI) { preset = null; angA = st.a; angB = st.b; }
         if (Number.isInteger(st.speedI)) speedI = Math.min(SPEEDS.length - 1, Math.max(0, st.speedI));
+        if (Number.isInteger(st.goalI)) goalI = Math.min(GOALS.length - 1, Math.max(0, st.goalI));
         if (typeof st.trace === 'boolean') traceOn = st.trace;
         if (typeof st.linked === 'boolean') linked = st.linked;
+        if (typeof st.winsOn === 'boolean') winsOn = st.winsOn;
         if (st.winsTouched && Array.isArray(st.wins) && st.wins.length >= 1 && st.wins.length <= NAMES.length) {
             wins = st.wins.map(w => ({ b0: mod(Math.round(w.b0), NB), nb: Math.min(NB_MAX, Math.max(NB_MIN, Math.round(w.nb))) }));
             winsTouched = true;
@@ -1263,5 +1329,5 @@
     document.fonts.ready.then(() => layout());
     requestAnimationFrame(frame);
     dbg('bereit');
-    window.Dreiecksbillard = { sim, pre, get wins() { return wins; }, get G() { return G; } };   // debug
+    window.Dreiecksbillard = { sim, fine, dirLen, get rose() { return rose; }, get wins() { return wins; }, get G() { return G; } };   // debug
 })();
