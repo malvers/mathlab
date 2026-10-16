@@ -264,7 +264,7 @@ h3 .w.on, h2 .w.on { color: var(--navy); }
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '4c3e362e5b3ef18df8c1f899';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = 'c865fc5b1ba884485b171d1e';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -432,16 +432,17 @@ function buildToc() {
 }
 
 // karaoke data of the open chapter: sentences > word groups > words, each with its start time
-// (a sentence: [start, text, end of speech, [[offset, start] of its 2nd, 3rd ... group]]; word times are spread over
-// their group by length - inside a group Solita speaks evenly)
+// (a sentence: [start, text, end of speech, [[offset, start] of its 2nd, 3rd ... group], [start of every word]]; the
+// word times come from speech recognition - only where they are missing, words are spread over their group by length)
 let S = [], si = -1, gi = -1, wi = -1;
 const MODES = ['gruppe', 'wort', 'satz'], MODE_LABEL = { gruppe: 'Gruppe', wort: 'Wort', satz: 'Satz' };
 let mode = MODES.includes(store.get('mode', 'gruppe')) ? store.get('mode', 'gruppe') : 'gruppe';
 
 function sentenceHtml(sent, idx) {
-  const [t, txt, e0, g0] = sent, e = e0 == null ? t + txt.length / 17 : e0, gs = [[0, t]].concat(g0 || []);
+  // 5th field (since 16.10.2026, from speech recognition): the start of every word - then no spreading by length
+  const [t, txt, e0, g0, W] = sent, e = e0 == null ? t + txt.length / 17 : e0, gs = [[0, t]].concat(g0 || []);
   const out = { t, e, groups: [] };
-  let html = '';
+  let html = '', wn = 0;
   gs.forEach(([o, gt], k) => {
     const end = k + 1 < gs.length ? gs[k + 1][0] : txt.length, gte = k + 1 < gs.length ? gs[k + 1][1] : e;
     const piece = txt.slice(o, end), parts = piece.split(/(\s+)/), words = [];
@@ -451,7 +452,7 @@ function sentenceHtml(sent, idx) {
     parts.forEach(w => {
       if (!w) return;
       if (/^\s+$/.test(w)) { wh += w; return; }
-      words.push(gt + (gte - gt) * acc / (total || 1));
+      words.push(W && W[wn] != null ? W[wn] : gt + (gte - gt) * acc / (total || 1)); wn++;
       acc += w.length + 1 + (/[,;:.!?…]$/.test(w) ? 3 : 0);
       wh += `<span class="w" data-w="${words.length - 1}">${esc(w)}</span>`;
     });
