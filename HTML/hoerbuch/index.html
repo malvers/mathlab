@@ -141,6 +141,9 @@ nav .meta svg { width: 15px; height: 15px; fill: currentColor; vertical-align: -
 nav .meta .have { color: var(--green); }
 nav .prog { height: 3px; margin-top: 6px; border-radius: 3px; background: rgba(var(--tint), .15); overflow: hidden; }
 nav .prog i { display: block; height: 100%; width: 0; background: var(--green); }
+nav button.pdf { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; border-color: var(--line); }
+nav button.pdf svg { width: 22px; height: 22px; fill: var(--accent); flex: none; }
+nav button.pdf small { display: block; font-size: 12px; color: var(--muted); }
 
 main { overflow-y: auto; padding: 28px 24px calc(var(--bar-h) + 40px); scroll-behavior: smooth; }
 article { max-width: 760px; margin: 0 auto; }
@@ -261,7 +264,7 @@ h3 .w.on, h2 .w.on { color: var(--navy); }
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '9dfd42fbd20225469192f647';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '4c3e362e5b3ef18df8c1f899';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -331,7 +334,7 @@ async function keyFromPassword(pw) {   // lock.bin: the data key wrapped with PB
 }
 async function openBook(key) {
   const data = JSON.parse(new TextDecoder().decode(await gunzip(await unseal(key, await getSealed(DATA)))));
-  KEY = key; AUTHOR = data.author;
+  KEY = key; AUTHOR = data.author; PDF = data.pdf || null;
   $('bookTitle').textContent = data.title;
   $('bookBy').textContent = data.author + ' · Hörbuch, gelesen von Solita';
   document.title = data.title;
@@ -388,10 +391,36 @@ async function audioSrc(c, progress) {
 }
 
 // ---------- the player ----------
+// the re-typeset book as PDF, first entry of the menu: sealed like the sound, unsealed here and handed to the browser
+let PDF = null, pdfNote = '', pdfBusy = false;
+const chapBtns = () => toc.querySelectorAll('button.chap');
+function pdfButton() {
+  const b = document.createElement('button');
+  b.className = 'pdf';
+  b.innerHTML = `<svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5zm7-3 5-5h-3V4h-4v8H7z"/></svg><span>PDF herunterladen<small>${pdfNote || mb(PDF.n)}</small></span>`;
+  b.onclick = downloadPdf;
+  return b;
+}
+async function downloadPdf() {
+  if (pdfBusy) return;
+  const note = t => { pdfNote = t; const s = toc.querySelector('button.pdf small'); if (s) s.textContent = t; };   // the menu is rebuilt meanwhile
+  pdfBusy = true;
+  try {
+    note('Lade …');
+    const bytes = await unseal(KEY, await getSealed(PDF.h, f => note('Lade ' + Math.round(f * 100) + ' %')));
+    const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })), a = document.createElement('a');
+    a.href = url; a.download = PDF.name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    note(mb(PDF.n) + ' · heruntergeladen');
+  } catch (e) { note((e.message || 'Fehler') + ' - nochmal tippen'); }
+  pdfBusy = false;
+}
 function buildToc() {
   toc.innerHTML = '';
+  if (PDF) toc.appendChild(pdfButton());
   BOOK.forEach((c, i) => {
     const b = document.createElement('button');
+    b.className = 'chap';
     const pos = store.get('pos.' + c.key, 0), badge = SEALED ? (have.has(c.audio.h) ? `<span class="have" title="offline gespeichert">${ICON.have}</span>`
       : `<span title="noch nicht offline">${ICON.cloud}</span>`) : '';
     b.innerHTML = `<div>${esc(c.short)}</div><div class="meta"><span>${fmt(c.dur)} ${badge}</span><span class="pos">${pos > 5 ? fmt(pos) : ''}</span></div>
@@ -446,7 +475,7 @@ async function load(i, at = 0, play = false) {
   text.innerHTML = html;
   spans = [...text.querySelectorAll('.s')];
   S.forEach((x, k) => { x.el = spans[k]; x.gEls = [...spans[k].querySelectorAll('.g')]; x.groups.forEach((g, j) => { g.wEls = [...x.gEls[j].querySelectorAll('.w')]; }); });
-  [...toc.children].forEach((b, k) => b.classList.toggle('on', k === i));
+  [...chapBtns()].forEach((b, k) => b.classList.toggle('on', k === i));
   $('nowTitle').textContent = c.short;
   main.scrollTop = 0;
   store.set('ch', c.key);
@@ -504,7 +533,7 @@ let lastSave = 0;
 function save() {
   const c = BOOK[ch]; if (!c || !audio.src) return;
   store.set('pos.' + c.key, Math.floor(audio.currentTime));
-  const b = toc.children[ch];
+  const b = chapBtns()[ch];
   if (b) { b.querySelector('.prog i').style.width = Math.min(100, audio.currentTime / c.dur * 100) + '%';
            b.querySelector('.pos').textContent = fmt(audio.currentTime); }
 }
