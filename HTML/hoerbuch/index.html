@@ -91,6 +91,7 @@ html.theme-light {
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
+html { touch-action: manipulation; }   /* no double-tap zoom: a double tap is full screen */
 body {
   background: var(--bg); color: var(--ink);
   font-family: Raleway, "Helvetica Neue", Arial, sans-serif; font-size: 18px; line-height: 1.7;
@@ -165,7 +166,10 @@ h3 .w.on, h2 .w.on { color: var(--navy); }
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 7;
   padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); background: var(--bar-bg);
   border-top: 1px solid var(--line); backdrop-filter: blur(8px);
+  transition: transform .3s;
 }
+.bar.away { transform: translateY(110%); }   /* full screen: hidden after 5 s, one tap brings it back */
+#follow:has(~ .bar.away) { bottom: 16px; }
 .bar .now { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
 .bar .now b { color: var(--ink); font: 600 13px Orbitron, Arial, sans-serif; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .bar input[type=range] { width: 100%; margin: 8px 0 6px; accent-color: var(--accent); height: 22px; }
@@ -550,14 +554,55 @@ $('speed').onclick = () => {
 };
 seek.addEventListener('input', () => { seeking = true; const c = BOOK[ch]; if (c) $('nowTime').textContent = fmt(seek.value / 1000 * c.dur) + ' / ' + fmt(c.dur); });
 seek.addEventListener('change', () => { seeking = false; if (!audio.src) return; audio.currentTime = seek.value / 1000 * BOOK[ch].dur; follow = true; userScrollUntil = 0; tick(true); });
+// a tap on the text jumps there - after a short wait, because a second tap makes it a double tap (full screen)
+const DOUBLE_MS = 350;
+let jumpLater = 0;
 text.addEventListener('click', e => {
+  if (hiddenAtDown) return;                 // that tap only brought the player bar back
   const sEl = e.target.closest('.s'); if (!sEl || !audio.src) return;
   const x = S[+sEl.dataset.i], gEl = e.target.closest('.g'), wEl = e.target.closest('.w');
   let t = x.t;
   if (mode !== 'satz' && gEl) { const g = x.groups[+gEl.dataset.g]; t = mode === 'wort' && wEl ? g.words[+wEl.dataset.w] : g.t; }
-  audio.currentTime = t; follow = true; userScrollUntil = 0; tick(true);
-  if (audio.paused) audio.play().catch(() => {});
+  clearTimeout(jumpLater);
+  jumpLater = setTimeout(() => {
+    audio.currentTime = t; follow = true; userScrollUntil = 0; tick(true);
+    if (audio.paused) audio.play().catch(() => {});
+  }, DOUBLE_MS);
 });
+
+// full screen: double tap (phone) or double click (Mac) anywhere but on a control turns it on and off again;
+// Escape or the back gesture leave it as usual. iPhones have no full screen for pages - there nothing happens.
+const FS_SKIP = 'button, input, label, a, #lock';
+const fsOn = () => document.fullscreenElement || document.webkitFullscreenElement;
+function toggleFullscreen() {
+  const d = document, el = d.documentElement;
+  const fn = fsOn() ? d.exitFullscreen || d.webkitExitFullscreen : el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!fn) return;
+  try { Promise.resolve(fn.call(fsOn() ? d : el, { navigationUI: 'hide' })).catch(() => {}); } catch (_) {}
+}
+let tap1 = null;
+document.addEventListener('click', e => {      // runs after the text's own click, so it can cancel the jump
+  if (e.target.closest(FS_SKIP)) { tap1 = null; return; }
+  const now = performance.now();
+  if (tap1 && now - tap1.t < DOUBLE_MS && Math.hypot(e.clientX - tap1.x, e.clientY - tap1.y) < 40) {
+    tap1 = null; clearTimeout(jumpLater); toggleFullscreen(); return;
+  }
+  tap1 = { t: now, x: e.clientX, y: e.clientY };
+});
+document.addEventListener('mousedown', e => { if (e.detail > 1 && !e.target.closest(FS_SKIP)) e.preventDefault(); });   // no word selected by the double click
+// in full screen the player bar hides after 5 s without a touch, key or mouse move; the tap that brings it back
+// does nothing else (no jump in the text). Outside full screen it always stays.
+const HIDE_MS = 5000, bar = document.querySelector('.bar');
+let barTimer = 0, hiddenAtDown = false;
+function showBar() {
+  clearTimeout(barTimer);
+  bar.classList.remove('away');
+  if (fsOn()) barTimer = setTimeout(() => { if (seeking) showBar(); else bar.classList.add('away'); }, HIDE_MS);
+}
+document.addEventListener('pointerdown', () => { hiddenAtDown = bar.classList.contains('away'); showBar(); }, true);
+document.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') showBar(); }, true);
+document.addEventListener('keydown', showBar, true);
+['fullscreenchange', 'webkitfullscreenchange'].forEach(n => document.addEventListener(n, () => { showBar(); tick(true); }));   // keep the sentence in view
 
 // reading ahead by hand pauses the auto-scroll; "Zur Stelle" brings it back
 const userScroll = () => { userScrollUntil = Date.now() + 8000; $('follow').style.display = 'inline-flex'; };
