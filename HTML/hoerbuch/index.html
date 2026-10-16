@@ -235,6 +235,11 @@ nav button.gloss { display: flex; align-items: center; gap: 10px; margin-bottom:
 nav button.gloss svg { width: 22px; height: 22px; fill: var(--accent); flex: none; }
 nav button.gloss small { display: block; font-size: 12px; color: var(--muted); }
 nav button.pdf + button.gloss { margin-top: -6px; }
+/* the language tabs on top of the menu: Deutsch / Englisch (Doc 16.10.2026) - each shows its own chapters */
+nav .tabs { display: flex; gap: 6px; margin: 0 0 14px; padding: 4px; border-radius: 14px; border: 1px solid var(--line); }
+nav .tabs button { flex: 1; width: auto; margin: 0; padding: 0 8px; height: 40px; text-align: center; border-radius: 10px;
+  font: 600 13px Orbitron, Arial, sans-serif; letter-spacing: .06em; color: var(--muted); }
+nav .tabs button[aria-selected="true"] { background: var(--orange); color: var(--navy); border-color: var(--orange); }
 
 #lock { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: var(--bg); }
 #lock form { width: min(360px, 100%); padding: 28px 26px 22px; border-radius: 16px; background: var(--card);
@@ -342,7 +347,7 @@ nav button.pdf + button.gloss { margin-top: -6px; }
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '676d7842e6df1c117c63891d';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = 'b64cfb4ac35dcfca3ccd7f23';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -472,7 +477,26 @@ async function audioSrc(c, progress) {
 // ---------- the player ----------
 // the re-typeset book as PDF, first entry of the menu: sealed like the sound, unsealed here and handed to the browser
 let PDF = null, pdfNote = '', pdfBusy = false;
-const chapBtns = () => toc.querySelectorAll('button.chap');
+const chapBtn = i => toc.querySelector(`button.chap[data-i="${i}"]`);
+// languages: a chapter without "lang" is the English original; the menu shows the chapters of one language
+const LANGS = [['de', 'Deutsch'], ['en', 'Englisch']];
+const langOf = c => (c && c.lang) || 'en';
+let tocLang = store.get('lang', 'en');
+function stepCh(d) {   // the next / previous chapter in the same language, or -1
+  for (let i = ch + d; i >= 0 && i < BOOK.length; i += d) if (langOf(BOOK[i]) === langOf(BOOK[ch])) return i;
+  return -1;
+}
+function tabsRow() {
+  const row = document.createElement('div');
+  row.className = 'tabs'; row.setAttribute('role', 'tablist');
+  for (const [l, label] of LANGS) {
+    const b = document.createElement('button');
+    b.textContent = label; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(l === tocLang));
+    b.onclick = () => { tocLang = l; store.set('lang', l); buildToc(); };
+    row.appendChild(b);
+  }
+  return row;
+}
 function pdfButton() {
   const b = document.createElement('button');
   b.className = 'pdf';
@@ -496,11 +520,14 @@ async function downloadPdf() {
 }
 function buildToc() {
   toc.innerHTML = '';
+  if (!BOOK.some(c => langOf(c) === tocLang)) tocLang = 'en';
+  if (BOOK.some(c => langOf(c) !== 'en')) toc.appendChild(tabsRow());
   if (PDF) toc.appendChild(pdfButton());
   if (GLOSS.length) toc.appendChild(glossButton());
   BOOK.forEach((c, i) => {
+    if (langOf(c) !== tocLang) return;
     const b = document.createElement('button');
-    b.className = 'chap';
+    b.className = 'chap'; b.dataset.i = i;
     const pos = store.get('pos.' + c.key, 0), badge = SEALED ? (have.has(c.audio.h) ? `<span class="have" title="offline gespeichert">${ICON.have}</span>`
       : `<span title="noch nicht offline">${ICON.cloud}</span>`) : '';
     b.innerHTML = `<div>${esc(c.short)}</div><div class="meta"><span>${fmt(c.dur)} ${badge}</span><span class="pos">${pos > 5 ? fmt(pos) : ''}</span></div>
@@ -556,7 +583,8 @@ function sentenceHtml(sent, idx) {
   const [t, txt, e0, g0, W] = sent, e = e0 == null ? t + txt.length / 17 : e0, gs = [[0, t]].concat(g0 || []);
   const out = { t, e, groups: [] };
   let html = '', wn = 0;
-  const marks = GLOSS.length ? glossMarks(gs.flatMap(([o], k) => txt.slice(o, k + 1 < gs.length ? gs[k + 1][0] : txt.length)
+  // the glossary is English -> German: no marks in a translated chapter
+  const marks = GLOSS.length && langOf(BOOK[ch]) === 'en' ? glossMarks(gs.flatMap(([o], k) => txt.slice(o, k + 1 < gs.length ? gs[k + 1][0] : txt.length)
     .split(/\s+/).filter(Boolean))) : [];
   gs.forEach(([o, gt], k) => {
     const end = k + 1 < gs.length ? gs[k + 1][0] : txt.length, gte = k + 1 < gs.length ? gs[k + 1][1] : e;
@@ -591,9 +619,11 @@ async function load(i, at = 0, play = false) {
     else html += `<p>${parts}</p>`;
   });
   text.innerHTML = html;
+  text.lang = langOf(c);
   spans = [...text.querySelectorAll('.s')];
   S.forEach((x, k) => { x.el = spans[k]; x.gEls = [...spans[k].querySelectorAll('.g')]; x.groups.forEach((g, j) => { g.wEls = [...x.gEls[j].querySelectorAll('.w')]; }); });
-  [...chapBtns()].forEach((b, k) => b.classList.toggle('on', k === i));
+  if (langOf(c) !== tocLang) { tocLang = langOf(c); store.set('lang', tocLang); buildToc(); }   // the menu follows the chapter
+  toc.querySelectorAll('button.chap').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
   $('nowTitle').textContent = c.short;
   main.scrollTop = 0;
   store.set('ch', c.key);
@@ -651,7 +681,7 @@ let lastSave = 0;
 function save() {
   const c = BOOK[ch]; if (!c || !audio.src) return;
   store.set('pos.' + c.key, Math.floor(audio.currentTime));
-  const b = chapBtns()[ch];
+  const b = chapBtn(ch);
   if (b) { b.querySelector('.prog i').style.width = Math.min(100, audio.currentTime / c.dur * 100) + '%';
            b.querySelector('.pos').textContent = fmt(audio.currentTime); }
 }
@@ -659,7 +689,7 @@ function save() {
 audio.addEventListener('timeupdate', () => { tick(false); if (Date.now() - lastSave > 5000) { lastSave = Date.now(); save(); } });
 audio.addEventListener('pause', () => { save(); setPlayIcon(); });
 audio.addEventListener('play', setPlayIcon);
-audio.addEventListener('ended', () => { store.set('pos.' + BOOK[ch].key, 0); save(); if (ch + 1 < BOOK.length) load(ch + 1, 0, true); });
+audio.addEventListener('ended', () => { store.set('pos.' + BOOK[ch].key, 0); save(); if (stepCh(1) >= 0) load(stepCh(1), 0, true); });
 audio.addEventListener('loadedmetadata', () => { audio.playbackRate = store.get('speed', 1); });
 
 function setPlayIcon() {
@@ -673,8 +703,8 @@ const speedLabel = v => v.toFixed(v * 10 % 1 ? 2 : 1).replace('.', ',') + '×';
 $('play').onclick = toggle;
 $('prevS').onclick = () => jumpS(audio.currentTime - starts[si] > 2 ? 0 : -1);
 $('nextS').onclick = () => jumpS(1);
-$('prevCh').onclick = () => load(ch - 1, 0, !audio.paused);
-$('nextCh').onclick = () => load(ch + 1, 0, !audio.paused);
+$('prevCh').onclick = () => load(stepCh(-1), 0, !audio.paused);
+$('nextCh').onclick = () => load(stepCh(1), 0, !audio.paused);
 // the chapter menu: a drawer on a phone held upright, a column when held sideways (or on a wide screen). Both can be
 // swiped away to the left - the menu follows the finger - and the menu button brings them back.
 const narrow = matchMedia('(max-width: 860px)');
@@ -800,8 +830,8 @@ if ('mediaSession' in navigator) {
   ms.setActionHandler('pause', () => audio.pause());
   ms.setActionHandler('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
   ms.setActionHandler('seekforward', () => { audio.currentTime += 15; });
-  ms.setActionHandler('previoustrack', () => load(ch - 1, 0, true));
-  ms.setActionHandler('nexttrack', () => load(ch + 1, 0, true));
+  ms.setActionHandler('previoustrack', () => load(stepCh(-1), 0, true));
+  ms.setActionHandler('nexttrack', () => load(stepCh(1), 0, true));
 }
 
 // ---------- the glossary: a long press on a word opens its card; the menu opens the whole list ----------
@@ -923,7 +953,7 @@ async function goToWord(gi) {
   let ci = -1, at = 0;
   if (sv && sv.ch) { ci = BOOK.findIndex(c => c.key === sv.ch); at = sv.at || 0; }
   if (ci < 0) {
-    find: for (let c = 0; c < BOOK.length; c++) for (const p of BOOK[c].paras) for (const s of p.s) {
+    find: for (let c = 0; c < BOOK.length; c++) if (langOf(BOOK[c]) === 'en') for (const p of BOOK[c].paras) for (const s of p.s) {
       if (glossMarks(s[1].split(/\s+/).filter(Boolean)).includes(gi)) { ci = c; at = s[0]; break find; }
     }
   }
