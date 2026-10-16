@@ -124,11 +124,14 @@ header .grow { flex: 1; min-width: 0; }
 .iconbtn:disabled { opacity: .5; cursor: default; }
 .iconbtn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
 #offline.done { color: var(--green); border-color: var(--green); }
-#tocBtn { display: none; }
-
 .wrap { display: grid; grid-template-columns: 320px 1fr; height: calc(100% - 73px); }
 nav {
   overflow-y: auto; border-right: 1px solid var(--line); padding: 14px 10px calc(var(--bar-h) + 20px);
+  touch-action: pan-y;                       /* sideways is ours: swiping the menu away */
+}
+@media (min-width: 861px) {                /* wide screen: the column swiped away, the menu button brings it back */
+  body.toc-hidden .wrap { grid-template-columns: 1fr; }
+  body.toc-hidden nav { display: none; }
 }
 nav button {
   display: block; width: 100%; text-align: left; margin: 0 0 6px; padding: 10px 12px; border-radius: 12px;
@@ -558,7 +561,37 @@ $('prevS').onclick = () => jumpS(audio.currentTime - starts[si] > 2 ? 0 : -1);
 $('nextS').onclick = () => jumpS(1);
 $('prevCh').onclick = () => load(ch - 1, 0, !audio.paused);
 $('nextCh').onclick = () => load(ch + 1, 0, !audio.paused);
-$('tocBtn').onclick = () => toc.classList.toggle('open');
+// the chapter menu: a drawer on a phone held upright, a column when held sideways (or on a wide screen). Both can be
+// swiped away to the left - the menu follows the finger - and the menu button brings them back.
+const narrow = matchMedia('(max-width: 860px)');
+function showToc(on) {
+  if (narrow.matches) toc.classList.toggle('open', on);
+  else { document.body.classList.toggle('toc-hidden', !on); store.set('tocHidden', !on); }
+}
+if (store.get('tocHidden', false)) document.body.classList.add('toc-hidden');
+$('tocBtn').onclick = () => showToc(narrow.matches ? !toc.classList.contains('open') : document.body.classList.contains('toc-hidden'));
+document.addEventListener('click', e => {   // a tap beside the open drawer closes it - and does nothing else
+  if (!narrow.matches || !toc.classList.contains('open') || toc.contains(e.target) || $('tocBtn').contains(e.target)) return;
+  e.stopPropagation(); e.preventDefault(); showToc(false);
+}, true);
+let swipe = null;
+toc.addEventListener('touchstart', e => { const t = e.touches[0]; swipe = { x: t.clientX, y: t.clientY, dx: 0, side: null }; }, { passive: true });
+toc.addEventListener('touchmove', e => {
+  if (!swipe) return;
+  const t = e.touches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y;
+  if (swipe.side === null && Math.abs(dx) + Math.abs(dy) > 10) swipe.side = Math.abs(dx) > 1.5 * Math.abs(dy);   // sideways, or scrolling the list
+  if (!swipe.side) return;
+  swipe.dx = Math.min(0, dx);
+  toc.style.transition = 'none'; toc.style.transform = `translateX(${swipe.dx}px)`;
+}, { passive: true });
+toc.addEventListener('touchend', () => {
+  if (!swipe) return;
+  const away = swipe.side && swipe.dx < -60;
+  swipe = null;
+  if (!away) { toc.style.transition = ''; toc.style.transform = ''; return; }
+  toc.style.transition = 'transform .2s'; toc.style.transform = 'translateX(-105%)';
+  setTimeout(() => { showToc(false); toc.style.transition = ''; toc.style.transform = ''; }, 200);
+});
 $('offline').onclick = offlineAll;
 // Blau / Hell / Grau, cycling like the Stoffverteilungsplan (svp-nav.js); the button names the scheme it switches to
 const THEME_LABEL = { dark: 'Blau', light: 'Hell', grey: 'Grau' }, THEME_NEXT = { light: 'dark', dark: 'grey', grey: 'light' };
