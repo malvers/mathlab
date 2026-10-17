@@ -162,6 +162,7 @@ details.sum summary { cursor: pointer; padding: 10px 0 6px; font: 700 15px Orbit
 details.sum p { margin: .55em 0; }
 details.sum ul { margin: .2em 0 .7em; padding-left: 1.2em; }
 details.sum li { margin: .25em 0; }
+details.sum .sumh { font-size: .92em; opacity: .75; }
 details.sum .sumplay { display: inline-flex; align-items: center; gap: 8px; width: auto; height: 40px; margin: 4px 0 6px; padding: 0 14px;
                        border-radius: 20px; border: 1px solid var(--line); background: transparent; color: var(--accent); cursor: pointer;
                        font: 700 13px Orbitron, Arial, sans-serif; letter-spacing: .04em; }
@@ -364,7 +365,7 @@ nav .tabs button[aria-selected="true"] { background: var(--orange); color: var(-
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = 'f231806b383f4290178bb2cf';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '34c9b5ed9607493838d5108d';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -602,7 +603,7 @@ function glossMarks(words) {   // words of a sentence -> glossary index per word
   return marks;
 }
 
-function sentenceHtml(sent, idx) {
+function sentenceHtml(sent, idx, into = S) {
   // 5th field (since 16.10.2026, from speech recognition): the start of every word - then no spreading by length
   const [t, txt, e0, g0, W] = sent, e = e0 == null ? t + txt.length / 17 : e0, gs = [[0, t]].concat(g0 || []);
   const out = { t, e, groups: [] };
@@ -628,15 +629,33 @@ function sentenceHtml(sent, idx) {
     out.groups.push({ t: gt, words });
     html += `<span class="g" data-g="${k}">${wh}</span>`;
   });
-  S[idx] = out;
+  into[idx] = out;
   return `<span class="s" data-i="${idx}">${html}</span>`;
 }
 
+let sumS = [], sumStarts = [];
+function sumKaraoke(k) {   // a summary Solita read: sentences like a chapter's, so it can be lit and tapped
+  sumS = []; sumStarts = [];
+  let n = 0, out = '', list = '';
+  const flush = () => { if (list) { out += `<ul>${list}</ul>`; list = ''; } };
+  k.paras.forEach((p, pi) => {
+    const kind = k.kinds[pi], parts = p.s.map(sent => { sumStarts.push(sent[0]); return sentenceHtml(sent, n++, sumS); });
+    if (kind === 'li') { list += `<li>${parts.join(' ')}</li>`; return; }
+    flush();
+    if (kind === 'h') out += `<p class="sumh">${parts.join(' ')}</p>`;
+    else if (kind === 'lab') out += `<p><b>${parts.join(' ')}</b></p>`;
+    else if (kind === 'b') out += `<p><b>${parts[0]}</b> ${parts.slice(1).join(' ')}</p>`;
+    else out += `<p>${parts.join(' ')}</p>`;
+  });
+  flush();
+  return out;
+}
 function sumHtml(c) {   // "Kurz gefasst": **bold**, paragraphs, "- " lists (Doc 17.10.2026: "so dass das ein Physiker versteht")
+  sumS = []; sumStarts = [];
   if (!c.sum) return '';
   const label = { de: 'Kurz gefasst', en: 'In brief', es: 'En resumen' }[langOf(c)] || 'Kurz gefasst';
   const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-  const body = c.sum.split(/\n\n+/).map(block => {
+  const body = c.sumK ? sumKaraoke(c.sumK) : c.sum.split(/\n\n+/).map(block => {
     const lines = block.split('\n'), items = lines.filter(l => l.startsWith('- ')), rest = lines.filter(l => !l.startsWith('- '));
     return (rest.length ? `<p>${inline(rest.join(' '))}</p>` : '') + (items.length ? `<ul>${items.map(l => `<li>${inline(l.slice(2))}</li>`).join('')}</ul>` : '');
   }).join('');
@@ -656,13 +675,27 @@ function sumLabel() {
     ? fmt(sumAudio.currentTime) + ' / ' + fmt(c.sumAudio.d) : word + ' · ' + fmt(c.sumAudio.d);
 }
 function sumStop() {
-  sumAudio.pause();
+  sumAudio.pause(); sSi = sGi = sWi = -1;
   if (sumUrl.startsWith('blob:')) URL.revokeObjectURL(sumUrl);
   sumUrl = ''; sumFor = ''; sumAudio.removeAttribute('src');
 }
-async function sumToggle() {
+let sSi = -1, sGi = -1, sWi = -1;
+function sumTick(force, scroll = true) {   // the box's karaoke, the same three modes as the chapter
+  if (!sumS.length || sumFor !== (BOOK[ch] && BOOK[ch].key)) return;
+  const t = sumAudio.currentTime;
+  let s = 0;
+  for (let k = 0; k < sumStarts.length; k++) { if (sumStarts[k] <= t + 0.05) s = k; else break; }
+  const x = sumS[s]; if (!x || !x.el) return;
+  const g = lastAt(x.groups, t, 't'), w = lastAt(x.groups[g].words, t), newS = s !== sSi;
+  if (newS || g !== sGi || w !== sWi || force) {
+    sSi = s; sGi = g; sWi = w;
+    paintOn(x, g, w);
+    if (scroll && (newS || force) && follow && Date.now() > userScrollUntil) x.el.scrollIntoView({ block: 'center', behavior: force ? 'auto' : 'smooth' });
+  }
+}
+async function sumToggle(at) {
   const c = BOOK[ch]; if (!c || !c.sumAudio) return;
-  if (sumFor === c.key && !sumAudio.paused) { sumAudio.pause(); sumLabel(); return; }
+  if (at == null && sumFor === c.key && !sumAudio.paused) { sumAudio.pause(); sumLabel(); return; }
   if (sumFor !== c.key) {
     sumStop(); sumFor = c.key;
     const b = sumBtn(); if (b) b.querySelector('span').textContent = 'Lade …';
@@ -674,10 +707,22 @@ async function sumToggle() {
   }
   audio.pause();
   sumAudio.playbackRate = audio.playbackRate;
+  if (at != null) { sumAudio.currentTime = at; follow = true; userScrollUntil = 0; }
   sumAudio.play().catch(() => {});
+  sSi = -1; sumTick(true);
 }
-text.addEventListener('click', e => { if (e.target.closest('.sumplay')) { e.preventDefault(); sumToggle(); } });
+text.addEventListener('click', e => {
+  if (!e.target.closest('details.sum')) return;
+  if (e.target.closest('.sumplay')) { e.preventDefault(); sumToggle(); return; }
+  const sEl = e.target.closest('.s'), c = BOOK[ch];
+  if (!sEl || !c || !c.sumAudio || !sumS.length) return;   // a tap in a summary that was not read aloud: nothing
+  const x = sumS[+sEl.dataset.i], gEl = e.target.closest('.g'), wEl = e.target.closest('.w');
+  let t = x.t;
+  if (mode !== 'satz' && gEl) { const g = x.groups[+gEl.dataset.g]; t = mode === 'wort' && wEl ? g.words[+wEl.dataset.w] : g.t; }
+  sumToggle(t);
+});
 ['play', 'pause', 'timeupdate', 'ended'].forEach(n => sumAudio.addEventListener(n, sumLabel));
+sumAudio.addEventListener('seeked', () => sumTick(true, false));
 audio.addEventListener('play', () => { if (!sumAudio.paused) { sumAudio.pause(); sumLabel(); } });
 text.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('sum')) store.set('sumOpen', e.target.open); }, true);
 
@@ -695,7 +740,9 @@ async function load(i, at = 0, play = false) {
   text.innerHTML = html.replace('</h2>', '</h2>' + sumHtml(c));   // the summary right under the title
   text.lang = langOf(c);
   text.classList.toggle('mute', !!c.text);
-  spans = [...text.querySelectorAll('.s')];
+  spans = [...text.querySelectorAll('#text > :not(details) .s')];   // the chapter's sentences; the box has its own
+  const sspans = [...text.querySelectorAll('details.sum .s')];
+  sumS.forEach((x, k) => { x.el = sspans[k]; x.gEls = [...sspans[k].querySelectorAll('.g')]; x.groups.forEach((g, j) => { g.wEls = [...x.gEls[j].querySelectorAll('.w')]; }); });
   S.forEach((x, k) => { x.el = spans[k]; x.gEls = [...spans[k].querySelectorAll('.g')]; x.groups.forEach((g, j) => { g.wEls = [...x.gEls[j].querySelectorAll('.w')]; }); });
   if (langOf(c) !== tocLang) { tocLang = langOf(c); store.set('lang', tocLang); buildToc(); }   // the menu follows the chapter
   toc.querySelectorAll('button.chap').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
@@ -735,9 +782,10 @@ function indexAt(t) {   // last sentence whose start is <= t
 }
 const lastAt = (arr, t, key) => { let r = 0; for (let k = 0; k < arr.length; k++) { if ((key ? arr[k][key] : arr[k]) <= t + 0.03) r = k; else break; } return r; };
 
-function paint() {        // the classes for the current sentence / group / word in the chosen mode
+function paint() { paintOn(S[si], gi, wi); }
+function paintOn(x, gi, wi) {        // the classes for the current sentence / group / word in the chosen mode
   text.querySelectorAll('.on, .cur').forEach(el => el.classList.remove('on', 'cur'));
-  const x = S[si]; if (!x) return;
+  if (!x) return;
   const gEl = x.gEls[gi], wEl = x.groups[gi] && x.groups[gi].wEls[wi];
   if (mode === 'satz') x.el.classList.add('on');
   else if (mode === 'gruppe') { x.el.classList.add('cur'); if (gEl) gEl.classList.add('on'); }
@@ -760,7 +808,7 @@ function tick(force) {
   }
 }
 // words change faster than 'timeupdate' (4 per second) - while playing, every frame
-(function frame() { if (!audio.paused) tick(false); requestAnimationFrame(frame); })();
+(function frame() { if (!audio.paused) tick(false); if (!sumAudio.paused) sumTick(false); requestAnimationFrame(frame); })();
 
 let lastSave = 0;
 function save() {
@@ -837,12 +885,13 @@ function applyTheme(t) {
 }
 $('theme').onclick = () => applyTheme(THEME_NEXT[theme]);
 applyTheme(theme);
-function applyMode(m) { mode = m; $('mode').textContent = MODE_LABEL[m]; store.set('mode', m); paint(); }
+function applyMode(m) { mode = m; $('mode').textContent = MODE_LABEL[m]; store.set('mode', m); if (!sumAudio.paused) sumTick(true, false); else paint(); }
 $('mode').onclick = () => applyMode(MODES[(MODES.indexOf(mode) + 1) % MODES.length]);
 applyMode(mode);
 $('speed').onclick = () => {
   const k = (SPEEDS.indexOf(audio.playbackRate) + 1) % SPEEDS.length;
   audio.playbackRate = SPEEDS[k]; store.set('speed', SPEEDS[k]); $('speed').textContent = speedLabel(SPEEDS[k]);
+  sumAudio.playbackRate = SPEEDS[k];
 };
 seek.addEventListener('input', () => { seeking = true; const c = BOOK[ch]; if (c) $('nowTime').textContent = fmt(seek.value / 1000 * c.dur) + ' / ' + fmt(c.dur); });
 seek.addEventListener('change', () => { seeking = false; if (!audio.src) return; audio.currentTime = seek.value / 1000 * BOOK[ch].dur; follow = true; userScrollUntil = 0; tick(true); });
@@ -850,7 +899,7 @@ seek.addEventListener('change', () => { seeking = false; if (!audio.src) return;
 const DOUBLE_MS = 350;
 let jumpLater = 0;
 text.addEventListener('click', e => {
-  if (hiddenAtDown) return;                 // that tap only brought the player bar back
+  if (hiddenAtDown || e.target.closest('details.sum')) return;   // the box has its own player                 // that tap only brought the player bar back
   const sEl = e.target.closest('.s'); if (!sEl || !audio.src) return;
   const x = S[+sEl.dataset.i], gEl = e.target.closest('.g'), wEl = e.target.closest('.w');
   let t = x.t;
