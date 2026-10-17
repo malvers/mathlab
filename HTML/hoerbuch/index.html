@@ -350,7 +350,7 @@ nav .tabs button[aria-selected="true"] { background: var(--orange); color: var(-
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = 'b46e296b73696d84bb3f7e1d';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = 'da2a28abbb9bb01f15f931de';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -618,7 +618,7 @@ async function load(i, at = 0, play = false) {
   let html = '', n = 0;
   c.paras.forEach((p, pi) => {
     const parts = p.s.map(sent => { starts.push(sent[0]); return sentenceHtml(sent, n++); }).join(' ');
-    if (p.h) html += pi === 0 || /^(Chapter \d+\.|Foreword|Preface|Introduction)/.test(p.s[0][1]) ? `<h2>${parts}</h2>` : `<h3>${parts}</h3>`;
+    if (p.h) html += pi === 0 || /^(Chapter \d+\.|Foreword|Preface|Introduction|Kapitel \d+:|Geleitwort|Vorwort|Einleitung)/.test(p.s[0][1]) ? `<h2>${parts}</h2>` : `<h3>${parts}</h3>`;
     else html += `<p>${parts}</p>`;
   });
   text.innerHTML = html;
