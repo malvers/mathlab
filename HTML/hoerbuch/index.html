@@ -154,6 +154,14 @@ nav button.pdf small { display: block; font-size: 12px; color: var(--muted); }
 main { overflow-y: auto; padding: 28px 24px calc(var(--bar-h) + 40px); scroll-behavior: smooth; }
 article { max-width: 760px; margin: 0 auto; }
 article h2 { font: 700 22px/1.4 Orbitron, Arial, sans-serif; color: var(--accent); margin: 0 0 26px; letter-spacing: .03em; }
+/* the chapter in brief: a box under the title, open until it is closed (remembered) */
+details.sum { margin: -6px 0 30px; padding: 4px 18px 10px; border: 1px solid var(--line); border-radius: 14px;
+              background: rgba(var(--tint), .05); font-size: .9em; line-height: 1.6; }
+details.sum summary { cursor: pointer; padding: 10px 0 6px; font: 700 15px Orbitron, Arial, sans-serif; letter-spacing: .06em;
+                      color: var(--accent); }
+details.sum p { margin: .55em 0; }
+details.sum ul { margin: .2em 0 .7em; padding-left: 1.2em; }
+details.sum li { margin: .25em 0; }
 article h3 { font: 600 17px/1.5 Orbitron, Arial, sans-serif; color: var(--head); margin: 34px 0 12px; letter-spacing: .03em; }
 article p { margin: 0 0 18px; color: var(--ink); }
 /* karaoke: sentence .s > word group .g > word .w; "on" = being read, "cur" = the frame around it */
@@ -352,7 +360,7 @@ nav .tabs button[aria-selected="true"] { background: var(--orange); color: var(-
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '9cea03fabb04a64f16478d4a';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '5fbdc11d7030511b29bf03fa';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -618,6 +626,18 @@ function sentenceHtml(sent, idx) {
   return `<span class="s" data-i="${idx}">${html}</span>`;
 }
 
+function sumHtml(c) {   // "Kurz gefasst": **bold**, paragraphs, "- " lists (Doc 17.10.2026: "so dass das ein Physiker versteht")
+  if (!c.sum) return '';
+  const label = { de: 'Kurz gefasst', en: 'In brief', es: 'En resumen' }[langOf(c)] || 'Kurz gefasst';
+  const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  const body = c.sum.split(/\n\n+/).map(block => {
+    const lines = block.split('\n'), items = lines.filter(l => l.startsWith('- ')), rest = lines.filter(l => !l.startsWith('- '));
+    return (rest.length ? `<p>${inline(rest.join(' '))}</p>` : '') + (items.length ? `<ul>${items.map(l => `<li>${inline(l.slice(2))}</li>`).join('')}</ul>` : '');
+  }).join('');
+  return `<details class="sum"${store.get('sumOpen', true) ? ' open' : ''}><summary>${label}</summary>${body}</details>`;
+}
+text.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('sum')) store.set('sumOpen', e.target.open); }, true);
+
 async function load(i, at = 0, play = false) {
   if (i < 0 || i >= BOOK.length) return;
   const c = BOOK[i], token = ++loadToken;
@@ -628,7 +648,7 @@ async function load(i, at = 0, play = false) {
     if (p.h) html += pi === 0 || /^(Chapter \d+\.|Foreword|Preface|Introduction|Kapitel \d+:|Geleitwort|Vorwort|Einleitung|Capítulo \d+\.|Prólogo|Prefacio|Introducción)/.test(p.s[0][1]) ? `<h2>${parts}</h2>` : `<h3>${parts}</h3>`;
     else html += `<p>${parts}</p>`;
   });
-  text.innerHTML = html;
+  text.innerHTML = html.replace('</h2>', '</h2>' + sumHtml(c));   // the summary right under the title
   text.lang = langOf(c);
   text.classList.toggle('mute', !!c.text);
   spans = [...text.querySelectorAll('.s')];
@@ -800,7 +820,7 @@ text.addEventListener('click', e => {
 
 // full screen: double tap (phone) or double click (Mac) anywhere but on a control turns it on and off again;
 // Escape or the back gesture leave it as usual. iPhones have no full screen for pages - there nothing happens.
-const FS_SKIP = 'button, input, label, a, #lock, #card, #gloss';
+const FS_SKIP = 'button, input, label, a, details, #lock, #card, #gloss';
 const fsOn = () => document.fullscreenElement || document.webkitFullscreenElement;
 function toggleFullscreen() {
   const d = document, el = d.documentElement;
