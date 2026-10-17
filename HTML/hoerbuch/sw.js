@@ -1,7 +1,7 @@
 // Service worker of the audiobook page (generated into HTML/hoerbuch/ by pack_hoerbuch.mjs). It only keeps the page
 // itself, its icons and the fonts, so the page opens on the plane. The book (text and sound) is encrypted in the R2
 // bucket; the page stores those files itself, still encrypted, in the cache "hoerbuch-files".
-const VERSION = 'f43b1f3a5dd9';
+const VERSION = '7c437c38740e';
 const SHELL = 'hoerbuch-shell-' + VERSION;
 const FILES = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 self.addEventListener('install', e => e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));

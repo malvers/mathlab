@@ -352,7 +352,7 @@ nav .tabs button[aria-selected="true"] { background: var(--orange); color: var(-
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '9e8f56a755544dce495694c1';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '9cea03fabb04a64f16478d4a';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -422,7 +422,7 @@ async function keyFromPassword(pw) {   // lock.bin: the data key wrapped with PB
 }
 async function openBook(key) {
   const data = JSON.parse(new TextDecoder().decode(await gunzip(await unseal(key, await getSealed(DATA)))));
-  KEY = key; AUTHOR = data.author; PDF = data.pdf || null; PDF_DE = data.pdf_de || null;
+  KEY = key; AUTHOR = data.author; PDF = data.pdf || null; PDF_DE = data.pdf_de || null; PDF_ES = data.pdf_es || null;
   GLOSS = (data.glossary || []).map(([t, de, x, d, n, forms, k]) => ({ t, de, x, d, n, forms, k })); glossIndex();
   $('bookTitle').textContent = data.title;
   $('bookBy').textContent = data.author + ' · Hörbuch, gelesen von Solita';
@@ -481,11 +481,12 @@ async function audioSrc(c, progress) {
 
 // ---------- the player ----------
 // the re-typeset book as PDF, first entry of the menu: sealed like the sound, unsealed here and handed to the browser
-let PDF = null, PDF_DE = null, pdfNotes = {}, pdfBusy = false;   // PDF_DE: the German translation (17.10.2026)
+let PDF = null, PDF_DE = null, PDF_ES = null, pdfNotes = {}, pdfBusy = false;   // PDF_DE / PDF_ES: the translations (17.10.2026)
 const chapBtn = i => toc.querySelector(`button.chap[data-i="${i}"]`);
 // languages: a chapter without "lang" is the English original; the menu shows the chapters of one language
-const LANGS = [['de', 'Deutsch'], ['en', 'Englisch']];
+const LANGS = [['de', 'Deutsch'], ['en', 'Englisch'], ['es', 'Spanisch']];
 const langOf = c => (c && c.lang) || 'en';
+const textNote = c => langOf(c) === 'de' ? 'nur Text · Stimme folgt' : 'nur Text';   // German gets Solita's voice in November
 let tocLang = store.get('lang', 'en');
 function stepCh(d) {   // the next / previous chapter in the same language, or -1
   for (let i = ch + d; i >= 0 && i < BOOK.length; i += d) if (langOf(BOOK[i]) === langOf(BOOK[ch])) return i;
@@ -528,6 +529,7 @@ function buildToc() {
   if (!BOOK.some(c => langOf(c) === tocLang)) tocLang = 'en';
   if (BOOK.some(c => langOf(c) !== 'en')) toc.appendChild(tabsRow());
   if (tocLang === 'de' && PDF_DE) toc.appendChild(pdfButton(PDF_DE, 'PDF herunterladen (deutsch)'));   // each tab its own book
+  else if (tocLang === 'es' && PDF_ES) toc.appendChild(pdfButton(PDF_ES, 'PDF herunterladen (spanisch)'));
   else if (PDF) toc.appendChild(pdfButton(PDF, 'PDF herunterladen'));
   if (GLOSS.length) toc.appendChild(glossButton());
   BOOK.forEach((c, i) => {
@@ -537,7 +539,7 @@ function buildToc() {
     const pos = store.get('pos.' + c.key, 0), badge = SEALED && c.audio ? (have.has(c.audio.h) ? `<span class="have" title="offline gespeichert">${ICON.have}</span>`
       : `<span title="noch nicht offline">${ICON.cloud}</span>`) : '';
     b.innerHTML = c.text   // translated, not voiced yet: no time, no sound
-      ? `<div>${esc(c.short)}</div><div class="meta"><span>nur Text · Stimme folgt</span><span class="pos"></span></div><div class="prog"><i></i></div>`
+      ? `<div>${esc(c.short)}</div><div class="meta"><span>${textNote(c)}</span><span class="pos"></span></div><div class="prog"><i></i></div>`
       : `<div>${esc(c.short)}</div><div class="meta"><span>${fmt(c.dur)} ${badge}</span><span class="pos">${pos > 5 ? fmt(pos) : ''}</span></div>
       <div class="prog"><i style="width:${Math.min(100, pos / c.dur * 100)}%"></i></div>`;
     b.classList.toggle('on', i === ch);
@@ -623,7 +625,7 @@ async function load(i, at = 0, play = false) {
   let html = '', n = 0;
   c.paras.forEach((p, pi) => {
     const parts = p.s.map(sent => { starts.push(sent[0]); return sentenceHtml(sent, n++); }).join(' ');
-    if (p.h) html += pi === 0 || /^(Chapter \d+\.|Foreword|Preface|Introduction|Kapitel \d+:|Geleitwort|Vorwort|Einleitung)/.test(p.s[0][1]) ? `<h2>${parts}</h2>` : `<h3>${parts}</h3>`;
+    if (p.h) html += pi === 0 || /^(Chapter \d+\.|Foreword|Preface|Introduction|Kapitel \d+:|Geleitwort|Vorwort|Einleitung|Capítulo \d+\.|Prólogo|Prefacio|Introducción)/.test(p.s[0][1]) ? `<h2>${parts}</h2>` : `<h3>${parts}</h3>`;
     else html += `<p>${parts}</p>`;
   });
   text.innerHTML = html;
@@ -641,7 +643,7 @@ async function load(i, at = 0, play = false) {
   if (c.text) {                      // text only: no sound to load; the reading place is the scroll position
     if (audioUrlNow.startsWith('blob:')) URL.revokeObjectURL(audioUrlNow);
     audioUrlNow = ''; audio.removeAttribute('src'); audio.load();
-    $('nowTime').textContent = 'nur Text – Stimme folgt';
+    $('nowTime').textContent = textNote(c);
     seek.value = 0;
     $('follow').style.display = 'none'; userScrollUntil = 0;
     requestAnimationFrame(() => main.scrollTo({ top: store.get('scroll.' + c.key, 0), behavior: 'instant' }));   // no glide down the chapter
