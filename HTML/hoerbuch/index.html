@@ -162,6 +162,10 @@ details.sum summary { cursor: pointer; padding: 10px 0 6px; font: 700 15px Orbit
 details.sum p { margin: .55em 0; }
 details.sum ul { margin: .2em 0 .7em; padding-left: 1.2em; }
 details.sum li { margin: .25em 0; }
+details.sum .sumplay { display: inline-flex; align-items: center; gap: 8px; width: auto; height: 40px; margin: 4px 0 6px; padding: 0 14px;
+                       border-radius: 20px; border: 1px solid var(--line); background: transparent; color: var(--accent); cursor: pointer;
+                       font: 700 13px Orbitron, Arial, sans-serif; letter-spacing: .04em; }
+details.sum .sumplay svg { width: 18px; height: 18px; fill: currentColor; }
 article h3 { font: 600 17px/1.5 Orbitron, Arial, sans-serif; color: var(--head); margin: 34px 0 12px; letter-spacing: .03em; }
 article p { margin: 0 0 18px; color: var(--ink); }
 /* karaoke: sentence .s > word group .g > word .w; "on" = being read, "cur" = the frame around it */
@@ -360,13 +364,15 @@ nav .tabs button[aria-selected="true"] { background: var(--orange); color: var(-
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '5fbdc11d7030511b29bf03fa';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = 'f231806b383f4290178bb2cf';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
 const SPEEDS = [1, 1.1, 1.25, 1.5, 0.9];
 const ICON = { have: '<svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>',
-               cloud: '<svg viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 5.35 8.04 6 6 0 0 0 6 20h13a5 5 0 0 0 .35-9.96zM17 13l-5 5-5-5h3V9h4v4z"/></svg>' };
+               cloud: '<svg viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 5.35 8.04 6 6 0 0 0 6 20h13a5 5 0 0 0 .35-9.96zM17 13l-5 5-5-5h3V9h4v4z"/></svg>',
+               play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+               pause: '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>' };
 const store = {   // per-viewer convenience only; the page works without it
   get(k, d) { try { const v = localStorage.getItem('cn.' + k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } },
   set(k, v) { try { localStorage.setItem('cn.' + k, JSON.stringify(v)); } catch (_) {} }
@@ -634,12 +640,50 @@ function sumHtml(c) {   // "Kurz gefasst": **bold**, paragraphs, "- " lists (Doc
     const lines = block.split('\n'), items = lines.filter(l => l.startsWith('- ')), rest = lines.filter(l => !l.startsWith('- '));
     return (rest.length ? `<p>${inline(rest.join(' '))}</p>` : '') + (items.length ? `<ul>${items.map(l => `<li>${inline(l.slice(2))}</li>`).join('')}</ul>` : '');
   }).join('');
-  return `<details class="sum"${store.get('sumOpen', true) ? ' open' : ''}><summary>${label}</summary>${body}</details>`;
+  const play = c.sumAudio ? `<button class="sumplay" type="button">${ICON.play}<span>${{ de: 'Vorlesen', en: 'Listen', es: 'Escuchar' }[langOf(c)] || 'Vorlesen'} · ${fmt(c.sumAudio.d)}</span></button>` : '';
+  return `<details class="sum"${store.get('sumOpen', true) ? ' open' : ''}><summary>${label}</summary>${play}${body}</details>`;
 }
+// the summary read aloud: its own player, so the chapter keeps its place; one of the two plays at a time
+const sumAudio = new Audio();
+let sumUrl = '', sumFor = '';
+const sumBtn = () => text.querySelector('.sumplay');
+function sumLabel() {
+  const b = sumBtn(), c = BOOK[ch]; if (!b || !c || !c.sumAudio) return;
+  const playing = !sumAudio.paused && sumFor === c.key;
+  b.querySelector('svg').outerHTML = playing ? ICON.pause : ICON.play;
+  const word = { de: 'Vorlesen', en: 'Listen', es: 'Escuchar' }[langOf(c)] || 'Vorlesen';
+  b.querySelector('span').textContent = sumFor === c.key && sumAudio.currentTime > 0
+    ? fmt(sumAudio.currentTime) + ' / ' + fmt(c.sumAudio.d) : word + ' · ' + fmt(c.sumAudio.d);
+}
+function sumStop() {
+  sumAudio.pause();
+  if (sumUrl.startsWith('blob:')) URL.revokeObjectURL(sumUrl);
+  sumUrl = ''; sumFor = ''; sumAudio.removeAttribute('src');
+}
+async function sumToggle() {
+  const c = BOOK[ch]; if (!c || !c.sumAudio) return;
+  if (sumFor === c.key && !sumAudio.paused) { sumAudio.pause(); sumLabel(); return; }
+  if (sumFor !== c.key) {
+    sumStop(); sumFor = c.key;
+    const b = sumBtn(); if (b) b.querySelector('span').textContent = 'Lade …';
+    try {
+      sumUrl = c.sumAudio.url || URL.createObjectURL(new Blob([await unseal(KEY, await getSealed(c.sumAudio.h, () => {}))], { type: c.sumAudio.t }));
+    } catch (e) { sumFor = ''; if (b) b.querySelector('span').textContent = e.message || 'Fehler'; return; }
+    if (sumFor !== c.key) return;            // another chapter meanwhile
+    sumAudio.src = sumUrl;
+  }
+  audio.pause();
+  sumAudio.playbackRate = audio.playbackRate;
+  sumAudio.play().catch(() => {});
+}
+text.addEventListener('click', e => { if (e.target.closest('.sumplay')) { e.preventDefault(); sumToggle(); } });
+['play', 'pause', 'timeupdate', 'ended'].forEach(n => sumAudio.addEventListener(n, sumLabel));
+audio.addEventListener('play', () => { if (!sumAudio.paused) { sumAudio.pause(); sumLabel(); } });
 text.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('sum')) store.set('sumOpen', e.target.open); }, true);
 
 async function load(i, at = 0, play = false) {
   if (i < 0 || i >= BOOK.length) return;
+  sumStop();
   const c = BOOK[i], token = ++loadToken;
   ch = i; si = gi = wi = -1; starts = []; S = [];
   let html = '', n = 0;
