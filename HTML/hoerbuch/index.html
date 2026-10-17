@@ -160,6 +160,8 @@ article p { margin: 0 0 18px; color: var(--ink); }
 .s, .g, .w { cursor: pointer; border-radius: 5px; transition: background .15s, color .15s; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .w { transition: none; }                  /* a word must switch at once, not fade */
 .w:hover { background: rgba(var(--tint), .14); }
+#text.mute .s, #text.mute .g, #text.mute .w { cursor: auto; }   /* text only: nothing to jump to */
+#text.mute .w:hover { background: none; }
 .s.on, .g.on { background: rgba(var(--hl), var(--hl-a)); color: var(--hl-ink); box-shadow: 0 0 0 1px rgba(var(--hl), .4); }
 .s.cur, .g.cur { background: rgba(var(--hl), var(--cur-a)); }
 .w.on { background: var(--orange); color: var(--navy); box-shadow: 0 0 0 2px var(--orange); }
@@ -350,7 +352,7 @@ nav .tabs button[aria-selected="true"] { background: var(--orange); color: var(-
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = 'da2a28abbb9bb01f15f931de';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '9e8f56a755544dce495694c1';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -420,7 +422,7 @@ async function keyFromPassword(pw) {   // lock.bin: the data key wrapped with PB
 }
 async function openBook(key) {
   const data = JSON.parse(new TextDecoder().decode(await gunzip(await unseal(key, await getSealed(DATA)))));
-  KEY = key; AUTHOR = data.author; PDF = data.pdf || null;
+  KEY = key; AUTHOR = data.author; PDF = data.pdf || null; PDF_DE = data.pdf_de || null;
   GLOSS = (data.glossary || []).map(([t, de, x, d, n, forms, k]) => ({ t, de, x, d, n, forms, k })); glossIndex();
   $('bookTitle').textContent = data.title;
   $('bookBy').textContent = data.author + ' · Hörbuch, gelesen von Solita';
@@ -454,7 +456,7 @@ async function offlineAll() {
   const btn = $('offline'), label = btn.querySelector('span');
   btn.disabled = true;
   try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (_) {}
-  const todo = BOOK.filter(c => !have.has(c.audio.h)), total = todo.reduce((s, c) => s + c.audio.n, 0);
+  const todo = BOOK.filter(c => c.audio && !have.has(c.audio.h)), total = todo.reduce((s, c) => s + c.audio.n, 0);
   let done = 0;
   try {
     for (const c of todo) {
@@ -466,10 +468,10 @@ async function offlineAll() {
 }
 function offlineState() {
   if (!SEALED) return;
-  const btn = $('offline'), label = btn.querySelector('span'), all = BOOK.every(c => have.has(c.audio.h));
+  const btn = $('offline'), label = btn.querySelector('span'), all = BOOK.every(c => !c.audio || have.has(c.audio.h));
   btn.hidden = false; btn.disabled = all; btn.classList.toggle('done', all);
   label.textContent = all ? 'Offline bereit' : 'Offline laden';
-  btn.title = all ? 'Alle Kapitel sind auf diesem Gerät' : mb(BOOK.filter(c => !have.has(c.audio.h)).reduce((s, c) => s + c.audio.n, 0)) + ' laden';
+  btn.title = all ? 'Alle Kapitel sind auf diesem Gerät' : mb(BOOK.filter(c => c.audio && !have.has(c.audio.h)).reduce((s, c) => s + c.audio.n, 0)) + ' laden';
 }
 // the sound of a chapter: the file next to the page, or decrypted into a blob
 async function audioSrc(c, progress) {
@@ -479,7 +481,7 @@ async function audioSrc(c, progress) {
 
 // ---------- the player ----------
 // the re-typeset book as PDF, first entry of the menu: sealed like the sound, unsealed here and handed to the browser
-let PDF = null, pdfNote = '', pdfBusy = false;
+let PDF = null, PDF_DE = null, pdfNotes = {}, pdfBusy = false;   // PDF_DE: the German translation (17.10.2026)
 const chapBtn = i => toc.querySelector(`button.chap[data-i="${i}"]`);
 // languages: a chapter without "lang" is the English original; the menu shows the chapters of one language
 const LANGS = [['de', 'Deutsch'], ['en', 'Englisch']];
@@ -500,24 +502,24 @@ function tabsRow() {
   }
   return row;
 }
-function pdfButton() {
+function pdfButton(pdf, label) {
   const b = document.createElement('button');
   b.className = 'pdf';
-  b.innerHTML = `<svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5zm7-3 5-5h-3V4h-4v8H7z"/></svg><span>PDF herunterladen<small>${pdfNote || mb(PDF.n)}</small></span>`;
-  b.onclick = downloadPdf;
+  b.innerHTML = `<svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5zm7-3 5-5h-3V4h-4v8H7z"/></svg><span>${label}<small>${pdfNotes[pdf.h] || mb(pdf.n)}</small></span>`;
+  b.onclick = () => downloadPdf(pdf);
   return b;
 }
-async function downloadPdf() {
+async function downloadPdf(pdf) {
   if (pdfBusy) return;
-  const note = t => { pdfNote = t; const s = toc.querySelector('button.pdf small'); if (s) s.textContent = t; };   // the menu is rebuilt meanwhile
+  const note = t => { pdfNotes[pdf.h] = t; const s = toc.querySelector('button.pdf small'); if (s) s.textContent = t; };   // the menu is rebuilt meanwhile
   pdfBusy = true;
   try {
     note('Lade …');
-    const bytes = await unseal(KEY, await getSealed(PDF.h, f => note('Lade ' + Math.round(f * 100) + ' %')));
+    const bytes = await unseal(KEY, await getSealed(pdf.h, f => note('Lade ' + Math.round(f * 100) + ' %')));
     const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })), a = document.createElement('a');
-    a.href = url; a.download = PDF.name; document.body.appendChild(a); a.click(); a.remove();
+    a.href = url; a.download = pdf.name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
-    note(mb(PDF.n) + ' · heruntergeladen');
+    note(mb(pdf.n) + ' · heruntergeladen');
   } catch (e) { note((e.message || 'Fehler') + ' - nochmal tippen'); }
   pdfBusy = false;
 }
@@ -525,15 +527,18 @@ function buildToc() {
   toc.innerHTML = '';
   if (!BOOK.some(c => langOf(c) === tocLang)) tocLang = 'en';
   if (BOOK.some(c => langOf(c) !== 'en')) toc.appendChild(tabsRow());
-  if (PDF) toc.appendChild(pdfButton());
+  if (tocLang === 'de' && PDF_DE) toc.appendChild(pdfButton(PDF_DE, 'PDF herunterladen (deutsch)'));   // each tab its own book
+  else if (PDF) toc.appendChild(pdfButton(PDF, 'PDF herunterladen'));
   if (GLOSS.length) toc.appendChild(glossButton());
   BOOK.forEach((c, i) => {
     if (langOf(c) !== tocLang) return;
     const b = document.createElement('button');
     b.className = 'chap'; b.dataset.i = i;
-    const pos = store.get('pos.' + c.key, 0), badge = SEALED ? (have.has(c.audio.h) ? `<span class="have" title="offline gespeichert">${ICON.have}</span>`
+    const pos = store.get('pos.' + c.key, 0), badge = SEALED && c.audio ? (have.has(c.audio.h) ? `<span class="have" title="offline gespeichert">${ICON.have}</span>`
       : `<span title="noch nicht offline">${ICON.cloud}</span>`) : '';
-    b.innerHTML = `<div>${esc(c.short)}</div><div class="meta"><span>${fmt(c.dur)} ${badge}</span><span class="pos">${pos > 5 ? fmt(pos) : ''}</span></div>
+    b.innerHTML = c.text   // translated, not voiced yet: no time, no sound
+      ? `<div>${esc(c.short)}</div><div class="meta"><span>nur Text · Stimme folgt</span><span class="pos"></span></div><div class="prog"><i></i></div>`
+      : `<div>${esc(c.short)}</div><div class="meta"><span>${fmt(c.dur)} ${badge}</span><span class="pos">${pos > 5 ? fmt(pos) : ''}</span></div>
       <div class="prog"><i style="width:${Math.min(100, pos / c.dur * 100)}%"></i></div>`;
     b.classList.toggle('on', i === ch);
     b.onclick = () => { load(i, store.get('pos.' + c.key, 0), true); toc.classList.remove('open'); };
@@ -623,6 +628,7 @@ async function load(i, at = 0, play = false) {
   });
   text.innerHTML = html;
   text.lang = langOf(c);
+  text.classList.toggle('mute', !!c.text);
   spans = [...text.querySelectorAll('.s')];
   S.forEach((x, k) => { x.el = spans[k]; x.gEls = [...spans[k].querySelectorAll('.g')]; x.groups.forEach((g, j) => { g.wEls = [...x.gEls[j].querySelectorAll('.w')]; }); });
   if (langOf(c) !== tocLang) { tocLang = langOf(c); store.set('lang', tocLang); buildToc(); }   // the menu follows the chapter
@@ -632,6 +638,16 @@ async function load(i, at = 0, play = false) {
   store.set('ch', c.key);
   audio.pause();
   $('play').disabled = true;
+  if (c.text) {                      // text only: no sound to load; the reading place is the scroll position
+    if (audioUrlNow.startsWith('blob:')) URL.revokeObjectURL(audioUrlNow);
+    audioUrlNow = ''; audio.removeAttribute('src'); audio.load();
+    $('nowTime').textContent = 'nur Text – Stimme folgt';
+    seek.value = 0;
+    $('follow').style.display = 'none'; userScrollUntil = 0;
+    requestAnimationFrame(() => main.scrollTo({ top: store.get('scroll.' + c.key, 0), behavior: 'instant' }));   // no glide down the chapter
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = null;
+    return;
+  }
   $('nowTime').textContent = 'Lade …';
   let src;
   try { src = await audioSrc(c, f => { if (token === loadToken) $('nowTime').textContent = 'Lade ' + Math.round(f * 100) + ' %'; }); }
@@ -814,8 +830,14 @@ document.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') s
 document.addEventListener('keydown', showBar, true);
 ['fullscreenchange', 'webkitfullscreenchange'].forEach(n => document.addEventListener(n, () => { showBar(); tick(true); }));   // keep the sentence in view
 
+// a text-only chapter (no sound yet): remember how far it was read
+let scrollSave = 0;
+main.addEventListener('scroll', () => {
+  const c = BOOK[ch]; if (!c || !c.text) return;
+  clearTimeout(scrollSave); scrollSave = setTimeout(() => store.set('scroll.' + c.key, Math.round(main.scrollTop)), 400);
+}, { passive: true });
 // reading ahead by hand pauses the auto-scroll; "Zur Stelle" brings it back
-const userScroll = () => { userScrollUntil = Date.now() + 8000; $('follow').style.display = 'inline-flex'; };
+const userScroll = () => { if (BOOK[ch] && BOOK[ch].text) return; userScrollUntil = Date.now() + 8000; $('follow').style.display = 'inline-flex'; };   // text only: no place to go back to
 main.addEventListener('wheel', userScroll, { passive: true });
 main.addEventListener('touchmove', userScroll, { passive: true });
 $('follow').onclick = () => { userScrollUntil = 0; follow = true; $('follow').style.display = 'none'; tick(true); };
