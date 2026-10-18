@@ -13,6 +13,8 @@ chapter: the same tags and the same structural attributes, only <b> and the like
 After that: node tools/buch-en/check.mjs <book>-en, and in the browser node tools/buch-en/encheck.mjs <book>-en --poke.
 --lang es (package ES0, 12.10.2026): the same for a Spanish edition - HTML/buch/<book>-es/, js/buch-es.js and
 js/buch-es/<module>.js, header and title in Spanish. Without --lang everything is English as before.
+--lang it (package IT0, 18.10.2026): the same for an Italian edition - HTML/buch/<book>-it/, js/buch-it.js and
+js/buch-it/<module>.js, header and title in Italian.
 """
 import sys, os, re, json, subprocess, html.parser, difflib
 
@@ -23,7 +25,7 @@ out_dir = sys.argv[sys.argv.index('--out') + 1] if '--out' in sys.argv else None
 if out_dir: args.remove(out_dir)
 LANG = sys.argv[sys.argv.index('--lang') + 1] if '--lang' in sys.argv else 'en'
 if '--lang' in sys.argv: args.remove(LANG)
-assert LANG in ('en', 'es'), 'unknown language ' + LANG
+assert LANG in ('en', 'es', 'it'), 'unknown language ' + LANG
 book, name, src = args
 name = name[:-5] if name.endswith('.html') else name
 DE_DIR = os.path.join(HTML, 'buch', book)
@@ -38,6 +40,10 @@ WORDS = {
            'title': '%s · Capítulo %s · %s | Doc Alvers Mathe-Labor',
            'desc': '%s. Capítulo %s del libro de texto interactivo %s: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.',
            'langname': 'Spanish'},
+    'it': {'Kapitel': 'Capitolo', 'Inhalt des Kapitels': 'Contenuto del capitolo', 'CHAPTER': 'CAPITOLO %s · ',
+           'title': '%s · Capitolo %s · %s | Doc Alvers Mathe-Labor',
+           'desc': '%s. Capitolo %s del libro di testo interattivo %s: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.',
+           'langname': 'Italian'},
 }[LANG]
 
 
@@ -81,7 +87,7 @@ made = []
 def dictionary(m):
     mod = m.group(1)
     src_js = os.path.join(HTML, 'js', 'buch-%s.js' % mod)
-    if mod in ('en', 'es', 'druck') or not os.path.exists(src_js) or not re.search(r"^[ \t]*W\('", open(src_js, encoding='utf-8').read(), re.M):
+    if mod in ('en', 'es', 'it', 'druck') or not os.path.exists(src_js) or not re.search(r"^[ \t]*W\('", open(src_js, encoding='utf-8').read(), re.M):
         return m.group(0)
     f = os.path.join(HTML, 'js', 'buch-' + LANG, mod + '.js')
     if not os.path.exists(f) and LANG == 'es':
@@ -97,6 +103,20 @@ def dictionary(m):
             " * After changing a German widget sentence: node tools/buch-en/check.mjs --lang es\n"
             " */\n"
             "window.BuchES && BuchES.add('%s', {\n    word: {\n    },\n    phrase: [\n    ],\n    rule: []\n});\n" % (mod, mod, mod, mod))
+        made.append(f)
+    if not os.path.exists(f) and LANG == 'it':
+        os.makedirs(os.path.dirname(f), exist_ok=True)
+        open(f, 'w', encoding='utf-8').write(
+            "/* js/buch-it/%s.js — Italian for the widgets of js/buch-%s.js.\n"
+            " * Loaded by the Italian editions right after js/buch-%s.js; the engine and the shared words are in js/buch-it.js.\n"
+            " *   word    a whole label → its Italian\n"
+            " *   phrase  German sentence pieces exactly as the widget source writes them → Italian\n"
+            " *   rule    word order and notation (after the point rules of js/buch-it.js, before its header rules)\n"
+            " * Numbers keep their German form (0,5 · 10.000 · 30 %%); never write a rule that can match digits around a comma or a\n"
+            " * point without German words around them - SVG coordinates are written \"x,y\" (tools/buch-es/auftrag.md, section 5).\n"
+            " * After changing a German widget sentence: node tools/buch-en/check.mjs --lang it\n"
+            " */\n"
+            "window.BuchIT && BuchIT.add('%s', {\n    word: {\n    },\n    phrase: [\n    ],\n    rule: []\n});\n" % (mod, mod, mod, mod))
         made.append(f)
     if not os.path.exists(f):
         open(f, 'w', encoding='utf-8').write(

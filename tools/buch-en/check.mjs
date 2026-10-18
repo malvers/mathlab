@@ -21,6 +21,9 @@
 //                                                     js/buch-es.js, js/buch-es/<module>.js, tools/buch-es/known.json);
 //                                                     unknown words are measured against /usr/share/dict/spanish if there
 //                                                     is one, else against the words of the Spanish dictionaries only
+//        node tools/buch-en/check.mjs --lang it [book-it …]   the same for the Italian editions (package IT0, 18.10.2026:
+//                                                     HTML/buch/*-it/, js/buch-it.js, js/buch-it/<module>.js,
+//                                                     tools/buch-it/known.json, words of /usr/share/dict/italian if any)
 import fs from 'fs';
 import vm from 'vm';
 import path from 'path';
@@ -30,8 +33,8 @@ const ROOT = process.env.BUCH_EN_ROOT ? path.resolve(process.env.BUCH_EN_ROOT) +
 const args = process.argv.slice(2);
 // the language of the editions: en (default) or es (package ES0, 12.10.2026)
 const LANG = args.includes('--lang') ? args.splice(args.indexOf('--lang'), 2)[1] : 'en';
-if (!['en', 'es'].includes(LANG)) { console.log('✗ unknown language ' + LANG); process.exit(1); }
-const NAME = { en: 'English', es: 'Spanish' }[LANG];
+if (!['en', 'es', 'it'].includes(LANG)) { console.log('✗ unknown language ' + LANG); process.exit(1); }
+const NAME = { en: 'English', es: 'Spanish', it: 'Italian' }[LANG];
 const KNOWN = new URL(LANG === 'en' ? 'known.json' : '../buch-' + LANG + '/known.json', import.meta.url).pathname;
 const accept = args.includes('--accept');
 const books = args.filter(a => !a.startsWith('--'));
@@ -56,7 +59,7 @@ function attrs(src) {
 }
 const MODULE = /<script src="\.\.\/\.\.\/js\/buch-([a-z0-9-]+)\.js"><\/script>/g;
 const DICT = new RegExp('<script src="\\.\\./\\.\\./js/buch-' + LANG + '/([a-z0-9-]+)\\.js"></script>', 'g');
-const NOT_WIDGETS = new Set(['en', 'es', 'druck']);
+const NOT_WIDGETS = new Set(['en', 'es', 'it', 'druck']);
 
 // the widgets of every module: W('name', …) up to its closing bracket; everything outside them are the helpers
 const modules = {};
@@ -150,7 +153,7 @@ function engine(dicts) {
         const f = ROOT + 'js/buch-' + LANG + '/' + d + '.js';
         if (fs.existsSync(f)) vm.runInContext(read(f), ctx, { filename: 'buch-' + LANG + '/' + d + '.js' });
     }
-    return (engines[key] = LANG === 'en' ? ctx.BuchEN : ctx.BuchES);
+    return (engines[key] = LANG === 'en' ? ctx.BuchEN : LANG === 'it' ? ctx.BuchIT : ctx.BuchES);
 }
 
 // what counts as German: umlauts, frequent small words, typical words of the widgets - outside of tags and maths
@@ -164,12 +167,13 @@ const visible = s => s.replace(/<[^>]*>/g, t => ' ' + [...t.matchAll(/\s(?:title
 // "richtig – weiter so" → "correct – weiter so". Names and code words that stay are English enough: SAFE, and every
 // word of the English dictionaries.
 // Spanish: the words of /usr/share/dict/spanish if there is one; else none, and only the Spanish dictionaries count
-const WORDLIST = LANG === 'en' ? '/usr/share/dict/words' : '/usr/share/dict/spanish';
+// Italian the same with /usr/share/dict/italian
+const WORDLIST = LANG === 'en' ? '/usr/share/dict/words' : LANG === 'it' ? '/usr/share/dict/italian' : '/usr/share/dict/spanish';
 const ENGLISH = fs.existsSync(WORDLIST) ? new Set(read(WORDLIST).toLowerCase().split('\n')) : LANG === 'en' ? null : new Set();
 const SAFE = new Set('orbitron raleway rgba hsla svg viewbox katex px em rem nbsp xmidymid pagerank anscombe dresden gauss jordan monty hall use strict'.split(' '));
 function englishWords(B) {
     const set = new Set();
-    const add = v => String(v).toLowerCase().split(/[^a-zäöüßáéíóúñ]+/).forEach(w => w && set.add(w));
+    const add = v => String(v).toLowerCase().split(LANG === 'it' ? /[^a-zäöüßàèéìíòóùú]+/ : /[^a-zäöüßáéíóúñ]+/).forEach(w => w && set.add(w));
     for (const d of B.dicts) { Object.values(d.word).forEach(add); d.phrase.forEach(([, en]) => add(en)); }
     return set;
 }
@@ -181,7 +185,7 @@ function looksGerman(r, s) {
     if (GERMAN.test(v)) return true;
     if (!ENGLISH || CODE.test(v)) return false;
     // Spanish: accented letters belong to the word ("Parábola" is one word, not "Par" + "bola")
-    const words = v.match(LANG === 'en' ? /[A-Za-zÄÖÜäöüß]{3,}/g : /[A-Za-zÄÖÜäöüßáéíóúñÁÉÍÓÚÑ]{3,}/g) || [];
+    const words = v.match(LANG === 'en' ? /[A-Za-zÄÖÜäöüß]{3,}/g : LANG === 'it' ? /[A-Za-zÄÖÜäöüßàèéìíòóùúÀÈÉÌÍÒÓÙÚ]{3,}/g : /[A-Za-zÄÖÜäöüßáéíóúñÁÉÍÓÚÑ]{3,}/g) || [];
     // one lowercase word on its own is a key, a class or a value inside the widget ("wurf", "b-ctrls", "oben"), not text
     if (words.length < 2 && !/[A-ZÄÖÜ]/.test(v)) return false;
     // one identifier: "baum-hero", "AnB", "b_go"

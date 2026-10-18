@@ -88,6 +88,10 @@ const BOOK_WORDS = {
     es: { tagline: (n) => `Libro de texto interactivo / ${n} capítulos`, coverAlt: 'portada del libro de texto interactivo', chapter: 'Capítulo',
         chapterAlt: 'vista previa del libro de texto interactivo', locale: 'es_ES',
         desc: (c, B) => `${c.sub}. Capítulo ${c.k} del libro de texto interactivo ${B.title}: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.` },
+    // the Italian editions (package IT0, 18.10.2026); desc as tools/buch-en/wrap.py --lang it writes it
+    it: { tagline: (n) => `Libro di testo interattivo / ${n} capitoli`, coverAlt: 'copertina del libro di testo interattivo', chapter: 'Capitolo',
+        chapterAlt: 'anteprima dal libro di testo interattivo', locale: 'it_IT',
+        desc: (c, B) => `${c.sub}. Capitolo ${c.k} del libro di testo interattivo ${B.title}: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.` },
 };
 
 // The textbooks (HTML/buch/<book>/): a card for the cover page and one per chapter. The texts come from the
