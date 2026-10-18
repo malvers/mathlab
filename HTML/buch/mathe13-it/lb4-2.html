@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica 13 · Capitolo 4.2 · Test di significatività | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Ipotesi, regione di rifiuto, errori di I e di II specie. Capitolo 4.2 del libro di testo interattivo Matematica · Berufliches Gymnasium 13: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · BERUFLICHES GYMNASIUM 13</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 4.2 · AREA DI APPRENDIMENTO 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 4.2 · AREA DI APPRENDIMENTO 4 · NOVEMBRE · DICEMBRE</p>
+            <h1>Test di significatività</h1>
+            <p class="b-hero-lead">Una moneta dà testa 33 volte su 50 lanci. È truccata o è stato un caso? In uno studio un farmaco guarisce 72 malati su 100; quello vecchio solo il 60 %. Funziona davvero meglio? Un <b>test di significatività</b> prende decisioni di questo tipo secondo una regola fissa e ti dice esattamente quanto spesso ci si sbaglia.</p>
+            <div class="b-chips"><span class="b-chip">8 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">DECIDERE IN CONDIZIONI DI INCERTEZZA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="50" data-p="0.5" data-lo="32" data-hi="50" data-step="10"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>formulare l’<b>ipotesi nulla</b> e l’<b>ipotesi alternativa</b>, fissare la statistica test e il <b>livello di significatività</b></li>
+                <li>determinare la <b>regione di rifiuto</b> e il <b>valore critico</b> e stabilire una <b>regola di decisione</b></li>
+                <li>eseguire test <b>unilaterali</b> e <b>bilaterali</b>, anche con il CAS</li>
+                <li>distinguere e interpretare gli <b>errori di I e di II specie</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="25" data-ph="μ ="><p class="b-q-text">Valore atteso del numero di teste in 50 lanci di una moneta equa?</p><div class="b-sol"><p>25</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$P(X \ge 32)$ è uguale a …</p>
+                <div class="b-mc"><button>$1 - P(X \le 32)$</button><button>$P(X \le 31)$</button><button>$1 - P(X \le 31)$</button></div>
+                <div class="b-sol"><p>L’evento contrario di «almeno 32» è «al massimo 31».</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="percentuale"><p class="b-q-text">Quale percentuale è 0,05?</p><div class="b-sol"><p>5 %</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">DA QUANDO È TRUCCATA?</div>
+            <div class="b-text"><p>Si lancia una moneta 50 volte. Volete decidere se favorisce la testa.</p>
+                <ul><li>Da quante teste in su direste «truccata»? Mettetevi d’accordo su un numero.</li><li>Quanto spesso accusereste così ingiustamente una moneta equa?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DUE MODI DI SBAGLIARE</div>
+            <div class="b-text"><p>Un test per il covid, un rilevatore di fumo, un tribunale: tutti possono sbagliare in due modi diversi.</p>
+                <ul><li>Descrivete entrambi gli errori per ogni esempio. Quale è peggiore in ciascun caso?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">IL DADO EQUO</div>
+            <div class="b-text"><p>Si lancia un dado 120 volte e il sei esce 28 volte.</p>
+                <ul><li>Quanti sei vi aspettate? 28 è sospetto?</li><li>Sarebbe sospetto anche 8?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Test unilaterali" data-toc-k="1" data-toc-short="1 Unilaterale">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Ipotesi, regione di rifiuto, regola di decisione</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Supponiamo per prima cosa che la moneta sia equa: $p = 0{,}5$. Con questa ipotesi $X$, il numero di teste in 50 lanci, ha una distribuzione binomiale con $n = 50$ e $p = 0{,}5$. I valori molto grandi sono allora rari: $P(X \ge 32) \approx 0{,}032$, $P(X \ge 31) \approx 0{,}059$.</p></div></div>
+            <div class="b-text"><p>Stabiliamo: se escono 32 teste o più, non crediamo più che la moneta sia equa. Così sospetteremmo ingiustamente di una moneta equa solo in circa il 3,2 % dei casi. Questo limite si fissa <b>prima</b> di lanciare.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · TEST DI SIGNIFICATIVITÀ</div>
+                <div class="b-text">
+                    <p><b>Ipotesi nulla</b> $H_0\colon p = p_0$ (la situazione nota finora), <b>ipotesi alternativa</b> $H_1$, per esempio $p > p_0$ (unilaterale destro) o $p < p_0$ (unilaterale sinistro).</p>
+                    <p><b>Statistica test</b> $X$: numero di successi nel campione; sotto $H_0$ ha una distribuzione binomiale con $n$ e $p_0$. <b>Livello di significatività</b> $\alpha$, di solito il 5 %.</p>
+                    <p><b>Regione di rifiuto</b> $\overline{A}$: i valori estremi che sotto $H_0$ hanno complessivamente al massimo la probabilità $\alpha$. Nel test destro $\overline{A} = \{k, \ldots, n\}$ con il più piccolo $k$ per cui vale $P(X \ge k) \le \alpha$. $k$ si chiama <b>valore critico</b>.</p>
+                    <p><b>Regola di decisione:</b> se il risultato cade in $\overline{A}$, si rifiuta $H_0$: il risultato è <b>significativo</b>. Altrimenti $H_0$ non viene rifiutata.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Ciò che si vuole dimostrare va in $H_1$.</b> Infatti solo il rifiuto di $H_0$ è un’affermazione forte con una probabilità di errore nota.</p>
+            <p class="b-note"><b>Non rifiutata</b> non significa dimostrata. Significa solo che i dati non bastano per confutare $H_0$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · IL TEST DI SIGNIFICATIVITÀ</div>
+        <p class="b-help" style="margin:0 0 12px">Imposta $n$, $p_0$, il tipo di test e $\alpha$. In rosso c’è la regione di rifiuto. Sposta il numero di successi osservato $k$ e leggi la decisione.</p>
+        <div data-widget="signifikanztest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · IL NUOVO FARMACO</div>
+            <div class="b-text"><p>Un vecchio farmaco guarisce il 60 %. Il produttore di uno nuovo afferma che funziona meglio. In uno studio con 100 malati ne guariscono 72. Esegui il test con $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}6$, $H_1\colon p > 0{,}6$, $X \sim B(100;\, 0{,}6)$. $P(X \ge 69) \approx 0{,}040 \le 0{,}05$, ma $P(X \ge 68) \approx 0{,}062$. Quindi $\overline{A} = \{69, \ldots, 100\}$.</p>
+                <p>72 cade nella regione di rifiuto: <span class="b-res">$H_0$ viene rifiutata.</span> L’efficacia migliore è significativa al livello del 5 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · UNILATERALE SINISTRO</div>
+            <div class="b-text"><p>Un partito afferma di avere il 40 % dei consensi. Un’avversaria sospetta che siano meno e intervista 200 persone. Determina la regione di rifiuto per $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}4$, $H_1\colon p < 0{,}4$. Si cerca il più grande $k$ con $P(X \le k) \le 0{,}05$: $P(X \le 68) \approx 0{,}047$.
+                <span class="b-res">$\overline{A} = \{0, \ldots, 68\}$</span>. Solo con 68 consensi o meno il sospetto è confermato.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Formula $H_0$ e $H_1$: a) Un fornitore garantisce al massimo il 10 % di scarti; l’acquirente ne dubita. b) Un insegnante sospetta che più di metà della classe copi i compiti.</p></div>
+            <div class="b-sol"><p>a) $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$ &nbsp; b) $H_0\colon p = 0{,}5$, $H_1\colon p > 0{,}5$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Sull’esercizio 1 a): l’acquirente controlla 50 pezzi. Determina con il widget la regione di rifiuto per $\alpha = 5\,\%$. Che cosa decide con 7 pezzi difettosi?</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{10, \ldots, 50\}$ ($P(X \ge 10) \approx 0{,}025$, $P(X \ge 9) > 0{,}05$). Con 7 $H_0$ non viene rifiutata.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Come cambia la regione di rifiuto nel test della moneta ($n = 50$, destro) se si sceglie $\alpha = 1\,\%$ invece del $5\,\%$? Che cosa significa per la decisione con 33 teste?</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{34, \ldots, 50\}$ invece di $\{32, \ldots\}$. Con 33 teste: significativo al livello del 5 %, ma non al livello dell’1 %.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Perché bisogna fissare $\alpha$ e la regione di rifiuto <b>prima</b> di conoscere i dati?</p></div>
+            <div class="b-sol"><p>Altrimenti si può collocare il limite in modo che venga fuori il risultato desiderato. La probabilità di errore indicata non sarebbe più corretta.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="32" data-ph="k ="><p class="b-q-text">Test della moneta $n = 50$, $p_0 = 0{,}5$, destro, $\alpha = 5\,\%$: valore più piccolo della regione di rifiuto?</p><div class="b-sol"><p>32</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Il risultato non cade nella regione di rifiuto. Allora …</p>
+            <div class="b-mc"><button>$H_0$ è dimostrata</button><button>$H_0$ non viene rifiutata</button><button>$H_1$ è dimostrata</button></div>
+            <div class="b-sol"><p>I dati non bastano per confutare $H_0$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Test bilaterali, errori di I e II specie" data-toc-k="2" data-toc-short="2 Errori">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Test bilaterali, errori di I e di II specie</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un dado è equo? Sarebbero sospetti <b>troppi</b> e <b>troppo pochi</b> sei. Perciò si divide $\alpha$ tra i due lati, $\tfrac{\alpha}{2}$ ciascuno.</p></div></div>
+            <div class="b-text"><p>Ogni decisione può essere sbagliata. Se si rifiuta $H_0$ anche se è vera, si commette un <b>errore di I specie</b>. La sua probabilità è al massimo $\alpha$. Se si mantiene $H_0$ anche se in realtà vale un altro $p$, si commette un <b>errore di II specie</b>. La sua probabilità $\beta$ dipende dal vero $p$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · BILATERALE, ERRORI DI I E II SPECIE</div>
+                <div class="b-text">
+                    <p><b>Test bilaterale</b> $H_0\colon p = p_0$ contro $H_1\colon p \neq p_0$: $\overline{A} = \{0, \ldots, l\} \cup \{r, \ldots, n\}$ con il più grande $l$ per cui $P(X \le l) \le \tfrac{\alpha}{2}$ e il più piccolo $r$ per cui vale $P(X \ge r) \le \tfrac{\alpha}{2}$.</p>
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th></th><th>$H_0$ è vera</th><th>$H_1$ è vera</th></tr>
+                        <tr><th>$H_0$ rifiutata</th><td><b>errore di I specie</b> (al massimo $\alpha$)</td><td>corretto</td></tr>
+                        <tr><th>$H_0$ non rifiutata</th><td>corretto</td><td><b>errore di II specie</b> ($\beta$)</td></tr></table></div>
+                    <p>Un $\alpha$ più piccolo rende più raro l’errore di I specie, ma più frequente quello di II specie. Solo un’ampiezza del campione maggiore li riduce entrambi.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In tribunale:</b> $H_0$ = innocente. Errore di I specie: condannare un innocente. Errore di II specie: assolvere un colpevole. Il primo si tiene piccolo di proposito.</p>
+            <p class="b-note"><b>Nel widget:</b> spunta «Mostra l’errore di II specie» e scegli un $p$ vero. In viola compare allora la distribuzione vera.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · IL DADO, BILATERALE</div>
+            <div class="b-text"><p>Si lancia un dado 120 volte. Verifica $H_0\colon p = \tfrac16$ (sei) contro $H_1\colon p \neq \tfrac16$ con $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>Da ciascun lato $2{,}5\,\%$: $P(X \le 11) \approx 0{,}014$, $P(X \ge 29) \approx 0{,}022$. <span class="b-res">$\overline{A} = \{0, \ldots, 11\} \cup \{29, \ldots, 120\}$.</span>
+                Quindi 28 sei non sono ancora significativi, 8 sei sì.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · ERRORE DI II SPECIE</div>
+            <div class="b-text"><p>Nel test del farmaco (esempio 1) il nuovo farmaco in realtà guarisce il 70 %. Con quale probabilità il test non se ne accorge?</p></div>
+            <div class="b-sol"><p>Errore di II specie: $H_0$ non viene rifiutata, cioè $X \le 68$, anche se $p = 0{,}7$. $\beta = P(X \le 68) \approx 0{,}367$.
+                <span class="b-res">In più di un caso su tre</span> il miglioramento passerebbe inosservato. Con $p = 0{,}75$ sarebbe ormai solo il 7 % circa.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Descrivi nel contesto gli errori di I e di II specie nel test del farmaco.</p></div>
+            <div class="b-sol"><p>I specie: si ritiene migliore il nuovo farmaco anche se non lo è. II specie: si ritiene che non sia migliore anche se lo è.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Si lancia una moneta 20 volte. Determina con il widget la regione di rifiuto di un test bilaterale con $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{0, \ldots, 5\} \cup \{15, \ldots, 20\}$, da ciascun lato $\approx 2{,}1\,\%$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Per il partito dell’esempio 2 il consenso vero è il 35 %. Qual è la probabilità che l’avversaria non riesca comunque a confermare il suo sospetto?</p></div>
+            <div class="b-sol"><p>$\beta = P(X \ge 69)$ con $p = 0{,}35$, $n = 200$: $\approx 0{,}585$. Il test è troppo debole per differenze così piccole; servirebbero più intervistati.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Prova nel widget: come cambia $\beta$ nel test del farmaco ($p$ vero $= 0{,}7$) se si aumenta $n$ da 100 a 200? Spiegalo.</p></div>
+            <div class="b-sol"><p>$\beta$ scende nettamente (a circa 0,1). Con più dati le distribuzioni diventano relativamente più strette e si sovrappongono meno; il test distingue meglio.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$H_0$ è vera, ma viene rifiutata. Questo è …</p>
+            <div class="b-mc"><button>un errore di I specie</button><button>un errore di II specie</button><button>una decisione corretta</button></div>
+            <div class="b-sol"><p>Errore di I specie, con probabilità al massimo $\alpha$.</p></div></div>
+        <div class="b-q" data-ans="29" data-ph="r ="><p class="b-q-text">Test del dado dell’esempio 3: valore più piccolo della parte destra della regione di rifiuto?</p><div class="b-sol"><p>29</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Un’azienda afferma che il 20 % dei suoi biglietti vince. Tu sospetti che ci siano più biglietti perdenti, cioè meno del 20 % di vincenti. Formula le ipotesi.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}2$, $H_1\colon p < 0{,}2$ (unilaterale sinistro).</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Una moneta dà testa 9 volte su 10 lanci. Esegui un test destro con $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$P(X \ge 9) = \tfrac{11}{1024} \approx 0{,}011$, $P(X \ge 8) \approx 0{,}055$. $\overline{A} = \{9, 10\}$: $H_0$ viene rifiutata.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Collegare con il capitolo 1.1 della 12ª classe:</b> spiega perché «Il risultato è significativo, quindi $H_0$ è falsa al 95 %» è un’affermazione sbagliata.</p></div>
+            <div class="b-sol"><p>$\alpha$ è $P_{H_0}(\text{rifiuto})$, una probabilità condizionata sotto la condizione che $H_0$ sia vera. L’affermazione la confonde con $P_{\text{rifiuto}}(H_0 \text{ falsa})$, come nel test rapido positivo $P_M(+)$ e $P_+(M)$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: la signora che assaggiava il tè" data-toc-k="X" data-toc-short="Tè">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">IL TEST PIÙ FAMOSO DELLA STATISTICA</span></div>
+    <h2>La signora che assaggiava il tè</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Lo statistico inglese Ronald A. Fisher racconta nel suo libro sulla progettazione degli esperimenti di una signora che sosteneva di riconoscere dal sapore se nella tazza fosse stato versato prima il latte o prima il tè.</p>
+            <p>Fisher progettò il test così: otto tazze, quattro di ogni tipo, in ordine casuale. La signora deve individuare le quattro tazze «prima il latte». Se tira solo a indovinare, ci sono $\binom84 = 70$ scelte ugualmente probabili, quindi indovinarle tutte e quattro ha solo una probabilità di $\tfrac{1}{70} \approx 1{,}4\,\%$. Se ci riesce, si rifiuta l’ipotesi nulla «tira solo a indovinare». Fisher ne fece lo schema di base di ogni test di significatività.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Ronald A. Fisher: The Design of Experiments. Oliver and Boyd, Edimburgo 1935, capitolo 2.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>IPOTESI</h4><p>$H_0\colon p = p_0$; ciò che si vuole dimostrare va in $H_1$.</p></div>
+        <div><p>Farmaco: $H_1\colon p > 0{,}6$</p></div></div>
+    <div class="b-rueck"><div><h4>REGIONE DI RIFIUTO</h4><p>Valori estremi con probabilità al massimo $\alpha$ sotto $H_0$.</p></div>
+        <div><p>Moneta $n = 50$: $\{32, \ldots, 50\}$</p></div></div>
+    <div class="b-rueck"><div><h4>BILATERALE</h4><p>$\tfrac{\alpha}{2}$ da ciascun lato.</p></div>
+        <div><p>Dado $n = 120$: $\{0, \ldots, 11\} \cup \{29, \ldots, 120\}$</p></div></div>
+    <div class="b-rueck"><div><h4>ERRORI DI I E II SPECIE</h4><p>I specie: $H_0$ rifiutata a torto ($\le \alpha$). II specie: $H_0$ mantenuta a torto ($\beta$).</p></div>
+        <div><p>Farmaco, $p$ vero $= 0{,}7$: $\beta \approx 0{,}37$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1</div>
+            <div class="b-q" data-ans="69" data-ph="k ="><p class="b-q-text">Test del farmaco $n = 100$, $p_0 = 0{,}6$, destro, $\alpha = 5\,\%$: valore critico?</p><div class="b-sol"><p>69</p></div></div>
+            <div class="b-q" data-ans="68" data-ph="k ="><p class="b-q-text">Test del partito $n = 200$, $p_0 = 0{,}4$, sinistro, $\alpha = 5\,\%$: valore più grande della regione di rifiuto?</p><div class="b-sol"><p>68</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$H_1$ è vera, ma $H_0$ non viene rifiutata. Questo è …</p>
+                <div class="b-mc"><button>un errore di I specie</button><button>un errore di II specie</button><button>corretto</button></div>
+                <div class="b-sol"><p>Errore di II specie</p></div></div>
+            <div class="b-q" data-ans="1/70" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Con quale probabilità la signora del tè sceglie tirando a indovinare le quattro tazze giuste?</p><div class="b-sol"><p>$\tfrac{1}{70}$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MACCHINA DI GALTON</span><span class="b-lab-what">La distribuzione binomiale dietro ogni test</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Berufliches Gymnasium, 13ª classe · Area di apprendimento 4 secondo il programma di matematica del Berufliches Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-it/stochastik.js"></script>
+</body>
+</html>
