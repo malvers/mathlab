@@ -295,6 +295,28 @@ professionale: tre anni, dall’11ª alla 13ª classe, che si concludono con l�
 
 ## mathe11-it
 
+Package IT1, 18.10.2026: decisions made while translating BGY 11; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Buttons of the widgets: Ausführen, Anwenden, Nächster Schritt, Neues LGS, Neue Gleichung, Neue Tafel, 1 Schritt | Applica, Applica, Passo successivo, Nuovo sistema, Nuova equazione, Nuova tabella, 1 passo | the chapter text quotes them in «…» |
+| Glücksrad (lb1) | ruota della fortuna | as in section 5 |
+| Pfad / Pfadregeln, Ast | percorso / regole dei percorsi, ramo | "1ª regola dei percorsi (regola del prodotto)" |
+| Kugeln rot / blau (urn) | palline rosse / blu | letters R / B stay as in the German book (rosso / blu) |
+| Wappen / Zahl | testa / croce | letters T / C (rule in js/buch-it/stochastik.js) |
+| krank K / gesund (rapid test) | malato $M$ / sano $\overline{M}$ | tree letters M / S (rule) |
+| Sportverein S, Fahrrad F (lb1 lesson 2) | the letters $S$ and $F$ stay | the text says once "le lettere del libro tedesco" |
+| Treffer (Simulation table head) | SUCCESSI | Monte Carlo hits in wb3: centri |
+| Ziegenproblem: bleiben / wechseln | restare / cambiare | "Resto con la porta 1", "Passo alla porta 3" |
+| graphquiz score "3 richtig" | "3 giuste" | rule in js/buch-it/funktionen.js |
+| Vierfeld-Trainer "3 von 5 richtig" | "3 su 5 corrette" | rule in js/buch-it/stochastik.js |
+| Tageslänge dates "21. Jun" | "21 giu" | rule; months gen feb mar apr mag giu lug ago set ott nov dic |
+| Lösungsmenge $L$ (lb2 text and the waage widget) | $S$ | rule `$L = …` → `$S = …` in js/buch-it/gleichungen.js |
+| Kerze, Bremsweg, Abkühlen, Weltbevölkerung (regression) | candela, spazio di frenata, raffreddamento, popolazione mondiale | |
+| Riesenrad | ruota panoramica | lb3-4 |
+| Hotel von Hilbert | l’albergo di Hilbert | wb3 |
+| Faustregel der Fahrschule | regola empirica delle scuole guida tedesche | lb3-3, lb3-5 |
+
 ## mathe12-it
 
 | German | Italian | Note |
