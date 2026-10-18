@@ -13,6 +13,14 @@
 window.BuchIT && BuchIT.add('numerik', {
     word: {
         // book it-1 mathe11-it:
+        // bisektion, flaeche, mc-flaeche
+        'Bisektionsverfahren': 'Metodo di bisezione', 'Intervall halbieren': 'Dimezza l’intervallo', '5 Schritte': '5 passi',
+        'Schritt': 'Passo', 'Mitte $m$': 'Punto medio $m$', 'Breite': 'Larghezza',
+        'x² auf [0; 2]': 'x² in [0, 2]', '√x auf [0; 4]': '√x in [0, 4]', 'sin x auf [0; π]': 'sin x in [0, π]',
+        'Rechtecke links': 'Rettangoli a sinistra', 'Rechtecke Mitte': 'Rettangoli al centro', 'Trapeze': 'Trapezi', 'Verfahren': 'Metodo',
+        'Anzahl der Streifen $n$': 'Numero di strisce $n$', 'Flächeninhalt mit Streifen angenähert': 'Area approssimata con strisce',
+        '+100 Punkte': '+100 punti', '+1\u202f000 Punkte': '+1\u202f000 punti', '+10\u202f000 Punkte': '+10\u202f000 punti',   // narrow space as the widget writes it
+        'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Punti casuali nel rettangolo, centri sotto la parabola',
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
         'x² auf [0; 2]': 'x² in [0, 2]',
@@ -27,6 +35,13 @@ window.BuchIT && BuchIT.add('numerik', {
     },
     phrase: [
         // book it-1 mathe11-it:
+        // bisektion, flaeche, mc-flaeche
+        [' · Startintervall $', ' · intervallo iniziale $'], ['$ mit $f(', '$ con $f('], ['$ und $f(', '$ e $f('],
+        ['Näherung mit $n = ', 'Approssimazione con $n = '], [' · genauer Wert $', ' · valore esatto $'], [' · Fehler $', ' · errore $'],
+        ['$ · genauer Wert $', '$ · valore esatto $'], ['$ · Fehler $', '$ · errore $'],
+        ['$ unter der Parabel. Rechteck: ', '$ cadono sotto la parabola. Rettangolo: '],
+        ['Schätzwert: $A', 'Stima: $A'], [' · genau: $', ' · esatto: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Lancia punti casuali nel rettangolo '],
+        ['. Der Anteil der Treffer unter ', '. La frazione di centri sotto '], [' schätzt den Anteil der Fläche.', ' stima la frazione dell’area.'],
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
         ['Näherung mit $n = ', 'Approssimazione con $n = '],
@@ -37,6 +52,8 @@ window.BuchIT && BuchIT.add('numerik', {
     ],
     rule: [
         // book it-1 mathe11-it:
+        // mc-flaeche "Von $500$ Punkten liegen $160$ unter …" → "Di $500$ punti, $160$ cadono sotto …"
+        [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'Di $' + n + '$ punti, $'],
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
     ]
