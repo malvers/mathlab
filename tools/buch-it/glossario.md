@@ -297,4 +297,22 @@ professionale: tre anni, dall’11ª alla 13ª classe, che si concludono con l�
 
 ## mathe12-it
 
+| German | Italian | Note |
+|---|---|---|
+| Treffer / Niete (letters in the Bernoulli trees) | S / I (successo / insuccesso) | rule in `js/buch-it/stochastik.js`; the chapter text keeps "66NNN (N: non sei)" |
+| Gegenvektor | vettore opposto | 5.1 |
+| Firstpunkt, Traufpunkt, Sparren, First | punto di colmo, punto di gronda, puntone, colmo | 5.2 |
+| Hochpunkt / Tiefpunkt (short widget labels) | Massimo / Minimo | running text: massimo, minimo; Merke: punto di massimo / di minimo |
+| Linkskurve / Rechtskurve (road picture, bicycle rule) | curva a sinistra / curva a destra | only for the picture; the term is concavità verso l’alto / verso il basso |
+| Klasse 11 (in running text) | l’11ª classe, la 12ª classe | "Collegare con l’11ª classe" |
+
 ## mathe13-it
+
+| German | Italian | Note |
+|---|---|---|
+| Schätzproblem / Testproblem | problema di stima / problema di test | 4.1 |
+| Verzerrung (Stichprobe) | distorsione | 4.1 |
+| Wahlberechtigte | aventi diritto al voto | 4.1 |
+| unilateral rechts-/linksseitig (test) | test destro / sinistro (unilaterale destro / sinistro) | 4.2 |
+| Wahlbereich Numerik (BGY 11) | area opzionale di calcolo numerico | 3.4 |
+| Kepler, Descartes | Keplero, Cartesio (René Descartes) | names as Italian schools say them |
