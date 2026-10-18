@@ -113,6 +113,62 @@ body {
     background: rgba(0, 210, 255, 0.2);
 }
 
+/* Copy button (opt-in: data-copy on the box, see js/coach-box.js) - looks like the collapse handle beside it */
+.coach-copy {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid rgba(0, 210, 255, 0.25);
+    border-radius: 7px;
+    background: rgba(0, 210, 255, 0.08);
+    color: #00d2ff;
+    cursor: pointer;
+    transition: background .2s ease;
+}
+
+.coach-copy:hover {
+    background: rgba(0, 210, 255, 0.2);
+}
+
+.coach-copy + .coach-toggle {
+    margin-left: 0;
+}
+
+#math-coach-box.collapsed .coach-copy {
+    display: none;
+}
+
+/* Long texts (opt-in: data-scroll on the box): the box stops at the stage edge and its text scrolls */
+#math-coach-box[data-scroll]:not(.collapsed) {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100% - 20px);
+    box-sizing: border-box;
+}
+
+#math-coach-box[data-scroll] #coach-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    pointer-events: auto;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 210, 255, 0.35) transparent;
+}
+
+#math-coach-box[data-scroll] #coach-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+#math-coach-box[data-scroll] #coach-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 210, 255, 0.35);
+    border-radius: 3px;
+}
+
 #math-coach-box.collapsed .coach-toggle {
     transform: rotate(-90deg);
 }

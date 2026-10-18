@@ -1,0 +1,40 @@
+/* Politik-Arena - lab-specific bits only; buttons, cards and sliders come from the central files */
+#arena { display: block; width: 100%; height: 100%; touch-action: manipulation; }
+#arena text { font-family: 'Orbitron', sans-serif; pointer-events: none; }
+#arena .pa-node, #arena .pa-center, #arena .pa-edge, #arena .pa-spoke { cursor: pointer; }
+#arena .pa-edge { fill: none; transition: stroke 0.6s, stroke-width 0.6s, opacity 0.6s; }
+#arena .pa-spoke { transition: stroke 0.6s, stroke-width 0.6s; }
+#arena .pa-ring { fill: none; stroke-width: 2; opacity: 0; }
+#arena .pa-node.talking .pa-ring { animation: pa-pulse 1.1s ease-out infinite; }
+#arena .pa-node.picked .pa-dot, #arena .pa-center.picked .pa-diamond { stroke: #fff; stroke-width: 3; }
+@keyframes pa-pulse {
+    0% { opacity: 0.9; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.6); }
+}
+
+.pa-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 4px 0 10px; }
+.pa-info { font-size: 0.9rem; line-height: 1.55; color: rgba(255, 255, 255, 0.75); margin-top: 6px; }
+.pa-info b { color: #fff; font-weight: 600; }
+.pa-info a { color: #00d2ff; }
+.pa-count { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: rgba(255, 255, 255, 0.75); margin: 6px 0 2px; }
+.pa-count b { color: #00d2ff; font-weight: 700; }
+.pa-lineup { list-style: none; margin: 6px 0 0; padding: 0; font-size: 0.85rem; }
+.pa-lineup li { display: flex; align-items: center; gap: 8px; padding: 3px 0; color: rgba(255, 255, 255, 0.85); }
+.pa-lineup .pa-sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.pa-lineup .pa-pilot { margin-left: auto; font-size: 0.7rem; color: rgb(245, 194, 66); font-family: 'Orbitron', sans-serif; }
+.pa-legend { height: 10px; border-radius: 5px; margin: 8px 0 2px;
+    background: linear-gradient(90deg, rgb(176, 36, 24), rgb(245, 194, 66), rgb(121, 158, 49)); }
+.pa-legend-row { display: flex; justify-content: space-between; font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: rgba(255, 255, 255, 0.6); }
+.pa-pass { display: flex; gap: 6px; margin: 6px 0; }
+.pa-pass input { flex: 1; min-width: 0; }
+.pa-log { max-height: 40vh; overflow-y: auto; font-size: 0.85rem; line-height: 1.45; }
+.pa-log div { padding: 5px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); }
+.pa-log b { font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 700; }
+.pa-err { color: rgb(220, 90, 70) !important; }
+
+/* coach box: what the arena is doing, or what a clicked node / edge says */
+#coach-content .pa-step { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: #00d2ff; margin-bottom: 6px; }
+#coach-content ul { margin: 6px 0; padding-left: 18px; }
+#coach-content li { margin: 3px 0; }
+#coach-content .pa-score { font-family: 'Orbitron', sans-serif; font-weight: 700; }
+#coach-content .pa-dim { color: rgba(255, 255, 255, 0.6); font-size: 0.85em; }
