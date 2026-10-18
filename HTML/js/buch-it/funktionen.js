@@ -17,16 +17,47 @@ window.BuchIT && BuchIT.add('funktionen', {
             'Copertina: parabola, sinusoide, funzione esponenziale e retta',
         // book it-1 mathe11-it:
         // book it-2 mathe12-it:
+        'Parabel': 'Parabola',
+        'Liegende Spitze': 'V coricata',
+        'Liegende Parabel': 'Parabola coricata',
+        'Wurzel': 'Radice quadrata',
+        'Hyperbel': 'Iperbole',
+        'Betrag': 'Valore assoluto',
+        'Zaun an der Mauer': 'Recinzione lungo il muro',
+        'Rechteck mit Umfang 24 cm': 'Rettangolo di perimetro 24 cm',
         // book it-3 mathe13-it:
     },
     phrase: [
         // book it-1 mathe11-it:
         // book it-2 mathe12-it:
+        ['$. Die Scheitel $S', '$. I vertici $S'],
+        [' liegen alle auf der Parabel $y = -x^2$ (gestrichelt).', ' stanno tutti sulla parabola $y = -x^2$ (tratteggiata).'],
+        ['Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: Zu $x = 1$ gehören $y = 2$ und $y = -2$.', 'A destra di $x = -1$ ogni retta verticale taglia la curva due volte: a $x = 1$ corrispondono $y = 2$ e $y = -2$.'],
+        ['Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.', 'A $x = 2$ corrispondono $y = 2$ e $y = -2$. Ma una funzione associa a ogni $x$ esattamente un $y$.'],
+        ['Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: ', 'A destra di $x = -1$ ogni retta verticale taglia la curva due volte: '],
+        ['Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.', 'Ma una funzione associa a ogni $x$ esattamente un $y$.'],
+        ['$ und $y = ', '$ e $y = '],
+        ['$ und $', '$ e $'],
+        ['zwei Nullstellen $x = 0$ und $x = -a$', 'due zeri $x = 0$ e $x = -a$'],
+        ['zwei Nullstellen ', 'due zeri '],
+        ['eine (doppelte) Nullstelle ', 'uno zero (doppio) '],
+        ['eine doppelte Nullstelle ', 'uno zero doppio '],
+        ['keine Parabel, sondern die Gerade $y = -4$: keine Nullstelle', 'non una parabola, ma la retta $y = -4$: nessuno zero'],
+        ['keine Parabel, sondern die Gerade $y = -4$', 'non una parabola, ma la retta $y = -4$'],
+        [': keine Nullstelle', ': nessuno zero'],
+        ['keine Nullstelle', 'nessuno zero'],
+        ['Diskriminante: $', 'Discriminante: $'],
+        ['$ hat $D = ', '$ ha $D = '],
+        ['Ausklammern: $', 'Raccogliendo a fattor comune: $'],
+        ['nach unten geöffnet mit dem Scheitel ', 'rivolta verso il basso con il vertice '],
+        ['$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.', '$kx^2 = 4$ ha soluzioni solo per $k > 0$. Il caso $k = 0$ va studiato a parte, perché allora $x^2$ sparisce.'],
         // book it-3 mathe13-it:
     ],
     rule: [
         // book it-1 mathe11-it:
         // book it-2 mathe12-it:
+        // helpers: CURVES (funktion) - the whole sentences, before the header rule "^Zu " of js/buch-it.js
+        [/(: )?\bZu (\$x = [^$]+\$) gehören (\$y = [^$]+\$) und (\$y = [^$]+\$)\./g, (m, c, x, y1, y2) => (c ? ': a ' : 'A ') + x + ' corrispondono ' + y1 + ' e ' + y2 + '.'],
         // book it-3 mathe13-it:
     ]
 });
