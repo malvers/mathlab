@@ -15,11 +15,25 @@ window.BuchIT && BuchIT.add('numerik', {
         // book it-1 mathe11-it:
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
+        'x² auf [0; 2]': 'x² in [0, 2]',
+        '√x auf [0; 4]': '√x in [0, 4]',
+        'sin x auf [0; π]': 'sin x in [0, π]',
+        'Rechtecke links': 'Rettangoli a sinistra',
+        'Rechtecke Mitte': 'Rettangoli punto medio',
+        'Trapeze': 'Trapezi',
+        'Verfahren': 'Metodo',
+        'Anzahl der Streifen $n$': 'Numero di strisce $n$',
+        'Flächeninhalt mit Streifen angenähert': 'Area approssimata con strisce',
     },
     phrase: [
         // book it-1 mathe11-it:
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
+        ['Näherung mit $n = ', 'Approssimazione con $n = '],
+        ['$ · genauer Wert $', '$ · valore esatto $'],
+        [' · genauer Wert $', ' · valore esatto $'],
+        ['$ · Fehler $', '$ · errore $'],
+        [' · Fehler $', ' · errore $'],
     ],
     rule: [
         // book it-1 mathe11-it:

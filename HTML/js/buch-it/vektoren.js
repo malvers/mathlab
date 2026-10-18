@@ -32,6 +32,19 @@ window.BuchIT && BuchIT.add('vektoren', {
         'Quadrat': 'Quadrato',
         'Trapez': 'Trapezio',
         // book it-3 mathe13-it:
+        'Parameter $t$': 'Parametro $t$',
+        'Ebene und Normalenvektor': 'Piano e vettore normale',
+        'Liegt der Punkt in E?': 'Il punto giace in E?',
+        'Gerade schneidet Ebene': 'Una retta taglia un piano',
+        'identisch': 'coincidenti',
+        'schneidend': 'incidenti',
+        'windschief': 'sghembe',
+        'Pyramide': 'Piramide',
+        'Prisma (schief möglich)': 'Prisma (anche obliquo)',
+        'Körper': 'Solido',
+        'Grundkante $a$': 'Spigolo di base $a$',
+        'Höhe $h$': 'Altezza $h$',
+        'Verschiebung der Spitze in $x$': 'Spostamento del vertice in $x$',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -63,6 +76,40 @@ window.BuchIT && BuchIT.add('vektoren', {
         ['$: Diagonalen senkrecht zueinander', '$: diagonali perpendicolari tra loro'],
         ['$ABCD$ ist ', '$ABCD$ è '],
         // book it-3 mathe13-it:
+        ['Der Richtungsvektor darf nicht der Nullvektor sein.', 'Il vettore direzione non può essere il vettore nullo.'],
+        ['Punktprobe für $Q(', 'Verifica di appartenenza per $Q('],
+        ['Alle Zeilen liefern $t = ', 'Tutte le righe danno $t = '],
+        ['$, also <b>$Q \\in g$</b>.', '$, quindi <b>$Q \\in g$</b>.'],
+        ['Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.', 'Le righe danno valori diversi di $t$, quindi <b>$Q \\notin g$</b>.'],
+        ['Spurpunkte: keine', 'Punti traccia: nessuno'],
+        ['Spurpunkte: ', 'Punti traccia: '],
+        ['$\\vec{u}$ und $\\vec{v}$ sind parallel, sie spannen keine Ebene auf.', '$\\vec{u}$ e $\\vec{v}$ sono paralleli, non individuano un piano.'],
+        ['$ · Koordinatenform: $', '$ · equazione cartesiana: $'],
+        ['Spurpunkte mit den Achsen: ', 'Punti traccia con gli assi: '],
+        ['Punktprobe: $', 'Verifica di appartenenza: $'],
+        ['$: <b>$Q$ liegt in $E$</b>.', '$: <b>$Q$ giace in $E$</b>.'],
+        ['$: <b>$Q$ liegt nicht in $E$</b>. Abstand $\\approx ', '$: <b>$Q$ non giace in $E$</b>. Distanza $\\approx '],
+        ['$: Die Gerade ist parallel zur Ebene ', '$: la retta è parallela al piano '],
+        ['und liegt in ihr.', 'e giace in esso.'],
+        ['und schneidet sie nicht.', 'e non lo interseca.'],
+        ['Einsetzen von $g$ in $E$: $t = ', 'Sostituendo $g$ in $E$: $t = '],
+        ['$, Schnittpunkt $S(', '$, punto di intersezione $S('],
+        ['Richtungsvektoren dürfen nicht der Nullvektor sein.', 'I vettori direzione non possono essere il vettore nullo.'],
+        ['Die Richtungsvektoren sind parallel ($\\vec{v} = ', 'I vettori direzione sono paralleli ($\\vec{v} = '],
+        ['Der Stützpunkt $Q$ liegt auf $g$: <b>identisch</b>.', 'Il punto d’appoggio $Q$ sta su $g$: <b>coincidenti</b>.'],
+        ['Der Stützpunkt $Q$ liegt nicht auf $g$: <b>echt parallel</b>.', 'Il punto d’appoggio $Q$ non sta su $g$: <b>parallele distinte</b>.'],
+        ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Non parallele. Uguagliando si ottiene $t = '],
+        ['$: <b>schneidend</b> im Punkt $S(', '$: <b>incidenti</b> nel punto $S('],
+        ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ', 'Non parallele e il sistema di equazioni non ha soluzione: <b>sghembe</b>. Distanza minima (rosso tratteggiato) $\\approx '],
+        ['Grundfläche $G', 'Area di base $G'],
+        ['$, Spitze $S(', '$, vertice $S('],
+        ['$, Höhe $h = ', '$, altezza $h = '],
+        ['Volumen $V', 'Volume $V'],
+        ['Oberfläche $O = ', 'Superficie totale $O = '],
+        [' · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', ' · Se sposti il vertice orizzontalmente, il volume resta uguale, la superficie laterale no.'],
+        ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, traslazione della base superiore $\\vec{w} = '],
+        [' · Mantel (4 Parallelogramme, je $', ' · superficie laterale (4 parallelogrammi, ciascuno $'],
+        [' (Prinzip von Cavalieri: auch schief)', ' (principio di Cavalieri: anche obliquo)'],
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -74,5 +121,7 @@ window.BuchIT && BuchIT.add('vektoren', {
         // skalarprodukt: the preset "parallel" means two vectors (paralleli)
         [/(data-p="para">)parallel</g, '$1paralleli<'],
         // book it-3 mathe13-it:
+        // geradenlage: the preset "parallel" means two lines (parallele); a global word would also hit the vectors
+        [/(data-p="par">)parallel</g, '$1parallele<'],
     ]
 });

@@ -61,6 +61,17 @@ window.BuchIT && BuchIT.add('stochastik', {
         'Histogramm der Binomialverteilung': 'Istogramma della distribuzione binomiale',
         'unvereinbar': 'incompatibili',
         // book it-3 mathe13-it:
+        'Anteil in der Grundgesamtheit $p$': 'Proporzione nella popolazione $p$',
+        'Stichprobenumfang $n$': 'Ampiezza del campione $n$',
+        'Stichproben ziehen:': 'Estrai campioni:',
+        'Verteilung der relativen Häufigkeiten vieler Stichproben': 'Distribuzione delle frequenze relative di molti campioni',
+        'Noch keine Stichprobe gezogen.': 'Non è ancora stato estratto nessun campione.',
+        'Nullhypothese $p_0$': 'Ipotesi nulla $p_0$',
+        'Art des Tests': 'Tipo di test',
+        'Signifikanzniveau $\\alpha$:': 'Livello di significatività $\\alpha$:',
+        'Signifikanzniveau': 'Livello di significatività',
+        'Beobachtete Trefferzahl $k$': 'Numero di successi osservato $k$',
+        'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribuzione binomiale sotto l’ipotesi nulla con la regione di rifiuto',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -107,6 +118,20 @@ window.BuchIT && BuchIT.add('stochastik', {
         ['$ und $p = ', '$ e $p = '],
         ['Erwartungswert $\\mu', 'Valore atteso $\\mu'],
         // book it-3 mathe13-it:
+        [' Fehler 2. Art zeigen: wahres $p$ =', ' Mostra l’errore di II specie: $p$ vero ='],
+        [' Stichproben vom Umfang ', ' campioni di ampiezza '],
+        [' Stichprobe vom Umfang ', ' campione di ampiezza '],
+        ['Mittelwert der $h$: $', 'Media delle $h$: $'],
+        ['$ · Standardabweichung der $h$: $', '$ · deviazione standard delle $h$: $'],
+        ['$. Viermal so großes $n$ halbiert die Streuung.', '$. Un $n$ quattro volte più grande dimezza la dispersione.'],
+        ['$ gegen $H_1\\colon ', '$ contro $H_1\\colon '],
+        ['$ · tatsächliche Irrtumswahrscheinlichkeit $\\approx ', '$ · probabilità di errore effettiva $\\approx '],
+        ['Beobachtet $k = ', 'Osservato $k = '],
+        ['<b>$H_0$ wird abgelehnt.</b> Das Ergebnis ist signifikant.', '<b>$H_0$ viene rifiutata.</b> Il risultato è significativo.'],
+        ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>$H_0$ non viene rifiutata.</b> Ma questo non dimostra che $H_0$ sia vera.'],
+        ['Ist in Wahrheit $p = ', 'Se in realtà $p = '],
+        ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (viola), $H_0$ viene mantenuta per errore con $\\beta \\approx '],
+        ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (errore di II specie).'],
     ],
     rule: [
         // book it-1 mathe11-it:

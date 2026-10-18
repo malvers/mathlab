@@ -72,6 +72,12 @@ window.BuchIT && BuchIT.add('analysis', {
         'Karton mit ausgeschnittenen Ecken': 'Cartone con gli angoli ritagliati',
         'Gehege an einer Mauer': 'Recinto lungo un muro',
         // book it-3 mathe13-it:
+        'Funktionenschar': 'Famiglia di funzioni',
+        'Funktionenschar mit Ortskurve': 'Famiglia di funzioni con il luogo geometrico',
+        'Parameter $a$': 'Parametro $a$',
+        'Verkaufspreis $p$ (€ pro Stück)': 'Prezzo di vendita $p$ (€ al pezzo)',
+        'x in Stück': 'x in pezzi',
+        'Kosten, Erlös und Gewinn': 'Costi, ricavo e profitto',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -138,6 +144,19 @@ window.BuchIT && BuchIT.add('analysis', {
         ['$: Die beste Dose ist so hoch wie breit.', '$: la lattina migliore è alta quanto larga.'],
         [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' Il lato parallelo al muro è allora lungo $60 - 2 \\cdot 15 = 30\\,\\text{m}$.'],
         // book it-3 mathe13-it:
+        [' Ortskurve der Extrempunkte zeigen', ' Mostra il luogo geometrico dei punti di estremo'],
+        ['Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.', 'Per $a \\le 0$ non ci sono punti di estremo: $f_a\'(x) = 3x^2 - a$ non ha allora nessuno zero con cambio di segno.'],
+        [' mit Vorzeichenwechsel', ' con cambio di segno'],
+        ['Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.', 'Ogni parabola della famiglia passa per l’origine, perché $f_a(0) = 0$ per ogni $a$.'],
+        ['Ortskurve aller Extrempunkte (violett): $', 'Luogo geometrico di tutti i punti di estremo (viola): $'],
+        ['Gewinnschwelle bei $x \\approx ', 'Soglia di profitto in $x \\approx '],
+        ['$, Gewinngrenze bei $x \\approx ', '$, limite di profitto in $x \\approx '],
+        ['$ Stück, $G \\approx ', '$ pezzi, $G \\approx '],
+        ['$ Stück.', '$ pezzi.'],
+        ['Gewinn ab $x \\approx ', 'Profitto da $x \\approx '],
+        ['Bei diesem Preis wird nie Gewinn gemacht.', 'Con questo prezzo non si fa mai profitto.'],
+        ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Profitto massimo: $G\'(x) = 0$ in $x \\approx '],
+        ['Kein positives Gewinnmaximum.', 'Nessun profitto massimo positivo.'],
     ],
     rule: [
         // book it-1 mathe11-it:
