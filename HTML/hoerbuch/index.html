@@ -365,7 +365,7 @@ nav .tabs button[aria-selected="true"] { background: var(--orange); color: var(-
 <script>
 const LOCAL = [];          // local build: the chapters inlined; sealed build: empty
 const LOCALMETA = {};         // local build: title and author (the sealed page names no book at all)
-const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = '34c9b5ed9607493838d5108d';           // sealed build: the R2 bucket and the name of the encrypted data
+const STORE = 'https://pub-34e908b48a654cbda5ca2db6245db480.r2.dev/', DATA = 'f0ca2afeabc3a3ed9a68b224';           // sealed build: the R2 bucket and the name of the encrypted data
 const SEALED = !!STORE;
 const $ = id => document.getElementById(id);
 const audio = $('audio'), text = $('text'), main = $('main'), toc = $('toc'), seek = $('seek');
@@ -440,7 +440,7 @@ async function openBook(key) {
   KEY = key; AUTHOR = data.author; PDF = data.pdf || null; PDF_DE = data.pdf_de || null; PDF_ES = data.pdf_es || null;
   GLOSS = (data.glossary || []).map(([t, de, x, d, n, forms, k]) => ({ t, de, x, d, n, forms, k })); glossIndex();
   $('bookTitle').textContent = data.title;
-  $('bookBy').textContent = data.author + ' · Hörbuch, gelesen von Solita';
+  $('bookBy').textContent = data.author + ' · Hörbuch, gelesen von Solita und Charon';
   document.title = data.title;
   return data.chapters;
 }
@@ -772,7 +772,7 @@ async function load(i, at = 0, play = false) {
   const go = () => { audio.currentTime = Math.min(at, c.dur - 1); if (play) audio.play().catch(() => {}); tick(true); };
   if (audio.readyState >= 1) go(); else audio.addEventListener('loadedmetadata', go, { once: true });
   if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({
-    title: c.short, artist: AUTHOR + ' · gelesen von Solita', album: $('bookTitle').textContent });
+    title: c.short, artist: AUTHOR + (langOf(c) === 'es' ? ' · leído por Charon' : ' · gelesen von Solita'), album: $('bookTitle').textContent });
 }
 
 function indexAt(t) {   // last sentence whose start is <= t
@@ -1116,7 +1116,7 @@ document.addEventListener('keydown', e => {
   if (!SEALED) {
     BOOK = LOCAL;
     AUTHOR = LOCALMETA.author; document.title = $('bookTitle').textContent = LOCALMETA.title;
-    $('bookBy').textContent = AUTHOR + ' · Hörbuch, gelesen von Solita';
+    $('bookBy').textContent = AUTHOR + ' · Hörbuch, gelesen von Solita und Charon';
   } else {
     if (!window.crypto || !crypto.subtle || !window.caches || !window.DecompressionStream) {
       $('lock').hidden = false; $('msg').textContent = 'Dieser Browser kann das Hörbuch nicht öffnen (bitte aktuelles Chrome).'; $('go').disabled = true; return;
