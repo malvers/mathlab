@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica 13 · Capitolo 3.1 · Primitive | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Derivare all’indietro, l’integrale indefinito, regole di integrazione. Capitolo 3.1 del libro di testo interattivo Matematica · Berufliches Gymnasium 13: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · BERUFLICHES GYMNASIUM 13</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 3.1 · AREA DI APPRENDIMENTO 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 3.1 · AREA DI APPRENDIMENTO 3 · AGOSTO · SETTEMBRE</p>
+            <h1>Primitive</h1>
+            <p class="b-hero-lead">Nella 12ª classe hai trasformato una funzione nel suo tasso di variazione. Ora si va <b>all’indietro</b>: conosci la velocità e cerchi lo spazio percorso, conosci la portata in entrata e cerchi la quantità d’acqua. Per questo ti serve una funzione la cui derivata sia la funzione data: una <b>primitiva</b>. È l’ingresso nel calcolo integrale, il grande tema dell’anno dell’Abitur.</p>
+            <div class="b-chips"><span class="b-chip">12 ORE</span><span class="b-chip">3 LEZIONI</span><span class="b-chip">DERIVARE ALL’INDIETRO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^2-1","x^3/3-x","x^3/3-x+1","x^3/3-x-1"]' data-labels='["f","F","",""]' data-lat="[2.05,2.2]" data-x="-3,3" data-y="-3,4" data-h="240" data-aria="Una funzione e tre delle sue primitive"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>spiegare il concetto di <b>primitiva</b> e <b>verificare</b> le primitive derivando</li>
+                <li>scrivere l’<b>integrale indefinito</b> con la costante $C$</li>
+                <li>integrare funzioni polinomiali e funzioni potenza <b>senza calcolatrice</b></li>
+                <li>dare le primitive di $\mathrm{e}^x$, $\sin x$ e $\cos x$; tutto il resto con il CAS</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="12" data-ph="f'(2) ="><p class="b-q-text">$f(x) = x^3$. Quanto vale $f'(2)$?</p><div class="b-sol"><p>$3 \cdot 4 = 12$</p></div></div>
+            <div class="b-q" data-ans="0" data-ph="numero"><p class="b-q-text">Qual è la derivata della costante 7?</p><div class="b-sol"><p>0</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Quanto vale $(\sin x)'$?</p>
+                <div class="b-mc"><button>$-\cos x$</button><button>$\cos x$</button><button>$\sin x$</button></div>
+                <div class="b-sol"><p>$\cos x$</p></div></div>
+            <div class="b-q" data-ans="1,5" data-tol="0.0001" data-ph="r ="><p class="b-q-text">Scrivi $x\sqrt{x} = x^r$. Quanto vale $r$?</p><div class="b-sol"><p>$x^1 \cdot x^{0{,}5} = x^{1{,}5}$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">QUALE FUNZIONE ERA?</div>
+            <div class="b-text"><p>Qualcuno ha derivato una funzione e ha ottenuto $f'(x) = 2x$.</p>
+                <ul><li>Quale funzione potrebbe essere stata? Trovatene almeno tre.</li><li>Che cosa hanno in comune tutte le vostre risposte?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA REGOLA DELLA POTENZA ALL’INDIETRO</div>
+            <div class="b-text"><p>Derivando, l’esponente diventa un fattore e diminuisce di 1.</p>
+                <ul><li>Che cosa bisogna fare all’indietro? Provatelo con $x^2$, $x^3$, $x^7$.</li><li>Verificate ogni risultato derivando.</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DAL TACHIMETRO ALLO SPAZIO PERCORSO</div>
+            <div class="b-text"><p>Un’auto parte con la velocità $v(t) = 2t$ (m/s).</p>
+                <ul><li>Quale funzione posizione $s(t)$ ha questa derivata?</li><li>A che distanza si trova l’auto dopo 5 secondi, se parte da $s = 0$?</li></ul></div>
+            <span class="b-pair">→ Lezioni 1 e 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Primitiva e integrale indefinito" data-toc-k="1" data-toc-short="1 Primitiva">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Primitiva e integrale indefinito</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$x^2$, $x^2 + 5$ e $x^2 - 3$ hanno tutte la derivata $2x$. Una costante sparisce quando si deriva, quindi all’indietro non si può recuperare.</p></div></div>
+            <div class="b-text"><p>Ogni funzione $F$ con $F' = f$ si chiama primitiva di $f$. Trovata una, tutte le altre si ottengono sommando una costante. I loro grafici sono traslati l’uno rispetto all’altro nella direzione dell’asse $y$ e hanno in ogni punto la stessa pendenza.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · PRIMITIVA</div>
+                <div class="b-text">
+                    <p>$F$ si chiama <b>primitiva</b> di $f$ se $F'(x) = f(x)$ per ogni $x$.</p>
+                    <p>Se $F$ è una primitiva, allora tutte le primitive sono della forma $F(x) + C$ con una costante $C$. Si scrivono come <b>integrale indefinito</b>: $$\int f(x)\,\mathrm{d}x = F(x) + C.$$</p>
+                    <p><b>Verifica:</b> se $F$ è una primitiva di $f$ lo si verifica derivando $F$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notazione:</b> $\mathrm{d}x$ indica la variabile rispetto a cui si integra. Il simbolo $\int$ è una S allungata, per «somma».</p>
+            <p class="b-note"><b>Condizione iniziale:</b> se si conosce un punto del grafico di $F$, $C$ è determinata.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · LE PRIMITIVE E LA LORO PENDENZA</div>
+        <div data-widget="stammfunktion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · VERIFICA</div>
+            <div class="b-text"><p>Dimostra che $F(x) = \tfrac13 x^3 - x + 4$ è una primitiva di $f(x) = x^2 - 1$.</p></div>
+            <div class="b-sol"><p>$F'(x) = x^2 - 1 = f(x)$. ✓ Il 4 non conta: è una scelta di $C$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · CON CONDIZIONE INIZIALE</div>
+            <div class="b-text"><p>Si cerca la primitiva di $f(x) = 2x$ il cui grafico passa per $P(1, 5)$.</p></div>
+            <div class="b-sol"><p>$F(x) = x^2 + C$, $F(1) = 1 + C = 5 \Rightarrow C = 4$. <span class="b-res">$F(x) = x^2 + 4$</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Verifica derivando: $F$ è una primitiva di $f$? a) $F(x) = x^4 + 2$, $f(x) = 4x^3$ &nbsp; b) $F(x) = 3x^2$, $f(x) = 3x$</p></div>
+            <div class="b-sol"><p>a) sì &nbsp; b) no, $F'(x) = 6x$. Corretto sarebbe $\tfrac32 x^2$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Indica tre primitive diverse di $f(x) = 3x^2$.</p></div>
+            <div class="b-sol"><p>Per esempio $x^3$, $x^3 + 1$, $x^3 - 7{,}5$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Determina la primitiva di $f(x) = 6x^2 - 4x$ passante per $P(1, 3)$.</p></div>
+            <div class="b-sol"><p>$F(x) = 2x^3 - 2x^2 + C$, $F(1) = C = 3$. $F(x) = 2x^3 - 2x^2 + 3$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Esplorazione «Dal tachimetro allo spazio percorso»: determina $s(t)$ con $s'(t) = 2t$ e $s(0) = 0$. Quanta strada fa l’auto in 5 secondi? E se partisse da $s(0) = 10$?</p></div>
+            <div class="b-sol"><p>$s(t) = t^2$, $s(5) = 25$ m. Partendo da 10 m: $s(t) = t^2 + 10$; dopo 5 s si trova nella posizione 35 m, ma la strada percorsa è sempre 25 m.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="4" data-ph="C ="><p class="b-q-text">$F(x) = x^2 + C$ deve passare per $(2, 8)$. Quanto vale $C$?</p><div class="b-sol"><p>$4 + C = 8$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quale funzione è una primitiva di $f(x) = 5$?</p>
+            <div class="b-mc"><button>$F(x) = 0$</button><button>$F(x) = 5x^2$</button><button>$F(x) = 5x + 2$</button></div>
+            <div class="b-sol"><p>$(5x + 2)' = 5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Regole di integrazione" data-toc-k="2" data-toc-short="2 Regole">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Integrare senza calcolatrice: potenze e somme</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Derivando $x^4$ si ottiene $4x^3$. All’indietro bisogna <b>aumentare</b> l’esponente di 1 e <b>dividere</b> per il nuovo esponente: $\int x^3\,\mathrm{d}x = \tfrac14 x^4 + C$.</p></div></div>
+            <div class="b-text"><p>Poiché derivando i fattori restano e le somme si trattano addendo per addendo, integrando succede lo stesso.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · REGOLE DI INTEGRAZIONE</div>
+                <div class="b-text">
+                    <p><b>Regola della potenza:</b> $\displaystyle\int x^r\,\mathrm{d}x = \frac{1}{r + 1}\,x^{r + 1} + C$ per $r \neq -1$, anche per esponenti razionali.</p>
+                    <p><b>Regola del fattore costante:</b> $\int c \cdot f(x)\,\mathrm{d}x = c \cdot \int f(x)\,\mathrm{d}x$ &nbsp; · &nbsp; <b>Regola della somma:</b> $\int (f + g)\,\mathrm{d}x = \int f\,\mathrm{d}x + \int g\,\mathrm{d}x$</p>
+                    <p>Costante: $\int c\,\mathrm{d}x = cx + C$. Verifica sempre derivando.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Perché $r \neq -1$?</b> Per $\tfrac1x = x^{-1}$ bisognerebbe dividere per 0. Una primitiva è $\ln|x|$, ma nel corso di base non ti serve.</p>
+            <p class="b-note"><b>Radici e frazioni</b> si scrivono prima come potenze, come quando si deriva.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · POLINOMIALE</div>
+            <div class="b-text"><p>Calcola $\int \left(6x^2 - 4x + 3\right) \mathrm{d}x$.</p></div>
+            <div class="b-sol"><p><span class="b-res">$2x^3 - 2x^2 + 3x + C$</span>. Verifica: $(2x^3 - 2x^2 + 3x)' = 6x^2 - 4x + 3$ ✓</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · RADICE E FRAZIONE</div>
+            <div class="b-text"><p>Calcola $\int \sqrt{x}\,\mathrm{d}x$ e $\int \dfrac{1}{x^2}\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\int x^{\frac12}\,\mathrm{d}x = \tfrac23 x^{\frac32} + C = \tfrac23 x\sqrt{x} + C$ · $\int x^{-2}\,\mathrm{d}x = \tfrac{1}{-1} x^{-1} + C = -\tfrac1x + C$</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REATTORE DI INTEGRALI</span><span class="b-lab-what">Funzioni e i loro integrali (in tedesco)</span></span></a>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola: a) $\int x^5\,\mathrm{d}x$ &nbsp; b) $\int 8x^3\,\mathrm{d}x$ &nbsp; c) $\int (2x + 1)\,\mathrm{d}x$ &nbsp; d) $\int 4\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac16 x^6 + C$ &nbsp; b) $2x^4 + C$ &nbsp; c) $x^2 + x + C$ &nbsp; d) $4x + C$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola $\int \left(x^3 - 3x^2 + 2x - 5\right) \mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\tfrac14 x^4 - x^3 + x^2 - 5x + C$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Calcola: a) $\int 3\sqrt{x}\,\mathrm{d}x$ &nbsp; b) $\int \dfrac{2}{x^3}\,\mathrm{d}x$ &nbsp; c) $\int x^{\frac23}\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $2x^{\frac32} + C$ &nbsp; b) $-\tfrac{1}{x^2} + C$ &nbsp; c) $\tfrac35 x^{\frac53} + C$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Calcola $\int (x - 2)(x + 3)\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>Sviluppando il prodotto: $\int (x^2 + x - 6)\,\mathrm{d}x = \tfrac13 x^3 + \tfrac12 x^2 - 6x + C$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Il grafico di $F$ passa per $(0, 1)$ e ha ovunque la pendenza $F'(x) = 3x^2 - 2$. Determina $F$ e i punti con tangente orizzontale.</p></div>
+            <div class="b-sol"><p>$F(x) = x^3 - 2x + 1$. Orizzontale quando $3x^2 = 2$, cioè $x = \pm\sqrt{\tfrac23} \approx \pm 0{,}82$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="0,25" data-tol="0.0001" data-ph="fattore"><p class="b-q-text">$\int x^3\,\mathrm{d}x = a \cdot x^4 + C$. Quanto vale $a$?</p><div class="b-sol"><p>$\tfrac14$</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="F(1) ="><p class="b-q-text">$F(x)$ è la primitiva di $f(x) = 6x^2$ con $F(0) = 5$. Quanto vale $F(1)$?</p><div class="b-sol"><p>$F(x) = 2x^3 + 5$, $F(1) = 7$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="eˣ, sin x, cos x" data-toc-k="3" data-toc-short="3 eˣ, sin">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 3</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">3</span>Primitive della funzione esponenziale, del seno e del coseno</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dalla 12ª classe: $(\mathrm{e}^x)' = \mathrm{e}^x$, $(\sin x)' = \cos x$ e $(\cos x)' = -\sin x$. Quale funzione ha la derivata $\sin x$?</p></div></div>
+            <div class="b-text"><p>$(\cos x)'$ è $-\sin x$, quindi $-\cos x$ ha la derivata $\sin x$. Con la funzione esponenziale è ancora più semplice: è la primitiva di se stessa.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · FUNZIONE ESPONENZIALE E FUNZIONI GONIOMETRICHE</div>
+                <div class="b-text">
+                    <p>$\int \mathrm{e}^x\,\mathrm{d}x = \mathrm{e}^x + C$ &nbsp; · &nbsp; $\int \sin x\,\mathrm{d}x = -\cos x + C$ &nbsp; · &nbsp; $\int \cos x\,\mathrm{d}x = \sin x + C$</p>
+                    <p>Per tutte le altre funzioni che non si possono integrare senza calcolatrice si usa un <b>CAS</b>. Ogni risultato si può verificare derivando.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Trucco per ricordarlo:</b> derivando si gira nel cerchio $\sin \to \cos \to -\sin \to -\cos \to \sin$. Integrando si percorre lo stesso cerchio all’indietro.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 5 · MISTO</div>
+            <div class="b-text"><p>Calcola $\int \left(3\mathrm{e}^x + 2\sin x - x\right) \mathrm{d}x$.</p></div>
+            <div class="b-sol"><p><span class="b-res">$3\mathrm{e}^x - 2\cos x - \tfrac12 x^2 + C$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 6 · VERIFICATO CON IL CAS</div>
+            <div class="b-text"><p>Un CAS dà $\int x \cdot \mathrm{e}^x\,\mathrm{d}x = (x - 1)\,\mathrm{e}^x + C$. Verificalo a mano.</p></div>
+            <div class="b-sol"><p>Regola del prodotto: $\left((x - 1)\,\mathrm{e}^x\right)' = 1 \cdot \mathrm{e}^x + (x - 1)\,\mathrm{e}^x = x\,\mathrm{e}^x$ ✓</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola: a) $\int 2\mathrm{e}^x\,\mathrm{d}x$ &nbsp; b) $\int (\cos x - \sin x)\,\mathrm{d}x$ &nbsp; c) $\int (\mathrm{e}^x + 1)\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $2\mathrm{e}^x + C$ &nbsp; b) $\sin x + \cos x + C$ &nbsp; c) $\mathrm{e}^x + x + C$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Determina la primitiva di $f(x) = \sin x$ con $F(0) = 0$. Quale valore assume in $\pi$?</p></div>
+            <div class="b-sol"><p>$F(x) = -\cos x + C$, $F(0) = -1 + C = 0 \Rightarrow C = 1$. $F(x) = 1 - \cos x$, $F(\pi) = 2$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dimostra derivando che $F(x) = x\sin x + \cos x$ è una primitiva di $f(x) = x\cos x$.</p></div>
+            <div class="b-sol"><p>$F'(x) = \sin x + x\cos x - \sin x = x\cos x$ ✓</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Quale funzione è una primitiva di $\sin x$?</p>
+            <div class="b-mc"><button>$-\cos x$</button><button>$\cos x$</button><button>$-\sin x$</button></div>
+            <div class="b-sol"><p>$(-\cos x)' = \sin x$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="C ="><p class="b-q-text">$F(x) = \mathrm{e}^x + C$ con $F(0) = 2$. Quanto vale $C$?</p><div class="b-sol"><p>$\mathrm{e}^0 + C = 1 + C = 2 \Rightarrow C = 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="13">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola: a) $\int (4x^3 - 6x)\,\mathrm{d}x$ &nbsp; b) $\int \tfrac12 x\,\mathrm{d}x$ &nbsp; c) $\int (x^2 + \mathrm{e}^x)\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $x^4 - 3x^2 + C$ &nbsp; b) $\tfrac14 x^2 + C$ &nbsp; c) $\tfrac13 x^3 + \mathrm{e}^x + C$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Si lancia una palla verticalmente verso l’alto con $v(t) = 15 - 10t$ (m/s); parte da 2 m di altezza. Determina l’altezza $h(t)$. Quando è più in alto?</p></div>
+            <div class="b-sol"><p>$h(t) = 15t - 5t^2 + 2$. È più in alto quando $v(t) = 0$, cioè in $t = 1{,}5$ s, con $h(1{,}5) = 13{,}25$ m.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Collegare con la 12ª classe:</b> il grafico di $f'$ è una parabola rivolta verso l’alto con zeri in $-1$ e $3$. Che cosa sai di $f$? Indica una $f$ adatta.</p></div>
+            <div class="b-sol"><p>$f$ ha un massimo in $-1$ e un minimo in $3$. Con $f'(x) = (x + 1)(x - 3) = x^2 - 2x - 3$, per esempio $f(x) = \tfrac13 x^3 - x^2 - 3x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Perché non esiste nessuna primitiva di $f(x) = 2x$ il cui grafico passi per $(0, 1)$ e per $(1, 1)$?</p></div>
+            <div class="b-sol"><p>Tutte le primitive sono $x^2 + C$. Da $(0, 1)$ segue $C = 1$, ma allora $F(1) = 2 \neq 1$. Due punti sono una condizione di troppo.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: il simbolo di integrale" data-toc-k="X" data-toc-short="∫">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">UNA S LUNGA PER «SOMMA»</span></div>
+    <h2>Come è nato il simbolo di integrale</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>A Parigi Gottfried Wilhelm Leibniz cercava una notazione per sommare infinite strisce infinitamente sottili. In un manoscritto del 29 ottobre 1675 scrisse per la prima volta una S allungata, l’iniziale di <i>summa</i>. Nello stesso contesto introdusse la $\mathrm{d}$ per «differenza».</p>
+            <p>Il simbolo apparve stampato nel 1686 nella rivista Acta Eruditorum. Leibniz curava molto le notazioni, perché una buona notazione facilita il pensiero. Il suo $\int f(x)\,\mathrm{d}x$ oggi lo usa il mondo intero.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> G. W. Leibniz: De geometria recondita et analysi indivisibilium atque infinitorum. Acta Eruditorum, giugno 1686.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>PRIMITIVA</h4><p>$F' = f$. Tutte le primitive: $F(x) + C$.</p></div>
+        <div><p>$f(x) = 2x$: $F(x) = x^2 + C$</p></div></div>
+    <div class="b-rueck"><div><h4>REGOLA DELLA POTENZA</h4><p>$\int x^r\,\mathrm{d}x = \tfrac{1}{r + 1} x^{r + 1} + C$, $r \neq -1$</p></div>
+        <div><p>$\int \sqrt{x}\,\mathrm{d}x = \tfrac23 x^{\frac32} + C$</p></div></div>
+    <div class="b-rueck"><div><h4>REGOLE DEL FATTORE COSTANTE E DELLA SOMMA</h4><p>I fattori restano, gli addendi uno per uno.</p></div>
+        <div><p>$\int (6x^2 - 4x + 3)\,\mathrm{d}x = 2x^3 - 2x^2 + 3x + C$</p></div></div>
+    <div class="b-rueck"><div><h4>e E FUNZIONI GONIOMETRICHE</h4><p>$\int \mathrm{e}^x = \mathrm{e}^x$ · $\int \sin x = -\cos x$ · $\int \cos x = \sin x$, ogni volta $+ C$.</p></div>
+        <div><p>Verifica sempre derivando.</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1</div>
+            <div class="b-q" data-ans="1/6" data-tol="0.0005" data-ph="fattore"><p class="b-q-text">$\int x^5\,\mathrm{d}x = a \cdot x^6 + C$. Quanto vale $a$?</p><div class="b-sol"><p>$\tfrac16$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="F(1) ="><p class="b-q-text">$F$ è la primitiva di $f(x) = 2x + 1$ con $F(0) = 1$. Quanto vale $F(1)$?</p><div class="b-sol"><p>$F(x) = x^2 + x + 1$, $F(1) = 3$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$\int \cos x\,\mathrm{d}x = $</p>
+                <div class="b-mc"><button>$-\sin x + C$</button><button>$\sin x + C$</button><button>$\cos x + C$</button></div>
+                <div class="b-sol"><p>$(\sin x)' = \cos x$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2</div>
+            <div class="b-q" data-ans="-1" data-ph="fattore"><p class="b-q-text">$\int x^{-2}\,\mathrm{d}x = a \cdot x^{-1} + C$. Quanto vale $a$?</p><div class="b-sol"><p>$\tfrac{1}{-1} = -1$</p></div></div>
+            <div class="b-q" data-ans="13,25" data-tol="0.001" data-ph="metri"><p class="b-q-text">$h(t) = 15t - 5t^2 + 2$. Altezza massima in metri?</p><div class="b-sol"><p>$h(1{,}5) = 13{,}25$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="F(π) ="><p class="b-q-text">$F(x) = 1 - \cos x$. Quanto vale $F(\pi)$?</p><div class="b-sol"><p>$1 - (-1) = 2$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest13.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TEST D’INGRESSO 13</span><span class="b-lab-what">Che cosa dovresti portare con te nella 13ª classe</span></span></a>
+        <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REATTORE DI INTEGRALI</span><span class="b-lab-what">Sperimenta con gli integrali</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Berufliches Gymnasium, 13ª classe · Area di apprendimento 3 secondo il programma di matematica del Berufliches Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-it/funktionen.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-it/integral.js"></script>
+</body>
+</html>

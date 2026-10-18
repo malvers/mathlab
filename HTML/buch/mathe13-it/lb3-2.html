@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica 13 · Capitolo 3.2 · L’integrale definito | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Quantità ricostruita, proprietà, teorema fondamentale. Capitolo 3.2 del libro di testo interattivo Matematica · Berufliches Gymnasium 13: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · BERUFLICHES GYMNASIUM 13</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 3.2 · AREA DI APPRENDIMENTO 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 3.2 · AREA DI APPRENDIMENTO 3 · SETTEMBRE</p>
+            <h1>L’integrale definito</h1>
+            <p class="b-hero-lead">Quanta acqua c’è nel serbatoio se si sa soltanto con che velocità entra ed esce? Quanta strada ha fatto un’auto se si conosce solo il tachimetro? La risposta è un’<b>area</b> sotto un grafico: l’integrale definito. E il <b>teorema fondamentale</b> rivela come calcolare quest’area con una primitiva in una sola riga. Unisce derivare e integrare in un’unica teoria.</p>
+            <div class="b-chips"><span class="b-chip">8 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">TEOREMA FONDAMENTALE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["-0.5*x^2+3*x"]' data-labels='["r"]' data-lat="[7.6]" data-x="-0.5,9.5" data-y="-8,6" data-xl="t" data-yl="r" data-h="240" data-aria="Portata in entrata e in uscita di un serbatoio d’acqua"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>interpretare l’integrale definito come <b>quantità ricostruita</b></li>
+                <li>calcolare quantità a partire da <b>tassi di variazione</b> e da una quantità iniziale</li>
+                <li>usare le <b>proprietà</b> dell’integrale: additività rispetto all’intervallo, linearità</li>
+                <li>calcolare integrali con il <b>teorema fondamentale</b> $\int_a^b f(x)\,\mathrm{d}x = F(b) - F(a)$</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="150" data-ph="km"><p class="b-q-text">Un treno viaggia per 2,5 ore a 60 km/h. Quanta strada percorre?</p><div class="b-sol"><p>$60 \cdot 2{,}5 = 150$ km</p></div></div>
+            <div class="b-q" data-ans="1/3" data-tol="0.0005" data-ph="fattore"><p class="b-q-text">$\int x^2\,\mathrm{d}x = a \cdot x^3 + C$. Quanto vale $a$?</p><div class="b-sol"><p>$\tfrac13$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="area"><p class="b-q-text">Qual è l’area di un trapezio con i lati paralleli 2 e 4 e altezza 4?</p><div class="b-sol"><p>$\tfrac{2 + 4}{2} \cdot 4 = 12$</p></div></div>
+            <div class="b-q" data-ans="8" data-ph="F(2) ="><p class="b-q-text">$F(x) = x^3$. Quanto vale $F(2) - F(0)$?</p><div class="b-sol"><p>$8 - 0 = 8$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">IL SERBATOIO D’ACQUA</div>
+            <div class="b-text"><p>Un serbatoio contiene 20 l d’acqua. La portata in entrata è $r(t) = -0{,}5t^2 + 3t$ (l/min). I valori negativi indicano un’uscita.</p>
+                <ul><li>Quando entra acqua e quando esce? Quando c’è più acqua nel serbatoio?</li><li>Stimate contando i quadretti sotto il grafico quanta acqua c’è nel serbatoio dopo 6 minuti.</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">IL REGISTRO DEL TACHIMETRO</div>
+            <div class="b-text"><p>Un’auto viaggia per 10 secondi a 20 m/s costanti e poi per 5 secondi a 30 m/s.</p>
+                <ul><li>Disegnate il grafico della velocità. Quanta strada ha percorso l’auto?</li><li>Che cosa c’entra l’area sotto il grafico?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">AREA E PRIMITIVA</div>
+            <div class="b-text"><p>L’area sotto la retta $f(x) = 2x$ da 0 a $b$ è un triangolo.</p>
+                <ul><li>Calcolatela per $b = 1, 2, 3$ e in generale.</li><li>Quale funzione di $b$ si ottiene? Derivatela.</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Quantità ricostruita" data-toc-k="1" data-toc-short="1 Quantità">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>L’integrale come quantità ricostruita</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Nel registro del tachimetro l’auto percorre $20 \cdot 10 + 30 \cdot 5 = 350$ m. È esattamente l’area sotto il grafico della velocità: due rettangoli.</p></div></div>
+            <div class="b-text"><p>Se il tasso di variazione non è costante a tratti, si divide il tempo in molti piccoli intervalli in cui è quasi costante e si somma tasso per tempo. Al limite, con suddivisioni sempre più fini, si ottiene l’area sotto il grafico: l’<b>integrale definito</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · QUANTITÀ RICOSTRUITA</div>
+                <div class="b-text">
+                    <p>Se $r(t)$ è il tasso di variazione di una quantità $B(t)$ e $B(a)$ è la quantità iniziale, allora $$B(b) = B(a) + \int_a^b r(t)\,\mathrm{d}t.$$</p>
+                    <p>L’integrale misura la <b>variazione totale</b> nell’intervallo di tempo da $a$ a $b$. Le aree sopra l’asse $t$ contano come positive (aumento), quelle sotto l’asse come <b>negative</b> (diminuzione).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Unità di misura:</b> un tasso in l/min per un tempo in min dà litri. L’unità dell’integrale è sempre «unità del tasso per unità di $t$».</p>
+            <p class="b-note"><b>Esempi:</b> velocità → spazio percorso, portata in entrata → volume, potenza → energia, costo marginale → costi.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · DAL TASSO ALLA QUANTITÀ</div>
+        <p class="b-help" style="margin:0 0 12px">Sposta il tempo $t$. Sopra cresce l’area sotto il tasso (oro positivo, rosso negativo); sotto, la quantità.</p>
+        <div data-widget="bestand"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · IL SERBATOIO D’ACQUA</div>
+            <div class="b-text"><p>Quanta acqua c’è nel serbatoio dopo 6 e dopo 9 minuti? (Una primitiva di $r$ è $R(t) = -\tfrac16 t^3 + \tfrac32 t^2$.)</p></div>
+            <div class="b-sol"><p>$B(6) = 20 + R(6) - R(0) = 20 + (-36 + 54) = 38$ l. $B(9) = 20 + (-121{,}5 + 121{,}5) = 20$ l.
+                <span class="b-res">Dopo 9 minuti è uscita tanta acqua quanta ne era entrata prima.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · IL VIAGGIO IN AUTO</div>
+            <div class="b-text"><p>Un’auto viaggia con $v(t) = 1{,}2t^2 - 0{,}1t^3$ (m/s) da $t = 0$ a $t = 12$. Quanta strada percorre?</p></div>
+            <div class="b-sol"><p>Primitiva $s(t) = 0{,}4t^3 - 0{,}025t^4$. Strada percorsa $s(12) - s(0) = 691{,}2 - 518{,}4 = 172{,}8$ m.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Una vasca viene riempita per 30 minuti a 40 l/min costanti e poi svuotata per 10 minuti a 20 l/min. All’inizio contiene 500 l. Quanta acqua c’è alla fine?</p></div>
+            <div class="b-sol"><p>$500 + 40 \cdot 30 - 20 \cdot 10 = 1500$ l</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Un’azienda produce al ritmo di $p(t) = 200 + 20t$ pezzi al giorno. Quanti pezzi si producono nei primi 10 giorni?</p></div>
+            <div class="b-sol"><p>Primitiva $200t + 10t^2$, quindi $2000 + 1000 = 3000$ pezzi. (Geometricamente: un trapezio con altezze 200 e 400.)</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Nel serbatoio d’acqua: quando c’è più acqua e quanta? Giustifica con il tasso.</p></div>
+            <div class="b-sol"><p>La quantità cresce finché $r(t) > 0$, cioè fino a $t = 6$. Lì c’è il massimo, con 38 l (esempio 1).</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Mostralo con il serbatoio d’acqua: per quale $t > 0$ c’è di nuovo esattamente tanta acqua quanta all’inizio?</p></div>
+            <div class="b-sol"><p>$R(t) = -\tfrac16 t^3 + \tfrac32 t^2 = 0 \Rightarrow t^2(9 - t) = 0 \Rightarrow t = 9$ min.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="350" data-ph="m"><p class="b-q-text">10 s a 20 m/s e poi 5 s a 30 m/s. Quanta strada percorre l’auto?</p><div class="b-sol"><p>$200 + 150 = 350$ m</p></div></div>
+        <div class="b-q" data-ans="38" data-ph="litri"><p class="b-q-text">Quanta acqua c’è dopo 6 minuti nel serbatoio dell’esempio 1?</p><div class="b-sol"><p>38 l</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Proprietà e teorema fondamentale" data-toc-k="2" data-toc-short="2 Teorema">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Proprietà dell’integrale e teorema fondamentale</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>L’area sotto $f(x) = 2x$ da 0 a $b$ è un triangolo di area $\tfrac12 \cdot b \cdot 2b = b^2$. La funzione $b \mapsto b^2$ è una <b>primitiva</b> di $2x$!</p></div></div>
+            <div class="b-text"><p>Non è un caso. La «funzione integrale» cresce in ogni punto esattamente tanto rapidamente quanto è alto il grafico, quindi la sua derivata è la stessa $f$. Ne segue: ogni primitiva fornisce l’area tramite la differenza dei suoi valori agli estremi di integrazione.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · TEOREMA FONDAMENTALE DEL CALCOLO INTEGRALE</div>
+                <div class="b-text">
+                    <p>Se $F$ è una primitiva della funzione continua $f$, allora $$\int_a^b f(x)\,\mathrm{d}x = \Big[F(x)\Big]_a^b = F(b) - F(a).$$</p>
+                    <p><b>Proprietà:</b> $\int_a^b f\,\mathrm{d}x + \int_b^c f\,\mathrm{d}x = \int_a^c f\,\mathrm{d}x$ (additività rispetto all’intervallo) · $\int_a^b (c \cdot f + g)\,\mathrm{d}x = c\int_a^b f\,\mathrm{d}x + \int_a^b g\,\mathrm{d}x$ (linearità) · $\int_a^a f\,\mathrm{d}x = 0$ · $\int_b^a f\,\mathrm{d}x = -\int_a^b f\,\mathrm{d}x$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>La costante $C$</b> sparisce in $F(b) - F(a)$. Per questo si può sempre prendere la primitiva più semplice.</p>
+            <p class="b-note"><b>Definizione:</b> a rigore l’integrale è il limite di somme di rettangoli; vedi il capitolo 3.4. Il teorema fondamentale mostra che quasi mai serve calcolarlo.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · L’INTEGRALE DEFINITO</div>
+        <p class="b-help" style="margin:0 0 12px">Trascina gli estremi $a$ e $b$ sull’asse $x$. L’integrale è la somma delle aree dorate meno quelle rosse.</p>
+        <div data-widget="integral"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · CON IL TEOREMA FONDAMENTALE</div>
+            <div class="b-text"><p>Calcola $\int_0^2 x^2\,\mathrm{d}x$ e $\int_1^3 (2x + 1)\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\Big[\tfrac13 x^3\Big]_0^2 = \tfrac83 \approx 2{,}667$ · $\Big[x^2 + x\Big]_1^3 = 12 - 2 = 10$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · SENO E FUNZIONE ESPONENZIALE</div>
+            <div class="b-text"><p>Calcola $\int_0^{\pi} \sin x\,\mathrm{d}x$ e $\int_0^1 \mathrm{e}^x\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\Big[-\cos x\Big]_0^{\pi} = 1 - (-1) = 2$ · $\Big[\mathrm{e}^x\Big]_0^1 = \mathrm{e} - 1 \approx 1{,}718$</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola: a) $\int_0^3 x\,\mathrm{d}x$ &nbsp; b) $\int_1^2 4x^3\,\mathrm{d}x$ &nbsp; c) $\int_0^2 (3x^2 - 2x + 1)\,\mathrm{d}x$ &nbsp; d) $\int_0^{\pi/2} \cos x\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $4{,}5$ &nbsp; b) $16 - 1 = 15$ &nbsp; c) $8 - 4 + 2 = 6$ &nbsp; d) $1$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola $\int_1^4 \sqrt{x}\,\mathrm{d}x$ e $\int_1^4 \dfrac{1}{x^2}\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\Big[\tfrac23 x^{\frac32}\Big]_1^4 = \tfrac{16}{3} - \tfrac23 = \tfrac{14}{3} \approx 4{,}667$ · $\Big[-\tfrac1x\Big]_1^4 = -\tfrac14 + 1 = \tfrac34$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Sono dati $\int_0^2 f(x)\,\mathrm{d}x = 5$ e $\int_2^6 f(x)\,\mathrm{d}x = -3$. Determina $\int_0^6 f\,\mathrm{d}x$, $\int_6^2 f\,\mathrm{d}x$ e $\int_0^2 3f(x)\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$2$; $3$; $15$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Per quale $b > 0$ vale $\int_0^b x^2\,\mathrm{d}x = 9$?</p></div>
+            <div class="b-sol"><p>$\tfrac13 b^3 = 9 \Rightarrow b^3 = 27 \Rightarrow b = 3$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Determina $\int_{-2}^{2} (x^3 - 4x)\,\mathrm{d}x$ senza calcoli e giustifica con la simmetria. È anche l’area?</p></div>
+            <div class="b-sol"><p>Il grafico è simmetrico rispetto all’origine; le aree a sinistra e a destra si compensano: l’integrale vale 0. L’area però è $2 \cdot 4 = 8$ (capitolo 3.3).</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="8/3" data-tol="0.001" data-ph="valore"><p class="b-q-text">Calcola $\int_0^2 x^2\,\mathrm{d}x$.</p><div class="b-sol"><p>$\tfrac83$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="valore"><p class="b-q-text">Calcola $\int_0^{\pi} \sin x\,\mathrm{d}x$.</p><div class="b-sol"><p>2</p></div></div>
+        <div class="b-q" data-ans="-5" data-ph="valore"><p class="b-q-text">$\int_1^4 f(x)\,\mathrm{d}x = 5$. Quanto vale $\int_4^1 f(x)\,\mathrm{d}x$?</p><div class="b-sol"><p>Estremi scambiati: $-5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola $\int_{-1}^{1} (x^2 + 1)\,\mathrm{d}x$ e $\int_0^1 (\mathrm{e}^x - x)\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\Big[\tfrac13 x^3 + x\Big]_{-1}^{1} = \tfrac43 + \tfrac43 = \tfrac83$ · $\Big[\mathrm{e}^x - \tfrac12 x^2\Big]_0^1 = \mathrm{e} - 0{,}5 - 1 \approx 1{,}218$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Una molla con costante elastica $D = 200$ N/m viene allungata di 10 cm. La forza è $F(s) = D \cdot s$. Calcola il lavoro $W = \int_0^{0{,}1} F(s)\,\mathrm{d}s$.</p></div>
+            <div class="b-sol"><p>$\Big[100 s^2\Big]_0^{0{,}1} = 1$ J</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Collegare con la 12ª classe:</b> il costo marginale di un’azienda è $K'(x) = 0{,}06x^2 - 2{,}4x + 30$ (€ al pezzo) e i costi fissi sono 200 €. Determina la funzione dei costi e i costi per 40 pezzi.</p></div>
+            <div class="b-sol"><p>$K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + 200$, $K(40) = 1280 - 1920 + 1200 + 200 = 760$ €</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Spiega in modo intuitivo perché la funzione integrale $A(b) = \int_0^b f(x)\,\mathrm{d}x$ ha la derivata $A'(b) = f(b)$.</p></div>
+            <div class="b-sol"><p>Se $b$ aumenta di un piccolo $h$, si aggiunge una striscia stretta, quasi un rettangolo di larghezza $h$ e altezza $f(b)$. Quindi $\tfrac{A(b + h) - A(b)}{h} \approx f(b)$, e al limite $h \to 0$ esattamente $f(b)$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: il maestro di Newton" data-toc-k="X" data-toc-short="Barrow">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">CHI VIDE PER PRIMO IL TEOREMA FONDAMENTALE</span></div>
+    <h2>Isaac Barrow, il maestro di Newton</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Le aree si calcolavano già nell’antichità, le tangenti dal XVII secolo. Uno dei primi ad accorgersi che le due cose sono <b>operazioni inverse</b> l’una dell’altra fu Isaac Barrow, professore di matematica a Cambridge. Nelle sue «Lectiones geometricae» del 1670 descrive questo legame, però interamente nel linguaggio della geometria, con curve e segmenti.</p>
+            <p>Il suo allievo Isaac Newton e, indipendentemente, Gottfried Wilhelm Leibniz ne fecero un metodo di calcolo. Nel 1669 Barrow lasciò la sua cattedra a Cambridge, e il suo successore fu Isaac Newton.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Isaac Barrow: Lectiones geometricae. Londra 1670.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>QUANTITÀ RICOSTRUITA</h4><p>$B(b) = B(a) + \int_a^b r(t)\,\mathrm{d}t$</p></div>
+        <div><p>Serbatoio: $B(6) = 38$ l, $B(9) = 20$ l</p></div></div>
+    <div class="b-rueck"><div><h4>TEOREMA FONDAMENTALE</h4><p>$\int_a^b f(x)\,\mathrm{d}x = F(b) - F(a)$</p></div>
+        <div><p>$\int_0^2 x^2\,\mathrm{d}x = \tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>SEGNO</h4><p>Le aree sotto l’asse $x$ contano come negative.</p></div>
+        <div><p>$\int_{-2}^2 (x^3 - 4x)\,\mathrm{d}x = 0$</p></div></div>
+    <div class="b-rueck"><div><h4>PROPRIETÀ</h4><p>Additivo rispetto all’intervallo, lineare, $\int_a^a = 0$; scambiare gli estremi → cambia il segno.</p></div>
+        <div><p>$5 + (-3) = 2$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1</div>
+            <div class="b-q" data-ans="10" data-ph="valore"><p class="b-q-text">Calcola $\int_1^3 (2x + 1)\,\mathrm{d}x$.</p><div class="b-sol"><p>$12 - 2 = 10$</p></div></div>
+            <div class="b-q" data-ans="15" data-ph="valore"><p class="b-q-text">Calcola $\int_1^2 4x^3\,\mathrm{d}x$.</p><div class="b-sol"><p>$16 - 1 = 15$</p></div></div>
+            <div class="b-q" data-ans="1500" data-ph="litri"><p class="b-q-text">500 l, 30 min di entrata a 40 l/min, 10 min di uscita a 20 l/min. Quanti litri ci sono alla fine?</p><div class="b-sol"><p>1500 l</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2</div>
+            <div class="b-q" data-ans="1,7183" data-tol="0.001" data-ph="valore"><p class="b-q-text">Calcola $\int_0^1 \mathrm{e}^x\,\mathrm{d}x$ con quattro cifre decimali.</p><div class="b-sol"><p>$\mathrm{e} - 1 \approx 1{,}7183$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="b ="><p class="b-q-text">Per quale $b > 0$ vale $\int_0^b x^2\,\mathrm{d}x = 9$?</p><div class="b-sol"><p>$b = 3$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="valore"><p class="b-q-text">$\int_0^2 f = 5$, $\int_2^6 f = -3$. Quanto vale $\int_0^6 f$?</p><div class="b-sol"><p>$5 - 3 = 2$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REATTORE DI INTEGRALI</span><span class="b-lab-what">Area sotto la curva</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Berufliches Gymnasium, 13ª classe · Area di apprendimento 3 secondo il programma di matematica del Berufliches Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-it/funktionen.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-it/integral.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-it/numerik.js"></script>
+</body>
+</html>
