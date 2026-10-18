@@ -168,30 +168,38 @@ function rowEur(provider: string, model: string, inTok: number, outTok: number, 
 // JS and cannot be read from a function, so this is the documented value for the premium voices; what is
 // really billed stands in Cloud Billing (Service = Cloud Text-to-Speech API). Doc's billing account also
 // carries a 10 EUR/month budget alert - which mails, it does not switch anything off.
+// Each voice family has its OWN pot (Doc, 18.10.2026: Solita = Studio, Charon = Chirp 3 HD), so the mail
+// counts them apart - one sum against one million would be wrong since Charon reads the Spanish book.
 const TTS_FREE_CHARS = 1_000_000;
 
-// Characters synthesised since `sinceISO` (provider 'google-tts', characters live in in_tok). Paginated
-// and best-effort, exactly like aiTotalSinceEur - the watchdog mail must never fail over this.
-async function ttsCharsSince(sinceISO: string): Promise<number> {
+// Characters synthesised since `sinceISO` per voice family (provider 'google-tts', characters live in in_tok,
+// the voice name in model). Paginated and best-effort, exactly like aiTotalSinceEur - the watchdog mail must
+// never fail over this.
+async function ttsCharsSince(sinceISO: string): Promise<{ studio: number; chirp: number }> {
+  const out = { studio: 0, chirp: 0 };
   try {
     const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    if (!url || !key) return 0;
+    if (!url || !key) return out;
     const supa = createClient(url, key, { auth: { persistSession: false } });
-    let total = 0, from = 0; const page = 1000;
+    let from = 0; const page = 1000;
     for (;;) {
       const { data, error } = await supa.from('ai_cost_log')
-        .select('in_tok')
+        .select('model, in_tok')
         .eq('provider', 'google-tts')
         .gte('created_at', sinceISO)
         .order('id', { ascending: true })
         .range(from, from + page - 1);
       if (error || !Array.isArray(data)) break;
-      for (const r of data as Array<Record<string, unknown>>) total += Number(r.in_tok) || 0;
+      for (const r of data as Array<Record<string, unknown>>) {
+        const m = String(r.model || ''), n = Number(r.in_tok) || 0;
+        if (/Studio/.test(m)) out.studio += n;
+        else if (/Chirp/.test(m)) out.chirp += n;
+      }
       if (data.length < page) break;
       from += page;
     }
-    return total;
-  } catch (_) { return 0; }
+    return out;
+  } catch (_) { return out; }
 }
 
 // Sum the last 24 h of ai_cost_log per provider (via the SECURITY-DEFINER RPC). Fully best-effort — a
@@ -313,10 +321,13 @@ Deno.serve(async (req) => {
     const r2pct = de(r2pctN, 2), dbpct = de(dbpctN, 2);   // 2 Nachkommastellen, deutsche Komma-Schreibweise
     const ghPctN = ghBytes != null ? pctN(ghBytes, GH_PAGES_QUOTA_GB) : null;   // null → GitHub unreachable, skip the row
     const ghpct = ghPctN != null ? de(ghPctN, 2) : '';
-    const ttsPctN = ttsChars / TTS_FREE_CHARS * 100;          // monthly, resets with the quota on the 1st
+    const ttsPctN = ttsChars.studio / TTS_FREE_CHARS * 100;   // monthly, resets with the quota on the 1st
     const ttsPct = de(ttsPctN, 2);
-    const ttsDe = ttsChars.toLocaleString('de-DE');
-    const warn = r2pctN >= 80 || dbpctN >= 80 || (ghPctN != null && ghPctN >= 80) || (repoPctN != null && repoPctN >= 80) || ttsPctN >= 80;
+    const ttsDe = ttsChars.studio.toLocaleString('de-DE');
+    const chirpPctN = ttsChars.chirp / TTS_FREE_CHARS * 100;
+    const chirpPct = de(chirpPctN, 2);
+    const chirpDe = ttsChars.chirp.toLocaleString('de-DE');
+    const warn = r2pctN >= 80 || dbpctN >= 80 || (ghPctN != null && ghPctN >= 80) || (repoPctN != null && repoPctN >= 80) || ttsPctN >= 80 || chirpPctN >= 80;
     // Always list all three providers — Doc wants Gemini/DeepSeek visible even at 0 (2026-07-04). Any
     // provider that actually billed but isn't in this fixed order gets appended so nothing is ever hidden.
     const FIXED_PROVS = ['claude', 'gemini', 'deepseek'];
@@ -337,7 +348,8 @@ Deno.serve(async (req) => {
       `• Supabase-DB: ${dbpct}% von ${de(DB_QUOTA_GB, 1)} GB  (${gbDe(db)} GB)\n` +
       (ghPctN != null ? `• GitHub Pages: ${ghpct}% von ${GH_PAGES_QUOTA_GB} GB  (${gbDe(ghBytes!)} GB)\n` : '') +
       (repoPctN != null ? `• GitHub Repo mit Historie: ${repoPct}% von ${GH_REPO_QUOTA_GB} GB  (${gbDe(repoBytes!)} GB)\n` : '') +
-      `• Solitas Stimme: ${ttsPct}% von 1 Mio Zeichen/Monat  (${ttsDe} Zeichen seit ${monthLabel})\n` +
+      `• Solitas Stimme (Studio): ${ttsPct}% von 1 Mio Zeichen/Monat  (${ttsDe} Zeichen seit ${monthLabel})\n` +
+      `• Charons Stimme (Chirp 3 HD): ${chirpPct}% von 1 Mio Zeichen/Monat  (${chirpDe} Zeichen seit ${monthLabel})\n` +
       aiText +
       (searches > 0 ? `\nGemini-Suchen (24 h): ${searches} / 1500 gratis\n` : '') + `\n` +
       `Verbrauch beim Anbieter:\n` +
@@ -391,8 +403,10 @@ Deno.serve(async (req) => {
       + (ghPctN != null ? usageRow('🐙', 'GitHub Pages', ghPctN, ghpct, gbDe(ghBytes!), `${GH_PAGES_QUOTA_GB} GB`, false) : '')
       + (repoPctN != null ? usageRow('🐙', `GitHub Repo <span style="color:${C.muted};font-size:12px;">mit Historie</span>`,
                                      repoPctN, repoPct, gbDe(repoBytes!), `${GH_REPO_QUOTA_GB} GB`, ghPctN != null) : '')
-      + usageRow('🔊', `Solitas Stimme <span style="color:${C.muted};font-size:12px;">seit ${monthLabel}</span>`,
+      + usageRow('🔊', `Solitas Stimme <span style="color:${C.muted};font-size:12px;">Studio · seit ${monthLabel}</span>`,
                  ttsPctN, ttsPct, ttsDe, '1 Mio Zeichen', (ghPctN != null) !== (repoPctN != null), 'Zeichen')
+      + usageRow('🔊', `Charons Stimme <span style="color:${C.muted};font-size:12px;">Chirp 3 HD · seit ${monthLabel}</span>`,
+                 chirpPctN, chirpPct, chirpDe, '1 Mio Zeichen', (ghPctN != null) === (repoPctN != null), 'Zeichen')
       + `</tbody></table>`
       + aiHtml
       + `<div style="margin:22px 0 0;padding:12px 14px;border-radius:8px;font-size:14px;font-weight:bold;`
@@ -419,7 +433,7 @@ Deno.serve(async (req) => {
       + `. ${warn ? 'Achtung, ein Wert liegt über 80 Prozent.' : 'Alles im grünen Bereich.'}`;
     if (!b.dry) await sendMail(subject, body, html, pass);
     return json({ ok: true, r2pct, dbpct, ghpct: ghPctN != null ? ghpct : null, r2bytes: r2, dbbytes: db, ghbytes: ghBytes,
-                  repopct: repoPctN != null ? repoPct : null, repobytes: repoBytes, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls, monthTotal, monthLabel }, body, html, spoken, mailed: !b.dry });
+                  repopct: repoPctN != null ? repoPct : null, repobytes: repoBytes, tts: ttsChars, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls, monthTotal, monthLabel }, body, html, spoken, mailed: !b.dry });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);
   }
