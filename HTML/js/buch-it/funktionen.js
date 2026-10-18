@@ -141,7 +141,6 @@ window.BuchIT && BuchIT.add('funktionen', {
         [' liegen alle auf der Parabel $y = -x^2$ (gestrichelt).', ' stanno tutti sulla parabola $y = -x^2$ (tratteggiata).'],
         ['Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: Zu $x = 1$ gehören $y = 2$ und $y = -2$.', 'A destra di $x = -1$ ogni retta verticale taglia la curva due volte: a $x = 1$ corrispondono $y = 2$ e $y = -2$.'],
         ['Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.', 'A $x = 2$ corrispondono $y = 2$ e $y = -2$. Ma una funzione associa a ogni $x$ esattamente un $y$.'],
-        ['Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: ', 'A destra di $x = -1$ ogni retta verticale taglia la curva due volte: '],
         ['Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.', 'Ma una funzione associa a ogni $x$ esattamente un $y$.'],
         ['$ und $y = ', '$ e $y = '],
         ['$ und $', '$ e $'],
@@ -149,15 +148,10 @@ window.BuchIT && BuchIT.add('funktionen', {
         ['zwei Nullstellen ', 'due zeri '],
         ['eine (doppelte) Nullstelle ', 'uno zero (doppio) '],
         ['eine doppelte Nullstelle ', 'uno zero doppio '],
-        ['keine Parabel, sondern die Gerade $y = -4$: keine Nullstelle', 'non una parabola, ma la retta $y = -4$: nessuno zero'],
-        ['keine Parabel, sondern die Gerade $y = -4$', 'non una parabola, ma la retta $y = -4$'],
         [': keine Nullstelle', ': nessuno zero'],
         ['keine Nullstelle', 'nessuno zero'],
         ['Diskriminante: $', 'Discriminante: $'],
         ['$ hat $D = ', '$ ha $D = '],
-        ['Ausklammern: $', 'Raccogliendo a fattor comune: $'],
-        ['nach unten geöffnet mit dem Scheitel ', 'rivolta verso il basso con il vertice '],
-        ['$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.', '$kx^2 = 4$ ha soluzioni solo per $k > 0$. Il caso $k = 0$ va studiato a parte, perché allora $x^2$ sparisce.'],
         // book it-3 mathe13-it:
     ],
     rule: [

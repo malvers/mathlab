@@ -130,8 +130,6 @@ window.BuchIT && BuchIT.add('stochastik', {
         ['Positiv getestet werden <b>', 'Risultano positive <b>'],
         ['</b> von 10 000 Personen – ', '</b> persone su 10 000 – '],
         ['aber nur <b>', 'ma solo <b>'],
-        ['</b> davon sind wirklich krank.', '</b> di queste sono davvero malate.'],
-        ['Anteil der Kranken unter den positiv Getesteten: ', 'Proporzione di malati tra i positivi al test: '],
         ['$ und $P(A \\cap B) = ', '$ e $P(A \\cap B) = '],
         ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.', '<b>Indipendenti:</b> che $B$ si verifichi o no, la parte di $A$ resta la stessa. Nel quadrato il confine si trova alla stessa altezza in entrambe le colonne.'],
         ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.', '<b>Incompatibili</b> ($A \\cap B = \\emptyset$) e quindi <b>dipendenti</b>: se si verifica $B$, $A$ non può più verificarsi.'],
