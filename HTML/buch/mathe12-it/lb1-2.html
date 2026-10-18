@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica 12 · Capitolo 1.2 · Variabili aleatorie | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Distribuzione di probabilità, valore atteso, varianza, giochi equi. Capitolo 1.2 del libro di testo interattivo Matematica · Berufliches Gymnasium 12: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 1.2 · AREA DI APPRENDIMENTO 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 1.2 · AREA DI APPRENDIMENTO 1 · SETTEMBRE</p>
+            <h1>Variabili aleatorie</h1>
+            <p class="b-hero-lead">Una ruota della fortuna alla festa della scuola, un gioco di dadi alla fiera, un’assicurazione per la bicicletta: dietro ogni esperimento aleatorio ci sono <b>numeri</b>, vincite, perdite, quantità. Qui impari a calcolare con questi numeri. Il <b>valore atteso</b> ti dice che cosa si ottiene a lungo andare; la <b>deviazione standard</b>, quanto i risultati oscillano.</p>
+            <div class="b-chips"><span class="b-chip">12 ORE</span><span class="b-chip">3 LEZIONI</span><span class="b-chip">VALUTARE I GIOCHI D’AZZARDO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>definire una <b>variabile aleatoria</b> e dare la sua <b>distribuzione di probabilità</b> come tabella e come diagramma a barre</li>
+                <li>tradurre «esattamente», «al massimo» e «almeno» in probabilità</li>
+                <li>calcolare e interpretare <b>valore atteso</b>, <b>varianza</b> e <b>deviazione standard</b></li>
+                <li>decidere se un gioco è <b>equo</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="5" data-ph="numero"><p class="b-q-text">Calcola la media di 2, 4, 6 e 8.</p><div class="b-sol"><p>$\tfrac{2 + 4 + 6 + 8}{4} = 5$</p></div></div>
+            <div class="b-q" data-ans="3/8" data-tol="0.0005" data-ph="frazione"><p class="b-q-text">Calcola $\tfrac14 + \tfrac18$.</p><div class="b-sol"><p>$\tfrac28 + \tfrac18 = \tfrac38$</p></div></div>
+            <div class="b-q" data-ans="1/4" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Si lanciano due monete. Qual è la probabilità di ottenere due volte testa?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12 = \tfrac14$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="numero"><p class="b-q-text">Calcola $0{,}5 \cdot 4 + 0{,}5 \cdot (-2)$.</p><div class="b-sol"><p>$2 - 1 = 1$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA RUOTA DELLA FORTUNA DELLA FESTA DELLA SCUOLA</div>
+            <div class="b-text"><p>Puntata: 2 €. Metà della ruota non dà niente, un quarto dà 1 €, un ottavo 2 € e un altro ottavo 10 €.</p>
+                <ul><li>Giochereste? Stimate se la cassa della classe ci guadagna.</li><li>Immaginate che giochino 800 persone. Quanto viene pagato in vincite?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DUE GIOCHI, UN VALORE ATTESO</div>
+            <div class="b-text"><p>Gioco A: una moneta; vinci o perdi 1 €. Gioco B: con una probabilità dell’1 % vinci 99 €, altrimenti perdi 1 €.</p>
+                <ul><li>Quanto si vince in media in ciascun gioco?</li><li>In che cosa si differenziano, nonostante tutto?</li></ul></div>
+            <span class="b-pair">→ Lezione 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">CONTARE LE SOMME DEI PUNTI</div>
+            <div class="b-text"><p>Lanciate due dadi 50 volte e annotate ogni volta la somma dei punti.</p>
+                <ul><li>Quale somma esce più spesso? Perché?</li><li>Calcolate la media delle vostre 50 somme. Che cosa vi aspettate?</li></ul></div>
+            <span class="b-pair">→ Lezioni 1 e 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Variabili aleatorie e distribuzioni" data-toc-k="1" data-toc-short="1 Distribuzione">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Variabile aleatoria e distribuzione di probabilità</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si lanciano tre monete. Ci sono 8 risultati ugualmente probabili, da TTT a CCC (T = testa, C = croce). Ci interessa solo: <b>quante volte testa?</b></p></div></div>
+            <div class="b-text">
+                <p>Il numero $X$ = «numero di teste» dipende dal caso e può assumere i valori 0, 1, 2, 3. Contando i risultati si ottiene:</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <tr><th>$x_i$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>$P(X = x_i)$</th><td>$\tfrac18$</td><td>$\tfrac38$</td><td>$\tfrac38$</td><td>$\tfrac18$</td></tr></table></div>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · VARIABILE ALEATORIA</div>
+                <div class="b-text">
+                    <p>Una <b>variabile aleatoria</b> $X$ associa a ogni risultato di un esperimento aleatorio un numero reale.</p>
+                    <p>La <b>distribuzione di probabilità</b> di $X$ dà per ogni valore $x_i$ la probabilità $P(X = x_i)$. Tutte insieme danno 1. Si rappresenta come tabella, <b>diagramma a barre</b> o istogramma.</p>
+                    <p>«esattamente $k$»: $P(X = k)$ · «al massimo $k$»: $P(X \le k)$ · «almeno $k$»: $P(X \ge k) = 1 - P(X \le k - 1)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note">Una variabile aleatoria si dice <b>discreta</b> se assume solo valori isolati e numerabili, per esempio quantità o importi di denaro.</p>
+            <p class="b-note"><b>Evento contrario:</b> «almeno uno» si calcola quasi sempre tramite $1 - P(\text{nessuno})$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURA · SOMMA DEI PUNTI DI DUE DADI</div>
+        <p class="b-help" style="margin:0 0 12px">L’altezza delle barre è $P(X = k)$, da $\tfrac{1}{36}$ per il 2 e il 12 fino a $\tfrac{6}{36}$ per il 7.</p>
+        <div data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · SOMMA DEI PUNTI</div>
+            <div class="b-text"><p>$X$ è la somma dei punti di due dadi. Calcola $P(X = 7)$, $P(X \le 4)$ e $P(X \ge 10)$.</p></div>
+            <div class="b-sol"><p>$P(X = 7) = \tfrac{6}{36} = \tfrac16$ · $P(X \le 4) = \tfrac{1 + 2 + 3}{36} = \tfrac16$ · $P(X \ge 10) = \tfrac{3 + 2 + 1}{36} = \tfrac16$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · ESTRAZIONE SENZA REIMMISSIONE</div>
+            <div class="b-text"><p>Da un’urna con 3 palline rosse e 2 blu se ne estraggono due senza reimmissione. $X$ = numero di palline rosse. Dai la distribuzione.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac25 \cdot \tfrac14 = \tfrac{1}{10}$, $P(X = 2) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$, $P(X = 1) = 1 - \tfrac{1}{10} - \tfrac{3}{10} = \tfrac{6}{10}$</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Si lanciano quattro monete, $X$ = numero di teste. Dai la distribuzione di probabilità.</p></div>
+            <div class="b-hint"><p>Ci sono 16 risultati. Quanti di questi hanno esattamente due teste?</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac{1}{16}$, $P(X = 1) = \tfrac{4}{16}$, $P(X = 2) = \tfrac{6}{16}$, $P(X = 3) = \tfrac{4}{16}$, $P(X = 4) = \tfrac{1}{16}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Completa la probabilità mancante e calcola $P(X \ge 2)$.</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:360px"><tr><th>$x_i$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>$P(X = x_i)$</th><td>0,1</td><td>0,3</td><td>?</td><td>0,2</td></tr></table></div></div>
+            <div class="b-sol"><p>$1 - 0{,}1 - 0{,}3 - 0{,}2 = 0{,}4$, $P(X \ge 2) = 0{,}4 + 0{,}2 = 0{,}6$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Si lancia un dado due volte; $X$ è il maggiore dei due punteggi. Determina la distribuzione di $X$.</p></div>
+            <div class="b-sol"><p>$P(X = k) = \tfrac{2k - 1}{36}$: $\tfrac{1}{36}, \tfrac{3}{36}, \tfrac{5}{36}, \tfrac{7}{36}, \tfrac{9}{36}, \tfrac{11}{36}$ per $k = 1, \ldots, 6$. Giustificazione: entrambi i dadi danno al massimo $k$ in $k^2$ casi e al massimo $k - 1$ in $(k - 1)^2$ casi; la differenza è $2k - 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Una ruota della fortuna ha tre settori con angoli al centro di 180°, 120° e 60°. Pagano 0 €, 2 € e 5 €. Dai la distribuzione della vincita e disegna un diagramma a barre.</p></div>
+            <div class="b-sol"><p>$P(0) = \tfrac{180}{360} = \tfrac12$, $P(2) = \tfrac{120}{360} = \tfrac13$, $P(5) = \tfrac{60}{360} = \tfrac16$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="3/8" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Tre monete, $X$ = numero di teste. Quanto vale $P(X = 2)$?</p><div class="b-sol"><p>TTC, TCT, CTT: $\tfrac38$</p></div></div>
+        <div class="b-q" data-ans="0,3" data-tol="0.0001" data-ph="P ="><p class="b-q-text">I valori di una distribuzione hanno le probabilità 0,25; 0,35; ?; 0,1. Quale manca?</p><div class="b-sol"><p>$1 - 0{,}7 = 0{,}3$</p></div></div>
+        <div class="b-q" data-ans="1/12" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Due dadi, $X$ = somma dei punti. Quanto vale $P(X \ge 11)$?</p><div class="b-sol"><p>$\tfrac{2 + 1}{36} = \tfrac{1}{12}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Valore atteso" data-toc-k="2" data-toc-short="2 Valore atteso">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Il valore atteso</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Alla ruota della fortuna della festa della scuola giocano 800 persone. Circa 400 non ricevono nulla, 200 ricevono 1 € ciascuna, 100 ricevono 2 € e 100 ricevono 10 €. Sono $200 + 200 + 1000 = 1400$ €, cioè in media $\tfrac{1400}{800} = 1{,}75$ € a partita.</p></div></div>
+            <div class="b-text"><p>Lo stesso risultato si ottiene senza le 800 persone, direttamente dalla distribuzione: $0 \cdot \tfrac12 + 1 \cdot \tfrac14 + 2 \cdot \tfrac18 + 10 \cdot \tfrac18 = 1{,}75$. Con una puntata di 2 € si perdono in media 25 centesimi a partita; la cassa della classe guadagna.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · VALORE ATTESO</div>
+                <div class="b-text">
+                    <p>Se $X$ assume i valori $x_1, \ldots, x_n$, il <b>valore atteso</b> è $$E(X) = \mu = x_1 \cdot P(X = x_1) + x_2 \cdot P(X = x_2) + \ldots + x_n \cdot P(X = x_n).$$</p>
+                    <p>È la <b>media a lungo andare</b>: ripetendo l’esperimento moltissime volte, la media dei risultati è vicina a $E(X)$.</p>
+                    <p>Se $X$ è il <b>guadagno</b> (vincita meno puntata), un gioco si dice <b>equo</b> se $E(X) = 0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Non è un valore possibile:</b> il valore atteso nel lancio di un dado è 3,5. Questo punteggio non esce mai; è una media.</p>
+            <p class="b-note"><b>Baricentro:</b> se immagini le barre del diagramma come pesi su un’altalena a bilico, il punto di appoggio si trova in $\mu$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · VARIABILI ALEATORIE E I LORO PARAMETRI</div>
+        <p class="b-help" style="margin:0 0 12px">Scegli un esempio. Poi gioca 10, 100 o 1000 volte e confronta la media delle tue partite con il valore atteso.</p>
+        <div data-widget="zufallsgroesse"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · IL DADO</div>
+            <div class="b-text"><p>Calcola il valore atteso del punteggio di un dado.</p></div>
+            <div class="b-sol"><p>$E(X) = (1 + 2 + 3 + 4 + 5 + 6) \cdot \tfrac16 = \tfrac{21}{6} = 3{,}5$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · CHUCK-A-LUCK</div>
+            <div class="b-text"><p>Punti 1 € su un numero, poi si lanciano tre dadi. Per ogni dado che mostra il tuo numero vinci 1 €; se nessuno lo mostra, perdi la puntata. Il gioco è equo?</p></div>
+            <div class="b-sol"><p>Nessuna coincidenza: $\left(\tfrac56\right)^3 = \tfrac{125}{216}$, una: $3 \cdot \tfrac16 \cdot \left(\tfrac56\right)^2 = \tfrac{75}{216}$, due: $\tfrac{15}{216}$, tre: $\tfrac{1}{216}$.</p>
+                <p>$E(X) = \dfrac{-125 + 75 + 2 \cdot 15 + 3 \cdot 1}{216} = -\dfrac{17}{216} \approx -0{,}079$. <span class="b-res">Non è equo: quasi 8 centesimi di perdita a partita.</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola $E(X)$ per la distribuzione $x_i$: 0, 1, 2, 3 con $P(X = x_i)$: 0,1; 0,3; 0,4; 0,2.</p></div>
+            <div class="b-sol"><p>$0 + 0{,}3 + 0{,}8 + 0{,}6 = 1{,}7$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola il valore atteso del numero di teste lanciando tre monete. Interpreta il risultato.</p></div>
+            <div class="b-sol"><p>$0 \cdot \tfrac18 + 1 \cdot \tfrac38 + 2 \cdot \tfrac38 + 3 \cdot \tfrac18 = \tfrac{12}{8} = 1{,}5$. In media, su tre lanci esce testa 1,5 volte.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La ruota della fortuna della festa della scuola deve diventare equa. a) Quanto dovrebbe essere la puntata? b) La puntata resta di 2 €. Quale importo deve pagare allora il settore da 10 €?</p></div>
+            <div class="b-sol"><p>a) 1,75 € &nbsp; b) $0{,}25 + 0{,}25 + \tfrac{a}{8} = 2 \Rightarrow a = 12$ €</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Una lotteria vende 1 000 biglietti da 2 € ciascuno. C’è un premio da 500 €, 10 premi da 50 € e 100 premi da 5 €. Calcola il valore atteso del guadagno per un biglietto.</p></div>
+            <div class="b-sol"><p>Vincita media $\tfrac{500 + 500 + 500}{1000} = 1{,}5$ €. Guadagno $1{,}5 - 2 = -0{,}5$ €. La lotteria incassa 500 €.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Una bicicletta del valore di 800 € viene rubata con una probabilità del 3 % all’anno. Quale premio annuo sarebbe equo? Un’assicurazione chiede 39 €. Perché molti si assicurano lo stesso?</p></div>
+            <div class="b-sol"><p>Premio equo $800 \cdot 0{,}03 = 24$ €. I 15 € di differenza coprono i costi e l’utile dell’assicurazione. Si paga un importo piccolo e certo per proteggersi da una perdita grande e improbabile.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="0,2" data-tol="0.0001" data-ph="E(X) ="><p class="b-q-text">$X$ assume $-1$ con 0,6 e $2$ con 0,4. Calcola $E(X)$.</p><div class="b-sol"><p>$-0{,}6 + 0{,}8 = 0{,}2$</p></div></div>
+        <div class="b-q" data-ans="3,5" data-tol="0.0001" data-ph="euro"><p class="b-q-text">Un gioco di dadi paga in euro il punteggio ottenuto. Quale puntata è equa?</p><div class="b-sol"><p>$E(X) = 3{,}5$ €</p></div></div>
+        <div class="b-q" data-ans="0,4" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$X$ assume solo i valori 0 e 5 e ha $E(X) = 2$. Quanto vale $P(X = 5)$?</p><div class="b-sol"><p>$5p = 2 \Rightarrow p = 0{,}4$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Varianza e deviazione standard" data-toc-k="3" data-toc-short="3 Dispersione">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 3</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">3</span>Varianza e deviazione standard</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Nel gioco A vinci o perdi 1 € con la stessa probabilità. Nel gioco B vinci 99 € con una probabilità dell’1 %, altrimenti perdi 1 €. Entrambi hanno valore atteso 0. Eppure il gioco B dà una sensazione molto diversa.</p></div></div>
+            <div class="b-text"><p>La differenza sta nella <b>dispersione</b>: nel gioco A ogni risultato dista 1 € dal valore atteso; nel gioco B quasi sempre 1 €, ma raramente 99 €. La dispersione si misura con la media degli <b>scarti al quadrato</b> rispetto al valore atteso.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · VARIANZA E DEVIAZIONE STANDARD</div>
+                <div class="b-text">
+                    <p><b>Varianza:</b> $V(X) = (x_1 - \mu)^2 \cdot P(X = x_1) + \ldots + (x_n - \mu)^2 \cdot P(X = x_n)$</p>
+                    <p><b>Deviazione standard:</b> $\sigma = \sqrt{V(X)}$. Ha la stessa unità di misura di $X$ e indica quanto i valori si discostano <b>tipicamente</b> dal valore atteso.</p>
+                    <p>Gioco A: $V = 1$, $\sigma = 1$ · Gioco B: $V = 99^2 \cdot 0{,}01 + (-1)^2 \cdot 0{,}99 = 99$, $\sigma \approx 9{,}95$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Scorciatoia di calcolo:</b> spesso è più rapido $V(X) = E(X^2) - \mu^2$, cioè «media dei quadrati meno quadrato della media».</p>
+            <p class="b-note"><b>Rischio:</b> nel mondo della finanza la deviazione standard serve come misura del rischio di un investimento.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 5 · IL DADO</div>
+            <div class="b-text"><p>Calcola la varianza e la deviazione standard del punteggio di un dado.</p></div>
+            <div class="b-sol"><p>Con $\mu = 3{,}5$: $V(X) = \tfrac16 \left(2{,}5^2 + 1{,}5^2 + 0{,}5^2 + 0{,}5^2 + 1{,}5^2 + 2{,}5^2\right) = \tfrac{17{,}5}{6} \approx 2{,}917$, $\sigma \approx 1{,}708$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 6 · DUE IMPIANTI DI RIEMPIMENTO</div>
+            <div class="b-text"><p>L’impianto 1 riempie 498 g, 500 g e 502 g con 0,1; 0,8; 0,1. L’impianto 2 riempie 495 g, 500 g e 505 g con 0,2; 0,6; 0,2. Quale lavora con più precisione?</p></div>
+            <div class="b-sol"><p>Entrambi: $\mu = 500$ g. $\sigma_1 = \sqrt{4 \cdot 0{,}1 + 4 \cdot 0{,}1} = \sqrt{0{,}8} \approx 0{,}89$ g, $\sigma_2 = \sqrt{25 \cdot 0{,}2 \cdot 2} = \sqrt{10} \approx 3{,}16$ g.
+                <span class="b-res">L’impianto 1 ha una dispersione minore.</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola $V(X)$ e $\sigma$ per il numero di teste lanciando tre monete ($\mu = 1{,}5$).</p></div>
+            <div class="b-sol"><p>$V = 2{,}25 \cdot \tfrac18 + 0{,}25 \cdot \tfrac38 + 0{,}25 \cdot \tfrac38 + 2{,}25 \cdot \tfrac18 = \tfrac68 = 0{,}75$, $\sigma \approx 0{,}866$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ assume 0, 2 e 4 con 0,25; 0,5; 0,25. Calcola $\mu$, $V(X)$ e $\sigma$.</p></div>
+            <div class="b-sol"><p>$\mu = 2$, $V = 4 \cdot 0{,}25 + 0 + 4 \cdot 0{,}25 = 2$, $\sigma = \sqrt2 \approx 1{,}414$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Confronta il Chuck-a-luck (esempio 4) con il gioco A di «Per cominciare»: calcola la deviazione standard del guadagno nel Chuck-a-luck. Usa il widget per controllare.</p></div>
+            <div class="b-sol"><p>$E(X^2) = \tfrac{125 + 75 + 4 \cdot 15 + 9}{216} = \tfrac{269}{216} \approx 1{,}2454$, $V = 1{,}2454 - 0{,}0787^2 \approx 1{,}239$, $\sigma \approx 1{,}113$ €</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Mostra con l’esempio del dado che $V(X) = E(X^2) - \mu^2$ dà lo stesso risultato della definizione.</p></div>
+            <div class="b-sol"><p>$E(X^2) = \tfrac{1 + 4 + 9 + 16 + 25 + 36}{6} = \tfrac{91}{6} \approx 15{,}167$; meno $3{,}5^2 = 12{,}25$ dà $\tfrac{35}{12} \approx 2{,}917$. Come nell’esempio 5.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="5" data-ph="σ ="><p class="b-q-text">$X$ assume 0 e 10 con 0,5 ciascuno. Quanto vale $\sigma$?</p><div class="b-sol"><p>$\mu = 5$, $V = 25$, $\sigma = 5$</p></div></div>
+        <div class="b-q" data-ans="1,5" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">$V(X) = 2{,}25$. Quanto vale la deviazione standard?</p><div class="b-sol"><p>$\sqrt{2{,}25} = 1{,}5$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Due giochi hanno lo stesso valore atteso; il gioco A ha $\sigma = 2$ € e il gioco B $\sigma = 8$ €. Quale è più rischioso?</p>
+            <div class="b-mc"><button>Gioco A</button><button>Gioco B</button><button>Entrambi uguali</button></div>
+            <div class="b-sol"><p>Nel gioco B i risultati si discostano tipicamente molto di più dal valore atteso.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Giustifica senza un lungo calcolo che la somma dei punti di due dadi ha valore atteso 7.</p></div>
+            <div class="b-sol"><p>La distribuzione è simmetrica rispetto al 7. Oppure: ogni dado ha valore atteso 3,5 e i valori attesi si sommano.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Quanti euro si perdono a lungo andare al Chuck-a-luck in 216 partite? E in 1 000?</p></div>
+            <div class="b-sol"><p>216 partite: circa 17 €. 1 000 partite: $1000 \cdot \tfrac{17}{216} \approx 78{,}70$ €.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Collegare con il capitolo 1.1:</b> da un’urna con 3 palline rosse e 2 blu ne estrai due senza reimmissione. Per ogni pallina rossa ricevi 1 €. La puntata è 1 €. Il gioco è equo?</p></div>
+            <div class="b-sol"><p>Con l’esempio 2: $E(\text{vincita}) = 0 \cdot 0{,}1 + 1 \cdot 0{,}6 + 2 \cdot 0{,}3 = 1{,}2$ €. Guadagno medio $+0{,}20$ €: favorevole per chi gioca. Sarebbe equa una puntata di 1,20 €.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Gioco di dadi: se esce un sei vinci $a$ €, altrimenti perdi 1 €. Per quale $a$ il gioco è equo? Quanto vale allora $\sigma$?</p></div>
+            <div class="b-sol"><p>$\tfrac{a}{6} - \tfrac56 = 0 \Rightarrow a = 5$. $V = 25 \cdot \tfrac16 + 1 \cdot \tfrac56 = 5$, $\sigma = \sqrt5 \approx 2{,}24$ €.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: il paradosso di San Pietroburgo" data-toc-k="X" data-toc-short="San Pietroburgo">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">UN GIOCO CON VALORE ATTESO INFINITO</span></div>
+    <h2>Il paradosso di San Pietroburgo</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Si lancia una moneta finché esce croce per la prima volta. Se succede al $k$-esimo lancio, ricevi $2^k$ euro. Con probabilità $\tfrac12$ ricevi 2 €, con $\tfrac14$ ricevi 4 €, con $\tfrac18$ ricevi 8 €, e così via.</p>
+            <p>Il valore atteso è $2 \cdot \tfrac12 + 4 \cdot \tfrac14 + 8 \cdot \tfrac18 + \ldots = 1 + 1 + 1 + \ldots$, cioè <b>infinito</b>. Eppure quasi nessuno pagherebbe più di 20 € per giocare. Perché?</p>
+            <p>Nicolaus I Bernoulli pose la domanda nel 1713 in una lettera a Pierre Rémond de Montmort. Suo cugino Daniel Bernoulli rispose nel 1738: le persone non valutano il denaro in base all’importo, ma in base alla sua <b>utilità</b>, che cresce più lentamente dell’importo. Inoltre nessuna banca al mondo potrebbe pagare le enormi vincite delle rare serie lunghe.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Daniel Bernoulli: Specimen theoriae novae de mensura sortis. Commentarii Academiae Scientiarum Imperialis Petropolitanae 5 (1738).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>VARIABILE ALEATORIA</h4><p>Associa un numero a ogni risultato. Distribuzione: tutte le $P(X = x_i)$, somma 1.</p></div>
+        <div><p>Numero di teste con tre monete: $\tfrac18, \tfrac38, \tfrac38, \tfrac18$</p></div></div>
+    <div class="b-rueck"><div><h4>VALORE ATTESO</h4><p>$E(X) = \mu = \sum x_i \cdot P(X = x_i)$, la media a lungo andare.</p></div>
+        <div><p>Dado: 3,5 · Ruota della fortuna: 1,75 €</p></div></div>
+    <div class="b-rueck"><div><h4>GIOCO EQUO</h4><p>Valore atteso del guadagno uguale a 0.</p></div>
+        <div><p>Chuck-a-luck: $-\tfrac{17}{216}$ €, non è equo</p></div></div>
+    <div class="b-rueck"><div><h4>VARIANZA E DEVIAZIONE STANDARD</h4><p>$V(X) = \sum (x_i - \mu)^2 \cdot P(X = x_i)$, $\sigma = \sqrt{V(X)}$</p></div>
+        <div><p>Dado: $V \approx 2{,}917$, $\sigma \approx 1{,}708$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1</div>
+            <div class="b-q" data-ans="2,1" data-tol="0.0001" data-ph="E(X) ="><p class="b-q-text">$X$ assume 1, 2, 3 con 0,2; 0,5; 0,3. Calcola $E(X)$.</p><div class="b-sol"><p>$0{,}2 + 1 + 0{,}9 = 2{,}1$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Un gioco si dice equo se …</p>
+                <div class="b-mc"><button>vincere è più probabile che perdere</button><button>il valore atteso del guadagno è 0</button><button>la deviazione standard è 0</button></div>
+                <div class="b-sol"><p>A lungo andare nessuno vince.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="σ ="><p class="b-q-text">$X$ assume 0 e 4 con 0,5 ciascuno. Quanto vale $\sigma$?</p><div class="b-sol"><p>$\mu = 2$, $V = 4$, $\sigma = 2$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2</div>
+            <div class="b-q" data-ans="0,35" data-tol="0.0001" data-ph="P ="><p class="b-q-text">Una distribuzione ha le probabilità 0,2; 0,15; ?; 0,3. Quale manca?</p><div class="b-sol"><p>$1 - 0{,}65 = 0{,}35$</p></div></div>
+            <div class="b-q" data-ans="-0,2" data-tol="0.0001" data-ph="euro"><p class="b-q-text">Puntata 1 €. Con probabilità 0,1 vengono pagati 8 €, altrimenti niente. Valore atteso del guadagno?</p><div class="b-sol"><p>$0{,}8 - 1 = -0{,}2$ €</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="V ="><p class="b-q-text">$X$ assume $-2$ e $2$ con 0,5 ciascuno. Calcola $V(X)$.</p><div class="b-sol"><p>$\mu = 0$, $V = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-stochastik-uebung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESERCIZI DI PROBABILITÀ</span><span class="b-lab-what">Distribuzioni e valore atteso</span></span></a>
+        <a class="b-lab" href="../../mathetest11-simulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULAZIONE</span><span class="b-lab-what">La media a lungo andare</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Berufliches Gymnasium, 12ª classe · Area di apprendimento 1 secondo il programma di matematica del Berufliches Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-it/stochastik.js"></script>
+</body>
+</html>

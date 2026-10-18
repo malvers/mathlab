@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica 12 · Capitolo 2.1 · Limiti | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Comportamento all’infinito, asintoti, continuità. Capitolo 2.1 del libro di testo interattivo Matematica · Berufliches Gymnasium 12: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 2.1 · AREA DI APPRENDIMENTO 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 2.1 · AREA DI APPRENDIMENTO 2 · NOVEMBRE · DICEMBRE</p>
+            <h1>Limiti</h1>
+            <p class="b-hero-lead">Un caffè caldo si raffredda, ma mai sotto la temperatura ambiente. Una curva si accosta sempre di più a una retta senza mai toccarla. Una funzione ha un buco in un punto e, nonostante ciò, si sa esattamente dove vuole andare lì. I <b>limiti</b> descrivono che cosa succede quando ci si avvicina sempre di più a qualcosa. Sono il fondamento di tutto il calcolo differenziale.</p>
+            <div class="b-chips"><span class="b-chip">8 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">BASE PER LA DERIVATA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["(2*x+1)/(x-1)"]' data-labels='["f"]' data-lat="[5]" data-hl="2" data-x="-6,8" data-y="-6,9" data-h="240" data-aria="Grafico con un asintoto orizzontale e uno verticale"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>determinare il <b>comportamento all’infinito</b> e indicare gli <b>asintoti orizzontali</b></li>
+                <li>studiare i <b>limiti in un punto</b>, anche da sinistra e da destra</li>
+                <li>distinguere i <b>poli</b> (asintoti verticali) dalle <b>discontinuità eliminabili</b></li>
+                <li>capire che cosa significa <b>continuità</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="0,001" data-tol="0.000001" data-ph="Numero"><p class="b-q-text">Quanto fa $\tfrac{1}{1000}$ come numero decimale?</p><div class="b-sol"><p>$0{,}001$</p></div></div>
+            <div class="b-q" data-ans="0,125" data-tol="0.0001" data-ph="Numero"><p class="b-q-text">Calcola $2^{-3}$.</p><div class="b-sol"><p>$\tfrac{1}{2^3} = \tfrac18 = 0{,}125$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Per quale $x$ $\tfrac{1}{x - 2}$ non è definito?</p><div class="b-sol"><p>Per $x = 2$ il denominatore sarebbe 0.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="Numero"><p class="b-q-text">Semplifica $\tfrac{x^2 - 9}{x - 3}$ e poi sostituisci $x = 3$.</p><div class="b-sol"><p>$\tfrac{(x - 3)(x + 3)}{x - 3} = x + 3$, quindi in $x = 3$ dà 6.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">IL CAFFÈ</div>
+            <div class="b-text"><p>La temperatura di un caffè dopo $t$ minuti è data da $T(t) = 20 + 60 \cdot 0{,}9^t$ (in °C).</p>
+                <ul><li>Calcolate $T(0)$, $T(10)$, $T(30)$, $T(60)$.</li><li>Quale temperatura il caffè non raggiunge mai? Che cosa significa il 20?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">SEMPRE PIÙ VICINO A 1</div>
+            <div class="b-text"><p>Sostituite in $f(x) = \tfrac{x^2 - 1}{x - 1}$ i valori 0,9; 0,99; 0,999 e 1,1; 1,01; 1,001.</p>
+                <ul><li>Che cosa osservate? Che cosa succede in $x = 1$?</li><li>Disegnate il grafico. Che aspetto ha nel punto 1?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA TARIFFA DEI PACCHI</div>
+            <div class="b-text"><p>Un corriere chiede 5 € fino a 2 kg, 7 € fino a 5 kg e 10 € fino a 10 kg.</p>
+                <ul><li>Disegnate il prezzo in funzione del peso.</li><li>In quali punti il grafico «salta»? Quanto costa un pacco di esattamente 2 kg?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Comportamento all’infinito" data-toc-k="1" data-toc-short="1 Infinito">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Comportamento all’infinito</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Per il caffè $T(60) = 20 + 60 \cdot 0{,}9^{60} \approx 20{,}11$. Più si aspetta, più $0{,}9^t$ diventa piccolo, e $T(t)$ si avvicina a 20 quanto si vuole.</p></div></div>
+            <div class="b-text"><p>Si scrive $\lim\limits_{t \to \infty} T(t) = 20$ (si legge: «il limite di $T(t)$ per $t$ che tende a infinito è 20»). La retta $y = 20$ si chiama <b>asintoto orizzontale</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · LIMITE ALL’INFINITO</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to \infty} f(x) = g$ significa: $f(x)$ si avvicina a $g$ quanto si vuole, purché $x$ sia abbastanza grande. Allora $y = g$ è un <b>asintoto orizzontale</b>.</p>
+                    <p>Le <b>funzioni polinomiali</b> di grado 1 o superiore si comportano per $x \to \pm\infty$ come il loro termine di grado massimo: tendono a $+\infty$ o a $-\infty$.</p>
+                    <p><b>Funzioni razionali fratte</b> $\tfrac{Z(x)}{N(x)}$: grado del numeratore minore del grado del denominatore → limite 0. Gradi uguali → quoziente dei coefficienti della potenza più alta. Grado del numeratore maggiore → nessun asintoto orizzontale.</p>
+                    <p>Inoltre: $\tfrac1x \to 0$, $\mathrm{e}^{-x} \to 0$ e $q^x \to 0$ per $0 < q < 1$, ogni volta per $x \to \infty$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Trucco:</b> dividi numeratore e denominatore per la potenza più alta del denominatore. Tutti i termini come $\tfrac{1}{x}$ o $\tfrac{3}{x^2}$ scompaiono per $x \to \infty$.</p>
+            <p class="b-note"><b>Asintoto</b> viene dal greco e significa «che non coincide».</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · PASSO DOPO PASSO VERSO IL LIMITE</div>
+        <p class="b-help" style="margin:0 0 12px">Scegli una funzione e la direzione dell’avvicinamento. A ogni passo $k$, $x$ va dieci volte più lontano verso l’esterno o dieci volte più vicino al punto.</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · GRADI UGUALI</div>
+            <div class="b-text"><p>Determina $\lim\limits_{x \to \infty} \dfrac{3x^2 + 1}{x^2 + 2}$.</p></div>
+            <div class="b-sol"><p>Dividere per $x^2$: $\dfrac{3 + \frac{1}{x^2}}{1 + \frac{2}{x^2}} \to \dfrac{3 + 0}{1 + 0} = 3$. <span class="b-res">Asintoto orizzontale $y = 3$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · POLINOMIALE</div>
+            <div class="b-text"><p>Come si comporta $f(x) = -2x^3 + 5x^2 + 1$ per $x \to \infty$ e per $x \to -\infty$?</p></div>
+            <div class="b-sol"><p>Decisivo è $-2x^3$: per $x \to \infty$, $f(x) \to -\infty$; per $x \to -\infty$, $f(x) \to +\infty$.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina per $x \to \infty$: a) $5 - \tfrac1x$ &nbsp; b) $3 \cdot 0{,}5^x$ &nbsp; c) $\dfrac{4x + 1}{2x - 3}$ &nbsp; d) $x^3 - 100x^2$</p></div>
+            <div class="b-sol"><p>a) 5 &nbsp; b) 0 &nbsp; c) 2 &nbsp; d) $+\infty$ (per $x$ grandi vince $x^3$)</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola $f(10)$, $f(100)$ e $f(1000)$ per $f(x) = \tfrac{x + 1}{x}$. A quale valore tende $f$?</p></div>
+            <div class="b-sol"><p>$1{,}1$; $1{,}01$; $1{,}001$. Limite 1, perché $\tfrac{x + 1}{x} = 1 + \tfrac1x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Esplorazione «Il caffè»: calcola $T(10)$. Dopo quanti minuti il caffè è sotto i 30 °C?</p></div>
+            <div class="b-sol"><p>$T(10) = 20 + 60 \cdot 0{,}9^{10} \approx 40{,}9$ °C. $60 \cdot 0{,}9^t < 10 \Rightarrow 0{,}9^t < \tfrac16 \Rightarrow t > \tfrac{\ln(1/6)}{\ln 0{,}9} \approx 17{,}01$, cioè dopo poco più di 17 minuti.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Indica gli asintoti orizzontali, se ce ne sono: a) $\dfrac{6x^2}{2x^2 + 5}$ &nbsp; b) $\dfrac{x + 4}{x^2 + 1}$ &nbsp; c) $\dfrac{x^3}{x + 1}$</p></div>
+            <div class="b-sol"><p>a) $y = 3$ &nbsp; b) $y = 0$ &nbsp; c) nessuno, il grado del numeratore è maggiore</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dai una funzione razionale fratta il cui grafico abbia l’asintoto orizzontale $y = -3$ e l’asintoto verticale $x = 2$.</p></div>
+            <div class="b-sol"><p>Per esempio $f(x) = \dfrac{-3x}{x - 2}$ oppure $f(x) = -3 + \dfrac{1}{x - 2}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="5" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to \infty} \dfrac{5x^2 - x}{x^2 + 4}$.</p><div class="b-sol"><p>Gradi uguali: $\tfrac51 = 5$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to \infty} \dfrac{7}{x + 1}$.</p><div class="b-sol"><p>Il denominatore cresce oltre ogni limite: 0</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to \infty} \left(4 + 2\mathrm{e}^{-x}\right)$.</p><div class="b-sol"><p>$\mathrm{e}^{-x} \to 0$, quindi 4</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Limite in un punto, continuità" data-toc-k="2" data-toc-short="2 Punto">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Limite in un punto e continuità</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = \tfrac{x^2 - 1}{x - 1}$ non è definita in $x = 1$. Ma i valori $f(0{,}999) = 1{,}999$ e $f(1{,}001) = 2{,}001$ mostrano che, da entrambi i lati, $f(x)$ si avvicina al numero 2.</p></div></div>
+            <div class="b-text"><p>Per $x \neq 1$ si ha $f(x) = \tfrac{(x - 1)(x + 1)}{x - 1} = x + 1$. Il grafico è la retta $y = x + 1$ con un <b>buco</b> in $(1, 2)$. Diverso è il caso di $g(x) = \tfrac{1}{x - 1}$: qui per $x \to 1$ i valori crescono oltre ogni limite, e la retta $x = 1$ è un <b>asintoto verticale</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · LIMITE IN UN PUNTO E CONTINUITÀ</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to a} f(x) = g$ significa: $f(x)$ si avvicina a $g$ quanto si vuole se $x$ è abbastanza vicino ad $a$, e questo <b>da sinistra e da destra</b>.</p>
+                    <p><b>Polo:</b> $|f(x)|$ cresce oltre ogni limite per $x \to a$; $x = a$ è un asintoto verticale, con o senza cambio di segno. <b>Discontinuità eliminabile:</b> $f(a)$ non è definito, ma il limite esiste.</p>
+                    <p>$f$ si dice <b>continua</b> nel punto $a$ se $f(a)$ è definito e vale $\lim\limits_{x \to a} f(x) = f(a)$. Intuitivamente: lì il grafico si può disegnare senza staccare la matita. Le funzioni polinomiali, $\mathrm{e}^x$ e $\sin x$ sono continue ovunque.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Da sinistra, da destra:</b> se da sinistra e da destra si ottengono valori diversi, in quel punto non c’è limite, per esempio nella tariffa dei pacchi.</p>
+            <p class="b-note"><b>Nel widget qui sopra</b> trovi un polo ($x \to 1$ nella prima funzione) e due discontinuità eliminabili.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURA · POLI CON E SENZA CAMBIO DI SEGNO</div>
+        <p class="b-help" style="margin:0 0 12px">Oro: $f(x) = \tfrac{1}{x - 2}$ passa in $x = 2$ da $-\infty$ a $+\infty$. Ciano: $g(x) = \tfrac{1}{(x - 2)^2}$ tende a $+\infty$ da entrambi i lati.</p>
+        <div data-widget="graph" data-fns='["1/(x-2)","1/((x-2)^2)"]' data-labels='["f","g"]' data-lat="[3.4,0.6]" data-x="-2,6" data-y="-5,6" data-h="280" data-aria="Due poli in x uguale a 2"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · DISCONTINUITÀ ELIMINABILE O POLO?</div>
+            <div class="b-text"><p>Studia $f(x) = \dfrac{x^2 - 4}{x - 2}$ e $g(x) = \dfrac{x + 2}{x - 2}$ nel punto $x = 2$.</p></div>
+            <div class="b-sol"><p>$f(x) = x + 2$ per $x \neq 2$: discontinuità eliminabile, $\lim\limits_{x \to 2} f(x) = 4$.</p>
+                <p>In $g$ il numeratore tende a 4 e il denominatore a 0: polo con cambio di segno, asintoto verticale $x = 2$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · LA TARIFFA DEI PACCHI</div>
+            <div class="b-text"><p>La funzione prezzo del corriere è continua nel punto 2 kg?</p></div>
+            <div class="b-sol"><p>Da sinistra (appena sotto 2 kg): 5 €. Da destra (appena sopra 2 kg): 7 €. I limiti destro e sinistro sono diversi: <span class="b-res">non c’è limite, quindi non è continua.</span> Il grafico salta.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina il punto in cui la funzione non è definita e di che tipo è: a) $\dfrac{3}{x + 4}$ &nbsp; b) $\dfrac{x^2 - 9}{x + 3}$ &nbsp; c) $\dfrac{1}{x^2}$</p></div>
+            <div class="b-sol"><p>a) $x = -4$: polo con cambio di segno &nbsp; b) $x = -3$: discontinuità eliminabile, limite $-6$ &nbsp; c) $x = 0$: polo senza cambio di segno</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina $\lim\limits_{x \to 2} (x^2 + 3x)$ e $\lim\limits_{x \to 0} \dfrac{x^2 + 5x}{x}$.</p></div>
+            <div class="b-sol"><p>Continua, quindi si sostituisce: $4 + 6 = 10$. Semplificare: $x + 5 \to 5$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$f(x) = \dfrac{|x|}{x}$ per $x \neq 0$. Calcola $f(0{,}1)$, $f(-0{,}1)$, $f(0{,}001)$, $f(-0{,}001)$. $f$ ha un limite in 0?</p></div>
+            <div class="b-sol"><p>Per $x > 0$ si ha $f(x) = 1$; per $x < 0$ si ha $f(x) = -1$. Da sinistra $-1$, da destra $1$: non c’è limite.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Per quale $c$ la funzione $f(x) = \begin{cases} x^2 & \text{se } x \le 1 \\ 2x + c & \text{se } x > 1 \end{cases}$ è continua nel punto 1?</p></div>
+            <div class="b-sol"><p>Da sinistra si ottiene $1^2 = 1$, da destra $2 + c$. Coincidono per $c = -1$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="6" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to 3} \dfrac{x^2 - 9}{x - 3}$.</p><div class="b-sol"><p>$x + 3 \to 6$</p></div></div>
+        <div class="b-q" data-ans="-5" data-ph="x ="><p class="b-q-text">In quale punto $f(x) = \dfrac{1}{x + 5}$ ha un polo?</p><div class="b-sol"><p>$x = -5$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Che cosa ha $f(x) = \dfrac{1}{x^2}$ nel punto 0?</p>
+            <div class="b-mc"><button>una discontinuità eliminabile</button><button>un polo con cambio di segno</button><button>un polo senza cambio di segno</button></div>
+            <div class="b-sol"><p>$x^2 > 0$ da entrambi i lati, quindi $f(x) \to +\infty$ da sinistra e da destra.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Indica tutti gli asintoti del grafico di $f(x) = \dfrac{2x - 1}{x + 1}$.</p></div>
+            <div class="b-sol"><p>Orizzontale $y = 2$, verticale $x = -1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La concentrazione di un farmaco nel sangue è $c(t) = \dfrac{8t}{t^2 + 4}$ ($t$ in ore). Determina $\lim\limits_{t \to \infty} c(t)$ e interpretalo.</p></div>
+            <div class="b-sol"><p>Grado del numeratore minore del grado del denominatore: limite 0. A lungo andare il farmaco viene eliminato completamente.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Collegare con l’11ª classe:</b> di 1 000 nuclei di iodio-131, dopo $t$ giorni ne restano $N(t) = 1000 \cdot 0{,}5^{t/8}$. Determina il limite per $t \to \infty$. Quando, secondo il calcolo, resta meno di un nucleo?</p></div>
+            <div class="b-sol"><p>Limite 0. $0{,}5^{t/8} < 0{,}001 \Rightarrow t > 8 \cdot \tfrac{\ln 0{,}001}{\ln 0{,}5} \approx 79{,}7$ giorni. Per numeri così piccoli, però, il modello fornisce ormai solo un valore medio.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$f(x) = \dfrac{x^2 + x}{x}$ non è definita in 0. Come bisogna fissare $f(0)$ perché $f$ sia continua ovunque?</p></div>
+            <div class="b-sol"><p>$f(x) = x + 1$ per $x \neq 0$, quindi $f(0) := 1$. Questo si chiama <b>prolungamento per continuità</b>.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: Achille e la tartaruga" data-toc-k="X" data-toc-short="Achille">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">INFINITI PASSI, UNA META FINITA</span></div>
+    <h2>Achille e la tartaruga</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Il filosofo greco Zenone di Elea sostenne nel V secolo a.C. che il veloce Achille non può mai raggiungere una tartaruga che ha un vantaggio su di lui. Infatti, quando lui arriva dove era lei, lei è già un po’ più avanti. Quando lui arriva lì, lei è di nuovo più avanti, e così infinite volte.</p>
+            <p>Con i limiti l’enigma si risolve. Se Achille è due volte più veloce e la tartaruga ha 1 metro di vantaggio, lui percorre uno dopo l’altro $1 + \tfrac12 + \tfrac14 + \tfrac18 + \ldots$ metri. Questi infiniti tratti hanno il <b>limite</b> 2: dopo 2 metri l’ha raggiunta.</p>
+            <p>Infiniti passi possono quindi dare insieme una distanza finita e un tempo finito. Proprio questa idea si trova in ogni limite.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> tramandato da Aristotele, Fisica, libro VI, capitolo 9 (239b).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>ALL’INFINITO</h4><p>$\lim\limits_{x \to \infty} f(x) = g$: asintoto orizzontale $y = g$.</p></div>
+        <div><p>$\tfrac{3x^2 + 1}{x^2 + 2} \to 3$ · $20 + 60 \cdot 0{,}9^t \to 20$</p></div></div>
+    <div class="b-rueck"><div><h4>RAZIONALI FRATTE</h4><p>Grado del numeratore &lt; grado del denominatore: 0 · uguali: quoziente dei coefficienti · maggiore: nessun asintoto orizzontale.</p></div>
+        <div><p>$\tfrac{6x^2}{2x^2 + 5} \to 3$</p></div></div>
+    <div class="b-rueck"><div><h4>IN UN PUNTO</h4><p>Stesso valore da sinistra e da destra. Polo: asintoto verticale. Discontinuità eliminabile: il limite esiste.</p></div>
+        <div><p>$\tfrac{x^2 - 1}{x - 1}$: discontinuità eliminabile in 1, limite 2</p></div></div>
+    <div class="b-rueck"><div><h4>CONTINUITÀ</h4><p>$\lim\limits_{x \to a} f(x) = f(a)$: si disegna senza staccare la matita.</p></div>
+        <div><p>Tariffa dei pacchi: salti, non è continua</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1</div>
+            <div class="b-q" data-ans="2" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to \infty} \dfrac{6x + 1}{3x - 2}$.</p><div class="b-sol"><p>$\tfrac63 = 2$</p></div></div>
+            <div class="b-q" data-ans="0" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to \infty} \dfrac{1}{x^3}$.</p><div class="b-sol"><p>0</p></div></div>
+            <div class="b-q" data-ans="8" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to 4} \dfrac{x^2 - 16}{x - 4}$.</p><div class="b-sol"><p>$x + 4 \to 8$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2</div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Come si comporta $f(x) = \dfrac{2x^3 + 1}{x^2 + 1}$ per $x \to \infty$?</p>
+                <div class="b-mc"><button>$f(x) \to 2$</button><button>$f(x) \to 0$</button><button>$f(x) \to \infty$</button></div>
+                <div class="b-sol"><p>Il grado del numeratore è maggiore; $f(x)$ si comporta circa come $2x$.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="x ="><p class="b-q-text">Dov’è l’asintoto verticale di $f(x) = \dfrac{x + 1}{x - 6}$?</p><div class="b-sol"><p>$x = 6$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="c ="><p class="b-q-text">$f(x) = x^2$ per $x \le 2$ e $f(x) = x + c$ per $x > 2$. Per quale $c$ $f$ è continua?</p><div class="b-sol"><p>$4 = 2 + c \Rightarrow c = 2$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-grenzwerte.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMITI</span><span class="b-lab-what">All’infinito e in un punto</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Berufliches Gymnasium, 12ª classe · Area di apprendimento 2 secondo il programma di matematica del Berufliches Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-it/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-it/analysis.js"></script>
+</body>
+</html>
