@@ -388,7 +388,7 @@
     const fm = glow.append('feMerge');
     fm.append('feMergeNode').attr('in', 'b');
     fm.append('feMergeNode').attr('in', 'SourceGraphic');
-    const gEdges = svg.append('g'), gSpokes = svg.append('g'), gCenter = svg.append('g').attr('class', 'pa-center'), gNodes = svg.append('g');
+    const gEdges = svg.append('g'), gHits = svg.append('g'), gSpokes = svg.append('g'), gCenter = svg.append('g').attr('class', 'pa-center'), gNodes = svg.append('g');
     const color = d3.scaleLinear().domain([0, 5, 10]).range([RED, ORANGE, GREEN]).interpolate(d3.interpolateRgb).clamp(true);
     const nodes = ACTORS.map((a, i) => ({ id: a.id, a: a, i: i }));
     const NODE = Object.fromEntries(nodes.map(n => [n.id, n]));
@@ -472,9 +472,14 @@
         relink(edges);
         const sel = gEdges.selectAll('path.pa-edge').data(edges, d => d.key);
         sel.exit().remove();
-        sel.enter().append('path').attr('class', 'pa-edge')
+        sel.enter().append('path').attr('class', 'pa-edge');
+        const hit = gHits.selectAll('path.pa-hit').data(edges, d => d.key);
+        hit.exit().remove();
+        hit.enter().append('path').attr('class', 'pa-hit')
             .on('click', (ev, d) => { ev.stopPropagation(); state.picked = { kind: 'edge', a: d.a, b: d.b, t: d.t }; draw(); showLive(); })
             .append('title');
+        gHits.selectAll('path.pa-hit').select('title')
+            .text(d => ACTOR[d.a].short + ' ↔ ' + ACTOR[d.b].short + ' · ' + TOPIC[d.t].label + ': ' + komma(d.v, 1) + '/10');
         gEdges.selectAll('path.pa-edge')
             .attr('stroke', d => color(d.v))
             .attr('stroke-width', d => (d.main ? 1.2 : 0.8) + d.v * (d.main ? 0.55 : 0.3))
@@ -484,8 +489,7 @@
                 if (p && p.kind === 'edge') return d.a === p.a && d.b === p.b && d.t === p.t ? 1 : 0.12;
                 return d.main ? 0.35 + d.v * 0.05 : 0.4;
             })
-            .attr('stroke-dasharray', d => TOPIC[d.t].dash)
-            .select('title').text(d => ACTOR[d.a].short + ' ↔ ' + ACTOR[d.b].short + ' · ' + TOPIC[d.t].label + ': ' + komma(d.v, 1) + '/10');
+            .attr('stroke-dasharray', d => TOPIC[d.t].dash);
 
         const spokes = ACTORS.filter(a => score(view, a.id) != null).map(a => ({ id: a.id, s: score(view, a.id), flag: view.flags && view.flags[a.id] && view.flags[a.id].treu === false }));
         const sp = gSpokes.selectAll('line.pa-spoke').data(spokes, d => d.id);
@@ -534,12 +538,14 @@
         gCenter.attr('transform', 'translate(' + CX + ',' + CY + ')');
         gNodes.selectAll('g.pa-node').attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
         gSpokes.selectAll('line.pa-spoke').attr('x1', d => NODE[d.id].x).attr('y1', d => NODE[d.id].y).attr('x2', CX).attr('y2', CY);
-        gEdges.selectAll('path.pa-edge').attr('d', d => {
-            const p = NODE[d.a], q = NODE[d.b];
-            if (!d.k) return 'M' + p.x + ',' + p.y + 'L' + q.x + ',' + q.y;
-            const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2, dx = q.x - p.x, dy = q.y - p.y, L = Math.hypot(dx, dy) || 1;
-            return 'M' + p.x + ',' + p.y + 'Q' + (mx - dy / L * d.k * 26) + ',' + (my + dx / L * d.k * 26) + ' ' + q.x + ',' + q.y;
-        });
+        gEdges.selectAll('path.pa-edge').attr('d', edgePath);
+        gHits.selectAll('path.pa-hit').attr('d', edgePath);
+    }
+    function edgePath(d) {
+        const p = NODE[d.a], q = NODE[d.b];
+        if (!d.k) return 'M' + p.x + ',' + p.y + 'L' + q.x + ',' + q.y;
+        const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2, dx = q.x - p.x, dy = q.y - p.y, L = Math.hypot(dx, dy) || 1;
+        return 'M' + p.x + ',' + p.y + 'Q' + (mx - dy / L * d.k * 26) + ',' + (my + dx / L * d.k * 26) + ' ' + q.x + ',' + q.y;
     }
 
     // ------------------------------------------------------------------------------------------------ coach box
@@ -615,7 +621,12 @@
         CyberUI.createSlider('pa-rounds', 'Runden höchstens', 1, 6, state.rounds, 1, v => { state.rounds = Math.round(v); });
         CyberUI.createSlider('pa-thr', 'Einigung ab', 4, 9, state.threshold, 1, v => { state.threshold = Math.round(v); }, 'var(--neon-blue)', v => Math.round(v) + '/10');
         document.getElementById('pa-run').addEventListener('click', () => {
-            if (!state.running) { if (!pass()) { showPassCard(true); return; } run(); }
+            if (!state.running) {
+                if (!pass()) { showPassCard(true); return; }
+                const panel = document.getElementById('side-panel');
+                if (window.innerWidth < 900 && panel && !panel.classList.contains('collapsed') && typeof window.toggleSidebar === 'function') window.toggleSidebar();
+                run();
+            }
             else { state.paused = !state.paused; status(state.paused ? 'Pause' : state.statusText.replace(/^Pause$/, 'Weiter')); }
             syncButtons();
         });
