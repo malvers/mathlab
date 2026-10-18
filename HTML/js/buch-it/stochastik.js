@@ -13,6 +13,34 @@
 window.BuchIT && BuchIT.add('stochastik', {
     word: {
         // book it-1 mathe11-it:
+        // baum-hero, baum, schnelltest, vierfeld-trainer, simulation, ziegen
+        'Baumdiagramm': 'Diagramma ad albero', 'Baumdiagramm: zwei Kugeln ohne Zurücklegen': 'Diagramma ad albero: due palline senza reimmissione',
+        'Rot': 'Rosso', 'eine rote Kugel weniger': 'una pallina rossa in meno', 'eine rote Kugel mehr': 'una pallina rossa in più',
+        'eine blaue Kugel weniger': 'una pallina blu in meno', 'eine blaue Kugel mehr': 'una pallina blu in più',
+        'Anzahl der Züge': 'Numero di estrazioni', '2 Züge': '2 estrazioni', '3 Züge': '3 estrazioni', 'Ziehen': 'Estrazione',
+        'ohne Zurücklegen': 'senza reimmissione', 'mit Zurücklegen': 'con reimmissione', 'Urne:': 'Urna:',
+        'Ereignis wählen:': 'Scegli un evento:', 'Ereignis': 'Evento', 'Baumdiagramm der Urne': 'Diagramma ad albero dell’urna', 'unmöglich': 'impossibile',
+        'beide Rot': 'entrambe rosse', 'alle Rot': 'tutte rosse', 'genau einmal Rot': 'esattamente una rossa', 'mindestens einmal Rot': 'almeno una rossa',
+        'keinmal Rot': 'nessuna rossa', 'beide gleich': 'entrambe uguali', 'alle gleich': 'tutte uguali', 'leeren': 'svuota',
+        'Anteil der Erkrankten': 'Percentuale di malati', 'Test erkennt Kranke (Sensitivität)': 'Il test riconosce i malati (sensibilità)',
+        'Test erkennt Gesunde (Spezifität)': 'Il test riconosce i sani (specificità)', 'Darstellung': 'Rappresentazione',
+        'Anzahlen (von 10 000)': 'Numeri (su 10 000)', 'Wahrscheinlichkeiten': 'Probabilità', 'Anzahlen': 'Numeri',
+        'positiv $T^+$': 'positivo $T^+$', 'negativ $T^-$': 'negativo $T^-$', 'krank $K$': 'malato $M$', 'gesund $\\overline{K}$': 'sano $\\overline{M}$',
+        'krank': 'malato', 'gesund': 'sano', 'Baumdiagramm: krank oder gesund, dann Testergebnis': 'Diagramma ad albero: malato o sano, poi il risultato del test',
+        'Neue Tafel': 'Nuova tabella', 'A und B': 'A e B', 'A und nicht B': 'A e non B', 'nicht A und B': 'non A e B', 'nicht A und nicht B': 'non A e non B',
+        'A gesamt': 'totale di A', 'nicht A gesamt': 'totale di non A', 'B gesamt': 'totale di B', 'nicht B gesamt': 'totale di non B', 'gesamt': 'totale',
+        // "Würfel" (dado / cubo) is never a global word: the simulator's button is a rule below
+        'Münze': 'Moneta', 'Zwei Würfel': 'Due dadi', 'Urne': 'Urna', 'Wappen': 'testa', 'Sechs': 'sei', 'Augensumme 7': 'somma dei punti 7',
+        'beide rot (3 rot, 2 blau, ohne Zurücklegen)': 'entrambe rosse (3 rosse, 2 blu, senza reimmissione)',
+        'mindestens eine Sechs in vier Würfen': 'almeno un sei in quattro lanci', 'Zufallsversuch': 'Esperimento aleatorio', 'Durchführen:': 'Esegui:',
+        'Relative Häufigkeit in Abhängigkeit von der Anzahl der Versuche': 'Frequenza relativa in funzione del numero di prove',
+        'VERSUCHE n': 'PROVE n', 'TREFFER': 'SUCCESSI', 'REL. HÄUFIGKEIT': 'FREQ. RELATIVA', 'WAHRSCHEINLICHKEIT': 'PROBABILITÀ',
+        'Noch kein Versuch – starte mit +1 oder +10.': 'Ancora nessuna prova – comincia con +1 o +10.',
+        'Hinter einer Tür steht ein Auto, hinter den anderen beiden je eine Ziege. Wähle eine Tür.':
+            'Dietro una porta c’è un’automobile, dietro ciascuna delle altre due una capra. Scegli una porta.',
+        'Neues Spiel': 'Nuova partita', '1000 Spiele vom Rechner spielen lassen': 'Fai giocare 1000 partite al computer',
+        'Strategie': 'Strategia', 'Spiele': 'Partite', 'Autos': 'Automobili', 'Gewinnquote': 'Percentuale di vittorie',
+        'du: bleiben': 'tu: resti', 'du: wechseln': 'tu: cambi', 'Rechner: bleiben': 'computer: resta', 'Rechner: wechseln': 'computer: cambia',
         // book it-2 mathe12-it:
         'Anzahlen (von 10 000)': 'Frequenze (su 10 000)',
         'Baumdiagramm: zwei Kugeln ohne Zurücklegen': 'Diagramma ad albero: due palline senza reimmissione',
@@ -75,6 +103,20 @@ window.BuchIT && BuchIT.add('stochastik', {
     },
     phrase: [
         // book it-1 mathe11-it:
+        // baum, schnelltest, vierfeld-trainer, simulation, ziegen
+        ['Klicke auf die Enden der Pfade (rechts im Baum) oder wähle oben ein Ereignis. ', 'Fai clic sulle estremità dei percorsi (a destra nell’albero) o scegli in alto un evento. '],
+        ['Das Buch rechnet dir die Pfadregeln vor.', 'Il libro ti mostra il calcolo con le regole dei percorsi.'],
+        ['<b>1. Pfadregel</b> (multiplizieren entlang des Pfades):', '<b>1ª regola dei percorsi</b> (moltiplicare lungo il percorso):'],
+        ['<b>2. Pfadregel</b> (Pfade addieren):', '<b>2ª regola dei percorsi</b> (sommare i percorsi):'],
+        ['aber nur <b>', 'ma solo <b>'], ['</b> davon sind wirklich krank.', '</b> di loro sono davvero malate.'],
+        ['Anteil der Kranken unter den positiv Getesteten: ', 'Percentuale di malati tra chi risulta positivo: '],
+        [' alles richtig', ' tutto corretto'], ['Ereignis: <b>', 'Evento: <b>'], ['Zuletzt: ', 'Ultimi: '],
+        ['TÜR', 'PORTA'], ['Tür', 'Porta'], ['Gewonnen – das Auto! ', 'Hai vinto l’automobile! '], ['Leider eine Ziege. ', 'Peccato, una capra. '],
+        ['Du hast gewechselt.', 'Hai cambiato.'], ['Du bist geblieben.', 'Sei rimasto.'],
+        // the module-level constants of venn (not on a BGY 11 page, but check.mjs reads them for every page)
+        ['$A$ oder $B$ (oder beide)', '$A$ o $B$ (o entrambi)'], ['$A$ und $B$', '$A$ e $B$'], ['nicht $A$ und nicht $B$', 'non $A$ e non $B$'],
+        ['nicht $A$ oder nicht $B$', 'non $A$ o non $B$'], ['weder $A$ noch $B$', 'né $A$ né $B$'], ['nicht beide', 'non entrambi'], ['nicht $A$', 'non $A$'],
+        ['gerade · Vielfaches von 3', 'pari · multiplo di 3'], ['Primzahl · größer als 6', 'primo · maggiore di 6'], ['unvereinbar', 'incompatibili'],
         // book it-2 mathe12-it:
         ['$A$ oder $B$ (oder beide)', '$A$ o $B$ (o entrambi)'],
         ['$A$ und $B$', '$A$ e $B$'],
@@ -135,6 +177,20 @@ window.BuchIT && BuchIT.add('stochastik', {
     ],
     rule: [
         // book it-1 mathe11-it:
+        // letters in the trees and in the simulator: R/B (rot/blau) stay R/B (rosso/blu), K/G (krank/gesund) → M/S (malato/sano),
+        // coin W/Z (Wappen/Zahl) → T/C (testa/croce); the chapter text lb1 uses the same letters
+        [/(font-weight:700">)K(<\/text>)/g, '$1M$2'], [/(font-weight:700">)G(<\/text>)/g, '$1S$2'],
+        [/(margin-right:10px">)W</g, '$1T<'], [/(margin-right:10px">)Z</g, '$1C<'],
+        // simulator: the dice button ("Würfel" has two meanings, so no global word)
+        [/(data-x="wuerfel">)Würfel</g, '$1Dado<'],
+        // four-field trainer: "3 von 5 richtig"
+        [/(\d+) von (\d+) richtig/g, '$1 su $2 corrette'],
+        // rapid test
+        [/Positiv getestet werden <b>([^<]*)<\/b> von 10 000 Personen – /g, (m, n) => 'Su 10 000 persone risultano positive <b>' + n + '</b>, '],
+        // goats (before the header rule "^Zu " of js/buch-it.js)
+        [/Der Moderator weiß, wo das Auto steht, und öffnet Tür (\d): eine Ziege\. Bleibst du oder wechselst du\?/g,
+            'Il presentatore sa dov’è l’automobile e apre la porta $1: una capra. Resti o cambi?'],
+        [/Bei Tür (\d) bleiben/g, 'Resto con la porta $1'], [/Zu Tür (\d) wechseln/g, 'Passo alla porta $1'],
         // book it-2 mathe12-it:
         // letters in the trees: K/G (krank/gesund) → M/S (malato/sano), coins W/Z (Wappen/Zahl) → T/C (testa/croce); R/B stay (rosso/blu)
         [/(font-weight:700">)K(<\/text>)/g, '$1M$2'], [/(font-weight:700">)G(<\/text>)/g, '$1S$2'],
