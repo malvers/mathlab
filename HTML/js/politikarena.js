@@ -11,6 +11,11 @@
 //   - two actors without a party: the treasurer (does the money add up?) and the generation retiring around 2060
 //   - the women slider: how many of the seven negotiators are women (names only - the persona says nothing else
 //     about gender, so the run shows whether the mix alone changes anything); the pilot profile is a separate switch
+//   - neutral (Doc, 19.10.2026: "weder weiblich noch männlich, nur der Aufgabe verpflichtet"): no names, no gendered
+//     words, no profile - the same prompt minus the person
+//   - the parties' own words (19.10.2026): every party agent gets the verbatim pension / migration chapters of its
+//     2025 program (politikarena-programme.js), the program check gets all of them; a click on a node shows the whole
+//     prompt, so you can see what each agent is told to want
 (function () {
     'use strict';
 
@@ -72,15 +77,44 @@
         'Überprüfungsklauseln. Keine Floskeln: konkrete Maßnahmen, Zahlen wo möglich. Antworte auf Deutsch, ' +
         'ausschließlich als JSON-Objekt ohne Text davor oder danach.';
     const CHECK_SYSTEM = 'Du prüfst in der Politik-Arena (einer Simulation) die Programmtreue. Für jede Partei: Passt ihre ' +
-        'Zustimmung zum Vorschlag zu ihrem Wahlprogramm 2025 und zu ihren roten Linien? Zu viel Nachgiebigkeit ist ein ' +
-        'Verstoß, ebenso eine Ablehnung, die das Programm nicht hergibt. Antworte auf Deutsch, ausschließlich als ' +
-        'JSON-Objekt ohne Text davor oder danach.';
+        'Zustimmung zum Vorschlag zu ihrem Wahlprogramm 2025 (Wortlaut der Kapitel unten) und zu ihren roten Linien? Zu ' +
+        'viel Nachgiebigkeit ist ein Verstoß, ebenso eine Ablehnung, die das Programm nicht hergibt. Urteile nach dem ' +
+        'Wortlaut, nicht nach deinem Bild der Partei. Antworte auf Deutsch, ausschließlich als JSON-Objekt ohne Text ' +
+        'davor oder danach.';
+
+    // ------------------------------------------------------------------------------------- the parties' own words
+    const PROG = window.PolitikArenaProgramme || null;
+    function topicNow() { return state.run ? state.run.topic : state.topic; }
+    function sectionsOf(a, topicId) {
+        if (!PROG || !a.party) return [];
+        return (topicId === 'paket' ? ['rente', 'migration'] : [topicId]).flatMap(k => (PROG[k] && PROG[k][a.id]) || []);
+    }
+    function pagesOf(s) { return s.seiten[0] === s.seiten[1] ? String(s.seiten[0]) : s.seiten[0] + '–' + s.seiten[1]; }
+    function programmeText(a, topicId) {
+        const secs = sectionsOf(a, topicId);
+        if (!secs.length) return '';
+        return 'Aus dem Wahlprogramm 2025 („' + PROG.quellen[a.id].titel + '“), wörtlich:\n\n' +
+            secs.map(s => '## ' + s.abschnitt + ' (PDF-Seite ' + pagesOf(s) + ')\n\n' + s.text).join('\n\n');
+    }
+    function wordsOf(t) { return t ? t.split(/\s+/).filter(Boolean).length : 0; }
+    // the check reads every party's chapters - one fixed block per topic, so the proxy's cache carries it from round to round
+    function checkSystem(topicId) {
+        return CHECK_SYSTEM + '\n\n' + ACTORS.filter(a => a.party).map(a => '# [' + a.id + '] ' + a.party + '\n\n' +
+            (programmeText(a, topicId) || '(kein Programmtext)')).join('\n\n');
+    }
+    // a quotation counts as verbatim when every piece between the ellipses stands in the program
+    function plain(t) { return String(t).toLowerCase().replace(/[„“”"‚‘’'«»]/g, '').replace(/[–—-]/g, '-').replace(/\s+/g, ' ').trim(); }
+    function quoteFound(q, a, topicId) {
+        const hay = plain(sectionsOf(a, topicId).map(s => s.text).join(' '));
+        const parts = plain(q).split(/\s*(?:…|\.\.\.)\s*/).filter(x => x.length >= 12);
+        return parts.length > 0 && parts.every(x => hay.includes(x));
+    }
 
     const state = {
         topic: 'rente', model: 'sonnet', rounds: 4, threshold: 6,
-        women: 5, female: new Set(), profile: 'female', noPilot: false,
+        women: 5, female: new Set(), profile: 'female', noPilot: false, neutral: false,
         running: false, paused: false, runId: 0, calls: 0, cost: 0,
-        run: null,         // { topic, positions, naehe, votes, flags, proposal, round, verdict, female, profile }
+        run: null,         // { topic, positions, naehe, votes, flags, proposal, round, verdict, female, profile, neutral, heads }
         history: [],       // snapshots for the timeline
         view: -1,          // history index on screen, -1 = live
         finals: {},        // topic id -> final closeness matrix, for "other topics"
@@ -101,28 +135,42 @@
     function femOf(a) { return state.run && state.run.female ? state.run.female.includes(a.id) : state.female.has(a.id); }
     // the profile in force: the check box "rauslassen" (Doc + Liliana, 18.10.2026: "die Diskussion ist hier groß") wins over the scope
     function profileNow() { return state.noPilot ? 'none' : state.profile; }
-    function nameOf(a) { return femOf(a) ? a.f : a.m; }
+    function neutralNow() { return state.run ? !!state.run.neutral : state.neutral; }
+    function nameOf(a) { return neutralNow() ? '' : femOf(a) ? a.f : a.m; }
     function pilotOf(a) {
+        if (neutralNow()) return false;
         const p = state.run ? state.run.profile : profileNow();
         return p === 'all' || (p === 'female' && femOf(a));
     }
-    function label(a) { return (a.party || (a.role === 'kasse' ? 'Kasse' : 'Generation 2060')) + ' (' + nameOf(a) + ')'; }
-    function persona(a) {
-        const fem = femOf(a), name = nameOf(a);
+    function label(a) {
+        const role = a.party || (a.role === 'kasse' ? 'Kasse' : 'Generation 2060');
+        return neutralNow() ? role : role + ' (' + nameOf(a) + ')';
+    }
+    // who sits there and what they are told to want - everything of the system prompt except the program text
+    function personaHead(a) {
+        const fem = femOf(a), name = nameOf(a), neutral = neutralNow();
         let who;
         if (a.party) {
-            who = 'Du bist ' + name + ', ' + (fem ? 'Verhandlerin' : 'Verhandler') + ' für ' + a.party + '. Du vertrittst die ' +
-                'Positionen von ' + a.party + ', wie sie im Wahlprogramm zur Bundestagswahl 2025 und im Grundsatzprogramm ' +
-                'stehen. Erfinde keine Positionen; wo das Programm schweigt, sag das.';
+            who = (neutral ? 'Du verhandelst für ' + a.party + '.' : 'Du bist ' + name + ', ' + (fem ? 'Verhandlerin' : 'Verhandler') + ' für ' + a.party + '.') +
+                ' Du vertrittst die Positionen von ' + a.party + ', wie sie im Wahlprogramm zur Bundestagswahl 2025 stehen. ' +
+                'Unten steht der Wortlaut der Programmkapitel zum Thema. Stütze dich darauf und belege deine Positionen mit kurzen ' +
+                'wörtlichen Zitaten daraus. Erfinde keine Positionen; wo das Programm zu einer Frage schweigt, sag das.';
         } else if (a.role === 'kasse') {
-            who = 'Du bist ' + name + ', ' + (fem ? 'Kassenwartin' : 'Kassenwart') + ' ohne Partei. Du prüfst jeden Vorschlag ' +
-                'auf Finanzierbarkeit: Was kostet er, wer zahlt, trägt er bis 2060? Ein Vorschlag ohne Finanzierung bekommt ' +
-                'von dir keine hohe Zustimmung.';
+            who = (neutral ? 'Du führst die Kasse, ohne Partei.' : 'Du bist ' + name + ', ' + (fem ? 'Kassenwartin' : 'Kassenwart') + ' ohne Partei.') +
+                ' Du prüfst jeden Vorschlag auf Finanzierbarkeit: Was kostet er, wer zahlt, trägt er bis 2060? Ein Vorschlag ' +
+                'ohne Finanzierung bekommt von dir keine hohe Zustimmung.';
         } else {
-            who = 'Du bist ' + name + ', ' + (fem ? 'Sprecherin' : 'Sprecher') + ' der Generation 2060, ohne Partei: Menschen, ' +
-                'die heute um die 30 sind und um 2060 in Rente gehen. Du achtest auf eine faire Lastenverteilung zwischen den Generationen.';
+            who = (neutral ? 'Du sprichst für die Generation 2060, ohne Partei:' : 'Du bist ' + name + ', ' + (fem ? 'Sprecherin' : 'Sprecher') + ' der Generation 2060, ohne Partei:') +
+                ' Menschen, die heute um die 30 sind und um 2060 in Rente gehen. Du achtest auf eine faire Lastenverteilung zwischen den Generationen.';
         }
         return RULES + '\n\n' + who + (pilotOf(a) ? '\n\n' + PILOT : '');
+    }
+    // the program text comes last: one fixed block per agent and topic, which the proxy caches for the whole run
+    // During and after a run: the head as it was sent (run.heads); before the first run: a preview from the panel.
+    function headOf(a) { return (state.run && state.run.heads && state.run.heads[a.id]) || personaHead(a); }
+    function persona(a) {
+        const prog = programmeText(a, topicNow());
+        return headOf(a) + (prog ? '\n\n' + prog : '');
     }
 
     // ------------------------------------------------------------------------------------------------------ the proxy
@@ -167,7 +215,10 @@
             }
             state.calls++;
             const u = j && j.usage, p = PRICE[(j && j.model) || model] || PRICE[model];
-            if (u && p) state.cost += ((u.input_tokens || 0) + (u.cache_read_input_tokens || 0) * 0.1 + (u.cache_creation_input_tokens || 0) * 1.25) * p[0] / 1e6 * EUR + (u.output_tokens || 0) * p[1] / 1e6 * EUR;
+            // cache writes: the proxy caches the system block for 1 h (2x the input price), the last message for 5 min (1.25x)
+            const cc = u && u.cache_creation, write = cc ? (cc.ephemeral_1h_input_tokens || 0) * 2 + (cc.ephemeral_5m_input_tokens || 0) * 1.25
+                : (u && u.cache_creation_input_tokens || 0) * 1.25;
+            if (u && p) state.cost += ((u.input_tokens || 0) + (u.cache_read_input_tokens || 0) * 0.1 + write) * p[0] / 1e6 * EUR + (u.output_tokens || 0) * p[1] / 1e6 * EUR;
             showCost();
             const text = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
             if (j && j.stop_reason === 'max_tokens') {
@@ -257,20 +308,25 @@
         const id = ++state.runId;
         const topic = TOPIC[state.topic];
         state.run = { topic: topic.id, positions: {}, naehe: {}, votes: {}, flags: {}, proposal: null, round: 0, verdict: null,
-            female: Array.from(state.female), profile: profileNow(), model: MODELS[state.model] };
+            female: Array.from(state.female), profile: profileNow(), neutral: state.neutral, model: MODELS[state.model] };
+        // what each agent was told, kept as sent - the lineup may change after the run, the record must not
+        state.run.heads = Object.fromEntries(ACTORS.map(a => [a.id, personaHead(a)]));
         state.history = []; state.view = -1; state.picked = null;
         state.running = true; state.paused = false;
         syncButtons(); syncTimeline(); clearLog(); renderLineup();
-        log(null, 'Thema: <b>' + esc(topic.label) + '</b> · ' + esc(MODELS[state.model]) + ' · ' + state.female.size + ' von 7 sind Frauen');
+        log(null, 'Thema: <b>' + esc(topic.label) + '</b> · ' + esc(MODELS[state.model]) + ' · ' +
+            (state.run.neutral ? 'neutral, ohne Namen und Geschlecht' : state.female.size + ' von 7 sind Frauen') +
+            (PROG ? ' · Parteien mit ihrem Programmtext' : ' · <span class="pa-err">ohne Programmtexte (Datei fehlt)</span>'));
         try {
             await gate(id);
             status('Runde 0 · Ausgangspositionen');
             await Promise.all(ACTORS.map(async a => {
                 const o = await askActor(a, 'Thema: ' + topic.frage + '\n\nLege deine Ausgangsposition dar. JSON: ' +
-                    '{"position": "2-3 Sätze", "rote_linien": ["...", "..."], "spielraum": ["..."]}', 1000);
+                    '{"position": "2-3 Sätze", "rote_linien": ["...", "..."], "spielraum": ["..."]' +
+                    (a.party ? ', "belege": ["bis zu drei kurze wörtliche Zitate aus deinem Programmtext, die deine Position tragen"]' : '') + '}', 1400);
                 alive(id);
-                state.run.positions[a.id] = o ? { position: String(o.position || ''), rote_linien: arr(o.rote_linien), spielraum: arr(o.spielraum) }
-                    : { position: '(keine Antwort)', rote_linien: [], spielraum: [] };
+                state.run.positions[a.id] = o ? { position: String(o.position || ''), rote_linien: arr(o.rote_linien), spielraum: arr(o.spielraum), belege: arr(o.belege) }
+                    : { position: '(keine Antwort)', rote_linien: [], spielraum: [], belege: [] };
                 log(a, esc(state.run.positions[a.id].position));
             }));
             snap('Ausgangspositionen');
@@ -333,7 +389,7 @@
                 await gate(id);
                 status('Runde ' + r + ' · Prüfung der Programmtreue');
                 const parties = ACTORS.filter(a => a.party);
-                const chk = await askCenter(CHECK_SYSTEM, 'Vorschlag:\n' + proposalText(state.run.proposal) + '\n\nDie Parteien:\n' +
+                const chk = await askCenter(checkSystem(topic.id), 'Vorschlag:\n' + proposalText(state.run.proposal) + '\n\nDie Parteien:\n' +
                     parties.map(a => {
                         const p = state.run.positions[a.id], v = state.run.votes[a.id];
                         return '[' + a.id + '] ' + a.party + ' – Ausgangsposition: ' + p.position + (p.rote_linien.length ? ' Rote Linien: ' + p.rote_linien.join('; ') + '.' : '') +
@@ -571,7 +627,8 @@
         if (view.proposal) h += proposalHtml(view);
         else if (!state.run) h += '<div>Sieben Verhandelnde, ein Auftrag: eine Lösung finden, ohne die eigenen roten Linien zu verraten. ' +
             'Thema wählen, START drücken. Linien zwischen den Seiten: <b>grün</b> = einig, <b>rot</b> = uneinig, dick = stark. ' +
-            'Knoten, Linien und den Vorschlag in der Mitte anklicken.</div>';
+            'Knoten, Linien und den Vorschlag in der Mitte anklicken – ein Knoten zeigt auch seinen ganzen Auftrag, die Mitte den der Moderation.</div>';
+        if (p && p.kind === 'center') h += centerPromptHtml();
         coach.innerHTML = h;
     }
     function proposalHtml(view) {
@@ -598,7 +655,37 @@
             if (v.bedingung) h += '<div class="pa-dim">' + esc(v.bedingung) + '</div>';
         }
         if (f && f.treu === false) h += '<div class="pa-err" style="margin-top:6px">Prüfung: ' + esc(f.hinweis) + '</div>';
-        coach.innerHTML = h;
+        if (p && p.belege && p.belege.length) {
+            h += '<div style="margin-top:6px"><b>Belege aus dem Programm</b></div><ul class="pa-quotes">' + p.belege.map(q => {
+                const ok = quoteFound(q, a, state.run.topic);
+                return '<li class="' + (ok ? 'pa-ok' : 'pa-warn') + '">„' + esc(q) + '“ <span class="pa-dim">' +
+                    (ok ? '✓ steht so im Programm' : '⚠ nicht wörtlich im Programmtext gefunden') + '</span></li>';
+            }).join('') + '</ul>';
+        }
+        coach.innerHTML = h + promptHtml(a);
+    }
+    // "das Wollen": the whole system prompt of an agent - the instruction open, the program text folded
+    function promptHtml(a) {
+        const t = topicNow(), secs = sectionsOf(a, t), src = PROG && PROG.quellen[a.id];
+        const when = !state.run ? 'Vorschau für den nächsten Lauf' : state.run.heads ? 'so im Lauf gesendet'
+            : 'Vorschau – der gespeicherte Lauf lief noch ohne Programmtext';
+        let h = '<details class="pa-prompt-box" open><summary>Auftrag (Prompt) · ' + esc(TOPIC[t].label) + ' · <span class="pa-dim">' + when + '</span></summary>' +
+            '<div class="pa-prompt">' + esc(headOf(a)) + '</div>';
+        if (secs.length) {
+            h += '<details class="pa-prompt-box"><summary>Dazu der Programmtext · ' + wordsOf(secs.map(s => s.text).join(' ')).toLocaleString('de-DE') + ' Wörter</summary>' +
+                '<div class="pa-dim">Quelle: <a href="' + esc(src.url) + '#page=' + secs[0].seiten[0] + '" target="_blank" rel="noopener">' + esc(src.titel) + '</a>, ' +
+                secs.map(s => esc(s.abschnitt) + ' (PDF-Seite ' + pagesOf(s) + ')').join('; ') + '</div>' +
+                '<div class="pa-prompt">' + esc(programmeText(a, t)) + '</div></details>';
+        } else if (a.party) h += '<div class="pa-err">Kein Programmtext geladen – die Agentin stützt sich nur auf das Wissen des Modells.</div>';
+        else h += '<div class="pa-dim">Ohne Partei – also auch ohne Programmtext.</div>';
+        return h + '</details>';
+    }
+    // the two roles in the middle: moderation and program check
+    function centerPromptHtml() {
+        const t = topicNow(), n = wordsOf(ACTORS.filter(a => a.party).map(a => programmeText(a, t)).join(' '));
+        return '<details class="pa-prompt-box"><summary>Auftrag der Moderation</summary><div class="pa-prompt">' + esc(MOD_SYSTEM) + '</div></details>' +
+            '<details class="pa-prompt-box"><summary>Auftrag der Programmprüfung</summary><div class="pa-prompt">' + esc(CHECK_SYSTEM) + '</div>' +
+            '<div class="pa-dim">Dazu der Programmtext aller fünf Parteien zum Thema ' + esc(TOPIC[t].label) + ' (' + n.toLocaleString('de-DE') + ' Wörter) – derselbe, den die Parteien sehen.</div></details>';
     }
     function showEdge(p, view) {
         const naehe = p.t === (state.run && state.run.topic) ? view.naehe : state.finals[p.t] || {};
@@ -616,7 +703,7 @@
             '<div class="pa-btn-grid"><button type="button" class="cyber-btn" id="pa-run">START</button>' +
             '<button type="button" class="cyber-btn" id="pa-stop">STOPP</button></div>' +
             '<div class="pa-count" id="pa-cost"></div>', '#f5c242');
-        CyberUI.createRadioGroup('pa-topic', 'Thema', TOPICS.map(t => ({ label: t.label, value: t.id })), state.topic, v => { state.topic = v; });
+        CyberUI.createRadioGroup('pa-topic', 'Thema', TOPICS.map(t => ({ label: t.label, value: t.id })), state.topic, v => { state.topic = v; if (!state.run) showLive(); });
         CyberUI.createRadioGroup('pa-model', 'Modell', [{ label: 'Sonnet – klüger', value: 'sonnet' }, { label: 'Haiku – günstiger', value: 'haiku' }], state.model, v => { state.model = v; });
         CyberUI.createSlider('pa-rounds', 'Runden höchstens', 1, 6, state.rounds, 1, v => { state.rounds = Math.round(v); });
         CyberUI.createSlider('pa-thr', 'Einigung ab', 4, 9, state.threshold, 1, v => { state.threshold = Math.round(v); }, 'var(--neon-blue)', v => Math.round(v) + '/10');
@@ -637,12 +724,22 @@
         });
 
         CyberUI.createCard('ui-container', 'Verhandlerinnen',
-            '<div id="pa-women"></div><div id="pa-nopilot"></div><div id="pa-profile"></div>' +
-            '<div class="pa-btn-grid"><button type="button" class="cyber-btn" id="pa-mix">NEU MISCHEN</button></div>' +
+            '<div id="pa-neutral"></div>' +
+            '<div id="pa-persons"><div id="pa-women"></div><div id="pa-nopilot"></div><div id="pa-profile"></div>' +
+            '<div class="pa-btn-grid"><button type="button" class="cyber-btn" id="pa-mix">NEU MISCHEN</button></div></div>' +
             '<ul class="pa-lineup" id="pa-lineup"></ul>' +
-            '<div class="pa-info">Wer eine Frau ist, wird zufällig verteilt. Der Name ist das Einzige, was sich ändert – so zeigt ein Lauf, ob die Mischung allein etwas bewirkt. ' +
+            '<div class="pa-info"><b>Neutral</b>: keine Namen, kein Geschlecht, kein Profil – nur der Auftrag und das Programm. ' +
+            'Sonst wird zufällig verteilt, wer eine Frau ist. Der Name ist das Einzige, was sich ändert – so zeigt ein Lauf, ob die Mischung allein etwas bewirkt. ' +
             'Das <b>Pilotinnen-Profil</b> ist ein eigener Schalter: selbstbewusst, durchsetzungsstark, offen, ruhig unter Druck (Persönlichkeitsstudien der US Air Force mit Pilotinnen), ' +
-            'dazu das Cockpit-Schema FOR-DEC: Fakten, Optionen, Risiken und Nutzen, Entscheidung, Ausführung, Kontrolle.</div>', '#f5c242');
+            'dazu das Cockpit-Schema FOR-DEC: Fakten, Optionen, Risiken und Nutzen, Entscheidung, Ausführung, Kontrolle. ' +
+            'Ein Klick auf eine Seite im Netz zeigt ihren ganzen Auftrag.</div>', '#f5c242');
+        CyberUI.createCheckbox('pa-neutral', 'Neutral – ohne Namen und Geschlecht', state.neutral, on => {
+            if (state.running) return;
+            state.neutral = on;
+            document.getElementById('pa-persons').hidden = on;
+            afterLineupChange();
+        });
+        document.getElementById('pa-persons').hidden = state.neutral;
         CyberUI.createSlider('pa-women', 'Frauen am Tisch', 0, 7, state.women, 1, v => { if (state.running) return; setWomen(Math.round(v)); afterLineupChange(); }, 'var(--neon-blue)', v => Math.round(v) + ' von 7');
         CyberUI.createCheckbox('pa-nopilot', 'Pilotinnen-Profil rauslassen', state.noPilot, on => {
             if (state.running) return;
@@ -699,12 +796,12 @@
         card.hidden = !on;
     }
     function afterLineupChange() {
-        if (state.run && !state.running) { state.run.female = Array.from(state.female); state.run.profile = profileNow(); }
-        renderLineup(); draw(); save();
+        if (state.run && !state.running) { state.run.female = Array.from(state.female); state.run.profile = profileNow(); state.run.neutral = state.neutral; }
+        renderLineup(); draw(); save(); showLive();
     }
     function renderLineup() {
         document.getElementById('pa-lineup').innerHTML = ACTORS.map(a => '<li><span class="pa-sw" style="background:' + a.color + '"></span>' +
-            esc(a.short) + ' · ' + esc(nameOf(a)) + (pilotOf(a) ? '<span class="pa-pilot">PILOTIN</span>' : '') + '</li>').join('');
+            esc(a.short) + (nameOf(a) ? ' · ' + esc(nameOf(a)) : '') + (pilotOf(a) ? '<span class="pa-pilot">PILOTIN</span>' : '') + '</li>').join('');
     }
     function syncButtons() {
         document.getElementById('pa-run').textContent = !state.running ? 'START' : state.paused ? 'WEITER' : 'PAUSE';
@@ -733,7 +830,7 @@
     function save() {
         try {
             localStorage.setItem(SAVE_KEY, JSON.stringify({ run: state.run, history: state.history, finals: state.finals,
-                topic: state.topic, model: state.model, women: state.women, female: Array.from(state.female), profile: state.profile, noPilot: state.noPilot,
+                topic: state.topic, model: state.model, women: state.women, female: Array.from(state.female), profile: state.profile, noPilot: state.noPilot, neutral: state.neutral,
                 calls: state.calls, cost: state.cost, statusText: state.statusText }));
         } catch (e) { dbg('save failed: ' + e.message); }
     }
@@ -742,7 +839,7 @@
         try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { s = null; }
         if (!s) return false;
         Object.assign(state, { run: s.run || null, history: s.history || [], finals: s.finals || {}, topic: s.topic || 'rente',
-            model: s.model || 'sonnet', women: s.women == null ? 5 : s.women, female: new Set(s.female || []), profile: s.profile === 'all' ? 'all' : 'female', noPilot: !!s.noPilot,
+            model: s.model || 'sonnet', women: s.women == null ? 5 : s.women, female: new Set(s.female || []), profile: s.profile === 'all' ? 'all' : 'female', noPilot: !!s.noPilot, neutral: !!s.neutral,
             calls: s.calls || 0, cost: s.cost || 0, statusText: s.statusText || '' });
         return true;
     }
