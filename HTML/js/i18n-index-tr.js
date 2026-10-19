@@ -88,7 +88,7 @@
                 exit: "Çıkış"
             },
             labs: {
-                "buecher": { title: "3 dilde {n} kitap", description: "Tüm etkileşimli ders kitaplarımız tek bir yerde: Saksonya müfredatına göre 5. sınıftan Abitur'a kadar matematik; Gymnasium, Oberschule, mesleki Gymnasium ve Fachoberschule için — her kitap Almanca, İngilizce ve İspanyolca. Keşifler, öz değerlendirme testleri, denenecek laboratuvarlar ve basılabilir bir sürüm ile." },
+                "buecher": { title: "3 dilde {n} kitap", description: "Tüm etkileşimli ders kitaplarımız tek bir yerde: Saksonya müfredatına göre 5. sınıftan Abitur'a kadar matematik; Gymnasium, Oberschule, mesleki Gymnasium ve Fachoberschule için — her kitap Almanca, İngilizce ve İspanyolca; mesleki Gymnasium'un üç kitabı İtalyanca da var. Keşifler, öz değerlendirme testleri, denenecek laboratuvarlar ve basılabilir bir sürüm ile." },
                 "fourier": { title: "Fourier Dönüşümü", description: "Matematiğin müziği. Karmaşık şekilleri harmonik dairesel salınımlara ayrıştırın." },
                 "mandelbrot-deep": { title: "Fraktallar", description: "Mandelbrot ve Julia karmaşık düzlemi ortaya koyuyor: GPU parça gölgelendirici yinelemesi aracılığıyla z↦z²+c'nin kaçış zamanı dinamikleri; Fraktal sınır boyunca uyarlanabilir yineleme derinliği ile c'nin parametrik keşfi." },
                 "atomorbitale": { title: "Atomik Orbitaller", description: "3 boyutlu küresel harmonikler Y_ℓ^m: olasılık bulutları ve kuantum sayıları." },

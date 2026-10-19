@@ -88,7 +88,7 @@
                 exit: "Afsluiten"
             },
             labs: {
-                "buecher": { title: "{n} boeken in 3 talen", description: "Al onze interactieve leerboeken op één plek: wiskunde van leerjaar 5 tot het Abitur, volgens het leerplan van Saksen, voor Gymnasium, Oberschule, beroepsgericht Gymnasium en Fachoberschule — elk boek in het Duits, Engels en Spaans. Met verkenningen, zelftests, labs om uit te proberen en een printversie." },
+                "buecher": { title: "{n} boeken in 3 talen", description: "Al onze interactieve leerboeken op één plek: wiskunde van leerjaar 5 tot het Abitur, volgens het leerplan van Saksen, voor Gymnasium, Oberschule, beroepsgericht Gymnasium en Fachoberschule — elk boek in het Duits, Engels en Spaans, de drie van het beroepsgerichte Gymnasium ook in het Italiaans. Met verkenningen, zelftests, labs om uit te proberen en een printversie." },
                 "fourier": { title: "Fouriertransformatie", description: "De muziek van de wiskunde. Ontbind complexe vormen in harmonische cirkelbewegingen." },
                 "mandelbrot-deep": { title: "Fractalen", description: "Mandelbrot- en Juliaverzamelingen in het complexe vlak: escape-time-dynamica van z↦z²+c via GPU fragment-shaderiteratie; parametrische verkenning van c met adaptieve iteratiediepte langs de fractale rand." },
                 "atomorbitale": { title: "Atoomorbitalen", description: "Bolfuncties Y_ℓ^m in 3D: waarschijnlijkheidswolken en kwantumgetallen." },

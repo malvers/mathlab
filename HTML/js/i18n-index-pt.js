@@ -88,7 +88,7 @@
                 exit: "Sair"
             },
             labs: {
-                "buecher": { title: "{n} livros em 3 idiomas", description: "Todos os nossos livros didáticos interativos em um só lugar: matemática do 5º ano até o Abitur, segundo o currículo da Saxônia, para Gymnasium, Oberschule, Gymnasium profissional e Fachoberschule — cada livro em alemão, inglês e espanhol. Com explorações, autoavaliações, laboratórios para experimentar e uma edição para impressão." },
+                "buecher": { title: "{n} livros em 3 idiomas", description: "Todos os nossos livros didáticos interativos em um só lugar: matemática do 5º ano até o Abitur, segundo o currículo da Saxônia, para Gymnasium, Oberschule, Gymnasium profissional e Fachoberschule — cada livro em alemão, inglês e espanhol, e os três do Gymnasium profissional também em italiano. Com explorações, autoavaliações, laboratórios para experimentar e uma edição para impressão." },
                 "fourier": { title: "Transformada de Fourier", description: "A música da matemática. Decomponha formas complexas em oscilações." },
                 "mandelbrot-deep": { title: "Fractais", description: "Conjuntos de Mandelbrot e Julia no plano complexo: dinâmica de tempo de escape de z↦z²+c por iteração em shader de fragmentos na GPU; exploração paramétrica de c com profundidade adaptativa na fronteira fractal." },
                 "atomorbitale": { title: "Orbitais Atômicos", description: "Harmônicos esféricos Y_ℓ^m em 3D." },

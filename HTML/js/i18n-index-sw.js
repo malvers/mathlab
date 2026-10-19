@@ -88,7 +88,7 @@
                 exit: "Toka"
             },
             labs: {
-                "buecher": { title: "Vitabu {n} katika lugha 3", description: "Vitabu vyetu vyote vya kiada shirikishi mahali pamoja: hisabati kuanzia darasa la 5 hadi Abitur, kufuata mtaala wa Saxony, kwa Gymnasium, Oberschule, Gymnasium ya ufundi na Fachoberschule — kila kitabu kwa Kijerumani, Kiingereza na Kihispania. Pamoja na uchunguzi, majaribio binafsi, maabara za kujaribu na toleo la kuchapisha." },
+                "buecher": { title: "Vitabu {n} katika lugha 3", description: "Vitabu vyetu vyote vya kiada shirikishi mahali pamoja: hisabati kuanzia darasa la 5 hadi Abitur, kufuata mtaala wa Saxony, kwa Gymnasium, Oberschule, Gymnasium ya ufundi na Fachoberschule — kila kitabu kwa Kijerumani, Kiingereza na Kihispania, na vitabu vitatu vya Gymnasium ya ufundi pia kwa Kiitaliano. Pamoja na uchunguzi, majaribio binafsi, maabara za kujaribu na toleo la kuchapisha." },
                 "fourier": { title: "Mabadiliko ya Fourier", description: "Muziki wa hisabati. Kutenganisha maumbo changamano katika oscillations ya mduara wa harmonic." },
                 "mandelbrot-deep": { title: "Fractals", description: "Mandelbrot na Julia wanaweka katika ndege changamano: mienendo ya wakati wa kutoroka ya z↦z²+c kupitia urudiaji wa kipande cha kishamiri cha GPU; uchunguzi wa parametric wa c na kina cha kurudia badilika kando ya mpaka wa fractal." },
                 "atomorbitale": { title: "Obiti za Atomiki", description: "Ulinganifu wa spherical Y_ℓ^m katika 3D: mawingu ya uwezekano na nambari za quantum." },
