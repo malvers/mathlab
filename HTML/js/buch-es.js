@@ -57,8 +57,9 @@
     const PHRASE = [
         // used by more than one module: graphquiz (funktionen), vierfeld-trainer (stochastik)
         ['richtig', 'correcto'],
-        // header
-        ['Fehler<br>melden', 'Informar<br>de un error'], ['Zur Markierung in ', 'Sobre la selección en '], ['Deine Frage an ', 'Tu pregunta a ']
+        // header; Solita's invitations "Frag Solita zu dieser Stelle im Buch" (the rule below turns "Frag Solita" first)
+        ['Fehler<br>melden', 'Informar<br>de un error'], ['Zur Markierung in ', 'Sobre la selección en '], ['Deine Frage an ', 'Tu pregunta a '],
+        [' zu dieser Stelle im Buch', ' sobre este punto del libro'], [' zu dieser Stelle', ' sobre este punto'], [' zur Markierung', ' sobre la selección']
     ];
 
     // ---------- word order and notation ----------
