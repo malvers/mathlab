@@ -20,9 +20,20 @@
     'use strict';
 
     const AI_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
-    const MODELS = { haiku: 'claude-haiku-4-5', sonnet: 'claude-sonnet-4-6' };
+    // DeepSeek has its own password-gated proxy (supabase/functions/deepseek, as in Solita) - it opens only for
+    // Doc's own password, not for the pupils' one. One model for the whole table, so a run compares like with like.
+    const DS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/deepseek';
+    const MODELS = {
+        sonnet: { id: 'claude-sonnet-4-6', url: AI_URL, label: 'Sonnet – klüger' },
+        haiku: { id: 'claude-haiku-4-5', url: AI_URL, label: 'Haiku – günstiger' },
+        dspro: { id: 'deepseek-v4-pro', url: DS_URL, ds: true, label: 'DeepSeek Pro' },
+        dsflash: { id: 'deepseek-flash', url: DS_URL, ds: true, label: 'DeepSeek Flash – am günstigsten' },
+    };
     // $ per million tokens [input, output] and the euro rate - the figures solita-frage.js uses
     const PRICE = { 'claude-haiku-4-5': [1, 5], 'claude-sonnet-4-6': [3, 15] };
+    // DeepSeek [input from its cache, input, output] at peak hours, half of that off-peak - as solita-frage.js
+    // (api-docs.deepseek.com/quick_start/pricing, read 30.09.2026; peak is 01-04 and 06-10 UTC, Monday to Friday)
+    const DS_RATE = { flash: [0.006, 0.30, 1.20], pro: [0.044, 1.32, 3.96] };
     const EUR = 0.92;
     const SAVE_KEY = 'politikarena:last';
     const RED = 'rgb(176, 36, 24)', ORANGE = 'rgb(245, 194, 66)', GREEN = 'rgb(121, 158, 49)';
@@ -180,8 +191,8 @@
         return String(t || '').normalize('NFC').replace(/[\u00AD\u200B-\u200F\u2028-\u202E\u2060-\u2064\uFEFF\r\n\t]/g, '')
             .replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, '');
     }
-    function post(body, pw) {
-        return fetch(AI_URL, {
+    function post(body, pw, url) {
+        return fetch(url || AI_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-App-Pass': pw },
             body: JSON.stringify(Object.assign({ pass: pw }, body)),
@@ -193,35 +204,51 @@
         if (s < 0 || e <= s) return null;
         try { return JSON.parse(t.slice(s, e + 1)); } catch (x) { return null; }
     }
+    // what one answer cost: Claude's usage (input, cache read 0.1x, cache writes - the proxy caches the system block
+    // for 1 h at 2x, the last message for 5 min at 1.25x) or DeepSeek's (prompt tokens include its cache hits)
+    function costOf(m, j) {
+        const u = j && j.usage;
+        if (!u) return 0;
+        if (m.ds) {
+            const d = new Date(), h = d.getUTCHours(), day = d.getUTCDay();
+            const peak = day >= 1 && day <= 5 && ((h >= 1 && h < 4) || (h >= 6 && h < 10));
+            const r = DS_RATE[/pro/i.test((j && j.model) || m.id) ? 'pro' : 'flash'], hit = u.prompt_cache_hit_tokens || 0;
+            return (((u.prompt_tokens || 0) - hit) * r[1] + hit * r[0] + (u.completion_tokens || 0) * r[2]) * (peak ? 1 : 0.5) / 1e6 * EUR;
+        }
+        const p = PRICE[(j && j.model) || m.id] || PRICE[m.id];
+        if (!p) return 0;
+        const cc = u.cache_creation, write = cc ? (cc.ephemeral_1h_input_tokens || 0) * 2 + (cc.ephemeral_5m_input_tokens || 0) * 1.25
+            : (u.cache_creation_input_tokens || 0) * 1.25;
+        return ((u.input_tokens || 0) + (u.cache_read_input_tokens || 0) * 0.1 + write) * p[0] / 1e6 * EUR + (u.output_tokens || 0) * p[1] / 1e6 * EUR;
+    }
     // One agent call. Problems are told in the protocol, not only in DEBUG (Doc, 18.10.2026: "Kann man das etwas
     // transparenter machen?" - the moderation had run into its token limit twice, cut off mid-JSON). A cut-off
     // answer is asked again with twice the room, a busy server again after a pause.
-    const MAX_OUT = 4096;                      // the proxy's own cap (supabase/functions/claude)
+    const MAX_OUT = 4096;                      // the Claude proxy's own cap (supabase/functions/claude), kept for DeepSeek too
     let lastProblem = '';
-    async function claude(system, user, maxTokens, who) {
-        const model = MODELS[state.model];
+    async function ask(system, user, maxTokens, who) {
+        const m = MODELS[(state.run && state.run.modelKey) || state.model];
         let max = maxTokens;
         for (let attempt = 1; attempt <= 3; attempt++) {
             let r, j;
             try {
-                r = await post({ model: model, max_tokens: max, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }, pass());
+                // DeepSeek thinks by default - slower and dearer; off, like Claude here
+                const body = { model: m.id, max_tokens: max, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] };
+                if (m.ds) body.thinking = false;
+                r = await post(body, pass(), m.url);
                 j = await r.json().catch(() => ({}));
             } catch (e) { problem(who, 'kein Netz (' + e.message + ')', attempt); await sleep(1500 * attempt); continue; }
-            if (r.status === 401) { const err = new Error('auth'); err.auth = true; err.reason = j && j.reason; throw err; }
+            if (r.status === 401) { const err = new Error('auth'); err.auth = true; err.ds = !!m.ds; err.reason = j && j.reason; throw err; }
             if (!r.ok) {
                 problem(who, 'Fehler ' + r.status + ': ' + String((j && (j.error && (j.error.message || j.error))) || 'ohne Meldung'), attempt);
                 await sleep(2500 * attempt);
                 continue;
             }
             state.calls++;
-            const u = j && j.usage, p = PRICE[(j && j.model) || model] || PRICE[model];
-            // cache writes: the proxy caches the system block for 1 h (2x the input price), the last message for 5 min (1.25x)
-            const cc = u && u.cache_creation, write = cc ? (cc.ephemeral_1h_input_tokens || 0) * 2 + (cc.ephemeral_5m_input_tokens || 0) * 1.25
-                : (u && u.cache_creation_input_tokens || 0) * 1.25;
-            if (u && p) state.cost += ((u.input_tokens || 0) + (u.cache_read_input_tokens || 0) * 0.1 + write) * p[0] / 1e6 * EUR + (u.output_tokens || 0) * p[1] / 1e6 * EUR;
+            state.cost += costOf(m, j);
             showCost();
-            const text = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-            if (j && j.stop_reason === 'max_tokens') {
+            const c0 = j && j.choices && j.choices[0], text = c0 && c0.message && c0.message.content;
+            if (m.ds ? c0 && c0.finish_reason === 'length' : j && j.stop_reason === 'max_tokens') {
                 const more = Math.min(MAX_OUT, max * 2);
                 problem(who, 'Antwort bei ' + max + ' Tokens abgeschnitten' + (more > max ? ' – neuer Versuch mit ' + more : ''), attempt);
                 if (more === max) break;
@@ -241,11 +268,11 @@
     }
     async function askActor(a, user, max) {
         state.talking.add(a.id); draw();
-        try { return await claude(persona(a), user, max, a.id); } finally { state.talking.delete(a.id); draw(); }
+        try { return await ask(persona(a), user, max, a.id); } finally { state.talking.delete(a.id); draw(); }
     }
     async function askCenter(system, user, max) {
         state.talking.add('center'); draw();
-        try { return await claude(system, user, max, 'center'); } finally { state.talking.delete('center'); draw(); }
+        try { return await ask(system, user, max, 'center'); } finally { state.talking.delete('center'); draw(); }
     }
 
     // keys in the agents' JSON: our ids, but a model may write "SPD" or "Grüne" - map those back
@@ -308,13 +335,13 @@
         const id = ++state.runId;
         const topic = TOPIC[state.topic];
         state.run = { topic: topic.id, positions: {}, naehe: {}, votes: {}, flags: {}, proposal: null, round: 0, verdict: null,
-            female: Array.from(state.female), profile: profileNow(), neutral: state.neutral, model: MODELS[state.model] };
+            female: Array.from(state.female), profile: profileNow(), neutral: state.neutral, modelKey: state.model, model: MODELS[state.model].id };
         // what each agent was told, kept as sent - the lineup may change after the run, the record must not
         state.run.heads = Object.fromEntries(ACTORS.map(a => [a.id, personaHead(a)]));
         state.history = []; state.view = -1; state.picked = null;
         state.running = true; state.paused = false;
         syncButtons(); syncTimeline(); clearLog(); renderLineup();
-        log(null, 'Thema: <b>' + esc(topic.label) + '</b> · ' + esc(MODELS[state.model]) + ' · ' +
+        log(null, 'Thema: <b>' + esc(topic.label) + '</b> · ' + esc(MODELS[state.model].id) + ' · ' +
             (state.run.neutral ? 'neutral, ohne Namen und Geschlecht' : state.female.size + ' von 7 sind Frauen') +
             (PROG ? ' · Parteien mit ihrem Programmtext' : ' · <span class="pa-err">ohne Programmtexte (Datei fehlt)</span>'));
         try {
@@ -419,7 +446,10 @@
             save();
         } catch (e) {
             if (e.message === 'stopped') return;
-            if (e.auth) {
+            if (e.auth && e.ds) {
+                // the password itself is fine for Claude - DeepSeek opens only for Doc's own one, so keep it
+                status('DeepSeek gibt es nur mit Docs Passwort – mit diesem Passwort bitte Sonnet oder Haiku wählen.');
+            } else if (e.auth) {
                 status(e.reason === 'locked' ? 'Das Passwort ist richtig, aber gerade gesperrt.' : 'Das Passwort gilt nicht mehr – bitte neu eingeben.');
                 try { localStorage.removeItem('dev_access'); } catch (x) { }
                 showPassCard(true);
@@ -704,7 +734,7 @@
             '<button type="button" class="cyber-btn" id="pa-stop">STOPP</button></div>' +
             '<div class="pa-count" id="pa-cost"></div>', '#f5c242');
         CyberUI.createRadioGroup('pa-topic', 'Thema', TOPICS.map(t => ({ label: t.label, value: t.id })), state.topic, v => { state.topic = v; if (!state.run) showLive(); });
-        CyberUI.createRadioGroup('pa-model', 'Modell', [{ label: 'Sonnet – klüger', value: 'sonnet' }, { label: 'Haiku – günstiger', value: 'haiku' }], state.model, v => { state.model = v; });
+        CyberUI.createRadioGroup('pa-model', 'Modell', Object.keys(MODELS).map(k => ({ label: MODELS[k].label, value: k })), state.model, v => { state.model = v; });
         CyberUI.createSlider('pa-rounds', 'Runden höchstens', 1, 6, state.rounds, 1, v => { state.rounds = Math.round(v); });
         CyberUI.createSlider('pa-thr', 'Einigung ab', 4, 9, state.threshold, 1, v => { state.threshold = Math.round(v); }, 'var(--neon-blue)', v => Math.round(v) + '/10');
         document.getElementById('pa-run').addEventListener('click', () => {
@@ -839,7 +869,7 @@
         try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { s = null; }
         if (!s) return false;
         Object.assign(state, { run: s.run || null, history: s.history || [], finals: s.finals || {}, topic: s.topic || 'rente',
-            model: s.model || 'sonnet', women: s.women == null ? 5 : s.women, female: new Set(s.female || []), profile: s.profile === 'all' ? 'all' : 'female', noPilot: !!s.noPilot, neutral: !!s.neutral,
+            model: MODELS[s.model] ? s.model : 'sonnet', women: s.women == null ? 5 : s.women, female: new Set(s.female || []), profile: s.profile === 'all' ? 'all' : 'female', noPilot: !!s.noPilot, neutral: !!s.neutral,
             calls: s.calls || 0, cost: s.cost || 0, statusText: s.statusText || '' });
         return true;
     }
