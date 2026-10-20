@@ -83,6 +83,8 @@ window.BuchIT && BuchIT.add('funktionen', {
         '$g$: Anstieg $m_1$': '$g$: pendenza $m_1$', '$g$: Achsenabschnitt $n_1$': '$g$: intercetta $n_1$',
         '$h$: Anstieg $m_2$': '$h$: pendenza $m_2$', '$h$: Achsenabschnitt $n_2$': '$h$: intercetta $n_2$',
         'Zwei Geraden und ihre Lage zueinander': 'Due rette e la loro posizione reciproca',
+        // parabelschar
+        'Parameter': 'Parametro', 'Schar von Parabeln mit einem hervorgehobenen Mitglied': 'Famiglia di parabole con un membro evidenziato',
 
         // book it-5 mathefos12-it:
 
@@ -195,6 +197,8 @@ window.BuchIT && BuchIT.add('funktionen', {
         ['Verschiedene Anstiege: Die Geraden <b>schneiden</b> sich.', 'Pendenze diverse: le rette si <b>intersecano</b>.'],
         ['Gleichsetzen: $', 'Uguagliando: $'], ['$ ergibt $x = ', '$ dà $x = '], ['$, also ', '$, quindi '], [' · Schnittwinkel $', ' · angolo di intersezione $'],
         ['parallel zur $x$-Achse', 'parallela all’asse $x$'],
+        // parabelschar
+        ['$ für $', '$ per $'], ['Nullstellen: $', 'Zeri: $'], [' · Scheitel $(', ' · vertice $('],
 
         // book it-5 mathefos12-it:
 
