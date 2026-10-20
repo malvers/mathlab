@@ -32,7 +32,7 @@ window.BUCH = {
         { file: 'lb9-1.html', lb: 'Area di apprendimento 9', k: '9.1', title: 'Distanze estreme, angoli e simmetrie',
           sub: 'Funzione distanza, punto e curva, angolo visuale massimo, simmetria rispetto a un punto e a un piano, cammini minimi', when: 'Febbraio · marzo', ustd: 10 },
         { file: 'lb9-2.html', lb: 'Area di apprendimento 9', k: '9.2', title: 'Aree, densità, famiglie e luoghi geometrici',
-          sub: 'Aree in tre modi, regioni illimitate, densità e probabilità, famiglie di funzioni, luoghi geometrici, fasci di rette e di piani', when: 'Marzo', ustd: 10 },
+          sub: 'Aree in tre modi, regioni illimitate, densità e probabilità, famiglie di funzioni, luoghi geometrici, famiglie di rette e di piani', when: 'Marzo', ustd: 10 },
         { file: 'abi.html', lb: 'Abitur', k: 'A', title: 'Pronti per l’Abitur',
           sub: 'Liste di controllo, errori tipici ed esercizi in formato Abitur del Leistungskurs dell’11ª e della 12ª classe', when: 'Aprile', ustd: 0 }
     ]
