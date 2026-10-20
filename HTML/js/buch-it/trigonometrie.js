@@ -50,7 +50,7 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         'Einheitskreis mit Tangente an der Stelle 1': 'Circonferenza goniometrica con la retta tangente nel punto 1', 'Graph der Tangensfunktion mit Polstellen': 'Grafico della funzione tangente con i poli',
         // pyramidekegel
         'Quadratische Pyramide': 'Piramide quadrata', 'Kegel': 'Cono', 'Körper': 'Solido', 'Höhe – Seitenhöhe': 'Altezza – apotema', 'Höhe – Seitenkante': 'Altezza – spigolo laterale',
-        'Höhe – Mantellinie': 'Altezza – apotema del cono', 'Rechtwinkliges Dreieck': 'Triangolo rettangolo', 'Grundkante $a$': 'Spigolo di base $a$', 'Radius $r$': 'Raggio $r$', 'Höhe $h$': 'Altezza $h$',
+        'Höhe – Mantellinie': 'Altezza – generatrice', 'Rechtwinkliges Dreieck': 'Triangolo rettangolo', 'Grundkante $a$': 'Spigolo di base $a$', 'Radius $r$': 'Raggio $r$', 'Höhe $h$': 'Altezza $h$',
 
         // book it-19 mathe9-it:
 
@@ -97,7 +97,7 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         ['Schrägbild einer quadratischen Pyramide', 'Assonometria cavaliera di una piramide quadrata'], ['Schrägbild eines Kegels', 'Assonometria cavaliera di un cono'], [' mit einem rechtwinkligen Dreieck', ' con un triangolo rettangolo'],
         ['Seitenhöhe $h_a', 'Apotema $h_a'], ['Neigungswinkel der Seitenfläche:', 'Angolo di inclinazione della faccia laterale:'],
         ['Seitenkante $s', 'Spigolo laterale $s'], ['$ mit der Diagonale $d', '$ con la diagonale $d'], ['Neigungswinkel der Seitenkante:', 'Angolo di inclinazione dello spigolo laterale:'],
-        ['$ · Oberfläche $O', '$ · superficie totale $O'], ['Mantellinie $s', 'Apotema $s'],
+        ['$ · Oberfläche $O', '$ · superficie totale $O'], ['Mantellinie $s', 'Generatrice $s'], ['Volumen $V', 'Volume $V'],
         ['halber Öffnungswinkel:', 'metà dell’angolo di apertura:'], ['$ · Öffnungswinkel $2', '$ · angolo di apertura $2'], ['$ · Mantel $M', '$ · superficie laterale $M'],
 
         // book it-19 mathe9-it:
