@@ -48,6 +48,8 @@ window.BuchIT && BuchIT.add('vektoren', {
         'Höhe $h$': 'Altezza $h$',
         'Verschiebung der Spitze in $x$': 'Spostamento del vertice in $x$',
         // book it-5 mathefos12-it:
+        // kreuzprodukt
+        'zwei Vektoren': 'due vettori', 'Dachfläche': 'falda del tetto', 'in der x-y-Ebene': 'nel piano x-y', 'Dreieck': 'Triangolo', 'Welche Fläche?': 'Quale superficie?',
 
         // book it-6 mathegy11-it:
 
@@ -122,6 +124,12 @@ window.BuchIT && BuchIT.add('vektoren', {
         [' · Mantel (4 Parallelogramme, je $', ' · superficie laterale (4 parallelogrammi, ciascuno $'],
         [' (Prinzip von Cavalieri: auch schief)', ' (principio di Cavalieri: anche obliquo)'],
         // book it-5 mathefos12-it:
+        // kreuzprodukt
+        ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
+            '$\\vec{u}$ e $\\vec{v}$ sono paralleli: il prodotto vettoriale è il vettore nullo e non generano alcuna superficie.'],
+        ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$: il prodotto vettoriale è perpendicolare a entrambi i vettori'],
+        [' (im Bild verkürzt gezeichnet)', ' (nella figura disegnato più corto)'], ['Dreieck: $A = ', 'Triangolo: $A = '], ['Parallelogramm: $A = ', 'Parallelogramma: $A = '],
+        [' Flächeneinheiten', ' unità di superficie'], ['$ und $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = ', '$ e $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = '],
 
         // book it-6 mathegy11-it:
 
