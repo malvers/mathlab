@@ -21,6 +21,9 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-13 mathegy8-it:
 
         // book it-14 mathegy9-it:
+        // titelbildgy9
+        'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
+            'Copertina: triangolo rettangolo con i quadrati sui suoi lati, un rettangolo aureo con spirale, un cerchio tra due esagoni e una parabola',
 
         // book it-16 mathe6-it:
 
