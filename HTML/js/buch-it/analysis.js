@@ -92,6 +92,11 @@ window.BuchIT && BuchIT.add('analysis', {
         // the slider value after "Capitalizzazione" (short, so the row fits at 390 px); in the sentence below the adverbs of the phrases
         'jährlich': 'annuale', 'halbjährlich': 'semestrale', 'vierteljährlich': 'trimestrale', 'monatlich': 'mensile', 'wöchentlich': 'settimanale',
         'täglich': 'giornaliera', 'stündlich': 'oraria', 'minütlich': 'al minuto',
+        // bruchfunktion: the same entries as the it-6 block (GY 11, branch it-mathegy11), so the books agree - keep one copy when merging
+        'Polstelle': 'Polo', 'Lücke': 'Buco', 'ohne Vorzeichenwechsel': 'Senza cambio di segno', 'schiefe Asymptote': 'Asintoto obliquo',
+        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Grafico di una funzione razionale fratta con poli, buchi e asintoti',
+        'Zähler:': 'Numeratore:', 'Nenner:': 'Denominatore:', 'Grad des Zählers': 'Grado del numeratore', 'Grad des Nenners': 'Grado del denominatore',
+        'Grad 0': 'Grado 0', 'Grad 1': 'Grado 1', 'Grad 2': 'Grado 2', 'Faktor $k$': 'Fattore $k$', 'Beispiele:': 'Esempi:',
 
         // book it-6 mathegy11-it:
         // bruchfunktion
@@ -204,6 +209,19 @@ window.BuchIT && BuchIT.add('analysis', {
         ['täglich', 'giornalmente'], ['stündlich', 'ogni ora'], ['minütlich', 'ogni minuto'],
         ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
             'Più spesso si accreditano gli interessi, più il saldo si avvicina a $\\mathrm{e} = 2{,}718281\\ldots$, ma senza mai superarlo: $'],
+        // bruchfunktion: as in the it-6 block, except "Zählergrad um 1 größer" (it-6: "maggiore di 1" would mean "greater than 1")
+        ['Nullstelle des Zählers $', 'Zero del numeratore $'], ['Nullstelle des Nenners $', 'Zero del denominatore $'],
+        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Dopo la semplificazione al denominatore non resta più nessuna $x$: il grafico è '],
+        ['eine waagerechte Gerade', 'una retta orizzontale'], ['eine Gerade', 'una retta'],
+        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grado del numeratore minore del grado del denominatore: asintoto orizzontale $y = 0$, l’asse $x$.'],
+        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Grado del numeratore uguale al grado del denominatore: asintoto orizzontale $y = '],
+        ['$ (Quotient der Leitkoeffizienten).', '$ (quoziente dei coefficienti direttivi).'],
+        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grado del numeratore più alto di 1: la divisione tra polinomi dà $f(x) = '],
+        ['$, schiefe Asymptote $y = ', '$, asintoto obliquo $y = '],
+        ['Kürzen: $f(x) = ', 'Semplificando: $f(x) = '], ['$ für $x \\neq ', '$ per $x \\neq '],
+        ['$ · hebbare Lücken', '$ · buchi (discontinuità eliminabili)'], ['$ · hebbare Lücke', '$ · buco (discontinuità eliminabile)'],
+        ['Nullstellen: ', 'Zeri: '], [' · Polstellen: ', ' · poli: '],
+        [' mit Vorzeichenwechsel', ' con cambio di segno'], [' ohne Vorzeichenwechsel', ' senza cambio di segno'], [' (senkrechte Asymptote)', ' (asintoto verticale)'],
 
         // book it-6 mathegy11-it:
         // bruchfunktion
@@ -239,6 +257,10 @@ window.BuchIT && BuchIT.add('analysis', {
         // book it-5 mathefos12-it:
         // efunktion: "1-mal $\tfrac…" is "1 volta" (the pieces make "volte" of every other number)
         [/(?<![\d.])1-mal \$/g, '1 volta $$'],
+        // bruchfunktion (as in the it-6 block): "… mit einem Loch.", "Nullstellen: keine", and the set of the domain "\{1; -2\}" → "\{1, -2\}" when no number has a decimal comma
+        [/ mit (Löchern|einem Loch)\./g, (m, w) => ' con ' + (w === 'Löchern' ? 'dei buchi' : 'un buco') + '.'],
+        [/Nullstellen: keine(?![a-zäöüß])/g, 'Zeri: nessuno'], [/Polstellen: keine(?![a-zäöüß])/g, 'poli: nessuno'],
+        [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => /,/.test(b) ? m : a + b.replace(/; /g, ', ') + c],
 
         // book it-6 mathegy11-it:
         // bruchfunktion: "… mit einem Loch.", "Nullstellen: keine", and the set of the domain "\{1; -2\}" → "\{1, -2\}" when no number has a decimal comma
