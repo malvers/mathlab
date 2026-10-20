@@ -124,6 +124,10 @@ window.BuchIT && BuchIT.add('gy5', {
         'Beim Multiplizieren mit 10 rückt jede Ziffer eine Stelle nach links, beim Dividieren nach rechts. Man sagt kurz: Das Komma wandert.':
             'Moltiplicando per 10 ogni cifra si sposta di un posto verso sinistra, dividendo verso destra. In breve si dice: la virgola si sposta.',
         'nicht möglich: Die Ziffern würden aus der Tafel fallen.': 'non è possibile: le cifre uscirebbero dalla tabella.',
+        // mittel5
+        'Ausgleichen': 'Pareggia', 'Neue Werte': 'Nuovi valori', 'Mittelwert': 'Media', 'Säulen mit dem Mittelwert': 'Colonne con la media',
+        'Zieh die Säulen höher oder niedriger. „Ausgleichen“ verteilt alles gerecht: Jede Säule bekommt gleich viel.':
+            'Trascina le colonne più in alto o più in basso. «Pareggia» distribuisce tutto in modo equo: ogni colonna riceve la stessa quantità.',
 
     },
     phrase: [
@@ -226,6 +230,9 @@ window.BuchIT && BuchIT.add('gy5', {
         // bruchstrahl5
         ['Jetzt vergleicht man nur die Zähler: ', 'Ora si confrontano solo i numeratori: '],
         ['Als Dezimalzahlen: ', 'Come numeri decimali: '], ['. Weiter rechts auf dem Zahlenstrahl heißt größer.', '. Più a destra sulla retta numerica vuol dire più grande.'],
+        // mittel5
+        ['Mittelwert', 'Media'], ['Summe: ', 'Somma: '], ['Geteilt durch die Anzahl: ', 'Diviso per il numero dei valori: '],
+        ['Was über der Linie war (gestrichelt grau), füllt genau die Lücken (gelb).', 'Ciò che stava sopra la linea (grigio tratteggiato) riempie esattamente i vuoti (giallo).'],
 
     ],
     rule: [

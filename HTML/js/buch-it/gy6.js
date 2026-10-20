@@ -176,6 +176,18 @@ window.BuchIT && BuchIT.add('gy6', {
         'Grün': 'Verde',
         'Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.': 'Numeratore per numeratore, denominatore per denominatore. Semplificare prima fa risparmiare lavoro.',
         'Durch einen Bruch teilt man, indem man mit seinem Kehrwert malnimmt.': 'Per dividere per una frazione si moltiplica per la sua reciproca.',
+        // vorrang6
+        'Punkt vor Strich': 'Prima per e diviso', 'Klammern zuerst': 'Prima le parentesi', 'Mit Komma': 'Con i decimali',
+        'Von links nach rechts': 'Da sinistra a destra', 'Rechenvorteil': 'Trucco di calcolo', 'Aufgabe': 'Esercizio',
+        'Nächster Schritt': 'Passo successivo', 'Von vorn': 'Da capo', 'Jetzt:': 'Ora:', 'Fertig.': 'Fatto.',
+        'Jetzt die Strichrechnung.': 'Ora addizioni e sottrazioni.',
+        // probieren6
+        'Einsetzen': 'Sostituisci', 'Alle Werte prüfen': 'Verifica tutti i valori',
+        'Zahlenstrahl: grün erfüllt, rot nicht': 'Retta numerica: in verde i valori che vanno bene, in rosso quelli no',
+        'Passt.': 'Va bene.', 'Passt nicht.': 'Non va bene.',
+        'Probe: Einsetzen ergibt eine wahre Aussage.': 'Verifica: sostituendo si ottiene un’uguaglianza vera.',
+        'Die linke Seite ist zu klein.': 'Il primo membro è troppo piccolo.', 'kleiner': 'minore', 'größer': 'maggiore',
+        'Die linke Seite ist zu groß.': 'Il primo membro è troppo grande.',
 
         // book it-17 mathe7-it:
 
@@ -367,6 +379,19 @@ window.BuchIT && BuchIT.add('gy6', {
         ['Erst gleichnamig machen, dann die Zähler subtrahieren. Der Nenner bleibt.', 'Prima si porta allo stesso denominatore, poi si sottraggono i numeratori. Il denominatore resta uguale.'],
         ['$: Wie oft passt nichts in etwas? Diese Frage hat keine Antwort. Durch $0$ teilt man nie.',
             '$: quante volte sta il niente in qualcosa? Questa domanda non ha risposta. Per $0$ non si divide mai.'],
+        // vorrang6
+        ['Punktrechnung zuerst: $', 'Prima la moltiplicazione: $'], ['Hauptnenner 4: $', 'Denominatore comune 4: $'],
+        ['Die Klammer zuerst: $', 'Prima la parentesi: $'],
+        ['Fertig. Mit der Klammer kommt etwas anderes heraus als ohne.', 'Fatto. Con la parentesi viene un risultato diverso che senza.'],
+        ['Punkt vor Strich: $', 'Prima per e diviso, poi più e meno: $'],
+        ['Fertig. Wer von links rechnet, erhält falsch $6$.', 'Fatto. Chi calcola semplicemente da sinistra ottiene il risultato sbagliato $6$.'],
+        ['Zwei Punktrechnungen: die linke zuerst. $', 'Due moltiplicazioni o divisioni: prima quella a sinistra. $'],
+        ['Distributivgesetz: $\\tfrac25$ ausklammern.', 'Proprietà distributiva: raccogliere $\\tfrac25$ a fattor comune.'],
+        ['Fertig. Ohne Ausklammern: $\\tfrac{14}{5} + \\tfrac65 = \\tfrac{20}{5} = 4$, mehr Arbeit.', 'Fatto. Senza raccogliere: $\\tfrac{14}{5} + \\tfrac65 = \\tfrac{20}{5} = 4$, più lavoro.'],
+        // probieren6 (the sentences with a number inside are rules below)
+        ['Gesucht sind alle Zahlen, für die die linke Seite kleiner als $', 'Si cercano tutti i numeri per cui il primo membro è minore di $'],
+        ['Gesucht sind alle Zahlen, für die die linke Seite größer als $', 'Si cercano tutti i numeri per cui il primo membro è maggiore di $'],
+        ['Es passen: ', 'Vanno bene: '], ['Bisher passt keiner.', 'Finora non va bene nessuno.'],
 
         // book it-17 mathe7-it:
 
@@ -464,6 +489,11 @@ window.BuchIT && BuchIT.add('gy6', {
         [/\(das kleinste gemeinsame Vielfache von \$(\d+)\$ und \$(\d+)\$\)/g, (m, a, b) => '(il minimo comune multiplo di $' + a + '$ e $' + b + '$)'],
         [/\$(\d+)\$ von \$(\d+)\$ Kästchen\. Das ist (\$[^$]*\$) von (\$[^$]*\$)\./g, (m, a, b, x, y) => '$' + a + '$ quadretti su $' + b + '$. Sono ' + x + ' di ' + y + '.'],
         [/(\$[^$]*\$) passt (\$[^$]*\$)-mal in (\$[^$]*\$)\./g, (m, x, k, y) => x + ' sta ' + k + ' volte in ' + y + '.'],
+        // probieren6
+        [/Gesucht sind alle Zahlen, für die die linke Seite (kleiner|größer) als (\$[^$]*\$) ist\./g,
+            (m, r, x) => 'Si cercano tutti i numeri per cui il primo membro è ' + (r === 'kleiner' ? 'minore' : 'maggiore') + ' di ' + x + '.'],
+        [/(\$[^$]*\$), und (\$[^$]*\$)<\/p>/g, '$1, e $2</p>'],
+        [/Geprüft: (\d+) von (\d+) Werten\. /g, (m, a, b) => (a === '1' ? 'Verificato: 1 valore su ' : 'Verificati: ' + a + ' valori su ') + b + '. '],
 
         // book it-17 mathe7-it:
 
