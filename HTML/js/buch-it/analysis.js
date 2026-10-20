@@ -130,6 +130,18 @@ window.BuchIT && BuchIT.add('analysis', {
         'nur f': 'solo f',
 
         // book it-9 mathegy12lk-it:
+        // abstandmin, geradenschar (the same widgets as GY 12, js/buch-es/analysis.js block mathegy12-es)
+        'Gerade': 'Retta', 'Wurzelkurve': 'Curva radice', 'Kurve:': 'Curva:',
+        'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).':
+            'Trascina il punto P. Il cursore muove Q sulla curva, in basso la distanza d(x) cresce e diminuisce.',
+        'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Curva, punto P e il punto Q sulla curva con la loro distanza',
+        'Abstandsfunktion d(x) mit ihrem Minimum': 'Funzione distanza d(x) con il suo minimo', '$x$-Koordinate von $Q$': 'Coordinata $x$ di $Q$',
+        'Büschel': 'Fascio', 'Parallelen': 'Parallele', 'Gerade und Parabel': 'Retta e parabola', 'Geradenschar': 'Famiglia di rette',
+        'Geradenschar mit der hervorgehobenen Geraden für den gewählten Parameter': 'Famiglia di rette con evidenziata la retta del parametro scelto',
+        'Alle Geraden gehen durch $(2 \\mid 1)$: Für $x = 2$ fällt $a$ heraus. Der Parameter ist die Steigung, eine Gerade fehlt aber: die senkrechte $x = 2$.':
+            'Tutte le rette passano per $(2, 1)$: per $x = 2$, $a$ sparisce. Il parametro è la pendenza, ma manca una retta: la verticale $x = 2$.',
+        'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
+            'La pendenza è sempre $0{,}5$: le rette sono parallele e non hanno nessun punto in comune. Il parametro le trasla.',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -292,6 +304,18 @@ window.BuchIT && BuchIT.add('analysis', {
         // integrieren
         ['Bestimme eine Stammfunktion: $f(x) = ', 'Trova una primitiva: $f(x) = '],
         ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Non ancora. Deriva la tua soluzione per verificarla. Suggerimento: '],
+        // abstandmin
+        ['Jetzt: $x = ', 'Ora: $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · minima in $x \\approx '],
+        ['$P$ liegt auf der Kurve, der Abstand ist $0$.', '$P$ giace sulla curva, la distanza è $0$.'],
+        ['Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ', 'Il segmento più corto (verde) è perpendicolare alla tangente: angolo $\\approx '],
+        ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. Per questo il punto si chiama anche piede della perpendicolare.'],
+        ['Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.',
+            'Il minimo sta al bordo dell’intervallo; lì il segmento non deve essere per forza perpendicolare alla tangente.'],
+        // geradenschar
+        ['Schnitt mit $y = x^2 + 2$: $x^2 - ', 'Intersezione con $y = x^2 + 2$: $x^2 - '], ['x + 1 = 0$, Diskriminante $a^2 - 4 = ', 'x + 1 = 0$, discriminante $a^2 - 4 = '],
+        ['zwei Schnittpunkte.', 'due punti di intersezione.'], ['kein gemeinsamer Punkt.', 'nessun punto in comune.'],
+        ['genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', 'esattamente un punto: la retta è <b>tangente</b> alla parabola in $x = '],
+        ['$. Das passiert für $a = \\pm 2$.', '$. Succede per $a = \\pm 2$.'],
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -327,5 +351,7 @@ window.BuchIT && BuchIT.add('analysis', {
         [/\$Q\(x \\mid f\(x\)\)\$/g, '$Q(x, f(x))$'],
 
         // book it-9 mathegy12lk-it:
+        // abstandmin: the general point Q(x | f(x))
+        [/\$Q\(x \\mid f\(x\)\)\$/g, '$Q(x, f(x))$'],
     ]
 });
