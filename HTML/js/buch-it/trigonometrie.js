@@ -98,6 +98,8 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         'eingeschlossener Winkel $\\gamma$': 'angolo compreso $\\gamma$',
         'Dreieck aus zwei Seiten und dem eingeschlossenen Winkel': 'Triangolo da due lati e dall’angolo compreso',
         'Winkel $\\alpha$': 'Angolo $\\alpha$', 'Dreieck': 'Triangolo', 'Jahr': 'Anno', 'Jahre': 'anni',
+        // dreieckloeser: the step labels are written in capitals (k.toUpperCase())
+        'KOSINUSSATZ': 'TEOREMA DEL COSENO', 'SINUSSATZ': 'TEOREMA DEI SENI', 'WINKELSUMME': 'SOMMA DEGLI ANGOLI',
 
     },
     phrase: [
