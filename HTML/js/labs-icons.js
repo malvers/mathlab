@@ -86,6 +86,7 @@ const LAB_ICONS = {
     </span>`,
     // book 4 in English as well (Doc, 11.10.2026: the next books in English, in parallel)
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
+    // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
     "lehrbuch-mathefos11": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathefos11-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
@@ -101,9 +102,16 @@ const LAB_ICONS = {
             <img src="resources/og/buch-mathefos11-es-cover.jpg" alt="" loading="lazy" decoding="async"
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
+        <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-it/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-it/index.html'; }">
+            <img src="resources/og/buch-mathefos11-it-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
     </span>`,
     // book 5 in English as well (Doc, 11.10.2026: two more books in English)
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
+    // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
     "lehrbuch-mathefos12": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathefos12-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
@@ -117,6 +125,12 @@ const LAB_ICONS = {
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-es/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-es/index.html'; }">
             <img src="resources/og/buch-mathefos12-es-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-it/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-it/index.html'; }">
+            <img src="resources/og/buch-mathefos12-it-cover.jpg" alt="" loading="lazy" decoding="async"
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
@@ -318,6 +332,7 @@ const LAB_ICONS = {
     </span>`,
     // book 8 in English as well (Doc, 11.10.2026: "ok, go on all agents")
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
+    // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
     "lehrbuch-mathegy11": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathegy11-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
@@ -333,9 +348,16 @@ const LAB_ICONS = {
             <img src="resources/og/buch-mathegy11-es-cover.jpg" alt="" loading="lazy" decoding="async"
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
+        <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy11-it/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy11-it/index.html'; }">
+            <img src="resources/og/buch-mathegy11-it-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
     </span>`,
     // book 6 as well (Doc, 11.10.2026: "macht gemeinsam noch 2 Bücher")
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
+    // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
     "lehrbuch-mathegy12": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathegy12-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
@@ -351,9 +373,16 @@ const LAB_ICONS = {
             <img src="resources/og/buch-mathegy12-es-cover.jpg" alt="" loading="lazy" decoding="async"
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
+        <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy12-it/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy12-it/index.html'; }">
+            <img src="resources/og/buch-mathegy12-it-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
     </span>`,
     // book 9 as well (Doc, 11.10.2026: "Dann fangt an")
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
+    // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
     "lehrbuch-mathegy11lk": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathegy11lk-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
@@ -369,9 +398,16 @@ const LAB_ICONS = {
             <img src="resources/og/buch-mathegy11lk-es-cover.jpg" alt="" loading="lazy" decoding="async"
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
+        <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy11lk-it/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy11lk-it/index.html'; }">
+            <img src="resources/og/buch-mathegy11lk-it-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
     </span>`,
     // book 7 as well (Doc, 11.10.2026: "ok, go on all agents")
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
+    // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
     "lehrbuch-mathegy12lk": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathegy12lk-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
@@ -385,6 +421,12 @@ const LAB_ICONS = {
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy12lk-es/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy12lk-es/index.html'; }">
             <img src="resources/og/buch-mathegy12lk-es-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy12lk-it/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathegy12lk-it/index.html'; }">
+            <img src="resources/og/buch-mathegy12lk-it-cover.jpg" alt="" loading="lazy" decoding="async"
                 style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
