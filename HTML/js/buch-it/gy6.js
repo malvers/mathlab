@@ -41,7 +41,7 @@ window.BuchIT && BuchIT.add('gy6', {
         'Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.': 'Numeratore per numeratore, denominatore per denominatore. Semplificare prima fa risparmiare lavoro.',
         'Durch einen Bruch teilt man, indem man mit seinem Kehrwert malnimmt.': 'Per dividere per una frazione si moltiplica per la sua reciproca.',
         // vorrang6
-        'Punkt vor Strich': 'Prima × e :', 'Klammern zuerst': 'Prima le parentesi', 'Mit Komma': 'Con la virgola',
+        'Punkt vor Strich': 'Prima per e diviso', 'Klammern zuerst': 'Prima le parentesi', 'Mit Komma': 'Con la virgola',
         'Von links nach rechts': 'Da sinistra a destra', 'Rechenvorteil': 'Trucco di calcolo', 'Aufgabe': 'Esercizio',
         'Nächster Schritt': 'Passo successivo', 'Von vorn': 'Ricomincia', 'Jetzt:': 'Ora:', 'Fertig.': 'Fatto.',
         'Jetzt die Strichrechnung.': 'Ora le addizioni e le sottrazioni.',
@@ -341,7 +341,7 @@ window.BuchIT && BuchIT.add('gy6', {
         // probieren6
         [/Gesucht sind alle Zahlen, für die die linke Seite (kleiner|größer) als \$([^$]*)\$ ist\./g,
             (m, r, t) => 'Si cercano tutti i numeri per cui il primo membro è ' + (r === 'kleiner' ? 'minore' : 'maggiore') + ' di $' + t + '$.'],
-        [/Geprüft: (\d+) von (\d+) Werten\. /g, 'Controllati: $1 valori su $2. '],
+        [/Geprüft: (\d+) von (\d+) Werten\. /g, (m, a, b) => 'Controllati: ' + a + (a === '1' ? ' valore' : ' valori') + ' su ' + b + '. '],
         // pfeile6
         [/Von „([^“]+)“ gehen (\d+) Pfeile aus\./g, 'Da «$1» partono $2 frecce.'],
         [/Bei „([^“]+)“ kommen aber (\d+) Pfeile an, rückwärts ist die Zuordnung also nicht eindeutig\./g,
