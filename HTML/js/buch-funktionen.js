@@ -274,7 +274,7 @@
             const ts = v0 / g, hmax = h0 + v0 * v0 / (2 * g), tl = (v0 + Math.sqrt(v0 * v0 + 2 * g * h0)) / g;
             p.view([0, Math.max(1, tl * 1.12)], [0, Math.max(2, hmax * 1.18)]);
             p.draw([{ fn: h, color: 'lambda', domain: [0, tl] }, { pts: [[ts, hmax], [tl, 0]], color: 'cyan' }, { vline: ts }]);
-            out.innerHTML = '<p style="margin:0 0 6px">$h(t) = ' + texNum(h0, 2) + sg(v0, 2) + '\\,t - 4{,}905\\,t^2$</p>' +
+            out.innerHTML = '<p style="margin:0 0 6px">$h(t) = ' + texNum(h0, 2) + (v0 ? sg(v0, 2) + '\\,t' : '') + ' - 4{,}905\\,t^2$</p>' +
                 '<p style="margin:0">Höchster Punkt nach $t_S = \\tfrac{v_0}{g} \\approx ' + texNum(ts, 2) + '\\,\\text{s}$ in $' + texNum(hmax, 2) + '\\,\\text{m}$ Höhe. ' +
                 'Aufprall nach $' + texNum(tl, 2) + '\\,\\text{s}$.</p>';
             math(out);

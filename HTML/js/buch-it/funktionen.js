@@ -119,6 +119,22 @@ window.BuchIT && BuchIT.add('funktionen', {
         'fällt für $x < 0$ und fällt für $x > 0$': 'decrescente per $x < 0$ e decrescente per $x > 0$',
         '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, senza cambio di segno', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, con cambio di segno',
         'senkrecht $x = 0$, waagerecht $y = 0$': 'verticale $x = 0$, orizzontale $y = 0$',
+        // parabelschar: the select label (the Italian of js/buch-it/analysis.js, which GY 9 does not load)
+        'Funktionenschar': 'Famiglia di funzioni',
+        // extremwert
+        'Aufgabe': 'Problema', 'Seite $x$': 'Lato $x$', 'Flächeninhalt in Abhängigkeit von x': 'Area in funzione di x', 'MAUER': 'MURO',
+        'x in m': 'x in m', 'x in cm': 'x in cm', 'A in m²': 'A in m²', 'A in cm²': 'A in cm²',
+        'Rechteckiges Gehege an einer Mauer mit 40 m Zaun': 'Recinto rettangolare lungo un muro con 40 m di rete',
+        'Rechteck mit festem Umfang 24 cm': 'Rettangolo di perimetro fisso 24 cm',
+        'Zielgröße $A = x \\cdot (40 - 2x)$, Nebenbedingung: Zaunlänge $x + (40 - 2x) + x = 40$.':
+            'Grandezza obiettivo $A = x \\cdot (40 - 2x)$, vincolo: lunghezza della rete $x + (40 - 2x) + x = 40$.',
+        'Scheitelpunktform: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$': 'Forma del vertice: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$',
+        'Maximum: $x = 10\\,\\text{m}$, Breite $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.': 'Massimo: $x = 10\\,\\text{m}$, larghezza $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.',
+        'Such die größte Fläche. Sie liegt am Scheitel der Parabel.': 'Cerca l’area più grande. Sta nel vertice della parabola.',
+        'Zielgröße $A = x \\cdot y$, Nebenbedingung $2x + 2y = 24$, also $y = 12 - x$.': 'Grandezza obiettivo $A = x \\cdot y$, vincolo $2x + 2y = 24$, quindi $y = 12 - x$.',
+        'Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$': 'Forma del vertice: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$',
+        'Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.': 'Massimo: il quadrato di lato $6\\,\\text{cm}$, $A = 36\\,\\text{cm}^2$.',
+        'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': 'Quale rettangolo di perimetro $24\\,\\text{cm}$ ha l’area più grande?',
 
         // book it-15 mathegy10-it:
         'Graphen der Grundfunktionen': 'Grafici delle funzioni di base',
@@ -254,6 +270,8 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-13 mathegy8-it:
 
         // book it-14 mathegy9-it:
+        // extremwert
+        ['Jetzt: $A(', 'Ora: $A('],
 
         // book it-15 mathegy10-it:
 
