@@ -50,6 +50,9 @@ window.BuchIT && BuchIT.add('vektoren', {
         // book it-5 mathefos12-it:
         // kreuzprodukt
         'zwei Vektoren': 'due vettori', 'Dachfläche': 'falda del tetto', 'in der x-y-Ebene': 'nel piano x-y', 'Dreieck': 'Triangolo', 'Welche Fläche?': 'Quale superficie?',
+        // lot3d
+        'Punkt über E': 'Punto sopra E', 'Ursprung': 'Origine', 'Punkt unter E': 'Punto sotto E', 'Punkt in E': 'Punto in E',
+        'Spiegelpunkt P′ zeigen': 'Mostra il punto simmetrico P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Costante $d$ in $\\vec{n} \\circ \\vec{x} = d$',
 
         // book it-6 mathegy11-it:
 
@@ -130,6 +133,12 @@ window.BuchIT && BuchIT.add('vektoren', {
         ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$: il prodotto vettoriale è perpendicolare a entrambi i vettori'],
         [' (im Bild verkürzt gezeichnet)', ' (nella figura disegnato più corto)'], ['Dreieck: $A = ', 'Triangolo: $A = '], ['Parallelogramm: $A = ', 'Parallelogramma: $A = '],
         [' Flächeneinheiten', ' unità di superficie'], ['$ und $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = ', '$ e $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = '],
+        // lot3d
+        ['Der Normalenvektor darf nicht der Nullvektor sein.', 'Il vettore normale non può essere il vettore nullo.'],
+        ['$ · Lotfußpunkt $F(', '$ · piede della perpendicolare $F('],
+        ['$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.', '$t = 0$: il punto $P$ giace esso stesso nel piano, la sua distanza è $0$.'],
+        ['$ · ohne Lotfußpunkt: $', '$ · senza il piede della perpendicolare: $'],
+        ['Spiegelpunkt: $t$ verdoppeln, $', 'Punto simmetrico: raddoppiare $t$, $'],
 
         // book it-6 mathegy11-it:
 
