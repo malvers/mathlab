@@ -107,6 +107,8 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-5 mathefos12-it:
 
         // book it-6 mathegy11-it:
+        // pascal (FOS 11 uses this widget too)
+        '$n$ (Zeile)': '$n$ (riga)', '$k$ (Stelle)': '$k$ (posizione)', 'Pascalsches Dreieck bis zur Zeile 10': 'Triangolo di Tartaglia fino alla riga 10',
 
         // book it-7 mathegy11lk-it:
 
@@ -190,6 +192,10 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-5 mathefos12-it:
 
         // book it-6 mathegy11-it:
+        // pascal
+        [': So viele Möglichkeiten gibt es, $', ': è il numero di modi per scegliere $'], ['$ aus $', '$ tra $'], ['$ auszuwählen.', '$.'],
+        ['Summenregel (grün umrandet): $', 'Regola della somma (bordo verde): $'], ['Symmetrie (gestrichelt): $', 'Simmetria (tratteggiata): $'],
+        ['Die Mitte der Zeile: $', 'Il centro della riga: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ qui è l’immagine speculare di se stesso.'],
 
         // book it-7 mathegy11lk-it:
 
@@ -231,6 +237,8 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-5 mathefos12-it:
 
         // book it-6 mathegy11-it:
+        // pascal: "$, denn $2$ auswählen heißt $3$ weglassen."
+        [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, perché sceglierne $' + k + '$ equivale a lasciarne fuori $' + r + '$.'],
 
         // book it-7 mathegy11lk-it:
 
