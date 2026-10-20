@@ -436,6 +436,31 @@ Package it-6 (Nalli), 20.10.2026: decisions made while translating GY 11 (Grundk
 
 <!-- it-7: terms of this book only, write right below this line -->
 
+Round 2, Pastori, 20.10.2026: decisions made while translating GY 11 LK; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Gymnasium, Leistungskurs, Grundkurs | stay as names | start page: liceo tedesco a indirizzo generale; Leistungskurs (corso di livello avanzato), Grundkurs (corso base) |
+| Steckbrief, Extremwerte, Regression (title 1.5) | Condizioni, ottimizzazione, regressione | "funzioni da condizioni date" in the text |
+| Grenzwertsätze, h-Methode | teoremi sui limiti, metodo dell’h | 1.1 |
+| Sprungstelle, hebbare Unstetigkeit, Zwischenwertsatz | punto di salto, discontinuità eliminabile, teorema dei valori intermedi | 1.1 |
+| knickfrei / ruckfrei (Übergang) | senza spigoli / senza strappi (senza salti di curvatura) | 1.5 |
+| Rettungsschwimmerin | bagnina | 1.5, rettung |
+| Typ einer Matrix | dimensione | "una matrice $(2,3)$" |
+| Drehmatrix, Drehachse | matrice di rotazione, asse di rotazione | 2 |
+| Verflechtung, Rohstoffe, Zwischenprodukte, Endprodukte, ME | produzione a più stadi, materie prime, semilavorati, prodotti finiti, unità (u.) | 2, verflechtung; Gozinto-Graph: grafo di Gozinto |
+| Zeile $Z_1$ (Gauß in the text) | riga $R_1$ | 3.2 |
+| Fixpunkt, Fixpunktiteration, Spinnennetz, anziehend / abstoßend | punto fisso, iterazione di punto fisso, ragnatela, attrattivo / repulsivo | OP |
+| Zylinder-, Kugelkoordinaten, Länge / Breite | coordinate cilindriche, sferiche, longitudine / latitudine | 3.1 |
+| Schrägbild | assonometria cavaliera | 3.1 |
+| Spurgerade | retta traccia | 3.3 |
+| Abzählverfahren; Variation / Kombination mit, ohne Wiederholung | tecniche di conteggio; disposizioni / combinazioni con, senza ripetizione | 4.1, urne |
+| Pascalsches Dreieck | triangolo di Tartaglia | 4.1 |
+| Lotto 6 aus 49, Skat, Bube | lotto tedesco «6 su 49», mazzo da skat (gioco tedesco), fante | 4.1 |
+| Brille $B$, Linkshänder $L$ (4.2) | occhiali $O$, mancini $M$ | letters changed like the Spanish edition |
+| Spreadsheet =GANZZAHL(6*ZUFALLSZAHL())+1 | =INT(6*CASUALE())+1 | 4.1 |
+| Dresden, Stettin, Lemberg | Dresda, Stettino, Leopoli | Italian exonyms |
+
 ## mathegy12-it
 
 <!-- it-8: terms of this book only, write right below this line -->
