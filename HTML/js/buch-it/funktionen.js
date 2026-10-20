@@ -85,6 +85,10 @@ window.BuchIT && BuchIT.add('funktionen', {
         'Zwei Geraden und ihre Lage zueinander': 'Due rette e la loro posizione reciproca',
         // parabelschar
         'Parameter': 'Parametro', 'Schar von Parabeln mit einem hervorgehobenen Mitglied': 'Famiglia di parabole con un membro evidenziato',
+        // ganzrational (GY 11 it-6 uses the same widget)
+        'Vielfachheit': 'Molteplicità', 'Vielfachheit kleiner': 'Molteplicità minore', 'Vielfachheit größer': 'Molteplicità maggiore', 'Faktor $a$': 'Fattore $a$',
+        'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Trascina gli zeri lungo l’asse $x$. La molteplicità 0 toglie il fattore lineare.',
+        'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Funzione polinomiale con zeri trascinabili',
 
         // book it-5 mathefos12-it:
 
@@ -199,6 +203,16 @@ window.BuchIT && BuchIT.add('funktionen', {
         ['parallel zur $x$-Achse', 'parallela all’asse $x$'],
         // parabelschar
         ['$ für $', '$ per $'], ['Nullstellen: $', 'Zeri: $'], [' · Scheitel $(', ' · vertice $('],
+        // ganzrational
+        [': einfach → ', ': semplice → '], [': doppelt → ', ': doppio → '], [': dreifach → ', ': triplo → '], [': vierfach → ', ': quadruplo → '],
+        [': fünffach → ', ': quintuplo → '], [': sechsfach → ', ': sestuplo → '], [': siebenfach → ', ': settuplo → '], [': achtfach → ', ': ottuplo → '],
+        [': neunfach → ', ': nonuplo → '],
+        ['Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse', 'cambio di segno, il grafico <b>attraversa</b> l’asse $x$'],
+        ['Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)', 'cambio di segno, il grafico attraversa l’asse $x$ <b>in modo piatto</b> (flesso a tangente orizzontale)'],
+        ['kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse', 'nessun cambio di segno, il grafico <b>tocca</b> l’asse $x$'],
+        ['$ · Grad $', '$ · grado $'], ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'Per $x \\to +\\infty$, $f(x) \\to '],
+        ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$; per $x \\to -\\infty$, $f(x) \\to '],
+        ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Decide solo l’addendo con la potenza più alta: $'],
 
         // book it-5 mathefos12-it:
 
