@@ -110,6 +110,12 @@ window.BuchIT && BuchIT.add('gy8', {
         'Rückwärts: ein Schritt': 'All’indietro: un passo', 'Neues Rätsel': 'Nuovo indovinello', 'Startzahl': 'Numero di partenza',
         'Probier eine Zahl im ersten Kästchen, oder rechne rückwärts: Jede Rechnung wird durch ihre Umkehrung ersetzt, plus durch minus, mal durch geteilt.':
             'Prova un numero nella prima casella, oppure calcola all’indietro: ogni operazione viene sostituita dalla sua inversa, il più con il meno, il per con il diviso.',
+        // wegzeit8
+        'Zeit $t$ in min': 'Tempo $t$ in min', 't in min': 't in min', 's in m': 's in m',
+        'Weg-Zeit-Diagramm des Schulwegs': 'Diagramma spazio-tempo del tragitto verso scuola',
+        'Zuhause': 'Casa', 'Haltestelle': 'Fermata', 'Schule': 'Scuola',
+        'Der Schulweg als Strecke, der Punkt zeigt, wo Mia gerade ist': 'Il tragitto verso scuola come segmento: il punto mostra dove si trova Mia in questo momento',
+        'Mia ist in der Schule angekommen.': 'Mia è arrivata a scuola.',
 
         // book it-20 mathe10-it:
         'gleich': 'uguale',
@@ -197,6 +203,14 @@ window.BuchIT && BuchIT.add('gy8', {
         ['$ hat er den Wert ', '$ ha il valore '], ['. Gerechnet wird von unten nach oben.', '. Si calcola dal basso verso l’alto.'],
         // rueckwaerts8
         ['Richtig!</b>', 'Giusto!</b>'], ['Das passt nicht.', 'Non torna.'],
+        // wegzeit8
+        [' von zu Hause entfernt.', ' da casa.'],
+        ['Der Graph steigt gleichmäßig.', 'Il grafico sale in modo uniforme.'],
+        ['Der Graph verläuft waagerecht: Die Zeit läuft, der Weg bleibt gleich.', 'Il grafico è orizzontale: il tempo passa, la distanza resta la stessa.'],
+        ['Hier steigt der Graph am steilsten.', 'Qui il grafico sale in modo più ripido.'],
+        ['Der Graph steigt flacher als beim ersten Fußweg.', 'Il grafico sale meno ripido che nel primo tratto a piedi.'],
+        ['geht zu Fuß zur Haltestelle', 'va a piedi alla fermata'], ['wartet an der Haltestelle', 'aspetta alla fermata'],
+        ['fährt mit dem Bus', 'va in autobus'], ['geht das letzte Stück zur Schule', 'percorre a piedi l’ultimo tratto fino a scuola'],
 
         // book it-20 mathe10-it:
         ['Gemessen: Der Stab ist $2$ m hoch, sein Schatten ist $s \\approx ', 'Misurato: l’asta è alta $2$ m, la sua ombra è $s \\approx '],
@@ -333,6 +347,11 @@ window.BuchIT && BuchIT.add('gy8', {
                 '. Il risultato è $' + e + '$. Che numero era?'],
         [/Mit \$([^$]*)\$ kommt \$([^$]*)\$ heraus\. /g, (m, a, b) => 'Con $' + a + '$ viene $' + b + '$. '],
         [/Rückwärts von \$([^$]*)\$ aus, mit den Umkehrrechnungen: Die Startzahl ist <b>/g, (m, e) => 'All’indietro da $' + e + '$, con le operazioni inverse: il numero di partenza è <b>'],
+        // wegzeit8: "Nach $t = 3$ min ist Mia <span …>$240$ m</span> von zu Hause entfernt." and "Sie fährt mit dem Bus: $300$ m pro Minute. "
+        [/Nach \$t = ([^$]+)\$ min ist Mia /g, 'Dopo $t = $1$ min Mia si trova a '],
+        [/Sie (geht zu Fuß zur Haltestelle|wartet an der Haltestelle|fährt mit dem Bus|geht das letzte Stück zur Schule)(?:: \$(\d+)\$ m pro Minute\. |\. )/g,
+            (m, d, v) => ({ 'geht zu Fuß zur Haltestelle': 'Va a piedi alla fermata', 'wartet an der Haltestelle': 'Aspetta alla fermata', 'fährt mit dem Bus': 'Va in autobus',
+                'geht das letzte Stück zur Schule': 'Percorre a piedi l’ultimo tratto fino a scuola' })[d] + (v ? ': $' + v + '$ m al minuto. ' : '. ')],
 
         // book it-20 mathe10-it:
 

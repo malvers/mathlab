@@ -299,6 +299,13 @@ window.BuchIT && BuchIT.add('gy6', {
         'Umfrage in einer Klasse: Wie kommst du zur Schule?': 'Sondaggio in una classe: come vieni a scuola?',
 
         // book it-18 mathe8-it:
+        // pfeile6
+        'Schüler → Vorname': 'Alunno → nome', 'Vorname → Schüler': 'Nome → alunno', 'Schüler → Sitzplatz': 'Alunno → posto',
+        'Zahl → Teiler': 'Numero → divisore', 'Zahl → Doppeltes': 'Numero → doppio', 'Zahl → Rest bei : 3': 'Numero → resto nella divisione per 3',
+        'Zuordnung': 'Corrispondenza', 'Platz 1': 'Posto 1', 'Platz 2': 'Posto 2', 'Platz 3': 'Posto 3', 'Platz 4': 'Posto 4',
+        'Welche Art von Zuordnung ist das?': 'Che tipo di corrispondenza è?',
+        'mehrdeutig': 'non univoca', 'eindeutig': 'univoca', 'eineindeutig': 'biunivoca', 'eindeutig, aber nicht eineindeutig': 'univoca, ma non biunivoca',
+        'Richtig:': 'Giusto:', 'Nicht ganz.': 'Non proprio.',
 
     },
     phrase: [
@@ -607,6 +614,18 @@ window.BuchIT && BuchIT.add('gy6', {
         ['Winkel = Anteil · 360°. ', 'Angolo = parte · 360°. '], ['Eine Person entspricht hier $', 'Qui una persona corrisponde a $'],
 
         // book it-18 mathe8-it:
+        // pfeile6
+        ['Pfeildarstellung: ', 'Diagramma a frecce: '],
+        ['Schüler → Vorname', 'Alunno → nome'], ['Vorname → Schüler', 'Nome → alunno'], ['Schüler → Sitzplatz', 'Alunno → posto'],
+        ['Zahl → Teiler', 'Numero → divisore'], ['Zahl → Doppeltes', 'Numero → doppio'], ['Zahl → Rest bei : 3', 'Numero → resto nella divisione per 3'],
+        ['Die Zuordnung ist mehrdeutig. ', 'La corrispondenza non è univoca. '],
+        ['Die Zuordnung ist eindeutig, aber nicht eineindeutig. ', 'La corrispondenza è univoca, ma non biunivoca. '],
+        ['Die Zuordnung ist eineindeutig. ', 'La corrispondenza è biunivoca. '],
+        ['Von jedem Element links geht genau ein Pfeil aus, und rechts kommt bei jedem genau ein Pfeil an. Auch rückwärts ist die Zuordnung eindeutig.',
+            'Da ogni elemento a sinistra parte esattamente una freccia, e a ogni elemento a destra ne arriva esattamente una. Anche al contrario la corrispondenza è univoca.'],
+        ['Von jedem Element links geht genau ein Pfeil aus. ', 'Da ogni elemento a sinistra parte esattamente una freccia. '],
+        ['<b>mehrdeutig:</b> von einem Element gehen mehrere Pfeile aus. <b>eindeutig:</b> von jedem genau einer. <b>eineindeutig:</b> eindeutig, und auch rückwärts eindeutig.',
+            '<b>non univoca:</b> da un elemento partono più frecce. <b>univoca:</b> da ciascuno ne parte esattamente una. <b>biunivoca:</b> univoca, e univoca anche al contrario.'],
 
     ],
     rule: [
@@ -762,6 +781,10 @@ window.BuchIT && BuchIT.add('gy6', {
         [/(g6-tab"><tr><th>)Ergebnis(<\/th>)/g, '$1Esito$2'],
 
         // book it-18 mathe8-it:
+        // pfeile6
+        [/Von „([^“]+)“ gehen (\d+) Pfeile aus\./g, 'Da «$1» partono $2 frecce.'],
+        [/Bei „([^“]+)“ kommen aber (\d+) Pfeile an, rückwärts ist die Zuordnung also nicht eindeutig\./g,
+            'Ma a «$1» arrivano $2 frecce: al contrario, quindi, la corrispondenza non è univoca.'],
 
     ]
 });
