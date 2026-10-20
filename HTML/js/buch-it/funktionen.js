@@ -109,6 +109,7 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-14 mathegy9-it:
 
         // book it-15 mathegy10-it:
+        'Graphen der Grundfunktionen': 'Grafici delle funzioni di base',
 
         // book it-18 mathe8-it:
 
