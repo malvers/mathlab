@@ -162,6 +162,20 @@ window.BuchIT && BuchIT.add('gy6', {
         'Liegt die Zahl vielleicht zwischen zwei natürlichen Zahlen?': 'Il numero sta forse tra due numeri naturali?',
         'in $\\mathbb{N}$ (und damit auch in $\\mathbb{Q}^+$)': 'in $\\mathbb{N}$ (e quindi anche in $\\mathbb{Q}^+$)',
         'nur in $\\mathbb{Q}^+$': 'solo in $\\mathbb{Q}^+$',
+        // bruchop6
+        'plus': 'più', 'minus': 'meno', 'mal': 'per', 'durch': 'diviso', 'Rechenart': 'Operazione',
+        'Zähler 1': 'Numeratore 1', 'Nenner 1': 'Denominatore 1', 'Zähler 2': 'Numeratore 2', 'Nenner 2': 'Denominatore 2',
+        'erster Zähler': 'primo numeratore', 'erster Nenner': 'primo denominatore', 'zweiter Zähler': 'secondo numeratore', 'zweiter Nenner': 'secondo denominatore',
+        'Das Ergebnis wäre kleiner als null.': 'Il risultato sarebbe minore di zero.',
+        'Für das Bild sind die Zahlen zu groß.': 'Per la figura i numeri sono troppo grandi.',
+        'Das Bild zeigt nur Brüche bis 1.': 'La figura mostra solo frazioni fino a 1.',
+        'Mal null ist null.': 'Per zero fa zero.', 'Durch null kann man nicht teilen.': 'Non si può dividere per zero.',
+        '1. Bruch': '1ª frazione', '2. Bruch': '2ª frazione', 'Ergebnis': 'Risultato',
+        'Streifenbild der Rechnung': 'Il calcolo come striscia', 'Rechteckbild: ein Teil von einem Teil': 'Rettangolo: una parte di una parte',
+        'Wie oft passt der zweite Bruch in den ersten?': 'Quante volte sta la seconda frazione nella prima?',
+        'Grün': 'Verde',
+        'Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.': 'Numeratore per numeratore, denominatore per denominatore. Semplificare prima fa risparmiare lavoro.',
+        'Durch einen Bruch teilt man, indem man mit seinem Kehrwert malnimmt.': 'Per dividere per una frazione si moltiplica per la sua reciproca.',
 
         // book it-17 mathe7-it:
 
@@ -345,6 +359,14 @@ window.BuchIT && BuchIT.add('gy6', {
         [': die gebrochenen Zahlen, also alle Zahlen, die man als Bruch $', ': i numeri frazionari, cioè tutti i numeri che si possono scrivere come frazione $'],
         ['$ schreiben kann.', '$.'],
         ['Jede natürliche Zahl ist auch eine gebrochene Zahl: $', 'Ogni numero naturale è anche un numero frazionario: $'],
+        // bruchop6
+        ['$: Bei den gebrochenen Zahlen geht diese Subtraktion nicht. Negative Zahlen lernst du in Klasse 7 kennen.',
+            '$: con i numeri frazionari questa sottrazione non è possibile. I numeri negativi li conoscerai in 7ª classe.'],
+        ['Hauptnenner: $', 'Minimo comune denominatore: $'],
+        ['Erst gleichnamig machen, dann die Zähler addieren. Der Nenner bleibt.', 'Prima si porta allo stesso denominatore, poi si sommano i numeratori. Il denominatore resta uguale.'],
+        ['Erst gleichnamig machen, dann die Zähler subtrahieren. Der Nenner bleibt.', 'Prima si porta allo stesso denominatore, poi si sottraggono i numeratori. Il denominatore resta uguale.'],
+        ['$: Wie oft passt nichts in etwas? Diese Frage hat keine Antwort. Durch $0$ teilt man nie.',
+            '$: quante volte sta il niente in qualcosa? Questa domanda non ha risposta. Per $0$ non si divide mai.'],
 
         // book it-17 mathe7-it:
 
@@ -436,6 +458,12 @@ window.BuchIT && BuchIT.add('gy6', {
         [/Alle Zahlen sind einsortiert(?:, (\d+) von (\d+) gleich beim ersten Versuch richtig)?\./g,
             (m, a, b) => 'Tutti i numeri sono al loro posto' + (a ? ': ' + a + ' su ' + b + ' giusti al primo tentativo' : '') + '.'],
         [/(\\in \\mathbb\{Q\}\^\+\$) und \$/g, '$1 e $'], [/(\\in \\mathbb\{Q\}\^\+\$), aber \$/g, '$1, ma $'],
+        // bruchop6: "… dann die Zähler addieren / subtrahieren." (the whole sentences are phrases; this is the joined form)
+        [/Erst gleichnamig machen, dann die Zähler (addieren|subtrahieren)\. Der Nenner bleibt\./g,
+            (m, v) => 'Prima si porta allo stesso denominatore, poi si ' + (v === 'addieren' ? 'sommano' : 'sottraggono') + ' i numeratori. Il denominatore resta uguale.'],
+        [/\(das kleinste gemeinsame Vielfache von \$(\d+)\$ und \$(\d+)\$\)/g, (m, a, b) => '(il minimo comune multiplo di $' + a + '$ e $' + b + '$)'],
+        [/\$(\d+)\$ von \$(\d+)\$ Kästchen\. Das ist (\$[^$]*\$) von (\$[^$]*\$)\./g, (m, a, b, x, y) => '$' + a + '$ quadretti su $' + b + '$. Sono ' + x + ' di ' + y + '.'],
+        [/(\$[^$]*\$) passt (\$[^$]*\$)-mal in (\$[^$]*\$)\./g, (m, x, k, y) => x + ' sta ' + k + ' volte in ' + y + '.'],
 
         // book it-17 mathe7-it:
 

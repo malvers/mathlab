@@ -119,6 +119,11 @@ window.BuchIT && BuchIT.add('gy5', {
             'Scrivi frazioni come 3/4 o numeri decimali come 0,7, anche numeri maggiori di 1, fino a 3.',
         'Zahlenstrahl mit zwei Zahlen': 'Retta numerica con due numeri',
         'Bitte zwei Zahlen zwischen 0 und 3 eingeben, zum Beispiel 3/4 oder 0,7.': 'Scrivi due numeri tra 0 e 3, per esempio 3/4 o 0,7.',
+        // komma5
+        'Neu': 'Nuovo',
+        'Beim Multiplizieren mit 10 rückt jede Ziffer eine Stelle nach links, beim Dividieren nach rechts. Man sagt kurz: Das Komma wandert.':
+            'Moltiplicando per 10 ogni cifra si sposta di un posto verso sinistra, dividendo verso destra. In breve si dice: la virgola si sposta.',
+        'nicht möglich: Die Ziffern würden aus der Tafel fallen.': 'non è possibile: le cifre uscirebbero dalla tabella.',
 
     },
     phrase: [
@@ -336,6 +341,9 @@ window.BuchIT && BuchIT.add('gy5', {
         // bruchstrahl5
         [/^Zahl ([A-Z])$/, 'Numero $1'],
         [/Auf denselben Nenner (\d+) gebracht: (\$[^$]*\$) und (\$[^$]*\$)/, 'Con il denominatore comune $1: $2 e $3'],
+        // komma5 (and stellenwert5): the column heads of the place value tables, u, da, h, k …; d, c, m after the comma
+        [/<table class="g5-sw[\s\S]*?<\/table>/g, t => t.replace(/<th( class="[^"]*")?>(Mrd|HM|ZM|M|HT|ZT|T|H|Z|E|z|h|t)<\/th>/g, (m, c, k) => '<th' + (c || '') + '>' +
+            ({ Mrd: 'G', HM: 'hM', ZM: 'daM', M: 'M', HT: 'hk', ZT: 'dak', T: 'k', H: 'h', Z: 'da', E: 'u', z: 'd', h: 'c', t: 'm' })[k] + '</th>')],
 
     ]
 });
