@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica GY 6 · Capitolo OP · Numeri primi | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Crivello di Eratostene, scomposizione in fattori primi, infiniti numeri primi, crittografia. Capitolo OP del libro di testo interattivo Matematica · Gymnasium 6: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · GYMNASIUM 6</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">AREA OPZIONALE</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">AREA OPZIONALE 3 · MAGGIO · GIUGNO</p>
+            <h1>Numeri primi</h1>
+            <p class="b-hero-lead">2, 3, 5, 7, 11, 13: questi numeri non si possono dividere per nient’altro che per 1 e per se stessi. Ogni altro numero naturale è composto da loro,
+                come una casa dai mattoni. Da più di 2000 anni le persone ci si arrovellano sopra. Alcune domande sono ancora senza risposta, e senza i numeri primi non ci sarebbe l’online banking sicuro.</p>
+            <div class="b-chips"><span class="b-chip">8 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">2 LABORATORI</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="sieb6" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>distinguere i <b>numeri primi</b> dai <b>numeri composti</b></li>
+                <li>trovare i numeri primi con il <b>crivello di Eratostene</b></li>
+                <li>scomporre i numeri in <b>fattori primi</b> e trovare così MCD e mcm</li>
+                <li>capire perché <b>non esiste un numero primo più grande di tutti</b></li>
+                <li>conoscere i primi gemelli, i numeri perfetti e i numeri amicabili</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="6" data-ph="quanti"><p class="b-q-text">Quanti divisori ha il numero 12?</p><div class="b-sol"><p>$1, 2, 3, 4, 6, 12$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="quanti"><p class="b-q-text">Quanti divisori ha il numero 13?</p><div class="b-sol"><p>Solo $1$ e $13$.</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="numero"><p class="b-q-text">Qual è il massimo comune divisore di 8 e 12?</p><div class="b-sol"><p>Divisori di 8: 1, 2, 4, 8. Di 12: 1, 2, 3, 4, 6, 12. Il più grande in comune: 4.</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="numero"><p class="b-q-text">Qual è il minimo comune multiplo di 8 e 12?</p><div class="b-sol"><p>Multipli di 12: 12, 24, … e 24 è divisibile per 8.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">FORMARE RETTANGOLI</div>
+            <div class="b-text"><p>Prendete 12 tesserine e formate tutti i rettangoli completamente pieni: 1 per 12, 2 per 6, 3 per 4.</p>
+                <ul><li>Provate con tutti i numeri da 2 a 20. Con quali numeri c’è solo un’unica lunga fila?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">FINISCONO PRIMA O POI?</div>
+            <div class="b-text"><p>Scrivete tutti i numeri primi fino a 100. Contate quanti ce ne sono tra 1 e 25, tra 26 e 50, tra 51 e 75, tra 76 e 100.</p>
+                <ul><li>Diventano più rari? Può darsi che a un certo punto finiscano del tutto?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Numeri primi e fattori primi" data-toc-k="1" data-toc-short="1 Numeri primi">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Numeri primi e fattori primi</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con 12 tesserine ci sono tre rettangoli, con 13 tesserine solo un’unica lunga fila. Il 13 ha solo due divisori: 1 e 13.
+                Numeri come questo si chiamano <b>numeri primi</b>. Il 12 invece è composto da numeri più piccoli: $12 = 2 \cdot 2 \cdot 3$.</p></div></div>
+            <div class="b-text"><p>Un <b>numero primo</b> è un numero naturale con esattamente due divisori: 1 e se stesso. L’1 non è un numero primo, ha un solo divisore.
+                Ogni altro numero maggiore di 1 si dice <b>composto</b>.</p>
+                <p>Ogni numero composto si può scrivere come prodotto di numeri primi, e in un solo modo (a parte l’ordine). È la <b>scomposizione in fattori primi</b>.
+                    Il modo più semplice per trovarla è un <b>albero dei fattori</b>: si stacca sempre il numero primo più piccolo che divide il numero.</p>
+                <p>Aiutano i <b>criteri di divisibilità</b>. Un numero è divisibile per 2 se l’ultima cifra è pari; per 5 se finisce con 0 o con 5;
+                    per 3 (o per 9) se la <b>somma delle sue cifre</b> è divisibile per 3 (o per 9); per 4 se il numero formato dalle ultime due cifre è divisibile per 4.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · NUMERI PRIMI</div>
+                <div class="b-text">
+                    <p><b>Numero primo:</b> esattamente due divisori. I primi sono $2, 3, 5, 7, 11, 13, 17, 19, 23, 29$. Il 2 è l’unico pari.</p>
+                    <p><b>Crivello di Eratostene:</b> cancella l’1. Il più piccolo numero non cancellato è primo: cancella tutti i suoi multipli. Ripeti.</p>
+                    <p><b>Scomposizione in fattori primi:</b> $360 = 2 \cdot 2 \cdot 2 \cdot 3 \cdot 3 \cdot 5 = 2^3 \cdot 3^2 \cdot 5$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Scorciatoia nel crivello:</b> fino a 100 basta cancellare i multipli di 2, 3, 5 e 7. Infatti $11 \cdot 11 = 121$ è già maggiore di 100.</p>
+            <p class="b-note"><b>91 è primo?</b> Sembra di sì, ma non lo è: $91 = 7 \cdot 13$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · IL CRIVELLO DI ERATOSTENE</div>
+        <p class="b-help" style="margin:0 0 12px">Tocca «Primo successivo». Ogni colore cancella i multipli di un numero primo. Perché ogni colore comincia solo dal quadrato del numero primo?</p>
+        <div data-widget="sieb6"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · ALBERO DEI FATTORI, MCD E MCM</div>
+        <p class="b-help" style="margin:0 0 12px">Scrivi due numeri. A sinistra cresce l’albero dei fattori del primo numero, a destra ci sono le due scomposizioni con MCD e mcm.</p>
+        <div data-widget="primfaktor6"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · PRIMO O NO?</div>
+            <div class="b-text"><p>221 è un numero primo?</p></div>
+            <div class="b-sol"><p>Si controllano solo i numeri primi il cui quadrato è al massimo 221: 2, 3, 5, 7, 11, 13 (perché $17 \cdot 17 = 289$).
+                2: dispari. 3: somma delle cifre 5. 5: finisce con 1. 7: $7 \cdot 31 = 217$, resto 4. 11: $11 \cdot 20 = 220$, resto 1. 13: $13 \cdot 17 = 221$!</p>
+                <p><span class="b-res">$221 = 13 \cdot 17$, non è un numero primo</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · SEMPLIFICARE CON I FATTORI PRIMI</div>
+            <div class="b-text"><p>Riduci $\tfrac{84}{360}$ ai minimi termini.</p></div>
+            <div class="b-sol"><p>$84 = 2^2 \cdot 3 \cdot 7$, $360 = 2^3 \cdot 3^2 \cdot 5$. In comune: $2^2 \cdot 3 = 12$, è il MCD.</p>
+                <p><span class="b-res">$\tfrac{84}{360} = \tfrac{7}{30}$</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Primo o composto? Giustifica. a) 51 &nbsp; b) 53 &nbsp; c) 57 &nbsp; d) 87 &nbsp; e) 97</p></div>
+            <div class="b-hint"><p>Controlla la somma delle cifre per la divisibilità per 3.</p></div>
+            <div class="b-sol"><p>a) $3 \cdot 17$ &nbsp; b) primo &nbsp; c) $3 \cdot 19$ &nbsp; d) $3 \cdot 29$ &nbsp; e) primo</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Scomponi in fattori primi: a) 48 &nbsp; b) 90 &nbsp; c) 126 &nbsp; d) 1000 &nbsp; e) 1001</p></div>
+            <div class="b-sol"><p>a) $2^4 \cdot 3$ &nbsp; b) $2 \cdot 3^2 \cdot 5$ &nbsp; c) $2 \cdot 3^2 \cdot 7$ &nbsp; d) $2^3 \cdot 5^3$ &nbsp; e) $7 \cdot 11 \cdot 13$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Trova MCD e mcm con i fattori primi: a) 24 e 36 &nbsp; b) 45 e 75 &nbsp; c) 14 e 15</p></div>
+            <div class="b-sol"><p>a) $24 = 2^3 \cdot 3$, $36 = 2^2 \cdot 3^2$: MCD 12, mcm 72 &nbsp; b) $45 = 3^2 \cdot 5$, $75 = 3 \cdot 5^2$: MCD 15, mcm 225 &nbsp; c) MCD 1, mcm 210</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con il capitolo 1.2:</b> calcola $\tfrac{5}{24} + \tfrac{7}{36}$. Il minimo comune denominatore lo trovi con il mcm.</p></div>
+            <div class="b-sol"><p>mcm$(24, 36) = 72$. $\tfrac{15}{72} + \tfrac{14}{72} = \tfrac{29}{72}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quali numeri hanno esattamente tre divisori? Trovali tutti fino a 100.</p></div>
+            <div class="b-hint"><p>Guarda 4, 9 e 25.</p></div>
+            <div class="b-sol"><p>I quadrati dei numeri primi: 4, 9, 25, 49. I loro divisori sono $1$, $p$ e $p^2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="25" data-ph="quanti"><p class="b-q-text">Quanti numeri primi ci sono fino a 100?</p><div class="b-sol"><p>25. Provalo con il crivello.</p></div></div>
+        <div class="b-q" data-ans="13" data-ph="numero"><p class="b-q-text">$91 = 7 \cdot x$. Quale numero primo è $x$?</p><div class="b-sol"><p>$91 : 7 = 13$</p></div></div>
+        <div class="b-q" data-ans="12" data-ph="MCD"><p class="b-q-text">Qual è il MCD di 84 e 360?</p><div class="b-sol"><p>$2^2 \cdot 3 = 12$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Nessun numero primo più grande" data-toc-k="2" data-toc-short="2 Infiniti">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Non esiste un numero primo più grande di tutti</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Fino a 25 ci sono 9 numeri primi, tra 76 e 100 ormai solo 4. Diventano più rari. A un certo punto finiscono del tutto?
+                No. Lo ha dimostrato Euclide già più di 2000 anni fa, con un’idea sorprendentemente breve.</p></div></div>
+            <div class="b-text"><p><b>L’idea di Euclide:</b> prendi una lista qualsiasi di numeri primi, per esempio 2, 3, 5, 7. Moltiplicali tutti e aggiungi 1: $2 \cdot 3 \cdot 5 \cdot 7 + 1 = 211$.
+                Se si divide 211 per 2, 3, 5 o 7, resta sempre 1. Quindi in 211 c’è un fattore primo che <b>non</b> è nella lista. (Qui 211 stesso è un numero primo.)
+                Funziona con ogni lista. Per questo nessuna lista è completa, e i numeri primi sono infiniti.</p>
+                <p>Attenzione: il nuovo numero non deve essere per forza primo. $2 \cdot 3 \cdot 5 \cdot 7 \cdot 11 \cdot 13 + 1 = 30\,031 = 59 \cdot 509$. Ma anche 59 e 509 non erano nella lista.</p>
+                <p>In molti hanno cercato una <b>formula</b> che produca solo numeri primi. Leonhard Euler trovò $n^2 + n + 41$: per $n = 0, 1, 2, \ldots, 39$ vengono solo numeri primi.
+                    Ma per $n = 40$ si ottiene $1681 = 41 \cdot 41$. Una formula per tutti i numeri primi non l’ha trovata ancora nessuno.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · INFINITI NUMERI PRIMI</div>
+                <div class="b-text">
+                    <p><b>Teorema (Euclide):</b> non esiste un numero primo più grande di tutti.</p>
+                    <p><b>Idea della dimostrazione:</b> per ogni lista di numeri primi, (prodotto di tutti) $+ 1$ non è divisibile per nessuno di loro. I suoi fattori primi sono quindi numeri primi nuovi.</p>
+                    <p><b>Primi gemelli</b> sono numeri primi a distanza 2: $(3, 5)$, $(5, 7)$, $(11, 13)$, $(17, 19)$ … Se siano infiniti, nessuno lo sa.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Numeri perfetti</b> sono uguali alla somma dei loro divisori propri: $6 = 1 + 2 + 3$, $28 = 1 + 2 + 4 + 7 + 14$.</p>
+            <p class="b-note"><b>Numeri amicabili:</b> i divisori propri di 220 danno insieme 284, quelli di 284 danno 220.</p>
+            <p class="b-note"><b>Numeri primi in internet:</b> moltiplicare due grandi numeri primi è facile. Ritrovarli partendo dal prodotto è estremamente difficile. Su questo si basa il metodo RSA (1977), con cui si cifrano i dati.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · CONTROLLARE IL NUMERO DI EUCLIDE</div>
+        <p class="b-help" style="margin:0 0 12px">$2310 = 2 \cdot 3 \cdot 5 \cdot 7 \cdot 11$ e accanto $2311$. Hanno un divisore comune? Prova anche $210$ e $211$.</p>
+        <div data-widget="primfaktor6" data-a="2310" data-b="2311"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · L’ALGORITMO DI EUCLIDE</div>
+            <div class="b-text"><p>Trova il MCD di 84 e 360 senza i fattori primi: dividi con il resto finché non resta più niente.</p></div>
+            <div class="b-sol"><p>$360 = 4 \cdot 84 + 24$ · $84 = 3 \cdot 24 + 12$ · $24 = 2 \cdot 12 + 0$. L’ultimo divisore è il MCD.</p>
+                <p><span class="b-res">MCD$(84, 360) = 12$</span>. Questo algoritmo si può programmare facilmente.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · NUMERI AMICABILI</div>
+            <div class="b-text"><p>Verifica che 220 e 284 sono amicabili.</p></div>
+            <div class="b-sol"><p>Divisori di 220 senza 220: $1 + 2 + 4 + 5 + 10 + 11 + 20 + 22 + 44 + 55 + 110 = 284$.</p>
+                <p>Divisori di 284 senza 284: $1 + 2 + 4 + 71 + 142 =$ <span class="b-res">$220$</span> ✓</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Trova tutti i primi gemelli minori di 100.</p></div>
+            <div class="b-sol"><p>$(3, 5)$, $(5, 7)$, $(11, 13)$, $(17, 19)$, $(29, 31)$, $(41, 43)$, $(59, 61)$, $(71, 73)$: otto coppie.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola $n^2 + n + 41$ per $n = 0, 1, 2, 3, 4$. Sono numeri primi? Controlla anche $n = 40$ e $n = 41$.</p></div>
+            <div class="b-sol"><p>41, 43, 47, 53, 61: tutti primi. $n = 40$: $1681 = 41^2$. $n = 41$: $1763 = 41 \cdot 43$. La formula non funziona più.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Mostra che 28 è un numero perfetto. 12 è perfetto? 8 è perfetto?</p></div>
+            <div class="b-sol"><p>$1 + 2 + 4 + 7 + 14 = 28$ ✓. Per 12: $1 + 2 + 3 + 4 + 6 = 16$, troppo. Per 8: $1 + 2 + 4 = 7$, troppo poco.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Trova con l’algoritmo di Euclide: a) MCD$(48, 180)$ &nbsp; b) MCD$(91, 119)$</p></div>
+            <div class="b-sol"><p>a) $180 = 3 \cdot 48 + 36$, $48 = 1 \cdot 36 + 12$, $36 = 3 \cdot 12$: MCD 12 &nbsp; b) $119 = 1 \cdot 91 + 28$, $91 = 3 \cdot 28 + 7$, $28 = 4 \cdot 7$: MCD 7</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>La dimostrazione di Euclide con la lista 3, 5: $3 \cdot 5 + 1 = 16$. Il 16 non è un numero primo. Contraddice la dimostrazione?</p></div>
+            <div class="b-hint"><p>Quali fattori primi ha 16? Sono nella lista?</p></div>
+            <div class="b-sol"><p>No. $16 = 2^4$, e il 2 non era nella lista. La dimostrazione dice solo: c’è un fattore primo che non è nella lista. Qui è il 2.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="211" data-ph="numero"><p class="b-q-text">Quanto fa $2 \cdot 3 \cdot 5 \cdot 7 + 1$?</p><div class="b-sol"><p>$210 + 1 = 211$</p></div></div>
+        <div class="b-q" data-ans="1681" data-ph="numero"><p class="b-q-text">Quanto dà $n^2 + n + 41$ per $n = 40$?</p><div class="b-sol"><p>$1600 + 40 + 41 = 1681 = 41^2$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="quante"><p class="b-q-text">Quante coppie di primi gemelli ci sono sotto 100?</p><div class="b-sol"><p>Otto coppie.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Due autobus partono insieme alle 8:00. L’autobus A torna ogni 12 minuti, l’autobus B ogni 18 minuti. Quando ripartono di nuovo insieme?</p></div>
+            <div class="b-sol"><p>mcm$(12, 18) = 36$. Alle 8:36.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con il capitolo 1.1:</b> quali frazioni $\tfrac{1}{n}$ con $n$ da 2 a 50 danno numeri decimali limitati? Usa i fattori primi dei denominatori.</p></div>
+            <div class="b-sol"><p>Solo i denominatori fatti di 2 e 5: 2, 4, 5, 8, 10, 16, 20, 25, 32, 40, 50.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Bisogna posare un rettangolo di 72 piastrelle quadrate uguali. Quanti rettangoli diversi ci sono? Quale si avvicina di più a un quadrato?</p></div>
+            <div class="b-sol"><p>Divisori di 72: 1, 2, 3, 4, 6, 8, 9, 12, 18, 24, 36, 72. Quindi 6 rettangoli: 1 × 72, 2 × 36, 3 × 24, 4 × 18, 6 × 12, 8 × 9. Il più simile a un quadrato: 8 × 9.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Le cicale nordamericane del genere <i>Magicicada</i> escono dalla terra solo ogni 13 o ogni 17 anni. Chi le studia ipotizza che i cicli di numeri primi le proteggano dai nemici che sono numerosi ogni 2, 3 o 4 anni. In 60 anni, quante volte una cicala con ciclo di 12 anni incontra un nemico con ciclo di 4 anni, e quante volte una cicala con ciclo di 13 anni?</p></div>
+            <div class="b-hint"><p>Gli anni in comune sono i multipli comuni.</p></div>
+            <div class="b-sol"><p>Cicala con ciclo di 12 anni: mcm$(12, 4) = 12$, quindi negli anni 12, 24, 36, 48, 60: cinque volte. Cicala con ciclo di 13 anni: mcm$(13, 4) = 52$, quindi una volta sola. Se il motivo sia davvero questo non è ancora chiarito con certezza.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: il più grande numero primo conosciuto" data-toc-k="X" data-toc-short="Record">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">LA RICERCA OGGI</span></div>
+    <h2>Il più grande numero primo conosciuto</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>I numeri primi sono infiniti, ma naturalmente non li conosciamo tutti. Il più grande conosciuto è $2^{136\,279\,841} - 1$. Ha <b>41 024 320 cifre</b>.
+                L’ha trovato il 12 ottobre 2024 lo statunitense <b>Luke Durant</b>. Partecipava al progetto GIMPS, in cui tante persone fanno cercare insieme numeri primi ai loro computer.
+                Per farlo ha usato molti processori grafici noleggiati nei centri di calcolo.</p>
+            <p>I numeri della forma $2^p - 1$ si chiamano <b>numeri di Mersenne</b>, dal nome del frate francese Marin Mersenne. Per loro esiste un test particolarmente veloce, per questo quasi tutti i numeri primi da record hanno questa forma.
+                Nell’autunno 2026 nessuno ne ha ancora trovato uno più grande.</p>
+            <p><b>Fai il conto:</b> in una pagina di un libro stanno circa 3000 cifre. Quante pagine servirebbero per stampare il numero? E quanti libri da 500 pagine ciascuno?</p>
+            <div class="b-sol"><p>$41\,024\,320 : 3000 \approx 13\,700$ pagine, cioè circa 27 grossi libri.</p></div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonti:</b> GIMPS, «Mersenne Prime Discovery – 2^136279841−1 is Prime!», mersenne.org (ottobre 2024). Euclide, Elementi, libro IX, proposizione 20 (infiniti numeri primi).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>NUMERO PRIMO</h4><p>esattamente due divisori, l’1 non lo è</p></div>
+        <div><p>$2, 3, 5, 7, 11, 13, \ldots$</p></div></div>
+    <div class="b-rueck"><div><h4>CRIVELLO</h4><p>il più piccolo numero rimasto è primo, cancellare i suoi multipli</p></div>
+        <div><p>fino a 100: 25 numeri primi</p></div></div>
+    <div class="b-rueck"><div><h4>FATTORI PRIMI</h4><p>ogni numero in un solo modo come prodotto di numeri primi · da qui MCD e mcm</p></div>
+        <div><p>$360 = 2^3 \cdot 3^2 \cdot 5$</p></div></div>
+    <div class="b-rueck"><div><h4>EUCLIDE</h4><p>prodotto di una lista più 1: nuovi fattori primi, quindi nessun numero primo più grande di tutti</p></div>
+        <div><p>$2 \cdot 3 \cdot 5 \cdot 7 + 1 = 211$</p></div></div>
+    <div class="b-rueck"><div><h4>DOMANDE APERTE</h4><p>una formula per i numeri primi? Infiniti primi gemelli?</p></div>
+        <div><p>$n^2 + n + 41$ non funziona per $n = 40$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · NUMERI PRIMI</div>
+            <div class="b-q" data-ans="17" data-ph="numero"><p class="b-q-text">$221 = 13 \cdot x$. Quanto vale $x$?</p><div class="b-sol"><p>$221 : 13 = 17$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="quanti"><p class="b-q-text">Quanti fattori primi (contando le ripetizioni) ha $48 = 2^4 \cdot 3$?</p><div class="b-sol"><p>$2, 2, 2, 2, 3$: cinque.</p></div></div>
+            <div class="b-q" data-ans="97" data-ph="numero"><p class="b-q-text">Qual è il numero primo più grande sotto 100?</p><div class="b-sol"><p>97</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · MCD, MCM E ALTRO</div>
+            <div class="b-q" data-ans="72" data-ph="mcm"><p class="b-q-text">mcm di 24 e 36?</p><div class="b-sol"><p>$2^3 \cdot 3^2 = 72$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="MCD"><p class="b-q-text">MCD di 91 e 119?</p><div class="b-sol"><p>Algoritmo di Euclide: 7</p></div></div>
+            <div class="b-q" data-ans="28" data-ph="numero"><p class="b-q-text">Qual è il secondo numero perfetto più piccolo?</p><div class="b-sol"><p>$28 = 1 + 2 + 4 + 7 + 14$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRO DA PROVARE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="kreisteilung" href="../../kreisteilung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIVIDERE IL CERCHIO</span><span class="b-lab-what">Come la formula dei numeri primi: uno schema che d’improvviso si rompe</span></span></a>
+        <a class="b-lab" data-lab="collatz" href="../../collatz.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COLLATZ</span><span class="b-lab-what">Un altro enigma sui numeri ancora irrisolto</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Gymnasium, 6ª classe · area opzionale 3 secondo il programma di matematica del Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-it/geometrie.js"></script>
+<script src="../../js/buch-gy6.js"></script>
+<script src="../../js/buch-it/gy6.js"></script>
+</body>
+</html>

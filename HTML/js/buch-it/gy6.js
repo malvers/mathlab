@@ -390,7 +390,7 @@ window.BuchIT && BuchIT.add('gy6', {
             (m, t) => 'Già $' + t + '$ è maggiore di 100. Tutto quello che resta è un numero primo. <b>Fatto: 25 numeri primi fino a 100.</b>'],
         [/Die \$(\d+)\$ ist nicht gestrichen, also eine Primzahl\. Gestrichen werden ihre Vielfachen ab \$([^$]+)\$: (\d+) Zahlen \(/g,
             (m, p, q, n) => 'Il $' + p + '$ non è cancellato, quindi è un numero primo. Si cancellano i suoi multipli a partire da $' + q + '$: ' + n + ' numeri ('],
-        [/Gefunden: (\d+) Primzahlen\. Gestrichen: /g, 'Trovati: $1 numeri primi. Cancellati: '],
+        [/Gefunden: (\d+) Primzahlen\. Gestrichen: /g, (m, n) => (n === '1' ? 'Trovato: 1 numero primo' : 'Trovati: ' + n + ' numeri primi') + '. Cancellati: '],
 
         // book it-16 mathe6-it:
 
