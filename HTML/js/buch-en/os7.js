@@ -16,7 +16,7 @@
             'Titelbild: ein Hunderterfeld mit 25 hellen Feldern, ein Parkett aus Sechsecken, ein Zahlenstrahl von minus 3 bis 3, ein Prisma und ein Kreisdiagramm':
                 'Cover: a hundred square with 25 lit cells, a tiling of hexagons, a number line from minus 3 to 3, a prism and a pie chart',
             // tageszinsos7
-            'Kapital $K$': 'Capital $K$', 'Zinssatz $p\\,\\%$': 'Interest rate $p\\,\\%$', 'Tage $t$': 'Days $t$', 'Jahr': 'Year', '360 Tage': '360 days',
+            'Kapital $K$': 'Capital $K$', 'Zinssatz $p\\,\\%$': 'Interest rate $p\\%$', 'Tage $t$': 'Days $t$', 'Jahr': 'Year', '360 Tage': '360 days',
             'Bei Banken hat ein Zinsjahr meist 360 Tage und jeder Monat 30 Tage. Gerundet wird erst am Ende auf ganze Cent.':
                 'At banks an interest year usually has 360 days and every month 30 days. Rounding to whole cents only happens at the end.',
             // dichteos7 (Holz as in os10, Stoff as in gy7)

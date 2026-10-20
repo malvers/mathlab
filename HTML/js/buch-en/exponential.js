@@ -12,9 +12,9 @@ window.BuchEN && BuchEN.add('exponential', {
         // wachstumsmodell
         'beschränkt': 'bounded', 'logistisch': 'logistic',
         'Sparschwein: 50 € am Anfang, jede Woche kommen 20 € dazu.': 'Piggy bank: €50 at the start, and €20 is added every week.',
-        'Bakterienkultur: 200 Bakterien, jede Stunde 30 % mehr.': 'Culture of bacteria: 200 bacteria, 30 % more every hour.',
+        'Bakterienkultur: 200 Bakterien, jede Stunde 30 % mehr.': 'Culture of bacteria: 200 bacteria, 30% more every hour.',
         'Ein Getränk aus dem Kühlschrank (6 °C) erwärmt sich auf Raumtemperatur (22 °C). Pro Minute schrumpft der Abstand zur Raumtemperatur um 15 %.':
-            'A drink from the fridge (6 °C) warms up to room temperature (22 °C). Every minute the distance to room temperature shrinks by 15 %.',
+            'A drink from the fridge (6 °C) warms up to room temperature (22 °C). Every minute the distance to room temperature shrinks by 15%.',
         'Ein Gerücht an einer Schule mit 800 Schülerinnen und Schülern: Am Anfang kennen es 10.': 'A rumour at a school with 800 students: at the start 10 know it.',
         'Betrag in €': 'Amount in €', 'Anzahl': 'Number', 'Temperatur in °C': 'Temperature in °C', 'kennen es': 'know it',
         'Zunahme $d$ pro Schritt': 'Increase $d$ per step', 'Wachstumsfaktor $q$': 'Growth factor $q$',
@@ -35,9 +35,9 @@ window.BuchEN && BuchEN.add('exponential', {
         'Zwei Funktionen und ihre Verknüpfung': 'Two functions and their combination', 'Ergebnis': 'Result',
         // expanwendung
         'Sparen': 'Saving', 'Wochen': 'weeks', 'Minuten': 'minutes', 'Medikament': 'Drug', 'Bakterien': 'Bacteria', 'Sachverhalt': 'Situation',
-        '2000 € werden mit 3 % pro Jahr verzinst.': '€2000 earns 3 % interest per year.',
+        '2000 € werden mit 3 % pro Jahr verzinst.': '€2000 earns 3% interest per year.',
         'Kohlenstoff-14 zerfällt mit einer Halbwertszeit von 5730 Jahren.': 'Carbon-14 decays with a half-life of 5730 years.',
-        '400 mg eines Wirkstoffs, der Körper baut pro Stunde 20 % ab.': '400 mg of an active ingredient; the body breaks down 20 % of it every hour.',
+        '400 mg eines Wirkstoffs, der Körper baut pro Stunde 20 % ab.': '400 mg of an active ingredient; the body breaks down 20% of it every hour.',
         '500 Bakterien, die Anzahl verdoppelt sich alle 3 Stunden.': '500 bacteria; the number doubles every 3 hours.',
         'Zielwert $Z$': 'Target value $Z$', 'Wachstums- oder Zerfallskurve mit Zielwert': 'Curve of growth or decay with a target value',
         't in Jahre': 't in years', 't in Stunden': 't in hours',

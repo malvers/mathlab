@@ -76,7 +76,7 @@
         '⇄ Seiten tauschen': '⇄ swap sides', 'Rechteck': 'Rectangle', 'Umfang': 'Perimeter', 'Geschwindigkeit': 'Speed', 'Dichte': 'Density', 'Pyramide': 'Pyramid',
         'Formel': 'Formula', 'Nächster Schritt': 'Next step', 'umstellen nach': 'rearrange for',
         // prozent7
-        'Grundwert $G$': 'Base value $G$', 'Prozentsatz $p\\,\\%$': 'Percentage rate $p\\,\\%$', 'Änderung um': 'Change by',
+        'Grundwert $G$': 'Base value $G$', 'Prozentsatz $p\\,\\%$': 'Percentage rate $p\\%$', 'Änderung um': 'Change by',
         'Danach um denselben Prozentsatz zurück': 'Then back by the same percentage', 'Balken vor und nach der Änderung': 'Bars before and after the change',
         'Steigerung': 'increase', 'Senkung': 'decrease', 'Nicht': 'Not',
         // diagramm7
