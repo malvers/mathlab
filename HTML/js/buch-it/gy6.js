@@ -188,6 +188,19 @@ window.BuchIT && BuchIT.add('gy6', {
         'Probe: Einsetzen ergibt eine wahre Aussage.': 'Verifica: sostituendo si ottiene un’uguaglianza vera.',
         'Die linke Seite ist zu klein.': 'Il primo membro è troppo piccolo.', 'kleiner': 'minore', 'größer': 'maggiore',
         'Die linke Seite ist zu groß.': 'Il primo membro è troppo grande.',
+        // pfeile6
+        'Schüler → Vorname': 'Alunno → nome', 'Vorname → Schüler': 'Nome → alunno', 'Schüler → Sitzplatz': 'Alunno → posto',
+        'Zahl → Teiler': 'Numero → divisore', 'Zahl → Doppeltes': 'Numero → doppio', 'Zahl → Rest bei : 3': 'Numero → resto nella divisione per 3',
+        'Zuordnung': 'Corrispondenza', 'Platz 1': 'Posto 1', 'Platz 2': 'Posto 2', 'Platz 3': 'Posto 3', 'Platz 4': 'Posto 4',
+        'Welche Art von Zuordnung ist das?': 'Che tipo di corrispondenza è?',
+        'mehrdeutig': 'non univoca', 'eindeutig': 'univoca', 'eineindeutig': 'biunivoca', 'eindeutig, aber nicht eineindeutig': 'univoca, ma non biunivoca',
+        'Richtig:': 'Giusto:', 'Nicht ganz.': 'Non proprio.',
+        // darstellung6
+        'Kerze': 'Candela', 'Temperatur': 'Temperatura', 'Fahrradverleih': 'Noleggio bici', 'Zeile wählen': 'Scegli una riga',
+        'Zeit in h': 'Tempo in h', 'Höhe in cm': 'Altezza in cm', 'Uhrzeit': 'Ora', 'Temperatur in °C': 'Temperatura in °C',
+        'Leihzeit in h': 'Noleggio in h', 'Preis in €': 'Prezzo in €',
+        'Wortform:': 'A parole:', 'Tabelle:': 'Tabella:', 'Gleichung:': 'Equazione:',
+        'Keine. Die Temperatur kann man nur messen, nicht ausrechnen.': 'Nessuna. La temperatura si può solo misurare, non calcolare.',
 
         // book it-17 mathe7-it:
 
@@ -392,6 +405,29 @@ window.BuchIT && BuchIT.add('gy6', {
         ['Gesucht sind alle Zahlen, für die die linke Seite kleiner als $', 'Si cercano tutti i numeri per cui il primo membro è minore di $'],
         ['Gesucht sind alle Zahlen, für die die linke Seite größer als $', 'Si cercano tutti i numeri per cui il primo membro è maggiore di $'],
         ['Es passen: ', 'Vanno bene: '], ['Bisher passt keiner.', 'Finora non va bene nessuno.'],
+        // pfeile6
+        ['Pfeildarstellung: ', 'Diagramma a frecce: '],
+        ['Schüler → Vorname', 'Alunno → nome'], ['Vorname → Schüler', 'Nome → alunno'], ['Schüler → Sitzplatz', 'Alunno → posto'],
+        ['Zahl → Teiler', 'Numero → divisore'], ['Zahl → Doppeltes', 'Numero → doppio'], ['Zahl → Rest bei : 3', 'Numero → resto nella divisione per 3'],
+        ['Die Zuordnung ist mehrdeutig. ', 'La corrispondenza non è univoca. '],
+        ['Die Zuordnung ist eindeutig, aber nicht eineindeutig. ', 'La corrispondenza è univoca, ma non biunivoca. '],
+        ['Die Zuordnung ist eineindeutig. ', 'La corrispondenza è biunivoca. '],
+        ['Die Zuordnung ist ', 'La corrispondenza è '],
+        ['Von jedem Element links geht genau ein Pfeil aus, und rechts kommt bei jedem genau ein Pfeil an. Auch rückwärts ist die Zuordnung eindeutig.',
+            'Da ogni elemento a sinistra parte esattamente una freccia, e a destra a ognuno arriva esattamente una freccia. Anche all’indietro la corrispondenza è univoca.'],
+        ['Von jedem Element links geht genau ein Pfeil aus. ', 'Da ogni elemento a sinistra parte esattamente una freccia. '],
+        ['<b>mehrdeutig:</b> von einem Element gehen mehrere Pfeile aus. <b>eindeutig:</b> von jedem genau einer. <b>eineindeutig:</b> eindeutig, und auch rückwärts eindeutig.',
+            '<b>non univoca:</b> da un elemento partono più frecce. <b>univoca:</b> da ognuno ne parte esattamente una. <b>biunivoca:</b> univoca, e univoca anche all’indietro.'],
+        // darstellung6
+        ['Eine Kerze ist 20 cm hoch. Jede Stunde brennt sie 2,5 cm herunter.', 'Una candela è alta 20 cm. Ogni ora si consuma di 2,5 cm.'],
+        ['An einem Herbsttag wird alle zwei Stunden die Temperatur gemessen.', 'In un giorno d’autunno si misura la temperatura ogni due ore.'],
+        ['Ein Fahrrad kostet 3 € pro Stunde Leihzeit.', 'Noleggiare una bici costa 3 € all’ora.'],
+        ['Diagramm: ', 'Grafico: '], ['Gewählt: ', 'Selezionato: '],
+        ['Die Kerze brennt gleichmäßig, auch zwischen den vollen Stunden. Darum darf man die Punkte mit einer Linie verbinden.',
+            'La candela si consuma in modo regolare, anche tra un’ora e l’altra. Per questo si possono collegare i punti con una linea.'],
+        ['Die gestrichelte Linie verbindet nur die Messpunkte. Was dazwischen geschah, weiß man nicht genau.',
+            'La linea tratteggiata collega solo i punti misurati. Che cosa sia successo nel frattempo non si sa con precisione.'],
+        ['Abgerechnet wird nur nach ganzen Stunden, darum gibt es nur einzelne Punkte.', 'Si pagano solo ore intere, perciò ci sono solo punti isolati.'],
 
         // book it-17 mathe7-it:
 
@@ -494,6 +530,12 @@ window.BuchIT && BuchIT.add('gy6', {
             (m, r, x) => 'Si cercano tutti i numeri per cui il primo membro è ' + (r === 'kleiner' ? 'minore' : 'maggiore') + ' di ' + x + '.'],
         [/(\$[^$]*\$), und (\$[^$]*\$)<\/p>/g, '$1, e $2</p>'],
         [/Geprüft: (\d+) von (\d+) Werten\. /g, (m, a, b) => (a === '1' ? 'Verificato: 1 valore su ' : 'Verificati: ' + a + ' valori su ') + b + '. '],
+        // pfeile6
+        [/Von „([^“]+)“ gehen (\d+) Pfeile aus\./g, 'Da «$1» partono $2 frecce.'],
+        [/Bei „([^“]+)“ kommen aber (\d+) Pfeile an, rückwärts ist die Zuordnung also nicht eindeutig\./g,
+            'Ma a «$1» arrivano $2 frecce, quindi all’indietro la corrispondenza non è univoca.'],
+        // darstellung6: "Gewählt: Uhrzeit 12 → Temperatur 14."
+        [/Gewählt: Uhrzeit /g, 'Gewählt: ora '], [/ → Temperatur /g, ' → temperatura '],
 
         // book it-17 mathe7-it:
 
