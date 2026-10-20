@@ -83,6 +83,8 @@ window.BuchIT && BuchIT.add('analysis', {
         // book it-4 mathefos11-it:
 
         // book it-5 mathefos12-it:
+        'Titelbild: Exponentialkurve mit Hochpunkt, Wendetangente und Rechtecken darunter, eine Hyperbel mit Asymptoten und ein Parallelogramm im Raum mit seinem Vektorprodukt':
+            'Copertina: curva esponenziale con punto di massimo, tangente di flesso e rettangoli sotto, un’iperbole con i suoi asintoti e un parallelogramma nello spazio con il suo prodotto vettoriale',
 
         // book it-6 mathegy11-it:
         // bruchfunktion
