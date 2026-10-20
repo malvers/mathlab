@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica GY 10 · Capitolo 2.1 · Variabili aleatorie e regole dei percorsi | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Distribuzioni di probabilità, diagramma a barre, «esattamente k», «almeno k», «al massimo k». Capitolo 2.1 del libro di testo interattivo Matematica · Gymnasium 10: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · GYMNASIUM 10</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 2.1 · AREA DI APPRENDIMENTO 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 2.1 · AREA DI APPRENDIMENTO 2 · NOVEMBRE</p>
+            <h1>Variabili aleatorie e regole dei percorsi</h1>
+            <p class="b-hero-lead">Chi lancia due dadi raramente si interessa alla coppia; quasi sempre gli interessa un <b>numero</b>: la somma dei punti, la vincita, il numero di sei.
+                Questi numeri si chiamano <b>variabili aleatorie</b>. Scriverai la loro distribuzione di probabilità, calcolerai con diagrammi ad albero e regole dei percorsi
+                e imparerai che cosa significano nel calcolo delle probabilità «esattamente», «almeno» e «al massimo».</p>
+            <div class="b-chips"><span class="b-chip">8 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">3 LABORATORI</span><span class="b-chip">GIOCHI</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>definire una <b>variabile aleatoria</b> e determinarne i valori possibili</li>
+                <li>scrivere una <b>distribuzione di probabilità</b> e rappresentarla come tabella, diagramma a barre o istogramma</li>
+                <li>calcolare probabilità di esperimenti a più stadi con il <b>diagramma ad albero</b>, le <b>regole dei percorsi</b> e il <b>conteggio</b></li>
+                <li>formulare con precisione eventi come «esattamente $k$», «almeno $k$» e «al massimo $k$» e calcolarli, anche attraverso l’<b>evento contrario</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="1/6" data-ph="per es. 1/6"><p class="b-q-text">Qual è la probabilità di ottenere un sei con un dado?</p><div class="b-sol"><p>$\tfrac16$</p></div></div>
+            <div class="b-q" data-ans="1/4" data-ph="frazione"><p class="b-q-text">Si lancia una moneda due volte. Che probabilità c’è di ottenere due volte testa?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12 = \tfrac14$</p></div></div>
+            <div class="b-q" data-ans="5/6" data-ph="frazione"><p class="b-q-text">Che probabilità c’è di <b>non</b> ottenere un sei con un dado?</p><div class="b-sol"><p>$1 - \tfrac16 = \tfrac56$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quanti esiti ci sono lanciando un dado rosso e uno blu?</p><div class="b-mc"><button>$12$</button><button>$21$</button><button>$36$</button></div><div class="b-sol"><p>$6 \cdot 6 = 36$ coppie</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">SOMME DI DADI</div>
+            <div class="b-text"><p>Lanciate due dadi cento volte e annotate ogni volta la somma dei punti.</p>
+                <ul><li>Quale somma esce più spesso e quale meno? Perché?</li><li>Disegnate le vostre frequenze in un diagramma a colonne.</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">ALMENO UN SEI</div>
+            <div class="b-text"><p>Scommettete che in $n$ lanci esca almeno un sei.</p>
+                <ul><li>Da quale $n$ in poi conviene la scommessa, cioè vincete più spesso di quanto perdete? Prima stimatelo, poi provatelo.</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">IL GIOCO DEI DADI</span><span class="b-lab-what">Diagramma ad albero e regole dei percorsi (in tedesco)</span></span></a></div>
+        <div class="b-box b-erk"><div class="b-box-title">TIRARE A INDOVINARE IN UN TEST</div>
+            <div class="b-text"><p>Un test ha 5 domande con 4 risposte ciascuna, ed esattamente una è corretta. Qualcuno segna tutto a caso.</p>
+                <ul><li>Che probabilità c’è di 5 risposte giuste? E di almeno 3?</li><li>Quale numero di risposte corrette è il più probabile?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Variabili aleatorie e distribuzioni" data-toc-k="1" data-toc-short="1 Distribuzioni">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Variabili aleatorie e distribuzioni</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Due dadi hanno 36 esiti ugualmente probabili, ma solo 11 somme possibili. La somma 7 si ottiene in sei modi,
+                (1, 6), (2, 5), (3, 4), (4, 3), (5, 2) e (6, 1); la somma 2 in uno solo. Per questo nell’esplorazione il 7 esce più spesso.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · VARIABILE ALEATORIA E DISTRIBUZIONE</div>
+                <div class="b-text">
+                    <p>Una <b>variabile aleatoria</b> $X$ associa a ogni esito di un esperimento aleatorio un numero reale.</p>
+                    <p>La <b>distribuzione di probabilità</b> di $X$ indica per ogni valore $x_i$ la probabilità $P(X = x_i)$. Tutte insieme danno $1$.</p>
+                    <p>Si rappresenta come <b>tabella</b>, come <b>diagramma a barre</b> (barra di lunghezza $P(X = x_i)$ sopra $x_i$) o come <b>istogramma</b> (colonne di larghezza 1, la cui area è la probabilità).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notazione:</b> $P(X = 7)$ si legge «probabilità che $X$ assuma il valore 7». $P(X \leq 3)$ riunisce tutti i valori fino a 3.</p>
+            <p class="b-note"><b>Controllo:</b> se le probabilità non danno esattamente 1, manca un valore o c’è un errore di calcolo.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · DEFINIRE UNA VARIABILE ALEATORIA</div>
+        <p class="b-help" style="margin:0 0 12px">A sinistra i 36 esiti (riga: primo dado, colonna: secondo). In ogni casella c’è il valore di $X$. A destra la distribuzione.</p>
+        <div data-widget="verteilung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · TRE MONETE</div>
+            <div class="b-text"><p>Si lanciano tre monete; $X$ è il numero di teste. Scrivi la distribuzione.</p></div>
+            <div class="b-sol"><p>8 esiti ugualmente probabili: CCC · TCC, CTC, CCT · TTC, TCT, CTT · TTT.</p>
+                <p><span class="b-res">$P(X = 0) = \tfrac18$, $P(X = 1) = \tfrac38$, $P(X = 2) = \tfrac38$, $P(X = 3) = \tfrac18$</span>; insieme $\tfrac88 = 1$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · LA VINCITA COME VARIABILE ALEATORIA</div>
+            <div class="b-text"><p>Una ruota della fortuna costa 1 € di puntata. Con probabilità $\tfrac12$ non si riceve nulla, con $\tfrac14$ la puntata, con $\tfrac14$ 5 €. $X$ è il guadagno.</p></div>
+            <div class="b-sol"><p>Guadagno = vincita − puntata: $X$ assume i valori $-1$, $0$ e $4$ con $\tfrac12$, $\tfrac14$, $\tfrac14$.</p>
+                <p>Guadagnare qualcosa: <span class="b-res">$P(X > 0) = P(X = 4) = \tfrac14$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Due dadi; $X$ è la somma dei punti. Calcola $P(X = 7)$, $P(X = 2)$ e $P(X \geq 10)$.</p></div>
+            <div class="b-sol"><p>$\tfrac{6}{36} = \tfrac16$, $\;\tfrac{1}{36}$, $\;\tfrac{3 + 2 + 1}{36} = \tfrac16$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ è il punteggio più alto di due dadi. Scrivi la distribuzione (il widget aiuta).</p></div>
+            <div class="b-sol"><p>$P(X = k) = \tfrac{2k - 1}{36}$: $\tfrac{1}{36}$, $\tfrac{3}{36}$, $\tfrac{5}{36}$, $\tfrac{7}{36}$, $\tfrac{9}{36}$, $\tfrac{11}{36}$ per $k = 1, \ldots, 6$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Da un’urna con 3 palline rosse e 2 blu se ne estraggono due senza reimmissione. $X$ è il numero di palline rosse. Scrivi la distribuzione.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac25 \cdot \tfrac14 = \tfrac{1}{10}$, $P(X = 2) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$, $P(X = 1) = 1 - \tfrac{1}{10} - \tfrac{3}{10} = \tfrac{6}{10}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>È una distribuzione di probabilità? a) valori 1, 2, 3, 4 con 0,1; 0,35; 0,4; 0,2 &nbsp; b) gli stessi valori con 0,25; 0,25; 0,3; 0,2</p></div>
+            <div class="b-sol"><p>a) No, la somma è $1{,}05$. &nbsp; b) Sì, tutti i valori stanno tra 0 e 1 e la somma è 1.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$X$ è la differenza tra i due punteggi di due dadi (il maggiore meno il minore). Scrivi la distribuzione. Quale valore è il più probabile?</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac{6}{36}$, $P(X = 1) = \tfrac{10}{36}$, $P(X = 2) = \tfrac{8}{36}$, $P(X = 3) = \tfrac{6}{36}$, $P(X = 4) = \tfrac{4}{36}$, $P(X = 5) = \tfrac{2}{36}$. Il più probabile è <span class="b-res">la differenza 1</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="1/6" data-ph="frazione"><p class="b-q-text">Due dadi: quanto vale $P(\text{somma} = 7)$?</p><div class="b-sol"><p>$\tfrac{6}{36} = \tfrac16$</p></div></div>
+        <div class="b-q" data-ans="3/8" data-ph="frazione"><p class="b-q-text">Tre monete, $X$ = numero di teste. Quanto vale $P(X = 2)$?</p><div class="b-sol"><p>TTC, TCT, CTT: $\tfrac38$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quale tabella è una distribuzione di probabilità?</p><div class="b-mc"><button>$0{,}5$; $0{,}3$; $0{,}3$</button><button>$0{,}2$; $0{,}5$; $0{,}3$</button><button>$0{,}6$; $0{,}6$; $-0{,}2$</button></div><div class="b-sol"><p>Tutti i valori tra 0 e 1, e la somma esattamente 1.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Regole dei percorsi e conteggio" data-toc-k="2" data-toc-short="2 Percorsi">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Regole dei percorsi e metodi di conteggio</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Almeno un sei in quattro lanci: sono moltissimi percorsi nell’albero. Il contrario è un solo percorso, «quattro volte nessun sei»,
+                con probabilità $\left(\tfrac56\right)^4 \approx 0{,}482$. Quindi $P(\text{almeno un sei}) = 1 - 0{,}482 \approx 0{,}518$. Da quattro lanci in poi la scommessa conviene.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · REGOLE DEI PERCORSI E CONTEGGIO</div>
+                <div class="b-text">
+                    <p><b>Regola del prodotto:</b> la probabilità di un percorso è il prodotto delle probabilità lungo il percorso.</p>
+                    <p><b>Regola della somma:</b> la probabilità di un evento è la somma delle probabilità di tutti i percorsi che gli appartengono.</p>
+                    <p><b>Conteggio:</b> se tutti i percorsi di un evento hanno la stessa probabilità, si calcola numero di percorsi per probabilità del percorso. Con $n$ stadi successo/insuccesso ci sono $\binom{n}{k}$ percorsi con esattamente $k$ successi (calcolatrice grafica: <code>nCr</code>).</p>
+                    <p>«almeno $k$»: $P(X \geq k)$ · «al massimo $k$»: $P(X \leq k)$ · «almeno uno»: $1 - P(\text{nessuno})$, l’<b>evento contrario</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Tradurre:</b> «più di 2» significa $X \geq 3$; «meno di 2» $X \leq 1$; «non più di 2» $X \leq 2$.</p>
+            <p class="b-note"><b>Senza reimmissione</b> le probabilità cambiano da uno stadio all’altro; con reimmissione restano uguali.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · LABORATORIO DEI DIAGRAMMI AD ALBERO</div>
+        <p class="b-help" style="margin:0 0 12px">Imposta l’urna, scegli con o senza reimmissione e un evento. I percorsi corrispondenti si illuminano.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · TIRARE A INDOVINARE IN UN TEST</div>
+            <div class="b-text"><p>5 domande, 4 risposte ciascuna, tutto a caso. $X$ è il numero di risposte corrette. Calcola $P(X = 3)$ e $P(X \geq 3)$.</p></div>
+            <div class="b-sol"><p>Un percorso con 3 risposte giuste: $0{,}25^3 \cdot 0{,}75^2 \approx 0{,}00879$. Ci sono $\binom{5}{3} = 10$ percorsi così: $P(X = 3) \approx 0{,}0879$.</p>
+                <p>$P(X \geq 3) = 0{,}0879 + 5 \cdot 0{,}25^4 \cdot 0{,}75 + 0{,}25^5 \approx$ <span class="b-res">$0{,}104$</span>, cioè poco più del 10 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · L’EVENTO CONTRARIO</div>
+            <div class="b-text"><p>Che probabilità c’è di almeno un sei in dieci lanci?</p></div>
+            <div class="b-sol"><p>Evento contrario: dieci volte nessun sei, $\left(\tfrac56\right)^{10} \approx 0{,}162$.</p>
+                <p><span class="b-res">$P(X \geq 1) = 1 - \left(\tfrac56\right)^{10} \approx 0{,}838$</span>. Senza l’evento contrario bisognerebbe sommare dieci addendi.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · ESATTAMENTE k SUCCESSI</div>
+        <p class="b-help" style="margin:0 0 12px">Tutti i percorsi con esattamente $k$ successi hanno la stessa probabilità. Basta contarli.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Si lancia una moneta tre volte. Calcola $P(\text{esattamente 2 volte testa})$, $P(\text{almeno 1 volta testa})$ e $P(\text{al massimo 1 volta testa})$.</p></div>
+            <div class="b-sol"><p>$\tfrac38$, $\;1 - \tfrac18 = \tfrac78$, $\;\tfrac18 + \tfrac38 = \tfrac12$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Urna con 3 palline rosse e 2 blu, due estrazioni <b>con</b> reimmissione. Che probabilità c’è di due rosse, e di due colori diversi?</p></div>
+            <div class="b-sol"><p>$\tfrac35 \cdot \tfrac35 = \tfrac{9}{25} = 0{,}36$; $2 \cdot \tfrac35 \cdot \tfrac25 = \tfrac{12}{25} = 0{,}48$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una giocatrice di pallacanestro segna il 70 % dei suoi tiri liberi. Tira tre volte. Che probabilità c’è di esattamente due canestri e di almeno due?</p></div>
+            <div class="b-sol"><p>$P(X = 2) = 3 \cdot 0{,}7^2 \cdot 0{,}3 = 0{,}441$; $P(X \geq 2) = 0{,}441 + 0{,}7^3 = 0{,}784$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quante volte bisogna lanciare come minimo perché, con probabilità superiore al 90 %, esca almeno un sei?</p></div>
+            <div class="b-hint"><p>$1 - \left(\tfrac56\right)^n > 0{,}9$ significa $\left(\tfrac56\right)^n < 0{,}1$. Prova valori di $n$.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac56\right)^{12} \approx 0{,}112$, $\left(\tfrac56\right)^{13} \approx 0{,}093$: <span class="b-res">13 volte</span>.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Si lancia un dado dieci volte; $X$ è il numero di sei. Scrivilo con $P(X \leq \ldots)$: a) più di 2 sei &nbsp; b) meno di 4 &nbsp; c) almeno 2, ma al massimo 5</p></div>
+            <div class="b-sol"><p>a) $1 - P(X \leq 2)$ &nbsp; b) $P(X \leq 3)$ &nbsp; c) $P(X \leq 5) - P(X \leq 1)$</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="11/36" data-ph="frazione"><p class="b-q-text">Che probabilità c’è di almeno un sei in due lanci?</p><div class="b-sol"><p>$1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div></div>
+        <div class="b-q" data-ans="0,441" data-ph="decimale"><p class="b-q-text">Percentuale di canestri del 70 %, tre tiri. Che probabilità c’è di esattamente due canestri?</p><div class="b-sol"><p>$3 \cdot 0{,}49 \cdot 0{,}3 = 0{,}441$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">«Al massimo 2 successi» significa …</p><div class="b-mc"><button>$X \leq 2$</button><button>$X < 2$</button><button>$X \geq 2$</button></div><div class="b-sol"><p>0, 1 o 2 successi: $X \leq 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>In un’urna della lotteria ci sono 10 biglietti, e 2 sono vincenti. Peschi due biglietti. Che probabilità c’è di almeno una vincita?</p></div>
+            <div class="b-sol"><p>$1 - \tfrac{8}{10} \cdot \tfrac79 = 1 - \tfrac{56}{90} = \tfrac{17}{45} \approx 0{,}378$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Si scelgono tre persone a caso. Che probabilità c’è che almeno due siano nate nello stesso giorno della settimana? (Tutti i giorni della settimana sono ugualmente probabili.)</p></div>
+            <div class="b-sol"><p>Evento contrario «tutti diversi»: $\tfrac77 \cdot \tfrac67 \cdot \tfrac57 = \tfrac{30}{49}$. Quindi $1 - \tfrac{30}{49} = \tfrac{19}{49} \approx 0{,}388$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con il capitolo 1.1:</b> $P(\text{nessun sei in } n \text{ lanci}) = \left(\tfrac56\right)^n$. Che modello di crescita è? Dopo quanti lanci scende per la prima volta sotto $\tfrac12$?</p></div>
+            <div class="b-sol"><p>Decrescita esponenziale con il fattore $\tfrac56$. $\left(\tfrac56\right)^3 \approx 0{,}579$, $\left(\tfrac56\right)^4 \approx 0{,}482$: dopo 4 lanci, il «tempo di dimezzamento» della serie sfortunata.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dall’urna con 3 palline rosse e 2 blu si estrae tre volte con reimmissione. $X$ è il numero di rosse. Scrivi la distribuzione e disegna un diagramma a barre.</p></div>
+            <div class="b-sol"><p>$P(X = k) = \binom{3}{k} \cdot 0{,}6^k \cdot 0{,}4^{3 - k}$: $0{,}064$; $0{,}288$; $0{,}432$; $0{,}216$ per $k = 0, 1, 2, 3$. Somma 1.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: il problema del cavaliere de Méré" data-toc-k="X" data-toc-short="De Méré">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">STORIA</span></div>
+    <h2>Il problema del cavaliere de Méré</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Antoine Gombaud, cavaliere de Méré, giocava volentieri d’azzardo nella Parigi del XVII secolo. Sapeva per esperienza: se si scommette su almeno un sei in quattro lanci
+                di un dado, alla lunga si vince. Ne dedusse che doveva essere favorevole anche la scommessa «almeno un doppio sei in 24 lanci con due dadi»,
+                perché 4 sta a 6 come 24 sta a 36. Ma con essa perdeva.</p>
+            <p>Blaise Pascal ne scrisse nel 1654 a Pierre de Fermat. Con l’evento contrario si calcola subito: $1 - \left(\tfrac56\right)^4 \approx 0{,}518$, ma
+                $1 - \left(\tfrac{35}{36}\right)^{24} \approx 0{,}491$. La prima scommessa è appena favorevole, la seconda appena sfavorevole. La corrispondenza tra i due è considerata
+                l’inizio del calcolo delle probabilità.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> lettera di Blaise Pascal a Pierre de Fermat del 29 luglio 1654, riprodotta nelle edizioni delle opere di Pascal (Œuvres complètes) e di Fermat (Œuvres, tomo 2).</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · GIOCA TU ALLA SCOMMESSA DI MÉRÉ</div>
+        <p class="b-help" style="margin:0 0 12px">Scegli «De Méré» e fai girare la scommessa mille volte. La frequenza relativa si stabilizza su $0{,}518$.</p>
+        <div data-widget="simulation"></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>VARIABILE ALEATORIA</h4><p>Associa a ogni esito un numero: somma dei punti, guadagno, numero di successi.</p></div>
+        <div><p>Due dadi: $X$ = somma dei punti, valori da 2 a 12</p></div></div>
+    <div class="b-rueck"><div><h4>DISTRIBUZIONE</h4><p>Tutti i valori $x_i$ con $P(X = x_i)$, che danno 1. Come tabella, diagramma a barre o istogramma.</p></div>
+        <div><p>Tre monete: $\tfrac18$, $\tfrac38$, $\tfrac38$, $\tfrac18$</p></div></div>
+    <div class="b-rueck"><div><h4>REGOLE DEI PERCORSI</h4><p>Moltiplicare lungo un percorso; sommare i percorsi di un evento.</p></div>
+        <div><p>Urna 3 rosse, 2 blu, senza reimmissione: $P(RR) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div></div>
+    <div class="b-rueck"><div><h4>CONTEGGIO</h4><p>Contare percorsi ugualmente probabili: $\binom{n}{k}$ percorsi con esattamente $k$ successi.</p></div>
+        <div><p>$P(X = 3) = 10 \cdot 0{,}25^3 \cdot 0{,}75^2 \approx 0{,}088$</p></div></div>
+    <div class="b-rueck"><div><h4>ESATTAMENTE, ALMENO, AL MASSIMO</h4><p>$P(X = k)$, $P(X \geq k)$, $P(X \leq k)$. Almeno uno: $1 - P(\text{nessuno})$.</p></div>
+        <div><p>$1 - \left(\tfrac56\right)^{10} \approx 0{,}838$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="1/36" data-ph="frazione"><p class="b-q-text">Due dadi: che probabilità ha la somma 12?</p><div class="b-sol"><p>Solo (6, 6): $\tfrac{1}{36}$</p></div></div>
+            <div class="b-q" data-ans="3/4" data-ph="frazione"><p class="b-q-text">Due lanci di moneta: che probabilità c’è di al massimo una volta testa?</p><div class="b-sol"><p>$1 - P(TT) = 1 - \tfrac14 = \tfrac34$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Come si calcola più rapidamente «almeno un sei in $n$ lanci»?</p><div class="b-mc"><button>$n \cdot \tfrac16$</button><button>$\left(\tfrac16\right)^n$</button><button>$1 - \left(\tfrac56\right)^n$</button></div><div class="b-sol"><p>Attraverso l’evento contrario «nessun sei».</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="0,784" data-ph="decimale"><p class="b-q-text">Percentuale di canestri del 70 %, tre tiri: che probabilità c’è di almeno due canestri?</p><div class="b-sol"><p>$0{,}441 + 0{,}343 = 0{,}784$</p></div></div>
+            <div class="b-q" data-ans="0,518" data-tol="0.001" data-ph="tre decimali"><p class="b-q-text">Che probabilità c’è di almeno un sei in quattro lanci (con tre decimali)?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 0{,}518$</p></div></div>
+            <div class="b-q" data-ans="11/36" data-ph="frazione"><p class="b-q-text">$X$ è il punteggio più alto di due dadi. Quanto vale $P(X = 6)$?</p><div class="b-sol"><p>$\tfrac{2 \cdot 6 - 1}{36} = \tfrac{11}{36}$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">IL GIOCO DEI DADI</span><span class="b-lab-what">Diagramma ad albero e regole dei percorsi</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../tours/wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PERCORSO: CINQUE SU NOVE</span><span class="b-lab-what">Percorso guidato nel gioco dei dadi</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MACCHINA DI GALTON</span><span class="b-lab-what">Tanti percorsi, una distribuzione</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Gymnasium, 10ª classe · area di apprendimento 2 secondo il programma di matematica del Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-it/stochastik.js"></script>
+<script src="../../js/buch-spiele.js"></script>
+<script src="../../js/buch-it/spiele.js"></script>
+</body>
+</html>
