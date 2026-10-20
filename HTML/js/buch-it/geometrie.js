@@ -24,6 +24,9 @@ window.BuchIT && BuchIT.add('geometrie', {
         // titelbildgy9
         'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
             'Copertina: triangolo rettangolo con i quadrati sui suoi lati, un rettangolo aureo con spirale, un cerchio tra due esagoni e una parabola',
+        // kreisteil
+        'Radius $r$': 'Raggio $r$', 'Mittelpunktswinkel $\\alpha$': 'Angolo al centro $\\alpha$', 'Kreis mit Kreisausschnitt und Kreisbogen': 'Cerchio con settore circolare e arco',
+        'Kreisbogen': 'Arco', 'Kreisausschnitt': 'Settore circolare',
 
         // book it-16 mathe6-it:
 
@@ -46,6 +49,9 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-13 mathegy8-it:
 
         // book it-14 mathegy9-it:
+        // kreisteil
+        ['Anteil am Vollkreis: $', 'Frazione del cerchio intero: $'],
+        ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Trascina l’estremo dell’arco. Per confronto il cerchio intero: $u \\approx '],
 
         // book it-16 mathe6-it:
 
