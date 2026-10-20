@@ -548,6 +548,32 @@ Round 2, 20.10.2026 (Gianotti): decisions made while translating GY 12 LK; nothi
 
 <!-- it-15: terms of this book only, write right below this line -->
 
+Package it-15 (Cibrario), 20.10.2026: decisions made while translating GY 10; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Mathematik · Gymnasium 10 | Matematica · Gymnasium 10 | `short`: Matematica GY 10; Gymnasium explained once on the start page («liceo tedesco che porta all’Abitur», 5ª–12ª classe) |
+| Wahlbereich | area opzionale | kicker CAPITOLO OP · AREA OPZIONALE |
+| Brücke in die Oberstufe | ponte verso le classi 11 e 12 | chip of 4.5 |
+| Sinussatz, Kosinussatz, Flächeninhaltsformel | teorema dei seni, teorema del coseno, formula dell’area con il seno | 3.1 |
+| WSW, SsW, SWS, SSS | ALA, LLA, LAL, LLL | L = lato, A = angolo; LAA for SWW |
+| mehrdeutiger Fall (SsW), Umkreis | caso ambiguo, circonferenza circoscritta | 3.1 |
+| Triangulation, Vermessung | triangolazione, topografia | 3.1, 3.2 |
+| Lösungsplan, Dreieckslöser | piano di risoluzione, risolutore di triangoli | 3.2 |
+| Seitenhöhe, Seitenkante, Grundkante, Mantellinie | apotema, spigolo laterale, spigolo di base, generatrice | 3.2; widget pyramidekegel uses the same words |
+| Neigungswinkel, Öffnungswinkel, Mantelfläche | angolo di inclinazione, angolo di apertura, superficie laterale | 3.2 |
+| Cheops, Gizeh, Napier, Euler, Thales, Zenon, Heron | Cheope, Giza, Nepero (John Napier), Eulero (Leonhard Euler), Talete, Zenone, Erone | excursions |
+| Umkehrfunktion, umkehrbar, Wertebereich | funzione inversa, invertibile, insieme immagine | 4.1 |
+| Logarithmengesetze, Basiswechsel, natürlicher Logarithmus, Rechenschieber | proprietà dei logaritmi, cambiamento di base, logaritmo naturale, regolo calcolatore | 4.1 |
+| Verdopplungszeit, Halbwertszeit, Radiokarbonmethode | tempo di raddoppio, tempo di dimezzamento, metodo del radiocarbonio | 4.2 |
+| Verkettung, innere / äußere Funktion, Tangensfunktion, Polstelle | composizione, funzione interna / esterna, funzione tangente, polo | 4.3 |
+| Funktionsklasse, Steckbrief, Grundfunktion, ganzrational, gebrochenrational | classe di funzioni, carta d’identità, funzione di base, polinomiale, razionale | 4.4 |
+| Zahlenfolge, Glied, explizit, rekursiv, beschränkt, Schranke | successione numerica, termine, esplicita, ricorsiva, limitata, limite inferiore / superiore | 4.5 |
+| Grenzwert, konvergent, Nullfolge, ε-Schlauch, Parameterform | limite, convergente, successione infinitesima, striscia ε, forma parametrica | 4.5; widget: «Striscia», «Ampiezza ε della striscia» |
+| Zinsfaktor, Endkapital, Tilgungsplan, Annuitätendarlehen | fattore di capitalizzazione, montante, piano di ammortamento, prestito a rate costanti | 5; widget buttons as in the FOS rows above |
+| Dispozinsen, Inflation, Barwert | interessi di scoperto, inflazione, valore attuale | 5 |
+| Gaußsche Zahlenebene, Betrag, Argument, konjugiert komplex | piano di Gauss, modulo, argomento, complessi coniugati | OP |
+
 ## mathe6-it
 
 <!-- it-16: terms of this book only, write right below this line -->
