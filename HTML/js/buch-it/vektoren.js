@@ -53,6 +53,10 @@ window.BuchIT && BuchIT.add('vektoren', {
         // lot3d
         'Punkt über E': 'Punto sopra E', 'Ursprung': 'Origine', 'Punkt unter E': 'Punto sotto E', 'Punkt in E': 'Punto in E',
         'Spiegelpunkt P′ zeigen': 'Mostra il punto simmetrico P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Costante $d$ in $\\vec{n} \\circ \\vec{x} = d$',
+        // zentralprojektion
+        'Abstand des Auges $a$': 'Distanza dell’occhio $a$', 'Fluchtlinien zeigen': 'Mostra le linee di fuga', 'Horizont': 'Orizzonte',
+        'Zieh den Fluchtpunkt V. Er liegt auf dem Horizont in Augenhöhe.': 'Trascina il punto di fuga V. Sta sull’orizzonte, all’altezza degli occhi.',
+        'Zentralprojektion eines Quaders und einer Pfostenreihe mit Fluchtpunkt': 'Proiezione centrale di un parallelepipedo e di una fila di pali con il punto di fuga',
 
         // book it-6 mathegy11-it:
 
@@ -139,6 +143,13 @@ window.BuchIT && BuchIT.add('vektoren', {
         ['$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.', '$t = 0$: il punto $P$ giace esso stesso nel piano, la sua distanza è $0$.'],
         ['$ · ohne Lotfußpunkt: $', '$ · senza il piede della perpendicolare: $'],
         ['Spiegelpunkt: $t$ verdoppeln, $', 'Punto simmetrico: raddoppiare $t$, $'],
+        // zentralprojektion
+        ['Fluchtpunkt $V(', 'Punto di fuga $V('], [')$ · Bildebene vor dem Quader, Auge im Abstand $a = ', ')$ · piano del quadro davanti al parallelepipedo, occhio alla distanza $a = '],
+        ['$ davor', '$ davanti a esso'],
+        ['Alle Kanten, die in die Tiefe laufen, treffen sich in $V$. Kanten parallel zur Bildebene bleiben parallel und behalten ihr Verhältnis.',
+            'Tutti gli spigoli che vanno in profondità si incontrano in $V$. Gli spigoli paralleli al piano del quadro restano paralleli e mantengono le loro proporzioni.'],
+        ['Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{', 'Un palo alla profondità $z$ appare con il fattore $\\dfrac{a}{a + z}$: con $z = 8$ quindi $\\dfrac{'],
+        ['$ so hoch wie vorn.', '$ volte l’altezza che avrebbe davanti.'],
 
         // book it-6 mathegy11-it:
 

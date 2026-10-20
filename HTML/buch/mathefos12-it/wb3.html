@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica FOS 12 · Capitolo OP · Calcolo differenziale e integrale con il CAS | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Famiglie con due parametri, funzioni definite a tratti, regressione, uno sguardo alla proiezione centrale. Capitolo OP del libro di testo interattivo Matematica · Fachoberschule 12: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · FACHOBERSCHULE 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO OP · AREA OPZIONALE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO OP · AREA OPZIONALE 3 · GIUGNO</p>
+            <h1>Calcolo differenziale e integrale con il CAS</h1>
+            <p class="b-hero-lead">Dopo l’esame la calcolatrice può fare di più: un <b>sistema di calcolo simbolico</b> (CAS) deriva in modo esatto, integra con parametri e risolve equazioni con lettere.
+                Con esso studi famiglie dell’economia con due parametri, funzioni definite a tratti e serie di misure con la <b>regressione</b>.
+                E poiché l’analisi può ora lasciare il calcolo alla macchina, resta tempo per pensare: che cosa significa davvero «ottimo»?</p>
+            <div class="b-chips"><span class="b-chip">8 ORE</span><span class="b-chip">3 LEZIONI</span><span class="b-chip">GEOGEBRA CAS</span><span class="b-chip">ANTEPRIMA: LA PROSPETTIVA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x<=50 ? 12*x-300 : 12*x-0.2*(x-50)^2-300"]' data-labels='["G"]' data-lat="[105]" data-x="0,120" data-y="-350,560" data-pts="[[80,480],[50,300]]" data-xl="x in pezzi" data-yl="€" data-h="240" data-aria="Funzione profitto definita a tratti, con uno spigolo a 50 pezzi e il massimo a 80 pezzi"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>derivare e integrare in modo esatto con un <b>CAS</b> e risolvere equazioni con parametri</li>
+                <li>studiare <b>famiglie di funzioni</b> con uno o due parametri dell’economia e della tecnica</li>
+                <li>risolvere problemi di ottimizzazione con <b>funzioni definite a tratti</b> e interpretare i risultati secondo l’obiettivo</li>
+                <li>modellizzare serie di misure con la <b>regressione</b> e valutare i modelli in modo critico</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="40" data-ph="x ="><p class="b-q-text">$G(x) = -0{,}02x^3 + 1{,}2x^2 - 200$: dove si ha $G'(x) = 0$ per $x > 0$?</p><div class="b-sol"><p>$-0{,}06x^2 + 2{,}4x = 0$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="a ="><p class="b-q-text">$f(x) = x^2$ per $x \le 1$ e $2x + a$ per $x > 1$. Per quale $a$ la funzione $f$ è continua?</p><div class="b-sol"><p>$1 = 2 + a$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">$f(x) = x^3 - 12x$: dove si trova il minimo?</p><div class="b-sol"><p>$3x^2 = 12$, $x = 2$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Una candela si accorcia in modo uniforme. Quale modello è adatto?</p><div class="b-mc"><button>lineare</button><button>quadratico</button><button>esponenziale</button></div><div class="b-sol"><p>La stessa diminuzione ogni ora</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO · CON GEOGEBRA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA CALCOLATRICE CHE CONOSCE LE LETTERE</div>
+            <div class="b-text"><p>Aprite GeoGebra e scegliete la vista CAS. Scrivete <code>f(x) := a*x^3 - b*x</code>, poi <code>Derivative(f(x))</code> e <code>Solve(Derivative(f(x)) = 0, x)</code>. I comandi sono in inglese: GeoGebra li accetta in ogni lingua.</p>
+                <ul><li>Che cosa dà la calcolatrice? Che cosa dovete ancora decidere voi?</li><li>Provate $a = 1$, $b = 12$ e confrontate con il calcolo a mente.</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">SCONTO SULLA QUANTITÀ</div>
+            <div class="b-text"><p>Un’azienda vende un pezzo a 20 € l’uno. Dal 51° pezzo in poi concede uno sconto che cresce con la quantità.</p>
+                <ul><li>Abbozzate il ricavo in funzione del numero di pezzi. Che cosa succede al grafico a 50 pezzi?</li><li>Può convenire vendere di più anche se ogni pezzo diventa più economico?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">UNA CURVA PER I VALORI MISURATI</div>
+            <div class="b-text"><p>Misurate ogni 5 minuti la temperatura di una tazza di tè e la temperatura ambiente.</p>
+                <ul><li>Rappresentate la differenza in funzione del tempo. I punti stanno su una retta, su una parabola o su un’altra curva?</li><li>Fate cercare alla calcolatrice una curva adatta. Quanto bene si adatta?</li></ul></div>
+            <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RETTA DI REGRESSIONE</span><span class="b-lab-what">La retta migliore attraverso dei punti (in tedesco)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="CAS e famiglie di funzioni" data-toc-k="1" data-toc-short="1 CAS">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">1</span>Calcolare in modo esatto con il CAS: famiglie dell’economia</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Per $f(x) = ax^3 - bx$ il CAS risponde a <code>Solve(Derivative(f(x)) = 0, x)</code> con $x = \pm\sqrt{\tfrac{b}{3a}}$. Il calcolo è fatto, il ragionamento no:
+                per $a, b > 0$ ci sono due estremi, per $a > 0$ e $b < 0$ nessuno. Con $a = 1$ e $b = 12$ stanno in $\pm 2$, e il minimo è $T(2, -16)$.</p></div></div>
+            <div class="b-text"><p>Un <b>CAS</b> calcola con espressioni invece che con numeri: deriva, integra, scompone e risolve equazioni, anche se contengono parametri. Questo rende accessibili le famiglie con
+                due parametri. In economia sono per esempio il prezzo di vendita e i costi fissi: come dipende dal prezzo la migliore quantità venduta?</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · LAVORARE CON IL CAS</div>
+                <div class="b-text">
+                    <p><b>Comandi di GeoGebra CAS:</b> <code>f(x) := …</code> definisce, <code>Derivative(f(x))</code>, <code>Integral(f(x), a, b)</code>, <code>Solve(equazione, x)</code>, <code>Factor(…)</code></p>
+                    <p><b>Costi, ricavo, profitto:</b> $G(x) = E(x) - K(x)$ con $E(x) = p \cdot x$. <b>Soglia di profitto</b> e <b>limite di profitto</b>: zeri di $G$. <b>Profitto massimo</b>: $G'(x) = 0$, cioè $K'(x) = p$.</p>
+                    <p>Il CAS dà soluzioni per <b>tutti</b> i parametri. Quali hanno senso nel contesto lo decidi tu.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Esatto o numerico:</b> il CAS scrive $\sqrt2$, non 1,414. Con <code>Numeric(…)</code> o ≈ ottieni il numero decimale.</p>
+            <p class="b-note"><b>Costo marginale:</b> in economia $K'(x)$ si chiama costo marginale, il costo di un pezzo in più.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · COSTI, RICAVO E PROFITTO</div>
+        <p class="b-help" style="margin:0 0 12px">Il prezzo di vendita $p$ è il parametro. Osserva come si spostano con il prezzo la soglia di profitto, il limite di profitto e il profitto massimo, e da quale prezzo in giù la produzione non conviene più affatto.</p>
+        <div data-widget="gewinn"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · UNA FAMIGLIA CON DUE PARAMETRI</div>
+            <div class="b-text"><p>Studia gli estremi di $f_{a,b}(x) = ax^3 - bx$ con $a > 0$.</p></div>
+            <div class="b-sol"><p>CAS: $f'(x) = 3ax^2 - b$, $x = \pm\sqrt{\tfrac{b}{3a}}$. Per $b > 0$ un massimo e un minimo, per $b \le 0$ nessun estremo.</p>
+                <p>Per $a = 1$, $b = 12$: <span class="b-res">$H(-2, 16)$, $T(2, -16)$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · IL PROFITTO MASSIMO</div>
+            <div class="b-text"><p>$K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + 200$ (in €), prezzo di vendita 30 € al pezzo. Determina la soglia di profitto, il limite di profitto e il profitto massimo.</p></div>
+            <div class="b-sol"><p>$G(x) = 30x - K(x) = -0{,}02x^3 + 1{,}2x^2 - 200$. Zeri con il CAS: circa 14,9 e 56,9 pezzi.</p>
+                <p>$G'(x) = -0{,}06x^2 + 2{,}4x = 0$: <span class="b-res">40 pezzi, $G(40) = 440$ €</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina con il CAS la derivata e una primitiva di $f(x) = ax^2 + bx + c$. Verifica a mano.</p></div>
+            <div class="b-sol"><p>$f'(x) = 2ax + b$, $F(x) = \tfrac{a}{3} x^3 + \tfrac{b}{2} x^2 + cx$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Nell’esempio 2 il prezzo sale a 40 €. Quanti pezzi danno ora il profitto maggiore? Usa il widget e verifica con $K'(x) = 40$.</p></div>
+            <div class="b-sol"><p>$0{,}06x^2 - 2{,}4x + 30 = 40$: $x \approx 43{,}8$ pezzi; il profitto sale a circa 860 €.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Per quali prezzi $p$ è possibile realizzare un profitto nell’esempio 2? Provalo con il widget e giustifica.</p></div>
+            <div class="b-sol"><p>Il profitto è massimo dove $K'(x) = p$. Sotto circa 18 € il massimo è negativo: allora i ricavi non coprono mai i costi, qualunque quantità si venda.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$f_{a}(x) = x^2 \mathrm{e}^{-ax}$ con $a > 0$. Determina con il CAS gli estremi in funzione di $a$. Su quale curva stanno i massimi?</p></div>
+            <div class="b-sol"><p>$f_a'(x) = (2x - ax^2)\,\mathrm{e}^{-ax} = 0$: $x = 0$ (minimo) e $x = \tfrac2a$ (massimo) con $y = \tfrac{4}{a^2}\,\mathrm{e}^{-2}$.
+                Con $a = \tfrac2x$: $y = x^2\,\mathrm{e}^{-2}$, una parabola.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Una funzione dei costi ha la forma $K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + F$, con i costi fissi $F$. Con quali costi fissi il profitto massimo al prezzo di 30 € è esattamente 0 €?</p></div>
+            <div class="b-sol"><p>I costi fissi spostano $G$ solo verso il basso; il massimo resta a 40 pezzi. $G(40) = 640 - F = 0$: <span class="b-res">$F = 640$ €</span>. Con costi fissi maggiori l’azienda è sempre in perdita.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="-16" data-ph="y ="><p class="b-q-text">Quale coordinata $y$ ha il minimo di $x^3 - 12x$?</p><div class="b-sol"><p>$f(2) = 8 - 24$</p></div></div>
+        <div class="b-q" data-ans="440" data-ph="€"><p class="b-q-text">Qual è il profitto massimo dell’esempio 2?</p><div class="b-sol"><p>$G(40)$</p></div></div>
+        <div class="b-q" data-ans="640" data-ph="€"><p class="b-q-text">Con quali costi fissi questo profitto massimo è esattamente 0?</p><div class="b-sol"><p>$440 + 200$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Funzioni definite a tratti" data-toc-k="2" data-toc-short="2 A tratti">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">2,5 ORE</span></div>
+    <h2><span class="b-no">2</span>Funzioni definite a tratti e ottimizzazione aperta</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Fino a 50 pezzi ogni pezzo rende 20 €, oltre c’è uno sconto: $E(x) = 20x$ per $x \le 50$, $E(x) = 20x - 0{,}2(x - 50)^2$ per $x > 50$. I costi sono $K(x) = 8x + 300$.
+                Nel primo tratto il profitto $12x - 300$ sale fino a 300 €. Nel secondo, $G'(x) = 12 - 0{,}4(x - 50) = 0$ in $x = 80$: lì la vendita rende <b>480 €</b>, di più nonostante lo sconto.</p></div></div>
+            <div class="b-text"><p>Molti processi seguono leggi diverse in tratti diversi: tariffe, sconti, strade fatte di rettilinei e curve. Si studia ogni tratto separatamente
+                e si controllano uno per uno i <b>punti di raccordo</b>. E spesso la domanda stessa è aperta: il profitto maggiore, il fatturato maggiore o il minor consumo di materiale sono obiettivi diversi con risposte diverse.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · FUNZIONI DEFINITE A TRATTI</div>
+                <div class="b-text">
+                    <p><b>Continua</b> nel punto di raccordo $x_0$: le due parti hanno lì lo stesso valore. <b>Senza spigolo</b> (derivabile): inoltre la stessa pendenza.</p>
+                    <p><b>Problemi di ottimizzazione:</b> risolvere $f'(x) = 0$ in ogni tratto, tenere solo le soluzioni interne al tratto e poi confrontare i punti di raccordo e gli estremi dell’intervallo.</p>
+                    <p><b>Domande aperte:</b> prima fissare l’obiettivo, poi ottimizzare e alla fine valutare il risultato nel contesto.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In GeoGebra:</b> <code>G(x) := If(x &lt;= 50, 12x - 300, 12x - 0.2(x - 50)^2 - 300)</code> disegna le due parti in un solo grafico.</p>
+            <p class="b-note"><b>Attenzione agli spigoli:</b> in uno spigolo non c’è derivata. Può comunque esserci un estremo, come per $|x|$ nell’origine.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURA · PROFITTO CON SCONTO SULLA QUANTITÀ</div>
+        <p class="b-help" style="margin:0 0 12px">A sinistra di 50 pezzi una retta, a destra una parabola. Lo spigolo a 50 non è un massimo; il massimo arriva solo a 80 pezzi.</p>
+        <div data-widget="graph" data-fns='["x<=50 ? 12*x-300 : 12*x-0.2*(x-50)^2-300"]' data-labels='["G"]' data-lat="[105]" data-x="0,120" data-y="-350,560" data-pts="[[80,480],[50,300]]" data-xl="x in pezzi" data-yl="€" data-h="280" data-aria="Funzione profitto formata da una retta e da una parabola"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · RACCORDO SENZA SPIGOLO</div>
+            <div class="b-text"><p>Uno scivolo ha il profilo $f(x) = 0{,}5x^2$ per $0 \le x \le 2$ e $f(x) = 2x - 2$ per $x > 2$. Il raccordo è continuo e senza spigolo?</p></div>
+            <div class="b-sol"><p>In $x = 2$: $0{,}5 \cdot 4 = 2$ e $2 \cdot 2 - 2 = 2$, continuo. Pendenze: da sinistra $f'(2) = 2$, da destra $2$.</p>
+                <p><span class="b-res">Continuo e senza spigolo</span>: la retta è la tangente alla parabola in 2.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · CHE COSA È OTTIMO?</div>
+            <div class="b-text"><p>Con lo sconto sulla quantità: quanti pezzi danno il <b>ricavo</b> maggiore e quanti il <b>profitto</b> maggiore?</p></div>
+            <div class="b-sol"><p>Ricavo a destra: $E'(x) = 20 - 0{,}4(x - 50) = 0$ in $x = 100$, $E(100) = 1500$ €. Profitto: massimo a 80 pezzi.</p>
+                <p><span class="b-res">Il ricavo maggiore e il profitto maggiore stanno in punti diversi.</span> Quale obiettivo conta è una decisione, non un calcolo.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una tariffa telefonica costa 10 € fino a 5 GB e, oltre, 2 € per ogni GB in più. Scrivi il costo come funzione definita a tratti. È continua? È senza spigolo?</p></div>
+            <div class="b-sol"><p>$T(x) = 10$ per $x \le 5$, $T(x) = 10 + 2(x - 5)$ per $x > 5$. Continua, ma con uno spigolo: pendenza 0 a sinistra e 2 a destra.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Per quale $c$ è continua $f(x) = x^2$ per $x \le 2$ e $f(x) = 4x + c$ per $x > 2$? In tal caso $f$ è anche senza spigolo?</p></div>
+            <div class="b-sol"><p>$4 = 8 + c$: $c = -4$. Pendenze $2 \cdot 2 = 4$ e $4$: anche senza spigolo.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Con lo sconto sulla quantità i costi fissi salgono da 300 € a 500 €. Cambia il numero di pezzi migliore? Cambia il profitto?</p></div>
+            <div class="b-sol"><p>Il numero di pezzi resta 80, perché i costi fissi spostano il grafico solo verso il basso. Il profitto scende a 280 €.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>La lattina da un litro più economica ha $h = 2r \approx 10{,}8$ cm (capitolo 2.4). Le lattine vere sono spesso più strette e più alte. Indica tre obiettivi che possono spiegarlo.</p></div>
+            <div class="b-sol"><p>Per esempio: che si impugni bene con la mano, lo spazio sugli scaffali e in frigorifero, lo spazio per l’etichetta, la stabilità quando si impilano. Per questi obiettivi è ottimo un altro $r$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un taxi costa 4 € di tariffa base, 2 € al km per i primi 10 km e 1,50 € per ogni km in più. Un’auto a noleggio costa 25 € più 0,80 € al km.
+            Scrivi i due costi e determina con il CAS da quale distanza in poi l’auto a noleggio è più economica.</p></div>
+            <div class="b-sol"><p>Taxi: $4 + 2x$ per $x \le 10$, $24 + 1{,}5(x - 10)$ per $x > 10$. Auto a noleggio: $25 + 0{,}8x$. Nel primo tratto coincidono in $x = 17{,}5$, che non sta nel tratto.
+                Nel secondo: $9 + 1{,}5x = 25 + 0{,}8x$, <span class="b-res">$x \approx 22{,}9$ km</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="80" data-ph="pezzi"><p class="b-q-text">Con quale numero di pezzi il profitto con sconto sulla quantità è massimo?</p><div class="b-sol"><p>$12 - 0{,}4(x - 50) = 0$</p></div></div>
+        <div class="b-q" data-ans="-4" data-ph="c ="><p class="b-q-text">Per quale $c$ si raccordano in modo continuo $x^2$ ($x \le 2$) e $4x + c$ ($x > 2$)?</p><div class="b-sol"><p>$4 = 8 + c$</p></div></div>
+        <div class="b-q" data-ans="100" data-ph="pezzi"><p class="b-q-text">Con quale numero di pezzi il ricavo con sconto sulla quantità è massimo?</p><div class="b-sol"><p>$20 - 0{,}4(x - 50) = 0$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Regressione" data-toc-k="3" data-toc-short="3 Regressione">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 3</span><span class="b-band-sub">2,5 ORE</span></div>
+    <h2><span class="b-no">3</span>Regressione: funzioni dai valori misurati</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Una candela all’inizio è alta 20 cm e viene misurata ogni ora. I punti stanno quasi su una retta. La regressione lineare dà $y \approx -1{,}57x + 20{,}0$.
+                Per $y = 0$ la candela si è consumata: dopo circa 12,7 ore. Il coefficiente di determinazione $R^2 \approx 0{,}9997$ indica che la retta si adatta quasi alla perfezione.</p></div></div>
+            <div class="b-text"><p>Nella <b>regressione</b> la calcolatrice cerca, tra tutte le funzioni di un tipo, quella che si avvicina di più ai punti misurati. Il tipo lo scegli tu:
+                deve essere adatto al contesto, non solo ai punti. E ogni modello vale solo nell’intervallo in cui si è misurato. Calcolare molto oltre è rischioso.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · REGRESSIONE</div>
+                <div class="b-text">
+                    <p><b>Scegliere il modello:</b> la stessa variazione a ogni passo → lineare · lo stesso fattore a ogni passo → esponenziale · spazio di frenata, lancio, area → quadratico</p>
+                    <p><b>Qualità:</b> il coefficiente di determinazione $R^2$ sta tra 0 e 1. Più si avvicina a 1, meglio il modello descrive i punti.</p>
+                    <p><b>Limiti:</b> interpolare all’interno dei valori misurati di solito è sicuro; estrapolare al di fuori, solo con cautela.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In GeoGebra:</b> valori misurati nel foglio di calcolo, selezionarli, strumento «Analisi di regressione a due variabili», scegliere il modello di regressione. Comandi: <code>FitPoly</code>, <code>FitExp</code>.</p>
+            <p class="b-note"><b>Un buon $R^2$ non basta:</b> anche un modello sbagliato può adattarsi bene nell’intervallo misurato e fallire del tutto fuori da esso.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · REGRESSIONE</div>
+        <p class="b-help" style="margin:0 0 12px">Scegli una serie di misure e un modello. Puoi spostare i punti. Quale modello è adatto alla candela, allo spazio di frenata, al raffreddamento?</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 5 · LO SPAZIO DI FRENATA</div>
+            <div class="b-text"><p>Nel widget ci sono i valori misurati dello spazio di frenata tra 30 e 130 km/h. Quale modello è adatto? Stima lo spazio di frenata a 150 km/h.</p></div>
+            <div class="b-sol"><p>Fisicamente lo spazio di frenata cresce con il quadrato della velocità: regressione quadratica, circa $y \approx 0{,}0099x^2 + 0{,}013x - 0{,}27$.</p>
+                <p>A 150 km/h: <span class="b-res">circa 224 m</span>, un’estrapolazione appena oltre l’intervallo misurato.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 6 · IL TÈ SI RAFFREDDA</div>
+            <div class="b-text"><p>La differenza di temperatura con la stanza era di 70 °C, dopo 5 min di 55 °C, dopo 10 min di 42 °C, e così via fino a 15 °C dopo 30 min. Modellizzala.</p></div>
+            <div class="b-sol"><p>Ogni 5 minuti circa lo stesso fattore: esponenziale, $\Delta T(t) \approx 70{,}7 \cdot 0{,}949^t$.</p>
+                <p>Dopo 45 minuti <span class="b-res">ancora circa 7 °C sopra la temperatura ambiente</span>. Il tè si raffredda secondo la stessa legge del caffè del capitolo 4.2.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Quale modello sceglieresti? a) Saldo di un conto con un tasso di interesse fisso &nbsp; b) Livello di un serbatoio con una portata in entrata costante &nbsp; c) Altezza di una palla lanciata</p></div>
+            <div class="b-sol"><p>a) esponenziale &nbsp; b) lineare &nbsp; c) quadratico</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Scegli la candela nel widget. Secondo il modello, quanto tempo le resta quando è alta 10 cm?</p></div>
+            <div class="b-sol"><p>$10 = -1{,}57x + 20$ in $x \approx 6{,}4$ h. Fino alla fine, a 12,7 h, restano circa 6,4 ore.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Scegli nel widget lo spazio di frenata e il modello <b>lineare</b>. Quanto bene si adatta? Perché è comunque il modello sbagliato?</p></div>
+            <div class="b-sol"><p>$R^2$ è piuttosto alto, ma i punti stanno prima sopra, poi sotto e poi di nuovo sopra la retta: uno schema. Fisicamente lo spazio di frenata cresce in modo quadratico.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Scegli la popolazione mondiale con il modello esponenziale. Che cosa prevede per il 2050? Perché le previsioni delle Nazioni Unite sono nettamente più basse?</p></div>
+            <div class="b-sol"><p>Il modello esponenziale dà molto più di 10 miliardi. Ma il tasso di crescita scende da decenni; la crescita non è più esponenziale. Le previsioni usano modelli più precisi.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Misura con il cronometro il tempo di caduta di una palla da 0,5 m, 1 m, 1,5 m e 2 m di altezza. Trova con il CAS una funzione $h(t)$ e confrontala con $h = 5t^2$ del capitolo 2.1.</p></div>
+            <div class="b-sol"><p>Una regressione quadratica per l’origine dovrebbe dare circa $h \approx 5t^2$; più precisamente $h = \tfrac{g}{2}t^2$ con $g \approx 9{,}81$ m/s². Il tempo di reazione nel fermare il cronometro falsa la misura.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="12,7" data-tol="0.1" data-ph="ore"><p class="b-q-text">Secondo il modello lineare, dopo quante ore la candela si è consumata, con un decimale?</p><div class="b-sol"><p>$\tfrac{20{,}0}{1{,}57}$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quale modello è adatto al raffreddamento?</p><div class="b-mc"><button>lineare</button><button>quadratico</button><button>esponenziale</button></div><div class="b-sol"><p>Lo stesso fattore a ogni passo di tempo</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$R^2 = 0{,}999$ significa …</p><div class="b-mc"><button>Il modello vale per tutti i valori.</button><button>Il modello descrive molto bene i punti misurati.</button><button>La misura è priva di errori.</button></div><div class="b-sol"><p>Dice qualcosa solo sui punti misurati</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Fai calcolare al CAS $\int_0^2 \left(ax^2 + 1\right)\mathrm{d}x$. Per quale $a$ l’integrale vale 10?</p></div>
+            <div class="b-sol"><p>$\tfrac{8a}{3} + 2 = 10$: $a = 3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con il capitolo 2.4:</b> per quale $k$ la retta $y = kx$ è tangente al grafico di $f(x) = \mathrm{e}^x$? Risolvi con il CAS le condizioni del punto di tangenza.</p></div>
+            <div class="b-sol"><p>$\mathrm{e}^{x_0} = kx_0$ e $\mathrm{e}^{x_0} = k$: da qui $x_0 = 1$ e $k = \mathrm{e}$. La tangente $y = \mathrm{e}\,x$ la conosci già dal capitolo 4.2.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con il capitolo 1.3:</b> fai calcolare al CAS il prodotto vettoriale di $(a, 1, 0)$ e $(0, 1, a)$. Per quale $a$ il parallelogramma misura 3 unità di superficie?</p></div>
+            <div class="b-sol"><p>$(a, -a^2, a)$, con modulo $\sqrt{2a^2 + a^4}$. $a^4 + 2a^2 = 9$: $a^2 = -1 + \sqrt{10}$, cioè $a \approx \pm 1{,}47$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Presentate in piccoli gruppi una serie di misure del vostro indirizzo di studio, per esempio di tecnica, economia o salute: dati, scelta del modello, regressione, previsione e una valutazione critica, in cinque minuti.</p></div>
+            <div class="b-sol"><p>Fate attenzione a: la giustificazione del modello a partire dal contesto, $R^2$, se i residui mostrano uno schema o no, l’intervallo di validità e un limite onesto del modello.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: proiezione centrale" data-toc-k="X" data-toc-short="Prospettiva">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">ANTEPRIMA DELL’AREA OPZIONALE 1 · ARTE E TECNICA</span></div>
+    <h2>Proiezione centrale: come fu inventata la prospettiva</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Intorno al 1420 l’architetto fiorentino Filippo Brunelleschi dipinse il Battistero di Firenze in modo che gli osservatori potessero confrontare il suo quadro con l’edificio vero guardando attraverso un foro e uno specchio.
+                Tutte le linee che andavano in profondità si incontravano in un punto. Nel 1435 Leon Battista Alberti descrisse il procedimento nel suo libro «De pictura»: il quadro è una finestra attraverso cui si guarda il mondo.</p>
+            <p>Matematicamente è una <b>proiezione centrale</b>: ogni punto viene portato sul piano del quadro lungo la retta che lo congiunge all’occhio. Un oggetto alla profondità $z$ dietro il piano del quadro appare ridotto del fattore $\tfrac{a}{a + z}$
+                se l’occhio si trova alla distanza $a$ davanti a esso. Gli spigoli che vanno in profondità convergono nel <b>punto di fuga</b>, all’altezza degli occhi, sull’orizzonte.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> L. B. Alberti, «De pictura» (Della pittura), 1435. L’esperimento di Brunelleschi secondo il suo biografo Antonio Manetti; panoramica: Smarthistory, «Linear Perspective: Brunelleschi’s Experiment».</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · PUNTO DI FUGA E ORIZZONTE</div>
+        <div data-widget="zentralprojektion"></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>CAS</h4><p>Esatto con espressioni e parametri: <code>Derivative</code>, <code>Integral</code>, <code>Solve</code></p></div>
+        <div><p>$ax^3 - bx$: $x = \pm\sqrt{\tfrac{b}{3a}}$</p></div></div>
+    <div class="b-rueck"><div><h4>ECONOMIA</h4><p>$G = E - K$; soglia e limite di profitto come zeri; massimo in $K'(x) = p$</p></div>
+        <div><p>Prezzo 30 €: 40 pezzi, 440 €</p></div></div>
+    <div class="b-rueck"><div><h4>TRATTI</h4><p>Studiare ogni tratto separatamente e controllare nei punti di raccordo continuità e spigoli.</p></div>
+        <div><p>$0{,}5x^2$ e $2x - 2$ in 2: senza spigolo</p></div></div>
+    <div class="b-rueck"><div><h4>DOMANDE APERTE</h4><p>Prima fissare l’obiettivo. Il ricavo maggiore e il profitto maggiore possono non coincidere.</p></div>
+        <div><p>Sconto: ricavo a 100, profitto a 80 pezzi</p></div></div>
+    <div class="b-rueck"><div><h4>REGRESSIONE</h4><p>Modello dal contesto, qualità con $R^2$, cautela nell’estrapolare</p></div>
+        <div><p>Candela lineare, frenata quadratica, raffreddamento esponenziale</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Dove si trova l’estremo di $ax^3 - bx$ per $a = 1$ e $b = 12$ con $x > 0$?</p><div class="b-sol"><p>$\sqrt{12/3}$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="a ="><p class="b-q-text">Per quale $a$ si ha $\int_0^2 (ax^2 + 1)\,\mathrm{d}x = 10$?</p><div class="b-sol"><p>$\tfrac{8a}{3} = 8$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$x^2$ per $x \le 2$ e $4x - 4$ per $x > 2$ in 2 è …</p><div class="b-mc"><button>discontinua.</button><button>continua e senza spigolo.</button><button>continua con uno spigolo.</button></div><div class="b-sol"><p>Stesso valore 4, stessa pendenza 4</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="480" data-ph="€"><p class="b-q-text">Qual è il profitto maggiore con lo sconto sulla quantità?</p><div class="b-sol"><p>$G(80) = 960 - 180 - 300$</p></div></div>
+            <div class="b-q" data-ans="22,9" data-tol="0.05" data-ph="km"><p class="b-q-text">Da quanti chilometri in poi l’auto a noleggio è più economica del taxi, con un decimale?</p><div class="b-sol"><p>$9 + 1{,}5x = 25 + 0{,}8x$</p></div></div>
+            <div class="b-q" data-ans="0,5" data-tol="0.01" data-ph="fattore"><p class="b-q-text">Occhio a 8 m davanti al piano del quadro: con quale fattore appare un palo che si trova 8 m dietro?</p><div class="b-sol"><p>$\tfrac{8}{8 + 8}$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-cas1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CAS I</span><span class="b-lab-what">Famiglie e ottimizzazione con il CAS</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-cas2.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CAS II</span><span class="b-lab-what">Ottimizzazione aperta e regressione</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-zentralprojektion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROIEZIONE CENTRALE</span><span class="b-lab-what">Punti di fuga nell’arte e nella tecnica</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-jahresabschluss.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FINE DELL’ANNO</span><span class="b-lab-what">Giochi matematici e rompicapi</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Fachoberschule, 12ª classe · area opzionale 3 secondo il programma di matematica della Fachoberschule della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-it/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-it/analysis.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-it/vektoren.js"></script>
+</body>
+</html>
