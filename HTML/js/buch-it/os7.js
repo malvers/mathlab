@@ -19,7 +19,7 @@ window.BuchIT && BuchIT.add('os7', {
         // tageszinsos7
         'Kapital $K$': 'Capitale $K$', 'Zinssatz $p\\,\\%$': 'Tasso d’interesse $p\\,\\%$', 'Tage $t$': 'Giorni $t$', 'Jahr': 'Anno', '360 Tage': '360 giorni',
         'Bei Banken hat ein Zinsjahr meist 360 Tage und jeder Monat 30 Tage. Gerundet wird erst am Ende auf ganze Cent.':
-            'In banca l’anno degli interessi ha di solito 360 giorni e ogni mese 30 giorni. Si arrotonda ai centesimi interi solo alla fine.',
+            'In banca l’anno commerciale ha di solito 360 giorni e ogni mese 30 giorni. Si arrotonda ai centesimi interi solo alla fine.',
         // dichteos7
         'Holz': 'Legno', 'Eis': 'Ghiaccio', 'Aluminium': 'Alluminio', 'Eisen': 'Ferro', 'Gold': 'Oro', 'Stoff': 'Materiale',
         'Länge $a$': 'Lunghezza $a$', 'Breite $b$': 'Larghezza $b$', 'Höhe $c$': 'Altezza $c$',
@@ -68,7 +68,7 @@ window.BuchIT && BuchIT.add('os7', {
         [/^1 Tag$/, '1 giorno'], [/^(\d+) Tage$/, '$1 giorni'], [/>1 Tag</g, '>1 giorno<'], [/>(\d+) Tage</g, '>$1 giorni<'],
         [/für \$(\d+)\$ (Tag|Tage): /, (m, t, w) => 'per $' + t + '$ ' + (w === 'Tag' ? 'giorno' : 'giorni') + ': '],
         [/Zinsjahr mit 360 Tagen, davon (\d+) Tage; Jahreszinsen und Tageszinsen als Säulen/,
-            (m, t) => 'Anno degli interessi di 360 giorni, di cui ' + t + (t === '1' ? ' giorno' : ' giorni') + '; interessi annui e interessi dei giorni come colonne'],
+            (m, t) => 'Anno commerciale di 360 giorni, di cui ' + t + (t === '1' ? ' giorno' : ' giorni') + '; interessi annui e interessi dei giorni come colonne'],
         // dichteos7: the label of the picture and the density sentence
         [/Quader aus (Holz|Eis|Aluminium|Eisen|Gold), (\d+) cm mal (\d+) cm mal (\d+) cm/, (m, s, a, b, c) => 'Parallelepipedo di ' +
             ({ Holz: 'legno', Eis: 'ghiaccio', Aluminium: 'alluminio', Eisen: 'ferro', Gold: 'oro' })[s] + ', ' + a + ' cm per ' + b + ' cm per ' + c + ' cm'],
