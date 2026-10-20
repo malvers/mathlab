@@ -86,7 +86,7 @@ window.BuchIT && BuchIT.add('gy6', {
         'Schritt 1: Schreib auf, was du weißt.': 'Passo 1: scrivi quello che sai.',
         'Schritt 3: Rechne auf die gesuchte Menge hoch.': 'Passo 3: calcola la quantità cercata.',
         // winkelsumme6
-        'Beweisfigur': 'Figura della dimostrazione',
+        'Beweisfigur': 'Figura della dimostrazione', 'Ansicht': 'Vista',
         'Dreieck mit seinen Innenwinkeln': 'Triangolo con i suoi angoli interni',
         'Dreieck mit seinen Innenwinkeln und der Parallelen durch C': 'Triangolo con i suoi angoli interni e la parallela per C',
         'Zieh an den Ecken. Die Winkel ändern sich, ihre Summe bleibt. Die Werte sind auf ganze Grad gerundet.':
