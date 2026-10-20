@@ -289,6 +289,9 @@ window.BuchIT && BuchIT.add('analysis', {
         ['$. Das passiert für $a = \\pm 2$.', '$. Succede per $a = \\pm 2$.'],
 
         // book it-9 mathegy12lk-it:
+        // integrieren
+        ['Bestimme eine Stammfunktion: $f(x) = ', 'Trova una primitiva: $f(x) = '],
+        ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Non ancora. Deriva la tua soluzione per verificarla. Suggerimento: '],
     ],
     rule: [
         // book it-1 mathe11-it:
