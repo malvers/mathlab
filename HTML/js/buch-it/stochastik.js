@@ -103,6 +103,11 @@ window.BuchIT && BuchIT.add('stochastik', {
         'Beobachtete Trefferzahl $k$': 'Numero di successi osservato $k$',
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribuzione binomiale sotto l’ipotesi nulla con la regione di rifiuto',
         // book it-4 mathefos11-it:
+        // venn
+        'Ein Glücksrad hat 12 gleich große Felder: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Wähle eine Vorlage oder stell $A$ und $B$ selbst zusammen: Ereignis wählen, dann Zahlen antippen.':
+            'Una ruota della fortuna ha 12 settori uguali: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Scegli un modello o componi tu $A$ e $B$: scegli l’evento, poi tocca i numeri.',
+        'Vorlage': 'Modello', '$A$ bearbeiten': 'Modifica $A$', '$B$ bearbeiten': 'Modifica $B$', 'Ereignis bearbeiten': 'Evento da modificare',
+        'Verknüpfung:': 'Operazione:', 'Verknüpfung': 'Operazione', 'Mengendiagramm der Ereignisse A und B': 'Diagramma di Venn degli eventi A e B',
 
         // book it-5 mathefos12-it:
 
@@ -188,6 +193,12 @@ window.BuchIT && BuchIT.add('stochastik', {
         ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (viola), $H_0$ viene mantenuta per errore con $\\beta \\approx '],
         ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (errore di II specie).'],
         // book it-4 mathefos11-it:
+        // venn
+        ['Additionssatz: $', 'Regola della somma: $'], ['Gegenereignis: $', 'Evento contrario: $'],
+        [' · $A$ und $B$ sind <b>unvereinbar</b> ($A \\cap B = \\emptyset$), es wird nichts doppelt gezählt.', ' · $A$ e $B$ sono <b>incompatibili</b> ($A \\cap B = \\emptyset$): niente viene contato due volte.'],
+        ['Die Zahlen, die in beiden Ereignissen liegen.', 'I numeri che stanno in entrambi gli eventi.'],
+        ['$A \\cap B = \\emptyset$: Die Ereignisse sind <b>unvereinbar</b>, sie können nicht zusammen eintreten.', '$A \\cap B = \\emptyset$: gli eventi sono <b>incompatibili</b>, non possono verificarsi insieme.'],
+        ['Regel von de Morgan: $', 'Legge di De Morgan: $'], ['$. Wähle die andere Seite und vergleiche: Es ist dieselbe Menge.', '$. Scegli l’altro membro e confronta: è lo stesso insieme.'],
 
         // book it-5 mathefos12-it:
 
