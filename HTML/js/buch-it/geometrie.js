@@ -36,6 +36,16 @@ window.BuchIT && BuchIT.add('geometrie', {
             'I due quadrati dei cateti hanno insieme esattamente l’area del quadrato dell’ipotenusa.',
         'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Ogni quadrato di un cateto è equivalente al rettangolo che gli sta sotto.',
         'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.': 'Il quadrato dell’altezza è equivalente al rettangolo formato dalle due proiezioni.',
+        // trigo
+        'Sinus': 'Seno', 'Kosinus': 'Coseno', 'Tangens': 'Tangente', 'Verhältnis': 'Rapporto', 'Winkel $\\alpha$': 'Angolo $\\alpha$', 'Hypotenuse $c$': 'Ipotenusa $c$',
+        'Gegenkathete a': 'cateto opposto a', 'Ankathete b': 'cateto adiacente b', 'Hypotenuse c': 'ipotenusa c',
+        'Rechtwinkliges Dreieck mit Winkel alpha': 'Triangolo rettangolo con l’angolo alfa',
+        'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.':
+            'Cambia $c$: il triangolo diventa più grande o più piccolo, ma i tre rapporti restano uguali. Dipendono solo dall’angolo.',
+        // vieleck
+        'Ecken verdoppeln': 'Raddoppia i vertici', 'Zurück auf 6': 'Torna a 6', 'Anzahl der Ecken $n$': 'Numero di vertici $n$',
+        'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Cerchio con un poligono inscritto e uno circoscritto', 'innen': 'inscritto', 'außen': 'circoscritto',
+        'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Cerchio di raggio $r = 1$, quindi $u = 2\\pi$. Perimetro diviso per $2$:',
 
         // book it-16 mathe6-it:
 
@@ -63,6 +73,8 @@ window.BuchIT && BuchIT.add('geometrie', {
         ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Trascina l’estremo dell’arco. Per confronto il cerchio intero: $u \\approx '],
         // pythagoras: "$a^2 \approx 9$ und $c \cdot p \approx …" (the page loads no funktionen, so no '$ und $' from there)
         ['$ und $c \\cdot p \\approx ', '$ e $c \\cdot p \\approx '], ['$ und $c \\cdot q \\approx ', '$ e $c \\cdot q \\approx '], ['$ und $p \\cdot q \\approx ', '$ e $p \\cdot q \\approx '],
+        // trigo
+        ['\\text{Gegenkathete}', '\\text{cateto opposto}'], ['\\text{Ankathete}', '\\text{cateto adiacente}'], ['\\text{Hypotenuse}', '\\text{ipotenusa}'],
 
         // book it-16 mathe6-it:
 
@@ -85,6 +97,8 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-13 mathegy8-it:
 
         // book it-14 mathegy9-it:
+        // vieleck: "Also $3{,}1… < \pi < 3{,}2…$, Abstand $…$" (a rule with context instead of a bare 'Also $')
+        [/Also \$([^$<]*) < \\pi < ([^$<]*)\$, Abstand \$/g, (m, lo, hi) => 'Quindi $' + lo + ' < \\pi < ' + hi + '$, differenza $'],
 
         // book it-16 mathe6-it:
 
