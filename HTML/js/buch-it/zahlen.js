@@ -25,7 +25,7 @@ window.BuchIT && BuchIT.add('zahlen', {
         'Rechenart': 'Operazione', 'Gaußsche Zahlenebene mit zwei komplexen Zahlen als Pfeile': 'Piano di Gauss con due numeri complessi come frecce',
         'Ergebnis': 'Risultato',
         // schaltung
-        'Reihe (UND)': 'Serie (E)', 'Parallel (ODER)': 'Parallelo (O)', 'Wechselschaltung': 'Deviatore', 'Schaltung': 'Circuito',
+        'Reihe (UND)': 'Serie (E)', 'Parallel (ODER)': 'Parallelo (O)', 'Wechselschaltung': 'Deviatori', 'Schaltung': 'Circuito',
         'Schalter $a$ umlegen': 'Aziona l’interruttore $a$', 'Schalter $b$ umlegen': 'Aziona l’interruttore $b$', 'Schalter a': 'Interruttore a', 'Schalter b': 'Interruttore b',
         'Quelle': 'Fonte', 'Stromkreis mit zwei Schaltern und einer Lampe': 'Circuito elettrico con due interruttori e una lampadina',
         'Die Lampe leuchtet nur, wenn <b>beide</b> Schalter geschlossen sind.': 'La lampadina si accende solo se <b>entrambi</b> gli interruttori sono chiusi.',
