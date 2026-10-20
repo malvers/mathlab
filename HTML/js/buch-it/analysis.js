@@ -89,6 +89,8 @@ window.BuchIT && BuchIT.add('analysis', {
         'Welche Basis?': 'Quale base?', 'Zinseszins': 'Interesse composto', 'Was wird gezeigt?': 'Che cosa si mostra?', 'a = e setzen': 'Poni a = e', 'Basis $a$': 'Base $a$',
         'Exponentialfunktionen und die Eulersche Zahl e': 'Funzioni esponenziali e il numero di Nepero e', 'Faktor $a$': 'Fattore $a$', 'im Exponenten $b$': 'Nell’esponente $b$',
         'Verschiebung $c$': 'Traslazione $c$', 'Verzinsung': 'Capitalizzazione',
+        // kurve: the first button (not yet in the dictionary)
+        'nur f': 'solo f',
         // the slider value after "Capitalizzazione" (short, so the row fits at 390 px); in the sentence below the adverbs of the phrases
         'jährlich': 'annuale', 'halbjährlich': 'semestrale', 'vierteljährlich': 'trimestrale', 'monatlich': 'mensile', 'wöchentlich': 'settimanale',
         'täglich': 'giornaliera', 'stündlich': 'oraria', 'minütlich': 'al minuto',
@@ -97,6 +99,8 @@ window.BuchIT && BuchIT.add('analysis', {
         'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Grafico di una funzione razionale fratta con poli, buchi e asintoti',
         'Zähler:': 'Numeratore:', 'Nenner:': 'Denominatore:', 'Grad des Zählers': 'Grado del numeratore', 'Grad des Nenners': 'Grado del denominatore',
         'Grad 0': 'Grado 0', 'Grad 1': 'Grado 1', 'Grad 2': 'Grado 2', 'Faktor $k$': 'Fattore $k$', 'Beispiele:': 'Esempi:',
+        // kurve (the sign table), optimieren: not yet in the dictionary
+        'steigt ↗': 'cresce ↗', 'konstant': 'costante', 'Zylindrische Dose': 'Lattina cilindrica',
 
         // book it-6 mathegy11-it:
         // bruchfunktion
@@ -201,10 +205,13 @@ window.BuchIT && BuchIT.add('analysis', {
         [' · Mit $a = 0$ oder $b = 0$ ist $f$ konstant.', ' · Con $a = 0$ o $b = 0$, $f$ è costante.'],
         ['Schnittpunkt mit der $y$-Achse: $', 'Intersezione con l’asse $y$: $'], [' · Nullstelle: ', ' · zero: '],
         ['keine, denn $\\mathrm{e}^{bx} > 0$ kann nicht $', 'nessuno, perché $\\mathrm{e}^{bx} > 0$ non può valere $'], ['$ sein</p>', '$</p>'],
-        ['Für $', 'Per $'], ['$ geht $f(x) \\to ', '$, $f(x) \\to '], ['$: waagerechte Asymptote $y = ', '$: asintoto orizzontale $y = '], ['$. Für $', '$. Per $'],
+        ['$: waagerechte Asymptote $y = ', '$: asintoto orizzontale $y = '],
+        // kurve and schar (the Hochpunkt/Tiefpunkt lists, "keine Extrempunkte" after other text), not yet in the dictionary
+        ['Hochpunkt $', 'Massimo $'], ['Tiefpunkt $', 'Minimo $'], ['keine Extrempunkte', 'nessun punto di estremo'],
         ['$f$ ist überall streng monoton ', '$f$ è ovunque strettamente '], ['steigend', 'crescente'], ['fallend', 'decrescente'],
         [', weil $f\'(x)$ immer ', ', perché $f\'(x)$ è sempre '], ['positiv ist.', 'positiva.'], ['negativ ist.', 'negativa.'],
         ['Ein Euro, 100 % Zinsen im Jahr, ', 'Un euro, il 100 % di interesse all’anno, accreditato '], [' verzinst: ', ': '], ['-mal $\\tfrac{100\\,\\%}{', ' volte $\\tfrac{100\\,\\%}{'],
+        ['$, also $\\left(1 + \\tfrac{1}{', '$, cioè $\\left(1 + \\tfrac{1}{'], ['$, also $x = ', '$, cioè $x = '],
         ['jährlich', 'annualmente'], ['halbjährlich', 'semestralmente'], ['vierteljährlich', 'trimestralmente'], ['monatlich', 'mensilmente'], ['wöchentlich', 'settimanalmente'],
         ['täglich', 'giornalmente'], ['stündlich', 'ogni ora'], ['minütlich', 'ogni minuto'],
         ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
@@ -222,6 +229,15 @@ window.BuchIT && BuchIT.add('analysis', {
         ['$ · hebbare Lücken', '$ · buchi (discontinuità eliminabili)'], ['$ · hebbare Lücke', '$ · buco (discontinuità eliminabile)'],
         ['Nullstellen: ', 'Zeri: '], [' · Polstellen: ', ' · poli: '],
         [' mit Vorzeichenwechsel', ' con cambio di segno'], [' ohne Vorzeichenwechsel', ' senza cambio di segno'], [' (senkrechte Asymptote)', ' (asintoto verticale)'],
+        // schar: the note comes right after "… $y = -2x^3$. ", where the it-2 piece "$. Für $" starts earlier than the sentence of the it-3 block -
+        // the same sentence with its "$. " in front wins (longest first) and keeps it whole
+        ['$. Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
+            '$. Per $a \\le 0$ non ci sono punti di estremo: $f_a\'(x) = 3x^2 - a$ non ha allora nessuno zero con cambio di segno.'],
+        // sekante, optimieren, the hints of the ableiten trainer: not yet in the dictionary
+        ['Sekantensteigung (Differenzenquotient): $', 'Pendenza della secante (rapporto incrementale): $'], ['$ ergibt $', '$ dà $'],
+        ['Summenregel; $\\mathrm{e}^x$ bleibt beim Ableiten $\\mathrm{e}^x$.', 'Regola della somma; derivando, $\\mathrm{e}^x$ resta $\\mathrm{e}^x$.'],
+        ['$, also $\\int \\sin x\\,\\mathrm{d}x = -\\cos x + C$.', '$, cioè $\\int \\sin x\\,\\mathrm{d}x = -\\cos x + C$.'],
+        ['$, also $\\int \\cos x\\,\\mathrm{d}x = \\sin x + C$.', '$, cioè $\\int \\cos x\\,\\mathrm{d}x = \\sin x + C$.'],
 
         // book it-6 mathegy11-it:
         // bruchfunktion
@@ -257,6 +273,9 @@ window.BuchIT && BuchIT.add('analysis', {
         // book it-5 mathefos12-it:
         // efunktion: "1-mal $\tfrac…" is "1 volta" (the pieces make "volte" of every other number)
         [/(?<![\d.])1-mal \$/g, '1 volta $$'],
+        // efunktion (and ganzrational): "Für $x \to -\infty$ geht $f(x) \to " → "Per $x \to -\infty$ $f(x) \to " - a rule, because a bare piece "Für $"
+        // would start earlier than the long sentence "Für $a \le 0$ gibt es keine Extrempunkte: …" of the schar widget and break it
+        [/(^|\. |>)Für \$(x \\to [+-]\\infty)\$ geht \$f\(x\) \\to /g, (m, a, b) => a + 'Per $' + b + '$ $f(x) \\to '],
         // bruchfunktion (as in the it-6 block): "… mit einem Loch.", "Nullstellen: keine", and the set of the domain "\{1; -2\}" → "\{1, -2\}" when no number has a decimal comma
         [/ mit (Löchern|einem Loch)\./g, (m, w) => ' con ' + (w === 'Löchern' ? 'dei buchi' : 'un buco') + '.'],
         [/Nullstellen: keine(?![a-zäöüß])/g, 'Zeri: nessuno'], [/Polstellen: keine(?![a-zäöüß])/g, 'poli: nessuno'],

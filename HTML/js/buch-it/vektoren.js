@@ -150,6 +150,12 @@ window.BuchIT && BuchIT.add('vektoren', {
             'Tutti gli spigoli che vanno in profondità si incontrano in $V$. Gli spigoli paralleli al piano del quadro restano paralleli e mantengono le loro proporzioni.'],
         ['Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{', 'Un palo alla profondità $z$ appare con il fattore $\\dfrac{a}{a + z}$: con $z = 8$ quindi $\\dfrac{'],
         ['$ so hoch wie vorn.', '$ volte l’altezza che avrebbe davanti.'],
+        ['Abstand: $|', 'Distanza: $|'],
+        // the 3D widgets shared with BGY 12/13 (raum3d, skalarprodukt, ebene3d, pyramide, lot3d): pieces the it-2/it-3 blocks do not have yet
+        ['Ortsvektoren $', 'Vettori posizione $'], ['$ · Verbindungsvektor $', '$ · vettore congiungente $'], ['$ multipliziert: $', '$: $'],
+        ['<b>orthogonal</b>', '<b>ortogonali</b>'], ['Normalenvektor $\\vec{n}', 'Vettore normale $\\vec{n}'], ['$ · Schnittwinkel: $', '$ · angolo di intersezione: $'],
+        ['$ (rot)', '$ (in rosso)'], [' · Mantel (4 Dreiecke, je $', ' · superficie laterale (4 triangoli, ciascuno $'],
+        ['$ · Lotgerade $l\\colon', '$ · retta perpendicolare $l\\colon'], ['$l$ in $E$ einsetzen: $', 'Sostituire $l$ in $E$: $'],
 
         // book it-6 mathegy11-it:
 
