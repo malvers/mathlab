@@ -27,6 +27,15 @@ window.BuchIT && BuchIT.add('geometrie', {
         // kreisteil
         'Radius $r$': 'Raggio $r$', 'Mittelpunktswinkel $\\alpha$': 'Angolo al centro $\\alpha$', 'Kreis mit Kreisausschnitt und Kreisbogen': 'Cerchio con settore circolare e arco',
         'Kreisbogen': 'Arco', 'Kreisausschnitt': 'Settore circolare',
+        // pythagoras
+        'Pythagoras': 'Pitagora', 'Kathetensatz': 'Teorema del cateto', 'Höhensatz': 'Teorema dell’altezza', 'Satz': 'Teorema', 'gleichschenklig': 'isoscele',
+        'Zieh am Punkt $C$. Er bleibt auf dem Thaleskreis über $\\overline{AB}$, deshalb ist der Winkel bei $C$ immer ein rechter.':
+            'Trascina il punto $C$. Resta sulla semicirconferenza di Talete costruita su $\\overline{AB}$, per questo l’angolo in $C$ è sempre retto.',
+        'Rechtwinkliges Dreieck mit Quadraten über den Seiten': 'Triangolo rettangolo con i quadrati sui lati',
+        'Die beiden Kathetenquadrate haben zusammen genau den Flächeninhalt des Hypotenusenquadrats.':
+            'I due quadrati dei cateti hanno insieme esattamente l’area del quadrato dell’ipotenusa.',
+        'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Ogni quadrato di un cateto è equivalente al rettangolo che gli sta sotto.',
+        'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.': 'Il quadrato dell’altezza è equivalente al rettangolo formato dalle due proiezioni.',
 
         // book it-16 mathe6-it:
 
@@ -52,6 +61,8 @@ window.BuchIT && BuchIT.add('geometrie', {
         // kreisteil
         ['Anteil am Vollkreis: $', 'Frazione del cerchio intero: $'],
         ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Trascina l’estremo dell’arco. Per confronto il cerchio intero: $u \\approx '],
+        // pythagoras: "$a^2 \approx 9$ und $c \cdot p \approx …" (the page loads no funktionen, so no '$ und $' from there)
+        ['$ und $c \\cdot p \\approx ', '$ e $c \\cdot p \\approx '], ['$ und $c \\cdot q \\approx ', '$ e $c \\cdot q \\approx '], ['$ und $p \\cdot q \\approx ', '$ e $p \\cdot q \\approx '],
 
         // book it-16 mathe6-it:
 
