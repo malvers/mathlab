@@ -29,6 +29,13 @@ window.BuchIT && BuchIT.add('gy11', {
         'Nächster Schritt': 'Passo successivo',
 
         // book it-7 mathegy11lk-it:
+        // kettenregel (chapter 1.3), matrixprodukt and drehmatrix (chapter 2), newton (Wahlbereich 2) - the same widgets as in mathegy11-it (block it-6)
+        'Äußere Funktion u(z)': 'Funzione esterna u(z)', 'Innere Funktion v(x)': 'Funzione interna v(x)',
+        'Verkettete Funktion mit Tangente an einem verschiebbaren Punkt': 'Funzione composta con la tangente in un punto che si può spostare',
+        'Typen der Matrizen': 'Dimensioni delle matrici', 'Reihenfolge': 'Ordine', 'Neue Zahlen': 'Nuovi numeri', 'nicht definiert': 'non definito',
+        'Eine Figur wird mit einer Drehmatrix um den Ursprung gedreht': 'Una figura ruota intorno all’origine con una matrice di rotazione',
+        'Drehwinkel $\\varphi$': 'Angolo di rotazione $\\varphi$',
+        'Newton-Verfahren: Tangenten führen zur Nullstelle': 'Metodo di Newton: le tangenti portano allo zero',
 
     },
     phrase: [
@@ -56,6 +63,27 @@ window.BuchIT && BuchIT.add('gy11', {
         ['$. Den Startwert verschiebst du mit dem weißen Punkt auf der $x$-Achse.', '$. Il valore iniziale lo sposti con il punto bianco sull’asse $x$.'],
 
         // book it-7 mathegy11lk-it:
+        // kettenregel
+        ['$ &nbsp;·&nbsp; außen $u(z) = ', '$ &nbsp;·&nbsp; esterna $u(z) = '], ['$, innen $v(x) = ', '$, interna $v(x) = '],
+        ['An der Stelle $x_0 = ', 'Nel punto $x_0 = '], ['$ ist $v(x_0) = ', '$ si ha $v(x_0) = '],
+        ['$: Dort ist $f$ nicht definiert oder nicht differenzierbar. Zieh den Punkt weiter.', '$: lì $f$ non è definita o non è derivabile. Sposta il punto più in là.'],
+        ['$, also $f\'(x_0) \\approx ', '$, quindi $f\'(x_0) \\approx '],
+        ['$. Kontrolle mit dem Differenzenquotienten ($h = 0{,}0001$): $', '$. Controllo con il rapporto incrementale ($h = 0{,}0001$): $'],
+        // matrixprodukt
+        ['$ hat den Typ $', '$ ha dimensione $'], ['$ den Typ $', '$ dimensione $'],
+        [' Zeilen: Die Matrizen sind in dieser Reihenfolge nicht verkettet, das Produkt gibt es nicht.', ' righe: in quest’ordine le matrici non sono compatibili, il prodotto non esiste.'],
+        ['Die Matrizen sind in dieser Reihenfolge nicht verkettet, das Produkt gibt es nicht.', 'in quest’ordine le matrici non sono compatibili, il prodotto non esiste.'],
+        ['Typen: $', 'Dimensioni: $'], ['$ · Klick auf ein Feld des Ergebnisses.', '$ · Fai clic su una casella del risultato.'],
+        ['$ ist nicht definiert.', '$ non è definito.'], ['$, ist also etwas ganz anderes.', '$, quindi è tutt’altra cosa.'],
+        ['$ ergibt ', '$ dà '], ['hier zufällig dasselbe', 'qui per caso lo stesso risultato'], ['andere Zahlen', 'altri numeri'],
+        ['Andersherum: ', 'Al contrario: '], [' Das Kommutativgesetz gilt für Matrizen im Allgemeinen nicht.', ' Per le matrici la proprietà commutativa in generale non vale.'],
+        // drehmatrix
+        ['$ · Gedreht wird um den Ursprung gegen den Uhrzeigersinn.', '$ · La rotazione avviene intorno all’origine, in senso antiorario.'],
+        // newton
+        ['Bei $x_{', 'In $x_{'], ['}$ ist $f\'(x) = 0$: Die Tangente ist waagerecht, das Verfahren bricht ab.', '}$ si ha $f\'(x) = 0$: la tangente è orizzontale, il metodo si interrompe.'],
+        ['Die Folge läuft weg: anderer Startwert.', 'La successione scappa via: prova un altro valore iniziale.'], ['$ und $f\'(x) = ', '$ e $f\'(x) = '],
+        ['$. Iteration: $x_{n+1}', '$. Iterazione: $x_{n+1}'],
+        ['$. Den Startwert verschiebst du mit dem weißen Punkt auf der $x$-Achse.', '$. Il valore iniziale lo sposti con il punto bianco sull’asse $x$.'],
 
     ],
     rule: [
@@ -65,6 +93,9 @@ window.BuchIT && BuchIT.add('gy11', {
         [/Zeile (\d+) von \$([AB])\$ mal Spalte (\d+) von \$([AB])\$/g, (m, i, p, j, q) => 'Riga ' + i + ' di $' + p + '$ per colonna ' + j + ' di $' + q + '$'],
 
         // book it-7 mathegy11lk-it:
+        // matrixprodukt: "A hat 2 Spalten, B aber 3 Zeilen: …" and "Zeile 1 von $A$ mal Spalte 2 von $B$"
+        [/ ([AB]) hat (\d+) Spalten, ([AB]) aber (\d+) Zeilen: /g, (m, p, i, q, j) => ' ' + p + ' ha ' + i + (i === '1' ? ' colonna' : ' colonne') + ', ma ' + q + ' ha ' + j + (j === '1' ? ' riga: ' : ' righe: ')],
+        [/Zeile (\d+) von \$([AB])\$ mal Spalte (\d+) von \$([AB])\$/g, (m, i, p, j, q) => 'Riga ' + i + ' di $' + p + '$ per colonna ' + j + ' di $' + q + '$'],
 
     ]
 });
