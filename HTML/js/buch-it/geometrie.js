@@ -46,6 +46,11 @@ window.BuchIT && BuchIT.add('geometrie', {
         'Ecken verdoppeln': 'Raddoppia i vertici', 'Zurück auf 6': 'Torna a 6', 'Anzahl der Ecken $n$': 'Numero di vertici $n$',
         'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Cerchio con un poligono inscritto e uno circoscritto', 'innen': 'inscritto', 'außen': 'circoscritto',
         'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Cerchio di raggio $r = 1$, quindi $u = 2\\pi$. Perimetro diviso per $2$:',
+        // spitzkoerper
+        'Quadratische Pyramide': 'Piramide quadrangolare', 'Kreiskegel': 'Cono', 'Körper': 'Solido', 'Seitenhöhe': 'Apotema', 'Seitenkante': 'Spigolo laterale',
+        'Hilfsdreieck': 'Triangolo ausiliario', 'Grundkante $a$': 'Spigolo di base $a$', 'Höhe $h$': 'Altezza $h$',
+        'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Piramide quadrangolare in assonometria cavaliera con triangolo ausiliario',
+        'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cono in assonometria cavaliera con triangolo ausiliario',
 
         // book it-16 mathe6-it:
 
@@ -75,6 +80,8 @@ window.BuchIT && BuchIT.add('geometrie', {
         ['$ und $c \\cdot p \\approx ', '$ e $c \\cdot p \\approx '], ['$ und $c \\cdot q \\approx ', '$ e $c \\cdot q \\approx '], ['$ und $p \\cdot q \\approx ', '$ e $p \\cdot q \\approx '],
         // trigo
         ['\\text{Gegenkathete}', '\\text{cateto opposto}'], ['\\text{Ankathete}', '\\text{cateto adiacente}'], ['\\text{Hypotenuse}', '\\text{ipotenusa}'],
+        // spitzkoerper
+        [' im Schrägbild mit Hilfsdreieck', ' in assonometria cavaliera con triangolo ausiliario'],
 
         // book it-16 mathe6-it:
 
