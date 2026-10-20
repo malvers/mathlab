@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica FOS 11 · Capitolo 2.3 · Calcolo combinatorio, modello dell’urna e schemi di Bernoulli | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Principio di moltiplicazione, permutazioni, disposizioni, combinazioni, formula di Bernoulli. Capitolo 2.3 del libro di testo interattivo Matematica · Fachoberschule 11: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · FACHOBERSCHULE 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 2.3 · AREA DI APPRENDIMENTO 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 2.3 · AREA DI APPRENDIMENTO 2 · APRILE</p>
+            <h1>Calcolo combinatorio, modello dell’urna e schemi di Bernoulli</h1>
+            <p class="b-hero-lead">Quasi 14 milioni di combinazioni al lotto, mille codici sul lucchetto della bici, 336 podi possibili con otto atlete:
+                negli esperimenti di Laplace bisogna contare, e con abilità. Imparerai il <b>principio di moltiplicazione</b>, distinguerai <b>permutazioni</b>, <b>disposizioni</b>
+                e <b>combinazioni</b>, ricondurrai i problemi a un <b>modello dell’urna</b> e calcolerai con la <b>formula di Bernoulli</b>.</p>
+            <div class="b-chips"><span class="b-chip">12 ORE</span><span class="b-chip">4 LEZIONI</span><span class="b-chip">CALCOLATRICE GRAFICA: nPr, nCr, binompdf</span><span class="b-chip">CHIUSURA DELL’AREA 2</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="10" data-p="0.3" data-lo="3" data-hi="3" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>trovare quantità con il <b>principio generale di moltiplicazione</b> e contare le <b>permutazioni</b> con e senza ripetizione</li>
+                <li>distinguere <b>disposizioni</b> e <b>combinazioni</b> e usare il <b>coefficiente binomiale</b></li>
+                <li>ricondurre problemi reali a uno dei quattro <b>modelli dell’urna</b></li>
+                <li>riconoscere gli <b>schemi di Bernoulli</b> e calcolare probabilità con la formula di Bernoulli</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="24" data-ph="numero"><p class="b-q-text">Calcola $4 \cdot 3 \cdot 2 \cdot 1$.</p><div class="b-sol"><p>$24$</p></div></div>
+            <div class="b-q" data-ans="3/8" data-ph="frazione"><p class="b-q-text">Tre volte la moneta: che probabilità c’è di esattamente due teste?</p><div class="b-sol"><p>$\tfrac38$, dal capitolo 2.2</p></div></div>
+            <div class="b-q" data-ans="0,09" data-ph="decimale"><p class="b-q-text">Calcola $0{,}3^2$.</p><div class="b-sol"><p>$0{,}09$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Estrarre <b>con</b> reimmissione significa …</p><div class="b-mc"><button>le probabilità non cambiano</button><button>restano sempre meno palline</button><button>l’ordine non conta</button></div><div class="b-sol"><p>Prima di ogni estrazione l’urna è di nuovo completa.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">CHI SI SIEDE DOVE?</div>
+            <div class="b-text"><p>Quattro amici vanno al cinema e si siedono in una fila.</p>
+                <ul><li>In quanti modi possono sedersi? Scrivete le possibilità in modo sistematico.</li><li>Quanti sarebbero con cinque, con dieci amici?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">PODIO O FINALE?</div>
+            <div class="b-text"><p>Partono otto atlete. a) Si assegnano oro, argento e bronzo. b) Le tre più veloci vanno in finale.</p>
+                <ul><li>In a) e in b) ci sono tante possibilità quante? Quale domanda ne ha di più, e di quale fattore?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TIRARE A INDOVINARE NEL TEST</div>
+            <div class="b-text"><p>Un test ha 5 domande con 4 risposte ciascuna, di cui una corretta. Qualcuno segna le risposte del tutto a caso.</p>
+                <ul><li>Che probabilità c’è di esattamente 2 risposte corrette? Quanti percorsi appartengono a questo evento?</li></ul></div>
+            <span class="b-pair">→ Lezione 4</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Principio di moltiplicazione e permutazioni" data-toc-k="1" data-toc-short="1 Contare">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">1</span>Il principio di moltiplicazione e le permutazioni</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Una mensa offre 3 antipasti, 4 secondi e 2 dolci. A ogni antipasto si possono abbinare 4 secondi, e a ciascuna di queste combinazioni 2 dolci:
+                $3 \cdot 4 \cdot 2 = 24$ menu diversi. Non serve scriverli per contarli.</p></div></div>
+            <div class="b-text"><p>Lo stesso principio sta nel diagramma ad albero: il numero dei percorsi è il prodotto delle biforcazioni. Al cinema dell’esplorazione il primo posto ha 4 possibilità,
+                il secondo ancora 3, il terzo 2 e l’ultimo 1: $4 \cdot 3 \cdot 2 \cdot 1 = 24$ modi di sedersi.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · PRINCIPIO DI MOLTIPLICAZIONE E PERMUTAZIONI</div>
+                <div class="b-text">
+                    <p><b>Principio generale di moltiplicazione:</b> se un procedimento ha $k$ stadi con $n_1, n_2, \ldots, n_k$ possibilità, ci sono in tutto $n_1 \cdot n_2 \cdot \ldots \cdot n_k$ possibilità.</p>
+                    <p><b>Permutazione:</b> $n$ oggetti distinti si possono ordinare in $n! = n \cdot (n - 1) \cdot \ldots \cdot 2 \cdot 1$ modi ($n$ <b>fattoriale</b>, $0! = 1$).</p>
+                    <p><b>Permutazione con ripetizione:</b> se tra gli $n$ oggetti ce ne sono $k_1$, $k_2$, … uguali, ci sono $\dfrac{n!}{k_1! \cdot k_2! \cdot \ldots}$ ordinamenti.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>I fattoriali crescono in fretta:</b> $10! = 3\,628\,800$, e $70!$ è già maggiore di $10^{100}$.</p>
+            <p class="b-note"><b>Calcolatrice grafica:</b> il segno $!$ si trova di solito nel menu della probabilità (PRB o PROB).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · TUTTI GLI ORDINAMENTI</div>
+        <p class="b-help" style="margin:0 0 12px">4 palline, si estraggono tutte, con ordine, senza reimmissione: sono esattamente le permutazioni. Cambia $n$ e $k$ e guarda come cresce l’elenco.</p>
+        <div data-widget="urne" data-n="4" data-k="4" data-ord="1" data-rep="0"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · CODICI</div>
+            <div class="b-text"><p>Un codice d’accesso è formato da 2 lettere (26 possibilità) e poi 3 cifre. Quanti codici ci sono?</p></div>
+            <div class="b-sol"><p>Cinque stadi: $26 \cdot 26 \cdot 10 \cdot 10 \cdot 10 = 26^2 \cdot 10^3$.</p>
+                <p><span class="b-res">$676\,000$ codici</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · ANAGRAMMI</div>
+            <div class="b-text"><p>Quante «parole» diverse si possono formare con le lettere di OTTO e di ANANAS?</p></div>
+            <div class="b-sol"><p>OTTO: $\dfrac{4!}{2! \cdot 2!} = \dfrac{24}{4} = 6$ (due O, due T).</p>
+                <p>ANANAS: $\dfrac{6!}{3! \cdot 2!} = \dfrac{720}{12} = $ <span class="b-res">$60$</span> (tre A, due N).</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Quanti PIN di quattro cifre con le cifre da 0 a 9 ci sono? Quanti, se la prima cifra non può essere 0?</p></div>
+            <div class="b-sol"><p>$10^4 = 10\,000$ · $9 \cdot 10^3 = 9\,000$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola: a) $5!$ &nbsp; b) $7!$ &nbsp; c) $\dfrac{10!}{8!}$</p></div>
+            <div class="b-sol"><p>a) $120$ &nbsp; b) $5040$ &nbsp; c) $10 \cdot 9 = 90$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Sei persone si siedono su sei sedie in fila. Quanti modi di sedersi ci sono? Quanti, se due persone precise vogliono stare vicine?</p></div>
+            <div class="b-hint"><p>Riunisci le due in un blocco. Dentro il blocco ci sono due ordini.</p></div>
+            <div class="b-sol"><p>$6! = 720$ · blocco più 4 persone: $5! \cdot 2 = 240$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quanti ordinamenti ci sono delle lettere della parola MISSISSIPPI?</p></div>
+            <div class="b-sol"><p>11 lettere, quattro I, quattro S, due P: $\dfrac{11!}{4! \cdot 4! \cdot 2!} = 34\,650$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quanti numeri di quattro cifre con tutte le cifre diverse ci sono? La prima cifra non può essere 0.</p></div>
+            <div class="b-sol"><p>Primo posto 9 possibilità (da 1 a 9), poi 9, 8, 7: $9 \cdot 9 \cdot 8 \cdot 7 = 4536$</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="24" data-ph="quantità"><p class="b-q-text">3 antipasti, 4 secondi, 2 dolci: quanti menu?</p><div class="b-sol"><p>$3 \cdot 4 \cdot 2$</p></div></div>
+        <div class="b-q" data-ans="720" data-ph="quantità"><p class="b-q-text">Quanti modi di sedersi ci sono per 6 persone su 6 sedie?</p><div class="b-sol"><p>$6!$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="quantità"><p class="b-q-text">Quanti ordinamenti diversi ha OTTO?</p><div class="b-sol"><p>$\tfrac{24}{4}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Disposizioni e combinazioni" data-toc-k="2" data-toc-short="2 Scegliere">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">2</span>Disposizioni e combinazioni</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Oro, argento e bronzo con otto atlete: $8 \cdot 7 \cdot 6 = 336$ possibilità. Per la finale, invece, conta solo <b>chi</b> c’è, non in che ordine.
+                Ogni gruppo di tre è stato contato nel podio $3! = 6$ volte. Quindi ci sono $\tfrac{336}{6} = 56$ finali possibili.</p></div></div>
+            <div class="b-text"><p>La domanda decisiva in ogni scelta è: <b>l’ordine conta?</b> Se conta, si parla di disposizione; se no, di combinazione.
+                Il numero delle combinazioni ha un nome tutto suo: il coefficiente binomiale.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · SCEGLIERE $k$ TRA $n$</div>
+                <div class="b-text">
+                    <p><b>Disposizione</b> (l’ordine conta), senza ripetizione: $\dfrac{n!}{(n - k)!} = n \cdot (n - 1) \cdot \ldots \cdot (n - k + 1)$ · con ripetizione: $n^k$</p>
+                    <p><b>Combinazione</b> (l’ordine non conta), senza ripetizione: $\dbinom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$, che si legge «$n$ su $k$»</p>
+                    <p>$\binom{n}{0} = \binom{n}{n} = 1$ · $\binom{n}{k} = \binom{n}{n - k}$ · $\binom{n}{k} = \binom{n - 1}{k - 1} + \binom{n - 1}{k}$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calcolatrice grafica:</b> disposizioni senza ripetizione con nPr, combinazioni con nCr. $8$ nPr $3 = 336$, $8$ nCr $3 = 56$.</p>
+            <p class="b-note"><b>Regola pratica:</b> ruoli, posizioni, codici → l’ordine conta. Gruppi, squadre, numeri del lotto → l’ordine non conta.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · IL TRIANGOLO DI PASCAL</div>
+        <p class="b-help" style="margin:0 0 12px">Ogni numero è la somma dei due sopra di esso. Tocca un numero o usa i cursori: è il coefficiente binomiale $\binom{n}{k}$.</p>
+        <div data-widget="pascal"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · LOTTO 6 SU 49</div>
+            <div class="b-text"><p>Quante combinazioni ci sono nel lotto «6 su 49»? Che probabilità c’è di fare sei con una sola giocata?</p></div>
+            <div class="b-sol"><p>L’ordine non conta e nessun numero si ripete: $\binom{49}{6} = 13\,983\,816$.</p>
+                <p>$P(\text{6 numeri giusti}) = $ <span class="b-res">$\tfrac{1}{13\,983\,816}$</span>, senza numero supplementare.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · SQUADRA O CONSIGLIO DIRETTIVO?</div>
+            <div class="b-text"><p>Tra 12 persone si sceglie a) una squadra di 3 persone, b) presidenza, vicepresidenza e tesoreria. Quante possibilità ci sono in ciascun caso?</p></div>
+            <div class="b-sol"><p>a) Combinazione: $\binom{12}{3} = 220$.</p>
+                <p>b) Disposizione: $12 \cdot 11 \cdot 10 = $ <span class="b-res">$1320$</span>, cioè $3! = 6$ volte tanto.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola: a) $\binom{5}{2}$ &nbsp; b) $\binom{6}{3}$ &nbsp; c) $\binom{10}{1}$ &nbsp; d) $\binom{10}{10}$</p></div>
+            <div class="b-sol"><p>a) $10$ &nbsp; b) $20$ &nbsp; c) $10$ &nbsp; d) $1$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>L’ordine conta? a) estrazione del lotto &nbsp; b) PIN &nbsp; c) i posti da 1 a 3 di una classifica &nbsp; d) 4 ingredienti per la pizza su 10</p></div>
+            <div class="b-sol"><p>a) no &nbsp; b) sì &nbsp; c) sì &nbsp; d) no</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dieci persone si salutano stringendosi la mano a vicenda. Quante strette di mano ci sono?</p></div>
+            <div class="b-sol"><p>Ogni stretta è una coppia; l’ordine non conta: $\binom{10}{2} = 45$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In una classe ci sono 7 ragazze e 5 ragazzi. Una commissione deve essere formata da 2 ragazze e 2 ragazzi. Quante possibilità ci sono?</p></div>
+            <div class="b-sol"><p>Principio di moltiplicazione: $\binom{7}{2} \cdot \binom{5}{2} = 21 \cdot 10 = 210$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Verifica con $n = 8$, $k = 3$ che vale $\binom{n}{k} = \binom{n}{n - k}$ e spiega la regola a parole.</p></div>
+            <div class="b-sol"><p>$\binom{8}{3} = \binom{8}{5} = 56$. Chi sceglie 3 su 8 stabilisce allo stesso tempo quali 5 non vengono scelti.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="336" data-ph="quantità"><p class="b-q-text">Quanti podi (oro, argento, bronzo) ci sono con 8 partecipanti?</p><div class="b-sol"><p>$8 \cdot 7 \cdot 6$</p></div></div>
+        <div class="b-q" data-ans="45" data-ph="quantità"><p class="b-q-text">Quante strette di mano ci sono tra 10 persone?</p><div class="b-sol"><p>$\binom{10}{2}$</p></div></div>
+        <div class="b-q" data-ans="13983816" data-ph="quantità"><p class="b-q-text">Quante combinazioni ci sono nel lotto «6 su 49»?</p><div class="b-sol"><p>$\binom{49}{6}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Il modello dell’urna" data-toc-k="3" data-toc-short="3 Urna">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 3</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">3</span>Il modello dell’urna</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Il lotto è come estrarre 6 palline su 49 senza reimmissione, senza che l’ordine conti. Un lucchetto a combinazione con 4 rotelle è come 4 estrazioni da 10 palline
+                con reimmissione, con l’ordine che conta. Moltissimi problemi di conteggio diventano così una domanda su un’urna.</p></div></div>
+            <div class="b-text"><p>Due domande decidono il caso: l’<b>ordine</b> conta? La pallina viene <b>rimessa</b>, cioè qualcosa si può ripetere?
+                Ne nascono quattro casi fondamentali.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · QUATTRO CASI: $k$ ESTRAZIONI, $n$ PALLINE</div>
+                <div class="b-text">
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th></th><th>con reimmissione</th><th>senza reimmissione</th></tr>
+                        <tr><th>con ordine</th><td>$n^k$</td><td>$\dfrac{n!}{(n - k)!}$</td></tr>
+                        <tr><th>senza ordine</th><td>$\dbinom{n + k - 1}{k}$</td><td>$\dbinom{n}{k}$</td></tr>
+                    </table></div>
+                    <p style="margin-top:10px"><b>Estrarre senza reimmissione con due tipi:</b> se su $N$ palline $M$ sono rosse, la probabilità di esattamente $r$ rosse tra $n$ estratte è
+                        $\dfrac{\binom{M}{r} \cdot \binom{N - M}{n - r}}{\binom{N}{n}}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Laplace contando:</b> $P = \tfrac{\text{favorevoli}}{\text{possibili}}$, contando entrambi con lo stesso modello dell’urna.</p>
+            <p class="b-note"><b>Il caso raro</b> «senza ordine, con reimmissione» descrive per esempio le palline di gelato di più gusti.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · L’URNA</div>
+        <p class="b-help" style="margin:0 0 12px">Regola $n$, $k$, l’ordine e la reimmissione. Vedi il caso fondamentale, la formula, un esempio e, finché non sono troppi, tutti gli esiti. «Estrai una volta» ne segna uno a caso.</p>
+        <div data-widget="urne"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 5 · TRE NUMERI GIUSTI</div>
+            <div class="b-text"><p>Che probabilità c’è di indovinare esattamente tre numeri al lotto «6 su 49»?</p></div>
+            <div class="b-sol"><p>3 dei 6 numeri vincenti e 3 dei 43 restanti: $\binom{6}{3} \cdot \binom{43}{3} = 20 \cdot 12\,341 = 246\,820$ combinazioni favorevoli.</p>
+                <p>$P = \tfrac{246\,820}{13\,983\,816} \approx$ <span class="b-res">$0{,}0177$</span>, cioè circa l’1,8 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 6 · CAMPIONE DA UNA FORNITURA</div>
+            <div class="b-text"><p>Una fornitura contiene 20 pezzi, 3 dei quali difettosi. Si controllano 4 pezzi senza reimmissione. Che probabilità c’è che non ce ne sia nessuno difettoso?</p></div>
+            <div class="b-sol"><p>$P = \dfrac{\binom{17}{4}}{\binom{20}{4}} = \dfrac{2380}{4845} \approx 0{,}491$.</p>
+                <p>Quindi con probabilità <span class="b-res">$\approx 0{,}509$</span> si scopre almeno un pezzo difettoso.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Quale caso fondamentale è? a) lucchetto a combinazione con 4 rotelle &nbsp; b) si estraggono 3 biglietti su 20, tutti i premi uguali &nbsp; c) modi di sedersi di 5 persone &nbsp; d) 3 palline di gelato da 8 gusti, i gusti si possono ripetere</p></div>
+            <div class="b-sol"><p>a) con ordine, con reimmissione &nbsp; b) senza ordine, senza reimmissione &nbsp; c) con ordine, senza reimmissione, $k = n$ &nbsp; d) senza ordine, con reimmissione</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola le quantità dell’esercizio 11.</p></div>
+            <div class="b-sol"><p>a) $10^4 = 10\,000$ &nbsp; b) $\binom{20}{3} = 1140$ &nbsp; c) $5! = 120$ &nbsp; d) $\binom{10}{3} = 120$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Da un’urna con 5 palline rosse e 3 blu se ne estraggono 3 senza reimmissione. Che probabilità c’è di esattamente 2 rosse?</p></div>
+            <div class="b-sol"><p>$\dfrac{\binom{5}{2} \cdot \binom{3}{1}}{\binom{8}{3}} = \dfrac{10 \cdot 3}{56} = \dfrac{15}{28} \approx 0{,}536$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Che probabilità c’è di indovinare esattamente quattro numeri al lotto «6 su 49»?</p></div>
+            <div class="b-sol"><p>$\dfrac{\binom{6}{4} \cdot \binom{43}{2}}{\binom{49}{6}} = \dfrac{15 \cdot 903}{13\,983\,816} \approx 0{,}00097$, cioè quasi lo 0,1 %.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Ricalcola l’esempio 6 con un albero (percorso «quattro volte buono») e confronta.</p></div>
+            <div class="b-sol"><p>$\tfrac{17}{20} \cdot \tfrac{16}{19} \cdot \tfrac{15}{18} \cdot \tfrac{14}{17} \approx 0{,}491$. Le due strade danno lo stesso risultato.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="1140" data-ph="quantità"><p class="b-q-text">In quanti modi si possono estrarre 3 biglietti su 20 (senza che l’ordine conti)?</p><div class="b-sol"><p>$\binom{20}{3}$</p></div></div>
+        <div class="b-q" data-ans="15/28" data-ph="frazione"><p class="b-q-text">5 palline rosse, 3 blu, 3 senza reimmissione: che probabilità c’è di esattamente 2 rosse?</p><div class="b-sol"><p>$\tfrac{30}{56}$</p></div></div>
+        <div class="b-q" data-ans="0,491" data-tol="0.001" data-ph="decimale"><p class="b-q-text">20 pezzi, 3 difettosi, se ne controllano 4: che probabilità c’è di nessun difettoso (con tre decimali)?</p><div class="b-sol"><p>$\tfrac{2380}{4845}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Schemi di Bernoulli" data-toc-k="4" data-toc-short="4 Bernoulli">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 4</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">4</span>Schemi di Bernoulli</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Tirando a indovinare nel test, ogni domanda è giusta con $p = 0{,}25$. Un percorso con esattamente 2 risposte giuste e 3 sbagliate ha la probabilità $0{,}25^2 \cdot 0{,}75^3$.
+                Quanti percorsi così ci sono? Si sceglie quali 2 delle 5 domande sono giuste: $\binom{5}{2} = 10$. Quindi $P = 10 \cdot 0{,}25^2 \cdot 0{,}75^3 \approx 0{,}264$.</p></div></div>
+            <div class="b-text"><p>Ogni volta che una prova ha solo due esiti e si ripete in modo indipendente con la stessa probabilità, questo calcolo funziona.
+                È così importante che ha un nome tutto suo.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · FORMULA DI BERNOULLI</div>
+                <div class="b-text">
+                    <p>Una <b>prova di Bernoulli</b> ha esattamente due esiti: <b>successo</b> con probabilità $p$ e <b>insuccesso</b> con $1 - p$.</p>
+                    <p>Se si ripete $n$ volte in modo <b>indipendente</b> e con la stessa $p$, si ottiene uno <b>schema di Bernoulli</b> di lunghezza $n$.</p>
+                    <p>Per il numero $X$ dei successi vale: $$P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k}$$</p>
+                    <p>$\binom{n}{k}$ conta i percorsi con esattamente $k$ successi. Per «almeno un successo»: $P(X \geq 1) = 1 - (1 - p)^n$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calcolatrice grafica:</b> $P(X = k)$ con binompdf$(n, p, k)$, $P(X \leq k)$ con binomcdf$(n, p, k)$. I nomi possono variare un po’ a seconda della calcolatrice.</p>
+            <p class="b-note"><b>Non è uno schema di Bernoulli:</b> estrarre senza reimmissione da un’urna piccola, perché allora $p$ cambia da un’estrazione all’altra.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · L’ALBERO DI UNO SCHEMA DI BERNOULLI</div>
+        <p class="b-help" style="margin:0 0 12px">Si illuminano tutti i percorsi con esattamente $k$ successi. Contali e confronta con $\binom{n}{k}$.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">UNO SGUARDO AVANTI · TUTTI I NUMERI DI SUCCESSI A COLPO D’OCCHIO</div>
+        <p class="b-help" style="margin:0 0 12px">Il diagramma a barre mostra $P(X = k)$ per tutti i $k$. Si chiama distribuzione binomiale e torna nella 12ª classe.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 7 · TIRARE A INDOVINARE NEL TEST</div>
+            <div class="b-text"><p>5 domande, 4 risposte ciascuna, tirando a indovinare. Che probabilità c’è di esattamente 2 giuste?</p></div>
+            <div class="b-sol"><p>$n = 5$, $p = 0{,}25$, $k = 2$: $\binom{5}{2} \cdot 0{,}25^2 \cdot 0{,}75^3 = 10 \cdot 0{,}0625 \cdot 0{,}421875$.</p>
+                <p><span class="b-res">$\approx 0{,}264$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 8 · DUE SEI</div>
+            <div class="b-text"><p>Si lancia un dado 10 volte. Che probabilità c’è di esattamente due sei?</p></div>
+            <div class="b-sol"><p>$\binom{10}{2} \cdot \left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^8 = 45 \cdot \tfrac{1}{36} \cdot 0{,}2326\ldots$</p>
+                <p><span class="b-res">$\approx 0{,}291$</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>È uno schema di Bernoulli? Indica, se è il caso, $n$ e $p$. a) 10 volte la moneta, successo: testa &nbsp; b) 3 palline da un’urna con 4 rosse e 2 blu senza reimmissione, successo: rossa &nbsp; c) 20 pezzi da una grande produzione con il 3 % di difettosi, successo: difettoso</p></div>
+            <div class="b-sol"><p>a) sì, $n = 10$, $p = 0{,}5$ &nbsp; b) no, $p$ cambia &nbsp; c) approssimativamente sì, $n = 20$, $p = 0{,}03$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Si lancia una moneta 4 volte. Che probabilità c’è di esattamente due teste?</p></div>
+            <div class="b-sol"><p>$\binom{4}{2} \cdot 0{,}5^4 = \tfrac{6}{16} = 0{,}375$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una macchina produce il 5 % di pezzi difettosi. Si controllano 10 pezzi. Che probabilità c’è di nessun difettoso, di esattamente uno, di almeno due?</p></div>
+            <div class="b-sol"><p>$0{,}95^{10} \approx 0{,}599$ · $10 \cdot 0{,}05 \cdot 0{,}95^9 \approx 0{,}315$ · $1 - 0{,}599 - 0{,}315 \approx 0{,}086$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una cestista segna con il 70 %. Che probabilità c’è che su 5 tiri ne segni esattamente quattro?</p></div>
+            <div class="b-sol"><p>$\binom{5}{4} \cdot 0{,}7^4 \cdot 0{,}3 \approx 0{,}360$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quanti pezzi della produzione con il 5 % di difettosi bisogna controllare come minimo perché, con probabilità maggiore del 95 %, ce ne sia almeno uno difettoso?</p></div>
+            <div class="b-sol"><p>$1 - 0{,}95^n > 0{,}95$, cioè $0{,}95^n < 0{,}05$. Tabella della calcolatrice grafica: $n = 58$ dà $0{,}949$, $n = 59$ dà $0{,}952$. <span class="b-res">Almeno 59 pezzi.</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="0,375" data-ph="decimale"><p class="b-q-text">Quattro lanci di moneta: che probabilità c’è di esattamente due teste?</p><div class="b-sol"><p>$\tfrac{6}{16}$</p></div></div>
+        <div class="b-q" data-ans="0,599" data-tol="0.001" data-ph="decimale"><p class="b-q-text">5 % di difettosi, 10 pezzi: che probabilità c’è che non ce ne sia nessuno difettoso (con tre decimali)?</p><div class="b-sol"><p>$0{,}95^{10}$</p></div></div>
+        <div class="b-q" data-ans="0,264" data-tol="0.001" data-ph="decimale"><p class="b-q-text">5 domande, 4 risposte ciascuna, tirando a indovinare: che probabilità c’è di esattamente 2 giuste (con tre decimali)?</p><div class="b-sol"><p>$\approx 0{,}264$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="21">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola $\binom{8}{3}$ e $\dfrac{8!}{5!}$. Di quale fattore differiscono e perché?</p></div>
+            <div class="b-sol"><p>$56$ e $336$. Fattore $3! = 6$: tanti ordini ha ogni gruppo di tre.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con il capitolo 2.2:</b> una ruota della fortuna mostra rosso con $p = 0{,}2$ e si gira tre volte. Calcola $P(\text{esattamente un rosso})$ con l’albero e con la formula di Bernoulli.</p></div>
+            <div class="b-sol"><p>Tre percorsi con $0{,}2 \cdot 0{,}8^2 = 0{,}128$ ciascuno, in tutto $0{,}384$. Formula: $\binom31 \cdot 0{,}2 \cdot 0{,}8^2 = 0{,}384$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una ruota della fortuna con $P(\text{rosso}) = \tfrac13$ si gira 6 volte. Che probabilità c’è che esca rosso al massimo una volta?</p></div>
+            <div class="b-sol"><p>$\left(\tfrac23\right)^6 + 6 \cdot \tfrac13 \cdot \left(\tfrac23\right)^5 = \tfrac{64}{729} + \tfrac{192}{729} = \tfrac{256}{729} \approx 0{,}351$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Una password ha 8 caratteri scelti tra 26 minuscole, 26 maiuscole e 10 cifre. Un computer prova 10 miliardi di password al secondo. Quanto impiega al massimo?</p></div>
+            <div class="b-sol"><p>$62^8 \approx 2{,}18 \cdot 10^{14}$ password. $\tfrac{2{,}18 \cdot 10^{14}}{10^{10}} \approx 21\,800$ s, cioè poco più di 6 ore. Le password più lunghe aiutano moltissimo: con 12 caratteri sarebbero millenni.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: un triangolo con molti nomi" data-toc-k="X" data-toc-short="Triangolo">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">STORIA</span></div>
+    <h2>Un triangolo con molti nomi</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In Europa il triangolo di numeri del widget porta il nome di Blaise Pascal, che nel 1654 gli dedicò un intero trattato e lo usò per le probabilità; in Italia si chiama anche triangolo di Tartaglia, il matematico del capitolo 1.7.
+                Ma era noto molto prima: in Cina porta il nome di Yang Hui, e nel 1303 Zhu Shijie lo rappresentò nel suo libro «Prezioso specchio dei quattro elementi», per le potenze fino all’ottava.
+                Lo conoscevano anche matematici persiani e indiani.</p>
+            <p>Le righe danno i numeri $\binom{n}{k}$, cioè il numero dei percorsi con $k$ successi in uno schema di Bernoulli. E stanno nelle potenze di un binomio:
+                $(a + b)^3 = 1a^3 + 3a^2b + 3ab^2 + 1b^3$, esattamente la terza riga $1, 3, 3, 1$.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonti:</b> Blaise Pascal, «Traité du triangle arithmétique» (scritto nel 1654, stampato nel 1665). · Zhu Shijie, «Siyuan yujian» (Prezioso specchio dei quattro elementi), 1303.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>PRINCIPIO DI MOLTIPLICAZIONE</h4><p>Moltiplicare le possibilità degli stadi.</p></div>
+        <div><p>Menu: $3 \cdot 4 \cdot 2 = 24$</p></div></div>
+    <div class="b-rueck"><div><h4>PERMUTAZIONE</h4><p>$n!$ ordinamenti; con oggetti uguali, dividere per i loro fattoriali.</p></div>
+        <div><p>ANANAS: $\tfrac{6!}{3! \cdot 2!} = 60$</p></div></div>
+    <div class="b-rueck"><div><h4>DISPOSIZIONE E COMBINAZIONE</h4><p>L’ordine conta: $\tfrac{n!}{(n - k)!}$ oppure $n^k$. L’ordine non conta: $\binom{n}{k}$.</p></div>
+        <div><p>Podio: 336 · finale: 56</p></div></div>
+    <div class="b-rueck"><div><h4>MODELLO DELL’URNA</h4><p>Ordine? Reimmissione? Quattro casi fondamentali. Due tipi senza reimmissione: prodotto di coefficienti binomiali diviso $\binom{N}{n}$.</p></div>
+        <div><p>3 numeri giusti: $\tfrac{20 \cdot 12\,341}{13\,983\,816} \approx 0{,}018$</p></div></div>
+    <div class="b-rueck"><div><h4>BERNOULLI</h4><p>$P(X = k) = \binom{n}{k} p^k (1 - p)^{n - k}$ · $P(X \geq 1) = 1 - (1 - p)^n$</p></div>
+        <div><p>Tirare a indovinare: $10 \cdot 0{,}25^2 \cdot 0{,}75^3 \approx 0{,}264$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="120" data-ph="numero"><p class="b-q-text">Calcola $5!$.</p><div class="b-sol"><p>$120$</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="numero"><p class="b-q-text">Calcola $\binom{5}{2}$.</p><div class="b-sol"><p>$\tfrac{5 \cdot 4}{2}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Il lotto «6 su 49» corrisponde a estrarre …</p><div class="b-mc"><button>con ordine, con reimmissione</button><button>senza ordine, senza reimmissione</button><button>con ordine, senza reimmissione</button></div><div class="b-sol"><p>Nessun numero si ripete e l’ordine non conta.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="0,0177" data-tol="0.0002" data-ph="decimale"><p class="b-q-text">Che probabilità c’è di indovinare esattamente tre numeri al lotto (con quattro decimali)?</p><div class="b-sol"><p>$\approx 0{,}0177$</p></div></div>
+            <div class="b-q" data-ans="59" data-ph="pezzi"><p class="b-q-text">5 % di difettosi: quanti pezzi bisogna controllare perché, con più del 95 %, ce ne sia almeno uno difettoso?</p><div class="b-sol"><p>59</p></div></div>
+            <div class="b-q" data-ans="0,360" data-tol="0.001" data-ph="decimale"><p class="b-q-text">Percentuale di canestri del 70 %, 5 tiri: che probabilità c’è di esattamente 4 canestri?</p><div class="b-sol"><p>$5 \cdot 0{,}7^4 \cdot 0{,}3$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos11-zaehlprinzip.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRINCIPIO DI MOLTIPLICAZIONE</span><span class="b-lab-what">Permutazioni, fattoriale</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-kombination-variation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COMBINAZIONI E DISPOSIZIONI</span><span class="b-lab-what">Coefficiente binomiale, lotto</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-urnenmodell.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MODELLO DELL’URNA</span><span class="b-lab-what">I quattro casi fondamentali</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-bernoulli.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SCHEMI DI BERNOULLI</span><span class="b-lab-what">Formula di Bernoulli</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-ka3.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRONTI PER LA VERIFICA 3</span><span class="b-lab-what">Tutta l’area di apprendimento 2</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-uebung-stochastik.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESERCITAZIONE DI PROBABILITÀ</span><span class="b-lab-what">Esercizi misti</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Fachoberschule, 11ª classe · area di apprendimento 2 secondo il programma di matematica della Fachoberschule della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le illustrazioni sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-it/stochastik.js"></script>
+</body>
+</html>

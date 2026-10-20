@@ -105,9 +105,14 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-4 mathefos11-it:
         // venn
         'Ein Glücksrad hat 12 gleich große Felder: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Wähle eine Vorlage oder stell $A$ und $B$ selbst zusammen: Ereignis wählen, dann Zahlen antippen.':
-            'Una ruota della fortuna ha 12 settori uguali: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Scegli un modello o componi tu $A$ e $B$: scegli l’evento, poi tocca i numeri.',
+            'Una ruota della fortuna ha 12 settori uguali: $\\Omega = \\{1, 2, \\ldots, 12\\}$. Scegli un modello o componi tu $A$ e $B$: scegli l’evento, poi tocca i numeri.',
         'Vorlage': 'Modello', '$A$ bearbeiten': 'Modifica $A$', '$B$ bearbeiten': 'Modifica $B$', 'Ereignis bearbeiten': 'Evento da modificare',
         'Verknüpfung:': 'Operazione:', 'Verknüpfung': 'Operazione', 'Mengendiagramm der Ereignisse A und B': 'Diagramma di Venn degli eventi A e B',
+        // urne
+        'Kugeln $n$': 'Palline $n$', 'Ziehungen $k$': 'Estrazioni $k$', 'n kleiner': 'n minore', 'n größer': 'n maggiore', 'k kleiner': 'k minore', 'k größer': 'k maggiore',
+        'mit Reihenfolge': 'con ordine', 'ohne Reihenfolge': 'senza ordine', 'Reihenfolge': 'Ordine', 'Zurücklegen': 'Reimmissione', 'Einmal ziehen': 'Estrai una volta', 'URNE': 'URNA',
+        // pascal
+        '$n$ (Zeile)': '$n$ (riga)', '$k$ (Stelle)': '$k$ (posizione)', 'Pascalsches Dreieck bis zur Zeile 10': 'Triangolo di Pascal fino alla riga 10',
 
         // book it-5 mathefos12-it:
 
@@ -199,6 +204,24 @@ window.BuchIT && BuchIT.add('stochastik', {
         ['Die Zahlen, die in beiden Ereignissen liegen.', 'I numeri che stanno in entrambi gli eventi.'],
         ['$A \\cap B = \\emptyset$: Die Ereignisse sind <b>unvereinbar</b>, sie können nicht zusammen eintreten.', '$A \\cap B = \\emptyset$: gli eventi sono <b>incompatibili</b>, non possono verificarsi insieme.'],
         ['Regel von de Morgan: $', 'Legge di De Morgan: $'], ['$. Wähle die andere Seite und vergleiche: Es ist dieselbe Menge.', '$. Scegli l’altro membro e confronta: è lo stesso insieme.'],
+        // urne
+        ['Variation mit Wiederholung', 'Disposizione con ripetizione'], ['Permutation (alle Kugeln, mit Reihenfolge)', 'Permutazione (tutte le palline, con ordine)'],
+        ['Variation ohne Wiederholung', 'Disposizione senza ripetizione'], ['Kombination ohne Wiederholung', 'Combinazione senza ripetizione'],
+        ['Kombination mit Wiederholung', 'Combinazione con ripetizione'], ['</b> · Beispiel: ', '</b> · esempio: '], ['Anzahl der Möglichkeiten: ', 'Numero delle possibilità: '],
+        ['Gezogen: <b>', 'Estratto: <b>'], ['Ergebnisse als Tupel $(\\ldots)$: Die Reihenfolge zählt.', 'Esiti come n-uple $(\\ldots)$: l’ordine conta.'],
+        ['Ergebnisse als Mengen $\\{\\ldots\\}$: Die Reihenfolge zählt nicht.', 'Esiti come insiemi $\\{\\ldots\\}$: l’ordine non conta.'],
+        [' Genau dafür gibt es die Formel.', ' Proprio per questo c’è la formula.'],
+        // urne: the pieces of the examples that the rules below translate as a whole (for tools/buch-en/check.mjs)
+        ['ein Zahlenschloss mit ', 'un lucchetto a combinazione con '], [' Rädern zu je ', ' rotelle da '], [' Personen stellen sich in eine Reihe', ' persone si mettono in fila'],
+        ['ein Siegerpodest: ', 'un podio: '], [' Startern auf die Plätze 1 bis ', ' partecipanti ai posti da 1 a '], ['Lotto: ', 'lotto: '],
+        [' Zahlen, die Reihenfolge der Ziehung zählt nicht', ' numeri, l’ordine dell’estrazione non conta'], [' Kugeln Eis aus ', ' palline di gelato da '],
+        [' Sorten, eine Sorte darf mehrfach vorkommen', ' gusti, un gusto può ripetersi'], [' Möglichkeiten sind zu viele zum Auflisten.', ' possibilità sono troppe da elencare.'],
+        // pascal
+        [': So viele Möglichkeiten gibt es, $', ': ci sono altrettanti modi di scegliere $'], ['$ aus $', '$ tra $'], ['$ auszuwählen.', '$.'],
+        ['Summenregel (grün umrandet): $', 'Regola della somma (bordo verde): $'], ['Symmetrie (gestrichelt): $', 'Simmetria (tratteggiata): $'],
+        ['Die Mitte der Zeile: $', 'Il centro della riga: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ è qui l’immagine speculare di sé stesso.'],
+        // binomial: the standard deviation after the expected value (the BGY books have only the h of the samples)
+        ['$ · Standardabweichung $', '$ · deviazione standard $'],
 
         // book it-5 mathefos12-it:
 
@@ -244,6 +267,18 @@ window.BuchIT && BuchIT.add('stochastik', {
         [/Pfade mit genau 1 Treffern: \$/g, 'Percorsi con esattamente 1 successo: $'],
         // book it-3 mathe13-it:
         // book it-4 mathefos11-it:
+        // venn: sets of whole numbers in TeX, \{2;\,4\} → \{2, 4\} (with a decimal comma the semicolon stays; needs "\{", so SVG text cannot match)
+        [/\\\{([^$]*?)\\\}/g, (m, s) => /\d(?:,|\{,\})\d/.test(s) ? m : '\\{' + s.replace(/;\\,|; /g, ', ') + '\\}'],
+        // urne: outcomes "(1; 2)" and "{1; 2}" → "(1, 2)", "{1, 2}"; the examples with their numbers (singular for 1)
+        [/[({]\d+(?:; \d+)+[)}]/g, m => m.replace(/; /g, ', ')],
+        [/ein Zahlenschloss mit (\d+) Rädern zu je (\d+) Ziffern/g, (m, k, n) => 'un lucchetto a combinazione con ' + k + (k === '1' ? ' rotella' : ' rotelle') + ' da ' + n + ' cifre'],
+        [/(\d+) Personen stellen sich in eine Reihe/g, '$1 persone si mettono in fila'],
+        [/ein Siegerpodest: (\d+) von (\d+) Startern auf die Plätze 1 bis (\d+)/g, (m, k, n, p) => 'un podio: ' + k + (k === '1' ? ' partecipante' : ' partecipanti') + ' su ' + n + ' ' + (p === '1' ? 'al posto 1' : 'ai posti da 1 a ' + p)],
+        [/Lotto: (\d+) aus (\d+) Zahlen, die Reihenfolge der Ziehung zählt nicht/g, 'lotto: $1 numeri su $2, l’ordine dell’estrazione non conta'],
+        [/(\d+) Kugeln Eis aus (\d+) Sorten, eine Sorte darf mehrfach vorkommen/g, (m, k, n) => k + (k === '1' ? ' pallina' : ' palline') + ' di gelato da ' + n + ' gusti, un gusto può ripetersi'],
+        [/(\d{1,3}(?:\.\d{3})*) Möglichkeiten sind zu viele zum Auflisten\./g, '$1 possibilità sono troppe da elencare.'],
+        // pascal: "$, denn $2$ auswählen heißt $3$ weglassen."
+        [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, perché scegliere $' + k + '$ equivale a lasciarne fuori $' + r + '$.'],
 
         // book it-5 mathefos12-it:
 
