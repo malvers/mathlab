@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica GY 11 LK · Capitolo 1.2 · Tassi di variazione e concetto di derivata | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Approssimazione lineare, rapporto incrementale e derivata, derivata per definizione, derivabilità. Capitolo 1.2 del libro di testo interattivo Matematica · Gymnasium 11 · Leistungskurs: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · GYMNASIUM 11 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 1.2 · AREA DI APPRENDIMENTO 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 1.2 · AREA DI APPRENDIMENTO 1 · SETTEMBRE</p>
+            <h1>Tassi di variazione e concetto di derivata</h1>
+            <p class="b-hero-lead">Quanto velocemente cade un sasso proprio in questo istante? Quanto cresce adesso una coltura di batteri? La risposta è un
+                <b>tasso di variazione istantaneo</b>: il limite dei tassi di variazione medi. Nel grafico è la pendenza della <b>tangente</b>, e la tangente è
+                la retta che si adatta meglio alla curva. Nel Leistungskurs ricavi le derivate direttamente <b>per definizione</b>,
+                anche quella di $a^x$, e così incontri il numero $e$.</p>
+            <div class="b-chips"><span class="b-chip">10 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">4 LABORATORI ED ESERCIZI</span><span class="b-chip">STORIA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["0.25*x^3-x+1","2*x-3"]' data-labels='["f","Tangente"]' data-lat="[2.2,-2.6]" data-x="-3,3.5" data-y="-3,4" data-pts="[[2,1]]" data-h="240" data-aria="Un grafico con la sua tangente nel punto (2, 1)"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>interpretare il <b>rapporto incrementale</b> come pendenza della secante e come tasso di variazione medio</li>
+                <li>capire la <b>derivata</b>, limite del rapporto incrementale, come pendenza della tangente e come tasso di variazione istantaneo</li>
+                <li><b>approssimare linearmente</b> una funzione vicino a un punto con la sua tangente</li>
+                <li>calcolare derivate <b>per definizione</b>, per $x^2$ e per $a^x$, schizzare la funzione derivata e il suo grafico e verificare la <b>derivabilità</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="3" data-ph="m ="><p class="b-q-text">Quale pendenza ha la retta passante per $(1, 2)$ e $(3, 8)$?</p><div class="b-sol"><p>$\tfrac{8 - 2}{3 - 1} = 3$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="Limite"><p class="b-q-text">Calcola $\lim\limits_{h \to 0} (6 + h)$.</p><div class="b-sol"><p>6</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quanto fa $(2 + h)^2$?</p><div class="b-mc"><button>$4 + h^2$</button><button>$4 + 2h + h^2$</button><button>$4 + 4h + h^2$</button></div><div class="b-sol"><p>Quadrato di un binomio.</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="Limite"><p class="b-q-text">Calcola $\lim\limits_{x \to 3} \tfrac{x^2 - 9}{x - 3} + 1$.</p><div class="b-sol"><p>$6 + 1 = 7$ (capitolo 1.1)</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">IL SASSO CHE CADE</div>
+            <div class="b-text"><p>Un sasso cade in $t$ secondi di circa $s(t) = 5t^2$ metri.</p>
+                <ul><li>Quale velocità media ha tra 1 e 2 secondi, tra 1,9 e 2 secondi, tra 1,99 e 2 secondi?</li><li>Quanto va veloce esattamente dopo 2 secondi?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">ZOOM SUL GRAFICO</div>
+            <div class="b-text"><p>Disegnate $y = x^2$ con la calcolatrice grafica e ingrandite più volte il punto $(1, 1)$.</p>
+                <ul><li>Che cosa vedete dopo alcuni ingrandimenti? Quale pendenza ha quello che vedete?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span>
+            <a class="b-lab" data-lab="steigung" href="../../steigung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DELLE PENDENZE</span><span class="b-lab-what">Pendenza e tangente (in tedesco)</span></span></a></div>
+        <div class="b-box b-erk"><div class="b-box-title">QUANTO È RIPIDA 2ˣ IN 0?</div>
+            <div class="b-text"><p>Calcolate $\tfrac{2^h - 1}{h}$ per $h = 0{,}1$; 0,01; 0,001, e lo stesso per $3^h$.</p>
+                <ul><li>Verso quali numeri tendono i rapporti? Esiste una base per cui viene esattamente 1?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Dalla secante alla tangente" data-toc-k="1" data-toc-short="1 Tangente">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">5 ORE</span></div>
+    <h2><span class="b-no">1</span>Dalla secante alla tangente</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Tra 1 e 2 secondi il sasso cade di $s(2) - s(1) = 15$ m, cioè in media 15 m/s. Tra 2 e $2 + h$ sono
+                $\tfrac{5(2 + h)^2 - 20}{h} = 20 + 5h$ metri al secondo. Se l’intervallo di tempo diventa sempre più breve, questo numero si avvicina alla <b>velocità istantanea</b> di 20 m/s.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · RAPPORTO INCREMENTALE E DERIVATA</div>
+                <div class="b-text">
+                    <p>Il <b>rapporto incrementale</b> $\dfrac{f(x_0 + h) - f(x_0)}{h}$ è la pendenza della secante passante per $(x_0, f(x_0))$ e $(x_0 + h, f(x_0 + h))$: il <b>tasso di variazione medio</b>.</p>
+                    <p>Se esiste il suo limite per $h \to 0$, $f$ si dice <b>derivabile</b> nel punto $x_0$, e $$f'(x_0) = \lim_{h \to 0} \frac{f(x_0 + h) - f(x_0)}{h}$$ è la <b>derivata</b> (il limite del rapporto incrementale): la pendenza della tangente e il <b>tasso di variazione istantaneo</b>.</p>
+                    <p>La tangente $t(x) = f(x_0) + f'(x_0)(x - x_0)$ è la migliore <b>approssimazione lineare</b>: $f(x_0 + h) \approx f(x_0) + f'(x_0) \cdot h$, e l’errore diventa piccolo più in fretta di $h$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notazioni:</b> $f'(x_0)$ (Lagrange) e $\tfrac{\mathrm{d}f}{\mathrm{d}x}$ (Leibniz). I fisici scrivono un punto per le derivate rispetto al tempo: $\dot{s}$ (Newton).</p>
+            <p class="b-note"><b>Unità di misura:</b> il tasso di variazione ha l’unità «unità di $y$ per unità di $x$»: metri al secondo, gradi al minuto, euro al pezzo.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · LA SECANTE DIVENTA TANGENTE</div>
+        <p class="b-help" style="margin:0 0 12px">Trascina il secondo punto verso il primo. Il rapporto incrementale si avvicina alla pendenza della tangente.</p>
+        <div data-widget="sekante"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · VELOCITÀ ISTANTANEA</div>
+            <div class="b-text"><p>Trova la velocità del sasso con $s(t) = 5t^2$ dopo 2 secondi.</p></div>
+            <div class="b-sol"><p>$\dfrac{s(2 + h) - s(2)}{h} = \dfrac{20 + 20h + 5h^2 - 20}{h} = 20 + 5h$.</p>
+                <p>Limite per $h \to 0$: <span class="b-res">$s'(2) = 20$ m/s</span>, cioè 72 km/h.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · APPROSSIMARE LINEARMENTE</div>
+            <div class="b-text"><p>Calcola approssimativamente $\sqrt{4{,}1}$ con la tangente a $f(x) = \sqrt{x}$ in $x_0 = 4$. Si ha $f'(4) = \tfrac14$.</p></div>
+            <div class="b-sol"><p>$\sqrt{4 + h} \approx 2 + \tfrac14 h$; con $h = 0{,}1$: $\sqrt{4{,}1} \approx 2{,}025$.</p>
+                <p>Valore esatto $2{,}024\,846$: <span class="b-res">errore di appena circa $0{,}000\,15$</span>.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · DA VICINO OGNI CURVA È DRITTA</div>
+        <p class="b-help" style="margin:0 0 12px">Rimpicciolisci la finestra. Curva e tangente diventano indistinguibili, l’errore diminuisce più in fretta di $h$.</p>
+        <div data-widget="linapprox"></div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola il tasso di variazione medio di $f(x) = x^3$ su $[1, 3]$ e su $[1, 2]$.</p></div>
+            <div class="b-sol"><p>$\tfrac{27 - 1}{2} = 13$ e $\tfrac{8 - 1}{1} = 7$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Si riempie un serbatoio: dopo 0, 2, 5 e 10 minuti contiene 0, 120, 270 e 420 litri. Calcola le portate in entrata medie nei tre intervalli di tempo. Che cosa noti?</p></div>
+            <div class="b-sol"><p>60 l/min, 50 l/min, 30 l/min. La portata in entrata diminuisce.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Trova il tasso di variazione istantaneo di $f(x) = \tfrac1x$ nel punto $x_0 = 2$ con il limite del rapporto incrementale.</p></div>
+            <div class="b-sol"><p>$\dfrac{\frac{1}{2 + h} - \frac12}{h} = \dfrac{2 - (2 + h)}{2(2 + h)h} = \dfrac{-1}{2(2 + h)} \to -\dfrac14$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Approssima linearmente e confronta con la calcolatrice: a) $e^{0{,}1}$ con la tangente a $e^x$ in 0 &nbsp; b) $\sin 0{,}2$ con la tangente a $\sin x$ in 0. Indica gli errori relativi.</p></div>
+            <div class="b-sol"><p>a) 1,1 invece di $1{,}105\,17$, errore relativo di circa lo $0{,}47\,\%$ &nbsp; b) 0,2 invece di $0{,}198\,67$, errore relativo di circa lo $0{,}67\,\%$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dimostra per $f(x) = x^2$ e $x_0 = 1$: l’errore $f(1 + h) - t(1 + h)$ della tangente è $h^2$. Che cosa significa $\lim\limits_{h \to 0} \tfrac{h^2}{h} = 0$ per la qualità dell’approssimazione?</p></div>
+            <div class="b-sol"><p>$t(x) = 1 + 2(x - 1)$, quindi $f(1 + h) - t(1 + h) = 1 + 2h + h^2 - 1 - 2h = h^2$. In rapporto a $h$ l’errore è piccolo quanto si vuole: nessun’altra retta passante per $(1, 1)$ ha questa proprietà, la tangente è la migliore approssimazione lineare.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="4" data-ph="m ="><p class="b-q-text">Quale pendenza ha la secante a $f(x) = x^2$ passante per i punti di ascissa $x = 1$ e $x = 3$?</p><div class="b-sol"><p>$\tfrac{9 - 1}{2} = 4$</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="m/s"><p class="b-q-text">$s(t) = 5t^2$. Quanto vale $s'(2)$ in m/s?</p><div class="b-sol"><p>$20 + 5h \to 20$</p></div></div>
+        <div class="b-q" data-ans="2,025" data-tol="0.0005" data-ph="Numero"><p class="b-q-text">Quale valore approssimato di $\sqrt{4{,}1}$ dà la tangente in $x_0 = 4$?</p><div class="b-sol"><p>$2 + \tfrac14 \cdot 0{,}1 = 2{,}025$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Derivata per definizione" data-toc-k="2" data-toc-short="2 Definizione">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">5 ORE</span></div>
+    <h2><span class="b-no">2</span>Derivata per definizione</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>I rapporti dell’esplorazione tendono a circa 0,693 per la base 2 e a 1,099 per la base 3. Tra le due deve esserci una base
+                per cui il limite è esattamente 1: il numero di Nepero $e \approx 2{,}718$. I numeri 0,693 e 1,099 sono $\ln 2$ e $\ln 3$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · FUNZIONE DERIVATA PER DEFINIZIONE</div>
+                <div class="b-text">
+                    <p>Se a ogni punto $x$ in cui $f$ è derivabile si associa il numero $f'(x)$, si ottiene la <b>funzione derivata</b> $f'$ con $$f'(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h}$$</p>
+                    <p>$f(x) = x^2$: $\dfrac{(x + h)^2 - x^2}{h} = 2x + h \to 2x$, quindi $f'(x) = 2x$.</p>
+                    <p>$f(x) = a^x$: $\dfrac{a^{x + h} - a^x}{h} = a^x \cdot \dfrac{a^h - 1}{h} \to a^x \cdot \ln a$, quindi $\left(a^x\right)' = \ln a \cdot a^x$ e $\left(e^x\right)' = e^x$.</p>
+                    <p><b>Derivabile ⇒ continua</b>, ma non viceversa: $|x|$ è continua in 0, ma lì il rapporto incrementale vale −1 da sinistra e 1 da destra.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Schizzare il grafico di $f'$:</b> dove $f$ cresce, $f' > 0$; dove decresce, $f' < 0$. Massimi e minimi di $f$ diventano zeri di $f'$, i punti di massima pendenza diventano estremi di $f'$.</p>
+            <p class="b-note"><b>Perché $e$?</b> Solo con la base $e$ la funzione esponenziale è la derivata di sé stessa. Per questo $e^x$ è la scelta naturale nelle scienze e nella tecnica.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · LA DERIVATA DI aˣ</div>
+        <p class="b-help" style="margin:0 0 12px">Cambia la base e rendi $h$ più piccolo. In verde la secante passante per $(0, 1)$, tratteggiata la tangente.</p>
+        <div data-widget="ablnachdef"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · PER DEFINIZIONE</div>
+            <div class="b-text"><p>Trova la funzione derivata di $f(x) = \tfrac1x$ per definizione.</p></div>
+            <div class="b-sol"><p>$\dfrac{\frac{1}{x + h} - \frac1x}{h} = \dfrac{x - (x + h)}{x(x + h)h} = \dfrac{-1}{x(x + h)}$</p>
+                <p>Limite per $h \to 0$: <span class="b-res">$f'(x) = -\dfrac{1}{x^2}$</span> per ogni $x \neq 0$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · NON DERIVABILE</div>
+            <div class="b-text"><p>$f(x) = |x|$ è derivabile nel punto 0?</p></div>
+            <div class="b-sol"><p>Da destra: $\tfrac{|h|}{h} = 1$ per $h > 0$. Da sinistra: $\tfrac{|h|}{h} = -1$ per $h < 0$.</p>
+                <p>Limite sinistro e limite destro sono diversi: <span class="b-res">non derivabile</span>. Il grafico ha uno spigolo in 0, ma non un salto.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · COSÌ NASCE IL GRAFICO DELLA DERIVATA</div>
+        <p class="b-help" style="margin:0 0 12px">Trascina il punto lungo la curva. La pendenza della sua tangente disegna punto per punto il grafico di $f'$.</p>
+        <div data-widget="ableitungsgraph"></div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Trova la funzione derivata per definizione: a) $f(x) = 3x^2$ &nbsp; b) $f(x) = x^3$ &nbsp; c) $f(x) = 5x - 2$</p></div>
+            <div class="b-sol"><p>a) $\tfrac{3(2xh + h^2)}{h} = 6x + 3h \to 6x$ &nbsp; b) $\tfrac{3x^2 h + 3xh^2 + h^3}{h} \to 3x^2$ &nbsp; c) $\tfrac{5h}{h} = 5$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola $\tfrac{10^h - 1}{h}$ per $h = 0{,}001$ e confronta con $\ln 10$. Indica la derivata di $10^x$.</p></div>
+            <div class="b-sol"><p>$\approx 2{,}3052$; $\ln 10 \approx 2{,}3026$. $\left(10^x\right)' = \ln 10 \cdot 10^x$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deriva $f(x) = \sqrt{x}$ per definizione.</p></div>
+            <div class="b-hint"><p>Moltiplica e dividi per $\sqrt{x + h} + \sqrt{x}$, come nel capitolo 1.1.</p></div>
+            <div class="b-sol"><p>$\dfrac{\sqrt{x + h} - \sqrt{x}}{h} = \dfrac{1}{\sqrt{x + h} + \sqrt{x}} \to \dfrac{1}{2\sqrt{x}}$ per $x > 0$. In 0, $\sqrt{x}$ non è derivabile.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Schizza per $f(x) = x^3 - 3x$ il grafico di $f'$ senza calcolare $f'$. Controlla poi con $f'(x) = 3x^2 - 3$.</p></div>
+            <div class="b-sol"><p>$f$ ha un massimo in $x = -1$ e un minimo in $x = 1$: lì $f'$ ha degli zeri; è positiva all’esterno e negativa in mezzo, con il minimo in 0. È la parabola $3x^2 - 3$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$f(x) = x^2$ per $x \leq 1$ e $g(x) = 3x - 2$ per $x > 1$ formano insieme una funzione $F$. $F$ è continua nel punto 1? È derivabile? Che cosa cambia se si prende $g(x) = 2x - 1$?</p></div>
+            <div class="b-sol"><p>Continua: entrambi i tratti danno 1. Da sinistra la pendenza è $2 \cdot 1 = 2$, da destra 3: uno spigolo, quindi non derivabile. Con $2x - 1$ coincidono il valore e la pendenza: continua e derivabile, la retta è la tangente alla parabola.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="6" data-ph="f'(3) ="><p class="b-q-text">$f(x) = x^2$. Calcola $f'(3)$.</p><div class="b-sol"><p>$2 \cdot 3 = 6$</p></div></div>
+        <div class="b-q" data-ans="0,693" data-tol="0.001" data-ph="Numero"><p class="b-q-text">Verso quale numero tende $\tfrac{2^h - 1}{h}$ per $h \to 0$ (con tre decimali)?</p><div class="b-sol"><p>$\ln 2 \approx 0{,}693$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quale affermazione è corretta?</p><div class="b-mc"><button>Ogni funzione continua è derivabile.</button><button>Ogni funzione derivabile è continua.</button><button>$|x|$ è derivabile in 0.</button></div><div class="b-sol"><p>Controesempio alla prima affermazione: $|x|$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Trova l’equazione della tangente a $f(x) = x^2$ nel punto $(3, 9)$.</p></div>
+            <div class="b-sol"><p>$f'(3) = 6$: $t(x) = 9 + 6(x - 3) = 6x - 9$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con il capitolo 1.1:</b> giustifica: se $f$ è derivabile nel punto $x_0$, allora lì $f$ è continua.</p></div>
+            <div class="b-hint"><p>Scrivi $f(x_0 + h) - f(x_0) = \dfrac{f(x_0 + h) - f(x_0)}{h} \cdot h$ e usa i teoremi sui limiti.</p></div>
+            <div class="b-sol"><p>Per $h \to 0$ il primo fattore tende a $f'(x_0)$, il secondo a 0. Per il teorema sul limite del prodotto $f(x_0 + h) - f(x_0) \to f'(x_0) \cdot 0 = 0$, quindi $f(x_0 + h) \to f(x_0)$: continua.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una coltura di batteri cresce secondo $N(t) = 1000 \cdot 2^t$ ($t$ in ore). Con quale ritmo cresce dopo 3 ore? Indica il risultato con $\ln 2$ e come numero decimale.</p></div>
+            <div class="b-sol"><p>$N'(t) = 1000 \cdot \ln 2 \cdot 2^t$, $N'(3) = 8000 \ln 2 \approx 5545$ batteri all’ora.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Per quali $a$ e $b$ la funzione $F(x) = ax^2$ per $x \leq 1$, $F(x) = 2x + b$ per $x > 1$ è continua e derivabile nel punto 1?</p></div>
+            <div class="b-sol"><p>Pendenza: $2a = 2$, quindi $a = 1$. Valore: $a = 2 + b$, quindi $b = -1$. Allora $F(x) = x^2$ e $2x - 1$ rispettivamente.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: chi ha inventato il calcolo differenziale?" data-toc-k="X" data-toc-short="Newton e Leibniz">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">STORIA</span></div>
+    <h2>Chi ha inventato il calcolo differenziale?</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Isaac Newton sviluppò il suo «calcolo delle flussioni» negli anni Sessanta del Seicento. Il suo trattato «Metodo delle flussioni» era pronto nel 1671, ma non lo pubblicò.
+                Gottfried Wilhelm Leibniz scoprì il calcolo differenziale in modo indipendente e lo pubblicò nel 1684 nella rivista di Lipsia «Acta Eruditorum»,
+                con i simboli $\mathrm{d}x$ e $\tfrac{\mathrm{d}y}{\mathrm{d}x}$, che usiamo ancora oggi.</p>
+            <p>Ne nacque una delle dispute di priorità più accanite della scienza. Nel 1712 la Royal Society, di cui Newton era presidente, esaminò la questione. Il suo rapporto, il
+                «Commercium epistolicum», attribuì l’invenzione a Newton e accusò Leibniz di plagio; Newton stesso aveva collaborato a scriverlo. Oggi si ritiene che Newton sia stato
+                il primo, che Leibniz ci sia arrivato in modo indipendente e che abbia pubblicato prima. Le flussioni di Newton uscirono solo nel 1736, nove anni dopo la sua morte.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonti:</b> G. W. Leibniz: «Nova methodus pro maximis et minimis», Acta Eruditorum, ottobre 1684, pp. 467–473 · I. Newton: «The Method of Fluxions and Infinite Series», Londra 1736 (scritto nel 1671) · Royal Society: «Commercium epistolicum D. Johannis Collins et aliorum de analysi promota», Londra 1712.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>RAPPORTO INCREMENTALE</h4><p>$\tfrac{f(x_0 + h) - f(x_0)}{h}$: pendenza della secante, tasso di variazione medio.</p></div>
+        <div><p>$x^3$ su $[1, 3]$: 13</p></div></div>
+    <div class="b-rueck"><div><h4>DERIVATA</h4><p>$f'(x_0) = \lim\limits_{h \to 0} \tfrac{f(x_0 + h) - f(x_0)}{h}$: pendenza della tangente, tasso di variazione istantaneo.</p></div>
+        <div><p>$s(t) = 5t^2$: $s'(2) = 20$ m/s</p></div></div>
+    <div class="b-rueck"><div><h4>APPROSSIMAZIONE LINEARE</h4><p>$f(x_0 + h) \approx f(x_0) + f'(x_0) h$, l’errore diventa piccolo più in fretta di $h$.</p></div>
+        <div><p>$\sqrt{4{,}1} \approx 2{,}025$</p></div></div>
+    <div class="b-rueck"><div><h4>PER DEFINIZIONE</h4><p>$(x^2)' = 2x$, $\left(\tfrac1x\right)' = -\tfrac{1}{x^2}$, $(a^x)' = \ln a \cdot a^x$, $(e^x)' = e^x$</p></div>
+        <div><p>$\tfrac{2^h - 1}{h} \to \ln 2 \approx 0{,}693$</p></div></div>
+    <div class="b-rueck"><div><h4>DERIVABILITÀ</h4><p>Limite sinistro e destro del rapporto incrementale uguali. Derivabile ⇒ continua, non viceversa.</p></div>
+        <div><p>$|x|$ in 0: spigolo, non derivabile</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="7" data-ph="m ="><p class="b-q-text">Tasso di variazione medio di $x^3$ su $[1, 2]$?</p><div class="b-sol"><p>$8 - 1 = 7$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="f'(2) ="><p class="b-q-text">$f(x) = 3x^2$. Calcola $f'(2)$.</p><div class="b-sol"><p>$6 \cdot 2 = 12$</p></div></div>
+            <div class="b-q" data-ans="-1/4" data-ph="Frazione"><p class="b-q-text">$f(x) = \tfrac1x$. Calcola $f'(2)$.</p><div class="b-sol"><p>$-\tfrac{1}{4}$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="2,303" data-tol="0.001" data-ph="Numero"><p class="b-q-text">Verso quale numero tende $\tfrac{10^h - 1}{h}$ (con tre decimali)?</p><div class="b-sol"><p>$\ln 10 \approx 2{,}303$</p></div></div>
+            <div class="b-q" data-ans="5545" data-tol="1" data-ph="all’ora"><p class="b-q-text">$N(t) = 1000 \cdot 2^t$. Calcola $N'(3)$ (numero intero).</p><div class="b-sol"><p>$8000 \ln 2 \approx 5545$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="b ="><p class="b-q-text">$ax^2$ per $x \leq 1$, $2x + b$ per $x > 1$, continua e derivabile. Quanto vale $b$?</p><div class="b-sol"><p>$a = 1$, $b = -1$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-aenderungsraten.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TASSI DI VARIAZIONE</span><span class="b-lab-what">20 esercizi con soluzioni</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-ableitung-definition.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DERIVATA PER DEFINIZIONE</span><span class="b-lab-what">20 esercizi con soluzioni</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DIFFERENZIALE</span><span class="b-lab-what">Derivate e tangenti</span></span></a>
+        <a class="b-lab" data-lab="steigung" href="../../steigung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DELLE PENDENZE</span><span class="b-lab-what">Pendenza e tangente</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Gymnasium, 11ª classe, Leistungskurs · Area di apprendimento 1 secondo il programma di matematica del Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le illustrazioni sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-it/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-it/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-it/gy11lk.js"></script>
+</body>
+</html>
