@@ -61,6 +61,18 @@ window.BuchIT && BuchIT.add('daten', {
             'L’occhio confronta le aree: $2 \\cdot 2 = 4$, l’immagine sembra <b>quattro volte</b> più grande. Disegnata come solido, addirittura $2^3 = 8$ volte.',
 
         // book it-17 mathe7-it:
+        // achsentrick
+        'Abgeschnittene Achse': 'Asse tagliato', 'Bild statt Balken': 'Figure invece di barre', 'Achse beginnt bei': 'L’asse parte da', 'Trick': 'Trucco',
+        'Säulendiagramm Mitglieder eines Sportvereins': 'Diagramma a colonne: soci di una società sportiva',
+        'Die Achse beginnt nicht bei null. Bei Säulen täuscht das immer, denn das Auge vergleicht ihre Höhen. In Liniendiagrammen ist ein späterer Achsenbeginn üblich, dann aber mit deutlichem Bruchzeichen.':
+            'L’asse non parte da zero. Con le colonne questo inganna sempre, perché l’occhio confronta le loro altezze. Nei diagrammi a linee è normale che l’asse parta più in alto, ma allora con un segno di interruzione ben visibile.',
+        'Achse ab null: Die Höhen sind ehrlich vergleichbar.': 'Asse da zero: le altezze si possono confrontare onestamente.',
+        '2020: 100 Mio. €': '2020: 100 mln €', '2025: 200 Mio. €': '2025: 200 mln €',
+        'Zwei Geldsymbole, das zweite doppelt so hoch und doppelt so breit': 'Due simboli del denaro, il secondo alto il doppio e largo il doppio',
+        'Der Umsatz hat sich <b>verdoppelt</b>. Das rechte Bild ist doppelt so hoch, aber auch doppelt so breit.':
+            'Il fatturato è <b>raddoppiato</b>. La figura a destra è alta il doppio, ma anche larga il doppio.',
+        'Das Auge vergleicht Flächen: $2 \\cdot 2 = 4$, das Bild wirkt <b>viermal</b> so groß. Als Körper gezeichnet sogar $2^3 = 8$-mal.':
+            'L’occhio confronta le aree: $2 \\cdot 2 = 4$, la figura sembra <b>quattro volte</b> più grande. Disegnata come solido, addirittura $2^3 = 8$ volte.',
 
         // book it-19 mathe9-it:
 
@@ -79,6 +91,9 @@ window.BuchIT && BuchIT.add('daten', {
         ['-mal so hoch wie die erste.', ' volte la prima.'], ['Tatsächlich: $\\tfrac{437}{412}', 'In realtà: $\\tfrac{437}{412}'], ['$, also ein Plus von ', '$, cioè un aumento del '],
 
         // book it-17 mathe7-it:
+        // achsentrick
+        ['Mitglieder eines Sportvereins. Die letzte Säule <b>wirkt</b> ', 'Soci di una società sportiva. L’ultima colonna <b>sembra</b> '],
+        ['-mal so hoch wie die erste.', ' volte più alta della prima.'], ['Tatsächlich: $', 'In realtà: $'], ['$, also ein Plus von ', '$, quindi un aumento del '],
 
         // book it-19 mathe9-it:
 

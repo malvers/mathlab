@@ -50,6 +50,8 @@ window.BuchIT && BuchIT.add('os6', {
         'Größe': 'Grandezza',
 
         // book it-17 mathe7-it:
+        // tangramos6
+        'Tangram: sieben Teile in einem Quadrat': 'Tangram: sette pezzi in un quadrato',
 
     },
     phrase: [
@@ -78,6 +80,11 @@ window.BuchIT && BuchIT.add('os6', {
         ['), die 2 und die 12 nur eins.', '), il 2 e il 12 solo una ciascuno.'],
 
         // book it-17 mathe7-it:
+        // tangramos6
+        ['großes Dreieck', 'triangolo grande'], ['mittleres Dreieck', 'triangolo medio'], ['kleines Dreieck', 'triangolo piccolo'],
+        ['Anteil am Quadrat: ', 'Parte del quadrato: '],
+        ['Ist das Quadrat 4 cm × 4 cm groß, hat das Teil ', 'Se il quadrato misura 4 cm × 4 cm, il pezzo ha '],
+        ['Tippe auf ein Teil. Alle sieben zusammen ergeben das ganze Quadrat: ', 'Tocca un pezzo. Tutti e sette insieme formano il quadrato intero: '],
 
     ],
     rule: [
@@ -101,6 +108,12 @@ window.BuchIT && BuchIT.add('os6', {
         [/Augensumme <b>(\d+)<\/b>: (\d+)-mal(, relativ )?/, (m, s, k, r) => 'Somma dei punti <b>' + s + '</b>: ' + (k === '1' ? '1 volta' : k + ' volte') + (r ? ', frequenza relativa ' : '')],
 
         // book it-17 mathe7-it:
+        // tangramos6: the square and the parallelogram as the name of the piece and in the list of pieces of equal area
+        [/(<p style="margin:0"><b>)(Quadrat|Parallelogramm)(<\/b><\/p>)/, (m, a, n, b) => a + (n === 'Quadrat' ? 'quadrato' : 'parallelogramma') + b],
+        [/Genauso groß: ([^(<]+) \(hell markiert\)\./, (m, l) => {
+            const one = !l.includes(',');
+            return 'Della stessa grandezza: ' + l.replace(/\bQuadrat\b/g, 'quadrato').replace(/\bParallelogramm\b/g, 'parallelogramma') + (one ? ' (evidenziato).' : ' (evidenziati).');
+        }],
 
     ]
 });

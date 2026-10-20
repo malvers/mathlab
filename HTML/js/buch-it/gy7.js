@@ -88,6 +88,51 @@ window.BuchIT && BuchIT.add('gy7', {
         'flach': 'piatto',
 
         // book it-17 mathe7-it:
+        // shared: the solids, the 3D stage ("Würfel" is a die in gy6: the cube is a rule below)
+        'Quader': 'Parallelepipedo', 'Dreiecksprisma': 'Prisma triangolare', 'Sechseckprisma': 'Prisma esagonale', 'Quadratische Pyramide': 'Piramide quadrangolare',
+        'Quadr. Pyramide': 'Piramide quadr.', 'Dreieckspyramide': 'Piramide triangolare', 'Pyramidenstumpf': 'Tronco di piramide', 'Tetraeder': 'Tetraedro',
+        'Oktaeder': 'Ottaedro', 'Dodekaeder': 'Dodecaedro', 'Ikosaeder': 'Icosaedro', 'Körper in 3D': 'Solido in 3D', 'Ziehen zum Drehen': 'Trascina per ruotare',
+        'weniger': 'meno', 'mehr': 'più',
+        // zahlengerade7
+        'Addieren': 'Addizione', 'Subtrahieren': 'Sottrazione', 'Rechenart': 'Operazione', 'erste Zahl $a$': 'primo numero $a$', 'zweite Zahl $b$': 'secondo numero $b$',
+        'Zieh die Punkte $a$ und $b$ auf der Zahlengeraden. Sie rasten in halben Schritten ein.': 'Trascina i punti $a$ e $b$ sulla retta dei numeri. Scattano di mezza unità in mezza unità.',
+        'Gegenzahlen': 'Opposti', 'Start': 'Partenza', 'Zahlengerade mit rationalen Zahlen': 'Retta dei numeri con numeri razionali',
+        'Rechnen als Bewegung auf der Zahlengeraden': 'Calcolare come movimento sulla retta dei numeri',
+        // zahlbereiche7
+        'Wohin gehört die Zahl?': 'Dove va il numero?', 'Nächste Zahl': 'Numero successivo', 'DIE ZAHL': 'IL NUMERO',
+        '$\\mathbb{Z}$, aber nicht $\\mathbb{N}$': '$\\mathbb{Z}$, ma non $\\mathbb{N}$', '$\\mathbb{Q}^+$, aber nicht $\\mathbb{N}$': '$\\mathbb{Q}^+$, ma non $\\mathbb{N}$',
+        'nur $\\mathbb{Q}$': 'solo $\\mathbb{Q}$', 'Nur das Bild': 'Solo la figura', 'Teilmengen': 'Sottoinsiemi', 'Schnittmenge': 'Intersezione', 'Vereinigung': 'Unione', 'Mengen': 'Insiemi',
+        'rationale Zahlen': 'numeri razionali', 'ganze Zahlen': 'numeri interi', 'gebrochene Zahlen': 'razionali assoluti', 'natürliche': 'naturali',
+        'Mengendiagramm: natürliche, ganze, gebrochene und rationale Zahlen': 'Diagramma di Venn: numeri naturali, interi, razionali assoluti e razionali',
+        'In welchen Teil des Bildes gehört sie? Tippe auf einen Knopf oder ins Bild.': 'In quale parte della figura va? Tocca un pulsante o la figura.',
+        // vorzeichen7
+        'Multiplizieren': 'Moltiplicazione', 'Potenzen': 'Potenze', 'Muster': 'Schema', 'erster Faktor': 'primo fattore', 'Nächste Zeile': 'Riga successiva',
+        'positiv': 'positivo', 'negativ': 'negativo', 'Die Ergebnisse auf der Zahlengeraden': 'I risultati sulla retta dei numeri',
+        // waagebild7
+        'Eine Waage im Gleichgewicht: links drei Kisten x und zwei Gewichte, rechts eine Kiste x und sechs Gewichte':
+            'Una bilancia in equilibrio: a sinistra tre scatole x e due pesi, a destra una scatola x e sei pesi',
+        // umstellen7
+        '⇄ Seiten tauschen': '⇄ scambia i lati', 'Rechteck': 'Rettangolo', 'Umfang': 'Perimetro', 'Geschwindigkeit': 'Velocità', 'Dichte': 'Densità', 'Pyramide': 'Piramide',
+        'Formel': 'Formula', 'Nächster Schritt': 'Passo successivo', 'umstellen nach': 'ricava',
+        // prozent7
+        'Grundwert $G$': 'Valore di base $G$', 'Prozentsatz $p\\,\\%$': 'Tasso percentuale $p\\,\\%$', 'Änderung um': 'Variazione del',
+        'Danach um denselben Prozentsatz zurück': 'Poi indietro dello stesso tasso percentuale', 'Balken vor und nach der Änderung': 'Barre prima e dopo la variazione',
+        'Nicht': 'Non',
+        // diagramm7
+        'Wie kommst du zur Schule? Umfrage in einer Klasse': 'Come vieni a scuola? Sondaggio in una classe', 'Antworten': 'Risposte', 'zu Fuß': 'a piedi',
+        'Fahrrad': 'bici', 'Bus, Bahn': 'autobus, treno', 'Auto': 'auto', 'Klassensprecherwahl: Stimmen': 'Elezione del rappresentante di classe: voti', 'Stimmen': 'Voti',
+        'Höhe einer Sonnenblume, jede Woche gemessen': 'Altezza di un girasole, misurata ogni settimana',
+        'Säulendiagramm': 'Diagramma a colonne', 'Liniendiagramm': 'Diagramma a linee', 'Kreisdiagramm': 'Diagramma a torta', 'Diagramm': 'Diagramma', 'Woche': 'Settimana',
+        'Anteil': 'Parte', 'Winkel': 'Angolo',
+        // schraegbild7
+        'Fichtenholz': 'Legno di abete', 'Glas': 'Vetro', 'Stahl': 'Acciaio', 'Schrägbild': 'Assonometria', 'Zweitafelbild': 'Doppia proiezione', 'Wahre Länge': 'Vera lunghezza',
+        'Darstellung': 'Rappresentazione', 'Körper': 'Solido', 'Grundkante $a$': 'Spigolo di base $a$', 'Kante $b$': 'Spigolo $b$', 'Höhe $h$': 'Altezza $h$', 'Stoff': 'Materiale',
+        'Deckkante $b$': 'Spigolo superiore $b$', 'Breite $b$': 'Larghezza $b$', 'AUFRISS': 'PROSPETTO', 'GRUNDRISS': 'PIANTA',
+        // faltnetz7
+        'Falten': 'Piegatura', '▶ Zusammenfalten': '▶ Piega', '◀ Auffalten': '◀ Riapri', 'Ein Netz faltet sich zu einem Körper': 'Uno sviluppo si piega e diventa un solido',
+        // eckenwinkel7
+        'Dreiecke': 'Triangoli', 'Quadrate': 'Quadrati', 'Fünfecke': 'Pentagoni', 'Sechsecke': 'Esagoni', 'Vieleck': 'Poligono', 'Anzahl an der Ecke': 'Numero nel vertice',
+        'flach': 'piatto',
 
         // book it-18 mathe8-it:
 
@@ -249,6 +294,85 @@ window.BuchIT && BuchIT.add('gy7', {
             'Colonne: quanti poligoni in un vertice. Esattamente cinque caselle hanno la spunta: esistono esattamente cinque solidi platonici.'],
 
         // book it-17 mathe7-it:
+        // zahlengerade7
+        [', denn ', ', perché '], [' liegt weiter <b>links</b>.', ' sta più a <b>sinistra</b>.'], ['Betrag: ', 'Valore assoluto: '], [', der Abstand von der Null · ', ', la distanza dallo zero · '],
+        ['Gegenzahl: ', 'Opposto: '], [', gespiegelt an der Null', ', simmetrico rispetto allo zero'], ['Abstand von $a$ und $b$: $', 'Distanza tra $a$ e $b$: $'],
+        ['Start bei $', 'Si parte da $'], ['$, dann $', '$, poi $'], ['nach <b>rechts</b>', 'verso <b>destra</b>'], ['nach <b>links</b>', 'verso <b>sinistra</b>'],
+        ['$ gar nicht.', '$: non ci si muove.'],
+        ['Eine Zahl subtrahieren heißt ihre <b>Gegenzahl addieren</b>. ', 'Sottrarre un numero significa <b>addizionare il suo opposto</b>. '],
+        ['Minus mal minus: Wer $', 'Meno per meno: chi sottrae $'], ['$ abzieht, geht nach rechts.', '$ va verso destra.'],
+        ['Eine positive Zahl addieren: nach rechts. Eine negative Zahl addieren: nach links.', 'Addizionare un numero positivo: verso destra. Addizionare un numero negativo: verso sinistra.'],
+        // zahlbereiche7
+        ['eine natürliche Zahl', 'un numero naturale'], [', also natürlich', ', quindi naturale'], ['der Betrag von $-4$ ist $4$', 'il valore assoluto di $-4$ è $4$'],
+        ['ganz und negativ', 'intero e negativo'], ['ein Bruch ohne Minuszeichen', 'una frazione senza segno meno'], ['zwischen 2 und 3, nicht ganz', 'tra 2 e 3, non intero'],
+        ['negativ und nicht ganz', 'negativo e non intero'],
+        ['Die <b>ganzen</b> Zahlen $\\mathbb{Z}$ und die <b>gebrochenen</b> Zahlen $\\mathbb{Q}^+$ überlappen sich. Im Überlapp liegen die <b>natürlichen</b> Zahlen $\\mathbb{N}$. Alles zusammen liegt in den <b>rationalen</b> Zahlen $\\mathbb{Q}$.',
+            'I numeri <b>interi</b> $\\mathbb{Z}$ e i numeri <b>razionali assoluti</b> $\\mathbb{Q}^+$ si sovrappongono. Nella parte comune ci sono i numeri <b>naturali</b> $\\mathbb{N}$. Tutto insieme sta nei numeri <b>razionali</b> $\\mathbb{Q}$.'],
+        ['<b>Teilmenge:</b> $\\mathbb{N} \\subset \\mathbb{Z}$, $\\mathbb{N} \\subset \\mathbb{Q}^+$, $\\mathbb{Z} \\subset \\mathbb{Q}$ und $\\mathbb{Q}^+ \\subset \\mathbb{Q}$. Jede natürliche Zahl ist auch eine ganze Zahl, aber nicht umgekehrt: $-3 \\in \\mathbb{Z}$, aber $-3 \\notin \\mathbb{N}$.',
+            '<b>Sottoinsieme:</b> $\\mathbb{N} \\subset \\mathbb{Z}$, $\\mathbb{N} \\subset \\mathbb{Q}^+$, $\\mathbb{Z} \\subset \\mathbb{Q}$ e $\\mathbb{Q}^+ \\subset \\mathbb{Q}$. Ogni numero naturale è anche un numero intero, ma non viceversa: $-3 \\in \\mathbb{Z}$, ma $-3 \\notin \\mathbb{N}$.'],
+        ['<b>Schnittmenge:</b> $\\mathbb{Z} \\cap \\mathbb{Q}^+ = \\mathbb{N}$. Das sind die Zahlen, die in beiden Mengen liegen: ganz <b>und</b> ohne Minuszeichen.',
+            '<b>Intersezione:</b> $\\mathbb{Z} \\cap \\mathbb{Q}^+ = \\mathbb{N}$. Sono i numeri che stanno in entrambi gli insiemi: interi <b>e</b> senza segno meno.'],
+        ['<b>Vereinigungsmenge:</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ enthält alle Zahlen, die in mindestens einer der beiden Mengen liegen. Das ist noch nicht ganz $\\mathbb{Q}$: $-\\tfrac12$ liegt in keiner von beiden.',
+            '<b>Unione:</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ contiene tutti i numeri che stanno in almeno uno dei due insiemi. Non è ancora tutto $\\mathbb{Q}$: $-\\tfrac12$ non sta in nessuno dei due.'],
+        ['<b>Richtig!</b> $', '<b>Giusto!</b> $'], ['Noch nicht. Tipp: ', 'Non ancora. Suggerimento: '],
+        ['Hat die Zahl ein Minuszeichen, wenn du sie ausrechnest?', 'Il numero ha un segno meno, quando lo calcoli?'],
+        ['Rechne die Zahl zuerst aus. Ist sie ganz?', 'Prima calcola il numero. È intero?'],
+        // vorzeichen7 ("Von Zeile zu Zeile … kleiner/größer" is a rule)
+        ['Gerader Exponent: positiv. Ungerader Exponent: negativ. Denn je zwei Minuszeichen heben sich auf.', 'Esponente pari: positivo. Esponente dispari: negativo. Perché ogni coppia di segni meno si annulla.'],
+        ['Vorsicht: $-2^2 = -(2 \\cdot 2) = -4$, aber $(-2)^2 = 4$. Die Klammer entscheidet.', 'Attenzione: $-2^2 = -(2 \\cdot 2) = -4$, ma $(-2)^2 = 4$. Decide la parentesi.'],
+        ['Wie geht das Muster weiter? Überlege, bevor du die nächste Zeile aufdeckst.', 'Come continua lo schema? Pensaci prima di scoprire la riga successiva.'],
+        ['. Damit das Muster weitergeht, muss $', '. Perché lo schema continui, deve essere $'], ['$ sein.', '$.'],
+        ['Plus mal minus ergibt minus.', 'Più per meno dà meno.'], ['Minus mal minus ergibt plus. Minus mal plus ergibt minus.', 'Meno per meno dà più. Meno per più dà meno.'],
+        // umstellen7 (the instruction sentence is a rule: the word order changes)
+        ['Probe: ', 'Verifica: '], ['Stahl, $', 'acciaio, $'], ['Wasser, $', 'acqua, $'], ['Fertig. Mit Zahlen: ', 'Fatto. Con i numeri: '],
+        // prozent7
+        [' von 100 Feldern', ' di 100 caselle'], ['Hunderterfeld mit ', 'Griglia da cento con '], [' gefärbten Feldern', ' caselle colorate'], [' und Prozentstreifen', ' e striscia delle percentuali'],
+        ['Grundwert $G = ', 'Valore di base $G = '], ['$ · Prozentsatz $p\\,\\% = ', '$ · tasso percentuale $p\\,\\% = '], ['Prozentwert ', 'Valore percentuale '],
+        ['\\,\\% \\text{ von } ', '\\,\\% \\text{ di } '], ['Die drei Grundaufgaben:', 'I tre problemi fondamentali:'],
+        ['vorher ', 'prima '], ['nachher ', 'dopo '], ['zurück ', 'ritorno '],
+        ['Steigerung um $', 'Un aumento del $'], ['Senkung um $', 'Una riduzione del $'],
+        ['. Der Faktor ist $', '. Il fattore è $'], ['Neuer Wert: ', 'Nuovo valore: '], ['Zurückrechnen auf den Grundwert: $', 'Ritorno al valore di base: $'],
+        [' der alte Wert! Die zweiten $', ' è il vecchio valore! Il secondo $'], ['\\,\\%$ beziehen sich auf einen anderen Grundwert.', '\\,\\%$ si riferisce a un altro valore di base.'],
+        // diagramm7 (the aria "<title> als Säulendiagramm" is a rule)
+        ['Zusammen: ', 'In tutto: '], ['Antworten', 'risposte'], ['Stimmen', 'voti'],
+        // the chart titles also stand in bold inside a sentence block, where they are not whole labels
+        ['Wie kommst du zur Schule? Umfrage in einer Klasse', 'Come vieni a scuola? Sondaggio in una classe'], ['Klassensprecherwahl: Stimmen', 'Elezione del rappresentante di classe: voti'],
+        ['Höhe einer Sonnenblume, jede Woche gemessen', 'Altezza di un girasole, misurata ogni settimana'],
+        [' = 100 % = 360°. Im Kreisdiagramm gehören zu 1 % genau 3,6°.', ' = 100 % = 360°. Nel diagramma a torta all’1 % corrispondono esattamente 3,6°.'],
+        ['Ein Liniendiagramm passt hier nicht: Die Kategorien haben keine Reihenfolge, und zwischen ihnen gibt es keine Zwischenwerte.',
+            'Qui un diagramma a linee non va bene: le categorie non hanno un ordine e tra di esse non ci sono valori intermedi.'],
+        ['Ein Kreisdiagramm passt hier nicht: Es zeigt Anteile an einem Ganzen. Die Höhen der einzelnen Wochen ergeben zusammen kein sinnvolles Ganzes.',
+            'Qui un diagramma a torta non va bene: mostra le parti di un tutto. Le altezze delle singole settimane messe insieme non formano un tutto sensato.'],
+        ['Das Liniendiagramm passt: Es zeigt, wie sich ein Wert im Lauf der Zeit verändert.', 'Il diagramma a linee va bene: mostra come cambia un valore nel corso del tempo.'],
+        // schraegbild7 (the aria "Quader im Schrägbild" is a rule)
+        [' · Ecken $', ' · vertici $'], ['$ · Kanten $', '$ · spigoli $'], ['$ · Flächen $', '$ · facce $'],
+        ['<b>Schrägbild:</b> Kanten, die nach hinten gehen, zeichnest du unter $45^\\circ$ und auf die <b>Hälfte</b> verkürzt. Alle anderen Kanten haben ihre wahre Länge. Verdeckte Kanten sind gestrichelt.',
+            '<b>Assonometria cavaliera:</b> gli spigoli che vanno all’indietro li disegni inclinati di $45^\\circ$ e ridotti alla <b>metà</b>. Tutti gli altri spigoli hanno la loro lunghezza reale. Gli spigoli nascosti sono tratteggiati.'],
+        ['<b>Aufriss</b> (oben): der Körper von vorn. <b>Grundriss</b> (unten): von oben. Zusammengehörige Punkte liegen auf einer <b>Ordnungslinie</b> senkrecht zur Rissachse $x_{12}$. ',
+            '<b>Prospetto</b> (sopra): il solido visto di fronte. <b>Pianta</b> (sotto): visto dall’alto. I punti corrispondenti stanno su una <b>linea di richiamo</b> perpendicolare alla linea di terra $x_{12}$. '],
+        ['Bezeichnung: $A\'$ im Grundriss, $A\'\'$ im Aufriss.', 'Notazione: $A\'$ nella pianta, $A\'\'$ nel prospetto.'],
+        ['Die Seitenkante ', 'Lo spigolo laterale '], [' liegt schräg im Raum. In beiden Rissen erscheint sie <b>verkürzt</b>. Drehe sie im Grundriss um $S\'$, bis sie parallel zur Rissachse liegt: $B_0\'$. ',
+            ' è inclinato nello spazio. In entrambe le proiezioni appare <b>accorciato</b>. Ruotalo nella pianta attorno a $S\'$ finché è parallelo alla linea di terra: $B_0\'$. '],
+        ['Die Ordnungslinie führt zu $B_0\'\'$. Die Strecke ', 'La linea di richiamo porta a $B_0\'\'$. Il segmento '], [' zeigt die <b>wahre Länge</b>.', ' mostra la <b>vera lunghezza</b>.'],
+        ['Gemessen: $\\overline{SB} \\approx ', 'Misurato: $\\overline{SB} \\approx '],
+        ['$h_s$ ist die Höhe einer Seitenfläche, hier gemessen: $h_s \\approx ', '$h_s$ è l’altezza di una faccia laterale, qui misurata: $h_s \\approx '],
+        ['$V = V_{\\text{groß}} - V_{\\text{klein}}$: Ergänze den Stumpf zur ganzen Pyramide (Höhe $', '$V = V_{\\text{grande}} - V_{\\text{piccola}}$: completa il tronco fino alla piramide intera (altezza $'],
+        ['$ cm) und ziehe die kleine Spitze ab.', '$ cm) e togli la piccola punta.'],
+        ['Die vier Seitenflächen sind Trapeze mit der Höhe $h_s \\approx ', 'Le quattro facce laterali sono trapezi di altezza $h_s \\approx '],
+        ['Masse aus ', 'Massa se di '], ['Fichtenholz', 'legno di abete'], ['Glas', 'vetro'], ['Stahl', 'acciaio'],
+        // faltnetz7
+        ['Dreiecke', 'triangoli'], ['Dreieck', 'triangolo'], ['Vierecke', 'quadrilateri'], ['Viereck', 'quadrilatero'], ['Fünfecke', 'pentagoni'], ['Fünfeck', 'pentagono'],
+        ['Sechsecke', 'esagoni'], ['Sechseck', 'esagono'],
+        ['Ecken $e = ', 'Vertici $e = '], ['$ · Kanten $k = ', '$ · spigoli $k = '], ['$ · Flächen $f = ', '$ · facce $f = '],
+        ['Alle Flächen sind gleiche regelmäßige ', 'Tutte le facce sono '], [', an jeder Ecke stoßen ', ' regolari uguali; in ogni vertice si incontrano '], [' zusammen.', '.'],
+        // eckenwinkel7 ("So ist das <b>Ikosaeder</b> gebaut." and the aria are rules)
+        ['Lücke ', 'spazio vuoto '], ['Jeder Innenwinkel: $', 'Ogni angolo interno: $'], ['^\\circ$ · an der Ecke: $', '^\\circ$ · nel vertice: $'],
+        ['Weniger als $360^\\circ$: Klappt man die Lücke zu, entsteht eine räumliche Ecke. ', 'Meno di $360^\\circ$: se si chiude lo spazio vuoto, si forma un vertice nello spazio. '],
+        ['Genau $360^\\circ$: Die Vielecke liegen flach in der Ebene, ein Parkett. Eine Ecke eines Körpers entsteht nicht.',
+            'Esattamente $360^\\circ$: i poligoni stanno piatti nel piano, come in una tassellazione. Non si forma il vertice di un solido.'],
+        ['Mehr als $360^\\circ$: Die Vielecke überlappen sich. Daraus lässt sich keine Ecke falten.', 'Più di $360^\\circ$: i poligoni si sovrappongono. Non se ne può piegare nessun vertice.'],
+        ['Spalten: wie viele Vielecke an einer Ecke. Genau fünf Felder haben ein Häkchen: Es gibt genau fünf platonische Körper.',
+            'Colonne: quanti poligoni in un vertice. Esattamente cinque caselle hanno il segno di spunta: esistono esattamente cinque solidi platonici.'],
 
         // book it-18 mathe8-it:
 
@@ -301,6 +425,34 @@ window.BuchIT && BuchIT.add('gy7', {
         [/^Würfel$/, () => 'Cubo'], [/>Würfel</g, () => '>Cubo<'],
 
         // book it-17 mathe7-it:
+        // zahlbereiche7: "Richtig: 3 von 5"
+        [/Richtig: (\d+) von (\d+)/g, (m, a, b) => 'Giuste: ' + a + ' su ' + b],
+        // vorzeichen7: "Von Zeile zu Zeile wird das Ergebnis um 3 kleiner."
+        [/Von Zeile zu Zeile wird das Ergebnis um 3 (kleiner|größer)(?=\.)/g, (m, w) => 'Di riga in riga il risultato ' + (w === 'kleiner' ? 'diminuisce' : 'aumenta') + ' di 3'],
+        // umstellen7: the instruction (Italian starts with the variable), then the buttons "nach $b$" under "ricava"
+        [/Die Formel \$([^$]+)\$ nach \$([^$]+)\$ umstellen: auf <b>beiden<\/b> Seiten dasselbe tun, bis \$([^$]+)\$ allein steht\./g,
+            (m, f, v, w) => 'Ricava $' + v + '$ dalla formula $' + f + '$: fai la stessa cosa su <b>entrambi</b> i lati finché $' + w + '$ resta da sola.'],
+        [/\bnach \$([A-Za-z])\$/g, (m, v) => '$' + v + '$'],
+        // prozent7: "Steigerung um $20\,\%$ heißt Steigerung <b>auf</b> $120\,\%$", "Danach um $20\,\%$ senken"
+        [/\$ heißt (?:Steigerung|Senkung) <b>auf<\/b> \$/g, () => '$ significa passare <b>al</b> $'],
+        [/Danach um \$(\d+)\\,\\%\$ (senken|erhöhen)/g, (m, p, v) => 'Poi ' + (v === 'senken' ? 'ridurre' : 'aumentare') + ' del $' + p + '\\,\\%$'],
+        // diagramm7: aria "<title> als Säulendiagramm"
+        [/^(.+) als (Säulendiagramm|Liniendiagramm|Kreisdiagramm)$/, (m, t, c) => ({
+            'Wie kommst du zur Schule? Umfrage in einer Klasse': 'Come vieni a scuola? Sondaggio in una classe',
+            'Klassensprecherwahl: Stimmen': 'Elezione del rappresentante di classe: voti',
+            'Höhe einer Sonnenblume, jede Woche gemessen': 'Altezza di un girasole, misurata ogni settimana'
+        }[t] || t) + ' come ' + { Säulendiagramm: 'diagramma a colonne', Liniendiagramm: 'diagramma a linee', Kreisdiagramm: 'diagramma a torta' }[c]],
+        // schraegbild7: aria "Quader im Schrägbild"
+        [/^(.+) im (Schrägbild|Zweitafelbild)$/, (m, b, v) => ({
+            'Würfel': 'Cubo', 'Quader': 'Parallelepipedo', 'Dreiecksprisma': 'Prisma triangolare', 'Sechseckprisma': 'Prisma esagonale', 'Quadratische Pyramide': 'Piramide quadrangolare',
+            'Dreieckspyramide': 'Piramide triangolare', 'Pyramidenstumpf': 'Tronco di piramide'
+        }[b] || b) + (v === 'Schrägbild' ? ' in assonometria cavaliera' : ' in doppia proiezione')],
+        // eckenwinkel7: "So ist das <b>Ikosaeder</b> gebaut." and the aria "4 regelmäßige 3-Ecke an einer Ecke"
+        [/So ist (?:der|das) <b>([^<]+)<\/b> gebaut\./g, (m, s) => 'Così è fatto ' +
+            ({ 'Tetraeder': 'il <b>tetraedro</b>', 'Würfel': 'il <b>cubo</b>', 'Oktaeder': 'l’<b>ottaedro</b>', 'Dodekaeder': 'il <b>dodecaedro</b>', 'Ikosaeder': 'l’<b>icosaedro</b>' }[s] || '<b>' + s + '</b>') + '.'],
+        [/^(\d+) regelmäßige (\d+)-Ecke an einer Ecke$/, (m, n, k) => n + ' poligoni regolari di ' + k + ' lati in un vertice'],
+        // "Würfel" is a die (word in gy6): the cube button in the lists of solids (faltnetz7, schraegbild7), also when the word pass came first
+        [/(data-v="wuerfel">)(?:Würfel|\u0003\d+\u0004)(<\/button>)(?=[\s\S]*data-v="(?:quader|oktaeder)")/g, '$1Cubo$2'],
 
         // book it-18 mathe8-it:
 

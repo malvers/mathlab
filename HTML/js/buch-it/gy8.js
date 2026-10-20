@@ -94,6 +94,13 @@ window.BuchIT && BuchIT.add('gy8', {
             'Prova un numero nella prima casella, oppure calcola all’indietro: ogni operazione si sostituisce con la sua inversa, più con meno, per con diviso.',
 
         // book it-17 mathe7-it:
+        // termbaum8
+        'Term': 'Espressione', 'Wert für $x$': 'Valore di $x$',
+        'Tipp auf einen Knoten: Dann leuchtet sein Teilterm auf.': 'Tocca un nodo: si illumina la sua sottoespressione.',
+        // gluecksrad8
+        'Felder': 'Settori', 'ein Feld weniger': 'un settore in meno', 'ein Feld mehr': 'un settore in più',
+        'gleich groß': 'uguali', 'verschieden groß': 'diversi', 'Größe der Felder': 'Ampiezza dei settori', 'Drehen': 'Gira',
+        'Tippe Felder im Rad an: Sie bilden das Ereignis $E$ (gelb). Dann dreh das Rad.': 'Tocca dei settori della ruota: formano l’evento $E$ (in giallo). Poi gira la ruota.',
 
         // book it-18 mathe8-it:
 
@@ -163,6 +170,17 @@ window.BuchIT && BuchIT.add('gy8', {
         ['Rückwärts von $', 'All’indietro da $'], ['$ aus, mit den Umkehrrechnungen: Die Startzahl ist <b>', '$, con le operazioni inverse: il numero iniziale è <b>'],
 
         // book it-17 mathe7-it:
+        // termbaum8
+        ['Rechenbaum des Terms ', 'Albero di calcolo dell’espressione '],
+        ['Für $x = ', 'Per $x = '], ['$ hat er den Wert ', '$ ha il valore '], ['. Gerechnet wird von unten nach oben.', '. Si calcola dal basso verso l’alto.'],
+        ['die Variable $x$ mit dem Wert $', 'la variabile $x$ con il valore $'], ['Ausgewählt: ', 'Selezione: '], ['die Zahl $', 'il numero $'],
+        // the pieces of the sentences that a rule below translates as a whole (so tools/buch-en/check.mjs sees them translated, too)
+        ['Summanden', 'Addendi'], ['Minuend und Subtrahend', 'Minuendo e sottraendo'], ['Faktoren', 'Fattori'], ['Dividend und Divisor', 'Dividendo e divisore'],
+        ['Der Term $', 'L’espressione $'], ['</b>: Zuletzt wird ', '</b>: l’ultima operazione è '], ['der Teilterm $', 'la sottoespressione $'], [' mit dem Wert $', ' con il valore $'],
+        // gluecksrad8
+        ['Alle Felder sind gleich groß: ein <b>Laplace-Versuch</b>. ', 'Tutti i settori sono uguali: un <b>esperimento di Laplace</b>. '],
+        ['Die Felder sind <b>verschieden groß</b>: Das ist <b>kein</b> Laplace-Versuch. ', 'I settori hanno <b>ampiezze diverse</b>: <b>non</b> è un esperimento di Laplace. '],
+        ['}$ wäre falsch. ', '}$ sarebbe sbagliato. '], ['Es zählt der Anteil am ganzen Rad: ', 'Conta la parte dell’intera ruota: '],
 
         // book it-18 mathe8-it:
 
@@ -266,6 +284,19 @@ window.BuchIT && BuchIT.add('gy8', {
         [/Mit \$([^$]*)\$ kommt \$([^$]*)\$ heraus\. /g, (m, a, b) => 'Con $' + a + '$ viene $' + b + '$. '],
 
         // book it-17 mathe7-it:
+        // termbaum8: "Der Term $3x + 4$ ist eine <b>Summe</b>: Zuletzt wird addiert. Summanden: $3x$ und $4$."
+        [/Der Term \$([^$]*)\$ ist eine? <b>(Summe|Differenz|Produkt|Quotient|Potenz)<\/b>: Zuletzt wird (?:addiert|subtrahiert|multipliziert|dividiert|potenziert)\. /g,
+            (m, t, k) => 'L’espressione $' + t + '$ è ' + ({ Summe: 'una <b>somma</b>', Differenz: 'una <b>differenza</b>', Produkt: 'un <b>prodotto</b>', Quotient: 'un <b>quoziente</b>', Potenz: 'una <b>potenza</b>' })[k] +
+                ': l’ultima operazione è ' + ({ Summe: 'l’addizione', Differenz: 'la sottrazione', Produkt: 'la moltiplicazione', Quotient: 'la divisione', Potenz: 'l’elevamento a potenza' })[k] + '. '],
+        [/(Summanden|Minuend und Subtrahend|Faktoren|Dividend und Divisor): \$([^$]*)\$ und \$([^$]*)\$\./g,
+            (m, p, a, b) => ({ 'Summanden': 'Addendi', 'Minuend und Subtrahend': 'Minuendo e sottraendo', 'Faktoren': 'Fattori', 'Dividend und Divisor': 'Dividendo e divisore' })[p] + ': $' + a + '$ e $' + b + '$.'],
+        [/Basis \$([^$]*)\$, Exponent \$([^$]*)\$\./g, (m, a, b) => 'Base $' + a + '$, esponente $' + b + '$.'],
+        [/Ausgewählt: der Teilterm \$([^$]*)\$, eine? (Summe|Differenz|Produkt|Quotient|Potenz) mit dem Wert \$/g,
+            (m, t, k) => 'Selezione: la sottoespressione $' + t + '$, ' + ({ Summe: 'una somma', Differenz: 'una differenza', Produkt: 'un prodotto', Quotient: 'un quoziente', Potenz: 'una potenza' })[k] + ', con il valore $'],
+        // gluecksrad8: the aria label and "Gedreht: $12$-mal · $E$ eingetreten: $5$-mal · relative Häufigkeit …"
+        [/Glücksrad mit (\d+) Feldern/g, 'Ruota della fortuna con $1 settori'],
+        [/Gedreht: \$([^$]*)\$-mal · \$E\$ eingetreten: \$([^$]*)\$-mal · relative Häufigkeit /g,
+            (m, a, b) => 'Giri: $' + a + '$ · $E$ si è verificato $' + b + '$ ' + (b === '1' ? 'volta' : 'volte') + ' · frequenza relativa '],
 
         // book it-18 mathe8-it:
 

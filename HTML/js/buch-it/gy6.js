@@ -261,6 +261,41 @@ window.BuchIT && BuchIT.add('gy6', {
         'absolut': 'assoluta', 'relativ': 'relativa', 'in %': 'in %',
 
         // book it-17 mathe7-it:
+        // zufall6 ("Würfel" is the die here; the cube of gy7 is a rule in js/buch-it/gy7.js)
+        'Münze': 'Moneta', 'Würfel': 'Dado', 'Glücksrad': 'Ruota della fortuna', 'Versuch': 'Esperimento',
+        'Kopf': 'Testa', 'Zahl': 'Croce', 'Rot': 'Rosso', 'Grün': 'Verde',
+        '1-mal': '1 volta', '10-mal': '10 volte', '100-mal': '100 volte', 'Löschen': 'Cancella',
+        'Säulendiagramm der relativen Häufigkeiten': 'Diagramma a colonne delle frequenze relative',
+        'absolut': 'assoluta', 'relativ': 'relativa', 'in %': 'in %',
+        // flaeche6
+        'Parallelogramm': 'Parallelogramma', 'Dreieck': 'Triangolo', 'Trapez': 'Trapezio', 'Drachenviereck': 'Deltoide', 'Figur': 'Figura',
+        'Zerlegen und verschieben': 'Scomponi e sposta', 'Grundseite $g$': 'Base $g$', 'Höhe $h$': 'Altezza $h$',
+        'Diagonale $e$': 'Diagonale $e$', 'Diagonale $f$': 'Diagonale $f$',
+        // vierecke6 ("gleichschenkliges" / "Trapez" in two lines: a rule below puts them in Italian order)
+        'Quadrat': 'Quadrato', 'Rechteck': 'Rettangolo', 'Raute': 'Rombo', 'Viereck': 'Quadrilatero',
+        'gleichschenkliges Trapez': 'Trapezio isoscele', 'Haus der Vierecke': 'Casa dei quadrilateri',
+        'parallele Seiten': 'lati paralleli', 'gleich lange Seiten': 'lati uguali', 'rechte Winkel': 'angoli retti', 'Symmetrieachsen': 'assi di simmetria',
+        'Diagonalen halbieren sich': 'le diagonali si tagliano a metà', 'Diagonalen senkrecht': 'diagonali perpendicolari', 'Diagonalen gleich lang': 'diagonali uguali',
+        '2 Paare': '2 coppie', '1 Paar': '1 coppia', 'alle vier': 'tutti e quattro', 'je zwei gegenüber': 'quelli opposti, a due a due', 'keine nötig': 'nessuno necessario',
+        'keins nötig': 'nessuno necessario', 'die beiden Schenkel': 'i due lati obliqui', 'je zwei benachbarte': 'quelli consecutivi, a due a due',
+        'nur eine die andere': 'solo una taglia a metà l’altra', 'mindestens 1': 'almeno 1', 'ja': 'sì', 'nein': 'no',
+        'Das <b>Viereck</b> steht ganz unten: Es braucht nur vier Ecken und vier Seiten, sonst nichts.':
+            'Il <b>quadrilatero</b> sta in fondo: gli bastano quattro vertici e quattro lati, nient’altro.',
+        'Tipp auf ein Viereck im Haus. Was weiter unten steht, ist allgemeiner, was weiter oben steht, hat mehr Eigenschaften.':
+            'Tocca un quadrilatero della casa. Ciò che sta più in basso è più generale, ciò che sta più in alto ha più proprietà.',
+        // prisma6
+        'Dreiecksprisma': 'Prisma triangolare', 'Quader': 'Parallelepipedo', 'Trapezprisma': 'Prisma trapezoidale', 'Sechseckprisma': 'Prisma esagonale',
+        'Prisma': 'Prisma', 'Schrägbild': 'Assonometria', 'Netz': 'Sviluppo',
+        'Grundkante $a$': 'Spigolo di base $a$', 'Höhe $h$ des Prismas': 'Altezza $h$ del prisma',
+        'Kavalierperspektive: Die Grundfläche liegt vorn in wahrer Größe. Die Kanten nach hinten laufen unter $45^\\circ$ und sind halb so lang. Verdeckte Kanten sind gestrichelt.':
+            'Assonometria cavaliera: la base sta davanti in vera grandezza. Gli spigoli che vanno all’indietro sono inclinati di $45^\\circ$ e lunghi la metà. Gli spigoli nascosti sono tratteggiati.',
+        'Das Netz besteht aus den beiden Grundflächen und dem Mantel. Der Mantel ist ein Rechteck: so breit wie der Umfang $u$, so hoch wie $h$.':
+            'Lo sviluppo è formato dalle due basi e dalla superficie laterale. La superficie laterale è un rettangolo: largo quanto il perimetro $u$, alto quanto $h$.',
+        // kreisdiagramm6
+        'zu Fuß': 'a piedi', 'Fahrrad': 'bici', 'Bus oder Bahn': 'autobus o treno', 'Auto': 'auto',
+        'Kreisdiagramm: Wie kommst du zur Schule?': 'Diagramma a torta: come vieni a scuola?',
+        'Anzahl': 'Numero', 'Anteil': 'Parte', 'Prozent': 'Percentuale', 'Winkel': 'Angolo', 'zusammen': 'totale',
+        'Umfrage in einer Klasse: Wie kommst du zur Schule?': 'Sondaggio in una classe: come vieni a scuola?',
 
         // book it-18 mathe8-it:
 
@@ -550,6 +585,25 @@ window.BuchIT && BuchIT.add('gy6', {
         ['. Je mehr Versuche, desto näher kommen die Säulen meistens heran.', '. Più prove si fanno, più le colonne di solito si avvicinano.'],
 
         // book it-17 mathe7-it:
+        // zufall6
+        ['Relative Häufigkeit = absolute Häufigkeit : Anzahl der Versuche. Die gestrichelte Linie zeigt die Chance',
+            'Frequenza relativa = frequenza assoluta : numero di prove. La linea tratteggiata mostra la probabilità'],
+        [' (Rot ist das halbe Rad, Blau ein Drittel, Grün ein Sechstel)', ' (il rosso è mezza ruota, il blu un terzo, il verde un sesto)'],
+        ['. Je mehr Versuche, desto näher kommen die Säulen meistens heran.', '. Più prove fai, più le colonne di solito si avvicinano.'],
+        // flaeche6
+        ['Das abgeschnittene Dreieck rückt nach rechts. Aus dem Parallelogramm wird ein Rechteck mit derselben Grundseite und derselben Höhe.',
+            'Il triangolo tagliato si sposta a destra. Il parallelogramma diventa un rettangolo con la stessa base e la stessa altezza.'],
+        ['Eine Kopie des Dreiecks dreht sich um die Mitte einer Seite. Zusammen ergeben beide ein Parallelogramm. Das Dreieck ist die Hälfte davon.',
+            'Una copia del triangolo ruota attorno al punto medio di un lato. Insieme formano un parallelogramma. Il triangolo ne è la metà.'],
+        ['Eine Kopie des Trapezes dreht sich um die Mitte eines Schenkels. Zusammen ergeben beide ein Parallelogramm mit der Grundseite $a + c$.',
+            'Una copia del trapezio ruota attorno al punto medio di un lato obliquo. Insieme formano un parallelogramma di base $a + c$.'],
+        ['Die vier Dreiecke im Drachen klappen nach außen. Sie füllen das Rechteck aus den beiden Diagonalen genau zur Hälfte.',
+            'I quattro triangoli del deltoide si ribaltano verso l’esterno. Riempiono esattamente metà del rettangolo formato dalle due diagonali.'],
+        // prisma6
+        ['Grundfläche $G', 'Area di base $G'], ['$, Umfang der Grundfläche $u', '$, perimetro di base $u'], ['Mantel $M', 'Superficie laterale $M'],
+        ['Oberfläche $O', 'Superficie totale $O'], ['Volumen $V', 'Volume $V'],
+        // kreisdiagramm6
+        ['Winkel = Anteil · 360°. ', 'Angolo = parte · 360°. '], ['Eine Person entspricht hier $', 'Qui una persona corrisponde a $'],
 
         // book it-18 mathe8-it:
 
@@ -678,6 +732,29 @@ window.BuchIT && BuchIT.add('gy6', {
         [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '1' ? ' prova' : ' prove') + '<'],
 
         // book it-17 mathe7-it:
+        // the steppers' aria-labels of kreisdiagramm6: "zu Fuß kleiner" → "A piedi: meno"
+        [/^(zu Fuß|Fahrrad|Bus oder Bahn|Auto) (kleiner|größer)$/, (m, w, d) =>
+            ({ 'zu Fuß': 'A piedi', 'Fahrrad': 'Bici', 'Bus oder Bahn': 'Autobus o treno', 'Auto': 'Auto' })[w] + (d === 'kleiner' ? ': meno' : ': più')],
+        // zufall6: "20 Versuche" in the picture
+        [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '1' ? ' prova' : ' prove') + '<'],
+        // flaeche6
+        [/^(Parallelogramm|Dreieck|Trapez|Drachenviereck): zerlegen und verschieben$/, (m, s) =>
+            ({ 'Parallelogramm': 'Parallelogramma', 'Dreieck': 'Triangolo', 'Trapez': 'Trapezio', 'Drachenviereck': 'Deltoide' })[s] + ': scomponi e sposta'],
+        // vierecke6: the two-line label "gleichschenkliges / Trapez" (the second line may already be a translated label)
+        [/(<text class="g6-nodetxt"[^>]*>)gleichschenkliges(<\/text>[^<]*<text class="g6-nodetxt"[^>]*>)(?:Trapez|\u0003\d+\u0004)(<\/text>)/g, '$1Trapezio$2isoscele$3'],
+        // vierecke6: "Jedes <b>Quadrat</b> ist auch ein Rechteck, eine Raute, …." (every Italian name is masculine: "ogni", "un")
+        [/Jede[s]? <b>([^<]+)<\/b> ist auch ([^<]+)\.<\/p>/g, (m, s, list) => {
+            const N = { 'Quadrat': 'quadrato', 'Rechteck': 'rettangolo', 'Raute': 'rombo', 'Parallelogramm': 'parallelogramma', 'gleichschenkliges Trapez': 'trapezio isoscele',
+                'gleichschenklige Trapez': 'trapezio isoscele', 'Drachenviereck': 'deltoide', 'Trapez': 'trapezio', 'Viereck': 'quadrilatero' };
+            return 'Ogni <b>' + (N[s] || s) + '</b> è anche ' + list.split(', ').map(x => { const k = x.replace(/^eine?s? /, ''); return N[k] ? 'un ' + N[k] : x; }).join(', ') + '.</p>';
+        }],
+        // prisma6: the aria labels of the two pictures
+        [/^(Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma) im Schrägbild: Grundfläche vorn in wahrer Größe, Tiefe unter 45 Grad und halb so lang$/, (m, s) =>
+            ({ 'Dreiecksprisma': 'Prisma triangolare', 'Quader': 'Parallelepipedo', 'Trapezprisma': 'Prisma trapezoidale', 'Sechseckprisma': 'Prisma esagonale' })[s] +
+            ' in assonometria cavaliera: base davanti in vera grandezza, profondità inclinata di 45 gradi e lunga la metà'],
+        [/^Netz des (Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma)s: zwei Grundflächen und der Mantel aus Rechtecken$/, (m, s) =>
+            'Sviluppo del ' + ({ 'Dreiecksprisma': 'prisma triangolare', 'Quader': 'parallelepipedo', 'Trapezprisma': 'prisma trapezoidale', 'Sechseckprisma': 'prisma esagonale' })[s] +
+            ': due basi e la superficie laterale fatta di rettangoli'],
 
         // book it-18 mathe8-it:
 
