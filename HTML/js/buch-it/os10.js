@@ -34,6 +34,7 @@ window.BuchIT && BuchIT.add('os10', {
         'Prozentsatz': 'Percentuale',
         'Betrag im Monat': 'Importo mensile',
         'Nettolohn': 'Stipendio netto',
+        'Pyramidenstumpf im Achsenschnitt und als Körper': 'Tronco di piramide in sezione assiale e come solido',
 
     },
     phrase: [
@@ -59,6 +60,8 @@ window.BuchIT && BuchIT.add('os10', {
         ['Oben und unten gleich groß: das ist ein Zylinder, $V = G \\cdot h$.', 'Sopra e sotto della stessa grandezza: è un cilindro, $V = G \\cdot h$.'],
         ['Oben und unten gleich groß: das ist ein Quader mit quadratischer Grundfläche, $V = G \\cdot h$.', 'Sopra e sotto della stessa grandezza: è un parallelepipedo a base quadrata, $V = G \\cdot h$.'],
         ['Kegelstumpf im Achsenschnitt und als Körper', 'Tronco di cono in sezione assiale e come solido'],
+        // stumpfos10: the material with its density
+        ['Holz (', 'Legno ('], ['Beton (', 'Calcestruzzo ('], ['Stahl (', 'Acciaio ('],
 
     ],
     rule: [

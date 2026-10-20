@@ -160,6 +160,8 @@ window.BuchIT && BuchIT.add('funktionen', {
         'senkrecht $x = 0$, waagerecht $y = 0$': 'verticale $x = 0$, orizzontale $y = 0$',
         'A in m²': 'A in m²',
         'A in cm²': 'A in cm²',
+        // potenzfunktion: the row "Polstelle"
+        'Polstelle': 'Polo', '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, senza cambio di segno', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, con cambio di segno',
     },
     phrase: [
         // book it-1 mathe11-it:
