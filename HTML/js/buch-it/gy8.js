@@ -98,6 +98,18 @@ window.BuchIT && BuchIT.add('gy8', {
         // book it-18 mathe8-it:
 
         // book it-20 mathe10-it:
+        'gleich': 'uguale',
+        'Schattenmethode': 'Metodo dell’ombra',
+        'Försterdreieck': 'Triangolo del guardaboschi',
+        'Methode': 'Metodo',
+        'Sonnenhöhe': 'Altezza del sole',
+        'Abstand $d$ zum Baum': 'Distanza $d$ dall’albero',
+        'Höhe ausrechnen': 'Calcola l’altezza',
+        'Neuer Baum': 'Nuovo albero',
+        'Stab 2 m': 'Asta 2 m',
+        'Baum und Stab mit ihren Schatten': 'Albero e asta con le loro ombre',
+        'Höhenmessung mit dem Försterdreieck': 'Misura dell’altezza con il triangolo del guardaboschi',
+        'Die Sonnenstrahlen fallen parallel ein. Das blaue und das gelbe Dreieck sind deshalb ähnlich: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.': 'I raggi del sole arrivano paralleli. Per questo il triangolo blu e quello giallo sono simili: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.',
 
     },
     phrase: [
@@ -155,6 +167,19 @@ window.BuchIT && BuchIT.add('gy8', {
         // book it-18 mathe8-it:
 
         // book it-20 mathe10-it:
+        ['Gemessen: Der Stab ist $2$ m hoch, sein Schatten ist $s \\approx ', 'Misurato: l’asta è alta $2$ m, la sua ombra è $s \\approx '],
+        ['$ m lang. Der Schatten des Baums ist $S \\approx ', '$ m. L’ombra dell’albero è $S \\approx '],
+        ['$ m lang.', '$ m.'],
+        ['. Tatsächlich ist der Baum $', '. In realtà l’albero è alto $'],
+        ['$ m hoch.', '$ m.'],
+        ['Du hältst ein gleichschenklig-rechtwinkliges Dreieck vor das Auge (Augenhöhe $1{,}6$ m) und peilst an seiner langen Seite entlang. Diese Linie steigt unter $45^\\circ$: ', 'Tieni un triangolo rettangolo isoscele davanti all’occhio (altezza degli occhi $1{,}6$ m) e guardi lungo il suo lato lungo. Questa linea sale con un angolo di $45^\\circ$: '],
+        ['Auf $d = ', 'Su $d = '],
+        ['$ m steigt sie um $', '$ m sale di $'],
+        ['Treffer!', 'Centro!'],
+        ['</b> Du siehst genau die Spitze. ', '</b> Vedi esattamente la cima. '],
+        ['Du siehst den Baum in $', 'Vedi l’albero a $'],
+        ['$ m Höhe, unter der Spitze: Geh weiter zurück.', '$ m di altezza, sotto la cima: allontanati ancora.'],
+        ['Deine Peillinie geht über die Spitze hinweg: Geh näher heran.', 'La tua linea di mira passa sopra la cima: avvicinati.'],
 
     ],
     rule: [

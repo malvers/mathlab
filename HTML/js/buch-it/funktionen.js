@@ -144,6 +144,22 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-19 mathe9-it:
 
         // book it-20 mathe10-it:
+        'Verwandte zeigen': 'Mostra le funzioni imparentate',
+        'Graph einer Potenzfunktion': 'Grafico di una funzione potenza',
+        'Exponent': 'Esponente',
+        'Nullstelle': 'Zero',
+        'Gemeinsame Punkte': 'Punti comuni',
+        'keine, $f$ ist nur für $x \\geq 0$ definiert': 'nessuna, $f$ è definita solo per $x \\geq 0$',
+        'achsensymmetrisch zur $y$-Achse, denn $f(-x) = f(x)$': 'simmetrica rispetto all’asse $y$, perché $f(-x) = f(x)$',
+        'punktsymmetrisch zum Ursprung, denn $f(-x) = -f(x)$': 'simmetrica rispetto all’origine, perché $f(-x) = -f(x)$',
+        'steigt für $x \\geq 0$': 'crescente per $x \\geq 0$',
+        'steigt überall': 'crescente ovunque',
+        'fällt für $x < 0$, steigt für $x > 0$': 'decrescente per $x < 0$, crescente per $x > 0$',
+        'steigt für $x < 0$, fällt für $x > 0$': 'crescente per $x < 0$, decrescente per $x > 0$',
+        'fällt für $x < 0$ und fällt für $x > 0$': 'decrescente per $x < 0$ e decrescente per $x > 0$',
+        'senkrecht $x = 0$, waagerecht $y = 0$': 'verticale $x = 0$, orizzontale $y = 0$',
+        'A in m²': 'A in m²',
+        'A in cm²': 'A in cm²',
     },
     phrase: [
         // book it-1 mathe11-it:

@@ -72,6 +72,32 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-19 mathe9-it:
 
         // book it-20 mathe10-it:
+        'Quadratische Pyramide': 'Piramide a base quadrata',
+        'Kreiskegel': 'Cono',
+        'Seitenhöhe': 'Apotema',
+        'Seitenkante': 'Spigolo laterale',
+        'Hilfsdreieck': 'Triangolo ausiliario',
+        'Radius $r$': 'Raggio $r$',
+        'Sinus': 'Seno',
+        'Kosinus': 'Coseno',
+        'Tangens': 'Tangente',
+        'Verhältnis': 'Rapporto',
+        'Hypotenuse $c$': 'Ipotenusa $c$',
+        'Gegenkathete a': 'cateto opposto a',
+        'Ankathete b': 'cateto adiacente b',
+        'Hypotenuse c': 'ipotenusa c',
+        'Rechtwinkliges Dreieck mit Winkel alpha': 'Triangolo rettangolo con l’angolo alfa',
+        'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.': 'Cambia $c$: il triangolo diventa più grande o più piccolo, ma i tre rapporti restano uguali. Dipendono solo dall’angolo.',
+        'Ecken verdoppeln': 'Raddoppia i vertici',
+        'Zurück auf 6': 'Torna a 6',
+        'Anzahl der Ecken $n$': 'Numero di vertici $n$',
+        'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Circonferenza con un poligono inscritto e uno circoscritto',
+        'innen': 'inscritto',
+        'außen': 'circoscritto',
+        'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circonferenza con $r = 1$, quindi $u = 2\\pi$. Perimetro diviso $2$:',
+        'Seite': 'Lato',
+        'Pythagoras': 'Pitagora',
+        'Winkel $\\alpha$': 'Angolo $\\alpha$',
 
     },
     phrase: [
@@ -112,6 +138,10 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-19 mathe9-it:
 
         // book it-20 mathe10-it:
+        [' im Schrägbild mit Hilfsdreieck', ' in prospettiva cavaliera con il triangolo ausiliario'],
+        ['\\text{Gegenkathete}', '\\text{cateto opposto}'],
+        ['\\text{Ankathete}', '\\text{cateto adiacente}'],
+        ['\\text{Hypotenuse}', '\\text{ipotenusa}'],
 
     ],
     rule: [
@@ -140,6 +170,8 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-19 mathe9-it:
 
         // book it-20 mathe10-it:
+        // vieleck: "Also $3,14159 < \pi < 3,21539$, Abstand $0,0738$." with its context, no bare piece "Also $"
+        [/>Also \$([^$]*< \\pi < [^$]*)\$, Abstand \$/g, (m, a) => '>Quindi $' + a + '$, differenza $'],
 
     ]
 });
