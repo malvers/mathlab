@@ -63,6 +63,12 @@ window.BuchIT && BuchIT.add('vektoren', {
         // book it-7 mathegy11lk-it:
 
         // book it-8 mathegy12-it:
+        // kreuzprodukt, lot3d, winkel3d
+        'zwei Vektoren': 'due vettori', 'Dachfläche': 'falda del tetto', 'in der x-y-Ebene': 'nel piano x-y', 'Dreieck': 'Triangolo', 'Welche Fläche?': 'Quale area?',
+        'Punkt über E': 'Punto sopra E', 'Ursprung': 'Origine', 'Punkt unter E': 'Punto sotto E', 'Punkt in E': 'Punto in E',
+        'Spiegelpunkt P′ zeigen': 'Mostra il punto simmetrico P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Costante $d$ in $\\vec{n} \\circ \\vec{x} = d$',
+        'Gerade – Gerade': 'retta – retta', 'Gerade – Ebene': 'retta – piano', 'Ebene – Ebene': 'piano – piano', 'Welcher Winkel?': 'Quale angolo?',
+        'spitz': 'acuto', 'stumpfe Vektoren': 'vettori con angolo ottuso', 'senkrecht': 'perpendicolare', 'schräg': 'obliquo', 'Dach und Boden': 'tetto e pavimento',
 
         // book it-9 mathegy12lk-it:
     },
@@ -162,6 +168,37 @@ window.BuchIT && BuchIT.add('vektoren', {
         // book it-7 mathegy11lk-it:
 
         // book it-8 mathegy12-it:
+        // kreuzprodukt
+        ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
+            '$\\vec{u}$ e $\\vec{v}$ sono paralleli: il prodotto vettoriale è il vettore nullo, non individuano nessuna area.'],
+        ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$: il prodotto vettoriale è perpendicolare a entrambi i vettori'],
+        [' (im Bild verkürzt gezeichnet)', ' (nella figura disegnato più corto)'], ['Dreieck: $A = ', 'Triangolo: $A = '], ['Parallelogramm: $A = ', 'Parallelogramma: $A = '],
+        [' Flächeneinheiten', ' unità di area'], ['$ und $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = ', '$ e $(\\vec{u} \\times \\vec{v}) \\circ \\vec{v} = '],
+        ['Probe: $(\\vec{u} \\times \\vec{v}) \\circ \\vec{u} = ', 'Verifica: $(\\vec{u} \\times \\vec{v}) \\circ \\vec{u} = '],
+        // lot3d
+        ['Der Normalenvektor darf nicht der Nullvektor sein.', 'Il vettore normale non può essere il vettore nullo.'],
+        ['$ · Lotgerade $l\\colon', '$ · retta perpendicolare $l\\colon'], ['$l$ in $E$ einsetzen: $', 'Sostituire $l$ in $E$: $'], ['$ · Lotfußpunkt $F(', '$ · piede della perpendicolare $F('],
+        ['$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.', '$t = 0$: il punto $P$ stesso giace nel piano, la sua distanza è $0$.'],
+        ['Abstand: $|', 'Distanza: $|'], ['$ · ohne Lotfußpunkt: $', '$ · senza piede della perpendicolare: $'],
+        ['Spiegelpunkt: $t$ verdoppeln, $', 'Punto simmetrico: raddoppiare $t$, $'], ['$, also $P\'(', '$, quindi $P\'('],
+        // winkel3d
+        ['Der Nullvektor hat keine Richtung, er liefert keinen Winkel.', 'Il vettore nullo non ha direzione, non fornisce nessun angolo.'],
+        ['$, also $\\varphi \\approx ', '$, quindi $\\varphi \\approx '],
+        ['Die Richtungsvektoren sind parallel: Die Geraden sind parallel oder identisch, sie schneiden sich nicht unter einem Winkel.',
+            'I vettori direzione sono paralleli: le rette sono parallele o coincidenti, non si intersecano formando un angolo.'],
+        ['Die Vektoren selbst schließen $', 'I vettori stessi formano $'],
+        ['$ ein, also einen stumpfen Winkel. Die Geraden bilden den spitzen Nebenwinkel $180^\\circ - ', '$, cioè un angolo ottuso. Le rette formano l’angolo acuto supplementare $180^\\circ - '],
+        ['$; dafür steht der Betrag im Zähler.', '$; per questo al numeratore c’è il valore assoluto.'],
+        ['Das Skalarprodukt ist $0$: Die Geraden schneiden sich senkrecht.', 'Il prodotto scalare è $0$: le rette si intersecano perpendicolarmente.'],
+        ['Das Skalarprodukt ist positiv, der Winkel zwischen den Vektoren ist schon spitz.', 'Il prodotto scalare è positivo, l’angolo tra i vettori è già acuto.'],
+        ['Winkel zwischen $\\vec{u}$ und dem Normalenvektor: $\\cos\\alpha = ', 'Angolo tra $\\vec{u}$ e il vettore normale: $\\cos\\alpha = '],
+        ['Der Winkel zur Ebene ergänzt ihn zu $90^\\circ$: $', 'L’angolo con il piano è il suo complementare a $90^\\circ$: $'],
+        ['. Das Skalarprodukt ist $0$: $g$ ist parallel zu $E$ oder liegt in $E$.', '. Il prodotto scalare è $0$: $g$ è parallela a $E$ o giace in $E$.'],
+        ['. $\\vec{u}$ ist ein Vielfaches von $\\vec{n}$: $g$ steht senkrecht auf $E$.', '. $\\vec{u}$ è un multiplo di $\\vec{n}$: $g$ è perpendicolare a $E$.'],
+        ['. Gelb gestrichelt: die Projektion von $g$ in die Ebene.', '. Tratteggiata in giallo: la proiezione di $g$ sul piano.'],
+        ['Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.', 'I vettori normali sono paralleli: i piani sono paralleli o coincidenti.'],
+        ['Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $', 'In bianco: la retta di intersezione $s$ con il vettore direzione $'],
+        ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. L’angolo si misura perpendicolarmente a essa, tra le due linee colorate nei piani.'],
 
         // book it-9 mathegy12lk-it:
     ],
@@ -184,6 +221,8 @@ window.BuchIT && BuchIT.add('vektoren', {
         // book it-7 mathegy11lk-it:
 
         // book it-8 mathegy12-it:
+        // winkel3d: the preset "parallel" for a line and a plane (paralleli; the vectors of skalarprodukt and kreuzprodukt have the rule of it-2 above)
+        [/(data-p="flach">)parallel</g, '$1paralleli<'],
 
         // book it-9 mathegy12lk-it:
     ]
