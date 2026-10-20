@@ -88,9 +88,10 @@ window.BuchIT && BuchIT.add('analysis', {
         // efunktion
         'Welche Basis?': 'Quale base?', 'Zinseszins': 'Interesse composto', 'Was wird gezeigt?': 'Che cosa si mostra?', 'a = e setzen': 'Poni a = e', 'Basis $a$': 'Base $a$',
         'Exponentialfunktionen und die Eulersche Zahl e': 'Funzioni esponenziali e il numero di Nepero e', 'Faktor $a$': 'Fattore $a$', 'im Exponenten $b$': 'Nell’esponente $b$',
-        'Verschiebung $c$': 'Traslazione $c$', 'Verzinsung': 'Accredito degli interessi',
-        'jährlich': 'annualmente', 'halbjährlich': 'semestralmente', 'vierteljährlich': 'trimestralmente', 'monatlich': 'mensilmente', 'wöchentlich': 'settimanalmente',
-        'täglich': 'giornalmente', 'stündlich': 'ogni ora', 'minütlich': 'ogni minuto',
+        'Verschiebung $c$': 'Traslazione $c$', 'Verzinsung': 'Capitalizzazione',
+        // the slider value after "Capitalizzazione" (short, so the row fits at 390 px); in the sentence below the adverbs of the phrases
+        'jährlich': 'annuale', 'halbjährlich': 'semestrale', 'vierteljährlich': 'trimestrale', 'monatlich': 'mensile', 'wöchentlich': 'settimanale',
+        'täglich': 'giornaliera', 'stündlich': 'oraria', 'minütlich': 'al minuto',
 
         // book it-6 mathegy11-it:
         // bruchfunktion
