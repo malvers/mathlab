@@ -755,6 +755,8 @@ window.BuchIT && BuchIT.add('gy6', {
         [/^Netz des (Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma)s: zwei Grundflächen und der Mantel aus Rechtecken$/, (m, s) =>
             'Sviluppo del ' + ({ 'Dreiecksprisma': 'prisma triangolare', 'Quader': 'parallelepipedo', 'Trapezprisma': 'prisma trapezoidale', 'Sechseckprisma': 'prisma esagonale' })[s] +
             ': due basi e la superficie laterale fatta di rettangoli'],
+        // zufall6: the head of the table ("Ergebnis" is an outcome here, not a result)
+        [/(g6-tab"><tr><th>)Ergebnis(<\/th>)/g, '$1Esito$2'],
 
         // book it-18 mathe8-it:
 

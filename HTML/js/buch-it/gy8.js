@@ -181,6 +181,8 @@ window.BuchIT && BuchIT.add('gy8', {
         ['Alle Felder sind gleich groß: ein <b>Laplace-Versuch</b>. ', 'Tutti i settori sono uguali: un <b>esperimento di Laplace</b>. '],
         ['Die Felder sind <b>verschieden groß</b>: Das ist <b>kein</b> Laplace-Versuch. ', 'I settori hanno <b>ampiezze diverse</b>: <b>non</b> è un esperimento di Laplace. '],
         ['}$ wäre falsch. ', '}$ sarebbe sbagliato. '], ['Es zählt der Anteil am ganzen Rad: ', 'Conta la parte dell’intera ruota: '],
+        ['Zuletzt: Feld <b>', 'Ultimo: settore <b>'], [', $E$ ist eingetreten.', ', $E$ si è verificato.'], [', $E$ ist nicht eingetreten.', ', $E$ non si è verificato.'],
+        [' · Wahrscheinlichkeit $P(E)', ' · probabilità $P(E)'],
 
         // book it-18 mathe8-it:
 
@@ -297,6 +299,8 @@ window.BuchIT && BuchIT.add('gy8', {
         [/Glücksrad mit (\d+) Feldern/g, 'Ruota della fortuna con $1 settori'],
         [/Gedreht: \$([^$]*)\$-mal · \$E\$ eingetreten: \$([^$]*)\$-mal · relative Häufigkeit /g,
             (m, a, b) => 'Giri: $' + a + '$ · $E$ si è verificato $' + b + '$ ' + (b === '1' ? 'volta' : 'volte') + ' · frequenza relativa '],
+        // gluecksrad8: the sets of whole numbers with commas, as the Italian books write them: \{1; 2; \ldots; 8\} → \{1, 2, \ldots, 8\}
+        [/\\\{((?:\d+|\\ldots)(?:; (?:\d+|\\ldots))+)\\\}/g, (m, l) => '\\{' + l.replace(/; /g, ', ') + '\\}'],
 
         // book it-18 mathe8-it:
 
