@@ -103,6 +103,10 @@ window.BuchIT && BuchIT.add('funktionen', {
         'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Funzione polinomiale con zeri che si possono spostare',
 
         // book it-7 mathegy11lk-it:
+        // ganzrational (chapter 1.4)
+        'Vielfachheit': 'Molteplicità', 'Vielfachheit kleiner': 'Molteplicità minore', 'Vielfachheit größer': 'Molteplicità maggiore', 'Faktor $a$': 'Fattore $a$',
+        'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Trascina gli zeri sull’asse $x$. La molteplicità 0 elimina il fattore lineare.',
+        'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Funzione polinomiale con zeri che si possono spostare',
 
         // book it-8 mathegy12-it:
 
@@ -243,6 +247,16 @@ window.BuchIT && BuchIT.add('funktionen', {
         ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Decide solo l’addendo con la potenza più alta: $'],
 
         // book it-7 mathegy11lk-it:
+        // ganzrational: "$x = -2$: einfach → Vorzeichenwechsel, …" (zero is masculine: zero semplice, doppio …)
+        [': einfach → ', ': semplice → '], [': doppelt → ', ': doppio → '], [': dreifach → ', ': triplo → '], [': vierfach → ', ': quadruplo → '],
+        [': fünffach → ', ': quintuplo → '], [': sechsfach → ', ': sestuplo → '], [': siebenfach → ', ': settuplo → '], [': achtfach → ', ': ottuplo → '],
+        [': neunfach → ', ': nonuplo → '],
+        ['Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse', 'cambio di segno, il grafico <b>attraversa</b> l’asse $x$'],
+        ['Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)', 'cambio di segno, il grafico attraversa l’asse $x$ <b>appiattendosi</b> (flesso a tangente orizzontale)'],
+        ['kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse', 'nessun cambio di segno, il grafico <b>tocca</b> l’asse $x$'],
+        ['$ · Grad $', '$ · grado $'], ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'Per $x \\to +\\infty$, $f(x) \\to '],
+        ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$; per $x \\to -\\infty$, $f(x) \\to '],
+        ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Decide solo il termine con la potenza più alta: $'],
 
         // book it-8 mathegy12-it:
 

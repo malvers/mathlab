@@ -110,6 +110,11 @@ window.BuchIT && BuchIT.add('analysis', {
         'Grad 0': 'Grado 0', 'Grad 1': 'Grado 1', 'Grad 2': 'Grado 2', 'Faktor $k$': 'Fattore $k$', 'Beispiele:': 'Esempi:',
 
         // book it-7 mathegy11lk-it:
+        // bruchfunktion (chapter 1.4)
+        'Polstelle': 'Polo', 'Lücke': 'Discontinuità eliminabile', 'ohne Vorzeichenwechsel': 'Senza cambio di segno', 'schiefe Asymptote': 'Asintoto obliquo',
+        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Grafico di una funzione razionale fratta con poli, discontinuità eliminabili e asintoti',
+        'Zähler:': 'Numeratore:', 'Nenner:': 'Denominatore:', 'Grad des Zählers': 'Grado del numeratore', 'Grad des Nenners': 'Grado del denominatore',
+        'Grad 0': 'Grado 0', 'Grad 1': 'Grado 1', 'Grad 2': 'Grado 2', 'Faktor $k$': 'Fattore $k$', 'Beispiele:': 'Esempi:',
 
         // book it-8 mathegy12-it:
         // titelbildgy12, integrieren, abstandmin, geradenschar
@@ -285,6 +290,18 @@ window.BuchIT && BuchIT.add('analysis', {
         [' mit Vorzeichenwechsel', ' con cambio di segno'], [' ohne Vorzeichenwechsel', ' senza cambio di segno'], [' (senkrechte Asymptote)', ' (asintoto verticale)'],
 
         // book it-7 mathegy11lk-it:
+        // bruchfunktion
+        ['Nullstelle des Zählers $', 'Zero del numeratore $'], ['Nullstelle des Nenners $', 'Zero del denominatore $'],
+        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Dopo aver semplificato non c’è più $x$ al denominatore: il grafico è '],
+        ['eine waagerechte Gerade', 'una retta orizzontale'], ['eine Gerade', 'una retta'],
+        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grado del numeratore minore del grado del denominatore: asintoto orizzontale $y = 0$, l’asse $x$.'],
+        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Grado del numeratore uguale al grado del denominatore: asintoto orizzontale $y = '],
+        ['$ (Quotient der Leitkoeffizienten).', '$ (rapporto dei coefficienti direttivi).'],
+        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grado del numeratore maggiore di 1: la divisione tra polinomi dà $f(x) = '],
+        ['$, schiefe Asymptote $y = ', '$, asintoto obliquo $y = '],
+        ['Kürzen: $f(x) = ', 'Semplificando: $f(x) = '], ['$ · hebbare Lücken', '$ · discontinuità eliminabili'], ['$ · hebbare Lücke', '$ · discontinuità eliminabile'],
+        ['Nullstellen: ', 'Zeri: '], [' · Polstellen: ', ' · poli: '],
+        [' mit Vorzeichenwechsel', ' con cambio di segno'], [' ohne Vorzeichenwechsel', ' senza cambio di segno'], [' (senkrechte Asymptote)', ' (asintoto verticale)'],
 
         // book it-8 mathegy12-it:
         // integrieren
@@ -352,6 +369,9 @@ window.BuchIT && BuchIT.add('analysis', {
         [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => /,/.test(b) ? m : a + b.replace(/; /g, ', ') + c],
 
         // book it-7 mathegy11lk-it:
+        // bruchfunktion: "… mit einem Loch.", "Nullstellen: keine", "Polstellen: keine"
+        [/ mit (Löchern|einem Loch)\./g, (m, w) => ' con ' + (w === 'Löchern' ? 'dei buchi' : 'un buco') + '.'],
+        [/Nullstellen: keine(?![a-zäöüß])/g, 'Zeri: nessuno'], [/Polstellen: keine(?![a-zäöüß])/g, 'poli: nessuno'],
 
         // book it-8 mathegy12-it:
         // abstandmin: the general point Q(x | f(x))
