@@ -103,6 +103,9 @@ window.BuchIT && BuchIT.add('gy8', {
         'Tippe Felder im Rad an: Sie bilden das Ereignis $E$ (gelb). Dann dreh das Rad.': 'Tocca dei settori della ruota: formano l’evento $E$ (in giallo). Poi gira la ruota.',
 
         // book it-18 mathe8-it:
+        // termbaum8 (OS 8 chapter 1.1)
+        'Wert für $x$': 'Valore di $x$',
+        'Tipp auf einen Knoten: Dann leuchtet sein Teilterm auf.': 'Tocca un nodo: si illumina la sua sottoespressione.',
 
         // book it-20 mathe10-it:
         'gleich': 'uguale',
@@ -185,6 +188,9 @@ window.BuchIT && BuchIT.add('gy8', {
         [' · Wahrscheinlichkeit $P(E)', ' · probabilità $P(E)'],
 
         // book it-18 mathe8-it:
+        // termbaum8
+        ['Rechenbaum des Terms ', 'Albero di calcolo dell’espressione '],
+        ['$ hat er den Wert ', '$ ha il valore '], ['. Gerechnet wird von unten nach oben.', '. Si calcola dal basso verso l’alto.'],
 
         // book it-20 mathe10-it:
         ['Gemessen: Der Stab ist $2$ m hoch, sein Schatten ist $s \\approx ', 'Misurato: l’asta è alta $2$ m, la sua ombra è $s \\approx '],
@@ -303,6 +309,18 @@ window.BuchIT && BuchIT.add('gy8', {
         [/\\\{((?:\d+|\\ldots)(?:; (?:\d+|\\ldots))+)\\\}/g, (m, l) => '\\{' + l.replace(/; /g, ', ') + '\\}'],
 
         // book it-18 mathe8-it:
+        // termbaum8: "Der Term $3x + 4$ ist eine <b>Summe</b>: Zuletzt wird addiert. Summanden: $3x$ und $4$." and the selected node
+        [/Der Term \$([^$]*)\$ ist eine? <b>(Summe|Differenz|Produkt|Quotient|Potenz)<\/b>: Zuletzt wird (?:addiert|subtrahiert|multipliziert|dividiert|potenziert)\. /g,
+            (m, t, k) => 'L’espressione $' + t + '$ è ' + ({ Summe: 'una <b>somma</b>', Differenz: 'una <b>differenza</b>', Produkt: 'un <b>prodotto</b>', Quotient: 'un <b>quoziente</b>', Potenz: 'una <b>potenza</b>' })[k] +
+                ': per ultima si esegue ' + ({ Summe: 'l’addizione', Differenz: 'la sottrazione', Produkt: 'la moltiplicazione', Quotient: 'la divisione', Potenz: 'l’elevamento a potenza' })[k] + '. '],
+        [/(Summanden|Minuend und Subtrahend|Faktoren|Dividend und Divisor): \$([^$]*)\$ und \$([^$]*)\$\./g,
+            (m, p, a, b) => ({ 'Summanden': 'Addendi', 'Minuend und Subtrahend': 'Minuendo e sottraendo', 'Faktoren': 'Fattori', 'Dividend und Divisor': 'Dividendo e divisore' })[p] + ': $' + a + '$ e $' + b + '$.'],
+        [/Basis \$([^$]*)\$, Exponent \$([^$]*)\$\./g, (m, a, b) => 'Base $' + a + '$, esponente $' + b + '$.'],
+        [/Für \$x = ([^$]*)\$ hat er den Wert /g, (m, v) => 'Per $x = ' + v + '$ ha il valore '],
+        [/Ausgewählt: der Teilterm \$([^$]*)\$, eine? (Summe|Differenz|Produkt|Quotient|Potenz) mit dem Wert \$/g,
+            (m, t, k) => 'Selezionata: la sottoespressione $' + t + '$, ' + ({ Summe: 'una somma', Differenz: 'una differenza', Produkt: 'un prodotto', Quotient: 'un quoziente', Potenz: 'una potenza' })[k] + ', con il valore $'],
+        [/Ausgewählt: die Variable \$x\$ mit dem Wert \$/g, () => 'Selezionata: la variabile $x$ con il valore $'],
+        [/Ausgewählt: die Zahl \$/g, () => 'Selezionato: il numero $'],
 
         // book it-20 mathe10-it:
 
