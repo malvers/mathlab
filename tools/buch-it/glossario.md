@@ -382,6 +382,30 @@ Round 2, 20.10.2026 (Castelnuovo): decisions made while translating FOS 11; noth
 
 <!-- it-5: terms of this book only, write right below this line -->
 
+Package it-5 (Cibrario), 20.10.2026: decisions made while translating FOS 12; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Fachoberschule, Fachhochschulreife (FHR), FHR-Prüfung | Fachoberschule, Fachhochschulreife (FHR), esame della FHR | names stay; start page: «scuola superiore tecnica tedesca di due anni … il diploma che dà accesso alle università di scienze applicate» |
+| Klausur 1, 2, 3 (chips, quiz cards) | VERIFICA SCRITTA 1, 2, 3 | |
+| Wahlbereich 3 (chapter W) | Area opzionale 3 (chapter OP) | as in BGY 11 |
+| Kavalierperspektive | assonometria cavaliera | 1.1 |
+| Punktrichtungsform, Zweipunkteform, Dreipunkteform | forma punto-direzione, forma per due punti, forma per tre punti | 1.2, 1.3 |
+| Lotgerade, Lotfußpunkt, Spiegelpunkt | retta perpendicolare, piede della perpendicolare, punto simmetrico | 1.4, widget lot3d |
+| Differenzialquotient | derivata, «detta anche quoziente differenziale» | 2.2; section title «Derivata e funzione derivata» |
+| Untersumme, Obersumme, Grundintegral | somma inferiore, somma superiore, integrale immediato | 3 |
+| Linkskurve / Rechtskurve (Merke 2.3) | curva a sinistra / curva a destra, with «(concavità verso l’alto / verso il basso)» | as in mathe12-it |
+| hebbare Lücke, Lücke (widget button) | discontinuità eliminabile, buco nel grafico; button «Buco» | widget bruchfunktion as in the it-6 block |
+| Zählergrad um 1 größer | grado del numeratore più alto di 1 (supera di 1 quello del denominatore) | not «maggiore di 1» (= greater than 1) |
+| Steckbrief (2.4, widget steckbrief) | carta d’identità della funzione | the task type: «determinare funzioni» |
+| Hauptbedingung, Nebenbedingung, Zielfunktion | condizione principale, vincolo, funzione obiettivo | 2.4 |
+| abschnittsweise definiert, Nahtstelle, knickfrei, Knick | definita a tratti, punto di raccordo, senza spigolo, spigolo | OP |
+| Mengenrabatt | sconto sulla quantità | OP |
+| Verzinsung (widget efunktion: jährlich … minütlich) | capitalizzazione (annuale, semestrale, trimestrale, mensile, settimanale, giornaliera, oraria, al minuto) | short slider words, so the row fits at 390 px; in the sentence the adverbs (annualmente …) |
+| Zentralprojektion, Fluchtpunkt, Bildebene, Horizont | proiezione centrale, punto di fuga, piano del quadro, orizzonte | OP, widget zentralprojektion |
+| GeoGebra-CAS-Befehle Ableitung, Löse, Faktorisiere, Numerisch, Wenn, TrendPoly, TrendExp | Derivative, Solve, Factor, Numeric, If, FitPoly, FitExp | English names, said once in OP |
+| Wappen / Zahl (FHR chapter, «mindestens einmal Zahl») | testa / croce («almeno una croce») | as in section 5 |
+
 ## mathegy11-it
 
 <!-- it-6: terms of this book only, write right below this line -->
