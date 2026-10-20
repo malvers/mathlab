@@ -85,6 +85,12 @@ window.BuchIT && BuchIT.add('analysis', {
         // book it-5 mathefos12-it:
         'Titelbild: Exponentialkurve mit Hochpunkt, Wendetangente und Rechtecken darunter, eine Hyperbel mit Asymptoten und ein Parallelogramm im Raum mit seinem Vektorprodukt':
             'Copertina: curva esponenziale con punto di massimo, tangente di flesso e rettangoli sotto, un’iperbole con i suoi asintoti e un parallelogramma nello spazio con il suo prodotto vettoriale',
+        // efunktion
+        'Welche Basis?': 'Quale base?', 'Zinseszins': 'Interesse composto', 'Was wird gezeigt?': 'Che cosa si mostra?', 'a = e setzen': 'Poni a = e', 'Basis $a$': 'Base $a$',
+        'Exponentialfunktionen und die Eulersche Zahl e': 'Funzioni esponenziali e il numero di Nepero e', 'Faktor $a$': 'Fattore $a$', 'im Exponenten $b$': 'Nell’esponente $b$',
+        'Verschiebung $c$': 'Traslazione $c$', 'Verzinsung': 'Accredito degli interessi',
+        'jährlich': 'annualmente', 'halbjährlich': 'semestralmente', 'vierteljährlich': 'trimestralmente', 'monatlich': 'mensilmente', 'wöchentlich': 'settimanalmente',
+        'täglich': 'giornalmente', 'stündlich': 'ogni ora', 'minütlich': 'ogni minuto',
 
         // book it-6 mathegy11-it:
         // bruchfunktion
@@ -180,6 +186,23 @@ window.BuchIT && BuchIT.add('analysis', {
         // book it-4 mathefos11-it:
 
         // book it-5 mathefos12-it:
+        // efunktion (the engine has already written the point (0 \mid 1) as (0, 1) here: the rules run before the pieces)
+        [' · Steigung in $(0, 1)$: $', ' · pendenza in $(0, 1)$: $'],
+        ['<b>Treffer:</b> Bei $a = \\mathrm{e} \\approx 2{,}71828$ ist die Steigung genau $1$ und $f\'(x) = f(x)$: Die Graphen von $f$ und $f\'$ liegen aufeinander.',
+            '<b>Centro!</b> Con $a = \\mathrm{e} \\approx 2{,}71828$ la pendenza è esattamente $1$ e $f\'(x) = f(x)$: i grafici di $f$ e di $f\'$ coincidono.'],
+        ['Die Ableitung ist $f\'(x) = ', 'La derivata è $f\'(x) = '],
+        [' \\cdot f(x)$, ein Vielfaches von $f$. Für welche Basis ist der Faktor genau $1$?', ' \\cdot f(x)$, un multiplo di $f$. Per quale base il fattore è esattamente $1$?'],
+        [' · Mit $a = 0$ oder $b = 0$ ist $f$ konstant.', ' · Con $a = 0$ o $b = 0$, $f$ è costante.'],
+        ['Schnittpunkt mit der $y$-Achse: $', 'Intersezione con l’asse $y$: $'], [' · Nullstelle: ', ' · zero: '],
+        ['keine, denn $\\mathrm{e}^{bx} > 0$ kann nicht $', 'nessuno, perché $\\mathrm{e}^{bx} > 0$ non può valere $'], ['$ sein</p>', '$</p>'],
+        ['Für $', 'Per $'], ['$ geht $f(x) \\to ', '$, $f(x) \\to '], ['$: waagerechte Asymptote $y = ', '$: asintoto orizzontale $y = '], ['$. Für $', '$. Per $'],
+        ['$f$ ist überall streng monoton ', '$f$ è ovunque strettamente '], ['steigend', 'crescente'], ['fallend', 'decrescente'],
+        [', weil $f\'(x)$ immer ', ', perché $f\'(x)$ è sempre '], ['positiv ist.', 'positiva.'], ['negativ ist.', 'negativa.'],
+        ['Ein Euro, 100 % Zinsen im Jahr, ', 'Un euro, il 100 % di interesse all’anno, accreditato '], [' verzinst: ', ': '], ['-mal $\\tfrac{100\\,\\%}{', ' volte $\\tfrac{100\\,\\%}{'],
+        ['jährlich', 'annualmente'], ['halbjährlich', 'semestralmente'], ['vierteljährlich', 'trimestralmente'], ['monatlich', 'mensilmente'], ['wöchentlich', 'settimanalmente'],
+        ['täglich', 'giornalmente'], ['stündlich', 'ogni ora'], ['minütlich', 'ogni minuto'],
+        ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
+            'Più spesso si accreditano gli interessi, più il saldo si avvicina a $\\mathrm{e} = 2{,}718281\\ldots$, ma senza mai superarlo: $'],
 
         // book it-6 mathegy11-it:
         // bruchfunktion
@@ -213,6 +236,8 @@ window.BuchIT && BuchIT.add('analysis', {
         // book it-4 mathefos11-it:
 
         // book it-5 mathefos12-it:
+        // efunktion: "1-mal $\tfrac…" is "1 volta" (the pieces make "volte" of every other number)
+        [/(?<![\d.])1-mal \$/g, '1 volta $$'],
 
         // book it-6 mathegy11-it:
         // bruchfunktion: "… mit einem Loch.", "Nullstellen: keine", and the set of the domain "\{1; -2\}" → "\{1, -2\}" when no number has a decimal comma
