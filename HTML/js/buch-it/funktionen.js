@@ -71,6 +71,13 @@ window.BuchIT && BuchIT.add('funktionen', {
         'Rechteck mit Umfang 24 cm': 'Rettangolo di perimetro 24 cm',
         // book it-3 mathe13-it:
         // book it-4 mathefos11-it:
+        // funktion (the vertical line test)
+        'Kurve': 'Curva', 'Kurve mit verschiebbarer senkrechter Gerade': 'Curva con una retta verticale trascinabile',
+        'Zieh den türkisen Punkt unten: Die senkrechte Gerade wandert mit. Wie oft trifft sie die Kurve?':
+            'Trascina il punto turchese in basso: la retta verticale si sposta con lui. Quante volte interseca la curva?',
+        'Ist die Kurve der Graph einer Funktion?': 'La curva è il grafico di una funzione?', 'keine Funktion': 'non è una funzione',
+        'Richtig.': 'Giusto.', 'Nicht ganz.': 'Non proprio.',
+        'Entscheide mit den Knöpfen. Danach siehst du Definitions- und Wertebereich.': 'Decidi con i pulsanti. Poi vedrai il dominio e l’insieme immagine.',
 
         // book it-5 mathefos12-it:
 
@@ -171,6 +178,10 @@ window.BuchIT && BuchIT.add('funktionen', {
         ['$ hat $D = ', '$ ha $D = '],
         // book it-3 mathe13-it:
         // book it-4 mathefos11-it:
+        // funktion
+        ['$ · Bei $x = ', '$ · In $x = '], ['$ trifft die Senkrechte die Kurve <b>', '$ la verticale interseca la curva <b>'],
+        ['gar nicht', 'in nessun punto'], ['genau einmal', 'esattamente una volta'],
+        ['Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. ', 'Ogni retta verticale interseca la curva al massimo una volta: è una funzione. '],
 
         // book it-5 mathefos12-it:
 
@@ -220,6 +231,8 @@ window.BuchIT && BuchIT.add('funktionen', {
         [/(: )?\bZu (\$x = [^$]+\$) gehören (\$y = [^$]+\$) und (\$y = [^$]+\$)\./g, (m, c, x, y1, y2) => (c ? ': a ' : 'A ') + x + ' corrispondono ' + y1 + ' e ' + y2 + '.'],
         // book it-3 mathe13-it:
         // book it-4 mathefos11-it:
+        // funktion: "die Kurve <b>2-mal</b>"
+        [/<b>(\d+)-mal<\/b>/g, '<b>$1 volte</b>'],
 
         // book it-5 mathefos12-it:
 
