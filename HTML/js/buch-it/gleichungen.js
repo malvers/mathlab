@@ -23,6 +23,11 @@ window.BuchIT && BuchIT.add('gleichungen', {
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
         // book it-4 mathefos11-it:
+        // ungleichung
+        'Relationszeichen': 'Segno di disuguaglianza', '$a$ (Zahl vor dem $x$)': '$a$ (numero davanti alla $x$)', '$c$ (rechte Seite)': '$c$ (secondo membro)',
+        'durch eine negative Zahl: Das Zeichen dreht sich um!': 'per un numero negativo: il verso si inverte!',
+        'Zahlenstrahl mit der Lösungsmenge': 'Retta dei numeri con l’insieme delle soluzioni', 'Probe': 'Prova', 'wahr': 'vera', 'falsch': 'falsa',
+
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -43,6 +48,11 @@ window.BuchIT && BuchIT.add('gleichungen', {
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
         // book it-4 mathefos11-it:
+        // ungleichung
+        ['heißt $', 'significa $'], ['Das stimmt für jede Zahl: ', 'È vera per ogni numero: '], ['Das stimmt für keine Zahl: ', 'Non è vera per nessun numero: '],
+        ['Zieh die <b>Probe</b> über den Zahlenstrahl. $x = ', 'Trascina la <b>prova</b> lungo la retta dei numeri. $x = '], ['$ ist ', '$ è '],
+        [': Die Zahl gehört zur Lösungsmenge.', ': il numero appartiene all’insieme delle soluzioni.'], [': Die Zahl gehört nicht dazu.', ': il numero non vi appartiene.'],
+
     ],
     rule: [
         // book it-1 mathe11-it:
