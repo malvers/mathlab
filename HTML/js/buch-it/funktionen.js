@@ -107,6 +107,18 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-13 mathegy8-it:
 
         // book it-14 mathegy9-it:
+        // potenzfunktion (OS 10 it-20 loads the same widget)
+        'Verwandte zeigen': 'Mostra le parenti', 'Graph einer Potenzfunktion': 'Grafico di una funzione potenza', 'Exponent': 'Esponente',
+        'Nullstelle': 'Zero', 'Polstelle': 'Polo', 'Gemeinsame Punkte': 'Punti in comune',
+        'keine, $f$ ist nur für $x \\geq 0$ definiert': 'nessuna, $f$ è definita solo per $x \\geq 0$',
+        'achsensymmetrisch zur $y$-Achse, denn $f(-x) = f(x)$': 'simmetrica rispetto all’asse $y$, perché $f(-x) = f(x)$',
+        'punktsymmetrisch zum Ursprung, denn $f(-x) = -f(x)$': 'simmetrica rispetto all’origine, perché $f(-x) = -f(x)$',
+        'steigt für $x \\geq 0$': 'crescente per $x \\geq 0$', 'steigt überall': 'crescente ovunque',
+        'fällt für $x < 0$, steigt für $x > 0$': 'decrescente per $x < 0$, crescente per $x > 0$',
+        'steigt für $x < 0$, fällt für $x > 0$': 'crescente per $x < 0$, decrescente per $x > 0$',
+        'fällt für $x < 0$ und fällt für $x > 0$': 'decrescente per $x < 0$ e decrescente per $x > 0$',
+        '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, senza cambio di segno', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, con cambio di segno',
+        'senkrecht $x = 0$, waagerecht $y = 0$': 'verticale $x = 0$, orizzontale $y = 0$',
 
         // book it-15 mathegy10-it:
         'Graphen der Grundfunktionen': 'Grafici delle funzioni di base',
