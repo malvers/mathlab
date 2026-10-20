@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica GY 11 · Capitolo 4.1 · Esperimenti aleatori a più stadi | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Modello dell’urna, regole dei percorsi, tabella a doppia entrata, indipendenza, simulazione. Capitolo 4.1 del libro di testo interattivo Matematica · Gymnasium 11: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 4.1 · AREA DI APPRENDIMENTO 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 4.1 · AREA DI APPRENDIMENTO 4 · APRILE · MAGGIO</p>
+            <h1>Esperimenti aleatori a più stadi</h1>
+            <p class="b-hero-lead">Estrarre due volte, lanciare un dado tre volte, un sondaggio con due domande: molti esperimenti aleatori si svolgono a stadi. Con il <b>diagramma ad albero</b> e le
+                <b>regole dei percorsi</b> non perdi la visione d’insieme; con la <b>tabella a doppia entrata</b> metti in ordine due caratteristiche; e con l’<b>indipendenza</b> chiarisci
+                se due eventi hanno qualcosa a che fare l’uno con l’altro. E dove calcolare diventa difficile, aiuta la <b>simulazione</b>.</p>
+            <div class="b-chips"><span class="b-chip">6 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">SIMULAZIONE</span><span class="b-chip">STORIA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>descrivere esperimenti aleatori a più stadi con il <b>modello dell’urna</b>, con e senza reimmissione</li>
+                <li>calcolare probabilità con il <b>diagramma ad albero</b> e le <b>regole dei percorsi</b>, e stimarle con l’evento contrario</li>
+                <li><b>simulare</b> esperimenti aleatori</li>
+                <li>costruire e leggere <b>tabelle a doppia entrata</b></li>
+                <li>verificare se due eventi sono <b>indipendenti</b> e discutere diverse strade di risoluzione</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="1/6" data-ph="frazione"><p class="b-q-text">Che probabilità c’è di fare sei con un dado?</p><div class="b-sol"><p>$\tfrac{1}{6}$</p></div></div>
+            <div class="b-q" data-ans="0,6" data-ph="numero"><p class="b-q-text">In un’urna ci sono 3 palline rosse e 2 blu. Che probabilità ha il rosso?</p><div class="b-sol"><p>$\tfrac{3}{5} = 0{,}6$</p></div></div>
+            <div class="b-q" data-ans="0,3" data-ph="numero"><p class="b-q-text">$P(A) = 0{,}7$. Quanto vale $P(\overline{A})$?</p><div class="b-sol"><p>0,3</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Quanto fa $\tfrac{3}{5} \cdot \tfrac{1}{2}$?</p><div class="b-mc"><button>$\tfrac{4}{7}$</button><button>$\tfrac{3}{10}$</button><button>$\tfrac{3}{7}$</button></div><div class="b-sol"><p>Numeratore per numeratore, denominatore per denominatore.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">CON O SENZA REIMMISSIONE?</div>
+            <div class="b-text"><p>In un’urna ci sono 3 palline rosse e 2 blu. Estraete due volte.</p>
+                <ul><li>Giocate 50 volte con reimmissione e 50 senza. Quante volte escono due palline rosse? Spiegate la differenza.</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">SPORT E MUSICA</div>
+            <div class="b-text"><p>Chiedete nella vostra classe: chi fa sport regolarmente e chi suona uno strumento?</p>
+                <ul><li>Ordinate le risposte in una tabella con quattro caselle. Chi fa sport suona meno spesso degli altri?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DADI IN LABORATORIO</div>
+            <div class="b-text"><p>Fate lanciare al computer il dado mille volte e osservate la frequenza relativa.</p></div>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GIOCO DEI DADI</span><span class="b-lab-what">Caso e frequenza (laboratorio in tedesco)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Modello dell’urna e regole dei percorsi" data-toc-k="1" data-toc-short="1 Albero">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">1</span>Modello dell’urna, diagramma ad albero e regole dei percorsi</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con reimmissione la probabilità del rosso a ogni estrazione è $\tfrac{3}{5}$; quindi quella di due rosse è $\tfrac{3}{5} \cdot \tfrac{3}{5} = \tfrac{9}{25} = 0{,}36$.
+                Senza reimmissione, dopo la prima pallina rossa restano solo 2 rosse su 4 palline: $\tfrac{3}{5} \cdot \tfrac{2}{4} = \tfrac{3}{10} = 0{,}3$.
+                Nel diagramma ad albero su ogni ramo si scrive la probabilità di quello stadio, e un cammino attraverso l’albero si chiama <b>percorso</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · REGOLE DEI PERCORSI</div>
+                <div class="b-text">
+                    <p><b>1ª regola dei percorsi (regola del prodotto):</b> la probabilità di un percorso è il prodotto delle probabilità lungo il percorso.</p>
+                    <p><b>2ª regola dei percorsi (regola della somma):</b> la probabilità di un evento è la somma delle probabilità dei suoi percorsi.</p>
+                    <p><b>Modello dell’urna:</b> con reimmissione le probabilità restano uguali; senza reimmissione cambiano da uno stadio all’altro.</p>
+                    <p><b>Evento contrario:</b> $P(\text{almeno una volta}) = 1 - P(\text{nessuna volta})$, spesso la strada più breve.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Verifica:</b> la somma delle probabilità di tutti i percorsi è 1, come la somma dei rami a ogni biforcazione.</p>
+            <p class="b-note"><b>Simulazione:</b> con cifre casuali da 0 a 9 si simula $p = 0{,}3$ contando 0, 1 e 2 come successi. Molte ripetizioni stimano la probabilità.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · OFFICINA DEI DIAGRAMMI AD ALBERO</div>
+        <p class="b-help" style="margin:0 0 12px">Regola l’urna, scegli con o senza reimmissione e clicca sulle estremità dei percorsi per formare un evento.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · ESATTAMENTE UNA ROSSA</div>
+            <div class="b-text"><p>Due estrazioni senza reimmissione da 3 palline rosse e 2 blu. Che probabilità c’è di esattamente una pallina rossa?</p></div>
+            <div class="b-sol"><p>Due percorsi: rossa–blu $\tfrac{3}{5} \cdot \tfrac{2}{4}$ e blu–rossa $\tfrac{2}{5} \cdot \tfrac{3}{4}$.</p>
+                <p>$\tfrac{6}{20} + \tfrac{6}{20} =$ <span class="b-res">$\tfrac{3}{5}$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · ALMENO UN SEI</div>
+            <div class="b-text"><p>Si lancia un dado quattro volte. Che probabilità c’è di almeno un sei?</p></div>
+            <div class="b-sol"><p>Evento contrario «nessun sei»: $\left(\tfrac{5}{6}\right)^4 \approx 0{,}482$.</p>
+                <p><span class="b-res">$1 - 0{,}482 \approx 0{,}518$</span>: poco più della metà.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Urna con 3 palline rosse e 2 blu. Calcola per due estrazioni: a) con reimmissione, due colori diversi &nbsp; b) con reimmissione, almeno una blu &nbsp; c) con tre estrazioni senza reimmissione, tre volte rosso</p></div>
+            <div class="b-sol"><p>a) $\tfrac{12}{25}$ &nbsp; b) $\tfrac{16}{25}$ &nbsp; c) $\tfrac{3}{5} \cdot \tfrac{2}{4} \cdot \tfrac{1}{3} = \tfrac{1}{10}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Due dadi: che probabilità c’è che la somma dei punti sia 7, e che probabilità c’è di fare un doppio?</p></div>
+            <div class="b-sol"><p>Tutte e due $\tfrac{6}{36} = \tfrac{1}{6}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Il 60 % degli studenti di una grande scuola arriva in autobus. Se ne scelgono due a caso. Che probabilità c’è che esattamente uno dei due arrivi in autobus? Perché qui si può calcolare come con reimmissione?</p></div>
+            <div class="b-sol"><p>$2 \cdot 0{,}6 \cdot 0{,}4 = 0{,}48$. Con molte persone, una scelta cambia appena la proporzione.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quante volte bisogna lanciare il dado come minimo perché con una probabilità di almeno il 90 % esca almeno un sei? Provalo con il CAS.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac{5}{6}\right)^n \geq 0{,}9$: $n = 13$ (con $n = 12$ solo circa 0,888).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Progetta una simulazione con cifre casuali per: «Una ruota della fortuna dà rosso con il 30 %; che probabilità c’è di almeno due rossi in 5 giri?». Fai 20 ripetizioni e confronta con il calcolo $1 - 0{,}7^5 - 5 \cdot 0{,}3 \cdot 0{,}7^4 \approx 0{,}47$.</p></div>
+            <div class="b-sol"><p>Ogni volta cinque cifre, successo con 0, 1 e 2; contare quante volte ci sono almeno due successi. Con 20 ripetizioni il risultato oscilla in modo evidente intorno a 0,47.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="0,3" data-ph="probabilità"><p class="b-q-text">Due estrazioni senza reimmissione da 3 rosse e 2 blu: $P(\text{due rosse})$?</p><div class="b-sol"><p>$\tfrac{3}{10}$</p></div></div>
+        <div class="b-q" data-ans="7/8" data-ph="frazione"><p class="b-q-text">Tre lanci di una moneta: $P(\text{almeno una testa})$?</p><div class="b-sol"><p>$1 - \tfrac{1}{8}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Che cosa dice la 1ª regola dei percorsi?</p><div class="b-mc"><button>Moltiplicare lungo un percorso.</button><button>Sommare lungo un percorso.</button><button>Moltiplicare tutti i percorsi.</button></div><div class="b-sol"><p>Regola del prodotto.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Tabella a doppia entrata e indipendenza" data-toc-k="2" data-toc-short="2 Indipendenza">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">2</span>Tabella a doppia entrata e indipendenza</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Su 100 intervistati, 60 fanno sport ($S$), 40 suonano uno strumento ($M$, musica) e 30 fanno entrambe le cose. Nella tabella a doppia entrata ci sono le quattro combinazioni e, ai margini, le somme.
+                Se sport e musica fossero indipendenti, dei 60 sportivi dovrebbe suonare il 40 %, cioè 24. Ma sono 30.
+                Quindi in questo gruppo le due caratteristiche sono legate: $P(S \cap M) = 0{,}3 \neq 0{,}6 \cdot 0{,}4 = 0{,}24$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · TABELLA A DOPPIA ENTRATA E INDIPENDENZA</div>
+                <div class="b-text">
+                    <p>La <b>tabella a doppia entrata</b> contiene $P(A \cap B)$, $P(A \cap \overline{B})$, $P(\overline{A} \cap B)$, $P(\overline{A} \cap \overline{B})$; le somme di righe e colonne danno $P(A)$, $P(\overline{A})$, $P(B)$, $P(\overline{B})$, e la somma totale 1.</p>
+                    <p>$A$ e $B$ sono <b>indipendenti</b> se vale $P(A \cap B) = P(A) \cdot P(B)$; altrimenti sono <b>dipendenti</b>. Allora sono indipendenti anche $\overline{A}$ e $B$ ecc.</p>
+                    <p>Intuitivamente: la proporzione di $B$ nel gruppo $A$ è uguale a quella nel gruppo $\overline{A}$.</p>
+                    <p><b>Incompatibili</b> ($A \cap B = \emptyset$) è un’altra cosa: con probabilità positive, gli eventi incompatibili sono perfino dipendenti.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Albero ↔ tabella:</b> $P(A \cap B)$ nell’albero è il prodotto lungo il percorso $A$, poi $B$; nella tabella compare direttamente nella casella.</p>
+            <p class="b-note"><b>Dipendente non vuol dire causale:</b> un legame nei dati non dice qual è la causa. Forse gli sportivi hanno semplicemente più tempo il pomeriggio.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · INDIPENDENTI O NO?</div>
+        <p class="b-help" style="margin:0 0 12px">Regola $P(A)$, $P(B)$ e $P(A \cap B)$. La tabella a doppia entrata e il quadrato unitario mostrano quando gli eventi sono indipendenti.</p>
+        <div data-widget="unabhaengig"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · COMPLETARE LA TABELLA</div>
+            <div class="b-text"><p>$P(A) = 0{,}4$, $P(B) = 0{,}5$, $P(A \cap B) = 0{,}2$. Completa la tabella e verifica se sono indipendenti.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}2$, $P(\overline{A} \cap B) = 0{,}3$, $P(\overline{A} \cap \overline{B}) = 0{,}3$.</p>
+                <p>$0{,}4 \cdot 0{,}5 = 0{,}2 = P(A \cap B)$: <span class="b-res">indipendenti</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · CALCOLARE CON L’INDIPENDENZA</div>
+            <div class="b-text"><p>$A$ e $B$ sono indipendenti con $P(A) = 0{,}3$ e $P(B) = 0{,}5$. Trova $P(A \cap B)$, $P(A \cup B)$ e $P(\overline{A} \cap \overline{B})$.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}15$, $P(A \cup B) = 0{,}3 + 0{,}5 - 0{,}15 = 0{,}65$.</p>
+                <p><span class="b-res">$P(\overline{A} \cap \overline{B}) = 0{,}7 \cdot 0{,}5 = 0{,}35$</span> $= 1 - 0{,}65$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ALLENAMENTO · COMPLETARE TABELLE A DOPPIA ENTRATA</div>
+        <p class="b-help" style="margin:0 0 12px">Riempi le caselle mancanti. Se vuoi, c’è una tabella nuova.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Su 200 persone, 80 portano gli occhiali, 120 sono donne e 50 donne portano gli occhiali. Costruisci la tabella a doppia entrata con i numeri assoluti.</p></div>
+            <div class="b-sol"><p>Donna/occhiali 50, donna/senza occhiali 70, uomo/occhiali 30, uomo/senza occhiali 50; somme 120, 80, 80, 120, 200.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>In questo gruppo «donna» e «occhiali» sono indipendenti? Confronta le proporzioni di chi porta gli occhiali tra donne e uomini.</p></div>
+            <div class="b-sol"><p>Donne $\tfrac{50}{120} \approx 41{,}7\,\%$, uomini $\tfrac{30}{80} = 37{,}5\,\%$; $0{,}6 \cdot 0{,}4 = 0{,}24 \neq 0{,}25$: leggermente dipendenti.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Due dadi: $A$ «il primo dado mostra 6», $B$ «somma dei punti 7». $A$ e $B$ sono indipendenti?</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac{1}{6}$, $P(B) = \tfrac{1}{6}$, $P(A \cap B) = P(\{(6,1)\}) = \tfrac{1}{36}$: indipendenti, anche se non lo si direbbe.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$A$ e $B$ sono incompatibili con $P(A) = 0{,}3$ e $P(B) = 0{,}4$. Trova $P(A \cup B)$ e dimostra che sono dipendenti.</p></div>
+            <div class="b-sol"><p>$P(A \cup B) = 0{,}7$; $P(A \cap B) = 0 \neq 0{,}12$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Risolvi l’esempio 4 in due modi: con il teorema della somma delle probabilità e con l’evento contrario. Discuti quale strada è più rapida.</p></div>
+            <div class="b-sol"><p>Teorema della somma: $0{,}3 + 0{,}5 - 0{,}15 = 0{,}65$. Evento contrario: $1 - 0{,}7 \cdot 0{,}5 = 0{,}65$. Con eventi indipendenti la seconda strada è spesso più breve.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="0,24" data-ph="prodotto"><p class="b-q-text">Sport 60 %, musica 40 %: quale proporzione di «entrambe le cose» ci si aspetterebbe se fossero indipendenti?</p><div class="b-sol"><p>0,24</p></div></div>
+        <div class="b-q" data-ans="0,65" data-ph="P(A ∪ B)"><p class="b-q-text">Indipendenti, $P(A) = 0{,}3$, $P(B) = 0{,}5$: $P(A \cup B)$?</p><div class="b-sol"><p>0,65</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$A$, $B$ incompatibili con probabilità positive. Che cosa vale?</p><div class="b-mc"><button>indipendenti</button><button>dipendenti</button><button>Non si può dire.</button></div><div class="b-sol"><p>$0 \neq P(A) \cdot P(B)$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una ruota della fortuna dà rosso con probabilità $\tfrac{1}{4}$, altrimenti verde. La si gira due volte. Dai tutti i percorsi con le loro probabilità.</p></div>
+            <div class="b-sol"><p>RR $\tfrac{1}{16}$, RV $\tfrac{3}{16}$, VR $\tfrac{3}{16}$, VV $\tfrac{9}{16}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con la 10ª classe:</b> la variabile aleatoria $X$ conta le palline rosse in due estrazioni con reimmissione da 3 rosse e 2 blu. Dai la distribuzione e $E(X)$.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = 0{,}16$, $P(X = 1) = 0{,}48$, $P(X = 2) = 0{,}36$; $E(X) = 0{,}48 + 0{,}72 = 1{,}2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Si lancia un dado dieci volte. Prima stima e poi calcola: che probabilità c’è di almeno un sei?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac{5}{6}\right)^{10} \approx 0{,}84$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Educazione allo sviluppo sostenibile: in una città il 30 % va al lavoro in bicicletta. Tra chi ha meno di 30 anni è il 45 %, e questi sono il 20 % dei lavoratori. Fai una tabella a doppia entrata e verifica se età e uso della bicicletta sono indipendenti.</p></div>
+            <div class="b-sol"><p>Giovane e bici: $0{,}2 \cdot 0{,}45 = 0{,}09$; giovane senza bici 0,11; più anziano con bici $0{,}3 - 0{,}09 = 0{,}21$; più anziano senza bici 0,59. $0{,}2 \cdot 0{,}3 = 0{,}06 \neq 0{,}09$: dipendenti.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: la scommessa del cavaliere de Méré" data-toc-k="X" data-toc-short="de Méré">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">STORIA</span></div>
+    <h2>La scommessa del cavaliere de Méré</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Lo scrittore e giocatore francese Antoine Gombaud, detto cavaliere de Méré, conosceva una buona scommessa: in quattro lanci di un dado esce almeno un sei.
+                Pensava che una seconda scommessa fosse altrettanto buona: in 24 lanci con due dadi esce almeno un doppio sei. Il ragionamento: $\tfrac{4}{6} = \tfrac{24}{36}$.
+                Ma con questa alla lunga perdeva.</p>
+            <p>Nel 1654 sottopose le sue domande a Blaise Pascal, che ne discusse per lettera con Pierre de Fermat. Questo carteggio è considerato l’inizio del calcolo delle probabilità.
+                Con l’evento contrario è facile: $1 - \left(\tfrac{5}{6}\right)^4 \approx 51{,}8\,\%$, ma $1 - \left(\tfrac{35}{36}\right)^{24} \approx 49{,}1\,\%$. La prima scommessa è favorevole, la seconda leggermente sfavorevole.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> D. R. Bellhouse, C. Genest, «Antoine Gombaud, Chevalier de Méré», Statistical Science 39 (2024), numero 3. Il carteggio tra Pascal e Fermat è dell’anno 1654.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>MODELLO DELL’URNA</h4><p>Con reimmissione costante, senza reimmissione variabile.</p></div>
+        <div><p>Due rosse: rispettivamente $\tfrac{9}{25}$ e $\tfrac{3}{10}$</p></div></div>
+    <div class="b-rueck"><div><h4>REGOLE DEI PERCORSI</h4><p>Moltiplicare lungo il percorso, sommare i percorsi.</p></div>
+        <div><p>Esattamente una rossa: $\tfrac{3}{5}$</p></div></div>
+    <div class="b-rueck"><div><h4>EVENTO CONTRARIO</h4><p>«Almeno una volta» = 1 − «nessuna volta».</p></div>
+        <div><p>$1 - \left(\tfrac{5}{6}\right)^4 \approx 0{,}518$</p></div></div>
+    <div class="b-rueck"><div><h4>TABELLA A DOPPIA ENTRATA</h4><p>Quattro caselle, somme ai margini, somma totale 1.</p></div>
+        <div><p>Sport/musica: 0,3 · 0,3 · 0,1 · 0,3</p></div></div>
+    <div class="b-rueck"><div><h4>INDIPENDENZA</h4><p>$P(A \cap B) = P(A) \cdot P(B)$; incompatibili è un’altra cosa.</p></div>
+        <div><p>$0{,}4 \cdot 0{,}5 = 0{,}2$: indipendenti</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="16/25" data-ph="frazione"><p class="b-q-text">Due estrazioni con reimmissione da 3 rosse e 2 blu: almeno una blu?</p><div class="b-sol"><p>$1 - \tfrac{9}{25}$</p></div></div>
+            <div class="b-q" data-ans="0,15" data-ph="P(A ∩ B)"><p class="b-q-text">Indipendenti, $P(A) = 0{,}3$, $P(B) = 0{,}5$: $P(A \cap B)$?</p><div class="b-sol"><p>0,15</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quale simulazione corrisponde a $p = 0{,}3$ con cifre casuali?</p><div class="b-mc"><button>la cifra 3 è un successo</button><button>le cifre da 0 a 3 sono successi</button><button>le cifre 0, 1 e 2 sono successi</button></div><div class="b-sol"><p>3 cifre su 10.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="13" data-ph="lanci"><p class="b-q-text">Numero minimo di lanci per avere almeno il 90 % di probabilità di un sei?</p><div class="b-sol"><p>13</p></div></div>
+            <div class="b-q" data-ans="49,1" data-tol="0.1" data-ph="%"><p class="b-q-text">Seconda scommessa di de Méré: $1 - \left(\tfrac{35}{36}\right)^{24}$ in percentuale (con un decimale)?</p><div class="b-sol"><p>49,1 %</p></div></div>
+            <div class="b-q" data-ans="1,2" data-ph="E(X)"><p class="b-q-text">Numero atteso di palline rosse in due estrazioni con reimmissione (3 rosse, 2 blu)?</p><div class="b-sol"><p>1,2</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-mehrstufig.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESPERIMENTI ALEATORI A PIÙ STADI</span><span class="b-lab-what">Urna, albero, regole dei percorsi, 20 esercizi</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABELLA A DOPPIA ENTRATA</span><span class="b-lab-what">Tabelle e indipendenza, 20 esercizi</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Gymnasium, 11ª classe, corso base · Area di apprendimento 4 secondo il programma di matematica del Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-it/stochastik.js"></script>
+</body>
+</html>
