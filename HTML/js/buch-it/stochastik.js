@@ -133,6 +133,8 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-13 mathegy8-it:
 
         // book it-15 mathegy10-it:
+        // zufallsgroesse: the stat label (not yet in the dictionary)
+        'ERWARTUNGSWERT': 'VALORE ATTESO',
 
         // book it-18 mathe8-it:
 
