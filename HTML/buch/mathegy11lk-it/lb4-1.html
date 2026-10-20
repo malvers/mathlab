@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica GY 11 LK · Capitolo 4.1 · Probabilità e conteggio | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Statistica, Laplace, Kolmogorov, simulazione, modello dell’urna, regole dei percorsi, tabella a doppia entrata, tecniche di conteggio. Capitolo 4.1 del libro di testo interattivo Matematica · Gymnasium 11 · Leistungskurs: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · GYMNASIUM 11 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 4.1 · AREA DI APPRENDIMENTO 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 4.1 · AREA DI APPRENDIMENTO 4 · APRILE · MAGGIO</p>
+            <h1>Probabilità e conteggio</h1>
+            <p class="b-hero-lead">Che cosa significa davvero «probabile»? Conoscerai tre risposte: quella <b>statistica</b>, dalle lunghe serie di prove, quella di <b>Laplace</b>, da esiti
+                equiprobabili, e quella di <b>Kolmogorov</b>, da tre assiomi da cui si possono dimostrare tutte le regole di calcolo. Poi scomponi esperimenti aleatori a più stadi
+                con urne, alberi e tabelle a doppia entrata, e conti con abilità insiemi di esiti molto grandi, con il <b>fattoriale</b> e il <b>coefficiente binomiale</b>.</p>
+            <div class="b-chips"><span class="b-chip">13 ORE</span><span class="b-chip">3 LEZIONI</span><span class="b-chip">3 PAGINE DI ESERCIZI</span><span class="b-chip">CONTEGGIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>distinguere il concetto di probabilità <b>statistico</b>, <b>di Laplace</b> e <b>assiomatico</b> e dimostrare regole di calcolo a partire dagli assiomi</li>
+                <li><b>simulare</b> esperimenti aleatori e stimare la precisione di una simulazione</li>
+                <li>rappresentare esperimenti aleatori a più stadi con il <b>modello dell’urna</b>, il <b>diagramma ad albero</b> e la <b>tabella a doppia entrata</b> e calcolare con le regole dei percorsi</li>
+                <li>contare gli esiti con la regola del prodotto, il <b>fattoriale</b> e il <b>coefficiente binomiale</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="1/3" data-ph="P ="><p class="b-q-text">Si lancia un dado. Qual è la probabilità di un punteggio maggiore di 4?</p><div class="b-sol"><p>Due casi favorevoli su sei esiti equiprobabili: $\tfrac26 = \tfrac13$ (10ª classe).</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Si lancia un dado due volte. Qual è l’evento contrario di «almeno un 6»?</p><div class="b-mc"><button>esattamente un 6</button><button>nessun 6</button><button>due 6</button></div><div class="b-sol"><p>«Almeno uno» è falso esattamente quando non esce nessun 6.</p></div></div>
+            <div class="b-q" data-ans="0,3" data-ph="Valore"><p class="b-q-text">Calcola $\tfrac35 \cdot \tfrac24$ come numero decimale.</p><div class="b-sol"><p>$\tfrac{6}{20} = 0{,}3$</p></div></div>
+            <div class="b-q" data-ans="0,25" data-ph="P ="><p class="b-q-text">Si lancia una moneta due volte. Qual è la probabilità di ottenere due volte testa?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12 = \tfrac14$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA PUNTINA DA DISEGNO</div>
+            <div class="b-text"><p>Lanciate una puntina da disegno (o un tappo di bottiglia) 50 volte e contate quante volte cade con la punta in alto. Mettete insieme i risultati di tutti i gruppi.</p>
+                <ul><li>Come cambia la proporzione quando sommate sempre più lanci?</li><li>Perché qui non si può calcolare la probabilità così semplicemente come con il dado?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DUE PALLINE</div>
+            <div class="b-text"><p>In un’urna ci sono tre palline rosse e due blu. Ne estraete due.</p>
+                <ul><li>«Due colori diversi» è più probabile se rimettete dentro la prima pallina o se non la rimettete? Prima indovinate, poi calcolate.</li><li>Come potete scrivere in modo ordinato tutte le possibilità?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LO STESSO COMPLEANNO</div>
+            <div class="b-text"><p>Quante persone devono esserci in una stanza perché, con una probabilità superiore al $50\,\%$, due compiano gli anni lo stesso giorno?</p>
+                <ul><li>Stimatelo prima ognuno per conto suo e confrontate.</li><li>Verificatelo nella vostra classe. Quante coppie di compleanni ci sono in tutto?</li></ul></div>
+            <span class="b-pair">→ Lezione 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Approcci al concetto di probabilità" data-toc-k="1" data-toc-short="1 Approcci">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Approcci al concetto di probabilità</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con un dado tutti dicono subito: la probabilità di un 6 è $\tfrac16$, perché nessuna faccia è favorita. Con una puntina da disegno questa simmetria
+                non c’è. Qui serve solo provare: se la si lancia moltissime volte, la proporzione di «punta in alto» si stabilizza su un valore fisso. E che cos’è
+                <b>davvero</b> una probabilità? La matematica dà una risposta sorprendentemente breve: tre regole.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · TRE APPROCCI</div>
+                <div class="b-text">
+                    <p><b>Statistico:</b> se un evento $E$ si verifica $H_n(E)$ volte in $n$ prove, $h_n(E) = \tfrac{H_n(E)}{n}$ è la sua <b>frequenza relativa</b>. Per $n$ grande
+                        si stabilizza (legge empirica del caso). È una <b>stima</b> di $P(E)$.</p>
+                    <p><b>Laplace:</b> se un esperimento aleatorio ha un numero finito di esiti <b>equiprobabili</b>, vale $P(E) = \dfrac{|E|}{|\Omega|} = \dfrac{\text{numero dei casi favorevoli}}{\text{numero dei casi possibili}}$.</p>
+                    <p><b>Kolmogorov (assiomatico):</b> una probabilità associa a ogni evento $E \subseteq \Omega$ un numero $P(E)$ con<br>
+                        (K1) $P(E) \ge 0$, (K2) $P(\Omega) = 1$, (K3) $P(A \cup B) = P(A) + P(B)$ se $A \cap B = \emptyset$ (eventi incompatibili).</p>
+                    <p><b>Conseguenze:</b> $P(\overline{E}) = 1 - P(E)$, $P(\emptyset) = 0$ e il <b>teorema della somma</b> $P(A \cup B) = P(A) + P(B) - P(A \cap B)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Dimostrazione dell’evento contrario:</b> $E$ e $\overline{E}$ sono incompatibili, $E \cup \overline{E} = \Omega$. Con (K3) e (K2): $P(E) + P(\overline{E}) = 1$.</p>
+            <p class="b-note"><b>Laplace solo con la simmetria:</b> le somme dei punti $2, 3, \ldots, 12$ di due dadi <b>non</b> sono equiprobabili. Equiprobabili sono le 36 coppie $(1, 1), \ldots, (6, 6)$.</p>
+            <p class="b-note"><b>Fonte:</b> Andrej N. Kolmogorov: «Grundbegriffe der Wahrscheinlichkeitsrechnung», Springer, Berlino 1933. In circa 60 pagine fece del calcolo delle probabilità una teoria fondata su assiomi, come la geometria.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · LA LEGGE DEI GRANDI NUMERI</div>
+        <p class="b-help" style="margin:0 0 12px">Scegli un esperimento aleatorio e ripetilo 10, 100 o 1000 volte. La frequenza relativa all’inizio oscilla molto, poi si avvicina alla probabilità.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · DUE DADI</div>
+            <div class="b-text"><p>Si lanciano due dadi. Calcola le probabilità che la somma dei punti sia 7 e che sia almeno 10.</p></div>
+            <div class="b-sol"><p>Modello di Laplace con le 36 coppie equiprobabili. Somma 7: $(1, 6), (2, 5), \ldots, (6, 1)$, cioè 6 coppie e $P = \tfrac{6}{36} = \tfrac16$.</p>
+                <p>Somma almeno 10: la somma 10 ha 3 coppie, la 11 ne ha 2, la 12 ne ha 1. <span class="b-res">$P = \tfrac{6}{36} = \tfrac16$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · IL TEOREMA DELLA SOMMA DAGLI ASSIOMI</div>
+            <div class="b-text"><p>Dimostra $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ e calcola con esso, per una carta di un mazzo da skat (32 carte, gioco tedesco), la probabilità di «cuori o fante».</p></div>
+            <div class="b-sol"><p>$A \cup B$ si scompone nelle parti incompatibili $A$ e $B \setminus A$, allo stesso modo $B$ in $A \cap B$ e $B \setminus A$. Per (K3) $P(A \cup B) = P(A) + P(B \setminus A)$ e $P(B) = P(A \cap B) + P(B \setminus A)$.
+                Sostituendo $P(B \setminus A) = P(B) - P(A \cap B)$ si ottiene il teorema.</p>
+                <p>8 carte di cuori, 4 fanti, 1 fante di cuori: <span class="b-res">$P = \tfrac{8}{32} + \tfrac{4}{32} - \tfrac{1}{32} = \tfrac{11}{32} \approx 0{,}344$.</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una puntina da disegno è caduta 248 volte con la punta in alto su 400 lanci. Stima la probabilità di questo esito e giustifica perché qui non va bene un modello di Laplace.</p></div>
+            <div class="b-sol"><p>$h_{400} = \tfrac{248}{400} = 0{,}62$ è la stima. Le posizioni «punta in alto» e «di fianco» non sono simmetriche, quindi non sono equiprobabili.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Due dadi: calcola la probabilità di un doppio e quella di almeno un 6.</p></div>
+            <div class="b-sol"><p>Doppio: 6 coppie su 36, $P = \tfrac16$. Almeno un 6: con l’evento contrario $1 - \tfrac{25}{36} = \tfrac{11}{36} \approx 0{,}306$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dimostra con gli assiomi: da $A \subseteq B$ segue $P(A) \le P(B)$.</p></div>
+            <div class="b-sol"><p>$B = A \cup (B \setminus A)$ con parti incompatibili. Per (K3) $P(B) = P(A) + P(B \setminus A)$, per (K1) $P(B \setminus A) \ge 0$. Quindi $P(B) \ge P(A)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Vale $P(A) = 0{,}5$, $P(B) = 0{,}4$ e $P(A \cup B) = 0{,}7$. Calcola $P(A \cap B)$ e la probabilità che si verifichi solo $A$.</p></div>
+            <div class="b-sol"><p>Teorema della somma: $P(A \cap B) = 0{,}5 + 0{,}4 - 0{,}7 = 0{,}2$. Solo $A$: $P(A \setminus B) = 0{,}5 - 0{,}2 = 0{,}3$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un foglio di calcolo fornisce numeri casuali $z$ distribuiti uniformemente in $[0, 1)$. Come si simula con essi un dado? Circa quante simulazioni servono
+            perché la frequenza relativa di una probabilità intorno a $0{,}5$ sia quasi sempre esatta a $\pm 0{,}01$?</p></div>
+            <div class="b-sol"><p>Punteggio $\lfloor 6z \rfloor + 1$, per esempio con <code>=INT(6*CASUALE())+1</code>. La frequenza relativa oscilla intorno a $P$ con la deviazione standard $\sqrt{\tfrac{P(1 - P)}{n}} \le \tfrac{0{,}5}{\sqrt n}$.
+                Per una sicurezza di circa il $95\,\%$, il doppio dell’oscillazione deve essere al massimo $0{,}01$: $\tfrac{1}{\sqrt n} \le 0{,}01$, quindi $n \ge 10\,000$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="1/9" data-ph="P ="><p class="b-q-text">Due dadi: qual è la probabilità che la somma dei punti sia 9?</p><div class="b-sol"><p>$(3, 6), (4, 5), (5, 4), (6, 3)$: $\tfrac{4}{36} = \tfrac19$</p></div></div>
+        <div class="b-q" data-ans="0,8" data-ph="P ="><p class="b-q-text">$A$ e $B$ sono incompatibili, $P(A) = 0{,}3$, $P(B) = 0{,}5$. Quanto vale $P(A \cup B)$?</p><div class="b-sol"><p>(K3): $0{,}3 + 0{,}5 = 0{,}8$</p></div></div>
+        <div class="b-q" data-ans="0,19" data-ph="h ="><p class="b-q-text">Un dado ha dato il 6 in 380 lanci su 2000. Qual è la frequenza relativa?</p><div class="b-sol"><p>$\tfrac{380}{2000} = 0{,}19$, nettamente sopra $\tfrac16 \approx 0{,}167$: il dado è sospetto.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Esperimenti aleatori a più stadi" data-toc-k="2" data-toc-short="2 Più stadi">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">5 ORE</span></div>
+    <h2><span class="b-no">2</span>Esperimenti aleatori a più stadi</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dall’urna con tre palline rosse e due blu se ne estraggono due. Se la prima non viene rimessa, l’urna cambia per la seconda estrazione.
+                Un <b>diagramma ad albero</b> lo registra: a ogni stadio si ramifica, e sui rami stanno le probabilità <b>sotto le condizioni precedenti</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · REGOLE DEI PERCORSI E TABELLA A DOPPIA ENTRATA</div>
+                <div class="b-text">
+                    <p><b>1ª regola dei percorsi (regola del prodotto):</b> la probabilità di un percorso è il prodotto delle probabilità lungo il percorso.</p>
+                    <p><b>2ª regola dei percorsi (regola della somma):</b> la probabilità di un evento è la somma delle probabilità di tutti i percorsi che gli appartengono.</p>
+                    <p><b>Modello dell’urna:</b> nell’estrazione <b>con reimmissione</b> le probabilità sono uguali a ogni stadio, nell’estrazione <b>senza reimmissione</b> cambiano da uno stadio all’altro.</p>
+                    <p><b>Tabella a doppia entrata:</b> per due caratteristiche $A$ e $B$ nelle quattro caselle stanno $P(A \cap B)$, $P(A \cap \overline{B})$, $P(\overline{A} \cap B)$, $P(\overline{A} \cap \overline{B})$,
+                        ai margini le somme $P(A)$, $P(\overline{A})$, $P(B)$, $P(\overline{B})$, in basso a destra $1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Verifica:</b> le probabilità di tutte le estremità dei percorsi danno insieme $1$, e lo stesso vale per i rami che escono da ogni nodo.</p>
+            <p class="b-note"><b>L’evento contrario fa risparmiare percorsi:</b> almeno un 6 in quattro lanci: $1 - \left(\tfrac56\right)^4 \approx 0{,}518$. Senza l’evento contrario sarebbero 15 percorsi.</p>
+            <p class="b-note"><b>Tabella o albero?</b> Entrambi contengono le stesse quattro probabilità di intersezione. La tabella mostra tutte le somme a colpo d’occhio, l’albero l’ordine degli stadi.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · LABORATORIO DEI DIAGRAMMI AD ALBERO</div>
+        <p class="b-help" style="margin:0 0 12px">Regola l’urna, scegli con o senza reimmissione e fai clic sulle estremità dei percorsi o su un evento. Le regole dei percorsi calcolano insieme a te.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · CON O SENZA REIMMISSIONE</div>
+            <div class="b-text"><p>Dall’urna con tre palline rosse e due blu si estraggono due palline. Calcola $P(\text{due colori diversi})$ senza e con reimmissione.</p></div>
+            <div class="b-sol"><p>Senza reimmissione, percorsi $rb$ e $br$: $\tfrac35 \cdot \tfrac24 + \tfrac25 \cdot \tfrac34 = \tfrac{6}{20} + \tfrac{6}{20} = \tfrac35 = 0{,}6$.</p>
+                <p>Con reimmissione: $2 \cdot \tfrac35 \cdot \tfrac25 = \tfrac{12}{25} = 0{,}48$. <span class="b-res">Senza reimmissione «diversi» è più probabile.</span> La prima pallina manca nell’urna, e l’altro colore diventa relativamente più frequente.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · TABELLA A DOPPIA ENTRATA</div>
+            <div class="b-text"><p>Su 200 studentesse e studenti, 80 abitano fuori città ($A$), di questi 60 vanno in autobus ($B$). Degli altri, 30 vanno in autobus.
+                Costruisci la tabella a doppia entrata e determina $P(B)$ e $P(\overline{A} \cap \overline{B})$ per una persona scelta a caso.</p></div>
+            <div class="b-sol"><div class="b-table-wrap"><table class="b-table" style="min-width:0"><tr><th></th><th>$B$</th><th>$\overline{B}$</th><th>$\Sigma$</th></tr>
+                <tr><th>$A$</th><td>60</td><td>20</td><td>80</td></tr><tr><th>$\overline{A}$</th><td>30</td><td>90</td><td>120</td></tr><tr><th>$\Sigma$</th><td>90</td><td>110</td><td>200</td></tr></table></div>
+                <p><span class="b-res">$P(B) = \tfrac{90}{200} = 0{,}45$ e $P(\overline{A} \cap \overline{B}) = \tfrac{90}{200} = 0{,}45$.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · COMPLETARE TABELLE A DOPPIA ENTRATA</div>
+        <p class="b-help" style="margin:0 0 12px">Tre valori sono dati; completa le caselle mancanti con le somme di righe e colonne. «Nuova tabella» crea un nuovo esercizio.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Si lanciano una moneta e un dado. Qual è la probabilità di ottenere testa e un punteggio pari?</p></div>
+            <div class="b-sol"><p>Percorso testa, pari: $\tfrac12 \cdot \tfrac12 = \tfrac14$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un’urna contiene 4 palline rosse e 6 bianche. Se ne estraggono due senza reimmissione. Calcola $P(\text{due rosse})$ e $P(\text{almeno una bianca})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{4}{10} \cdot \tfrac39 = \tfrac{12}{90} = \tfrac{2}{15} \approx 0{,}133$. Almeno una bianca è l’evento contrario: $1 - \tfrac{2}{15} = \tfrac{13}{15} \approx 0{,}867$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Da un’urna con 2 palline rosse e 3 blu si estrae tre volte con reimmissione. Qual è la probabilità di estrarre esattamente due palline rosse?</p></div>
+            <div class="b-sol"><p>Tre percorsi $rrb$, $rbr$, $brr$, ciascuno con $\left(\tfrac25\right)^2 \cdot \tfrac35 = \tfrac{12}{125}$. In tutto $\tfrac{36}{125} = 0{,}288$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Completa la tabella a doppia entrata con $P(A) = 0{,}4$, $P(B) = 0{,}3$ e $P(A \cap B) = 0{,}1$.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}3$, $P(\overline{A} \cap B) = 0{,}2$, $P(\overline{A} \cap \overline{B}) = 0{,}6 - 0{,}2 = 0{,}4$; somme marginali $P(\overline{A}) = 0{,}6$, $P(\overline{B}) = 0{,}7$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dall’urna con tre palline rosse e due blu si estrae senza reimmissione finché esce la prima pallina blu. Con quale probabilità si estrae esattamente tre volte?
+            Con quale probabilità bastano al massimo due estrazioni?</p></div>
+            <div class="b-sol"><p>Esattamente tre estrazioni significa $rrb$: $\tfrac35 \cdot \tfrac24 \cdot \tfrac23 = \tfrac{12}{60} = \tfrac15$. Al massimo due: $b$ oppure $rb$, cioè $\tfrac25 + \tfrac35 \cdot \tfrac24 = \tfrac25 + \tfrac{3}{10} = \tfrac{7}{10}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="4/9" data-ph="P ="><p class="b-q-text">Da 5 palline rosse e 5 blu se ne estraggono due senza reimmissione. Quanto vale $P(\text{due dello stesso colore})$?</p><div class="b-sol"><p>$2 \cdot \tfrac{5}{10} \cdot \tfrac49 = \tfrac{40}{90} = \tfrac49 \approx 0{,}444$</p></div></div>
+        <div class="b-q" data-ans="0,579" data-ph="P ="><p class="b-q-text">Si lancia un dado tre volte. Qual è la probabilità di nessun 6 (tre decimali)?</p><div class="b-sol"><p>$\left(\tfrac56\right)^3 = \tfrac{125}{216} \approx 0{,}579$</p></div></div>
+        <div class="b-q" data-ans="0,35" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}6$, $P(B) = 0{,}5$, $P(A \cap B) = 0{,}45$. Quanto vale $P(\overline{A} \cap \overline{B})$?</p><div class="b-sol"><p>$P(A \cup B) = 0{,}65$, quindi $P(\overline{A} \cap \overline{B}) = 1 - 0{,}65 = 0{,}35$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Tecniche di conteggio" data-toc-k="3" data-toc-short="3 Conteggio">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 3</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">3</span>Tecniche di conteggio</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un lucchetto per bici ha tre rotelle con dieci cifre ciascuna: $10 \cdot 10 \cdot 10 = 1000$ combinazioni. Per il lotto tedesco «6 su 49» nessuno disegnerebbe più un albero con 49 rami
+                al primo nodo. Ma per le probabilità di Laplace basta <b>contare</b>, e ci si riesce con poche regole.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · CONTARE NEL MODELLO DELL’URNA</div>
+                <div class="b-text">
+                    <p><b>Regola del prodotto:</b> se un procedimento ha $k$ stadi con $n_1, n_2, \ldots, n_k$ possibilità, ci sono $n_1 \cdot n_2 \cdot \ldots \cdot n_k$ esiti.</p>
+                    <p>Da un’urna con $n$ palline distinguibili si estrae $k$ volte:</p>
+                    <ul>
+                        <li>con reimmissione, con ordine: $n^k$</li>
+                        <li>senza reimmissione, con ordine: $n \cdot (n - 1) \cdot \ldots \cdot (n - k + 1) = \dfrac{n!}{(n - k)!}$</li>
+                        <li>senza reimmissione, senza ordine: $\dbinom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$ (coefficiente binomiale, si legge «$n$ su $k$»)</li>
+                    </ul>
+                    <p><b>Fattoriale:</b> $n! = 1 \cdot 2 \cdot \ldots \cdot n$ è il numero di ordinamenti di $n$ oggetti; $0! = 1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Perché dividere per $k!$?</b> Ogni scelta di $k$ palline compare tra le estrazioni ordinate esattamente $k!$ volte, in ognuno dei suoi ordini.</p>
+            <p class="b-note"><b>Simmetria:</b> $\binom{n}{k} = \binom{n}{n - k}$, perché chi sceglie $k$ palline fissa nello stesso momento le $n - k$ che restano.</p>
+            <p class="b-note"><b>Calcolatrice:</b> il coefficiente binomiale si chiama spesso <code>nCr</code>, il fattoriale <code>n!</code>. Già $70!$ è maggiore di $10^{100}$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · L’URNA</div>
+        <p class="b-help" style="margin:0 0 12px">Scegli il numero di palline e di estrazioni, con o senza ordine e reimmissione. Il widget mostra la formula, il numero e, con numeri piccoli, tutti gli esiti.</p>
+        <div data-widget="urne" data-n="5" data-k="3" data-ord="0" data-rep="0"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 5 · LOTTO 6 SU 49</div>
+            <div class="b-text"><p>Quante giocate ci sono? Qual è la probabilità di sei numeri giusti, e quale di esattamente tre?</p></div>
+            <div class="b-sol"><p>Senza reimmissione, senza ordine: $\binom{49}{6} = 13\,983\,816$ giocate equiprobabili, quindi $P(6\ \text{giusti}) = \tfrac{1}{13\,983\,816} \approx 7{,}2 \cdot 10^{-8}$.</p>
+                <p>Esattamente tre giusti: 3 dei 6 numeri estratti e 3 degli altri 43, $\binom63 \cdot \binom{43}{3} = 20 \cdot 12\,341 = 246\,820$ giocate.
+                    <span class="b-res">$P = \tfrac{246\,820}{13\,983\,816} \approx 0{,}0177$, cioè circa una giocata su 57.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 6 · IL PROBLEMA DEI COMPLEANNI</div>
+            <div class="b-text"><p>In una classe ci sono 23 persone. Qual è la probabilità che almeno due compiano gli anni lo stesso giorno? Calcola con 365 giorni equiprobabili.</p></div>
+            <div class="b-sol"><p>Evento contrario «tutti diversi»: ordinato senza reimmissione, $365 \cdot 364 \cdot \ldots \cdot 343$ casi favorevoli su $365^{23}$ esiti possibili.</p>
+                <p>$P(\text{tutti diversi}) = \dfrac{365!}{342! \cdot 365^{23}} \approx 0{,}4927$, quindi <span class="b-res">$P(\text{almeno due uguali}) \approx 0{,}5073$.</span> Già con 23 persone si supera il $50\,\%$, perché ci sono $\binom{23}{2} = 253$ coppie.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · IL PROBLEMA DEI COMPLEANNI</div>
+        <p class="b-help" style="margin:0 0 12px">Regola il numero di persone. La curva mostra la probabilità di almeno un compleanno doppio, la simulazione la verifica con mille classi.</p>
+        <div data-widget="geburtstag" data-n="23"></div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Quanti PIN di quattro cifre ci sono? Quanti di essi hanno quattro cifre diverse?</p></div>
+            <div class="b-sol"><p>$10^4 = 10\,000$; con cifre diverse $10 \cdot 9 \cdot 8 \cdot 7 = 5040$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>In quanti modi sei persone possono mettersi in fila?</p></div>
+            <div class="b-sol"><p>$6! = 720$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Tra 20 persone si sceglie una squadra di tre. Quante squadre ci sono? Quante possibilità ci sono se i tre ricoprono i ruoli di presidente, vicepresidente e tesoriere?</p></div>
+            <div class="b-sol"><p>Senza ordine $\binom{20}{3} = 1140$; con i ruoli l’ordine conta: $20 \cdot 19 \cdot 18 = 6840 = 3! \cdot 1140$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Nello skat si ricevono 10 delle 32 carte. Qual è la probabilità di ricevere tutti e quattro i fanti?</p></div>
+            <div class="b-sol"><p>$\dfrac{\binom44 \cdot \binom{28}{6}}{\binom{32}{10}} = \dfrac{376\,740}{64\,512\,240} \approx 0{,}0058$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dimostra contando: $\binom{n}{k} = \binom{n - 1}{k - 1} + \binom{n - 1}{k}$ per $1 \le k \le n - 1$. Che cosa c’entra con il triangolo di Tartaglia?</p></div>
+            <div class="b-sol"><p>Contrassegna una delle $n$ palline. Le scelte di $k$ palline o la contengono (allora mancano $k - 1$ delle restanti $n - 1$: $\binom{n - 1}{k - 1}$) o non la contengono (tutte le $k$ tra le restanti: $\binom{n - 1}{k}$).
+                Nel triangolo di Tartaglia è la regola: ogni numero è la somma dei due che gli stanno sopra.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="35" data-ph="Numero"><p class="b-q-text">Quanto vale $\binom73$?</p><div class="b-sol"><p>$\tfrac{7 \cdot 6 \cdot 5}{3!} = 35$</p></div></div>
+        <div class="b-q" data-ans="336" data-ph="Numero"><p class="b-q-text">In quanti modi si possono appendere 3 quadri su 8 uno accanto all’altro su una parete?</p><div class="b-sol"><p>Con ordine, senza ripetizione: $8 \cdot 7 \cdot 6 = 336$</p></div></div>
+        <div class="b-q" data-ans="15/28" data-ph="P ="><p class="b-q-text">Da 5 palline rosse e 3 blu se ne estraggono 3 senza reimmissione. Quanto vale $P(\text{esattamente due rosse})$?</p><div class="b-sol"><p>$\dfrac{\binom52 \cdot \binom31}{\binom83} = \dfrac{30}{56} = \dfrac{15}{28} \approx 0{,}536$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un test ha 5 domande con 4 risposte ciascuna, di cui esattamente una è giusta. Con quale probabilità si fa tutto giusto tirando a indovinare? Con quale almeno una risposta giusta?</p></div>
+            <div class="b-sol"><p>$\left(\tfrac14\right)^5 = \tfrac{1}{1024} \approx 0{,}001$. Almeno una giusta: $1 - \left(\tfrac34\right)^5 = 1 - \tfrac{243}{1024} = \tfrac{781}{1024} \approx 0{,}763$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Collegare con la biologia:</b> due genitori sono eterozigoti $Aa$ per un carattere ereditario recessivo. Ogni figlio riceve da ciascun genitore l’allele $a$ con probabilità $\tfrac12$.
+            Con quale probabilità nasce un figlio $aa$? Con quale probabilità, su tre figli, almeno uno è $aa$?</p></div>
+            <div class="b-sol"><p>$P(aa) = \tfrac12 \cdot \tfrac12 = \tfrac14$. Con tre figli, tramite l’evento contrario: $1 - \left(\tfrac34\right)^3 = \tfrac{37}{64} \approx 0{,}578$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quanti esiti diversi ha il lancio di tre dadi distinguibili? Qual è la probabilità che i tre punteggi siano diversi?</p></div>
+            <div class="b-sol"><p>$6^3 = 216$ esiti; diversi $6 \cdot 5 \cdot 4 = 120$, quindi $\tfrac{120}{216} = \tfrac59 \approx 0{,}556$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un fornitore afferma che in una scatola di 20 apparecchi ce ne sono al massimo 2 difettosi. Controlli 4 apparecchi scelti a caso e non ne trovi nessuno difettoso.
+            Con quale probabilità si ha questo esito se ce ne sono davvero esattamente 2 difettosi? Che cosa dice questo sull’affermazione?</p></div>
+            <div class="b-sol"><p>Senza reimmissione: $\dfrac{\binom{18}{4}}{\binom{20}{4}} = \dfrac{3060}{4845} \approx 0{,}632$. L’esito è quindi del tutto compatibile con l’affermazione, ma non la dimostra.
+                Come si prendono decisioni del genere in modo rigoroso lo imparerai nella statistica inferenziale della 12ª classe.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: la partita interrotta" data-toc-k="X" data-toc-short="Pascal e Fermat">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">STORIA</span></div>
+    <h2>La partita interrotta</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Nell’estate del 1654 due francesi si scrissero lettere su una questione che i giocatori discutevano da secoli: due giocatori puntano 32 pistole (monete d’oro) ciascuno. Chi vince per primo
+                tre round si prende tutte e 64. Sul $2:1$ la partita deve essere interrotta. Come si divide equamente la posta?</p>
+            <p>Proposte precedenti, come quella di Luca Pacioli del 1494, dividevano in base ai round già vinti, cioè $2:1$. Blaise Pascal e Pierre de Fermat guardarono invece <b>in avanti</b>:
+                se chi è in vantaggio vince il round successivo, ottiene 64; se lo perde, si è sul $2:2$ e ciascuno ha la stessa possibilità, cioè 32. Con $\tfrac12$ per ciascun caso gli spettano $\tfrac12 \cdot 64 + \tfrac12 \cdot 32 = 48$ pistole, all’altro 16.</p>
+            <p>Fermat fece il calcolo in un altro modo, contando: al più dopo altri due round tutto è deciso. Le quattro prosecuzioni equiprobabili sono $AA$, $AB$, $BA$, $BB$; solo con $BB$ vince chi è in svantaggio.
+                Chi è in vantaggio riceve quindi $\tfrac34$ della posta. Entrambe le strade portano a $48:16$. Con questo carteggio comincia il calcolo delle probabilità come matematica.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> lettera di Blaise Pascal a Pierre de Fermat del 29 luglio 1654, con esattamente questo esempio (32 pistole, tre round vinti).</p>
+            <p class="b-note"><b>Verifica:</b> punteggio $2:0$ con tre round da vincere. Mostra con il conteggio di Fermat (fino a tre altri round) che a chi è in vantaggio spettano i $\tfrac78$.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>TRE APPROCCI</h4><p>Frequenza relativa come stima; Laplace $\tfrac{|E|}{|\Omega|}$ con esiti equiprobabili; assiomi da (K1) a (K3) di Kolmogorov.</p></div>
+        <div><p>Puntina: $h_{400} = 0{,}62$; somma dei punti 7: $\tfrac{6}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>REGOLE DI CALCOLO</h4><p>$P(\overline{E}) = 1 - P(E)$; teorema della somma $P(A \cup B) = P(A) + P(B) - P(A \cap B)$.</p></div>
+        <div><p>Cuori o fante: $\tfrac{8 + 4 - 1}{32} = \tfrac{11}{32}$</p></div></div>
+    <div class="b-rueck"><div><h4>REGOLE DEI PERCORSI</h4><p>Moltiplicare lungo un percorso, sommare i percorsi di un evento; senza reimmissione cambiano i rami.</p></div>
+        <div><p>Due colori diversi: $\tfrac35 \cdot \tfrac24 + \tfrac25 \cdot \tfrac34 = \tfrac35$</p></div></div>
+    <div class="b-rueck"><div><h4>TABELLA A DOPPIA ENTRATA</h4><p>Quattro probabilità di intersezione, somme marginali, in basso a destra $1$.</p></div>
+        <div><p>$P(\overline{A} \cap \overline{B}) = 1 - P(A \cup B)$</p></div></div>
+    <div class="b-rueck"><div><h4>CONTEGGIO</h4><p>$n^k$; $\tfrac{n!}{(n - k)!}$; $\binom{n}{k} = \tfrac{n!}{k!\,(n - k)!}$; $n!$ ordinamenti.</p></div>
+        <div><p>Lotto: $\binom{49}{6} = 13\,983\,816$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="1/12" data-ph="P ="><p class="b-q-text">Due dadi: qual è la probabilità che la somma dei punti sia 4?</p><div class="b-sol"><p>$(1, 3), (2, 2), (3, 1)$: $\tfrac{3}{36} = \tfrac{1}{12}$</p></div></div>
+            <div class="b-q" data-ans="15" data-ph="Numero"><p class="b-q-text">Quanto vale $\binom62$?</p><div class="b-sol"><p>$\tfrac{6 \cdot 5}{2} = 15$</p></div></div>
+            <div class="b-q" data-ans="0,8" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}7$, $P(B) = 0{,}4$, $P(A \cap B) = 0{,}3$. Quanto vale $P(A \cup B)$?</p><div class="b-sol"><p>$0{,}7 + 0{,}4 - 0{,}3 = 0{,}8$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="8/15" data-ph="P ="><p class="b-q-text">Da 7 palline rosse e 3 blu se ne estraggono due senza reimmissione. Quanto vale $P(\text{almeno una blu})$?</p><div class="b-sol"><p>$1 - \tfrac{7}{10} \cdot \tfrac69 = 1 - \tfrac{42}{90} = \tfrac{8}{15} \approx 0{,}533$</p></div></div>
+            <div class="b-q" data-ans="0,706" data-tol="0.001" data-ph="P ="><p class="b-q-text">Qual è la probabilità di almeno un compleanno doppio tra 30 persone (tre decimali)?</p><div class="b-sol"><p>$1 - \tfrac{365 \cdot 364 \cdot \ldots \cdot 336}{365^{30}} \approx 1 - 0{,}294 = 0{,}706$</p></div></div>
+            <div class="b-q" data-ans="0,0177" data-tol="0.0001" data-ph="P ="><p class="b-q-text">Qual è nel lotto «6 su 49» la probabilità di esattamente tre numeri giusti (quattro decimali)?</p><div class="b-sol"><p>$\tfrac{20 \cdot 12\,341}{13\,983\,816} \approx 0{,}0177$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-wahrscheinlichkeitsbegriff.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">APPROCCI ALLA PROBABILITÀ</span><span class="b-lab-what">20 esercizi con soluzioni</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-mehrstufig.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESPERIMENTI A PIÙ STADI</span><span class="b-lab-what">20 esercizi con soluzioni</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-abzaehlen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TECNICHE DI CONTEGGIO</span><span class="b-lab-what">20 esercizi con soluzioni</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">IL GIOCO DEI DADI</span><span class="b-lab-what">Diagrammi ad albero e regole dei percorsi</span></span></a>
+        <a class="b-lab" data-lab="binomischeslabor" href="../../binomischeslabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DEI BINOMI</span><span class="b-lab-what">Esplorare i coefficienti binomiali</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Gymnasium, 11ª classe, Leistungskurs · Area di apprendimento 4 secondo il programma di matematica del Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le illustrazioni sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-it/stochastik.js"></script>
+<script src="../../js/buch-gy11lk-stoch.js"></script>
+<script src="../../js/buch-it/gy11lk-stoch.js"></script>
+</body>
+</html>

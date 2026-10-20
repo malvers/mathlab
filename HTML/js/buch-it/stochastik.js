@@ -121,6 +121,9 @@ window.BuchIT && BuchIT.add('stochastik', {
         '$n$ (Zeile)': '$n$ (riga)', '$k$ (Stelle)': '$k$ (posizione)', 'Pascalsches Dreieck bis zur Zeile 10': 'Triangolo di Tartaglia fino alla riga 10',
 
         // book it-7 mathegy11lk-it:
+        // urne (chapter 4.1; the same widget as the Spanish mathegy8-es block)
+        'Kugeln $n$': 'Palline $n$', 'Ziehungen $k$': 'Estrazioni $k$', 'n kleiner': 'n minore', 'n größer': 'n maggiore', 'k kleiner': 'k minore', 'k größer': 'k maggiore',
+        'mit Reihenfolge': 'con ordine', 'ohne Reihenfolge': 'senza ordine', 'Reihenfolge': 'Ordine', 'Zurücklegen': 'Reimmissione', 'Einmal ziehen': 'Estrai una volta', 'URNE': 'URNA',
 
         // book it-8 mathegy12-it:
         // signifikanztest: the side of the test (lb6, abi)
@@ -236,6 +239,18 @@ window.BuchIT && BuchIT.add('stochastik', {
         ['Die Mitte der Zeile: $', 'Il centro della riga: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ qui è l’immagine speculare di se stesso.'],
 
         // book it-7 mathegy11lk-it:
+        // urne
+        ['Variation mit Wiederholung', 'Disposizioni con ripetizione'], ['Permutation (alle Kugeln, mit Reihenfolge)', 'Permutazioni (tutte le palline, con ordine)'],
+        ['Variation ohne Wiederholung', 'Disposizioni senza ripetizione'], ['Kombination ohne Wiederholung', 'Combinazioni senza ripetizione'],
+        ['Kombination mit Wiederholung', 'Combinazioni con ripetizione'], ['</b> · Beispiel: ', '</b> · esempio: '], ['Anzahl der Möglichkeiten: ', 'Numero delle possibilità: '],
+        ['Gezogen: <b>', 'Estratto: <b>'], ['Ergebnisse als Tupel $(\\ldots)$: Die Reihenfolge zählt.', 'Esiti come n-uple $(\\ldots)$: l’ordine conta.'],
+        ['Ergebnisse als Mengen $\\{\\ldots\\}$: Die Reihenfolge zählt nicht.', 'Esiti come insiemi $\\{\\ldots\\}$: l’ordine non conta.'],
+        [' Genau dafür gibt es die Formel.', ' Proprio per questo c’è la formula.'],
+        // urne: the pieces of the examples that the rules below translate as a whole (for tools/buch-en/check.mjs)
+        ['ein Zahlenschloss mit ', 'un lucchetto a combinazione con '], [' Rädern zu je ', ' rotelle da '], [' Personen stellen sich in eine Reihe', ' persone si mettono in fila'],
+        ['ein Siegerpodest: ', 'un podio: '], [' Startern auf die Plätze 1 bis ', ' concorrenti ai posti da 1 a '], ['Lotto: ', 'lotto: '],
+        [' Zahlen, die Reihenfolge der Ziehung zählt nicht', ' numeri, l’ordine dell’estrazione non conta'], [' Kugeln Eis aus ', ' palline di gelato da '],
+        [' Sorten, eine Sorte darf mehrfach vorkommen', ' gusti, un gusto può ripetersi'], [' Möglichkeiten sind zu viele zum Auflisten.', ' possibilità sono troppe per elencarle.'],
 
         // book it-8 mathegy12-it:
 
@@ -294,6 +309,14 @@ window.BuchIT && BuchIT.add('stochastik', {
         [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, perché sceglierne $' + k + '$ equivale a lasciarne fuori $' + r + '$.'],
 
         // book it-7 mathegy11lk-it:
+        // urne: outcomes "(1; 2)" and "{1; 2}" → "(1, 2)", "{1, 2}"; the examples with their numbers (singular for 1)
+        [/[({]\d+(?:; \d+)+[)}]/g, m => m.replace(/; /g, ', ')],
+        [/ein Zahlenschloss mit (\d+) Rädern zu je (\d+) Ziffern/g, (m, k, n) => 'un lucchetto a combinazione con ' + k + (k === '1' ? ' rotella' : ' rotelle') + ' da ' + n + ' cifre'],
+        [/(\d+) Personen stellen sich in eine Reihe/g, '$1 persone si mettono in fila'],
+        [/ein Siegerpodest: (\d+) von (\d+) Startern auf die Plätze 1 bis (\d+)/g, (m, k, n, p) => 'un podio: ' + k + ' su ' + n + ' concorrenti ' + (p === '1' ? 'al 1º posto' : 'ai posti da 1 a ' + p)],
+        [/Lotto: (\d+) aus (\d+) Zahlen, die Reihenfolge der Ziehung zählt nicht/g, 'lotto: $1 numeri su $2, l’ordine dell’estrazione non conta'],
+        [/(\d+) Kugeln Eis aus (\d+) Sorten, eine Sorte darf mehrfach vorkommen/g, (m, k, n) => k + (k === '1' ? ' pallina' : ' palline') + ' di gelato da ' + n + ' gusti, un gusto può ripetersi'],
+        [/(\d{1,3}(?:\.\d{3})*) Möglichkeiten sind zu viele zum Auflisten\./g, '$1 possibilità sono troppe per elencarle.'],
 
         // book it-8 mathegy12-it:
 
