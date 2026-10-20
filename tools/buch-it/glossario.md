@@ -351,6 +351,28 @@ Package IT1, 18.10.2026: decisions made while translating BGY 11; nothing above 
 
 <!-- it-6: terms of this book only, write right below this line -->
 
+Package it-6 (Nalli), 20.10.2026: decisions made while translating GY 11 (Grundkurs); nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Grundkurs / Leistungskurs | corso base / corso avanzato | start page: "come corso base (Grundkurs) o come corso avanzato (Leistungskurs)" |
+| Jahrgangsstufe 11, Kurshalbjahr 11/I | 11ª classe, semestre 11/I | |
+| Differentialquotient | derivata (il limite del rapporto incrementale) | "quoziente differenziale" is not used in Italian schools |
+| h-Methode | metodo dell’incremento $h$ | 1.2 |
+| Ableitungstrainer | allenamento sulle derivate | chip ALLENAMENTO |
+| äußere / innere Funktion, verkettete Funktion | funzione esterna / interna, funzione composta | widget kettenregel |
+| Lücke (rational function) | buco (discontinuità eliminabile) | button "Buco" in bruchfunktion |
+| Vielfachheit; einfach, doppelt, dreifach (zero) | molteplicità; semplice, doppio, triplo … | widget ganzrational |
+| Typ einer Matrix, verkettet, Drehmatrix | dimensione, compatibili, matrice di rotazione | 2; the identity matrix is $I$ |
+| Zeilen $Z_1$, $Z_2$ (row operations) | righe $R_1$, $R_2$ | 2, 3.2 |
+| Fahnenstange | asta della bandiera | 3.3 |
+| parameterfreie Form / Koordinatenform (plane) | equazione cartesiana (forma senza parametri) | 3.3 |
+| Glücksrad rot / grün, paths RG | rosso / verde, paths RV | 4.1 |
+| Pascalsches Dreieck | triangolo di Tartaglia | 4.2, once "fuori dall’Italia lo si chiama triangolo di Pascal" |
+| Ratetest | test a crocette | 4.2 |
+| Treffer / Niete paths TTNN | SSII (S successo, I insuccesso) | as in mathe12-it |
+| Galtonbrett | macchina di Galton | as in section 5 |
+
 ## mathegy11lk-it
 
 <!-- it-7: terms of this book only, write right below this line -->
