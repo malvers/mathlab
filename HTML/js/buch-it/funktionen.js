@@ -91,6 +91,10 @@ window.BuchIT && BuchIT.add('funktionen', {
         'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Funzione polinomiale con zeri trascinabili',
 
         // book it-5 mathefos12-it:
+        // ganzrational (also in FOS 11, GY 11, GY 11 LK)
+        'Vielfachheit': 'Molteplicità', 'Vielfachheit kleiner': 'Molteplicità minore', 'Vielfachheit größer': 'Molteplicità maggiore',
+        'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Trascina gli zeri lungo l’asse $x$. La molteplicità 0 elimina il fattore lineare.',
+        'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Funzione polinomiale con zeri trascinabili',
 
         // book it-6 mathegy11-it:
         // ganzrational
@@ -215,6 +219,16 @@ window.BuchIT && BuchIT.add('funktionen', {
         ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Decide solo l’addendo con la potenza più alta: $'],
 
         // book it-5 mathefos12-it:
+        // ganzrational (also in FOS 11, GY 11, GY 11 LK)
+        [': einfach → ', ': semplice → '], [': doppelt → ', ': doppio → '], [': dreifach → ', ': triplo → '], [': vierfach → ', ': quadruplo → '],
+        [': fünffach → ', ': quintuplo → '], [': sechsfach → ', ': sestuplo → '], [': siebenfach → ', ': settuplo → '], [': achtfach → ', ': ottuplo → '],
+        [': neunfach → ', ': nonuplo → '],
+        ['Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse', 'cambio di segno, il grafico <b>attraversa</b> l’asse $x$'],
+        ['Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)', 'cambio di segno, il grafico attraversa l’asse $x$ <b>appiattendosi</b> (flesso a tangente orizzontale)'],
+        ['kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse', 'nessun cambio di segno, il grafico <b>tocca</b> l’asse $x$'],
+        ['$ · Grad $', '$ · grado $'], ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'Per $x \\to +\\infty$ $f(x) \\to '],
+        ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$; per $x \\to -\\infty$ $f(x) \\to '],
+        ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Decide solo l’addendo con la potenza più alta: $'],
 
         // book it-6 mathegy11-it:
         // ganzrational ("$x = 1$: doppelt → …": a double zero)
