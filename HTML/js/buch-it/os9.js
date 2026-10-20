@@ -115,13 +115,15 @@ window.BuchIT && BuchIT.add('os9', {
     rule: [
         // book it-19 mathe9-it:
         // aria labels with a number in the middle
-        [/^Steigungsdreieck einer Straße mit (\d+) Prozent Steigung$/, 'Triangolo della pendenza di una strada con pendenza del $1 per cento'],
+        [/^Steigungsdreieck einer Straße mit (\d+) Prozent Steigung$/, 'Triangolo della pendenza di una strada: pendenza $1 per cento'],
         [/^Dreieck mit den Seiten (\d+), (\d+) und (\d+)$/, 'Triangolo con i lati $1, $2 e $3'],
         [/^Querschnitt eines Satteldachs mit Neigung (\d+) Grad$/, 'Sezione di un tetto a due falde con inclinazione di $1 gradi'],
         // parabelos9: "Scheitelpunkt (weiß)" and the zeros "genau eine, …" with their context (rules run before the phrases)
         [/\(weiß\)/g, '(bianco)'], [/Nullstellen \(türkis\): genau eine, /g, 'Zeri (turchese): esattamente uno, '],
         // quadglos9: "… > 0$ ist: " after the discriminant
         [/( &gt; 0)\$ ist: /g, '$1$: '],
+        // dachos9: the table cell (a bare word would also hit other labels)
+        [/<td>Dachfläche<\/td>/g, '<td>Superficie del tetto</td>'],
 
     ]
 });
