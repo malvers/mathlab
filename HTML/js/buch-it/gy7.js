@@ -17,7 +17,7 @@ window.BuchIT && BuchIT.add('gy7', {
         'Quader': 'Parallelepipedo', 'Dreiecksprisma': 'Prisma triangolare', 'Sechseckprisma': 'Prisma esagonale', 'Quadratische Pyramide': 'Piramide quadrangolare',
         'Quadr. Pyramide': 'Piramide quadr.', 'Dreieckspyramide': 'Piramide triangolare', 'Pyramidenstumpf': 'Tronco di piramide', 'Tetraeder': 'Tetraedro',
         'Oktaeder': 'Ottaedro', 'Dodekaeder': 'Dodecaedro', 'Ikosaeder': 'Icosaedro', 'Körper in 3D': 'Solido in 3D', 'Ziehen zum Drehen': 'Trascina per ruotare',
-        'Von vorn': 'Ricomincia', 'Alle Schritte': 'Tutti i passi', 'weniger': 'meno', 'mehr': 'più',
+        'Von vorn': 'Da capo', 'Alle Schritte': 'Tutti i passi', 'weniger': 'meno', 'mehr': 'più',
         // titelbildgy7
         'Titelbild: ein Kreis mit rechtwinkligem Dreieck über dem Durchmesser, eine Pyramide im Schrägbild, ein Ikosaeder, ein Kreisdiagramm und eine Zahlengerade mit einer Zahl und ihrer Gegenzahl':
             'Illustrazione di copertina: una circonferenza con un triangolo rettangolo sul diametro, una piramide in assonometria cavaliera, un icosaedro, un diagramma circolare e una retta dei numeri con un numero e il suo opposto',
