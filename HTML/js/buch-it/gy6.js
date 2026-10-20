@@ -27,7 +27,7 @@ window.BuchIT && BuchIT.add('gy6', {
         'in $\\mathbb{N}$ (und damit auch in $\\mathbb{Q}^+$)': 'in $\\mathbb{N}$ (e quindi anche in $\\mathbb{Q}^+$)',
         'nur in $\\mathbb{Q}^+$': 'solo in $\\mathbb{Q}^+$',
         // bruchop6
-        'mal': 'per', 'durch': 'diviso', 'Rechenart': 'Operazione',
+        'plus': 'più', 'minus': 'meno', 'mal': 'per', 'durch': 'diviso', 'Rechenart': 'Operazione',
         'Zähler 1': 'Numeratore 1', 'Nenner 1': 'Denominatore 1', 'Zähler 2': 'Numeratore 2', 'Nenner 2': 'Denominatore 2',
         'erster Zähler': 'primo numeratore', 'erster Nenner': 'primo denominatore', 'zweiter Zähler': 'secondo numeratore', 'zweiter Nenner': 'secondo denominatore',
         'Das Ergebnis wäre kleiner als null.': 'Il risultato sarebbe minore di zero.',
