@@ -11,6 +11,8 @@
  * strings the widgets write.
  * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
  * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
+ * Round 3 (20.10.2026): eleven books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('lgs', {
     word: {
@@ -29,6 +31,7 @@ window.BuchIT && BuchIT.add('lgs', {
         // book it-6 mathegy11-it:
 
         // book it-7 mathegy11lk-it:
+        // book it-13 mathegy8-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -57,6 +60,7 @@ window.BuchIT && BuchIT.add('lgs', {
         // book it-6 mathegy11-it:
 
         // book it-7 mathegy11lk-it:
+        // book it-13 mathegy8-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -71,5 +75,6 @@ window.BuchIT && BuchIT.add('lgs', {
         // book it-6 mathegy11-it:
 
         // book it-7 mathegy11lk-it:
+        // book it-13 mathegy8-it:
     ]
 });

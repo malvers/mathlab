@@ -9,6 +9,8 @@
  * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
  * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  * The Spanish file js/buch-es/zahlen.js shows which German strings the widgets write.
+ * Round 3 (20.10.2026): eleven books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('zahlen', {
     word: {
@@ -33,6 +35,9 @@ window.BuchIT && BuchIT.add('zahlen', {
         'Treppenhaus: Jeder der beiden Schalter kann die Lampe ein- und ausschalten. Sie leuchtet, wenn beide Schalter <b>gleich</b> stehen.':
             'Scale: ciascuno dei due interruttori può accendere e spegnere la lampadina. Si accende se i due interruttori sono nella <b>stessa</b> posizione.',
 
+        // book it-14 mathegy9-it:
+
+        // book it-15 mathegy10-it:
     },
     phrase: [
         // book it-4 mathefos11-it:
@@ -56,6 +61,9 @@ window.BuchIT && BuchIT.add('zahlen', {
         // schaltung: L is the lamp
         ['Term: $L = ', 'Espressione: $L = '], ['$ · jetzt: $a = ', '$ · ora: $a = '], ['$ → Lampe <b>', '$ → lampadina <b>'],
 
+        // book it-14 mathegy9-it:
+
+        // book it-15 mathegy10-it:
     ],
     rule: [
         // book it-4 mathefos11-it:
@@ -64,5 +72,8 @@ window.BuchIT && BuchIT.add('zahlen', {
         // schaltung: "Lampe <b>an</b>" / "<b>aus</b>" (the rules run before the pieces)
         [/Lampe <b>an<\/b>/g, 'Lampe <b>accesa</b>'], [/Lampe <b>aus<\/b>/g, 'Lampe <b>spenta</b>'],
 
+        // book it-14 mathegy9-it:
+
+        // book it-15 mathegy10-it:
     ]
 });

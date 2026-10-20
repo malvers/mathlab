@@ -9,6 +9,8 @@
  * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
  * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  * The Spanish file js/buch-es/finanz.js shows which German strings the widgets write.
+ * Round 3 (20.10.2026): eleven books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('finanz', {
     word: {
@@ -27,6 +29,13 @@ window.BuchIT && BuchIT.add('finanz', {
         'eingezahlt &nbsp;': 'versato &nbsp;', 'Zinsen (Kapital am Jahresende)': 'interessi (capitale a fine anno)',
         'Zinsen &nbsp;': 'interessi &nbsp;', 'Tilgung (zusammen: die Rate)': 'quota capitale (insieme: la rata)',
 
+        // book it-15 mathegy10-it:
+
+        // book it-17 mathe7-it:
+
+        // book it-18 mathe8-it:
+
+        // book it-20 mathe10-it:
     },
     phrase: [
         // book it-4 mathefos11-it:
@@ -43,11 +52,25 @@ window.BuchIT && BuchIT.add('finanz', {
         ['Die Rate sinkt, weil die Restschuld und damit die Zinsen sinken. Zinsen insgesamt: <b>',
             'La rata diminuisce perché diminuiscono il debito residuo e con esso gli interessi. Interessi in tutto: <b>'],
 
+        // book it-15 mathegy10-it:
+
+        // book it-17 mathe7-it:
+
+        // book it-18 mathe8-it:
+
+        // book it-20 mathe10-it:
     ],
     rule: [
         // book it-4 mathefos11-it:
         // slider values: "20 J." → "20 anni" (1 → "1 anno")
         [/^(\d+) J\.$/, (m, n) => n + (n === '1' ? ' anno' : ' anni')],
 
+        // book it-15 mathegy10-it:
+
+        // book it-17 mathe7-it:
+
+        // book it-18 mathe8-it:
+
+        // book it-20 mathe10-it:
     ]
 });

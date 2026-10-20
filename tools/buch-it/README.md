@@ -78,3 +78,41 @@ book; the brief is this README plus `tools/buch-es/auftrag.md` sections 1, 4 and
 6. **Report** at the end: branch, commits, check results (`check.mjs --lang it`, `encheck --poke`, `geo`, `fit`),
    German errors fixed, open questions. The orchestrator merges, adds the hub card with the Italian cover and pushes
    on Doc's word.
+
+## Round 3 (20.10.2026): the eleven remaining books, eleven local agents
+
+Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch" - the six agents of round 2 plus five new ones, one
+book each. The rules 1-6 of round 2 hold; the blocks are `it-10` … `it-20`.
+
+| Book | Agent | Worktree `.claude/worktrees/` | Branch | Port | Block |
+|---|---|---|---|---|---|
+| GY 5 `mathegy5` | Cornaro | `it3-cornaro` | `it-mathegy5` | 8805 | `it-10` |
+| GY 6 `mathegy6` | Montessori | `it3-montessori` | `it-mathegy6` | 8806 | `it-11` |
+| GY 7 `mathegy7` | Cristoforetti | `it3-cristoforetti` | `it-mathegy7` | 8807 | `it-12` |
+| GY 8 `mathegy8` | Nalli | `it3-nalli` | `it-mathegy8` | 8797 | `it-13` |
+| GY 9 `mathegy9` | Castelnuovo | `it3-castelnuovo` | `it-mathegy9` | 8795 | `it-14` |
+| GY 10 `mathegy10` | Cibrario | `it3-cibrario` | `it-mathegy10` | 8796 | `it-15` |
+| OS 6 `mathe6` | Montalcini | `it3-montalcini` | `it-mathe6` | 8808 | `it-16` |
+| OS 7 `mathe7` | Trotula | `it3-trotula` | `it-mathe7` | 8809 | `it-17` |
+| OS 8 `mathe8` | Pastori | `it3-pastori` | `it-mathe8` | 8798 | `it-18` |
+| OS 9 `mathe9` | Hack | `it3-hack` | `it-mathe9` | 8799 | `it-19` |
+| OS 10 `mathe10` | Gianotti | `it3-gianotti` | `it-mathe10` | 8800 | `it-20` |
+
+What round 2 taught us:
+
+- **Never a bare word `'Fehler'`** in a dictionary: it also hits the header button "Fehler melden" and the page never
+  finishes loading. Translate "Fehler" only inside a longer phrase or a rule with context.
+- **No bare phrase pieces** like `'Für $'`: they eat the start of other sentences (the schar note of BGY 13). Make every
+  piece long enough to be unique.
+- **`check.mjs --lang it` has blind spots:** labels passed to `B.seg`/`segBox` and German keys of the Italian
+  dictionaries count as Italian. After a chapter, run `dump.mjs` and look for German words in the widget output.
+- **Slow CDN:** `encheck`, `geo`, `fit` and `dump` wait for `networkidle` and time out when jsdelivr is slow. Use a copy
+  in your scratch folder that waits for `load` with a 90 s timeout; leave the tools in the repo as they are.
+- **`.b-box-title` is a flex box:** a long title with `$…$` cannot wrap and overflows at 390 px - shorten the Italian.
+- **Shared widgets:** the OS books load widgets of the GY books (`gy5` … `gy8`), and many books load `geometrie`, so two
+  agents may translate the same German string at the same time. Use the glossary terms; the orchestrator keeps one
+  copy when merging.
+- **Start pages:** the German start page gets "English edition", "Edición española" and "Edizione italiana" (add the
+  missing ones), the English one "Edición española" and "Edizione italiana", the Spanish one "Edizione italiana".
+- **Links to sister books** go to their Italian edition: after this round all 20 books exist in Italian.
+- "Oberschule" and "Gymnasium" stay as school names and are explained once on the start page.

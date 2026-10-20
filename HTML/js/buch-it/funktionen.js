@@ -11,6 +11,8 @@
  * strings the widgets write.
  * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
  * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
+ * Round 3 (20.10.2026): eleven books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('funktionen', {
     word: {
@@ -102,6 +104,17 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-8 mathegy12-it:
 
         // book it-9 mathegy12lk-it:
+        // book it-13 mathegy8-it:
+
+        // book it-14 mathegy9-it:
+
+        // book it-15 mathegy10-it:
+
+        // book it-18 mathe8-it:
+
+        // book it-19 mathe9-it:
+
+        // book it-20 mathe10-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -225,6 +238,17 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-8 mathegy12-it:
 
         // book it-9 mathegy12lk-it:
+        // book it-13 mathegy8-it:
+
+        // book it-14 mathegy9-it:
+
+        // book it-15 mathegy10-it:
+
+        // book it-18 mathe8-it:
+
+        // book it-19 mathe9-it:
+
+        // book it-20 mathe10-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -266,5 +290,16 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-8 mathegy12-it:
 
         // book it-9 mathegy12lk-it:
+        // book it-13 mathegy8-it:
+
+        // book it-14 mathegy9-it:
+
+        // book it-15 mathegy10-it:
+
+        // book it-18 mathe8-it:
+
+        // book it-19 mathe9-it:
+
+        // book it-20 mathe10-it:
     ]
 });

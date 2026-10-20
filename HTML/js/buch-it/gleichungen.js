@@ -11,6 +11,8 @@
  * strings the widgets write.
  * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
  * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
+ * Round 3 (20.10.2026): eleven books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('gleichungen', {
     word: {
@@ -28,6 +30,15 @@ window.BuchIT && BuchIT.add('gleichungen', {
         'durch eine negative Zahl: Das Zeichen dreht sich um!': 'per un numero negativo: il verso si inverte!',
         'Zahlenstrahl mit der Lösungsmenge': 'Retta dei numeri con l’insieme delle soluzioni', 'Probe': 'Prova', 'wahr': 'vera', 'falsch': 'falsa',
 
+        // book it-12 mathegy7-it:
+
+        // book it-13 mathegy8-it:
+
+        // book it-14 mathegy9-it:
+
+        // book it-17 mathe7-it:
+
+        // book it-18 mathe8-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -53,6 +64,15 @@ window.BuchIT && BuchIT.add('gleichungen', {
         ['Zieh die <b>Probe</b> über den Zahlenstrahl. $x = ', 'Trascina la <b>prova</b> lungo la retta dei numeri. $x = '], ['$ ist ', '$ è '],
         [': Die Zahl gehört zur Lösungsmenge.', ': il numero appartiene all’insieme delle soluzioni.'], [': Die Zahl gehört nicht dazu.', ': il numero non vi appartiene.'],
 
+        // book it-12 mathegy7-it:
+
+        // book it-13 mathegy8-it:
+
+        // book it-14 mathegy9-it:
+
+        // book it-17 mathe7-it:
+
+        // book it-18 mathe8-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -61,5 +81,14 @@ window.BuchIT && BuchIT.add('gleichungen', {
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
         // book it-4 mathefos11-it:
+        // book it-12 mathegy7-it:
+
+        // book it-13 mathegy8-it:
+
+        // book it-14 mathegy9-it:
+
+        // book it-17 mathe7-it:
+
+        // book it-18 mathe8-it:
     ]
 });

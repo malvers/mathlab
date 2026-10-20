@@ -1,4 +1,4 @@
-# Glossario — the Italian editions (BGY 11, 12, 13; round 2: FOS 11, FOS 12, GY 11, GY 11 LK, GY 12, GY 12 LK)
+# Glossario — the Italian editions (BGY 11, 12, 13; round 2: FOS 11, FOS 12, GY 11, GY 11 LK, GY 12, GY 12 LK; round 3: GY 5–10, OS 6–10)
 
 Package IT0, 18.10.2026. Every term of `tools/buch-es/glosario.md` that the three BGY books need, decided once in Italian
 for `mathe11-it`, `mathe12-it` and `mathe13-it` (sections 1–5 and the Spanish blocks es-1, es-2, es-3, folded in below).
@@ -523,3 +523,47 @@ Round 2, 20.10.2026 (Gianotti): decisions made while translating GY 12 LK; nothi
 | Mantel (Pyramide, Prisma) | superficie laterale | |
 | linksseitig / rechtsseitig / zweiseitig (widget signifikanztest) | sinistro / destro / bilaterale | running text: test sinistro / destro / bilaterale |
 | Konsultation, Generalprobe (online training) | consultazione, prova generale | |
+
+## mathegy5-it
+
+<!-- it-10: terms of this book only, write right below this line -->
+
+## mathegy6-it
+
+<!-- it-11: terms of this book only, write right below this line -->
+
+## mathegy7-it
+
+<!-- it-12: terms of this book only, write right below this line -->
+
+## mathegy8-it
+
+<!-- it-13: terms of this book only, write right below this line -->
+
+## mathegy9-it
+
+<!-- it-14: terms of this book only, write right below this line -->
+
+## mathegy10-it
+
+<!-- it-15: terms of this book only, write right below this line -->
+
+## mathe6-it
+
+<!-- it-16: terms of this book only, write right below this line -->
+
+## mathe7-it
+
+<!-- it-17: terms of this book only, write right below this line -->
+
+## mathe8-it
+
+<!-- it-18: terms of this book only, write right below this line -->
+
+## mathe9-it
+
+<!-- it-19: terms of this book only, write right below this line -->
+
+## mathe10-it
+
+<!-- it-20: terms of this book only, write right below this line -->
