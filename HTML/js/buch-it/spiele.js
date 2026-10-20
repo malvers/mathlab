@@ -13,6 +13,15 @@
 window.BuchIT && BuchIT.add('spiele', {
     word: {
         // book it-13 mathegy8-it:
+        // verteilung (Augensumme, Glücksrad, Zufallsgröße: js/buch-it/stochastik.js), and the module constants of spielstreuung that tools/buch-en/check.mjs reads for every page
+        'Differenz': 'Differenza', 'Maximum': 'Massimo', 'Anzahl Sechsen': 'Numero di sei',
+        'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Distribuzione di probabilità come diagramma a barre',
+        'Die 36 Ergebnisse zweier Würfel mit dem Wert der Zufallsgröße': 'I 36 esiti di due dadi con il valore della variabile aleatoria',
+        '2. Würfel →': '2° dado →',
+        'Münzwette': 'Scommessa sulla moneta', 'Los': 'Biglietto della lotteria',
+        'Einsatz 1 €. Wappen: 2 € zurück, Zahl: nichts.': 'Puntata 1 €. Testa: ti restituiscono 2 €, croce: niente.',
+        'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{10}$ gibt es 10 € zurück, sonst nichts.': 'Puntata 1 €. Con probabilità $\\tfrac{1}{10}$ ti restituiscono 10 €, altrimenti niente.',
+        'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{100}$ gibt es 100 € zurück, sonst nichts.': 'Puntata 1 €. Con probabilità $\\tfrac{1}{100}$ ti restituiscono 100 €, altrimenti niente.',
 
         // book it-15 mathegy10-it:
         // verteilung and the module constants of spielstreuung (reported for every page that loads the module)
@@ -40,6 +49,11 @@ window.BuchIT && BuchIT.add('spiele', {
     },
     phrase: [
         // book it-13 mathegy8-it:
+        // verteilung: "$X$ = die Summe der beiden Augenzahlen. Tippe auf ein Feld oder einen Wert."
+        ['die Summe der beiden Augenzahlen', 'la somma dei due punteggi'], ['der Abstand der beiden Augenzahlen, die größere minus die kleinere', 'la distanza tra i due punteggi, il maggiore meno il minore'],
+        ['die größere der beiden Augenzahlen', 'il maggiore dei due punteggi'], ['wie viele der beiden Würfel eine Sechs zeigen', 'quanti dei due dadi mostrano un sei'],
+        ['. Tippe auf ein Feld oder einen Wert.', '. Tocca una casella o un valore.'],
+        [' der 36 gleich wahrscheinlichen Ergebnisse gehören dazu. Alle Wahrscheinlichkeiten zusammen ergeben $1$.', ' dei 36 esiti ugualmente probabili ne fanno parte. Tutte le probabilità insieme danno $1$.'],
 
         // book it-15 mathegy10-it:
         // verteilung: "$X$ = die Summe der beiden Augenzahlen. Tippe auf ein Feld oder einen Wert."
@@ -68,6 +82,8 @@ window.BuchIT && BuchIT.add('spiele', {
     ],
     rule: [
         // book it-13 mathegy8-it:
+        // verteilung: one outcome takes the singular
+        [/· 1 der 36 gleich wahrscheinlichen Ergebnisse gehören dazu\./g, '· 1 dei 36 esiti ugualmente probabili ne fa parte.'],
 
         // book it-15 mathegy10-it:
         // verteilung: one outcome takes the singular
