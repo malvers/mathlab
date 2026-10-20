@@ -142,6 +142,8 @@ window.BuchIT && BuchIT.add('analysis', {
             'Tutte le rette passano per $(2, 1)$: per $x = 2$, $a$ sparisce. Il parametro è la pendenza, ma manca una retta: la verticale $x = 2$.',
         'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
             'La pendenza è sempre $0{,}5$: le rette sono parallele e non hanno nessun punto in comune. Il parametro le trasla.',
+        // kurve (abi.html): the labels BGY 13 left German
+        'nur f': 'solo f', 'konstant': 'costante', 'steigt ↗': 'cresce ↗',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -316,6 +318,11 @@ window.BuchIT && BuchIT.add('analysis', {
         ['zwei Schnittpunkte.', 'due punti di intersezione.'], ['kein gemeinsamer Punkt.', 'nessun punto in comune.'],
         ['genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', 'esattamente un punto: la retta è <b>tangente</b> alla parabola in $x = '],
         ['$. Das passiert für $a = \\pm 2$.', '$. Succede per $a = \\pm 2$.'],
+        // kurve, schar: "Hochpunkt $H(…)$" (short widget labels as in the glossary, block mathe12-it)
+        ['Hochpunkt $', 'Massimo $'], ['Tiefpunkt $', 'Minimo $'],
+        // schar: the piece "$. Für $" of an earlier block starts one position before the note and took its "Für" away
+        ['$. Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
+            '$. Per $a \\le 0$ non ci sono punti di estremo: $f_a\'(x) = 3x^2 - a$ non ha allora nessuno zero con cambio di segno.'],
     ],
     rule: [
         // book it-1 mathe11-it:

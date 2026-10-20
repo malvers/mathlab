@@ -127,6 +127,8 @@ window.BuchIT && BuchIT.add('stochastik', {
         'linksseitig': 'sinistro', 'rechtsseitig': 'destro', 'zweiseitig': 'bilaterale',
 
         // book it-9 mathegy12lk-it:
+        // signifikanztest: the kind of the test
+        'linksseitig': 'sinistro', 'rechtsseitig': 'destro', 'zweiseitig': 'bilaterale',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -238,6 +240,9 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-8 mathegy12-it:
 
         // book it-9 mathegy12lk-it:
+        // stichprobe, binomial, signifikanztest: pieces BGY 12/13 left German
+        [' · letzte: $h = ', ' · ultima: $h = '], ['$ (gold)', '$ (oro)'], ['Theorie: $', 'Teoria: $'],
+        ['$ · Standardabweichung $', '$ · deviazione standard $'], ['Ablehnungsbereich (rot): $', 'Regione di rifiuto (rossa): $'],
     ],
     rule: [
         // book it-1 mathe11-it:

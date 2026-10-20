@@ -469,3 +469,32 @@ Round 2, 20.10.2026 (Hack): decisions made while translating GY 12 Grundkurs; no
 ## mathegy12lk-it
 
 <!-- it-9: terms of this book only, write right below this line -->
+
+Round 2, 20.10.2026 (Gianotti): decisions made while translating GY 12 LK; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Gymnasium, Leistungskurs, Grundkurs | Gymnasium, Leistungskurs, Grundkurs | school names; start page: liceo tedesco, corso di livello avanzato / di base |
+| Jahrgangsstufe 12 | 12ª classe | "Collegare con l’11ª classe" |
+| Untersumme / Obersumme | somma inferiore / somma superiore | the letters $U_n$, $O_n$ stay; 5.2 says once that Italian books write $s_n$, $S_n$ |
+| Integralfunktion, Integrand, Integrationsgrenzen | funzione integrale, funzione integranda, estremi di integrazione | |
+| orientierter Flächeninhalt | area orientata | |
+| Rotationskörper, Kreisscheibe | solido di rotazione, disco | widget: Cono, Sfera, Paraboloide, Botte |
+| Keplersche Fassregel, Fass | regola delle botti di Keplero, botte | |
+| Rechteckverfahren, Mittelpunktsregel, Trapezverfahren, Abbruchkriterium | metodo dei rettangoli, regola del punto medio, metodo dei trapezi, criterio di arresto | |
+| Glockenkurve, Dichtefunktion, Verteilungsfunktion | curva a campana (di Gauss), funzione di densità, funzione di ripartizione | |
+| standardisieren, standardnormalverteilt | standardizzare, con distribuzione normale standard | |
+| Stetigkeitskorrektur, Laplace-Bedingung | correzione di continuità, condizione di Laplace | |
+| statistische Sicherheit | significatività statistica | 7, lesson 3 |
+| Hochrechnung | estensione alla popolazione | "estendere a 60 000 aventi diritto al voto" |
+| Normalenform, Koordinatenform | (equazione in) forma normale, equazione cartesiana | |
+| Lotgerade, Lotfußpunkt, Hilfsebene | retta perpendicolare, piede della perpendicolare, piano ausiliario | |
+| Spiegelpunkt, Symmetrieebene, Spiegeln | punto simmetrico, piano di simmetria, riflettere | |
+| Sehwinkel | angolo visuale | 9.1 |
+| unbegrenzte Fläche | regione illimitata | |
+| Geradenschar, Büschel, Parallelenschar, Ebenenschar | famiglia di rette, fascio di rette, famiglia di parallele, famiglia di piani | |
+| Trägergerade (Ebenenbüschel) | retta comune (l’asse del fascio di piani) | |
+| Einhüllende | inviluppo | 9.2 excursion |
+| Mantel (Pyramide, Prisma) | superficie laterale | |
+| linksseitig / rechtsseitig / zweiseitig (widget signifikanztest) | sinistro / destro / bilaterale | running text: test sinistro / destro / bilaterale |
+| Konsultation, Generalprobe (online training) | consultazione, prova generale | |

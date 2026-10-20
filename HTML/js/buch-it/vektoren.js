@@ -77,6 +77,8 @@ window.BuchIT && BuchIT.add('vektoren', {
         'Spiegelpunkt P′ zeigen': 'Mostra il punto simmetrico P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Costante $d$ in $\\vec{n} \\circ \\vec{x} = d$',
         'Gerade – Gerade': 'retta – retta', 'Gerade – Ebene': 'retta – piano', 'Ebene – Ebene': 'piano – piano', 'Welcher Winkel?': 'Quale angolo?',
         'spitz': 'acuto', 'stumpfe Vektoren': 'vettori con angolo ottuso', 'senkrecht': 'perpendicolari', 'schräg': 'obliquo', 'Dach und Boden': 'tetto e pavimento',
+        // skalarprodukt: the preset "orthogonal" (two vectors)
+        'orthogonal': 'ortogonali',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -238,6 +240,10 @@ window.BuchIT && BuchIT.add('vektoren', {
         ['Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.', 'I vettori normali sono paralleli: i piani sono paralleli o coincidenti.'],
         ['Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $', 'In bianco: la retta di intersezione $s$ con il vettore direzione $'],
         ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. L’angolo si misura perpendicolarmente a essa, tra le due linee colorate nei piani.'],
+        // ebene3d, raum3d, skalarprodukt, pyramide: pieces BGY 12/13 left German
+        ['Normalenvektor $\\vec{n}', 'Vettore normale $\\vec{n}'], ['Ortsvektoren $', 'Vettori posizione $'], ['$ · Verbindungsvektor $', '$ · vettore congiungente $'],
+        ['$ multipliziert: $', '$: $'], [' · <b>orthogonal</b>: $', ' · <b>ortogonali</b>: $'], ['$ · Schnittwinkel: $', '$ · angolo di intersezione: $'],
+        [' · Mantel (4 Dreiecke, je $', ' · superficie laterale (4 triangoli, ciascuno $'], ['$ (rot)', '$ (rosso)'],
     ],
     rule: [
         // book it-1 mathe11-it:
