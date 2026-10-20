@@ -126,6 +126,8 @@ window.BuchIT && BuchIT.add('analysis', {
             'Tutte le rette passano per $(2, 1)$: per $x = 2$, $a$ sparisce. Il parametro è la pendenza, ma manca una retta: quella verticale $x = 2$.',
         'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
             'La pendenza è sempre $0{,}5$: le rette sono parallele e non hanno nessun punto in comune. Il parametro le trasla.',
+        // kurve: the choice of the derivatives (abi)
+        'nur f': 'solo f',
 
         // book it-9 mathegy12lk-it:
     },

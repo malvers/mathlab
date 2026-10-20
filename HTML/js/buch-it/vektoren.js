@@ -223,6 +223,8 @@ window.BuchIT && BuchIT.add('vektoren', {
         // book it-8 mathegy12-it:
         // winkel3d: the preset "parallel" for a line and a plane (paralleli; the vectors of skalarprodukt and kreuzprodukt have the rule of it-2 above)
         [/(data-p="flach">)parallel</g, '$1paralleli<'],
+        // skalarprodukt: the preset "orthogonal" means two vectors (ortogonali)
+        [/(data-p="ortho">)orthogonal</g, '$1ortogonali<'],
 
         // book it-9 mathegy12lk-it:
     ]

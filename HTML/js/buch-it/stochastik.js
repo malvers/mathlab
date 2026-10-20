@@ -123,6 +123,8 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-7 mathegy11lk-it:
 
         // book it-8 mathegy12-it:
+        // signifikanztest: the side of the test (lb6, abi)
+        'linksseitig': 'sinistro', 'rechtsseitig': 'destro', 'zweiseitig': 'bilaterale',
 
         // book it-9 mathegy12lk-it:
     },
