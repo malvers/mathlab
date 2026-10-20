@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica GY 11 · Capitolo OP · Metodi numerici | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Risolvere equazioni graficamente, bisezione, metodo di Newton. Capitolo OP del libro di testo interattivo Matematica · Gymnasium 11: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">AREA OPZIONALE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">AREA OPZIONALE 2 · GENNAIO · FEBBRAIO</p>
+            <h1>Metodi numerici</h1>
+            <p class="b-hero-lead">L’equazione $e^x = 3 - x$ sembra innocua, ma nessuna trasformazione porta a $x = \ldots$. Nella tecnica e nelle scienze naturali equazioni così sono la normalità.
+                Una calcolatrice le risolve comunque, e lo fa con <b>metodi di approssimazione</b>: dimezza intervalli (<b>bisezione</b>) oppure segue tangenti (<b>metodo di Newton</b>)
+                finché la soluzione ha tutte le cifre esatte che si desiderano. Imparerai come funziona, quando fallisce e quale metodo conviene in ogni caso.</p>
+            <div class="b-chips"><span class="b-chip">8 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">CAS</span><span class="b-chip">STORIA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["exp(x)","3-x"]' data-labels='["eˣ","3 − x"]' data-lat="[1.35,-1.3]" data-x="-1.5,2.5" data-y="-0.5,5" data-pts="[[0.7921,2.2079]]" data-h="240" data-aria="I grafici di e elevato alla x e di 3 meno x si intersecano circa in x uguale a 0,79"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>risolvere equazioni <b>graficamente</b> e interpretare le soluzioni come ascisse di punti di intersezione</li>
+                <li>applicare il <b>metodo di bisezione</b> e stimarne la precisione</li>
+                <li>ricavare e applicare il <b>metodo di Newton</b> e riconoscere quando fallisce</li>
+                <li><b>valutare</b> se conviene un metodo algebrico, grafico o numerico</li>
+                <li>usare liste e ricorsioni nel CAS</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="-2" data-ph="h(0) ="><p class="b-q-text">Calcola $h(0)$ per $h(x) = e^x + x - 3$.</p><div class="b-sol"><p>$1 + 0 - 3 = -2$</p></div></div>
+            <div class="b-q" data-ans="1,5" data-ph="punto medio"><p class="b-q-text">Dov’è il punto medio dell’intervallo $[1, 2]$?</p><div class="b-sol"><p>1,5</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="f′(3) ="><p class="b-q-text">Calcola $f'(3)$ per $f(x) = x^2 - 2$.</p><div class="b-sol"><p>$f'(x) = 2x$, quindi 6</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Dove taglia l’asse $x$ la retta $y = 4x - 2$?</p><div class="b-mc"><button>in $x = 0{,}5$</button><button>in $x = -2$</button><button>in $x = 2$</button></div><div class="b-sol"><p>$4x - 2 = 0$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">INDOVINARE NUMERI</div>
+            <div class="b-text"><p>Una persona pensa un numero tra 1 e 1000; l’altra può solo chiedere: «È maggiore di …?»</p>
+                <ul><li>Con quale strategia servono meno domande? Quante sono al massimo?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">QUANTE SOLUZIONI?</div>
+            <div class="b-text"><p>Disegnate $x^2$ e $2^x$ in uno stesso sistema di coordinate, anche per $x$ negativi.</p>
+                <ul><li>Quante soluzioni ha $x^2 = 2^x$? Quali si possono indovinare?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TANGENTI CHE INDICANO LA STRADA</div>
+            <div class="b-text"><p>Tracciate la tangente a $f(x) = x^2 - 2$ nel punto $(2, 2)$.</p>
+                <ul><li>Dove taglia l’asse $x$? Ripetete da lì. A quale numero vi avvicinate?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Risolvere graficamente e bisezione" data-toc-k="1" data-toc-short="1 Bisezione">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Risolvere equazioni graficamente, bisezione</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quando si indovinano numeri, ogni domanda intelligente dimezza l’intervallo: 1000, 500, 250, … Dopo 10 domande resta un solo numero, perché $2^{10} = 1024$.
+                Allo stesso modo si trova la soluzione di $e^x = 3 - x$: la si scrive come zero di $h(x) = e^x + x - 3$. Si ha $h(0) = -2 < 0$ e $h(1) = e - 2 \approx 0{,}72 > 0$.
+                Il grafico, che è continuo, deve attraversare l’asse $x$ tra i due. Si dimezza: $h(0{,}5) \approx -0{,}85$, quindi lo zero sta in $[0{,}5;\,1]$, e così via.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · RISOLVERE GRAFICAMENTE E BISEZIONE</div>
+                <div class="b-text">
+                    <p><b>Graficamente:</b> le soluzioni di $f(x) = g(x)$ sono le coordinate $x$ dei punti di intersezione dei grafici. Lo schizzo mostra quante sono e dove si trovano all’incirca.</p>
+                    <p><b>Cambio di segno:</b> se $h$ è continua su $[a, b]$ e $h(a) \cdot h(b) < 0$, allora $h$ ha almeno uno zero in $(a, b)$.</p>
+                    <p><b>Bisezione:</b> calcolare il punto medio $m = \tfrac{a + b}{2}$; tenere il sottointervallo con il cambio di segno; ripetere. Dopo $n$ passi l’intervallo è lungo $\tfrac{b - a}{2^n}$.</p>
+                    <p>La bisezione funziona sempre quando c’è un cambio di segno, ma è lenta: circa tre passi per ogni cifra decimale.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Punto cieco:</b> in uno zero doppio come quello di $(x - 1)^2$ non c’è cambio di segno. La bisezione non lo trova.</p>
+            <p class="b-note"><b>Con il CAS:</b> una tabella dei valori con passo piccolo (valutazione di liste) mostra subito i cambi di segno. Per esempio tra 1,6 e 1,7 $x^3 - 2x - 1$ passa da meno a più.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · DIMEZZARE L’INTERVALLO</div>
+        <p class="b-help" style="margin:0 0 12px">Dimezza l’intervallo passo dopo passo. La tabella mostra quanto rapidamente si riduce l’ampiezza.</p>
+        <div data-widget="bisektion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · DUE PASSI</div>
+            <div class="b-text"><p>Dimezza due volte per $h(x) = x^3 + x - 1$ su $[0, 1]$.</p></div>
+            <div class="b-sol"><p>$h(0) = -1$, $h(1) = 1$. $h(0{,}5) = -0{,}375$: si continua con $[0{,}5;\,1]$.</p>
+                <p>$h(0{,}75) \approx 0{,}17$: <span class="b-res">zero in $[0{,}5;\,0{,}75]$</span>, in realtà circa in 0,682.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · QUANTI PASSI?</div>
+            <div class="b-text"><p>Un intervallo iniziale ha lunghezza 1. Quanti passi servono per una precisione di 0,001?</p></div>
+            <div class="b-sol"><p>Si cerca $\tfrac{1}{2^n} < 0{,}001$, cioè $2^n > 1000$.</p>
+                <p>$2^9 = 512$, $2^{10} = 1024$: <span class="b-res">10 passi</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Risolvi graficamente: a) $x^2 = x + 2$ &nbsp; b) $x^2 = 2^x$ &nbsp; c) $\ln x = 2 - x$ (con un decimale)</p></div>
+            <div class="b-sol"><p>a) $-1$ e $2$ &nbsp; b) $2$, $4$ e circa $-0{,}77$ &nbsp; c) circa $1{,}6$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>In quale intervallo di lunghezza 1 c’è una soluzione? a) $\cos x = x$ &nbsp; b) $\ln x = 2 - x$ &nbsp; c) $x^3 - 2x - 1 = 0$ (soluzione positiva)</p></div>
+            <div class="b-sol"><p>a) $[0, 1]$ &nbsp; b) $[1, 2]$ &nbsp; c) $[1, 2]$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Fai tre passi di bisezione per $h(x) = e^x + x - 3$ su $[0, 1]$. Dai l’intervallo finale.</p></div>
+            <div class="b-sol"><p>$h(0{,}5) < 0$ → $[0{,}5;\,1]$; $h(0{,}75) \approx -0{,}13$ → $[0{,}75;\,1]$; $h(0{,}875) \approx 0{,}27$ → $[0{,}75;\,0{,}875]$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quanti passi di bisezione servono per ridurre un intervallo di lunghezza 1 a meno di 0,01? E a meno di $10^{-6}$?</p></div>
+            <div class="b-sol"><p>7 passi ($2^7 = 128$); 20 passi ($2^{20} \approx 1{,}05$ milioni).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Giustifica perché la bisezione «trova» un risultato per $h(x) = \dfrac{1}{x}$ su $[-1, 1]$, anche se $h$ non ha nessuno zero.</p></div>
+            <div class="b-sol"><p>$h(-1) < 0 < h(1)$, ma $h$ non è continua in 0 (polo). L’ipotesi «continua» non è soddisfatta; il metodo si dirige verso il polo.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="0,125" data-ph="lunghezza"><p class="b-q-text">$[2, 3]$ viene dimezzato tre volte. Quanto è lungo allora l’intervallo?</p><div class="b-sol"><p>$\tfrac{1}{8}$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="numero"><p class="b-q-text">Quante soluzioni ha $x^2 = 2^x$?</p><div class="b-sol"><p>3</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Di che cosa ha bisogno la bisezione per partire?</p><div class="b-mc"><button>della derivata</button><button>di una funzione continua con un cambio di segno</button><button>di un valore iniziale vicino alla soluzione</button></div><div class="b-sol"><p>$h(a) \cdot h(b) < 0$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Il metodo di Newton" data-toc-k="2" data-toc-short="2 Newton">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Il metodo di Newton</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La tangente a $f(x) = x^2 - 2$ in $(2, 2)$ ha pendenza 4: $t(x) = 4x - 6$. Taglia l’asse $x$ in $1{,}5$.
+                La tangente in $(1{,}5;\,0{,}25)$ lo taglia in $1{,}4167$, la successiva in $1{,}41422$. Dopo tre passi coincidono cinque cifre di $\sqrt{2} \approx 1{,}414\,21$.
+                L’idea: vicino al punto di tangenza la tangente approssima bene il grafico, e il suo zero è facile da calcolare.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · METODO DI NEWTON</div>
+                <div class="b-text">
+                    <p>Partendo da un valore iniziale $x_0$: $$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$</p>
+                    <p><b>Come si ricava:</b> tangente $t(x) = f(x_n) + f'(x_n)(x - x_n)$; per lo zero ricavare $x$ da $t(x) = 0$.</p>
+                    <p><b>Vantaggio:</b> vicino a uno zero semplice il numero di cifre corrette circa raddoppia a ogni passo.</p>
+                    <p><b>Limiti:</b> $f$ deve essere derivabile; se $f'(x_n) = 0$ il metodo si interrompe; un valore iniziale sfavorevole porta a un altro zero, in un ciclo o lontano da tutto. Ci si ferma quando $|x_{n+1} - x_n| < \varepsilon$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Erone:</b> per $f(x) = x^2 - a$ il metodo di Newton diventa l’antichissima regola $x_{n+1} = \tfrac{1}{2}\left(x_n + \tfrac{a}{x_n}\right)$ per calcolare le radici.</p>
+            <p class="b-note"><b>Nel CAS:</b> definisci la successione in modo ricorsivo, per esempio $x_{n+1} = x_n - \dfrac{x_n^2 - 2}{2x_n}$ con $x_0 = 1$, e mostra la lista dei termini.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · METODO DI NEWTON</div>
+        <p class="b-help" style="margin:0 0 12px">Sposta il valore iniziale lungo l’asse $x$ e procedi passo dopo passo. Prova con $x^3 - 2x + 2$ il valore iniziale 0: che cosa succede?</p>
+        <div data-widget="newton"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · DUE PASSI</div>
+            <div class="b-text"><p>Newton per $f(x) = x^3 - x - 1$ con $x_0 = 1$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 1$. $x_1 = 1 - \dfrac{-1}{2} = 1{,}5$.</p>
+                <p>$x_2 = 1{,}5 - \dfrac{0{,}875}{5{,}75} \approx 1{,}348$; <span class="b-res">la soluzione è circa 1,3247</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · UN CICLO</div>
+            <div class="b-text"><p>Newton per $f(x) = x^3 - 2x + 2$ con $x_0 = 0$.</p></div>
+            <div class="b-sol"><p>$x_1 = 0 - \dfrac{2}{-2} = 1$, $x_2 = 1 - \dfrac{1}{1} = 0$, $x_3 = 1$, …</p>
+                <p><span class="b-res">La successione salta per sempre tra 0 e 1</span>. Con $x_0 = -2$ funziona: zero circa in $-1{,}77$.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola due passi del metodo di Newton: a) $f(x) = x^2 - 2$, $x_0 = 1$ &nbsp; b) $f(x) = e^x + x - 3$, $x_0 = 1$</p></div>
+            <div class="b-sol"><p>a) $1{,}5$; $1{,}4167$ &nbsp; b) $0{,}807$; $0{,}7921$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola con la regola di Erone un passo per $\sqrt{10}$ partendo da $x_0 = 3$ e confronta con la calcolatrice.</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{2}\left(3 + \tfrac{10}{3}\right) = \tfrac{19}{6} \approx 3{,}1667$; $\sqrt{10} \approx 3{,}1623$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Risolvi $\cos x = x$ con il metodo di Newton partendo da $x_0 = 1$, con quattro decimali. Quanti passi di bisezione servirebbero partendo da $[0, 1]$ per la stessa precisione?</p></div>
+            <div class="b-sol"><p>$0{,}7504$; $0{,}7391$; $0{,}7391$: soluzione $0{,}7391$ dopo tre passi. Bisezione: circa 14 passi.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Perché il metodo di Newton fallisce per $f(x) = x^2 - 4x + 5$ con qualsiasi valore iniziale? Giustificalo anche graficamente.</p></div>
+            <div class="b-sol"><p>$f(x) = (x - 2)^2 + 1 > 0$: non c’è nessuno zero. La successione salta qua e là senza meta; in $x_n = 2$ si ha perfino $f'(x_n) = 0$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Valuta le tre strade per $x^3 + x - 1 = 0$: algebrica, grafica, numerica. Che cosa offre ciascuna?</p></div>
+            <div class="b-sol"><p>Algebricamente esiste una formula, ma è complicata; graficamente: una soluzione circa in 0,7; numericamente (Newton da 1): 0,75; 0,686; 0,6823, con la precisione che si vuole.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="1,5" data-ph="x₁ ="><p class="b-q-text">Newton per $x^2 - 2$ da $x_0 = 1$: quanto vale $x_1$?</p><div class="b-sol"><p>1,5</p></div></div>
+        <div class="b-q" data-ans="0,75" data-tol="0.001" data-ph="x₁ ="><p class="b-q-text">Newton per $\cos x - x$ da $x_0 = 1$: $x_1$ con due decimali?</p><div class="b-sol"><p>0,75</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quando si interrompe di sicuro il metodo di Newton?</p><div class="b-mc"><button>quando $f(x_n) > 0$</button><button>dopo cinque passi</button><button>quando $f'(x_n) = 0$</button></div><div class="b-sol"><p>Tangente orizzontale senza zero.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Scrivi come problema di zeri e dai un intervallo iniziale: a) $e^x = 3 - x$ &nbsp; b) $\ln x = 2 - x$ &nbsp; c) $\cos x = x$</p></div>
+            <div class="b-sol"><p>a) $e^x + x - 3$, $[0, 1]$ &nbsp; b) $\ln x + x - 2$, $[1, 2]$ &nbsp; c) $\cos x - x$, $[0, 1]$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con il capitolo 1.4:</b> gli estremi di $f(x) = x^4 - 3x^2 + x$ sono zeri di $f'(x) = 4x^3 - 6x + 1$. Determinali con il metodo di Newton con tre decimali.</p></div>
+            <div class="b-sol"><p>Valori iniziali dallo schizzo, per es. $-1{,}3$; $0{,}2$; $1{,}1$: zeri circa in $-1{,}301$; $0{,}170$; $1{,}131$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dimostra: se $x_n$ si trova esattamente in uno zero, allora $x_{n+1} = x_n$. Che cosa significa per il metodo?</p></div>
+            <div class="b-sol"><p>$f(x_n) = 0$, quindi non si sottrae niente. Lo zero è un punto fisso: la successione resta lì.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Per $f(x) = \sqrt[3]{x}$ il metodo di Newton si allontana con qualsiasi valore iniziale $x_0 \neq 0$. Calcola $x_1$ in generale e spiegalo.</p></div>
+            <div class="b-sol"><p>$f'(x) = \tfrac{1}{3}x^{-\frac{2}{3}}$, $x_1 = x_0 - \dfrac{x_0^{1/3}}{\frac{1}{3}x_0^{-2/3}} = x_0 - 3x_0 = -2x_0$. La distanza dallo zero raddoppia a ogni passo.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: chi ha inventato il metodo di Newton?" data-toc-k="X" data-toc-short="Newton">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">STORIA</span></div>
+    <h2>Chi ha inventato il metodo di Newton?</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Isaac Newton descrisse nel 1669, nel suo scritto «De analysi», un metodo di approssimazione per le equazioni; fu stampato solo nel 1711. Il suo metodo divenne pubblico per la prima volta nel 1685, nel libro di algebra di John Wallis.
+                Ma Newton calcolava in modo diverso da noi: a ogni passo trasformava di nuovo l’equazione e non usava derivate.</p>
+            <p>Joseph Raphson ne fece nel 1690 una formula da applicare più e più volte, e Thomas Simpson descrisse nel 1740 il metodo con l’aiuto delle flussioni,
+                cioè della derivata, così come lo conosciamo oggi. Per questo lo storico della scienza Nick Kollerstrom ha definito l’attribuzione a Newton «un mito persistente».
+                E l’idea per le radici quadrate è molto più antica: Erone di Alessandria calcolava già così nel I secolo.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> N. Kollerstrom, «Thomas Simpson and ‘Newton’s method of approximation’: an enduring myth», British Journal for the History of Science 25 (1992), pp. 347–354.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>GRAFICAMENTE</h4><p>Soluzioni = ascisse dei punti di intersezione; lo schizzo mostra quante sono e dove.</p></div>
+        <div><p>$x^2 = 2^x$: tre soluzioni</p></div></div>
+    <div class="b-rueck"><div><h4>CAMBIO DI SEGNO</h4><p>Continua e $h(a) \cdot h(b) < 0$: c’è uno zero nel mezzo.</p></div>
+        <div><p>$e^x + x - 3$ su $[0, 1]$</p></div></div>
+    <div class="b-rueck"><div><h4>BISEZIONE</h4><p>Dimezzare; lunghezza dopo $n$ passi: $\tfrac{b - a}{2^n}$.</p></div>
+        <div><p>10 passi: meno di 0,001</p></div></div>
+    <div class="b-rueck"><div><h4>NEWTON</h4><p>$x_{n+1} = x_n - \tfrac{f(x_n)}{f'(x_n)}$; rapido, ma dipende dal valore iniziale.</p></div>
+        <div><p>$\sqrt{2}$: 1; 1,5; 1,4167; 1,41422</p></div></div>
+    <div class="b-rueck"><div><h4>VALUTARE</h4><p>Algebrico, esatto; grafico, visione d’insieme; numerico, preciso quanto si vuole.</p></div>
+        <div><p>Ciclo per $x^3 - 2x + 2$ da 0</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="7" data-ph="passi"><p class="b-q-text">Dopo quanti passi di bisezione un intervallo di lunghezza 1 è lungo meno di 0,01?</p><div class="b-sol"><p>$2^7 = 128$</p></div></div>
+            <div class="b-q" data-ans="1,5" data-ph="x₁ ="><p class="b-q-text">Newton per $x^3 - x - 1$ da $x_0 = 1$: $x_1$?</p><div class="b-sol"><p>1,5</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Quale condizione serve al metodo di Newton, ma non alla bisezione?</p><div class="b-mc"><button>derivabilità</button><button>continuità</button><button>un cambio di segno</button></div><div class="b-sol"><p>La formula contiene $f'$.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="0,792" data-tol="0.001" data-ph="x ="><p class="b-q-text">Risolvi $e^x = 3 - x$ con tre decimali.</p><div class="b-sol"><p>0,792</p></div></div>
+            <div class="b-q" data-ans="0,739" data-tol="0.001" data-ph="x ="><p class="b-q-text">Risolvi $\cos x = x$ con tre decimali.</p><div class="b-sol"><p>0,739</p></div></div>
+            <div class="b-q" data-ans="1,325" data-tol="0.001" data-ph="x ="><p class="b-q-text">Risolvi $x^3 - x - 1 = 0$ con tre decimali.</p><div class="b-sol"><p>1,325</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-bisektion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BISEZIONE</span><span class="b-lab-what">risolvere graficamente, dimezzare intervalli, 20 esercizi</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-newton-verfahren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">METODO DI NEWTON</span><span class="b-lab-what">Tangenti, convergenza, casi di fallimento, 20 esercizi</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Gymnasium, 11ª classe, corso base · Area opzionale 2 secondo il programma di matematica del Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-it/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-it/numerik.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-it/gy11.js"></script>
+</body>
+</html>
