@@ -9,6 +9,8 @@
  * Package IT0 (18.10.2026) put in only the block comments; every book writes only below its own comment line, each entry ending
  * with a comma, so the three books merge without a conflict. The Spanish file js/buch-es/numerik.js shows which German
  * strings the widgets write.
+ * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('numerik', {
     word: {
@@ -32,6 +34,15 @@ window.BuchIT && BuchIT.add('numerik', {
         'Verfahren': 'Metodo',
         'Anzahl der Streifen $n$': 'Numero di strisce $n$',
         'Flächeninhalt mit Streifen angenähert': 'Area approssimata con strisce',
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -49,6 +60,15 @@ window.BuchIT && BuchIT.add('numerik', {
         [' · genauer Wert $', ' · valore esatto $'],
         ['$ · Fehler $', '$ · errore $'],
         [' · Fehler $', ' · errore $'],
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -56,5 +76,14 @@ window.BuchIT && BuchIT.add('numerik', {
         [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'Di $' + n + '$ punti, $'],
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ]
 });

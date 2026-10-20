@@ -9,6 +9,8 @@
  * Package IT0 (18.10.2026) put in only the block comments; every book writes only below its own comment line, each entry ending
  * with a comma, so the three books merge without a conflict. The Spanish file js/buch-es/gleichungen.js shows which German
  * strings the widgets write.
+ * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('gleichungen', {
     word: {
@@ -20,6 +22,7 @@ window.BuchIT && BuchIT.add('gleichungen', {
         'Höhe $h$ in cm': 'Altezza $h$ in cm', 'Skizze des Körpers': 'Schizzo del solido',
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
+        // book it-4 mathefos11-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -39,6 +42,7 @@ window.BuchIT && BuchIT.add('gleichungen', {
         ['Mantellinie $s = ', 'Apotema $s = '],
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
+        // book it-4 mathefos11-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -46,5 +50,6 @@ window.BuchIT && BuchIT.add('gleichungen', {
         [/\$L = (?=\\mathbb\{R\}|\\\{)/g, '$S = '],
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
+        // book it-4 mathefos11-it:
     ]
 });

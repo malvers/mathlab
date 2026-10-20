@@ -9,6 +9,8 @@
  * Package IT0 (18.10.2026) put in only the block comments; every book writes only below its own comment line, each entry ending
  * with a comma, so the three books merge without a conflict. The Spanish file js/buch-es/vektoren.js shows which German
  * strings the widgets write.
+ * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('vektoren', {
     word: {
@@ -45,6 +47,15 @@ window.BuchIT && BuchIT.add('vektoren', {
         'Grundkante $a$': 'Spigolo di base $a$',
         'Höhe $h$': 'Altezza $h$',
         'Verschiebung der Spitze in $x$': 'Spostamento del vertice in $x$',
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -110,6 +121,15 @@ window.BuchIT && BuchIT.add('vektoren', {
         ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, traslazione della base superiore $\\vec{w} = '],
         [' · Mantel (4 Parallelogramme, je $', ' · superficie laterale (4 parallelogrammi, ciascuno $'],
         [' (Prinzip von Cavalieri: auch schief)', ' (principio di Cavalieri: anche obliquo)'],
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -123,5 +143,14 @@ window.BuchIT && BuchIT.add('vektoren', {
         // book it-3 mathe13-it:
         // geradenlage: the preset "parallel" means two lines (parallele); a global word would also hit the vectors
         [/(data-p="par">)parallel</g, '$1parallele<'],
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ]
 });

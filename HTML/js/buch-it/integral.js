@@ -9,6 +9,8 @@
  * Package IT0 (18.10.2026) put in only the cover of the start page; every book writes only below its own comment line, each entry ending
  * with a comma, so the three books merge without a conflict. The Spanish file js/buch-es/integral.js shows which German
  * strings the widgets write.
+ * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('integral', {
     word: {
@@ -38,6 +40,13 @@ window.BuchIT && BuchIT.add('integral', {
         'Funktionen': 'Funzioni',
         'Fläche zwischen zwei Graphen': 'Area tra due grafici',
         'Zu wenige Schnittstellen im Bild.': 'Troppo pochi punti di intersezione nell’immagine.',
+        // book it-5 mathefos12-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -55,10 +64,24 @@ window.BuchIT && BuchIT.add('integral', {
         [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · L’integrale è minore perché le aree sotto l’asse (rosse) contano come negative.'],
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Attenzione: $a > b$ cambia il segno.'],
         ['$ · Schnittstellen: ', '$ · intersezioni: '],
+        // book it-5 mathefos12-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ],
     rule: [
         // book it-1 mathe11-it:
         // book it-2 mathe12-it:
         // book it-3 mathe13-it:
+        // book it-5 mathefos12-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ]
 });

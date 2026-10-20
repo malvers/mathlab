@@ -9,6 +9,8 @@
  * Package IT0 (18.10.2026) put in only the cover of the start page; every book writes only below its own comment line, each entry ending
  * with a comma, so the three books merge without a conflict. The Spanish file js/buch-es/funktionen.js shows which German
  * strings the widgets write.
+ * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('funktionen', {
     word: {
@@ -68,6 +70,17 @@ window.BuchIT && BuchIT.add('funktionen', {
         'Zaun an der Mauer': 'Recinzione lungo il muro',
         'Rechteck mit Umfang 24 cm': 'Rettangolo di perimetro 24 cm',
         // book it-3 mathe13-it:
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -153,6 +166,17 @@ window.BuchIT && BuchIT.add('funktionen', {
         ['Diskriminante: $', 'Discriminante: $'],
         ['$ hat $D = ', '$ ha $D = '],
         // book it-3 mathe13-it:
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -181,5 +205,16 @@ window.BuchIT && BuchIT.add('funktionen', {
         // helpers: CURVES (funktion) - the whole sentences, before the header rule "^Zu " of js/buch-it.js
         [/(: )?\bZu (\$x = [^$]+\$) gehören (\$y = [^$]+\$) und (\$y = [^$]+\$)\./g, (m, c, x, y1, y2) => (c ? ': a ' : 'A ') + x + ' corrispondono ' + y1 + ' e ' + y2 + '.'],
         // book it-3 mathe13-it:
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ]
 });

@@ -9,6 +9,8 @@
  * Package IT0 (18.10.2026) put in only the block comments; every book writes only below its own comment line, each entry ending
  * with a comma, so the three books merge without a conflict. The Spanish file js/buch-es/stochastik.js shows which German
  * strings the widgets write.
+ * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('stochastik', {
     word: {
@@ -100,6 +102,17 @@ window.BuchIT && BuchIT.add('stochastik', {
         'Signifikanzniveau': 'Livello di significatività',
         'Beobachtete Trefferzahl $k$': 'Numero di successi osservato $k$',
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribuzione binomiale sotto l’ipotesi nulla con la regione di rifiuto',
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -172,6 +185,17 @@ window.BuchIT && BuchIT.add('stochastik', {
         ['Ist in Wahrheit $p = ', 'Se in realtà $p = '],
         ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (viola), $H_0$ viene mantenuta per errore con $\\beta \\approx '],
         ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (errore di II specie).'],
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -202,5 +226,16 @@ window.BuchIT && BuchIT.add('stochastik', {
         [/(<text\b[^>]*>)([TN]{1,4})(<\/text>)/g, (m, a, k, b) => a + k.replace(/T/g, 'S').replace(/N/g, 'I') + b],
         [/Pfade mit genau 1 Treffern: \$/g, 'Percorsi con esattamente 1 successo: $'],
         // book it-3 mathe13-it:
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ]
 });

@@ -1,4 +1,4 @@
-# Glossario — the Italian editions (BGY 11, 12, 13)
+# Glossario — the Italian editions (BGY 11, 12, 13; round 2: FOS 11, FOS 12, GY 11, GY 11 LK, GY 12, GY 12 LK)
 
 Package IT0, 18.10.2026. Every term of `tools/buch-es/glosario.md` that the three BGY books need, decided once in Italian
 for `mathe11-it`, `mathe12-it` and `mathe13-it` (sections 1–5 and the Spanish blocks es-1, es-2, es-3, folded in below).
@@ -338,3 +338,27 @@ Package IT1, 18.10.2026: decisions made while translating BGY 11; nothing above 
 | unilateral rechts-/linksseitig (test) | test destro / sinistro (unilaterale destro / sinistro) | 4.2 |
 | Wahlbereich Numerik (BGY 11) | area opzionale di calcolo numerico | 3.4 |
 | Kepler, Descartes | Keplero, Cartesio (René Descartes) | names as Italian schools say them |
+
+## mathefos11-it
+
+<!-- it-4: terms of this book only, write right below this line -->
+
+## mathefos12-it
+
+<!-- it-5: terms of this book only, write right below this line -->
+
+## mathegy11-it
+
+<!-- it-6: terms of this book only, write right below this line -->
+
+## mathegy11lk-it
+
+<!-- it-7: terms of this book only, write right below this line -->
+
+## mathegy12-it
+
+<!-- it-8: terms of this book only, write right below this line -->
+
+## mathegy12lk-it
+
+<!-- it-9: terms of this book only, write right below this line -->

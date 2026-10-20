@@ -47,3 +47,34 @@ in `glossario.md`. Books: BGY 11 `mathe11-it` (IT1), BGY 12 `mathe12-it` (IT2), 
 
 `check.mjs --lang it` measures leftover words against `/usr/share/dict/italian` if there is one, else only against the
 words of the Italian dictionaries. Without `--lang` every tool works on the English editions exactly as before.
+
+## Round 2 (20.10.2026): the six upper-school books, six local agents
+
+Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch". One orchestrator, one agent per
+book; the brief is this README plus `tools/buch-es/auftrag.md` sections 1, 4 and 5 (es → it).
+
+| Book | Agent | Worktree `.claude/worktrees/` | Branch | Port | Block |
+|---|---|---|---|---|---|
+| FOS 11 `mathefos11` | Castelnuovo | `it-castelnuovo` | `it-mathefos11` | 8795 | `it-4` |
+| FOS 12 `mathefos12` | Cibrario | `it-cibrario` | `it-mathefos12` | 8796 | `it-5` |
+| GY 11 `mathegy11` | Nalli | `it-nalli` | `it-mathegy11` | 8797 | `it-6` |
+| GY 11 LK `mathegy11lk` | Pastori | `it-pastori` | `it-mathegy11lk` | 8798 | `it-7` |
+| GY 12 `mathegy12` | Hack | `it-hack` | `it-mathegy12` | 8799 | `it-8` |
+| GY 12 LK `mathegy12lk` | Gianotti | `it-gianotti` | `it-mathegy12lk` | 8800 | `it-9` |
+
+1. **Only your own worktree**, never the main checkout (other agents' uncommitted work lives there). No `git switch`,
+   `stash`, `rebase`, `checkout --`, no push. Commit locally on your branch after every chapter.
+2. **Own server** from your worktree: `python3 -m http.server <port> -d HTML --bind localhost`; every browser tool with
+   `PORT=<port>`. Stop it when you are done.
+3. **Shared files have a block per book:** every `js/buch-it/<module>.js` (word, phrase, rule) and `glossario.md`.
+   Write only right below your book's comment line, every entry ending with a comma. A German string that BGY 11/12/13
+   or the IT0 part already translates: do not add it again (`check.mjs` flags two translations of one German string).
+   `js/buch-it.js`, `js/buch.js`, `js/buch-titel.css`, the hub: not yours - write what you need into your report.
+   A German error found on the way: smallest fix, named in the report.
+4. **`known.json`** conflicts between the books are expected; the orchestrator takes the union when merging.
+5. **Your own files besides the dictionaries:** `HTML/buch/<book>-it/`, the "Edizione italiana" button on the start
+   pages of your book's German, English and Spanish editions, the link previews of your pages
+   (`node tools/og-preview/make-og.mjs --only <ids>`).
+6. **Report** at the end: branch, commits, check results (`check.mjs --lang it`, `encheck --poke`, `geo`, `fit`),
+   German errors fixed, open questions. The orchestrator merges, adds the hub card with the Italian cover and pushes
+   on Doc's word.

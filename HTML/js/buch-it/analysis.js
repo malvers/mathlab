@@ -9,6 +9,8 @@
  * Package IT0 (18.10.2026) put in only the cover of the start page; every book writes only below its own comment line, each entry ending
  * with a comma, so the three books merge without a conflict. The Spanish file js/buch-es/analysis.js shows which German
  * strings the widgets write.
+ * Round 2 (20.10.2026): six books are translated at the same time; each has its own comment line in word, phrase and
+ * rule - write only right below your book's line, every entry ending with a comma, so the books merge without a conflict.
  */
 window.BuchIT && BuchIT.add('analysis', {
     word: {
@@ -78,6 +80,17 @@ window.BuchIT && BuchIT.add('analysis', {
         'Verkaufspreis $p$ (€ pro Stück)': 'Prezzo di vendita $p$ (€ al pezzo)',
         'x in Stück': 'x in pezzi',
         'Kosten, Erlös und Gewinn': 'Costi, ricavo e profitto',
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -157,6 +170,17 @@ window.BuchIT && BuchIT.add('analysis', {
         ['Bei diesem Preis wird nie Gewinn gemacht.', 'Con questo prezzo non si fa mai profitto.'],
         ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Profitto massimo: $G\'(x) = 0$ in $x \\approx '],
         ['Kein positives Gewinnmaximum.', 'Nessun profitto massimo positivo.'],
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -166,5 +190,16 @@ window.BuchIT && BuchIT.add('analysis', {
         // ableiten: "3 von 5 gelöst"
         [/(\d+) von (\d+) gelöst/g, '$1 su $2 risolti'],
         // book it-3 mathe13-it:
+        // book it-4 mathefos11-it:
+
+        // book it-5 mathefos12-it:
+
+        // book it-6 mathegy11-it:
+
+        // book it-7 mathegy11lk-it:
+
+        // book it-8 mathegy12-it:
+
+        // book it-9 mathegy12lk-it:
     ]
 });
