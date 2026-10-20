@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica GY 12 · Capitolo 6 · Statistica inferenziale | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Campioni, stima di proporzioni, media e varianza, test di significatività unilaterali e bilaterali. Capitolo 6 del libro di testo interattivo Matematica · Gymnasium 12: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 6 · AREA DI APPRENDIMENTO 6</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 6 · AREA DI APPRENDIMENTO 6 · NOVEMBRE</p>
+            <h1>Statistica inferenziale</h1>
+            <p class="b-hero-lead">La sera delle elezioni, alle 18, c’è già una previsione, anche se non è stato ancora contato nessun voto: si basa sull’intervista di qualche migliaio di elettori. Si dice che un fornaio faccia troppi panini troppo piccoli,
+                che una moneta sia truccata. In questo capitolo passi da un <b>campione</b> al tutto: <b>stimi</b> proporzioni, medie e varianze e
+                decidi con i <b>test di significatività</b> se un risultato è ancora un caso o già una prova.</p>
+            <div class="b-chips"><span class="b-chip">12 ORE</span><span class="b-chip">3 LEZIONI</span><span class="b-chip">4 WIDGET</span><span class="b-chip">1 LABORATORIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["5*exp(-((x-5)^2)/2)/2.5066"]' data-labels='["P"]' data-lat="[7.4]" data-x="0,10" data-y="-0.2,2.4" data-pts="[[5,1.995]]" data-h="240" data-aria="Distribuzione a campana del numero di successi attorno al valore atteso"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>i <b>problemi di base</b> della statistica inferenziale: dal campione alla popolazione</li>
+                <li>calcolare proporzioni, <b>media campionaria</b> e <b>varianza campionaria</b> ed estenderle alla popolazione</li>
+                <li>impostare ed eseguire <b>test di significatività unilaterali</b> per variabili aleatorie binomiali</li>
+                <li>eseguire <b>test bilaterali</b> e interpretare che cosa significa «significativo» e che cosa no</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="10" data-ph="E(X) ="><p class="b-q-text">$X$ ha distribuzione binomiale con $n = 50$ e $p = 0{,}2$. Quanto vale $E(X)$?</p><div class="b-sol"><p>$n \cdot p$</p></div></div>
+            <div class="b-q" data-ans="0,125" data-ph="P ="><p class="b-q-text">Una moneta equa viene lanciata tre volte. Quanto vale $P(\text{tre volte croce})$?</p><div class="b-sol"><p>$0{,}5^3$</p></div></div>
+            <div class="b-q" data-ans="0,7" data-ph="P ="><p class="b-q-text">Vale $P(X \le 4) = 0{,}3$. Quanto vale $P(X \ge 5)$?</p><div class="b-sol"><p>Evento contrario</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">La media di $2$, $4$ e $9$ è …</p><div class="b-mc"><button>$4$</button><button>$5$</button><button>$15$</button></div><div class="b-sol"><p>$\tfrac{15}{3}$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">QUANTE ROSSE?</div>
+            <div class="b-text"><p>In un sacchetto non trasparente ci sono molte palline rosse e blu. Ogni gruppo estrae $20$ palline con reimmissione e annota il numero di quelle rosse.</p>
+                <ul><li>Stimate la proporzione di palline rosse. Confrontate le stime dei gruppi.</li><li>Come potreste stimare in modo più preciso?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">È TRUCCATO?</div>
+            <div class="b-text"><p>Un giocatore lancia un dado $60$ volte e ottiene $16$ sei. Ce ne si sarebbe aspettati $10$.</p>
+                <ul><li>Simulate con i dadi o al computer quanto spesso un dado equo mostra almeno $16$ sei in $60$ lanci.</li><li>Da quanti sei in su sospettereste del dado? Mettetevi d’accordo su una regola prima di lanciare.</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TROPPO SPESSO O TROPPO DI RADO</div>
+            <div class="b-text"><p>Una moneta viene lanciata $100$ volte. Volete verificare se è equa, senza sapere in quale direzione potrebbe essere truccata.</p>
+                <ul><li>Quali risultati considerereste sospetti? C’è un limite verso il basso e uno verso l’alto?</li><li>Guardate la distribuzione con la macchina di Galton.</li></ul></div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">Tavola chiodata con istogramma – la curva a campana nasce dal vivo (in tedesco)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Stima dei parametri" data-toc-k="1" data-toc-short="1 Stima">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">1</span>Problemi di base e stima dei parametri</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Su $1200$ aventi diritto al voto scelti a caso, $444$ vogliono votare il partito A: sono il $37\,\%$. Se alle elezioni sarà esattamente il $37\,\%$ nessuno lo sa:
+                un altro campione avrebbe dato un risultato un po’ diverso. La statistica inferenziale si chiede che cosa si possa comunque dire con sicurezza a partire dal campione.</p></div></div>
+            <div class="b-text"><p>La <b>popolazione</b> sono tutti gli aventi diritto al voto, il <b>campione</b> è la parte intervistata a caso. I valori caratteristici sconosciuti della popolazione
+                (i suoi <b>parametri</b>) si stimano con i corrispondenti valori del campione: la proporzione $p$ con la frequenza relativa $h$, la media $\mu$
+                con la <b>media campionaria</b> $\bar x$, la varianza $\sigma^2$ con la <b>varianza campionaria</b> $s^2$. Perché $s^2$ stimi in media correttamente, si divide per $n - 1$.</p>
+                <p>Le stime oscillano da un campione all’altro. Per le proporzioni $h$ si disperde circa di $\sqrt{\tfrac{p(1 - p)}{n}}$: serve un’ampiezza del campione <b>quattro volte</b> maggiore per <b>dimezzare</b> la dispersione.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · STIMARE DA UN CAMPIONE</div>
+                <div class="b-text">
+                    <p><b>Proporzione:</b> $p \approx h = \tfrac{k}{n}$ ($k$ successi su $n$) · <b>Estensione alla popolazione:</b> numero nella popolazione $\approx N \cdot h$</p>
+                    <p><b>Media campionaria:</b> $\bar x = \dfrac{x_1 + x_2 + \ldots + x_n}{n}$ · <b>Varianza campionaria:</b> $s^2 = \dfrac{1}{n - 1} \sum\limits_{i=1}^{n} (x_i - \bar x)^2$, $s = \sqrt{s^2}$</p>
+                    <p>Il campione deve essere estratto <b>a caso</b>, altrimenti la stima è sistematicamente sbagliata.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Perché $n - 1$?</b> I valori si disperdono attorno alla loro media $\bar x$ sempre un po’ meno che attorno alla media vera $\mu$. Il fattore $\tfrac{1}{n-1}$ compensa questo effetto. Il widget lo mostra con mille campioni.</p>
+            <p class="b-note"><b>La sera delle elezioni</b> gli istituti fanno le proiezioni a partire dalle prime sezioni elettorali scrutinate. Il vero capolavoro è scegliere bene queste sezioni.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · STIMARE MEDIA E VARIANZA</div>
+        <p class="b-help" style="margin:0 0 12px">Un impianto riempie bottiglie. Estrai dei campioni e confronta $\bar x$ con il valore nominale. Con «+1000» vedi che $s^2$ con $\tfrac{1}{n-1}$ in media coglie la varianza vera, mentre con $\tfrac1n$ risulta troppo piccola.</p>
+        <div data-widget="schaetzen"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · LE PROPORZIONI OSCILLANO</div>
+        <p class="b-help" style="margin:0 0 12px">Molti campioni dalla stessa popolazione: le frequenze relative si disperdono attorno alla proporzione vera $p$. Quadruplica $n$ e osserva la larghezza.</p>
+        <div data-widget="stichprobe"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · QUANTITÀ DI RIEMPIMENTO</div>
+            <div class="b-text"><p>Cinque bottiglie contengono $498$, $503$, $501$, $497$ e $501$ ml. Stima la media e la deviazione standard del riempimento.</p></div>
+            <div class="b-sol"><p>$\bar x = \tfrac{2500}{5} = 500$ ml. Scarti $-2$; $3$; $1$; $-3$; $1$, quadrati $4 + 9 + 1 + 9 + 1 = 24$.</p>
+                <p>$s^2 = \tfrac{24}{4} = 6$: <span class="b-res">$s \approx 2{,}45$ ml</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · ESTENSIONE ALLA POPOLAZIONE</div>
+            <div class="b-text"><p>Su $500$ pezzi controllati, $12$ sono difettosi. Quanti pezzi difettosi ci si deve aspettare in una produzione giornaliera di $20\,000$ pezzi?</p></div>
+            <div class="b-sol"><p>$h = \tfrac{12}{500} = 0{,}024$, quindi $20\,000 \cdot 0{,}024 = 480$.</p>
+                <p><span class="b-res">Circa $480$ pezzi.</span> La stima si disperde di circa $\sqrt{\tfrac{0{,}024 \cdot 0{,}976}{500}} \approx 0{,}007$, cioè di circa $140$ pezzi.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola $\bar x$, $s^2$ e $s$ per il campione $3$; $7$; $5$; $9$; $6$.</p></div>
+            <div class="b-sol"><p>$\bar x = 6$; scarti $-3$; $1$; $-1$; $3$; $0$, somma dei quadrati $20$: $s^2 = \tfrac{20}{4} = 5$, $s \approx 2{,}24$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Su $1200$ intervistati, $444$ vogliono votare il partito A. Stima la proporzione ed estendila a $60\,000$ aventi diritto al voto.</p></div>
+            <div class="b-sol"><p>$h = 0{,}37$; circa $22\,200$ voti.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Per un sondaggio sulla soddisfazione per autobus e treni si intervistano solo persone a una fermata dell’autobus. Perché non è un buon campione?</p></div>
+            <div class="b-sol"><p>Il campione non è casuale: alla fermata ci sono quasi solo persone che prendono l’autobus. Chi trova il servizio così scadente da usare l’auto non viene quasi mai intervistato.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Per i valori $1$ e $3$ calcola la varianza una volta con il fattore $\tfrac1n$ e una volta con $\tfrac{1}{n-1}$. Quale stima è pensata per un campione?</p></div>
+            <div class="b-sol"><p>$\bar x = 2$, somma dei quadrati $2$: con $\tfrac1n$ si ottiene $1$, con $\tfrac{1}{n-1}$ si ottiene $2$. Per i campioni si usa $\tfrac{1}{n-1}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quanto deve essere grande almeno un sondaggio perché la dispersione $\sqrt{\tfrac{p(1-p)}{n}}$ della proporzione stimata, con $p \approx 0{,}5$, sia al massimo di un punto percentuale?</p></div>
+            <div class="b-sol"><p>$\sqrt{\tfrac{0{,}25}{n}} \le 0{,}01$, quindi $\tfrac{0{,}25}{n} \le 0{,}0001$: <span class="b-res">$n \ge 2500$</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="6" data-ph="s² ="><p class="b-q-text">Varianza campionaria di $498$; $503$; $501$; $497$; $501$?</p><div class="b-sol"><p>$\tfrac{24}{4}$</p></div></div>
+        <div class="b-q" data-ans="480" data-ph="numero"><p class="b-q-text">$12$ difettosi su $500$: estensione a $20\,000$ pezzi?</p><div class="b-sol"><p>$20\,000 \cdot 0{,}024$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Come cambia la dispersione di una proporzione stimata se si quadruplica $n$?</p><div class="b-mc"><button>Si riduce a un quarto.</button><button>Resta uguale.</button><button>Si dimezza.</button></div><div class="b-sol"><p>$\sqrt{4} = 2$ al denominatore</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Test di significatività unilaterali" data-toc-k="2" data-toc-short="2 Unilaterali">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Test di significatività unilaterali</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un fornaio dice: al massimo il $10\,\%$ dei miei panini è troppo piccolo. Una cliente sospetta che siano di più e pesa $50$ panini.
+                Anche se il fornaio ha ragione, per caso possono essercene più di $5$ troppo piccoli. Da quanti in su può contraddirlo senza sbagliare troppo spesso?
+                La regola deve fissarla <b>prima</b> di pesare.</p></div></div>
+            <div class="b-text"><p>Si verifica l’<b>ipotesi nulla</b> $H_0\colon p = 0{,}1$ contro il sospetto $H_1\colon p > 0{,}1$. La <b>statistica test</b> $X$ conta i panini troppo piccoli.
+                Se $H_0$ è vera, $X$ ha distribuzione binomiale con $n = 50$ e $p = 0{,}1$. Valori grandi di $X$ parlano contro $H_0$: la <b>regione di rifiuto</b> sta a destra.
+                La si sceglie in modo che, se $H_0$ è vera, venga colpita al massimo con la probabilità $\alpha$, il <b>livello di significatività</b>.</p>
+                <p>Un test può sbagliare in due modi: $H_0$ viene rifiutata anche se è vera (<b>errore di I specie</b>, al massimo $\alpha$), oppure $H_0$ viene mantenuta anche se è falsa (<b>errore di II specie</b>).</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · TEST DI SIGNIFICATIVITÀ UNILATERALE</div>
+                <div class="b-text">
+                    <p>1. Fissare $H_0\colon p = p_0$ e la direzione. 2. Statistica test $X$, sotto $H_0$ binomiale con $n$ e $p_0$. 3. Scegliere il livello di significatività $\alpha$.</p>
+                    <p>4. <b>Destro:</b> $K = \{k, \ldots, n\}$ con il più piccolo $k$ per cui $P(X \ge k) \le \alpha$. <b>Sinistro:</b> $K = \{0, \ldots, k\}$ con il più grande $k$ per cui $P(X \le k) \le \alpha$. $k$ si chiama <b>valore critico</b>.</p>
+                    <p>5. <b>Regola di decisione:</b> se il risultato del campione sta in $K$, $H_0$ viene rifiutata, altrimenti no.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Non rifiutata non vuol dire dimostrata:</b> se il risultato non sta in $K$, i dati semplicemente non bastano per confutare $H_0$.</p>
+            <p class="b-note"><b>Con la calcolatrice:</b> molti strumenti conoscono solo $P(X \le k)$. Allora $P(X \ge k) = 1 - P(X \le k - 1)$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · IL TEST DI SIGNIFICATIVITÀ</div>
+        <p class="b-help" style="margin:0 0 12px">Imposta $n$, $p_0$, la direzione e $\alpha$. In rosso c’è la regione di rifiuto. Attiva l’errore di II specie e cambia la $p$ vera: quanto spesso il test non si accorge che $H_0$ è falsa?</p>
+        <div data-widget="signifikanztest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · DESTRO: IL FORNAIO</div>
+            <div class="b-text"><p>$n = 50$, $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$, $\alpha = 5\,\%$. Vale $P(X \ge 9) \approx 0{,}058$ e $P(X \ge 10) \approx 0{,}025$. La cliente trova $9$ panini troppo piccoli.</p></div>
+            <div class="b-sol"><p>$k = 9$ è troppo piccolo ($0{,}058 > 0{,}05$), $k = 10$ va bene: <span class="b-res">$K = \{10, \ldots, 50\}$</span>.</p>
+                <p>$9$ non sta in $K$: $H_0$ non viene rifiutata. I dati non bastano per contraddire il fornaio.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · SINISTRO: LE SEMENTI</div>
+            <div class="b-text"><p>Un commerciante promette che germina almeno il $90\,\%$ dei semi. Un giardiniere semina $100$ semi. $H_0\colon p = 0{,}9$, $H_1\colon p < 0{,}9$, $\alpha = 5\,\%$, con $P(X \le 84) \approx 0{,}040$ e $P(X \le 85) \approx 0{,}073$.</p></div>
+            <div class="b-sol"><p>La regione di rifiuto sta a sinistra: il più grande $k$ con $P(X \le k) \le 0{,}05$ è $84$.</p>
+                <p><span class="b-res">$K = \{0, \ldots, 84\}$</span>: se germinano al massimo $84$ semi, il giardiniere contraddice il commerciante.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Indica $H_0$, $H_1$ e il tipo di test. a) Un nuovo farmaco dovrebbe funzionare meglio di quello vecchio, con un tasso di guarigione del $70\,\%$. b) Un fornitore garantisce al massimo il $3\,\%$ di pezzi difettosi, l’acquirente ne dubita. c) Un partito afferma di avere almeno il $30\,\%$ dei consensi.</p></div>
+            <div class="b-sol"><p>a) $H_0\colon p = 0{,}7$, $H_1\colon p > 0{,}7$, destro &nbsp; b) $H_0\colon p = 0{,}03$, $H_1\colon p > 0{,}03$, destro &nbsp; c) $H_0\colon p = 0{,}3$, $H_1\colon p < 0{,}3$, sinistro</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una moneta viene lanciata $30$ volte. Con un test destro si verifica se esce croce troppo spesso: $H_0\colon p = 0{,}5$, $\alpha = 5\,\%$. Vale $P(X \ge 19) \approx 0{,}100$ e $P(X \ge 20) \approx 0{,}049$. Determina $K$.</p></div>
+            <div class="b-sol"><p>$K = \{20, \ldots, 30\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Nel test del fornaio ($K = \{10, \ldots, 50\}$) in realtà il $20\,\%$ dei panini è troppo piccolo. Con quale probabilità la cliente non se ne accorge? Vale $P(X \le 9) \approx 0{,}444$ per $n = 50$, $p = 0{,}2$.</p></div>
+            <div class="b-sol"><p>Errore di II specie: il risultato non sta in $K$, quindi $P(X \le 9) \approx 44\,\%$. Quasi un controllo su due non scopre il cattivo fornaio.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Nel test delle sementi germinano a) $86$ semi, b) $83$ semi. Formula a parole la decisione in ciascun caso.</p></div>
+            <div class="b-sol"><p>a) $86 \notin K$: l’affermazione del commerciante non viene rifiutata. b) $83 \in K$: al livello del $5\,\%$ il risultato parla in modo significativo contro un tasso di germinazione del $90\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Ora la cliente pesa $100$ panini. Per $n = 100$, $p = 0{,}1$ vale $P(X \ge 15) \approx 0{,}073$ e $P(X \ge 16) \approx 0{,}040$; per $p = 0{,}2$ si ha $P(X \le 15) \approx 0{,}129$. Determina $K$ e l’errore di II specie per $p = 0{,}2$. Che cosa porta l’ampiezza del campione maggiore?</p></div>
+            <div class="b-sol"><p>$K = \{16, \ldots, 100\}$, errore di II specie $\approx 13\,\%$ invece del $44\,\%$. <span class="b-res">Più dati rendono il test più preciso</span>, a parità di $\alpha$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="10" data-ph="k ="><p class="b-q-text">Valore critico nel test del fornaio ($n = 50$, $\alpha = 5\,\%$)?</p><div class="b-sol"><p>$P(X \ge 10) \approx 0{,}025$</p></div></div>
+        <div class="b-q" data-ans="84" data-ph="k ="><p class="b-q-text">Il numero più grande nella regione di rifiuto del test delle sementi?</p><div class="b-sol"><p>$P(X \le 84) \approx 0{,}040$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Un errore di I specie significa …</p><div class="b-mc"><button>$H_0$ viene mantenuta anche se è falsa.</button><button>$H_0$ viene rifiutata anche se è vera.</button><button>Si è sbagliato un calcolo.</button></div><div class="b-sol"><p>La sua probabilità è al massimo $\alpha$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Test bilaterali" data-toc-k="3" data-toc-short="3 Bilaterali">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 3</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">3</span>Test bilaterali e affidabilità statistica</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Una moneta è equa? Sono sospette <b>troppe</b> croci, ma anche <b>troppo poche</b>. Per questo la regione di rifiuto è formata da due parti,
+                una a sinistra e una a destra. Perché il test nel complesso sbagli al massimo con probabilità $\alpha$, ogni lato riceve al massimo $\tfrac{\alpha}{2}$.</p></div></div>
+            <div class="b-text"><p>Se $H_0$ viene rifiutata, si dice: il risultato è <b>significativo</b> al livello $\alpha$. Significa solo: se $H_0$ fosse vera, un risultato così estremo capiterebbe di rado.
+                <b>Non</b> significa che $H_0$ sia falsa con probabilità $1 - \alpha$, e nemmeno che la differenza sia grande o importante.
+                Quanto bene un test riconosca un’ipotesi falsa dipende dalla $p$ vera e dall’ampiezza del campione.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · TEST BILATERALE</div>
+                <div class="b-text">
+                    <p>$H_0\colon p = p_0$, $H_1\colon p \neq p_0$. Regione di rifiuto $K = \{0, \ldots, k_l\} \cup \{k_r, \ldots, n\}$ con</p>
+                    <p>il più grande $k_l$ per cui $P(X \le k_l) \le \tfrac{\alpha}{2}$ e il più piccolo $k_r$ per cui $P(X \ge k_r) \le \tfrac{\alpha}{2}$.</p>
+                    <p><b>Significativo</b> vuol dire: se $H_0$ fosse vera, il risultato sarebbe finito in $K$ al massimo con probabilità $\alpha$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>La direzione conta:</b> chi sa già prima in quale direzione cerca fa un test unilaterale e riconosce più facilmente gli scostamenti in quella direzione.</p>
+            <p class="b-note"><b>Con il CAS:</b> richiama la tabella della distribuzione binomiale cumulata e leggi i limiti $k_l$ e $k_r$; il widget qui sotto calcola la stessa cosa.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · DISTRIBUZIONE BINOMIALE CUMULATA</div>
+        <p class="b-help" style="margin:0 0 12px">Imposta $n = 100$ e $p = 0{,}5$ e scegli $P(X \le k)$. Cerca il più grande $k$ per cui la probabilità è al massimo $0{,}025$.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 5 · LA MONETA È EQUA?</div>
+            <div class="b-text"><p>$n = 100$, $H_0\colon p = 0{,}5$, $H_1\colon p \neq 0{,}5$, $\alpha = 5\,\%$. Vale $P(X \le 39) \approx 0{,}018$ e $P(X \le 40) \approx 0{,}028$.</p></div>
+            <div class="b-sol"><p>A sinistra: $k_l = 39$. Per simmetria a destra $k_r = 61$.</p>
+                <p><span class="b-res">$K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$</span>. L’errore di I specie è addirittura solo $2 \cdot 0{,}0176 \approx 3{,}5\,\%$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 6 · SE LA MONETA È TRUCCATA</div>
+            <div class="b-text"><p>In realtà la moneta mostra croce con $p = 0{,}6$. Con quale probabilità il test non lo riconosce?</p></div>
+            <div class="b-sol"><p>Errore di II specie: $P(40 \le X \le 60)$ con $p = 0{,}6$ $\approx 0{,}54$.</p>
+                <p><span class="b-res">In più della metà dei casi la moneta non viene scoperta.</span> Con $p = 0{,}7$ è solo circa il $2\,\%$.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Giustifica perché l’equità di una moneta si verifica con un test bilaterale, mentre l’efficacia di un nuovo farmaco con uno unilaterale.</p></div>
+            <div class="b-sol"><p>Per la moneta sono sospetti gli scostamenti in entrambe le direzioni. Per il farmaco interessa solo se è migliore.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$n = 50$, $H_0\colon p = 0{,}5$, bilaterale, $\alpha = 5\,\%$. Vale $P(X \le 17) \approx 0{,}016$ e $P(X \le 18) \approx 0{,}033$. Determina $K$.</p></div>
+            <div class="b-sol"><p>$k_l = 17$, per simmetria $k_r = 33$: $K = \{0, \ldots, 17\} \cup \{33, \ldots, 50\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un dado viene lanciato $120$ volte e si verifica con un test bilaterale la probabilità di un sei, $\alpha = 5\,\%$. Vale $P(X \le 11) \approx 0{,}014$, $P(X \le 12) \approx 0{,}028$, $P(X \ge 28) \approx 0{,}037$, $P(X \ge 29) \approx 0{,}022$. Determina $K$. Come si decide con $27$ sei?</p></div>
+            <div class="b-sol"><p>$K = \{0, \ldots, 11\} \cup \{29, \ldots, 120\}$. $27 \notin K$: $H_0$ non viene rifiutata.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Vero o falso? a) Il risultato è significativo, quindi $H_0$ è falsa con probabilità del $95\,\%$. b) Se $H_0$ non viene rifiutata, è dimostrata. c) Un $\alpha$ più piccolo rende più grande l’errore di II specie.</p></div>
+            <div class="b-sol"><p>a) falso: $\alpha$ descrive il comportamento del test quando $H_0$ è vera, non è una probabilità per $H_0$. b) falso. c) vero, la regione di rifiuto diventa più piccola.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Una moneta ha in realtà $p = 0{,}55$. Nel test bilaterale con $\alpha = 5\,\%$ l’errore di II specie è circa $0{,}86$ per $n = 100$ e circa $0{,}52$ per $n = 400$. Interpreta i numeri. Che cosa ne segue per la progettazione di un test?</p></div>
+            <div class="b-sol"><p>Con $100$ lanci i piccoli scostamenti restano quasi sempre nascosti, anche con $400$ in un caso su due. <span class="b-res">Chi vuole trovare piccole differenze ha bisogno di campioni molto grandi</span>; bisogna pianificarlo prima del test.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="61" data-ph="k_r ="><p class="b-q-text">Moneta, $n = 100$, bilaterale, $\alpha = 5\,\%$: da quale numero si rifiuta a destra?</p><div class="b-sol"><p>Simmetrico a $39$</p></div></div>
+        <div class="b-q" data-ans="0,025" data-ph="per lato"><p class="b-q-text">Con $\alpha = 5\,\%$, quale probabilità può avere al massimo ciascun lato di un test bilaterale?</p><div class="b-sol"><p>$\tfrac{\alpha}{2}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Un’ampiezza del campione maggiore …</p><div class="b-mc"><button>a parità di $\alpha$ riduce l’errore di II specie.</button><button>aumenta l’errore di I specie.</button><button>non cambia nulla.</button></div><div class="b-sol"><p>Esercizio 15</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un test sul dado con $60$ lanci ha $K = \{16, \ldots, 60\}$. Quanti sei ci si aspetta da un dado equo? Come si decide con $14$ e con $18$ sei?</p></div>
+            <div class="b-sol"><p>Attesi $10$. Con $14$ non si rifiuta, con $18$ si rifiuta: il dado mostra il sei troppo spesso in modo significativo.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con l’11ª classe:</b> calcola con la formula di Bernoulli $P(X \ge 9)$ per $n = 10$ e $p = 0{,}5$. Con $9$ successi su $10$ considereresti truccata una moneta ($\alpha = 5\,\%$, test destro)?</p></div>
+            <div class="b-sol"><p>$P(X = 9) + P(X = 10) = \tfrac{10 + 1}{1024} \approx 0{,}011 \le 0{,}05$: sì, significativo al livello del $5\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Spiega perché bisogna fissare la regione di rifiuto <b>prima</b> di estrarre il campione.</p></div>
+            <div class="b-sol"><p>Chi fissa il limite solo dopo il risultato può metterlo in modo da ottenere il giudizio desiderato. Allora l’affermazione sull’errore di I specie non vale più.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un partito aveva finora il $40\,\%$. Dopo uno scandalo vengono intervistate $200$ persone. Progetta un test con cui il partito possa verificare con $\alpha = 5\,\%$ se la sua quota è calata. Il CAS dà per $n = 200$, $p = 0{,}4$: $P(X \le 68) \approx 0{,}048$ e $P(X \le 69) \approx 0{,}064$.</p></div>
+            <div class="b-sol"><p>Sinistro, $H_0\colon p = 0{,}4$, $H_1\colon p < 0{,}4$, $K = \{0, \ldots, 68\}$. Se al massimo $68$ dei $200$ intervistati vogliono votare il partito, il calo è significativo.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: la signora e il tè" data-toc-k="X" data-toc-short="Test del tè">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">STORIA</span></div>
+    <h2>La signora che assaggiava il tè</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Lo statistico Ronald A. Fisher descrisse nel 1935, nel suo libro <i>The Design of Experiments</i>, un esperimento famoso: una signora afferma di riconoscere dal sapore
+                se nella tazza è stato versato prima il latte o prima il tè. Si preparano otto tazze, quattro di ogni tipo, in ordine casuale. Lei deve individuare le quattro tazze con il latte versato prima.</p>
+            <p>Se tira solo a indovinare, ci sono $\binom{8}{4} = 70$ scelte ugualmente probabili, e solo una è del tutto giusta: probabilità $\tfrac{1}{70} \approx 1{,}4\,\%$. Un risultato senza errori è quindi significativo al livello del $5\,\%$.
+                Con un solo errore non lo sarebbe già più: tirando a indovinare si fa almeno altrettanto bene con probabilità $\tfrac{17}{70} \approx 24\,\%$. Pare che la signora sia esistita davvero:
+                secondo un resoconto successivo, la botanica Muriel Bristol riconobbe correttamente tutte e otto le tazze.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonti:</b> R. A. Fisher, <i>The Design of Experiments</i>, 1935, capitolo 2. Il resoconto su Muriel Bristol è di H. Fairfield Smith, riportato in D. Salsburg, <i>The Lady Tasting Tea</i>, 2001.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>STIMARE</h4><p>$p \approx h$, $\mu \approx \bar x$, $\sigma^2 \approx s^2 = \tfrac{1}{n-1} \sum (x_i - \bar x)^2$</p></div>
+        <div><p>Quantità di riempimento: $\bar x = 500$ ml, $s^2 = 6$</p></div></div>
+    <div class="b-rueck"><div><h4>IPOTESI</h4><p>$H_0\colon p = p_0$; $H_1$ indica la direzione.</p></div>
+        <div><p>Fornaio: $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$</p></div></div>
+    <div class="b-rueck"><div><h4>UNILATERALE</h4><p>$K$ a destra o a sinistra con $P(X \in K) \le \alpha$</p></div>
+        <div><p>$n = 50$: $K = \{10, \ldots, 50\}$</p></div></div>
+    <div class="b-rueck"><div><h4>BILATERALE</h4><p>su ogni lato al massimo $\tfrac{\alpha}{2}$</p></div>
+        <div><p>Moneta, $n = 100$: $K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$</p></div></div>
+    <div class="b-rueck"><div><h4>ERRORI</h4><p>I specie: $H_0$ rifiutata a torto, al massimo $\alpha$; II specie: $H_0$ mantenuta a torto</p></div>
+        <div><p>Moneta con $p = 0{,}6$: errore di II specie $\approx 54\,\%$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="5" data-ph="s² ="><p class="b-q-text">Varianza campionaria di $3$; $7$; $5$; $9$; $6$?</p><div class="b-sol"><p>$\tfrac{20}{4}$</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="k ="><p class="b-q-text">$n = 30$, $H_0\colon p = 0{,}5$, test destro, $\alpha = 5\,\%$, $P(X \ge 20) \approx 0{,}049$, $P(X \ge 19) \approx 0{,}100$: valore critico?</p><div class="b-sol"><p>Il più piccolo $k$ con $P(X \ge k) \le 0{,}05$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">«$H_0$ non viene rifiutata» significa …</p><div class="b-mc"><button>$H_0$ è dimostrata.</button><button>$H_0$ è falsa.</button><button>I dati non bastano contro $H_0$.</button></div><div class="b-sol"><p>Nessuna dimostrazione</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="2500" data-ph="n ≥"><p class="b-q-text">Ampiezza minima perché la dispersione di una proporzione intorno a $0{,}5$ sia al massimo $0{,}01$?</p><div class="b-sol"><p>$\tfrac{0{,}25}{n} \le 0{,}0001$</p></div></div>
+            <div class="b-q" data-ans="0,54" data-tol="0.01" data-ph="β ≈"><p class="b-q-text">Test sulla moneta, $n = 100$, $K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$: errore di II specie con $p = 0{,}6$?</p><div class="b-sol"><p>$P(40 \le X \le 60)$</p></div></div>
+            <div class="b-q" data-ans="1/70" data-tol="0.001" data-ph="P ="><p class="b-q-text">Test del tè: probabilità di classificare correttamente tutte e otto le tazze tirando a indovinare?</p><div class="b-sol"><p>$\binom84 = 70$</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12-schaetzen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">STIMARE</span><span class="b-lab-what">Campioni, estensione alla popolazione, media e varianza</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12-signifikanztest.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TEST UNILATERALI</span><span class="b-lab-what">Ipotesi, regione di rifiuto, decisione</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12-zweiseitige-tests.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TEST BILATERALI</span><span class="b-lab-what">Due lati, errori, significato di «significativo»</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12-klausur1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VERIFICA SCRITTA 12/I</span><span class="b-lab-what">Prova sull’area di apprendimento 5, l’area opzionale 5 e l’area di apprendimento 6</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Gymnasium, 12ª classe, corso di base · Area di apprendimento 6 secondo il programma di matematica del Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-it/funktionen.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-it/stochastik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-it/gy12.js"></script>
+</body>
+</html>
