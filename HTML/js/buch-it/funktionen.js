@@ -78,6 +78,11 @@ window.BuchIT && BuchIT.add('funktionen', {
         'Ist die Kurve der Graph einer Funktion?': 'La curva è il grafico di una funzione?', 'keine Funktion': 'non è una funzione',
         'Richtig.': 'Giusto.', 'Nicht ganz.': 'Non proprio.',
         'Entscheide mit den Knöpfen. Danach siehst du Definitions- und Wertebereich.': 'Decidi con i pulsanti. Poi vedrai il dominio e l’insieme immagine.',
+        // lage (the buttons: the same Italian as in js/buch-it/vektoren.js, which the FOS pages do not load)
+        'schneidend': 'incidenti', 'orthogonal': 'ortogonali', 'parallel': 'parallele', 'identisch': 'coincidenti',
+        '$g$: Anstieg $m_1$': '$g$: pendenza $m_1$', '$g$: Achsenabschnitt $n_1$': '$g$: intercetta $n_1$',
+        '$h$: Anstieg $m_2$': '$h$: pendenza $m_2$', '$h$: Achsenabschnitt $n_2$': '$h$: intercetta $n_2$',
+        'Zwei Geraden und ihre Lage zueinander': 'Due rette e la loro posizione reciproca',
 
         // book it-5 mathefos12-it:
 
@@ -182,6 +187,14 @@ window.BuchIT && BuchIT.add('funktionen', {
         ['$ · Bei $x = ', '$ · In $x = '], ['$ trifft die Senkrechte die Kurve <b>', '$ la verticale interseca la curva <b>'],
         ['gar nicht', 'in nessun punto'], ['genau einmal', 'esattamente una volta'],
         ['Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. ', 'Ogni retta verticale interseca la curva al massimo una volta: è una funzione. '],
+        // lage
+        ['Gleicher Anstieg und gleicher Achsenabschnitt: <b>identisch</b>. Jeder Punkt ist gemeinsam.', 'Stessa pendenza e stessa intercetta: <b>coincidenti</b>. Tutti i punti sono in comune.'],
+        ['Gleicher Anstieg $m_1 = m_2$, verschiedene Achsenabschnitte: <b>parallel</b>. Es gibt keinen Schnittpunkt.',
+            'Stessa pendenza $m_1 = m_2$, intercette diverse: <b>parallele</b>. Non c’è nessun punto di intersezione.'],
+        ['$: Die Geraden sind <b>orthogonal</b> (senkrecht zueinander).', '$: le rette sono <b>perpendicolari</b> (ortogonali).'],
+        ['Verschiedene Anstiege: Die Geraden <b>schneiden</b> sich.', 'Pendenze diverse: le rette si <b>intersecano</b>.'],
+        ['Gleichsetzen: $', 'Uguagliando: $'], ['$ ergibt $x = ', '$ dà $x = '], ['$, also ', '$, quindi '], [' · Schnittwinkel $', ' · angolo di intersezione $'],
+        ['parallel zur $x$-Achse', 'parallela all’asse $x$'],
 
         // book it-5 mathefos12-it:
 
