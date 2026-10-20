@@ -58,7 +58,7 @@ window.BuchIT && BuchIT.add('gy6', {
         'Zuordnung': 'Corrispondenza', 'Platz 1': 'Posto 1', 'Platz 2': 'Posto 2', 'Platz 3': 'Posto 3', 'Platz 4': 'Posto 4',
         'Welche Art von Zuordnung ist das?': 'Che tipo di corrispondenza è?',
         'mehrdeutig': 'non univoca', 'eindeutig': 'univoca', 'eineindeutig': 'biunivoca', 'eindeutig, aber nicht eineindeutig': 'univoca, ma non biunivoca',
-        'Richtig:': 'Giusto:', 'Nicht ganz.': 'Non proprio.',
+        'Richtig:': 'Giusto.', 'Nicht ganz.': 'Non proprio.',
         // zufall6 ("Würfel" and "Glücksrad" by a rule below: "Würfel" is also the cube)
         'Münze': 'Moneta', 'Versuch': 'Esperimento',
         'Kopf': 'Testa', 'Zahl': 'Croce', 'Rot': 'Rosso',
