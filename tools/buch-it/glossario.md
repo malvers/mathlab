@@ -343,6 +343,41 @@ Package IT1, 18.10.2026: decisions made while translating BGY 11; nothing above 
 
 <!-- it-4: terms of this book only, write right below this line -->
 
+Round 2, 20.10.2026 (Castelnuovo): decisions made while translating FOS 11; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Fachoberschule, Fachhochschulreife | Fachoberschule, Fachhochschulreife | names stay; start page: scuola superiore tecnico-professionale tedesca, diploma per le università di scienze applicate |
+| Ausblicke (chapter E), Wahlbereich 1 und 3 | Prospettive, aree opzionali 1 e 3 | the letter E stays |
+| Anstieg, Achsenabschnitt (FOS) | pendenza, intercetta (ordinata all’origine) | widget sliders "$g$: pendenza $m_1$", "$g$: intercetta $n_1$" |
+| Bruchgleichung, Scheinlösung | equazione fratta, soluzione non accettabile | 1.3 |
+| Grundmenge $G$, Doppelungleichung | insieme di riferimento $G$, disequazione doppia | 1.3 |
+| das Zeichen dreht sich um | il verso si inverte | inequalities; Relationszeichen: segno di disuguaglianza |
+| Probe (test point of the inequality widget) | prova | the text says «numero di prova» |
+| Gleichsetzungs-, Einsetzungs-, Additionsverfahren | metodo del confronto, della sostituzione, di riduzione | 1.4 |
+| identisch / parallel / schneidend / orthogonal (two lines) | coincidenti / parallele / incidenti / perpendicolari (ortogonali) | same words as js/buch-it/vektoren.js |
+| Geradenschar, Funktionenschar | fascio di rette, famiglia di funzioni | |
+| Linearfaktorform, Fallunterscheidung | forma fattorizzata, distinzione dei casi | 1.6 |
+| normierte Normalform $x^2 + px + q$ | forma normale ridotta | 1.5; pq-Formel: formula risolutiva |
+| ganzrationale Funktion, Vielfachheit, Leitkoeffizient, Substitution | funzione polinomiale, molteplicità, coefficiente direttivo, sostituzione | 1.7; einfach/doppelt/dreifach: semplice/doppio/triplo |
+| Ergebnis, Ergebnismenge, Ereignismenge | esito, spazio campionario, insieme degli eventi | 2.1 |
+| Additionssatz, Regeln von De Morgan | regola della somma, leggi di De Morgan | |
+| Zählprinzip, Permutation, Variation, Kombination | principio di moltiplicazione, permutazione, disposizione, combinazione | 2.3 |
+| Urnenmodell, Lotto 6 aus 49 | modello dell’urna, lotto «6 su 49» | |
+| Pascalsches Dreieck | triangolo di Pascal | the excursion adds: in Italia anche triangolo di Tartaglia |
+| Zinseszins, Endkapital, Barwert, Aufzinsungsfaktor, Laufzeit | interesse composto, montante, valore attuale, fattore di capitalizzazione, durata | OP |
+| Sparplan, Ratentilgung, Annuitätentilgung | piano di risparmio, ammortamento a quote capitale costanti, ammortamento a rate costanti | widget buttons: Piano di risparmio, Quote capitale costanti, Rate costanti |
+| Annuität, Tilgung, Restschuld, Tilgungsplan | rata (annualità), quota capitale, debito residuo, piano di ammortamento | |
+| effektiver Jahreszins, Skonto, Dispozinsen, Ratenkauf | tasso annuo effettivo (TAEG), sconto per pagamento in contanti, interessi di scoperto, acquisto a rate | |
+| Mehrwertsteuer, brutto, netto | IVA, lordo, netto | 1.1 keeps the German 19 % |
+| Schaltalgebra, Wahrheitstafel | algebra dei circuiti (algebra di Boole), tavola di verità | E |
+| UND, ODER, NICHT; Reihen-, Parallelschaltung | E, O, NON; collegamento in serie, in parallelo | widget: Serie (E), Parallelo (O) |
+| Wechselschaltung, Öffner | deviatori (circuito con deviatori), contatto normalmente chiuso | |
+| Halbaddierer, Volladdierer | semisommatore, sommatore completo | |
+| imaginäre Einheit, Gaußsche Zahlenebene, Betrag, konjugiert | unità immaginaria, piano di Gauss, modulo, coniugato | |
+| Fit für die Klassenarbeit 1 (online quiz) | PRONTI PER LA VERIFICA 1 | quizzes stay German |
+| letters: Erwachsene/Kinder $e$/$k$, Einzel-/Doppelzimmer, Hühner/Kaninchen, Fußball $F$ | $a$/$b$, $s$/$d$, $g$/$c$, $C$ | only in the chapter text; no widget writes them |
+
 ## mathefos12-it
 
 <!-- it-5: terms of this book only, write right below this line -->
