@@ -104,17 +104,9 @@ window.BuchIT && BuchIT.add('analysis', {
 
         // book it-6 mathegy11-it:
         // bruchfunktion
-        'Polstelle': 'Polo', 'Lücke': 'Buco', 'ohne Vorzeichenwechsel': 'Senza cambio di segno', 'schiefe Asymptote': 'Asintoto obliquo',
-        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Grafico di una funzione razionale fratta con poli, buchi e asintoti',
-        'Zähler:': 'Numeratore:', 'Nenner:': 'Denominatore:', 'Grad des Zählers': 'Grado del numeratore', 'Grad des Nenners': 'Grado del denominatore',
-        'Grad 0': 'Grado 0', 'Grad 1': 'Grado 1', 'Grad 2': 'Grado 2', 'Faktor $k$': 'Fattore $k$', 'Beispiele:': 'Esempi:',
 
         // book it-7 mathegy11lk-it:
         // bruchfunktion (chapter 1.4)
-        'Polstelle': 'Polo', 'Lücke': 'Discontinuità eliminabile', 'ohne Vorzeichenwechsel': 'Senza cambio di segno', 'schiefe Asymptote': 'Asintoto obliquo',
-        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Grafico di una funzione razionale fratta con poli, discontinuità eliminabili e asintoti',
-        'Zähler:': 'Numeratore:', 'Nenner:': 'Denominatore:', 'Grad des Zählers': 'Grado del numeratore', 'Grad des Nenners': 'Grado del denominatore',
-        'Grad 0': 'Grado 0', 'Grad 1': 'Grado 1', 'Grad 2': 'Grado 2', 'Faktor $k$': 'Fattore $k$', 'Beispiele:': 'Esempi:',
 
         // book it-8 mathegy12-it:
         // titelbildgy12, integrieren, abstandmin, geradenschar
@@ -132,23 +124,10 @@ window.BuchIT && BuchIT.add('analysis', {
         'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
             'La pendenza è sempre $0{,}5$: le rette sono parallele e non hanno nessun punto in comune. Il parametro le trasla.',
         // kurve: the choice of the derivatives (abi)
-        'nur f': 'solo f',
 
         // book it-9 mathegy12lk-it:
         // abstandmin, geradenschar (the same widgets as GY 12, js/buch-es/analysis.js block mathegy12-es)
-        'Gerade': 'Retta', 'Wurzelkurve': 'Curva radice', 'Kurve:': 'Curva:',
-        'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).':
-            'Trascina il punto P. Il cursore muove Q sulla curva, in basso la distanza d(x) cresce e diminuisce.',
-        'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Curva, punto P e il punto Q sulla curva con la loro distanza',
-        'Abstandsfunktion d(x) mit ihrem Minimum': 'Funzione distanza d(x) con il suo minimo', '$x$-Koordinate von $Q$': 'Coordinata $x$ di $Q$',
-        'Büschel': 'Fascio', 'Parallelen': 'Parallele', 'Gerade und Parabel': 'Retta e parabola', 'Geradenschar': 'Famiglia di rette',
-        'Geradenschar mit der hervorgehobenen Geraden für den gewählten Parameter': 'Famiglia di rette con evidenziata la retta del parametro scelto',
-        'Alle Geraden gehen durch $(2 \\mid 1)$: Für $x = 2$ fällt $a$ heraus. Der Parameter ist die Steigung, eine Gerade fehlt aber: die senkrechte $x = 2$.':
-            'Tutte le rette passano per $(2, 1)$: per $x = 2$, $a$ sparisce. Il parametro è la pendenza, ma manca una retta: la verticale $x = 2$.',
-        'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
-            'La pendenza è sempre $0{,}5$: le rette sono parallele e non hanno nessun punto in comune. Il parametro le trasla.',
         // kurve (abi.html): the labels BGY 13 left German
-        'nur f': 'solo f', 'konstant': 'costante', 'steigt ↗': 'cresce ↗',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -263,7 +242,7 @@ window.BuchIT && BuchIT.add('analysis', {
         ['Kürzen: $f(x) = ', 'Semplificando: $f(x) = '], ['$ für $x \\neq ', '$ per $x \\neq '],
         ['$ · hebbare Lücken', '$ · buchi (discontinuità eliminabili)'], ['$ · hebbare Lücke', '$ · buco (discontinuità eliminabile)'],
         ['Nullstellen: ', 'Zeri: '], [' · Polstellen: ', ' · poli: '],
-        [' mit Vorzeichenwechsel', ' con cambio di segno'], [' ohne Vorzeichenwechsel', ' senza cambio di segno'], [' (senkrechte Asymptote)', ' (asintoto verticale)'],
+        [' ohne Vorzeichenwechsel', ' senza cambio di segno'], [' (senkrechte Asymptote)', ' (asintoto verticale)'],
         // schar: the note comes right after "… $y = -2x^3$. ", where the it-2 piece "$. Für $" starts earlier than the sentence of the it-3 block -
         // the same sentence with its "$. " in front wins (longest first) and keeps it whole
         ['$. Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
@@ -276,32 +255,9 @@ window.BuchIT && BuchIT.add('analysis', {
 
         // book it-6 mathegy11-it:
         // bruchfunktion
-        ['Nullstelle des Zählers $', 'Zero del numeratore $'], ['Nullstelle des Nenners $', 'Zero del denominatore $'],
-        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Dopo la semplificazione al denominatore non resta più nessuna $x$: il grafico è '],
-        ['eine waagerechte Gerade', 'una retta orizzontale'], ['eine Gerade', 'una retta'],
-        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grado del numeratore minore del grado del denominatore: asintoto orizzontale $y = 0$, l’asse $x$.'],
-        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Grado del numeratore uguale al grado del denominatore: asintoto orizzontale $y = '],
-        ['$ (Quotient der Leitkoeffizienten).', '$ (quoziente dei coefficienti direttivi).'],
-        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grado del numeratore maggiore di 1: la divisione tra polinomi dà $f(x) = '],
-        ['$, schiefe Asymptote $y = ', '$, asintoto obliquo $y = '],
-        ['Kürzen: $f(x) = ', 'Semplificando: $f(x) = '], ['$ für $x \\neq ', '$ per $x \\neq '],
-        ['$ · hebbare Lücken', '$ · buchi (discontinuità eliminabili)'], ['$ · hebbare Lücke', '$ · buco (discontinuità eliminabile)'],
-        ['Nullstellen: ', 'Zeri: '], [' · Polstellen: ', ' · poli: '],
-        [' mit Vorzeichenwechsel', ' con cambio di segno'], [' ohne Vorzeichenwechsel', ' senza cambio di segno'], [' (senkrechte Asymptote)', ' (asintoto verticale)'],
 
         // book it-7 mathegy11lk-it:
         // bruchfunktion
-        ['Nullstelle des Zählers $', 'Zero del numeratore $'], ['Nullstelle des Nenners $', 'Zero del denominatore $'],
-        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Dopo aver semplificato non c’è più $x$ al denominatore: il grafico è '],
-        ['eine waagerechte Gerade', 'una retta orizzontale'], ['eine Gerade', 'una retta'],
-        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grado del numeratore minore del grado del denominatore: asintoto orizzontale $y = 0$, l’asse $x$.'],
-        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Grado del numeratore uguale al grado del denominatore: asintoto orizzontale $y = '],
-        ['$ (Quotient der Leitkoeffizienten).', '$ (rapporto dei coefficienti direttivi).'],
-        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grado del numeratore maggiore di 1: la divisione tra polinomi dà $f(x) = '],
-        ['$, schiefe Asymptote $y = ', '$, asintoto obliquo $y = '],
-        ['Kürzen: $f(x) = ', 'Semplificando: $f(x) = '], ['$ · hebbare Lücken', '$ · discontinuità eliminabili'], ['$ · hebbare Lücke', '$ · discontinuità eliminabile'],
-        ['Nullstellen: ', 'Zeri: '], [' · Polstellen: ', ' · poli: '],
-        [' mit Vorzeichenwechsel', ' con cambio di segno'], [' ohne Vorzeichenwechsel', ' senza cambio di segno'], [' (senkrechte Asymptote)', ' (asintoto verticale)'],
 
         // book it-8 mathegy12-it:
         // integrieren
@@ -321,25 +277,10 @@ window.BuchIT && BuchIT.add('analysis', {
 
         // book it-9 mathegy12lk-it:
         // integrieren
-        ['Bestimme eine Stammfunktion: $f(x) = ', 'Trova una primitiva: $f(x) = '],
-        ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Non ancora. Deriva la tua soluzione per verificarla. Suggerimento: '],
         // abstandmin
-        ['Jetzt: $x = ', 'Ora: $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · minima in $x \\approx '],
-        ['$P$ liegt auf der Kurve, der Abstand ist $0$.', '$P$ giace sulla curva, la distanza è $0$.'],
-        ['Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ', 'Il segmento più corto (verde) è perpendicolare alla tangente: angolo $\\approx '],
-        ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. Per questo il punto si chiama anche piede della perpendicolare.'],
-        ['Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.',
-            'Il minimo sta al bordo dell’intervallo; lì il segmento non deve essere per forza perpendicolare alla tangente.'],
         // geradenschar
-        ['Schnitt mit $y = x^2 + 2$: $x^2 - ', 'Intersezione con $y = x^2 + 2$: $x^2 - '], ['x + 1 = 0$, Diskriminante $a^2 - 4 = ', 'x + 1 = 0$, discriminante $a^2 - 4 = '],
-        ['zwei Schnittpunkte.', 'due punti di intersezione.'], ['kein gemeinsamer Punkt.', 'nessun punto in comune.'],
-        ['genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', 'esattamente un punto: la retta è <b>tangente</b> alla parabola in $x = '],
-        ['$. Das passiert für $a = \\pm 2$.', '$. Succede per $a = \\pm 2$.'],
         // kurve, schar: "Hochpunkt $H(…)$" (short widget labels as in the glossary, block mathe12-it)
-        ['Hochpunkt $', 'Massimo $'], ['Tiefpunkt $', 'Minimo $'],
         // schar: the piece "$. Für $" of an earlier block starts one position before the note and took its "Für" away
-        ['$. Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
-            '$. Per $a \\le 0$ non ci sono punti di estremo: $f_a\'(x) = 3x^2 - a$ non ha allora nessuno zero con cambio di segno.'],
     ],
     rule: [
         // book it-1 mathe11-it:

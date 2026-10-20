@@ -112,18 +112,15 @@ window.BuchIT && BuchIT.add('stochastik', {
         'Kugeln $n$': 'Palline $n$', 'Ziehungen $k$': 'Estrazioni $k$', 'n kleiner': 'n minore', 'n größer': 'n maggiore', 'k kleiner': 'k minore', 'k größer': 'k maggiore',
         'mit Reihenfolge': 'con ordine', 'ohne Reihenfolge': 'senza ordine', 'Reihenfolge': 'Ordine', 'Zurücklegen': 'Reimmissione', 'Einmal ziehen': 'Estrai una volta', 'URNE': 'URNA',
         // pascal
-        '$n$ (Zeile)': '$n$ (riga)', '$k$ (Stelle)': '$k$ (posizione)', 'Pascalsches Dreieck bis zur Zeile 10': 'Triangolo di Pascal fino alla riga 10',
+        '$n$ (Zeile)': '$n$ (riga)', '$k$ (Stelle)': '$k$ (posizione)', 'Pascalsches Dreieck bis zur Zeile 10': 'Triangolo di Tartaglia fino alla riga 10',
 
         // book it-5 mathefos12-it:
 
         // book it-6 mathegy11-it:
         // pascal (FOS 11 uses this widget too)
-        '$n$ (Zeile)': '$n$ (riga)', '$k$ (Stelle)': '$k$ (posizione)', 'Pascalsches Dreieck bis zur Zeile 10': 'Triangolo di Tartaglia fino alla riga 10',
 
         // book it-7 mathegy11lk-it:
         // urne (chapter 4.1; the same widget as the Spanish mathegy8-es block)
-        'Kugeln $n$': 'Palline $n$', 'Ziehungen $k$': 'Estrazioni $k$', 'n kleiner': 'n minore', 'n größer': 'n maggiore', 'k kleiner': 'k minore', 'k größer': 'k maggiore',
-        'mit Reihenfolge': 'con ordine', 'ohne Reihenfolge': 'senza ordine', 'Reihenfolge': 'Ordine', 'Zurücklegen': 'Reimmissione', 'Einmal ziehen': 'Estrai una volta', 'URNE': 'URNA',
 
         // book it-8 mathegy12-it:
         // signifikanztest: the side of the test (lb6, abi)
@@ -131,7 +128,6 @@ window.BuchIT && BuchIT.add('stochastik', {
 
         // book it-9 mathegy12lk-it:
         // signifikanztest: the kind of the test
-        'linksseitig': 'sinistro', 'rechtsseitig': 'destro', 'zweiseitig': 'bilaterale',
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -224,7 +220,7 @@ window.BuchIT && BuchIT.add('stochastik', {
         [' Zahlen, die Reihenfolge der Ziehung zählt nicht', ' numeri, l’ordine dell’estrazione non conta'], [' Kugeln Eis aus ', ' palline di gelato da '],
         [' Sorten, eine Sorte darf mehrfach vorkommen', ' gusti, un gusto può ripetersi'], [' Möglichkeiten sind zu viele zum Auflisten.', ' possibilità sono troppe da elencare.'],
         // pascal
-        [': So viele Möglichkeiten gibt es, $', ': ci sono altrettanti modi di scegliere $'], ['$ aus $', '$ tra $'], ['$ auszuwählen.', '$.'],
+        [': So viele Möglichkeiten gibt es, $', ': è il numero di modi per scegliere $'], ['$ aus $', '$ tra $'], ['$ auszuwählen.', '$.'],
         ['Summenregel (grün umrandet): $', 'Regola della somma (bordo verde): $'], ['Symmetrie (gestrichelt): $', 'Simmetria (tratteggiata): $'],
         ['Die Mitte der Zeile: $', 'Il centro della riga: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ è qui l’immagine speculare di sé stesso.'],
         // binomial: the standard deviation after the expected value (the BGY books have only the h of the samples)
@@ -234,30 +230,17 @@ window.BuchIT && BuchIT.add('stochastik', {
 
         // book it-6 mathegy11-it:
         // pascal
-        [': So viele Möglichkeiten gibt es, $', ': è il numero di modi per scegliere $'], ['$ aus $', '$ tra $'], ['$ auszuwählen.', '$.'],
-        ['Summenregel (grün umrandet): $', 'Regola della somma (bordo verde): $'], ['Symmetrie (gestrichelt): $', 'Simmetria (tratteggiata): $'],
-        ['Die Mitte der Zeile: $', 'Il centro della riga: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ qui è l’immagine speculare di se stesso.'],
 
         // book it-7 mathegy11lk-it:
         // urne
-        ['Variation mit Wiederholung', 'Disposizioni con ripetizione'], ['Permutation (alle Kugeln, mit Reihenfolge)', 'Permutazioni (tutte le palline, con ordine)'],
-        ['Variation ohne Wiederholung', 'Disposizioni senza ripetizione'], ['Kombination ohne Wiederholung', 'Combinazioni senza ripetizione'],
-        ['Kombination mit Wiederholung', 'Combinazioni con ripetizione'], ['</b> · Beispiel: ', '</b> · esempio: '], ['Anzahl der Möglichkeiten: ', 'Numero delle possibilità: '],
-        ['Gezogen: <b>', 'Estratto: <b>'], ['Ergebnisse als Tupel $(\\ldots)$: Die Reihenfolge zählt.', 'Esiti come n-uple $(\\ldots)$: l’ordine conta.'],
-        ['Ergebnisse als Mengen $\\{\\ldots\\}$: Die Reihenfolge zählt nicht.', 'Esiti come insiemi $\\{\\ldots\\}$: l’ordine non conta.'],
-        [' Genau dafür gibt es die Formel.', ' Proprio per questo c’è la formula.'],
         // urne: the pieces of the examples that the rules below translate as a whole (for tools/buch-en/check.mjs)
-        ['ein Zahlenschloss mit ', 'un lucchetto a combinazione con '], [' Rädern zu je ', ' rotelle da '], [' Personen stellen sich in eine Reihe', ' persone si mettono in fila'],
-        ['ein Siegerpodest: ', 'un podio: '], [' Startern auf die Plätze 1 bis ', ' concorrenti ai posti da 1 a '], ['Lotto: ', 'lotto: '],
-        [' Zahlen, die Reihenfolge der Ziehung zählt nicht', ' numeri, l’ordine dell’estrazione non conta'], [' Kugeln Eis aus ', ' palline di gelato da '],
-        [' Sorten, eine Sorte darf mehrfach vorkommen', ' gusti, un gusto può ripetersi'], [' Möglichkeiten sind zu viele zum Auflisten.', ' possibilità sono troppe per elencarle.'],
 
         // book it-8 mathegy12-it:
 
         // book it-9 mathegy12lk-it:
         // stichprobe, binomial, signifikanztest: pieces BGY 12/13 left German
         [' · letzte: $h = ', ' · ultima: $h = '], ['$ (gold)', '$ (oro)'], ['Theorie: $', 'Teoria: $'],
-        ['$ · Standardabweichung $', '$ · deviazione standard $'], ['Ablehnungsbereich (rot): $', 'Regione di rifiuto (rossa): $'],
+        ['Ablehnungsbereich (rot): $', 'Regione di rifiuto (rossa): $'],
     ],
     rule: [
         // book it-1 mathe11-it:
