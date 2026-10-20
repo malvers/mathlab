@@ -70,6 +70,16 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-18 mathe8-it:
 
         // book it-19 mathe9-it:
+        // pythagoras (OS 9 chapter 1.1): the theorems as buttons, the notes under the picture
+        'Pythagoras': 'Pitagora', 'Kathetensatz': '1° teorema di Euclide', 'Höhensatz': '2° teorema di Euclide', 'Satz': 'Teorema', 'gleichschenklig': 'isoscele',
+        'Zieh am Punkt $C$. Er bleibt auf dem Thaleskreis über $\\overline{AB}$, deshalb ist der Winkel bei $C$ immer ein rechter.':
+            'Trascina il punto $C$. Resta sulla semicirconferenza di diametro $\\overline{AB}$, perciò l’angolo in $C$ è sempre retto.',
+        'Rechtwinkliges Dreieck mit Quadraten über den Seiten': 'Triangolo rettangolo con i quadrati sui lati',
+        'Die beiden Kathetenquadrate haben zusammen genau den Flächeninhalt des Hypotenusenquadrats.':
+            'I due quadrati sui cateti insieme hanno esattamente l’area del quadrato sull’ipotenusa.',
+        'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Ogni quadrato su un cateto è grande quanto il rettangolo sotto di esso.',
+        'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.':
+            'Il quadrato sull’altezza è grande quanto il rettangolo formato dalle due proiezioni dei cateti sull’ipotenusa.',
 
         // book it-20 mathe10-it:
         'Quadratische Pyramide': 'Piramide a base quadrata',
@@ -139,6 +149,9 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-18 mathe8-it:
 
         // book it-19 mathe9-it:
+        // pythagoras: "$a^2 \approx …$ und $c \cdot p \approx 5 \cdot …$"
+        ['$ und $c \\cdot p \\approx 5 \\cdot ', '$ e $c \\cdot p \\approx 5 \\cdot '], ['$ und $c \\cdot q \\approx 5 \\cdot ', '$ e $c \\cdot q \\approx 5 \\cdot '],
+        ['$ und $p \\cdot q \\approx ', '$ e $p \\cdot q \\approx '],
 
         // book it-20 mathe10-it:
         [' im Schrägbild mit Hilfsdreieck', ' in prospettiva cavaliera con il triangolo ausiliario'],
