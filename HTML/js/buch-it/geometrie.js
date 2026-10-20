@@ -80,6 +80,12 @@ window.BuchIT && BuchIT.add('geometrie', {
         'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Ogni quadrato su un cateto è grande quanto il rettangolo sotto di esso.',
         'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.':
             'Il quadrato sull’altezza è grande quanto il rettangolo formato dalle due proiezioni dei cateti sull’ipotenusa.',
+        // trigo (OS 9 chapter 1.2)
+        'Sinus': 'Seno', 'Kosinus': 'Coseno', 'Tangens': 'Tangente', 'Verhältnis': 'Rapporto', 'Hypotenuse $c$': 'Ipotenusa $c$',
+        'Gegenkathete a': 'cateto opposto a', 'Ankathete b': 'cateto adiacente b', 'Hypotenuse c': 'ipotenusa c',
+        'Rechtwinkliges Dreieck mit Winkel alpha': 'Triangolo rettangolo con l’angolo alfa',
+        'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.':
+            'Cambia $c$: il triangolo diventa più grande o più piccolo, i tre rapporti restano uguali. Dipendono solo dall’angolo.',
 
         // book it-20 mathe10-it:
         'Quadratische Pyramide': 'Piramide a base quadrata',
@@ -152,6 +158,8 @@ window.BuchIT && BuchIT.add('geometrie', {
         // pythagoras: "$a^2 \approx …$ und $c \cdot p \approx 5 \cdot …$"
         ['$ und $c \\cdot p \\approx 5 \\cdot ', '$ e $c \\cdot p \\approx 5 \\cdot '], ['$ und $c \\cdot q \\approx 5 \\cdot ', '$ e $c \\cdot q \\approx 5 \\cdot '],
         ['$ und $p \\cdot q \\approx ', '$ e $p \\cdot q \\approx '],
+        // trigo: the words in the fractions
+        ['\\text{Gegenkathete}', '\\text{cateto opposto}'], ['\\text{Ankathete}', '\\text{cateto adiacente}'], ['\\text{Hypotenuse}', '\\text{ipotenusa}'],
 
         // book it-20 mathe10-it:
         [' im Schrägbild mit Hilfsdreieck', ' in prospettiva cavaliera con il triangolo ausiliario'],
