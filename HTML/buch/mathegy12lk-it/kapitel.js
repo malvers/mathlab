@@ -22,7 +22,7 @@ window.BUCH = {
         { file: 'lb6.html', lb: 'Area di apprendimento 6', k: '6', title: 'Variabili aleatorie normali',
           sub: 'Curva a campana di Gauss, funzione di densità e funzione di ripartizione, valore atteso e deviazione standard, regole σ, De Moivre-Laplace', when: 'Novembre', ustd: 10 },
         { file: 'lb7.html', lb: 'Area di apprendimento 7', k: '7', title: 'Statistica inferenziale',
-          sub: 'Campioni, stima di proporzioni, media e varianza, test di significatività unilaterali e bilaterali, livello di confidenza', when: 'Dicembre', ustd: 15 },
+          sub: 'Campioni, stima di proporzioni, media e varianza, test di significatività unilaterali e bilaterali, significatività statistica', when: 'Dicembre', ustd: 15 },
         { file: 'lb8-1.html', lb: 'Area di apprendimento 8', k: '8.1', title: 'Prodotto scalare, prodotto vettoriale e forma normale di Hesse',
           sub: 'Angolo e proiezione, vettore perpendicolare e area, equazione normale ed equazione cartesiana, forma normale di Hesse per la retta e il piano', when: 'Gennaio', ustd: 10 },
         { file: 'lb8-2.html', lb: 'Area di apprendimento 8', k: '8.2', title: 'Angoli di intersezione',
