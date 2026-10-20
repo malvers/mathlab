@@ -440,6 +440,32 @@ Package it-6 (Nalli), 20.10.2026: decisions made while translating GY 11 (Grundk
 
 <!-- it-8: terms of this book only, write right below this line -->
 
+Round 2, 20.10.2026 (Hack): decisions made while translating GY 12 Grundkurs; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Grundkurs / Leistungskurs | corso di base / corso avanzato | start page: "corso di base (Grundkurs)" once |
+| Wahlbereich 5, Kapitel W | Area opzionale 5, OP | as in the glossary |
+| Prüfung (chapter A in kapitel.js) | Esame | |
+| Grundintegrale | integrali immediati | 5.1 |
+| lineare Verkettung | funzione composta lineare | 5.1; the widget keeps its existing label |
+| Integrationskonstante, Integrand, Integrationsgrenze | costante di integrazione, funzione integranda, estremo di integrazione | 5.1, 5.2 |
+| Untersumme / Obersumme | somma inferiore / somma superiore | the letters $U_n$, $O_n$ stay as in the German book |
+| orientierter Flächeninhalt | area orientata | 5.2 |
+| Rechteckverfahren links / rechts / Mittelpunktsregel, Trapezverfahren | metodo dei rettangoli a sinistra / a destra / regola del punto medio, metodo dei trapezi | widget labels: "Rettangoli a sinistra / a destra / punto medio", as js/buch-it/numerik.js |
+| linksgekrümmt / rechtsgekrümmt | con la concavità verso l’alto / verso il basso | OP |
+| Normalenform, Koordinatenform, Hessesche Normalform | forma normale, equazione cartesiana, forma normale di Hesse | 7.1, 7.3 |
+| Lotgerade | retta perpendicolare | 7.3, 8.1 |
+| Steigungswinkel, Innenwinkel (an einer Kante) | angolo di inclinazione, angolo interno | 7.2 |
+| Abstandsfunktion, Abstandsformel | funzione distanza, formula della distanza | 7.3, 8.1 |
+| spiegeln, Spiegelpunkt, Spiegelebene | trovare il simmetrico, punto simmetrico, piano di simmetria | 8.1 |
+| Geradenschar, Geradenbüschel, Parallelenschar | fascio di rette, fascio proprio, fascio improprio | 8.2; widget buttons "Fascio proprio", "Fascio improprio" |
+| Hüllkurve | inviluppo | 8.2 |
+| Hilfsmittel (Teil ohne Hilfsmittel) | calcolatrice / strumenti digitali | as in section 2 |
+| Konsultation (training) | consultazione | A |
+| Klausur 12/I, 12/II | verifica scritta 12/I, 12/II | |
+| Signifikanztest: links-, rechts-, zweiseitig (widget) | sinistro, destro, bilaterale | js/buch-it/stochastik.js |
+
 ## mathegy12lk-it
 
 <!-- it-9: terms of this book only, write right below this line -->
