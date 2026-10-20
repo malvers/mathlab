@@ -135,6 +135,18 @@ window.BuchIT && BuchIT.add('gy7', {
         'flach': 'piatto',
 
         // book it-18 mathe8-it:
+        // module constants (the solids of the 3D stage; "Würfel" stays out: dice and cube share the German word)
+        'Quader': 'Parallelepipedo', 'Dreiecksprisma': 'Prisma triangolare', 'Sechseckprisma': 'Prisma esagonale', 'Quadratische Pyramide': 'Piramide quadrangolare',
+        'Dreieckspyramide': 'Piramide triangolare', 'Pyramidenstumpf': 'Tronco di piramide', 'Tetraeder': 'Tetraedro', 'Oktaeder': 'Ottaedro', 'Dodekaeder': 'Dodecaedro',
+        'Ikosaeder': 'Icosaedro', 'Körper in 3D': 'Solido in 3D', 'Ziehen zum Drehen': 'Trascina per ruotare',
+        // waagebild7 (OS 8 chapter 1.2)
+        'Eine Waage im Gleichgewicht: links drei Kisten x und zwei Gewichte, rechts eine Kiste x und sechs Gewichte':
+            'Una bilancia in equilibrio: a sinistra tre pacchi x e due pesi, a destra un pacco x e sei pesi',
+        // umstellen7
+        '⇄ Seiten tauschen': '⇄ scambia i lati', 'Rechteck': 'Rettangolo', 'Umfang': 'Perimetro', 'Dichte': 'Densità', 'Pyramide': 'Piramide',
+        'Formel': 'Formula', 'umstellen nach': 'ricava',
+        'nach $a$': 'ricava $a$', 'nach $b$': 'ricava $b$', 'nach $c$': 'ricava $c$', 'nach $s$': 'ricava $s$', 'nach $t$': 'ricava $t$',
+        'nach $m$': 'ricava $m$', 'nach $V$': 'ricava $V$', 'nach $h$': 'ricava $h$', 'nach $G$': 'ricava $G$',
 
         // book it-19 mathe9-it:
         // shared solids and the 3D stage (OS 9 chapter 2.1: faltnetz7, schraegbild7, drittel7; "Körper" is in os9.js)
@@ -400,6 +412,8 @@ window.BuchIT && BuchIT.add('gy7', {
             'Colonne: quanti poligoni in un vertice. Esattamente cinque caselle hanno il segno di spunta: esistono esattamente cinque solidi platonici.'],
 
         // book it-18 mathe8-it:
+        // umstellen7 ("… $. Probe: $4 \cdot 6 = 24$ ✓" goes through the os8 piece "$. Probe: $")
+        ['Fertig. Mit Zahlen: ', 'Fatto. Con i numeri: '], ['Stahl, $\\varrho = ', 'Acciaio, $\\varrho = '], ['Wasser, $\\varrho = ', 'Acqua, $\\varrho = '],
 
         // book it-19 mathe9-it:
         // schraegbild7
@@ -505,6 +519,9 @@ window.BuchIT && BuchIT.add('gy7', {
         [/(<p style="margin:0"><b>)Würfel(<\/b>: \d+ )/g, '$1Cubo$2'],
 
         // book it-18 mathe8-it:
+        // umstellen7: "Die Formel $A = a \cdot b$ nach $b$ umstellen: auf <b>beiden</b> Seiten dasselbe tun, bis $b$ allein steht."
+        [/Die Formel \$([^$]+)\$ nach \$([^$]+)\$ umstellen: auf <b>beiden<\/b> Seiten dasselbe tun, bis \$([^$]+)\$ allein steht\./g,
+            (m, f, v, w) => 'Ricavare $' + v + '$ dalla formula $' + f + '$: fare la stessa cosa su <b>entrambi</b> i lati, finché $' + w + '$ resta da sola.'],
 
         // book it-19 mathe9-it:
         // schraegbild7: the sentences around the coloured spans (tags cut the phrases), the material of the mass, the aria "Quader im Schrägbild"

@@ -106,6 +106,10 @@ window.BuchIT && BuchIT.add('gy8', {
         // termbaum8 (OS 8 chapter 1.1)
         'Wert für $x$': 'Valore di $x$',
         'Tipp auf einen Knoten: Dann leuchtet sein Teilterm auf.': 'Tocca un nodo: si illumina la sua sottoespressione.',
+        // rueckwaerts8 (OS 8 chapter 1.2)
+        'Rückwärts: ein Schritt': 'All’indietro: un passo', 'Neues Rätsel': 'Nuovo indovinello', 'Startzahl': 'Numero di partenza',
+        'Probier eine Zahl im ersten Kästchen, oder rechne rückwärts: Jede Rechnung wird durch ihre Umkehrung ersetzt, plus durch minus, mal durch geteilt.':
+            'Prova un numero nella prima casella, oppure calcola all’indietro: ogni operazione viene sostituita dalla sua inversa, il più con il meno, il per con il diviso.',
 
         // book it-20 mathe10-it:
         'gleich': 'uguale',
@@ -191,6 +195,8 @@ window.BuchIT && BuchIT.add('gy8', {
         // termbaum8
         ['Rechenbaum des Terms ', 'Albero di calcolo dell’espressione '],
         ['$ hat er den Wert ', '$ ha il valore '], ['. Gerechnet wird von unten nach oben.', '. Si calcola dal basso verso l’alto.'],
+        // rueckwaerts8
+        ['Richtig!</b>', 'Giusto!</b>'], ['Das passt nicht.', 'Non torna.'],
 
         // book it-20 mathe10-it:
         ['Gemessen: Der Stab ist $2$ m hoch, sein Schatten ist $s \\approx ', 'Misurato: l’asta è alta $2$ m, la sua ombra è $s \\approx '],
@@ -321,6 +327,12 @@ window.BuchIT && BuchIT.add('gy8', {
             (m, t, k) => 'Selezionata: la sottoespressione $' + t + '$, ' + ({ Summe: 'una somma', Differenz: 'una differenza', Produkt: 'un prodotto', Quotient: 'un quoziente', Potenz: 'una potenza' })[k] + ', con il valore $'],
         [/Ausgewählt: die Variable \$x\$ mit dem Wert \$/g, () => 'Selezionata: la variabile $x$ con il valore $'],
         [/Ausgewählt: die Zahl \$/g, () => 'Selezionato: il numero $'],
+        // rueckwaerts8: the puzzle in words, the try and the backward solution
+        [/Ich denke mir eine Zahl und rechne: (.+?)\. Heraus kommt \$([^$]*)\$\. Welche Zahl war es\?/g,
+            (m, ops, e) => 'Penso un numero e calcolo: ' + ops.replace(/geteilt durch/g, 'diviso').replace(/\bmal\b/g, 'per').replace(/\bplus\b/g, 'più').replace(/\bminus\b/g, 'meno').replace(/, dann /g, ', poi ') +
+                '. Il risultato è $' + e + '$. Che numero era?'],
+        [/Mit \$([^$]*)\$ kommt \$([^$]*)\$ heraus\. /g, (m, a, b) => 'Con $' + a + '$ viene $' + b + '$. '],
+        [/Rückwärts von \$([^$]*)\$ aus, mit den Umkehrrechnungen: Die Startzahl ist <b>/g, (m, e) => 'All’indietro da $' + e + '$, con le operazioni inverse: il numero di partenza è <b>'],
 
         // book it-20 mathe10-it:
 
