@@ -111,6 +111,14 @@ window.BuchIT && BuchIT.add('gy5', {
         'Linienbrett mit Rechenpfennigen': 'Tavola a linee con gettoni da calcolo',
 
         // book it-16 mathe6-it:
+        // bruch5
+        'Kreis': 'Cerchio', 'Rechteck': 'Rettangolo', 'Streifen': 'Striscia', 'Bild': 'Figura', 'Zähler': 'Numeratore', 'Nenner': 'Denominatore',
+        'Erweitern mit 2': 'Amplifica per 2', 'mit 3': 'per 3', 'Kürzen': 'Semplifica', 'weniger': 'meno', 'mehr': 'più',
+        // bruchstrahl5
+        'Gib Brüche wie 3/4 oder Dezimalzahlen wie 0,7 ein, auch Zahlen größer als 1 bis 3.':
+            'Scrivi frazioni come 3/4 o numeri decimali come 0,7, anche numeri maggiori di 1, fino a 3.',
+        'Zahlenstrahl mit zwei Zahlen': 'Retta numerica con due numeri',
+        'Bitte zwei Zahlen zwischen 0 und 3 eingeben, zum Beispiel 3/4 oder 0,7.': 'Scrivi due numeri tra 0 e 3, per esempio 3/4 o 0,7.',
 
     },
     phrase: [
@@ -199,6 +207,20 @@ window.BuchIT && BuchIT.add('gy5', {
         ['g und h sind weder parallel noch senkrecht. Versuche, sie parallel oder senkrecht zu stellen.', 'g e h non sono né parallele né perpendicolari. Prova a metterle parallele o perpendicolari.'],
 
         // book it-16 mathe6-it:
+        // bruch5
+        ['Null Teile: der Bruch hat den Wert 0.', 'Zero parti: la frazione vale 0.'],
+        ['Ein <b>echter Bruch</b>: weniger als ein Ganzes.', 'Una <b>frazione propria</b>: meno di un intero.'],
+        ['Genau <b>ein Ganzes</b>.', 'Esattamente <b>un intero</b>.'],
+        ['Ein <b>unechter Bruch</b>: mehr als ein Ganzes', 'Una <b>frazione impropria</b>: più di un intero'],
+        [', als gemischte Zahl $', ', come numero misto $'],
+        ['Der Bruch lässt sich nicht weiter kürzen.', 'La frazione non si può semplificare ulteriormente.'],
+        ['Als Dezimalzahl: ', 'Come numero decimale: '], [' · in Prozent: ', ' · in percentuale: '],
+        ['Als Dezimalzahl ungefähr ', 'Come numero decimale circa '],
+        ['. Der Nenner hat einen anderen Primfaktor als 2 und 5, deshalb hört die Dezimalzahl nicht auf.',
+            '. Il denominatore ha un fattore primo diverso da 2 e da 5, perciò il numero decimale non finisce.'],
+        // bruchstrahl5
+        ['Jetzt vergleicht man nur die Zähler: ', 'Ora si confrontano solo i numeratori: '],
+        ['Als Dezimalzahlen: ', 'Come numeri decimali: '], ['. Weiter rechts auf dem Zahlenstrahl heißt größer.', '. Più a destra sulla retta numerica vuol dire più grande.'],
 
     ],
     rule: [
@@ -307,6 +329,13 @@ window.BuchIT && BuchIT.add('gy5', {
         [/(\d[\d ]*) dazugelegt\. Jetzt muss gebündelt werden\./, 'Aggiunto $1. Ora bisogna raggruppare.'],
 
         // book it-16 mathe6-it:
+        // bruch5
+        [/^(Kreis|Streifen|Rechteck)bild des Bruchs (\d+)\/(\d+)$/, (m, f, z, n) => 'La frazione ' + z + '/' + n + ' come ' + ({ Kreis: 'cerchio', Streifen: 'striscia', Rechteck: 'rettangolo' })[f]],
+        [/, genau (\d+) Ganze\./, ', esattamente $1 interi.'],
+        [/Kürzen mit (\d+) ergibt /, 'Semplificando per $1 si ottiene '],
+        // bruchstrahl5
+        [/^Zahl ([A-Z])$/, 'Numero $1'],
+        [/Auf denselben Nenner (\d+) gebracht: (\$[^$]*\$) und (\$[^$]*\$)/, 'Con il denominatore comune $1: $2 e $3'],
 
     ]
 });

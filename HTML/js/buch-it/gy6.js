@@ -152,6 +152,16 @@ window.BuchIT && BuchIT.add('gy6', {
         'Gib für $a$ eine natürliche Zahl von 2 bis 9999 ein.': 'Scrivi per $a$ un numero naturale da 2 a 9999.',
 
         // book it-16 mathe6-it:
+        // bruchbild6
+        'Zähler': 'Numeratore', 'Nenner': 'Denominatore', 'Kreis': 'Cerchio', 'Streifen': 'Striscia', 'Bild': 'Figura',
+        'Der Bruch ist eine natürliche Zahl.': 'La frazione è un numero naturale.',
+        // mengen6
+        'Mengendiagramm: die natürlichen Zahlen liegen innerhalb der gebrochenen Zahlen': 'Diagramma di Venn: i numeri naturali stanno dentro i numeri frazionari',
+        'Richtig.': 'Giusto.', 'Noch nicht.': 'Non ancora.', 'Noch einmal': 'Ancora una volta',
+        'Rechne den Wert aus: Ist das eine ganze Zahl ohne Rest?': 'Calcola il valore: è un numero intero, senza resto?',
+        'Liegt die Zahl vielleicht zwischen zwei natürlichen Zahlen?': 'Il numero sta forse tra due numeri naturali?',
+        'in $\\mathbb{N}$ (und damit auch in $\\mathbb{Q}^+$)': 'in $\\mathbb{N}$ (e quindi anche in $\\mathbb{Q}^+$)',
+        'nur in $\\mathbb{Q}^+$': 'solo in $\\mathbb{Q}^+$',
 
         // book it-17 mathe7-it:
 
@@ -314,6 +324,27 @@ window.BuchIT && BuchIT.add('gy6', {
         ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'I due numeri non hanno divisori comuni oltre a 1.'],
 
         // book it-16 mathe6-it:
+        // bruchbild6
+        ['Bruch: $', 'Frazione: $'], ['Bild des Bruches ', 'Figura della frazione '], ['Dezimalzahl: $', 'Numero decimale: $'], ['Prozent: $', 'Percentuale: $'],
+        ['Null Teile von ', 'Zero parti su '], [' sind nichts: $0$.', ' non sono niente: $0$.'],
+        ['Der gekürzte Nenner ', 'Il denominatore semplificato '],
+        [' hat nur die Primfaktoren 2 und 5. Erweitern mit $', ' ha solo i fattori primi 2 e 5. Amplificare per $'],
+        ['. Die Dezimalzahl <b>bricht ab</b>.', '. Il numero decimale è <b>limitato</b>.'],
+        ['$ enthält den Primfaktor $', '$ contiene il fattore primo $'],
+        ['$. Auf 10, 100, 1000 … kann man nicht erweitern: Die Dezimalzahl ist <b>periodisch</b>.',
+            '$. Non si può amplificare fino a 10, 100, 1000 …: il numero decimale è <b>periodico</b>.'],
+        // mengen6
+        ['5 ist eine natürliche Zahl, und jede natürliche Zahl ist auch eine gebrochene Zahl: ', '5 è un numero naturale, e ogni numero naturale è anche un numero frazionario: '],
+        [' liegt zwischen 0 und 1. Das ist keine natürliche Zahl.', ' sta tra 0 e 1. Non è un numero naturale.'],
+        [' liegt zwischen 0 und 1.', ' sta tra 0 e 1.'], [' liegt zwischen 2 und 3.', ' sta tra 2 e 3.'],
+        [' liegt zwischen 4 und 5.', ' sta tra 4 e 5.'],
+        ['. Der Bruch sieht nur anders aus als die 3.', '. La frazione è il 3, solo scritto in un altro modo.'],
+        ['In der Schule zählt die 0 zu den natürlichen Zahlen.', 'A scuola lo 0 conta tra i numeri naturali.'],
+        ['. Die Null nach dem Komma ändert nichts.', '. Lo zero dopo la virgola non cambia niente.'],
+        [': die natürlichen Zahlen $', ': i numeri naturali $'],
+        [': die gebrochenen Zahlen, also alle Zahlen, die man als Bruch $', ': i numeri frazionari, cioè tutti i numeri che si possono scrivere come frazione $'],
+        ['$ schreiben kann.', '$.'],
+        ['Jede natürliche Zahl ist auch eine gebrochene Zahl: $', 'Ogni numero naturale è anche un numero frazionario: $'],
 
         // book it-17 mathe7-it:
 
@@ -393,6 +424,18 @@ window.BuchIT && BuchIT.add('gy6', {
         [/Gefunden: (\d+) Primzahlen\. Gestrichen: /g, (m, n) => (n === '1' ? 'Trovato: 1 numero primo' : 'Trovati: ' + n + ' numeri primi') + '. Cancellati: '],
 
         // book it-16 mathe6-it:
+        // the steppers' aria-labels: "Zähler kleiner" → "Numeratore: meno"
+        [/^(Zähler|Nenner|erster Zähler|erster Nenner|zweiter Zähler|zweiter Nenner|zu Fuß|Fahrrad|Bus oder Bahn|Auto) (kleiner|größer)$/, (m, w, d) => ({
+            'Zähler': 'Numeratore', 'Nenner': 'Denominatore', 'erster Zähler': 'Primo numeratore', 'erster Nenner': 'Primo denominatore',
+            'zweiter Zähler': 'Secondo numeratore', 'zweiter Nenner': 'Secondo denominatore',
+            'zu Fuß': 'A piedi', 'Fahrrad': 'Bici', 'Bus oder Bahn': 'Autobus o treno', 'Auto': 'Auto' })[w] + (d === 'kleiner' ? ': meno' : ': più')],
+        // bruchbild6
+        [/^Bild des Bruches (\d+) durch (\d+)$/, 'Figura della frazione $1/$2'],
+        // mengen6
+        [/Zahl (\d+) von (\d+): Wohin gehört <b>(\$[^$]*\$)<\/b>\?/g, 'Numero $1 di $2: dove va <b>$3</b>?'],
+        [/Alle Zahlen sind einsortiert(?:, (\d+) von (\d+) gleich beim ersten Versuch richtig)?\./g,
+            (m, a, b) => 'Tutti i numeri sono al loro posto' + (a ? ': ' + a + ' su ' + b + ' giusti al primo tentativo' : '') + '.'],
+        [/(\\in \\mathbb\{Q\}\^\+\$) und \$/g, '$1 e $'], [/(\\in \\mathbb\{Q\}\^\+\$), aber \$/g, '$1, ma $'],
 
         // book it-17 mathe7-it:
 
