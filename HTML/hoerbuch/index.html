@@ -283,10 +283,19 @@ nav button.gloss, nav button.notesbtn { display: flex; align-items: center; gap:
 nav button.gloss svg, nav button.notesbtn svg { width: 22px; height: 22px; fill: var(--accent); flex: none; }
 nav button.gloss small, nav button.notesbtn small { display: block; font-size: 12px; color: var(--muted); }
 nav button.pdf + button.gloss, nav button.gloss + button.notesbtn, nav button.pdf + button.notesbtn { margin-top: -6px; }
-/* bookmarks and notes (Doc 21.10.2026): a small sign before the sentence; a tap on it opens the note */
-.mk { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 0 4px 0 0; padding: 0;
-  vertical-align: -5px; border: 0; border-radius: 6px; background: rgba(var(--hl), .16); color: var(--accent); cursor: pointer; }
-.mk svg { width: 16px; height: 16px; fill: currentColor; }
+/* bookmarks and notes (Doc 21.10.2026: "ein kleines Zeichen rechts am Rand und oder das Wort durchgehend unterstreichen"):
+   the word gets a solid underline, the sign sits in the right margin on its line (a float that hangs out into the
+   padding, so the text keeps its width); a tap on the sign opens the note */
+.w.noted { text-decoration: underline solid var(--accent); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.mk { float: right; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin: 4px -32px 0 10px;
+  padding: 0; border: 0; border-radius: 6px; background: rgba(var(--hl), .16); color: var(--accent); cursor: pointer; }
+.mk svg { width: 15px; height: 15px; fill: currentColor; }
+@media (max-width: 860px) { .mk { width: 16px; height: 18px; margin: 5px -16px 0 0; background: none; } .mk svg { width: 14px; height: 14px; } }
+/* a short "done" under the header - free of the card and the player bar */
+#toast { position: fixed; z-index: 12; left: 50%; top: calc(84px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); padding: 8px 16px;
+  border-radius: 18px; background: var(--card); border: 1px solid var(--accent); color: var(--ink); font: 600 14px Raleway, Arial, sans-serif;
+  box-shadow: 0 8px 24px var(--shadow); pointer-events: none; transition: opacity .25s; opacity: 0; }
+#toast.on { opacity: 1; }
 .s.flash { background: rgba(var(--hl), .45); box-shadow: 0 0 0 3px rgba(var(--hl), .45); }
 /* the note: spoken (the browser's speech recognition writes along) or typed; on top, so the phone keyboard leaves it free */
 #note { position: fixed; inset: 0; z-index: 11; background: rgba(0, 0, 0, .4); display: grid; align-items: start; justify-items: center;
@@ -460,6 +469,7 @@ nav .tabs.sizes button { padding: 0; letter-spacing: 0; line-height: 1; }   /* f
   </div>
   <div id="glossList" class="dlg-list"></div>
 </div>
+<div id="toast" role="status" aria-live="polite"></div>
 <audio id="audio" preload="metadata"></audio>
 
 <script>
@@ -1037,7 +1047,7 @@ seek.addEventListener('change', () => { seeking = false; if (!audio.src) return;
 const DOUBLE_MS = 350;
 let jumpLater = 0;
 text.addEventListener('click', e => {
-  if (hiddenAtDown || e.target.closest('details.sum')) return;   // the box has its own player                 // that tap only brought the player bar back
+  if (hiddenAtDown || e.target.closest('details.sum') || e.target.closest('.mk')) return;   // the box has its own player                 // that tap only brought the player bar back
   const sEl = e.target.closest('.s'); if (!sEl || !audio.src) return;
   const x = S[+sEl.dataset.i], gEl = e.target.closest('.g'), wEl = e.target.closest('.w');
   let t = x.t;
@@ -1334,18 +1344,26 @@ function notesChanged(push = true) {
   if (!$('card').hidden) cardMarkState();
   if (push) { clearTimeout(syncLater); syncLater = setTimeout(syncNow, 1500); }
 }
-// the signs in the text: before each sentence that has a bookmark or a note
+// the marks in the text: the word underlined, a sign in the right margin on its line
 function paintMarks() {
   text.querySelectorAll('.mk').forEach(b => b.remove());
+  text.querySelectorAll('.w.noted').forEach(w => w.classList.remove('noted'));
   const c = BOOK[ch]; if (!c) return;
   for (const n of notesLive()) {
     if (n.ch !== c.key) continue;
     const el = spans[noteS(n)]; if (!el) continue;
+    const words = el.querySelectorAll('.w'), w = words[Math.min(Math.max(n.wi || 0, 0), words.length - 1)];
+    if (w) w.classList.add('noted');
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'mk'; b.dataset.id = n.id; b.innerHTML = n.note ? ICON_NOTE : ICON_MARK;
     b.title = n.note ? n.note.slice(0, 140) : 'Lesezeichen'; b.setAttribute('aria-label', n.note ? 'Notiz' : 'Lesezeichen');
-    el.before(b);
+    (w || el).before(b);
   }
+}
+let toastTimer = 0;
+function toast(t) {
+  const el = $('toast'); el.textContent = t; el.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), 1800);
 }
 text.addEventListener('click', e => {
   const b = e.target.closest('.mk'); if (!b) return;
@@ -1363,8 +1381,8 @@ $('cardMark').onclick = () => {
   if (!cardFor || cardFor.sum) return;
   const here = entriesHere(cardFor.el), note = here.find(n => n.note);
   if (note) { closeCard(); openNote(note, false); return; }
-  if (here.length) here.forEach(n => notesDrop(n.id));
-  else { const n = entryAt(cardFor.el); if (n) notesPut(n); }
+  if (here.length) { here.forEach(n => notesDrop(n.id)); toast('Lesezeichen entfernt'); }
+  else { const n = entryAt(cardFor.el); if (n) { notesPut(n); toast('Lesezeichen gesetzt'); } }
   cardMarkState();
 };
 $('cardNote').onclick = () => {
@@ -1400,7 +1418,7 @@ async function closeNote(keep) {
   if (!noteFor) return;
   await recFinish();
   const n = noteFor;
-  if (keep) { n.note = $('noteText').value.trim(); notesPut(n); }   // nothing said: then it is a bookmark
+  if (keep) { n.note = $('noteText').value.trim(); notesPut(n); toast(n.note ? 'Notiz gespeichert' : 'Lesezeichen gesetzt'); }   // nothing said: a bookmark
   noteHide();
 }
 function noteDelArm(on) {
@@ -1412,7 +1430,7 @@ $('noteDel').onclick = async () => {
   if (!$('noteDel').classList.contains('sure')) { noteDelArm(true); return; }
   const id = noteFor && noteFor.id;
   await recFinish(); noteHide();
-  if (id) notesDrop(id);
+  if (id) { notesDrop(id); toast('Gelöscht'); }
 };
 $('noteOk').onclick = () => closeNote(true);
 $('noteCancel').onclick = () => closeNote(false);
