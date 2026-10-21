@@ -840,6 +840,39 @@ Round 3, 20.10.2026 (Trotula): decisions made while translating OS 7 (Realschulb
 
 <!-- it-18: terms of this book only, write right below this line -->
 
+| German | Italian | Note |
+|---|---|---|
+| Oberschule, Realschulbildungsgang, Klasse 8 | Oberschule (school name, explained once on the start page), percorso Realschule, 8ª classe | |
+| Wahlpflichtbereich (WP) | Area a scelta (letter OP in kapitel.js) | |
+| Ustd. | ORE | chips and band subtitles |
+| Runde 1 · Kopfrechnen / Runde 2 · Nachdenken | PARTE 1 · CALCOLO MENTALE / PARTE 2 · RAGIONANDO | 1 with a calculator: CON LA CALCOLATRICE |
+| Mehr zum Ausprobieren (labs) | ALTRO DA SPERIMENTARE (IN TEDESCO) | the lab lines themselves carry no "(in tedesco)" |
+| Lösungsmenge $L$ | insieme delle soluzioni $S$ | rule `$L = …` → `$S = …` in os8.js |
+| eindeutig, eineindeutig, mehrdeutig, Pfeildiagramm | univoca, biunivoca, non univoca, diagramma a frecce | 2.1, pfeile6 |
+| Argument, Funktionswert, Definitions-, Wertebereich | argomento, valore della funzione, dominio, insieme immagine ($W$ stays) | 2.1 |
+| proportionale Funktion, Ursprungsgerade | funzione di proporzionalità (proporzionalità diretta), retta passante per l’origine | 2.1 |
+| y-Achsenabschnitt, Punktprobe | intercetta (ordinata all’origine), verifica di appartenenza | 2.2 |
+| Gleichsetzungs-, Einsetzungs-, Additionsverfahren | metodo del confronto, di sostituzione, di riduzione | 2.3, lgs8 |
+| Passante, Sehne, Berührungspunkt | retta esterna, corda, punto di contatto | 3.1 |
+| Satz des Thales, Thaleskreis | teorema di Talete (explained once: the right angle in the semicircle), circonferenza di Talete | 3.1 |
+| Peripheriewinkel, Zentriwinkel, Sehnenviereck | angolo alla circonferenza, angolo al centro, quadrilatero inscritto | kreiswinkel7 |
+| Kreisausschnitte (kreisflaecheos8), Rosette | spicchi, rosetta | 3.1 |
+| Netz, Schrägbild, Mantelfläche, Oberfläche, Hohlzylinder | sviluppo piano, assonometria cavaliera, superficie laterale, superficie totale, cilindro cavo | 3.2 |
+| zentrische Streckung, Streckfaktor, Streckzentrum | omotetia, rapporto di omotetia, centro di omotetia | 4 |
+| Hauptähnlichkeitssatz | primo criterio di similitudine | 4 |
+| Kongruenzsätze sss, sws, wsw, SsW, www | criteri LLL, LAL, ALA, LLA, AAA | 4, konstruktion6 |
+| Försterdreieck | triangolo della guardia forestale | schatten8 |
+| Pfadregeln, mit/ohne Zurücklegen, Gegenereignis | regole dei percorsi, con/senza reimmissione, evento contrario | 5 |
+| Wappen/Zahl, Galtonbrett L/R | T/C (testa/croce), tavola di Galton S/D | 5 |
+| Sammelbilder, Tüte | figurine, bustina | sammel8 |
+| Kaltmiete, Nebenkosten, Warmmiete | affitto netto, spese accessorie, affitto con le spese | 6 |
+| Arbeitspreis, Grundpreis, Abschlag, Nachzahlung, Guthaben | prezzo dell’energia, quota fissa, acconto, conguaglio da pagare, credito | 6, stromos8 |
+| Verschnitt, Estrich | sfrido, massetto | 6, raumos8 |
+| Rabatt, Skonto, Anzahlung, Rate | sconto, sconto per pagamento in contanti, anticipo, rata | 6 |
+| Kettenblatt, Ritzel, Übersetzung, Trittfrequenz, Radumfang | corona, pignone, rapporto di trasmissione, cadenza, circonferenza della ruota | WP 1 |
+| Zoll, Felge, Schrittlänge, Rahmenhöhe | pollici, cerchione, altezza del cavallo, altezza del telaio | WP 1 |
+| Laufmaschine, Hochrad | draisina («macchina da corsa»), biciclo | WP 1 |
+
 ## mathe9-it
 
 <!-- it-19: terms of this book only, write right below this line -->
