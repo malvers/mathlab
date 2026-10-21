@@ -637,7 +637,7 @@ window.BuchIT && BuchIT.add('gy6', {
             'Ma a «$1» arrivano $2 frecce, quindi al contrario la corrispondenza non è univoca.'],
         // zufall6: the die and the spinner (glossary: dado, ruota della fortuna; "Würfel" alone is also the cube)
         [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '1' ? ' prova' : ' prove') + '<'],
-        [/(data-v="wuerfel">)Würfel</g, '$1Dado<'], [/>Glücksrad</g, '>Ruota della fortuna<'],
+        [/>Glücksrad</g, '>Ruota della fortuna<'],
         // kreisdiagramm6: the column of the table
         [/>Anteil</g, '>Parte<'],
         // darstellung6: "Gewählt: Uhrzeit 12 → Temperatur 14."
