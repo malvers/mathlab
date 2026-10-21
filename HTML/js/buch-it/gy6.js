@@ -245,6 +245,14 @@ window.BuchIT && BuchIT.add('gy6', {
         'Parallelogramm': 'Parallelogramma', 'Trapez': 'Trapezio', 'Drachenviereck': 'Deltoide', 'Figur': 'Figura',
         'Zerlegen und verschieben': 'Scomporre e spostare', 'Grundseite $g$': 'Base $g$', 'Höhe $h$': 'Altezza $h$',
         'Diagonale $e$': 'Diagonale $e$', 'Diagonale $f$': 'Diagonale $f$',
+        // prisma6
+        'Dreiecksprisma': 'Prisma triangolare', 'Quader': 'Parallelepipedo', 'Trapezprisma': 'Prisma trapezoidale', 'Sechseckprisma': 'Prisma esagonale',
+        'Prisma': 'Prisma', 'Schrägbild': 'Assonometria', 'Netz': 'Sviluppo',
+        'Grundkante $a$': 'Spigolo di base $a$', 'Höhe $h$ des Prismas': 'Altezza $h$ del prisma',
+        'Kavalierperspektive: Die Grundfläche liegt vorn in wahrer Größe. Die Kanten nach hinten laufen unter $45^\\circ$ und sind halb so lang. Verdeckte Kanten sind gestrichelt.':
+            'Assonometria cavaliera: la base sta davanti in vera grandezza. Gli spigoli verso il fondo sono inclinati di $45^\\circ$ e lunghi la metà. Gli spigoli nascosti sono tratteggiati.',
+        'Das Netz besteht aus den beiden Grundflächen und dem Mantel. Der Mantel ist ein Rechteck: so breit wie der Umfang $u$, so hoch wie $h$.':
+            'Lo sviluppo è formato dalle due basi e dalla superficie laterale. La superficie laterale è un rettangolo: largo quanto il perimetro $u$, alto quanto $h$.',
 
         // book it-17 mathe7-it:
 
@@ -526,6 +534,9 @@ window.BuchIT && BuchIT.add('gy6', {
             'Una copia del trapezio ruota attorno al punto medio di un lato obliquo. Insieme formano un parallelogramma con base $a + c$.'],
         ['Die vier Dreiecke im Drachen klappen nach außen. Sie füllen das Rechteck aus den beiden Diagonalen genau zur Hälfte.',
             'I quattro triangoli del deltoide si ribaltano verso l’esterno. Riempiono esattamente metà del rettangolo formato dalle due diagonali.'],
+        // prisma6
+        ['Grundfläche $G', 'Area di base $G'], ['$, Umfang der Grundfläche $u', '$, perimetro di base $u'], ['Mantel $M', 'Superficie laterale $M'],
+        ['Oberfläche $O', 'Superficie totale $O'], ['Volumen $V', 'Volume $V'],
 
         // book it-17 mathe7-it:
 
@@ -645,6 +656,13 @@ window.BuchIT && BuchIT.add('gy6', {
         // flaeche6
         [/^(Parallelogramm|Dreieck|Trapez|Drachenviereck): zerlegen und verschieben$/,
             (m, s) => ({ Parallelogramm: 'Parallelogramma', Dreieck: 'Triangolo', Trapez: 'Trapezio', Drachenviereck: 'Deltoide' })[s] + ': scomporre e spostare'],
+        // prisma6
+        [/^(Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma) im Schrägbild: Grundfläche vorn in wahrer Größe, Tiefe unter 45 Grad und halb so lang$/,
+            (m, s) => ({ Dreiecksprisma: 'Prisma triangolare', Quader: 'Parallelepipedo', Trapezprisma: 'Prisma trapezoidale', Sechseckprisma: 'Prisma esagonale' })[s] +
+                ' in assonometria cavaliera: base davanti in vera grandezza, profondità a 45 gradi e lunga la metà'],
+        [/^Netz des (Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma)s: zwei Grundflächen und der Mantel aus Rechtecken$/,
+            (m, s) => 'Sviluppo del ' + ({ Dreiecksprisma: 'prisma triangolare', Quader: 'parallelepipedo', Trapezprisma: 'prisma trapezoidale', Sechseckprisma: 'prisma esagonale' })[s] +
+                ': due basi e la superficie laterale fatta di rettangoli'],
 
         // book it-17 mathe7-it:
 

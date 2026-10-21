@@ -138,6 +138,10 @@ window.BuchIT && BuchIT.add('gy5', {
         'Zusammengesetzte Figur': 'Figura composta', 'Figur': 'Figura', 'Zerlegen': 'Scomponi', 'Ergänzen': 'Completa', 'Weg': 'Metodo',
         'Zieh an der Ecke. Ein Kästchen ist 1 cm lang und 1 cm breit, also 1 cm² groß.':
             'Trascina l’angolo. Un quadretto è lungo 1 cm e largo 1 cm, quindi ha un’area di 1 cm².',
+        // quader5
+        'Schrägbild': 'Assonometria', 'Netz': 'Sviluppo', 'Einheitswürfel': 'Cubetti unitari', 'Ansicht': 'Vista',
+        'Länge a (cm)': 'Lunghezza a (cm)', 'Breite b (cm)': 'Larghezza b (cm)', 'Höhe c (cm)': 'Altezza c (cm)',
+        'hinten': 'dietro', 'oben': 'sopra', 'vorn': 'davanti', 'unten': 'sotto', 'links': 'sinistra', 'rechts': 'destra',
 
     },
     phrase: [
@@ -260,6 +264,9 @@ window.BuchIT && BuchIT.add('gy5', {
         ['Zum großen Rechteck ergänzen und das fehlende Stück abziehen:', 'Completare fino al rettangolo grande e sottrarre il pezzo che manca:'],
         ['Erstaunlich: Der Umfang ist so groß wie beim ganzen Rechteck, weil die Stufe genauso lang ist wie die fehlenden Seiten.',
             'Sorprendente: il perimetro è uguale a quello del rettangolo intero, perché il gradino è lungo esattamente quanto i lati che mancano.'],
+        // quader5
+        ['Gegenüberliegende Flächen haben dieselbe Farbe: Sie sind gleich groß.', 'Le facce opposte hanno lo stesso colore: sono uguali.'],
+        ['Alle 12 Kanten zusammen: ', 'Tutti i 12 spigoli insieme: '], ['Alle Kanten gleich lang: ein Würfel.', 'Tutti gli spigoli sono uguali: un cubo.'],
 
     ],
     rule: [
@@ -385,6 +392,9 @@ window.BuchIT && BuchIT.add('gy5', {
         [/Das ist 1 Reihe mit (\d+) Kästchen\./, (m, k) => 'È 1 fila di ' + k + (k === '1' ? ' quadretto.' : ' quadretti.')],
         [/Das sind (\d+) Reihen mit je (\d+) Kästchen\./, (m, r, k) => 'Sono ' + r + ' file di ' + k + (k === '1' ? ' quadretto' : ' quadretti') + ' ciascuna.'],
         [/<p>Zusammen (\d+) cm²/, '<p>In tutto $1 cm²'],
+        // quader5
+        [/^Quader (\d+) mal (\d+) mal (\d+)$/, 'Parallelepipedo di $1 per $2 per $3'],
+        [/(\d+) Schicht(en)? mit je (.+?) Würfeln\./, (m, c, en, x) => c + (c === '1' ? ' strato' : ' strati') + ' di ' + x + ' cubetti ciascuno.'],
 
     ]
 });
