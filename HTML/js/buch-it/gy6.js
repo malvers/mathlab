@@ -254,7 +254,7 @@ window.BuchIT && BuchIT.add('gy6', {
         'Das Netz besteht aus den beiden Grundflächen und dem Mantel. Der Mantel ist ein Rechteck: so breit wie der Umfang $u$, so hoch wie $h$.':
             'Lo sviluppo è formato dalle due basi e dalla superficie laterale. La superficie laterale è un rettangolo: largo quanto il perimetro $u$, alto quanto $h$.',
         // zufall6 ("Würfel" and "Zahl" only as whole labels: the die and the tails side of the coin)
-        'Münze': 'Moneta', 'Würfel': 'Dado', 'Glücksrad': 'Ruota della fortuna', 'Versuch': 'Esperimento',
+        'Münze': 'Moneta', 'Glücksrad': 'Ruota della fortuna', 'Versuch': 'Esperimento',
         'Kopf': 'Testa', 'Zahl': 'Croce', 'Rot': 'Rosso',
         '1-mal': '1 volta', '10-mal': '10 volte', '100-mal': '100 volte', 'Löschen': 'Cancella',
         'Säulendiagramm der relativen Häufigkeiten': 'Diagramma a colonne delle frequenze relative',
