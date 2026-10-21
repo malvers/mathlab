@@ -79,6 +79,8 @@ window.BuchIT && BuchIT.add('os9', {
         'Firsthöhe': 'Altezza del colmo', 'Sparrenlänge': 'Lunghezza dei puntoni',
         'Die Höhe teilt den Giebel in zwei gleiche rechtwinklige Dreiecke. Dachüberstände sind hier nicht mitgerechnet.':
             'L’altezza divide il timpano in due triangoli rettangoli uguali. Le sporgenze del tetto qui non sono considerate.',
+        // parabelos9: the aria of the form buttons
+        'Form': 'Forma',
 
     },
     phrase: [
