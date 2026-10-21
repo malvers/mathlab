@@ -35,6 +35,7 @@ window.BuchIT && BuchIT.add('os10', {
         'Betrag im Monat': 'Importo mensile',
         'Nettolohn': 'Stipendio netto',
         'Pyramidenstumpf im Achsenschnitt und als Körper': 'Tronco di piramide in sezione assiale e come solido',
+        'Körper': 'Solido', 'Höhe $h$': 'Altezza $h$',
 
     },
     phrase: [
@@ -62,6 +63,7 @@ window.BuchIT && BuchIT.add('os10', {
         ['Kegelstumpf im Achsenschnitt und als Körper', 'Tronco di cono in sezione assiale e come solido'],
         // stumpfos10: the material with its density
         ['Holz (', 'Legno ('], ['Beton (', 'Calcestruzzo ('], ['Stahl (', 'Acciaio ('],
+        ['Mantellinie $s = ', 'Apotema $s = '],
 
     ],
     rule: [

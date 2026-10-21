@@ -100,6 +100,7 @@ window.BuchIT && BuchIT.add('geometrie', {
         'Winkel $\\alpha$': 'Angolo $\\alpha$',
         'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Piramide a base quadrata in prospettiva cavaliera con il triangolo ausiliario',
         'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cono in prospettiva cavaliera con il triangolo ausiliario',
+        'Körper': 'Solido', 'Höhe $h$': 'Altezza $h$', 'Grundkante $a$': 'Spigolo di base $a$',
 
     },
     phrase: [
