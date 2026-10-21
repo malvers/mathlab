@@ -286,7 +286,7 @@ window.BuchIT && BuchIT.add('gy6', {
             'Tocca un quadrilatero della casa. Ciò che sta più in basso è più generale, ciò che sta più in alto ha più proprietà.',
         // prisma6
         'Dreiecksprisma': 'Prisma triangolare', 'Quader': 'Parallelepipedo', 'Trapezprisma': 'Prisma trapezoidale', 'Sechseckprisma': 'Prisma esagonale',
-        'Prisma': 'Prisma', 'Schrägbild': 'Assonometria', 'Netz': 'Sviluppo',
+        'Prisma': 'Prisma', 'Schrägbild': 'Assonometria', 'Netz': 'Sviluppo', 'Ansicht': 'Vista',
         'Grundkante $a$': 'Spigolo di base $a$', 'Höhe $h$ des Prismas': 'Altezza $h$ del prisma',
         'Kavalierperspektive: Die Grundfläche liegt vorn in wahrer Größe. Die Kanten nach hinten laufen unter $45^\\circ$ und sind halb so lang. Verdeckte Kanten sind gestrichelt.':
             'Assonometria cavaliera: la base sta davanti in vera grandezza. Gli spigoli che vanno all’indietro sono inclinati di $45^\\circ$ e lunghi la metà. Gli spigoli nascosti sono tratteggiati.',

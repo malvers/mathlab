@@ -51,7 +51,7 @@ window.BuchIT && BuchIT.add('os7', {
         // tageszinsos7
         ['Jahreszinsen: ', 'Interessi annui: '],
         // dichteos7
-        ['Masse: ', 'Massa: '],
+        ['Volumen: ', 'Volume: '], ['Masse: ', 'Massa: '],
         ['Die Dichte ist kleiner als die von Wasser (', 'La densità è minore di quella dell’acqua ('], ['): Der Körper schwimmt.', '): il corpo galleggia.'],
         ['Die Dichte ist größer als die von Wasser (', 'La densità è maggiore di quella dell’acqua ('], ['): Der Körper geht unter.', '): il corpo affonda.'],
         // quadrantos7
@@ -70,8 +70,8 @@ window.BuchIT && BuchIT.add('os7', {
         [/Zinsjahr mit 360 Tagen, davon (\d+) Tage; Jahreszinsen und Tageszinsen als Säulen/,
             (m, t) => 'Anno commerciale di 360 giorni, di cui ' + t + (t === '1' ? ' giorno' : ' giorni') + '; interessi annui e interessi dei giorni come colonne'],
         // dichteos7: the label of the picture and the density sentence
-        [/Quader aus (Holz|Eis|Aluminium|Eisen|Gold), (\d+) cm mal (\d+) cm mal (\d+) cm/, (m, s, a, b, c) => 'Parallelepipedo di ' +
-            ({ Holz: 'legno', Eis: 'ghiaccio', Aluminium: 'alluminio', Eisen: 'ferro', Gold: 'oro' })[s] + ', ' + a + ' cm per ' + b + ' cm per ' + c + ' cm'],
+        [/Quader aus (Holz|Eis|Aluminium|Eisen|Gold), (\d+) cm mal (\d+) cm mal (\d+) cm/, (m, s, a, b, c) => 'Parallelepipedo ' +
+            ({ Holz: 'di legno', Eis: 'di ghiaccio', Aluminium: 'di alluminio', Eisen: 'di ferro', Gold: 'd’oro' })[s] + ', ' + a + ' cm per ' + b + ' cm per ' + c + ' cm'],
         [/Dichte von (Fichtenholz|Eis|Aluminium|Eisen|Gold): /, (m, s) => 'Densità ' +
             ({ Fichtenholz: 'del legno di abete', Eis: 'del ghiaccio', Aluminium: 'dell’alluminio', Eisen: 'del ferro', Gold: 'dell’oro' })[s] + ': '],
         // quadrantos7: "P(3 | 2)" in the label, "liegt im I. Quadranten"
