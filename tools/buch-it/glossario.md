@@ -812,3 +812,25 @@ percorso di Realschule e uno di Hauptschule.* Elided forms: l’Oberschule, dell
 ## mathe10-it
 
 <!-- it-20: terms of this book only, write right below this line -->
+
+Round 3, 21.10.2026 (Gianotti): decisions made while translating OS 10 (from the Spanish edition, checked against German); nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Oberschule, Realschulbildungsgang | Oberschule, indirizzo Realschule | school names; explained once on the start page; footer "10ª classe (indirizzo Realschule)" |
+| Lernbereich, Wahlpflicht(bereich) 3 | area di apprendimento, Area a scelta 3 | kicker "AREA A SCELTA 3 · MAGGIO", chapter key OP |
+| Viereckfamilie, Drachenviereck | famiglia dei quadrilateri, deltoide (aquilone) | 1.1 |
+| Sinussatz, Kosinussatz, Winkelsumme | teorema dei seni, teorema del coseno, somma degli angoli | dreieckloeser step labels in capitals: TEOREMA DEI SENI, TEOREMA DEL COSENO, SOMMA DEGLI ANGOLI |
+| SSS, SWS, WSW, SsW | LLL, LAL, ALA, LLA | |
+| Wachstumsfaktor, Halbwertszeit, Zinseszins | fattore di crescita, tempo di dimezzamento, interesse composto | |
+| Schranke (begrenztes Wachstum) | soglia $S$ | 2.2 |
+| Bogenmaß, Einheitskreis, Amplitude, Periode, Mittellinie | radianti, circonferenza goniometrica, ampiezza, periodo, linea mediana | 2.3 |
+| Zufallsgröße, Erwartungswert, faires Spiel | variabile aleatoria, valore atteso, gioco equo | as in section 5; Pfadregel / Summenregel = regola dei percorsi / regola della somma |
+| Pasch | doppio | spiele: 'Ergebnis' = 'Risultato' as in zahlen.js |
+| Lohnabrechnung, Brutto, Netto, Abzüge, Arbeitgeberanteil | busta paga, lordo, netto, trattenute, quota del datore di lavoro | 4.1 |
+| Haushaltsplan, Ratenkauf, Dispo(kredit), Ratenkredit, Schuldenfalle | bilancio familiare, acquisto a rate, scoperto di conto, prestito personale, trappola dei debiti | effektiver Jahreszins = TAEG (as above) |
+| Kegelstumpf, Pyramidenstumpf, Zerlegungsprinzip | tronco di cono, tronco di piramide, principio di scomposizione | Mantellinie = apotema; Seitenhöhe (Pyramide) = altezza della faccia laterale |
+| Beton (stumpfos10 material) | calcestruzzo | running text of 4.2 uses the same word |
+| Försterdreieck, Schattenmethode, Peilstab, Messrad, Daumensprung | triangolo del guardaboschi, metodo dell’ombra, asta di mira, rotella metrica, salto del pollice | as in gy8.js; Strahlensatz = teorema di Talete |
+| Giebel, Sparren, First (lb1) | timpano, puntoni, colmo | |
+| Fermi-Frage | domanda di Fermi | 4.3 |
