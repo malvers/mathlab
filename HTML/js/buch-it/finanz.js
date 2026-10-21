@@ -34,6 +34,8 @@ window.BuchIT && BuchIT.add('finanz', {
         // book it-17 mathe7-it:
 
         // book it-18 mathe8-it:
+        // zins: the axis label
+        'Jahre': 'anni',
 
         // book it-20 mathe10-it:
     },
