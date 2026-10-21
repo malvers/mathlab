@@ -116,6 +116,17 @@ window.BuchIT && BuchIT.add('gy8', {
         'Zuhause': 'Casa', 'Haltestelle': 'Fermata', 'Schule': 'Scuola',
         'Der Schulweg als Strecke, der Punkt zeigt, wo Mia gerade ist': 'Il tragitto verso scuola come segmento: il punto mostra dove si trova Mia in questo momento',
         'Mia ist in der Schule angekommen.': 'Mia è arrivata a scuola.',
+        // lgs8
+        'Einsetzungsverfahren': 'Sostituzione', 'Gleichsetzungsverfahren': 'Confronto', 'Additionsverfahren': 'Riduzione', 'Verfahren': 'Metodo',
+        'Neues Gleichungssystem': 'Nuovo sistema',
+        'Die beiden Geraden des Gleichungssystems und ihr Schnittpunkt': 'Le due rette del sistema e il loro punto di intersezione',
+        'Klammer auflösen und zusammenfassen.': 'Togli le parentesi e semplifica.',
+        'Löse beide Gleichungen nach $y$ auf.': 'Ricava $y$ da entrambe le equazioni.',
+        'Die rechten Seiten sind beide gleich $y$, also sind sie gleich: Gleichsetzen.': 'I secondi membri sono entrambi uguali a $y$, quindi sono uguali tra loro: si confrontano.',
+        'Alle $x$ nach links, alle Zahlen nach rechts, dann teilen.': 'Tutte le $x$ a sinistra, tutti i numeri a destra, poi dividi.',
+        'Multipliziere so, dass die Zahlen vor $y$ entgegengesetzt gleich werden.': 'Moltiplica in modo che i numeri davanti a $y$ diventino opposti.',
+        'Addiere die beiden Gleichungen: $y$ fällt weg.': 'Somma le due equazioni: $y$ sparisce.',
+        'Nach $x$ auflösen.': 'Ricava $x$.', 'Nach $y$ auflösen.': 'Ricava $y$.',
 
         // book it-20 mathe10-it:
         'gleich': 'uguale',
@@ -211,6 +222,8 @@ window.BuchIT && BuchIT.add('gy8', {
         ['Der Graph steigt flacher als beim ersten Fußweg.', 'Il grafico sale meno ripido che nel primo tratto a piedi.'],
         ['geht zu Fuß zur Haltestelle', 'va a piedi alla fermata'], ['wartet an der Haltestelle', 'aspetta alla fermata'],
         ['fährt mit dem Bus', 'va in autobus'], ['geht das letzte Stück zur Schule', 'percorre a piedi l’ultimo tratto fino a scuola'],
+        // lgs8 (a sentence that starts with <b> is no whole label for the engine)
+        ['<b>Probe</b> in beiden Gleichungen, dann die Lösungsmenge.', '<b>Verifica</b> in entrambe le equazioni, poi l’insieme delle soluzioni.'],
 
         // book it-20 mathe10-it:
         ['Gemessen: Der Stab ist $2$ m hoch, sein Schatten ist $s \\approx ', 'Misurato: l’asta è alta $2$ m, la sua ombra è $s \\approx '],
@@ -352,6 +365,13 @@ window.BuchIT && BuchIT.add('gy8', {
         [/Sie (geht zu Fuß zur Haltestelle|wartet an der Haltestelle|fährt mit dem Bus|geht das letzte Stück zur Schule)(?:: \$(\d+)\$ m pro Minute\. |\. )/g,
             (m, d, v) => ({ 'geht zu Fuß zur Haltestelle': 'Va a piedi alla fermata', 'wartet an der Haltestelle': 'Aspetta alla fermata', 'fährt mit dem Bus': 'Va in autobus',
                 'geht das letzte Stück zur Schule': 'Percorre a piedi l’ultimo tratto fino a scuola' })[d] + (v ? ': $' + v + '$ m al minuto. ' : '. ')],
+        // lgs8: the steps with a variable or a number in them
+        [/Löse Gleichung I nach \$([xy])\$ auf\./g, (m, v) => 'Ricava $' + v + '$ dall’equazione I.'],
+        [/Setze das für \$([xy])\$ in Gleichung II ein\./g, (m, v) => 'Sostituisci questa espressione al posto di $' + v + '$ nell’equazione II.'],
+        [/Setze \$([xy] = -?\d+)\$ in die umgestellte Gleichung ein\./g, (m, v) => 'Sostituisci $' + v + '$ nell’equazione trasformata.'],
+        [/Setze \$(x = -?\d+)\$ in Gleichung I \(umgestellt\) ein\./g, (m, v) => 'Sostituisci $' + v + '$ nell’equazione I (trasformata).'],
+        [/Setze \$(x = -?\d+)\$ in Gleichung I ein\./g, (m, v) => 'Sostituisci $' + v + '$ nell’equazione I.'],
+        [/Schritt (\d+) von (\d+): erst selbst überlegen, dann aufdecken\./g, 'Passo $1 di $2: prima ragionaci tu, poi scopri la soluzione.'],
 
         // book it-20 mathe10-it:
 
