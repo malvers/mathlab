@@ -127,6 +127,25 @@ window.BuchIT && BuchIT.add('gy8', {
         'Multipliziere so, dass die Zahlen vor $y$ entgegengesetzt gleich werden.': 'Moltiplica in modo che i numeri davanti a $y$ diventino opposti.',
         'Addiere die beiden Gleichungen: $y$ fällt weg.': 'Somma le due equazioni: $y$ sparisce.',
         'Nach $x$ auflösen.': 'Ricava $x$.', 'Nach $y$ auflösen.': 'Ricava $y$.',
+        // streckung8
+        'Streckfaktor $k$': 'Rapporto di omotetia $k$', 'Original': 'Originale', 'Verhältnis': 'Rapporto', 'Winkel bei $A$': 'Angolo in $A$', 'gleich': 'uguale',
+        'Zieh an $Z$, $A$, $B$ und $C$. Die gestrichelten Strahlen beginnen in $Z$ und gehen durch Punkt und Bildpunkt.':
+            'Trascina $Z$, $A$, $B$ e $C$. Le semirette tratteggiate partono da $Z$ e passano per ogni punto e la sua immagine.',
+        // aehnlich8
+        'Ein Beispiel zeigen': 'Mostra un esempio', 'gegeben': 'dato', 'dein Dreieck': 'il tuo triangolo',
+        'Ein gegebenes Dreieck und ein zweites Dreieck zum Vergleichen': 'Un triangolo dato e un secondo triangolo da confrontare',
+        'klein': 'piccolo', 'mittel': 'medio', 'groß': 'grande', 'Winkel, gegeben': 'Angoli del triangolo dato', 'Winkel bei dir': 'I tuoi angoli', 'Seiten­verhältnis': 'Rapporto tra i lati',
+        'Zieh die gelben Ecken auf die Gitterpunkte. Schaffst du ein Dreieck, das ähnlich zum gegebenen ist, aber anders liegt?':
+            'Trascina i vertici gialli sui punti della griglia. Riesci a fare un triangolo simile a quello dato, ma in un’altra posizione?',
+        // gulliver8
+        'k = 12 (Gulliver)': 'k = 12 (Gulliver)', 'Streckfaktor': 'Rapporto di omotetia', 'großer Würfel': 'Cubo grande', 'Faktor': 'Fattore', 'Kantenlänge': 'Spigolo',
+        // schatten8
+        'Schattenmethode': 'Metodo dell’ombra', 'Försterdreieck': 'Triangolo della guardia forestale', 'Methode': 'Metodo', 'Sonnenhöhe': 'Altezza del sole',
+        'Abstand $d$ zum Baum': 'Distanza $d$ dall’albero', 'Höhe ausrechnen': 'Calcola l’altezza', 'Neuer Baum': 'Nuovo albero', 'Stab 2 m': 'Bastone 2 m',
+        'Baum und Stab mit ihren Schatten': 'Albero e bastone con le loro ombre', 'Höhenmessung mit dem Försterdreieck': 'Misurare un’altezza con il triangolo della guardia forestale',
+        'Die Sonnenstrahlen fallen parallel ein. Das blaue und das gelbe Dreieck sind deshalb ähnlich: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.':
+            'I raggi del sole arrivano paralleli. Per questo il triangolo blu e quello giallo sono simili: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.',
+        'Deine Peillinie geht über die Spitze hinweg: Geh näher heran.': 'La tua linea di mira passa sopra la cima: avvicinati.',
 
         // book it-20 mathe10-it:
         'gleich': 'uguale',
@@ -224,6 +243,23 @@ window.BuchIT && BuchIT.add('gy8', {
         ['fährt mit dem Bus', 'va in autobus'], ['geht das letzte Stück zur Schule', 'percorre a piedi l’ultimo tratto fino a scuola'],
         // lgs8 (a sentence that starts with <b> is no whole label for the engine)
         ['<b>Probe</b> in beiden Gleichungen, dann die Lösungsmenge.', '<b>Verifica</b> in entrambe le equazioni, poi l’insieme delle soluzioni.'],
+        // streckung8
+        ['Zentrische Streckung des Dreiecks ABC am Zentrum Z mit dem Faktor ', 'Omotetia del triangolo ABC con centro Z e rapporto '],
+        ['Mit $k = 0$ fallen alle Bildpunkte auf $Z$: Das Bild ist nur noch ein Punkt.', 'Con $k = 0$ tutti i punti immagine cadono in $Z$: l’immagine è solo un punto.'],
+        ['Mit $k = 1$ bleibt jeder Punkt, wo er ist.', 'Con $k = 1$ ogni punto resta dov’è.'],
+        ['Mit $k = -1$ ist die Streckung eine Punktspiegelung an $Z$.', 'Con $k = -1$ l’omotetia è una simmetria centrale rispetto a $Z$.'],
+        [' Alle Winkel bleiben gleich.', ' Tutti gli angoli restano uguali.'],
+        // aehnlich8
+        ['Die drei Punkte liegen auf einer Geraden: Das ist kein Dreieck.', 'I tre punti stanno su una retta: non è un triangolo.'],
+        [' Mit $k = 1$ sind die Dreiecke sogar kongruent.', ' Con $k = 1$ i triangoli sono addirittura congruenti.'],
+        // gulliver8
+        ['Gulliver ist 12-mal so groß wie ein Liliputaner. Seine Haut hat also die $144$-fache Fläche, sein Körper das $1728$-fache Volumen. ',
+            'Gulliver è 12 volte più alto di un lillipuziano. La sua pelle ha quindi una superficie $144$ volte più grande, il suo corpo un volume $1728$ volte più grande. '],
+        ['Bei Jonathan Swift rechnen die Mathematiker des Kaisers genau so und geben ihm jeden Tag Essen für 1724 Liliputaner, vier weniger als $12^3$.',
+            'In Jonathan Swift i matematici dell’imperatore calcolano proprio così e gli danno ogni giorno cibo per 1724 lillipuziani, quattro in meno di $12^3$.'],
+        // schatten8
+        ['Du hältst ein gleichschenklig-rechtwinkliges Dreieck vor das Auge (Augenhöhe $1{,}6$ m) und peilst an seiner langen Seite entlang. Diese Linie steigt unter $45^\\circ$: ',
+            'Tieni un triangolo rettangolo isoscele davanti all’occhio (altezza degli occhi $1{,}6$ m) e guardi lungo il suo lato lungo. Questa linea sale con un angolo di $45^\\circ$: '],
 
         // book it-20 mathe10-it:
         ['Gemessen: Der Stab ist $2$ m hoch, sein Schatten ist $s \\approx ', 'Misurato: l’asta è alta $2$ m, la sua ombra è $s \\approx '],
@@ -372,6 +408,30 @@ window.BuchIT && BuchIT.add('gy8', {
         [/Setze \$(x = -?\d+)\$ in Gleichung I \(umgestellt\) ein\./g, (m, v) => 'Sostituisci $' + v + '$ nell’equazione I (trasformata).'],
         [/Setze \$(x = -?\d+)\$ in Gleichung I ein\./g, (m, v) => 'Sostituisci $' + v + '$ nell’equazione I.'],
         [/Schritt (\d+) von (\d+): erst selbst überlegen, dann aufdecken\./g, 'Passo $1 di $2: prima ragionaci tu, poi scopri la soluzione.'],
+        // streckung8, gulliver8: "Bild", "Fläche", "Einheitswürfel" by their place
+        [/<th>Bild<\/th>/g, '<th>Immagine</th>'], [/<td>Fläche<\/td>/g, '<td>Area</td>'], [/>Einheitswürfel</g, '>Cubo unitario<'],
+        // streckung8: the sentence with k
+        [/Bei negativem \$k\$ liegt jeder Bildpunkt auf der anderen Seite von \$Z\$\. Die Bildstrecken sind \$\|k\| = ([^$]+)\$-mal so lang\./g,
+            (m, v) => 'Con $k$ negativo ogni punto immagine sta dall’altra parte di $Z$. I segmenti immagine vengono moltiplicati per $|k| = ' + v + '$.'],
+        [/(Eine <b>Vergrößerung<\/b>|<b>Eine Verkleinerung<\/b>): Jede Strecke wird \$([^$]+)\$-mal so lang, die Fläche \$k\^2 = ([^$]+)\$-mal so groß\./g,
+            (m, w, a, b) => (w.indexOf('Vergr') >= 0 ? 'Un <b>ingrandimento</b>' : '<b>Una riduzione</b>') + ': ogni segmento viene moltiplicato per $' + a + '$, l’area per $k^2 = ' + b + '$.'],
+        // aehnlich8: the verdict
+        [/<b class="g-ok">Ähnlich!<\/b> Alle Winkel stimmen überein, und alle Seiten sind mit demselben Faktor \$k \\approx ([^$]+)\$ gestreckt\./g,
+            (m, v) => '<b class="g-ok">Simili!</b> Tutti gli angoli coincidono e tutti i lati sono moltiplicati per lo stesso fattore $k \\approx ' + v + '$.'],
+        [/Noch nicht ähnlich: (Nur ein Winkel stimmt|Kein Winkel stimmt)\. Die Seitenverhältnisse sind verschieden\./g,
+            (m, w) => 'Non ancora simili: ' + (w.charAt(0) === 'N' ? 'coincide solo un angolo' : 'non coincide nessun angolo') + '. I rapporti tra i lati sono diversi.'],
+        // gulliver8: k = 1 changes nothing, the other k, and the aria label
+        [/Alle Längen werden \$1\$-mal so groß, jede Fläche \$1\^2 = 1\$-mal so groß, das Volumen \$1\^3 = 1\$-mal so groß\./g, 'Con $k = 1$ lunghezze, aree e volumi non cambiano.'],
+        [/Alle Längen werden \$(\d+)\$-mal so groß, jede Fläche \$(\d+\^2 = \d+)\$-mal so groß, das Volumen \$(\d+\^3 = \d+)\$-mal so groß\./g,
+            (m, a, b, c) => 'Tutte le lunghezze vengono moltiplicate per $' + a + '$, ogni area per $' + b + '$, il volume per $' + c + '$.'],
+        [/Ein Einheitswürfel und ein Würfel aus (\d+) hoch drei Einheitswürfeln/g, 'Un cubo unitario e un cubo di $1 × $1 × $1 cubi unitari'],
+        // schatten8: the measured shadows, the result and the forester's triangle
+        [/Gemessen: Der Stab ist \$2\$ m hoch, sein Schatten ist \$s \\approx ([^$]+)\$ m lang\. Der Schatten des Baums ist \$S \\approx ([^$]+)\$ m lang\./g,
+            (m, a, b) => 'Misurato: il bastone è alto $2$ m, la sua ombra è lunga $s \\approx ' + a + '$ m. L’ombra dell’albero è lunga $S \\approx ' + b + '$ m.'],
+        [/\. Tatsächlich ist der Baum \$([^$]+)\$ m hoch\./g, (m, a) => '. In realtà l’albero è alto $' + a + '$ m.'],
+        [/Auf \$d = ([^$]+)\$ m steigt sie um \$([^$]+)\$ m\./g, (m, a, b) => 'su $d = ' + a + '$ m sale di $' + b + '$ m.'],
+        [/<b class="g-ok">Treffer!<\/b> Du siehst genau die Spitze\. /g, '<b class="g-ok">Centro!</b> Vedi proprio la cima. '],
+        [/Du siehst den Baum in \$([^$]+)\$ m Höhe, unter der Spitze: Geh weiter zurück\./g, (m, a) => 'Vedi l’albero a $' + a + '$ m di altezza, sotto la cima: allontanati ancora.'],
 
         // book it-20 mathe10-it:
 

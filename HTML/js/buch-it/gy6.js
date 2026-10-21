@@ -306,6 +306,12 @@ window.BuchIT && BuchIT.add('gy6', {
         'Welche Art von Zuordnung ist das?': 'Che tipo di corrispondenza è?',
         'mehrdeutig': 'non univoca', 'eindeutig': 'univoca', 'eineindeutig': 'biunivoca', 'eindeutig, aber nicht eineindeutig': 'univoca, ma non biunivoca',
         'Richtig:': 'Giusto:', 'Nicht ganz.': 'Non proprio.',
+        // konstruktion6
+        'sss': 'LLL', 'sws': 'LAL', 'wsw': 'ALA', 'SsW': 'LLA', 'www': 'AAA', 'Gegeben': 'Dati',
+        'Seite $a$': 'Lato $a$', 'Seite $b$': 'Lato $b$', 'Seite $c$': 'Lato $c$',
+        'Winkel $\\alpha$': 'Angolo $\\alpha$', 'Winkel $\\beta$': 'Angolo $\\beta$', 'Seite $a$ gegenüber $\\alpha$': 'Lato $a$ opposto a $\\alpha$',
+        'Genau ein Dreieck.': 'Esattamente un triangolo.', 'Kein Dreieck.': 'Nessun triangolo.', 'Zwei Dreiecke.': 'Due triangoli.',
+        'Unendlich viele Dreiecke.': 'Infiniti triangoli.',
 
     },
     phrase: [
@@ -626,6 +632,28 @@ window.BuchIT && BuchIT.add('gy6', {
         ['Von jedem Element links geht genau ein Pfeil aus. ', 'Da ogni elemento a sinistra parte esattamente una freccia. '],
         ['<b>mehrdeutig:</b> von einem Element gehen mehrere Pfeile aus. <b>eindeutig:</b> von jedem genau einer. <b>eineindeutig:</b> eindeutig, und auch rückwärts eindeutig.',
             '<b>non univoca:</b> da un elemento partono più frecce. <b>univoca:</b> da ciascuno ne parte esattamente una. <b>biunivoca:</b> univoca, e univoca anche al contrario.'],
+        // konstruktion6
+        [' Die Kreise um $A$ mit $r = b$ und um $B$ mit $r = a$ schneiden sich oberhalb von $c$ in genau einem Punkt.',
+            ' Le circonferenze di centro $A$ con $r = b$ e di centro $B$ con $r = a$ si intersecano sopra $c$ in esattamente un punto.'],
+        ['Die Kreise berühren sich nur auf der längsten Seite.', 'Le circonferenze si toccano solo sul lato più lungo.'],
+        ['Die Kreise treffen sich nicht.', 'Le circonferenze non si incontrano.'],
+        [' Auf dem Schenkel von $\\alpha$ trägt man $b$ ab. Der Endpunkt ist $C$.', ' Sul lato di $\\alpha$ si riporta $b$. L’estremo è $C$.'],
+        [' Die freien Schenkel der Winkel schneiden sich in $C$. ', ' I lati liberi degli angoli si intersecano in $C$. '],
+        ['. Für $\\gamma$ bleibt nichts übrig, die Schenkel laufen auseinander.', '. Per $\\gamma$ non resta niente: i lati si allontanano.'],
+        [' Der Kreis um $B$ schneidet den Schenkel zweimal. Die Angaben legen das Dreieck nicht fest.', ' La circonferenza di centro $B$ interseca il lato due volte. I dati non determinano il triangolo.'],
+        [' Die gegenüberliegende Seite $a$ ist die größere: $a \\geq c$.', ' Il lato opposto $a$ è il maggiore: $a \\geq c$.'],
+        [' Der Kreis berührt den Schenkel nur.', ' La circonferenza tocca soltanto il lato.'],
+        [' Der Kreis um $B$ erreicht den Schenkel nicht.', ' La circonferenza di centro $B$ non raggiunge il lato.'],
+        [' Alle haben dieselbe Form, aber verschiedene Größen. Drei Winkel legen kein Dreieck fest.', ' Hanno tutti la stessa forma, ma grandezze diverse. Tre angoli non determinano un triangolo.'],
+        ['Den dritten Winkel kennt man ohnehin: $\\gamma = 180^\\circ - \\alpha - \\beta$. Es fehlt eine Länge.', 'Il terzo angolo si conosce comunque: $\\gamma = 180^\\circ - \\alpha - \\beta$. Manca una lunghezza.'],
+        ['<b>Kongruenzsatz sss:</b> Wenn zwei Dreiecke in allen drei Seiten übereinstimmen, dann sind sie kongruent.',
+            '<b>Criterio LLL:</b> se due triangoli coincidono in tutti e tre i lati, allora sono congruenti.'],
+        ['<b>Kongruenzsatz sws:</b> Wenn zwei Dreiecke in zwei Seiten und dem eingeschlossenen Winkel übereinstimmen, dann sind sie kongruent.',
+            '<b>Criterio LAL:</b> se due triangoli coincidono in due lati e nell’angolo compreso, allora sono congruenti.'],
+        ['<b>Kongruenzsatz wsw:</b> Wenn zwei Dreiecke in einer Seite und den beiden anliegenden Winkeln übereinstimmen, dann sind sie kongruent.',
+            '<b>Criterio ALA:</b> se due triangoli coincidono in un lato e nei due angoli adiacenti, allora sono congruenti.'],
+        ['<b>Kongruenzsatz SsW:</b> Wenn zwei Dreiecke in zwei Seiten und dem Winkel übereinstimmen, der der <b>größeren</b> Seite gegenüberliegt, dann sind sie kongruent.',
+            '<b>Criterio LLA:</b> se due triangoli coincidono in due lati e nell’angolo opposto al lato <b>maggiore</b>, allora sono congruenti.'],
 
     ],
     rule: [
@@ -785,6 +813,10 @@ window.BuchIT && BuchIT.add('gy6', {
         [/Von „([^“]+)“ gehen (\d+) Pfeile aus\./g, 'Da «$1» partono $2 frecce.'],
         [/Bei „([^“]+)“ kommen aber (\d+) Pfeile an, rückwärts ist die Zuordnung also nicht eindeutig\./g,
             'Ma a «$1» arrivano $2 frecce: al contrario, quindi, la corrispondenza non è univoca.'],
+        // konstruktion6: the two shorter sides, "alpha + beta is already", the aria label
+        [/Die beiden kürzeren Seiten sind zusammen ([\d,]+) cm lang, die längste ([\d,]+) cm\. /g, (m, a, b) => 'I due lati più corti insieme sono lunghi ' + a + ' cm, il più lungo ' + b + ' cm. '],
+        [/\$\\alpha \+ \\beta\$ ist schon \$/g, () => '$\\alpha + \\beta$ è già $'],
+        [/^Konstruktion aus (sss|sws|wsw|SsW|www)$/, (m, k) => 'Costruzione con ' + { sss: 'LLL', sws: 'LAL', wsw: 'ALA', SsW: 'LLA', www: 'AAA' }[k]],
 
     ]
 });
