@@ -70,6 +70,7 @@ window.BuchIT && BuchIT.add('spiele', {
         'sonst': 'altro',
         'Gewinn $x_i$ in €': 'Guadagno $x_i$ in €',
         'Lass das Spiel 1000-mal laufen und vergleiche den mittleren Gewinn mit dem Erwartungswert.': 'Fai ripetere il gioco 1000 volte e confronta il guadagno medio con il valore atteso.',
+        'Maximum': 'Massimo', 'Ergebnis': 'Risultato',
 
     },
     phrase: [
