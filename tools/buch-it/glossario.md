@@ -627,6 +627,30 @@ Round 3, Montessori, 20.10.2026: decisions made while translating GY 6; nothing 
 
 <!-- it-13: terms of this book only, write right below this line -->
 
+Package it-13 (Nalli), 21.10.2026: decisions made while translating GY 8; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Rechenbaum (Termbaum) | albero di calcolo | 1.1, widget termbaum8 |
+| 1./2./3. binomische Formel | 1ª/2ª/3ª formula (quadrato di una somma / quadrato di una differenza / somma per differenza) | 1.2, widget buttons «1ª formula» … |
+| Urne rot / blau / grün | rosso / blu / verde, letters r, b, v | 2.1, 2.2 |
+| Weg-Zeit-Diagramm | diagramma spazio-tempo | 3.1 |
+| Senkrechtentest | test della retta verticale | 3.1 |
+| Zeilen $Z_1$, $Z_2$ (LGS steps) | $R_1$, $R_2$ | 3.3, as in mathegy11-it |
+| Fasanen / Kaninchen, Erwachsene / Jugendliche, Kerzen rot / weiß | $f$, $c$; $a$, $r$; $r$, $b$ | 3.3; hens and rabbits in 5: $g$, $c$ |
+| zentrische Streckung, Streckzentrum, Streckfaktor | omotetia, centro di omotetia, rapporto di omotetia | 4.1 |
+| Strahlensätze | teorema di Talete | 4.1, once «in Germania si parla di “teoremi delle semirette”» |
+| Ähnlichkeit, Hauptähnlichkeitssatz | similitudine, criterio principale di similitudine | 4.2 (it.: primo criterio di similitudine, AA) |
+| Hilfsfigur | figura ausiliaria | 4.2 |
+| Försterdreieck, Daumensprung | triangolo del forestale, salto del pollice | 4.2, widget schatten8 |
+| Fahnenmast | asta della bandiera | 4.2 |
+| Vorwärtsarbeiten / Rückwärtsarbeiten | ragionare in avanti / a ritroso | 5 |
+| Zahlenrätsel, «Neues Rätsel» | rompicapo, «Nuovo rompicapo» | 5, widget rueckwaerts8 |
+| Sammelbilder, Tüte, doppelt | figurine, bustina, doppione | W, widget sammel8 |
+| Wahlbereich (chapter W) | Area opzionale (chapter OP) | kapitel.js, as in mathegy8-es |
+| ZUFALLSBEREICH(1;6) | CASUALE.TRA(1;6) | W, Italian spreadsheet name |
+| MEHR ZUM AUSPROBIEREN | ALTRO DA SPERIMENTARE (IN TEDESCO) | all chapters, the labs stay German |
+
 ## mathegy9-it
 
 <!-- it-14: terms of this book only, write right below this line -->

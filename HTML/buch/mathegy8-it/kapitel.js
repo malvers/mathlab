@@ -30,7 +30,7 @@ window.BUCH = {
         { file: 'lb4-2.html', lb: 'Area di apprendimento 4', k: '4.2', title: 'Similitudine',
           sub: 'Criterio principale di similitudine, figure ausiliarie, misurare altezze, lunghezze, aree e volumi', when: 'Aprile · maggio', ustd: 12 },
         { file: 'lb5.html', lb: 'Area di apprendimento 5', k: '5', title: 'Strategie euristiche',
-          sub: 'Procedere in avanti e a ritroso, piani di risoluzione, presentare le soluzioni', when: 'Maggio', ustd: 4 },
+          sub: 'Ragionare in avanti e a ritroso, piani di soluzione, presentare le soluzioni', when: 'Maggio', ustd: 4 },
         { file: 'wb.html', lb: 'Area opzionale', k: 'OP', title: 'Simulazione con numeri casuali',
           sub: 'Numeri casuali, metodo Monte Carlo, problema di Monty Hall, figurine', when: 'Maggio · giugno', ustd: 8 }
     ]
