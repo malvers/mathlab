@@ -201,6 +201,20 @@ window.BuchIT && BuchIT.add('gy6', {
         'Leihzeit in h': 'Noleggio in h', 'Preis in €': 'Prezzo in €',
         'Wortform:': 'A parole:', 'Tabelle:': 'Tabella:', 'Gleichung:': 'Equazione:',
         'Keine. Die Temperatur kann man nur messen, nicht ausrechnen.': 'Nessuna. La temperatura si può solo misurare, non calcolare.',
+        // proportional6
+        'Äpfel': 'Mele', 'Kuchen': 'Torta', 'Taxi': 'Taxi',
+        'direkt proportional': 'direttamente proporzionale', 'indirekt proportional': 'inversamente proporzionale', 'keins von beiden': 'nessuna delle due',
+        'Masse in kg': 'Massa in kg', 'Personen': 'Persone', 'Stück pro Person': 'Pezzi a persona', 'Strecke in km': 'Percorso in km',
+        'Der Quotient $y : x$ ist immer $2{,}5$: <b>direkt proportional</b>. Der Graph ist eine Gerade durch den Ursprung.':
+            'Il quoziente $y : x$ è sempre $2{,}5$: <b>direttamente proporzionale</b>. Il grafico è una retta che passa per l’origine.',
+        'Das Produkt $x \\cdot y$ ist immer $24$: <b>indirekt proportional</b>. Doppelt so viele Personen, halb so viel Kuchen.':
+            'Il prodotto $x \\cdot y$ è sempre $24$: <b>inversamente proporzionale</b>. Il doppio delle persone, la metà della torta.',
+        'Je mehr Kilometer, desto teurer. Aber der Quotient ändert sich: <b>nicht proportional</b>. Die Gerade geht nicht durch den Ursprung.':
+            'Più chilometri, più si spende. Ma il quoziente cambia: <b>non proporzionale</b>. La retta non passa per l’origine.',
+        // dreisatz6
+        'Pumpen': 'Pompe', 'Hefte': 'Quaderni', 'Futter': 'Mangime', 'Kaninchen': 'Conigli', 'Tage': 'giorni', 'Antwort:': 'Risposta:',
+        'Schritt 1: Schreib auf, was du weißt.': 'Passo 1: scrivi ciò che sai.',
+        'Schritt 3: Rechne auf die gesuchte Menge hoch.': 'Passo 3: calcola fino alla quantità cercata.',
 
         // book it-17 mathe7-it:
 
@@ -428,6 +442,21 @@ window.BuchIT && BuchIT.add('gy6', {
         ['Die gestrichelte Linie verbindet nur die Messpunkte. Was dazwischen geschah, weiß man nicht genau.',
             'La linea tratteggiata collega solo i punti misurati. Che cosa sia successo nel frattempo non si sa con precisione.'],
         ['Abgerechnet wird nur nach ganzen Stunden, darum gibt es nur einzelne Punkte.', 'Si pagano solo ore intere, perciò ci sono solo punti isolati.'],
+        // proportional6
+        ['Äpfel: 1 kg kostet 2,50 €', 'Mele: 1 kg costa 2,50 €'], ['24 Stück Kuchen werden gerecht verteilt', '24 pezzi di torta vengono divisi in modo equo'],
+        ['Taxi: 3 € Grundgebühr und 2 € pro km', 'Taxi: 3 € di quota fissa e 2 € al km'],
+        ['Graph der Zuordnung ', 'Grafico della corrispondenza: '], ['. Zieh den gelben Punkt.', '. Trascina il punto giallo.'],
+        // dreisatz6
+        ['3 kg Äpfel kosten 7,50 €. Wie viel kosten 5 kg?', '3 kg di mele costano 7,50 €. Quanto costano 5 kg?'],
+        ['4 Pumpen leeren ein Becken in 6 Stunden. Wie lange brauchen 3 Pumpen?', '4 pompe svuotano una vasca in 6 ore. Quanto tempo impiegano 3 pompe?'],
+        ['5 Hefte kosten 4 €. Wie viel kosten 8 Hefte?', '5 quaderni costano 4 €. Quanto costano 8 quaderni?'],
+        ['Ein Futtervorrat reicht für 12 Kaninchen 10 Tage. Wie lange reicht er für 8 Kaninchen?', 'Una scorta di mangime basta a 12 conigli per 10 giorni. Quanto dura per 8 conigli?'],
+        ['5 kg Äpfel kosten 12,50 €.', '5 kg di mele costano 12,50 €.'], ['3 Pumpen brauchen 8 Stunden.', '3 pompe impiegano 8 ore.'],
+        ['8 Hefte kosten 6,40 €.', '8 quaderni costano 6,40 €.'], ['Für 8 Kaninchen reicht das Futter 15 Tage.', 'Per 8 conigli il mangime basta 15 giorni.'],
+        ['Schritt 2: Rechne auf eins zurück. ', 'Passo 2: riduci all’unità. '],
+        ['direkt proportional: Beide Seiten werden mit derselben Zahl gerechnet.', 'direttamente proporzionale: entrambi i lati si calcolano con lo stesso numero.'],
+        ['indirekt proportional: Rechts wird umgekehrt gerechnet. Aus „: 4“ links wird „· 4“ rechts.',
+            'inversamente proporzionale: a destra si fa l’operazione inversa. «: 4» a sinistra diventa «· 4» a destra.'],
 
         // book it-17 mathe7-it:
 
@@ -536,6 +565,9 @@ window.BuchIT && BuchIT.add('gy6', {
             'Ma a «$1» arrivano $2 frecce, quindi all’indietro la corrispondenza non è univoca.'],
         // darstellung6: "Gewählt: Uhrzeit 12 → Temperatur 14."
         [/Gewählt: Uhrzeit /g, 'Gewählt: ora '], [/ → Temperatur /g, ' → temperatura '],
+        // dreisatz6: "4 Pumpen" → "4 pompe", "1 Tage" → "1 giorno"
+        [/>([\d.,]+) (Pumpen|Hefte|Kaninchen|Tage)</g, (m, n, u) => '>' + n + ' ' +
+            ({ Pumpen: ['pompa', 'pompe'], Hefte: ['quaderno', 'quaderni'], Kaninchen: ['coniglio', 'conigli'], Tage: ['giorno', 'giorni'] })[u][n === '1' ? 0 : 1] + '<'],
 
         // book it-17 mathe7-it:
 
