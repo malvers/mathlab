@@ -53,6 +53,21 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         'Höhe – Mantellinie': 'Altezza – generatrice', 'Rechtwinkliges Dreieck': 'Triangolo rettangolo', 'Grundkante $a$': 'Spigolo di base $a$', 'Radius $r$': 'Raggio $r$', 'Höhe $h$': 'Altezza $h$',
 
         // book it-19 mathe9-it:
+        // pyramidekegel (OS 9 chapters 2.1, 2.2)
+        'Quadratische Pyramide': 'Piramide quadrangolare', 'Kegel': 'Cono', 'Körper': 'Solido', 'Höhe – Seitenhöhe': 'Altezza – apotema', 'Höhe – Seitenkante': 'Altezza – spigolo laterale',
+        'Höhe – Mantellinie': 'Altezza – apotema del cono', 'Rechtwinkliges Dreieck': 'Triangolo rettangolo', 'Grundkante $a$': 'Spigolo di base $a$', 'Radius $r$': 'Raggio $r$', 'Höhe $h$': 'Altezza $h$',
+        // module-wide labels the check counts for every page that loads trigonometrie (dreieck-hero, messkurve, dreieckloeser)
+        'Geometrische Figur': 'Figura geometrica', 'Ebbe und Flut': 'Alta e bassa marea', 'Riesenrad': 'Ruota panoramica', 'Sonnenflecken': 'Macchie solari',
+        'Wasserstand in m': 'Livello dell’acqua in m', 'Höhe in m': 'Altezza in m', 'Spannung in mV': 'Tensione in mV', 'Jahr': 'Anno', 'Fleckenzahl': 'Numero di macchie',
+        'Wasserstand an einem Pegel an der Nordsee, bezogen auf das mittlere Niveau (vereinfachte Werte).':
+            'Livello dell’acqua a un idrometro sul Mare del Nord, rispetto al livello medio (valori semplificati).',
+        'Höhe einer Gondel über dem Boden: Das Rad hat 50 m Durchmesser, die Achse liegt 27 m hoch, eine Umdrehung dauert 20 Minuten.':
+            'Altezza di una cabina dal suolo: la ruota ha un diametro di 50 m, l’asse è a 27 m di altezza, un giro dura 20 minuti.',
+        'Ein Elektrokardiogramm zeichnet die elektrische Spannung am Herzen auf (vereinfachte Kurve). Periodisch, aber keine Sinuskurve.':
+            'Un elettrocardiogramma registra la tensione elettrica del cuore (curva semplificata). È periodica, ma non è una sinusoide.',
+        'Monatsmittel der Sonnenflecken als geglättetes Modell mit dem Zyklus von etwa 11 Jahren (vereinfachte Werte, nicht die Messreihe).':
+            'Media mensile delle macchie solari come modello livellato con il ciclo di circa 11 anni (valori semplificati, non la serie di misure).',
+        'Winkel $\\beta$': 'Angolo $\\beta$', 'Winkel $\\alpha$ (gegenüber von $a$)': 'Angolo $\\alpha$ (opposto ad $a$)',
 
         // book it-20 mathe10-it:
         'Geometrische Figur': 'Figura geometrica',
@@ -146,6 +161,13 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         ['halber Öffnungswinkel:', 'metà dell’angolo di apertura:'], ['$ · Öffnungswinkel $2', '$ · angolo di apertura $2'], ['$ · Mantel $M', '$ · superficie laterale $M'],
 
         // book it-19 mathe9-it:
+        // pyramidekegel
+        ['Schrägbild einer quadratischen Pyramide', 'Assonometria cavaliera di una piramide quadrangolare'], ['Schrägbild eines Kegels', 'Assonometria cavaliera di un cono'],
+        [' mit einem rechtwinkligen Dreieck', ' con un triangolo rettangolo'],
+        ['Seitenhöhe $h_a = \\sqrt{', 'Apotema $h_a = \\sqrt{'], ['Neigungswinkel der Seitenfläche: $\\tan', 'Angolo di inclinazione della faccia laterale: $\\tan'],
+        ['Seitenkante $s = \\sqrt{', 'Spigolo laterale $s = \\sqrt{'], ['$ mit der Diagonale $d = ', '$ con la diagonale $d = '], ['Neigungswinkel der Seitenkante: $\\tan', 'Angolo di inclinazione dello spigolo laterale: $\\tan'],
+        ['Volumen $V = \\tfrac13', 'Volume $V = \\tfrac13'], ['$ · Oberfläche $O = ', '$ · superficie $O = '], ['Mantellinie $s = ', 'Apotema $s = '],
+        ['halber Öffnungswinkel: $\\tan', 'metà dell’angolo di apertura: $\\tan'], ['$ · Öffnungswinkel $2', '$ · angolo di apertura $2'], ['$ · Mantel $M = ', '$ · superficie laterale $M = '],
 
         // book it-20 mathe10-it:
         ['Abstand der Marker: <b>$', 'Distanza tra i marcatori: <b>$'],
@@ -186,6 +208,13 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         [/\$ Jahre<\/b>/g, '$ anni</b>'],
 
         // book it-19 mathe9-it:
+        // messkurve: the unit after the distance of the markers ("$11,0$ Jahre</b>")
+        [/\$ Jahre<\/b>/g, '$ anni</b>'],
+        // dreieckloeser: "Gegeben: drei Seiten. Die Bezeichnungen sind die üblichen: …"
+        [/Gegeben: (drei Seiten|zwei Seiten und der eingeschlossene Winkel|eine Seite und die beiden anliegenden Winkel|zwei Seiten und ein Winkel, der einer der Seiten gegenüberliegt)\. Die Bezeichnungen sind die üblichen: \$a\$ liegt \$A\$ gegenüber, \$\\alpha\$ liegt bei \$A\$\./g,
+            (m, g) => 'Dati: ' + { 'drei Seiten': 'tre lati', 'zwei Seiten und der eingeschlossene Winkel': 'due lati e l’angolo compreso',
+                'eine Seite und die beiden anliegenden Winkel': 'un lato e i due angoli adiacenti', 'zwei Seiten und ein Winkel, der einer der Seiten gegenüberliegt': 'due lati e un angolo opposto a uno dei due' }[g] +
+            '. Le lettere sono quelle solite: $a$ sta di fronte ad $A$, $\\alpha$ sta in $A$.'],
 
         // book it-20 mathe10-it:
         // messkurve: the unit after the distance of the markers ("$11,0$ Jahre</b>")

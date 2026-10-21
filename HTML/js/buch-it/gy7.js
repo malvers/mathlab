@@ -137,6 +137,19 @@ window.BuchIT && BuchIT.add('gy7', {
         // book it-18 mathe8-it:
 
         // book it-19 mathe9-it:
+        // shared solids and the 3D stage (OS 9 chapter 2.1: faltnetz7, schraegbild7, drittel7; "Körper" is in os9.js)
+        'Quader': 'Parallelepipedo', 'Dreiecksprisma': 'Prisma triangolare', 'Sechseckprisma': 'Prisma esagonale', 'Quadratische Pyramide': 'Piramide quadrangolare',
+        'Quadr. Pyramide': 'Piramide quadr.', 'Dreieckspyramide': 'Piramide triangolare', 'Pyramidenstumpf': 'Tronco di piramide', 'Tetraeder': 'Tetraedro',
+        'Oktaeder': 'Ottaedro', 'Dodekaeder': 'Dodecaedro', 'Ikosaeder': 'Icosaedro', 'Körper in 3D': 'Solido in 3D', 'Ziehen zum Drehen': 'Trascina per ruotare',
+        // schraegbild7
+        'Fichtenholz': 'Legno di abete', 'Glas': 'Vetro', 'Stahl': 'Acciaio', 'Schrägbild': 'Assonometria', 'Zweitafelbild': 'Proiezioni ortogonali', 'Wahre Länge': 'Vera lunghezza',
+        'Darstellung': 'Rappresentazione', 'Grundkante $a$': 'Spigolo di base $a$', 'Kante $b$': 'Spigolo $b$', 'Höhe $h$': 'Altezza $h$', 'Stoff': 'Materiale',
+        'Deckkante $b$': 'Spigolo superiore $b$', 'Breite $b$': 'Larghezza $b$', 'AUFRISS': 'PROSPETTO', 'GRUNDRISS': 'PIANTA',
+        // faltnetz7
+        'Falten': 'Piegatura', '▶ Zusammenfalten': '▶ Ripiega', '◀ Auffalten': '◀ Apri', 'Ein Netz faltet sich zu einem Körper': 'Uno sviluppo si ripiega e forma un solido',
+        // drittel7
+        'Zusammenschieben': 'Avvicinamento', '▶ Zusammenschieben': '▶ Avvicina', '◀ Auseinander': '◀ Separa',
+        'Drei gleiche Pyramiden ergeben einen Würfel': 'Tre piramidi uguali formano un cubo',
 
     },
     phrase: [
@@ -377,6 +390,25 @@ window.BuchIT && BuchIT.add('gy7', {
         // book it-18 mathe8-it:
 
         // book it-19 mathe9-it:
+        // schraegbild7
+        [' · Ecken $', ' · vertici $'], ['$ · Kanten $', '$ · spigoli $'], ['$ · Flächen $', '$ · facce $'],
+        ['<b>Schrägbild:</b> Kanten, die nach hinten gehen, zeichnest du unter $45^\\circ$ und auf die <b>Hälfte</b> verkürzt. Alle anderen Kanten haben ihre wahre Länge. Verdeckte Kanten sind gestrichelt.',
+            '<b>Assonometria cavaliera:</b> gli spigoli che vanno verso il fondo li disegni a $45^\\circ$ e ridotti alla <b>metà</b>. Tutti gli altri spigoli hanno la loro vera lunghezza. Gli spigoli nascosti sono tratteggiati.'],
+        ['<b>Aufriss</b> (oben): der Körper von vorn. <b>Grundriss</b> (unten): von oben. Zusammengehörige Punkte liegen auf einer <b>Ordnungslinie</b> senkrecht zur Rissachse $x_{12}$. ',
+            '<b>Prospetto</b> (sopra): il solido visto di fronte. <b>Pianta</b> (sotto): visto dall’alto. I punti corrispondenti stanno su una <b>linea di richiamo</b> perpendicolare alla linea di terra $x_{12}$. '],
+        ['Bezeichnung: $A\'$ im Grundriss, $A\'\'$ im Aufriss.', 'Notazione: $A\'$ nella pianta, $A\'\'$ nel prospetto.'],
+        ['Gemessen: $\\overline{SB} \\approx ', 'Misurato: $\\overline{SB} \\approx '],
+        ['$h_s$ ist die Höhe einer Seitenfläche, hier gemessen: $h_s \\approx ', '$h_s$ è l’altezza di una faccia laterale (l’apotema), qui misurata: $h_s \\approx '],
+        ['$V = V_{\\text{groß}} - V_{\\text{klein}}$: Ergänze den Stumpf zur ganzen Pyramide (Höhe $', '$V = V_{\\text{grande}} - V_{\\text{piccola}}$: completa il tronco fino alla piramide intera (altezza $'],
+        ['$ cm) und ziehe die kleine Spitze ab.', '$ cm) e togli la piccola punta.'],
+        ['Die vier Seitenflächen sind Trapeze mit der Höhe $h_s \\approx ', 'Le quattro facce laterali sono trapezi con l’altezza $h_s \\approx '],
+        // faltnetz7
+        ['Ecken $e = ', 'Vertici $e = '], ['$ · Kanten $k = ', '$ · spigoli $k = '], ['$ · Flächen $f = ', '$ · facce $f = '],
+        // drittel7
+        ['Der Würfel hat die Kantenlänge $a$. Alle drei Pyramiden haben ihre Spitze in derselben Würfelecke. Jede hat ein Quadrat mit $G = a^2$ als Grundfläche und die Höhe $h = a$.',
+            'Il cubo ha lo spigolo di lunghezza $a$. Le tre piramidi hanno il vertice nello stesso vertice del cubo. Ognuna ha come base un quadrato con $G = a^2$ e l’altezza $h = a$.'],
+        ['Drei gleiche Pyramiden füllen den Würfel: $3 \\cdot V_{\\text{Pyramide}} = a^3$, also ', 'Tre piramidi uguali riempiono il cubo: $3 \\cdot V_{\\text{piramide}} = a^3$, quindi '],
+        ['$V_{\\text{Pyramide}} = \\tfrac13 \\cdot a^2 \\cdot a = \\tfrac13 \\cdot G \\cdot h$', '$V_{\\text{piramide}} = \\tfrac13 \\cdot a^2 \\cdot a = \\tfrac13 \\cdot G \\cdot h$'],
 
     ],
     rule: [
@@ -459,6 +491,23 @@ window.BuchIT && BuchIT.add('gy7', {
         // book it-18 mathe8-it:
 
         // book it-19 mathe9-it:
+        // schraegbild7: the sentences around the coloured spans (tags cut the phrases), the material of the mass, the aria "Quader im Schrägbild"
+        [/Die Seitenkante (<span class="g-cy">[^<]*<\/span>) liegt schräg im Raum\. In beiden Rissen erscheint sie <b>verkürzt<\/b>\. Drehe sie im Grundriss um \$S'\$, bis sie parallel zur Rissachse liegt: \$B_0'\$\. /g,
+            (m, s) => 'Lo spigolo laterale ' + s + ' è obliquo nello spazio. In entrambe le proiezioni appare <b>accorciato</b>. Ruotalo nella pianta attorno a $S\'$ finché è parallelo alla linea di terra: $B_0\'$. '],
+        [/Die Ordnungslinie führt zu \$B_0''\$\. Die Strecke (<span class="g-lam">[^<]*<\/span>) zeigt die <b>wahre Länge<\/b>\./g,
+            (m, s) => 'La linea di richiamo porta a $B_0\'\'$. Il segmento ' + s + ' mostra la <b>vera lunghezza</b>.'],
+        [/Masse aus (Fichtenholz|Glas|Stahl) \(/g, (m, s) => 'Massa in ' + { 'Fichtenholz': 'legno di abete', 'Glas': 'vetro', 'Stahl': 'acciaio' }[s] + ' ('],
+        [/^(.+) im (Schrägbild|Zweitafelbild)$/, (m, b, v) => ({
+            'Würfel': 'Cubo', 'Quader': 'Parallelepipedo', 'Dreiecksprisma': 'Prisma triangolare', 'Sechseckprisma': 'Prisma esagonale', 'Quadratische Pyramide': 'Piramide quadrangolare',
+            'Dreieckspyramide': 'Piramide triangolare', 'Pyramidenstumpf': 'Tronco di piramide'
+        }[b] || b) + (v === 'Schrägbild' ? ' in assonometria cavaliera' : ' in proiezioni ortogonali')],
+        // faltnetz7: "1 Viereck, 4 Dreiecke" and the sentence about the regular solids
+        [/(\d+) (Dreiecke?|Vierecke?|Fünfecke?|Sechsecke?)(?=, |<\/p>)/g, (m, n, w) => n + ' ' + ({ 'Dreieck': 'triangolo', 'Dreiecke': 'triangoli', 'Viereck': 'quadrilatero',
+            'Vierecke': 'quadrilateri', 'Fünfeck': 'pentagono', 'Fünfecke': 'pentagoni', 'Sechseck': 'esagono', 'Sechsecke': 'esagoni' }[w])],
+        [/Alle Flächen sind gleiche regelmäßige (Dreiecke|Vierecke|Fünfecke|Sechsecke), an jeder Ecke stoßen (\d+) zusammen\./g, (m, w, n) => 'Tutte le facce sono ' +
+            { 'Dreiecke': 'triangoli', 'Vierecke': 'quadrilateri', 'Fünfecke': 'pentagoni', 'Sechsecke': 'esagoni' }[w] + ' regolari uguali; in ogni vertice se ne incontrano ' + n + '.'],
+        // "Würfel" is a die in the stochastics dictionary: here it is the cube, as a whole label and in bold
+        [/^Würfel$/, () => 'Cubo'], [/>Würfel</g, () => '>Cubo<'],
 
     ]
 });

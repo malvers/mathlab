@@ -86,6 +86,10 @@ window.BuchIT && BuchIT.add('geometrie', {
         'Rechtwinkliges Dreieck mit Winkel alpha': 'Triangolo rettangolo con l’angolo alfa',
         'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.':
             'Cambia $c$: il triangolo diventa più grande o più piccolo, i tre rapporti restano uguali. Dipendono solo dall’angolo.',
+        // spitzkoerper (OS 9 chapters 2.1, 2.2; "Quadratische Pyramide", "Grundkante $a$", "Höhe $h$", "Radius $r$" are in gy7.js / trigonometrie.js / os9.js)
+        'Kreiskegel': 'Cono circolare', 'Seitenhöhe': 'Apotema', 'Seitenkante': 'Spigolo laterale', 'Hilfsdreieck': 'Triangolo ausiliario',
+        'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Piramide quadrangolare in assonometria cavaliera con triangolo ausiliario',
+        'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cono circolare in assonometria cavaliera con triangolo ausiliario',
 
         // book it-20 mathe10-it:
         'Quadratische Pyramide': 'Piramide a base quadrata',
