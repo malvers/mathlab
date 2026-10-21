@@ -215,6 +215,32 @@ window.BuchIT && BuchIT.add('gy6', {
         'Pumpen': 'Pompe', 'Hefte': 'Quaderni', 'Futter': 'Mangime', 'Kaninchen': 'Conigli', 'Tage': 'giorni', 'Antwort:': 'Risposta:',
         'Schritt 1: Schreib auf, was du weißt.': 'Passo 1: scrivi ciò che sai.',
         'Schritt 3: Rechne auf die gesuchte Menge hoch.': 'Passo 3: calcola fino alla quantità cercata.',
+        // winkelsumme6
+        'Dreieck': 'Triangolo', 'Ansicht': 'Vista', 'Beweisfigur': 'Figura della dimostrazione',
+        'Dreieck mit seinen Innenwinkeln': 'Triangolo con i suoi angoli interni',
+        'Dreieck mit seinen Innenwinkeln und der Parallelen durch C': 'Triangolo con i suoi angoli interni e la parallela per C',
+        'Zieh an den Ecken. Die Winkel ändern sich, ihre Summe bleibt. Die Werte sind auf ganze Grad gerundet.':
+            'Trascina i vertici. Gli angoli cambiano, la loro somma resta. I valori sono arrotondati ai gradi interi.',
+        // konstruktion6
+        'sss': 'LLL', 'sws': 'LAL', 'wsw': 'ALA', 'SsW': 'LlA', 'www': 'AAA', 'Gegeben': 'Dati',
+        'Seite $a$': 'Lato $a$', 'Seite $b$': 'Lato $b$', 'Seite $c$': 'Lato $c$',
+        'Winkel $\\alpha$': 'Angolo $\\alpha$', 'Winkel $\\beta$': 'Angolo $\\beta$', 'Seite $a$ gegenüber $\\alpha$': 'Lato $a$ opposto ad $\\alpha$',
+        'Genau ein Dreieck.': 'Esattamente un triangolo.', 'Kein Dreieck.': 'Nessun triangolo.', 'Zwei Dreiecke.': 'Due triangoli.',
+        'Unendlich viele Dreiecke.': 'Infiniti triangoli.',
+        'Die Kreise um $A$ mit $r = b$ und um $B$ mit $r = a$ schneiden sich oberhalb von $c$ in genau einem Punkt.':
+            'Le circonferenze di centro $A$ con $r = b$ e di centro $B$ con $r = a$ si intersecano sopra $c$ in esattamente un punto.',
+        'Auf dem Schenkel von $\\alpha$ trägt man $b$ ab. Der Endpunkt ist $C$.': 'Sul lato di $\\alpha$ si riporta $b$. L’estremo è $C$.',
+        'Der Kreis um $B$ schneidet den Schenkel zweimal. Die Angaben legen das Dreieck nicht fest.':
+            'La circonferenza di centro $B$ taglia il lato due volte. I dati non determinano il triangolo.',
+        'Die gegenüberliegende Seite $a$ ist die größere: $a \\geq c$.': 'Il lato opposto $a$ è il maggiore: $a \\geq c$.',
+        'Der Kreis berührt den Schenkel nur.': 'La circonferenza tocca soltanto il lato.',
+        'Der Kreis um $B$ erreicht den Schenkel nicht.': 'La circonferenza di centro $B$ non raggiunge il lato.',
+        'Alle haben dieselbe Form, aber verschiedene Größen. Drei Winkel legen kein Dreieck fest.':
+            'Hanno tutti la stessa forma, ma grandezze diverse. Tre angoli non determinano un triangolo.',
+        'Den dritten Winkel kennt man ohnehin: $\\gamma = 180^\\circ - \\alpha - \\beta$. Es fehlt eine Länge.':
+            'Il terzo angolo lo si conosce comunque: $\\gamma = 180^\\circ - \\alpha - \\beta$. Manca una lunghezza.',
+        // seitenwinkel6
+        'Dreieck aus drei Stäben': 'Triangolo di tre bastoncini', 'Die Stäbe ergeben kein Dreieck': 'I bastoncini non formano un triangolo',
 
         // book it-17 mathe7-it:
 
@@ -457,6 +483,36 @@ window.BuchIT && BuchIT.add('gy6', {
         ['direkt proportional: Beide Seiten werden mit derselben Zahl gerechnet.', 'direttamente proporzionale: entrambi i lati si calcolano con lo stesso numero.'],
         ['indirekt proportional: Rechts wird umgekehrt gerechnet. Aus „: 4“ links wird „· 4“ rechts.',
             'inversamente proporzionale: a destra si fa l’operazione inversa. «: 4» a sinistra diventa «· 4» a destra.'],
+        // winkelsumme6
+        ['Die gestrichelte Linie ist parallel zu $\\overline{AB}$. $\\alpha\'$ und $\\alpha$ sind Wechselwinkel an Parallelen, also gleich groß. Ebenso $\\beta\'$ und $\\beta$. ',
+            'La linea tratteggiata è parallela ad $\\overline{AB}$. $\\alpha\'$ e $\\alpha$ sono angoli alterni tra parallele, quindi uguali. Lo stesso vale per $\\beta\'$ e $\\beta$. '],
+        ['Zusammen mit $\\gamma$ bilden $\\alpha\'$ und $\\beta\'$ einen gestreckten Winkel: $180^\\circ$.',
+            'Insieme a $\\gamma$, $\\alpha\'$ e $\\beta\'$ formano un angolo piatto: $180^\\circ$.'],
+        [' und der Parallelen durch C', ' e la parallela per C'],
+        // konstruktion6
+        ['<b>Kongruenzsatz sss:</b> Wenn zwei Dreiecke in allen drei Seiten übereinstimmen, dann sind sie kongruent.',
+            '<b>Criterio LLL:</b> se due triangoli hanno i tre lati rispettivamente congruenti, allora sono congruenti.'],
+        ['<b>Kongruenzsatz sws:</b> Wenn zwei Dreiecke in zwei Seiten und dem eingeschlossenen Winkel übereinstimmen, dann sind sie kongruent.',
+            '<b>Criterio LAL:</b> se due triangoli hanno rispettivamente congruenti due lati e l’angolo tra essi compreso, allora sono congruenti.'],
+        ['<b>Kongruenzsatz wsw:</b> Wenn zwei Dreiecke in einer Seite und den beiden anliegenden Winkeln übereinstimmen, dann sind sie kongruent.',
+            '<b>Criterio ALA:</b> se due triangoli hanno rispettivamente congruenti un lato e i due angoli ad esso adiacenti, allora sono congruenti.'],
+        ['<b>Kongruenzsatz SsW:</b> Wenn zwei Dreiecke in zwei Seiten und dem Winkel übereinstimmen, der der <b>größeren</b> Seite gegenüberliegt, dann sind sie kongruent.',
+            '<b>Criterio LlA:</b> se due triangoli hanno rispettivamente congruenti due lati e l’angolo opposto al lato <b>maggiore</b>, allora sono congruenti.'],
+        ['Die freien Schenkel der Winkel schneiden sich in $C$. ', 'I lati liberi degli angoli si intersecano in $C$. '],
+        ['. Für $\\gamma$ bleibt nichts übrig, die Schenkel laufen auseinander.', '. Per $\\gamma$ non resta niente, i lati si allontanano.'],
+        ['$\\alpha + \\beta$ ist schon $', '$\\alpha + \\beta$ è già $'],
+        ['Die beiden kürzeren Seiten sind zusammen ', 'I due lati più corti insieme misurano '], [' cm lang, die längste ', ' cm, il più lungo '],
+        [' cm. Die Kreise treffen sich nicht.', ' cm. Le circonferenze non si incontrano.'], ['Die Kreise treffen sich nicht.', 'Le circonferenze non si incontrano.'],
+        ['Die Kreise berühren sich nur auf der längsten Seite.', 'Le circonferenze si toccano solo sul lato più lungo.'], ['Konstruktion aus ', 'Costruzione da '],
+        // seitenwinkel6
+        ['Alle Seiten gleich lang: alle Winkel $60^\\circ$. ', 'Tutti i lati uguali: tutti gli angoli misurano $60^\\circ$. '],
+        ['Zwei Seiten sind gleich lang: Das Dreieck ist gleichschenklig, und die Basiswinkel sind gleich groß.',
+            'Due lati sono uguali: il triangolo è isoscele e gli angoli alla base sono uguali.'],
+        ['Die beiden kürzeren Stäbe sind zusammen genau so lang wie der längste: Sie liegen flach auf ihm. Das ist kein Dreieck.',
+            'I due bastoncini più corti insieme sono lunghi esattamente quanto il più lungo: restano distesi su di esso. Non è un triangolo.'],
+        ['Die beiden kürzeren Stäbe reichen nicht bis zueinander, egal wie man sie dreht.', 'I due bastoncini più corti non si toccano, comunque li si giri.'],
+        [' <b>Dreiecksungleichung:</b> Zwei Seiten zusammen müssen immer länger sein als die dritte.',
+            ' <b>Disuguaglianza triangolare:</b> due lati insieme devono essere sempre più lunghi del terzo.'],
 
         // book it-17 mathe7-it:
 
@@ -568,6 +624,11 @@ window.BuchIT && BuchIT.add('gy6', {
         // dreisatz6: "4 Pumpen" → "4 pompe", "1 Tage" → "1 giorno"
         [/>([\d.,]+) (Pumpen|Hefte|Kaninchen|Tage)</g, (m, n, u) => '>' + n + ' ' +
             ({ Pumpen: ['pompa', 'pompe'], Hefte: ['quaderno', 'quaderni'], Kaninchen: ['coniglio', 'conigli'], Tage: ['giorno', 'giorni'] })[u][n === '1' ? 0 : 1] + '<'],
+        // konstruktion6
+        [/^Konstruktion aus (sss|sws|wsw|SsW|www)$/, (m, k) => 'Costruzione da ' + ({ sss: 'LLL', sws: 'LAL', wsw: 'ALA', SsW: 'LlA', www: 'AAA' })[k]],
+        // seitenwinkel6: the largest angle lies opposite the longest side
+        [/Der <span class="g-lam">längsten Seite \$([abc])\$<\/span> liegt der <span class="g-lam">größte Winkel \$(\\[a-z]+)\$<\/span> gegenüber, der <span class="g-cy">kürzesten \$([abc])\$<\/span> der kleinste\. /g,
+            (m, s1, w, s2) => 'Di fronte al <span class="g-lam">lato più lungo $' + s1 + '$</span> sta l’<span class="g-lam">angolo maggiore $' + w + '$</span>, di fronte al <span class="g-cy">più corto $' + s2 + '$</span> il minore. '],
 
         // book it-17 mathe7-it:
 

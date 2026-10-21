@@ -128,6 +128,12 @@ window.BuchIT && BuchIT.add('gy5', {
         'Ausgleichen': 'Pareggia', 'Neue Werte': 'Nuovi valori', 'Mittelwert': 'Media', 'Säulen mit dem Mittelwert': 'Colonne con la media',
         'Zieh die Säulen höher oder niedriger. „Ausgleichen“ verteilt alles gerecht: Jede Säule bekommt gleich viel.':
             'Trascina le colonne più in alto o più in basso. «Pareggia» distribuisce tutto in modo equo: ogni colonna riceve la stessa quantità.',
+        // winkelpaare5
+        'Scheitelwinkel': 'Opposti al vertice', 'Nebenwinkel': 'Adiacenti', 'Stufenwinkel': 'Corrispondenti', 'Wechselwinkel': 'Alterni',
+        'Winkelpaar': 'Coppia di angoli', 'Anderes Paar': 'Altra coppia', 'h kippen': 'Inclina h',
+        'Zieh am Punkt auf der Geraden s, um sie zu drehen. Mit „h kippen“ sind g und h nicht mehr parallel.':
+            'Trascina il punto sulla retta s per ruotarla. Con «Inclina h» g e h non sono più parallele.',
+        'Zwei Geraden g und h, geschnitten von s': 'Due rette g e h tagliate da s',
 
     },
     phrase: [
@@ -233,6 +239,17 @@ window.BuchIT && BuchIT.add('gy5', {
         // mittel5
         ['Mittelwert', 'Media'], ['Summe: ', 'Somma: '], ['Geteilt durch die Anzahl: ', 'Diviso per il numero dei valori: '],
         ['Was über der Linie war (gestrichelt grau), füllt genau die Lücken (gelb).', 'Ciò che stava sopra la linea (grigio tratteggiato) riempie esattamente i vuoti (giallo).'],
+        // winkelpaare5
+        ['Scheitelwinkel liegen sich am selben Schnittpunkt gegenüber. Sie sind <b>immer gleich groß</b>.',
+            'Gli angoli opposti al vertice stanno uno di fronte all’altro nello stesso punto di intersezione. Sono <b>sempre uguali</b>.'],
+        ['Nebenwinkel liegen am selben Schnittpunkt nebeneinander und bilden zusammen einen gestreckten Winkel: Sie ergänzen sich <b>immer zu 180°</b>.',
+            'Gli angoli adiacenti stanno uno accanto all’altro nello stesso punto di intersezione e insieme formano un angolo piatto: sommati fanno <b>sempre 180°</b>.'],
+        ['Stufenwinkel liegen an verschiedenen Schnittpunkten auf derselben Seite von s und derselben Seite der Geraden. ',
+            'Gli angoli corrispondenti stanno in punti di intersezione diversi, dalla stessa parte di s e dalla stessa parte delle rette. '],
+        ['Wechselwinkel liegen an verschiedenen Schnittpunkten auf verschiedenen Seiten von s und zwischen den Geraden. ',
+            'Gli angoli alterni stanno in punti di intersezione diversi, da parti diverse di s e tra le rette. '],
+        ['An <b>parallelen</b> Geraden sind sie <b>gleich groß</b>.', 'Su rette <b>parallele</b> sono <b>uguali</b>.'],
+        ['Weil g und h <b>nicht parallel</b> sind, sind sie verschieden groß.', 'Poiché g e h <b>non sono parallele</b>, sono diversi.'],
 
     ],
     rule: [
@@ -351,6 +368,8 @@ window.BuchIT && BuchIT.add('gy5', {
         // komma5 (and stellenwert5): the column heads of the place value tables, u, da, h, k …; d, c, m after the comma
         [/<table class="g5-sw[\s\S]*?<\/table>/g, t => t.replace(/<th( class="[^"]*")?>(Mrd|HM|ZM|M|HT|ZT|T|H|Z|E|z|h|t)<\/th>/g, (m, c, k) => '<th' + (c || '') + '>' +
             ({ Mrd: 'G', HM: 'hM', ZM: 'daM', M: 'M', HT: 'hk', ZT: 'dak', T: 'k', H: 'h', Z: 'da', E: 'u', z: 'd', h: 'c', t: 'm' })[k] + '</th>')],
+        // winkelpaare5
+        [/g und h sind (nicht )?parallel\./, (m, n) => 'g e h ' + (n ? 'non sono' : 'sono') + ' parallele.'],
 
     ]
 });
