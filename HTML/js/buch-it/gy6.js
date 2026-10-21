@@ -261,8 +261,8 @@ window.BuchIT && BuchIT.add('gy6', {
         'absolut': 'assoluta', 'relativ': 'relativa', 'in %': 'in %',
 
         // book it-17 mathe7-it:
-        // zufall6 ("Würfel" is the die here; the cube of gy7 is a rule in js/buch-it/gy7.js)
-        'Münze': 'Moneta', 'Würfel': 'Dado', 'Glücksrad': 'Ruota della fortuna', 'Versuch': 'Esperimento',
+        // zufall6 ("Würfel" is never a word: the die is a rule below, the cube of gy7 a rule in js/buch-it/gy7.js)
+        'Münze': 'Moneta', 'Glücksrad': 'Ruota della fortuna', 'Versuch': 'Esperimento',
         'Kopf': 'Testa', 'Zahl': 'Croce', 'Rot': 'Rosso', 'Grün': 'Verde',
         '1-mal': '1 volta', '10-mal': '10 volte', '100-mal': '100 volte', 'Löschen': 'Cancella',
         'Säulendiagramm der relativen Häufigkeiten': 'Diagramma a colonne delle frequenze relative',
@@ -736,6 +736,8 @@ window.BuchIT && BuchIT.add('gy6', {
         // the steppers' aria-labels of kreisdiagramm6: "zu Fuß kleiner" → "A piedi: meno"
         [/^(zu Fuß|Fahrrad|Bus oder Bahn|Auto) (kleiner|größer)$/, (m, w, d) =>
             ({ 'zu Fuß': 'A piedi', 'Fahrrad': 'Bici', 'Bus oder Bahn': 'Autobus o treno', 'Auto': 'Auto' })[w] + (d === 'kleiner' ? ': meno' : ': più')],
+        // zufall6: the die button, next to the coin (faltnetz7 and schraegbild7 have a cube with the same data-v)
+        [/(data-v="muenze">[^]*?data-v="wuerfel">)(?:Würfel|\u0003\d+\u0004)(<)/g, '$1Dado$2'],
         // zufall6: "20 Versuche" in the picture
         [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '1' ? ' prova' : ' prove') + '<'],
         // flaeche6

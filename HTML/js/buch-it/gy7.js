@@ -452,7 +452,9 @@ window.BuchIT && BuchIT.add('gy7', {
             ({ 'Tetraeder': 'il <b>tetraedro</b>', 'Würfel': 'il <b>cubo</b>', 'Oktaeder': 'l’<b>ottaedro</b>', 'Dodekaeder': 'il <b>dodecaedro</b>', 'Ikosaeder': 'l’<b>icosaedro</b>' }[s] || '<b>' + s + '</b>') + '.'],
         [/^(\d+) regelmäßige (\d+)-Ecke an einer Ecke$/, (m, n, k) => n + ' poligoni regolari di ' + k + ' lati in un vertice'],
         // "Würfel" is a die (word in gy6): the cube button in the lists of solids (faltnetz7, schraegbild7), also when the word pass came first
-        [/(data-v="wuerfel">)(?:Würfel|\u0003\d+\u0004)(<\/button>)(?=[\s\S]*data-v="(?:quader|oktaeder)")/g, '$1Cubo$2'],
+        [/(data-v="wuerfel">)(?:Würfel|Dado|\u0003\d+\u0004)(<\/button>)(?=[\s\S]*data-v="(?:quader|oktaeder)")/g, '$1Cubo$2'],
+        // faltnetz7: the cube as the bold name before the list of faces ("<b>Würfel</b>: 6 Vierecke")
+        [/(<p style="margin:0"><b>)Würfel(<\/b>: \d+ )/g, '$1Cubo$2'],
 
         // book it-18 mathe8-it:
 
