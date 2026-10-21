@@ -844,6 +844,37 @@ Round 3, 20.10.2026 (Trotula): decisions made while translating OS 7 (Realschulb
 
 <!-- it-19: terms of this book only, write right below this line -->
 
+Round 3, 21.10.2026 (Hack): decisions made while translating OS 9 (Realschulbildungsgang); nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Oberschule, Realschulbildungsgang | Oberschule, percorso Realschule | the school name stays; explained once on the start page (scuola secondaria tedesca, classi 5–10) |
+| Wahlpflichtbereich 1 (chapter OP) | Area a scelta 1 | as section 1 |
+| Kathetensatz / Höhensatz | 1° teorema di Euclide / 2° teorema di Euclide | the Italian school names; widget buttons in js/buch-it/geometrie.js |
+| Hypotenusenabschnitte $p$, $q$ | proiezioni dei cateti sull’ipotenusa | 1.1 |
+| Umkehrung des Satzes von Pythagoras, pythagoreisches Zahlentripel | inverso del teorema di Pitagora, terna pitagorica | 1.1 |
+| Knotenschnur (Seilspanner) | corda a nodi | 1.1 |
+| Gegenkathete / Ankathete | cateto opposto / cateto adiacente | 1.2; in fractions `\text{cateto opposto}` |
+| Steigung in Prozent, Steigungswinkel, Steigungsdreieck | pendenza in percentuale, angolo di inclinazione, triangolo della pendenza | 1.3 |
+| Dachneigung, Firsthöhe, Sparrenlänge, Abspannseil | inclinazione del tetto, altezza del colmo, lunghezza dei puntoni, tirante | 1.3 |
+| Seitenhöhe $h_s$ / Seitenkante $s$ (Pyramide) | apotema / spigolo laterale | 2.1 |
+| Hilfsdreieck | triangolo ausiliario | 2.1, 2.2 |
+| Zweitafelbild, Aufriss / Grundriss, Ordnungslinie, Rissachse, wahre Länge | proiezioni ortogonali, prospetto / pianta, linea di richiamo, linea di terra, vera lunghezza | 2.1 |
+| Kreiskegel, Mantellinie $s$ | cono circolare, apotema | 2.2 |
+| Kubikwurzel | radice cubica | 2.2 |
+| zusammengesetzte Körper, Materialbedarf | solidi composti, fabbisogno di materiale | 2.3 |
+| Ausklammern, Nullprodukt | raccogliere, prodotto uguale a zero | 3.2 |
+| Fallunterscheidung | distinzione dei casi | 3.2 |
+| Goldener Schnitt, goldenes Rechteck, goldene Spirale | sezione aurea, rettangolo aureo, spirale aurea | OP |
+| Fibonacci-Folge, Fibonacci-Zahlen, Pentagramm | successione di Fibonacci, numeri di Fibonacci, pentagramma | OP |
+| Leonardo von Pisa | Leonardo da Pisa (Leonardo Pisano) | OP excursion |
+| Säulendiagramm / Liniendiagramm / Kreisdiagramm | diagramma a colonne / diagramma a linee / diagramma a torta | 4; not "istogramma" (that is the Histogramm) |
+| absolute / relative Häufigkeit, Häufigkeitstabelle | frequenza assoluta / relativa, tabella delle frequenze | 4 |
+| Mittelwert (arithmetisches Mittel), Zentralwert (Median), Modalwert | media (aritmetica), mediana, moda | 4; "drei Mittelwerte" = tre valori medi |
+| Spannweite, Streuung, Ausreißer | campo di variazione, dispersione, valore anomalo | 4 |
+| Urliste, Strichliste, Suggestivfrage | elenco dei dati grezzi, tabella con le stanghette, domanda tendenziosa | 4 |
+| RUNDE 1 · OHNE TASCHENRECHNER / RUNDE 2 · MIT TASCHENRECHNER | PARTE 1 · SENZA CALCOLATRICE / PARTE 2 · CON LA CALCOLATRICE | test boxes; "IM KOPF" / "MIT RECHNUNG": A MENTE / CON I CALCOLI |
+
 ## mathe10-it
 
 <!-- it-20: terms of this book only, write right below this line -->
