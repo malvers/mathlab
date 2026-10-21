@@ -92,7 +92,7 @@ window.BuchIT && BuchIT.add('gy7', {
         'Quader': 'Parallelepipedo', 'Dreiecksprisma': 'Prisma triangolare', 'Sechseckprisma': 'Prisma esagonale', 'Quadratische Pyramide': 'Piramide quadrangolare',
         'Quadr. Pyramide': 'Piramide quadr.', 'Dreieckspyramide': 'Piramide triangolare', 'Pyramidenstumpf': 'Tronco di piramide', 'Tetraeder': 'Tetraedro',
         'Oktaeder': 'Ottaedro', 'Dodekaeder': 'Dodecaedro', 'Ikosaeder': 'Icosaedro', 'Körper in 3D': 'Solido in 3D', 'Ziehen zum Drehen': 'Trascina per ruotare',
-        'weniger': 'meno', 'mehr': 'più',
+        'weniger': 'meno', 'mehr': 'più', 'Von vorn': 'Da capo', 'Alle Schritte': 'Tutti i passi',
         // zahlengerade7
         'Addieren': 'Addizione', 'Subtrahieren': 'Sottrazione', 'Rechenart': 'Operazione', 'erste Zahl $a$': 'primo numero $a$', 'zweite Zahl $b$': 'secondo numero $b$',
         'Zieh die Punkte $a$ und $b$ auf der Zahlengeraden. Sie rasten in halben Schritten ein.': 'Trascina i punti $a$ e $b$ sulla retta dei numeri. Scattano di mezza unità in mezza unità.',
