@@ -631,6 +631,42 @@ Round 3, Montessori, 20.10.2026: decisions made while translating GY 6; nothing 
 
 <!-- it-14: terms of this book only, write right below this line -->
 
+| German | Italian | Note |
+|---|---|---|
+| Wahlbereich, Kapitel W | area opzionale, CAPITOLO OP | `k: 'OP'` in kapitel.js |
+| Wurzelgleichung, Scheinlösung | equazione irrazionale, soluzione non accettabile | 1.1, check by substituting |
+| Permanenzprinzip | principio di permanenza | powers with rational exponents |
+| Potenzfunktion, Polstelle, Asymptote | funzione potenza, polo, asintoto | widget potenzfunktion: "Zero: non ha" via the shared word 'keine' |
+| Normalform, allgemeine Form, Scheitelpunktform | forma normale, forma generale, forma del vertice | |
+| quadratische Ergänzung | completamento del quadrato | |
+| Erlös $E(x)$, Zielgröße, Nebenbedingung | entrate $E(x)$, grandezza obiettivo, vincolo | 1.4, letters stay |
+| Kreisausschnitt, Kreisbogen, Kreisring, Mittelpunktswinkel | settore circolare, arco, corona circolare, angolo al centro | |
+| $V_K$, $V_Z$ (Kugel, Zylinder) | $V_S$, $V_C$ (sfera, cilindro) | chapter 2 |
+| Höhensatz, Kathetensatz | teorema dell’altezza, teorema del cateto | named once as secondo / primo teorema di Euclide |
+| Hypotenusenabschnitte $p$, $q$ | proiezioni dei cateti sull’ipotenusa | |
+| Thaleskreis | semicirconferenza di Talete | |
+| Umkehrung, indirekter Beweis, Voraussetzung, Behauptung | teorema inverso, dimostrazione per assurdo, ipotesi, tesi | |
+| Quader, Raumdiagonale | parallelepipedo rettangolo, diagonale | |
+| Gegenkathete, Ankathete; Merkhilfe GAG-HHA | cateto opposto, cateto adiacente; seno = CO : I, coseno = CA : I, tangente = CO : CA | review: CO, CA, I |
+| Steigung in Prozent, Steigungswinkel, Höhenwinkel, Tiefenwinkel | pendenza in percentuale, angolo di inclinazione, angolo di elevazione, angolo di depressione | |
+| regelmäßiges $n$-Eck, Umkreis | poligono regolare di $n$ lati, circonferenza circoscritta | widget vieleck: inscritto / circoscritto |
+| Seitenhöhe $h_s$, Seitenkante $s$, Mantellinie $s$ | apotema, spigolo laterale, generatrice (detta anche apotema del cono) | |
+| Grundfläche $G$, Mantel $M$, Oberfläche $O$ | area di base, superficie laterale, superficie totale | letters stay, explained once in 3.3 |
+| Schrägbild, Hilfsdreieck | assonometria cavaliera, triangolo ausiliario | widget spitzkoerper |
+| Vermessungsprojekt | progetto di misurazione | |
+| Modalwert, Median, arithmetisches Mittel, Ausreißer | moda, mediana, media aritmetica, valore anomalo | |
+| Lagemaß, Streumaß | indice di posizione, indice di dispersione | |
+| Spannweite, Varianz, Standardabweichung | campo di variazione, varianza, deviazione standard | |
+| Nominal-, Ordinal-, metrische Skala | scala nominale, ordinale, metrica | |
+| Klassenbreite, Histogramm, Prozentpunkte | ampiezza delle classi, istogramma, punti percentuali | |
+| abgeschnittene Achse, Bild statt Balken | asse tagliato, immagine al posto della barra | widget achsentrick (also GY 7) |
+| Tabellenkalkulation: MITTELWERT, VAR.P, STABW.N, STABW.S | foglio di calcolo: MEDIA, VAR.P, DEV.ST.P, DEV.ST.C | Italian Excel; decimal comma as in German: `=B2*1,03` |
+| Mietpreisbremse | il freno agli affitti tedesco (Mietpreisbremse) | chapter 5 |
+| goldener Schnitt, goldene Zahl | sezione aurea, numero aureo | Euclid: «in media ed estrema ragione» |
+| goldenes Rechteck, goldenes Dreieck, goldene Spirale, äußere Teilung | rettangolo aureo, triangolo aureo, spirale aurea, divisione esterna | |
+| DIN A4 | formato A4 | |
+| MEHR AUSPROBIEREN, RUNDE 2 · MIT CAS | ALTRO DA SPERIMENTARE, PARTE 2 · CON IL CAS | |
+
 ## mathegy10-it
 
 <!-- it-15: terms of this book only, write right below this line -->
