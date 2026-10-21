@@ -1,7 +1,7 @@
 // Service worker of the audiobook page (generated into HTML/hoerbuch/ by pack_hoerbuch.mjs). It only keeps the page
 // itself, its icons and the fonts, so the page opens on the plane. The book (text and sound) is encrypted in the R2
 // bucket; the page stores those files itself, still encrypted, in the cache "hoerbuch-files".
-const VERSION = '160f66d51f41';
+const VERSION = '6e29568099bd';
 const SHELL = 'hoerbuch-shell-' + VERSION;
 const FILES = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 self.addEventListener('install', e => e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
@@ -10,6 +10,10 @@ self.addEventListener('activate', e => e.waitUntil((async () => {
   await self.clients.claim();
 })()));
 const FONTS = /^https:\/\/fonts\.(googleapis|gstatic)\.com\//;
+// for the notes, from outside this folder: Doc's login (svp-auth.js) and the shared speech engine (solita-listen.js) -
+// from the net when it answers, else the stored copy. Not in FILES: where they are missing (a test server of this
+// folder only) the install must not fail.
+const EXTRA = ['../svp/svp-auth.js', '../js/solita-listen.js'].map(p => new URL(p, self.registration.scope).pathname);
 self.addEventListener('fetch', e => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET') return;
@@ -23,6 +27,12 @@ self.addEventListener('fetch', e => {
         if (res.ok) { c.put('./', res.clone()); return res; }
       } catch (_) { /* offline */ }
       return (await c.match('./')) || Response.error();
+    })());
+  } else if (url.origin === location.origin && EXTRA.includes(url.pathname)) {
+    e.respondWith((async () => {
+      const c = await caches.open(SHELL);
+      try { const res = await fetch(req); if (res.ok) c.put(req, res.clone()); return res; }
+      catch (_) { return (await c.match(req)) || Response.error(); }
     })());
   } else if (url.origin === location.origin && url.pathname.startsWith(new URL('./', self.registration.scope).pathname)) {
     e.respondWith(caches.match(req).then(r => r || fetch(req)));
