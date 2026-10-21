@@ -623,6 +623,46 @@ Round 3, Montessori, 20.10.2026: decisions made while translating GY 6; nothing 
 
 <!-- it-12: terms of this book only, write right below this line -->
 
+Round 3, 20.10.2026 (Cristoforetti): decisions made while translating GY 7; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Klasse 7, Gymnasium | 7ª classe, Gymnasium | start page: liceo tedesco a indirizzo accademico, dalla 5ª alla 12ª classe |
+| TR, DGS (task chips) | CALC, SGD | start page: SGD = software di geometria dinamica (per esempio GeoGebra) |
+| Runde 2 · mit Überlegen / mit Umformen / mit Rechnung | PARTE 2 · RAGIONANDO / CON LE TRASFORMAZIONI / CON I CALCOLI | Runde 1 · im Kopf: PARTE 1 · A MENTE |
+| Mehr ausprobieren (labs) | ALTRO DA PROVARE | |
+| Passante, Tangente, Sekante, Sehne, Berührungspunkt | retta esterna, tangente, secante, corda, punto di tangenza | 1.1; the aside says once that German calls it Passante |
+| Umkreis, Inkreis, Umkreis-/Inkreismittelpunkt | circonferenza circoscritta, inscritta, circocentro, incentro | widget buttons: Circoscritta / Inscritta |
+| Mittelsenkrechte, Winkelhalbierende | asse (del segmento), bisettrice | masculine/feminine: a rule in js/buch-it/gy7.js writes «I tre assi» / «Le tre bisettrici» |
+| Satz des Thales, Thaleskreis | teorema di Talete, circonferenza di Talete | 1.2 says once that in Italy «teorema di Talete» usually means the parallels |
+| Peripheriewinkel, Zentriwinkel, Sehnenviereck | angolo alla circonferenza, angolo al centro, quadrilatero inscritto | «che insistono sullo stesso arco» |
+| Zentri-Peripheriewinkelsatz, Peripheriewinkelsatz | teorema dell’angolo al centro, teorema degli angoli alla circonferenza | |
+| Voraussetzung, Behauptung, Umkehrung, Gegenbeispiel | ipotesi, tesi, teorema inverso, controesempio | Allaussage / Existenzaussage: affermazione universale / esistenziale |
+| Planfigur, Konstruktionsplan, Konstruktionsbeschreibung | figura di analisi, piano di costruzione, descrizione della costruzione | |
+| SSS, SWS, WSW | LLL, LAL, ALA | widget konstruktion7: «È il caso ALA» |
+| Vorwärts-, Rückwärtsarbeiten | procedere in avanti, a ritroso | Pappos: Pappo di Alessandria; Pólya: «Come risolvere i problemi di matematica» |
+| Gegenzahl, Betrag, Zahlengerade | opposto, valore assoluto, retta dei numeri | |
+| gebrochene Zahlen $\mathbb{Q}^+$ | numeri frazionari | Mengendiagramm: diagramma di Eulero-Venn |
+| Teilmenge, Schnittmenge, Vereinigungsmenge, leere Menge | sottoinsieme, intersezione, unione, insieme vuoto | sets keep the German semicolons $\{-1;\, 0;\, 1\}$ |
+| Vorzeichenregeln, Rechengesetze, Punkt vor Strich | regola dei segni, proprietà delle operazioni, prima moltiplicazioni e divisioni | Kommutativ-/Assoziativ-/Distributivgesetz: proprietà commutativa/associativa/distributiva |
+| Lösungsmenge $L$ | insieme delle soluzioni $S$ | 2.3, as in mathe11-it; the aside names the German $L$ once |
+| Formeln umstellen | formule inverse, ricavare una variabile | widget umstellen7: «ricava $b$», «⇄ scambia i membri» |
+| Grundwert $G$, Prozentwert $W$, Prozentsatz $p\,\%$ | valore di base $G$, valore percentuale $W$, tasso percentuale $p\,\%$ | letters stay; Dreisatz: proporzione (regola del tre) |
+| Steigerung um / auf | aumentare del / portare al (fino al) | rule in gy7.js: «significa passare <b>al</b>» |
+| Rabatt, Mehrwertsteuer, netto/brutto, Skonto | sconto, IVA, netto/lordo, sconto per pagamento immediato | the German 19 % stays, «(in Italia è del 22 %)» once |
+| Prozentpunkte | punti percentuali | |
+| Säulen-, Linien-, Kreis-, Balkendiagramm | diagramma a colonne, grafico a linee, diagramma circolare, diagramma a barre | |
+| Netz, Schrägbild, Zweitafelbild | sviluppo (piano), assonometria cavaliera, proiezioni ortogonali | widget buttons: Assonometria / Proiezioni ortogonali / Vera lunghezza |
+| Aufriss, Grundriss, Rissachse $x_{12}$, Ordnungslinie | prospetto, pianta, linea di terra, linea di richiamo | $P'$, $P''$ stay |
+| wahre Länge, wahre Größe | vera lunghezza, vera grandezza | |
+| Quader, Grund-/Deckkante, Seitenkante, Seitenfläche | parallelepipedo (rettangolo), spigolo di base / superiore, spigolo laterale, faccia laterale | |
+| Oberfläche $O$, Mantel $M$, Grundfläche $G$ | superficie totale, superficie laterale, base | letters stay as in the German book (said once in 3.2) |
+| Pyramidenstumpf, Rückführprinzip | tronco di piramide, ricondursi a solidi noti (scomporre / completare) | |
+| Ecken $e$, Kanten $k$, Flächen $f$ (Euler) | vertici $v$, spigoli $s$, facce $f$ | $v - s + f = 2$; rule in gy7.js for the widget; wb says once that German writes $e - k + f$ |
+| Polyeder, reguläres Polyeder, platonische Körper | poliedro, poliedro regolare, solidi platonici | Eulerscher Polyedersatz: formula di Eulero per i poliedri |
+| Labs: Satz von Cavalieri, Körper, Kreisteilung, Winkel-Labor | PRINCIPIO DI CAVALIERI, SOLIDI, DIVIDERE IL CERCHIO, LABORATORIO DEGLI ANGOLI | |
+| Leipzig, Dresden, Erzgebirge | Lipsia, Dresda, Monti Metalliferi | |
+
 ## mathegy8-it
 
 <!-- it-13: terms of this book only, write right below this line -->
