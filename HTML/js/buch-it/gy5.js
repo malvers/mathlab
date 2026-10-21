@@ -101,6 +101,8 @@ window.BuchIT && BuchIT.add('gy5', {
             'Tocca i quadretti per colorarli. I quadretti simmetrici si colorano da soli.',
         // linien5
         'erste Zahl': 'primo numero', 'zweite Zahl': 'secondo numero',
+        // stellenwert5 (aria-labels of ▲ ▼), linien5 ("plus" between the two inputs)
+        'plus': 'più', 'minus': 'meno',
         'Legen': 'Metti', 'Dazulegen': 'Aggiungi', 'Bündeln': 'Raggruppa', 'Alles bündeln': 'Raggruppa tutto',
         'Fünf Pfennige auf einer Linie werden zu einem Pfennig im Feld darüber, zwei Pfennige in einem Feld zu einem auf der nächsten Linie. So rechnete man vor 500 Jahren.':
             'Cinque gettoni su una linea diventano un gettone nello spazio sopra, due gettoni in uno spazio diventano uno sulla linea successiva. Così si calcolava 500 anni fa.',
