@@ -271,6 +271,7 @@ window.BuchIT && BuchIT.add('gy6', {
         'Parallelogramm': 'Parallelogramma', 'Dreieck': 'Triangolo', 'Trapez': 'Trapezio', 'Drachenviereck': 'Deltoide', 'Figur': 'Figura',
         'Zerlegen und verschieben': 'Scomponi e sposta', 'Grundseite $g$': 'Base $g$', 'Höhe $h$': 'Altezza $h$',
         'Diagonale $e$': 'Diagonale $e$', 'Diagonale $f$': 'Diagonale $f$',
+        'Seite $a$': 'Lato $a$', 'Seite $b$': 'Lato $b$', 'Seite $c$': 'Lato $c$',
         // vierecke6 ("gleichschenkliges" / "Trapez" in two lines: a rule below puts them in Italian order)
         'Quadrat': 'Quadrato', 'Rechteck': 'Rettangolo', 'Raute': 'Rombo', 'Viereck': 'Quadrilatero',
         'gleichschenkliges Trapez': 'Trapezio isoscele', 'Haus der Vierecke': 'Casa dei quadrilateri',
