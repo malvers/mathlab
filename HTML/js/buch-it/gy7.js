@@ -150,6 +150,18 @@ window.BuchIT && BuchIT.add('gy7', {
         // drittel7
         'Zusammenschieben': 'Avvicinamento', '▶ Zusammenschieben': '▶ Avvicina', '◀ Auseinander': '◀ Separa',
         'Drei gleiche Pyramiden ergeben einen Würfel': 'Tre piramidi uguali formano un cubo',
+        // diagramm7 (OS 9 chapter 4; the aria "<title> als Säulendiagramm" and the sum line are rules)
+        'Wie kommst du zur Schule? Umfrage in einer Klasse': 'Come vieni a scuola? Sondaggio in una classe', 'Antworten': 'Risposte', 'zu Fuß': 'a piedi',
+        'Fahrrad': 'bicicletta', 'Bus, Bahn': 'autobus, treno', 'Auto': 'auto', 'Klassensprecherwahl: Stimmen': 'Elezione del rappresentante di classe: voti', 'Stimmen': 'Voti',
+        'Höhe einer Sonnenblume, jede Woche gemessen': 'Altezza di un girasole, misurata ogni settimana',
+        'Säulendiagramm': 'Diagramma a colonne', 'Liniendiagramm': 'Diagramma a linee', 'Kreisdiagramm': 'Diagramma a torta', 'Diagramm': 'Diagramma',
+        'Woche': 'Settimana', 'Anteil': 'Percentuale', 'Winkel': 'Angolo',
+        'Ein Liniendiagramm passt hier nicht: Die Kategorien haben keine Reihenfolge, und zwischen ihnen gibt es keine Zwischenwerte.':
+            'Un diagramma a linee qui non è adatto: le categorie non hanno un ordine e tra di loro non ci sono valori intermedi.',
+        'Ein Kreisdiagramm passt hier nicht: Es zeigt Anteile an einem Ganzen. Die Höhen der einzelnen Wochen ergeben zusammen kein sinnvolles Ganzes.':
+            'Un diagramma a torta qui non è adatto: mostra le parti di un intero. Le altezze delle singole settimane insieme non formano un intero che abbia senso.',
+        'Das Liniendiagramm passt: Es zeigt, wie sich ein Wert im Lauf der Zeit verändert.': 'Il diagramma a linee è adatto: mostra come cambia un valore nel corso del tempo.',
+        'weniger': 'meno', 'mehr': 'più',
 
     },
     phrase: [
@@ -409,6 +421,10 @@ window.BuchIT && BuchIT.add('gy7', {
             'Il cubo ha lo spigolo di lunghezza $a$. Le tre piramidi hanno il vertice nello stesso vertice del cubo. Ognuna ha come base un quadrato con $G = a^2$ e l’altezza $h = a$.'],
         ['Drei gleiche Pyramiden füllen den Würfel: $3 \\cdot V_{\\text{Pyramide}} = a^3$, also ', 'Tre piramidi uguali riempiono il cubo: $3 \\cdot V_{\\text{piramide}} = a^3$, quindi '],
         ['$V_{\\text{Pyramide}} = \\tfrac13 \\cdot a^2 \\cdot a = \\tfrac13 \\cdot G \\cdot h$', '$V_{\\text{piramide}} = \\tfrac13 \\cdot a^2 \\cdot a = \\tfrac13 \\cdot G \\cdot h$'],
+        // diagramm7: the chart titles also stand in bold inside a sentence block, where they are not whole labels
+        ['<b>Wie kommst du zur Schule? Umfrage in einer Klasse</b>', '<b>Come vieni a scuola? Sondaggio in una classe</b>'],
+        ['<b>Klassensprecherwahl: Stimmen</b>', '<b>Elezione del rappresentante di classe: voti</b>'],
+        ['<b>Höhe einer Sonnenblume, jede Woche gemessen</b>', '<b>Altezza di un girasole, misurata ogni settimana</b>'],
 
     ],
     rule: [
@@ -508,6 +524,14 @@ window.BuchIT && BuchIT.add('gy7', {
             { 'Dreiecke': 'triangoli', 'Vierecke': 'quadrilateri', 'Fünfecke': 'pentagoni', 'Sechsecke': 'esagoni' }[w] + ' regolari uguali; in ogni vertice se ne incontrano ' + n + '.'],
         // "Würfel" is a die in the stochastics dictionary: here it is the cube, as a whole label and in bold
         [/^Würfel$/, () => 'Cubo'], [/>Würfel</g, () => '>Cubo<'],
+        // diagramm7: "Zusammen: 28 Antworten = 100 % = 360°. …" and the aria "<title> als Säulendiagramm"
+        [/Zusammen: (\d+) (Antworten|Stimmen) = 100 % = 360°\. Im Kreisdiagramm gehören zu 1 % genau 3,6°\./g,
+            (m, n, u) => 'In totale: ' + n + (u === 'Antworten' ? ' risposte' : ' voti') + ' = 100 % = 360°. Nel diagramma a torta all’1 % corrispondono esattamente 3,6°.'],
+        [/^(.+) als (Säulendiagramm|Liniendiagramm|Kreisdiagramm)$/, (m, t, c) => ({ Säulendiagramm: 'Diagramma a colonne', Liniendiagramm: 'Diagramma a linee', Kreisdiagramm: 'Diagramma a torta' }[c]) + ': ' + ({
+            'Wie kommst du zur Schule? Umfrage in einer Klasse': 'come vieni a scuola? Sondaggio in una classe',
+            'Klassensprecherwahl: Stimmen': 'elezione del rappresentante di classe, voti',
+            'Höhe einer Sonnenblume, jede Woche gemessen': 'altezza di un girasole, misurata ogni settimana'
+        }[t] || t)],
 
     ]
 });

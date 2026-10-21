@@ -75,6 +75,23 @@ window.BuchIT && BuchIT.add('daten', {
             'L’occhio confronta le aree: $2 \\cdot 2 = 4$, la figura sembra <b>quattro volte</b> più grande. Disegnata come solido, addirittura $2^3 = 8$ volte.',
 
         // book it-19 mathe9-it:
+        // achsentrick, mittelwerte (OS 9 chapter 4; "Mittelwert" is in os9.js)
+        'Abgeschnittene Achse': 'Asse tagliato', 'Bild statt Balken': 'Figura invece delle barre', 'Achse beginnt bei': 'L’asse comincia da', 'Trick': 'Trucco',
+        'Säulendiagramm Mitglieder eines Sportvereins': 'Diagramma a colonne: soci di una società sportiva',
+        'Die Achse beginnt nicht bei null. Bei Säulen täuscht das immer, denn das Auge vergleicht ihre Höhen. In Liniendiagrammen ist ein späterer Achsenbeginn üblich, dann aber mit deutlichem Bruchzeichen.':
+            'L’asse non comincia da zero. Con le colonne questo inganna sempre, perché l’occhio confronta le loro altezze. Nei diagrammi a linee è normale che l’asse cominci più in alto, ma allora con un segno di interruzione ben visibile.',
+        'Achse ab null: Die Höhen sind ehrlich vergleichbar.': 'Asse da zero: le altezze si possono confrontare onestamente.',
+        '2020: 100 Mio. €': '2020: 100 mln €', '2025: 200 Mio. €': '2025: 200 mln €',
+        'Zwei Geldsymbole, das zweite doppelt so hoch und doppelt so breit': 'Due simboli del denaro, il secondo alto il doppio e largo il doppio',
+        'Der Umsatz hat sich <b>verdoppelt</b>. Das rechte Bild ist doppelt so hoch, aber auch doppelt so breit.':
+            'Il fatturato è <b>raddoppiato</b>. La figura a destra è alta il doppio, ma anche larga il doppio.',
+        'Das Auge vergleicht Flächen: $2 \\cdot 2 = 4$, das Bild wirkt <b>viermal</b> so groß. Als Körper gezeichnet sogar $2^3 = 8$-mal.':
+            'L’occhio confronta le aree: $2 \\cdot 2 = 4$, la figura sembra <b>quattro volte</b> più grande. Disegnata come solido, addirittura $2^3 = 8$ volte.',
+        'Ausreißer dazu (75 min)': 'Aggiungi il valore anomalo (75 min)', 'Ausreißer weg': 'Togli il valore anomalo', 'Fahrzeit in min': 'Tempo di percorrenza in min',
+        'Median': 'Mediana', 'Modalwert': 'Moda',
+        'Punktdiagramm der Fahrzeiten mit Median und Mittelwert': 'Diagramma a punti dei tempi di percorrenza con mediana e media',
+        'Zieh die Punkte. Ein einzelner weiter Weg verschiebt den Mittelwert deutlich, den Median kaum.':
+            'Trascina i punti. Un solo tragitto lungo sposta molto la media, la mediana quasi per niente.',
 
     },
     phrase: [
@@ -96,6 +113,11 @@ window.BuchIT && BuchIT.add('daten', {
         ['-mal so hoch wie die erste.', ' volte più alta della prima.'], ['Tatsächlich: $', 'In realtà: $'], ['$, also ein Plus von ', '$, quindi un aumento del '],
 
         // book it-19 mathe9-it:
+        // achsentrick: "Die letzte Säule wirkt 3,1-mal so hoch wie die erste."
+        ['Mitglieder eines Sportvereins. Die letzte Säule <b>wirkt</b> ', 'Soci di una società sportiva. L’ultima colonna <b>sembra</b> alta '],
+        ['-mal so hoch wie die erste.', ' volte la prima.'], ['Tatsächlich: $', 'In realtà: $'], ['$, also ein Plus von ', '$, cioè un aumento del '],
+        // mittelwerte
+        ['Geordnet ($n = ', 'In ordine ($n = '], ['keiner (jeder Wert kommt nur einmal vor)', 'nessuna (ogni valore compare una sola volta)'],
 
     ],
     rule: [
@@ -111,6 +133,8 @@ window.BuchIT && BuchIT.add('daten', {
         // book it-17 mathe7-it:
 
         // book it-19 mathe9-it:
+        // mittelwerte: several modes "15 und 18 min" right after the label
+        [/(<span class="g-phi">Modalwert<\/span> )([\d und]+ min)/g, (m, a, b) => a + b.replace(/ und /g, ' e ')],
 
     ]
 });
