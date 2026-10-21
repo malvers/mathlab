@@ -68,6 +68,10 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-17 mathe7-it:
 
         // book it-18 mathe8-it:
+        // vieleck
+        'Ecken verdoppeln': 'Raddoppia i vertici', 'Zurück auf 6': 'Torna a 6', 'Anzahl der Ecken $n$': 'Numero di vertici $n$',
+        'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Circonferenza con un poligono inscritto e uno circoscritto', 'innen': 'inscritto', 'außen': 'circoscritto',
+        'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circonferenza con $r = 1$, quindi $u = 2\\pi$. Perimetro diviso $2$:',
 
         // book it-19 mathe9-it:
         // pythagoras (OS 9 chapter 1.1): the theorems as buttons, the notes under the picture
@@ -214,6 +218,8 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-17 mathe7-it:
 
         // book it-18 mathe8-it:
+        // vieleck: "Also $3,14103 < \pi < 3,15966$, Abstand $0,01863$."
+        [/<p style="margin:0">Also \$([^$]+)\$, Abstand \$/g, (m, a) => '<p style="margin:0">Quindi $' + a + '$, differenza $'],
 
         // book it-19 mathe9-it:
         // goldenerschnitt: "Seiten $1,618 : 1$." and "Nach 5 Schnitten ist die lange Seite nur noch $…$ so lang."

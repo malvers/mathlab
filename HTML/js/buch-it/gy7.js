@@ -147,6 +147,18 @@ window.BuchIT && BuchIT.add('gy7', {
         'Formel': 'Formula', 'umstellen nach': 'ricava',
         'nach $a$': 'ricava $a$', 'nach $b$': 'ricava $b$', 'nach $c$': 'ricava $c$', 'nach $s$': 'ricava $s$', 'nach $t$': 'ricava $t$',
         'nach $m$': 'ricava $m$', 'nach $V$': 'ricava $V$', 'nach $h$': 'ricava $h$', 'nach $G$': 'ricava $G$',
+        // kreisgerade7
+        'Passante': 'Retta esterna', 'Sekante': 'Secante', 'Tangente': 'Tangente',
+        'Zieh an den beiden Punkten der Geraden. Kommt der Abstand $d$ nahe an den Radius $r$, rastet die Gerade als Tangente ein.':
+            'Trascina i due punti della retta. Quando la distanza $d$ si avvicina al raggio $r$, la retta scatta in posizione di tangente.',
+        'Ein Kreis mit einer Passante, einer Sekante und einer Tangente': 'Una circonferenza con una retta esterna, una secante e una tangente',
+        'Kreis mit einer verschiebbaren Geraden': 'Circonferenza con una retta che si può spostare',
+        // kreiswinkel7
+        'Thales': 'Talete', 'Peripheriewinkel': 'Angolo alla circonferenza', 'Sehnenviereck': 'Quadrilatero inscritto', 'Satz': 'Teorema', 'Zentriwinkel': 'Angolo al centro',
+        'Beweisidee zeigen': 'Mostra l’idea della dimostrazione',
+        'Satz des Thales: Dreieck über dem Durchmesser': 'Teorema di Talete: triangolo sul diametro',
+        'Peripheriewinkel und Zentriwinkel über einem Kreisbogen': 'Angolo alla circonferenza e angolo al centro su un arco',
+        'Sehnenviereck mit seinen vier Winkeln': 'Quadrilatero inscritto con i suoi quattro angoli',
 
         // book it-19 mathe9-it:
         // shared solids and the 3D stage (OS 9 chapter 2.1: faltnetz7, schraegbild7, drittel7; "Körper" is in os9.js)
@@ -414,6 +426,37 @@ window.BuchIT && BuchIT.add('gy7', {
         // book it-18 mathe8-it:
         // umstellen7 ("… $. Probe: $4 \cdot 6 = 24$ ✓" goes through the os8 piece "$. Probe: $")
         ['Fertig. Mit Zahlen: ', 'Fatto. Con i numeri: '], ['Stahl, $\\varrho = ', 'Acciaio, $\\varrho = '], ['Wasser, $\\varrho = ', 'Acqua, $\\varrho = '],
+        // kreisgerade7 (the kind of line in bold is a rule)
+        ['$r = 3\\,\\text{cm}$ · Abstand der Geraden vom Mittelpunkt: $d \\approx ', '$r = 3\\,\\text{cm}$ · distanza della retta dal centro: $d \\approx '],
+        ['$d > r$: Die Gerade hat <b>keinen</b> Punkt mit dem Kreis gemeinsam. Sie ist eine ', '$d > r$: la retta non ha <b>nessun</b> punto in comune con la circonferenza. È una '],
+        ['$d = r$: Die Gerade hat <b>genau einen</b> Punkt $B$ mit dem Kreis gemeinsam, den Berührungspunkt. Sie ist eine ',
+            '$d = r$: la retta ha <b>esattamente un</b> punto $B$ in comune con la circonferenza, il punto di contatto. È una '],
+        ['. Der Radius $\\overline{MB}$ steht senkrecht auf ihr.', '. Il raggio $\\overline{MB}$ è perpendicolare a essa.'],
+        ['$d < r$: Die Gerade schneidet den Kreis in <b>zwei</b> Punkten $S_1$ und $S_2$. Sie ist eine ', '$d < r$: la retta interseca la circonferenza in <b>due</b> punti, $S_1$ e $S_2$. È una '],
+        ['. Die Strecke $\\overline{S_1S_2}$ ist eine <b>Sehne</b>, hier etwa $', '. Il segmento $\\overline{S_1S_2}$ è una <b>corda</b>, qui lunga circa $'],
+        [' Die Sekante geht durch $M$: Die Sehne ist ein Durchmesser.', ' La secante passa per $M$: la corda è un diametro.'],
+        // kreiswinkel7
+        ['<b>Satz des Thales:</b> Liegt $C$ auf dem Kreis über dem Durchmesser $\\overline{AB}$, so ist der Winkel bei $C$ ein rechter Winkel.',
+            '<b>Teorema di Talete:</b> se $C$ sta sulla circonferenza di diametro $\\overline{AB}$, l’angolo in $C$ è un angolo retto.'],
+        ['Die Strecke $\\overline{MC}$ teilt das Dreieck in zwei <b>gleichschenklige</b> Dreiecke, denn $\\overline{MA} = \\overline{MB} = \\overline{MC} = r$. ',
+            'Il segmento $\\overline{MC}$ divide il triangolo in due triangoli <b>isosceli</b>, perché $\\overline{MA} = \\overline{MB} = \\overline{MC} = r$. '],
+        ['Ihre Basiswinkel sind gleich: ', 'I loro angoli alla base sono uguali: '], ['$\\alpha$ bei $A$ und bei $C$', '$\\alpha$ in $A$ e in $C$'], ['$\\beta$ bei $B$ und bei $C$', '$\\beta$ in $B$ e in $C$'],
+        ['Winkelsumme: $\\alpha + \\beta + (\\alpha + \\beta) = 180^\\circ$, also $\\gamma = \\alpha + \\beta = 90^\\circ$.', 'Somma degli angoli: $\\alpha + \\beta + (\\alpha + \\beta) = 180^\\circ$, quindi $\\gamma = \\alpha + \\beta = 90^\\circ$.'],
+        ['<b>Zentri-Peripheriewinkelsatz:</b> Der Zentriwinkel ist doppelt so groß wie jeder Peripheriewinkel über demselben Bogen. ',
+            '<b>Teorema dell’angolo al centro:</b> l’angolo al centro è il doppio di ogni angolo alla circonferenza che insiste sullo stesso arco. '],
+        ['<b>Peripheriewinkelsatz:</b> Alle Peripheriewinkel über demselben Bogen sind gleich groß. Zieh $P$ auf seinem Bogen hin und her.',
+            '<b>Teorema degli angoli alla circonferenza:</b> tutti gli angoli alla circonferenza che insistono sullo stesso arco sono uguali. Sposta $P$ avanti e indietro sul suo arco.'],
+        ['Beweisidee: Der Durchmesser durch $P$ zerlegt die Figur in gleichschenklige Dreiecke mit der Spitze $M$. ',
+            'Idea della dimostrazione: il diametro per $P$ divide la figura in triangoli isosceli con il vertice in $M$. '],
+        ['An jedem ist der Außenwinkel bei $M$ doppelt so groß wie ein Basiswinkel. Liegt $M$ nicht zwischen den Schenkeln, braucht der Beweis eine Fallunterscheidung.',
+            'In ciascuno l’angolo esterno in $M$ è il doppio di un angolo alla base. Se $M$ non sta tra i lati dell’angolo, la dimostrazione deve distinguere i casi.'],
+        ['<b>Satz über die Gegenwinkel im Sehnenviereck:</b> In einem Viereck, dessen Ecken auf einem Kreis liegen, ergänzen sich gegenüberliegende Winkel zu $180^\\circ$.',
+            '<b>Teorema degli angoli opposti del quadrilatero inscritto:</b> in un quadrilatero i cui vertici stanno su una circonferenza, gli angoli opposti sommati danno $180^\\circ$.'],
+        ['Beweisidee: Die vier Radien zerlegen das Viereck in vier gleichschenklige Dreiecke. Jeder Winkel des Vierecks besteht aus zwei Basiswinkeln. ',
+            'Idea della dimostrazione: i quattro raggi dividono il quadrilatero in quattro triangoli isosceli. Ogni angolo del quadrilatero è formato da due angoli alla base. '],
+        ['$\\alpha + \\gamma$ enthält jeden der vier verschiedenen Basiswinkel genau einmal, ebenso $\\beta + \\delta$. Beide Summen sind also gleich, zusammen $360^\\circ$, jede $180^\\circ$. ',
+            '$\\alpha + \\gamma$ contiene ciascuno dei quattro diversi angoli alla base esattamente una volta, e così anche $\\beta + \\delta$. Le due somme sono quindi uguali, insieme $360^\\circ$, ciascuna $180^\\circ$. '],
+        ['(So einfach geht es, wenn $M$ im Viereck liegt.)', '(Così semplice è quando $M$ sta dentro il quadrilatero.)'],
 
         // book it-19 mathe9-it:
         // schraegbild7
@@ -522,6 +565,10 @@ window.BuchIT && BuchIT.add('gy7', {
         // umstellen7: "Die Formel $A = a \cdot b$ nach $b$ umstellen: auf <b>beiden</b> Seiten dasselbe tun, bis $b$ allein steht."
         [/Die Formel \$([^$]+)\$ nach \$([^$]+)\$ umstellen: auf <b>beiden<\/b> Seiten dasselbe tun, bis \$([^$]+)\$ allein steht\./g,
             (m, f, v, w) => 'Ricavare $' + v + '$ dalla formula $' + f + '$: fare la stessa cosa su <b>entrambi</b> i lati, finché $' + w + '$ resta da sola.'],
+        // kreisgerade7: the kind of line in bold, in the middle of a sentence ("È una <b>retta esterna</b>.")
+        [/>(Passante|Tangente|Sekante)<\/b>/g, (m, w) => '>' + { Passante: 'retta esterna', Tangente: 'tangente', Sekante: 'secante' }[w] + '</b>'],
+        // kreisgerade7: "$ lang." after the chord length (rules run before the phrases, so on the German sentence)
+        [/(ist eine <b>Sehne<\/b>, hier etwa \$[^$]+)\$ lang\./g, '$1$.'],
 
         // book it-19 mathe9-it:
         // schraegbild7: the sentences around the coloured spans (tags cut the phrases), the material of the mass, the aria "Quader im Schrägbild"

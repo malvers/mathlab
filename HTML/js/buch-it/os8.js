@@ -17,7 +17,7 @@ window.BuchIT && BuchIT.add('os8', {
         'Titelbild: zwei sich schneidende Geraden, ein Kreiszylinder im Schrägbild, eine zentrische Streckung, ein Baumdiagramm und ein Kettenblatt':
             'Copertina: due rette che si intersecano, un cilindro in assonometria, un’omotetia, un diagramma ad albero e una corona di bicicletta',
         // kreisflaecheos8
-        'Anzahl der Stücke $n$': 'Numero di pezzi $n$',
+        'Anzahl der Stücke $n$': 'Numero di spicchi $n$',
         // zylinderos8
         'Kreiszylinder': 'Cilindro', 'Hohlzylinder': 'Cilindro cavo', 'Körper': 'Solido', 'Schrägbild': 'Assonometria', 'Netz': 'Sviluppo',
         'Darstellung': 'Rappresentazione', 'Material': 'Materiale', 'Holz': 'Legno', 'Aluminium': 'Alluminio', 'Stahl': 'Acciaio',
@@ -91,7 +91,7 @@ window.BuchIT && BuchIT.add('os8', {
         // kreisflaecheos8
         ['\\,\\%$ von $r$), ', '\\,\\%$ di $r$), '],
         ['seine Länge ist der halbe Umfang $\\dfrac{u}{2} = \\pi \\cdot r$. Je mehr Stücke, desto genauer stimmt es:',
-            'la sua lunghezza è mezza circonferenza, $\\dfrac{u}{2} = \\pi \\cdot r$. Più pezzi ci sono, più è preciso:'],
+            'la sua lunghezza è mezza circonferenza, $\\dfrac{u}{2} = \\pi \\cdot r$. Più spicchi ci sono, più è preciso:'],
         // zylinderos8: the mass row
         ['Masse (Holz, $', 'Massa (legno, $'], ['Masse (Aluminium, $', 'Massa (alluminio, $'], ['Masse (Stahl, $', 'Massa (acciaio, $'],
         // stromos8
@@ -153,8 +153,8 @@ window.BuchIT && BuchIT.add('os8', {
     rule: [
         // book it-18 mathe8-it:
         // kreisflaecheos8
-        [/Ein Kreis in (\d+) Stücke geschnitten und die Stücke abwechselnd nebeneinandergelegt/g, 'Un cerchio tagliato in $1 pezzi e i pezzi messi uno accanto all’altro, alternati'],
-        [/Die (\d+) Stücke bilden fast ein Rechteck\. Seine Höhe ist fast der Radius \$r\$ \(hier \$/g, 'I $1 pezzi formano quasi un rettangolo. La sua altezza è quasi il raggio $r$ (qui $'],
+        [/Ein Kreis in (\d+) Stücke geschnitten und die Stücke abwechselnd nebeneinandergelegt/g, 'Un cerchio tagliato in $1 spicchi e gli spicchi messi uno accanto all’altro, alternati'],
+        [/Die (\d+) Stücke bilden fast ein Rechteck\. Seine Höhe ist fast der Radius \$r\$ \(hier \$/g, 'I $1 spicchi formano quasi un rettangolo. La sua altezza è quasi il raggio $r$ (qui $'],
         // zylinderos8: "Kreiszylinder mit dem Radius 3 cm und der Höhe 8 cm"
         [/(Hohlzylinder|Kreiszylinder) mit dem Radius ([\d,]+) cm und der Höhe ([\d,]+) cm/g,
             (m, k, r, h) => (k === 'Hohlzylinder' ? 'Cilindro cavo' : 'Cilindro') + ' di raggio ' + r + ' cm e altezza ' + h + ' cm'],
@@ -180,7 +180,7 @@ window.BuchIT && BuchIT.add('os8', {
         [/Tarif ([AB]) ist immer günstiger\./g, 'La tariffa $1 è sempre più conveniente.'],
         [/Bis etwa ([\d.,]+) (min|kWh|km) ist Tarif ([AB]) günstiger, darüber Tarif ([AB])\./g, 'Fino a circa $1 $2 conviene la tariffa $3, oltre la tariffa $4.'],
         // rosetteos8
-        [/Rosette mit (\d+) Blättern, mit dem Zirkel konstruiert/g, 'Rosone con $1 petali, costruito con il compasso'],
+        [/Rosette mit (\d+) Blättern, mit dem Zirkel konstruiert/g, 'Rosetta con $1 petali, costruita con il compasso'],
         [/ gleiche Teile von je \$([\d{},]+)\^\\circ\$\. /g, (m, d) => ' parti uguali di $' + d + '^\\circ$ ciascuna. '],
         // zaehlenos8
         [/(\d+) Personen auf (\d+) Plätzen: Für den ersten Platz gibt es (\d+) Möglichkeiten, für den zweiten noch (\d+), und so weiter bis zum letzten Platz\./g,
