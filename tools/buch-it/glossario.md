@@ -724,6 +724,38 @@ Package it-15 (Cibrario), 20.10.2026: decisions made while translating GY 10; no
 ## mathe6-it
 
 <!-- it-16: terms of this book only, write right below this line -->
+The start page says once: *L’Oberschule è la scuola secondaria sassone dalla 5ª alla 10ª classe; dalla 7ª classe si divide in un
+percorso di Realschule e uno di Hauptschule.* Elided forms: l’Oberschule, dell’Oberschule.
+
+| German | Italian | Note |
+|---|---|---|
+| gebrochene Zahlen ($\mathbb{Q}^+$) | numeri frazionari | |
+| Erweitern, Kürzen, vollständig gekürzt | amplificare, semplificare, ridotta ai minimi termini | "amplificare" as in Swiss Italian schools, explained in 1.1 |
+| gemischte Zahl, echter / unechter Bruch | numero misto, frazione propria / impropria | |
+| abbrechende / periodische Dezimalzahl, Periode | numero decimale limitato / periodico, periodo | |
+| Kehrwert | reciproca (di una frazione) | |
+| Rechengesetze, Vorrangregeln, Punkt vor Strich | proprietà delle operazioni, ordine delle operazioni, prima per e diviso | |
+| Kommutativ-, Assoziativ-, Distributivgesetz | proprietà commutativa, associativa, distributiva | |
+| arithmetisches Mittel | media aritmetica | |
+| Zuordnung eindeutig / eineindeutig / mehrdeutig | corrispondenza univoca / biunivoca / non univoca | |
+| Pfeilbild, Ausgangsmenge, Zielmenge | diagramma a frecce (sagittale), insieme di partenza, insieme di arrivo | |
+| direkt / indirekt proportional, quotientengleich, produktgleich | direttamente / inversamente proporzionale, stesso quoziente, stesso prodotto | |
+| Dreisatz | regola del tre | "Regel de tri" in the Adam Ries excursion |
+| Neben-, Scheitel-, Stufen-, Wechselwinkel | angoli adiacenti, opposti al vertice, corrispondenti, alterni | |
+| Innenwinkelsatz | teorema della somma degli angoli interni | |
+| Kongruenzsätze sss, sws, wsw, SsW | criteri di congruenza LLL, LAL, ALA, LlA | L = lato, A = angolo, as in Spanish |
+| Dreiecksungleichung | disuguaglianza triangolare | |
+| Drachenviereck, Grundseite $g$ | deltoide, base $g$ | letters stay |
+| Ar, Hektar | ara (a), ettaro (ha) | |
+| Schrägbild, Netz, Bauplan | assonometria cavaliera, sviluppo (piano), pianta quotata | |
+| Draufsicht, Vorderansicht, Seitenansicht | pianta (vista dall’alto), vista frontale, vista laterale | |
+| Ecken, Kanten, Flächen | vertici, spigoli, facce | |
+| Quader, Mantel | parallelepipedo (rettangolo), superficie laterale | |
+| Strichliste, absolute / relative Häufigkeit | tabella di spoglio (a tacche), frequenza assoluta / relativa | |
+| wenn – dann, je – desto, Umkehrung | se – allora, più … più, inversa | |
+| Schiebepuzzle, Hölzer (Nim) | puzzle a scorrimento («gioco del quindici»), bastoncini | |
+| Augensumme, fair | somma dei punti, equo | |
+| Wahlbereich 2 | area opzionale 2 | chapter OP |
 
 ## mathe7-it
 
