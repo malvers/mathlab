@@ -528,6 +528,45 @@ Round 2, 20.10.2026 (Gianotti): decisions made while translating GY 12 LK; nothi
 
 <!-- it-10: terms of this book only, write right below this line -->
 
+Round 3, Cornaro (20.10.2026): decisions made while translating GY 5; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Stellenwerttafel, Stellenwert | tabella dei valori posizionali, valore posizionale | widget heads u, da, h · uk, dak, hk · uM, daM, hM · uG; after the comma d, c, m; groups MLD. · MILIONI · MIGLIAIA · UNITÀ |
+| Einer, Zehner, Hunderter, Tausender, Zehntausender | unità, decine, centinaia, migliaia, decine di migliaia | groups of three: "classi" (unità, migliaia, milioni, miliardi) |
+| Milliarde, Billion | miliardo, bilione | number words: one word below a million, milioni/miliardi apart (rule in js/buch-it/gy5.js) |
+| aufrunden / abrunden | arrotondare per eccesso / per difetto | |
+| Überschlag, Probe | stima, prova | |
+| Rechengesetze: Vertauschungs-, Verbindungs-, Verteilungsgesetz | proprietà delle operazioni: commutativa, associativa, distributiva | |
+| Vorrangregeln, Punkt vor Strich | ordine delle operazioni, prima moltiplicazioni e divisioni | |
+| schriftlich addieren / dividieren | addizione / divisione in colonna | the German layout of the long division is kept and named once |
+| Teilermenge $T_{12}$ | insieme dei divisori $D_{12}$ | as in Spanish |
+| Quersumme, Teilbarkeitsregeln | somma delle cifre, criteri di divisibilità | |
+| Sieb des Eratosthenes | crivello di Eratostene | |
+| ggT, kgV | massimo comune divisore, minimo comune multiplo | |
+| Kürzen / Erweitern | semplificare / amplificare | Merke names the proprietà invariantiva; "vollständig gekürzt" = ridotta ai minimi termini |
+| echter / unechter Bruch, gemischte Zahl | frazione propria / impropria, numero misto | 4/4 also "apparente" once |
+| Stammbruch, Zehnerbruch | frazione unitaria, frazione decimale | |
+| Winkelarten: spitz, recht, stumpf, gestreckt, überstumpf, Vollwinkel | acuto, retto, ottuso, piatto, concavo, giro | |
+| Scheitel, Schenkel | vertice, lati | the vertex label S becomes V (rule) |
+| Scheitel-, Neben-, Stufen-, Wechselwinkel | angoli opposti al vertice, adiacenti, corrispondenti, alterni | |
+| Geodreieck | squadra goniometrica | "Geodreieck" named once |
+| Achsen- / Punktsymmetrie | simmetria assiale / simmetria centrale | |
+| Spiegelung, Verschiebung, Drehung | riflessione, traslazione, rotazione | Bildfigur = figura immagine, Umlaufsinn = verso di percorrenza |
+| Umfang $u$, Flächeninhalt $A$ | perimetro, area | the letter $u$ stays; the text says once that Italian books write $2p$ |
+| Ar, Hektar | ara, ettaro | |
+| Quader, Würfel | parallelepipedo rettangolo, cubo | chapter title "Parallelepipedi rettangoli" |
+| Schrägbild, Netz, Ansichten (Grundriss, Vorder-, Seitenansicht) | assonometria (cavaliera), sviluppo, viste (pianta, vista frontale, vista laterale) | |
+| Oberflächeninhalt $O$ | area della superficie totale | the letter $O$ stays; the text names $S_t$ once |
+| Hohlmaße, Einheitentreppe | unità di capacità, scala delle unità | |
+| Mittelwert (arithmetisches Mittel) | media (aritmetica) | widget button Ausgleichen = Pareggia |
+| Fermi-Aufgabe | problema di Fermi | Enrico Fermi, "il fisico italiano" |
+| Rechenpfennige, Linienbrett, bündeln | gettoni da calcolo, tavola a linee, raggruppare | |
+| Zweiersystem, Fünfersystem, Zwanzigersystem | sistema binario, sistema in base cinque, sistema in base venti | |
+| ägyptische Zeichen: Strich, Fessel, Seil, Lotus, Finger, Kaulquappe | bastoncino, ansa, corda, fiore di loto, dito, girino | |
+| Maya: Punkt, Strich, Muschel | punto, barra, conchiglia | |
+| Wahlbereich (chapter W) | area opzionale, chapter OP | |
+
 ## mathegy6-it
 
 <!-- it-11: terms of this book only, write right below this line -->
