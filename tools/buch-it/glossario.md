@@ -532,6 +532,54 @@ Round 2, 20.10.2026 (Gianotti): decisions made while translating GY 12 LK; nothi
 
 <!-- it-11: terms of this book only, write right below this line -->
 
+Round 3, Montessori, 20.10.2026: decisions made while translating GY 6; nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Klasse 6, Klassenstufe | 6ª classe | start page explains the Gymnasium as in mathegy11-it |
+| gebrochene Zahlen ($\mathbb{Q}^+$) | numeri frazionari | 1.1; "numeri razionali assoluti" not used |
+| Dezimalzahl endlich / periodisch, Periode, Periodenstrich | numero decimale limitato / periodico, periodo, trattino del periodo | 1.1 |
+| erweitern, kürzen, gekürzter Bruch | amplificare, semplificare, frazione ridotta ai minimi termini | |
+| gleichnamig machen | ridurre allo stesso denominatore | |
+| Kehrwert, Stammbruch, gemischte Zahl | reciproca (di una frazione), frazione unitaria, numero misto | |
+| Menge, Element, Teilmenge, Mengendiagramm | insieme, elemento, sottoinsieme, diagramma di Eulero-Venn | |
+| überschlagen, Überschlag, Probe | stimare, stima, verifica | |
+| Vorrangregeln, Punkt vor Strich, Vorrangautomatik | regole di precedenza, prima moltiplicazioni e divisioni, precedenza automatica | widget vorrang6: "Prima per e diviso" |
+| Rechengesetze: Vertauschen, Verbinden, Verteilen | proprietà delle operazioni: scambiare (commutativa), raggruppare (associativa), distribuire (distributiva) | |
+| Ungleichung, linke Seite | disequazione, primo membro | |
+| Sachaufgabe, Lösungsplan | problema, piano di risoluzione | |
+| Zuordnung; mehrdeutig, eindeutig, eineindeutig | corrispondenza; non univoca, univoca, biunivoca | 2.1 |
+| Pfeildarstellung, Wortform | diagramma a frecce, forma a parole | |
+| Zufallsversuch, Versuch (count) | esperimento aleatorio, prova ("20 prove") | |
+| Münze Kopf / Zahl | moneta, testa / croce | |
+| Säulendiagramm, Kreisdiagramm | diagramma a colonne, diagramma circolare | |
+| direkt / indirekt proportional, Quotienten-, Produktgleichheit | direttamente / inversamente proporzionale, quoziente costante, prodotto costante | 2.2 |
+| Proportionalitätsfaktor | costante di proporzionalità | |
+| Dreisatz, auf eins zurückrechnen | regola del tre, ridurre all’unità | 2.2 explains "Dreisatz" once |
+| Innenwinkelsatz, Außenwinkel | teorema della somma degli angoli interni, angolo esterno | 3.1 |
+| Wechselwinkel, Nebenwinkel, gestreckter Winkel | angoli alterni, angoli adiacenti, angolo piatto | |
+| Voraussetzung, Behauptung, Wenn-dann-Form | ipotesi, tesi, forma «se … allora …» | |
+| Kongruenzsätze sss, sws, wsw, SsW; www, ssW | criteri di congruenza LLL, LAL, ALA, LlA; AAA, llA | L = lato, A = angolo, the capital L is the longer side (as in Spanish) |
+| Planfigur, Konstruktionsbeschreibung, Geodreieck | figura di analisi, descrizione della costruzione, squadra | |
+| Basiswinkelsatz, Schenkel (isosceles), Basis | teorema degli angoli alla base, lati obliqui, base | 3.2 |
+| Seiten-Winkel-Beziehung, Dreiecksungleichung | relazione tra lati e angoli, disuguaglianza triangolare | |
+| Mittelsenkrechte, Umkreis(mittelpunkt) | asse (di un lato), circonferenza circoscritta (circocentro) | |
+| Winkelhalbierende, Inkreis(mittelpunkt) | bisettrice, circonferenza inscritta (incentro) | |
+| Höhe, Höhenschnittpunkt; Seitenhalbierende, Schwerpunkt | altezza, ortocentro; mediana, baricentro | |
+| Euler-Gerade | retta di Eulero | 3.2 |
+| Drachenviereck, Haus der Vierecke | deltoide (aquilone), casa dei quadrilateri | 3.3 |
+| Grundseite, Rückführprinzip | base, principio di riduzione | |
+| Schrägbild, Kavalierperspektive | disegno in assonometria, assonometria cavaliera | 4 |
+| Körpernetz, Mantel(fläche), Oberflächeninhalt | sviluppo, superficie laterale, area della superficie totale | |
+| Grundfläche / Deckfläche (prism) | base inferiore / base superiore | |
+| Quader | parallelepipedo (rettangolo) | widget button "Parallelepipedo" |
+| Anteil, Flächenanteil, Volumenanteil | parte (di un tutto), parte di superficie, parte di volume | 5 |
+| Primzahl, zusammengesetzt, Primfaktorzerlegung, Faktorbaum | numero primo, composto, scomposizione in fattori primi, albero dei fattori | OP |
+| ggT, kgV | MCD, mcm | |
+| Sieb des Eratosthenes, Quersumme | crivello di Eratostene, somma delle cifre | |
+| Primzahlzwillinge, vollkommene / befreundete Zahlen | primi gemelli, numeri perfetti / amicabili | |
+| TR (Taschenrechner symbol) | CALC | as in Spanish |
+
 ## mathegy7-it
 
 <!-- it-12: terms of this book only, write right below this line -->
