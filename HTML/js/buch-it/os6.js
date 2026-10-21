@@ -46,6 +46,8 @@ window.BuchIT && BuchIT.add('os6', {
         '1-mal': '1 volta', '10-mal': '10 volte', '100-mal': '100 volte', 'Löschen': 'Cancella',
         'Die 36 Ergebnisse zweier Würfel mit ihrer Augensumme': 'I 36 risultati di due dadi con la loro somma dei punti',
         'Säulendiagramm: relative Häufigkeiten der Augensummen': 'Diagramma a colonne: frequenze relative delle somme dei punti',
+        // schiebeos6: the aria-label of the size buttons
+        'Größe': 'Grandezza',
 
         // book it-17 mathe7-it:
 
