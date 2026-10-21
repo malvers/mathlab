@@ -146,6 +146,14 @@ window.BuchIT && BuchIT.add('gy8', {
         'Die Sonnenstrahlen fallen parallel ein. Das blaue und das gelbe Dreieck sind deshalb ähnlich: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.':
             'I raggi del sole arrivano paralleli. Per questo il triangolo blu e quello giallo sono simili: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.',
         'Deine Peillinie geht über die Spitze hinweg: Geh näher heran.': 'La tua linea di mira passa sopra la cima: avvicinati.',
+        // gluecksrad8
+        'Felder': 'Settori', 'ein Feld weniger': 'un settore in meno', 'ein Feld mehr': 'un settore in più',
+        'gleich groß': 'uguali', 'verschieden groß': 'diversi', 'Größe der Felder': 'Grandezza dei settori', 'Drehen': 'Gira',
+        'Tippe Felder im Rad an: Sie bilden das Ereignis $E$ (gelb). Dann dreh das Rad.': 'Tocca i settori della ruota: formano l’evento $E$ (in giallo). Poi gira la ruota.',
+        // sammel8
+        'Größe des Albums': 'Grandezza dell’album', 'Eine Tüte öffnen': 'Apri una bustina', 'Bis das Album voll ist': 'Fino all’album completo',
+        '1000 Alben': '1000 album', 'Neues Album': 'Nuovo album', 'Mittelwert': 'Media', 'Anzahl der Tüten bis zum vollen Album': 'Numero di bustine fino all’album completo',
+        'Histogramm: wie viele Tüten 1000 Alben gebraucht haben': 'Istogramma: quante bustine sono servite per 1000 album', 'Voll!': 'Completo!',
 
         // book it-20 mathe10-it:
         'gleich': 'uguale',
@@ -260,6 +268,11 @@ window.BuchIT && BuchIT.add('gy8', {
         // schatten8
         ['Du hältst ein gleichschenklig-rechtwinkliges Dreieck vor das Auge (Augenhöhe $1{,}6$ m) und peilst an seiner langen Seite entlang. Diese Linie steigt unter $45^\\circ$: ',
             'Tieni un triangolo rettangolo isoscele davanti all’occhio (altezza degli occhi $1{,}6$ m) e guardi lungo il suo lato lungo. Questa linea sale con un angolo di $45^\\circ$: '],
+        // gluecksrad8
+        ['Alle Felder sind gleich groß: ein <b>Laplace-Versuch</b>. ', 'Tutti i settori sono uguali: un <b>esperimento di Laplace</b>. '],
+        ['Die Felder sind <b>verschieden groß</b>: Das ist <b>kein</b> Laplace-Versuch. ', 'I settori hanno <b>grandezze diverse</b>: <b>non</b> è un esperimento di Laplace. '],
+        // sammel8
+        ['Man kann es auch ausrechnen, mit Mitteln aus der Oberstufe: $', 'Si può anche calcolare, con gli strumenti degli ultimi anni delle superiori: $'],
 
         // book it-20 mathe10-it:
         ['Gemessen: Der Stab ist $2$ m hoch, sein Schatten ist $s \\approx ', 'Misurato: l’asta è alta $2$ m, la sua ombra è $s \\approx '],
@@ -432,6 +445,21 @@ window.BuchIT && BuchIT.add('gy8', {
         [/Auf \$d = ([^$]+)\$ m steigt sie um \$([^$]+)\$ m\./g, (m, a, b) => 'su $d = ' + a + '$ m sale di $' + b + '$ m.'],
         [/<b class="g-ok">Treffer!<\/b> Du siehst genau die Spitze\. /g, '<b class="g-ok">Centro!</b> Vedi proprio la cima. '],
         [/Du siehst den Baum in \$([^$]+)\$ m Höhe, unter der Spitze: Geh weiter zurück\./g, (m, a) => 'Vedi l’albero a $' + a + '$ m di altezza, sotto la cima: allontanati ancora.'],
+        // gluecksrad8: the aria label, "wäre falsch", the last spin and the counts
+        [/Glücksrad mit (\d+) Feldern/g, 'Ruota della fortuna con $1 settori'],
+        [/\}\$ wäre falsch\. Es zählt der Anteil am ganzen Rad: /g, () => '}$ sarebbe sbagliato. Conta la parte di tutta la ruota: '],
+        [/Zuletzt: Feld <b>(\d+)<\/b>, \$E\$ ist (nicht )?eingetreten\./g, (m, f, n) => 'Ultimo giro: settore <b>' + f + '</b>, $E$ ' + (n ? 'non si è verificato.' : 'si è verificato.')],
+        [/Gedreht: \$([^$]*)\$-mal · \$E\$ eingetreten: \$([^$]*)\$-mal · relative Häufigkeit /g,
+            (m, a, b) => 'Giri: $' + a + '$ · $E$ si è verificato $' + b + '$ ' + (b === '1' ? 'volta' : 'volte') + ' · frequenza relativa '],
+        [/ · Wahrscheinlichkeit \$P\(E\) \\approx /g, () => ' · probabilità $P(E) \\approx '],
+        // sammel8: the album in numbers (before the album sizes "10 Bilder")
+        [/Jede Tüte enthält ein Bild\. Alle (\d+) Bilder sind gleich häufig\. Wie viele Tüten brauchst du, bis das Album voll ist\?/g,
+            'Ogni bustina contiene una figurina. Tutte le $1 figurine sono ugualmente frequenti. Quante bustine ti servono per completare l’album?'],
+        [/Geöffnet: \$(\d+)\$ Tüten · im Album: \$(\d+)\$ von \$(\d+)\$ Bildern · doppelt: \$/g,
+            (m, p, g, n) => 'Aperte: $' + p + '$ ' + (p === '1' ? 'bustina' : 'bustine') + ' · nell’album: $' + g + '$ di $' + n + '$ figurine · doppie: $'],
+        [/1000 Alben: Im Mittel brauchte man <span class="b-res">\$([^$]+)\$ Tüten<\/span> \(am wenigsten \$(\d+)\$, am meisten \$(\d+)\$\)\. /g,
+            (m, a, b, c) => '1000 album: in media sono servite <span class="b-res">$' + a + '$ bustine</span> (al minimo $' + b + '$, al massimo $' + c + '$). '],
+        [/(\d+) Bilder\b/g, '$1 figurine'], [/title="Bild (\d+)"/g, 'title="Figurina $1"'],
 
         // book it-20 mathe10-it:
 
