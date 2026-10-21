@@ -173,6 +173,12 @@ window.BuchIT && BuchIT.add('exponential', {
         'Sinus und Kosinus: alle reellen Zahlen; Tangens: ohne $\\tfrac{\\pi}{2} + k\\pi$': 'seno e coseno: tutti i numeri reali; tangente: senza $\\tfrac{\\pi}{2} + k\\pi$',
         'Sinus und Kosinus: $-1 \\leq y \\leq 1$; Tangens: alle reellen Zahlen': 'seno e coseno: $-1 \\leq y \\leq 1$; tangente: tutti i numeri reali',
         'Schwingungen, Gezeiten, Tageslänge': 'oscillazioni, maree, durata del giorno',
+        // wachstumsmodell (axis label); expanwendung of GY 10, which the check counts for every page that loads the module
+        'Anzahl': 'Numero', 'Medikament': 'Farmaco',
+        '2000 € werden mit 3 % pro Jahr verzinst.': '2000 € vengono investiti al 3 % annuo.',
+        'Kohlenstoff-14 zerfällt mit einer Halbwertszeit von 5730 Jahren.': 'Il carbonio-14 decade con un tempo di dimezzamento di 5730 anni.',
+        '400 mg eines Wirkstoffs, der Körper baut pro Stunde 20 % ab.': '400 mg di un principio attivo; il corpo ne elimina il 20 % ogni ora.',
+        '500 Bakterien, die Anzahl verdoppelt sich alle 3 Stunden.': '500 batteri; il loro numero raddoppia ogni 3 ore.',
 
     },
     phrase: [
@@ -231,6 +237,10 @@ window.BuchIT && BuchIT.add('exponential', {
         ['Nullstelle: $', 'Zero: $'],
         ['<b>Polstellen</b> mit senkrechten Asymptoten, oft eine waagerechte Asymptote', '<b>poli</b> con asintoti verticali, spesso un asintoto orizzontale'],
         ['<b>periodisch</b>: Periode $2\\pi$ bei Sinus und Kosinus, $\\pi$ beim Tangens', '<b>periodica</b>: periodo $2\\pi$ per seno e coseno, $\\pi$ per la tangente'],
+        ['Unter der Wurzel darf keine negative Zahl stehen.', 'Sotto la radice non può esserci un numero negativo.'], ['Ein Nenner darf nicht null werden.', 'Un denominatore non può essere zero.'],
+        // expanwendung: "Wann ist das Kapital auf 3000 €?", "Wann sind nur noch 50 mg übrig?"
+        ['Wann ist das Kapital auf', 'Quando il capitale arriva a'], ['Wann ist der Anteil auf', 'Quando la frazione scende al'],
+        ['Wann sind nur noch', 'Quando restano solo'], [' mg übrig?', ' mg?'], ['Wann sind es', 'Quando sono'],
 
     ],
     rule: [
