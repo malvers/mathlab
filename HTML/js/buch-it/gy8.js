@@ -88,86 +88,27 @@ window.BuchIT && BuchIT.add('gy8', {
 
         // book it-16 mathe6-it:
         // rueckwaerts8
-        'Rückwärts: ein Schritt': 'All’indietro: un passo', 'Alle Schritte': 'Tutti i passi', 'Neues Rätsel': 'Nuovo indovinello', 'Startzahl': 'Numero iniziale',
-        'Richtig!': 'Giusto!',
-        'Probier eine Zahl im ersten Kästchen, oder rechne rückwärts: Jede Rechnung wird durch ihre Umkehrung ersetzt, plus durch minus, mal durch geteilt.':
-            'Prova un numero nella prima casella, oppure calcola all’indietro: ogni operazione si sostituisce con la sua inversa, più con meno, per con diviso.',
 
         // book it-17 mathe7-it:
         // termbaum8
-        'Term': 'Espressione', 'Wert für $x$': 'Valore di $x$',
-        'Tipp auf einen Knoten: Dann leuchtet sein Teilterm auf.': 'Tocca un nodo: si illumina la sua sottoespressione.',
         // gluecksrad8
-        'Felder': 'Settori', 'ein Feld weniger': 'un settore in meno', 'ein Feld mehr': 'un settore in più',
-        'gleich groß': 'uguali', 'verschieden groß': 'diversi', 'Größe der Felder': 'Ampiezza dei settori', 'Drehen': 'Gira',
-        'Tippe Felder im Rad an: Sie bilden das Ereignis $E$ (gelb). Dann dreh das Rad.': 'Tocca dei settori della ruota: formano l’evento $E$ (in giallo). Poi gira la ruota.',
 
         // book it-18 mathe8-it:
         // termbaum8 (OS 8 chapter 1.1)
-        'Wert für $x$': 'Valore di $x$',
-        'Tipp auf einen Knoten: Dann leuchtet sein Teilterm auf.': 'Tocca un nodo: si illumina la sua sottoespressione.',
         // rueckwaerts8 (OS 8 chapter 1.2)
-        'Rückwärts: ein Schritt': 'All’indietro: un passo', 'Neues Rätsel': 'Nuovo indovinello', 'Startzahl': 'Numero di partenza',
-        'Probier eine Zahl im ersten Kästchen, oder rechne rückwärts: Jede Rechnung wird durch ihre Umkehrung ersetzt, plus durch minus, mal durch geteilt.':
-            'Prova un numero nella prima casella, oppure calcola all’indietro: ogni operazione viene sostituita dalla sua inversa, il più con il meno, il per con il diviso.',
         // wegzeit8
-        'Zeit $t$ in min': 'Tempo $t$ in min', 't in min': 't in min', 's in m': 's in m',
-        'Weg-Zeit-Diagramm des Schulwegs': 'Diagramma spazio-tempo del tragitto verso scuola',
-        'Zuhause': 'Casa', 'Haltestelle': 'Fermata', 'Schule': 'Scuola',
-        'Der Schulweg als Strecke, der Punkt zeigt, wo Mia gerade ist': 'Il tragitto verso scuola come segmento: il punto mostra dove si trova Mia in questo momento',
-        'Mia ist in der Schule angekommen.': 'Mia è arrivata a scuola.',
+        't in min': 't in min', 's in m': 's in m',
         // lgs8
-        'Einsetzungsverfahren': 'Sostituzione', 'Gleichsetzungsverfahren': 'Confronto', 'Additionsverfahren': 'Riduzione', 'Verfahren': 'Metodo',
-        'Neues Gleichungssystem': 'Nuovo sistema',
-        'Die beiden Geraden des Gleichungssystems und ihr Schnittpunkt': 'Le due rette del sistema e il loro punto di intersezione',
-        'Klammer auflösen und zusammenfassen.': 'Togli le parentesi e semplifica.',
-        'Löse beide Gleichungen nach $y$ auf.': 'Ricava $y$ da entrambe le equazioni.',
-        'Die rechten Seiten sind beide gleich $y$, also sind sie gleich: Gleichsetzen.': 'I secondi membri sono entrambi uguali a $y$, quindi sono uguali tra loro: si confrontano.',
-        'Alle $x$ nach links, alle Zahlen nach rechts, dann teilen.': 'Tutte le $x$ a sinistra, tutti i numeri a destra, poi dividi.',
-        'Multipliziere so, dass die Zahlen vor $y$ entgegengesetzt gleich werden.': 'Moltiplica in modo che i numeri davanti a $y$ diventino opposti.',
-        'Addiere die beiden Gleichungen: $y$ fällt weg.': 'Somma le due equazioni: $y$ sparisce.',
-        'Nach $x$ auflösen.': 'Ricava $x$.', 'Nach $y$ auflösen.': 'Ricava $y$.',
         // streckung8
-        'Streckfaktor $k$': 'Rapporto di omotetia $k$', 'Original': 'Originale', 'Verhältnis': 'Rapporto', 'Winkel bei $A$': 'Angolo in $A$', 'gleich': 'uguale',
-        'Zieh an $Z$, $A$, $B$ und $C$. Die gestrichelten Strahlen beginnen in $Z$ und gehen durch Punkt und Bildpunkt.':
-            'Trascina $Z$, $A$, $B$ e $C$. Le semirette tratteggiate partono da $Z$ e passano per ogni punto e la sua immagine.',
         // aehnlich8
-        'Ein Beispiel zeigen': 'Mostra un esempio', 'gegeben': 'dato', 'dein Dreieck': 'il tuo triangolo',
-        'Ein gegebenes Dreieck und ein zweites Dreieck zum Vergleichen': 'Un triangolo dato e un secondo triangolo da confrontare',
-        'klein': 'piccolo', 'mittel': 'medio', 'groß': 'grande', 'Winkel, gegeben': 'Angoli del triangolo dato', 'Winkel bei dir': 'I tuoi angoli', 'Seiten­verhältnis': 'Rapporto tra i lati',
-        'Zieh die gelben Ecken auf die Gitterpunkte. Schaffst du ein Dreieck, das ähnlich zum gegebenen ist, aber anders liegt?':
-            'Trascina i vertici gialli sui punti della griglia. Riesci a fare un triangolo simile a quello dato, ma in un’altra posizione?',
         // gulliver8
-        'k = 12 (Gulliver)': 'k = 12 (Gulliver)', 'Streckfaktor': 'Rapporto di omotetia', 'großer Würfel': 'Cubo grande', 'Faktor': 'Fattore', 'Kantenlänge': 'Spigolo',
+        'k = 12 (Gulliver)': 'k = 12 (Gulliver)', 
         // schatten8
-        'Schattenmethode': 'Metodo dell’ombra', 'Försterdreieck': 'Triangolo della guardia forestale', 'Methode': 'Metodo', 'Sonnenhöhe': 'Altezza del sole',
-        'Abstand $d$ zum Baum': 'Distanza $d$ dall’albero', 'Höhe ausrechnen': 'Calcola l’altezza', 'Neuer Baum': 'Nuovo albero', 'Stab 2 m': 'Bastone 2 m',
-        'Baum und Stab mit ihren Schatten': 'Albero e bastone con le loro ombre', 'Höhenmessung mit dem Försterdreieck': 'Misurare un’altezza con il triangolo della guardia forestale',
-        'Die Sonnenstrahlen fallen parallel ein. Das blaue und das gelbe Dreieck sind deshalb ähnlich: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.':
-            'I raggi del sole arrivano paralleli. Per questo il triangolo blu e quello giallo sono simili: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.',
         'Deine Peillinie geht über die Spitze hinweg: Geh näher heran.': 'La tua linea di mira passa sopra la cima: avvicinati.',
         // gluecksrad8
-        'Felder': 'Settori', 'ein Feld weniger': 'un settore in meno', 'ein Feld mehr': 'un settore in più',
-        'gleich groß': 'uguali', 'verschieden groß': 'diversi', 'Größe der Felder': 'Grandezza dei settori', 'Drehen': 'Gira',
-        'Tippe Felder im Rad an: Sie bilden das Ereignis $E$ (gelb). Dann dreh das Rad.': 'Tocca i settori della ruota: formano l’evento $E$ (in giallo). Poi gira la ruota.',
         // sammel8
-        'Größe des Albums': 'Grandezza dell’album', 'Eine Tüte öffnen': 'Apri una bustina', 'Bis das Album voll ist': 'Fino all’album completo',
-        '1000 Alben': '1000 album', 'Neues Album': 'Nuovo album', 'Mittelwert': 'Media', 'Anzahl der Tüten bis zum vollen Album': 'Numero di bustine fino all’album completo',
-        'Histogramm: wie viele Tüten 1000 Alben gebraucht haben': 'Istogramma: quante bustine sono servite per 1000 album', 'Voll!': 'Completo!',
 
         // book it-20 mathe10-it:
-        'gleich': 'uguale',
-        'Schattenmethode': 'Metodo dell’ombra',
-        'Försterdreieck': 'Triangolo del guardaboschi',
-        'Methode': 'Metodo',
-        'Sonnenhöhe': 'Altezza del sole',
-        'Abstand $d$ zum Baum': 'Distanza $d$ dall’albero',
-        'Höhe ausrechnen': 'Calcola l’altezza',
-        'Neuer Baum': 'Nuovo albero',
-        'Stab 2 m': 'Asta 2 m',
-        'Baum und Stab mit ihren Schatten': 'Albero e asta con le loro ombre',
-        'Höhenmessung mit dem Försterdreieck': 'Misura dell’altezza con il triangolo del guardaboschi',
-        'Die Sonnenstrahlen fallen parallel ein. Das blaue und das gelbe Dreieck sind deshalb ähnlich: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.': 'I raggi del sole arrivano paralleli. Per questo il triangolo blu e quello giallo sono simili: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.',
 
     },
     phrase: [
@@ -217,62 +158,33 @@ window.BuchIT && BuchIT.add('gy8', {
 
         // book it-16 mathe6-it:
         // rueckwaerts8
-        ['$. Welche Zahl war es?', '$. Quale numero era?'], ['Das passt nicht.', 'Non torna.'],
         ['Rückwärts von $', 'All’indietro da $'], ['$ aus, mit den Umkehrrechnungen: Die Startzahl ist <b>', '$, con le operazioni inverse: il numero iniziale è <b>'],
 
         // book it-17 mathe7-it:
         // termbaum8
-        ['Rechenbaum des Terms ', 'Albero di calcolo dell’espressione '],
-        ['Für $x = ', 'Per $x = '], ['$ hat er den Wert ', '$ ha il valore '], ['. Gerechnet wird von unten nach oben.', '. Si calcola dal basso verso l’alto.'],
+        ['Für $x = ', 'Per $x = '], ['$ hat er den Wert ', '$ ha il valore '], 
         ['die Variable $x$ mit dem Wert $', 'la variabile $x$ con il valore $'], ['Ausgewählt: ', 'Selezione: '], ['die Zahl $', 'il numero $'],
         // the pieces of the sentences that a rule below translates as a whole (so tools/buch-en/check.mjs sees them translated, too)
         ['Summanden', 'Addendi'], ['Minuend und Subtrahend', 'Minuendo e sottraendo'], ['Faktoren', 'Fattori'], ['Dividend und Divisor', 'Dividendo e divisore'],
         ['Der Term $', 'L’espressione $'], ['</b>: Zuletzt wird ', '</b>: l’ultima operazione è '], ['der Teilterm $', 'la sottoespressione $'], [' mit dem Wert $', ' con il valore $'],
         // gluecksrad8
-        ['Alle Felder sind gleich groß: ein <b>Laplace-Versuch</b>. ', 'Tutti i settori sono uguali: un <b>esperimento di Laplace</b>. '],
-        ['Die Felder sind <b>verschieden groß</b>: Das ist <b>kein</b> Laplace-Versuch. ', 'I settori hanno <b>ampiezze diverse</b>: <b>non</b> è un esperimento di Laplace. '],
-        ['}$ wäre falsch. ', '}$ sarebbe sbagliato. '], ['Es zählt der Anteil am ganzen Rad: ', 'Conta la parte dell’intera ruota: '],
-        ['Zuletzt: Feld <b>', 'Ultimo: settore <b>'], [', $E$ ist eingetreten.', ', $E$ si è verificato.'], [', $E$ ist nicht eingetreten.', ', $E$ non si è verificato.'],
         [' · Wahrscheinlichkeit $P(E)', ' · probabilità $P(E)'],
 
         // book it-18 mathe8-it:
         // termbaum8
-        ['Rechenbaum des Terms ', 'Albero di calcolo dell’espressione '],
-        ['$ hat er den Wert ', '$ ha il valore '], ['. Gerechnet wird von unten nach oben.', '. Si calcola dal basso verso l’alto.'],
         // rueckwaerts8
-        ['Richtig!</b>', 'Giusto!</b>'], ['Das passt nicht.', 'Non torna.'],
+        ['Richtig!</b>', 'Giusto!</b>'], 
         // wegzeit8
         [' von zu Hause entfernt.', ' da casa.'],
-        ['Der Graph steigt gleichmäßig.', 'Il grafico sale in modo uniforme.'],
-        ['Der Graph verläuft waagerecht: Die Zeit läuft, der Weg bleibt gleich.', 'Il grafico è orizzontale: il tempo passa, la distanza resta la stessa.'],
-        ['Hier steigt der Graph am steilsten.', 'Qui il grafico sale in modo più ripido.'],
-        ['Der Graph steigt flacher als beim ersten Fußweg.', 'Il grafico sale meno ripido che nel primo tratto a piedi.'],
         ['geht zu Fuß zur Haltestelle', 'va a piedi alla fermata'], ['wartet an der Haltestelle', 'aspetta alla fermata'],
         ['fährt mit dem Bus', 'va in autobus'], ['geht das letzte Stück zur Schule', 'percorre a piedi l’ultimo tratto fino a scuola'],
         // lgs8 (a sentence that starts with <b> is no whole label for the engine)
-        ['<b>Probe</b> in beiden Gleichungen, dann die Lösungsmenge.', '<b>Verifica</b> in entrambe le equazioni, poi l’insieme delle soluzioni.'],
         // streckung8
-        ['Zentrische Streckung des Dreiecks ABC am Zentrum Z mit dem Faktor ', 'Omotetia del triangolo ABC con centro Z e rapporto '],
-        ['Mit $k = 0$ fallen alle Bildpunkte auf $Z$: Das Bild ist nur noch ein Punkt.', 'Con $k = 0$ tutti i punti immagine cadono in $Z$: l’immagine è solo un punto.'],
-        ['Mit $k = 1$ bleibt jeder Punkt, wo er ist.', 'Con $k = 1$ ogni punto resta dov’è.'],
-        ['Mit $k = -1$ ist die Streckung eine Punktspiegelung an $Z$.', 'Con $k = -1$ l’omotetia è una simmetria centrale rispetto a $Z$.'],
-        [' Alle Winkel bleiben gleich.', ' Tutti gli angoli restano uguali.'],
         // aehnlich8
-        ['Die drei Punkte liegen auf einer Geraden: Das ist kein Dreieck.', 'I tre punti stanno su una retta: non è un triangolo.'],
-        [' Mit $k = 1$ sind die Dreiecke sogar kongruent.', ' Con $k = 1$ i triangoli sono addirittura congruenti.'],
         // gulliver8
-        ['Gulliver ist 12-mal so groß wie ein Liliputaner. Seine Haut hat also die $144$-fache Fläche, sein Körper das $1728$-fache Volumen. ',
-            'Gulliver è 12 volte più alto di un lillipuziano. La sua pelle ha quindi una superficie $144$ volte più grande, il suo corpo un volume $1728$ volte più grande. '],
-        ['Bei Jonathan Swift rechnen die Mathematiker des Kaisers genau so und geben ihm jeden Tag Essen für 1724 Liliputaner, vier weniger als $12^3$.',
-            'In Jonathan Swift i matematici dell’imperatore calcolano proprio così e gli danno ogni giorno cibo per 1724 lillipuziani, quattro in meno di $12^3$.'],
         // schatten8
-        ['Du hältst ein gleichschenklig-rechtwinkliges Dreieck vor das Auge (Augenhöhe $1{,}6$ m) und peilst an seiner langen Seite entlang. Diese Linie steigt unter $45^\\circ$: ',
-            'Tieni un triangolo rettangolo isoscele davanti all’occhio (altezza degli occhi $1{,}6$ m) e guardi lungo il suo lato lungo. Questa linea sale con un angolo di $45^\\circ$: '],
         // gluecksrad8
-        ['Alle Felder sind gleich groß: ein <b>Laplace-Versuch</b>. ', 'Tutti i settori sono uguali: un <b>esperimento di Laplace</b>. '],
-        ['Die Felder sind <b>verschieden groß</b>: Das ist <b>kein</b> Laplace-Versuch. ', 'I settori hanno <b>grandezze diverse</b>: <b>non</b> è un esperimento di Laplace. '],
         // sammel8
-        ['Man kann es auch ausrechnen, mit Mitteln aus der Oberstufe: $', 'Si può anche calcolare, con gli strumenti degli ultimi anni delle superiori: $'],
 
         // book it-20 mathe10-it:
         ['Gemessen: Der Stab ist $2$ m hoch, sein Schatten ist $s \\approx ', 'Misurato: l’asta è alta $2$ m, la sua ombra è $s \\approx '],
@@ -280,14 +192,12 @@ window.BuchIT && BuchIT.add('gy8', {
         ['$ m lang.', '$ m.'],
         ['. Tatsächlich ist der Baum $', '. In realtà l’albero è alto $'],
         ['$ m hoch.', '$ m.'],
-        ['Du hältst ein gleichschenklig-rechtwinkliges Dreieck vor das Auge (Augenhöhe $1{,}6$ m) und peilst an seiner langen Seite entlang. Diese Linie steigt unter $45^\\circ$: ', 'Tieni un triangolo rettangolo isoscele davanti all’occhio (altezza degli occhi $1{,}6$ m) e guardi lungo il suo lato lungo. Questa linea sale con un angolo di $45^\\circ$: '],
         ['Auf $d = ', 'Su $d = '],
         ['$ m steigt sie um $', '$ m sale di $'],
         ['Treffer!', 'Centro!'],
         ['</b> Du siehst genau die Spitze. ', '</b> Vedi esattamente la cima. '],
         ['Du siehst den Baum in $', 'Vedi l’albero a $'],
         ['$ m Höhe, unter der Spitze: Geh weiter zurück.', '$ m di altezza, sotto la cima: allontanati ancora.'],
-        ['Deine Peillinie geht über die Spitze hinweg: Geh näher heran.', 'La tua linea di mira passa sopra la cima: avvicinati.'],
 
     ],
     rule: [

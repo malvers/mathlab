@@ -69,73 +69,14 @@ window.BuchIT && BuchIT.add('geometrie', {
 
         // book it-18 mathe8-it:
         // vieleck
-        'Ecken verdoppeln': 'Raddoppia i vertici', 'Zurück auf 6': 'Torna a 6', 'Anzahl der Ecken $n$': 'Numero di vertici $n$',
-        'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Circonferenza con un poligono inscritto e uno circoscritto', 'innen': 'inscritto', 'außen': 'circoscritto',
-        'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circonferenza con $r = 1$, quindi $u = 2\\pi$. Perimetro diviso $2$:',
 
         // book it-19 mathe9-it:
         // pythagoras (OS 9 chapter 1.1): the theorems as buttons, the notes under the picture
-        'Pythagoras': 'Pitagora', 'Kathetensatz': '1° teorema di Euclide', 'Höhensatz': '2° teorema di Euclide', 'Satz': 'Teorema', 'gleichschenklig': 'isoscele',
-        'Zieh am Punkt $C$. Er bleibt auf dem Thaleskreis über $\\overline{AB}$, deshalb ist der Winkel bei $C$ immer ein rechter.':
-            'Trascina il punto $C$. Resta sulla semicirconferenza di diametro $\\overline{AB}$, perciò l’angolo in $C$ è sempre retto.',
-        'Rechtwinkliges Dreieck mit Quadraten über den Seiten': 'Triangolo rettangolo con i quadrati sui lati',
-        'Die beiden Kathetenquadrate haben zusammen genau den Flächeninhalt des Hypotenusenquadrats.':
-            'I due quadrati sui cateti insieme hanno esattamente l’area del quadrato sull’ipotenusa.',
-        'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Ogni quadrato su un cateto è grande quanto il rettangolo sotto di esso.',
-        'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.':
-            'Il quadrato sull’altezza è grande quanto il rettangolo formato dalle due proiezioni dei cateti sull’ipotenusa.',
         // trigo (OS 9 chapter 1.2)
-        'Sinus': 'Seno', 'Kosinus': 'Coseno', 'Tangens': 'Tangente', 'Verhältnis': 'Rapporto', 'Hypotenuse $c$': 'Ipotenusa $c$',
-        'Gegenkathete a': 'cateto opposto a', 'Ankathete b': 'cateto adiacente b', 'Hypotenuse c': 'ipotenusa c',
-        'Rechtwinkliges Dreieck mit Winkel alpha': 'Triangolo rettangolo con l’angolo alfa',
-        'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.':
-            'Cambia $c$: il triangolo diventa più grande o più piccolo, i tre rapporti restano uguali. Dipendono solo dall’angolo.',
         // spitzkoerper (OS 9 chapters 2.1, 2.2; "Quadratische Pyramide", "Grundkante $a$", "Höhe $h$", "Radius $r$" are in gy7.js / trigonometrie.js / os9.js)
-        'Kreiskegel': 'Cono circolare', 'Seitenhöhe': 'Apotema', 'Seitenkante': 'Spigolo laterale', 'Hilfsdreieck': 'Triangolo ausiliario',
-        'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Piramide quadrangolare in assonometria cavaliera con triangolo ausiliario',
-        'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cono circolare in assonometria cavaliera con triangolo ausiliario',
         // goldenerschnitt (OS 9 elective OP)
-        'Ansicht': 'Vista', 'Strecke teilen': 'Dividi il segmento', 'Goldenes Rechteck': 'Rettangolo aureo', 'Pentagramm': 'Pentagramma',
-        'Golden teilen': 'Dividi in modo aureo', 'Quadrate abschneiden': 'Quadrati tagliati',
-        'Ganzes : größerer Teil': 'intero : parte maggiore', 'größerer : kleinerer Teil': 'parte maggiore : parte minore',
-        'Strecke AB mit Teilungspunkt T': 'Segmento AB con il punto di divisione T',
-        'Beide Verhältnisse sind gleich: goldener Schnitt, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.':
-            'I due rapporti sono uguali: sezione aurea, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.',
-        'Zieh den Punkt $T$, bis beide Verhältnisse gleich sind.': 'Trascina il punto $T$ finché i due rapporti sono uguali.',
-        'Goldenes Rechteck, in Quadrate zerlegt, mit Spirale': 'Rettangolo aureo scomposto in quadrati, con la spirale',
-        'Regelmäßiges Fünfeck mit Pentagramm': 'Pentagono regolare con il pentagramma', 'Seite': 'Lato',
-        'größerer Teil': 'parte maggiore', 'kleinerer Teil': 'parte minore',
 
         // book it-20 mathe10-it:
-        'Quadratische Pyramide': 'Piramide a base quadrata',
-        'Kreiskegel': 'Cono',
-        'Seitenhöhe': 'Apotema',
-        'Seitenkante': 'Spigolo laterale',
-        'Hilfsdreieck': 'Triangolo ausiliario',
-        'Radius $r$': 'Raggio $r$',
-        'Sinus': 'Seno',
-        'Kosinus': 'Coseno',
-        'Tangens': 'Tangente',
-        'Verhältnis': 'Rapporto',
-        'Hypotenuse $c$': 'Ipotenusa $c$',
-        'Gegenkathete a': 'cateto opposto a',
-        'Ankathete b': 'cateto adiacente b',
-        'Hypotenuse c': 'ipotenusa c',
-        'Rechtwinkliges Dreieck mit Winkel alpha': 'Triangolo rettangolo con l’angolo alfa',
-        'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.': 'Cambia $c$: il triangolo diventa più grande o più piccolo, ma i tre rapporti restano uguali. Dipendono solo dall’angolo.',
-        'Ecken verdoppeln': 'Raddoppia i vertici',
-        'Zurück auf 6': 'Torna a 6',
-        'Anzahl der Ecken $n$': 'Numero di vertici $n$',
-        'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Circonferenza con un poligono inscritto e uno circoscritto',
-        'innen': 'inscritto',
-        'außen': 'circoscritto',
-        'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circonferenza con $r = 1$, quindi $u = 2\\pi$. Perimetro diviso $2$:',
-        'Seite': 'Lato',
-        'Pythagoras': 'Pitagora',
-        'Winkel $\\alpha$': 'Angolo $\\alpha$',
-        'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Piramide a base quadrata in prospettiva cavaliera con il triangolo ausiliario',
-        'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cono in prospettiva cavaliera con il triangolo ausiliario',
-        'Körper': 'Solido', 'Höhe $h$': 'Altezza $h$', 'Grundkante $a$': 'Spigolo di base $a$',
 
     },
     phrase: [
@@ -176,24 +117,10 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-19 mathe9-it:
         // pythagoras: "$a^2 \approx …$ und $c \cdot p \approx 5 \cdot …$"
         ['$ und $c \\cdot p \\approx 5 \\cdot ', '$ e $c \\cdot p \\approx 5 \\cdot '], ['$ und $c \\cdot q \\approx 5 \\cdot ', '$ e $c \\cdot q \\approx 5 \\cdot '],
-        ['$ und $p \\cdot q \\approx ', '$ e $p \\cdot q \\approx '],
         // trigo: the words in the fractions
-        ['\\text{Gegenkathete}', '\\text{cateto opposto}'], ['\\text{Ankathete}', '\\text{cateto adiacente}'], ['\\text{Hypotenuse}', '\\text{ipotenusa}'],
         // goldenerschnitt
-        ['$ · größerer Teil $', '$ · parte maggiore $'], ['$ · kleinerer Teil $', '$ · parte minore $'],
-        ['\\text{Ganzes}', '\\text{intero}'], ['\\text{größerer Teil}', '\\text{parte maggiore}'], ['\\text{kleinerer Teil}', '\\text{parte minore}'],
-        [' : 1$. Schneidet man das Quadrat über der kurzen Seite ab, bleibt wieder ein goldenes Rechteck übrig, um den Faktor $\\Phi$ verkleinert.',
-            ' : 1$. Se si taglia via il quadrato costruito sul lato corto, resta di nuovo un rettangolo aureo, rimpicciolito del fattore $\\Phi$.'],
-        ['\\,\\%$ so lang. Die Viertelkreise bilden die <b>goldene Spirale</b>.', '\\,\\%$ della lunghezza iniziale. I quarti di cerchio formano la <b>spirale aurea</b>.'],
-        [' $s$ und Diagonale $d$ des regelmäßigen Fünfecks: $', ' $s$ e diagonale $d$ del pentagono regolare: $'],
-        ['Jede Diagonale wird von einer anderen im goldenen Schnitt geteilt: ', 'Ogni diagonale è divisa da un’altra secondo la sezione aurea: '],
-        ['$= \\Phi$, und der größere Teil ist genau so lang wie die Seite.', '$= \\Phi$, e la parte maggiore è lunga esattamente quanto il lato.'],
 
         // book it-20 mathe10-it:
-        [' im Schrägbild mit Hilfsdreieck', ' in prospettiva cavaliera con il triangolo ausiliario'],
-        ['\\text{Gegenkathete}', '\\text{cateto opposto}'],
-        ['\\text{Ankathete}', '\\text{cateto adiacente}'],
-        ['\\text{Hypotenuse}', '\\text{ipotenusa}'],
 
     ],
     rule: [

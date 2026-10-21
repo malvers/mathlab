@@ -49,72 +49,16 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         // tangensfunktion
         'Einheitskreis mit Tangente an der Stelle 1': 'Circonferenza goniometrica con la retta tangente nel punto 1', 'Graph der Tangensfunktion mit Polstellen': 'Grafico della funzione tangente con i poli',
         // pyramidekegel
-        'Quadratische Pyramide': 'Piramide quadrata', 'Kegel': 'Cono', 'Körper': 'Solido', 'Höhe – Seitenhöhe': 'Altezza – apotema', 'Höhe – Seitenkante': 'Altezza – spigolo laterale',
+        'Quadratische Pyramide': 'Piramide quadrangolare', 'Kegel': 'Cono', 'Körper': 'Solido', 'Höhe – Seitenhöhe': 'Altezza – apotema', 'Höhe – Seitenkante': 'Altezza – spigolo laterale',
         'Höhe – Mantellinie': 'Altezza – generatrice', 'Rechtwinkliges Dreieck': 'Triangolo rettangolo', 'Grundkante $a$': 'Spigolo di base $a$', 'Radius $r$': 'Raggio $r$', 'Höhe $h$': 'Altezza $h$',
 
         // book it-19 mathe9-it:
         // pyramidekegel (OS 9 chapters 2.1, 2.2)
-        'Quadratische Pyramide': 'Piramide quadrangolare', 'Kegel': 'Cono', 'Körper': 'Solido', 'Höhe – Seitenhöhe': 'Altezza – apotema', 'Höhe – Seitenkante': 'Altezza – spigolo laterale',
-        'Höhe – Mantellinie': 'Altezza – apotema del cono', 'Rechtwinkliges Dreieck': 'Triangolo rettangolo', 'Grundkante $a$': 'Spigolo di base $a$', 'Radius $r$': 'Raggio $r$', 'Höhe $h$': 'Altezza $h$',
         // module-wide labels the check counts for every page that loads trigonometrie (dreieck-hero, messkurve, dreieckloeser)
-        'Geometrische Figur': 'Figura geometrica', 'Ebbe und Flut': 'Alta e bassa marea', 'Riesenrad': 'Ruota panoramica', 'Sonnenflecken': 'Macchie solari',
-        'Wasserstand in m': 'Livello dell’acqua in m', 'Höhe in m': 'Altezza in m', 'Spannung in mV': 'Tensione in mV', 'Jahr': 'Anno', 'Fleckenzahl': 'Numero di macchie',
-        'Wasserstand an einem Pegel an der Nordsee, bezogen auf das mittlere Niveau (vereinfachte Werte).':
-            'Livello dell’acqua a un idrometro sul Mare del Nord, rispetto al livello medio (valori semplificati).',
-        'Höhe einer Gondel über dem Boden: Das Rad hat 50 m Durchmesser, die Achse liegt 27 m hoch, eine Umdrehung dauert 20 Minuten.':
-            'Altezza di una cabina dal suolo: la ruota ha un diametro di 50 m, l’asse è a 27 m di altezza, un giro dura 20 minuti.',
-        'Ein Elektrokardiogramm zeichnet die elektrische Spannung am Herzen auf (vereinfachte Kurve). Periodisch, aber keine Sinuskurve.':
-            'Un elettrocardiogramma registra la tensione elettrica del cuore (curva semplificata). È periodica, ma non è una sinusoide.',
-        'Monatsmittel der Sonnenflecken als geglättetes Modell mit dem Zyklus von etwa 11 Jahren (vereinfachte Werte, nicht die Messreihe).':
-            'Media mensile delle macchie solari come modello livellato con il ciclo di circa 11 anni (valori semplificati, non la serie di misure).',
-        'Winkel $\\beta$': 'Angolo $\\beta$', 'Winkel $\\alpha$ (gegenüber von $a$)': 'Angolo $\\alpha$ (opposto ad $a$)',
 
         // book it-20 mathe10-it:
-        'Geometrische Figur': 'Figura geometrica',
-        'Ebbe und Flut': 'Marea',
-        'Riesenrad': 'Ruota panoramica',
-        'EKG': 'ECG',
-        'Sonnenflecken': 'Macchie solari',
-        'Marker auf zwei Hochpunkte': 'Marcatori su due massimi',
-        'Messkurve mit zwei verschiebbaren Markern': 'Curva di misura con due marcatori spostabili',
-        't in h': 't in h',
-        't in min': 't in min',
-        't in s': 't in s',
-        'Wasserstand in m': 'Livello dell’acqua in m',
-        'Höhe in m': 'Altezza in m',
-        'Spannung in mV': 'Tensione in mV',
-        'Fleckenzahl': 'Numero di macchie',
-        'Wasserstand an einem Pegel an der Nordsee, bezogen auf das mittlere Niveau (vereinfachte Werte).': 'Livello dell’acqua a un idrometro sul Mare del Nord, rispetto al livello medio (valori semplificati).',
-        'Höhe einer Gondel über dem Boden: Das Rad hat 50 m Durchmesser, die Achse liegt 27 m hoch, eine Umdrehung dauert 20 Minuten.': 'Altezza di una cabina dal suolo: la ruota ha 50 m di diametro, l’asse è a 27 m di altezza, un giro dura 20 minuti.',
-        'Ein Elektrokardiogramm zeichnet die elektrische Spannung am Herzen auf (vereinfachte Kurve). Periodisch, aber keine Sinuskurve.': 'Un elettrocardiogramma registra la tensione elettrica del cuore (curva semplificata). È periodica, ma non è una sinusoide.',
-        'Monatsmittel der Sonnenflecken als geglättetes Modell mit dem Zyklus von etwa 11 Jahren (vereinfachte Werte, nicht die Messreihe).': 'Media mensile delle macchie solari come modello livellato con il ciclo di circa 11 anni (valori semplificati, non la serie di misure).',
-        'Mittellage': 'livello medio',
-        'Höhe $h_c$': 'Altezza $h_c$',
-        'Umkreis': 'Circonferenza circoscritta',
-        'Hilfslinie': 'Linea ausiliaria',
-        'Dreieck mit verschiebbaren Ecken': 'Triangolo con vertici spostabili',
-        'Dreieck mit Quadraten über den drei Seiten': 'Triangolo con quadrati sui tre lati',
-        'SSS': 'LLL',
-        'SWS': 'LAL',
-        'WSW': 'ALA',
-        'SSW': 'LLA',
-        'Gegeben': 'Dati',
-        'Das berechnete Dreieck': 'Il triangolo calcolato',
-        'Kosinussatz': 'Teorema del coseno',
-        'Sinussatz': 'Teorema dei seni',
-        'Winkelsumme': 'Somma degli angoli',
-        'Seite $a$': 'Lato $a$',
-        'Seite $b$': 'Lato $b$',
-        'Seite $c$': 'Lato $c$',
-        'Winkel $\\beta$': 'Angolo $\\beta$',
-        'Winkel $\\alpha$ (gegenüber von $a$)': 'Angolo $\\alpha$ (opposto ad $a$)',
-        'Kein Dreieck: Jede Seite muss kürzer sein als die beiden anderen zusammen (Dreiecksungleichung).': 'Nessun triangolo: ogni lato deve essere più corto degli altri due insieme (disuguaglianza triangolare).',
-        '$\\sin\\beta > 1$ ist unmöglich: Die Seite $a$ ist zu kurz, sie erreicht die andere Schenkellinie gar nicht. <b>Kein Dreieck.</b>': '$\\sin\\beta > 1$ è impossibile: il lato $a$ è troppo corto e non raggiunge nemmeno l’altra semiretta dell’angolo. <b>Nessun triangolo.</b>',
-        'eingeschlossener Winkel $\\gamma$': 'angolo compreso $\\gamma$',
-        'Dreieck aus zwei Seiten und dem eingeschlossenen Winkel': 'Triangolo da due lati e dall’angolo compreso',
-        'Winkel $\\alpha$': 'Angolo $\\alpha$', 'Dreieck': 'Triangolo', 'Jahr': 'Anno', 'Jahre': 'anni',
+        'Jahre': 'anni',
         // dreieckloeser: the step labels are written in capitals (k.toUpperCase())
-        'KOSINUSSATZ': 'TEOREMA DEL COSENO', 'SINUSSATZ': 'TEOREMA DEI SENI', 'WINKELSUMME': 'SOMMA DEGLI ANGOLI',
 
     },
     phrase: [
@@ -162,44 +106,12 @@ window.BuchIT && BuchIT.add('trigonometrie', {
 
         // book it-19 mathe9-it:
         // pyramidekegel
-        ['Schrägbild einer quadratischen Pyramide', 'Assonometria cavaliera di una piramide quadrangolare'], ['Schrägbild eines Kegels', 'Assonometria cavaliera di un cono'],
-        [' mit einem rechtwinkligen Dreieck', ' con un triangolo rettangolo'],
         ['Seitenhöhe $h_a = \\sqrt{', 'Apotema $h_a = \\sqrt{'], ['Neigungswinkel der Seitenfläche: $\\tan', 'Angolo di inclinazione della faccia laterale: $\\tan'],
         ['Seitenkante $s = \\sqrt{', 'Spigolo laterale $s = \\sqrt{'], ['$ mit der Diagonale $d = ', '$ con la diagonale $d = '], ['Neigungswinkel der Seitenkante: $\\tan', 'Angolo di inclinazione dello spigolo laterale: $\\tan'],
         ['Volumen $V = \\tfrac13', 'Volume $V = \\tfrac13'], ['$ · Oberfläche $O = ', '$ · superficie $O = '], ['Mantellinie $s = ', 'Apotema $s = '],
-        ['halber Öffnungswinkel: $\\tan', 'metà dell’angolo di apertura: $\\tan'], ['$ · Öffnungswinkel $2', '$ · angolo di apertura $2'], ['$ · Mantel $M = ', '$ · superficie laterale $M = '],
+        ['halber Öffnungswinkel: $\\tan', 'metà dell’angolo di apertura: $\\tan'], ['$ · Mantel $M = ', '$ · superficie laterale $M = '],
 
         // book it-20 mathe10-it:
-        ['Abstand der Marker: <b>$', 'Distanza tra i marcatori: <b>$'],
-        ['</b> · Liegen beide Marker auf benachbarten Hochpunkten, ist das die <b>Periode</b>.', '</b> · Se i due marcatori stanno su due massimi vicini, questa distanza è il <b>periodo</b>.'],
-        ['Größter Wert $', 'Valore massimo $'],
-        ['$, kleinster Wert $', '$, valore minimo $'],
-        [' · Amplitude $', ' · ampiezza $'],
-        ['Die Höhe aus zwei Richtungen: $h_c = b \\cdot \\sin\\alpha = ', 'L’altezza in due modi: $h_c = b \\cdot \\sin\\alpha = '],
-        ['$ und $h_c = a \\cdot \\sin\\beta \\approx ', '$ e $h_c = a \\cdot \\sin\\beta \\approx '],
-        ['$. Gleichsetzen und teilen ergibt $\\tfrac{a}{\\sin\\alpha} = \\tfrac{b}{\\sin\\beta}$.', '$. Uguagliando e dividendo si ottiene $\\tfrac{a}{\\sin\\alpha} = \\tfrac{b}{\\sin\\beta}$.'],
-        ['Alle drei Quotienten sind so groß wie der <b>Durchmesser des Umkreises</b>: $2r = ', 'Tutti e tre i quozienti sono uguali al <b>diametro della circonferenza circoscritta</b>: $2r = '],
-        ['$\\gamma = 90^\\circ$: Der Korrekturterm ist null, es bleibt der <b>Satz des Pythagoras</b> $c^2 = a^2 + b^2$.', '$\\gamma = 90^\\circ$: il termine correttivo è zero e resta il <b>teorema di Pitagora</b> $c^2 = a^2 + b^2$.'],
-        ['$\\gamma < 90^\\circ$: $\\cos\\gamma > 0$, das Quadrat über $c$ ist <b>kleiner</b> als die beiden anderen zusammen.', '$\\gamma < 90^\\circ$: $\\cos\\gamma > 0$, il quadrato su $c$ è <b>minore</b> degli altri due insieme.'],
-        ['$\\gamma > 90^\\circ$: $\\cos\\gamma < 0$, das Quadrat über $c$ ist <b>größer</b> als die beiden anderen zusammen.', '$\\gamma > 90^\\circ$: $\\cos\\gamma < 0$, il quadrato su $c$ è <b>maggiore</b> degli altri due insieme.'],
-        [' Zieh $C$, bis der Winkel genau $90^\\circ$ hat.', ' Trascina $C$ finché l’angolo misura esattamente $90^\\circ$.'],
-        ['Gegeben: ', 'Dati: '],
-        ['drei Seiten', 'tre lati'],
-        ['zwei Seiten und der eingeschlossene Winkel', 'due lati e l’angolo compreso'],
-        ['eine Seite und die beiden anliegenden Winkel', 'un lato e i due angoli adiacenti'],
-        ['zwei Seiten und ein Winkel, der einer der Seiten gegenüberliegt', 'due lati e un angolo opposto a uno di essi'],
-        ['. Die Bezeichnungen sind die üblichen: $a$ liegt $A$ gegenüber, $\\alpha$ liegt bei $A$.', '. Le lettere sono quelle consuete: $a$ sta di fronte ad $A$, $\\alpha$ sta in $A$.'],
-        ['Kein Dreieck: Die beiden Winkel sind zusammen schon $', 'Nessun triangolo: i due angoli insieme fanno già $'],
-        ['^\\circ$, für $\\gamma$ bleibt nichts übrig.', '^\\circ$, per $\\gamma$ non resta niente.'],
-        ['\\text{ zu groß, }', '\\text{ troppo grande, }'],
-        ['<b>Zwei Dreiecke</b> passen zu den Angaben: Die Seite $a$ schneidet die Schenkellinie zweimal. Das ist der mehrdeutige Fall von SSW (der gegebene Winkel liegt der <b>kürzeren</b> Seite gegenüber).', '<b>Due triangoli</b> corrispondono ai dati: il lato $a$ interseca due volte la semiretta dell’angolo. È il caso ambiguo di LLA (l’angolo dato sta di fronte al lato <b>più corto</b>).'],
-        ['Genau <b>ein</b> Dreieck: Der Winkel liegt der <b>längeren</b> (oder gleich langen) Seite gegenüber, dann ist SSW eindeutig.', 'Esattamente <b>un</b> triangolo: l’angolo sta di fronte al lato <b>più lungo</b> (o di uguale lunghezza), e allora LLA ha una sola soluzione.'],
-        ['Genau <b>ein</b> Dreieck: Hier berührt $a$ die Schenkellinie nur, das Dreieck ist rechtwinklig.', 'Esattamente <b>un</b> triangolo: qui $a$ tocca soltanto la semiretta dell’angolo, e il triangolo è rettangolo.'],
-        ['Höhe $h = b \\cdot \\sin\\gamma = ', 'Altezza $h = b \\cdot \\sin\\gamma = '],
-        ['$ Flächeneinheiten', '$ unità di area'],
-        [' · Bei $90^\\circ$ ist die Fläche am größten.', ' · Con $90^\\circ$ l’area è massima.'],
-        [' · Derselbe Flächeninhalt bei $', ' · La stessa area con $'],
-        ['^\\circ$, denn $\\sin(180^\\circ - \\gamma) = \\sin\\gamma$.', '^\\circ$, perché $\\sin(180^\\circ - \\gamma) = \\sin\\gamma$.'],
 
     ],
     rule: [

@@ -51,7 +51,6 @@ window.BuchIT && BuchIT.add('os6', {
 
         // book it-17 mathe7-it:
         // tangramos6
-        'Tangram: sieben Teile in einem Quadrat': 'Tangram: sette pezzi in un quadrato',
 
     },
     phrase: [
@@ -81,10 +80,6 @@ window.BuchIT && BuchIT.add('os6', {
 
         // book it-17 mathe7-it:
         // tangramos6
-        ['großes Dreieck', 'triangolo grande'], ['mittleres Dreieck', 'triangolo medio'], ['kleines Dreieck', 'triangolo piccolo'],
-        ['Anteil am Quadrat: ', 'Parte del quadrato: '],
-        ['Ist das Quadrat 4 cm × 4 cm groß, hat das Teil ', 'Se il quadrato misura 4 cm × 4 cm, il pezzo ha '],
-        ['Tippe auf ein Teil. Alle sieben zusammen ergeben das ganze Quadrat: ', 'Tocca un pezzo. Tutti e sette insieme formano il quadrato intero: '],
 
     ],
     rule: [

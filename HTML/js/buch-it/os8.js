@@ -52,7 +52,7 @@ window.BuchIT && BuchIT.add('os8', {
         'Graph einer linearen Funktion mit Steigungsdreieck': 'Grafico di una funzione lineare con il triangolo della pendenza',
         'Der Graph ist eine Gerade durch den Ursprung $(0 \\mid 0)$.': 'Il grafico è una retta passante per l’origine $(0, 0)$.',
         // lgsgrafos8
-        'Gleichungssystem': 'Sistema di equazioni', 'Nächster Schritt': 'Passo successivo', 'Alle Schritte': 'Tutti i passi', 'Von vorn': 'Ricomincia',
+        'Gleichungssystem': 'Sistema di equazioni', 'Nächster Schritt': 'Passo successivo', 'Alle Schritte': 'Tutti i passi', 'Von vorn': 'Da capo',
         'Zwei Geraden eines Gleichungssystems im Koordinatensystem': 'Due rette di un sistema di equazioni nel sistema di coordinate',
         'Unendlich viele Lösungen.': 'Infinite soluzioni.', 'Keine Lösung: $L = \\{\\,\\}$': 'Nessuna soluzione: $S = \\{\\,\\}$',
         // tarifos8

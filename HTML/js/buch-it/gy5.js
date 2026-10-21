@@ -29,7 +29,7 @@ window.BuchIT && BuchIT.add('gy5', {
         'Zieh den Punkt. Liegt er genau in der Mitte oder rechts davon, wird aufgerundet, sonst abgerundet.':
             'Trascina il punto. Se sta esattamente a metà o alla sua destra, si arrotonda per eccesso, altrimenti per difetto.',
         // sieb5
-        'Von vorn': 'Ricomincia',
+        'Von vorn': 'Da capo',
         'Tippe auf eine Zahl: Du siehst alle ihre Teiler und ihre Zerlegung in Primfaktoren.': 'Tocca un numero: vedrai tutti i suoi divisori e la sua scomposizione in fattori primi.',
         'Die 1 hat nur sich selbst als Teiler.': 'L’1 ha come divisore solo se stesso.',
         'Zerlegung in Primfaktoren': 'Scomposizione in fattori primi',
@@ -112,36 +112,12 @@ window.BuchIT && BuchIT.add('gy5', {
 
         // book it-16 mathe6-it:
         // bruch5
-        'Kreis': 'Cerchio', 'Rechteck': 'Rettangolo', 'Streifen': 'Striscia', 'Bild': 'Figura', 'Zähler': 'Numeratore', 'Nenner': 'Denominatore',
-        'Erweitern mit 2': 'Amplifica per 2', 'mit 3': 'per 3', 'Kürzen': 'Semplifica', 'weniger': 'meno', 'mehr': 'più',
         // bruchstrahl5
-        'Gib Brüche wie 3/4 oder Dezimalzahlen wie 0,7 ein, auch Zahlen größer als 1 bis 3.':
-            'Scrivi frazioni come 3/4 o numeri decimali come 0,7, anche numeri maggiori di 1, fino a 3.',
-        'Zahlenstrahl mit zwei Zahlen': 'Retta numerica con due numeri',
-        'Bitte zwei Zahlen zwischen 0 und 3 eingeben, zum Beispiel 3/4 oder 0,7.': 'Scrivi due numeri tra 0 e 3, per esempio 3/4 o 0,7.',
         // komma5
-        'Neu': 'Nuovo',
-        'Beim Multiplizieren mit 10 rückt jede Ziffer eine Stelle nach links, beim Dividieren nach rechts. Man sagt kurz: Das Komma wandert.':
-            'Moltiplicando per 10 ogni cifra si sposta di un posto verso sinistra, dividendo verso destra. In breve si dice: la virgola si sposta.',
-        'nicht möglich: Die Ziffern würden aus der Tafel fallen.': 'non è possibile: le cifre uscirebbero dalla tabella.',
         // mittel5
-        'Ausgleichen': 'Pareggia', 'Neue Werte': 'Nuovi valori', 'Mittelwert': 'Media', 'Säulen mit dem Mittelwert': 'Colonne con la media',
-        'Zieh die Säulen höher oder niedriger. „Ausgleichen“ verteilt alles gerecht: Jede Säule bekommt gleich viel.':
-            'Trascina le colonne più in alto o più in basso. «Pareggia» distribuisce tutto in modo equo: ogni colonna riceve la stessa quantità.',
         // winkelpaare5
-        'Scheitelwinkel': 'Opposti al vertice', 'Nebenwinkel': 'Adiacenti', 'Stufenwinkel': 'Corrispondenti', 'Wechselwinkel': 'Alterni',
-        'Winkelpaar': 'Coppia di angoli', 'Anderes Paar': 'Altra coppia', 'h kippen': 'Inclina h',
-        'Zieh am Punkt auf der Geraden s, um sie zu drehen. Mit „h kippen“ sind g und h nicht mehr parallel.':
-            'Trascina il punto sulla retta s per ruotarla. Con «Inclina h» g e h non sono più parallele.',
-        'Zwei Geraden g und h, geschnitten von s': 'Due rette g e h tagliate da s',
         // rechteck5
-        'Zusammengesetzte Figur': 'Figura composta', 'Figur': 'Figura', 'Zerlegen': 'Scomponi', 'Ergänzen': 'Completa', 'Weg': 'Metodo',
-        'Zieh an der Ecke. Ein Kästchen ist 1 cm lang und 1 cm breit, also 1 cm² groß.':
-            'Trascina l’angolo. Un quadretto è lungo 1 cm e largo 1 cm, quindi ha un’area di 1 cm².',
         // quader5
-        'Schrägbild': 'Assonometria', 'Netz': 'Sviluppo', 'Einheitswürfel': 'Cubetti unitari', 'Ansicht': 'Vista',
-        'Länge a (cm)': 'Lunghezza a (cm)', 'Breite b (cm)': 'Larghezza b (cm)', 'Höhe c (cm)': 'Altezza c (cm)',
-        'hinten': 'dietro', 'oben': 'sopra', 'vorn': 'davanti', 'unten': 'sotto', 'links': 'sinistra', 'rechts': 'destra',
 
     },
     phrase: [
@@ -231,42 +207,11 @@ window.BuchIT && BuchIT.add('gy5', {
 
         // book it-16 mathe6-it:
         // bruch5
-        ['Null Teile: der Bruch hat den Wert 0.', 'Zero parti: la frazione vale 0.'],
-        ['Ein <b>echter Bruch</b>: weniger als ein Ganzes.', 'Una <b>frazione propria</b>: meno di un intero.'],
-        ['Genau <b>ein Ganzes</b>.', 'Esattamente <b>un intero</b>.'],
-        ['Ein <b>unechter Bruch</b>: mehr als ein Ganzes', 'Una <b>frazione impropria</b>: più di un intero'],
-        [', als gemischte Zahl $', ', come numero misto $'],
-        ['Der Bruch lässt sich nicht weiter kürzen.', 'La frazione non si può semplificare ulteriormente.'],
-        ['Als Dezimalzahl: ', 'Come numero decimale: '], [' · in Prozent: ', ' · in percentuale: '],
-        ['Als Dezimalzahl ungefähr ', 'Come numero decimale circa '],
-        ['. Der Nenner hat einen anderen Primfaktor als 2 und 5, deshalb hört die Dezimalzahl nicht auf.',
-            '. Il denominatore ha un fattore primo diverso da 2 e da 5, perciò il numero decimale non finisce.'],
         // bruchstrahl5
-        ['Jetzt vergleicht man nur die Zähler: ', 'Ora si confrontano solo i numeratori: '],
-        ['Als Dezimalzahlen: ', 'Come numeri decimali: '], ['. Weiter rechts auf dem Zahlenstrahl heißt größer.', '. Più a destra sulla retta numerica vuol dire più grande.'],
         // mittel5
-        ['Mittelwert', 'Media'], ['Summe: ', 'Somma: '], ['Geteilt durch die Anzahl: ', 'Diviso per il numero dei valori: '],
-        ['Was über der Linie war (gestrichelt grau), füllt genau die Lücken (gelb).', 'Ciò che stava sopra la linea (grigio tratteggiato) riempie esattamente i vuoti (giallo).'],
         // winkelpaare5
-        ['Scheitelwinkel liegen sich am selben Schnittpunkt gegenüber. Sie sind <b>immer gleich groß</b>.',
-            'Gli angoli opposti al vertice stanno uno di fronte all’altro nello stesso punto di intersezione. Sono <b>sempre uguali</b>.'],
-        ['Nebenwinkel liegen am selben Schnittpunkt nebeneinander und bilden zusammen einen gestreckten Winkel: Sie ergänzen sich <b>immer zu 180°</b>.',
-            'Gli angoli adiacenti stanno uno accanto all’altro nello stesso punto di intersezione e insieme formano un angolo piatto: sommati fanno <b>sempre 180°</b>.'],
-        ['Stufenwinkel liegen an verschiedenen Schnittpunkten auf derselben Seite von s und derselben Seite der Geraden. ',
-            'Gli angoli corrispondenti stanno in punti di intersezione diversi, dalla stessa parte di s e dalla stessa parte delle rette. '],
-        ['Wechselwinkel liegen an verschiedenen Schnittpunkten auf verschiedenen Seiten von s und zwischen den Geraden. ',
-            'Gli angoli alterni stanno in punti di intersezione diversi, da parti diverse di s e tra le rette. '],
-        ['An <b>parallelen</b> Geraden sind sie <b>gleich groß</b>.', 'Su rette <b>parallele</b> sono <b>uguali</b>.'],
-        ['Weil g und h <b>nicht parallel</b> sind, sind sie verschieden groß.', 'Poiché g e h <b>non sono parallele</b>, sono diversi.'],
         // rechteck5
-        ['Ein Quadrat: alle vier Seiten gleich lang.', 'Un quadrato: tutti e quattro i lati sono uguali.'],
-        ['Zerlegen in zwei Rechtecke:', 'Scomporre in due rettangoli:'],
-        ['Zum großen Rechteck ergänzen und das fehlende Stück abziehen:', 'Completare fino al rettangolo grande e sottrarre il pezzo che manca:'],
-        ['Erstaunlich: Der Umfang ist so groß wie beim ganzen Rechteck, weil die Stufe genauso lang ist wie die fehlenden Seiten.',
-            'Sorprendente: il perimetro è uguale a quello del rettangolo intero, perché il gradino è lungo esattamente quanto i lati che mancano.'],
         // quader5
-        ['Gegenüberliegende Flächen haben dieselbe Farbe: Sie sind gleich groß.', 'Le facce opposte hanno lo stesso colore: sono uguali.'],
-        ['Alle 12 Kanten zusammen: ', 'Tutti i 12 spigoli insieme: '], ['Alle Kanten gleich lang: ein Würfel.', 'Tutti gli spigoli sono uguali: un cubo.'],
 
     ],
     rule: [

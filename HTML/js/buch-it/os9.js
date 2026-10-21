@@ -33,7 +33,7 @@ window.BuchIT && BuchIT.add('os9', {
         // kugelos9
         'Radius gegeben': 'Raggio dato', 'Volumen gegeben': 'Volume dato', 'Gegeben': 'Dati', 'Volumen $V$': 'Volume $V$', 'Radius $r$': 'Raggio $r$',
         'Eine Kugel in einem Zylinder, der genau um sie passt': 'Una sfera in un cilindro che la contiene esattamente',
-        'Radius': 'Raggio', 'Oberfläche': 'Superficie', 'Volumen': 'Volume', 'Zylinder darum': 'Cilindro circoscritto',
+        'Radius': 'Raggio', 'Oberfläche': 'Superficie totale', 'Volumen': 'Volume', 'Zylinder darum': 'Cilindro circoscritto',
         'Die Kugel füllt immer genau $\\tfrac{2}{3}$ des Zylinders, der um sie passt. Das hat Archimedes entdeckt.':
             'La sfera riempie sempre esattamente $\\tfrac{2}{3}$ del cilindro circoscritto. Lo scoprì Archimede.',
         // turmos9

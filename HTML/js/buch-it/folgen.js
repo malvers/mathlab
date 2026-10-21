@@ -21,7 +21,7 @@ window.BuchIT && BuchIT.add('folgen', {
         'Breite $\\varepsilon$ des Schlauchs': 'Ampiezza $\\varepsilon$ della striscia',
         'Folgenglieder und ein Streifen um den Grenzwert': 'Termini della successione e una striscia intorno al limite',
         // kreisparameter
-        'Kreis': 'Circonferenza', 'Ellipse (Ausblick)': 'Ellisse (prospettiva)',
+        'Kreis': 'Cerchio', 'Ellipse (Ausblick)': 'Ellisse (prospettiva)',
         'Ein Punkt läuft auf einem Kreis, gesteuert vom Parameter t': 'Un punto percorre una circonferenza, guidato dal parametro t',
         'Parameter $t$ (Winkel)': 'Parametro $t$ (angolo)', 'Radius $r$': 'Raggio $r$', 'Halbachse $a$': 'Semiasse $a$', 'Halbachse $b$': 'Semiasse $b$',
 
