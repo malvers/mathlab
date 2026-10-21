@@ -801,6 +801,41 @@ percorso di Realschule e uno di Hauptschule.* Elided forms: l’Oberschule, dell
 
 <!-- it-17: terms of this book only, write right below this line -->
 
+Round 3, 20.10.2026 (Trotula): decisions made while translating OS 7 (Realschulbildungsgang); nothing above was changed.
+
+| German | Italian | Note |
+|---|---|---|
+| Oberschule, Realschulbildungsgang | Oberschule, indirizzo Realschule | start page: scuola secondaria sassone dalla 5ª alla 10ª classe; the Realschule track ends in the 10th class with an exam |
+| Grundwert $G$, Prozentwert $W$, Prozentsatz $p\,\%$ | valore di base $G$, valore percentuale $W$, tasso percentuale $p\,\%$ | 1.1; the letters of the German book stay, said once |
+| Dreisatz, die drei Grundaufgaben | regola del tre, i tre problemi fondamentali | 1.1 |
+| Kreisdiagramm, Hunderterfeld, Prozentstreifen | diagramma a torta, griglia da cento, striscia delle percentuali | 1.1, widgets prozent7, kreisdiagramm6, diagramm7 |
+| vermehrter / verminderter Grundwert, um / auf | valore di base aumentato / diminuito, «del» / «al» | 1.2: «ridotto del 20 %» / «ridotto al 20 %» |
+| Rabatt, Skonto, Mehrwertsteuer, brutto, netto | sconto, sconto cassa, IVA, lordo, netto | 1.2; the German rates 19 % / 7 % stay («in Germania») |
+| Zinsjahr (360 Tage), Jahres- / Tageszinsen, Kapital $K$, Zinsen $Z$ | anno commerciale, interessi annui / giornalieri, capitale $K$, interessi $Z$ | 1.2, widget tageszinsos7 |
+| Tagesgeld, Dispokredit, Girokonto | conto deposito, scoperto di conto, conto corrente | 1.2 |
+| 72er-Regel | regola del 72 | 1.2 (Pacioli) |
+| Urliste, Strichliste | elenco dei dati grezzi, tabella di spoglio | 2 |
+| Kopf / Zahl (Münze), Würfel (game) | testa / croce (T / C), dado | 2; «Würfel» is never a global word: the die and the cube are rules by context (gy6 zufall6, gy7 faltnetz7) |
+| Glücksrad, Feld (Rad) | ruota della fortuna, settore | widget gluecksrad8 |
+| Legostein, Reißzwecke (Rücken / Seite) | mattoncino LEGO, puntina da disegno (a punta in su / di fianco) | 2 |
+| Mengen $\{1; 2; 3\}$ | $\{1, 2, 3\}$ | commas as in the other Italian books; rule in js/buch-it/gy8.js for gluecksrad8 |
+| Gegenzahl, Betrag, Zahlengerade | opposto, valore assoluto, retta dei numeri | 3.1 |
+| gebrochene Zahlen $\mathbb{Q}^+$ | numeri razionali assoluti | 3.1, widget zahlbereiche7 |
+| Spiegeln an der x-Achse / am Ursprung | simmetria rispetto all’asse x / all’origine | widget quadrantos7 |
+| Vertauschungs-, Verbindungs-, Verteilungsgesetz, Vorrangregeln | proprietà commutativa, associativa, distributiva, ordine delle operazioni | 3.2 |
+| Term, Termwert, Verhältnisgleichung | espressione, valore dell’espressione, proporzione | 3.3 |
+| Formel umstellen nach $b$ | ricavare $b$ dalla formula | widget umstellen7 |
+| Planfigur, Konstruktionsbeschreibung | schizzo di progetto, descrizione della costruzione | 4.1 |
+| Drachenviereck, Drachen | deltoide (aquilone) | 4.1, widgets flaeche6 and vierecke6 |
+| inhaltsgleich, zerlegungsgleich | equivalenti, equiscomponibili | 4.1 |
+| Haus der Vierecke | casa dei quadrilateri | widget vierecke6 |
+| Schrägbild, Zweitafelbild, Grundriss, Aufriss, Ordnungslinie | assonometria cavaliera, doppia proiezione ortogonale, pianta, prospetto, linea di richiamo | 4.2, widget schraegbild7 |
+| Mantel $M$, Oberfläche $O$, Netz | superficie laterale $M$, superficie totale $O$, sviluppo | 4.2; the letters stay, said once |
+| umbauter Raum | cubatura (volume costruito) | 4.2 |
+| Beton, Kiefer, Fichtenholz | calcestruzzo, pino, legno di abete | 4.2, widget dichteos7 |
+| Parkett, Parkettierung, Kachel, Schablone | tassellazione, piastrella, sagoma | W; Wahlbereich 3 → AREA OPZIONALE 3 |
+| Verschiebung / Drehung (Escher) | traslazione / rotazione | W, widget escheros7 |
+
 ## mathe8-it
 
 <!-- it-18: terms of this book only, write right below this line -->
