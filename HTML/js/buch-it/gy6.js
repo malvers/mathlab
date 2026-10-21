@@ -253,6 +253,12 @@ window.BuchIT && BuchIT.add('gy6', {
             'Assonometria cavaliera: la base sta davanti in vera grandezza. Gli spigoli verso il fondo sono inclinati di $45^\\circ$ e lunghi la metà. Gli spigoli nascosti sono tratteggiati.',
         'Das Netz besteht aus den beiden Grundflächen und dem Mantel. Der Mantel ist ein Rechteck: so breit wie der Umfang $u$, so hoch wie $h$.':
             'Lo sviluppo è formato dalle due basi e dalla superficie laterale. La superficie laterale è un rettangolo: largo quanto il perimetro $u$, alto quanto $h$.',
+        // zufall6 ("Würfel" and "Zahl" only as whole labels: the die and the tails side of the coin)
+        'Münze': 'Moneta', 'Würfel': 'Dado', 'Glücksrad': 'Ruota della fortuna', 'Versuch': 'Esperimento',
+        'Kopf': 'Testa', 'Zahl': 'Croce', 'Rot': 'Rosso',
+        '1-mal': '1 volta', '10-mal': '10 volte', '100-mal': '100 volte', 'Löschen': 'Cancella',
+        'Säulendiagramm der relativen Häufigkeiten': 'Diagramma a colonne delle frequenze relative',
+        'absolut': 'assoluta', 'relativ': 'relativa', 'in %': 'in %',
 
         // book it-17 mathe7-it:
 
@@ -537,6 +543,11 @@ window.BuchIT && BuchIT.add('gy6', {
         // prisma6
         ['Grundfläche $G', 'Area di base $G'], ['$, Umfang der Grundfläche $u', '$, perimetro di base $u'], ['Mantel $M', 'Superficie laterale $M'],
         ['Oberfläche $O', 'Superficie totale $O'], ['Volumen $V', 'Volume $V'],
+        // zufall6
+        ['Relative Häufigkeit = absolute Häufigkeit : Anzahl der Versuche. Die gestrichelte Linie zeigt die Chance',
+            'Frequenza relativa = frequenza assoluta : numero di prove. La linea tratteggiata mostra la probabilità'],
+        [' (Rot ist das halbe Rad, Blau ein Drittel, Grün ein Sechstel)', ' (il rosso è metà della ruota, il blu un terzo, il verde un sesto)'],
+        ['. Je mehr Versuche, desto näher kommen die Säulen meistens heran.', '. Più prove si fanno, più le colonne di solito si avvicinano.'],
 
         // book it-17 mathe7-it:
 
@@ -663,6 +674,8 @@ window.BuchIT && BuchIT.add('gy6', {
         [/^Netz des (Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma)s: zwei Grundflächen und der Mantel aus Rechtecken$/,
             (m, s) => 'Sviluppo del ' + ({ Dreiecksprisma: 'prisma triangolare', Quader: 'parallelepipedo', Trapezprisma: 'prisma trapezoidale', Sechseckprisma: 'prisma esagonale' })[s] +
                 ': due basi e la superficie laterale fatta di rettangoli'],
+        // zufall6
+        [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '1' ? ' prova' : ' prove') + '<'],
 
         // book it-17 mathe7-it:
 

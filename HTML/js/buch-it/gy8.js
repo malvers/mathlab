@@ -87,6 +87,11 @@ window.BuchIT && BuchIT.add('gy8', {
         'Augenzahl': 'Punteggio', 'absolut': 'assoluta', 'relativ': 'relativa',
 
         // book it-16 mathe6-it:
+        // rueckwaerts8
+        'Rückwärts: ein Schritt': 'All’indietro: un passo', 'Alle Schritte': 'Tutti i passi', 'Neues Rätsel': 'Nuovo indovinello', 'Startzahl': 'Numero iniziale',
+        'Richtig!': 'Giusto!',
+        'Probier eine Zahl im ersten Kästchen, oder rechne rückwärts: Jede Rechnung wird durch ihre Umkehrung ersetzt, plus durch minus, mal durch geteilt.':
+            'Prova un numero nella prima casella, oppure calcola all’indietro: ogni operazione si sostituisce con la sua inversa, più con meno, per con diviso.',
 
         // book it-17 mathe7-it:
 
@@ -141,6 +146,9 @@ window.BuchIT && BuchIT.add('gy8', {
         ['Der Viertelkreis bedeckt $\\tfrac{\\pi}{4}$ des Quadrats, also ist ', 'Il quarto di cerchio copre $\\tfrac{\\pi}{4}$ del quadrato, quindi '], ['(Abweichung $', '(scarto $'],
 
         // book it-16 mathe6-it:
+        // rueckwaerts8
+        ['$. Welche Zahl war es?', '$. Quale numero era?'], ['Das passt nicht.', 'Non torna.'],
+        ['Rückwärts von $', 'All’indietro da $'], ['$ aus, mit den Umkehrrechnungen: Die Startzahl ist <b>', '$, con le operazioni inverse: il numero iniziale è <b>'],
 
         // book it-17 mathe7-it:
 
@@ -227,6 +235,10 @@ window.BuchIT && BuchIT.add('gy8', {
             'Le cifre da 1 a 6 sono punteggi, 0, 7, 8 e 9 si saltano (in grigio). Così si ottengono $1 lanci.'],
 
         // book it-16 mathe6-it:
+        // rueckwaerts8: the puzzle in words and the try
+        [/Ich denke mir eine Zahl und rechne: (.+?)\. Heraus kommt \$/g,
+            (m, ops) => 'Penso un numero e calcolo: ' + ops.replace(/geteilt durch/g, 'diviso').replace(/\bmal\b/g, 'per').replace(/\bplus\b/g, 'più').replace(/\bminus\b/g, 'meno').replace(/, dann /g, ', poi ') + '. Viene $'],
+        [/Mit \$([^$]*)\$ kommt \$([^$]*)\$ heraus\. /g, (m, a, b) => 'Con $' + a + '$ viene $' + b + '$. '],
 
         // book it-17 mathe7-it:
 
