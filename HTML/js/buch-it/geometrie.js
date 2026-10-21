@@ -90,6 +90,17 @@ window.BuchIT && BuchIT.add('geometrie', {
         'Kreiskegel': 'Cono circolare', 'Seitenhöhe': 'Apotema', 'Seitenkante': 'Spigolo laterale', 'Hilfsdreieck': 'Triangolo ausiliario',
         'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Piramide quadrangolare in assonometria cavaliera con triangolo ausiliario',
         'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cono circolare in assonometria cavaliera con triangolo ausiliario',
+        // goldenerschnitt (OS 9 elective OP)
+        'Ansicht': 'Vista', 'Strecke teilen': 'Dividi il segmento', 'Goldenes Rechteck': 'Rettangolo aureo', 'Pentagramm': 'Pentagramma',
+        'Golden teilen': 'Dividi in modo aureo', 'Quadrate abschneiden': 'Quadrati tagliati',
+        'Ganzes : größerer Teil': 'intero : parte maggiore', 'größerer : kleinerer Teil': 'parte maggiore : parte minore',
+        'Strecke AB mit Teilungspunkt T': 'Segmento AB con il punto di divisione T',
+        'Beide Verhältnisse sind gleich: goldener Schnitt, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.':
+            'I due rapporti sono uguali: sezione aurea, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.',
+        'Zieh den Punkt $T$, bis beide Verhältnisse gleich sind.': 'Trascina il punto $T$ finché i due rapporti sono uguali.',
+        'Goldenes Rechteck, in Quadrate zerlegt, mit Spirale': 'Rettangolo aureo scomposto in quadrati, con la spirale',
+        'Regelmäßiges Fünfeck mit Pentagramm': 'Pentagono regolare con il pentagramma', 'Seite': 'Lato',
+        'größerer Teil': 'parte maggiore', 'kleinerer Teil': 'parte minore',
 
         // book it-20 mathe10-it:
         'Quadratische Pyramide': 'Piramide a base quadrata',
@@ -164,6 +175,15 @@ window.BuchIT && BuchIT.add('geometrie', {
         ['$ und $p \\cdot q \\approx ', '$ e $p \\cdot q \\approx '],
         // trigo: the words in the fractions
         ['\\text{Gegenkathete}', '\\text{cateto opposto}'], ['\\text{Ankathete}', '\\text{cateto adiacente}'], ['\\text{Hypotenuse}', '\\text{ipotenusa}'],
+        // goldenerschnitt
+        ['$ · größerer Teil $', '$ · parte maggiore $'], ['$ · kleinerer Teil $', '$ · parte minore $'],
+        ['\\text{Ganzes}', '\\text{intero}'], ['\\text{größerer Teil}', '\\text{parte maggiore}'], ['\\text{kleinerer Teil}', '\\text{parte minore}'],
+        [' : 1$. Schneidet man das Quadrat über der kurzen Seite ab, bleibt wieder ein goldenes Rechteck übrig, um den Faktor $\\Phi$ verkleinert.',
+            ' : 1$. Se si taglia via il quadrato costruito sul lato corto, resta di nuovo un rettangolo aureo, rimpicciolito del fattore $\\Phi$.'],
+        ['\\,\\%$ so lang. Die Viertelkreise bilden die <b>goldene Spirale</b>.', '\\,\\%$ della lunghezza iniziale. I quarti di cerchio formano la <b>spirale aurea</b>.'],
+        [' $s$ und Diagonale $d$ des regelmäßigen Fünfecks: $', ' $s$ e diagonale $d$ del pentagono regolare: $'],
+        ['Jede Diagonale wird von einer anderen im goldenen Schnitt geteilt: ', 'Ogni diagonale è divisa da un’altra secondo la sezione aurea: '],
+        ['$= \\Phi$, und der größere Teil ist genau so lang wie die Seite.', '$= \\Phi$, e la parte maggiore è lunga esattamente quanto il lato.'],
 
         // book it-20 mathe10-it:
         [' im Schrägbild mit Hilfsdreieck', ' in prospettiva cavaliera con il triangolo ausiliario'],
@@ -196,6 +216,9 @@ window.BuchIT && BuchIT.add('geometrie', {
         // book it-18 mathe8-it:
 
         // book it-19 mathe9-it:
+        // goldenerschnitt: "Seiten $1,618 : 1$." and "Nach 5 Schnitten ist die lange Seite nur noch $…$ so lang."
+        [/>Seiten \$/g, '>Lati $'],
+        [/Nach (\d+) Schnitt(?:en)? ist die lange Seite nur noch \$/g, (m, n) => 'Dopo ' + n + (+n > 1 ? ' tagli' : ' taglio') + ' il lato lungo misura solo $'],
 
         // book it-20 mathe10-it:
         // vieleck: "Also $3,14159 < \pi < 3,21539$, Abstand $0,0738$." with its context, no bare piece "Also $"
