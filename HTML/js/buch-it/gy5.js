@@ -134,6 +134,10 @@ window.BuchIT && BuchIT.add('gy5', {
         'Zieh am Punkt auf der Geraden s, um sie zu drehen. Mit „h kippen“ sind g und h nicht mehr parallel.':
             'Trascina il punto sulla retta s per ruotarla. Con «Inclina h» g e h non sono più parallele.',
         'Zwei Geraden g und h, geschnitten von s': 'Due rette g e h tagliate da s',
+        // rechteck5
+        'Zusammengesetzte Figur': 'Figura composta', 'Figur': 'Figura', 'Zerlegen': 'Scomponi', 'Ergänzen': 'Completa', 'Weg': 'Metodo',
+        'Zieh an der Ecke. Ein Kästchen ist 1 cm lang und 1 cm breit, also 1 cm² groß.':
+            'Trascina l’angolo. Un quadretto è lungo 1 cm e largo 1 cm, quindi ha un’area di 1 cm².',
 
     },
     phrase: [
@@ -250,6 +254,12 @@ window.BuchIT && BuchIT.add('gy5', {
             'Gli angoli alterni stanno in punti di intersezione diversi, da parti diverse di s e tra le rette. '],
         ['An <b>parallelen</b> Geraden sind sie <b>gleich groß</b>.', 'Su rette <b>parallele</b> sono <b>uguali</b>.'],
         ['Weil g und h <b>nicht parallel</b> sind, sind sie verschieden groß.', 'Poiché g e h <b>non sono parallele</b>, sono diversi.'],
+        // rechteck5
+        ['Ein Quadrat: alle vier Seiten gleich lang.', 'Un quadrato: tutti e quattro i lati sono uguali.'],
+        ['Zerlegen in zwei Rechtecke:', 'Scomporre in due rettangoli:'],
+        ['Zum großen Rechteck ergänzen und das fehlende Stück abziehen:', 'Completare fino al rettangolo grande e sottrarre il pezzo che manca:'],
+        ['Erstaunlich: Der Umfang ist so groß wie beim ganzen Rechteck, weil die Stufe genauso lang ist wie die fehlenden Seiten.',
+            'Sorprendente: il perimetro è uguale a quello del rettangolo intero, perché il gradino è lungo esattamente quanto i lati che mancano.'],
 
     ],
     rule: [
@@ -370,6 +380,11 @@ window.BuchIT && BuchIT.add('gy5', {
             ({ Mrd: 'G', HM: 'hM', ZM: 'daM', M: 'M', HT: 'hk', ZT: 'dak', T: 'k', H: 'h', Z: 'da', E: 'u', z: 'd', h: 'c', t: 'm' })[k] + '</th>')],
         // winkelpaare5
         [/g und h sind (nicht )?parallel\./, (m, n) => 'g e h ' + (n ? 'non sono' : 'sono') + ' parallele.'],
+        // rechteck5
+        [/^Rechteck aus (\d+) Einheitsquadraten$/, 'Rettangolo formato da $1 quadrati unitari'],
+        [/Das ist 1 Reihe mit (\d+) Kästchen\./, (m, k) => 'È 1 fila di ' + k + (k === '1' ? ' quadretto.' : ' quadretti.')],
+        [/Das sind (\d+) Reihen mit je (\d+) Kästchen\./, (m, r, k) => 'Sono ' + r + ' file di ' + k + (k === '1' ? ' quadretto' : ' quadretti') + ' ciascuna.'],
+        [/<p>Zusammen (\d+) cm²/, '<p>In tutto $1 cm²'],
 
     ]
 });

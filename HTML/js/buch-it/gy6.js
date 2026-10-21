@@ -241,6 +241,10 @@ window.BuchIT && BuchIT.add('gy6', {
             'Il terzo angolo lo si conosce comunque: $\\gamma = 180^\\circ - \\alpha - \\beta$. Manca una lunghezza.',
         // seitenwinkel6
         'Dreieck aus drei Stäben': 'Triangolo di tre bastoncini', 'Die Stäbe ergeben kein Dreieck': 'I bastoncini non formano un triangolo',
+        // flaeche6
+        'Parallelogramm': 'Parallelogramma', 'Trapez': 'Trapezio', 'Drachenviereck': 'Deltoide', 'Figur': 'Figura',
+        'Zerlegen und verschieben': 'Scomporre e spostare', 'Grundseite $g$': 'Base $g$', 'Höhe $h$': 'Altezza $h$',
+        'Diagonale $e$': 'Diagonale $e$', 'Diagonale $f$': 'Diagonale $f$',
 
         // book it-17 mathe7-it:
 
@@ -513,6 +517,15 @@ window.BuchIT && BuchIT.add('gy6', {
         ['Die beiden kürzeren Stäbe reichen nicht bis zueinander, egal wie man sie dreht.', 'I due bastoncini più corti non si toccano, comunque li si giri.'],
         [' <b>Dreiecksungleichung:</b> Zwei Seiten zusammen müssen immer länger sein als die dritte.',
             ' <b>Disuguaglianza triangolare:</b> due lati insieme devono essere sempre più lunghi del terzo.'],
+        // flaeche6
+        ['Das abgeschnittene Dreieck rückt nach rechts. Aus dem Parallelogramm wird ein Rechteck mit derselben Grundseite und derselben Höhe.',
+            'Il triangolo tagliato si sposta a destra. Il parallelogramma diventa un rettangolo con la stessa base e la stessa altezza.'],
+        ['Eine Kopie des Dreiecks dreht sich um die Mitte einer Seite. Zusammen ergeben beide ein Parallelogramm. Das Dreieck ist die Hälfte davon.',
+            'Una copia del triangolo ruota attorno al punto medio di un lato. Insieme formano un parallelogramma. Il triangolo ne è la metà.'],
+        ['Eine Kopie des Trapezes dreht sich um die Mitte eines Schenkels. Zusammen ergeben beide ein Parallelogramm mit der Grundseite $a + c$.',
+            'Una copia del trapezio ruota attorno al punto medio di un lato obliquo. Insieme formano un parallelogramma con base $a + c$.'],
+        ['Die vier Dreiecke im Drachen klappen nach außen. Sie füllen das Rechteck aus den beiden Diagonalen genau zur Hälfte.',
+            'I quattro triangoli del deltoide si ribaltano verso l’esterno. Riempiono esattamente metà del rettangolo formato dalle due diagonali.'],
 
         // book it-17 mathe7-it:
 
@@ -629,6 +642,9 @@ window.BuchIT && BuchIT.add('gy6', {
         // seitenwinkel6: the largest angle lies opposite the longest side
         [/Der <span class="g-lam">längsten Seite \$([abc])\$<\/span> liegt der <span class="g-lam">größte Winkel \$(\\[a-z]+)\$<\/span> gegenüber, der <span class="g-cy">kürzesten \$([abc])\$<\/span> der kleinste\. /g,
             (m, s1, w, s2) => 'Di fronte al <span class="g-lam">lato più lungo $' + s1 + '$</span> sta l’<span class="g-lam">angolo maggiore $' + w + '$</span>, di fronte al <span class="g-cy">più corto $' + s2 + '$</span> il minore. '],
+        // flaeche6
+        [/^(Parallelogramm|Dreieck|Trapez|Drachenviereck): zerlegen und verschieben$/,
+            (m, s) => ({ Parallelogramm: 'Parallelogramma', Dreieck: 'Triangolo', Trapez: 'Trapezio', Drachenviereck: 'Deltoide' })[s] + ': scomporre e spostare'],
 
         // book it-17 mathe7-it:
 
