@@ -218,7 +218,7 @@ window.BuchIT && BuchIT.add('gy8', {
             (m, a, lo, hi) => '1000 album: in media sono servite ' + a + ' bustine</span> (al minimo $' + lo + '$, al massimo $' + hi + '$). '],
         [/(\d+) Bilder\b/g, '$1 figurine'], [/title="Bild (\d+)"/g, 'title="Figurina $1"'],
         // mcpi8: the buttons and "Von $1.000$ Punkten liegen $791$ im Viertelkreis, das ist der Anteil $…"
-        [/\+([\d.]+) Punkte</g, '+$1 punti<'],
+        [/\+(\d[\d.\s]*?) Punkte</g, '+$1 punti<'],
         [/Von \$([^$]*)\$ Punkten liegen \$([^$]*)\$ im Viertelkreis, das ist der Anteil \$/g,
             (m, a, b) => 'Su $' + a + '$ punti, $' + b + '$ cadono nel quarto di cerchio: è la frazione $'],
         // ziffern8: the coin count and the dice
