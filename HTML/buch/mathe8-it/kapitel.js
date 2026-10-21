@@ -26,7 +26,7 @@ window.BUCH = {
         { file: 'lb3-2.html', lb: 'Area di apprendimento 3', k: '3.2', title: 'Il cilindro',
           sub: 'Sviluppo, viste e assonometria cavaliera, superficie totale, volume e massa di cilindri pieni e cavi', when: 'Gennaio', ustd: 6 },
         { file: 'lb4.html', lb: 'Area di apprendimento 4', k: '4', title: 'Similitudine',
-          sub: 'Omotetia e scala, criterio fondamentale di similitudine, lunghezze, aree e volumi, congruenza', when: 'Marzo', ustd: 14 },
+          sub: 'Omotetia e scala, primo criterio di similitudine, lunghezze, aree e volumi, congruenza', when: 'Marzo', ustd: 14 },
         { file: 'lb5.html', lb: 'Area di apprendimento 5', k: '5', title: 'Eventi casuali',
           sub: 'Simulare, diagramma ad albero e regole dei percorsi, con e senza reimmissione, conteggio combinatorio', when: 'Aprile', ustd: 14 },
         { file: 'lb6.html', lb: 'Area di apprendimento 6', k: '6', title: 'La matematica di tutti i giorni',
