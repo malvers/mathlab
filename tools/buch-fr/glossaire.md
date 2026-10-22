@@ -376,6 +376,27 @@ Package fr-2 (Châtelet), 22.10.2026: decisions made while translating BGY 12; n
 
 <!-- fr-3: terms of this book only, write right below this line -->
 
+Package fr-3 (Lepaute), 22.10.2026: decisions made while translating BGY 13; nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Fehler 1. / 2. Art (the event) | erreur de première / de deuxième espèce | its probability is the risque de première / deuxième espèce of section 5 (4.2 says both once); short: erreur de 1re / 2e espèce |
+| Test (chapter 4.2 title, Signifikanztests) | Tests d’hypothèse | the widget: « Afficher l’erreur de 2e espèce », sides unilatéral à gauche / à droite, bilatéral |
+| Ablehnungsbereich written as a list | $\overline{A} = \{69\,;\,\ldots\,;\,100\}$ | the widget gets the same form by a rule in js/buch-fr/stochastik.js |
+| Stichprobenanteil $h$ (4.1) | fréquence observée $h$ | the letter h stays |
+| Teedame (Fisher) | la dame qui goûtait le thé | 4.2 excursion |
+| Literary Digest, Gallup | names stay | 4.1 excursion |
+| Stützpunkt in running text | un point connu de la droite, un point du plan | as section 5 (no « point d’appui »); the widget: « Le point $Q$ de $h$ est sur $g$ » |
+| Spurpunkte einer Ebene mit den Achsen | points d’intersection avec les axes | « points de percée » only for a line and the coordinate planes |
+| Gerade schneidet Ebene (button) | Une droite coupe un plan | the chapter text OP.3 quotes it |
+| Ortskurve (lb6) | lieu des points | the widget: « Afficher le lieu des extremums » |
+| K, E, G (Kosten, Erlös, Gewinn) | letters stay | lb6 says once: les initiales des mots allemands pour coût, recette et bénéfice |
+| Stück (lb3-2, lb3-4, lb6) | unités | « € par unité »; Teile (Ausschuss, 4.2) stay pièces |
+| Firstpunkt, Traufpunkt (OP.3) | point de faîtage, point d’égout | as fr-2 |
+| Pyramidenstumpf, Elle (Moskauer Papyrus) | tronc de pyramide, coudée | OP.3 excursion |
+| Wahlbereich Numerik (BGY 11, quoted in 3.4) | le domaine optionnel des méthodes numériques | as the start page of mathe11-fr |
+| Gebiet 1–3 (abi) | Bloc 1–3 | as section 2; Tipps für die Prüfung: Conseils pour l’examen, letter C |
+
 ## mathefos11-fr
 
 <!-- fr-4: terms of this book only, write right below this line -->
