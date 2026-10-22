@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques FOS 11 · Chapitre 2.1 · Hasard et probabilité | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Issues et événements, loi des grands nombres, Laplace, combiner des événements. Chapitre 2.1 du manuel interactif Mathématiques · Fachoberschule 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · FACHOBERSCHULE 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.1 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.1 · DOMAINE D’APPRENTISSAGE 2 · FÉVRIER · MARS</p>
+            <h1>Hasard et probabilité</h1>
+            <p class="b-hero-lead">La pièce est-elle défectueuse ? La pièce de monnaie tombe-t-elle sur face ? Mon billet est-il gagnant ? Personne ne peut prévoir un hasard isolé.
+                Mais si on le répète très souvent, des régularités étonnamment stables apparaissent. Dans ce chapitre, tu décris des <b>expériences aléatoires</b> avec des ensembles,
+                tu apprends ce qu’est une <b>probabilité</b> et tu combines des <b>événements</b> entre eux.</p>
+            <div class="b-chips"><span class="b-chip">9 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">SIMULATION</span><span class="b-chip">2 LABORATOIRES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>décrire des expériences aléatoires : <b>issue</b>, <b>univers</b>, <b>événement</b>, <b>ensemble des événements</b></li>
+                <li>utiliser des <b>fréquences</b> comme estimations de probabilités et vivre la <b>loi des grands nombres</b> par la simulation</li>
+                <li>calculer des probabilités dans des <b>situations d’équiprobabilité</b> (Laplace)</li>
+                <li>combiner des événements par <b>réunion</b>, <b>intersection</b> et <b>événement contraire</b>, appliquer la formule de la réunion et les lois de De Morgan</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="1/4" data-ph="fraction"><p class="b-q-text">Simplifie $\tfrac{9}{36}$ au maximum.</p><div class="b-sol"><p>$\tfrac14$</p></div></div>
+            <div class="b-q" data-ans="0,25" data-ph="nombre décimal"><p class="b-q-text">Écris 25 % sous forme de nombre décimal.</p><div class="b-sol"><p>$0{,}25$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Que vaut $\{1\,;\,2\,;\,3\} \cap \{2\,;\,3\,;\,4\}$ ?</p><div class="b-mc"><button>$\{1\,;\,2\,;\,3\,;\,4\}$</button><button>$\{2\,;\,3\}$</button><button>$\{1\,;\,4\}$</button></div><div class="b-sol"><p>L’intersection contient les éléments qui sont dans les deux ensembles.</p></div></div>
+            <div class="b-q" data-ans="5/6" data-ph="fraction"><p class="b-q-text">Calcule $1 - \tfrac16$.</p><div class="b-sol"><p>$\tfrac56$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DEUX DÉS</div>
+            <div class="b-text"><p>On lance deux dés et on additionne les points obtenus.</p>
+                <ul><li>Quelles sommes sont possibles ? Sont-elles toutes également probables ?</li><li>Pariez : quelle somme sort le plus souvent ? Lancez 50 fois et tenez une feuille de comptage.</li></ul></div>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Deux dés, une question (en allemand)</span></span></a></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA PUNAISE</div>
+            <div class="b-text"><p>Une punaise retombe sur la tête (pointe vers le haut) ou sur le côté.</p>
+                <ul><li>Quelle est la probabilité de « pointe vers le haut » ? Pouvez-vous la calculer ?</li><li>Lancez-la 100 fois, rassemblez les résultats de tous les groupes et comparez.</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COMPTÉS DEUX FOIS</div>
+            <div class="b-text"><p>Sur les 28 élèves d’une classe, 12 jouent au football et 9 au volley-ball.</p>
+                <ul><li>Combien jouent « au football ou au volley-ball » ? Suffit-il de calculer $12 + 9 = 21$ ?</li><li>Quelle information manque pour répondre à coup sûr ?</li></ul></div>
+            <span class="b-pair">→ Leçon 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Expériences aléatoires et événements" data-toc-k="1" data-toc-short="1 Événements">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">1</span>Expériences aléatoires, issues et événements</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quand on lance deux dés, une issue est par exemple $(2\,;\,5)$ : d’abord un 2, puis un 5. Il y a $6 \cdot 6 = 36$ couples de ce genre.
+                La question « La somme des points vaut-elle 7 ? » en regroupe six. Un tel regroupement s’appelle un <b>événement</b>.</p></div></div>
+            <div class="b-text"><p>Les expériences aléatoires n’existent pas seulement dans les jeux. Au contrôle qualité, une pièce est conforme ou défectueuse ; dans un sondage, quelqu’un répond oui ou non.
+                L’essentiel est toujours le même : on connaît toutes les issues possibles, mais on ne sait pas à l’avance laquelle se produira.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · VOCABULAIRE</div>
+                <div class="b-text">
+                    <p>Une <b>expérience aléatoire</b> a plusieurs issues possibles, peut être répétée dans les mêmes conditions, et son résultat ne peut pas être prévu.</p>
+                    <p>Chaque issue possible est une <b>issue</b> $\omega$. L’ensemble de toutes les issues forme l’<b>univers</b> $\Omega$.</p>
+                    <p>Un <b>événement</b> $E$ est une partie de $\Omega$. Il est réalisé quand l’une de ses issues se produit. $\Omega$ s’appelle l’événement <b>certain</b>, $\emptyset$ l’événement <b>impossible</b>.</p>
+                    <p>L’<b>ensemble des événements</b> contient tous les événements. Si $\Omega$ a exactement $n$ issues, il y a $2^n$ événements.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Plusieurs épreuves :</b> pour plusieurs lancers, on écrit les issues sous forme de couples ou de triplets ordonnés, par exemple $(F\,;\,P\,;\,F)$ pour face, pile, face.</p>
+            <p class="b-note"><b>Une ou plusieurs épreuves ?</b> Lancer deux dés en même temps revient au même que lancer deux fois de suite.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURE · LES 36 ISSUES DE DEUX DÉS</div>
+        <p class="b-help" style="margin:0 0 12px">Ligne : premier dé, colonne : deuxième dé. En jaune, l’événement « somme des points égale à 7 », avec six issues.</p>
+        <div class="b-table-wrap b-scroll"><table class="b-table" style="min-width:0"><tr><th>1er \ 2e</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr><tr><th>1</th><td>(1 ; 1)</td><td>(1 ; 2)</td><td>(1 ; 3)</td><td>(1 ; 4)</td><td>(1 ; 5)</td><td class="b-hot">(1 ; 6)</td></tr><tr><th>2</th><td>(2 ; 1)</td><td>(2 ; 2)</td><td>(2 ; 3)</td><td>(2 ; 4)</td><td class="b-hot">(2 ; 5)</td><td>(2 ; 6)</td></tr><tr><th>3</th><td>(3 ; 1)</td><td>(3 ; 2)</td><td>(3 ; 3)</td><td class="b-hot">(3 ; 4)</td><td>(3 ; 5)</td><td>(3 ; 6)</td></tr><tr><th>4</th><td>(4 ; 1)</td><td>(4 ; 2)</td><td class="b-hot">(4 ; 3)</td><td>(4 ; 4)</td><td>(4 ; 5)</td><td>(4 ; 6)</td></tr><tr><th>5</th><td>(5 ; 1)</td><td class="b-hot">(5 ; 2)</td><td>(5 ; 3)</td><td>(5 ; 4)</td><td>(5 ; 5)</td><td>(5 ; 6)</td></tr><tr><th>6</th><td class="b-hot">(6 ; 1)</td><td>(6 ; 2)</td><td>(6 ; 3)</td><td>(6 ; 4)</td><td>(6 ; 5)</td><td>(6 ; 6)</td></tr></table></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · DEUX LANCERS DE PIÈCE</div>
+            <div class="b-text"><p>On lance deux fois une pièce de monnaie. Donne $\Omega$ et l’événement $E$ : « au moins une fois face ».</p></div>
+            <div class="b-sol"><p>$\Omega = \{FF\,;\,FP\,;\,PF\,;\,PP\}$ ($F$ : face, $P$ : pile), quatre issues.</p>
+                <p><span class="b-res">$E = \{FF\,;\,FP\,;\,PF\}$</span>. Le contraire, « aucune face », est $\{PP\}$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · ÉVÉNEMENTS AVEC UN DÉ</div>
+            <div class="b-text"><p>Un dé : écris sous forme d’ensembles « nombre pair », « plus grand que 6 », « plus petit que 7 ». Combien y a-t-il d’événements en tout ?</p></div>
+            <div class="b-sol"><p>$\{2\,;\,4\,;\,6\}$ · $\emptyset$, l’événement impossible · $\{1\,;\,\ldots\,;\,6\} = \Omega$, l’événement certain.</p>
+                <p>Il y a <span class="b-res">$2^6 = 64$ événements</span>, de l’ensemble vide à l’événement certain.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Donne l’univers et compte les issues : a) une pièce lancée trois fois &nbsp; b) une roue de loterie aux couleurs rouge, jaune, bleu, tournée deux fois &nbsp; c) on contrôle trois pièces : conforme ($c$) ou défectueuse ($d$)</p></div>
+            <div class="b-sol"><p>a) $\{FFF\,;\,FFP\,;\,FPF\,;\,PFF\,;\,FPP\,;\,PFP\,;\,PPF\,;\,PPP\}$, 8 issues &nbsp; b) $\{RR\,;\,RJ\,;\,RB\,;\,JR\,;\,JJ\,;\,JB\,;\,BR\,;\,BJ\,;\,BB\}$, 9 &nbsp; c) comme a) avec $c$ et $d$, 8 issues</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance un dé. Écris sous forme d’ensemble : $A$ : « nombre premier », $B$ : « au plus 2 », $C$ : « divisible par 7 ».</p></div>
+            <div class="b-sol"><p>$A = \{2\,;\,3\,;\,5\}$, $B = \{1\,;\,2\}$, $C = \emptyset$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deux dés : écris sous forme d’ensemble « somme des points égale à 10 », « double » (les deux dés identiques), « somme des points égale à 13 ».</p></div>
+            <div class="b-sol"><p>$\{(4\,;\,6)\,;\,(5\,;\,5)\,;\,(6\,;\,4)\}$ · $\{(1\,;\,1)\,;\,(2\,;\,2)\,;\,\ldots\,;\,(6\,;\,6)\}$ avec 6 issues · $\emptyset$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une roue de loterie a trois secteurs $a$, $b$, $c$. Écris tous les événements. Leur nombre correspond-il à $2^n$ ?</p></div>
+            <div class="b-sol"><p>$\emptyset$, $\{a\}$, $\{b\}$, $\{c\}$, $\{a\,;\,b\}$, $\{a\,;\,c\}$, $\{b\,;\,c\}$, $\{a\,;\,b\,;\,c\}$ : 8 événements, $2^3 = 8$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>« Demain, il pleut à Dresde » est-il une expérience aléatoire ? Vérifie les trois caractéristiques de l’encadré « À retenir ».</p></div>
+            <div class="b-sol"><p>Les issues possibles et l’imprévisibilité conviennent, mais la journée ne peut pas être répétée dans les mêmes conditions. Au sens strict, ce n’est pas une expérience aléatoire.
+                Les services météo donnent pourtant des probabilités : elles reposent sur des modèles et sur de nombreuses situations météorologiques comparables.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="8" data-ph="nombre"><p class="b-q-text">Combien d’issues a une pièce lancée trois fois ?</p><div class="b-sol"><p>$2^3 = 8$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Quand on lance deux dés, combien d’issues appartiennent à l’événement « double » ?</p><div class="b-sol"><p>$(1\,;\,1)$ à $(6\,;\,6)$ : 6</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quel événement est impossible quand on lance un dé ?</p><div class="b-mc"><button>nombre pair</button><button>le 7</button><button>au plus 6</button></div><div class="b-sol"><p>Le 7 n’existe pas sur un dé.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Fréquence et probabilité" data-toc-k="2" data-toc-short="2 Probabilité">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">2</span>Fréquence et probabilité</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une punaise n’est pas symétrique : on ne peut pas calculer sa probabilité. Alors on la lance : sur 1000 lancers, elle est tombée 620 fois
+                la pointe vers le haut. La <b>fréquence</b> $\tfrac{620}{1000} = 0{,}62$ est une bonne estimation de la probabilité.</p></div></div>
+            <div class="b-text"><p>Après quelques lancers, la fréquence varie fortement. Plus il y a de lancers, plus elle se calme et se stabilise.
+                Pour des objets symétriques comme un dé ou une pièce, on peut calculer à l’avance la valeur vers laquelle elle tend.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · PROBABILITÉ</div>
+                <div class="b-text">
+                    <p>Si $E$ se réalise $H$ fois en $n$ essais, $h = \tfrac{H}{n}$ est la <b>fréquence</b> de $E$.</p>
+                    <p><b>Loi des grands nombres :</b> quand $n$ augmente, $h$ fluctue de moins en moins autour d’une valeur fixe, la <b>probabilité</b> $P(E)$.</p>
+                    <p><b>Équiprobabilité (Laplace) :</b> si toutes les issues sont également probables, $P(E) = \dfrac{|E|}{|\Omega|} = \dfrac{\text{nombre d’issues favorables}}{\text{nombre total d’issues}}$.</p>
+                    <p>On a toujours : $0 \leq P(E) \leq 1$, $P(\Omega) = 1$, et pour des événements incompatibles $P(A \cup B) = P(A) + P(B)$. On en déduit $P(\overline{E}) = 1 - P(E)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Axiomes :</b> Andreï Kolmogorov a posé en 1933 les trois règles de la fin de l’encadré comme fondement de tout le calcul des probabilités.</p>
+            <p class="b-note"><b>Pas de mémoire :</b> après cinq fois rouge à la roulette, le noir n’est pas « dû ». La loi des grands nombres ne compense pas, elle dilue.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA LOI DES GRANDS NOMBRES</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une expérience et lance-la 1, 10, 100 ou 1000 fois. La courbe montre la fréquence, la ligne en pointillés la probabilité.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · LAPLACE AVEC DEUX DÉS</div>
+            <div class="b-text"><p>Calcule les probabilités de « somme des points égale à 7 », « double » et « somme des points au moins égale à 10 ».</p></div>
+            <div class="b-sol"><p>Les 36 couples sont tous également probables. Somme 7 : 6 couples, $P = \tfrac{6}{36} = \tfrac16$. Double : 6 couples, également $\tfrac16$.</p>
+                <p>Au moins 10 : sommes 10, 11, 12 avec $3 + 2 + 1 = 6$ couples : <span class="b-res">$\tfrac{6}{36} = \tfrac16$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · EN PRODUCTION</div>
+            <div class="b-text"><p>Sur 200 pièces contrôlées, 7 sont défectueuses. Estime la probabilité qu’une pièce soit défectueuse. Combien de pièces défectueuses faut-il prévoir sur 5000 ?</p></div>
+            <div class="b-sol"><p>$h = \tfrac{7}{200} = 0{,}035$, donc environ 3,5 %.</p>
+                <p>$5000 \cdot 0{,}035 = $ <span class="b-res">environ 175 pièces défectueuses</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance un dé. Calcule $P(\text{pair})$, $P(\text{au plus } 2)$ et $P(\text{pas de } 6)$.</p></div>
+            <div class="b-sol"><p>$\tfrac36 = \tfrac12$ · $\tfrac26 = \tfrac13$ · $\tfrac56$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une urne contient 4 boules rouges et 6 boules bleues. Quelle est la probabilité de tirer une boule rouge, et celle de l’événement contraire ?</p></div>
+            <div class="b-sol"><p>$P(\text{rouge}) = \tfrac{4}{10} = 0{,}4$, $P(\text{bleue}) = 1 - 0{,}4 = 0{,}6$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deux dés : calcule $P(\text{somme égale à } 8)$ et $P(\text{somme au plus égale à } 4)$.</p></div>
+            <div class="b-sol"><p>Somme 8 : $(2\,;\,6)$, $(3\,;\,5)$, $(4\,;\,4)$, $(5\,;\,3)$, $(6\,;\,2)$, donc $\tfrac{5}{36}$. Au plus 4 : $1 + 2 + 3 = 6$ couples, donc $\tfrac16$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dans le widget, lance le dé dix fois et note la fréquence du six. Recommence trois fois. Puis fais une fois 1000 lancers. Qu’observes-tu ?</p></div>
+            <div class="b-sol"><p>Après 10 lancers, les valeurs sont très dispersées (par exemple $0$, $0{,}3$, $0{,}1$). Après 1000 lancers, $h$ est le plus souvent proche de $\tfrac16 \approx 0{,}167$ : c’est la loi des grands nombres.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Sur 10 lancers d’une pièce, face est sortie 8 fois. La pièce est-elle truquée ? Justifie. (Pour une pièce équilibrée, la probabilité d’obtenir au moins 8 fois face en 10 lancers est d’environ 5,5 %.)</p></div>
+            <div class="b-sol"><p>C’est remarquable, mais pas très rare : environ une série de dix lancers sur 18 avec une pièce équilibrée donne un tel résultat. Sur 10 lancers seulement, la fréquence varie beaucoup. Pour conclure, il faut beaucoup plus de lancers.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1/6" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité d’obtenir une somme de 7 avec deux dés ?</p><div class="b-sol"><p>$\tfrac{6}{36}$</p></div></div>
+        <div class="b-q" data-ans="0,035" data-ph="nombre décimal"><p class="b-q-text">7 pièces sur 200 sont défectueuses. Quelle est la fréquence ?</p><div class="b-sol"><p>$0{,}035$</p></div></div>
+        <div class="b-q" data-ans="5/6" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité de « pas de six » en lançant un dé ?</p><div class="b-sol"><p>$1 - \tfrac16$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Combiner des événements" data-toc-k="3" data-toc-short="3 Combiner">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">3</span>Combiner des événements</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une roue de loterie a 12 secteurs de même taille. $A$ : « nombre pair » a 6 secteurs, $B$ : « multiple de 3 » en a 4.
+                Quelle est la probabilité de « $A$ ou $B$ » ? Pas $\tfrac{6 + 4}{12}$ : le 6 et le 12 appartiennent aux deux et seraient comptés deux fois. La bonne réponse est $\tfrac{8}{12}$.</p></div></div>
+            <div class="b-text"><p>Les événements sont des ensembles : on peut donc les combiner comme des ensembles. Le mot « ou » devient la réunion, « et » l’intersection,
+                « non » l’événement contraire. Un diagramme montre tout de suite ce qui serait compté deux fois.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · OPÉRATIONS, FORMULE DE LA RÉUNION, DE MORGAN</div>
+                <div class="b-text">
+                    <p>$A \cup B$ : « $A$ ou $B$ », au moins l’un des deux se réalise · $A \cap B$ : « $A$ et $B$ », les deux se réalisent · $\overline{A}$ : « non $A$ », l’<b>événement contraire</b></p>
+                    <p>$A$ et $B$ sont dits <b>incompatibles</b> si $A \cap B = \emptyset$.</p>
+                    <p><b>Formule de la réunion :</b> $P(A \cup B) = P(A) + P(B) - P(A \cap B)$</p>
+                    <p><b>Lois de De Morgan :</b> $\overline{A \cup B} = \overline{A} \cap \overline{B}$ (« ni $A$ ni $B$ ») et $\overline{A \cap B} = \overline{A} \cup \overline{B}$ (« pas les deux »)</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>« Ou »</b> n’est jamais exclusif en mathématiques : $A \cup B$ inclut le cas où les deux se réalisent.</p>
+            <p class="b-note"><b>L’événement contraire comme raccourci :</b> « au moins un » est le contraire de « aucun ».</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LES ÉVÉNEMENTS COMME ENSEMBLES</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une opération. En vert, les cases pour lesquelles l’événement se réalise. Pour les lois de De Morgan, essaie les deux membres.</p>
+        <div data-widget="venn"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LA ROUE DE LOTERIE</div>
+            <div class="b-text"><p>$A$ : « pair », $B$ : « multiple de 3 » sur la roue de loterie à 12 secteurs. Calcule $P(A \cup B)$ avec la formule de la réunion.</p></div>
+            <div class="b-sol"><p>$A \cap B = \{6\,;\,12\}$. $P(A \cup B) = \tfrac{6}{12} + \tfrac{4}{12} - \tfrac{2}{12} = \tfrac{8}{12}$, donc <span class="b-res">$\tfrac23$</span>.</p>
+                <p>Vérification en comptant : $A \cup B = \{2\,;\,3\,;\,4\,;\,6\,;\,8\,;\,9\,;\,10\,;\,12\}$ a 8 éléments.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · FOOTBALL ET VOLLEY-BALL</div>
+            <div class="b-text"><p>Sur 28 personnes, 12 jouent au football ($F$), 9 au volley-ball ($V$) et 4 aux deux. On choisit une personne au hasard. Calcule $P(F \cup V)$ et $P(\text{ni l’un ni l’autre})$.</p></div>
+            <div class="b-sol"><p>$P(F \cup V) = \tfrac{12 + 9 - 4}{28} = \tfrac{17}{28}$.</p>
+                <p>Ni l’un ni l’autre, d’après De Morgan $\overline{F} \cap \overline{V} = \overline{F \cup V}$ : <span class="b-res">$1 - \tfrac{17}{28} = \tfrac{11}{28}$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dé : $A = \{1\,;\,2\,;\,3\}$, $B = \{2\,;\,4\,;\,6\}$. Donne $A \cup B$, $A \cap B$, $\overline{A}$ et $\overline{B}$.</p></div>
+            <div class="b-sol"><p>$\{1\,;\,2\,;\,3\,;\,4\,;\,6\}$ · $\{2\}$ · $\{4\,;\,5\,;\,6\}$ · $\{1\,;\,3\,;\,5\}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dans une boulangerie : $A$ : « le client paie en espèces », $B$ : « le client achète du pain ». Décris avec des mots : $A \cap \overline{B}$ et $\overline{A \cup B}$.</p></div>
+            <div class="b-sol"><p>$A \cap \overline{B}$ : paie en espèces et n’achète pas de pain. $\overline{A \cup B}$ : ne paie pas en espèces et n’achète pas de pain.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>On a $P(A) = 0{,}5$, $P(B) = 0{,}3$ et $P(A \cap B) = 0{,}1$. Calcule $P(A \cup B)$ et $P(\overline{A} \cap \overline{B})$.</p></div>
+            <div class="b-sol"><p>$P(A \cup B) = 0{,}5 + 0{,}3 - 0{,}1 = 0{,}7$ ; d’après De Morgan, $P(\overline{A} \cap \overline{B}) = 1 - 0{,}7 = 0{,}3$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Vérifie la première loi de De Morgan avec un dé, $A = \{1\,;\,2\}$ et $B = \{2\,;\,3\}$.</p></div>
+            <div class="b-sol"><p>$\overline{A \cup B} = \overline{\{1\,;\,2\,;\,3\}} = \{4\,;\,5\,;\,6\}$. $\overline{A} \cap \overline{B} = \{3\,;\,4\,;\,5\,;\,6\} \cap \{1\,;\,4\,;\,5\,;\,6\} = \{4\,;\,5\,;\,6\}$. C’est égal.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Justifie à l’aide d’un diagramme : $P(A \cup B) \leq P(A) + P(B)$. Quand a-t-on l’égalité ?</p></div>
+            <div class="b-sol"><p>L’intersection est comptée deux fois dans $P(A) + P(B)$, la somme est donc au moins aussi grande. Égalité si et seulement si $P(A \cap B) = 0$, par exemple pour des événements incompatibles.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2/3" data-ph="fraction"><p class="b-q-text">Roue de loterie à 12 secteurs : quelle est la probabilité de « pair ou multiple de 3 » ?</p><div class="b-sol"><p>$\tfrac{8}{12} = \tfrac23$</p></div></div>
+        <div class="b-q" data-ans="0,7" data-ph="nombre décimal"><p class="b-q-text">$P(A) = 0{,}5$, $P(B) = 0{,}3$, $P(A \cap B) = 0{,}1$. Calcule $P(A \cup B)$.</p><div class="b-sol"><p>$0{,}7$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$\overline{A \cup B}$ signifie …</p><div class="b-mc"><button>pas les deux</button><button>ni $A$ ni $B$</button><button>exactement l’un des deux</button></div><div class="b-sol"><p>Aucun des deux ne se réalise.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une roue de loterie a 8 secteurs de même taille numérotés de 1 à 8. Quelle est la probabilité d’obtenir un nombre premier ?</p></div>
+            <div class="b-sol"><p>2, 3, 5, 7 : $\tfrac48 = \tfrac12$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 1.1 :</b> une machine produit 2 % de rebut. Combien de pièces sans défaut peut-on attendre sur 12 500 pièces ?</p></div>
+            <div class="b-sol"><p>$12\,500 \cdot 0{,}98 = 12\,250$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deux dés : quelle est la probabilité d’obtenir au moins un six ? Utilise l’événement contraire.</p></div>
+            <div class="b-sol"><p>Aucun six : $5 \cdot 5 = 25$ couples. $P = 1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Deux dés : $A$ : « somme des points paire », $B$ : « au moins un 5 ». Calcule $P(A \cap B)$ et $P(A \cup B)$.</p></div>
+            <div class="b-sol"><p>$A \cap B$ : $(5\,;\,1)$, $(5\,;\,3)$, $(5\,;\,5)$, $(1\,;\,5)$, $(3\,;\,5)$, donc $\tfrac{5}{36}$. $P(A \cup B) = \tfrac{18 + 11 - 5}{36} = \tfrac{24}{36} = \tfrac23$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le chevalier de Méré" data-toc-k="X" data-toc-short="De Méré">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Le chevalier de Méré et le double six</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Le gentilhomme français Antoine Gombaud, dit le chevalier de Méré, aimait parier : en quatre lancers d’un dé, il sort au moins un six.
+                À la longue, il gagnait. Puis il paria qu’en 24 lancers de deux dés, il sortirait au moins un double six, et à la longue, il perdait.
+                Pourtant, le rapport lui semblait le même : $\tfrac46 = \tfrac{24}{36}$.</p>
+            <p>Avec l’événement contraire, l’explication est rapide : $1 - \left(\tfrac56\right)^4 \approx 0{,}518$, mais $1 - \left(\tfrac{35}{36}\right)^{24} \approx 0{,}491$.
+                Blaise Pascal écrivit à ce sujet à Pierre de Fermat en 1654. De cette correspondance est né le calcul des probabilités. Dans le widget plus haut, tu peux
+                lancer toi-même mille fois l’expérience « De Méré ».</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> lettre de Blaise Pascal à Pierre de Fermat du 29 juillet 1654, dans laquelle Pascal expose le problème de dés du chevalier de Méré.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>EXPÉRIENCE ALÉATOIRE</h4><p>Plusieurs issues, répétable, imprévisible. Univers $\Omega$.</p></div>
+        <div><p>Pièce lancée deux fois : $\Omega = \{FF\,;\,FP\,;\,PF\,;\,PP\}$</p></div></div>
+    <div class="b-rueck"><div><h4>ÉVÉNEMENT</h4><p>Partie de $\Omega$. Certain : $\Omega$, impossible : $\emptyset$. $2^n$ événements.</p></div>
+        <div><p>« pair » $= \{2\,;\,4\,;\,6\}$</p></div></div>
+    <div class="b-rueck"><div><h4>LOI DES GRANDS NOMBRES</h4><p>Quand $n$ augmente, la fréquence se stabilise autour de la probabilité.</p></div>
+        <div><p>Punaise : $h = 0{,}62$ après 1000 lancers</p></div></div>
+    <div class="b-rueck"><div><h4>LAPLACE</h4><p>$P(E) = \tfrac{|E|}{|\Omega|}$ si toutes les issues sont également probables. $P(\overline{E}) = 1 - P(E)$.</p></div>
+        <div><p>Somme des points 7 : $\tfrac{6}{36} = \tfrac16$</p></div></div>
+    <div class="b-rueck"><div><h4>COMBINER</h4><p>$P(A \cup B) = P(A) + P(B) - P(A \cap B)$ · $\overline{A \cup B} = \overline{A} \cap \overline{B}$ · $\overline{A \cap B} = \overline{A} \cup \overline{B}$</p></div>
+        <div><p>Roue de loterie : $\tfrac{6}{12} + \tfrac{4}{12} - \tfrac{2}{12} = \tfrac{8}{12}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="1/6" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité d’obtenir un double avec deux dés ?</p><div class="b-sol"><p>$\tfrac{6}{36}$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Combien d’issues a une pièce lancée deux fois ?</p><div class="b-sol"><p>$FF$, $FP$, $PF$, $PP$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$A \cap B = \emptyset$ signifie …</p><div class="b-mc"><button>$A$ et $B$ sont incompatibles</button><button>$A$ et $B$ sont également probables</button><button>$A$ est certain</button></div><div class="b-sol"><p>Ils ne peuvent pas se réaliser ensemble.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="11/36" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité d’obtenir au moins un six en lançant deux dés ?</p><div class="b-sol"><p>$1 - \tfrac{25}{36}$</p></div></div>
+            <div class="b-q" data-ans="17/28" data-ph="fraction"><p class="b-q-text">28 personnes, 12 jouent au football, 9 au volley-ball, 4 aux deux. Quelle est la probabilité qu’une personne choisie au hasard pratique au moins l’un des deux ?</p><div class="b-sol"><p>$\tfrac{17}{28}$</p></div></div>
+            <div class="b-q" data-ans="175" data-ph="pièces"><p class="b-q-text">7 pièces sur 200 sont défectueuses. Combien de pièces défectueuses faut-il prévoir sur 5000 ?</p><div class="b-sol"><p>$5000 \cdot 0{,}035$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos11-zufallsexperimente.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXPÉRIENCES ALÉATOIRES</span><span class="b-lab-what">Issue, univers, événement</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-haeufigkeit-wahrscheinlichkeit.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FRÉQUENCE ET PROBABILITÉ</span><span class="b-lab-what">Loi des grands nombres, Laplace</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-ereignisse-verknuepfen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COMBINER DES ÉVÉNEMENTS</span><span class="b-lab-what">Formule de la réunion, De Morgan</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Le hasard qui crée de l’ordre (en allemand)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Fachoberschule, 11e année · domaine d’apprentissage 2 d’après le programme de mathématiques de la Fachoberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+</body>
+</html>
