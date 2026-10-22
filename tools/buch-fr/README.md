@@ -90,3 +90,25 @@ exactly as before.
 6. Usage limit or API error: commit what is done (phase B) and stop.
 7. Report: branch, commits, check results (`check.mjs --lang fr`, `encheck --poke`, `geo`, `fit`, a `dump.mjs` look for
    German words), German errors fixed, open questions.
+
+## Merging the books (22.10.2026) and the next round
+
+All five books went live on 22.10.2026 (bc694d32). What the orchestrator learned while merging them:
+
+- **One French per German string, and the later file wins** - for `word` and for `phrase` alike (both are tables in
+  `compile()` of `js/buch-fr.js`: `Object.assign` and `Map.set`); only the `rule` list runs in order, so there the first
+  matching rule wins. A string that two blocks or two modules translate differently is therefore decided silently by
+  the load order ("Was wird gezeigt?" in analysis and in vektoren). `check.mjs --lang fr` over **all** French books
+  together names these cases - run it over all of them, not only over your own book.
+- The five books had translated 494 widget strings two or three times. The merge kept one copy per string: the lowest
+  block wins (fr0, then the book the widget belongs to), with a reason where a later one was better. So, **before you
+  translate a widget string, search the dictionaries for it** (`grep -n "<German>" HTML/js/buch-fr/*.js`): another
+  block may have it already.
+- **Gender:** one German word may need two French words ("orthogonal": vectors "orthogonaux", lines
+  "perpendiculaires"). Keep the common one as a word and make the other a rule tied to its widget's markup (see `lage`
+  in `js/buch-fr/funktionen.js`).
+- The chapter text says what the widget shows: a term changed in a dictionary is changed in the pages too ("boîte de
+  conserve" in FOS 12).
+- **Hub:** a card with five covers fits only at 80 px with an 8 px gap (`js/labs-icons.js`, measured at 1280 and 390).
+- **Next round:** FR0 exists. The orchestrator only adds the comment lines `// book fr-6 …` (and so on) and empty
+  dictionaries for the modules not translated yet, then one agent per book, all starting at once.
