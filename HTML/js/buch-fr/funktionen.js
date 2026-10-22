@@ -222,6 +222,9 @@ window.BuchFR && BuchFR.add('funktionen', {
         // parameter ("Der Graph ist …": la courbe, feminine)
         ['gespiegelt an der $x$-Achse', 'symétrisée par rapport à l’axe des $x$'], ['gespiegelt an der $y$-Achse', 'symétrisée par rapport à l’axe des $y$'],
         [', in $x$-Richtung mit Faktor ', ', étirée dans la direction $x$ avec le facteur '], ['Der Graph ist ', 'La courbe est '],
+        // parameter: the slider labels "$c \cdot f(x)$: strecken in $y$-Richtung"
+        [': strecken in $y$-Richtung', ' : étirer dans la direction $y$'], [': verschieben in $y$-Richtung', ' : translater dans la direction $y$'],
+        [': stauchen in $x$-Richtung', ' : comprimer dans la direction $x$'], [': verschieben in $x$-Richtung', ' : translater dans la direction $x$'],
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
