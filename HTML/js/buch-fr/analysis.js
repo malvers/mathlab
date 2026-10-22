@@ -85,13 +85,13 @@ window.BuchFR && BuchFR.add('analysis', {
         'z. B. 6x^2 - 2 oder cos x': 'p. ex. 6x^2 - 2 ou cos x',
         // book fr-3 mathe13-fr:
         'Funktionenschar': 'Famille de fonctions',
-        'Funktionenschar mit Ortskurve': 'Famille de fonctions avec lieu des points',
+        'Funktionenschar mit Ortskurve': 'Famille de fonctions avec le lieu de ses extremums',
         'Parameter $a$': 'Paramètre $a$',
         'Verkaufspreis $p$ (€ pro Stück)': 'Prix de vente $p$ (€ par unité)',
         'x in Stück': 'x en unités',
-        'Kosten, Erlös und Gewinn': 'Coût, recette et bénéfice',
+        'Kosten, Erlös und Gewinn': 'Coûts, recette et bénéfice',
         // schar: the short labels of the extrema (also BGY 12, kurve: keep one copy when merging with fr-2)
-        'Hochpunkt': 'Maximum', 'Tiefpunkt': 'Minimum', 'keine Extrempunkte': 'aucun extremum',
+        'Hochpunkt': 'Maximum', 'Tiefpunkt': 'Minimum', 'keine Extrempunkte': 'pas d’extremum',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     },
@@ -185,7 +185,7 @@ window.BuchFR && BuchFR.add('analysis', {
         ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Bénéfice maximal : $G\'(x) = 0$ en $x \\approx '],
         ['Kein positives Gewinnmaximum.', 'Pas de bénéfice maximal positif.'],
         // schar: the list of extrema after other text, and the note with its "$. " in front (wins over a shorter piece "$. Für $" of another book)
-        ['Hochpunkt $', 'Maximum $'], ['Tiefpunkt $', 'Minimum $'], ['keine Extrempunkte', 'aucun extremum'],
+        ['Hochpunkt $', 'Maximum $'], ['Tiefpunkt $', 'Minimum $'], ['keine Extrempunkte', 'pas d’extremum'],
         ['$. Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
             '$. Pour $a \\le 0$, il n’y a pas d’extremum : $f_a\'(x) = 3x^2 - a$ n’a alors aucun zéro avec changement de signe.'],
         // book fr-4 mathefos11-fr:

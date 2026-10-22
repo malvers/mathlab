@@ -22,7 +22,7 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         'Konstante $C$': 'Constante $C$',
-        'Oben: Stammfunktionen F + C (die gewählte hell). Ziehe den Punkt. Unten: f. Die Steigung von F im Punkt ist genau der Funktionswert f(x₀).': 'En haut : primitives F + C (celle choisie en clair). Fais glisser le point. En bas : f. La pente de F au point est exactement la valeur f(x₀) de la fonction.',
+        'Oben: Stammfunktionen F + C (die gewählte hell). Ziehe den Punkt. Unten: f. Die Steigung von F im Punkt ist genau der Funktionswert f(x₀).': 'En haut : des primitives F + C (celle choisie en clair). Fais glisser le point. En bas : f. La pente de F en ce point est exactement la valeur f(x₀).',
         'Schar von Stammfunktionen': 'Famille de primitives',
         'Die Funktion f': 'La fonction f',
         'Wassertank': 'Cuve d’eau',
@@ -34,13 +34,13 @@ window.BuchFR && BuchFR.add('integral', {
         'Änderungsrate mit Fläche': 'Taux de variation avec l’aire',
         'Rekonstruierter Bestand': 'Quantité reconstituée',
         'Zeit $t$': 'Temps $t$',
-        'Bestimmtes Integral zwischen zwei Grenzen': 'Intégrale définie entre deux bornes',
+        'Bestimmtes Integral zwischen zwei Grenzen': 'Intégrale entre deux bornes',
         'Parabel und Gerade': 'Parabole et droite',
         'Kubik und Parabel': 'Cubique et parabole',
         'Sinus und Kosinus': 'Sinus et cosinus',
         'Funktionen': 'Fonctions',
         'Fläche zwischen zwei Graphen': 'Aire entre deux courbes',
-        'Zu wenige Schnittstellen im Bild.': 'Trop peu de points d’intersection dans l’image.',
+        'Zu wenige Schnittstellen im Bild.': 'Trop peu d’abscisses d’intersection dans l’image.',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     },
@@ -59,7 +59,7 @@ window.BuchFR && BuchFR.add('integral', {
         ['Flächeninhalt zwischen Graph und $x$-Achse: $A \\approx ', 'Aire entre la courbe et l’axe des $x$ : $A \\approx '],
         [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · L’intégrale est plus petite, car les aires sous l’axe (en rouge) comptent négativement.'],
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Attention : $a > b$ change le signe.'],
-        ['$ · Schnittstellen: ', '$ · intersections : '],
+        ['$ · Schnittstellen: ', '$ · abscisses d’intersection : '],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     ],
