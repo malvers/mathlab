@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques FOS 11 · Chapitre E · Nombres complexes et algèbre de Boole | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Les domaines optionnels 1 et 3 en excursions : plan complexe, tables de vérité, circuits. Chapitre E du manuel interactif Mathématiques · Fachoberschule 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · FACHOBERSCHULE 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">PERSPECTIVES</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">PERSPECTIVES · DOMAINES OPTIONNELS 1 ET 3 · JUIN</p>
+            <h1>Nombres complexes et algèbre de Boole</h1>
+            <p class="b-hero-lead">Deux escapades pour la fin de l’année scolaire. La première agrandit encore une fois les nombres : soudain, $x^2 = -1$ a une solution, et les nombres deviennent des flèches dans un plan.
+                La deuxième mène à la logique avec laquelle calculent tous les téléphones et tous les ordinateurs : des interrupteurs qui ne connaissent que <b>marche</b> ou <b>arrêt</b>, et des règles que tu connais déjà
+                grâce au calcul des probabilités.</p>
+            <div class="b-chips"><span class="b-chip">EXCURSIONS</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">3 LABORATOIRES</span><span class="b-chip">INFORMATIQUE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["sqrt(4-x^2)","-sqrt(4-x^2)"]' data-labels='["",""]' data-x="-3.5,3.5" data-y="-2.4,2.4" data-pts="[[2,0],[0,2],[-2,0],[0,-2],[1.4142,1.4142]]" data-xl="Re" data-yl="Im" data-h="240" data-equal data-aria="Plan complexe : tous les nombres complexes de module 2 sont sur un cercle"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CES PERSPECTIVES</div>
+            <div class="b-text"><ul>
+                <li>comprendre pourquoi on a agrandi les ensembles de nombres jusqu’aux <b>nombres complexes</b></li>
+                <li>calculer avec l’unité imaginaire $\mathrm{i}$ et représenter des nombres complexes dans le <b>plan complexe</b></li>
+                <li>décrire des propositions et des circuits avec <b>ET</b>, <b>OU</b> et <b>NON</b>, et établir des tables de vérité</li>
+                <li>simplifier des expressions logiques avec des règles de calcul</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Combien de solutions réelles l’équation $x^2 + 4 = 0$ a-t-elle ?</p><div class="b-mc"><button>deux</button><button>une</button><button>aucune</button></div><div class="b-sol"><p>Un carré n’est jamais négatif.</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">Quelle est la longueur du segment allant de $(0\,;\,0)$ à $(3\,;\,4)$ ?</p><div class="b-sol"><p>Pythagore : $\sqrt{9 + 16} = 5$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">À quoi est égal $\overline{A \cup B}$ d’après De Morgan ?</p><div class="b-mc"><button>$\overline{A} \cup \overline{B}$</button><button>$\overline{A} \cap \overline{B}$</button><button>$A \cap B$</button></div><div class="b-sol"><p>« Ni $A$ ni $B$ », chapitre 2.1</p></div></div>
+            <div class="b-q" data-ans="0,81" data-ph="nombre décimal"><p class="b-q-text">Deux composants en série fonctionnent chacun avec 0,9. Quelle est la probabilité que le montage fonctionne ?</p><div class="b-sol"><p>$0{,}9^2$, chapitre 2.2</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DIX EN DEUX PARTIES</div>
+            <div class="b-text"><p>Partagez le nombre 10 en deux termes dont le produit vaut 40.</p>
+                <ul><li>Posez une équation du second degré et résolvez-la. Que se passe-t-il ?</li><li>Continuez malgré tout à calculer avec $5 + \sqrt{-15}$ et $5 - \sqrt{-15}$, comme si de rien n’était. La somme et le produit sont-ils justes ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA CAGE D’ESCALIER</div>
+            <div class="b-text"><p>En bas et en haut d’un escalier, il y a un interrupteur. Chacun doit pouvoir allumer et éteindre la lumière, quelle que soit la position de l’autre.</p>
+                <ul><li>Dessinez un circuit qui en est capable. Combien de fils faut-il entre les interrupteurs ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">1 + 1 DANS L’ORDINATEUR</div>
+            <div class="b-text"><p>Un ordinateur ne connaît que 0 et 1. Dans le système binaire, $1 + 1 = 10$.</p>
+                <ul><li>Quand on additionne deux nombres binaires à un chiffre, quel chiffre reste à droite, lequel passe à gauche comme retenue ? Faites un tableau.</li></ul></div>
+            <a class="b-lab" data-lab="binaer" href="../../binaer.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">NOMBRES BINAIRES</span><span class="b-lab-what">Un boulier pour le système binaire (en allemand)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Nombres complexes" data-toc-k="1" data-toc-short="1 Complexes">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">DOMAINE OPTIONNEL 1 · EXCURSION</span></div>
+    <h2><span class="b-no">1</span>Nombres complexes</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dix en deux parties de produit 40 : $x(10 - x) = 40$ mène à $x^2 - 10x + 40 = 0$ et $x = 5 \pm \sqrt{-15}$. Ce n’est pas un nombre réel.
+                Si l’on continue malgré tout le calcul, la somme vaut $10$ et le produit $25 - (-15) = 40$. Les nombres « impossibles » obéissent aux règles de calcul.</p></div></div>
+            <div class="b-text"><p>Comme au chapitre 1.1, on agrandit un ensemble de nombres parce qu’un calcul est impossible dans l’ancien. On invente un nombre $\mathrm{i}$ tel que $\mathrm{i}^2 = -1$.
+                Avec lui, toute équation du second degré a des solutions. Depuis Carl Friedrich Gauss, on représente ces nombres comme des points d’un plan.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · NOMBRES COMPLEXES</div>
+                <div class="b-text">
+                    <p>L’<b>unité imaginaire</b> $\mathrm{i}$ est définie par $\mathrm{i}^2 = -1$.</p>
+                    <p>Un <b>nombre complexe</b> s’écrit $z = a + b\,\mathrm{i}$, avec la <b>partie réelle</b> $a$ et la <b>partie imaginaire</b> $b$. Tous les nombres complexes forment $\mathbb{C}$, et $\mathbb{R} \subset \mathbb{C}$.</p>
+                    <p><b>Calculer</b> comme avec des expressions, puis remplacer $\mathrm{i}^2$ par $-1$ : $(a + b\mathrm{i})(c + d\mathrm{i}) = (ac - bd) + (ad + bc)\,\mathrm{i}$.</p>
+                    <p><b>Plan complexe :</b> $z = a + b\mathrm{i}$ est le point $(a\,;\,b)$. <b>Module</b> $|z| = \sqrt{a^2 + b^2}$, <b>conjugué</b> $\overline{z} = a - b\mathrm{i}$, $\;z \cdot \overline{z} = a^2 + b^2$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Puissances de i :</b> $\mathrm{i}^1 = \mathrm{i}$, $\mathrm{i}^2 = -1$, $\mathrm{i}^3 = -\mathrm{i}$, $\mathrm{i}^4 = 1$, puis cela recommence.</p>
+            <p class="b-note"><b>En technique,</b> les électrotechniciens calculent avec des nombres complexes pour décrire les courants alternatifs. L’unité imaginaire s’y appelle souvent $\mathrm{j}$.</p>
+            <a class="b-lab" data-lab="imaginarynumbers" href="../../imaginarynumbers/index.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">IMAGINARY NUMBERS</span><span class="b-lab-what">Le plan complexe à manipuler (en allemand)</span></span></a>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · CALCULER DANS LE PLAN COMPLEXE</div>
+        <p class="b-help" style="margin:0 0 12px">Déplace $z_1$ et $z_2$. Additionner, c’est mettre les flèches bout à bout. Quand on multiplie, les longueurs se multiplient et les angles s’additionnent.</p>
+        <div data-widget="komplex"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · ADDITIONNER ET MULTIPLIER</div>
+            <div class="b-text"><p>Calcule $(3 + 2\mathrm{i}) + (1 - 4\mathrm{i})$ et $(3 + 2\mathrm{i}) \cdot (1 - 4\mathrm{i})$.</p></div>
+            <div class="b-sol"><p>Somme : $4 - 2\mathrm{i}$.</p>
+                <p>Produit : $3 - 12\mathrm{i} + 2\mathrm{i} - 8\mathrm{i}^2 = 3 - 10\mathrm{i} + 8 = $ <span class="b-res">$11 - 10\mathrm{i}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · UNE ÉQUATION DU SECOND DEGRÉ</div>
+            <div class="b-text"><p>Résous $x^2 + 2x + 5 = 0$ dans $\mathbb{C}$.</p></div>
+            <div class="b-sol"><p>$x = -1 \pm \sqrt{1 - 5} = -1 \pm \sqrt{-4} = $ <span class="b-res">$-1 \pm 2\mathrm{i}$</span>.</p>
+                <p>Vérification : $(-1 + 2\mathrm{i})^2 + 2(-1 + 2\mathrm{i}) + 5 = (-3 - 4\mathrm{i}) + (-2 + 4\mathrm{i}) + 5 = 0$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule : a) $(2 + \mathrm{i}) + (3 - 5\mathrm{i})$ &nbsp; b) $(4 - 2\mathrm{i}) - (1 + 3\mathrm{i})$ &nbsp; c) $\mathrm{i}^3$ &nbsp; d) $\mathrm{i}^4$</p></div>
+            <div class="b-sol"><p>a) $5 - 4\mathrm{i}$ &nbsp; b) $3 - 5\mathrm{i}$ &nbsp; c) $-\mathrm{i}$ &nbsp; d) $1$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule le module : a) $|3 + 4\mathrm{i}|$ &nbsp; b) $|-5\mathrm{i}|$ &nbsp; c) $|1 + \mathrm{i}|$</p></div>
+            <div class="b-sol"><p>a) $5$ &nbsp; b) $5$ &nbsp; c) $\sqrt2$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule : a) $(2 + 3\mathrm{i})(2 - 3\mathrm{i})$ &nbsp; b) $(1 + \mathrm{i})^2$</p></div>
+            <div class="b-sol"><p>a) $4 - 9\mathrm{i}^2 = 13$, un nombre réel, car $z \cdot \overline{z} = |z|^2$ &nbsp; b) $1 + 2\mathrm{i} + \mathrm{i}^2 = 2\mathrm{i}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Résous dans $\mathbb{C}$ : $x^2 - 4x + 13 = 0$.</p></div>
+            <div class="b-sol"><p>$x = 2 \pm \sqrt{4 - 13} = 2 \pm 3\mathrm{i}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Multiplie $z = 1 + \mathrm{i}$ quatre fois de suite par $\mathrm{i}$ et dessine les résultats. Quel est l’effet de la multiplication par $\mathrm{i}$ dans le plan complexe ?</p></div>
+            <div class="b-sol"><p>$1 + \mathrm{i} \to -1 + \mathrm{i} \to -1 - \mathrm{i} \to 1 - \mathrm{i} \to 1 + \mathrm{i}$. À chaque fois, une rotation de $90^\circ$ dans le sens inverse des aiguilles d’une montre autour de l’origine.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="-1" data-ph="nombre"><p class="b-q-text">Que vaut $\mathrm{i}^2$ ?</p><div class="b-sol"><p>$-1$, c’est ainsi que $\mathrm{i}$ est défini.</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">Que vaut $|3 + 4\mathrm{i}|$ ?</p><div class="b-sol"><p>$\sqrt{9 + 16}$</p></div></div>
+        <div class="b-q" data-ans="13" data-ph="nombre"><p class="b-q-text">Calcule $(2 + 3\mathrm{i})(2 - 3\mathrm{i})$.</p><div class="b-sol"><p>$4 + 9$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Algèbre de Boole" data-toc-k="2" data-toc-short="2 Circuits">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">DOMAINE OPTIONNEL 3 · EXCURSION</span></div>
+    <h2><span class="b-no">2</span>Algèbre de Boole</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Deux interrupteurs l’un après l’autre : la lumière s’allume seulement si <b>les deux</b> sont fermés. Deux interrupteurs côte à côte : la lumière s’allume si <b>au moins un</b> est fermé.
+                Ce sont exactement les mots « et » et « ou ». Avec 1 pour « fermé, le courant passe » et 0 pour « ouvert », chaque circuit devient une expression de calcul.</p></div></div>
+            <div class="b-text"><p>Ce calcul avec seulement deux valeurs s’appelle l’<b>algèbre de Boole</b> ou algèbre des circuits. Ses règles ressemblent à celles des événements :
+                $\cup$ devient $\vee$, $\cap$ devient $\wedge$, l’événement contraire devient la négation.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · ET, OU, NON</div>
+                <div class="b-text">
+                    <p><b>Conjonction</b> $a \wedge b$ (ET, <b>montage en série</b>) : vaut $1$ seulement si $a = 1$ et $b = 1$.</p>
+                    <p><b>Disjonction</b> $a \vee b$ (OU, <b>montage en parallèle</b>) : vaut $1$ si au moins l’un des deux vaut $1$.</p>
+                    <p><b>Négation</b> $\overline{a}$ (NON) : inverse la valeur. Comme interrupteur, c’est un contact à ouverture, qui coupe le circuit quand on l’actionne.</p>
+                    <p><b>Règles :</b> $a \wedge (b \vee c) = (a \wedge b) \vee (a \wedge c)$ · $a \vee \overline{a} = 1$ · $a \wedge \overline{a} = 0$ · De Morgan : $\overline{a \vee b} = \overline{a} \wedge \overline{b}$, $\overline{a \wedge b} = \overline{a} \vee \overline{b}$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Table de vérité :</b> avec $n$ interrupteurs, il y a $2^n$ positions, donc $2^n$ lignes. C’est le principe multiplicatif du chapitre 2.3.</p>
+            <a class="b-lab" data-lab="einsundeins" href="../../einsundeinsgleichzwei.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">1 + 1 = 2</span><span class="b-lab-what">Du programme à l’additionneur complet (en allemand)</span></span></a>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · TROIS CIRCUITS</div>
+        <p class="b-help" style="margin:0 0 12px">Touche les interrupteurs ou les boutons. La ligne de la table de vérité qui s’applique est mise en évidence. Le montage va-et-vient, c’est la cage d’escalier des explorations.</p>
+        <div data-widget="schaltung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · UNE TABLE DE VÉRITÉ</div>
+            <div class="b-text"><p>Établis la table de vérité de $(a \wedge b) \vee \overline{a}$.</p></div>
+            <div class="b-sol"><div class="b-table-wrap"><table class="b-table" style="min-width:0"><tr><th>$a$</th><th>$b$</th><th>$a \wedge b$</th><th>$\overline{a}$</th><th>Résultat</th></tr>
+                <tr><td>0</td><td>0</td><td>0</td><td>1</td><td class="b-hot">1</td></tr><tr><td>0</td><td>1</td><td>0</td><td>1</td><td class="b-hot">1</td></tr>
+                <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td><td>0</td><td class="b-hot">1</td></tr></table></div>
+                <p><span class="b-res">$\overline{a} \vee b$</span> a les mêmes valeurs : $0$ seulement si $a = 1$ et $b = 0$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · SIMPLIFIER</div>
+            <div class="b-text"><p>Simplifie $(a \wedge b) \vee (a \wedge \overline{b})$. Qu’est-ce que cela signifie pour le circuit ?</p></div>
+            <div class="b-sol"><p>Distributivité dans l’autre sens : $a \wedge (b \vee \overline{b}) = a \wedge 1 = $ <span class="b-res">$a$</span>.</p>
+                <p>Le circuit à deux branches et quatre contacts peut être remplacé par un seul interrupteur $a$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Établis la table de vérité de $a \vee \overline{b}$.</p></div>
+            <div class="b-sol"><p>$a, b = 0, 0$ : 1 · $0, 1$ : 0 · $1, 0$ : 1 · $1, 1$ : 1</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>ET ou OU ? a) Une alarme se déclenche quand on ouvre la porte ou une fenêtre. b) Une machine à café fonctionne s’il y a de l’eau dans le réservoir et si l’on appuie sur le bouton.</p></div>
+            <div class="b-sol"><p>a) OU, montage en parallèle &nbsp; b) ET, montage en série</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Vérifie la loi de De Morgan $\overline{a \wedge b} = \overline{a} \vee \overline{b}$ avec une table de vérité.</p></div>
+            <div class="b-sol"><p>Pour $00, 01, 10, 11$, les deux membres donnent les valeurs $1, 1, 1, 0$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Simplifie $(a \vee b) \wedge (a \vee \overline{b})$.</p></div>
+            <div class="b-sol"><p>$a \vee (b \wedge \overline{b}) = a \vee 0 = a$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une lampe doit s’allumer quand au moins deux des trois interrupteurs $a$, $b$, $c$ sont en marche. Donne une expression logique et établis la table de vérité.</p></div>
+            <div class="b-sol"><p>$(a \wedge b) \vee (a \wedge c) \vee (b \wedge c)$. Sur les 8 lignes, exactement 4 donnent un 1 : $011$, $101$, $110$, $111$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Un montage en série de deux interrupteurs correspond à …</p><div class="b-mc"><button>ET</button><button>OU</button><button>NON</button></div><div class="b-sol"><p>Le courant passe seulement si les deux sont fermés.</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="0 ou 1"><p class="b-q-text">Quelle valeur a $a \vee \overline{a}$, quelle que soit la position de $a$ ?</p><div class="b-sol"><p>Toujours $1$.</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Dans combien de lignes de la table de vérité de « au moins deux sur trois » y a-t-il un 1 ?</p><div class="b-sol"><p>4</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $(1 + 2\mathrm{i}) + (3 - \mathrm{i})$ et $(1 + 2\mathrm{i}) \cdot (3 - \mathrm{i})$.</p></div>
+            <div class="b-sol"><p>$4 + \mathrm{i}$ et $3 - \mathrm{i} + 6\mathrm{i} - 2\mathrm{i}^2 = 5 + 5\mathrm{i}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 1.5 :</b> résous $x^2 + 9 = 0$ dans $\mathbb{C}$. Que dit le discriminant, et quel est le lien avec la courbe de $y = x^2 + 9$ ?</p></div>
+            <div class="b-sol"><p>$x = \pm 3\mathrm{i}$. Le discriminant est négatif, la parabole ne coupe pas l’axe des $x$. Les solutions ne sont pas sur l’axe réel.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 2.1 :</b> traduis $A \cup B$, $A \cap B$, $\overline{A}$ et les lois de De Morgan dans le langage de l’algèbre de Boole.</p></div>
+            <div class="b-sol"><p>$a \vee b$, $a \wedge b$, $\overline{a}$, $\overline{a \vee b} = \overline{a} \wedge \overline{b}$, $\overline{a \wedge b} = \overline{a} \vee \overline{b}$. La même structure.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un <b>demi-additionneur</b> additionne deux chiffres binaires $a$ et $b$. Le chiffre de la somme est $s = (a \wedge \overline{b}) \vee (\overline{a} \wedge b)$, la retenue $c = a \wedge b$. Établis la table et vérifie que $1 + 1 = 10$.</p></div>
+            <div class="b-sol"><p>$00$ : $s = 0$, $c = 0$ · $01$ et $10$ : $s = 1$, $c = 0$ · $11$ : $s = 0$, $c = 1$. Pour $1 + 1$, on a donc une retenue de 1 et une somme de 0, en binaire $10$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : de Boole à Shannon" data-toc-k="X" data-toc-short="Boole">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE DE L’INFORMATIQUE</span></div>
+    <h2>De Boole à Shannon</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En 1854, le mathématicien anglais George Boole publia un livre dans lequel il traduisait la pensée logique en règles de calcul : les propositions n’ont que deux valeurs,
+                et « et », « ou », « non » deviennent des signes de calcul. Pendant plus de quatre-vingts ans, on y vit un jeu pour philosophes.</p>
+            <p>En 1937, l’étudiant Claude Shannon montra dans son mémoire de master que l’algèbre de Boole décrit exactement le câblage des relais et des interrupteurs. On pouvait désormais
+                calculer et simplifier des circuits avant de les construire. Aujourd’hui, chaque processeur se compose de milliards de ces interrupteurs, sous forme de transistors.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> George Boole, « An Investigation of the Laws of Thought » (Londres 1854). · Claude E. Shannon, « A Symbolic Analysis of Relay and Switching Circuits », mémoire de master au MIT, 1937, publié dans les Transactions of the AIEE 57 (1938).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>UNITÉ IMAGINAIRE</h4><p>$\mathrm{i}^2 = -1$. Nombre complexe $a + b\mathrm{i}$, $\mathbb{R} \subset \mathbb{C}$.</p></div>
+        <div><p>$x^2 + 2x + 5 = 0$ : $x = -1 \pm 2\mathrm{i}$</p></div></div>
+    <div class="b-rueck"><div><h4>CALCULER</h4><p>Comme avec des expressions, en remplaçant $\mathrm{i}^2$ par $-1$.</p></div>
+        <div><p>$(3 + 2\mathrm{i})(1 - 4\mathrm{i}) = 11 - 10\mathrm{i}$</p></div></div>
+    <div class="b-rueck"><div><h4>PLAN COMPLEXE</h4><p>$a + b\mathrm{i}$ est le point $(a\,;\,b)$, de module $\sqrt{a^2 + b^2}$. Multiplier par $\mathrm{i}$ : rotation de $90^\circ$.</p></div>
+        <div><p>$|3 + 4\mathrm{i}| = 5$</p></div></div>
+    <div class="b-rueck"><div><h4>ET, OU, NON</h4><p>Série $= a \wedge b$, parallèle $= a \vee b$, contact à ouverture $= \overline{a}$. Table de vérité de $2^n$ lignes.</p></div>
+        <div><p>Cage d’escalier : $(a \wedge b) \vee (\overline{a} \wedge \overline{b})$</p></div></div>
+    <div class="b-rueck"><div><h4>SIMPLIFIER</h4><p>Distributivité, $a \vee \overline{a} = 1$, $a \wedge \overline{a} = 0$, De Morgan.</p></div>
+        <div><p>$(a \wedge b) \vee (a \wedge \overline{b}) = a$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="7" data-ph="partie réelle"><p class="b-q-text">Quelle est la partie réelle de $(2 + \mathrm{i})(3 - \mathrm{i})$ ?</p><div class="b-sol"><p>$6 - 2\mathrm{i} + 3\mathrm{i} + 1 = 7 + \mathrm{i}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Quelles sont les solutions de $x^2 + 4 = 0$ dans $\mathbb{C}$ ?</p><div class="b-mc"><button>$\pm 2$</button><button>$\pm 2\mathrm{i}$</button><button>aucune</button></div><div class="b-sol"><p>$(2\mathrm{i})^2 = -4$</p></div></div>
+            <div class="b-q" data-ans="0" data-ph="0 ou 1"><p class="b-q-text">Quelle valeur a $a \wedge \overline{a}$ ?</p><div class="b-sol"><p>Toujours $0$.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="13" data-ph="nombre"><p class="b-q-text">Que vaut $|5 + 12\mathrm{i}|$ ?</p><div class="b-sol"><p>$\sqrt{25 + 144} = 13$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$(a \wedge b) \vee (a \wedge \overline{b})$ est égal à …</p><div class="b-mc"><button>$a$</button><button>$b$</button><button>$a \vee b$</button></div><div class="b-sol"><p>$a \wedge 1 = a$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="nombre"><p class="b-q-text">Dans combien de lignes de la table du demi-additionneur le chiffre de la somme vaut-il $s = 1$ ?</p><div class="b-sol"><p>Pour $01$ et $10$.</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos11-komplexe-zahlen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">NOMBRES COMPLEXES</span><span class="b-lab-what">Unité imaginaire, plan complexe</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-schaltalgebra.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ALGÈBRE DE BOOLE</span><span class="b-lab-what">Tables de vérité et circuits</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-vertiefung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">APPROFONDISSEMENT</span><span class="b-lab-what">Exercices variés sur toute l’année</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-ausblick-klasse12.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGARD VERS LA 12E ANNÉE</span><span class="b-lab-what">Vecteurs et taux de variation</span></span></a>
+        <a class="b-lab" data-lab="neuroaddierer" href="../../neuroaddierer.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">L’ADDITIONNEUR APPRIS</span><span class="b-lab-what">Un réseau apprend l’additionneur complet</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Fachoberschule, 11e année · domaines optionnels 1 et 3 d’après le programme de mathématiques de la Fachoberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-zahlen.js"></script>
+<script src="../../js/buch-fr/zahlen.js"></script>
+</body>
+</html>
