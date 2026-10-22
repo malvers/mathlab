@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques FOS 12 · Chapitre 3 · Calcul intégral | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Primitives, intégrale, théorème fondamental, aires entre deux courbes. Chapitre 3 du manuel interactif Mathématiques · Fachoberschule 12 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · FACHOBERSCHULE 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 3 · DOMAINE D’APPRENTISSAGE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 3 · DOMAINE D’APPRENTISSAGE 3 · FÉVRIER · MARS</p>
+            <h1>Calcul intégral</h1>
+            <p class="b-hero-lead">De la vitesse à la distance parcourue, du débit à la quantité d’eau, d’une courbe à l’aire sous celle-ci : le <b>calcul intégral</b> parcourt le chemin de la dérivée à l’envers.
+                Tu apprends à déterminer des <b>primitives</b>, à approcher des aires avec des rectangles et à les calculer exactement avec le <b>théorème fondamental</b>, y compris entre deux courbes.</p>
+            <div class="b-chips"><span class="b-chip">10 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">4 WIDGETS</span><span class="b-chip">1 LABORATOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["4-x^2"]' data-labels='["f"]' data-lat="[1.4]" data-x="-3,3" data-y="-1,4.8" data-pts="[[-2,0],[2,0],[0,4]]" data-h="240" data-aria="Arc de parabole au-dessus de l’axe des abscisses avec ses zéros et son sommet"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>déterminer des <b>primitives</b> et calculer l’intégrale indéfinie avec les règles d’intégration</li>
+                <li>approcher des aires par des <b>sommes de rectangles</b> et interpréter l’<b>intégrale</b></li>
+                <li>appliquer le <b>théorème fondamental de l’analyse</b></li>
+                <li>calculer des <b>aires</b> entre une courbe et l’axe des $x$ et entre deux courbes, aussi avec une borne inconnue</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="12" data-ph="f′(2) ="><p class="b-q-text">$f(x) = x^3$ : combien vaut $f'(2)$ ?</p><div class="b-sol"><p>$3 \cdot 2^2 = 12$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="aire"><p class="b-q-text">Un triangle a une base de 4 et une hauteur de 3. Quelle est son aire ?</p><div class="b-sol"><p>$\tfrac12 \cdot 4 \cdot 3$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Quel est le zéro positif de $x^2 - 4$ ?</p><div class="b-sol"><p>$x = 2$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quelle fonction a pour dérivée $2x$ ?</p><div class="b-mc"><button>$x^2$</button><button>$x^2 + 5$</button><button>les deux</button></div><div class="b-sol"><p>La constante disparaît quand on dérive.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DÉRIVER À L’ENVERS</div>
+            <div class="b-text"><p>Cherchez des fonctions dont la dérivée est $3x^2$, $2x$, $5$ et $x$.</p>
+                <ul><li>En trouvez-vous chaque fois plus d’une ? En quoi diffèrent-elles ?</li><li>Quelle règle pour $x^n$ se cache derrière ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DE L’EAU DANS LA CUVE</div>
+            <div class="b-text"><p>Pendant dix minutes, 2 litres par minute s’écoulent dans une cuve. Puis on modifie l’installation : le débit part de 0 et augmente régulièrement jusqu’à 5 litres par minute au bout de dix minutes.</p>
+                <ul><li>Représentez les deux débits en fonction du temps. Quelle quantité d’eau entre à chaque fois ?</li><li>Quelle aire du diagramme correspond à la quantité d’eau ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COMPTER LES CARREAUX</div>
+            <div class="b-text"><p>Tracez l’arc ci-dessus, $f(x) = 4 - x^2$, sur du papier quadrillé avec 1 cm par unité.</p>
+                <ul><li>Estimez l’aire entre l’arc et l’axe des $x$ en comptant les carreaux.</li><li>Comparez avec le triangle formé par les trois points marqués. Quel facteur obtenez-vous ?</li></ul></div>
+            <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INTÉGRALES</span><span class="b-lab-what">Aires sous des courbes (en allemand)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Primitives" data-toc-k="1" data-toc-short="1 Primitive">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Primitive et intégrale indéfinie</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quelle fonction a pour dérivée $2x$ ? $F(x) = x^2$, mais aussi $x^2 + 1$ et $x^2 - 7$. En dérivant, toute constante disparaît ; en remontant, on ne la connaît pas.
+                Toutes les solutions sont de la forme $x^2 + C$ ; leurs courbes sont décalées les unes par rapport aux autres vers le haut ou vers le bas.</p></div></div>
+            <div class="b-text"><p>Une fonction $F$ telle que $F' = f$ s’appelle une <b>primitive</b> de $f$. On la trouve en appliquant les règles de dérivation à l’envers : augmenter l’exposant de 1, diviser par le nouvel exposant.
+                On écrit l’ensemble de toutes les primitives sous forme d’<b>intégrale indéfinie</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · PRIMITIVES</div>
+                <div class="b-text">
+                    <p>$F$ est une primitive de $f$ si $F'(x) = f(x)$. Toutes les primitives : $F(x) + C$ avec la <b>constante d’intégration</b> $C$.</p>
+                    <p><b>Intégrale indéfinie :</b> $\displaystyle\int f(x)\,\mathrm{d}x = F(x) + C$</p>
+                    <p><b>Primitive de référence :</b> $\displaystyle\int x^n\,\mathrm{d}x = \frac{x^{n+1}}{n+1} + C$ pour $n \neq -1$ · <b>règles du facteur constant et de la somme</b> comme pour la dérivation</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Vérification :</b> dériver la primitive ; on doit retrouver $f$. C’est toujours rapide.</p>
+            <p class="b-note"><b>Aussi pour les exposants négatifs :</b> $\int \tfrac{1}{x^2}\,\mathrm{d}x = \int x^{-2}\,\mathrm{d}x = \tfrac{x^{-1}}{-1} + C = -\tfrac1x + C$. Seul $\tfrac1x$ lui-même ne fonctionne pas ainsi.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · F ET SES PRIMITIVES</div>
+        <p class="b-help" style="margin:0 0 12px">En haut, une primitive $F$ avec une constante $C$ réglable et sa tangente ; en bas, $f$. La pente de $F$ en chaque point est la valeur de $f$ en ce point, quelle que soit la valeur de $C$.</p>
+        <div data-widget="stammfunktion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · TERME PAR TERME</div>
+            <div class="b-text"><p>Calcule $\displaystyle\int \left(6x^2 - 4x + 3\right)\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$6 \cdot \tfrac{x^3}{3} - 4 \cdot \tfrac{x^2}{2} + 3x + C$</p>
+                <p><span class="b-res">$2x^3 - 2x^2 + 3x + C$</span>. Vérification : $(2x^3 - 2x^2 + 3x)' = 6x^2 - 4x + 3$ ✔</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · PAR UN POINT DONNÉ</div>
+            <div class="b-text"><p>Détermine la primitive de $f(x) = x^2 - 1$ dont la courbe passe par $P(3\,;\,5)$.</p></div>
+            <div class="b-sol"><p>$F(x) = \tfrac13 x^3 - x + C$, $F(3) = 9 - 3 + C = 5$, donc $C = -1$.</p>
+                <p><span class="b-res">$F(x) = \tfrac13 x^3 - x - 1$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule : a) $\int x^4\,\mathrm{d}x$ &nbsp; b) $\int 3\,\mathrm{d}x$ &nbsp; c) $\int (2x + 1)\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac15 x^5 + C$ &nbsp; b) $3x + C$ &nbsp; c) $x^2 + x + C$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule : a) $\int (x^3 - 6x)\,\mathrm{d}x$ &nbsp; b) $\int \tfrac{1}{x^2}\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac14 x^4 - 3x^2 + C$ &nbsp; b) $-\tfrac1x + C$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Vérifie en dérivant : $F(x) = \tfrac13 (x - 1)^3$ est-elle une primitive de $f(x) = x^2 - 2x + 1$ ?</p></div>
+            <div class="b-sol"><p>Règle de la chaîne : $F'(x) = (x - 1)^2 = x^2 - 2x + 1$ ✔, oui.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Détermine la primitive de $f(x) = 2x - 4$ dont la courbe passe par $(1\,;\,0)$.</p></div>
+            <div class="b-sol"><p>$F(x) = x^2 - 4x + C$, $F(1) = -3 + C = 0$ : $F(x) = x^2 - 4x + 3$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un corps part de la position 0 avec la vitesse $v(t) = 2t + 1$ (en m/s). Détermine sa position $s(t)$. Quelle distance parcourt-il en 5 secondes ?</p></div>
+            <div class="b-hint"><p>La position est une primitive de la vitesse, car $s'(t) = v(t)$.</p></div>
+            <div class="b-sol"><p>$s(t) = t^2 + t + C$ avec $s(0) = 0$ : $s(t) = t^2 + t$. Au bout de 5 s : <span class="b-res">30 m</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3" data-ph="F(1) ="><p class="b-q-text">La primitive $F$ de $3x^2$ passe par $(0\,;\,2)$. Combien vaut $F(1)$ ?</p><div class="b-sol"><p>$F(x) = x^3 + 2$</p></div></div>
+        <div class="b-q" data-ans="0,2" data-ph="facteur"><p class="b-q-text">$\int x^4\,\mathrm{d}x = k \cdot x^5 + C$. Combien vaut $k$ ?</p><div class="b-sol"><p>$\tfrac15$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Si $F'(x) = f(x)$, alors $F$ est …</p><div class="b-mc"><button>la dérivée de $f$.</button><button>une primitive de $f$.</button><button>la constante d’intégration.</button></div><div class="b-sol"><p>Définition de la primitive</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Intégrale et théorème fondamental" data-toc-k="2" data-toc-short="2 Théorème">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>L’intégrale et le théorème fondamental</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si le débit augmente régulièrement selon $r(t) = 0{,}5t$ (en l/min), il entre en dix minutes autant de litres que l’aire du triangle sous la courbe : $\tfrac12 \cdot 10 \cdot 5 = 25$.
+                Remarquable : $R(t) = 0{,}25t^2$ est une primitive de $r$, et $R(10) - R(0) = 25$. L’aire se déduit de la primitive.</p></div></div>
+            <div class="b-text"><p>Pour des courbes non rectilignes, on approche l’aire par des rectangles étroits : la <b>somme inférieure</b> est en dessous, la <b>somme supérieure</b> au-dessus. Plus les bandes sont étroites,
+                plus les deux se rapprochent d’une même limite, l’<b>intégrale</b>. Le <b>théorème fondamental</b> dit comment la calculer sans bandes.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · THÉORÈME FONDAMENTAL DE L’ANALYSE</div>
+                <div class="b-text">
+                    <p>$$\int_a^b f(x)\,\mathrm{d}x = \Big[F(x)\Big]_a^b = F(b) - F(a)$$ pour toute primitive $F$ d’une fonction continue $f$</p>
+                    <p>L’intégrale est une <b>aire algébrique</b> : les aires au-dessus de l’axe des $x$ comptent positivement, celles en dessous négativement.</p>
+                    <p>$\int_a^a f(x)\,\mathrm{d}x = 0$ · $\int_a^b + \int_b^c = \int_a^c$ · $\int_b^a f(x)\,\mathrm{d}x = -\int_a^b f(x)\,\mathrm{d}x$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Le symbole :</b> Leibniz écrivait $\int$ comme un S allongé pour « somme ». $\mathrm{d}x$ rappelle la largeur des bandes infiniment étroites.</p>
+            <p class="b-note"><b>Sur la calculatrice graphique :</b> faire calculer avec la commande d’intégrale (fnInt). La constante $C$ disparaît toujours dans $F(b) - F(a)$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DES BANDES SOUS LA COURBE</div>
+        <p class="b-help" style="margin:0 0 12px">Augmente le nombre de bandes et passe des rectangles à gauche aux rectangles au milieu et aux trapèzes. À quelle vitesse la somme s’approche-t-elle de la valeur exacte ?</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · SOMME INFÉRIEURE, SOMME SUPÉRIEURE, THÉORÈME</div>
+            <div class="b-text"><p>Approche $\int_0^2 x^2\,\mathrm{d}x$ avec quatre bandes de largeur 0,5 et calcule la valeur exacte.</p></div>
+            <div class="b-sol"><p>Somme inférieure $0{,}5(0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$, somme supérieure $0{,}5(0{,}25 + 1 + 2{,}25 + 4) = 3{,}75$.</p>
+                <p>Exactement : $\left[\tfrac13 x^3\right]_0^2 = \tfrac83$, <span class="b-res">environ 2,67</span>, entre les deux.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · QUAND DES AIRES SE COMPENSENT</div>
+            <div class="b-text"><p>Calcule $\int_{-1}^{2} (x^2 - 1)\,\mathrm{d}x$ et interprète le résultat.</p></div>
+            <div class="b-sol"><p>$\left[\tfrac13 x^3 - x\right]_{-1}^{2} = \tfrac23 - \tfrac23 = 0$</p>
+                <p>Sous l’axe, sur $[-1\,;\,1]$, il y a une partie d’aire $\tfrac43$ ; au-dessus, sur $[1\,;\,2]$, également $\tfrac43$. <span class="b-res">Elles se compensent.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule : a) $\int_1^3 2x\,\mathrm{d}x$ &nbsp; b) $\int_0^1 (3x^2 + 1)\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $9 - 1 = 8$ &nbsp; b) $\left[x^3 + x\right]_0^1 = 2$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $\int_0^4 (4 - x)\,\mathrm{d}x$ et contrôle avec l’aire d’un triangle.</p></div>
+            <div class="b-sol"><p>$\left[4x - \tfrac12 x^2\right]_0^4 = 8$, triangle $\tfrac12 \cdot 4 \cdot 4 = 8$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule la somme inférieure et la somme supérieure de $f(x) = x$ sur $[0\,;\,1]$ avec quatre bandes et compare avec l’intégrale.</p></div>
+            <div class="b-sol"><p>Somme inférieure 0,375, somme supérieure 0,625, intégrale $\tfrac12$ exactement au milieu.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Justifie sans calcul que $\int_{-2}^{2} x^3\,\mathrm{d}x = 0$.</p></div>
+            <div class="b-sol"><p>La courbe est symétrique par rapport à l’origine : la partie sous l’axe à gauche est exactement aussi grande que la partie au-dessus à droite.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>De l’eau entre dans une cuve avec le débit $r(t) = -0{,}5t^2 + 3t$ (en l/min). Quelle quantité entre pendant les 6 premières minutes ? Que se passe-t-il ensuite jusqu’à $t = 8$ ?</p></div>
+            <div class="b-sol"><p>$\int_0^6 r(t)\,\mathrm{d}t = \left[-\tfrac16 t^3 + 1{,}5t^2\right]_0^6 = 18$ l. À partir de $t = 6$, $r < 0$ : de l’eau s’écoule, environ 7,3 l jusqu’à $t = 8$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="8/3" data-tol="0.01" data-ph="valeur"><p class="b-q-text">Calcule $\int_0^2 x^2\,\mathrm{d}x$.</p><div class="b-sol"><p>$\tfrac83$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="valeur"><p class="b-q-text">Calcule $\int_1^3 2x\,\mathrm{d}x$.</p><div class="b-sol"><p>$9 - 1$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$\int_{-1}^{2}(x^2 - 1)\,\mathrm{d}x = 0$ signifie …</p><div class="b-mc"><button>Il n’y a pas d’aire.</button><button>Les aires au-dessus et en dessous de l’axe sont égales.</button><button>Le calcul est faux.</button></div><div class="b-sol"><p>Aire algébrique</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Calculs d’aires" data-toc-k="3" data-toc-short="3 Aires">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">2 HEURES</span></div>
+    <h2><span class="b-no">3</span>Aires entre une courbe et l’axe, et entre deux courbes</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>L’intégrale de $x^2 - 1$ sur $[-1\,;\,2]$ vaut 0, mais l’aire entre la courbe et l’axe vaut $\tfrac43 + \tfrac43 = \tfrac83$.
+                Pour calculer des aires, il faut découper aux <b>zéros</b> et additionner les parties en valeur absolue.</p></div></div>
+            <div class="b-text"><p>Entre deux courbes, on calcule avec la fonction différence $f - g$. Ses zéros sont les abscisses des points d’intersection des courbes : ce sont les bornes.
+                Si une aire est donnée et qu’une borne est cherchée, le théorème fondamental devient une équation pour cette borne.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · CALCUL D’AIRES</div>
+                <div class="b-text">
+                    <p><b>Courbe et axe des $x$ :</b> déterminer les zéros dans l’intervalle, intégrer séparément sur chaque morceau, additionner les <b>valeurs absolues</b>.</p>
+                    <p><b>Entre deux courbes :</b> abscisses des points d’intersection $x_1 < x_2$ à partir de $f(x) = g(x)$, puis $A = \left|\displaystyle\int_{x_1}^{x_2} \big(f(x) - g(x)\big)\,\mathrm{d}x\right|$. S’il y a plus de points d’intersection, par morceaux.</p>
+                    <p><b>Borne cherchée :</b> résoudre $F(b) - F(a) = A$ en $b$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>D’abord un croquis :</b> une courbe sommaire montre quelles parties sont au-dessus et lesquelles en dessous de l’axe, et quelle courbe est au-dessus.</p>
+            <p class="b-note"><b>Sur la calculatrice graphique :</b> intégrer directement la valeur absolue, $\int |f(x) - g(x)|\,\mathrm{d}x$ ; il n’est alors pas nécessaire de découper.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · AIRE ALGÉBRIQUE</div>
+        <p class="b-help" style="margin:0 0 12px">Fais glisser les bornes $a$ et $b$. Les parties jaunes sont au-dessus de l’axe et comptent positivement, les rouges en dessous et comptent négativement. Compare l’intégrale et l’aire.</p>
+        <div data-widget="integral"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · AIRE ENTRE DEUX COURBES</div>
+        <p class="b-help" style="margin:0 0 12px">Le widget détermine les abscisses des points d’intersection et intègre la fonction différence de l’une à l’autre.</p>
+        <div data-widget="zwischenflaeche"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · SOUS L’AXE</div>
+            <div class="b-text"><p>Calcule l’aire entre la courbe de $f(x) = x^2 - 4$ et l’axe des $x$.</p></div>
+            <div class="b-sol"><p>Zéros $\pm 2$ : $\left[\tfrac13 x^3 - 4x\right]_{-2}^{2} = -\tfrac{32}{3}$ ; l’aire est entièrement sous l’axe.</p>
+                <p><span class="b-res">$A = \tfrac{32}{3} \approx 10{,}67$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · PARABOLE ET DROITE</div>
+            <div class="b-text"><p>Calcule l’aire entre $f(x) = -x^2 + 4$ et $g(x) = x + 2$.</p></div>
+            <div class="b-sol"><p>$-x^2 + 4 = x + 2$ : $x^2 + x - 2 = 0$, donc $x_1 = -2$, $x_2 = 1$.</p>
+                <p>$\int_{-2}^{1} \left(-x^2 - x + 2\right)\mathrm{d}x = \left[-\tfrac13 x^3 - \tfrac12 x^2 + 2x\right]_{-2}^{1} = \tfrac76 + \tfrac{10}{3}$ : <span class="b-res">$A = 4{,}5$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule l’aire sous $f(x) = x^2 + 1$ sur $[0\,;\,3]$.</p></div>
+            <div class="b-sol"><p>$\left[\tfrac13 x^3 + x\right]_0^3 = 9 + 3 = 12$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule l’aire entre $f(x) = 3x - x^2$ et l’axe des $x$.</p></div>
+            <div class="b-sol"><p>Zéros 0 et 3 : $\left[1{,}5x^2 - \tfrac13 x^3\right]_0^3 = 13{,}5 - 9 = 4{,}5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule l’aire entre $f(x) = x^3 - x$ et l’axe des $x$ sur $[-1\,;\,1]$. Pourquoi l’intégrale sur $[-1\,;\,1]$ est-elle nulle ?</p></div>
+            <div class="b-sol"><p>Découper en 0 : $\int_0^1 (x^3 - x)\,\mathrm{d}x = -\tfrac14$, à gauche de même $\tfrac14$ au-dessus de l’axe. Aire $\tfrac12$, intégrale 0 à cause de la symétrie par rapport à l’origine.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule l’aire entre $f(x) = x^2$ et $g(x) = 2x$.</p></div>
+            <div class="b-sol"><p>Abscisses d’intersection 0 et 2 : $\int_0^2 (2x - x^2)\,\mathrm{d}x = 4 - \tfrac83 = \tfrac43$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>a) Pour quel $b > 0$ a-t-on $\int_0^b x^2\,\mathrm{d}x = 9$ ? &nbsp; b) La droite verticale $x = k$ doit partager en deux l’aire sous $f(x) = x^2$ sur $[0\,;\,3]$. Détermine $k$.</p></div>
+            <div class="b-sol"><p>a) $\tfrac{b^3}{3} = 9$ : $b = 3$. &nbsp; b) Aire totale 9, donc $\tfrac{k^3}{3} = 4{,}5$ : <span class="b-res">$k = \sqrt[3]{13{,}5} \approx 2{,}38$</span>. Pas 1,5, car la courbe est plus haute à droite.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="10,67" data-tol="0.01" data-ph="aire"><p class="b-q-text">Aire entre $x^2 - 4$ et l’axe des $x$, à deux chiffres après la virgule ?</p><div class="b-sol"><p>$\tfrac{32}{3}$</p></div></div>
+        <div class="b-q" data-ans="4,5" data-ph="aire"><p class="b-q-text">Aire entre $3x - x^2$ et l’axe des $x$ ?</p><div class="b-sol"><p>$13{,}5 - 9$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="b ="><p class="b-q-text">Pour quel $b > 0$ a-t-on $\int_0^b x^2\,\mathrm{d}x = 9$ ?</p><div class="b-sol"><p>$b^3 = 27$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $\int_1^2 \left(4x^3 - 2x\right)\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\left[x^4 - x^2\right]_1^2 = 12 - 0 = 12$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier avec le chapitre 2.2 :</b> la voiture freine avec $v(t) = 20 - 4t$ (en m/s) jusqu’à l’arrêt. Calcule la distance de freinage sous forme d’intégrale et compare avec le résultat du chapitre 2.2.</p></div>
+            <div class="b-sol"><p>Arrêt en $t = 5$ : $\int_0^5 (20 - 4t)\,\mathrm{d}t = \left[20t - 2t^2\right]_0^5 = 50$ m, comme là-bas.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Justifie : pour une fonction croissante, la somme avec des rectangles à gauche est toujours trop petite. Qu’en est-il pour une fonction décroissante ?</p></div>
+            <div class="b-sol"><p>Croissante : le bord gauche de chaque bande donne la plus petite valeur sur la bande, le rectangle reste sous la courbe. Décroissante : c’est l’inverse, les rectangles à gauche sont trop grands.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>La tangente à $f(x) = -x^2 + 4$ au point $(1\,;\,3)$, la courbe de $f$ et l’axe des $y$ délimitent une surface. Calcule son aire.</p></div>
+            <div class="b-sol"><p>Tangente $y = -2x + 5$. Elle est au-dessus de la parabole : $\int_0^1 \left(-2x + 5 + x^2 - 4\right)\mathrm{d}x = \int_0^1 (x - 1)^2\,\mathrm{d}x = \tfrac13$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Archimède" data-toc-k="X" data-toc-short="Archimède">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Archimède et l’arc de parabole</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Dès le IIIe siècle av. J.-C., Archimède calcula l’aire sous un arc de parabole, sans aucune intégrale. Il y plaça un triangle, puis dans les deux espaces restants deux triangles plus petits,
+                qui ensemble ne font qu’un quart du premier, puis quatre encore plus petits, et ainsi de suite. La somme $1 + \tfrac14 + \tfrac{1}{16} + \ldots$ vaut $\tfrac43$.</p>
+            <p>Son résultat : un segment de parabole vaut $\tfrac43$ du triangle de même base et de même hauteur. Pour l’arc $4 - x^2$ ci-dessus : triangle $\tfrac12 \cdot 4 \cdot 4 = 8$,
+                segment $\tfrac43 \cdot 8 = \tfrac{32}{3}$. Avec le théorème fondamental : $\int_{-2}^{2}(4 - x^2)\,\mathrm{d}x = \tfrac{32}{3}$. Deux mille ans séparent les deux calculs.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> Archimède, « La Quadrature de la parabole », proposition 24. Explication : MacTutor History of Mathematics, « Archimedes: Quadrature of the parabola », University of St Andrews.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>PRIMITIVE</h4><p>$F' = f$, toutes les primitives $F + C$</p></div>
+        <div><p>$\int (6x^2 - 4x + 3)\,\mathrm{d}x = 2x^3 - 2x^2 + 3x + C$</p></div></div>
+    <div class="b-rueck"><div><h4>PRIMITIVE DE RÉFÉRENCE</h4><p>$\int x^n\,\mathrm{d}x = \tfrac{x^{n+1}}{n+1} + C$, $n \neq -1$</p></div>
+        <div><p>$\int x^{-2}\,\mathrm{d}x = -\tfrac1x + C$</p></div></div>
+    <div class="b-rueck"><div><h4>THÉORÈME FONDAMENTAL</h4><p>$\int_a^b f(x)\,\mathrm{d}x = F(b) - F(a)$, aire algébrique</p></div>
+        <div><p>$\int_0^2 x^2\,\mathrm{d}x = \tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>AIRE AVEC L’AXE</h4><p>Découper aux zéros, additionner les valeurs absolues.</p></div>
+        <div><p>$x^2 - 1$ sur $[-1\,;\,2]$ : intégrale 0, aire $\tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>ENTRE DEUX COURBES</h4><p>$\left|\int_{x_1}^{x_2} (f - g)\,\mathrm{d}x\right|$ entre les abscisses d’intersection</p></div>
+        <div><p>$-x^2 + 4$ et $x + 2$ : $A = 4{,}5$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="9" data-ph="valeur"><p class="b-q-text">Calcule $\int_0^3 2x\,\mathrm{d}x$.</p><div class="b-sol"><p>$\left[x^2\right]_0^3 = 9$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="F(0) ="><p class="b-q-text">$F$ est la primitive de $2x - 4$ passant par $(1\,;\,0)$. Combien vaut $F(0)$ ?</p><div class="b-sol"><p>$F(x) = x^2 - 4x + 3$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$\int_{-2}^{2} x^3\,\mathrm{d}x = \ldots$</p><div class="b-mc"><button>$0$</button><button>$8$</button><button>$4$</button></div><div class="b-sol"><p>Symétrie par rapport à l’origine</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="4,5" data-ph="aire"><p class="b-q-text">Aire entre $-x^2 + 4$ et $x + 2$ ?</p><div class="b-sol"><p>Bornes $-2$ et $1$</p></div></div>
+            <div class="b-q" data-ans="2,38" data-tol="0.01" data-ph="k ="><p class="b-q-text">Pour quel $k$ la droite $x = k$ partage-t-elle en deux l’aire sous $x^2$ sur $[0\,;\,3]$, à deux chiffres après la virgule ?</p><div class="b-sol"><p>$k^3 = 13{,}5$</p></div></div>
+            <div class="b-q" data-ans="18" data-ph="litres"><p class="b-q-text">Débit $-0{,}5t^2 + 3t$ : combien de litres entrent pendant les 6 premières minutes ?</p><div class="b-sol"><p>$-36 + 54$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-stammfunktion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRIMITIVE</span><span class="b-lab-what">Intégrale indéfinie, règles d’intégration</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-hauptsatz.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">THÉORÈME FONDAMENTAL</span><span class="b-lab-what">Sommes supérieure et inférieure, intégrale</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-flaechen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">AIRES</span><span class="b-lab-what">Courbe et axe, deux courbes, bornes</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Fachoberschule, 12e année · Domaine d’apprentissage 3 d’après le programme de mathématiques de la Fachoberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-fr/integral.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-fr/numerik.js"></script>
+</body>
+</html>
