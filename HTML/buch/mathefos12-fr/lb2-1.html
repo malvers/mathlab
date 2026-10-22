@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques FOS 12 · Chapitre 2.1 · Limites et taux de variation | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Suites de nombres, comportement à l’infini, continuité, vitesse moyenne et instantanée. Chapitre 2.1 du manuel interactif Mathématiques · Fachoberschule 12 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · FACHOBERSCHULE 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.1 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.1 · DOMAINE D’APPRENTISSAGE 2 · NOVEMBRE</p>
+            <h1>Limites et taux de variation</h1>
+            <p class="b-hero-lead">Achille rattrapera-t-il un jour la tortue ? Vers quoi tend un capital si l’on verse les intérêts de plus en plus souvent ? À quelle vitesse va une pierre exactement à l’instant où elle touche le sol ?
+                Derrière ces trois questions se cache la <b>limite</b>, l’outil par lequel commence le calcul différentiel. Tu apprends à déterminer des limites de suites et de fonctions
+                et à passer d’un taux de variation <b>moyen</b> à un taux de variation <b>instantané</b>.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">1 LABORATOIRE</span><span class="b-chip">PHYSIQUE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x/(x+1)","1"]' data-labels='["n/(n+1)",""]' data-lat="[6.5]" data-x="-0.5,10.5" data-y="-0.1,1.2" data-pts="[[1,0.5],[2,0.6667],[3,0.75],[4,0.8],[5,0.8333],[6,0.8571],[7,0.875],[8,0.8889],[9,0.9],[10,0.9091]]" data-xl="n" data-yl="aₙ" data-h="240" data-aria="La suite n sur n plus 1 se rapproche du nombre 1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>étudier des suites de nombres et déterminer leur <b>limite</b></li>
+                <li>lire le <b>comportement à l’infini</b> des fonctions polynômes sur le terme de plus haut degré</li>
+                <li>calculer des limites en un point et juger de la <b>continuité</b> de façon intuitive</li>
+                <li>calculer et interpréter des <b>taux de variation moyens</b> et <b>instantanés</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="0,001" data-ph="nombre"><p class="b-q-text">Écris $\tfrac{1}{1000}$ sous forme décimale.</p><div class="b-sol"><p>$0{,}001$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="f(−2) ="><p class="b-q-text">Calcule $f(-2)$ pour $f(x) = x^2 - 3$.</p><div class="b-sol"><p>$4 - 3 = 1$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="m ="><p class="b-q-text">Quelle est la pente de la droite passant par $(1\,;\,2)$ et $(3\,;\,8)$ ?</p><div class="b-sol"><p>$\tfrac{8 - 2}{3 - 1} = 3$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Quelle expression est la plus grande pour $x = 1000$ ?</p><div class="b-mc"><button>$100x^2$</button><button>$x^3$</button><button>$1000x$</button></div><div class="b-sol"><p>$10^9$ contre $10^8$ et $10^6$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">ACHILLE ET LA TORTUE</div>
+            <div class="b-text"><p>Achille court à 10 m/s, la tortue à 1 m/s ; elle a 100 m d’avance. Quand Achille atteint son point de départ, elle a déjà 10 m de plus. Quand il y arrive, 1 m de plus, et ainsi de suite.</p>
+                <ul><li>Combien de temps faut-il à Achille pour chaque étape ? Additionnez les cinq premières durées.</li><li>La rattrape-t-il ? Quand ? Calculez aussi directement avec la différence de vitesse.</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TRÈS LOIN DEHORS</div>
+            <div class="b-text"><p>On donne $f(x) = -2x^3 + 50x^2 + 100$.</p>
+                <ul><li>Calculez $f(10)$, $f(100)$ et $f(1000)$. Que se passe-t-il pour des $x$ de plus en plus grands ?</li><li>Lequel des trois termes l’emporte à la fin ? Mettez $x^3$ en facteur.</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COMPTEUR OU CHRONOMÈTRE ?</div>
+            <div class="b-text"><p>Un train parcourt 120 km en une heure et demie. Dans la cabine de conduite, le compteur indique à un moment 140 km/h.</p>
+                <ul><li>Comment concilier 80 km/h de moyenne et 140 km/h ?</li><li>Comment mesureriez-vous la vitesse à un seul instant, avec seulement un chronomètre et un mètre ruban ?</li></ul></div>
+            <a class="b-lab" data-lab="steigung" href="../../steigung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PENTE</span><span class="b-lab-what">Lire et mesurer des pentes (en allemand)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Suites de nombres et limites" data-toc-k="1" data-toc-short="1 Suites">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">2 HEURES</span></div>
+    <h2><span class="b-no">1</span>Suites de nombres et leurs limites</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Les étapes d’Achille durent 10 s, 1 s, 0,1 s, 0,01 s et ainsi de suite. Les sommes 10 ; 11 ; 11,1 ; 11,11 ; … augmentent, mais ne dépassent jamais $11{,}\overline{1}$.
+                En calculant directement : Achille gagne 9 m par seconde ; pour 100 m, il lui faut $\tfrac{100}{9} = 11{,}\overline{1}$ s. Une infinité d’étapes durent ensemble un temps fini.</p></div></div>
+            <div class="b-text"><p>Une <b>suite de nombres</b> associe à chaque entier naturel $n$ un nombre $a_n$, par exemple $a_n = \tfrac{n}{n+1}$ : $\tfrac12$, $\tfrac23$, $\tfrac34$, … Les termes s’approchent aussi près que l’on veut du nombre 1.
+                On dit : la suite <b>converge</b> vers la <b>limite</b> 1. Les suites sans limite sont dites <b>divergentes</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · LIMITE D’UNE SUITE</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{n \to \infty} a_n = g$ signifie : pour toute tolérance, aussi petite soit-elle, <b>tous</b> les termes à partir d’un certain rang $n$ sont plus proches de $g$ que cette tolérance.</p>
+                    <p><b>Suites qui tendent vers 0 :</b> $\tfrac{1}{n} \to 0$, $\tfrac{c}{n^k} \to 0$ pour $k > 0$</p>
+                    <p><b>Fractions :</b> diviser le numérateur et le dénominateur par la plus haute puissance de $n$ : $\dfrac{n}{n + 1} = \dfrac{1}{1 + \frac1n} \to \dfrac{1}{1 + 0} = 1$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Explorer sur ordinateur :</b> dans le tableur, mettre 1 en A1, la formule <code>=A1+1</code> en A2 et tirer vers le bas, puis <code>=A1/(A1+1)</code> en B1.</p>
+            <p class="b-note"><b>Divergentes</b> sont par exemple $(-1)^n$ (saute entre $-1$ et $1$) et $n^2$ (croît au-delà de toute borne).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DES INTÉRÊTS DE PLUS EN PLUS SOUVENT</div>
+        <p class="b-help" style="margin:0 0 12px">Un euro, 100 % d’intérêts par an, mais crédités en portions de plus en plus petites. Les points violets sont la suite $\left(1 + \tfrac1n\right)^n$ pour $n = 1$ à 40.</p>
+        <div data-widget="efunktion" data-mode="zins"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · LIMITE ET TOLÉRANCE</div>
+            <div class="b-text"><p>Détermine la limite de $a_n = \dfrac{3n + 2}{n}$. À partir de quel $n$ les termes diffèrent-ils de la limite de moins de 0,01 ?</p></div>
+            <div class="b-sol"><p>$a_n = 3 + \tfrac{2}{n} \to 3$. L’écart $\tfrac{2}{n} < 0{,}01$ signifie $n > 200$.</p>
+                <p><span class="b-res">Limite 3, à partir de $n = 201$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · LE CERCLE COMME LIMITE</div>
+            <div class="b-text"><p>Un polygone régulier à $n$ côtés inscrit dans un cercle de rayon 1 a pour périmètre $U_n = 2n \cdot \sin\left(\tfrac{180^\circ}{n}\right)$. Calcule $U_6$, $U_{12}$ et $U_{96}$.</p></div>
+            <div class="b-sol"><p>$U_6 = 6$, $U_{12} \approx 6{,}2117$, $U_{96} \approx 6{,}2821$.</p>
+                <p>La suite tend vers le périmètre du cercle <span class="b-res">$2\pi \approx 6{,}2832$</span>. Archimède calculait exactement ainsi, avec le polygone à 96 côtés.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Écris les cinq premiers termes de $a_n = \tfrac{1}{n^2}$ et donne la limite.</p></div>
+            <div class="b-sol"><p>$1$, $\tfrac14$, $\tfrac19$, $\tfrac{1}{16}$, $\tfrac{1}{25}$. Limite 0.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine la limite : a) $\dfrac{2n - 1}{n}$ &nbsp; b) $5 + \dfrac{3}{n}$ &nbsp; c) $\dfrac{n + 4}{2n}$</p></div>
+            <div class="b-sol"><p>a) $2$ &nbsp; b) $5$ &nbsp; c) $\tfrac12$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>À partir de quel $n$ a-t-on $\left|\tfrac{n}{n + 1} - 1\right| < 0{,}001$ ?</p></div>
+            <div class="b-hint"><p>$1 - \tfrac{n}{n+1} = \tfrac{1}{n+1}$</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{n + 1} < 0{,}001$ signifie $n + 1 > 1000$ : à partir de $n = 1000$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Convergente ou divergente ? a) $(-1)^n$ &nbsp; b) $\dfrac{(-1)^n}{n}$ &nbsp; c) $\dfrac{n^2}{n + 1}$</p></div>
+            <div class="b-sol"><p>a) divergente, elle saute &nbsp; b) convergente vers 0 &nbsp; c) divergente, croît au-delà de toute borne</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>1000 € sont placés à 3 % par an. Combien y a-t-il sur le compte au bout d’un an si une part des intérêts est créditée chaque année, chaque mois ou chaque jour ? Vers quelle valeur tend le capital ?</p></div>
+            <div class="b-sol"><p>Chaque année 1030 €, chaque mois $1000 \cdot \left(1 + \tfrac{0{,}03}{12}\right)^{12} \approx 1030{,}42$ €, chaque jour environ 1030,45 €.
+                Limite $1000 \cdot \mathrm{e}^{0{,}03} \approx 1030{,}45$ € : verser les intérêts plus souvent ne rapporte pas plus de 45 centimes.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="4" data-ph="g ="><p class="b-q-text">Vers quel nombre tend $\dfrac{4n + 1}{n}$ ?</p><div class="b-sol"><p>$4 + \tfrac1n \to 4$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="g ="><p class="b-q-text">Vers quel nombre tend $\dfrac{7}{n}$ ?</p><div class="b-sol"><p>Elle tend vers 0.</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quelle suite est divergente ?</p><div class="b-mc"><button>$\tfrac1n$</button><button>$(-1)^n$</button><button>$\tfrac{n}{n+1}$</button></div><div class="b-sol"><p>Elle saute entre $-1$ et $1$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Limites de fonctions" data-toc-k="2" data-toc-short="2 Fonctions">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">2</span>Limites de fonctions et continuité</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = -2x^3 + 50x^2 + 100$ vaut encore 3100 en $x = 10$, mais déjà $-1\,499\,900$ en $x = 100$. La mise en facteur montre pourquoi :
+                $f(x) = x^3 \left(-2 + \tfrac{50}{x} + \tfrac{100}{x^3}\right)$. La parenthèse tend vers $-2$, donc $f(x) \to -\infty$ pour $x \to \infty$. Le terme de plus haute puissance l’emporte.</p></div></div>
+            <div class="b-text"><p>Pour les fonctions, on se demande ce qui arrive à $f(x)$ quand $x$ devient de plus en plus grand ou s’approche d’une valeur $x_0$. Pour cela, on remplace par des valeurs de plus en plus proches de $x_0$,
+                à gauche et à droite. Si les deux côtés coïncident avec la valeur de la fonction, on peut y tracer la courbe sans lever le crayon : la fonction est <b>continue</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · COMPORTEMENT À L’INFINI ET CONTINUITÉ</div>
+                <div class="b-text">
+                    <p>Pour $f(x) = a_n x^n + \ldots + a_0$, c’est $a_n x^n$ qui décide : <b>$n$ pair</b> : les deux extrémités selon le signe de $a_n$ · <b>$n$ impair</b> : pour $a_n > 0$ de $-\infty$ à $+\infty$, pour $a_n < 0$ l’inverse.</p>
+                    <p>$\lim\limits_{x \to x_0} f(x) = g$ si $f(x)$ tend vers $g$ quand on s’approche à gauche <b>et</b> à droite.</p>
+                    <p>$f$ est <b>continue</b> en $x_0$ si $\lim\limits_{x \to x_0} f(x) = f(x_0)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Valeurs test :</b> remplacer par $x_0 \pm 0{,}1$, $x_0 \pm 0{,}01$, $x_0 \pm 0{,}001$, de préférence avec le tableau de la calculatrice graphique.</p>
+            <p class="b-note"><b>Simplifier aide :</b> en cas de « $\tfrac{0}{0}$ », factoriser le numérateur. Les fonctions polynômes sont continues partout.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · PAS À PAS VERS LA LIMITE</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une fonction et une direction. À chaque pas, les valeurs se rapprochent dix fois plus du point ou s’éloignent dix fois plus vers l’extérieur.</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · COMPORTEMENT À L’INFINI</div>
+            <div class="b-text"><p>Décris le comportement de $f(x) = -0{,}5x^4 + 3x^3 + x$ pour $x \to \pm\infty$.</p></div>
+            <div class="b-sol"><p>Terme de plus haut degré $-0{,}5x^4$ : exposant pair, coefficient négatif.</p>
+                <p><span class="b-res">$f(x) \to -\infty$ pour $x \to \infty$ et pour $x \to -\infty$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · UN TROU DANS LA COURBE</div>
+            <div class="b-text"><p>Calcule $\lim\limits_{x \to 2} \dfrac{x^2 - 4}{x - 2}$. La fonction est-elle continue en 2 ?</p></div>
+            <div class="b-sol"><p>$\dfrac{(x - 2)(x + 2)}{x - 2} = x + 2$ pour $x \neq 2$ : <span class="b-res">limite 4</span>.</p>
+                <p>En $x = 2$, elle n’est pas définie, donc pas continue en ce point. Si l’on pose $f(2) = 4$, elle devient continue.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Décris le comportement pour $x \to \pm\infty$ : a) $2x^3 - x$ &nbsp; b) $-x^4 + 5x^2$ &nbsp; c) $3 - x$</p></div>
+            <div class="b-sol"><p>a) $-\infty$ à gauche, $+\infty$ à droite &nbsp; b) les deux extrémités $-\infty$ &nbsp; c) $+\infty$ à gauche, $-\infty$ à droite</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine $\lim\limits_{x \to 3} \dfrac{x^2 - 9}{x - 3}$ avec les valeurs test 2,9 ; 2,99 ; 3,01 et 3,1.</p></div>
+            <div class="b-sol"><p>Valeurs 5,9 ; 5,99 ; 6,01 ; 6,1 : limite 6.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule $\lim\limits_{x \to 1} \dfrac{x^2 + x - 2}{x - 1}$ en simplifiant.</p></div>
+            <div class="b-sol"><p>$x^2 + x - 2 = (x - 1)(x + 2)$ : limite $1 + 2 = 3$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$f(x) = x^2$ pour $x \le 1$ et $f(x) = 2x + a$ pour $x > 1$. Pour quelle valeur de $a$ la fonction $f$ est-elle continue ?</p></div>
+            <div class="b-hint"><p>Les deux morceaux doivent avoir la même valeur en $x = 1$.</p></div>
+            <div class="b-sol"><p>$1 = 2 + a$ : <span class="b-res">$a = -1$</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Détermine en divisant par la plus haute puissance de $x$ : a) $\lim\limits_{x \to \infty} \dfrac{3x^2 + 1}{x^2 + 2}$ &nbsp; b) $\lim\limits_{x \to \infty} \dfrac{2x + 1}{x^2 + 1}$. Qu’est-ce que cela signifie pour les courbes ?</p></div>
+            <div class="b-sol"><p>a) $\dfrac{3 + \frac{1}{x^2}}{1 + \frac{2}{x^2}} \to 3$ : asymptote horizontale $y = 3$. &nbsp; b) $\dfrac{\frac2x + \frac{1}{x^2}}{1 + \frac{1}{x^2}} \to 0$ : l’asymptote est l’axe des $x$. Plus de détails au chapitre 4.1.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="4" data-ph="g ="><p class="b-q-text">Combien vaut $\lim\limits_{x \to 2} \dfrac{x^2 - 4}{x - 2}$ ?</p><div class="b-sol"><p>$x + 2 \to 4$</p></div></div>
+        <div class="b-q" data-ans="-1" data-ph="a ="><p class="b-q-text">$f(x) = x^2$ pour $x \le 1$, $f(x) = 2x + a$ pour $x > 1$. Pour quelle valeur de $a$ la fonction $f$ est-elle continue ?</p><div class="b-sol"><p>$1 = 2 + a$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$f(x) = -3x^5 + x$ pour $x \to \infty$ :</p><div class="b-mc"><button>$f(x) \to +\infty$</button><button>$f(x) \to -\infty$</button><button>$f(x) \to 0$</button></div><div class="b-sol"><p>Exposant impair, coefficient négatif.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Taux de variation" data-toc-k="3" data-toc-short="3 Taux de variation">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">3</span>Taux de variation moyen et instantané</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une pierre tombe ; au bout de $t$ secondes, elle a parcouru environ $s(t) = 5t^2$ mètres. De la première à la troisième seconde, elle tombe de $45 - 5 = 40$ m, en moyenne $\tfrac{40}{2} = 20$ m/s.
+                À quelle vitesse va-t-elle exactement en $t = 2$ ? Sur $[2\,;\,2 + h]$, la moyenne est $\dfrac{5(2 + h)^2 - 20}{h} = 20 + 5h$. Plus $h$ est petit, plus on est proche de <b>20 m/s</b>.</p></div></div>
+            <div class="b-text"><p>Le <b>taux de variation moyen</b> compare deux instants : variation divisée par la durée. Sur la courbe, c’est la pente de la <b>sécante</b> passant par deux points.
+                Si l’on rapproche de plus en plus le deuxième instant du premier, on obtient le <b>taux de variation instantané</b>, la pente de la <b>tangente</b>. C’est l’idée de la dérivée.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TAUX DE VARIATION</div>
+                <div class="b-text">
+                    <p><b>Taux de variation moyen</b> (taux d’accroissement) sur $[a\,;\,b]$ : $\dfrac{f(b) - f(a)}{b - a}$, la pente de la sécante</p>
+                    <p><b>Taux de variation instantané</b> en $x_0$ : $\lim\limits_{h \to 0} \dfrac{f(x_0 + h) - f(x_0)}{h}$, la pente de la tangente</p>
+                    <p>Unité : unité de $f$ par unité de $x$, par exemple m/s, °C/h ou € par unité.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Au quotidien :</b> vitesse moyenne et compteur, taux de croissance moyen et instantané, débit par minute, coût d’une unité supplémentaire.</p>
+            <p class="b-note"><b>Méthode du $h$ :</b> développer $f(x_0 + h)$, soustraire $f(x_0)$, simplifier par $h$, et seulement ensuite poser $h = 0$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DE LA SÉCANTE À LA TANGENTE</div>
+        <p class="b-help" style="margin:0 0 12px">Fais glisser le point $P$ et rends l’écart $h$ de plus en plus petit. La marche verte montre $h$ et $f(x_0 + h) - f(x_0)$ ; la sécante pivote jusqu’à devenir la tangente.</p>
+        <div data-widget="sekante"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LA TEMPÉRATURE LE MATIN</div>
+            <div class="b-text"><p>$T(t) = 12 + 3t - 0{,}25t^2$ est la température en °C, $t$ en heures après 8 h. Calcule le taux de variation moyen de 8 h à 12 h et le taux instantané à 9 h.</p></div>
+            <div class="b-sol"><p>$\tfrac{T(4) - T(0)}{4} = \tfrac{20 - 12}{4} = 2$ °C/h.</p>
+                <p>$\dfrac{T(1 + h) - T(1)}{h} = \dfrac{2{,}5h - 0{,}25h^2}{h} = 2{,}5 - 0{,}25h \to$ <span class="b-res">2,5 °C/h à 9 h</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · LA PIERRE QUI TOMBE</div>
+            <div class="b-text"><p>À quelle vitesse va la pierre, avec $s(t) = 5t^2$, au bout de 2 secondes ?</p></div>
+            <div class="b-sol"><p>$\dfrac{5(4 + 4h + h^2) - 20}{h} = \dfrac{20h + 5h^2}{h} = 20 + 5h \to 20$</p>
+                <p><span class="b-res">20 m/s, soit 72 km/h</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule le taux de variation moyen de $f(x) = x^2$ sur $[1\,;\,3]$ et sur $[1\,;\,1{,}1]$.</p></div>
+            <div class="b-sol"><p>$\tfrac{9 - 1}{2} = 4$ et $\tfrac{1{,}21 - 1}{0{,}1} = 2{,}1$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>À 6 h, le niveau de la rivière est de 1,20 m ; à 10 h, de 0,80 m. Quel est le taux de variation moyen ? Que signifie le signe ?</p></div>
+            <div class="b-sol"><p>$\tfrac{0{,}80 - 1{,}20}{4} = -0{,}1$ m/h : le niveau baisse de 10 cm par heure.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Détermine avec la méthode du $h$ le taux de variation instantané de $f(x) = x^2$ en $x_0 = 3$.</p></div>
+            <div class="b-sol"><p>$\dfrac{(3 + h)^2 - 9}{h} = 6 + h \to 6$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une ville compte $N(t) = 1000 \cdot 1{,}02^t$ habitants (en milliers, $t$ en années). Calcule le taux de variation moyen au cours des 10 premières années et estime le taux instantané en $t = 0$ avec $h = 0{,}001$.</p></div>
+            <div class="b-sol"><p>$\tfrac{N(10) - N(0)}{10} \approx 21{,}9$ milliers par an. En $t = 0$ : $\tfrac{N(0{,}001) - 1000}{0{,}001} \approx 19{,}8$ milliers par an.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une pierre tombe d’une hauteur de 45 m, $s(t) = 5t^2$. Quand et à quelle vitesse touche-t-elle le sol ?</p></div>
+            <div class="b-sol"><p>$5t^2 = 45$, $t = 3$ s. $\dfrac{5(3 + h)^2 - 45}{h} = 30 + 5h \to 30$ : <span class="b-res">30 m/s, soit 108 km/h</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2" data-ph="taux"><p class="b-q-text">Taux de variation moyen de $f(x) = x^2$ sur $[0\,;\,2]$ ?</p><div class="b-sol"><p>$\tfrac{4 - 0}{2}$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="taux"><p class="b-q-text">Taux de variation instantané de $f(x) = x^2$ en $x_0 = 3$ ?</p><div class="b-sol"><p>$6 + h \to 6$</p></div></div>
+        <div class="b-q" data-ans="2,5" data-ph="°C/h"><p class="b-q-text">$T(t) = 12 + 3t - 0{,}25t^2$ : à quelle vitesse la température monte-t-elle en $t = 1$ ?</p><div class="b-sol"><p>$2{,}5 - 0{,}25h \to 2{,}5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine $\lim\limits_{n \to \infty} \dfrac{5n - 3}{n}$.</p></div>
+            <div class="b-sol"><p>$5 - \tfrac3n \to 5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier avec la 11e année :</b> une culture de bactéries double chaque heure, $N(t) = 100 \cdot 2^t$. Quel est le taux de variation moyen pendant la troisième heure ? Pourquoi est-il plus grand que pendant la première ?</p></div>
+            <div class="b-sol"><p>$\tfrac{N(3) - N(2)}{1} = 800 - 400 = 400$ bactéries par heure, pendant la première seulement 100. La croissance exponentielle est de plus en plus rapide.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Avec le polygone à 96 côtés, Archimède montra que $3\tfrac{10}{71} < \pi < 3\tfrac17$. Vérifie ces bornes à la calculatrice et compare avec $\tfrac{U_{96}}{2}$ de l’exemple 2.</p></div>
+            <div class="b-sol"><p>$3\tfrac{10}{71} \approx 3{,}14085$, $3\tfrac17 \approx 3{,}14286$, $\pi \approx 3{,}14159$ est entre les deux. $\tfrac{U_{96}}{2} \approx 3{,}14103$ : le polygone inscrit à 96 côtés est encore un peu trop petit.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une cycliste démarre : $s(t) = 0{,}5t^2$ pour $0 \le t \le 4$, ensuite $s(t) = 8 + 4(t - 4)$ (en m et s). Montre que $s$ est continue en $t = 4$.
+            La vitesse fait-elle un saut à cet instant, ou passe-t-elle en douceur ?</p></div>
+            <div class="b-sol"><p>Les deux morceaux donnent $s(4) = 8$ : continue. À gauche : $\dfrac{8 - 0{,}5(4 - h)^2}{h} = 4 - 0{,}5h \to 4$, à droite : 4 m/s. Pas de saut, la vitesse passe en douceur.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Zénon" data-toc-k="X" data-toc-short="Zénon">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">PHILOSOPHIE ET HISTOIRE</span></div>
+    <h2>Le paradoxe de Zénon</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Au Ve siècle av. J.-C., le philosophe grec Zénon d’Élée affirmait que le coureur le plus rapide ne pourrait jamais rattraper le plus lent : chaque fois qu’il arrive là où était le plus lent,
+                celui-ci est déjà un peu plus loin. Les étapes ne s’arrêtent jamais, donc la poursuite non plus.</p>
+            <p>Pendant plus de deux mille ans, les philosophes ont débattu de l’endroit où se trouve l’erreur. La réponse des mathématiques : une infinité de durées peut avoir une durée totale finie.
+                $10 + 1 + 0{,}1 + 0{,}01 + \ldots = 11{,}\overline{1}$ est la limite d’une suite de sommes. Ce n’est qu’avec la notion de limite du XIXe siècle que cela a été formulé rigoureusement.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> rapporté par Aristote, « Physique », livre VI, chapitre 9 (239b). Vue d’ensemble : Stanford Encyclopedia of Philosophy, « Zeno’s Paradoxes ».</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>SUITES</h4><p>Diviser par la plus haute puissance de $n$, laisser tomber les termes qui tendent vers 0.</p></div>
+        <div><p>$\dfrac{3n + 2}{n} = 3 + \dfrac2n \to 3$</p></div></div>
+    <div class="b-rueck"><div><h4>À L’INFINI</h4><p>C’est le terme de plus haut degré $a_n x^n$ qui décide.</p></div>
+        <div><p>$-0{,}5x^4 + \ldots$ : les deux extrémités $-\infty$</p></div></div>
+    <div class="b-rueck"><div><h4>EN UN POINT</h4><p>S’approcher à gauche et à droite, lever « $\tfrac00$ » en simplifiant.</p></div>
+        <div><p>$\dfrac{x^2 - 4}{x - 2} \to 4$ pour $x \to 2$</p></div></div>
+    <div class="b-rueck"><div><h4>CONTINUE</h4><p>Limite égale à la valeur de la fonction : tracer sans lever le crayon.</p></div>
+        <div><p>$x^2$ et $2x - 1$ se rejoignent en $(1\,;\,1)$</p></div></div>
+    <div class="b-rueck"><div><h4>TAUX DE VARIATION</h4><p>Moyen : pente de la sécante · instantané : limite pour $h \to 0$, pente de la tangente</p></div>
+        <div><p>$s(t) = 5t^2$ : $20 + 5h \to 20$ m/s</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="2" data-ph="g ="><p class="b-q-text">Détermine $\lim\limits_{n \to \infty} \dfrac{2n + 3}{n}$.</p><div class="b-sol"><p>$2 + \tfrac3n \to 2$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="g ="><p class="b-q-text">Détermine $\lim\limits_{x \to 3} \dfrac{x^2 - 9}{x - 3}$.</p><div class="b-sol"><p>$x + 3 \to 6$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$f(x) = 2x^4 - x$ pour $x \to -\infty$ :</p><div class="b-mc"><button>$f(x) \to +\infty$</button><button>$f(x) \to -\infty$</button><button>$f(x) \to 2$</button></div><div class="b-sol"><p>Exposant pair, coefficient positif.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="1030,42" data-tol="0.01" data-ph="€"><p class="b-q-text">1000 € à 3 % par an, intérêts crédités chaque mois : capital au bout d’un an, au centime près ?</p><div class="b-sol"><p>$1000 \cdot \left(1 + \tfrac{0{,}03}{12}\right)^{12} \approx 1030{,}42$</p></div></div>
+            <div class="b-q" data-ans="30" data-ph="m/s"><p class="b-q-text">$s(t) = 5t^2$ : à quelle vitesse va la pierre au bout de 3 secondes ?</p><div class="b-sol"><p>$30 + 5h \to 30$</p></div></div>
+            <div class="b-q" data-ans="21,9" data-tol="0.05" data-ph="taux"><p class="b-q-text">$N(t) = 1000 \cdot 1{,}02^t$ : taux de variation moyen sur $[0\,;\,10]$, à un chiffre après la virgule ?</p><div class="b-sol"><p>$\tfrac{1218{,}99 - 1000}{10} \approx 21{,}9$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-grenzwerte.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMITES</span><span class="b-lab-what">Suites et comportement à l’infini</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-aenderungsraten.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TAUX DE VARIATION</span><span class="b-lab-what">Continuité, taux moyen et instantané</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Fachoberschule, 12e année · Domaine d’apprentissage 2 d’après le programme de mathématiques de la Fachoberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+</body>
+</html>
