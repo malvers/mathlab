@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques FOS 11 · Chapitre 2.3 · Dénombrement, modèle de l’urne et schémas de Bernoulli | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Principe multiplicatif, permutation, arrangement, combinaison, formule de Bernoulli. Chapitre 2.3 du manuel interactif Mathématiques · Fachoberschule 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · FACHOBERSCHULE 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.3 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.3 · DOMAINE D’APPRENTISSAGE 2 · AVRIL</p>
+            <h1>Dénombrement, modèle de l’urne et schémas de Bernoulli</h1>
+            <p class="b-hero-lead">Près de 14 millions de grilles au loto, mille codes sur un cadenas de vélo, 336 podiums possibles avec huit concurrentes :
+                dans les situations d’équiprobabilité, il faut compter, et habilement. Tu apprends le <b>principe multiplicatif</b>, tu distingues <b>permutation</b>, <b>arrangement</b>
+                et <b>combinaison</b>, tu ramènes des problèmes à un <b>modèle de l’urne</b> et tu calcules avec la <b>formule de Bernoulli</b>.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">4 LEÇONS</span><span class="b-chip">CALCULATRICE : nPr, nCr, binompdf</span><span class="b-chip">FIN DU DOMAINE 2</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="10" data-p="0.3" data-lo="3" data-hi="3" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>déterminer des nombres de possibilités avec le <b>principe multiplicatif</b>, compter des <b>permutations</b> avec et sans répétition</li>
+                <li>distinguer <b>arrangement</b> et <b>combinaison</b>, et utiliser le <b>coefficient binomial</b></li>
+                <li>ramener des problèmes concrets à l’un des quatre <b>modèles de l’urne</b></li>
+                <li>reconnaître des <b>schémas de Bernoulli</b> et calculer des probabilités avec la formule de Bernoulli</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="24" data-ph="nombre"><p class="b-q-text">Calcule $4 \cdot 3 \cdot 2 \cdot 1$.</p><div class="b-sol"><p>$24$</p></div></div>
+            <div class="b-q" data-ans="3/8" data-ph="fraction"><p class="b-q-text">Trois lancers de pièce : quelle est la probabilité d’obtenir exactement deux fois face ?</p><div class="b-sol"><p>$\tfrac38$, voir le chapitre 2.2</p></div></div>
+            <div class="b-q" data-ans="0,09" data-ph="nombre décimal"><p class="b-q-text">Calcule $0{,}3^2$.</p><div class="b-sol"><p>$0{,}09$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Tirer <b>avec</b> remise signifie …</p><div class="b-mc"><button>les probabilités restent les mêmes</button><button>il y a de moins en moins de boules</button><button>l’ordre ne compte pas</button></div><div class="b-sol"><p>L’urne est de nouveau complète avant chaque tirage.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">QUI S’ASSOIT OÙ ?</div>
+            <div class="b-text"><p>Quatre amis vont au cinéma et s’assoient dans une même rangée.</p>
+                <ul><li>De combien de façons peuvent-ils s’asseoir ? Écrivez les possibilités de manière systématique.</li><li>Combien y en aurait-il avec cinq amis, avec dix ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">PODIUM OU FINALE ?</div>
+            <div class="b-text"><p>Huit coureuses prennent le départ. a) On attribue l’or, l’argent et le bronze. b) Les trois plus rapides vont en finale.</p>
+                <ul><li>Y a-t-il autant de possibilités pour a) et pour b) ? Quelle question en a le plus, et de quel facteur ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">RÉPONDRE AU HASARD</div>
+            <div class="b-text"><p>Un test comporte 5 questions à 4 réponses chacune, dont une seule est juste. Quelqu’un coche complètement au hasard.</p>
+                <ul><li>Quelle est la probabilité d’avoir exactement 2 réponses justes ? Combien de chemins correspondent à cet événement ?</li></ul></div>
+            <span class="b-pair">→ Leçon 4</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Principe multiplicatif et permutations" data-toc-k="1" data-toc-short="1 Compter">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">1</span>Le principe multiplicatif et les permutations</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une cantine propose 3 entrées, 4 plats et 2 desserts. À chaque entrée correspondent 4 plats, à chacune de ces combinaisons 2 desserts :
+                $3 \cdot 4 \cdot 2 = 24$ menus différents. Pas besoin de les écrire pour les compter.</p></div></div>
+            <div class="b-text"><p>Le même principe se cache dans l’arbre : le nombre de chemins est le produit des nombres de branches. Pour le cinéma de l’exploration, la première place offre 4 possibilités,
+                la deuxième encore 3, la troisième 2, la dernière 1 : $4 \cdot 3 \cdot 2 \cdot 1 = 24$ façons de s’asseoir.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · PRINCIPE MULTIPLICATIF ET PERMUTATIONS</div>
+                <div class="b-text">
+                    <p><b>Principe multiplicatif :</b> si un processus comporte $k$ étapes avec $n_1, n_2, \ldots, n_k$ possibilités, il y a en tout $n_1 \cdot n_2 \cdot \ldots \cdot n_k$ possibilités.</p>
+                    <p><b>Permutation :</b> on peut ranger $n$ objets différents de $n! = n \cdot (n - 1) \cdot \ldots \cdot 2 \cdot 1$ façons ($n$ <b>factorielle</b>, $0! = 1$).</p>
+                    <p><b>Permutation avec répétition :</b> si, parmi les $n$ objets, $k_1$, $k_2$, … sont identiques, il y a $\dfrac{n!}{k_1! \cdot k_2! \cdot \ldots}$ rangements.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Les factorielles croissent vite :</b> $10! = 3\,628\,800$, et $70!$ dépasse déjà $10^{100}$.</p>
+            <p class="b-note"><b>Calculatrice :</b> le symbole $!$ se trouve le plus souvent dans le menu des probabilités (PRB ou PROB).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · TOUS LES RANGEMENTS</div>
+        <p class="b-help" style="margin:0 0 12px">4 boules, toutes tirées, avec ordre, sans remise : ce sont exactement les permutations. Modifie $n$ et $k$ et regarde la liste s’allonger.</p>
+        <div data-widget="urne" data-n="4" data-k="4" data-ord="1" data-rep="0"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · CODES</div>
+            <div class="b-text"><p>Un code d’accès se compose de 2 lettres (26 possibilités) suivies de 3 chiffres. Combien y a-t-il de codes ?</p></div>
+            <div class="b-sol"><p>Cinq étapes : $26 \cdot 26 \cdot 10 \cdot 10 \cdot 10 = 26^2 \cdot 10^3$.</p>
+                <p><span class="b-res">$676\,000$ codes</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · ANAGRAMMES</div>
+            <div class="b-text"><p>Combien de « mots » différents peut-on former avec les lettres de OTTO et de ANANAS ?</p></div>
+            <div class="b-sol"><p>OTTO : $\dfrac{4!}{2! \cdot 2!} = \dfrac{24}{4} = 6$ (deux fois O, deux fois T).</p>
+                <p>ANANAS : $\dfrac{6!}{3! \cdot 2!} = \dfrac{720}{12} = $ <span class="b-res">$60$</span> (trois fois A, deux fois N).</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Combien y a-t-il de codes PIN à quatre chiffres formés avec les chiffres de 0 à 9 ? Combien si le premier chiffre ne peut pas être 0 ?</p></div>
+            <div class="b-sol"><p>$10^4 = 10\,000$ · $9 \cdot 10^3 = 9\,000$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule : a) $5!$ &nbsp; b) $7!$ &nbsp; c) $\dfrac{10!}{8!}$</p></div>
+            <div class="b-sol"><p>a) $120$ &nbsp; b) $5040$ &nbsp; c) $10 \cdot 9 = 90$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Six personnes s’assoient sur six chaises en rangée. Combien y a-t-il de façons de s’asseoir ? Combien si deux personnes précises veulent être côte à côte ?</p></div>
+            <div class="b-hint"><p>Regroupe ces deux personnes en un bloc. À l’intérieur du bloc, il y a deux ordres possibles.</p></div>
+            <div class="b-sol"><p>$6! = 720$ · le bloc plus 4 personnes : $5! \cdot 2 = 240$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Combien de rangements y a-t-il pour les lettres du mot MISSISSIPPI ?</p></div>
+            <div class="b-sol"><p>11 lettres, quatre fois I, quatre fois S, deux fois P : $\dfrac{11!}{4! \cdot 4! \cdot 2!} = 34\,650$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Combien y a-t-il de nombres à quatre chiffres tous différents ? Le premier chiffre ne peut pas être 0.</p></div>
+            <div class="b-sol"><p>Premier chiffre : 9 possibilités (1 à 9), puis 9, 8, 7 : $9 \cdot 9 \cdot 8 \cdot 7 = 4536$</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="24" data-ph="nombre"><p class="b-q-text">3 entrées, 4 plats, 2 desserts : combien de menus ?</p><div class="b-sol"><p>$3 \cdot 4 \cdot 2$</p></div></div>
+        <div class="b-q" data-ans="720" data-ph="nombre"><p class="b-q-text">De combien de façons 6 personnes peuvent-elles s’asseoir sur 6 chaises ?</p><div class="b-sol"><p>$6!$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Combien de rangements différents le mot OTTO a-t-il ?</p><div class="b-sol"><p>$\tfrac{24}{4}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Arrangements et combinaisons" data-toc-k="2" data-toc-short="2 Choisir">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">2</span>Arrangements et combinaisons</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Or, argent, bronze parmi huit coureuses : $8 \cdot 7 \cdot 6 = 336$ possibilités. Pour la finale, en revanche, seul compte <b>qui</b> y participe, pas dans quel ordre.
+                Chaque groupe de trois a été compté $3! = 6$ fois pour le podium. Il y a donc $\tfrac{336}{6} = 56$ finales possibles.</p></div></div>
+            <div class="b-text"><p>La question décisive pour tout choix est : <b>l’ordre compte-t-il ?</b> Si oui, on parle d’arrangement, sinon de combinaison.
+                Le nombre de combinaisons a un nom à lui : le coefficient binomial.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · CHOISIR $k$ PARMI $n$</div>
+                <div class="b-text">
+                    <p><b>Arrangement</b> (l’ordre compte), sans répétition : $\dfrac{n!}{(n - k)!} = n \cdot (n - 1) \cdot \ldots \cdot (n - k + 1)$ · avec répétition : $n^k$</p>
+                    <p><b>Combinaison</b> (l’ordre ne compte pas), sans répétition : $\dbinom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$, qui se lit « $k$ parmi $n$ »</p>
+                    <p>$\binom{n}{0} = \binom{n}{n} = 1$ · $\binom{n}{k} = \binom{n}{n - k}$ · $\binom{n}{k} = \binom{n - 1}{k - 1} + \binom{n - 1}{k}$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculatrice :</b> arrangements sans répétition avec nPr, combinaisons avec nCr. $8$ nPr $3 = 336$, $8$ nCr $3 = 56$.</p>
+            <p class="b-note"><b>Règle empirique :</b> rôles, places, codes → l’ordre compte. Groupes, équipes, numéros du loto → l’ordre ne compte pas.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE TRIANGLE DE PASCAL</div>
+        <p class="b-help" style="margin:0 0 12px">Chaque nombre est la somme des deux nombres situés au-dessus. Touche un nombre ou utilise les curseurs : c’est le coefficient binomial $\binom{n}{k}$.</p>
+        <div data-widget="pascal"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · LE LOTO « 6 SUR 49 »</div>
+            <div class="b-text"><p>Combien y a-t-il de grilles au loto allemand « 6 sur 49 » ? Quelle est la probabilité d’avoir les six bons numéros avec une grille ?</p></div>
+            <div class="b-sol"><p>L’ordre ne compte pas, aucun numéro en double : $\binom{49}{6} = 13\,983\,816$.</p>
+                <p>$P(\text{6 bons numéros}) = $ <span class="b-res">$\tfrac{1}{13\,983\,816}$</span>, sans le numéro supplémentaire (Superzahl).</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · ÉQUIPE OU BUREAU ?</div>
+            <div class="b-text"><p>Parmi 12 personnes, on choisit a) une équipe de 3 personnes, b) un président, un vice-président et un trésorier. Combien y a-t-il de possibilités dans chaque cas ?</p></div>
+            <div class="b-sol"><p>a) Combinaison : $\binom{12}{3} = 220$.</p>
+                <p>b) Arrangement : $12 \cdot 11 \cdot 10 = $ <span class="b-res">$1320$</span>, soit $3! = 6$ fois plus.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule : a) $\binom{5}{2}$ &nbsp; b) $\binom{6}{3}$ &nbsp; c) $\binom{10}{1}$ &nbsp; d) $\binom{10}{10}$</p></div>
+            <div class="b-sol"><p>a) $10$ &nbsp; b) $20$ &nbsp; c) $10$ &nbsp; d) $1$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>L’ordre compte-t-il ? a) tirage du loto &nbsp; b) code PIN &nbsp; c) les places 1 à 3 d’un classement &nbsp; d) 4 garnitures de pizza parmi 10</p></div>
+            <div class="b-sol"><p>a) non &nbsp; b) oui &nbsp; c) oui &nbsp; d) non</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dix personnes se saluent toutes en se serrant la main. Combien de poignées de main y a-t-il ?</p></div>
+            <div class="b-sol"><p>Chaque poignée de main est une paire, l’ordre ne compte pas : $\binom{10}{2} = 45$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une classe compte 7 filles et 5 garçons. Un comité doit se composer de 2 filles et de 2 garçons. Combien y a-t-il de possibilités ?</p></div>
+            <div class="b-sol"><p>Principe multiplicatif : $\binom{7}{2} \cdot \binom{5}{2} = 21 \cdot 10 = 210$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Montre avec $n = 8$, $k = 3$ que $\binom{n}{k} = \binom{n}{n - k}$, et explique la règle avec des mots.</p></div>
+            <div class="b-sol"><p>$\binom{8}{3} = \binom{8}{5} = 56$. Choisir 3 personnes parmi 8, c’est en même temps fixer les 5 qui ne sont pas choisies.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="336" data-ph="nombre"><p class="b-q-text">Combien de podiums (or, argent, bronze) y a-t-il avec 8 concurrents ?</p><div class="b-sol"><p>$8 \cdot 7 \cdot 6$</p></div></div>
+        <div class="b-q" data-ans="45" data-ph="nombre"><p class="b-q-text">Combien de poignées de main y a-t-il entre 10 personnes ?</p><div class="b-sol"><p>$\binom{10}{2}$</p></div></div>
+        <div class="b-q" data-ans="13983816" data-ph="nombre"><p class="b-q-text">Combien y a-t-il de grilles au loto « 6 sur 49 » ?</p><div class="b-sol"><p>$\binom{49}{6}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Le modèle de l’urne" data-toc-k="3" data-toc-short="3 Urne">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">3</span>Le modèle de l’urne</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Le loto, c’est comme tirer 6 boules parmi 49 sans remise, l’ordre ne compte pas. Un cadenas à code à 4 molettes, c’est comme 4 tirages parmi 10 boules
+                avec remise, l’ordre compte. Un très grand nombre de problèmes de dénombrement deviennent ainsi une question d’urne.</p></div></div>
+            <div class="b-text"><p>Deux questions déterminent le cas : l’<b>ordre</b> compte-t-il ? Y a-t-il <b>remise</b>, autrement dit des répétitions sont-elles possibles ?
+                On obtient ainsi quatre cas de base.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · LES QUATRE CAS DE BASE ($k$ TIRAGES PARMI $n$ BOULES)</div>
+                <div class="b-text">
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th></th><th>avec remise</th><th>sans remise</th></tr>
+                        <tr><th>avec ordre</th><td>$n^k$</td><td>$\dfrac{n!}{(n - k)!}$</td></tr>
+                        <tr><th>sans ordre</th><td>$\dbinom{n + k - 1}{k}$</td><td>$\dbinom{n}{k}$</td></tr>
+                    </table></div>
+                    <p style="margin-top:10px"><b>Tirage sans remise avec deux sortes :</b> si $M$ des $N$ boules sont rouges, la probabilité d’obtenir exactement $r$ rouges parmi $n$ boules tirées vaut
+                        $\dfrac{\binom{M}{r} \cdot \binom{N - M}{n - r}}{\binom{N}{n}}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Laplace en dénombrant :</b> $P = \tfrac{\text{favorables}}{\text{possibles}}$, en comptant les deux avec le même modèle d’urne.</p>
+            <p class="b-note"><b>Le cas rare</b> « sans ordre, avec remise » décrit par exemple des boules de glace de plusieurs parfums.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’URNE</div>
+        <p class="b-help" style="margin:0 0 12px">Règle $n$, $k$, l’ordre et la remise. Tu vois le cas de base, la formule, un exemple et, tant qu’il n’y en a pas trop, toutes les issues. Le bouton de tirage en marque une au hasard.</p>
+        <div data-widget="urne"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · TROIS BONS NUMÉROS</div>
+            <div class="b-text"><p>Au loto « 6 sur 49 », quelle est la probabilité d’avoir exactement trois bons numéros ?</p></div>
+            <div class="b-sol"><p>3 des 6 numéros gagnants et 3 des 43 autres : $\binom{6}{3} \cdot \binom{43}{3} = 20 \cdot 12\,341 = 246\,820$ grilles favorables.</p>
+                <p>$P = \tfrac{246\,820}{13\,983\,816} \approx$ <span class="b-res">$0{,}0177$</span>, soit environ 1,8 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · ÉCHANTILLON D’UNE LIVRAISON</div>
+            <div class="b-text"><p>Une livraison contient 20 pièces, dont 3 défectueuses. On contrôle 4 pièces sans remise. Quelle est la probabilité qu’aucune ne soit défectueuse ?</p></div>
+            <div class="b-sol"><p>$P = \dfrac{\binom{17}{4}}{\binom{20}{4}} = \dfrac{2380}{4845} \approx 0{,}491$.</p>
+                <p>Avec une probabilité <span class="b-res">$\approx 0{,}509$</span>, on repère donc au moins une pièce défectueuse.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>De quel cas de base s’agit-il ? a) cadenas à code à 4 molettes &nbsp; b) on tire 3 billets parmi 20, tous les lots sont identiques &nbsp; c) placement de 5 personnes &nbsp; d) 3 boules de glace parmi 8 parfums, les parfums peuvent se répéter</p></div>
+            <div class="b-sol"><p>a) avec ordre, avec remise &nbsp; b) sans ordre, sans remise &nbsp; c) avec ordre, sans remise, $k = n$ &nbsp; d) sans ordre, avec remise</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule les nombres de possibilités de l’exercice 11.</p></div>
+            <div class="b-sol"><p>a) $10^4 = 10\,000$ &nbsp; b) $\binom{20}{3} = 1140$ &nbsp; c) $5! = 120$ &nbsp; d) $\binom{10}{3} = 120$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>D’une urne contenant 5 boules rouges et 3 boules bleues, on tire 3 boules sans remise. Quelle est la probabilité d’obtenir exactement 2 boules rouges ?</p></div>
+            <div class="b-sol"><p>$\dfrac{\binom{5}{2} \cdot \binom{3}{1}}{\binom{8}{3}} = \dfrac{10 \cdot 3}{56} = \dfrac{15}{28} \approx 0{,}536$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Au loto « 6 sur 49 », quelle est la probabilité d’avoir exactement quatre bons numéros ?</p></div>
+            <div class="b-sol"><p>$\dfrac{\binom{6}{4} \cdot \binom{43}{2}}{\binom{49}{6}} = \dfrac{15 \cdot 903}{13\,983\,816} \approx 0{,}00097$, soit un peu moins de 0,1 %.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Refais le calcul de l’exemple 6 avec un arbre (chemin « quatre fois bonne ») et compare.</p></div>
+            <div class="b-sol"><p>$\tfrac{17}{20} \cdot \tfrac{16}{19} \cdot \tfrac{15}{18} \cdot \tfrac{14}{17} \approx 0{,}491$. Les deux méthodes donnent le même résultat.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1140" data-ph="nombre"><p class="b-q-text">De combien de façons peut-on tirer 3 billets parmi 20 (l’ordre ne compte pas) ?</p><div class="b-sol"><p>$\binom{20}{3}$</p></div></div>
+        <div class="b-q" data-ans="15/28" data-ph="fraction"><p class="b-q-text">5 boules rouges, 3 bleues, 3 tirages sans remise : quelle est la probabilité d’obtenir exactement 2 rouges ?</p><div class="b-sol"><p>$\tfrac{30}{56}$</p></div></div>
+        <div class="b-q" data-ans="0,491" data-tol="0.001" data-ph="nombre décimal"><p class="b-q-text">20 pièces, 3 défectueuses, on en contrôle 4 : quelle est la probabilité qu’aucune ne soit défectueuse (trois décimales) ?</p><div class="b-sol"><p>$\tfrac{2380}{4845}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Schémas de Bernoulli" data-toc-k="4" data-toc-short="4 Bernoulli">
+    <div class="b-band"><span class="b-band-tag">LEÇON 4</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">4</span>Schémas de Bernoulli</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quand on répond au hasard au test, chaque question est juste avec $p = 0{,}25$. Un chemin avec exactement 2 réponses justes et 3 fausses a pour probabilité $0{,}25^2 \cdot 0{,}75^3$.
+                Combien y a-t-il de tels chemins ? On choisit lesquelles des 5 questions sont justes : $\binom{5}{2} = 10$. Donc $P = 10 \cdot 0{,}25^2 \cdot 0{,}75^3 \approx 0{,}264$.</p></div></div>
+            <div class="b-text"><p>Ce calcul fonctionne chaque fois qu’une épreuve n’a que deux issues et qu’on la répète de façon indépendante avec la même probabilité.
+                Il est si important qu’il porte un nom.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · FORMULE DE BERNOULLI</div>
+                <div class="b-text">
+                    <p>Une <b>épreuve de Bernoulli</b> a exactement deux issues : <b>succès</b> avec la probabilité $p$ et <b>échec</b> avec $1 - p$.</p>
+                    <p>Si on la répète $n$ fois de façon <b>indépendante</b> avec le même $p$, on obtient un <b>schéma de Bernoulli</b> de longueur $n$.</p>
+                    <p>Pour le nombre $X$ de succès : $$P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k}$$</p>
+                    <p>$\binom{n}{k}$ compte les chemins avec exactement $k$ succès. Pour « au moins un succès » : $P(X \geq 1) = 1 - (1 - p)^n$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculatrice :</b> $P(X = k)$ avec binompdf$(n, p, k)$, $P(X \leq k)$ avec binomcdf$(n, p, k)$. Les noms peuvent varier légèrement selon la calculatrice.</p>
+            <p class="b-note"><b>Pas un schéma de Bernoulli :</b> des tirages sans remise dans une petite urne, car $p$ change alors d’un tirage à l’autre.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ARBRE D’UN SCHÉMA DE BERNOULLI</div>
+        <p class="b-help" style="margin:0 0 12px">Tous les chemins avec exactement $k$ succès s’allument. Compte-les et compare avec $\binom{n}{k}$.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">PERSPECTIVE · TOUS LES NOMBRES DE SUCCÈS D’UN COUP D’ŒIL</div>
+        <p class="b-help" style="margin:0 0 12px">Le diagramme en colonnes montre $P(X = k)$ pour tous les $k$. On l’appelle la loi binomiale ; tu la retrouveras en 12e année.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 7 · RÉPONDRE AU HASARD</div>
+            <div class="b-text"><p>5 questions à 4 réponses chacune, réponses au hasard. Quelle est la probabilité d’avoir exactement 2 réponses justes ?</p></div>
+            <div class="b-sol"><p>$n = 5$, $p = 0{,}25$, $k = 2$ : $\binom{5}{2} \cdot 0{,}25^2 \cdot 0{,}75^3 = 10 \cdot 0{,}0625 \cdot 0{,}421875$.</p>
+                <p><span class="b-res">$\approx 0{,}264$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 8 · DEUX SIX</div>
+            <div class="b-text"><p>On lance un dé 10 fois. Quelle est la probabilité d’obtenir exactement deux six ?</p></div>
+            <div class="b-sol"><p>$\binom{10}{2} \cdot \left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^8 = 45 \cdot \tfrac{1}{36} \cdot 0{,}2326\ldots$</p>
+                <p><span class="b-res">$\approx 0{,}291$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>S’agit-il d’un schéma de Bernoulli ? Si oui, donne $n$ et $p$. a) 10 lancers de pièce, succès : face &nbsp; b) 3 boules tirées sans remise d’une urne contenant 4 rouges et 2 bleues, succès : rouge &nbsp; c) 20 pièces d’une grande production avec 3 % de rebut, succès : défectueuse</p></div>
+            <div class="b-sol"><p>a) oui, $n = 10$, $p = 0{,}5$ &nbsp; b) non, $p$ change &nbsp; c) approximativement oui, $n = 20$, $p = 0{,}03$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance une pièce 4 fois. Quelle est la probabilité d’obtenir exactement deux fois face ?</p></div>
+            <div class="b-sol"><p>$\binom{4}{2} \cdot 0{,}5^4 = \tfrac{6}{16} = 0{,}375$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une machine produit 5 % de rebut. On contrôle 10 pièces. Quelle est la probabilité de n’en trouver aucune défectueuse, exactement une, au moins deux ?</p></div>
+            <div class="b-sol"><p>$0{,}95^{10} \approx 0{,}599$ · $10 \cdot 0{,}05 \cdot 0{,}95^9 \approx 0{,}315$ · $1 - 0{,}599 - 0{,}315 \approx 0{,}086$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une basketteuse marque avec une probabilité de 70 %. Quelle est la probabilité qu’elle marque exactement quatre fois sur 5 tirs ?</p></div>
+            <div class="b-sol"><p>$\binom{5}{4} \cdot 0{,}7^4 \cdot 0{,}3 \approx 0{,}360$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Combien de pièces faut-il au moins contrôler dans la production à 5 % de rebut pour trouver au moins une pièce défectueuse avec une probabilité supérieure à 95 % ?</p></div>
+            <div class="b-sol"><p>$1 - 0{,}95^n > 0{,}95$, donc $0{,}95^n < 0{,}05$. Tableau de la calculatrice : $n = 58$ donne $0{,}949$, $n = 59$ donne $0{,}952$. <span class="b-res">Au moins 59 pièces.</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,375" data-ph="nombre décimal"><p class="b-q-text">Quatre lancers de pièce : quelle est la probabilité d’obtenir exactement deux fois face ?</p><div class="b-sol"><p>$\tfrac{6}{16}$</p></div></div>
+        <div class="b-q" data-ans="0,599" data-tol="0.001" data-ph="nombre décimal"><p class="b-q-text">5 % de rebut, 10 pièces : quelle est la probabilité qu’aucune ne soit défectueuse (trois décimales) ?</p><div class="b-sol"><p>$0{,}95^{10}$</p></div></div>
+        <div class="b-q" data-ans="0,264" data-tol="0.001" data-ph="nombre décimal"><p class="b-q-text">5 questions à 4 réponses chacune, au hasard : quelle est la probabilité d’avoir exactement 2 réponses justes (trois décimales) ?</p><div class="b-sol"><p>$\approx 0{,}264$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="21">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $\binom{8}{3}$ et $\dfrac{8!}{5!}$. De quel facteur diffèrent-ils, et pourquoi ?</p></div>
+            <div class="b-sol"><p>$56$ et $336$. Facteur $3! = 6$ : c’est le nombre d’ordres possibles de chaque groupe de trois.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 2.2 :</b> une roue de loterie s’arrête sur le rouge avec $p = 0{,}2$ et on la fait tourner trois fois. Calcule $P(\text{exactement une fois rouge})$ avec l’arbre et avec la formule de Bernoulli.</p></div>
+            <div class="b-sol"><p>Trois chemins de probabilité $0{,}2 \cdot 0{,}8^2 = 0{,}128$ chacun, en tout $0{,}384$. Formule : $\binom31 \cdot 0{,}2 \cdot 0{,}8^2 = 0{,}384$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une roue de loterie avec $P(\text{rouge}) = \tfrac13$ tourne 6 fois. Quelle est la probabilité d’obtenir au plus une fois rouge ?</p></div>
+            <div class="b-sol"><p>$\left(\tfrac23\right)^6 + 6 \cdot \tfrac13 \cdot \left(\tfrac23\right)^5 = \tfrac{64}{729} + \tfrac{192}{729} = \tfrac{256}{729} \approx 0{,}351$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un mot de passe a 8 caractères choisis parmi 26 minuscules, 26 majuscules et 10 chiffres. Un ordinateur essaie 10 milliards de mots de passe par seconde. Combien de temps lui faut-il au maximum ?</p></div>
+            <div class="b-sol"><p>$62^8 \approx 2{,}18 \cdot 10^{14}$ mots de passe. $\tfrac{2{,}18 \cdot 10^{14}}{10^{10}} \approx 21\,800$ s, soit un peu plus de 6 heures. Des mots de passe plus longs aident énormément : avec 12 caractères, il faudrait des millénaires.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : un triangle aux nombreux noms" data-toc-k="X" data-toc-short="Triangle">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Un triangle aux nombreux noms</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En Europe, le triangle de nombres du widget porte le nom de Blaise Pascal, qui lui consacra tout un traité en 1654 et l’utilisa pour les probabilités.
+                Mais il était connu bien plus tôt : en Chine, il porte le nom de Yang Hui, et en 1303 Zhu Shijie le reproduisit dans son livre « Le Miroir précieux des quatre éléments », pour les puissances jusqu’à la huitième.
+                Des mathématiciens persans et indiens le connaissaient aussi.</p>
+            <p>Les lignes donnent les nombres $\binom{n}{k}$, c’est-à-dire le nombre de chemins avec $k$ succès dans un schéma de Bernoulli. Et elles se cachent dans les identités remarquables :
+                $(a + b)^3 = 1a^3 + 3a^2b + 3ab^2 + 1b^3$, exactement la troisième ligne $1, 3, 3, 1$.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> Blaise Pascal, « Traité du triangle arithmétique » (rédigé en 1654, imprimé en 1665). · Zhu Shijie, « Siyuan yujian » (Le Miroir précieux des quatre éléments), 1303.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>PRINCIPE MULTIPLICATIF</h4><p>Multiplier les nombres de possibilités des étapes.</p></div>
+        <div><p>Menu : $3 \cdot 4 \cdot 2 = 24$</p></div></div>
+    <div class="b-rueck"><div><h4>PERMUTATION</h4><p>$n!$ rangements ; avec des objets identiques, diviser par leurs factorielles.</p></div>
+        <div><p>ANANAS : $\tfrac{6!}{3! \cdot 2!} = 60$</p></div></div>
+    <div class="b-rueck"><div><h4>ARRANGEMENT ET COMBINAISON</h4><p>L’ordre compte : $\tfrac{n!}{(n - k)!}$ ou $n^k$. L’ordre ne compte pas : $\binom{n}{k}$.</p></div>
+        <div><p>Podium : 336 · finale : 56</p></div></div>
+    <div class="b-rueck"><div><h4>MODÈLE DE L’URNE</h4><p>Ordre ? Remise ? Quatre cas de base. Deux sortes sans remise : produit de coefficients binomiaux divisé par $\binom{N}{n}$.</p></div>
+        <div><p>3 bons numéros : $\tfrac{20 \cdot 12\,341}{13\,983\,816} \approx 0{,}018$</p></div></div>
+    <div class="b-rueck"><div><h4>BERNOULLI</h4><p>$P(X = k) = \binom{n}{k} p^k (1 - p)^{n - k}$ · $P(X \geq 1) = 1 - (1 - p)^n$</p></div>
+        <div><p>Au hasard : $10 \cdot 0{,}25^2 \cdot 0{,}75^3 \approx 0{,}264$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="120" data-ph="nombre"><p class="b-q-text">Calcule $5!$.</p><div class="b-sol"><p>$120$</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="nombre"><p class="b-q-text">Calcule $\binom{5}{2}$.</p><div class="b-sol"><p>$\tfrac{5 \cdot 4}{2}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Le loto « 6 sur 49 » correspond à un tirage …</p><div class="b-mc"><button>avec ordre, avec remise</button><button>sans ordre, sans remise</button><button>avec ordre, sans remise</button></div><div class="b-sol"><p>Aucun numéro en double, l’ordre ne compte pas.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="0,0177" data-tol="0.0002" data-ph="nombre décimal"><p class="b-q-text">Quelle est la probabilité d’avoir exactement trois bons numéros au loto (quatre décimales) ?</p><div class="b-sol"><p>$\approx 0{,}0177$</p></div></div>
+            <div class="b-q" data-ans="59" data-ph="pièces"><p class="b-q-text">5 % de rebut : combien de pièces faut-il contrôler pour en trouver au moins une défectueuse avec plus de 95 % de probabilité ?</p><div class="b-sol"><p>59</p></div></div>
+            <div class="b-q" data-ans="0,360" data-tol="0.001" data-ph="nombre décimal"><p class="b-q-text">Taux de réussite de 70 %, 5 tirs : quelle est la probabilité d’exactement 4 réussites ?</p><div class="b-sol"><p>$5 \cdot 0{,}7^4 \cdot 0{,}3$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos11-zaehlprinzip.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRINCIPE MULTIPLICATIF</span><span class="b-lab-what">Permutations, factorielle</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-kombination-variation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COMBINAISON ET ARRANGEMENT</span><span class="b-lab-what">Coefficient binomial, loto</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-urnenmodell.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MODÈLE DE L’URNE</span><span class="b-lab-what">Les quatre cas de base</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-bernoulli.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SCHÉMAS DE BERNOULLI</span><span class="b-lab-what">Formule de Bernoulli</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-ka3.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRÊT POUR LE DEVOIR SURVEILLÉ 3</span><span class="b-lab-what">Tout le domaine d’apprentissage 2</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-uebung-stochastik.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRAÎNEMENT PROBABILITÉS</span><span class="b-lab-what">Exercices variés</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Fachoberschule, 11e année · domaine d’apprentissage 2 d’après le programme de mathématiques de la Fachoberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+</body>
+</html>
