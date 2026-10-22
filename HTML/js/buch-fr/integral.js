@@ -69,6 +69,8 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-3 mathe13-fr:
         // bestand: a no-break space before the colon after "$t = …$" (the phrase below turns the words)
         [/(Bestand nach \$t = [^$]*\$):/g, '$1 :'],
+        // zwischenflaeche: the list of intersections ("0,785, 3,927") is separated by semicolons, as the numbers have a decimal comma
+        [/(Schnittstellen: [^<]*)/g, m => m.replace(/\$, \$/g, '$ ; $')],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     ]

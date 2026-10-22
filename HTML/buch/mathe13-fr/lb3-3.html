@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 13 · Chapitre 3.3 · Calculs d’aires | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Entre une courbe et l’axe des x, entre deux courbes. Chapitre 3.3 du manuel interactif Mathématiques · Berufliches Gymnasium 13 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 13</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 3.3 · DOMAINE D’APPRENTISSAGE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 3.3 · DOMAINE D’APPRENTISSAGE 3 · FIN SEPTEMBRE · OCTOBRE</p>
+            <h1>Calculs d’aires</h1>
+            <p class="b-hero-lead">Une intégrale peut être nulle alors que la courbe délimite une grande surface. En effet, sous l’axe des $x$, l’aire compte négativement.
+                Pour obtenir une vraie <b>aire</b>, il faut découper aux zéros. Et pour l’aire <b>entre deux courbes</b>, il te faut leurs abscisses d’intersection.
+                Avec ces deux idées, tu calcules des aires qu’on n’obtiendrait jamais avec les formules de la géométrie.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">AVEC ET SANS CAS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["-(x^2)+4","x+2"]' data-labels='["f","g"]' data-lat="[1.6,-3]" data-pts="[[-2,0],[1,3]]" data-x="-3.5,2.5" data-y="-2,5" data-h="240" data-aria="Aire entre une parabole et une droite"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>calculer des aires entre une courbe et l’axe des $x$, aussi <b>sous</b> l’axe</li>
+                <li><b>découper aux zéros</b> et additionner des valeurs absolues</li>
+                <li>calculer des aires <b>entre deux courbes</b> à l’aide de la fonction différence et des abscisses d’intersection</li>
+                <li>résoudre des problèmes d’application avec le CAS</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">L’équation $x^2 - 4 = 0$ a deux solutions. Donne la solution positive.</p><div class="b-sol"><p>$x = \pm 2$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">En quelle abscisse $x > 0$ les courbes de $y = x^2$ et $y = x$ se coupent-elles ?</p><div class="b-sol"><p>$x^2 = x \Rightarrow x(x - 1) = 0$, donc $x = 1$ (et $x = 0$)</p></div></div>
+            <div class="b-q" data-ans="-4" data-ph="valeur"><p class="b-q-text">Calcule $\int_0^2 (x^3 - 4x)\,\mathrm{d}x$.</p><div class="b-sol"><p>$\Big[\tfrac14 x^4 - 2x^2\Big]_0^2 = 4 - 8 = -4$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="valeur absolue"><p class="b-q-text">Combien vaut $|-4|$ ?</p><div class="b-sol"><p>4</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">ZÉRO, ET POURTANT PAS RIEN</div>
+            <div class="b-text"><p>Calculez $\int_{-1}^{2} (x^2 - 1)\,\mathrm{d}x$ et tracez la courbe.</p>
+                <ul><li>L’intégrale vaut 0. La surface délimitée est-elle nulle aussi ?</li><li>Comment obtenez-vous la vraie aire ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA FEUILLE</div>
+            <div class="b-text"><p>Les courbes de $y = x^2$ et $y = \sqrt{x}$ délimitent entre 0 et 1 une surface en forme de feuille.</p>
+                <ul><li>Estimez son aire en comptant les carreaux.</li><li>Comment pourrait-on la calculer avec deux intégrales ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE TUNNEL</div>
+            <div class="b-text"><p>La section d’un tunnel est décrite par $f(x) = -0{,}25x^2 + 4$ (en m) au-dessus du sol.</p>
+                <ul><li>Quelle est la largeur et la hauteur du tunnel ?</li><li>Combien de mètres carrés mesure sa section ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Courbe et axe des x" data-toc-k="1" data-toc-short="1 Axe des x">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Aire entre une courbe et l’axe des $x$</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$\int_{-1}^{2} (x^2 - 1)\,\mathrm{d}x = 0$. Pourtant, entre $-1$ et $1$ la courbe est sous l’axe, entre $1$ et $2$ au-dessus. Les deux parties se compensent exactement.</p></div></div>
+            <div class="b-text"><p>Calculées séparément : $\int_{-1}^{1} (x^2 - 1)\,\mathrm{d}x = -\tfrac43$ et $\int_{1}^{2} (x^2 - 1)\,\mathrm{d}x = \tfrac43$. L’aire vaut $\tfrac43 + \tfrac43 = \tfrac83$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · AIRE AVEC L’AXE DES x</div>
+                <div class="b-text">
+                    <p><b>1.</b> Déterminer les zéros de $f$ dans l’intervalle $[a\,;\,b]$.</p>
+                    <p><b>2.</b> Intégrer séparément entre deux zéros voisins (et les bornes).</p>
+                    <p><b>3.</b> Additionner les <b>valeurs absolues</b> des intégrales partielles : $A = \left|\int_a^{x_1} f\,\mathrm{d}x\right| + \left|\int_{x_1}^{b} f\,\mathrm{d}x\right| + \ldots$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>La symétrie aide :</b> pour une courbe symétrique par rapport à l’origine, les aires à gauche et à droite sont égales ; pour une courbe symétrique par rapport à l’axe des $y$ aussi.</p>
+            <p class="b-note"><b>Sans bornes :</b> « l’aire que la courbe délimite avec l’axe des $x$ » désigne l’aire entre les zéros.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · INTÉGRALE ET AIRE</div>
+        <p class="b-help" style="margin:0 0 12px">Fais passer les bornes au-delà d’un zéro et compare l’intégrale avec l’aire.</p>
+        <div data-widget="integral"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · DEUX PARTIES ÉGALES</div>
+            <div class="b-text"><p>Quelle aire la courbe de $f(x) = x^3 - 4x$ délimite-t-elle avec l’axe des $x$ ?</p></div>
+            <div class="b-sol"><p>Zéros $-2$, $0$, $2$. $\int_0^2 (x^3 - 4x)\,\mathrm{d}x = -4$, par symétrie $\int_{-2}^0 = 4$. <span class="b-res">$A = 4 + 4 = 8$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · LE TUNNEL</div>
+            <div class="b-text"><p>Quelle est l’aire de la section du tunnel $f(x) = -0{,}25x^2 + 4$ ?</p></div>
+            <div class="b-sol"><p>Zéros $\pm 4$ : 8 m de large, 4 m de haut. $A = \int_{-4}^{4} (-0{,}25x^2 + 4)\,\mathrm{d}x = \Big[-\tfrac{1}{12}x^3 + 4x\Big]_{-4}^{4} = \tfrac{32}{3} + \tfrac{32}{3} \approx 21{,}3$ m².</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule l’aire entre la courbe et l’axe des $x$ : a) $f(x) = -x^2 + 4$ &nbsp; b) $f(x) = x^2 - 4$</p></div>
+            <div class="b-sol"><p>a) $\int_{-2}^{2} (-x^2 + 4)\,\mathrm{d}x = \tfrac{32}{3} \approx 10{,}67$ &nbsp; b) image symétrique, même aire $\tfrac{32}{3}$ (l’intégrale vaut $-\tfrac{32}{3}$).</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule l’aire que $f(x) = \sin x$ délimite avec l’axe des $x$ sur l’intervalle $[0\,;\,2\pi]$.</p></div>
+            <div class="b-sol"><p>Zéro en $\pi$ : $\int_0^{\pi} \sin x\,\mathrm{d}x = 2$, $\int_{\pi}^{2\pi} \sin x\,\mathrm{d}x = -2$. $A = 4$ (l’intégrale vaut 0).</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Calcule l’aire que $f(x) = x^3 - x$ délimite avec l’axe des $x$.</p></div>
+            <div class="b-sol"><p>Zéros $-1$, $0$, $1$. $\int_0^1 (x^3 - x)\,\mathrm{d}x = -\tfrac14$, par symétrie : $A = 2 \cdot \tfrac14 = \tfrac12$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Pour quel $a > 0$ la courbe de $f(x) = -x^2 + a^2$ délimite-t-elle avec l’axe des $x$ une aire de 36 ?</p></div>
+            <div class="b-sol"><p>$A = \int_{-a}^{a} (a^2 - x^2)\,\mathrm{d}x = 2a^3 - \tfrac23 a^3 = \tfrac43 a^3 = 36 \Rightarrow a^3 = 27 \Rightarrow a = 3$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="8/3" data-tol="0.001" data-ph="A ="><p class="b-q-text">Aire entre $f(x) = x^2 - 1$ et l’axe des $x$ sur l’intervalle $[-1\,;\,2]$ ?</p><div class="b-sol"><p>$\tfrac43 + \tfrac43 = \tfrac83$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="A ="><p class="b-q-text">Aire sous $\sin x$ sur l’intervalle $[0\,;\,2\pi]$ (avec valeurs absolues) ?</p><div class="b-sol"><p>$2 + 2 = 4$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Entre deux courbes" data-toc-k="2" data-toc-short="2 Deux courbes">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Aire entre deux courbes</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La parabole $f(x) = -x^2 + 4$ et la droite $g(x) = x + 2$ se coupent en $x = -2$ et $x = 1$. Entre les deux, la parabole est au-dessus.</p></div></div>
+            <div class="b-text"><p>L’aire comprise entre elles est « aire sous $f$ moins aire sous $g$ », c’est-à-dire l’intégrale de la <b>fonction différence</b> $d(x) = f(x) - g(x) = -x^2 - x + 2$.
+                Peu importe que les courbes soient au-dessus ou au-dessous de l’axe des $x$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · AIRE ENTRE DEUX COURBES</div>
+                <div class="b-text">
+                    <p><b>1.</b> Déterminer les abscisses d’intersection en résolvant $f(x) = g(x)$.</p>
+                    <p><b>2.</b> Entre deux abscisses d’intersection voisines, calculer $\int (f(x) - g(x))\,\mathrm{d}x$.</p>
+                    <p><b>3.</b> Additionner les valeurs absolues : $A = \sum \left|\int_{x_i}^{x_{i+1}} (f(x) - g(x))\,\mathrm{d}x\right|$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Laquelle est au-dessus ?</b> Avec les valeurs absolues, peu importe. Sans valeurs absolues, il faut calculer « celle du haut moins celle du bas ».</p>
+            <p class="b-note"><b>CAS :</b> les abscisses d’intersection avec le solveur d’équations, les intégrales avec la fonction d’intégration.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · AIRE ENTRE DEUX COURBES</div>
+        <div data-widget="zwischenflaeche"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · PARABOLE ET DROITE</div>
+            <div class="b-text"><p>Calcule l’aire entre $f(x) = -x^2 + 4$ et $g(x) = x + 2$.</p></div>
+            <div class="b-sol"><p>$\int_{-2}^{1} (-x^2 - x + 2)\,\mathrm{d}x = \Big[-\tfrac13 x^3 - \tfrac12 x^2 + 2x\Big]_{-2}^{1} = \tfrac76 - \left(-\tfrac{10}{3}\right) = $ <span class="b-res">$\tfrac92 = 4{,}5$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · TROIS INTERSECTIONS</div>
+            <div class="b-text"><p>Calcule l’aire entre $f(x) = x^3$ et $g(x) = x^2 + 2x$.</p></div>
+            <div class="b-sol"><p>$d(x) = x^3 - x^2 - 2x = x(x + 1)(x - 2)$, abscisses d’intersection $-1$, $0$, $2$.
+                $\int_{-1}^{0} d\,\mathrm{d}x = \tfrac{5}{12}$, $\int_0^2 d\,\mathrm{d}x = -\tfrac83$. <span class="b-res">$A = \tfrac{5}{12} + \tfrac83 = \tfrac{37}{12} \approx 3{,}08$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule l’aire entre $f(x) = x$ et $g(x) = x^2$.</p></div>
+            <div class="b-sol"><p>Abscisses d’intersection 0 et 1 : $\int_0^1 (x - x^2)\,\mathrm{d}x = \tfrac12 - \tfrac13 = \tfrac16$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule l’aire entre $f(x) = 2x$ et $g(x) = x^2$.</p></div>
+            <div class="b-sol"><p>Abscisses d’intersection 0 et 2 : $\int_0^2 (2x - x^2)\,\mathrm{d}x = 4 - \tfrac83 = \tfrac43$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Résous l’exploration « La feuille » : calcule l’aire entre $y = x^2$ et $y = \sqrt{x}$.</p></div>
+            <div class="b-sol"><p>$\int_0^1 (\sqrt{x} - x^2)\,\mathrm{d}x = \tfrac23 - \tfrac13 = \tfrac13$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Calcule l’aire entre $\sin x$ et $\cos x$ de $x = \tfrac{\pi}{4}$ à $x = \tfrac{5\pi}{4}$ (entre les deux, $\sin x$ est au-dessus).</p></div>
+            <div class="b-sol"><p>$\Big[-\cos x - \sin x\Big]_{\pi/4}^{5\pi/4} = \sqrt2 - (-\sqrt2) = 2\sqrt2 \approx 2{,}83$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un logo est formé par la surface comprise entre $f(x) = -\tfrac12 x^2 + 2$ et $g(x) = \tfrac12 x^2 - 2$ (en cm). Combien de cm² faut-il peindre ?</p></div>
+            <div class="b-sol"><p>Abscisses d’intersection $\pm 2$. $\int_{-2}^{2} (4 - x^2)\,\mathrm{d}x = \tfrac{32}{3} \approx 10{,}7$ cm²</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1/6" data-tol="0.0005" data-ph="A ="><p class="b-q-text">Aire entre $y = x$ et $y = x^2$ ?</p><div class="b-sol"><p>$\tfrac16$</p></div></div>
+        <div class="b-q" data-ans="4,5" data-tol="0.0001" data-ph="A ="><p class="b-q-text">Aire entre $f(x) = -x^2 + 4$ et $g(x) = x + 2$ ?</p><div class="b-sol"><p>$\tfrac92$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule l’aire entre $f(x) = x^2 - 2x$ et l’axe des $x$.</p></div>
+            <div class="b-sol"><p>Zéros 0 et 2, $\int_0^2 (x^2 - 2x)\,\mathrm{d}x = \tfrac83 - 4 = -\tfrac43$, $A = \tfrac43$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La tangente à $f(x) = x^2$ au point $(1\,;\,1)$, la courbe de $f$ et l’axe des $y$ délimitent une surface. Calcule son aire.</p></div>
+            <div class="b-sol"><p>Tangente $t(x) = 2x - 1$. $\int_0^1 (x^2 - 2x + 1)\,\mathrm{d}x = \tfrac13 - 1 + 1 = \tfrac13$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relier avec la 12e année :</b> détermine la droite passant par les points extrémaux de $f(x) = x^3 - 3x$ et l’aire qu’elle délimite avec la courbe entre les abscisses des extremums.</p></div>
+            <div class="b-sol"><p>$H(-1\,;\,2)$, $T(1\,;\,-2)$, droite $g(x) = -2x$. $d(x) = x^3 - x$, abscisses d’intersection $-1$, $0$, $1$, $A = 2 \cdot \tfrac14 = \tfrac12$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Pour quel $k > 0$ la droite $y = k$ partage-t-elle en deux parties égales l’aire entre $f(x) = -x^2 + 4$ et l’axe des $x$ ? (Avec le CAS.)</p></div>
+            <div class="b-sol"><p>L’aire au-dessus de $y = k$ : $\tfrac43 (4 - k)^{3/2}$ (segment de parabole) ; elle doit valoir $\tfrac{16}{3}$ : $(4 - k)^{3/2} = 4 \Rightarrow k = 4 - 4^{2/3} \approx 1{,}48$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Archimède et la parabole" data-toc-k="X" data-toc-short="Archimède">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">INTÉGRER IL Y A 2 200 ANS</span></div>
+    <h2>Archimède et le segment de parabole</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Au IIIe siècle avant notre ère, Archimède de Syracuse calcula l’aire d’un segment de parabole, sans aucune primitive. Il remplit la surface de triangles de plus en plus petits
+                et démontra que le segment vaut exactement $\tfrac43$ du plus grand triangle inscrit.</p>
+            <p>Vérifie-le : l’aire entre $y = x^2$ et $y = 1$ vaut $\int_{-1}^{1} (1 - x^2)\,\mathrm{d}x = \tfrac43$. Le plus grand triangle qu’elle contient a pour sommets $(-1\,;\,1)$, $(1\,;\,1)$ et $(0\,;\,0)$ ;
+                son aire vaut 1. Le rapport est exactement $\tfrac43$, comme Archimède l’a démontré il y a plus de 2 000 ans.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> Archimède : La quadrature de la parabole (Tetragonismos), IIIe siècle av. J.-C.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>AVEC L’AXE DES x</h4><p>Découper aux zéros, additionner les valeurs absolues.</p></div>
+        <div><p>$x^2 - 1$ sur $[-1\,;\,2]$ : intégrale 0, aire $\tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>ENTRE DEUX COURBES</h4><p>$A = \sum \left|\int (f - g)\,\mathrm{d}x\right|$ entre les abscisses d’intersection.</p></div>
+        <div><p>Parabole et droite : $\tfrac92$</p></div></div>
+    <div class="b-rueck"><div><h4>SYMÉTRIE</h4><p>Ne calculer qu’une fois les parties égales.</p></div>
+        <div><p>$x^3 - 4x$ : $2 \cdot 4 = 8$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+            <div class="b-q" data-ans="32/3" data-tol="0.002" data-ph="A ="><p class="b-q-text">Aire entre $f(x) = -x^2 + 4$ et l’axe des $x$ ?</p><div class="b-sol"><p>$\tfrac{32}{3}$</p></div></div>
+            <div class="b-q" data-ans="8" data-ph="A ="><p class="b-q-text">Aire entre $f(x) = x^3 - 4x$ et l’axe des $x$ ?</p><div class="b-sol"><p>8</p></div></div>
+            <div class="b-q" data-ans="0,5" data-tol="0.0001" data-ph="A ="><p class="b-q-text">Aire entre $f(x) = x^3 - x$ et l’axe des $x$ ?</p><div class="b-sol"><p>$\tfrac12$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+            <div class="b-q" data-ans="4/3" data-tol="0.001" data-ph="A ="><p class="b-q-text">Aire entre $f(x) = 2x$ et $g(x) = x^2$ ?</p><div class="b-sol"><p>$\tfrac43$</p></div></div>
+            <div class="b-q" data-ans="1/3" data-tol="0.001" data-ph="A ="><p class="b-q-text">Aire entre $y = x^2$ et $y = \sqrt{x}$ ?</p><div class="b-sol"><p>$\tfrac13$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$\int_a^b f(x)\,\mathrm{d}x = 0$. Qu’en déduit-on ?</p>
+                <div class="b-mc"><button>L’aire est nulle.</button><button>Les aires au-dessus et au-dessous de l’axe sont égales, ou $f$ est nulle.</button><button>$f$ n’a pas de zéro.</button></div>
+                <div class="b-sol"><p>Les parts positives et négatives se compensent.</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RÉACTEUR À INTÉGRALES</span><span class="b-lab-what">Des aires sous des courbes</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 13e année · Domaine d’apprentissage 3 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-fr/integral.js"></script>
+</body>
+</html>
