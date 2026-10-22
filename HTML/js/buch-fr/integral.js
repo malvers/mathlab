@@ -21,6 +21,26 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-1 mathe11-fr:
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
+        'Konstante $C$': 'Constante $C$',
+        'Oben: Stammfunktionen F + C (die gewählte hell). Ziehe den Punkt. Unten: f. Die Steigung von F im Punkt ist genau der Funktionswert f(x₀).': 'En haut : primitives F + C (celle choisie en clair). Fais glisser le point. En bas : f. La pente de F au point est exactement la valeur f(x₀) de la fonction.',
+        'Schar von Stammfunktionen': 'Famille de primitives',
+        'Die Funktion f': 'La fonction f',
+        'Wassertank': 'Cuve d’eau',
+        'Zuflussrate in l/min': 'Débit entrant en l/min',
+        'Wasser in l': 'Eau en l',
+        'Bis $t = 6$ fließt Wasser zu, danach läuft es ab (negative Änderungsrate). Der Bestand ist bei $t = 6$ am größten.': 'Jusqu’à $t = 6$, l’eau entre, ensuite elle s’écoule (taux de variation négatif). La quantité est maximale en $t = 6$.',
+        'Autofahrt': 'Trajet en voiture',
+        'Die Fläche unter dem Geschwindigkeitsgraphen ist der zurückgelegte Weg.': 'L’aire sous la courbe de la vitesse est la distance parcourue.',
+        'Änderungsrate mit Fläche': 'Taux de variation avec l’aire',
+        'Rekonstruierter Bestand': 'Quantité reconstituée',
+        'Zeit $t$': 'Temps $t$',
+        'Bestimmtes Integral zwischen zwei Grenzen': 'Intégrale définie entre deux bornes',
+        'Parabel und Gerade': 'Parabole et droite',
+        'Kubik und Parabel': 'Cubique et parabole',
+        'Sinus und Kosinus': 'Sinus et cosinus',
+        'Funktionen': 'Fonctions',
+        'Fläche zwischen zwei Graphen': 'Aire entre deux courbes',
+        'Zu wenige Schnittstellen im Bild.': 'Trop peu de points d’intersection dans l’image.',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     },
@@ -28,6 +48,18 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-1 mathe11-fr:
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
+        ['$ · Stammfunktionen $F(x) = ', '$ · primitives $F(x) = '],
+        [' + C$, denn $F\'(x) = f(x)$.', ' + C$, car $F\'(x) = f(x)$.'],
+        ['Bei $x_0 = ', 'En $x_0 = '],
+        ['$: Steigung von $F$ $= f(', '$ : pente de $F$ $= f('],
+        ['$, egal welches $C$.', '$, quel que soit $C$.'],
+        ['$ · Anfangsbestand $', '$ · quantité initiale $'],
+        ['Bestand nach $t = ', 'Quantité après $t = '],
+        ['Teilstücke zwischen den Nullstellen: ', 'Morceaux entre les zéros : '],
+        ['Flächeninhalt zwischen Graph und $x$-Achse: $A \\approx ', 'Aire entre la courbe et l’axe des $x$ : $A \\approx '],
+        [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · L’intégrale est plus petite, car les aires sous l’axe (en rouge) comptent négativement.'],
+        [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Attention : $a > b$ change le signe.'],
+        ['$ · Schnittstellen: ', '$ · intersections : '],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     ],
