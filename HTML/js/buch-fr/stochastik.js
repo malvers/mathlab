@@ -23,6 +23,54 @@ window.BuchFR && BuchFR.add('stochastik', {
         'unvereinbar': 'incompatibles',
         // book fr-1 mathe11-fr:
         // book fr-2 mathe12-fr:
+        'Anzahlen (von 10 000)': 'Effectifs (sur 10 000)',
+        'Baumdiagramm: zwei Kugeln ohne Zurücklegen': 'Arbre pondéré : deux boules sans remise',
+        'Anteil der Erkrankten': 'Proportion de malades',
+        'Test erkennt Kranke (Sensitivität)': 'Le test détecte les malades (sensibilité)',
+        'Test erkennt Gesunde (Spezifität)': 'Le test reconnaît les personnes saines (spécificité)',
+        'positiv $T^+$': 'positif $T^+$',
+        'negativ $T^-$': 'négatif $T^-$',
+        'krank $K$': 'malade $M$',
+        'gesund $\\overline{K}$': 'sain $\\overline{M}$',
+        'krank': 'malade',
+        'gesund': 'sain',
+        'Baumdiagramm: krank oder gesund, dann Testergebnis': 'Arbre pondéré : malade ou sain, puis résultat du test',
+        'Unabhängig machen': 'Rendre indépendants',
+        'Unvereinbar machen': 'Rendre incompatibles',
+        'Einheitsquadrat: Anteil von A in B und in nicht B': 'Carré unité : part de A dans B et dans non B',
+        'A und B': 'A et B',
+        'A und nicht B': 'A et non B',
+        'nicht A und B': 'non A et B',
+        'nicht A und nicht B': 'non A et non B',
+        'A gesamt': 'total de A',
+        'nicht A gesamt': 'total de non A',
+        'B gesamt': 'total de B',
+        'nicht B gesamt': 'total de non B',
+        'gesamt': 'total',
+        'Darstellung': 'Représentation',
+        'Wahrscheinlichkeiten': 'Probabilités',
+        'Anzahlen': 'Effectifs',
+        'Neue Tafel': 'Nouveau tableau',
+        'Drei Münzen': 'Trois pièces',
+        'Augensumme': 'Somme des points',
+        'Glücksrad': 'Roue de loterie',
+        'Zufallsgröße': 'Variable aléatoire',
+        'Einsatz': 'Mise',
+        'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Loi de probabilité en diagramme en bâtons',
+        'Spielen:': 'Jouer :',
+        'SPIELE n': 'PARTIES n',
+        'MITTELWERT': 'MOYENNE',
+        'ERWARTUNGSWERT': 'ESPÉRANCE',
+        'LETZTE': 'DERNIÈRES',
+        'Stufen $n$:': 'Épreuves $n$ :',
+        'Anzahl der Stufen': 'Nombre d’épreuves',
+        'Trefferwahrscheinlichkeit $p$': 'Probabilité de succès $p$',
+        'Genau $k$ Treffer:': 'Exactement $k$ succès :',
+        'Anzahl der Treffer': 'Nombre de succès',
+        'Baumdiagramm einer Bernoulli-Kette': 'Arbre d’un schéma de Bernoulli',
+        'Anzahl der Versuche $n$': 'Nombre d’essais $n$',
+        'Was wird berechnet?': 'Que calcule-t-on ?',
+        'Histogramm der Binomialverteilung': 'Histogramme de la loi binomiale',
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
@@ -39,6 +87,37 @@ window.BuchFR && BuchFR.add('stochastik', {
         ['nicht $A$ oder nicht $B$', 'non $A$ ou non $B$'],
         // book fr-1 mathe11-fr:
         // book fr-2 mathe12-fr:
+        ['aber nur <b>', 'mais seulement <b>'],
+        ['</b> davon sind wirklich krank.', '</b> d’entre elles sont vraiment malades.'],
+        ['Anteil der Kranken unter den positiv Getesteten: ', 'Proportion de malades parmi les personnes testées positives : '],
+        ['$ und $P(A \\cap B) = ', '$ et $P(A \\cap B) = '],
+        ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.', '<b>Indépendants :</b> que $B$ se réalise ou non, la part de $A$ reste la même. Dans le carré, la limite est à la même hauteur dans les deux colonnes.'],
+        ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.', '<b>Incompatibles</b> ($A \\cap B = \\emptyset$) et donc <b>dépendants</b> : si $B$ se réalise, $A$ ne peut plus se réaliser.'],
+        ['<b>Abhängig:</b> $B$ verändert die Wahrscheinlichkeit von $A$ ', '<b>Dépendants :</b> $B$ modifie la probabilité de $A$ '],
+        ['nach oben', 'vers le haut'],
+        ['nach unten', 'vers le bas'],
+        [' alles richtig', ' tout est correct'],
+        ['Histogramm einer Binomialverteilung', 'Histogramme d’une loi binomiale'],
+        ['Augenzahl', 'numéro du dé'],
+        ['Anzahl Wappen', 'nombre de faces'],
+        ['Augensumme zweier Würfel', 'somme des points de deux dés'],
+        ['Gewinn = Auszahlung − Einsatz', 'gain = somme versée − mise'],
+        ['Gewinn bei 1 € Einsatz', 'gain pour une mise de 1 €'],
+        [' Auszahlungen 0 €, 1 €, 2 €, 10 € mit den Wahrscheinlichkeiten ', ' Sommes versées 0 €, 1 €, 2 €, 10 € avec les probabilités '],
+        [' Du setzt 1 € auf eine Zahl, dann werden drei Würfel geworfen. Für jeden Würfel mit deiner Zahl bekommst du 1 € Gewinn, sonst ist der Einsatz weg.', ' Tu mises 1 € sur un nombre, puis on lance trois dés. Pour chaque dé qui affiche ton nombre, tu gagnes 1 € ; sinon, la mise est perdue.'],
+        ['Erwartungswert: $E(X)', 'Espérance : $E(X)'],
+        [' · Das Spiel ist <b>fair</b>.', ' · Le jeu est <b>équitable</b>.'],
+        [' · Auf lange Sicht <b>verlierst</b> du im Mittel ', ' · À long terme, tu <b>perds</b> en moyenne '],
+        [' € pro Spiel.', ' € par partie.'],
+        [' · Auf lange Sicht <b>gewinnst</b> du im Mittel ', ' · À long terme, tu <b>gagnes</b> en moyenne '],
+        ['Varianz: $V(X)', 'Variance : $V(X)'],
+        ['$ · Standardabweichung: $\\sigma', '$ · écart type : $\\sigma'],
+        ['$ · Standardabweichung $\\sigma', '$ · écart type $\\sigma'],
+        ['$ · jeder hat die Wahrscheinlichkeit $', '$ · chacun a la probabilité $'],
+        ['Formel von Bernoulli: $P(X = ', 'Formule de Bernoulli : $P(X = '],
+        ['$X$ ist binomialverteilt mit $n = ', '$X$ suit la loi binomiale de paramètres $n = '],
+        ['$ und $p = ', '$ et $p = '],
+        ['Erwartungswert $\\mu', 'Espérance $\\mu'],
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
@@ -46,6 +125,17 @@ window.BuchFR && BuchFR.add('stochastik', {
     rule: [
         // book fr-1 mathe11-fr:
         // book fr-2 mathe12-fr:
+        // letters in the trees: K/G (krank/gesund) → M/S (malade/sain), coins W/Z (Wappen/Zahl) → F/P (face/pile); R/B stay (rouge/bleu)
+        [/(font-weight:700">)K(<\/text>)/g, '$1M$2'], [/(font-weight:700">)G(<\/text>)/g, '$1S$2'],
+        [/(margin-right:10px">)W</g, '$1F<'], [/(margin-right:10px">)Z</g, '$1P<'],
+        // four-field trainer: "3 von 5 richtig"
+        [/(\d+) von (\d+) richtig/g, '$1 sur $2 corrects'],
+        // rapid test: "Positiv getestet werden <b>670</b> von 10 000 Personen – "
+        [/Positiv getestet werden <b>([^<]*)<\/b> von 10 000 Personen – /g, (m, n) => 'Sur 10 000 personnes, <b>' + n + '</b> sont testées positives, '],
+        // zufallsgroesse: the dice button ("Würfel" has two meanings, so no global word); Bernoulli trees: T/N (Treffer/Niete) → S/E (succès/échec)
+        [/(<button type="button" data-v="wuerfel">)Würfel(<\/button>)/g, '$1Dé$2'],
+        [/(<text\b[^>]*>)([TN]{1,4})(<\/text>)/g, (m, a, k, b) => a + k.replace(/T/g, 'S').replace(/N/g, 'E') + b],
+        [/Pfade mit genau (\d+) Treffern: \$/g, 'Chemins avec exactement $1 succès : $'],
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
