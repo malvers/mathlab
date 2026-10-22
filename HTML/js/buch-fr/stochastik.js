@@ -359,7 +359,7 @@ window.BuchFR && BuchFR.add('stochastik', {
         ['$ · Standardabweichung $', '$ · écart type $'],
         // book fr-5 mathefos12-fr:
         ['Klicke auf die Enden der Pfade (rechts im Baum) oder wähle oben ein Ereignis. ', 'Clique sur les extrémités des chemins (à droite dans l’arbre) ou choisis un événement en haut. '],
-        ['Das Buch rechnet dir die Pfadregeln vor.', 'Le livre te montre le calcul avec les règles des chemins.'],
+        ['Das Buch rechnet dir die Pfadregeln vor.', 'Le manuel te montre le calcul avec les règles des chemins.'],
         ['<b>1. Pfadregel</b> (multiplizieren entlang des Pfades):', '<b>1re règle des chemins</b> (multiplier le long du chemin) :'],
         ['<b>2. Pfadregel</b> (Pfade addieren):', '<b>2e règle des chemins</b> (additionner les chemins) :'],
     ],
