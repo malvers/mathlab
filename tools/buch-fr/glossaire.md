@@ -345,6 +345,39 @@ l’accès à l’université, comme le baccalauréat.*
 
 <!-- fr-1: terms of this book only, write right below this line -->
 
+Package fr-1 (Germain), 22.10.2026: decisions made while translating BGY 11; nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| lineare Funktion, lineares Wachstum (3.2) | fonction affine, croissance linéaire | the Merke box of 3.2 names the German term (« fonction linéaire ») once |
+| Buttons of the widgets: Anwenden / Ausführen, Nächster Schritt, Neues LGS, Neue Gleichung, Neue Tafel, 1 Schritt | Appliquer, Étape suivante, Nouveau système, Nouvelle équation, Nouveau tableau, 1 étape | the chapter text quotes them in « » |
+| Glücksrad (lb1) | roue de loterie | |
+| Pfadregeln (1. und 2.) | 1re / 2e règle des chemins (règle du produit / de la somme) | widget baum says the same |
+| Kugeln rot / blau (urn) | boules rouges / bleues | letters R / B stay |
+| Wappen / Zahl | face / pile | letters F / P (rule in js/buch-fr/stochastik.js); lb1 tasks use FFP, PPP |
+| krank $K$ / gesund (rapid test) | malade $M$ / sain $\overline{M}$ | tree letters M / S (rule); lb1: $P_{T^+}(M)$ |
+| Sportverein $S$, Fahrrad $F$ (lb1 lesson 2) | $S$ (sport en club), $V$ (vélo) | the letter F became V in the page text; no widget writes it |
+| Jahrgangsstufe 11 / 12, Jg. 11 | 11e / 12e année, 11e | |
+| Treffer (simulation table head) | SUCCÈS | Monte-Carlo points « dedans » in wb3 |
+| Ziegenproblem: bleiben / wechseln | rester / changer | « Rester à la porte 1 », « Passer à la porte 3 » |
+| graphquiz score « 3 richtig » | « 3 bonnes réponses » | rule in js/buch-fr/funktionen.js |
+| Vierfeld-Trainer « 3 von 5 richtig » | « 3 sur 5 justes » | rule in js/buch-fr/stochastik.js |
+| Tageslänge dates « 21. Jun » | « 21 juin » | rule; janv. févr. mars avr. mai juin juil. août sept. oct. nov. déc. |
+| $\lg$ (Zehnerlogarithmus) | $\log$ | page text and widgets (rule in js/buch-fr/funktionen.js); 3.6 says once « le manuel allemand écrit lg » |
+| Einheitsmatrix $E$ (lb4) | matrice identité $I$ | the Merke box names the German $E$ once |
+| Lösungsmenge $L$, $L = \{(2 - t;\ 1;\ t)\}$ | $S$, $S = \{(2 - t\,;\,1\,;\,t)\}$ | augmented-matrix rows $(0\;\;0\;\;0 \mid c)$ and $(A \mid \vec{b})$ keep their bar |
+| Kerze, Bremsweg, Abkühlen, Weltbevölkerung (regression) | bougie, distance de freinage, refroidissement, population mondiale | |
+| Riesenrad | grande roue | lb3-4 |
+| Hotel von Hilbert | l’hôtel de Hilbert | wb3 |
+| Faustregel der Fahrschule | règle empirique des auto-écoles allemandes | lb3-3, lb3-5 |
+| Diskriminante $D$ (pq-Formel) | discriminant $D$ | lb3-3 adds once: en France $\Delta = b^2 - 4ac$, même signe |
+| Satz von Vieta | relations de Viète | |
+| Excel ZUFALLSBEREICH, ZÄHLENWENN, WENN | ALEA.ENTRE.BORNES, NB.SI, SI | French Excel, with `;` |
+| GeoGebra Löse, NLöse, Nullstelle, TrendLin/TrendPoly/TrendExp, Folge, Zufallszahl, ZähleWenn, Wenn | Solve, NSolve, Root, FitLine/FitPoly/FitExp, Sequence, RandomBetween, CountIf, If | English names, said once per chapter |
+| Mobiltelefon « Fon » (lb2) | smartphone | |
+| Mehrwertsteuer 19 % | TVA (le taux allemand) | lb2 keeps the German 19 % |
+| Lab names | LABORATOIRE DES BINÔMES, AU TABLEAU, SOLIDES, REPÈRE, LABORATOIRE DES PARABOLES, LABORATOIRE DES PUISSANCES, SIMULATION D’ÉPIDÉMIE, DROITE D’AJUSTEMENT, COVARIANCE, TRIGONOMÉTRIE, SYSTÈMES D’ÉQUATIONS, LE JEU DE DÉS, PLANCHE DE GALTON, RÉACTEUR À INTÉGRALES, LABORATOIRE DIFFÉRENTIEL | DOCPAD, CAVALIERI, BATMAN, FOURIER, LISSAJOUS, FIBONACCI, FALLING PI stay |
+
 ## mathe12-fr
 
 <!-- fr-2: terms of this book only, write right below this line -->
