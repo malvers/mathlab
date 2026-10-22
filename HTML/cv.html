@@ -43,6 +43,7 @@
   }
   .langs { display: flex; gap: 7px; flex-wrap: wrap; }
   .lang-btn {
+    display: inline-flex; align-items: center; gap: 7px;
     font-family: "Orbitron", sans-serif; font-weight: 500; font-size: 0.8rem;
     letter-spacing: 0.1em; color: var(--muted);
     background: transparent; border: 1px solid var(--hair); border-radius: 999px;
@@ -60,6 +61,8 @@
     padding: 8px 15px; cursor: pointer; transition: all 0.18s ease;
   }
   .print-btn:hover { background: rgba(255, 255, 255, 0.08); }
+  /* flag before the code – Apple's picture on every system via js/apple-emoji.js */
+  .lang-flag { font-size: 1.35em; line-height: 1; }
 
   /* ---------- edit mode (?edit=1): login + save in the topbar ---------- */
   .editbar { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
@@ -87,14 +90,14 @@
   @keyframes cv-breathe { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
 
   /* ---------- login dialog (pencil) ---------- */
-  .login-overlay {
+  .login-overlay, .docs-overlay {
     position: fixed; inset: 0; z-index: 100;
     display: flex; align-items: center; justify-content: center;
     background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(6px);
     padding: 16px;
   }
-  .login-overlay[hidden] { display: none; }
-  .login-dlg {
+  .login-overlay[hidden], .docs-overlay[hidden] { display: none; }
+  .login-dlg, .docs-dlg {
     position: relative; width: min(360px, 100%);
     display: flex; flex-direction: column; gap: 12px;
     background: linear-gradient(160deg, #2a2d34 0%, var(--card) 38%, #121316 100%);
@@ -102,11 +105,11 @@
     padding: 26px 24px 20px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
   }
-  .login-dlg::before {
+  .login-dlg::before, .docs-dlg::before {
     content: ""; position: absolute; top: -1px; left: 12%; right: 12%; height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
   }
-  .login-dlg h3 {
+  .login-dlg h3, .docs-dlg h3 {
     font-family: "Orbitron", sans-serif; font-weight: 500;
     font-size: 0.95rem; color: #ffffff;
     letter-spacing: 0.22em; text-transform: uppercase;
@@ -114,12 +117,12 @@
     background: linear-gradient(90deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12) 55%, transparent 95%)
                 bottom left / 100% 2px no-repeat;
   }
-  .login-dlg input {
+  .login-dlg input, .docs-dlg input {
     font: inherit; font-size: 0.9rem; color: var(--text);
     background: rgba(255, 255, 255, 0.05); border: 1px solid var(--hair);
     border-radius: 999px; padding: 10px 16px; width: 100%;
   }
-  .login-dlg input:focus { outline: none; border-color: var(--hair-strong); }
+  .login-dlg input:focus, .docs-dlg input:focus { outline: none; border-color: var(--hair-strong); }
   .login-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
   .login-go { color: #17181b; background: var(--text); border-color: var(--text); font-weight: 700; }
   .login-go:hover { background: #ffffff; }
@@ -135,6 +138,80 @@
   .edit-toggle:hover { color: var(--text); border-color: var(--hair-strong); }
   .edit-toggle.on, .edit-toggle.on:hover { color: #3fae6d; border-color: #3fae6d; }
   [contenteditable] { outline: 1px dashed var(--hair-strong); outline-offset: 3px; border-radius: 3px; }
+
+  /* ---------- documents dialog: grid of first pages, then all pages of one document ---------- */
+  html.docs-open { overflow: hidden; }
+  .docs-dlg {
+    width: min(800px, 100%);
+    max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+    padding: 22px 0 0; gap: 14px;
+  }
+  .docs-dlg [hidden] { display: none !important; }
+  .docs-head { display: flex; align-items: center; gap: 8px; padding: 0 22px; }
+  .docs-head h3 { flex: 1; min-width: 0; margin-bottom: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .docs-body {
+    overflow-y: auto; overscroll-behavior: contain; padding: 4px 22px 24px;
+    scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  }
+  .docs-body::-webkit-scrollbar { width: 8px; }
+  .docs-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 999px; }
+  .icon-btn {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; color: var(--muted);
+    background: transparent; border: 1px solid var(--hair); border-radius: 999px;
+    cursor: pointer; transition: all 0.18s ease;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--hair-strong); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  /* copy link: the chain turns into a green tick for a moment */
+  .icon-btn .ok, .icon-btn.done .ic { display: none; }
+  .icon-btn.done .ok { display: block; }
+  .icon-btn.done, .icon-btn.done:hover { color: #3fae6d; border-color: #3fae6d; }
+  /* password form (locked documents) */
+  .docs-lock {
+    display: flex; flex-direction: column; gap: 12px;
+    max-width: 340px; margin: 22px auto 14px; text-align: center;
+  }
+  .docs-lock .docs-note { margin-bottom: 4px; }
+  .docs-lock input { font-size: 1rem; }  /* 16px: no zoom-on-focus on iPhone */
+  .docs-lock .login-go { align-self: center; min-width: 150px; }
+  .docs-lock .edit-status { align-self: center; }
+  .docs-note { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+  .docs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px 20px; }
+  .doc-card {
+    display: flex; flex-direction: column; gap: 4px; text-align: left;
+    font: inherit; color: var(--text); background: transparent; border: none; padding: 0;
+    cursor: pointer;
+  }
+  .doc-card img {
+    display: block; width: 100%; aspect-ratio: 210 / 297; margin-bottom: 6px;
+    object-fit: cover; object-position: top; background: #fff;
+    border: 1px solid var(--hair); border-radius: 6px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    transition: transform 0.18s ease, border-color 0.18s ease;
+  }
+  .doc-card:hover img, .doc-card:focus-visible img { transform: translateY(-3px); border-color: var(--hair-strong); }
+  /* more than one page: a second sheet peeks out behind the first */
+  .doc-card.multi img { box-shadow: 5px 5px 0 -1px #c9ccd1, 0 8px 22px rgba(0, 0, 0, 0.45); }
+  .docs-group {
+    font-family: "Orbitron", sans-serif; font-weight: 500; font-size: 0.78rem;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    margin: 30px 0 14px;
+  }
+  .docs-group:first-child { margin-top: 0; }
+  .doc-card:focus-visible { outline: none; }
+  .docs-dlg .dt { display: block; font-weight: 600; font-size: 0.88rem; line-height: 1.35; }
+  .docs-dlg .ds { display: block; color: var(--muted); font-size: 0.8rem; line-height: 1.35; }
+  .docs-cap { margin-bottom: 14px; }
+  .docs-cap .dt { font-size: 1rem; }
+  .docs-cap .ds { font-size: 0.85rem; }
+  .docs-pages { display: flex; flex-direction: column; gap: 16px; }
+  .docs-pages a { display: block; cursor: zoom-in; }
+  .docs-pages img:not([src]) { aspect-ratio: 210 / 297; }
+  .docs-pages img {
+    display: block; width: 100%; height: auto; background: #fff;
+    border-radius: 6px; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  }
   [contenteditable]:focus { outline: 1px solid #fff; }
 
   /* ---------- card ---------- */
@@ -226,13 +303,21 @@
     .contact .row { line-height: 1.7; }
     .job-head { flex-direction: column; gap: 0; }
     p.lead, ul.plain li { text-align: left; }
+    .docs-overlay { padding: 8px; }
+    .docs-dlg { max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); padding-top: 16px; }
+    .docs-head { padding: 0 14px; gap: 6px; }
+    .docs-body { padding: 4px 14px 18px; }
+    .docs-grid { grid-template-columns: repeat(2, 1fr); gap: 18px 14px; }
+    /* phone: flags only, so all five fit in one row */
+    .lang-code { display: none; }
+    .lang-btn { padding: 7px 11px; }
   }
 
   /* ---------- print: clean light CV, greyscale, A4 ---------- */
   @media print {
     @page { size: A4; margin: 12mm 15mm 16mm; } /* extra bottom room for our own footer */
     body { background: #fff; color: #1c1e21; padding: 0; font-size: 10.5pt; line-height: 1.45; }
-    .topbar, footer, noscript, .login-overlay { display: none !important; }
+    .topbar, footer, noscript, .login-overlay, .docs-overlay { display: none !important; }
     [contenteditable] { outline: none !important; }
     .wrap { max-width: none; }
     .card { background: #fff; border: none; box-shadow: none; border-radius: 0; padding: 0; }
@@ -295,6 +380,7 @@
     <div class="editbar" id="editBar" hidden>
       <span class="edit-status" id="editStatus"></span>
     </div>
+    <button class="print-btn" id="docsBtn" type="button">Dokumente</button>
     <button class="print-btn" id="printBtn" type="button" onclick="window.print()">Drucken / PDF</button>
   </div>
 
@@ -326,10 +412,58 @@
   </div>
 </div>
 
+<!-- Documents dialog (button left of print): scans of certificates and references -->
+<div class="docs-overlay" id="docsOverlay" hidden>
+  <div class="docs-dlg" role="dialog" aria-modal="true" aria-labelledby="docsTitle">
+    <div class="docs-head">
+      <button class="icon-btn" id="docsGridBtn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/>
+          <rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/>
+        </svg>
+      </button>
+      <h3 id="docsTitle">Dokumente</h3>
+      <button class="icon-btn" id="docsPrev" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button class="icon-btn" id="docsNext" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="icon-btn" id="docsLink" type="button">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/>
+        </svg>
+        <svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </button>
+      <button class="icon-btn" id="docsLockBtn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="docsClose" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="docs-body" id="docsBody">
+      <form class="docs-lock" id="docsLock" autocomplete="on" hidden>
+        <p class="docs-note" id="docsLockNote"></p>
+        <input name="username" autocomplete="username" value="cv-dokumente" hidden> <!-- for the password manager -->
+        <input id="docsPw" name="password" type="password" autocomplete="current-password" required>
+        <button class="print-btn login-go" id="docsGo" type="submit"></button>
+        <span class="edit-status" id="docsStatus"></span>
+      </form>
+      <p class="docs-note" id="docsNote"></p>
+      <div id="docsGrid"></div>
+      <div class="docs-view" id="docsView" hidden></div>
+    </div>
+  </div>
+</div>
+
 <div class="print-footer" id="printFooter" aria-hidden="true"></div>
 
 <noscript>Bitte JavaScript aktivieren. / Please enable JavaScript.</noscript>
 
+<script src="js/apple-emoji.js"></script>
 <script src="js/lade-skript.js"></script>
 <script>
 "use strict";
@@ -732,9 +866,184 @@ const CV = {
 };
 
 /* ============================================================
+   Documents – scans of certificates and references (Doc, 22.10.2026).
+   Pages live in resources/cv-docs/<page>.jpg, the first page of each
+   document also as <page>-thumb.jpg for the grid.
+   ============================================================ */
+const DOCS_DIR = "resources/cv-docs/";
+
+const DOCS_UI = {
+  de: { label: "Dokumente", note: "Scans der Originaldokumente. Ein Klick auf eine Seite öffnet sie in voller Größe.",
+        close: "Schließen", grid: "Übersicht", prev: "Vorheriges Dokument", next: "Nächstes Dokument",
+        link: "Link kopieren", linkDone: "Link kopiert", lock: "Sperren",
+        locked: "Die Dokumente sind passwortgeschützt.", pw: "Passwort", go: "Öffnen",
+        wrong: "Falsches Passwort", busy: "Entschlüsseln …",
+        page: "Seite", pages: "Seiten" },
+  en: { label: "Documents", note: "Scans of the original documents (in German). Click a page to open it at full size.",
+        close: "Close", grid: "Overview", prev: "Previous document", next: "Next document",
+        link: "Copy link", linkDone: "Link copied", lock: "Lock",
+        locked: "The documents are password-protected.", pw: "Password", go: "Open",
+        wrong: "Wrong password", busy: "Decrypting …",
+        page: "Page", pages: "pages" },
+  es: { label: "Documentos", note: "Escaneos de los documentos originales (en alemán). Haga clic en una página para verla a tamaño completo.",
+        close: "Cerrar", grid: "Vista general", prev: "Documento anterior", next: "Documento siguiente",
+        link: "Copiar enlace", linkDone: "Enlace copiado", lock: "Bloquear",
+        locked: "Los documentos están protegidos con contraseña.", pw: "Contraseña", go: "Abrir",
+        wrong: "Contraseña incorrecta", busy: "Descifrando …",
+        page: "Página", pages: "páginas" },
+  fr: { label: "Documents", note: "Scans des documents originaux (en allemand). Cliquez sur une page pour l’ouvrir en taille réelle.",
+        close: "Fermer", grid: "Vue d’ensemble", prev: "Document précédent", next: "Document suivant",
+        link: "Copier le lien", linkDone: "Lien copié", lock: "Verrouiller",
+        locked: "Les documents sont protégés par un mot de passe.", pw: "Mot de passe", go: "Ouvrir",
+        wrong: "Mot de passe incorrect", busy: "Déchiffrement …",
+        page: "Page", pages: "pages" },
+  it: { label: "Documenti", note: "Scansioni dei documenti originali (in tedesco). Clicca su una pagina per aprirla a grandezza intera.",
+        close: "Chiudi", grid: "Panoramica", prev: "Documento precedente", next: "Documento successivo",
+        link: "Copia link", linkDone: "Link copiato", lock: "Blocca",
+        locked: "I documenti sono protetti da password.", pw: "Password", go: "Apri",
+        wrong: "Password errata", busy: "Decrittazione …",
+        page: "Pagina", pages: "pagine" }
+};
+
+/* grid headings – DOCS below is listed in this order (prev/next follows it) */
+const DOCS_GROUPS = {
+  deg: { de: "Abschlüsse", en: "Degrees and qualifications", es: "Títulos y cualificaciones",
+         fr: "Diplômes et qualifications", it: "Titoli e qualifiche" },
+  ref: { de: "Referenzen und Arbeitszeugnisse", en: "References", es: "Referencias",
+         fr: "Références", it: "Referenze" },
+  awd: { de: "Auszeichnungen und Weiterbildung", en: "Awards and professional development",
+         es: "Premios y formación continua", fr: "Distinctions et formation continue",
+         it: "Premi e formazione continua" }
+};
+
+const DOCS = [
+  /* ---- degrees ---- */
+  { g: "deg", pages: ["promotion"],
+    t: { de: "Promotionsurkunde (Dr. rer. nat.)", en: "Doctoral certificate (Dr. rer. nat.)",
+         es: "Título de doctor (Dr. rer. nat.)", fr: "Diplôme de doctorat (Dr. rer. nat.)",
+         it: "Diploma di dottorato (Dr. rer. nat.)" },
+    s: { de: "Freie Universität Berlin, 1998", en: "Freie Universität Berlin, 1998",
+         es: "Freie Universität Berlin, 1998", fr: "Freie Universität Berlin, 1998",
+         it: "Freie Universität Berlin, 1998" } },
+  { g: "deg", pages: ["lehrerlaubnis"],
+    t: { de: "Zeugnis: unbefristete Lehrerlaubnis, Förderschwerpunkt Lernen",
+         en: "Certificate: permanent teaching licence, special needs (learning)",
+         es: "Certificado: habilitación docente indefinida, Pedagogía Terapéutica (aprendizaje)",
+         fr: "Certificat : autorisation d’enseigner permanente, pédagogie spécialisée (apprentissage)",
+         it: "Certificato: abilitazione permanente all’insegnamento, pedagogia speciale (apprendimento)" },
+    s: { de: "Landesamt für Schule und Bildung Sachsen, 2023",
+         en: "Saxon State Office for Schools and Education, 2023",
+         es: "Oficina Estatal de Escuelas y Educación de Sajonia, 2023",
+         fr: "Office régional de l’école et de l’éducation de Saxe, 2023",
+         it: "Ufficio statale per la scuola e l’istruzione della Sassonia, 2023" } },
+  { g: "deg", pages: ["transcript-of-records-1", "transcript-of-records-2"],
+    t: { de: "Transcript of Records, Sonderpädagogik", en: "Transcript of Records, Special Needs Education",
+         es: "Expediente académico, Pedagogía Terapéutica", fr: "Relevé de notes, pédagogie spécialisée",
+         it: "Transcript of Records, pedagogia speciale" },
+    s: { de: "Universität Leipzig, 2023", en: "Leipzig University, 2023", es: "Universidad de Leipzig, 2023",
+         fr: "Université de Leipzig, 2023", it: "Università di Lipsia, 2023" } },
+  { g: "deg", pages: ["diplom"],
+    t: { de: "Diplom-Urkunde Geophysik", en: "Diplom certificate in Geophysics",
+         es: "Título de Diplom en Geofísica", fr: "Diplôme (Diplom) de géophysique",
+         it: "Diploma (Diplom) in Geofisica" },
+    s: { de: "Freie Universität Berlin, 1992", en: "Freie Universität Berlin, 1992",
+         es: "Freie Universität Berlin, 1992", fr: "Freie Universität Berlin, 1992",
+         it: "Freie Universität Berlin, 1992" } },
+  { g: "deg", pages: ["diplom-zeugnis"],
+    t: { de: "Zeugnis über die Diplomprüfung Geophysik", en: "Diplom examination transcript, Geophysics",
+         es: "Certificado de notas del Diplom en Geofísica", fr: "Relevé de notes de l’examen de Diplom en géophysique",
+         it: "Certificato dei voti dell’esame di Diplom in Geofisica" },
+    s: { de: "Freie Universität Berlin, 1992", en: "Freie Universität Berlin, 1992",
+         es: "Freie Universität Berlin, 1992", fr: "Freie Universität Berlin, 1992",
+         it: "Freie Universität Berlin, 1992" } },
+  { g: "deg", pages: ["reifezeugnis-1", "reifezeugnis-2", "reifezeugnis-3"],
+    t: { de: "Reifezeugnis (Abitur) mit Anerkennung in Berlin",
+         en: "School-leaving certificate (Abitur) with recognition in Berlin",
+         es: "Título de bachillerato (Abitur) con reconocimiento en Berlín",
+         fr: "Certificat de fin d’études secondaires (Abitur) avec reconnaissance à Berlin",
+         it: "Diploma di maturità (Abitur) con riconoscimento a Berlino" },
+    s: { de: "Kreisvolkshochschule Freital, 1985", en: "Freital adult evening school, 1985",
+         es: "Escuela nocturna de adultos de Freital, 1985", fr: "Cours du soir pour adultes de Freital, 1985",
+         it: "Scuola serale per adulti di Freital, 1985" } },
+  { g: "deg", pages: ["facharbeiter-porzellangestalter"],
+    t: { de: "Facharbeiter-Urkunde Porzellangestalter", en: "Skilled worker certificate, porcelain designer",
+         es: "Certificado de oficial cualificado, diseñador de porcelana",
+         fr: "Certificat d’ouvrier qualifié, créateur sur porcelaine",
+         it: "Attestato di operaio qualificato, designer di porcellana" },
+    s: { de: "Freital, 1983", en: "Freital, 1983", es: "Freital, 1983", fr: "Freital, 1983", it: "Freital, 1983" } },
+  /* ---- references ---- */
+  { g: "ref", pages: ["gutachten-binnig-1", "gutachten-binnig-2"],
+    t: { de: "Gutachten Prof. Dr. Gerd Binnig (Physik-Nobelpreisträger 1986)",
+         en: "Reference letter from Prof. Dr Gerd Binnig (Nobel Laureate in Physics 1986)",
+         es: "Carta de referencia del Prof. Dr. Gerd Binnig (Premio Nobel de Física 1986)",
+         fr: "Lettre de recommandation du Prof. Dr Gerd Binnig (prix Nobel de physique 1986)",
+         it: "Lettera di referenza del Prof. Dr. Gerd Binnig (Premio Nobel per la Fisica 1986)" },
+    s: { de: "Definiens AG, München, 2012", en: "Definiens AG, Munich, 2012", es: "Definiens AG, Múnich, 2012",
+         fr: "Definiens AG, Munich, 2012", it: "Definiens AG, Monaco di Baviera, 2012" } },
+  { g: "ref", pages: ["harbaugh-1", "harbaugh-2"],
+    t: { de: "Empfehlungsschreiben Prof. John W. Harbaugh", en: "Reference letter from Prof. John W. Harbaugh",
+         es: "Carta de recomendación del Prof. John W. Harbaugh",
+         fr: "Lettre de recommandation du Prof. John W. Harbaugh",
+         it: "Lettera di raccomandazione del Prof. John W. Harbaugh" },
+    s: { de: "Stanford University, 1993", en: "Stanford University, 1993", es: "Stanford University, 1993",
+         fr: "Stanford University, 1993", it: "Stanford University, 1993" } },
+  { g: "ref", pages: ["arbeitszeugnis-ias-1", "arbeitszeugnis-ias-2"],
+    t: { de: "Arbeitszeugnis interActive Systems GmbH", en: "Employment reference, interActive Systems GmbH",
+         es: "Certificado de trabajo, interActive Systems GmbH", fr: "Certificat de travail, interActive Systems GmbH",
+         it: "Referenza di lavoro, interActive Systems GmbH" },
+    s: { de: "Marburg, 2005", en: "Marburg, 2005", es: "Marburgo, 2005", fr: "Marbourg, 2005", it: "Marburgo, 2005" } },
+  { g: "ref", pages: ["arbeitszeugnis-definiens-1", "arbeitszeugnis-definiens-2"],
+    t: { de: "Arbeitszeugnis Definiens AG", en: "Employment reference, Definiens AG",
+         es: "Certificado de trabajo, Definiens AG", fr: "Certificat de travail, Definiens AG",
+         it: "Referenza di lavoro, Definiens AG" },
+    s: { de: "München, 2003", en: "Munich, 2003", es: "Múnich, 2003", fr: "Munich, 2003", it: "Monaco di Baviera, 2003" } },
+  { g: "ref", pages: ["awi-zeugnis"],
+    t: { de: "Zeugnis Alfred-Wegener-Institut (Nordpolarexpedition, FS Polarstern)",
+         en: "Reference, Alfred Wegener Institute (North Pole expedition, RV Polarstern)",
+         es: "Certificado del Instituto Alfred Wegener (expedición al Polo Norte, buque Polarstern)",
+         fr: "Certificat de l’Institut Alfred Wegener (expédition au pôle Nord, navire Polarstern)",
+         it: "Attestato dell’Istituto Alfred Wegener (spedizione al Polo Nord, nave Polarstern)" },
+    s: { de: "Bremerhaven, 1991", en: "Bremerhaven, 1991", es: "Bremerhaven, 1991", fr: "Bremerhaven, 1991",
+         it: "Bremerhaven, 1991" } },
+  /* ---- awards and professional development ---- */
+  { g: "awd", pages: ["red-dot-award"],
+    t: { de: "red dot design award: best of the best (GoPubMed)", en: "red dot design award: best of the best (GoPubMed)",
+         es: "red dot design award: best of the best (GoPubMed)", fr: "red dot design award : best of the best (GoPubMed)",
+         it: "red dot design award: best of the best (GoPubMed)" },
+    s: { de: "Transinsight GmbH, 2009", en: "Transinsight GmbH, 2009", es: "Transinsight GmbH, 2009",
+         fr: "Transinsight GmbH, 2009", it: "Transinsight GmbH, 2009" } },
+  { g: "awd", pages: ["dgg-vortragspreis"],
+    t: { de: "Vortragspreis der Deutschen Geophysikalischen Gesellschaft",
+         en: "Talk award of the German Geophysical Society (DGG)",
+         es: "Premio a la ponencia de la Sociedad Alemana de Geofísica (DGG)",
+         fr: "Prix de communication de la Société allemande de géophysique (DGG)",
+         it: "Premio per la relazione della Società Geofisica Tedesca (DGG)" },
+    s: { de: "55. Jahrestagung, Hamburg 1995", en: "55th Annual Meeting, Hamburg 1995",
+         es: "55.ª reunión anual, Hamburgo 1995", fr: "55e congrès annuel, Hambourg 1995",
+         it: "55° congresso annuale, Amburgo 1995" } },
+  { g: "awd", pages: ["sap-analytics-cloud"],
+    t: { de: "Teilnahmebestätigung SAP Analytics Cloud (SAC01)", en: "Certificate of attendance: SAP Analytics Cloud (SAC01)",
+         es: "Certificado de asistencia: SAP Analytics Cloud (SAC01)",
+         fr: "Attestation de participation : SAP Analytics Cloud (SAC01)",
+         it: "Attestato di partecipazione: SAP Analytics Cloud (SAC01)" },
+    s: { de: "SAP Deutschland, Walldorf, 2018", en: "SAP Deutschland, Walldorf, 2018", es: "SAP Deutschland, Walldorf, 2018",
+         fr: "SAP Deutschland, Walldorf, 2018", it: "SAP Deutschland, Walldorf, 2018" } },
+  { g: "awd", pages: ["dgfp-fuehrungsseminar-1", "dgfp-fuehrungsseminar-2"],
+    t: { de: "Zertifikate Führungsseminar I und II", en: "Leadership seminar certificates I and II",
+         es: "Certificados del seminario de liderazgo I y II", fr: "Certificats du séminaire de leadership I et II",
+         it: "Certificati del seminario di leadership I e II" },
+    s: { de: "Deutsche Gesellschaft für Personalführung (DGFP), München, 2001",
+         en: "German Association for People Management (DGFP), Munich, 2001",
+         es: "Asociación Alemana de Gestión de Personal (DGFP), Múnich, 2001",
+         fr: "Association allemande pour la gestion du personnel (DGFP), Munich, 2001",
+         it: "Associazione tedesca per la gestione del personale (DGFP), Monaco di Baviera, 2001" } }
+];
+
+/* ============================================================
    Rendering – DOM built via createElement (no innerHTML for content)
    ============================================================ */
 const LANG_ORDER = ["de", "en", "es", "fr", "it"];
+const LANG_FLAGS = { de: "🇩🇪", en: "🇬🇧", es: "🇪🇸", fr: "🇫🇷", it: "🇮🇹" };
 
 function el(tag, cls, text) {
   const n = document.createElement(tag);
@@ -819,6 +1128,8 @@ function setLang(code, updateUrl) {
   photo.alt = cv.photoAlt;
   photo.style.display = cv.photo === false ? "none" : "";
   document.getElementById("printBtn").textContent = cv.printLabel;
+  document.getElementById("docsBtn").textContent = DOCS_UI[code].label;
+  Docs.render();
   document.getElementById("printFooter").textContent = cv.docfoot;
   renderContact(document.getElementById("cvContact"), cv.contact);
   renderSections(document.getElementById("cvMain"), cv.sections);
@@ -859,7 +1170,10 @@ if (new URLSearchParams(location.search).get("pdf") === "1") {
 /* build language buttons */
 const nav = document.getElementById("langs");
 for (const code of LANG_ORDER) {
-  const b = el("button", "lang-btn", CV[code].label);
+  const b = el("button", "lang-btn");
+  const flag = el("span", "lang-flag", LANG_FLAGS[code]);
+  flag.setAttribute("aria-hidden", "true");
+  b.append(flag, el("span", "lang-code", CV[code].label));
   b.type = "button";
   b.dataset.lang = code;
   b.lang = code;
@@ -869,6 +1183,288 @@ for (const code of LANG_ORDER) {
   b.addEventListener("click", () => setLang(code, true));
   nav.appendChild(b);
 }
+
+/* documents dialog: grid of first pages ↔ all pages of one document.
+   The scans are encrypted (scripts/cv-docs.mjs): key.json holds the data key
+   wrapped with PBKDF2(password); every <page>.bin is "CVD1" | iv 12 | AES-GCM.
+   The unwrapped key is remembered on the device as a non-extractable CryptoKey
+   in IndexedDB – the password itself is never stored. Direct links:
+   cv.html#docs (overview) and cv.html#docs/<first page> (one document). */
+const Docs = (function () {
+  const $ = (id) => document.getElementById(id);
+  const overlay = $("docsOverlay");
+  const body = $("docsBody");
+  const note = $("docsNote");
+  const grid = $("docsGrid");
+  const view = $("docsView");
+  const form = $("docsLock");
+  const pwIn = $("docsPw");
+  const goBtn = $("docsGo");
+  const statusEl = $("docsStatus");
+  const gridBtn = $("docsGridBtn");
+  const prevBtn = $("docsPrev");
+  const nextBtn = $("docsNext");
+  const linkBtn = $("docsLink");
+  const lockBtn = $("docsLockBtn");
+  const closeBtn = $("docsClose");
+  let current = -1;      /* -1 = grid, else index into DOCS */
+  let dataKey = null;    /* AES-GCM CryptoKey of all scans, null = locked */
+  let checking = false;  /* looking for a key remembered on this device */
+  let urls = {};         /* page name -> promise of a blob: URL */
+  let keyFileP = null;
+
+  const code = () => DOCS_UI[document.documentElement.lang] ? document.documentElement.lang : "en";
+  const docId = (d) => d.pages[0].replace(/-1$/, "");
+  const b64 = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
+
+  /* ---- crypto ---- */
+  function keyFile() {
+    keyFileP = keyFileP || fetch(DOCS_DIR + "key.json", { cache: "no-cache" }).then((r) => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).catch((e) => { keyFileP = null; throw e; });
+    return keyFileP;
+  }
+
+  async function keyFromPassword(pw) {
+    const kf = await keyFile();
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+    const kek = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: b64(kf.salt), iterations: kf.iter, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    let raw;
+    try { raw = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(kf.iv) }, kek, b64(kf.key)); }
+    catch (e) { const err = new Error(DOCS_UI[code()].wrong); err.pw = true; throw err; }
+    return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);  /* non-extractable */
+  }
+
+  /* a remembered key fits as long as the scans were sealed with it (new password = new key) */
+  async function keyFits(key) {
+    const c = b64((await keyFile()).check);
+    try { await crypto.subtle.decrypt({ name: "AES-GCM", iv: c.subarray(0, 12) }, key, c.subarray(12)); return true; }
+    catch (e) { return false; }
+  }
+
+  function blobUrl(name) {
+    urls[name] = urls[name] || fetch(DOCS_DIR + name + ".bin").then(async (r) => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const bin = new Uint8Array(await r.arrayBuffer());
+      const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: bin.subarray(4, 16) }, dataKey, bin.subarray(16));
+      return URL.createObjectURL(new Blob([plain], { type: "image/jpeg" }));
+    }).catch((e) => { delete urls[name]; throw e; });
+    return urls[name];
+  }
+
+  /* IndexedDB "cv-docs", store "keys", entry "data" – every access may fail (private mode) */
+  function idb(mode, fn) {
+    return new Promise((resolve, reject) => {
+      const rq = indexedDB.open("cv-docs", 1);
+      rq.onupgradeneeded = () => rq.result.createObjectStore("keys");
+      rq.onerror = () => reject(rq.error);
+      rq.onsuccess = () => {
+        const tx = rq.result.transaction("keys", mode);
+        const req = fn(tx.objectStore("keys"));
+        tx.oncomplete = () => { rq.result.close(); resolve(req.result); };
+        tx.onerror = () => { rq.result.close(); reject(tx.error); };
+      };
+    });
+  }
+  const loadKey = () => idb("readonly", (st) => st.get("data")).catch(() => null);
+  const saveKey = (key) => idb("readwrite", (st) => st.put(key, "data")).catch(() => {});
+  const dropKey = () => idb("readwrite", (st) => st.delete("data")).catch(() => {});
+
+  /* the dialog unlocks by script, so Chrome would not offer to save the password by itself */
+  function rememberInChrome(pw) {
+    if (!window.PasswordCredential || !navigator.credentials) return Promise.resolve();
+    const store = navigator.credentials.store(
+      new PasswordCredential({ id: "cv-dokumente", name: "Dokumente – Dr. Michael R. Alvers", password: pw })).catch(() => {});
+    return Promise.race([store, new Promise((r) => setTimeout(r, 1500))]);
+  }
+
+  /* ---- rendering ---- */
+  function caption(d) {
+    const L = code();
+    const sub = d.s[L] + (d.pages.length > 1 ? " · " + d.pages.length + " " + DOCS_UI[L].pages : "");
+    return [el("span", "dt", d.t[L]), el("span", "ds", sub)];
+  }
+
+  function fill(img, name, alt) {
+    blobUrl(name).then((u) => { img.src = u; img.alt = alt; }).catch(() => {});
+  }
+
+  function renderGrid() {
+    grid.replaceChildren();
+    let box = null, group = null;
+    DOCS.forEach((d, i) => {
+      if (d.g !== group) {
+        group = d.g;
+        grid.appendChild(el("h4", "docs-group", DOCS_GROUPS[group][code()]));
+        box = grid.appendChild(el("div", "docs-grid"));
+      }
+      const b = el("button", d.pages.length > 1 ? "doc-card multi" : "doc-card");
+      b.type = "button";
+      const img = el("img");
+      fill(img, d.pages[0] + "-thumb", "");
+      b.append(img, ...caption(d));
+      b.addEventListener("click", () => show(i));
+      box.appendChild(b);
+    });
+  }
+
+  function renderView() {
+    const d = DOCS[current];
+    const L = code();
+    const cap = el("p", "docs-cap");
+    cap.append(...caption(d));
+    const pages = el("div", "docs-pages");
+    d.pages.forEach((p, pi) => {
+      const a = el("a");
+      a.target = "_blank";
+      a.rel = "noopener";
+      const img = el("img");
+      img.decoding = "async";
+      blobUrl(p).then((u) => {
+        a.href = img.src = u;
+        img.alt = d.t[L] + (d.pages.length > 1 ? " – " + DOCS_UI[L].page + " " + (pi + 1) : "");
+      }).catch(() => {});
+      a.appendChild(img);
+      pages.appendChild(a);
+    });
+    view.replaceChildren(cap, pages);
+  }
+
+  function status(t, busy) {
+    statusEl.textContent = t;
+    statusEl.classList.toggle("busy", !!busy);
+  }
+
+  /* the address bar always shows a link to what is open – that is what "copy link" sends */
+  function syncHash() {
+    const h = overlay.hidden ? "" : current >= 0 ? "#docs/" + docId(DOCS[current]) : "#docs";
+    if (location.hash !== h) history.replaceState(null, "", location.pathname + location.search + h);
+  }
+
+  function render() {
+    if (overlay.hidden) return;
+    const ui = DOCS_UI[code()];
+    $("docsTitle").textContent = ui.label;
+    note.textContent = ui.note;
+    $("docsLockNote").textContent = ui.locked;
+    pwIn.placeholder = ui.pw;
+    pwIn.setAttribute("aria-label", ui.pw);
+    goBtn.textContent = ui.go;
+    [[closeBtn, ui.close], [gridBtn, ui.grid], [prevBtn, ui.prev], [nextBtn, ui.next],
+     [linkBtn, linkBtn.classList.contains("done") ? ui.linkDone : ui.link], [lockBtn, ui.lock]].forEach(([b, t]) => {
+      b.title = t;
+      b.setAttribute("aria-label", t);
+    });
+    const locked = !dataKey;
+    const inView = !locked && current >= 0;
+    form.hidden = !locked || checking;
+    note.hidden = grid.hidden = locked || inView;
+    view.hidden = !inView;
+    gridBtn.hidden = prevBtn.hidden = nextBtn.hidden = !inView;
+    lockBtn.hidden = locked || inView;
+    if (inView) renderView(); else if (!locked) renderGrid();
+    syncHash();
+  }
+
+  function show(i) {
+    current = i;
+    render();
+    body.scrollTop = 0;
+  }
+
+  async function open(id) {
+    const i = DOCS.findIndex((d) => docId(d) === id);
+    current = i;
+    overlay.hidden = false;
+    document.documentElement.classList.add("docs-open");
+    if (!dataKey) {
+      checking = true;
+      render();
+      try {
+        const key = await loadKey();
+        if (key && await keyFits(key)) dataKey = key;
+        else if (key) await dropKey();
+      } catch (e) { /* offline or no IndexedDB → password form */ }
+      checking = false;
+    }
+    show(current);
+    (dataKey ? closeBtn : pwIn).focus();
+  }
+
+  function close() {
+    overlay.hidden = true;
+    document.documentElement.classList.remove("docs-open");
+    syncHash();
+    $("docsBtn").focus();
+  }
+
+  const step = (dir) => show((current + dir + DOCS.length) % DOCS.length);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pw = pwIn.value.trim();
+    if (!pw) return;
+    goBtn.disabled = true;
+    status(DOCS_UI[code()].busy.replace(/\s*…$/, ""), true);
+    try {
+      dataKey = await keyFromPassword(pw);
+      await saveKey(dataKey);
+      await rememberInChrome(pw);
+      pwIn.value = "";
+      status("");
+      show(current);
+      closeBtn.focus();
+    } catch (err) {
+      status(err.pw ? err.message : "Fehler: " + err.message);
+      pwIn.select();
+    } finally {
+      goBtn.disabled = false;
+    }
+  });
+
+  lockBtn.addEventListener("click", () => {
+    dataKey = null;
+    dropKey();
+    Object.values(urls).forEach((p) => p.then((u) => URL.revokeObjectURL(u)).catch(() => {}));
+    urls = {};
+    show(-1);
+    pwIn.focus();
+  });
+
+  linkBtn.addEventListener("click", async () => {
+    const url = new URL(location.href);
+    url.searchParams.set("lang", code());  /* the recipient sees the same language */
+    try { await navigator.clipboard.writeText(url.href); } catch (e) { return; }
+    /* only the button changes – a full render would rebuild the open pages and lose the scroll position */
+    const label = (t) => { linkBtn.title = t; linkBtn.setAttribute("aria-label", t); };
+    linkBtn.classList.add("done");
+    label(DOCS_UI[code()].linkDone);
+    setTimeout(() => { linkBtn.classList.remove("done"); label(DOCS_UI[code()].link); }, 1600);
+  });
+
+  $("docsBtn").addEventListener("click", () => open());
+  closeBtn.addEventListener("click", close);
+  gridBtn.addEventListener("click", () => show(-1));
+  prevBtn.addEventListener("click", () => step(-1));
+  nextBtn.addEventListener("click", () => step(1));
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  document.addEventListener("keydown", (e) => {
+    if (overlay.hidden) return;
+    const inView = dataKey && current >= 0;
+    if (e.key === "Escape") { if (inView) show(-1); else close(); }
+    else if (inView && e.key === "ArrowLeft") step(-1);
+    else if (inView && e.key === "ArrowRight") step(1);
+  });
+
+  /* direct link: cv.html#docs or cv.html#docs/<first page> */
+  const m = /^#docs(?:\/([\w-]+))?$/.exec(location.hash);
+  if (m) open(m[1]);
+
+  return { render };
+})();
 
 setLang(pickInitialLang(), false);
 
