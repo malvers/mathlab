@@ -16,6 +16,11 @@
 window.BuchFR && BuchFR.add('gleichungen', {
     word: {
         // book fr-1 mathe11-fr:
+        // waage, binom, koerper
+        'z. B. −3 oder :4 oder −2x': 'p. ex. −3 ou :4 ou −2x', 'Anwenden': 'Appliquer', 'Neue Gleichung': 'Nouvelle équation',
+        'Länge $a$': 'Longueur $a$', 'Länge $b$': 'Longueur $b$', 'Quadrat mit Seitenlänge a + b': 'Carré de côté a + b',
+        'Zylinder': 'Cylindre', 'Kegel': 'Cône', 'Kugel': 'Boule', 'Körper': 'Solide', 'Radius $r$ in cm': 'Rayon $r$ en cm',
+        'Höhe $h$ in cm': 'Hauteur $h$ en cm', 'Skizze des Körpers': 'Croquis du solide',
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
@@ -40,6 +45,20 @@ window.BuchFR && BuchFR.add('gleichungen', {
     },
     phrase: [
         // book fr-1 mathe11-fr:
+        // waage
+        ['Gelöst: $x = ', 'Résolu : $x = '], ['$. Mach die Probe: Setz den Wert in die erste Zeile ein.', '$. Fais la vérification : remplace $x$ par cette valeur dans la première ligne.'],
+        ['Beide Seiten sind gleich: Jede Zahl ist Lösung, ', 'Les deux membres sont égaux : tout nombre est solution, '],
+        ['Widerspruch: Es gibt keine Lösung, ', 'Contradiction : il n’y a aucune solution, '],
+        ['Schreib die Umformung, die du auf <b>beide</b> Seiten anwenden willst.', 'Écris la transformation que tu veux appliquer aux <b>deux</b> membres.'],
+        ['Das verstehe ich nicht. Beispiele: ', 'Je ne comprends pas. Exemples : '], ['Hinter dem Rechenzeichen fehlt eine Zahl.', 'Il manque un nombre après le signe d’opération.'],
+        ['Mit $x$ multiplizieren oder durch $x$ teilen ist keine sichere Umformung, $x$ könnte $0$ sein.', 'Multiplier ou diviser par $x$ n’est pas une transformation sûre : $x$ pourrait valoir $0$.'],
+        ['Durch $0$ darf man nicht teilen.', 'On ne peut pas diviser par $0$.'],
+        ['Mit $0$ multiplizieren macht aus jeder Gleichung $0 = 0$, dabei geht die Information verloren.', 'Multiplier par $0$ transforme toute équation en $0 = 0$, et l’information est perdue.'],
+        ['Bring alle $x$ auf eine Seite: ', 'Mets tous les $x$ du même côté : '], ['Bring die Zahl auf die andere Seite: ', 'Fais passer le nombre de l’autre côté : '],
+        ['Teile durch die Zahl vor dem $x$: ', 'Divise par le nombre devant le $x$ : '],
+        // binom, koerper ($M$ and $O$ stay as in the chapter text of lb2)
+        ['Der häufigste Fehler: ', 'L’erreur la plus fréquente : '], ['. Im Bild fehlen dann die beiden blauen Rechtecke, hier ', '. Sur la figure, il manque alors les deux rectangles bleus, ici '],
+        ['Mantellinie $s = ', 'Génératrice $s = '],
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
