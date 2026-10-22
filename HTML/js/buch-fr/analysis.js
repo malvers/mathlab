@@ -84,6 +84,14 @@ window.BuchFR && BuchFR.add('analysis', {
         'Lösung mit der Ableitung': 'Solution par la dérivée',
         'z. B. 6x^2 - 2 oder cos x': 'p. ex. 6x^2 - 2 ou cos x',
         // book fr-3 mathe13-fr:
+        'Funktionenschar': 'Famille de fonctions',
+        'Funktionenschar mit Ortskurve': 'Famille de fonctions avec lieu des points',
+        'Parameter $a$': 'Paramètre $a$',
+        'Verkaufspreis $p$ (€ pro Stück)': 'Prix de vente $p$ (€ par unité)',
+        'x in Stück': 'x en unités',
+        'Kosten, Erlös und Gewinn': 'Coût, recette et bénéfice',
+        // schar: the short labels of the extrema (also BGY 12, kurve: keep one copy when merging with fr-2)
+        'Hochpunkt': 'Maximum', 'Tiefpunkt': 'Minimum', 'keine Extrempunkte': 'aucun extremum',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     },
@@ -163,6 +171,23 @@ window.BuchFR && BuchFR.add('analysis', {
         ['$: Die beste Dose ist so hoch wie breit.', '$ : la meilleure boîte est aussi haute que large.'],
         [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' Le côté parallèle au mur mesure alors $60 - 2 \\cdot 15 = 30\\,\\text{m}$.'],
         // book fr-3 mathe13-fr:
+        [' Ortskurve der Extrempunkte zeigen', ' Afficher le lieu des extremums'],
+        ['Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.', 'Pour $a \\le 0$, il n’y a pas d’extremum : $f_a\'(x) = 3x^2 - a$ n’a alors aucun zéro avec changement de signe.'],
+        [' mit Vorzeichenwechsel', ' avec changement de signe'],
+        ['Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.', 'Chaque parabole de la famille passe par l’origine, car $f_a(0) = 0$ pour tout $a$.'],
+        ['Ortskurve aller Extrempunkte (violett): $', 'Lieu de tous les extremums (en violet) : $'],
+        ['Gewinnschwelle bei $x \\approx ', 'Seuil de rentabilité en $x \\approx '],
+        ['$, Gewinngrenze bei $x \\approx ', '$, limite de rentabilité en $x \\approx '],
+        ['$ Stück, $G \\approx ', '$ unités, $G \\approx '],
+        ['$ Stück.', '$ unités.'],
+        ['Gewinn ab $x \\approx ', 'Bénéfice à partir de $x \\approx '],
+        ['Bei diesem Preis wird nie Gewinn gemacht.', 'À ce prix, on ne fait jamais de bénéfice.'],
+        ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Bénéfice maximal : $G\'(x) = 0$ en $x \\approx '],
+        ['Kein positives Gewinnmaximum.', 'Pas de bénéfice maximal positif.'],
+        // schar: the list of extrema after other text, and the note with its "$. " in front (wins over a shorter piece "$. Für $" of another book)
+        ['Hochpunkt $', 'Maximum $'], ['Tiefpunkt $', 'Minimum $'], ['keine Extrempunkte', 'aucun extremum'],
+        ['$. Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
+            '$. Pour $a \\le 0$, il n’y a pas d’extremum : $f_a\'(x) = 3x^2 - a$ n’a alors aucun zéro avec changement de signe.'],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     ],
