@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques FOS 12 · Chapitre 1.1 · Vecteurs et produit scalaire | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Flèches dans l’espace, norme, calculer avec des vecteurs, angle et orthogonalité. Chapitre 1.1 du manuel interactif Mathématiques · Fachoberschule 12 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · FACHOBERSCHULE 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 1.1 · DOMAINE D’APPRENTISSAGE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 1.1 · DOMAINE D’APPRENTISSAGE 1 · AOÛT · SEPTEMBRE</p>
+            <h1>Vecteurs et produit scalaire</h1>
+            <p class="b-hero-lead">Un drone traverse la salle de classe, une grue soulève une charge contre le vent, on tire une luge en biais :
+                pour décrire des mouvements et des forces dans l’espace, il faut des <b>vecteurs</b>. Tu apprends à calculer avec eux, à déterminer des longueurs
+                et, avec le <b>produit scalaire</b>, à mesurer des angles et à reconnaître les angles droits.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">VRAIE 3D</span><span class="b-chip">1 LABORATOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>représenter des points et des vecteurs dans un repère de l’espace, déterminer des <b>vecteurs position et des vecteurs entre deux points</b></li>
+                <li>calculer la <b>norme</b> d’un vecteur, des distances et des milieux</li>
+                <li><b>additionner, soustraire et multiplier par un nombre</b> des vecteurs, aussi géométriquement</li>
+                <li>calculer des angles avec le <b>produit scalaire</b> et vérifier l’<b>orthogonalité</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="10" data-ph="cm"><p class="b-q-text">Un rectangle mesure 6 cm de long et 8 cm de large. Quelle est la longueur de sa diagonale ?</p><div class="b-sol"><p>Pythagore : $\sqrt{36 + 64} = 10$</p></div></div>
+            <div class="b-q" data-mc="3"><p class="b-q-text">Dans quel quadrant se trouve le point $(3\,;\,-2)$ ?</p><div class="b-mc"><button>I</button><button>II</button><button>III</button><button>IV</button></div><div class="b-sol"><p>En bas à droite : quatrième quadrant.</p></div></div>
+            <div class="b-q" data-ans="0,5" data-ph="nombre"><p class="b-q-text">Combien vaut $\cos 60^\circ$ ?</p><div class="b-sol"><p>$\cos 60^\circ = 0{,}5$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Résous $2x - 4 = 0$.</p><div class="b-sol"><p>$x = 2$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LE DRONE DANS LA SALLE DE CLASSE</div>
+            <div class="b-text"><p>Votre salle de classe mesure 8 m de long, 6 m de large et 3 m de haut. Un drone décolle d’un coin au sol et vole en ligne droite jusqu’au coin opposé au plafond.</p>
+                <ul><li>Comment pouvez-vous décrire le départ et l’arrivée avec trois nombres chacun ? Où placez-vous l’origine ?</li><li>Quelle est la longueur du vol ? Indice : deux fois Pythagore.</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DEUX CORDES, UN CROCHET</div>
+            <div class="b-text"><p>Deux personnes tirent sur un crochet, l’une vers la droite, l’autre vers l’avant. Les deux tirent avec la même force.</p>
+                <ul><li>Dessinez les deux forces sous forme de flèches. Dans quelle direction le crochet se déplace-t-il ?</li><li>La force totale est-elle deux fois plus grande qu’une force seule ? Justifiez.</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">QUAND EST-CE PERPENDICULAIRE ?</div>
+            <div class="b-text"><p>Dans le plan, les flèches $(3\,;\,4)$ et $(-4\,;\,3)$ partent de l’origine.</p>
+                <ul><li>Dessinez-les toutes les deux. Sont-elles perpendiculaires ?</li><li>Calculez $3 \cdot (-4) + 4 \cdot 3$. Essayez le même calcul avec deux flèches qui ne sont pas perpendiculaires. Que remarquez-vous ?</li></ul></div>
+            <a class="b-lab" data-lab="vektoren" href="../../vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTEURS</span><span class="b-lab-what">Additionner et mesurer des flèches (en allemand)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Points et vecteurs dans l’espace" data-toc-k="1" data-toc-short="1 Vecteurs">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">1</span>Points et vecteurs dans l’espace</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si l’on place l’origine dans le coin de départ du drone, l’arrivée est en $C(8\,;\,6\,;\,3)$. Le vol est la flèche de l’origine à $C$,
+                le vecteur $\vec{OC} = \begin{pmatrix} 8 \\ 6 \\ 3 \end{pmatrix}$. Sa longueur : $\sqrt{8^2 + 6^2 + 3^2} = \sqrt{109} \approx 10{,}44$ m.</p></div></div>
+            <div class="b-text"><p>Dans un <b>repère de l’espace</b>, l’axe des $x$ pointe vers l’avant, l’axe des $y$ vers la droite et l’axe des $z$ vers le haut. Un point a trois coordonnées, $P(p_1\,;\,p_2\,;\,p_3)$.
+                Un <b>vecteur</b> décrit une translation : toutes les flèches de même longueur, de même direction et de même sens représentent le même vecteur.
+                La flèche de l’origine à un point s’appelle le <b>vecteur position</b> du point, la flèche de $A$ à $B$ le <b>vecteur entre deux points</b> $\vec{AB}$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · VECTEURS DANS L’ESPACE</div>
+                <div class="b-text">
+                    <p><b>Vecteur entre deux points :</b> « extrémité moins origine », $\vec{AB} = \vec{OB} - \vec{OA} = \begin{pmatrix} b_1 - a_1 \\ b_2 - a_2 \\ b_3 - a_3 \end{pmatrix}$</p>
+                    <p><b>Norme</b> (longueur) : $|\vec{a}| = \sqrt{a_1^2 + a_2^2 + a_3^2}$. La distance entre deux points est $|\vec{AB}|$.</p>
+                    <p><b>Vecteur unitaire</b> (longueur 1, même direction et même sens) : $\vec{a}_0 = \dfrac{1}{|\vec{a}|} \cdot \vec{a}$</p>
+                    <p><b>Milieu</b> du segment $[AB]$ : $\vec{OM} = \tfrac12\,(\vec{OA} + \vec{OB})$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Perspective cavalière :</b> sur le papier, on dessine l’axe des $x$ en biais vers le bas à gauche et on le raccourcit, le plus souvent d’un facteur $\tfrac12\sqrt2$, environ 0,7.</p>
+            <p class="b-note"><b>Notation :</b> on écrit les vecteurs en colonne, les points avec des traits verticaux. Le point $P(2\,;\,1\,;\,3)$ a pour vecteur position $\begin{pmatrix} 2 \\ 1 \\ 3 \end{pmatrix}$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · POINTS ET VECTEURS EN 3D</div>
+        <p class="b-help" style="margin:0 0 12px">Saisis les coordonnées de $A$ et de $B$ et fais tourner le repère avec la souris ou le doigt. Les pointillés montrent comment on atteint le point depuis le plan $x$-$y$.</p>
+        <div data-widget="raum3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · DISTANCE ET MILIEU</div>
+            <div class="b-text"><p>On donne $A(1\,;\,2\,;\,-1)$ et $B(4\,;\,-2\,;\,11)$. Calcule la distance entre les points et le milieu du segment $[AB]$.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = \begin{pmatrix} 3 \\ -4 \\ 12 \end{pmatrix}$, $|\vec{AB}| = \sqrt{9 + 16 + 144} = \sqrt{169}$ : <span class="b-res">distance 13</span>.</p>
+                <p>$\vec{OM} = \tfrac12 \begin{pmatrix} 5 \\ 0 \\ 10 \end{pmatrix}$ : <span class="b-res">$M(2{,}5\,;\,0\,;\,5)$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · VECTEUR UNITAIRE</div>
+            <div class="b-text"><p>Détermine le vecteur unitaire associé à $\vec{a} = \begin{pmatrix} 2 \\ -1 \\ 2 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$|\vec{a}| = \sqrt{4 + 1 + 4} = 3$, donc <span class="b-res">$\vec{a}_0 = \tfrac13 \begin{pmatrix} 2 \\ -1 \\ 2 \end{pmatrix}$</span>.</p>
+                <p>Vérification : $\sqrt{\tfrac49 + \tfrac19 + \tfrac49} = 1$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine $\vec{AB}$ et $|\vec{AB}|$ pour $A(2\,;\,0\,;\,1)$ et $B(5\,;\,4\,;\,1)$.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = \begin{pmatrix} 3 \\ 4 \\ 0 \end{pmatrix}$, $|\vec{AB}| = 5$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule la norme : a) $\begin{pmatrix} 1 \\ 2 \\ 2 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} -6 \\ 2 \\ 3 \end{pmatrix}$ &nbsp; c) $\begin{pmatrix} 0 \\ -5 \\ 12 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) $3$ &nbsp; b) $\sqrt{49} = 7$ &nbsp; c) $\sqrt{169} = 13$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule la longueur du segment $[PQ]$ et son milieu pour $P(-3\,;\,5\,;\,2)$ et $Q(1\,;\,-1\,;\,6)$.</p></div>
+            <div class="b-sol"><p>$\vec{PQ} = \begin{pmatrix} 4 \\ -6 \\ 4 \end{pmatrix}$, $|\vec{PQ}| = \sqrt{68} \approx 8{,}25$ ; $M(-1\,;\,2\,;\,4)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pour quels nombres $t$ le vecteur $\begin{pmatrix} t \\ 2 \\ 4 \end{pmatrix}$ a-t-il la longueur 6 ?</p></div>
+            <div class="b-hint"><p>Élève l’équation $\sqrt{t^2 + 4 + 16} = 6$ au carré.</p></div>
+            <div class="b-sol"><p>$t^2 + 20 = 36 \Rightarrow t^2 = 16$ : <span class="b-res">$t = 4$ ou $t = -4$</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un pavé droit a un sommet à l’origine et des arêtes de longueur 4, 3 et 2 le long des axes. Calcule la longueur de la grande diagonale et de la diagonale de la base.
+            Résous ainsi une nouvelle fois l’exploration « Le drone dans la salle de classe », sans vecteurs.</p></div>
+            <div class="b-sol"><p>Sommet opposé $G(4\,;\,3\,;\,2)$ : grande diagonale $\sqrt{16 + 9 + 4} = \sqrt{29} \approx 5{,}39$, base $\sqrt{16 + 9} = 5$.
+                Drone : diagonale du sol $\sqrt{64 + 36} = 10$, puis $\sqrt{10^2 + 3^2} = \sqrt{109} \approx 10{,}44$ m. Deux fois Pythagore donne la même formule que la norme.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="7" data-ph="longueur"><p class="b-q-text">Quelle est la longueur du vecteur $\begin{pmatrix} 2 \\ 3 \\ 6 \end{pmatrix}$ ?</p><div class="b-sol"><p>$\sqrt{4 + 9 + 36} = 7$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="longueur"><p class="b-q-text">Quelle distance sépare $A(1\,;\,1\,;\,1)$ et $B(3\,;\,5\,;\,5)$ ?</p><div class="b-sol"><p>$\vec{AB} = (2\,;\,4\,;\,4)$, longueur $\sqrt{36} = 6$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quel vecteur est un vecteur unitaire ?</p><div class="b-mc"><button>$\begin{pmatrix} 1 \\ 1 \\ 0 \end{pmatrix}$</button><button>$\begin{pmatrix} 0{,}6 \\ 0 \\ 0{,}8 \end{pmatrix}$</button><button>$\begin{pmatrix} 0{,}5 \\ 0{,}5 \\ 0{,}5 \end{pmatrix}$</button></div><div class="b-sol"><p>$0{,}36 + 0{,}64 = 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Calculer avec des vecteurs" data-toc-k="2" data-toc-short="2 Calculer">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">2 HEURES</span></div>
+    <h2><span class="b-no">2</span>Calculer avec des vecteurs</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une grue soulève une charge avec la force $\vec{F}_1 = \begin{pmatrix} 0 \\ 0 \\ 5 \end{pmatrix}$ kN, le vent pousse avec $\vec{F}_2 = \begin{pmatrix} 2 \\ 1 \\ 0 \end{pmatrix}$ kN.
+                Sur la charge agit la somme $\vec{F}_1 + \vec{F}_2 = \begin{pmatrix} 2 \\ 1 \\ 5 \end{pmatrix}$ kN, de norme $\sqrt{30} \approx 5{,}48$ kN, moins que $5 + \sqrt5 \approx 7{,}24$ kN.</p></div></div>
+            <div class="b-text"><p>Pour additionner des vecteurs, on met les flèches bout à bout. En coordonnées, cela signifie : on additionne ligne par ligne.
+                Un multiple $r \cdot \vec{a}$ allonge ou raccourcit la flèche ; un $r$ négatif inverse en plus le sens.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÈGLES DE CALCUL</div>
+                <div class="b-text">
+                    <p>$\vec{a} + \vec{b} = \begin{pmatrix} a_1 + b_1 \\ a_2 + b_2 \\ a_3 + b_3 \end{pmatrix}$, &nbsp; $r \cdot \vec{a} = \begin{pmatrix} r a_1 \\ r a_2 \\ r a_3 \end{pmatrix}$, &nbsp; $\vec{a} - \vec{b} = \vec{a} + (-\vec{b})$</p>
+                    <p>La commutativité, l’associativité et la distributivité sont valables comme pour le calcul avec des nombres.</p>
+                    <p>Deux vecteurs sont dits <b>colinéaires</b> (parallèles) si l’un est un multiple de l’autre : $\vec{b} = r \cdot \vec{a}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Règle du parallélogramme :</b> $\vec{a} + \vec{b}$ est la diagonale du parallélogramme construit sur $\vec{a}$ et $\vec{b}$, $\vec{a} - \vec{b}$ l’autre diagonale.</p>
+            <p class="b-note"><b>Vecteur nul :</b> $\vec{a} + (-\vec{a}) = \vec{0}$. Il a la longueur 0 et pas de direction.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · SOMME, DIFFÉRENCE, MULTIPLE</div>
+        <p class="b-help" style="margin:0 0 12px">En haut, tu peux basculer entre points, somme et différence, et multiples. Modifie les coordonnées et regarde le parallélogramme se déplacer.</p>
+        <div data-widget="raum3d" data-mode="summe"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · LE QUATRIÈME SOMMET</div>
+            <div class="b-text"><p>$A(1\,;\,0\,;\,2)$, $B(4\,;\,1\,;\,2)$ et $C(5\,;\,5\,;\,3)$ sont des sommets du parallélogramme $ABCD$. Détermine $D$.</p></div>
+            <div class="b-sol"><p>Dans le parallélogramme, $\vec{AD} = \vec{BC} = \begin{pmatrix} 1 \\ 4 \\ 1 \end{pmatrix}$.</p>
+                <p>$\vec{OD} = \vec{OA} + \vec{BC}$ : <span class="b-res">$D(2\,;\,4\,;\,3)$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · COLINÉAIRES ?</div>
+            <div class="b-text"><p>Les vecteurs $\vec{a} = \begin{pmatrix} 2 \\ -4 \\ 6 \end{pmatrix}$ et $\vec{b} = \begin{pmatrix} -3 \\ 6 \\ -9 \end{pmatrix}$ sont-ils colinéaires ?</p></div>
+            <div class="b-sol"><p>La première ligne donne $r = -1{,}5$. Vérification : $-1{,}5 \cdot (-4) = 6$ et $-1{,}5 \cdot 6 = -9$.</p>
+                <p><span class="b-res">Oui, $\vec{b} = -1{,}5 \cdot \vec{a}$</span> : parallèles, mais de sens contraires.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule : a) $\begin{pmatrix} 2 \\ -1 \\ 3 \end{pmatrix} + \begin{pmatrix} 4 \\ 5 \\ -2 \end{pmatrix}$ &nbsp; b) $3 \cdot \begin{pmatrix} 1 \\ -2 \\ 0 \end{pmatrix} - \begin{pmatrix} 2 \\ 1 \\ 4 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) $\begin{pmatrix} 6 \\ 4 \\ 1 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 1 \\ -7 \\ -4 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Vérifie la colinéarité : a) $\begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix}$, $\begin{pmatrix} 3 \\ 6 \\ 9 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 2 \\ 0 \\ -1 \end{pmatrix}$, $\begin{pmatrix} -4 \\ 0 \\ 3 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) oui, facteur 3 &nbsp; b) non : la première ligne exige $r = -2$, la troisième $r = -3$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Le centre de gravité d’un triangle est donné par $\vec{OS} = \tfrac13\,(\vec{OA} + \vec{OB} + \vec{OC})$. Calcule-le pour $A(1\,;\,2\,;\,0)$, $B(5\,;\,0\,;\,3)$, $C(3\,;\,7\,;\,6)$.</p></div>
+            <div class="b-sol"><p>$\tfrac13 \begin{pmatrix} 9 \\ 9 \\ 9 \end{pmatrix}$ : $S(3\,;\,3\,;\,3)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Détermine $r$ et $s$ tels que $r \cdot \begin{pmatrix} 1 \\ 0 \\ 2 \end{pmatrix} + s \cdot \begin{pmatrix} 0 \\ 1 \\ 1 \end{pmatrix} = \begin{pmatrix} 3 \\ -2 \\ 4 \end{pmatrix}$.</p></div>
+            <div class="b-hint"><p>Les deux premières lignes donnent directement $r$ et $s$. La troisième sert de vérification.</p></div>
+            <div class="b-sol"><p>$r = 3$, $s = -2$, vérification : $2 \cdot 3 + (-2) = 4$ ✔</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un drone part de l’origine et parcourt toutes les 10 secondes le vecteur $\vec{v} = \begin{pmatrix} 4 \\ 3 \\ 1{,}2 \end{pmatrix}$ (en m).
+            Où se trouve-t-il au bout de 25 secondes ? À quelle vitesse vole-t-il ?</p></div>
+            <div class="b-sol"><p>Au bout de 25 s : $2{,}5 \cdot \vec{v} = \begin{pmatrix} 10 \\ 7{,}5 \\ 3 \end{pmatrix}$, donc au point $(10\,;\,7{,}5\,;\,3)$.
+                Vitesse : $|\vec{v}| = \sqrt{26{,}44} \approx 5{,}14$ m en 10 s, <span class="b-res">environ 0,51 m/s</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1" data-ph="z ="><p class="b-q-text">Quelle est la troisième coordonnée de $\begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix} + 2 \cdot \begin{pmatrix} 0 \\ 1 \\ -1 \end{pmatrix}$ ?</p><div class="b-sol"><p>$3 + 2 \cdot (-1) = 1$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="y ="><p class="b-q-text">$ABCD$ est un parallélogramme avec $A(0\,;\,0\,;\,0)$, $B(2\,;\,0\,;\,0)$, $C(3\,;\,2\,;\,1)$. Quelle est l’ordonnée $y$ de $D$ ?</p><div class="b-sol"><p>$\vec{OD} = \vec{OA} + \vec{BC} = (1\,;\,2\,;\,1)$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quel vecteur est colinéaire à $\begin{pmatrix} 2 \\ -1 \\ 4 \end{pmatrix}$ ?</p><div class="b-mc"><button>$\begin{pmatrix} 4 \\ 2 \\ 8 \end{pmatrix}$</button><button>$\begin{pmatrix} -6 \\ 3 \\ -12 \end{pmatrix}$</button><button>$\begin{pmatrix} 2 \\ 1 \\ 4 \end{pmatrix}$</button></div><div class="b-sol"><p>Facteur $-3$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Produit scalaire et angle" data-toc-k="3" data-toc-short="3 Produit scalaire">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">3</span>Produit scalaire, angle et orthogonalité</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un chariot roule 20 m tout droit, $\vec{s} = \begin{pmatrix} 20 \\ 0 \\ 0 \end{pmatrix}$ m. La corde tire en biais vers le haut avec $\vec{F} = \begin{pmatrix} 30 \\ 0 \\ 15 \end{pmatrix}$ N.
+                Seule la part de la force dans la direction du déplacement fournit un travail : $W = 30 \cdot 20 + 0 \cdot 0 + 15 \cdot 0 = 600$ J. C’est exactement ce calcul qu’on appelle <b>produit scalaire</b>.</p></div></div>
+            <div class="b-text"><p>Le produit scalaire de deux vecteurs est un <b>nombre</b>. On le calcule en coordonnées. En même temps, une formule géométrique fait intervenir l’angle entre les vecteurs.
+                En la transformant, on peut calculer des angles dans l’espace. Et comme $\cos 90^\circ = 0$, on reconnaît un angle droit au fait que le produit scalaire est nul.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · PRODUIT SCALAIRE</div>
+                <div class="b-text">
+                    <p>$\vec{a} \circ \vec{b} = a_1 b_1 + a_2 b_2 + a_3 b_3 = |\vec{a}| \cdot |\vec{b}| \cdot \cos \varphi$</p>
+                    <p><b>Angle :</b> $\cos \varphi = \dfrac{\vec{a} \circ \vec{b}}{|\vec{a}| \cdot |\vec{b}|}$ avec $0^\circ \le \varphi \le 180^\circ$</p>
+                    <p><b>Orthogonaux :</b> $\vec{a} \perp \vec{b} \iff \vec{a} \circ \vec{b} = 0$ (pour des vecteurs non nuls)</p>
+                    <p>$\vec{a} \circ \vec{b} > 0$ : angle aigu · $\vec{a} \circ \vec{b} < 0$ : angle obtus · $\vec{a} \circ \vec{a} = |\vec{a}|^2$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notation :</b> beaucoup de livres écrivent $\vec{a} \cdot \vec{b}$. Comme les widgets, nous écrivons $\vec{a} \circ \vec{b}$, pour ne pas le confondre avec le multiple $r \cdot \vec{a}$.</p>
+            <p class="b-note"><b>Sur la calculatrice graphique :</b> calculer l’angle avec $\cos^{-1}$. Vérifier avant que la calculatrice est en degrés (DEG).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · PRODUIT SCALAIRE ET ANGLE</div>
+        <p class="b-help" style="margin:0 0 12px">Essaie les exemples et tes propres vecteurs. Le trait en pointillés est la perpendiculaire abaissée de l’extrémité de $\vec{b}$ sur $\vec{a}$ : il montre la part de $\vec{b}$ dans la direction de $\vec{a}$.</p>
+        <div data-widget="skalarprodukt"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · ANGLE ENTRE DEUX VECTEURS</div>
+            <div class="b-text"><p>Calcule l’angle entre $\vec{a} = \begin{pmatrix} 1 \\ 2 \\ 2 \end{pmatrix}$ et $\vec{b} = \begin{pmatrix} 2 \\ -1 \\ 2 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\vec{a} \circ \vec{b} = 2 - 2 + 4 = 4$, $|\vec{a}| = |\vec{b}| = 3$.</p>
+                <p>$\cos \varphi = \tfrac49$ : <span class="b-res">$\varphi \approx 63{,}6^\circ$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · TRIANGLE RECTANGLE</div>
+            <div class="b-text"><p>Montre que le triangle $A(1\,;\,0\,;\,0)$, $B(3\,;\,2\,;\,1)$, $C(0\,;\,2\,;\,-2)$ est rectangle en $A$, et calcule l’angle en $B$.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = \begin{pmatrix} 2 \\ 2 \\ 1 \end{pmatrix}$, $\vec{AC} = \begin{pmatrix} -1 \\ 2 \\ -2 \end{pmatrix}$, $\vec{AB} \circ \vec{AC} = -2 + 4 - 2 = 0$ ✔</p>
+                <p>En $B$ : $\vec{BA} \circ \vec{BC} = 9$, $|\vec{BA}| = 3$, $|\vec{BC}| = \sqrt{18}$, $\cos \beta = \tfrac{9}{3\sqrt{18}} \approx 0{,}707$ : <span class="b-res">$\beta = 45^\circ$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule le produit scalaire : a) $\begin{pmatrix} 2 \\ 3 \\ 1 \end{pmatrix} \circ \begin{pmatrix} 4 \\ -1 \\ 5 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 1 \\ -2 \\ 3 \end{pmatrix} \circ \begin{pmatrix} 3 \\ 3 \\ 1 \end{pmatrix}$. Que signifie le résultat de b) ?</p></div>
+            <div class="b-sol"><p>a) $8 - 3 + 5 = 10$ &nbsp; b) $3 - 6 + 3 = 0$ : les vecteurs sont perpendiculaires.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Pour quelle valeur de $t$ les vecteurs $\begin{pmatrix} 2 \\ t \\ 1 \end{pmatrix}$ et $\begin{pmatrix} 3 \\ -1 \\ 4 \end{pmatrix}$ sont-ils orthogonaux ?</p></div>
+            <div class="b-sol"><p>$6 - t + 4 = 0$ : $t = 10$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule l’angle entre $\begin{pmatrix} 1 \\ 1 \\ 0 \end{pmatrix}$ et $\begin{pmatrix} 1 \\ 0 \\ 1 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\cos \varphi = \dfrac{1}{\sqrt2 \cdot \sqrt2} = \tfrac12$ : $\varphi = 60^\circ$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Donne deux vecteurs différents, orthogonaux à $\begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix}$ et non colinéaires entre eux.</p></div>
+            <div class="b-hint"><p>Mets une coordonnée à zéro, échange les deux autres et change un signe.</p></div>
+            <div class="b-sol"><p>Par exemple $\begin{pmatrix} 2 \\ -1 \\ 0 \end{pmatrix}$ et $\begin{pmatrix} 3 \\ 0 \\ -1 \end{pmatrix}$ : $2 - 2 = 0$ et $3 - 3 = 0$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dans un cube : quel angle la grande diagonale forme-t-elle avec une arête ? Quel angle deux grandes diagonales forment-elles entre elles ?</p></div>
+            <div class="b-hint"><p>Place un cube d’arête 1 à l’origine : grandes diagonales $\begin{pmatrix} 1 \\ 1 \\ 1 \end{pmatrix}$ et $\begin{pmatrix} -1 \\ 1 \\ 1 \end{pmatrix}$, arête $\begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>Avec l’arête : $\cos \varphi = \tfrac{1}{\sqrt3}$, $\varphi \approx 54{,}7^\circ$. Deux grandes diagonales : $\cos \varphi = \tfrac13$, <span class="b-res">$\varphi \approx 70{,}5^\circ$</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0" data-ph="nombre"><p class="b-q-text">Calcule $\begin{pmatrix} 1 \\ 2 \\ -1 \end{pmatrix} \circ \begin{pmatrix} 3 \\ 0 \\ 3 \end{pmatrix}$.</p><div class="b-sol"><p>$3 + 0 - 3 = 0$ : orthogonaux</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="t ="><p class="b-q-text">Pour quelle valeur de $t$ a-t-on $\begin{pmatrix} t \\ 1 \\ 2 \end{pmatrix} \perp \begin{pmatrix} 2 \\ 4 \\ -3 \end{pmatrix}$ ?</p><div class="b-sol"><p>$2t + 4 - 6 = 0$ : $t = 1$</p></div></div>
+        <div class="b-q" data-ans="45" data-tol="0.5" data-ph="degrés"><p class="b-q-text">Quel angle forment $\begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}$ et $\begin{pmatrix} 1 \\ 1 \\ 0 \end{pmatrix}$ ?</p><div class="b-sol"><p>$\cos \varphi = \tfrac{1}{\sqrt2}$ : $45^\circ$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>À quelle distance de l’origine se trouve le point $P(2\,;\,-3\,;\,6)$ ?</p></div>
+            <div class="b-sol"><p>$\sqrt{4 + 9 + 36} = 7$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier avec la 11e année :</b> deux droites du plan de pentes $m_1$ et $m_2$ sont perpendiculaires si $m_1 \cdot m_2 = -1$.
+            Justifie-le avec le produit scalaire des vecteurs directeurs $\begin{pmatrix} 1 \\ m_1 \end{pmatrix}$ et $\begin{pmatrix} 1 \\ m_2 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>Orthogonaux signifie $1 \cdot 1 + m_1 m_2 = 0$, donc $m_1 m_2 = -1$. Exemple : $m_1 = 2$ et $m_2 = -0{,}5$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Montre que $A(2\,;\,0\,;\,1)$, $B(4\,;\,3\,;\,1)$, $C(1\,;\,5\,;\,1)$, $D(-1\,;\,2\,;\,1)$ forment un carré.</p></div>
+            <div class="b-hint"><p>Parallélogramme ($\vec{AB} = \vec{DC}$), angle droit ($\vec{AB} \circ \vec{AD} = 0$), côtés de même longueur.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = \vec{DC} = \begin{pmatrix} 2 \\ 3 \\ 0 \end{pmatrix}$, $\vec{AD} = \begin{pmatrix} -3 \\ 2 \\ 0 \end{pmatrix}$, $\vec{AB} \circ \vec{AD} = -6 + 6 = 0$, $|\vec{AB}| = |\vec{AD}| = \sqrt{13}$ : un carré.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>On tire une luge sur 50 m. La corde tire avec 120 N sous un angle de 30° par rapport à la piste. Calcule le travail fourni sous forme de produit scalaire.</p></div>
+            <div class="b-sol"><p>$\vec{s} = \begin{pmatrix} 50 \\ 0 \\ 0 \end{pmatrix}$, $\vec{F} = \begin{pmatrix} 120 \cos 30^\circ \\ 0 \\ 120 \sin 30^\circ \end{pmatrix} \approx \begin{pmatrix} 103{,}9 \\ 0 \\ 60 \end{pmatrix}$, $W = \vec{F} \circ \vec{s} \approx 5196$ J, <span class="b-res">environ 5,2 kJ</span>.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Grassmann" data-toc-k="X" data-toc-short="Grassmann">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Le professeur qui inventa le vecteur</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Hermann Grassmann (1809–1877) était professeur de lycée à Stettin. En 1844, il publia un livre intitulé « Die lineale Ausdehnungslehre, ein neuer Zweig der Mathematik » (La théorie de l’extension linéaire, une nouvelle branche des mathématiques).
+                Il y calculait avec des segments orientés exactement comme tu le fais dans ce chapitre : il les additionnait, les multipliait par des nombres et les multipliait entre eux, non seulement en trois dimensions, mais en un nombre quelconque de dimensions.</p>
+            <p>Presque personne ne comprit le livre. Grassmann n’obtint jamais de chaire à l’université et se tourna vers la linguistique. Ce n’est que des décennies plus tard que les mathématiciens reconnurent
+                qu’il avait posé les fondements de l’algèbre linéaire, sur laquelle reposent aujourd’hui l’infographie, la robotique et l’intelligence artificielle.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> H. Grassmann, « Die lineale Ausdehnungslehre, ein neuer Zweig der Mathematik », Leipzig 1844. Biographie et extrait de la préface : MacTutor History of Mathematics, University of St Andrews.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>VECTEUR ENTRE DEUX POINTS</h4><p>Extrémité moins origine : $\vec{AB} = \vec{OB} - \vec{OA}$</p></div>
+        <div><p>$A(1\,;\,2\,;\,-1)$, $B(4\,;\,-2\,;\,11)$ : $\vec{AB} = (3\,;\,-4\,;\,12)$</p></div></div>
+    <div class="b-rueck"><div><h4>NORME</h4><p>$|\vec{a}| = \sqrt{a_1^2 + a_2^2 + a_3^2}$, distance entre deux points $= |\vec{AB}|$</p></div>
+        <div><p>$|(3\,;\,-4\,;\,12)| = 13$</p></div></div>
+    <div class="b-rueck"><div><h4>CALCULER</h4><p>Additionner et multiplier ligne par ligne · colinéaires : $\vec{b} = r \cdot \vec{a}$</p></div>
+        <div><p>Milieu $\vec{OM} = \tfrac12(\vec{OA} + \vec{OB})$</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUIT SCALAIRE</h4><p>$\vec{a} \circ \vec{b} = a_1 b_1 + a_2 b_2 + a_3 b_3 = |\vec{a}|\,|\vec{b}| \cos \varphi$</p></div>
+        <div><p>$(1\,;\,2\,;\,2) \circ (2\,;\,-1\,;\,2) = 4$, $\varphi \approx 63{,}6^\circ$</p></div></div>
+    <div class="b-rueck"><div><h4>ORTHOGONAUX</h4><p>Produit scalaire nul signifie angle droit.</p></div>
+        <div><p>$(1\,;\,-2\,;\,3) \circ (3\,;\,3\,;\,1) = 0$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="9" data-ph="longueur"><p class="b-q-text">Quelle est la longueur de $\begin{pmatrix} 4 \\ -4 \\ 7 \end{pmatrix}$ ?</p><div class="b-sol"><p>$\sqrt{16 + 16 + 49} = 9$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="z ="><p class="b-q-text">Quelle est la cote $z$ du milieu de $A(2\,;\,1\,;\,3)$ et $B(0\,;\,5\,;\,-5)$ ?</p><div class="b-sol"><p>$\tfrac12(3 - 5) = -1$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$\vec{a} \circ \vec{b} = -5$. Quelle affirmation est vraie ?</p><div class="b-mc"><button>Les vecteurs sont orthogonaux.</button><button>L’angle est aigu.</button><button>L’angle est obtus.</button></div><div class="b-sol"><p>Produit scalaire négatif : $\cos \varphi < 0$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="63,6" data-tol="0.2" data-ph="degrés"><p class="b-q-text">Angle entre $\begin{pmatrix} 1 \\ 2 \\ 2 \end{pmatrix}$ et $\begin{pmatrix} 2 \\ -1 \\ 2 \end{pmatrix}$, à un chiffre après la virgule ?</p><div class="b-sol"><p>$\cos^{-1}\tfrac49 \approx 63{,}6^\circ$</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="t ="><p class="b-q-text">Pour quelle valeur de $t$ les vecteurs $\begin{pmatrix} 2 \\ t \\ 1 \end{pmatrix}$ et $\begin{pmatrix} 3 \\ -1 \\ 4 \end{pmatrix}$ sont-ils orthogonaux ?</p><div class="b-sol"><p>$10 - t = 0$</p></div></div>
+            <div class="b-q" data-ans="5196" data-tol="5" data-ph="joules"><p class="b-q-text">120 N sous 30° par rapport à la piste, 50 m de trajet : combien de joules de travail, arrondi au joule près ?</p><div class="b-sol"><p>$120 \cdot 50 \cdot \cos 30^\circ \approx 5196$ J</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-auftakt.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INTRODUCTION</span><span class="b-lab-what">Retour sur la 11e année et test de la calculatrice graphique</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTEURS DANS L’ESPACE</span><span class="b-lab-what">Représentation, norme, calculs</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-skalarprodukt.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRODUIT SCALAIRE</span><span class="b-lab-what">Angle et orthogonalité</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Fachoberschule, 12e année · Domaine d’apprentissage 1 d’après le programme de mathématiques de la Fachoberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-fr/vektoren.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+</body>
+</html>
