@@ -43,14 +43,6 @@ window.BuchFR && BuchFR.add('integral', {
         'Zu wenige Schnittstellen im Bild.': 'Trop peu d’abscisses d’intersection dans l’image.',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
-        // stammfunktion
-        'Konstante $C$': 'Constante $C$', 'Schar von Stammfunktionen': 'Famille de primitives', 'Die Funktion f': 'La fonction f',
-        'Oben: Stammfunktionen F + C (die gewählte hell). Ziehe den Punkt. Unten: f. Die Steigung von F im Punkt ist genau der Funktionswert f(x₀).':
-            'En haut : des primitives F + C (celle choisie en clair). Fais glisser le point. En bas : f. La pente de F en ce point est exactement la valeur f(x₀).',
-        // integral, zwischenflaeche
-        'Bestimmtes Integral zwischen zwei Grenzen': 'Intégrale entre deux bornes', 'Parabel und Gerade': 'Parabole et droite', 'Kubik und Parabel': 'Cubique et parabole',
-        'Sinus und Kosinus': 'Sinus et cosinus', 'Funktionen': 'Fonctions', 'Fläche zwischen zwei Graphen': 'Aire entre deux courbes',
-        'Zu wenige Schnittstellen im Bild.': 'Trop peu d’abscisses d’intersection dans l’image.',
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -70,11 +62,6 @@ window.BuchFR && BuchFR.add('integral', {
         ['$ · Schnittstellen: ', '$ · abscisses d’intersection : '],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
-        ['$ · Stammfunktionen $F(x) = ', '$ · primitives $F(x) = '], [' + C$, denn $F\'(x) = f(x)$.', ' + C$, car $F\'(x) = f(x)$.'],
-        ['Bei $x_0 = ', 'En $x_0 = '], ['$: Steigung von $F$ $= f(', '$ : pente de $F$ $= f('], ['$, egal welches $C$.', '$, quel que soit $C$.'],
-        ['Teilstücke zwischen den Nullstellen: ', 'Morceaux entre les zéros : '], ['Flächeninhalt zwischen Graph und $x$-Achse: $A \\approx ', 'Aire entre la courbe et l’axe des $x$ : $A \\approx '],
-        [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · L’intégrale est plus petite, car les aires sous l’axe (en rouge) comptent négativement.'],
-        [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Attention : $a > b$ change le signe.'], ['$ · Schnittstellen: ', '$ · abscisses d’intersection : '],
     ],
     rule: [
         // book fr-1 mathe11-fr:

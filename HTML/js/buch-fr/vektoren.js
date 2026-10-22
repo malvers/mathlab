@@ -50,22 +50,8 @@ window.BuchFR && BuchFR.add('vektoren', {
         'Grundkante $a$': 'Arête de base $a$',
         'Höhe $h$': 'Hauteur $h$',
         'Verschiebung der Spitze in $x$': 'Déplacement du sommet en $x$',
-        // raum-hero and the mode switch of ebene3d (also BGY 12: keep one copy when merging with fr-2)
-        'Räumliches Koordinatensystem mit einem Punkt und seinem Ortsvektor': 'Repère de l’espace avec un point et son vecteur position',
-        'Was wird gezeigt?': 'Qu’affiche-t-on ?',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
-        // raum3d, skalarprodukt
-        'Räumliches Koordinatensystem mit einem Punkt und seinem Ortsvektor': 'Repère de l’espace avec un point et son vecteur position',
-        'Punkte und Verbindungsvektor': 'Points et vecteur AB', 'Summe und Differenz': 'Somme et différence', 'Vielfaches': 'Multiple',
-        'Was wird gezeigt?': 'Que montrer ?', 'Summe oder Differenz': 'Somme ou différence', 'Faktor $r$': 'Facteur $r$',
-        'spitzer Winkel': 'angle aigu', 'stumpfer Winkel': 'angle obtus', 'Parallelogramm': 'Parallélogramme',
-        // gerade3d, ebene3d, geradenlage
-        'Parameter $t$': 'Paramètre $t$', 'Ebene und Normalenvektor': 'Plan et vecteur normal', 'Liegt der Punkt in E?': 'Le point est-il dans E ?',
-        'Gerade schneidet Ebene': 'Droite qui coupe un plan', 'identisch': 'confondues', 'schneidend': 'sécantes', 'windschief': 'non coplanaires',
-        // pyramide
-        'Pyramide': 'Pyramide', 'Prisma (schief möglich)': 'Prisme (éventuellement oblique)', 'Körper': 'Solide', 'Grundkante $a$': 'Arête de base $a$',
-        'Höhe $h$': 'Hauteur $h$', 'Verschiebung der Spitze in $x$': 'Déplacement du sommet en $x$',
         // kreuzprodukt
         'zwei Vektoren': 'deux vecteurs', 'Dachfläche': 'pan de toit', 'in der x-y-Ebene': 'dans le plan x-y', 'Dreieck': 'Triangle', 'Welche Fläche?': 'Quelle surface ?',
         // lot3d
@@ -152,42 +138,14 @@ window.BuchFR && BuchFR.add('vektoren', {
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
         // raum3d
-        ['Mittelpunkt M zeigen', 'Afficher le milieu M'], ['Ortsvektoren $', 'Vecteurs position $'], ['$ · Verbindungsvektor $', '$ · vecteur $'],
-        ['Länge: $', 'Longueur : $'], ['Mittelpunkt: $', 'Milieu : $'], ['$, also $', '$, donc $'],
-        ['Subtrahieren heißt: den Gegenvektor $-\\vec{b}$ anhängen.', 'Soustraire, c’est ajouter le vecteur opposé $-\\vec{b}$ au bout.'],
-        ['Addieren heißt: $\\vec{b}$ an die Spitze von $\\vec{a}$ hängen. Die Summe ist die Diagonale des Parallelogramms.',
-            'Additionner, c’est placer $\\vec{b}$ à l’extrémité de $\\vec{a}$. La somme est la diagonale du parallélogramme.'],
-        ['Ein negativer Faktor dreht die Richtung um.', 'Un facteur négatif inverse le sens.'], ['Mit $r = 0$ entsteht der Nullvektor.', 'Avec $r = 0$, on obtient le vecteur nul.'],
-        [' Die Länge wird mit $|r| = ', ' La longueur est multipliée par $|r| = '], ['$ multipliziert: $', '$ : $'],
+        ['Ortsvektoren $', 'Vecteurs position $'], ['$ · Verbindungsvektor $', '$ · vecteur $'],
+        ['$ multipliziert: $', '$ : $'],
         // skalarprodukt
-        [' · <b>orthogonal</b>: $', ' · <b>orthogonaux</b> : $'], [' (stumpf: das Skalarprodukt ist negativ)', ' (obtus : le produit scalaire est négatif)'],
-        [' (spitz: das Skalarprodukt ist positiv)', ' (aigu : le produit scalaire est positif)'], [' (parallel, gleiche Richtung)', ' (parallèles, même sens)'],
-        ['Mit dem Nullvektor gibt es keinen Winkel.', 'Avec le vecteur nul, il n’y a pas d’angle.'],
+        [' · <b>orthogonal</b>: $', ' · <b>orthogonaux</b> : $'],
         // gerade3d
-        ['Der Richtungsvektor darf nicht der Nullvektor sein.', 'Le vecteur directeur ne doit pas être le vecteur nul.'],
-        ['Punktprobe für $Q(', 'Test d’appartenance pour $Q('], [')$: Alle Zeilen liefern $t = ', ')$ : toutes les lignes donnent $t = '],
+        [')$: Alle Zeilen liefern $t = ', ')$ : toutes les lignes donnent $t = '],
         [')$: Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.', ')$ : les lignes donnent des valeurs différentes de $t$, donc <b>$Q \\notin g$</b>.'],
         ['$: $X(', '$ : $X('],
-        ['Alle Zeilen liefern $t = ', 'Toutes les lignes donnent $t = '],
-        ['$, also <b>$Q \\in g$</b>.', '$, donc <b>$Q \\in g$</b>.'],
-        ['Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.', 'Les lignes donnent des valeurs différentes de $t$, donc <b>$Q \\notin g$</b>.'],
-        ['Spurpunkte: keine', 'Points de percée : aucun'], ['Spurpunkte: ', 'Points de percée : '],
-        // ebene3d
-        ['$\\vec{u}$ und $\\vec{v}$ sind parallel, sie spannen keine Ebene auf.', '$\\vec{u}$ et $\\vec{v}$ sont colinéaires : ils ne définissent pas de plan.'],
-        ['Normalenvektor $\\vec{n}', 'Vecteur normal $\\vec{n}'], ['$ · Koordinatenform: $', '$ · équation cartésienne : $'],
-        ['Spurpunkte mit den Achsen: ', 'Points de percée des axes : '], ['Punktprobe: $', 'Test d’appartenance : $'],
-        ['$: <b>$Q$ liegt in $E$</b>.', '$ : <b>$Q$ est dans $E$</b>.'], ['$: <b>$Q$ liegt nicht in $E$</b>. Abstand $\\approx ', '$ : <b>$Q$ n’est pas dans $E$</b>. Distance $\\approx '],
-        ['$: Die Gerade ist parallel zur Ebene ', '$ : la droite est parallèle au plan '], ['und liegt in ihr.', 'et y est contenue.'], ['und schneidet sie nicht.', 'et ne le coupe pas.'],
-        ['Einsetzen von $g$ in $E$: $t = ', 'En remplaçant $g$ dans $E$ : $t = '], ['$, Schnittpunkt $S(', '$, point d’intersection $S('],
-        ['$ · Schnittwinkel: $', '$ · angle d’intersection : $'],
-        // geradenlage
-        ['Richtungsvektoren dürfen nicht der Nullvektor sein.', 'Les vecteurs directeurs ne doivent pas être le vecteur nul.'],
-        ['Die Richtungsvektoren sind parallel ($\\vec{v} = ', 'Les vecteurs directeurs sont colinéaires ($\\vec{v} = '],
-        ['Der Stützpunkt $Q$ liegt auf $g$: <b>identisch</b>.', 'Le point $Q$ de $h$ est sur $g$ : <b>confondues</b>.'],
-        ['Der Stützpunkt $Q$ liegt nicht auf $g$: <b>echt parallel</b>.', 'Le point $Q$ de $h$ n’est pas sur $g$ : <b>strictement parallèles</b>.'],
-        ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Pas parallèles. En égalant, on obtient $t = '], ['$: <b>schneidend</b> im Punkt $S(', '$ : <b>sécantes</b> au point $S('],
-        ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ',
-            'Pas parallèles, et le système d’équations n’a pas de solution : <b>non coplanaires</b>. Plus courte distance (pointillés rouges) $\\approx '],
         // kreuzprodukt
         ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
             '$\\vec{u}$ et $\\vec{v}$ sont colinéaires : le produit vectoriel est le vecteur nul, ils n’engendrent aucune surface.'],
@@ -196,12 +154,6 @@ window.BuchFR && BuchFR.add('vektoren', {
         ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$ : le produit vectoriel est perpendiculaire aux deux vecteurs'],
         [' (im Bild verkürzt gezeichnet)', ' (dessiné raccourci sur l’image)'], ['Dreieck: $A = ', 'Triangle : $A = '], ['Parallelogramm: $A = ', 'Parallélogramme : $A = '],
         [' Flächeneinheiten', ' unités d’aire'],
-        // pyramide
-        ['Grundfläche $G', 'Aire de la base $G'], ['$, Spitze $S(', '$, sommet $S('], ['$, Höhe $h = ', '$, hauteur $h = '], ['$ (rot)', '$ (en rouge)'],
-        ['Volumen $V', 'Volume $V'], [' · Mantel (4 Dreiecke, je $', ' · aire latérale (4 triangles, chacun $'], ['Oberfläche $O = ', 'Aire totale $O = '],
-        [' · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', ' · Si tu déplaces le sommet horizontalement, le volume reste le même, l’aire latérale non.'],
-        ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, translation de la face supérieure $\\vec{w} = '],
-        [' (Prinzip von Cavalieri: auch schief)', ' (principe de Cavalieri : même oblique)'], [' · Mantel (4 Parallelogramme, je $', ' · aire latérale (4 parallélogrammes, chacun $'],
         // lot3d
         ['Der Normalenvektor darf nicht der Nullvektor sein.', 'Le vecteur normal ne doit pas être le vecteur nul.'],
         ['$ · Lotgerade $l\\colon', '$ · perpendiculaire $l\\colon'], ['$l$ in $E$ einsetzen: $', 'Remplacer $l$ dans $E$ : $'],

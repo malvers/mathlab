@@ -26,21 +26,8 @@ window.BuchFR && BuchFR.add('numerik', {
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Points au hasard dans le rectangle, points sous la parabole',
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
-        'x² auf [0; 2]': 'x² sur [0 ; 2]',
-        '√x auf [0; 4]': '√x sur [0 ; 4]',
-        'sin x auf [0; π]': 'sin x sur [0 ; π]',
-        'Rechtecke links': 'Rectangles à gauche',
-        'Rechtecke Mitte': 'Rectangles au milieu',
-        'Trapeze': 'Trapèzes',
-        'Verfahren': 'Méthode',
-        'Anzahl der Streifen $n$': 'Nombre de bandes $n$',
-        'Flächeninhalt mit Streifen angenähert': 'Aire approchée par des bandes',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
-        // flaeche
-        'x² auf [0; 2]': 'x² sur [0 ; 2]', '√x auf [0; 4]': '√x sur [0 ; 4]', 'sin x auf [0; π]': 'sin x sur [0 ; π]',
-        'Rechtecke links': 'Rectangles à gauche', 'Rechtecke Mitte': 'Rectangles au milieu', 'Trapeze': 'Trapèzes', 'Verfahren': 'Méthode',
-        'Anzahl der Streifen $n$': 'Nombre de bandes $n$', 'Flächeninhalt mit Streifen angenähert': 'Aire approchée par des bandes',
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -53,14 +40,9 @@ window.BuchFR && BuchFR.add('numerik', {
         ['. Der Anteil der Treffer unter ', '. La part des points tombés sous '], [' schätzt den Anteil der Fläche.', ' estime la part de l’aire.'],
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
-        ['Näherung mit $n = ', 'Approximation avec $n = '],
-        ['$ · genauer Wert $', '$ · valeur exacte $'],
-        [' · genauer Wert $', ' · valeur exacte $'],
-        ['$ · Fehler $', '$ · erreur $'],
-        [' · Fehler $', ' · erreur $'],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
-        ['Näherung mit $n = ', 'Approximation avec $n = '], ['$: $A \\approx ', '$ : $A \\approx '], ['$ · genauer Wert $', '$ · valeur exacte $'], ['$ · Fehler $', '$ · erreur $'],
+        ['$: $A \\approx ', '$ : $A \\approx '],
     ],
     rule: [
         // book fr-1 mathe11-fr:
