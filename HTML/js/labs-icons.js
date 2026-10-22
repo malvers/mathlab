@@ -12,126 +12,166 @@ const LAB_ICONS = {
     // the card's German one (Doc, 10.10.2026: "ein zweites icon vom cover mit der EN version -> click EN Version")
     // and in Spanish (Doc, 12.10.2026: "übersetze bitte drei Bücher ins Spanische")
     // and in Italian (Doc, 18.10.2026: "macht die Übersetzung für die Mathebücher BGY elf zwölf dreizehn. Bitte in Italienisch.")
-    "lehrbuch-mathe11": `<span style="display: flex; gap: 12px; align-items: center;">
+    // and in French (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch. Fang mit BGY an."); five covers
+    // only fit the card at 80 px with an 8 px gap
+    "lehrbuch-mathe11": `<span style="display: flex; gap: 8px; align-items: center;">
         <img src="resources/og/buch-mathe11-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+            style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-en/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-en/index.html'; }">
             <img src="resources/og/buch-mathe11-en-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edición española" aria-label="Edición española" lang="es" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-es/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-es/index.html'; }">
             <img src="resources/og/buch-mathe11-es-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-it/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-it/index.html'; }">
             <img src="resources/og/buch-mathe11-it-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Édition française" aria-label="Édition française" lang="fr" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-fr/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe11-fr/index.html'; }">
+            <img src="resources/og/buch-mathe11-fr-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
     // book 2 as well (Doc, 11.10.2026: "mach das zweite Buch in EN")
     // and in Spanish (Doc, 12.10.2026: "übersetze bitte drei Bücher ins Spanische")
     // and in Italian (Doc, 18.10.2026: "macht die Übersetzung für die Mathebücher BGY elf zwölf dreizehn. Bitte in Italienisch.")
-    "lehrbuch-mathe12": `<span style="display: flex; gap: 12px; align-items: center;">
+    // and in French (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch. Fang mit BGY an."); five covers
+    // only fit the card at 80 px with an 8 px gap
+    "lehrbuch-mathe12": `<span style="display: flex; gap: 8px; align-items: center;">
         <img src="resources/og/buch-mathe12-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+            style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12-en/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12-en/index.html'; }">
             <img src="resources/og/buch-mathe12-en-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edición española" aria-label="Edición española" lang="es" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12-es/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12-es/index.html'; }">
             <img src="resources/og/buch-mathe12-es-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12-it/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12-it/index.html'; }">
             <img src="resources/og/buch-mathe12-it-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Édition française" aria-label="Édition française" lang="fr" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12-fr/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12-fr/index.html'; }">
+            <img src="resources/og/buch-mathe12-fr-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
     // book 3 as well (Doc, 11.10.2026: "das nächste parallel mit Einstein")
     // and in Spanish (Doc, 12.10.2026: "übersetze bitte drei Bücher ins Spanische")
     // and in Italian (Doc, 18.10.2026: "macht die Übersetzung für die Mathebücher BGY elf zwölf dreizehn. Bitte in Italienisch.")
-    "lehrbuch-mathe13": `<span style="display: flex; gap: 12px; align-items: center;">
+    // and in French (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch. Fang mit BGY an."); five covers
+    // only fit the card at 80 px with an 8 px gap
+    "lehrbuch-mathe13": `<span style="display: flex; gap: 8px; align-items: center;">
         <img src="resources/og/buch-mathe13-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+            style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-en/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-en/index.html'; }">
             <img src="resources/og/buch-mathe13-en-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edición española" aria-label="Edición española" lang="es" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-es/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-es/index.html'; }">
             <img src="resources/og/buch-mathe13-es-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-it/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-it/index.html'; }">
             <img src="resources/og/buch-mathe13-it-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Édition française" aria-label="Édition française" lang="fr" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-fr/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe13-fr/index.html'; }">
+            <img src="resources/og/buch-mathe13-fr-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
     // book 4 in English as well (Doc, 11.10.2026: the next books in English, in parallel)
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
     // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
-    "lehrbuch-mathefos11": `<span style="display: flex; gap: 12px; align-items: center;">
+    // and in French (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch. Fang mit BGY an."); five covers
+    // only fit the card at 80 px with an 8 px gap
+    "lehrbuch-mathefos11": `<span style="display: flex; gap: 8px; align-items: center;">
         <img src="resources/og/buch-mathefos11-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+            style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-en/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-en/index.html'; }">
             <img src="resources/og/buch-mathefos11-en-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edición española" aria-label="Edición española" lang="es" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-es/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-es/index.html'; }">
             <img src="resources/og/buch-mathefos11-es-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-it/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-it/index.html'; }">
             <img src="resources/og/buch-mathefos11-it-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Édition française" aria-label="Édition française" lang="fr" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-fr/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos11-fr/index.html'; }">
+            <img src="resources/og/buch-mathefos11-fr-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
     // book 5 in English as well (Doc, 11.10.2026: two more books in English)
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
     // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
-    "lehrbuch-mathefos12": `<span style="display: flex; gap: 12px; align-items: center;">
+    // and in French (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch. Fang mit BGY an."); five covers
+    // only fit the card at 80 px with an 8 px gap
+    "lehrbuch-mathefos12": `<span style="display: flex; gap: 8px; align-items: center;">
         <img src="resources/og/buch-mathefos12-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+            style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-en/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-en/index.html'; }">
             <img src="resources/og/buch-mathefos12-en-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edición española" aria-label="Edición española" lang="es" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-es/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-es/index.html'; }">
             <img src="resources/og/buch-mathefos12-es-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
         <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
             onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-it/index.html';"
             onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-it/index.html'; }">
             <img src="resources/og/buch-mathefos12-it-cover.jpg" alt="" loading="lazy" decoding="async"
-                style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Édition française" aria-label="Édition française" lang="fr" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-fr/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathefos12-fr/index.html'; }">
+            <img src="resources/og/buch-mathefos12-fr-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
     // the Oberschule books 6 and 7 get their hub cards (Doc, 13.10.2026: "nicht vergessen")
