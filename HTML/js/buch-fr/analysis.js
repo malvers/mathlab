@@ -100,7 +100,7 @@ window.BuchFR && BuchFR.add('analysis', {
         'Beispiele:': 'Exemples :', 'Zähler:': 'Numérateur :', 'Nenner:': 'Dénominateur :', 'Grad des Zählers': 'Degré du numérateur', 'Grad des Nenners': 'Degré du dénominateur',
         'Grad 0': 'Degré 0', 'Grad 1': 'Degré 1', 'Grad 2': 'Degré 2', 'Faktor $k$': 'Facteur $k$',
         // efunktion: the slider value after "Intérêts versés" and the same words in the sentence below it
-        'Welche Basis?': 'Quelle base ?', 'Zinseszins': 'Intérêts composés', 'Was wird gezeigt?': 'Que montrer ?',
+        'Welche Basis?': 'Quelle base ?', 'Zinseszins': 'Intérêts composés', 'Was wird gezeigt?': 'Qu’affiche-t-on ?',
         'Exponentialfunktionen und die Eulersche Zahl e': 'Fonctions exponentielles et le nombre e', 'Basis $a$': 'Base $a$', 'a = e setzen': 'Poser a = e',
         'Faktor $a$': 'Facteur $a$', 'im Exponenten $b$': 'Dans l’exposant $b$', 'Verschiebung $c$': 'Translation $c$', 'Verzinsung': 'Intérêts versés',
         'jährlich': 'chaque année', 'halbjährlich': 'chaque semestre', 'vierteljährlich': 'chaque trimestre', 'monatlich': 'chaque mois',

@@ -105,7 +105,6 @@ window.BuchFR && BuchFR.add('funktionen', {
         'Mrd. Menschen': 'Milliards d’habitants',
         // lage (the examples are the buttons)
         'schneidend': 'sécantes',
-        'orthogonal': 'perpendiculaires',
         'parallel': 'parallèles',
         'identisch': 'confondues',
         '$g$: Anstieg $m_1$': '$g$ : coefficient directeur $m_1$',
@@ -257,6 +256,9 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
+        // lage: the example button "orthogonal" for two lines (a rule, not a word - the vektoren widgets say "orthogonaux"
+        // for vectors, and a word table has only one French per German word)
+        [/^orthogonal$|(<button type="button" data-v="orthogonal">)orthogonal(?=<\/button>)/g, (m, b) => (b || '') + 'perpendiculaires'],
         // funktion: "die Kurve <b>2-mal</b>"
         [/<b>(\d+)-mal<\/b>/g, '<b>$1 fois</b>'],
         // lage: "$g$</span>: $" gets its no-break space
