@@ -22,6 +22,34 @@ window.BuchFR && BuchFR.add('stochastik', {
         'Primzahl · größer als 6': 'premier · supérieur à 6',
         'unvereinbar': 'incompatibles',
         // book fr-1 mathe11-fr:
+        // baum-hero, baum, schnelltest, vierfeld-trainer, simulation, ziegen
+        'Baumdiagramm: zwei Kugeln ohne Zurücklegen': 'Arbre pondéré : deux boules sans remise',
+        'Rot': 'Rouge', 'eine rote Kugel weniger': 'une boule rouge de moins', 'eine rote Kugel mehr': 'une boule rouge de plus',
+        'eine blaue Kugel weniger': 'une boule bleue de moins', 'eine blaue Kugel mehr': 'une boule bleue de plus',
+        'Anzahl der Züge': 'Nombre de tirages', '2 Züge': '2 tirages', '3 Züge': '3 tirages', 'Ziehen': 'Tirage',
+        'ohne Zurücklegen': 'sans remise', 'mit Zurücklegen': 'avec remise', 'Urne:': 'Urne :',
+        'Ereignis wählen:': 'Choisis un événement :', 'Ereignis': 'Événement', 'Baumdiagramm der Urne': 'Arbre pondéré de l’urne', 'unmöglich': 'impossible',
+        'beide Rot': 'les deux rouges', 'alle Rot': 'toutes rouges', 'genau einmal Rot': 'exactement une rouge', 'mindestens einmal Rot': 'au moins une rouge',
+        'keinmal Rot': 'aucune rouge', 'beide gleich': 'les deux de même couleur', 'alle gleich': 'toutes de même couleur', 'leeren': 'effacer',
+        'Anteil der Erkrankten': 'Part des malades', 'Test erkennt Kranke (Sensitivität)': 'Le test reconnaît les malades (sensibilité)',
+        'Test erkennt Gesunde (Spezifität)': 'Le test reconnaît les personnes saines (spécificité)', 'Darstellung': 'Représentation',
+        'Anzahlen (von 10 000)': 'Effectifs (sur 10 000)', 'Wahrscheinlichkeiten': 'Probabilités', 'Anzahlen': 'Effectifs',
+        'positiv $T^+$': 'positif $T^+$', 'negativ $T^-$': 'négatif $T^-$', 'krank $K$': 'malade $M$', 'gesund $\\overline{K}$': 'sain $\\overline{M}$',
+        'krank': 'malade', 'gesund': 'sain', 'Baumdiagramm: krank oder gesund, dann Testergebnis': 'Arbre pondéré : malade ou sain, puis résultat du test',
+        'Neue Tafel': 'Nouveau tableau', 'A und B': 'A et B', 'A und nicht B': 'A et non B', 'nicht A und B': 'non A et B', 'nicht A und nicht B': 'non A et non B',
+        'A gesamt': 'total de A', 'nicht A gesamt': 'total de non A', 'B gesamt': 'total de B', 'nicht B gesamt': 'total de non B', 'gesamt': 'total',
+        // "Würfel" (dé / cube) is never a global word: the simulator's button is a rule below
+        'Münze': 'Pièce', 'Zwei Würfel': 'Deux dés', 'Urne': 'Urne', 'Wappen': 'face', 'Sechs': 'six', 'Augensumme 7': 'somme des points 7',
+        'beide rot (3 rot, 2 blau, ohne Zurücklegen)': 'les deux rouges (3 rouges, 2 bleues, sans remise)',
+        'mindestens eine Sechs in vier Würfen': 'au moins un six en quatre lancers', 'Zufallsversuch': 'Expérience aléatoire', 'Durchführen:': 'Réaliser :',
+        'Relative Häufigkeit in Abhängigkeit von der Anzahl der Versuche': 'Fréquence en fonction du nombre d’épreuves',
+        'VERSUCHE n': 'ÉPREUVES n', 'TREFFER': 'SUCCÈS', 'REL. HÄUFIGKEIT': 'FRÉQUENCE', 'WAHRSCHEINLICHKEIT': 'PROBABILITÉ',
+        'Noch kein Versuch – starte mit +1 oder +10.': 'Pas encore d’épreuve – commence avec +1 ou +10.',
+        'Hinter einer Tür steht ein Auto, hinter den anderen beiden je eine Ziege. Wähle eine Tür.':
+            'Derrière une porte se trouve une voiture, derrière chacune des deux autres une chèvre. Choisis une porte.',
+        'Neues Spiel': 'Nouvelle partie', '1000 Spiele vom Rechner spielen lassen': 'Faire jouer 1000 parties à l’ordinateur',
+        'Strategie': 'Stratégie', 'Spiele': 'Parties', 'Autos': 'Voitures', 'Gewinnquote': 'Taux de victoires',
+        'du: bleiben': 'toi : rester', 'du: wechseln': 'toi : changer', 'Rechner: bleiben': 'ordinateur : rester', 'Rechner: wechseln': 'ordinateur : changer',
         // book fr-2 mathe12-fr:
         'Anzahlen (von 10 000)': 'Effectifs (sur 10 000)',
         'Baumdiagramm: zwei Kugeln ohne Zurücklegen': 'Arbre pondéré : deux boules sans remise',
@@ -218,6 +246,16 @@ window.BuchFR && BuchFR.add('stochastik', {
         ['nicht beide', 'pas les deux'],
         ['nicht $A$ oder nicht $B$', 'non $A$ ou non $B$'],
         // book fr-1 mathe11-fr:
+        // baum, schnelltest, vierfeld-trainer, simulation, ziegen
+        ['Klicke auf die Enden der Pfade (rechts im Baum) oder wähle oben ein Ereignis. ', 'Clique sur les extrémités des chemins (à droite dans l’arbre) ou choisis un événement en haut. '],
+        ['Das Buch rechnet dir die Pfadregeln vor.', 'Le manuel te montre le calcul avec les règles des chemins.'],
+        ['<b>1. Pfadregel</b> (multiplizieren entlang des Pfades):', '<b>1re règle des chemins</b> (multiplier le long du chemin) :'],
+        ['<b>2. Pfadregel</b> (Pfade addieren):', '<b>2e règle des chemins</b> (additionner les chemins) :'],
+        ['aber nur <b>', 'mais seulement <b>'], ['</b> davon sind wirklich krank.', '</b> d’entre elles sont vraiment malades.'],
+        ['Anteil der Kranken unter den positiv Getesteten: ', 'Part des malades parmi les personnes testées positives : '],
+        [' alles richtig', ' tout est juste'], ['Ereignis: <b>', 'Événement : <b>'], ['Zuletzt: ', 'Derniers : '],
+        ['TÜR', 'PORTE'], ['Tür', 'Porte'], ['Gewonnen – das Auto! ', 'Gagné – la voiture ! '], ['Leider eine Ziege. ', 'Dommage, une chèvre. '],
+        ['Du hast gewechselt.', 'Tu as changé.'], ['Du bist geblieben.', 'Tu n’as pas changé.'],
         // book fr-2 mathe12-fr:
         ['aber nur <b>', 'mais seulement <b>'],
         ['</b> davon sind wirklich krank.', '</b> d’entre elles sont vraiment malades.'],
@@ -365,6 +403,20 @@ window.BuchFR && BuchFR.add('stochastik', {
     ],
     rule: [
         // book fr-1 mathe11-fr:
+        // letters in the trees and in the simulator: R/B (rot/blau) stay R/B (rouge/bleu), K/G (krank/gesund) → M/S (malade/sain),
+        // coin W/Z (Wappen/Zahl) → F/P (face/pile); the chapter text lb1 uses the same letters
+        [/(font-weight:700">)K(<\/text>)/g, '$1M$2'], [/(font-weight:700">)G(<\/text>)/g, '$1S$2'],
+        [/(margin-right:10px">)W</g, '$1F<'], [/(margin-right:10px">)Z</g, '$1P<'],
+        // simulator: the dice button ("Würfel" has two meanings, so no global word)
+        [/(data-x="wuerfel">)Würfel</g, '$1Dé<'],
+        // four-field trainer: "3 von 5 richtig"
+        [/(\d+) von (\d+) richtig/g, '$1 sur $2 justes'],
+        // rapid test
+        [/Positiv getestet werden <b>([^<]*)<\/b> von 10 000 Personen – /g, (m, n) => 'Sur 10 000 personnes, <b>' + n + '</b> sont testées positives, '],
+        // goats (before the header rule "^Zu " of js/buch-fr.js)
+        [/Der Moderator weiß, wo das Auto steht, und öffnet Tür (\d): eine Ziege\. Bleibst du oder wechselst du\?/g,
+            'L’animateur sait où est la voiture et ouvre la porte $1 : une chèvre. Tu restes ou tu changes ?'],
+        [/Bei Tür (\d) bleiben/g, 'Rester à la porte $1'], [/Zu Tür (\d) wechseln/g, 'Passer à la porte $1'],
         // book fr-2 mathe12-fr:
         // letters in the trees: K/G (krank/gesund) → M/S (malade/sain), coins W/Z (Wappen/Zahl) → F/P (face/pile); R/B stay (rouge/bleu)
         [/(font-weight:700">)K(<\/text>)/g, '$1M$2'], [/(font-weight:700">)G(<\/text>)/g, '$1S$2'],

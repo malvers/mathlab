@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 11 · Chapitre 1 · Probabilités des expériences aléatoires à plusieurs épreuves | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Arbres pondérés, tableaux croisés, simulation. Chapitre 1 du manuel interactif Mathématiques · Berufliches Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 1 · DOMAINE D’APPRENTISSAGE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<!-- ================================================================ AUFTAKT -->
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 1 · DOMAINE D’APPRENTISSAGE 1 · AVRIL</p>
+            <h1>Probabilités des expériences aléatoires à plusieurs épreuves</h1>
+            <p class="b-hero-lead">Tirer deux fois, lancer trois fois le dé, d’abord tester puis vérifier : beaucoup d’expériences aléatoires se déroulent en plusieurs étapes.
+                Dans ce chapitre, tu apprends à comprendre ces expériences avec des <b>arbres pondérés</b> et des <b>tableaux croisés</b> –
+                et à les <b>rejouer</b> des milliers de fois avec l’ordinateur.</p>
+            <div class="b-chips">
+                <span class="b-chip">15 HEURES</span>
+                <span class="b-chip">3 LEÇONS</span>
+                <span class="b-chip">4 LABORATOIRES</span>
+                <span class="b-chip">INTERACTIF</span>
+            </div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text">
+                <ul>
+                    <li>dessiner des arbres pondérés et calculer des probabilités avec les <b>règles des chemins</b></li>
+                    <li>distinguer les tirages <b>avec et sans remise</b></li>
+                    <li>établir, compléter et exploiter des <b>tableaux croisés</b></li>
+                    <li><b>simuler</b> des expériences aléatoires avec des outils numériques et comparer simulation et calcul</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="1/3">
+                <p class="b-q-text">On lance un dé une fois. Quelle est la probabilité d’obtenir un nombre supérieur à 4 ?</p>
+                <div class="b-sol"><p>Les issues favorables sont 5 et 6, donc $\tfrac26 = \tfrac13 \approx 0{,}33$.</p></div>
+            </div>
+            <div class="b-q" data-ans="3/10">
+                <p class="b-q-text">Calcule $\tfrac34 \cdot \tfrac25$.</p>
+                <div class="b-sol"><p>Numérateur fois numérateur, dénominateur fois dénominateur : $\tfrac{3 \cdot 2}{4 \cdot 5} = \tfrac{6}{20} = \tfrac{3}{10}$.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,65">
+                <p class="b-q-text">On a $P(A) = 0{,}35$. Quelle est la probabilité de l’événement contraire $\overline{A}$ ?</p>
+                <div class="b-sol"><p>$P(\overline{A}) = 1 - P(A) = 1 - 0{,}35 = 0{,}65$.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,12" data-tol="0.0001">
+                <p class="b-q-text">Écris 12 % sous forme décimale.</p>
+                <div class="b-sol"><p>Pour cent signifie « sur cent » : $12\,\% = \tfrac{12}{100} = 0{,}12$.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ ERKUNDUNGEN -->
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-text"><p>Avant les règles : estimez, essayez, discutez. Pour les explorations, vous n’avez besoin d’aucune connaissance préalable.
+        Les laboratoires aident à essayer, et dans la marge figure la leçon où se trouve la réponse.</p></div>
+
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LES DÉS DE LÉNA</div>
+            <div class="b-text">
+                <p>Léna joue avec deux dés dont elle a elle-même écrit les faces : qui obtient le plus grand nombre gagne, en cas d’égalité, c’est match nul.</p>
+                <ul>
+                    <li>Regardez les patrons des dés dans le laboratoire. Qui a les meilleures chances ? Estimez d’abord.</li>
+                    <li>Jouez 20 manches et comptez les victoires.</li>
+                    <li>Comment déterminer la chance de gagner <b>exactement</b>, sans jouer ?</li>
+                </ul>
+            </div>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Écrire sur les dés, l’arbre et le résultat se calculent aussitôt</span></span></a>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">DEUX BOULES DANS LE SAC</div>
+            <div class="b-text">
+                <p>Dans un sac, il y a <span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
+                    – trois boules rouges et deux bleues. Vous tirez à l’aveugle deux boules l’une après l’autre et ne remettez <b>pas</b> la première.</p>
+                <ul>
+                    <li>Qu’est-ce qui est le plus probable : deux couleurs pareilles ou deux couleurs différentes ? Votez.</li>
+                    <li>Jouez 20 fois avec des bouts de papier et comptez.</li>
+                    <li>Dessinez toutes les possibilités. Comment pouvez-vous calculer les chances ?</li>
+                </ul>
+            </div>
+            <span class="b-pair">→ Leçon 1, exemple 2</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA PLANCHE À CLOUS</div>
+            <div class="b-text">
+                <p>Une bille tombe à travers plusieurs rangées de clous. À chaque clou, elle rebondit avec la même chance à gauche ou à droite.</p>
+                <ul>
+                    <li>Faites tomber beaucoup de billes dans le laboratoire. Pourquoi la plupart arrivent-elles au milieu ?</li>
+                    <li>Combien de chemins mènent à la case tout à gauche, combien à une case du milieu ?</li>
+                </ul>
+            </div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Planche à clous avec histogramme – la courbe en cloche apparaît en direct</span></span></a>
+            <span class="b-pair">→ Leçons 1 et 3</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">POSITIF – ET POURTANT EN BONNE SANTÉ ?</div>
+            <div class="b-text">
+                <p>Un test rapide reconnaît correctement 95 % des malades et 95 % des personnes saines. Sur 10 000 personnes, 200 sont malades.</p>
+                <ul>
+                    <li>Ton test est positif. À quel point es-tu sûr(e) d’être malade : 95 % ? 50 % ? Moins ? Estimez.</li>
+                    <li>Calculez : combien de malades et combien de personnes saines obtiennent un résultat positif ? Un tableau aide.</li>
+                </ul>
+            </div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 1 -->
+<section class="b-sec" id="le1" data-kind="le" data-toc="Arbres pondérés et règles des chemins" data-toc-k="1" data-toc-short="1 Arbres">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">5 HEURES</span></div>
+    <h2><span class="b-no">1</span>Arbres pondérés et règles des chemins</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Léa fait tourner deux fois une roue de loterie à trois secteurs égaux : deux sont rouges, un est bleu.
+                    Elle gagne si elle obtient <b>rouge</b> les deux fois. Gagne-t-elle plus d’une partie sur deux ?</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Une expérience aléatoire composée de plusieurs épreuves successives s’appelle une <b>expérience aléatoire à plusieurs épreuves</b>.
+                    On la représente par un <b>arbre pondéré</b> : chaque épreuve est un embranchement, et sur chaque branche on écrit la probabilité
+                    de ce résultat partiel.</p>
+                <p>Chaque issue de l’expérience complète correspond à exactement un <b>chemin</b> du départ jusqu’à une extrémité.
+                    Un <b>événement</b> regroupe plusieurs issues, donc plusieurs chemins.</p>
+                <p>Pour Léa, à chaque épreuve $P(\text{rouge}) = \tfrac23$. Dans $\tfrac23$ des parties, le rouge sort d’abord, et parmi ces parties,
+                    le rouge ressort dans $\tfrac23$ des cas. Donc
+                    $$P(\text{RR}) = \tfrac23 \cdot \tfrac23 = \tfrac49 \approx 0{,}44.$$
+                    Léa gagne donc <b>moins</b> d’une partie sur deux.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÈGLES DES CHEMINS</div>
+                <div class="b-text">
+                    <p>À chaque embranchement, la somme des probabilités vaut $1$.</p>
+                    <p><b>1re règle des chemins (règle du produit) :</b> la probabilité d’une issue est le <b>produit</b> des
+                        probabilités le long de son chemin.</p>
+                    <p><b>2e règle des chemins (règle de la somme) :</b> la probabilité d’un événement est la <b>somme</b> des
+                        probabilités de tous les chemins qui appartiennent à cet événement.</p>
+                </div>
+            </div>
+
+            <div class="b-text">
+                <p>Pour un tirage dans une urne, tout dépend de savoir si l’on remet la boule tirée.
+                    <b>Avec remise</b>, les probabilités restent les mêmes à chaque épreuve.
+                    <b>Sans remise</b>, le contenu de l’urne change, et avec lui les probabilités de l’épreuve suivante.</p>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notation :</b> R signifie rouge, B bleu. RB signifie : d’abord rouge, puis bleu.</p>
+            <p class="b-note"><b>Vérification :</b> les probabilités de toutes les extrémités de chemins font $1$ au total.</p>
+            <p class="b-note"><b>Laboratoire :</b> dans le jeu de dés, tu construis toi-même l’arbre pour deux dés, épreuve par épreuve.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ATELIER DES ARBRES</div>
+        <p class="b-help" style="margin:0 0 12px">Règle l’urne, choisis avec ou sans remise et clique à droite sur les extrémités des chemins.
+            L’atelier te montre le calcul avec les deux règles des chemins.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-bsp">
+                <div class="b-box-title">EXEMPLE 1 · AU MOINS UNE FOIS</div>
+                <div class="b-text">
+                    <p>Léa fait de nouveau tourner sa roue deux fois. Quelle est la probabilité d’obtenir <b>au moins une fois</b> le rouge ?</p>
+                </div>
+                <div class="b-sol">
+                        <p>À « au moins une fois rouge » appartiennent les trois chemins RR, RB et BR. On va plus vite avec l’<b>événement contraire</b>
+                            « jamais rouge », qui n’est que le chemin BB :</p>
+                        <p>$$P(\text{BB}) = \tfrac13 \cdot \tfrac13 = \tfrac19, \qquad P(\text{au moins une fois rouge}) = 1 - \tfrac19 = \tfrac89 \approx 0{,}89.$$</p>
+                    </div>
+            </div>
+
+            <div class="b-box b-bsp">
+                <div class="b-box-title">EXEMPLE 2 · SANS REMISE</div>
+                <div class="b-text">
+                    <p>Dans le sac contenant trois boules rouges et deux bleues, on tire deux boules sans remise.
+                        Calcule la probabilité d’obtenir a) deux boules rouges, b) deux couleurs différentes.</p>
+                </div>
+                <div class="b-sol">
+                        <p>Après une boule rouge, il reste 2 rouges et 2 bleues dans le sac ; après une bleue, 3 rouges et 1 bleue.</p>
+                        <p>a) $P(\text{RR}) = \tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p>
+                        <p>b) $P(\text{RB}) + P(\text{BR}) = \tfrac35 \cdot \tfrac24 + \tfrac25 \cdot \tfrac34 = \tfrac{6}{20} + \tfrac{6}{20} = \tfrac35$</p>
+                        <p>Deux couleurs différentes sont donc plus probables ($\tfrac35$) que deux pareilles ($\tfrac25$). C’est la réponse à l’exploration.</p>
+                    </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Astuce :</b> « au moins une fois » se calcule presque toujours avec l’événement contraire « jamais » :
+                $P(E) = 1 - P(\overline{E})$.</p>
+        </aside>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>On lance une pièce trois fois. Dessine l’arbre pondéré et calcule la probabilité d’obtenir
+                a) trois fois pile, b) exactement deux fois face.</p></div>
+            <div class="b-sol"><p>L’arbre a 8 chemins, chacun a la probabilité $\left(\tfrac12\right)^3 = \tfrac18$.</p>
+                <p>a) $P(\text{PPP}) = \tfrac18$ &nbsp; b) chemins FFP, FPF, PFF : $3 \cdot \tfrac18 = \tfrac38$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Une roue de loterie donne rouge avec $\tfrac12$, jaune avec $\tfrac13$ et bleu avec $\tfrac16$. On la fait tourner deux fois.
+                Quelle est la probabilité d’obtenir a) deux fois la même couleur, b) deux couleurs différentes ?</p></div>
+            <div class="b-sol"><p>a) $\tfrac12 \cdot \tfrac12 + \tfrac13 \cdot \tfrac13 + \tfrac16 \cdot \tfrac16 = \tfrac{9}{36} + \tfrac{4}{36} + \tfrac{1}{36} = \tfrac{14}{36} = \tfrac{7}{18} \approx 0{,}389$</p>
+                <p>b) Événement contraire : $1 - \tfrac{7}{18} = \tfrac{11}{18} \approx 0{,}611$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une urne contient 4 boules rouges et 6 blanches. On tire deux boules sans remise.</p>
+                <p>a) Calcule la probabilité que les deux soient blanches. b) Calcule la probabilité d’obtenir au moins une boule rouge.
+                    c) Compare a) avec le tirage avec remise et explique la différence.</p></div>
+            <div class="b-hint"><p>Pour b) : quel est l’événement contraire de « au moins une rouge » ?</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{10} \cdot \tfrac59 = \tfrac{30}{90} = \tfrac13$ &nbsp; b) $1 - \tfrac13 = \tfrac23$</p>
+                <p>c) Avec remise : $0{,}6 \cdot 0{,}6 = 0{,}36 > \tfrac13$. Sans remise, après une boule blanche, il y a une blanche de moins dans l’urne,
+                    donc la chance d’une deuxième blanche diminue.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une pièce mécanique passe deux contrôles indépendants. Le contrôle 1 détecte un défaut existant avec
+                90 %, le contrôle 2 avec 80 %. Une pièce est défectueuse.</p>
+                <p>a) Quelle est la probabilité que le défaut soit détecté ? b) Quelle est la probabilité que seul le contrôle 2 le détecte ?</p></div>
+            <div class="b-hint"><p>Le défaut ne reste inaperçu que si les <b>deux</b> contrôles le manquent.</p></div>
+            <div class="b-sol"><p>a) $1 - 0{,}1 \cdot 0{,}2 = 1 - 0{,}02 = 0{,}98$ &nbsp; b) $0{,}1 \cdot 0{,}8 = 0{,}08$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Combien de fois au moins faut-il lancer un dé pour obtenir au moins un six avec une probabilité d’au moins 90 % ?</p></div>
+            <div class="b-hint"><p>Événement contraire : $n$ fois pas de six, donc $\left(\tfrac56\right)^n$. Essaie avec la calculatrice ou un tableau de valeurs.</p></div>
+            <div class="b-sol"><p>On cherche le plus petit $n$ tel que $1 - \left(\tfrac56\right)^n \geq 0{,}9$, donc $\left(\tfrac56\right)^n \leq 0{,}1$.</p>
+                <p>$\left(\tfrac56\right)^{12} \approx 0{,}112$ est encore trop grand, $\left(\tfrac56\right)^{13} \approx 0{,}093$ suffit.
+                    <span class="b-res">Il faut au moins 13 lancers.</span></p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Tim calcule pour l’exemple 2 : « Les deux boules rouges : $\tfrac35 \cdot \tfrac35 = \tfrac{9}{25}$. »
+                Trouve l’erreur et explique-la à un ou une camarade.</p></div>
+            <div class="b-sol"><p>Tim calcule comme si la première boule était remise. Sans remise, au deuxième tirage, il ne reste plus que
+                4 boules dans le sac, dont 2 rouges : $\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1/36">
+            <p class="b-q-text">On lance un dé deux fois. Quelle est la probabilité d’obtenir deux fois le six ?</p>
+            <div class="b-sol"><p>$\tfrac16 \cdot \tfrac16 = \tfrac{1}{36} \approx 0{,}028$</p></div>
+        </div>
+        <div class="b-q" data-ans="3/10">
+            <p class="b-q-text">Une urne contient 2 boules rouges et 3 bleues. On en tire deux sans remise. Quelle est la probabilité que les deux soient bleues ?</p>
+            <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p></div>
+        </div>
+        <div class="b-q" data-ans="0,488">
+            <p class="b-q-text">Dans un jeu de hasard, on gagne avec la probabilité $0{,}2$. On joue trois fois.
+                Quelle est la probabilité de gagner au moins une fois ?</p>
+            <div class="b-sol"><p>$1 - 0{,}8^3 = 1 - 0{,}512 = 0{,}488$</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 2 -->
+<section class="b-sec" id="le2" data-kind="le" data-toc="Tableaux croisés" data-toc-k="2" data-toc-short="2 Tableau croisé">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">5 HEURES</span></div>
+    <h2><span class="b-no">2</span>Tableaux croisés</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Au Berufliches Gymnasium, on a interrogé 200 élèves : 80 font du sport en club,
+                    70 viennent au lycée à vélo, 35 font les deux. Les sportifs en club viennent-ils plus souvent à vélo que les autres ?</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Si l’on relève pour chaque personne deux caractères ayant chacun deux modalités, on range les effectifs dans un
+                    <b>tableau croisé</b>. Les quatre cases intérieures contiennent les combinaisons, les totaux sont en marge.
+                    Ici, $S$ signifie « fait du sport en club » et $V$ « vient à vélo » :</p>
+            </div>
+            <div class="b-table-wrap" style="margin:0 0 14px">
+                <table class="b-table" style="max-width:520px;min-width:0">
+                    <thead><tr><th></th><th>$V$</th><th>$\overline{V}$</th><th class="b-sum">Total</th></tr></thead>
+                    <tbody>
+                        <tr><th>$S$</th><td class="b-hot">35</td><td>45</td><td class="b-sum">80</td></tr>
+                        <tr><th>$\overline{S}$</th><td>35</td><td>85</td><td class="b-sum">120</td></tr>
+                        <tr><th class="b-sum">Total</th><td class="b-sum">70</td><td class="b-sum">130</td><td class="b-sum">200</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="b-text">
+                <p>Si l’on divise toutes les valeurs par 200, on obtient des probabilités : une personne choisie au hasard fait du sport en club <b>et</b> vient à vélo
+                    avec la probabilité $\tfrac{35}{200} = 0{,}175$.</p>
+                <p>Pour la question : sur les 80 sportifs, 35 viennent à vélo, soit $\tfrac{35}{80} \approx 44\,\%$. Sur les 120 autres, ce n’est que
+                    $\tfrac{35}{120} \approx 29\,\%$. Les sportifs en club viennent donc nettement plus souvent à vélo.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TABLEAU CROISÉ</div>
+                <div class="b-table-wrap" style="margin:0 0 12px">
+                    <table class="b-table" style="min-width:0">
+                        <thead><tr><th></th><th>$B$</th><th>$\overline{B}$</th><th class="b-sum">Total</th></tr></thead>
+                        <tbody>
+                            <tr><th>$A$</th><td>$P(A \cap B)$</td><td>$P(A \cap \overline{B})$</td><td class="b-sum">$P(A)$</td></tr>
+                            <tr><th>$\overline{A}$</th><td>$P(\overline{A} \cap B)$</td><td>$P(\overline{A} \cap \overline{B})$</td><td class="b-sum">$P(\overline{A})$</td></tr>
+                            <tr><th class="b-sum">Total</th><td class="b-sum">$P(B)$</td><td class="b-sum">$P(\overline{B})$</td><td class="b-sum">$1$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="b-text">
+                    <p>Chaque ligne et chaque colonne donne sa valeur en marge. Les quatre cases intérieures font $1$ au total
+                        (avec des effectifs : l’effectif total).</p>
+                    <p>$A \cap B$ signifie « $A$ et $B$ ». $\overline{A}$ est l’événement contraire « non $A$ ».</p>
+                </div>
+            </div>
+
+            <div class="b-text">
+                <p>À chaque tableau croisé correspondent deux arbres pondérés, selon le caractère que l’on regarde en premier.
+                    Les probabilités aux extrémités des chemins sont exactement les quatre cases intérieures du tableau.</p>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Vérification :</b> additionne les valeurs en marge une fois sur les lignes et une fois sur les colonnes. En bas à droite, il faut
+                obtenir les deux fois la même chose.</p>
+            <p class="b-note"><b>Lecture :</b> $A \cap B$ se lit « $A$ inter $B$ » ou simplement « $A$ et $B$ ».</p>
+            <p class="b-note"><b>Attention :</b> $P(S \cap V) = 0{,}175$ n’est pas la part des cyclistes parmi les sportifs. Celle-ci vaut
+                $\tfrac{35}{80}$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EXEMPLE 3 · COMPLÉTER LE TABLEAU</div>
+        <div class="b-text">
+            <p>Dans un magasin de vélos, 30 % des clients achètent un vélo électrique ($A$), 60 % paient par carte ($B$), et 12 % font les deux.
+                Complète le tableau croisé. Quel pourcentage n’achète pas de vélo électrique et paie en espèces ?</p>
+        </div>
+        <div class="b-sol">
+                <p>On connaît $P(A) = 0{,}3$, $P(B) = 0{,}6$ et $P(A \cap B) = 0{,}12$. D’abord les marges, puis les cases intérieures :</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <thead><tr><th></th><th>$B$</th><th>$\overline{B}$</th><th class="b-sum">Total</th></tr></thead>
+                    <tbody>
+                        <tr><th>$A$</th><td>0,12</td><td>0,18</td><td class="b-sum">0,3</td></tr>
+                        <tr><th>$\overline{A}$</th><td>0,48</td><td class="b-hot">0,22</td><td class="b-sum">0,7</td></tr>
+                        <tr><th class="b-sum">Total</th><td class="b-sum">0,6</td><td class="b-sum">0,4</td><td class="b-sum">1</td></tr>
+                    </tbody>
+                </table></div>
+                <p>$P(\overline{A} \cap \overline{B}) = 0{,}4 - 0{,}18 = 0{,}22$ : <span class="b-res">22 % n’achètent pas de vélo électrique et paient en espèces.</span></p>
+            </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE TEST RAPIDE</div>
+        <p class="b-help" style="margin:0 0 12px">10 000 personnes font un test rapide. Déplace les curseurs et observe les cases jaunes :
+            combien de personnes testées positives sont vraiment malades ? C’est la solution de l’exploration.</p>
+        <div data-widget="schnelltest"></div>
+    </div>
+
+    <div class="b-box b-ausblick">
+        <div class="b-box-title">PERSPECTIVE · PROBABILITÉ CONDITIONNELLE</div>
+        <div class="b-text">
+            <p>Pour le test rapide, on ne s’intéresse pas à « malade <b>et</b> positif », mais à « malade <b>sachant que</b> positif ».
+                On écrit $P_{T^+}(M)$ et on parle de <b>probabilité conditionnelle</b>. On peut la lire dans le tableau croisé :</p>
+            <p>$$P_{T^+}(M) = \frac{P(M \cap T^+)}{P(T^+)}$$</p>
+            <p>Si $P(A \cap B) = P(A) \cdot P(B)$, on dit que $A$ et $B$ sont <b>indépendants</b>, sinon dépendants.
+                Dans le magasin de vélos, $0{,}3 \cdot 0{,}6 = 0{,}18 \neq 0{,}12$ : l’achat d’un vélo électrique et le paiement par carte sont dépendants.
+                Tu travailleras plus tard ces deux notions plus en détail.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ENTRAÎNEUR DES TABLEAUX CROISÉS</div>
+        <p class="b-help" style="margin:0 0 12px">Quatre cases sont données (en jaune). Remplis les autres et vérifie. « Nouveau tableau » tire au sort un nouvel exercice.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>On a interrogé 500 élèves : 220 sont en 11e année, les autres en 12e.
+                150 prennent le bus ou le train, dont 90 de 11e année.</p>
+                <p>a) Établis le tableau croisé. b) Quelle est la probabilité qu’une personne choisie au hasard soit en 11e année
+                    et ne prenne <b>pas</b> le bus ou le train ? c) Compare les parts des usagers du bus et du train dans les deux années.</p></div>
+            <div class="b-sol">
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <thead><tr><th></th><th>bus/train</th><th>non</th><th class="b-sum">Total</th></tr></thead>
+                    <tbody>
+                        <tr><th>11e</th><td>90</td><td>130</td><td class="b-sum">220</td></tr>
+                        <tr><th>12e</th><td>60</td><td>220</td><td class="b-sum">280</td></tr>
+                        <tr><th class="b-sum">Total</th><td class="b-sum">150</td><td class="b-sum">350</td><td class="b-sum">500</td></tr>
+                    </tbody>
+                </table></div>
+                <p>b) $\tfrac{130}{500} = 0{,}26$ &nbsp; c) 11e : $\tfrac{90}{220} \approx 41\,\%$, 12e : $\tfrac{60}{280} \approx 21\,\%$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>On a $P(A) = 0{,}45$, $P(A \cap B) = 0{,}15$ et $P(\overline{A} \cap \overline{B}) = 0{,}35$.
+                Complète le tableau croisé.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}30$, $P(\overline{A}) = 0{,}55$, $P(\overline{A} \cap B) = 0{,}20$,
+                $P(B) = 0{,}35$, $P(\overline{B}) = 0{,}65$. Vérification : $0{,}35 + 0{,}65 = 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Dans un arbre pondéré, $P(A) = 0{,}4$. Parmi les cas avec $A$, 75 % ont aussi le caractère $B$,
+                parmi les cas sans $A$, seulement 25 %. Dessine l’arbre, établis le tableau croisé et détermine $P(B)$.</p></div>
+            <div class="b-hint"><p>Les extrémités des chemins de l’arbre sont les cases intérieures du tableau, par exemple $P(A \cap B) = 0{,}4 \cdot 0{,}75$.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}3$, $P(A \cap \overline{B}) = 0{,}1$, $P(\overline{A} \cap B) = 0{,}6 \cdot 0{,}25 = 0{,}15$,
+                $P(\overline{A} \cap \overline{B}) = 0{,}45$.</p>
+                <p><span class="b-res">$P(B) = 0{,}3 + 0{,}15 = 0{,}45$</span></p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Un test reconnaît correctement 90 % des malades et 90 % des personnes saines. 1 % de la population est malade.
+                Quel pourcentage des personnes testées positives est malade ? Calcule avec 10 000 personnes et vérifie avec le test rapide ci-dessus.</p></div>
+            <div class="b-sol"><p>100 malades, dont 90 positifs. 9 900 personnes saines, dont 990 positives. En tout, 1 080 positifs.</p>
+                <p><span class="b-res">$\tfrac{90}{1080} \approx 8{,}3\,\%$</span>. Le test est bon, mais la maladie est rare. La plupart des résultats positifs sont de fausses alertes.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>On a $P(A) = 0{,}5$ et $P(B) = 0{,}4$. Quelle valeur $P(A \cap B)$ peut-elle prendre au plus, au moins ?
+                Justifie avec le tableau croisé.</p></div>
+            <div class="b-hint"><p>Pose $P(A \cap B) = x$ et exprime les trois autres cases intérieures en fonction de $x$. Aucune ne doit être négative.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}5 - x$, $P(\overline{A} \cap B) = 0{,}4 - x$, $P(\overline{A} \cap \overline{B}) = 0{,}1 + x$.
+                Toutes doivent être $\geq 0$, donc $0 \leq x \leq 0{,}4$.</p>
+                <p><span class="b-res">Au plus $0{,}4$</span> (alors chaque $B$ appartient aussi à $A$), <span class="b-res">au moins $0$</span>.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="130" data-ph="nombre">
+            <p class="b-q-text">Sur 300 personnes, 120 ont le caractère $A$, 90 le caractère $B$, 40 les deux. Combien n’ont ni l’un ni l’autre ?</p>
+            <div class="b-sol"><p>$300 - 120 - 90 + 40 = 130$. Les 40 ont été comptées dans $A$ et dans $B$, donc retirées une fois de trop.</p></div>
+        </div>
+        <div class="b-q" data-ans="0,25">
+            <p class="b-q-text">On a $P(A) = 0{,}6$, $P(B) = 0{,}5$ et $P(A \cap B) = 0{,}35$. Calcule $P(\overline{A} \cap \overline{B})$.</p>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}25$, donc $P(\overline{A} \cap \overline{B}) = P(\overline{B}) - 0{,}25 = 0{,}5 - 0{,}25 = 0{,}25$.</p></div>
+        </div>
+        <div class="b-q" data-ans="40" data-ph="nombre">
+            <p class="b-q-text">On teste 1 000 personnes, 5 % sont malades. Le test reconnaît 80 % des malades.
+                Combien de malades sont testés positifs ?</p>
+            <div class="b-sol"><p>50 malades, dont 80 % : $50 \cdot 0{,}8 = 40$.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 3 -->
+<section class="b-sec" id="le3" data-kind="le" data-toc="Simulation" data-toc-k="3" data-toc-short="3 Simulation">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">5 HEURES</span></div>
+    <h2><span class="b-no">3</span>Simuler des expériences aléatoires</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>À la fête du lycée, on lance deux dés. Avant, on parie sur une somme des points.
+                    Vaut-il mieux parier sur 7 plutôt que sur 6 ou 8 ? Vous n’avez pas le temps de lancer 1 000 fois.</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Si l’on réalise une expérience aléatoire $n$ fois et qu’un événement $E$ se produit $k$ fois, on appelle
+                    $$h_n(E) = \frac{k}{n}$$ la <b>fréquence</b> (relative) de $E$.</p>
+                <p>Avec peu d’essais, $h_n$ varie beaucoup. Plus on fait d’essais, moins elle varie : elle se stabilise
+                    près de la probabilité $P(E)$. C’est la <b>loi des grands nombres</b> (stabilisation des fréquences).</p>
+                <p>Au lieu de lancer vraiment 1 000 fois, on fait produire des nombres aléatoires à l’ordinateur et on rejoue l’expérience.
+                    C’est une <b>simulation</b>.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · SIMULER EN TROIS ÉTAPES</div>
+                <div class="b-text">
+                    <p><b>1. Modèle :</b> associer des nombres aléatoires aux issues de l’expérience, p. ex. numéro du dé ↔ nombre aléatoire de 1 à 6.</p>
+                    <p><b>2. Réaliser :</b> répéter l’expérience un très grand nombre de fois avec l’ordinateur.</p>
+                    <p><b>3. Exploiter :</b> déterminer la fréquence. Elle est une <b>estimation</b> de $P(E)$.
+                        Chaque nouvelle simulation donne une estimation un peu différente.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Fête du lycée :</b> pour le 7, il y a 6 possibilités sur 36, pour le 6 et le 8 seulement 5 chacun.
+                Essaie-le dans le simulateur avec « Deux dés ».</p>
+            <p class="b-note"><b>Histoire :</b> Antoine Gombaud, chevalier de Méré, savait par expérience que le pari sur « au moins un six
+                en quatre lancers » est gagnant à la longue. Ses questions sur les jeux de hasard déclenchèrent en 1654 la correspondance entre Blaise Pascal et
+                Pierre de Fermat. On la considère comme le début du calcul des probabilités.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE SIMULATEUR</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une expérience aléatoire et lance-la 1, 10, 100 ou 1 000 fois.
+            La courbe bleue est la fréquence, la ligne jaune la probabilité.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">MÉTHODE · SIMULER AVEC UN TABLEUR ET GEOGEBRA</div>
+        <div class="b-text">
+            <p><b>Tableur</b> (Excel, LibreOffice, en français) : deux dés, somme des points 7, 1 000 essais.</p>
+            <p><code class="b-codeline">A1:  =ALEA.ENTRE.BORNES(1;6)+ALEA.ENTRE.BORNES(1;6)</code>
+                Recopier la formule vers le bas jusqu’à A1000. Compter les succès et diviser par le nombre d’essais :
+                <code class="b-codeline">B1:  =NB.SI(A1:A1000;7)/1000</code>
+                Avec <code>F9</code> (Excel), on relance les dés.</p>
+            <p><b>GeoGebra</b> (noms anglais des commandes) :
+                <code class="b-codeline">L = Sequence(RandomBetween(1, 6) + RandomBetween(1, 6), i, 1, 1000)</code>
+                <code class="b-codeline">CountIf(x == 7, L) / 1000</code></p>
+        </div>
+    </div>
+
+    <div class="b-box b-warn">
+        <div class="b-box-title">CONSCIENCE DE LA MÉTHODE · CALCULER OU SIMULER ?</div>
+        <div class="b-text">
+            <p><b>Calculer</b> avec un arbre ou un tableau donne la valeur exacte, mais demande un modèle simple.</p>
+            <p><b>Simuler</b> fonctionne aussi pour des expériences trop compliquées à calculer, par exemple les files d’attente ou la propagation
+                d’une maladie. Mais une simulation ne donne que des estimations, et elles ne deviennent précises que lentement : pour un chiffre de précision
+                en plus, il faut environ cent fois plus d’essais.</p>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Monte-Carlo : des points au hasard estiment le nombre $\pi$</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Beaucoup de billes, beaucoup d’étapes – l’histogramme grandit</span></span></a>
+        <a class="b-lab" data-lab="infektionssimulation" href="../../infektionssimulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULATION D’ÉPIDÉMIE</span><span class="b-lab-what">Trop compliqué à calculer, donc on simule</span></span></a>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="12">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dans le simulateur, lance cinq fois de suite 100 lancers « Dé : six » (en réinitialisant entre deux) et note chaque fois $h_{100}$.
+                Fais la même chose avec 1 000 lancers. Que remarques-tu ?</p></div>
+            <div class="b-sol"><p>Avec 100 lancers, les valeurs se situent le plus souvent quelque part entre environ $0{,}10$ et $0{,}24$. Avec 1 000 lancers, elles sont
+                beaucoup plus resserrées autour de $\tfrac16 \approx 0{,}167$. Plus d’essais, moins de variations.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Comment simuler avec un dé : a) un lancer de pièce, b) une roue de loterie avec $P(\text{rouge}) = \tfrac13$,
+                c) une roue de loterie avec $P(\text{rouge}) = \tfrac14$ ?</p></div>
+            <div class="b-hint"><p>Pour c) : on peut aussi déclarer des lancers non valables et simplement relancer.</p></div>
+            <div class="b-sol"><p>a) nombre pair ↔ face &nbsp; b) 1 ou 2 ↔ rouge &nbsp; c) Relancer pour 5 ou 6. De 1 à 4, le 1 signifie rouge.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Dans le simulateur, lance « De Méré » au moins 2 000 fois et estime la probabilité d’au moins un six en
+                quatre lancers. Calcule-la ensuite avec l’événement contraire et compare.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 = 1 - \tfrac{625}{1296} = \tfrac{671}{1296} \approx 0{,}518$.
+                La simulation arrive près de cette valeur. Comme elle est juste au-dessus de $\tfrac12$, de Méré gagnait à la longue.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Simule avec un tableur 1 000 lancers de deux dés. Détermine les fréquences des
+                sommes 6, 7 et 8 et compare avec les probabilités.</p></div>
+            <div class="b-sol"><p>Colonne A comme dans l’encadré méthode. Puis <code>=NB.SI(A1:A1000;6)/1000</code>, de même pour 7 et 8.</p>
+                <p>On s’attend à environ $\tfrac{5}{36} \approx 0{,}139$, $\tfrac{6}{36} \approx 0{,}167$ et $\tfrac{5}{36} \approx 0{,}139$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Mia a lancé un dé 20 fois et obtenu cinq six. Elle dit : « La probabilité d’un six est de $0{,}25$ avec
+                ce dé. Le dé est truqué. » Prends position.</p></div>
+            <div class="b-sol"><p>$h_{20} = 0{,}25$ n’est qu’une estimation grossière. Sur 20 lancers, la fréquence varie beaucoup.
+                Même avec un dé équilibré, environ 23 % de toutes les séries de 20 lancers donnent cinq six ou plus.
+                Pour juger le dé, Mia a besoin de beaucoup plus de lancers.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="112/600" data-tol="0.002">
+            <p class="b-q-text">Sur 600 lancers, le six est sorti 112 fois. Quelle est la fréquence ?</p>
+            <div class="b-sol"><p>$h_{600} = \tfrac{112}{600} \approx 0{,}187$, pas loin de $\tfrac16 \approx 0{,}167$.</p></div>
+        </div>
+        <div class="b-q" data-mc="1">
+            <p class="b-q-text">Quelle simulation convient pour une roue de loterie avec $P(\text{rouge}) = 0{,}3$ ?</p>
+            <div class="b-mc">
+                <button>ALEA.ENTRE.BORNES(1;3), rouge pour 1</button>
+                <button>ALEA.ENTRE.BORNES(1;10), rouge pour 1, 2 ou 3</button>
+                <button>ALEA.ENTRE.BORNES(1;6), rouge pour 1 ou 2</button>
+            </div>
+            <div class="b-sol"><p>Sur dix nombres équiprobables, trois représentent le rouge : $\tfrac{3}{10} = 0{,}3$. Les deux autres donnent $\tfrac13$.</p></div>
+        </div>
+        <div class="b-q" data-ans="200" data-ph="nombre">
+            <p class="b-q-text">On lance deux dés 1 200 fois. Combien de fois environ t’attends-tu à obtenir la somme 7 ?</p>
+            <div class="b-sol"><p>$1200 \cdot \tfrac16 = 200$. En simulation, on obtient le plus souvent des valeurs proches de 200, rarement exactement 200.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ WIEDERHOLEN -->
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="17">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Un cadenas à code a trois molettes avec les chiffres de 0 à 9. Quelle est la probabilité de l’ouvrir avec un essai au hasard ?
+                Comment la probabilité change-t-elle si l’on connaît le premier chiffre ?</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{10} \cdot \tfrac{1}{10} \cdot \tfrac{1}{10} = \tfrac{1}{1000}$. Avec le premier chiffre connu : $\tfrac{1}{100}$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>On lance un dé deux fois. Calcule la probabilité d’obtenir a) un double, b) la somme des points 10,
+                c) au moins un 1.</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{36} = \tfrac16$ &nbsp; b) (4 ; 6), (5 ; 5), (6 ; 4) : $\tfrac{3}{36} = \tfrac{1}{12}$ &nbsp;
+                c) $1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une entreprise achète 30 % de ses pièces au fournisseur A et 70 % au fournisseur B. Chez A, 4 % sont défectueuses, chez B 2 %.</p>
+                <p>a) Dessine l’arbre et établis le tableau croisé. b) Quel pourcentage de toutes les pièces est défectueux ?
+                    c) Une pièce est défectueuse. Vient-elle plutôt de A ou de B ?</p></div>
+            <div class="b-sol"><p>a) A et défectueuse : $0{,}3 \cdot 0{,}04 = 0{,}012$, A et en bon état : $0{,}288$,
+                B et défectueuse : $0{,}7 \cdot 0{,}02 = 0{,}014$, B et en bon état : $0{,}686$.</p>
+                <p>b) $0{,}012 + 0{,}014 = 0{,}026$, donc 2,6 %.</p>
+                <p>c) De justesse plutôt de B ($0{,}014 > 0{,}012$), alors que les pièces de A sont deux fois plus souvent défectueuses : B livre beaucoup plus de pièces.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Trois personnes se rencontrent. Quelle est la probabilité qu’elles aient toutes les trois leur anniversaire des jours différents
+                (365 jours, tous équiprobables) ? Quelle est la probabilité qu’au moins deux aient leur anniversaire le même jour ?</p></div>
+            <div class="b-sol"><p>$\tfrac{365}{365} \cdot \tfrac{364}{365} \cdot \tfrac{363}{365} \approx 0{,}9918$, donc au moins deux pareils : $\approx 0{,}0082$.</p>
+                <p>Pour aller plus loin : à partir de 23 personnes, un anniversaire commun est plus probable que pas d’anniversaire commun. C’est le <b>paradoxe des anniversaires</b>.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une basketteuse réussit ses lancers francs à 70 %. Elle tire jusqu’à ce qu’elle marque, mais au plus trois fois.</p>
+                <p>a) Quelle est la probabilité qu’elle marque ? b) Quelle est la probabilité qu’il lui faille exactement deux tirs ? c) Quelle est la probabilité qu’elle tire trois fois ?</p></div>
+            <div class="b-hint"><p>L’arbre n’est pas complet : après un panier, le chemin s’arrête.</p></div>
+            <div class="b-sol"><p>a) $1 - 0{,}3^3 = 0{,}973$ &nbsp; b) $0{,}3 \cdot 0{,}7 = 0{,}21$ &nbsp;
+                c) Le troisième tir n’a lieu qu’après deux échecs : $0{,}3 \cdot 0{,}3 = 0{,}09$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Relier au domaine d’apprentissage 3 :</b> la fonction $f(n) = 1 - \left(\tfrac56\right)^n$ donne la probabilité
+                d’au moins un six en $n$ lancers.</p>
+                <p>a) Calcule $f(1)$, $f(4)$ et $f(10)$. b) À partir de quel $n$ a-t-on $f(n) > 0{,}5$ ? c) Quel type de fonction est
+                    $n \mapsto \left(\tfrac56\right)^n$ ? Que devient $f(n)$ pour $n$ très grand ?</p></div>
+            <div class="b-sol"><p>a) $f(1) = \tfrac16 \approx 0{,}167$, $f(4) \approx 0{,}518$, $f(10) \approx 0{,}838$ &nbsp; b) à partir de $n = 4$, car $f(3) \approx 0{,}421$.</p>
+                <p>c) Une fonction exponentielle de facteur $\tfrac56$, donc une décroissance exponentielle. $f(n)$ se rapproche autant qu’on veut de $1$, mais ne l’atteint jamais.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ EXKURSION -->
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le problème de Monty Hall" data-toc-k="X" data-toc-short="Monty Hall">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">POUR ALLER PLUS LOIN</span></div>
+    <h2>Le problème de Monty Hall</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Dans un jeu télévisé, il y a trois portes. Derrière l’une se trouve une voiture, derrière chacune des deux autres une chèvre. Tu choisis une porte.
+                L’animateur sait où est la voiture. Il ouvre l’une des deux autres portes, et toujours une porte avec une chèvre. Puis il demande :
+                « Voulez-vous changer ? »</p>
+            <p>En 1990, Marilyn vos Savant répondit à cette question dans sa chronique « Ask Marilyn » du magazine américain <i>Parade</i> :
+                changer double la chance de gagner, de $\tfrac13$ à $\tfrac23$. Elle reçut alors plus de 10 000 lettres de lecteurs.
+                La plupart étaient sûrs qu’elle se trompait, dont beaucoup de titulaires d’un doctorat.</p>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sources :</b> Steve Selvin, lettre de lecteur dans <i>The American Statistician</i> 29 (1975), p. 67.
+                Marilyn vos Savant, « Ask Marilyn », <i>Parade</i>, 9 septembre 1990.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · JOUE TOI-MÊME</div>
+        <div data-widget="ziegen"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">POURQUOI CHANGER EST GAGNANT</div>
+        <div class="b-text"><p>Explique avec un arbre à deux épreuves : première épreuve ton choix, deuxième épreuve ta stratégie.</p></div>
+            <div class="b-sol">
+                <p>Ton premier choix tombe sur la voiture avec $\tfrac13$ et sur une chèvre avec $\tfrac23$.</p>
+                <p><b>Rester</b> ne gagne que si le premier choix était déjà le bon : $\tfrac13$.</p>
+                <p><b>Changer</b> gagne exactement quand le premier choix était une chèvre. L’animateur a déjà montré l’autre chèvre,
+                    donc la voiture doit se trouver derrière la dernière porte : $\tfrac23$.</p>
+                <p>L’essentiel est que l’animateur <b>sait</b> où est la voiture et n’ouvre jamais la porte de la voiture.</p>
+            </div>
+    </div>
+</section>
+
+<!-- ================================================================ RÜCKBLICK -->
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+
+    <div class="b-rueck">
+        <div><h4>EXPÉRIENCE À PLUSIEURS ÉPREUVES</h4>
+            <p>Plusieurs épreuves successives. Dans l’arbre pondéré, chaque épreuve est un embranchement, chaque issue un chemin.
+                À chaque embranchement, les probabilités font $1$ au total.</p></div>
+        <div><p>Deux boules parmi <span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
+            sans remise : chemins RR, RB, BR, BB.</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>1RE RÈGLE DES CHEMINS</h4><p>Probabilité d’une issue = <b>produit</b> le long du chemin.</p></div>
+        <div><p>$P(\text{RB}) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>2E RÈGLE DES CHEMINS</h4><p>Probabilité d’un événement = <b>somme</b> des chemins qui y appartiennent.</p></div>
+        <div><p>$P(\text{couleurs différentes}) = \tfrac{3}{10} + \tfrac{3}{10} = \tfrac35$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>ÉVÉNEMENT CONTRAIRE</h4><p>$P(E) = 1 - P(\overline{E})$. Particulièrement pratique pour « au moins une fois ».</p></div>
+        <div><p>Deux tours de roue, $P(\text{rouge}) = \tfrac23$ : $P(\text{au moins une fois rouge}) = 1 - \tfrac19 = \tfrac89$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>AVEC / SANS REMISE</h4><p>Avec remise, les probabilités restent les mêmes ; sans remise, elles changent d’une épreuve à l’autre.</p></div>
+        <div><p>avec : $\tfrac35 \cdot \tfrac35 = \tfrac{9}{25}$ &nbsp; sans : $\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>TABLEAU CROISÉ</h4><p>Deux caractères à deux modalités chacun. Quatre cases intérieures, totaux en marge, en bas à droite $1$ ou l’effectif total.
+            Les cases intérieures sont les extrémités des chemins de l’arbre correspondant.</p></div>
+        <div><p>$P(\overline{A} \cap \overline{B}) = 1 - P(A) - P(B) + P(A \cap B)$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>FRÉQUENCE</h4><p>$h_n(E) = \tfrac{k}{n}$. Quand $n$ augmente, elle se stabilise près de $P(E)$
+            (loi des grands nombres).</p></div>
+        <div><p>600 lancers, 112 six : $h_{600} \approx 0{,}187$, proche de $\tfrac16$.</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>SIMULATION</h4><p>Modèle avec des nombres aléatoires, réaliser un très grand nombre de fois, la fréquence comme estimation. Donne des estimations, pas des valeurs exactes.</p></div>
+        <div><p><code>=ALEA.ENTRE.BORNES(1;6)</code> simule un lancer de dé.</p></div>
+    </div>
+</section>
+
+<!-- ================================================================ TEST -->
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+            <div class="b-q" data-ans="1/8">
+                <p class="b-q-text">On lance une pièce trois fois. Quelle est la probabilité d’obtenir trois fois face ?</p>
+                <div class="b-sol"><p>$\left(\tfrac12\right)^3 = \tfrac18$</p></div>
+            </div>
+            <div class="b-q" data-ans="16/25">
+                <p class="b-q-text">Dans une urne avec 4 boules rouges et 1 bleue, on tire deux fois avec remise. Quelle est la probabilité que les deux soient rouges ?</p>
+                <div class="b-sol"><p>$\tfrac45 \cdot \tfrac45 = \tfrac{16}{25} = 0{,}64$</p></div>
+            </div>
+            <div class="b-q" data-ans="0,2">
+                <p class="b-q-text">On a $P(A) = 0{,}7$, $P(B) = 0{,}4$ et $P(A \cap B) = 0{,}3$. Calcule $P(\overline{A} \cap \overline{B})$.</p>
+                <div class="b-sol"><p>$1 - 0{,}7 - 0{,}4 + 0{,}3 = 0{,}2$</p></div>
+            </div>
+            <div class="b-q" data-mc="1">
+                <p class="b-q-text">Sur 50 lancers, le six est sorti 12 fois. Quelle affirmation est juste ?</p>
+                <div class="b-mc">
+                    <button>Le dé est sûrement truqué.</button>
+                    <button>$h_{50} = 0{,}24$ n’est qu’une estimation. De tels écarts par rapport à $\tfrac16$ sont normaux sur 50 lancers.</button>
+                    <button>Dans les 50 prochains lancers, le six sortira moins souvent, pour compenser.</button>
+                </div>
+                <div class="b-sol"><p>Le dé n’a pas de mémoire. Avec peu de lancers, $h_n$ varie beaucoup ; ce n’est qu’avec beaucoup de lancers que l’estimation devient fiable.</p></div>
+            </div>
+        </div>
+
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+            <div class="b-q" data-ans="1/10">
+                <p class="b-q-text">Dans une urne avec 2 boules rouges et 3 bleues, on en tire trois sans remise. Quelle est la probabilité qu’elles soient toutes bleues ?</p>
+                <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 \cdot \tfrac13 = \tfrac{6}{60} = \tfrac{1}{10}$</p></div>
+            </div>
+            <div class="b-q" data-ans="0,40951">
+                <p class="b-q-text">Un billet de loterie gagne avec $0{,}1$. Tu achètes cinq billets. Quelle est la probabilité qu’au moins un gagne ? (deux décimales)</p>
+                <div class="b-sol"><p>$1 - 0{,}9^5 = 1 - 0{,}59049 \approx 0{,}41$</p></div>
+            </div>
+            <div class="b-q" data-ans="540" data-ph="nombre">
+                <p class="b-q-text">On teste 2 000 personnes, 10 % sont malades. Le test reconnaît correctement 90 % des malades et 80 % des personnes saines.
+                    Combien de personnes sont testées positives en tout ?</p>
+                <div class="b-sol"><p>200 malades : 180 positifs. 1 800 personnes saines : 20 % de faux positifs, donc 360. En tout 540.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,25">
+                <p class="b-q-text">On a $P(B) = 0{,}45$ et $P(A \cap B) = 0{,}2$. Calcule $P(\overline{A} \cap B)$.</p>
+                <div class="b-sol"><p>La colonne $B$ donne $P(B)$ : $0{,}45 - 0{,}2 = 0{,}25$.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-baumdiagramme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ARBRES PONDÉRÉS</span><span class="b-lab-what">20 exercices avec correction</span></span></a>
+        <a class="b-lab" href="../../mathetest11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLEAUX CROISÉS</span><span class="b-lab-what">20 exercices avec correction</span></span></a>
+        <a class="b-lab" href="../../mathetest11-simulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULATION</span><span class="b-lab-what">20 exercices avec correction</span></span></a>
+        <a class="b-lab" href="../../mathetest11-stochastik-uebung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBABILITÉS MÉLANGÉES</span><span class="b-lab-what">Monty Hall, anniversaires et plus encore</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 11e année · domaine d’apprentissage 1 d’après le programme de mathématiques
+        du Berufliches Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux. Emoji : Apple, via emoji-data d’iamcal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+</body>
+</html>
