@@ -72,6 +72,19 @@ window.BuchFR && BuchFR.add('stochastik', {
         'Was wird berechnet?': 'Que calcule-t-on ?',
         'Histogramm der Binomialverteilung': 'Histogramme de la loi binomiale',
         // book fr-3 mathe13-fr:
+        'Anteil in der Grundgesamtheit $p$': 'Proportion dans la population $p$',
+        'Stichprobenumfang $n$': 'Taille de l’échantillon $n$',
+        'Stichproben ziehen:': 'Prélever des échantillons :',
+        'Verteilung der relativen Häufigkeiten vieler Stichproben': 'Distribution des fréquences de nombreux échantillons',
+        'Noch keine Stichprobe gezogen.': 'Aucun échantillon prélevé pour l’instant.',
+        'Nullhypothese $p_0$': 'Hypothèse nulle $p_0$',
+        'Art des Tests': 'Type de test',
+        'Signifikanzniveau $\\alpha$:': 'Seuil de signification $\\alpha$ :',
+        'Signifikanzniveau': 'Seuil de signification',
+        'Beobachtete Trefferzahl $k$': 'Nombre de succès observé $k$',
+        'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Loi binomiale sous l’hypothèse nulle avec la zone de rejet',
+        // signifikanztest: the side of the test (B.seg)
+        'linksseitig': 'unilatéral à gauche', 'rechtsseitig': 'unilatéral à droite', 'zweiseitig': 'bilatéral',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     },
@@ -119,6 +132,25 @@ window.BuchFR && BuchFR.add('stochastik', {
         ['$ und $p = ', '$ et $p = '],
         ['Erwartungswert $\\mu', 'Espérance $\\mu'],
         // book fr-3 mathe13-fr:
+        [' Fehler 2. Art zeigen: wahres $p$ =', ' Afficher l’erreur de 2e espèce : vraie valeur $p$ ='],
+        [' Stichproben vom Umfang ', ' échantillons de taille '],
+        [' Stichprobe vom Umfang ', ' échantillon de taille '],
+        ['Mittelwert der $h$: $', 'Moyenne des $h$ : $'],
+        ['$ · Standardabweichung der $h$: $', '$ · écart type des $h$ : $'],
+        ['$. Viermal so großes $n$ halbiert die Streuung.', '$. Un $n$ quatre fois plus grand divise la dispersion par deux.'],
+        ['$ gegen $H_1\\colon ', '$ contre $H_1\\colon '],
+        ['$ · tatsächliche Irrtumswahrscheinlichkeit $\\approx ', '$ · risque d’erreur effectif $\\approx '],
+        ['Beobachtet $k = ', 'Observé $k = '],
+        ['<b>$H_0$ wird abgelehnt.</b> Das Ergebnis ist signifikant.', '<b>$H_0$ est rejetée.</b> Le résultat est significatif.'],
+        ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>$H_0$ n’est pas rejetée.</b> Mais cela ne prouve pas que $H_0$ est vraie.'],
+        ['Ist in Wahrheit $p = ', 'Si en réalité $p = '],
+        ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (en violet), $H_0$ est conservée à tort avec $\\beta \\approx '],
+        ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (erreur de 2e espèce).'],
+        // histo-hero (also BGY 12: keep one copy when merging with fr-2)
+        ['Histogramm einer Binomialverteilung', 'Histogramme d’une loi binomiale'],
+        // stichprobe, signifikanztest: pieces the it-3 block left German
+        [' · letzte: $h = ', ' · dernière fréquence : $h = '], ['$ (gold)', '$ (en doré)'], ['Theorie: $', 'Théorie : $'],
+        ['Ablehnungsbereich (rot): $', 'Zone de rejet (en rouge) : $'],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     ],
