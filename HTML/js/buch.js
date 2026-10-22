@@ -15,6 +15,8 @@
  * numbers keep the decimal comma; the widget modules are translated by js/buch-es.js. Buch.en stays true only for English.
  * Italian editions (buch/<book>-it/, <html lang="it">, package IT0, 18.10.2026): t(de, en, es, it) picks the fourth word
  * (a missing Italian falls back to German), numbers keep the decimal comma, the widget modules are translated by js/buch-it.js.
+ * French editions (buch/<book>-fr/, <html lang="fr">, package FR0, 22.10.2026): t(de, en, es, it, fr) picks the fifth word
+ * (a missing French falls back to German), numbers keep the decimal comma, the widget modules are translated by js/buch-fr.js.
  */
 (function () {
     'use strict';
@@ -22,10 +24,12 @@
     // the language of the page: German books as before, English editions (Doc, 10.10.2026: "übersetz unser 1. Buch ins EN")
     // and Spanish editions (Doc, 12.10.2026: "übersetze bitte drei Bücher ins Spanische"): Buch.lang = 'de' | 'en' | 'es'
     // and Italian editions (Doc, 18.10.2026: "Bitte in Italienisch"): Buch.lang = 'de' | 'en' | 'es' | 'it'
-    const LANG = /^en/i.test(document.documentElement.lang || '') ? 'en' : /^es/i.test(document.documentElement.lang || '') ? 'es' : /^it/i.test(document.documentElement.lang || '') ? 'it' : 'de';
-    const EN = LANG === 'en', ES = LANG === 'es', IT = LANG === 'it';
-    // a word without its Spanish falls back to German, never to English
-    const t = (de, en, es, it) => EN ? en : ES && es !== undefined ? es : IT && it !== undefined ? it : de;
+    // and French editions (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch"): Buch.lang = … | 'fr'
+    const LANG = /^en/i.test(document.documentElement.lang || '') ? 'en' : /^es/i.test(document.documentElement.lang || '') ? 'es' : /^it/i.test(document.documentElement.lang || '') ? 'it' :
+        /^fr/i.test(document.documentElement.lang || '') ? 'fr' : 'de';
+    const EN = LANG === 'en', ES = LANG === 'es', IT = LANG === 'it', FR = LANG === 'fr';
+    // a word without its Spanish (Italian, French) falls back to German, never to English
+    const t = (de, en, es, it, fr) => EN ? en : ES && es !== undefined ? es : IT && it !== undefined ? it : FR && fr !== undefined ? fr : de;
 
     // The debug window only on request: ?debug in the address (Doc, 09.10.2026: "im Moment brauchen wir es ja nicht").
     // Loaded from beside this file; its own autostart (DOMContentLoaded) may already be past, so start it here.
@@ -163,8 +167,9 @@
                 head.appendChild(num);
                 const lvl = document.createElement('span');
                 lvl.className = 'b-lvl'; lvl.dataset.lvl = task.dataset.lvl || '1';
-                lvl.title = (EN ? ['', 'Basic', 'Intermediate', 'Advanced'] : ES ? ['', 'Básico', 'Intermedio', 'Avanzado'] : IT ? ['', 'Base', 'Intermedio', 'Avanzato'] : ['', 'Grundlage', 'Mittel', 'Anspruchsvoll'])[+lvl.dataset.lvl] || '';
-                lvl.setAttribute('aria-label', t('Niveau: ', 'Level: ', 'Nivel: ', 'Livello: ') + lvl.title);
+                lvl.title = (EN ? ['', 'Basic', 'Intermediate', 'Advanced'] : ES ? ['', 'Básico', 'Intermedio', 'Avanzado'] : IT ? ['', 'Base', 'Intermedio', 'Avanzato'] :
+                    FR ? ['', 'Base', 'Intermédiaire', 'Avancé'] : ['', 'Grundlage', 'Mittel', 'Anspruchsvoll'])[+lvl.dataset.lvl] || '';
+                lvl.setAttribute('aria-label', t('Niveau: ', 'Level: ', 'Nivel: ', 'Livello: ', 'Niveau : ') + lvl.title);
                 head.appendChild(lvl);
                 task.insertBefore(head, q);
                 if (q) head.appendChild(q);
@@ -172,7 +177,7 @@
                 const acts = document.createElement('div');
                 acts.className = 'b-acts';
                 task.insertBefore(acts, hint || sol);
-                [[hint, t('Tipp', 'Hint', 'Pista', 'Suggerimento'), 'b-hintbtn'], [sol, t('Lösung', 'Solution', 'Solución', 'Soluzione'), '']].forEach(([box, label, cls]) => {
+                [[hint, t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice'), 'b-hintbtn'], [sol, t('Lösung', 'Solution', 'Solución', 'Soluzione', 'Solution'), '']].forEach(([box, label, cls]) => {
                     if (!box) return;
                     box.classList.add('b-reveal');
                     const b = document.createElement('button');
@@ -207,7 +212,7 @@
             const isHint = box.classList.contains('b-hint');
             const b = document.createElement('button');
             b.type = 'button'; b.className = 'b-btn' + (isHint ? ' b-hintbtn' : '');
-            b.textContent = isHint ? t('Tipp', 'Hint', 'Pista', 'Suggerimento') : t('Lösung zeigen', 'Show solution', 'Ver solución', 'Mostra la soluzione');
+            b.textContent = isHint ? t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice') : t('Lösung zeigen', 'Show solution', 'Ver solución', 'Mostra la soluzione', 'Voir la solution');
             b.addEventListener('click', () => b.classList.toggle('open', box.classList.toggle('open')));
             acts.appendChild(b);
         });
@@ -261,7 +266,7 @@
                 if (q.dataset.ans == null) return;
                 if (PRINT) {                                                       // paper: a line to write on
                     const line = document.createElement('div');
-                    line.className = 'b-answer'; line.textContent = (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato')) + ':';
+                    line.className = 'b-answer'; line.textContent = (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat')) + ':';
                     q.insertBefore(line, sol || null);
                     return;
                 }
@@ -269,9 +274,9 @@
                 row.className = 'b-ask';
                 const inId = 'b-in-' + id + '-' + i;
                 row.innerHTML =
-                    '<label for="' + inId + '">' + (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato')) + '</label>' +
-                    '<input class="b-in" id="' + inId + '" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="' + (q.dataset.ph || t('z. B. 3/10', 'e.g. 3/10', 'p. ej. 3/10', 'per es. 3/10')) + '">' +
-                    '<button type="button" class="b-btn">' + t('Prüfen', 'Check', 'Comprobar', 'Verifica') + '</button>' +
+                    '<label for="' + inId + '">' + (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat')) + '</label>' +
+                    '<input class="b-in" id="' + inId + '" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="' + (q.dataset.ph || t('z. B. 3/10', 'e.g. 3/10', 'p. ej. 3/10', 'per es. 3/10', 'p. ex. 3/10')) + '">' +
+                    '<button type="button" class="b-btn">' + t('Prüfen', 'Check', 'Comprobar', 'Verifica', 'Vérifier') + '</button>' +
                     '<span class="b-fb" aria-live="polite"></span>';
                 q.insertBefore(row, sol || null);
                 const input = row.querySelector('input'), btn = row.querySelector('button'), fb = row.querySelector('.b-fb');
@@ -280,16 +285,16 @@
                     const ok = matches(input.value, q.dataset.ans, q.dataset.tol != null ? parseFloat(q.dataset.tol) : null);
                     input.classList.toggle('ok', ok); input.classList.toggle('bad', !ok);
                     fb.className = 'b-fb ' + (ok ? 'ok' : 'bad');
-                    if (ok) { fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto'); solved(input.value); dbg('check ' + sk + ' ok'); return; }
+                    if (ok) { fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct'); solved(input.value); dbg('check ' + sk + ' ok'); return; }
                     tries++;
-                    fb.innerHTML = ICON.bad + (tries >= 2 && sol ? t(' noch nicht – schau dir die Lösung an', ' not yet – have a look at the solution', ' todavía no – mira la solución', ' non ancora – guarda la soluzione') : t(' noch nicht – versuch es noch einmal', ' not yet – try again', ' todavía no – inténtalo otra vez', ' non ancora – riprova'));
+                    fb.innerHTML = ICON.bad + (tries >= 2 && sol ? t(' noch nicht – schau dir die Lösung an', ' not yet – have a look at the solution', ' todavía no – mira la solución', ' non ancora – guarda la soluzione', ' pas encore – regarde la solution') : t(' noch nicht – versuch es noch einmal', ' not yet – try again', ' todavía no – inténtalo otra vez', ' non ancora – riprova', ' pas encore – réessaie'));
                     if (tries >= 2) showSol();
                 }
                 btn.addEventListener('click', check);
                 input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
                 if (state[sk]) {
                     input.value = typeof state[sk] === 'string' ? state[sk] : '';
-                    input.classList.add('ok'); fb.className = 'b-fb ok'; fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto'); showSol();
+                    input.classList.add('ok'); fb.className = 'b-fb ok'; fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct'); showSol();
                 }
             });
             updateScore();
@@ -401,18 +406,18 @@
         if (top && top.tagName !== 'A') {
             const a = document.createElement('a');
             a.className = 'b-top-book'; a.href = 'index.html'; a.textContent = top.textContent;
-            a.title = t('Inhaltsverzeichnis des Buches', 'Contents of the book', 'Índice del libro', 'Indice del libro');
+            a.title = t('Inhaltsverzeichnis des Buches', 'Contents of the book', 'Índice del libro', 'Indice del libro', 'Sommaire du manuel');
             top.replaceWith(a);
         }
         if (i < 0) return;
         const prev = B.chapters[i - 1], next = B.chapters[i + 1];
         const nav = document.createElement('nav');
-        nav.className = 'b-chapnav'; nav.setAttribute('aria-label', t('Blättern', 'Turn the page', 'Pasar página', 'Sfoglia le pagine'));
+        nav.className = 'b-chapnav'; nav.setAttribute('aria-label', t('Blättern', 'Turn the page', 'Pasar página', 'Sfoglia le pagine', 'Changer de chapitre'));
         const card = (c, dir) => c
-            ? '<a class="b-chapcard ' + dir + '" href="' + c.file + '"><span class="b-chapcard-k">' + (dir === 'prev' ? t('← ZURÜCK', '← BACK', '← ATRÁS', '← INDIETRO') : t('WEITER →', 'NEXT →', 'SIGUIENTE →', 'AVANTI →')) +
-              t(' · KAPITEL ', ' · CHAPTER ', ' · CAPÍTULO ', ' · CAPITOLO ') + c.k + '</span><span class="b-chapcard-t">' + c.title + '</span></a>'
-            : '<a class="b-chapcard ' + dir + '" href="index.html"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ' : '') + t('INHALT', 'CONTENTS', 'ÍNDICE', 'INDICE') + (dir === 'next' ? ' →' : '') +
-              '</span><span class="b-chapcard-t">' + t('Alle Kapitel', 'All chapters', 'Todos los capítulos', 'Tutti i capitoli') + '</span></a>';
+            ? '<a class="b-chapcard ' + dir + '" href="' + c.file + '"><span class="b-chapcard-k">' + (dir === 'prev' ? t('← ZURÜCK', '← BACK', '← ATRÁS', '← INDIETRO', '← PRÉCÉDENT') : t('WEITER →', 'NEXT →', 'SIGUIENTE →', 'AVANTI →', 'SUIVANT →')) +
+              t(' · KAPITEL ', ' · CHAPTER ', ' · CAPÍTULO ', ' · CAPITOLO ', ' · CHAPITRE ') + c.k + '</span><span class="b-chapcard-t">' + c.title + '</span></a>'
+            : '<a class="b-chapcard ' + dir + '" href="index.html"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ' : '') + t('INHALT', 'CONTENTS', 'ÍNDICE', 'INDICE', 'SOMMAIRE') + (dir === 'next' ? ' →' : '') +
+              '</span><span class="b-chapcard-t">' + t('Alle Kapitel', 'All chapters', 'Todos los capítulos', 'Tutti i capitoli', 'Tous les chapitres') + '</span></a>';
         nav.innerHTML = card(prev, 'prev') + card(next, 'next');
         const foot = document.querySelector('.b-foot');
         if (foot) foot.parentNode.insertBefore(nav, foot); else document.querySelector('.b-main').appendChild(nav);
@@ -428,10 +433,10 @@
             if (c.lb !== last) { html += '<p class="b-lbhead">' + c.lb.toUpperCase() + '</p>'; last = c.lb; }
             let solved = 0;
             try { solved = Object.keys(JSON.parse(localStorage.getItem('buch:' + folder + c.file) || '{}')).length; } catch (_) { }
-            html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>' + t('KAPITEL', 'CHAPTER', 'CAPÍTULO', 'CAPITOLO') + '</small></span>' +
+            html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>' + t('KAPITEL', 'CHAPTER', 'CAPÍTULO', 'CAPITOLO', 'CHAPITRE') + '</small></span>' +
                 '<span><span class="b-chap-t">' + c.title + '</span><span class="b-chap-s">' + c.sub + '</span></span>' +
-                '<span class="b-chap-m">' + c.when.toUpperCase() + (c.ustd ? '<br>' + c.ustd + t(' USTD.', ' LESSONS', ' SESIONES', ' ORE') : '') +
-                (solved ? '<br><span class="b-done">' + solved + t(' GELÖST', ' SOLVED', ' RESUELTOS', ' RISOLTI') + '</span>' : '') + '</span></a>';
+                '<span class="b-chap-m">' + c.when.toUpperCase() + (c.ustd ? '<br>' + c.ustd + t(' USTD.', ' LESSONS', ' SESIONES', ' ORE', ' HEURES') : '') +
+                (solved ? '<br><span class="b-done">' + solved + t(' GELÖST', ' SOLVED', ' RESUELTOS', ' RISOLTI', ' RÉSOLUS') + '</span>' : '') + '</span></a>';
         });
         box.innerHTML = html;
     }
@@ -477,7 +482,7 @@
             ov = document.createElement('div');
             ov.className = 'b-ov';
             frame = document.createElement('iframe');
-            frame.title = t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa');
+            frame.title = t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée');
             frame.src = 'druck.html?uebersicht';
             ov.appendChild(frame);
             document.body.appendChild(ov);
@@ -500,11 +505,11 @@
         if (!top || !window.BUCH || window.BUCH.druck === false) return;
         ovBtn = document.createElement('button');
         ovBtn.type = 'button'; ovBtn.className = 'b-ovbtn';
-        ovBtn.title = t('Alle Seiten der Druckausgabe (O)', 'All pages of the print edition (O)', 'Todas las páginas de la edición impresa (O)', 'Tutte le pagine dell’edizione a stampa (O)');
-        ovBtn.setAttribute('aria-label', t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa'));
+        ovBtn.title = t('Alle Seiten der Druckausgabe (O)', 'All pages of the print edition (O)', 'Todas las páginas de la edición impresa (O)', 'Tutte le pagine dell’edizione a stampa (O)', 'Toutes les pages de l’édition imprimée (O)');
+        ovBtn.setAttribute('aria-label', t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée'));
         ovBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
             '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="1.2"/>' +
-            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">' + t('Seiten', 'Pages', 'Páginas', 'Pagine') + '</span>';
+            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">' + t('Seiten', 'Pages', 'Páginas', 'Pagine', 'Pages') + '</span>';
         const book = top.querySelector('.b-top-book');
         if (book) book.after(ovBtn); else top.appendChild(ovBtn);
         ovBtn.addEventListener('click', () => { if (ov && !ov.hidden) zu(); else auf(); });

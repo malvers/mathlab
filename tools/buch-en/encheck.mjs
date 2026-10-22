@@ -3,7 +3,7 @@
 // With --poke every widget button is clicked once and every slider moved.
 // usage: node tools/buch-en/encheck.mjs <book> [--poke] [file1.html …]   (no files: every page of the book)
 // A Spanish edition (<book>-es, package ES0) is checked the same way; there a decimal comma on a canvas is right.
-// The same for an Italian edition (<book>-it, package IT0).
+// The same for an Italian edition (<book>-it, package IT0) and a French one (<book>-fr, package FR0).
 // needs the local server (python3 serve.py, http://localhost:8765; PORT=… to change)
 import pw from '../../videopipeline/node_modules/playwright/index.js';
 import fs from 'fs';
@@ -14,13 +14,15 @@ const poke = args.includes('--poke');
 const given = args.filter(a => !a.startsWith('--'));
 const files = given.length ? given : fs.readdirSync(new URL('../../HTML/buch/' + book + '/', import.meta.url)).filter(f => f.endsWith('.html') && f !== 'druck.html').sort();
 const browser = await pw.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--mute-audio'] });
-const LANG = book.endsWith('-es') ? 'es' : book.endsWith('-it') ? 'it' : 'en';
+const LANG = book.endsWith('-es') ? 'es' : book.endsWith('-it') ? 'it' : book.endsWith('-fr') ? 'fr' : 'en';
 // Spanish: the names of the other editions, names and titles quoted on purpose (Graßmann, mathe12-es 5.1), and Spanish words
 // with ü (pingüino, bilingüe), are not German
 const ALLOW_ES = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Edición alemana|English edition|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller|[a-záéíóúñ]*gü[eiéí][a-záéíóúñ]*|[A-ZÁÉÍÓÚÑ]*GÜ[EIÉÍ][A-ZÁÉÍÓÚÑ]*/g;
 // Italian: the same names, the buttons of the other editions
 const ALLOW_IT = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Edizione tedesca|English edition|Edición española|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
-const ALLOW = LANG === 'es' ? ALLOW_ES : LANG === 'it' ? ALLOW_IT : /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Möbius|Schütz|Müller/g;
+// French: the same names, the buttons of the other editions, the second school name of the FOS books
+const ALLOW_FR = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Édition allemande|English edition|Edición española|Edizione italiana|Berufliches Gymnasium|Fachoberschule|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
+const ALLOW = LANG === 'es' ? ALLOW_ES : LANG === 'it' ? ALLOW_IT : LANG === 'fr' ? ALLOW_FR : /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Möbius|Schütz|Müller/g;
 const GERMAN = /[äöüÄÖÜß]|\b(der|die|das|und|nicht|ist|mit|von|für|auf|eine?|einer|wird|sind|oder|zum|zur|bei|wie|auch|noch|nach|aus|Lösung|Aufgabe|Ergebnis|Zeile|Schritt|Funktion|Gerade|Seite|Zurück|Neue|keine|Anzahl|Summe|Wahrscheinlichkeit)\b/;
 for (const f of files) {
   for (const w of [1280, 390]) {
