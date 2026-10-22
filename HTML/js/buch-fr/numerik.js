@@ -16,6 +16,14 @@
 window.BuchFR && BuchFR.add('numerik', {
     word: {
         // book fr-1 mathe11-fr:
+        // bisektion, flaeche, mc-flaeche
+        'Bisektionsverfahren': 'Méthode de dichotomie', 'Intervall halbieren': 'Couper l’intervalle en deux', '5 Schritte': '5 étapes',
+        'Schritt': 'Étape', 'Mitte $m$': 'Milieu $m$', 'Breite': 'Largeur',
+        'x² auf [0; 2]': 'x² sur [0 ; 2]', '√x auf [0; 4]': '√x sur [0 ; 4]', 'sin x auf [0; π]': 'sin x sur [0 ; π]',
+        'Rechtecke links': 'Rectangles à gauche', 'Rechtecke Mitte': 'Rectangles au milieu', 'Trapeze': 'Trapèzes', 'Verfahren': 'Méthode',
+        'Anzahl der Streifen $n$': 'Nombre de bandes $n$', 'Flächeninhalt mit Streifen angenähert': 'Aire approchée par des bandes',
+        '+100 Punkte': '+100 points', '+1 000 Punkte': '+1 000 points', '+10 000 Punkte': '+10 000 points',   // narrow space as the widget writes it
+        'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Points au hasard dans le rectangle, points sous la parabole',
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         'x² auf [0; 2]': 'x² sur [0 ; 2]',
@@ -36,6 +44,13 @@ window.BuchFR && BuchFR.add('numerik', {
     },
     phrase: [
         // book fr-1 mathe11-fr:
+        // bisektion, flaeche, mc-flaeche
+        [' · Startintervall $', ' · intervalle de départ $'], ['$ mit $f(', '$ avec $f('], ['$ und $f(', '$ et $f('],
+        ['Näherung mit $n = ', 'Approximation avec $n = '], [' · genauer Wert $', ' · valeur exacte $'], [' · Fehler $', ' · erreur $'],
+        ['$ · genauer Wert $', '$ · valeur exacte $'], ['$ · Fehler $', '$ · erreur $'],
+        ['$ unter der Parabel. Rechteck: ', '$ sont sous la parabole. Rectangle : '],
+        ['Schätzwert: $A', 'Estimation : $A'], [' · genau: $', ' · exact : $'], ['Wirf Zufallspunkte in das Rechteck ', 'Lance des points au hasard dans le rectangle '],
+        ['. Der Anteil der Treffer unter ', '. La part des points tombés sous '], [' schätzt den Anteil der Fläche.', ' estime la part de l’aire.'],
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         ['Näherung mit $n = ', 'Approximation avec $n = '],
@@ -49,6 +64,8 @@ window.BuchFR && BuchFR.add('numerik', {
     ],
     rule: [
         // book fr-1 mathe11-fr:
+        // mc-flaeche "Von $500$ Punkten liegen $160$ unter …" → "Sur $500$ points, $160$ sont sous …"
+        [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'Sur $' + n + '$ points, $'],
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // flaeche: a no-break space before the colon after "$n = …$" (the phrase turns the words)

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 11 · Chapitre OP · Méthodes numériques et simulations | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Dichotomie, aires approchées, méthode de Monte-Carlo. Chapitre OP du manuel interactif Mathématiques · Berufliches Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">DOMAINE OPTIONNEL 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE OP · DOMAINE OPTIONNEL 3 · MAI · JUIN</p>
+            <h1>Méthodes numériques et simulations</h1>
+            <p class="b-hero-lead">Beaucoup d’équations ne se résolvent pas de façon exacte, beaucoup d’aires ne se calculent pas exactement. Les ordinateurs calculent donc de façon <b>numérique</b> :
+                ils s’approchent de la solution à petits pas, aussi précisément que nécessaire. Ici, tu découvres trois méthodes présentes dans chaque calculatrice,
+                chaque simulation et chaque bureau d’études, et tu écris toi-même de petits programmes pour elles.</p>
+            <div class="b-chips"><span class="b-chip">10 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">PROGRAMMER</span><span class="b-chip">ÉDUCATION AU NUMÉRIQUE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3-x-2"]' data-labels='["f"]' data-lat="[1.9]" data-x="-0.5,2.5" data-y="-3,5" data-pts="[[1.5214,0]]" data-h="240" data-aria="Fonction avec un zéro vers 1,52"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>déterminer des zéros aussi précisément qu’on veut par <b>dichotomie</b></li>
+                <li>calculer de façon approchée des aires sous des courbes avec des <b>rectangles et des trapèzes</b></li>
+                <li>estimer des aires par le hasard avec la <b>méthode de Monte-Carlo</b></li>
+                <li>mettre en œuvre ces méthodes sous forme de petits <b>programmes</b> ou de tableaux</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="-2" data-ph="nombre"><p class="b-q-text">Calcule $f(1)$ pour $f(x) = x^3 - x - 2$.</p><div class="b-sol"><p>$1 - 1 - 2 = -2$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Calcule $f(2)$ pour $f(x) = x^3 - x - 2$.</p><div class="b-sol"><p>$8 - 2 - 2 = 4$</p></div></div>
+            <div class="b-q" data-ans="1,5" data-tol="0.001" data-ph="nombre"><p class="b-q-text">Quel est le milieu de l’intervalle $[1\,;\,2]$ ?</p><div class="b-sol"><p>$\tfrac{1 + 2}{2} = 1{,}5$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="aire"><p class="b-q-text">Un trapèze a des côtés parallèles de 4 et 8 et une hauteur de 2. Quelle est son aire ?</p><div class="b-sol"><p>$\tfrac{4 + 8}{2} \cdot 2 = 12$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DEVINER UN NOMBRE</div>
+            <div class="b-text"><p>Une personne pense à un nombre entier entre 1 et 1 000. Les autres devinent, elle répond seulement « plus grand » ou « plus petit ».</p>
+                <ul><li>Avec quelle stratégie vous faut-il le moins d’essais ? Combien au plus ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COMPTER LES CARREAUX</div>
+            <div class="b-text"><p>Tracez $y = x^2$ de $x = 0$ à $x = 2$ sur du papier quadrillé (1 cm = 2 carreaux).</p>
+                <ul><li>Estimez l’aire sous la courbe en comptant les carreaux. Comment être plus précis ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LANCER DU RIZ</div>
+            <div class="b-text"><p>Dessinez un carré avec un quart de cercle dedans. Lancez-y une poignée de riz de façon régulière et comptez les grains à l’intérieur et à l’extérieur.</p>
+                <ul><li>Quel rapport ce quotient a-t-il avec $\pi$ ?</li></ul></div>
+            <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Des fléchettes tombent dans le carré et estiment π</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Zéros : dichotomie" data-toc-k="1" data-toc-short="1 Dichotomie">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Des zéros en coupant en deux</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour $f(x) = x^3 - x - 2$, il n’y a pas de formule de résolution simple. Mais : $f(1) = -2 < 0$ et $f(2) = 4 > 0$.
+                La courbe est une ligne continue, elle doit donc couper l’axe des $x$ entre 1 et 2.</p></div></div>
+            <div class="b-text"><p>On teste le milieu : $f(1{,}5) = 3{,}375 - 1{,}5 - 2 = -0{,}125 < 0$. Le changement de signe se trouve donc entre 1,5 et 2. On recoupe en deux, on reteste, et ainsi de suite.
+                À chaque étape, l’intervalle devient deux fois plus étroit.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODE DE DICHOTOMIE</div>
+                <div class="b-text">
+                    <p>Si $f$ est continue (sans saut) et si $f(a)$ et $f(b)$ sont de signes contraires, alors l’intervalle $[a\,;\,b]$ contient au moins un zéro.</p>
+                    <ol><li>Calculer le milieu $m = \tfrac{a + b}{2}$.</li>
+                        <li>Si $f(m)$ a le même signe que $f(a)$, on pose $a := m$, sinon $b := m$.</li>
+                        <li>Recommencer jusqu’à ce que $b - a$ soit assez petit.</li></ol>
+                    <p>Après $n$ étapes, l’intervalle n’a plus qu’une largeur de $\tfrac{b - a}{2^n}$. Dix étapes le rendent donc un peu plus de mille fois plus petit.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Deviner un nombre :</b> en coupant en deux, tu trouves n’importe quel nombre de 1 à 1 000 en 10 essais au plus, car $2^{10} = 1024$.</p>
+            <p class="b-note"><b>Perspective :</b> la méthode de Newton est beaucoup plus rapide, mais elle a besoin de la dérivée, un sujet de la 12e année.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DICHOTOMIE</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une fonction et coupe l’intervalle en deux, étape par étape. Les lignes bleues délimitent l’intervalle, le point blanc est le milieu.</p>
+        <div data-widget="bisektion"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">MÉTHODE · LE PROGRAMME</div>
+        <div class="b-text"><p>En JavaScript (fonctionne dans la console de tout navigateur, F12) :</p></div>
+<pre class="b-pre"><code>const f = x => x ** 3 - x - 2;
+let a = 1, b = 2;
+while (b - a > 1e-6) {
+  const m = (a + b) / 2;
+  if (Math.sign(f(m)) === Math.sign(f(a))) a = m; else b = m;
+}
+console.log((a + b) / 2);   // 1.5213797…</code></pre>
+        <div class="b-text"><p>Dans un tableur : des colonnes pour $a$, $b$, $m$ et $f(m)$. Dans la ligne suivante, décider avec <code>=SI(…)</code> quelle borne est remplacée, puis recopier vers le bas.</p></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Fais à la main trois étapes de dichotomie pour $f(x) = x^2 - 2$ sur $[1\,;\,2]$. De quel nombre s’approche-t-on ainsi ?</p></div>
+            <div class="b-sol"><p>$m = 1{,}5$ : $f > 0$ → $[1\,;\,1{,}5]$ · $m = 1{,}25$ : $f < 0$ → $[1{,}25\,;\,1{,}5]$ · $m = 1{,}375$ : $f < 0$ → $[1{,}375\,;\,1{,}5]$. On s’approche de $\sqrt2 \approx 1{,}414$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Combien d’étapes faut-il pour encadrer un zéro de $[0\,;\,1]$ à $0{,}001$ près ?</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{2^n} \leq 0{,}001 \Rightarrow 2^n \geq 1000 \Rightarrow n = 10$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Détermine avec le widget la solution de $\cos x = x$ à trois décimales.</p></div>
+            <div class="b-sol"><p>Zéro de $\cos x - x$ : $x \approx 0{,}739$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>La fonction $2^x - 3x$ a deux zéros. Trouve des intervalles pour les deux et détermine le second de façon numérique.</p></div>
+            <div class="b-sol"><p>$f(0) = 1$, $f(1) = -1$ : le premier dans $[0\,;\,1]$ ($\approx 0{,}458$). $f(3) = -1$, $f(4) = 4$ : le second dans $[3\,;\,4]$, environ $3{,}31$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Pourquoi la dichotomie échoue-t-elle pour $f(x) = \tfrac1x$ sur $[-1\,;\,1]$, alors que $f(-1) < 0 < f(1)$ ? Et pourquoi pour $f(x) = x^2$ sur $[-1\,;\,1]$ ?</p></div>
+            <div class="b-sol"><p>$\tfrac1x$ fait un saut en $0$ et n’a aucun zéro : il manque la condition « continue ». Pour $x^2$, il y a bien un zéro, mais pas de changement de signe : $f(-1) = f(1) = 1 > 0$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1,521" data-tol="0.002" data-ph="x ≈"><p class="b-q-text">Zéro de $x^3 - x - 2$ à trois décimales ?</p><div class="b-sol"><p>$x \approx 1{,}521$</p></div></div>
+        <div class="b-q" data-ans="10" data-ph="étapes"><p class="b-q-text">Après combien de divisions par deux un intervalle de largeur 1 devient-il plus étroit que 0,001 ?</p><div class="b-sol"><p>$2^{10} = 1024 > 1000$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Aires numériques" data-toc-k="2" data-toc-short="2 Aires">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">2</span>Approcher des aires avec des bandes</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quelle est l’aire sous $y = x^2$ entre $x = 0$ et $x = 2$ ? Il n’existe pas de formule d’aire pour une telle courbe.
+                On découpe donc l’aire en <b>bandes</b> étroites et on remplace chaque bande par un rectangle ou un trapèze.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODES DES BANDES</div>
+                <div class="b-text">
+                    <p>Partager $[a\,;\,b]$ en $n$ bandes de même largeur $h = \tfrac{b - a}{n}$.</p>
+                    <p><b>Rectangles :</b> hauteur = valeur de la fonction au bord gauche (ou au milieu) de chaque bande. Somme des aires de tous les rectangles.</p>
+                    <p><b>Trapèzes :</b> chaque bande devient un trapèze avec les valeurs de la fonction aux deux bords : $A \approx \tfrac{h}{2}\big(f(x_0) + 2f(x_1) + \ldots + 2f(x_{n-1}) + f(x_n)\big)$.</p>
+                    <p>Plus il y a de bandes, plus c’est précis. Les rectangles au milieu et les trapèzes sont bien plus précis que les rectangles au bord.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Perspective :</b> la valeur exacte s’appelle intégrale, $\int_0^2 x^2\,dx = \tfrac83$. Le calcul intégral est un grand sujet de la 13e année.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ATELIER DES BANDES</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis la fonction, la méthode et le nombre de bandes. À droite, tu vois l’approximation, la valeur exacte et l’erreur.</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EXEMPLE 1 · QUATRE BANDES</div>
+        <div class="b-text"><p>Calcule l’aire sous $y = x^2$ sur $[0\,;\,2]$ avec $n = 4$ bandes : avec des rectangles à gauche, des rectangles au milieu et des trapèzes.</p></div>
+        <div class="b-sol"><p>$h = 0{,}5$. À gauche : $0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$.
+            Au milieu : $0{,}5 \cdot (0{,}0625 + 0{,}5625 + 1{,}5625 + 3{,}0625) = 2{,}625$.
+            Trapèzes : $0{,}25 \cdot (0 + 2 \cdot 0{,}25 + 2 \cdot 1 + 2 \cdot 2{,}25 + 4) = 2{,}75$.</p>
+            <p>Valeur exacte : $\tfrac83 \approx 2{,}667$. Erreurs : $-0{,}917$ · $-0{,}042$ · $+0{,}083$.</p></div>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RÉACTEUR À INTÉGRALES</span><span class="b-lab-what">Sommes de Riemann et méthodes d’approximation</span></span></a></div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Explique sur la figure pourquoi, pour $y = x^2$, les rectangles à gauche donnent toujours une aire trop petite.</p></div>
+            <div class="b-sol"><p>La fonction est croissante. Au bord gauche, elle est au plus bas, chaque rectangle est donc entièrement sous la courbe.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Combien de bandes faut-il à la méthode des trapèzes pour $x^2$ sur $[0\,;\,2]$ pour que l’erreur soit inférieure à 0,01 ? Essaie avec le widget.</p></div>
+            <div class="b-sol"><p>Pour $n = 10$, l’erreur vaut $0{,}013$ ; à partir de $n = 12$, elle est inférieure à $0{,}01$. L’erreur diminue à peu près comme $\tfrac{1}{n^2}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Détermine avec le widget l’aire sous une arche de sinus (de $0$ à $\pi$). Quelle valeur exacte obtient-on ?</p></div>
+            <div class="b-sol"><p>Les approximations se rapprochent du nombre 2. L’arche de sinus a exactement l’aire 2.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Écris un petit programme (tableur ou JavaScript) pour la méthode des trapèzes et calcule avec lui l’aire sous $y = \sqrt{x}$ sur $[0\,;\,4]$ avec $n = 100$.</p></div>
+            <div class="b-sol"><p>Résultat environ $5{,}33$, valeur exacte $\tfrac{16}{3} \approx 5{,}333$. En JavaScript : <code>let s = 0; for (let i = 0; i &lt; n; i++) s += (f(a+i*h) + f(a+(i+1)*h)) / 2 * h;</code></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2,75" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">Méthode des trapèzes pour $x^2$ sur $[0\,;\,2]$ avec 4 bandes ?</p><div class="b-sol"><p>$2{,}75$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quelle méthode est en général la moins précise à nombre de bandes égal ?</p><div class="b-mc"><button>les rectangles au milieu</button><button>les rectangles au bord</button><button>les trapèzes</button></div><div class="b-sol"><p>Les rectangles au bord.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Méthode de Monte-Carlo" data-toc-k="3" data-toc-short="3 Monte-Carlo">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">3</span>Des aires par le hasard : la méthode de Monte-Carlo</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Lance des points au hasard dans un rectangle qui contient l’aire cherchée. La part des points tombés dans l’aire correspond à peu près à la part de l’aire dans le rectangle.
+                Cela ressemble à un jeu de hasard, et cela marche étonnamment bien.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODE DE MONTE-CARLO</div>
+                <div class="b-text">
+                    <p>$$A \approx \frac{\text{nombre de points dedans}}{\text{nombre total de points}} \cdot A_{\text{rectangle}}$$</p>
+                    <p>Le résultat est une <b>estimation</b>, comme pour toute simulation (voir chapitre 1). La précision ne progresse que lentement : pour un chiffre de plus, il faut environ cent fois plus de points.</p>
+                    <p>La méthode est forte pour les formes compliquées et en grande dimension, là où les méthodes des bandes ne fonctionnent presque plus.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Nom :</b> la méthode est née dans les années 1940 à Los Alamos et doit son nom au casino de Monte-Carlo.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · AIRE SOUS LA PARABOLE</div>
+        <p class="b-help" style="margin:0 0 12px">Points au hasard dans le rectangle $2 \times 4$ : en jaune sous $y = x^2$, en gris au-dessus.</p>
+        <div data-widget="mc-flaeche"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">MÉTHODE · ESTIMER $\pi$ EN HUIT LIGNES</div>
+<pre class="b-pre"><code>const n = 1000000;
+let dedans = 0;
+for (let i = 0; i &lt; n; i++) {
+  const x = Math.random(), y = Math.random();
+  if (x * x + y * y &lt; 1) dedans++;       // dans le quart de cercle
+}
+console.log(4 * dedans / n);               // environ 3.14…</code></pre>
+        <div class="b-text"><p>Le quart de cercle a l’aire $\tfrac{\pi}{4}$, le carré unité l’aire 1. La part des points dedans estime donc $\tfrac{\pi}{4}$.</p></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Sur 1 000 points au hasard dans le rectangle $2 \times 4$, 338 sont sous $y = x^2$. Quelle aire est estimée ? Quelle est l’erreur ?</p></div>
+            <div class="b-sol"><p>$\tfrac{338}{1000} \cdot 8 = 2{,}704$. Valeur exacte $\tfrac83 \approx 2{,}667$, erreur d’environ $0{,}04$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Exécute le programme pour $\pi$ avec $n = 100$, $10\,000$ et $1\,000\,000$. Combien de chiffres sont à peu près justes à chaque fois ?</p></div>
+            <div class="b-sol"><p>Avec 100 points, souvent seulement le 3 ; avec 10 000, le plus souvent $3{,}1$ ; avec un million, le plus souvent $3{,}14$. Cent fois plus de points apportent environ un chiffre.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Compare Monte-Carlo et la méthode des trapèzes pour l’aire sous $x^2$ : laquelle est la plus précise avec 100 étapes de calcul ? Quand prendrais-tu quand même Monte-Carlo ?</p></div>
+            <div class="b-sol"><p>Trapèzes avec $n = 100$ : erreur d’environ $0{,}0001$. Monte-Carlo avec 100 points : erreur typiquement de $0{,}2$ à $0{,}4$. Monte-Carlo vaut la peine pour des formes difficiles à découper en bandes, ou pour des volumes en grande dimension.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3,2" data-tol="0.001" data-ph="π ≈"><p class="b-q-text">Sur 1 000 points dans le carré unité, 800 sont dans le quart de cercle. Quelle estimation de $\pi$ obtient-on ?</p><div class="b-sol"><p>$4 \cdot 0{,}8 = 3{,}2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Combien de points faut-il à peu près pour un chiffre de précision en plus ?</p><div class="b-mc"><button>cent fois plus</button><button>deux fois plus</button><button>dix fois plus</button></div><div class="b-sol"><p>L’erreur diminue comme $\tfrac{1}{\sqrt{n}}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : l’hôtel de Hilbert" data-toc-k="X" data-toc-short="Hôtel de Hilbert">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">L’INFINIMENT GRAND</span></div>
+    <h2>L’hôtel de Hilbert</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Un hôtel a une infinité de chambres, numérotées 1, 2, 3, … Toutes sont occupées. Un nouveau client arrive. Le portier demande à chaque client de passer de la chambre $n$ à la chambre $n + 1$.
+                La chambre 1 se libère, alors que tout était plein.</p>
+            <p>Puis arrive un car avec une infinité de clients. Cette fois, chaque client passe de la chambre $n$ à la chambre $2n$. Toutes les chambres impaires se libèrent, une infinité.</p>
+            <p>Avec les ensembles infinis, on ne peut donc pas compter comme avec les ensembles finis : il y a autant de nombres pairs que d’entiers naturels, car $n \mapsto 2n$ les associe un à un.
+                Mais Georg Cantor a aussi montré qu’il y a <b>plus</b> de nombres réels que d’entiers naturels. L’infini n’est pas égal à l’infini.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> David Hilbert présenta cette expérience de pensée en 1924 dans un cours. Elle devint célèbre grâce au livre de George Gamow « One Two Three … Infinity » (1947).</p></aside>
+    </div>
+    <div class="b-box b-check" data-check="hilbert">
+        <div class="b-box-title">RÉFLÉCHIS AVEC NOUS</div>
+        <div class="b-q" data-ans="7" data-ph="chambre"><p class="b-q-text">L’hôtel plein accueille 3 nouveaux clients. Dans quelle chambre va le client de la chambre 4 ?</p><div class="b-sol"><p>Chacun avance de 3 : de $n$ à $n + 3$, donc la chambre 7.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>DICHOTOMIE</h4><p>Chercher un changement de signe, couper l’intervalle en deux, garder la moitié avec changement de signe. Largeur après $n$ étapes : $\tfrac{b - a}{2^n}$.</p></div><div><p>$x^3 - x - 2 = 0$ : $x \approx 1{,}5214$</p></div></div>
+    <div class="b-rueck"><div><h4>MÉTHODES DES BANDES</h4><p>Rectangles (bord ou milieu) ou trapèzes, largeur $h = \tfrac{b - a}{n}$. Plus de bandes, plus de précision.</p></div><div><p>$x^2$ sur $[0\,;\,2]$, $n = 4$ : 1,75 · 2,625 · 2,75 (exact 2,667)</p></div></div>
+    <div class="b-rueck"><div><h4>MONTE-CARLO</h4><p>Part des points dedans · aire du rectangle. Une estimation, erreur d’environ $\tfrac{1}{\sqrt{n}}$.</p></div><div><p>$\pi \approx 4 \cdot \tfrac{\text{dedans}}{n}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">CORRECTION IMMÉDIATE</span></div>
+    <div class="b-box b-check" data-check="test1">
+        <div class="b-box-title">TEST</div>
+        <div class="b-q" data-ans="1,25" data-tol="0.001" data-ph="m ="><p class="b-q-text">Dichotomie pour $x^2 - 2$ : après la première étape, l’intervalle est $[1\,;\,1{,}5]$. Quel milieu teste-t-on ensuite ?</p><div class="b-sol"><p>$1{,}25$</p></div></div>
+        <div class="b-q" data-ans="1,75" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">Rectangles à gauche pour $x^2$ sur $[0\,;\,2]$ avec 4 bandes ?</p><div class="b-sol"><p>$0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$</p></div></div>
+        <div class="b-q" data-ans="2,4" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">Sur 1 000 points au hasard dans un rectangle d’aire 8, 300 sont dedans. Quelle aire estime-t-on ?</p><div class="b-sol"><p>$0{,}3 \cdot 8 = 2{,}4$</p></div></div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-numerik.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CALCUL NUMÉRIQUE</span><span class="b-lab-what">Dichotomie et aires</span></span></a>
+        <a class="b-lab" href="../../mathetest11-montecarlo.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MONTE-CARLO</span><span class="b-lab-what">Aires et π par le hasard</span></span></a>
+        <a class="b-lab" href="../../mathetest11-unendlich.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">L’INFINIMENT GRAND</span><span class="b-lab-what">Hôtel de Hilbert, Cantor</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 11e année · domaine optionnel 3 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-fr/numerik.js"></script>
+</body>
+</html>
