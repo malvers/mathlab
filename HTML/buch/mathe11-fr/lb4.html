@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 11 · Chapitre 4 · Systèmes d’équations linéaires et matrices | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Méthode du pivot de Gauss, ensembles de solutions, calcul matriciel. Chapitre 4 du manuel interactif Mathématiques · Berufliches Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 4 · DOMAINE D’APPRENTISSAGE 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 4 · DOMAINE D’APPRENTISSAGE 4 · MARS · AVRIL</p>
+            <h1>Systèmes d’équations linéaires et matrices</h1>
+            <p class="b-hero-lead">Combien de places de chaque catégorie le cinéma a-t-il vendues ? Combien une entreprise doit-elle produire pour utiliser toutes ses matières premières ?
+                Plusieurs inconnues, plusieurs conditions : un <b>système d’équations linéaires</b>. Avec des <b>matrices</b>, tu l’écris de façon compacte et tu le résous pas à pas
+                avec la méthode de Gauss, et les grands systèmes avec le CAS.</p>
+            <div class="b-chips"><span class="b-chip">20 HEURES</span><span class="b-chip">4 LEÇONS</span><span class="b-chip">ÉCONOMIE ET TECHNIQUE</span><span class="b-chip">ÉDUCATION AU NUMÉRIQUE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["4-x","x","(6-x)/2"]' data-labels='["","",""]' data-x="-2,6" data-y="-2,6" data-pts="[[2,2]]" data-equal data-h="240" data-aria="Trois droites avec un point commun"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>écrire un système linéaire sous <b>forme matricielle</b> $A \cdot \vec{x} = \vec{b}$ et reconnaître des <b>matrices particulières</b></li>
+                <li>résoudre <b>sans calculatrice</b> des systèmes de 3 équations à 3 inconnues avec la <b>méthode du pivot de Gauss</b></li>
+                <li>discuter les <b>ensembles de solutions</b> : aucune, une, une infinité de solutions</li>
+                <li>résoudre de grands systèmes avec le <b>CAS</b> et <b>calculer</b> avec des matrices : additionner, multiplier par un nombre, transposer</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">On a $x + y = 5$ et $x - y = 1$. Que vaut $x$ ?</p><div class="b-sol"><p>En additionnant : $2x = 6$, donc $x = 3$ et $y = 2$.</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="nombre"><p class="b-q-text">Calcule $2 \cdot 3 + (-1) \cdot 7$.</p><div class="b-sol"><p>$6 - 7 = -1$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Combien de points communs ont deux droites parallèles distinctes ?</p><div class="b-mc"><button>aucun</button><button>exactement un</button><button>une infinité</button></div><div class="b-sol"><p>Aucun.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA SOIRÉE AU CINÉMA</div>
+            <div class="b-text"><p>Plein tarif 8 €, tarif réduit 6 €, enfants 4 €. Un soir, on vend 200 places pour 1 280 € en tout, deux fois plus de places à tarif réduit que de places enfants.</p>
+                <ul><li>Écrivez trois équations. Combien de places de chaque catégorie y avait-il ?</li><li>Quelle stratégie avez-vous utilisée ? Marche-t-elle toujours ?</li></ul></div>
+            <span class="b-pair">→ Leçons 1 et 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">CALCULER AVEC DES TABLEAUX</div>
+            <div class="b-text"><p>Deux magasins notent chaque mois leurs ventes de trois produits dans un tableau.</p>
+                <ul><li>Comment obtenez-vous les ventes totales de janvier et février ? Et les ventes après une hausse de 10 % ?</li><li>Que se passe-t-il si l’on échange les lignes et les colonnes du tableau ?</li></ul></div>
+            <span class="b-pair">→ Leçon 4</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TROIS DROITES</div>
+            <div class="b-text"><p>Tracez les droites $x + y = 4$, $x - y = 0$ et $x + 2y = 6$.</p>
+                <ul><li>Les trois ont-elles un point commun ? Modifiez une équation de façon qu’il n’y en ait plus.</li></ul></div>
+            <a class="b-lab" data-lab="gleichungssysteme" href="../../gleichungssysteme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SYSTÈMES D’ÉQUATIONS</span><span class="b-lab-what">Points d’intersection et algèbre linéaire</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Matrices" data-toc-k="1" data-toc-short="1 Matrices">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">5 HEURES</span></div>
+    <h2><span class="b-no">1</span>Les matrices et la forme matricielle d’un système</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour la soirée au cinéma, avec $x$ places plein tarif, $y$ places à tarif réduit et $z$ places enfants, on a :</p>
+                <p>$$\begin{array}{rcrcrcl} x &+& y &+& z &=& 200 \\ 8x &+& 6y &+& 4z &=& 1280 \\ && y &-& 2z &=& 0 \end{array}$$</p>
+                <p>Au fond, seuls les nombres comptent. Les lettres sont toujours aux mêmes places.</p></div></div>
+            <div class="b-text"><p>Si l’on n’écrit que les nombres dans un tableau rectangulaire, on obtient une <b>matrice</b>. Le système s’écrit alors $A \cdot \vec{x} = \vec{b}$ :</p>
+                <p>$$\underbrace{\begin{pmatrix} 1 & 1 & 1 \\ 8 & 6 & 4 \\ 0 & 1 & -2 \end{pmatrix}}_{A} \cdot \underbrace{\begin{pmatrix} x \\ y \\ z \end{pmatrix}}_{\vec{x}} = \underbrace{\begin{pmatrix} 200 \\ 1280 \\ 0 \end{pmatrix}}_{\vec{b}}
+                    \qquad \text{en bref :} \qquad \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)$$</p>
+                <p>La forme de droite s’appelle la <b>matrice augmentée</b> (matrice complète du système).</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MATRICES</div>
+                <div class="b-text">
+                    <p>Une <b>matrice $m \times n$</b> a $m$ lignes et $n$ colonnes. L’élément de la ligne $i$ et de la colonne $j$ se note $a_{ij}$.</p>
+                    <p><b>Matrices particulières :</b> <b>carrée</b> ($m = n$) · <b>triangulaire supérieure</b> (que des zéros sous la diagonale) · <b>diagonale</b> (non nulle seulement sur la diagonale) ·
+                        <b>matrice identité</b> $I$ (diagonale de 1 ; le manuel allemand la note $E$) · <b>matrice nulle</b> (que des zéros) · <b>matrice colonne</b> ($m \times 1$) · <b>matrice ligne</b> ($1 \times n$)</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Exemples :</b> $I = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$ · triangulaire supérieure $\begin{pmatrix} 2 & 1 & 4 \\ 0 & 3 & 1 \\ 0 & 0 & 5 \end{pmatrix}$</p>
+            <p class="b-note"><b>Informatique :</b> une image en niveaux de gris est une matrice : chaque élément est la luminosité d’un pixel.</p>
+        </aside>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Donne la taille et l’élément $a_{23}$ : $A = \begin{pmatrix} 4 & -1 & 0 & 2 \\ 3 & 5 & 7 & -2 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>Matrice $2 \times 4$, $a_{23} = 7$ (2e ligne, 3e colonne)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>De quelles matrices particulières s’agit-il ? a) $\begin{pmatrix} 3 & 0 \\ 0 & -1 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 1 \\ 4 \\ 2 \end{pmatrix}$ &nbsp; c) $\begin{pmatrix} 1 & 5 \\ 0 & 2 \end{pmatrix}$ &nbsp; d) $\begin{pmatrix} 0 & 0 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) matrice diagonale (aussi carrée, aussi triangulaire) &nbsp; b) matrice colonne &nbsp; c) triangulaire supérieure &nbsp; d) matrice nulle et matrice ligne</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Écris la matrice augmentée : $\;2x - z = 4$, $\;x + 3y = 7$, $\;y + z = 1$</p></div>
+            <div class="b-hint"><p>Les variables absentes ont le coefficient 0.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{rrr|r} 2 & 0 & -1 & 4 \\ 1 & 3 & 0 & 7 \\ 0 & 1 & 1 & 1 \end{array}\right)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une entreprise fabrique trois produits P1, P2, P3 à partir de trois matières premières. Par pièce, il lui faut (en kg) :
+                R1 : 1, 2, 1 · R2 : 2, 1, 3 · R3 : 1, 1, 1. Elle dispose de 90 kg de R1, 110 kg de R2, 60 kg de R3. Écris le système sous forme matricielle pour que tous les stocks soient utilisés.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 1 & 2 & 1 \\ 2 & 1 & 3 \\ 1 & 1 & 1 \end{pmatrix} \cdot \begin{pmatrix} x_1 \\ x_2 \\ x_3 \end{pmatrix} = \begin{pmatrix} 90 \\ 110 \\ 60 \end{pmatrix}$. On le résout dans la leçon 2.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Combien d’éléments a une matrice $2 \times 3$ ?</p><div class="b-sol"><p>$2 \cdot 3 = 6$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quelle matrice est la matrice identité ?</p><div class="b-mc"><button>$\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}$</button><button>$\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</button><button>$\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$</button></div><div class="b-sol"><p>Des 1 sur la diagonale, des zéros ailleurs.</p></div></div>
+        <div class="b-q" data-ans="-2" data-ph="nombre"><p class="b-q-text">Dans le système du cinéma : quel est l’élément $a_{33}$ de la matrice $A$ ?</p><div class="b-sol"><p>3e ligne, 3e colonne : $-2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="La méthode de Gauss" data-toc-k="2" data-toc-short="2 Gauss">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">SANS CALCULATRICE · 5 HEURES</span></div>
+    <h2><span class="b-no">2</span>La méthode du pivot de Gauss</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une matrice triangulaire supérieure, c’est facile : avec $\;x + y + z = 6$, $\;y + z = 5$, $\;z = 3$, on lit $z = 3$, on remplace dans la deuxième ligne ($y = 2$), puis dans la première ($x = 1$).
+                L’idée de Gauss : transformer tout système pour qu’il ait cette <b>forme échelonnée</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODE DE GAUSS</div>
+                <div class="b-text">
+                    <p>L’ensemble des solutions ne change pas si l’on</p>
+                    <ul><li><b>échange</b> deux lignes,</li><li><b>multiplie une ligne par un nombre non nul</b>,</li><li><b>ajoute à une ligne un multiple d’une autre ligne</b>.</li></ul>
+                    <p><b>Gauss :</b> avec ces transformations, créer des zéros sous la diagonale d’abord dans la colonne 1, puis dans la colonne 2 (forme échelonnée), puis remplacer de bas en haut.</p>
+                    <p><b>Gauss-Jordan :</b> continuer jusqu’à obtenir la matrice identité à gauche. La solution se lit alors directement à droite.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notation :</b> « $\text{II} - 8 \cdot \text{I}$ » signifie : remplacer la ligne II par la ligne II moins 8 fois la ligne I.</p>
+            <p class="b-note"><b>Vérification :</b> toujours remplacer dans toutes les équations <b>de départ</b>.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EXEMPLE 1 · LA SOIRÉE AU CINÉMA</div>
+        <div class="b-text"><p>Résous le système du cinéma par la méthode de Gauss.</p></div>
+        <div class="b-sol">
+            <p>$$\left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)
+                \xrightarrow{\;\text{II} - 8 \cdot \text{I}\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & -2 & -4 & -320 \\ 0 & 1 & -2 & 0 \end{array}\right)
+                \xrightarrow{\;\text{II} : (-2)\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & 1 & 2 & 160 \\ 0 & 1 & -2 & 0 \end{array}\right)$$</p>
+            <p>$$\xrightarrow{\;\text{III} - \text{II}\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & 1 & 2 & 160 \\ 0 & 0 & -4 & -160 \end{array}\right)$$</p>
+            <p>En remontant : $z = 40$, $y = 160 - 80 = 80$, $x = 200 - 80 - 40 = 80$. <span class="b-res">80 places plein tarif, 80 à tarif réduit, 40 places enfants.</span></p>
+            <p>Vérification : $80 + 80 + 40 = 200$ · $640 + 480 + 160 = 1280$ · $80 = 2 \cdot 40$.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ATELIER DE GAUSS</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une transformation, la ligne cible, la deuxième ligne et le facteur $k$, puis « Appliquer ». Ou demande l’étape suivante de Gauss avec « Étape suivante ».
+            « Nouveau système » tire au sort un système à solution entière.</p>
+        <div data-widget="gauss"></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Résous : $\;x + y + z = 6$, $\;2x - y + z = 3$, $\;x + 2y - z = 2$</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$ : $-3y - z = -9$ · $\text{III} - \text{I}$ : $y - 2z = -4$ · puis $3 \cdot \text{III} + \text{II}$ : $-7z = -21$.
+                <span class="b-res">$z = 3$, $y = 2$, $x = 1$</span></p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Résous : $\;2x + y - z = 1$, $\;x - y + 2z = 5$, $\;3x + 2y + z = 10$</p></div>
+            <div class="b-hint"><p>Échange d’abord I et II, pour avoir un 1 en haut à gauche.</p></div>
+            <div class="b-sol"><p><span class="b-res">$x = 1$, $y = 2$, $z = 3$</span>. Vérification : $2 + 2 - 3 = 1$ · $1 - 2 + 6 = 5$ · $3 + 4 + 3 = 10$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Résous le système des matières premières de la leçon 1. Combien de pièces de P1, P2 et P3 sont produites ?</p></div>
+            <div class="b-hint"><p>$\text{I} - \text{III}$ donne tout de suite $x_2$.</p></div>
+            <div class="b-sol"><p>$\text{I} - \text{III}$ : $x_2 = 30$. Ensuite $x_1 + x_3 = 30$ et $2x_1 + 3x_3 = 80$, donc $x_3 = 20$, $x_1 = 10$.
+                <span class="b-res">10 pièces P1, 30 pièces P2, 20 pièces P3.</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une parabole $f(x) = ax^2 + bx + c$ passe par $(0\,;\,1)$, $(1\,;\,4)$ et $(2\,;\,9)$. Écris un système et détermine $a$, $b$, $c$.</p></div>
+            <div class="b-sol"><p>$c = 1$, $a + b + c = 4$, $4a + 2b + c = 9$ $\Rightarrow$ $a + b = 3$, $4a + 2b = 8$ $\Rightarrow$ $a = 1$, $b = 2$. <span class="b-res">$f(x) = x^2 + 2x + 1 = (x + 1)^2$</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">Détermine $x$ à partir de la forme échelonnée $\;x + y + z = 6$, $\;y + z = 5$, $\;z = 3$.</p><div class="b-sol"><p>$y = 2$, $x = 6 - 2 - 3 = 1$</p></div></div>
+        <div class="b-q" data-ans="40" data-ph="nombre"><p class="b-q-text">Combien de places enfants a-t-on vendues lors de la soirée au cinéma ?</p><div class="b-sol"><p>$z = 40$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quelle transformation n’est <b>pas</b> permise ?</p><div class="b-mc"><button>échanger des lignes</button><button>multiplier une ligne par $-3$</button><button>multiplier une ligne par $0$</button></div><div class="b-sol"><p>Multiplier par 0 détruit l’équation.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Ensembles de solutions" data-toc-k="3" data-toc-short="3 Ensembles de solutions">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">5 HEURES</span></div>
+    <h2><span class="b-no">3</span>Aucune, une ou une infinité de solutions</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Tous les systèmes ne tombent pas juste. À la fin de la méthode de Gauss, il peut apparaître une ligne avec seulement des zéros à gauche.
+                Tout dépend alors du membre de droite.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · ENSEMBLES DE SOLUTIONS</div>
+                <div class="b-text">
+                    <p><b>Exactement une solution :</b> avec autant d’équations que d’inconnues, la forme échelonnée a un pivot (premier élément non nul) dans chaque ligne.</p>
+                    <p><b>Aucune solution :</b> il apparaît une ligne $(0 \;\; 0 \;\; 0 \mid c)$ avec $c \neq 0$, donc la contradiction $0 = c$.</p>
+                    <p><b>Une infinité de solutions :</b> il apparaît une ligne nulle $(0 \;\; 0 \;\; 0 \mid 0)$ et aucune contradiction. Une variable reste libre ; on la prend comme paramètre $t$.</p>
+                    <p><b>Géométriquement</b> (deux inconnues) : deux droites se coupent en un point, sont parallèles ou sont confondues.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Perspective :</b> avec trois inconnues, chaque équation décrit un plan de l’espace. Trois plans peuvent avoir en commun un point, une droite ou rien du tout. Pour en savoir plus : la géométrie vectorielle.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DEUX DROITES</div>
+        <div data-widget="geraden"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · UNE INFINITÉ</div>
+            <div class="b-text"><p>Résous $\;x + y + z = 3$, $\;x - y + z = 1$, $\;2x + 2z = 4$.</p></div>
+            <div class="b-sol"><p>$\text{II} - \text{I}$ : $-2y = -2$ · $\text{III} - 2\,\text{I}$ : $-2y = -2$ · puis $\text{III} - \text{II}$ : $0 = 0$, une ligne nulle.</p>
+                <p>$y = 1$, $z = t$ libre, $x = 2 - t$ : <span class="b-res">$S = \{(2 - t\,;\,1\,;\,t) \mid t \in \mathbb{R}\}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · AUCUNE SOLUTION</div>
+            <div class="b-text"><p>Résous $\;x + 2y = 3$, $\;2x + 4y = 5$.</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$ : $0 = -1$. Une contradiction : <span class="b-res">$S = \{\,\}$</span>. Les deux droites sont parallèles.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Combien de solutions a le système de cette forme échelonnée ? a) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 0 & 5 \end{array}\right)$ &nbsp; b) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 0 & 0 \end{array}\right)$ &nbsp; c) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 2 & 2 \end{array}\right)$</p></div>
+            <div class="b-sol"><p>a) aucune ($0 = 5$) &nbsp; b) une infinité &nbsp; c) exactement une : $z = 1$, $y = -1$, $x = 5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pour quel $a$ le système $\;x + y = 1$, $\;2x + ay = 2$ a-t-il une infinité de solutions ? Qu’en est-il pour tous les autres $a$ ?</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$ : $(a - 2)y = 0$. Pour $a = 2$, c’est $0 = 0$ : une infinité de solutions. Sinon $y = 0$, $x = 1$ : exactement une solution.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pour quels $b$ le système $\;x + 2y = 3$, $\;2x + 4y = b$ n’a-t-il aucune solution ?</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$ : $0 = b - 6$. Pour $b \neq 6$ aucune solution, pour $b = 6$ une infinité.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un commerçant mélange deux cafés à 8 €/kg et 12 €/kg pour obtenir 10 kg d’un mélange à 100 €. Pour quel prix total n’y aurait-il pas de solution raisonnable ? Justifie.</p></div>
+            <div class="b-sol"><p>$x + y = 10$, $8x + 12y = P$ a toujours exactement une solution $y = \tfrac{P - 80}{4}$. Mais elle n’a de sens que pour $0 \leq y \leq 10$, donc $80 \leq P \leq 120$.
+                Pour $P = 100$ : 5 kg de chaque. Pour $P$ en dehors de cet intervalle, des quantités seraient négatives. Résoluble mathématiquement ne veut pas toujours dire raisonnable dans la situation.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">À la fin de la méthode de Gauss, on obtient la ligne $(0 \;\; 0 \;\; 0 \mid 7)$. Le système a …</p><div class="b-mc"><button>aucune solution</button><button>exactement une solution</button><button>une infinité de solutions</button></div><div class="b-sol"><p>$0 = 7$ est une contradiction.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">Pour quel $a$ le système $\;x + y = 1$, $\;2x + ay = 2$ a-t-il une infinité de solutions ?</p><div class="b-sol"><p>$a = 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="CAS et calcul matriciel" data-toc-k="4" data-toc-short="4 CAS et opérations">
+    <div class="b-band"><span class="b-band-tag">LEÇON 4</span><span class="b-band-sub">AVEC OUTILS NUMÉRIQUES · 5 HEURES</span></div>
+    <h2><span class="b-no">4</span>Grands systèmes avec le CAS, calcul avec les matrices</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En pratique, les systèmes linéaires ont souvent des dizaines ou des milliers d’inconnues, par exemple pour la statique d’un pont ou le traitement d’images.
+                On utilise alors des outils numériques. En classe, un CAS ou GeoGebra suffit.</p></div></div>
+            <div class="b-text"><p>Dans GeoGebra (nom anglais de la commande) :<code class="b-codeline">Solve({w+x+y+z=10, w-x+y-z=-2, 2w+x-y+z=5, w+2x+3y-z=10}, {w,x,y,z})</code></p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · CALCUL MATRICIEL</div>
+                <div class="b-text">
+                    <p><b>Addition et soustraction :</b> seulement pour des matrices de même taille, élément par élément : $(A + B)_{ij} = a_{ij} + b_{ij}$.</p>
+                    <p><b>Multiplication par un réel :</b> chaque élément est multiplié par le nombre $r$ : $(r \cdot A)_{ij} = r \cdot a_{ij}$.</p>
+                    <p><b>Transposition :</b> les lignes deviennent des colonnes : $(A^T)_{ij} = a_{ji}$. Une matrice $m \times n$ devient une matrice $n \times m$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Informatique :</b> tableurs, bases de données et formats d’image stockent les données sous forme de matrices. Faire pivoter une image de 90°, c’est au fond transposer et symétriser.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA CALCULATRICE MATRICIELLE</div>
+        <div data-widget="matrizen"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">EXEMPLE 4 · DEUX MAGASINS</div>
+        <div class="b-text"><p>Ventes (lignes : magasins 1 et 2, colonnes : produits X, Y, Z) en janvier $A = \begin{pmatrix} 12 & 8 & 5 \\ 7 & 10 & 4 \end{pmatrix}$ et en février $B = \begin{pmatrix} 10 & 9 & 6 \\ 8 & 12 & 3 \end{pmatrix}$.
+            Calcule les ventes totales et les objectifs pour mars, si l’on veut vendre 10 % de plus qu’en janvier.</p></div>
+        <div class="b-sol"><p>$A + B = \begin{pmatrix} 22 & 17 & 11 \\ 15 & 22 & 7 \end{pmatrix}$ · $1{,}1 \cdot A = \begin{pmatrix} 13{,}2 & 8{,}8 & 5{,}5 \\ 7{,}7 & 11 & 4{,}4 \end{pmatrix}$</p>
+            <p>$A^T = \begin{pmatrix} 12 & 7 \\ 8 & 10 \\ 5 & 4 \end{pmatrix}$ montre les mêmes nombres, maintenant avec les produits en lignes.</p></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="13">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Résous avec un CAS le système de la commande GeoGebra ci-dessus.</p></div>
+            <div class="b-sol"><p>$w = 1$, $x = 2$, $y = 3$, $z = 4$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule avec $A$ et $B$ de l’exemple 4 : $B - A$, $3B$ et $B^T$. Que signifie $B - A$ ?</p></div>
+            <div class="b-sol"><p>$B - A = \begin{pmatrix} -2 & 1 & 1 \\ 1 & 2 & -1 \end{pmatrix}$ : l’évolution de janvier à février. $3B = \begin{pmatrix} 30 & 27 & 18 \\ 24 & 36 & 9 \end{pmatrix}$, $B^T = \begin{pmatrix} 10 & 8 \\ 9 & 12 \\ 6 & 3 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pourquoi ne peut-on pas additionner une matrice $2 \times 3$ et une matrice $3 \times 2$ ? Que faudrait-il faire avant ?</p></div>
+            <div class="b-sol"><p>Les éléments n’ont pas de partenaire à la même place. On pourrait transposer l’une des deux, si cela a un sens dans la situation.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Montre sur un exemple : $(A + B)^T = A^T + B^T$ et $(r \cdot A)^T = r \cdot A^T$.</p></div>
+            <div class="b-sol"><p>Avec l’exemple 4 : $(A + B)^T = \begin{pmatrix} 22 & 15 \\ 17 & 22 \\ 11 & 7 \end{pmatrix} = A^T + B^T$. En transposant, chaque élément va à la même nouvelle place, les sommes suivent donc.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3" data-ph="nombre"><p class="b-q-text">$A$ est une matrice $2 \times 3$. Combien de lignes a $A^T$ ?</p><div class="b-sol"><p>3</p></div></div>
+        <div class="b-q" data-ans="22" data-ph="nombre"><p class="b-q-text">Dans l’exemple 4, quel nombre se trouve à la ligne 2, colonne 2 de $A + B$ ?</p><div class="b-sol"><p>$10 + 12 = 22$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="17">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Trois amis achètent des boissons. Anna : 2 colas, 1 jus, 1 eau pour 8 €. Ben : 1 cola, 2 jus pour 6,50 €. Cem : 1 jus, 3 eaux pour 5 €. Combien coûte chaque boisson ?</p></div>
+            <div class="b-sol"><p>$2c + s + w = 8$, $c + 2s = 6{,}5$, $s + 3w = 5$ donne <span class="b-res">cola 2,50 €, jus 2 €, eau 1 €</span>.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier au chapitre 3.3 :</b> détermine la parabole passant par $(-1\,;\,6)$, $(1\,;\,2)$ et $(2\,;\,3)$.</p></div>
+            <div class="b-sol"><p>$a - b + c = 6$, $a + b + c = 2$, $4a + 2b + c = 3$. De I et II : $b = -2$, $a + c = 4$ ; de III : $4a + c = 7$, donc $a = 1$, $c = 3$. <span class="b-res">$f(x) = x^2 - 2x + 3$</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un système de 3 équations a les solutions $(1\,;\,2\,;\,3)$ et $(3\,;\,2\,;\,1)$. Justifie qu’il a alors une infinité de solutions.</p></div>
+            <div class="b-sol"><p>S’il avait exactement une solution, il n’y en aurait pas de deuxième. Pour des équations linéaires, avec deux solutions, chaque point de la droite qui les relie est aussi une solution, par exemple $(2\,;\,2\,;\,2)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : PageRank" data-toc-k="X" data-toc-short="PageRank">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">ÉDUCATION AU NUMÉRIQUE</span></div>
+    <h2>Comment un moteur de recherche classe les pages</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>À la fin des années 1990, Sergey Brin et Larry Page eurent une idée : une page web est importante si des pages importantes renvoient vers elle. Un « internaute aléatoire » clique de lien en lien :
+                avec une probabilité de 85 %, il suit un lien de la page actuelle ; avec 15 %, il saute vers une page quelconque. La fréquence à laquelle il atterrit à la longue sur une page, c’est son <b>PageRank</b>.</p>
+            <p>Mathématiquement, c’est une matrice par laquelle on multiplie un vecteur encore et encore. Au bout de quelques étapes, le vecteur ne change presque plus.
+                Dans l’exemple ci-dessous, A est presque à égalité avec C, alors qu’une seule page renvoie vers A : ce lien unique vient de C, la page la plus importante.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> S. Brin, L. Page, « The Anatomy of a Large-Scale Hypertextual Web Search Engine », Computer Networks 30 (1998).</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · QUATRE PAGES</div>
+        <p class="b-help" style="margin:0 0 12px">Liens : A → B, A → C, B → C, C → A, D → C. La taille des cercles montre le rang actuel. Clique sur « 1 étape » jusqu’à ce que plus rien ne change.</p>
+        <div data-widget="pagerank"></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>FORME MATRICIELLE</h4><p>$A \cdot \vec{x} = \vec{b}$ · matrice augmentée $(A \mid \vec{b})$</p></div><div><p>Cinéma : $\left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)$</p></div></div>
+    <div class="b-rueck"><div><h4>MATRICES PARTICULIÈRES</h4><p>carrée, triangulaire, diagonale, identité, nulle, colonne, ligne</p></div><div><p>$I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</p></div></div>
+    <div class="b-rueck"><div><h4>GAUSS</h4><p>Échanger des lignes, multiplier par un nombre $\neq 0$, ajouter des multiples · forme échelonnée · remonter en remplaçant</p></div><div><p>Cinéma : $z = 40$, $y = 80$, $x = 80$</p></div></div>
+    <div class="b-rueck"><div><h4>ENSEMBLES DE SOLUTIONS</h4><p>Ligne contradictoire : aucune · ligne nulle : une infinité (paramètre) · sinon exactement une</p></div><div><p>$S = \{(2 - t\,;\,1\,;\,t)\}$</p></div></div>
+    <div class="b-rueck"><div><h4>OPÉRATIONS</h4><p>$A \pm B$ élément par élément (même taille) · $r \cdot A$ · $A^T$ : lignes ↔ colonnes</p></div><div><p>Magasins : janvier + février</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="2" data-ph="z ="><p class="b-q-text">Résous $\;x + y + z = 4$, $\;y - z = -1$, $\;3z = 6$. Que vaut $z$ ?</p><div class="b-sol"><p>$z = 2$ (puis $y = 1$, $x = 1$)</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">Que vaut $x$ dans le même système ?</p><div class="b-sol"><p>$y = 1$, $x = 4 - 1 - 2 = 1$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$\;x + y = 2$, $\;3x + 3y = 6$ a …</p><div class="b-mc"><button>aucune solution</button><button>exactement une solution</button><button>une infinité de solutions</button></div><div class="b-sol"><p>La deuxième équation est le triple de la première.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="30" data-ph="pièces"><p class="b-q-text">Combien de pièces P2 l’entreprise de la leçon 1 produit-elle ?</p><div class="b-sol"><p>$x_2 = 30$</p></div></div>
+            <div class="b-q" data-ans="2,5" data-tol="0.001" data-ph="euros"><p class="b-q-text">Combien coûte un cola dans l’exercice 17 ?</p><div class="b-sol"><p>2,50 €</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="z ="><p class="b-q-text">Quelle valeur a $z$ dans le système de la leçon 4 (CAS) ?</p><div class="b-sol"><p>$z = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-matrizen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MATRICES</span><span class="b-lab-what">Notion, matrices particulières</span></span></a>
+        <a class="b-lab" href="../../mathetest11-gauss.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GAUSS</span><span class="b-lab-what">3 × 3 sans calculatrice</span></span></a>
+        <a class="b-lab" href="../../mathetest11-loesungsmengen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENSEMBLES DE SOLUTIONS</span><span class="b-lab-what">aucune, une, une infinité</span></span></a>
+        <a class="b-lab" href="../../mathetest11-cas-lgs.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CAS ET OPÉRATIONS</span><span class="b-lab-what">grands systèmes, calcul matriciel</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 11e année · domaine d’apprentissage 4 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-lgs.js"></script>
+<script src="../../js/buch-fr/lgs.js"></script>
+</body>
+</html>
