@@ -23,7 +23,9 @@ const ALLOW_IT = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(
 // French: the same names, the buttons of the other editions, the second school name of the FOS books
 const ALLOW_FR = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Édition allemande|English edition|Edición española|Edizione italiana|Berufliches Gymnasium|Fachoberschule|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
 const ALLOW = LANG === 'es' ? ALLOW_ES : LANG === 'it' ? ALLOW_IT : LANG === 'fr' ? ALLOW_FR : /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Möbius|Schütz|Müller/g;
-const GERMAN = /[äöüÄÖÜß]|\b(der|die|das|und|nicht|ist|mit|von|für|auf|eine?|einer|wird|sind|oder|zum|zur|bei|wie|auch|noch|nach|aus|Lösung|Aufgabe|Ergebnis|Zeile|Schritt|Funktion|Gerade|Seite|Zurück|Neue|keine|Anzahl|Summe|Wahrscheinlichkeit)\b/;
+const GERMAN_DE = /[äöüÄÖÜß]|\b(der|die|das|und|nicht|ist|mit|von|für|auf|eine?|einer|wird|sind|oder|zum|zur|bei|wie|auch|noch|nach|aus|Lösung|Aufgabe|Ergebnis|Zeile|Schritt|Funktion|Gerade|Seite|Zurück|Neue|keine|Anzahl|Summe|Wahrscheinlichkeit)\b/;
+// French: word boundaries that know accented letters (\b alone finds "mit" in "extrémités" and "der" in "procéder")
+const GERMAN = LANG === 'fr' ? new RegExp(GERMAN_DE.source.replace('\\b(', '(?<![\\p{L}\\p{N}_])(').replace(/\)\\b$/, ')(?![\\p{L}\\p{N}_])'), 'u') : GERMAN_DE;
 for (const f of files) {
   for (const w of [1280, 390]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: 900 }, isMobile: w < 500, hasTouch: w < 500 });
@@ -50,7 +52,7 @@ for (const f of files) {
       });
     }
     const r = await page.evaluate((src) => {
-      const GERMAN = new RegExp(src.g), ALLOW = new RegExp(src.a, 'g');
+      const GERMAN = new RegExp(src.g, src.gf), ALLOW = new RegExp(src.a, 'g');
       const empty = [...document.querySelectorAll('[data-widget]')].filter(el => !el.children.length && !el.closest('.b-titel')).map(el => el.dataset.widget);
       const wide = [...document.querySelectorAll('.b-main *')].filter(el => { const b = el.getBoundingClientRect(); return b.right > innerWidth + 1 && b.width > 0 && !el.closest('.katex-display, .b-table-wrap, .b-svgbox, .katex, .b-scroll'); }).slice(0, 3).map(el => el.tagName + '.' + el.className);
       // visible text without the MathML copies of KaTeX
@@ -62,7 +64,7 @@ for (const f of files) {
         .filter(v => GERMAN.test(v.replace(ALLOW, '')));
       const cv = [...window.__cv].filter(v => GERMAN.test(v) || (src.en && /\d,\d/.test(v)));
       return { kerr: document.querySelectorAll('.katex-error').length, raw$: (document.querySelector('.b-main')?.innerText.match(/\$[^$\n]{1,40}\$/g) || []).slice(0, 2), empty, sw: document.documentElement.scrollWidth, wide, de, attrs: [...new Set(attrs)], cv };
-    }, { g: GERMAN.source, a: ALLOW.source, en: LANG === 'en' });
+    }, { g: GERMAN.source, gf: GERMAN.flags, a: ALLOW.source, en: LANG === 'en' });
     const bad = r.kerr || r.raw$.length || r.empty.length || r.sw > w + 1 || errs.length;
     console.log((bad ? 'XX ' : 'ok ') + f + ' @' + w, JSON.stringify({ kerr: r.kerr, raw$: r.raw$, empty: r.empty, sw: r.sw, wide: r.wide }), errs.slice(0, 3).join(' | ').slice(0, 300));
     if (w === 1280) {

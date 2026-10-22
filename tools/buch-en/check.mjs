@@ -162,8 +162,9 @@ function engine(dicts) {
 
 // what counts as German: umlauts, frequent small words, typical words of the widgets - outside of tags and maths
 let GERMAN = /[äöüÄÖÜß]|\b(der|die|das|den|dem|des|und|oder|nicht|ist|sind|mit|von|für|auf|ein|eine|einer|wird|zum|zur|bei|wie|auch|noch|nach|aus|im|am|vom|kein|keine|Lösung|Aufgabe|Ergebnis|Zeile|Schritt|Funktion|Gerade|Seite|Zurück|Neue|Neuer|Anzahl|Summe|Wahrscheinlichkeit|Punkt|Punkte|Wähle|Klick|Klicke|Zeige|Ziehe|Würfel|Treffer|Versuch|Versuche|richtig|falsch|Nullstelle|Steigung|Fläche|Höhe|Breite|Länge|Winkel|Kreis|Dreieck|Schritte|Tage|Jahre)\b/;
-// French: "des" is a French word (des fonctions), so it does not count as German there
-if (LANG === 'fr') GERMAN = new RegExp(GERMAN.source.replace('|des|', '|'));
+// French: "des" is a French word (des fonctions), so it does not count as German there; and the word boundaries know accented
+// letters (\b alone finds "mit" in "extrémités" and "der" in "procéder")
+if (LANG === 'fr') GERMAN = new RegExp(GERMAN.source.replace('|des|', '|').replace('\\b(', '(?<![\\p{L}\\p{N}_])(').replace(/\)\\b$/, ')(?![\\p{L}\\p{N}_])'), 'u');
 // the words a reader sees: tags out (their title, aria-label, placeholder, alt stay), TeX commands out, maths out -
 // but "$ und $" is not maths, a dollar pair counts as maths only without a word of three letters inside
 const visible = s => s.replace(/<[^>]*>/g, t => ' ' + [...t.matchAll(/\s(?:title|aria-label|placeholder|alt)="([^"]*)"/g)].map(m => m[1]).join(' ') + ' ')
