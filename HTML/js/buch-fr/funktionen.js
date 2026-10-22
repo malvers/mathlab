@@ -123,6 +123,16 @@ window.BuchFR && BuchFR.add('funktionen', {
         'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Déplace les zéros sur l’axe des $x$. Une multiplicité 0 supprime le facteur du premier degré.',
         'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Fonction polynôme avec des zéros déplaçables',
         // book fr-5 mathefos12-fr:
+        // regression
+        'Kerze': 'Bougie', 'Brenndauer in h': 'Durée de combustion en h', 'Länge in cm': 'Longueur en cm', 'Bremsweg': 'Distance de freinage',
+        'Tempo in km/h': 'Vitesse en km/h', 'Bremsweg in m': 'Distance de freinage en m', 'Abkühlen': 'Refroidissement', 'Zeit in min': 'Temps en min',
+        'ΔT in °C': 'ΔT en °C', 'Weltbevölkerung': 'Population mondiale', 'Jahr': 'Année', 'Mrd. Menschen': 'Milliards d’habitants', 'Messreihe': 'Série de mesures',
+        'Messpunkte und Regressionskurve': 'Points mesurés et courbe d’ajustement', 'Messpunkte lassen sich verschieben': 'Les points mesurés peuvent être déplacés',
+        'Für ein exponentielles Modell müssen die Werte positiv sein.': 'Pour un modèle exponentiel, les valeurs doivent être positives.',
+        // ganzrational
+        'Vielfachheit': 'Multiplicité', 'Vielfachheit kleiner': 'Multiplicité plus petite', 'Vielfachheit größer': 'Multiplicité plus grande', 'Faktor $a$': 'Facteur $a$',
+        'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Fais glisser les zéros sur l’axe des $x$. La multiplicité 0 retire le facteur linéaire.',
+        'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Fonction polynôme aux zéros déplaçables',
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -220,6 +230,21 @@ window.BuchFR && BuchFR.add('funktionen', {
         ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$ ; quand $x \\to -\\infty$, $f(x) \\to '],
         ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Seul le terme de plus haut degré décide : $'],
         // book fr-5 mathefos12-fr:
+        // regression
+        ['Wann ist die Kerze abgebrannt?', 'Quand la bougie est-elle consumée ?'], ['Bremsweg bei 150 km/h?', 'Distance de freinage à 150 km/h ?'],
+        ['Temperaturunterschied nach 45 min?', 'Écart de température après 45 min ?'], ['Prognose für 2050?', 'Prévision pour 2050 ?'],
+        ['Regressionsfunktion: $', 'Fonction d’ajustement : $'], [' &nbsp;mit $x$ = Jahre seit 1950', ' &nbsp;avec $x$ = années depuis 1950'],
+        ['Bestimmtheitsmaß $R^2 = ', 'Coefficient de détermination $R^2 = '], ['(passt sehr gut)', '(convient très bien)'], ['(passt gut)', '(convient bien)'],
+        ['(passt mäßig)', '(convient moyennement)'], [' Das Modell sagt: $f(', ' Le modèle prévoit : $f('],
+        // ganzrational: "$x = -2$: einfach → Vorzeichenwechsel, …" (le zéro: simple, double, triple …)
+        [': einfach → ', ' : simple → '], [': doppelt → ', ' : double → '], [': dreifach → ', ' : triple → '], [': vierfach → ', ' : quadruple → '],
+        [': fünffach → ', ' : quintuple → '], [': sechsfach → ', ' : sextuple → '], [': siebenfach → ', ' : septuple → '], [': achtfach → ', ' : octuple → '],
+        [': neunfach → ', ' : nonuple → '],
+        ['Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse', 'changement de signe, la courbe <b>coupe</b> l’axe des $x$'],
+        ['Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)', 'changement de signe, la courbe coupe l’axe des $x$ <b>à plat</b> (point d’inflexion à tangente horizontale)'],
+        ['kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse', 'pas de changement de signe, la courbe <b>touche</b> l’axe des $x$'],
+        ['$ · Grad $', '$ · degré $'], ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$ ; pour $x \\to -\\infty$, $f(x) \\to '],
+        ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Seul le terme de plus haut degré décide : $'],
     ],
     rule: [
         // book fr-1 mathe11-fr:

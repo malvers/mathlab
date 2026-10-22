@@ -445,3 +445,30 @@ Package fr-4 (Choquet), 22.10.2026: decisions made while translating FOS 11; not
 ## mathefos12-fr
 
 <!-- fr-5: terms of this book only, write right below this line -->
+
+Package fr-5 (Voisin), 22.10.2026: decisions made while translating FOS 12; nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Schrägbild, Kavalierperspektive | perspective cavalière | 1.1 |
+| Verbindungsvektor, „Spitze minus Fuß“ | vecteur entre deux points ($\vec{AB}$), « extrémité moins origine » | 1.1; widget raum3d: "Points et vecteur AB" |
+| Punkt-Richtungs-, Zwei-Punkte-, Drei-Punkte-Form | forme point-vecteur directeur, forme à deux points, forme à trois points | 1.2, 1.3 |
+| Stützpunkt (running text), Stützvektor | point de la droite (du plan), « point donné de $h$ »; $\vec{p}$ vecteur position d’un point de la droite | no "point d’appui" |
+| Spurpunkte einer Ebene, Spurdreieck | points de percée (des axes dans le plan), triangle des traces | 1.3 |
+| Durchstoßpunkt | point d’intersection (droite et plan) | 1.3 |
+| Lotgerade, Lotfußpunkt, Spiegelpunkt | droite perpendiculaire (perpendiculaire), projeté orthogonal, symétrique | 1.4, widget lot3d |
+| Miller-Indizes | indices de Miller | 1.3, excursion |
+| h-Methode | méthode du $h$ | 2.1, 2.2 |
+| Annäherung (widget grenzwert) | approche | "Approche, pas $k$" |
+| Steckbrief (2.4) | carte d’identité (de la fonction) | the task: « déterminer une fonction à partir de ses propriétés » |
+| Ortskurve (widget schar) | lieu des points, lieu des extremums | "Afficher le lieu des extremums" |
+| Klausur 1, 2, 3 | DEVOIR SURVEILLÉ 1, 2, 3 | chips and quiz cards |
+| Stück (wb3, widget gewinn) | unités | "x en unités", "€ par unité"; but "la température de la pièce" (room) |
+| Mengenrabatt | remise sur quantité | wb3 |
+| Zinseszins, Verzinsung (widget efunktion) | intérêts composés, intérêts versés chaque année / chaque mois … | the slider value and the sentence use the same words |
+| Regressionsmodell linear / quadratisch / exponentiell | linéaire / quadratique / exponentiel | as the fr0 words of the regression widget, also in the text of wb3 |
+| Gebiet 1 (fhr) | bloc 1 | as in section 2 |
+| Fit für die FHR-Prüfung | En forme pour l’examen de la FHR | chapter P |
+| Wahlbereich 3 (chapter W) | Domaine optionnel 3 (chapter OP) | as in section 1 |
+| Treffer (widget efunktion: a = e) | Dans le mille | "<b>Dans le mille !</b>" |
+| Zentralprojektion, Bildebene, Fluchtlinien | perspective centrale, plan du tableau, lignes de fuite | wb3, widget zentralprojektion |

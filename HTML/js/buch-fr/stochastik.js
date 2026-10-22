@@ -198,6 +198,14 @@ window.BuchFR && BuchFR.add('stochastik', {
         'Was wird berechnet?': 'Que calcule-t-on ?',
         'Histogramm der Binomialverteilung': 'Histogramme de la loi binomiale',
         // book fr-5 mathefos12-fr:
+        // baum
+        'Rot': 'Rouge', 'eine rote Kugel weniger': 'une boule rouge de moins', 'eine rote Kugel mehr': 'une boule rouge de plus',
+        'eine blaue Kugel weniger': 'une boule bleue de moins', 'eine blaue Kugel mehr': 'une boule bleue de plus', 'Anzahl der Züge': 'Nombre de tirages',
+        '2 Züge': '2 tirages', '3 Züge': '3 tirages', 'Ziehen': 'Tirage', 'ohne Zurücklegen': 'sans remise', 'mit Zurücklegen': 'avec remise',
+        'Urne:': 'Urne :', 'Ereignis wählen:': 'Choisis un événement :', 'Ereignis': 'Événement', 'Baumdiagramm der Urne': 'Arbre pondéré de l’urne',
+        'unmöglich': 'impossible', 'beide Rot': 'les deux rouges', 'alle Rot': 'toutes rouges', 'genau einmal Rot': 'exactement une rouge',
+        'mindestens einmal Rot': 'au moins une rouge', 'keinmal Rot': 'aucune rouge', 'beide gleich': 'les deux de même couleur',
+        'alle gleich': 'toutes de même couleur', 'leeren': 'effacer',
     },
     phrase: [
         // fr0: the helpers of the module (outside every widget; check.mjs stochastik/*), shared by all five books
@@ -350,6 +358,10 @@ window.BuchFR && BuchFR.add('stochastik', {
         ['Erwartungswert $\\mu', 'Espérance $\\mu'],
         ['$ · Standardabweichung $', '$ · écart type $'],
         // book fr-5 mathefos12-fr:
+        ['Klicke auf die Enden der Pfade (rechts im Baum) oder wähle oben ein Ereignis. ', 'Clique sur les extrémités des chemins (à droite dans l’arbre) ou choisis un événement en haut. '],
+        ['Das Buch rechnet dir die Pfadregeln vor.', 'Le livre te montre le calcul avec les règles des chemins.'],
+        ['<b>1. Pfadregel</b> (multiplizieren entlang des Pfades):', '<b>1re règle des chemins</b> (multiplier le long du chemin) :'],
+        ['<b>2. Pfadregel</b> (Pfade addieren):', '<b>2e règle des chemins</b> (additionner les chemins) :'],
     ],
     rule: [
         // book fr-1 mathe11-fr:

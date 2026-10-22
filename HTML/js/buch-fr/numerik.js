@@ -29,6 +29,10 @@ window.BuchFR && BuchFR.add('numerik', {
         'Flächeninhalt mit Streifen angenähert': 'Aire approchée par des bandes',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
+        // flaeche
+        'x² auf [0; 2]': 'x² sur [0 ; 2]', '√x auf [0; 4]': '√x sur [0 ; 4]', 'sin x auf [0; π]': 'sin x sur [0 ; π]',
+        'Rechtecke links': 'Rectangles à gauche', 'Rechtecke Mitte': 'Rectangles au milieu', 'Trapeze': 'Trapèzes', 'Verfahren': 'Méthode',
+        'Anzahl der Streifen $n$': 'Nombre de bandes $n$', 'Flächeninhalt mit Streifen angenähert': 'Aire approchée par des bandes',
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -41,6 +45,7 @@ window.BuchFR && BuchFR.add('numerik', {
         [' · Fehler $', ' · erreur $'],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
+        ['Näherung mit $n = ', 'Approximation avec $n = '], ['$ · genauer Wert $', '$ · valeur exacte $'], ['$ · Fehler $', '$ · erreur $'],
     ],
     rule: [
         // book fr-1 mathe11-fr:

@@ -101,6 +101,49 @@ window.BuchFR && BuchFR.add('analysis', {
         'Steigung im Wendepunkt $m$': 'Pente au point d’inflexion $m$',
         'Funktion aus Bedingungen': 'Fonction à partir de conditions',
         // book fr-5 mathefos12-fr:
+        // grenzwert
+        'Annäherung, Schritt $k$': 'Approche, pas $k$', 'Graph mit Annäherung an einen Grenzwert': 'Courbe qui s’approche d’une limite',
+        'Annäherung:': 'Approche :', 'Richtung': 'Direction', '$x$ links': '$x$ à gauche', '$x$ rechts': '$x$ à droite',
+        // sekante, ableitungsgraph, tangente
+        'Abstand $h$ von $P$ zu $Q$': 'Écart $h$ entre $P$ et $Q$', 'Tangente zeigen': 'Afficher la tangente', 'Tangente ausblenden': 'Masquer la tangente',
+        'Sekante durch P und Q nähert sich der Tangente': 'La sécante passant par P et Q se rapproche de la tangente',
+        'Ganzen Graphen von f′ zeigen': 'Afficher toute la courbe de f′', 'Spur löschen': 'Effacer la trace',
+        'Oben: f mit Tangente. Ziehe den Punkt P. Unten: Jede Tangentensteigung wird zu einem Punkt des Graphen von f′.':
+            'En haut : f avec sa tangente. Fais glisser le point P. En bas : chaque pente de tangente devient un point de la courbe de f′.',
+        'Graph von f mit Tangente': 'Courbe de f avec sa tangente', 'Graph der Ableitung f Strich': 'Courbe de la dérivée f prime',
+        'Tangente und Normale an einen Graphen': 'Tangente et normale à une courbe',
+        // ableiten
+        'Potenzen': 'Puissances', 'Summen': 'Sommes', 'Wurzeln und Brüche': 'Racines et fractions', 'eˣ und sin x': 'eˣ et sin x',
+        'Produkte': 'Produits', 'Gemischt': 'Mélange', 'Aufgabenart': 'Type d’exercice', 'Lösung': 'Solution', 'Neue Aufgabe': 'Nouvel exercice',
+        'z. B. 6x^2 - 2 oder cos x': 'p. ex. 6x^2 - 2 ou cos x',
+        // kurve
+        'Zeige auch:': 'Afficher aussi :', 'nur f': 'f seule', 'f′ und f″': 'f′ et f″', 'Ableitungen zeigen': 'Afficher les dérivées',
+        'Graph einer Funktion dritten Grades mit Extrem- und Wendepunkten': 'Courbe d’une fonction du troisième degré avec ses extremums et son point d’inflexion',
+        'Intervall': 'Intervalle', 'steigt ↗': 'croît ↗', 'fällt ↘': 'décroît ↘', 'konstant': 'constante',
+        'Hochpunkt': 'Maximum', 'Tiefpunkt': 'Minimum', 'keine Extrempunkte': 'pas d’extremum',
+        // steckbrief
+        'Parabel durch 3 Punkte': 'Parabole par 3 points', 'Kubisch: Extrempunkt + 2 Punkte': 'Degré 3 : extremum + 2 points',
+        'Kubisch: Wendepunkt mit Tangente + Punkt': 'Degré 3 : point d’inflexion avec tangente + point', 'Bedingungen': 'Conditions',
+        'Steigung im Wendepunkt $m$': 'Pente au point d’inflexion $m$', 'Funktion aus Bedingungen': 'Fonction à partir de conditions',
+        // optimieren
+        'Schachtel': 'Boîte', 'Maximum': 'Maximum', 'Dose': 'Canette', 'Minimum': 'Minimum', 'Zaun an der Mauer': 'Clôture le long d’un mur',
+        'Problem': 'Problème', 'Zielfunktion': 'Fonction à optimiser', 'Lösung mit der Ableitung': 'Solution avec la dérivée',
+        'x in cm': 'x en cm', 'V in cm³': 'V en cm³', 'r in cm': 'r en cm', 'O in cm²': 'O en cm²', 'x in m': 'x en m', 'A in m²': 'A en m²',
+        // schar
+        'Funktionenschar': 'Famille de fonctions', 'Funktionenschar mit Ortskurve': 'Famille de fonctions avec le lieu de ses extremums', 'Parameter $a$': 'Paramètre $a$',
+        // gewinn
+        'Verkaufspreis $p$ (€ pro Stück)': 'Prix de vente $p$ (€ par unité)', 'x in Stück': 'x en unités', 'Kosten, Erlös und Gewinn': 'Coûts, recette et bénéfice',
+        // bruchfunktion
+        'Polstelle': 'Pôle', 'Lücke': 'Trou', 'ohne Vorzeichenwechsel': 'Sans changement de signe', 'schiefe Asymptote': 'Asymptote oblique',
+        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Courbe d’une fonction rationnelle avec ses pôles, ses trous et ses asymptotes',
+        'Beispiele:': 'Exemples :', 'Zähler:': 'Numérateur :', 'Nenner:': 'Dénominateur :', 'Grad des Zählers': 'Degré du numérateur', 'Grad des Nenners': 'Degré du dénominateur',
+        'Grad 0': 'Degré 0', 'Grad 1': 'Degré 1', 'Grad 2': 'Degré 2', 'Faktor $k$': 'Facteur $k$',
+        // efunktion: the slider value after "Intérêts versés" and the same words in the sentence below it
+        'Welche Basis?': 'Quelle base ?', 'Zinseszins': 'Intérêts composés', 'Was wird gezeigt?': 'Que montrer ?',
+        'Exponentialfunktionen und die Eulersche Zahl e': 'Fonctions exponentielles et le nombre e', 'Basis $a$': 'Base $a$', 'a = e setzen': 'Poser a = e',
+        'Faktor $a$': 'Facteur $a$', 'im Exponenten $b$': 'Dans l’exposant $b$', 'Verschiebung $c$': 'Translation $c$', 'Verzinsung': 'Intérêts versés',
+        'jährlich': 'chaque année', 'halbjährlich': 'chaque semestre', 'vierteljährlich': 'chaque trimestre', 'monatlich': 'chaque mois',
+        'wöchentlich': 'chaque semaine', 'täglich': 'chaque jour', 'stündlich': 'chaque heure', 'minütlich': 'chaque minute',
     },
     phrase: [
         // fr0: the helpers of the module (outside every widget; check.mjs analysis/*), shared by the four books that load it
@@ -205,6 +248,90 @@ window.BuchFR && BuchFR.add('analysis', {
         ['> 0$, also ein Tiefpunkt.', '> 0$, donc un minimum.'],
         ['Mit diesen Bedingungen hat das Gleichungssystem keine eindeutige Lösung. Zwei Punkte mit gleichem $x$?', 'Avec ces conditions, le système d’équations n’a pas de solution unique. Deux points avec le même $x$ ?'],
         // book fr-5 mathefos12-fr:
+        // grenzwert
+        ['links gegen $-\\infty$, rechts gegen $+\\infty$: kein Grenzwert, senkrechte Asymptote $x = 1$',
+            'tend vers $-\\infty$ à gauche et vers $+\\infty$ à droite : pas de limite, asymptote verticale $x = 1$'],
+        ['wächst über alle Grenzen: $f(x) \\to \\infty$, kein Grenzwert', 'croît au-delà de toute borne : $f(x) \\to \\infty$, pas de limite'],
+        ['An der Stelle $x = 1$ ist $f$ nicht definiert, der Graph hat dort ein Loch. Der Grenzwert existiert trotzdem: Kürzen gibt $\\tfrac{(x-1)(x+1)}{x-1} = x + 1 \\to 2$.',
+            'En $x = 1$, $f$ n’est pas définie : la courbe y a un trou. La limite existe pourtant : en simplifiant, on obtient $\\tfrac{(x-1)(x+1)}{x-1} = x + 1 \\to 2$.'],
+        ['Bei $x = 0$ ist $f$ nicht definiert. Die Werte kommen trotzdem beliebig nah an 1 heran.', 'En $x = 0$, $f$ n’est pas définie. Les valeurs s’approchent pourtant aussi près que l’on veut de 1.'],
+        ['Der Graph pendelt um die $x$-Achse, die Ausschläge werden immer kleiner.', 'La courbe oscille autour de l’axe des $x$, et les oscillations sont de plus en plus petites.'],
+        ['$ für $x \\to ', '$ pour $x \\to '], ['Waagerechte Asymptote: $y = ', 'Asymptote horizontale : $y = '],
+        // sekante, ableitungsgraph, tangente
+        ['$ mit $h = ', '$ avec $h = '], ['Sekantensteigung (Differenzenquotient): $', 'Pente de la sécante (taux d’accroissement) : $'],
+        ['Tangentensteigung: $', 'Pente de la tangente : $'], ['· Für $h \\to 0$ wird aus der Sekante die Tangente.', '· Pour $h \\to 0$, la sécante devient la tangente.'],
+        ['· Mach $h$ kleiner.', '· Rends $h$ plus petit.'], ['$ · Steigung in $P', '$ · pente en $P'],
+        ['$ · Berührpunkt $P', '$ · point de contact $P'], ['Tangente: $', 'Tangente : $'],
+        ['Normale (senkrecht zur Tangente, $m_n = -\\tfrac{1}{m_t}$): $', 'Normale (perpendiculaire à la tangente, $m_n = -\\tfrac{1}{m_t}$) : $'],
+        // ableiten
+        ['Leite ab: $f(x) = ', 'Dérive : $f(x) = '], ['Das kann ich nicht lesen. Schreibe zum Beispiel ', 'Je n’arrive pas à le lire. Écris par exemple '],
+        ['<b>Richtig!</b>', '<b>Juste !</b>'], ['Noch nicht. Tipp: ', 'Pas encore. Indice : '],
+        // kurve (the sign table, the lists of high and low points, the point of inflection)
+        ['Hochpunkt $', 'Maximum $'], ['Tiefpunkt $', 'Minimum $'], [' · Sattelpunkt bei $x = ', ' · point d’inflexion à tangente horizontale en $x = '],
+        ['Wendepunkt $W', 'Point d’inflexion $W'], ['$: Dort ist $f\'\'(x) = 0$ und die Steigung ', '$ : on y a $f\'\'(x) = 0$ et la pente est '],
+        ['am kleinsten', 'minimale'], ['am größten', 'maximale'],
+        ['Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.', 'Pour $a = 0$, $f$ est une parabole (ou une droite) sans point d’inflexion.'],
+        // steckbrief
+        ['Lösung: $f(x) = ', 'Solution : $f(x) = '], ['Ansatz: $f(x) = ', 'Forme cherchée : $f(x) = '],
+        ['Achtung: Bei $E$ ist $f\'\'(x) = 0$, das ist ein Sattelpunkt, kein Extrempunkt.', 'Attention : en $E$, $f\'\'(x) = 0$ ; c’est un point d’inflexion à tangente horizontale, pas un extremum.'],
+        ['Probe: $f\'\'(', 'Vérification : $f\'\'('], ['< 0$, also ein Hochpunkt.', '< 0$, donc un maximum.'], ['> 0$, also ein Tiefpunkt.', '> 0$, donc un minimum.'],
+        ['Mit diesen Bedingungen hat das Gleichungssystem keine eindeutige Lösung. Zwei Punkte mit gleichem $x$?',
+            'Avec ces conditions, le système d’équations n’a pas de solution unique. Deux points avec le même $x$ ?'],
+        // optimieren
+        ['Aus einem Karton von 30 cm × 20 cm werden an den Ecken Quadrate mit der Seite $x$ ausgeschnitten und die Ränder hochgeklappt. Für welches $x$ wird das Volumen der offenen Schachtel am größten?',
+            'Dans un carton de 30 cm × 20 cm, on découpe aux coins des carrés de côté $x$ et on relève les bords. Pour quel $x$ le volume de la boîte ouverte est-il le plus grand ?'],
+        ['Eine zylindrische Dose soll 1 Liter fassen ($V = \\pi r^2 h = 1000\\,\\text{cm}^3$). Für welchen Radius $r$ braucht man am wenigsten Blech?',
+            'Une canette cylindrique doit contenir 1 litre ($V = \\pi r^2 h = 1000\\,\\text{cm}^3$). Pour quel rayon $r$ faut-il le moins de tôle ?'],
+        ['Mit 60 m Zaun soll an einer Mauer ein rechteckiges Gehege abgesteckt werden. Die Mauer bildet eine Seite. Wie groß wird die Fläche höchstens?',
+            'Avec 60 m de clôture, on veut délimiter un enclos rectangulaire contre un mur. Le mur forme un côté. Quelle peut être l’aire au maximum ?'],
+        ['Bei $x = ', 'Pour $x = '], ['Bei $r = ', 'Pour $r = '], ['}$: $V', '}$ : $V'], ['}$: $O', '}$ : $O'], ['}$: $A', '}$ : $A'],
+        ['$ ergibt $', '$ donne $'], ['}$ mit $', '}$ avec $'],
+        [' Die zweite Lösung $x \\approx ', ' La deuxième solution $x \\approx '], ['$ liegt außerhalb von $0 < x < 10$.', '$ est en dehors de $0 < x < 10$.'],
+        [' Dann ist $h = ', ' Alors $h = '], ['$: Die beste Dose ist so hoch wie breit.', '$ : la meilleure canette est aussi haute que large.'],
+        [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' Le côté parallèle au mur mesure alors $60 - 2 \\cdot 15 = 30\\,\\text{m}$.'],
+        // schar
+        [' Ortskurve der Extrempunkte zeigen', ' Afficher le lieu des extremums'],
+        ['Ortskurve aller Extrempunkte (violett): $', 'Lieu de tous les extremums (en violet) : $'],
+        ['$. Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
+            '$. Pour $a \\le 0$, il n’y a pas d’extremum : $f_a\'(x) = 3x^2 - a$ n’a alors aucun zéro avec changement de signe.'],
+        ['Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
+            'Pour $a \\le 0$, il n’y a pas d’extremum : $f_a\'(x) = 3x^2 - a$ n’a alors aucun zéro avec changement de signe.'],
+        ['Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.', 'Chaque parabole de la famille passe par l’origine, car $f_a(0) = 0$ pour tout $a$.'],
+        // gewinn
+        ['Gewinnschwelle bei $x \\approx ', 'Seuil de rentabilité en $x \\approx '], ['$, Gewinngrenze bei $x \\approx ', '$, limite de rentabilité en $x \\approx '],
+        ['$ Stück, $G \\approx ', '$ unités, $G \\approx '], ['$ Stück.', '$ unités.'], ['Gewinn ab $x \\approx ', 'Bénéfice à partir de $x \\approx '],
+        ['Bei diesem Preis wird nie Gewinn gemacht.', 'À ce prix, on ne fait jamais de bénéfice.'],
+        ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Bénéfice maximal : $G\'(x) = 0$ en $x \\approx '], ['Kein positives Gewinnmaximum.', 'Pas de bénéfice maximal positif.'],
+        // bruchfunktion
+        ['Nullstelle des Zählers $', 'Zéro du numérateur $'], ['Nullstelle des Nenners $', 'Zéro du dénominateur $'],
+        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Après simplification, il ne reste plus de $x$ au dénominateur : la courbe est '],
+        ['eine waagerechte Gerade', 'une droite horizontale'], ['eine Gerade', 'une droite'],
+        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Degré du numérateur inférieur à celui du dénominateur : asymptote horizontale $y = 0$, l’axe des $x$.'],
+        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Degrés du numérateur et du dénominateur égaux : asymptote horizontale $y = '],
+        ['$ (Quotient der Leitkoeffizienten).', '$ (quotient des coefficients dominants).'],
+        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Degré du numérateur supérieur de 1 : la division euclidienne donne $f(x) = '],
+        ['$, schiefe Asymptote $y = ', '$, asymptote oblique $y = '], ['Kürzen: $f(x) = ', 'Simplification : $f(x) = '], ['$ für $x \\neq ', '$ pour $x \\neq '],
+        ['$ · hebbare Lücken', '$ · trous (discontinuités supprimables)'], ['$ · hebbare Lücke', '$ · trou (discontinuité supprimable)'],
+        ['Nullstellen: ', 'Zéros : '], [' · Polstellen: ', ' · pôles : '], [' mit Vorzeichenwechsel', ' avec changement de signe'],
+        [' ohne Vorzeichenwechsel', ' sans changement de signe'], [' (senkrechte Asymptote)', ' (asymptote verticale)'],
+        // efunktion (the engine has already turned the point (0 \mid 1) into (0\,;\,1): the rules run before the pieces)
+        [' · Steigung in $(0\\,;\\,1)$: $', ' · pente en $(0\\,;\\,1)$ : $'],
+        ['<b>Treffer:</b> Bei $a = \\mathrm{e} \\approx 2{,}71828$ ist die Steigung genau $1$ und $f\'(x) = f(x)$: Die Graphen von $f$ und $f\'$ liegen aufeinander.',
+            '<b>Dans le mille !</b> Pour $a = \\mathrm{e} \\approx 2{,}71828$, la pente vaut exactement $1$ et $f\'(x) = f(x)$ : les courbes de $f$ et de $f\'$ se superposent.'],
+        ['Die Ableitung ist $f\'(x) = ', 'La dérivée est $f\'(x) = '],
+        [' \\cdot f(x)$, ein Vielfaches von $f$. Für welche Basis ist der Faktor genau $1$?', ' \\cdot f(x)$, un multiple de $f$. Pour quelle base le facteur vaut-il exactement $1$ ?'],
+        [' · Mit $a = 0$ oder $b = 0$ ist $f$ konstant.', ' · Avec $a = 0$ ou $b = 0$, $f$ est constante.'],
+        ['Schnittpunkt mit der $y$-Achse: $', 'Intersection avec l’axe des $y$ : $'], [' · Nullstelle: ', ' · zéro : '],
+        ['keine, denn $\\mathrm{e}^{bx} > 0$ kann nicht $', 'aucun, car $\\mathrm{e}^{bx} > 0$ ne peut pas valoir $'], ['$ sein', '$'],
+        ['$, also $x = ', '$, donc $x = '], ['$: waagerechte Asymptote $y = ', '$ : asymptote horizontale $y = '],
+        ['$f$ ist überall streng monoton ', '$f$ est partout strictement '], ['steigend', 'croissante'], ['fallend', 'décroissante'],
+        [', weil $f\'(x)$ immer ', ', car $f\'(x)$ est toujours '], ['positiv ist.', 'positive.'], ['negativ ist.', 'négative.'],
+        ['Ein Euro, 100 % Zinsen im Jahr, ', 'Un euro, 100 % d’intérêts par an, versés '], [' verzinst: ', ' : '], ['-mal $\\tfrac{100\\,\\%}{', ' fois $\\tfrac{100\\,\\%}{'],
+        ['}$, also $\\left(1 + \\tfrac{1}{', '}$, donc $\\left(1 + \\tfrac{1}{'],
+        ['halbjährlich', 'chaque semestre'], ['vierteljährlich', 'chaque trimestre'], ['jährlich', 'chaque année'], ['monatlich', 'chaque mois'],
+        ['wöchentlich', 'chaque semaine'], ['täglich', 'chaque jour'], ['stündlich', 'chaque heure'], ['minütlich', 'chaque minute'],
+        ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
+            'Plus les intérêts sont versés souvent, plus le capital se rapproche de $\\mathrm{e} = 2{,}718281\\ldots$, sans jamais le dépasser : $'],
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -220,5 +347,16 @@ window.BuchFR && BuchFR.add('analysis', {
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
+        // kurve: the sliders "$a$ (vor $x^3$)" → "$a$ (coefficient de $x^3$)"
+        [/\(vor (\$x(?:\^\d)?\$)\)/g, '(coefficient de $1)'],
+        // ableiten: "3 von 5 gelöst"
+        [/(\d+) von (\d+) gelöst/g, (m, a, b) => a + ' sur ' + b + (a === '0' || a === '1' ? ' résolu' : ' résolus')],
+        // efunktion, ganzrational: "Für $x \to -\infty$ geht $f(x) \to " - a rule, because a bare piece "Für $" would start
+        // earlier than the long sentence "Für $a \le 0$ gibt es keine Extrempunkte: …" of the schar widget
+        [/(^|\. |>)Für \$(x \\to [+-]\\infty)\$ geht \$f\(x\) \\to /g, (m, a, b) => a + 'Pour $' + b + '$, $f(x) \\to '],
+        // bruchfunktion: "… mit einem Loch.", "Nullstellen: keine", "Polstellen: keine"; the set of the domain "\{1; -2\}" → "\{1\,;\,-2\}"
+        [/ mit (Löchern|einem Loch)\./g, (m, w) => w === 'Löchern' ? ' avec des trous.' : ' avec un trou.'],
+        [/Nullstellen: keine(?![a-zäöüß])/g, 'Zéros : aucun'], [/Polstellen: keine(?![a-zäöüß])/g, 'pôles : aucun'],
+        [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => a + b.replace(/; /g, '\\,;\\,') + c],
     ]
 });
