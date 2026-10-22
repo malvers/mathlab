@@ -127,6 +127,8 @@ window.BuchFR && BuchFR.add('vektoren', {
         [' (Prinzip von Cavalieri: auch schief)', ' (principe de Cavalieri : même oblique)'],
         // ebene3d (the same keys as the it-5 block of js/buch-it/vektoren.js: FOS 12 may add them too, keep one copy)
         ['Normalenvektor $\\vec{n}', 'Vecteur normal $\\vec{n}'], ['$ · Schnittwinkel: $', '$ · angle d’intersection : $'],
+        // pyramide: pieces the it-3 block left German
+        [' · Mantel (4 Dreiecke, je $', ' · aire latérale (4 triangles, chacun $'], ['$ (rot)', '$ (en rouge)'],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     ],
