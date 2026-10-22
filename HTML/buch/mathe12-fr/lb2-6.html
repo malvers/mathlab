@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 12 · Chapitre 2.6 · Déterminer des fonctions et optimiser | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Des fonctions à partir de conditions, trouver le meilleur. Chapitre 2.6 du manuel interactif Mathématiques · Berufliches Gymnasium 12 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.6 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.6 · DOMAINE D’APPRENTISSAGE 2 · AVRIL · MAI</p>
+            <h1>Déterminer des fonctions et optimiser</h1>
+            <p class="b-hero-lead">Le calcul différentiel devient maintenant un outil. Une route doit se raccorder à une autre sans cassure : quelle fonction décrit le tronçon de raccordement ?
+                Un carton doit devenir une boîte de volume aussi grand que possible, une boîte de conserve doit utiliser le moins de tôle possible.
+                Tu apprends à construire des fonctions à partir de <b>conditions</b> et à trouver la <b>meilleure</b> parmi de nombreuses possibilités.</p>
+            <div class="b-chips"><span class="b-chip">20 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">APPLIQUER · MODÉLISER</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x*(30-2*x)*(20-2*x)"]' data-labels='["V"]' data-lat="[7.6]" data-pts="[[3.92,1056.3]]" data-x="-0.5,10.5" data-y="-100,1250" data-xl="x" data-yl="V" data-h="240" data-aria="Fonction volume de la boîte, avec son maximum"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>traduire des propriétés d’une courbe en <b>équations</b> et <b>déterminer des fonctions polynômes</b> à partir de ces conditions</li>
+                <li>résoudre les <b>systèmes d’équations</b> obtenus, aussi avec des outils numériques</li>
+                <li>pour les <b>problèmes d’optimisation</b>, établir la fonction à optimiser, la contrainte et l’ensemble de définition</li>
+                <li>tenir compte des <b>extremums au bord</b> et <b>évaluer de façon critique</b> les modèles</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Résous le système $x + y = 5$, $x - y = -1$. Que vaut $x$ ?</p><div class="b-sol"><p>On additionne : $2x = 4$, $x = 2$ (et $y = 3$)</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">$f(x) = ax^2 + bx + c$ avec $a = 1$, $b = 2$, $c = 2$. Que vaut $f(1)$ ?</p><div class="b-sol"><p>$1 + 2 + 2 = 5$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">En quelle valeur de $x$ la fonction $f(x) = -x^2 + 6x$ atteint-elle son maximum ?</p><div class="b-sol"><p>$-2x + 6 = 0$</p></div></div>
+            <div class="b-q" data-ans="18" data-ph="cm²"><p class="b-q-text">Un rectangle mesure 6 cm de long, et sa largeur vaut la moitié de sa longueur. Quelle est son aire ?</p><div class="b-sol"><p>$6 \cdot 3 = 18$ cm²</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">COMBLER LE DÉCALAGE</div>
+            <div class="b-text"><p>Deux routes droites se terminent de façon décalée : l’une en $(0\,;\,0)$ dans la direction de l’axe des abscisses, l’autre en $(4\,;\,2)$, elle aussi horizontale.</p>
+                <ul><li>Esquissez un tronçon de raccordement sans cassure. Quelles conditions doit-il remplir ?</li><li>Combien de conditions cela fait-il ? Quel type de fonction convient ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA BOÎTE</div>
+            <div class="b-text"><p>Découpez aux quatre coins d’une feuille A4 des carrés de même taille et pliez une boîte ouverte.</p>
+                <ul><li>Essayez différentes tailles de carrés. Quelle boîte contient le plus ?</li><li>De quoi dépend le volume ? Établissez une formule.</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA BOÎTE DE CONSERVE AU SUPERMARCHÉ</div>
+            <div class="b-text"><p>Mesurez le diamètre et la hauteur de trois boîtes de conserve et calculez leur volume.</p>
+                <ul><li>À volume égal, d’autres dimensions économiseraient-elles du matériau ?</li><li>Pourquoi les vraies boîtes sont-elles malgré tout souvent différentes ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Déterminer des fonctions" data-toc-k="1" data-toc-short="1 Déterminer">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">8 HEURES</span></div>
+    <h2><span class="b-no">1</span>Déterminer une fonction à partir de ses propriétés</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>On cherche une parabole passant par les points $(0\,;\,1)$, $(1\,;\,0)$ et $(3\,;\,4)$. On pose : $f(x) = ax^2 + bx + c$, avec trois nombres inconnus.</p></div></div>
+            <div class="b-text"><p>Chaque point fournit une équation : $f(0) = 1 \Rightarrow c = 1$ ; $f(1) = 0 \Rightarrow a + b + c = 0$ ; $f(3) = 4 \Rightarrow 9a + 3b + c = 4$.
+                Le système d’équations (méthode de Gauss vue en 11e année) donne $a = 1$, $b = -2$, $c = 1$, donc $f(x) = x^2 - 2x + 1 = (x - 1)^2$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · LA CARTE D’IDENTITÉ EN ÉQUATIONS</div>
+                <div class="b-text">
+                    <p>Une fonction polynôme de degré $n$ a $n + 1$ coefficients. Il faut donc $n + 1$ conditions.</p>
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th>Propriété</th><th>Équation</th></tr>
+                        <tr><td>Le point $P(x_0\,;\,y_0)$ est sur la courbe</td><td>$f(x_0) = y_0$</td></tr>
+                        <tr><td>Extremum (tangente horizontale) en $x_0$</td><td>$f'(x_0) = 0$</td></tr>
+                        <tr><td>Point d’inflexion en $x_0$</td><td>$f''(x_0) = 0$</td></tr>
+                        <tr><td>Pente $m$ (tangente) en $x_0$</td><td>$f'(x_0) = m$</td></tr>
+                        <tr><td>fonction paire / impaire</td><td>seulement des exposants pairs / impairs dans l’expression de départ</td></tr></table></div>
+                    <p>Méthode : poser $f$, $f'$, $f''$ · traduire les conditions · résoudre le système · <b>vérifier</b> que toutes les conditions sont remplies.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Un maximum, ce sont deux conditions :</b> $H(2\,;\,4)$ signifie $f(2) = 4$ <b>et</b> $f'(2) = 0$.</p>
+            <p class="b-note"><b>Outils numériques :</b> à partir de quatre inconnues, la calculatrice vaut la peine (fonction de résolution de systèmes ou fonction matricielle).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · UNE FONCTION À PARTIR DE CONDITIONS</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une carte d’identité et déplace les points. Le système d’équations et la solution s’adaptent aussitôt.</p>
+        <div data-widget="steckbrief"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · MAXIMUM ET MINIMUM</div>
+            <div class="b-text"><p>Une fonction de degré 3 passe par l’origine, a le maximum $H(1\,;\,2)$ et un extremum en $x = 3$. Détermine $f$.</p></div>
+            <div class="b-sol"><p>$f(0) = 0 \Rightarrow d = 0$ · $f(1) = 2$ : $a + b + c = 2$ · $f'(1) = 0$ : $3a + 2b + c = 0$ · $f'(3) = 0$ : $27a + 6b + c = 0$.</p>
+                <p>Solution : $a = 0{,}5$, $b = -3$, $c = 4{,}5$. <span class="b-res">$f(x) = 0{,}5x^3 - 3x^2 + 4{,}5x$</span>. Vérification : $f'(x) = 1{,}5(x - 1)(x - 3)$, $f''(1) = -3 < 0$. ✓</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · AVEC UNE SYMÉTRIE</div>
+            <div class="b-text"><p>Une fonction paire de degré 4 coupe l’axe des ordonnées en 2 et a un minimum en $(1\,;\,0)$.</p></div>
+            <div class="b-sol"><p>On pose $f(x) = ax^4 + bx^2 + c$. $c = 2$, $f(1) = a + b + 2 = 0$, $f'(1) = 4a + 2b = 0$. Donc $b = -2a$, $a = 2$, $b = -4$.
+                <span class="b-res">$f(x) = 2x^4 - 4x^2 + 2 = 2(x^2 - 1)^2$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Traduis en équations : la courbe d’une fonction de degré 3 a le point d’inflexion $W(1\,;\,3)$ et coupe l’axe des ordonnées en $-1$.</p></div>
+            <div class="b-sol"><p>$f(1) = 3$, $f''(1) = 0$, $f(0) = -1$. Cela fait trois conditions ; pour le degré 3, il en manque encore une.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine la parabole passant par $(0\,;\,3)$, $(1\,;\,2)$ et $(2\,;\,3)$.</p></div>
+            <div class="b-sol"><p>$c = 3$, $a + b = -1$, $4a + 2b = 0$ : $a = 1$, $b = -2$. $f(x) = x^2 - 2x + 3$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Résous l’exploration « Combler le décalage » : détermine une fonction de degré 3 telle que $f(0) = 0$, $f'(0) = 0$, $f(4) = 2$, $f'(4) = 0$.</p></div>
+            <div class="b-sol"><p>$d = 0$, $c = 0$ ; $64a + 16b = 2$, $48a + 8b = 0$ ⇒ $b = -6a$, $64a - 96a = 2$, $a = -\tfrac{1}{16}$, $b = \tfrac38$.
+                <span class="b-res">$f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</span> ; le point d’inflexion se trouve exactement au milieu, en $(2\,;\,1)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une fonction impaire de degré 3 a un minimum en $(1\,;\,-2)$. Détermine-la.</p></div>
+            <div class="b-sol"><p>On pose $f(x) = ax^3 + cx$. $a + c = -2$, $3a + c = 0$ : $a = 1$, $c = -3$. $f(x) = x^3 - 3x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un pont doit enjamber une rivière de 40 m de large sous la forme d’un arc parabolique, haut de 8 m au milieu. Détermine une équation, l’origine étant au milieu, au niveau de l’eau. Quelle est la pente de l’arc au bord de la rive ?</p></div>
+            <div class="b-sol"><p>Symétrie : $f(x) = ax^2 + 8$, $f(20) = 0 \Rightarrow a = -0{,}02$. $f'(x) = -0{,}04x$, $f'(-20) = 0{,}8$ : pente de 80 %, angle $\arctan 0{,}8 \approx 38{,}7°$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Combien de conditions faut-il pour une fonction de degré 3 ?</p><div class="b-sol"><p>Quatre coefficients $a, b, c, d$.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="nombre"><p class="b-q-text">Combien d’équations fournit « maximum $H(2\,;\,5)$ » ?</p><div class="b-sol"><p>$f(2) = 5$ et $f'(2) = 0$</p></div></div>
+        <div class="b-q" data-ans="-0,02" data-tol="0.0001" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + 8$ doit passer par $(20\,;\,0)$. Que vaut $a$ ?</p><div class="b-sol"><p>$400a = -8$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Problèmes d’optimisation" data-toc-k="2" data-toc-short="2 Optimiser">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">12 HEURES</span></div>
+    <h2><span class="b-no">2</span>Problèmes d’optimisation</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dans un carton de 30 cm × 20 cm, on découpe aux coins des carrés de côté $x$. Pour quelle valeur de $x$ la boîte contient-elle le plus ?</p></div></div>
+            <div class="b-text"><p>La boîte mesure $30 - 2x$ de long, $20 - 2x$ de large et $x$ de haut. Son volume est la <b>fonction à optimiser</b> $V(x) = x(30 - 2x)(20 - 2x) = 4x^3 - 100x^2 + 600x$
+                d’ensemble de définition $0 < x < 10$. $V'(x) = 12x^2 - 200x + 600 = 0$ donne $x \approx 3{,}92$ cm (la seconde solution, 12,74, est en dehors). Le volume vaut alors environ 1 056 cm³.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÉSOUDRE UN PROBLÈME D’OPTIMISATION</div>
+                <div class="b-text">
+                    <p><b>1. Fonction à optimiser :</b> quelle grandeur doit être maximale ou minimale ? En établir la formule, souvent avec deux variables.</p>
+                    <p><b>2. Contrainte :</b> qu’est-ce qui est fixé (périmètre, volume, matériau) ? S’en servir pour remplacer une variable, de sorte que la fonction à optimiser ne dépende plus que d’une seule.</p>
+                    <p><b>3. Ensemble de définition :</b> le fixer d’après le contexte.</p>
+                    <p><b>4. Extremum :</b> le déterminer avec $f' = 0$ et une condition suffisante. Comparer avec les <b>valeurs aux bornes</b>.</p>
+                    <p><b>5. Réponse</b> dans le contexte, avec l’unité, et examen critique du modèle.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Extremum au bord :</b> si la valeur où $f' = 0$ est hors de l’ensemble de définition, l’optimum peut se trouver à une borne.</p>
+            <p class="b-note"><b>Sans dérivée :</b> quand une fonction à optimiser est trop compliquée, les ordinateurs cherchent l’optimum par des essais habiles, par exemple avec des essaims de particules.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · OPTIMISER</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis un problème et cherche l’optimum avec le curseur. Compare ensuite avec la solution obtenue par la dérivée.</p>
+        <div data-widget="optimieren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · RECTANGLE SOUS UNE PARABOLE</div>
+            <div class="b-text"><p>Sous la parabole $f(x) = 9 - x^2$ se trouve un rectangle dont un côté est sur l’axe des abscisses et deux sommets sur la parabole. Quand son aire est-elle maximale ?</p></div>
+            <div class="b-sol"><p>Sommets en $\pm u$ : largeur $2u$, hauteur $9 - u^2$. $A(u) = 2u(9 - u^2) = 18u - 2u^3$, $0 < u < 3$.</p>
+                <p>$A'(u) = 18 - 6u^2 = 0 \Rightarrow u = \sqrt3 \approx 1{,}73$, $A''(u) = -12u < 0$. <span class="b-res">$A_{\max} = 12\sqrt3 \approx 20{,}8$</span> unités d’aire.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · LA BOÎTE DE CONSERVE</div>
+            <div class="b-text"><p>Une boîte doit contenir 1 litre. Quelles dimensions demandent le moins de tôle ?</p></div>
+            <div class="b-sol"><p>Contrainte $\pi r^2 h = 1000 \Rightarrow h = \tfrac{1000}{\pi r^2}$. Fonction à optimiser $O(r) = 2\pi r^2 + 2\pi r h = 2\pi r^2 + \tfrac{2000}{r}$.</p>
+                <p>$O'(r) = 4\pi r - \tfrac{2000}{r^2} = 0 \Rightarrow r^3 = \tfrac{500}{\pi}$, $r \approx 5{,}42$ cm, $h \approx 10{,}84$ cm. <span class="b-res">La boîte la plus économe est aussi haute que large.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="particleswarm" href="../../particleswarm.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESSAIM DE PARTICULES</span><span class="b-lab-what">Optimiser sans dérivée (en allemand)</span></span></a>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Deux nombres ont pour somme 20. Quand leur produit est-il le plus grand ?</p></div>
+            <div class="b-sol"><p>$P(x) = x(20 - x)$, $P'(x) = 20 - 2x = 0$ : $x = 10$, les deux nombres valent 10, produit 100.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Avec 60 m de clôture, on délimite un rectangle le long d’un mur (le mur formant un côté). Détermine l’aire la plus grande.</p></div>
+            <div class="b-sol"><p>$A(x) = x(60 - 2x)$, $A'(x) = 60 - 4x = 0$ : $x = 15$ m, côté le long du mur 30 m, $A = 450$ m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Comme l’exercice 7, mais le mur ne mesure que 20 m. Qu’est-ce qui change ?</p></div>
+            <div class="b-sol"><p>Il faut maintenant $60 - 2x \le 20$, donc $x \ge 20$. Sur $[20\,;\,30[$, $A$ est décroissante, l’optimum est à la <b>borne</b> $x = 20$ : $A = 20 \cdot 20 = 400$ m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Le bénéfice d’une entreprise est $G(x) = -x^3 + 6x^2 + 15x - 20$ (en milliers d’euros, $x$ en centaines d’unités, $0 \le x \le 8$). Pour quelle quantité est-il le plus grand ?</p></div>
+            <div class="b-sol"><p>$G'(x) = -3x^2 + 12x + 15 = 0 \Rightarrow x^2 - 4x - 5 = 0 \Rightarrow x = 5$. $G''(5) = -18 < 0$. $G(5) = 80$, donc 80 000 € pour 500 unités. Bornes : $G(0) = -20$, $G(8) = -28$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une fenêtre est formée d’un rectangle surmonté d’un demi-cercle. Le périmètre vaut 6 m. Pour quel rayon laisse-t-elle passer le plus de lumière ?</p></div>
+            <div class="b-hint"><p>Largeur $2r$, hauteur du rectangle $h$. Périmètre $2r + 2h + \pi r = 6$. Aire $A = 2rh + \tfrac{\pi}{2} r^2$.</p></div>
+            <div class="b-sol"><p>$h = 3 - r - \tfrac{\pi}{2} r$, $A(r) = 6r - 2r^2 - \tfrac{\pi}{2} r^2$, $A'(r) = 6 - (4 + \pi) r = 0$ : $r = \tfrac{6}{4 + \pi} \approx 0{,}84$ m.
+                Alors $h \approx 0{,}84$ m aussi : la hauteur du rectangle est égale au rayon.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="450" data-ph="m²"><p class="b-q-text">Aire maximale pour la clôture le long du mur (60 m de clôture) ?</p><div class="b-sol"><p>$15 \cdot 30 = 450$ m²</p></div></div>
+        <div class="b-q" data-ans="25" data-ph="produit"><p class="b-q-text">Deux nombres positifs ont pour somme 10. Quelle est la plus grande valeur possible de leur produit ?</p><div class="b-sol"><p>$5 \cdot 5 = 25$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">La solution de $f'(x) = 0$ est hors de l’ensemble de définition. Où se trouve l’optimum ?</p>
+            <div class="b-mc"><button>il n’y en a pas</button><button>à une borne de l’ensemble de définition</button><button>malgré tout en la solution de $f'(x) = 0$</button></div>
+            <div class="b-sol"><p>Il faut alors comparer les valeurs aux bornes.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine la fonction du second degré de sommet $S(2\,;\,-1)$ qui passe par $(0\,;\,3)$.</p></div>
+            <div class="b-sol"><p>$f(x) = a(x - 2)^2 - 1$, $f(0) = 4a - 1 = 3 \Rightarrow a = 1$. $f(x) = (x - 2)^2 - 1 = x^2 - 4x + 3$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Résous l’exploration « La boîte » pour une feuille A4 (29,7 cm × 21 cm). Quelle valeur de $x$ est optimale ?</p></div>
+            <div class="b-sol"><p>$V(x) = x(29{,}7 - 2x)(21 - 2x)$, $V'(x) = 12x^2 - 202{,}8x + 623{,}7 = 0$. Solution dans $0 < x < 10{,}5$ : $x \approx 4{,}04$ cm, $V \approx 1128$ cm³.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relier avec le chapitre 2.4 :</b> justifie que pour la boîte, il s’agit bien d’un maximum, et ce sans dérivée seconde.</p></div>
+            <div class="b-sol"><p>Aux bornes $x = 0$ et $x = 10$, $V = 0$ ; entre les deux, $V > 0$. Le seul point intérieur où $V' = 0$ doit être le maximum.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Critique du modèle de la boîte de conserve : les vraies boîtes sont souvent plus hautes que ne le propose le calcul $h = 2r$. Donne des raisons pour lesquelles le modèle ne rend compte qu’en partie de la réalité.</p></div>
+            <div class="b-sol"><p>Par exemple : le couvercle et le fond sont plus épais que la paroi ou ont un sertissage qui consomme du matériau. Les boîtes doivent tenir dans les rayons, dans la main et sur les machines.
+                Le prix de la tôle n’est qu’une partie des coûts. L’étiquette et l’empilement jouent aussi un rôle.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le problème de Didon" data-toc-k="X" data-toc-short="Didon">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">LE PLUS ANCIEN PROBLÈME D’OPTIMISATION</span></div>
+    <h2>Le problème de Didon</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Selon la légende, la princesse phénicienne Didon s’enfuit sur la côte d’Afrique du Nord. Elle put y acheter autant de terre qu’une peau de bœuf pouvait en entourer.
+                Elle découpa la peau en une longue et fine lanière et la disposa de manière à entourer le plus de terre possible. Ainsi naquit Carthage.</p>
+            <p>Quelle forme entoure la plus grande aire pour une longueur donnée ? Pour un rectangle, le calcul de ce chapitre le montre : le carré. Parmi toutes les formes, c’est le <b>cercle</b>,
+                et le long d’une côte rectiligne, un <b>demi-cercle</b>. Ce « problème isopérimétrique » n’a été entièrement démontré qu’au XIXe siècle.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> Virgile, Énéide, livre I, vers 365–368.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>CARTE D’IDENTITÉ</h4><p>Degré $n$ : $n + 1$ conditions. Point → $f(x_0) = y_0$, extremum → $f'(x_0) = 0$, point d’inflexion → $f''(x_0) = 0$.</p></div>
+        <div><p>Raccordement : $f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</p></div></div>
+    <div class="b-rueck"><div><h4>VÉRIFICATION</h4><p>Contrôler toutes les conditions, y compris la nature de l’extremum.</p></div>
+        <div><p>$f''(1) = -3 < 0$ : c’est bien un maximum</p></div></div>
+    <div class="b-rueck"><div><h4>PROBLÈME D’OPTIMISATION</h4><p>Fonction à optimiser, contrainte, ensemble de définition, $f' = 0$, bornes, réponse.</p></div>
+        <div><p>Boîte : $x \approx 3{,}92$ cm · Boîte de conserve : $h = 2r$</p></div></div>
+    <div class="b-rueck"><div><h4>EXTREMUM AU BORD</h4><p>Si $f' = 0$ est hors du domaine, c’est la borne qui décide.</p></div>
+        <div><p>Clôture le long d’un mur de 20 m : 400 m²</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+            <div class="b-q" data-ans="3" data-ph="nombre"><p class="b-q-text">Combien de conditions faut-il pour une parabole ?</p><div class="b-sol"><p>$a$, $b$, $c$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="a ="><p class="b-q-text">Une parabole $f(x) = ax^2 + bx + c$ passe par $(0\,;\,0)$, $(1\,;\,1)$ et $(2\,;\,4)$. Que vaut $a$ ?</p><div class="b-sol"><p>C’est la parabole $y = x^2$ : $a = 1$, $b = c = 0$.</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="x ="><p class="b-q-text">Pour quelle valeur de $x$ l’expression $x(20 - x)$ est-elle maximale ?</p><div class="b-sol"><p>$20 - 2x = 0$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+            <div class="b-q" data-ans="1,732" data-tol="0.005" data-ph="u ="><p class="b-q-text">Rectangle sous $f(x) = 9 - x^2$ : pour quelle valeur de $u$ l’aire $A(u) = 18u - 2u^3$ est-elle maximale ?</p><div class="b-sol"><p>$u = \sqrt3 \approx 1{,}732$</p></div></div>
+            <div class="b-q" data-ans="80" data-ph="milliers d’€"><p class="b-q-text">$G(x) = -x^3 + 6x^2 + 15x - 20$. Bénéfice maximal en milliers d’euros ?</p><div class="b-sol"><p>$G(5) = 80$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Pour la boîte de conserve la plus économe, on a …</p>
+                <div class="b-mc"><button>$h = 2r$</button><button>$h = r$</button><button>$h = \pi r$</button></div>
+                <div class="b-sol"><p>La hauteur est égale au diamètre.</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-extremalaufgaben.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBLÈMES D’OPTIMISATION</span><span class="b-lab-what">Fonction à optimiser et contrainte</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 12e année · Domaine d’apprentissage 2 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+</body>
+</html>
