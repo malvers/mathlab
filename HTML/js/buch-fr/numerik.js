@@ -45,7 +45,7 @@ window.BuchFR && BuchFR.add('numerik', {
         [' · Fehler $', ' · erreur $'],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
-        ['Näherung mit $n = ', 'Approximation avec $n = '], ['$ · genauer Wert $', '$ · valeur exacte $'], ['$ · Fehler $', '$ · erreur $'],
+        ['Näherung mit $n = ', 'Approximation avec $n = '], ['$: $A \\approx ', '$ : $A \\approx '], ['$ · genauer Wert $', '$ · valeur exacte $'], ['$ · Fehler $', '$ · erreur $'],
     ],
     rule: [
         // book fr-1 mathe11-fr:

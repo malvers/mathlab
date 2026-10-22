@@ -261,6 +261,7 @@ window.BuchFR && BuchFR.add('analysis', {
         ['$ mit $h = ', '$ avec $h = '], ['Sekantensteigung (Differenzenquotient): $', 'Pente de la sécante (taux d’accroissement) : $'],
         ['Tangentensteigung: $', 'Pente de la tangente : $'], ['· Für $h \\to 0$ wird aus der Sekante die Tangente.', '· Pour $h \\to 0$, la sécante devient la tangente.'],
         ['· Mach $h$ kleiner.', '· Rends $h$ plus petit.'], ['$ · Steigung in $P', '$ · pente en $P'],
+        ['$: $f\'(', '$ : $f\'('],
         ['$ · Berührpunkt $P', '$ · point de contact $P'], ['Tangente: $', 'Tangente : $'],
         ['Normale (senkrecht zur Tangente, $m_n = -\\tfrac{1}{m_t}$): $', 'Normale (perpendiculaire à la tangente, $m_n = -\\tfrac{1}{m_t}$) : $'],
         // ableiten

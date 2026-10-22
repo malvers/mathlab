@@ -165,7 +165,10 @@ window.BuchFR && BuchFR.add('vektoren', {
         ['Mit dem Nullvektor gibt es keinen Winkel.', 'Avec le vecteur nul, il n’y a pas d’angle.'],
         // gerade3d
         ['Der Richtungsvektor darf nicht der Nullvektor sein.', 'Le vecteur directeur ne doit pas être le vecteur nul.'],
-        ['Punktprobe für $Q(', 'Test d’appartenance pour $Q('], ['Alle Zeilen liefern $t = ', 'Toutes les lignes donnent $t = '],
+        ['Punktprobe für $Q(', 'Test d’appartenance pour $Q('], [')$: Alle Zeilen liefern $t = ', ')$ : toutes les lignes donnent $t = '],
+        [')$: Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.', ')$ : les lignes donnent des valeurs différentes de $t$, donc <b>$Q \\notin g$</b>.'],
+        ['$: $X(', '$ : $X('],
+        ['Alle Zeilen liefern $t = ', 'Toutes les lignes donnent $t = '],
         ['$, also <b>$Q \\in g$</b>.', '$, donc <b>$Q \\in g$</b>.'],
         ['Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.', 'Les lignes donnent des valeurs différentes de $t$, donc <b>$Q \\notin g$</b>.'],
         ['Spurpunkte: keine', 'Points de percée : aucun'], ['Spurpunkte: ', 'Points de percée : '],
