@@ -189,6 +189,9 @@ article p { margin: 0 0 18px; color: var(--ink); }
 #text.mute .w:hover { background: none; }
 .s.on, .g.on { background: rgba(var(--hl), var(--hl-a)); color: var(--hl-ink); box-shadow: 0 0 0 1px rgba(var(--hl), .4); }
 .s.cur, .g.cur { background: rgba(var(--hl), var(--cur-a)); }
+/* a little air left and right of the text in every highlighted line (Doc 22.10.2026: "rechts und links geklatscht");
+   the negative margin takes it back, so no line breaks differently - less than a space, so no box covers the word before */
+.s.on, .g.on, .s.cur, .g.cur { padding: 0 .2em; margin: 0 -.2em; }
 /* the word being read: the accent, like the play button and the tabs (Doc 21.10.2026: in Grau it was still the loud
    orange); Hell keeps the orange - its accent is the blue */
 .w.on { background: var(--word-on); color: var(--word-ink); box-shadow: 0 0 0 2px var(--word-on); }
@@ -849,7 +852,7 @@ function sumTick(force, scroll = true) {   // the box's karaoke, the same three 
   if (newS || g !== sGi || w !== sWi || force) {
     sSi = s; sGi = g; sWi = w;
     paintOn(x, g, w);
-    if (scroll && (newS || force) && follow && Date.now() > userScrollUntil) x.el.scrollIntoView({ block: 'center', behavior: force ? 'auto' : 'smooth' });
+    if (scroll && follow && Date.now() > userScrollUntil) keepInView(x, g, w, newS || force, !force);
   }
 }
 async function sumToggle(at) {
@@ -952,6 +955,21 @@ function paintOn(x, gi, wi) {        // the classes for the current sentence / g
   else { if (gEl) gEl.classList.add('cur'); if (wEl) wEl.classList.add('on'); }
 }
 
+// keep what is being read in the middle of what can be SEEN - under the header, above the bar (Doc 22.10.2026: in a
+// long sentence the light ended up half under the bar; scrollIntoView centred in the whole box, the bar covers its foot).
+// A new sentence that fits in half the view is centred whole; in a longer one the line being read is followed, and only
+// moved back to the middle when it leaves the band from 20 % to 75 % - so the page moves now and then, not all the time.
+function keepInView(x, g, wi, newS, smooth) {
+  const m = main.getBoundingClientRect(), b = document.querySelector('.bar');
+  const top = m.top, bottom = b && !b.classList.contains('away') ? Math.min(m.bottom, b.getBoundingClientRect().top) : m.bottom;
+  const h = bottom - top, sr = x.el.getBoundingClientRect();
+  const to = r => main.scrollTo({ top: main.scrollTop + (r.top + r.bottom) / 2 - (top + bottom) / 2, behavior: smooth ? 'smooth' : 'auto' });
+  if (newS && sr.height <= 0.5 * h) return to(sr);
+  const w = x.groups[g] && x.groups[g].wEls[wi];
+  if (!w) return newS && to(sr);
+  const r = w.getBoundingClientRect(), mid = (r.top + r.bottom) / 2;
+  if (newS || mid < top + 0.2 * h || mid > top + 0.75 * h) to(r);
+}
 function tick(force) {
   const t = audio.currentTime, c = BOOK[ch];
   if (!c || !audio.src) return;
@@ -964,7 +982,7 @@ function tick(force) {
   if (newS || g !== gi || w !== wi || force) {
     si = s; gi = g; wi = w;
     paint();
-    if ((newS || force) && follow && Date.now() > userScrollUntil) x.el.scrollIntoView({ block: 'center', behavior: force ? 'auto' : 'smooth' });
+    if (follow && Date.now() > userScrollUntil) keepInView(x, g, w, newS || force, !force);
   }
 }
 // words change faster than 'timeupdate' (4 per second) - while playing, every frame
