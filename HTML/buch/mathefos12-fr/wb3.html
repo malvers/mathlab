@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques FOS 12 · Chapitre OP · Calcul différentiel et intégral avec un CAS | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Familles à deux paramètres, fonctions définies par morceaux, régression, ouverture sur la perspective centrale. Chapitre OP du manuel interactif Mathématiques · Fachoberschule 12 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · FACHOBERSCHULE 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE OP · DOMAINE OPTIONNEL 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE OP · DOMAINE OPTIONNEL 3 · JUIN</p>
+            <h1>Calcul différentiel et intégral avec un CAS</h1>
+            <p class="b-hero-lead">Après l’examen, la calculatrice a le droit d’en faire plus : un <b>système de calcul formel</b> (CAS) dérive exactement, intègre avec des paramètres et résout des équations en lettres.
+                Tu étudies ainsi des familles à deux paramètres issues de l’économie, des fonctions définies par morceaux et des séries de mesures avec la <b>régression</b>.
+                Et comme l’analyse peut désormais confier les calculs à la machine, il reste du temps pour réfléchir : que veut dire au juste « optimal » ?</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">GEOGEBRA CAS</span><span class="b-chip">OUVERTURE : PERSPECTIVE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x<=50 ? 12*x-300 : 12*x-0.2*(x-50)^2-300"]' data-labels='["G"]' data-lat="[105]" data-x="0,120" data-y="-350,560" data-pts="[[80,480],[50,300]]" data-xl="x en unités" data-yl="€" data-h="240" data-aria="Fonction bénéfice définie par morceaux, avec un point anguleux à 50 unités et un maximum à 80 unités"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>dériver et intégrer exactement avec un <b>CAS</b> et résoudre des équations avec des paramètres</li>
+                <li>étudier des <b>familles de fonctions</b> à un ou deux paramètres issues de l’économie et de la technique</li>
+                <li>résoudre des problèmes d’optimisation avec des <b>fonctions définies par morceaux</b> et interpréter les résultats selon l’objectif</li>
+                <li>modéliser des séries de mesures par <b>régression</b> et évaluer les modèles de façon critique</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="40" data-ph="x ="><p class="b-q-text">$G(x) = -0{,}02x^3 + 1{,}2x^2 - 200$ : où a-t-on $G'(x) = 0$ pour $x > 0$ ?</p><div class="b-sol"><p>$-0{,}06x^2 + 2{,}4x = 0$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="a ="><p class="b-q-text">$f(x) = x^2$ pour $x \le 1$ et $2x + a$ pour $x > 1$. Pour quelle valeur de $a$ la fonction $f$ est-elle continue ?</p><div class="b-sol"><p>$1 = 2 + a$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">$f(x) = x^3 - 12x$ : où se trouve le minimum ?</p><div class="b-sol"><p>$3x^2 = 12$, $x = 2$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Une bougie raccourcit régulièrement. Quel modèle convient ?</p><div class="b-mc"><button>linéaire</button><button>quadratique</button><button>exponentiel</button></div><div class="b-sol"><p>La même diminution chaque heure</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE · AVEC GEOGEBRA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA CALCULATRICE QUI CONNAÎT LES LETTRES</div>
+            <div class="b-text"><p>Ouvrez GeoGebra et choisissez la vue Calcul formel. Saisissez <code>f(x) := a*x^3 - b*x</code>, puis <code>Derivative(f(x))</code> et <code>Solve(Derivative(f(x)) = 0, x)</code>.</p>
+                <ul><li>Que donne la calculatrice ? Que devez-vous encore décider vous-mêmes ?</li><li>Essayez $a = 1$, $b = 12$ et comparez avec un calcul de tête.</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">REMISE SUR QUANTITÉ</div>
+            <div class="b-text"><p>Une entreprise vend un composant 20 € l’unité. À partir de la 51e unité, elle accorde une remise qui augmente avec la quantité.</p>
+                <ul><li>Esquissez la recette en fonction du nombre d’unités. Que se passe-t-il pour la courbe à 50 unités ?</li><li>Peut-il être intéressant de vendre davantage, bien que chaque unité devienne moins chère ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">UNE COURBE À TRAVERS DES MESURES</div>
+            <div class="b-text"><p>Mesurez toutes les 5 minutes la température d’une tasse de thé et la température de la pièce.</p>
+                <ul><li>Reportez l’écart en fonction du temps. Les points sont-ils sur une droite, une parabole ou une autre courbe ?</li><li>Laissez la calculatrice chercher une courbe adaptée. Convient-elle bien ?</li></ul></div>
+            <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DROITE D’AJUSTEMENT</span><span class="b-lab-what">La meilleure droite à travers des points (en allemand)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="CAS et familles de fonctions" data-toc-k="1" data-toc-short="1 CAS">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">1</span>Calculer exactement avec un CAS : des familles issues de l’économie</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour $f(x) = ax^3 - bx$, le CAS répond à <code>Solve(Derivative(f(x)) = 0, x)</code> par $x = \pm\sqrt{\tfrac{b}{3a}}$. Le calcul est fait, la réflexion non :
+                pour $a, b > 0$, il y a deux points d’extremum ; pour $a > 0$ et $b < 0$, aucun. Avec $a = 1$ et $b = 12$, ils sont en $\pm 2$, et le minimum est $T(2\,;\,-16)$.</p></div></div>
+            <div class="b-text"><p>Un <b>CAS</b> calcule avec des expressions plutôt qu’avec des nombres : il dérive, intègre, factorise et résout des équations, même si elles contiennent des paramètres. Cela rend accessibles les familles
+                à deux paramètres. En économie, ce sont par exemple le prix de vente et les coûts fixes : comment la meilleure quantité vendue dépend-elle du prix ?</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TRAVAILLER AVEC UN CAS</div>
+                <div class="b-text">
+                    <p><b>Commandes dans GeoGebra (noms anglais, acceptés dans toutes les langues) :</b> <code>f(x) := …</code> définit, <code>Derivative(f(x))</code>, <code>Integral(f(x), a, b)</code>, <code>Solve(équation, x)</code>, <code>Factor(…)</code></p>
+                    <p><b>Coûts, recette, bénéfice :</b> $G(x) = E(x) - K(x)$ avec $E(x) = p \cdot x$. <b>Seuil de rentabilité</b> et <b>limite de rentabilité</b> : zéros de $G$. <b>Bénéfice maximal</b> : $G'(x) = 0$, donc $K'(x) = p$.</p>
+                    <p>Le CAS donne des solutions pour <b>tous</b> les paramètres. C’est toi qui décides lesquelles ont un sens dans le contexte.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Exact ou numérique :</b> le CAS écrit $\sqrt2$, pas 1,414. Avec <code>Numeric(…)</code> ou ≈, tu obtiens le nombre décimal.</p>
+            <p class="b-note"><b>Coût marginal :</b> en économie, $K'(x)$ s’appelle le coût marginal, le coût d’une unité supplémentaire.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · COÛTS, RECETTE ET BÉNÉFICE</div>
+        <p class="b-help" style="margin:0 0 12px">Le prix de vente $p$ est le paramètre. Observe comment le seuil de rentabilité, la limite de rentabilité et le bénéfice maximal se déplacent avec le prix, et à partir de quel prix la production n’est plus du tout rentable.</p>
+        <div data-widget="gewinn"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · UNE FAMILLE À DEUX PARAMÈTRES</div>
+            <div class="b-text"><p>Cherche les extremums de $f_{a,b}(x) = ax^3 - bx$ avec $a > 0$.</p></div>
+            <div class="b-sol"><p>CAS : $f'(x) = 3ax^2 - b$, $x = \pm\sqrt{\tfrac{b}{3a}}$. Pour $b > 0$, un maximum et un minimum ; pour $b \le 0$, pas d’extremum.</p>
+                <p>Pour $a = 1$, $b = 12$ : <span class="b-res">$H(-2\,;\,16)$, $T(2\,;\,-16)$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · LE BÉNÉFICE MAXIMAL</div>
+            <div class="b-text"><p>$K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + 200$ (en €), prix de vente 30 € l’unité. Détermine le seuil de rentabilité, la limite de rentabilité et le bénéfice maximal.</p></div>
+            <div class="b-sol"><p>$G(x) = 30x - K(x) = -0{,}02x^3 + 1{,}2x^2 - 200$. Zéros avec le CAS : environ 14,9 et 56,9 unités.</p>
+                <p>$G'(x) = -0{,}06x^2 + 2{,}4x = 0$ : <span class="b-res">40 unités, $G(40) = 440$ €</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine avec le CAS la dérivée et une primitive de $f(x) = ax^2 + bx + c$. Vérifie à la main.</p></div>
+            <div class="b-sol"><p>$f'(x) = 2ax + b$, $F(x) = \tfrac{a}{3} x^3 + \tfrac{b}{2} x^2 + cx$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dans l’exemple 2, le prix passe à 40 €. Combien d’unités rapportent maintenant le plus grand bénéfice ? Utilise le widget et vérifie avec $K'(x) = 40$.</p></div>
+            <div class="b-sol"><p>$0{,}06x^2 - 2{,}4x + 30 = 40$ : $x \approx 43{,}8$ unités, le bénéfice monte à environ 860 €.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pour quels prix $p$ un bénéfice est-il possible dans l’exemple 2 ? Essaie avec le widget et justifie.</p></div>
+            <div class="b-sol"><p>Le bénéfice est maximal là où $K'(x) = p$. En dessous d’environ 18 €, ce maximum devient négatif : la recette ne couvre alors jamais les coûts, quelle que soit la quantité vendue.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$f_{a}(x) = x^2 \mathrm{e}^{-ax}$ avec $a > 0$. Détermine avec le CAS les points d’extremum en fonction de $a$. Sur quelle courbe se trouvent les maximums ?</p></div>
+            <div class="b-sol"><p>$f_a'(x) = (2x - ax^2)\,\mathrm{e}^{-ax} = 0$ : $x = 0$ (minimum) et $x = \tfrac2a$ (maximum) avec $y = \tfrac{4}{a^2}\,\mathrm{e}^{-2}$.
+                Avec $a = \tfrac2x$ : $y = x^2\,\mathrm{e}^{-2}$, une parabole.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une fonction de coût a la forme $K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + F$ avec les coûts fixes $F$. Pour quels coûts fixes le bénéfice maximal au prix de 30 € vaut-il exactement 0 € ?</p></div>
+            <div class="b-sol"><p>Les coûts fixes ne font que décaler $G$ vers le bas ; le maximum reste à 40 unités. $G(40) = 640 - F = 0$ : <span class="b-res">$F = 640$ €</span>. Avec des coûts fixes plus élevés, l’entreprise est toujours en perte.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="-16" data-ph="y ="><p class="b-q-text">Quelle est l’ordonnée $y$ du minimum de $x^3 - 12x$ ?</p><div class="b-sol"><p>$f(2) = 8 - 24$</p></div></div>
+        <div class="b-q" data-ans="440" data-ph="€"><p class="b-q-text">Quel est le plus grand bénéfice dans l’exemple 2 ?</p><div class="b-sol"><p>$G(40)$</p></div></div>
+        <div class="b-q" data-ans="640" data-ph="€"><p class="b-q-text">Pour quels coûts fixes ce plus grand bénéfice vaut-il exactement 0 ?</p><div class="b-sol"><p>$440 + 200$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Fonctions définies par morceaux" data-toc-k="2" data-toc-short="2 Morceaux">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">2,5 HEURES</span></div>
+    <h2><span class="b-no">2</span>Fonctions définies par morceaux et optimisation ouverte</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Jusqu’à 50 unités, chaque composant rapporte 20 € ; au-delà, il y a une remise : $E(x) = 20x$ pour $x \le 50$, $E(x) = 20x - 0{,}2(x - 50)^2$ pour $x > 50$. Les coûts sont $K(x) = 8x + 300$.
+                Sur le premier morceau, le bénéfice $12x - 300$ monte jusqu’à 300 €. Sur le second, $G'(x) = 12 - 0{,}4(x - 50) = 0$ en $x = 80$ : là, la vente rapporte <b>480 €</b>, plus malgré la remise.</p></div></div>
+            <div class="b-text"><p>Beaucoup de processus suivent des lois différentes selon les domaines : tarifs, remises, routes faites de droites et de courbes. On étudie chaque morceau séparément
+                et on vérifie un par un les <b>points de raccord</b>. Et souvent, la question elle-même est ouverte : plus grand bénéfice, plus grand chiffre d’affaires ou le moins de matière possible sont des objectifs différents avec des réponses différentes.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · FONCTIONS DÉFINIES PAR MORCEAUX</div>
+                <div class="b-text">
+                    <p><b>Continue</b> au point de raccord $x_0$ : les deux morceaux y ont la même valeur. <b>Sans angle</b> (dérivable) : en plus, la même pente.</p>
+                    <p><b>Problèmes d’optimisation :</b> résoudre $f'(x) = 0$ sur chaque morceau, ne garder que les solutions situées dans le morceau, puis comparer avec les points de raccord et les bornes.</p>
+                    <p><b>Questions ouvertes :</b> fixer d’abord l’objectif, puis optimiser, et à la fin évaluer le résultat dans le contexte.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Dans GeoGebra :</b> <code>G(x) := If(x &lt;= 50, 12x - 300, 12x - 0.2(x - 50)^2 - 300)</code> trace les deux morceaux dans une seule courbe.</p>
+            <p class="b-note"><b>Attention aux angles :</b> en un point anguleux, il n’y a pas de dérivée. Il peut pourtant s’y trouver un extremum, comme pour $|x|$ à l’origine.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURE · BÉNÉFICE AVEC REMISE SUR QUANTITÉ</div>
+        <p class="b-help" style="margin:0 0 12px">À gauche de 50 unités, une droite ; à droite, une parabole. Le point 50 n’est pas un maximum : celui-ci n’arrive qu’à 80 unités.</p>
+        <div data-widget="graph" data-fns='["x<=50 ? 12*x-300 : 12*x-0.2*(x-50)^2-300"]' data-labels='["G"]' data-lat="[105]" data-x="0,120" data-y="-350,560" data-pts="[[80,480],[50,300]]" data-xl="x en unités" data-yl="€" data-h="280" data-aria="Fonction bénéfice formée d’une droite et d’une parabole"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · RACCORD SANS ANGLE</div>
+            <div class="b-text"><p>Un toboggan a le profil $f(x) = 0{,}5x^2$ pour $0 \le x \le 2$ et $f(x) = 2x - 2$ pour $x > 2$. Le raccord est-il continu et sans angle ?</p></div>
+            <div class="b-sol"><p>En $x = 2$ : $0{,}5 \cdot 4 = 2$ et $2 \cdot 2 - 2 = 2$, continu. Pentes : à gauche $f'(2) = 2$, à droite $2$.</p>
+                <p><span class="b-res">Continu et sans angle</span> : la droite est la tangente à la parabole en 2.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · QU’EST-CE QUI EST OPTIMAL ?</div>
+            <div class="b-text"><p>Avec la remise sur quantité : combien d’unités rapportent la plus grande <b>recette</b>, combien le plus grand <b>bénéfice</b> ?</p></div>
+            <div class="b-sol"><p>Recette à droite : $E'(x) = 20 - 0{,}4(x - 50) = 0$ en $x = 100$, $E(100) = 1500$ €. Bénéfice : maximum à 80 unités.</p>
+                <p><span class="b-res">La plus grande recette et le plus grand bénéfice se trouvent à des endroits différents.</span> Quel objectif compte, c’est une décision, pas un calcul.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un forfait mobile coûte 10 € jusqu’à 5 Go, puis 2 € par Go supplémentaire. Exprime le coût comme fonction définie par morceaux. Est-elle continue ? Est-elle sans angle ?</p></div>
+            <div class="b-sol"><p>$T(x) = 10$ pour $x \le 5$, $T(x) = 10 + 2(x - 5)$ pour $x > 5$. Continue, mais avec un angle : à gauche pente 0, à droite 2.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Pour quelle valeur de $c$ la fonction $f(x) = x^2$ pour $x \le 2$ et $f(x) = 4x + c$ pour $x > 2$ est-elle continue ? $f$ est-elle alors aussi sans angle ?</p></div>
+            <div class="b-sol"><p>$4 = 8 + c$ : $c = -4$. Pentes $2 \cdot 2 = 4$ et $4$ : sans angle aussi.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Avec la remise sur quantité, les coûts fixes passent de 300 € à 500 €. La meilleure quantité change-t-elle ? Le bénéfice change-t-il ?</p></div>
+            <div class="b-sol"><p>La quantité reste 80, car les coûts fixes ne font que décaler la courbe vers le bas. Le bénéfice baisse à 280 €.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>La canette d’un litre la plus économe a $h = 2r \approx 10{,}8$ cm (chapitre 2.4). Les vraies canettes sont souvent plus étroites et plus hautes. Cite trois objectifs qui peuvent l’expliquer.</p></div>
+            <div class="b-sol"><p>Par exemple : bien tenir en main, place dans les rayons et dans le réfrigérateur, place pour l’étiquette, stabilité à l’empilement. Pour ces objectifs, un autre $r$ est optimal.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un taxi coûte 4 € de prise en charge, 2 € par km pour les 10 premiers km, puis 1,50 € par kilomètre supplémentaire. Une voiture de location coûte 25 € plus 0,80 € par km.
+            Exprime les deux coûts et détermine avec le CAS à partir de quelle distance la voiture de location est moins chère.</p></div>
+            <div class="b-sol"><p>Taxi : $4 + 2x$ pour $x \le 10$, $24 + 1{,}5(x - 10)$ pour $x > 10$. Location : $25 + 0{,}8x$. Sur le premier morceau, égalité en $x = 17{,}5$, hors du morceau.
+                Sur le second : $9 + 1{,}5x = 25 + 0{,}8x$, <span class="b-res">$x \approx 22{,}9$ km</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="80" data-ph="unités"><p class="b-q-text">Pour quelle quantité le bénéfice avec remise sur quantité est-il le plus grand ?</p><div class="b-sol"><p>$12 - 0{,}4(x - 50) = 0$</p></div></div>
+        <div class="b-q" data-ans="-4" data-ph="c ="><p class="b-q-text">Pour quelle valeur de $c$ le raccord de $x^2$ ($x \le 2$) avec $4x + c$ ($x > 2$) est-il continu ?</p><div class="b-sol"><p>$4 = 8 + c$</p></div></div>
+        <div class="b-q" data-ans="100" data-ph="unités"><p class="b-q-text">Pour quelle quantité la recette avec remise sur quantité est-elle la plus grande ?</p><div class="b-sol"><p>$20 - 0{,}4(x - 50) = 0$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Régression" data-toc-k="3" data-toc-short="3 Régression">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">2,5 HEURES</span></div>
+    <h2><span class="b-no">3</span>Régression : des fonctions à partir de mesures</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une bougie mesure 20 cm au départ et on la mesure toutes les heures. Les points sont presque alignés. La régression linéaire donne $y \approx -1{,}57x + 20{,}0$.
+                En $y = 0$, la bougie est consumée : au bout d’environ 12,7 heures. Le coefficient de détermination $R^2 \approx 0{,}9997$ indique que la droite convient presque parfaitement.</p></div></div>
+            <div class="b-text"><p>Dans une <b>régression</b>, la calculatrice cherche, parmi toutes les fonctions d’un type, celle qui se rapproche le plus des points mesurés. Le type, c’est toi qui le choisis :
+                il doit correspondre au contexte, pas seulement aux points. Et chaque modèle ne vaut que dans le domaine où l’on a mesuré. Calculer loin au-delà est risqué.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÉGRESSION</div>
+                <div class="b-text">
+                    <p><b>Choisir le modèle :</b> même variation à chaque pas → linéaire · même facteur à chaque pas → exponentiel · distance de freinage, lancer, aire → quadratique</p>
+                    <p><b>Qualité :</b> le coefficient de détermination $R^2$ est compris entre 0 et 1. Plus il est proche de 1, mieux le modèle décrit les points.</p>
+                    <p><b>Limites :</b> interpoler à l’intérieur des mesures est le plus souvent sûr ; extrapoler à l’extérieur, seulement avec prudence.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Dans GeoGebra :</b> saisir les mesures dans le tableur, les sélectionner, outil « Analyse à deux variables », choisir le modèle de régression. Commandes : <code>FitPoly</code>, <code>FitExp</code>.</p>
+            <p class="b-note"><b>Un bon $R^2$ ne suffit pas :</b> même un modèle faux peut bien convenir dans le domaine mesuré et être complètement à côté au-delà.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · RÉGRESSION</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une série de mesures et un modèle. Tu peux déplacer les points. Quel modèle convient à la bougie, à la distance de freinage, au refroidissement ?</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LA DISTANCE DE FREINAGE</div>
+            <div class="b-text"><p>Des mesures de la distance de freinage entre 30 et 130 km/h sont dans le widget. Quel modèle convient ? Estime la distance de freinage à 150 km/h.</p></div>
+            <div class="b-sol"><p>Physiquement, la distance de freinage croît comme le carré de la vitesse : régression quadratique, environ $y \approx 0{,}0099x^2 + 0{,}013x - 0{,}27$.</p>
+                <p>À 150 km/h : <span class="b-res">environ 224 m</span>, une extrapolation un peu au-delà du domaine mesuré.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · LE THÉ REFROIDIT</div>
+            <div class="b-text"><p>L’écart de température avec la pièce était de 70 °C, après 5 min de 55 °C, après 10 min de 42 °C, et ainsi de suite jusqu’à 15 °C après 30 min. Modélise-le.</p></div>
+            <div class="b-sol"><p>Environ le même facteur toutes les 5 minutes : exponentiel, $\Delta T(t) \approx 70{,}7 \cdot 0{,}949^t$.</p>
+                <p>Au bout de 45 minutes, <span class="b-res">encore environ 7 °C au-dessus de la température de la pièce</span>. Le thé refroidit selon la même loi que le café du chapitre 4.2.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Quel modèle choisirais-tu ? a) Solde d’un compte à taux d’intérêt fixe &nbsp; b) Niveau d’une cuve avec un débit constant &nbsp; c) Hauteur d’une balle lancée</p></div>
+            <div class="b-sol"><p>a) exponentiel &nbsp; b) linéaire &nbsp; c) quadratique</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Choisis la bougie dans le widget. Selon le modèle, combien de temps brûle-t-elle encore quand elle mesure 10 cm ?</p></div>
+            <div class="b-sol"><p>$10 = -1{,}57x + 20$ en $x \approx 6{,}4$ h. Jusqu’à la fin à 12,7 h, il reste environ 6,4 heures.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Choisis dans le widget la distance de freinage et le modèle <b>linéaire</b>. Convient-il bien ? Pourquoi est-ce quand même le mauvais modèle ?</p></div>
+            <div class="b-sol"><p>$R^2$ est assez élevé, mais les points sont d’abord au-dessus, puis en dessous, puis de nouveau au-dessus de la droite : un motif. Physiquement, la distance de freinage croît comme un carré.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Choisis la population mondiale avec le modèle exponentiel. Que prévoit-il pour 2050 ? Pourquoi les projections des Nations unies sont-elles nettement plus basses ?</p></div>
+            <div class="b-sol"><p>Le modèle exponentiel donne bien plus de 10 milliards. Mais le taux de croissance baisse depuis des décennies ; la croissance n’est plus exponentielle. Les projections utilisent des modèles plus précis.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Mesure au chronomètre le temps de chute d’une balle lâchée de 0,5 m, 1 m, 1,5 m et 2 m de haut. Trouve avec le CAS une fonction $h(t)$ et compare avec $h = 5t^2$ du chapitre 2.1.</p></div>
+            <div class="b-sol"><p>Une régression quadratique passant par l’origine devrait donner environ $h \approx 5t^2$, plus précisément $h = \tfrac{g}{2}t^2$ avec $g \approx 9{,}81$ m/s². Le temps de réaction au chronomètre fausse la mesure.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="12,7" data-tol="0.1" data-ph="heures"><p class="b-q-text">Selon le modèle linéaire, au bout de combien d’heures la bougie est-elle consumée, à un chiffre après la virgule ?</p><div class="b-sol"><p>$\tfrac{20{,}0}{1{,}57}$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quel modèle convient au refroidissement ?</p><div class="b-mc"><button>linéaire</button><button>quadratique</button><button>exponentiel</button></div><div class="b-sol"><p>Le même facteur à chaque pas de temps</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$R^2 = 0{,}999$ signifie …</p><div class="b-mc"><button>Le modèle vaut pour toutes les valeurs.</button><button>Le modèle décrit très bien les points mesurés.</button><button>La mesure est sans erreur.</button></div><div class="b-sol"><p>Seulement une affirmation sur les points mesurés</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Fais calculer $\int_0^2 \left(ax^2 + 1\right)\mathrm{d}x$ par le CAS. Pour quelle valeur de $a$ l’intégrale vaut-elle 10 ?</p></div>
+            <div class="b-sol"><p>$\tfrac{8a}{3} + 2 = 10$ : $a = 3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier avec le chapitre 2.4 :</b> pour quelle valeur de $k$ la droite $y = kx$ est-elle tangente à la courbe de $f(x) = \mathrm{e}^x$ ? Résous avec le CAS les conditions du point de contact.</p></div>
+            <div class="b-sol"><p>$\mathrm{e}^{x_0} = kx_0$ et $\mathrm{e}^{x_0} = k$ : on en déduit $x_0 = 1$ et $k = \mathrm{e}$. Tu connais la tangente $y = \mathrm{e}\,x$ depuis le chapitre 4.2.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier avec le chapitre 1.3 :</b> fais calculer par le CAS le produit vectoriel de $(a\,;\,1\,;\,0)$ et $(0\,;\,1\,;\,a)$. Pour quelle valeur de $a$ le parallélogramme a-t-il une aire de 3 unités ?</p></div>
+            <div class="b-sol"><p>$(a\,;\,-a^2\,;\,a)$ de norme $\sqrt{2a^2 + a^4}$. $a^4 + 2a^2 = 9$ : $a^2 = -1 + \sqrt{10}$, donc $a \approx \pm 1{,}47$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Présentez en petits groupes une série de mesures de votre propre filière, par exemple en technique, en économie ou en santé : données, choix du modèle, régression, prévision et évaluation critique, en cinq minutes.</p></div>
+            <div class="b-sol"><p>Soyez attentifs à : justification du modèle par le contexte, $R^2$, résidus avec ou sans motif, domaine de validité, une limite honnête du modèle.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : perspective centrale" data-toc-k="X" data-toc-short="Perspective">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">OUVERTURE SUR LE DOMAINE OPTIONNEL 1 · ART ET TECHNIQUE</span></div>
+    <h2>Perspective centrale : comment la perspective fut inventée</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Vers 1420, l’architecte florentin Filippo Brunelleschi peignit le baptistère de Florence de telle sorte que les spectateurs pouvaient comparer son tableau avec le vrai bâtiment, à travers un trou et à l’aide d’un miroir.
+                Toutes les lignes qui partaient en profondeur se rejoignaient en un point. En 1435, Leon Battista Alberti décrivit le procédé dans son livre « De pictura » : le tableau est une fenêtre à travers laquelle on regarde le monde.</p>
+            <p>Mathématiquement, c’est une <b>perspective centrale</b> : chaque point est envoyé sur le plan du tableau le long de la droite qui le relie à l’œil. Un objet situé à la profondeur $z$ derrière le plan du tableau apparaît réduit du facteur $\tfrac{a}{a + z}$
+                si l’œil se trouve à la distance $a$ devant ce plan. Les arêtes qui partent en profondeur convergent vers le <b>point de fuite</b> situé à hauteur des yeux, sur l’horizon.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> L. B. Alberti, « De pictura » (De la peinture), 1435. Expérience de Brunelleschi d’après son biographe Antonio Manetti ; vue d’ensemble : Smarthistory, « Linear Perspective: Brunelleschi’s Experiment ».</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · POINT DE FUITE ET HORIZON</div>
+        <div data-widget="zentralprojektion"></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>CAS</h4><p>Exactement, avec des expressions et des paramètres : <code>Derivative</code>, <code>Integral</code>, <code>Solve</code></p></div>
+        <div><p>$ax^3 - bx$ : $x = \pm\sqrt{\tfrac{b}{3a}}$</p></div></div>
+    <div class="b-rueck"><div><h4>ÉCONOMIE</h4><p>$G = E - K$, seuil et limite de rentabilité comme zéros, maximum en $K'(x) = p$</p></div>
+        <div><p>Prix 30 € : 40 unités, 440 €</p></div></div>
+    <div class="b-rueck"><div><h4>MORCEAUX</h4><p>Étudier chaque morceau séparément, vérifier la continuité et les angles aux points de raccord.</p></div>
+        <div><p>$0{,}5x^2$ et $2x - 2$ en 2 : sans angle</p></div></div>
+    <div class="b-rueck"><div><h4>QUESTIONS OUVERTES</h4><p>Fixer d’abord l’objectif. La plus grande recette et le plus grand bénéfice peuvent être différents.</p></div>
+        <div><p>Remise : recette à 100, bénéfice à 80 unités</p></div></div>
+    <div class="b-rueck"><div><h4>RÉGRESSION</h4><p>Modèle tiré du contexte, qualité avec $R^2$, prudence en extrapolant</p></div>
+        <div><p>Bougie linéaire, freinage quadratique, refroidissement exponentiel</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Où se trouve le point d’extremum de $ax^3 - bx$ pour $a = 1$ et $b = 12$ avec $x > 0$ ?</p><div class="b-sol"><p>$\sqrt{12/3}$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="a ="><p class="b-q-text">Pour quelle valeur de $a$ a-t-on $\int_0^2 (ax^2 + 1)\,\mathrm{d}x = 10$ ?</p><div class="b-sol"><p>$\tfrac{8a}{3} = 8$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$x^2$ pour $x \le 2$ et $4x - 4$ pour $x > 2$ est en 2 …</p><div class="b-mc"><button>discontinue.</button><button>continue et sans angle.</button><button>continue avec un angle.</button></div><div class="b-sol"><p>Même valeur 4, même pente 4</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="480" data-ph="€"><p class="b-q-text">Quel est le plus grand bénéfice avec la remise sur quantité ?</p><div class="b-sol"><p>$G(80) = 960 - 180 - 300$</p></div></div>
+            <div class="b-q" data-ans="22,9" data-tol="0.05" data-ph="km"><p class="b-q-text">À partir de combien de kilomètres la voiture de location est-elle moins chère que le taxi, à un chiffre après la virgule ?</p><div class="b-sol"><p>$9 + 1{,}5x = 25 + 0{,}8x$</p></div></div>
+            <div class="b-q" data-ans="0,5" data-tol="0.01" data-ph="facteur"><p class="b-q-text">Œil à 8 m devant le plan du tableau : de quel facteur un poteau situé 8 m derrière apparaît-il réduit ?</p><div class="b-sol"><p>$\tfrac{8}{8 + 8}$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-cas1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CAS I</span><span class="b-lab-what">Familles et problèmes d’optimisation avec un CAS</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-cas2.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CAS II</span><span class="b-lab-what">Optimisation ouverte et régression</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-zentralprojektion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PERSPECTIVE CENTRALE</span><span class="b-lab-what">Points de fuite dans l’art et la technique</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-jahresabschluss.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FIN D’ANNÉE</span><span class="b-lab-what">Jeux mathématiques et casse-tête</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Fachoberschule, 12e année · Domaine optionnel 3 d’après le programme de mathématiques de la Fachoberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-fr/vektoren.js"></script>
+</body>
+</html>
