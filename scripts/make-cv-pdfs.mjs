@@ -1,5 +1,5 @@
 /* Generate the five CV PDFs (DE/EN/ES/FR/IT) from HTML/cv.html.
-   Output: ~/Downloads/cv-pdfs/cv-michael-alvers-<lang>.pdf
+   Output: ~/PRIVAT MRA/Bewerbungen/cv-michael-alvers-<lang>.pdf (next to the scans)
    The footer (name + doc title + "page X of Y") is drawn into the real page
    margin by Chrome's footerTemplate – it can never collide with content.
 
@@ -29,7 +29,7 @@ try {
   process.exit(1);
 }
 
-const OUT = join(homedir(), "Downloads", "cv-pdfs");
+const OUT = join(homedir(), "PRIVAT MRA", "Bewerbungen");
 mkdirSync(OUT, { recursive: true });
 
 const LANGS = {
@@ -55,7 +55,7 @@ const browser = await puppeteer.launch({
   headless: true,
   pipe: true, /* CDP over stdio – no debug port needed */
   args: [
-    "--user-data-dir=" + join(OUT, ".chrome-profile"),
+    "--user-data-dir=" + join(DIR, "chrome", ".profile"), /* gitignored, not among the PDFs */
     "--no-first-run", "--no-default-browser-check", "--disable-extensions",
   ],
 });

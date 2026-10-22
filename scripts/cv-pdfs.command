@@ -1,5 +1,5 @@
 #!/bin/bash
-# Double-click in Finder: regenerates the five CV PDFs into ~/Downloads/cv-pdfs.
+# Double-click in Finder: regenerates the five CV PDFs into ~/PRIVAT MRA/Bewerbungen.
 # First run installs local tooling (puppeteer-core + Chrome for Testing, ~250 MB)
 # into this folder – both are gitignored and never leave this machine.
 set -e
@@ -16,4 +16,4 @@ if ! ls -d chrome/*/chrome-mac-*/ > /dev/null 2>&1; then
 fi
 
 node make-cv-pdfs.mjs
-open "$HOME/Downloads/cv-pdfs"
+open "$HOME/PRIVAT MRA/Bewerbungen"
