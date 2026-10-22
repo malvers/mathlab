@@ -349,6 +349,29 @@ l’accès à l’université, comme le baccalauréat.*
 
 <!-- fr-2: terms of this book only, write right below this line -->
 
+Package fr-2 (Châtelet), 22.10.2026: decisions made while translating BGY 12; nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Bus $B$ / verspätet $V$ (1.1) | bus $B$ / en retard $R$ | the letter changed for the reader; no widget writes it |
+| Brille $B$ / liest täglich $L$, fehlerhaft $F$ (1.1 tasks) | lunettes $L$ / lit tous les jours $Q$, défectueuse $D$ | only in the chapter text |
+| krank $K$ / gesund (Schnelltest) | malade $M$ / sain | as section 5; tree letters K/G → M/S by a rule in js/buch-fr/stochastik.js |
+| Wappen / Zahl (1.2, 1.3) | face / pile | outcomes WWZ → FFP; coin letters W/Z → F/P by rule |
+| Treffer / Niete (letters in the Bernoulli trees) | S / E (succès / échec) | rule; the chapter text keeps «66NNN (N : pas de six)» |
+| Rate-Test, überbucht, Galtonbrett | le QCM au hasard, surréservation, planche de Galton | 1.3 |
+| Petersburger Spiel | le jeu de Saint-Pétersbourg | 1.2; Nikolaus I. Bernoulli → Nicolas Ier Bernoulli |
+| Paketporto | les frais d’envoi (d’un colis) | 2.1 |
+| Normalparabel (box titles of 2.2) | la fonction carré | running text: la parabole $y = x^2$ |
+| Steckbriefe und Extremwertprobleme (2.6) | Déterminer des fonctions et optimiser | chapter title; widget steckbrief: «Choisis une carte d’identité» |
+| Lückenschluss (2.6) | combler le décalage, tronçon de raccordement | |
+| Wendetangente (label of the 2.5 opener) | tangente d’inflexion | short graph label; the text says tangente au point d’inflexion |
+| Skalarprodukt $\vec a \circ \vec b$ | produit scalaire, $\circ$ kept as the widgets write it | Merke 5.2 adds: en France on note souvent $\vec a \cdot \vec b$ et $\|\vec a\|$ |
+| Firstpunkt, Traufpunkt, Sparren, First | point de faîtage, point d’égout, chevron, faîtage | 5.2; the letters F, T stay |
+| Kosinus-Ähnlichkeit | similarité cosinus | 5.2 excursion |
+| Graßmann, «Die lineale Ausdehnungslehre» | Grassmann; the title stays German, with «La théorie de l’extension linéaire» | 5.1 |
+| Dido, Karthago, Vergil: Aeneis | Didon, Carthage, Virgile, Énéide | 2.6 |
+| Seg labels of raum3d: Punkte und Verbindungsvektor | Points et vecteur AB | no maths in a segment button |
+
 ## mathe13-fr
 
 <!-- fr-3: terms of this book only, write right below this line -->

@@ -141,7 +141,7 @@ window.BuchFR && BuchFR.add('analysis', {
         ['keine Extrempunkte', 'pas d’extremum'],
         ['Sekantensteigung (Differenzenquotient): $', 'Pente de la sécante (taux d’accroissement) : $'],
         ['$ ergibt $', '$ donne $'],
-        ['$: Dort ist $f\'\'(x) = 0$ und die Steigung ', '$ : là, $f\'\'(x) = 0$ et la pente est '],
+        ['$: Dort ist $f\'\'(x) = 0$ und die Steigung ', '$ : là, $f\'\'(x) = 0$ et la pente est '],
         ['am kleinsten', 'minimale'],
         ['am größten', 'maximale'],
         ['Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.', 'Pour $a = 0$, $f$ est une parabole (ou une droite) sans point d’inflexion.'],
