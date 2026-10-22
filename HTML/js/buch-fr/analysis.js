@@ -93,6 +93,13 @@ window.BuchFR && BuchFR.add('analysis', {
         // schar: the short labels of the extrema (also BGY 12, kurve: keep one copy when merging with fr-2)
         'Hochpunkt': 'Maximum', 'Tiefpunkt': 'Minimum', 'keine Extrempunkte': 'pas d’extremum',
         // book fr-4 mathefos11-fr:
+        // steckbrief (FOS 11 uses the mode p3)
+        'Parabel durch 3 Punkte': 'Parabole passant par 3 points',
+        'Kubisch: Extrempunkt + 2 Punkte': 'Cubique : extremum + 2 points',
+        'Kubisch: Wendepunkt mit Tangente + Punkt': 'Cubique : point d’inflexion avec tangente + point',
+        'Bedingungen': 'Conditions',
+        'Steigung im Wendepunkt $m$': 'Pente au point d’inflexion $m$',
+        'Funktion aus Bedingungen': 'Fonction à partir de conditions',
         // book fr-5 mathefos12-fr:
     },
     phrase: [
@@ -189,6 +196,14 @@ window.BuchFR && BuchFR.add('analysis', {
         ['$. Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
             '$. Pour $a \\le 0$, il n’y a pas d’extremum : $f_a\'(x) = 3x^2 - a$ n’a alors aucun zéro avec changement de signe.'],
         // book fr-4 mathefos11-fr:
+        // steckbrief
+        ['Lösung: $f(x) = ', 'Solution : $f(x) = '],
+        ['Ansatz: $f(x) = ', 'Mise en équation : $f(x) = '],
+        ['Achtung: Bei $E$ ist $f\'\'(x) = 0$, das ist ein Sattelpunkt, kein Extrempunkt.', 'Attention : en $E$, on a $f\'\'(x) = 0$ ; c’est un point d’inflexion à tangente horizontale, pas un extremum.'],
+        ['Probe: $', 'Vérification : $'],
+        ['< 0$, also ein Hochpunkt.', '< 0$, donc un maximum.'],
+        ['> 0$, also ein Tiefpunkt.', '> 0$, donc un minimum.'],
+        ['Mit diesen Bedingungen hat das Gleichungssystem keine eindeutige Lösung. Zwei Punkte mit gleichem $x$?', 'Avec ces conditions, le système d’équations n’a pas de solution unique. Deux points avec le même $x$ ?'],
         // book fr-5 mathefos12-fr:
     ],
     rule: [

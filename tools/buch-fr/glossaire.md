@@ -401,6 +401,47 @@ Package fr-3 (Lepaute), 22.10.2026: decisions made while translating BGY 13; not
 
 <!-- fr-4: terms of this book only, write right below this line -->
 
+Package fr-4 (Choquet), 22.10.2026: decisions made while translating FOS 11; nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Ausblicke (chapter E), Wahlbereich 1 und 3 | Perspectives, domaines optionnels 1 et 3 | the letter E stays; kicker "PERSPECTIVES · DOMAINES OPTIONNELS 1 ET 3 · JUIN" |
+| Fit für Klausur 1 (online quiz card) | PRÊT POUR LE DEVOIR SURVEILLÉ 1 | the quizzes stay German |
+| Prozentwert $W$, Grundwert $G$, Wachstumsfaktor $1 \pm \tfrac{p}{100}$ | part $W$, valeur de référence $G$, coefficient multiplicateur | 1.1; the letters stay |
+| Prozentpunkte | points de pourcentage | |
+| Formel umstellen nach $x$ | isoler $x$ dans la formule, transformer une formule | |
+| Struktur eines Terms (Summe, Produkt …) | structure d’une expression (somme, produit …) | |
+| Widerspruchsbeweis | raisonnement par l’absurde | 1.1 excursion |
+| Steigungswinkel | angle d’inclinaison | 1.2 |
+| Punkt-Steigungs-Form | forme point-pente | |
+| Grundgebühr (Handy / Taxi) | abonnement / prise en charge | |
+| Zahlenstrahl, Halbgerade, Rand gefüllt / leer | droite graduée, demi-droite, extrémité pleine / vide | 1.3 |
+| Scheinlösung, doppelte Ungleichung | fausse solution, double inégalité | |
+| Probe (test point of the widget ungleichung) | test | the text says « nombre test » |
+| Brennspiegel, Brennpunkt | miroir ardent, foyer | 1.5 excursion |
+| Kettenlinie | chaînette | 1.6 excursion |
+| Substitution | changement de variable | 1.7 |
+| Ergebnismenge, Ereignismenge | univers $\Omega$, ensemble des événements | 2.1 |
+| Wappen / Zahl | face / pile, letters F / P | chapter text and simulator (rule in js/buch-fr/stochastik.js) |
+| Glücksrad rot / gelb / blau | roue de loterie, rouge / jaune / bleu, letters R / J / B | chapter text only |
+| Bauteil in Ordnung $i$ / defekt $d$ | pièce conforme $c$ / défectueuse $d$ | chapter text only |
+| Reißzwecke | punaise | |
+| 1. / 2. Pfadregel | 1re règle des chemins (règle du produit) / 2e règle des chemins (règle de la somme) | widget baum: « 1re règle des chemins » |
+| natürliche Häufigkeiten | effectifs naturels | 2.2 |
+| Treffer / Niete in the Bernoulli trees | succès / échec, letters S / E | rule in js/buch-fr/stochastik.js |
+| Lotto „6 aus 49“, Superzahl | le loto allemand « 6 sur 49 », numéro supplémentaire (Superzahl) | 2.3 |
+| Grundfall (Urnenmodell) | cas de base | |
+| Tabellenkalkulation | tableur | OP |
+| Rate (Kredit) | échéance | widget tilgung; Annuität: annuité |
+| Ratentilgung (Modell, Knopf) | amortissement constant (text: par amortissements constants) | |
+| Faustregel 72 | règle de 72 | |
+| Skonto, Dispozins, Ratenkauf | escompte, taux du découvert, achat à crédit | |
+| Öffner (Schalter) | contact à ouverture | E |
+| Halbaddierer, Volladdierer, Übertrag | demi-additionneur, additionneur complet, retenue | |
+| Erwachsene / Kinder $e$ / $k$, Einzel- / Doppelzimmer, Hühner / Kaninchen, Fasane / Kaninchen | $a$ / $e$, $s$ / $d$, $p$ / $l$, $f$ / $l$ | chapter text only; no widget writes them |
+| Messreihen der Regression: Kerze, Bremsweg, Abkühlen, Weltbevölkerung | Bougie, Distance de freinage, Refroidissement, Population mondiale | widget regression |
+| Schritt (widget wachstum) | pas | "20 pas" |
+
 ## mathefos12-fr
 
 <!-- fr-5: terms of this book only, write right below this line -->

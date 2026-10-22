@@ -18,6 +18,11 @@ window.BuchFR && BuchFR.add('lgs', {
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
+        // geraden
+        'eine Lösung': 'une solution',
+        'keine Lösung': 'aucune solution',
+        'unendlich viele': 'une infinité',
+        'Zwei Geraden': 'Deux droites',
         // book fr-5 mathefos12-fr:
     },
     phrase: [
@@ -25,6 +30,15 @@ window.BuchFR && BuchFR.add('lgs', {
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
+        // geraden
+        ['Gleichung I ist fest: ', 'L’équation I est fixe : '],
+        ['. Verändere Gleichung II: ', '. Modifie l’équation II : '],
+        ['Gleichung II lautet $0 = 0$, sie schränkt nichts ein.', 'L’équation II s’écrit $0 = 0$ : elle n’impose aucune condition.'],
+        ['Gleichung II lautet $0 = ', 'L’équation II s’écrit $0 = '],
+        ['$: ein Widerspruch, keine Lösung.', '$ : une contradiction, aucune solution.'],
+        ['<b>Genau eine Lösung</b>: Die Geraden schneiden sich in $S(', '<b>Exactement une solution</b> : les droites se coupent en $S('],
+        ['<b>Unendlich viele Lösungen</b>: Beide Gleichungen beschreiben dieselbe Gerade.', '<b>Une infinité de solutions</b> : les deux équations décrivent la même droite.'],
+        ['<b>Keine Lösung</b>: Die Geraden sind parallel und verschieden.', '<b>Aucune solution</b> : les droites sont parallèles et distinctes.'],
         // book fr-5 mathefos12-fr:
     ],
     rule: [
