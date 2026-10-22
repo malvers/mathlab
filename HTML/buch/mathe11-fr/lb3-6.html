@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 11 · Chapitre 3.6 · Fonctions réciproques et logarithme | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Fonction racine carrée, logarithme, équations exponentielles. Chapitre 3.6 du manuel interactif Mathématiques · Berufliches Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 3.6 · DOMAINE D’APPRENTISSAGE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 3.6 · DOMAINE D’APPRENTISSAGE 3 · JANVIER</p>
+            <h1>Fonctions réciproques et logarithme</h1>
+            <p class="b-hero-lead">Calculer l’aire à partir de la longueur du côté, c’est facile. Mais la longueur du côté à partir de l’aire ? Le capital à partir de la durée, mais la durée à partir du capital ?
+                Pour cela, il faut l’<b>opération réciproque</b>. La réciproque de l’élévation au carré est la <b>racine carrée</b>, la réciproque de la puissance à exposant inconnu est le <b>logarithme</b>.</p>
+            <div class="b-chips"><span class="b-chip">15 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">INTERACTIF</span><span class="b-chip">EXCURSION BENFORD</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["2^x","log2(x)","x"]' data-labels='["2ˣ","log₂ x",""]' data-lat="[1.4,3.4]" data-x="-3,5" data-y="-3,5" data-equal data-h="250" data-aria="Fonction exponentielle et fonction logarithme, symétriques par rapport à y = x"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>interpréter graphiquement la relation entre une <b>fonction et sa fonction réciproque</b></li>
+                <li>inverser $f(x) = x^2$ et calculer avec des <b>racines</b> écrites sous forme de puissances</li>
+                <li>connaître la notion de <b>logarithme</b> et les propriétés des <b>fonctions logarithmes</b></li>
+                <li>résoudre des <b>équations exponentielles</b> de la forme $a^x = b$ : demi-vie, temps de doublement</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="5" data-ph="k ="><p class="b-q-text">Résous $2^k = 32$.</p><div class="b-sol"><p>$k = 5$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="nombre"><p class="b-q-text">Calcule $\sqrt{49}$.</p><div class="b-sol"><p>$7$, car $7^2 = 49$.</p></div></div>
+            <div class="b-q" data-ans="0,125" data-tol="0.0001"><p class="b-q-text">Calcule $2^{-3}$.</p><div class="b-sol"><p>$\tfrac{1}{2^3} = \tfrac18 = 0{,}125$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Résous $2x + 1 = 7$.</p><div class="b-sol"><p>$x = 3$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">CALCULER À REBOURS</div>
+            <div class="b-text"><p>Une personne pense à un nombre, le double et ajoute 1. Elle ne vous donne que le résultat.</p>
+                <ul><li>Trouvez un calcul qui, à partir du résultat, redonne le nombre pensé.</li><li>Cela marche-t-il aussi si elle élève le nombre au carré ? Qu’est-ce qui ne va pas ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COMPTER LES CHIFFRES</div>
+            <div class="b-text"><p>Écrivez les nombres $2^1, 2^2, \ldots, 2^{20}$ (calculatrice permise) et comptez combien de chiffres a chacun.</p>
+                <ul><li>Combien de chiffres a $2^{100}$ ? Trouvez une règle sans calculer le nombre.</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LE PREMIER CHIFFRE</div>
+            <div class="b-text"><p>Rassemblez 50 nombres de la vie réelle : nombres d’habitants, numéros de maison, prix, longueurs de fleuves.</p>
+                <ul><li>Combien commencent par 1, combien par 9 ? Ne s’attendrait-on pas à ce que chaque chiffre soit aussi fréquent ?</li></ul></div>
+            <span class="b-pair">→ Excursion</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Fonctions réciproques" data-toc-k="1" data-toc-short="1 Réciproque">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">5 HEURES</span></div>
+    <h2><span class="b-no">1</span>Fonction et fonction réciproque</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un carreau carré a l’aire $A = s^2$. Pour le magasin de bricolage, il te faut l’inverse : à une aire de 900 cm² correspond la longueur de côté $s = \sqrt{900} = 30$ cm.</p></div></div>
+            <div class="b-text"><p>La <b>fonction réciproque</b> $f^{-1}$ défait ce que fait $f$ : si $f(x) = y$, alors $f^{-1}(y) = x$. Dans le repère, on échange $x$ et $y$ : la courbe est donc
+                <b>symétrisée par rapport à la droite $y = x$</b>.</p>
+                <p>On ne peut inverser qu’une fonction pour laquelle chaque valeur de $y$ n’apparaît qu’une fois. Pour $f(x) = x^2$, $x = 3$ et $x = -3$ donnent tous les deux $y = 9$.
+                    C’est pourquoi on restreint l’ensemble de définition à $x \geq 0$. La fonction réciproque est alors la <b>fonction racine carrée</b> $f^{-1}(x) = \sqrt{x}$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · FONCTION RÉCIPROQUE</div>
+                <div class="b-text">
+                    <p><b>Déterminer :</b> résoudre $y = f(x)$ par rapport à $x$, puis échanger $x$ et $y$.</p>
+                    <p><b>Courbe :</b> symétrique de la courbe de $f$ par rapport à la droite $y = x$. L’ensemble de définition et l’ensemble des images échangent leurs rôles.</p>
+                    <p><b>Racines sous forme de puissances :</b> $\sqrt{x} = x^{\frac12}$, $\sqrt[n]{x} = x^{\frac1n}$, $\sqrt[n]{x^m} = x^{\frac{m}{n}}$ (pour $x \geq 0$).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notation :</b> le $^{-1}$ de $f^{-1}$ n’est pas un inverse. $f^{-1}(x)$ n’est pas $\tfrac{1}{f(x)}$.</p>
+            <p class="b-note"><b>Irrationnel :</b> $\sqrt2 \approx 1{,}41421356\ldots$ n’est pas une fraction. Son écriture décimale ne s’arrête jamais et ne devient jamais périodique.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · SYMÉTRIE PAR RAPPORT À $y = x$</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une fonction et fais glisser le point jaune le long de la courbe. Son symétrique se déplace sur la fonction réciproque.</p>
+        <div data-widget="umkehr"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · DÉTERMINER LA FONCTION RÉCIPROQUE</div>
+            <div class="b-text"><p>Détermine la fonction réciproque de $f(x) = 2x + 1$.</p></div>
+            <div class="b-sol"><p>$y = 2x + 1 \Rightarrow x = \tfrac{y - 1}{2}$. On échange : <span class="b-res">$f^{-1}(x) = \tfrac{x - 1}{2}$</span>. Vérification : $f(3) = 7$ et $f^{-1}(7) = 3$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · ÉCRITURE EN PUISSANCES</div>
+            <div class="b-text"><p>Calcule sans calculatrice : $8^{\frac23}$ et $27^{-\frac13}$.</p></div>
+            <div class="b-sol"><p>$8^{\frac23} = \left(\sqrt[3]{8}\right)^2 = 2^2 = 4$ · $27^{-\frac13} = \tfrac{1}{\sqrt[3]{27}} = \tfrac13$</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine la fonction réciproque : a) $f(x) = 3x - 6$ &nbsp; b) $f(x) = \tfrac12 x + 2$ &nbsp; c) $f(x) = x^3$</p></div>
+            <div class="b-sol"><p>a) $\tfrac{x + 6}{3}$ &nbsp; b) $2x - 4$ &nbsp; c) $\sqrt[3]{x}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Écris sous forme de puissance : a) $\sqrt{x^3}$ &nbsp; b) $\tfrac{1}{\sqrt{x}}$ &nbsp; c) $\sqrt[3]{x^2}$. Calcule : d) $16^{\frac34}$ &nbsp; e) $32^{\frac25}$</p></div>
+            <div class="b-sol"><p>a) $x^{\frac32}$ &nbsp; b) $x^{-\frac12}$ &nbsp; c) $x^{\frac23}$ &nbsp; d) $8$ &nbsp; e) $4$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>On veut inverser la fonction $f(x) = (x - 1)^2$ avec $x \geq 1$. Détermine $f^{-1}$ et donne l’ensemble de définition et l’ensemble des images des deux fonctions.</p></div>
+            <div class="b-sol"><p>$y = (x - 1)^2 \Rightarrow x = 1 + \sqrt{y}$, donc $f^{-1}(x) = 1 + \sqrt{x}$. $f$ : $D$ : $x \geq 1$, $W$ : $y \geq 0$. $f^{-1}$ : $D$ : $x \geq 0$, $W$ : $y \geq 1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Trace $f(x) = 2x + 1$ et $f^{-1}$ dans un même repère. En quel point se coupent-elles ? Pourquoi est-il sur $y = x$ ?</p></div>
+            <div class="b-sol"><p>$2x + 1 = \tfrac{x - 1}{2} \Rightarrow x = -1$ : $S(-1\,;\,-1)$. Un point qui reste à sa place quand on le symétrise par rapport à $y = x$ doit être sur cette droite.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Démontre que $\sqrt2$ n’est pas une fraction.</p></div>
+            <div class="b-hint"><p>Suppose que $\sqrt2 = \tfrac{p}{q}$ avec une fraction irréductible. Élève au carré et demande-toi si $p$ et $q$ sont pairs.</p></div>
+            <div class="b-sol"><p>De $2 = \tfrac{p^2}{q^2}$ on tire $p^2 = 2q^2$. Donc $p^2$ est pair, et donc aussi $p = 2k$. Alors $4k^2 = 2q^2$, donc $q^2 = 2k^2$ et $q$ est pair aussi.
+                La fraction ne serait alors pas irréductible : contradiction. Donc $\sqrt2$ est irrationnel.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2" data-ph="nombre"><p class="b-q-text">Soit $f(x) = 4x + 2$. Calcule $f^{-1}(10)$.</p><div class="b-sol"><p>$f^{-1}(x) = \tfrac{x - 2}{4}$, donc $f^{-1}(10) = 2$.</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="nombre"><p class="b-q-text">Calcule $9^{\frac12}$.</p><div class="b-sol"><p>$\sqrt9 = 3$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Par rapport à quelle droite symétrise-t-on la courbe pour obtenir la courbe de la fonction réciproque ?</p><div class="b-mc"><button>l’axe des $x$</button><button>$y = x$</button><button>l’axe des $y$</button></div><div class="b-sol"><p>Par rapport à la bissectrice $y = x$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Le logarithme" data-toc-k="2" data-toc-short="2 Logarithme">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">5 HEURES</span></div>
+    <h2><span class="b-no">2</span>Le logarithme</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$2^x = 32$, tu le résous de tête : $x = 5$. Mais $2^x = 10$ ? La solution est entre 3 et 4. Elle a un nom à elle :
+                $x = \log_2 10$, « logarithme de 10 en base 2 ».</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · LOGARITHME</div>
+                <div class="b-text">
+                    <p>$\log_a b$ est le nombre auquel il faut élever $a$ pour obtenir $b$ :
+                        $$\log_a b = x \quad \Longleftrightarrow \quad a^x = b \qquad (a > 0,\ a \neq 1,\ b > 0)$$</p>
+                    <p><b>Logarithme décimal :</b> $\log b = \log_{10} b$ (le manuel allemand écrit $\lg$). <b>Logarithme népérien :</b> $\ln b = \log_e b$ avec le nombre d’Euler $e \approx 2{,}71828$.</p>
+                    <p><b>Changement de base</b> pour la calculatrice : $\log_a b = \dfrac{\log b}{\log a} = \dfrac{\ln b}{\ln a}$</p>
+                    <p><b>Fonction logarithme</b> $f(x) = \log_a x$ : fonction réciproque de $a^x$. $D$ : $x > 0$, $W = \mathbb{R}$, zéro $x = 1$, asymptote verticale $x = 0$.
+                        Croissante pour $a > 1$, décroissante pour $0 < a < 1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Toujours :</b> $\log_a 1 = 0$, $\log_a a = 1$, $\log_a a^x = x$.</p>
+            <p class="b-note"><b>Histoire :</b> John Napier publia en 1614 les premières tables de logarithmes. Elles transformaient les multiplications en additions et facilitèrent les calculs des astronomes.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">FONCTIONS LOGARITHMES COMPARÉES</div>
+        <div data-widget="graph" data-fns='["log2(x)","log10(x)","log(x)/log(0.5)"]' data-labels='["log₂ x","log x","log₀,₅ x"]' data-lat="[5.2,6,5.2]" data-x="-1,8" data-y="-3.5,3.5" data-pts="[[1,0]]" data-aria="Trois fonctions logarithmes, toutes passant par (1 ; 0)"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · DES LOGARITHMES DE TÊTE</div>
+            <div class="b-text"><p>Calcule $\log_2 8$, $\log 1000$, $\log_3 \tfrac19$, $\log 0{,}01$.</p></div>
+            <div class="b-sol"><p>$3$ (car $2^3 = 8$) · $3$ · $-2$ (car $3^{-2} = \tfrac19$) · $-2$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · COMPTER LES CHIFFRES</div>
+            <div class="b-text"><p>Combien de chiffres a $2^{100}$ ?</p></div>
+            <div class="b-sol"><p>Un nombre $z$ avec $10^{k} \leq z < 10^{k+1}$ a $k + 1$ chiffres, et $k$ est la partie entière de $\log z$.
+                $\log 2^{100} = 100 \cdot \log 2 \approx 30{,}1$. Donc $2^{100}$ a <span class="b-res">31 chiffres</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule sans calculatrice : a) $\log_2 64$ &nbsp; b) $\log_5 125$ &nbsp; c) $\log 0{,}001$ &nbsp; d) $\log_7 1$ &nbsp; e) $\log_4 2$</p></div>
+            <div class="b-sol"><p>a) $6$ &nbsp; b) $3$ &nbsp; c) $-3$ &nbsp; d) $0$ &nbsp; e) $\tfrac12$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Écris sous forme d’égalité de puissances : a) $\log_3 81 = 4$ &nbsp; b) $\log 100\,000 = 5$. Écris sous forme de logarithme : c) $2^{10} = 1024$</p></div>
+            <div class="b-sol"><p>a) $3^4 = 81$ &nbsp; b) $10^5 = 100\,000$ &nbsp; c) $\log_2 1024 = 10$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule avec la calculatrice grâce au changement de base : $\log_2 10$, $\log_3 50$, $\log_{1{,}05} 2$.</p></div>
+            <div class="b-sol"><p>$\approx 3{,}322$ · $\approx 3{,}561$ · $\approx 14{,}21$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Compare $f(x) = \log_2 x$ et $g(x) = \log_{0{,}5} x$ : qu’ont-elles en commun, en quoi diffèrent-elles ? Utilise le graphique ci-dessus.</p></div>
+            <div class="b-sol"><p>En commun : $D$ : $x > 0$, zéro en 1, asymptote $x = 0$. $f$ croît, $g$ décroît. $g$ est la symétrique de $f$ par rapport à l’axe des $x$ : $g(x) = -f(x)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Combien de chiffres a $3^{50}$ ? Combien en a le nombre premier record découvert en 2024, $2^{136\,279\,841} - 1$ ?</p></div>
+            <div class="b-sol"><p>$50 \cdot \log 3 \approx 23{,}86$ : 24 chiffres. $136\,279\,841 \cdot \log 2 \approx 41\,024\,319{,}9$ : donc environ 41 millions de chiffres (le « $-1$ » ne change pas le nombre de chiffres).</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Calcule $\log_2 64$.</p><div class="b-sol"><p>$2^6 = 64$</p></div></div>
+        <div class="b-q" data-ans="-3" data-ph="nombre"><p class="b-q-text">Calcule $\log 0{,}001$.</p><div class="b-sol"><p>$10^{-3} = 0{,}001$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">Où se trouve le zéro de toute fonction logarithme ?</p><div class="b-sol"><p>En $x = 1$, car $a^0 = 1$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Équations exponentielles" data-toc-k="3" data-toc-short="3 Équations">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">5 HEURES</span></div>
+    <h2><span class="b-no">3</span>Résoudre des équations exponentielles</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Au chapitre 2, une question est restée ouverte : quand 1 000 € placés à 3 % deviennent-ils 1 500 € ? On cherche $n$ dans $1000 \cdot 1{,}03^n = 1500$.
+                Maintenant, tu peux la résoudre de façon exacte.</p></div></div>
+            <div class="b-text"><p>D’abord isoler la puissance : $1{,}03^n = 1{,}5$. Puis passer au logarithme : $n = \log_{1{,}03} 1{,}5 = \dfrac{\log 1{,}5}{\log 1{,}03} \approx 13{,}72$.
+                Au bout de 14 ans, l’objectif d’épargne est atteint.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · ÉQUATION EXPONENTIELLE</div>
+                <div class="b-text">
+                    <p>Pour $a > 0$, $a \neq 1$, $b > 0$, l’équation $a^x = b$ a exactement une solution : $x = \log_a b = \dfrac{\log b}{\log a}$. Pour $b \leq 0$, il n’y a pas de solution.</p>
+                    <p><b>Démarche :</b> isoler la puissance d’un côté · passer au logarithme · vérifier.</p>
+                    <p><b>Demi-vie</b> avec le facteur $q$ par étape de temps : $T_{1/2} = \dfrac{\log 0{,}5}{\log q}$ · <b>temps de doublement</b> : $T_2 = \dfrac{\log 2}{\log q}$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sans calculatrice</b>, c’est possible si les deux membres sont des puissances de la même base : $4^x = 32 \Rightarrow 2^{2x} = 2^5 \Rightarrow x = 2{,}5$.</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · RÉSOUDRE $a^x = b$</div>
+        <p class="b-help" style="margin:0 0 12px">Saisis la base et le membre de droite. Les fractions et les nombres décimaux marchent aussi.</p>
+        <div data-widget="expgleichung"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · D’ABORD TRANSFORMER</div>
+            <div class="b-text"><p>Résous $5 \cdot 2^x = 80$ et $3^x = 20$.</p></div>
+            <div class="b-sol"><p>$2^x = 16 \Rightarrow x = 4$ · $x = \tfrac{\log 20}{\log 3} \approx 2{,}727$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · TEMPS DE DOUBLEMENT</div>
+            <div class="b-text"><p>Une population croît de 1,2 % par an. Au bout de combien d’années a-t-elle doublé ?</p></div>
+            <div class="b-sol"><p>$1{,}012^n = 2 \Rightarrow n = \tfrac{\log 2}{\log 1{,}012} \approx 58{,}1$ ans. Règle empirique : $72 : 1{,}2 = 60$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Résous : a) $2^x = 50$ &nbsp; b) $1{,}05^x = 2$ &nbsp; c) $0{,}8^x = 0{,}1$ &nbsp; d) $4 \cdot 3^x = 108$</p></div>
+            <div class="b-sol"><p>a) $\approx 5{,}644$ &nbsp; b) $\approx 14{,}21$ &nbsp; c) $\approx 10{,}32$ &nbsp; d) $3^x = 27$, $x = 3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Le corps élimine un médicament à raison de 15 % par heure. Au bout de combien de temps reste-t-il moins de 10 % de la dose dans le sang ?</p></div>
+            <div class="b-sol"><p>$0{,}85^t = 0{,}1 \Rightarrow t = \tfrac{\log 0{,}1}{\log 0{,}85} \approx 14{,}2$ h, donc au bout d’un peu plus de 14 heures.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une substance diminue de 5 % par an. Calcule la demi-vie.</p></div>
+            <div class="b-sol"><p>$T_{1/2} = \tfrac{\log 0{,}5}{\log 0{,}95} \approx 13{,}5$ ans</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Datation au carbone 14 :</b> le carbone 14 a une demi-vie de 5 730 ans. Dans un os, il ne reste plus que 30 % du C-14 d’origine. Quel est son âge ?</p></div>
+            <div class="b-sol"><p>$0{,}5^{t/5730} = 0{,}3 \Rightarrow \tfrac{t}{5730} = \tfrac{\log 0{,}3}{\log 0{,}5} \approx 1{,}737 \Rightarrow t \approx 9\,950$. L’os a environ <span class="b-res">10 000 ans</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">Résous $3^x = 81$.</p><div class="b-sol"><p>$x = 4$</p></div></div>
+        <div class="b-q" data-ans="3,585" data-tol="0.003" data-ph="x ≈"><p class="b-q-text">Résous $2^x = 12$ (trois décimales).</p><div class="b-sol"><p>$\tfrac{\log 12}{\log 2} \approx 3{,}585$</p></div></div>
+        <div class="b-q" data-ans="10,24" data-tol="0.02" data-ph="ans"><p class="b-q-text">Au bout de combien d’années un capital double-t-il à 7 % d’intérêts ?</p><div class="b-sol"><p>$\tfrac{\log 2}{\log 1{,}07} \approx 10{,}24$ ans</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Donne la fonction réciproque de $f(x) = 10^x$ et esquisse les deux courbes.</p></div>
+            <div class="b-sol"><p>$f^{-1}(x) = \log x$. Symétriques par rapport à $y = x$, $f$ passe par $(0\,;\,1)$, $f^{-1}$ par $(1\,;\,0)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier au chapitre 3.2 :</b> l’iode 131 a une demi-vie de 8 jours. Au bout de combien de jours en reste-t-il moins de 1 % ?</p></div>
+            <div class="b-sol"><p>$0{,}5^{t/8} = 0{,}01 \Rightarrow t = 8 \cdot \tfrac{\log 0{,}01}{\log 0{,}5} \approx 53{,}2$ jours.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Montre que $\log(100 \cdot 1000) = \log 100 + \log 1000$. Formule une règle générale et explique pourquoi elle est vraie.</p></div>
+            <div class="b-sol"><p>$5 = 2 + 3$. En général $\log_a(u \cdot v) = \log_a u + \log_a v$, car en multipliant des puissances de même base, on additionne les exposants : $a^r \cdot a^s = a^{r+s}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Benford" data-toc-k="X" data-toc-short="Benford">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">LES LOGARITHMES DÉMASQUENT LA FRAUDE</span></div>
+    <h2>Pourquoi tant de nombres commencent par 1</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En 1881, l’astronome Simon Newcomb remarqua que, dans les tables de logarithmes, les premières pages étaient bien plus usées que les dernières : on cherchait plus souvent des nombres commençant par 1.
+                En 1938, le physicien Frank Benford étudia plus de 20 000 nombres de la vie réelle et trouva le même schéma.</p>
+            <p>D’après la <b>loi de Benford</b>, un nombre commence par le chiffre $d$ avec la probabilité $P(d) = \log\left(1 + \tfrac1d\right)$.</p>
+            <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                <tr><th>Chiffre</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>
+                <tr><th>Part</th><td class="b-hot">30,1 %</td><td>17,6 %</td><td>12,5 %</td><td>9,7 %</td><td>7,9 %</td><td>6,7 %</td><td>5,8 %</td><td>5,1 %</td><td>4,6 %</td></tr></table></div>
+            <p>Les nombres inventés la respectent rarement. Les contrôleurs fiscaux s’en servent pour repérer des comptabilités falsifiées.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> S. Newcomb, American Journal of Mathematics 4 (1881) · F. Benford, Proceedings of the American Philosophical Society 78 (1938).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>FONCTION RÉCIPROQUE</h4><p>Résoudre par rapport à $x$, échanger $x$ et $y$. Symétriser la courbe par rapport à $y = x$. Possible seulement si chaque valeur de $y$ est atteinte une seule fois.</p></div><div><p>$2x + 1 \to \tfrac{x - 1}{2}$ · $x^2\ (x \geq 0) \to \sqrt{x}$</p></div></div>
+    <div class="b-rueck"><div><h4>RACINES ET PUISSANCES</h4><p>$\sqrt[n]{x^m} = x^{\frac{m}{n}}$</p></div><div><p>$8^{\frac23} = 4$ · $27^{-\frac13} = \tfrac13$</p></div></div>
+    <div class="b-rueck"><div><h4>LOGARITHME</h4><p>$\log_a b = x \Leftrightarrow a^x = b$ · $\log = \log_{10}$, $\ln = \log_e$ · changement de base $\tfrac{\log b}{\log a}$</p></div><div><p>$\log_2 8 = 3$ · $\log 0{,}01 = -2$</p></div></div>
+    <div class="b-rueck"><div><h4>FONCTION LOGARITHME</h4><p>$D$ : $x > 0$, $W = \mathbb{R}$, zéro 1, asymptote $x = 0$</p></div><div><p>$\log_2 x$ croît, $\log_{0{,}5} x$ décroît</p></div></div>
+    <div class="b-rueck"><div><h4>ÉQUATION EXPONENTIELLE</h4><p>Isoler la puissance, passer au logarithme. $T_{1/2} = \tfrac{\log 0{,}5}{\log q}$, $T_2 = \tfrac{\log 2}{\log q}$</p></div><div><p>$1{,}03^n = 1{,}5 \Rightarrow n \approx 13{,}72$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">Calcule $\log_3 243$.</p><div class="b-sol"><p>$3^5 = 243$</p></div></div>
+            <div class="b-q" data-ans="2,5" data-tol="0.001" data-ph="x ="><p class="b-q-text">Résous $4^x = 32$.</p><div class="b-sol"><p>$2^{2x} = 2^5 \Rightarrow x = 2{,}5$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Soit $f(x) = \tfrac12 x - 3$. Calcule $f^{-1}(-1)$.</p><div class="b-sol"><p>$f^{-1}(x) = 2x + 6$, donc $f^{-1}(-1) = 4$.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="13,72" data-tol="0.02" data-ph="ans"><p class="b-q-text">Résous $1000 \cdot 1{,}03^n = 1500$.</p><div class="b-sol"><p>$n \approx 13{,}72$</p></div></div>
+            <div class="b-q" data-ans="14,2" data-tol="0.1" data-ph="heures"><p class="b-q-text">Un médicament est éliminé à raison de 15 % par heure. Au bout de combien d’heures en reste-t-il 10 % (une décimale) ?</p><div class="b-sol"><p>$\tfrac{\log 0{,}1}{\log 0{,}85} \approx 14{,}2$</p></div></div>
+            <div class="b-q" data-ans="31" data-ph="nombre"><p class="b-q-text">Combien de chiffres a $2^{100}$ ?</p><div class="b-sol"><p>$100 \cdot \log 2 \approx 30{,}1$ : 31 chiffres</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-umkehrfunktion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FONCTION RÉCIPROQUE</span><span class="b-lab-what">Symétrie, racines, puissances</span></span></a>
+        <a class="b-lab" href="../../mathetest11-logarithmus.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LOGARITHME</span><span class="b-lab-what">Notion et propriétés</span></span></a>
+        <a class="b-lab" href="../../mathetest11-exponentialgleichungen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ÉQUATIONS EXPONENTIELLES</span><span class="b-lab-what">Demi-vie, temps de doublement</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 11e année · domaine d’apprentissage 3 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+</body>
+</html>
