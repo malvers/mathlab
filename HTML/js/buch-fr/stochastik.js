@@ -85,6 +85,7 @@ window.BuchFR && BuchFR.add('stochastik', {
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Loi binomiale sous l’hypothèse nulle avec la zone de rejet',
         // signifikanztest: the side of the test (B.seg)
         'linksseitig': 'unilatéral à gauche', 'rechtsseitig': 'unilatéral à droite', 'zweiseitig': 'bilatéral',
+        'Test:': 'Test :',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     },
@@ -169,6 +170,9 @@ window.BuchFR && BuchFR.add('stochastik', {
         [/(<text\b[^>]*>)([TN]{1,4})(<\/text>)/g, (m, a, k, b) => a + k.replace(/T/g, 'S').replace(/N/g, 'E') + b],
         [/Pfade mit genau (\d+) Treffern: \$/g, 'Chemins avec exactement $1 succès : $'],
         // book fr-3 mathe13-fr:
+        // signifikanztest: the rejection region as a French list {32 ; … ; 50}, and a no-break space before the colon after "$k = …$"
+        [/(Ablehnungsbereich \(rot\): \$\\overline\{A\} = )([^$]*)/g, (m, a, b) => a + b.replace(/, /g, '\\,;\\,')],
+        [/(Beobachtet \$k = [^$]*\$):/g, '$1 :'],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
     ]

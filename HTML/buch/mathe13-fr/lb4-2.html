@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 13 · Chapitre 4.2 · Tests d’hypothèse | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Hypothèses, zone de rejet, erreurs de première et de deuxième espèce. Chapitre 4.2 du manuel interactif Mathématiques · Berufliches Gymnasium 13 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 13</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 4.2 · DOMAINE D’APPRENTISSAGE 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 4.2 · DOMAINE D’APPRENTISSAGE 4 · NOVEMBRE · DÉCEMBRE</p>
+            <h1>Tests d’hypothèse</h1>
+            <p class="b-hero-lead">Une pièce tombe 33 fois sur face en 50 lancers. Est-elle truquée, ou était-ce le hasard ? Dans une étude, un médicament guérit 72 malades sur 100, l’ancien seulement 60 %.
+                Est-il vraiment plus efficace ? Un <b>test d’hypothèse</b> prend de telles décisions selon une règle fixée et te dit exactement à quelle fréquence on se trompe.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">DÉCIDER DANS L’INCERTITUDE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="50" data-p="0.5" data-lo="32" data-hi="50" data-step="10"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>formuler l’<b>hypothèse nulle</b> et l’<b>hypothèse alternative</b>, fixer la variable de décision et le <b>seuil de signification</b></li>
+                <li>déterminer la <b>zone de rejet</b> et la <b>valeur critique</b>, et énoncer une <b>règle de décision</b></li>
+                <li>effectuer des tests <b>unilatéraux</b> et <b>bilatéraux</b>, aussi avec le CAS</li>
+                <li>distinguer et interpréter les <b>erreurs de première et de deuxième espèce</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="25" data-ph="μ ="><p class="b-q-text">Espérance du nombre de « face » en 50 lancers d’une pièce équilibrée ?</p><div class="b-sol"><p>25</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$P(X \ge 32)$ est égal à…</p>
+                <div class="b-mc"><button>$1 - P(X \le 32)$</button><button>$P(X \le 31)$</button><button>$1 - P(X \le 31)$</button></div>
+                <div class="b-sol"><p>L’événement contraire de « au moins 32 » est « au plus 31 ».</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="pourcentage"><p class="b-q-text">Combien de pour cent représente 0,05 ?</p><div class="b-sol"><p>5 %</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">À PARTIR DE QUAND EST-ELLE TRUQUÉE ?</div>
+            <div class="b-text"><p>On lance une pièce 50 fois. Vous voulez décider si elle favorise « face ».</p>
+                <ul><li>À partir de combien de « face » diriez-vous « truquée » ? Mettez-vous d’accord sur un nombre.</li><li>À quelle fréquence accuseriez-vous ainsi à tort une pièce équilibrée ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DEUX FAÇONS DE SE TROMPER</div>
+            <div class="b-text"><p>Un test COVID, un détecteur de fumée, un tribunal : tous peuvent se tromper de deux façons différentes.</p>
+                <ul><li>Décrivez les deux erreurs pour chaque exemple. Laquelle est la plus grave à chaque fois ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE DÉ ÉQUILIBRÉ</div>
+            <div class="b-text"><p>On lance un dé 120 fois ; le six sort 28 fois.</p>
+                <ul><li>Combien de six attendez-vous ? 28 est-il suspect ?</li><li>8 serait-il suspect aussi ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Tests unilatéraux" data-toc-k="1" data-toc-short="1 Unilatéral">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Hypothèses, zone de rejet, règle de décision</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Supposons d’abord que la pièce est équilibrée : $p = 0{,}5$. Sous cette hypothèse, $X$, le nombre de « face » en 50 lancers, suit la loi binomiale de paramètres $n = 50$ et $p = 0{,}5$.
+                Les très grandes valeurs sont alors rares : $P(X \ge 32) \approx 0{,}032$, $P(X \ge 31) \approx 0{,}059$.</p></div></div>
+            <div class="b-text"><p>Nous décidons : si l’on obtient 32 « face » ou plus, nous ne croyons plus que la pièce est équilibrée. Nous ne soupçonnerions ainsi à tort une pièce équilibrée que dans environ 3,2 % des cas.
+                On fixe cette limite <b>avant</b> de lancer.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TEST D’HYPOTHÈSE</div>
+                <div class="b-text">
+                    <p><b>Hypothèse nulle</b> $H_0\colon p = p_0$ (la situation connue jusqu’ici), <b>hypothèse alternative</b> $H_1$, par exemple $p > p_0$ (unilatéral à droite) ou $p < p_0$ (unilatéral à gauche).</p>
+                    <p><b>Variable de décision</b> $X$ : nombre de succès dans l’échantillon ; sous $H_0$, elle suit la loi binomiale de paramètres $n$ et $p_0$. <b>Seuil de signification</b> $\alpha$, le plus souvent 5 %.</p>
+                    <p><b>Zone de rejet</b> $\overline{A}$ : les valeurs extrêmes qui, sous $H_0$, ont ensemble une probabilité d’au plus $\alpha$. À droite, $\overline{A} = \{k\,;\,\ldots\,;\,n\}$ avec le plus petit $k$
+                        tel que $P(X \ge k) \le \alpha$. $k$ s’appelle la <b>valeur critique</b>.</p>
+                    <p><b>Règle de décision :</b> si le résultat est dans $\overline{A}$, on rejette $H_0$ : le résultat est <b>significatif</b>. Sinon, on ne rejette pas $H_0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Ce qu’on veut montrer va dans $H_1$.</b> Car seul le rejet de $H_0$ est une affirmation forte, avec un risque d’erreur connu.</p>
+            <p class="b-note"><b>Ne pas rejeter</b> ne veut pas dire prouver. Cela veut seulement dire : les données ne suffisent pas pour réfuter $H_0$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE TEST D’HYPOTHÈSE</div>
+        <p class="b-help" style="margin:0 0 12px">Règle $n$, $p_0$, le type de test et $\alpha$. En rouge, la zone de rejet. Déplace le nombre de succès observé $k$ et lis la décision.</p>
+        <div data-widget="signifikanztest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · LE NOUVEAU MÉDICAMENT</div>
+            <div class="b-text"><p>Un ancien médicament guérit 60 % des malades. Le fabricant d’un nouveau affirme qu’il est plus efficace. Dans une étude portant sur 100 malades, 72 sont guéris. Teste avec $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}6$, $H_1\colon p > 0{,}6$, $X \sim B(100\,;\,0{,}6)$. $P(X \ge 69) \approx 0{,}040 \le 0{,}05$, mais $P(X \ge 68) \approx 0{,}062$. Donc $\overline{A} = \{69\,;\,\ldots\,;\,100\}$.</p>
+                <p>72 est dans la zone de rejet : <span class="b-res">on rejette $H_0$.</span> La meilleure efficacité est significative au seuil de 5 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · UNILATÉRAL À GAUCHE</div>
+            <div class="b-text"><p>Un parti affirme recueillir 40 % d’opinions favorables. Une adversaire en soupçonne moins et interroge 200 personnes. Détermine la zone de rejet pour $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}4$, $H_1\colon p < 0{,}4$. On cherche le plus grand $k$ tel que $P(X \le k) \le 0{,}05$ : $P(X \le 68) \approx 0{,}047$.
+                <span class="b-res">$\overline{A} = \{0\,;\,\ldots\,;\,68\}$</span>. Ce n’est qu’avec 68 avis favorables ou moins que la conjecture est étayée.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Formule $H_0$ et $H_1$ : a) un fournisseur garantit au plus 10 % de pièces défectueuses, l’acheteur en doute. b) un professeur soupçonne que plus de la moitié de la classe copie les devoirs.</p></div>
+            <div class="b-sol"><p>a) $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$ &nbsp; b) $H_0\colon p = 0{,}5$, $H_1\colon p > 0{,}5$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Pour l’exercice 1 a) : l’acheteur contrôle 50 pièces. Détermine avec le widget la zone de rejet pour $\alpha = 5\,\%$. Que décide-t-il avec 7 pièces défectueuses ?</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{10\,;\,\ldots\,;\,50\}$ ($P(X \ge 10) \approx 0{,}025$, $P(X \ge 9) > 0{,}05$). Avec 7, on ne rejette pas $H_0$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Comment la zone de rejet du test de la pièce ($n = 50$, à droite) change-t-elle si l’on choisit $\alpha = 1\,\%$ au lieu de $5\,\%$ ? Qu’est-ce que cela signifie pour la décision avec 33 « face » ?</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{34\,;\,\ldots\,;\,50\}$ au lieu de $\{32\,;\,\ldots\}$. Avec 33 « face » : significatif au seuil de 5 %, mais pas au seuil de 1 %.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Pourquoi faut-il fixer $\alpha$ et la zone de rejet <b>avant</b> de connaître les données ?</p></div>
+            <div class="b-sol"><p>Sinon, on peut placer la limite de façon à obtenir le résultat souhaité. Le risque d’erreur annoncé n’est alors plus exact.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="32" data-ph="k ="><p class="b-q-text">Test de la pièce $n = 50$, $p_0 = 0{,}5$, unilatéral à droite, $\alpha = 5\,\%$ : plus petite valeur de la zone de rejet ?</p><div class="b-sol"><p>32</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Le résultat n’est pas dans la zone de rejet. Alors…</p>
+            <div class="b-mc"><button>$H_0$ est prouvée</button><button>on ne rejette pas $H_0$</button><button>$H_1$ est prouvée</button></div>
+            <div class="b-sol"><p>Les données ne suffisent pas pour réfuter $H_0$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Tests bilatéraux, erreurs de 1re et 2e espèce" data-toc-k="2" data-toc-short="2 Erreurs">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Tests bilatéraux, erreurs de première et de deuxième espèce</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un dé est-il équilibré ? Seraient suspects <b>trop</b> de six et <b>trop peu</b> de six. On répartit donc $\alpha$ des deux côtés, $\tfrac{\alpha}{2}$ de chaque côté.</p></div></div>
+            <div class="b-text"><p>Toute décision peut être fausse. Si l’on rejette $H_0$ alors qu’elle est vraie, c’est une <b>erreur de première espèce</b>. Sa probabilité, le risque de première espèce, est d’au plus $\alpha$.
+                Si l’on conserve $H_0$ alors qu’en réalité une autre valeur de $p$ est vraie, c’est une <b>erreur de deuxième espèce</b>. Sa probabilité $\beta$, le risque de deuxième espèce, dépend de la vraie valeur de $p$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · BILATÉRAL, ERREURS DE 1re ET 2e ESPÈCE</div>
+                <div class="b-text">
+                    <p><b>Test bilatéral</b> $H_0\colon p = p_0$ contre $H_1\colon p \neq p_0$ : $\overline{A} = \{0\,;\,\ldots\,;\,l\} \cup \{r\,;\,\ldots\,;\,n\}$ avec le plus grand $l$ tel que $P(X \le l) \le \tfrac{\alpha}{2}$ et le plus petit $r$ tel que $P(X \ge r) \le \tfrac{\alpha}{2}$.</p>
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th></th><th>$H_0$ est vraie</th><th>$H_1$ est vraie</th></tr>
+                        <tr><th>$H_0$ rejetée</th><td><b>erreur de 1re espèce</b> (au plus $\alpha$)</td><td>juste</td></tr>
+                        <tr><th>$H_0$ non rejetée</th><td>juste</td><td><b>erreur de 2e espèce</b> ($\beta$)</td></tr></table></div>
+                    <p>Un $\alpha$ plus petit rend l’erreur de première espèce plus rare, mais celle de deuxième espèce plus fréquente. Seule une plus grande taille d’échantillon diminue les deux.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Au tribunal :</b> $H_0$ = innocent. Erreur de première espèce : condamner un innocent. Erreur de deuxième espèce : acquitter un coupable. On maintient volontairement la première à un niveau bas.</p>
+            <p class="b-note"><b>Dans le widget :</b> coche « Afficher l’erreur de 2e espèce » et choisis une vraie valeur de $p$. La vraie distribution apparaît alors en violet.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · LE DÉ, BILATÉRAL</div>
+            <div class="b-text"><p>On lance un dé 120 fois. Teste $H_0\colon p = \tfrac16$ (le six) contre $H_1\colon p \neq \tfrac16$ avec $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$2{,}5\,\%$ de chaque côté : $P(X \le 11) \approx 0{,}014$, $P(X \ge 29) \approx 0{,}022$. <span class="b-res">$\overline{A} = \{0\,;\,\ldots\,;\,11\} \cup \{29\,;\,\ldots\,;\,120\}$.</span>
+                28 six ne sont donc pas encore significatifs, 8 six le sont.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · ERREUR DE 2e ESPÈCE</div>
+            <div class="b-text"><p>Dans le test du médicament (exemple 1), le nouveau produit guérit en réalité 70 % des malades. Quelle est la probabilité que le test ne le détecte pas ?</p></div>
+            <div class="b-sol"><p>Erreur de deuxième espèce : on ne rejette pas $H_0$, donc $X \le 68$, alors que $p = 0{,}7$. $\beta = P(X \le 68) \approx 0{,}367$.
+                <span class="b-res">Dans plus d’un cas sur trois</span>, l’amélioration passerait inaperçue. Avec $p = 0{,}75$, ce ne serait plus qu’environ 7 %.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Décris dans le contexte l’erreur de première et celle de deuxième espèce pour le test du médicament.</p></div>
+            <div class="b-sol"><p>1re espèce : on croit le nouveau produit meilleur alors qu’il ne l’est pas. 2e espèce : on ne le croit pas meilleur alors qu’il l’est.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>On lance une pièce 20 fois. Détermine avec le widget la zone de rejet d’un test bilatéral avec $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$\overline{A} = \{0\,;\,\ldots\,;\,5\} \cup \{15\,;\,\ldots\,;\,20\}$, $\approx 2{,}1\,\%$ de chaque côté.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Pour le parti de l’exemple 2, la vraie proportion d’avis favorables est de 35 %. Quelle est la probabilité que l’adversaire ne puisse quand même pas étayer sa conjecture ?</p></div>
+            <div class="b-sol"><p>$\beta = P(X \ge 69)$ avec $p = 0{,}35$, $n = 200$ : $\approx 0{,}585$. Le test est trop faible pour de si petites différences ; il faudrait interroger plus de personnes.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Essaie dans le widget : comment $\beta$ change-t-elle dans le test du médicament (vraie valeur $p = 0{,}7$) si l’on fait passer $n$ de 100 à 200 ? Explique.</p></div>
+            <div class="b-sol"><p>$\beta$ diminue nettement (jusqu’à environ 0,1). Avec plus de données, les distributions deviennent relativement plus étroites et se chevauchent moins ; le test sépare mieux.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$H_0$ est vraie, mais on la rejette. C’est…</p>
+            <div class="b-mc"><button>une erreur de première espèce</button><button>une erreur de deuxième espèce</button><button>une décision juste</button></div>
+            <div class="b-sol"><p>Erreur de première espèce, de probabilité au plus $\alpha$.</p></div></div>
+        <div class="b-q" data-ans="29" data-ph="r ="><p class="b-q-text">Test du dé de l’exemple 3 : plus petite valeur de la zone de rejet de droite ?</p><div class="b-sol"><p>29</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Une entreprise affirme que 20 % de ses billets de loterie sont gagnants. Tu soupçonnes plus de billets perdants, donc moins de 20 % de gagnants. Formule les hypothèses.</p></div>
+            <div class="b-sol"><p>$H_0\colon p = 0{,}2$, $H_1\colon p < 0{,}2$ (unilatéral à gauche).</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une pièce tombe 9 fois sur face en 10 lancers. Fais un test unilatéral à droite avec $\alpha = 5\,\%$.</p></div>
+            <div class="b-sol"><p>$P(X \ge 9) = \tfrac{11}{1024} \approx 0{,}011$, $P(X \ge 8) \approx 0{,}055$. $\overline{A} = \{9\,;\,10\}$ : on rejette $H_0$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Relier avec le chapitre 1.1 de la 12e année :</b> explique pourquoi l’affirmation « Le résultat est significatif, donc $H_0$ est fausse à 95 % » est incorrecte.</p></div>
+            <div class="b-sol"><p>$\alpha$ vaut $P_{H_0}(\text{rejet})$, une probabilité conditionnelle sachant que $H_0$ est vraie. L’affirmation la confond avec $P_{\text{rejet}}(H_0 \text{ fausse})$,
+                comme on confondrait, pour un test rapide, $P_M(+)$ et $P_+(M)$ ($M$ : malade).</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : la dame qui goûtait le thé" data-toc-k="X" data-toc-short="Thé">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">LE TEST LE PLUS CÉLÈBRE DE LA STATISTIQUE</span></div>
+    <h2>La dame qui goûtait le thé</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Dans son livre sur la planification des expériences, le statisticien anglais Ronald A. Fisher raconte l’histoire d’une dame qui affirmait reconnaître au goût
+                si l’on avait versé d’abord le lait ou d’abord le thé dans la tasse.</p>
+            <p>Fisher conçut le test ainsi : huit tasses, quatre de chaque sorte, dans un ordre aléatoire. La dame doit retrouver les quatre tasses « lait d’abord ». Si elle ne fait que deviner, il y a
+                $\binom84 = 70$ choix également probables ; trouver les quatre n’a donc qu’une probabilité de $\tfrac{1}{70} \approx 1{,}4\,\%$.
+                Si elle y parvient, on rejette l’hypothèse nulle « elle ne fait que deviner ». Fisher en fit le schéma de base de tout test d’hypothèse.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> Ronald A. Fisher : The Design of Experiments. Oliver and Boyd, Édimbourg 1935, chapitre 2.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>HYPOTHÈSES</h4><p>$H_0\colon p = p_0$ ; ce qu’on veut montrer va dans $H_1$.</p></div>
+        <div><p>Médicament : $H_1\colon p > 0{,}6$</p></div></div>
+    <div class="b-rueck"><div><h4>ZONE DE REJET</h4><p>Valeurs extrêmes de probabilité au plus $\alpha$ sous $H_0$.</p></div>
+        <div><p>Pièce $n = 50$ : $\{32\,;\,\ldots\,;\,50\}$</p></div></div>
+    <div class="b-rueck"><div><h4>BILATÉRAL</h4><p>$\tfrac{\alpha}{2}$ de chaque côté.</p></div>
+        <div><p>Dé $n = 120$ : $\{0\,;\,\ldots\,;\,11\} \cup \{29\,;\,\ldots\,;\,120\}$</p></div></div>
+    <div class="b-rueck"><div><h4>ERREURS DE 1re ET 2e ESPÈCE</h4><p>1re espèce : $H_0$ rejetée à tort ($\le \alpha$). 2e espèce : $H_0$ conservée à tort ($\beta$).</p></div>
+        <div><p>Médicament, vraie valeur $p = 0{,}7$ : $\beta \approx 0{,}37$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+            <div class="b-q" data-ans="69" data-ph="k ="><p class="b-q-text">Test du médicament $n = 100$, $p_0 = 0{,}6$, unilatéral à droite, $\alpha = 5\,\%$ : valeur critique ?</p><div class="b-sol"><p>69</p></div></div>
+            <div class="b-q" data-ans="68" data-ph="k ="><p class="b-q-text">Test du parti $n = 200$, $p_0 = 0{,}4$, unilatéral à gauche, $\alpha = 5\,\%$ : plus grande valeur de la zone de rejet ?</p><div class="b-sol"><p>68</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$H_1$ est vraie, mais on ne rejette pas $H_0$. C’est…</p>
+                <div class="b-mc"><button>une erreur de première espèce</button><button>une erreur de deuxième espèce</button><button>juste</button></div>
+                <div class="b-sol"><p>Erreur de deuxième espèce</p></div></div>
+            <div class="b-q" data-ans="1/70" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Quelle est la probabilité que la dame au thé choisisse au hasard les quatre bonnes tasses ?</p><div class="b-sol"><p>$\tfrac{1}{70}$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">La loi binomiale derrière chaque test</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 13e année · Domaine d’apprentissage 4 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+</body>
+</html>
