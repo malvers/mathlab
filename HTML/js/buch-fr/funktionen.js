@@ -44,6 +44,44 @@ window.BuchFR && BuchFR.add('funktionen', {
         'Zaun an der Mauer': 'Clôture le long d’un mur',
         'Rechteck mit Umfang 24 cm': 'Rectangle de périmètre 24 cm',
         // book fr-1 mathe11-fr:
+        // detektiv, wachstum, gerade, parabel, wurf, einheitskreis, sinus, tageslaenge, regression, anscombe, umkehr, expgleichung,
+        // parameter, graphquiz (graph and the plot axis: js/buch-fr.js; the helpers of the module: the fr0 part above)
+        // detektiv ("keine" stands for no zeros, no symmetry, no asymptotes: "il n’y en a pas" fits all three)
+        'Graph der gewählten Funktion': 'Courbe de la fonction choisie', 'Alle aufdecken': 'Tout dévoiler', 'aufdecken': 'dévoiler',
+        'Definitionsbereich': 'Ensemble de définition', 'Wertebereich': 'Ensemble des images', 'Nullstellen': 'Zéros', 'Monotonie': 'Sens de variation',
+        'Symmetrie': 'Symétrie', 'Periodisch?': 'Périodique ?', 'Asymptoten': 'Asymptotes', 'nein': 'non', 'keine': 'il n’y en a pas',
+        // wachstum
+        'Sparen': 'Épargne', 'Kernzerfall': 'Désintégration radioactive', 'Eigene Werte': 'Valeurs au choix',
+        'Lineares und exponentielles Wachstum': 'Croissance linéaire et croissance exponentielle', 'Startwert $a$': 'Valeur initiale $a$',
+        'linear: Änderung $m$ pro Schritt': 'linéaire : variation $m$ par étape', 'exponentiell: Faktor $q$': 'exponentielle : facteur $q$',
+        'Zeitraum': 'Durée',
+        // gerade, parabel, wurf
+        'Gerade durch zwei verschiebbare Punkte': 'Droite passant par deux points mobiles',
+        'Streckfaktor $a$': 'Facteur d’étirement $a$', 'Verschiebung nach rechts $d$': 'Translation vers la droite $d$',
+        'Verschiebung nach oben $e$': 'Translation vers le haut $e$', 'Parabel mit verschiebbarem Scheitelpunkt': 'Parabole à sommet mobile',
+        'Abwurfhöhe $h_0$': 'Hauteur de lancer $h_0$', 'Abwurfgeschwindigkeit $v_0$': 'Vitesse de lancer $v_0$',
+        'Höhe beim senkrechten Wurf': 'Hauteur lors d’un lancer vertical', 't in s': 't en s', 'h in m': 'h en m',
+        // einheitskreis, sinus, tageslaenge
+        'Abspielen': 'Lancer', 'Anhalten': 'Pause', 'Winkel $\\alpha$': 'Angle $\\alpha$', 'Einheitskreis und Sinuskurve': 'Cercle trigonométrique et sinusoïde',
+        'Amplitude $a$': 'Amplitude $a$', 'Faktor $b$ (Periode $\\tfrac{2\\pi}{b}$)': 'Facteur $b$ (période $\\tfrac{2\\pi}{b}$)',
+        'Verschiebung $c$ nach rechts': 'Translation $c$ vers la droite', 'Verschiebung $d$ nach oben': 'Translation $d$ vers le haut',
+        'Sinusfunktion mit Parametern': 'Fonction sinus avec paramètres',
+        'Tag des Jahres': 'Jour de l’année', 't in Tagen': 't en jours', 'Stunden': 'heures', 'Tageslänge in Dresden': 'Durée du jour à Dresde',
+        // regression, anscombe
+        'Kerze': 'Bougie', 'Bremsweg': 'Distance de freinage', 'Abkühlen': 'Refroidissement', 'Weltbevölkerung': 'Population mondiale',
+        'Brenndauer in h': 'Durée de combustion en h', 'Länge in cm': 'Longueur en cm', 'Tempo in km/h': 'Vitesse en km/h',
+        'Bremsweg in m': 'Distance de freinage en m', 'Zeit in min': 'Temps en min', 'ΔT in °C': 'ΔT en °C', 'Jahr': 'Année',
+        'Mrd. Menschen': 'Mrd d’habitants', 'Messreihe': 'Série de mesures',
+        'Messpunkte und Regressionskurve': 'Points mesurés et courbe d’ajustement', 'Messpunkte lassen sich verschieben': 'Les points mesurés peuvent être déplacés',
+        'Für ein exponentielles Modell müssen die Werte positiv sein.': 'Pour un modèle exponentiel, les valeurs doivent être positives.',
+        'Datensatz': 'Jeu de données', 'Anscombe-Quartett': 'Quartet d’Anscombe',
+        // umkehr, expgleichung, parameter, graphquiz
+        'Funktion und Umkehrfunktion, gespiegelt an y = x': 'Fonction et fonction réciproque, symétriques par rapport à y = x',
+        'Basis $a$': 'Base $a$', 'rechte Seite $b$': 'membre de droite $b$', 'Lösen': 'Résoudre',
+        'Die Basis muss positiv und von 1 verschieden sein.': 'La base doit être positive et différente de 1.',
+        'Grundfunktion': 'Fonction de référence', 'Grundfunktion und veränderte Funktion': 'Fonction de référence et fonction transformée',
+        'Das ist die Grundfunktion selbst.': 'C’est la fonction de référence elle-même.',
+        'Graph, zu dem der Term gesucht ist': 'Courbe dont on cherche l’expression', 'Nächster Graph': 'Courbe suivante',
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
@@ -136,6 +174,54 @@ window.BuchFR && BuchFR.add('funktionen', {
     },
     phrase: [
         // book fr-1 mathe11-fr:
+        // parameter: c = 0 in f(c·x)
+        ['mit $c = 0$ ist $g(x) = f(0)$ konstant', 'avec $c = 0$, $g(x) = f(0)$ est constante'],
+        // detektiv
+        [' (doppelt)', ' (double)'], ['fallend für ', 'décroissante pour '], ['steigend für ', 'croissante pour '],
+        ['achsensymmetrisch zur $y$-Achse', 'symétrique par rapport à l’axe des $y$'], ['punktsymmetrisch zum Ursprung', 'symétrique par rapport à l’origine'],
+        ['überall steigend', 'croissante partout'], ['fallend auf ', 'décroissante sur '], [' und fallend auf ', ' et décroissante sur '],
+        [' (senkrecht) und ', ' (verticale) et '], ['(waagerecht)', '(horizontale)'], ['$ und $', '$ et $'],
+        ['abwechselnd steigend und fallend', 'tantôt croissante, tantôt décroissante'], ['ja, Periode ', 'oui, période '],
+        ['$ für $x', '$ pour $x'], ['$ mit $k', '$ avec $k'],
+        // wachstum
+        ['einfache Zinsen (30 € pro Jahr)', 'intérêts simples (30 € par an)'], ['Zinseszins (3 % pro Jahr)', 'intérêts composés (3 % par an)'],
+        ['linear: jeden Tag 6,25 Prozentpunkte weniger', 'linéaire : chaque jour 6,25 points de pourcentage de moins'],
+        ['Jod-131: Halbwertszeit 8 Tage', 'iode 131 : demi-vie 8 jours'],
+        [' — in jedem Schritt wird mit <b>demselben Faktor</b> multipliziert', ' — à chaque étape, on multiplie par <b>le même facteur</b>'],
+        [' — in jedem Schritt ', ' — à chaque étape, '], ['geht <b>gleich viel</b> weg', 'on enlève <b>la même quantité</b>'],
+        [' wäre alles verbraucht.', ', tout serait épuisé.'], ['kommt <b>gleich viel</b> hinzu.', 'on ajoute <b>la même quantité</b>.'],
+        ['. Nach $', '. Au bout de $'], [', das sind ', ', soit '], [' % pro Schritt. ', ' % par étape. '],
+        ['linear', 'linéaire'], ['exponentiell', 'exponentielle'], ['Verdopplungszeit', 'Temps de doublement'], ['Halbwertszeit', 'Demi-vie'],
+        ['Verdopplungszeit: ', 'Temps de doublement : '], ['Halbwertszeit: ', 'Demi-vie : '],
+        ['Jahre', 'ans'], ['Tage', 'jours'], ['Schritte', 'étapes'], ['Jahren', 'ans'], ['Tagen', 'jours'], ['Schritten', 'étapes'],
+        // gerade
+        ['Beide Punkte liegen senkrecht übereinander. Die Gerade $x = ', 'Les deux points sont sur la même verticale. La droite $x = '],
+        ['$ ist <b>kein</b> Funktionsgraph.', '$ <b>n’est pas</b> la courbe d’une fonction.'],
+        ['Steigung $m = ', 'Coefficient directeur $m = '], ['Achsenabschnitt $n = ', 'Ordonnée à l’origine $n = '], ['$ (weißer Punkt)', '$ (point blanc)'],
+        [' · Nullstelle $x_0 = ', ' · zéro $x_0 = '], [' · waagerechte Gerade', ' · droite horizontale'],
+        // parabel
+        ['Für $a = 0$ ist der Graph keine Parabel, sondern eine Gerade.', 'Pour $a = 0$, la courbe n’est pas une parabole mais une droite.'],
+        ['eine (doppelte) Nullstelle: $x = ', 'un zéro (double) : $x = '], ['Nullstellen: $x_1 = ', 'zéros : $x_1 = '],
+        ['Scheitelpunktform: $f(x) = ', 'Forme canonique : $f(x) = '], [' · Scheitel $S(', ' · sommet $S('], ['Normalform: $f(x) = ', 'Forme développée : $f(x) = '],
+        // wurf
+        ['Höchster Punkt nach $t_S = ', 'Point le plus haut au bout de $t_S = '], ['Aufprall nach $', 'Impact au bout de $'],
+        // einheitskreis, sinus, tageslaenge
+        ['$ im Bogenmaß · ', '$ en radians · '], ['Amplitude $|a| = ', 'Amplitude $|a| = '], [' · Periode $p = ', ' · période $p = '],
+        [' · Mittellinie $y = ', ' · axe médian $y = '], [' · Wertebereich $', ' · ensemble des images $'], ['$ · am ', '$ · le '],
+        [' min</b> Tageslicht', ' min</b> de jour'],
+        // regression, anscombe
+        ['Wann ist die Kerze abgebrannt?', 'Quand la bougie sera-t-elle consumée ?'], ['Bremsweg bei 150 km/h?', 'Distance de freinage à 150 km/h ?'],
+        ['Temperaturunterschied nach 45 min?', 'Écart de température au bout de 45 min ?'], ['Prognose für 2050?', 'Prévision pour 2050 ?'],
+        ['Regressionsfunktion: $', 'Fonction d’ajustement : $'], [' &nbsp;mit $x$ = Jahre seit 1950', ' &nbsp;avec $x$ = années depuis 1950'],
+        ['Bestimmtheitsmaß $R^2 = ', 'Coefficient de détermination $R^2 = '], ['(passt sehr gut)', '(très bon ajustement)'], ['(passt gut)', '(bon ajustement)'],
+        ['(passt mäßig)', '(ajustement moyen)'], [' Das Modell sagt: $f(', ' Le modèle donne : $f('], ['Regressionsgerade: $', 'Droite d’ajustement : $'],
+        ['Datensatz', 'Jeu de données'],
+        // umkehr, expgleichung (the points have the French semicolon already: js/buch-fr.js)
+        ['$ · Der Punkt $P(', '$ · Le point $P('], ['$ auf $f$ wird zum Punkt $P', '$ de $f$ devient le point $P'], ['$ auf $f^{-1}$.', '$ de $f^{-1}$.'],
+        ['Keine Lösung: $', 'Pas de solution : $'], ['Probe: $', 'Vérification : $'],
+        // parameter ("Der Graph ist …": la courbe, feminine)
+        ['gespiegelt an der $x$-Achse', 'symétrisée par rapport à l’axe des $x$'], ['gespiegelt an der $y$-Achse', 'symétrisée par rapport à l’axe des $y$'],
+        [', in $x$-Richtung mit Faktor ', ', étirée dans la direction $x$ avec le facteur '], ['Der Graph ist ', 'La courbe est '],
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
@@ -248,6 +334,28 @@ window.BuchFR && BuchFR.add('funktionen', {
     ],
     rule: [
         // book fr-1 mathe11-fr:
+        // tageslaenge: "21. Jun" → "21 juin", and the colon after the date gets its no-break space
+        [/(\d+)\. (Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)(?![a-zä])(:?)/g, (m, d, mo, c) => d + ' ' + { Jan: 'janv.', Feb: 'févr.', 'Mär': 'mars', Apr: 'avr.', Mai: 'mai', Jun: 'juin', Jul: 'juil.', Aug: 'août', Sep: 'sept.', Okt: 'oct.', Nov: 'nov.', Dez: 'déc.' }[mo] + (c ? ' :' : '')],
+        // wachstum: "einfache Zinsen (30 € pro Jahr):</span> $f(t) = …" - the French colon
+        [/:(<\/span> \$[fg]\(t\) = )/g, ' :$1'],
+        // parabel
+        [/keine Nullstellen: Der Scheitel liegt (über|unter) der \$x\$-Achse und die Parabel ist nach (oben|unten) geöffnet\./g,
+            (m, a, b) => 'aucun zéro : le sommet est ' + (a === 'über' ? 'au-dessus' : 'au-dessous') + ' de l’axe des $x$ et la parabole est tournée vers le ' + (b === 'oben' ? 'haut' : 'bas') + '.'],
+        // wurf: "… in $8{,}84\,\text{m}$ Höhe."
+        [/\$ in \$([^$]*)\$ Höhe\. /g, (m, h) => '$, à une hauteur de $' + h + '$. '],
+        // expgleichung
+        [/\^x\$ ist immer positiv, kann also nie \$([^$]*)\$ werden\./g, (m, b) => '^x$ est toujours positif, il ne peut donc jamais valoir $' + b + '$.'],
+        // expgleichung, umkehr: the decimal logarithm is log in French schools, not lg
+        [/\\lg(?![a-z])/g, '\\log'],
+        // parameter (la courbe: feminine)
+        [/in \$([xy])\$-Richtung mit Faktor \$([^$]+)\$ (gestreckt|gestaucht)/g,
+            (m, ax, f, w) => (w === 'gestreckt' ? 'étirée' : 'comprimée') + ' dans la direction $' + ax + '$ avec le facteur $' + f + '$'],
+        [/ und mit \$([^$]+)\$ gestreckt/g, (m, f) => ' et étirée avec le facteur $' + f + '$'],
+        [/ und mit \$([^$]+)\$ gestaucht/g, (m, f) => ' et comprimée avec le facteur $' + f + '$'],
+        [/um \$([^$]+)\$ nach (links|rechts|oben|unten) verschoben/g,
+            (m, c, d) => 'translatée de $' + c + '$ ' + { links: 'vers la gauche', rechts: 'vers la droite', oben: 'vers le haut', unten: 'vers le bas' }[d]],
+        // graphquiz score: "3 richtig" → "3 bonnes réponses" (the shared "richtig" → "correct" would not agree with the number)
+        [/^(\d+) richtig$/, (m, n) => n + (n === '1' ? ' bonne réponse' : ' bonnes réponses')],
         // book fr-2 mathe12-fr:
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
