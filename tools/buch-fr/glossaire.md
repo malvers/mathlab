@@ -505,3 +505,37 @@ Package fr-5 (Voisin), 22.10.2026: decisions made while translating FOS 12; noth
 | Wahlbereich 3 (chapter W) | Domaine optionnel 3 (chapter OP) | as in section 1 |
 | Treffer (widget efunktion: a = e) | Dans le mille | "<b>Dans le mille !</b>" |
 | Zentralprojektion, Bildebene, Fluchtlinien | perspective centrale, plan du tableau, lignes de fuite | wb3, widget zentralprojektion |
+
+## mathegy10-fr
+
+<!-- fr-6: terms of this book only, write right below this line -->
+
+Package fr-6 (Saint-Raymond), 25.10.2026: decisions made while translating GY 10; nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Klasse 10 | Gymnasium, 10e année | start page: le lycée allemand qui mène à l’Abitur ; en Saxe, de la 5e à la 12e année |
+| Wahlbereich (chapter W) | Domaine optionnel (chapter OP) | as section 1 |
+| beschränktes / logistisches Wachstum, Schranke $S$ | croissance bornée / logistique, borne $S$ | 1.1, widget wachstumsmodell; the models are feminine (la croissance) |
+| rekursiv / explizit | par récurrence / (de façon) explicite | 1.1, 4.5, widgets wachstumsmodell, folge |
+| Mittellage, Mittellinie | axe médian | 1.2, widgets messkurve, sinus, skizze |
+| Hochwasser / Niedrigwasser, Pegel | pleine mer / basse mer, échelle de marée | 1.2 |
+| Sinussatz, Kosinussatz | loi des sinus, loi des cosinus | 3.1 names Al-Kashi once; widget dreieckloeser: LOI DES SINUS, LOI DES COSINUS, SOMME DES ANGLES |
+| SSS, SWS, WSW, SWW, SSW, WWW | CCC, CAC, ACA, CAA, CCA, AAA | C côté, A angle; 3.1 says once that the German book writes WSW, SSW |
+| Schenkellinie | l’autre côté de l’angle | 3.1, widget dreieckloeser |
+| Seitenhöhe, Seitenkante, Mantellinie, (halber) Öffnungswinkel, Neigungswinkel | apothème, arête latérale, génératrice, (demi-)angle au sommet, angle d’inclinaison | 3.2, widget pyramidekegel |
+| Lösungsplan, Höhenwinkel | plan de résolution, angle d’élévation | 3.2 |
+| umkehrbar, Winkelhalbierende $y = x$ | admettre une (fonction) réciproque, première bissectrice | 4.1 |
+| $\lg$ | $\log$ | as fr-1; 4.1 says once « le manuel allemand écrit lg »; graph labels « log x » |
+| Verknüpfen, Verketten, innere / äußere Funktion | opérations sur les fonctions, composer (composée), fonction intérieure / extérieure | 4.3, widget verkettung |
+| Steigung in % (road) | pente (12 % de pente) | 4.3 |
+| Funktionsklasse, ganzrational, gebrochenrational | famille de fonctions, fonction polynôme, fonction rationnelle | 4.4, widget funktionsklassen (buttons: polynôme, rationnelle, Racine carrée, exponentielle, logarithme, trigonométrique) |
+| Steckbrief | carte d’identité | as section 5 |
+| Glied, Schranken, Grenzwert, Nullfolge, Epsilon-Schlauch | terme, bornes (minorée / majorée), limite, suite convergente vers 0, bande de largeur ε | 4.5, widgets folge, epsilonschlauch |
+| Parameterdarstellung | représentation paramétrique | 4.5, widget kreisparameter |
+| Zinsfaktor, Faustregel 72, Dispositionskredit, Funktion RMZ | coefficient de capitalisation, règle de 72, découvert autorisé, fonction VPM | 5; the widgets zins and tilgung as fr-4 |
+| Gaußsche Zahlenebene, Betrag (komplex) | plan complexe, module | OP says once « le manuel allemand parle du plan de Gauss »; widgets zeiger, quadkomplex |
+| Diskriminante $D = \left(\tfrac{p}{2}\right)^2 - q$ | discriminant $D$ | OP adds once: en France $\Delta = p^2 - 4q$, même signe |
+| Pasch, Augensumme, Münzwette, Los | double, somme des points, pari sur une pièce, billet de loterie | 2.1, 2.2, widgets verteilung, spielstreuung, fairesspiel |
+| Ergebnis (table head of fairesspiel) | Résultat | one French per German word, as js/buch-fr/zahlen.js |
+| Lab names | LE JEU DE DÉS, VISITE : CINQ SUR NEUF, PLANCHE DE GALTON, LABORATOIRE DES PUISSANCES, SIMULATION D’ÉPIDÉMIE, LABORATOIRE FIBONACCI, TRIGONOMÉTRIE, VISITE : DU TRIANGLE À L’ONDE, SOLIDES, PRINCIPE DE CAVALIERI, THÉORÈME DE BRAHMAGUPTA, LABORATOIRE DES PARABOLES, LABORATOIRE DE LA PENTE, DIVISION DU CERCLE, FRACTALES | PYTHAGORE; LISSAJOUS, COLLATZ, IMAGINARY NUMBERS stay |
