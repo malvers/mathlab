@@ -23,6 +23,10 @@ window.BuchFR && BuchFR.add('gy12', {
         'Füllmengen der Stichprobe als Punktdiagramm mit ihrem Mittelwert und dem Sollwert': 'Volumes de remplissage de l’échantillon en diagramme à points, avec leur moyenne et la valeur nominale',
         'Sollwert': 'valeur nominale',
         // book fr-10 mathegy12lk-fr:
+        // summen: the same words as js/buch-fr/numerik.js (widget flaeche), which the pages of LB 5 do not load
+        'Rechtecke links': 'Rectangles à gauche', 'Rechtecke rechts': 'Rectangles à droite', 'Rechtecke Mitte': 'Rectangles au milieu', 'Trapeze': 'Trapèzes',
+        'Verfahren': 'Méthode', 'Anzahl der Streifen $n$': 'Nombre de bandes $n$', 'Streifen unter einem Funktionsgraphen': 'Bandes sous la courbe d’une fonction',
+        'Hier ist das Verfahren schon exakt.': 'Ici, la méthode est déjà exacte.',
     },
     phrase: [
         // book fr-8 mathegy12-fr:
@@ -42,6 +46,15 @@ window.BuchFR && BuchFR.add('gy12', {
         ['Die Anlage füllt im Mittel $\\mu = ', 'En moyenne, la machine remplit $\\mu = '], ['$ ml mit der Standardabweichung $\\sigma = ', '$ ml avec l’écart type $\\sigma = '],
         ['$ ml ab. Das weiß die Prüferin aber nicht: Sie schätzt beides aus der Stichprobe.', '$ ml. Mais la contrôleuse ne le sait pas : elle estime les deux à partir de l’échantillon.'],
         // book fr-10 mathegy12lk-fr:
+        // summen: the letters U_n and O_n stay as in the German book (the chapter text says where they come from)
+        ['Untersumme (grün) $U_{', 'Somme inférieure (en vert) $U_{'], ['$ · Obersumme (rot, darüber) $O_{', '$ · somme supérieure (en rouge, au-dessus) $O_{'], ['$ · Unterschied $', '$ · écart $'],
+        ['Dazwischen liegt immer $', 'Entre les deux se trouve toujours $'],
+        ['$. Je mehr Streifen, desto näher rücken $U_n$ und $O_n$ zusammen; ihr gemeinsamer Grenzwert ist das Integral.',
+            '$. Plus il y a de bandes, plus $U_n$ et $O_n$ se rapprochent ; leur limite commune est l’intégrale.'],
+        ['Rechtecke links mit $n = ', 'Rectangles à gauche avec $n = '], ['Rechtecke rechts mit $n = ', 'Rectangles à droite avec $n = '],
+        ['Rechtecke Mitte mit $n = ', 'Rectangles au milieu avec $n = '], ['Trapeze mit $n = ', 'Trapèzes avec $n = '], ['$ · genauer Wert $', '$ · valeur exacte $'],
+        [' (ohne Stammfunktion, nur numerisch)', ' (sans primitive, seulement numériquement)'],
+        ['Doppelt so viele Streifen: Der Fehler wird etwa um den Faktor $', 'Deux fois plus de bandes : l’erreur est divisée environ par $'], ['$ kleiner.', '$.'],
     ],
     rule: [
         // book fr-8 mathegy12-fr:
@@ -53,5 +66,8 @@ window.BuchFR && BuchFR.add('gy12', {
         // schaetzen: the list of the sample ("498,2; 503,1") gets the French no-break space before its semicolons
         [/(Stichprobe: [^<]*)/g, m => m.replace(/; /g, ' ; ')],
         // book fr-10 mathegy12lk-fr:
+        // summen: the colon after "Rechtecke links mit $n = 4$"; the head of the error table (no bare word 'Fehler': the header button "Fehler<br>melden")
+        [/((?:Rechtecke (?:links|rechts|Mitte)|Trapeze) mit \$n = \d+\$):/g, '$1 :'],
+        [/<th>Näherung<\/th><th>Fehler<\/th>/g, '<th>Approximation</th><th>Erreur</th>'],
     ]
 });
