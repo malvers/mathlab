@@ -169,7 +169,32 @@ window.BUCH_FOTOS = {
         'lichtschalter': { artist: 'Santeri Viinamäki', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:White_light_switch.jpg',
             alt: { de: 'Ein Lichtschalter', en: 'A light switch' } },
         'boole': { artist: 'AIP Emilio Segrè Visual Archives', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Portrait_of_Boole.jpg',
-            alt: { de: 'George Boole, Kupferstich', en: 'George Boole, engraving' } }
+            alt: { de: 'George Boole, Kupferstich', en: 'George Boole, engraving' } },
+        // mathefos12 (2026-10-25)
+        'kran': { artist: 'Rubin Observatory/NSF/AURA', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Arrival_of_500_t_Crane_(rubin-500t).tiff',
+            alt: { de: 'Ein Kran hebt eine schwere Last', en: 'A crane lifts a heavy load' } },
+        'grassmann-ausdehnungslehre': { artist: 'Hermann Grassmann', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Grassmann-1.jpg',
+            alt: { de: 'Titelblatt von Hermann Graßmanns „Ausdehnungslehre“ (1844)', en: 'Title page of Hermann Grassmann’s Ausdehnungslehre (1844)' } },
+        'laserstrahlen': { artist: 'PANG KA KIT', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:RGB_Laser_Pointers.jpg',
+            alt: { de: 'Drei Laserstrahlen in Rot, Grün und Blau', en: 'Three laser beams in red, green and blue' } },
+        'kondensstreifen': { artist: 'Nestek', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Aircraft_Contrails_Closeup.jpg',
+            alt: { de: 'Ein Flugzeug mit Kondensstreifen', en: 'An aeroplane with a contrail' } },
+        'giebeldach': { artist: 'MOs810', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:MOs810_WG_41_2017_(Sulecin,_Osno,_Przewoz)_(Smogory,_house).jpg',
+            alt: { de: 'Ein Haus mit Giebeldach', en: 'A house with a gable roof' } },
+        'pyrit': { artist: 'Miguel Calvo', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Pyrite_Navajun_Screw_Growth.jpg',
+            alt: { de: 'Ein Pyrit-Kristall: Würfelflächen in der Natur', en: 'A pyrite crystal: cube faces in nature' } },
+        'solardach': { artist: 'Pujanak', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Solar_panels_on_a_roof.jpg',
+            alt: { de: 'Solarmodule auf einem Dach', en: 'Solar panels on a roof' } },
+        'gps-satellit': { artist: 'U.S. Air Force', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:GPS_Block_IIIA.jpg',
+            alt: { de: 'Ein GPS-Satellit über der Erde', en: 'A GPS satellite above the Earth' } },
+        'bienenwaben': { artist: 'Matthew T Rader', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Western_honey_bee_on_a_honeycomb.jpg',
+            alt: { de: 'Bienenwaben mit einer Biene', en: 'Honeycomb with a bee' } },
+        'wasserhahn': { artist: '247homerescue', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:247_Home_Rescue_sink_tap_plumbing_water_running.jpg',
+            alt: { de: 'Wasser fließt aus einem Wasserhahn', en: 'Water running from a tap' } },
+        'oetzi': { artist: 'Mannivu', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Ricostruzione_di_%C3%96tzi_-_Particolare_del_volto.jpg',
+            alt: { de: 'Rekonstruktion von Ötzi im Südtiroler Archäologiemuseum', en: 'Reconstruction of Ötzi in the South Tyrol Museum of Archaeology' } },
+        'duerer-zeichner': { artist: 'Rijksmuseum', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Tekenaar_tekent_een_luit,_RP-P-OB-1491.jpg',
+            alt: { de: 'Albrecht Dürer: Der Zeichner der Laute (1525)', en: 'Albrecht Dürer: The draughtsman of the lute (1525)' } }
     },
     books: {
         mathe11: {
@@ -355,6 +380,55 @@ window.BUCH_FOTOS = {
             'exkurse.html': [
                 { foto: 'lichtschalter', at: '#le2 .b-einstieg', put: 'in', w: 24 },
                 { foto: 'boole', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ]
+        },
+        mathefos12: {
+            'lb1-1.html': [
+                { foto: 'drohne', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'kran', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'grassmann-ausdehnungslehre', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 30%' }
+            ],
+            'lb1-2.html': [
+                { foto: 'laserstrahlen', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'kondensstreifen', at: '#le2 .b-einstieg', put: 'in', w: 32 }
+            ],
+            'lb1-3.html': [
+                { foto: 'giebeldach', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'pyrit', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb1-4.html': [
+                { foto: 'solardach', at: '#le2 .b-einstieg', put: 'in', w: 34 },
+                { foto: 'gps-satellit', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb2-1.html': [
+                { foto: 'schildkroete', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb2-2.html': [
+                { foto: 'leibniz', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }
+            ],
+            'lb2-3.html': [
+                { foto: 'alpenpanorama', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'rad-am-pass', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'fermat', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 22%' }
+            ],
+            'lb2-4.html': [
+                { foto: 'muengstener-bruecke', at: '#le2 .b-einstieg', put: 'in', w: 34 },
+                { foto: 'karton', at: '#le3 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'bienenwaben', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb3.html': [
+                { foto: 'feldermosaik', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'wasserhahn', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'archimedes-fetti', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 30%' }
+            ],
+            'lb4-2.html': [
+                { foto: 'kaffee', at: '#le3 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'oetzi', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 22%' }
+            ],
+            'wb3.html': [
+                { foto: 'widerstaende', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'kerze', at: '#le3 .b-einstieg', put: 'in', w: 26, pos: '50% 45%' },
+                { foto: 'duerer-zeichner', at: '#exkursion .b-row > .b-text', put: 'in', w: 38 }
             ]
         }
     }
