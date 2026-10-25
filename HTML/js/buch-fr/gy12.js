@@ -18,6 +18,10 @@ window.BuchFR && BuchFR.add('gy12', {
         'Rechtecke links': 'Rectangles à gauche', 'Rechtecke rechts': 'Rectangles à droite', 'Rechtecke Mitte': 'Rectangles au milieu', 'Trapeze': 'Trapèzes',
         'Verfahren': 'Méthode', 'Anzahl der Streifen $n$': 'Nombre de bandes $n$', 'Streifen unter einem Funktionsgraphen': 'Bandes sous une courbe',
         'Hier ist das Verfahren schon exakt.': 'Ici, la méthode est déjà exacte.',
+        // schaetzen (6): 'Stichprobenumfang $n$' is in js/buch-fr/stochastik.js
+        'Neue Stichprobe': 'Nouvel échantillon', '+1000 Stichproben': '+1000 échantillons', 'Anzahl': 'Nombre',
+        'Füllmengen der Stichprobe als Punktdiagramm mit ihrem Mittelwert und dem Sollwert': 'Volumes de remplissage de l’échantillon en diagramme à points, avec leur moyenne et la valeur nominale',
+        'Sollwert': 'valeur nominale',
         // book fr-10 mathegy12lk-fr:
     },
     phrase: [
@@ -30,6 +34,13 @@ window.BuchFR && BuchFR.add('gy12', {
         ['Rechtecke links mit $n = ', 'Rectangles à gauche avec $n = '], ['Rechtecke rechts mit $n = ', 'Rectangles à droite avec $n = '],
         ['Rechtecke Mitte mit $n = ', 'Rectangles au milieu avec $n = '], ['Trapeze mit $n = ', 'Trapèzes avec $n = '], ['$ · genauer Wert $', '$ · valeur exacte $'],
         [' (ohne Stammfunktion, nur numerisch)', ' (sans primitive, seulement numériquement)'],
+        // schaetzen
+        [' Werte)', ' valeurs)'], ['Stichprobe: ', 'Échantillon : '], ['Im Mittel über ', 'En moyenne sur '], [' Stichproben: $', ' échantillons : $'], ['(wahr: ', '(vraie valeur : '],
+        ['$s^2$ mit $\\tfrac{1}{n-1}$: $', '$s^2$ avec $\\tfrac{1}{n-1}$ : $'], ['$, mit $\\tfrac1n$: $', '$, avec $\\tfrac1n$ : $'],
+        ['Die Division durch $n$ liegt im Mittel um den Faktor $\\tfrac{n-1}{n} = ', 'En moyenne, la division par $n$ donne une valeur trop basse d’un facteur $\\tfrac{n-1}{n} = '],
+        ['$ zu tief.', '$.'],
+        ['Die Anlage füllt im Mittel $\\mu = ', 'En moyenne, la machine remplit $\\mu = '], ['$ ml mit der Standardabweichung $\\sigma = ', '$ ml avec l’écart type $\\sigma = '],
+        ['$ ml ab. Das weiß die Prüferin aber nicht: Sie schätzt beides aus der Stichprobe.', '$ ml. Mais la contrôleuse ne le sait pas : elle estime les deux à partir de l’échantillon.'],
         // book fr-10 mathegy12lk-fr:
     ],
     rule: [
@@ -39,6 +50,8 @@ window.BuchFR && BuchFR.add('gy12', {
         [/Doppelt so viele Streifen: Der Fehler wird etwa um den Faktor \$([^$]*)\$ kleiner\./g, (m, k) => 'Deux fois plus de bandes : l’erreur devient environ $' + k + '$ fois plus petite.'],
         // summen: the head of the error table; no global word 'Fehler' - it would hang on the header button "Fehler<br>melden"
         [/<th>Näherung<\/th><th>Fehler<\/th>/g, '<th>Approximation</th><th>Erreur</th>'],
+        // schaetzen: the list of the sample ("498,2; 503,1") gets the French no-break space before its semicolons
+        [/(Stichprobe: [^<]*)/g, m => m.replace(/; /g, ' ; ')],
         // book fr-10 mathegy12lk-fr:
     ]
 });
