@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 10 · Chapitre 2.2 · Espérance et jeux équitables | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Espérance, variance et écart type, jeux équitables et non équitables. Chapitre 2.2 du manuel interactif Mathématiques · Gymnasium 10 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 10</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.2 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.2 · DOMAINE D’APPRENTISSAGE 2 · NOVEMBRE</p>
+            <h1>Espérance et jeux équitables</h1>
+            <p class="b-hero-lead">Un billet de loterie vaut-il la peine ? Que gagne une assurance ? Comment fixer la mise et les gains à la fête de l’école ? L’<b>espérance</b> dit
+                ce qu’une variable aléatoire rapporte en moyenne à long terme, l’<b>écart type</b> à quel point elle varie. Avec les deux, tu juges des jeux,
+                des paris et des risques, et tu comprends pourquoi les jeux de hasard ne sont jamais <b>équitables</b>.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">3 LABORATOIRES</span><span class="b-chip">RISQUE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="10" data-p="0.5" data-lo="5" data-hi="5" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>calculer l’<b>espérance</b> d’une variable aléatoire et l’interpréter comme moyenne à long terme</li>
+                <li>calculer la <b>variance</b> et l’<b>écart type</b> et les utiliser comme mesure du risque</li>
+                <li>vérifier si des jeux sont <b>équitables</b> et évaluer la mise et la somme versée à l’aide de l’espérance</li>
+                <li>bien comprendre des phrases comme « probable » ou « 30 % de risque de pluie »</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">Calcule la moyenne de 2, 4 et 9.</p><div class="b-sol"><p>$\tfrac{2 + 4 + 9}{3} = 5$</p></div></div>
+            <div class="b-q" data-ans="1/6" data-ph="fraction"><p class="b-q-text">Deux dés : quelle est la probabilité d’obtenir la somme 7 ?</p><div class="b-sol"><p>$\tfrac{6}{36} = \tfrac16$</p></div></div>
+            <div class="b-q" data-ans="2,5" data-ph="nombre"><p class="b-q-text">Calcule $3 \cdot \tfrac16 + 6 \cdot \tfrac13$.</p><div class="b-sol"><p>$0{,}5 + 2 = 2{,}5$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Tu mises 2 € et on te verse 5 €. Quel est ton gain ?</p><div class="b-mc"><button>3 €</button><button>5 €</button><button>7 €</button></div><div class="b-sol"><p>Gain = somme versée − mise $= 5 - 2 = 3$ €</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">EN MOYENNE</div>
+            <div class="b-text"><p>Lancez un dé 60 fois et calculez après 10, 20, 40 et 60 lancers la moyenne de tous les numéros obtenus.</p>
+                <ul><li>Vers quel nombre la moyenne tend-elle ? Peut-on la calculer à l’avance ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DEUX JEUX, MÊME MOYENNE</div>
+            <div class="b-text"><p>Jeu A : mise 1 €, une pièce décide si vous récupérez 2 € ou rien. Jeu B : mise 1 €, avec la probabilité $\tfrac{1}{100}$, on reçoit 100 €.</p>
+                <ul><li>Montrez qu’à long terme, vous ne gagnez rien et ne perdez rien avec les deux jeux.</li><li>Auquel joueriez-vous ? Qu’est-ce qui les distingue ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA FÊTE DE L’ÉCOLE</div>
+            <div class="b-text"><p>Votre classe prévoit un stand avec un jeu de dés.</p>
+                <ul><li>Comment fixer la mise et les gains pour que la caisse de la classe en profite, tout en gardant un jeu amusant ?</li><li>Combien gagnez-vous à peu près en 300 parties ?</li></ul></div>
+            <span class="b-pair">→ Leçon 3</span>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Cinq sur neuf gagne</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="L’espérance" data-toc-k="1" data-toc-short="1 Espérance">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">1</span>L’espérance</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En 600 lancers, chaque numéro sort environ 100 fois. La somme vaut alors à peu près $100 \cdot (1 + 2 + \ldots + 6) = 2100$, la moyenne $\tfrac{2100}{600} = 3{,}5$.
+                On obtient la même chose directement à partir des probabilités : $1 \cdot \tfrac16 + 2 \cdot \tfrac16 + \ldots + 6 \cdot \tfrac16 = 3{,}5$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · ESPÉRANCE</div>
+                <div class="b-text">
+                    <p>Si $X$ prend les valeurs $x_1, \ldots, x_n$, on appelle $$E(X) = \mu = x_1 \cdot P(X = x_1) + x_2 \cdot P(X = x_2) + \ldots + x_n \cdot P(X = x_n)$$ l’<b>espérance</b> de $X$.</p>
+                    <p>C’est la moyenne autour de laquelle se stabilisent les résultats de nombreuses répétitions. Ce n’est pas forcément une valeur possible : personne n’obtient 3,5 avec un dé.</p>
+                    <p>Si toutes les valeurs sont équiprobables, $E(X)$ est la moyenne arithmétique des valeurs, comme en 9e année.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Un tableau aide :</b> les valeurs $x_i$ sur une ligne, les probabilités en dessous, puis les produits $x_i \cdot P(X = x_i)$ et leur somme.</p>
+            <p class="b-note"><b>Gain ou somme versée ?</b> Toujours préciser ce qu’est $X$. Gain = somme versée − mise.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · VARIABLE ALÉATOIRE ET ESPÉRANCE</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une variable aléatoire, lis l’espérance, puis joue mille fois : la moyenne s’en rapproche.</p>
+        <div data-widget="zufallsgroesse"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · LA ROUE DE LOTERIE</div>
+            <div class="b-text"><p>Mise 1 €. Avec $\tfrac12$, on ne récupère rien, avec $\tfrac14$ la mise, avec $\tfrac14$ 5 €. Calcule l’espérance du gain $X$.</p></div>
+            <div class="b-sol"><p>$E(X) = (-1) \cdot \tfrac12 + 0 \cdot \tfrac14 + 4 \cdot \tfrac14 = -0{,}5 + 1 = 0{,}5$</p>
+                <p>En moyenne, <span class="b-res">on gagne 50 centimes par partie</span>. Pour l’organisateur, c’est une affaire à perte.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · LA TOMBOLA</div>
+            <div class="b-text"><p>1000 billets à 1 € : un gros lot de 500 €, dix lots de 20 €, cent de 2 €, les autres sont perdants. Que vaut un billet ?</p></div>
+            <div class="b-sol"><p>Somme versée espérée : $500 \cdot \tfrac{1}{1000} + 20 \cdot \tfrac{10}{1000} + 2 \cdot \tfrac{100}{1000} = 0{,}5 + 0{,}2 + 0{,}2 = 0{,}9$ €.</p>
+                <p>Gain espéré : <span class="b-res">$0{,}9 - 1 = -0{,}10$ €</span> par billet. Sur tous les billets, la tombola encaisse 100 €.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule l’espérance : a) du numéro obtenu avec un dé &nbsp; b) du nombre de faces avec trois pièces</p></div>
+            <div class="b-sol"><p>a) $3{,}5$ &nbsp; b) $0 \cdot \tfrac18 + 1 \cdot \tfrac38 + 2 \cdot \tfrac38 + 3 \cdot \tfrac18 = 1{,}5$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ prend les valeurs 0, 1, 2, 3 avec les probabilités 0,1 ; 0,3 ; 0,4 ; 0,2. Calcule $E(X)$.</p></div>
+            <div class="b-sol"><p>$0 + 0{,}3 + 0{,}8 + 0{,}6 = 1{,}7$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une assurance vélo coûte 60 € par an. Avec une probabilité de 4 %, le vélo est volé (remplacement 800 €), avec 10 %, il y a un dommage de 150 €. Que gagne l’assurance en moyenne sur un contrat ?</p></div>
+            <div class="b-sol"><p>Somme versée espérée $0{,}04 \cdot 800 + 0{,}1 \cdot 150 = 32 + 15 = 47$ €. L’assurance gagne en moyenne <span class="b-res">13 €</span> par contrat (avec lesquels elle paie aussi ses frais).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Chuck-a-luck</b> (dans le widget) : mise de 1 € sur un nombre, trois dés. Pour chaque dé qui montre ton nombre, tu gagnes 1 €, sinon la mise est perdue. Les probabilités de 0, 1, 2, 3 succès sont $\tfrac{125}{216}$, $\tfrac{75}{216}$, $\tfrac{15}{216}$, $\tfrac{1}{216}$. Calcule l’espérance du gain.</p></div>
+            <div class="b-sol"><p>$E(X) = \tfrac{-125 + 75 + 2 \cdot 15 + 3 \cdot 1}{216} = -\tfrac{17}{216} \approx -0{,}079$ €. On perd en moyenne presque 8 centimes par partie, alors que le jeu a l’air intéressant au premier abord.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quel devrait être le gros lot de la tombola de l’exemple 2 pour que le gain espéré d’un billet soit exactement 0 € ?</p></div>
+            <div class="b-sol"><p>$\tfrac{a + 200 + 200}{1000} = 1 \Rightarrow a = 600$ €</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3,5" data-ph="E(X) ="><p class="b-q-text">Quelle est l’espérance du numéro obtenu avec un dé ?</p><div class="b-sol"><p>$\tfrac{1 + 2 + \ldots + 6}{6} = 3{,}5$</p></div></div>
+        <div class="b-q" data-ans="1,7" data-ph="E(X) ="><p class="b-q-text">Valeurs 0, 1, 2, 3 avec 0,1 ; 0,3 ; 0,4 ; 0,2. Calcule $E(X)$.</p><div class="b-sol"><p>$1{,}7$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Le gain $X$ d’un jeu a pour espérance $E(X) = -0{,}5$ €. Qu’est-ce que cela signifie ?</p><div class="b-mc"><button>Chaque partie coûte exactement 50 centimes.</button><button>À long terme, on perd en moyenne 50 centimes par partie.</button><button>On perd la moitié des parties.</button></div><div class="b-sol"><p>L’espérance est une moyenne à long terme.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Variance et écart type" data-toc-k="2" data-toc-short="2 Dispersion">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">2 HEURES</span></div>
+    <h2><span class="b-no">2</span>Variance et écart type</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Les deux jeux de l’exploration ont la même espérance, 0 €. Avec le pari sur une pièce, on a après chaque partie 1 € de plus ou de moins.
+                Avec le billet de loterie, on perd presque toujours un euro et on gagne très rarement beaucoup. Les valeurs sont plus ou moins <b>dispersées</b> autour de l’espérance.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · VARIANCE ET ÉCART TYPE</div>
+                <div class="b-text">
+                    <p><b>Variance :</b> $V(X) = (x_1 - \mu)^2 \cdot P(X = x_1) + \ldots + (x_n - \mu)^2 \cdot P(X = x_n)$, l’écart quadratique moyen par rapport à l’espérance.</p>
+                    <p><b>Écart type :</b> $\sigma = \sqrt{V(X)}$. Il a la même unité que $X$.</p>
+                    <p>Petit $\sigma$ : les valeurs sont resserrées autour de $\mu$. Grand $\sigma$ : de fortes variations, donc un grand <b>risque</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Pourquoi élever au carré ?</b> Sinon, les écarts vers le haut et vers le bas se compenseraient : la somme des $(x_i - \mu) \cdot P(X = x_i)$ vaut toujours 0.</p>
+            <p class="b-note"><b>9e année :</b> pour des données, il y avait l’écart type empirique. Ici, ce sont des probabilités au lieu de fréquences.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · MÊME MOYENNE, RISQUE DIFFÉRENT</div>
+        <p class="b-help" style="margin:0 0 12px">Huit personnes jouent chacune cent parties. Choisis le jeu et compare à quel point leurs soldes s’écartent les uns des autres.</p>
+        <div data-widget="spielstreuung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · PARI SUR UNE PIÈCE ET BILLET DE LOTERIE</div>
+            <div class="b-text"><p>Calcule $\sigma$ pour les deux jeux de l’exploration.</p></div>
+            <div class="b-sol"><p>Pari sur une pièce, $\mu = 0$ : $V = 1^2 \cdot \tfrac12 + (-1)^2 \cdot \tfrac12 = 1$, $\sigma = 1$ €.</p>
+                <p>Billet de loterie, $\mu = 0$ : $V = 99^2 \cdot 0{,}01 + (-1)^2 \cdot 0{,}99 = 99$, <span class="b-res">$\sigma \approx 9{,}95$ €</span>, presque dix fois plus.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · LE DÉ</div>
+            <div class="b-text"><p>Calcule la variance et l’écart type du numéro obtenu avec un dé.</p></div>
+            <div class="b-sol"><p>$\mu = 3{,}5$. Écarts $\pm 2{,}5$, $\pm 1{,}5$, $\pm 0{,}5$, chacun deux fois : $V = \tfrac{2 \cdot (6{,}25 + 2{,}25 + 0{,}25)}{6} = \tfrac{17{,}5}{6} \approx 2{,}92$.</p>
+                <p><span class="b-res">$\sigma \approx 1{,}71$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>La roue de loterie de l’exemple 1 : gains $-1$, $0$, $4$ avec $\tfrac12$, $\tfrac14$, $\tfrac14$ et $\mu = 0{,}5$. Calcule $V(X)$ et $\sigma$.</p></div>
+            <div class="b-sol"><p>$V = (-1{,}5)^2 \cdot \tfrac12 + (-0{,}5)^2 \cdot \tfrac14 + 3{,}5^2 \cdot \tfrac14 = 1{,}125 + 0{,}0625 + 3{,}0625 = 4{,}25$, $\sigma \approx 2{,}06$ €</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Le placement A rapporte à coup sûr 2 % d’intérêts. Le placement B rapporte avec la probabilité $\tfrac12$ 12 % et avec $\tfrac12$ une perte de 8 %. Compare l’espérance et l’écart type.</p></div>
+            <div class="b-sol"><p>Les deux ont pour espérance 2 %. $\sigma_A = 0$, $\sigma_B = 10$ points de pourcentage : B est plus risqué.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Trois pièces, $X$ = nombre de faces, $\mu = 1{,}5$. Calcule $V(X)$ et $\sigma$.</p></div>
+            <div class="b-sol"><p>$V = 2{,}25 \cdot \tfrac18 + 0{,}25 \cdot \tfrac38 + 0{,}25 \cdot \tfrac38 + 2{,}25 \cdot \tfrac18 = \tfrac68 = 0{,}75$, $\sigma \approx 0{,}87$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Le jeu 1 verse en euros le numéro obtenu avec un dé. Le jeu 2 verse 21 € pour un six, sinon rien. Montre que les deux ont la même espérance et compare les écarts types.</p></div>
+            <div class="b-sol"><p>Les deux $3{,}5$ €. $\sigma_1 \approx 1{,}71$ €, $\sigma_2 = \sqrt{17{,}5^2 \cdot \tfrac16 + 3{,}5^2 \cdot \tfrac56} = \sqrt{61{,}25} \approx 7{,}83$ €.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dans le pari sur une pièce ($\pm 1$ €), tous les montants sont a) augmentés de 2 €, b) doublés. Comment l’espérance et l’écart type changent-ils ? Justifie de façon générale.</p></div>
+            <div class="b-sol"><p>a) Valeurs 3 et 1 : $\mu = 2$, $\sigma = 1$. Une translation change $\mu$, mais pas les écarts. &nbsp; b) Valeurs 2 et −2 : $\mu = 0$, $\sigma = 2$. Avec le facteur, tous les écarts, et donc $\sigma$, sont aussi doublés.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1" data-ph="V(X) ="><p class="b-q-text">Pari sur une pièce avec un gain de $+1$ ou $-1$ €, chacun avec $\tfrac12$. Quelle est la variance ?</p><div class="b-sol"><p>$1 \cdot \tfrac12 + 1 \cdot \tfrac12 = 1$</p></div></div>
+        <div class="b-q" data-ans="9,95" data-tol="0.01" data-ph="σ en €"><p class="b-q-text">Gain de 99 € avec 0,01 et de −1 € avec 0,99. Calcule $\sigma$ (deux décimales).</p><div class="b-sol"><p>$\sqrt{99} \approx 9{,}95$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Deux jeux ont la même espérance, le jeu B a le plus grand écart type. Alors …</p><div class="b-mc"><button>on gagne en moyenne plus avec B.</button><button>B est plus équitable.</button><button>les résultats de B varient davantage.</button></div><div class="b-sol"><p>$\sigma$ mesure la dispersion, donc le risque.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Jeux équitables et non équitables" data-toc-k="3" data-toc-short="3 Équitable">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">3</span>Jeux équitables et non équitables</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un jeu de dés : mise 1 €, pour un six, on récupère 5 €. Cela paraît généreux, mais ne l’est pas : avec $\tfrac16$, on gagne 4 €, avec $\tfrac56$, on perd 1 €.
+                $E(X) = 4 \cdot \tfrac16 - 1 \cdot \tfrac56 = -\tfrac16$, donc en moyenne une perte d’environ 17 centimes par partie. Il serait équitable de verser 6 €.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · JEUX ÉQUITABLES</div>
+                <div class="b-text">
+                    <p>Un jeu est dit <b>équitable</b> si l’espérance du gain est nulle : $E(\text{gain}) = 0$, ce qui revient à $E(\text{somme versée}) = \text{mise}$.</p>
+                    <p>$E(\text{gain}) < 0$ : <b>défavorable</b> pour la joueuse ou le joueur, l’organisateur gagne de l’argent. $E(\text{gain}) > 0$ : favorable pour les joueurs.</p>
+                    <p>La <b>mise équitable</b> est la somme versée espérée.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Les jeux d’argent</b> comme le loto, la roulette ou les machines à sous ne sont jamais équitables. L’organisateur vit de l’espérance négative, et avec beaucoup de parties, elle devient une réalité très fiable.</p>
+            <p class="b-note"><b>« 70 % de risque de pluie »</b> signifie : il pleut environ 7 jours sur 10 où l’on a fait cette prévision. Un seul jour sec ne rend pas la prévision fausse.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE JEU DE LA FÊTE DE L’ÉCOLE</div>
+        <div data-widget="fairesspiel"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · DÉTERMINER LA MISE ÉQUITABLE</div>
+            <div class="b-text"><p>Au jeu de la fête de l’école, un double rapporte 6 €, la somme 7 rapporte 3 €. Quelle mise est équitable ? Quelle mise faut-il à la classe pour gagner 50 centimes par partie ?</p></div>
+            <div class="b-sol"><p>Le double et la somme 7 ont chacun la probabilité $\tfrac16$. $E(\text{somme versée}) = 6 \cdot \tfrac16 + 3 \cdot \tfrac16 = 1{,}50$ € : mise équitable 1,50 €.</p>
+                <p>Pour 50 centimes par partie : <span class="b-res">mise de 2 €</span>. Sur 300 parties, la classe gagne en moyenne 150 €.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · LA ROULETTE</div>
+            <div class="b-text"><p>À la roulette, il y a 37 cases (de 0 à 36). Celui qui mise 1 € sur un numéro et gagne récupère sa mise plus 35 €. Calcule l’espérance du gain.</p></div>
+            <div class="b-sol"><p>$E(X) = 35 \cdot \tfrac{1}{37} + (-1) \cdot \tfrac{36}{37} = -\tfrac{1}{37} \approx -0{,}027$ €</p>
+                <p>Le casino garde <span class="b-res">en moyenne 2,7 %</span> de toutes les mises. C’est le zéro qui fait la différence.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Mise 2 €. Pour face, on récupère 4 €, pour pile rien. Le jeu est-il équitable ?</p></div>
+            <div class="b-sol"><p>$E(\text{gain}) = 2 \cdot \tfrac12 + (-2) \cdot \tfrac12 = 0$ : équitable.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une roue de loterie a quatre secteurs de même taille avec les sommes versées 0 €, 0 €, 1 € et 5 €. Quelle mise est équitable ?</p></div>
+            <div class="b-sol"><p>$\tfrac{0 + 0 + 1 + 5}{4} = 1{,}50$ €</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Avec la roue de loterie, on ne reçoit rien avec $\tfrac12$, on récupère la mise de 2 € avec $\tfrac13$ et le montant $a$ avec $\tfrac16$. Pour quelle valeur de $a$ le jeu est-il équitable ?</p></div>
+            <div class="b-sol"><p>$0 \cdot \tfrac12 + 2 \cdot \tfrac13 + a \cdot \tfrac16 = 2 \Rightarrow \tfrac{a}{6} = \tfrac43 \Rightarrow a = 8$ €</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Sur 10 jours avec la prévision « 70 % de pluie », il a plu 8 jours. La prévision était-elle mauvaise ? Que faudrait-il vérifier pour évaluer une prévision météo ?</p></div>
+            <div class="b-sol"><p>Non. On attend environ 7 jours sur 10, 8 reste dans les limites du hasard. On ne peut l’évaluer que sur de nombreux jours : s’il pleut environ 70 % de tous les jours annoncés à « 70 % », elle est bonne.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>On lance une pièce au plus trois fois, jusqu’à obtenir face. Face au 1er lancer rapporte 2 €, au 2e lancer 4 €, au 3e lancer 8 €, trois fois pile ne rapporte rien. Quelle mise est équitable ?</p></div>
+            <div class="b-sol"><p>$2 \cdot \tfrac12 + 4 \cdot \tfrac14 + 8 \cdot \tfrac18 = 1 + 1 + 1 = 3$ €. Chaque lancer supplémentaire autorisé augmenterait la mise équitable de 1 €, voir l’excursion.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1,5" data-ph="euros"><p class="b-q-text">Quatre secteurs de même taille avec 0 €, 0 €, 1 €, 5 €. Quelle mise est équitable ?</p><div class="b-sol"><p>$1{,}50$ €</p></div></div>
+        <div class="b-q" data-ans="-1/6" data-ph="fraction"><p class="b-q-text">Mise 1 €, on récupère 5 € pour un six. Quel est le gain espéré en euros ?</p><div class="b-sol"><p>$4 \cdot \tfrac16 - 1 \cdot \tfrac56 = -\tfrac16$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">À la roulette, l’espérance du gain est négative. Cela signifie …</p><div class="b-mc"><button>qu’à long terme, le jeu est défavorable pour les joueurs.</button><button>qu’on perd chaque partie.</button><button>que le jeu est équitable si l’on joue assez souvent.</button></div><div class="b-sol"><p>Plus on joue souvent, plus il est sûr qu’on perd en moyenne 2,7 % des mises.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une loterie vend 500 billets à 2 € : un lot de 200 €, quatre de 50 €, vingt de 10 €. Calcule le gain espéré d’un billet et l’excédent de la loterie.</p></div>
+            <div class="b-sol"><p>Somme versée espérée $\tfrac{200 + 200 + 200}{500} = 1{,}20$ €, gain espéré $-0{,}80$ €. Excédent : $1000 - 600 = 400$ €.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier avec le chapitre 2.1 :</b> dans un test de 5 questions avec chacune 4 réponses, on répond à tout au hasard. Une bonne réponse rapporte un point, une mauvaise en retire un tiers. Quel score peut-on espérer ?</p></div>
+            <div class="b-sol"><p>Par question : $1 \cdot \tfrac14 - \tfrac13 \cdot \tfrac34 = 0$. En tout 0 point : avec cette pénalité, répondre au hasard ne rapporte rien en moyenne.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deux jeux de dés équitables avec une mise de 1 € : A verse 2 € pour un numéro pair, B verse 6 € seulement pour un six. Calcule chaque fois $\sigma$ du gain. Quel jeu convient à une personne prudente ?</p></div>
+            <div class="b-sol"><p>A : gains $\pm 1$, $\sigma = 1$ €. B : gain de 5 € avec $\tfrac16$, de $-1$ € avec $\tfrac56$, $\sigma = \sqrt{25 \cdot \tfrac16 + 1 \cdot \tfrac56} = \sqrt5 \approx 2{,}24$ €. A est moins risqué.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Conçois toi-même pour la fête de l’école un jeu avec deux dés et deux niveaux de gain, avec lequel la classe gagne en moyenne 30 centimes par partie et où au moins une partie sur quatre rapporte quelque chose. Justifie avec les probabilités et l’espérance.</p></div>
+            <div class="b-sol"><p>Par exemple : mise 2 €, un double ($\tfrac16$) rapporte 6 €, la somme 7 ($\tfrac16$) rapporte 4,20 €. Chance de gain $\tfrac13$, somme versée espérée $\tfrac{6 + 4{,}20}{6} = 1{,}70$ €, la classe gagne en moyenne 30 centimes par partie. D’autres solutions sont possibles.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le paradoxe de Saint-Pétersbourg" data-toc-k="X" data-toc-short="Saint-Pétersbourg">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">UN PARADOXE CÉLÈBRE</span></div>
+    <h2>Le paradoxe de Saint-Pétersbourg</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Prends le jeu de pièce de l’exercice 15 et autorise <b>autant de lancers que l’on veut</b> : face au $k$-ième lancer rapporte $2^k$ euros. Chaque issue possible apporte alors 1 € à l’espérance,
+                $2 \cdot \tfrac12 + 4 \cdot \tfrac14 + 8 \cdot \tfrac18 + \ldots = 1 + 1 + 1 + \ldots$, et cette somme dépasse toute limite. La mise équitable serait donc infinie.
+                Pourtant, presque personne ne paierait plus de quelques euros pour ce jeu.</p>
+            <p>Daniel Bernoulli publia en 1738 à Saint-Pétersbourg une explication : un euro de plus vaut moins pour quelqu’un qui possède déjà beaucoup que pour quelqu’un qui possède peu.
+                Il proposa de faire la moyenne non pas des montants, mais de leur <b>utilité</b>, et mesura l’utilité avec le logarithme de la fortune. Tu découvriras le logarithme au chapitre 4.1.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> Daniel Bernoulli : « Specimen theoriae novae de mensura sortis », Commentarii Academiae Scientiarum Imperialis Petropolitanae 5 (1738), p. 175–192.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>ESPÉRANCE</h4><p>$E(X) = \sum x_i \cdot P(X = x_i)$, la moyenne à long terme.</p></div>
+        <div><p>Dé : $E(X) = 3{,}5$ · tombola : $-0{,}10$ € par billet</p></div></div>
+    <div class="b-rueck"><div><h4>VARIANCE</h4><p>$V(X) = \sum (x_i - \mu)^2 \cdot P(X = x_i)$</p></div>
+        <div><p>Dé : $V(X) = \tfrac{17{,}5}{6} \approx 2{,}92$</p></div></div>
+    <div class="b-rueck"><div><h4>ÉCART TYPE</h4><p>$\sigma = \sqrt{V(X)}$, dans l’unité de $X$. Une mesure du risque.</p></div>
+        <div><p>Pari sur une pièce $\sigma = 1$ €, billet de loterie $\sigma \approx 9{,}95$ €</p></div></div>
+    <div class="b-rueck"><div><h4>JEU ÉQUITABLE</h4><p>$E(\text{gain}) = 0$, donc somme versée espérée égale à la mise.</p></div>
+        <div><p>Double 6 €, somme 7 3 € : mise équitable 1,50 €</p></div></div>
+    <div class="b-rueck"><div><h4>NON ÉQUITABLE</h4><p>$E(\text{gain}) < 0$ : l’organisateur gagne à la longue.</p></div>
+        <div><p>Roulette : $-\tfrac{1}{37} \approx -2{,}7\,\%$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="1,5" data-ph="E(X) ="><p class="b-q-text">Trois pièces, $X$ = nombre de faces. Combien vaut $E(X)$ ?</p><div class="b-sol"><p>$\tfrac{0 + 3 + 6 + 3}{8} = 1{,}5$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Mise 2 €, pour face on récupère 4 €, pour pile rien. Le jeu est …</p><div class="b-mc"><button>défavorable pour les joueurs.</button><button>équitable.</button><button>favorable pour les joueurs.</button></div><div class="b-sol"><p>$E(\text{gain}) = 0$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="V(X) ="><p class="b-q-text">Gain de $+1$ ou $-1$ €, chacun avec $\tfrac12$. Combien vaut $V(X)$ ?</p><div class="b-sol"><p>$1$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="47" data-ph="euros"><p class="b-q-text">Avec 4 %, on verse 800 €, avec 10 %, on verse 150 €. Quelle est la somme versée espérée en euros ?</p><div class="b-sol"><p>$32 + 15 = 47$ €</p></div></div>
+            <div class="b-q" data-ans="1,71" data-tol="0.01" data-ph="σ ="><p class="b-q-text">Calcule l’écart type du numéro obtenu avec un dé (deux décimales).</p><div class="b-sol"><p>$\sqrt{\tfrac{17{,}5}{6}} \approx 1{,}71$</p></div></div>
+            <div class="b-q" data-ans="8" data-ph="euros"><p class="b-q-text">Mise 2 €. Avec $\tfrac12$ rien, avec $\tfrac13$ on récupère la mise, avec $\tfrac16$ le montant $a$. Pour quelle valeur de $a$ le jeu est-il équitable ?</p><div class="b-sol"><p>$a = 8$ €</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Calculer les chances de gain</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Voir la moyenne et la dispersion</span></span></a>
+        <a class="b-lab" href="../mathe12-fr/lb1-2.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MANUEL BGY 12 · VARIABLES ALÉATOIRES</span><span class="b-lab-what">Plus d’exercices sur l’espérance et σ (en français)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 10e année · domaine d’apprentissage 2 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-spiele.js"></script>
+<script src="../../js/buch-fr/spiele.js"></script>
+</body>
+</html>
