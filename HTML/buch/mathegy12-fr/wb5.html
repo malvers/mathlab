@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 12 · Chapitre OP · Intégration numérique | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Histoire du calcul intégral, méthodes des rectangles et des trapèzes, précision. Chapitre OP du manuel interactif Mathématiques · Gymnasium 12 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">DOMAINE OPTIONNEL 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">DOMAINE OPTIONNEL 5 · OCTOBRE · NOVEMBRE</p>
+            <h1>Intégration numérique</h1>
+            <p class="b-hero-lead">La courbe en cloche $\mathrm{e}^{-x^2}$ est l’une des fonctions les plus importantes de la statistique, mais elle n’a pas de primitive qu’on puisse écrire.
+                Les valeurs mesurées lors d’une expérience n’ont pas non plus d’expression. Il ne reste alors que le <b>calcul avec des bandes</b> : tu découvres la <b>méthode des rectangles</b> et la
+                <b>méthode des trapèzes</b>, tu évalues leur précision et tu refais le chemin que le calcul intégral a parcouru d’Archimède à Riemann.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">2 WIDGETS</span><span class="b-chip">1 LABORATOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["exp(-(x^2))"]' data-labels='["f"]' data-lat="[1.3]" data-x="-2.4,2.4" data-y="-0.25,1.25" data-pts="[[0,1]]" data-h="240" data-aria="La courbe en cloche e puissance moins x au carré"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>des étapes de l’<b>histoire du calcul intégral</b> : Archimède, Kepler, Newton et Leibniz, Riemann</li>
+                <li>approcher des intégrales par la <b>méthode des rectangles</b> : points de subdivision à gauche, à droite et au milieu</li>
+                <li>établir et appliquer la <b>méthode des trapèzes</b>, aussi sur des valeurs mesurées</li>
+                <li>évaluer la <b>précision</b> : l’erreur quand on double le nombre de bandes, des intégrales sans primitive</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="8" data-ph="aire"><p class="b-q-text">Un trapèze a des côtés parallèles de longueurs $3$ et $5$ et une hauteur $2$. Quelle est son aire ?</p><div class="b-sol"><p>$\tfrac{3 + 5}{2} \cdot 2$</p></div></div>
+            <div class="b-q" data-ans="8/3" data-tol="0.01" data-ph="valeur"><p class="b-q-text">Calcule $\int_0^2 x^2\,\mathrm{d}x$.</p><div class="b-sol"><p>$\tfrac83$</p></div></div>
+            <div class="b-q" data-ans="1,25" data-ph="milieu"><p class="b-q-text">Où se trouve le milieu de l’intervalle $[1\,;\,1{,}5]$ ?</p><div class="b-sol"><p>$\tfrac{1 + 1{,}5}{2}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Pour $f$ croissante, la somme des rectangles à droite est …</p><div class="b-mc"><button>trop petite.</button><button>trop grande.</button><button>exacte.</button></div><div class="b-sol"><p>À droite se trouve la plus grande valeur.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">COMME ARCHIMÈDE</div>
+            <div class="b-text"><p>L’arc $y = 4 - x^2$ sur $[-2\,;\,2]$ délimite avec l’axe un segment de parabole. Placez-y le triangle $(-2\,;\,0)$, $(2\,;\,0)$, $(0\,;\,4)$.</p>
+                <ul><li>Quelle est l’aire du triangle, quelle est celle du segment (avec le théorème fondamental) ? Quel facteur obtient-on ?</li><li>Archimède a trouvé ce facteur sans intégrale. Comment a-t-il pu s’y prendre ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DANS LE TABLEUR</div>
+            <div class="b-text"><p>Dans un tableur, créez une colonne avec $x = 0\,;\,0{,}2\,;\,0{,}4\,;\,\ldots\,;\,2$ et à côté $f(x) = x^2$.</p>
+                <ul><li>Calculez avec une formule de somme les sommes de bandes avec des rectangles à gauche et à droite.</li><li>Divisez le pas par deux. Comment l’écart à la valeur exacte $\tfrac83$ change-t-il ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">EN BIAIS PLUTÔT QU’EN ESCALIER</div>
+            <div class="b-text"><p>Reliez les points de la courbe de $x^2$ en $x = 0\,;\,1\,;\,2$ par des segments au lieu de marches d’escalier.</p>
+                <ul><li>Quelles figures apparaissent sous les segments ? Calculez leur aire.</li><li>Le résultat est-il au-dessus ou en dessous de $\tfrac83$ ? Pourquoi ?</li></ul></div>
+            <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RÉACTEUR À INTÉGRALES</span><span class="b-lab-what">Des aires sous des courbes (laboratoire en allemand)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Histoire et méthode des rectangles" data-toc-k="1" data-toc-short="1 Rectangles">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Un peu d’histoire et la méthode des rectangles</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Bien avant les primitives, les mathématiciens calculaient des aires à bord courbe avec des figures qu’ils connaissaient. Au 3e siècle av. J.-C., Archimède remplit
+                un segment de parabole de triangles de plus en plus petits et trouva : son aire vaut $\tfrac43$ de celle du plus grand triangle qu’il contient. Aujourd’hui, on prend des rectangles, et un ordinateur en calcule des milliers en quelques secondes.</p></div></div>
+            <div class="b-text"><p>On partage $[a\,;\,b]$ en $n$ bandes de même largeur $h = \tfrac{b - a}{n}$, avec les points de subdivision $x_0 = a$, $x_1 = a + h$, …, $x_n = b$.
+                Sur chaque bande se dresse un rectangle. Sa hauteur est la valeur de la fonction au bord gauche, au bord droit ou au milieu de la bande.
+                Plus il y a de bandes, plus c’est précis. La méthode du point milieu est en général bien plus précise que les deux autres, car dans la bande le trop et le trop peu se compensent presque.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODE DES RECTANGLES</div>
+                <div class="b-text">
+                    <p>Avec $h = \tfrac{b - a}{n}$ et $x_i = a + i \cdot h$ :</p>
+                    <p><b>à gauche :</b> $L_n = h \cdot \big(f(x_0) + f(x_1) + \ldots + f(x_{n-1})\big)$ · <b>à droite :</b> $R_n = h \cdot \big(f(x_1) + \ldots + f(x_n)\big)$</p>
+                    <p><b>Méthode du point milieu :</b> $M_n = h \cdot \Big(f\big(x_0 + \tfrac h2\big) + f\big(x_1 + \tfrac h2\big) + \ldots + f\big(x_{n-1} + \tfrac h2\big)\Big)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Frise chronologique :</b> Archimède, 3e s. av. J.-C. · Kepler, règle des tonneaux 1615 · Leibniz écrit $\int$ pour la première fois en 1675 · Riemann éclaircit au 19e siècle ce qu’est une intégrale. Les lettres $L_n$ et $R_n$ viennent de l’allemand « links » (gauche) et « rechts » (droite).</p>
+            <p class="b-note"><b>Tableur :</b> colonne A les points de subdivision, colonne B les valeurs de la fonction, puis $h$ fois la somme des cellules qui conviennent.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · RECTANGLES ET TRAPÈZES</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une fonction et une méthode, puis augmente le nombre de bandes. À quelle vitesse la somme s’approche-t-elle de la valeur exacte ?</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · TROIS RÈGLES COMPARÉES</div>
+            <div class="b-text"><p>Approche $\int_0^2 x^2\,\mathrm{d}x = \tfrac83 \approx 2{,}667$ avec quatre bandes.</p></div>
+            <div class="b-sol"><p>$h = 0{,}5$ : $L_4 = 0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$, $R_4 = 0{,}5 \cdot (0{,}25 + 1 + 2{,}25 + 4) = 3{,}75$.</p>
+                <p>$M_4 = 0{,}5 \cdot (0{,}0625 + 0{,}5625 + 1{,}5625 + 3{,}0625) = 2{,}625$ : <span class="b-res">erreurs $-0{,}92$, $+1{,}08$, seulement $-0{,}04$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · DES MESURES AU LIEU D’UNE EXPRESSION</div>
+            <div class="b-text"><p>Un cycliste lit son compteur toutes les $10$ s : $4$ ; $6$ ; $7$ ; $7$ ; $5$ m/s en $t = 0\,;\,10\,;\,\ldots\,;\,40$ s. Estime la distance parcourue.</p></div>
+            <div class="b-sol"><p>À gauche : $10 \cdot (4 + 6 + 7 + 7) = 240$ m. À droite : $10 \cdot (6 + 7 + 7 + 5) = 250$ m.</p>
+                <p><span class="b-res">Entre $240$ et $250$ m.</span> Pour la méthode du point milieu, il manque les valeurs au milieu ; la leçon 2 montre ce qui aide alors.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $L_2$ et $R_2$ pour $\int_0^2 x\,\mathrm{d}x$ et compare avec la valeur exacte.</p></div>
+            <div class="b-sol"><p>$h = 1$ : $L_2 = 0 + 1 = 1$, $R_2 = 1 + 2 = 3$, valeur exacte $2$ (triangle), pile au milieu.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $M_4$ pour $\int_0^1 x^2\,\mathrm{d}x$ ainsi que l’erreur.</p></div>
+            <div class="b-sol"><p>Milieux $0{,}125$ ; $0{,}375$ ; $0{,}625$ ; $0{,}875$ : $M_4 = 0{,}25 \cdot 1{,}3125 = 0{,}328125$. Erreur $-0{,}0052$ par rapport à $\tfrac13$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule $L_4$ et $R_4$ pour $\int_1^2 \tfrac1x\,\mathrm{d}x = \ln 2 \approx 0{,}6931$. Quelle somme est trop grande ? Pourquoi ?</p></div>
+            <div class="b-sol"><p>$L_4 \approx 0{,}7595$, $R_4 \approx 0{,}6345$. $\tfrac1x$ est décroissante : à gauche se trouve la plus grande valeur de la bande, donc $L_4$ est trop grande.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Montre pour une fonction croissante : $L_n \le \int_a^b f(x)\,\mathrm{d}x \le R_n$ et $R_n - L_n = h \cdot \big(f(b) - f(a)\big)$.</p></div>
+            <div class="b-sol"><p>Les deux sommes contiennent $f(x_1)$ à $f(x_{n-1})$. Il reste $R_n - L_n = h \cdot (f(x_n) - f(x_0))$. Croissante : les rectangles à gauche sont sous la courbe, ceux à droite au-dessus.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Pour $\int_0^1 x^2\,\mathrm{d}x$, on a $\tfrac13 - L_n = \dfrac{3n - 1}{6n^2}$. Combien de bandes faut-il au minimum pour que l’erreur de $L_n$ soit inférieure à $0{,}01$ ?</p></div>
+            <div class="b-sol"><p>$n = 49$ : $0{,}01013$ ; $n = 50$ : $0{,}00993$. <span class="b-res">Au moins $50$ bandes.</span> L’erreur ne diminue qu’à peu près comme $\tfrac{1}{2n}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1,75" data-ph="L₄ ="><p class="b-q-text">$L_4$ pour $\int_0^2 x^2\,\mathrm{d}x$ ?</p><div class="b-sol"><p>$0{,}5 \cdot 3{,}5$</p></div></div>
+        <div class="b-q" data-ans="0,328" data-tol="0.001" data-ph="M₄ ≈"><p class="b-q-text">$M_4$ pour $\int_0^1 x^2\,\mathrm{d}x$, à trois décimales ?</p><div class="b-sol"><p>$0{,}328125$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quelle règle des rectangles est en général la plus précise ?</p><div class="b-mc"><button>à gauche</button><button>à droite</button><button>au milieu</button></div><div class="b-sol"><p>Le trop et le trop peu se compensent presque.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Méthode des trapèzes et précision" data-toc-k="2" data-toc-short="2 Trapèzes">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>La méthode des trapèzes et la précision</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si l’on relie par des segments des points voisins de la courbe, on obtient des <b>trapèzes</b> au lieu de rectangles. Chacun a l’aire $h \cdot \tfrac{f(x_{i}) + f(x_{i+1})}{2}$.
+                Quand on les additionne, chaque valeur intérieure compte en entier, car elle appartient à deux trapèzes. Les deux valeurs aux bornes ne comptent qu’à moitié.</p></div></div>
+            <div class="b-text"><p>La somme des trapèzes est exactement la moyenne de la somme des rectangles à gauche et de celle des rectangles à droite. Elle n’a besoin que des valeurs aux points de subdivision, ce qui convient parfaitement aux séries de mesures.
+                Quelle est sa précision ? Si l’on double le nombre de bandes, l’erreur des méthodes des trapèzes et du point milieu tombe environ au <b>quart</b>,
+                celle des rectangles à gauche et à droite seulement à la <b>moitié</b>. Si la courbe est convexe, les cordes sont au-dessus d’elle : les trapèzes sont alors trop grands.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODE DES TRAPÈZES</div>
+                <div class="b-text">
+                    <p>$$T_n = h \cdot \Big(\tfrac12 f(x_0) + f(x_1) + \ldots + f(x_{n-1}) + \tfrac12 f(x_n)\Big) = \frac{L_n + R_n}{2}$$</p>
+                    <p><b>Erreur quand on double $n$ :</b> rectangles à gauche et à droite environ divisée par deux, point milieu et trapèzes environ divisée par quatre.</p>
+                    <p><b>Courbure :</b> convexe : $T_n$ trop grand, $M_n$ trop petit · concave : l’inverse.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sans primitive :</b> $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x \approx 0{,}746824$ ne se calcule que numériquement. La courbe en cloche est au cœur de la loi normale, que tu découvres au chapitre 6.</p>
+            <p class="b-note"><b>Une astuce :</b> comme l’erreur est à peu près divisée par quatre quand on double $n$, $T_{2n} + \tfrac13 (T_{2n} - T_n)$ donne une valeur encore bien meilleure.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · QUATRE MÉTHODES, UNE ERREUR</div>
+        <p class="b-help" style="margin:0 0 12px">Le tableau montre l’approximation pour $n$, $2n$ et $4n$ bandes et son erreur. Compare le facteur dont l’erreur diminue quand on double $n$. Pour $\mathrm{e}^{-x^2}$, il n’y a pas de valeur exacte tirée d’une primitive.</p>
+        <div data-widget="summen" data-mode="verfahren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · DOUBLER</div>
+            <div class="b-text"><p>Calcule $T_4$ et $T_8$ pour $\int_0^2 x^2\,\mathrm{d}x$ et compare les erreurs.</p></div>
+            <div class="b-sol"><p>$T_4 = \tfrac{1{,}75 + 3{,}75}{2} = 2{,}75$, erreur $+0{,}0833$. $T_8 = 2{,}6875$, erreur $+0{,}0208$.</p>
+                <p><span class="b-res">L’erreur est tombée au quart.</span> Les deux valeurs sont trop grandes, car $x^2$ est convexe.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · LA COURBE EN CLOCHE</div>
+            <div class="b-text"><p>Approche $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$ par la méthode des trapèzes avec quatre bandes.</p></div>
+            <div class="b-sol"><p>Valeurs en $0\,;\,0{,}25\,;\,0{,}5\,;\,0{,}75\,;\,1$ : $1$ ; $0{,}9394$ ; $0{,}7788$ ; $0{,}5698$ ; $0{,}3679$.</p>
+                <p>$T_4 = 0{,}25 \cdot (0{,}5 + 0{,}9394 + 0{,}7788 + 0{,}5698 + 0{,}1839) \approx$ <span class="b-res">$0{,}7430$</span>, seulement $0{,}004$ sous la valeur exacte.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Estime la distance parcourue par le cycliste de l’exemple 2 avec la méthode des trapèzes.</p></div>
+            <div class="b-sol"><p>$10 \cdot (2 + 6 + 7 + 7 + 2{,}5) = 245$ m, exactement la moyenne de $240$ et $250$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $T_2$ pour $\int_0^2 x^3\,\mathrm{d}x$ ainsi que l’erreur.</p></div>
+            <div class="b-sol"><p>$h = 1$ : $T_2 = \tfrac12 \cdot 0 + 1 + \tfrac12 \cdot 8 = 5$, valeur exacte $4$ : erreur $+1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule $T_4$ pour $\int_1^2 \tfrac1x\,\mathrm{d}x$ avec les résultats de l’exercice 3, ainsi que l’erreur par rapport à $\ln 2$.</p></div>
+            <div class="b-sol"><p>$T_4 = \tfrac{0{,}7595 + 0{,}6345}{2} \approx 0{,}6970$, erreur $\approx +0{,}0039$ ; $\tfrac1x$ est convexe.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Justifie à l’aide d’une esquisse : pour une courbe concave, la méthode des trapèzes donne des valeurs trop petites.</p></div>
+            <div class="b-sol"><p>Concave signifie : la corde entre deux points passe sous la courbe. Chaque trapèze est plus petit que la bande sous la courbe.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Pour $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$, on a $T_4 \approx 0{,}742984$ et $T_8 \approx 0{,}745866$. Estime avec $T_8 + \tfrac13 (T_8 - T_4)$ une meilleure valeur et compare avec $0{,}746824$.</p></div>
+            <div class="b-sol"><p>$0{,}745866 + \tfrac13 \cdot 0{,}002882 \approx 0{,}746826$. <span class="b-res">Seulement $0{,}000002$ d’écart</span>, avec les mêmes valeurs de la fonction.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="245" data-ph="mètres"><p class="b-q-text">Le cycliste, méthode des trapèzes : combien de mètres ?</p><div class="b-sol"><p>Moyenne de $240$ et $250$</p></div></div>
+        <div class="b-q" data-ans="2,75" data-ph="T₄ ="><p class="b-q-text">$T_4$ pour $\int_0^2 x^2\,\mathrm{d}x$ ?</p><div class="b-sol"><p>$\tfrac{L_4 + R_4}{2}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Si l’on double $n$, l’erreur de la méthode des trapèzes est environ …</p><div class="b-mc"><button>divisée par quatre.</button><button>divisée par deux.</button><button>multipliée par deux.</button></div><div class="b-sol"><p>Exemple 3</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $M_2$ et $T_2$ pour $\int_0^\pi \sin x\,\mathrm{d}x = 2$. Quelle méthode est la plus proche ?</p></div>
+            <div class="b-sol"><p>$h = \tfrac{\pi}{2}$ : $M_2 = \tfrac{\pi}{2} \cdot (\sin\tfrac{\pi}{4} + \sin\tfrac{3\pi}{4}) \approx 2{,}221$, $T_2 = \tfrac{\pi}{2} \cdot 1 \approx 1{,}571$. Le point milieu est plus proche.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier avec la leçon 1 :</b> montre en transformant l’expression que $T_n = \tfrac12 (L_n + R_n)$.</p></div>
+            <div class="b-sol"><p>$L_n + R_n = h \cdot \big(f(x_0) + 2f(x_1) + \ldots + 2f(x_{n-1}) + f(x_n)\big)$. En divisant par deux, on obtient exactement la formule des trapèzes.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Décris comment calculer $T_{10}$ pour $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$ dans un tableur : quelles colonnes, quelle formule ?</p></div>
+            <div class="b-sol"><p>Colonne A : $0\,;\,0{,}1\,;\,\ldots\,;\,1$. Colonne B : $=\mathrm{EXP}(-(A2^2))$. Puis $T_{10} = 0{,}1 \cdot \big(\tfrac12 B_2 + B_3 + \ldots + B_{11} + \tfrac12 B_{12}\big)$, donc $0{,}1 \cdot (\mathrm{SOMME}(B2{:}B12) - \tfrac12 (B2 + B12))$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>La <b>règle des tonneaux de Kepler</b> donne une approximation avec seulement trois valeurs : $\int_a^b f(x)\,\mathrm{d}x \approx \tfrac{b - a}{6} \big(f(a) + 4f(m) + f(b)\big)$, où $m$ est le milieu. Teste-la sur $\int_0^2 x^3\,\mathrm{d}x$ et sur $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$\tfrac26 (0 + 4 + 8) = 4$, exactement juste. Pour $\mathrm{e}^{-x^2}$ : $\tfrac16 (1 + 4\mathrm{e}^{-0{,}25} + \mathrm{e}^{-1}) \approx 0{,}74718$, seulement $0{,}0004$ d’écart. La règle est exacte pour tous les polynômes jusqu’au degré $3$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Kepler et les tonneaux de vin" data-toc-k="X" data-toc-short="Kepler">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Kepler et les tonneaux de vin</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Johannes Kepler (1571–1630) est surtout connu comme astronome. En 1613, il se maria pour la seconde fois. Pendant les fêtes de la noce, il remarqua comment on mesurait
+                le vin dans le tonneau : on enfonçait une jauge en biais par la bonde, et de la longueur mouillée on déduisait le volume, quelle que soit la courbure du tonneau.</p>
+            <p>Cette idée ne le lâcha plus. Il étudia les volumes des solides obtenus par rotation et les découpa pour cela, à la manière d’Archimède, en une infinité de
+                tranches fines. En 1615 parut à Linz son livre <i>Nova stereometria doliorum vinariorum</i>, une « nouvelle stéréométrie des tonneaux de vin ».
+                L’approximation de l’exercice 14 porte son nom : la <b>règle des tonneaux de Kepler</b>. Elle prend la section du bas, celle du haut et quatre fois celle du milieu.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> MacTutor History of Mathematics, University of St Andrews : biographie « Johannes Kepler ».</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>BANDES</h4><p>$h = \tfrac{b - a}{n}$, points de subdivision $x_i = a + i \cdot h$</p></div>
+        <div><p>$[0\,;\,2]$, $n = 4$ : $h = 0{,}5$</p></div></div>
+    <div class="b-rueck"><div><h4>RECTANGLES</h4><p>Hauteur à gauche, à droite ou au milieu ; le milieu est en général le plus précis</p></div>
+        <div><p>$\int_0^2 x^2$ : $L_4 = 1{,}75$, $R_4 = 3{,}75$, $M_4 = 2{,}625$</p></div></div>
+    <div class="b-rueck"><div><h4>TRAPÈZES</h4><p>$T_n = \tfrac{L_n + R_n}{2}$, valeurs aux bornes comptées à moitié</p></div>
+        <div><p>Cycliste : $245$ m</p></div></div>
+    <div class="b-rueck"><div><h4>PRÉCISION</h4><p>Doubler $n$ : rectangles à gauche et à droite $\tfrac12$, point milieu et trapèzes $\tfrac14$</p></div>
+        <div><p>$T_4 = 2{,}75$, $T_8 = 2{,}6875$ pour $\tfrac83$</p></div></div>
+    <div class="b-rueck"><div><h4>SANS PRIMITIVE</h4><p>calculer numériquement</p></div>
+        <div><p>$\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x \approx 0{,}7468$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="3" data-ph="R₂ ="><p class="b-q-text">$R_2$ pour $\int_0^2 x\,\mathrm{d}x$ ?</p><div class="b-sol"><p>$1 \cdot (1 + 2)$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="T₂ ="><p class="b-q-text">$T_2$ pour $\int_0^2 x^3\,\mathrm{d}x$ ?</p><div class="b-sol"><p>$\tfrac12 \cdot 0 + 1 + \tfrac12 \cdot 8$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$x^2$ est convexe. La méthode des trapèzes donne alors …</p><div class="b-mc"><button>des valeurs trop petites.</button><button>des valeurs trop grandes.</button><button>des valeurs exactes.</button></div><div class="b-sol"><p>Les cordes sont au-dessus de la courbe.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="0,743" data-tol="0.001" data-ph="T₄ ≈"><p class="b-q-text">$T_4$ pour $\int_0^1 \mathrm{e}^{-x^2}\,\mathrm{d}x$, à trois décimales ?</p><div class="b-sol"><p>$0{,}742984$</p></div></div>
+            <div class="b-q" data-ans="50" data-ph="n ="><p class="b-q-text">Nombre minimal de bandes pour que $L_n$ s’écarte de moins de $0{,}01$ de $\int_0^1 x^2\,\mathrm{d}x$ ?</p><div class="b-sol"><p>$\tfrac{3n - 1}{6n^2} < 0{,}01$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="valeur"><p class="b-q-text">Règle des tonneaux de Kepler pour $\int_0^2 x^3\,\mathrm{d}x$ ?</p><div class="b-sol"><p>$\tfrac26 (0 + 4 + 8)$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12-rechteckverfahren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MÉTHODE DES RECTANGLES</span><span class="b-lab-what">Histoire, rectangles à gauche, à droite et au milieu</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12-trapezverfahren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MÉTHODE DES TRAPÈZES</span><span class="b-lab-what">Trapèzes, précision, intégrales sans primitive</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 12e année, Grundkurs · Domaine optionnel 5 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-fr/numerik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-fr/gy12.js"></script>
+</body>
+</html>
