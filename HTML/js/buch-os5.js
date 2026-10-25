@@ -192,4 +192,366 @@
         if (S.mode === 'lesen') neu();
         render();
     });
+
+    /* ---------- written arithmetic, step by step: + − · : ---------- */
+    const PLACE = { '-3': 'Tausendstel', '-2': 'Hundertstel', '-1': 'Zehntel', '0': 'Einer', '1': 'Zehner', '2': 'Hunderter', '3': 'Tausender',
+        '4': 'Zehntausender', '5': 'Hunderttausender', '6': 'Millionen', '7': 'Zehnmillionen', '8': 'Hundertmillionen', '9': 'Milliarden' };
+    // a number as typed ("1 234,5") → { i: '1234', f: '5' }; null if it is none
+    function dnum(t) {
+        const m = String(t).replace(/[\s ]/g, '').replace('.', ',').match(/^(\d+)(?:,(\d*))?$/);
+        return m ? { i: m[1].replace(/^0+(?=\d)/, ''), f: m[2] || '' } : null;
+    }
+    const dshow = x => grp(x.i) + (x.f ? ',' + x.f : '');
+    const scaled = (x, d) => parseInt(x.i + x.f.padEnd(d, '0'), 10);              // the value in units of 10^-d
+    function unscale(n, d) {                                                        // 14700, 3 → "14,7"
+        if (!d) return grp(n);
+        const s = String(n).padStart(d + 1, '0'), f = s.slice(-d).replace(/0+$/, '');
+        return grp(s.slice(0, -d)) + (f ? ',' + f : '');
+    }
+    // for an estimate: two leading digits for numbers from 100 on (4 738 → 4 700), tens below, decimals to whole numbers
+    const rough = v => v < 10 ? Math.round(v) : Math.round(v / Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2))) * Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2));
+    // one significant digit (352 → 400, 23 → 20) for the estimate of a product
+    const lead = v => v < 10 ? Math.max(1, Math.round(v)) : Math.round(v / Math.pow(10, String(Math.floor(v)).length - 1)) * Math.pow(10, String(Math.floor(v)).length - 1);
+    const val = x => parseFloat(x.i + '.' + (x.f || '0'));
+
+    // the sheet of a written calculation: rows of cells; a cell keeps its texts with the step they appear in,
+    // plus the steps from which it is struck through (x), carries a comma (ck) or a line above (line)
+    function Sheet(C) { this.C = C; this.rows = []; }
+    Sheet.prototype.row = function (cls) { const r = { cls: cls || '', c: {} }; this.rows.push(r); return r; };
+    const cell = (r, k) => r.c[k] || (r.c[k] = { v: [], cls: '' });
+    function put(r, k, t, s, cls) { const c = cell(r, k); c.v.push([s || 0, String(t)]); if (cls) c.cls = cls; return c; }
+    function lineAt(r, from, to, s) { for (let k = from; k <= to; k++) cell(r, k).line = s || 0; }
+    function sheetHtml(sh, step, right) {
+        let h = '<table class="os5-calc">';
+        sh.rows.forEach((r, ri) => {
+            h += '<tr' + (r.cls ? ' class="' + r.cls + '"' : '') + '>';
+            for (let k = 0; k < sh.C; k++) {
+                const c = r.c[k], cls = [];
+                let t = '';
+                if (c) {
+                    const vis = c.v.filter(v => v[0] <= step);
+                    if (vis.length) { t = vis[vis.length - 1][1]; if (step > 0 && vis[vis.length - 1][0] === step) cls.push('os5-new'); }
+                    if (c.cls) cls.push(c.cls);
+                    if (c.line != null && c.line <= step) cls.push('os5-l');
+                    if (c.x != null && c.x <= step) cls.push('os5-x');
+                    if (c.ck != null && c.ck <= step && t) cls.push('os5-ck');
+                }
+                h += '<td' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + '>' + t + '</td>';
+            }
+            if (right != null) h += ri === 0 ? '<td class="os5-r">' + right + '</td>' : '<td></td>';
+            h += '</tr>';
+        });
+        return h + '</table>';
+    }
+    // the digit of x at place p (p < 0: after the comma); null where x has no digit
+    const digAt = (x, p) => p >= 0 ? (p < x.i.length ? +x.i[x.i.length - 1 - p] : null) : (-p <= x.f.length ? +x.f[-p - 1] : null);
+    // the two numbers of an addition or subtraction, written place under place (col(p) for place p)
+    function twoRows(sh, a, b, d, col, rA, rB) {
+        [[rA, a], [rB, b]].forEach(([r, x]) => {
+            for (let p = -d; p < x.i.length; p++) {
+                const v = digAt(x, p), c = put(r, col(p), v == null ? 0 : v, 0, v == null ? 'os5-dim' : '');
+                if (p === 0 && d) c.ck = 0;
+            }
+        });
+    }
+    function buildAdd(a, b) {
+        const d = Math.max(a.f.length, b.f.length), top = Math.max(a.i.length, b.i.length);
+        const C = 2 + top + d, col = p => 1 + top - p;                       // col(top) = 1 for the last carry
+        const sh = new Sheet(C), rA = sh.row(), rB = sh.row(), rC = sh.row('os5-carry'), rR = sh.row();
+        twoRows(sh, a, b, d, col, rA, rB);
+        put(rB, 0, '+', 0); lineAt(rR, 0, C - 1, 0);
+        const text = ['Schreibe die Zahlen stellengerecht untereinander: Einer unter Einer' + (d ? ', Komma unter Komma. Fehlende Stellen hinter dem Komma füllst du mit Nullen auf' : '') + '. Gerechnet wird von rechts nach links.'];
+        let carry = 0, s = 0;
+        for (let p = -d; p < top; p++) {
+            const x = digAt(a, p) || 0, y = digAt(b, p) || 0, sum = x + y + carry;
+            s++;
+            const c = put(rR, col(p), sum % 10, s); if (p === 0 && d) c.ck = s;
+            if (sum >= 10) put(rC, col(p + 1), Math.floor(sum / 10), s);
+            text.push('<b>' + PLACE[p] + ':</b> ' + x + ' + ' + y + (carry ? ' + ' + carry + ' (Übertrag)' : '') + ' = ' + sum + '. Schreibe ' + (sum % 10) +
+                (sum >= 10 ? ' und übertrage ' + Math.floor(sum / 10) + ' in die nächste Spalte.' : '.'));
+            carry = Math.floor(sum / 10);
+        }
+        if (carry) { s++; put(rR, col(top), carry, s); text.push('Der letzte Übertrag ' + carry + ' kommt vorn ins Ergebnis.'); }
+        const R = scaled(a, d) + scaled(b, d), ea = rough(val(a)), eb = rough(val(b));
+        return { sh, n: s, text, res: dshow(a) + ' + ' + dshow(b) + ' = ' + unscale(R, d),
+            note: 'Überschlag: ' + grp(ea) + ' + ' + grp(eb) + ' = ' + grp(ea + eb) + '. Probe: ' + unscale(R, d) + ' − ' + dshow(b) + ' = ' + dshow(a) + '.' };
+    }
+    function buildSub(a, b, way) {
+        const d = Math.max(a.f.length, b.f.length), va = scaled(a, d), vb = scaled(b, d);
+        if (vb > va) return { err: 'Die zweite Zahl ist größer als die erste. In den natürlichen Zahlen geht diese Subtraktion nicht.' };
+        const top = Math.max(a.i.length, b.i.length), C = 1 + top + d, col = p => top - p;
+        const ent = way === 'ent', sh = new Sheet(C);
+        const rE = ent ? sh.row('os5-carry') : null, rA = sh.row(), rB = sh.row(), rC = ent ? null : sh.row('os5-carry'), rR = sh.row();
+        twoRows(sh, a, b, d, col, rA, rB);
+        put(rB, 0, '−', 0); lineAt(rR, 0, C - 1, 0);
+        const R = va - vb, hp = Math.max(0, String(R).length - 1 - d);                 // the highest place of the result
+        const text = ['Schreibe die Zahlen stellengerecht untereinander' + (d ? ', Komma unter Komma' : '') + '. Gerechnet wird von rechts nach links' +
+            (ent ? ', beim Entbündeln tauschst du 1 der nächsten Stelle gegen 10.' : ', beim Ergänzen fragst du: Wie viel fehlt von der unteren bis zur oberen Zahl?')];
+        let s = 0, carry = 0;
+        const tv = {};
+        for (let p = -d; p < top; p++) tv[p] = digAt(a, p) || 0;
+        for (let p = -d; p < top; p++) {
+            const y = digAt(b, p) || 0;
+            let r, t = '<b>' + PLACE[p] + ':</b> ';
+            s++;
+            if (!ent) {
+                const x = tv[p], bb = y + carry;
+                if (carry) t += y + ' + 1 (Übertrag) = ' + bb + '. ';
+                if (bb <= x) { r = x - bb; t += 'Von ' + bb + ' bis ' + x + ' sind ' + r + '.'; carry = 0; }
+                else { r = x + 10 - bb; t += 'Von ' + bb + ' bis ' + (x + 10) + ' sind ' + r + '. Übertrag 1 in die nächste Spalte.'; put(rC, col(p + 1), 1, s); carry = 1; }
+            } else {
+                if (tv[p] < y) {
+                    let q = p + 1; while (tv[q] === 0) q++;
+                    const mark = k => { put(rE, col(k), tv[k], s); const c = cell(rA, col(k)); if (c.x == null) c.x = s; };
+                    const chain = [];
+                    tv[q]--; mark(q);
+                    for (let k = q - 1; k > p; k--) { tv[k] = 9; mark(k); }
+                    for (let k = q; k > p; k--) chain.push('1 ' + PLACE[k].replace(/Millionen$/, 'Million') + ' → 10 ' + PLACE[k - 1]);
+                    t += tv[p] + ' ist kleiner als ' + y + '. Entbündle: ' + chain.join(', dann ') + '. ';
+                    tv[p] += 10; mark(p);
+                }
+                r = tv[p] - y; t += tv[p] + ' − ' + y + ' = ' + r + '.';
+            }
+            if (p <= hp) { const c = put(rR, col(p), r, s); if (p === 0 && d) c.ck = s; }
+            else t += ' Eine Null ganz vorn schreibt man nicht.';
+            text.push(t);
+        }
+        const ea = rough(val(a)), eb = rough(val(b));
+        return { sh, n: s, text, res: dshow(a) + ' − ' + dshow(b) + ' = ' + unscale(R, d),
+            note: 'Überschlag: ' + grp(ea) + ' − ' + grp(eb) + ' = ' + grp(Math.max(0, ea - eb)) + '. Probe: ' + unscale(R, d) + ' + ' + dshow(b) + ' = ' + dshow(a) + '.' };
+    }
+    function buildMul(a, b) {
+        if (b.f) return { err: 'Der zweite Faktor muss hier eine natürliche Zahl sein. Tausche die Faktoren, wenn nötig.' };
+        const da = a.f.length, A = a.i + a.f, Bd = b.i, na = A.length, nb = Bd.length;
+        if (na > 7 || nb > 3) return { err: 'Bitte höchstens sieben Ziffern im ersten und drei im zweiten Faktor.' };
+        const C = na + nb + 2, R = na + nb + 1, sh = new Sheet(C), rT = sh.row();
+        [...A].forEach((ch, k) => { const c = put(rT, 1 + k, ch, 0); if (da && k === na - da - 1) c.ck = 0; });
+        put(rT, na + 1, '·', 0);
+        [...Bd].forEach((ch, k) => put(rT, na + 2 + k, ch, 0));
+        const Av = parseInt(A, 10), Bv = parseInt(Bd, 10), total = Av * Bv;
+        const text = ['Schreibe die Aufgabe nebeneinander. Du nimmst den ersten Faktor nacheinander mit jeder Ziffer des zweiten Faktors mal' +
+            (da ? ', zuerst ohne auf das Komma zu achten.' : '.')];
+        let s = 0, rRes;
+        if (nb === 1) {
+            const y = Bv; rRes = sh.row(); lineAt(rRes, 1, R, 0);
+            let carry = 0;
+            for (let k = na - 1; k >= 0; k--) {
+                const x = +A[k], pr = x * y + carry, end = R - (na - 1 - k);
+                s++;
+                if (k > 0) {
+                    put(rRes, end, pr % 10, s);
+                    text.push(y + ' · ' + x + (carry ? ' + ' + carry + ' (gemerkt)' : '') + ' = ' + pr + '. Schreibe ' + pr % 10 + (pr >= 10 ? ', merke ' + Math.floor(pr / 10) : '') + '.');
+                    carry = Math.floor(pr / 10);
+                } else {
+                    String(pr).split('').reverse().forEach((ch, j) => put(rRes, end - j, ch, s));
+                    text.push(y + ' · ' + x + (carry ? ' + ' + carry + ' (gemerkt)' : '') + ' = ' + pr + '. Das ist die letzte Ziffer: Schreibe ' + pr + ' ganz hin.');
+                }
+            }
+        } else {
+            const parts = [];
+            [...Bd].forEach((ch, j) => {
+                const y = +ch, P = Av * y, end = na + 2 + j, r = sh.row();
+                if (!j) lineAt(r, 1, R, 0);
+                s++;
+                String(P).split('').reverse().forEach((c2, i) => put(r, end - i, c2, s));
+                parts.push(grp(P));
+                text.push(grp(Av) + ' · ' + y + ' = ' + grp(P) + '. Die letzte Ziffer steht genau unter der ' + y + ' des zweiten Faktors.');
+            });
+            rRes = sh.row(); s++;
+            lineAt(rRes, 1, R, s);
+            String(total).split('').reverse().forEach((ch, i) => put(rRes, R - i, ch, s));
+            text.push('Addiere die Teilprodukte stellengerecht, so wie sie stehen. Das ergibt ' + grp(total) + '.');
+        }
+        if (da) {
+            s++;
+            const str = String(total);
+            for (let i = str.length; i <= da; i++) put(rRes, R - i, 0, s);                   // 0,02 · 3: leading zeros for the comma
+            cell(rRes, R - da).ck = s;
+            text.push('Der erste Faktor hat ' + da + (da > 1 ? ' Stellen' : ' Stelle') + ' nach dem Komma, also auch das Ergebnis: ' + unscale(total, da) + '.');
+        }
+        const ea = lead(val(a)), eb = lead(Bv);
+        return { sh, n: s, text, res: dshow(a) + ' · ' + grp(Bd) + ' = ' + unscale(total, da),
+            note: 'Überschlag: ' + grp(ea) + ' · ' + grp(eb) + ' = ' + grp(ea * eb) + '.' };
+    }
+    function buildDiv(a, b) {
+        if (b.f || +b.i < 1 || +b.i > 9) return { err: 'Hier teilst du durch eine einstellige Zahl von 1 bis 9.' };
+        if (a.i.length + a.f.length > 8) return { err: 'Bitte höchstens acht Ziffern.' };
+        const y = +b.i, ia = a.i.length, dec = a.f.length > 0;
+        let D = (a.i + a.f).split('').map(Number), ext = 0;
+        if (dec) { let r = 0; D.forEach(x => { r = (r * 10 + x) % y; }); while (r && a.f.length + ext < 4) { ext++; r = (r * 10) % y; } }
+        D = D.concat(Array(ext).fill(0));
+        const n = D.length, places = a.f.length + ext, sh = new Sheet(n + 1), r0 = sh.row();
+        D.forEach((x, k) => { const c = put(r0, 1 + k, x, 0, k >= n - ext ? 'os5-dim' : ''); if (dec && k === ia - 1) c.ck = 0; });
+        const q = [], text = ['Teile von links nach rechts. Frage bei jeder Stelle: Wie oft passt die ' + y + ' hinein?' + (ext ? ' Hinten hängst du Nullen an, das ändert den Wert nicht.' : '')];
+        let cur = 0, s = 0, started = false, last = null;
+        for (let i = 0; i < n; i++) {
+            cur = cur * 10 + D[i];
+            if (!started && cur < y && i < ia - 1) continue;
+            s++;
+            let t = '';
+            if (last) { put(last, 1 + i, D[i], s); t = 'Hole die ' + D[i] + ' herunter: ' + cur + '. '; }
+            else if (i > 0) t = 'In die ' + D[0] + ' passt die ' + y + ' nicht, nimm die ersten ' + (i + 1) + ' Ziffern: ' + cur + '. ';
+            started = true;
+            const qd = Math.floor(cur / y), pr = qd * y, rem = cur - pr, ps = String(pr), cs = String(cur);
+            q.push([s, String(qd)]);
+            if (i === ia - 1 && i < n - 1) q.push([s, ',']);
+            const rp = sh.row();
+            ps.split('').reverse().forEach((ch, j) => put(rp, 1 + i - j, ch, s));
+            put(rp, i - ps.length + 1, '−', s);
+            const rr = sh.row();
+            String(rem).split('').reverse().forEach((ch, j) => put(rr, 1 + i - j, ch, s));
+            lineAt(rr, 2 + i - cs.length, 1 + i, s);
+            t += cur + ' : ' + y + ' = ' + qd + ', denn ' + qd + ' · ' + y + ' = ' + pr + '. ' + (rem ? 'Es bleibt ' + rem + '.' : 'Es bleibt nichts übrig.');
+            if (i === ia - 1 && i < n - 1) t += ' Hier kommt das Komma: Setze es auch im Ergebnis.';
+            text.push(t);
+            last = rr; cur = rem;
+        }
+        const Av = parseInt(D.join(''), 10), Q = Math.floor(Av / y), rest = Av - Q * y;
+        if (!dec && rest) q.push([s, ' Rest ' + rest]);
+        const res = dec ? dshow(a) + ' : ' + y + (rest ? ' ≈ ' : ' = ') + unscale(Q, places) : grp(a.i) + ' : ' + y + ' = ' + grp(Q) + (rest ? ' Rest ' + rest : '');
+        const note = dec ? (rest ? 'Die Division geht nicht auf. Nach ' + places + ' Stellen hinter dem Komma wird abgebrochen.' : 'Probe: ' + unscale(Q, places) + ' · ' + y + ' = ' + dshow(a) + '.')
+            : 'Probe: ' + grp(Q) + ' · ' + y + (rest ? ' + ' + rest : '') + ' = ' + grp(a.i) + '.';
+        return { sh, n: s, text, res, note, right: st => ': ' + y + ' = ' + q.filter(t => t[0] <= st).map(t => t[1]).join('') };
+    }
+    W('schriftlichos5', function (box) {
+        const S = { op: box.dataset.op || '+', a: box.dataset.a || '4738', b: box.dataset.b || '1296', way: box.dataset.way || 'erg', step: 0, P: null };
+        const hero = isHero(box);
+        const ctr = div(box, 'b-ctrls');
+        seg(ctr, [['+', 'Addieren'], ['−', 'Subtrahieren'], ['·', 'Multiplizieren'], [':', 'Dividieren']], S.op, v => { S.op = v; build(); }, 'Rechenart');
+        const wayBox = div(box, 'b-ctrls');
+        seg(wayBox, [['erg', 'Ergänzen'], ['ent', 'Entbündeln']], S.way, v => { S.way = v; build(); }, 'Verfahren');
+        const inp = div(box, 'b-ctrls');
+        inp.innerHTML = '<span class="b-ctrl"><input class="b-in os5-in" data-k="a" type="text" inputmode="decimal" autocomplete="off" aria-label="erste Zahl"> <b class="os5-op"></b> ' +
+            '<input class="b-in os5-in" data-k="b" type="text" inputmode="decimal" autocomplete="off" aria-label="zweite Zahl"></span>';
+        const ia = inp.querySelector('[data-k="a"]'), ib = inp.querySelector('[data-k="b"]'), opEl = inp.querySelector('.os5-op');
+        ia.value = S.a; ib.value = S.b;
+        [ia, ib].forEach(el => el.addEventListener('input', () => { S[el.dataset.k] = el.value; build(); }));
+        const acts = buttons(box, [['next', 'Nächster Schritt', 'b-go'], ['all', 'Alles zeigen'], ['reset', 'Von vorn']], k => {
+            if (!S.P || S.P.err) return;
+            S.step = k === 'next' ? Math.min(S.step + 1, S.P.n) : k === 'all' ? S.P.n : 0;
+            render();
+        });
+        const pic = div(box, 'os5-sheet'), out = div(box, 'b-out');
+        if (hero) [ctr, wayBox, inp, acts, out].forEach(e => { e.style.display = 'none'; });
+        function build() {
+            const a = dnum(S.a), b = dnum(S.b);
+            opEl.textContent = S.op;
+            if (!hero) wayBox.style.display = S.op === '−' ? '' : 'none';
+            if (!a || !b) S.P = { err: 'Bitte zwei Zahlen eingeben, zum Beispiel 4738 und 1296.' };
+            else if (a.f.length > 3 || b.f.length > 3) S.P = { err: 'Bitte höchstens drei Stellen nach dem Komma.' };
+            else if (a.i.length > 9 || b.i.length > 9) S.P = { err: 'Bitte Zahlen mit höchstens neun Stellen vor dem Komma.' };
+            else S.P = S.op === '+' ? buildAdd(a, b) : S.op === '−' ? buildSub(a, b, S.way) : S.op === '·' ? buildMul(a, b) : buildDiv(a, b);
+            S.step = (hero || B.printing()) && !S.P.err ? S.P.n : 0;
+            render();
+        }
+        function render() {
+            const P = S.P;
+            if (P.err) { pic.innerHTML = ''; out.innerHTML = '<p class="g-warn">' + P.err + '</p>'; return; }
+            pic.innerHTML = sheetHtml(P.sh, S.step, P.right ? P.right(S.step) : null);
+            const done = S.step >= P.n;
+            out.innerHTML = '<p>' + P.text[S.step] + '</p>' + (done ? '<hr class="g5-hr"><p class="g5-big">' + P.res + '</p><p class="g5-dim">' + P.note + '</p>'
+                : '<p class="g5-dim">Schritt ' + S.step + ' von ' + P.n + '</p>');
+        }
+        build();
+    });
+
+    /* ---------- order of operations, step by step ---------- */
+    const HL = s => '\\underline{\\textcolor{#e39b2d}{' + s + '}}';
+    function tokens(str) {
+        const s = String(str).replace(/[×*xX]/g, '·').replace(/[÷/]/g, ':').replace(/[−–]/g, '-').replace(/[\s ]+/g, '');
+        const out = [], re = /(\d+)|([+\-·:()])/y;
+        let i = 0;
+        while (i < s.length) {
+            re.lastIndex = i;
+            const m = re.exec(s);
+            if (!m) return null;
+            out.push(m[1] ? { n: +m[1] } : { o: m[2] });
+            i = re.lastIndex;
+        }
+        return out;
+    }
+    // expr = term {(+|−) term}; term = factor {(·|:) factor}; factor = number | (expr)
+    function valid(T) {
+        let i = 0;
+        const factor = () => {
+            if (T[i] && T[i].n != null) { i++; return true; }
+            if (T[i] && T[i].o === '(') { i++; if (!expr() || !T[i] || T[i].o !== ')') return false; i++; return true; }
+            return false;
+        };
+        const term = () => { if (!factor()) return false; while (T[i] && (T[i].o === '·' || T[i].o === ':')) { i++; if (!factor()) return false; } return true; };
+        const expr = () => { if (!term()) return false; while (T[i] && (T[i].o === '+' || T[i].o === '-')) { i++; if (!term()) return false; } return true; };
+        return T.length > 0 && expr() && i === T.length;
+    }
+    const tt = t => t.n != null ? String(t.n).replace(/\B(?=(\d{3})+(?!\d))/g, '\\,') : t.o === '·' ? '\\cdot' : t.o;
+    function texOf(T, hl) {
+        const p = T.map(tt);
+        return hl ? [p.slice(0, hl[0]).join(' '), HL(p.slice(hl[0], hl[1] + 1).join(' ')), p.slice(hl[1] + 1).join(' ')].join(' ') : p.join(' ');
+    }
+    // all steps of a term: the innermost (leftmost) bracket first, inside it · and : before + and −, else from the left
+    function vorrangSteps(T) {
+        const lines = [];
+        let err = '';
+        while (T.length > 1) {
+            const close = T.findIndex(t => t.o === ')');
+            let lo = 0, hi = T.length - 1, inBr = false;
+            if (close >= 0) { let open = close; while (T[open].o !== '(') open--; lo = open + 1; hi = close - 1; inBr = true; }
+            const ops = []; for (let j = lo; j <= hi; j++) if (T[j].o) ops.push(j);
+            const pts = ops.filter(j => T[j].o === '·' || T[j].o === ':'), str = ops.filter(j => T[j].o === '+' || T[j].o === '-');
+            const k = pts.length ? pts[0] : str[0];
+            const rule = (inBr ? 'Klammer zuerst' : '') + (pts.length && str.length ? (inBr ? ', darin ' : '') + 'Punkt vor Strich' : '') +
+                ((pts.length ? pts.length : str.length) > 1 ? (inBr || (pts.length && str.length) ? ', ' : '') + 'von links nach rechts' : '');
+            lines.push({ T, hl: [k - 1, k + 1], rule: rule || 'die letzte Rechnung' });
+            const x = T[k - 1].n, y = T[k + 1].n, o = T[k].o;
+            let v;
+            if (o === '+') v = x + y;
+            else if (o === '-') { if (y > x) { err = grp(x) + ' − ' + grp(y) + ' geht in den natürlichen Zahlen nicht.'; break; } v = x - y; }
+            else if (o === '·') v = x * y;
+            else { if (!y) { err = 'Durch 0 kann man nicht teilen.'; break; } if (x % y) { err = grp(x) + ' : ' + grp(y) + ' geht nicht ohne Rest auf. Wähle andere Zahlen.'; break; } v = x / y; }
+            T = T.slice(0, k - 1).concat([{ n: v }], T.slice(k + 2));
+            for (let j = 0; j + 2 < T.length; j++) if (T[j].o === '(' && T[j + 1].n != null && T[j + 2].o === ')') { T.splice(j + 2, 1); T.splice(j, 1); j = -1; }
+        }
+        if (!err) lines.push({ T, hl: null, rule: 'Ergebnis' });
+        return { lines, err };
+    }
+    W('vorrangos5', function (box) {
+        const PRE = (box.dataset.terms || '36 − 4 · 5|(36 − 4) · 5|48 : (2 + 6) − 3|100 − 20 − 30|7 · 8 + 7 · 2').split('|');
+        const S = { t: PRE[0], step: 0, P: null };
+        const ctr = div(box, 'b-ctrls');
+        ctr.innerHTML = PRE.map((p, i) => '<button type="button" class="b-btn" data-p="' + i + '">' + p + '</button>').join('');
+        const row = div(box, 'b-ctrls'), id = 'os5-term-' + (++uid);
+        row.innerHTML = '<label class="b-ctrl" for="' + id + '">Eigener Term</label><input class="b-in os5-term" id="' + id + '" type="text" autocomplete="off" spellcheck="false">';
+        const inp = row.querySelector('input');
+        inp.value = S.t;
+        ctr.addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (!b) return; S.t = PRE[+b.dataset.p]; inp.value = S.t; build(); });
+        inp.addEventListener('input', () => { S.t = inp.value; build(); });
+        buttons(box, [['next', 'Nächster Schritt', 'b-go'], ['all', 'Alle Schritte'], ['reset', 'Von vorn']], k => {
+            if (!S.P) return;
+            const n = S.P.lines.length - 1;
+            S.step = k === 'next' ? Math.min(S.step + 1, n) : k === 'all' ? n : 0;
+            render();
+        });
+        const out = div(box, 'b-out os5-steps');
+        div(box, 'b-help', 'Erlaubt sind natürliche Zahlen, + − · : und Klammern. Für · darfst du auch * tippen, für : auch /.');
+        function build() {
+            const T = tokens(S.t);
+            S.P = T && valid(T) ? vorrangSteps(T) : null;
+            S.step = S.P && B.printing() ? S.P.lines.length - 1 : 0;
+            render();
+        }
+        function render() {
+            if (!S.P) { out.innerHTML = '<p class="g-warn">Das ist kein vollständiger Term. Prüfe Zahlen, Rechenzeichen und Klammern.</p>'; return; }
+            const L = S.P.lines, n = L.length - 1;
+            let h = '';
+            for (let i = 0; i <= Math.min(S.step, n); i++) {
+                const l = L[i];
+                h += '<p class="os5-st' + (i === S.step ? ' on' : '') + '"><span>$' + (i ? '= ' : '') + texOf(l.T, l.hl) + '$</span>' +
+                    '<span class="os5-rule">' + l.rule + '</span></p>';
+            }
+            if (S.step >= n && S.P.err) h += '<p class="g-warn">' + S.P.err + '</p>';
+            else if (S.step < n) h += '<p class="g5-dim">Unterstrichen ist, was als Nächstes gerechnet wird.</p>';
+            out.innerHTML = h;
+            math(out);
+        }
+        build();
+    });
 })();
