@@ -246,7 +246,28 @@ window.BUCH_FOTOS = {
         'abfuellanlage': { artist: 'Carol M. Highsmith', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Part_of_the_washing_and_bottling_line_at_the_Dublin_Bottling_Works_and_W.P._Kloster_Museum_in_Dublin,_Texas_LCCN2015630792.tif',
             alt: { de: 'Eine Abfüllanlage für Flaschen', en: 'A bottling line' } },
         'museumssaal': { artist: 'Nben54', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Galerie_2.jpg',
-            alt: { de: 'Gemälde an der Wand eines Museums', en: 'Paintings on a museum wall' } }
+            alt: { de: 'Gemälde an der Wand eines Museums', en: 'Paintings on a museum wall' } },
+        // mathegy10 (2026-10-25)
+        'schachbrett': { artist: 'Paul Lloyd', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Empty_wooden_chessboard.jpg',
+            alt: { de: 'Ein leeres Schachbrett aus Holz', en: 'An empty wooden chessboard' } },
+        'hafen-ebbe': { artist: 'Richard Humphrey', license: 'CC BY-SA 2.0', page: 'https://commons.wikimedia.org/wiki/File:Fishing_boats_at_low_tide_in_Brancaster_Staithe_harbour_-_geograph.org.uk_-_5176851.jpg',
+            alt: { de: 'Fischerboote im Hafen bei Ebbe', en: 'Fishing boats in the harbour at low tide' } },
+        'sonnenflecken': { artist: 'Juliebern', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Sunspots_on_June_7_2023.jpg',
+            alt: { de: 'Die Sonne mit Sonnenflecken', en: 'The Sun with sunspots' } },
+        'vermessungspfeiler': { artist: 'Rude Health', license: 'CC BY-SA 2.0', page: 'https://commons.wikimedia.org/wiki/File:Vanessa_Trig_Point_-_geograph.org.uk_-_4532080.jpg',
+            alt: { de: 'Ein Vermessungspfeiler auf einem Berg', en: 'A triangulation pillar on a mountain' } },
+        'kirchturm': { artist: 'Jan-Herm Janßen', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Gross_Leuthen_Dorfkirche_14_-_edited.jpg',
+            alt: { de: 'Eine Dorfkirche mit Turm', en: 'A village church with its tower' } },
+        'tipi': { artist: 'Jiří Sedláček', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Overview_of_teepee_in_exhibition_S_lili%C3%AD_i_bez_lilie_in_Muzeum_Vyso%C4%8Diny_T%C5%99eb%C3%AD%C4%8D_in_T%C5%99eb%C3%AD%C4%8D,_T%C5%99eb%C3%AD%C4%8D_District.jpg',
+            alt: { de: 'Ein Tipi', en: 'A tipi' } },
+        'napier-staebe': { artist: 'The wub', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Napier%27s_Bones_circa_1700,_Computer_History_Museum.jpg',
+            alt: { de: 'Napiers Rechenstäbe in ihrem Kasten', en: 'Napier’s bones in their box' } },
+        'seismograf': { artist: 'Z22', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Seismogram_at_Weston_Observatory.JPG',
+            alt: { de: 'Ein Seismograf zeichnet Erschütterungen auf', en: 'A seismograph recording tremors' } },
+        'streichhoelzer': { artist: 'Subhrajyoti07', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Closeup_of_match_stick_heads.jpg',
+            alt: { de: 'Drei Streichholzköpfe', en: 'Three match heads' } },
+        'pacioli': { artist: 'Jacopo de\' Barbari', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Jacopo_de%27_Barbari_(attributed_to)_Portrait_of_Luca_Pacioli_(1445_1517)_with_a_student_(Guidobaldo_da_Montefeltro)_(2).jpg',
+            alt: { de: 'Luca Pacioli, Gemälde, Jacopo de’ Barbari zugeschrieben (1495)', en: 'Luca Pacioli, painting attributed to Jacopo de’ Barbari (1495)' } }
     },
     books: {
         mathe11: {
@@ -661,6 +682,54 @@ window.BUCH_FOTOS = {
             ],
             'abi.html': [
                 { foto: 'zicklein', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ]
+        },
+        mathegy10: {
+            'lb1-1.html': [
+                { foto: 'schachbrett', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'tee', at: '#le3 .b-einstieg', put: 'in', w: 28 }
+            ],
+            'lb1-2.html': [
+                { foto: 'riesenrad-wien', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'hafen-ebbe', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'sonnenflecken', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb2-1.html': [
+                { foto: 'zwei-rote-wuerfel', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'pascal', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb2-2.html': [
+                { foto: 'wuerfel-spieltisch', at: '#le3 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'winterpalast', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb3-1.html': [
+                { foto: 'vermessungspfeiler', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb3-2.html': [
+                { foto: 'kirchturm', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'tipi', at: '#le2 .b-einstieg', put: 'in', w: 26, pos: '50% 40%' },
+                { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb4-1.html': [
+                { foto: 'thermometer', at: '#le1 .b-einstieg', put: 'in', w: 26, pos: '50% 40%' },
+                { foto: 'napier-staebe', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb4-2.html': [
+                { foto: 'sparglas', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'seismograf', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb4-4.html': [
+                { foto: 'euler', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb4-5.html': [
+                { foto: 'streichhoelzer', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'schildkroete', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb5.html': [
+                { foto: 'pacioli', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'wb.html': [
+                { foto: 'cardano', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 30%' }
             ]
         }
     }
