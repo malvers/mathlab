@@ -343,7 +343,7 @@
             const lic = f.license === 'public domain' ? t('gemeinfrei', 'public domain', 'dominio público', 'pubblico dominio', 'domaine public') : f.license;
             const alt = ((f.alt && (f.alt[LANG] || f.alt.de)) || '').replace(/"/g, '&quot;');
             fig.innerHTML = '<img src="' + FOTO_DIR + p.foto + '.jpg" alt="' + alt + '"' + (print ? '' : ' loading="lazy"') + (p.pos ? ' style="object-position:' + p.pos + '"' : '') + '>' +
-                '<figcaption>' + t('Foto', 'Photo', 'Foto', 'Foto', 'Photo') + ': ' + f.artist + ' · ' + lic +
+                '<figcaption>' + t('Bild', 'Image', 'Imagen', 'Immagine', 'Image') + ': '        // "Bild": photos, paintings and engravings alike + f.artist + ' · ' + lic +
                 ' · <a href="' + f.page + '" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption>';
             if (p.put === 'after') at.after(fig);
             else { at.prepend(fig); at.classList.add('b-mit-foto'); }

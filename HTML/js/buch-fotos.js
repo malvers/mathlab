@@ -68,7 +68,42 @@ window.BUCH_FOTOS = {
         'hotelflur': { artist: 'Adrian Grycuk', license: 'CC BY-SA 3.0 pl', page: 'https://commons.wikimedia.org/wiki/File:Hotel_Grand_w_%C5%81odzi_012.JPG',
             alt: { de: 'Ein langer Hotelflur mit vielen Türen', en: 'A long hotel corridor with many doors' } },
         'wasserbogen': { artist: 'Pacific Southwest Region 5 (US Forest Service)', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:2016_water_fountain_(34210072876).jpg',
-            alt: { de: 'Ein Wasserstrahl fliegt im Bogen durch die Luft', en: 'A water jet flying through the air in an arc' } }
+            alt: { de: 'Ein Wasserstrahl fliegt im Bogen durch die Luft', en: 'A water jet flying through the air in an arc' } },
+        // mathe12 (2026-10-25)
+        'schulbus': { artist: 'Simon_sees', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Stuttgart_school_bus_(15363613767).jpg',
+            alt: { de: 'Ein Schulbus an der Haltestelle', en: 'A school bus at the stop' } },
+        'justitia': { artist: 'Paul Colin Hennig firstdorsal.eu', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Fountain_of_Justice_(Gerechtigkeitsbrunnen)_on_the_Roemerberg,_Frankfurt_(2025).jpg',
+            alt: { de: 'Die Justitia auf dem Gerechtigkeitsbrunnen in Frankfurt', en: 'Justitia on the Fountain of Justice in Frankfurt' } },
+        'winterpalast': { artist: 'Matthias Süßen', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Winter_Palace-2025-09-msu---2707.jpg',
+            alt: { de: 'Der Winterpalast in Sankt Petersburg', en: 'The Winter Palace in Saint Petersburg' } },
+        'widerstaende': { artist: 'Evan-Amos', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Electronic-Axial-Lead-Resistors-Array.jpg',
+            alt: { de: 'Elektrische Widerstände', en: 'Electrical resistors' } },
+        'galtonbrett': { artist: 'Exhibit made by Estes Objethos Atelier, photo by Rodrigo Tetsuo Argenton', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Tabuleiros_de_Galton_(antes_e_depois).jpg',
+            alt: { de: 'Zwei Galtonbretter vor und nach dem Durchlauf der Kugeln', en: 'Two Galton boards before and after the balls run through' } },
+        'kaffee': { artist: 'Jon-Isac Lindberg', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:White_cup_of_black_coffee.jpg',
+            alt: { de: 'Eine Tasse schwarzer Kaffee', en: 'A cup of black coffee' } },
+        'schildkroete': { artist: 'Joshua Tree National Park', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Desert_tortoise_walking_in_the_Pinto_Basin_(29803471006).jpg',
+            alt: { de: 'Eine Schildkröte', en: 'A tortoise' } },
+        'tacho': { artist: 'Anibal Clavel', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Speedometer_showing_0_km-h_(50376706).jpg',
+            alt: { de: 'Ein Tachometer bei Nacht', en: 'A speedometer at night' } },
+        'newton': { artist: 'Godfrey Kneller', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Portrait_of_Sir_Isaac_Newton,_1689_(head_shot_crop).jpg',
+            alt: { de: 'Isaac Newton, Gemälde von Godfrey Kneller (1689)', en: 'Isaac Newton, painted by Godfrey Kneller (1689)' } },
+        'euler': { artist: 'Jakob Emanuel Handmann', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Leonhard_Euler_-_Jakob_Emanuel_Handmann_(Kunstmuseum_Basel).jpg',
+            alt: { de: 'Leonhard Euler, Gemälde von Jakob Emanuel Handmann (1753)', en: 'Leonhard Euler, painted by Jakob Emanuel Handmann (1753)' } },
+        'alpenpanorama': { artist: 'Bernie', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:AD2008July01_Oetztal_Alps_main_chain_-_Fineil_ridge_-_panoramic_view_from_north.jpg',
+            alt: { de: 'Ein Alpenpanorama mit Gipfeln und Tälern', en: 'An Alpine panorama with peaks and valleys' } },
+        'fermat': { artist: 'François de Poilly', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Pierre_de_Fermat_par_Fran%C3%A7ois_de_Poilly.png',
+            alt: { de: 'Pierre de Fermat, Kupferstich', en: 'Pierre de Fermat, engraving' } },
+        'rad-am-pass': { artist: 'will_cyclist', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Col_de_Champlaurent.jpg',
+            alt: { de: 'Ein Fahrrad am Passschild auf dem Berg', en: 'A bicycle at a mountain pass sign' } },
+        'karton': { artist: 'HireAHelper', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Open_Cardboard_Moving_Box_(32067347137).jpg',
+            alt: { de: 'Ein offener Karton', en: 'An open cardboard box' } },
+        'dido-karthago': { artist: 'J. M. W. Turner', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Turner_-_Dido.jpg',
+            alt: { de: 'William Turner: Dido baut Karthago (1815)', en: 'William Turner: Dido building Carthage (1815)' } },
+        'drohne': { artist: 'Josh Sorenson', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Quadcopter_camera_drone_in_flight.jpg',
+            alt: { de: 'Eine Drohne im Flug', en: 'A drone in flight' } },
+        'rechenzentrum': { artist: 'PiDatacenters', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Racks_Amravati_Data_Center.jpg',
+            alt: { de: 'Serverschränke in einem Rechenzentrum', en: 'Server racks in a data centre' } }
     },
     books: {
         mathe11: {
@@ -120,6 +155,48 @@ window.BUCH_FOTOS = {
             'wb3.html': [
                 { foto: 'monte-carlo', at: '#auftakt .b-hero', put: 'after', wide: true },
                 { foto: 'hotelflur', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ]
+        },
+        mathe12: {
+            'lb1-1.html': [
+                { foto: 'schulbus', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'justitia', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 18%' }
+            ],
+            'lb1-2.html': [
+                { foto: 'gluecksrad-kind', at: '#le2 .b-einstieg', put: 'in', w: 32, pos: '50% 28%' },
+                { foto: 'winterpalast', at: '#exkursion .b-row > .b-text', put: 'in', w: 38 }
+            ],
+            'lb1-3.html': [
+                { foto: 'widerstaende', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'galtonbrett', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb2-1.html': [
+                { foto: 'kaffee', at: '#le1 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'schildkroete', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb2-2.html': [
+                { foto: 'tacho', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'newton', at: '#exkursion .b-row > .b-text', put: 'in', w: 32, pos: '50% 30%' }
+            ],
+            'lb2-3.html': [
+                { foto: 'euler', at: '#exkursion .b-row > .b-text', put: 'in', w: 30, pos: '50% 25%' }
+            ],
+            'lb2-4.html': [
+                { foto: 'alpenpanorama', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'fermat', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 22%' }
+            ],
+            'lb2-5.html': [
+                { foto: 'rad-am-pass', at: '#le3 .b-einstieg', put: 'in', w: 34 }
+            ],
+            'lb2-6.html': [
+                { foto: 'karton', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'dido-karthago', at: '#exkursion .b-row > .b-text', put: 'in', w: 38 }
+            ],
+            'lb5-1.html': [
+                { foto: 'drohne', at: '#le2 .b-einstieg', put: 'in', w: 32 }
+            ],
+            'lb5-2.html': [
+                { foto: 'rechenzentrum', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
             ]
         }
     }
