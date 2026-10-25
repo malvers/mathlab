@@ -539,3 +539,33 @@ Package fr-6 (Saint-Raymond), 25.10.2026: decisions made while translating GY 10
 | Pasch, Augensumme, Münzwette, Los | double, somme des points, pari sur une pièce, billet de loterie | 2.1, 2.2, widgets verteilung, spielstreuung, fairesspiel |
 | Ergebnis (table head of fairesspiel) | Résultat | one French per German word, as js/buch-fr/zahlen.js |
 | Lab names | LE JEU DE DÉS, VISITE : CINQ SUR NEUF, PLANCHE DE GALTON, LABORATOIRE DES PUISSANCES, SIMULATION D’ÉPIDÉMIE, LABORATOIRE FIBONACCI, TRIGONOMÉTRIE, VISITE : DU TRIANGLE À L’ONDE, SOLIDES, PRINCIPE DE CAVALIERI, THÉORÈME DE BRAHMAGUPTA, LABORATOIRE DES PARABOLES, LABORATOIRE DE LA PENTE, DIVISION DU CERCLE, FRACTALES | PYTHAGORE; LISSAJOUS, COLLATZ, IMAGINARY NUMBERS stay |
+## mathegy11-fr
+
+<!-- fr-7: terms of this book only, write right below this line -->
+
+Package fr-7 (Vergne), 25.10.2026: decisions made while translating GY 11 (Grundkurs); nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Grundkurs, Leistungskurs | stay | start page: le lycée allemand d’enseignement général, de la 5e à la 12e année en Saxe; Grundkurs (cours de base), Leistungskurs (cours approfondi) |
+| Jahrgangsstufe 11, Klasse 10 | 11e année, 10e année | « Lien avec la 10e année » |
+| Wahlbereich 2 (chapter W) | Domaine optionnel 2 (chapter OP) | as section 1 |
+| Differenzenquotient, Differentialquotient | taux d’accroissement, nombre dérivé | as section 5; « méthode du h » as fr-5 |
+| Faktorregel, äußere / innere Funktion, nachdifferenzieren | règle du facteur constant, fonction extérieure / intérieure, « ne pas oublier de dériver l’intérieur » | 1.3, widget kettenregel |
+| linksgekrümmt / rechtsgekrümmt | convexe / concave | 1.4; Links- / Rechtskurve: virage à gauche / à droite |
+| H, T, W (Hoch-, Tief-, Wendepunkt) | letters stay | 1.4 says once: les initiales des mots allemands |
+| Intervalle $(a;\,b)$, $[a;\,\infty)$ | $]a\,;\,b[$, $[a\,;\,+\infty[$ | French notation in the page text (1.4 aside explains it); widgets keep theirs |
+| Typ einer Matrix $(m,n)$, verkettete Matrizen | taille $(m,n)$ (aussi $m \times n$), matrices compatibles | 2; widget matrixprodukt: « est de taille », « compatibles » |
+| Einheitsmatrix $E$, Zeilen $Z_1$, $Z_2$ | matrice identité $I$ (2 names the German $E$ once), lignes $L_1$, $L_2$ | page text only |
+| Drehmatrix, Drehwinkel, Verflechtung | matrice de rotation, angle de rotation, production en plusieurs étapes | 2 |
+| Bisektion, Heron | dichotomie, Héron d’Alexandrie | OP |
+| windschief | non coplanaires | as section 5 |
+| Spurpunkte einer Geraden / einer Ebene, Spurdreieck | points de percée / points d’intersection avec les axes, triangle des traces | as fr-3; the widget ebene3d says « Intersections avec les axes » |
+| Durchstoßpunkt, Koordinatenform, parameterfreie Form | point d’intersection, équation cartésienne, plan sans paramètre | 3.3 |
+| Vektorkette, Teilungspunkt | relation de Chasles, point de partage (« $T$ partage $[AB]$ dans le rapport $m : n$ ») | 3.1 |
+| Halbkreisflugregel, Flugfläche | règle semi-circulaire, niveau de vol | 3.2 excursion |
+| $B_{n;\,p}(k)$, linkssteil | stays, 4.2 adds once « en France, on note la loi $\mathcal{B}(n\,;\,p)$ »; étalé vers la droite | 4.2 |
+| Ratetest, Klausur 11/I, 11/II | le QCM au hasard (as fr-2), DEVOIR SURVEILLÉ 11/I, 11/II | |
+| Grassmann, „Die lineale Ausdehnungslehre“ | Grassmann, title kept German with « la théorie de l’extension linéaire » | 3.1, as fr-2 |
+| Jakob / Nikolaus Bernoulli, Johann Bernoulli | Jacques (Jakob) / Nicolas, Jean (Johann) Bernoulli | 4.2, 1.3 |
+| Lab names | PUISSANCES, PENTE, LABORATOIRE DIFFÉRENTIEL, SYSTÈMES D’ÉQUATIONS, DROITE D’AJUSTEMENT, VECTEURS, SOLIDES, LE JEU DE DÉS, PLANCHE DE GALTON, LABORATOIRE DES BINÔMES | |
