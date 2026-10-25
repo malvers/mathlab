@@ -1135,7 +1135,7 @@
                 note: () => 'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.' },
             tangente: { k: 'Gerade und Parabel', tex: a => 'y = ' + (Math.abs(a) < 1e-9 ? '' : co(a) + 'x') + (Math.abs(a) < 1e-9 ? '1' : ' + 1'), f: (a, x) => a * x + 1, lo: -4, hi: 4, a: 1, y: [-1, 7], parab: x => x * x + 2,
                 note: a => { const D = a * a - 4, n = D > 1e-9 ? 2 : D < -1e-9 ? 0 : 1;
-                    return 'Schnitt mit $y = x^2 + 2$: $x^2 - ' + (Math.abs(a) < 1e-9 ? '0' : num(a, 1)) + 'x + 1 = 0$, Diskriminante $a^2 - 4 = ' + num(D, 2) + '$: ' +
+                    return 'Schnitt mit $y = x^2 + 2$: $x^2 - ' + (Math.abs(a) < 1e-9 ? '0' : a < 0 ? '(' + num(a, 1) + ')' : num(a, 1)) + 'x + 1 = 0$, Diskriminante $a^2 - 4 = ' + num(D, 2) + '$: ' +
                         (n === 2 ? 'zwei Schnittpunkte.' : n === 0 ? 'kein gemeinsamer Punkt.' : 'genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ' + num(a / 2, 1) + '$. Das passiert für $a = \\pm 2$.'); } }
         };
         let G = P.buendel, a = G.a;
