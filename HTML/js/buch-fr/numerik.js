@@ -28,6 +28,10 @@ window.BuchFR && BuchFR.add('numerik', {
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -43,6 +47,10 @@ window.BuchFR && BuchFR.add('numerik', {
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
         ['$: $A \\approx ', '$ : $A \\approx '],
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -54,5 +62,9 @@ window.BuchFR && BuchFR.add('numerik', {
         [/(Näherung mit \$n = [^$]*\$):/g, '$1 :'],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ]
 });

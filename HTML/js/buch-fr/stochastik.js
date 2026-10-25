@@ -117,6 +117,11 @@ window.BuchFR && BuchFR.add('stochastik', {
         '$k$ (Stelle)': '$k$ (position)',
         'Pascalsches Dreieck bis zur Zeile 10': 'Triangle de Pascal jusqu’à la ligne 10',
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     },
     phrase: [
         // fr0: the helpers of the module (outside every widget; check.mjs stochastik/*), shared by all five books
@@ -242,6 +247,11 @@ window.BuchFR && BuchFR.add('stochastik', {
         [' Treffern: $', ' succès : $'],
         ['$ · Standardabweichung $', '$ · écart type $'],
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -280,5 +290,10 @@ window.BuchFR && BuchFR.add('stochastik', {
         // pascal: "$, denn $2$ auswählen heißt $3$ weglassen."
         [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, car en choisir $' + k + '$, c’est en laisser $' + r + '$ de côté.'],
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ]
 });

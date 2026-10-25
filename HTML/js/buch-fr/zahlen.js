@@ -48,6 +48,7 @@ window.BuchFR && BuchFR.add('zahlen', {
         'Die Lampe leuchtet, wenn <b>mindestens einer</b> der Schalter geschlossen ist.': 'La lampe s’allume si <b>au moins un</b> des interrupteurs est fermé.',
         'Treppenhaus: Jeder der beiden Schalter kann die Lampe ein- und ausschalten. Sie leuchtet, wenn beide Schalter <b>gleich</b> stehen.': 'Cage d’escalier : chacun des deux interrupteurs peut allumer et éteindre la lampe. Elle s’allume quand les deux interrupteurs sont dans la <b>même</b> position.',
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -90,6 +91,7 @@ window.BuchFR && BuchFR.add('zahlen', {
         ['$ · jetzt: $a = ', '$ · maintenant : $a = '],
         ['$ → Lampe <b>', '$ → lampe <b>'],
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -102,5 +104,6 @@ window.BuchFR && BuchFR.add('zahlen', {
         // schaltung: "Lampe <b>an</b>" / "<b>aus</b>" (the rules run before the pieces)
         [/Lampe <b>an<\/b>/g, 'Lampe <b>allumée</b>'], [/Lampe <b>aus<\/b>/g, 'Lampe <b>éteinte</b>'],
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
     ]
 });

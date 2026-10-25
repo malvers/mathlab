@@ -105,6 +105,10 @@ window.BuchFR && BuchFR.add('analysis', {
         'Faktor $a$': 'Facteur $a$', 'im Exponenten $b$': 'Dans l’exposant $b$', 'Verschiebung $c$': 'Translation $c$', 'Verzinsung': 'Intérêts versés',
         'jährlich': 'chaque année', 'halbjährlich': 'chaque semestre', 'vierteljährlich': 'chaque trimestre', 'monatlich': 'chaque mois',
         'wöchentlich': 'chaque semaine', 'täglich': 'chaque jour', 'stündlich': 'chaque heure', 'minütlich': 'chaque minute',
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     },
     phrase: [
         // fr0: the helpers of the module (outside every widget; check.mjs analysis/*), shared by the four books that load it
@@ -237,6 +241,10 @@ window.BuchFR && BuchFR.add('analysis', {
         ['wöchentlich', 'chaque semaine'], ['täglich', 'chaque jour'], ['stündlich', 'chaque heure'], ['minütlich', 'chaque minute'],
         ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
             'Plus les intérêts sont versés souvent, plus le capital se rapproche de $\\mathrm{e} = 2{,}718281\\ldots$, sans jamais le dépasser : $'],
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -259,5 +267,9 @@ window.BuchFR && BuchFR.add('analysis', {
         [/ mit (Löchern|einem Loch)\./g, (m, w) => w === 'Löchern' ? ' avec des trous.' : ' avec un trou.'],
         [/Nullstellen: keine(?![a-zäöüß])/g, 'Zéros : aucun'], [/Polstellen: keine(?![a-zäöüß])/g, 'pôles : aucun'],
         [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => a + b.replace(/; /g, '\\,;\\,') + c],
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ]
 });

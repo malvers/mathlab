@@ -112,3 +112,32 @@ All five books went live on 22.10.2026 (bc694d32). What the orchestrator learned
 - **Hub:** a card with five covers fits only at 80 px with an 8 px gap (`js/labs-icons.js`, measured at 1280 and 390).
 - **Next round:** FR0 exists. The orchestrator only adds the comment lines `// book fr-6 …` (and so on) and empty
   dictionaries for the modules not translated yet, then one agent per book, all starting at once.
+
+## Round 2 (25.10.2026): the Gymnasium books
+
+Doc, 25.10.2026: "bitte beauftrage 5 Agentinnen weitere 5 Bücher in FR zu übersetzen … du bist die Dirigentin". The
+orchestrator prepared the dictionaries in one local commit `fr2-prep:` (the block lines `fr-6 … fr-10` in the ten
+existing modules, and the eleven new modules exponential, folgen, gy11, gy11lk, gy11lk-stoch, gy11lk-vek, gy12, gy12lk,
+komplex, spiele, trigonometrie with only the block lines of the books that load them). No FR0 phase: every agent starts
+right away on its own branch from that commit, with phase B of round 1.
+
+| Book | Agent | Worktree `.claude/worktrees/` | Branch | Port | Block |
+|---|---|---|---|---|---|
+| GY 10 `mathegy10` | Saint-Raymond | `fr-saintraymond` | `fr-mathegy10` | 8821 | `fr-6` |
+| GY 11 `mathegy11` | Vergne | `fr-vergne` | `fr-mathegy11` | 8822 | `fr-7` |
+| GY 12 `mathegy12` | Amice | `fr-amice` | `fr-mathegy12` | 8823 | `fr-8` |
+| LK 11 `mathegy11lk` | Dubreil | `fr-dubreil` | `fr-mathegy11lk` | 8824 | `fr-9` |
+| LK 12 `mathegy12lk` | Ferrand | `fr-ferrand` | `fr-mathegy12lk` | 8825 | `fr-10` |
+
+What is new in round 2:
+
+- **School names:** "Gymnasium", "Grundkurs", "Leistungskurs" stay German and are explained once on the start page
+  (like "Berufliches Gymnasium" in round 1).
+- **Links to other textbooks** go to the French edition if there is one (now the five of round 1 and the five of round 2),
+  else to the English one.
+- **Search first:** a widget shared with a round-1 book (or with another round-2 book) is mostly translated already.
+  `grep -n "<German>" HTML/js/buch-fr/*.js` before writing a string; a string written twice is merged away later anyway.
+- **Photos** (`js/buch-fotos.js`) come into every language by themselves, with a French credit line. Nothing to do.
+- **Not yours:** `js/buch.js`, `js/buch-fr.js`, `js/buch-fotos.js`, `js/buch-titel.css`, the tools, the hub (`js/labs-*`),
+  `tools/buch-fr/known.json` conflicts (the orchestrator takes the union). What you need there goes into the report.
+- Report to the orchestrator at the end: branch, tip, commits, check results, German errors fixed, open questions.

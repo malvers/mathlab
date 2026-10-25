@@ -124,6 +124,11 @@ window.BuchFR && BuchFR.add('funktionen', {
         'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Déplace les zéros sur l’axe des $x$. Une multiplicité 0 supprime le facteur du premier degré.',
         'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Fonction polynôme avec des zéros déplaçables',
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -228,6 +233,11 @@ window.BuchFR && BuchFR.add('funktionen', {
         ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$ ; quand $x \\to -\\infty$, $f(x) \\to '],
         ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Seul le terme de plus haut degré décide : $'],
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -267,5 +277,10 @@ window.BuchFR && BuchFR.add('funktionen', {
         [/\. Nach \$([^$]*)\$ (Jahre|Tage|Schritte)n wäre alles verbraucht\./g, (m, x, u) => '. Au bout de $' + x + '$ ' + { Jahre: 'ans', Tage: 'jours', Schritte: 'pas' }[u] + ', tout serait épuisé.'],
         [/(Verdopplungszeit|Halbwertszeit): \$/g, (m, w) => (w === 'Verdopplungszeit' ? 'Temps de doublement' : 'Demi-vie') + ' : $'],
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ]
 });

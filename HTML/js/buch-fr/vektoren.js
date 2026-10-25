@@ -61,6 +61,10 @@ window.BuchFR && BuchFR.add('vektoren', {
         'Abstand des Auges $a$': 'Distance de l’œil $a$', 'Fluchtlinien zeigen': 'Afficher les lignes de fuite', 'Horizont': 'Horizon',
         'Zieh den Fluchtpunkt V. Er liegt auf dem Horizont in Augenhöhe.': 'Fais glisser le point de fuite V. Il est sur l’horizon, à hauteur des yeux.',
         'Zentralprojektion eines Quaders und einer Pfostenreihe mit Fluchtpunkt': 'Perspective centrale d’un pavé droit et d’une rangée de poteaux avec le point de fuite',
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -169,6 +173,10 @@ window.BuchFR && BuchFR.add('vektoren', {
         ['Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{',
             'Un poteau à la profondeur $z$ apparaît réduit du facteur $\\dfrac{a}{a + z}$ : pour $z = 8$, donc $\\dfrac{'],
         ['$ so hoch wie vorn.', '$ de sa hauteur à l’avant.'],
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ],
     rule: [
         // fr0: the helpers of the module (outside every widget; check.mjs vektoren/*), shared by the three books that load it
@@ -190,5 +198,9 @@ window.BuchFR && BuchFR.add('vektoren', {
         // book fr-5 mathefos12-fr:
         // the presets "parallel" (two vectors in skalarprodukt and kreuzprodukt, two lines in geradenlage) and "orthogonal" (two vectors)
         [/(data-p="(?:para|par)">)parallel</g, '$1parallèles<'], [/(data-p="ortho">)orthogonal</g, '$1orthogonaux<'],
+        // book fr-7 mathegy11-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ]
 });

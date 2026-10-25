@@ -50,6 +50,7 @@ window.BuchFR && BuchFR.add('finanz', {
         'Zinsen &nbsp;': 'intérêts &nbsp;',
         'Tilgung (zusammen: die Rate)': 'amortissement (ensemble : l’échéance)',
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -75,6 +76,7 @@ window.BuchFR && BuchFR.add('finanz', {
         [', letzte Rate ', ', dernière échéance '],
         ['Die Rate sinkt, weil die Restschuld und damit die Zinsen sinken. Zinsen insgesamt: <b>', 'L’échéance diminue, car le capital restant dû et donc les intérêts diminuent. Intérêts au total : <b>'],
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -84,5 +86,6 @@ window.BuchFR && BuchFR.add('finanz', {
         // slider values: "20 J." → "20 ans" (1 → "1 an")
         [/^(\d+) J\.$/, (m, n) => n + (n === '1' ? ' an' : ' ans')],
         // book fr-5 mathefos12-fr:
+        // book fr-6 mathegy10-fr:
     ]
 });

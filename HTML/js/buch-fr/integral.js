@@ -43,6 +43,9 @@ window.BuchFR && BuchFR.add('integral', {
         'Zu wenige Schnittstellen im Bild.': 'Trop peu d’abscisses d’intersection dans l’image.',
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -62,6 +65,9 @@ window.BuchFR && BuchFR.add('integral', {
         ['$ · Schnittstellen: ', '$ · abscisses d’intersection : '],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -73,5 +79,8 @@ window.BuchFR && BuchFR.add('integral', {
         [/(Schnittstellen: [^<]*)/g, m => m.replace(/\$, \$/g, '$ ; $')],
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
+        // book fr-8 mathegy12-fr:
+        // book fr-9 mathegy11lk-fr:
+        // book fr-10 mathegy12lk-fr:
     ]
 });
