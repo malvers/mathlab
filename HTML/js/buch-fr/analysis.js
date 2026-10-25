@@ -112,6 +112,12 @@ window.BuchFR && BuchFR.add('analysis', {
             'Couverture : une aire sous une courbe avec des trapèzes, un histogramme avec la zone de rejet en rouge, une droite qui traverse un plan avec son angle d’intersection et le vecteur normal',
         'Lineare Verkettung': 'Composées affines',
         'z. B. x^3/3 - 2x oder -cos(2x)/2': 'p. ex. x^3/3 - 2x ou -cos(2x)/2',
+        // abstandmin (8.1; 'Parabel' is in js/buch-fr/funktionen.js)
+        'Gerade': 'Droite', 'Wurzelkurve': 'Courbe racine', 'Kurve:': 'Courbe :',
+        'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).':
+            'Déplace le point P. Le curseur fait glisser Q sur la courbe ; en bas, la distance d(x) augmente et diminue.',
+        'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Courbe, point P et point Q sur la courbe, avec leur distance',
+        'Abstandsfunktion d(x) mit ihrem Minimum': 'Fonction distance d(x) avec son minimum', '$x$-Koordinate von $Q$': 'Abscisse de $Q$',
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
     },
@@ -251,6 +257,13 @@ window.BuchFR && BuchFR.add('analysis', {
         // integrieren ("3 von 5 gelöst" has the rule of fr-2)
         ['Bestimme eine Stammfunktion: $f(x) = ', 'Détermine une primitive : $f(x) = '],
         ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Pas encore. Dérive ta solution pour la vérifier. Indice : '],
+        // abstandmin
+        ['$: $\\;d(x)^2 = ', '$ : $\\;d(x)^2 = '], ['Jetzt: $x = ', 'Maintenant : $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · minimale en $x \\approx '],
+        ['$: $d_{\\min} \\approx ', '$ : $d_{\\min} \\approx '], ['$P$ liegt auf der Kurve, der Abstand ist $0$.', '$P$ est sur la courbe, la distance vaut $0$.'],
+        ['Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ', 'Le segment le plus court (en vert) est perpendiculaire à la tangente : angle $\\approx '],
+        ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. C’est pourquoi ce point s’appelle aussi le projeté orthogonal.'],
+        ['Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.',
+            'Le minimum est au bord de l’intervalle : là, le segment n’est pas forcément perpendiculaire à la tangente.'],
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
     ],
