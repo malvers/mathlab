@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 11 · Chapitre 1.5 · Des fonctions sur mesure | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Fonctions à partir de conditions, problèmes d’optimisation, régression. Chapitre 1.5 du manuel interactif Mathématiques · Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 1.5 · DOMAINE D’APPRENTISSAGE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 1.5 · DOMAINE D’APPRENTISSAGE 1 · DÉCEMBRE · JANVIER</p>
+            <h1>Des fonctions sur mesure</h1>
+            <p class="b-hero-lead">Un toboggan doit commencer et finir à l’horizontale, un pont doit franchir une rivière en un arc élégant, une boîte faite avec peu de carton doit contenir le plus possible.
+                Maintenant, tu renverses la question : au lieu d’étudier une fonction donnée, tu <b>construis</b> la fonction qui convient à partir de conditions,
+                tu cherches l’<b>optimum</b>, et tu trouves par <b>régression</b> le meilleur modèle pour des valeurs mesurées.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">1 LABORATOIRE</span><span class="b-chip">HISTOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3/8-0.75*x^2+4"]' data-labels='["toboggan"]' data-lat="[2.2]" data-x="-0.5,4.6" data-y="-0.6,4.8" data-pts="[[0,4],[4,0],[2,2]]" data-xl="x en m" data-yl="y en m" data-h="240" data-aria="Profil d’un toboggan, horizontal en haut et en bas, avec un point d’inflexion au milieu"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>traduire les propriétés d’une courbe en <b>conditions</b> et déterminer des fonctions polynômes à l’aide d’un système d’équations</li>
+                <li>sans calculatrice jusqu’à trois inconnues, avec le CAS davantage</li>
+                <li>résoudre des <b>problèmes d’optimisation</b> avec une fonction à optimiser, une contrainte et un ensemble de définition</li>
+                <li>déterminer des équations de fonctions par <b>régression</b> et juger de la qualité d’un modèle</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="12" data-ph="f′(2) ="><p class="b-q-text">Détermine $f'(2)$ pour $f(x) = x^3$.</p><div class="b-sol"><p>$3 \cdot 4 = 12$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="a ="><p class="b-q-text">Résous $a + b = 2$, $2a + b = 3$. Combien vaut $a$ ?</p><div class="b-sol"><p>On soustrait : $a = 1$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Que sait-on en un maximum d’une fonction dérivable ?</p><div class="b-mc"><button>$f(x) = 0$</button><button>$f'(x) = 0$</button><button>$f''(x) = 0$</button></div><div class="b-sol"><p>Tangente horizontale.</p></div></div>
+            <div class="b-q" data-ans="25" data-ph="cm²"><p class="b-q-text">Quelle est l’aire d’un carré de périmètre 20 cm ?</p><div class="b-sol"><p>Côté 5 cm, aire 25 cm²</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LE TOBOGGAN PARFAIT</div>
+            <div class="b-text"><p>Un toboggan commence à 4 m de haut et se termine au sol 4 m plus loin ; en haut et en bas, il doit être horizontal, pour qu’on entre et sorte sans à-coup.</p>
+                <ul><li>Une parabole suffit-elle ? Combien de conditions avez-vous, de combien d’inconnues avez-vous besoin ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA PLUS GRANDE BOÎTE</div>
+            <div class="b-text"><p>Dans un carton de 12 cm × 12 cm, découpez des carrés aux coins et relevez les bords.</p>
+                <ul><li>Construisez des boîtes avec des bords de 1, 2, 3, 4 cm de haut et calculez le volume. Laquelle est la plus grande ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DES MESURES QUI ONT UNE TENDANCE</div>
+            <div class="b-text"><p>Une tasse de café refroidit. Vous mesurez la température toutes les 5 minutes.</p>
+                <ul><li>Quel type de fonction convient : linéaire, quadratique, exponentielle ? À quoi le reconnaît-on ?</li></ul></div>
+            <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DROITE D’AJUSTEMENT</span><span class="b-lab-what">la meilleure droite à travers des points de mesure</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Fonctions à partir de conditions" data-toc-k="1" data-toc-short="1 Conditions">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Des fonctions polynômes à partir de conditions</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une parabole n’a que trois inconnues, mais le toboggan fournit quatre conditions : $f(0) = 4$, $f'(0) = 0$, $f(4) = 0$, $f'(4) = 0$.
+                Il faut donc une fonction de degré 3 $f(x) = ax^3 + bx^2 + cx + d$. Les deux premières conditions donnent tout de suite $d = 4$ et $c = 0$.
+                Des deux autres : $64a + 16b + 4 = 0$ et $48a + 8b = 0$, donc $b = -6a$, $-32a + 4 = 0$ : $a = \tfrac{1}{8}$, $b = -\tfrac{3}{4}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · FONCTIONS À PARTIR DE CONDITIONS</div>
+                <div class="b-text">
+                    <p>Une fonction polynôme de degré $n$ a $n + 1$ coefficients ; il faut $n + 1$ conditions indépendantes.</p>
+                    <p>Point $P(x_0\,;\,y_0)$ : $f(x_0) = y_0$ · extremum en $x_0$ : $f'(x_0) = 0$ · point d’inflexion en $x_0$ : $f''(x_0) = 0$ · pente $m$ en $x_0$ : $f'(x_0) = m$ · courbe tangente à l’axe des abscisses : $f(x_0) = 0$ et $f'(x_0) = 0$.</p>
+                    <p><b>La symétrie économise des inconnues :</b> symétrique par rapport à l’origine : seulement des puissances impaires ; symétrique par rapport à l’axe des ordonnées : seulement des paires.</p>
+                    <p>Tu résous le système d’équations linéaires obtenu avec la méthode de Gauss-Jordan (chapitre 2), à partir de quatre inconnues avec le CAS. Pour finir : vérifier toutes les conditions.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sans point anguleux :</b> deux morceaux de courbe se raccordent sans point anguleux si l’image et la pente coïncident au point de raccordement.</p>
+            <p class="b-note"><b>Trop peu de conditions</b> donnent toute une famille de fonctions ; trop de conditions qui se contredisent n’en donnent aucune.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · UNE FONCTION À PARTIR DE CONDITIONS</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis le type de conditions et fais glisser les points. Le widget établit le système d’équations et montre la solution.</p>
+        <div data-widget="steckbrief"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · TROIS POINTS</div>
+            <div class="b-text"><p>Une parabole passe par $(1\,;\,2)$, $(-1\,;\,6)$ et $(2\,;\,3)$.</p></div>
+            <div class="b-sol"><p>$a + b + c = 2$, $a - b + c = 6$, $4a + 2b + c = 3$. Première moins deuxième : $2b = -4$, $b = -2$.</p>
+                <p>$a + c = 4$ et $4a + c = 7$ : $a = 1$, $c = 3$. <span class="b-res">$f(x) = x^2 - 2x + 3$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · AVEC SYMÉTRIE</div>
+            <div class="b-text"><p>Une fonction de degré 3 est symétrique par rapport à l’origine et a le maximum $H(1\,;\,2)$.</p></div>
+            <div class="b-sol"><p>On pose $f(x) = ax^3 + cx$ : $f(1) = a + c = 2$, $f'(1) = 3a + c = 0$.</p>
+                <p>$2a = -2$ : <span class="b-res">$f(x) = -x^3 + 3x$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Traduis en équations pour $f(x) = ax^3 + bx^2 + cx + d$ : a) la courbe passe par l’origine. b) En $x = 2$, il y a un extremum. c) $W(1\,;\,3)$ est un point d’inflexion.</p></div>
+            <div class="b-sol"><p>a) $d = 0$ &nbsp; b) $12a + 4b + c = 0$ &nbsp; c) $a + b + c + d = 3$ et $6a + 2b = 0$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine la parabole passant par $(0\,;\,3)$, $(1\,;\,0)$ et $(3\,;\,0)$, ainsi que la parabole de sommet $S(2\,;\,1)$ passant par $(0\,;\,5)$.</p></div>
+            <div class="b-sol"><p>$x^2 - 4x + 3$ et $(x - 2)^2 + 1 = x^2 - 4x + 5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>L’arc d’un pont a une portée de 40 m et une hauteur de 10 m au milieu. Détermine une parabole qui convient. Quelle est la hauteur de l’arc à 5 m de son pied ?</p></div>
+            <div class="b-sol"><p>$f(x) = -\tfrac{1}{40}x^2 + 10$ avec $x \in [-20\,;\,20]$. En $x = 15$ : $f(15) = 4{,}375$ m.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une fonction de degré 3 a pour zéros 0, 1 et 2 et passe par $(3\,;\,6)$. Détermine-la en partant de la forme factorisée.</p></div>
+            <div class="b-sol"><p>$f(x) = a \cdot x(x - 1)(x - 2)$ avec $6a = 6$ : $f(x) = x(x - 1)(x - 2)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une fonction de degré 4 est symétrique par rapport à l’axe des ordonnées, a en $x = 1$ un minimum avec $f(1) = 0$ et coupe l’axe des ordonnées en 1. Détermine-la et vérifie les conditions avec le CAS.</p></div>
+            <div class="b-sol"><p>On pose $ax^4 + cx^2 + e$ : $e = 1$, $a + c + 1 = 0$, $4a + 2c = 0$, donc $c = -2a$, $-a + 1 = 0$ : $f(x) = x^4 - 2x^2 + 1 = (x^2 - 1)^2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,125" data-ph="a ="><p class="b-q-text">Quel est le coefficient $a$ de la fonction du toboggan ?</p><div class="b-sol"><p>$a = \tfrac{1}{8}$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Combien de conditions faut-il pour une fonction de degré 3 ?</p><div class="b-sol"><p>4</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quelle condition correspond à « point d’inflexion en $x = 0$ » ?</p><div class="b-mc"><button>$f(0) = 0$</button><button>$f'(0) = 0$</button><button>$f''(0) = 0$</button></div><div class="b-sol"><p>Condition nécessaire pour un point d’inflexion.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Problèmes d’optimisation" data-toc-k="2" data-toc-short="2 Optimum">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Problèmes d’optimisation</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La boîte faite avec le carton de 12 cm, avec des bords de hauteur $x$, a pour volume $V(x) = x(12 - 2x)^2$. On doit avoir $0 < x < 6$.
+                De $V'(x) = (12 - 2x)(12 - 6x) = 0$, on tire $x = 2$ dans l’ensemble de définition. Aux bornes, $V = 0$, donc $x = 2$ donne le maximum :
+                $V(2) = 2 \cdot 8^2 = 128$ cm³.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODE POUR LES PROBLÈMES D’OPTIMISATION</div>
+                <div class="b-text">
+                    <p>1. Faire un croquis, nommer les variables. 2. <b>Fonction à optimiser</b> : la grandeur qui doit être maximale ou minimale.</p>
+                    <p>3. <b>Contrainte</b> : elle relie les variables, pour que la fonction à optimiser ne dépende plus que d’une seule.</p>
+                    <p>4. <b>Ensemble de définition</b> tiré du contexte. 5. Extremum avec $f' = 0$ et la condition suffisante, comparer les <b>valeurs aux bornes</b>.</p>
+                    <p>6. Réponse : toutes les grandeurs demandées, avec leurs unités.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Résultats typiques :</b> à périmètre fixé, c’est le carré qui a la plus grande aire ; à somme des arêtes fixée, c’est le cube qui a le plus grand volume. Les solutions symétriques sont souvent optimales.</p>
+            <p class="b-note"><b>Avec le CAS,</b> on peut tracer la fonction à optimiser et lire le maximum. Il faut quand même le justifier.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · OPTIMISER</div>
+        <p class="b-help" style="margin:0 0 12px">Boîte, boîte de conserve ou clôture : fais varier la variable et observe la fonction à optimiser. Où se trouve l’optimum, et que dit $f' = 0$ ?</p>
+        <div data-widget="optimieren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · CLÔTURE LE LONG D’UN MUR</div>
+            <div class="b-text"><p>Avec 40 m de clôture, on veut enclore un parterre rectangulaire le long d’un mur (trois côtés en clôture). Quelle est son aire maximale ?</p></div>
+            <div class="b-sol"><p>Contrainte $x + 2y = 40$, fonction à optimiser $A(y) = (40 - 2y)\,y$ pour $0 < y < 20$.</p>
+                <p>$A'(y) = 40 - 4y = 0 \Rightarrow y = 10$, $x = 20$ : <span class="b-res">$A = 200$ m²</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · RECTANGLE SOUS UNE PARABOLE</div>
+            <div class="b-text"><p>Sous $f(x) = 9 - x^2$ se trouve un rectangle de sommets $(\pm u\,;\,0)$ et $(\pm u\,;\,f(u))$. Quand est-il le plus grand ?</p></div>
+            <div class="b-sol"><p>$A(u) = 2u(9 - u^2) = 18u - 2u^3$, $A'(u) = 18 - 6u^2 = 0 \Rightarrow u = \sqrt{3}$.</p>
+                <p><span class="b-res">$A = 12\sqrt{3} \approx 20{,}8$</span> unités d’aire ; $A''(u) = -12u < 0$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Deux nombres positifs ont pour somme 10. Quel est au plus leur produit ? Deux nombres diffèrent de 8 : quelle est la plus petite valeur possible de leur produit ?</p></div>
+            <div class="b-sol"><p>25 (pour 5 et 5) ; $-16$ (pour $-4$ et $4$)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un bénéfice est décrit par $G(x) = -2x^2 + 120x - 1000$. Pour quelle quantité est-il le plus grand ?</p></div>
+            <div class="b-sol"><p>$G'(x) = -4x + 120 = 0$ : 30 unités, $G(30) = 800$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dans une tôle de 30 cm de large, on plie une gouttière de section rectangulaire. Quelle doit être la hauteur des bords pour que l’eau s’écoule le mieux possible ?</p></div>
+            <div class="b-sol"><p>$A(x) = x(30 - 2x)$, maximum pour $x = 7{,}5$ cm, $A = 112{,}5$ cm².</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un pavé droit à base carrée a une somme des longueurs des arêtes de 48 cm. Détermine le plus grand volume.</p></div>
+            <div class="b-sol"><p>$8a + 4h = 48$, $V(a) = a^2(12 - 2a)$, $V'(a) = 24a - 6a^2 = 0$ : $a = 4$, $h = 4$, $V = 64$ cm³.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une boîte de conserve doit contenir 1 litre. Pour quel rayon faut-il le moins de tôle ? Montre qu’alors la hauteur et le diamètre sont égaux.</p></div>
+            <div class="b-hint"><p>$h = \dfrac{1000}{\pi r^2}$, $O(r) = 2\pi r^2 + \dfrac{2000}{r}$.</p></div>
+            <div class="b-sol"><p>$O'(r) = 4\pi r - \dfrac{2000}{r^2} = 0 \Rightarrow r^3 = \dfrac{500}{\pi}$, $r \approx 5{,}42$ cm. Alors $h = \dfrac{1000}{\pi r^2} = 2r$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="128" data-ph="cm³"><p class="b-q-text">Plus grand volume de la boîte faite avec le carton de 12 cm ?</p><div class="b-sol"><p>128 cm³</p></div></div>
+        <div class="b-q" data-ans="200" data-ph="m²"><p class="b-q-text">Plus grande aire du parterre avec 40 m de clôture le long du mur ?</p><div class="b-sol"><p>200 m²</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Pourquoi vérifie-t-on les valeurs aux bornes ?</p><div class="b-mc"><button>parce que $f' = 0$ en ces points</button><button>parce que l’extremum global peut se trouver au bord</button><button>parce que la fonction à optimiser n’y est pas définie</button></div><div class="b-sol"><p>$f' = 0$ ne trouve que les extremums locaux à l’intérieur.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Régression" data-toc-k="3" data-toc-short="3 Régression">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">AVEC LE CAS · 4 HEURES</span></div>
+    <h2><span class="b-no">3</span>Des équations de fonctions par régression</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>De vraies valeurs mesurées ne sont jamais exactement sur une courbe. Au lieu d’imposer une fonction qui passe par tous les points, on cherche une fonction d’un type choisi
+                qui convient <b>globalement le mieux</b>. Le CAS le fait avec la <b>méthode des moindres carrés</b> : il choisit les paramètres de sorte que la somme des carrés des écarts
+                (résidus) soit la plus petite possible. Mais le type de fonction, c’est à toi de le choisir et de le justifier.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÉGRESSION</div>
+                <div class="b-text">
+                    <p><b>Choisir le type :</b> différences égales → linéaire · différences des différences égales → quadratique · quotients égaux → exponentielle · périodique → sinus · approche d’une limite → croissance limitée.</p>
+                    <p><b>Résidu :</b> valeur mesurée moins valeur du modèle. La régression rend minimale la somme des carrés des résidus.</p>
+                    <p><b>Coefficient de détermination</b> $r^2$ entre 0 et 1 : plus il est proche de 1, mieux le modèle décrit les données.</p>
+                    <p><b>Limites :</b> un modèle ne vaut que sur le domaine des données ; les prévisions loin en dehors (extrapolation) sont risquées.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Surajustement :</b> par 5 points passe toujours une fonction de degré 4. Mais elle suit chaque fluctuation des mesures et oscille fortement entre elles. Un bon modèle montre la tendance.</p>
+            <p class="b-note"><b>Avec le CAS :</b> entrer les valeurs mesurées dans deux listes, choisir le type de régression, lire l’équation et $r^2$, tracer le modèle avec les points.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · RÉGRESSION</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une régression linéaire, quadratique ou exponentielle et fais glisser les points de mesure. Comment l’équation et la qualité changent-elles ?</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · RECONNAÎTRE LE TYPE</div>
+            <div class="b-text"><p>Une population vaut 200, 240, 288 au cours d’années successives. Quel modèle convient ?</p></div>
+            <div class="b-sol"><p>$\dfrac{240}{200} = \dfrac{288}{240} = 1{,}2$ : quotients égaux, donc exponentiel.</p>
+                <p><span class="b-res">$N(t) = 200 \cdot 1{,}2^t$</span>, 20 % de croissance par an.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · REFROIDISSEMENT</div>
+            <div class="b-text"><p>Du café dans une pièce à 20 °C : quel type de modèle convient, et pourquoi un simple $a \cdot e^{-kt}$ est-il faux ?</p></div>
+            <div class="b-sol"><p>La température s’approche de 20 °C, pas de 0 °C. Donc $T(t) = 20 + a \cdot e^{-kt}$.</p>
+                <p><span class="b-res">Régression avec les valeurs $T - 20$</span>, puis on rajoute 20.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Quelle fonction convient exactement ? a) $(1\,;\,3)$, $(2\,;\,5)$, $(3\,;\,7)$ &nbsp; b) $(0\,;\,2)$, $(1\,;\,6)$, $(2\,;\,18)$ &nbsp; c) $(0\,;\,1)$, $(1\,;\,2)$, $(2\,;\,5)$, $(3\,;\,10)$</p></div>
+            <div class="b-sol"><p>a) $y = 2x + 1$ &nbsp; b) $y = 2 \cdot 3^x$ &nbsp; c) $y = x^2 + 1$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une régression donne $y = 1{,}5x + 2$ avec $r^2 = 0{,}98$. Que prévoit le modèle pour $x = 10$ ? Que signifie $r^2$ ?</p></div>
+            <div class="b-sol"><p>17 ; les données sont très proches de la droite.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une décroissance est décrite par $N(t) = 100 \cdot 0{,}5^{\frac{t}{8}}$ ($t$ en jours). Détermine la demi-vie et $N(24)$.</p></div>
+            <div class="b-sol"><p>8 jours ; $N(24) = 100 \cdot 0{,}5^3 = 12{,}5$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Entre 2 et 10 ans, un enfant grandit de façon presque linéaire de 6 cm par an. Pourquoi ce modèle est-il inutilisable pour sa taille à 40 ans ?</p></div>
+            <div class="b-sol"><p>Extrapolation : la croissance s’arrête. Le modèle linéaire prévoit plus de 2,5 m.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Valeurs mesurées : $t$ en min : 0, 5, 10, 15, 20 ; $T$ en °C : 85, 62, 46, 36, 29. Détermine avec le CAS un modèle $T(t) = 20 + a \cdot e^{-kt}$ et estime quand le café sera à 25 °C.</p></div>
+            <div class="b-hint"><p>Régression exponentielle avec les valeurs $T - 20$ : 65, 42, 26, 16, 9.</p></div>
+            <div class="b-sol"><p>Environ $T(t) \approx 20 + 65e^{-0{,}1t}$. $65e^{-0{,}1t} = 5$ donne $t \approx 26$ minutes.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="48" data-ph="y ="><p class="b-q-text">Quelle valeur $y = 3 \cdot 2^x$ donne-t-elle pour $x = 4$ ?</p><div class="b-sol"><p>48</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="%"><p class="b-q-text">De quel pourcentage la population 200, 240, 288 croît-elle chaque année ?</p><div class="b-sol"><p>20 %</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Qu’est-ce qu’un résidu ?</p><div class="b-mc"><button>valeur mesurée moins valeur du modèle</button><button>la valeur de départ du modèle</button><button>la pente de la droite de régression</button></div><div class="b-sol"><p>L’écart en un point.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$f(x) = ax^2 + bx + c$ vérifie $f(0) = 2$, $f'(0) = 3$ et $f(1) = 4$. Détermine $f$.</p></div>
+            <div class="b-sol"><p>$c = 2$, $b = 3$, $a + 5 = 4$ : $f(x) = -x^2 + 3x + 2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 1.4 :</b> montre que la fonction du toboggan $f(x) = \tfrac{1}{8}x^3 - \tfrac{3}{4}x^2 + 4$ est la plus raide en $x = 2$. Quelle est la pente du toboggan en ce point ?</p></div>
+            <div class="b-sol"><p>$f''(x) = \tfrac{3}{4}x - \tfrac{3}{2} = 0$ en $x = 2$ ; $f'(2) = 1{,}5 - 3 = -1{,}5$ : pente de 150 %, environ 56°.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Au prix de $p(x) = 100 - 2x$ € l’unité, on vend $x$ unités. Pour quelle quantité la recette est-elle la plus grande ?</p></div>
+            <div class="b-sol"><p>$E(x) = x(100 - 2x)$, maximum pour $x = 25$, $E = 1250$ €.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Deux routes, $y = 0$ pour $x \leq 0$ et $y = x - 4$ pour $x \geq 4$, doivent être reliées sans point anguleux entre $x = 0$ et $x = 4$ par une parabole. Détermine-la.</p></div>
+            <div class="b-sol"><p>$f(0) = 0$, $f'(0) = 0$, $f(4) = 0$, $f'(4) = 1$ : quatre conditions, une parabole ne suffit pas. Avec $ax^3 + bx^2$ : $64a + 16b = 0$, $48a + 8b = 1$ : $a = \tfrac{1}{16}$, $b = -\tfrac{1}{4}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Gauss retrouve une planète" data-toc-k="X" data-toc-short="Cérès">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">ASTRONOMIE ET HISTOIRE</span></div>
+    <h2>Gauss retrouve une planète</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Le 1er janvier 1801, l’astronome Giuseppe Piazzi découvrit à Palerme un nouveau corps céleste, la planète naine Cérès. Il put la suivre pendant environ 40 jours,
+                puis Cérès disparut dans la lumière du Soleil. À partir de ces quelques observations imprécises, Carl Friedrich Gauss, âgé de 24 ans, calcula l’orbite avec une telle précision
+                que Cérès fut retrouvée fin 1801 presque exactement là où il l’avait prédit.</p>
+            <p>L’un de ses outils était la <b>méthode des moindres carrés</b> : choisir l’orbite de façon que la somme des carrés des écarts aux mesures soit minimale.
+                Mais c’est Adrien-Marie Legendre qui la publia le premier, en 1805 à Paris. Gauss la décrivit en 1809 et écrivit qu’il l’utilisait depuis 1795. Il en naquit une querelle de priorité.
+                Aujourd’hui encore, chaque régression du CAS repose sur cette idée.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> A.-M. Legendre, « Nouvelles méthodes pour la détermination des orbites des comètes », Paris 1805, appendice. C. F. Gauss, « Theoria motus corporum coelestium », Hambourg 1809.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>CONDITIONS</h4><p>Point → $f$, extremum → $f' = 0$, point d’inflexion → $f'' = 0$ ; le degré $n$ demande $n + 1$ conditions.</p></div>
+        <div><p>Toboggan : $\tfrac{1}{8}x^3 - \tfrac{3}{4}x^2 + 4$</p></div></div>
+    <div class="b-rueck"><div><h4>SYMÉTRIE</h4><p>Symétrique par rapport à l’origine : seulement des puissances impaires ; par rapport à l’axe des ordonnées : seulement des paires.</p></div>
+        <div><p>$H(1\,;\,2)$ : $-x^3 + 3x$</p></div></div>
+    <div class="b-rueck"><div><h4>PROBLÈMES D’OPTIMISATION</h4><p>Fonction à optimiser, contrainte, ensemble de définition, $f' = 0$, bornes.</p></div>
+        <div><p>Boîte : $x = 2$, $V = 128$ cm³</p></div></div>
+    <div class="b-rueck"><div><h4>RÉGRESSION</h4><p>Choisir le type en le justifiant, moindres carrés, interpréter $r^2$.</p></div>
+        <div><p>200, 240, 288 : $200 \cdot 1{,}2^t$</p></div></div>
+    <div class="b-rueck"><div><h4>LIMITES</h4><p>Les modèles ne valent que sur le domaine des données ; pas de surajustement.</p></div>
+        <div><p>La croissance d’un enfant</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="-2" data-ph="b ="><p class="b-q-text">Parabole passant par $(1\,;\,2)$, $(-1\,;\,6)$, $(2\,;\,3)$ : combien vaut $b$ ?</p><div class="b-sol"><p>$f(x) = x^2 - 2x + 3$</p></div></div>
+            <div class="b-q" data-ans="81" data-ph="cm²"><p class="b-q-text">Plus grande aire d’un rectangle de périmètre 36 cm ?</p><div class="b-sol"><p>Carré de côté 9 cm</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quelle forme convient à « symétrique par rapport à l’origine, degré 3 » ?</p><div class="b-mc"><button>$ax^3 + bx^2$</button><button>$ax^3 + d$</button><button>$ax^3 + cx$</button></div><div class="b-sol"><p>Seulement des puissances impaires.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="5,42" data-tol="0.01" data-ph="cm"><p class="b-q-text">Rayon de la boîte de 1 litre qui demande le moins de tôle (à deux décimales) ?</p><div class="b-sol"><p>$\sqrt[3]{\tfrac{500}{\pi}} \approx 5{,}42$</p></div></div>
+            <div class="b-q" data-ans="12,5" data-tol="0.01" data-ph="N(24)"><p class="b-q-text">$N(t) = 100 \cdot 0{,}5^{t/8}$ : combien vaut $N(24)$ ?</p><div class="b-sol"><p>12,5</p></div></div>
+            <div class="b-q" data-ans="1250" data-ph="€"><p class="b-q-text">Recette maximale pour $p(x) = 100 - 2x$ ?</p><div class="b-sol"><p>1250 €</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-steckbrief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FONCTIONS À PARTIR DE CONDITIONS</span><span class="b-lab-what">Traduire des conditions, systèmes d’équations, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-extremwertprobleme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBLÈMES D’OPTIMISATION</span><span class="b-lab-what">Fonction à optimiser et contrainte, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-regression.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RÉGRESSION</span><span class="b-lab-what">Type de modèle, qualité, limites, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-ka1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DEVOIR SURVEILLÉ 11/I</span><span class="b-lab-what">Calcul différentiel et matrices mélangés, 20 exercices</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 11e année, Grundkurs · Domaine d’apprentissage 1 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+</body>
+</html>
