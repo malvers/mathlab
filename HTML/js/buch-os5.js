@@ -880,4 +880,53 @@
         }
         render();
     });
+    /* ---------- rounding decimals on a zoomed number line ---------- */
+    // a value in thousandths written with comma and d decimals: 3476, 2 → "3,48"
+    const thou = (t, d) => { const s = (t / 1000).toFixed(d), [i, f] = s.split('.'); return grp(i) + (f ? ',' + f : ''); };
+    const decOf = t => t % 10 ? 3 : t % 100 ? 2 : t % 1000 ? 1 : 0;
+    W('rundenos5', function (box) {
+        const PL = { e: [1000, 'Ganze', 0, 'Zehntel'], z: [100, 'Zehntel', 1, 'Hundertstel'], h: [10, 'Hundertstel', 2, 'Tausendstel'] };
+        const S = { t: Math.round(B.parseAnswer(box.dataset.v || '3,476') * 1000), p: box.dataset.p || 'z' };
+        const ctr = div(box, 'b-ctrls');
+        seg(ctr, [['e', 'auf Ganze'], ['z', 'auf Zehntel'], ['h', 'auf Hundertstel']], S.p, v => { S.p = v; render(); }, 'Runden');
+        const row = div(box, 'b-ctrls'), id = 'os5-r-' + (++uid);
+        row.innerHTML = '<label class="b-ctrl" for="' + id + '">Zahl</label><input class="b-in os5-in" id="' + id + '" type="text" inputmode="decimal" autocomplete="off"><button type="button" class="b-btn">Neue Zahl</button>';
+        const inp = row.querySelector('input');
+        inp.value = thou(S.t, decOf(S.t));
+        inp.addEventListener('input', () => { const v = B.parseAnswer(inp.value); if (!isNaN(v) && v >= 0 && v < 1000) { S.t = Math.round(v * 1000); render(); } });
+        row.querySelector('button').addEventListener('click', () => { S.t = rnd(0, 20000); inp.value = thou(S.t, decOf(S.t)); render(); });
+        const pic = div(box, 'b-svgbox g-svg'), out = div(box, 'b-out');
+        const help = div(box, 'b-help', 'Der Zahlenstrahl zeigt nur den Ausschnitt zwischen den beiden möglichen Ergebnissen, wie unter einer Lupe. Zieh den Punkt.');
+        heroOnly(box, pic, [ctr, row, out, help], 420);
+        const X0 = 40, X1 = 520, Y = 92;
+        dragSVG(pic, (i, x) => {
+            const [p] = PL[S.p], lo = Math.floor(S.t / p) * p, sub = p / 10;
+            S.t = lo + clamp(Math.round((x - X0) / (X1 - X0) * 10), 0, 9) * sub;
+            inp.value = thou(S.t, decOf(S.t)); render();
+        });
+        function render() {
+            const [p, name, d, next] = PL[S.p], lo = Math.floor(S.t / p) * p, hi = lo + p, up = S.t - lo >= p / 2, r = up ? hi : lo;
+            const xOf = t => X0 + (t - lo) / p * (X1 - X0);
+            let s = line([X0 - 20, Y], [X1 + 20, Y], 'stroke:' + TXT + ';stroke-width:2');
+            for (let i = 0; i <= 10; i++) {
+                const x = X0 + i * (X1 - X0) / 10, big = i === 0 || i === 10, mid = i === 5;
+                s += line([x, Y - (big ? 14 : mid ? 11 : 7)], [x, Y + (big ? 14 : mid ? 11 : 7)], 'stroke:' + (mid ? LAM : TXT) + ';stroke-width:' + (big ? 2 : 1.3) + (mid ? ';stroke-dasharray:3 3' : ''));
+                if (!big && !mid) s += T(x, Y + 26, thou(lo + i * p / 10, d + 1), 'g-small', 'middle', 'font-size:12px');
+            }
+            s += T(X0, Y - 26, thou(lo, d), 'g-val', 'middle', up ? '' : 'fill:' + PHI + ';font-weight:700');
+            s += T(X1, Y - 26, thou(hi, d), 'g-val', 'middle', up ? 'fill:' + PHI + ';font-weight:700' : '');
+            s += T((X0 + X1) / 2, Y + 44, 'Mitte ' + thou(lo + p / 2, d + 1), 'g-small', 'middle', 'fill:' + LAM);
+            const x = clamp(xOf(S.t), X0, X1);
+            s += '<path d="M' + f1(x) + ' ' + (Y - 4) + ' L' + f1(up ? X1 : X0) + ' ' + (Y - 4) + '" style="stroke:' + PHI + ';stroke-width:4;opacity:0.55"/>';
+            s += line([x, Y + 8], [x, Y + 62], 'stroke:' + LAM + ';stroke-width:1;stroke-dasharray:2 3') + T(Math.min(Math.max(x, 70), 490), Y + 78, thou(S.t, decOf(S.t)), 'g-pt');
+            s += handle([x, Y], 0, LAM);
+            pic.innerHTML = svg(560, 180, 'Zahlenstrahl zwischen ' + thou(lo, d) + ' und ' + thou(hi, d), s);
+            const digit = Math.floor(S.t / (p / 10)) % 10;
+            out.innerHTML = '<p class="g5-big">' + thou(S.t, decOf(S.t)) + ' ≈ ' + thou(r, d) + '</p>' +
+                '<p>Gerundet auf ' + name + '. Entscheidend ist die Ziffer der ' + next + ': <b>' + digit + '</b>. ' +
+                (digit >= 5 ? 'Bei 5, 6, 7, 8 oder 9 wird <b>aufgerundet</b>.' : 'Bei 0, 1, 2, 3 oder 4 wird <b>abgerundet</b>.') + '</p>' +
+                (d && r % (p * 10) === 0 ? '<p class="g5-dim">Die Null am Ende bleibt stehen: Sie zeigt, dass auf ' + name + ' gerundet wurde.</p>' : '');
+        }
+        render();
+    });
 })();
