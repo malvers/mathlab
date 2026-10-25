@@ -125,6 +125,8 @@ window.BuchFR && BuchFR.add('funktionen', {
         'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Fonction polynôme avec des zéros déplaçables',
         // book fr-5 mathefos12-fr:
         // book fr-6 mathegy10-fr:
+        // cover (the opener of chapter 4.4)
+        'Graphen der Grundfunktionen': 'Courbes des fonctions de référence',
         // book fr-7 mathegy11-fr:
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
