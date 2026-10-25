@@ -316,6 +316,38 @@
         });
     }
 
+    // ---------- photos (js/buch-fotos.js): one list for every book and every language ----------
+    // Doc, 24.10.2026: "Bilder aus der Lebensrealität … das wünsche ich mir wirklich sehr"; 25.10.: the translations
+    // get them too, so the photos are placed by this code, not written into each chapter file.
+    const BOOK = ((location.pathname.match(/\/buch\/([^/]+)\//) || [])[1] || '').replace(/-(en|es|it|fr)$/, '');
+    const FOTO_DIR = ME ? new URL('../buch/fotos/', ME).href : '../fotos/';
+    const fotosReady = new Promise(done => {
+        if (window.BUCH_FOTOS || !ME) { done(); return; }
+        const sc = document.createElement('script');
+        sc.src = ME.replace(/buch\.js(\?.*)?$/, 'buch-fotos.js');
+        sc.onload = sc.onerror = () => done();
+        document.head.appendChild(sc);
+    });
+    function fotos(root, file, print) {
+        const F = window.BUCH_FOTOS, list = F && F.books[BOOK] && F.books[BOOK][file];
+        if (!list) return;
+        list.forEach(p => {
+            const f = F.fotos[p.foto], at = root.querySelector(p.at);
+            if (!f || !at || at.dataset.foto === p.foto) return;
+            at.dataset.foto = p.foto;
+            const fig = document.createElement('figure');
+            fig.className = 'b-foto ' + (p.wide ? 'b-foto-breit' : 'b-foto-rechts');
+            if (!p.wide) fig.style.width = (p.w || 40) + '%';
+            const lic = f.license === 'public domain' ? t('gemeinfrei', 'public domain', 'dominio público', 'pubblico dominio', 'domaine public') : f.license;
+            const alt = ((f.alt && (f.alt[LANG] || f.alt.de)) || '').replace(/"/g, '&quot;');
+            fig.innerHTML = '<img src="' + FOTO_DIR + p.foto + '.jpg" alt="' + alt + '"' + (print ? '' : ' loading="lazy"') + (p.pos ? ' style="object-position:' + p.pos + '"' : '') + '>' +
+                '<figcaption>' + t('Foto', 'Photo', 'Foto', 'Foto', 'Photo') + ': ' + f.artist + ' · ' + lic +
+                ' · <a href="' + f.page + '" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption>';
+            if (p.put === 'after') at.after(fig);
+            else { at.prepend(fig); at.classList.add('b-mit-foto'); }
+        });
+    }
+
     // ---------- chapter list + strip + scroll progress ----------
     function buildToc() {
         const secs = Array.from(document.querySelectorAll('section.b-sec[id][data-toc]'));
@@ -581,6 +613,7 @@
         const main = document.querySelector('.b-main') || document.body;
         ziele(main, FILE);                                                       // before render: the source order
         render(main);
+        fotosReady.then(() => fotos(main, FILE));
         buildToc();
         buildBook();
         buildIndex();
@@ -592,5 +625,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 
-    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile };
+    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotosReady };
 })();

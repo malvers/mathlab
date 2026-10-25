@@ -45,6 +45,7 @@
         const doc = new DOMParser().parseFromString(src, 'text/html');
         const main = doc.querySelector('.b-main');
         Buch.ziele(main, c.file);                                        // where every block lives online (overview, O)
+        if (Buch.fotos) Buch.fotos(main, c.file, true);                  // photos from js/buch-fotos.js, while the ids are the chapter's own
         const sec = el('section', 'd-chapter');
         const pre = c.file.replace(/\.html$/, '');
         sec.id = 'kap-' + pre;
@@ -148,12 +149,13 @@
             '<img class="d-gruss-foto" src="../../resources/team/alvers_final.png" alt="Dr. Michael R. Alvers">' +
             '<div class="b-text">' +
             '<p>Liebe Schülerin, lieber Schüler,</p>' +
-            '<p>dieses Buch ist aus einer einfachen Überzeugung entstanden: Gute Bildung darf nicht am Geld scheitern. Deshalb gibt es alles, was du hier ' +
-            'in der Hand hältst, auch als Online-Buch – kostenlos, werbefrei und ohne Anmeldung. Niemand sammelt dabei deine Daten.</p>' +
+            '<p>dieses Buch ist aus einer einfachen Überzeugung entstanden: Gute Bildung darf nicht am Geld scheitern. Deshalb gibt es alles auf ' +
+            'docalvers.de kostenlos, werbefrei und ohne Anmeldung. Niemand sammelt dabei deine Daten. Auch die Videos auf meinem YouTube-Kanal ' +
+            '(youtube.com/@docalvers) stehen dir frei zur Verfügung.</p>' +
             '<p>Ich bin Physiker, habe ein Software-Unternehmen gegründet und unterrichte heute Mathematik und Informatik in Dresden. Das Mathe-Labor ' +
             'baue ich aus freien Stücken. Ich stecke Zeit und Geld hinein, weil ich überzeugt bin, dass sich diese Investition lohnt: in dich und in ' +
             'bessere Bildung für alle. Geholfen hat mir dabei ein ungewöhnliches Team – KI-Agenten, die nach meinen Vorgaben programmieren, zeichnen, ' +
-            'rechnen und übersetzen. So sind rund 100 interaktive Labs und 20 Lehrbücher in mehreren Sprachen entstanden.</p>' +
+            'rechnen und übersetzen. So sind rund 100 interaktive Labs und 20 Lehrbücher in mehreren Sprachen entstanden. Und es werden täglich mehr!</p>' +
             '<p>Mathematik soll man nicht nur lesen, sondern anfassen. Im Online-Buch kannst du jeden Graphen verschieben und jeden Zufallsversuch ' +
             'tausendmal laufen lassen, die QR-Codes in diesem Buch bringen dich direkt dorthin. Probier aus, mach Fehler – genau dabei lernt man am meisten.</p>' +
             '<p>Und wenn du im Buch einen Fehler findest: Sag es mir. Über „Fehler melden“ im Online-Buch landet jede Meldung direkt bei mir.</p>' +
@@ -229,6 +231,7 @@
         // every chapter is drawn and frozen before the next one is loaded: Chrome keeps only about 16 WebGL contexts
         // alive and drops the oldest, so a book with many 3D pictures came out with blank first ones (LK 12, 10.10.2026)
         await document.fonts.ready;
+        await Buch.fotosReady;
         for (let i = 0; i < B.chapters.length; i++) {
             const c = B.chapters[i];
             say('Kapitel ' + c.k + ' wird geladen und gezeichnet …');
@@ -244,6 +247,9 @@
             if (part) loes.appendChild(part);
         }
         book.appendChild(loes);
+        // Paged.js measures the pages: every photo has to be there with its real height first
+        say('Fotos werden geladen …');
+        await Promise.all(Array.from(book.querySelectorAll('img')).map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
         say('Seiten werden gesetzt … (das dauert einen Moment)');
         const t0 = performance.now();
         if (window.Farbschema && Farbschema.freeze) Farbschema.freeze();     // Paged.js copies the sheets: nothing more to translate
