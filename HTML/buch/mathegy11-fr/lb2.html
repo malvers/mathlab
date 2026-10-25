@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 11 · Chapitre 2 · Matrices | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Notation matricielle, multiplication, méthode de Gauss-Jordan, rotations. Chapitre 2 du manuel interactif Mathématiques · Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2 · DOMAINE D’APPRENTISSAGE 2 · NOVEMBRE · DÉCEMBRE</p>
+            <h1>Matrices</h1>
+            <p class="b-hero-lead">Résoudre à la main un système d’équations à trois inconnues, c’est s’exposer aux erreurs. Si l’on n’écrit que les nombres dans un tableau rectangulaire, une <b>matrice</b>,
+                on obtient une méthode que n’importe quel ordinateur sait appliquer : la <b>méthode de Gauss-Jordan</b>. Mais les matrices peuvent faire plus encore : on peut les multiplier, s’en servir pour faire tourner des figures
+                et suivre les flux de matières dans une usine. Et tu en as besoin dès le prochain chapitre, pour construire des fonctions sur mesure.</p>
+            <div class="b-chips"><span class="b-chip">6 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">1 LABORATOIRE</span><span class="b-chip">HISTOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["(5-x)/2","3*x-1"]' data-labels='["x + 2y = 5","3x − y = 1"]' data-lat="[-2.5,2.1]" data-x="-3.5,4" data-y="-2,5" data-pts="[[1,2]]" data-h="240" data-aria="Deux droites qui se coupent au point solution (1 ; 2) du système d’équations"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>écrire des systèmes d’équations linéaires sous <b>forme matricielle</b> $A \cdot \vec{x} = \vec{b}$</li>
+                <li>donner la <b>taille</b> d’une matrice et multiplier des <b>matrices compatibles</b></li>
+                <li>montrer sur des exemples que la <b>commutativité</b> ne vaut pas pour les matrices</li>
+                <li>résoudre des systèmes d’équations avec la <b>méthode de Gauss-Jordan</b> et reconnaître s’ils ont des solutions</li>
+                <li>avoir un aperçu des <b>rotations</b> et de la <b>production en plusieurs étapes</b> avec des matrices</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Résous $x + y = 5$, $x - y = 1$. Combien vaut $x$ ?</p><div class="b-sol"><p>On additionne : $2x = 6$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="y ="><p class="b-q-text">Et combien vaut $y$ ?</p><div class="b-sol"><p>$y = 5 - 3 = 2$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Que représente géométriquement la solution de deux équations linéaires à deux inconnues ?</p><div class="b-mc"><button>le point d’intersection de deux droites</button><button>le coefficient directeur d’une droite</button><button>la distance entre deux points</button></div><div class="b-sol"><p>Chaque équation est une droite.</p></div></div>
+            <div class="b-q" data-ans="11" data-ph="nombre"><p class="b-q-text">Calcule $1 \cdot 3 + 2 \cdot 4$.</p><div class="b-sol"><p>11</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">L’USINE DE MUESLI</div>
+            <div class="b-text"><p>Une entreprise mélange deux sortes de muesli. Pour un paquet « Sport », il lui faut 2 kg de flocons d’avoine et 1 kg de noix, pour un paquet « Fruits » 1 kg de flocons d’avoine et 3 kg de noix.</p>
+                <ul><li>Combien d’avoine et de noix lui faut-il pour 10 paquets Sport et 20 paquets Fruits ?</li><li>Comment peut-on faire ce calcul comme « tableau fois colonne » ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">SEULS LES NOMBRES COMPTENT</div>
+            <div class="b-text"><p>On donne $x + y + z = 6$, $2x - y + z = 3$, $x + 2y - z = 2$.</p>
+                <ul><li>Résolvez le système. À chaque étape, n’écrivez plus que les nombres. Qu’est-ce qui change, qu’est-ce qui reste ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">SYSTÈMES D’ÉQUATIONS AU LABORATOIRE</div>
+            <div class="b-text"><p>Essayez au laboratoire : quand deux équations ont-elles une solution, aucune ou une infinité ?</p></div>
+            <a class="b-lab" data-lab="gleichungssysteme" href="../../gleichungssysteme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SYSTÈMES D’ÉQUATIONS</span><span class="b-lab-what">Résoudre et savoir s’il y a des solutions</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Les matrices et leur multiplication" data-toc-k="1" data-toc-short="1 Produit">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">1</span>Les matrices et leur multiplication</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour 10 paquets Sport et 20 paquets Fruits, l’usine de muesli a besoin de $2 \cdot 10 + 1 \cdot 20 = 40$ kg d’avoine et de $1 \cdot 10 + 3 \cdot 20 = 70$ kg de noix.
+                Chaque ligne du tableau des besoins est « multipliée » par la colonne des quantités :
+                $$\begin{pmatrix} 2 & 1 \\ 1 & 3 \end{pmatrix} \cdot \begin{pmatrix} 10 \\ 20 \end{pmatrix} = \begin{pmatrix} 40 \\ 70 \end{pmatrix}$$
+                On peut écrire de la même façon n’importe quel système d’équations linéaires : $2x + y = 40$, $x + 3y = 70$ s’écrit $A \cdot \vec{x} = \vec{b}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MATRICES</div>
+                <div class="b-text">
+                    <p>Une <b>matrice</b> de <b>taille</b> $(m,n)$ (on écrit aussi $m \times n$) a $m$ lignes et $n$ colonnes ; $a_{ij}$ se trouve à la ligne $i$, colonne $j$.</p>
+                    <p>On écrit un système d’équations linéaires sous la forme $A \cdot \vec{x} = \vec{b}$ avec la <b>matrice des coefficients</b> $A$ ; la <b>matrice augmentée</b> est $(A \mid \vec{b})$.</p>
+                    <p><b>Produit :</b> $A \cdot B$ n’est défini que si $A$ a autant de colonnes que $B$ a de lignes (matrices compatibles). $(m,n) \cdot (n,k)$ donne $(m,k)$.
+                        L’élément $c_{ij}$ est « ligne $i$ de $A$ fois colonne $j$ de $B$ ».</p>
+                    <p>En général, $A \cdot B \neq B \cdot A$. La <b>matrice identité</b> $I$ (le manuel allemand l’appelle $E$) vérifie $I \cdot \vec{x} = \vec{x}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Ligne fois colonne :</b> l’index gauche suit la ligne, l’index droit descend la colonne ; on multiplie les paires et on additionne.</p>
+            <p class="b-note"><b>Variable absente :</b> dans $2x - z = 1$, il manque $y$ ; dans la matrice, on met un 0 à sa place.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LIGNE FOIS COLONNE</div>
+        <p class="b-help" style="margin:0 0 12px">Clique sur une case du résultat : la ligne et la colonne s’allument, et le calcul s’affiche en dessous. Compare $A \cdot B$ avec $B \cdot A$ et essaie différentes tailles.</p>
+        <div data-widget="matrixprodukt"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · MATRICE FOIS VECTEUR</div>
+            <div class="b-text"><p>Calcule $\begin{pmatrix} 2 & 0 & 1 \\ 1 & 3 & -1 \end{pmatrix} \cdot \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$2 \cdot 1 + 0 \cdot 2 + 1 \cdot 3 = 5$ ; $1 \cdot 1 + 3 \cdot 2 + (-1) \cdot 3 = 4$.</p>
+                <p><span class="b-res">$\begin{pmatrix} 5 \\ 4 \end{pmatrix}$</span>, tailles $(2,3) \cdot (3,1) = (2,1)$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · PAS COMMUTATIF</div>
+            <div class="b-text"><p>$A = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$, $B = \begin{pmatrix} 1 & 0 \\ 3 & 1 \end{pmatrix}$. Calcule $A \cdot B$ et $B \cdot A$.</p></div>
+            <div class="b-sol"><p>$A \cdot B = \begin{pmatrix} 7 & 2 \\ 3 & 1 \end{pmatrix}$, $B \cdot A = \begin{pmatrix} 1 & 2 \\ 3 & 7 \end{pmatrix}$.</p>
+                <p><span class="b-res">$A \cdot B \neq B \cdot A$</span> : un contre-exemple suffit à réfuter la commutativité.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Écris sous forme matricielle : a) $x + 2y = 5$, $3x - y = 1$ &nbsp; b) $x + y + z = 6$, $2x - z = 1$, $y + 3z = 4$</p></div>
+            <div class="b-sol"><p>a) $\begin{pmatrix} 1 & 2 \\ 3 & -1 \end{pmatrix} \vec{x} = \begin{pmatrix} 5 \\ 1 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 1 & 1 & 1 \\ 2 & 0 & -1 \\ 0 & 1 & 3 \end{pmatrix} \vec{x} = \begin{pmatrix} 6 \\ 1 \\ 4 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Quelle est la taille du produit, ou bien n’est-il pas défini ? a) $(2,3) \cdot (3,4)$ &nbsp; b) $(3,2) \cdot (3,2)$ &nbsp; c) $(1,3) \cdot (3,1)$</p></div>
+            <div class="b-sol"><p>a) $(2,4)$ &nbsp; b) non défini &nbsp; c) $(1,1)$, un seul nombre</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule $A^2 = A \cdot A$ pour $A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}$ et conjecture $A^n$.</p></div>
+            <div class="b-sol"><p>$A^2 = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$ ; probablement $A^n = \begin{pmatrix} 1 & n \\ 0 & 1 \end{pmatrix}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Vérifie si $(1\,;\,2\,;\,-1)$ est solution du système $\begin{pmatrix} 1 & 1 & 1 \\ 2 & -1 & 3 \end{pmatrix} \vec{x} = \begin{pmatrix} 2 \\ -3 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$1 + 2 - 1 = 2$ et $2 - 2 - 3 = -3$ : oui.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Trouve deux matrices $A$ et $B$ de taille $(2,2)$, toutes deux différentes de la matrice nulle, telles que $A \cdot B = 0$. Qu’est-ce que cela signifie par rapport au calcul avec des nombres ?</p></div>
+            <div class="b-sol"><p>Par exemple $A = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$, $B = \begin{pmatrix} 0 & 0 \\ 0 & 1 \end{pmatrix}$. Pour les matrices, la règle du produit nul ne s’applique pas.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="70" data-ph="kg de noix"><p class="b-q-text">Combien de kg de noix faut-il à l’usine de muesli pour 10 Sport et 20 Fruits ?</p><div class="b-sol"><p>$1 \cdot 10 + 3 \cdot 20 = 70$</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="c₂₂ ="><p class="b-q-text">Quel est l’élément en bas à droite de $B \cdot A$ dans l’exemple 2 ?</p><div class="b-sol"><p>$3 \cdot 2 + 1 \cdot 1 = 7$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quelle est la taille de $(2,3) \cdot (3,2)$ ?</p><div class="b-mc"><button>$(3,3)$</button><button>$(2,2)$</button><button>non défini</button></div><div class="b-sol"><p>Les nombres extérieurs : $(2,2)$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Gauss-Jordan, rotations, production en étapes" data-toc-k="2" data-toc-short="2 Gauss-Jordan">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">2</span>La méthode de Gauss-Jordan et ses applications</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quand on résout $x + y + z = 6$, $2x - y + z = 3$, $x + 2y - z = 2$, seuls les nombres changent. Avec la matrice augmentée :
+                $$\left(\begin{array}{ccc|c} 1 & 1 & 1 & 6 \\ 2 & -1 & 1 & 3 \\ 1 & 2 & -1 & 2 \end{array}\right) \;\longrightarrow\; \left(\begin{array}{ccc|c} 1 & 0 & 0 & 1 \\ 0 & 1 & 0 & 2 \\ 0 & 0 & 1 & 3 \end{array}\right)$$
+                À la fin, on a à gauche la matrice identité et à droite la solution $x = 1$, $y = 2$, $z = 3$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODE DE GAUSS-JORDAN</div>
+                <div class="b-text">
+                    <p><b>Opérations permises sur les lignes :</b> échanger deux lignes · multiplier une ligne par un nombre non nul · ajouter à une ligne un multiple d’une autre ligne.</p>
+                    <p><b>Gauss :</b> faire apparaître des zéros sous la diagonale (forme échelonnée). <b>Jordan :</b> des zéros aussi au-dessus et des 1 sur la diagonale (matrice identité à gauche).</p>
+                    <p><b>Solutions :</b> une ligne $(0 \; 0 \; 0 \mid c)$ avec $c \neq 0$ : aucune solution · une ligne $(0 \; 0 \; 0 \mid 0)$ et pas d’autre contradiction : une infinité de solutions · matrice identité atteinte : exactement une.</p>
+                    <p><b>Matrice de rotation</b> autour de l’origine : $D = \begin{pmatrix} \cos\varphi & -\sin\varphi \\ \sin\varphi & \cos\varphi \end{pmatrix}$, point image $P' = D \cdot P$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sans calculatrice,</b> tu résous des systèmes d’au plus trois inconnues avec des nombres simples. Avec le CAS, la commande de la forme échelonnée réduite (rref) donne directement la matrice finale.</p>
+            <p class="b-note"><b>Vérification :</b> remplacer la solution dans toutes les équations de départ. Ainsi, les erreurs de calcul commises en route apparaissent.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · GAUSS-JORDAN PAS À PAS</div>
+        <p class="b-help" style="margin:0 0 12px">Applique tes propres opérations sur les lignes ou fais-toi montrer l’étape suivante, jusqu’à ce que la matrice identité apparaisse à gauche.</p>
+        <div data-widget="gauss"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · PRIX D’ENTRÉE</div>
+            <div class="b-text"><p>2 adultes et 3 enfants paient 31 €, 1 adulte et 2 enfants 18 €. Combien coûtent les billets ?</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{cc|c} 2 & 3 & 31 \\ 1 & 2 & 18 \end{array}\right)$ ; $L_1 - 2L_2$ : $(0 \; -1 \mid -5)$, donc $E = 5$.</p>
+                <p>Puis $A = 18 - 10 = 8$ : <span class="b-res">adultes 8 €, enfants 5 €</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · ROTATION DE 90°</div>
+            <div class="b-text"><p>Fais tourner $Q(2\,;\,1)$ autour de l’origine avec $D = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$D \cdot \begin{pmatrix} 2 \\ 1 \end{pmatrix} = \begin{pmatrix} 0 \cdot 2 - 1 \cdot 1 \\ 1 \cdot 2 + 0 \cdot 1 \end{pmatrix}$</p>
+                <p><span class="b-res">$Q'(-1\,;\,2)$</span> : un quart de tour dans le sens inverse des aiguilles d’une montre ($\cos 90° = 0$, $\sin 90° = 1$).</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · TOURNER AVEC UNE MATRICE</div>
+        <p class="b-help" style="margin:0 0 12px">Règle l’angle de rotation. La figure tourne autour de l’origine avec $D(\varphi)$ ; pour le point $P(3\,;\,1)$, le calcul s’affiche en dessous.</p>
+        <div data-widget="drehmatrix"></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Résous avec la méthode de Gauss-Jordan : a) $2x + 3y = 12$, $4x - y = 10$ &nbsp; b) $x + y + z = 6$, $y + z = 5$, $z = 3$</p></div>
+            <div class="b-sol"><p>a) $x = 3$, $y = 2$ &nbsp; b) $x = 1$, $y = 2$, $z = 3$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Combien de solutions le système a-t-il ? a) $x + y = 2$, $2x + 2y = 4$ &nbsp; b) $x + y = 2$, $2x + 2y = 5$ &nbsp; c) matrice finale avec la ligne $(0 \; 0 \; 0 \mid 5)$</p></div>
+            <div class="b-sol"><p>a) une infinité &nbsp; b) aucune &nbsp; c) aucune</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Trois nombres ont pour somme 14. Le premier est le double du deuxième, le troisième dépasse le deuxième de 2. Écris le système sous forme de matrice et résous-le.</p></div>
+            <div class="b-sol"><p>$x - 2y = 0$, $-y + z = 2$, $x + y + z = 14$ : $x = 6$, $y = 3$, $z = 5$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>L’usine de muesli dispose de 40 kg d’avoine et de 70 kg de noix. Combien de paquets de chaque sorte peut-elle fabriquer si tout est utilisé ?</p></div>
+            <div class="b-sol"><p>$2x + y = 40$, $x + 3y = 70$ : 10 paquets Sport et 20 paquets Fruits. C’est le problème inverse de la leçon 1.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Montre que deux rotations de 90° reviennent à une seule rotation de 180°. Calcule pour cela $D_{90°} \cdot D_{90°}$.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}^2 = \begin{pmatrix} -1 & 0 \\ 0 & -1 \end{pmatrix} = D_{180°}$ : chaque point est remplacé par son symétrique par rapport à l’origine.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="5" data-ph="€"><p class="b-q-text">Combien coûte un billet enfant dans l’exemple 3 ?</p><div class="b-sol"><p>5 €</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="z ="><p class="b-q-text">Résous $x + y + z = 6$, $2x - y + z = 3$, $x + 2y - z = 2$. Combien vaut $z$ ?</p><div class="b-sol"><p>$z = 3$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Que signifie la ligne $(0 \; 0 \; 0 \mid 5)$ ?</p><div class="b-mc"><button>aucune solution</button><button>une infinité de solutions</button><button>$z = 5$</button></div><div class="b-sol"><p>$0 = 5$ est une contradiction.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $2 \cdot \begin{pmatrix} 1 & -1 \\ 0 & 3 \end{pmatrix} + \begin{pmatrix} 0 & 1 \\ -1 & 2 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 2 & -1 \\ -1 & 8 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 1.5 :</b> une parabole $y = ax^2 + bx + c$ passe par $(0\,;\,1)$, $(1\,;\,2)$ et $(2\,;\,5)$. Écris le système d’équations et résous-le.</p></div>
+            <div class="b-sol"><p>$c = 1$, $a + b + c = 2$, $4a + 2b + c = 5$ : $a = 1$, $b = 0$, $c = 1$, donc $y = x^2 + 1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Le CAS affiche la matrice finale $\left(\begin{array}{ccc|c} 1 & 0 & 2 & 3 \\ 0 & 1 & -1 & 1 \end{array}\right)$. Donne l’ensemble des solutions.</p></div>
+            <div class="b-sol"><p>$z$ libre : $x = 3 - 2z$, $y = 1 + z$, donc une infinité de solutions $(3 - 2t\,;\,1 + t\,;\,t)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une entreprise fabrique, à partir des matières premières $R_1$, $R_2$, des produits intermédiaires $Z_1$, $Z_2$, puis avec ceux-ci un produit final. Pour $Z_1$, il lui faut 2 $R_1$ et 1 $R_2$, pour $Z_2$ 1 $R_1$ et 2 $R_2$ ; un produit final demande 3 $Z_1$ et 1 $Z_2$. Combien de matières premières faut-il pour un produit final ?</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix} \cdot \begin{pmatrix} 3 \\ 1 \end{pmatrix} = \begin{pmatrix} 7 \\ 5 \end{pmatrix}$ : 7 unités de $R_1$ et 5 unités de $R_2$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : des baguettes à calcul dans la Chine ancienne" data-toc-k="X" data-toc-short="Fangcheng">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Des baguettes à calcul dans la Chine ancienne</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>La méthode à laquelle nous donnons le nom de Gauss est bien plus ancienne que Gauss. Dans le classique chinois « Neuf chapitres sur l’art du calcul » (Jiuzhang suanshu), le huitième chapitre s’intitule
+                « Fangcheng », disposition rectangulaire. Il contient 18 problèmes sur les systèmes d’équations linéaires. Les calculateurs disposaient les coefficients en colonnes sur une planche à calcul, avec des baguettes de bambou,
+                et soustrayaient des multiples de colonnes les unes des autres jusqu’à obtenir une forme échelonnée : au fond, la méthode d’élimination.</p>
+            <p>Le mot « matrice » (du latin matrix, « utérus », « ce dans quoi quelque chose prend naissance ») n’a été introduit qu’en 1850 par le mathématicien anglais James Joseph Sylvester.
+                Son ami Arthur Cayley étudia peu après comment calculer avec les matrices et montra que leur multiplication n’est pas commutative.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> la datation des « Neuf chapitres » est incertaine ; la plus ancienne version conservée est le commentaire de Liu Hui de l’an 263. R. Hart, « The Chinese Roots of Linear Algebra », Johns Hopkins University Press 2011. Sur Sylvester : MacTutor History of Mathematics, St Andrews.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>FORME MATRICIELLE</h4><p>$A \cdot \vec{x} = \vec{b}$, matrice augmentée $(A \mid \vec{b})$.</p></div>
+        <div><p>$2x + y = 40$, $x + 3y = 70$</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUIT</h4><p>Ligne fois colonne ; $(m,n) \cdot (n,k) = (m,k)$.</p></div>
+        <div><p>$(2,3) \cdot (3,1) = (2,1)$</p></div></div>
+    <div class="b-rueck"><div><h4>PAS COMMUTATIF</h4><p>En général, $A \cdot B \neq B \cdot A$.</p></div>
+        <div><p>Exemple 2</p></div></div>
+    <div class="b-rueck"><div><h4>GAUSS-JORDAN</h4><p>Opérations sur les lignes jusqu’à la matrice identité ; ligne contradictoire : aucune solution.</p></div>
+        <div><p>$(1\,;\,2\,;\,3)$</p></div></div>
+    <div class="b-rueck"><div><h4>APPLICATIONS</h4><p>Matrice de rotation $D(\varphi)$, besoins via des produits intermédiaires (production en plusieurs étapes).</p></div>
+        <div><p>$D_{90°}$ : $(2\,;\,1) \to (-1\,;\,2)$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="7" data-ph="élément"><p class="b-q-text">Calcule l’élément du haut de $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \cdot \begin{pmatrix} 1 \\ 3 \end{pmatrix}$.</p><div class="b-sol"><p>$1 + 6 = 7$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Résous $2x + 3y = 12$, $4x - y = 10$. Combien vaut $x$ ?</p><div class="b-sol"><p>$x = 3$, $y = 2$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quelle opération n’est pas permise ?</p><div class="b-mc"><button>échanger des lignes</button><button>ajouter un multiple d’une ligne</button><button>multiplier une ligne par 0</button></div><div class="b-sol"><p>On y perdrait une équation.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="20" data-ph="paquets"><p class="b-q-text">40 kg d’avoine, 70 kg de noix : combien de paquets Fruits ?</p><div class="b-sol"><p>20</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="R₁"><p class="b-q-text">Combien d’unités de $R_1$ faut-il pour un produit final dans l’exercice sur la production en plusieurs étapes ?</p><div class="b-sol"><p>7</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="x′ ="><p class="b-q-text">On fait tourner $(2\,;\,1)$ de 90°. Quelle est l’abscisse du point image ?</p><div class="b-sol"><p>$(-1\,;\,2)$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-matrizen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MATRICES</span><span class="b-lab-what">Notation, taille, multiplication, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-gauss-jordan.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MÉTHODE DE GAUSS-JORDAN</span><span class="b-lab-what">Résoudre et savoir s’il y a des solutions, 20 exercices</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 11e année, Grundkurs · Domaine d’apprentissage 2 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-lgs.js"></script>
+<script src="../../js/buch-fr/lgs.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-fr/gy11.js"></script>
+</body>
+</html>
