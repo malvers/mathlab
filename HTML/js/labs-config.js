@@ -92,6 +92,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathe5",
+        "href": "buch/mathe5/index.html",
+        "title": "Mathematik OS 5",
+        "description": "Das interaktive Lehrbuch Mathematik für die Oberschule, Klasse 5, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Zehn Kapitel in der Reihenfolge des Schuljahres – große Zahlen, Rechnen mit natürlichen Zahlen, Potenzen, Gleichungen und Teiler, Brüche, Dezimalzahlen und Prozent, Rechnen mit Dezimalzahlen und Größen, Koordinaten, Geraden und Winkel, Rechteck und Würfel, Symmetrie und deckungsgleiche Figuren und als Wahlbereich, wie die Menschen zählen und rechnen lernten. Zum Ausprobieren: schriftliches Rechnen Schritt für Schritt, Teilbarkeitsregeln, Würfelnetze, Bandornamente, Kerbholz und Keilschrift. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik OS 5 / 10 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe5"],
+        "category": "buecher arithmetik geometrie grade5",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 5 oberschule sachsen lehrplan kapitel grosse zahlen natuerliche zahlen schriftlich rechnen addieren subtrahieren multiplizieren dividieren potenzen quadratzahlen gleichungen teiler teilbarkeit primzahlen brueche dezimalzahlen prozent runden groessen einheiten koordinaten geraden winkel rechteck wuerfel wuerfelnetz symmetrie spiegelung verschiebung bandornament zahlzeichen kerbholz keilschrift aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathe6",
         "href": "buch/mathe6/index.html",
         "title": "Mathematik OS 6",

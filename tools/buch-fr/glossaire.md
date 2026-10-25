@@ -645,3 +645,33 @@ Package fr-9 (Dubreil), 25.10.2026: decisions made while translating LK 11 (Gymn
 | Klausur 11/I, Klausurtraining 11/II | DEVOIR SURVEILLÉ 11/I, ENTRAÎNEMENT AU DEVOIR SURVEILLÉ 11/II | online cards, en allemand |
 | Lab names | LABORATOIRE DES PENTES, LABORATOIRE DIFFÉRENTIEL, SOLIDES, VECTEURS, LE JEU DE DÉS, LABORATOIRE DES BINÔMES, PLANCHE DE GALTON, DROITE D’AJUSTEMENT | |
 | German titles in the sources (Heine, Kolmogorow, Grassmann) | stay German, with a French translation in « » where it helps | encheck lists them as German on purpose |
+
+## mathegy12lk-fr
+
+<!-- fr-10 (Ferrand, LK 12), written into the glossary by the orchestrator at the merge of round 2 (25.10.2026) -->
+
+| Deutsch | Français |
+|---|---|
+| orientierter Flächeninhalt | aire algébrique |
+| Integralfunktion | fonction intégrale |
+| lineare Verkettung / Substitution | composée affine / substitution affine |
+| Grundintegrale | primitives de référence |
+| Kettenregel rückwärts | règle de la chaîne à l’envers |
+| Untersumme / Obersumme | somme inférieure / supérieure ($U_n$, $O_n$ bleiben, einmal erklärt) |
+| Mittelpunktsregel | règle du point milieu |
+| Fassregel | règle des tonneaux de Kepler |
+| standardisieren | centrer et réduire |
+| standardnormalverteilt | loi normale centrée réduite |
+| $N(\mu;\ \sigma^2)$, $B(n;\ p)$ | $N(\mu\,;\,\sigma^2)$, $B(n\,;\,p)$ |
+| statistische Sicherheit | signification statistique |
+| Lotfußpunkt (windschiefe Geraden) | pieds de la perpendiculaire commune |
+| Lotgerade | perpendiculaire |
+| Hessesche Normalform | forme normale de Hesse |
+| Sehwinkel | angle de vue |
+| Geradenbüschel | faisceau de droites |
+| Parallelenschar | famille de droites parallèles |
+| Trägergerade | droite support |
+| Hüllkurve | enveloppe |
+| Gebiet 1–3 | Bloc 1–3 |
+| Tipps für die Prüfung | Conseils pour l’examen (lettre C) |
+| Prüfungsaufgabe | exercice d’examen |

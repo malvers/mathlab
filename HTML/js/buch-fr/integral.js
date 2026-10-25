@@ -49,7 +49,6 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
         // bestand: the axes of the car ride
-        'v in m/s': 'v en m/s', 's in m': 's en m',
     },
     phrase: [
         // book fr-1 mathe11-fr:

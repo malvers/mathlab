@@ -19,7 +19,7 @@ window.BuchFR && BuchFR.add('gy12lk', {
             'Couverture : un solide de révolution avec des disques, un histogramme de loi binomiale sous la courbe en cloche, deux droites non coplanaires et leur perpendiculaire commune',
         // normalverteilung ('Was wird berechnet?' is in js/buch-fr/stochastik.js, which the same page loads)
         'Erwartungswert $\\mu$': 'Espérance $\\mu$', 'Standardabweichung $\\sigma$': 'Écart type $\\sigma$', '$\\sigma$-Regeln': 'Règles des $\\sigma$',
-        'Dichte': 'Densité', 'Verteilungsfunktion': 'Fonction de répartition', 'Ansicht': 'Affichage',
+        'Dichte': 'Densité', 'Verteilungsfunktion': 'Fonction de répartition', 'Ansicht': 'Vue',
         'Dichtefunktion der Normalverteilung mit markierter Fläche': 'Densité de la loi normale avec une aire colorée',
         // moivre ('Anzahl der Versuche $n$', 'Trefferwahrscheinlichkeit $p$': js/buch-fr/stochastik.js)
         'Histogramm': 'Histogramme', 'standardisiert': 'centré réduit',
