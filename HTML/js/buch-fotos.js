@@ -311,7 +311,30 @@ window.BUCH_FOTOS = {
         'euklid-papyrus': { artist: 'University of Pennsylvania Museum of Archaeology and Anthropology', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:P.Penn._Museum_inv._E02748_Euclid%27s_Elements_2.5.jpg',
             alt: { de: 'Ein Papyrus mit einem Stück aus Euklids „Elementen“', en: 'A papyrus with a fragment of Euclid’s Elements' } },
         'playfair-torte': { artist: 'William Playfair', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Playfair_piecharts.jpg',
-            alt: { de: 'William Playfairs Tortendiagramme (1801)', en: 'William Playfair’s pie charts (1801)' } }
+            alt: { de: 'William Playfairs Tortendiagramme (1801)', en: 'William Playfair’s pie charts (1801)' } },
+        // mathe5 (2026-10-25)
+        'dresden-elbe': { artist: 'Guido Radig', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Dresden_-_Panorama_an_der_Elbe.JPG',
+            alt: { de: 'Die Dresdner Altstadt an der Elbe', en: 'Dresden’s old town on the Elbe' } },
+        'gummibaerchen': { artist: 'Jochen Spieker from Germany', license: 'CC BY-SA 2.0', page: 'https://commons.wikimedia.org/wiki/File:Gummy_Bears_(51279658803).jpg',
+            alt: { de: 'Drei Gummibärchen', en: 'Three gummy bears' } },
+        'zikade': { artist: 'G. Edward Johnson', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Cicada_with_extensive_abdomen_fungus_2021-05-31_093621_1_crop.jpg',
+            alt: { de: 'Eine Periodische Zikade', en: 'A periodical cicada' } },
+        'weitsprung': { artist: 'Sgt. Barry St. Clair', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:U.S._Army_Spc._Darius_Pittman,_with_the_1st_Armored_Division,_lands_in_a_long_jump_sand_pit_during_the_German_armed_forces_military_proficiency_badge_competition_at_Fort_Bliss,_Texas,_Sept_120904-A-UK859-006.jpg',
+            alt: { de: 'Landung in der Weitsprunggrube', en: 'Landing in the long-jump pit' } },
+        'elle': { artist: 'Dietmar Rabich', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Wien,_Stephansdom,_Elle_--_2018_--_3297.jpg',
+            alt: { de: 'Eine eiserne Elle an der Mauer des Wiener Stephansdoms', en: 'An iron ell on the wall of St Stephen’s Cathedral, Vienna' } },
+        'geodreieck': { artist: 'Kmtextor', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Geodreieck_klar_gross.jpg',
+            alt: { de: 'Ein Geodreieck', en: 'A set square with protractor (Geodreieck)' } },
+        'wuerfelzucker': { artist: 'Dietmar Rabich', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:W%C3%BCrfelzucker_--_2018_--_3582.jpg',
+            alt: { de: 'Würfelzucker', en: 'Sugar cubes' } },
+        'kerbholz': { artist: '', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:SAM_PC_1_-_Tally_sticks_1_-_Item_01.jpg',
+            alt: { de: 'Kerbhölzer', en: 'Tally sticks' } },
+        'keilschrift': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Cuneiform_Akkadian_clay_tablet_2.jpg',
+            alt: { de: 'Eine Tontafel mit Keilschrift', en: 'A clay tablet with cuneiform writing' } },
+        'ries-rechenbuch': { artist: 'Adam Ries', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:De_Adam_Risen_Rechbuch_035.jpg',
+            alt: { de: 'Eine Seite aus dem Rechenbuch von Adam Ries', en: 'A page of Adam Ries’ arithmetic book' } },
+        'ishango': { artist: 'JhowieNitnek', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Ishango_bone.jpg',
+            alt: { de: 'Der Knochen von Ishango', en: 'The Ishango bone' } }
     },
     books: {
         mathe11: {
@@ -847,6 +870,49 @@ window.BUCH_FOTOS = {
             'lb5.html': [
                 { foto: 'fahrraeder-schule', at: '#le1 .b-einstieg', put: 'in', w: 30 },
                 { foto: 'playfair-torte', at: '#exkursion .b-row > .b-text', put: 'in', w: 38 }
+            ]
+        },
+        mathe5: {
+            'lb1-1.html': [
+                { foto: 'dresden-elbe', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'fussballfeld', at: '#le1 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb1-2.html': [
+                { foto: 'kinosaal', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'gummibaerchen', at: '#le3 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'gauss', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb1-3.html': [
+                { foto: 'zikade', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb2-1.html': [
+                { foto: 'pizza', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'fahrraeder-schule', at: '#le3 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb2-2.html': [
+                { foto: 'weitsprung', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'stoppuhr', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb2-3.html': [
+                { foto: 'kuchen', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'elle', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb3-1.html': [
+                { foto: 'geodreieck', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb3-2.html': [
+                { foto: 'zwei-rote-wuerfel', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'wuerfelzucker', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb4.html': [
+                { foto: 'spiegel', at: '#le2 .b-einstieg', put: 'in', w: 26 }
+            ],
+            'wb.html': [
+                { foto: 'kerbholz', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'keilschrift', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'roemische-uhr', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'ries-rechenbuch', at: '#le4 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'ishango', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
             ]
         }
     }

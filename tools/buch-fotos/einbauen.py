@@ -20,12 +20,17 @@ credits = {}
 for name, key in spec['src'].items():
     if key == 'reuse': continue
     r = meta[tuple(key)]; src = f'dl/{name}.src'
-    if not os.path.exists(src):
-        q = {'action': 'query', 'format': 'json', 'titles': r['title'], 'prop': 'imageinfo', 'iiprop': 'url', 'iiurlwidth': 2000}
-        d = json.load(urllib.request.urlopen(urllib.request.Request('https://commons.wikimedia.org/w/api.php?' + urllib.parse.urlencode(q), headers=UA), timeout=60))
-        url = next(iter(d['query']['pages'].values()))['imageinfo'][0]['thumburl']
-        open(src, 'wb').write(urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=180).read())
-    im = Image.open(src).convert('RGB'); side = 2000 if name in banners else 1200
+    for attempt in range(3):                        # a download can arrive cut off: then fetch it again
+        if not os.path.exists(src):
+            q = {'action': 'query', 'format': 'json', 'titles': r['title'], 'prop': 'imageinfo', 'iiprop': 'url', 'iiurlwidth': 2000}
+            d = json.load(urllib.request.urlopen(urllib.request.Request('https://commons.wikimedia.org/w/api.php?' + urllib.parse.urlencode(q), headers=UA), timeout=60))
+            url = next(iter(d['query']['pages'].values()))['imageinfo'][0]['thumburl']
+            open(src, 'wb').write(urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=180).read())
+        try:
+            im = Image.open(src).convert('RGB'); break
+        except OSError:
+            os.replace(src, src + '.bad')
+    side = 2000 if name in banners else 1200
     im.thumbnail((side, side), Image.LANCZOS)
     out = f'out/{name}.jpg'; q = 82
     while True:
