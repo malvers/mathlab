@@ -5,6 +5,23 @@
  *                   Babylonian wedges for 2026 and a number line
  *   zahlenstrahlos5 natural numbers on the number line: steps of 1, 10, 100 … 100 000; explore (drag the point) or read a
  *                   marked number and type it (data-mode="lesen", data-s, data-a)
+ *   schriftlichos5  written addition, subtraction (Ergänzen or Entbündeln), multiplication and division by one digit, step by
+ *                   step, also with decimals; estimate and check at the end (data-op="+|−|·|:", data-a, data-b, data-way, data-hero)
+ *   vorrangos5      order of operations step by step for preset or typed terms: brackets, then · and :, then from the left (data-terms)
+ *   zehnerpotenzos5 powers of ten (count the zeros) and a power of ten split off a number, with the calculator display (data-mode, data-n, data-v)
+ *   quadratos5      square numbers as tiles and square roots: does a number of tiles make a square? (data-mode, data-n, data-v, data-hero)
+ *   probierenos5    equations and inequalities with natural numbers solved by trying, the inverse operation at the end (data-p)
+ *   teilbarkeitos5  divisibility by 2, 3, 4, 5, 6, 9 and 10 with the reason (last digits, digit sum), all divisors, prime or not (data-v)
+ *   bruchteilos5    z/n of a quantity: the whole in n groups of tokens, z of them lit (data-z, data-n, data-g, data-kind, data-hero)
+ *   halbesos5       two fractions as strips with the mark for one half, compared by reasoning: same denominator, same numerator,
+ *                   one half, one whole, the missing piece (data-a, data-b)
+ *   rundenos5       rounding decimals on a zoomed number line between the two possible results (data-v, data-p="e|z|h", data-hero)
+ *   wuerfelnetzos5  tap six squares: a cube is rolled over them, a net when every square gets its own face; die numbers and
+ *                   colours for opposite faces, how many of the 11 nets were found (data-start, data-hero)
+ *   bandos5         band ornaments from circles and rectangles: a motif translated, reflected at upright axes or at a level axis
+ *                   (data-motif, data-op, data-hero)
+ *   zahlzeichenos5  counting before digits: notches on a tally stick with the tally sheet in fives, Babylonian wedges in base 60
+ *                   (data-mode="kerbholz|babylon", data-n, data-v, data-hero)
  * Colours of drawn parts go into style="" (never fill=""), so js/farbschema.js can translate them — except on the cover,
  * which is dark in every scheme and keeps its colours through presentation attributes, like the other covers.
  * Looks: the general classes of js/buch.css (b-ctrls, b-two, b-svgbox, g-svg, b-out) and the section "Oberschule 5".
@@ -591,13 +608,18 @@
                 const k = S.k, m = t / Math.pow(10, k), s = String(t);
                 const forms = [];
                 for (let j = 1; j <= Math.min(z, 6); j++) forms.push(tg(t / Math.pow(10, j)) + ' \\cdot 10^{' + j + '}');
-                const tr = s.length <= 10 ? s : s[0] + (s.slice(1).replace(/0+$/, '') ? '.' + s.slice(1).replace(/0+$/, '').slice(0, 8) : '') + '<span class="os5-trx">×10<sup>' + (s.length - 1) + '</sup></span>';
+                // the display of a calculator: an SVG with presentation attributes, so it stays light green with dark digits in every scheme
+                const m8 = s.slice(1).replace(/0+$/, '').slice(0, 8);
+                const trText = s.length <= 10 ? s : s[0] + (m8 ? '.' + m8 : '') + '×10<tspan dy="-8" font-size="13">' + (s.length - 1) + '</tspan>';
+                const tr = '<svg viewBox="0 0 250 40" width="250" style="max-width:100%;height:auto;vertical-align:middle" role="img" aria-label="Anzeige des Taschenrechners">' +
+                    '<rect x="1" y="1" width="248" height="38" rx="6" fill="#c8d6be" stroke="#55654f" stroke-width="2"/>' +
+                    '<text x="236" y="27" text-anchor="end" font-family="SF Mono, Menlo, Consolas, monospace" font-size="20" fill="#1d2a1d">' + trText + '</text></svg>';
                 const mant = s[0] + (s.slice(1).replace(/0+$/, '') ? ',' + s.slice(1).replace(/0+$/, '').slice(0, 8) : '');
                 out.innerHTML = '<p class="g5-big">$' + tg(t) + (k ? ' = ' + tg(m) + ' \\cdot 10^{' + k + '}' : '') + '$</p>' +
                     (!z ? '<p>Die Zahl hat keine Endnull. Hier kann man keine Zehnerpotenz abtrennen.</p>' :
                         '<p>' + (k === z ? 'Vor dem Malpunkt steht keine Endnull mehr: Das ist die kürzeste Schreibweise.' : 'Du kannst noch ' + (z - k) + (z - k > 1 ? ' Nullen' : ' Null') + ' mehr abtrennen.') + '</p>' +
                         '<p class="g5-dim">Alle Schreibweisen: $' + tg(t) + ' = ' + forms.join(' = ') + '$</p>') +
-                    '<hr class="g5-hr"><p>So zeigt ein Taschenrechner mit 10 Stellen die Zahl:</p><p><span class="os5-tr">' + tr + '</span></p>' +
+                    '<hr class="g5-hr"><p>So zeigt ein Taschenrechner mit 10 Stellen die Zahl:</p><p>' + tr + '</p>' +
                     (s.length <= 10 ? '<p class="g5-dim">Die Zahl passt in die Anzeige.</p>' :
                         '<p class="g5-dim">Die Zahl ist zu lang. Der Rechner zeigt $' + mant.replace(',', '{,}') + ' \\cdot 10^{' + (s.length - 1) + '}$: Rücke das Komma um ' + (s.length - 1) + ' Stellen nach rechts, dann hast du die Zahl.</p>');
             }
