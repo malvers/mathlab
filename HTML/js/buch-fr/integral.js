@@ -44,6 +44,8 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-4 mathefos11-fr:
         // book fr-5 mathefos12-fr:
         // book fr-8 mathegy12-fr:
+        // bestand (5.2): the axis labels of the car on the canvas
+        'v in m/s': 'v en m/s', 's in m': 's en m',
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
     },
