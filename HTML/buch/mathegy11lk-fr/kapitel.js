@@ -21,7 +21,7 @@ window.BUCH = {
         { file: 'lb1-4.html', lb: 'Domaine d’apprentissage 1', k: '1.4', title: 'Étude de fonction',
           sub: 'Sens de variation, extremums, convexité et points d’inflexion, symétrie, pôles, asymptotes obliques', when: 'Novembre', ustd: 14 },
         { file: 'lb2.html', lb: 'Domaine d’apprentissage 2', k: '2', title: 'Matrices',
-          sub: 'Ax = b, produit de matrices enchaînées, méthode de Gauss-Jordan, rotations, production en plusieurs étapes', when: 'Novembre · décembre', ustd: 6 },
+          sub: 'Ax = b, produit de matrices compatibles, méthode de Gauss-Jordan, rotations, production en plusieurs étapes', when: 'Novembre · décembre', ustd: 6 },
         { file: 'lb1-5.html', lb: 'Domaine d’apprentissage 1', k: '1.5', title: 'Conditions, optimisation, régression',
           sub: 'Fonctions à partir de conditions, problèmes d’optimisation, équations de fonctions par régression', when: 'Décembre', ustd: 12 },
         { file: 'wb2.html', lb: 'Domaine optionnel 2', k: 'OP', title: 'Méthodes numériques',
