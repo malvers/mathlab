@@ -5,7 +5,7 @@
  *   fotos:  name → the photo <name>.jpg in Cloudflare R2, bucket "media", folder buch/fotos/ (js/buch.js FOTO_DIR; never in git):
  *           1200 px on the long side for a photo in a box, 2000 px for a banner, JPEG q ~80 re-saved without metadata;
  *           upload with  node tools/media_publish.mjs <file> buch/fotos/<name>.jpg  (it reads the file back);
- *           who took it, its licence and its page on Wikimedia Commons. Only free licences, never "NC" (the books
+ *           who took it ('' when unknown - the credit line then names only licence and source), its licence and its page on Wikimedia Commons. Only free licences, never "NC" (the books
  *           are sold through KDP). alt: what it shows, per language (missing languages fall back to German).
  *   books:  book (without -en/-es/-it/-fr) → chapter file → where each photo goes:
  *           at     a selector inside the chapter (ids as in the chapter file, also in the print edition)
@@ -107,7 +107,7 @@ window.BUCH_FOTOS = {
         // mathe13 (2026-10-25)
         'leibniz': { artist: 'Christoph Bernhard Francke', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Gottfried_Wilhelm_Leibniz,_Bernhard_Christoph_Francke.jpg',
             alt: { de: 'Gottfried Wilhelm Leibniz, Gemälde von Christoph Bernhard Francke', en: 'Gottfried Wilhelm Leibniz, painted by Christoph Bernhard Francke' } },
-        'barrow': { artist: 'anonymous', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Unknown_man,_formerly_known_as_Isaac_Barrow_from_NPG.jpg',
+        'barrow': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Unknown_man,_formerly_known_as_Isaac_Barrow_from_NPG.jpg',
             alt: { de: 'Isaac Barrow, Newtons Lehrer in Cambridge', en: 'Isaac Barrow, Newton’s teacher at Cambridge' } },
         'feldermosaik': { artist: 'Bhullargraphic', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Aerial_view_of_agricultural_fields_in_Punjab,_India.jpg',
             alt: { de: 'Felder von oben: ein Mosaik aus Flächen', en: 'Fields from above: a mosaic of areas' } },
@@ -136,7 +136,40 @@ window.BUCH_FOTOS = {
         'gizeh': { artist: 'kallerna', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Great_Pyramid_of_Giza.jpg',
             alt: { de: 'Die Cheops-Pyramide in Gizeh', en: 'The Great Pyramid of Giza' } },
         'autofabrik': { artist: 'Marek Ślusarczyk (Tupungato) Photo portfolio', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:001_Car_factory_assembly_line_-_Opel_factory_in_Gliwice,_Poland.jpg',
-            alt: { de: 'Ein Fließband in einer Autofabrik', en: 'An assembly line in a car factory' } }
+            alt: { de: 'Ein Fließband in einer Autofabrik', en: 'An assembly line in a car factory' } },
+        // mathefos11 (2026-10-25)
+        'fahrradhaendler': { artist: 'Tracy Anne Brooks', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:The_Bike_Shop.jpg',
+            alt: { de: 'Neue Fahrräder in einer Reihe', en: 'New bicycles in a row' } },
+        'fahrschule': { artist: 'WrS.tm.pl', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Training_car_of_one_of_the_driving_schools_in_Tomasz%C3%B3w_Mazowiecki,_Poland.jpg',
+            alt: { de: 'Ein Fahrschulauto', en: 'A driving-school car' } },
+        'chwarizmi-statue': { artist: 'DierkA', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Muhammad_ibn_Musa_al-Khwarizmi.jpg',
+            alt: { de: 'Das Denkmal für al-Chwarizmi', en: 'The monument to al-Khwarizmi' } },
+        'kaffeeroesterei': { artist: 'Dietmar Rabich', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_Privatr%C3%B6sterei_Schr%C3%B6er,_Kaffeebeh%C3%A4lter_--_2018_--_0529.jpg',
+            alt: { de: 'Kaffeebehälter in einer Rösterei', en: 'Coffee bins in a roastery' } },
+        'huhn': { artist: 'USDAgov', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:20220520-FPAC-PJK-0247_TONED.jpg',
+            alt: { de: 'Ein Huhn', en: 'A hen' } },
+        'brennspiegel': { artist: 'Solarbroman', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Parabolic_Solar_Cooker.jpg',
+            alt: { de: 'Ein Solarkocher: ein Hohlspiegel bündelt das Sonnenlicht', en: 'A solar cooker: a concave mirror focuses the sunlight' } },
+        'cardano': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Hieronimus_Cardanus.jpg',
+            alt: { de: 'Gerolamo Cardano, Kupferstich', en: 'Gerolamo Cardano, engraving' } },
+        'reisszwecken': { artist: 'Langläufer22', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Rei%C3%9Fzwecken_4_Dtzd_(77).jpg',
+            alt: { de: 'Eine Schachtel Reißzwecken', en: 'A box of drawing pins' } },
+        'pascal': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Blaise_Pascal_Versailles.JPG',
+            alt: { de: 'Blaise Pascal, Gemälde', en: 'Blaise Pascal, painting' } },
+        'bingokugeln': { artist: 'elizaIO', license: 'CC BY-SA 2.0', page: 'https://commons.wikimedia.org/wiki/File:Bingo_balls_in_bingo_drum.jpg',
+            alt: { de: 'Nummerierte Kugeln in einer Trommel', en: 'Numbered balls in a drum' } },
+        'kantine': { artist: 'RomanM82', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Yangzhou_-_Yangnong_Chemical,_canteen_lunch,_pic01.jpg',
+            alt: { de: 'Ein Tablett mit Mittagessen in der Kantine', en: 'A lunch tray in a canteen' } },
+        'siegerpodest': { artist: 'Charlyneros', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:2004_African_Championships_in_Athletics_25.jpg',
+            alt: { de: 'Siegerehrung auf dem Podest', en: 'Medal ceremony on the podium' } },
+        'tartaglia-dreieck': { artist: 'Dixy52', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Pascal_Triangle_14x14.jpg',
+            alt: { de: 'Das Zahlendreieck, das in Italien Tartaglias Dreieck heißt', en: 'The number triangle that is called Tartaglia’s triangle in Italy' } },
+        'jakob-bernoulli': { artist: 'Niklaus Bernoulli (1662-1716)', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Jakob_Bernoulli.jpg',
+            alt: { de: 'Jakob Bernoulli, Gemälde', en: 'Jakob Bernoulli, painting' } },
+        'lichtschalter': { artist: 'Santeri Viinamäki', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:White_light_switch.jpg',
+            alt: { de: 'Ein Lichtschalter', en: 'A light switch' } },
+        'boole': { artist: 'AIP Emilio Segrè Visual Archives', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Portrait_of_Boole.jpg',
+            alt: { de: 'George Boole, Kupferstich', en: 'George Boole, engraving' } }
     },
     books: {
         mathe11: {
@@ -272,6 +305,56 @@ window.BUCH_FOTOS = {
             ],
             'lb6.html': [
                 { foto: 'autofabrik', at: '#le4 .b-einstieg', put: 'in', w: 34 }
+            ]
+        },
+        mathefos11: {
+            'lb1-1.html': [
+                { foto: 'fahrradhaendler', at: '#le3 .b-einstieg', put: 'in', w: 32 }
+            ],
+            'lb1-2.html': [
+                { foto: 'kerze', at: '#le1 .b-einstieg', put: 'in', w: 28, pos: '50% 45%' }
+            ],
+            'lb1-3.html': [
+                { foto: 'fahrschule', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'chwarizmi-statue', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb1-4.html': [
+                { foto: 'kinosaal', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'kaffeeroesterei', at: '#le3 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'huhn', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb1-5.html': [
+                { foto: 'brennspiegel', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb1-6.html': [
+                { foto: 'wasserbogen', at: '#le1 .b-einstieg', put: 'in', w: 36 }
+            ],
+            'lb1-7.html': [
+                { foto: 'karton', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'cardano', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 30%' }
+            ],
+            'lb2-1.html': [
+                { foto: 'wuerfel-spieltisch', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'zwei-rote-wuerfel', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'reisszwecken', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'pascal', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }
+            ],
+            'lb2-2.html': [
+                { foto: 'bingokugeln', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'zicklein', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb2-3.html': [
+                { foto: 'kantine', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'siegerpodest', at: '#le2 .b-einstieg', put: 'in', w: 34 },
+                { foto: 'tartaglia-dreieck', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'wb2.html': [
+                { foto: 'sparglas', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'jakob-bernoulli', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 22%' }
+            ],
+            'exkurse.html': [
+                { foto: 'lichtschalter', at: '#le2 .b-einstieg', put: 'in', w: 24 },
+                { foto: 'boole', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
             ]
         }
     }

@@ -15,7 +15,8 @@ for (const suf of ['', ...sufs]) {
     const r = await p.evaluate(async () => {
       const imgs = [...document.querySelectorAll('figure.b-foto img')]; imgs.forEach(i => i.loading = 'eager');
       await Promise.all(imgs.map(i => i.decode().catch(() => null)));
-      return imgs.map(i => ({ src: i.src, ok: i.naturalWidth > 0 }));
+      // the credit line has to name licence and source (a broken line once showed only "Bild", 25.10.2026)
+      return imgs.map(i => { const c = i.parentElement.querySelector('figcaption')?.textContent || ''; return { src: i.src, ok: i.naturalWidth > 0 && /Wikimedia Commons/.test(c) && /(CC|gemeinfrei|public domain|dominio|pubblico|domaine)/i.test(c) }; });
     });
     n += r.length; bad.push(...r.filter(x => !x.ok || !x.src.includes('r2.dev')).map(x => f + ' ' + x.src));
   }
