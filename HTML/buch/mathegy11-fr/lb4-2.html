@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 11 · Chapitre 4.2 · La loi binomiale | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Schémas de Bernoulli, coefficient binomial, probabilités cumulées, espérance et dispersion. Chapitre 4.2 du manuel interactif Mathématiques · Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 4.2 · DOMAINE D’APPRENTISSAGE 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 4.2 · DOMAINE D’APPRENTISSAGE 4 · MAI · JUIN</p>
+            <h1>La loi binomiale</h1>
+            <p class="b-hero-lead">Combien d’ampoules sur 100 sont défectueuses ? Combien de bonnes réponses obtient-on en répondant au hasard ? Combien de graines sur 20 germent ? Chaque fois, une épreuve à deux issues
+                est répétée plusieurs fois de façon indépendante : c’est un <b>schéma de Bernoulli</b>. Le nombre de succès suit une <b>loi binomiale</b>. Tu apprends à calculer ses probabilités,
+                à manier « au plus » et « au moins », et à dire, avec l’espérance et l’écart type, ce qui est typique.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">2 LABORATOIRES</span><span class="b-chip">HISTOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>reconnaître des <b>épreuves de Bernoulli</b> et des <b>schémas de Bernoulli</b></li>
+                <li>compter des chemins avec la <b>factorielle</b> et le <b>coefficient binomial</b> et établir la formule de la probabilité d’une valeur</li>
+                <li>calculer des <b>probabilités d’une valeur</b> et des <b>probabilités cumulées</b>, aussi avec le symbole somme</li>
+                <li>calculer l’<b>espérance</b>, la <b>variance</b> et l’<b>écart type</b> et les interpréter sur l’histogramme</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="0,125" data-ph="nombre"><p class="b-q-text">Calcule $0{,}5^3$.</p><div class="b-sol"><p>0,125</p></div></div>
+            <div class="b-q" data-ans="3/8" data-ph="fraction"><p class="b-q-text">Trois lancers d’une pièce : quelle est la probabilité d’obtenir exactement deux fois face ?</p><div class="b-sol"><p>Trois chemins de $\tfrac{1}{8}$ chacun.</p></div></div>
+            <div class="b-q" data-ans="0,5" data-ph="nombre"><p class="b-q-text">$P(X \leq 2) = 0{,}5$. Combien vaut $P(X \geq 3)$ ?</p><div class="b-sol"><p>Événement contraire : 0,5</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quelle est l’espérance pour un seul lancer de dé ?</p><div class="b-mc"><button>3</button><button>6</button><button>3,5</button></div><div class="b-sol"><p>$\tfrac{1 + 2 + \ldots + 6}{6} = 3{,}5$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LE QCM AU HASARD</div>
+            <div class="b-text"><p>Un test a 5 questions avec 4 réponses chacune, dont exactement une est juste. Quelqu’un coche uniquement au hasard.</p>
+                <ul><li>Combien y a-t-il de chemins ? Combien mènent à exactement 2 bonnes réponses ? Quelle en est la probabilité ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA PLANCHE DE GALTON</div>
+            <div class="b-text"><p>Des billes tombent à travers plusieurs rangées de clous et rebondissent à chaque clou vers la gauche ou vers la droite.</p>
+                <ul><li>Dans quelles cases tombent le plus de billes ? Pourquoi ?</li></ul></div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Billes, clous et courbe en cloche</span></span></a></div>
+        <div class="b-box b-erk"><div class="b-box-title">QU’EST-CE QUI EST TYPIQUE ?</div>
+            <div class="b-text"><p>Vous lancez un dé 60 fois et comptez les six.</p>
+                <ul><li>Combien en attendez-vous ? Rassemblez les résultats de toute la classe : quelle est leur dispersion ?</li></ul></div>
+            <span class="b-pair">→ Leçon 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Schémas de Bernoulli et coefficient binomial" data-toc-k="1" data-toc-short="1 Bernoulli">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Schémas de Bernoulli et coefficient binomial</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dans le QCM au hasard, chaque question est une épreuve à deux issues : juste (succès, $p = \tfrac{1}{4}$) ou fausse. Un chemin avec exactement 2 succès, par exemple « juste, juste, faux, faux, faux »,
+                a pour probabilité $\left(\tfrac{1}{4}\right)^2 \cdot \left(\tfrac{3}{4}\right)^3$. Tous les chemins à 2 succès ont la même probabilité, seul compte le nombre de chemins :
+                on choisit parmi les 5 questions les 2 questions réussies, ce qui est possible de $\binom{5}{2} = 10$ façons. Donc $P = 10 \cdot \tfrac{1}{16} \cdot \tfrac{27}{64} \approx 0{,}264$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · SCHÉMA DE BERNOULLI ET COEFFICIENT BINOMIAL</div>
+                <div class="b-text">
+                    <p>Une <b>épreuve de Bernoulli</b> a exactement deux issues, le succès de probabilité $p$ et l’échec de probabilité $1 - p$. Un <b>schéma de Bernoulli de longueur $n$</b> est la répétition $n$ fois, de façon indépendante, avec le même $p$.</p>
+                    <p><b>Factorielle :</b> $n! = 1 \cdot 2 \cdot \ldots \cdot n$, $0! = 1$. <b>Coefficient binomial :</b> $\dbinom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$ compte les chemins avec exactement $k$ succès.</p>
+                    <p><b>Formule de Bernoulli :</b> pour le nombre $X$ de succès, on a $$P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k}$$</p>
+                    <p>$X$ suit la <b>loi binomiale</b> de paramètres $n$ et $p$ ; on écrit aussi $B_{n\,;\,p}(k)$ (en France, on note la loi $\mathcal{B}(n\,;\,p)$).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Symétrie :</b> $\binom{n}{k} = \binom{n}{n - k}$, car choisir 2 succès revient à choisir 3 échecs.</p>
+            <p class="b-note"><b>Pas un schéma de Bernoulli :</b> tirer sans remise dans une petite urne, car $p$ change. Pour de grandes populations (livraisons, population d’un pays), on calcule quand même de façon approchée avec la loi binomiale.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ARBRE D’UN SCHÉMA DE BERNOULLI</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis $n$ et $k$ : tous les chemins avec exactement $k$ succès s’allument. Leur nombre est le coefficient binomial.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · DEUX SIX</div>
+            <div class="b-text"><p>On lance un dé trois fois. Quelle est la probabilité d’obtenir exactement deux six ?</p></div>
+            <div class="b-sol"><p>$n = 3$, $p = \tfrac{1}{6}$, $k = 2$ : $\binom{3}{2} \cdot \left(\tfrac{1}{6}\right)^2 \cdot \tfrac{5}{6} = 3 \cdot \tfrac{5}{216}$.</p>
+                <p><span class="b-res">$\tfrac{15}{216} = \tfrac{5}{72} \approx 0{,}069$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · COEFFICIENTS BINOMIAUX</div>
+            <div class="b-text"><p>Calcule $\binom{10}{3}$ et $\binom{20}{18}$.</p></div>
+            <div class="b-sol"><p>$\binom{10}{3} = \dfrac{10 \cdot 9 \cdot 8}{3 \cdot 2 \cdot 1} = 120$.</p>
+                <p><span class="b-res">$\binom{20}{18} = \binom{20}{2} = \dfrac{20 \cdot 19}{2} = 190$</span>.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE TRIANGLE DE PASCAL</div>
+        <p class="b-help" style="margin:0 0 12px">Chaque nombre est la somme des deux nombres situés au-dessus. C’est ainsi que naissent tous les coefficients binomiaux.</p>
+        <div data-widget="pascal"></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule : a) $5!$ &nbsp; b) $\binom{5}{2}$ &nbsp; c) $\binom{6}{2}$ &nbsp; d) $\binom{7}{3}$ &nbsp; e) $\binom{n}{0}$ et $\binom{n}{n}$</p></div>
+            <div class="b-sol"><p>a) 120 &nbsp; b) 10 &nbsp; c) 15 &nbsp; d) 35 &nbsp; e) tous deux 1</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Schéma de Bernoulli ou non ? a) semer 10 graines, qui germent ou non &nbsp; b) trois tirages sans remise parmi 3 boules rouges et 2 bleues &nbsp; c) lancer un dé 20 fois, six ou non</p></div>
+            <div class="b-sol"><p>a) oui (à peu près indépendantes) &nbsp; b) non &nbsp; c) oui, $n = 20$, $p = \tfrac{1}{6}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pour le QCM au hasard (5 questions, $p = \tfrac{1}{4}$) : quelle est la probabilité de tout rater, d’avoir exactement une bonne réponse, d’avoir tout juste ?</p></div>
+            <div class="b-sol"><p>$\left(\tfrac{3}{4}\right)^5 \approx 0{,}237$ ; $5 \cdot \tfrac{1}{4} \cdot \left(\tfrac{3}{4}\right)^4 \approx 0{,}396$ ; $\left(\tfrac{1}{4}\right)^5 \approx 0{,}001$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Parmi 7 personnes, on élit un comité de 3. Combien y a-t-il de possibilités ? Combien si Anna en fait sûrement partie ?</p></div>
+            <div class="b-sol"><p>$\binom{7}{3} = 35$ ; avec Anna : les 2 autres parmi 6, donc $\binom{6}{2} = 15$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Établis la formule de Bernoulli pour $n = 4$, $k = 2$ : énumère tous les chemins avec exactement deux succès et justifie le facteur et les puissances.</p></div>
+            <div class="b-sol"><p>SSEE, SESE, SEES, ESSE, ESES, EESS : 6 chemins $= \binom{4}{2}$, chacun de probabilité $p^2(1 - p)^2$. Donc $P(X = 2) = 6p^2(1 - p)^2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="10" data-ph="nombre"><p class="b-q-text">Combien de chemins avec exactement 2 succès un schéma de longueur 5 a-t-il ?</p><div class="b-sol"><p>$\binom{5}{2} = 10$</p></div></div>
+        <div class="b-q" data-ans="5/72" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité d’obtenir exactement deux six en trois lancers ?</p><div class="b-sol"><p>$\tfrac{5}{72}$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Que vaut $0!$ ?</p><div class="b-mc"><button>0</button><button>1</button><button>non défini</button></div><div class="b-sol"><p>Par convention, $0! = 1$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Probabilités d’une valeur et probabilités cumulées" data-toc-k="2" data-toc-short="2 cumulées">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">AVEC LE CAS · 4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Probabilités d’une valeur et probabilités cumulées</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Sur 10 graines de probabilité de germination 0,9, toutes germent avec la probabilité $0{,}9^{10} \approx 0{,}349$, exactement 9 avec $10 \cdot 0{,}9^9 \cdot 0{,}1 \approx 0{,}387$.
+                Mais un jardinier se demande plutôt : quelle est la probabilité qu’<b>au moins</b> 8 germent ? Pour cela, on additionne des probabilités de valeurs :
+                $P(X \geq 8) = P(X = 8) + P(X = 9) + P(X = 10) \approx 0{,}194 + 0{,}387 + 0{,}349 = 0{,}930$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · PROBABILITÉS CUMULÉES</div>
+                <div class="b-text">
+                    <p><b>Cumulée :</b> $P(X \leq k) = \displaystyle\sum_{i=0}^{k} \binom{n}{i} p^i (1 - p)^{n - i}$</p>
+                    <p>« au plus $k$ » : $X \leq k$ · « moins de $k$ » : $X \leq k - 1$ · « au moins $k$ » : $X \geq k$, calculé comme $1 - P(X \leq k - 1)$ · « plus de $k$ » : $X \geq k + 1$</p>
+                    <p>« entre $a$ et $b$ » (inclus) : $P(a \leq X \leq b) = P(X \leq b) - P(X \leq a - 1)$</p>
+                    <p>L’<b>histogramme</b> montre au-dessus de chaque $k$ une barre de hauteur $P(X = k)$ ; pour $p = 0{,}5$, il est symétrique, pour $p$ petit, étalé vers la droite.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>L’erreur la plus fréquente :</b> $P(X \geq 3) = 1 - P(X \leq 3)$ est faux, car le 3 fait partie de « au moins 3 ». Correct : $1 - P(X \leq 2)$.</p>
+            <p class="b-note"><b>Avec le CAS :</b> il existe des commandes spéciales pour $P(X = k)$ (binomPdf) et $P(X \leq k)$ (binomCdf). D’abord traduire, puis taper.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LOI BINOMIALE</div>
+        <p class="b-help" style="margin:0 0 12px">Règle $n$ et $p$ et marque des zones : $P(X = k)$, $P(X \leq k)$, $P(X \geq k)$ ou $P(a \leq X \leq b)$. $\mu$ et $\sigma$ s’affichent aussi.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · AU MOINS TROIS BONNES RÉPONSES</div>
+            <div class="b-text"><p>QCM au hasard de 5 questions ($p = \tfrac{1}{4}$) : quelle est la probabilité de réussir avec au moins 3 bonnes réponses ?</p></div>
+            <div class="b-sol"><p>$P(X \geq 3) = \binom{5}{3}\tfrac{9}{1024} + \binom{5}{4}\tfrac{3}{1024} + \tfrac{1}{1024} = \tfrac{90 + 15 + 1}{1024}$.</p>
+                <p><span class="b-res">$\tfrac{106}{1024} \approx 0{,}104$</span> : répondre au hasard ne paie pas.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · AU PLUS UN</div>
+            <div class="b-text"><p>20 % des gens sont gauchers. Quelle est la probabilité que, dans un groupe de 10, il y ait au plus un gaucher ?</p></div>
+            <div class="b-sol"><p>$P(X \leq 1) = 0{,}8^{10} + 10 \cdot 0{,}2 \cdot 0{,}8^9 \approx 0{,}107 + 0{,}268$.</p>
+                <p><span class="b-res">$\approx 0{,}376$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ suit la loi binomiale de paramètres $n = 5$, $p = 0{,}2$. Calcule $P(X = 0)$, $P(X = 1)$, $P(X \leq 1)$ et $P(X \geq 1)$.</p></div>
+            <div class="b-sol"><p>0,32768 ; 0,4096 ; 0,73728 ; 0,67232</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Traduis pour $n = 10$ : a) plus de 3 &nbsp; b) moins de 3 &nbsp; c) au moins 2, mais au plus 5</p></div>
+            <div class="b-sol"><p>a) $1 - P(X \leq 3)$ &nbsp; b) $P(X \leq 2)$ &nbsp; c) $P(X \leq 5) - P(X \leq 1)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$n = 10$, $p = 0{,}5$. Calcule $P(X = 5)$ et $P(X \geq 9)$. Pourquoi a-t-on $P(X = 4) = P(X = 6)$ ?</p></div>
+            <div class="b-sol"><p>$\tfrac{252}{1024} \approx 0{,}246$ ; $\tfrac{11}{1024} \approx 0{,}011$ ; symétrie pour $p = 0{,}5$ et $\binom{10}{4} = \binom{10}{6}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>5 % des pièces d’une grosse livraison sont défectueuses. On en contrôle 20. Détermine avec le CAS : au plus une défectueuse, au moins deux défectueuses.</p></div>
+            <div class="b-sol"><p>$P(X \leq 1) \approx 0{,}736$ ; $P(X \geq 2) \approx 0{,}264$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Éducation au développement durable : des semences germent à 90 %. Combien de graines faut-il semer au minimum pour qu’au moins 20 germent avec une probabilité d’au moins 99 % ? Essaie avec le CAS.</p></div>
+            <div class="b-sol"><p>Pour $n = 26$, $P(X \geq 20) \approx 0{,}988$, pour $n = 27$ environ $0{,}996$ : au moins 27 graines.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,104" data-tol="0.001" data-ph="probabilité"><p class="b-q-text">QCM au hasard : $P(X \geq 3)$ à trois décimales près ?</p><div class="b-sol"><p>0,104</p></div></div>
+        <div class="b-q" data-ans="0,387" data-tol="0.001" data-ph="probabilité"><p class="b-q-text">10 graines, $p = 0{,}9$ : $P(X = 9)$ ?</p><div class="b-sol"><p>$0{,}9^9 \approx 0{,}387$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Comment calcule-t-on « au moins 3 » ?</p><div class="b-mc"><button>$1 - P(X \leq 3)$</button><button>$1 - P(X \leq 2)$</button><button>$P(X \leq 3)$</button></div><div class="b-sol"><p>Événement contraire « au plus 2 ».</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Espérance et dispersion" data-toc-k="3" data-toc-short="3 E et σ">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">3</span>Espérance, variance et écart type</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour 60 lancers, on attend $60 \cdot \tfrac{1}{6} = 10$ six. Mais dans la classe, on trouve aussi 7, 12 ou 14. De combien les résultats s’écartent typiquement de l’espérance,
+                c’est l’<b>écart type</b> qui le mesure. Pour les variables aléatoires binomiales, il existe des formules simples, ici $\sigma = \sqrt{60 \cdot \tfrac{1}{6} \cdot \tfrac{5}{6}} \approx 2{,}9$ :
+                des résultats entre 7 et 13 environ sont tout à fait normaux.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · INDICATEURS DE LA LOI BINOMIALE</div>
+                <div class="b-text">
+                    <p><b>Espérance :</b> $E(X) = \mu = n \cdot p$ · <b>variance :</b> $V(X) = n \cdot p \cdot (1 - p)$ · <b>écart type :</b> $\sigma = \sqrt{n \cdot p \cdot (1 - p)}$</p>
+                    <p>$E(X)$ est la moyenne à long terme, pas le résultat certain. $\sigma$ mesure la dispersion autour de $E(X)$ et a la même unité que $X$.</p>
+                    <p>Sur l’histogramme, la barre la plus haute est près de $\mu$ ; plus $\sigma$ est grand, plus la loi est étalée. Pour $n$ fixé, la dispersion est maximale pour $p = 0{,}5$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Quand n grandit :</b> si l’on multiplie $n$ par 4, $\mu$ est multiplié par 4, mais $\sigma$ seulement par 2. Rapportée à l’espérance, la dispersion diminue : c’est la loi des grands nombres.</p>
+            <p class="b-note"><b>À rebours :</b> de $E(X) = 6$ et $V(X) = 4{,}2$, on tire $1 - p = 0{,}7$, donc $p = 0{,}3$ et $n = 20$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · ESPÉRANCE ET DISPERSION</div>
+        <p class="b-help" style="margin:0 0 12px">Une variable aléatoire avec son diagramme en bâtons, $E(X)$, $V(X)$ et $\sigma$. Lance-la mille fois : la moyenne des résultats s’approche de $E(X)$.</p>
+        <div data-widget="zufallsgroesse"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · CONTRÔLE QUALITÉ</div>
+            <div class="b-text"><p>2 % des pièces sont défectueuses. Combien de pièces défectueuses attend-on sur 1000 ? Combien vaut $\sigma$ ?</p></div>
+            <div class="b-sol"><p>$\mu = 1000 \cdot 0{,}02 = 20$.</p>
+                <p><span class="b-res">$\sigma = \sqrt{1000 \cdot 0{,}02 \cdot 0{,}98} = \sqrt{19{,}6} \approx 4{,}43$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · INTERVALLE À UN σ</div>
+            <div class="b-text"><p>On lance une pièce 100 fois. Dans quelle fourchette le nombre de « face » se situe-t-il typiquement ?</p></div>
+            <div class="b-sol"><p>$\mu = 50$, $\sigma = \sqrt{25} = 5$.</p>
+                <p><span class="b-res">$[\mu - \sigma\,;\,\mu + \sigma] = [45\,;\,55]$</span> ; environ deux tiers des résultats s’y trouvent.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine $\mu$, $V(X)$ et $\sigma$ : a) $n = 50$, $p = 0{,}2$ &nbsp; b) $n = 400$, $p = 0{,}5$ &nbsp; c) 20 questions à 4 réponses, répondues au hasard</p></div>
+            <div class="b-sol"><p>a) 10 ; 8 ; $\approx 2{,}83$ &nbsp; b) 200 ; 100 ; 10 &nbsp; c) 5 ; 3,75 ; $\approx 1{,}94$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Que signifie $E(X) = 10$ pour 60 lancers ? Exactement 10 est-il le résultat le plus probable, et quelle est sa probabilité ?</p></div>
+            <div class="b-sol"><p>En moyenne, sur de nombreuses séries, 10 six. Oui, 10 est le plus probable, mais $P(X = 10) \approx 0{,}137$ est petit.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une variable aléatoire binomiale a $n = 40$ et $E(X) = 12$. Détermine $p$ et $\sigma$.</p></div>
+            <div class="b-sol"><p>$p = 0{,}3$, $\sigma = \sqrt{40 \cdot 0{,}3 \cdot 0{,}7} = \sqrt{8{,}4} \approx 2{,}90$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Lors d’une élection, un parti a 30 % d’opinions favorables. Un sondage interroge 500 personnes. Dans quelle fourchette le nombre de ses partisans se situe-t-il typiquement ($\mu \pm \sigma$) ?</p></div>
+            <div class="b-sol"><p>$\mu = 150$, $\sigma = \sqrt{105} \approx 10{,}2$ : environ 140 à 160, soit 28 % à 32 %.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Montre que, pour $n$ fixé, $V(X) = n \cdot p(1 - p)$ est maximale pour $p = 0{,}5$. Utilise la dérivée du domaine d’apprentissage 1.</p></div>
+            <div class="b-sol"><p>$v(p) = n(p - p^2)$, $v'(p) = n(1 - 2p) = 0 \Rightarrow p = 0{,}5$, $v''(p) = -2n < 0$ : maximum.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="20" data-ph="μ"><p class="b-q-text">Nombre attendu de pièces défectueuses sur 1000 pour 2 % ?</p><div class="b-sol"><p>20</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="σ"><p class="b-q-text">$\sigma$ pour 100 lancers d’une pièce ?</p><div class="b-sol"><p>5</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">On multiplie $n$ par 4. Que devient $\sigma$ ?</p><div class="b-mc"><button>Il double.</button><button>Il est multiplié par 4.</button><button>Il reste le même.</button></div><div class="b-sol"><p>$\sqrt{4} = 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance un dé six fois. Quelle est la probabilité d’obtenir exactement un six ? Pourquoi le résultat est-il égal à $\left(\tfrac{5}{6}\right)^5$ ?</p></div>
+            <div class="b-sol"><p>$6 \cdot \tfrac{1}{6} \cdot \left(\tfrac{5}{6}\right)^5 = \left(\tfrac{5}{6}\right)^5 \approx 0{,}402$ : le facteur 6 se simplifie avec $\tfrac{1}{6}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 4.1 :</b> résous « au moins un six en quatre lancers » une fois avec l’événement contraire et une fois comme $P(X \geq 1)$ d’une loi binomiale.</p></div>
+            <div class="b-sol"><p>Les deux : $1 - \left(\tfrac{5}{6}\right)^4 = 1 - P(X = 0) \approx 0{,}518$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une compagnie aérienne vend 105 billets pour 100 places, parce qu’en moyenne 5 % des passagers ne se présentent pas. Quelle est la probabilité que le vol soit en surréservation ? Détermine $P(X \geq 101)$ pour $n = 105$, $p = 0{,}95$ avec le CAS.</p></div>
+            <div class="b-sol"><p>Environ 0,39 : sans réserve, le vol est en surréservation presque 4 fois sur 10.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Détermine, pour $n = 10$, $p = 0{,}3$, la probabilité que $X$ soit dans l’intervalle à un $\sigma$ autour de $\mu$. Compare avec « environ deux tiers ».</p></div>
+            <div class="b-sol"><p>$\mu = 3$, $\sigma \approx 1{,}45$ : intervalle $[1{,}55\,;\,4{,}45]$, donc $X \in \{2\,;\,3\,;\,4\}$. $P \approx 0{,}233 + 0{,}267 + 0{,}200 = 0{,}700$, un peu plus des deux tiers.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le théorème d’or de Bernoulli" data-toc-k="X" data-toc-short="Bernoulli">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Le théorème d’or de Bernoulli</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Le mathématicien bâlois Jacques (Jakob) Bernoulli travailla une vingtaine d’années sur la question de savoir comment, à partir d’observations, on peut conclure à des probabilités.
+                Son œuvre principale, « Ars Conjectandi », l’art de conjecturer, ne parut qu’en 1713, huit ans après sa mort, éditée par son neveu Nicolas.
+                On y trouve non seulement la formule des schémas de Bernoulli, mais aussi son « théorème d’or » : la première loi des grands nombres.
+                Plus on répète une expérience, plus il est sûr que la fréquence est proche de la probabilité.</p>
+            <p>On le voit sur la <b>planche de Galton</b>. Francis Galton la fit construire en 1873 : des billes rebondissent au hasard vers la gauche ou vers la droite à chaque rangée de clous, un schéma de Bernoulli avec $p = 0{,}5$.
+                Le nombre de chemins menant à une case est un coefficient binomial, et les billes dessinent une forme en cloche. Galton décrivit l’appareil en 1889 dans son livre « Natural Inheritance ».</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> J. Bernoulli, « Ars Conjectandi », Bâle 1713, partie IV. F. Galton, « Natural Inheritance », Londres : Macmillan 1889, p. 63–70.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>SCHÉMA DE BERNOULLI</h4><p>$n$ répétitions indépendantes, deux issues, le même $p$.</p></div>
+        <div><p>QCM au hasard : $n = 5$, $p = \tfrac{1}{4}$</p></div></div>
+    <div class="b-rueck"><div><h4>COEFFICIENT BINOMIAL</h4><p>$\binom{n}{k} = \tfrac{n!}{k!(n - k)!}$ compte les chemins avec $k$ succès.</p></div>
+        <div><p>$\binom{5}{2} = 10$</p></div></div>
+    <div class="b-rueck"><div><h4>FORMULE DE BERNOULLI</h4><p>$P(X = k) = \binom{n}{k} p^k (1 - p)^{n - k}$</p></div>
+        <div><p>deux six en trois lancers : $\tfrac{5}{72}$</p></div></div>
+    <div class="b-rueck"><div><h4>CUMULÉE</h4><p>« au moins $k$ » = $1 - P(X \leq k - 1)$.</p></div>
+        <div><p>QCM au hasard, $X \geq 3$ : 0,104</p></div></div>
+    <div class="b-rueck"><div><h4>INDICATEURS</h4><p>$\mu = np$, $\sigma = \sqrt{np(1 - p)}$</p></div>
+        <div><p>100 lancers d’une pièce : $50 \pm 5$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="56" data-ph="nombre"><p class="b-q-text">Calcule $\binom{8}{3}$.</p><div class="b-sol"><p>56</p></div></div>
+            <div class="b-q" data-ans="0,3456" data-tol="0.0001" data-ph="probabilité"><p class="b-q-text">$n = 5$, $p = 0{,}4$ : $P(X = 2)$ ?</p><div class="b-sol"><p>$10 \cdot 0{,}16 \cdot 0{,}216 = 0{,}3456$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="μ"><p class="b-q-text">$n = 5$, $p = 0{,}4$ : espérance ?</p><div class="b-sol"><p>2</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="0,376" data-tol="0.001" data-ph="probabilité"><p class="b-q-text">Gauchers (20 %), groupe de 10 : au plus un ?</p><div class="b-sol"><p>0,376</p></div></div>
+            <div class="b-q" data-ans="4,43" data-tol="0.01" data-ph="σ"><p class="b-q-text">$\sigma$ pour $n = 1000$, $p = 0{,}02$ ?</p><div class="b-sol"><p>4,43</p></div></div>
+            <div class="b-q" data-ans="27" data-ph="graines"><p class="b-q-text">Combien de graines faut-il pour être sûr à 99 % qu’au moins 20 germent ($p = 0{,}9$) ?</p><div class="b-sol"><p>27</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-bernoulli.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SCHÉMAS DE BERNOULLI</span><span class="b-lab-what">Factorielle, coefficient binomial, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-binomialverteilung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBABILITÉS D’UNE VALEUR</span><span class="b-lab-what">$P(X = k)$ et histogrammes, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-kumuliert.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBABILITÉS CUMULÉES</span><span class="b-lab-what">Au plus, au moins, entre, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-erwartungswert-sigma.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESPÉRANCE ET σ</span><span class="b-lab-what">Interpréter les indicateurs, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-ka2.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DEVOIR SURVEILLÉ 11/II</span><span class="b-lab-what">Vecteurs, droites, plans et loi binomiale, 20 exercices</span></span></a>
+        <a class="b-lab" data-lab="binomischeslabor" href="../../binomischeslabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATOIRE DES BINÔMES</span><span class="b-lab-what">Explorer les coefficients binomiaux</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 11e année, Grundkurs · Domaine d’apprentissage 4 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+</body>
+</html>
