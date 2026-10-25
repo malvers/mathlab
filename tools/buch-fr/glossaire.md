@@ -569,3 +569,41 @@ Package fr-7 (Vergne), 25.10.2026: decisions made while translating GY 11 (Grund
 | Grassmann, „Die lineale Ausdehnungslehre“ | Grassmann, title kept German with « la théorie de l’extension linéaire » | 3.1, as fr-2 |
 | Jakob / Nikolaus Bernoulli, Johann Bernoulli | Jacques (Jakob) / Nicolas, Jean (Johann) Bernoulli | 4.2, 1.3 |
 | Lab names | PUISSANCES, PENTE, LABORATOIRE DIFFÉRENTIEL, SYSTÈMES D’ÉQUATIONS, DROITE D’AJUSTEMENT, VECTEURS, SOLIDES, LE JEU DE DÉS, PLANCHE DE GALTON, LABORATOIRE DES BINÔMES | |
+## mathegy12-fr
+
+<!-- fr-8: terms of this book only, write right below this line -->
+
+Package fr-8 (Amice), 25.10.2026: decisions made while translating GY 12 (Grundkurs); nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Grundkurs, Leistungskurs | stay | start page: le lycée allemand d’enseignement général (5e à 12e année en Saxe), Grundkurs (cours de base), Leistungskurs (cours approfondi) |
+| Jahrgangsstufe 12 | 12e année | |
+| Grundintegrale | primitives usuelles | |
+| lineare Verkettung | composée affine | widget label « Composées affines »; the fr0 rule of the trainer says « Composée avec une fonction affine » |
+| Integrationskonstante, Integrand, Integrationsgrenzen | constante d’intégration, intégrande, bornes d’intégration | |
+| orientierter Flächeninhalt | aire algébrique | |
+| Untersumme $U_n$, Obersumme $O_n$ | somme inférieure, somme supérieure | the letters stay; 5.2 names the German words once |
+| Integralfunktion | fonction intégrale | |
+| Rechteckverfahren (links, rechts, Mitte), Mittelpunktsregel, Trapezverfahren | méthode des rectangles (à gauche, à droite, au milieu), méthode du point milieu, méthode des trapèzes | the letters $L_n$, $R_n$, $M_n$, $T_n$ stay; OP names « links », « rechts » once |
+| Stützstellen | points de subdivision | |
+| linksgekrümmt / rechtsgekrümmt | convexe / concave | |
+| Keplersche Fassregel | règle des tonneaux de Kepler | |
+| Hochrechnung | extrapolation | |
+| Signifikanztest | test d’hypothèse | chapter 6, as fr-3 |
+| Ablehnungsbereich $K$ | zone de rejet $K$ | the page keeps $K$ (6 says it is German); the widget writes $\overline{A}$ as in the German book |
+| Sollwert (widget schaetzen) | valeur nominale | |
+| Normalenform | équation normale | |
+| Spurpunkte einer Ebene, Spurdreieck | points d’intersection avec les axes, triangle des traces | as fr-3 |
+| Achsenabschnittsform | équation par les points d’intersection avec les axes | |
+| Schnittwinkel, Steigungswinkel, Neigung, Innenwinkel | angle d’intersection, angle d’inclinaison, inclinaison, angle intérieur | |
+| Hessesche Normalform, Abstandsformel | forme normale de Hesse, formule de la distance | |
+| Lösungsplan | plan de résolution | 7.3 |
+| Abstandsfunktion | fonction distance | 8.1, widget abstandmin |
+| spiegeln an …, Spiegelpunkt, Spiegelebene | construire le symétrique par rapport à …, symétrique, plan de symétrie | |
+| Geradenbüschel, Parallelenschar | faisceau de droites, famille de droites parallèles | widget geradenschar: Faisceau, Parallèles, Droite et parabole |
+| Hüllkurve | enveloppe | 8.2 excursion |
+| winkel3d presets | droite – droite, droite – plan, plan – plan; aigu, vecteurs à angle obtus, perpendiculaires, oblique, parallèles, toit et sol | |
+| Prüfungsaufgabe (abi) | exercice d’Abitur | as fr-3; Gebiet: bloc |
+| Cheops, Gizeh, Königselle, Handbreit, Seked | Khéops, Gizeh, coudée royale, palme, seked | 7.2 excursion |
+| online quizzes Konsultation, Generalprobe | Consultation, Répétition générale | cards only, the quizzes stay German |
