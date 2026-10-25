@@ -209,7 +209,44 @@ window.BUCH_FOTOS = {
         'hocker': { artist: '', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Sgabello_a_tre_gambe_MEG_8213.tif',
             alt: { de: 'Ein dreibeiniger Holzhocker', en: 'A three-legged wooden stool' } },
         'keimlinge': { artist: 'Cbarlow', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Maclura_pomifera_fruit_sprouting_seeds.jpg',
-            alt: { de: 'Junge Keimlinge', en: 'Young seedlings' } }
+            alt: { de: 'Junge Keimlinge', en: 'Young seedlings' } },
+        // mathegy12 (2026-10-25)
+        'riemann': { artist: 'Smithsonian Institution', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Portrait_of_Bernhard_Riemann_(1826-1866),_Mathematician_(2551069295).jpg',
+            alt: { de: 'Bernhard Riemann', en: 'Bernhard Riemann' } },
+        'gabriels-horn': { artist: 'RokerHRO', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:GabrielHorn.png',
+            alt: { de: 'Gabriels Horn: unendlich lang, aber mit endlichem Volumen', en: 'Gabriel’s horn: infinitely long, yet of finite volume' } },
+        'broetchen': { artist: 'Jeremy Keith from Brighton & Hove, United Kingdom', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Bread_rolls_(5959546878).jpg',
+            alt: { de: 'Brötchen im Korb', en: 'Bread rolls in a basket' } },
+        'schlitten': { artist: 'USFWSAlaska', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Traveling_across_Selawik_National_Wildlife_Refuge_with_a_snowmachine_and_basket_sled_(52828118849).jpg',
+            alt: { de: 'Ein Holzschlitten im Schnee', en: 'A wooden sledge in the snow' } },
+        'spiegel': { artist: 'Acabashi', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Kelvedon_Hall_mirror_in_the_garden_room_Kelvedon_Hatch_Essex_England.jpg',
+            alt: { de: 'Ein Spiegel mit Spiegelbild', en: 'A mirror with a reflection' } },
+        // mathegy11lk (2026-10-25)
+        'cauchy': { artist: '', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Augstin_Louis,_Baron_Cauchy._Lithograph_by_Z._Belliard_after_Wellcome_V0001035.jpg',
+            alt: { de: 'Augustin-Louis Cauchy, Lithografie', en: 'Augustin-Louis Cauchy, lithograph' } },
+        's-kurve': { artist: 'contri from Yonezawa-Shi, Yamagata, Japan', license: 'CC BY-SA 2.0', page: 'https://commons.wikimedia.org/wiki/File:Winding_road_in_Iide,_Yamagata,_Japan.jpg',
+            alt: { de: 'Eine Straße mit S-Kurve', en: 'A road with an S-bend' } },
+        'cayley': { artist: 'Engraved by Richard Taylor (1872–1901), drawn by Thomas Dewell Scott, after a ph', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Arthur_Cayley_Engraving.jpg',
+            alt: { de: 'Arthur Cayley, Holzstich', en: 'Arthur Cayley, wood engraving' } },
+        'rettungsturm': { artist: 'Radomianin', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Lifeguard_stand,_Miami_Beach.jpg',
+            alt: { de: 'Ein Rettungsturm am Strand', en: 'A lifeguard tower on the beach' } },
+        'bremsspuren': { artist: 'Pete Forsyth', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Tire_skid_marks_on_maritime_road.jpg',
+            alt: { de: 'Bremsspuren auf dem Asphalt', en: 'Skid marks on the asphalt' } },
+        'schottisches-cafe': { artist: 'Сергій', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:27_Prospekt_Shevchenka,_Lviv.jpg',
+            alt: { de: 'Das Haus in Lwiw, in dem das Schottische Café war', en: 'The building in Lviv that housed the Scottish Café' } },
+        'radar': { artist: 'Rodhullandemu', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Radar_antenna,_Liverpool_John_Lennon_Airport_3.jpg',
+            alt: { de: 'Ein Radarturm am Flughafen', en: 'A radar tower at an airport' } },
+        'gesteinsschichten': { artist: 'Simon Burchell', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Rock_strata_near_the_Monastery_of_Santo_Toribio_de_Liebana.jpg',
+            alt: { de: 'Gefaltete Gesteinsschichten', en: 'Folded rock strata' } },
+        'zahlenschloss': { artist: 'Steven-L-Johnson', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Common_Tokyo_bike_lock_(14271965075).jpg',
+            alt: { de: 'Ein Zahlenschloss am Fahrrad', en: 'A combination lock on a bicycle' } },
+        'ars-conjectandi': { artist: 'Jakob Bernoulli', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Arsconj.gif',
+            alt: { de: 'Titelblatt der „Ars Conjectandi“ von Jakob Bernoulli (1713)', en: 'Title page of Jakob Bernoulli’s Ars Conjectandi (1713)' } },
+        // mathegy12lk (2026-10-25)
+        'abfuellanlage': { artist: 'Carol M. Highsmith', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Part_of_the_washing_and_bottling_line_at_the_Dublin_Bottling_Works_and_W.P._Kloster_Museum_in_Dublin,_Texas_LCCN2015630792.tif',
+            alt: { de: 'Eine Abfüllanlage für Flaschen', en: 'A bottling line' } },
+        'museumssaal': { artist: 'Nben54', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Galerie_2.jpg',
+            alt: { de: 'Gemälde an der Wand eines Museums', en: 'Paintings on a museum wall' } }
     },
     books: {
         mathe11: {
@@ -487,6 +524,143 @@ window.BUCH_FOTOS = {
             'lb4-2.html': [
                 { foto: 'keimlinge', at: '#le2 .b-einstieg', put: 'in', w: 30 },
                 { foto: 'jakob-bernoulli', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 22%' }
+            ]
+        },
+        mathegy12: {
+            'lb5-1.html': [
+                { foto: 'leibniz', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }
+            ],
+            'lb5-2.html': [
+                { foto: 'wasserhahn', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'riemann', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb5-3.html': [
+                { foto: 'feldermosaik', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'gabriels-horn', at: '#exkursion .b-row > .b-text', put: 'in', w: 38, pos: '8% 50%' }
+            ],
+            'wb5.html': [
+                { foto: 'weinfaesser', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb6.html': [
+                { foto: 'wahlurne', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'broetchen', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'muenzwurf', at: '#le3 .b-einstieg', put: 'in', w: 26, pos: '50% 30%' },
+                { foto: 'milchtee', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb7-1.html': [
+                { foto: 'schlitten', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'hamilton-tafel', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb7-2.html': [
+                { foto: 'giebeldach', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb7-3.html': [
+                { foto: 'gps-satellit', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb8-1.html': [
+                { foto: 'spiegel', at: '#le2 .b-einstieg', put: 'in', w: 26 }
+            ],
+            'abi.html': [
+                { foto: 'zicklein', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ]
+        },
+        mathegy11lk: {
+            'lb1-1.html': [
+                { foto: 'tee', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'taxi-koeln', at: '#le3 .b-einstieg', put: 'in', w: 26, pos: '50% 62%' },
+                { foto: 'cauchy', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb1-2.html': [
+                { foto: 'leibniz', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }
+            ],
+            'lb1-3.html': [
+                { foto: 'euler', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb1-4.html': [
+                { foto: 'alpenpanorama', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 's-kurve', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'weinfaesser', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb2.html': [
+                { foto: 'cayley', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 30%' }
+            ],
+            'lb1-5.html': [
+                { foto: 'rettungsturm', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'bremsspuren', at: '#le3 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'wb2.html': [
+                { foto: 'schottisches-cafe', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb3-1.html': [
+                { foto: 'radar', at: '#le2 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb3-2.html': [
+                { foto: 'kondensstreifen', at: '#le3 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'buntstifte', at: '#le4 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'grassmann-ausdehnungslehre', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 30%' }
+            ],
+            'lb3-3.html': [
+                { foto: 'hocker', at: '#le1 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'giebeldach', at: '#le4 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'gesteinsschichten', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb4-1.html': [
+                { foto: 'bingokugeln', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'zahlenschloss', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'pascal', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb4-2.html': [
+                { foto: 'schulbus', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'schnelltest', at: '#le2 .b-einstieg', put: 'in', w: 32 }
+            ],
+            'lb4-3.html': [
+                { foto: 'galtonbrett', at: '#le3 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'ars-conjectandi', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 20%' }
+            ]
+        },
+        mathegy12lk: {
+            'lb5-1.html': [
+                { foto: 'leibniz', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }
+            ],
+            'lb5-2.html': [
+                { foto: 'wasserhahn', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'riemann', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb5-3.html': [
+                { foto: 'feldermosaik', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'gabriels-horn', at: '#exkursion .b-row > .b-text', put: 'in', w: 38, pos: '8% 50%' }
+            ],
+            'wb5.html': [
+                { foto: 'weinfaesser', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb6.html': [
+                { foto: 'abfuellanlage', at: '#le2 .b-einstieg', put: 'in', w: 32 }
+            ],
+            'lb7.html': [
+                { foto: 'wahlurne', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'broetchen', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'muenzwurf', at: '#le3 .b-einstieg', put: 'in', w: 26, pos: '50% 30%' },
+                { foto: 'milchtee', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb8-1.html': [
+                { foto: 'schlitten', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'hamilton-tafel', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb8-2.html': [
+                { foto: 'giebeldach', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb8-3.html': [
+                { foto: 'kondensstreifen', at: '#le3 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'gps-satellit', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb9-1.html': [
+                { foto: 'spiegel', at: '#le2 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'museumssaal', at: '#le3 .b-einstieg', put: 'in', w: 32 }
+            ],
+            'abi.html': [
+                { foto: 'zicklein', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
             ]
         }
     }
