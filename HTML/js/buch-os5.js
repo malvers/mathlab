@@ -554,4 +554,215 @@
         }
         build();
     });
+    /* ---------- powers of ten: count the zeros, split a power of ten off ---------- */
+    const TEN = ['eins', 'zehn', 'hundert', 'tausend', 'zehntausend', 'hunderttausend', 'eine Million', 'zehn Millionen', 'hundert Millionen',
+        'eine Milliarde', 'zehn Milliarden', 'hundert Milliarden', 'eine Billion'];
+    const tg = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\\,');               // a whole number for TeX: 4\,700\,000
+    W('zehnerpotenzos5', function (box) {
+        const S = { mode: box.dataset.mode || 'potenz', n: +(box.dataset.n || 6), v: box.dataset.v || '4700000', k: null };
+        seg(div(box, 'b-ctrls'), [['potenz', 'Zehnerpotenzen'], ['abtrennen', 'Nullen abtrennen']], S.mode, v => { S.mode = v; render(); }, 'Ansicht');
+        const pBox = div(box, '');
+        range(pBox, { label: 'Hochzahl', min: 1, max: 12, step: 1, value: S.n, fmt: v => v, onInput: v => { S.n = v; render(); } });
+        const aBox = div(box, 'b-ctrls'), id = 'os5-zp-' + (++uid);
+        aBox.innerHTML = '<label class="b-ctrl" for="' + id + '">Zahl</label><input class="b-in os5-in os5-wide" id="' + id + '" type="text" inputmode="numeric" autocomplete="off">';
+        const vin = aBox.querySelector('input');
+        vin.value = grp(S.v);
+        const kBox = div(box, '');
+        const rk = range(kBox, { label: 'Nullen abtrennen', min: 0, max: 5, step: 1, value: 0, fmt: v => v, onInput: v => { S.k = v; render(); } });
+        vin.addEventListener('input', () => { S.v = vin.value; S.k = null; render(); });
+        const out = div(box, 'b-out');
+        function render() {
+            const pot = S.mode === 'potenz';
+            pBox.style.display = pot ? '' : 'none';
+            aBox.style.display = kBox.style.display = pot ? 'none' : '';
+            if (pot) {
+                const n = S.n, digits = ('1' + '0'.repeat(n)).split('');
+                const html = digits.map((d, i) => '<span class="' + (i ? 'os5-z' : '') + ((digits.length - i) % 3 === 0 && i ? ' os5-g' : '') + '">' + d + '</span>').join('');
+                out.innerHTML = '<p class="os5-zeros">' + html + '</p>' +
+                    '<p>$10^{' + n + '} = ' + (n <= 6 ? Array(n).fill('10').join(' \\cdot ') : '10 \\cdot 10 \\cdot \\ldots \\cdot 10') + ' = ' + tg('1' + '0'.repeat(n)) + '$</p>' +
+                    '<p>Die Hochzahl ' + n + ' sagt: ' + n + ' Faktoren 10, also ' + (n === 1 ? 'eine Null' : n + ' Nullen') + '. Das ist <b>' + TEN[n] + '</b>.</p>';
+            } else {
+                const t = whole(S.v);
+                if (isNaN(t) || !t || String(t).length > 15) { out.innerHTML = '<p class="g-warn">Bitte eine natürliche Zahl mit höchstens 15 Stellen eingeben, zum Beispiel 4 700 000.</p>'; return; }
+                const z = String(t).match(/0*$/)[0].length;
+                rk.input.max = Math.max(z, 1); rk.input.disabled = !z;
+                if (S.k == null || S.k > z) S.k = z;
+                rk.set(S.k);
+                const k = S.k, m = t / Math.pow(10, k), s = String(t);
+                const forms = [];
+                for (let j = 1; j <= Math.min(z, 6); j++) forms.push(tg(t / Math.pow(10, j)) + ' \\cdot 10^{' + j + '}');
+                const tr = s.length <= 10 ? s : s[0] + (s.slice(1).replace(/0+$/, '') ? '.' + s.slice(1).replace(/0+$/, '').slice(0, 8) : '') + '<span class="os5-trx">×10<sup>' + (s.length - 1) + '</sup></span>';
+                const mant = s[0] + (s.slice(1).replace(/0+$/, '') ? ',' + s.slice(1).replace(/0+$/, '').slice(0, 8) : '');
+                out.innerHTML = '<p class="g5-big">$' + tg(t) + (k ? ' = ' + tg(m) + ' \\cdot 10^{' + k + '}' : '') + '$</p>' +
+                    (!z ? '<p>Die Zahl hat keine Endnull. Hier kann man keine Zehnerpotenz abtrennen.</p>' :
+                        '<p>' + (k === z ? 'Vor dem Malpunkt steht keine Endnull mehr: Das ist die kürzeste Schreibweise.' : 'Du kannst noch ' + (z - k) + (z - k > 1 ? ' Nullen' : ' Null') + ' mehr abtrennen.') + '</p>' +
+                        '<p class="g5-dim">Alle Schreibweisen: $' + tg(t) + ' = ' + forms.join(' = ') + '$</p>') +
+                    '<hr class="g5-hr"><p>So zeigt ein Taschenrechner mit 10 Stellen die Zahl:</p><p><span class="os5-tr">' + tr + '</span></p>' +
+                    (s.length <= 10 ? '<p class="g5-dim">Die Zahl passt in die Anzeige.</p>' :
+                        '<p class="g5-dim">Die Zahl ist zu lang. Der Rechner zeigt $' + mant.replace(',', '{,}') + ' \\cdot 10^{' + (s.length - 1) + '}$: Rücke das Komma um ' + (s.length - 1) + ' Stellen nach rechts, dann hast du die Zahl.</p>');
+            }
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- square numbers and square roots ---------- */
+    W('quadratos5', function (box) {
+        const S = { mode: box.dataset.mode || 'quadrat', n: +(box.dataset.n || 12), v: box.dataset.v || '150' };
+        const ctr = div(box, 'b-ctrls');
+        seg(ctr, [['quadrat', 'Quadrieren'], ['wurzel', 'Wurzel ziehen']], S.mode, v => { S.mode = v; render(); }, 'Richtung');
+        const qBox = div(box, '');
+        range(qBox, { label: 'Seitenlänge n', min: 1, max: 20, step: 1, value: S.n, fmt: v => v, onInput: v => { S.n = v; render(); } });
+        const wBox = div(box, 'b-ctrls'), id = 'os5-q-' + (++uid);
+        wBox.innerHTML = '<label class="b-ctrl" for="' + id + '">Anzahl Plättchen</label><input class="b-in os5-in" id="' + id + '" type="text" inputmode="numeric" autocomplete="off">';
+        const win = wBox.querySelector('input');
+        win.value = S.v;
+        win.addEventListener('input', () => { S.v = win.value; render(); });
+        const two = div(box, 'b-two'), pic = div(two, 'b-svgbox g-svg'), out = div(two, 'b-out');
+        const tab = div(box, 'os5-sq');
+        heroOnly(box, pic, [ctr, qBox, wBox, out, tab], 280);
+        // n × n tiles, plus `extra` tiles in the next column and row (what is missing to the next square)
+        function tiles(n, extra) {
+            const u = Math.min(22, 236 / (n + (extra ? 1 : 0))), g = u > 9 ? 1.4 : 0.6;
+            let s = '';
+            for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) s += rect(10 + c * u, 10 + r * u, u - g, u - g, area(LAM, 0.3, 0.8));
+            for (let i = 0; i < extra; i++) {
+                const [c, r] = i < n ? [n, i] : [i - n, n];
+                s += rect(10 + c * u, 10 + r * u, u - g, u - g, area(CY, 0.3, 0.8));
+            }
+            const w = 20 + (n + (extra ? 1 : 0)) * u;
+            return svg(Math.ceil(w), Math.ceil(w), n + ' mal ' + n + ' Plättchen' + (extra ? ' und ' + extra + ' weitere' : ''), s);
+        }
+        function render() {
+            const q = S.mode === 'quadrat';
+            if (!isHero(box)) { qBox.style.display = q ? '' : 'none'; wBox.style.display = q ? 'none' : ''; }
+            let cur = S.n;
+            if (q) {
+                const n = S.n, v = n * n;
+                pic.innerHTML = tiles(n, 0);
+                out.innerHTML = '<p class="g5-big">$' + n + '^2 = ' + n + ' \\cdot ' + n + ' = ' + tg(v) + '$</p><p>' + n + ' Reihen mit je ' + n + ' Plättchen ergeben ein Quadrat aus ' + v + ' Plättchen.</p>' +
+                    '<p>Umgekehrt: $\\sqrt{' + tg(v) + '} = ' + n + '$, denn $' + n + ' \\cdot ' + n + ' = ' + tg(v) + '$.</p>';
+            } else {
+                const v = whole(S.v);
+                if (isNaN(v) || v < 1 || v > 440) { pic.innerHTML = ''; out.innerHTML = '<p class="g-warn">Bitte eine Zahl von 1 bis 440 eingeben.</p>'; tab.innerHTML = ''; return; }
+                const n = Math.floor(Math.sqrt(v + 0.5)), extra = v - n * n;
+                cur = n;
+                pic.innerHTML = tiles(n, extra);
+                out.innerHTML = extra === 0
+                    ? '<p class="g5-big">$\\sqrt{' + tg(v) + '} = ' + n + '$</p><p>' + v + ' ist eine Quadratzahl: Die Plättchen bilden ein Quadrat mit der Seite ' + n + '.</p>'
+                    : '<p class="g5-big">' + v + ' ist keine Quadratzahl.</p><p>$' + n + '^2 = ' + tg(n * n) + '$ ist zu klein, $' + (n + 1) + '^2 = ' + tg((n + 1) * (n + 1)) + '$ ist zu groß. ' +
+                        'Es bleiben ' + extra + ' Plättchen übrig, zum nächsten Quadrat fehlen ' + ((n + 1) * (n + 1) - v) + '.</p><p class="g5-dim">$\\sqrt{' + tg(v) + '}$ liegt zwischen ' + n + ' und ' + (n + 1) + '.</p>';
+            }
+            let t = '';
+            for (let k = 1; k <= 20; k++) t += '<span class="' + (k === cur ? 'on' : '') + '">' + k + '² = ' + k * k + '</span>';
+            tab.innerHTML = t;
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- solving by trying: equations and inequalities with natural numbers ---------- */
+    const PROB5 = [
+        { l: '540 + y = 684', t: '540 + y = 684', v: 'y', lo: 100, hi: 200, f: y => 540 + y, rel: '=', r: 684, inv: 'y = 684 - 540 = 144', sh: y => '540 + ' + y },
+        { l: '780 − x = 516', t: '780 - x = 516', v: 'x', lo: 200, hi: 300, f: x => 780 - x, rel: '=', r: 516, inv: 'x = 780 - 516 = 264', sh: x => '780 - ' + x },
+        { l: '7 · x = 84', t: '7 \\cdot x = 84', v: 'x', lo: 0, hi: 20, f: x => 7 * x, rel: '=', r: 84, inv: 'x = 84 : 7 = 12', sh: x => '7 \\cdot ' + x },
+        { l: 'x : 6 = 9', t: 'x : 6 = 9', v: 'x', lo: 30, hi: 70, f: x => x / 6, rel: '=', r: 9, inv: 'x = 9 \\cdot 6 = 54', sh: x => x + ' : 6' },
+        { l: '10<sup>x</sup> = 1 000', t: '10^x = 1\\,000', v: 'x', lo: 0, hi: 6, f: x => Math.pow(10, x), rel: '=', r: 1000, inv: '10^3 = 10 \\cdot 10 \\cdot 10 = 1\\,000', sh: x => '10^{' + x + '}' },
+        { l: 'y + 10 < 25', t: 'y + 10 < 25', v: 'y', lo: 0, hi: 25, f: y => y + 10, rel: '<', r: 25, sh: y => y + ' + 10' },
+        { l: '3 · x > 20', t: '3 \\cdot x > 20', v: 'x', lo: 0, hi: 15, f: x => 3 * x, rel: '>', r: 20, sh: x => '3 \\cdot ' + x, more: true }
+    ];
+    W('probierenos5', function (box) {
+        const S = { p: +(box.dataset.p || 0), x: 0, tried: new Set() };
+        const P = () => PROB5[S.p];
+        seg(div(box, 'b-ctrls'), PROB5.map((p, i) => [String(i), p.l]), String(S.p), v => { S.p = +v; reset(); }, 'Aufgabe');
+        const sl = div(box, '');
+        const rx = range(sl, { label: 'Einsetzen', min: 0, max: 10, step: 1, value: 0, fmt: v => P().v + ' = ' + v, onInput: v => { S.x = v; S.tried.add(v); render(); } });
+        buttons(box, [['all', 'Alle Zahlen prüfen'], ['reset', 'Von vorn']], a => { if (a === 'all') { for (let k = P().lo; k <= P().hi; k++) S.tried.add(k); render(); } else reset(); });
+        const pic = div(box, 'b-svgbox g-svg'), out = div(box, 'b-out');
+        const holds = (p, x) => { const d = p.f(x) - p.r; return p.rel === '=' ? Math.abs(d) < 1e-9 : p.rel === '<' ? d < 0 : d > 0; };
+        function reset() {
+            const p = P();
+            rx.input.min = p.lo; rx.input.max = p.hi;
+            S.x = p.lo + Math.round((p.hi - p.lo) / 3);
+            rx.set(S.x);
+            S.tried = new Set([S.x]);
+            if (B.printing()) for (let k = p.lo; k <= p.hi; k++) S.tried.add(k);
+            render();
+        }
+        function render() {
+            const p = P(), x = S.x, lv = p.f(x), ok = holds(p, x);
+            const X0 = 24, X1 = 536, Y = 40, n = p.hi - p.lo, X = k => X0 + (k - p.lo) / n * (X1 - X0);
+            const every = n <= 30 ? 1 : 10, lab = n <= 30 ? (n <= 10 ? 1 : 5) : 20;
+            let s = line([X0 - 10, Y], [X1 + 10, Y], 'stroke:' + TXT + ';stroke-width:1.6');
+            for (let k = p.lo; k <= p.hi; k++) {
+                if ((k - p.lo) % every && k % every) continue;
+                const big = k % lab === 0;
+                s += line([X(k), Y - (big ? 8 : 5)], [X(k), Y + (big ? 8 : 5)], 'stroke:' + DIM + ';stroke-width:1.2');
+                if (big) s += T(X(k), Y + 28, k, 'g-small');
+            }
+            S.tried.forEach(k => { s += '<circle cx="' + f1(X(k)) + '" cy="' + Y + '" r="' + (k === x ? 7 : 4.5) + '" style="fill:' + (holds(p, k) ? PHI : RED) + ';stroke:#0a1426;stroke-width:1.4"/>'; });
+            pic.innerHTML = svg(560, 80, 'Zahlenstrahl mit den eingesetzten Zahlen', s);
+            const inc = p.f(p.hi) > p.f(p.lo);
+            const lt = Number.isInteger(lv) ? tg(lv) : '\\approx ' + B.texNum(lv, 2);
+            let h = '<p class="g5-big">$' + p.t + '$</p><p>Einsetzen: $' + p.sh(x) + (Number.isInteger(lv) ? ' = ' : ' ') + lt + '$ ';
+            if (p.rel === '=') {
+                h += ok ? '<span class="g-ok">stimmt!</span></p><p>Lösung: $' + p.v + ' = ' + x + '$. Mit der Umkehraufgabe geht es direkt: $' + p.inv + '$.</p>'
+                    : (lv < p.r ? 'ist zu klein' : 'ist zu groß') + '.</p><p class="g5-dim">Nimm eine ' + ((lv < p.r) === inc ? 'größere' : 'kleinere') + ' Zahl.</p>';
+            } else {
+                h += (ok ? '<span class="g-ok">erfüllt die Ungleichung.</span>' : '<span class="g-warn">erfüllt sie nicht.</span>') + '</p>';
+                const sol = [...S.tried].filter(k => holds(p, k)).sort((a, b) => a - b);
+                const all = S.tried.size === n + 1;
+                if (all) {
+                    const L = []; for (let k = p.lo; k <= p.hi; k++) if (holds(p, k)) L.push(k);
+                    h += '<p>Alle Lösungen: ' + (p.more ? L.slice(0, 4).join(', ') + ', … und jede größere Zahl.' : L[0] + ', ' + L[1] + ', …, ' + L[L.length - 1] + ' (' + L.length + ' Zahlen).') + '</p>';
+                } else h += '<p class="g5-dim">' + (sol.length ? 'Bisher gefundene Lösungen: ' + sol.join(', ') + '.' : 'Noch keine Lösung gefunden.') + ' Eine Ungleichung hat oft viele Lösungen.</p>';
+            }
+            out.innerHTML = h;
+            math(out);
+        }
+        reset();
+    });
+
+    /* ---------- divisibility rules ---------- */
+    W('teilbarkeitos5', function (box) {
+        const S = { v: box.dataset.v || '2316' };
+        const row = div(box, 'b-ctrls'), id = 'os5-t-' + (++uid);
+        row.innerHTML = '<label class="b-ctrl" for="' + id + '">Zahl</label><input class="b-in os5-in" id="' + id + '" type="text" inputmode="numeric" autocomplete="off">' +
+            '<button type="button" class="b-btn">Zufallszahl</button>';
+        const inp = row.querySelector('input');
+        inp.value = grp(S.v);
+        inp.addEventListener('input', () => { S.v = inp.value; render(); });
+        row.querySelector('button').addEventListener('click', () => { S.v = String(rnd(100, 9999)); inp.value = grp(S.v); render(); });
+        const out = div(box, 'b-out os5-rules');
+        function render() {
+            const n = whole(S.v);
+            if (isNaN(n) || n < 1 || n > 999999999) { out.innerHTML = '<p class="g-warn">Bitte eine natürliche Zahl von 1 bis 999 999 999 eingeben.</p>'; return; }
+            const s = String(n), dig = s.split('').map(Number), last = dig[dig.length - 1], two = n % 100, qs = dig.reduce((a, b) => a + b, 0);
+            const ok = { 2: last % 2 === 0, 3: qs % 3 === 0, 4: two % 4 === 0, 5: last % 5 === 0, 9: qs % 9 === 0, 10: last === 0 };
+            ok[6] = ok[2] && ok[3];
+            const qsT = (dig.length > 1 ? dig.join(' + ') + ' = ' : '') + qs;
+            const why = {
+                2: 'Die letzte Ziffer ' + last + ' ist ' + (ok[2] ? 'gerade.' : 'ungerade.'),
+                3: 'Quersumme ' + qsT + (ok[3] ? ' ist durch 3 teilbar.' : ' ist nicht durch 3 teilbar.'),
+                4: 'Die letzten zwei Ziffern bilden ' + (s.length > 1 ? s.slice(-2) : s) + (ok[4] ? ', das ist durch 4 teilbar.' : ', das ist nicht durch 4 teilbar.'),
+                5: 'Die letzte Ziffer ist ' + last + (ok[5] ? '.' : ', nicht 0 oder 5.'),
+                6: ok[6] ? 'Durch 2 und durch 3 teilbar.' : ok[2] ? 'Durch 2, aber nicht durch 3 teilbar.' : ok[3] ? 'Durch 3, aber nicht durch 2 teilbar.' : 'Weder durch 2 noch durch 3 teilbar.',
+                9: 'Quersumme ' + qs + (ok[9] ? ' ist durch 9 teilbar.' : ' ist nicht durch 9 teilbar.'),
+                10: 'Die letzte Ziffer ist ' + last + (ok[10] ? '.' : ', nicht 0.')
+            };
+            let h = '<p class="g5-big">' + grp(n) + '</p>';
+            [2, 3, 4, 5, 6, 9, 10].forEach(d => {
+                h += '<p class="os5-rr ' + (ok[d] ? 'ok' : 'no') + '">' + (ok[d] ? B.icon.ok : B.icon.bad) + '<span><b>durch ' + d + (ok[d] ? '' : ' nicht') + ':</b> ' + why[d] +
+                    (ok[d] ? ' <span class="g5-dim">' + grp(n) + ' : ' + d + ' = ' + grp(n / d) + '</span>' : '') + '</span></p>';
+            });
+            if (n <= 100000) {
+                const T2 = []; for (let k = 1; k * k <= n; k++) if (n % k === 0) { T2.push(k); if (k * k !== n) T2.push(n / k); }
+                T2.sort((a, b) => a - b);
+                h += '<hr class="g5-hr"><p><b>Alle Teiler</b> (' + T2.length + '): ' + T2.map(grp).join(', ') + '</p>' +
+                    (n === 1 ? '<p class="g5-dim">Die 1 hat nur einen Teiler. Sie ist keine Primzahl.</p>' : T2.length === 2 ? '<p class="g-ok">' + grp(n) + ' ist eine Primzahl: genau zwei Teiler.</p>' : '<p class="g5-dim">' + grp(n) + ' ist keine Primzahl.</p>');
+            }
+            out.innerHTML = h;
+        }
+        render();
+    });
 })();
