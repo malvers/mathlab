@@ -35,7 +35,10 @@ for name, key in spec['src'].items():
     up = subprocess.run(['node', WT + '/tools/media_publish.mjs', out, f'buch/fotos/{name}.jpg'], capture_output=True, text=True)
     ok = 'r2.dev/buch/fotos/' in up.stdout + up.stderr
     lic = 'public domain' if r['license'].lower() == 'public domain' else r['license']
-    credits[name] = {'artist': r['artist'], 'license': lic, 'page': r['page']}
+    # one line, no Commons noise: a newline in an artist name once broke the whole list (25.10.2026)
+    artist = re.sub(r'\s+', ' ', r['artist']).strip()
+    artist = '' if re.fullmatch(r'(unknown|anonymous|unbekannt)( author)*', artist, re.I) else artist
+    credits[name] = {'artist': artist, 'license': lic, 'page': r['page']}
     print(f"{name:18} {im.size[0]}x{im.size[1]} {os.path.getsize(out)//1024:4} KB q{q} R2:{'ok' if ok else 'FAIL'} | {r['artist'][:30]} | {lic}")
     if not ok: print(up.stdout[-300:], up.stderr[-300:]); sys.exit(1)
 # entries
@@ -58,4 +61,6 @@ blk = f"        {book}: {{\n" + ',\n'.join(rows) + "\n        }"
 j = s.rindex('\n    }\n};')
 s = s[:j] + ',\n' + blk + s[j:]
 open(p, 'w', encoding='utf-8').write(s)
+chk = subprocess.run(['node', '-e', "global.window={}; eval(require('fs').readFileSync(process.argv[1],'utf8'))", p], capture_output=True, text=True)
+if chk.returncode: print('BUCH_FOTOS DOES NOT PARSE:', chk.stderr[-400:]); sys.exit(1)
 print('entries written:', len(credits), 'photos,', sum(len(v) for v in spec['plan'].values()), 'places')

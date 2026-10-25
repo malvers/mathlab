@@ -267,7 +267,51 @@ window.BUCH_FOTOS = {
         'streichhoelzer': { artist: 'Subhrajyoti07', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Closeup_of_match_stick_heads.jpg',
             alt: { de: 'Drei Streichholzköpfe', en: 'Three match heads' } },
         'pacioli': { artist: 'Jacopo de\' Barbari', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Jacopo_de%27_Barbari_(attributed_to)_Portrait_of_Luca_Pacioli_(1445_1517)_with_a_student_(Guidobaldo_da_Montefeltro)_(2).jpg',
-            alt: { de: 'Luca Pacioli, Gemälde, Jacopo de’ Barbari zugeschrieben (1495)', en: 'Luca Pacioli, painting attributed to Jacopo de’ Barbari (1495)' } }
+            alt: { de: 'Luca Pacioli, Gemälde, Jacopo de’ Barbari zugeschrieben (1495)', en: 'Luca Pacioli, painting attributed to Jacopo de’ Barbari (1495)' } },
+        // mathegy5 (2026-10-25)
+        'erbsenteller': { artist: 'Kari Söderholm from Kaarina, Finland', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Plate_of_Peas_(4002891340).jpg',
+            alt: { de: 'Eine Schale voller Erbsen', en: 'A bowl full of peas' } },
+        'gauss': { artist: 'Christian Albrecht Jensen', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Carl_Friedrich_Gauss_1840_by_Jensen.jpg',
+            alt: { de: 'Carl Friedrich Gauß, Gemälde von Christian Albrecht Jensen (1840)', en: 'Carl Friedrich Gauss, painted by Christian Albrecht Jensen (1840)' } },
+        'schokolade': { artist: 'SKopp', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Cooking_chocolate_with_packaging.jpg',
+            alt: { de: 'Eine Tafel Schokolade, in Stücke gebrochen', en: 'A chocolate bar broken into pieces' } },
+        'stevin-thiende': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:De_Thiende.jpg',
+            alt: { de: 'Titelblatt von Simon Stevins „De Thiende“ (1585)', en: 'Title page of Simon Stevin’s De Thiende (1585)' } },
+        'bonbons': { artist: 'gausanchennai', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Colored_sweets.jpg',
+            alt: { de: 'Bunte Bonbons', en: 'Colourful sweets' } },
+        'murmeln': { artist: 'Conrad 7', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Several_marbles.jpg',
+            alt: { de: 'Glasmurmeln', en: 'Glass marbles' } },
+        'stoppuhr': { artist: 'StefanPohl', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Stoppuhr_hanhart.jpg',
+            alt: { de: 'Eine Stoppuhr', en: 'A stopwatch' } },
+        'klecksbild': { artist: 'Hermann Rorschach', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Inkblot_6.tif',
+            alt: { de: 'Ein Klecksbild, das an der Mittellinie gespiegelt ist', en: 'An inkblot mirrored at its centre line' } },
+        'alhambra-fliesen': { artist: 'Ashaio', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Granada-La_Alhambra-02-Palacio_de_Comares-Azulejos-20190419.jpg',
+            alt: { de: 'Sternfliesen in der Alhambra in Granada', en: 'Star tiles in the Alhambra, Granada' } },
+        'fussballfeld': { artist: 'DiarmuidC15', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Ferbane_GAA_Pitch.jpg',
+            alt: { de: 'Ein Fußballfeld von oben', en: 'A football pitch from above' } },
+        'mars-climate-orbiter': { artist: 'NASA/JPL', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Mars_Climate_Orbiter_-_artist_depiction_-_climate-orbiter-browse.jpg',
+            alt: { de: 'Der Mars Climate Orbiter (Zeichnung der NASA)', en: 'The Mars Climate Orbiter (NASA drawing)' } },
+        'roemische-uhr': { artist: 'Ales Krivec aleskrivec', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Roman_numerals_on_alarm_clock_(Unsplash).jpg',
+            alt: { de: 'Ein Wecker mit römischen Ziffern', en: 'An alarm clock with Roman numerals' } },
+        'maya-codex': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Dresden_Codex_f8461796.png',
+            alt: { de: 'Eine Seite des Dresdner Maya-Codex', en: 'A page of the Dresden Maya Codex' } },
+        // mathegy6 (2026-10-25)
+        'pizza': { artist: 'Afshin Darian', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:White_slice_and_supreme_slice.jpg',
+            alt: { de: 'Pizzastücke im Karton', en: 'Pizza slices in a box' } },
+        'taschenrechner': { artist: 'LoMit', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Citizen_SLD-100NR_calculator.jpg',
+            alt: { de: 'Ein Taschenrechner', en: 'A pocket calculator' } },
+        'kamele': { artist: 'Bernard Gagnon', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Camels_in_Gobi_Desert_02.jpg',
+            alt: { de: 'Kamele in der Wüste', en: 'Camels in the desert' } },
+        'aepfel': { artist: 'USDAgov', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Farmers_Markets_(20141109-OC-LSC-0011).jpg',
+            alt: { de: 'Äpfel in einer Kiste auf dem Markt', en: 'Apples in a crate at the market' } },
+        'kuchen': { artist: 'Daria YakovlevaMinor edits made by Subsidiary account', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg',
+            alt: { de: 'Ein Stück Kuchen', en: 'A piece of cake' } },
+        'blue-marble': { artist: 'NASA/Apollo 17 crew; taken by either Harrison Schmitt or Ron Evans', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:The_Earth_seen_from_Apollo_17.jpg',
+            alt: { de: 'Die Erde, fotografiert von Apollo 17 (1972)', en: 'The Earth photographed from Apollo 17 (1972)' } },
+        'euklid-papyrus': { artist: 'University of Pennsylvania Museum of Archaeology and Anthropology', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:P.Penn._Museum_inv._E02748_Euclid%27s_Elements_2.5.jpg',
+            alt: { de: 'Ein Papyrus mit einem Stück aus Euklids „Elementen“', en: 'A papyrus with a fragment of Euclid’s Elements' } },
+        'playfair-torte': { artist: 'William Playfair', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Playfair_piecharts.jpg',
+            alt: { de: 'William Playfairs Tortendiagramme (1801)', en: 'William Playfair’s pie charts (1801)' } }
     },
     books: {
         mathe11: {
@@ -730,6 +774,79 @@ window.BUCH_FOTOS = {
             ],
             'wb.html': [
                 { foto: 'cardano', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 30%' }
+            ]
+        },
+        mathegy5: {
+            'lb1-1.html': [
+                { foto: 'erbsenteller', at: '#le3 .b-einstieg', put: 'in', w: 28 }
+            ],
+            'lb1-2.html': [
+                { foto: 'schachbrett', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'gauss', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb2-1.html': [
+                { foto: 'schokolade', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'fahrraeder-schule', at: '#le3 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb2-2.html': [
+                { foto: 'stevin-thiende', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 20%' }
+            ],
+            'lb2-3.html': [
+                { foto: 'bonbons', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'murmeln', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'stoppuhr', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb3-2.html': [
+                { foto: 'klecksbild', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'alhambra-fliesen', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb4-1.html': [
+                { foto: 'fussballfeld', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb4-2.html': [
+                { foto: 'karton', at: '#le1 .b-einstieg', put: 'in', w: 28 }
+            ],
+            'lb5.html': [
+                { foto: 'mars-climate-orbiter', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'wb.html': [
+                { foto: 'roemische-uhr', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'maya-codex', at: '#exkursion .b-row > .b-text', put: 'in', w: 38 }
+            ]
+        },
+        mathegy6: {
+            'lb1-1.html': [
+                { foto: 'pizza', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'taschenrechner', at: '#le2 .b-einstieg', put: 'in', w: 24 }
+            ],
+            'lb1-2.html': [
+                { foto: 'stevin-thiende', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 20%' }
+            ],
+            'lb1-3.html': [
+                { foto: 'kamele', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb2-1.html': [
+                { foto: 'kerze', at: '#le2 .b-einstieg', put: 'in', w: 26, pos: '50% 45%' },
+                { foto: 'reisszwecken', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'muenzwurf', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 30%' }
+            ],
+            'lb2-2.html': [
+                { foto: 'aepfel', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'kuchen', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'blue-marble', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb3-1.html': [
+                { foto: 'euklid-papyrus', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb3-2.html': [
+                { foto: 'euler', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' }
+            ],
+            'lb4.html': [
+                { foto: 'bienenwaben', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb5.html': [
+                { foto: 'fahrraeder-schule', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'playfair-torte', at: '#exkursion .b-row > .b-text', put: 'in', w: 38 }
             ]
         }
     }
