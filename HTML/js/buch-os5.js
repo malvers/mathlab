@@ -765,4 +765,119 @@
         }
         render();
     });
+    /* ---------- a fraction of a quantity: z/n of G things ---------- */
+    // a stepper "label [−] value [+]" inside parent; returns its output element
+    function stepper(parent, label, key, aria) {
+        const c = div(parent, 'b-ctrl');
+        c.innerHTML = label + ' <span class="b-stepper"><button type="button" data-k="' + key + '" data-d="-1" aria-label="' + (aria || label) + ' kleiner">−</button><output></output>' +
+            '<button type="button" data-k="' + key + '" data-d="1" aria-label="' + (aria || label) + ' größer">+</button></span>';
+        return c.querySelector('output');
+    }
+    // a little person (or a dot) in a cell of size c around (x, y)
+    function token(x, y, c, col, person) {
+        const st = 'fill:' + col + ';stroke:none';
+        if (!person) return '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="' + f1(c * 0.3) + '" style="' + st + '"/>';
+        return '<circle cx="' + f1(x) + '" cy="' + f1(y - 0.17 * c) + '" r="' + f1(0.16 * c) + '" style="' + st + '"/>' +
+            '<path d="M' + f1(x - 0.3 * c) + ' ' + f1(y + 0.38 * c) + ' Q' + f1(x - 0.3 * c) + ' ' + f1(y + 0.03 * c) + ' ' + f1(x) + ' ' + f1(y + 0.03 * c) +
+            ' Q' + f1(x + 0.3 * c) + ' ' + f1(y + 0.03 * c) + ' ' + f1(x + 0.3 * c) + ' ' + f1(y + 0.38 * c) + ' Z" style="' + st + '"/>';
+    }
+    W('bruchteilos5', function (box) {
+        const S = { z: +(box.dataset.z || 2), n: +(box.dataset.n || 3), g: +(box.dataset.g || 24), person: (box.dataset.kind || 'personen') === 'personen' };
+        const st = div(box, 'b-ctrls');
+        const oz = stepper(st, 'Zähler', 'z'), on = stepper(st, 'Nenner', 'n'), og = stepper(st, 'Ganzes', 'g');
+        st.addEventListener('click', e => {
+            const b = e.target.closest('[data-k]'); if (!b) return;
+            const d = +b.dataset.d, k = b.dataset.k;
+            if (k === 'z') S.z = clamp(S.z + d, 0, S.n);
+            else if (k === 'n') { S.n = clamp(S.n + d, 2, 12); S.z = Math.min(S.z, S.n); S.g = clamp(Math.round(S.g / S.n) * S.n, S.n, Math.floor(60 / S.n) * S.n); }
+            else S.g = clamp(S.g + d * S.n, S.n, Math.floor(60 / S.n) * S.n);
+            render();
+        });
+        const two = div(box, 'b-two'), pic = div(two, 'b-svgbox g-svg'), out = div(two, 'b-out');
+        const help = div(box, 'b-help', 'Das Ganze lässt sich nur in gleich große Gruppen teilen, wenn es ein Vielfaches des Nenners ist. Darum springt es in Schritten.');
+        heroOnly(box, pic, [st, out, help], 360);
+        function render() {
+            const { z, n, g } = S, k = g / n, r = z * k;
+            oz.textContent = z; on.textContent = n; og.textContent = g;
+            const gc = Math.ceil(Math.sqrt(k)), gr = Math.ceil(k / gc), c = 22, pad = 7, gw = gc * c + 2 * pad, gh = gr * c + 2 * pad;
+            const per = Math.max(1, Math.min(n, Math.floor(536 / (gw + 10))));
+            const rows = Math.ceil(n / per), Wd = per * (gw + 10) + 4, Ht = rows * (gh + 10) + 4;
+            let s = '';
+            for (let i = 0; i < n; i++) {
+                const gx = 4 + (i % per) * (gw + 10), gy = 4 + Math.floor(i / per) * (gh + 10), on2 = i < z;
+                s += '<rect x="' + gx + '" y="' + gy + '" width="' + gw + '" height="' + gh + '" rx="8" style="fill:' + (on2 ? rgba(LAM, 0.1) : 'none') + ';stroke:' + (on2 ? LAM : DIM) + ';stroke-width:1.4' + (on2 ? '' : ';stroke-dasharray:4 4') + '"/>';
+                for (let j = 0; j < k; j++) s += token(gx + pad + (j % gc + 0.5) * c, gy + pad + (Math.floor(j / gc) + 0.5) * c, c, on2 ? LAM : DIM, S.person);
+            }
+            pic.innerHTML = svg(Wd, Ht, z + ' von ' + n + ' Gruppen zu je ' + k + ' sind gefärbt', s);
+            out.innerHTML = '<p class="g5-big">$\\tfrac{' + z + '}{' + n + '}$ von ' + g + '</p>' +
+                '<p>1. Teile das Ganze in ' + n + ' gleich große Gruppen: $' + g + ' : ' + n + ' = ' + k + '$.</p>' +
+                '<p>2. Nimm ' + z + (z === 1 ? ' Gruppe' : ' Gruppen') + ': $' + z + ' \\cdot ' + k + ' = ' + r + '$.</p>' +
+                '<p class="g5-big">$\\tfrac{' + z + '}{' + n + '}$ von ' + g + ' sind ' + r + '.</p>' +
+                (z === n ? '<p class="g5-dim">Alle Gruppen: Das ist das Ganze.</p>' : 2 * z === n ? '<p class="g5-dim">Genau die Hälfte.</p>' : '');
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- comparing two fractions by reasoning: same denominator, same numerator, one half, the missing piece ---------- */
+    const NTH = ['', 'Ganze', 'Halbe', 'Drittel', 'Viertel', 'Fünftel', 'Sechstel', 'Siebtel', 'Achtel', 'Neuntel', 'Zehntel', 'Elftel', 'Zwölftel'];
+    const NTH1 = ['', 'Ganzes', 'Halbes', 'Drittel', 'Viertel', 'Fünftel', 'Sechstel', 'Siebtel', 'Achtel', 'Neuntel', 'Zehntel', 'Elftel', 'Zwölftel'];
+    W('halbesos5', function (box) {
+        const pf = (t, d) => { const m = String(t || d).match(/^(\d+)\/(\d+)$/); return m ? [+m[1], +m[2]] : d.split('/').map(Number); };
+        const S = { a: pf(box.dataset.a, '2/5'), b: pf(box.dataset.b, '3/4') };
+        const rA = div(box, 'b-ctrls'), rB = div(box, 'b-ctrls');
+        rA.insertAdjacentHTML('afterbegin', '<span class="b-ctrl os5-lab" style="color:' + LAM + '">A</span>');
+        rB.insertAdjacentHTML('afterbegin', '<span class="b-ctrl os5-lab" style="color:' + CY + '">B</span>');
+        const o = [stepper(rA, 'Zähler', 'az', 'Zähler A'), stepper(rA, 'Nenner', 'an', 'Nenner A'), stepper(rB, 'Zähler', 'bz', 'Zähler B'), stepper(rB, 'Nenner', 'bn', 'Nenner B')];
+        [rA, rB].forEach(r => r.addEventListener('click', e => {
+            const b = e.target.closest('[data-k]'); if (!b) return;
+            const F = S[b.dataset.k[0]], d = +b.dataset.d;
+            if (b.dataset.k[1] === 'z') F[0] = clamp(F[0] + d, 0, 2 * F[1]);
+            else { F[1] = clamp(F[1] + d, 1, 12); F[0] = Math.min(F[0], 2 * F[1]); }
+            render();
+        }));
+        const pic = div(box, 'b-svgbox g-svg'), out = div(box, 'b-out');
+        heroOnly(box, pic, [rA, rB, out], 420);
+        const fr = F => '\\tfrac{' + F[0] + '}{' + F[1] + '}';
+        const half = F => Math.sign(2 * F[0] - F[1]), whole1 = F => Math.sign(F[0] - F[1]);
+        const hw = F => half(F) < 0 ? 'weniger als ein Halbes' : half(F) > 0 ? 'mehr als ein Halbes' : 'genau ein Halbes';
+        function reason(A, Bf) {
+            const c = A[0] * Bf[1] - Bf[0] * A[1], rel = c < 0 ? '<' : c > 0 ? '>' : '=';
+            const res = '$' + fr(A) + ' ' + rel + ' ' + fr(Bf) + '$';
+            if (!c) return [res, 'Die gefärbten Längen sind genau gleich: zwei Namen für dieselbe Zahl.'];
+            if (A[1] === Bf[1]) return [res, '<b>Gleicher Nenner:</b> Beide Male sind es ' + NTH[A[1]] + ', also gleich große Stücke. Es kommt nur darauf an, wie viele: ' + A[0] + ' ' + rel + ' ' + Bf[0] + '.'];
+            if (A[0] === Bf[0]) return [res, '<b>Gleicher Zähler:</b> Beide Male sind es ' + A[0] + (A[0] === 1 ? ' Stück' : ' Stücke') + '. ' + NTH[Math.min(A[1], Bf[1])] + ' sind größer als ' + NTH[Math.max(A[1], Bf[1])] +
+                ': Je größer der Nenner, desto kleiner die Stücke.'];
+            if (whole1(A) !== whole1(Bf)) return [res, '<b>Vergleich mit 1:</b> $' + fr(A) + '$ ist ' + (whole1(A) < 0 ? 'weniger als' : whole1(A) > 0 ? 'mehr als' : 'genau') + ' ein Ganzes, $' + fr(Bf) + '$ ist ' + (whole1(Bf) < 0 ? 'weniger als' : whole1(Bf) > 0 ? 'mehr als' : 'genau') + ' ein Ganzes.'];
+            if (half(A) !== half(Bf) && whole1(A) < 0) return [res, '<b>Vergleich mit einem Halben:</b> $' + fr(A) + '$ ist ' + hw(A) + ', denn ' + A[0] + ' ist ' + (half(A) < 0 ? 'weniger' : half(A) > 0 ? 'mehr' : 'genau') + ' als die Hälfte von ' + A[1] +
+                '. $' + fr(Bf) + '$ ist ' + hw(Bf) + '.'];
+            const ma = A[1] - A[0], mb = Bf[1] - Bf[0];
+            if (ma === mb && ma > 0) return [res, '<b>Was fehlt zum Ganzen?</b> Bei A fehlen ' + ma + ' ' + NTH[A[1]] + ', bei B ' + mb + ' ' + NTH[Bf[1]] + '. ' + NTH[Math.max(A[1], Bf[1])] + ' sind kleiner, also fehlt bei ' + (A[1] > Bf[1] ? 'A' : 'B') + ' weniger.'];
+            return [res, 'Hier hilft das Bild: Der längere gefärbte Streifen gehört zum größeren Bruch. Genau nachrechnen kannst du das in Klasse 6, wenn du Brüche erweiterst.'];
+        }
+        function bar(F, y, col, U, X0, wholes) {
+            const [z, n] = F, w = U / n;
+            let s = '';
+            for (let i = 0; i < n * wholes; i++) s += rect(X0 + i * w, y, w, 34, 'fill:' + (i < z ? rgba(col, 0.42) : 'rgba(0,0,0,0.15)') + ';stroke:' + (i < z ? col : DIM) + ';stroke-width:1');
+            return s;
+        }
+        function render() {
+            const A = S.a, Bf = S.b;
+            o[0].textContent = A[0]; o[1].textContent = A[1]; o[2].textContent = Bf[0]; o[3].textContent = Bf[1];
+            const wholes = A[0] > A[1] || Bf[0] > Bf[1] ? 2 : 1, X0 = 36, U = 480 / wholes;
+            let s = bar(A, 34, LAM, U, X0, wholes) + bar(Bf, 98, CY, U, X0, wholes);
+            s += T(18, 57, 'A', 'g-pt', 'middle', 'fill:' + LAM) + T(18, 121, 'B', 'g-pt', 'middle', 'fill:' + CY);
+            for (let h = 1; h <= 2 * wholes; h++) {
+                const x = X0 + h * U / 2, full = h % 2 === 0;
+                s += line([x, 22], [x, 142], 'stroke:' + (full ? TXT : PHI) + ';stroke-width:' + (full ? 2 : 1.6) + (full ? '' : ';stroke-dasharray:5 4'));
+                s += T(x, 16, full ? String(h / 2) : (h === 1 ? '½' : (h - 1) / 2 + '½'), 'g-small', 'middle', full ? '' : 'fill:' + PHI);
+            }
+            s += line([X0, 22], [X0, 142], 'stroke:' + TXT + ';stroke-width:2') + T(X0, 16, '0', 'g-small');
+            pic.innerHTML = svg(540, 150, 'Zwei Bruchstreifen untereinander, mit der Marke für ein Halbes', s);
+            const [res, why] = reason(A, Bf);
+            out.innerHTML = '<p class="g5-big"><span class="g-lam">A</span> ' + res.replace(/\$(.*)\$/, (m, x) => '$' + x + '$') + ' <span class="g-cy">B</span></p><p>' + why + '</p>';
+            math(out);
+        }
+        render();
+    });
 })();
