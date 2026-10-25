@@ -79,7 +79,7 @@ window.BuchFR && BuchFR.add('gy12lk', {
         ['Lotfußpunkt: $\\big(', 'Projeté orthogonal : $\\big('], ['$ gibt $t = ', '$ donne $t = '], ['$, also $F(', '$, donc $F('], [')$ und $d(P, g) = ', ')$ et $d(P, g) = '],
         ['Kontrolle mit dem Vektorprodukt: $', 'Vérification avec le produit vectoriel : $'], ['. $P$ liegt auf $g$.', '. $P$ est sur $g$.'],
         ['$: Die Geraden sind parallel. Dann ist ihr Abstand der Abstand des Punktes $Q$ von $g$: $d ', '$ : les droites sont parallèles. Leur distance est alors la distance du point $Q$ à $g$ : $d '],
-        [', sie sind identisch.', ' : elles sont confondues.'],
+        [', sie sind identisch.', ', elles sont donc confondues.'],
         ['$ steht auf beiden Geraden senkrecht, $|\\vec{n}| ', '$ est orthogonal aux deux droites, $|\\vec{n}| '],
         ['. Abstand $0$: Die Geraden <b>schneiden</b> sich in $S(', '. Distance $0$ : les droites <b>se coupent</b> en $S('],
         ['. <b>Windschief</b>; das kürzeste Verbindungsstück (pink) verbindet $F(', '. Droites <b>non coplanaires</b> : la perpendiculaire commune (en rose) relie $F('], [')$ und $G(', ')$ et $G('],
