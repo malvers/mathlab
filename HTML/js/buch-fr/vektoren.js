@@ -69,6 +69,15 @@ window.BuchFR && BuchFR.add('vektoren', {
         'Der Nullvektor hat keine Richtung, er liefert keinen Winkel.': 'Le vecteur nul n’a pas de direction, il ne donne aucun angle.',
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // winkel3d (the presets "schräg", "senkrecht", "parallel" change their French with the mode: rules below)
+        'Gerade – Gerade': 'Droite – droite', 'Gerade – Ebene': 'Droite – plan', 'Ebene – Ebene': 'Plan – plan', 'Welcher Winkel?': 'Quel angle ?',
+        'spitz': 'aigu', 'stumpfe Vektoren': 'vecteurs à angle obtus', 'Dach und Boden': 'Toit et sol',
+        'Der Nullvektor hat keine Richtung, er liefert keinen Winkel.': 'Le vecteur nul n’a pas de direction, il ne donne aucun angle.',
+        'Die Richtungsvektoren sind parallel: Die Geraden sind parallel oder identisch, sie schneiden sich nicht unter einem Winkel.':
+            'Les vecteurs directeurs sont colinéaires : les droites sont parallèles ou confondues, elles ne se coupent pas sous un angle.',
+        'Das Skalarprodukt ist $0$: Die Geraden schneiden sich senkrecht.': 'Le produit scalaire vaut $0$ : les droites se coupent perpendiculairement.',
+        'Das Skalarprodukt ist positiv, der Winkel zwischen den Vektoren ist schon spitz.': 'Le produit scalaire est positif, l’angle entre les vecteurs est déjà aigu.',
+        'Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.': 'Les vecteurs normaux sont colinéaires : les plans sont parallèles ou confondus.',
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -197,6 +206,17 @@ window.BuchFR && BuchFR.add('vektoren', {
         ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. L’angle se mesure perpendiculairement à elle, entre les deux lignes colorées dans les plans.'],
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // winkel3d
+        ['Die Vektoren selbst schließen $', 'Les vecteurs eux-mêmes forment un angle de $'],
+        ['$ ein, also einen stumpfen Winkel. Die Geraden bilden den spitzen Nebenwinkel $180^\\circ - ', '$, donc un angle obtus. Les droites forment l’angle supplémentaire aigu $180^\\circ - '],
+        ['$; dafür steht der Betrag im Zähler.', '$ ; c’est le rôle de la valeur absolue au numérateur.'],
+        ['Winkel zwischen $\\vec{u}$ und dem Normalenvektor: $\\cos\\alpha = ', 'Angle entre $\\vec{u}$ et le vecteur normal : $\\cos\\alpha = '],
+        ['Der Winkel zur Ebene ergänzt ihn zu $90^\\circ$: $', 'L’angle avec le plan le complète à $90^\\circ$ : $'],
+        ['. Das Skalarprodukt ist $0$: $g$ ist parallel zu $E$ oder liegt in $E$.', '. Le produit scalaire vaut $0$ : $g$ est parallèle à $E$ ou contenue dans $E$.'],
+        ['. $\\vec{u}$ ist ein Vielfaches von $\\vec{n}$: $g$ steht senkrecht auf $E$.', '. $\\vec{u}$ est un multiple de $\\vec{n}$ : $g$ est perpendiculaire à $E$.'],
+        ['. Gelb gestrichelt: die Projektion von $g$ in die Ebene.', '. En jaune pointillé : la projection de $g$ sur le plan.'],
+        ['Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $\\vec{n}_1 \\times \\vec{n}_2 = ', 'En blanc : la droite d’intersection $s$, de vecteur directeur $\\vec{n}_1 \\times \\vec{n}_2 = '],
+        ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. L’angle se mesure perpendiculairement à elle, entre les deux lignes colorées situées dans les plans.'],
     ],
     rule: [
         // fr0: the helpers of the module (outside every widget; check.mjs vektoren/*), shared by the three books that load it
@@ -224,5 +244,9 @@ window.BuchFR && BuchFR.add('vektoren', {
         [/(data-p="flach">)parallel</g, '$1parallèles<'],
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // winkel3d: the presets by their markup (data-p): a line oblique / perpendicular / parallel to a plane, two oblique or perpendicular planes, two perpendicular lines
+        [/(data-p="dach">[^<]*<\/button><button type="button" class="b-btn" data-p="schraeg">)schräg(?=<)/g, '$1obliques'],
+        [/(data-p="schraeg">)schräg(?=<)/g, '$1oblique'], [/(data-p="steil">)senkrecht(?=<)/g, '$1perpendiculaire'],
+        [/(data-p="ortho">)senkrecht(?=<)/g, '$1perpendiculaires'], [/(data-p="flach">)parallel(?=<)/g, '$1parallèle'],
     ]
 });

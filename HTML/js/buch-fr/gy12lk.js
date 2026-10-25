@@ -44,6 +44,8 @@ window.BuchFR && BuchFR.add('gy12lk', {
         'Trapez': 'Trapèze',
         // abstand3d ('windschief', 'schneidend', 'parallel': js/buch-fr/vektoren.js)
         'Das 3D-Modul fehlt.': 'Le module 3D manque.', 'Beispiel 3': 'Exemple 3', 'Ursprungsgerade': 'Droite passant par l’origine', 'P auf g': 'P sur g',
+        // abstand3d: the third preset of two lines, as in js/buch-fr/funktionen.js (lb8-3 does not load it)
+        'parallel': 'parallèles',
     },
     phrase: [
         // book fr-10 mathegy12lk-fr:
