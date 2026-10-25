@@ -129,6 +129,13 @@ window.BuchFR && BuchFR.add('analysis', {
         // book fr-10 mathegy12lk-fr:
         // integrieren (the score "3 von 5 gelöst" is the rule of fr-5 below)
         'Lineare Verkettung': 'Composée affine', 'z. B. x^3/3 - 2x oder -cos(2x)/2': 'p. ex. x^3/3 - 2x ou -cos(2x)/2',
+        // abstandmin ('Parabel' is in js/buch-fr/funktionen.js, which the same pages load)
+        'Gerade': 'Droite', 'Wurzelkurve': 'Courbe de la racine', 'Kurve:': 'Courbe :', '$x$-Koordinate von $Q$': 'Abscisse de $Q$',
+        'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).': 'Fais glisser le point P. Le curseur déplace Q sur la courbe ; en bas, la distance d(x) augmente et diminue.',
+        'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Courbe, point P et point Q de la courbe avec leur distance',
+        'Abstandsfunktion d(x) mit ihrem Minimum': 'Fonction distance d(x) avec son minimum',
+        '$P$ liegt auf der Kurve, der Abstand ist $0$.': '$P$ est sur la courbe, la distance vaut $0$.',
+        'Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.': 'Le minimum est au bord de l’intervalle ; là, le segment n’a pas besoin d’être perpendiculaire à la tangente.',
     },
     phrase: [
         // fr0: the helpers of the module (outside every widget; check.mjs analysis/*), shared by the four books that load it
@@ -283,6 +290,10 @@ window.BuchFR && BuchFR.add('analysis', {
         // integrieren
         ['Bestimme eine Stammfunktion: $f(x) = ', 'Détermine une primitive : $f(x) = '],
         ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Pas encore. Dérive ta solution pour vérifier. Indice : '],
+        // abstandmin
+        ['$: $\\;d(x)^2 = ', '$ : $\\;d(x)^2 = '], ['Jetzt: $x = ', 'Maintenant : $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · minimale en $x \\approx '], ['$: $d_{\\min} \\approx ', '$ : $d_{\\min} \\approx '],
+        ['Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ', 'Le plus court segment (en vert) est perpendiculaire à la tangente : angle $\\approx '],
+        ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. C’est pourquoi ce point s’appelle aussi le projeté orthogonal.'],
     ],
     rule: [
         // book fr-1 mathe11-fr:
