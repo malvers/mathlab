@@ -22,7 +22,7 @@ window.BUCH = {
         { file: 'lb6.html', lb: 'Domaine d’apprentissage 6', k: '6', title: 'Variables aléatoires de loi normale',
           sub: 'Courbe en cloche de Gauss, densité et fonction de répartition, espérance et écart type, règles des σ, théorème de Moivre-Laplace', when: 'Novembre', ustd: 10 },
         { file: 'lb7.html', lb: 'Domaine d’apprentissage 7', k: '7', title: 'Statistique inférentielle',
-          sub: 'Échantillons, estimation de proportions, de moyennes et de variances, tests d’hypothèse unilatéraux et bilatéraux, niveau de confiance', when: 'Décembre', ustd: 15 },
+          sub: 'Échantillons, estimation de proportions, de moyennes et de variances, tests d’hypothèse unilatéraux et bilatéraux, signification statistique', when: 'Décembre', ustd: 15 },
         { file: 'lb8-1.html', lb: 'Domaine d’apprentissage 8', k: '8.1', title: 'Produit scalaire, produit vectoriel et forme normale de Hesse',
           sub: 'Angle et projection, vecteur orthogonal et aire, équation normale et équation cartésienne, forme normale de Hesse pour la droite et le plan', when: 'Janvier', ustd: 10 },
         { file: 'lb8-2.html', lb: 'Domaine d’apprentissage 8', k: '8.2', title: 'Angles d’intersection',
