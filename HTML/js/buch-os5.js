@@ -1073,4 +1073,82 @@
         }
         render();
     });
+    /* ---------- counting before digits: notches on a tally stick, Babylonian wedges ---------- */
+    // a vertical wedge (1) and a corner wedge (10) in the style="" colours of the book pages
+    const wedge = (x, y, c) => '<path d="M' + f1(x - 6) + ' ' + f1(y) + ' L' + f1(x + 6) + ' ' + f1(y) + ' L' + f1(x) + ' ' + f1(y + 9) + ' Z" style="fill:' + c + ';stroke:none"/>' +
+        '<path d="M' + f1(x) + ' ' + f1(y + 5) + ' L' + f1(x) + ' ' + f1(y + 26) + '" style="stroke:' + c + ';stroke-width:2.6;stroke-linecap:round;fill:none"/>';
+    const corner = (x, y, c) => '<path d="M' + f1(x + 15) + ' ' + f1(y - 10) + ' L' + f1(x) + ' ' + f1(y) + ' L' + f1(x + 15) + ' ' + f1(y + 10) + '" style="stroke:' + c + ';stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;fill:none"/>' +
+        '<path d="M' + f1(x - 1) + ' ' + f1(y) + ' L' + f1(x + 8) + ' ' + f1(y - 5) + ' L' + f1(x + 8) + ' ' + f1(y + 5) + ' Z" style="fill:' + c + ';stroke:none"/>';
+    W('zahlzeichenos5', function (box) {
+        const S = { mode: box.dataset.mode || 'babylon', v: +(box.dataset.v || 2026), n: +(box.dataset.n || 17) };
+        const hero = isHero(box);
+        const ctr = div(box, 'b-ctrls');
+        seg(ctr, [['kerbholz', 'Kerbholz und Strichliste'], ['babylon', 'Babylonische Keilschrift']], S.mode, v => { S.mode = v; render(); }, 'Zahlzeichen');
+        const kBox = buttons(box, [['p1', '+ 1'], ['p5', '+ 5'], ['m1', '− 1'], ['zero', 'Auf 0']], a => {
+            S.n = clamp(S.n + (a === 'p1' ? 1 : a === 'p5' ? 5 : a === 'm1' ? -1 : -S.n), 0, 60); render();
+        });
+        const bBox = div(box, '');
+        const rv = range(bBox, { label: 'Zahl', min: 1, max: 7200, step: 1, value: S.v, fmt: v => grp(v), onInput: v => { S.v = v; render(); } });
+        const st = div(bBox, 'b-ctrls');
+        st.innerHTML = '<span class="b-stepper"><button type="button" data-d="-1" aria-label="eins weniger">−</button><button type="button" data-d="1" aria-label="eins mehr">+</button></span>' +
+            '<button type="button" class="b-btn" data-d="60">+ 60</button><button type="button" class="b-btn" data-d="-60">− 60</button>';
+        st.addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (!b) return; S.v = clamp(S.v + +b.dataset.d, 1, 7200); rv.set(S.v); render(); });
+        const pic = div(box, 'b-svgbox g-svg'), out = div(box, 'b-out');
+        heroOnly(box, pic, [ctr, kBox, bBox, out], 380);
+        function render() {
+            const kerb = S.mode === 'kerbholz';
+            if (!hero) { kBox.style.display = kerb ? '' : 'none'; bBox.style.display = kerb ? 'none' : ''; }
+            let s = '', Wd = 560, Ht;
+            if (kerb) {
+                const n = S.n, L = 500;
+                // the stick: a long rounded bar with a notch for every item, every fifth one longer
+                s += '<rect x="20" y="20" width="' + (L + 20) + '" height="44" rx="20" style="fill:rgba(198,140,72,0.28);stroke:#c68c48;stroke-width:2"/>';
+                for (let i = 0; i < n; i++) {
+                    const x = 40 + i * (L - 20) / 59, long = (i + 1) % 5 === 0;
+                    s += line([x, long ? 22 : 30], [x, long ? 62 : 54], 'stroke:' + (long ? LAM : TXT) + ';stroke-width:' + (long ? 2.6 : 1.8) + ';stroke-linecap:round');
+                }
+                // the tally sheet: bundles of five, four upright and one across
+                const per = 10, bw = 34;
+                for (let b = 0; b * 5 < n; b++) {
+                    const k = Math.min(5, n - b * 5), x0 = 24 + (b % per) * (bw + 18), y0 = 92 + Math.floor(b / per) * 54;
+                    for (let i = 0; i < Math.min(k, 4); i++) s += line([x0 + i * 9, y0], [x0 + i * 9, y0 + 36], 'stroke:' + TXT + ';stroke-width:2.2;stroke-linecap:round');
+                    if (k === 5) s += line([x0 - 5, y0 + 30], [x0 + 32, y0 + 6], 'stroke:' + LAM + ';stroke-width:2.4;stroke-linecap:round');
+                }
+                Ht = 92 + Math.max(1, Math.ceil(Math.ceil(n / 5) / per)) * 54;
+                pic.innerHTML = svg(Wd, Ht, 'Kerbholz und Strichliste mit ' + n + ' Strichen', s);
+                const b5 = Math.floor(n / 5), r = n % 5;
+                out.innerHTML = '<p class="g5-big">' + n + '</p><p>' + (b5 ? b5 + (b5 === 1 ? ' Fünferbündel' : ' Fünferbündel') + (r ? ' und ' + r + (r === 1 ? ' einzelner Strich' : ' einzelne Striche') : '') : r + (r === 1 ? ' einzelner Strich' : ' einzelne Striche')) +
+                    (b5 ? ': $' + b5 + ' \\cdot 5' + (r ? ' + ' + r : '') + ' = ' + n + '$' : '') + '</p>' +
+                    '<p class="g5-dim">Auf dem Kerbholz ist jede fünfte Kerbe länger. So muss man nicht jede einzelne Kerbe zählen, sondern nur die Bündel.</p>';
+            } else {
+                const v = S.v, D = [Math.floor(v / 3600), Math.floor(v / 60) % 60, v % 60];
+                let first = D.findIndex(d => d > 0); if (first < 0) first = 2;
+                const used = D.slice(first), PV = [3600, 60, 1].slice(first);
+                let x = 24;
+                used.forEach((d, i) => {
+                    const tens = Math.floor(d / 10), ones = d % 10, x0 = x;
+                    if (!d) { s += rect(x, 24, 40, 52, 'fill:none;stroke:' + DIM + ';stroke-width:1.2;stroke-dasharray:4 4'); x += 40; }
+                    for (let t = 0; t < tens; t++) {
+                        const two = tens > 3, row = two ? Math.floor(t / 3) : 0, col = two ? t % 3 : t;
+                        s += corner(x + col * 18, two ? (row ? 64 : 36) : 50, LAM);
+                    }
+                    if (tens) x += Math.min(tens, 3) * 18 + (ones ? 4 : 0);
+                    const rows = ones > 6 ? 3 : ones > 3 ? 2 : 1, perRow = Math.ceil(ones / rows), y1 = [37, 24, 16][rows - 1], dy = rows === 3 ? 22 : 26;
+                    for (let o = 0; o < ones; o++) s += wedge(x + 8 + (o % perRow) * 14, y1 + Math.floor(o / perRow) * dy, LAM);
+                    if (ones) x += 4 + perRow * 14;
+                    s += T((x0 + x) / 2, 106, '· ' + grp(PV[i]), 'g-small');
+                    s += T((x0 + x) / 2, 126, d, 'g-val');
+                    x += 30;
+                });
+                Wd = Math.max(220, x); Ht = 136;
+                pic.innerHTML = svg(Wd, Ht, 'Die Zahl ' + v + ' in babylonischer Keilschrift', s);
+                pic.firstChild.setAttribute('width', Math.round(Wd * 1.5));                   // the wedges are small: draw them half as large again
+                out.innerHTML = '<p class="g5-big">' + grp(v) + '</p><p>$' + used.map((d, i) => d + (PV[i] > 1 ? ' \\cdot ' + tg(PV[i]) : '')).join(' + ') + ' = ' + tg(v) + '$</p>' +
+                    '<p class="g5-dim">Ein senkrechter Keil zählt 1, ein Winkelhaken 10. Jede Stelle nach links ist 60-mal so viel wert.' +
+                    (used.includes(0) ? ' Eine leere Stelle hatte lange kein eigenes Zeichen: Man sah nur eine Lücke.' : '') + '</p>';
+                math(out);
+            }
+        }
+        render();
+    });
 })();
