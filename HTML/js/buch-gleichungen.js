@@ -142,17 +142,25 @@
             const sc = 150 / Math.max(r * 2, k === 'kugel' ? r * 2 : h, 1), R = r * sc, H = (k === 'kugel' ? 2 * r : h) * sc, cx = 120, top = 30, ry = Math.max(6, R * 0.28);
             let svg = '';
             const st = 'fill:rgba(127,216,238,0.12);stroke:#7fd8ee;stroke-width:2';
-            if (k === 'zyl') svg = '<path d="M' + (cx - R) + ' ' + (top + ry) + ' V' + (top + ry + H) + ' A' + R + ' ' + ry + ' 0 0 0 ' + (cx + R) + ' ' + (top + ry + H) + ' V' + (top + ry) + '" style="' + st + '"/>' +
-                '<ellipse cx="' + cx + '" cy="' + (top + ry) + '" rx="' + R + '" ry="' + ry + '" style="' + st + '"/>';
+            // the side starts at the front rim of the lid, not at its middle: the two see-through fills never overlap
+            // (Doc, 25.10.2026: "warum ist die Hälfte dunkler?")
+            if (k === 'zyl') svg = '<path d="M' + (cx - R) + ' ' + (top + ry) + ' A' + R + ' ' + ry + ' 0 0 0 ' + (cx + R) + ' ' + (top + ry) + ' V' + (top + ry + H) + ' A' + R + ' ' + ry + ' 0 0 1 ' + (cx - R) + ' ' + (top + ry + H) + ' Z" style="' + st + '"/>' +
+                '<ellipse cx="' + cx + '" cy="' + (top + ry) + '" rx="' + R + '" ry="' + ry + '" style="' + st + '"/>' +
+                // the back half of the base is hidden: dashed, as in every oblique drawing (Doc on the KDP proof, p. 15)
+                '<path d="M' + (cx - R) + ' ' + (top + ry + H) + ' A' + R + ' ' + ry + ' 0 0 1 ' + (cx + R) + ' ' + (top + ry + H) + '" style="fill:none;stroke:#7fd8ee;stroke-width:1.2;stroke-dasharray:5 4"/>';
             if (k === 'kegel') svg = '<path d="M' + cx + ' ' + top + ' L' + (cx - R) + ' ' + (top + H) + ' A' + R + ' ' + ry + ' 0 0 0 ' + (cx + R) + ' ' + (top + H) + ' Z" style="' + st + '"/>' +
                 '<path d="M' + (cx - R) + ' ' + (top + H) + ' A' + R + ' ' + ry + ' 0 0 1 ' + (cx + R) + ' ' + (top + H) + '" style="fill:none;stroke:#7fd8ee;stroke-width:1.2;stroke-dasharray:5 4"/>';
             if (k === 'kugel') svg = '<circle cx="' + cx + '" cy="' + (top + R) + '" r="' + R + '" style="' + st + '"/>' +
-                '<ellipse cx="' + cx + '" cy="' + (top + R) + '" rx="' + R + '" ry="' + ry + '" style="fill:none;stroke:#7fd8ee;stroke-width:1.2;stroke-dasharray:5 4"/>';
+                // the equator: the front half seen, the back half hidden behind the ball
+                '<path d="M' + (cx - R) + ' ' + (top + R) + ' A' + R + ' ' + ry + ' 0 0 0 ' + (cx + R) + ' ' + (top + R) + '" style="fill:none;stroke:#7fd8ee;stroke-width:1.2"/>' +
+                '<path d="M' + (cx - R) + ' ' + (top + R) + ' A' + R + ' ' + ry + ' 0 0 1 ' + (cx + R) + ' ' + (top + R) + '" style="fill:none;stroke:#7fd8ee;stroke-width:1.2;stroke-dasharray:5 4"/>';
             const yb = k === 'kugel' ? top + R : top + (k === 'zyl' ? ry + H : H);
             svg += '<line x1="' + cx + '" y1="' + yb + '" x2="' + (cx + R) + '" y2="' + yb + '" stroke="rgb(245,194,66)" stroke-width="2.5"/>' +
-                '<text x="' + (cx + R / 2) + '" y="' + (yb - 6) + '" text-anchor="middle" style="fill:rgb(245,194,66);font-style:italic;font-size:16px">r</text>';
-            if (k !== 'kugel') svg += '<line x1="' + (cx + R + 18) + '" y1="' + (k === 'zyl' ? top + ry : top) + '" x2="' + (cx + R + 18) + '" y2="' + yb + '" stroke="rgb(160,200,90)" stroke-width="2"/>' +
-                '<text x="' + (cx + R + 26) + '" y="' + ((k === 'zyl' ? top + ry : top) + yb) / 2 + '" style="fill:rgb(160,200,90);font-style:italic;font-size:16px">h</text>';
+                '<circle cx="' + cx + '" cy="' + yb + '" r="2.8" fill="rgb(245,194,66)"/>' +
+                // r at the end of its radius, h on the left: no label sits on the dashed hidden edge (KDP proof p. 15)
+                '<text x="' + (cx + R + 6) + '" y="' + (yb + 5) + '" style="fill:rgb(245,194,66);font-style:italic;font-size:16px">r</text>';
+            if (k !== 'kugel') svg += '<line x1="' + (cx - R - 18) + '" y1="' + (k === 'zyl' ? top + ry : top) + '" x2="' + (cx - R - 18) + '" y2="' + yb + '" stroke="rgb(160,200,90)" stroke-width="2"/>' +
+                '<text x="' + (cx - R - 26) + '" y="' + ((k === 'zyl' ? top + ry : top) + yb) / 2 + '" text-anchor="end" style="fill:rgb(160,200,90);font-style:italic;font-size:16px">h</text>';
             pic.innerHTML = '<svg viewBox="0 0 300 230" width="300" height="230" style="min-width:0" role="img" aria-label="Skizze des Körpers">' + svg + '</svg>';
             let t = '';
             if (k === 'zyl') {

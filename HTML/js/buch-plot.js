@@ -67,13 +67,16 @@
                 const sx = w / (x1 - x0), ym = (y0 + y1) / 2, half = h / sx / 2;
                 y0 = ym - half; y1 = ym + half;
             }
-            this.f = { w, h, x0, x1, y0, y1 };
+            // an axis on the very edge (a range that starts at 0, e.g. time or height) moves 12 px in, room for its arrow head
+            // (Doc on the KDP proof, p. 49: the y-arrow of the vertical throw was cut in half; 25.10.: "ruhig noch bissl rein")
+            const pl = !this.opt.equal && x0 >= 0 ? 12 : 0, pb = !this.opt.equal && y0 >= 0 ? 12 : 0;
+            this.f = { w, h, x0, x1, y0, y1, pl, pb };
             return this.f;
         }
-        X(x) { const f = this.f; return (x - f.x0) / (f.x1 - f.x0) * f.w; }
-        Y(y) { const f = this.f; return f.h - (y - f.y0) / (f.y1 - f.y0) * f.h; }
-        ix(px) { const f = this.f; return f.x0 + px / f.w * (f.x1 - f.x0); }
-        iy(py) { const f = this.f; return f.y0 + (f.h - py) / f.h * (f.y1 - f.y0); }
+        X(x) { const f = this.f, pl = f.pl || 0; return pl + (x - f.x0) / (f.x1 - f.x0) * (f.w - pl); }
+        Y(y) { const f = this.f, pb = f.pb || 0; return f.h - pb - (y - f.y0) / (f.y1 - f.y0) * (f.h - pb); }
+        ix(px) { const f = this.f, pl = f.pl || 0; return f.x0 + (px - pl) / (f.w - pl) * (f.x1 - f.x0); }
+        iy(py) { const f = this.f, pb = f.pb || 0; return f.y0 + (f.h - pb - py) / (f.h - pb) * (f.y1 - f.y0); }
 
         // equal units in a box wider than the view needs: the drawing area keeps the given x- and y-range,
         // takes the width height · (x-span / y-span) and sits in the middle (in narrower boxes it fills the box as before)
@@ -108,7 +111,7 @@
             ctx.font = '13px ' + FONT; ctx.lineWidth = 1;
             const sx = o.xStep || (o.piX ? Math.PI / 2 : niceStep(x1 - x0, w / 70));
             const sy = o.yStep || niceStep(y1 - y0, h / 45);
-            const ax = Math.min(Math.max(this.Y(0), 0), h), ay = Math.min(Math.max(this.X(0), 0), w);
+            const ax = Math.min(Math.max(this.Y(0), 0), h - (this.f.pb || 0)), ay = Math.min(Math.max(this.X(0), this.f.pl || 0), w);
             ctx.textAlign = 'center'; ctx.textBaseline = 'top';
             for (let k = Math.ceil(x0 / sx); k * sx <= x1 + 1e-9; k++) {
                 const px = this.X(k * sx);
@@ -119,7 +122,7 @@
                     const lab = o.piX ? piLabel(k) : num(k * sx);
                     // no number cut off at the edge or under the axis name
                     const half = ctx.measureText(lab).width / 2;
-                    if (px - half > 2 && px + half < w - 8 - ctx.measureText(o.xLabel).width) ctx.fillText(lab, px, Math.min(ax + 7, h - 16));
+                    if (px - half > 2 && px + half < w - 8 - ctx.measureText(o.xLabel).width) ctx.fillText(lab, px, ax + 7 <= h - 16 ? ax + 7 : ax - 19);   // no room below: above the axis
                 }
             }
             ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
