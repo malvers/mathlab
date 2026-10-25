@@ -127,6 +127,8 @@ window.BuchFR && BuchFR.add('analysis', {
             'La pente vaut toujours $0{,}5$ : les droites sont parallèles et n’ont aucun point commun. Le paramètre les translate.',
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // integrieren (the score "3 von 5 gelöst" is the rule of fr-5 below)
+        'Lineare Verkettung': 'Composée affine', 'z. B. x^3/3 - 2x oder -cos(2x)/2': 'p. ex. x^3/3 - 2x ou -cos(2x)/2',
     },
     phrase: [
         // fr0: the helpers of the module (outside every widget; check.mjs analysis/*), shared by the four books that load it
@@ -278,6 +280,9 @@ window.BuchFR && BuchFR.add('analysis', {
         ['$. Das passiert für $a = \\pm 2$.', '$. Cela arrive pour $a = \\pm 2$.'],
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // integrieren
+        ['Bestimme eine Stammfunktion: $f(x) = ', 'Détermine une primitive : $f(x) = '],
+        ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Pas encore. Dérive ta solution pour vérifier. Indice : '],
     ],
     rule: [
         // book fr-1 mathe11-fr:

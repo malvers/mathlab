@@ -12,7 +12,7 @@ window.BUCH = {
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée général allemand), 12e année, Leistungskurs (cours approfondi), Saxe : calcul intégral avec la fonction intégrale, le théorème fondamental et des solides de révolution en vraie 3D, intégration numérique jusqu’à Simpson, variables aléatoires de loi normale et théorème de Moivre-Laplace, estimation et tests d’hypothèse, distances et angles dans l’espace avec la forme normale de Hesse et les droites non coplanaires, extremums, symétries, domaines non bornés, familles de fonctions et lieux des points, et entraînement à l’Abitur, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb5-1.html', lb: 'Domaine d’apprentissage 5', k: '5.1', title: 'Primitives et intégration',
-          sub: 'La dérivation à l’envers, primitives de référence, substitution linéaire, fonctions composées avec le CAS', when: 'Août · septembre', ustd: 15 },
+          sub: 'La dérivation à l’envers, primitives de référence, composées affines, fonctions composées avec le CAS', when: 'Août · septembre', ustd: 15 },
         { file: 'lb5-2.html', lb: 'Domaine d’apprentissage 5', k: '5.2', title: 'L’intégrale et le théorème fondamental',
           sub: 'Quantités à partir de taux de variation, grandeurs physiques, sommes de Riemann, propriétés, fonction intégrale, théorème fondamental avec démonstration', when: 'Septembre', ustd: 10 },
         { file: 'lb5-3.html', lb: 'Domaine d’apprentissage 5', k: '5.3', title: 'Aires et solides de révolution',
