@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 11 · Chapitre 4.1 · Expériences aléatoires à plusieurs épreuves | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Modèle de l’urne, règles des chemins, tableau croisé, indépendance, simulation. Chapitre 4.1 du manuel interactif Mathématiques · Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 4.1 · DOMAINE D’APPRENTISSAGE 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 4.1 · DOMAINE D’APPRENTISSAGE 4 · AVRIL · MAI</p>
+            <h1>Expériences aléatoires à plusieurs épreuves</h1>
+            <p class="b-hero-lead">Tirer deux fois, lancer trois fois un dé, un sondage avec deux questions : beaucoup d’expériences aléatoires se déroulent en plusieurs épreuves. Avec l’<b>arbre pondéré</b> et les
+                <b>règles des chemins</b>, tu gardes une vue d’ensemble, avec le <b>tableau croisé</b>, tu organises deux caractères, et avec l’<b>indépendance</b>, tu détermines
+                si deux événements ont quelque chose à voir l’un avec l’autre. Et là où le calcul devient difficile, la <b>simulation</b> t’aide.</p>
+            <div class="b-chips"><span class="b-chip">6 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">SIMULATION</span><span class="b-chip">HISTOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>décrire des expériences aléatoires à plusieurs épreuves avec le <b>modèle de l’urne</b>, avec et sans remise</li>
+                <li>calculer des probabilités avec un <b>arbre pondéré</b> et les <b>règles des chemins</b>, et les estimer avec l’événement contraire</li>
+                <li><b>simuler</b> des expériences aléatoires</li>
+                <li>établir et lire des <b>tableaux croisés</b></li>
+                <li>vérifier l’<b>indépendance</b> d’événements et discuter différentes méthodes de résolution</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="1/6" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité d’obtenir un six avec un dé ?</p><div class="b-sol"><p>$\tfrac{1}{6}$</p></div></div>
+            <div class="b-q" data-ans="0,6" data-ph="nombre"><p class="b-q-text">Une urne contient 3 boules rouges et 2 boules bleues. Quelle est la probabilité de tirer une rouge ?</p><div class="b-sol"><p>$\tfrac{3}{5} = 0{,}6$</p></div></div>
+            <div class="b-q" data-ans="0,3" data-ph="nombre"><p class="b-q-text">$P(A) = 0{,}7$. Combien vaut $P(\overline{A})$ ?</p><div class="b-sol"><p>0,3</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Que vaut $\tfrac{3}{5} \cdot \tfrac{1}{2}$ ?</p><div class="b-mc"><button>$\tfrac{4}{7}$</button><button>$\tfrac{3}{10}$</button><button>$\tfrac{3}{7}$</button></div><div class="b-sol"><p>Numérateur fois numérateur, dénominateur fois dénominateur.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">AVEC OU SANS REMISE ?</div>
+            <div class="b-text"><p>Une urne contient 3 boules rouges et 2 boules bleues. Vous tirez deux fois.</p>
+                <ul><li>Jouez 50 fois avec remise et 50 fois sans remise. Combien de fois obtenez-vous deux boules rouges ? Expliquez la différence.</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">SPORT ET MUSIQUE</div>
+            <div class="b-text"><p>Demandez dans votre cours : qui fait régulièrement du sport, qui fait de la musique ?</p>
+                <ul><li>Classez les réponses dans un tableau à quatre cases. Les sportifs font-ils moins souvent de la musique que les autres ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LANCER DES DÉS AU LABORATOIRE</div>
+            <div class="b-text"><p>Faites lancer un dé mille fois par l’ordinateur et observez la fréquence.</p></div>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Hasard et fréquence</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Modèle de l’urne et règles des chemins" data-toc-k="1" data-toc-short="1 Arbre">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">1</span>Modèle de l’urne, arbre pondéré et règles des chemins</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Avec remise, la probabilité de tirer une rouge vaut $\tfrac{3}{5}$ à chaque tirage, donc celle de tirer deux rouges $\tfrac{3}{5} \cdot \tfrac{3}{5} = \tfrac{9}{25} = 0{,}36$.
+                Sans remise, après la première boule rouge, il ne reste que 2 rouges parmi 4 boules : $\tfrac{3}{5} \cdot \tfrac{2}{4} = \tfrac{3}{10} = 0{,}3$.
+                Dans l’arbre pondéré, chaque branche porte la probabilité de cette épreuve, et un parcours à travers l’arbre s’appelle un <b>chemin</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÈGLES DES CHEMINS</div>
+                <div class="b-text">
+                    <p><b>1re règle des chemins (règle du produit) :</b> la probabilité d’un chemin est le produit des probabilités le long de ce chemin.</p>
+                    <p><b>2e règle des chemins (règle de la somme) :</b> la probabilité d’un événement est la somme des probabilités de ses chemins.</p>
+                    <p><b>Modèle de l’urne :</b> avec remise, les probabilités restent les mêmes ; sans remise, elles changent d’une épreuve à l’autre.</p>
+                    <p><b>Événement contraire :</b> $P(\text{au moins une fois}) = 1 - P(\text{jamais})$, souvent le chemin le plus court.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Vérification :</b> la somme des probabilités de tous les chemins vaut 1, de même que la somme des branches à chaque embranchement.</p>
+            <p class="b-note"><b>Simulation :</b> avec des chiffres au hasard de 0 à 9, on simule $p = 0{,}3$ en comptant 0, 1, 2 comme succès. Beaucoup de répétitions permettent d’estimer la probabilité.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ATELIER DES ARBRES PONDÉRÉS</div>
+        <p class="b-help" style="margin:0 0 12px">Règle l’urne, choisis avec ou sans remise et clique sur des fins de chemins pour composer un événement.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · EXACTEMENT UNE ROUGE</div>
+            <div class="b-text"><p>Deux tirages sans remise parmi 3 boules rouges et 2 boules bleues. Quelle est la probabilité d’obtenir exactement une boule rouge ?</p></div>
+            <div class="b-sol"><p>Deux chemins : rouge–bleue $\tfrac{3}{5} \cdot \tfrac{2}{4}$ et bleue–rouge $\tfrac{2}{5} \cdot \tfrac{3}{4}$.</p>
+                <p>$\tfrac{6}{20} + \tfrac{6}{20} =$ <span class="b-res">$\tfrac{3}{5}$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · AU MOINS UN SIX</div>
+            <div class="b-text"><p>On lance un dé quatre fois. Quelle est la probabilité d’obtenir au moins un six ?</p></div>
+            <div class="b-sol"><p>Événement contraire « aucun six » : $\left(\tfrac{5}{6}\right)^4 \approx 0{,}482$.</p>
+                <p><span class="b-res">$1 - 0{,}482 \approx 0{,}518$</span> : un peu plus de la moitié.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Urne avec 3 boules rouges et 2 bleues. Calcule pour deux tirages : a) avec remise, deux couleurs différentes &nbsp; b) avec remise, au moins une bleue &nbsp; c) pour trois tirages sans remise, trois fois rouge</p></div>
+            <div class="b-sol"><p>a) $\tfrac{12}{25}$ &nbsp; b) $\tfrac{16}{25}$ &nbsp; c) $\tfrac{3}{5} \cdot \tfrac{2}{4} \cdot \tfrac{1}{3} = \tfrac{1}{10}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Deux dés : quelle est la probabilité que la somme des points soit 7, quelle est celle d’un double ?</p></div>
+            <div class="b-sol"><p>Toutes deux $\tfrac{6}{36} = \tfrac{1}{6}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>60 % des élèves d’un grand lycée viennent en bus. On en choisit deux au hasard. Quelle est la probabilité qu’exactement un des deux vienne en bus ? Pourquoi peut-on calculer ici comme avec remise ?</p></div>
+            <div class="b-sol"><p>$2 \cdot 0{,}6 \cdot 0{,}4 = 0{,}48$. Avec beaucoup de personnes, un choix ne modifie presque pas la proportion.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Combien de fois au moins faut-il lancer un dé pour obtenir au moins un six avec une probabilité d’au moins 90 % ? Essaie avec le CAS.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac{5}{6}\right)^n \geq 0{,}9$ : $n = 13$ (pour $n = 12$, seulement environ 0,888).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Prévois une simulation avec des chiffres au hasard pour : « Une roue de loterie s’arrête sur le rouge avec une probabilité de 30 % ; quelle est la probabilité d’obtenir au moins deux fois rouge en 5 tours ? » Fais 20 répétitions et compare avec le calcul $1 - 0{,}7^5 - 5 \cdot 0{,}3 \cdot 0{,}7^4 \approx 0{,}47$.</p></div>
+            <div class="b-sol"><p>Cinq chiffres à chaque fois, succès pour 0, 1, 2 ; compter combien de fois il y a au moins deux succès. Avec 20 répétitions, le résultat fluctue nettement autour de 0,47.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,3" data-ph="probabilité"><p class="b-q-text">Deux tirages sans remise parmi 3 rouges et 2 bleues : $P(\text{deux rouges})$ ?</p><div class="b-sol"><p>$\tfrac{3}{10}$</p></div></div>
+        <div class="b-q" data-ans="7/8" data-ph="fraction"><p class="b-q-text">Trois lancers d’une pièce : $P(\text{au moins une fois face})$ ?</p><div class="b-sol"><p>$1 - \tfrac{1}{8}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Que dit la 1re règle des chemins ?</p><div class="b-mc"><button>Multiplier le long d’un chemin.</button><button>Additionner le long d’un chemin.</button><button>Multiplier tous les chemins.</button></div><div class="b-sol"><p>Règle du produit.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Tableau croisé et indépendance" data-toc-k="2" data-toc-short="2 Indépendance">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+    <h2><span class="b-no">2</span>Tableau croisé et indépendance</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Sur 100 personnes interrogées, 60 font du sport ($S$), 40 de la musique ($M$), 30 les deux. Le tableau croisé contient les quatre combinaisons et, en marge, les totaux.
+                Si le sport et la musique étaient indépendants, 40 % des 60 sportifs, soit 24, devraient faire de la musique. Or, ils sont 30.
+                Les deux caractères sont donc liés dans ce groupe : $P(S \cap M) = 0{,}3 \neq 0{,}6 \cdot 0{,}4 = 0{,}24$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TABLEAU CROISÉ ET INDÉPENDANCE</div>
+                <div class="b-text">
+                    <p>Le <b>tableau croisé</b> contient $P(A \cap B)$, $P(A \cap \overline{B})$, $P(\overline{A} \cap B)$, $P(\overline{A} \cap \overline{B})$ ; les totaux des lignes et des colonnes donnent $P(A)$, $P(\overline{A})$, $P(B)$, $P(\overline{B})$, le total général 1.</p>
+                    <p>$A$ et $B$ sont dits <b>indépendants</b> si $P(A \cap B) = P(A) \cdot P(B)$, sinon <b>dépendants</b>. Alors $\overline{A}$ et $B$, etc., sont aussi indépendants.</p>
+                    <p>Concrètement : la proportion de $B$ est aussi grande dans le groupe $A$ que dans le groupe $\overline{A}$.</p>
+                    <p><b>Incompatibles</b> ($A \cap B = \emptyset$), c’est autre chose : avec des probabilités positives, des événements incompatibles sont même dépendants.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Arbre ↔ tableau :</b> dans l’arbre, $P(A \cap B)$ est le produit le long du chemin $A$, puis $B$ ; dans le tableau, il figure directement dans la case.</p>
+            <p class="b-note"><b>Dépendant ne veut pas dire causal :</b> un lien dans les données ne dit pas quelle en est la cause. Les sportifs ont peut-être simplement plus de temps l’après-midi.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · INDÉPENDANTS OU NON ?</div>
+        <p class="b-help" style="margin:0 0 12px">Règle $P(A)$, $P(B)$ et $P(A \cap B)$. Le tableau croisé et le carré unité montrent quand les événements sont indépendants.</p>
+        <div data-widget="unabhaengig"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · COMPLÉTER LE TABLEAU</div>
+            <div class="b-text"><p>$P(A) = 0{,}4$, $P(B) = 0{,}5$, $P(A \cap B) = 0{,}2$. Complète le tableau et vérifie l’indépendance.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}2$, $P(\overline{A} \cap B) = 0{,}3$, $P(\overline{A} \cap \overline{B}) = 0{,}3$.</p>
+                <p>$0{,}4 \cdot 0{,}5 = 0{,}2 = P(A \cap B)$ : <span class="b-res">indépendants</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · CALCULER AVEC L’INDÉPENDANCE</div>
+            <div class="b-text"><p>$A$ et $B$ sont indépendants avec $P(A) = 0{,}3$ et $P(B) = 0{,}5$. Détermine $P(A \cap B)$, $P(A \cup B)$ et $P(\overline{A} \cap \overline{B})$.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}15$, $P(A \cup B) = 0{,}3 + 0{,}5 - 0{,}15 = 0{,}65$.</p>
+                <p><span class="b-res">$P(\overline{A} \cap \overline{B}) = 0{,}7 \cdot 0{,}5 = 0{,}35$</span> $= 1 - 0{,}65$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ENTRAÎNEMENT · COMPLÉTER DES TABLEAUX CROISÉS</div>
+        <p class="b-help" style="margin:0 0 12px">Remplis les cases manquantes. Si tu veux, un nouveau tableau t’attend.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Sur 200 personnes, 80 portent des lunettes, 120 sont des femmes, 50 femmes portent des lunettes. Établis le tableau croisé en effectifs.</p></div>
+            <div class="b-sol"><p>Femme/lunettes 50, femme/sans 70, homme/lunettes 30, homme/sans 50 ; totaux 120, 80, 80, 120, 200.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>« Femme » et « lunettes » sont-ils indépendants dans ce groupe ? Compare les proportions de porteurs de lunettes chez les femmes et chez les hommes.</p></div>
+            <div class="b-sol"><p>Femmes $\tfrac{50}{120} \approx 41{,}7\,\%$, hommes $\tfrac{30}{80} = 37{,}5\,\%$ ; $0{,}6 \cdot 0{,}4 = 0{,}24 \neq 0{,}25$ : légèrement dépendants.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deux dés : $A$ « le premier dé donne 6 », $B$ « la somme des points vaut 7 ». $A$ et $B$ sont-ils indépendants ?</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac{1}{6}$, $P(B) = \tfrac{1}{6}$, $P(A \cap B) = P(\{(6,1)\}) = \tfrac{1}{36}$ : indépendants, alors qu’on ne s’y attend pas.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$A$ et $B$ sont incompatibles avec $P(A) = 0{,}3$ et $P(B) = 0{,}4$. Détermine $P(A \cup B)$ et montre qu’ils sont dépendants.</p></div>
+            <div class="b-sol"><p>$P(A \cup B) = 0{,}7$ ; $P(A \cap B) = 0 \neq 0{,}12$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Résous l’exemple 4 de deux façons : avec la formule de la réunion et avec l’événement contraire. Discute de la méthode la plus rapide.</p></div>
+            <div class="b-sol"><p>Formule de la réunion : $0{,}3 + 0{,}5 - 0{,}15 = 0{,}65$. Événement contraire : $1 - 0{,}7 \cdot 0{,}5 = 0{,}65$. Pour des événements indépendants, la seconde méthode est souvent plus courte.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,24" data-ph="produit"><p class="b-q-text">Sport 60 %, musique 40 % : quelle proportion de « les deux » attendrait-on en cas d’indépendance ?</p><div class="b-sol"><p>0,24</p></div></div>
+        <div class="b-q" data-ans="0,65" data-ph="P(A ∪ B)"><p class="b-q-text">Indépendants, $P(A) = 0{,}3$, $P(B) = 0{,}5$ : $P(A \cup B)$ ?</p><div class="b-sol"><p>0,65</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$A$, $B$ incompatibles, de probabilités positives. Qu’en déduit-on ?</p><div class="b-mc"><button>indépendants</button><button>dépendants</button><button>On ne peut pas le dire.</button></div><div class="b-sol"><p>$0 \neq P(A) \cdot P(B)$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une roue de loterie s’arrête sur le rouge avec la probabilité $\tfrac{1}{4}$, sinon sur le vert. On la fait tourner deux fois. Donne tous les chemins avec leurs probabilités.</p></div>
+            <div class="b-sol"><p>RR $\tfrac{1}{16}$, RV $\tfrac{3}{16}$, VR $\tfrac{3}{16}$, VV $\tfrac{9}{16}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec la 10e année :</b> la variable aléatoire $X$ compte les boules rouges lors de deux tirages avec remise parmi 3 rouges et 2 bleues. Donne la loi de probabilité et $E(X)$.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = 0{,}16$, $P(X = 1) = 0{,}48$, $P(X = 2) = 0{,}36$ ; $E(X) = 0{,}48 + 0{,}72 = 1{,}2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>On lance un dé dix fois. Estime d’abord, puis calcule : quelle est la probabilité d’obtenir au moins un six ?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac{5}{6}\right)^{10} \approx 0{,}84$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Éducation au développement durable : dans une ville, 30 % des gens vont au travail à vélo. Chez les moins de 30 ans, ils sont 45 %, et ceux-ci représentent 20 % des actifs. Établis un tableau croisé et vérifie si l’âge et le vélo sont indépendants.</p></div>
+            <div class="b-sol"><p>Jeunes et vélo : $0{,}2 \cdot 0{,}45 = 0{,}09$ ; jeunes sans vélo 0,11 ; plus âgés à vélo $0{,}3 - 0{,}09 = 0{,}21$ ; plus âgés sans vélo 0,59. $0{,}2 \cdot 0{,}3 = 0{,}06 \neq 0{,}09$ : dépendants.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le pari du chevalier de Méré" data-toc-k="X" data-toc-short="de Méré">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Le pari du chevalier de Méré</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>L’écrivain et joueur français Antoine Gombaud, dit le chevalier de Méré, connaissait un bon pari : en quatre lancers d’un dé, on obtient au moins un six.
+                Il pensait qu’un second pari était tout aussi bon : en 24 lancers de deux dés, on obtient au moins un double six. Son raisonnement : $\tfrac{4}{6} = \tfrac{24}{36}$.
+                Mais à la longue, il y perdait.</p>
+            <p>En 1654, il soumit ses questions à Blaise Pascal, qui en discuta par lettres avec Pierre de Fermat. Cette correspondance passe pour le début du calcul des probabilités.
+                Avec l’événement contraire, c’est facile : $1 - \left(\tfrac{5}{6}\right)^4 \approx 51{,}8\,\%$, mais $1 - \left(\tfrac{35}{36}\right)^{24} \approx 49{,}1\,\%$. Le premier pari est favorable, le second de justesse défavorable.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> D. R. Bellhouse, C. Genest, « Antoine Gombaud, Chevalier de Méré », Statistical Science 39 (2024), n° 3. La correspondance entre Pascal et Fermat date de 1654.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>MODÈLE DE L’URNE</h4><p>Avec remise : probabilités constantes ; sans remise : elles changent.</p></div>
+        <div><p>Deux fois rouge : $\tfrac{9}{25}$ ou $\tfrac{3}{10}$</p></div></div>
+    <div class="b-rueck"><div><h4>RÈGLES DES CHEMINS</h4><p>Multiplier le long d’un chemin, additionner les chemins.</p></div>
+        <div><p>Exactement une rouge : $\tfrac{3}{5}$</p></div></div>
+    <div class="b-rueck"><div><h4>ÉVÉNEMENT CONTRAIRE</h4><p>« Au moins une fois » = 1 − « jamais ».</p></div>
+        <div><p>$1 - \left(\tfrac{5}{6}\right)^4 \approx 0{,}518$</p></div></div>
+    <div class="b-rueck"><div><h4>TABLEAU CROISÉ</h4><p>Quatre cases, totaux en marge, total général 1.</p></div>
+        <div><p>Sport/musique : 0,3 · 0,3 · 0,1 · 0,3</p></div></div>
+    <div class="b-rueck"><div><h4>INDÉPENDANCE</h4><p>$P(A \cap B) = P(A) \cdot P(B)$ ; incompatibles, c’est autre chose.</p></div>
+        <div><p>$0{,}4 \cdot 0{,}5 = 0{,}2$ : indépendants</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="16/25" data-ph="fraction"><p class="b-q-text">Deux tirages avec remise parmi 3 rouges et 2 bleues : au moins une bleue ?</p><div class="b-sol"><p>$1 - \tfrac{9}{25}$</p></div></div>
+            <div class="b-q" data-ans="0,15" data-ph="P(A ∩ B)"><p class="b-q-text">Indépendants, $P(A) = 0{,}3$, $P(B) = 0{,}5$ : $P(A \cap B)$ ?</p><div class="b-sol"><p>0,15</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quelle simulation convient pour $p = 0{,}3$ avec des chiffres au hasard ?</p><div class="b-mc"><button>le chiffre 3 est un succès</button><button>les chiffres 0 à 3 sont des succès</button><button>les chiffres 0, 1, 2 sont des succès</button></div><div class="b-sol"><p>3 chiffres sur 10.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="13" data-ph="lancers"><p class="b-q-text">Nombre minimal de lancers pour avoir au moins 90 % de chances d’obtenir un six ?</p><div class="b-sol"><p>13</p></div></div>
+            <div class="b-q" data-ans="49,1" data-tol="0.1" data-ph="%"><p class="b-q-text">Second pari de de Méré : $1 - \left(\tfrac{35}{36}\right)^{24}$ en pourcentage (à une décimale près) ?</p><div class="b-sol"><p>49,1 %</p></div></div>
+            <div class="b-q" data-ans="1,2" data-ph="E(X)"><p class="b-q-text">Nombre moyen de boules rouges attendu pour deux tirages avec remise (3 rouges, 2 bleues) ?</p><div class="b-sol"><p>1,2</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-mehrstufig.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXPÉRIENCES À PLUSIEURS ÉPREUVES</span><span class="b-lab-what">Urne, arbre, règles des chemins, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLEAU CROISÉ</span><span class="b-lab-what">Tableaux et indépendance, 20 exercices</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 11e année, Grundkurs · Domaine d’apprentissage 4 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+</body>
+</html>
