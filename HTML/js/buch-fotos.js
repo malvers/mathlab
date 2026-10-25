@@ -103,7 +103,40 @@ window.BUCH_FOTOS = {
         'drohne': { artist: 'Josh Sorenson', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Quadcopter_camera_drone_in_flight.jpg',
             alt: { de: 'Eine Drohne im Flug', en: 'A drone in flight' } },
         'rechenzentrum': { artist: 'PiDatacenters', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Racks_Amravati_Data_Center.jpg',
-            alt: { de: 'Serverschränke in einem Rechenzentrum', en: 'Server racks in a data centre' } }
+            alt: { de: 'Serverschränke in einem Rechenzentrum', en: 'Server racks in a data centre' } },
+        // mathe13 (2026-10-25)
+        'leibniz': { artist: 'Christoph Bernhard Francke', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Gottfried_Wilhelm_Leibniz,_Bernhard_Christoph_Francke.jpg',
+            alt: { de: 'Gottfried Wilhelm Leibniz, Gemälde von Christoph Bernhard Francke', en: 'Gottfried Wilhelm Leibniz, painted by Christoph Bernhard Francke' } },
+        'barrow': { artist: 'anonymous', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Unknown_man,_formerly_known_as_Isaac_Barrow_from_NPG.jpg',
+            alt: { de: 'Isaac Barrow, Newtons Lehrer in Cambridge', en: 'Isaac Barrow, Newton’s teacher at Cambridge' } },
+        'feldermosaik': { artist: 'Bhullargraphic', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Aerial_view_of_agricultural_fields_in_Punjab,_India.jpg',
+            alt: { de: 'Felder von oben: ein Mosaik aus Flächen', en: 'Fields from above: a mosaic of areas' } },
+        'archimedes-fetti': { artist: 'Dguendel', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Dresden,_Gem%C3%A4ldegalerie_Alte_Meister,_Domenico_Fetti,_Bildnis_eines_Gelehrten.jpg',
+            alt: { de: 'Domenico Fetti: Archimedes (1620), Gemäldegalerie Alte Meister Dresden', en: 'Domenico Fetti: Archimedes (1620), Old Masters Picture Gallery, Dresden' } },
+        'weinfaesser': { artist: 'Vyacheslav Argenberg', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Yerevan,_Brandy_barrels,_Armenia.jpg',
+            alt: { de: 'Weinfässer im Keller', en: 'Wine barrels in a cellar' } },
+        'wahlurne': { artist: 'W.carter', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Ballot_dropped_into_ballot_box_2024_Swedish_EU_election_at_St%C3%A5ngen%C3%A4sskolan,_Brastad_2.jpg',
+            alt: { de: 'Ein Stimmzettel fällt in die Wahlurne', en: 'A ballot paper goes into the ballot box' } },
+        'verpackung': { artist: 'dean blackburn', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Ramen_Packets_(2023713571).jpg',
+            alt: { de: 'Eine Verpackungsmaschine', en: 'A packaging machine' } },
+        'muenzwurf': { artist: 'ICMA Photos', license: 'CC BY-SA 2.0', page: 'https://commons.wikimedia.org/wiki/File:Coin_Toss_(3635981474).jpg',
+            alt: { de: 'Eine Münze wird mit dem Daumen hochgeworfen', en: 'A coin flipped with the thumb' } },
+        'milchtee': { artist: 'Billjones94', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Indian_Bengali_milk_tea_with_cream_biscuits.jpg',
+            alt: { de: 'Eine Tasse Tee mit Milch', en: 'A cup of tea with milk' } },
+        'glasfassade': { artist: 'Hands off my tags! Michael Gaida', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Modern_Skyscrapers_(or_Buildings)made_with_glass.jpg',
+            alt: { de: 'Eine Glasfassade', en: 'A glass facade' } },
+        'descartes': { artist: 'Frans Hals', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Frans_Hals,_Portrait_of_Ren%C3%A9_Descartes.jpg',
+            alt: { de: 'René Descartes, Gemälde nach Frans Hals', en: 'René Descartes, after Frans Hals' } },
+        'buntstifte': { artist: 'Dietmar Rabich', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Buntstifte_--_2021_--_9151.jpg',
+            alt: { de: 'Buntstifte, die Spitzen zur Mitte', en: 'Coloured pencils, tips to the centre' } },
+        'raytracing': { artist: 'Morn', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:DBW-Render_glass_scene,_recreated_in_POV-Ray.png',
+            alt: { de: 'Ein am Computer berechnetes Bild mit Glaskugeln', en: 'A computer-rendered image with glass spheres' } },
+        'louvre-pyramide': { artist: 'Benh LIEU SONG (Flickr)', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Louvre_Museum_Wikimedia_Commons.jpg',
+            alt: { de: 'Die Glaspyramide des Louvre in Paris', en: 'The glass pyramid of the Louvre in Paris' } },
+        'gizeh': { artist: 'kallerna', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Great_Pyramid_of_Giza.jpg',
+            alt: { de: 'Die Cheops-Pyramide in Gizeh', en: 'The Great Pyramid of Giza' } },
+        'autofabrik': { artist: 'Marek Ślusarczyk (Tupungato) Photo portfolio', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:001_Car_factory_assembly_line_-_Opel_factory_in_Gliwice,_Poland.jpg',
+            alt: { de: 'Ein Fließband in einer Autofabrik', en: 'An assembly line in a car factory' } }
     },
     books: {
         mathe11: {
@@ -197,6 +230,48 @@ window.BUCH_FOTOS = {
             ],
             'lb5-2.html': [
                 { foto: 'rechenzentrum', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ]
+        },
+        mathe13: {
+            'lb3-1.html': [
+                { foto: 'leibniz', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }
+            ],
+            'lb3-2.html': [
+                { foto: 'tacho', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'barrow', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 30%' }
+            ],
+            'lb3-3.html': [
+                { foto: 'feldermosaik', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'archimedes-fetti', at: '#exkursion .b-row > .b-text', put: 'in', w: 30, pos: '50% 30%' }
+            ],
+            'lb3-4.html': [
+                { foto: 'thermometer', at: '#le2 .b-einstieg', put: 'in', w: 26, pos: '50% 40%' },
+                { foto: 'weinfaesser', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb4-1.html': [
+                { foto: 'wahlurne', at: '#le1 .b-einstieg', put: 'in', w: 34 },
+                { foto: 'verpackung', at: '#le2 .b-einstieg', put: 'in', w: 32 }
+            ],
+            'lb4-2.html': [
+                { foto: 'muenzwurf', at: '#le1 .b-einstieg', put: 'in', w: 26, pos: '50% 30%' },
+                { foto: 'zwei-rote-wuerfel', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'milchtee', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'wp1-1.html': [
+                { foto: 'drohne', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'glasfassade', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'descartes', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }
+            ],
+            'wp1-2.html': [
+                { foto: 'buntstifte', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'raytracing', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'wp1-3.html': [
+                { foto: 'louvre-pyramide', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb6.html': [
+                { foto: 'autofabrik', at: '#le4 .b-einstieg', put: 'in', w: 34 }
             ]
         }
     }
