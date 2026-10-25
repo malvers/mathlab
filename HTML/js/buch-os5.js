@@ -1023,4 +1023,54 @@
         }
         render();
     });
+    /* ---------- band ornaments from circles and rectangles: translate or reflect a motif along a strip ---------- */
+    // motifs in a cell of 80 × 80, deliberately without a mirror axis, so that a reflection shows
+    const MOTIF = {
+        fahne: { l: 'Fahne', d: [['r', 12, 10, 8, 62, LAM], ['r', 20, 10, 40, 24, CY], ['c', 50, 58, 12, PHI]] },
+        schluessel: { l: 'Schlüssel', d: [['c', 24, 40, 15, LAM], ['r', 38, 36, 34, 8, CY], ['r', 58, 44, 6, 14, CY], ['r', 66, 44, 6, 10, CY]] },
+        blume: { l: 'Blume', d: [['r', 36, 38, 6, 36, PHI], ['c', 39, 24, 13, LAM], ['c', 56, 56, 8, PHI], ['r', 14, 70, 56, 4, CY]] }
+    };
+    W('bandos5', function (box) {
+        const S = { m: box.dataset.motif || 'fahne', op: box.dataset.op || 'schieb' };
+        const ctr = div(box, 'b-ctrls');
+        seg(ctr, Object.keys(MOTIF).map(k => [k, MOTIF[k].l]), S.m, v => { S.m = v; render(); }, 'Motiv');
+        const c2 = div(box, 'b-ctrls');
+        seg(c2, [['schieb', 'Verschieben'], ['spiegel', 'Spiegeln, senkrechte Achsen'], ['waag', 'Spiegeln, waagerechte Achse']], S.op, v => { S.op = v; render(); }, 'Bewegung');
+        const pic = div(box, 'b-svgbox g-svg os5-band'), out = div(box, 'b-out');
+        heroOnly(box, pic, [ctr, c2, out], 460);
+        const C = 80, n = 6, X0 = 10, Y0 = 14;
+        // one copy of the motif in cell k (row 0 or 1), flipped left–right (fx) or up–down (fy)
+        function copy(k, row, fx, fy, faint) {
+            const ox = X0 + k * C, oy = Y0 + row * C;
+            const X = x => ox + (fx ? C - x : x), Y = y => oy + (fy ? C - y : y);
+            return MOTIF[S.m].d.map(([t, a, b, c, d, col]) => t === 'c'                // circle: x, y, r, colour; rectangle: x, y, w, h, colour
+                ? '<circle cx="' + f1(X(a)) + '" cy="' + f1(Y(b)) + '" r="' + c + '" style="' + area(d, faint ? 0.12 : 0.3, 1.6) + '"/>'
+                : rect(fx ? X(a + c) : X(a), fy ? Y(b + d) : Y(b), c, d, area(col, faint ? 0.12 : 0.3, 1.6))).join('');
+        }
+        function render() {
+            const two = S.op === 'waag', H = Y0 + (two ? 2 : 1) * C + 26;
+            let s = '';
+            for (let k = 0; k < n; k++) {
+                s += rect(X0 + k * C, Y0, C, C, 'fill:none;stroke:' + DIM + ';stroke-width:0.6;stroke-dasharray:3 4');
+                if (two) s += rect(X0 + k * C, Y0 + C, C, C, 'fill:none;stroke:' + DIM + ';stroke-width:0.6;stroke-dasharray:3 4');
+                const flip = S.op === 'spiegel' && k % 2 === 1;
+                s += copy(k, 0, flip, false, false);
+                if (two) s += copy(k, 1, false, true, false);
+            }
+            if (S.op === 'spiegel') for (let k = 1; k < n; k++) s += line([X0 + k * C, Y0 - 8], [X0 + k * C, Y0 + C + 8], 'stroke:' + PHI + ';stroke-width:2;stroke-dasharray:7 5');
+            if (two) s += line([X0 - 6, Y0 + C], [X0 + n * C + 6, Y0 + C], 'stroke:' + PHI + ';stroke-width:2;stroke-dasharray:7 5');
+            if (S.op === 'schieb') {
+                const y = Y0 + C + 14;
+                s += line([X0 + 10, y], [X0 + C + 6, y], 'stroke:' + RED + ';stroke-width:2.2') + '<path d="M' + (X0 + C + 10) + ' ' + y + ' l-9 -5 l0 10 z" style="fill:' + RED + '"/>';
+                s += T(X0 + C / 2 + 8, y + 14, 'Verschiebungspfeil', 'g-small', 'middle', 'fill:' + RED + ';font-size:11px');
+            }
+            pic.innerHTML = svg(X0 * 2 + n * C, H + (S.op === 'schieb' ? 8 : 0), 'Bandornament aus dem Motiv ' + MOTIF[S.m].l, s);
+            out.innerHTML = {
+                schieb: '<p><b>Verschiebung:</b> Jedes Motiv entsteht aus dem vorigen durch dieselbe Verschiebung nach rechts, um eine Kästchenbreite. Alle Motive zeigen in dieselbe Richtung.</p>',
+                spiegel: '<p><b>Spiegelung an senkrechten Achsen:</b> Jedes Motiv ist das Spiegelbild seines Nachbarn. Die grünen Linien sind die Spiegelachsen. Jedes zweite Motiv ist umgeklappt.</p>',
+                waag: '<p><b>Spiegelung an einer waagerechten Achse:</b> Die untere Reihe ist das Spiegelbild der oberen. Oben und unten ist vertauscht, links und rechts nicht.</p>'
+            }[S.op] + '<p class="g5-dim">Alle Motive sind deckungsgleich: gleiche Form, gleiche Größe.</p>';
+        }
+        render();
+    });
 })();
