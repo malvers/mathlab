@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 11 · Chapitre OP · Méthodes numériques | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Résoudre des équations graphiquement, dichotomie, méthode de Newton. Chapitre OP du manuel interactif Mathématiques · Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">DOMAINE OPTIONNEL 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">DOMAINE OPTIONNEL 2 · JANVIER · FÉVRIER</p>
+            <h1>Méthodes numériques</h1>
+            <p class="b-hero-lead">L’équation $e^x = 3 - x$ a l’air inoffensive, mais aucune transformation ne mène à $x = \ldots$. De telles équations sont la règle en technique et en sciences.
+                Une calculatrice les résout pourtant, avec des <b>méthodes d’approximation</b> : elle coupe des intervalles en deux (<b>dichotomie</b>) ou suit des tangentes (<b>méthode de Newton</b>),
+                jusqu’à ce que la solution soit exacte avec autant de décimales qu’on veut. Tu apprends comment cela fonctionne, quand cela échoue et quelle méthode convient à quel cas.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">CAS</span><span class="b-chip">HISTOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["exp(x)","3-x"]' data-labels='["eˣ","3 − x"]' data-lat="[1.35,-1.3]" data-x="-1.5,2.5" data-y="-0.5,5" data-pts="[[0.7921,2.2079]]" data-h="240" data-aria="Les courbes de e puissance x et de 3 moins x se coupent en x environ égal à 0,79"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>résoudre des équations <b>graphiquement</b> et interpréter les solutions comme des abscisses de points d’intersection</li>
+                <li>appliquer la <b>méthode de dichotomie</b> et estimer sa précision</li>
+                <li>établir la <b>méthode de Newton</b>, l’appliquer et reconnaître quand elle échoue</li>
+                <li><b>juger</b> de la pertinence des méthodes algébriques, graphiques et numériques</li>
+                <li>utiliser des listes et des suites définies par récurrence dans le CAS</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="-2" data-ph="h(0) ="><p class="b-q-text">Calcule $h(0)$ pour $h(x) = e^x + x - 3$.</p><div class="b-sol"><p>$1 + 0 - 3 = -2$</p></div></div>
+            <div class="b-q" data-ans="1,5" data-ph="milieu"><p class="b-q-text">Où se trouve le milieu de l’intervalle $[1\,;\,2]$ ?</p><div class="b-sol"><p>1,5</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="f′(3) ="><p class="b-q-text">Calcule $f'(3)$ pour $f(x) = x^2 - 2$.</p><div class="b-sol"><p>$f'(x) = 2x$, donc 6</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Où la droite $y = 4x - 2$ coupe-t-elle l’axe des abscisses ?</p><div class="b-mc"><button>en $x = 0{,}5$</button><button>en $x = -2$</button><button>en $x = 2$</button></div><div class="b-sol"><p>$4x - 2 = 0$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DEVINER UN NOMBRE</div>
+            <div class="b-text"><p>L’une pense à un nombre entre 1 et 1000, l’autre n’a le droit que de demander : « Est-il plus grand que … ? »</p>
+                <ul><li>Avec quelle stratégie faut-il le moins de questions ? Combien en faut-il au plus ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">COMBIEN DE SOLUTIONS ?</div>
+            <div class="b-text"><p>Tracez $x^2$ et $2^x$ dans un même repère, aussi pour des $x$ négatifs.</p>
+                <ul><li>Combien de solutions $x^2 = 2^x$ a-t-elle ? Lesquelles peut-on deviner ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DES TANGENTES QUI MONTRENT LE CHEMIN</div>
+            <div class="b-text"><p>Tracez la tangente à $f(x) = x^2 - 2$ au point $(2\,;\,2)$.</p>
+                <ul><li>Où coupe-t-elle l’axe des abscisses ? Recommencez à partir de là. De quel nombre vous approchez-vous ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Résolution graphique et dichotomie" data-toc-k="1" data-toc-short="1 Dichotomie">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Résoudre graphiquement, dichotomie</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quand on devine un nombre, chaque question bien posée coupe le domaine en deux : 1000, 500, 250, … Au bout de 10 questions, il ne reste qu’un nombre, car $2^{10} = 1024$.
+                On trouve de la même façon la solution de $e^x = 3 - x$ : on l’écrit comme zéro de $h(x) = e^x + x - 3$. On a $h(0) = -2 < 0$ et $h(1) = e - 2 \approx 0{,}72 > 0$.
+                La courbe, continue, doit traverser l’axe des abscisses entre les deux. On coupe en deux : $h(0{,}5) \approx -0{,}85$, donc le zéro est dans $[0{,}5\,;\,1]$, et ainsi de suite.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÉSOLUTION GRAPHIQUE ET DICHOTOMIE</div>
+                <div class="b-text">
+                    <p><b>Graphiquement :</b> les solutions de $f(x) = g(x)$ sont les abscisses des points d’intersection des courbes. Le croquis montre leur nombre et leur position approximative.</p>
+                    <p><b>Changement de signe :</b> si $h$ est continue sur $[a\,;\,b]$ et si $h(a) \cdot h(b) < 0$, alors $h$ a au moins un zéro dans $]a\,;\,b[$.</p>
+                    <p><b>Dichotomie :</b> calculer le milieu $m = \tfrac{a + b}{2}$ ; garder le sous-intervalle où il y a un changement de signe ; recommencer. Au bout de $n$ étapes, l’intervalle a pour longueur $\tfrac{b - a}{2^n}$.</p>
+                    <p>La dichotomie marche toujours quand il y a un changement de signe, mais elle est lente : environ trois étapes par décimale.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Angle mort :</b> pour un zéro double comme celui de $(x - 1)^2$, il n’y a pas de changement de signe. La dichotomie ne le trouve pas.</p>
+            <p class="b-note"><b>Avec le CAS :</b> un tableau de valeurs avec un petit pas (évaluation d’une liste) montre tout de suite les changements de signe. Entre 1,6 et 1,7, par exemple, $x^3 - 2x - 1$ passe de moins à plus.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · COUPER L’INTERVALLE EN DEUX</div>
+        <p class="b-help" style="margin:0 0 12px">Coupe l’intervalle en deux, étape par étape. Le tableau montre à quelle vitesse la largeur diminue.</p>
+        <div data-widget="bisektion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · DEUX ÉTAPES</div>
+            <div class="b-text"><p>Coupe deux fois en deux pour $h(x) = x^3 + x - 1$ sur $[0\,;\,1]$.</p></div>
+            <div class="b-sol"><p>$h(0) = -1$, $h(1) = 1$. $h(0{,}5) = -0{,}375$ : on continue avec $[0{,}5\,;\,1]$.</p>
+                <p>$h(0{,}75) \approx 0{,}17$ : <span class="b-res">zéro dans $[0{,}5\,;\,0{,}75]$</span>, en réalité vers 0,682.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · COMBIEN D’ÉTAPES ?</div>
+            <div class="b-text"><p>Un intervalle de départ a pour longueur 1. Combien d’étapes faut-il pour une précision de 0,001 ?</p></div>
+            <div class="b-sol"><p>On cherche $\tfrac{1}{2^n} < 0{,}001$, donc $2^n > 1000$.</p>
+                <p>$2^9 = 512$, $2^{10} = 1024$ : <span class="b-res">10 étapes</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Résous graphiquement : a) $x^2 = x + 2$ &nbsp; b) $x^2 = 2^x$ &nbsp; c) $\ln x = 2 - x$ (à une décimale près)</p></div>
+            <div class="b-sol"><p>a) $-1$ et $2$ &nbsp; b) $2$, $4$ et environ $-0{,}77$ &nbsp; c) environ $1{,}6$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dans quel intervalle de longueur 1 se trouve une solution ? a) $\cos x = x$ &nbsp; b) $\ln x = 2 - x$ &nbsp; c) $x^3 - 2x - 1 = 0$ (solution positive)</p></div>
+            <div class="b-sol"><p>a) $[0\,;\,1]$ &nbsp; b) $[1\,;\,2]$ &nbsp; c) $[1\,;\,2]$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Effectue trois étapes de dichotomie pour $h(x) = e^x + x - 3$ sur $[0\,;\,1]$. Donne l’intervalle final.</p></div>
+            <div class="b-sol"><p>$h(0{,}5) < 0$ → $[0{,}5\,;\,1]$ ; $h(0{,}75) \approx -0{,}13$ → $[0{,}75\,;\,1]$ ; $h(0{,}875) \approx 0{,}27$ → $[0{,}75\,;\,0{,}875]$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Combien d’étapes de dichotomie faut-il pour réduire un intervalle de longueur 1 à moins de 0,01 ? Et à moins de $10^{-6}$ ?</p></div>
+            <div class="b-sol"><p>7 étapes ($2^7 = 128$) ; 20 étapes ($2^{20} \approx 1{,}05$ million).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Explique pourquoi la dichotomie « trouve » un résultat pour $h(x) = \dfrac{1}{x}$ sur $[-1\,;\,1]$, alors que $h$ n’a aucun zéro.</p></div>
+            <div class="b-sol"><p>$h(-1) < 0 < h(1)$, mais $h$ n’est pas continue en 0 (pôle). L’hypothèse « continue » n’est pas remplie ; la méthode converge vers le pôle.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,125" data-ph="longueur"><p class="b-q-text">On coupe $[2\,;\,3]$ trois fois en deux. Quelle est alors la longueur de l’intervalle ?</p><div class="b-sol"><p>$\tfrac{1}{8}$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="nombre"><p class="b-q-text">Combien de solutions $x^2 = 2^x$ a-t-elle ?</p><div class="b-sol"><p>3</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">De quoi la dichotomie a-t-elle besoin au départ ?</p><div class="b-mc"><button>de la dérivée</button><button>d’une fonction continue avec un changement de signe</button><button>d’une valeur de départ proche de la solution</button></div><div class="b-sol"><p>$h(a) \cdot h(b) < 0$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="La méthode de Newton" data-toc-k="2" data-toc-short="2 Newton">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>La méthode de Newton</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La tangente à $f(x) = x^2 - 2$ en $(2\,;\,2)$ a pour pente 4 : $t(x) = 4x - 6$. Elle coupe l’axe des abscisses en $1{,}5$.
+                La tangente en $(1{,}5\,;\,0{,}25)$ coupe en $1{,}4167$, la suivante en $1{,}41422$. Au bout de trois étapes, cinq décimales de $\sqrt{2} \approx 1{,}414\,21$ sont exactes.
+                L’idée : près du point de contact, la tangente est une bonne approximation de la courbe, et son zéro est facile à calculer.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MÉTHODE DE NEWTON</div>
+                <div class="b-text">
+                    <p>En partant d’une valeur de départ $x_0$ : $$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$</p>
+                    <p><b>Établissement :</b> tangente $t(x) = f(x_n) + f'(x_n)(x - x_n)$, puis résoudre $t(x) = 0$ en isolant $x$.</p>
+                    <p><b>Avantage :</b> au voisinage d’un zéro simple, le nombre de décimales exactes double à peu près à chaque étape.</p>
+                    <p><b>Limites :</b> $f$ doit être dérivable ; $f'(x_n) = 0$ arrête la méthode ; une valeur de départ mal choisie mène à un autre zéro, dans un cycle ou au loin. On s’arrête quand $|x_{n+1} - x_n| < \varepsilon$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Héron :</b> pour $f(x) = x^2 - a$, la méthode de Newton devient la très ancienne règle $x_{n+1} = \tfrac{1}{2}\left(x_n + \tfrac{a}{x_n}\right)$ pour extraire une racine carrée.</p>
+            <p class="b-note"><b>Dans le CAS :</b> définir la suite par récurrence, par exemple $x_{n+1} = x_n - \dfrac{x_n^2 - 2}{2x_n}$ avec $x_0 = 1$, et afficher la liste des termes.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · MÉTHODE DE NEWTON</div>
+        <p class="b-help" style="margin:0 0 12px">Déplace la valeur de départ sur l’axe des abscisses et avance étape par étape. Essaie, pour $x^3 - 2x + 2$, la valeur de départ 0 : que se passe-t-il ?</p>
+        <div data-widget="newton"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · DEUX ÉTAPES</div>
+            <div class="b-text"><p>Newton pour $f(x) = x^3 - x - 1$ avec $x_0 = 1$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 1$. $x_1 = 1 - \dfrac{-1}{2} = 1{,}5$.</p>
+                <p>$x_2 = 1{,}5 - \dfrac{0{,}875}{5{,}75} \approx 1{,}348$ ; <span class="b-res">la solution vaut environ 1,3247</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · UN CYCLE</div>
+            <div class="b-text"><p>Newton pour $f(x) = x^3 - 2x + 2$ avec $x_0 = 0$.</p></div>
+            <div class="b-sol"><p>$x_1 = 0 - \dfrac{2}{-2} = 1$, $x_2 = 1 - \dfrac{1}{1} = 0$, $x_3 = 1$, …</p>
+                <p><span class="b-res">La suite saute sans fin entre 0 et 1</span>. Avec $x_0 = -2$, cela marche : zéro vers $-1{,}77$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule deux étapes de Newton : a) $f(x) = x^2 - 2$, $x_0 = 1$ &nbsp; b) $f(x) = e^x + x - 3$, $x_0 = 1$</p></div>
+            <div class="b-sol"><p>a) $1{,}5$ ; $1{,}4167$ &nbsp; b) $0{,}807$ ; $0{,}7921$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule avec Héron une étape pour $\sqrt{10}$ à partir de $x_0 = 3$ et compare avec la calculatrice.</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{2}\left(3 + \tfrac{10}{3}\right) = \tfrac{19}{6} \approx 3{,}1667$ ; $\sqrt{10} \approx 3{,}1623$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Résous $\cos x = x$ avec Newton à partir de $x_0 = 1$, à quatre décimales près. Combien d’étapes de dichotomie faudrait-il à partir de $[0\,;\,1]$ pour la même précision ?</p></div>
+            <div class="b-sol"><p>$0{,}7504$ ; $0{,}7391$ ; $0{,}7391$ : solution $0{,}7391$ au bout de trois étapes. Dichotomie : environ 14 étapes.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pourquoi Newton échoue-t-il pour $f(x) = x^2 - 4x + 5$, quelle que soit la valeur de départ ? Justifie aussi graphiquement.</p></div>
+            <div class="b-sol"><p>$f(x) = (x - 2)^2 + 1 > 0$ : il n’y a pas de zéro. La suite saute au hasard d’un côté à l’autre ; en $x_n = 2$, on a même $f'(x_n) = 0$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Évalue les trois approches pour $x^3 + x - 1 = 0$ : algébrique, graphique, numérique. Laquelle donne quoi ?</p></div>
+            <div class="b-sol"><p>Algébriquement, il existe bien une formule, mais elle est compliquée ; graphiquement : une solution vers 0,7 ; numériquement (Newton à partir de 1) : 0,75 ; 0,686 ; 0,6823 — aussi précis qu’on veut.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1,5" data-ph="x₁ ="><p class="b-q-text">Newton pour $x^2 - 2$ à partir de $x_0 = 1$ : combien vaut $x_1$ ?</p><div class="b-sol"><p>1,5</p></div></div>
+        <div class="b-q" data-ans="0,75" data-tol="0.001" data-ph="x₁ ="><p class="b-q-text">Newton pour $\cos x - x$ à partir de $x_0 = 1$ : $x_1$ à deux décimales près ?</p><div class="b-sol"><p>0,75</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quand la méthode de Newton s’arrête-t-elle à coup sûr ?</p><div class="b-mc"><button>quand $f(x_n) > 0$</button><button>au bout de cinq étapes</button><button>quand $f'(x_n) = 0$</button></div><div class="b-sol"><p>Tangente horizontale sans zéro.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Écris sous forme de recherche de zéro et donne un intervalle de départ : a) $e^x = 3 - x$ &nbsp; b) $\ln x = 2 - x$ &nbsp; c) $\cos x = x$</p></div>
+            <div class="b-sol"><p>a) $e^x + x - 3$, $[0\,;\,1]$ &nbsp; b) $\ln x + x - 2$, $[1\,;\,2]$ &nbsp; c) $\cos x - x$, $[0\,;\,1]$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 1.4 :</b> les abscisses des extremums de $f(x) = x^4 - 3x^2 + x$ sont les zéros de $f'(x) = 4x^3 - 6x + 1$. Détermine-les avec Newton à trois décimales près.</p></div>
+            <div class="b-sol"><p>Valeurs de départ tirées du croquis, p. ex. $-1{,}3$ ; $0{,}2$ ; $1{,}1$ : zéros vers $-1{,}301$ ; $0{,}170$ ; $1{,}131$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Montre que si $x_n$ est exactement un zéro, alors $x_{n+1} = x_n$. Qu’est-ce que cela signifie pour la méthode ?</p></div>
+            <div class="b-sol"><p>$f(x_n) = 0$, donc on ne soustrait rien. Le zéro est un point fixe : la suite y reste.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Pour $f(x) = \sqrt[3]{x}$, la méthode de Newton s’éloigne quelle que soit la valeur de départ $x_0 \neq 0$. Calcule $x_1$ en général et explique.</p></div>
+            <div class="b-sol"><p>$f'(x) = \tfrac{1}{3}x^{-\frac{2}{3}}$, $x_1 = x_0 - \dfrac{x_0^{1/3}}{\frac{1}{3}x_0^{-2/3}} = x_0 - 3x_0 = -2x_0$. La distance au zéro double à chaque étape.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : qui a inventé la méthode de Newton ?" data-toc-k="X" data-toc-short="Newton">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Qui a inventé la méthode de Newton ?</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En 1669, Isaac Newton décrivit dans son écrit « De analysi » une méthode d’approximation pour les équations ; le texte ne fut imprimé qu’en 1711. Sa méthode fut rendue publique pour la première fois en 1685, dans le manuel d’algèbre de John Wallis.
+                Mais Newton calculait autrement que nous : à chaque étape, il transformait à nouveau l’équation et n’utilisait pas de dérivées.</p>
+            <p>Joseph Raphson en fit en 1690 une formule qu’on peut appliquer encore et encore, et Thomas Simpson décrivit en 1740 la méthode à l’aide des fluxions,
+                c’est-à-dire de la dérivée, telle que nous la connaissons aujourd’hui. L’historien des sciences Nick Kollerstrom a donc qualifié l’attribution à Newton de « mythe tenace ».
+                Et l’idée pour les racines carrées est bien plus ancienne encore : Héron d’Alexandrie calculait déjà ainsi au Ier siècle.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> N. Kollerstrom, « Thomas Simpson and ‘Newton’s method of approximation’: an enduring myth », British Journal for the History of Science 25 (1992), p. 347–354.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>GRAPHIQUEMENT</h4><p>Solutions = abscisses des points d’intersection ; le croquis montre leur nombre et leur position.</p></div>
+        <div><p>$x^2 = 2^x$ : trois solutions</p></div></div>
+    <div class="b-rueck"><div><h4>CHANGEMENT DE SIGNE</h4><p>Continue et $h(a) \cdot h(b) < 0$ : un zéro entre les deux.</p></div>
+        <div><p>$e^x + x - 3$ sur $[0\,;\,1]$</p></div></div>
+    <div class="b-rueck"><div><h4>DICHOTOMIE</h4><p>Couper en deux ; longueur au bout de $n$ étapes : $\tfrac{b - a}{2^n}$.</p></div>
+        <div><p>10 étapes : moins de 0,001</p></div></div>
+    <div class="b-rueck"><div><h4>NEWTON</h4><p>$x_{n+1} = x_n - \tfrac{f(x_n)}{f'(x_n)}$ ; rapide, mais dépend de la valeur de départ.</p></div>
+        <div><p>$\sqrt{2}$ : 1 ; 1,5 ; 1,4167 ; 1,41422</p></div></div>
+    <div class="b-rueck"><div><h4>JUGER</h4><p>Algébrique : exact ; graphique : vue d’ensemble ; numérique : aussi précis qu’on veut.</p></div>
+        <div><p>Cycle pour $x^3 - 2x + 2$ à partir de 0</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="7" data-ph="étapes"><p class="b-q-text">Combien d’étapes de dichotomie rendent un intervalle de longueur 1 plus court que 0,01 ?</p><div class="b-sol"><p>$2^7 = 128$</p></div></div>
+            <div class="b-q" data-ans="1,5" data-ph="x₁ ="><p class="b-q-text">Newton pour $x^3 - x - 1$ à partir de $x_0 = 1$ : $x_1$ ?</p><div class="b-sol"><p>1,5</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">De quelle condition Newton a-t-il besoin, mais pas la dichotomie ?</p><div class="b-mc"><button>la dérivabilité</button><button>la continuité</button><button>un changement de signe</button></div><div class="b-sol"><p>La formule contient $f'$.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="0,792" data-tol="0.001" data-ph="x ="><p class="b-q-text">Résous $e^x = 3 - x$ à trois décimales près.</p><div class="b-sol"><p>0,792</p></div></div>
+            <div class="b-q" data-ans="0,739" data-tol="0.001" data-ph="x ="><p class="b-q-text">Résous $\cos x = x$ à trois décimales près.</p><div class="b-sol"><p>0,739</p></div></div>
+            <div class="b-q" data-ans="1,325" data-tol="0.001" data-ph="x ="><p class="b-q-text">Résous $x^3 - x - 1 = 0$ à trois décimales près.</p><div class="b-sol"><p>1,325</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-bisektion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DICHOTOMIE</span><span class="b-lab-what">Résoudre graphiquement, couper des intervalles en deux, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-newton-verfahren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MÉTHODE DE NEWTON</span><span class="b-lab-what">Tangentes, convergence, échecs, 20 exercices</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 11e année, Grundkurs · Domaine optionnel 2 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-fr/numerik.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-fr/gy11.js"></script>
+</body>
+</html>
