@@ -72,7 +72,7 @@ window.BuchFR && BuchFR.add('gy11lk', {
         ['. Mach $\\varepsilon$ kleiner: Es gibt immer noch ein $\\delta > 0$. Genau das heißt „Grenzwert“.', '. Rends $\\varepsilon$ plus petit : il existe toujours un $\\delta > 0$. C’est exactement cela, une « limite ».'],
         ['Kein $\\delta$ passt:', 'Aucun $\\delta$ ne convient :'],
         ['So nah man der 0 von links auch kommt, dort ist $f(x) = -1$, also mindestens 2 vom behaupteten Grenzwert entfernt. Für $\\varepsilon < 2$ scheitert jede Wahl. Die Funktion hat bei 0 keinen Grenzwert, nur einseitige.',
-            'Aussi près de 0 que l’on soit à gauche, on y a $f(x) = -1$, donc un écart d’au moins 2 avec la limite affirmée. Pour $\\varepsilon < 2$, tout choix échoue. La fonction n’a pas de limite en 0, seulement une limite à gauche et une limite à droite.'],
+            'aussi près de 0 que l’on soit à gauche, on y a $f(x) = -1$, donc un écart d’au moins 2 avec la limite affirmée. Pour $\\varepsilon < 2$, tout choix échoue. La fonction n’a pas de limite en 0, seulement une limite à gauche et une limite à droite.'],
         // stetigkeit (the rule below turns "Stetig an der Stelle 1:" first; the piece is for tools/buch-en/check.mjs)
         ['Stetig an der Stelle ', 'Continue en '],
         ['linksseitiger Grenzwert, rechtsseitiger Grenzwert und Funktionswert stimmen überein. Der Graph lässt sich ohne Absetzen zeichnen.',
