@@ -22,7 +22,9 @@ const TYPES = {
 };
 
 function wrangler(args, { quiet = false } = {}) {
-    const r = spawnSync('npx', ['--yes', 'wrangler', ...args], { encoding: 'utf8' });
+    // wrangler pinned: 4.152 answers every object put with 403 "Please enable R2" (10042) although R2 is on and 4.40 uploads
+    // with the same login (25.10.2026) - try a newer one before you lift the pin
+    const r = spawnSync('npx', ['--yes', 'wrangler@4.40.0', ...args], { encoding: 'utf8' });
     const out = (r.stdout || '') + (r.stderr || '');
     if (r.status !== 0 && !quiet) {
         if (/Not logged in|CLOUDFLARE_API_TOKEN|auth token has expired/i.test(out)) {

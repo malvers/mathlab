@@ -320,7 +320,9 @@
     // Doc, 24.10.2026: "Bilder aus der Lebensrealität … das wünsche ich mir wirklich sehr"; 25.10.: the translations
     // get them too, so the photos are placed by this code, not written into each chapter file.
     const BOOK = ((location.pathname.match(/\/buch\/([^/]+)\//) || [])[1] || '').replace(/-(en|es|it|fr)$/, '');
-    const FOTO_DIR = ME ? new URL('../buch/fotos/', ME).href : '../fotos/';
+    // the photos live in Cloudflare R2 (bucket "media", folder buch/fotos/), not in git: free delivery, 10 GB
+    // (Doc, 25.10.2026: "warum nicht R2?" - "ja! Toll!"); upload: node tools/media_publish.mjs <file> buch/fotos/<name>.jpg
+    const FOTO_DIR = 'https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/buch/fotos/';
     const fotosReady = new Promise(done => {
         if (window.BUCH_FOTOS || !ME) { done(); return; }
         const sc = document.createElement('script');
