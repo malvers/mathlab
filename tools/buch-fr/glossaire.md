@@ -607,3 +607,41 @@ Package fr-8 (Amice), 25.10.2026: decisions made while translating GY 12 (Grundk
 | Prüfungsaufgabe (abi) | exercice d’Abitur | as fr-3; Gebiet: bloc |
 | Cheops, Gizeh, Königselle, Handbreit, Seked | Khéops, Gizeh, coudée royale, palme, seked | 7.2 excursion |
 | online quizzes Konsultation, Generalprobe | Consultation, Répétition générale | cards only, the quizzes stay German |
+## mathegy11lk-fr
+
+<!-- fr-9: terms of this book only -->
+
+Package fr-9 (Dubreil), 25.10.2026: decisions made while translating LK 11 (Gymnasium 11, Leistungskurs); nothing above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Grundkurs, Leistungskurs | stay | start page: le lycée allemand d’enseignement général, de la 5e à la 12e année ; Grundkurs (cours de base), Leistungskurs (cours approfondi) |
+| Wahlbereich 2 | Domaine optionnel 2, chapter OP | as section 1 |
+| Grenzwertsätze, h-Methode, Einschließung | théorèmes sur les limites, méthode du $h$, théorème des gendarmes | 1.1 |
+| abschnittsweise definiert, Nahtstelle | définie par morceaux, point de raccordement | widget stetigkeit |
+| Sprungstelle, hebbare Unstetigkeit | discontinuité de saut, discontinuité supprimable (trou) | 1.1 and widget stetigkeit |
+| Zwischenwertsatz | théorème des valeurs intermédiaires | |
+| lineare Approximation, Knick | approximation affine, point anguleux | 1.2 |
+| Sattelpunkt | point d’inflexion à tangente horizontale | the Merke box of 1.4 names the German word once |
+| links- / rechtsgekrümmt | convexe / concave | the bike picture: virage à gauche / à droite |
+| Polynomdivision | division euclidienne des polynômes | |
+| Steckbrief (title of 1.5), knickfrei, krümmungsruckfrei | Conditions ; fonctions à partir de conditions, sans angle, sans saut de courbure | |
+| Rettungsschwimmerin, Brechungsgesetz | la sauveteuse, la loi de la réfraction (Snell-Descartes) | widget rettung |
+| Typ einer Matrix $(m,n)$, verkettete Matrizen | taille $(m,n)$, matrices compatibles | as the widget matrixprodukt writes it |
+| Einheitsmatrix $E$ | matrice identité $I$ | 2 says once: le manuel allemand la note $E$ |
+| Verflechtung, Gozinto-Graph, ME | production en plusieurs étapes, graphe de Gozinto, u. (unités de quantité) | widget verflechtung; Zartbitter / Vollmilch: noir / au lait |
+| Bisektion, Fixpunktiteration, Spinnennetz, anziehend / abstoßend | dichotomie, méthode du point fixe, toile d’araignée, attractif / répulsif | OP |
+| Zylinder-, Kugelkoordinaten, Länge, Breite | coordonnées cylindriques, sphériques, longitude, latitude | 3.1, widget koordsys3d |
+| Teilverhältnis, geschlossener Vektorzug, Koeffizientenvergleich | rapport de partage, relation de Chasles fermée, identification des coefficients | 3.2 |
+| räumliches Viereck | quadrilatère gauche | widget varignon3d |
+| Spurgerade, Schnittgerade, First | trace, droite d’intersection, faîtage | 3.3 |
+| schneidend, identisch (two planes) | sécants, confondus | masculine for planes: rule in js/buch-fr/gy11lk-vek.js; lines stay feminine (js/buch-fr/vektoren.js) |
+| Streichen, Einfallen | direction, pendage | 3.3 excursion |
+| Ziegenproblem, Pasch, Skatblatt | problème de Monty Hall, double, jeu de 32 cartes | |
+| Treffer / Niete (path letters in the page text) | S / E | 4.3 example 2: SSEE … |
+| $B(n;\, p)$ | $B(n\,;\,p)$ | page text; the galton widget by a rule in js/buch-fr/gy11lk-stoch.js |
+| krank $K$, Wappen / Zahl $W$ / $Z$ (page text) | malade $M$, face / pile $F$ / $P$ | as section 5 |
+| Brille $B$, linkshändig $L$ (4.2) | lunettes $L$, gaucher $G$ | page text only |
+| Klausur 11/I, Klausurtraining 11/II | DEVOIR SURVEILLÉ 11/I, ENTRAÎNEMENT AU DEVOIR SURVEILLÉ 11/II | online cards, en allemand |
+| Lab names | LABORATOIRE DES PENTES, LABORATOIRE DIFFÉRENTIEL, SOLIDES, VECTEURS, LE JEU DE DÉS, LABORATOIRE DES BINÔMES, PLANCHE DE GALTON, DROITE D’AJUSTEMENT | |
+| German titles in the sources (Heine, Kolmogorow, Grassmann) | stay German, with a French translation in « » where it helps | encheck lists them as German on purpose |
