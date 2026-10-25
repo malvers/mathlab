@@ -194,7 +194,22 @@ window.BUCH_FOTOS = {
         'oetzi': { artist: 'Mannivu', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Ricostruzione_di_%C3%96tzi_-_Particolare_del_volto.jpg',
             alt: { de: 'Rekonstruktion von Ötzi im Südtiroler Archäologiemuseum', en: 'Reconstruction of Ötzi in the South Tyrol Museum of Archaeology' } },
         'duerer-zeichner': { artist: 'Rijksmuseum', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Tekenaar_tekent_een_luit,_RP-P-OB-1491.jpg',
-            alt: { de: 'Albrecht Dürer: Der Zeichner der Laute (1525)', en: 'Albrecht Dürer: The draughtsman of the lute (1525)' } }
+            alt: { de: 'Albrecht Dürer: Der Zeichner der Laute (1525)', en: 'Albrecht Dürer: The draughtsman of the lute (1525)' } },
+        // mathegy11 (2026-10-25)
+        'zahnraeder': { artist: 'W.carter', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Cog_wheel_on_a_huge_crane_claw_-_1.jpg',
+            alt: { de: 'Ineinandergreifende Zahnräder', en: 'Meshing gears' } },
+        'tabletten': { artist: 'Pöllö', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Tablets_pills_medicine_medical_waste.jpg',
+            alt: { de: 'Tabletten', en: 'Tablets' } },
+        'rechenstaebchen': { artist: 'Gary Todd from Xinzheng, China', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Western_Han_Lead_Counting_Rods_(9831915095).jpg',
+            alt: { de: 'Chinesische Rechenstäbchen', en: 'Chinese counting rods' } },
+        'rutsche': { artist: 'Selbymay', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Tadoussac_-_Playground_slide.jpg',
+            alt: { de: 'Eine Rutsche auf dem Spielplatz', en: 'A slide in a playground' } },
+        'hamilton-tafel': { artist: 'Brendan Ward', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Broombridge_Hamilton_Plaque.jpg',
+            alt: { de: 'Die Gedenktafel für William Rowan Hamilton an der Broom Bridge in Dublin', en: 'The plaque for William Rowan Hamilton on Broom Bridge, Dublin' } },
+        'hocker': { artist: '', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Sgabello_a_tre_gambe_MEG_8213.tif',
+            alt: { de: 'Ein dreibeiniger Holzhocker', en: 'A three-legged wooden stool' } },
+        'keimlinge': { artist: 'Cbarlow', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Maclura_pomifera_fruit_sprouting_seeds.jpg',
+            alt: { de: 'Junge Keimlinge', en: 'Young seedlings' } }
     },
     books: {
         mathe11: {
@@ -429,6 +444,49 @@ window.BUCH_FOTOS = {
                 { foto: 'widerstaende', at: '#le2 .b-einstieg', put: 'in', w: 30 },
                 { foto: 'kerze', at: '#le3 .b-einstieg', put: 'in', w: 26, pos: '50% 45%' },
                 { foto: 'duerer-zeichner', at: '#exkursion .b-row > .b-text', put: 'in', w: 38 }
+            ]
+        },
+        mathegy11: {
+            'lb1-1.html': [
+                { foto: 'tee', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'schildkroete', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb1-2.html': [
+                { foto: 'newton', at: '#exkursion .b-row > .b-text', put: 'in', w: 30, pos: '50% 30%' }
+            ],
+            'lb1-3.html': [
+                { foto: 'zahnraeder', at: '#le3 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb1-4.html': [
+                { foto: 'alpenpanorama', at: '#auftakt .b-hero', put: 'after', wide: true },
+                { foto: 'tabletten', at: '#le3 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'fermat', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 22%' }
+            ],
+            'lb2.html': [
+                { foto: 'rechenstaebchen', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }
+            ],
+            'lb1-5.html': [
+                { foto: 'rutsche', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'karton', at: '#le2 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb3-1.html': [
+                { foto: 'kondensstreifen', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'hamilton-tafel', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb3-2.html': [
+                { foto: 'buntstifte', at: '#le2 .b-einstieg', put: 'in', w: 32 }
+            ],
+            'lb3-3.html': [
+                { foto: 'hocker', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'raytracing', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb4-1.html': [
+                { foto: 'bingokugeln', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'zwei-rote-wuerfel', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb4-2.html': [
+                { foto: 'keimlinge', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'jakob-bernoulli', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 22%' }
             ]
         }
     }
