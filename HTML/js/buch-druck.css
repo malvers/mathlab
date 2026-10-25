@@ -1,6 +1,7 @@
 /* buch-druck.css — pages for the print edition of a textbook (js/buch-druck.js, set by Paged.js).
  * A4, page number at the foot, the chapter as running head, the cover bleeds to the edge. Colours are the light
  * scheme of js/farbschema.js (the page forces it); this sheet is data-fs-skip and writes print colours itself.
+ * Rules learnt from the first KDP proof: tools/kdp/druckregeln.md; check a book with tools/kdp/druckcheck.mjs.
  */
 @page {
     size: A4;
@@ -13,6 +14,9 @@
 /* the cover is always page 1 - :first is the sure way in Paged.js, the named page alone was not applied */
 @page :first { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
 @page front { @top-left { content: none; } }
+/* the cover does not count: the first sheet after it is page 1, as in the KDP interior, which starts without the cover
+ * (Doc, 24.10.2026: "Wir beginnen auf Seite 2, weil wahrscheinlich der Einband die Seite 1 ist") */
+.d-front { counter-reset: page 1; }
 
 /* ---- the screen around it: status bar, grey desk under the sheets ----
  * Only while html.d-screen is set: js/buch-druck.js removes it on "beforeprint" and puts it back afterwards.
@@ -91,6 +95,9 @@ body.b-print .b-lab { padding: 6pt 8pt; margin: 0 0 6pt; }
 body.b-print .b-lab-icon { width: 30pt; height: 30pt; }
 body.b-print .b-lab-icon svg { width: 28pt; height: 28pt; }
 body.b-print .b-lab::after { content: attr(href); display: block; font-size: 7.5pt; color: #6d8199; margin-left: 8pt; }
+/* a tree diagram keeps a minimum width on screen (it scrolls there); on paper it fits the column it stands in
+ * (p. 120 of the KDP proof ran over the right edge, beside the four-field table) */
+body.b-print .st-tree { min-width: 0 !important; max-width: 100%; height: auto; }
 body.b-print .b-check-score { display: none; }
 body.b-print .b-answer { margin: 6pt 0 2pt; padding-top: 14pt; border-bottom: 1px solid #b8c3d4; width: 60%; font-size: 9pt; color: #6d8199; }
 body.b-print .b-mc { display: block; }

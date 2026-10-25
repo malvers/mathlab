@@ -126,6 +126,43 @@
         return any ? part : null;
     }
 
+    // ---------- a heading never stays alone at the foot of a page ----------
+    // Doc, 24.10.2026, with the KDP proof in hand: "Aufgaben" (p. 34), "Wiederholen · Vertiefen · Vernetzen" (p. 38),
+    // "Rückblick" (p. 51) and "Gauß-Verfahren" (p. 101) stood alone at the bottom - "die fühlen sich dann auch einsam".
+    // Paged.js 0.4.3 ignores break-after: avoid. So after every page: if its last content is a heading (or a band with
+    // its heading), the page ends before it and the heading opens the next one. The approach of
+    // pagedjs.org/plugins/temporary-fix-for-break-after-avoid; a heading that already opens its page stays.
+    const KEEP = 'h1, h2, h3, h4, .b-band, .d-loes-h, .d-loes-t';
+    function contentNodes(area) {
+        const out = [];
+        const w = document.createTreeWalker(area, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+            acceptNode: n => (n.nodeType === 3 ? n.data.trim() : n.matches('img, svg, canvas, hr')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+        });
+        while (w.nextNode()) out.push(w.currentNode);
+        return out;
+    }
+    if (window.Paged && Paged.Handler) Paged.registerHandlers(class KeepWithNext extends Paged.Handler {
+        afterPageLayout(pageEl, page, breakToken, chunker) {
+            if (!breakToken || !breakToken.node || !page.area) return;
+            const nodes = contentNodes(page.area);
+            let i = nodes.length - 1, first = null;
+            while (i >= 0) {
+                const n = nodes[i], h = (n.nodeType === 3 ? n.parentElement : n).closest(KEEP);
+                if (!h || !page.area.contains(h)) break;
+                first = h;
+                while (i >= 0 && h.contains(nodes[i])) i--;
+            }
+            if (!first || i < 0) return;
+            const src = chunker.source && chunker.source.querySelector('[data-ref="' + first.dataset.ref + '"]');
+            if (!src) return;
+            breakToken.node = src;
+            breakToken.offset = 0;
+            // off this page: the heading and the empty wrappers after it
+            for (let n = first; n && n !== page.area; n = n.parentNode) while (n.nextSibling) n.nextSibling.remove();
+            first.remove();
+        }
+    });
+
     async function build() {
         const book = document.getElementById('d-book');
         // cover and how-to: already in druck.html, online they are the start page; contents next
