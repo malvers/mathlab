@@ -107,6 +107,11 @@ window.BuchFR && BuchFR.add('analysis', {
         'wöchentlich': 'chaque semaine', 'täglich': 'chaque jour', 'stündlich': 'chaque heure', 'minütlich': 'chaque minute',
         // book fr-7 mathegy11-fr:
         // book fr-8 mathegy12-fr:
+        // titelbildgy12 (start page), integrieren (5.1)
+        'Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor':
+            'Couverture : une aire sous une courbe avec des trapèzes, un histogramme avec la zone de rejet en rouge, une droite qui traverse un plan avec son angle d’intersection et le vecteur normal',
+        'Lineare Verkettung': 'Composées affines',
+        'z. B. x^3/3 - 2x oder -cos(2x)/2': 'p. ex. x^3/3 - 2x ou -cos(2x)/2',
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
     },
@@ -243,6 +248,9 @@ window.BuchFR && BuchFR.add('analysis', {
             'Plus les intérêts sont versés souvent, plus le capital se rapproche de $\\mathrm{e} = 2{,}718281\\ldots$, sans jamais le dépasser : $'],
         // book fr-7 mathegy11-fr:
         // book fr-8 mathegy12-fr:
+        // integrieren ("3 von 5 gelöst" has the rule of fr-2)
+        ['Bestimme eine Stammfunktion: $f(x) = ', 'Détermine une primitive : $f(x) = '],
+        ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Pas encore. Dérive ta solution pour la vérifier. Indice : '],
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
     ],
