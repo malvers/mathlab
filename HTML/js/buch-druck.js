@@ -31,6 +31,15 @@
         return SITE + u.pathname + u.hash;
     }
 
+    // a lab card on paper: the short address under its text and a QR code at the right edge (js/buch-druck.css)
+    function labCard(a) {
+        const url = a.getAttribute('href') || '';
+        const text = a.querySelector(':scope > span:not(.b-lab-icon)');
+        if (!/^https?:/.test(url) || !text) return;
+        text.appendChild(el('span', 'd-lab-url', url.replace(/^https?:\/\//, '')));
+        a.appendChild(el('span', 'd-lab-qr', qrSvg(url)));
+    }
+
     async function chapter(c, n) {
         const src = await (await fetch(c.file)).text();
         const doc = new DOMParser().parseFromString(src, 'text/html');
@@ -57,6 +66,7 @@
         sec.querySelectorAll('[id]').forEach(e => { if (e !== sec) e.id = pre + '-' + e.id; });
         sec.querySelectorAll('a[href^="#"]').forEach(a => { a.setAttribute('href', '#' + pre + '-' + a.getAttribute('href').slice(1)); });
         sec.querySelectorAll('a[href]').forEach(a => { if (!a.getAttribute('href').startsWith('#')) a.setAttribute('href', absolute(a.getAttribute('href'))); });
+        sec.querySelectorAll('a.b-lab').forEach(labCard);
         sec.querySelectorAll('.b-sec').forEach(s => s.removeAttribute('data-toc'));
         // every interactive box says where it lives
         sec.querySelectorAll('.b-widget').forEach(w => w.appendChild(el('p', 'd-online', 'Interaktiv im Online-Buch: ' + url.replace('https://', ''))));
@@ -126,6 +136,35 @@
         return any ? part : null;
     }
 
+    // ---------- the foreword: one page before "So arbeitest du mit diesem Buch", the same in every book ----------
+    // Doc, 24.10.2026, with the KDP proof: "wir brauchen ein Grußwort von Doc Alvers, was das Aim ist … dass wir investieren,
+    // um bessere Bildung zu ermöglichen, dass wir das alles aus freien Stücken machen und dass es kein Geld kostet …
+    // und ein Bild von Doc Alvers". German only for now: the translated books keep their first page as it is.
+    function grusswort() {
+        if ((document.documentElement.lang || 'de') !== 'de') return null;
+        const sec = el('section', 'd-gruss');
+        sec.innerHTML =
+            '<h1>Grußwort</h1>' +
+            '<img class="d-gruss-foto" src="../../resources/team/alvers_final.png" alt="Dr. Michael R. Alvers">' +
+            '<div class="b-text">' +
+            '<p>Liebe Schülerin, lieber Schüler,</p>' +
+            '<p>dieses Buch ist aus einer einfachen Überzeugung entstanden: Gute Bildung darf nicht am Geld scheitern. Deshalb gibt es alles, was du hier ' +
+            'in der Hand hältst, auch als Online-Buch – kostenlos, werbefrei und ohne Anmeldung. Niemand sammelt dabei deine Daten.</p>' +
+            '<p>Ich bin Physiker, habe ein Software-Unternehmen gegründet und unterrichte heute Mathematik und Informatik in Dresden. Das Mathe-Labor ' +
+            'baue ich aus freien Stücken. Ich stecke Zeit und Geld hinein, weil ich überzeugt bin, dass sich diese Investition lohnt: in dich und in ' +
+            'bessere Bildung für alle. Geholfen hat mir dabei ein ungewöhnliches Team – KI-Agenten, die nach meinen Vorgaben programmieren, zeichnen, ' +
+            'rechnen und übersetzen. So sind rund 100 interaktive Labs und 20 Lehrbücher in mehreren Sprachen entstanden.</p>' +
+            '<p>Mathematik soll man nicht nur lesen, sondern anfassen. Im Online-Buch kannst du jeden Graphen verschieben und jeden Zufallsversuch ' +
+            'tausendmal laufen lassen, die QR-Codes in diesem Buch bringen dich direkt dorthin. Probier aus, mach Fehler – genau dabei lernt man am meisten.</p>' +
+            '<p>Und wenn du im Buch einen Fehler findest: Sag es mir. Über „Fehler melden“ im Online-Buch landet jede Meldung direkt bei mir.</p>' +
+            '<p>An die Lehrerinnen und Lehrer: Nutzen Sie alles gern im Unterricht – genau dafür ist es da.</p>' +
+            '<p>Viel Freude und viel Erfolg!</p>' +
+            '</div>' +
+            '<p class="d-gruss-sig"><b>Dr. Michael R. Alvers</b><br>Doc Alvers Mathe-Labor · docalvers.de</p>';
+        sec.dataset.ziel = 'index.html|start|';
+        return sec;
+    }
+
     // ---------- a heading never stays alone at the foot of a page ----------
     // Doc, 24.10.2026, with the KDP proof in hand: "Aufgaben" (p. 34), "Wiederholen · Vertiefen · Vernetzen" (p. 38),
     // "Rückblick" (p. 51) and "Gauß-Verfahren" (p. 101) stood alone at the bottom - "die fühlen sich dann auch einsam".
@@ -169,6 +208,10 @@
         const tag = (sel, z) => { const e = book.querySelector(sel); if (e) e.dataset.ziel = z; };
         tag('.d-cover', 'index.html|start|');
         tag('.d-front', 'index.html|sogehts|');
+        const gruss = grusswort(), front = book.querySelector('.d-front');
+        if (gruss && front) front.before(gruss);
+        // page 1 is the first sheet after the cover (js/buch-druck.css .d-p1)
+        (gruss || front)?.classList.add('d-p1');
         const toc = el('section', 'd-toc');
         toc.appendChild(el('h1', 'd-toc-h', 'Inhalt'));
         const list = el('ol', 'd-toc-list');

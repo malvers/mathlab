@@ -58,9 +58,14 @@ Innenteil ohne Einband, Seite 1 ist eine rechte Seite, also stehen ungerade Zahl
 
 ## 6. Links im Druck
 
-Ein Link auf Papier ist nur nützlich, wenn man ihn abtippen oder scannen kann: als kurze URL mit QR-Code,
-sauber untereinander. Offen (Docs Wunsch, 24.10.2026): Lab- und DocPad-Kästen mit QR-Code, ein eigenes
-Icon für Links ins Buch.
+Ein Link auf Papier ist nur nützlich, wenn man ihn abtippen oder scannen kann. Jeder Lab-Kasten (`a.b-lab`)
+zeigt im Druck links das Icon auf dunkelblauer Kachel, daneben Name, Beschreibung und die kurze Adresse
+untereinander und rechts einen QR-Code (`labCard()` in `buch-druck.js`). Kästen ohne eigenes Lab-Icon
+bekommen das Buch-Icon (`ICON.buch` in `buch.js`). Lab-Icons sind für dunklen Grund gezeichnet, deshalb
+bleibt ihre Kachel auch im hellen Schema dunkel.
+
+Vorfälle: S. 12 die Adressen von DocPad und Vorrechnen standen nicht untereinander, Vorrechnen war kaum zu
+sehen; S. 29 Batman und Herz 3D; S. 41 „Mehr üben online“ ohne passendes Icon.
 
 ## 7. Bilder
 

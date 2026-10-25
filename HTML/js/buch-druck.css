@@ -16,7 +16,7 @@
 @page front { @top-left { content: none; } }
 /* the cover does not count: the first sheet after it is page 1, as in the KDP interior, which starts without the cover
  * (Doc, 24.10.2026: "Wir beginnen auf Seite 2, weil wahrscheinlich der Einband die Seite 1 ist") */
-.d-front { counter-reset: page 1; }
+.d-p1 { counter-reset: page 1; }                     /* set by js/buch-druck.js: the foreword, else the how-to */
 
 /* ---- the screen around it: status bar, grey desk under the sheets ----
  * Only while html.d-screen is set: js/buch-druck.js removes it on "beforeprint" and puts it back afterwards.
@@ -54,8 +54,14 @@ body.b-print { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
 /* ---- front matter: how to use, contents ---- */
 .d-front { page: front; break-after: page; }
-.d-front h1, .d-toc-h { font-family: 'Orbitron', sans-serif; font-size: 20pt; margin: 0 0 14pt; color: #0e244e; }
+.d-front h1, .d-gruss h1, .d-toc-h { font-family: 'Orbitron', sans-serif; font-size: 20pt; margin: 0 0 14pt; color: #0e244e; }
 .d-toc { page: front; break-after: page; }
+/* the foreword (js/buch-druck.js grusswort()): Doc's photo to the right, the letter, his name below */
+.d-gruss { page: front; break-after: page; }
+.d-gruss-foto { float: right; width: 50mm; height: 50mm; object-fit: cover; object-position: 50% 30%; border-radius: 8px; margin: 0 0 5mm 8mm; }
+.d-gruss .b-text p { font-size: 11pt; line-height: 1.55; margin: 0 0 9pt; font-family: Raleway, sans-serif; }   /* a letter: "100 Labs" in text figures, not Lab Ziffern */
+.d-gruss-sig { clear: both; margin: 10mm 0 0; font-size: 10.5pt; line-height: 1.5; color: #3a4558; }
+.d-gruss-sig b { font-family: 'Orbitron', sans-serif; font-size: 11pt; color: #0e244e; }
 .d-toc-list { list-style: none; margin: 0; padding: 0; }
 .d-toc-list li { border-bottom: 1px dotted #b8c3d4; }
 .d-toc-list a { display: flex; align-items: baseline; gap: 12pt; padding: 7pt 0; text-decoration: none; color: #18223a; }
@@ -91,10 +97,20 @@ body.b-print .b-widget { break-inside: avoid; }        /* a frozen figure never 
 body.b-print h2, body.b-print h3, body.b-print .b-band, body.b-print .b-box-title { break-after: avoid; }
 body.b-print .b-band { margin-bottom: 10pt; }
 body.b-print .b-labs { display: block; }
-body.b-print .b-lab { padding: 6pt 8pt; margin: 0 0 6pt; }
-body.b-print .b-lab-icon { width: 30pt; height: 30pt; }
-body.b-print .b-lab-icon svg { width: 28pt; height: 28pt; }
-body.b-print .b-lab::after { content: attr(href); display: block; font-size: 7.5pt; color: #6d8199; margin-left: 8pt; }
+/* lab cards on paper: icon · name, what it does and the short address one under the other · QR code to scan with a
+ * phone (js/buch-druck.js labCard). Doc on the KDP proof, p. 12/29/41: the addresses stood wherever the text ended,
+ * "größer und ein QR-Code dahinter, dass man das auch von dort direkt mit dem Mobile scannen kann" */
+body.b-print .b-lab { display: flex; align-items: center; gap: 11pt; padding: 7pt 10pt; margin: 0 0 6pt; }
+body.b-print .b-lab-icon { width: 40pt; height: 40pt; border-radius: 8pt; }
+body.b-print .b-lab-icon svg { width: 36pt; height: 36pt; }
+body.b-print .b-lab-icon svg.b-ic-buch { width: 26pt; height: 26pt; }
+body.b-print .b-lab > span:nth-child(2) { flex: 1 1 auto; min-width: 0; }
+body.b-print .b-lab-name { font-size: 9pt; }
+body.b-print .b-lab-what { font-size: 10pt; }
+.d-lab-url { display: block; margin-top: 4pt; font-size: 8pt; color: #4c5b75; overflow-wrap: anywhere; }
+.d-lab-qr { flex: 0 0 auto; display: block; width: 50pt; height: 50pt; }
+.d-lab-qr svg { display: block; width: 50pt; height: 50pt; }
+.d-lab-qr svg path, .d-lab-qr svg rect[fill="black"] { fill: #0e244e; }
 /* a tree diagram keeps a minimum width on screen (it scrolls there); on paper it fits the column it stands in
  * (p. 120 of the KDP proof ran over the right edge, beside the four-field table) */
 body.b-print .st-tree { min-width: 0 !important; max-width: 100%; height: auto; }

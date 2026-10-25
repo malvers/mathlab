@@ -4,7 +4,7 @@
  *   section.b-sec[id][data-toc]          → entry in the chapter list (left) and the pill strip (narrow screens)
  *   .b-tasks > .b-task[data-lvl]         → numbered task with level mark, "Tipp" / "Lösung" buttons for .b-hint / .b-sol
  *   .b-check > .b-q[data-ans] / [data-mc]→ self-check: answer field (fraction, decimal comma or percent) or choice
- *   a.b-lab[data-lab]                    → lab card with the lab's own icon from js/labs-icons.js
+ *   a.b-lab[data-lab]                    → lab card with the lab's own icon from js/labs-icons.js (without: the book icon)
  *   [data-widget="name"]                 → interactive widget registered with Buch.widget(name, init)
  * Maths: $…$ and $$…$$ via KaTeX auto-render (loaded by the page, fires 'katex-ready').
  * Solved self-checks are remembered per browser (localStorage, wrapped - the page works without it).
@@ -133,7 +133,10 @@
     const ICON = {
         ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>',
         bad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-        ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>'
+        ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+        // a page of the lab that belongs to the book (practice sheets, applications, a sister book): an open book with a tick
+        // (Doc, 24.10.2026, on "Mehr üben online": "ein Icon entwickeln, was auf einen Link im Buch deutet")
+        buch: '<svg class="b-ic-buch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5 8.5 4.5 3 4.5v13c5.5 0 7.5.5 9 2 1.5-1.5 3.5-2 9-2v-13c-5.5 0-7.5.5-9 2z"/><path d="M12 6.5v13"/><path d="M14.8 11.6l1.9 1.9 3.3-3.6"/></svg>'
     };
 
     // ---------- maths ----------
@@ -308,7 +311,7 @@
             const slot = a.querySelector('.b-lab-icon');
             if (slot && !slot.innerHTML.trim()) {
                 const icons = (typeof LAB_ICONS !== 'undefined') ? LAB_ICONS : null;
-                slot.innerHTML = (icons && icons[a.dataset.lab]) || ICON.ext;
+                slot.innerHTML = (icons && icons[a.dataset.lab]) || ICON.buch;
             }
         });
     }
