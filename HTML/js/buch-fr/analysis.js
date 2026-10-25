@@ -118,6 +118,13 @@ window.BuchFR && BuchFR.add('analysis', {
             'Déplace le point P. Le curseur fait glisser Q sur la courbe ; en bas, la distance d(x) augmente et diminue.',
         'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Courbe, point P et point Q sur la courbe, avec leur distance',
         'Abstandsfunktion d(x) mit ihrem Minimum': 'Fonction distance d(x) avec son minimum', '$x$-Koordinate von $Q$': 'Abscisse de $Q$',
+        // geradenschar (8.2): the notes are whole labels, the keys keep \mid as the widget writes it
+        'Büschel': 'Faisceau', 'Parallelen': 'Parallèles', 'Gerade und Parabel': 'Droite et parabole', 'Geradenschar': 'Famille de droites',
+        'Geradenschar mit der hervorgehobenen Geraden für den gewählten Parameter': 'Famille de droites avec, en évidence, la droite du paramètre choisi',
+        'Alle Geraden gehen durch $(2 \\mid 1)$: Für $x = 2$ fällt $a$ heraus. Der Parameter ist die Steigung, eine Gerade fehlt aber: die senkrechte $x = 2$.':
+            'Toutes les droites passent par $(2\\,;\\,1)$ : pour $x = 2$, $a$ disparaît. Le paramètre est la pente, mais il manque une droite : la verticale $x = 2$.',
+        'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
+            'La pente vaut toujours $0{,}5$ : les droites sont parallèles et n’ont aucun point commun. Le paramètre les translate.',
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
     },
@@ -264,6 +271,11 @@ window.BuchFR && BuchFR.add('analysis', {
         ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. C’est pourquoi ce point s’appelle aussi le projeté orthogonal.'],
         ['Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.',
             'Le minimum est au bord de l’intervalle : là, le segment n’est pas forcément perpendiculaire à la tangente.'],
+        // geradenschar
+        ['Schnitt mit $y = x^2 + 2$: $x^2 - ', 'Intersection avec $y = x^2 + 2$ : $x^2 - '], ['x + 1 = 0$, Diskriminante $a^2 - 4 = ', 'x + 1 = 0$, discriminant $a^2 - 4 = '],
+        ['$: zwei Schnittpunkte.', '$ : deux points d’intersection.'], ['$: kein gemeinsamer Punkt.', '$ : aucun point commun.'],
+        ['$: genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', '$ : exactement un point, la droite est <b>tangente</b> à la parabole en $x = '],
+        ['$. Das passiert für $a = \\pm 2$.', '$. Cela arrive pour $a = \\pm 2$.'],
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
     ],
