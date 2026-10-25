@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 11 · Chapitre 3.2 · Droites de l’espace | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Représentation paramétrique, test d’appartenance, points de percée, positions relatives de deux droites. Chapitre 3.2 du manuel interactif Mathématiques · Gymnasium 11 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 3.2 · DOMAINE D’APPRENTISSAGE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 3.2 · DOMAINE D’APPRENTISSAGE 3 · MARS</p>
+            <h1>Droites de l’espace</h1>
+            <p class="b-hero-lead">Un avion monte en ligne droite après le décollage, un rayon laser traverse la pièce, deux barres d’une structure d’escalade se croisent sans se toucher.
+                Avec un point et un vecteur directeur, tu décris n’importe quelle droite de l’espace. Puis tu vérifies si un point lui appartient, où elle perce un plan de coordonnées
+                et quelle est la position relative de deux droites : dans l’espace, il y a pour cela un cas de plus que dans le plan.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">3D</span><span class="b-chip">AVIATION</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>établir des équations de droites sous forme de <b>représentation paramétrique</b> à partir d’un point et d’une direction ou de deux points</li>
+                <li>faire le <b>test d’appartenance</b> et décrire des segments par l’intervalle du paramètre</li>
+                <li>calculer les <b>points de percée</b> avec les plans de coordonnées</li>
+                <li>déterminer la <b>position relative</b> de deux droites : confondues, parallèles, sécantes ou non coplanaires</li>
+                <li>calculer des <b>points d’intersection</b> et décrire des mouvements avec des droites</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Que vaut $\overrightarrow{AB}$ pour $A(1\,;\,0\,;\,2)$ et $B(3\,;\,4\,;\,2)$ ?</p><div class="b-mc"><button>$(2\,;\,4\,;\,0)$</button><button>$(4\,;\,4\,;\,4)$</button><button>$(-2\,;\,-4\,;\,0)$</button></div><div class="b-sol"><p>Extrémité moins origine.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">Résous $1 + 2t = 5$.</p><div class="b-sol"><p>$t = 2$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="s ="><p class="b-q-text">Résous $t = 2 - s$ et $2t = 2s$. Combien vaut $s$ ?</p><div class="b-sol"><p>$t = s = 1$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$(2\,;\,-4\,;\,6)$ et $(-1\,;\,2\,;\,-3)$ sont-ils parallèles ?</p><div class="b-mc"><button>non</button><button>oui</button><button>seulement s’ils ont la même longueur</button></div><div class="b-sol"><p>Facteur $-2$.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA MONTÉE</div>
+            <div class="b-text"><p>À l’instant $t = 0$, un avion est au point $(0\,;\,0\,;\,1)$ (données en km) et se déplace chaque minute de $(6\,;\,8\,;\,0{,}5)$.</p>
+                <ul><li>Où est-il au bout de 1, 2, 5 minutes ? À quelle vitesse vole-t-il ? Quand atteint-il 4 km d’altitude ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DES STYLOS SUR LA TABLE</div>
+            <div class="b-text"><p>Tenez dans l’espace deux stylos comme modèles de droites.</p>
+                <ul><li>Trouvez toutes les positions possibles. Laquelle n’existe que dans l’espace, et pas sur la table ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LES ARÊTES D’UN CUBE</div>
+            <div class="b-text"><p>Choisissez une arête d’un cube. Classez les onze autres arêtes selon leur position par rapport à elle.</p></div>
+            <a class="b-lab" data-lab="koerper" href="../../koerper.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SOLIDES</span><span class="b-lab-what">Faire tourner des cubes et d’autres solides</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Représentation paramétrique d’une droite" data-toc-k="1" data-toc-short="1 Droite">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Représentation paramétrique d’une droite</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Au bout de $t$ minutes, l’avion est au point de vecteur position $\vec{x} = \begin{pmatrix} 0 \\ 0 \\ 1 \end{pmatrix} + t \cdot \begin{pmatrix} 6 \\ 8 \\ 0{,}5 \end{pmatrix}$.
+                Au bout de 2 minutes en $(12\,;\,16\,;\,2)$, au bout de 6 minutes à 4 km d’altitude. Si l’on fait parcourir à $t$ tous les nombres réels, y compris les négatifs,
+                on obtient tous les points d’une droite : le départ, le passé et l’avenir de la trajectoire.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · DROITES DE L’ESPACE</div>
+                <div class="b-text">
+                    <p><b>Représentation paramétrique :</b> $g\colon \vec{x} = \vec{p} + t \cdot \vec{u}$ avec le <b>vecteur position</b> $\vec{p}$ d’un point de la droite et le <b>vecteur directeur</b> $\vec{u} \neq \vec{o}$, $t \in \mathbb{R}$.</p>
+                    <p>Droite passant par $A$ et $B$ : $\vec{x} = \vec{a} + t \cdot \overrightarrow{AB}$. Le <b>segment</b> $[AB]$ correspond à $0 \leq t \leq 1$, le milieu à $t = \tfrac{1}{2}$.</p>
+                    <p><b>Test d’appartenance :</b> on remplace par le point ; si les trois équations des coordonnées donnent le même $t$, le point est sur la droite.</p>
+                    <p><b>Points de percée :</b> points d’intersection avec les plans de coordonnées, p. ex. avec le plan $xy$ par $z = 0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Beaucoup d’équations, une seule droite :</b> n’importe quel point de la droite peut servir de point de départ, n’importe quel multiple non nul du vecteur directeur de direction.</p>
+            <p class="b-note"><b>Mouvement :</b> si $t$ est le temps, alors $|\vec{u}|$ est la vitesse. Pour la montée : $|\vec{u}| = \sqrt{36 + 64 + 0{,}25} \approx 10{,}01$ km par minute.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · UNE DROITE DE L’ESPACE</div>
+        <p class="b-help" style="margin:0 0 12px">Règle le point de départ et le vecteur directeur, fais avancer le point et fais le test d’appartenance. Le widget montre aussi les points de percée.</p>
+        <div data-widget="gerade3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · TEST D’APPARTENANCE</div>
+            <div class="b-text"><p>$g\colon \vec{x} = \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix} + t \begin{pmatrix} 2 \\ 0 \\ -1 \end{pmatrix}$. Les points $P(5\,;\,2\,;\,1)$ et $Q(3\,;\,1\,;\,2)$ sont-ils sur $g$ ?</p></div>
+            <div class="b-sol"><p>$P$ : $1 + 2t = 5$, $2 = 2$, $3 - t = 1$ : chaque fois $t = 2$, donc oui.</p>
+                <p>$Q$ : sur $g$, la coordonnée $y$ vaut toujours 2 : <span class="b-res">$Q$ n’est pas sur $g$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · POINT DE PERCÉE</div>
+            <div class="b-text"><p>Où la même droite $g$ perce-t-elle le plan $xy$ ?</p></div>
+            <div class="b-sol"><p>$z = 3 - t = 0 \Rightarrow t = 3$.</p>
+                <p><span class="b-res">$S_{xy}(7\,;\,2\,;\,0)$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Établis une équation de la droite : a) passant par $A(1\,;\,0\,;\,2)$ et $B(3\,;\,4\,;\,2)$ &nbsp; b) l’axe des $z$ &nbsp; c) passant par $(0\,;\,2\,;\,3)$ et parallèle à l’axe des $x$</p></div>
+            <div class="b-sol"><p>a) $\vec{x} = (1\,;\,0\,;\,2) + t(2\,;\,4\,;\,0)$ &nbsp; b) $\vec{x} = t(0\,;\,0\,;\,1)$ &nbsp; c) $\vec{x} = (0\,;\,2\,;\,3) + t(1\,;\,0\,;\,0)$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Pour quelle valeur du paramètre $(4\,;\,4\,;\,1)$ est-il sur $\vec{x} = (2\,;\,2\,;\,3) + t(1\,;\,1\,;\,-1)$ ? Quel point correspond à $t = -1$ ?</p></div>
+            <div class="b-sol"><p>$t = 2$ ; $(1\,;\,1\,;\,4)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcule tous les points de percée de $\vec{x} = (2\,;\,1\,;\,4) + t(1\,;\,1\,;\,-2)$.</p></div>
+            <div class="b-sol"><p>$xy$ : $t = 2$, $(4\,;\,3\,;\,0)$ · $xz$ : $t = -1$, $(1\,;\,0\,;\,6)$ · $yz$ : $t = -2$, $(0\,;\,-1\,;\,8)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Résous l’exploration « La montée » : position au bout de 5 minutes, vitesse en km/h, instant où l’avion atteint 4 km d’altitude.</p></div>
+            <div class="b-sol"><p>$(30\,;\,40\,;\,3{,}5)$ ; $|\vec{u}| \approx 10{,}01$ km/min, soit environ 601 km/h ; $1 + 0{,}5t = 4 \Rightarrow t = 6$ min.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Montre que $\vec{x} = (1\,;\,0\,;\,0) + t(1\,;\,1\,;\,0)$ et $\vec{x} = (3\,;\,2\,;\,0) + s(-2\,;\,-2\,;\,0)$ décrivent la même droite.</p></div>
+            <div class="b-sol"><p>Les directions sont multiples l’une de l’autre (facteur $-2$) et $(3\,;\,2\,;\,0)$ est sur la première droite pour $t = 2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="7" data-ph="x ="><p class="b-q-text">Quelle est la coordonnée $x$ du point de percée de $g$ dans l’exemple 2 ?</p><div class="b-sol"><p>$S_{xy}(7\,;\,2\,;\,0)$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="min"><p class="b-q-text">Quand l’avion en montée atteint-il 4 km d’altitude ?</p><div class="b-sol"><p>Au bout de 6 minutes</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quelles valeurs du paramètre décrivent le segment $[AB]$ pour $\vec{x} = \vec{a} + t\,\overrightarrow{AB}$ ?</p><div class="b-mc"><button>$t \geq 0$</button><button>$-1 \leq t \leq 1$</button><button>$0 \leq t \leq 1$</button></div><div class="b-sol"><p>$t = 0$ : $A$, $t = 1$ : $B$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Positions relatives de droites" data-toc-k="2" data-toc-short="2 Position">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Positions relatives de deux droites</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Deux stylos posés sur la table se coupent, sont parallèles ou sont l’un sur l’autre. Si on les tient en l’air, il y a un quatrième cas :
+                ils ne sont pas parallèles et pourtant ne se touchent pas, comme les barres d’une structure d’escalade ou une arête de la base et une arête opposée en biais de la face supérieure d’un cube.
+                De telles droites sont dites <b>non coplanaires</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · POSITION DE DEUX DROITES</div>
+                <div class="b-text">
+                    <p><b>1. Vecteurs directeurs colinéaires ?</b> Oui : test d’appartenance du point de départ de l’une sur l’autre. S’il en fait partie : <b>confondues</b>, sinon <b>strictement parallèles</b>.</p>
+                    <p><b>2. Non colinéaires :</b> égaler les équations des droites. Le système a 3 équations pour 2 paramètres : déterminer $t$ et $s$ avec deux d’entre elles, vérifier avec la troisième.</p>
+                    <p>Si la troisième convient : <b>sécantes</b>, et l’on obtient le <b>point d’intersection</b> en remplaçant. Si elle ne convient pas : <b>non coplanaires</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Collision ?</b> Pour des mouvements, le paramètre est le temps. Deux avions ne se heurtent que s’ils sont au point d’intersection au <b>même</b> instant : $t = s$.</p>
+            <p class="b-note"><b>Perspective :</b> la distance entre deux droites non coplanaires, le widget l’affiche déjà ; tu apprendras à calculer des distances en 12e année.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · POSITION DE DEUX DROITES</div>
+        <p class="b-help" style="margin:0 0 12px">Règle deux droites et fais tourner l’espace. Le widget décide : confondues, parallèles, sécantes (avec le point d’intersection) ou non coplanaires.</p>
+        <div data-widget="geradenlage"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · SÉCANTES</div>
+            <div class="b-text"><p>$g\colon \vec{x} = (0\,;\,0\,;\,0) + t(1\,;\,2\,;\,3)$ et $h\colon \vec{x} = (2\,;\,0\,;\,0) + s(-1\,;\,2\,;\,3)$.</p></div>
+            <div class="b-sol"><p>Non colinéaires. $t = 2 - s$, $2t = 2s$, $3t = 3s$ : de la deuxième, $t = s$, puis $t = s = 1$ ; la troisième convient.</p>
+                <p><span class="b-res">Point d’intersection $S(1\,;\,2\,;\,3)$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · NON COPLANAIRES</div>
+            <div class="b-text"><p>$g\colon \vec{x} = (1\,;\,2\,;\,0) + t(1\,;\,0\,;\,1)$ et $h\colon \vec{x} = (3\,;\,0\,;\,4) + s(0\,;\,1\,;\,1)$.</p></div>
+            <div class="b-sol"><p>Non colinéaires. $1 + t = 3$, $2 = s$, $t = 4 + s$ : des deux premières, $t = 2$, $s = 2$ ; troisième : $2 = 6$, faux.</p>
+                <p><span class="b-res">Non coplanaires</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Décide : a) $(1\,;\,0\,;\,0) + t(1\,;\,1\,;\,0)$ et $(0\,;\,1\,;\,0) + s(2\,;\,2\,;\,0)$ &nbsp; b) $(1\,;\,0\,;\,2) + t(2\,;\,1\,;\,0)$ et $(3\,;\,1\,;\,2) + s(4\,;\,2\,;\,0)$</p></div>
+            <div class="b-sol"><p>a) strictement parallèles &nbsp; b) confondues</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine le point d’intersection de $(1\,;\,1\,;\,0) + t(1\,;\,0\,;\,1)$ et $(2\,;\,0\,;\,1) + s(0\,;\,1\,;\,0)$.</p></div>
+            <div class="b-sol"><p>$t = 1$, $s = 1$ : $S(2\,;\,1\,;\,1)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pour quelle valeur de $a$ les droites $\vec{x} = t(1\,;\,1\,;\,0)$ et $\vec{x} = (2\,;\,0\,;\,a) + s(0\,;\,1\,;\,0)$ se coupent-elles ? Quelle est leur position pour les autres valeurs de $a$ ?</p></div>
+            <div class="b-sol"><p>Seulement pour $a = 0$ (point d’intersection $(2\,;\,2\,;\,0)$), sinon elles sont non coplanaires.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deux avions volent sur $\vec{x} = (0\,;\,0\,;\,8) + t(6\,;\,8\,;\,0)$ et $\vec{x} = (60\,;\,0\,;\,8) + s(-6\,;\,8\,;\,0)$ ($t$, $s$ en minutes, données en km, départ au même instant). Les trajectoires se coupent-elles ? Y a-t-il une collision ?</p></div>
+            <div class="b-sol"><p>$6t = 60 - 6s$, $8t = 8s$ : $t = s = 5$, point d’intersection $(30\,;\,40\,;\,8)$. Les deux y sont au bout de 5 minutes : trajectoire de collision ! Le contrôle aérien doit intervenir.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Pour $g\colon \vec{x} = (1\,;\,2\,;\,3) + t(1\,;\,0\,;\,0)$, donne une droite parallèle, une droite qui coupe $g$ et une droite non coplanaire avec $g$.</p></div>
+            <div class="b-sol"><p>Par exemple parallèle : $(0\,;\,0\,;\,0) + s(1\,;\,0\,;\,0)$ ; sécante : $(0\,;\,2\,;\,3) + s(0\,;\,1\,;\,0)$ ; non coplanaire : $(0\,;\,0\,;\,0) + s(0\,;\,1\,;\,0)$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3" data-ph="z ="><p class="b-q-text">Quelle est la coordonnée $z$ du point d’intersection dans l’exemple 3 ?</p><div class="b-sol"><p>$S(1\,;\,2\,;\,3)$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="a ="><p class="b-q-text">Pour quelle valeur de $a$ les droites $t(1\,;\,1\,;\,0)$ et $(2\,;\,0\,;\,a) + s(0\,;\,1\,;\,0)$ se coupent-elles ?</p><div class="b-sol"><p>$a = 0$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Non colinéaires, système sans solution. Quelle est la position des droites ?</p><div class="b-mc"><button>parallèles</button><button>non coplanaires</button><button>confondues</button></div><div class="b-sol"><p>Ni parallèles ni de point commun.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dans un cube $ABCDEFGH$ (base $ABCD$, au-dessus $EFGH$) : quelle est la position des arêtes $[AB]$ et $[GH]$, $[AB]$ et $[BF]$, $[AB]$ et $[CG]$ ?</p></div>
+            <div class="b-sol"><p>$[AB]$ et $[GH]$ parallèles ; $[AB]$ et $[BF]$ se coupent en $B$ ; $[AB]$ et $[CG]$ non coplanaires.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec le chapitre 2 :</b> écris le système de l’exemple 4 sous forme de matrice augmentée pour $t$ et $s$ et montre avec Gauss qu’il n’a pas de solution.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{cc|c} 1 & 0 & 2 \\ 0 & -1 & -2 \\ 1 & -1 & 4 \end{array}\right)$ ; $L_3 - L_1 - L_2$ donne $(0 \; 0 \mid 4)$ : contradiction.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un ballon monte en ligne droite à partir de $(2\,;\,3\,;\,0)$ selon $\vec{x} = (2\,;\,3\,;\,0) + t(1\,;\,0\,;\,2)$ ($t$ en min, données en centaines de mètres). Quand atteint-il 1000 m, et où est-il alors ?</p></div>
+            <div class="b-sol"><p>$2t = 10 \Rightarrow t = 5$ min, point $(7\,;\,3\,;\,10)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Trois droites passent par le même point $P$ et ont pour directions $(1\,;\,0\,;\,0)$, $(0\,;\,1\,;\,0)$, $(1\,;\,1\,;\,0)$. Sont-elles dans un même plan ? Justifie avec le chapitre 3.1.</p></div>
+            <div class="b-sol"><p>Oui : les trois vecteurs directeurs sont linéairement dépendants (coplanaires), donc les trois droites sont dans le plan passant par $P$ et parallèle au plan $xy$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : pourquoi les avions volent sur des droites non coplanaires" data-toc-k="X" data-toc-short="Altitudes">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">AVIATION</span></div>
+    <h2>Pourquoi les avions volent sur des droites non coplanaires</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Deux avions sur la même voie aérienne, l’un vers l’est, l’autre vers l’ouest, se rencontreraient sur la même droite. Pour que cela n’arrive pas, il existe la
+                <b>règle semi-circulaire</b> : qui vole sur une route entre 0° et 179°, donc grosso modo vers l’est, choisit un niveau de vol impair (p. ex. le niveau de vol 350, soit 35 000 pieds),
+                qui vole entre 180° et 359°, un niveau pair (p. ex. le niveau de vol 360).</p>
+            <p>Géométriquement, cela signifie : les trajectoires d’avions qui vont l’un vers l’autre sont dans des plans horizontaux différents, à au moins 1000 pieds (environ 300 m) l’un au-dessus de l’autre.
+                Si elles sont parallèles vues d’en haut, ce sont des droites parallèles ; si elles se croisent vues d’en haut, elles sont <b>non coplanaires</b>. Un point d’intersection est exclu, avant même que le contrôle aérien ne calcule.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> OACI, Annexe 2 « Règles de l’air », appendice 3 (tableau des niveaux de croisière). La référence est la route magnétique ; dans certains espaces aériens, les voies aériennes fixent leurs propres niveaux, qui ont la priorité.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>REPRÉSENTATION PARAMÉTRIQUE</h4><p>$\vec{x} = \vec{p} + t\vec{u}$ ; par $A$, $B$ : direction $\overrightarrow{AB}$.</p></div>
+        <div><p>$(1\,;\,0\,;\,2) + t(2\,;\,4\,;\,0)$</p></div></div>
+    <div class="b-rueck"><div><h4>TEST D’APPARTENANCE</h4><p>Le même $t$ dans les trois équations ?</p></div>
+        <div><p>$P(5\,;\,2\,;\,1)$ : $t = 2$</p></div></div>
+    <div class="b-rueck"><div><h4>POINTS DE PERCÉE</h4><p>Annuler une coordonnée.</p></div>
+        <div><p>$S_{xy}(7\,;\,2\,;\,0)$</p></div></div>
+    <div class="b-rueck"><div><h4>POSITIONS RELATIVES</h4><p>Colinéaires ? → confondues/parallèles. Sinon égaler → sécantes/non coplanaires.</p></div>
+        <div><p>Exemple 3 : $S(1\,;\,2\,;\,3)$, exemple 4 : non coplanaires</p></div></div>
+    <div class="b-rueck"><div><h4>MOUVEMENT</h4><p>Paramètre = temps, $|\vec{u}|$ = vitesse ; collision seulement si $t = s$.</p></div>
+        <div><p>Les avions se rencontrent au bout de 5 min</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">Pour quelle valeur de $t$ le point $(4\,;\,4\,;\,1)$ est-il sur $(2\,;\,2\,;\,3) + t(1\,;\,1\,;\,-1)$ ?</p><div class="b-sol"><p>$t = 2$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Quelle est la coordonnée $x$ du point d’intersection de $(1\,;\,1\,;\,0) + t(1\,;\,0\,;\,1)$ et $(2\,;\,0\,;\,1) + s(0\,;\,1\,;\,0)$ ?</p><div class="b-sol"><p>$S(2\,;\,1\,;\,1)$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Y a-t-il des droites non coplanaires dans le plan ?</p><div class="b-mc"><button>non</button><button>oui</button><button>seulement des droites perpendiculaires</button></div><div class="b-sol"><p>Pour cela, il faut la troisième dimension.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">Point de percée de $(2\,;\,1\,;\,4) + t(1\,;\,1\,;\,-2)$ avec le plan $xy$ : coordonnée $x$ ?</p><div class="b-sol"><p>$(4\,;\,3\,;\,0)$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="min"><p class="b-q-text">Au bout de combien de minutes les deux avions de l’exercice 9 se rencontrent-ils ?</p><div class="b-sol"><p>5</p></div></div>
+            <div class="b-q" data-ans="601" data-tol="1" data-ph="km/h"><p class="b-q-text">Vitesse pendant la montée $(6\,;\,8\,;\,0{,}5)$ km par minute, en km/h (nombre entier) ?</p><div class="b-sol"><p>$\sqrt{100{,}25} \cdot 60 \approx 601$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-geraden.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DROITES : REPRÉSENTATION PARAMÉTRIQUE</span><span class="b-lab-what">Établir, test d’appartenance, points de percée, 20 exercices</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-lage-geraden.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">POSITIONS RELATIVES</span><span class="b-lab-what">Parallèles, sécantes, non coplanaires, 20 exercices</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 11e année, Grundkurs · Domaine d’apprentissage 3 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-fr/vektoren.js"></script>
+</body>
+</html>
