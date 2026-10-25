@@ -929,4 +929,98 @@
         }
         render();
     });
+    /* ---------- cube nets: tap six squares, the cube is rolled over them ---------- */
+    // Rolling a cube from square to square: the face lying on the paper is tracked with a rotation matrix.
+    // A shape of six squares is a net exactly when every square gets a different face.
+    const mm = (A, Bm) => A.map((r, i) => Bm[0].map((_, j) => r.reduce((s, _, k) => s + A[i][k] * Bm[k][j], 0)));
+    const ROLL = {                      // world rotations for a roll to the east, west, north (up on the page) and south
+        e: [[0, 0, 1], [0, 1, 0], [-1, 0, 0]], w: [[0, 0, -1], [0, 1, 0], [1, 0, 0]],
+        n: [[1, 0, 0], [0, 0, 1], [0, -1, 0]], s: [[1, 0, 0], [0, 0, -1], [0, 1, 0]]
+    };
+    // the face on the paper as a cube-local normal → its number on a die (opposite faces add up to 7)
+    const PIPS = { '0,0,-1': 1, '0,0,1': 6, '1,0,0': 3, '-1,0,0': 4, '0,1,0': 2, '0,-1,0': 5 };
+    function rollNet(cells) {           // cells: ['c,r', …] → { face: {cell: number}, clash: [cells], connected }
+        const set = new Set(cells), face = {}, seen = new Map(), clash = new Set();
+        if (!cells.length) return { face, clash: [], connected: false };
+        const st = [[cells[0], [[1, 0, 0], [0, 1, 0], [0, 0, 1]]]], visited = new Set([cells[0]]);
+        while (st.length) {
+            const [c, R] = st.shift();
+            const n = [0, 1, 2].map(i => -R[2][i]);                    // R^T · (0, 0, −1)
+            const pip = PIPS[n.map(v => v + 0).join(',')];
+            face[c] = pip;
+            if (seen.has(pip)) { clash.add(c); clash.add(seen.get(pip)); } else seen.set(pip, c);
+            const [x, y] = c.split(',').map(Number);
+            [['e', 1, 0], ['w', -1, 0], ['n', 0, -1], ['s', 0, 1]].forEach(([d, dx, dy]) => {
+                const k = (x + dx) + ',' + (y + dy);
+                if (set.has(k) && !visited.has(k)) { visited.add(k); st.push([k, mm(ROLL[d], R)]); }
+            });
+        }
+        return { face, clash: [...clash], connected: visited.size === cells.length };
+    }
+    // the same shape turned or flipped counts once: the smallest of its eight images, moved to the corner
+    function shapeKey(cells) {
+        const P = cells.map(c => c.split(',').map(Number)), keys = [];
+        for (let k = 0; k < 8; k++) {
+            const Q = P.map(([x, y]) => { let a = k & 1 ? [y, x] : [x, y]; if (k & 2) a = [-a[0], a[1]]; if (k & 4) a = [a[0], -a[1]]; return a; });
+            const mx = Math.min(...Q.map(q => q[0])), my = Math.min(...Q.map(q => q[1]));
+            keys.push(Q.map(q => (q[0] - mx) + ',' + (q[1] - my)).sort().join(' '));
+        }
+        return keys.sort()[0];
+    }
+    W('wuerfelnetzos5', function (box) {
+        const N = 5, U = 52;
+        const START = { kreuz: ['1,1', '0,2', '1,2', '2,2', '3,2', '1,3'], treppe: ['0,1', '1,1', '1,2', '2,2', '2,3', '3,3'], quadrat: ['1,1', '2,1', '1,2', '2,2', '3,2', '1,3'] };
+        const S = { on: new Set(START[box.dataset.start] || START.kreuz), found: new Set() };
+        const acts = buttons(box, [['rnd', 'Zufälliges Netz', 'b-go'], ['clear', 'Alles löschen']], a => {
+            if (a === 'clear') S.on = new Set();
+            else {
+                const old = shapeKey([...S.on]);
+                for (let t = 0; t < 500; t++) {                          // grow a random shape of six squares until it folds
+                    const c0 = [rnd(1, 3), rnd(1, 3)], cells = [c0.join(',')];
+                    while (cells.length < 6) {
+                        const [x, y] = cells[rnd(0, cells.length - 1)].split(',').map(Number), d = [[1, 0], [-1, 0], [0, 1], [0, -1]][rnd(0, 3)];
+                        const nx = x + d[0], ny = y + d[1], k = nx + ',' + ny;
+                        if (nx >= 0 && ny >= 0 && nx < N && ny < N && !cells.includes(k)) cells.push(k);
+                    }
+                    const r = rollNet(cells);
+                    if (r.connected && !r.clash.length && shapeKey(cells) !== old) { S.on = new Set(cells); break; }
+                }
+            }
+            render();
+        });
+        const two = div(box, 'b-two'), pic = div(two, 'b-svgbox g-svg'), out = div(two, 'b-out');
+        const help = div(box, 'b-help', 'Tippe Quadrate an, um sie hinzuzufügen oder wegzunehmen. Sechs zusammenhängende Quadrate werden sofort geprüft.');
+        heroOnly(box, pic, [acts, out, help], 300);
+        pic.addEventListener('click', e => {
+            if (isHero(box)) return;
+            const c = e.target.closest('[data-c]'); if (!c) return;
+            const k = c.dataset.c;
+            if (S.on.has(k)) S.on.delete(k); else S.on.add(k);
+            render();
+        });
+        const COL = { 1: LAM, 6: LAM, 2: CY, 5: CY, 3: PHI, 4: PHI };
+        function render() {
+            const cells = [...S.on], n = cells.length;
+            const r = n === 6 ? rollNet(cells) : null, ok = r && r.connected && !r.clash.length;
+            if (ok) S.found.add(shapeKey(cells));
+            let s = '';
+            for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+                const k = x + ',' + y, on = S.on.has(k), X = 6 + x * U, Y = 6 + y * U;
+                const col = !on ? null : r && r.clash.includes(k) ? RED : ok ? COL[r.face[k]] : LAM;
+                s += '<rect data-c="' + k + '" x="' + X + '" y="' + Y + '" width="' + (U - 4) + '" height="' + (U - 4) + '" rx="5" style="' +
+                    (on ? area(col, ok ? 0.3 : 0.22, 2) : 'fill:rgba(127,216,238,0.03);stroke:' + DIM + ';stroke-width:1;stroke-dasharray:4 4') + ';cursor:pointer"/>';
+                if (on && ok) s += T(X + (U - 4) / 2, Y + (U - 4) / 2 + 8, r.face[k], 'g-pt', 'middle', 'font-size:22px;pointer-events:none');
+            }
+            pic.innerHTML = svg(N * U + 8, N * U + 8, 'Gitter mit ' + n + ' ausgewählten Quadraten', s);
+            let h;
+            if (n < 6) h = '<p>Wähle 6 Quadrate aus' + (n ? ', es fehlen noch ' + (6 - n) : '') + '.</p><p class="g5-dim">Ein Würfel hat 6 Flächen, also besteht jedes Würfelnetz aus 6 Quadraten.</p>';
+            else if (n > 6) h = '<p class="g-warn">Das sind ' + n + ' Quadrate. Ein Würfel hat nur 6 Flächen.</p>';
+            else if (!r.connected) h = '<p class="g-warn">Die Quadrate hängen nicht alle zusammen.</p><p class="g5-dim">Jedes Quadrat muss mit einer ganzen Kante an ein anderes stoßen.</p>';
+            else if (r.clash.length) h = '<p class="g-warn"><b>Kein Würfelnetz.</b></p><p>Beim Falten würden die rot markierten Quadrate aufeinanderliegen, und eine Fläche des Würfels bliebe offen.</p>';
+            else h = '<p class="g-ok"><b>Ein Würfelnetz!</b></p><p>Die Zahlen zeigen, wie ein Spielwürfel beschriftet wäre: Gegenüberliegende Flächen haben dieselbe Farbe und ergeben zusammen 7.</p>';
+            h += '<p class="g5-dim">Gefunden: ' + S.found.size + ' von 11 verschiedenen Würfelnetzen.</p>';
+            out.innerHTML = h;
+        }
+        render();
+    });
 })();
