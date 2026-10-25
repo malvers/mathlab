@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 10 · Chapitre 2.1 · Variables aléatoires et règles des chemins | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Lois de probabilité, diagramme en bâtons, « exactement k », « au moins k », « au plus k ». Chapitre 2.1 du manuel interactif Mathématiques · Gymnasium 10 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 10</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.1 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.1 · DOMAINE D’APPRENTISSAGE 2 · NOVEMBRE</p>
+            <h1>Variables aléatoires et règles des chemins</h1>
+            <p class="b-hero-lead">Quand on lance deux dés, on s’intéresse rarement à la paire, le plus souvent à un <b>nombre</b> : la somme des points, le gain, le nombre de six.
+                De tels nombres s’appellent des <b>variables aléatoires</b>. Tu établis leur loi de probabilité, tu calcules avec des arbres pondérés et les règles des chemins
+                et tu apprends ce que signifient « exactement », « au moins » et « au plus » en probabilités.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">3 LABORATOIRES</span><span class="b-chip">JEUX</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>définir une <b>variable aléatoire</b> et déterminer ses valeurs possibles</li>
+                <li>établir une <b>loi de probabilité</b> et la représenter par un tableau, un diagramme en bâtons ou un histogramme</li>
+                <li>calculer des probabilités d’expériences à plusieurs épreuves avec un <b>arbre pondéré</b>, les <b>règles des chemins</b> et le <b>dénombrement</b></li>
+                <li>formuler correctement et calculer des événements comme « exactement $k$ », « au moins $k$ » et « au plus $k$ », aussi à l’aide de l’<b>événement contraire</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="1/6" data-ph="p. ex. 1/6"><p class="b-q-text">Quelle est la probabilité d’obtenir un six avec un dé ?</p><div class="b-sol"><p>$\tfrac16$</p></div></div>
+            <div class="b-q" data-ans="1/4" data-ph="fraction"><p class="b-q-text">On lance deux fois une pièce. Quelle est la probabilité d’obtenir deux fois face ?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12 = \tfrac14$</p></div></div>
+            <div class="b-q" data-ans="5/6" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité de <b>ne pas</b> obtenir de six avec un dé ?</p><div class="b-sol"><p>$1 - \tfrac16 = \tfrac56$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Combien y a-t-il d’issues quand on lance un dé rouge et un dé bleu ?</p><div class="b-mc"><button>$12$</button><button>$21$</button><button>$36$</button></div><div class="b-sol"><p>$6 \cdot 6 = 36$ paires</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">SOMMES DE DEUX DÉS</div>
+            <div class="b-text"><p>Lancez cent fois deux dés et notez chaque fois la somme des points.</p>
+                <ul><li>Quelle somme sort le plus souvent, laquelle le plus rarement ? Pourquoi ?</li><li>Représentez vos effectifs par un diagramme en colonnes.</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">AU MOINS UN SIX</div>
+            <div class="b-text"><p>Vous pariez qu’en $n$ lancers, au moins un six sortira.</p>
+                <ul><li>À partir de quel $n$ le pari est-il intéressant, c’est-à-dire gagnez-vous plus souvent que vous ne perdez ? Estimez d’abord, puis essayez.</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Arbre pondéré et règles des chemins</span></span></a></div>
+        <div class="b-box b-erk"><div class="b-box-title">RÉPONDRE AU HASARD À UN QCM</div>
+            <div class="b-text"><p>Un test a 5 questions avec chacune 4 réponses, dont exactement une est juste. Quelqu’un coche tout au hasard.</p>
+                <ul><li>Quelle est la probabilité d’avoir 5 bonnes réponses ? Et au moins 3 ?</li><li>Quel nombre de bonnes réponses est le plus probable ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Variables aléatoires et lois" data-toc-k="1" data-toc-short="1 Lois">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Variables aléatoires et lois de probabilité</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Deux dés ont 36 issues équiprobables, mais seulement 11 sommes possibles. La somme 7 s’obtient de six façons,
+                (1, 6), (2, 5), (3, 4), (4, 3), (5, 2) et (6, 1), la somme 2 d’une seule. C’est pourquoi le 7 sort le plus souvent dans l’exploration.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · VARIABLE ALÉATOIRE ET LOI DE PROBABILITÉ</div>
+                <div class="b-text">
+                    <p>Une <b>variable aléatoire</b> $X$ associe un nombre réel à chaque issue d’une expérience aléatoire.</p>
+                    <p>La <b>loi de probabilité</b> de $X$ donne pour chaque valeur $x_i$ la probabilité $P(X = x_i)$. Toutes ensemble ont pour somme $1$.</p>
+                    <p>Représentation par un <b>tableau</b>, un <b>diagramme en bâtons</b> (un bâton de longueur $P(X = x_i)$ au-dessus de $x_i$) ou un <b>histogramme</b> (des colonnes de largeur 1, dont l’aire est la probabilité).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notation :</b> $P(X = 7)$ se lit « probabilité que $X$ prenne la valeur 7 ». $P(X \leq 3)$ regroupe toutes les valeurs jusqu’à 3.</p>
+            <p class="b-note"><b>Contrôle :</b> si la somme des probabilités ne vaut pas exactement 1, il manque une valeur ou il y a une erreur de calcul.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DÉFINIR UNE VARIABLE ALÉATOIRE</div>
+        <p class="b-help" style="margin:0 0 12px">À gauche, les 36 issues (ligne : premier dé, colonne : deuxième). Dans chaque case figure la valeur de $X$. À droite, la loi de probabilité.</p>
+        <div data-widget="verteilung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · TROIS PIÈCES</div>
+            <div class="b-text"><p>On lance trois pièces, $X$ est le nombre de faces. Établis la loi de probabilité.</p></div>
+            <div class="b-sol"><p>8 issues équiprobables : PPP · FPP, PFP, PPF · FFP, FPF, PFF · FFF.</p>
+                <p><span class="b-res">$P(X = 0) = \tfrac18$, $P(X = 1) = \tfrac38$, $P(X = 2) = \tfrac38$, $P(X = 3) = \tfrac18$</span>, en tout $\tfrac88 = 1$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · LE GAIN COMME VARIABLE ALÉATOIRE</div>
+            <div class="b-text"><p>Une roue de loterie coûte 1 € de mise. Avec la probabilité $\tfrac12$, on ne récupère rien, avec $\tfrac14$ la mise, avec $\tfrac14$ 5 €. $X$ est le gain.</p></div>
+            <div class="b-sol"><p>Gain = somme versée − mise : $X$ prend les valeurs $-1$, $0$ et $4$ avec $\tfrac12$, $\tfrac14$, $\tfrac14$.</p>
+                <p>Gagner quelque chose : <span class="b-res">$P(X > 0) = P(X = 4) = \tfrac14$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Deux dés, $X$ est la somme des points. Calcule $P(X = 7)$, $P(X = 2)$ et $P(X \geq 10)$.</p></div>
+            <div class="b-sol"><p>$\tfrac{6}{36} = \tfrac16$, $\;\tfrac{1}{36}$, $\;\tfrac{3 + 2 + 1}{36} = \tfrac16$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ est le plus grand des deux numéros obtenus avec deux dés. Établis la loi de probabilité (le widget t’aide).</p></div>
+            <div class="b-sol"><p>$P(X = k) = \tfrac{2k - 1}{36}$ : $\tfrac{1}{36}$, $\tfrac{3}{36}$, $\tfrac{5}{36}$, $\tfrac{7}{36}$, $\tfrac{9}{36}$, $\tfrac{11}{36}$ pour $k = 1, \ldots, 6$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dans une urne contenant 3 boules rouges et 2 bleues, on tire deux boules sans remise. $X$ est le nombre de boules rouges. Établis la loi de probabilité.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac25 \cdot \tfrac14 = \tfrac{1}{10}$, $P(X = 2) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$, $P(X = 1) = 1 - \tfrac{1}{10} - \tfrac{3}{10} = \tfrac{6}{10}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Est-ce une loi de probabilité ? a) les valeurs 1, 2, 3, 4 avec 0,1 ; 0,35 ; 0,4 ; 0,2 &nbsp; b) les mêmes valeurs avec 0,25 ; 0,25 ; 0,3 ; 0,2</p></div>
+            <div class="b-sol"><p>a) Non, la somme vaut $1{,}05$. &nbsp; b) Oui, toutes les valeurs sont comprises entre 0 et 1, la somme vaut 1.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$X$ est l’écart entre les deux numéros obtenus avec deux dés (le plus grand moins le plus petit). Établis la loi de probabilité. Quelle valeur est la plus probable ?</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac{6}{36}$, $P(X = 1) = \tfrac{10}{36}$, $P(X = 2) = \tfrac{8}{36}$, $P(X = 3) = \tfrac{6}{36}$, $P(X = 4) = \tfrac{4}{36}$, $P(X = 5) = \tfrac{2}{36}$. La plus probable est <span class="b-res">l’écart 1</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1/6" data-ph="fraction"><p class="b-q-text">Deux dés : combien vaut $P(\text{somme des points} = 7)$ ?</p><div class="b-sol"><p>$\tfrac{6}{36} = \tfrac16$</p></div></div>
+        <div class="b-q" data-ans="3/8" data-ph="fraction"><p class="b-q-text">Trois pièces, $X$ = nombre de faces. Combien vaut $P(X = 2)$ ?</p><div class="b-sol"><p>FFP, FPF, PFF : $\tfrac38$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Quel tableau est une loi de probabilité ?</p><div class="b-mc"><button>$0{,}5$ ; $0{,}3$ ; $0{,}3$</button><button>$0{,}2$ ; $0{,}5$ ; $0{,}3$</button><button>$0{,}6$ ; $0{,}6$ ; $-0{,}2$</button></div><div class="b-sol"><p>Toutes les valeurs entre 0 et 1 et une somme égale à exactement 1.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Règles des chemins et dénombrement" data-toc-k="2" data-toc-short="2 Chemins">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Règles des chemins et dénombrement</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Au moins un six en quatre lancers : cela fait beaucoup de chemins dans l’arbre. Le contraire est un seul chemin, « quatre fois pas de six »,
+                de probabilité $\left(\tfrac56\right)^4 \approx 0{,}482$. Donc $P(\text{au moins un six}) = 1 - 0{,}482 \approx 0{,}518$. À partir de quatre lancers, le pari est intéressant.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÈGLES DES CHEMINS ET DÉNOMBREMENT</div>
+                <div class="b-text">
+                    <p><b>1re règle des chemins (règle du produit) :</b> la probabilité d’un chemin est le produit des probabilités le long de ce chemin.</p>
+                    <p><b>2e règle des chemins (règle de la somme) :</b> la probabilité d’un événement est la somme des probabilités de tous les chemins qui le réalisent.</p>
+                    <p><b>Dénombrer :</b> si tous les chemins d’un événement ont la même probabilité, on calcule le nombre de chemins fois la probabilité d’un chemin. Pour $n$ épreuves avec succès ou échec, il y a $\binom{n}{k}$ chemins avec exactement $k$ succès (calculatrice graphique : <code>nCr</code>).</p>
+                    <p>« au moins $k$ » : $P(X \geq k)$ · « au plus $k$ » : $P(X \leq k)$ · « au moins un » : $1 - P(\text{aucun})$, l’<b>événement contraire</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Traduire :</b> « plus de 2 » signifie $X \geq 3$, « moins de 2 » signifie $X \leq 1$, « pas plus de 2 » signifie $X \leq 2$.</p>
+            <p class="b-note"><b>Sans remise</b>, les probabilités changent d’une épreuve à l’autre ; avec remise, elles restent les mêmes.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ATELIER DES ARBRES PONDÉRÉS</div>
+        <p class="b-help" style="margin:0 0 12px">Règle l’urne, choisis avec ou sans remise et un événement. Les chemins correspondants s’allument.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · RÉPONDRE AU HASARD À UN QCM</div>
+            <div class="b-text"><p>5 questions, chacune avec 4 réponses, tout est deviné au hasard. $X$ est le nombre de bonnes réponses. Calcule $P(X = 3)$ et $P(X \geq 3)$.</p></div>
+            <div class="b-sol"><p>Un chemin avec 3 succès : $0{,}25^3 \cdot 0{,}75^2 \approx 0{,}00879$. Il y a $\binom{5}{3} = 10$ chemins de ce type : $P(X = 3) \approx 0{,}0879$.</p>
+                <p>$P(X \geq 3) = 0{,}0879 + 5 \cdot 0{,}25^4 \cdot 0{,}75 + 0{,}25^5 \approx$ <span class="b-res">$0{,}104$</span>, soit un peu plus de 10 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · L’ÉVÉNEMENT CONTRAIRE</div>
+            <div class="b-text"><p>Quelle est la probabilité d’obtenir au moins un six en dix lancers ?</p></div>
+            <div class="b-sol"><p>Événement contraire : dix fois pas de six, $\left(\tfrac56\right)^{10} \approx 0{,}162$.</p>
+                <p><span class="b-res">$P(X \geq 1) = 1 - \left(\tfrac56\right)^{10} \approx 0{,}838$</span>. Sans l’événement contraire, il faudrait additionner dix termes.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · EXACTEMENT k SUCCÈS</div>
+        <p class="b-help" style="margin:0 0 12px">Tous les chemins avec exactement $k$ succès ont la même probabilité. Il suffit de les compter.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance trois fois une pièce. Calcule $P(\text{exactement 2 fois face})$, $P(\text{au moins 1 fois face})$ et $P(\text{au plus 1 fois face})$.</p></div>
+            <div class="b-sol"><p>$\tfrac38$, $\;1 - \tfrac18 = \tfrac78$, $\;\tfrac18 + \tfrac38 = \tfrac12$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une urne contient 3 boules rouges et 2 bleues ; on tire deux fois <b>avec</b> remise. Quelle est la probabilité d’obtenir deux rouges, quelle est celle d’obtenir deux couleurs différentes ?</p></div>
+            <div class="b-sol"><p>$\tfrac35 \cdot \tfrac35 = \tfrac{9}{25} = 0{,}36$ ; $2 \cdot \tfrac35 \cdot \tfrac25 = \tfrac{12}{25} = 0{,}48$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une basketteuse réussit 70 % de ses lancers francs. Elle tire trois fois. Quelle est la probabilité d’exactement deux paniers, quelle est celle d’au moins deux ?</p></div>
+            <div class="b-sol"><p>$P(X = 2) = 3 \cdot 0{,}7^2 \cdot 0{,}3 = 0{,}441$ ; $P(X \geq 2) = 0{,}441 + 0{,}7^3 = 0{,}784$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Combien de fois au moins faut-il lancer un dé pour obtenir au moins un six avec une probabilité de plus de 90 % ?</p></div>
+            <div class="b-hint"><p>$1 - \left(\tfrac56\right)^n > 0{,}9$ signifie $\left(\tfrac56\right)^n < 0{,}1$. Essaie des valeurs de $n$.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac56\right)^{12} \approx 0{,}112$, $\left(\tfrac56\right)^{13} \approx 0{,}093$ : <span class="b-res">13 fois</span>.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>On lance dix fois un dé, $X$ est le nombre de six. Écris à l’aide de $P(X \leq \ldots)$ : a) plus de 2 six &nbsp; b) moins de 4 &nbsp; c) au moins 2, mais au plus 5</p></div>
+            <div class="b-sol"><p>a) $1 - P(X \leq 2)$ &nbsp; b) $P(X \leq 3)$ &nbsp; c) $P(X \leq 5) - P(X \leq 1)$</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="11/36" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité d’obtenir au moins un six en deux lancers ?</p><div class="b-sol"><p>$1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div></div>
+        <div class="b-q" data-ans="0,441" data-ph="nombre décimal"><p class="b-q-text">Taux de réussite 70 %, trois tirs. Quelle est la probabilité d’exactement deux paniers ?</p><div class="b-sol"><p>$3 \cdot 0{,}49 \cdot 0{,}3 = 0{,}441$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">« Au plus 2 succès » signifie …</p><div class="b-mc"><button>$X \leq 2$</button><button>$X < 2$</button><button>$X \geq 2$</button></div><div class="b-sol"><p>0, 1 ou 2 succès : $X \leq 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une urne de loterie contient 10 billets, dont 2 sont gagnants. Tu tires deux billets. Quelle est la probabilité d’au moins un gain ?</p></div>
+            <div class="b-sol"><p>$1 - \tfrac{8}{10} \cdot \tfrac79 = 1 - \tfrac{56}{90} = \tfrac{17}{45} \approx 0{,}378$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>On choisit trois personnes au hasard. Quelle est la probabilité qu’au moins deux d’entre elles soient nées le même jour de la semaine ? (On suppose chaque jour de la semaine équiprobable.)</p></div>
+            <div class="b-sol"><p>Événement contraire « toutes différentes » : $\tfrac77 \cdot \tfrac67 \cdot \tfrac57 = \tfrac{30}{49}$. Donc $1 - \tfrac{30}{49} = \tfrac{19}{49} \approx 0{,}388$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier avec le chapitre 1.1 :</b> $P(\text{aucun six en } n \text{ lancers}) = \left(\tfrac56\right)^n$. De quel modèle de croissance s’agit-il ? Au bout de combien de lancers cette probabilité passe-t-elle pour la première fois sous $\tfrac12$ ?</p></div>
+            <div class="b-sol"><p>Décroissance exponentielle de facteur $\tfrac56$. $\left(\tfrac56\right)^3 \approx 0{,}579$, $\left(\tfrac56\right)^4 \approx 0{,}482$ : au bout de 4 lancers, la « demi-vie » de la série noire.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dans l’urne contenant 3 boules rouges et 2 bleues, on tire trois fois avec remise. $X$ est le nombre de boules rouges. Établis la loi de probabilité et trace un diagramme en bâtons.</p></div>
+            <div class="b-sol"><p>$P(X = k) = \binom{3}{k} \cdot 0{,}6^k \cdot 0{,}4^{3 - k}$ : $0{,}064$ ; $0{,}288$ ; $0{,}432$ ; $0{,}216$ pour $k = 0, 1, 2, 3$. Somme 1.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le problème du chevalier de Méré" data-toc-k="X" data-toc-short="De Méré">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Le problème du chevalier de Méré</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Antoine Gombaud, chevalier de Méré, aimait jouer de l’argent dans le Paris du XVIIe siècle. Il savait par expérience que si l’on parie d’obtenir au moins
+                un six en quatre lancers d’un dé, on gagne à la longue. Il en conclut que le pari « au moins un double six en 24 lancers de deux dés » devait lui aussi être favorable,
+                car 4 est à 6 ce que 24 est à 36. Mais il y perdit.</p>
+            <p>Blaise Pascal en écrivit en 1654 à Pierre de Fermat. Avec l’événement contraire, le calcul est rapide : $1 - \left(\tfrac56\right)^4 \approx 0{,}518$, mais
+                $1 - \left(\tfrac{35}{36}\right)^{24} \approx 0{,}491$. Le premier pari est tout juste favorable, le second tout juste défavorable. La correspondance des deux savants est considérée comme
+                le début du calcul des probabilités.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> lettre de Blaise Pascal à Pierre de Fermat du 29 juillet 1654, publiée dans les éditions des œuvres de Pascal (Œuvres complètes) et de Fermat (Œuvres, tome 2).</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · JOUER SOI-MÊME LE PARI DE DE MÉRÉ</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis « De Méré » et fais tourner le pari mille fois. La fréquence se stabilise autour de $0{,}518$.</p>
+        <div data-widget="simulation"></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>VARIABLE ALÉATOIRE</h4><p>Associe un nombre à chaque issue : somme des points, gain, nombre de succès.</p></div>
+        <div><p>Deux dés : $X$ = somme des points, valeurs de 2 à 12</p></div></div>
+    <div class="b-rueck"><div><h4>LOI DE PROBABILITÉ</h4><p>Toutes les valeurs $x_i$ avec $P(X = x_i)$, de somme 1. Sous forme de tableau, de diagramme en bâtons ou d’histogramme.</p></div>
+        <div><p>Trois pièces : $\tfrac18$, $\tfrac38$, $\tfrac38$, $\tfrac18$</p></div></div>
+    <div class="b-rueck"><div><h4>RÈGLES DES CHEMINS</h4><p>Multiplier le long d’un chemin, additionner les chemins d’un événement.</p></div>
+        <div><p>Urne 3 rouges, 2 bleues, sans remise : $P(RR) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div></div>
+    <div class="b-rueck"><div><h4>DÉNOMBRER</h4><p>Compter des chemins équiprobables : $\binom{n}{k}$ chemins avec exactement $k$ succès.</p></div>
+        <div><p>$P(X = 3) = 10 \cdot 0{,}25^3 \cdot 0{,}75^2 \approx 0{,}088$</p></div></div>
+    <div class="b-rueck"><div><h4>EXACTEMENT, AU MOINS, AU PLUS</h4><p>$P(X = k)$, $P(X \geq k)$, $P(X \leq k)$. Au moins un : $1 - P(\text{aucun})$.</p></div>
+        <div><p>$1 - \left(\tfrac56\right)^{10} \approx 0{,}838$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="1/36" data-ph="fraction"><p class="b-q-text">Deux dés : quelle est la probabilité d’obtenir la somme 12 ?</p><div class="b-sol"><p>Seulement (6, 6) : $\tfrac{1}{36}$</p></div></div>
+            <div class="b-q" data-ans="3/4" data-ph="fraction"><p class="b-q-text">Deux lancers de pièce : quelle est la probabilité d’obtenir au plus une fois face ?</p><div class="b-sol"><p>$1 - P(FF) = 1 - \tfrac14 = \tfrac34$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Comment calcule-t-on le plus vite « au moins un six en $n$ lancers » ?</p><div class="b-mc"><button>$n \cdot \tfrac16$</button><button>$\left(\tfrac16\right)^n$</button><button>$1 - \left(\tfrac56\right)^n$</button></div><div class="b-sol"><p>Par l’événement contraire « aucun six ».</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+            <div class="b-q" data-ans="0,784" data-ph="nombre décimal"><p class="b-q-text">Taux de réussite 70 %, trois tirs : quelle est la probabilité d’au moins deux paniers ?</p><div class="b-sol"><p>$0{,}441 + 0{,}343 = 0{,}784$</p></div></div>
+            <div class="b-q" data-ans="0,518" data-tol="0.001" data-ph="trois décimales"><p class="b-q-text">Quelle est la probabilité d’au moins un six en quatre lancers (trois décimales) ?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 0{,}518$</p></div></div>
+            <div class="b-q" data-ans="11/36" data-ph="fraction"><p class="b-q-text">$X$ est le plus grand des deux numéros obtenus avec deux dés. Combien vaut $P(X = 6)$ ?</p><div class="b-sol"><p>$\tfrac{2 \cdot 6 - 1}{36} = \tfrac{11}{36}$</p></div></div>
+        </div>
+    </div>
+    <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Arbre pondéré et règles des chemins</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../tours/wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VISITE : CINQ SUR NEUF</span><span class="b-lab-what">Visite guidée en direct du jeu de dés</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Beaucoup de chemins, une seule loi</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 10e année · domaine d’apprentissage 2 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-spiele.js"></script>
+<script src="../../js/buch-fr/spiele.js"></script>
+</body>
+</html>
