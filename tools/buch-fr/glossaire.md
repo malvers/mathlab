@@ -770,7 +770,12 @@ above was changed.
 | Strecke $\overline{AB}$, Strahl, Gerade | segment [AB], demi-droite, droite | 3.1; the line names g, h, s stay as in the widgets koord5 and winkelpaare5 (s = sécante) |
 | Schenkel, Scheitel (eines Winkels) | côtés, sommet | 3.1 |
 | Neben-, Scheitel-, Stufen-, Wechselwinkel | angles adjacents (supplémentaires), opposés par le sommet, correspondants (en F), alternes-internes (en Z) | 3.1, widget winkelpaare5; buttons Autre paire, Incliner h |
-| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD, LABORATOIRE DU REPÈRE, L’HORLOGE DES ANGLES, LABORATOIRE DES ANGLES, PUZZLE D’ANGLES | cards, en allemand |
+| achsensymmetrisch / punktsymmetrisch, Symmetrieachse, Symmetriezentrum | a un axe de symétrie / a un centre de symétrie, axe de symétrie, centre de symétrie | 3.2; Achsen-/Punktsymmetrie: symétrie axiale / centrale |
+| Verschiebung, Drehung (um Z), Spiegelung (an der Achse $s$) | translation, rotation (autour de O), symétrie axiale (par rapport à l’axe $(d)$) | 3.2: O and (d) as OS 5 and the fr-11 rules of spiegel5; Bewegungen: mouvements (« aussi appelés transformations ») |
+| Bildfigur, $A'$ „A Strich“ | figure image, $A'$ « A prime » | 3.2 |
+| Wörter mit senkrechter Achse: OTTO, ANNA, TOM, UHU, MAMA | OTTO, ANNA, TOM, YOYO, MAMAN | 3.2 task 2: French words, the solution follows the letters (N breaks the axis) |
+| Pik-Dame, „Vorfahrt achten“ | la dame de pique, « Cédez le passage » | 3.2 |
+| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD, LABORATOIRE DU REPÈRE, L’HORLOGE DES ANGLES, LABORATOIRE DES ANGLES, PUZZLE D’ANGLES, FIGURES SUPERPOSABLES | cards, en allemand |
 
 ## mathegy6-fr
 
