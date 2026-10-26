@@ -7,7 +7,8 @@
  *   bruchstrahl5   two numbers (fraction or decimal) on the number line, compared via a common denominator (data-a, data-b, data-hero)
  *   winkel5        an angle with a draggable arm and a protractor scale, its type; guessing mode with a hidden scale (data-hero)
  *   winkelpaare5   two lines cut by a third: vertical, adjacent, corresponding and alternate angles, the second line parallel or not
- *   spiegel5       a figure on the grid: reflection in a line, translation, rotation, and a quiz "which movement?" (data-mode, data-hero)
+ *   spiegel5       a figure on the grid: reflection in a line, translation, rotation, and a quiz "which movement?" (data-mode, data-hero;
+ *                  data-ohne="dreh" leaves the rotation out - OS 5, whose 2019 curriculum has none)
  *   rechteck5      a rectangle of unit squares with a draggable corner: area and perimeter; an L-shape by splitting or completing (data-mode, data-hero)
  *   quader5        a cuboid a × b × c: oblique view, net, unit cubes; volume, surface area, edges (data-mode, data-a/b/c, data-hero)
  *   einheiten5     the unit staircase for length, mass, time, area and volume: convert a value step by step (data-kind, data-hero)
@@ -630,13 +631,14 @@
     W('spiegel5', function (box) {
         const FIG = [[2, 1], [5, 1], [5, 3], [3, 4]], NAMES = ['A', 'B', 'C', 'D'];
         const S = { mode: box.dataset.mode || 'spiegel', axis: 'senk', k: 7, v: [5, 1], rot: 90, quiz: null, answer: null };
+        const dreh = box.dataset.ohne !== 'dreh';   // false: no rotation, neither as a mode nor in the quiz
         const ctr = div(box, 'b-ctrls');
-        seg(ctr, [['spiegel', 'Spiegelung'], ['schieb', 'Verschiebung'], ['dreh', 'Drehung'], ['quiz', 'Rätsel']], S.mode, v => { S.mode = v; if (v === 'quiz') newQuiz(); render(); }, 'Bewegung');
+        seg(ctr, [['spiegel', 'Spiegelung'], ['schieb', 'Verschiebung'], ['dreh', 'Drehung'], ['quiz', 'Rätsel']].filter(m => dreh || m[0] !== 'dreh'), S.mode, v => { S.mode = v; if (v === 'quiz') newQuiz(); render(); }, 'Bewegung');
         const c2 = div(box, 'b-ctrls');
         const axSeg = seg(c2, [['senk', 'Achse senkrecht'], ['waag', 'waagerecht'], ['schraeg', 'schräg']], S.axis, v => { S.axis = v; S.k = v === 'senk' ? 7 : v === 'waag' ? 5 : 0; render(); }, 'Achse');
         const rot = range(c2, { label: 'Drehwinkel', min: 0, max: 360, step: 15, value: S.rot, fmt: v => v + '°', onInput: v => { S.rot = v; render(); } });
         const qz = div(c2, 'b-ctrl g5-acts');
-        qz.innerHTML = ['Spiegelung', 'Verschiebung', 'Drehung'].map((l, i) => '<button type="button" class="b-btn" data-q="' + i + '">' + l + '</button>').join('') + '<button type="button" class="b-btn b-go" data-q="neu">Neues Rätsel</button>';
+        qz.innerHTML = ['Spiegelung', 'Verschiebung', 'Drehung'].slice(0, dreh ? 3 : 2).map((l, i) => '<button type="button" class="b-btn" data-q="' + i + '">' + l + '</button>').join('') + '<button type="button" class="b-btn b-go" data-q="neu">Neues Rätsel</button>';
         qz.addEventListener('click', e => {
             const b = e.target.closest('[data-q]'); if (!b) return;
             if (b.dataset.q === 'neu') newQuiz(); else S.answer = +b.dataset.q;
@@ -666,7 +668,7 @@
         const shift = p => [p[0] + S.v[0], p[1] + S.v[1]];
         const turn = (p, a, Z) => { const c = Math.cos(a * DEG), s = Math.sin(a * DEG), d = sub(p, Z); return [Z[0] + c * d[0] - s * d[1], Z[1] + s * d[0] + c * d[1]]; };
         function newQuiz() {
-            const t = rnd(0, 2);
+            const t = rnd(0, dreh ? 2 : 1);
             // a symmetric shape would make two answers right: draw again until mirror, half turn and quarter turn all look different
             const key = F => { const mx = Math.min(...F.map(p => p[0])), my = Math.min(...F.map(p => p[1])); return F.map(p => Math.round(p[0] - mx) + ',' + Math.round(p[1] - my)).sort().join(' '); };
             let base;
