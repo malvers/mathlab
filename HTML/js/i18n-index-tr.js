@@ -21,7 +21,8 @@
                 about_title: "Sinematik Giriş — Doc Alvers",
                 qr_title: "Bu sayfanın QR Kodu",
                 sound_title: "Ortam Sesi",
-                search_placeholder: "LABORATUVAR TARAMASINI BAŞLATIN...",
+                search_placeholder: "örn. Pisagor, sinüs, orbital",
+                search_placeholder_short: "sinüs …",
                 mission_start: "Görevi Başlat",
                 all_tools: "Tüm Araçlar",
                 tools_subtitle_word: "Araçlar",
@@ -81,6 +82,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "ETKİLEŞİMLİ MATEMATİK EVRENİ",
+                subtitle_count: "{n} MATEMATİK LABORATUVARIYLA",
                 author: "GOOD VIBES Dr. Michael R. Alvers"
             },
             view: {

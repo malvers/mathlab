@@ -21,7 +21,8 @@
                 about_title: "Cinematic Intro — Doc Alvers",
                 qr_title: "QR Code of this page",
                 sound_title: "Ambient Sound",
-                search_placeholder: "START LABORATORY SCAN...",
+                search_placeholder: "e.g. Pythagoras, sine, grade 11, atomic orbitals",
+                search_placeholder_short: "sine …",
                 mission_start: "Start Mission",
                 all_tools: "All Tools",
                 tools_subtitle_word: "Tools",
@@ -81,6 +82,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "THE INTERACTIVE MATHEMATICS UNIVERSE",
+                subtitle_count: "WITH {n} MATH LABS",
                 author: "GOOD VIBES by Dr. Michael R. Alvers"
             },
             view: {

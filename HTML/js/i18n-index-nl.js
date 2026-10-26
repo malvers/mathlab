@@ -21,7 +21,8 @@
                 about_title: "Filmische intro — Doc Alvers",
                 qr_title: "QR-code van deze pagina",
                 sound_title: "Achtergrondgeluid",
-                search_placeholder: "LABORATORIUMSCAN STARTEN...",
+                search_placeholder: "bijv. Pythagoras, sinus, klas 11, atoomorbitalen",
+                search_placeholder_short: "sinus …",
                 mission_start: "Missie starten",
                 all_tools: "Alle tools",
                 tools_subtitle_word: "Tools",
@@ -81,6 +82,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "HET INTERACTIEVE WISKUNDE-UNIVERSUM",
+                subtitle_count: "MET {n} WISKUNDE-LABS",
                 author: "GOOD VIBES door Dr. Michael R. Alvers"
             },
             view: {

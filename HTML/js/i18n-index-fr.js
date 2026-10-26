@@ -21,7 +21,8 @@
                 about_title: "Intro Cinématique — Doc Alvers",
                 qr_title: "Code QR de cette page",
                 sound_title: "Son d'Ambiance",
-                search_placeholder: "LANCER LE SCAN DU LABORATOIRE...",
+                search_placeholder: "p. ex. Pythagore, sinus, première, orbitales atomiques",
+                search_placeholder_short: "sinus …",
                 mission_start: "Démarrer Mission",
                 all_tools: "Tous les Outils",
                 tools_subtitle_word: "Outils",
@@ -81,6 +82,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "L’UNIVERS INTERACTIF DES MATHÉMATIQUES",
+                subtitle_count: "AVEC {n} LABORATOIRES DE MATHS",
                 author: "GOOD VIBES par Dr. Michael R. Alvers"
             },
             view: {

@@ -21,7 +21,8 @@
                 about_title: "Utangulizi wa sinema — Doc Alvers",
                 qr_title: "Msimbo wa QR wa ukurasa huu",
                 sound_title: "Sauti ya mandhari",
-                search_placeholder: "ANZA UCHUNGUZI WA MAABARA...",
+                search_placeholder: "k.m. Pythagoras, sine, darasa la 11, obiti",
+                search_placeholder_short: "sine …",
                 mission_start: "Anza misheni",
                 all_tools: "Zana zote",
                 tools_subtitle_word: "Zana",
@@ -81,6 +82,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "ULIMWENGU SHIRIKISHI WA HISABATI",
+                subtitle_count: "NA MAABARA {n} ZA HISABATI",
                 author: "GOOD VIBES na Dk. Michael R. Alvers"
             },
             view: {

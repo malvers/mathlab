@@ -21,7 +21,8 @@
                 about_title: "Intro Cinemática — Doc Alvers",
                 qr_title: "Código QR de esta página",
                 sound_title: "Sonido Ambiente",
-                search_placeholder: "INICIAR ESCANEO DE LABORATORIO...",
+                search_placeholder: "p. ej. Pitágoras, seno, curso 11, orbitales atómicos",
+                search_placeholder_short: "seno …",
                 mission_start: "Iniciar Misión",
                 all_tools: "Todas las Herramientas",
                 tools_subtitle_word: "Herramientas",
@@ -81,6 +82,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "EL UNIVERSO INTERACTIVO DE LAS MATEMÁTICAS",
+                subtitle_count: "CON {n} LABORATORIOS DE MATEMÁTICAS",
                 author: "GOOD VIBES por Dr. Michael R. Alvers"
             },
             view: {

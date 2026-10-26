@@ -2354,10 +2354,31 @@
 
         // Centralized Search Engine Hook (input + hit drop-down)
         CyberUI.init();
-        const searchHint = CyberI18n.getOr('index.ui.search_placeholder', "LABOR-SCAN STARTEN...");
+        /* examples instead of the old "Labor-Scan starten ..." (Doc, 26.10.2026: the magnifier says it is a search;
+           every example finds something in its language - tested) */
+        const searchHint = CyberI18n.getOr('index.ui.search_placeholder', 'z. B. Pythagoras, Sinus, Klasse 11, Atomorbitale');
         LabSearch.attach('search-mount', searchHint, (val) => {
             filterLabs(val);
         });
+        /* On a phone the field next to Solita, universe and YouTube is too narrow for the examples - it then
+           shows one short example ("Sinus …") and the full hint again as soon as it fits (on every resize). */
+        (function fitSearchHint() {
+            const shortHint = CyberI18n.getOr('index.ui.search_placeholder_short', 'Sinus …');
+            const inp = document.querySelector('#search-mount .search-input');
+            if (!inp) return;
+            const ctx = document.createElement('canvas').getContext('2d');
+            function fit() {
+                const cs = getComputedStyle(inp);
+                ctx.font = cs.font;
+                const text = cs.textTransform === 'uppercase' ? searchHint.toUpperCase() : searchHint;
+                const need = ctx.measureText(text).width + text.length * (parseFloat(cs.letterSpacing) || 0);
+                const room = inp.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+                inp.placeholder = need <= room ? searchHint : shortHint;
+            }
+            fit();
+            window.addEventListener('resize', fit);
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+        })();
 
         (function syncUniverseGalaxyBtnHeight() {
             const btn = document.querySelector('.search-scan-row .universe-galaxy-btn');
@@ -2401,11 +2422,12 @@
         /* Books view grouped by school type (Doc, 26.10.2026: "nach Schulart strukturieren"):
            a heading per school, the book cards below it sorted by grade; the LK books get their own row.
            The cards are moved, not re-rendered; leaving the view puts them back in LABS_DATA order. */
+        /* Berufliches Gymnasium on top (Doc, 26.10.2026: "Bring bitte das berufliche Gymnasium on top") */
         const BOOK_SCHOOLS = [
+            { key: 'bgy', label: 'Berufliches Gymnasium' },
             { key: 'gy', label: 'Gymnasium' },
             { key: 'gylk', label: 'Gymnasium · Leistungskurs' },
             { key: 'os', label: 'Oberschule' },
-            { key: 'bgy', label: 'Berufliches Gymnasium' },
             { key: 'fos', label: 'Fachoberschule' }
         ];
 
@@ -2572,8 +2594,41 @@
                 typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function'
                     ? CyberI18n.getOr('index.header.subtitle', 'DAS INTERAKTIVE MATHEMATIK-UNIVERSUM')
                     : 'DAS INTERAKTIVE MATHEMATIK-UNIVERSUM';
-            subtitle.textContent = tagline; /* lab count dropped from the tagline (Doc, 26.08.2026) */
+            /* the number is back (Doc, 26.10.2026: "schreibt man dann noch dahinter mit wie viel Mathe-Laboren",
+               books, apps and tours counted - it was dropped on 26.08.2026); always LABS_DATA.length, so it stays right */
+            const more = (typeof CyberI18n !== 'undefined' && typeof CyberI18n.getOr === 'function'
+                ? CyberI18n.getOr('index.header.subtitle_count', 'MIT {n} MATHE-LABOREN')
+                : 'MIT {n} MATHE-LABOREN').replace('{n}', count);
+            /* "mit 126 Mathe-Laboren" stays in one piece - on a phone it gets a line of its own */
+            subtitle.textContent = tagline + ' ';
+            const countSpan = document.createElement('span');
+            countSpan.style.whiteSpace = 'nowrap';
+            countSpan.textContent = more;
+            subtitle.appendChild(countSpan);
+            fitSubtitle();
         }
+
+        /* Doc, 26.10.2026: "den Font etwas kleiner, damit es so breit ist wie die Ueberschrift, oder einen Tick
+           kleiner" - while title and tagline each sit on one line, the tagline shrinks to 97 % of the title's
+           width (measured, two passes because the letter spacing does not scale exactly); on a phone both wrap
+           and the tagline keeps the size of the stylesheet. Again on resize and once the fonts are in. */
+        function fitSubtitle() {
+            const title = document.getElementById('header-title');
+            const sub = document.getElementById('dynamic-subtitle');
+            if (!title || !sub) return;
+            sub.style.fontSize = '';
+            const box = function (el) { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect(); };
+            const oneLine = function (el) { return box(el).height < parseFloat(getComputedStyle(el).fontSize) * 1.9; };
+            if (!oneLine(title) || !oneLine(sub)) return;
+            const target = box(title).width * 0.97;
+            for (let pass = 0; pass < 2; pass++) {
+                const w = box(sub).width;
+                if (w <= target) break;
+                sub.style.fontSize = (parseFloat(getComputedStyle(sub).fontSize) * target / w) + 'px';
+            }
+        }
+        window.addEventListener('resize', fitSubtitle);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSubtitle);
 
         function updateThemesCount() {
             const countEl = document.getElementById('themes-count');

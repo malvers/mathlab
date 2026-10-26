@@ -21,7 +21,8 @@
                 about_title: "Introdução Cinematográfica — Doc Alvers",
                 qr_title: "Código QR desta página",
                 sound_title: "Som Ambiente",
-                search_placeholder: "INICIAR VERIFICAÇÃO DO LABORATÓRIO...",
+                search_placeholder: "p. ex. Pitágoras, seno, ano 11, orbitais atômicos",
+                search_placeholder_short: "seno …",
                 mission_start: "Iniciar Missão",
                 all_tools: "Todas as Ferramentas",
                 tools_subtitle_word: "Ferramentas",
@@ -81,6 +82,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "O UNIVERSO INTERATIVO DA MATEMÁTICA",
+                subtitle_count: "COM {n} LABORATÓRIOS DE MATEMÁTICA",
                 author: "GOOD VIBES por Dr. Michael R. Alvers"
             },
             view: {
