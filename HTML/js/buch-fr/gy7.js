@@ -152,6 +152,13 @@ window.BuchFR && BuchFR.add('gy7', {
         'Drei gleiche Pyramiden füllen den Würfel: $3 \\cdot V_{\\text{Pyramide}} = a^3$, also':
             'Trois pyramides identiques remplissent le cube : $3 \\times V_{\\text{pyramide}} = a^3$, donc',
         '$V_{\\text{Pyramide}} = \\tfrac13 \\cdot a^2 \\cdot a = \\tfrac13 \\cdot G \\cdot h$': '$V_{\\text{pyramide}} = \\tfrac13 \\times a^2 \\times a = \\tfrac13 \\times \\mathcal{B} \\times h$',
+        // eckenwinkel7 (regular polygons around one vertex)
+        'Dreiecke': 'Triangles', 'Quadrate': 'Carrés', 'Fünfecke': 'Pentagones', 'Sechsecke': 'Hexagones', 'Vieleck': 'Polygone', 'Anzahl an der Ecke': 'Nombre au sommet', 'flach': 'plat',
+        'Genau $360^\\circ$: Die Vielecke liegen flach in der Ebene, ein Parkett. Eine Ecke eines Körpers entsteht nicht.':
+            'Exactement $360^\\circ$ : les polygones sont à plat dans le plan, comme un pavage. On n’obtient pas de sommet de solide.',
+        'Mehr als $360^\\circ$: Die Vielecke überlappen sich. Daraus lässt sich keine Ecke falten.': 'Plus de $360^\\circ$ : les polygones se chevauchent. On ne peut pas en plier un sommet.',
+        'Spalten: wie viele Vielecke an einer Ecke. Genau fünf Felder haben ein Häkchen: Es gibt genau fünf platonische Körper.':
+            'Colonnes : combien de polygones à un sommet. Exactement cinq cases sont cochées : il existe exactement cinq solides de Platon.',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -231,6 +238,9 @@ window.BuchFR && BuchFR.add('gy7', {
         ['$h_a$ ist die Höhe einer Seitenfläche, hier gemessen: $h_a \\approx ', '$h_a$ est l’apothème, la hauteur d’une face latérale, ici mesurée : $h_a \\approx '],
         ['$: Ergänze den Stumpf zur ganzen Pyramide (Höhe $', '$ : complète le tronc en une pyramide entière (hauteur $'], ['$ cm) und ziehe die kleine Spitze ab.', '$ cm) et retire la petite pointe.'],
         ['Die vier Seitenflächen sind Trapeze mit der Höhe $h_a \\approx ', 'Les quatre faces latérales sont des trapèzes de hauteur $h_a \\approx '],
+        // eckenwinkel7 ("So ist das <b>Ikosaeder</b> gebaut." is a rule)
+        ['Jeder Innenwinkel: $', 'Chaque angle intérieur : $'], ['^\\circ$ · an der Ecke: $', '^\\circ$ · au sommet : $'],
+        ['Weniger als $360^\\circ$: Klappt man die Lücke zu, entsteht eine räumliche Ecke. ', 'Moins de $360^\\circ$ : si l’on referme le vide, on obtient un sommet dans l’espace. '],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -252,7 +262,7 @@ window.BuchFR && BuchFR.add('gy7', {
         [/(<button type="button" class="b-btn" data-k="(?:0|reset)">)Von vorn(<\/button>)/g, '$1Début$2'],
         [/(<text class="g-side"[^>]*>)k(<\/text>)/g, '$1𝒞$2'], [/(<text class="g-side"[^>]*>)h(<\/text>)/g, '$1𝒞′$2'],
         // zahlbereiche7: "Richtig: 3 von 5" as in js/buch-fr/zahlen.js, and the colon after the number in "<b>Richtig!</b> $7$: …"
-        [/Richtig: (\d+) von (\d+)/g, 'Bonnes réponses : $1 sur $2'], [/(<b>Richtig!<\/b> \$[^$]*\$): /g, '$1 : '],
+        [/Richtig: (\d+) von (\d+)/g, 'Bonnes réponses : $1 sur $2'], [/(<b>Richtig!<\/b> \$[^$]*\$): /g, '$1 : '],
         // vorzeichen7: "Von Zeile zu Zeile wird das Ergebnis um 3 kleiner. Damit das Muster weitergeht, muss $3 \times (-1) = -3$ sein."
         [/Von Zeile zu Zeile wird das Ergebnis um 3 (kleiner|größer)\. Damit das Muster weitergeht, muss \$([^$]+)\$ sein\./g,
             (m, w, f) => 'D’une ligne à l’autre, le résultat ' + (w === 'kleiner' ? 'diminue' : 'augmente') + ' de 3. Pour que la suite continue, il faut avoir $' + f + '$.'],
@@ -274,7 +284,7 @@ window.BuchFR && BuchFR.add('gy7', {
         [/Prozentwert (<span class="g-lam">)\$W = (\d+)\\,\\% \\text\{ von \} /g, 'Part $1$P = $2\\,\\% \\text{ de } '],
         [/(Steigerung|Senkung) um \$(\d+)\\,\\%\$ heißt (?:Steigerung|Senkung) <b>auf<\/b> \$(\d+)\\,\\%\$\. Der Faktor ist \$/g,
             (m, k, a, b) => (k === 'Steigerung' ? 'Augmenter' : 'Diminuer') + ' de $' + a + '\\,\\%$, c’est passer <b>à</b> $' + b + '\\,\\%$. Le coefficient multiplicateur est $'],
-        [/Danach um \$(\d+)\\,\\%\$ (senken|erhöhen): /g, (m, p, v) => 'Puis ' + (v === 'senken' ? 'diminuer' : 'augmenter') + ' de $' + p + '\\,\\%$ : '],
+        [/Danach um \$(\d+)\\,\\%\$ (senken|erhöhen): /g, (m, p, v) => 'Puis ' + (v === 'senken' ? 'diminuer' : 'augmenter') + ' de $' + p + '\\,\\%$ : '],
         // diagramm7: the aria "<title> als Säulendiagramm" and the line under the table
         [/^(.+) als (Säulendiagramm|Liniendiagramm|Kreisdiagramm)$/, (m, t, c) => ({ Säulendiagramm: 'Diagramme en colonnes', Liniendiagramm: 'Diagramme en ligne brisée',
             Kreisdiagramm: 'Diagramme circulaire' }[c]) + ' : ' + ({ 'Wie kommst du zur Schule? Umfrage in einer Klasse': 'comment viens-tu à l’école ? Sondage dans une classe',
@@ -288,7 +298,7 @@ window.BuchFR && BuchFR.add('gy7', {
         // faltnetz7: "6 Vierecke", "1 Viereck, 4 Dreiecke" after the name, the colon after the name, Euler's S − A + F, the sentence about the regular solids
         [/(\d+) (Dreiecke?|Vierecke?|Fünfecke?|Sechsecke?)(?=, |<\/p>)/g, (m, n, w) => n + ' ' + ({ 'Dreieck': 'triangle', 'Dreiecke': 'triangles', 'Viereck': 'quadrilatère',
             'Vierecke': 'quadrilatères', 'Fünfeck': 'pentagone', 'Fünfecke': 'pentagones', 'Sechseck': 'hexagone', 'Sechsecke': 'hexagones' }[w])],
-        [/(<p style="margin:0"><b>[^<]+<\/b>): /g, '$1 : '], [/\$e - k \+ f = /g, '$S - A + F = '],
+        [/(<p style="margin:0"><b>[^<]+<\/b>): /g, '$1 : '], [/\$e - k \+ f = /g, '$S - A + F = '],
         [/Alle Flächen sind gleiche regelmäßige (Dreiecke|Vierecke|Fünfecke|Sechsecke), an jeder Ecke stoßen (\d+) zusammen\./g, (m, w, n) => 'Toutes les faces sont des ' +
             { 'Dreiecke': 'triangles équilatéraux', 'Vierecke': 'carrés', 'Fünfecke': 'pentagones réguliers', 'Sechsecke': 'hexagones réguliers' }[w] + ' identiques ; chaque sommet en réunit ' + n + '.'],
         // schraegbild7 with data-calc (the output ends with "Masse aus …"): the French letters in its formulas - aire de la base 𝓑 (German G),
@@ -297,5 +307,10 @@ window.BuchFR && BuchFR.add('gy7', {
             .replace(/(?<![A-Za-z\\])G(?![A-Za-z])/g, '\\mathcal{B}').replace(/(?<![A-Za-z\\])M(?![A-Za-z])/g, 'A_L').replace(/(?<![A-Za-z\\])O(?![A-Za-z])/g, 'A')
             .replace(/(?<![A-Za-z\\])u(?![A-Za-z])/g, 'P')).replace(/\$\): \$/g, '$) : $')],
         [/Masse aus (Fichtenholz|Glas|Stahl) \(/g, (m, s) => 'Masse en ' + { 'Fichtenholz': 'épicéa', 'Glas': 'verre', 'Stahl': 'acier' }[s] + ' ('],
+        // eckenwinkel7: "So ist das <b>Ikosaeder</b> gebaut." (the cube may already be "Cube" from the rule above), the gap, the aria
+        [/So ist (?:der|das) <b>([^<]+)<\/b> gebaut\./g, (m, s) => 'C’est ainsi qu’est construit ' + ({ 'Tetraeder': 'le <b>tétraèdre</b>', 'Würfel': 'le <b>cube</b>',
+            'Cube': 'le <b>cube</b>', 'Oktaeder': 'l’<b>octaèdre</b>', 'Dodekaeder': 'le <b>dodécaèdre</b>', 'Ikosaeder': 'l’<b>icosaèdre</b>' }[s] || '<b>' + s + '</b>') + '.'],
+        [/>Lücke (\d+)°</g, '>Vide $1°<'],
+        [/^(\d+) regelmäßige (\d+)-Ecke an einer Ecke$/, (m, n, k) => n + ' polygones réguliers à ' + k + ' côtés autour d’un sommet'],
     ]
 });

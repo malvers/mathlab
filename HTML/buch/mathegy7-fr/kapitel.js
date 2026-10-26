@@ -10,7 +10,7 @@ window.BUCH = {
     short: 'Mathématiques GY 7',
     lang: 'fr',
     druck: false,
-    description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand qui mène à l’Abitur), 7e année, Saxe : cercle et droite, cercle circonscrit et cercle inscrit, le triangle rectangle inscrit dans un demi-cercle et les angles inscrits, constructions et résolution de problèmes, nombres rationnels et calcul, équations et formules, pourcentages, prismes et pyramides en perspective cavalière, en patron et en vues, aire et volume, diagrammes et solides de Platon, avec des patrons qui se plient en 3D, des constructions à suivre pas à pas et des autoévaluations corrigées immédiatement.',
+    description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand qui mène à l’Abitur), 7e année, Saxe : cercle et droite, cercle circonscrit et cercle inscrit, le triangle rectangle inscrit dans un demi-cercle et les angles inscrits, constructions et résolution de problèmes, nombres rationnels et calcul, équations et formules, pourcentages, prismes et pyramides en perspective cavalière, en patron et en vues, aire et volume, diagrammes et solides de Platon, avec des patrons qui se plient en 3D, des constructions à suivre pas à pas et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Cercle et droite, cercle circonscrit et cercle inscrit',
           sub: 'Droite extérieure, tangente et sécante, médiatrices et bissectrices du triangle', when: 'Août · septembre', ustd: 8 },
