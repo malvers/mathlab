@@ -883,6 +883,12 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Lösungsplan: verstehen, planen, durchführen, zurückschauen; Teilziel | plan de résolution : comprendre, planifier, exécuter, prendre du recul ; étape intermédiaire | 5 |
 | Pólya: How to Solve It (Schule des Denkens) | Comment poser et résoudre un problème | 5 excursion |
 | Hühner / Kaninchen $h$, $k$; Uhrzeit 10:30 Uhr | poules / lapins $p$, $l$; 10 h 30 | 5 |
+| Wahlbereich 3 (chapter W) | Domaine optionnel 3 (chapter OP) | as section 1 |
+| Zufallszahlen, strukturgleich, Monte-Carlo-Methode, Pseudozufall | nombres aléatoires, de même structure, méthode de Monte-Carlo, pseudo-hasard | OP |
+| Viertelkreis (points inside) | quart de disque | widget mcpi8 |
+| Sammelalbum, Tüte, Bild | album de vignettes, pochette, vignette | widget sammel8 |
+| Ziegenproblem, Moderator | problème de Monty Hall, animateur | as section 5 and the widget ziegen |
+| Lab names | CRYPTARITHMES, LABORATOIRE DES BINÔMES, LE JEU DE DÉS, PLANCHE DE GALTON, LABORATOIRE DU REPÈRE, LABORATOIRE DES PARABOLES, LABORATOIRE DE STATISTIQUE, LABORATOIRE DE LA PENTE, SYSTÈMES D’ÉQUATIONS, TRANSFORMATIONS, PYTHAGORE, SIMULATION D’ÉPIDÉMIE | FALLING PI, COLLATZ stay |
 
 ## mathegy9-fr
 

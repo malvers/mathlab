@@ -67,6 +67,14 @@ window.BuchFR && BuchFR.add('gy8', {
         'Rückwärts: ein Schritt': 'En arrière : une étape', 'Neues Rätsel': 'Nouvelle devinette', 'Startzahl': 'Nombre de départ', 'Richtig!': 'Correct !',
         'Probier eine Zahl im ersten Kästchen, oder rechne rückwärts: Jede Rechnung wird durch ihre Umkehrung ersetzt, plus durch minus, mal durch geteilt.':
             'Essaie un nombre dans la première case, ou calcule à rebours : chaque opération est remplacée par son opération inverse, plus par moins, fois par divisé par.',
+        // mcpi8 (the counts: a rule below)
+        'Zufallspunkte in einem Quadrat, Treffer im Viertelkreis gelb': 'Points aléatoires dans un carré, en jaune ceux qui tombent dans le quart de disque',
+        'Noch keine Punkte. Lass es regnen!': 'Pas encore de points. Fais pleuvoir !',
+        // sammel8 (Bilder are vignettes, Tüten are pochettes; the sentences with numbers: rules below)
+        'Größe des Albums': 'Taille de l’album', 'Eine Tüte öffnen': 'Ouvrir une pochette', 'Bis das Album voll ist': 'Jusqu’à l’album complet',
+        '1000 Alben': '1000 albums', 'Neues Album': 'Nouvel album', 'Mittelwert': 'Moyenne', 'Voll!': 'Complet !',
+        'Anzahl der Tüten bis zum vollen Album': 'Nombre de pochettes jusqu’à l’album complet',
+        'Histogramm: wie viele Tüten 1000 Alben gebraucht haben': 'Histogramme : combien de pochettes il a fallu pour 1000 albums',
         // gluecksrad8
         'Felder': 'Secteurs', 'ein Feld weniger': 'un secteur de moins', 'ein Feld mehr': 'un secteur de plus',
         'gleich groß': 'de même taille', 'verschieden groß': 'de tailles différentes', 'Größe der Felder': 'Taille des secteurs', 'Drehen': 'Tourner',
@@ -97,6 +105,10 @@ window.BuchFR && BuchFR.add('gy8', {
         ['Du hältst ein gleichschenklig-rechtwinkliges Dreieck vor das Auge (Augenhöhe $1{,}6$ m) und peilst an seiner langen Seite entlang. Diese Linie steigt unter $45^\\circ$: ',
             'Tu tiens devant ton œil un triangle rectangle isocèle (yeux à $1{,}6$ m de hauteur) et tu vises le long de son grand côté. Cette ligne monte avec un angle de $45^\\circ$ : '],
         ['Treffer!</b> Du siehst genau die Spitze. ', 'Dans le mille !</b> Tu vois exactement le sommet. '],
+        // mcpi8
+        ['Der Viertelkreis bedeckt $\\tfrac{\\pi}{4}$ des Quadrats, also ist ', 'Le quart de disque couvre $\\tfrac{\\pi}{4}$ du carré, donc '], ['(Abweichung $', '(écart $'],
+        // sammel8
+        ['Man kann es auch ausrechnen, mit Mitteln aus der Oberstufe: $', 'On peut aussi le calculer, avec des outils du lycée : $'],
         // lgs8 (a sentence that starts with <b> is no whole label for the engine)
         ['<b>Probe</b> in beiden Gleichungen, dann die Lösungsmenge.', '<b>Vérification</b> dans les deux équations, puis l’ensemble des solutions.'],
         // wegzeit8 (where Mia is: a rule below)
@@ -187,6 +199,17 @@ window.BuchFR && BuchFR.add('gy8', {
         [/Mit \$([^$]*)\$ kommt \$([^$]*)\$ heraus\. /g, (m, a, b) => 'Avec $' + a + '$, on obtient $' + b + '$. '],
         [/Das passt nicht\./g, 'Ça ne marche pas.'],
         [/Rückwärts von \$([^$]*)\$ aus, mit den Umkehrrechnungen: Die Startzahl ist <b>/g, (m, e) => 'À rebours à partir de $' + e + '$, avec les opérations inverses : le nombre de départ est <b>'],
+        // mcpi8: the buttons "+100 Punkte" and the sentence "Von $1000$ Punkten liegen $791$ im Viertelkreis, das ist der Anteil $…"
+        [/\+(\d[\d ]*) Punkte</g, '+$1 points<'],
+        [/Von \$([^$]*)\$ Punkten liegen \$([^$]*)\$ im Viertelkreis, das ist der Anteil \$/g, (m, a, b) => 'Sur $' + a + '$ points, $' + b + '$ sont dans le quart de disque, soit la part $'],
+        // sammel8: the album in numbers (the sentence rules before the album sizes "10 Bilder")
+        [/Jede Tüte enthält ein Bild\. Alle (\d+) Bilder sind gleich häufig\. Wie viele Tüten brauchst du, bis das Album voll ist\?/g,
+            'Chaque pochette contient une vignette. Les $1 vignettes sont toutes aussi fréquentes. Combien de pochettes te faut-il pour compléter l’album ?'],
+        [/Geöffnet: \$(\d+)\$ Tüten · im Album: \$(\d+)\$ von \$(\d+)\$ Bildern · doppelt: \$/g,
+            (m, p, g, n) => 'Ouvertes : $' + p + '$ ' + (p === '1' ? 'pochette' : 'pochettes') + ' · dans l’album : $' + g + '$ vignettes sur $' + n + '$ · en double : $'],
+        [/1000 Alben: Im Mittel brauchte man <span class="b-res">\$([^$]*)\$ Tüten<\/span> \(am wenigsten \$(\d+)\$, am meisten \$(\d+)\$\)\. /g,
+            (m, a, b, c) => '1000 albums : il a fallu en moyenne <span class="b-res">$' + a + '$ pochettes</span> (au minimum $' + b + '$, au maximum $' + c + '$). '],
+        [/(\d+) Bilder\b/g, '$1 vignettes'], [/title="Bild (\d+)"/g, 'title="Vignette $1"'],
         // geraden (js/buch-lgs.js, chapter 3.3): the point of intersection is I in the chapter text (S is the solution set)
         [/<b>Genau eine Lösung<\/b>: Die Geraden schneiden sich in \$S\(/g, '<b>Exactement une solution</b> : les droites se coupent en $I('],
         // wegzeit8: the axis label "s in m" is d here (js/buch-fr/integral.js has "s en m" as a word, so a rule and no second word)

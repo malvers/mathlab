@@ -33,6 +33,6 @@ window.BUCH = {
         { file: 'lb5.html', lb: 'Domaine d’apprentissage 5', k: '5', title: 'Stratégies de résolution de problèmes',
           sub: 'Raisonner en avant et en arrière, plans de résolution, présenter une solution', when: 'Mai', ustd: 4 },
         { file: 'wb.html', lb: 'Domaine optionnel', k: 'OP', title: 'Simulation avec des nombres aléatoires',
-          sub: 'Nombres aléatoires, méthode de Monte-Carlo, problème de Monty Hall, album d’images à collectionner', when: 'Mai · juin', ustd: 8 }
+          sub: 'Nombres aléatoires, méthode de Monte-Carlo, problème de Monty Hall, album de vignettes', when: 'Mai · juin', ustd: 8 }
     ]
 };
