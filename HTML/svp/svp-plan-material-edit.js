@@ -51,21 +51,28 @@ window.svpPlanParts.push(function (P) {
             lbl.textContent = cfg.label;
             rb.appendChild(lbl);
             rb.addEventListener('click', function (e) { e.stopPropagation(); });
-            if (cfg.items && cfg.items.length) {
+            if ((cfg.items && cfg.items.length) || cfg.src) {
                 rb.setAttribute('aria-haspopup', 'dialog');
                 rb.setAttribute('aria-expanded', 'false');
                 rb.addEventListener('click', function () {
                     const wasOpen = P.redListOpen && P.redListOpen.btn === rb;
                     P.closeRedList();
                     if (wasOpen) return;
-                    /* built once per week, reused across re-renders of the row */
-                    if (!ref.redList) ref.redList = P.buildRedList(cfg.title || cfg.label, cfg.items, art);
-                    ref.redList.hidden = false;
-                    P.redListOpen = { panel: ref.redList, btn: rb };
-                    rb.setAttribute('aria-expanded', 'true');
-                    P.placeRedList();
+                    /* items inline or from cfg.src (svp-plan-aufgaben.js) */
+                    P.redListItems(cfg).then(function (items) {
+                        if (!items.length || !rb.isConnected) return;
+                        /* built once per week, reused across re-renders of the row */
+                        if (!ref.redList) ref.redList = P.buildRedList(cfg.title || cfg.label, items, art);
+                        P.closeRedList();
+                        ref.redList.hidden = false;
+                        P.redListOpen = { panel: ref.redList, btn: rb };
+                        rb.setAttribute('aria-expanded', 'true');
+                        P.placeRedList();
+                    });
                 });
             }
+            /* a dated test shows only at each group's next lesson (P.redBtnShown) */
+            if (!P.redBtnShown(ref)) rb.style.display = 'none';
             ref.matTd.appendChild(rb);
             ref.redBtnEl = rb;
             P.watchRedBtn(ref);

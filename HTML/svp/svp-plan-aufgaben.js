@@ -4,7 +4,8 @@ window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
         quizSource, buildQuizBtn, buildAufgabenCell, fillAufgabenPane, watchRedBtn,
-        closeRedList, placeRedList, buildRedList, pruefArt
+        closeRedList, placeRedList, buildRedList, redListItems, pruefArt,
+        redBtnShown, applyRedBtnDates
     });
 
     // --- Material quick-add (per week row, owner only) -------------------
@@ -288,6 +289,32 @@ window.svpPlanParts.push(function (P) {
         requestAnimationFrame(placeRedBtns);
     }
 
+    /* Doc, 26.10.2026 ("das ist heute"): a test "from next week on" carries
+       redBtn.ab = 'YYYY-MM-DD'. In the group view of a termin plan every row
+       knows the group's own date (r.terminYmd, svp-plan-untis.js); of all rows
+       carrying the same list only the first one on or after `ab` keeps its
+       button - for each group its next lesson from that day. Without group
+       dates (all groups together, or not logged in) every such row shows it. */
+    function redBtnKey(c) { return c.src || c.title || c.label; }
+    function redBtnShown(ref) {
+        const cfg = ref.redBtn;
+        if (!cfg || !cfg.ab || !ref.terminYmd) return true;
+        const ab = String(cfg.ab).replace(/-/g, '');
+        for (const r of P.rendered) {
+            const c = r.redBtn;
+            if (!c || !c.ab || redBtnKey(c) !== redBtnKey(cfg)) continue;
+            if (r.terminYmd && r.terminYmd >= ab) return r === ref;
+        }
+        return false;
+    }
+    /* .red-btn sets its own display, so [hidden] would not hide it */
+    function applyRedBtnDates() {
+        for (const r of P.rendered) {
+            if (r.redBtnEl) r.redBtnEl.style.display = redBtnShown(r) ? '' : 'none';
+        }
+        placeRedBtns();
+    }
+
     /* Doc, 18.09.2026: "eine Liste von 30 Punkten unter den butt ... gib mir
        ein x" - row.redBtn = { label, title, items } opens a numbered list under
        the button, closed by its ✕, Escape or a click outside. The panel hangs
@@ -332,6 +359,27 @@ window.svpPlanParts.push(function (P) {
        "Schulaufgabe" steht. Wer es anders braucht, schreibt es hin -
        redBtn.art = 'klausur' oder 'nachweis' sticht die Regel. */
     const ROT_WORT = /klausur|klassenarbeit|schulaufgabe/i;
+
+    /* Doc, 26.10.2026: the same 30 questions in two rows of FO 12 - in termin
+       mode the groups reach their next lesson in different rows. Such a list
+       lives in a JSON file of its own (row.redBtn.src, relative to the plan
+       page, { items: [...] }), fetched once on the first click; inline items
+       work as before. A failed fetch is forgotten, so the next click retries. */
+    const redSrc = {};
+    function redListItems(cfg) {
+        if (!cfg.src) return Promise.resolve(cfg.items || []);
+        if (!redSrc[cfg.src]) {
+            redSrc[cfg.src] = fetch(cfg.src, { cache: 'no-cache' })
+                .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(function (d) { return Array.isArray(d) ? d : (d.items || []); })
+                .catch(function (e) {
+                    delete redSrc[cfg.src];
+                    console.warn('[svp] red list ' + cfg.src + ': ' + e.message);
+                    return [];
+                });
+        }
+        return redSrc[cfg.src];
+    }
 
     function pruefArt(cfg) {
         if (cfg && (cfg.art === 'klausur' || cfg.art === 'nachweis')) return cfg.art;

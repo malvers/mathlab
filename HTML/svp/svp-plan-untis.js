@@ -540,6 +540,8 @@ window.svpPlanParts.push(function (P) {
            sie stuende der Plan einer Gruppe ganz ohne "hier sind wir" da. */
         if (!P.runNowMark()) markNextTermin();
         markPastWeeks();
+        /* a dated test button (redBtn.ab) moves to the group's own next lesson */
+        P.applyRedBtnDates();
     }
 
     /* ---- Leerwochen und der Platz der Ferien ------------------------------

@@ -323,7 +323,8 @@ window.svpPlanParts.push(function (P) {
             type: rowType, nr: ov.nr != null ? ov.nr : row.nr, kw: ov.kw != null ? ov.kw : row.kw,
             upBtn: upBtn,
             /* optional red button left of the Aufgaben pill: row.redBtn = 'Label'
-               or { label, title, items } - items open as a list under it */
+               or { label, title, items } - items open as a list under it;
+               { label, title, src } reads them from a JSON file instead */
             redBtn: row.redBtn || null
         };
 
