@@ -19,6 +19,9 @@ window.BuchFR && BuchFR.add('geometrie', {
         // book fr-14 mathegy7-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // titelbildgy9 (the cover of GY 9)
+        'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
+            'Couverture : triangle rectangle avec les carrés construits sur ses côtés, rectangle d’or avec sa spirale, cercle entre deux hexagones et parabole',
     },
     phrase: [
         // book fr-11 mathe5-fr:
