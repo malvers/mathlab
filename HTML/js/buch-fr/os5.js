@@ -297,7 +297,7 @@ window.BuchFR && BuchFR.add('os5', {
         [/^Bandornament aus dem Motiv (\S+)$/, (m, k) => 'Frise avec le motif ' + ({ 'Fahne': 'drapeau', 'Schlüssel': 'clé', 'Blume': 'fleur' }[k] || k)],
         // zahlzeichenos5
         [/^Kerbholz und Strichliste mit (\d+) Strichen$/, 'Bâton à encoches et traits de comptage : $1 traits'],
-        [/(?:(\d+) Fünferbündel(?: und (\d+) einzelner? (?:Strich|Striche))?|(\d+) einzelner? (?:Strich|Striche))(: )?/, (m, b5, r1, r2, c) => {
+        [/(?:(\d+) Fünferbündel(?: und (\d+) einzelner? (?:Striche|Strich))?|(\d+) einzelner? (?:Striche|Strich))(: )?/, (m, b5, r1, r2, c) => {
             const t = r => r + (r === '0' || r === '1' ? ' trait isolé' : ' traits isolés');
             return (b5 ? b5 + (b5 === '1' ? ' paquet de cinq' : ' paquets de cinq') + (r1 ? ' et ' + t(r1) : '') : t(r2)) + (c ? ' : ' : '');
         }],
