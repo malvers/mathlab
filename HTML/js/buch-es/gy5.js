@@ -141,6 +141,9 @@
             'Rot markiert: Hier muss noch gebündelt werden.': 'Marcado en rojo: aquí todavía hay que agrupar.',
             'Linienbrett mit Rechenpfennigen': 'Tablero de líneas con fichas de cálculo',
 
+            // book es mathe5-es (Wonenburger)
+            // stellenwert5 (aria-label of the ▲ ▼ buttons), linien5 ("plus" between the two numbers), einheiten5 ("in" before the second unit)
+            'plus': 'más', 'minus': 'menos', 'in': 'a',
         },
         phrase: [
             // book es mathegy5-es (Einstein)

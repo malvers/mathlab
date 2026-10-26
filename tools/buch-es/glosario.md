@@ -1026,3 +1026,49 @@ Two decisions differ in wording from a line above, see the notes ("Sin calculado
 | Dichte, umbauter Raum, Hohlkörper | densidad (ρ, «ro»), volumen construido, cuerpo hueco | widget dichteos7 |
 | Parkett, Parkettierung, Kachel, parkettieren | teselación, teselación, tesela, teselar | GY 7 eckenwinkel7 says «embaldosado» in one sentence |
 | Escher: Verschiebung, Drehung, Schablone | traslación, giro, plantilla | widget escheros7 |
+
+## Added by mathe5-es (Wonenburger)
+
+Oberschule 5 (26.10.2026). Doc, 26.10.2026: the school conventions of Spain, never German ones (letters, symbols, notation);
+answers and numbers stay. Nothing above was changed; where this book differs from older Spanish books it says so.
+
+| Deutsch | Español | Note |
+|---|---|---|
+| Oberschule Klasse 5 | Oberschule, 5.º curso | start page as in mathe6-es |
+| Wahlbereich 1, Kapitel W | Optativa 1, capítulo OP | kicker «OPTATIVA · JUNIO · JULIO» |
+| schriftlich rechnen, halbschriftlich | calcular por escrito, por pasos | |
+| Übertrag, übertragen, merken | llevada, llevarse («me llevo 1») | |
+| Ergänzen / Entbündeln (Subtraktion) | completar («de 7 a 13 van 6») / desagrupar | completar is the Spanish school method |
+| Probe (schriftliches Rechnen) / Probe (Gleichung) | prueba / comprobación | «hacer la prueba» of a division |
+| Teilprodukt, Rest | producto parcial, resto | |
+| Term, Rechenzeichen | expresión, signo de operación | |
+| Punkt vor Strich | multiplicar y dividir antes que sumar y restar | widget label: «· y : antes que + y −» |
+| Quadratzahl | cuadrado perfecto | «cuadrado» alone is the figure |
+| Hochzahl, Grundzahl, Zehnerpotenz abtrennen | exponente, base, separar una potencia de diez | |
+| Ungleichung | inecuación | |
+| Quersumme | suma de las cifras | as in GY 5 |
+| Stammbruch, Bruchteil | fracción unitaria, fracción de una cantidad | |
+| ein Halbes, Zwanzigstel | un medio, un veinteavo | onceavo, doceavo |
+| Hunderterfeld | cuadrícula de cien | |
+| Dezimalzahl lesen: 3,47 | «tres coma cuarenta y siete» or «tres unidades y cuarenta y siete centésimas» | the German digit-by-digit reading is not used; os5.js turns stellenwert5 into it |
+| Notendurchschnitt (Noten 1–6) | media de puntos (pruebas cortas de 5 puntos) | German marks are not Spanish marks; the numbers stay |
+| Gerade g, h | recta r, s | koord5 output via os5.js; older Spanish books keep g, h |
+| Umfang u, Oberfläche O | perímetro P, área total A_T | rechteck5, quader5 via os5.js |
+| Spiegelachse s | eje de simetría e | |
+| Scheitelpunkt S | vértice V | as in GY 5 |
+| rechter Winkel (Zeichen) | un pequeño cuadrado en el vértice | |
+| Geodreieck | escuadra con transportador | the brand Geodreieck stays in the excursion |
+| Schrägbild, Verkürzungsverhältnis q, Verzerrungswinkel | perspectiva caballera, coeficiente de reducción, ángulo (45°) | no letter q |
+| Würfelnetz, Kreuznetz, Treppe | desarrollo del cubo, desarrollo en cruz, escalera | |
+| Kantenmodell, Vollmodell | modelo de aristas, modelo macizo | |
+| Hohlmaße | unidades de capacidad | |
+| Bandornament, Ornament, Motiv | friso, ornamento, motivo | |
+| deckungsgleich | congruentes | |
+| Verschiebungspfeil | flecha de traslación | |
+| Umlaufsinn | sentido de recorrido | |
+| Faltprobe, Spiegelprobe | prueba del plegado, prueba del espejo | |
+| Spiegelschrift | escritura especular | |
+| Kerbholz, Strichliste, Fünferbündel | palo de tarja, tabla de recuento, grupo de cinco | |
+| Keil, Winkelhaken (Babylonier) | cuña, espiga | |
+| Sechzigersystem | sistema sexagesimal | |
+| Rechenpfennig, Rechentisch, Zwischenraum | ficha de cálculo, mesa de cálculo, espacio | as in GY 5 |
