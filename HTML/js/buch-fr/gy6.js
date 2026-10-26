@@ -144,6 +144,11 @@ window.BuchFR && BuchFR.add('gy6', {
             'Perspective cavalière : la base est devant, en vraie grandeur. Les arêtes fuyantes sont tracées à $45^\\circ$ et réduites de moitié. Les arêtes cachées sont en pointillés.',
         'Das Netz besteht aus den beiden Grundflächen und dem Mantel. Der Mantel ist ein Rechteck: so breit wie der Umfang $u$, so hoch wie $h$.':
             'Le patron est formé des deux bases et de la surface latérale. La surface latérale est un rectangle : aussi large que le périmètre $P$ de la base, aussi haut que $h$.',
+        // kreisdiagramm6
+        'zu Fuß': 'À pied', 'Fahrrad': 'À vélo', 'Bus oder Bahn': 'En bus ou en train', 'Auto': 'En voiture',
+        'Kreisdiagramm: Wie kommst du zur Schule?': 'Diagramme circulaire : comment viens-tu à l’école ?',
+        'Anzahl': 'Nombre', 'Anteil': 'Proportion', 'Prozent': 'Pourcentage', 'Winkel': 'Angle', 'zusammen': 'Total',
+        'Umfrage in einer Klasse: Wie kommst du zur Schule?': 'Sondage dans une classe : comment viens-tu à l’école ?',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -265,6 +270,8 @@ window.BuchFR && BuchFR.add('gy6', {
         // prisma6 (after the rule × for \cdot)
         ['Grundfläche $G', 'Aire de la base $B'], ['$, Umfang der Grundfläche $u', '$, périmètre de la base $P'], ['Mantel $M = u', 'Aire latérale $A_L = P'],
         ['Oberfläche $O = 2 \\times G + M', 'Aire totale $A = 2 \\times B + A_L'], ['Volumen $V = G \\times h', 'Volume $V = B \\times h'],
+        // kreisdiagramm6
+        ['Winkel = Anteil · 360°. ', 'Angle = proportion × 360°. '], ['Eine Person entspricht hier $', 'Ici, une personne correspond à $'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -274,7 +281,7 @@ window.BuchFR && BuchFR.add('gy6', {
         [/^(Zähler|Nenner|erster Zähler|erster Nenner|zweiter Zähler|zweiter Nenner|zu Fuß|Fahrrad|Bus oder Bahn|Auto) (kleiner|größer)$/, (m, w, d) => ({
             'Zähler': 'Numérateur', 'Nenner': 'Dénominateur', 'erster Zähler': 'Premier numérateur', 'erster Nenner': 'Premier dénominateur',
             'zweiter Zähler': 'Deuxième numérateur', 'zweiter Nenner': 'Deuxième dénominateur',
-            'zu Fuß': 'À pied', 'Fahrrad': 'À vélo', 'Bus oder Bahn': 'Bus ou train', 'Auto': 'En voiture' })[w] + (d === 'kleiner' ? ' : diminuer' : ' : augmenter')],
+            'zu Fuß': 'À pied', 'Fahrrad': 'À vélo', 'Bus oder Bahn': 'En bus ou en train', 'Auto': 'En voiture' })[w] + (d === 'kleiner' ? ' : diminuer' : ' : augmenter')],
         // bruchbild6
         [/^Bild des Bruches (\d+) durch (\d+)$/, 'La fraction $1/$2 en image'],
         [/Erweitern mit \$(\d+)\$: /, 'On amplifie par $$$1$$ : '],

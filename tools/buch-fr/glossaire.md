@@ -852,6 +852,10 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 | Kante, Ecke, Fläche, eulerscher Satz | arête, sommet, face, relation d’Euler | 4 |
 | Projekt Verpackungsmüll | projet déchets d’emballage | 4 |
 | Varro, honeycomb conjecture (Hales) | Varron, la conjecture du nid d’abeilles | 4 excursion |
+| Anteil, Vernetzung | proportion, relier | 5 « Relier : les proportions »; widget kreisdiagramm6 head « Proportion » |
+| Kreisdiagramm, Tortendiagramm, $\widehat{=}$ | diagramme circulaire, « camembert », « correspond à » | 5 |
+| Flächen-, Volumenanteil | proportion d’aire, proportion de volume | 5 |
+| Klassensprecher(in), Taschengeld | délégué de classe, argent de poche | 5 |
 
 ## mathegy7-fr
 
