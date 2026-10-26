@@ -25,6 +25,15 @@ window.BuchFR && BuchFR.add('geometrie', {
         // kreisteil (chapter 2): arc length ℓ and perimeter P, the French letters (rules below)
         'Radius $r$': 'Rayon $r$', 'Mittelpunktswinkel $\\alpha$': 'Angle au centre $\\alpha$', 'Kreis mit Kreisausschnitt und Kreisbogen': 'Cercle avec un secteur circulaire et un arc',
         'Kreisbogen': 'Arc', 'Kreisausschnitt': 'Secteur',
+        // pythagoras (chapter 3.1): Kathetensatz and Höhensatz have Swiss-French names, France says "relations métriques"
+        'Pythagoras': 'Pythagore', 'Kathetensatz': 'Théorème d’Euclide', 'Höhensatz': 'Théorème de la hauteur', 'Satz': 'Théorème', 'gleichschenklig': 'isocèle',
+        'Zieh am Punkt $C$. Er bleibt auf dem Thaleskreis über $\\overline{AB}$, deshalb ist der Winkel bei $C$ immer ein rechter.':
+            'Déplace le point $C$. Il reste sur le cercle de diamètre $[AB]$, c’est pourquoi l’angle en $C$ est toujours droit.',
+        'Rechtwinkliges Dreieck mit Quadraten über den Seiten': 'Triangle rectangle avec les carrés construits sur ses côtés',
+        'Die beiden Kathetenquadrate haben zusammen genau den Flächeninhalt des Hypotenusenquadrats.':
+            'Les deux carrés construits sur les côtés de l’angle droit ont ensemble exactement l’aire du carré construit sur l’hypoténuse.',
+        'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Chaque carré construit sur un côté de l’angle droit a la même aire que le rectangle situé en dessous.',
+        'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.': 'Le carré de la hauteur a la même aire que le rectangle formé par les deux segments de l’hypoténuse.',
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -36,6 +45,8 @@ window.BuchFR && BuchFR.add('geometrie', {
         // kreisteil (u, the German perimeter, is P in French)
         ['Anteil am Vollkreis: $', 'Part du cercle entier : $'],
         ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Fais glisser l’extrémité de l’arc. Pour comparer, le cercle entier : $P \\approx '],
+        // pythagoras: "$a^2 \\approx 9$ und $c \\times p \\approx …" (the products are \\times already: the rule below runs first)
+        ['$ und $c \\times p \\approx ', '$ et $c \\times p \\approx '], ['$ und $c \\times q \\approx ', '$ et $c \\times q \\approx '], ['$ und $p \\times q \\approx ', '$ et $p \\times q \\approx '],
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -56,5 +67,7 @@ window.BuchFR && BuchFR.add('geometrie', {
         [/\$O = (?=2\\pi r\^2 \+ 2\\pi r h|\\pi r\^2 \+ \\pi r s|4 ?\\pi r\^2)/g, '$$A = '],
         [/\$M = (?=2\\pi r h|\\pi r s|4 \\times \\tfrac12 a)/g, '$$A_L = '],
         [/\$G = (?=a\^2|\\pi r\^2)/g, '$$\\mathcal{B} = '], [/\\tfrac13\\,G\\,h/g, '\\tfrac13\\,\\mathcal{B}\\,h'],
+        // pythagoras: the area labels in the picture, c·q, c·p, p·q
+        [/>([cp])·([pq])<\/text>/g, '>$1×$2</text>'],
     ]
 });
