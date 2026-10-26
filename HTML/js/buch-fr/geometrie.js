@@ -34,6 +34,16 @@ window.BuchFR && BuchFR.add('geometrie', {
             'Les deux carrés construits sur les côtés de l’angle droit ont ensemble exactement l’aire du carré construit sur l’hypoténuse.',
         'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Chaque carré construit sur un côté de l’angle droit a la même aire que le rectangle situé en dessous.',
         'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.': 'Le carré de la hauteur a la même aire que le rectangle formé par les deux segments de l’hypoténuse.',
+        // trigo (chapter 3.2): côté opposé, côté adjacent, hypoténuse
+        'Sinus': 'Sinus', 'Kosinus': 'Cosinus', 'Tangens': 'Tangente', 'Verhältnis': 'Rapport', 'Winkel $\\alpha$': 'Angle $\\alpha$', 'Hypotenuse $c$': 'Hypoténuse $c$',
+        'Gegenkathete a': 'côté opposé a', 'Ankathete b': 'côté adjacent b', 'Hypotenuse c': 'hypoténuse c',
+        'Rechtwinkliges Dreieck mit Winkel alpha': 'Triangle rectangle avec l’angle alpha',
+        'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.':
+            'Modifie $c$ : le triangle devient plus grand ou plus petit, mais les trois rapports restent les mêmes. Ils ne dépendent que de l’angle.',
+        // vieleck (chapter 3.2): the perimeter is P
+        'Ecken verdoppeln': 'Doubler les sommets', 'Zurück auf 6': 'Revenir à 6', 'Anzahl der Ecken $n$': 'Nombre de sommets $n$',
+        'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Cercle avec un polygone inscrit et un polygone circonscrit', 'innen': 'inscrit', 'außen': 'circonscrit',
+        'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Cercle de rayon $r = 1$, donc $P = 2\\pi$. Périmètre divisé par $2$ :',
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -47,6 +57,8 @@ window.BuchFR && BuchFR.add('geometrie', {
         ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Fais glisser l’extrémité de l’arc. Pour comparer, le cercle entier : $P \\approx '],
         // pythagoras: "$a^2 \\approx 9$ und $c \\times p \\approx …" (the products are \\times already: the rule below runs first)
         ['$ und $c \\times p \\approx ', '$ et $c \\times p \\approx '], ['$ und $c \\times q \\approx ', '$ et $c \\times q \\approx '], ['$ und $p \\times q \\approx ', '$ et $p \\times q \\approx '],
+        // trigo: the words in the fractions
+        ['\\text{Gegenkathete}', '\\text{côté opposé}'], ['\\text{Ankathete}', '\\text{côté adjacent}'], ['\\text{Hypotenuse}', '\\text{hypoténuse}'],
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -69,5 +81,7 @@ window.BuchFR && BuchFR.add('geometrie', {
         [/\$G = (?=a\^2|\\pi r\^2)/g, '$$\\mathcal{B} = '], [/\\tfrac13\\,G\\,h/g, '\\tfrac13\\,\\mathcal{B}\\,h'],
         // pythagoras: the area labels in the picture, c·q, c·p, p·q
         [/>([cp])·([pq])<\/text>/g, '>$1×$2</text>'],
+        // vieleck: "Also $3{,}1… < \\pi < 3{,}2…$, Abstand $…$" (a rule with context instead of a bare piece 'Also $')
+        [/Also \$([^$<]*) < \\pi < ([^$<]*)\$, Abstand \$/g, (m, lo, hi) => 'Donc $' + lo + ' < \\pi < ' + hi + '$, écart $'],
     ]
 });
