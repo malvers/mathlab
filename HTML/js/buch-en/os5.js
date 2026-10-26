@@ -210,6 +210,9 @@
             [/([\d)]) · (?=[\d(a-z])/g, '$1 × '], [/^·$/, '×'], [/^:$/, '÷'], [/(<td[^>]*>)·(<\/td>)/g, '$1×$2'], [/(<text[^>]*>)· (?=\d)/g, '$1× '], [/(<button[^>]*>)· (?=\d)/g, '$1× '],
             // the labels "Zahl" of the text fields ("Zahl" alone is a coin side elsewhere)
             [/(<label class="b-ctrl" for="os5-[a-z]+-\d+">)Zahl(<\/label>)/, '$1Number$2'],
+            // rechteck5, quader5 (js/buch-gy5.js): perimeter P (German u, Umfang) and surface area S (German O, Oberfläche); 3 cm · 4 cm → 3 cm × 4 cm
+            [/(<p class="g5-big">)u = /g, '$1P = '], [/\$u = /g, () => '$P = '], [/(<p class="g5-big">)O = /g, '$1S = '], [/\$O = /g, () => '$S = '],
+            [/(\d [a-z]{1,2}) · (?=\d)/g, '$1 × '],
             // winkel5 (js/buch-en/gy5.js says "full angle"): British pupils call 360° a full turn
             [/\bfull angle\b/g, 'full turn'],
             // zahlenstrahlos5
