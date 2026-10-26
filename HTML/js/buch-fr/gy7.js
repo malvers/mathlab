@@ -142,6 +142,16 @@ window.BuchFR && BuchFR.add('gy7', {
         'AUFRISS': 'DE FACE', 'GRUNDRISS': 'DE DESSUS', '$\\overline{SB}$': '$[SB]$', '$\\overline{S\'\'B_0\'\'}$': '$[S\'\'B_0\'\']$',
         // faltnetz7
         'Falten': 'Pliage', '▶ Zusammenfalten': '▶ Plier', '◀ Auffalten': '◀ Déplier', 'Ein Netz faltet sich zu einem Körper': 'Un patron se plie pour former un solide',
+        // schraegbild7 with data-calc: the materials (the formulas get the French letters by a rule below)
+        'Stoff': 'Matériau', 'Fichtenholz': 'Épicéa', 'Glas': 'Verre', 'Stahl': 'Acier',
+        // drittel7
+        'Zusammenschieben': 'Assembler', '▶ Zusammenschieben': '▶ Assembler', '◀ Auseinander': '◀ Séparer',
+        'Drei gleiche Pyramiden ergeben einen Würfel': 'Trois pyramides identiques forment un cube',
+        'Der Würfel hat die Kantenlänge $a$. Alle drei Pyramiden haben ihre Spitze in derselben Würfelecke. Jede hat ein Quadrat mit $G = a^2$ als Grundfläche und die Höhe $h = a$.':
+            'Le cube a des arêtes de longueur $a$. Les trois pyramides ont leur sommet au même sommet du cube. Chacune a pour base un carré d’aire $\\mathcal{B} = a^2$ et pour hauteur $h = a$.',
+        'Drei gleiche Pyramiden füllen den Würfel: $3 \\cdot V_{\\text{Pyramide}} = a^3$, also':
+            'Trois pyramides identiques remplissent le cube : $3 \\times V_{\\text{pyramide}} = a^3$, donc',
+        '$V_{\\text{Pyramide}} = \\tfrac13 \\cdot a^2 \\cdot a = \\tfrac13 \\cdot G \\cdot h$': '$V_{\\text{pyramide}} = \\tfrac13 \\times a^2 \\times a = \\tfrac13 \\times \\mathcal{B} \\times h$',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -217,6 +227,10 @@ window.BuchFR && BuchFR.add('gy7', {
         ['Gemessen: $\\overline{SB} \\approx ', 'Mesuré : $SB \\approx '],
         // faltnetz7: Euler with the French letters S, A, F (sommets, arêtes, faces)
         ['Ecken $e = ', 'Sommets $S = '], ['$ · Kanten $k = ', '$ · arêtes $A = '], ['$ · Flächen $f = ', '$ · faces $F = '],
+        // schraegbild7 with data-calc (after the rule that gives the French letters: h_s is h_a there)
+        ['$h_a$ ist die Höhe einer Seitenfläche, hier gemessen: $h_a \\approx ', '$h_a$ est l’apothème, la hauteur d’une face latérale, ici mesurée : $h_a \\approx '],
+        ['$: Ergänze den Stumpf zur ganzen Pyramide (Höhe $', '$ : complète le tronc en une pyramide entière (hauteur $'], ['$ cm) und ziehe die kleine Spitze ab.', '$ cm) et retire la petite pointe.'],
+        ['Die vier Seitenflächen sind Trapeze mit der Höhe $h_a \\approx ', 'Les quatre faces latérales sont des trapèzes de hauteur $h_a \\approx '],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -277,5 +291,11 @@ window.BuchFR && BuchFR.add('gy7', {
         [/(<p style="margin:0"><b>[^<]+<\/b>): /g, '$1 : '], [/\$e - k \+ f = /g, '$S - A + F = '],
         [/Alle Flächen sind gleiche regelmäßige (Dreiecke|Vierecke|Fünfecke|Sechsecke), an jeder Ecke stoßen (\d+) zusammen\./g, (m, w, n) => 'Toutes les faces sont des ' +
             { 'Dreiecke': 'triangles équilatéraux', 'Vierecke': 'carrés', 'Fünfecke': 'pentagones réguliers', 'Sechsecke': 'hexagones réguliers' }[w] + ' identiques ; chaque sommet en réunit ' + n + '.'],
+        // schraegbild7 with data-calc (the output ends with "Masse aus …"): the French letters in its formulas - aire de la base 𝓑 (German G),
+        // aire latérale A_L (M), aire totale A (O), périmètre P (u), apothème h_a (h_s); V_groß, V_klein; then the material of the mass
+        [/[\s\S]*Masse aus [\s\S]*/, s => s.replace(/\$[^$]*\$/g, x => x.replace(/h_s/g, 'h_a').replace(/\\text\{groß\}/g, '\\text{grande}').replace(/\\text\{klein\}/g, '\\text{petite}')
+            .replace(/(?<![A-Za-z\\])G(?![A-Za-z])/g, '\\mathcal{B}').replace(/(?<![A-Za-z\\])M(?![A-Za-z])/g, 'A_L').replace(/(?<![A-Za-z\\])O(?![A-Za-z])/g, 'A')
+            .replace(/(?<![A-Za-z\\])u(?![A-Za-z])/g, 'P')).replace(/\$\): \$/g, '$) : $')],
+        [/Masse aus (Fichtenholz|Glas|Stahl) \(/g, (m, s) => 'Masse en ' + { 'Fichtenholz': 'épicéa', 'Glas': 'verre', 'Stahl': 'acier' }[s] + ' ('],
     ]
 });
