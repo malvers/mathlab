@@ -128,6 +128,13 @@ window.BuchFR && BuchFR.add('gy5', {
         // titelbildgy5
         'Titelbild: ein Quader aus Einheitswürfeln, ein Kreis mit drei Achteln, ein Winkel mit Skala, ein gespiegelter Drachen, ein Zahlenstrahl und Maya-Ziffern':
             'Illustration de couverture : un pavé droit fait de cubes unités, un disque avec trois huitièmes, un angle avec sa graduation, un cerf-volant et son symétrique, une droite graduée et des chiffres mayas',
+        // winkelpaare5
+        'Scheitelwinkel': 'Opposés par le sommet', 'Nebenwinkel': 'Adjacents', 'Stufenwinkel': 'Correspondants', 'Wechselwinkel': 'Alternes-internes',
+        'Winkelpaar': 'Paire d’angles', 'Anderes Paar': 'Autre paire', 'h kippen': 'Incliner h',
+        'Zieh am Punkt auf der Geraden s, um sie zu drehen. Mit „h kippen“ sind g und h nicht mehr parallel.':
+            'Fais glisser le point de la droite s pour la faire tourner. Avec « Incliner h », g et h ne sont plus parallèles.',
+        'Zwei Geraden g und h, geschnitten von s': 'Deux droites g et h coupées par la sécante s',
+        'g und h sind parallel.': 'g et h sont parallèles.', 'g und h sind nicht parallel.': 'g et h ne sont pas parallèles.',
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -178,6 +185,17 @@ window.BuchFR && BuchFR.add('gy5', {
         // koord5
         ['Getroffen! A liegt auf ', 'Gagné ! A est en '], ['<b>Aufgabe:</b> Zieh A auf den Punkt ', '<b>Consigne :</b> fais glisser A sur le point '],
         // book fr-12 mathegy5-fr:
+        // winkelpaare5
+        ['Scheitelwinkel liegen sich am selben Schnittpunkt gegenüber. Sie sind <b>immer gleich groß</b>.',
+            'Les angles opposés par le sommet se font face au même point d’intersection. Ils ont <b>toujours la même mesure</b>.'],
+        ['Nebenwinkel liegen am selben Schnittpunkt nebeneinander und bilden zusammen einen gestreckten Winkel: Sie ergänzen sich <b>immer zu 180°</b>.',
+            'Les angles adjacents sont côte à côte au même point d’intersection et forment ensemble un angle plat : leur somme vaut <b>toujours 180°</b>.'],
+        ['Stufenwinkel liegen an verschiedenen Schnittpunkten auf derselben Seite von s und derselben Seite der Geraden. ',
+            'Les angles correspondants sont en deux points d’intersection différents, du même côté de s et du même côté des droites. '],
+        ['Wechselwinkel liegen an verschiedenen Schnittpunkten auf verschiedenen Seiten von s und zwischen den Geraden. ',
+            'Les angles alternes-internes sont en deux points d’intersection différents, de part et d’autre de s et entre les droites. '],
+        ['An <b>parallelen</b> Geraden sind sie <b>gleich groß</b>.', 'Avec des droites <b>parallèles</b>, ils ont <b>la même mesure</b>.'],
+        ['Weil g und h <b>nicht parallel</b> sind, sind sie verschieden groß.', 'Comme g et h ne sont <b>pas parallèles</b>, leurs mesures sont différentes.'],
     ],
     rule: [
         // book fr-11 mathe5-fr:

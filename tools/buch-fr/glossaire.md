@@ -766,7 +766,11 @@ above was changed.
 | Schlussverkauf, Rabatt | soldes, réduction | 2.2 |
 | Komma unter Komma, Kommaverschiebung | virgule sous virgule, déplacer la virgule | 2.3; the widget komma5 says « la virgule se déplace » |
 | arithmetisches Mittel, Mittelwert, Durchschnitt | moyenne (moyenne arithmétique) | 2.3, as the widget mittel5 |
-| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD | cards, en allemand |
+| Koordinatensystem, x-Achse, y-Achse, Ursprung, P(3 \| 5) | repère, axe des abscisses, axe des ordonnées, origine, P(3 ; 5) | 3.1; TeX $P(3\,;\,5)$ |
+| Strecke $\overline{AB}$, Strahl, Gerade | segment [AB], demi-droite, droite | 3.1; the line names g, h, s stay as in the widgets koord5 and winkelpaare5 (s = sécante) |
+| Schenkel, Scheitel (eines Winkels) | côtés, sommet | 3.1 |
+| Neben-, Scheitel-, Stufen-, Wechselwinkel | angles adjacents (supplémentaires), opposés par le sommet, correspondants (en F), alternes-internes (en Z) | 3.1, widget winkelpaare5; buttons Autre paire, Incliner h |
+| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD, LABORATOIRE DU REPÈRE, L’HORLOGE DES ANGLES, LABORATOIRE DES ANGLES, PUZZLE D’ANGLES | cards, en allemand |
 
 ## mathegy6-fr
 
