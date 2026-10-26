@@ -22,7 +22,9 @@ import importlib
 import json
 import os
 import re
+import subprocess
 import sys
+import time
 
 HTML_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'HTML')
 TOOLS_PPTX = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tools', 'pptx')
@@ -67,13 +69,38 @@ def local_icon(path):
     return None
 
 
-def inject(html, extra=b''):
-    """Put the badge (and `extra`) right before the last </body>; pages without one get it appended."""
+# Doc, 26.10.2026: localhost showed a main checkout 538 commits behind GitHub and nobody noticed
+# ("das ist missleading") - the badge of THIS server says how far behind origin/main its checkout is.
+# The refs are shared by every worktree, so any agent's `git fetch` keeps the number fresh.
+ROOT = os.path.dirname(os.path.abspath(__file__))
+_lag = {'t': 0.0, 'n': 0}
+
+
+def behind():
+    """Commits this checkout lags behind origin/main; asked from git at most once a minute."""
+    if time.time() - _lag['t'] > 60:
+        try:
+            out = subprocess.run(['git', 'rev-list', '--count', 'HEAD..origin/main'], cwd=ROOT,
+                                 capture_output=True, text=True, timeout=5).stdout.strip()
+            _lag['n'] = int(out or 0)
+        except (OSError, ValueError, subprocess.SubprocessError):
+            _lag['n'] = 0
+        _lag['t'] = time.time()
+    return _lag['n']
+
+
+def inject(html, extra=b'', lag=False):
+    """Put the badge (and `extra`) right before the last </body>; pages without one get it appended.
+    lag=True (only this server, not the ones importing inject) adds "· N hinter GitHub" to the badge."""
+    badge = BADGE
+    n = behind() if lag else 0
+    if n:
+        badge = BADGE.replace(b'>LOCAL</div>', ('>LOCAL \u00b7 %d hinter GitHub</div>' % n).encode('utf-8'))
     hits = list(BODY_END.finditer(html))
     if not hits:
-        return html + BADGE + extra
+        return html + badge + extra
     i = hits[-1].start()
-    return html[:i] + BADGE + extra + html[i:]
+    return html[:i] + badge + extra + html[i:]
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -211,7 +238,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         deck = os.path.dirname(os.path.abspath(path)) == os.path.join(HTML_DIR, 'decks')
         try:
             with open(path, 'rb') as f:
-                body = inject(f.read(), LIVE_RELOAD + (DECK_EDITOR if deck else b''))
+                body = inject(f.read(), LIVE_RELOAD + (DECK_EDITOR if deck else b''), lag=True)
         except OSError:
             return self.send_error(404, 'File not found')
         self.send_response(200)
