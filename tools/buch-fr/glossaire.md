@@ -783,6 +783,10 @@ above was changed.
 | Oberflächeninhalt $O$ | aire totale $A$ | 4.2, as the widget quader5 (rule O → A of fr-11); two boxes A and B became « boîte 1, boîte 2 » with $A_1$, $A_2$ |
 | Hohlmaße: l, ml, hl | contenances : L, mL, hL | 4.2, as OS 5 |
 | Kantenmodell, Körpernetz | squelette, patron | 4.2 |
+| Uhrzeit 7:05 Uhr, d (Tag) | 7 h 05 (no-break spaces), j (jour) | 5; the timetable too; j as OS 5 and the widget einheiten5 |
+| Maßzahl, Einheit, Umrechnungszahl, Einheitentreppe | nombre, unité, nombre de conversion, escalier des unités | 5 |
+| Fermi-Aufgabe, Näherungswert, Lösungsplan | problème de Fermi, valeur approchée, plan de résolution | 5 |
+| Schulsportfest | la journée sportive de l’école | 5 project |
 | Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD, LABORATOIRE DU REPÈRE, L’HORLOGE DES ANGLES, LABORATOIRE DES ANGLES, PUZZLE D’ANGLES, FIGURES SUPERPOSABLES, SOLIDES, PRINCIPE DE CAVALIERI | cards, en allemand |
 
 ## mathegy6-fr
