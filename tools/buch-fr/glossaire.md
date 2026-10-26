@@ -867,6 +867,43 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 
 <!-- fr-14: terms of this book only (GY 7), write right below this line -->
 
+Package fr-14 (Gallagher), 26.10.2026: decisions made while translating GY 7; nothing above was changed. The French school
+notation of round 3 everywhere (× for the product, segment [AB], length AB, line (AB), points (2 ; 3)); the letters below
+are the ones the widgets show too (rules in js/buch-fr/gy7.js); the pages name the German letters once where a reader
+might compare (U in 1.1, L in 2.3, G, p %, W in 2.4, G, M, O, u, h_s in 3.2, e, k, f in OP).
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Klasse 7 | Gymnasium, 7e année | start page: à peu près l’âge de la classe de cinquième en France |
+| Wahlbereich 3 (chapter W) | Domaine optionnel 3 (chapter OP) | as section 1 |
+| Passante, Tangente, Sekante, Sehne, Berührungspunkt | droite extérieure, tangente, sécante, corde, point de contact | widget labels keep the capital of gy11lk.js (« Tangente »), so the sentence ends on the label after an arrow |
+| Umkreis / Inkreis, Mittelsenkrechte, Winkelhalbierende | cercle circonscrit / cercle inscrit, médiatrice, bissectrice | the circumcentre U is $O$ (picture and sentences), the incentre stays $I$ |
+| Kreis $k$, $k_1$, $k_2$, Hilfskreis $h$ | cercle $\mathcal{C}$, $\mathcal{C}_1$, $\mathcal{C}_2$, cercle auxiliaire $\mathcal{C}'$ | also the labels 𝒞, 𝒞′ in konstruktion7 |
+| Satz des Thales, Thaleskreis über $\overline{AB}$ | théorème du demi-cercle, cercle de diamètre $[AB]$ | never « théorème de Thalès » (in France the intercept theorem); 1.2 names « Satz des Thales » and « cercle de Thalès » once; button « Demi-cercle » |
+| Peripheriewinkel, Zentriwinkel, Sehnenviereck, über dem Bogen | angle inscrit, angle au centre, quadrilatère inscrit, qui intercepte l’arc | 1.2, widget kreiswinkel7 |
+| Satz, Definition, Voraussetzung, Behauptung, Umkehrung, genau dann wenn | théorème, définition, hypothèse, conclusion, réciproque, si et seulement si | Beweisidee: idée de la démonstration |
+| Allaussage, Existenzaussage, Gegenbeispiel | énoncé universel, énoncé d’existence, contre-exemple | 1.2 |
+| Planfigur, Konstruktionsplan, Konstruktionsbeschreibung | figure d’étude, plan de construction, programme de construction | 1.3; WSW, SSS: ACA, CCC (as fr-6) |
+| Vorwärts- / Rückwärtsarbeiten, Analysis / Synthesis | raisonner en avant / en arrière, analyse / synthèse | Pólya: « Comment poser et résoudre un problème » |
+| Zahlengerade, Gegenzahl, Betrag $\lvert a \rvert$ | droite graduée, opposé, valeur absolue (la distance à zéro) | 2.1, widget zahlengerade7 |
+| $\mathbb{N}$, $\mathbb{Z}$, $\mathbb{Q}^+$ (gebrochene Zahlen), $\mathbb{Q}$ | entiers naturels, entiers relatifs, rationnels positifs, nombres rationnels | 2.1 says once that ℕ contains 0 in France; Mengendiagramm: diagramme de Venn; Schnitt-, Vereinigungsmenge: intersection, réunion |
+| Vorzeichenregeln, Punkt vor Strich, Rechengesetze | règles des signes, × et : avant + et −, propriétés des opérations (commutativité, associativité, distributivité) | 2.2 |
+| Mark TR (Taschenrechner), DGS | CALC, GÉO | start page; only CALC occurs in the chapters (2.2) |
+| Lösungsmenge $L$, Äquivalenzumformung, Probe | ensemble des solutions $S$, transformation équivalente, vérification | 2.3 names the German $L$ once |
+| Formel umstellen (nach $b$) | isoler $b$ (dans la formule) | widget umstellen7: buttons « isoler $b$ », « ⇄ échanger les membres » |
+| Umfang $u$, Strecke $s$ in $v = \tfrac{s}{t}$, Dichte $\varrho$ | périmètre $P$, distance $d$ ($v = \tfrac{d}{t}$), masse volumique $\varrho$ | 2.3, umstellen7 (« Dichte » is a rule: gy12lk.js has the word for a probability density) |
+| Grundwert $G$, Prozentsatz $p\,\%$, Prozentwert $W$ | valeur de référence $V$, taux $t\,\%$, part $P$ | 2.4 and prozent7: $P = t\,\% \times V$; 2.4 names the German letters once |
+| Steigerung um / auf, Faktor | augmenter de / passer à, coefficient multiplicateur | 2.4 |
+| Mehrwertsteuer, netto, brutto, Rabatt, Skonto, Prozentpunkte | TVA, HT, TTC, remise, escompte, points de pourcentage | the German rates 19 % and 7 % stay (the French ones named once) |
+| Säulen-, Linien-, Kreis-, Balkendiagramm | diagramme en colonnes, en ligne brisée, circulaire, en barres | 2.4, 4, widget diagramm7 |
+| Netz, Schrägbild, Zweitafelbild | patron, perspective cavalière, épure | fuyantes à 45° réduites de moitié |
+| Aufriss, Grundriss, Rissachse $x_{12}$, Ordnungslinie, Rissebene | vue de face, vue de dessus, ligne de terre $x_{12}$, ligne de rappel, plan de projection (frontal, horizontal) | labels in the picture: DE FACE, DE DESSUS; points keep $P'$ and $P''$ |
+| wahre Länge, wahre Größe | vraie grandeur | 3.1 |
+| Grundfläche $G$, Mantel $M$, Oberfläche $O$, Höhe $h_s$ der Seitenfläche | aire de la base $\mathcal{B}$, aire latérale $A_L$, aire totale $A$, apothème $h_a$ | 3.2 and schraegbild7 (data-calc), as fr-16 (GY 9) |
+| Ecken $e$, Kanten $k$, Flächen $f$, Eulerscher Polyedersatz | sommets $S$, arêtes $A$, faces $F$, relation d’Euler $S - A + F = 2$ | 3.1, OP, widget faltnetz7 |
+| Würfel (solid) | cube | never a global word (a die in stochastik.js): rules `^Würfel$`, `>Würfel<` in gy7.js |
+| Lab names | DROITE D’EULER, DIVISION DU CERCLE, LABORATOIRE DES ANGLES, THÉORÈME DE BRAHMAGUPTA, DÉMONTRER LA SOMME DES ANGLES, PUZZLE D’ANGLES, SOMME DES ANGLES, FIGURES SUPERPOSABLES, PUZZLE DE NOMBRES, SOUSTRACTION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, LABORATOIRE DES PUISSANCES, SYSTÈMES D’ÉQUATIONS, SOLIDES, PRINCIPE DE CAVALIERI, SOMME DES ANGLES EN 3D, PLANCHE DE GALTON | DOCPAD stays |
+
 ## mathegy8-fr
 
 <!-- fr-15: terms of this book only (GY 8), write right below this line -->
