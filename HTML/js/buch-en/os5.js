@@ -5,7 +5,9 @@
  *   word    a whole label → its English
  *   phrase  German sentence pieces exactly as the widget source writes them → English
  *   rule    word order and notation (after the number rules of js/buch-en.js, before its header rules)
- * Division is written ÷ (in TeX \div), as in the English GY 5 book whose widgets the OS 5 book shares (js/buch-en/gy5.js).
+ * British school notation (Doc, 26.10.2026: always the conventions of the target language): division ÷ (in TeX \div), as in the
+ * English GY 5 book whose widgets the OS 5 book shares (js/buch-en/gy5.js), and multiplication × (in TeX \times) - in British
+ * schools a raised dot between digits reads as a decimal point.
  * After changing a German widget sentence: node tools/buch-en/check.mjs
  */
 (function () {
@@ -70,7 +72,7 @@
             // vorrangos5
             'Eigener Term': 'Your own expression', 'Alle Schritte': 'All steps', 'Ergebnis': 'Result',
             'Erlaubt sind natürliche Zahlen, + − · : und Klammern. Für · darfst du auch * tippen, für : auch /.':
-                'You may use natural numbers, + − · ÷ and brackets. For · you can also type *, for ÷ also : or /.',
+                'You may use natural numbers, + − × ÷ and brackets. For × you can also type * or x, for ÷ also : or /.',
             'Das ist kein vollständiger Term. Prüfe Zahlen, Rechenzeichen und Klammern.':
                 'That is not a complete expression. Check the numbers, the operation signs and the brackets.',
             'Unterstrichen ist, was als Nächstes gerechnet wird.': 'What is underlined is calculated next.',
@@ -201,9 +203,11 @@
             [' Eine leere Stelle hatte lange kein eigenes Zeichen: Man sah nur eine Lücke.', ' For a long time an empty place had no symbol of its own: you only saw a gap.']
         ],
         rule: [
-            // TeX: thousands with a comma as in the English pages (4\,700 → 4{,}700), division as \div
+            // TeX: thousands with a comma as in the English pages (4\,700 → 4{,}700), division as \div, multiplication as \times
             [new RegExp('([0-9])[' + BS + BS + '],(?=[0-9]{3}(?![0-9]))', 'g'), '$1{,}'],
-            [/\$[^$]*\$/g, m => m.replace(/ (?::|÷) /g, ' ' + BS + 'div ')],
+            [/\$[^$]*\$/g, m => m.replace(/ (?::|÷) /g, ' ' + BS + 'div ').replace(new RegExp('[' + BS + BS + ']cdot(?![a-z])', 'g'), BS + 'times')],
+            // plain text: 352 · 23 → 352 × 23, (36 − 4) · 5; the sign alone (schriftlichos5: the input row, the cell of the sheet, the cuneiform place values)
+            [/([\d)]) · (?=[\d(])/g, '$1 × '], [/^·$/, '×'], [/^:$/, '÷'], [/(<td[^>]*>)·(<\/td>)/g, '$1×$2'], [/(<text[^>]*>)· (?=\d)/g, '$1× '],
             // the labels "Zahl" of the text fields ("Zahl" alone is a coin side elsewhere)
             [/(<label class="b-ctrl" for="os5-[a-z]+-\d+">)Zahl(<\/label>)/, '$1Number$2'],
             // zahlenstrahlos5
