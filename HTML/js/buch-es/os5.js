@@ -206,7 +206,7 @@
             [/^Zahlenstrahl von (.+) bis (.+)$/, 'Recta numérica de $1 a $2'],
             [new RegExp('Von (' + G + ') bis (' + G + ') sind es 10 Schritte, einer ist (' + G + ') groß\\.'), 'De $1 a $2 hay 10 pasos; cada uno mide $3.'],
             [new RegExp('Links steht (' + G + '), rechts (' + G + ')\\. Dazwischen liegen 10 gleich große Schritte\\.'), 'A la izquierda está $1; a la derecha, $2. Entre ellos hay 10 pasos iguales.'],
-            [new RegExp('Ein Schritt von Strich zu Strich ist <b>(' + G + ')</b>\\. Der Punkt liegt (\\d+) Schritte rechts von (' + G + ')\\.'),
+            [new RegExp('Ein Schritt von Strich zu Strich ist <b>(' + G + ')</b>\\. Der Punkt liegt (\\d+) Schritte? rechts von (' + G + ')\\.'),
                 (m, s, k, a) => 'Un paso de raya a raya mide <b>' + s + '</b>. El punto está ' + k + ' ' + pl(k, 'paso', 'pasos') + ' a la derecha de ' + a + '.'],
             [new RegExp('Vorgänger (' + G + '|–), Nachfolger (' + G + ')\\.'), 'Anterior: $1; siguiente: $2.'],
             [new RegExp('Die Zahl liegt zwischen (' + G + ') und (' + G + ')\\.'), 'El número está entre $1 y $2.'],
@@ -231,13 +231,13 @@
             // vorrangos5: the label of the rule of each step
             [/(<span class="os5-rule">)([^<]*)(<\/span>)/g, (m, a, r, b) => a + VR.reduce((s, [de, es]) => s.split(de).join(es), r) + b],
             // zehnerpotenzos5
-            [/Die Hochzahl (\d+) sagt: (\d+) Faktoren 10, also (?:eine Null|\d+ Nullen)\. Das ist <b>([^<]+)<\/b>\./,
+            [/Die Hochzahl (\d+) sagt: (\d+) Faktor(?:en)? 10, also (?:eine Null|\d+ Nullen)\. Das ist <b>([^<]+)<\/b>\./,
                 (m, n, f, w) => 'El exponente ' + n + ' dice: ' + f + ' ' + pl(f, 'factor', 'factores') + ' 10, es decir, ' + (n === '1' ? 'un cero' : n + ' ceros') + '. Es <b>' + (TEN[w] || w) + '</b>.'],
             [/Du kannst noch (\d+) (?:Nullen|Null) mehr abtrennen\./, (m, n) => 'Todavía puedes separar ' + n + ' ' + pl(n, 'cero más', 'ceros más') + '.'],
             [/: Rücke das Komma um (\d+) Stellen nach rechts, dann hast du die Zahl\./, ': desplaza la coma $1 posiciones hacia la derecha y tendrás el número.'],
             // quadratos5
             [/^(\d+) mal (\d+) Plättchen(?: und (\d+) weitere)?$/, (m, a, b, e) => a + ' por ' + b + ' fichas' + (e ? ' y ' + e + ' más' : '')],
-            [/(\d+) Reihen mit je (\d+) Plättchen ergeben ein Quadrat aus (\d+) Plättchen\./,
+            [/(\d+) Reihen? mit (?:je )?(\d+) Plättchen (?:ergeben|ergibt) ein Quadrat aus (\d+) Plättchen\./,
                 (m, r, k, v) => r + ' ' + pl(r, 'fila', 'filas') + ' de ' + k + ' ' + pl(k, 'ficha', 'fichas') + pl(r, ' forma', ' cada una forman') + ' un cuadrado de ' + v + ' ' + pl(v, 'ficha', 'fichas') + '.'],
             [/(\d+) ist eine Quadratzahl: Die Plättchen bilden ein Quadrat mit der Seite (\d+)\./, '$1 es un cuadrado perfecto: las fichas forman un cuadrado de lado $2.'],
             [/(\d+) ist keine Quadratzahl\./, '$1 no es un cuadrado perfecto.'],
@@ -259,7 +259,7 @@
             // bruchteilos5, halbesos5: the steppers "Zähler A kleiner"
             [/^(Zähler|Nenner|Ganzes)( [AB])? (kleiner|größer)$/, (m, w, ab, d) => (d === 'kleiner' ? 'Reducir ' : 'Aumentar ') +
                 ({ 'Zähler': 'el numerador', Nenner: 'el denominador', Ganzes: 'el todo' })[w] + (ab ? ' de' + ab : '')],
-            [/^(\d+) von (\d+) Gruppen zu je (\d+) sind gefärbt$/, (m, z, n, k) => z + ' de ' + n + ' grupos de ' + k + ' ' + pl(z, 'está coloreado', 'están coloreados')],
+            [/^(\d+) von (\d+) Gruppen zu je (\d+) (?:sind|ist) gefärbt$/, (m, z, n, k) => z + ' de ' + n + ' grupos de ' + k + ' ' + pl(z, 'está coloreado', 'están coloreados')],
             [/(\$\\tfrac\{\d+\}\{\d+\}\$) von (\d+) sind (\d+)\./, (m, f, g, r) => f + ' de ' + g + ' son ' + r + '.'],
             [/(\$\\tfrac\{\d+\}\{\d+\}\$) von (\d+)/g, (m, f, g) => f + ' de ' + g],
             [/1\. Teile das Ganze in (\d+) gleich große Gruppen: /, '1. Divide el todo en $1 grupos iguales: '],
@@ -271,9 +271,9 @@
                     ': cuanto mayor es el denominador, más pequeños son los trozos.'],
             [/\$ ist (weniger als|mehr als|genau) ein Ganzes/g, (m, w) => '$ es ' + LESS[w] + ' un entero'],
             [/\$ ist (weniger als|mehr als|genau) ein Halbes/g, (m, w) => '$ es ' + LESS[w] + ' un medio'],
-            [/, denn (\d+) ist (weniger|mehr|genau) als die Hälfte von (\d+)\./,
+            [/, denn (\d+) ist (weniger|mehr|genau)(?: als)? die Hälfte von (\d+)\./,
                 (m, a, w, b) => ', porque ' + a + ' es ' + ({ weniger: 'menos que la mitad', mehr: 'más que la mitad', genau: 'exactamente la mitad' })[w] + ' de ' + b + '.'],
-            [new RegExp('<b>Was fehlt zum Ganzen\\?</b> Bei A fehlen (\\d+) (' + NTHS + '), bei B (\\d+) (' + NTHS + ')\\. (' + NTHS + ') sind kleiner, also fehlt bei ([AB]) weniger\\.'),
+            [new RegExp('<b>Was fehlt zum Ganzen\\?</b> Bei A (?:fehlen|fehlt) (\\d+) (' + NTHS + '), bei B (\\d+) (' + NTHS + ')\\. (' + NTHS + ') sind kleiner, also fehlt bei ([AB]) weniger\\.'),
                 (m, ma, ka, mb, kb, k, x) => '<b>¿Qué falta hasta el entero?</b> A la fracción A le ' + pl(ma, 'falta', 'faltan') + ' ' + ma + ' ' + piece(ma, ka) + '; a la B, ' + mb + ' ' + piece(mb, kb) +
                     '. Los ' + NTH[k][0] + ' son más pequeños, así que a la ' + x + ' le falta menos.'],
             // rundenos5

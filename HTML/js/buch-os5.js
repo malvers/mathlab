@@ -206,7 +206,7 @@
                 return;
             }
             out.innerHTML = '<p class="g5-big">' + grp(v) + '</p>' +
-                '<p>Ein Schritt von Strich zu Strich ist <b>' + grp(S.s) + '</b>. Der Punkt liegt ' + S.k + ' Schritte rechts von ' + grp(S.a) + '.</p>' +
+                '<p>Ein Schritt von Strich zu Strich ist <b>' + grp(S.s) + '</b>. Der Punkt liegt ' + S.k + (+S.k === 1 ? ' Schritt' : ' Schritte') + ' rechts von ' + grp(S.a) + '.</p>' +
                 (S.s === 1 ? '<p class="g5-dim">Vorgänger ' + (v ? grp(v - 1) : '–') + ', Nachfolger ' + grp(v + 1) + '.</p>' :
                     '<p class="g5-dim">Die Zahl liegt zwischen ' + grp(v - S.s) + ' und ' + grp(v + S.s) + '.</p>');
         }
@@ -230,7 +230,7 @@
         return grp(s.slice(0, -d)) + (f ? DP + f : '');
     }
     // for an estimate: two leading digits for numbers from 100 on (4 738 → 4 700), tens below, decimals to whole numbers
-    const rough = v => v < 10 ? Math.round(v) : Math.round(v / Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2))) * Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2));
+    const rough = v => v < 10 || v % 1 ? Math.round(v) : Math.round(v / Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2))) * Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2));
     // one significant digit (352 → 400, 23 → 20) for the estimate of a product
     const lead = v => v < 10 ? Math.max(1, Math.round(v)) : Math.round(v / Math.pow(10, String(Math.floor(v)).length - 1)) * Math.pow(10, String(Math.floor(v)).length - 1);
     const val = x => parseFloat(x.i + '.' + (x.f || '0'));
@@ -601,7 +601,7 @@
                 const html = digits.map((d, i) => '<span class="' + (i ? 'os5-z' : '') + ((digits.length - i) % 3 === 0 && i ? ' os5-g' : '') + '">' + d + '</span>').join('');
                 out.innerHTML = '<p class="os5-zeros">' + html + '</p>' +
                     '<p>$10^{' + n + '} = ' + (n <= 6 ? Array(n).fill('10').join(' \\cdot ') : '10 \\cdot 10 \\cdot \\ldots \\cdot 10') + ' = ' + tg('1' + '0'.repeat(n)) + '$</p>' +
-                    '<p>Die Hochzahl ' + n + ' sagt: ' + n + ' Faktoren 10, also ' + (n === 1 ? 'eine Null' : n + ' Nullen') + '. Das ist <b>' + TEN[n] + '</b>.</p>';
+                    '<p>Die Hochzahl ' + n + ' sagt: ' + n + (n === 1 ? ' Faktor' : ' Faktoren') + ' 10, also ' + (n === 1 ? 'eine Null' : n + ' Nullen') + '. Das ist <b>' + TEN[n] + '</b>.</p>';
             } else {
                 const t = whole(S.v);
                 if (isNaN(t) || !t || String(t).length > 15) { out.innerHTML = '<p class="g-warn">Bitte eine natürliche Zahl mit höchstens 15 Stellen eingeben, zum Beispiel 4 700 000.</p>'; return; }
@@ -666,7 +666,7 @@
             if (q) {
                 const n = S.n, v = n * n;
                 pic.innerHTML = tiles(n, 0);
-                out.innerHTML = '<p class="g5-big">$' + n + '^2 = ' + n + ' \\cdot ' + n + ' = ' + tg(v) + '$</p><p>' + n + ' Reihen mit je ' + n + ' Plättchen ergeben ein Quadrat aus ' + v + ' Plättchen.</p>' +
+                out.innerHTML = '<p class="g5-big">$' + n + '^2 = ' + n + ' \\cdot ' + n + ' = ' + tg(v) + '$</p><p>' + (n === 1 ? '1 Reihe mit 1 Plättchen ergibt ein Quadrat aus 1 Plättchen.' : n + ' Reihen mit je ' + n + ' Plättchen ergeben ein Quadrat aus ' + v + ' Plättchen.') + '</p>' +
                     '<p>Umgekehrt: $\\sqrt{' + tg(v) + '} = ' + n + '$, denn $' + n + ' \\cdot ' + n + ' = ' + tg(v) + '$.</p>';
             } else {
                 const v = whole(S.v);
@@ -834,7 +834,7 @@
                 s += '<rect x="' + gx + '" y="' + gy + '" width="' + gw + '" height="' + gh + '" rx="8" style="fill:' + (on2 ? rgba(LAM, 0.1) : 'none') + ';stroke:' + (on2 ? LAM : DIM) + ';stroke-width:1.4' + (on2 ? '' : ';stroke-dasharray:4 4') + '"/>';
                 for (let j = 0; j < k; j++) s += token(gx + pad + (j % gc + 0.5) * c, gy + pad + (Math.floor(j / gc) + 0.5) * c, c, on2 ? LAM : DIM, S.person);
             }
-            pic.innerHTML = svg(Wd, Ht, z + ' von ' + n + ' Gruppen zu je ' + k + ' sind gefärbt', s);
+            pic.innerHTML = svg(Wd, Ht, z + ' von ' + n + ' Gruppen zu je ' + k + (z === 1 ? ' ist' : ' sind') + ' gefärbt', s);
             out.innerHTML = '<p class="g5-big">$\\tfrac{' + z + '}{' + n + '}$ von ' + g + '</p>' +
                 '<p>1. Teile das Ganze in ' + n + ' gleich große Gruppen: $' + g + ' : ' + n + ' = ' + k + '$.</p>' +
                 '<p>2. Nimm ' + z + (z === 1 ? ' Gruppe' : ' Gruppen') + ': $' + z + ' \\cdot ' + k + ' = ' + r + '$.</p>' +
@@ -875,10 +875,10 @@
             if (A[0] === Bf[0]) return [res, '<b>Gleicher Zähler:</b> Beide Male sind es ' + A[0] + (A[0] === 1 ? ' Stück' : ' Stücke') + '. ' + NTH[Math.min(A[1], Bf[1])] + ' sind größer als ' + NTH[Math.max(A[1], Bf[1])] +
                 ': Je größer der Nenner, desto kleiner die Stücke.'];
             if (whole1(A) !== whole1(Bf)) return [res, '<b>Vergleich mit 1:</b> $' + fr(A) + '$ ist ' + (whole1(A) < 0 ? 'weniger als' : whole1(A) > 0 ? 'mehr als' : 'genau') + ' ein Ganzes, $' + fr(Bf) + '$ ist ' + (whole1(Bf) < 0 ? 'weniger als' : whole1(Bf) > 0 ? 'mehr als' : 'genau') + ' ein Ganzes.'];
-            if (half(A) !== half(Bf) && whole1(A) < 0) return [res, '<b>Vergleich mit einem Halben:</b> $' + fr(A) + '$ ist ' + hw(A) + ', denn ' + A[0] + ' ist ' + (half(A) < 0 ? 'weniger' : half(A) > 0 ? 'mehr' : 'genau') + ' als die Hälfte von ' + A[1] +
+            if (half(A) !== half(Bf) && whole1(A) < 0) return [res, '<b>Vergleich mit einem Halben:</b> $' + fr(A) + '$ ist ' + hw(A) + ', denn ' + A[0] + ' ist ' + (half(A) < 0 ? 'weniger als' : half(A) > 0 ? 'mehr als' : 'genau') + ' die Hälfte von ' + A[1] +
                 '. $' + fr(Bf) + '$ ist ' + hw(Bf) + '.'];
             const ma = A[1] - A[0], mb = Bf[1] - Bf[0];
-            if (ma === mb && ma > 0) return [res, '<b>Was fehlt zum Ganzen?</b> Bei A fehlen ' + ma + ' ' + NTH[A[1]] + ', bei B ' + mb + ' ' + NTH[Bf[1]] + '. ' + NTH[Math.max(A[1], Bf[1])] + ' sind kleiner, also fehlt bei ' + (A[1] > Bf[1] ? 'A' : 'B') + ' weniger.'];
+            if (ma === mb && ma > 0) return [res, '<b>Was fehlt zum Ganzen?</b> Bei A ' + (ma === 1 ? 'fehlt ' : 'fehlen ') + ma + ' ' + NTH[A[1]] + ', bei B ' + mb + ' ' + NTH[Bf[1]] + '. ' + NTH[Math.max(A[1], Bf[1])] + ' sind kleiner, also fehlt bei ' + (A[1] > Bf[1] ? 'A' : 'B') + ' weniger.'];
             return [res, 'Hier hilft das Bild: Der längere gefärbte Streifen gehört zum größeren Bruch. Genau nachrechnen kannst du das in Klasse 6, wenn du Brüche erweiterst.'];
         }
         function bar(F, y, col, U, X0, wholes) {
@@ -1147,6 +1147,7 @@
                 out.innerHTML = '<p class="g5-big">' + n + '</p><p>' + (b5 ? b5 + (b5 === 1 ? ' Fünferbündel' : ' Fünferbündel') + (r ? ' und ' + r + (r === 1 ? ' einzelner Strich' : ' einzelne Striche') : '') : r + (r === 1 ? ' einzelner Strich' : ' einzelne Striche')) +
                     (b5 ? ': $' + b5 + ' \\cdot 5' + (r ? ' + ' + r : '') + ' = ' + n + '$' : '') + '</p>' +
                     '<p class="g5-dim">Auf dem Kerbholz ist jede fünfte Kerbe länger. So muss man nicht jede einzelne Kerbe zählen, sondern nur die Bündel.</p>';
+                math(out);
             } else {
                 const v = S.v, D = [Math.floor(v / 3600), Math.floor(v / 60) % 60, v % 60];
                 let first = D.findIndex(d => d > 0); if (first < 0) first = 2;

@@ -209,7 +209,7 @@ window.BuchIT && BuchIT.add('os5', {
                 [/(<p class="g-ok">)Richtig: /, '$1Giusto: '],
                 R('Von (' + G + ') bis (' + G + ') sind es 10 Schritte, einer ist (' + G + ') groß\\.', 'Da $1 a $2 ci sono 10 passi, ognuno vale $3.'),
                 R('Links steht (' + G + '), rechts (' + G + ')\\. Dazwischen liegen 10 gleich große Schritte\\.', 'A sinistra c’è $1, a destra $2. In mezzo ci sono 10 passi uguali.'),
-                R('Der Punkt liegt (\\d+) Schritte rechts von (' + G + ')\\.', (m, k, a) => 'Il punto si trova ' + k + (k === '1' ? ' passo' : ' passi') + ' a destra di ' + a + '.'),
+                R('Der Punkt liegt (\\d+) Schritte? rechts von (' + G + ')\\.', (m, k, a) => 'Il punto si trova ' + k + (k === '1' ? ' passo' : ' passi') + ' a destra di ' + a + '.'),
                 R('Vorgänger ([^,<]+), Nachfolger (' + G + ')\\.', 'Precedente $1, successivo $2.'),
                 R('Die Zahl liegt zwischen (' + G + ') und (' + G + ')\\.', 'Il numero è compreso tra $1 e $2.'),
                 // schriftlichos5: the place in front of every step, the steps
@@ -241,13 +241,13 @@ window.BuchIT && BuchIT.add('os5', {
                 [/(\d) Rest (\d+)/g, '$1 resto $2'],
                 [/Die Division geht nicht auf\. Nach (\d+) Stellen hinter dem Komma wird abgebrochen\./, 'La divisione non è esatta. Ci si ferma dopo $1 cifre dopo la virgola.'],
                 // zehnerpotenzos5
-                [new RegExp('Die Hochzahl (\\d+) sagt: \\d+ Faktoren 10, also (?:eine Null|\\d+ Nullen)\\. Das ist <b>(' + Object.keys(TEN).join('|') + ')</b>\\.'),
+                [new RegExp('Die Hochzahl (\\d+) sagt: \\d+ Faktor(?:en)? 10, also (?:eine Null|\\d+ Nullen)\\. Das ist <b>(' + Object.keys(TEN).join('|') + ')</b>\\.'),
                     (m, n, t) => 'L’esponente ' + n + ' dice: ' + (n === '1' ? '1 fattore 10, quindi uno zero' : n + ' fattori 10, quindi ' + n + ' zeri') + '. È <b>' + TEN[t] + '</b>.'],
                 [/Du kannst noch (\d+) (?:Nullen|Null) mehr abtrennen\./, (m, n) => 'Puoi separare ancora ' + (n === '1' ? 'uno zero' : n + ' zeri') + '.'],
                 [/\$: Rücke das Komma um (\d+) Stellen nach rechts, dann hast du die Zahl\./, (m, n) => '$: sposta la virgola di ' + n + ' posti verso destra e ottieni il numero.'],
                 // quadratos5
                 [/^(\d+) mal (\d+) Plättchen(?: und (\d+) weitere)?$/, (m, a, b, e) => a + ' per ' + b + ' tessere' + (e ? ' e altre ' + e : '')],
-                [/(\d+) Reihen mit je (\d+) Plättchen ergeben ein Quadrat aus (\d+) Plättchen\./,
+                [/(\d+) Reihen? mit (?:je )?(\d+) Plättchen (?:ergeben|ergibt) ein Quadrat aus (\d+) Plättchen\./,
                     (m, a, b, v) => a === '1' ? '1 fila con 1 tessera forma un quadrato di 1 tessera.' : a + ' file da ' + b + ' tessere formano un quadrato di ' + v + ' tessere.'],
                 [/(\d+) ist eine Quadratzahl: Die Plättchen bilden ein Quadrat mit der Seite (\d+)\./, '$1 è un quadrato perfetto: le tessere formano un quadrato di lato $2.'],
                 [/(\d+) ist keine Quadratzahl\./, '$1 non è un quadrato perfetto.'],
@@ -266,7 +266,7 @@ window.BuchIT && BuchIT.add('os5', {
                 R('(' + G + ') ist eine Primzahl: genau zwei Teiler\\.', '$1 è un numero primo: esattamente due divisori.'),
                 R('(' + G + ') ist keine Primzahl\\.', '$1 non è un numero primo.'),
                 // bruchteilos5
-                [/^(\d+) von (\d+) Gruppen zu je (\d+) sind gefärbt$/, (m, z, n, k) => z + (z === '1' ? ' gruppo' : ' gruppi') + ' su ' + n + ', da ' + k + ' ciascuno, ' + (z === '1' ? 'è colorato' : 'sono colorati')],
+                [/^(\d+) von (\d+) Gruppen zu je (\d+) (?:sind|ist) gefärbt$/, (m, z, n, k) => z + (z === '1' ? ' gruppo' : ' gruppi') + ' su ' + n + ', da ' + k + ' ciascuno, ' + (z === '1' ? 'è colorato' : 'sono colorati')],
                 [/\$ von (\d+) sind (\d+)\./, '$ di $1 sono $2.'],
                 [/\$ von (\d+)<\/p>/, '$ di $1</p>'],
                 [/1\. Teile das Ganze in (\d+) gleich große Gruppen: /, '1. Dividi l’intero in $1 gruppi uguali: '],
@@ -279,9 +279,9 @@ window.BuchIT && BuchIT.add('os5', {
                         of(NTH[b][0]) + ': più grande è il denominatore, più piccoli sono i pezzi.'],
                 [/\$ ist (weniger als|mehr als|genau) ein Ganzes/g, (m, x) => '$ è ' + { 'weniger als': 'meno di', 'mehr als': 'più di', 'genau': 'esattamente' }[x] + ' un intero'],
                 [/\$ ist (weniger als|mehr als|genau) ein Halbes/g, (m, x) => '$ è ' + { 'weniger als': 'meno di', 'mehr als': 'più di', 'genau': 'esattamente' }[x] + ' un mezzo'],
-                [/, denn (\d+) ist (weniger|mehr|genau) als die Hälfte von (\d+)\./, (m, a, x, n) => ', perché ' + a + ' è ' +
+                [/, denn (\d+) ist (weniger|mehr|genau)(?: als)? die Hälfte von (\d+)\./, (m, a, x, n) => ', perché ' + a + ' è ' +
                     { 'weniger': 'meno della', 'mehr': 'più della', 'genau': 'esattamente la' }[x] + ' metà di ' + n + '.'],
-                [new RegExp('<b>Was fehlt zum Ganzen\\?</b> Bei A fehlen (\\d+) (' + N + '), bei B (\\d+) (' + N + ')\\. (' + N + ') sind kleiner, also fehlt bei (A|B) weniger\\.'),
+                [new RegExp('<b>Was fehlt zum Ganzen\\?</b> Bei A (?:fehlen|fehlt) (\\d+) (' + N + '), bei B (\\d+) (' + N + ')\\. (' + N + ') sind kleiner, also fehlt bei (A|B) weniger\\.'),
                     (m, a, wa, b, wb, w, x) => '<b>Quanto manca all’intero?</b> Ad A ' + (a === '1' ? 'manca ' : 'mancano ') + part(a, wa) + ', a B ' + part(b, wb) + '. ' +
                         cap(the(NTH[w][0])) + ' sono più piccoli, quindi ' + (x === 'A' ? 'ad A' : 'a B') + ' manca meno.'],
                 // rundenos5

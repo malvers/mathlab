@@ -223,7 +223,7 @@
             [/^Zahlenstrahl von (.+) bis (.+)$/, 'Number line from $1 to $2'],
             [/Von ([\d,.]+) bis ([\d,.]+) sind es 10 Schritte, einer ist ([\d,.]+) groß\./, 'From $1 to $2 there are 10 steps; each one is $3.'],
             [/Links steht ([\d,.]+), rechts ([\d,.]+)\. Dazwischen liegen 10 gleich große Schritte\./, 'On the left is $1, on the right $2. In between there are 10 equal steps.'],
-            [/Der Punkt liegt (\d+) Schritte rechts von ([\d,.]+)\./, (m, k, a) => 'The point lies ' + pl(k, 'step', 'steps') + ' to the right of ' + a + '.'],
+            [/Der Punkt liegt (\d+) Schritte? rechts von ([\d,.]+)\./, (m, k, a) => 'The point lies ' + pl(k, 'step', 'steps') + ' to the right of ' + a + '.'],
             [/Vorgänger (–|[\d,.]+?), Nachfolger ([\d,.]+)\./, 'Predecessor $1, successor $2.'],
             [/Die Zahl liegt zwischen ([\d,.]+) und ([\d,.]+)\./, 'The number lies between $1 and $2.'],
             // schriftlichos5: subtraction by adding on and by exchanging (rechteck5 has its own "Ergänzen", data-v="ergaenzen")
@@ -247,14 +247,14 @@
             [/(data-p="\d+">)([^<]*)/g, (m, a, t) => a + t.replace(/ : /g, ' ÷ ')],
             [/([\d,]+ − [\d,]+) geht in den natürlichen Zahlen nicht\./, '$1 is not possible with natural numbers.'],
             // zehnerpotenzos5
-            [/Die Hochzahl (\d+) sagt: \d+ Faktoren 10, also (?:eine Null|\d+ Nullen)\. Das ist <b>([^<]+)<\/b>\./, (m, n, w) => 'The index ' + n + ' says: ' +
+            [/Die Hochzahl (\d+) sagt: \d+ Faktor(?:en)? 10, also (?:eine Null|\d+ Nullen)\. Das ist <b>([^<]+)<\/b>\./, (m, n, w) => 'The index ' + n + ' says: ' +
                 (n === '1' ? '1 factor of 10, so one zero' : n + ' factors of 10, so ' + n + ' zeros') + '. That is <b>' + (TENW[w] || w) + '</b>.'],
             [/Du kannst noch (\d+) (?:Nullen|Null) mehr abtrennen\./, (m, n) => 'You can split off ' + pl(n, 'more zero', 'more zeros') + '.'],
             [/Die Zahl ist zu lang\. Der Rechner zeigt (\$[^$]+\$): Rücke das Komma um (\d+) Stellen nach rechts, dann hast du die Zahl\./,
                 (m, t, n) => 'The number is too long. The calculator shows ' + t + ': move the decimal point ' + n + ' places to the right and you have the number.'],
             // quadratos5
             [/^(\d+) mal (\d+) Plättchen(?: und (\d+) weitere)?$/, (m, a, b, c) => a + ' by ' + b + ' tiles' + (c ? ' and ' + c + ' more' : '')],
-            [/(\d+) Reihen mit je (\d+) Plättchen ergeben ein Quadrat aus (\d+) Plättchen\./, (m, a, b, c) => a === '1' ? '1 row of 1 tile makes a square of 1 tile.' :
+            [/(\d+) Reihen? mit (?:je )?(\d+) Plättchen (?:ergeben|ergibt) ein Quadrat aus (\d+) Plättchen\./, (m, a, b, c) => a === '1' ? '1 row of 1 tile makes a square of 1 tile.' :
                 a + ' rows of ' + b + ' tiles each make a square of ' + c + ' tiles.'],
             [/(\d+) ist eine Quadratzahl: Die Plättchen bilden ein Quadrat mit der Seite (\d+)\./, '$1 is a square number: the tiles form a square with side $2.'],
             [/(\d+) ist keine Quadratzahl\./, '$1 is not a square number.'],
@@ -275,7 +275,7 @@
             [/^(Zähler|Nenner|Ganzes)( [AB])? (kleiner|größer)$/, (m, w, ab, d) => (d === 'kleiner' ? 'Decrease the ' : 'Increase the ') + STEP[w] + (ab ? ' of' + ab : '')],
             [/^(Zähler|Nenner) ([AB])$/, (m, w, ab) => cap(STEP[w]) + ' of ' + ab],
             // bruchteilos5
-            [/^(\d+) von (\d+) Gruppen zu je (\d+) sind gefärbt$/, (m, z, n, k) => z + ' of ' + n + ' groups of ' + k + (z === '1' ? ' is' : ' are') + ' coloured'],
+            [/^(\d+) von (\d+) Gruppen zu je (\d+) (?:sind|ist) gefärbt$/, (m, z, n, k) => z + ' of ' + n + ' groups of ' + k + (z === '1' ? ' is' : ' are') + ' coloured'],
             [/(\$.tfrac\{\d+\}\{\d+\}\$) von (\d+) sind (\d+)\./, (m, f, g, r) => f + ' of ' + g + ' is ' + r + '.'],
             [/(\$.tfrac\{\d+\}\{\d+\}\$) von (\d+)/, (m, f, g) => f + ' of ' + g],
             [/1\. Teile das Ganze in (\d+) gleich große Gruppen: /, '1. Divide the whole into $1 equal groups: '],
@@ -286,9 +286,9 @@
             [new RegExp('<b>Gleicher Zähler:</b> Beide Male sind es (\\d+) (?:Stück|Stücke)\\. (' + NTHS + ') sind größer als (' + NTHS + '): Je größer der Nenner, desto kleiner die Stücke\\.'),
                 (m, n, a, b) => '<b>Same numerator:</b> both times it is ' + pl(n, 'piece', 'pieces') + '. ' + cap(NTH[a]) + ' are bigger than ' + NTH[b] +
                     ': the bigger the denominator, the smaller the pieces.'],
-            [/, denn (\d+) ist (weniger|mehr|genau) als die Hälfte von (\d+)\./, (m, a, w, b) => ', because ' + a + ' is ' +
+            [/, denn (\d+) ist (weniger|mehr|genau)(?: als)? die Hälfte von (\d+)\./, (m, a, w, b) => ', because ' + a + ' is ' +
                 (w === 'weniger' ? 'less than half' : w === 'mehr' ? 'more than half' : 'exactly half') + ' of ' + b + '.'],
-            [new RegExp('<b>Was fehlt zum Ganzen\\?</b> Bei A fehlen (\\d+) (' + NTHS + '), bei B (\\d+) (' + NTHS + ')\\. (' + NTHS + ') sind kleiner, also fehlt bei ([AB]) weniger\\.'),
+            [new RegExp('<b>Was fehlt zum Ganzen\\?</b> Bei A (?:fehlen|fehlt) (\\d+) (' + NTHS + '), bei B (\\d+) (' + NTHS + ')\\. (' + NTHS + ') sind kleiner, also fehlt bei ([AB]) weniger\\.'),
                 (m, a, wa, b, wb, w, x) => '<b>What is missing to make a whole?</b> A is missing ' + pieces(a, wa) + ', B ' + pieces(b, wb) + '. ' + cap(NTH[w]) +
                     ' are smaller, so less is missing from ' + x + '.'],
             // rundenos5
