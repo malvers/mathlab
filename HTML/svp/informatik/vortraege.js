@@ -104,11 +104,14 @@
             sub: 'Lernbereich 1 \u201eInformatische Modellierung\u201c, Lernbereich 2 \u201eModellierung von Datenbanken\u201c, Lernbereich 3 \u201eAlgorithmen und Programme\u201c + Wahlbereich \u201eK\u00fcnstliche Intelligenz\u201c',
             switchLabel: 'Kurs wechseln',
             klassen: [['a', 'BGY25']],
-            /* Talk dates by PLACE: one lesson on Tuesday, one talk per lesson, since
-               18.09.2026 starting after the autumn holidays (Doc). Doc's date on the page wins. */
-            dates: ['2026-10-27', '2026-11-03', '2026-11-10', '2026-11-17', '2026-11-24',
-                    '2026-12-01', '2026-12-08', '2026-12-15', '2026-12-22', '2027-01-05',
-                    '2027-01-12', '2027-01-19'],
+            /* Talk dates by PLACE: one talk per week, Doc's date on the page wins.
+               Since the autumn holidays BGY25 has Informatik on THURSDAY (Untis, 14:45),
+               no longer on Tuesday; talks from next week on (Doc, 26.10.2026). 19.11. is
+               left out - "Betriebsruhe Campus" for the whole staff, although Untis still
+               lists the lesson. */
+            dates: ['2026-11-05', '2026-11-12', '2026-11-26', '2026-12-03', '2026-12-10',
+                    '2026-12-17', '2027-01-07', '2027-01-14', '2027-01-21', '2027-01-28',
+                    '2027-02-04', '2027-02-25'],
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Was ein Modell weglässt', sub: 'Wetter, Verkehr, Epidemie: dieselbe Wirklichkeit in drei Modellen — und die Entscheidung, die jeweils daran hängt.' },
@@ -131,11 +134,13 @@
             sub: 'Lernbereich 3 „Algorithmen und Programme“, Lernbereich 4A „Projekt Webtechnologie“ + Wahlbereich „Quanteninformatik“',
             switchLabel: 'Kurs wechseln',
             klassen: [['a', 'BGY24']],
-            /* Talk dates by PLACE: one lesson on Monday afternoon, one talk per
-               lesson, since 18.09.2026 starting after the autumn holidays (Doc). Doc's date wins. */
-            dates: ['2026-10-26', '2026-11-02', '2026-11-09', '2026-11-16', '2026-11-23',
-                    '2026-11-30', '2026-12-07', '2026-12-14', '2026-12-21', '2027-01-04',
-                    '2027-01-11', '2027-01-18'],
+            /* Talk dates by PLACE: one talk per week, Doc's date wins. Since the autumn
+               holidays BGY24 has Informatik on THURSDAY (Untis, 13:30), no longer on
+               Monday; talks from next week on, 19.11. left out (Betriebsruhe Campus) -
+               same as inf12 (Doc, 26.10.2026). */
+            dates: ['2026-11-05', '2026-11-12', '2026-11-26', '2026-12-03', '2026-12-10',
+                    '2026-12-17', '2027-01-07', '2027-01-14', '2027-01-21', '2027-01-28',
+                    '2027-02-04', '2027-02-25'],
             labels: { lb3: ['LB 3', 'b-violet'], lb4: ['LB 4A', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb3', title: 'Vom ggT zum RSA-Schlüssel', sub: 'Der euklidische Algorithmus ist über 2300 Jahre alt — und steckt heute im Herzen jeder sicheren Verbindung. Wie hängt beides zusammen?' },
@@ -185,18 +190,22 @@
                Since 18.09.2026 all talks start after the autumn holidays (Doc): each
                group's one date before them is gone, one more at the end in the same
                fortnight rhythm (over Christmas to the next one, as FOS25-1 already
-               had it). Doc's date on the page still wins (META_PAGE). */
+               had it). Doc's date on the page still wins (META_PAGE).
+               Doc, 26.10.2026: "bitte nicht heute ... next time" - talks from next
+               week on, on the group's real Untis days; FOG25-1, FOS25-2 and FOW25-1
+               start one appointment later. */
             dates: {
-                'FOG25-1': twice(['2026-10-26', '2026-11-09', '2026-11-23', '2026-12-07', '2026-12-21',
-                    '2027-01-04', '2027-01-18']),
+                'FOG25-1': twice(['2026-11-09', '2026-11-23', '2026-12-07', '2026-12-21', '2027-01-04',
+                    '2027-01-18', '2027-02-01']),
                 'FOG25-2_FOW25-2': twice(['2026-11-02', '2026-11-16', '2026-11-30', '2026-12-14', '2027-01-11',
                     '2027-01-25', '2027-02-22']),
                 'FOS25-1': twice(['2026-11-04', '2026-12-02', '2026-12-16', '2027-01-13', '2027-01-27',
                     '2027-02-24', '2027-03-10']),
-                'FOS25-2': twice(['2026-10-28', '2026-11-11', '2026-11-25', '2026-12-09', '2027-01-06',
-                    '2027-01-20', '2027-02-03']),
-                'FOW25-1': twice(['2026-10-27', '2026-11-10', '2026-11-24', '2026-12-08', '2026-12-22',
-                    '2027-01-05', '2027-01-19'])
+                'FOS25-2': twice(['2026-11-11', '2026-11-25', '2026-12-09', '2027-01-06', '2027-01-20',
+                    '2027-02-03', '2027-03-03']),
+                /* 27.10. ("Projekt") and 22.12. are cancelled in Untis */
+                'FOW25-1': twice(['2026-11-10', '2026-11-24', '2026-12-08', '2027-01-05', '2027-01-19',
+                    '2027-02-02', '2027-03-02'])
             },
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3A', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [

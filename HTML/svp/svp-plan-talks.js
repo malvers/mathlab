@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        paintTalk, loadTalks
+        paintTalk, loadTalks, placeTalks
     });
 
     /* Doc, 18.09.2026: "Vortrag: ..." - the head of a week's sub-row names the
@@ -34,6 +34,53 @@ window.svpPlanParts.push(function (P) {
         box.appendChild(line);
         head.classList.add('has-talk');
         head.appendChild(box);
+    }
+    /* Which row shows which talk. Doc, 26.10.2026 (?g=FOG25-1: the talks of 26.10. stood in the row of 09.11.): in
+       the group view of a termin plan a row is the group's appointment, not its plan week - the date column shows
+       that day (svp-plan-untis.js, r.terminYmd), and the talk line follows it. Two talks a day, one per double
+       lesson (Doc, 15.09.2026): the first half of the day's talks goes to the row of the 1st DS, the rest to the
+       2nd. Until the appointments are there (they load later, and only for Doc) the plan week decides, as it
+       does everywhere else. Run again once the dates are painted. */
+    let talkData = null;
+    function clearTalk(ref) {
+        delete ref.talk;
+        const head = ref.subHeadL;
+        if (!head) return;
+        const old = head.querySelector('.sub-talk');
+        if (old) old.remove();
+        head.classList.remove('has-talk');
+    }
+    function placeTalks() {
+        if (!talkData) return;
+        const byDate = !!P.GROUP && P.rendered.some(function (r) { return r.terminYmd; });
+        P.rendered.forEach(function (ref) {
+            let talk = null;
+            if (byDate) {
+                const list = ref.terminYmd && talkData.byDay[ref.terminYmd];
+                if (list && list.length) {
+                    const cut = Math.ceil(list.length / 2);
+                    const mine = svpTermine.slot(P.planRows, ref.i).half ? list.slice(cut) : list.slice(0, cut);
+                    if (mine.length) talk = [['Vortrag', mine.join(' · ')]];
+                }
+            } else {
+                const g = ref.kw != null && talkData.byKw[+ref.kw];
+                if (g) {
+                    const labels = Object.keys(g);
+                    const texts = labels.map(function (l) { return g[l].join(' · '); });
+                    /* the same talk in every Lerngruppe: one line without the group. Every one of them must have it -
+                       a week with a talk in 9a alone read as both groups' talk (Doc, 02.10.2026, after 9b moved to
+                       KW 46: "Big Data und Empfehlungsalgorithmen sind noch da oben") */
+                    talk = labels.length === talkData.nKlassen && texts.every(function (t) { return t === texts[0]; })
+                        ? [['Vortrag', texts[0]]]
+                        : labels.map(function (l, n) { return [(n ? '' : 'Vortrag ') + l, texts[n]]; });
+                }
+            }
+            if (!talk) { if (ref.talk) clearTalk(ref); return; }
+            if (!ref.ensureSubRow) return;
+            ref.talk = talk;
+            ref.ensureSubRow();
+            paintTalk(ref);
+        });
     }
     function loadTalks() {
         /* the talk data lives next to the informatics plans and covers only them -
@@ -103,6 +150,8 @@ window.svpPlanParts.push(function (P) {
         };
         /* kw -> Lerngruppe label -> ["1 · Titel", ...] */
         const byKw = {};
+        /* the same by day, "20261026" -> ["1 · Titel", ...] in place order (see placeTalks) */
+        const byDay = {};
         /* dieselben Vortraege noch einmal flach, mit Datum: daraus macht
            svp-plan-news.js die naechsten Termine fuer das Neuigkeiten-Band
            (Doc, 20.09.2026: "welche Vortraege wann sind") */
@@ -128,23 +177,13 @@ window.svpPlanParts.push(function (P) {
                 const w = P.isoWeek(new Date(iso + 'T12:00:00'));   /* the one markCurrentWeek uses */
                 const g = (byKw[w] = byKw[w] || {});
                 (g[k[1]] = g[k[1]] || []).push((pos + 1) + ' · ' + e.title);
+                const day = String(iso).replace(/-/g, '');
+                (byDay[day] = byDay[day] || []).push((pos + 1) + ' · ' + e.title);
                 termine.push({ iso: iso, label: k[1] || '', text: (pos + 1) + ' · ' + e.title });
             });
         });
-        P.rendered.forEach(function (ref) {
-            const g = ref.kw != null && byKw[+ref.kw];
-            if (!g || !ref.ensureSubRow) return;
-            const labels = Object.keys(g);
-            const texts = labels.map(function (l) { return g[l].join(' · '); });
-            /* the same talk in every Lerngruppe: one line without the group. Every one of them must have it - a week
-               with a talk in 9a alone read as both groups' talk (Doc, 02.10.2026, after 9b moved to KW 46: "Big Data und
-               Empfehlungsalgorithmen sind noch da oben") */
-            ref.talk = labels.length === klassen.length && texts.every(function (t) { return t === texts[0]; })
-                ? [['Vortrag', texts[0]]]
-                : labels.map(function (l, n) { return [(n ? '' : 'Vortrag ') + l, texts[n]]; });
-            ref.ensureSubRow();
-            paintTalk(ref);
-        });
+        talkData = { byKw: byKw, byDay: byDay, nKlassen: klassen.length };
+        placeTalks();
         if (P.newsTalks) P.newsTalks(termine);
         markTalksDone(key, themen, dbKlasse).catch(function (e) { console.warn('svp talks done:', e); });
     }
