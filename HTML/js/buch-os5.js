@@ -46,6 +46,10 @@
     const rgba = (c, a) => { const n = parseInt(c.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
     const area = (c, a, w) => 'fill:' + rgba(c, a) + ';stroke:' + c + ';stroke-width:' + (w || 1.6) + ';stroke-linejoin:round';
     const isHero = box => box.dataset.hero != null;
+    // the decimal separator: a point in the English editions, a comma everywhere else
+    const DP = B.en ? '.' : ',';
+    // the signs × and ÷ of British schools where the English editions show a sign the dictionary cannot reach (input values, a lone sign)
+    const SIGN = t => B.en ? String(t).replace(/·/g, '×').replace(/:/g, '÷') : t;
     // hero mode (chapter opener): only the picture, centred
     function heroOnly(box, pic, hide, maxW) {
         if (!isHero(box)) return false;
@@ -218,12 +222,12 @@
         const m = String(t).replace(/[\s ]/g, '').replace('.', ',').match(/^(\d+)(?:,(\d*))?$/);
         return m ? { i: m[1].replace(/^0+(?=\d)/, ''), f: m[2] || '' } : null;
     }
-    const dshow = x => grp(x.i) + (x.f ? ',' + x.f : '');
+    const dshow = x => grp(x.i) + (x.f ? DP + x.f : '');
     const scaled = (x, d) => parseInt(x.i + x.f.padEnd(d, '0'), 10);              // the value in units of 10^-d
     function unscale(n, d) {                                                        // 14700, 3 → "14,7"
         if (!d) return grp(n);
         const s = String(n).padStart(d + 1, '0'), f = s.slice(-d).replace(/0+$/, '');
-        return grp(s.slice(0, -d)) + (f ? ',' + f : '');
+        return grp(s.slice(0, -d)) + (f ? DP + f : '');
     }
     // for an estimate: two leading digits for numbers from 100 on (4 738 → 4 700), tens below, decimals to whole numbers
     const rough = v => v < 10 ? Math.round(v) : Math.round(v / Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2))) * Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2));
@@ -411,7 +415,7 @@
             started = true;
             const qd = Math.floor(cur / y), pr = qd * y, rem = cur - pr, ps = String(pr), cs = String(cur);
             q.push([s, String(qd)]);
-            if (i === ia - 1 && i < n - 1) q.push([s, ',']);
+            if (i === ia - 1 && i < n - 1) q.push([s, DP]);
             const rp = sh.row();
             ps.split('').reverse().forEach((ch, j) => put(rp, 1 + i - j, ch, s));
             put(rp, i - ps.length + 1, '−', s);
@@ -441,7 +445,7 @@
         inp.innerHTML = '<span class="b-ctrl"><input class="b-in os5-in" data-k="a" type="text" inputmode="decimal" autocomplete="off" aria-label="erste Zahl"> <b class="os5-op"></b> ' +
             '<input class="b-in os5-in" data-k="b" type="text" inputmode="decimal" autocomplete="off" aria-label="zweite Zahl"></span>';
         const ia = inp.querySelector('[data-k="a"]'), ib = inp.querySelector('[data-k="b"]'), opEl = inp.querySelector('.os5-op');
-        ia.value = S.a; ib.value = S.b;
+        ia.value = S.a.replace(',', DP); ib.value = S.b.replace(',', DP);
         [ia, ib].forEach(el => el.addEventListener('input', () => { S[el.dataset.k] = el.value; build(); }));
         const acts = buttons(box, [['next', 'Nächster Schritt', 'b-go'], ['all', 'Alles zeigen'], ['reset', 'Von vorn']], k => {
             if (!S.P || S.P.err) return;
@@ -452,7 +456,7 @@
         if (hero) [ctr, wayBox, inp, acts, out].forEach(e => { e.style.display = 'none'; });
         function build() {
             const a = dnum(S.a), b = dnum(S.b);
-            opEl.textContent = S.op;
+            opEl.textContent = SIGN(S.op);
             if (!hero) wayBox.style.display = S.op === '−' ? '' : 'none';
             if (!a || !b) S.P = { err: 'Bitte zwei Zahlen eingeben, zum Beispiel 4738 und 1296.' };
             else if (a.f.length > 3 || b.f.length > 3) S.P = { err: 'Bitte höchstens drei Stellen nach dem Komma.' };
@@ -538,8 +542,8 @@
         const row = div(box, 'b-ctrls'), id = 'os5-term-' + (++uid);
         row.innerHTML = '<label class="b-ctrl" for="' + id + '">Eigener Term</label><input class="b-in os5-term" id="' + id + '" type="text" autocomplete="off" spellcheck="false">';
         const inp = row.querySelector('input');
-        inp.value = S.t;
-        ctr.addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (!b) return; S.t = PRE[+b.dataset.p]; inp.value = S.t; build(); });
+        inp.value = SIGN(S.t);
+        ctr.addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (!b) return; S.t = PRE[+b.dataset.p]; inp.value = SIGN(S.t); build(); });
         inp.addEventListener('input', () => { S.t = inp.value; build(); });
         buttons(box, [['next', 'Nächster Schritt', 'b-go'], ['all', 'Alle Schritte'], ['reset', 'Von vorn']], k => {
             if (!S.P) return;
@@ -904,11 +908,12 @@
     });
     /* ---------- rounding decimals on a zoomed number line ---------- */
     // a value in thousandths written with comma and d decimals: 3476, 2 → "3,48"
-    const thou = (t, d) => { const s = (t / 1000).toFixed(d), [i, f] = s.split('.'); return grp(i) + (f ? ',' + f : ''); };
+    const thou = (t, d) => { const s = (t / 1000).toFixed(d), [i, f] = s.split('.'); return grp(i) + (f ? DP + f : ''); };
     const decOf = t => t % 10 ? 3 : t % 100 ? 2 : t % 1000 ? 1 : 0;
     W('rundenos5', function (box) {
         const PL = { e: [1000, 'Ganze', 0, 'Zehntel'], z: [100, 'Zehntel', 1, 'Hundertstel'], h: [10, 'Hundertstel', 2, 'Tausendstel'] };
-        const S = { t: Math.round(B.parseAnswer(box.dataset.v || '3,476') * 1000), p: box.dataset.p || 'z' };
+        // data-v keeps its German comma in every edition (B.parseAnswer would read an English "3,476" as 3476)
+        const S = { t: Math.round(parseFloat(String(box.dataset.v || '3,476').replace(',', '.')) * 1000), p: box.dataset.p || 'z' };
         const ctr = div(box, 'b-ctrls');
         seg(ctr, [['e', 'auf Ganze'], ['z', 'auf Zehntel'], ['h', 'auf Hundertstel']], S.p, v => { S.p = v; render(); }, 'Runden');
         const row = div(box, 'b-ctrls'), id = 'os5-r-' + (++uid);
