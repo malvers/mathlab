@@ -237,7 +237,7 @@ window.BuchFR && BuchFR.add('os5', {
         [/Du kannst noch (\d+) (?:Nullen|Null) mehr abtrennen\./, (m, n) => 'Tu peux encore séparer ' + n + (n === '1' ? ' zéro.' : ' zéros.')],
         [/\$: Rücke das Komma um (\d+) Stellen nach rechts, dann hast du die Zahl\./, (m, n) => '$ : décale la virgule de ' + n + ' rangs vers la droite, et tu retrouves le nombre.'],
         // quadratos5
-        [/^(\d+) mal (\d+) Plättchen(?: und (\d+) weitere)?$/, (m, a, b, x) => a + ' fois ' + b + ' carreaux' + (x ? ' et ' + x + ' de plus' : '')],
+        [/^(\d+) mal (\d+) Plättchen(?: und (\d+) weitere)?$/, (m, a, b, x) => a + ' fois ' + b + (a === '1' ? ' carreau' : ' carreaux') + (x ? ' et ' + x + ' de plus' : '')],
         [/(\d+) Reihen mit je (\d+) Plättchen ergeben ein Quadrat aus (\d+) Plättchen\./, (m, r, k, v) => r === '1'
             ? '1 rangée de 1 carreau forme un carré de 1 carreau.' : r + ' rangées de ' + k + ' carreaux forment un carré de ' + v + ' carreaux.'],
         [/(\d+) ist eine Quadratzahl: Die Plättchen bilden ein Quadrat mit der Seite (\d+)\./, '$1 est un carré parfait : les carreaux forment un carré de côté $2.'],
@@ -250,7 +250,7 @@ window.BuchFR && BuchFR.add('os5', {
         [/Die letzte Ziffer (\d) ist (gerade|ungerade)\./, (m, d, g) => 'Le dernier chiffre, ' + d + ', est ' + (g === 'gerade' ? 'pair.' : 'impair.')],
         [/Die letzten zwei Ziffern bilden (\d+), das ist (nicht )?durch 4 teilbar\./, (m, x, n) => 'Les deux derniers chiffres forment ' + x + (n ? ', qui n’est pas divisible par 4.' : ', qui est divisible par 4.')],
         [/ ist (nicht )?durch (\d+) teilbar\./g, (m, n, d) => (n ? ', non divisible par ' : ', divisible par ') + d + '.'],
-        [/Die letzte Ziffer ist (\d)(, nicht 0 oder 5|, nicht 0)?\./, (m, d, x) => 'Le dernier chiffre est ' + d + (x ? (x.length > 9 ? ', ce n’est ni 0 ni 5' : ', ce n’est pas 0') : '') + '.'],
+        [/Die letzte Ziffer ist (\d)(, nicht 0 oder 5|, nicht 0)?\./g, (m, d, x) => 'Le dernier chiffre est ' + d + (x ? (x.length > 9 ? ', ce n’est ni 0 ni 5' : ', ce n’est pas 0') : '') + '.'],
         [/<b>durch (\d+)( nicht)?:<\/b>/g, (m, d, n) => '<b>' + (n ? 'pas par ' : 'par ') + d + ' :</b>'],
         [/<b>Alle Teiler<\/b> \((\d+)\): /, '<b>Tous les diviseurs</b> ($1) : '],
         [/(\d[\d ]*) ist eine Primzahl: genau zwei Teiler\./, '$1 est un nombre premier : exactement deux diviseurs.'],
