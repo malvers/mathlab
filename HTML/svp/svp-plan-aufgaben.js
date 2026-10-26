@@ -365,13 +365,25 @@ window.svpPlanParts.push(function (P) {
        lives in a JSON file of its own (row.redBtn.src, relative to the plan
        page, { items: [...] }), fetched once on the first click; inline items
        work as before. A failed fetch is forgotten, so the next click retries. */
+    /* Doc, 26.10.2026: "Download PDF" in the head of the list, no print dialog.
+       The PDF is built beforehand from the same list (tools/aufgaben/red-list-pdf.mjs)
+       and named by "pdf" in the JSON file or by row.redBtn.pdf for inline items,
+       relative to the plan page like src. It rides along on the item array,
+       and so does "info", a line under the head (Doc: "oben die Gesamtzeit"). */
+    function withMeta(items, pdf, info) {
+        if (!pdf && !info) return items;
+        items = items.slice();
+        items.pdf = pdf;
+        items.info = info;
+        return items;
+    }
     const redSrc = {};
     function redListItems(cfg) {
-        if (!cfg.src) return Promise.resolve(cfg.items || []);
+        if (!cfg.src) return Promise.resolve(withMeta(cfg.items || [], cfg.pdf, cfg.info));
         if (!redSrc[cfg.src]) {
             redSrc[cfg.src] = fetch(cfg.src, { cache: 'no-cache' })
                 .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                .then(function (d) { return Array.isArray(d) ? d : (d.items || []); })
+                .then(function (d) { return Array.isArray(d) ? withMeta(d, cfg.pdf, cfg.info) : withMeta(d.items || [], cfg.pdf || d.pdf, cfg.info || d.info); })
                 .catch(function (e) {
                     delete redSrc[cfg.src];
                     console.warn('[svp] red list ' + cfg.src + ': ' + e.message);
@@ -413,7 +425,17 @@ window.svpPlanParts.push(function (P) {
         x.title = 'Schließen';
         x.setAttribute('aria-label', 'Schließen');
         x.addEventListener('click', closeRedList);
-        head.append(h, x);
+        head.appendChild(h);
+        if (items.pdf) {
+            const pdf = document.createElement('a');
+            pdf.className = 'red-list-pdf';
+            pdf.href = items.pdf;
+            pdf.download = items.pdf.split('/').pop();
+            pdf.textContent = 'Download PDF';
+            pdf.title = 'Aufgaben und Lösungen als PDF herunterladen';
+            head.appendChild(pdf);
+        }
+        head.appendChild(x);
         /* an item is a string or { q, a }: the answer folds out under the
            question (Doc, 18.09.2026: "aufklappbar drunter die Loesungen") */
         const ol = document.createElement('ol');
@@ -434,7 +456,14 @@ window.svpPlanParts.push(function (P) {
             }
             ol.appendChild(li);
         });
-        panel.append(head, ol);
+        panel.appendChild(head);
+        if (items.info) {
+            const info = document.createElement('div');
+            info.className = 'red-list-info';
+            P.setMathText(info, items.info);
+            panel.appendChild(info);
+        }
+        panel.appendChild(ol);
         /* clicks inside must not reach the document (closes) or the row (folds) */
         panel.addEventListener('click', function (e) { e.stopPropagation(); });
         document.body.appendChild(panel);

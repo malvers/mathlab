@@ -135,6 +135,29 @@
     cursor: pointer;
 }
 .red-list-x:hover { background: rgba(255, 255, 255, 0.18); }
+/* "Download PDF" sits right, next to the cross; the title takes what is left */
+.red-list-head > span { min-width: 0; }
+.red-list-pdf {
+    flex: none;
+    margin-left: auto;
+    padding: 3px 9px;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    color: inherit;
+    font-size: 0.64rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.red-list-pdf:hover { background: rgba(255, 255, 255, 0.18); }
+/* one line under the head, e.g. the total time of all tasks */
+.red-list-info {
+    flex: none;
+    padding: 6px 16px 0 18px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.red-list.nachweis .red-list-pdf:hover { background: rgba(14, 36, 78, 0.16); }
 .red-list ol {
     min-height: 0;
     overflow-y: auto;
@@ -160,7 +183,9 @@
 .red-list-sol > summary::before { content: '\25B8\00A0'; }
 .red-list-sol[open] > summary::before { content: '\25BE\00A0'; }
 .red-list-sol > summary:hover { text-decoration: underline; }
+/* a line break (\n) in a solution starts a new line - a table of paths gets one of its own */
 .red-list-sol > div {
+    white-space: pre-line;
     margin: 3px 0 2px;
     padding: 5px 10px;
     border-left: 2px solid var(--phi);
