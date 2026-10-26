@@ -178,9 +178,33 @@ const LAB_ICONS = {
     // and in Spanish (Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische")
     // and in Italian (Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch")
     // Oberschule 5 (Doc, 25.10.2026: "Buch OS 5 brauchen wir"), German only so far
-    "lehrbuch-mathe5": `<span style="display: flex; gap: 12px; align-items: center;">
+    "lehrbuch-mathe5": `<span style="display: flex; gap: 8px; align-items: center;">
         <img src="resources/og/buch-mathe5-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+            style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe5-en/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe5-en/index.html'; }">
+            <img src="resources/og/buch-mathe5-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Edición española" aria-label="Edición española" lang="es" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe5-es/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe5-es/index.html'; }">
+            <img src="resources/og/buch-mathe5-es-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe5-it/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe5-it/index.html'; }">
+            <img src="resources/og/buch-mathe5-it-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Édition française" aria-label="Édition française" lang="fr" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe5-fr/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe5-fr/index.html'; }">
+            <img src="resources/og/buch-mathe5-fr-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
     </span>`,
     "lehrbuch-mathe6": `<span style="display: flex; gap: 12px; align-items: center;">
         <img src="resources/og/buch-mathe6-cover.jpg" alt="" loading="lazy" decoding="async"
