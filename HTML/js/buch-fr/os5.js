@@ -220,7 +220,7 @@ window.BuchFR && BuchFR.add('os5', {
             ];
         })(),
         [/Der letzte Übertrag (\d) kommt vorn ins Ergebnis\./, 'La dernière retenue, $1, s’écrit tout à gauche du résultat.'],
-        [/Von (\d+) bis (\d+) sind (\d+)\./, 'De $1 jusqu’à $2, il y a $3.'],
+        [/(<\/b> )?Von (\d+) bis (\d+) sind (\d+)\./g, (m, b, x, y, r) => (b ? b + 'de ' : 'De ') + x + ' jusqu’à ' + y + ', il y a ' + r + '.'],
         [/\. Die letzte Ziffer steht genau unter der (\d) des zweiten Faktors\./, '. Le dernier chiffre se place juste sous le $1 du deuxième facteur.'],
         [/Der erste Faktor hat (\d+) Stellen? nach dem Komma, also auch das Ergebnis: /, (m, n) => 'Le premier facteur a ' + n + (n === '1' ? ' chiffre' : ' chiffres') + ' après la virgule, le résultat aussi : '],
         [/Teile von links nach rechts\. Frage bei jeder Stelle: Wie oft passt die (\d) hinein\?/, 'Divise de gauche à droite. À chaque étape, demande-toi : combien de fois y a-t-il $1 ?'],
