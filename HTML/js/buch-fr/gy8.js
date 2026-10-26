@@ -24,6 +24,11 @@ window.BuchFR && BuchFR.add('gy8', {
         'als Münze': 'comme une pièce', 'als Würfel': 'comme un dé', 'Lesart': 'Lecture', 'Neue Tabelle': 'Nouveau tableau',
         'Gerade Ziffer (0, 2, 4, 6, 8) = Wappen, ungerade = Zahl. Jede Ziffer ist ein Münzwurf.': 'Chiffre pair (0, 2, 4, 6, 8) = face, impair = pile. Chaque chiffre est un lancer de pièce.',
         'Augenzahl': 'Numéro', 'absolut': 'effectif', 'relativ': 'fréquence',
+        // wegzeit8 (the distance is d, as in the chapter text: « loi distance-temps $d = 5t$ »)
+        'Zeit $t$ in min': 'Temps $t$ en min', 't in min': 't en min', 'Weg-Zeit-Diagramm des Schulwegs': 'Diagramme distance-temps du trajet de l’école',
+        'Zuhause': 'Maison', 'Haltestelle': 'Arrêt', 'Schule': 'École',
+        'Der Schulweg als Strecke, der Punkt zeigt, wo Mia gerade ist': 'Le trajet de l’école comme un segment ; le point montre où se trouve Mia',
+        'Mia ist in der Schule angekommen.': 'Mia est arrivée à l’école.',
         // gluecksrad8
         'Felder': 'Secteurs', 'ein Feld weniger': 'un secteur de moins', 'ein Feld mehr': 'un secteur de plus',
         'gleich groß': 'de même taille', 'verschieden groß': 'de tailles différentes', 'Größe der Felder': 'Taille des secteurs', 'Drehen': 'Tourner',
@@ -44,6 +49,12 @@ window.BuchFR && BuchFR.add('gy8', {
         // termbaum8 (the sentences with the term in them are rules below; these pieces let check.mjs see them translated)
         ['Rechenbaum des Terms ', 'Arbre de calcul de l’expression '], ['. Gerechnet wird von unten nach oben.', '. On calcule du bas vers le haut.'],
         ['Summanden', 'Termes'], ['Minuend und Subtrahend', 'Premier et second terme'], ['Faktoren', 'Facteurs'], ['Dividend und Divisor', 'Dividende et diviseur'],
+        // wegzeit8 (where Mia is: a rule below)
+        ['Der Graph steigt gleichmäßig.', 'La courbe monte régulièrement.'],
+        ['Der Graph verläuft waagerecht: Die Zeit läuft, der Weg bleibt gleich.', 'La courbe est horizontale : le temps passe, la distance reste la même.'],
+        ['Hier steigt der Graph am steilsten.', 'C’est ici que la courbe monte le plus fort.'], ['Der Graph steigt flacher als beim ersten Fußweg.', 'La courbe monte moins fort que sur le premier trajet à pied.'],
+        [' von zu Hause entfernt.', ' de chez elle.'], ['geht zu Fuß zur Haltestelle', 'va à pied jusqu’à l’arrêt'], ['wartet an der Haltestelle', 'attend à l’arrêt'],
+        ['fährt mit dem Bus', 'prend le bus'], ['geht das letzte Stück zur Schule', 'fait à pied le dernier bout de chemin jusqu’à l’école'],
         // gluecksrad8 (the counts and the last spin are rules below)
         ['Alle Felder sind gleich groß: ein <b>Laplace-Versuch</b>. ', 'Tous les secteurs ont la même taille : c’est une <b>expérience de Laplace</b>. '],
         ['Die Felder sind <b>verschieden groß</b>: Das ist <b>kein</b> Laplace-Versuch. ', 'Les secteurs sont <b>de tailles différentes</b> : ce <b>n’est pas</b> une expérience de Laplace. '],
@@ -81,6 +92,13 @@ window.BuchFR && BuchFR.add('gy8', {
         [/Wappen: \$(\d+)\$ · Zahl: \$(\d+)\$ · relative Häufigkeit von Wappen: \$/g, (m, a, b) => 'Face : $' + a + '$ · pile : $' + b + '$ · fréquence de face : $'],
         [/Ziffern 1 bis 6 sind Augenzahlen, 0, 7, 8 und 9 werden übersprungen \(grau\)\. So entstehen (\d+) Würfe\./g,
             'Les chiffres de 1 à 6 sont les numéros du dé ; on saute 0, 7, 8 et 9 (en gris). On obtient ainsi $1 lancers.'],
+        // wegzeit8: the axis label "s in m" is d here (js/buch-fr/integral.js has "s en m" as a word, so a rule and no second word)
+        [/^s in m$/, 'd en m'], [/>s in m</g, '>d en m<'],
+        // wegzeit8: "Nach $t = 5$ min ist Mia <span …>$400$ m</span> von zu Hause entfernt." and "Sie fährt mit dem Bus: $300$ m pro Minute. "
+        [/Nach \$t = ([^$]*)\$ min ist Mia (<span class="b-res">\$[^$]*\$ m<\/span>) von zu Hause entfernt\./g, (m, t, d) => 'Après $t = ' + t + '$ min, Mia est à ' + d + ' de chez elle.'],
+        [/Sie (geht zu Fuß zur Haltestelle|wartet an der Haltestelle|fährt mit dem Bus|geht das letzte Stück zur Schule)(?:: \$(\d+)\$ m pro Minute\. |\. )/g,
+            (m, d, v) => ({ 'geht zu Fuß zur Haltestelle': 'Elle va à pied jusqu’à l’arrêt', 'wartet an der Haltestelle': 'Elle attend à l’arrêt', 'fährt mit dem Bus': 'Elle prend le bus',
+                'geht das letzte Stück zur Schule': 'Elle fait à pied le dernier bout de chemin jusqu’à l’école' })[d] + (v ? ' : $' + v + '$ m par minute. ' : '. ')],
         // gluecksrad8: the aria label, the last spin and the counts (relative frequency f, as in the chapter text)
         [/Glücksrad mit (\d+) Feldern/g, 'Roue de loterie à $1 secteurs'],
         [/Zuletzt: Feld <b>(\d+)<\/b>, \$E\$ ist (nicht )?eingetreten\./g, (m, f, n) => 'Dernier tour : secteur <b>' + f + '</b>, $E$ ' + (n ? 'ne s’est pas réalisé.' : 's’est réalisé.')],

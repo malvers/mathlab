@@ -845,6 +845,13 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | ZUFALLSBEREICH, randInt | ALEA.ENTRE.BORNES, randInt | 2.2 (French Excel, glossary section 4) |
 | Kaugummikugeln, Zahlenschloss, Eiswaffel, Siegerpodest, Schere-Stein-Papier, Sechserpasch | boules de chewing-gum, cadenas à code, cornet de glace, podium, pierre-feuille-ciseaux, double six | 2.2 |
 | plain-text outcome lists {2; 3}, (1; 2) of the widget urne | {2 ; 3}, (1 ; 2) | rule in js/buch-fr/gy8.js |
+| eindeutige Zuordnung, Zuordnungsvorschrift, Funktionswert, Senkrechten-Test | relation qui associe une seule valeur, règle d’association, image, test de la droite verticale | 3.1 |
+| Definitionsbereich $D$, Wertebereich $W$ | ensemble de définition $D$, ensemble des images $I$ | 3.1: the letter W becomes I (images) |
+| Hochpunkt $H$, Tiefpunkt $T$ | maximum, minimum (« maximum au point $(-1\,;\,2)$ ») | 3.1: no German letters; the points are named by their coordinates |
+| monoton steigend / fallend, Nullstelle, Schnittpunkt mit der y-Achse | croissante / décroissante, zéro, point d’intersection avec l’axe des ordonnées | 3.1 |
+| Weg-Zeit-Diagramm, Weg $s$ | diagramme distance-temps, distance $d$ | 3.1, widget wegzeit8 (axis « d en m ») |
+| Zuhause, Haltestelle, Schule | Maison, Arrêt, École | widget wegzeit8 |
+| Klimadiagramm (Deutscher Wetterdienst), Bildfahrplan (Ibry) | diagramme climatique (Météo-France), horaire graphique | 3.1 |
 
 ## mathegy9-fr
 
