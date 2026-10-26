@@ -509,6 +509,10 @@ window.svpPlanParts.push(function (P) {
                 window.open(FORMELN_URL, '_blank', 'noopener');
             });
             kopfKnoepfe().appendChild(b);
+            /* Doc, 26.10.2026: its first page as a cover left of the textbook's (svp-plan-core.js) -
+               rendered once from the IQB PDF (pdftoppm, 690 px wide like the book covers). */
+            P.kopfCover('../../resources/og/formelsammlung-iqb-cover.jpg', FORMELN_URL,
+                'Formelsammlung', b.title, true);
         }
         /* Aus der Suche unter dem Laufband kommend: ?q=<wort> fuellt das Feld und
            laesst die Suche laufen, damit der Treffer hier auch angemalt ist -

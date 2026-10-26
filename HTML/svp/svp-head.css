@@ -100,16 +100,28 @@
     .page-head.has-buch > .head-row { grid-area: 1 / 1; }
     .page-head.has-buch > .subtitle { grid-area: 2 / 1; }
     .page-head.has-buch > .lp-fold { grid-area: 3 / 1 / 4 / -1; }
-    .page-head.has-buch > .svp-buch { grid-area: 1 / 2 / 3 / 3; }
+    .page-head.has-buch > .svp-covers { grid-area: 1 / 2 / 3 / 3; }
+}
+/* Doc, 26.10.2026: the Formelsammlung's cover left of the book's - the column
+   holds a row of covers (kopfCover in svp-plan-core.js). */
+.page-head .svp-covers {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+@media (max-width: 600px) {
+    .page-head .svp-covers { gap: 6px; }
 }
 /* Doc, 10.10.2026: "noch nicht y zentriert" - 92 px lie between the plan search
    above and the toolbar buttons below (8 px gap + 58 px head + 16 px margin +
    10 px toolbar padding, measured); the 82 px cover starts 3 px above the head,
    which leaves 5 px on either side. */
-.page-head .svp-buch {
-    position: relative;
+.page-head .svp-covers {
     align-self: start;
     margin: -3px 0 -24px;
+}
+.page-head .svp-buch {
+    position: relative;
     line-height: 0;
     border-radius: 4px;
     box-shadow: 0 3px 10px -3px var(--shadow);
@@ -117,7 +129,7 @@
 /* Doc, 10.10.2026: "die LP cards starten tiefer als die Suchzeile" - open, the
    cards start where the toolbar buttons start when closed: 5 px below the
    cover, the fold's own 12 px margin minus 7. */
-body.lp-open .page-head .svp-buch { margin-bottom: -7px; }
+body.lp-open .page-head .svp-covers { margin-bottom: -7px; }
 .page-head .svp-buch img { display: block; height: 82px; width: auto; border-radius: 4px; }
 @media (max-width: 600px) {
     .page-head .svp-buch img { height: 68px; }
@@ -150,7 +162,7 @@ body.lp-open .page-head .svp-buch { margin-bottom: -7px; }
         transition-delay: 0.15s;
     }
 }
-@media print { .page-head .svp-buch { display: none; } }
+@media print { .page-head .svp-covers { display: none; } }
 
 /* No action buttons on paper - the toolbar has its own print rule. */
 @media print { .page-head button.action { display: none; } }

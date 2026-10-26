@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        groupKey, inGroup, lbPdfLink, linkBadge, weekOf, isoWeek
+        groupKey, inGroup, lbPdfLink, linkBadge, weekOf, isoWeek, kopfCover
     });
 
     /* Which week does a row carry? In the group view the one of this group's Termin (gkw, set by
@@ -198,20 +198,35 @@ window.svpPlanParts.push(function (P) {
        so a new book brings its cover along; plans without a book find no JPG
        and nothing is added. */
     (function buchCover() {
-        const head = document.querySelector('.plan-sticky header.page-head');
         const m = location.pathname.match(/\/svp\/mathe\/([a-z0-9]+)(?:\.html)?$/);
-        if (!head || !m) return;
-        const name = m[1];
+        if (!m) return;
+        kopfCover('../../resources/og/buch-' + m[1] + '-cover.jpg', '../../buch/' + m[1] + '/',
+            'Lehrbuch', 'Lehrbuch öffnen', false);
+    })();
+
+    /* One cover in the head's cover column (.svp-covers, svp-head.css). Doc, 26.10.2026: "links neben das
+       Mathebuch auch ein Cover-Icon von dieser komischen Formelsammlung" - so the column holds more than the
+       book; first = true puts a cover at the left (svp-plan-search.js, the Formelsammlung). Added only once
+       the JPG has loaded, so a missing picture leaves no empty frame. */
+    function kopfCover(src, href, alt, title, first) {
+        const head = document.querySelector('.plan-sticky header.page-head');
+        if (!head) return;
         const img = new Image();
-        img.alt = 'Lehrbuch';
+        img.alt = alt;
         img.decoding = 'async';
         img.addEventListener('load', function () {
+            let box = head.querySelector(':scope > .svp-covers');
+            if (!box) {
+                box = document.createElement('div');
+                box.className = 'svp-covers';
+                head.appendChild(box);
+            }
             const a = document.createElement('a');
             a.className = 'svp-buch';
-            a.href = '../../buch/' + name + '/';
+            a.href = href;
             a.target = '_blank';
             a.rel = 'noopener';
-            a.title = 'Lehrbuch öffnen';
+            a.title = title;
             a.appendChild(img);
             /* Doc, 10.10.2026: "zeig beim hover über das cover selbiges groß" -
                the same JPG once more, shown large on hover (svp-head.css). */
@@ -220,11 +235,11 @@ window.svpPlanParts.push(function (P) {
             big.alt = '';
             big.src = img.src;
             a.appendChild(big);
-            head.appendChild(a);
+            box.insertBefore(a, first ? box.firstChild : null);
             head.classList.add('has-buch');
         });
-        img.src = '../../resources/og/buch-' + name + '-cover.jpg';
-    })();
+        img.src = src;
+    }
 
     /* Doc, 19.09.2026: "oben steht Lehrplan. Mach daraus ein drop. wenn offen
        blende diese Zeile ein und zwar direkt unter Stoffverteilungsplan ... mach
