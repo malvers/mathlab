@@ -145,9 +145,9 @@ window.BuchFR && BuchFR.add('gy6', {
         'Das Netz besteht aus den beiden Grundflächen und dem Mantel. Der Mantel ist ein Rechteck: so breit wie der Umfang $u$, so hoch wie $h$.':
             'Le patron est formé des deux bases et de la surface latérale. La surface latérale est un rectangle : aussi large que le périmètre $P$ de la base, aussi haut que $h$.',
         // kreisdiagramm6
-        'zu Fuß': 'À pied', 'Fahrrad': 'À vélo', 'Bus oder Bahn': 'En bus ou en train', 'Auto': 'En voiture',
+        'zu Fuß': 'À pied', 'Fahrrad': 'À vélo', 'Bus oder Bahn': 'Bus ou train', 'Auto': 'En voiture',
         'Kreisdiagramm: Wie kommst du zur Schule?': 'Diagramme circulaire : comment viens-tu à l’école ?',
-        'Anzahl': 'Nombre', 'Anteil': 'Proportion', 'Prozent': 'Pourcentage', 'Winkel': 'Angle', 'zusammen': 'Total',
+        'Anteil': 'Proportion', 'Winkel': 'Angle', 'zusammen': 'Total',
         'Umfrage in einer Klasse: Wie kommst du zur Schule?': 'Sondage dans une classe : comment viens-tu à l’école ?',
         // sieb6
         'Nächste Primzahl': 'Nombre premier suivant', 'Alle Schritte': 'Toutes les étapes',
@@ -296,11 +296,15 @@ window.BuchFR && BuchFR.add('gy6', {
         // the French write the plus below: \\mathbb{Q}_+ and ℚ₊ for the German \\mathbb{Q}^+ and ℚ⁺ (Doc, 26.10.2026:
         // always the local conventions) - before the phrases, so a phrase key of this block writes _+
         [/\\mathbb\{Q\}\^\+/g, '\\mathbb{Q}_+'], [/ℚ⁺/g, 'ℚ₊'],
+        // kreisdiagramm6: the count column of a statistics table is « Effectif » in French schools (lb5 says « l’effectif »);
+        // a rule, because the word 'Anzahl' is « Nombre » in the other modules (exponential, gy12)
+        // and the percent column is « % »: with « Pourcentage » the table was 72 px too wide at 1280 and hid « Angle »
+        [/<th>Anzahl<\/th>/g, '<th>Effectif</th>'], [/<th>Prozent<\/th>/g, '<th>%</th>'],
         // the steppers' aria-labels: "Zähler kleiner" → "Numérateur : diminuer"
         [/^(Zähler|Nenner|erster Zähler|erster Nenner|zweiter Zähler|zweiter Nenner|zu Fuß|Fahrrad|Bus oder Bahn|Auto) (kleiner|größer)$/, (m, w, d) => ({
             'Zähler': 'Numérateur', 'Nenner': 'Dénominateur', 'erster Zähler': 'Premier numérateur', 'erster Nenner': 'Premier dénominateur',
             'zweiter Zähler': 'Deuxième numérateur', 'zweiter Nenner': 'Deuxième dénominateur',
-            'zu Fuß': 'À pied', 'Fahrrad': 'À vélo', 'Bus oder Bahn': 'En bus ou en train', 'Auto': 'En voiture' })[w] + (d === 'kleiner' ? ' : diminuer' : ' : augmenter')],
+            'zu Fuß': 'À pied', 'Fahrrad': 'À vélo', 'Bus oder Bahn': 'Bus ou train', 'Auto': 'En voiture' })[w] + (d === 'kleiner' ? ' : diminuer' : ' : augmenter')],
         // bruchbild6
         [/^Bild des Bruches (\d+) durch (\d+)$/, 'La fraction $1/$2 en image'],
         [/Erweitern mit \$(\d+)\$: /, 'On amplifie par $$$1$$ : '],
