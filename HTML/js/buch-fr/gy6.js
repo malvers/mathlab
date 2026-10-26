@@ -120,6 +120,22 @@ window.BuchFR && BuchFR.add('gy6', {
         'Dreieck aus drei Stäben': 'Triangle formé de trois baguettes', 'Die Stäbe ergeben kein Dreieck': 'Les baguettes ne forment pas de triangle',
         // linien6 (French letters: O for the circumcentre, G for the centroid; rules below)
         'Mittelsenkrechten': 'Médiatrices', 'Winkelhalbierende': 'Bissectrices', 'Höhen': 'Hauteurs', 'Seitenhalbierende': 'Médianes', 'Linien': 'Droites',
+        // flaeche6 (French letters: the base b of the parallelogram and the triangle, German g; rules below)
+        'Parallelogramm': 'Parallélogramme', 'Trapez': 'Trapèze', 'Drachenviereck': 'Cerf-volant', 'Figur': 'Figure',
+        'Zerlegen und verschieben': 'Découper et déplacer', 'Grundseite $g$': 'Base $b$', 'Höhe $h$': 'Hauteur $h$',
+        'Diagonale $e$': 'Diagonale $e$', 'Diagonale $f$': 'Diagonale $f$',
+        // vierecke6 ("gleichschenkliges" / "Trapez" in two lines: a rule below puts them in French order)
+        'Quadrat': 'Carré', 'Rechteck': 'Rectangle', 'Raute': 'Losange', 'Viereck': 'Quadrilatère',
+        'gleichschenkliges Trapez': 'Trapèze isocèle', 'Haus der Vierecke': 'Maison des quadrilatères',
+        'parallele Seiten': 'côtés parallèles', 'gleich lange Seiten': 'côtés de même longueur', 'rechte Winkel': 'angles droits', 'Symmetrieachsen': 'axes de symétrie',
+        'Diagonalen halbieren sich': 'diagonales de même milieu', 'Diagonalen senkrecht': 'diagonales perpendiculaires', 'Diagonalen gleich lang': 'diagonales de même longueur',
+        '2 Paare': '2 paires', '1 Paar': '1 paire', 'alle vier': 'les quatre', 'je zwei gegenüber': 'opposés deux à deux', 'keine nötig': 'non exigé',
+        'keins nötig': 'non exigé', 'die beiden Schenkel': 'les deux côtés obliques', 'je zwei benachbarte': 'consécutifs deux à deux',
+        'nur eine die andere': 'l’une coupe l’autre en son milieu', 'mindestens 1': 'au moins 1', 'ja': 'oui', 'nein': 'non',
+        'Das <b>Viereck</b> steht ganz unten: Es braucht nur vier Ecken und vier Seiten, sonst nichts.':
+            'Le <b>quadrilatère</b> est tout en bas : il lui faut seulement quatre sommets et quatre côtés, rien d’autre.',
+        'Tipp auf ein Viereck im Haus. Was weiter unten steht, ist allgemeiner, was weiter oben steht, hat mehr Eigenschaften.':
+            'Touche un quadrilatère de la maison. Ce qui est plus bas est plus général, ce qui est plus haut a plus de propriétés.',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -229,6 +245,15 @@ window.BuchFR && BuchFR.add('gy6', {
         [' Beim rechtwinkligen Dreieck ist $H$ die Ecke mit dem rechten Winkel.', ' Dans un triangle rectangle, $H$ est le sommet de l’angle droit.'],
         ['Eine Seitenhalbierende verbindet eine Ecke mit der Mitte der gegenüberliegenden Seite. Ihr Schnittpunkt $S$ ist der Schwerpunkt: Ein Dreieck aus Pappe kann man dort auf einer Nadelspitze balancieren.',
             'Une médiane relie un sommet au milieu du côté opposé. Leur point d’intersection $G$ est le centre de gravité : on peut y faire tenir en équilibre un triangle en carton sur la pointe d’une aiguille.'],
+        // flaeche6
+        ['Das abgeschnittene Dreieck rückt nach rechts. Aus dem Parallelogramm wird ein Rechteck mit derselben Grundseite und derselben Höhe.',
+            'Le triangle découpé glisse vers la droite. Le parallélogramme devient un rectangle de même base et de même hauteur.'],
+        ['Eine Kopie des Dreiecks dreht sich um die Mitte einer Seite. Zusammen ergeben beide ein Parallelogramm. Das Dreieck ist die Hälfte davon.',
+            'Une copie du triangle tourne autour du milieu d’un côté. Ensemble, les deux forment un parallélogramme. Le triangle en est la moitié.'],
+        ['Eine Kopie des Trapezes dreht sich um die Mitte eines Schenkels. Zusammen ergeben beide ein Parallelogramm mit der Grundseite $a + c$.',
+            'Une copie du trapèze tourne autour du milieu d’un côté oblique. Ensemble, les deux forment un parallélogramme de base $a + c$.'],
+        ['Die vier Dreiecke im Drachen klappen nach außen. Sie füllen das Rechteck aus den beiden Diagonalen genau zur Hälfte.',
+            'Les quatre triangles du cerf-volant se rabattent vers l’extérieur. Ils remplissent exactement la moitié du rectangle formé par les deux diagonales.'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -290,5 +315,17 @@ window.BuchFR && BuchFR.add('gy6', {
                 'Höhenschnittpunkt': 'orthocentre', 'Schwerpunkt': 'centre de gravité' })[w]],
         [/^Dreieck mit seinen (Mittelsenkrechten|Winkelhalbierende|Höhen|Seitenhalbierende)$/, (m, l) => 'Triangle avec ses ' +
             ({ 'Mittelsenkrechten': 'médiatrices', 'Winkelhalbierende': 'bissectrices', 'Höhen': 'hauteurs', 'Seitenhalbierende': 'médianes' })[l]],
+        // flaeche6: the base b (German g) in the formulas, the aria label of the picture
+        [/\$A = (\\tfrac12 \\times )?g \\times h = /g, '$$A = $1b \\times h = '],
+        [/^(Parallelogramm|Dreieck|Trapez|Drachenviereck): zerlegen und verschieben$/, (m, s) =>
+            ({ 'Parallelogramm': 'Parallélogramme', 'Dreieck': 'Triangle', 'Trapez': 'Trapèze', 'Drachenviereck': 'Cerf-volant' })[s] + ' : découper et déplacer'],
+        // vierecke6: the two-line label "gleichschenkliges / Trapez" (the second line may already be a translated label)
+        [/(<text class="g6-nodetxt"[^>]*>)gleichschenkliges(<\/text>[^<]*<text class="g6-nodetxt"[^>]*>)(?:Trapez|\u0003\d+\u0004)(<\/text>)/g, '$1Trapèze$2isocèle$3'],
+        // vierecke6: "Jedes <b>Quadrat</b> ist auch ein Rechteck, eine Raute, …" - every French name is masculine ("tout", "un")
+        [/Jede[s]? <b>([^<]+)<\/b> ist auch ([^<]+)\.<\/p>/g, (m, s, list) => {
+            const N = { 'Quadrat': 'carré', 'Rechteck': 'rectangle', 'Raute': 'losange', 'Parallelogramm': 'parallélogramme', 'gleichschenkliges Trapez': 'trapèze isocèle',
+                'gleichschenklige Trapez': 'trapèze isocèle', 'Drachenviereck': 'cerf-volant', 'Trapez': 'trapèze', 'Viereck': 'quadrilatère' };
+            return 'Tout <b>' + (N[s] || s) + '</b> est aussi ' + list.split(', ').map(x => { const k = x.replace(/^eine?s? /, ''); return N[k] ? 'un ' + N[k] : x; }).join(', ') + '.</p>';
+        }],
     ]
 });

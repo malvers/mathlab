@@ -841,6 +841,11 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 | Mittelsenkrechte, Winkelhalbierende, Höhe, Seitenhalbierende | médiatrice, bissectrice, hauteur, médiane | 3.2, widget linien6 |
 | Umkreismittelpunkt $U$, Inkreismittelpunkt $I$, Höhenschnittpunkt $H$, Schwerpunkt $S$ | centre du cercle circonscrit $O$, centre du cercle inscrit $I$, orthocentre $H$, centre de gravité $G$ | French letters O and G in the pages and, by rules, in widget linien6; Euler line: HG = 2 GO |
 | Lab names (3.1, 3.2) | DÉMONTRER LA SOMME DES ANGLES, LABORATOIRE DES ANGLES, FIGURES ÉGALES, EULER, FEUERBACH ET NAPOLÉON, PUZZLE D’ANGLES, POINT DE FERMAT | |
+| Grundseite $g$, Höhe $h$ (Parallelogramm, Dreieck) | base $b$, hauteur $h$ | $A = b \times h$, $A = \tfrac12 \times b \times h$; widget flaeche6 by a rule |
+| Trapez $a$, $c$; Drachenviereck, Raute $e$, $f$ | trapèze, cerf-volant, losange; letters kept (sides and diagonals, no German words) | 3.3 names the French $\dfrac{(B + b) \times h}{2}$ once; the widget lets $c > a$ |
+| Rückführprinzip, zerlegen / ergänzen | principe du retour au connu, découper / compléter | 3.3 |
+| Haus der Vierecke, Systematisieren | maison des quadrilatères, classer | widget vierecke6 « Tout carré est aussi un rectangle… » |
+| Satz von Pick $A = I + \tfrac{R}{2} - 1$ | théorème de Pick $A = I + \tfrac{B}{2} - 1$ | B for « bord » (German R, Rand) |
 
 ## mathegy7-fr
 
