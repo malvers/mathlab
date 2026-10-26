@@ -44,6 +44,11 @@ window.BuchFR && BuchFR.add('geometrie', {
         'Ecken verdoppeln': 'Doubler les sommets', 'Zurück auf 6': 'Revenir à 6', 'Anzahl der Ecken $n$': 'Nombre de sommets $n$',
         'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Cercle avec un polygone inscrit et un polygone circonscrit', 'innen': 'inscrit', 'außen': 'circonscrit',
         'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Cercle de rayon $r = 1$, donc $P = 2\\pi$. Périmètre divisé par $2$ :',
+        // spitzkoerper (chapter 3.3): apothème h_a, arête latérale ℓ, génératrice g (rules below)
+        'Quadratische Pyramide': 'Pyramide à base carrée', 'Kreiskegel': 'Cône de révolution', 'Körper': 'Solide', 'Seitenhöhe': 'Apothème',
+        'Seitenkante': 'Arête latérale', 'Hilfsdreieck': 'Triangle auxiliaire', 'Grundkante $a$': 'Arête de base $a$', 'Höhe $h$': 'Hauteur $h$',
+        'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Pyramide à base carrée en perspective cavalière, avec le triangle auxiliaire',
+        'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cône de révolution en perspective cavalière, avec le triangle auxiliaire',
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -83,5 +88,13 @@ window.BuchFR && BuchFR.add('geometrie', {
         [/>([cp])·([pq])<\/text>/g, '>$1×$2</text>'],
         // vieleck: "Also $3{,}1… < \\pi < 3{,}2…$, Abstand $…$" (a rule with context instead of a bare piece 'Also $')
         [/Also \$([^$<]*) < \\pi < ([^$<]*)\$, Abstand \$/g, (m, lo, hi) => 'Donc $' + lo + ' < \\pi < ' + hi + '$, écart $'],
+        // spitzkoerper and koerper: the slant height of the cone is g (génératrice) - after the rules for A and A_L above
+        [/Mantellinie \$s = /g, 'Génératrice $$g = '], [/(\$A(?:_L)? = (?:\\pi r\^2 \+ )?\\pi r )s(?![a-zA-Z])/g, '$1g'],
+        [/(<p style="margin:0;line-height:2">)\$s = (?=\\sqrt\{r\^2 \+ h\^2\})/g, '$1$$g = '],
+        // spitzkoerper, the pyramid: apothème h_a (German h_s), arête latérale ℓ (German s)
+        [/<p style="margin:0;line-height:2">\$h_s = [\s\S]*?<\/p>/g, m => m.replace(/h_s/g, 'h_a').replace('$s = \\sqrt{h^2', () => '$\\ell = \\sqrt{h^2')],
+        // spitzkoerper, the labels in the picture: hₛ → hₐ, s → ℓ (pyramid) or g (cone)
+        [/<svg viewBox="0 0 360 290" role="img" aria-label="(Quadratische Pyramide|Kreiskegel) im Schrägbild mit Hilfsdreieck">[\s\S]*?<\/svg>/g,
+            (m, k) => m.replace(/>hₛ</g, '>hₐ<').replace(/>s<\/text>/g, k === 'Kreiskegel' ? '>g</text>' : '>ℓ</text>')],
     ]
 });
