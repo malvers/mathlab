@@ -223,13 +223,15 @@ window.svpPlanParts.push(function (P) {
         return n;
     }
 
-    /* Doc, 18.09.2026: "zwischen Text und Aufgaben zentriert in x" - the red
-       button (row.redBtn) floats out of the flow, centered in the gap between
-       the end of the topic text and whatever follows it in the cell: since the
-       Aufgaben pill left the row (20.09.2026) that is the material clip, or the
-       right edge of the cell in a week without material. If the gap is too
-       narrow (phone), it falls back into the flow. Re-placed when a column
-       changes width, on resize and once the fonts have loaded. */
+    /* The red/orange button (row.redBtn) floats out of the flow. Doc,
+       26.10.2026: "die Buttons immer einheitlich links neben den Gedanken der
+       Woche. Ueberall. Und gleich breit" - it stands a fixed gap left of what
+       follows it in the cell (the weekly-thought thumbnail, else the right
+       edge of the cell), so every button of every plan lines up; until then
+       it was centered between topic text and thumbnail (18.09.2026). If there
+       is no room left of it (phone), it falls back into the flow. Re-placed
+       when a column changes width, on resize and once the fonts have loaded. */
+    const RED_GAP = 14;
     const redBtnRefs = new Set();
     let redBtnRO = null;
     function placeRedBtns() {
@@ -251,15 +253,20 @@ window.svpPlanParts.push(function (P) {
             const endL = next ? next.getBoundingClientRect().left
                               : td.right - parseFloat(getComputedStyle(ref.matTd).paddingRight);
             const w = rb.offsetWidth;
-            if (!td.width || endL - textR < w + 24) {
+            if (!td.width || endL - RED_GAP - w < textR + 12) {
                 rb.classList.remove('floating');
+                /* back in the flow it already stands left of the thumbnail, only
+                   the white space moves it a few pixels - nudge it onto the same
+                   edge as the floating ones, never far (on a phone it wraps) */
+                const nx = Math.round(endL - RED_GAP - rb.getBoundingClientRect().right);
+                if (Math.abs(nx) <= 8) rb.style.transform = 'translateX(' + nx + 'px)';
                 return;
             }
             /* The cell is not positioned (see svp.css), so the button keeps its
                static position and the transform carries it from there - it
                follows its row whenever a week above opens or closes. */
             const at = rb.getBoundingClientRect();
-            const dx = Math.round((textR + endL) / 2 - w / 2 - at.left);
+            const dx = Math.round(endL - RED_GAP - w - at.left);
             /* same vertical middle as the pill */
             let dy = 0;
             if (next) {
