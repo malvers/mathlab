@@ -20,6 +20,10 @@ window.BuchFR && BuchFR.add('gy8', {
             'Couverture : un triangle agrandi à partir d’un centre, un carré formé de a², deux fois ab et b², deux droites avec leur point d’intersection et un arbre pondéré',
         // termbaum8 ('Term' → 'Expression' is in js/buch-fr/exponential.js, which this book does not load)
         'Term': 'Expression', 'Wert für $x$': 'Valeur de $x$',
+        // ziffern8 ('Augenzahl' is a phrase in js/buch-fr/stochastik.js; the table head is a whole word here)
+        'als Münze': 'comme une pièce', 'als Würfel': 'comme un dé', 'Lesart': 'Lecture', 'Neue Tabelle': 'Nouveau tableau',
+        'Gerade Ziffer (0, 2, 4, 6, 8) = Wappen, ungerade = Zahl. Jede Ziffer ist ein Münzwurf.': 'Chiffre pair (0, 2, 4, 6, 8) = face, impair = pile. Chaque chiffre est un lancer de pièce.',
+        'Augenzahl': 'Numéro', 'absolut': 'effectif', 'relativ': 'fréquence',
         // gluecksrad8
         'Felder': 'Secteurs', 'ein Feld weniger': 'un secteur de moins', 'ein Feld mehr': 'un secteur de plus',
         'gleich groß': 'de même taille', 'verschieden groß': 'de tailles différentes', 'Größe der Felder': 'Taille des secteurs', 'Drehen': 'Tourner',
@@ -71,6 +75,12 @@ window.BuchFR && BuchFR.add('gy8', {
         [/Ausgewählt: die Zahl \$([^$]*)\$\./g, (m, v) => 'Sélection : le nombre $' + v + '$.'],
         // sets of whole numbers written by the widgets (gluecksrad8, venn …): a thin space on both sides of every semicolon, as in the chapter text
         [/\\\{((?:\d+|\\ldots)(?:; (?:\d+|\\ldots))+)\\\}/g, (m, l) => '\\{' + l.replace(/; /g, '\\,;\\,') + '\\}'],
+        // the same in plain text (urne of js/buch-stochastik.js lists its outcomes as {2; 3} and (1; 2)): a no-break space before the semicolon
+        [/(?<!\\)([{(])(\d+(?:; \d+)+)([})])/g, (m, a, l, b) => a + l.replace(/; /g, ' ; ') + b],
+        // ziffern8: the coin count and the dice
+        [/Wappen: \$(\d+)\$ · Zahl: \$(\d+)\$ · relative Häufigkeit von Wappen: \$/g, (m, a, b) => 'Face : $' + a + '$ · pile : $' + b + '$ · fréquence de face : $'],
+        [/Ziffern 1 bis 6 sind Augenzahlen, 0, 7, 8 und 9 werden übersprungen \(grau\)\. So entstehen (\d+) Würfe\./g,
+            'Les chiffres de 1 à 6 sont les numéros du dé ; on saute 0, 7, 8 et 9 (en gris). On obtient ainsi $1 lancers.'],
         // gluecksrad8: the aria label, the last spin and the counts (relative frequency f, as in the chapter text)
         [/Glücksrad mit (\d+) Feldern/g, 'Roue de loterie à $1 secteurs'],
         [/Zuletzt: Feld <b>(\d+)<\/b>, \$E\$ ist (nicht )?eingetreten\./g, (m, f, n) => 'Dernier tour : secteur <b>' + f + '</b>, $E$ ' + (n ? 'ne s’est pas réalisé.' : 's’est réalisé.')],

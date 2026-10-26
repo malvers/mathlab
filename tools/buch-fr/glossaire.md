@@ -837,6 +837,14 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Farben r / g / b (Glücksrad rot, gelb, blau), Urne rot / blau / grün | r / j / b, r / b / v | 2.1 page text |
 | Reißzwecke, Legostein (Noppen), Kronkorken, Lostrommel, Hauptgewinn / Niete | punaise, brique de Lego (tenons), capsule de bouteille, urne de tombola, gros lot / billet perdant | 2.1 |
 | Skatblatt, Herz-Bube | jeu de 32 cartes, valet de cœur | 2.1 |
+| mehrstufiger Zufallsversuch, Stufe, Urnenmodell, abhängig / unabhängig | expérience à plusieurs épreuves, épreuve, modèle de l’urne, dépendantes / indépendantes | 2.2 |
+| Produktregel / Summenregel (Pfade), Verzweigungspunkt | règle du produit / règle de la somme (règles des chemins), nœud | 2.2 |
+| Produktregel (Zählen), Fakultät | principe multiplicatif, factorielle ($4!$ « factorielle 4 ») | 2.2; two German rules of the same name, two French names |
+| Wappen / Zahl in the page text ($WWZ$) | face / pile ($FFP$) | as section 5; widget ziffern8 (« face », « pile ») |
+| Zufallsziffern, Lesart als Münze / als Würfel, absolut / relativ | chiffres aléatoires, lecture comme une pièce / comme un dé, effectif / fréquence | widget ziffern8 |
+| ZUFALLSBEREICH, randInt | ALEA.ENTRE.BORNES, randInt | 2.2 (French Excel, glossary section 4) |
+| Kaugummikugeln, Zahlenschloss, Eiswaffel, Siegerpodest, Schere-Stein-Papier, Sechserpasch | boules de chewing-gum, cadenas à code, cornet de glace, podium, pierre-feuille-ciseaux, double six | 2.2 |
+| plain-text outcome lists {2; 3}, (1; 2) of the widget urne | {2 ; 3}, (1 ; 2) | rule in js/buch-fr/gy8.js |
 
 ## mathegy9-fr
 

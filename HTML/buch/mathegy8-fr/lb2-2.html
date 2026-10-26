@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 8 · Chapitre 2.2 · Expériences à plusieurs épreuves et dénombrement | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Modèle de l’urne, arbre pondéré, règles des chemins, principe multiplicatif, simulation. Chapitre 2.2 du manuel interactif Mathématiques · Gymnasium 8 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 8</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.2 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.2 · DOMAINE D’APPRENTISSAGE 2 · DÉCEMBRE</p>
+            <h1>Expériences à plusieurs épreuves et dénombrement</h1>
+            <p class="b-hero-lead">Lancer deux fois un dé, tirer trois boules de chewing-gum du distributeur, craquer un cadenas à code : beaucoup d’expériences aléatoires se déroulent en plusieurs épreuves.
+                Avec l’<b>arbre pondéré</b>, tu gardes une vue d’ensemble ; avec les <b>règles des chemins</b>, tu calcules ; avec le <b>principe multiplicatif</b>, tu dénombres sans tout écrire ;
+                et avec des <b>nombres aléatoires</b>, tu laisses la calculatrice lancer le dé à ta place.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">ARBRE PONDÉRÉ</span><span class="b-chip">SIMULATION</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>décrire des expériences à plusieurs épreuves avec le <b>modèle de l’urne</b> et les représenter par un <b>arbre pondéré</b></li>
+                <li>calculer avec la <b>règle du produit</b> et la <b>règle de la somme</b> pour les chemins, aussi avec l’événement contraire</li>
+                <li>distinguer le tirage <b>avec</b> et <b>sans remise</b></li>
+                <li>dénombrer des possibilités avec le <b>principe multiplicatif</b> et simuler une expérience aléatoire avec des <b>nombres aléatoires</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="1/6" data-ph="fraction"><p class="b-q-text">Calcule $\tfrac12 \times \tfrac13$.</p><div class="b-sol"><p>Numérateur fois numérateur, dénominateur fois dénominateur.</p></div></div>
+            <div class="b-q" data-ans="7/12" data-ph="fraction"><p class="b-q-text">Calcule $\tfrac14 + \tfrac13$.</p><div class="b-sol"><p>$\tfrac{3}{12} + \tfrac{4}{12}$</p></div></div>
+            <div class="b-q" data-ans="2/5" data-ph="fraction"><p class="b-q-text">Une urne contient 2 boules rouges et 3 bleues. $P(\text{rouge})$ ?</p><div class="b-sol"><p>2 boules sur 5</p></div></div>
+            <div class="b-q" data-ans="3/4" data-ph="fraction"><p class="b-q-text">$P(\text{rouge}) = \tfrac14$. Combien vaut $P(\text{pas rouge})$ ?</p><div class="b-sol"><p>$1 - \tfrac14$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DEUX BOULES DE CHEWING-GUM</div>
+            <div class="b-text"><p>Dans un sachet, il y a 3 boules de chewing-gum rouges et 2 bleues. Vous en tirez deux l’une après l’autre sans regarder, et vous ne remettez pas la première.</p>
+                <ul><li>Qu’est-ce qui est le plus probable : deux couleurs identiques ou deux couleurs différentes ? Estimez d’abord, puis essayez 20 fois.</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LE CADENAS À CODE</div>
+            <div class="b-text"><p>Un antivol de vélo a 4 molettes avec les chiffres de 0 à 9.</p>
+                <ul><li>Combien y a-t-il de codes ? Combien de temps faudrait-il à quelqu’un qui met 2 secondes par code ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA TENUE</div>
+            <div class="b-text"><p>Lena a 3 T-shirts, 2 pantalons et 2 paires de chaussures.</p>
+                <ul><li>Combien de tenues différentes peut-elle porter ? Faites un dessin où l’on voit toutes les tenues.</li></ul></div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Un arbre fait de clous</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Arbre pondéré et règles des chemins" data-toc-k="1" data-toc-short="1 Arbre">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Arbre pondéré et règles des chemins</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Au premier tirage dans le sachet, $P(\text{rouge}) = \tfrac35$. Si la première boule était rouge, il reste 2 rouges et 2 bleues dans le sachet :
+                au deuxième tirage, $P(\text{rouge}) = \tfrac24$. L’<b>arbre pondéré</b> montre toutes les possibilités, épreuve après épreuve, et sur chaque branche figure sa probabilité.</p></div></div>
+            <div class="b-text"><p>Beaucoup d’expériences aléatoires peuvent être imitées par des tirages dans une <b>urne</b>. Si l’on remet la boule, les probabilités restent les mêmes à chaque épreuve :
+                les épreuves sont <b>indépendantes</b>. Si on ne la remet pas, le premier tirage change le contenu de l’urne : les épreuves sont <b>dépendantes</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÈGLES DES CHEMINS</div>
+                <div class="b-text">
+                    <p><b>Règle du produit :</b> la probabilité d’un chemin est le produit des probabilités portées par ses branches : $P(\text{rouge, rouge}) = \tfrac35 \times \tfrac24 = \tfrac{3}{10}$.</p>
+                    <p><b>Règle de la somme :</b> la probabilité d’un événement est la somme des probabilités de ses chemins : $P(\text{même couleur}) = \tfrac{3}{10} + \tfrac{1}{10} = \tfrac25$.</p>
+                    <p>À chaque nœud, la somme des probabilités des branches vaut $1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Le dé n’a pas de mémoire :</b> même après cinq lancers sans six, le six n’est pas plus probable au sixième lancer. Les lancers sont indépendants.</p>
+            <p class="b-note"><b>Raccourci :</b> pour « au moins une fois », l’événement contraire « aucune fois » aide. Il n’a souvent qu’un seul chemin.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ATELIER DE L’ARBRE PONDÉRÉ</div>
+        <p class="b-help" style="margin:0 0 12px">Règle les boules dans l’urne, choisis avec ou sans remise et un événement. Les chemins qui conviennent s’allument, le calcul s’affiche en dessous.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · SANS REMISE</div>
+            <div class="b-text"><p>Sachet avec 3 boules de chewing-gum rouges et 2 bleues, on en tire deux sans remise. Calcule $P(\text{rouge, rouge})$, $P(\text{bleue, bleue})$ et $P(\text{couleurs différentes})$.</p></div>
+            <div class="b-sol"><p>$P(\text{rouge, rouge}) = \tfrac35 \times \tfrac24 = \tfrac{3}{10}$, $\;P(\text{bleue, bleue}) = \tfrac25 \times \tfrac14 = \tfrac{1}{10}$</p>
+                <p>Mêmes couleurs : $\tfrac{4}{10}$. Donc <span class="b-res">$P(\text{différentes}) = 1 - \tfrac25 = \tfrac35$</span>. Des couleurs différentes sont plus probables.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · AU MOINS UN SIX</div>
+            <div class="b-text"><p>On lance un dé deux fois. Quelle est la probabilité d’obtenir au moins un six ?</p></div>
+            <div class="b-sol"><p>Événement contraire « aucun six » : un seul chemin, $\tfrac56 \times \tfrac56 = \tfrac{25}{36}$.</p>
+                <p><span class="b-res">$P(\text{au moins un six}) = 1 - \tfrac{25}{36} = \tfrac{11}{36}$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance une pièce trois fois. Dessine l’arbre pondéré. Calcule $P(\text{trois fois face})$ et $P(\text{exactement deux fois face})$.</p></div>
+            <div class="b-sol"><p>Chacun des 8 chemins a la probabilité $\tfrac18$. Trois fois face : $\tfrac18$. Exactement deux fois : $FFP$, $FPF$, $PFF$, donc $\tfrac38$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une urne contient 4 boules rouges et 1 blanche. On tire deux fois <b>avec</b> remise. Calcule $P(\text{rouge, rouge})$, $P(\text{deux blanches})$ et $P(\text{exactement une blanche})$.</p></div>
+            <div class="b-sol"><p>$\tfrac45 \times \tfrac45 = \tfrac{16}{25}$, $\;\tfrac15 \times \tfrac15 = \tfrac{1}{25}$, $\;2 \times \tfrac45 \times \tfrac15 = \tfrac{8}{25}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>La même urne, mais <b>sans</b> remise. Calcule à nouveau les trois probabilités. Pourquoi $P(\text{deux blanches})$ vaut-elle maintenant $0$ ?</p></div>
+            <div class="b-sol"><p>$\tfrac45 \times \tfrac34 = \tfrac35$ ; deux blanches est impossible, il n’y a qu’une boule blanche ; exactement une blanche : $\tfrac45 \times \tfrac14 + \tfrac15 \times \tfrac44 = \tfrac25$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dans un jeu, on fait tourner deux fois une roue de loterie sur laquelle on gagne avec la probabilité $\tfrac14$. Quelle est la probabilité de gagner au moins une fois ?</p></div>
+            <div class="b-sol"><p>$1 - \tfrac34 \times \tfrac34 = 1 - \tfrac{9}{16} = \tfrac{7}{16}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Une basketteuse réussit 70 % de ses lancers francs. Elle tire trois fois. Calcule $P(\text{trois paniers})$ et $P(\text{au moins un panier})$. Quelle hypothèse se cache dans ton calcul ?</p></div>
+            <div class="b-sol"><p>$0{,}7^3 = 0{,}343$ et $1 - 0{,}3^3 = 0{,}973$. Hypothèse : les lancers sont indépendants, la nervosité ou la fatigue ne jouent aucun rôle.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3/10" data-ph="fraction"><p class="b-q-text">$P(\text{rouge, rouge})$ dans l’exemple 1 ?</p><div class="b-sol"><p>$\tfrac35 \times \tfrac24$</p></div></div>
+        <div class="b-q" data-ans="11/36" data-ph="fraction"><p class="b-q-text">$P(\text{au moins un six})$ en deux lancers ?</p><div class="b-sol"><p>$1 - \tfrac{25}{36}$</p></div></div>
+        <div class="b-q" data-ans="0,343" data-ph="nombre décimal"><p class="b-q-text">$P(\text{trois paniers})$ dans l’exercice 5 ?</p><div class="b-sol"><p>$0{,}7^3$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Dénombrer et simuler" data-toc-k="2" data-toc-short="2 Dénombrer">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">CAS · 4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Dénombrer et simuler</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour le cadenas à code, il y a 10 possibilités pour la première molette, et de nouveau 10 pour chacune des suivantes. En tout, cela fait $10 \times 10 \times 10 \times 10 = 10\,000$ codes.
+                À 2 secondes par essai, tout essayer prend jusqu’à $20\,000$ secondes, plus de cinq heures et demie. Inutile d’écrire les codes : on multiplie.</p></div></div>
+            <div class="b-text"><p>Quand on tire dans une urne, il faut savoir si l’on remet les boules et si l’ordre compte. Sans remise, le choix se réduit à chaque tirage.
+                Si l’ordre ne compte pas, les issues qui ne diffèrent que par l’ordre se confondent.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · DÉNOMBRER AVEC LE PRINCIPE MULTIPLICATIF</div>
+                <div class="b-text">
+                    <p>Si une procédure a $k$ étapes avec $n_1, n_2, \ldots, n_k$ possibilités, il y a en tout $n_1 \times n_2 \times \ldots \times n_k$ possibilités.</p>
+                    <p><b>Avec remise</b>, l’ordre compte : $k$ tirages parmi $n$ boules donnent $n \times n \times \ldots \times n = n^k$.</p>
+                    <p><b>Sans remise</b>, l’ordre compte : $n \times (n - 1) \times (n - 2) \times \ldots$ avec $k$ facteurs.</p>
+                    <p>Si l’<b>ordre ne compte pas</b>, on divise par le nombre d’ordres possibles : choisir 2 parmi 5 sans tenir compte de l’ordre donne $\tfrac{5 \times 4}{2} = 10$.</p>
+                </div>
+            </div>
+            <div class="b-box b-methode">
+                <div class="b-box-title">MÉTHODE · SIMULER AVEC DES NOMBRES ALÉATOIRES</div>
+                <div class="b-text"><p>On peut imiter une expérience aléatoire avec des nombres aléatoires : dé → nombre aléatoire de 1 à 6, pièce → 0 ou 1.
+                    Avec le CAS, par exemple <code>randInt(1,6)</code>, avec le tableur <code>=ALEA.ENTRE.BORNES(1;6)</code>.
+                    Beaucoup de répétitions donnent une fréquence qui estime la probabilité cherchée.</p></div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Ordres :</b> on peut ranger 3 objets de $3 \times 2 \times 1 = 6$ façons, 4 objets de $4 \times 3 \times 2 \times 1 = 24$ façons. En bref, on écrit $4!$, qui se lit « factorielle 4 ».</p>
+            <p class="b-note"><b>Pour aller plus loin :</b> l’outil ci-dessous montre aussi des noms et des formules dont tu n’auras besoin que plus tard. Pour l’instant, c’est la liste de toutes les possibilités qui compte.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE MODÈLE DE L’URNE</div>
+        <p class="b-help" style="margin:0 0 12px">Règle les boules et les tirages, et compare avec et sans remise, avec et sans ordre. Compte la liste et vérifie avec le principe multiplicatif.</p>
+        <div data-widget="urne" data-n="4" data-k="2" data-ord="1" data-rep="0"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LANCER UN DÉ AVEC DES CHIFFRES ALÉATOIRES</div>
+        <p class="b-help" style="margin:0 0 12px">Chaque chiffre du tableau est aléatoire. Lis-les comme une pièce ou comme un dé et compare les fréquences avec les probabilités.</p>
+        <div data-widget="ziffern8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · DÉNOMBRER</div>
+            <div class="b-text"><p>a) Combien de nombres à trois chiffres peut-on former avec les chiffres 1, 2, 3, 4, 5, si un chiffre peut apparaître plusieurs fois ? b) si chaque chiffre apparaît au plus une fois ?
+                c) Combien d’équipes de deux peut-on former avec 5 personnes ?</p></div>
+            <div class="b-sol"><p>a) $5 \times 5 \times 5 =$ <span class="b-res">$125$</span> &nbsp; b) $5 \times 4 \times 3 =$ <span class="b-res">$60$</span></p>
+                <p>c) $5 \times 4 = 20$ paires avec ordre, mais Lena avec Tom, c’est la même équipe que Tom avec Lena : $\tfrac{20}{2} =$ <span class="b-res">$10$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · SIMULER</div>
+            <div class="b-text"><p>Combien de fois faut-il lancer le dé, en moyenne, jusqu’à ce que le premier six sorte ? Simule avec les chiffres aléatoires ci-dessus.</p></div>
+            <div class="b-sol"><p>Lis les chiffres dans l’ordre, saute 0, 7, 8 et 9 et compte les lancers jusqu’au premier 6. Puis recommence depuis le début.</p>
+                <p>Beaucoup de répétitions donnent en moyenne <span class="b-res">environ 6 lancers</span>. Mais certaines répétitions peuvent durer bien plus longtemps.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un glacier propose 8 parfums. Combien de possibilités y a-t-il pour un cornet de 2 boules, a) si l’ordre compte et qu’un parfum peut être pris deux fois, b) si ce doivent être deux parfums différents et que l’ordre n’a pas d’importance ?</p></div>
+            <div class="b-sol"><p>a) $8 \times 8 = 64$ &nbsp; b) $\tfrac{8 \times 7}{2} = 28$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un mot de passe est formé de 4 lettres minuscules (26 lettres). Combien y a-t-il de mots de passe ? Combien, si les 10 chiffres sont aussi permis ?</p></div>
+            <div class="b-sol"><p>$26^4 = 456\,976$ et $36^4 = 1\,679\,616$. Un seul caractère de plus change déjà beaucoup : $26^5 = 11\,881\,376$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dans une course de 8 coureuses, on attribue l’or, l’argent et le bronze. Combien de podiums différents y a-t-il ?</p></div>
+            <div class="b-sol"><p>$8 \times 7 \times 6 = 336$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><span class="g-cas">CAS</span> Au loto allemand « 6 sur 49 », on tire 6 numéros sans remise. Combien y a-t-il de possibilités si l’ordre compte ? Pour jouer une grille, l’ordre ne compte pas. Par quel nombre dois-tu diviser ?</p></div>
+            <div class="b-sol"><p>$49 \times 48 \times 47 \times 46 \times 45 \times 44 = 10\,068\,347\,520$. Les 6 numéros tirés peuvent être rangés de $6! = 720$ façons : $\tfrac{10\,068\,347\,520}{720} = 13\,983\,816$ grilles.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Simule avec des chiffres aléatoires : dans un groupe de 5 personnes, quelle est la probabilité qu’au moins deux soient nées le même mois ? Lis pour cela des paires de chiffres et n’utilise que 01 à 12.
+            Compare avec le calcul $1 - \tfrac{12 \times 11 \times 10 \times 9 \times 8}{12^5}$.</p></div>
+            <div class="b-hint"><p>La fraction est la probabilité que les cinq soient nés des mois différents.</p></div>
+            <div class="b-sol"><p>Calcul : $1 - \tfrac{95\,040}{248\,832} \approx 0{,}62$. Avec 20 à 30 répétitions, la simulation en est le plus souvent déjà proche. Plus d’un groupe de cinq sur deux a donc un mois de naissance en commun.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="10000" data-ph="nombre"><p class="b-q-text">Combien de codes a un cadenas à 4 molettes de 0 à 9 ?</p><div class="b-sol"><p>$10^4$</p></div></div>
+        <div class="b-q" data-ans="336" data-ph="nombre"><p class="b-q-text">Podiums dans l’exercice 8 ?</p><div class="b-sol"><p>$8 \times 7 \times 6$</p></div></div>
+        <div class="b-q" data-ans="28" data-ph="nombre"><p class="b-q-text">Cornets avec deux parfums différents dans l’exercice 6 b) ?</p><div class="b-sol"><p>$\tfrac{8 \times 7}{2}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une urne contient 2 boules rouges et 3 vertes. On tire trois fois avec remise. Calcule $P(\text{trois fois vert})$ et $P(\text{au moins une fois rouge})$.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac35\right)^3 = \tfrac{27}{125}$ et $1 - \tfrac{27}{125} = \tfrac{98}{125}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Les tenues de Lena, dans les explorations : 3 T-shirts, 2 pantalons, 2 paires de chaussures. Combien y a-t-il de tenues ? Combien, si le T-shirt jaune ne va pas avec le pantalon rouge ?</p></div>
+            <div class="b-sol"><p>$3 \times 2 \times 2 = 12$. La combinaison jaune avec rouge existe avec les deux paires de chaussures, donc 2 tenues disparaissent : 10 tenues.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><span class="g-cas">CAS</span> Le pari du chevalier de Méré (excursion) : calcule la probabilité d’obtenir au moins un six en 4 lancers et celle d’obtenir au moins un double six en 24 lancers de deux dés.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 0{,}518$ et $1 - \left(\tfrac{35}{36}\right)^{24} \approx 0{,}491$. Le premier pari gagne à la longue, le second perd de peu.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Lena et Tom jouent à « pierre-feuille-ciseaux », tous les deux choisissent au hasard. Dessine un arbre pondéré à deux épreuves. Quelle est la probabilité que Lena gagne, et celle d’un match nul ?</p></div>
+            <div class="b-sol"><p>9 chemins de même probabilité, chacun $\tfrac19$. Lena gagne sur 3 chemins : $\tfrac13$. Match nul sur 3 chemins : $\tfrac13$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le pari du chevalier de Méré" data-toc-k="X" data-toc-short="De Méré">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Le pari du chevalier de Méré</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Dans le Paris du XVIIe siècle, le chevalier de Méré aimait parier aux dés. Son pari préféré : en quatre lancers d’un dé, on obtient au moins un six.
+                À la longue, il y gagnait de l’argent. Puis il essaya avec deux dés. Un double six est six fois plus rare qu’un six, il se dit donc : six fois plus de lancers,
+                24 au lieu de 4, donnent la même chance. Mais cette fois, il perdit.</p>
+            <p>Il interrogea le mathématicien <b>Blaise Pascal</b>, qui écrivit à ce sujet à <b>Pierre de Fermat</b> pendant l’été 1654. Dans leurs lettres, tous les deux calculèrent
+                ce que tu as calculé dans l’exercice 13 : le premier pari gagne avec une probabilité d’environ $0{,}518$, le second seulement avec environ $0{,}491$. La règle empirique de De Méré était fausse.
+                Cette correspondance passe pour l’acte de naissance du calcul des probabilités.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> correspondance entre B. Pascal et P. de Fermat, de juillet à octobre 1654, entre autres la lettre de Pascal à Fermat du 29 juillet 1654.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>MODÈLE DE L’URNE</h4><p>tirer des boules, avec ou sans remise</p></div>
+        <div><p>3 boules de chewing-gum rouges, 2 bleues</p></div></div>
+    <div class="b-rueck"><div><h4>RÈGLE DU PRODUIT POUR LES CHEMINS</h4><p>multiplier le long d’un chemin</p></div>
+        <div><p>$\tfrac35 \times \tfrac24 = \tfrac{3}{10}$</p></div></div>
+    <div class="b-rueck"><div><h4>RÈGLE DE LA SOMME</h4><p>additionner les probabilités des chemins qui conviennent</p></div>
+        <div><p>$\tfrac{3}{10} + \tfrac{1}{10} = \tfrac25$</p></div></div>
+    <div class="b-rueck"><div><h4>ÉVÉNEMENT CONTRAIRE</h4><p>« au moins une fois » $= 1 - $ « aucune fois »</p></div>
+        <div><p>$1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>DÉNOMBRER</h4><p>$n^k$ avec remise, $n(n - 1)\ldots$ sans remise ; sans ordre, diviser par le nombre d’ordres</p></div>
+        <div><p>Cadenas à code : $10^4 = 10\,000$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="1/8" data-ph="fraction"><p class="b-q-text">$P(\text{trois fois face})$ en trois lancers de pièce ?</p><div class="b-sol"><p>$\left(\tfrac12\right)^3$</p></div></div>
+            <div class="b-q" data-ans="60" data-ph="nombre"><p class="b-q-text">Nombres à trois chiffres formés avec les chiffres 1 à 5, chaque chiffre au plus une fois ?</p><div class="b-sol"><p>$5 \times 4 \times 3$</p></div></div>
+            <div class="b-q" data-ans="7/16" data-ph="fraction"><p class="b-q-text">$P(\text{au moins un gain})$ dans l’exercice 4 ?</p><div class="b-sol"><p>$1 - \tfrac{9}{16}$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · APPLIQUER</div>
+            <div class="b-q" data-ans="98/125" data-ph="fraction"><p class="b-q-text">$P(\text{au moins une fois rouge})$ dans l’exercice 11 ?</p><div class="b-sol"><p>$1 - \tfrac{27}{125}$</p></div></div>
+            <div class="b-q" data-ans="13983816" data-ph="nombre"><p class="b-q-text">Combien de grilles y a-t-il au loto « 6 sur 49 » (exercice 9) ?</p><div class="b-sol"><p>$\tfrac{10\,068\,347\,520}{720}$</p></div></div>
+            <div class="b-q" data-ans="0,518" data-ph="nombre décimal"><p class="b-q-text">Probabilité d’obtenir au moins un six en 4 lancers, à trois décimales ?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4$</p></div></div>
+        </div>
+    </div>
+    <h3>À ESSAYER AUSSI (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">À chaque clou, à gauche ou à droite</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Qui gagne avec deux dés spéciaux ?</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 8e année · domaine d’apprentissage 2 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-fr/geometrie.js"></script>
+<script src="../../js/buch-gy8.js"></script>
+<script src="../../js/buch-fr/gy8.js"></script>
+</body>
+</html>
