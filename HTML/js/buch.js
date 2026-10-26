@@ -344,7 +344,7 @@
             const alt = ((f.alt && (f.alt[LANG] || f.alt.de)) || '').replace(/"/g, '&quot;');
             // "Bild", not "Foto": photos, paintings and engravings alike; an unknown artist is left out
             fig.innerHTML = '<img src="' + FOTO_DIR + p.foto + '.jpg" alt="' + alt + '"' + (print ? '' : ' loading="lazy"') + (p.pos ? ' style="object-position:' + p.pos + '"' : '') + '>' +
-                '<figcaption>' + t('Bild', 'Image', 'Imagen', 'Immagine', 'Image') + ': ' + (f.artist ? f.artist + ' · ' : '') + lic +
+                '<figcaption>' + t('Bild: ', 'Image: ', 'Imagen: ', 'Immagine: ', 'Image : ') + (f.artist ? f.artist + ' · ' : '') + lic +
                 ' · <a href="' + f.page + '" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption>';
             if (p.put === 'after') at.after(fig);
             else { at.prepend(fig); at.classList.add('b-mit-foto'); }
