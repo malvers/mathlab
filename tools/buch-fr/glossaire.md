@@ -864,6 +864,14 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | schneidend, parallel, identisch, orthogonal (lines) | sécantes, parallèles, confondues, perpendiculaires | as the widget lage says |
 | Fasane und Hasen (Sunzi) $f$, $h$ | faisans et lapins $f$, $l$ | 3.3, the classic French wording of the puzzle |
 | Erwachsene $e$ / Jugendliche $j$, Autos $a$ / Motorräder $m$, Boot $b$ / Fluss $f$, Kerze rot $r$ / weiß $w$, Rechteck $a$, $b$ | adultes $a$ / jeunes $j$, voitures $v$ / motos $m$, bateau $b$ / courant $c$, bougie rouge $r$ / blanche $b$, $L$, $\ell$ | 3.3 page text |
+| zentrische Streckung, Streckzentrum $Z$, Streckfaktor $k$, Bildpunkt $P'$ | homothétie, centre $O$, rapport $k$, point image $P'$ | 4.1; widget streckung8 by rules (the drawn « Z » becomes O) |
+| $\overline{ZP}$ (length), Strecke, Gerade, Strahl | $OP$, segment $[OP]$, droite $(OP)$, demi-droite | 4.1 aside names the German $Z$ and $\overline{ZP}$ once |
+| Vergrößerung, Verkleinerung, Punktspiegelung an $Z$ | agrandissement, réduction, symétrie centrale de centre $O$ | 4.1 |
+| geradentreu, parallelentreu, winkeltreu | conserve l’alignement, le parallélisme, les angles | 4.1 |
+| Verhältnisgleichung, Strahlensätze | égalité de rapports, théorème de Thalès | 4.1 |
+| Flächeninhalt $A' = k^2 \cdot A$ | $\mathcal{A}' = k^2 \times \mathcal{A}$ | 4.1: the area is $\mathcal{A}$ where A is a point |
+| DGS, GeoGebra Streckung | géométrie dynamique, Dilate | English command name, said once |
+| Storchschnabel, Pantograph | pantographe (« Storchschnabel », bec de cigogne) | 4.1 excursion |
 
 ## mathegy9-fr
 

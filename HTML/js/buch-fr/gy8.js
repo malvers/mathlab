@@ -40,6 +40,10 @@ window.BuchFR && BuchFR.add('gy8', {
         'Multipliziere so, dass die Zahlen vor $y$ entgegengesetzt gleich werden.': 'Multiplie de sorte que les nombres devant $y$ deviennent opposés.',
         'Addiere die beiden Gleichungen: $y$ fällt weg.': 'Additionne les deux équations : $y$ disparaît.',
         'Nach $x$ auflösen.': 'Isole $x$.', 'Nach $y$ auflösen.': 'Isole $y$.',
+        // streckung8 (the centre Z is O in French, the lengths are written OA, AB: rules below)
+        'Streckfaktor $k$': 'Rapport $k$', 'Original': 'Figure initiale', 'Verhältnis': 'Rapport', 'Winkel bei $A$': 'Angle en $A$', 'gleich': 'égal', 'Fläche': 'Aire',
+        'Zieh an $Z$, $A$, $B$ und $C$. Die gestrichelten Strahlen beginnen in $Z$ und gehen durch Punkt und Bildpunkt.':
+            'Fais glisser $O$, $A$, $B$ et $C$. Les demi-droites en pointillés partent de $O$ et passent par chaque point et par son image.',
         // gluecksrad8
         'Felder': 'Secteurs', 'ein Feld weniger': 'un secteur de moins', 'ein Feld mehr': 'un secteur de plus',
         'gleich groß': 'de même taille', 'verschieden groß': 'de tailles différentes', 'Größe der Felder': 'Taille des secteurs', 'Drehen': 'Tourner',
@@ -60,6 +64,12 @@ window.BuchFR && BuchFR.add('gy8', {
         // termbaum8 (the sentences with the term in them are rules below; these pieces let check.mjs see them translated)
         ['Rechenbaum des Terms ', 'Arbre de calcul de l’expression '], ['. Gerechnet wird von unten nach oben.', '. On calcule du bas vers le haut.'],
         ['Summanden', 'Termes'], ['Minuend und Subtrahend', 'Premier et second terme'], ['Faktoren', 'Facteurs'], ['Dividend und Divisor', 'Dividende et diviseur'],
+        // streckung8 (the sentences with k: rules below)
+        ['Zentrische Streckung des Dreiecks ABC am Zentrum Z mit dem Faktor ', 'Homothétie du triangle ABC, de centre O et de rapport '],
+        ['Mit $k = 0$ fallen alle Bildpunkte auf $Z$: Das Bild ist nur noch ein Punkt.', 'Avec $k = 0$, tous les points images sont confondus avec $O$ : l’image n’est plus qu’un point.'],
+        ['Mit $k = 1$ bleibt jeder Punkt, wo er ist.', 'Avec $k = 1$, chaque point reste à sa place.'],
+        ['Mit $k = -1$ ist die Streckung eine Punktspiegelung an $Z$.', 'Avec $k = -1$, l’homothétie est la symétrie centrale de centre $O$.'],
+        [' Alle Winkel bleiben gleich.', ' Tous les angles sont conservés.'],
         // lgs8 (a sentence that starts with <b> is no whole label for the engine)
         ['<b>Probe</b> in beiden Gleichungen, dann die Lösungsmenge.', '<b>Vérification</b> dans les deux équations, puis l’ensemble des solutions.'],
         // wegzeit8 (where Mia is: a rule below)
@@ -115,6 +125,13 @@ window.BuchFR && BuchFR.add('gy8', {
         [/Setze \$([xy]) = (-?\d+)\$ in Gleichung I \(umgestellt\) ein\./g, (m, v, a) => 'Remplace $' + v + '$ par $' + a + '$ dans l’équation I transformée.'],
         [/Setze \$([xy]) = (-?\d+)\$ in Gleichung I ein\./g, (m, v, a) => 'Remplace $' + v + '$ par $' + a + '$ dans l’équation I.'],
         [/Schritt (\d+) von (\d+): erst selbst überlegen, dann aufdecken\./g, 'Étape $1 sur $2 : réfléchis d’abord toi-même, puis dévoile.'],
+        // streckung8: the centre O (letter of the drawing), the lengths OA, AB instead of \overline{ZA}, "Bild" in the table head,
+        // and the sentences with k
+        [/(<text class="g-pt" [^>]*>)Z(<\/text>)/g, '$1O$2'], [/\\overline\{Z([ABC])\}/g, 'O$1'], [/\\overline\{([ABC]{2})\}/g, '$1'], [/<th>Bild<\/th>/g, '<th>Image</th>'],
+        [/Bei negativem \$k\$ liegt jeder Bildpunkt auf der anderen Seite von \$Z\$\. Die Bildstrecken sind \$\|k\| = ([^$]*)\$-mal so lang\./g,
+            (m, k) => 'Pour $k$ négatif, chaque point image est de l’autre côté de $O$. Les segments images sont $|k| = ' + k + '$ fois plus longs.'],
+        [/(Eine <b>Vergrößerung<\/b>|<b>Eine Verkleinerung<\/b>): Jede Strecke wird \$([^$]*)\$-mal so lang, die Fläche \$k\^2 = ([^$]*)\$-mal so groß\./g,
+            (m, w, a, b) => (/Vergr/.test(w) ? 'Un <b>agrandissement</b>' : '<b>Une réduction</b>') + ' : chaque longueur est multipliée par $' + a + '$, l’aire par $k^2 = ' + b + '$.'],
         // geraden (js/buch-lgs.js, chapter 3.3): the point of intersection is I in the chapter text (S is the solution set)
         [/<b>Genau eine Lösung<\/b>: Die Geraden schneiden sich in \$S\(/g, '<b>Exactement une solution</b> : les droites se coupent en $I('],
         // wegzeit8: the axis label "s in m" is d here (js/buch-fr/integral.js has "s en m" as a word, so a rule and no second word)
