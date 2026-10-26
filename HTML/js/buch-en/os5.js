@@ -303,10 +303,10 @@
             // bandos5
             [/^Bandornament aus dem Motiv (Fahne|Schlüssel|Blume)$/, (m, k) => 'Frieze pattern from the ' + MOTIF[k] + ' motif'],
             // zahlzeichenos5
-            [/^Kerbholz und Strichliste mit (\d+) Strichen$/, (m, n) => 'Tally stick and tally chart with ' + pl(n, 'mark', 'marks')],
-            [/(\d+) Fünferbündel und (\d+) (?:einzelner Strich|einzelne Striche)/, (m, b, r) => pl(b, 'bundle of five', 'bundles of five') + ' and ' + pl(r, 'single mark', 'single marks')],
+            [/^Kerbholz und Strichliste mit (\d+) Strichen$/, (m, n) => 'Tally stick and tally chart with ' + pl(n, 'stroke', 'strokes')],
+            [/(\d+) Fünferbündel und (\d+) (?:einzelner Strich|einzelne Striche)/, (m, b, r) => pl(b, 'bundle of five', 'bundles of five') + ' and ' + pl(r, 'single stroke', 'single strokes')],
             [/(\d+) Fünferbündel/, (m, b) => pl(b, 'bundle of five', 'bundles of five')],
-            [/(\d+) (?:einzelner Strich|einzelne Striche)/, (m, r) => pl(r, 'single mark', 'single marks')],
+            [/(\d+) (?:einzelner Strich|einzelne Striche)/, (m, r) => pl(r, 'single stroke', 'single strokes')],
             [/^Die Zahl (\d+) in babylonischer Keilschrift$/, 'The number $1 in Babylonian cuneiform']
         ]
     });
