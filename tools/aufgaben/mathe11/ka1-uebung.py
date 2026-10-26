@@ -5,7 +5,7 @@
 import json, sys
 
 COMMENT = ("Klassenarbeit 1 Mathe 11 BGY (Doc, 26.10.2026: '40 Aufgaben a la Info zum Ueben', plan rows nr 3-9, plus item 41 like task 13 of the entrance test with the deck example Lena gegen Mia and item 42 (AFB III: make that game fair), "
-           "AFB I/II/III = 20/12/8 = 50/30/20 %, key of the head of maths). Read by the red button (row.redBtn.src) of row nr 10 (KW 45) in mathe11.html.")
+           "AFB I/II/III = 20/12/8 = 50/30/20 %, key of the head of maths). Read by the red button (row.redBtn.src) of row nr 11 (KW 46) in mathe11.html - the Klassenarbeit moved there from KW 45.")
 
 I, II, III = 'AFB I', 'AFB II', 'AFB III'
 T = []
