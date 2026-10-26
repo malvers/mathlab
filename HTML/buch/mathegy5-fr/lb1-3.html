@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 5 · Chapitre 1.3 · Diviseurs et nombres premiers | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Diviseurs et multiples, critères de divisibilité, le crible d’Ératosthène, facteurs premiers. Chapitre 1.3 du manuel interactif Mathématiques · Gymnasium 5 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 5</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 1.3 · DOMAINE D’APPRENTISSAGE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 1.3 · DOMAINE D’APPRENTISSAGE 1 · SEPTEMBRE · OCTOBRE</p>
+            <h1>Diviseurs et nombres premiers</h1>
+            <p class="b-hero-lead">Peut-on partager équitablement 24 muffins entre 5 personnes ? Entre 6 ? Entre 8 ? Quels nombres <b>divisent</b> un nombre sans reste, ses chiffres le révèlent souvent déjà.
+                Certains nombres ne se décomposent pas du tout : ils ne sont divisibles que par 1 et par eux-mêmes. Ces <b>nombres premiers</b> sont les briques avec lesquelles
+                on obtient tous les autres nombres par multiplication.</p>
+            <div class="b-chips"><span class="b-chip">3 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">1 LABORATOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="sieb5" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>trouver les <b>diviseurs</b> et les <b>multiples</b> d’un nombre</li>
+                <li>appliquer les <b>critères de divisibilité</b> par 2, 3, 4, 5, 6 et 10</li>
+                <li>reconnaître les <b>nombres premiers</b> et les trouver avec le <b>crible d’Ératosthène</b></li>
+                <li>décomposer des nombres en produit de <b>facteurs premiers</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="8" data-ph="nombre"><p class="b-q-text">Calcule $48 : 6$.</p><div class="b-sol"><p>$6 \times 8 = 48$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="reste"><p class="b-q-text">Quel est le reste dans $23 : 7$ ?</p><div class="b-sol"><p>$3 \times 7 = 21$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">36 est-il un nombre pair ?</p><div class="b-mc"><button>oui</button><button>non</button></div><div class="b-sol"><p>Le dernier chiffre, 6, est pair.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">FORMER DES RECTANGLES</div>
+            <div class="b-text"><p>Avec 12 carrés identiques (jetons, carreaux de cahier), formez tous les rectangles possibles. Faites de même avec 7, avec 16 et avec 13 carrés.</p>
+                <ul><li>Pour quels nombres n’y a-t-il qu’un seul rectangle, tout en longueur ?</li><li>Quel est le rapport entre les longueurs des côtés et la division ?</li></ul></div>
+            <span class="b-pair">→ Leçons 1 et 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA SOMME DES CHIFFRES</div>
+            <div class="b-text"><p>La somme des chiffres est la somme de tous les chiffres d’un nombre : pour 471, c’est $4 + 7 + 1 = 12$.</p>
+                <ul><li>Calculez la somme des chiffres de 12, 27, 111, 471, 1 002 et 3 333. Divisez les nombres par 3.</li><li>Remarquez-vous un lien ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Diviseurs et divisibilité" data-toc-k="1" data-toc-short="1 Diviseurs">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">2 HEURES</span></div>
+    <h2><span class="b-no">1</span>Diviseurs, multiples et critères de divisibilité</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Avec 12 carrés, on peut former trois rectangles : $1 \times 12$, $2 \times 6$ et $3 \times 4$. Les longueurs des côtés 1, 2, 3, 4, 6, 12 sont exactement les nombres
+                par lesquels on peut diviser 12 sans reste. Avec 7 ou 13 carrés, il n’y a que la longue bande.</p></div></div>
+            <div class="b-text"><p>Si une division tombe juste, on dit : 3 est un <b>diviseur</b> de 12, et 12 est un <b>multiple</b> de 3. On écrit $3 \mid 12$ et on lit « 3 divise 12 ».
+                Tous les diviseurs d’un nombre forment ensemble l’<b>ensemble de ses diviseurs</b> : $D_{12} = \{1\,;\,2\,;\,3\,;\,4\,;\,6\,;\,12\}$. Le mieux est de chercher les diviseurs par paires : $1 \times 12$, $2 \times 6$, $3 \times 4$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · CRITÈRES DE DIVISIBILITÉ</div>
+                <div class="b-text">
+                    <p>Un nombre est divisible</p>
+                    <ul><li>par <b>2</b> si son dernier chiffre est 0, 2, 4, 6 ou 8,</li>
+                        <li>par <b>5</b> si son dernier chiffre est 0 ou 5, par <b>10</b> s’il est 0,</li>
+                        <li>par <b>4</b> si le nombre formé par ses <b>deux derniers chiffres</b> est divisible par 4,</li>
+                        <li>par <b>3</b> si la <b>somme de ses chiffres</b> est divisible par 3,</li>
+                        <li>par <b>6</b> s’il est divisible par 2 <b>et</b> par 3.</li></ul>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Pourquoi le critère de 4 marche :</b> chaque centaine entière est divisible par 4, car $100 = 4 \times 25$. Seul compte donc ce qui reste après les centaines.</p>
+            <p class="b-note"><b>En prime :</b> un nombre est divisible par 9 si la somme de ses chiffres est divisible par 9.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · TOUS LES DIVISEURS</div>
+            <div class="b-text"><p>Détermine l’ensemble des diviseurs de 36.</p></div>
+            <div class="b-sol"><p>Chercher les paires : $1 \times 36$, $2 \times 18$, $3 \times 12$, $4 \times 9$, $6 \times 6$. À 6, les paires se rejoignent : on peut s’arrêter.</p>
+                <p><span class="b-res">$D_{36} = \{1\,;\,2\,;\,3\,;\,4\,;\,6\,;\,9\,;\,12\,;\,18\,;\,36\}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · APPLIQUER LES CRITÈRES</div>
+            <div class="b-text"><p>5 724 est-il divisible par 3, par 4 et par 6 ?</p></div>
+            <div class="b-sol"><p>Somme des chiffres $5 + 7 + 2 + 4 = 18$ : divisible par 3. Deux derniers chiffres 24 : divisible par 4. Pair et divisible par 3 : divisible par 6.</p>
+                <p><span class="b-res">divisible par 3, par 4 et par 6</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Détermine les ensembles de diviseurs : a) $D_{18}$ &nbsp; b) $D_{30}$ &nbsp; c) $D_{17}$ &nbsp; d) $D_{64}$</p></div>
+            <div class="b-sol"><p>a) {1 ; 2 ; 3 ; 6 ; 9 ; 18} &nbsp; b) {1 ; 2 ; 3 ; 5 ; 6 ; 10 ; 15 ; 30} &nbsp; c) {1 ; 17} &nbsp; d) {1 ; 2 ; 4 ; 8 ; 16 ; 32 ; 64}</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Écris les six premiers multiples : a) de 7 &nbsp; b) de 12 &nbsp; c) de 25</p></div>
+            <div class="b-sol"><p>a) 7, 14, 21, 28, 35, 42 &nbsp; b) 12, 24, 36, 48, 60, 72 &nbsp; c) 25, 50, 75, 100, 125, 150</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Vérifie avec les critères par lesquels des nombres 2, 3, 4, 5, 6, 10 le nombre est divisible : a) 120 &nbsp; b) 4 515 &nbsp; c) 2 316 &nbsp; d) 7 777</p></div>
+            <div class="b-sol"><p>a) par les six &nbsp; b) par 3 et 5 (somme des chiffres 15) &nbsp; c) par 2, 3, 4 et 6 (somme des chiffres 12, se termine par 16) &nbsp; d) par aucun</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Remplace ▢ par un chiffre pour que le nombre soit divisible par 3. Trouve toutes les possibilités : a) 5▢1 &nbsp; b) 2 0▢4</p></div>
+            <div class="b-sol"><p>a) Somme des chiffres $6 + ▢$ : ▢ = 0, 3, 6, 9 &nbsp; b) Somme des chiffres $6 + ▢$ : ▢ = 0, 3, 6, 9</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>On veut partager équitablement 24 muffins, sans en couper aucun. Entre combien de personnes est-ce possible ? Donne toutes les possibilités.</p></div>
+            <div class="b-sol"><p>Entre 1, 2, 3, 4, 6, 8, 12 ou 24 personnes : les diviseurs de 24.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quel nombre inférieur à 100 a le plus de diviseurs ? Indice : essaie des nombres qui ont beaucoup de petits facteurs, comme 60, 72, 84, 90 et 96.</p></div>
+            <div class="b-sol"><p>60, 72, 84, 90 et 96 ont chacun 12 diviseurs ; aucun nombre inférieur à 100 n’en a plus. Par exemple $D_{60} = \{1\,;\,2\,;\,3\,;\,4\,;\,5\,;\,6\,;\,10\,;\,12\,;\,15\,;\,20\,;\,30\,;\,60\}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Combien de diviseurs a 12 ?</p><div class="b-sol"><p>1, 2, 3, 4, 6, 12</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">7 314 est-il divisible par 4 ?</p><div class="b-mc"><button>oui</button><button>non</button></div><div class="b-sol"><p>Les deux derniers chiffres forment 14, et 14 n’est pas divisible par 4.</p></div></div>
+        <div class="b-q" data-ans="21" data-ph="somme des chiffres"><p class="b-q-text">Quelle est la somme des chiffres de 8 571 ?</p><div class="b-sol"><p>$8 + 5 + 7 + 1 = 21$ : le nombre est donc divisible par 3.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Nombres premiers" data-toc-k="2" data-toc-short="2 Nombres premiers">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">1 HEURE</span></div>
+    <h2><span class="b-no">2</span>Nombres premiers et facteurs premiers</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Avec 7 ou 13 carrés, il n’y a qu’un seul rectangle : la longue bande. Ces nombres ont exactement deux diviseurs : 1 et eux-mêmes.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · NOMBRES PREMIERS</div>
+                <div class="b-text">
+                    <p>Un nombre entier naturel qui a <b>exactement deux diviseurs</b> s’appelle un <b>nombre premier</b>. Les plus petits sont 2, 3, 5, 7, 11, 13, 17, 19, 23, 29.</p>
+                    <p>1 n’est pas un nombre premier : il n’a qu’un seul diviseur. 2 est le seul nombre premier pair.</p>
+                    <p>Tout nombre plus grand que 1 qui n’est pas premier peut s’écrire comme produit de nombres premiers : c’est sa <b>décomposition en facteurs premiers</b>, $60 = 2 \times 2 \times 3 \times 5$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Décomposer par étapes :</b> $60 = 6 \times 10 = (2 \times 3) \times (2 \times 5)$. Peu importe par où l’on commence : à la fin, on obtient toujours les mêmes facteurs premiers.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE CRIBLE D’ÉRATOSTHÈNE</div>
+        <div data-widget="sieb5"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · PREMIER OU NON ?</div>
+            <div class="b-text"><p>91 est-il un nombre premier ?</p></div>
+            <div class="b-sol"><p>91 est impair, la somme de ses chiffres est 10, il ne se termine ni par 0 ni par 5. Mais $91 = 7 \times 13$.</p>
+                <p><span class="b-res">ce n’est pas un nombre premier</span>. Joli piège : 91 a l’air d’un nombre premier.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · FACTEURS PREMIERS</div>
+            <div class="b-text"><p>Décompose 84 en facteurs premiers.</p></div>
+            <div class="b-sol"><p>$84 = 2 \times 42 = 2 \times 2 \times 21 = 2 \times 2 \times 3 \times 7$</p>
+                <p><span class="b-res">$84 = 2 \times 2 \times 3 \times 7$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Quels nombres sont premiers ? 21, 23, 27, 29, 31, 33, 37, 39, 41, 51</p></div>
+            <div class="b-sol"><p>23, 29, 31, 37, 41. Pas premiers : $21 = 3 \times 7$, $27 = 3 \times 9$, $33 = 3 \times 11$, $39 = 3 \times 13$, $51 = 3 \times 17$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Décompose en facteurs premiers : a) 20 &nbsp; b) 45 &nbsp; c) 100 &nbsp; d) 96</p></div>
+            <div class="b-sol"><p>a) $2 \times 2 \times 5$ &nbsp; b) $3 \times 3 \times 5$ &nbsp; c) $2 \times 2 \times 5 \times 5$ &nbsp; d) $2 \times 2 \times 2 \times 2 \times 2 \times 3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quel nombre a pour décomposition en facteurs premiers a) $2 \times 3 \times 3 \times 5$ &nbsp; b) $2 \times 2 \times 2 \times 7$ &nbsp; c) $3 \times 5 \times 7$ ?</p></div>
+            <div class="b-sol"><p>a) 90 &nbsp; b) 56 &nbsp; c) 105</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Des <b>nombres premiers jumeaux</b> sont deux nombres premiers dont l’écart est 2, par exemple 11 et 13. Trouve avec le crible tous les jumeaux inférieurs à 100.</p></div>
+            <div class="b-sol"><p>3 et 5, 5 et 7, 11 et 13, 17 et 19, 29 et 31, 41 et 43, 59 et 61, 71 et 73 : huit paires.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="25" data-ph="nombre"><p class="b-q-text">Combien y a-t-il de nombres premiers entre 1 et 100 ?</p><div class="b-sol"><p>Le crible laisse 25 nombres.</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Quel nombre est premier ?</p><div class="b-mc"><button>1</button><button>51</button><button>53</button></div><div class="b-sol"><p>$51 = 3 \times 17$, et 1 n’a qu’un seul diviseur.</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="facteur premier"><p class="b-q-text">$84 = 2 \times 2 \times 3 \times ▢$. Quel facteur premier manque ?</p><div class="b-sol"><p>$84 : 12 = 7$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On veut planter 60 arbres dans une cour d’école, en rangées de même longueur, avec au moins 3 arbres par rangée et au moins 3 rangées. Quelles sont les possibilités ?</p></div>
+            <div class="b-sol"><p>$3 \times 20$, $4 \times 15$, $5 \times 12$, $6 \times 10$, $10 \times 6$, $12 \times 5$, $15 \times 4$, $20 \times 3$ : huit possibilités (rangées × arbres par rangée).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier au chapitre 1.2 :</b> écris la décomposition en facteurs premiers avec des puissances : a) $72$ &nbsp; b) $1\,000$ &nbsp; c) $1\,024$</p></div>
+            <div class="b-sol"><p>a) $2^3 \times 3^2$ &nbsp; b) $2^3 \times 5^3$ &nbsp; c) $2^{10}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deux cloches sonnent en même temps. L’une sonne toutes les 6 minutes, l’autre toutes les 8 minutes. Au bout de combien de minutes sonnent-elles de nouveau ensemble pour la première fois ?</p></div>
+            <div class="b-sol"><p>Multiples de 6 : 6, 12, 18, 24, … Multiples de 8 : 8, 16, 24, … Le plus petit multiple commun est <span class="b-res">24</span>.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Pourquoi un nombre de plus d’un chiffre dont la somme des chiffres vaut 3 n’est-il jamais un nombre premier ?</p></div>
+            <div class="b-sol"><p>La somme de ses chiffres est divisible par 3, donc le nombre est divisible par 3. Comme il est plus grand que 3, il a au moins trois diviseurs : 1, 3 et lui-même.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le plus grand nombre premier" data-toc-k="X" data-toc-short="Record">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE ET ACTUALITÉ</span></div>
+    <h2>Existe-t-il un plus grand nombre premier ?</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Le savant grec <b>Ératosthène de Cyrène</b> vécut au 3e siècle avant Jésus-Christ et dirigea la célèbre bibliothèque d’Alexandrie. La méthode avec laquelle tu tries les nombres premiers
+                porte son nom. C’est Nicomaque de Gérase qui nous l’a transmise, environ 300 ans plus tard.</p>
+            <p>Avant lui déjà, <b>Euclide</b> avait démontré qu’il existe <b>une infinité de nombres premiers</b>. Son idée : prends quelques nombres premiers, multiplie-les et ajoute 1, par exemple $2 \times 3 \times 5 + 1 = 31$.
+                Divisé par chacun de ces nombres premiers, ce nouveau nombre donne le reste 1. Il contient donc un nombre premier qui n’était pas encore dans la liste. La liste ne peut donc jamais être complète.</p>
+            <p>Aujourd’hui, des ordinateurs du monde entier cherchent des nombres premiers records. Le plus grand connu a été trouvé en octobre 2024 : $2^{136\,279\,841} - 1$. Écrit en entier, il a
+                41 024 320 chiffres. Imprimé dans ce manuel, il remplirait plusieurs milliers de pages.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> Euclide, Éléments IX, 20. Nicomaque de Gérase, Introduction arithmétique I, 13. Great Internet Mersenne Prime Search (mersenne.org), 52e nombre premier de Mersenne, trouvé par L. Durant, annoncé le 21 octobre 2024.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>DIVISEURS ET MULTIPLES</h4><p>$3 \mid 12$ : 3 est un diviseur de 12, 12 est un multiple de 3. Chercher les diviseurs par paires.</p></div>
+        <div><p>$D_{36} = \{1\,;\,2\,;\,3\,;\,4\,;\,6\,;\,9\,;\,12\,;\,18\,;\,36\}$</p></div></div>
+    <div class="b-rueck"><div><h4>CRITÈRES DE DIVISIBILITÉ</h4><p>2, 5, 10 : dernier chiffre · 4 : deux derniers chiffres · 3 : somme des chiffres · 6 : par 2 et par 3</p></div>
+        <div><p>5 724 : divisible par 3, par 4 et par 6</p></div></div>
+    <div class="b-rueck"><div><h4>NOMBRES PREMIERS</h4><p>exactement deux diviseurs ; 1 n’en fait pas partie</p></div>
+        <div><p>2, 3, 5, 7, 11, 13, 17, 19, 23, 29, …</p></div></div>
+    <div class="b-rueck"><div><h4>FACTEURS PREMIERS</h4><p>Tout nombre plus grand que 1 est un produit de nombres premiers.</p></div>
+        <div><p>$84 = 2 \times 2 \times 3 \times 7$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · CALCUL MENTAL</div>
+            <div class="b-q" data-ans="8" data-ph="nombre"><p class="b-q-text">Combien de diviseurs a 30 ?</p><div class="b-sol"><p>1, 2, 3, 5, 6, 10, 15, 30</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">2 352 est-il divisible par 6 ?</p><div class="b-mc"><button>oui</button><button>non</button></div><div class="b-sol"><p>Pair, somme des chiffres 12</p></div></div>
+            <div class="b-q" data-ans="97" data-ph="nombre"><p class="b-q-text">Quel est le plus grand nombre premier inférieur à 100 ?</p><div class="b-sol"><p>99 et 98 ne sont pas premiers, 97 l’est.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC UN CRAYON ET DU PAPIER</div>
+            <div class="b-q" data-ans="5" data-ph="facteur premier"><p class="b-q-text">$150 = 2 \times 3 \times 5 \times ▢$. Quel nombre premier manque ?</p><div class="b-sol"><p>$150 : 30 = 5$</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="minutes"><p class="b-q-text">Une cloche sonne toutes les 6 minutes, une autre toutes les 8 minutes. Quand sonnent-elles de nouveau ensemble pour la première fois ?</p><div class="b-sol"><p>le plus petit multiple commun</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="nombre"><p class="b-q-text">Combien de diviseurs a 60 ?</p><div class="b-sol"><p>1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60</p></div></div>
+        </div>
+    </div>
+    <h3>À ESSAYER AUSSI (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="glocken" href="../../glocken/glocken.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LES CLOCHES DE BAGDAD</span><span class="b-lab-what">Quand sonnent-elles toutes en même temps ?</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 5e année · domaine d’apprentissage 1 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-fr/geometrie.js"></script>
+<script src="../../js/buch-gy5.js"></script>
+<script src="../../js/buch-fr/gy5.js"></script>
+</body>
+</html>

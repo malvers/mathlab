@@ -753,7 +753,11 @@ above was changed.
 | Basis, Exponent, „zwei hoch fünf“ | base, exposant, « deux puissance cinq » (« deux exposant cinq ») | 1.2 |
 | schriftlich dividieren: teilen, malnehmen, abziehen, herunterholen | division posée : diviser, multiplier, soustraire, abaisser | 1.2 keeps the German layout and says once that France uses the potence |
 | Schullandheim | classe verte | 1.2 |
-| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES | cards, en allemand |
+| Teiler, Vielfaches, $3 \mid 12$ „3 teilt 12“ | diviseur, multiple, $3 \mid 12$ « 3 divise 12 » | 1.3 |
+| Teilermenge $T_{12} = \{1, 2, 3\}$ | ensemble des diviseurs $D_{12} = \{1\,;\,2\,;\,3\}$ | 1.3: the letter D (diviseurs), lists with the French semicolon; plain text {1 ; 2 ; 3} |
+| Primfaktorzerlegung | décomposition en (produit de) facteurs premiers | 1.3 |
+| kleinstes gemeinsames Vielfaches | plus petit multiple commun | 1.3 |
+| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD | cards, en allemand |
 
 ## mathegy6-fr
 
