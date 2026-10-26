@@ -129,6 +129,9 @@
                 'On the tally stick every fifth notch is longer. That way you do not have to count every single notch, only the bundles.'
         },
         phrase: [
+            // sieb5 (js/buch-en/gy5.js has it with ·, which the rule above has already turned into ×)
+            ['Fertig! Die nächste Zahl wäre 11, aber 11 × 11 = 121 liegt schon über 100. Alle übrigen Zahlen sind <b>Primzahlen</b>: Es sind 25 Stück.',
+                'Done! The next number would be 11, but 11 × 11 = 121 is already over 100. All the remaining numbers are <b>prime numbers</b>: there are 25 of them.'],
             // askRow (zahlenstrahlos5)
             ['noch nicht', 'not yet'],
             // zahlenstrahlos5
@@ -221,7 +224,7 @@
             [/Von ([\d,.]+) bis ([\d,.]+) sind es 10 Schritte, einer ist ([\d,.]+) groß\./, 'From $1 to $2 there are 10 steps; each one is $3.'],
             [/Links steht ([\d,.]+), rechts ([\d,.]+)\. Dazwischen liegen 10 gleich große Schritte\./, 'On the left is $1, on the right $2. In between there are 10 equal steps.'],
             [/Der Punkt liegt (\d+) Schritte rechts von ([\d,.]+)\./, (m, k, a) => 'The point lies ' + pl(k, 'step', 'steps') + ' to the right of ' + a + '.'],
-            [/Vorgänger ([^,<]+), Nachfolger ([\d,.]+)\./, 'Predecessor $1, successor $2.'],
+            [/Vorgänger (–|[\d,.]+?), Nachfolger ([\d,.]+)\./, 'Predecessor $1, successor $2.'],
             [/Die Zahl liegt zwischen ([\d,.]+) und ([\d,.]+)\./, 'The number lies between $1 and $2.'],
             // schriftlichos5: subtraction by adding on and by exchanging (rechteck5 has its own "Ergänzen", data-v="ergaenzen")
             [/(data-v="erg">)[^<]*</, '$1Adding on<'], [/(data-v="ent">)Entbündeln</, '$1Exchanging<'],
