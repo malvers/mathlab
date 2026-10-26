@@ -145,6 +145,20 @@ window.BuchFR && BuchFR.add('funktionen', {
         'fällt für $x < 0$ und fällt für $x > 0$': 'décroissante pour $x < 0$ et décroissante pour $x > 0$',
         '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, sans changement de signe', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, avec changement de signe',
         'senkrecht $x = 0$, waagerecht $y = 0$': 'verticale $x = 0$, horizontale $y = 0$',
+        // extremwert (chapter 1.4; the two problems are fr0 helpers): × for the product, as French schools write it
+        'Aufgabe': 'Exercice', 'Seite $x$': 'Côté $x$', 'Flächeninhalt in Abhängigkeit von x': 'Aire en fonction de x', 'MAUER': 'MUR',
+        'x in m': 'x en m', 'x in cm': 'x en cm', 'A in m²': 'A en m²', 'A in cm²': 'A en cm²',
+        'Rechteckiges Gehege an einer Mauer mit 40 m Zaun': 'Enclos rectangulaire le long d’un mur, avec 40 m de clôture',
+        'Rechteck mit festem Umfang 24 cm': 'Rectangle de périmètre fixe 24 cm',
+        'Zielgröße $A = x \\cdot (40 - 2x)$, Nebenbedingung: Zaunlänge $x + (40 - 2x) + x = 40$.':
+            'Grandeur à optimiser $A = x \\times (40 - 2x)$, contrainte : longueur de clôture $x + (40 - 2x) + x = 40$.',
+        'Scheitelpunktform: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$': 'Forme canonique : $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$',
+        'Maximum: $x = 10\\,\\text{m}$, Breite $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.': 'Maximum : $x = 10\\,\\text{m}$, largeur $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.',
+        'Such die größte Fläche. Sie liegt am Scheitel der Parabel.': 'Cherche la plus grande aire. Elle se trouve au sommet de la parabole.',
+        'Zielgröße $A = x \\cdot y$, Nebenbedingung $2x + 2y = 24$, also $y = 12 - x$.': 'Grandeur à optimiser $A = x \\times y$, contrainte $2x + 2y = 24$, donc $y = 12 - x$.',
+        'Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$': 'Forme canonique : $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$',
+        'Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.': 'Maximum : le carré de $6\\,\\text{cm}$ de côté, $A = 36\\,\\text{cm}^2$.',
+        'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': 'Quel rectangle de périmètre $24\\,\\text{cm}$ a la plus grande aire ?',
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -302,5 +316,7 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-10 mathegy12lk-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // extremwert: "Jetzt: $A(6) = 6 \\cdot 28 = 168\\,\\text{m}^2$" - the French word and × (only this sentence of this widget)
+        [/Jetzt: \$A\(([^$]*?) \\cdot /g, (m, s) => 'Maintenant : $A(' + s + ' \\times '],
     ]
 });
