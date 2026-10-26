@@ -787,7 +787,14 @@ above was changed.
 | Maßzahl, Einheit, Umrechnungszahl, Einheitentreppe | nombre, unité, nombre de conversion, escalier des unités | 5 |
 | Fermi-Aufgabe, Näherungswert, Lösungsplan | problème de Fermi, valeur approchée, plan de résolution | 5 |
 | Schulsportfest | la journée sportive de l’école | 5 project |
-| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD, LABORATOIRE DU REPÈRE, L’HORLOGE DES ANGLES, LABORATOIRE DES ANGLES, PUZZLE D’ANGLES, FIGURES SUPERPOSABLES, SOLIDES, PRINCIPE DE CAVALIERI | cards, en allemand |
+| Additionssystem, Stellenwertsystem | système additif, numération de position | OP |
+| Strich, Fessel, Seil, Lotusblüte, Finger, Kaulquappe (Ägypter) | bâton, anse, corde, fleur de lotus, doigt, têtard | OP, as the widget zahlschrift5 (fr-11) |
+| Zwanzigersystem der Maya: Punkt, Strich, Muschel, Stufe | base vingt : point, barre, coquillage, étage | OP |
+| Zweiersystem, Fünfersystem, $1011_2$ | binaire (base deux), base cinq, $1011_2$ | OP |
+| Linienbrett, Rechenpfennige, Linien / Felder, bündeln | table à calculer, jetons, lignes / espaces, regrouper | OP, as the widget linien5 (fr-11) |
+| „Nach Adam Ries(e)“; Rechenung auff der linihen und federn | stays German with a French gloss in « » | OP; encheck lists these on purpose |
+| Sächsische Landesbibliothek (SLUB) | Bibliothèque d’État de Saxe | OP |
+| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD, LABORATOIRE DU REPÈRE, L’HORLOGE DES ANGLES, LABORATOIRE DES ANGLES, PUZZLE D’ANGLES, FIGURES SUPERPOSABLES, SOLIDES, PRINCIPE DE CAVALIERI, NOMBRES MAYAS, VISITE : POINT, BARRE, COQUILLAGE, NOMBRES BINAIRES | cards, en allemand |
 
 ## mathegy6-fr
 
