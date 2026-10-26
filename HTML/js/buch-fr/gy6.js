@@ -92,6 +92,30 @@ window.BuchFR && BuchFR.add('gy6', {
         '5 kg Äpfel kosten 12,50 €.': '5 kg de pommes coûtent 12,50 €.', '3 Pumpen brauchen 8 Stunden.': '3 pompes mettent 8 heures.',
         '8 Hefte kosten 6,40 €.': '8 cahiers coûtent 6,40 €.', 'Für 8 Kaninchen reicht das Futter 15 Tage.': 'Pour 8 lapins, la nourriture suffit 15 jours.',
         'Schritt 1: Schreib auf, was du weißt.': 'Étape 1 : écris ce que tu sais.', 'Schritt 3: Rechne auf die gesuchte Menge hoch.': 'Étape 3 : calcule la valeur pour la quantité cherchée.',
+        // winkelsumme6
+        'Dreieck': 'Triangle', 'Beweisfigur': 'Figure de la démonstration', 'Ansicht': 'Vue',
+        'Dreieck mit seinen Innenwinkeln': 'Triangle avec ses trois angles',
+        'Dreieck mit seinen Innenwinkeln und der Parallelen durch C': 'Triangle avec ses trois angles et la parallèle passant par C',
+        'Zieh an den Ecken. Die Winkel ändern sich, ihre Summe bleibt. Die Werte sind auf ganze Grad gerundet.':
+            'Fais glisser les sommets. Les angles changent, leur somme reste la même. Les valeurs sont arrondies au degré près.',
+        // konstruktion6: C côté, A angle; CcA = two sides and the angle opposite the larger one C (German SsW)
+        'sss': 'CCC', 'sws': 'CAC', 'wsw': 'ACA', 'SsW': 'CcA', 'www': 'AAA', 'Gegeben': 'Données',
+        'Seite $a$': 'Côté $a$', 'Seite $b$': 'Côté $b$', 'Seite $c$': 'Côté $c$',
+        'Winkel $\\alpha$': 'Angle $\\alpha$', 'Winkel $\\beta$': 'Angle $\\beta$', 'Seite $a$ gegenüber $\\alpha$': 'Côté $a$ opposé à $\\alpha$',
+        'Genau ein Dreieck.': 'Exactement un triangle.', 'Kein Dreieck.': 'Aucun triangle.', 'Zwei Dreiecke.': 'Deux triangles.',
+        'Unendlich viele Dreiecke.': 'Une infinité de triangles.',
+        'Die Kreise um $A$ mit $r = b$ und um $B$ mit $r = a$ schneiden sich oberhalb von $c$ in genau einem Punkt.':
+            'Le cercle de centre $A$ et de rayon $r = b$ et le cercle de centre $B$ et de rayon $r = a$ se coupent au-dessus de $c$ en exactement un point.',
+        'Auf dem Schenkel von $\\alpha$ trägt man $b$ ab. Der Endpunkt ist $C$.': 'Sur le côté de l’angle $\\alpha$, on reporte la longueur $b$. L’extrémité est $C$.',
+        'Der Kreis um $B$ schneidet den Schenkel zweimal. Die Angaben legen das Dreieck nicht fest.':
+            'Le cercle de centre $B$ coupe deux fois le côté de l’angle. Les données ne déterminent pas le triangle.',
+        'Die gegenüberliegende Seite $a$ ist die größere: $a \\geq c$.': 'Le côté opposé $a$ est le plus grand : $a \\geq c$.',
+        'Der Kreis berührt den Schenkel nur.': 'Le cercle touche seulement le côté de l’angle.',
+        'Der Kreis um $B$ erreicht den Schenkel nicht.': 'Le cercle de centre $B$ n’atteint pas le côté de l’angle.',
+        'Alle haben dieselbe Form, aber verschiedene Größen. Drei Winkel legen kein Dreieck fest.':
+            'Ils ont tous la même forme, mais des tailles différentes. Trois angles ne déterminent pas un triangle.',
+        'Den dritten Winkel kennt man ohnehin: $\\gamma = 180^\\circ - \\alpha - \\beta$. Es fehlt eine Länge.':
+            'On connaît de toute façon le troisième angle : $\\gamma = 180^\\circ - \\alpha - \\beta$. Il manque une longueur.',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -161,6 +185,24 @@ window.BuchFR && BuchFR.add('gy6', {
         ['direkt proportional: Beide Seiten werden mit derselben Zahl gerechnet.', 'Proportionnalité : on fait le même calcul des deux côtés.'],
         ['indirekt proportional: Rechts wird umgekehrt gerechnet. Aus „: 4“ links wird „· 4“ rechts.',
             'Proportionnalité inverse : à droite, on fait le calcul inverse. « : 4 » à gauche devient « × 4 » à droite.'],
+        // winkelsumme6
+        ['Die gestrichelte Linie ist parallel zu $\\overline{AB}$. $\\alpha\'$ und $\\alpha$ sind Wechselwinkel an Parallelen, also gleich groß. Ebenso $\\beta\'$ und $\\beta$. ',
+            'La ligne en pointillés est parallèle à $(AB)$. $\\alpha\'$ et $\\alpha$ sont des angles alternes-internes formés par des parallèles, donc ils ont la même mesure. De même pour $\\beta\'$ et $\\beta$. '],
+        ['Zusammen mit $\\gamma$ bilden $\\alpha\'$ und $\\beta\'$ einen gestreckten Winkel: $180^\\circ$.', 'Avec $\\gamma$, $\\alpha\'$ et $\\beta\'$ forment un angle plat : $180^\\circ$.'],
+        // konstruktion6: the theorems, the sentences with a computed number
+        ['<b>Kongruenzsatz sss:</b> Wenn zwei Dreiecke in allen drei Seiten übereinstimmen, dann sind sie kongruent.',
+            '<b>Cas d’égalité CCC :</b> si deux triangles ont leurs trois côtés de même longueur, alors ils sont égaux.'],
+        ['<b>Kongruenzsatz sws:</b> Wenn zwei Dreiecke in zwei Seiten und dem eingeschlossenen Winkel übereinstimmen, dann sind sie kongruent.',
+            '<b>Cas d’égalité CAC :</b> si deux triangles ont deux côtés de même longueur et l’angle compris entre eux de même mesure, alors ils sont égaux.'],
+        ['<b>Kongruenzsatz wsw:</b> Wenn zwei Dreiecke in einer Seite und den beiden anliegenden Winkeln übereinstimmen, dann sind sie kongruent.',
+            '<b>Cas d’égalité ACA :</b> si deux triangles ont un côté de même longueur et les deux angles adjacents à ce côté de même mesure, alors ils sont égaux.'],
+        ['<b>Kongruenzsatz SsW:</b> Wenn zwei Dreiecke in zwei Seiten und dem Winkel übereinstimmen, der der <b>größeren</b> Seite gegenüberliegt, dann sind sie kongruent.',
+            '<b>Cas d’égalité CcA :</b> si deux triangles ont deux côtés de même longueur et la même mesure pour l’angle opposé au <b>plus grand</b> de ces côtés, alors ils sont égaux.'],
+        ['Die freien Schenkel der Winkel schneiden sich in $C$. ', 'Les côtés libres des angles se coupent en $C$. '],
+        ['. Für $\\gamma$ bleibt nichts übrig, die Schenkel laufen auseinander.', '. Il ne reste rien pour $\\gamma$ : les côtés des angles s’écartent l’un de l’autre.'],
+        ['$\\alpha + \\beta$ ist schon $', '$\\alpha + \\beta$ vaut déjà $'],
+        ['Die Kreise berühren sich nur auf der längsten Seite.', 'Les cercles se touchent seulement sur le plus long côté.'],
+        ['Die Kreise treffen sich nicht.', 'Les cercles ne se coupent pas.'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -209,5 +251,8 @@ window.BuchFR && BuchFR.add('gy6', {
         [/>([\d.,]+) (Pumpen|Hefte|Kaninchen|Tage)</g, (m, n, u) => '>' + n + ' ' +
             ({ 'Pumpen': ['pompe', 'pompes'], 'Hefte': ['cahier', 'cahiers'], 'Kaninchen': ['lapin', 'lapins'], 'Tage': ['jour', 'jours'] })[u][n === '1' ? 0 : 1] + '<'],
         [/(↓ )· (?=\d)/g, '$1× '],
+        // konstruktion6
+        [/Die beiden kürzeren Seiten sind zusammen ([\d,]+) cm lang, die längste ([\d,]+) cm\. /g, 'Les deux côtés les plus courts mesurent ensemble $1 cm, le plus long $2 cm. '],
+        [/^Konstruktion aus (sss|sws|wsw|SsW|www)$/, (m, k) => 'Construction à partir de ' + ({ sss: 'CCC', sws: 'CAC', wsw: 'ACA', SsW: 'CcA', www: 'AAA' })[k]],
     ]
 });

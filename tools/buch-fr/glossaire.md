@@ -831,6 +831,11 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 | Umfang $u$ (2.2 task) | périmètre $P$ | $P = 4 \times a$ |
 | Eratosthenes, Syene, Stadion, Kleomedes | Ératosthène, Syène, stade, Cléomède | 2.2 excursion |
 | Lab STEIGUNGS-LABOR, KOORDINATENSYSTEM, GALTON BOARD | LABORATOIRE DE LA PENTE, REPÈRE, PLANCHE DE GALTON | as fr-1 and fr-6 |
+| kongruent, Kongruenzsätze sss, sws, wsw, SsW, www, ssW | égaux (superposables), cas d’égalité CCC, CAC, ACA, CcA, AAA, ccA | 3.1, widget konstruktion6; C côté, A angle; CcA mirrors SsW: C the larger side, the angle opposite it (not taught in France, explained once) |
+| Innenwinkelsatz, Wechselwinkel, Nebenwinkel, gestreckter Winkel, Außenwinkel | somme des angles d’un triangle, angles alternes-internes, angles supplémentaires adjacents, angle plat, angle extérieur | 3.1, widget winkelsumme6 |
+| Definition, Satz, Wenn-dann-Form, Voraussetzung, Behauptung, Beweis | définition, théorème, forme « si…, alors… », hypothèse, conclusion, démonstration | 3.1 |
+| Planfigur, Konstruktionsbeschreibung, Geodreieck, DGS | figure à main levée, programme de construction, équerre-rapporteur, logiciel de géométrie dynamique | 3.1 |
+| Strecke $\overline{AB}$ / Länge / Gerade AB | segment $[AB]$ / longueur $AB$ / droite $(AB)$ | French notation in the pages; widget winkelsumme6: « parallèle à $(AB)$ » |
 
 ## mathegy7-fr
 
