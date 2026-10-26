@@ -814,6 +814,18 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 | Stammbruch, Papyrus Rhind, Ahmes | fraction unitaire, papyrus Rhind, Ahmès | 1.1 excursion |
 | TR (Taschenrechner-Zeichen) | CALC | the marker `g-cas` in front of a task |
 | Labs SCHRIFTLICHE DIVISION, RECHEN-RALLYE | DIVISION POSÉE, RALLYE DE CALCUL | « À ESSAYER AUSSI (EN ALLEMAND) » as OS 5 |
+| Kehrwert, gemischte Zahl, Überschlag, Probe | inverse, écriture mixte ($2\tfrac12 = 2 + \tfrac12$), ordre de grandeur, vérification | 1.2 |
+| De Thiende (Stevin) | « La Disme » | 1.2 excursion, the French title of 1585 |
+| Vorrangregeln, Punkt vor Strich | règles de priorité, « × et : avant + et − » | 1.3, widget vorrang6 (as OS 5) |
+| Vertauschen, Verbinden, Verteilen | échanger (commutativité), regrouper (associativité), distribuer (distributivité) | 1.3 |
+| Variable, Umkehraufgabe, Lösungsplan | inconnue, opération inverse, plan de résolution | 1.3 |
+| Landheim | classe de découverte | 1.2 test |
+| Zuordnung: mehrdeutig / eindeutig / eineindeutig, Pfeildarstellung | correspondance : non univoque / univoque / biunivoque, diagramme sagittal | 2.1, widget pfeile6 |
+| Wortform, Wertetabelle | description en mots, tableau de valeurs | 2.1, widget darstellung6 « En mots » |
+| absolute / relative Häufigkeit, Chance | effectif / fréquence, probabilité (« une chance sur six ») | 2.1, widget zufall6 |
+| Münze Kopf / Zahl | pièce : face / pile | widget zufall6 (« Zahl » by a rule tied to the table and the picture) |
+| Ergebnis (table head of zufall6) | Issue | rule: the word « Ergebnis » stays « Résultat » (bruchop6) |
+| Schulfach Deutsch (survey in 2.1) | français | the pupil's own language |
 
 ## mathegy7-fr
 

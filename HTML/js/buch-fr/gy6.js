@@ -55,6 +55,24 @@ window.BuchFR && BuchFR.add('gy6', {
         'Passt.': 'Convient.', 'Passt nicht.': 'Ne convient pas.',
         'Probe: Einsetzen ergibt eine wahre Aussage.': 'Vérification : en remplaçant, on obtient une égalité vraie.',
         'Die linke Seite ist zu klein.': 'Le membre de gauche est trop petit.', 'Die linke Seite ist zu groß.': 'Le membre de gauche est trop grand.',
+        // pfeile6
+        'Schüler → Vorname': 'Élève → prénom', 'Vorname → Schüler': 'Prénom → élève', 'Schüler → Sitzplatz': 'Élève → place',
+        'Zahl → Teiler': 'Nombre → diviseurs', 'Zahl → Doppeltes': 'Nombre → double', 'Zahl → Rest bei : 3': 'Nombre → reste de la division par 3',
+        'Zuordnung': 'Correspondance', 'Platz 1': 'Place 1', 'Platz 2': 'Place 2', 'Platz 3': 'Place 3', 'Platz 4': 'Place 4',
+        'Welche Art von Zuordnung ist das?': 'De quel type de correspondance s’agit-il ?',
+        'mehrdeutig': 'non univoque', 'eindeutig': 'univoque', 'eineindeutig': 'biunivoque',
+        'Richtig:': 'Correct :', 'Nicht ganz.': 'Pas tout à fait.',
+        // zufall6 ("Würfel" and the coin side "Zahl" are rules below: "Würfel" is also the cube, "Zahl" also a number)
+        'Münze': 'Pièce', 'Glücksrad': 'Roue de loterie', 'Versuch': 'Expérience', 'Kopf': 'Face', 'Rot': 'Rouge', 'Blau': 'Bleu',
+        '1-mal': '1 fois', '10-mal': '10 fois', '100-mal': '100 fois', 'Löschen': 'Effacer',
+        'Säulendiagramm der relativen Häufigkeiten': 'Diagramme en colonnes des fréquences',
+        'absolut': 'effectif', 'relativ': 'fréquence', 'in %': 'en %',
+        // darstellung6
+        'Kerze': 'Bougie', 'Temperatur': 'Température', 'Fahrradverleih': 'Location de vélos', 'Zeile wählen': 'Choisir une valeur',
+        'Zeit in h': 'Durée en h', 'Höhe in cm': 'Hauteur en cm', 'Uhrzeit': 'Heure', 'Temperatur in °C': 'Température en °C',
+        'Leihzeit in h': 'Durée de location en h', 'Preis in €': 'Prix en €',
+        'Wortform:': 'En mots :', 'Tabelle:': 'Tableau :', 'Gleichung:': 'Équation :',
+        'Keine. Die Temperatur kann man nur messen, nicht ausrechnen.': 'Aucune. La température se mesure, elle ne se calcule pas.',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -91,6 +109,30 @@ window.BuchFR && BuchFR.add('gy6', {
         ['Fertig. Ohne Ausklammern: $', 'Terminé. Sans mettre en facteur : $'], ['$, mehr Arbeit.', '$, c’est plus de travail.'],
         // probieren6
         ['Es passen: ', 'Conviennent : '], ['Bisher passt keiner.', 'Aucune valeur ne convient pour l’instant.'],
+        // pfeile6: the labels inside the picture's aria label, the reasons
+        ['Pfeildarstellung: ', 'Diagramme sagittal : '],
+        ['Schüler → Vorname', 'élève → prénom'], ['Vorname → Schüler', 'prénom → élève'], ['Schüler → Sitzplatz', 'élève → place'],
+        ['Zahl → Teiler', 'nombre → diviseurs'], ['Zahl → Doppeltes', 'nombre → double'], ['Zahl → Rest bei : 3', 'nombre → reste de la division par 3'],
+        ['Von jedem Element links geht genau ein Pfeil aus, und rechts kommt bei jedem genau ein Pfeil an. Auch rückwärts ist die Zuordnung eindeutig.',
+            'De chaque élément de gauche part exactement une flèche, et chaque élément de droite en reçoit exactement une. Dans l’autre sens aussi, la correspondance est univoque.'],
+        ['Von jedem Element links geht genau ein Pfeil aus. ', 'De chaque élément de gauche part exactement une flèche. '],
+        ['<b>mehrdeutig:</b> von einem Element gehen mehrere Pfeile aus. <b>eindeutig:</b> von jedem genau einer. <b>eineindeutig:</b> eindeutig, und auch rückwärts eindeutig.',
+            '<b>non univoque :</b> d’un élément partent plusieurs flèches. <b>univoque :</b> de chacun en part exactement une. <b>biunivoque :</b> univoque, et univoque aussi dans l’autre sens.'],
+        // zufall6
+        ['Relative Häufigkeit = absolute Häufigkeit : Anzahl der Versuche. Die gestrichelte Linie zeigt die Chance',
+            'Fréquence = effectif : nombre d’essais. La ligne en pointillés montre la probabilité'],
+        [' (Rot ist das halbe Rad, Blau ein Drittel, Grün ein Sechstel)', ' (le rouge occupe la moitié de la roue, le bleu un tiers, le vert un sixième)'],
+        ['. Je mehr Versuche, desto näher kommen die Säulen meistens heran.', '. Plus il y a d’essais, plus les colonnes s’en approchent, en général.'],
+        // darstellung6
+        ['Eine Kerze ist 20 cm hoch. Jede Stunde brennt sie 2,5 cm herunter.', 'Une bougie mesure 20 cm de haut. Chaque heure, elle diminue de 2,5 cm.'],
+        ['An einem Herbsttag wird alle zwei Stunden die Temperatur gemessen.', 'Un jour d’automne, on mesure la température toutes les deux heures.'],
+        ['Ein Fahrrad kostet 3 € pro Stunde Leihzeit.', 'Louer un vélo coûte 3 € par heure.'],
+        ['Diagramm: ', 'Graphique : '], ['Gewählt: ', 'Choisi : '],
+        ['Die Kerze brennt gleichmäßig, auch zwischen den vollen Stunden. Darum darf man die Punkte mit einer Linie verbinden.',
+            'La bougie se consume régulièrement, même entre les heures pleines. C’est pourquoi on peut relier les points par une ligne.'],
+        ['Die gestrichelte Linie verbindet nur die Messpunkte. Was dazwischen geschah, weiß man nicht genau.',
+            'La ligne en pointillés relie seulement les points mesurés. Ce qui s’est passé entre deux mesures, on ne le sait pas exactement.'],
+        ['Abgerechnet wird nur nach ganzen Stunden, darum gibt es nur einzelne Punkte.', 'On ne paie que des heures entières : c’est pourquoi il n’y a que des points isolés.'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -122,5 +164,18 @@ window.BuchFR && BuchFR.add('gy6', {
         [/Gesucht sind alle Zahlen, für die die linke Seite (kleiner|größer) als (\$[^$]*\$) ist\./g, (m, r, x) =>
             'On cherche tous les nombres pour lesquels le membre de gauche est ' + (r === 'kleiner' ? 'inférieur' : 'supérieur') + ' à ' + x + '.'],
         [/Geprüft: (\d+) von (\d+) Werten\. /g, (m, a, b) => (a === '1' ? 'Valeur testée : 1 sur ' : 'Valeurs testées : ' + a + ' sur ') + b + '. '],
+        // pfeile6
+        [/Die Zuordnung ist (mehrdeutig|eindeutig, aber nicht eineindeutig|eineindeutig)\. /g, (m, k) => 'La correspondance est ' +
+            ({ 'mehrdeutig': 'non univoque', 'eindeutig, aber nicht eineindeutig': 'univoque, mais pas biunivoque', 'eineindeutig': 'biunivoque' })[k] + '. '],
+        [/Von „([^“]+)“ gehen (\d+) Pfeile aus\./g, 'De « $1 » partent $2 flèches.'],
+        [/Bei „([^“]+)“ kommen aber (\d+) Pfeile an, rückwärts ist die Zuordnung also nicht eindeutig\./g,
+            'Mais « $1 » reçoit $2 flèches : dans l’autre sens, la correspondance n’est donc pas univoque.'],
+        // zufall6: the die (the cube of other books has the same word), the coin side "Zahl", the table head, the number of trials
+        [/(data-v="wuerfel">)(?:Würfel|\u0003\d+\u0004)(<)/g, '$1Dé$2'],
+        [/(<td>|<text class="d-num"[^>]*>)Zahl(<\/)/g, '$1Pile$2'],
+        [/(g6-tab"><tr><th>)(?:Ergebnis|\u0003\d+\u0004)(<\/th><th>)/g, '$1Issue$2'],
+        [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '0' || n === '1' ? ' essai' : ' essais') + '<'],
+        // darstellung6: "Gewählt: Uhrzeit 12 → Temperatur 14."
+        [/Gewählt: Uhrzeit /g, 'Gewählt: heure '], [/ → Temperatur /g, ' → température '],
     ]
 });
