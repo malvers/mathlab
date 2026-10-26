@@ -872,6 +872,13 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Flächeninhalt $A' = k^2 \cdot A$ | $\mathcal{A}' = k^2 \times \mathcal{A}$ | 4.1: the area is $\mathcal{A}$ where A is a point |
 | DGS, GeoGebra Streckung | géométrie dynamique, Dilate | English command name, said once |
 | Storchschnabel, Pantograph | pantographe (« Storchschnabel », bec de cigogne) | 4.1 excursion |
+| Ähnlichkeit, ähnlich, kongruent | figures semblables, semblables, superposables | 4.2; widget aehnlich8 |
+| Hauptähnlichkeitssatz | critère des deux angles | 4.2 |
+| entsprechende Winkel / Seiten, Stufenwinkel | angles / côtés correspondants, angles correspondants (parallèles) | 4.2 |
+| Hilfsfigur, Vorwärts- / Rückwärtsarbeiten | figure auxiliaire, raisonner en avant / en arrière | 4.2, 5 |
+| Schattenmethode, Schatten $s$, $S$, Försterdreieck, Daumensprung | méthode des ombres, ombres $o$, $O$, triangle du forestier, saut du pouce | widget schatten8 (the drawn s, S become o, O) |
+| Maßstab $1 : m$, Einheitswürfel | échelle $1/m$, cube unité | 4.2, widget gulliver8 |
+| Liliputaner | Lilliputiens | 4.2 |
 
 ## mathegy9-fr
 

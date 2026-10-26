@@ -44,6 +44,25 @@ window.BuchFR && BuchFR.add('gy8', {
         'Streckfaktor $k$': 'Rapport $k$', 'Original': 'Figure initiale', 'Verhältnis': 'Rapport', 'Winkel bei $A$': 'Angle en $A$', 'gleich': 'égal', 'Fläche': 'Aire',
         'Zieh an $Z$, $A$, $B$ und $C$. Die gestrichelten Strahlen beginnen in $Z$ und gehen durch Punkt und Bildpunkt.':
             'Fais glisser $O$, $A$, $B$ et $C$. Les demi-droites en pointillés partent de $O$ et passent par chaque point et par son image.',
+        // aehnlich8 (the verdicts with k: rules below; the table head "Seiten­verhältnis" has a soft hyphen)
+        'Ein Beispiel zeigen': 'Montrer un exemple', 'gegeben': 'donné', 'dein Dreieck': 'ton triangle',
+        'Ein gegebenes Dreieck und ein zweites Dreieck zum Vergleichen': 'Un triangle donné et un second triangle à comparer',
+        'klein': 'petit', 'mittel': 'moyen', 'groß': 'grand', 'Winkel, gegeben': 'Angles donnés', 'Winkel bei dir': 'Tes angles', 'Seiten­verhältnis': 'Rapport des côtés',
+        'Die drei Punkte liegen auf einer Geraden: Das ist kein Dreieck.': 'Les trois points sont alignés : ce n’est pas un triangle.',
+        'Zieh die gelben Ecken auf die Gitterpunkte. Schaffst du ein Dreieck, das ähnlich zum gegebenen ist, aber anders liegt?':
+            'Fais glisser les sommets jaunes sur les points du quadrillage. Arrives-tu à construire un triangle semblable au triangle donné, mais placé autrement ?',
+        // gulliver8 (the sentence for the other k: a rule below)
+        'Streckfaktor': 'Rapport', 'großer Würfel': 'grand cube', 'Faktor': 'Facteur',
+        'Kantenlänge': 'Arête', 'Oberfläche': 'Aire totale', 'Volumen': 'Volume',
+        'Gulliver ist 12-mal so groß wie ein Liliputaner. Seine Haut hat also die $144$-fache Fläche, sein Körper das $1728$-fache Volumen. Bei Jonathan Swift rechnen die Mathematiker des Kaisers genau so und geben ihm jeden Tag Essen für 1724 Liliputaner, vier weniger als $12^3$.':
+            'Gulliver est 12 fois plus grand qu’un Lilliputien. Sa peau a donc une aire $144$ fois plus grande, son corps un volume $1728$ fois plus grand. Chez Jonathan Swift, les mathématiciens de l’empereur font exactement ce calcul et lui donnent chaque jour à manger pour 1724 Lilliputiens, quatre de moins que $12^3$.',
+        // schatten8 (the shadows s, S are o, O in French, as « ombre »; the sentences with numbers: rules below)
+        'Schattenmethode': 'Méthode des ombres', 'Försterdreieck': 'Triangle du forestier', 'Methode': 'Méthode', 'Sonnenhöhe': 'Hauteur du soleil',
+        'Abstand $d$ zum Baum': 'Distance $d$ à l’arbre', 'Höhe ausrechnen': 'Calculer la hauteur', 'Neuer Baum': 'Nouvel arbre', 'Stab 2 m': 'Bâton 2 m',
+        'Baum und Stab mit ihren Schatten': 'Arbre et bâton avec leurs ombres', 'Höhenmessung mit dem Försterdreieck': 'Mesure d’une hauteur avec le triangle du forestier',
+        'Die Sonnenstrahlen fallen parallel ein. Das blaue und das gelbe Dreieck sind deshalb ähnlich: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.':
+            'Les rayons du soleil arrivent parallèles. Le triangle bleu et le triangle jaune sont donc semblables : $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{O}{o}$.',
+        'Deine Peillinie geht über die Spitze hinweg: Geh näher heran.': 'Ta ligne de visée passe au-dessus du sommet : rapproche-toi.',
         // gluecksrad8
         'Felder': 'Secteurs', 'ein Feld weniger': 'un secteur de moins', 'ein Feld mehr': 'un secteur de plus',
         'gleich groß': 'de même taille', 'verschieden groß': 'de tailles différentes', 'Größe der Felder': 'Taille des secteurs', 'Drehen': 'Tourner',
@@ -70,6 +89,10 @@ window.BuchFR && BuchFR.add('gy8', {
         ['Mit $k = 1$ bleibt jeder Punkt, wo er ist.', 'Avec $k = 1$, chaque point reste à sa place.'],
         ['Mit $k = -1$ ist die Streckung eine Punktspiegelung an $Z$.', 'Avec $k = -1$, l’homothétie est la symétrie centrale de centre $O$.'],
         [' Alle Winkel bleiben gleich.', ' Tous les angles sont conservés.'],
+        // schatten8
+        ['Du hältst ein gleichschenklig-rechtwinkliges Dreieck vor das Auge (Augenhöhe $1{,}6$ m) und peilst an seiner langen Seite entlang. Diese Linie steigt unter $45^\\circ$: ',
+            'Tu tiens devant ton œil un triangle rectangle isocèle (yeux à $1{,}6$ m de hauteur) et tu vises le long de son grand côté. Cette ligne monte avec un angle de $45^\\circ$ : '],
+        ['Treffer!</b> Du siehst genau die Spitze. ', 'Dans le mille !</b> Tu vois exactement le sommet. '],
         // lgs8 (a sentence that starts with <b> is no whole label for the engine)
         ['<b>Probe</b> in beiden Gleichungen, dann die Lösungsmenge.', '<b>Vérification</b> dans les deux équations, puis l’ensemble des solutions.'],
         // wegzeit8 (where Mia is: a rule below)
@@ -132,6 +155,26 @@ window.BuchFR && BuchFR.add('gy8', {
             (m, k) => 'Pour $k$ négatif, chaque point image est de l’autre côté de $O$. Les segments images sont $|k| = ' + k + '$ fois plus longs.'],
         [/(Eine <b>Vergrößerung<\/b>|<b>Eine Verkleinerung<\/b>): Jede Strecke wird \$([^$]*)\$-mal so lang, die Fläche \$k\^2 = ([^$]*)\$-mal so groß\./g,
             (m, w, a, b) => (/Vergr/.test(w) ? 'Un <b>agrandissement</b>' : '<b>Une réduction</b>') + ' : chaque longueur est multipliée par $' + a + '$, l’aire par $k^2 = ' + b + '$.'],
+        // aehnlich8: the verdicts
+        [/Ähnlich!<\/b> Alle Winkel stimmen überein, und alle Seiten sind mit demselben Faktor \$k \\approx ([^$]*)\$ gestreckt\./g,
+            (m, k) => 'Semblables !</b> Tous les angles sont égaux, et tous les côtés sont multipliés par le même nombre $k \\approx ' + k + '$.'],
+        [/ Mit \$k = 1\$ sind die Dreiecke sogar kongruent\./g, ' Avec $k = 1$, les triangles sont même superposables.'],
+        [/Noch nicht ähnlich: (Nur ein Winkel stimmt|Kein Winkel stimmt)\. Die Seitenverhältnisse sind verschieden\./g,
+            (m, w) => 'Pas encore semblables : ' + (w[0] === 'N' ? 'un seul angle est égal' : 'aucun angle n’est égal') + '. Les rapports des côtés sont différents.'],
+        // gulliver8: k = 1 changes nothing, the other k, and the aria label
+        [/Alle Längen werden \$1\$-mal so groß, jede Fläche \$1\^2 = 1\$-mal so groß, das Volumen \$1\^3 = 1\$-mal so groß\./g, 'Avec $k = 1$, les longueurs, les aires et les volumes ne changent pas.'],
+        [/Alle Längen werden \$(\d+)\$-mal so groß, jede Fläche \$(\d+\^2 = \d+)\$-mal so groß, das Volumen \$(\d+\^3 = \d+)\$-mal so groß\./g,
+            (m, a, b, c) => 'Toutes les longueurs sont multipliées par $' + a + '$, chaque aire par $' + b + '$, le volume par $' + c + '$.'],
+        // ("Einheitswürfel" by its place: js/buch-fr/gy5.js has the plural « Cubes unités » as a word)
+        [/>Einheitswürfel</g, '>Cube unité<'],
+        [/Ein Einheitswürfel und ein Würfel aus (\d+) hoch drei Einheitswürfeln/g, 'Un cube unité et un cube formé de $1 × $1 × $1 cubes unités'],
+        // schatten8: the shadows o and O (labels of the drawing and formulas), the measured lengths, the forester's triangle
+        [/(<text class="g8-lab sc8-it" [^>]*>)s(<\/text>)/g, '$1o$2'], [/(<text class="g8-lab sc8-it" [^>]*>)S(<\/text>)/g, '$1O$2'],
+        [/Gemessen: Der Stab ist \$2\$ m hoch, sein Schatten ist \$s \\approx ([^$]*)\$ m lang\. Der Schatten des Baums ist \$S \\approx ([^$]*)\$ m lang\./g,
+            (m, a, b) => 'Mesures : le bâton mesure $2$ m de haut, son ombre $o \\approx ' + a + '$ m. L’ombre de l’arbre mesure $O \\approx ' + b + '$ m.'],
+        [/\. Tatsächlich ist der Baum \$([^$]*)\$ m hoch\./g, (m, h) => '. En réalité, l’arbre mesure $' + h + '$ m.'],
+        [/Auf \$d = ([^$]*)\$ m steigt sie um \$([^$]*)\$ m\./g, (m, a, b) => 'sur $d = ' + a + '$ m, elle monte de $' + b + '$ m.'],
+        [/Du siehst den Baum in \$([^$]*)\$ m Höhe, unter der Spitze: Geh weiter zurück\./g, (m, h) => 'Tu vois l’arbre à $' + h + '$ m de hauteur, sous le sommet : recule encore.'],
         // geraden (js/buch-lgs.js, chapter 3.3): the point of intersection is I in the chapter text (S is the solution set)
         [/<b>Genau eine Lösung<\/b>: Die Geraden schneiden sich in \$S\(/g, '<b>Exactement une solution</b> : les droites se coupent en $I('],
         // wegzeit8: the axis label "s in m" is d here (js/buch-fr/integral.js has "s en m" as a word, so a rule and no second word)
