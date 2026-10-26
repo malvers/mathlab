@@ -761,6 +761,9 @@ above was changed.
 | echter / unechter Bruch | fraction inférieure à 1 / supérieure ou égale à 1 | 2.1, as OS 5 and the widget bruch5 |
 | gemischte Zahl $1\tfrac34$ | écriture mixte, « c’est-à-dire $1 + \tfrac34$ » | 2.1 says the sum once |
 | vollständig kürzen, größter gemeinsamer Teiler | rendre irréductible, plus grand diviseur commun | 2.1 |
+| „drei Komma vier sieben“ (not „siebenundvierzig“) | « trois virgule quarante-sept » or « 3 unités et 47 centièmes » | 2.2: the French way of reading, as the widget stellenwert5 says; the aside warns that « quarante-sept » sounds bigger than « cinq » |
+| ct (Cent) | centimes (written out) | 2.2 |
+| Schlussverkauf, Rabatt | soldes, réduction | 2.2 |
 | Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD | cards, en allemand |
 
 ## mathegy6-fr
