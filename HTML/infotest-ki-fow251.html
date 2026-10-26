@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leistungstest KI FOW25-1 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js - this file only carries the questions. Same questions,
+     options and order as the paper test of group G, so the stencil fits both. -->
+<script>
+window.QUIZ = {
+  "id": "infotest-ki-fow251",
+  "back": "svp/informatik/fos12.html",
+  "version": "v1",
+  "title": "Leistungstest KI · FOW25-1",
+  "subtitle": "Informatik · Gruppe G · Künstliche Intelligenz · 20 Fragen · genau eine Antwort pro Frage",
+  "questions": [
+    {
+      "q": "Welche Grundidee steckt hinter künstlichen neuronalen Netzen?",
+      "opts": [
+        "Eine riesige Datenbank speichert zu jeder Frage die fertige Antwort",
+        "Ein Programmierer schreibt für jede Frage eine feste Regel in den Code",
+        "Das Gehirn nachbauen: viele einfache Neurone, die über gewichtete Verbindungen Zahlen weitergeben",
+        "Ein einziger, sehr schneller Prozessor probiert alle Antworten der Reihe nach durch"
+      ],
+      "steps": [
+        "„Copy the Brain“: Man baut das Gehirn in seiner wesentlichen Funktion nach – viele einfache Neurone, die über gewichtete Verbindungen Zahlen weitergeben."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein künstliches Neuron bekommt die Eingänge 5 und 2 mit den Gewichten 0,8 und 0,5. Sein Ergebnis geht mit dem Gewicht 0,6 weiter. Was kommt beim nächsten Neuron an?",
+      "opts": [
+        "4,2",
+        "2,4",
+        "3",
+        "5"
+      ],
+      "steps": [
+        "Erst jeden Eingang mit seinem Gewicht malnehmen und alles addieren: $5 \\cdot 0{,}8 + 2 \\cdot 0{,}5 = 4 + 1 = 5$. Dann mit dem nächsten Gewicht malnehmen: $5 \\cdot 0{,}6 = 3$. Beim nächsten Neuron kommt 3 an."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wann und wo wurde die Künstliche Intelligenz als Forschungsgebiet begründet?",
+      "opts": [
+        "1956 beim Dartmouth Workshop in den USA",
+        "1997 beim Schachsieg von Deep Blue in New York",
+        "1936 mit Alan Turings Rechenmaschine in England",
+        "1969 bei der NASA, im Jahr der Mondlandung"
+      ],
+      "steps": [
+        "1956 beim Dartmouth Workshop in den USA (Dartmouth Summer Research Project on Artificial Intelligence) – mit Marvin Minsky, Claude Shannon, Ray Solomonoff und anderen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Warum „explodiert“ KI gerade jetzt? Welche zwei Gründe nennt der Vortrag?",
+      "opts": [
+        "Ein neues EU-Gesetz und staatliche Fördergelder",
+        "Neue Programmiersprachen und schnellere Internetverbindungen",
+        "Riesige Mengen an Trainingsdaten und riesige Rechenleistung durch Grafikkarten",
+        "Billigere Festplatten und mehr Programmierer weltweit"
+      ],
+      "steps": [
+        "1. Riesige Mengen an Trainingsdaten sind verfügbar, z. B. ImageNet mit 15 Millionen von Hand beschrifteten Bildern. 2. Riesige Rechenleistung ist verfügbar: Grafikkarten (NVIDIA) rechnen die nötigen Matrix-Multiplikationen massenhaft parallel."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wofür stehen die drei Buchstaben in GPT?",
+      "opts": [
+        "General, Processing, Technology",
+        "Global, Prediction, Tool",
+        "Generative, Pre-trained, Transformer",
+        "Generated, Programmed, Text"
+      ],
+      "steps": [
+        "G = Generative (erzeugt Text), P = Pre-trained (vorab an riesigen Textmengen trainiert), T = Transformer (die Bauart des Netzes)."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie heißt der Artikel von 2017, mit dem der Transformer – das T in GPT – vorgestellt wurde?",
+      "opts": [
+        "„Computing Machinery and Intelligence“",
+        "„Attention Is All You Need“",
+        "„Language Models Are Few-Shot Learners“",
+        "„Deep Learning Is All You Need“"
+      ],
+      "steps": [
+        "„Attention Is All You Need“ von Vaswani und Kollegen (2017). Unsere Präsentation trägt denselben Titel."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was zeigt das Beispiel der „manipulierten Vorhersage“ („… im Wesentlichen einer Person zu verdanken: Bundeskanzler Merz“)?",
+      "opts": [
+        "Sprachmodelle kennen immer die neuesten Nachrichten",
+        "Die Vorhersage lässt sich lenken: Das Modell setzt Muster fort, ob sie stimmen, prüft es nicht",
+        "Das Modell prüft jede Aussage in einer Datenbank nach",
+        "Das Modell weigert sich, über Politik zu schreiben"
+      ],
+      "steps": [
+        "Die Vorhersage lässt sich lenken: Das Modell setzt fort, was zu den Mustern im Kontext und in den Trainingsdaten passt – ob es stimmt, prüft es nicht. Wer Prompt oder Trainingsdaten steuert, steuert die Antwort."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "GPT-3 hat 175 Milliarden Parameter, das Gehirn etwa $10^{15}$ Verbindungen. Wie viel Mal so viele hat das Gehirn?",
+      "opts": [
+        "rund 570 000-mal so viele",
+        "rund 175-mal so viele",
+        "rund 57-mal so viele",
+        "rund 5 700-mal so viele"
+      ],
+      "steps": [
+        "$10^{15} = 1\\,000\\,000\\,000\\,000\\,000$ geteilt durch $175\\,000\\,000\\,000$. Auf beiden Seiten neun Nullen streichen: $1\\,000\\,000 : 175 \\approx 5\\,714$. Das Gehirn hat rund 5 700-mal so viele Verbindungen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie lernte AlphaGo Zero Go – und wie ging es gegen das ältere AlphaGo aus?",
+      "opts": [
+        "Es spielte nur gegen sich selbst und schlug AlphaGo Lee mit 100 : 0",
+        "Es lernte aus Millionen Partien von Profis und gewann 4 : 1",
+        "Es spielte gegen Menschen im Internet und verlor knapp",
+        "Go-Meister programmierten seine Züge, das Spiel endete 50 : 50"
+      ],
+      "steps": [
+        "AlphaGo Zero ist selbstlernend: Es spielte nur gegen sich selbst. Nach 40 Tagen Training schlug es AlphaGo Lee – die Version, die 2016 Weltmeister Lee Sedol 4 : 1 besiegt hatte – mit 100 : 0."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "DeepSeek gab für das Training von DeepSeek-V3 2,788 Millionen GPU-Stunden an, gerechnet mit 2 US-Dollar je Stunde. Was kostete das?",
+      "opts": [
+        "rund 2,8 Millionen US-Dollar",
+        "rund 5,6 Millionen US-Dollar",
+        "rund 5,6 Milliarden US-Dollar",
+        "rund 56 Millionen US-Dollar"
+      ],
+      "steps": [
+        "$2{,}788 \\cdot 2 = 5{,}576$, also 5,576 Millionen US-Dollar – rund 5,6 Millionen. Achtung: nur die Trainingsläufe, ohne Vorversuche, ohne Hardware und nicht unabhängig geprüft. Trotzdem bebten die Technologie-Börsen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist der Unterschied zwischen „Open Weights“ und Open Source?",
+      "opts": [
+        "Open Weights sind kostenlos, Open Source kostet immer Geld",
+        "Bei Open Weights ist alles offen, auch alle Trainingsdaten",
+        "Open Weights laufen nur in der Cloud des Herstellers",
+        "Bei Open Weights kann man die Gewichte herunterladen, die Trainingsdaten bleiben aber geheim"
+      ],
+      "steps": [
+        "Bei Open Weights (z. B. Llama, Mistral, Qwen, DeepSeek) kann man die Gewichte herunterladen und das Modell auf eigener Hardware betreiben – keine Cloud, keine Daten nach draußen. Die Trainingsdaten bleiben aber geheim; echtes Open Source würde alles offenlegen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche KI-Anwendung ist nach dem EU AI Act seit Februar 2025 in der Schule verboten?",
+      "opts": [
+        "Die Emotionserkennung",
+        "Die automatische Übersetzung von Texten",
+        "Die Sprachausgabe für Vorlesetexte",
+        "Die Rechtschreibprüfung"
+      ],
+      "steps": [
+        "Die Emotionserkennung. Der EU AI Act gilt seit August 2024 und ordnet KI nach Risikoklassen: je höher das Risiko, desto strenger die Pflichten. Bildung zählt zu den Hochrisiko-Bereichen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wo steckt nach dem Training, was ein neuronales Netz gelernt hat?",
+      "opts": [
+        "Im Arbeitsspeicher, der beim Ausschalten gelöscht wird",
+        "In einer Liste von Regeln, die ein Programmierer geschrieben hat",
+        "In einer Datenbank mit allen Trainingsbeispielen",
+        "Ausschließlich in den Gewichten, den Zahlen an den Verbindungen"
+      ],
+      "steps": [
+        "Ausschließlich in den Gewichten – den Zahlen an den Verbindungen. Niemand programmiert sie; sie werden aus Beispielen zurechtgerückt, bis der Fehler klein ist."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was heißt „Deep Learning“?",
+      "opts": [
+        "Lernen aus Daten, die tief im Internet versteckt sind",
+        "Lernen mit einem einzigen, sehr großen Neuron",
+        "Lernen mit einem besonders großen Bildschirm",
+        "Lernen mit einem Netz aus vielen Schichten hintereinander"
+      ],
+      "steps": [
+        "Lernen mit einem Netz aus vielen Schichten hintereinander. Die verdeckten Schichten bauen Merkmale auf: frühe erkennen Kanten, spätere z. B. Augen, noch spätere Gesichter."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wofür steht LLM, und welche einzige Aufgabe hat ein LLM?",
+      "opts": [
+        "Learning Language Memory; es schlägt Antworten im Internet nach",
+        "Large Logic Machine; es löst logische Rätsel",
+        "Large Language Model; es sagt das nächste Token voraus",
+        "Long Language Model; es übersetzt lange Texte"
+      ],
+      "steps": [
+        "Large Language Model, ein großes Sprachmodell. Seine einzige Aufgabe: das nächste Token vorhersagen. Es erzeugt Text (generativ), es schlägt ihn nicht nach."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Faustregel Deutsch: 1 Wort ≈ 1,5 bis 2 Token. Mit wie vielen Token rechnest du bei einem Text mit 300 Wörtern?",
+      "opts": [
+        "genau 300 Token",
+        "etwa 450 bis 600 Token",
+        "etwa 150 bis 200 Token",
+        "etwa 4 500 bis 6 000 Token"
+      ],
+      "steps": [
+        "$300 \\cdot 1{,}5 = 450$ und $300 \\cdot 2 = 600$. Also mit etwa 450 bis 600 Token."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "GPT-4 kennt nur 100 256 Token, Deutsch hat aber Millionen Wortformen. Wie passt das zusammen?",
+      "opts": [
+        "Jedes Wort wird erst ins Englische übersetzt",
+        "Seltene oder lange Wörter werden in Wortteile zerlegt, aus denen sich jedes Wort zusammensetzen lässt",
+        "GPT-4 kann nur 100 256 deutsche Wörter benutzen",
+        "Unbekannte Wörter werden einfach weggelassen"
+      ],
+      "steps": [
+        "Der Tokenizer zerlegt Text in Stücke: Häufige Wörter sind ein Token, lange oder seltene zerfallen in Wortteile („Kont|ext|fen|ster“). Aus den Stücken lässt sich jedes Wort zusammensetzen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist eine Halluzination, und woher kommt sie?",
+      "opts": [
+        "Ein Computervirus verändert die Antwort",
+        "Der Bildschirm flackert und zeigt ein falsches Bild",
+        "Das Modell wurde absichtlich zum Lügen programmiert",
+        "Das Modell erfindet etwas Plausibles, weil es das wahrscheinlichste Wort vorhersagt, nicht das wahre"
+      ],
+      "steps": [
+        "Das Modell erfindet etwas, das plausibel klingt – oft Quellen, Zitate, Zahlen oder Paragraphen. Ursache: Es sagt das wahrscheinlichste Wort voraus, nicht das wahre, und hat keine „weiß ich nicht“-Taste. Gegenmittel: Beleg mitgeben und nachprüfen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Worin unterscheiden sich Prompt Engineering und Context Engineering?",
+      "opts": [
+        "Prompt Engineering formuliert die Anweisung, Context Engineering füllt das ganze Kontextfenster bewusst",
+        "Prompt Engineering trainiert das Modell, Context Engineering löscht es",
+        "Prompt Engineering baut die Hardware, Context Engineering die Software",
+        "Beides ist dasselbe, einmal englisch, einmal deutsch"
+      ],
+      "steps": [
+        "Prompt Engineering formuliert die einzelne Anweisung präzise („Wie formuliere ich?“). Context Engineering füllt das ganze Kontextfenster bewusst – Daten, Werkzeuge, Verlauf, Regeln („Was weiß das Modell gerade?“) – und lässt Ballast weg."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was geschieht bei RAG, bevor das Modell antwortet?",
+      "opts": [
+        "Im eigenen Bestand wird gesucht, und die Fundstellen kommen in den Prompt",
+        "Die Frage wird zuerst ins Englische übersetzt",
+        "Das Modell fragt einen Menschen um Rat",
+        "Das Modell wird mit den neuen Daten komplett neu trainiert"
+      ],
+      "steps": [
+        "RAG = Retrieval-Augmented Generation: Erst wird im eigenen Bestand gesucht (nach Ähnlichkeit, über Embeddings), dann wandern die Fundstellen in den Prompt. Das Modell antwortet aus dem mitgelieferten Text – aktuell, prüfbar, mit Quelle."
+      ],
+      "solution": 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

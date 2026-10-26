@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leistungstest KI FOS25-2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js - this file only carries the questions. Same questions,
+     options and order as the paper test of group H, so the stencil fits both. -->
+<script>
+window.QUIZ = {
+  "id": "infotest-ki-fos252",
+  "back": "svp/informatik/fos12.html",
+  "version": "v1",
+  "title": "Leistungstest KI · FOS25-2",
+  "subtitle": "Informatik · Gruppe H · Künstliche Intelligenz · 20 Fragen · genau eine Antwort pro Frage",
+  "questions": [
+    {
+      "q": "Ein Netz hat 1 000 Neurone, jedes ist mit 500 anderen verbunden. Wie viele Verbindungen sind das – gerechnet wie im Vortrag beim Gehirn?",
+      "opts": [
+        "50 000",
+        "500 000",
+        "1 500",
+        "5 000 000"
+      ],
+      "steps": [
+        "Wie beim Gehirn: Neurone mal Verbindungen je Neuron, $1\\,000 \\cdot 500 = 500\\,000$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein künstliches Neuron bekommt die Eingänge 4 und 10 mit den Gewichten 0,5 und 0,2. Sein Ergebnis geht mit dem Gewicht 0,5 weiter. Was kommt beim nächsten Neuron an?",
+      "opts": [
+        "4",
+        "2",
+        "7",
+        "1"
+      ],
+      "steps": [
+        "Erst jeden Eingang mit seinem Gewicht malnehmen und addieren: $4 \\cdot 0{,}5 + 10 \\cdot 0{,}2 = 2 + 2 = 4$.",
+        "Dann mit dem nächsten Gewicht malnehmen: $4 \\cdot 0{,}5 = 2$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist ImageNet, das der Vortrag als einen Grund für den KI-Boom nennt?",
+      "opts": [
+        "Eine Sammlung von rund 15 Millionen von Hand beschrifteten Bildern",
+        "Ein Netz aus Grafikkarten von NVIDIA",
+        "Eine Suchmaschine nur für Bilder",
+        "Ein Sprachmodell, das Bilder beschreibt"
+      ],
+      "steps": [
+        "ImageNet: rund 15 Millionen von Hand beschriftete Bilder – riesige Mengen an Trainingsdaten. Der zweite Grund ist die Rechenleistung der Grafikkarten."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wovon hängt ab, welches Wort ein Sprachmodell als Nächstes schreibt?",
+      "opts": [
+        "Vom Text davor (Prompt und Kontext) und von den Mustern aus dem Training",
+        "Nur vom letzten Buchstaben des Satzes",
+        "Von einer festen Wortliste, die immer gleich ist",
+        "Von einem Würfel, der jedes Wort gleich wahrscheinlich macht"
+      ],
+      "steps": [
+        "Das Modell sagt das wahrscheinlichste nächste Wort voraus. Was wahrscheinlich ist, hängt vom Text davor ab: nach dem Italiener „Spaghetti“, im Liebesbrief „Dich“."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Modell wurde mit 200 Milliarden Token trainiert, ein neueres mit 10 Billionen. Wie viel Mal so viel ist das?",
+      "opts": [
+        "5-mal so viel",
+        "500-mal so viel",
+        "50-mal so viel",
+        "20-mal so viel"
+      ],
+      "steps": [
+        "1 Billion = 1 000 Milliarden, also 10 Billionen = 10 000 Milliarden.",
+        "$10\\,000 : 200 = 50$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Gegen wen gewann AlphaGo 2016 mit 4 : 1?",
+      "opts": [
+        "Gegen das Programm Deep Blue von IBM",
+        "Gegen den Go-Weltmeister Lee Sedol",
+        "Gegen AlphaGo Zero",
+        "Gegen den Schachweltmeister Garri Kasparow"
+      ],
+      "steps": [
+        "AlphaGo Lee besiegte 2016 Weltmeister Lee Sedol 4 : 1. Später schlug das selbstlernende AlphaGo Zero diese Version 100 : 0."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wobei hilft „Reasoning“ einem Sprachmodell vor allem?",
+      "opts": [
+        "Beim schnelleren Laden von Webseiten",
+        "Beim Speichern großer Dateien",
+        "Bei Mathematik, Physik und Programmieren",
+        "Beim Erkennen von Gesichtern auf Fotos"
+      ],
+      "steps": [
+        "Beim Reasoning schreibt das Modell erst eine interne Gedankenkette und antwortet dann – mehr Rechenzeit beim Antworten. Das hilft vor allem bei Mathematik, Physik und Programmieren."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Training braucht 1,5 Millionen GPU-Stunden zu je 2 US-Dollar. Was kostet es?",
+      "opts": [
+        "1,5 Millionen US-Dollar",
+        "300 000 US-Dollar",
+        "3 Millionen US-Dollar",
+        "30 Millionen US-Dollar"
+      ],
+      "steps": [
+        "$1{,}5 \\cdot 2 = 3$, also 3 Millionen US-Dollar."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welchen Vorteil hat ein Modell mit „Open Weights“?",
+      "opts": [
+        "Es kann nicht halluzinieren",
+        "Man kann es auf eigener Hardware betreiben, ohne dass Daten nach draußen gehen",
+        "Man kann alle seine Trainingsdaten einsehen",
+        "Es braucht keinen Strom"
+      ],
+      "steps": [
+        "Bei Open Weights (z. B. Llama, Mistral, Qwen, DeepSeek) lädt man die Gewichte herunter und betreibt das Modell selbst – keine Cloud, keine Daten nach draußen. Die Trainingsdaten bleiben geheim."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie ordnet der EU AI Act KI-Anwendungen?",
+      "opts": [
+        "Nach dem Preis: teure Systeme sind verboten",
+        "Nach der Zahl der Nutzer",
+        "Nach Risikoklassen: je höher das Risiko, desto strenger die Pflichten",
+        "Nach dem Herkunftsland des Herstellers"
+      ],
+      "steps": [
+        "Der EU AI Act gilt seit August 2024 und ordnet KI nach Risikoklassen: je höher das Risiko, desto strenger die Pflichten. Bildung zählt zu den Hochrisiko-Bereichen, Emotionserkennung in der Schule ist seit Februar 2025 verboten."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie viel Leistung braucht das menschliche Gehirn ungefähr – zum Vergleich mit dem riesigen Stromverbrauch der KI?",
+      "opts": [
+        "etwa 20 Watt",
+        "etwa 2 Watt",
+        "etwa 20 000 Watt",
+        "etwa 2 000 Watt"
+      ],
+      "steps": [
+        "Das Gehirn kommt mit etwa 20 Watt aus. Der riesige Stromverbrauch ist eines der Probleme heutiger KI."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was können Systeme wie Sora (OpenAI) oder Veo (Google)?",
+      "opts": [
+        "Gefälschte Videos sicher erkennen",
+        "Fotos verlustfrei verkleinern",
+        "Aus Text Videos mit Ton erzeugen",
+        "Videos in Text übersetzen und dann löschen"
+      ],
+      "steps": [
+        "Sora und Veo erzeugen aus Text Videos mit Ton, täuschend echt. Deshalb ist ein Video heute kein Beweis mehr."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wer legt die Gewichte eines neuronalen Netzes fest?",
+      "opts": [
+        "Ein Programmierer tippt jedes Gewicht von Hand ein",
+        "Niemand programmiert sie: Sie werden beim Training aus Beispielen zurechtgerückt",
+        "Sie werden einmal ausgelost und ändern sich nie",
+        "Der Nutzer stellt sie bei jeder Frage neu ein"
+      ],
+      "steps": [
+        "Das Gelernte steckt ausschließlich in den Gewichten. Niemand programmiert sie; sie werden aus Beispielen zurechtgerückt, bis der Fehler klein ist."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was erkennen in einem Bildnetz die frühen Schichten, was die späteren?",
+      "opts": [
+        "Früh Kanten, später Augen, noch später Gesichter",
+        "Früh Dateinamen, später Farben, noch später Pixel",
+        "Alle Schichten erkennen dasselbe",
+        "Früh Gesichter, später Augen, noch später Kanten"
+      ],
+      "steps": [
+        "Deep Learning: viele Schichten hintereinander. Die verdeckten Schichten bauen Merkmale auf – frühe erkennen Kanten, spätere Augen, noch spätere Gesichter."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "In welcher Reihenfolge läuft ein Trainingsschritt ab?",
+      "opts": [
+        "Fehler messen, Netz löschen, neu programmieren",
+        "Gewichte anpassen, raten, fertig",
+        "Lösung abschreiben, speichern, ausgeben",
+        "Raten, mit der Lösung vergleichen, Fehler messen, Gewichte anpassen"
+      ],
+      "steps": [
+        "Das Netz rät, vergleicht mit der Lösung und misst den Fehler. Der Fehler läuft rückwärts durchs Netz, alle Gewichte rücken ein Stück in die bessere Richtung – millionenfach."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was muss alles ins Kontextfenster passen?",
+      "opts": [
+        "Nur die letzte Frage des Nutzers",
+        "Nur die Antwort des Modells",
+        "Alle Trainingsdaten des Modells",
+        "Systemanweisung, Verlauf, Anhänge und auch die Antwort"
+      ],
+      "steps": [
+        "Das Kontextfenster ist das Kurzzeitgedächtnis: Systemanweisung, Verlauf, Anhänge und auch die Antwort müssen hineinpassen. Ist es voll, fällt das Älteste heraus."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein Kontextfenster wächst von 4 000 auf 200 000 Token. Wie viel Mal so groß ist es dann?",
+      "opts": [
+        "5-mal so groß",
+        "500-mal so groß",
+        "20-mal so groß",
+        "50-mal so groß"
+      ],
+      "steps": [
+        "$200\\,000 : 4\\,000 = 200 : 4 = 50$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche Frage stellt Context Engineering?",
+      "opts": [
+        "„Wer hat das Modell gebaut?“",
+        "„Wie schnell ist der Rechner?“",
+        "„Wie formuliere ich?“",
+        "„Was weiß das Modell gerade?“"
+      ],
+      "steps": [
+        "Prompt Engineering fragt „Wie formuliere ich?“. Context Engineering fragt „Was weiß das Modell gerade?“ und füllt das Kontextfenster bewusst mit Daten, Werkzeugen, Verlauf und Regeln."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wofür steht RAG?",
+      "opts": [
+        "Retrieval-Augmented Generation",
+        "Reasoning And Guessing",
+        "Rapid AI Growth",
+        "Random Answer Generator"
+      ],
+      "steps": [
+        "RAG = Retrieval-Augmented Generation: Erst wird im eigenen Bestand gesucht, dann wandern die Fundstellen in den Prompt – aktuell, prüfbar, mit Quelle."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wo liegt bei einem KI-Agenten das größte Risiko?",
+      "opts": [
+        "In der Länge seiner Antworten",
+        "In der Farbe seiner Benutzeroberfläche",
+        "In der Zahl der Sprachen, die er spricht",
+        "In seinen Berechtigungen, also darin, was er tun darf"
+      ],
+      "steps": [
+        "Agent = Modell + Werkzeuge + Schleife + Ziel. Der Mensch setzt Ziel und Grenzen; das Risiko liegt in den Berechtigungen."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

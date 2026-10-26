@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leistungstest KI BGY24 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js - this file only carries the questions. Same questions,
+     options and order as the paper test of group E, so the stencil fits both. -->
+<script>
+window.QUIZ = {
+  "id": "infotest-ki-bgy24",
+  "back": "svp/informatik/inf13.html",
+  "version": "v1",
+  "title": "Leistungstest KI · BGY24",
+  "subtitle": "Informatik · Gruppe E · Künstliche Intelligenz · 20 Fragen · genau eine Antwort pro Frage",
+  "questions": [
+    {
+      "q": "Das Gehirn hat etwa 86 Milliarden Neurone, jedes ist im Schnitt mit 10 000 anderen verbunden. Wie viele Verbindungen („Parameter“) sind das ungefähr?",
+      "opts": [
+        "etwa $10^{13}$, also rund zehn Billionen",
+        "etwa $10^{15}$, also rund eine Billiarde",
+        "etwa $10^{11}$, also rund hundert Milliarden",
+        "etwa $10^{18}$, also rund eine Trillion"
+      ],
+      "steps": [
+        "86 Milliarden mal 10 000: $86 \\cdot 10^{9} \\cdot 10^{4} = 86 \\cdot 10^{13}$ $= 8{,}6 \\cdot 10^{14} \\approx 10^{15}$. Das sind rund eine Billiarde Verbindungen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein künstliches Neuron bekommt die Eingänge 5 und 2 mit den Gewichten 0,8 und 0,5. Sein Ergebnis geht mit dem Gewicht 0,6 weiter. Was kommt beim nächsten Neuron an?",
+      "opts": [
+        "2,4",
+        "4,2",
+        "3",
+        "5"
+      ],
+      "steps": [
+        "Erst jeden Eingang mit seinem Gewicht malnehmen und alles addieren: $5 \\cdot 0{,}8 + 2 \\cdot 0{,}5 = 4 + 1 = 5$. Dann mit dem nächsten Gewicht malnehmen: $5 \\cdot 0{,}6 = 3$. Beim nächsten Neuron kommt 3 an."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum „explodiert“ KI gerade jetzt? Welche zwei Gründe nennt der Vortrag?",
+      "opts": [
+        "Ein neues EU-Gesetz und staatliche Fördergelder",
+        "Neue Programmiersprachen und schnellere Internetverbindungen",
+        "Riesige Mengen an Trainingsdaten und riesige Rechenleistung durch Grafikkarten",
+        "Billigere Festplatten und mehr Programmierer weltweit"
+      ],
+      "steps": [
+        "1. Riesige Mengen an Trainingsdaten sind verfügbar, z. B. ImageNet mit 15 Millionen von Hand beschrifteten Bildern. 2. Riesige Rechenleistung ist verfügbar: Grafikkarten (NVIDIA) rechnen die nötigen Matrix-Multiplikationen massenhaft parallel."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie heißt der Artikel von 2017, mit dem der Transformer – das T in GPT – vorgestellt wurde?",
+      "opts": [
+        "„Attention Is All You Need“",
+        "„Computing Machinery and Intelligence“",
+        "„Language Models Are Few-Shot Learners“",
+        "„Deep Learning Is All You Need“"
+      ],
+      "steps": [
+        "„Attention Is All You Need“ von Vaswani und Kollegen (2017). Unsere Präsentation trägt denselben Titel."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "„Gestern war ich beim Italiener … Und ich liebe …“ – warum ergänzt ein Sprachmodell hier „Spaghetti“, in einem Liebesbrief aber „Dich“?",
+      "opts": [
+        "Ein Mensch im Hintergrund ergänzt das passende Wort",
+        "Es hat sich gemerkt, was der Nutzer gestern gegessen hat",
+        "Es sagt das wahrscheinlichste nächste Wort voraus, und das hängt vom Text davor ab",
+        "Es wählt das nächste Wort zufällig aus einer festen Liste"
+      ],
+      "steps": [
+        "Es sagt das wahrscheinlichste nächste Wort voraus, und was wahrscheinlich ist, hängt vom Text davor ab (Prompt bzw. Kontext). Nach dem Italiener passt „Spaghetti“, nach einer Liebeserklärung „Dich“."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was zeigt das Beispiel der „manipulierten Vorhersage“ („… im Wesentlichen einer Person zu verdanken: Bundeskanzler Merz“)?",
+      "opts": [
+        "Das Modell prüft jede Aussage in einer Datenbank nach",
+        "Das Modell weigert sich, über Politik zu schreiben",
+        "Die Vorhersage lässt sich lenken: Das Modell setzt Muster fort, ob sie stimmen, prüft es nicht",
+        "Sprachmodelle kennen immer die neuesten Nachrichten"
+      ],
+      "steps": [
+        "Die Vorhersage lässt sich lenken: Das Modell setzt fort, was zu den Mustern im Kontext und in den Trainingsdaten passt – ob es stimmt, prüft es nicht. Wer Prompt oder Trainingsdaten steuert, steuert die Antwort."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "GPT-3 wurde mit rund 500 Milliarden Token trainiert, heutige Modelle mit 15 bis 30 Billionen. Wie viel Mal so viel ist das?",
+      "opts": [
+        "15- bis 30-mal so viel",
+        "300- bis 600-mal so viel",
+        "3- bis 6-mal so viel",
+        "30- bis 60-mal so viel"
+      ],
+      "steps": [
+        "1 Billion = 1 000 Milliarden. Also $15\\,000 : 500 = 30$ und $30\\,000 : 500 = 60$. Heutige Modelle lernen aus 30- bis 60-mal so viel Text."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "GPT-3 hat 175 Milliarden Parameter, das Gehirn etwa $10^{15}$ Verbindungen. Wie viel Mal so viele hat das Gehirn?",
+      "opts": [
+        "rund 175-mal so viele",
+        "rund 5 700-mal so viele",
+        "rund 570 000-mal so viele",
+        "rund 57-mal so viele"
+      ],
+      "steps": [
+        "$10^{15} = 1\\,000\\,000\\,000\\,000\\,000$ geteilt durch $175\\,000\\,000\\,000$. Auf beiden Seiten neun Nullen streichen: $1\\,000\\,000 : 175 \\approx 5\\,714$. Das Gehirn hat rund 5 700-mal so viele Verbindungen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "DeepSeek gab für das Training von DeepSeek-V3 2,788 Millionen GPU-Stunden an, gerechnet mit 2 US-Dollar je Stunde. Was kostete das?",
+      "opts": [
+        "rund 5,6 Millionen US-Dollar",
+        "rund 56 Millionen US-Dollar",
+        "rund 5,6 Milliarden US-Dollar",
+        "rund 2,8 Millionen US-Dollar"
+      ],
+      "steps": [
+        "$2{,}788 \\cdot 2 = 5{,}576$, also 5,576 Millionen US-Dollar – rund 5,6 Millionen. Achtung: nur die Trainingsläufe, ohne Vorversuche, ohne Hardware und nicht unabhängig geprüft. Trotzdem bebten die Technologie-Börsen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ist der Unterschied zwischen „Open Weights“ und Open Source?",
+      "opts": [
+        "Open Weights sind kostenlos, Open Source kostet immer Geld",
+        "Open Weights laufen nur in der Cloud des Herstellers",
+        "Bei Open Weights ist alles offen, auch alle Trainingsdaten",
+        "Bei Open Weights kann man die Gewichte herunterladen, die Trainingsdaten bleiben aber geheim"
+      ],
+      "steps": [
+        "Bei Open Weights (z. B. Llama, Mistral, Qwen, DeepSeek) kann man die Gewichte herunterladen und das Modell auf eigener Hardware betreiben – keine Cloud, keine Daten nach draußen. Die Trainingsdaten bleiben aber geheim; echtes Open Source würde alles offenlegen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche KI-Anwendung ist nach dem EU AI Act seit Februar 2025 in der Schule verboten?",
+      "opts": [
+        "Die Sprachausgabe für Vorlesetexte",
+        "Die Emotionserkennung",
+        "Die Rechtschreibprüfung",
+        "Die automatische Übersetzung von Texten"
+      ],
+      "steps": [
+        "Die Emotionserkennung. Der EU AI Act gilt seit August 2024 und ordnet KI nach Risikoklassen: je höher das Risiko, desto strenger die Pflichten. Bildung zählt zu den Hochrisiko-Bereichen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum ist „Ich habe ein Video davon“ heute kein Beweis mehr?",
+      "opts": [
+        "Weil Videos heute nicht mehr gespeichert werden dürfen",
+        "Weil Videos immer mit KI nachbearbeitet werden müssen",
+        "Weil KI täuschend echte Videos mit Ton erzeugt und Stimmen in Sekunden klont",
+        "Weil Handykameras zu schlecht filmen"
+      ],
+      "steps": [
+        "Weil KI aus Text Videos mit Ton erzeugt (Sora von OpenAI, Veo von Google) und Stimmen in Sekunden klont – täuschend echt, Gespräche sogar in Echtzeit."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt nach dem Training, was ein neuronales Netz gelernt hat?",
+      "opts": [
+        "Ausschließlich in den Gewichten, den Zahlen an den Verbindungen",
+        "In einer Datenbank mit allen Trainingsbeispielen",
+        "Im Arbeitsspeicher, der beim Ausschalten gelöscht wird",
+        "In einer Liste von Regeln, die ein Programmierer geschrieben hat"
+      ],
+      "steps": [
+        "Ausschließlich in den Gewichten – den Zahlen an den Verbindungen. Niemand programmiert sie; sie werden aus Beispielen zurechtgerückt, bis der Fehler klein ist."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was heißt „Deep Learning“?",
+      "opts": [
+        "Lernen aus Daten, die tief im Internet versteckt sind",
+        "Lernen mit einem einzigen, sehr großen Neuron",
+        "Lernen mit einem besonders großen Bildschirm",
+        "Lernen mit einem Netz aus vielen Schichten hintereinander"
+      ],
+      "steps": [
+        "Lernen mit einem Netz aus vielen Schichten hintereinander. Die verdeckten Schichten bauen Merkmale auf: frühe erkennen Kanten, spätere z. B. Augen, noch spätere Gesichter."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie lernt ein Netz beim Training aus einem Fehler (Backpropagation)?",
+      "opts": [
+        "Ein Mensch korrigiert die falschen Gewichte von Hand",
+        "Das Netz speichert die richtige Lösung und gibt sie nächstes Mal aus",
+        "Das Netz löscht alle Gewichte und fängt von vorn an",
+        "Der Fehler läuft rückwärts durchs Netz, und alle Gewichte werden ein kleines Stück verbessert"
+      ],
+      "steps": [
+        "Das Netz rät, vergleicht mit der Lösung und misst den Fehler. Der Fehler läuft rückwärts durchs Netz, und alle Gewichte werden ein kleines Stück in die bessere Richtung gerückt – millionenfach, bis der Fehler klein bleibt."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Faustregel Deutsch: 1 Wort ≈ 1,5 bis 2 Token. Mit wie vielen Token rechnest du bei einem Text mit 300 Wörtern?",
+      "opts": [
+        "etwa 450 bis 600 Token",
+        "etwa 150 bis 200 Token",
+        "etwa 4 500 bis 6 000 Token",
+        "genau 300 Token"
+      ],
+      "steps": [
+        "$300 \\cdot 1{,}5 = 450$ und $300 \\cdot 2 = 600$. Also mit etwa 450 bis 600 Token."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "2020 fasste ein Kontextfenster etwa 2 000 Token, 2026 bis zu 1 000 000. Wie viel Mal so groß ist das?",
+      "opts": [
+        "50-mal so groß",
+        "500-mal so groß",
+        "200-mal so groß",
+        "5 000-mal so groß"
+      ],
+      "steps": [
+        "$1\\,000\\,000 : 2\\,000 = 1\\,000 : 2 = 500$. Das Fenster ist 500-mal so groß – von etwa 3 Seiten zu einem ganzen Regal. Aber größer ist nicht automatisch besser: Die Mitte wird schlechter beachtet, und jedes Token kostet bei jeder Anfrage neu."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist eine Halluzination, und woher kommt sie?",
+      "opts": [
+        "Ein Computervirus verändert die Antwort",
+        "Das Modell erfindet etwas Plausibles, weil es das wahrscheinlichste Wort vorhersagt, nicht das wahre",
+        "Der Bildschirm flackert und zeigt ein falsches Bild",
+        "Das Modell wurde absichtlich zum Lügen programmiert"
+      ],
+      "steps": [
+        "Das Modell erfindet etwas, das plausibel klingt – oft Quellen, Zitate, Zahlen oder Paragraphen. Ursache: Es sagt das wahrscheinlichste Wort voraus, nicht das wahre, und hat keine „weiß ich nicht“-Taste. Gegenmittel: Beleg mitgeben und nachprüfen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Worin unterscheiden sich Prompt Engineering und Context Engineering?",
+      "opts": [
+        "Prompt Engineering formuliert die Anweisung, Context Engineering füllt das ganze Kontextfenster bewusst",
+        "Beides ist dasselbe, einmal englisch, einmal deutsch",
+        "Prompt Engineering baut die Hardware, Context Engineering die Software",
+        "Prompt Engineering trainiert das Modell, Context Engineering löscht es"
+      ],
+      "steps": [
+        "Prompt Engineering formuliert die einzelne Anweisung präzise („Wie formuliere ich?“). Context Engineering füllt das ganze Kontextfenster bewusst – Daten, Werkzeuge, Verlauf, Regeln („Was weiß das Modell gerade?“) – und lässt Ballast weg."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was geschieht bei RAG, bevor das Modell antwortet?",
+      "opts": [
+        "Das Modell fragt einen Menschen um Rat",
+        "Die Frage wird zuerst ins Englische übersetzt",
+        "Das Modell wird mit den neuen Daten komplett neu trainiert",
+        "Im eigenen Bestand wird gesucht, und die Fundstellen kommen in den Prompt"
+      ],
+      "steps": [
+        "RAG = Retrieval-Augmented Generation: Erst wird im eigenen Bestand gesucht (nach Ähnlichkeit, über Embeddings), dann wandern die Fundstellen in den Prompt. Das Modell antwortet aus dem mitgelieferten Text – aktuell, prüfbar, mit Quelle."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
