@@ -14,6 +14,10 @@
  * ending with a comma, so the books merge without a conflict. The Italian file js/buch-it/funktionen.js shows which
  * German strings the widgets write.
  */
+// French school letters for lines (Doc, 26.10.2026: always the conventions of the target country): the collège books
+// (GY 5-9, OS 5-9) write f(x) = ax + b, the lycée books y = mx + p (BGY, FOS, GY 10-12). One flag for the page, from
+// its path; the entries below that name the letters ask it.
+window.BuchFR && (BuchFR.college = /\/(?:mathegy[5-9]|mathe[5-9])-fr\//.test(location.pathname));
 window.BuchFR && BuchFR.add('funktionen', {
     word: {
         // fr0: the cover of the start page (BGY 11 mathe11)
@@ -107,10 +111,10 @@ window.BuchFR && BuchFR.add('funktionen', {
         'schneidend': 'sécantes',
         'parallel': 'parallèles',
         'identisch': 'confondues',
-        '$g$: Anstieg $m_1$': '$g$ : coefficient directeur $m_1$',
-        '$g$: Achsenabschnitt $n_1$': '$g$ : ordonnée à l’origine $n_1$',
-        '$h$: Anstieg $m_2$': '$h$ : coefficient directeur $m_2$',
-        '$h$: Achsenabschnitt $n_2$': '$h$ : ordonnée à l’origine $n_2$',
+        '$g$: Anstieg $m_1$': BuchFR.college ? '$g$ : coefficient directeur $a_1$' : '$g$ : coefficient directeur $m_1$',
+        '$g$: Achsenabschnitt $n_1$': BuchFR.college ? '$g$ : ordonnée à l’origine $b_1$' : '$g$ : ordonnée à l’origine $p_1$',
+        '$h$: Anstieg $m_2$': BuchFR.college ? '$h$ : coefficient directeur $a_2$' : '$h$ : coefficient directeur $m_2$',
+        '$h$: Achsenabschnitt $n_2$': BuchFR.college ? '$h$ : ordonnée à l’origine $b_2$' : '$h$ : ordonnée à l’origine $p_2$',
         'Zwei Geraden und ihre Lage zueinander': 'Deux droites et leur position relative',
         // parabelschar
         'Funktionenschar': 'Famille de fonctions',
@@ -185,7 +189,8 @@ window.BuchFR && BuchFR.add('funktionen', {
         // gerade
         ['Beide Punkte liegen senkrecht übereinander. Die Gerade $x = ', 'Les deux points sont sur la même verticale. La droite $x = '],
         ['$ ist <b>kein</b> Funktionsgraph.', '$ <b>n’est pas</b> la courbe d’une fonction.'],
-        ['Steigung $m = ', 'Coefficient directeur $m = '], ['Achsenabschnitt $n = ', 'Ordonnée à l’origine $n = '], ['$ (weißer Punkt)', '$ (point blanc)'],
+        ['Steigung $m = ', BuchFR.college ? 'Coefficient directeur $a = ' : 'Coefficient directeur $m = '],
+        ['Achsenabschnitt $n = ', BuchFR.college ? 'Ordonnée à l’origine $b = ' : 'Ordonnée à l’origine $p = '], ['$ (weißer Punkt)', '$ (point blanc)'],
         [' · Nullstelle $x_0 = ', ' · zéro $x_0 = '], [' · waagerechte Gerade', ' · droite horizontale'],
         // parabel
         ['Für $a = 0$ ist der Graph keine Parabel, sondern eine Gerade.', 'Pour $a = 0$, la courbe n’est pas une parabole mais une droite.'],
@@ -228,7 +233,8 @@ window.BuchFR && BuchFR.add('funktionen', {
         ['Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. ', 'Chaque droite verticale coupe la courbe au plus une fois : c’est une fonction. '],
         // lage
         ['Gleicher Anstieg und gleicher Achsenabschnitt: <b>identisch</b>. Jeder Punkt ist gemeinsam.', 'Même coefficient directeur et même ordonnée à l’origine : <b>confondues</b>. Tous les points sont communs.'],
-        ['Gleicher Anstieg $m_1 = m_2$, verschiedene Achsenabschnitte: <b>parallel</b>. Es gibt keinen Schnittpunkt.', 'Même coefficient directeur $m_1 = m_2$, ordonnées à l’origine différentes : <b>parallèles</b>. Il n’y a pas de point d’intersection.'],
+        ['Gleicher Anstieg $m_1 = m_2$, verschiedene Achsenabschnitte: <b>parallel</b>. Es gibt keinen Schnittpunkt.', (BuchFR.college ? 'Même coefficient directeur $a_1 = a_2$, ordonnées à l’origine différentes : <b>parallèles</b>. Il n’y a pas de point d’intersection.'
+            : 'Même coefficient directeur $m_1 = m_2$, ordonnées à l’origine différentes : <b>parallèles</b>. Il n’y a pas de point d’intersection.')],
         ['$: Die Geraden sind <b>orthogonal</b> (senkrecht zueinander).', '$ : les droites sont <b>perpendiculaires</b> (orthogonales).'],
         ['Verschiedene Anstiege: Die Geraden <b>schneiden</b> sich.', 'Coefficients directeurs différents : les droites sont <b>sécantes</b>.'],
         ['Gleichsetzen: $', 'En égalant : $'],
@@ -272,6 +278,10 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-16 mathegy9-fr:
     ],
     rule: [
+        // the letters of lines (see BuchFR.college above): gerade's zero, lage's intersection and orthogonality (× as everywhere in French)
+        [/-\\tfrac\{n\}\{m\}/g, () => BuchFR.college ? '-\\tfrac{b}{a}' : '-\\tfrac{p}{m}'],
+        [/\\dfrac\{n_2 - n_1\}\{m_1 - m_2\}/g, () => BuchFR.college ? '\\dfrac{b_2 - b_1}{a_1 - a_2}' : '\\dfrac{p_2 - p_1}{m_1 - m_2}'],
+        [/\$m_1 \\(?:cdot|times) m_2 = /g, () => BuchFR.college ? '$a_1 \\times a_2 = ' : '$m_1 \\times m_2 = '],
         // book fr-1 mathe11-fr:
         // tageslaenge: "21. Jun" → "21 juin", and the colon after the date gets its no-break space
         [/(\d+)\. (Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)(?![a-zä])(:?)/g, (m, d, mo, c) => d + ' ' + { Jan: 'janv.', Feb: 'févr.', 'Mär': 'mars', Apr: 'avr.', Mai: 'mai', Jun: 'juin', Jul: 'juil.', Aug: 'août', Sep: 'sept.', Okt: 'oct.', Nov: 'nov.', Dez: 'déc.' }[mo] + (c ? ' :' : '')],

@@ -153,9 +153,9 @@ l’accès à l’université, comme le baccalauréat.*
 | Nullstelle | zéro (de la fonction) | "les zéros de f", "f n’a aucun zéro" |
 | Monotonie, monoton steigend/fallend, streng monoton | sens de variation, croissante/décroissante, strictement croissante | "monotone" where the German says monoton |
 | Symmetrie, achsensymmetrisch (zur y-Achse) / punktsymmetrisch (zum Ursprung) | symétrie, symétrique par rapport à l’axe des ordonnées (fonction paire) / par rapport à l’origine (fonction impaire) | |
-| lineare Funktion ($y = mx + n$) | fonction affine | in France "linéaire" is only $y = mx$; lineares Wachstum: croissance linéaire |
-| Steigung, Anstieg | coefficient directeur (pente) | |
-| Achsenabschnitt | ordonnée à l’origine | |
+| lineare Funktion ($y = mx + n$) | fonction affine | in France "linéaire" is only $y = mx$; lineares Wachstum: croissance linéaire. Letters (Doc, 26.10.2026, "lokal"): lycée books (BGY, FOS, GY 10-12) $y = mx + p$, collège books (GY 5-9, OS 5-9) $f(x) = ax + b$ - the widgets follow `BuchFR.college` in js/buch-fr/funktionen.js |
+| Steigung, Anstieg ($m$) | coefficient directeur (pente) ($m$; collège: $a$) | |
+| Achsenabschnitt ($n$) | ordonnée à l’origine ($p$; collège: $b$) | |
 | Normalparabel | parabole de référence ($y = x^2$) | |
 | Scheitelpunkt, Scheitelpunktform, Normalform | sommet, forme canonique, forme développée | the vertex keeps the letter S |
 | Linearfaktorform (Produktform) | forme factorisée | |
@@ -952,7 +952,7 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Weg-Zeit-Diagramm, Weg $s$ | diagramme distance-temps, distance $d$ | 3.1, widget wegzeit8 (axis « d en m ») |
 | Zuhause, Haltestelle, Schule | Maison, Arrêt, École | widget wegzeit8 |
 | Klimadiagramm (Deutscher Wetterdienst), Bildfahrplan (Ibry) | diagramme climatique (Météo-France), horaire graphique | 3.1 |
-| lineare Funktion $y = mx + n$, Anstieg $m$, y-Achsenabschnitt $n$ | fonction affine, coefficient directeur (pente) $m$, ordonnée à l’origine $n$ | 3.2: the letters stay as the widget gerade writes them; the aside names $f(x) = ax + b$ once; $n = 0$: fonction linéaire |
+| lineare Funktion $y = mx + n$, Anstieg $m$, y-Achsenabschnitt $n$ | fonction affine $f(x) = ax + b$, coefficient directeur (pente) $a$, ordonnée à l’origine $b$ | 3.2: the French collège letters since 26.10.2026 (pages and the widgets gerade/lage via `BuchFR.college`); the taxis are $p_A$, $p_B$, the battery $f(t)$ |
 | Differenzenquotient, Steigungsdreieck, Gefälle | taux d’accroissement, triangle de pente, descente (pente) | 3.2 |
 | Schnittpunkt $S$ (two lines) | point d’intersection $I$ | 3.2 page text |
 | Regressionsgerade, Methode der kleinsten Quadrate, Trendlinie | droite de régression, méthode des moindres carrés, courbe de tendance | 3.2; Excel PENTE, ORDONNEE.ORIGINE |
