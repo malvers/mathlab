@@ -282,8 +282,8 @@ window.BuchFR && BuchFR.add('gy5', {
         [/(<p class="g5-big">)O = /g, '$1A = '], [/\$O = /g, '$$A = '],
         [/Alle 12 Kanten zusammen: /, 'Les 12 arêtes ensemble : '],
         // einheiten5: j for the day (German d)
-        [/^Einheitentreppe (Länge|Masse|Zeit|Fläche|Volumen)$/, (m, k) => 'Escalier des unités de ' +
-            ({ 'Länge': 'longueur', 'Masse': 'masse', 'Zeit': 'durée', 'Fläche': 'aire', 'Volumen': 'volume' })[k]],
+        [/^Einheitentreppe (Länge|Masse|Zeit|Fläche|Volumen)$/, (m, k) => 'Escalier des unités ' +
+            ({ 'Länge': 'de longueur', 'Masse': 'de masse', 'Zeit': 'de durée', 'Fläche': 'd’aire', 'Volumen': 'de volume' })[k]],
         [/(<option value="0">)d(<\/option>)/g, '$1j$2'], [/(<text class="g-pt"[^>]*>)d(<\/text>)/g, '$1j$2'], [/(\d) d(?= [=≈]|<\/p>)/g, '$1 j'],
         // zahlschrift5
         [/^Die Zahl (\d+) in (aegypten|rom|maya|binaer)$/, (m, v, k) => 'Le nombre ' + v + ' ' +
