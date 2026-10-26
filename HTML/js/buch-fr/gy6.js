@@ -116,6 +116,10 @@ window.BuchFR && BuchFR.add('gy6', {
             'Ils ont tous la même forme, mais des tailles différentes. Trois angles ne déterminent pas un triangle.',
         'Den dritten Winkel kennt man ohnehin: $\\gamma = 180^\\circ - \\alpha - \\beta$. Es fehlt eine Länge.':
             'On connaît de toute façon le troisième angle : $\\gamma = 180^\\circ - \\alpha - \\beta$. Il manque une longueur.',
+        // seitenwinkel6
+        'Dreieck aus drei Stäben': 'Triangle formé de trois baguettes', 'Die Stäbe ergeben kein Dreieck': 'Les baguettes ne forment pas de triangle',
+        // linien6 (French letters: O for the circumcentre, G for the centroid; rules below)
+        'Mittelsenkrechten': 'Médiatrices', 'Winkelhalbierende': 'Bissectrices', 'Höhen': 'Hauteurs', 'Seitenhalbierende': 'Médianes', 'Linien': 'Droites',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -203,6 +207,28 @@ window.BuchFR && BuchFR.add('gy6', {
         ['$\\alpha + \\beta$ ist schon $', '$\\alpha + \\beta$ vaut déjà $'],
         ['Die Kreise berühren sich nur auf der längsten Seite.', 'Les cercles se touchent seulement sur le plus long côté.'],
         ['Die Kreise treffen sich nicht.', 'Les cercles ne se coupent pas.'],
+        // seitenwinkel6
+        ['Alle Seiten gleich lang: alle Winkel $60^\\circ$. ', 'Tous les côtés ont la même longueur : tous les angles mesurent $60^\\circ$. '],
+        ['Zwei Seiten sind gleich lang: Das Dreieck ist gleichschenklig, und die Basiswinkel sind gleich groß.',
+            'Deux côtés ont la même longueur : le triangle est isocèle, et ses angles à la base ont la même mesure.'],
+        ['Die beiden kürzeren Stäbe sind zusammen genau so lang wie der längste: Sie liegen flach auf ihm. Das ist kein Dreieck.',
+            'Les deux baguettes les plus courtes sont ensemble exactement aussi longues que la plus longue : elles restent à plat sur elle. Ce n’est pas un triangle.'],
+        ['Die beiden kürzeren Stäbe reichen nicht bis zueinander, egal wie man sie dreht.', 'Les deux baguettes les plus courtes ne se rejoignent pas, quelle que soit la façon dont on les tourne.'],
+        [' <b>Dreiecksungleichung:</b> Zwei Seiten zusammen müssen immer länger sein als die dritte.', ' <b>Inégalité triangulaire :</b> deux côtés ensemble doivent toujours être plus longs que le troisième.'],
+        // linien6
+        ['Jeder Punkt der Mittelsenkrechten ist von den beiden Ecken gleich weit entfernt. Ihr Schnittpunkt $U$ ist von <b>allen drei Ecken</b> gleich weit entfernt: der Mittelpunkt des Umkreises.',
+            'Chaque point d’une médiatrice est à la même distance des deux sommets. Leur point d’intersection $O$ est à la même distance des <b>trois sommets</b> : c’est le centre du cercle circonscrit.'],
+        [' Bei einem stumpfwinkligen Dreieck liegt $U$ außerhalb.', ' Dans un triangle obtusangle, $O$ est à l’extérieur.'],
+        [' Beim rechtwinkligen Dreieck liegt $U$ genau auf der längsten Seite.', ' Dans un triangle rectangle, $O$ est exactement sur le plus long côté.'],
+        [' Bei einem spitzwinkligen Dreieck liegt $U$ innen.', ' Dans un triangle acutangle, $O$ est à l’intérieur.'],
+        ['Jeder Punkt einer Winkelhalbierenden ist von den beiden Schenkeln gleich weit entfernt. Ihr Schnittpunkt $I$ ist von <b>allen drei Seiten</b> gleich weit entfernt: der Mittelpunkt des Inkreises. Er liegt immer innen.',
+            'Chaque point d’une bissectrice est à la même distance des deux côtés de l’angle. Leur point d’intersection $I$ est à la même distance des <b>trois côtés</b> : c’est le centre du cercle inscrit. Il est toujours à l’intérieur.'],
+        ['Eine Höhe ist das Lot von einer Ecke auf die gegenüberliegende Seite. Die drei Höhen schneiden sich in einem Punkt $H$.',
+            'Une hauteur est la perpendiculaire abaissée d’un sommet sur le côté opposé. Les trois hauteurs se coupent en un point $H$.'],
+        [' Beim stumpfwinkligen Dreieck liegt $H$ außerhalb: Man muss die Seiten verlängern (gestrichelt).', ' Dans un triangle obtusangle, $H$ est à l’extérieur : il faut prolonger les côtés (en pointillés).'],
+        [' Beim rechtwinkligen Dreieck ist $H$ die Ecke mit dem rechten Winkel.', ' Dans un triangle rectangle, $H$ est le sommet de l’angle droit.'],
+        ['Eine Seitenhalbierende verbindet eine Ecke mit der Mitte der gegenüberliegenden Seite. Ihr Schnittpunkt $S$ ist der Schwerpunkt: Ein Dreieck aus Pappe kann man dort auf einer Nadelspitze balancieren.',
+            'Une médiane relie un sommet au milieu du côté opposé. Leur point d’intersection $G$ est le centre de gravité : on peut y faire tenir en équilibre un triangle en carton sur la pointe d’une aiguille.'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -254,5 +280,15 @@ window.BuchFR && BuchFR.add('gy6', {
         // konstruktion6
         [/Die beiden kürzeren Seiten sind zusammen ([\d,]+) cm lang, die längste ([\d,]+) cm\. /g, 'Les deux côtés les plus courts mesurent ensemble $1 cm, le plus long $2 cm. '],
         [/^Konstruktion aus (sss|sws|wsw|SsW|www)$/, (m, k) => 'Construction à partir de ' + ({ sss: 'CCC', sws: 'CAC', wsw: 'ACA', SsW: 'CcA', www: 'AAA' })[k]],
+        // seitenwinkel6: the largest angle lies opposite the longest side
+        [/Der <span class="g-lam">längsten Seite \$([abc])\$<\/span> liegt der <span class="g-lam">größte Winkel \$(\\[a-z]+)\$<\/span> gegenüber, der <span class="g-cy">kürzesten \$([abc])\$<\/span> der kleinste\. /g,
+            (m, s1, w, s2) => 'Le <span class="g-lam">plus grand angle $' + w + '$</span> est opposé au <span class="g-lam">plus long côté $' + s1 + '$</span>, le plus petit au <span class="g-cy">plus court $' + s2 + '$</span>. '],
+        // linien6: the French letters of the points (O circumcentre, G centroid), the line under the buttons, the aria label
+        [/(r="5.5" fill="#F5C242"\/><text class="g-pt"[^>]*>)([US])(<\/text>)/g, (m, a, p, b) => a + (p === 'U' ? 'O' : 'G') + b],
+        [/ · Schnittpunkt \$([UIHS])\$: (Umkreismittelpunkt|Inkreismittelpunkt|Höhenschnittpunkt|Schwerpunkt)/g, (m, p, w) => ' · point d’intersection $' +
+            ({ U: 'O', I: 'I', H: 'H', S: 'G' })[p] + '$ : ' + ({ 'Umkreismittelpunkt': 'centre du cercle circonscrit', 'Inkreismittelpunkt': 'centre du cercle inscrit',
+                'Höhenschnittpunkt': 'orthocentre', 'Schwerpunkt': 'centre de gravité' })[w]],
+        [/^Dreieck mit seinen (Mittelsenkrechten|Winkelhalbierende|Höhen|Seitenhalbierende)$/, (m, l) => 'Triangle avec ses ' +
+            ({ 'Mittelsenkrechten': 'médiatrices', 'Winkelhalbierende': 'bissectrices', 'Höhen': 'hauteurs', 'Seitenhalbierende': 'médianes' })[l]],
     ]
 });

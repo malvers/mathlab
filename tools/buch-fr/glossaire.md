@@ -836,6 +836,11 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 | Definition, Satz, Wenn-dann-Form, Voraussetzung, Behauptung, Beweis | définition, théorème, forme « si…, alors… », hypothèse, conclusion, démonstration | 3.1 |
 | Planfigur, Konstruktionsbeschreibung, Geodreieck, DGS | figure à main levée, programme de construction, équerre-rapporteur, logiciel de géométrie dynamique | 3.1 |
 | Strecke $\overline{AB}$ / Länge / Gerade AB | segment $[AB]$ / longueur $AB$ / droite $(AB)$ | French notation in the pages; widget winkelsumme6: « parallèle à $(AB)$ » |
+| gleichschenklig: Schenkel, Basis, Spitze, Basiswinkel(satz) | isocèle : côtés égaux, base, sommet principal, (propriété des) angles à la base | 3.2, widget seitenwinkel6 |
+| Seiten-Winkel-Beziehung, Dreiecksungleichung | relation entre côtés et angles, inégalité triangulaire | 3.2 |
+| Mittelsenkrechte, Winkelhalbierende, Höhe, Seitenhalbierende | médiatrice, bissectrice, hauteur, médiane | 3.2, widget linien6 |
+| Umkreismittelpunkt $U$, Inkreismittelpunkt $I$, Höhenschnittpunkt $H$, Schwerpunkt $S$ | centre du cercle circonscrit $O$, centre du cercle inscrit $I$, orthocentre $H$, centre de gravité $G$ | French letters O and G in the pages and, by rules, in widget linien6; Euler line: HG = 2 GO |
+| Lab names (3.1, 3.2) | DÉMONTRER LA SOMME DES ANGLES, LABORATOIRE DES ANGLES, FIGURES ÉGALES, EULER, FEUERBACH ET NAPOLÉON, PUZZLE D’ANGLES, POINT DE FERMAT | |
 
 ## mathegy7-fr
 
