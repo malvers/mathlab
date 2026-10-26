@@ -800,6 +800,21 @@ above was changed.
 
 <!-- fr-13: terms of this book only (GY 6), write right below this line -->
 
+Package fr-13 (Morel), 26.10.2026: decisions made while translating GY 6; nothing above was changed. French school conventions
+as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-fr/gy6.js, in the widgets; L and mL).
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Klasse 6 | Gymnasium, 6e année | start page: « à peu près l’âge de la classe de sixième en France » |
+| gebrochene Zahlen $\mathbb{Q}^+$ | nombres rationnels positifs $\mathbb{Q}^+$ | 1.1 lesson 3, widget mengen6; titles say « fractions » |
+| natürliche Zahlen $\mathbb{N}$ | entiers naturels | |
+| Dezimalzahl (endlich / periodisch) | écriture décimale (finie / périodique), nombre décimal | 1.1 says once: in France a « nombre décimal » has a finite decimal writing; widget bruchbild6: « Écriture décimale », « s’arrête », « périodique » |
+| erweitern, kürzen, gleichnamig machen | amplifier (as OS 5), simplifier, mettre au même dénominateur | |
+| Menge, Element, Teilmenge, Mengendiagramm | ensemble, élément (appartient à), partie (est inclus dans), diagramme de Venn | sets in braces with semicolons: $\{1\,;\,2\,;\,3\}$ |
+| Stammbruch, Papyrus Rhind, Ahmes | fraction unitaire, papyrus Rhind, Ahmès | 1.1 excursion |
+| TR (Taschenrechner-Zeichen) | CALC | the marker `g-cas` in front of a task |
+| Labs SCHRIFTLICHE DIVISION, RECHEN-RALLYE | DIVISION POSÉE, RALLYE DE CALCUL | « À ESSAYER AUSSI (EN ALLEMAND) » as OS 5 |
+
 ## mathegy7-fr
 
 <!-- fr-14: terms of this book only (GY 7), write right below this line -->
