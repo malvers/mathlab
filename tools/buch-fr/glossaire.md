@@ -852,6 +852,12 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Weg-Zeit-Diagramm, Weg $s$ | diagramme distance-temps, distance $d$ | 3.1, widget wegzeit8 (axis « d en m ») |
 | Zuhause, Haltestelle, Schule | Maison, Arrêt, École | widget wegzeit8 |
 | Klimadiagramm (Deutscher Wetterdienst), Bildfahrplan (Ibry) | diagramme climatique (Météo-France), horaire graphique | 3.1 |
+| lineare Funktion $y = mx + n$, Anstieg $m$, y-Achsenabschnitt $n$ | fonction affine, coefficient directeur (pente) $m$, ordonnée à l’origine $n$ | 3.2: the letters stay as the widget gerade writes them; the aside names $f(x) = ax + b$ once; $n = 0$: fonction linéaire |
+| Differenzenquotient, Steigungsdreieck, Gefälle | taux d’accroissement, triangle de pente, descente (pente) | 3.2 |
+| Schnittpunkt $S$ (two lines) | point d’intersection $I$ | 3.2 page text |
+| Regressionsgerade, Methode der kleinsten Quadrate, Trendlinie | droite de régression, méthode des moindres carrés, courbe de tendance | 3.2; Excel PENTE, ORDONNEE.ORIGINE |
+| Algorithmus: Eingabe, Wenn, Sonst, Ausgabe | Entrée, Si, Sinon, Sortie | 3.2 method box |
+| Körpergröße $h$, Schuhgröße $s$; Federkraftmesser | taille $t$, pointure $p$; dynamomètre à ressort | 3.2 |
 
 ## mathegy9-fr
 
