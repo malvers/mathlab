@@ -40,6 +40,7 @@ window.BuchIT && BuchIT.add('gy11lk-vek', {
         ['Alle Punkte mit demselben $r$ liegen auf einer Kugel um den Ursprung; auf der Erde sind $\\varphi$ und $\\vartheta$ die geografische Länge und Breite.',
             'Tutti i punti con lo stesso $r$ stanno su una sfera con centro nell’origine; sulla Terra $\\varphi$ e $\\vartheta$ sono la longitudine e la latitudine geografiche.'],
         // linabh3d
+        ['\\vec{o}', '\\vec{0}'],   // the null vector as pupils write it here, not the German \vec{o}
         ['$ als Gleichungssystem: $', '$ come sistema di equazioni: $'],
         ['Das Gauß-Verfahren führt auf die Einheitsmatrix: Nur $r = s = t = 0$ löst das System. Die Vektoren sind <b>linear unabhängig</b>, sie liegen nicht in einer Ebene.',
             'Il metodo di Gauss porta alla matrice identità: solo $r = s = t = 0$ risolve il sistema. I vettori sono <b>linearmente indipendenti</b>, non stanno in uno stesso piano.'],
