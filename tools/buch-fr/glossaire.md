@@ -764,6 +764,8 @@ above was changed.
 | „drei Komma vier sieben“ (not „siebenundvierzig“) | « trois virgule quarante-sept » or « 3 unités et 47 centièmes » | 2.2: the French way of reading, as the widget stellenwert5 says; the aside warns that « quarante-sept » sounds bigger than « cinq » |
 | ct (Cent) | centimes (written out) | 2.2 |
 | Schlussverkauf, Rabatt | soldes, réduction | 2.2 |
+| Komma unter Komma, Kommaverschiebung | virgule sous virgule, déplacer la virgule | 2.3; the widget komma5 says « la virgule se déplace » |
+| arithmetisches Mittel, Mittelwert, Durchschnitt | moyenne (moyenne arithmétique) | 2.3, as the widget mittel5 |
 | Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD | cards, en allemand |
 
 ## mathegy6-fr
