@@ -207,7 +207,7 @@
             [new RegExp('([0-9])[' + BS + BS + '],(?=[0-9]{3}(?![0-9]))', 'g'), '$1{,}'],
             [/\$[^$]*\$/g, m => m.replace(/ (?::|÷) /g, ' ' + BS + 'div ').replace(new RegExp('[' + BS + BS + ']cdot(?![a-z])', 'g'), BS + 'times')],
             // plain text: 352 · 23 → 352 × 23, (36 − 4) · 5; the sign alone (schriftlichos5: the input row, the cell of the sheet, the cuneiform place values)
-            [/([\d)]) · (?=[\d(a-z])/g, '$1 × '], [/^·$/, '×'], [/^:$/, '÷'], [/(<td[^>]*>)·(<\/td>)/g, '$1×$2'], [/(<text[^>]*>)· (?=\d)/g, '$1× '],
+            [/([\d)]) · (?=[\d(a-z])/g, '$1 × '], [/^·$/, '×'], [/^:$/, '÷'], [/(<td[^>]*>)·(<\/td>)/g, '$1×$2'], [/(<text[^>]*>)· (?=\d)/g, '$1× '], [/(<button[^>]*>)· (?=\d)/g, '$1× '],
             // the labels "Zahl" of the text fields ("Zahl" alone is a coin side elsewhere)
             [/(<label class="b-ctrl" for="os5-[a-z]+-\d+">)Zahl(<\/label>)/, '$1Number$2'],
             // zahlenstrahlos5
