@@ -341,5 +341,10 @@ window.BuchIT && BuchIT.add('gy5', {
         [/^Quader (\d+) mal (\d+) mal (\d+)$/, 'Parallelepipedo di $1 per $2 per $3'],
         [/(\d+) Schicht(en)? mit je (.+?) Würfeln\./, (m, c, en, x) => c + (c === '1' ? ' strato' : ' strati') + ' di ' + x + ' cubetti ciascuno.'],
 
+        // book it-21 mathe5-it:
+        // stellenwert5, komma5: the it-10 rule above already writes the Italian heads, the it-16 copy then reads the hundreds head
+        // "h" once more as German hundredths and makes it "c"; a head "c" without g5-sw-frac is the hundreds column again
+        [/<table class="g5-sw[\s\S]*?<\/table>/g, t => t.replace(/<th class="((?:(?!g5-sw-frac)[^"])*)">c<\/th>/g, '<th class="$1">h</th>')],
+
     ]
 });
