@@ -874,7 +874,13 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     if (f && f !== document.body && typeof f.blur === 'function') f.blur();
     if (o) { aufgabenPanel(true); return; }
-    if (e.key === 'ArrowUp') { vorschauHoch(); return; }
+    // Doc, 26.10.2026: "dass man das alles auf die Taste nach oben macht" - with no grey step left to send up,
+    // ↑ goes on to the next task like →, so one key carries a whole task and the next (not while a line flies)
+    if (e.key === 'ArrowUp') {
+        if (vorschau && aufgabenModus && !naechsterSchritt() && !fluege.length) naechsteVorlage(1);
+        else vorschauHoch();
+        return;
+    }
     if (e.key === 'ArrowDown') { vorschauRunter(); return; }
     naechsteVorlage(e.key === 'ArrowLeft' ? -1 : 1);
 });
