@@ -210,6 +210,8 @@
             [/([\d)]) · (?=[\d(a-z])/g, '$1 × '], [/^·$/, '×'], [/^:$/, '÷'], [/(<td[^>]*>)·(<\/td>)/g, '$1×$2'], [/(<text[^>]*>)· (?=\d)/g, '$1× '], [/(<button[^>]*>)· (?=\d)/g, '$1× '],
             // the labels "Zahl" of the text fields ("Zahl" alone is a coin side elsewhere)
             [/(<label class="b-ctrl" for="os5-[a-z]+-\d+">)Zahl(<\/label>)/, '$1Number$2'],
+            // winkel5 (js/buch-en/gy5.js says "full angle"): British pupils call 360° a full turn
+            [/\bfull angle\b/g, 'full turn'],
             // zahlenstrahlos5
             [/(data-v="\d+">)Schritt (\d{1,3}(?: \d{3})*)(?=<)/g, (m, a, n) => a + 'Step ' + n.replace(/ /g, ',')],
             [/^Zahlenstrahl von (.+) bis (.+)$/, 'Number line from $1 to $2'],
