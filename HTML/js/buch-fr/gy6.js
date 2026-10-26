@@ -73,6 +73,25 @@ window.BuchFR && BuchFR.add('gy6', {
         'Leihzeit in h': 'Durée de location en h', 'Preis in €': 'Prix en €',
         'Wortform:': 'En mots :', 'Tabelle:': 'Tableau :', 'Gleichung:': 'Équation :',
         'Keine. Die Temperatur kann man nur messen, nicht ausrechnen.': 'Aucune. La température se mesure, elle ne se calcule pas.',
+        // proportional6
+        'Äpfel': 'Pommes', 'Kuchen': 'Gâteau', 'Taxi': 'Taxi',
+        'direkt proportional': 'proportionnel', 'indirekt proportional': 'inversement proportionnel', 'keins von beiden': 'ni l’un ni l’autre',
+        'Masse in kg': 'Masse en kg', 'Personen': 'Personnes', 'Stück pro Person': 'Parts par personne', 'Strecke in km': 'Distance en km',
+        'Der Quotient $y : x$ ist immer $2{,}5$: <b>direkt proportional</b>. Der Graph ist eine Gerade durch den Ursprung.':
+            'Le quotient $y : x$ vaut toujours $2{,}5$ : c’est <b>proportionnel</b>. Le graphique est une droite qui passe par l’origine.',
+        'Das Produkt $x \\cdot y$ ist immer $24$: <b>indirekt proportional</b>. Doppelt so viele Personen, halb so viel Kuchen.':
+            'Le produit $x \\times y$ vaut toujours $24$ : c’est <b>inversement proportionnel</b>. Deux fois plus de personnes, deux fois moins de gâteau.',
+        'Je mehr Kilometer, desto teurer. Aber der Quotient ändert sich: <b>nicht proportional</b>. Die Gerade geht nicht durch den Ursprung.':
+            'Plus il y a de kilomètres, plus c’est cher. Mais le quotient change : ce n’est <b>pas proportionnel</b>. La droite ne passe pas par l’origine.',
+        // dreisatz6
+        'Pumpen': 'Pompes', 'Hefte': 'Cahiers', 'Futter': 'Nourriture', 'Antwort:': 'Réponse :',
+        '3 kg Äpfel kosten 7,50 €. Wie viel kosten 5 kg?': '3 kg de pommes coûtent 7,50 €. Combien coûtent 5 kg ?',
+        '4 Pumpen leeren ein Becken in 6 Stunden. Wie lange brauchen 3 Pumpen?': '4 pompes vident un bassin en 6 heures. Combien de temps faut-il à 3 pompes ?',
+        '5 Hefte kosten 4 €. Wie viel kosten 8 Hefte?': '5 cahiers coûtent 4 €. Combien coûtent 8 cahiers ?',
+        'Ein Futtervorrat reicht für 12 Kaninchen 10 Tage. Wie lange reicht er für 8 Kaninchen?': 'Une réserve de nourriture suffit à 12 lapins pendant 10 jours. Combien de temps suffit-elle à 8 lapins ?',
+        '5 kg Äpfel kosten 12,50 €.': '5 kg de pommes coûtent 12,50 €.', '3 Pumpen brauchen 8 Stunden.': '3 pompes mettent 8 heures.',
+        '8 Hefte kosten 6,40 €.': '8 cahiers coûtent 6,40 €.', 'Für 8 Kaninchen reicht das Futter 15 Tage.': 'Pour 8 lapins, la nourriture suffit 15 jours.',
+        'Schritt 1: Schreib auf, was du weißt.': 'Étape 1 : écris ce que tu sais.', 'Schritt 3: Rechne auf die gesuchte Menge hoch.': 'Étape 3 : calcule la valeur pour la quantité cherchée.',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -133,6 +152,15 @@ window.BuchFR && BuchFR.add('gy6', {
         ['Die gestrichelte Linie verbindet nur die Messpunkte. Was dazwischen geschah, weiß man nicht genau.',
             'La ligne en pointillés relie seulement les points mesurés. Ce qui s’est passé entre deux mesures, on ne le sait pas exactement.'],
         ['Abgerechnet wird nur nach ganzen Stunden, darum gibt es nur einzelne Punkte.', 'On ne paie que des heures entières : c’est pourquoi il n’y a que des points isolés.'],
+        // proportional6: the question inside the picture's aria label and above the table
+        ['Äpfel: 1 kg kostet 2,50 €', 'Pommes : 1 kg coûte 2,50 €'], ['24 Stück Kuchen werden gerecht verteilt', '24 parts de gâteau sont partagées équitablement'],
+        ['Taxi: 3 € Grundgebühr und 2 € pro km', 'Taxi : 3 € de prise en charge et 2 € par km'],
+        ['Graph der Zuordnung ', 'Graphique de la correspondance : '], ['. Zieh den gelben Punkt.', '. Fais glisser le point jaune.'],
+        // dreisatz6
+        ['Schritt 2: Rechne auf eins zurück. ', 'Étape 2 : passe par l’unité. '],
+        ['direkt proportional: Beide Seiten werden mit derselben Zahl gerechnet.', 'Proportionnalité : on fait le même calcul des deux côtés.'],
+        ['indirekt proportional: Rechts wird umgekehrt gerechnet. Aus „: 4“ links wird „· 4“ rechts.',
+            'Proportionnalité inverse : à droite, on fait le calcul inverse. « : 4 » à gauche devient « × 4 » à droite.'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -177,5 +205,9 @@ window.BuchFR && BuchFR.add('gy6', {
         [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '0' || n === '1' ? ' essai' : ' essais') + '<'],
         // darstellung6: "Gewählt: Uhrzeit 12 → Temperatur 14."
         [/Gewählt: Uhrzeit /g, 'Gewählt: heure '], [/ → Temperatur /g, ' → température '],
+        // dreisatz6: "4 Pumpen" → "4 pompes", "1 Kaninchen" → "1 lapin"; the arrows "↓ · 5" → "↓ × 5"
+        [/>([\d.,]+) (Pumpen|Hefte|Kaninchen|Tage)</g, (m, n, u) => '>' + n + ' ' +
+            ({ 'Pumpen': ['pompe', 'pompes'], 'Hefte': ['cahier', 'cahiers'], 'Kaninchen': ['lapin', 'lapins'], 'Tage': ['jour', 'jours'] })[u][n === '1' ? 0 : 1] + '<'],
+        [/(↓ )· (?=\d)/g, '$1× '],
     ]
 });

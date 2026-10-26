@@ -826,6 +826,11 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 | Münze Kopf / Zahl | pièce : face / pile | widget zufall6 (« Zahl » by a rule tied to the table and the picture) |
 | Ergebnis (table head of zufall6) | Issue | rule: the word « Ergebnis » stays « Résultat » (bruchop6) |
 | Schulfach Deutsch (survey in 2.1) | français | the pupil's own language |
+| direkt / indirekt proportional, Quotienten- / Produktgleichheit, Proportionalitätsfaktor | proportionnel / inversement proportionnel, quotient constant / produit constant, coefficient de proportionnalité | 2.2, widget proportional6 |
+| Dreisatz, auf eins zurückrechnen | règle de trois, passer par l’unité | 2.2, widget dreisatz6 « Étape 2 : passe par l’unité » |
+| Umfang $u$ (2.2 task) | périmètre $P$ | $P = 4 \times a$ |
+| Eratosthenes, Syene, Stadion, Kleomedes | Ératosthène, Syène, stade, Cléomède | 2.2 excursion |
+| Lab STEIGUNGS-LABOR, KOORDINATENSYSTEM, GALTON BOARD | LABORATOIRE DE LA PENTE, REPÈRE, PLANCHE DE GALTON | as fr-1 and fr-6 |
 
 ## mathegy7-fr
 
