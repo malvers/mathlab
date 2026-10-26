@@ -757,6 +757,10 @@ above was changed.
 | Teilermenge $T_{12} = \{1, 2, 3\}$ | ensemble des diviseurs $D_{12} = \{1\,;\,2\,;\,3\}$ | 1.3: the letter D (diviseurs), lists with the French semicolon; plain text {1 ; 2 ; 3} |
 | Primfaktorzerlegung | décomposition en (produit de) facteurs premiers | 1.3 |
 | kleinstes gemeinsames Vielfaches | plus petit multiple commun | 1.3 |
+| Zähler „zählt“, Nenner „nennt“ | le numérateur *compte*, le dénominateur *dénomme* | 2.1, the German wordplay kept |
+| echter / unechter Bruch | fraction inférieure à 1 / supérieure ou égale à 1 | 2.1, as OS 5 and the widget bruch5 |
+| gemischte Zahl $1\tfrac34$ | écriture mixte, « c’est-à-dire $1 + \tfrac34$ » | 2.1 says the sum once |
+| vollständig kürzen, größter gemeinsamer Teiler | rendre irréductible, plus grand diviseur commun | 2.1 |
 | Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD | cards, en allemand |
 
 ## mathegy6-fr
