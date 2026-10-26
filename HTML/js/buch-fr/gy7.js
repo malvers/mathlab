@@ -135,6 +135,13 @@ window.BuchFR && BuchFR.add('gy7', {
         'Ein Kreisdiagramm passt hier nicht: Es zeigt Anteile an einem Ganzen. Die Höhen der einzelnen Wochen ergeben zusammen kein sinnvolles Ganzes.':
             'Un diagramme circulaire ne convient pas ici : il montre des parts d’un tout. Les hauteurs des différentes semaines ne forment pas ensemble un tout qui ait un sens.',
         'Das Liniendiagramm passt: Es zeigt, wie sich ein Wert im Lauf der Zeit verändert.': 'Le diagramme en ligne brisée convient : il montre comment une valeur évolue au cours du temps.',
+        // schraegbild7 (Zweitafelbild: épure, Aufriss / Grundriss: vue de face / vue de dessus, Rissachse: ligne de terre, Ordnungslinie: ligne de rappel,
+        // wahre Länge: vraie grandeur; the points keep P′ and P″)
+        'Körper': 'Solide', 'Schrägbild': 'Perspective cavalière', 'Zweitafelbild': 'Épure', 'Wahre Länge': 'Vraie grandeur', 'Darstellung': 'Représentation',
+        'Kante $b$': 'Arête $b$', 'Deckkante $b$': 'Arête supérieure $b$', 'Breite $b$': 'Largeur $b$', 'Grundkante $a$': 'Arête de base $a$', 'Höhe $h$': 'Hauteur $h$',
+        'AUFRISS': 'DE FACE', 'GRUNDRISS': 'DE DESSUS', '$\\overline{SB}$': '$[SB]$', '$\\overline{S\'\'B_0\'\'}$': '$[S\'\'B_0\'\']$',
+        // faltnetz7
+        'Falten': 'Pliage', '▶ Zusammenfalten': '▶ Plier', '◀ Auffalten': '◀ Déplier', 'Ein Netz faltet sich zu einem Körper': 'Un patron se plie pour former un solide',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -196,6 +203,20 @@ window.BuchFR && BuchFR.add('gy7', {
         // diagramm7: the chart title in bold above the table (a part that starts with <b> is no word)
         ['Wie kommst du zur Schule? Umfrage in einer Klasse', 'Comment viens-tu à l’école ? Sondage dans une classe'],
         ['Klassensprecherwahl: Stimmen', 'Élection du délégué de classe : voix'], ['Höhe einer Sonnenblume, jede Woche gemessen', 'Hauteur d’un tournesol, mesurée chaque semaine'],
+        // schraegbild7: the counts under the name of the solid, the three representations
+        [' · Ecken $', ' · sommets $'], ['$ · Kanten $', '$ · arêtes $'], ['$ · Flächen $', '$ · faces $'],
+        ['<b>Schrägbild:</b> Kanten, die nach hinten gehen, zeichnest du unter $45^\\circ$ und auf die <b>Hälfte</b> verkürzt. Alle anderen Kanten haben ihre wahre Länge. Verdeckte Kanten sind gestrichelt.',
+            '<b>Perspective cavalière :</b> les arêtes qui partent vers l’arrière (les fuyantes) sont tracées à $45^\\circ$ et réduites de <b>moitié</b>. Toutes les autres arêtes sont en vraie grandeur. Les arêtes cachées sont en pointillés.'],
+        ['<b>Aufriss</b> (oben): der Körper von vorn. <b>Grundriss</b> (unten): von oben. Zusammengehörige Punkte liegen auf einer <b>Ordnungslinie</b> senkrecht zur Rissachse $x_{12}$. ',
+            '<b>Vue de face</b> (en haut) : le solide vu de devant. <b>Vue de dessus</b> (en bas) : vu d’en haut. Les points qui se correspondent sont sur une <b>ligne de rappel</b> perpendiculaire à la ligne de terre $x_{12}$. '],
+        ['Bezeichnung: $A\'$ im Grundriss, $A\'\'$ im Aufriss.', 'Notation : $A\'$ dans la vue de dessus, $A\'\'$ dans la vue de face.'],
+        ['Die Seitenkante ', 'L’arête latérale '],
+        [' liegt schräg im Raum. In beiden Rissen erscheint sie <b>verkürzt</b>. Drehe sie im Grundriss um $S\'$, bis sie parallel zur Rissachse liegt: $B_0\'$. ',
+            ' est oblique dans l’espace. Dans les deux vues, elle paraît <b>raccourcie</b>. Fais-la tourner autour de $S\'$ dans la vue de dessus, jusqu’à ce qu’elle soit parallèle à la ligne de terre : $B_0\'$. '],
+        ['Die Ordnungslinie führt zu $B_0\'\'$. Die Strecke ', 'La ligne de rappel mène à $B_0\'\'$. Le segment '], [' zeigt die <b>wahre Länge</b>.', ' est en <b>vraie grandeur</b>.'],
+        ['Gemessen: $\\overline{SB} \\approx ', 'Mesuré : $SB \\approx '],
+        // faltnetz7: Euler with the French letters S, A, F (sommets, arêtes, faces)
+        ['Ecken $e = ', 'Sommets $S = '], ['$ · Kanten $k = ', '$ · arêtes $A = '], ['$ · Flächen $f = ', '$ · faces $F = '],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -246,5 +267,15 @@ window.BuchFR && BuchFR.add('gy7', {
             'Klassensprecherwahl: Stimmen': 'élection du délégué de classe, voix', 'Höhe einer Sonnenblume, jede Woche gemessen': 'hauteur d’un tournesol, mesurée chaque semaine' }[t] || t)],
         [/Zusammen: (\d+) (Antworten|Stimmen) = 100 % = 360°\. Im Kreisdiagramm gehören zu 1 % genau 3,6°\./g,
             (m, n, u) => 'Total : ' + n + (u === 'Antworten' ? ' réponses' : ' voix') + ' = 100 % = 360°. Dans le diagramme circulaire, 1 % correspond exactement à 3,6°.'],
+        // schraegbild7: aria "Quader im Schrägbild"
+        [/^(.+) im (Schrägbild|Zweitafelbild)$/, (m, b, v) => ({ 'Würfel': 'Cube', 'Quader': 'Pavé droit', 'Dreiecksprisma': 'Prisme triangulaire', 'Sechseckprisma': 'Prisme hexagonal',
+            'Quadratische Pyramide': 'Pyramide à base carrée', 'Dreieckspyramide': 'Pyramide triangulaire', 'Pyramidenstumpf': 'Tronc de pyramide' }[b] || b) +
+            (v === 'Schrägbild' ? ' en perspective cavalière' : ' : épure (vue de face et vue de dessus)')],
+        // faltnetz7: "6 Vierecke", "1 Viereck, 4 Dreiecke" after the name, the colon after the name, Euler's S − A + F, the sentence about the regular solids
+        [/(\d+) (Dreiecke?|Vierecke?|Fünfecke?|Sechsecke?)(?=, |<\/p>)/g, (m, n, w) => n + ' ' + ({ 'Dreieck': 'triangle', 'Dreiecke': 'triangles', 'Viereck': 'quadrilatère',
+            'Vierecke': 'quadrilatères', 'Fünfeck': 'pentagone', 'Fünfecke': 'pentagones', 'Sechseck': 'hexagone', 'Sechsecke': 'hexagones' }[w])],
+        [/(<p style="margin:0"><b>[^<]+<\/b>): /g, '$1 : '], [/\$e - k \+ f = /g, '$S - A + F = '],
+        [/Alle Flächen sind gleiche regelmäßige (Dreiecke|Vierecke|Fünfecke|Sechsecke), an jeder Ecke stoßen (\d+) zusammen\./g, (m, w, n) => 'Toutes les faces sont des ' +
+            { 'Dreiecke': 'triangles équilatéraux', 'Vierecke': 'carrés', 'Fünfecke': 'pentagones réguliers', 'Sechsecke': 'hexagones réguliers' }[w] + ' identiques ; chaque sommet en réunit ' + n + '.'],
     ]
 });
