@@ -727,3 +727,23 @@ every part joined by a hyphen (vingt-et-un, deux-cent-mille, un-million); "trois
 | Rechenpfennige; Linien / Zwischenräume | jetons de calcul; lignes / espaces |
 | Notendurchschnitt | moyenne (German marks 1, the best, to 6) |
 | Klasse 5 | 5e année (about the age of CM2) |
+
+## mathegy5-fr
+
+<!-- fr-12: terms of this book only (GY 5), write right below this line -->
+
+## mathegy6-fr
+
+<!-- fr-13: terms of this book only (GY 6), write right below this line -->
+
+## mathegy7-fr
+
+<!-- fr-14: terms of this book only (GY 7), write right below this line -->
+
+## mathegy8-fr
+
+<!-- fr-15: terms of this book only (GY 8), write right below this line -->
+
+## mathegy9-fr
+
+<!-- fr-16: terms of this book only (GY 9), write right below this line -->

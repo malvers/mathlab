@@ -141,3 +141,35 @@ What is new in round 2:
 - **Not yours:** `js/buch.js`, `js/buch-fr.js`, `js/buch-fotos.js`, `js/buch-titel.css`, the tools, the hub (`js/labs-*`),
   `tools/buch-fr/known.json` conflicts (the orchestrator takes the union). What you need there goes into the report.
 - Report to the orchestrator at the end: branch, tip, commits, check results, German errors fixed, open questions.
+
+## Round 3 (26.10.2026): Gymnasium 5 to 9
+
+Doc, 26.10.2026: "Wir machen jetzt noch 5 Bücher ins Französische vom Gymnasium … du bist die Dirigentin". Same recipe
+as round 2: one local commit `fr3-prep:` (block lines `fr-12 … fr-16` in the modules these books load, the new empty
+modules gy6, gy7, gy8 and daten, a `## <book>-fr` heading per book at the end of `glossaire.md`), then one agent per
+book on its own branch from that commit.
+
+| Book | Agent | Worktree `.claude/worktrees/` | Branch | Port | Block | Modules |
+|---|---|---|---|---|---|---|
+| GY 5 `mathegy5` | Audin | `fr-audin` | `fr-mathegy5` | 8861 | `fr-12` | geometrie, gy5 |
+| GY 6 `mathegy6` | Morel | `fr-morel` | `fr-mathegy6` | 8862 | `fr-13` | geometrie, gy6 |
+| GY 7 `mathegy7` | Gallagher | `fr-gallagher` | `fr-mathegy7` | 8863 | `fr-14` | geometrie, gy7, daten, gleichungen |
+| GY 8 `mathegy8` | Moeglin | `fr-moeglin` | `fr-mathegy8` | 8864 | `fr-15` | geometrie, gy8, funktionen, gleichungen, lgs, spiele, stochastik |
+| GY 9 `mathegy9` | Libermann | `fr-libermann` | `fr-mathegy9` | 8865 | `fr-16` | geometrie, daten, funktionen, gleichungen, zahlen |
+
+What is new in round 3:
+
+- **Always the French school conventions** (Doc, 26.10.2026: "lokal bitte immer"): letters taken from French words
+  (an event "G: gerade" becomes "P : pair"), the zero vector $\vec{0}$, × for the product, P for the perimeter (German
+  u), A for the total area (German O), points `(2 ; 3)`, segments [AB], lines (AB), number words in the 1990 rectified
+  spelling. What OS 5 decided is in the header of `js/buch-fr/gy5.js` and in `## mathe5-fr` of `glossaire.md`.
+  Answers (`data-ans`) and numbers stay as in the German book; what a widget draws as a German letter goes through the
+  dictionaries.
+- **GY 5 shares its widgets with OS 5** (`mathe5-fr`, block `fr-11` in gy5.js): most strings are there already.
+- **Links to other textbooks** go to the French edition if there is one (the eleven before this round and the five of
+  this round), else to the English one.
+- **Photos:** GY 5 and GY 6 have photos (`js/buch-fotos.js`, not yours): put a French `alt` for each of your book's
+  photos into the report, the orchestrator adds them.
+- **Backslashes:** a `\\;` typed into a tool can arrive as `\;` and the phrase never matches; check your block with
+  `git diff fr3-prep -- HTML/js/buch-fr/ | grep '^+' | grep '[^\\]\\[;,:!]'` before every commit.
+- Every agent works only in its own worktree and its own scratch subfolder (`scratchpad/fr-<name>/`).

@@ -124,6 +124,7 @@ window.BuchFR && BuchFR.add('gy5', {
         'Fertig gebündelt. Jetzt kann man das Ergebnis ablesen.': 'Tout est regroupé. On peut maintenant lire le résultat.',
         'Rot markiert: Hier muss noch gebündelt werden.': 'Marqué en rouge : ici, il faut encore regrouper.',
         'Linienbrett mit Rechenpfennigen': 'Table à calculer avec des jetons',
+        // book fr-12 mathegy5-fr:
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -173,6 +174,7 @@ window.BuchFR && BuchFR.add('gy5', {
         ['Was über der Linie war (gestrichelt grau), füllt genau die Lücken (gelb).', 'Ce qui dépassait la ligne (en gris pointillé) comble exactement les vides (en jaune).'],
         // koord5
         ['Getroffen! A liegt auf ', 'Gagné ! A est en '], ['<b>Aufgabe:</b> Zieh A auf den Punkt ', '<b>Consigne :</b> fais glisser A sur le point '],
+        // book fr-12 mathegy5-fr:
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -298,5 +300,6 @@ window.BuchFR && BuchFR.add('gy5', {
         [/Zwei Pfennige im Feld (\d[\d ]*) werden zu einem auf der Linie (\d[\d ]*)\./, 'Deux jetons dans l’espace $1 deviennent un jeton sur la ligne $2.'],
         [/(\d[\d ]*) ist gelegt\./, '$1 est posé.'],
         [/(\d[\d ]*) dazugelegt\. Jetzt muss gebündelt werden\./, '$1 ajouté. Il faut maintenant regrouper.'],
+        // book fr-12 mathegy5-fr:
     ]
 });

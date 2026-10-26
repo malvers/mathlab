@@ -14,11 +14,26 @@
 window.BuchFR && BuchFR.add('geometrie', {
     word: {
         // book fr-11 mathe5-fr:
+        // book fr-12 mathegy5-fr:
+        // book fr-13 mathegy6-fr:
+        // book fr-14 mathegy7-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     },
     phrase: [
         // book fr-11 mathe5-fr:
+        // book fr-12 mathegy5-fr:
+        // book fr-13 mathegy6-fr:
+        // book fr-14 mathegy7-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     ],
     rule: [
         // book fr-11 mathe5-fr:
+        // book fr-12 mathegy5-fr:
+        // book fr-13 mathegy6-fr:
+        // book fr-14 mathegy7-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     ]
 });

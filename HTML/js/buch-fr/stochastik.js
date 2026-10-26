@@ -122,6 +122,7 @@ window.BuchFR && BuchFR.add('stochastik', {
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // book fr-15 mathegy8-fr:
     },
     phrase: [
         // fr0: the helpers of the module (outside every widget; check.mjs stochastik/*), shared by all five books
@@ -252,6 +253,7 @@ window.BuchFR && BuchFR.add('stochastik', {
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // book fr-15 mathegy8-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -295,5 +297,6 @@ window.BuchFR && BuchFR.add('stochastik', {
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // book fr-15 mathegy8-fr:
     ]
 });

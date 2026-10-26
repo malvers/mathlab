@@ -131,6 +131,8 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -240,6 +242,8 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -284,5 +288,7 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     ]
 });

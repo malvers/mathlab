@@ -31,6 +31,7 @@ window.BuchFR && BuchFR.add('spiele', {
         'Fairen Einsatz einstellen': 'Régler la mise équitable', '1000 Spiele': '1000 parties',
         'Ergebnis': 'Résultat', 'Pasch': 'Double', 'Summe 7': 'Somme 7', 'sonst': 'autre', 'Gewinn $x_i$ in €': 'Gain $x_i$ en €',
         'Lass das Spiel 1000-mal laufen und vergleiche den mittleren Gewinn mit dem Erwartungswert.': 'Fais tourner le jeu 1000 fois et compare le gain moyen à l’espérance.',
+        // book fr-15 mathegy8-fr:
     },
     phrase: [
         // book fr-6 mathegy10-fr:
@@ -53,8 +54,10 @@ window.BuchFR && BuchFR.add('spiele', {
         ['Für die Spielerin oder den Spieler <b>günstig</b>: Die Klasse verliert im Mittel ', 'Pour la joueuse ou le joueur, le jeu est <b>favorable</b> : la classe perd en moyenne '],
         [' € pro Spiel.', ' € par partie.'], [' Fair wäre der Einsatz $e = \\tfrac{', ' La mise équitable serait $e = \\tfrac{'],
         ['Gespielt: ', 'Parties jouées : '], [' Spiele, mittlerer Gewinn <b>', ', gain moyen <b>'], [' €</b> pro Spiel (Erwartungswert ', ' €</b> par partie (espérance '],
+        // book fr-15 mathegy8-fr:
     ],
     rule: [
         // book fr-6 mathegy10-fr:
+        // book fr-15 mathegy8-fr:
     ]
 });

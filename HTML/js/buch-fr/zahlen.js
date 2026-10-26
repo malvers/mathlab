@@ -49,6 +49,7 @@ window.BuchFR && BuchFR.add('zahlen', {
         'Treppenhaus: Jeder der beiden Schalter kann die Lampe ein- und ausschalten. Sie leuchtet, wenn beide Schalter <b>gleich</b> stehen.': 'Cage d’escalier : chacun des deux interrupteurs peut allumer et éteindre la lampe. Elle s’allume quand les deux interrupteurs sont dans la <b>même</b> position.',
         // book fr-5 mathefos12-fr:
         // book fr-6 mathegy10-fr:
+        // book fr-16 mathegy9-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -92,6 +93,7 @@ window.BuchFR && BuchFR.add('zahlen', {
         ['$ → Lampe <b>', '$ → lampe <b>'],
         // book fr-5 mathefos12-fr:
         // book fr-6 mathegy10-fr:
+        // book fr-16 mathegy9-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -105,5 +107,6 @@ window.BuchFR && BuchFR.add('zahlen', {
         [/Lampe <b>an<\/b>/g, 'Lampe <b>allumée</b>'], [/Lampe <b>aus<\/b>/g, 'Lampe <b>éteinte</b>'],
         // book fr-5 mathefos12-fr:
         // book fr-6 mathegy10-fr:
+        // book fr-16 mathegy9-fr:
     ]
 });

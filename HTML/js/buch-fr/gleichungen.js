@@ -34,6 +34,9 @@ window.BuchFR && BuchFR.add('gleichungen', {
         'wahr': 'vrai',
         'falsch': 'faux',
         // book fr-5 mathefos12-fr:
+        // book fr-14 mathegy7-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -63,6 +66,9 @@ window.BuchFR && BuchFR.add('gleichungen', {
         [': Die Zahl gehört zur Lösungsmenge.', ' : le nombre appartient à l’ensemble des solutions.'],
         [': Die Zahl gehört nicht dazu.', ' : le nombre n’en fait pas partie.'],
         // book fr-5 mathefos12-fr:
+        // book fr-14 mathegy7-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     ],
     rule: [
         // fr0: the solution set is S in the French books (glossaire, section 4), also in the widget sentences:
@@ -75,5 +81,8 @@ window.BuchFR && BuchFR.add('gleichungen', {
         // ungleichung: "… Zahlenstrahl. $x = 1$: $…" gets its no-break space (before the pieces)
         [/(Zahlenstrahl\. \$x = [^$]*\$): \$/g, '$1 : $'],
         // book fr-5 mathefos12-fr:
+        // book fr-14 mathegy7-fr:
+        // book fr-15 mathegy8-fr:
+        // book fr-16 mathegy9-fr:
     ]
 });
