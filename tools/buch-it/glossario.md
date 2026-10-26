@@ -933,3 +933,53 @@ Round 3, 21.10.2026 (Gianotti): decisions made while translating OS 10 (from the
 | Försterdreieck, Schattenmethode, Peilstab, Messrad, Daumensprung | triangolo del guardaboschi, metodo dell’ombra, asta di mira, rotella metrica, salto del pollice | as in gy8.js; Strahlensatz = teorema di Talete |
 | Giebel, Sparren, First (lb1) | timpano, puntoni, colmo | |
 | Fermi-Frage | domanda di Fermi | 4.3 |
+
+## mathe5-it
+
+<!-- it-21: terms of this book only, write right below this line -->
+
+Castelnuovo, 26.10.2026: decisions made while translating OS 5 (Oberschule, 5th class); nothing above was changed. Doc, 26.10.2026:
+translations use the school conventions of the target country, not the German ones (letters, symbols, notation); answers and
+numbers stay. The start page explains the Oberschule as in mathe6-it.
+
+| German | Italian | Note |
+|---|---|---|
+| Vorgänger, Nachfolger | precedente, successivo | 1.1 |
+| Zahlenstrahl, Strich, Einteilung, Schritt | retta numerica, tacca, suddivisione, passo | 1.1, widget zahlenstrahlos5 |
+| Stellenwerttafel HM ZM M HT ZT T H Z E, z h t | hM daM uM hk dak uk h da u, d c m | the heads of the it-10 rule in gy5.js; Billion = bilione (mille miliardi) |
+| schriftlich, halbschriftlich | in colonna, in riga (a passi) | 1.2 |
+| Summand, Minuend, Subtrahend, Faktor, Dividend, Divisor, Quotient | addendo, minuendo, sottraendo, fattore, dividendo, divisore, quoziente | 1.2 |
+| Übertrag, gemerkt | riporto | 1.2, schriftlichos5 |
+| Ergänzen / Entbündeln (Subtraktion) | Completa / Cambia («con il cambio», il prestito delle scuole italiane) | buttons of schriftlichos5; 'Ergänzen' is the gy5 word |
+| Überschlag, Probe, Umkehraufgabe | stima, prova (widget: «Verifica:» as in gy7), operazione inversa | 1.2 |
+| Teilprodukt, Rest | prodotto parziale, resto | the German layouts of multiplication and division are named once (1.2) |
+| Term, Vorrangregeln, Punkt vor Strich, Klammer zuerst | espressione, ordine delle operazioni, prima per e diviso, prima le parentesi | 1.2, vorrangos5 |
+| Zehnerpotenz, Grundzahl, Hochzahl, Endnull | potenza di dieci, base, esponente, zero finale | 1.3; «dieci alla sesta» |
+| Quadratzahl, Quadratwurzel, Plättchen | quadrato perfetto, radice quadrata, tessera | 1.3, quadratos5 |
+| Gleichung, Ungleichung, Variable | equazione, disequazione, incognita | 1.3 |
+| Teiler, Vielfache, Quersumme, Primzahlzwillinge | divisori, multipli, somma delle cifre, primi gemelli | 1.3; teilbarkeitos5 «divisibile per 2:» |
+| Bruchteil, Stammbruch, Zehnerbruch | frazione di una grandezza, frazione unitaria, frazione decimale | 2.1, 2.2; 4/4 and 8/4 also «apparente» once |
+| Ganze, Halbe, Drittel … Zwölftel | interi, mezzi, terzi … dodicesimi (sg. intero, mezzo, terzo …) | halbesos5 |
+| Prozent, Hunderterfeld | percentuale, griglia da cento | 2.2; the page explains once that Italy often writes 25% without the space |
+| Notendurchschnitt (Noten 1–6) | punteggio medio (punti di un quiz) | 2.3: German school grades replaced by quiz points, numbers kept |
+| Vorsätze Kilo, Dezi, Zenti, Milli | prefissi chilo, deci, centi, milli | 2.3 names hm, dam, hg, dag once; 1 a = 1 dam², 1 ha = 1 hm² (3.2) |
+| Elle (Dresdner Elle) | braccio (di Dresda) | 2.3 excursion |
+| P(3 \| 5), Ursprung O(0 \| 0) | P(3, 5), origine O(0, 0) | 3.1, page text; widgets through the engine |
+| Strecke, Strahl, Gerade, schneiden | segmento, semiretta, retta, incidenti | 3.1 |
+| Scheitelpunkt S, Schenkel | vertice V, lati | 3.1 (the gy5 rule draws V) |
+| überstumpfer Winkel | angolo concavo | 3.1 |
+| rechter Winkel (Viertelkreis mit Punkt) | angolo retto (piccolo quadrato) | 3.1, the German mark named once |
+| Geodreieck | squadra goniometrica | 3.1 excursion: in Italy a squadra and a goniometro |
+| Umfang u | perimetro 2p (p semiperimetro) | 3.2; the rechteck5 output on these pages too (rule in os5.js) |
+| Oberfläche O | superficie totale S_t | 3.2; the quader5 output on these pages too (rule in os5.js) |
+| Schrägbild, Verzerrungswinkel, Verkürzungsverhältnis q | assonometria cavaliera, angolo, coefficiente di riduzione q | 3.2 |
+| Würfelnetz, Kreuznetz, Klebelasche | sviluppo del cubo, sviluppo a croce, aletta | 3.2, wuerfelnetzos5 |
+| Hohlmaße | unità di capacità | 3.2 |
+| Achsensymmetrie, Geradenspiegelung, Spiegelachse | simmetria assiale, simmetria rispetto a una retta (riflessione), asse di simmetria | 4; P′ = «P primo» |
+| Verschiebung, Verschiebungspfeil, Verschiebungsweite | traslazione, freccia di traslazione (vettore), ampiezza | 4 |
+| deckungsgleich, Original, Bild, Umlaufsinn | congruenti, figura, immagine, verso di percorrenza | 4 |
+| Bandornament, Ornament, Motiv | fregio, motivo decorativo, motivo | 4, bandos5 |
+| Kerbholz, Strichliste, Fünferbündel | bastone a tacche, conteggio a stanghette, gruppo da cinque | OP, zahlzeichenos5 |
+| Keil, Winkelhaken, Sechzigersystem | cuneo, uncino, sistema sessagesimale | OP |
+| Rechenpfennig, Rechentisch, Linie, Zwischenraum | gettone da calcolo, tavolo da calcolo, linea, spazio | OP |
+| Wahlbereich (1) | area opzionale (1), chapter OP | kicker «AREA OPZIONALE · GIUGNO · LUGLIO» |
