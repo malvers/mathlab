@@ -112,6 +112,12 @@ window.BuchFR && BuchFR.add('gy7', {
         'Plus mal minus ergibt minus.': 'Plus par moins donne moins.', 'Minus mal minus ergibt plus. Minus mal plus ergibt minus.': 'Moins par moins donne plus. Moins par plus donne moins.',
         'Gerader Exponent: positiv. Ungerader Exponent: negativ. Denn je zwei Minuszeichen heben sich auf.': 'Exposant pair : positif. Exposant impair : négatif. Car les signes moins s’annulent deux à deux.',
         'Vorsicht: $-2^2 = -(2 \\cdot 2) = -4$, aber $(-2)^2 = 4$. Die Klammer entscheidet.': 'Attention : $-2^2 = -(2 \\times 2) = -4$, mais $(-2)^2 = 4$. Ce sont les parenthèses qui décident.',
+        // waagebild7
+        'Eine Waage im Gleichgewicht: links drei Kisten x und zwei Gewichte, rechts eine Kiste x und sechs Gewichte':
+            'Une balance en équilibre : à gauche trois boîtes x et deux poids, à droite une boîte x et six poids',
+        // umstellen7 (French letters: P for the perimeter, d for the distance, 𝓑 for the base of the pyramid - a rule below; "Dichte" is a rule:
+        // gy12lk.js has the word for the density of a distribution)
+        'Rechteck': 'Rectangle', 'Nächster Schritt': 'Étape suivante', 'Umfang': 'Périmètre', 'Geschwindigkeit': 'Vitesse', 'Formel': 'Formule', '⇄ Seiten tauschen': '⇄ échanger les membres', 'umstellen nach': 'isoler',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -164,6 +170,8 @@ window.BuchFR && BuchFR.add('gy7', {
             '<b>Intersection :</b> $\\mathbb{Z} \\cap \\mathbb{Q}^+ = \\mathbb{N}$. Ce sont les nombres qui sont dans les deux ensembles : entiers <b>et</b> sans signe moins.'],
         ['<b>Vereinigungsmenge:</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ enthält alle Zahlen, die in mindestens einer der beiden Mengen liegen. Das ist noch nicht ganz $\\mathbb{Q}$: $-\\tfrac12$ liegt in keiner von beiden.',
             '<b>Réunion :</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ contient tous les nombres qui sont dans au moins un des deux ensembles. Ce n’est pas encore tout $\\mathbb{Q}$ : $-\\tfrac12$ n’est dans aucun des deux.'],
+        // umstellen7: the end of the steps and the check with numbers
+        ['Fertig. Mit Zahlen: ', 'Terminé. Avec des nombres : '], ['. Probe: ', '. Vérification : '], ['Stahl, $\\varrho', 'Acier, $\\varrho'], ['Wasser, $\\varrho', 'Eau, $\\varrho'],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -189,5 +197,16 @@ window.BuchFR && BuchFR.add('gy7', {
         // vorzeichen7: "Von Zeile zu Zeile wird das Ergebnis um 3 kleiner. Damit das Muster weitergeht, muss $3 \times (-1) = -3$ sein."
         [/Von Zeile zu Zeile wird das Ergebnis um 3 (kleiner|größer)\. Damit das Muster weitergeht, muss \$([^$]+)\$ sein\./g,
             (m, w, f) => 'D’une ligne à l’autre, le résultat ' + (w === 'kleiner' ? 'diminue' : 'augmente') + ' de 3. Pour que la suite continue, il faut avoir $' + f + '$.'],
+        // umstellen7: the instruction, and the French letters in every formula of the output (u → P, s → d, G → 𝓑); the colon between
+        // two formulas of the check gets its no-break space
+        [/^<p class="b-help" style="margin:0 0 4px">Die Formel \$([^$]+)\$ nach \$([^$]+)\$ umstellen: auf <b>beiden<\/b> Seiten dasselbe tun, bis \$[^$]+\$ allein steht\.<\/p>([\s\S]*)$/,
+            (m, f, v, rest) => {
+                const map = /^u = /.test(f) ? [/\bu\b/g, 'P'] : /^v = \\dfrac\{s\}/.test(f) ? [/\bs\b/g, 'd'] : /\\tfrac13 \\times G/.test(f) ? [/\bG\b/g, '\\mathcal{B}'] : null;
+                const fix = t => map ? t.replace(/\$[^$]*\$/g, x => x.replace(map[0], map[1])) : t;
+                return '<p class="b-help" style="margin:0 0 4px">' + fix('Isoler $' + v + '$ dans la formule $' + f + '$ : faire la même chose dans les <b>deux</b> membres, jusqu’à ce que $' + v + '$ soit seul.') + '</p>' + fix(rest).replace(/\$: (?=\$)/g, '$ : ');
+            }],
+        // umstellen7: the buttons "nach $b$" under "isoler" (s and G of the formulas are d and 𝓑), the formula "Dichte"
+        [/(<button type="button" data-v="([A-Za-z])">)nach \$\2\$(<\/button>)/g, (m, a, v, c) => a + 'isoler $' + ({ s: 'd', G: '\\mathcal{B}' }[v] || v) + '$' + c],
+        [/(<button type="button" data-v="4">)Dichte(<\/button>)/g, '$1Masse volumique$2'],
     ]
 });
