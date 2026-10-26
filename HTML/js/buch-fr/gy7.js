@@ -105,6 +105,13 @@ window.BuchFR && BuchFR.add('gy7', {
         'In welchen Teil des Bildes gehört sie? Tippe auf einen Knopf oder ins Bild.': 'Dans quelle partie de la figure va-t-il ? Touche un bouton ou la figure.',
         'Die <b>ganzen</b> Zahlen $\\mathbb{Z}$ und die <b>gebrochenen</b> Zahlen $\\mathbb{Q}^+$ überlappen sich. Im Überlapp liegen die <b>natürlichen</b> Zahlen $\\mathbb{N}$. Alles zusammen liegt in den <b>rationalen</b> Zahlen $\\mathbb{Q}$.':
             'Les <b>entiers relatifs</b> $\\mathbb{Z}$ et les <b>rationnels positifs</b> $\\mathbb{Q}^+$ se chevauchent. Dans la partie commune se trouvent les <b>entiers naturels</b> $\\mathbb{N}$. Le tout est contenu dans les <b>nombres rationnels</b> $\\mathbb{Q}$.',
+        // vorzeichen7 (the products of the rows get their × by the rule above; "Von Zeile zu Zeile …" is a rule below)
+        'Multiplizieren': 'Multiplication', 'Potenzen': 'Puissances', 'Muster': 'Régularité', 'erster Faktor': 'premier facteur', 'Nächste Zeile': 'Ligne suivante',
+        'positiv': 'positif', 'negativ': 'négatif', 'Die Ergebnisse auf der Zahlengeraden': 'Les résultats sur la droite graduée',
+        'Wie geht das Muster weiter? Überlege, bevor du die nächste Zeile aufdeckst.': 'Comment la suite continue-t-elle ? Réfléchis avant de découvrir la ligne suivante.',
+        'Plus mal minus ergibt minus.': 'Plus par moins donne moins.', 'Minus mal minus ergibt plus. Minus mal plus ergibt minus.': 'Moins par moins donne plus. Moins par plus donne moins.',
+        'Gerader Exponent: positiv. Ungerader Exponent: negativ. Denn je zwei Minuszeichen heben sich auf.': 'Exposant pair : positif. Exposant impair : négatif. Car les signes moins s’annulent deux à deux.',
+        'Vorsicht: $-2^2 = -(2 \\cdot 2) = -4$, aber $(-2)^2 = 4$. Die Klammer entscheidet.': 'Attention : $-2^2 = -(2 \\times 2) = -4$, mais $(-2)^2 = 4$. Ce sont les parenthèses qui décident.',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -179,5 +186,8 @@ window.BuchFR && BuchFR.add('gy7', {
         [/(<text class="g-side"[^>]*>)k(<\/text>)/g, '$1𝒞$2'], [/(<text class="g-side"[^>]*>)h(<\/text>)/g, '$1𝒞′$2'],
         // zahlbereiche7: "Richtig: 3 von 5" as in js/buch-fr/zahlen.js, and the colon after the number in "<b>Richtig!</b> $7$: …"
         [/Richtig: (\d+) von (\d+)/g, 'Bonnes réponses : $1 sur $2'], [/(<b>Richtig!<\/b> \$[^$]*\$): /g, '$1 : '],
+        // vorzeichen7: "Von Zeile zu Zeile wird das Ergebnis um 3 kleiner. Damit das Muster weitergeht, muss $3 \times (-1) = -3$ sein."
+        [/Von Zeile zu Zeile wird das Ergebnis um 3 (kleiner|größer)\. Damit das Muster weitergeht, muss \$([^$]+)\$ sein\./g,
+            (m, w, f) => 'D’une ligne à l’autre, le résultat ' + (w === 'kleiner' ? 'diminue' : 'augmente') + ' de 3. Pour que la suite continue, il faut avoir $' + f + '$.'],
     ]
 });
