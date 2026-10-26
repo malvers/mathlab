@@ -119,12 +119,6 @@ window.BuchFR && BuchFR.add('os5', {
         'Fahne': 'Drapeau', 'Schlüssel': 'Clé', 'Blume': 'Fleur', 'Motiv': 'Motif', 'Bewegung': 'Mouvement',
         'Verschieben': 'Translation', 'Spiegeln, senkrechte Achsen': 'Symétrie, axes verticaux', 'Spiegeln, waagerechte Achse': 'Symétrie, axe horizontal',
         'Verschiebungspfeil': 'Flèche de translation',
-        '<b>Verschiebung:</b> Jedes Motiv entsteht aus dem vorigen durch dieselbe Verschiebung nach rechts, um eine Kästchenbreite. Alle Motive zeigen in dieselbe Richtung.':
-            '<b>Translation :</b> chaque motif s’obtient à partir du précédent par la même translation vers la droite, d’une largeur de case. Tous les motifs sont orientés dans le même sens.',
-        '<b>Spiegelung an senkrechten Achsen:</b> Jedes Motiv ist das Spiegelbild seines Nachbarn. Die grünen Linien sind die Spiegelachsen. Jedes zweite Motiv ist umgeklappt.':
-            '<b>Symétrie par rapport à des axes verticaux :</b> chaque motif est le symétrique de son voisin. Les lignes vertes sont les axes de symétrie. Un motif sur deux est retourné.',
-        '<b>Spiegelung an einer waagerechten Achse:</b> Die untere Reihe ist das Spiegelbild der oberen. Oben und unten ist vertauscht, links und rechts nicht.':
-            '<b>Symétrie par rapport à un axe horizontal :</b> la rangée du bas est le symétrique de celle du haut. Le haut et le bas sont échangés, mais pas la gauche et la droite.',
         'Alle Motive sind deckungsgleich: gleiche Form, gleiche Größe.': 'Tous les motifs sont superposables : même forme, même taille.',
         // zahlzeichenos5
         'Kerbholz und Strichliste': 'Bâton à encoches et traits', 'Babylonische Keilschrift': 'Écriture cunéiforme babylonienne', 'Zahlzeichen': 'Numération',
@@ -181,6 +175,13 @@ window.BuchFR && BuchFR.add('os5', {
         ['Bei 0, 1, 2, 3 oder 4 wird <b>abgerundet</b>.', 'Avec 0, 1, 2, 3 ou 4, on arrondit <b>vers le bas</b>.'],
         // wuerfelnetzos5
         ['Wähle 6 Quadrate aus', 'Choisis 6 carrés'],
+        // bandos5 (phrases: a word that starts with <b> is never looked up in innerHTML)
+        ['<b>Verschiebung:</b> Jedes Motiv entsteht aus dem vorigen durch dieselbe Verschiebung nach rechts, um eine Kästchenbreite. Alle Motive zeigen in dieselbe Richtung.',
+            '<b>Translation :</b> chaque motif s’obtient à partir du précédent par la même translation vers la droite, d’une largeur de case. Tous les motifs sont orientés dans le même sens.'],
+        ['<b>Spiegelung an senkrechten Achsen:</b> Jedes Motiv ist das Spiegelbild seines Nachbarn. Die grünen Linien sind die Spiegelachsen. Jedes zweite Motiv ist umgeklappt.',
+            '<b>Symétrie par rapport à des axes verticaux :</b> chaque motif est le symétrique de son voisin. Les lignes vertes sont les axes de symétrie. Un motif sur deux est retourné.'],
+        ['<b>Spiegelung an einer waagerechten Achse:</b> Die untere Reihe ist das Spiegelbild der oberen. Oben und unten ist vertauscht, links und rechts nicht.',
+            '<b>Symétrie par rapport à un axe horizontal :</b> la rangée du bas est le symétrique de celle du haut. Le haut et le bas sont échangés, mais pas la gauche et la droite.'],
         // zahlzeichenos5
         ['Ein senkrechter Keil zählt 1, ein Winkelhaken 10. Jede Stelle nach links ist 60-mal so viel wert.',
             'Un clou vertical vaut 1, un chevron vaut 10. Chaque position vers la gauche vaut 60 fois plus.'],
