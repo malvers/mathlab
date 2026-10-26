@@ -858,6 +858,12 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Regressionsgerade, Methode der kleinsten Quadrate, Trendlinie | droite de régression, méthode des moindres carrés, courbe de tendance | 3.2; Excel PENTE, ORDONNEE.ORIGINE |
 | Algorithmus: Eingabe, Wenn, Sonst, Ausgabe | Entrée, Si, Sinon, Sortie | 3.2 method box |
 | Körpergröße $h$, Schuhgröße $s$; Federkraftmesser | taille $t$, pointure $p$; dynamomètre à ressort | 3.2 |
+| lineares Gleichungssystem, Lösbarkeit, vollständige Fallunterscheidung | système d’équations linéaires, nombre de solutions, étude exhaustive des cas | 3.3 |
+| Einsetzungs-, Gleichsetzungs-, Additionsverfahren | méthode par substitution, par comparaison, par combinaison | widget lgs8: Substitution, Comparaison, Combinaison |
+| Schnittpunkt $S$ (widget geraden), Lösungsmenge $L$ (widget lgs8) | $I$, $S = \{(2\,;\,3)\}$ | rules in js/buch-fr/gy8.js, only on the pages of this book |
+| schneidend, parallel, identisch, orthogonal (lines) | sécantes, parallèles, confondues, perpendiculaires | as the widget lage says |
+| Fasane und Hasen (Sunzi) $f$, $h$ | faisans et lapins $f$, $l$ | 3.3, the classic French wording of the puzzle |
+| Erwachsene $e$ / Jugendliche $j$, Autos $a$ / Motorräder $m$, Boot $b$ / Fluss $f$, Kerze rot $r$ / weiß $w$, Rechteck $a$, $b$ | adultes $a$ / jeunes $j$, voitures $v$ / motos $m$, bateau $b$ / courant $c$, bougie rouge $r$ / blanche $b$, $L$, $\ell$ | 3.3 page text |
 
 ## mathegy9-fr
 

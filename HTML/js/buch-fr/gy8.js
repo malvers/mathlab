@@ -29,6 +29,17 @@ window.BuchFR && BuchFR.add('gy8', {
         'Zuhause': 'Maison', 'Haltestelle': 'Arrêt', 'Schule': 'École',
         'Der Schulweg als Strecke, der Punkt zeigt, wo Mia gerade ist': 'Le trajet de l’école comme un segment ; le point montre où se trouve Mia',
         'Mia ist in der Schule angekommen.': 'Mia est arrivée à l’école.',
+        // lgs8 ('Nächster Schritt' is in js/buch-fr/lgs.js, which chapter 3.3 loads)
+        'Einsetzungsverfahren': 'Substitution', 'Gleichsetzungsverfahren': 'Comparaison', 'Additionsverfahren': 'Combinaison', 'Verfahren': 'Méthode',
+        'Alle Schritte': 'Toutes les étapes', 'Neues Gleichungssystem': 'Nouveau système',
+        'Die beiden Geraden des Gleichungssystems und ihr Schnittpunkt': 'Les deux droites du système et leur point d’intersection',
+        'Klammer auflösen und zusammenfassen.': 'Développe et réduis.',
+        'Löse beide Gleichungen nach $y$ auf.': 'Isole $y$ dans les deux équations.',
+        'Die rechten Seiten sind beide gleich $y$, also sind sie gleich: Gleichsetzen.': 'Les membres de droite sont tous les deux égaux à $y$, donc égaux entre eux : on les égale.',
+        'Alle $x$ nach links, alle Zahlen nach rechts, dann teilen.': 'Tous les $x$ à gauche, tous les nombres à droite, puis divise.',
+        'Multipliziere so, dass die Zahlen vor $y$ entgegengesetzt gleich werden.': 'Multiplie de sorte que les nombres devant $y$ deviennent opposés.',
+        'Addiere die beiden Gleichungen: $y$ fällt weg.': 'Additionne les deux équations : $y$ disparaît.',
+        'Nach $x$ auflösen.': 'Isole $x$.', 'Nach $y$ auflösen.': 'Isole $y$.',
         // gluecksrad8
         'Felder': 'Secteurs', 'ein Feld weniger': 'un secteur de moins', 'ein Feld mehr': 'un secteur de plus',
         'gleich groß': 'de même taille', 'verschieden groß': 'de tailles différentes', 'Größe der Felder': 'Taille des secteurs', 'Drehen': 'Tourner',
@@ -49,6 +60,8 @@ window.BuchFR && BuchFR.add('gy8', {
         // termbaum8 (the sentences with the term in them are rules below; these pieces let check.mjs see them translated)
         ['Rechenbaum des Terms ', 'Arbre de calcul de l’expression '], ['. Gerechnet wird von unten nach oben.', '. On calcule du bas vers le haut.'],
         ['Summanden', 'Termes'], ['Minuend und Subtrahend', 'Premier et second terme'], ['Faktoren', 'Facteurs'], ['Dividend und Divisor', 'Dividende et diviseur'],
+        // lgs8 (a sentence that starts with <b> is no whole label for the engine)
+        ['<b>Probe</b> in beiden Gleichungen, dann die Lösungsmenge.', '<b>Vérification</b> dans les deux équations, puis l’ensemble des solutions.'],
         // wegzeit8 (where Mia is: a rule below)
         ['Der Graph steigt gleichmäßig.', 'La courbe monte régulièrement.'],
         ['Der Graph verläuft waagerecht: Die Zeit läuft, der Weg bleibt gleich.', 'La courbe est horizontale : le temps passe, la distance reste la même.'],
@@ -92,6 +105,18 @@ window.BuchFR && BuchFR.add('gy8', {
         [/Wappen: \$(\d+)\$ · Zahl: \$(\d+)\$ · relative Häufigkeit von Wappen: \$/g, (m, a, b) => 'Face : $' + a + '$ · pile : $' + b + '$ · fréquence de face : $'],
         [/Ziffern 1 bis 6 sind Augenzahlen, 0, 7, 8 und 9 werden übersprungen \(grau\)\. So entstehen (\d+) Würfe\./g,
             'Les chiffres de 1 à 6 sont les numéros du dé ; on saute 0, 7, 8 et 9 (en gris). On obtient ainsi $1 lancers.'],
+        // lgs8: the solution set is S (as the rule of js/buch-fr/gleichungen.js, which chapter 3.3 does not load), and its point
+        // gets the French semicolon although it stands inside a set: $L = \{(2 \mid 3)\}$
+        [/\$L = (?=\\mathbb\{R\}|\\\{)/g, '$S = '], [/\\\{\((-?\d+) \\mid (-?\d+)\)\\\}/g, '\\{($1\\,;\\,$2)\\}'],
+        // lgs8: the steps with a variable or a number in them
+        [/Löse Gleichung I nach \$([xy])\$ auf\./g, (m, v) => 'Isole $' + v + '$ dans l’équation I.'],
+        [/Setze das für \$([xy])\$ in Gleichung II ein\./g, (m, v) => 'Remplace $' + v + '$ par cette expression dans l’équation II.'],
+        [/Setze \$([xy]) = (-?\d+)\$ in die umgestellte Gleichung ein\./g, (m, v, a) => 'Remplace $' + v + '$ par $' + a + '$ dans l’équation transformée.'],
+        [/Setze \$([xy]) = (-?\d+)\$ in Gleichung I \(umgestellt\) ein\./g, (m, v, a) => 'Remplace $' + v + '$ par $' + a + '$ dans l’équation I transformée.'],
+        [/Setze \$([xy]) = (-?\d+)\$ in Gleichung I ein\./g, (m, v, a) => 'Remplace $' + v + '$ par $' + a + '$ dans l’équation I.'],
+        [/Schritt (\d+) von (\d+): erst selbst überlegen, dann aufdecken\./g, 'Étape $1 sur $2 : réfléchis d’abord toi-même, puis dévoile.'],
+        // geraden (js/buch-lgs.js, chapter 3.3): the point of intersection is I in the chapter text (S is the solution set)
+        [/<b>Genau eine Lösung<\/b>: Die Geraden schneiden sich in \$S\(/g, '<b>Exactement une solution</b> : les droites se coupent en $I('],
         // wegzeit8: the axis label "s in m" is d here (js/buch-fr/integral.js has "s en m" as a word, so a rule and no second word)
         [/^s in m$/, 'd en m'], [/>s in m</g, '>d en m<'],
         // wegzeit8: "Nach $t = 5$ min ist Mia <span …>$400$ m</span> von zu Hause entfernt." and "Sie fährt mit dem Bus: $300$ m pro Minute. "
