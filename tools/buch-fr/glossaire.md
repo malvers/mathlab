@@ -879,6 +879,10 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Schattenmethode, Schatten $s$, $S$, Försterdreieck, Daumensprung | méthode des ombres, ombres $o$, $O$, triangle du forestier, saut du pouce | widget schatten8 (the drawn s, S become o, O) |
 | Maßstab $1 : m$, Einheitswürfel | échelle $1/m$, cube unité | 4.2, widget gulliver8 |
 | Liliputaner | Lilliputiens | 4.2 |
+| heuristische Strategien, Vorwärts- / Rückwärtsarbeiten, Umkehrrechnung | stratégies de résolution de problèmes, raisonner en avant / en arrière, opération inverse | 5, widget rueckwaerts8 (« fois », « divisé par », × in the chain) |
+| Lösungsplan: verstehen, planen, durchführen, zurückschauen; Teilziel | plan de résolution : comprendre, planifier, exécuter, prendre du recul ; étape intermédiaire | 5 |
+| Pólya: How to Solve It (Schule des Denkens) | Comment poser et résoudre un problème | 5 excursion |
+| Hühner / Kaninchen $h$, $k$; Uhrzeit 10:30 Uhr | poules / lapins $p$, $l$; 10 h 30 | 5 |
 
 ## mathegy9-fr
 

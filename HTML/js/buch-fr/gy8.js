@@ -63,6 +63,10 @@ window.BuchFR && BuchFR.add('gy8', {
         'Die Sonnenstrahlen fallen parallel ein. Das blaue und das gelbe Dreieck sind deshalb ähnlich: $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{S}{s}$.':
             'Les rayons du soleil arrivent parallèles. Le triangle bleu et le triangle jaune sont donc semblables : $\\dfrac{H}{2\\,\\text{m}} = \\dfrac{O}{o}$.',
         'Deine Peillinie geht über die Spitze hinweg: Geh näher heran.': 'Ta ligne de visée passe au-dessus du sommet : rapproche-toi.',
+        // rueckwaerts8 ('Neues Rätsel' and 'Richtig!' as in js/buch-fr/gy5.js and js/buch-fr/zahlen.js)
+        'Rückwärts: ein Schritt': 'En arrière : une étape', 'Neues Rätsel': 'Nouvelle devinette', 'Startzahl': 'Nombre de départ', 'Richtig!': 'Correct !',
+        'Probier eine Zahl im ersten Kästchen, oder rechne rückwärts: Jede Rechnung wird durch ihre Umkehrung ersetzt, plus durch minus, mal durch geteilt.':
+            'Essaie un nombre dans la première case, ou calcule à rebours : chaque opération est remplacée par son opération inverse, plus par moins, fois par divisé par.',
         // gluecksrad8
         'Felder': 'Secteurs', 'ein Feld weniger': 'un secteur de moins', 'ein Feld mehr': 'un secteur de plus',
         'gleich groß': 'de même taille', 'verschieden groß': 'de tailles différentes', 'Größe der Felder': 'Taille des secteurs', 'Drehen': 'Tourner',
@@ -175,6 +179,14 @@ window.BuchFR && BuchFR.add('gy8', {
         [/\. Tatsächlich ist der Baum \$([^$]*)\$ m hoch\./g, (m, h) => '. En réalité, l’arbre mesure $' + h + '$ m.'],
         [/Auf \$d = ([^$]*)\$ m steigt sie um \$([^$]*)\$ m\./g, (m, a, b) => 'sur $d = ' + a + '$ m, elle monte de $' + b + '$ m.'],
         [/Du siehst den Baum in \$([^$]*)\$ m Höhe, unter der Spitze: Geh weiter zurück\./g, (m, h) => 'Tu vois l’arbre à $' + h + '$ m de hauteur, sous le sommet : recule encore.'],
+        // rueckwaerts8: × in the chain of operations, the puzzle in words, the try and the backward solution
+        [/(class="rw8-op[^"]*">(?:← )?)·/g, '$1×'],
+        [/Ich denke mir eine Zahl und rechne: (.+?)\. Heraus kommt \$([^$]*)\$\. Welche Zahl war es\?/g,
+            (m, ops, e) => 'Je pense à un nombre et je calcule : ' + ops.replace(/geteilt durch/g, 'divisé par').replace(/\bmal\b/g, 'fois').replace(/\bminus\b/g, 'moins').replace(/, dann /g, ', puis ') +
+                '. J’obtiens $' + e + '$. Quel était ce nombre ?'],
+        [/Mit \$([^$]*)\$ kommt \$([^$]*)\$ heraus\. /g, (m, a, b) => 'Avec $' + a + '$, on obtient $' + b + '$. '],
+        [/Das passt nicht\./g, 'Ça ne marche pas.'],
+        [/Rückwärts von \$([^$]*)\$ aus, mit den Umkehrrechnungen: Die Startzahl ist <b>/g, (m, e) => 'À rebours à partir de $' + e + '$, avec les opérations inverses : le nombre de départ est <b>'],
         // geraden (js/buch-lgs.js, chapter 3.3): the point of intersection is I in the chapter text (S is the solution set)
         [/<b>Genau eine Lösung<\/b>: Die Geraden schneiden sich in \$S\(/g, '<b>Exactement une solution</b> : les droites se coupent en $I('],
         // wegzeit8: the axis label "s in m" is d here (js/buch-fr/integral.js has "s en m" as a word, so a rule and no second word)
