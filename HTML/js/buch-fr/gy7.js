@@ -89,6 +89,22 @@ window.BuchFR && BuchFR.add('gy7', {
         'Verschiebe die Hilfstangenten um $r_2$ nach außen: Die Parallelen durch $B_1$ und $B_2$ sind die gemeinsamen Tangenten. Sie berühren $k_2$ dort, wo der Radius senkrecht auf ihnen steht.':
             'Déplace les tangentes auxiliaires de $r_2$ vers l’extérieur : les parallèles passant par $B_1$ et $B_2$ sont les tangentes communes. Elles touchent $\\mathcal{C}_2$ là où le rayon leur est perpendiculaire.',
         'Du kannst $P$ verschieben, in jedem Schritt.': 'Tu peux déplacer $P$ à chaque étape.', 'Du kannst $M_2$ verschieben, in jedem Schritt.': 'Tu peux déplacer $M_2$ à chaque étape.',
+        // zahlengerade7 (Betrag: valeur absolue, Gegenzahl: opposé)
+        'Gegenzahlen': 'Opposés', 'Start': 'Départ', 'Addieren': 'Addition', 'Subtrahieren': 'Soustraction', 'Rechenart': 'Opération',
+        'erste Zahl $a$': 'premier nombre $a$', 'zweite Zahl $b$': 'deuxième nombre $b$',
+        'Zieh die Punkte $a$ und $b$ auf der Zahlengeraden. Sie rasten in halben Schritten ein.': 'Fais glisser les points $a$ et $b$ sur la droite graduée. Ils se calent de demi-unité en demi-unité.',
+        'Zahlengerade mit rationalen Zahlen': 'Droite graduée avec des nombres rationnels', 'Rechnen als Bewegung auf der Zahlengeraden': 'Calculer, c’est se déplacer sur la droite graduée',
+        'Betrag:': 'Valeur absolue :', ', der Abstand von der Null · Gegenzahl:': ', la distance à zéro · opposé :', ', gespiegelt an der Null': ', le symétrique par rapport à zéro',
+        'Eine positive Zahl addieren: nach rechts. Eine negative Zahl addieren: nach links.': 'Ajouter un nombre positif : vers la droite. Ajouter un nombre négatif : vers la gauche.',
+        // zahlbereiche7 (N, Z, Q+ and Q: entiers naturels, entiers relatifs, rationnels positifs, nombres rationnels; the words of zahlen.js where they exist)
+        'Wohin gehört die Zahl?': 'Où va ce nombre ?', 'Nächste Zahl': 'Nombre suivant', 'DIE ZAHL': 'LE NOMBRE',
+        '$\\mathbb{Z}$, aber nicht $\\mathbb{N}$': '$\\mathbb{Z}$, mais pas $\\mathbb{N}$', '$\\mathbb{Q}^+$, aber nicht $\\mathbb{N}$': '$\\mathbb{Q}^+$, mais pas $\\mathbb{N}$',
+        'nur $\\mathbb{Q}$': 'seulement $\\mathbb{Q}$', 'Nur das Bild': 'Figure seule', 'Teilmengen': 'Sous-ensembles', 'Schnittmenge': 'Intersection', 'Vereinigung': 'Réunion', 'Mengen': 'Ensembles',
+        'rationale Zahlen': 'nombres rationnels', 'ganze Zahlen': 'entiers relatifs', 'gebrochene Zahlen': 'rationnels positifs', 'natürliche': 'naturels',
+        'Mengendiagramm: natürliche, ganze, gebrochene und rationale Zahlen': 'Diagramme de Venn : entiers naturels, entiers relatifs, rationnels positifs et nombres rationnels',
+        'In welchen Teil des Bildes gehört sie? Tippe auf einen Knopf oder ins Bild.': 'Dans quelle partie de la figure va-t-il ? Touche un bouton ou la figure.',
+        'Die <b>ganzen</b> Zahlen $\\mathbb{Z}$ und die <b>gebrochenen</b> Zahlen $\\mathbb{Q}^+$ überlappen sich. Im Überlapp liegen die <b>natürlichen</b> Zahlen $\\mathbb{N}$. Alles zusammen liegt in den <b>rationalen</b> Zahlen $\\mathbb{Q}$.':
+            'Les <b>entiers relatifs</b> $\\mathbb{Z}$ et les <b>rationnels positifs</b> $\\mathbb{Q}^+$ se chevauchent. Dans la partie commune se trouvent les <b>entiers naturels</b> $\\mathbb{N}$. Le tout est contenu dans les <b>nombres rationnels</b> $\\mathbb{Q}$.',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -123,6 +139,24 @@ window.BuchFR && BuchFR.add('gy7', {
         // konstruktion7: the warning after "$\alpha + \beta = 190^\circ$"
         [': Die freien Schenkel schneiden sich nicht. Ein solches Dreieck gibt es nicht, denn die Winkelsumme im Dreieck beträgt $180^\\circ$.',
             ' : les côtés libres ne se coupent pas. Un tel triangle n’existe pas, car la somme des angles d’un triangle vaut $180^\\circ$.'],
+        // zahlengerade7: order, distance, and adding as a move
+        ['b$, denn $', 'b$, car $'], [' liegt weiter <b>links</b>.', ' est plus à <b>gauche</b>.'], ['Abstand von $a$ und $b$: $', 'Distance entre $a$ et $b$ : $'],
+        ['Start bei $', 'Départ en $'], ['$, dann $', '$, puis $'], ['nach <b>rechts</b>', 'vers la <b>droite</b>'], ['nach <b>links</b>', 'vers la <b>gauche</b>'],
+        ['$ gar nicht.', '$ : on ne bouge pas.'],
+        ['Eine Zahl subtrahieren heißt ihre <b>Gegenzahl addieren</b>. ', 'Soustraire un nombre, c’est <b>ajouter son opposé</b>. '],
+        ['Minus mal minus: Wer $', 'Moins par moins : soustraire $'], ['$ abzieht, geht nach rechts.', '$, c’est aller vers la droite.'],
+        // zahlbereiche7: why a number belongs to its set ("le nombre" is masculine), the hint and the set operations
+        ['<b>Richtig!</b> $', '<b>Correct !</b> $'], ['eine natürliche Zahl', 'un entier naturel'], [', also natürlich', ', donc naturel'],
+        ['der Betrag von $-4$ ist $4$', 'la valeur absolue de $-4$ est $4$'], ['ganz und negativ', 'entier et négatif'], ['ein Bruch ohne Minuszeichen', 'une fraction sans signe moins'],
+        ['zwischen 2 und 3, nicht ganz', 'entre 2 et 3, pas entier'], ['negativ und nicht ganz', 'négatif et pas entier'],
+        ['Noch nicht. Tipp: ', 'Pas encore. Indice : '], ['Hat die Zahl ein Minuszeichen, wenn du sie ausrechnest?', 'Le nombre a-t-il un signe moins quand tu le calcules ?'],
+        ['Rechne die Zahl zuerst aus. Ist sie ganz?', 'Calcule d’abord le nombre. Est-il entier ?'],
+        ['<b>Teilmenge:</b> $\\mathbb{N} \\subset \\mathbb{Z}$, $\\mathbb{N} \\subset \\mathbb{Q}^+$, $\\mathbb{Z} \\subset \\mathbb{Q}$ und $\\mathbb{Q}^+ \\subset \\mathbb{Q}$. Jede natürliche Zahl ist auch eine ganze Zahl, aber nicht umgekehrt: $-3 \\in \\mathbb{Z}$, aber $-3 \\notin \\mathbb{N}$.',
+            '<b>Sous-ensemble :</b> $\\mathbb{N} \\subset \\mathbb{Z}$, $\\mathbb{N} \\subset \\mathbb{Q}^+$, $\\mathbb{Z} \\subset \\mathbb{Q}$ et $\\mathbb{Q}^+ \\subset \\mathbb{Q}$. Tout entier naturel est aussi un entier relatif, mais pas l’inverse : $-3 \\in \\mathbb{Z}$, mais $-3 \\notin \\mathbb{N}$.'],
+        ['<b>Schnittmenge:</b> $\\mathbb{Z} \\cap \\mathbb{Q}^+ = \\mathbb{N}$. Das sind die Zahlen, die in beiden Mengen liegen: ganz <b>und</b> ohne Minuszeichen.',
+            '<b>Intersection :</b> $\\mathbb{Z} \\cap \\mathbb{Q}^+ = \\mathbb{N}$. Ce sont les nombres qui sont dans les deux ensembles : entiers <b>et</b> sans signe moins.'],
+        ['<b>Vereinigungsmenge:</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ enthält alle Zahlen, die in mindestens einer der beiden Mengen liegen. Das ist noch nicht ganz $\\mathbb{Q}$: $-\\tfrac12$ liegt in keiner von beiden.',
+            '<b>Réunion :</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ contient tous les nombres qui sont dans au moins un des deux ensembles. Ce n’est pas encore tout $\\mathbb{Q}$ : $-\\tfrac12$ n’est dans aucun des deux.'],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -143,5 +177,7 @@ window.BuchFR && BuchFR.add('gy7', {
         [/(<button type="button" class="b-btn" data-k="all">)Alle Schritte(<\/button>)/g, '$1Tout voir$2'],
         [/(<button type="button" class="b-btn" data-k="(?:0|reset)">)Von vorn(<\/button>)/g, '$1Début$2'],
         [/(<text class="g-side"[^>]*>)k(<\/text>)/g, '$1𝒞$2'], [/(<text class="g-side"[^>]*>)h(<\/text>)/g, '$1𝒞′$2'],
+        // zahlbereiche7: "Richtig: 3 von 5" as in js/buch-fr/zahlen.js, and the colon after the number in "<b>Richtig!</b> $7$: …"
+        [/Richtig: (\d+) von (\d+)/g, 'Bonnes réponses : $1 sur $2'], [/(<b>Richtig!<\/b> \$[^$]*\$): /g, '$1 : '],
     ]
 });
