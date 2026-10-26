@@ -256,7 +256,7 @@ window.BuchFR && BuchFR.add('os5', {
         [/(\d[\d ]*) ist eine Primzahl: genau zwei Teiler\./, '$1 est un nombre premier : exactement deux diviseurs.'],
         [/Bitte eine natürliche Zahl von 1 bis (\d[\d  ]*) eingeben\./, 'Saisis un nombre entier de 1 à $1.'],
         // bruchteilos5
-        [/^(\d+) von (\d+) Gruppen zu je (\d+) sind gefärbt$/, '$1 groupes sur $2, de $3 chacun, sont coloriés'],
+        [/^(\d+) von (\d+) Gruppen zu je (\d+) sind gefärbt$/, (m, z, n, k) => z + (+z > 1 ? ' groupes sur ' : ' groupe sur ') + n + ', de ' + k + ' chacun, ' + (+z > 1 ? 'sont coloriés' : 'est colorié')],
         [/\$ von (\d+) sind (\d+)\./, (m, g, r) => '$ de ' + g + ', c’est ' + r + '.'],
         [/\$ von (\d+)<\/p>/g, (m, g) => '$ de ' + g + '</p>'],
         [/2\. Nimm (\d+) (?:Gruppe|Gruppen): /, (m, z) => '2. Prends ' + z + (z === '0' || z === '1' ? ' groupe : ' : ' groupes : ')],
