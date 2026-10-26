@@ -675,3 +675,55 @@ Package fr-9 (Dubreil), 25.10.2026: decisions made while translating LK 11 (Gymn
 | Gebiet 1–3 | Bloc 1–3 |
 | Tipps für die Prüfung | Conseils pour l’examen (lettre C) |
 | Prüfungsaufgabe | exercice d’examen |
+
+## mathe5-fr
+
+Oberschule 5 (Vignéras, 26.10.2026). Doc's rule of 26.10.: the French school way everywhere - × for the product, P for the
+perimeter and A for the total area, j for the day, L and mL, points (2 ; 3), segments [AB], lines (AB), axis (d), rotation
+centre O, place-value columns C D U per class (M C D U, d c m after the comma). Number words in the 1990 rectified spelling,
+every part joined by a hyphen (vingt-et-un, deux-cent-mille, un-million); "trois virgule zéro quarante-sept".
+
+| Deutsch | Français |
+|---|---|
+| Zahlenstrahl | droite graduée |
+| Stellenwerttafel | tableau de numération |
+| Dreiergruppen | tranches de trois chiffres |
+| Vorgänger / Nachfolger | prédécesseur / successeur |
+| auf-/abrunden | arrondir vers le haut / vers le bas |
+| Überschlag | ordre de grandeur |
+| Probe | preuve / vérification |
+| Umkehraufgabe | opération inverse |
+| schriftlich / halbschriftlich | poser l’opération / en ligne |
+| Übertrag | retenue |
+| Ergänzen / Entbündeln | Compléter / Casser |
+| Summand | terme |
+| Rechengesetze | propriétés des opérations |
+| Vorrangregeln / Punkt vor Strich | règles de priorité / « × et : avant + et − » |
+| Term | expression |
+| Hochzahl / Grundzahl | exposant / base |
+| Quadratzahl | carré parfait |
+| Quersumme | somme des chiffres |
+| Teilbarkeitsregeln | critères de divisibilité |
+| Sieb des Eratosthenes | crible d’Ératosthène |
+| Primzahlzwillinge | nombres premiers jumeaux |
+| Stammbruch | fraction unitaire |
+| echter / unechter Bruch | fraction inférieure / supérieure à 1 |
+| Zehnerbruch | fraction décimale |
+| Erweitern | amplifier |
+| Ganzes | unité / le tout |
+| Schrägbild | perspective cavalière |
+| Netz / Kantenmodell | patron / squelette |
+| Oberfläche / Umfang | aire totale A / périmètre P |
+| deckungsgleich | superposables |
+| Bandornament | frise |
+| Spiegelachse / Geradenspiegelung | axe de symétrie (d) / symétrie axiale |
+| Verschiebung | translation |
+| Umlaufsinn | sens de parcours |
+| überstumpfer Winkel / Vollwinkel | angle rentrant / angle plein |
+| Geodreieck | équerre-rapporteur (explained once) |
+| Einheitentreppe | escalier des unités |
+| Kerbholz / Strichliste / Fünferbündel | bâton à encoches (taille) / traits de comptage / paquet de cinq |
+| Keil / Winkelhaken | clou / chevron |
+| Rechenpfennige; Linien / Zwischenräume | jetons de calcul; lignes / espaces |
+| Notendurchschnitt | moyenne (German marks 1, the best, to 6) |
+| Klasse 5 | 5e année (about the age of CM2) |
