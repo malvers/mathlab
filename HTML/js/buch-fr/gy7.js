@@ -42,6 +42,17 @@ window.BuchFR && BuchFR.add('gy7', {
         'Das Dreieck ist <b>spitzwinklig</b>: $U$ liegt <b>innerhalb</b> des Dreiecks.': 'Le triangle est <b>acutangle</b> : $O$ est à l’<b>intérieur</b> du triangle.',
         'Der Inkreis berührt jede Seite. $I$ liegt immer innerhalb des Dreiecks.': 'Le cercle inscrit touche chaque côté. $I$ est toujours à l’intérieur du triangle.',
         'Die drei Ecken liegen fast auf einer Geraden. Zieh eine Ecke weiter weg.': 'Les trois sommets sont presque alignés. Éloigne un sommet.',
+        // kreiswinkel7 (the German "Satz des Thales" is the French "théorème du demi-cercle": in France "théorème de Thalès" is the intercept theorem)
+        'Thales': 'Demi-cercle', 'Peripheriewinkel': 'Angle inscrit', 'Sehnenviereck': 'Quadrilatère inscrit', 'Satz': 'Théorème', 'Zentriwinkel': 'Angle au centre',
+        'Beweisidee zeigen': 'Idée de la démonstration',
+        'Satz des Thales: Dreieck über dem Durchmesser': 'Théorème du demi-cercle : triangle inscrit dans un demi-cercle',
+        'Peripheriewinkel und Zentriwinkel über einem Kreisbogen': 'Angle inscrit et angle au centre qui interceptent le même arc',
+        'Sehnenviereck mit seinen vier Winkeln': 'Quadrilatère inscrit et ses quatre angles',
+        'Die Strecke $\\overline{MC}$ teilt das Dreieck in zwei <b>gleichschenklige</b> Dreiecke, denn $\\overline{MA} = \\overline{MB} = \\overline{MC} = r$. Ihre Basiswinkel sind gleich:':
+            'Le segment $[MC]$ partage le triangle en deux triangles <b>isocèles</b>, car $MA = MB = MC = r$. Leurs angles à la base sont égaux :',
+        '$\\alpha$ bei $A$ und bei $C$': '$\\alpha$ en $A$ et en $C$', '$\\beta$ bei $B$ und bei $C$': '$\\beta$ en $B$ et en $C$',
+        '. Winkelsumme: $\\alpha + \\beta + (\\alpha + \\beta) = 180^\\circ$, also $\\gamma = \\alpha + \\beta = 90^\\circ$.':
+            '. Somme des angles : $\\alpha + \\beta + (\\alpha + \\beta) = 180^\\circ$, donc $\\gamma = \\alpha + \\beta = 90^\\circ$.',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -54,6 +65,25 @@ window.BuchFR && BuchFR.add('gy7', {
         ['$d < r$: Die Gerade schneidet den Kreis in <b>zwei</b> Punkten $S_1$ und $S_2$. Sie ist eine ', '$d < r$ : la droite coupe le cercle en <b>deux</b> points $S_1$ et $S_2$ → '],
         ['. Die Strecke $\\overline{S_1S_2}$ ist eine <b>Sehne</b>, hier etwa $', '. Le segment $[S_1S_2]$ est une <b>corde</b>, ici d’environ $'],
         [' Die Sekante geht durch $M$: Die Sehne ist ein Durchmesser.', ' La sécante passe par $M$ : la corde est un diamètre.'],
+        // kreiswinkel7: the proof ideas, one piece per line of the widget source
+        ['Beweisidee: Der Durchmesser durch $P$ zerlegt die Figur in gleichschenklige Dreiecke mit der Spitze $M$. ',
+            'Idée de la démonstration : le diamètre qui passe par $P$ partage la figure en triangles isocèles de sommet principal $M$. '],
+        ['An jedem ist der Außenwinkel bei $M$ doppelt so groß wie ein Basiswinkel. Liegt $M$ nicht zwischen den Schenkeln, braucht der Beweis eine Fallunterscheidung.',
+            'Dans chacun, l’angle extérieur en $M$ est le double d’un angle à la base. Si $M$ n’est pas entre les côtés de l’angle, la démonstration doit distinguer plusieurs cas.'],
+        ['Beweisidee: Die vier Radien zerlegen das Viereck in vier gleichschenklige Dreiecke. Jeder Winkel des Vierecks besteht aus zwei Basiswinkeln. ',
+            'Idée de la démonstration : les quatre rayons partagent le quadrilatère en quatre triangles isocèles. Chaque angle du quadrilatère est formé de deux angles à la base. '],
+        ['$\\alpha + \\gamma$ enthält jeden der vier verschiedenen Basiswinkel genau einmal, ebenso $\\beta + \\delta$. Beide Summen sind also gleich, zusammen $360^\\circ$, jede $180^\\circ$. ',
+            '$\\alpha + \\gamma$ contient exactement une fois chacun des quatre angles à la base différents, et $\\beta + \\delta$ aussi. Les deux sommes sont donc égales ; ensemble, elles font $360^\\circ$, donc chacune $180^\\circ$. '],
+        ['(So einfach geht es, wenn $M$ im Viereck liegt.)', '(C’est aussi simple quand $M$ est à l’intérieur du quadrilatère.)'],
+        // kreiswinkel7: the theorems start with their name in bold (a word key cannot start with <b>)
+        ['<b>Satz des Thales:</b> Liegt $C$ auf dem Kreis über dem Durchmesser $\\overline{AB}$, so ist der Winkel bei $C$ ein rechter Winkel.',
+            '<b>Théorème du demi-cercle :</b> si $C$ est sur le cercle de diamètre $[AB]$, alors l’angle en $C$ est un angle droit.'],
+        ['<b>Zentri-Peripheriewinkelsatz:</b> Der Zentriwinkel ist doppelt so groß wie jeder Peripheriewinkel über demselben Bogen. ',
+            '<b>Angle inscrit et angle au centre :</b> l’angle au centre est le double de tout angle inscrit qui intercepte le même arc. '],
+        ['<b>Peripheriewinkelsatz:</b> Alle Peripheriewinkel über demselben Bogen sind gleich groß. Zieh $P$ auf seinem Bogen hin und her.',
+            '<b>Angles inscrits :</b> tous les angles inscrits qui interceptent le même arc sont égaux. Fais glisser $P$ sur son arc.'],
+        ['<b>Satz über die Gegenwinkel im Sehnenviereck:</b> In einem Viereck, dessen Ecken auf einem Kreis liegen, ergänzen sich gegenüberliegende Winkel zu $180^\\circ$.',
+            '<b>Angles opposés d’un quadrilatère inscrit :</b> dans un quadrilatère dont les sommets sont sur un cercle, les angles opposés sont supplémentaires : leur somme vaut $180^\\circ$.'],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
