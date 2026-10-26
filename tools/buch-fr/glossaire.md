@@ -811,3 +811,57 @@ above was changed.
 ## mathegy9-fr
 
 <!-- fr-16: terms of this book only (GY 9), write right below this line -->
+
+Package fr-16 (Libermann), 26.10.2026: decisions made while translating GY 9; nothing above was changed. French school
+letters everywhere (Doc, 26.10.2026: "lokal bitte immer"), in the pages and, through rules in js/buch-fr/geometrie.js
+and js/buch-fr/daten.js, in what the widgets write.
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Klasse 9 | Gymnasium, 9e année | start page as mathegy10-fr, plus one sentence on the notation (×, P, A, points, [AB], (AB)) |
+| Wahlbereich (chapter W) | Domaine optionnel (chapter OP) | as section 1 |
+| $a \cdot b$ | $a \times b$ | pages and widgets; rule in js/buch-fr/geometrie.js (every GY 5–9 and OS 5 page that loads it) and in the extremwert words; the funktionen widgets shared with round 1/2 keep their · |
+| Potenzieren, Radizieren, n-te Wurzel | élever à une puissance, extraire une racine, racine n-ième | 1.1 |
+| Potenzgesetze, Permanenzprinzip | règles de calcul sur les puissances, principe de permanence | 1.1 |
+| Wurzelgleichung, Scheinlösung, Probe | équation avec racine (équation irrationnelle), fausse solution, vérification | 1.1; $L = \{\,\}$ → $S = \emptyset$ |
+| Potenzfunktion, Parabel n-ter Ordnung, Hyperbel | fonction puissance, parabole d’ordre $n$, hyperbole | 1.2, widget potenzfunktion |
+| Polstelle mit / ohne Vorzeichenwechsel | pôle avec / sans changement de signe | 1.2 |
+| Polynom, Grad | polynôme, degré | 1.2 |
+| Normalform $x^2 + px + q$, allgemeine Form $ax^2 + bx + c$, Scheitelpunktform | forme normalisée, forme développée (générale), forme canonique | 1.3; the parabel widget (fr-1) says « Forme développée » for $ax^2 + bx + c$ |
+| quadratische Ergänzung | mise sous forme canonique | 1.3, 1.4 |
+| Diskriminante $D = (p/2)^2 - q$ | discriminant $D$ | 1.4 adds once: en France $\Delta = b^2 - 4ac$, même signe |
+| Satz von Vieta, Nullproduktsatz | relations de Viète, règle du produit nul | 1.4 |
+| Extremwertaufgabe, Zielgröße, Nebenbedingung | problème d’optimisation, grandeur à optimiser, contrainte | 1.4, widget extremwert |
+| Einnahmen $E(x)$ | recette $R(x)$ | 1.4, 5 |
+| Schnittpunkte $S_1$, $S_2$ | $I_1$, $I_2$ | 1.4; S stays for the vertex (sommet) |
+| Umfang $u$ | périmètre $P$ | 2, 3.2; widgets kreisteil, vieleck |
+| Kreisbogen $b$, Kreisausschnitt, Kreisring $r_a$, $r_i$ | arc $\ell$, secteur circulaire, couronne $r_e$, $r_i$ | 2, widget kreisteil |
+| Grundfläche $G$, Mantel(fläche) $M$, Oberfläche $O$ | aire de la base $\mathcal{B}$, aire latérale $A_L$, aire totale $A$ | 2, 3.3; widgets koerper (on the GY pages) and spitzkoerper |
+| Kreiszylinder, Kugel, Kreiskegel | cylindre de révolution, boule (aire de la sphère), cône de révolution | 2, 3.3 |
+| Dichte $\varrho$ | masse volumique $\varrho$ | 2 |
+| $\ell$, m$\ell$ | L, mL | as OS 5 |
+| Satzgruppe des Pythagoras | Pythagore et les relations métriques | 3.1 title |
+| Kathete, Hypotenuse, Hypotenusenabschnitte $p$, $q$ | côté de l’angle droit, hypoténuse, segments de l’hypoténuse $p$, $q$ | 3.1 |
+| Höhensatz, Kathetensatz | théorème de la hauteur, théorème d’Euclide | Swiss-French names; 3.1 says once that France speaks of « relations métriques dans le triangle rectangle »; widget pythagoras |
+| Thaleskreis über $\overline{AB}$ | cercle de diamètre $[AB]$ | widget pythagoras |
+| Länge $\overline{AB}$, Strecke $\overline{AB}$ | $AB$, segment $[AB]$ | 3.1, OP; widget goldenerschnitt « $AB = 10$ » |
+| Voraussetzung $V$, Behauptung $B$, Umkehrung, genau dann wenn | hypothèse $H$, conclusion $C$, réciproque, si et seulement si | 3.1 |
+| indirekter Beweis | raisonnement par l’absurde | 3.1 |
+| SSS | CCC | as fr-6 |
+| Gegenkathete, Ankathete | côté opposé, côté adjacent | 3.2; mnemonic CAH SOH TOA instead of GAG-HHA; widget trigo |
+| Umkehrtasten $\sin^{-1}$ | touches $\sin^{-1}$ (en France : Arcsin) | 3.2 |
+| Höhenwinkel, Tiefenwinkel, Steigung in % | angle d’élévation, angle de dépression, pente en pourcentage | 3.2 |
+| regelmäßiges $n$-Eck, Seite $s$, Umkreis | polygone régulier à $n$ côtés, côté $c$, cercle circonscrit | 3.2, OP (pentagon: côté $c$, diagonale $d$) |
+| Geodreieck, Winkelmesser (selbst gebaut) | équerre-rapporteur (explained once), rapporteur de visée | 3.2, 3.3 |
+| Seitenhöhe $h_s$, Seitenkante $s$, Mantellinie $s$ | apothème $h_a$, arête latérale $\ell$, génératrice $g$ | 3.3, widgets spitzkoerper and koerper |
+| Landvermessung | arpentage | 3.3 |
+| Modalwert, Median, arithmetisches Mittel | mode, médiane, moyenne (arithmétique) | 4, widget mittelwerte |
+| Nominal-, Ordinal-, metrische Skala | échelle nominale, ordinale, métrique | 4 |
+| absolute / relative Häufigkeit $h_i$ | effectif $n_i$ / fréquence | 4, widget histogramm |
+| Spannweite $R$, Varianz $s^2$, Standardabweichung $s$ | étendue $e$, variance $V$, écart type $\sigma$ | 4, widget streuung |
+| Klasse $[150;\,155)$, Klassenbreite | classe $[150\,;\,155[$, amplitude | 4, rule in js/buch-fr/daten.js |
+| Ausreißer, Prozentpunkte | valeur aberrante, points de pourcentage | 4 |
+| Tabellenkalkulation MITTELWERT, STABW.N, STABW.S | tableur MOYENNE, ECARTYPE.PEARSON, ECARTYPE.STANDARD | 4, 5 (French Excel) |
+| goldener Schnitt, goldene Zahl $\Phi$ | section dorée (partage en extrême et moyenne raison), nombre d’or $\Phi$ | OP title « Le nombre d’or » |
+| größerer / kleinerer Teil, goldenes Rechteck / Dreieck | grande / petite partie, rectangle d’or / triangle d’or | OP, widget goldenerschnitt |
+| Lab names | LABORATOIRE DES PUISSANCES, IDENTITÉS REMARQUABLES, LABORATOIRE DU REPÈRE, LABORATOIRE DES PARABOLES, PRINCIPE DE CAVALIERI, SOLIDES, PYTHAGORE, DÉMONSTRATION DE PYTHAGORE, TRIGONOMÉTRIE, LABORATOIRE DES POLYGONES, PLANCHE DE GALTON, DROITE D’AJUSTEMENT, LABORATOIRE FIBONACCI | FALLING PI, COOL SQUARES, COLLATZ stay |
