@@ -149,6 +149,14 @@ window.BuchFR && BuchFR.add('gy6', {
         'Kreisdiagramm: Wie kommst du zur Schule?': 'Diagramme circulaire : comment viens-tu à l’école ?',
         'Anzahl': 'Nombre', 'Anteil': 'Proportion', 'Prozent': 'Pourcentage', 'Winkel': 'Angle', 'zusammen': 'Total',
         'Umfrage in einer Klasse: Wie kommst du zur Schule?': 'Sondage dans une classe : comment viens-tu à l’école ?',
+        // sieb6
+        'Nächste Primzahl': 'Nombre premier suivant', 'Alle Schritte': 'Toutes les étapes',
+        '1 ist keine Primzahl: Sie hat nur einen Teiler. Tipp auf „Nächste Primzahl“.': '1 n’est pas un nombre premier : il n’a qu’un seul diviseur. Touche « Nombre premier suivant ».',
+        'Sieb des Eratosthenes: die Zahlen von 1 bis 100': 'Crible d’Ératosthène : les nombres de 1 à 100',
+        'Vielfache von 2': 'multiples de 2', 'von 3': 'de 3', 'von 5': 'de 5', 'von 7': 'de 7',
+        // primfaktor6 (French PGCD and PPCM with a semicolon, rules below)
+        'Zahl $a$': 'Nombre $a$', 'Zahl $b$': 'Nombre $b$',
+        'Gib für $a$ eine natürliche Zahl von 2 bis 9999 ein.': 'Saisis pour $a$ un entier naturel de 2 à 9999.',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -272,6 +280,14 @@ window.BuchFR && BuchFR.add('gy6', {
         ['Oberfläche $O = 2 \\times G + M', 'Aire totale $A = 2 \\times B + A_L'], ['Volumen $V = G \\times h', 'Volume $V = B \\times h'],
         // kreisdiagramm6
         ['Winkel = Anteil · 360°. ', 'Angle = proportion × 360°. '], ['Eine Person entspricht hier $', 'Ici, une personne correspond à $'],
+        // sieb6
+        [' Kleinere Vielfache wie $', ' Des multiples plus petits, comme $'], ['$ waren schon weg.', '$, étaient déjà barrés.'],
+        // primfaktor6
+        ['$ ist eine <b>Primzahl</b>.', '$ est un <b>nombre premier</b>.'], ['Faktorbaum von ', 'Arbre de décomposition de '],
+        ['Der ggT besteht aus den Primfaktoren, die in <b>beiden</b> Zerlegungen vorkommen. Das kgV enthält jeden Primfaktor so oft, wie er <b>höchstens</b> vorkommt. ',
+            'Le PGCD est formé des facteurs premiers qui apparaissent dans les <b>deux</b> décompositions. Le PPCM contient chaque facteur premier autant de fois qu’il apparaît <b>au maximum</b>. '],
+        ['Damit kürzt man: $', 'On s’en sert pour simplifier : $'],
+        ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'Les deux nombres n’ont aucun diviseur commun autre que 1.'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -354,5 +370,13 @@ window.BuchFR && BuchFR.add('gy6', {
         [/^Netz des (Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma)s: zwei Grundflächen und der Mantel aus Rechtecken$/, (m, s) => 'Patron du ' +
             ({ 'Dreiecksprisma': 'prisme triangulaire', 'Quader': 'pavé droit', 'Trapezprisma': 'prisme trapézoïdal', 'Sechseckprisma': 'prisme hexagonal' })[s] +
             ' : deux bases et la surface latérale faite de rectangles'],
+        // sieb6
+        [/Schon \$([^$]+)\$ ist größer als 100\. Alles, was noch übrig ist, ist eine Primzahl\. <b>Fertig: 25 Primzahlen bis 100\.<\/b>/g, (m, t) =>
+            'Déjà $' + t + '$ dépasse 100. Tout ce qui reste est un nombre premier. <b>Terminé : 25 nombres premiers jusqu’à 100.</b>'],
+        [/Die \$(\d+)\$ ist nicht gestrichen, also eine Primzahl\. Gestrichen werden ihre Vielfachen ab \$([^$]+)\$: (\d+) Zahlen \(/g, (m, p, q, n) =>
+            'Le $' + p + '$ n’est pas barré, c’est donc un nombre premier. On barre ses multiples à partir de $' + q + '$ : ' + n + (n === '1' ? ' nombre (' : ' nombres (')],
+        [/Gefunden: (\d+) Primzahlen\. Gestrichen: /g, (m, n) => (n === '0' || n === '1' ? 'Trouvé : ' + n + ' nombre premier' : 'Trouvés : ' + n + ' nombres premiers') + '. Barrés : '],
+        // primfaktor6: "ggT(360, 84) = 12" → "PGCD(360 ; 84) = 12", the same for kgV → PPCM
+        [/(<span class="g-(?:lam|cy)">)(ggT|kgV)(<\/span>)\$\((\d+), (\d+)\) = /g, (m, a, k, b, x, y) => a + (k === 'ggT' ? 'PGCD' : 'PPCM') + b + '$(' + x + '\\,;\\,' + y + ') = '],
     ]
 });

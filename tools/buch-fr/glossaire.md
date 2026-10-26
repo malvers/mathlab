@@ -856,6 +856,12 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 | Kreisdiagramm, Tortendiagramm, $\widehat{=}$ | diagramme circulaire, « camembert », « correspond à » | 5 |
 | Flächen-, Volumenanteil | proportion d’aire, proportion de volume | 5 |
 | Klassensprecher(in), Taschengeld | délégué de classe, argent de poche | 5 |
+| Wahlbereich 3 (chapter W) | Domaine optionnel 3 (chapter OP) | as section 1 |
+| ggT, kgV | PGCD, PPCM, written PGCD$(84\,;\,360)$ with a semicolon | OP, widget primfaktor6 by a rule |
+| Primzahl, zusammengesetzt, Primfaktorzerlegung, Faktorbaum, Quersumme, Teilbarkeitsregeln | nombre premier, composé, décomposition en facteurs premiers, arbre de décomposition, somme des chiffres, critères de divisibilité | OP, widgets sieb6, primfaktor6 |
+| Sieb des Eratosthenes | crible d’Ératosthène | widget sieb6 « Nombre premier suivant » |
+| Primzahlzwillinge (Paare), vollkommene, befreundete Zahlen, euklidischer Algorithmus | nombres premiers jumeaux $(3\,;\,5)$, nombres parfaits, nombres amicaux, algorithme d’Euclide | OP |
+| Mersenne-Zahlen, GIMPS | nombres de Mersenne (le moine français Marin Mersenne), GIMPS | OP excursion |
 
 ## mathegy7-fr
 

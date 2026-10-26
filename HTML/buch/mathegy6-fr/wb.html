@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques GY 6 · Chapitre OP · Nombres premiers | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Crible d’Ératosthène, décomposition en facteurs premiers, une infinité de nombres premiers, cryptographie. Chapitre OP du manuel interactif Mathématiques · Gymnasium 6 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · GYMNASIUM 6</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">DOMAINE OPTIONNEL</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">DOMAINE OPTIONNEL 3 · MAI · JUIN</p>
+            <h1>Nombres premiers</h1>
+            <p class="b-hero-lead">2, 3, 5, 7, 11, 13 : ces nombres ne sont divisibles que par 1 et par eux-mêmes. Tous les autres entiers naturels sont formés à partir d’eux,
+                comme une maison à partir de briques. Depuis plus de 2 000 ans, on s’interroge à leur sujet. Certaines questions ne sont toujours pas résolues, et sans les nombres premiers, il n’y aurait pas de banque en ligne sécurisée.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">2 LABORATOIRES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="sieb6" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>distinguer les <b>nombres premiers</b> et les <b>nombres composés</b></li>
+                <li>trouver des nombres premiers avec le <b>crible d’Ératosthène</b></li>
+                <li>décomposer des nombres en <b>facteurs premiers</b> et en déduire le PGCD et le PPCM</li>
+                <li>comprendre pourquoi il n’existe <b>pas de plus grand nombre premier</b></li>
+                <li>découvrir les nombres premiers jumeaux, les nombres parfaits et les nombres amicaux</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Combien de diviseurs a le nombre 12 ?</p><div class="b-sol"><p>$1$, $2$, $3$, $4$, $6$, $12$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="nombre"><p class="b-q-text">Combien de diviseurs a le nombre 13 ?</p><div class="b-sol"><p>Seulement $1$ et $13$.</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Quel est le plus grand diviseur commun de 8 et 12 ?</p><div class="b-sol"><p>Diviseurs de 8 : 1, 2, 4, 8. De 12 : 1, 2, 3, 4, 6, 12. Le plus grand diviseur commun : 4.</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="nombre"><p class="b-q-text">Quel est le plus petit multiple commun de 8 et 12 ?</p><div class="b-sol"><p>Multiples de 12 : 12, 24… et 24 est divisible par 8.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">FORMER DES RECTANGLES</div>
+            <div class="b-text"><p>Prenez 12 jetons et formez tous les rectangles entièrement remplis : 1 sur 12, 2 sur 6, 3 sur 4.</p>
+                <ul><li>Essayez avec tous les nombres de 2 à 20. Pour quels nombres n’y a-t-il qu’une seule longue rangée ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">EST-CE QUE ÇA S’ARRÊTE ?</div>
+            <div class="b-text"><p>Écrivez tous les nombres premiers jusqu’à 100. Comptez combien il y en a entre 1 et 25, entre 26 et 50, entre 51 et 75, entre 76 et 100.</p>
+                <ul><li>Deviennent-ils plus rares ? Se peut-il qu’ils s’arrêtent complètement un jour ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Nombres premiers et facteurs premiers" data-toc-k="1" data-toc-short="1 Nombres premiers">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Nombres premiers et facteurs premiers</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Avec 12 jetons, il y a trois rectangles ; avec 13 jetons, une seule longue rangée. 13 n’a que deux diviseurs : 1 et 13.
+                De tels nombres s’appellent des <b>nombres premiers</b>. 12, au contraire, est formé de nombres plus petits : $12 = 2 \times 2 \times 3$.</p></div></div>
+            <div class="b-text"><p>Un <b>nombre premier</b> est un entier naturel qui a exactement deux diviseurs : 1 et lui-même. 1 n’est pas un nombre premier, il n’a qu’un seul diviseur.
+                Tout autre nombre plus grand que 1 est dit <b>composé</b>.</p>
+                <p>Tout nombre composé peut s’écrire comme un produit de nombres premiers, et d’une seule façon (à l’ordre près). C’est la <b>décomposition en facteurs premiers</b>.
+                    Le plus simple pour la trouver est un <b>arbre de décomposition</b> : on détache toujours le plus petit nombre premier qui divise le nombre.</p>
+                <p>Les <b>critères de divisibilité</b> aident. Un nombre est divisible par 2 si son dernier chiffre est pair ; par 5 s’il se termine par 0 ou 5 ;
+                    par 3 (ou 9) si la <b>somme de ses chiffres</b> est divisible par 3 (ou 9) ; par 4 si le nombre formé par ses deux derniers chiffres est divisible par 4.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · NOMBRES PREMIERS</div>
+                <div class="b-text">
+                    <p><b>Nombre premier :</b> exactement deux diviseurs. Les premiers sont $2\,;\,3\,;\,5\,;\,7\,;\,11\,;\,13\,;\,17\,;\,19\,;\,23\,;\,29$. 2 est le seul nombre premier pair.</p>
+                    <p><b>Crible d’Ératosthène :</b> barre 1. Le plus petit nombre non barré est premier, barre tous ses multiples. Recommence.</p>
+                    <p><b>Décomposition en facteurs premiers :</b> $360 = 2 \times 2 \times 2 \times 3 \times 3 \times 5 = 2^3 \times 3^2 \times 5$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Raccourci pour le crible :</b> jusqu’à 100, il suffit de barrer les multiples de 2, 3, 5 et 7. En effet, $11 \times 11 = 121$ dépasse déjà 100.</p>
+            <p class="b-note"><b>91 est-il premier ?</b> On dirait bien, mais non : $91 = 7 \times 13$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE CRIBLE D’ÉRATOSTHÈNE</div>
+        <p class="b-help" style="margin:0 0 12px">Touche « Nombre premier suivant ». Chaque couleur barre les multiples d’un nombre premier. Pourquoi chaque couleur ne commence-t-elle qu’au carré du nombre premier ?</p>
+        <div data-widget="sieb6"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · ARBRE DE DÉCOMPOSITION, PGCD ET PPCM</div>
+        <p class="b-help" style="margin:0 0 12px">Saisis deux nombres. À gauche pousse l’arbre de décomposition du premier nombre, à droite figurent les deux décompositions avec le PGCD et le PPCM.</p>
+        <div data-widget="primfaktor6"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · PREMIER OU NON ?</div>
+            <div class="b-text"><p>221 est-il un nombre premier ?</p></div>
+            <div class="b-sol"><p>On ne teste que les nombres premiers dont le carré vaut au plus 221 : 2, 3, 5, 7, 11, 13 (car $17 \times 17 = 289$).
+                2 : impair. 3 : somme des chiffres 5. 5 : se termine par 1. 7 : $7 \times 31 = 217$, reste 4. 11 : $11 \times 20 = 220$, reste 1. 13 : $13 \times 17 = 221$ !</p>
+                <p><span class="b-res">$221 = 13 \times 17$, ce n’est pas un nombre premier</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · SIMPLIFIER AVEC LES FACTEURS PREMIERS</div>
+            <div class="b-text"><p>Simplifie complètement $\tfrac{84}{360}$.</p></div>
+            <div class="b-sol"><p>$84 = 2^2 \times 3 \times 7$, $360 = 2^3 \times 3^2 \times 5$. En commun : $2^2 \times 3 = 12$, c’est le PGCD.</p>
+                <p><span class="b-res">$\tfrac{84}{360} = \tfrac{7}{30}$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Premier ou composé ? Justifie. a) 51 &nbsp; b) 53 &nbsp; c) 57 &nbsp; d) 87 &nbsp; e) 97</p></div>
+            <div class="b-hint"><p>Regarde la somme des chiffres pour la divisibilité par 3.</p></div>
+            <div class="b-sol"><p>a) $3 \times 17$ &nbsp; b) premier &nbsp; c) $3 \times 19$ &nbsp; d) $3 \times 29$ &nbsp; e) premier</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Décompose en facteurs premiers : a) 48 &nbsp; b) 90 &nbsp; c) 126 &nbsp; d) 1 000 &nbsp; e) 1 001</p></div>
+            <div class="b-sol"><p>a) $2^4 \times 3$ &nbsp; b) $2 \times 3^2 \times 5$ &nbsp; c) $2 \times 3^2 \times 7$ &nbsp; d) $2^3 \times 5^3$ &nbsp; e) $7 \times 11 \times 13$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Détermine le PGCD et le PPCM à l’aide des facteurs premiers : a) 24 et 36 &nbsp; b) 45 et 75 &nbsp; c) 14 et 15</p></div>
+            <div class="b-sol"><p>a) $24 = 2^3 \times 3$, $36 = 2^2 \times 3^2$ : PGCD 12, PPCM 72 &nbsp; b) $45 = 3^2 \times 5$, $75 = 3 \times 5^2$ : PGCD 15, PPCM 225 &nbsp; c) PGCD 1, PPCM 210</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier au chapitre 1.2 :</b> calcule $\tfrac{5}{24} + \tfrac{7}{36}$. Le dénominateur commun se trouve avec le PPCM.</p></div>
+            <div class="b-sol"><p>PPCM$(24\,;\,36) = 72$. $\tfrac{15}{72} + \tfrac{14}{72} = \tfrac{29}{72}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quels nombres ont exactement trois diviseurs ? Trouve-les tous jusqu’à 100.</p></div>
+            <div class="b-hint"><p>Regarde 4, 9 et 25.</p></div>
+            <div class="b-sol"><p>Les carrés des nombres premiers : 4, 9, 25, 49. Leurs diviseurs sont $1$, $p$ et $p^2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="25" data-ph="nombre"><p class="b-q-text">Combien y a-t-il de nombres premiers jusqu’à 100 ?</p><div class="b-sol"><p>25. Essaie avec le crible.</p></div></div>
+        <div class="b-q" data-ans="13" data-ph="nombre"><p class="b-q-text">$91 = 7 \times x$. Quel nombre premier est $x$ ?</p><div class="b-sol"><p>$91 : 7 = 13$</p></div></div>
+        <div class="b-q" data-ans="12" data-ph="PGCD"><p class="b-q-text">Quel est le PGCD de 84 et 360 ?</p><div class="b-sol"><p>$2^2 \times 3 = 12$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Pas de plus grand nombre premier" data-toc-k="2" data-toc-short="2 Infinité">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Il n’y a pas de plus grand nombre premier</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Jusqu’à 25, il y a 9 nombres premiers, entre 76 et 100 il n’y en a plus que 4. Ils deviennent plus rares. S’arrêtent-ils complètement un jour ?
+                Non. Euclide l’a démontré il y a plus de 2 000 ans, avec une idée étonnamment courte.</p></div></div>
+            <div class="b-text"><p><b>L’idée d’Euclide :</b> prends une liste quelconque de nombres premiers, par exemple 2, 3, 5, 7. Multiplie-les tous et ajoute 1 : $2 \times 3 \times 5 \times 7 + 1 = 211$.
+                Si l’on divise 211 par 2, 3, 5 ou 7, il reste toujours 1. Donc 211 a un facteur premier qui n’est <b>pas</b> dans la liste. (Ici, 211 est lui-même un nombre premier.)
+                Cela marche avec n’importe quelle liste. C’est pourquoi aucune liste n’est complète : il y a une infinité de nombres premiers.</p>
+                <p>Attention : le nouveau nombre n’est pas forcément premier lui-même. $2 \times 3 \times 5 \times 7 \times 11 \times 13 + 1 = 30\,031 = 59 \times 509$. Mais 59 et 509 n’étaient pas non plus dans la liste.</p>
+                <p>Beaucoup ont essayé de trouver une <b>formule</b> qui ne donne que des nombres premiers. Leonhard Euler a trouvé $n^2 + n + 41$ : pour $n = 0$, $1$, $2$, …, $39$, on n’obtient que des nombres premiers.
+                    Mais pour $n = 40$, on obtient $1681 = 41 \times 41$. Personne n’a trouvé jusqu’à aujourd’hui une formule pour tous les nombres premiers.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · UNE INFINITÉ DE NOMBRES PREMIERS</div>
+                <div class="b-text">
+                    <p><b>Théorème (Euclide) :</b> il n’existe pas de plus grand nombre premier.</p>
+                    <p><b>Idée de la démonstration :</b> pour toute liste de nombres premiers, (le produit de tous) $+ 1$ n’est divisible par aucun d’eux. Ses facteurs premiers sont donc de nouveaux nombres premiers.</p>
+                    <p>Les <b>nombres premiers jumeaux</b> sont des nombres premiers dont l’écart vaut 2 : $(3\,;\,5)$, $(5\,;\,7)$, $(11\,;\,13)$, $(17\,;\,19)$… Personne ne sait s’il y en a une infinité.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Les nombres parfaits</b> sont égaux à la somme de leurs diviseurs autres qu’eux-mêmes : $6 = 1 + 2 + 3$, $28 = 1 + 2 + 4 + 7 + 14$.</p>
+            <p class="b-note"><b>Nombres amicaux :</b> les diviseurs de 220 autres que lui-même font ensemble 284, ceux de 284 font 220.</p>
+            <p class="b-note"><b>Les nombres premiers sur Internet :</b> multiplier deux grands nombres premiers est facile. Retrouver les deux à partir du produit est extrêmement difficile. C’est sur cela que repose le chiffrement RSA (1977), qui sert à protéger des données.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · VÉRIFIER LE NOMBRE D’EUCLIDE</div>
+        <p class="b-help" style="margin:0 0 12px">$2310 = 2 \times 3 \times 5 \times 7 \times 11$ et, à côté, $2311$. Ont-ils un diviseur commun ? Essaie aussi $210$ et $211$.</p>
+        <div data-widget="primfaktor6" data-a="2310" data-b="2311"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · L’ALGORITHME D’EUCLIDE</div>
+            <div class="b-text"><p>Détermine le PGCD de 84 et 360 sans facteurs premiers : divise avec reste jusqu’à ce qu’il ne reste plus rien.</p></div>
+            <div class="b-sol"><p>$360 = 4 \times 84 + 24$ · $84 = 3 \times 24 + 12$ · $24 = 2 \times 12 + 0$. Le dernier diviseur est le PGCD.</p>
+                <p><span class="b-res">PGCD$(84\,;\,360) = 12$</span>. Cet algorithme se programme facilement.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · NOMBRES AMICAUX</div>
+            <div class="b-text"><p>Vérifie que 220 et 284 sont amicaux.</p></div>
+            <div class="b-sol"><p>Diviseurs de 220 sans 220 : $1 + 2 + 4 + 5 + 10 + 11 + 20 + 22 + 44 + 55 + 110 = 284$.</p>
+                <p>Diviseurs de 284 sans 284 : $1 + 2 + 4 + 71 + 142 =$ <span class="b-res">$220$</span> ✓</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Trouve tous les nombres premiers jumeaux inférieurs à 100.</p></div>
+            <div class="b-sol"><p>$(3\,;\,5)$, $(5\,;\,7)$, $(11\,;\,13)$, $(17\,;\,19)$, $(29\,;\,31)$, $(41\,;\,43)$, $(59\,;\,61)$, $(71\,;\,73)$ : huit paires.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $n^2 + n + 41$ pour $n = 0$, $1$, $2$, $3$, $4$. Sont-ce des nombres premiers ? Vérifie aussi $n = 40$ et $n = 41$.</p></div>
+            <div class="b-sol"><p>41, 43, 47, 53, 61 : tous premiers. $n = 40$ : $1681 = 41^2$. $n = 41$ : $1763 = 41 \times 43$. La formule échoue.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Montre que 28 est un nombre parfait. 12 est-il parfait ? 8 est-il parfait ?</p></div>
+            <div class="b-sol"><p>$1 + 2 + 4 + 7 + 14 = 28$ ✓. Pour 12 : $1 + 2 + 3 + 4 + 6 = 16$, trop. Pour 8 : $1 + 2 + 4 = 7$, pas assez.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Détermine avec l’algorithme d’Euclide : a) PGCD$(48\,;\,180)$ &nbsp; b) PGCD$(91\,;\,119)$</p></div>
+            <div class="b-sol"><p>a) $180 = 3 \times 48 + 36$, $48 = 1 \times 36 + 12$, $36 = 3 \times 12$ : PGCD 12 &nbsp; b) $119 = 1 \times 91 + 28$, $91 = 3 \times 28 + 7$, $28 = 4 \times 7$ : PGCD 7</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>La démonstration d’Euclide avec la liste 3, 5 : $3 \times 5 + 1 = 16$. 16 n’est pas un nombre premier. Est-ce que cela contredit la démonstration ?</p></div>
+            <div class="b-hint"><p>Quels sont les facteurs premiers de 16 ? Sont-ils dans la liste ?</p></div>
+            <div class="b-sol"><p>Non. $16 = 2^4$, et 2 n’était pas dans la liste. La démonstration dit seulement : il existe un facteur premier qui n’est pas dans la liste. Ici, c’est 2.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="211" data-ph="nombre"><p class="b-q-text">Combien font $2 \times 3 \times 5 \times 7 + 1$ ?</p><div class="b-sol"><p>$210 + 1 = 211$</p></div></div>
+        <div class="b-q" data-ans="1681" data-ph="nombre"><p class="b-q-text">Que donne $n^2 + n + 41$ pour $n = 40$ ?</p><div class="b-sol"><p>$1600 + 40 + 41 = 1681 = 41^2$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="nombre"><p class="b-q-text">Combien y a-t-il de paires de nombres premiers jumeaux inférieurs à 100 ?</p><div class="b-sol"><p>Huit paires.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Deux bus partent ensemble à 8 h 00. Le bus A repasse toutes les 12 minutes, le bus B toutes les 18 minutes. Quand repartent-ils de nouveau en même temps ?</p></div>
+            <div class="b-sol"><p>PPCM$(12\,;\,18) = 36$. À 8 h 36.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relier au chapitre 1.1 :</b> quelles fractions $\tfrac{1}{n}$, avec $n$ de 2 à 50, ont une écriture décimale finie ? Utilise les facteurs premiers des dénominateurs.</p></div>
+            <div class="b-sol"><p>Seulement les dénominateurs faits de 2 et de 5 : 2, 4, 5, 8, 10, 16, 20, 25, 32, 40, 50.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>On veut former un rectangle avec 72 carreaux carrés identiques. Combien de rectangles différents existe-t-il ? Lequel est le plus proche d’un carré ?</p></div>
+            <div class="b-sol"><p>Diviseurs de 72 : 1, 2, 3, 4, 6, 8, 9, 12, 18, 24, 36, 72. Donc 6 rectangles : 1 × 72, 2 × 36, 3 × 24, 4 × 18, 6 × 12, 8 × 9. Le plus proche d’un carré : 8 × 9.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Les cigales nord-américaines du genre <i>Magicicada</i> ne sortent de terre que tous les 13 ou tous les 17 ans. Les chercheurs supposent que ces cycles premiers les protègent de prédateurs qui abondent tous les 2, 3 ou 4 ans. Combien de fois, en 60 ans, une cigale à cycle de 12 ans rencontre-t-elle un prédateur à cycle de 4 ans ? Et une cigale à cycle de 13 ans ?</p></div>
+            <div class="b-hint"><p>Les années communes sont des multiples communs.</p></div>
+            <div class="b-sol"><p>Cigale à 12 ans : PPCM$(12\,;\,4) = 12$, donc les années 12, 24, 36, 48, 60 : cinq fois. Cigale à 13 ans : PPCM$(13\,;\,4) = 52$, donc une seule fois. On ne sait pas encore avec certitude si c’est vraiment la raison.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le plus grand nombre premier connu" data-toc-k="X" data-toc-short="Record">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">LA RECHERCHE AUJOURD’HUI</span></div>
+    <h2>Le plus grand nombre premier connu</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Il y a une infinité de nombres premiers, mais bien sûr on ne les connaît pas tous. Le plus grand connu est $2^{136\,279\,841} - 1$. Il a <b>41 024 320 chiffres</b>.
+                Il a été trouvé le 12 octobre 2024 par l’Américain <b>Luke Durant</b>. Il participait au projet GIMPS, dans lequel beaucoup de gens font chercher ensemble des nombres premiers à leurs ordinateurs.
+                Il a utilisé pour cela de nombreux processeurs graphiques loués dans des centres de calcul.</p>
+            <p>Les nombres de la forme $2^p - 1$ s’appellent les <b>nombres de Mersenne</b>, d’après le moine français Marin Mersenne. Il existe pour eux un test particulièrement rapide ; c’est pourquoi presque tous les nombres premiers records sont de cette forme.
+                À l’automne 2026, personne n’en a trouvé de plus grand.</p>
+            <p><b>Calcule :</b> une page de livre contient environ 3 000 chiffres. Combien de pages faudrait-il pour imprimer ce nombre ? Et combien de livres de 500 pages ?</p>
+            <div class="b-sol"><p>$41\,024\,320 : 3000 \approx 13\,700$ pages, donc environ 27 gros livres.</p></div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> GIMPS, « Mersenne Prime Discovery – 2^136279841−1 is Prime ! », mersenne.org (octobre 2024). Euclide, Éléments, livre IX, proposition 20 (une infinité de nombres premiers).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>NOMBRE PREMIER</h4><p>exactement deux diviseurs, 1 n’est pas premier</p></div>
+        <div><p>$2\,;\,3\,;\,5\,;\,7\,;\,11\,;\,13\,;\,\ldots$</p></div></div>
+    <div class="b-rueck"><div><h4>CRIBLE</h4><p>le plus petit nombre restant est premier, on barre ses multiples</p></div>
+        <div><p>jusqu’à 100 : 25 nombres premiers</p></div></div>
+    <div class="b-rueck"><div><h4>FACTEURS PREMIERS</h4><p>tout nombre s’écrit de façon unique comme produit de nombres premiers · on en déduit le PGCD et le PPCM</p></div>
+        <div><p>$360 = 2^3 \times 3^2 \times 5$</p></div></div>
+    <div class="b-rueck"><div><h4>EUCLIDE</h4><p>produit d’une liste plus 1 : de nouveaux facteurs premiers, donc pas de plus grand nombre premier</p></div>
+        <div><p>$2 \times 3 \times 5 \times 7 + 1 = 211$</p></div></div>
+    <div class="b-rueck"><div><h4>QUESTIONS OUVERTES</h4><p>une formule des nombres premiers ? Une infinité de jumeaux ?</p></div>
+        <div><p>$n^2 + n + 41$ échoue pour $n = 40$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · NOMBRES PREMIERS</div>
+            <div class="b-q" data-ans="17" data-ph="nombre"><p class="b-q-text">$221 = 13 \times x$. Combien vaut $x$ ?</p><div class="b-sol"><p>$221 : 13 = 17$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">Combien de facteurs premiers (en comptant les répétitions) a $48 = 2^4 \times 3$ ?</p><div class="b-sol"><p>$2$, $2$, $2$, $2$, $3$ : cinq.</p></div></div>
+            <div class="b-q" data-ans="97" data-ph="nombre"><p class="b-q-text">Quel est le plus grand nombre premier inférieur à 100 ?</p><div class="b-sol"><p>97</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · PGCD, PPCM ET PLUS</div>
+            <div class="b-q" data-ans="72" data-ph="PPCM"><p class="b-q-text">PPCM de 24 et 36 ?</p><div class="b-sol"><p>$2^3 \times 3^2 = 72$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="PGCD"><p class="b-q-text">PGCD de 91 et 119 ?</p><div class="b-sol"><p>Algorithme d’Euclide : 7</p></div></div>
+            <div class="b-q" data-ans="28" data-ph="nombre"><p class="b-q-text">Quel est le deuxième plus petit nombre parfait ?</p><div class="b-sol"><p>$28 = 1 + 2 + 4 + 7 + 14$</p></div></div>
+        </div>
+    </div>
+    <h3>À ESSAYER AUSSI (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="kreisteilung" href="../../kreisteilung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIVISION DU CERCLE</span><span class="b-lab-what">Comme la formule des nombres premiers : une régularité qui se brise soudain</span></span></a>
+        <a class="b-lab" data-lab="collatz" href="../../collatz.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COLLATZ</span><span class="b-lab-what">Encore une énigme de nombres non résolue</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Gymnasium, 6e année · domaine optionnel 3 d’après le programme de mathématiques du Gymnasium de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-fr/geometrie.js"></script>
+<script src="../../js/buch-gy6.js"></script>
+<script src="../../js/buch-fr/gy6.js"></script>
+</body>
+</html>
