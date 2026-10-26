@@ -823,6 +823,11 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Malpunkt | signe × | 1.1 aside |
 | Breite $b$ (rectangle), Umfang $u$, Oberfläche $O$ | largeur $\ell$, périmètre $P$, aire totale $A$ | page text |
 | Streichhölzer, Zahlentrick | allumettes, tour de magie des nombres | 1.1 |
+| binomische Formeln, 1./2./3. binomische Formel, Binom | identités remarquables, 1re/2e/3e identité, binôme | 1.2, widget binomformeln8 |
+| lineare Gleichung, Probe, Lösungsmenge $L$ | équation du premier degré, vérification, ensemble des solutions $S$ | 1.2; $S = \{\,\}$, $S = \{\,x \mid x > -3\,\}$ |
+| Ungleichung, das Zeichen dreht sich um | inéquation, le sens de l’inégalité change | 1.2; Zahlenstrahl offener Kreis / voller Punkt: droite graduée, cercle vide / point plein |
+| Balkenwaage, Fitnessstudio, Besuche $b$ | balance, salle de sport, visites $v$ | 1.2 (the letter follows the French word) |
+| Zahlenrätsel | devinette | 1.2 |
 
 ## mathegy9-fr
 

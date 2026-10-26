@@ -20,6 +20,15 @@ window.BuchFR && BuchFR.add('gy8', {
             'Couverture : un triangle agrandi à partir d’un centre, un carré formé de a², deux fois ab et b², deux droites avec leur point d’intersection et un arbre pondéré',
         // termbaum8 ('Term' → 'Expression' is in js/buch-fr/exponential.js, which this book does not load)
         'Term': 'Expression', 'Wert für $x$': 'Valeur de $x$',
+        // binomformeln8 (the binomial formulas are the identités remarquables; 'Länge $a$', 'Länge $b$' are in js/buch-fr/gleichungen.js)
+        '1. Formel': '1re identité', '2. Formel': '2e identité', '3. Formel': '3e identité', 'Binomische Formel': 'Identité remarquable',
+        'Binomische Formel als Flächenbild': 'Identité remarquable vue comme une figure d’aires',
+        'Das große Quadrat besteht aus vier Teilen: $a^2$, zweimal $ab$ und $b^2$. Wer nur $a^2 + b^2$ rechnet, vergisst die beiden blauen Rechtecke.':
+            'Le grand carré est formé de quatre parties : $a^2$, deux fois $ab$ et $b^2$. Qui calcule seulement $a^2 + b^2$ oublie les deux rectangles bleus.',
+        'Vom Quadrat $a^2$ nimmst du die beiden roten Streifen $ab$ weg. Das grüne Eckquadrat $b^2$ steckt in beiden Streifen, du hast es also zweimal weggenommen. Einmal kommt es zurück: $+\\,b^2$.':
+            'Du carré $a^2$, tu enlèves les deux bandes rouges $ab$. Le petit carré vert du coin, $b^2$, se trouve dans les deux bandes : tu l’as donc enlevé deux fois. Il revient une fois : $+\\,b^2$.',
+        'Aus dem Quadrat $a^2$ wird die Ecke $b^2$ herausgeschnitten. Das blaue Stück wird gedreht und rechts angelegt: Es entsteht ein Rechteck mit den Seiten $a + b$ und $a - b$.':
+            'Dans le carré $a^2$, on découpe le coin $b^2$. La partie bleue est tournée et placée à droite : on obtient un rectangle de côtés $a + b$ et $a - b$.',
         'Tipp auf einen Knoten: Dann leuchtet sein Teilterm auf.': 'Touche un nœud : sa sous-expression s’allume.',
     },
     phrase: [
@@ -33,6 +42,8 @@ window.BuchFR && BuchFR.add('gy8', {
         // French school notation (Doc, 26.10.2026, as OS 5 in js/buch-fr/gy5.js): × for the product, in TeX and in plain text
         // between two numbers; on every page of this book (the dot as a separator stays)
         [/\\cdot(?![a-zA-Z])/g, '\\times'], [/(\d|\)) · (?=[\d(])/g, '$1 × '],
+        // waage (js/buch-gleichungen.js, chapter 1.2): its parser takes × as well, so the example shows the French sign
+        [/<code>·2<\/code>/g, '<code>×2</code>'],
         // termbaum8: the product node is drawn as a dot; French pupils write × (the same text style as + − :)
         [/<circle cx="([\d.]+)" cy="([\d.]+)" r="4\.2" style="fill:rgb\(245,194,66\)"\/>/g,
             (m, x, y) => '<text class="tb8-op" x="' + x + '" y="' + (Math.round((+y + 1) * 10) / 10) + '" text-anchor="middle" dominant-baseline="middle">×</text>'],
