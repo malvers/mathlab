@@ -173,3 +173,14 @@ What is new in round 3:
 - **Backslashes:** a `\\;` typed into a tool can arrive as `\;` and the phrase never matches; check your block with
   `git diff fr3-prep -- HTML/js/buch-fr/ | grep '^+' | grep '[^\\]\\[;,:!]'` before every commit.
 - Every agent works only in its own worktree and its own scratch subfolder (`scratchpad/fr-<name>/`).
+
+Merged on 26.10.2026 (what the orchestrator learned):
+
+- **A rule in a shared module reaches every book that loads it.** GY 9 put the French school letters for solids into
+  `geometrie.js` (`\cdot` → `\times`, A, A_L, $\mathcal{B}$, ℓ, g, h_a); they run on all GY 5–9 pages and on OS 5, before
+  the phrase table. The other agents were told while still working and aligned their letters (GY 6 changed B to
+  $\mathcal{B}$). Tell the others at once when a shared rule appears.
+- `check.mjs --lang fr` compares the words of **all** modules, also of two modules that never share a page (gy6, gy7):
+  the later block takes the earlier label, or turns its own into a rule tied to the widget markup.
+- `known.json` conflicts came up four times in the cherry-picks: union of both sides, keys and lists sorted.
+- Widgets that size a box from their label need a French branch (`vierecke6`: `BuchFR.plain`).
