@@ -846,7 +846,7 @@ as in `## mathe5-fr` (× for the product in the pages and, by a rule in js/buch-
 | Rückführprinzip, zerlegen / ergänzen | principe du retour au connu, découper / compléter | 3.3 |
 | Haus der Vierecke, Systematisieren | maison des quadrilatères, classer | widget vierecke6 « Tout carré est aussi un rectangle… » |
 | Satz von Pick $A = I + \tfrac{R}{2} - 1$ | théorème de Pick $A = I + \tfrac{B}{2} - 1$ | B for « bord » (German R, Rand) |
-| Prisma: Grundfläche $G$, Deckfläche, Mantel $M$, Umfang der Grundfläche $u$, Oberfläche $O$, Volumen $V$ | prisme : aire de la base $B$, face supérieure, surface latérale (aire latérale $A_L$), périmètre de la base $P$, aire totale $A$, volume $V$ | 4: $A_L = P \times h$, $A = 2 \times B + A_L$, $V = B \times h$; widget prisma6 by phrases and a rule tied to its two pictures |
+| Prisma: Grundfläche $G$, Deckfläche, Mantel $M$, Umfang der Grundfläche $u$, Oberfläche $O$, Volumen $V$ | prisme : aire de la base $\mathcal{B}$, face supérieure, surface latérale (aire latérale $A_L$), périmètre de la base $P$, aire totale $A$, volume $V$ | 4: $A_L = P \times h$, $A = 2 \times \mathcal{B} + A_L$, $V = \mathcal{B} \times h$ (the letters of GY 9, block fr-16 of js/buch-fr/geometrie.js); widget prisma6 by phrases and a rule tied to its two pictures (ℬ in the SVG) |
 | Dreiecks-, Trapez-, Sechseckprisma, Quader | prisme triangulaire, prisme trapézoïdal (à base trapèze), prisme hexagonal, pavé droit | widget prisma6 |
 | Schrägbild, Kavalierperspektive, Körpernetz, Klebelasche | perspective cavalière (fuyantes à 45°, réduites de moitié), patron, languette de collage | 4 |
 | Kante, Ecke, Fläche, eulerscher Satz | arête, sommet, face, relation d’Euler | 4 |

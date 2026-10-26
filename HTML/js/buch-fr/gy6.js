@@ -136,7 +136,7 @@ window.BuchFR && BuchFR.add('gy6', {
             'Le <b>quadrilatère</b> est tout en bas : il lui faut seulement quatre sommets et quatre côtés, rien d’autre.',
         'Tipp auf ein Viereck im Haus. Was weiter unten steht, ist allgemeiner, was weiter oben steht, hat mehr Eigenschaften.':
             'Touche un quadrilatère de la maison. Ce qui est plus bas est plus général, ce qui est plus haut a plus de propriétés.',
-        // prisma6 (French letters: B base area, P perimeter of the base, A_L lateral area, A total area; German G, u, M, O)
+        // prisma6 (French letters as GY 9, js/buch-fr/geometrie.js: \\mathcal{B} base area, P perimeter of the base, A_L lateral area, A total area; German G, u, M, O)
         'Dreiecksprisma': 'Prisme triangulaire', 'Quader': 'Pavé droit', 'Trapezprisma': 'Prisme trapézoïdal', 'Sechseckprisma': 'Prisme hexagonal',
         'Prisma': 'Prisme', 'Schrägbild': 'Perspective cavalière', 'Netz': 'Patron',
         'Grundkante $a$': 'Arête de base $a$', 'Höhe $h$ des Prismas': 'Hauteur $h$ du prisme',
@@ -277,7 +277,7 @@ window.BuchFR && BuchFR.add('gy6', {
             'Les quatre triangles du cerf-volant se rabattent vers l’extérieur. Ils remplissent exactement la moitié du rectangle formé par les deux diagonales.'],
         // prisma6 (after the rule × for \cdot)
         ['$, Umfang der Grundfläche $u', '$, périmètre de la base $P'], ['Mantel $M = u', 'Aire latérale $A_L = P'],
-        ['Oberfläche $O = 2 \\times G + M', 'Aire totale $A = 2 \\times B + A_L'], ['Volumen $V = G \\times h', 'Volume $V = B \\times h'],
+        ['Oberfläche $O = 2 \\times G + M', 'Aire totale $A = 2 \\times \\mathcal{B} + A_L'], ['Volumen $V = G \\times h', 'Volume $V = \\mathcal{B} \\times h'],
         // kreisdiagramm6
         ['Winkel = Anteil · 360°. ', 'Angle = proportion × 360°. '], ['Eine Person entspricht hier $', 'Ici, une personne correspond à $'],
         // sieb6
@@ -362,10 +362,10 @@ window.BuchFR && BuchFR.add('gy6', {
             return 'Tout <b>' + (N[s] || s) + '</b> est aussi ' + list.split(', ').map(x => { const k = x.replace(/^eine?s? /, ''); return N[k] ? 'un ' + N[k] : x; }).join(', ') + '.</p>';
         }],
         // prisma6: the first line of the results (a rule: js/buch-fr/vektoren.js has the phrase "Grundfläche $G" with the German letter)
-        [/Grundfläche \$G (= |\\approx )/g, 'Aire de la base $$B $1'],
-        // prisma6: the letters in the two pictures (G → B, M → A with a subscript L), only inside the prism pictures
+        [/Grundfläche \$G (= |\\approx )/g, 'Aire de la base $$\\mathcal{B} $1'],
+        // prisma6: the letters in the two pictures (G → ℬ as $\\mathcal{B}$ in the text, M → A with a subscript L), only inside the prism pictures
         [/(aria-label="[^"]*(?:im Schrägbild: Grundfläche vorn in wahrer Größe|zwei Grundflächen und der Mantel aus Rechtecken)[^"]*"[\s\S]*?<\/svg>)/g, m =>
-            m.replace(/(<text class="g-area"[^>]*>)G(<\/text>)/g, '$1B$2').replace(/(<text class="g-area"[^>]*>)M(<\/text>)/g, '$1A<tspan dy="4" font-size="0.7em">L</tspan>$2')],
+            m.replace(/(<text class="g-area"[^>]*>)G(<\/text>)/g, '$1ℬ$2').replace(/(<text class="g-area"[^>]*>)M(<\/text>)/g, '$1A<tspan dy="4" font-size="0.7em">L</tspan>$2')],
         [/^(Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma) im Schrägbild: Grundfläche vorn in wahrer Größe, Tiefe unter 45 Grad und halb so lang$/, (m, s) =>
             ({ 'Dreiecksprisma': 'Prisme triangulaire', 'Quader': 'Pavé droit', 'Trapezprisma': 'Prisme trapézoïdal', 'Sechseckprisma': 'Prisme hexagonal' })[s] +
             ' en perspective cavalière : la base devant en vraie grandeur, la profondeur à 45 degrés et réduite de moitié'],
