@@ -78,11 +78,11 @@
             'Unterstrichen ist, was als Nächstes gerechnet wird.': 'What is underlined is calculated next.',
             'Durch 0 kann man nicht teilen.': 'You cannot divide by 0.',
             // zehnerpotenzos5
-            'Zehnerpotenzen': 'Powers of ten', 'Nullen abtrennen': 'Split off zeros', 'Hochzahl': 'Exponent',
+            'Zehnerpotenzen': 'Powers of ten', 'Nullen abtrennen': 'Split off zeros', 'Hochzahl': 'Index',
             'Anzeige des Taschenrechners': 'Calculator display',
             'Die Zahl hat keine Endnull. Hier kann man keine Zehnerpotenz abtrennen.': 'The number has no zero at the end. No power of ten can be split off here.',
             'Vor dem Malpunkt steht keine Endnull mehr: Das ist die kürzeste Schreibweise.':
-                'There is no zero left at the end in front of the multiplication dot: this is the shortest way of writing it.',
+                'There is no zero left at the end in front of the multiplication sign: this is the shortest way of writing it.',
             'So zeigt ein Taschenrechner mit 10 Stellen die Zahl:': 'This is how a calculator with 10 digits shows the number:',
             'Die Zahl passt in die Anzeige.': 'The number fits in the display.',
             // quadratos5
@@ -207,7 +207,7 @@
             [new RegExp('([0-9])[' + BS + BS + '],(?=[0-9]{3}(?![0-9]))', 'g'), '$1{,}'],
             [/\$[^$]*\$/g, m => m.replace(/ (?::|÷) /g, ' ' + BS + 'div ').replace(new RegExp('[' + BS + BS + ']cdot(?![a-z])', 'g'), BS + 'times')],
             // plain text: 352 · 23 → 352 × 23, (36 − 4) · 5; the sign alone (schriftlichos5: the input row, the cell of the sheet, the cuneiform place values)
-            [/([\d)]) · (?=[\d(])/g, '$1 × '], [/^·$/, '×'], [/^:$/, '÷'], [/(<td[^>]*>)·(<\/td>)/g, '$1×$2'], [/(<text[^>]*>)· (?=\d)/g, '$1× '],
+            [/([\d)]) · (?=[\d(a-z])/g, '$1 × '], [/^·$/, '×'], [/^:$/, '÷'], [/(<td[^>]*>)·(<\/td>)/g, '$1×$2'], [/(<text[^>]*>)· (?=\d)/g, '$1× '],
             // the labels "Zahl" of the text fields ("Zahl" alone is a coin side elsewhere)
             [/(<label class="b-ctrl" for="os5-[a-z]+-\d+">)Zahl(<\/label>)/, '$1Number$2'],
             // zahlenstrahlos5
@@ -239,7 +239,7 @@
             [/(data-p="\d+">)([^<]*)/g, (m, a, t) => a + t.replace(/ : /g, ' ÷ ')],
             [/([\d,]+ − [\d,]+) geht in den natürlichen Zahlen nicht\./, '$1 is not possible with natural numbers.'],
             // zehnerpotenzos5
-            [/Die Hochzahl (\d+) sagt: \d+ Faktoren 10, also (?:eine Null|\d+ Nullen)\. Das ist <b>([^<]+)<\/b>\./, (m, n, w) => 'The exponent ' + n + ' says: ' +
+            [/Die Hochzahl (\d+) sagt: \d+ Faktoren 10, also (?:eine Null|\d+ Nullen)\. Das ist <b>([^<]+)<\/b>\./, (m, n, w) => 'The index ' + n + ' says: ' +
                 (n === '1' ? '1 factor of 10, so one zero' : n + ' factors of 10, so ' + n + ' zeros') + '. That is <b>' + (TENW[w] || w) + '</b>.'],
             [/Du kannst noch (\d+) (?:Nullen|Null) mehr abtrennen\./, (m, n) => 'You can split off ' + pl(n, 'more zero', 'more zeros') + '.'],
             [/Die Zahl ist zu lang\. Der Rechner zeigt (\$[^$]+\$): Rücke das Komma um (\d+) Stellen nach rechts, dann hast du die Zahl\./,
@@ -255,6 +255,7 @@
             [/(\$.sqrt\{[^}]+\}\$) liegt zwischen (\d+) und (\d+)\./, (m, t, a, b) => t + ' lies between ' + a + ' and ' + b + '.'],
             // probierenos5: "x : 6 = 9" on its button, "(14 Zahlen)"
             [/(<button type="button" data-v="\d+">)x : /, '$1x ÷ '],
+            [/(>10<sup>x<\/sup> = )1 000</, '$11,000<'],
             [/ \((\d+) Zahlen\)\./, ' ($1 numbers).'],
             // teilbarkeitos5
             [/Bitte eine natürliche Zahl von 1 bis ([\d,]+) eingeben\./, 'Please enter a natural number from 1 to $1.'],
