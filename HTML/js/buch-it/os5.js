@@ -220,7 +220,8 @@ window.BuchIT && BuchIT.add('os5', {
                 [/\. Das ist die letzte Ziffer: Schreibe (\d+) ganz hin\./, '. È l’ultima cifra: scrivi $1 per intero.'],
                 [/\. Schreibe (\d+)\./, '. Scrivi $1.'],
                 [/Der letzte Übertrag (\d+) kommt vorn ins Ergebnis\./, 'L’ultimo riporto, $1, va davanti nel risultato.'],
-                [/Von (\d+) bis (\d+) sind (\d+)\./, 'Da $1 a $2 mancano $3.'],
+                // right after the place ("<b>Decine:</b> da 4 a 7 mancano 3.") in lower case
+                [/(<\/b> )?Von (\d+) bis (\d+) sind (\d+)\./, (m, b, x, y, r) => (b ? b + 'da ' : 'Da ') + x + ' a ' + y + ' mancano ' + r + '.'],
                 [new RegExp('(\\d+) ist kleiner als (\\d+)\\. Entbündle: ((?:1 (?:' + ONE + ') → 10 (?:' + PLACES + ')(?:, dann )?)+)\\. '),
                     (m, a, b, chain) => a + ' è minore di ' + b + '. Fai il cambio: ' + chain.split(', dann ').map(c => {
                         const [, one, ten] = new RegExp('^1 (' + ONE + ') → 10 (' + PLACES + ')$').exec(c);
