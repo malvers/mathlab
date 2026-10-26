@@ -747,7 +747,13 @@ above was changed.
 | Zahlwörter | rectified spelling of 1990, every part joined by a hyphen | 1.1 says so in its aside instead of the German "one word below a million" |
 | Dresden | Dresde | French name of the city in the page text |
 | Kopfrechnen; mit Stift und Papier (test rounds) | calcul mental; avec un crayon et du papier | |
-| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE | cards, en allemand |
+| Vertauschungs-, Verbindungs-, Verteilungsgesetz | commutativité, associativité, distributivité | 1.2, as OS 5; Rechengesetze: propriétés des opérations |
+| Summand, Minuend − Subtrahend, Dividend : Divisor | terme, terme − terme, dividende : diviseur | 1.2 table |
+| Punktrechnung vor Strichrechnung | multiplications et divisions (× et :) avant additions et soustractions (+ et −) | 1.2 |
+| Basis, Exponent, „zwei hoch fünf“ | base, exposant, « deux puissance cinq » (« deux exposant cinq ») | 1.2 |
+| schriftlich dividieren: teilen, malnehmen, abziehen, herunterholen | division posée : diviser, multiplier, soustraire, abaisser | 1.2 keeps the German layout and says once that France uses the potence |
+| Schullandheim | classe verte | 1.2 |
+| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES | cards, en allemand |
 
 ## mathegy6-fr
 
