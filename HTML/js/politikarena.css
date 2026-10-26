@@ -23,6 +23,11 @@
 .pa-lineup { list-style: none; margin: 6px 0 0; padding: 0; font-size: 0.85rem; }
 .pa-lineup li { display: flex; align-items: center; gap: 8px; padding: 3px 0; color: rgba(255, 255, 255, 0.85); }
 .pa-lineup .pa-sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+/* a name in the list opens that actor's prompt and position, like its node */
+.pa-lineup li[data-id] { cursor: pointer; border-radius: 4px; padding-left: 4px; margin-left: -4px; transition: background 0.15s; }
+.pa-lineup li[data-id]:hover { background: rgba(255, 255, 255, 0.06); }
+.pa-lineup li[data-id]:focus-visible { outline: 1px solid #00d2ff; outline-offset: 1px; }
+.pa-lineup li.picked { background: rgba(245, 194, 66, 0.14); color: #fff; }
 .pa-lineup .pa-pilot { margin-left: auto; font-size: 0.7rem; color: rgb(245, 194, 66); font-family: 'Orbitron', sans-serif; }
 .pa-legend { height: 10px; border-radius: 5px; margin: 8px 0 2px;
     background: linear-gradient(90deg, rgb(176, 36, 24), rgb(245, 194, 66), rgb(121, 158, 49)); }
@@ -45,8 +50,43 @@
 /* "das Wollen": an agent's whole prompt, folded - the instruction open, the program text closed */
 #coach-content .pa-prompt-box { margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.12); padding-top: 6px; }
 #coach-content .pa-prompt-box .pa-prompt-box { margin-top: 6px; border-top: none; padding-top: 0; }
-#coach-content .pa-prompt-box summary { cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 0.72rem; color: rgb(245, 194, 66); padding: 4px 0; }
+#coach-content .pa-prompt-box summary { cursor: pointer; font-size: 0.9rem; font-weight: 600; color: rgb(245, 194, 66); padding: 4px 0; }
 #coach-content .pa-prompt { white-space: pre-wrap; font-size: 0.82rem; line-height: 1.5; color: rgba(255, 255, 255, 0.82);
     background: rgba(255, 255, 255, 0.04); border-left: 2px solid rgba(245, 194, 66, 0.5); padding: 6px 8px; margin: 4px 0; border-radius: 4px; }
 #coach-content .pa-quotes li.pa-ok { list-style: none; margin-left: -18px; padding-left: 18px; border-left: 2px solid rgb(121, 158, 49); }
 #coach-content .pa-quotes li.pa-warn { list-style: none; margin-left: -18px; padding-left: 18px; border-left: 2px solid rgb(176, 36, 24); }
+.pa-btn-grid.pa-three { grid-template-columns: repeat(3, 1fr); }
+.pa-btn-grid.pa-three .cyber-btn { padding-left: 4px; padding-right: 4px; }
+.pa-btn-grid.pa-team { margin: 10px 0 2px; }
+.pa-btn-grid[hidden] { display: none; }
+/* the parts of a prompt: a title and one line on what the part does */
+#coach-content .pa-part { margin-top: 8px; font-size: 0.85rem; }
+#coach-content .pa-part b { font-family: 'Orbitron', sans-serif; font-size: 0.72rem; color: #00d2ff; font-weight: 700; }
+/* the common rules, folded under the "Verhandlerinnen" title */
+.pa-rules { margin: 0 0 8px; }
+.pa-rules summary { cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 600; color: #00d2ff; padding: 2px 0 4px; }
+.pa-rules-text { font-family: 'Outfit', sans-serif; font-size: 0.85rem; line-height: 1.5; color: rgba(255, 255, 255, 0.8); background: rgba(255, 255, 255, 0.04);
+    border-left: 2px solid rgba(0, 210, 255, 0.5); padding: 6px 8px; border-radius: 4px; }
+/* the fixed red lines: a list in the prompt view with their sources, a tag in the position view */
+#coach-content .pa-lines { margin: 4px 0 6px; padding-left: 18px; font-size: 0.85rem; line-height: 1.5; }
+#coach-content .pa-lines li { margin-bottom: 3px; border-left: 2px solid rgba(176, 36, 24, 0.8); list-style: none; margin-left: -18px; padding-left: 10px; }
+#coach-content .pa-lines a { color: #00d2ff; }
+#coach-content .pa-tag { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; font-weight: 700; color: #fff; background: rgb(176, 36, 24);
+    border-radius: 3px; padding: 1px 5px; margin-left: 4px; vertical-align: 1px; }
+/* "Wer trägt welchen Punkt?" - one row per side, one column per measure */
+#coach-content .pa-measures { padding-left: 22px; }
+#coach-content .pa-for { margin-top: 6px; font-size: 0.85rem; line-height: 1.5; border-left: 2px solid rgb(245, 194, 66); padding-left: 8px; }
+#coach-content .pa-matrix-wrap { overflow-x: auto; margin: 4px 0 6px; }
+#coach-content .pa-matrix { border-collapse: separate; border-spacing: 3px; font-size: 0.8rem; }
+#coach-content .pa-matrix th { font-family: 'Orbitron', sans-serif; font-size: 0.66rem; font-weight: 700; color: rgba(255, 255, 255, 0.7); padding: 0 4px; text-align: center; }
+#coach-content .pa-matrix tr[data-id] th { text-align: left; cursor: pointer; }
+#coach-content .pa-matrix tr[data-id]:hover th { text-decoration: underline; }
+#coach-content .pa-cell { min-width: 26px; height: 22px; text-align: center; border-radius: 4px; color: #0b1020; font-weight: 700; background: rgba(255, 255, 255, 0.06); }
+#coach-content .pa-cell.pa-knack { outline: 2px solid #fff; outline-offset: -2px; }
+#coach-content .pa-sum { padding-left: 6px; font-family: 'Orbitron', sans-serif; font-weight: 700; white-space: nowrap; }
+#coach-content .pa-sum s { color: rgba(255, 255, 255, 0.45); font-weight: 400; }
+#coach-content .pa-why { padding-left: 18px; font-size: 0.85rem; line-height: 1.5; }
+#coach-content .pa-why li { margin-bottom: 4px; }
+/* the cross-check: treasurer and generation 2060 off the table - faded in the network and in the list */
+#arena .pa-node.off { opacity: 0.22; }
+.pa-lineup li.off { opacity: 0.4; text-decoration: line-through; }

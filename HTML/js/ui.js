@@ -1688,14 +1688,16 @@ class CyberUI {
         `, '#00d2ff', { collapsible: true });
     }
 
-    static createDropdown(containerId, options, onSelect, defaultId = null) {
+    // title (optional): a small heading above, styled like createRadioGroup's (Doc, 19.10.2026, Politik-Arena: Thema and
+    // Modell as dropdowns). Returns { el, set(id) } - set shows an option without calling onSelect (for a lab's reset).
+    static createDropdown(containerId, options, onSelect, defaultId = null, title = null) {
         const container = document.getElementById(containerId);
         if (!container) return;
 
         const dropdownId = `dropdown-${Math.random().toString(36).substr(2, 9)}`;
         const defaultOption = options.find(o => o.id === defaultId) || options[0];
 
-        const html = `
+        const html = (title ? `<span class="cyber-label" style="display:block; font-size: 0.65rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">${title}</span>` : '') + `
             <div id="${dropdownId}" class="cyber-dropdown">
                 <div class="dropdown-trigger">
                     <span class="selected-val">${defaultOption.label}</span>
@@ -1768,6 +1770,14 @@ class CyberUI {
                 window.katex.render(initialMp.dataset.tex, initialMp, { throwOnError: false });
             }
         }
+
+        return {
+            el: dropdown,
+            set(id) {
+                const opt = dropdown.querySelector(`.dropdown-option[data-id="${id}"]`);
+                if (opt) dropdown.querySelector('.selected-val').innerHTML = opt.innerHTML;
+            },
+        };
     }
 
     /**
