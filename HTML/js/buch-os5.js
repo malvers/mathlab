@@ -48,8 +48,8 @@
     const isHero = box => box.dataset.hero != null;
     // the decimal separator: a point in the English editions, a comma everywhere else
     const DP = B.en ? '.' : ',';
-    // the signs × and ÷ of British schools where the English editions show a sign the dictionary cannot reach (input values, a lone sign)
-    const SIGN = t => B.en ? String(t).replace(/·/g, '×').replace(/:/g, '÷') : t;
+    // the signs of British (× ÷) and French (×) schools where an edition shows a sign the dictionary cannot reach (input values, a lone sign)
+    const SIGN = t => B.en ? String(t).replace(/·/g, '×').replace(/:/g, '÷') : B.lang === 'fr' ? String(t).replace(/·/g, '×') : t;
     // hero mode (chapter opener): only the picture, centred
     function heroOnly(box, pic, hide, maxW) {
         if (!isHero(box)) return false;
@@ -231,9 +231,10 @@
     }
     // for an estimate: two leading digits for numbers from 100 on (4 738 → 4 700), tens below, decimals to whole numbers
     const rough = v => v < 10 || v % 1 ? Math.round(v) : Math.round(v / Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2))) * Math.pow(10, Math.max(1, String(Math.floor(v)).length - 2));
-    // one significant digit (352 → 400, 23 → 20) for the estimate of a product
-    const lead = v => v < 10 ? Math.max(1, Math.round(v)) : Math.round(v / Math.pow(10, String(Math.floor(v)).length - 1)) * Math.pow(10, String(Math.floor(v)).length - 1);
+    // one significant digit (352 → 400, 23 → 20, 0,02 → 0,02) for the estimate of a product
+    const lead = v => v < 1 ? +v.toPrecision(1) : v < 10 ? Math.round(v) : Math.round(v / Math.pow(10, String(Math.floor(v)).length - 1)) * Math.pow(10, String(Math.floor(v)).length - 1);
     const val = x => parseFloat(x.i + '.' + (x.f || '0'));
+    const est = x => Number.isInteger(x) ? grp(x) : String(+x.toFixed(6)).replace('.', DP);   // an estimate below 1 keeps its decimals
 
     // the sheet of a written calculation: rows of cells; a cell keeps its texts with the step they appear in,
     // plus the steps from which it is struck through (x), carries a comma (ck) or a line above (line)
@@ -392,7 +393,7 @@
         }
         const ea = lead(val(a)), eb = lead(Bv);
         return { sh, n: s, text, res: dshow(a) + ' · ' + grp(Bd) + ' = ' + unscale(total, da),
-            note: 'Überschlag: ' + grp(ea) + ' · ' + grp(eb) + ' = ' + grp(ea * eb) + '.' };
+            note: 'Überschlag: ' + est(ea) + ' · ' + grp(eb) + ' = ' + est(ea * eb) + '.' };
     }
     function buildDiv(a, b) {
         if (b.f || +b.i < 1 || +b.i > 9) return { err: 'Hier teilst du durch eine einstellige Zahl von 1 bis 9.' };
