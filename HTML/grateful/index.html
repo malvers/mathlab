@@ -33,12 +33,15 @@
         html, body { margin: 0; background: var(--bg); color: var(--text); }
         body {
             font-family: Orbitron, sans-serif;
-            padding: max(20px, env(safe-area-inset-top)) 16px max(40px, env(safe-area-inset-bottom));
+            padding: 0 16px max(40px, env(safe-area-inset-bottom));
         }
         .wrap { max-width: 640px; margin: 0 auto; }
+        /* the heading stays at the top while the list scrolls under it (top padding = former body padding) */
         h1 {
-            font-size: clamp(21px, 6vw, 30px); font-weight: 700; margin: 0 0 18px; letter-spacing: .04em;
+            font-size: clamp(21px, 6vw, 30px); font-weight: 700; margin: 0 0 6px; letter-spacing: .04em;
             display: flex; justify-content: space-between; align-items: center; gap: 8px;
+            position: sticky; top: 0; z-index: 2; background: var(--bg);
+            padding: max(20px, env(safe-area-inset-top)) 0 12px;
         }
 
         .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
@@ -50,11 +53,19 @@
         .card.entry textarea { flex: 1 1 auto; }
         label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; letter-spacing: .03em; }
 
-        .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+        /* arrows left and right of the day strip: one day back / forward, the strip follows */
+        .strip { display: grid; grid-template-columns: 30px 1fr 30px; gap: clamp(4px, 1.5vw, 8px); margin-bottom: 16px; }
+        .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(4px, 1.5vw, 8px); }
+        button.step {
+            height: 58px; padding: 0; border: 0; border-radius: 10px; background: transparent;
+            color: var(--text); cursor: pointer; display: grid; place-items: center;
+        }
+        button.step svg { width: 30px; height: 30px; fill: currentColor; }
+        button.step:disabled { opacity: .25; }
         .day {
             height: 58px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg);
             padding: 0; cursor: pointer; color: var(--muted); line-height: 1.2;
-            font: 600 15px Raleway, sans-serif; font-variant-numeric: lining-nums;
+            font: 600 clamp(13px, 3.9vw, 15px) Raleway, sans-serif; font-variant-numeric: lining-nums;
         }
         .day small { display: block; font-size: 11px; font-weight: 400; }
         .day.has { background: var(--phi); border-color: var(--phi); color: var(--bg); }
@@ -119,7 +130,12 @@
 
         <div id="app" hidden>
             <div class="card entry">
-                <div class="days" id="days" role="group" aria-label="Letzte 5 Tage"></div>
+                <!-- chevrons: Material Icons "chevron_left" / "chevron_right" (Apache 2.0) -->
+                <div class="strip">
+                    <button class="step" id="prevBtn" type="button" aria-label="Einen Tag zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+                    <div class="days" id="days" role="group" aria-label="Tage"></div>
+                    <button class="step" id="nextBtn" type="button" aria-label="Einen Tag vor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
+                </div>
 
                 <textarea id="text" placeholder="Dass …" aria-label="Wofür bist du dankbar?"></textarea>
 
@@ -151,10 +167,13 @@
             let selectedDay = null;  // YYYY-MM-DD the form is for - yellow frame in the strip, its year in the head
             let editing = null;      // id of the selected day's entry, null while the day is still empty
             let newTexts = {};       // day -> text typed for a day without entry, kept while other days are looked at
+            let stripEnd = null;     // last day of the strip: today, or earlier once the arrows went further back
+            let loadedSince = null;  // entries are loaded from this day on - going further back loads more
 
             /* local calendar date as YYYY-MM-DD (sv-SE formats exactly like that) */
             const iso = d => d.toLocaleDateString('sv-SE');
             const todayIso = () => iso(new Date());
+            const addDays = (s, n) => iso(new Date(new Date(s + 'T12:00:00').getTime() + n * 864e5));   // noon: safe across DST
             const shortDate = s => `${WD[new Date(s + 'T12:00:00').getDay()]} ${s.slice(8, 10)}.${s.slice(5, 7)}.`;
             const byId = id => entries.find(x => x.id === id);
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -182,8 +201,7 @@
             }
 
             async function load() {
-                const since = iso(new Date(Date.now() - 60 * 864e5));
-                const res = await auth.api(`grateful?select=id,day,text&day=gte.${since}&order=day.desc,id.desc`);
+                const res = await auth.api(`grateful?select=id,day,text&day=gte.${loadedSince}&order=day.desc,id.desc`);
                 if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto' : 'HTTP ' + res.status);
                 entries = await res.json();
             }
@@ -209,12 +227,30 @@
             const showDay = d => fill(d, entries.find(x => x.day === d));   // newest entry of that day
             const showEntry = id => { const e = byId(id); if (e) fill(e.day, e); };
 
+            /* one day back (-1) or forward (+1); older than what is loaded -> load 60 more days first */
+            async function step(n) {
+                const d = addDays(selectedDay, n);
+                if (d > todayIso()) return;
+                if (d < loadedSince) {
+                    loadedSince = addDays(d, -60);
+                    try { await load(); } catch (e) { status(e.message, 'err'); return; }
+                }
+                status('');
+                showDay(d);
+            }
+
             function render() {
                 const byDay = new Set(entries.map(e => e.day));
+                const today = todayIso();
+                // the strip keeps its place while the selected day is in it, otherwise it moves just far enough
+                if (!stripEnd || stripEnd > today) stripEnd = today;
+                if (selectedDay > stripEnd) stripEnd = selectedDay;
+                if (selectedDay < addDays(stripEnd, 1 - DAYS)) stripEnd = addDays(selectedDay, DAYS - 1);
+                $('nextBtn').disabled = selectedDay >= today;
                 const days = $('days');
                 days.innerHTML = '';
                 for (let i = DAYS - 1; i >= 0; i--) {
-                    const d = iso(new Date(Date.now() - i * 864e5));
+                    const d = addDays(stripEnd, -i);
                     const b = document.createElement('button');
                     b.type = 'button';
                     b.className = 'day' + (byDay.has(d) ? ' has' : '') + (d === selectedDay ? ' on' : '');
@@ -300,9 +336,11 @@
             async function showApp() {
                 $('gate').hidden = true;
                 $('app').hidden = false;
-                try { await load(); } catch (e) { status(e.message, 'err'); }
-                // back to where the last visit stopped, unsaved text included
+                // back to where the last visit stopped, unsaved text included (its day is loaded too)
                 const d = loadDraft();
+                loadedSince = addDays(todayIso(), -60);
+                if (d.day && d.day < loadedSince) loadedSince = d.day;
+                try { await load(); } catch (e) { status(e.message, 'err'); }
                 newTexts = d.newTexts || {};
                 if (d.editing && byId(d.editing)) showEntry(d.editing);
                 else showDay(d.day && !d.editing ? d.day : todayIso());
@@ -323,6 +361,8 @@
                 $('text').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save(); });
                 $('saveBtn').onclick = save;
                 $('micBtn').onclick = dictate;
+                $('prevBtn').onclick = () => step(-1);
+                $('nextBtn').onclick = () => step(1);
                 $('cancelBtn').onclick = () => {   // revert the stored entry
                     const e = editing && byId(editing);
                     if (e) { $('text').value = e.text; buttons(); saveDraft(); }
