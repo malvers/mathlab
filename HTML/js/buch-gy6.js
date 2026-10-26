@@ -1115,9 +1115,9 @@
         pic.addEventListener('click', e => { const g = e.target.closest('[data-n]'); if (g) { S.n = g.dataset.n; render(); } });
         pic.addEventListener('keydown', e => { const g = e.target.closest('[data-n]'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); S.n = g.dataset.n; render(); } });
         // the box fits the label as the page shows it (English editions: "Quadrilateral" is longer than "Viereck", Spanish: "Cuadrilátero",
-        // Italian: "Quadrilatero")
+        // Italian: "Quadrilatero", French: "Quadrilatère")
         const shown = t => (B.en && window.BuchEN ? BuchEN.plain(t) : B.lang === 'es' && window.BuchES ? BuchES.plain(t) :
-            B.lang === 'it' && window.BuchIT ? BuchIT.plain(t) : t);
+            B.lang === 'it' && window.BuchIT ? BuchIT.plain(t) : B.lang === 'fr' && window.BuchFR ? BuchFR.plain(t) : t);
         const ancestors = n => { const set = new Set([n]); const go = m => VK[m].up.forEach(u => { if (!set.has(u)) { set.add(u); go(u); } }); go(n); return set; };
         function render() {
             const anc = ancestors(S.n);
