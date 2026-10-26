@@ -808,6 +808,22 @@ above was changed.
 
 <!-- fr-15: terms of this book only (GY 8), write right below this line -->
 
+Package fr-15 (Moeglin), 26.10.2026: decisions made while translating GY 8; nothing above was changed. The French school
+conventions of `## mathe5-fr` hold: × for the product (the rule `\cdot` → `\times` in js/buch-fr/gy8.js turns the widgets,
+too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (AB) line.
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Klasse 8 | Gymnasium, 8e année | start page: about the age of the French 4e |
+| Term, Rechenbaum | expression, arbre de calcul | 1.1, widget termbaum8 (the product node shows × instead of the dot) |
+| Variable als Platzhalter, Unbekannte, Veränderliche | nombre quelconque, inconnue, grandeur variable | 1.1; Name, Wert, Bedeutung: nom, valeur, signification |
+| Summe, Differenz, Produkt, Quotient, Potenz | somme, différence, produit, quotient, puissance | Summanden: termes; Minuend und Subtrahend: premier et second terme; Faktoren, Dividend und Divisor, Basis und Exponent: facteurs, dividende et diviseur, base et exposant |
+| zusammenfassen, ausmultiplizieren, ausklammern, gleichartige Glieder | réduire, développer, factoriser, termes semblables | 1.1 |
+| Punkt vor Strich, Reihenfolge der Rechenarten | ordre des priorités, × et : avant + et − | division stays « : » as in OS 5 |
+| Malpunkt | signe × | 1.1 aside |
+| Breite $b$ (rectangle), Umfang $u$, Oberfläche $O$ | largeur $\ell$, périmètre $P$, aire totale $A$ | page text |
+| Streichhölzer, Zahlentrick | allumettes, tour de magie des nombres | 1.1 |
+
 ## mathegy9-fr
 
 <!-- fr-16: terms of this book only (GY 9), write right below this line -->
