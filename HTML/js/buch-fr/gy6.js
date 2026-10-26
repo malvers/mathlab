@@ -29,6 +29,18 @@ window.BuchFR && BuchFR.add('gy6', {
         'in $\\mathbb{N}$ (und damit auch in $\\mathbb{Q}^+$)': 'dans $\\mathbb{N}$ (et donc aussi dans $\\mathbb{Q}^+$)',
         'nur in $\\mathbb{Q}^+$': 'seulement dans $\\mathbb{Q}^+$',
         'In der Schule zählt die 0 zu den natürlichen Zahlen.': 'À l’école, 0 fait partie des entiers naturels.',
+        // bruchop6
+        'plus': 'plus', 'minus': 'moins', 'mal': 'fois', 'durch': 'divisé par', 'Rechenart': 'Opération',
+        'Zähler 1': 'Numérateur 1', 'Nenner 1': 'Dénominateur 1', 'Zähler 2': 'Numérateur 2', 'Nenner 2': 'Dénominateur 2',
+        'Das Ergebnis wäre kleiner als null.': 'Le résultat serait plus petit que zéro.',
+        'Für das Bild sind die Zahlen zu groß.': 'Les nombres sont trop grands pour la figure.',
+        'Das Bild zeigt nur Brüche bis 1.': 'La figure ne montre que des fractions jusqu’à 1.',
+        'Mal null ist null.': 'Zéro fois un nombre, c’est zéro.', 'Durch null kann man nicht teilen.': 'On ne peut pas diviser par zéro.',
+        '1. Bruch': '1re fraction', '2. Bruch': '2e fraction', 'Ergebnis': 'Résultat', 'Grün': 'Vert',
+        'Streifenbild der Rechnung': 'Le calcul représenté par des bandes', 'Rechteckbild: ein Teil von einem Teil': 'Rectangle : une part d’une part',
+        'Wie oft passt der zweite Bruch in den ersten?': 'Combien de fois la deuxième fraction tient-elle dans la première ?',
+        'Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.': 'Numérateur fois numérateur, dénominateur fois dénominateur. Simplifier avant fait gagner du travail.',
+        'Durch einen Bruch teilt man, indem man mit seinem Kehrwert malnimmt.': 'Pour diviser par une fraction, on multiplie par son inverse.',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -52,6 +64,12 @@ window.BuchFR && BuchFR.add('gy6', {
         [': die gebrochenen Zahlen, also alle Zahlen, die man als Bruch $\\tfrac{p}{q}$ schreiben kann.',
             ' : les nombres rationnels positifs, c’est-à-dire tous les nombres qu’on peut écrire sous forme de fraction $\\tfrac{p}{q}$.'],
         ['Jede natürliche Zahl ist auch eine gebrochene Zahl: $', 'Tout entier naturel est aussi un nombre rationnel positif : $'],
+        // bruchop6
+        ['$: Bei den gebrochenen Zahlen geht diese Subtraktion nicht. Negative Zahlen lernst du in Klasse 7 kennen.',
+            '$ : avec les nombres rationnels positifs, cette soustraction est impossible. Tu découvriras les nombres négatifs en 7e année.'],
+        ['Hauptnenner: $', 'Dénominateur commun : $'],
+        ['$: Wie oft passt nichts in etwas? Diese Frage hat keine Antwort. Durch $0$ teilt man nie.',
+            '$ : combien de fois « rien » tient-il dans quelque chose ? Cette question n’a pas de réponse. On ne divise jamais par $0$.'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -71,5 +89,12 @@ window.BuchFR && BuchFR.add('gy6', {
         [/Alle Zahlen sind einsortiert(?:, (\d+) von (\d+) gleich beim ersten Versuch richtig)?\./g,
             (m, a, b) => 'Tous les nombres sont rangés' + (a ? ' : ' + a + ' sur ' + b + ' justes du premier coup' : '') + '.'],
         [/(\\in \\mathbb\{Q\}\^\+\$) und \$/g, '$1 et $'], [/(\\in \\mathbb\{Q\}\^\+\$), aber \$/g, '$1, mais $'],
+        // bruchop6
+        [/\(das kleinste gemeinsame Vielfache von \$(\d+)\$ und \$(\d+)\$\)/g, (m, a, b) => '(le plus petit multiple commun de $' + a + '$ et $' + b + '$)'],
+        [/Erst gleichnamig machen, dann die Zähler (addieren|subtrahieren)\. Der Nenner bleibt\./g, (m, v) =>
+            'On met d’abord au même dénominateur, puis on ' + (v === 'addieren' ? 'additionne' : 'soustrait') + ' les numérateurs. Le dénominateur reste le même.'],
+        [/(<span class="g-phi">)(?:Grün|\u0003\d+\u0004)(<\/span>): \$(\d+)\$ von \$(\d+)\$ Kästchen\. Das ist (\$[^$]*\$) von (\$[^$]*\$)\./g, (m, s1, s2, a, b, x, y) =>
+            s1 + 'Vert' + s2 + ' : $' + a + '$ cases sur $' + b + '$. C’est ' + x + ' de ' + y + '.'],
+        [/(\$[^$]*\$) passt (\$[^$]*\$)-mal in (\$[^$]*\$)\./g, (m, x, k, y) => x + ' tient ' + k + ' fois dans ' + y + '.'],
     ]
 });
