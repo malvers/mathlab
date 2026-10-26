@@ -133,6 +133,18 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-10 mathegy12lk-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // potenzfunktion (chapter 1.2): the table of properties
+        'Verwandte zeigen': 'Afficher la famille', 'Graph einer Potenzfunktion': 'Courbe d’une fonction puissance', 'Exponent': 'Exposant',
+        'Nullstelle': 'Zéro', 'Polstelle': 'Pôle', 'Gemeinsame Punkte': 'Points communs',
+        'keine, $f$ ist nur für $x \\geq 0$ definiert': 'aucune, $f$ n’est définie que pour $x \\geq 0$',
+        'achsensymmetrisch zur $y$-Achse, denn $f(-x) = f(x)$': 'symétrique par rapport à l’axe des $y$, car $f(-x) = f(x)$',
+        'punktsymmetrisch zum Ursprung, denn $f(-x) = -f(x)$': 'symétrique par rapport à l’origine, car $f(-x) = -f(x)$',
+        'steigt für $x \\geq 0$': 'croissante pour $x \\geq 0$', 'steigt überall': 'croissante partout',
+        'fällt für $x < 0$, steigt für $x > 0$': 'décroissante pour $x < 0$, croissante pour $x > 0$',
+        'steigt für $x < 0$, fällt für $x > 0$': 'croissante pour $x < 0$, décroissante pour $x > 0$',
+        'fällt für $x < 0$ und fällt für $x > 0$': 'décroissante pour $x < 0$ et décroissante pour $x > 0$',
+        '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, sans changement de signe', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, avec changement de signe',
+        'senkrecht $x = 0$, waagerecht $y = 0$': 'verticale $x = 0$, horizontale $y = 0$',
     },
     phrase: [
         // book fr-1 mathe11-fr:
