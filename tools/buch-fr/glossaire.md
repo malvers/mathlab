@@ -778,7 +778,12 @@ above was changed.
 | Flächeninhalt $A = a \cdot b$, Umfang $u = 2a + 2b$ | aire $A = a \times b$, périmètre $P = 2a + 2b$ | 4.1, as the widget rechteck5 (rule u → P of fr-11) |
 | Auslegen, Zerlegen, Ergänzen | paver, décomposer, compléter | 4.1 |
 | Ar, Hektar | are (a), hectare (ha) | 4.1 |
-| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD, LABORATOIRE DU REPÈRE, L’HORLOGE DES ANGLES, LABORATOIRE DES ANGLES, PUZZLE D’ANGLES, FIGURES SUPERPOSABLES | cards, en allemand |
+| Quader, Ecken, Kanten, Flächen | pavé droit, sommets, arêtes, faces | 4.2 |
+| Ansichten: Grundriss, Vorder-, Seitenansicht | vues : vue de dessus, vue de face, vue de côté | 4.2 |
+| Oberflächeninhalt $O$ | aire totale $A$ | 4.2, as the widget quader5 (rule O → A of fr-11); two boxes A and B became « boîte 1, boîte 2 » with $A_1$, $A_2$ |
+| Hohlmaße: l, ml, hl | contenances : L, mL, hL | 4.2, as OS 5 |
+| Kantenmodell, Körpernetz | squelette, patron | 4.2 |
+| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE, ADDITION POSÉE, MULTIPLICATION POSÉE, DIVISION POSÉE, PUZZLE DE NOMBRES, LES CLOCHES DE BAGDAD, LABORATOIRE DU REPÈRE, L’HORLOGE DES ANGLES, LABORATOIRE DES ANGLES, PUZZLE D’ANGLES, FIGURES SUPERPOSABLES, SOLIDES, PRINCIPE DE CAVALIERI | cards, en allemand |
 
 ## mathegy6-fr
 
