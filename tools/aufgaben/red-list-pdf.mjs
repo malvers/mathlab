@@ -66,17 +66,18 @@ for (const file of plans(SVP)) {
     for (const row of rows) {
         const cfg = row && row.redBtn;
         if (!cfg) continue;
-        let items = cfg.items || [], pdf = cfg.pdf, info = cfg.info;
+        let items = cfg.items || [], pdf = cfg.pdf, info = cfg.info, title = cfg.title || cfg.label;
         if (cfg.src) {
             const d = JSON.parse(fs.readFileSync(path.join(path.dirname(file), cfg.src), 'utf8'));
             items = Array.isArray(d) ? d : (d.items || []);
             pdf = pdf || d.pdf;
             info = info || d.info;
+            title = d.title || title;   // a list shared by plans with different buttons names itself
         }
         if (!pdf) continue;
         const out = path.join(path.dirname(file), pdf);
         const plan = planName(src);
-        if (!lists.has(out)) lists.set(out, { title: cfg.title || cfg.label, items, info, names: [], sj: plan.sj });
+        if (!lists.has(out)) lists.set(out, { title, items, info, names: [], sj: plan.sj });
         const l = lists.get(out);
         if (!l.names.includes(plan.name)) l.names.push(plan.name);
     }
