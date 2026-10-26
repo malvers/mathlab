@@ -15,7 +15,7 @@
 window.BuchFR && BuchFR.add('daten', {
     word: {
         // book fr-14 mathegy7-fr:
-        // achsentrick (also on the GY 9 pages: the same French as the fr-16 block, which translated it at the same time)
+        // achsentrick (also on the GY 9 pages; the fr-16 copy was merged away, 26.10.2026)
         'Abgeschnittene Achse': 'Axe tronqué', 'Bild statt Balken': 'Image au lieu de barres', 'Achse beginnt bei': 'L’axe commence à', 'Trick': 'Astuce',
         'Säulendiagramm Mitglieder eines Sportvereins': 'Diagramme en colonnes : membres d’un club de sport',
         'Die Achse beginnt nicht bei null. Bei Säulen täuscht das immer, denn das Auge vergleicht ihre Höhen. In Liniendiagrammen ist ein späterer Achsenbeginn üblich, dann aber mit deutlichem Bruchzeichen.':
@@ -49,18 +49,6 @@ window.BuchFR && BuchFR.add('daten', {
         'Histogramm der Körpergrößen': 'Histogramme des tailles',
         'Sehr schmale Klassen zeigen fast nur Einzelwerte, sehr breite verwischen alles. Dazwischen erkennt man die Form der Verteilung.':
             'Des classes très étroites ne montrent presque que des valeurs isolées, des classes très larges brouillent tout. Entre les deux, on reconnaît la forme de la distribution.',
-        // achsentrick (GY 7, block fr-14, uses it too - one copy is kept when merging)
-        'Abgeschnittene Achse': 'Axe tronqué', 'Bild statt Balken': 'Image au lieu de barres', 'Achse beginnt bei': 'L’axe commence à', 'Trick': 'Astuce',
-        'Säulendiagramm Mitglieder eines Sportvereins': 'Diagramme en colonnes : membres d’un club de sport',
-        'Die Achse beginnt nicht bei null. Bei Säulen täuscht das immer, denn das Auge vergleicht ihre Höhen. In Liniendiagrammen ist ein späterer Achsenbeginn üblich, dann aber mit deutlichem Bruchzeichen.':
-            'L’axe ne commence pas à zéro. Avec des colonnes, cela trompe toujours, car l’œil compare leurs hauteurs. Dans les graphiques en courbes, il est courant de faire commencer l’axe plus haut, mais alors avec un signe de coupure bien visible.',
-        'Achse ab null: Die Höhen sind ehrlich vergleichbar.': 'Axe à partir de zéro : les hauteurs se comparent honnêtement.',
-        '2020: 100 Mio. €': '2020 : 100 M€', '2025: 200 Mio. €': '2025 : 200 M€',
-        'Zwei Geldsymbole, das zweite doppelt so hoch und doppelt so breit': 'Deux symboles monétaires, le second deux fois plus haut et deux fois plus large',
-        'Der Umsatz hat sich <b>verdoppelt</b>. Das rechte Bild ist doppelt so hoch, aber auch doppelt so breit.':
-            'Le chiffre d’affaires a <b>doublé</b>. L’image de droite est deux fois plus haute, mais aussi deux fois plus large.',
-        'Das Auge vergleicht Flächen: $2 \\cdot 2 = 4$, das Bild wirkt <b>viermal</b> so groß. Als Körper gezeichnet sogar $2^3 = 8$-mal.':
-            'L’œil compare des aires : $2 \\times 2 = 4$, l’image paraît <b>quatre fois</b> plus grande. Dessinée comme un solide, même $2^3 = 8$ fois.',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -69,12 +57,10 @@ window.BuchFR && BuchFR.add('daten', {
         // book fr-16 mathegy9-fr:
         // mittelwerte
         ['keiner (jeder Wert kommt nur einmal vor)', 'aucun (chaque valeur n’apparaît qu’une fois)'],
-        // achsentrick
-        ['Tatsächlich: $', 'En réalité : $'], ['$, also ein Plus von ', '$, soit une hausse de '],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
-        // achsentrick: "Die letzte Säule wirkt 3,7-mal so hoch wie die erste." (as the fr-16 block)
+        // achsentrick: "Die letzte Säule wirkt 3,7-mal so hoch wie die erste."
         [/Mitglieder eines Sportvereins\. Die letzte Säule <b>wirkt<\/b> ([\d,]+)-mal so hoch wie die erste\./g,
             'Membres d’un club de sport. La dernière colonne <b>paraît</b> $1 fois plus haute que la première.'],
         // book fr-16 mathegy9-fr:
@@ -86,8 +72,5 @@ window.BuchFR && BuchFR.add('daten', {
         // histogramm: "8 Klassen der Breite 5 cm · häufigste Klasse $[165;\\,170)$ mit 10 von 40 Werten (25 %)" - French classes [165 ; 170[
         [/(\d+) Klassen der Breite (\d+) cm · häufigste Klasse \$\[(\d+);\\,(\d+)\)\$ mit (\d+) von (\d+) Werten \(/g,
             (m, k, w, a, b, c, n) => k + ' classes d’amplitude ' + w + ' cm · classe la plus fréquente $[' + a + '\\,;\\,' + b + '[$ avec ' + c + ' valeurs sur ' + n + ' ('],
-        // achsentrick: "Die letzte Säule wirkt 3,7-mal so hoch wie die erste."
-        [/Mitglieder eines Sportvereins\. Die letzte Säule <b>wirkt<\/b> ([\d,]+)-mal so hoch wie die erste\./g,
-            'Membres d’un club de sport. La dernière colonne <b>paraît</b> $1 fois plus haute que la première.'],
     ]
 });

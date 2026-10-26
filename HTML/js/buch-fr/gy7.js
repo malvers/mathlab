@@ -33,7 +33,7 @@ window.BuchFR && BuchFR.add('gy7', {
         'Dreieck mit Inkreis': 'Triangle et son cercle inscrit',
         'Zieh an den Ecken. In der Nähe von $90^\\circ$ rastet der Winkel an der gezogenen Ecke als rechter Winkel ein.':
             'Fais glisser les sommets. Près de $90^\\circ$, l’angle au sommet que tu déplaces se cale sur un angle droit.',
-        'Die drei': 'Les trois', 'Mittelsenkrechten': 'médiatrices', 'Winkelhalbierenden': 'bissectrices',
+        'Die drei': 'Les trois', 'Winkelhalbierenden': 'bissectrices',
         'schneiden sich in einem Punkt $U$. Er ist von allen drei Ecken gleich weit entfernt:': 'se coupent en un point $O$. Il est à la même distance des trois sommets :',
         'schneiden sich in einem Punkt $I$. Er hat von allen drei <b>Seiten</b> denselben Abstand:': 'se coupent en un point $I$. Il est à la même distance des trois <b>côtés</b> :',
         'Das Dreieck ist <b>rechtwinklig</b>: $U$ liegt genau in der Mitte der längsten Seite. Das ist der Satz des Thales von der anderen Seite gesehen.':
@@ -125,11 +125,11 @@ window.BuchFR && BuchFR.add('gy7', {
             'Les trois problèmes types :<br>$P = t\\,\\% \\times V$ · $t\\,\\% = \\dfrac{P}{V}$ · $V = \\dfrac{P}{t\\,\\%}$',
         'Neuer Wert:': 'Nouvelle valeur :', 'Nicht': 'Pas',
         // diagramm7 (one data set as bar, line or pie chart)
-        'Wie kommst du zur Schule? Umfrage in einer Klasse': 'Comment viens-tu à l’école ? Sondage dans une classe', 'Antworten': 'Réponses', 'zu Fuß': 'à pied',
-        'Fahrrad': 'vélo', 'Bus, Bahn': 'bus, train', 'Auto': 'voiture', 'Klassensprecherwahl: Stimmen': 'Élection du délégué de classe : voix', 'Stimmen': 'Voix',
+        'Wie kommst du zur Schule? Umfrage in einer Klasse': 'Comment viens-tu à l’école ? Sondage dans une classe', 'Antworten': 'Réponses', 'zu Fuß': 'À pied',
+        'Fahrrad': 'À vélo', 'Bus, Bahn': 'Bus, train', 'Auto': 'En voiture', 'Klassensprecherwahl: Stimmen': 'Élection du délégué de classe : voix', 'Stimmen': 'Voix',
         'Höhe einer Sonnenblume, jede Woche gemessen': 'Hauteur d’un tournesol, mesurée chaque semaine',
         'Säulendiagramm': 'Diagramme en colonnes', 'Liniendiagramm': 'Diagramme en ligne brisée', 'Kreisdiagramm': 'Diagramme circulaire', 'Diagramm': 'Diagramme',
-        'Woche': 'Semaine', 'Anteil': 'Part', 'Winkel': 'Angle', 'weniger': 'moins', 'mehr': 'plus',
+        'Woche': 'Semaine', 'Anteil': 'Proportion', 'Winkel': 'Angle', 'weniger': 'moins', 'mehr': 'plus',
         'Ein Liniendiagramm passt hier nicht: Die Kategorien haben keine Reihenfolge, und zwischen ihnen gibt es keine Zwischenwerte.':
             'Un diagramme en ligne brisée ne convient pas ici : les catégories n’ont pas d’ordre, et il n’y a pas de valeurs intermédiaires entre elles.',
         'Ein Kreisdiagramm passt hier nicht: Es zeigt Anteile an einem Ganzen. Die Höhen der einzelnen Wochen ergeben zusammen kein sinnvolles Ganzes.':
@@ -247,6 +247,9 @@ window.BuchFR && BuchFR.add('gy7', {
         // French school notation (as js/buch-fr/gy5.js): × for the product in every formula of the widgets. Rules run before the
         // phrases, so a phrase key of this block writes \times where the widget writes \cdot (a word key keeps \cdot)
         [/\\cdot(?![a-zA-Z])/g, '\\times'],
+        // dreieckkreise7: "Die drei <span>Mittelsenkrechten</span> schneiden sich …" - lower case inside the sentence; a rule,
+        // because the word 'Mittelsenkrechten' is the button label « Médiatrices » of GY 6 (merge of 26.10.2026)
+        [/(<span class="g-cy">)Mittelsenkrechten(?=<\/span>)/g, '$1médiatrices'],
         // kreisgerade7: "… ist eine <b>Sehne</b>, hier etwa $4,8 cm$ lang." - the French has no "lang"
         [/(ist eine <b>Sehne<\/b>, hier etwa \$[^$]+)\$ lang\./g, '$1$.'],
         // dreieckkreise7: the centre of the circumcircle is O (German U), in the picture and in the formula of the radius
