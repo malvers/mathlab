@@ -267,7 +267,7 @@
             [/^(Zähler|Nenner|Ganzes)( [AB])? (kleiner|größer)$/, (m, w, ab, d) => (d === 'kleiner' ? 'Decrease the ' : 'Increase the ') + STEP[w] + (ab ? ' of' + ab : '')],
             [/^(Zähler|Nenner) ([AB])$/, (m, w, ab) => cap(STEP[w]) + ' of ' + ab],
             // bruchteilos5
-            [/^(\d+) von (\d+) Gruppen zu je (\d+) sind gefärbt$/, (m, z, n, k) => z + ' of ' + n + ' groups of ' + k + ' are coloured'],
+            [/^(\d+) von (\d+) Gruppen zu je (\d+) sind gefärbt$/, (m, z, n, k) => z + ' of ' + n + ' groups of ' + k + (z === '1' ? ' is' : ' are') + ' coloured'],
             [/(\$.tfrac\{\d+\}\{\d+\}\$) von (\d+) sind (\d+)\./, (m, f, g, r) => f + ' of ' + g + ' is ' + r + '.'],
             [/(\$.tfrac\{\d+\}\{\d+\}\$) von (\d+)/, (m, f, g) => f + ' of ' + g],
             [/1\. Teile das Ganze in (\d+) gleich große Gruppen: /, '1. Divide the whole into $1 equal groups: '],
