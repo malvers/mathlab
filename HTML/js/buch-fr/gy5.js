@@ -125,6 +125,9 @@ window.BuchFR && BuchFR.add('gy5', {
         'Rot markiert: Hier muss noch gebündelt werden.': 'Marqué en rouge : ici, il faut encore regrouper.',
         'Linienbrett mit Rechenpfennigen': 'Table à calculer avec des jetons',
         // book fr-12 mathegy5-fr:
+        // titelbildgy5
+        'Titelbild: ein Quader aus Einheitswürfeln, ein Kreis mit drei Achteln, ein Winkel mit Skala, ein gespiegelter Drachen, ein Zahlenstrahl und Maya-Ziffern':
+            'Illustration de couverture : un pavé droit fait de cubes unités, un disque avec trois huitièmes, un angle avec sa graduation, un cerf-volant et son symétrique, une droite graduée et des chiffres mayas',
     },
     phrase: [
         // book fr-11 mathe5-fr:

@@ -732,6 +732,23 @@ every part joined by a hyphen (vingt-et-un, deux-cent-mille, un-million); "trois
 
 <!-- fr-12: terms of this book only (GY 5), write right below this line -->
 
+Package fr-12 (Audin), 26.10.2026: decisions made while translating GY 5; the conventions of `## mathe5-fr` hold, nothing
+above was changed.
+
+| German | French | Note |
+|---|---|---|
+| Gymnasium, Klasse 5 | Gymnasium, 5e année | start page: le lycée allemand d’enseignement général qui mène à l’Abitur, de la 5e à la 12e année en Saxe; 5e année ≈ CM2 |
+| Wahlbereich (chapter W) | Domaine optionnel (chapter OP) | as section 1 |
+| Stelle, Stellenwert | rang, valeur de position | "le rang des milliers", "à droite du rang des dizaines de mille" |
+| Dreiergruppen: Einer, Tausender, Millionen, Milliarden | tranches de trois chiffres : unités, mille, millions, milliards | as the widget stellenwert5 |
+| runden auf Zehner / Hunderter / Tausender | arrondir à la dizaine / à la centaine / au millier | auf Zehntausender: à la dizaine de mille |
+| Rasterverfahren | méthode du quadrillage | 1.1 |
+| Eselsbrücke | pour t’en souvenir (moyen mnémotechnique) | |
+| Zahlwörter | rectified spelling of 1990, every part joined by a hyphen | 1.1 says so in its aside instead of the German "one word below a million" |
+| Dresden | Dresde | French name of the city in the page text |
+| Kopfrechnen; mit Stift und Papier (test rounds) | calcul mental; avec un crayon et du papier | |
+| Lab names | RALLYE DE CALCUL, HORLOGE MONDIALE | cards, en allemand |
+
 ## mathegy6-fr
 
 <!-- fr-13: terms of this book only (GY 6), write right below this line -->
