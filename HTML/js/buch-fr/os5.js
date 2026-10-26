@@ -204,7 +204,7 @@ window.BuchFR && BuchFR.add('os5', {
         [/(<p class="g-ok">)Richtig: /, '$1Correct : '],
         [/Von (\d[\d ]*) bis (\d[\d ]*) sind es 10 Schritte, einer ist (\d[\d ]*) groß\./, 'De $1 à $2, il y a 10 pas ; chacun vaut $3.'],
         [/Links steht (\d[\d ]*), rechts (\d[\d ]*)\. Dazwischen liegen 10 gleich große Schritte\./, 'À gauche, il y a $1, à droite $2. Entre les deux, il y a 10 pas égaux.'],
-        [/Der Punkt liegt (\d+) Schritte rechts von (\d[\d ]*)\./, 'Le point est $1 pas à droite de $2.'],
+        [/Der Punkt liegt (\d+) Schritte? rechts von (\d[\d ]*)\./, 'Le point est $1 pas à droite de $2.'],
         [/Die Zahl liegt zwischen (\d[\d ]*) und (\d[\d ]*)\./, 'Le nombre est compris entre $1 et $2.'],
         // schriftlichos5: the place in bold before every step, "1 Zehner → 10 Einer" when a place is broken up
         ...(() => {
@@ -230,7 +230,7 @@ window.BuchFR && BuchFR.add('os5', {
         [/Nach (\d+) Stellen hinter dem Komma wird abgebrochen\./, 'On s’arrête à $1 chiffres après la virgule.'],
         [/(<p class="g5-dim">)Schritt (\d+) von (\d+)</, '$1Étape $2 sur $3<'],
         // zehnerpotenzos5: "Die Hochzahl 6 sagt: 6 Faktoren 10, also 6 Nullen. Das ist eine Million." (number words: 1990 spelling)
-        [/Die Hochzahl (\d+) sagt: \d+ Faktoren 10, also (?:eine Null|\d+ Nullen)\. Das ist <b>([^<]+)<\/b>\./, (m, n, w) => 'L’exposant ' + n + ' indique ' + n +
+        [/Die Hochzahl (\d+) sagt: \d+ Faktor(?:en)? 10, also (?:eine Null|\d+ Nullen)\. Das ist <b>([^<]+)<\/b>\./, (m, n, w) => 'L’exposant ' + n + ' indique ' + n +
             (n === '1' ? ' facteur 10, donc un zéro' : ' facteurs 10, donc ' + n + ' zéros') + '. C’est <b>' + ({ 'eins': 'un', 'zehn': 'dix', 'hundert': 'cent', 'tausend': 'mille',
                 'zehntausend': 'dix-mille', 'hunderttausend': 'cent-mille', 'eine Million': 'un-million', 'zehn Millionen': 'dix-millions', 'hundert Millionen': 'cent-millions',
                 'eine Milliarde': 'un-milliard', 'zehn Milliarden': 'dix-milliards', 'hundert Milliarden': 'cent-milliards', 'eine Billion': 'un-billion' }[w] || w) + '</b>.'],
@@ -239,7 +239,7 @@ window.BuchFR && BuchFR.add('os5', {
         [/\$: Rücke das Komma um (\d+) Stellen nach rechts, dann hast du die Zahl\./, (m, n) => '$ : décale la virgule de ' + n + ' rangs vers la droite, et tu retrouves le nombre.'],
         // quadratos5
         [/^(\d+) mal (\d+) Plättchen(?: und (\d+) weitere)?$/, (m, a, b, x) => a + ' fois ' + b + (a === '1' ? ' carreau' : ' carreaux') + (x ? ' et ' + x + ' de plus' : '')],
-        [/(\d+) Reihen mit je (\d+) Plättchen ergeben ein Quadrat aus (\d+) Plättchen\./, (m, r, k, v) => r === '1'
+        [/(\d+) Reihen? mit (?:je )?(\d+) Plättchen (?:ergeben|ergibt) ein Quadrat aus (\d+) Plättchen\./, (m, r, k, v) => r === '1'
             ? '1 rangée de 1 carreau forme un carré de 1 carreau.' : r + ' rangées de ' + k + ' carreaux forment un carré de ' + v + ' carreaux.'],
         [/(\d+) ist eine Quadratzahl: Die Plättchen bilden ein Quadrat mit der Seite (\d+)\./, '$1 est un carré parfait : les carreaux forment un carré de côté $2.'],
         [/(\d+) ist keine Quadratzahl\./, '$1 n’est pas un carré parfait.'],
@@ -257,7 +257,7 @@ window.BuchFR && BuchFR.add('os5', {
         [/(\d[\d ]*) ist eine Primzahl: genau zwei Teiler\./, '$1 est un nombre premier : exactement deux diviseurs.'],
         [/Bitte eine natürliche Zahl von 1 bis (\d[\d  ]*) eingeben\./, 'Saisis un nombre entier de 1 à $1.'],
         // bruchteilos5
-        [/^(\d+) von (\d+) Gruppen zu je (\d+) sind gefärbt$/, (m, z, n, k) => z + (+z > 1 ? ' groupes sur ' : ' groupe sur ') + n + ', de ' + k + ' chacun, ' + (+z > 1 ? 'sont coloriés' : 'est colorié')],
+        [/^(\d+) von (\d+) Gruppen zu je (\d+) (?:sind|ist) gefärbt$/, (m, z, n, k) => z + (+z > 1 ? ' groupes sur ' : ' groupe sur ') + n + ', de ' + k + ' chacun, ' + (+z > 1 ? 'sont coloriés' : 'est colorié')],
         [/\$ von (\d+) sind (\d+)\./, (m, g, r) => '$ de ' + g + ', c’est ' + r + '.'],
         [/\$ von (\d+)<\/p>/g, (m, g) => '$ de ' + g + '</p>'],
         [/2\. Nimm (\d+) (?:Gruppe|Gruppen): /, (m, z) => '2. Prends ' + z + (z === '0' || z === '1' ? ' groupe : ' : ' groupes : ')],
@@ -273,12 +273,12 @@ window.BuchFR && BuchFR.add('os5', {
                 [/<b>Gleicher Zähler:<\/b> Beide Male sind es (\d+) (?:Stück|Stücke)\. (\S+) sind größer als (\S+): Je größer der Nenner, desto kleiner die Stücke\./, (m, k, a, b) =>
                     '<b>Même numérateur :</b> les deux fois, il y a ' + k + (k === '1' ? ' part' : ' parts') + '. Les ' + n('2', a) + ' sont plus grands que les ' + n('2', b) +
                     ' : plus le dénominateur est grand, plus les parts sont petites.'],
-                [/<b>Was fehlt zum Ganzen\?<\/b> Bei A fehlen (\d+) (\S+), bei B (\d+) (\S+)\. (\S+) sind kleiner, also fehlt bei (A|B) weniger\./, (m, a, wa, b, wb, w, x) =>
+                [/<b>Was fehlt zum Ganzen\?<\/b> Bei A (?:fehlen|fehlt) (\d+) (\S+), bei B (\d+) (\S+)\. (\S+) sind kleiner, also fehlt bei (A|B) weniger\./, (m, a, wa, b, wb, w, x) =>
                     '<b>Que manque-t-il pour faire 1 ?</b> À A, il manque ' + a + ' ' + n(a, wa) + ', à B ' + b + ' ' + n(b, wb) + '. Les ' + n('2', w) +
                     ' sont plus petits, donc il manque moins à ' + x + '.'],
             ];
         })(),
-        [/, denn (\d+) ist (weniger|mehr|genau) als die Hälfte von (\d+)\./, (m, a, w, b) => ', car ' + a + ' est ' +
+        [/, denn (\d+) ist (weniger|mehr|genau)(?: als)? die Hälfte von (\d+)\./, (m, a, w, b) => ', car ' + a + ' est ' +
             ({ weniger: 'moins que', mehr: 'plus que', genau: 'exactement' })[w] + ' la moitié de ' + b + '.'],
         // rundenos5
         [/>Mitte (?=\d)/g, '>Milieu '],
