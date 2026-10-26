@@ -30,6 +30,38 @@
 
     /* one entry per plan: ten talk topics + the badge label/colour of each Lernbereich */
     const PLANS = {
+        /* Mathe 11 BGY (Doc, 26.10.2026): a presentation about a mathematician, made over the Christmas
+           holidays and only UPLOADED - graded as a small grade before the Notenstopp of Mon 18.01.2027; who
+           also presents it live gets a bonus point. No talk dates. BGY26-1 and BGY26-2 are one coupled group
+           (as in Info). fach: the subject in the page title and heading. */
+        mathe11: {
+            fach: 'Mathematik',
+            page: 'mathe11.html', back: 'Mathematik BGY 11',
+            sub: 'Mathematikerinnen und Mathematiker und ihre Mathematik in unserem Unterricht · Präsentation über die Weihnachtsferien, Abgabe per Upload bis So 03.01.2027 · wer sie zusätzlich vorträgt, bekommt einen Bonuspunkt',
+            switchLabel: 'Kurs wechseln',
+            klassen: [['a', 'BGY26-1 + BGY26-2']],
+            dates: [],
+            labels: { lb2: ['Gleichungen', 'b-orange'], lb3: ['Funktionen', 'b-cyan'], st: ['Stochastik', 'b-violet'], ge: ['Geometrie', 'b-teal'], wb: ['Zahlen & Ideen', 'b-green'] },
+            topics: [
+                { lb: 'lb2', title: 'Al-Chwarizmi: Wie die Algebra zu ihrem Namen kam', sub: 'Ergänzen und Ausgleichen (al-dschabr): eine Gleichung aus seinem Buch so lösen, wie wir es heute tun — und woher das Wort „Algorithmus“ kommt.' },
+                { lb: 'lb3', title: 'Leonardo Fibonacci und die Kaninchen', sub: 'Die Folge 1, 1, 2, 3, 5, 8 … als Wachstumsmodell, der goldene Schnitt in Sonnenblume und Kunst.' },
+                { lb: 'lb3', title: 'John Napier und Jost Bürgi: Rechnen mit Logarithmen', sub: 'Wie man vor dem Taschenrechner mit Tabellen multiplizierte — die Idee hinter dem Logarithmus, den wir im Januar lernen.' },
+                { lb: 'lb3', title: 'Jakob Bernoulli, der Zinseszins und die Zahl e', sub: 'Was passiert, wenn die Bank immer öfter Zinsen zahlt? Exponentielles Wachstum mit Zahlen vorgerechnet.' },
+                { lb: 'lb3', title: 'Galileo Galilei und das Fallgesetz', sub: 'Kugeln auf der schiefen Ebene, s = ½ g t²: warum die Wurfbahn eine Parabel ist.' },
+                { lb: 'lb3', title: 'René Descartes: das Koordinatensystem', sub: 'Wie aus Geometrie Algebra wurde — Punkte, Geraden und Funktionsgraphen in einem Bild.' },
+                { lb: 'lb3', title: 'Leonhard Euler und das f(x)', sub: 'Der fleißigste Mathematiker der Geschichte: der Funktionsbegriff, die Schreibweise f(x) und die Königsberger Brücken.' },
+                { lb: 'lb3', title: 'Joseph Fourier: alles ist Schwingung', sub: 'Jeder Ton lässt sich aus Sinuskurven zusammensetzen — vom Klang zur Sinusfunktion im Unterricht.' },
+                { lb: 'lb3', title: 'Katherine Johnson: Bahnen für die NASA', sub: 'Die Mathematikerin aus „Hidden Figures“: wie man ohne Computer die Flugbahn einer Raumkapsel berechnet.' },
+                { lb: 'st', title: 'Blaise Pascal und Pierre de Fermat: ein Streit ums Würfelspiel', sub: 'Der Briefwechsel von 1654 und die Geburt der Wahrscheinlichkeitsrechnung — mit Baumdiagramm vorgerechnet.' },
+                { lb: 'st', title: 'Carl Friedrich Gauß: der Fürst der Mathematiker', sub: 'Die Summe 1 bis 100 im Kopf, die Glockenkurve auf dem Zehnmarkschein und das Gauß-Verfahren.' },
+                { lb: 'ge', title: 'Archimedes: Kugel, Zylinder und π', sub: 'Warum er Kugel und Zylinder auf seinem Grabstein wollte — Volumen und Oberfläche, wie wir sie in Woche 6 berechnet haben.' },
+                { lb: 'ge', title: 'Hypatia von Alexandria', sub: 'Mathematikerin der Antike: Kegelschnitte, Astronomie und ihr Leben in einer gefährlichen Zeit.' },
+                { lb: 'ge', title: 'Maryam Mirzakhani', sub: 'Die erste Frau mit der Fields-Medaille: gekrümmte Flächen und Billardbahnen, anschaulich erklärt.' },
+                { lb: 'wb', title: 'Ada Lovelace: das erste Programm', sub: 'Die Analytical Engine und die Bernoulli-Zahlen — warum sie als erste Programmiererin gilt.' },
+                { lb: 'wb', title: 'Emmy Noether: Symmetrie', sub: 'Ihr berühmter Satz in einfachen Worten — und was Achsen- und Punktsymmetrie von Funktionen damit zu tun haben.' },
+                { lb: 'wb', title: 'Srinivasa Ramanujan und die Zahl 1729', sub: 'Ein Autodidakt aus Indien schreibt nach Cambridge: Reihen, Zahlenmuster und die „Taxi-Zahl“.' }
+            ]
+        },
         /* Oberschule 9 — lb1 "Informationen und Daten", wb "Informatik und Automatisierung" */
         informatik9: {
             page: 'informatik9.html', back: 'Informatik 9',
@@ -257,6 +289,8 @@
         return;
     }
     const PLAN_DEF = PLANS[PLAN] || PLANS.informatik9;
+    /* the subject in title and heading - Informatik unless the plan says otherwise (mathe11) */
+    const FACH = PLAN_DEF.fach || 'Informatik';
     const TOPICS = PLAN_DEF.topics;
 
     const LB_LABEL = PLAN_DEF.labels;
@@ -1603,7 +1637,7 @@
             const text = h1.textContent.replace(/[^·]*$/, ' ' + here.label);
             if (window.svpZweig) svpZweig(h1, text); else h1.textContent = text;
         }
-        document.title = 'Vortragsthemen Informatik ' + here.label + ' | SJ 2026/27';
+        document.title = 'Vortragsthemen ' + FACH + ' ' + here.label + ' | SJ 2026/27';
         const confirmBox = document.getElementById('confirm');
         if (confirmBox && confirmBox.firstChild) {
             confirmBox.firstChild.textContent = 'Alle Namen von ' + here.label + ' löschen?';
@@ -2206,7 +2240,7 @@
     function buildPage() {
         if ($('list')) return;                    /* the rig brings its own markup */
         const label = klasseLabel();
-        document.title = 'Vortragsthemen Informatik ' + label + ' | SJ 2026/27';
+        document.title = 'Vortragsthemen ' + FACH + ' ' + label + ' | SJ 2026/27';
         /* Only the a/b pages get the two pills; where the Lerngruppen come from
            the timetable, buildSwitch fills this span with the dropdown. */
         const pills = GROUPS_SRC ? '' : (PLAN_DEF.klassen || []).map((k) =>
@@ -2218,7 +2252,7 @@
             '<a class="back-link" href="' + PLAN_DEF.page + '">&larr; Stoffverteilungsplan ' + esc(PLAN_DEF.back) + '</a>' +
             '<div class="head-row">' +
                 '<div class="title-group">' +
-                    '<h1>Vortragsthemen &middot; Informatik &middot; ' + esc((PLAN_DEF.vor || '') + label) + '</h1>' +
+                    '<h1>Vortragsthemen &middot; ' + esc(FACH) + ' &middot; ' + esc((PLAN_DEF.vor || '') + label) + '</h1>' +
                     '<span class="vt-switch" aria-label="' +
                         esc(GROUPS_SRC ? 'Lerngruppe wechseln' : (PLAN_DEF.switchLabel || 'Klasse wechseln')) +
                         '">' + pills + '</span>' +
