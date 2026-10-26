@@ -26,8 +26,8 @@ window.BuchFR && BuchFR.add('gy6', {
         'Richtig.': 'Correct.', 'Noch nicht.': 'Pas encore.', 'Noch einmal': 'Recommencer',
         'Rechne den Wert aus: Ist das eine ganze Zahl ohne Rest?': 'Calcule la valeur : est-ce un nombre entier, sans reste ?',
         'Liegt die Zahl vielleicht zwischen zwei natürlichen Zahlen?': 'Ce nombre ne serait-il pas entre deux entiers naturels ?',
-        'in $\\mathbb{N}$ (und damit auch in $\\mathbb{Q}^+$)': 'dans $\\mathbb{N}$ (et donc aussi dans $\\mathbb{Q}^+$)',
-        'nur in $\\mathbb{Q}^+$': 'seulement dans $\\mathbb{Q}^+$',
+        'in $\\mathbb{N}$ (und damit auch in $\\mathbb{Q}^+$)': 'dans $\\mathbb{N}$ (et donc aussi dans $\\mathbb{Q}_+$)',
+        'nur in $\\mathbb{Q}^+$': 'seulement dans $\\mathbb{Q}_+$',
         'In der Schule zählt die 0 zu den natürlichen Zahlen.': 'À l’école, 0 fait partie des entiers naturels.',
         // bruchop6
         'plus': 'plus', 'minus': 'moins', 'mal': 'fois', 'durch': 'divisé par', 'Rechenart': 'Opération',
@@ -293,6 +293,9 @@ window.BuchFR && BuchFR.add('gy6', {
         // book fr-13 mathegy6-fr:
         // French school notation (Doc, 26.10.2026: always the conventions of the target language): × for the product
         [/\\cdot(?![a-zA-Z])/g, '\\times'],
+        // the French write the plus below: \\mathbb{Q}_+ and ℚ₊ for the German \\mathbb{Q}^+ and ℚ⁺ (Doc, 26.10.2026:
+        // always the local conventions) - before the phrases, so a phrase key of this block writes _+
+        [/\\mathbb\{Q\}\^\+/g, '\\mathbb{Q}_+'], [/ℚ⁺/g, 'ℚ₊'],
         // the steppers' aria-labels: "Zähler kleiner" → "Numérateur : diminuer"
         [/^(Zähler|Nenner|erster Zähler|erster Nenner|zweiter Zähler|zweiter Nenner|zu Fuß|Fahrrad|Bus oder Bahn|Auto) (kleiner|größer)$/, (m, w, d) => ({
             'Zähler': 'Numérateur', 'Nenner': 'Dénominateur', 'erster Zähler': 'Premier numérateur', 'erster Nenner': 'Premier dénominateur',

@@ -98,13 +98,13 @@ window.BuchFR && BuchFR.add('gy7', {
         'Eine positive Zahl addieren: nach rechts. Eine negative Zahl addieren: nach links.': 'Ajouter un nombre positif : vers la droite. Ajouter un nombre négatif : vers la gauche.',
         // zahlbereiche7 (N, Z, Q+ and Q: entiers naturels, entiers relatifs, rationnels positifs, nombres rationnels; the words of zahlen.js where they exist)
         'Wohin gehört die Zahl?': 'Où va ce nombre ?', 'Nächste Zahl': 'Nombre suivant', 'DIE ZAHL': 'LE NOMBRE',
-        '$\\mathbb{Z}$, aber nicht $\\mathbb{N}$': '$\\mathbb{Z}$, mais pas $\\mathbb{N}$', '$\\mathbb{Q}^+$, aber nicht $\\mathbb{N}$': '$\\mathbb{Q}^+$, mais pas $\\mathbb{N}$',
+        '$\\mathbb{Z}$, aber nicht $\\mathbb{N}$': '$\\mathbb{Z}$, mais pas $\\mathbb{N}$', '$\\mathbb{Q}^+$, aber nicht $\\mathbb{N}$': '$\\mathbb{Q}_+$, mais pas $\\mathbb{N}$',
         'nur $\\mathbb{Q}$': 'seulement $\\mathbb{Q}$', 'Nur das Bild': 'Figure seule', 'Teilmengen': 'Sous-ensembles', 'Schnittmenge': 'Intersection', 'Vereinigung': 'Réunion', 'Mengen': 'Ensembles',
         'rationale Zahlen': 'nombres rationnels', 'ganze Zahlen': 'entiers relatifs', 'gebrochene Zahlen': 'rationnels positifs', 'natürliche': 'naturels',
         'Mengendiagramm: natürliche, ganze, gebrochene und rationale Zahlen': 'Diagramme de Venn : entiers naturels, entiers relatifs, rationnels positifs et nombres rationnels',
         'In welchen Teil des Bildes gehört sie? Tippe auf einen Knopf oder ins Bild.': 'Dans quelle partie de la figure va-t-il ? Touche un bouton ou la figure.',
         'Die <b>ganzen</b> Zahlen $\\mathbb{Z}$ und die <b>gebrochenen</b> Zahlen $\\mathbb{Q}^+$ überlappen sich. Im Überlapp liegen die <b>natürlichen</b> Zahlen $\\mathbb{N}$. Alles zusammen liegt in den <b>rationalen</b> Zahlen $\\mathbb{Q}$.':
-            'Les <b>entiers relatifs</b> $\\mathbb{Z}$ et les <b>rationnels positifs</b> $\\mathbb{Q}^+$ se chevauchent. Dans la partie commune se trouvent les <b>entiers naturels</b> $\\mathbb{N}$. Le tout est contenu dans les <b>nombres rationnels</b> $\\mathbb{Q}$.',
+            'Les <b>entiers relatifs</b> $\\mathbb{Z}$ et les <b>rationnels positifs</b> $\\mathbb{Q}_+$ se chevauchent. Dans la partie commune se trouvent les <b>entiers naturels</b> $\\mathbb{N}$. Le tout est contenu dans les <b>nombres rationnels</b> $\\mathbb{Q}$.',
         // vorzeichen7 (the products of the rows get their × by the rule above; "Von Zeile zu Zeile …" is a rule below)
         'Multiplizieren': 'Multiplication', 'Potenzen': 'Puissances', 'Muster': 'Régularité', 'erster Faktor': 'premier facteur', 'Nächste Zeile': 'Ligne suivante',
         'positiv': 'positif', 'negativ': 'négatif', 'Die Ergebnisse auf der Zahlengeraden': 'Les résultats sur la droite graduée',
@@ -205,12 +205,12 @@ window.BuchFR && BuchFR.add('gy7', {
         ['zwischen 2 und 3, nicht ganz', 'entre 2 et 3, pas entier'], ['negativ und nicht ganz', 'négatif et pas entier'],
         ['Noch nicht. Tipp: ', 'Pas encore. Indice : '], ['Hat die Zahl ein Minuszeichen, wenn du sie ausrechnest?', 'Le nombre a-t-il un signe moins quand tu le calcules ?'],
         ['Rechne die Zahl zuerst aus. Ist sie ganz?', 'Calcule d’abord le nombre. Est-il entier ?'],
-        ['<b>Teilmenge:</b> $\\mathbb{N} \\subset \\mathbb{Z}$, $\\mathbb{N} \\subset \\mathbb{Q}^+$, $\\mathbb{Z} \\subset \\mathbb{Q}$ und $\\mathbb{Q}^+ \\subset \\mathbb{Q}$. Jede natürliche Zahl ist auch eine ganze Zahl, aber nicht umgekehrt: $-3 \\in \\mathbb{Z}$, aber $-3 \\notin \\mathbb{N}$.',
-            '<b>Sous-ensemble :</b> $\\mathbb{N} \\subset \\mathbb{Z}$, $\\mathbb{N} \\subset \\mathbb{Q}^+$, $\\mathbb{Z} \\subset \\mathbb{Q}$ et $\\mathbb{Q}^+ \\subset \\mathbb{Q}$. Tout entier naturel est aussi un entier relatif, mais pas l’inverse : $-3 \\in \\mathbb{Z}$, mais $-3 \\notin \\mathbb{N}$.'],
-        ['<b>Schnittmenge:</b> $\\mathbb{Z} \\cap \\mathbb{Q}^+ = \\mathbb{N}$. Das sind die Zahlen, die in beiden Mengen liegen: ganz <b>und</b> ohne Minuszeichen.',
-            '<b>Intersection :</b> $\\mathbb{Z} \\cap \\mathbb{Q}^+ = \\mathbb{N}$. Ce sont les nombres qui sont dans les deux ensembles : entiers <b>et</b> sans signe moins.'],
-        ['<b>Vereinigungsmenge:</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ enthält alle Zahlen, die in mindestens einer der beiden Mengen liegen. Das ist noch nicht ganz $\\mathbb{Q}$: $-\\tfrac12$ liegt in keiner von beiden.',
-            '<b>Réunion :</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ contient tous les nombres qui sont dans au moins un des deux ensembles. Ce n’est pas encore tout $\\mathbb{Q}$ : $-\\tfrac12$ n’est dans aucun des deux.'],
+        ['<b>Teilmenge:</b> $\\mathbb{N} \\subset \\mathbb{Z}$, $\\mathbb{N} \\subset \\mathbb{Q}_+$, $\\mathbb{Z} \\subset \\mathbb{Q}$ und $\\mathbb{Q}_+ \\subset \\mathbb{Q}$. Jede natürliche Zahl ist auch eine ganze Zahl, aber nicht umgekehrt: $-3 \\in \\mathbb{Z}$, aber $-3 \\notin \\mathbb{N}$.',
+            '<b>Sous-ensemble :</b> $\\mathbb{N} \\subset \\mathbb{Z}$, $\\mathbb{N} \\subset \\mathbb{Q}_+$, $\\mathbb{Z} \\subset \\mathbb{Q}$ et $\\mathbb{Q}_+ \\subset \\mathbb{Q}$. Tout entier naturel est aussi un entier relatif, mais pas l’inverse : $-3 \\in \\mathbb{Z}$, mais $-3 \\notin \\mathbb{N}$.'],
+        ['<b>Schnittmenge:</b> $\\mathbb{Z} \\cap \\mathbb{Q}_+ = \\mathbb{N}$. Das sind die Zahlen, die in beiden Mengen liegen: ganz <b>und</b> ohne Minuszeichen.',
+            '<b>Intersection :</b> $\\mathbb{Z} \\cap \\mathbb{Q}_+ = \\mathbb{N}$. Ce sont les nombres qui sont dans les deux ensembles : entiers <b>et</b> sans signe moins.'],
+        ['<b>Vereinigungsmenge:</b> $\\mathbb{Z} \\cup \\mathbb{Q}_+$ enthält alle Zahlen, die in mindestens einer der beiden Mengen liegen. Das ist noch nicht ganz $\\mathbb{Q}$: $-\\tfrac12$ liegt in keiner von beiden.',
+            '<b>Réunion :</b> $\\mathbb{Z} \\cup \\mathbb{Q}_+$ contient tous les nombres qui sont dans au moins un des deux ensembles. Ce n’est pas encore tout $\\mathbb{Q}$ : $-\\tfrac12$ n’est dans aucun des deux.'],
         // umstellen7: the end of the steps and the check with numbers
         ['Fertig. Mit Zahlen: ', 'Terminé. Avec des nombres : '], ['. Probe: ', '. Vérification : '], ['Stahl, $\\varrho', 'Acier, $\\varrho'], ['Wasser, $\\varrho', 'Eau, $\\varrho'],
         // prozent7: the bars, the check, the way back
@@ -247,6 +247,9 @@ window.BuchFR && BuchFR.add('gy7', {
         // French school notation (as js/buch-fr/gy5.js): × for the product in every formula of the widgets. Rules run before the
         // phrases, so a phrase key of this block writes \times where the widget writes \cdot (a word key keeps \cdot)
         [/\\cdot(?![a-zA-Z])/g, '\\times'],
+        // the French write the plus below: \\mathbb{Q}_+ and ℚ₊ for the German \\mathbb{Q}^+ and ℚ⁺ (Doc, 26.10.2026:
+        // always the local conventions) - before the phrases, so a phrase key of this block writes _+
+        [/\\mathbb\{Q\}\^\+/g, '\\mathbb{Q}_+'], [/ℚ⁺/g, 'ℚ₊'],
         // dreieckkreise7: "Die drei <span>Mittelsenkrechten</span> schneiden sich …" - lower case inside the sentence; a rule,
         // because the word 'Mittelsenkrechten' is the button label « Médiatrices » of GY 6 (merge of 26.10.2026)
         [/(<span class="g-cy">)Mittelsenkrechten(?=<\/span>)/g, '$1médiatrices'],
