@@ -828,6 +828,15 @@ too), P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (A
 | Ungleichung, das Zeichen dreht sich um | inéquation, le sens de l’inégalité change | 1.2; Zahlenstrahl offener Kreis / voller Punkt: droite graduée, cercle vide / point plein |
 | Balkenwaage, Fitnessstudio, Besuche $b$ | balance, salle de sport, visites $v$ | 1.2 (the letter follows the French word) |
 | Zahlenrätsel | devinette | 1.2 |
+| Zufallsversuch, Ergebnis, Ergebnismenge, Ereignis, sicheres / unmögliches Ereignis | expérience aléatoire, issue, univers $\Omega$, événement, événement certain / impossible | 2.1; « tritt ein »: se réalise |
+| Vereinigung, Durchschnitt, Differenz „A ohne B“, Gegenereignis | réunion, intersection, différence « $A$ privé de $B$ », événement contraire | 2.1 |
+| absolute / relative Häufigkeit $H_n(E)$, $h_n(E)$ | effectif $N_n(E)$, fréquence $f_n(E)$ | letters from the French words (N nombre, f fréquence); gluecksrad8 writes $f(E)$ by a rule |
+| Laplace-Versuch, Laplace-Regel | expérience de Laplace (situation d’équiprobabilité), règle de Laplace | 2.1, widget gluecksrad8 |
+| Glücksrad, Feld (des Glücksrads), gleich / verschieden groß | roue de loterie, secteur, de même taille / de tailles différentes | widget gluecksrad8 |
+| Mengen $\{1; 2; 3\}$ | $\{1\,;\,2\,;\,3\}$ | page text and widget sets (rule in js/buch-fr/gy8.js) |
+| Farben r / g / b (Glücksrad rot, gelb, blau), Urne rot / blau / grün | r / j / b, r / b / v | 2.1 page text |
+| Reißzwecke, Legostein (Noppen), Kronkorken, Lostrommel, Hauptgewinn / Niete | punaise, brique de Lego (tenons), capsule de bouteille, urne de tombola, gros lot / billet perdant | 2.1 |
+| Skatblatt, Herz-Bube | jeu de 32 cartes, valet de cœur | 2.1 |
 
 ## mathegy9-fr
 

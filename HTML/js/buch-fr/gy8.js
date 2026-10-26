@@ -20,6 +20,10 @@ window.BuchFR && BuchFR.add('gy8', {
             'Couverture : un triangle agrandi à partir d’un centre, un carré formé de a², deux fois ab et b², deux droites avec leur point d’intersection et un arbre pondéré',
         // termbaum8 ('Term' → 'Expression' is in js/buch-fr/exponential.js, which this book does not load)
         'Term': 'Expression', 'Wert für $x$': 'Valeur de $x$',
+        // gluecksrad8
+        'Felder': 'Secteurs', 'ein Feld weniger': 'un secteur de moins', 'ein Feld mehr': 'un secteur de plus',
+        'gleich groß': 'de même taille', 'verschieden groß': 'de tailles différentes', 'Größe der Felder': 'Taille des secteurs', 'Drehen': 'Tourner',
+        'Tippe Felder im Rad an: Sie bilden das Ereignis $E$ (gelb). Dann dreh das Rad.': 'Touche des secteurs de la roue : ils forment l’événement $E$ (en jaune). Puis fais tourner la roue.',
         // binomformeln8 (the binomial formulas are the identités remarquables; 'Länge $a$', 'Länge $b$' are in js/buch-fr/gleichungen.js)
         '1. Formel': '1re identité', '2. Formel': '2e identité', '3. Formel': '3e identité', 'Binomische Formel': 'Identité remarquable',
         'Binomische Formel als Flächenbild': 'Identité remarquable vue comme une figure d’aires',
@@ -36,6 +40,12 @@ window.BuchFR && BuchFR.add('gy8', {
         // termbaum8 (the sentences with the term in them are rules below; these pieces let check.mjs see them translated)
         ['Rechenbaum des Terms ', 'Arbre de calcul de l’expression '], ['. Gerechnet wird von unten nach oben.', '. On calcule du bas vers le haut.'],
         ['Summanden', 'Termes'], ['Minuend und Subtrahend', 'Premier et second terme'], ['Faktoren', 'Facteurs'], ['Dividend und Divisor', 'Dividende et diviseur'],
+        // gluecksrad8 (the counts and the last spin are rules below)
+        ['Alle Felder sind gleich groß: ein <b>Laplace-Versuch</b>. ', 'Tous les secteurs ont la même taille : c’est une <b>expérience de Laplace</b>. '],
+        ['Die Felder sind <b>verschieden groß</b>: Das ist <b>kein</b> Laplace-Versuch. ', 'Les secteurs sont <b>de tailles différentes</b> : ce <b>n’est pas</b> une expérience de Laplace. '],
+        ['}$ wäre falsch. ', '}$ serait faux. '], ['Es zählt der Anteil am ganzen Rad: ', 'Ce qui compte, c’est la part de la roue entière : '],
+        [', $E$ ist eingetreten.', ', $E$ s’est réalisé.'], [', $E$ ist nicht eingetreten.', ', $E$ ne s’est pas réalisé.'],
+        [' · Wahrscheinlichkeit $P(E) \\approx ', ' · probabilité $P(E) \\approx '],
     ],
     rule: [
         // book fr-15 mathegy8-fr:
@@ -59,5 +69,12 @@ window.BuchFR && BuchFR.add('gy8', {
             (m, t, k, v) => 'Sélection : la sous-expression $' + t + '$, ' + ({ Summe: 'une somme', Differenz: 'une différence', Produkt: 'un produit', Quotient: 'un quotient', Potenz: 'une puissance' })[k] + ' de valeur $' + v + '$.'],
         [/Ausgewählt: die Variable \$x\$ mit dem Wert \$([^$]*)\$\./g, (m, v) => 'Sélection : la variable $x$, de valeur $' + v + '$.'],
         [/Ausgewählt: die Zahl \$([^$]*)\$\./g, (m, v) => 'Sélection : le nombre $' + v + '$.'],
+        // sets of whole numbers written by the widgets (gluecksrad8, venn …): a thin space on both sides of every semicolon, as in the chapter text
+        [/\\\{((?:\d+|\\ldots)(?:; (?:\d+|\\ldots))+)\\\}/g, (m, l) => '\\{' + l.replace(/; /g, '\\,;\\,') + '\\}'],
+        // gluecksrad8: the aria label, the last spin and the counts (relative frequency f, as in the chapter text)
+        [/Glücksrad mit (\d+) Feldern/g, 'Roue de loterie à $1 secteurs'],
+        [/Zuletzt: Feld <b>(\d+)<\/b>, \$E\$ ist (nicht )?eingetreten\./g, (m, f, n) => 'Dernier tour : secteur <b>' + f + '</b>, $E$ ' + (n ? 'ne s’est pas réalisé.' : 's’est réalisé.')],
+        [/Gedreht: \$([^$]*)\$-mal · \$E\$ eingetreten: \$([^$]*)\$-mal · relative Häufigkeit (?:\$h\(E\))?/g,
+            (m, a, b) => 'Tours de roue : $' + a + '$ · $E$ réalisé : $' + b + '$ fois · fréquence ' + (/\$h/.test(m) ? '$f(E)' : '')],
     ]
 });
