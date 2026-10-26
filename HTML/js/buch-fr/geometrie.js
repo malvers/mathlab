@@ -22,6 +22,9 @@ window.BuchFR && BuchFR.add('geometrie', {
         // titelbildgy9 (the cover of GY 9)
         'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
             'Couverture : triangle rectangle avec les carrés construits sur ses côtés, rectangle d’or avec sa spirale, cercle entre deux hexagones et parabole',
+        // kreisteil (chapter 2): arc length ℓ and perimeter P, the French letters (rules below)
+        'Radius $r$': 'Rayon $r$', 'Mittelpunktswinkel $\\alpha$': 'Angle au centre $\\alpha$', 'Kreis mit Kreisausschnitt und Kreisbogen': 'Cercle avec un secteur circulaire et un arc',
+        'Kreisbogen': 'Arc', 'Kreisausschnitt': 'Secteur',
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -30,6 +33,9 @@ window.BuchFR && BuchFR.add('geometrie', {
         // book fr-14 mathegy7-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // kreisteil (u, the German perimeter, is P in French)
+        ['Anteil am Vollkreis: $', 'Part du cercle entier : $'],
+        ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Fais glisser l’extrémité de l’arc. Pour comparer, le cercle entier : $P \\approx '],
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -38,5 +44,17 @@ window.BuchFR && BuchFR.add('geometrie', {
         // book fr-14 mathegy7-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // French school notation in the formulas the widgets write (Doc, 26.10.2026: always the local conventions), on every
+        // page that loads this module - the GY 5-9 and OS 5 editions; BGY 11 and the round-2 books never load it.
+        // × for the product, as js/buch-fr/gy5.js does: a phrase key that contains a product must therefore be written with \times
+        [/\\cdot(?![a-zA-Z])/g, '\\times'],
+        // kreisteil: the arc length is ℓ ("Kreisbogen $b = \tfrac{\alpha}{360^\circ} …")
+        [/(<\/span> )\$b = (?=\\tfrac\{\\alpha\}\{360\^\\circ\})/g, '$1$$\\ell = '],
+        // surface area A (German O), lateral area A_L (German M, Mantel), base area 𝓑 (German G, Grundfläche): the formulas of
+        // spitzkoerper and of koerper (js/buch-gleichungen.js, on the GY pages that load both modules)
+        [/\$O = G \+ M/g, '$$A = \\mathcal{B} + A_L'],
+        [/\$O = (?=2\\pi r\^2 \+ 2\\pi r h|\\pi r\^2 \+ \\pi r s|4 ?\\pi r\^2)/g, '$$A = '],
+        [/\$M = (?=2\\pi r h|\\pi r s|4 \\times \\tfrac12 a)/g, '$$A_L = '],
+        [/\$G = (?=a\^2|\\pi r\^2)/g, '$$\\mathcal{B} = '], [/\\tfrac13\\,G\\,h/g, '\\tfrac13\\,\\mathcal{B}\\,h'],
     ]
 });
