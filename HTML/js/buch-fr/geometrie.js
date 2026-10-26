@@ -49,6 +49,17 @@ window.BuchFR && BuchFR.add('geometrie', {
         'Seitenkante': 'Arête latérale', 'Hilfsdreieck': 'Triangle auxiliaire', 'Grundkante $a$': 'Arête de base $a$', 'Höhe $h$': 'Hauteur $h$',
         'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Pyramide à base carrée en perspective cavalière, avec le triangle auxiliaire',
         'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cône de révolution en perspective cavalière, avec le triangle auxiliaire',
+        // goldenerschnitt (chapter OP): section dorée, nombre d’or, the side of the pentagon is c (côté) as in chapter 3.2
+        'Ansicht': 'Vue', 'Strecke teilen': 'Partager un segment', 'Goldenes Rechteck': 'Rectangle d’or', 'Pentagramm': 'Pentagramme',
+        'Golden teilen': 'Partage doré', 'Quadrate abschneiden': 'Retirer des carrés',
+        'Ganzes : größerer Teil': 'tout : grande partie', 'größerer : kleinerer Teil': 'grande : petite partie',
+        'Strecke AB mit Teilungspunkt T': 'Segment [AB] avec le point de partage T',
+        'Beide Verhältnisse sind gleich: goldener Schnitt, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.':
+            'Les deux rapports sont égaux : c’est la section dorée, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.',
+        'Zieh den Punkt $T$, bis beide Verhältnisse gleich sind.': 'Déplace le point $T$ jusqu’à ce que les deux rapports soient égaux.',
+        'Goldenes Rechteck, in Quadrate zerlegt, mit Spirale': 'Rectangle d’or découpé en carrés, avec sa spirale',
+        'Regelmäßiges Fünfeck mit Pentagramm': 'Pentagone régulier avec son pentagramme', 'Seite': 'Côté',
+        'größerer Teil': 'grande partie', 'kleinerer Teil': 'petite partie',
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -64,6 +75,12 @@ window.BuchFR && BuchFR.add('geometrie', {
         ['$ und $c \\times p \\approx ', '$ et $c \\times p \\approx '], ['$ und $c \\times q \\approx ', '$ et $c \\times q \\approx '], ['$ und $p \\times q \\approx ', '$ et $p \\times q \\approx '],
         // trigo: the words in the fractions
         ['\\text{Gegenkathete}', '\\text{côté opposé}'], ['\\text{Ankathete}', '\\text{côté adjacent}'], ['\\text{Hypotenuse}', '\\text{hypoténuse}'],
+        // goldenerschnitt
+        ['$\\overline{AB} = 10$ · größerer Teil $', '$AB = 10$ · grande partie $'], ['$ · kleinerer Teil $', '$ · petite partie $'],
+        ['\\text{Ganzes}', '\\text{tout}'], ['\\text{größerer Teil}', '\\text{grande partie}'], ['\\text{kleinerer Teil}', '\\text{petite partie}'],
+        [' $s$ und Diagonale $d$ des regelmäßigen Fünfecks: $\\tfrac{d}{s} = \\Phi', ' $c$ et diagonale $d$ du pentagone régulier : $\\tfrac{d}{c} = \\Phi'],
+        ['Jede Diagonale wird von einer anderen im goldenen Schnitt geteilt: ', 'Chaque diagonale est partagée par une autre selon la section dorée : '],
+        ['$= \\Phi$, und der größere Teil ist genau so lang wie die Seite.', '$= \\Phi$, et la grande partie est exactement aussi longue que le côté.'],
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -96,5 +113,12 @@ window.BuchFR && BuchFR.add('geometrie', {
         // spitzkoerper, the labels in the picture: hₛ → hₐ, s → ℓ (pyramid) or g (cone)
         [/<svg viewBox="0 0 360 290" role="img" aria-label="(Quadratische Pyramide|Kreiskegel) im Schrägbild mit Hilfsdreieck">[\s\S]*?<\/svg>/g,
             (m, k) => m.replace(/>hₛ</g, '>hₐ<').replace(/>s<\/text>/g, k === 'Kreiskegel' ? '>g</text>' : '>ℓ</text>')],
+        // goldenerschnitt: the golden rectangle ("Seiten $1{,}618 : 1$. …" and "Nach 5 Schnitten ist die lange Seite nur noch $…$ so lang. …")
+        [/Seiten \$([^$]*) : 1\$\. Schneidet man das Quadrat über der kurzen Seite ab, bleibt wieder ein goldenes Rechteck übrig, um den Faktor \$\\Phi\$ verkleinert\./g,
+            (m, r) => 'Côtés $' + r + ' : 1$. Si l’on retire le carré construit sur le petit côté, il reste de nouveau un rectangle d’or, réduit du facteur $\\Phi$.'],
+        [/Nach (\d+) Schnitt(?:en)? ist die lange Seite nur noch \$([^$]*)\$ so lang\. Die Viertelkreise bilden die <b>goldene Spirale<\/b>\./g,
+            (m, n, f) => 'Après ' + n + (n === '1' ? ' carré retiré' : ' carrés retirés') + ', le grand côté ne mesure plus que $' + f + '$ de sa longueur. Les quarts de cercle forment la <b>spirale d’or</b>.'],
+        // goldenerschnitt, the pentagram: "grande partie</span> : <span …>petite partie" gets its no-break space
+        [/(<\/span>) : (<span class="g-phi">)/g, '$1 : $2'],
     ]
 });
