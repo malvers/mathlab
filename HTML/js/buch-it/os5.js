@@ -259,10 +259,10 @@ window.BuchIT && BuchIT.add('os5', {
                 // teilbarkeitos5
                 [/Bitte eine natürliche Zahl von 1 bis (999 999 999) eingeben\./, 'Scrivi un numero naturale da 1 a $1.'],
                 [/<b>durch (\d+)( nicht)?:<\/b>/g, (m, d, n) => '<b>' + (n ? 'non divisibile per ' : 'divisibile per ') + d + ':</b>'],
-                [/Die letzte Ziffer (\d) ist (gerade|ungerade)\./, (m, d, g) => 'L’ultima cifra, ' + d + ', è ' + (g === 'gerade' ? 'pari' : 'dispari') + '.'],
-                [/Quersumme ([\d +=]+?) ist (nicht )?durch (\d) teilbar\./, (m, q, n, d) => 'La somma delle cifre ' + q + (n ? ' non è' : ' è') + ' divisibile per ' + d + '.'],
-                [/Die letzten zwei Ziffern bilden (\d+), das ist (nicht )?durch 4 teilbar\./, (m, x, n) => 'Le ultime due cifre formano ' + x + ', che' + (n ? ' non è' : ' è') + ' divisibile per 4.'],
-                [/Die letzte Ziffer ist (\d)(?:, nicht (0 oder 5|0))?\./, (m, d, x) => 'L’ultima cifra è ' + d + (x ? ', non ' + x.replace(' oder ', ' o ') : '') + '.'],
+                [/Die letzte Ziffer (\d) ist (gerade|ungerade)\./g, (m, d, g) => 'L’ultima cifra, ' + d + ', è ' + (g === 'gerade' ? 'pari' : 'dispari') + '.'],
+                [/Quersumme ([\d +=]+?) ist (nicht )?durch (\d) teilbar\./g, (m, q, n, d) => 'La somma delle cifre ' + q + (n ? ' non è' : ' è') + ' divisibile per ' + d + '.'],
+                [/Die letzten zwei Ziffern bilden (\d+), das ist (nicht )?durch 4 teilbar\./g, (m, x, n) => 'Le ultime due cifre formano ' + x + ', che' + (n ? ' non è' : ' è') + ' divisibile per 4.'],
+                [/Die letzte Ziffer ist (\d)(?:, nicht (0 oder 5|0))?\./g, (m, d, x) => 'L’ultima cifra è ' + d + (x ? ', non ' + x.replace(' oder ', ' o ') : '') + '.'],
                 R('(' + G + ') ist eine Primzahl: genau zwei Teiler\\.', '$1 è un numero primo: esattamente due divisori.'),
                 R('(' + G + ') ist keine Primzahl\\.', '$1 non è un numero primo.'),
                 // bruchteilos5
