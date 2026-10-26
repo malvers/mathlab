@@ -41,6 +41,20 @@ window.BuchFR && BuchFR.add('gy6', {
         'Wie oft passt der zweite Bruch in den ersten?': 'Combien de fois la deuxième fraction tient-elle dans la première ?',
         'Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.': 'Numérateur fois numérateur, dénominateur fois dénominateur. Simplifier avant fait gagner du travail.',
         'Durch einen Bruch teilt man, indem man mit seinem Kehrwert malnimmt.': 'Pour diviser par une fraction, on multiplie par son inverse.',
+        // vorrang6 (the steps; "Jetzt:" and the sentences with a formula are phrases)
+        'Punkt vor Strich': '× et : avant + et −', 'Klammern zuerst': 'Parenthèses d’abord', 'Mit Komma': 'Avec une virgule',
+        'Von links nach rechts': 'De gauche à droite', 'Rechenvorteil': 'Calcul astucieux', 'Aufgabe': 'Exercice',
+        'Nächster Schritt': 'Étape suivante', 'Von vorn': 'Recommencer', 'Fertig.': 'Terminé.',
+        'Fertig. Mit der Klammer kommt etwas anderes heraus als ohne.': 'Terminé. Avec la parenthèse, on n’obtient pas la même chose que sans.',
+        'Fertig. Wer von links rechnet, erhält falsch $6$.': 'Terminé. Qui calcule simplement de gauche à droite trouve, à tort, $6$.',
+        'Jetzt die Strichrechnung.': 'l’addition.',
+        'Distributivgesetz: $\\tfrac25$ ausklammern.': 'distributivité : on met $\\tfrac25$ en facteur.',
+        // probieren6
+        'Einsetzen': 'Essayer', 'Alle Werte prüfen': 'Tester toutes les valeurs',
+        'Zahlenstrahl: grün erfüllt, rot nicht': 'Droite graduée : en vert les valeurs qui conviennent, en rouge les autres',
+        'Passt.': 'Convient.', 'Passt nicht.': 'Ne convient pas.',
+        'Probe: Einsetzen ergibt eine wahre Aussage.': 'Vérification : en remplaçant, on obtient une égalité vraie.',
+        'Die linke Seite ist zu klein.': 'Le membre de gauche est trop petit.', 'Die linke Seite ist zu groß.': 'Le membre de gauche est trop grand.',
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -70,6 +84,13 @@ window.BuchFR && BuchFR.add('gy6', {
         ['Hauptnenner: $', 'Dénominateur commun : $'],
         ['$: Wie oft passt nichts in etwas? Diese Frage hat keine Antwort. Durch $0$ teilt man nie.',
             '$ : combien de fois « rien » tient-il dans quelque chose ? Cette question n’a pas de réponse. On ne divise jamais par $0$.'],
+        // vorrang6
+        ['<b>Jetzt:</b> ', '<b>Maintenant :</b> '], ['Punktrechnung zuerst: $', 'la multiplication d’abord : $'], ['Hauptnenner 4: $', 'dénominateur commun 4 : $'],
+        ['Die Klammer zuerst: $', 'la parenthèse d’abord : $'], ['Punkt vor Strich: $', 'la multiplication avant la soustraction : $'],
+        ['Zwei Punktrechnungen: die linke zuerst. $', 'deux opérations prioritaires : celle de gauche d’abord. $'],
+        ['Fertig. Ohne Ausklammern: $', 'Terminé. Sans mettre en facteur : $'], ['$, mehr Arbeit.', '$, c’est plus de travail.'],
+        // probieren6
+        ['Es passen: ', 'Conviennent : '], ['Bisher passt keiner.', 'Aucune valeur ne convient pour l’instant.'],
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -96,5 +117,10 @@ window.BuchFR && BuchFR.add('gy6', {
         [/(<span class="g-phi">)(?:Grün|\u0003\d+\u0004)(<\/span>): \$(\d+)\$ von \$(\d+)\$ Kästchen\. Das ist (\$[^$]*\$) von (\$[^$]*\$)\./g, (m, s1, s2, a, b, x, y) =>
             s1 + 'Vert' + s2 + ' : $' + a + '$ cases sur $' + b + '$. C’est ' + x + ' de ' + y + '.'],
         [/(\$[^$]*\$) passt (\$[^$]*\$)-mal in (\$[^$]*\$)\./g, (m, x, k, y) => x + ' tient ' + k + ' fois dans ' + y + '.'],
+        // probieren6
+        [/(\$[a-z] = [^$]*\$): &nbsp; /g, '$1 : &nbsp; '], [/(\$[^$]*\$), und (\$[^$]*\$)<\/p>/g, '$1, et $2</p>'],
+        [/Gesucht sind alle Zahlen, für die die linke Seite (kleiner|größer) als (\$[^$]*\$) ist\./g, (m, r, x) =>
+            'On cherche tous les nombres pour lesquels le membre de gauche est ' + (r === 'kleiner' ? 'inférieur' : 'supérieur') + ' à ' + x + '.'],
+        [/Geprüft: (\d+) von (\d+) Werten\. /g, (m, a, b) => (a === '1' ? 'Valeur testée : 1 sur ' : 'Valeurs testées : ' + a + ' sur ') + b + '. '],
     ]
 });
