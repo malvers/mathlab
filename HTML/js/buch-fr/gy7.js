@@ -118,6 +118,23 @@ window.BuchFR && BuchFR.add('gy7', {
         // umstellen7 (French letters: P for the perimeter, d for the distance, 𝓑 for the base of the pyramid - a rule below; "Dichte" is a rule:
         // gy12lk.js has the word for the density of a distribution)
         'Rechteck': 'Rectangle', 'Nächster Schritt': 'Étape suivante', 'Umfang': 'Périmètre', 'Geschwindigkeit': 'Vitesse', 'Formel': 'Formule', '⇄ Seiten tauschen': '⇄ échanger les membres', 'umstellen nach': 'isoler',
+        // prozent7 (French letters: valeur de référence V, taux t %, part P - German G, p %, W; the sentences with numbers are rules below)
+        'Grundwert $G$': 'Valeur de référence $V$', 'Prozentsatz $p\\,\\%$': 'Taux $t\\,\\%$', 'Änderung um': 'Variation de',
+        'Danach um denselben Prozentsatz zurück': 'Puis le même taux en sens inverse', 'Balken vor und nach der Änderung': 'Barres avant et après la variation',
+        'Die drei Grundaufgaben:<br>$W = p\\,\\% \\cdot G$ · $p\\,\\% = \\dfrac{W}{G}$ · $G = \\dfrac{W}{p\\,\\%}$':
+            'Les trois problèmes types :<br>$P = t\\,\\% \\times V$ · $t\\,\\% = \\dfrac{P}{V}$ · $V = \\dfrac{P}{t\\,\\%}$',
+        'Neuer Wert:': 'Nouvelle valeur :', 'Nicht': 'Pas',
+        // diagramm7 (one data set as bar, line or pie chart)
+        'Wie kommst du zur Schule? Umfrage in einer Klasse': 'Comment viens-tu à l’école ? Sondage dans une classe', 'Antworten': 'Réponses', 'zu Fuß': 'à pied',
+        'Fahrrad': 'vélo', 'Bus, Bahn': 'bus, train', 'Auto': 'voiture', 'Klassensprecherwahl: Stimmen': 'Élection du délégué de classe : voix', 'Stimmen': 'Voix',
+        'Höhe einer Sonnenblume, jede Woche gemessen': 'Hauteur d’un tournesol, mesurée chaque semaine',
+        'Säulendiagramm': 'Diagramme en colonnes', 'Liniendiagramm': 'Diagramme en ligne brisée', 'Kreisdiagramm': 'Diagramme circulaire', 'Diagramm': 'Diagramme',
+        'Woche': 'Semaine', 'Anteil': 'Part', 'Winkel': 'Angle', 'weniger': 'moins', 'mehr': 'plus',
+        'Ein Liniendiagramm passt hier nicht: Die Kategorien haben keine Reihenfolge, und zwischen ihnen gibt es keine Zwischenwerte.':
+            'Un diagramme en ligne brisée ne convient pas ici : les catégories n’ont pas d’ordre, et il n’y a pas de valeurs intermédiaires entre elles.',
+        'Ein Kreisdiagramm passt hier nicht: Es zeigt Anteile an einem Ganzen. Die Höhen der einzelnen Wochen ergeben zusammen kein sinnvolles Ganzes.':
+            'Un diagramme circulaire ne convient pas ici : il montre des parts d’un tout. Les hauteurs des différentes semaines ne forment pas ensemble un tout qui ait un sens.',
+        'Das Liniendiagramm passt: Es zeigt, wie sich ein Wert im Lauf der Zeit verändert.': 'Le diagramme en ligne brisée convient : il montre comment une valeur évolue au cours du temps.',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -172,6 +189,13 @@ window.BuchFR && BuchFR.add('gy7', {
             '<b>Réunion :</b> $\\mathbb{Z} \\cup \\mathbb{Q}^+$ contient tous les nombres qui sont dans au moins un des deux ensembles. Ce n’est pas encore tout $\\mathbb{Q}$ : $-\\tfrac12$ n’est dans aucun des deux.'],
         // umstellen7: the end of the steps and the check with numbers
         ['Fertig. Mit Zahlen: ', 'Terminé. Avec des nombres : '], ['. Probe: ', '. Vérification : '], ['Stahl, $\\varrho', 'Acier, $\\varrho'], ['Wasser, $\\varrho', 'Eau, $\\varrho'],
+        // prozent7: the bars, the check, the way back
+        ['vorher ', 'avant '], ['nachher ', 'après '], ['zurück ', 'retour '], ['Probe: $', 'Vérification : $'],
+        ['Zurückrechnen auf den Grundwert: $', 'Retour à la valeur de référence : $'],
+        [' der alte Wert! Die zweiten $', ' l’ancienne valeur ! Les $'], ['\\,\\%$ beziehen sich auf einen anderen Grundwert.', '\\,\\%$ du retour portent sur une autre valeur de référence.'],
+        // diagramm7: the chart title in bold above the table (a part that starts with <b> is no word)
+        ['Wie kommst du zur Schule? Umfrage in einer Klasse', 'Comment viens-tu à l’école ? Sondage dans une classe'],
+        ['Klassensprecherwahl: Stimmen', 'Élection du délégué de classe : voix'], ['Höhe einer Sonnenblume, jede Woche gemessen', 'Hauteur d’un tournesol, mesurée chaque semaine'],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -208,5 +232,19 @@ window.BuchFR && BuchFR.add('gy7', {
         // umstellen7: the buttons "nach $b$" under "isoler" (s and G of the formulas are d and 𝓑), the formula "Dichte"
         [/(<button type="button" data-v="([A-Za-z])">)nach \$\2\$(<\/button>)/g, (m, a, v, c) => a + 'isoler $' + ({ s: 'd', G: '\\mathcal{B}' }[v] || v) + '$' + c],
         [/(<button type="button" data-v="4">)Dichte(<\/button>)/g, '$1Masse volumique$2'],
+        // prozent7: the hundred square, the values with the French letters V, t %, P, increase "um" / "auf", the way back
+        [/(\d+) von 100 Feldern/g, '$1 cases sur 100'],
+        [/^Hunderterfeld mit (\d+) gefärbten Feldern( und Prozentstreifen)?$/, (m, n, s) => 'Grille de cent cases dont ' + n + ' colorées' + (s ? ', et bande de pourcentage' : '')],
+        [/Grundwert \$G = ([^$]+)\$ · Prozentsatz \$p\\,\\% = ([^$]+)\$/g, 'Valeur de référence $V = $1$ · taux $t\\,\\% = $2$'],
+        [/Prozentwert (<span class="g-lam">)\$W = (\d+)\\,\\% \\text\{ von \} /g, 'Part $1$P = $2\\,\\% \\text{ de } '],
+        [/(Steigerung|Senkung) um \$(\d+)\\,\\%\$ heißt (?:Steigerung|Senkung) <b>auf<\/b> \$(\d+)\\,\\%\$\. Der Faktor ist \$/g,
+            (m, k, a, b) => (k === 'Steigerung' ? 'Augmenter' : 'Diminuer') + ' de $' + a + '\\,\\%$, c’est passer <b>à</b> $' + b + '\\,\\%$. Le coefficient multiplicateur est $'],
+        [/Danach um \$(\d+)\\,\\%\$ (senken|erhöhen): /g, (m, p, v) => 'Puis ' + (v === 'senken' ? 'diminuer' : 'augmenter') + ' de $' + p + '\\,\\%$ : '],
+        // diagramm7: the aria "<title> als Säulendiagramm" and the line under the table
+        [/^(.+) als (Säulendiagramm|Liniendiagramm|Kreisdiagramm)$/, (m, t, c) => ({ Säulendiagramm: 'Diagramme en colonnes', Liniendiagramm: 'Diagramme en ligne brisée',
+            Kreisdiagramm: 'Diagramme circulaire' }[c]) + ' : ' + ({ 'Wie kommst du zur Schule? Umfrage in einer Klasse': 'comment viens-tu à l’école ? Sondage dans une classe',
+            'Klassensprecherwahl: Stimmen': 'élection du délégué de classe, voix', 'Höhe einer Sonnenblume, jede Woche gemessen': 'hauteur d’un tournesol, mesurée chaque semaine' }[t] || t)],
+        [/Zusammen: (\d+) (Antworten|Stimmen) = 100 % = 360°\. Im Kreisdiagramm gehören zu 1 % genau 3,6°\./g,
+            (m, n, u) => 'Total : ' + n + (u === 'Antworten' ? ' réponses' : ' voix') + ' = 100 % = 360°. Dans le diagramme circulaire, 1 % correspond exactement à 3,6°.'],
     ]
 });
