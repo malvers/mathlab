@@ -53,6 +53,42 @@ window.BuchFR && BuchFR.add('gy7', {
         '$\\alpha$ bei $A$ und bei $C$': '$\\alpha$ en $A$ et en $C$', '$\\beta$ bei $B$ und bei $C$': '$\\beta$ en $B$ et en $C$',
         '. Winkelsumme: $\\alpha + \\beta + (\\alpha + \\beta) = 180^\\circ$, also $\\gamma = \\alpha + \\beta = 90^\\circ$.':
             '. Somme des angles : $\\alpha + \\beta + (\\alpha + \\beta) = 180^\\circ$, donc $\\gamma = \\alpha + \\beta = 90^\\circ$.',
+        // konstruktion7 (the circle k is 𝒞 in French schools, k1 and k2 are 𝒞1 and 𝒞2, the auxiliary circle h is 𝒞′; the steps are whole list items)
+        'Tangenten von P': 'Tangentes issues de P', 'Dreieck aus c, α, β': 'Triangle donné par c, α, β', 'Tangenten an zwei Kreise': 'Tangentes à deux cercles',
+        // the row of four step buttons does not wrap (.b-ctrl) and must fit at 390 px: short labels; "Alle Schritte" and "Von vorn" are rules
+        // below, as gy5.js and os5.js have longer words for them
+        'Konstruktion': 'Construction', '◀ Zurück': '◀ Retour', 'Weiter ▶': 'Suite ▶',
+        'Winkel $\\alpha$': 'Angle $\\alpha$', 'Winkel $\\beta$': 'Angle $\\beta$',
+        'Konstruktion der Tangenten von einem Punkt an einen Kreis': 'Construction des tangentes à un cercle issues d’un point',
+        'Konstruktion eines Dreiecks aus einer Seite und zwei Winkeln': 'Construction d’un triangle à partir d’un côté et de deux angles',
+        'Konstruktion der gemeinsamen Tangenten an zwei Kreise': 'Construction des tangentes communes à deux cercles',
+        'Gegeben sind ein Kreis $k$ um $M$ mit $r = 2$ cm und ein Punkt $P$ außerhalb von $k$.':
+            'On donne un cercle $\\mathcal{C}$ de centre $M$ et de rayon $r = 2$ cm, et un point $P$ extérieur à $\\mathcal{C}$.',
+        'Verbinde $M$ und $P$.': 'Trace le segment $[MP]$.',
+        'Konstruiere die Mittelsenkrechte von $\\overline{MP}$: zwei Kreisbögen um $M$ und $P$ mit demselben Radius. Sie schneidet $\\overline{MP}$ im Mittelpunkt $H$.':
+            'Construis la médiatrice de $[MP]$ : deux arcs de cercle de centres $M$ et $P$ et de même rayon. Elle coupe $[MP]$ en son milieu $H$.',
+        'Zeichne den Kreis um $H$ durch $M$ und $P$, den Thaleskreis über $\\overline{MP}$.': 'Trace le cercle de centre $H$ qui passe par $M$ et $P$ : le cercle de diamètre $[MP]$.',
+        'Er schneidet $k$ in $B_1$ und $B_2$. Nach dem Satz des Thales sind die Winkel $\\angle MB_1P$ und $\\angle MB_2P$ rechte Winkel.':
+            'Il coupe $\\mathcal{C}$ en $B_1$ et $B_2$. D’après le théorème du demi-cercle, les angles $\\angle MB_1P$ et $\\angle MB_2P$ sont droits.',
+        'Die Geraden $PB_1$ und $PB_2$ stehen in $B_1$ und $B_2$ senkrecht auf dem Radius: Das sind die beiden Tangenten von $P$ an $k$.':
+            'Les droites $(PB_1)$ et $(PB_2)$ sont perpendiculaires aux rayons en $B_1$ et $B_2$ : ce sont les deux tangentes à $\\mathcal{C}$ issues de $P$.',
+        'Fertige eine Planfigur an und markiere, was gegeben ist: $c = 6$ cm, $\\alpha$ und $\\beta$. Das ist der Fall WSW.':
+            'Fais une figure d’étude et marque les données : $c = 6$ cm, $\\alpha$ et $\\beta$. C’est le cas ACA : un côté et ses deux angles adjacents.',
+        'Zeichne die Strecke $\\overline{AB}$ mit $c = 6$ cm.': 'Trace le segment $[AB]$ de longueur $c = 6$ cm.',
+        'Trage in $A$ den Winkel $\\alpha$ an.': 'Reporte l’angle $\\alpha$ en $A$.', 'Trage in $B$ den Winkel $\\beta$ an.': 'Reporte l’angle $\\beta$ en $B$.',
+        'Die freien Schenkel schneiden sich im Punkt $C$.': 'Les côtés libres des deux angles se coupent au point $C$.',
+        'Zeichne das Dreieck $ABC$. Probe: Miss $\\gamma$ und vergleiche mit $180^\\circ - \\alpha - \\beta$.':
+            'Trace le triangle $ABC$. Vérification : mesure $\\gamma$ et compare avec $180^\\circ - \\alpha - \\beta$.',
+        'Gegeben sind $k_1$ um $M_1$ mit $r_1 = 2$ cm und $k_2$ um $M_2$ mit $r_2 = 1$ cm. Gesucht sind die beiden gemeinsamen äußeren Tangenten.':
+            'On donne le cercle $\\mathcal{C}_1$ de centre $M_1$ et de rayon $r_1 = 2$ cm, et le cercle $\\mathcal{C}_2$ de centre $M_2$ et de rayon $r_2 = 1$ cm. On cherche les deux tangentes communes extérieures.',
+        'Zeichne den Hilfskreis $h$ um $M_1$ mit dem Radius $r_1 - r_2 = 1$ cm.': 'Trace le cercle auxiliaire $\\mathcal{C}\'$ de centre $M_1$ et de rayon $r_1 - r_2 = 1$ cm.',
+        'Konstruiere die Tangenten von $M_2$ an $h$ wie bei „Tangenten von P“: Der Thaleskreis über $\\overline{M_1M_2}$ schneidet $h$ in $T_1$ und $T_2$.':
+            'Construis les tangentes à $\\mathcal{C}\'$ issues de $M_2$ comme dans « Tangentes issues de P » : le cercle de diamètre $[M_1M_2]$ coupe $\\mathcal{C}\'$ en $T_1$ et $T_2$.',
+        'Verlängere $M_1T_1$ und $M_1T_2$ bis zum Kreis $k_1$: die Berührungspunkte $B_1$ und $B_2$.':
+            'Prolonge $[M_1T_1]$ et $[M_1T_2]$ jusqu’au cercle $\\mathcal{C}_1$ : tu obtiens les points de contact $B_1$ et $B_2$.',
+        'Verschiebe die Hilfstangenten um $r_2$ nach außen: Die Parallelen durch $B_1$ und $B_2$ sind die gemeinsamen Tangenten. Sie berühren $k_2$ dort, wo der Radius senkrecht auf ihnen steht.':
+            'Déplace les tangentes auxiliaires de $r_2$ vers l’extérieur : les parallèles passant par $B_1$ et $B_2$ sont les tangentes communes. Elles touchent $\\mathcal{C}_2$ là où le rayon leur est perpendiculaire.',
+        'Du kannst $P$ verschieben, in jedem Schritt.': 'Tu peux déplacer $P$ à chaque étape.', 'Du kannst $M_2$ verschieben, in jedem Schritt.': 'Tu peux déplacer $M_2$ à chaque étape.',
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -84,6 +120,9 @@ window.BuchFR && BuchFR.add('gy7', {
             '<b>Angles inscrits :</b> tous les angles inscrits qui interceptent le même arc sont égaux. Fais glisser $P$ sur son arc.'],
         ['<b>Satz über die Gegenwinkel im Sehnenviereck:</b> In einem Viereck, dessen Ecken auf einem Kreis liegen, ergänzen sich gegenüberliegende Winkel zu $180^\\circ$.',
             '<b>Angles opposés d’un quadrilatère inscrit :</b> dans un quadrilatère dont les sommets sont sur un cercle, les angles opposés sont supplémentaires : leur somme vaut $180^\\circ$.'],
+        // konstruktion7: the warning after "$\alpha + \beta = 190^\circ$"
+        [': Die freien Schenkel schneiden sich nicht. Ein solches Dreieck gibt es nicht, denn die Winkelsumme im Dreieck beträgt $180^\\circ$.',
+            ' : les côtés libres ne se coupent pas. Un tel triangle n’existe pas, car la somme des angles d’un triangle vaut $180^\\circ$.'],
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -97,5 +136,12 @@ window.BuchFR && BuchFR.add('gy7', {
         [/\\overline\{UA\} = \\overline\{UB\} = \\overline\{UC\}/g, 'OA = OB = OC'],
         // "Würfel" is a die in other books (js/buch-fr/stochastik.js): here it is always the cube, as a whole label and between two tags
         [/^Würfel$/, 'Cube'], [/>Würfel</g, '>Cube<'],
+        // konstruktion7: "SCHRITT 2 VON 5"; the circle k is 𝒞 and the auxiliary circle h is 𝒞′ in the picture (only the labels drawn with
+        // the class first: the height h of schraegbild7 carries its colour before the class and stays)
+        [/SCHRITT (\d+) VON (\d+)/g, 'ÉTAPE $1 SUR $2'],
+        // the step buttons of konstruktion7, umstellen7 and vorzeichen7 (rows that do not wrap)
+        [/(<button type="button" class="b-btn" data-k="all">)Alle Schritte(<\/button>)/g, '$1Tout voir$2'],
+        [/(<button type="button" class="b-btn" data-k="(?:0|reset)">)Von vorn(<\/button>)/g, '$1Début$2'],
+        [/(<text class="g-side"[^>]*>)k(<\/text>)/g, '$1𝒞$2'], [/(<text class="g-side"[^>]*>)h(<\/text>)/g, '$1𝒞′$2'],
     ]
 });
