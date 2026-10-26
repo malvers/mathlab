@@ -575,6 +575,26 @@
             background: linear-gradient(to right, var(--neon-blue), rgba(255, 255, 255, 0.2), transparent);
         }
 
+        /* Books view: one heading per school type across the whole card grid */
+        #tool-container .book-school-head {
+            grid-column: 1 / -1;
+            width: 100%;
+            max-width: none;
+            margin: 14px 0 -8px 0;
+        }
+
+        #tool-container .book-school-head:first-child {
+            margin-top: 0;
+        }
+
+        @media (max-width: 520px) {
+            #tool-container .book-school-head h2 {
+                font-size: 1.05rem;
+                letter-spacing: 3px;
+                white-space: normal;
+            }
+        }
+
         #grade-view,
         #tool-view,
         #tool-subchrome {
@@ -2375,6 +2395,56 @@
                 if (el) el.classList.toggle('hidden', !visible);
             });
             document.body.classList.remove('view-buecher');
+            groupBooksBySchool(false);
+        }
+
+        /* Books view grouped by school type (Doc, 26.10.2026: "nach Schulart strukturieren"):
+           a heading per school, the book cards below it sorted by grade; the LK books get their own row.
+           The cards are moved, not re-rendered; leaving the view puts them back in LABS_DATA order. */
+        const BOOK_SCHOOLS = [
+            { key: 'gy', label: 'Gymnasium' },
+            { key: 'gylk', label: 'Gymnasium · Leistungskurs' },
+            { key: 'os', label: 'Oberschule' },
+            { key: 'bgy', label: 'Berufliches Gymnasium' },
+            { key: 'fos', label: 'Fachoberschule' }
+        ];
+
+        function groupBooksBySchool(on) {
+            const box = document.getElementById('tool-container');
+            if (!box || typeof LABS_DATA === 'undefined') return;
+            box.querySelectorAll('.book-school-head').forEach(h => h.remove());
+            if (!on) {
+                if (box.dataset.grouped) {
+                    LABS_DATA.forEach(lab => {
+                        const card = box.querySelector(`.card[data-lab-id="${lab.id}"]`);
+                        if (card) box.appendChild(card);
+                    });
+                    delete box.dataset.grouped;
+                }
+                return;
+            }
+            const gradeOf = (lab) => parseInt((lab.title.match(/\d+/) || ['0'])[0], 10);
+            const frag = document.createDocumentFragment();
+            BOOK_SCHOOLS.forEach(school => {
+                const books = LABS_DATA
+                    .filter(lab => lab.school === school.key)
+                    .sort((a, b) => gradeOf(a) - gradeOf(b));
+                if (!books.length) return;
+                const head = document.createElement('div');
+                head.className = 'view-section book-school-head';
+                const h2 = document.createElement('h2');
+                h2.textContent = CyberI18n.getOr('index.ui.school_' + school.key, school.label);
+                const line = document.createElement('div');
+                line.className = 'line';
+                head.append(h2, line);
+                frag.appendChild(head);
+                books.forEach(lab => {
+                    const card = box.querySelector(`.card[data-lab-id="${lab.id}"]`);
+                    if (card) frag.appendChild(card);
+                });
+            });
+            box.prepend(frag);
+            box.dataset.grouped = '1';
         }
 
         function showEducationJahrgang(updateHash = true) {
@@ -2454,6 +2524,7 @@
             document.getElementById('grade-view').classList.add('hidden');
             setLabToolLayerVisible(true);
             document.body.classList.toggle('view-buecher', filter === 'buecher');
+            groupBooksBySchool(filter === 'buecher');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             if (updateHash) {

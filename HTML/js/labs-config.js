@@ -25,6 +25,7 @@
 const LABS_DATA = [
     // one tile for all books in the "Neu" view instead of the 20 book cards (Doc, 14.10.2026:
     // "aus der Card neu ... Die Bücher raus und nur eine Kachel rein. Wo dran steht Bücher")
+    // Every book card carries "school" (gy | gylk | os | bgy | fos): the books view groups by it (Doc, 26.10.2026)
     {
         "id": "buecher",
         "href": "index.html#buecher",
@@ -44,6 +45,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik 11 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe11"],
         "category": "buecher funktionen stochastik grade11",
+        "school": "bgy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 11 berufliches gymnasium bgy sachsen lehrplan kapitel gleichungen formeln binomische formeln prozent funktionen lineare funktion exponentialfunktion wachstum zerfall zinseszins halbwertszeit quadratische funktion parabel scheitelpunktform loesungsformel vieta sinus sinusfunktion einheitskreis regression logarithmus umkehrfunktion parameter gleichungssystem lgs gauss matrix matrizen wahrscheinlichkeit baumdiagramm pfadregel vierfeldertafel simulation bisektion monte carlo numerik aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -55,6 +57,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik 12 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe12"],
         "category": "buecher funktionen stochastik geometrie grade12",
+        "school": "bgy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 berufliches gymnasium bgy sachsen lehrplan grundkurs kapitel bedingte wahrscheinlichkeit vierfeldertafel unabhaengigkeit zufallsgroesse erwartungswert varianz standardabweichung faires spiel binomialverteilung bernoulli binomialkoeffizient grenzwert asymptote stetigkeit ableitung differenzenquotient differenzialquotient sekante tangente normale ableitungsregeln potenzregel produktregel e-funktion sinus monotonie extrempunkt hochpunkt tiefpunkt wendepunkt kruemmung symmetrie steckbrief extremwertproblem optimierung vektoren vektor raum betrag mittelpunkt schwerpunkt skalarprodukt orthogonal winkel parallelogramm 3d aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -66,6 +69,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik 13 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe13"],
         "category": "buecher funktionen stochastik geometrie oberstufe",
+        "school": "bgy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 13 abitur abiturvorbereitung berufliches gymnasium bgy sachsen lehrplan grundkurs kapitel stammfunktion unbestimmtes integral bestimmtes integral hauptsatz rekonstruierter bestand flaeche flaecheninhalt flaeche zwischen graphen rechteckmethode trapezmethode numerische integration mittelwert grundgesamtheit stichprobe stichprobenvarianz signifikanztest hypothese nullhypothese ablehnungsbereich fehler erster art fehler zweiter art gerade ebene parametergleichung normalenvektor vektorprodukt kreuzprodukt koordinatengleichung spurpunkt lagebeziehung windschief schnittpunkt schnittwinkel prisma pyramide volumen oberflaeche funktionenschar ortskurve parameter lgs kosten erloes gewinn gewinnschwelle 3d aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -77,6 +81,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik FOS 11 / 12 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathefos11"],
         "category": "buecher funktionen stochastik",
+        "school": "fos",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 11 fachoberschule fos fo sachsen lehrplan kapitel zahlenbereiche natuerliche ganze rationale reelle zahlen betrag terme binomische formeln formeln umstellen prozent potenzgesetze funktionsbegriff definitionsbereich wertebereich lineare funktion anstieg achsenabschnitt proportionalitaet steigungswinkel geradengleichung regression ungleichung zahlenstrahl bruchgleichung scheinloesung lagebeziehung orthogonal parallel gleichungssystem lgs gleichsetzungsverfahren einsetzungsverfahren additionsverfahren quadratische funktion parabel scheitelpunktform loesungsformel diskriminante vieta linearfaktor funktionenschar fallunterscheidung ganzrationale funktion substitution vielfachheit zufallsexperiment ereignis laplace gesetz der grossen zahlen de morgan additionssatz unabhaengigkeit baumdiagramm pfadregel zaehlprinzip permutation variation kombination binomialkoeffizient pascalsches dreieck urnenmodell lotto bernoulli kette finanzmathematik zinseszins sparplan tilgung annuitaet komplexe zahlen gausssche zahlenebene schaltalgebra wahrheitstafel aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -88,6 +93,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik FOS 12 / 13 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathefos12"],
         "category": "buecher funktionen geometrie oberstufe",
+        "school": "fos",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 fachoberschule fos fo sachsen lehrplan fhr fachhochschulreife pruefung kapitel vektoren vektor raum 3d betrag einheitsvektor skalarprodukt winkel orthogonal gerade geraden parametergleichung punktprobe spurpunkte lagebeziehung windschief schnittpunkt schnittwinkel ebene ebenen parameterform koordinatengleichung normalenvektor vektorprodukt kreuzprodukt durchstosspunkt lot lotfusspunkt abstand spiegelpunkt flaecheninhalt parallelogramm dreieck pyramide grenzwert folge stetigkeit aenderungsrate differenzenquotient differenzialquotient ableitung ableitungsregeln kettenregel produktregel quotientenregel tangente normale kurvendiskussion nullstellen vielfachheit symmetrie monotonie extrempunkt wendepunkt kruemmung funktionenschar ortskurve steckbrief extremalaufgabe optimierung stammfunktion integral hauptsatz flaeche gebrochenrational polstelle luecke asymptote e-funktion eulersche zahl exponentialgleichung wachstum zerfall cas geogebra regression zentralprojektion fluchtpunkt aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -99,6 +105,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik OS 5 / 10 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe5"],
         "category": "buecher arithmetik geometrie grade5",
+        "school": "os",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 5 oberschule sachsen lehrplan kapitel grosse zahlen natuerliche zahlen schriftlich rechnen addieren subtrahieren multiplizieren dividieren potenzen quadratzahlen gleichungen teiler teilbarkeit primzahlen brueche dezimalzahlen prozent runden groessen einheiten koordinaten geraden winkel rechteck wuerfel wuerfelnetz symmetrie spiegelung verschiebung bandornament zahlzeichen kerbholz keilschrift aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -110,6 +117,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik OS 6 / 10 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe6"],
         "category": "buecher arithmetik geometrie grade6",
+        "school": "os",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 6 oberschule sachsen lehrplan kapitel brueche bruch gebrochene zahlen dezimalzahlen erweitern kuerzen vergleichen addieren multiplizieren dividieren rechengesetze mittelwert sachaufgaben zuordnung proportional dreisatz winkel dreieck flaecheninhalt umfang koerper netz wuerfel quader wuerfelbau ansichten alltag spiele hanoi nim tangram schiebepuzzle augensumme wuerfel aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -121,6 +129,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik OS 7 / 9 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe7"],
         "category": "buecher arithmetik algebra geometrie stochastik grade7",
+        "school": "os",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 7 oberschule realschule realschulbildungsgang sachsen lehrplan kapitel prozent prozentrechnung grundwert prozentwert prozentsatz zinsen tageszinsen zinsrechnung rabatt mehrwertsteuer stochastik zufall haeufigkeit wahrscheinlichkeit diagramm rationale zahlen negative zahlen koordinatensystem quadranten terme gleichungen viereck vielecke prisma volumen oberflaeche masse dichte parkettierung parkett escher aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -132,6 +141,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik OS 8 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe8"],
         "category": "buecher algebra funktionen geometrie stochastik grade8",
+        "school": "os",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 8 oberschule realschule realschulbildungsgang sachsen lehrplan kapitel terme termumformungen ausmultiplizieren ausklammern lineare gleichungen formeln umstellen funktionen lineare funktion anstieg steigungsdreieck y-achsenabschnitt nullstelle gleichungssystem grafisch einsetzungsverfahren gleichsetzungsverfahren additionsverfahren kreis kreisumfang kreisflaeche pi kreiszylinder hohlzylinder oberflaeche volumen masse aehnlichkeit zentrische streckung massstab zufall wahrscheinlichkeit baumdiagramm zaehlen tarif stromrechnung renovieren fahrrad uebersetzung reifen etrto aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -143,6 +153,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik OS 9 / 10 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe9"],
         "category": "buecher algebra funktionen geometrie stochastik grade9",
+        "school": "os",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 9 oberschule realschule realschulbildungsgang sachsen lehrplan kapitel pythagoras satz des pythagoras hypotenuse kathete umkehrung knotenschnur abstand koordinatensystem sinus kosinus tangens rechtwinkliges dreieck steigung prozent steigungswinkel leiter dach spannseil hoehenwinkel tiefenwinkel pyramide netz schraegbild zweitafelbild koerperhoehe seitenhoehe seitenkante kegel kreiskegel mantellinie kreisausschnitt kugel kubikwurzel oberflaeche volumen masse zusammengesetzte koerper turm silo quadratische funktion normalparabel scheitelpunkt scheitelpunktform normalform quadratische ergaenzung quadratische gleichung loesungsformel diskriminante nullstellen goldener schnitt phi fibonacci pentagramm statistik mittelwert zentralwert median modalwert spannweite ausreisser diagramm umfrage aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -154,6 +165,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik OS 10 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe10"],
         "category": "buecher funktionen stochastik geometrie grade10",
+        "school": "os",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 10 oberschule realschule realschulbildungsgang abschlusspruefung sachsen lehrplan kapitel dreieck viereck haus der vierecke winkelsumme trigonometrie sinus kosinus tangens sinussatz kosinussatz flaecheninhalt vieleck regelmaessig potenzfunktion parabel hyperbel asymptote umgekehrt proportional exponentialfunktion wachstum zerfall halbwertszeit zinseszins bogenmass einheitskreis sinusfunktion amplitude periode zufallsgroesse erwartungswert faires spiel simulation risiko lohn brutto netto sozialabgaben haushaltsplan kredit ratenkauf dispo schuldenfalle prisma zylinder pyramide kegel kugel pyramidenstumpf kegelstumpf masse dichte problemloesen fermi basiswissen vermessung foersterdreieck messrad daumensprung triangulation aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -165,6 +177,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 5 / 12 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy5"],
         "category": "buecher arithmetik geometrie grade5",
+        "school": "gy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 5 gymnasium gy sachsen lehrplan kapitel natuerliche zahlen grosse zahlen million milliarde stellenwerttafel zahlenstrahl runden schaetzen vergleichen ordnen rechengesetze kommutativgesetz assoziativgesetz distributivgesetz ueberschlag potenz quadratzahl zehnerpotenz vorrangregeln dividieren rest probe teiler vielfache teilbarkeitsregeln quersumme primzahl primfaktorzerlegung sieb eratosthenes bruch brueche zaehler nenner kuerzen erweitern gemischte zahl dezimalzahl zehntel hundertstel prozent kommaverschiebung mittelwert durchschnitt koordinatensystem parallel senkrecht winkel geodreieck winkelarten scheitelwinkel nebenwinkel stufenwinkel wechselwinkel symmetrie achsensymmetrie punktsymmetrie spiegelung verschiebung drehung rechteck umfang flaecheninhalt flaecheneinheiten hektar quader wuerfel schraegbild netz volumen liter oberflaeche groessen einheiten fahrplan fermi aegypter roemische zahlen maya adam ries linienbrett rechenpfennig zweiersystem binaer aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -176,6 +189,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 6 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy6"],
         "category": "buecher arithmetik geometrie grade6",
+        "school": "gy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 6 gymnasium gy sachsen lehrplan kapitel gebrochene zahlen bruch brueche dezimalzahl periodisch prozent addieren subtrahieren multiplizieren dividieren kehrwert rechengesetze gleichungen sachaufgaben zuordnung proportional dreisatz tabelle diagramm dreieck viereck winkelsumme innenwinkel kongruenz kongruenzsaetze konstruktion basiswinkelsatz mittelsenkrechte winkelhalbierende hoehe seitenhalbierende flaecheninhalt parallelogramm trapez raute drachen haus der vierecke prisma oberflaeche volumen anteile kreisdiagramm primzahlen aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -187,6 +201,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 7 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy7"],
         "category": "buecher geometrie arithmetik grade7",
+        "school": "gy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 7 gymnasium gy sachsen lehrplan kapitel kreis gerade tangente sekante passante umkreis inkreis thales peripheriewinkel sehnenviereck konstruieren konstruktionsbeschreibung rationale zahlen negative zahlen zahlengerade betrag gegenzahl rechnen potenz quadratwurzel gleichung formel umstellen prozentrechnung grundwert prozentwert prozentsatz saeulendiagramm kreisdiagramm prisma pyramide schraegbild netz zweitafelbild oberflaeche volumen masse dichte pyramidenstumpf daten diagramme platonische koerper tetraeder wuerfel oktaeder dodekaeder ikosaeder euler aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -198,6 +213,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 8 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy8"],
         "category": "buecher algebra stochastik geometrie grade8",
+        "school": "gy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 8 gymnasium gy sachsen lehrplan kapitel variable term termbaum ausmultiplizieren ausklammern binomische formeln gleichung ungleichung aequivalenzumformung zufallsversuch wahrscheinlichkeit relative haeufigkeit laplace baumdiagramm pfadregel zaehlprinzip funktion lineare funktion steigung y-achsenabschnitt geradengleichung lineares gleichungssystem gleichsetzungsverfahren einsetzungsverfahren additionsverfahren zentrische streckung streckfaktor aehnlichkeit strahlensatz heuristik rueckwaertsarbeiten simulation zufallszahlen monte carlo pi aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -209,6 +225,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 9 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy9"],
         "category": "buecher funktionen geometrie grade9",
+        "school": "gy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 9 gymnasium gy sachsen lehrplan kapitel potenz potenzen wurzel wurzeln radizieren potenzgesetze rationale exponenten reelle zahlen irrational wurzelgleichung scheinloesung probe potenzfunktion hyperbel definitionsbereich wertebereich symmetrie nullstelle polstelle asymptote polynom parameter strecken stauchen verschieben spiegeln quadratische funktion parabel normalform scheitelpunktform quadratische ergaenzung quadratische gleichung loesungsformel diskriminante vieta extremwertaufgabe maximum minimum kreis kreisbogen kreisausschnitt kreisring zylinder kugel oberflaeche volumen masse dichte archimedes pythagoras satz des pythagoras hypotenuse kathete beweis raumdiagonale hoehensatz kathetensatz umkehrung indirekter beweis trigonometrie sinus kosinus tangens steigung hoehenwinkel regelmaessiges vieleck pi pyramide kegel mantellinie seitenhoehe landvermessung modalwert median mittelwert arithmetisches mittel skala streuung spannweite varianz standardabweichung histogramm klassen manipulation prozentpunkte tabellenkalkulation cas goldener schnitt phi pentagramm fuenfeck fibonacci aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -220,6 +237,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 10 / 13 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy10"],
         "category": "buecher funktionen stochastik geometrie grade10",
+        "school": "gy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 10 gymnasium gy sachsen lehrplan kapitel wachstum zerfall linear exponentiell beschraenkt logistisch rekursiv explizit wachstumsfaktor halbwertszeit verdopplungszeit regression exponentialfunktion periodisch periode amplitude mittellage frequenz bogenmass einheitskreis sinus sinusfunktion kosinus tageslaenge riesenrad gezeiten zufallsgroesse wahrscheinlichkeitsverteilung stabdiagramm histogramm pfadregel baumdiagramm genau mindestens hoechstens gegenereignis erwartungswert varianz standardabweichung risiko faires spiel roulette sinussatz kosinussatz flaecheninhalt dreieck sss sws wsw ssw vermessung triangulation pyramide kegel neigungswinkel umkehrfunktion logarithmus lg ln logarithmengesetze basiswechsel rechenschieber logarithmusfunktion exponentialgleichung dezibel richterskala verkettung verknuepfung innere aeussere funktion tangens polstelle funktionsklassen steckbrief symmetrie skizzieren zahlenfolge arithmetisch geometrisch monotonie schranke grenzwert konvergenz parameterdarstellung kreis zinsrechnung zinseszins tilgung annuitaet kredit komplexe zahlen imaginaere einheit gausssche zahlenebene betrag argument aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -231,6 +249,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 11 / 12 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy11"],
         "category": "buecher funktionen stochastik geometrie grade11",
+        "school": "gy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 11 jahrgangsstufe 11 gymnasium gy grundkurs sachsen lehrplan kapitel grenzwert stetigkeit aenderungsrate sekante tangente differenzenquotient differentialquotient ableitung ableitungsfunktion ableitungsregeln potenzregel faktorregel summenregel produktregel kettenregel e-funktion logarithmus sinus funktionsuntersuchung monotonie extrempunkt wendepunkt symmetrie polstelle asymptote matrix matrizen matrizenmultiplikation gauss-jordan lgs drehung drehmatrix steckbrief funktionen aus bedingungen extremwertproblem optimierung regression numerische verfahren bisektion newton-verfahren vektor vektoren raum 3d lineare abhaengigkeit betrag gerade geraden parameterform spurpunkt lagebeziehung windschief ebene ebenen koordinatenform durchstosspunkt urnenmodell baumdiagramm pfadregel vierfeldertafel unabhaengigkeit bernoulli kette binomialkoeffizient binomialverteilung kumulierte wahrscheinlichkeit erwartungswert standardabweichung aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -242,6 +261,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 12 / 11 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy12"],
         "category": "buecher funktionen stochastik geometrie grade12",
+        "school": "gy",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 jahrgangsstufe 12 gymnasium gy grundkurs abitur sachsen lehrplan kapitel stammfunktion unbestimmtes integral integrationskonstante grundintegrale potenzregel integrationsregeln lineare verkettung cas bestimmtes integral bestand aenderungsrate obersumme untersumme riemann hauptsatz integralfunktion orientierter flaecheninhalt flaeche zwischen graphen numerische integration rechteckverfahren trapezverfahren keplersche fassregel beurteilende statistik stichprobe schaetzen hochrechnung stichprobenmittel stichprobenvarianz signifikanztest nullhypothese ablehnungsbereich signifikanzniveau fehler erster art fehler zweiter art zweiseitiger test skalarprodukt vektorprodukt kreuzprodukt normalenvektor normalenform koordinatenform spurpunkte schnittwinkel winkel gerade ebene abstand lotfusspunkt hessesche normalform spiegelung spiegelpunkt extremale entfernung abstandsfunktion funktionenschar ortskurve geradenschar parameter aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -253,6 +273,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 11 LK / 13 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy11lk"],
         "category": "buecher funktionen stochastik geometrie grade11",
+        "school": "gylk",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 11 jahrgangsstufe 11 gymnasium gy leistungskurs lk sachsen lehrplan kapitel grenzwert grenzwertsaetze stetigkeit epsilon delta abschnittsweise definierte funktion aenderungsrate lineare approximation differenzenquotient differentialquotient ableitung nach definition ableitungsregeln beweis produktregel kettenregel e-funktion logarithmus sinus funktionsuntersuchung monotonie extrema wendepunkte polstellen asymptoten matrizen matrixprodukt gauss jordan drehung verflechtung gozinto steckbrief extremwertproblem regression numerische verfahren bisektion newton verfahren iteration fixpunkt banach vektoren raum lineare abhaengigkeit geraden ebenen parameterform koordinatenform lagebeziehungen schnittgerade wahrscheinlichkeit laplace kolmogorow abzaehlen binomialkoeffizient vierfeldertafel bedingte wahrscheinlichkeit satz von bayes unabhaengigkeit bernoulli binomialverteilung erwartungswert standardabweichung galtonbrett aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -264,6 +285,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik GY 12 LK / 12 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathegy12lk"],
         "category": "buecher funktionen stochastik geometrie grade12",
+        "school": "gylk",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 jahrgangsstufe 12 gymnasium gy leistungskurs lk abitur sachsen lehrplan kapitel stammfunktion unbestimmtes integral grundintegrale lineare substitution kettenregel rueckwaerts cas bestimmtes integral bestand riemann hauptsatz beweis integralfunktion physikalische groesse arbeit flaeche zwischen graphen rotationskoerper volumen kegel kugel numerische integration trapezverfahren keplersche fassregel simpsonregel normalverteilung glockenkurve gauss dichte verteilungsfunktion sigma regeln standardisieren de moivre laplace beurteilende statistik schaetzen signifikanztest zweiseitiger test skalarprodukt vektorprodukt normalenvektor hessesche normalform schnittwinkel abstand punkt gerade windschiefe geraden lotfusspunkt spiegelung extremale entfernung sehwinkel regiomontanus uneigentliches integral unbegrenzte flaeche exponentialverteilung funktionenschar ortskurve ebenenschar aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
