@@ -64,13 +64,13 @@ window.BuchFR && BuchFR.add('gy5', {
             'Fais glisser l’axe de symétrie. Chaque point image est sur la perpendiculaire à l’axe, à la même distance de lui.',
         'Zieh an der Pfeilspitze: Jeder Punkt wird um denselben Pfeil verschoben.': 'Fais glisser la pointe de la flèche : chaque point est déplacé selon la même flèche.',
         'Stell den Drehwinkel ein. Gedreht wird gegen den Uhrzeigersinn um den Punkt Z.':
-            'Règle l’angle de rotation. On tourne dans le sens inverse des aiguilles d’une montre autour du point Z.',
+            'Règle l’angle de rotation. On tourne dans le sens inverse des aiguilles d’une montre autour du centre O.',
         'Welche Bewegung bringt die gelbe Figur auf die grüne?': 'Quel mouvement amène la figure jaune sur la verte ?',
         'Figur und Bildfigur im Koordinatensystem': 'Figure et figure image dans le repère',
         'Tippe auf deine Antwort.': 'Touche ta réponse.',
         'Die Bildfigur ist gleich groß, aber <b>umgeklappt</b>: Der Umlaufsinn A → B → C → D dreht sich um.':
             'La figure image a la même taille, mais elle est <b>retournée</b> : le sens de parcours A → B → C → D s’inverse.',
-        'Jeder Punkt bleibt gleich weit von Z entfernt. Die Figur wird nicht umgeklappt.': 'Chaque point reste à la même distance de Z. La figure n’est pas retournée.',
+        'Jeder Punkt bleibt gleich weit von Z entfernt. Die Figur wird nicht umgeklappt.': 'Chaque point reste à la même distance de O. La figure n’est pas retournée.',
         // rechteck5
         'Zusammengesetzte Figur': 'Figure composée', 'Figur': 'Figure', 'Zerlegen': 'Décomposer', 'Ergänzen': 'Compléter', 'Weg': 'Méthode',
         'Zieh an der Ecke. Ein Kästchen ist 1 cm lang und 1 cm breit, also 1 cm² groß.':
@@ -267,7 +267,8 @@ window.BuchFR && BuchFR.add('gy5', {
         // spiegel5
         [/Jeder Punkt wandert (\d+) nach (links|rechts) und (\d+) nach (unten|oben)\./, (m, a, lr, b, du) => 'Chaque point se déplace de ' + a + ' vers la ' +
             (lr === 'links' ? 'gauche' : 'droite') + ' et de ' + b + ' vers le ' + (du === 'oben' ? 'haut' : 'bas') + '.'],
-        [/Drehung um Z(\([^)]*\)) um (\d+)°\./, 'Rotation de $2° autour de Z$1.'],
+        // the centre of the rotation: O in French schools (German Z, Zentrum), in the picture and in the sentences
+        [/Drehung um Z(\([^)]*\)) um (\d+)°\./, 'Rotation de $2° autour de O$1.'], [/(<text class="g-pt"[^>]*>)Z(<\/text>)/g, '$1O$2'],
         [/(Richtig, es ist|Nicht ganz\. Es ist) eine (Spiegelung|Verschiebung|Drehung)\./, (m, p, k) => (p[0] === 'R' ? 'Bravo, c’est une ' : 'Pas tout à fait. C’est une ') +
             ({ 'Spiegelung': 'symétrie', 'Verschiebung': 'translation', 'Drehung': 'rotation' })[k] + '.'],
         // rechteck5: P for the perimeter (German u, Umfang)
