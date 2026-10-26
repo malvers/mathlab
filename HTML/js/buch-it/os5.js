@@ -306,6 +306,14 @@ window.BuchIT && BuchIT.add('os5', {
                 [/^Die Zahl (\d+) in babylonischer Keilschrift$/, 'Il numero $1 in caratteri cuneiformi babilonesi'],
             ];
         })(),
+        // the Italian school letters (Doc, 26.10.2026: translations use the conventions of the pupils' own country) for the
+        // widgets of js/buch-gy5.js on the pages of this book: perimeter 2p instead of u (Umfang), total surface S_t instead of O
+        // (Oberfläche). Here and not in js/buch-it/gy5.js, because only mathe5-it loads this file: the other Italian books still
+        // write u and O in their page text.
+        [/(<p class="g5-big">)u = /g, (m, p) => p + '2p = '],
+        [/\$u = 2 \\cdot a/g, () => '$2p = 2 \\cdot a'],
+        [/(<p class="g5-big">)O = /g, (m, p) => p + 'S<sub>t</sub> = '],
+        [/\$O = 2 \\cdot \(/g, () => '$S_t = 2 \\cdot ('],
 
     ]
 });
