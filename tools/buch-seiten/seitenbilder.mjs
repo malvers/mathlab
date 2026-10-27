@@ -47,8 +47,15 @@ function books() {
     return readdirSync(path.join(ROOT, 'HTML/buch')).filter(b => existsSync(path.join(ROOT, 'HTML/buch', b, 'druck.html'))).sort();
 }
 
+// a request on the Mac's network fails now and then (mathe6, 27.10.2026: "fetch failed" while reading back):
+// three tries before a book counts as failed
+async function fetchRetry(url, init) {
+    for (let k = 1; ; k++) {
+        try { return await fetch(url, init); } catch (e) { if (k === 3) throw e; await new Promise(r => setTimeout(r, 2000 * k)); }
+    }
+}
 async function get(p) {
-    const r = await fetch(BASE + '/' + p + '?t=' + Date.now());
+    const r = await fetchRetry(BASE + '/' + p + '?t=' + Date.now());
     if (!r.ok) throw new Error(p + ': HTTP ' + r.status);
     return r.text();
 }
@@ -78,7 +85,7 @@ function deploying() {
 
 async function online(book) {
     try {
-        const r = await fetch(MEDIA + KEY(book) + 'seiten.json?t=' + Date.now());
+        const r = await fetchRetry(MEDIA + KEY(book) + 'seiten.json?t=' + Date.now());
         return r.ok ? await r.json() : null;
     } catch (_) { return null; }
 }
@@ -178,7 +185,7 @@ async function upload(book, out, json) {
     }));
     // read back before seiten.json points to them
     for (const f of files) {
-        const r = await fetch(MEDIA + KEY(book) + f + '?v=' + json.v, { method: 'HEAD' });
+        const r = await fetchRetry(MEDIA + KEY(book) + f + '?v=' + json.v, { method: 'HEAD' });
         if (!r.ok || +r.headers.get('content-length') !== statSync(path.join(out, f)).size) throw new Error('Rücklesen ' + f + ': HTTP ' + r.status);
     }
     await put(path.join(out, 'seiten.json'), KEY(book) + 'seiten.json', 'application/json', 'public, max-age=60');
