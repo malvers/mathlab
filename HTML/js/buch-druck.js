@@ -295,6 +295,7 @@
         const cols = Math.max(1, Math.floor((W + GAP) / (w + GAP)));
         root.style.setProperty('--z', (w / pageW).toFixed(4));
         box.style.gridTemplateColumns = 'repeat(' + cols + ', ' + Math.floor(w) + 'px)';
+        if (bild) bildGroesse(w);
     }
     function zeige(z) {
         z = String(z || '').replace(/"/g, '');
@@ -307,7 +308,8 @@
             const e = f && document.querySelector('.pagedjs_pages ' + sel);
             if (e) { hit = e.closest('.pagedjs_page'); break; }
         }
-        if (hit) { hit.classList.add('d-ov-cur'); hit.scrollIntoView({ block: 'center' }); }
+        // instant, as hin() in js/buch.js: buch.css scrolls smoothly, and across a hundred tiles that crawls
+        if (hit) { hit.classList.add('d-ov-cur'); hit.scrollIntoView({ block: 'center', behavior: 'instant' }); }
     }
     function ovReady() {
         const pages = Array.from(document.querySelectorAll('.pagedjs_page'));
@@ -333,8 +335,71 @@
         ovScale = Math.min(6, Math.max(1, ovScale * f));
         ovLayout();
         const cur = document.querySelector('.pagedjs_page.d-ov-cur');
-        if (cur) cur.scrollIntoView({ block: 'center' });
+        if (cur) cur.scrollIntoView({ block: 'center', behavior: 'instant' });
     }
+
+    // ---------- the overview from pictures (tools/buch-seiten/seitenbilder.mjs) ----------
+    // Doc, 27.10.2026, on the phone: "Die lädt sehr langsam" - setting all 164 pages of Mathe 11 took ~40 s there. The
+    // pages are rendered once into sprites on R2 (buch/seiten/<buch>/): s.webp holds all of them small, l-<k>.webp nine
+    // at full size for bigger tiles (+). A tile carries the jump targets of its blocks as empty [data-ziel] elements and
+    // the class of a set sheet, so layout, gold frame, numbers and the click work as on set pages. No pictures yet: build().
+    let bild = null;
+    const bildPos = (i, cols, rows) => (cols > 1 ? (i % cols) / (cols - 1) * 100 : 0) + '% ' + (rows > 1 ? Math.floor(i / cols) / (rows - 1) * 100 : 0) + '%';
+    async function ovBilder() {
+        const book = (here.match(/\/buch\/([^/]+)\/$/) || [])[1];
+        if (!book || !Buch.media) return false;
+        const base = Buch.media + 'seiten/' + book + '/';
+        let m = null;
+        try { const r = await fetch(base + 'seiten.json', { cache: 'no-cache' }); if (r.ok) m = await r.json(); } catch (_) { }
+        if (!m || !Array.isArray(m.seiten) || !m.seiten.length) return false;
+        const q = '?v=' + encodeURIComponent(m.v), small = 'url("' + base + 's.webp' + q + '")';
+        say('Seiten werden geladen …');
+        // the tiles appear once the small sprite is there, not as white sheets filling in
+        await new Promise(r => { const im = new Image(); im.onload = im.onerror = r; im.src = base + 's.webp' + q; });
+        const box = el('div', 'pagedjs_pages');
+        m.seiten.forEach((zs, i) => {
+            const p = el('div', 'pagedjs_page d-ov-bild');
+            p.dataset.i = i;
+            p.style.width = m.w + 'px'; p.style.height = m.h + 'px';
+            p.style.backgroundImage = small;
+            p.style.backgroundSize = m.s.cols * 100 + '% ' + m.s.rows * 100 + '%';
+            p.style.backgroundPosition = bildPos(i, m.s.cols, m.s.rows);
+            zs.forEach(z => { const e = document.createElement('i'); e.hidden = true; e.dataset.ziel = z; p.appendChild(e); });
+            box.appendChild(p);
+        });
+        document.getElementById('d-book').style.display = 'none';
+        document.getElementById('d-pages').appendChild(box);
+        bild = { m, base, q, small, big: false, t: 0 };
+        addEventListener('scroll', nachladen, { passive: true });
+        ovReady();
+        return true;
+    }
+    // bigger than the small sprite on this screen: the visible tiles get their large picture, the small one stays beneath until it is there
+    function bildGroesse(w) {
+        bild.big = w * (window.devicePixelRatio || 1) > bild.m.s.w * 1.15;
+        nachladen();
+    }
+    // only where the scroll comes to rest, half a screen ahead and behind: the smooth scroll to the gold page and a
+    // flick on the phone pass dozens of tiles that need no large picture
+    function nachladen() {
+        clearTimeout(bild.t);
+        bild.t = setTimeout(() => {
+            if (bild.big) document.querySelectorAll('.d-ov-bild').forEach(p => {
+                const r = p.getBoundingClientRect();
+                if (r.bottom > -innerHeight / 2 && r.top < innerHeight * 1.5) gross(p);
+            });
+        }, 150);
+    }
+    function gross(p) {
+        if (p.dataset.gross) return;
+        p.dataset.gross = '1';
+        const m = bild.m, i = +p.dataset.i, k = Math.floor(i / m.l.per), j = i % m.l.per;
+        const rows = Math.ceil(Math.min(m.l.per, m.seiten.length - k * m.l.per) / m.l.cols);
+        p.style.backgroundImage = 'url("' + bild.base + 'l-' + k + '.webp' + bild.q + '"), ' + bild.small;
+        p.style.backgroundSize = m.l.cols * 100 + '% ' + rows * 100 + '%, ' + m.s.cols * 100 + '% ' + m.s.rows * 100 + '%';
+        p.style.backgroundPosition = bildPos(j, m.l.cols, rows) + ', ' + bildPos(i, m.s.cols, m.s.rows);
+    }
+
     if (OV) {
         document.documentElement.classList.add('d-ov');
         document.documentElement.classList.toggle('d-ov-narrow', innerWidth <= 640);   // already while it is built
@@ -379,5 +444,9 @@
     const mq = matchMedia('print');
     if (mq.addEventListener) mq.addEventListener('change', e => printing(e.matches));
     document.getElementById('d-print')?.addEventListener('click', () => window.print());
-    window.addEventListener('load', () => { build().catch(e => { say('Fehler: ' + e.message); console.error(e); }); });
+    const start = () => build().catch(e => { say('Fehler: ' + e.message); console.error(e); });
+    const loaded = () => { if (document.readyState === 'complete') start(); else window.addEventListener('load', start); };
+    // the overview first tries the pictures: it need not wait for the page to load, nor set anything
+    if (OV) ovBilder().catch(e => { console.error(e); return false; }).then(ok => { if (!ok) loaded(); });
+    else loaded();
 })();

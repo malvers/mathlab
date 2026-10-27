@@ -322,7 +322,9 @@
     const BOOK = ((location.pathname.match(/\/buch\/([^/]+)\//) || [])[1] || '').replace(/-(en|es|it|fr)$/, '');
     // the photos live in Cloudflare R2 (bucket "media", folder buch/fotos/), not in git: free delivery, 10 GB
     // (Doc, 25.10.2026: "warum nicht R2?" - "ja! Toll!"); upload: node tools/media_publish.mjs <file> buch/fotos/<name>.jpg
-    const FOTO_DIR = 'https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/buch/fotos/';
+    // The pictures of the print pages for the overview sit beside them (buch/seiten/, js/buch-druck.js).
+    const MEDIA = 'https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/buch/';
+    const FOTO_DIR = MEDIA + 'fotos/';
     const fotosReady = new Promise(done => {
         if (window.BUCH_FOTOS || !ME) { done(); return; }
         const sc = document.createElement('script');
@@ -628,5 +630,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 
-    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotosReady };
+    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotosReady, media: MEDIA };
 })();
