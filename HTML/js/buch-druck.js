@@ -104,6 +104,16 @@
         root.querySelectorAll('.b-widget .b-ctrls, .b-widget .b-range, .b-widget .b-seg, .b-widget button, .b-widget input, .b-widget .b-help, .b-widget .st-say-acts, .b-acts').forEach(e => e.remove());
     }
 
+    // a table wider than its column shrinks until it fits: widget tables with many columns of numbers (white-space: nowrap)
+    // scroll on screen but ran over the edge of the paper (druckcheck, 27.10.2026: Mathe 6 p. 37 +22 px, Mathe 9 p. 63 +153 px)
+    function fitTables(root) {
+        root.querySelectorAll('.b-table-wrap').forEach(w => {
+            const t = w.querySelector(':scope > table');
+            const over = t ? t.scrollWidth / (w.clientWidth || 1) : 1;
+            if (over > 1.005) t.style.zoom = (1 / over).toFixed(3);
+        });
+    }
+
     // solutions of tasks and self-checks move into the appendix; worked examples keep theirs in the text
     function harvest(sec, c) {
         const part = el('div', 'd-loes-kap');
@@ -238,6 +248,7 @@
             window.dispatchEvent(new Event('resize'));
             await wait(300);
             freezeCanvases(sec);
+            fitTables(sec);
             const part = harvest(sec, c);
             if (part) loes.appendChild(part);
         }
