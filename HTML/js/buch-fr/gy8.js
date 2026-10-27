@@ -89,6 +89,11 @@ window.BuchFR && BuchFR.add('gy8', {
         'Aus dem Quadrat $a^2$ wird die Ecke $b^2$ herausgeschnitten. Das blaue Stück wird gedreht und rechts angelegt: Es entsteht ein Rechteck mit den Seiten $a + b$ und $a - b$.':
             'Dans le carré $a^2$, on découpe le coin $b^2$. La partie bleue est tournée et placée à droite : on obtient un rectangle de côtés $a + b$ et $a - b$.',
         'Tipp auf einen Knoten: Dann leuchtet sein Teilterm auf.': 'Touche un nœud : sa sous-expression s’allume.',
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     },
     phrase: [
         // book fr-15 mathegy8-fr:
@@ -123,6 +128,11 @@ window.BuchFR && BuchFR.add('gy8', {
         ['}$ wäre falsch. ', '}$ serait faux. '], ['Es zählt der Anteil am ganzen Rad: ', 'Ce qui compte, c’est la part de la roue entière : '],
         [', $E$ ist eingetreten.', ', $E$ s’est réalisé.'], [', $E$ ist nicht eingetreten.', ', $E$ ne s’est pas réalisé.'],
         [' · Wahrscheinlichkeit $P(E) \\approx ', ' · probabilité $P(E) \\approx '],
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     ],
     rule: [
         // book fr-15 mathegy8-fr:
@@ -224,5 +234,10 @@ window.BuchFR && BuchFR.add('gy8', {
         [/Zuletzt: Feld <b>(\d+)<\/b>, \$E\$ ist (nicht )?eingetreten\./g, (m, f, n) => 'Dernier tour : secteur <b>' + f + '</b>, $E$ ' + (n ? 'ne s’est pas réalisé.' : 's’est réalisé.')],
         [/Gedreht: \$([^$]*)\$-mal · \$E\$ eingetreten: \$([^$]*)\$-mal · relative Häufigkeit (?:\$h\(E\))?/g,
             (m, a, b) => 'Tours de roue : $' + a + '$ · $E$ réalisé : $' + b + '$ fois · fréquence ' + (/\$h/.test(m) ? '$f(E)' : '')],
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     ]
 });

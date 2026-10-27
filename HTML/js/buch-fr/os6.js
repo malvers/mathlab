@@ -23,6 +23,8 @@ window.BuchFR && BuchFR.add('os6', {
         'von vorn': 'vue de face', 'von rechts': 'vue de droite',
         'Tippe im Bauplan auf ein Feld: Die Zahl sagt, wie viele Würfel dort übereinander stehen (bis 3, dann wieder 0). Kantenlänge 1 cm.':
             'Touche une case du plan : le nombre indique combien de cubes sont empilés à cet endroit (jusqu’à 3, puis de nouveau 0). Longueur d’arête : 1 cm.',
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -30,11 +32,15 @@ window.BuchFR && BuchFR.add('os6', {
         ['großes Dreieck', 'grand triangle'], ['mittleres Dreieck', 'triangle moyen'], ['kleines Dreieck', 'petit triangle'],
         // wuerfelbauos6: the line under the views (the number of cubes is a rule below)
         [' · Oberfläche ', ' · aire totale '],
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
     ],
     rule: [
         // book fr-11 mathe5-fr:
         // wuerfelbauos6: the button "Mauer" and "7 Würfel · Volumen"
         [/(data-v="mauer">)Mauer</, '$1Mur<'],
         [/<b>(\d+)<\/b> Würfel · Volumen /, (m, n) => '<b>' + n + '</b> ' + (n === '1' ? 'cube' : 'cubes') + ' · volume '],
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
     ]
 });

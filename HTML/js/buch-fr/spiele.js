@@ -32,6 +32,8 @@ window.BuchFR && BuchFR.add('spiele', {
         'Ergebnis': 'Résultat', 'Pasch': 'Double', 'Summe 7': 'Somme 7', 'sonst': 'autre', 'Gewinn $x_i$ in €': 'Gain $x_i$ en €',
         'Lass das Spiel 1000-mal laufen und vergleiche den mittleren Gewinn mit dem Erwartungswert.': 'Fais tourner le jeu 1000 fois et compare le gain moyen à l’espérance.',
         // book fr-15 mathegy8-fr:
+        // book fr-17 mathe6-fr:
+        // book fr-21 mathe10-fr:
     },
     phrase: [
         // book fr-6 mathegy10-fr:
@@ -55,9 +57,13 @@ window.BuchFR && BuchFR.add('spiele', {
         [' € pro Spiel.', ' € par partie.'], [' Fair wäre der Einsatz $e = \\tfrac{', ' La mise équitable serait $e = \\tfrac{'],
         ['Gespielt: ', 'Parties jouées : '], [' Spiele, mittlerer Gewinn <b>', ', gain moyen <b>'], [' €</b> pro Spiel (Erwartungswert ', ' €</b> par partie (espérance '],
         // book fr-15 mathegy8-fr:
+        // book fr-17 mathe6-fr:
+        // book fr-21 mathe10-fr:
     ],
     rule: [
         // book fr-6 mathegy10-fr:
         // book fr-15 mathegy8-fr:
+        // book fr-17 mathe6-fr:
+        // book fr-21 mathe10-fr:
     ]
 });

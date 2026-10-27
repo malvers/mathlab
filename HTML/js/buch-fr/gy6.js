@@ -157,6 +157,9 @@ window.BuchFR && BuchFR.add('gy6', {
         // primfaktor6 (French PGCD and PPCM with a semicolon, rules below)
         'Zahl $a$': 'Nombre $a$', 'Zahl $b$': 'Nombre $b$',
         'Gib für $a$ eine natürliche Zahl von 2 bis 9999 ein.': 'Saisis pour $a$ un entier naturel de 2 à 9999.',
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
     },
     phrase: [
         // book fr-13 mathegy6-fr:
@@ -288,6 +291,9 @@ window.BuchFR && BuchFR.add('gy6', {
             'Le PGCD est formé des facteurs premiers qui apparaissent dans les <b>deux</b> décompositions. Le PPCM contient chaque facteur premier autant de fois qu’il apparaît <b>au maximum</b>. '],
         ['Damit kürzt man: $', 'On s’en sert pour simplifier : $'],
         ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'Les deux nombres n’ont aucun diviseur commun autre que 1.'],
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
     ],
     rule: [
         // book fr-13 mathegy6-fr:
@@ -387,5 +393,8 @@ window.BuchFR && BuchFR.add('gy6', {
         [/Gefunden: (\d+) Primzahlen\. Gestrichen: /g, (m, n) => (n === '0' || n === '1' ? 'Trouvé : ' + n + ' nombre premier' : 'Trouvés : ' + n + ' nombres premiers') + '. Barrés : '],
         // primfaktor6: "ggT(360, 84) = 12" → "PGCD(360 ; 84) = 12", the same for kgV → PPCM
         [/(<span class="g-(?:lam|cy)">)(ggT|kgV)(<\/span>)\$\((\d+), (\d+)\) = /g, (m, a, k, b, x, y) => a + (k === 'ggT' ? 'PGCD' : 'PPCM') + b + '$(' + x + '\\,;\\,' + y + ') = '],
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
     ]
 });

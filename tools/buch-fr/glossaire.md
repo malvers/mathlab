@@ -1047,3 +1047,23 @@ and js/buch-fr/daten.js, in what the widgets write.
 | goldener Schnitt, goldene Zahl $\Phi$ | section dorée (partage en extrême et moyenne raison), nombre d’or $\Phi$ | OP title « Le nombre d’or » |
 | größerer / kleinerer Teil, goldenes Rechteck / Dreieck | grande / petite partie, rectangle d’or / triangle d’or | OP, widget goldenerschnitt |
 | Lab names | LABORATOIRE DES PUISSANCES, IDENTITÉS REMARQUABLES, LABORATOIRE DU REPÈRE, LABORATOIRE DES PARABOLES, PRINCIPE DE CAVALIERI, SOLIDES, PYTHAGORE, DÉMONSTRATION DE PYTHAGORE, TRIGONOMÉTRIE, LABORATOIRE DES POLYGONES, PLANCHE DE GALTON, DROITE D’AJUSTEMENT, LABORATOIRE FIBONACCI | FALLING PI, COOL SQUARES, COLLATZ stay |
+
+## mathe6-fr
+
+<!-- fr-17: terms of this book only (OS 6), write right below this line -->
+
+## mathe7-fr
+
+<!-- fr-18: terms of this book only (OS 7), write right below this line -->
+
+## mathe8-fr
+
+<!-- fr-19: terms of this book only (OS 8), write right below this line -->
+
+## mathe9-fr
+
+<!-- fr-20: terms of this book only (OS 9), write right below this line -->
+
+## mathe10-fr
+
+<!-- fr-21: terms of this book only (OS 10), write right below this line -->

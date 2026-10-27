@@ -60,6 +60,11 @@ window.BuchFR && BuchFR.add('geometrie', {
         'Goldenes Rechteck, in Quadrate zerlegt, mit Spirale': 'Rectangle d’or découpé en carrés, avec sa spirale',
         'Regelmäßiges Fünfeck mit Pentagramm': 'Pentagone régulier avec son pentagramme', 'Seite': 'Côté',
         'größerer Teil': 'grande partie', 'kleinerer Teil': 'petite partie',
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -81,6 +86,11 @@ window.BuchFR && BuchFR.add('geometrie', {
         [' $s$ und Diagonale $d$ des regelmäßigen Fünfecks: $\\tfrac{d}{s} = \\Phi', ' $c$ et diagonale $d$ du pentagone régulier : $\\tfrac{d}{c} = \\Phi'],
         ['Jede Diagonale wird von einer anderen im goldenen Schnitt geteilt: ', 'Chaque diagonale est partagée par une autre selon la section dorée : '],
         ['$= \\Phi$, und der größere Teil ist genau so lang wie die Seite.', '$= \\Phi$, et la grande partie est exactement aussi longue que le côté.'],
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -120,5 +130,10 @@ window.BuchFR && BuchFR.add('geometrie', {
             (m, n, f) => 'Après ' + n + (n === '1' ? ' carré retiré' : ' carrés retirés') + ', le grand côté ne mesure plus que $' + f + '$ de sa longueur. Les quarts de cercle forment la <b>spirale d’or</b>.'],
         // goldenerschnitt, the pentagram: "grande partie</span> : <span …>petite partie" gets its no-break space
         [/(<\/span>) : (<span class="g-phi">)/g, '$1 : $2'],
+        // book fr-17 mathe6-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     ]
 });

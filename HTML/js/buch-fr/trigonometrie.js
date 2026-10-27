@@ -52,6 +52,8 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         // pyramidekegel
         'Quadratische Pyramide': 'Pyramide à base carrée', 'Kegel': 'Cône', 'Körper': 'Solide', 'Höhe – Seitenhöhe': 'Hauteur – apothème', 'Höhe – Seitenkante': 'Hauteur – arête latérale',
         'Höhe – Mantellinie': 'Hauteur – génératrice', 'Rechtwinkliges Dreieck': 'Triangle rectangle', 'Grundkante $a$': 'Arête de base $a$', 'Radius $r$': 'Rayon $r$', 'Höhe $h$': 'Hauteur $h$',
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     },
     phrase: [
         // book fr-6 mathegy10-fr:
@@ -95,10 +97,14 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         ['Seitenkante $s', 'Arête latérale $s'], ['$ mit der Diagonale $d', '$ avec la diagonale $d'], ['Neigungswinkel der Seitenkante:', 'Angle d’inclinaison de l’arête latérale :'],
         ['$ · Oberfläche $O', '$ · aire totale $O'], ['Mantellinie $s', 'Génératrice $s'], ['Volumen $V', 'Volume $V'],
         ['halber Öffnungswinkel:', 'Demi-angle au sommet :'], ['$ · Öffnungswinkel $2', '$ · angle au sommet $2'], ['$ · Mantel $M', '$ · aire latérale $M'],
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     ],
     rule: [
         // book fr-6 mathegy10-fr:
         // messkurve: the unit after the distance of the markers ("$11,0$ Jahre</b>")
         [/\$ Jahre<\/b>/g, '$ ans</b>'],
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     ]
 });

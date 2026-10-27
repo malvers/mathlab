@@ -159,6 +159,9 @@ window.BuchFR && BuchFR.add('gy7', {
         'Mehr als $360^\\circ$: Die Vielecke überlappen sich. Daraus lässt sich keine Ecke falten.': 'Plus de $360^\\circ$ : les polygones se chevauchent. On ne peut pas en plier un sommet.',
         'Spalten: wie viele Vielecke an einer Ecke. Genau fünf Felder haben ein Häkchen: Es gibt genau fünf platonische Körper.':
             'Colonnes : combien de polygones à un sommet. Exactement cinq cases sont cochées : il existe exactement cinq solides de Platon.',
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -241,6 +244,9 @@ window.BuchFR && BuchFR.add('gy7', {
         // eckenwinkel7 ("So ist das <b>Ikosaeder</b> gebaut." is a rule)
         ['Jeder Innenwinkel: $', 'Chaque angle intérieur : $'], ['^\\circ$ · an der Ecke: $', '^\\circ$ · au sommet : $'],
         ['Weniger als $360^\\circ$: Klappt man die Lücke zu, entsteht eine räumliche Ecke. ', 'Moins de $360^\\circ$ : si l’on referme le vide, on obtient un sommet dans l’espace. '],
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -318,5 +324,8 @@ window.BuchFR && BuchFR.add('gy7', {
             'Cube': 'le <b>cube</b>', 'Oktaeder': 'l’<b>octaèdre</b>', 'Dodekaeder': 'le <b>dodécaèdre</b>', 'Ikosaeder': 'l’<b>icosaèdre</b>' }[s] || '<b>' + s + '</b>') + '.'],
         [/>Lücke (\d+)°</g, '>Vide $1°<'],
         [/^(\d+) regelmäßige (\d+)-Ecke an einer Ecke$/, (m, n, k) => n + ' polygones réguliers à ' + k + ' côtés autour d’un sommet'],
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
     ]
 });

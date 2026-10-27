@@ -184,3 +184,31 @@ Merged on 26.10.2026 (what the orchestrator learned):
   the later block takes the earlier label, or turns its own into a rule tied to the widget markup.
 - `known.json` conflicts came up four times in the cherry-picks: union of both sides, keys and lists sorted.
 - Widgets that size a box from their label need a French branch (`vierecke6`: `BuchFR.plain`).
+
+## Round 4 (27.10.2026): Oberschule 6 to 10
+
+Doc, 27.10.2026: "erst die Übersetzung die restlichen 5 ins Französisch … Ada Lovelace wieder mal die Orchestratorin".
+With these five every German textbook has a French edition. Same recipe as round 3: one local commit `fr4-prep:` (block
+lines `fr-17 … fr-21` in the modules these books load, the new empty modules os7, os8, os9, os10, a `## <book>-fr`
+heading per book at the end of `glossaire.md`), then one agent per book on its own branch from that commit.
+
+| Book | Agent | Worktree `.claude/worktrees/` | Branch | Port | Block | Modules |
+|---|---|---|---|---|---|---|
+| OS 6 `mathe6` | Voisin | `fr-voisin` | `fr-mathe6` | 8871 | `fr-17` | geometrie, gy5, gy6, gy8, os6, spiele |
+| OS 7 `mathe7` | Esnault | `fr-esnault` | `fr-mathe7` | 8872 | `fr-18` | geometrie, gy6, gy7, gy8, os6, os7, gleichungen, finanz, daten |
+| OS 8 `mathe8` | Anantharaman | `fr-anantharaman` | `fr-mathe8` | 8873 | `fr-19` | geometrie, gy6, gy7, gy8, os8, funktionen, stochastik, gleichungen, finanz |
+| OS 9 `mathe9` | Serfaty | `fr-serfaty` | `fr-mathe9` | 8874 | `fr-20` | geometrie, gy7, gy8, os9, trigonometrie, funktionen, daten, gleichungen |
+| OS 10 `mathe10` | Choquet | `fr-choquet` | `fr-mathe10` | 8875 | `fr-21` | geometrie, gy8, os10, trigonometrie, funktionen, exponential, stochastik, spiele, finanz |
+
+What is new in round 4:
+
+- **The Oberschule books reuse the Gymnasium widgets** (gy5 … gy8, geometrie, daten): most of their strings were
+  translated in round 3, with its rules (French school letters for solids in `geometrie.js`, `\cdot` → `\times`).
+  Search first, and do not write a second French for a string that has one.
+- **School name:** "Oberschule" stays German and is explained once on the start page, as in OS 5 (`mathe5-fr`).
+- **Collège or lycée:** `BuchFR.college` (js/buch-fr/funktionen.js) is true for `mathe5`–`mathe9` and GY 5–9: lines
+  $f(x) = ax + b$. OS 10 is the lycée convention $y = mx + p$, as GY 10.
+- **"Würfel":** gy7 turns a lone "Würfel" into « Cube »; a book that loads gy7 and stochastik (OS 8) needs the die
+  (« dé ») where a widget means the die - tie it to the widget's markup.
+- **No photos** in OS 6–10 yet; nothing to do in `js/buch-fotos.js`.
+- **Links to other textbooks:** after this round every book has a French edition.

@@ -37,6 +37,9 @@ window.BuchFR && BuchFR.add('gleichungen', {
         // book fr-14 mathegy7-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -69,6 +72,9 @@ window.BuchFR && BuchFR.add('gleichungen', {
         // book fr-14 mathegy7-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
     ],
     rule: [
         // fr0: the solution set is S in the French books (glossaire, section 4), also in the widget sentences:
@@ -84,5 +90,8 @@ window.BuchFR && BuchFR.add('gleichungen', {
         // book fr-14 mathegy7-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
     ]
 });

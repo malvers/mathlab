@@ -108,6 +108,7 @@ window.BuchFR && BuchFR.add('exponential', {
         'Wochen': 'semaines', 'Minuten': 'minutes',
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
+        // book fr-21 mathe10-fr:
     },
     phrase: [
         // book fr-6 mathegy10-fr:
@@ -151,6 +152,7 @@ window.BuchFR && BuchFR.add('exponential', {
         ['Wann sind nur noch', 'Quand ne reste-t-il plus que'], ['Wann sind es', 'Quand y en a-t-il'],
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
+        // book fr-21 mathe10-fr:
     ],
     rule: [
         // book fr-6 mathegy10-fr:
@@ -163,5 +165,6 @@ window.BuchFR && BuchFR.add('exponential', {
         [/\(Funktion (\d+) von (\d+)\)/g, '(fonction $1 sur $2)'],
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
+        // book fr-21 mathe10-fr:
     ]
 });

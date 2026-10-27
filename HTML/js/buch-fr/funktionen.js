@@ -163,6 +163,9 @@ window.BuchFR && BuchFR.add('funktionen', {
         'Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$': 'Forme canonique : $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$',
         'Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.': 'Maximum : le carré de $6\\,\\text{cm}$ de côté, $A = 36\\,\\text{cm}^2$.',
         'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': 'Quel rectangle de périmètre $24\\,\\text{cm}$ a la plus grande aire ?',
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -276,6 +279,9 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-10 mathegy12lk-fr:
         // book fr-15 mathegy8-fr:
         // book fr-16 mathegy9-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     ],
     rule: [
         // the letters of lines (see BuchFR.college above): gerade's zero, lage's intersection and orthogonality (× as everywhere in French)
@@ -328,5 +334,8 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-16 mathegy9-fr:
         // extremwert: "Jetzt: $A(6) = 6 \\cdot 28 = 168\\,\\text{m}^2$" - the French word and × (only this sentence of this widget)
         [/Jetzt: \$A\(([^$]*?) \\cdot /g, (m, s) => 'Maintenant : $A(' + s + ' \\times '],
+        // book fr-19 mathe8-fr:
+        // book fr-20 mathe9-fr:
+        // book fr-21 mathe10-fr:
     ]
 });

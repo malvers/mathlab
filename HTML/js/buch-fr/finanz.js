@@ -51,6 +51,9 @@ window.BuchFR && BuchFR.add('finanz', {
         'Tilgung (zusammen: die Rate)': 'amortissement (ensemble : l’échéance)',
         // book fr-5 mathefos12-fr:
         // book fr-6 mathegy10-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-21 mathe10-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -77,6 +80,9 @@ window.BuchFR && BuchFR.add('finanz', {
         ['Die Rate sinkt, weil die Restschuld und damit die Zinsen sinken. Zinsen insgesamt: <b>', 'L’échéance diminue, car le capital restant dû et donc les intérêts diminuent. Intérêts au total : <b>'],
         // book fr-5 mathefos12-fr:
         // book fr-6 mathegy10-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-21 mathe10-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -87,5 +93,8 @@ window.BuchFR && BuchFR.add('finanz', {
         [/^(\d+) J\.$/, (m, n) => n + (n === '1' ? ' an' : ' ans')],
         // book fr-5 mathefos12-fr:
         // book fr-6 mathegy10-fr:
+        // book fr-18 mathe7-fr:
+        // book fr-19 mathe8-fr:
+        // book fr-21 mathe10-fr:
     ]
 });

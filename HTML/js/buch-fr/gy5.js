@@ -135,6 +135,7 @@ window.BuchFR && BuchFR.add('gy5', {
             'Fais glisser le point de la droite s pour la faire tourner. Avec « Incliner h », g et h ne sont plus parallèles.',
         'Zwei Geraden g und h, geschnitten von s': 'Deux droites g et h coupées par la sécante s',
         'g und h sind parallel.': 'g et h sont parallèles.', 'g und h sind nicht parallel.': 'g et h ne sont pas parallèles.',
+        // book fr-17 mathe6-fr:
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -196,6 +197,7 @@ window.BuchFR && BuchFR.add('gy5', {
             'Les angles alternes-internes sont en deux points d’intersection différents, de part et d’autre de s et entre les droites. '],
         ['An <b>parallelen</b> Geraden sind sie <b>gleich groß</b>.', 'Avec des droites <b>parallèles</b>, ils ont <b>la même mesure</b>.'],
         ['Weil g und h <b>nicht parallel</b> sind, sind sie verschieden groß.', 'Comme g et h ne sont <b>pas parallèles</b>, leurs mesures sont différentes.'],
+        // book fr-17 mathe6-fr:
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -322,5 +324,6 @@ window.BuchFR && BuchFR.add('gy5', {
         [/(\d[\d ]*) ist gelegt\./, '$1 est posé.'],
         [/(\d[\d ]*) dazugelegt\. Jetzt muss gebündelt werden\./, '$1 ajouté. Il faut maintenant regrouper.'],
         // book fr-12 mathegy5-fr:
+        // book fr-17 mathe6-fr:
     ]
 });

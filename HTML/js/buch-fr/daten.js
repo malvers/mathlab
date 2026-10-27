@@ -49,6 +49,8 @@ window.BuchFR && BuchFR.add('daten', {
         'Histogramm der Körpergrößen': 'Histogramme des tailles',
         'Sehr schmale Klassen zeigen fast nur Einzelwerte, sehr breite verwischen alles. Dazwischen erkennt man die Form der Verteilung.':
             'Des classes très étroites ne montrent presque que des valeurs isolées, des classes très larges brouillent tout. Entre les deux, on reconnaît la forme de la distribution.',
+        // book fr-18 mathe7-fr:
+        // book fr-20 mathe9-fr:
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -57,6 +59,8 @@ window.BuchFR && BuchFR.add('daten', {
         // book fr-16 mathegy9-fr:
         // mittelwerte
         ['keiner (jeder Wert kommt nur einmal vor)', 'aucun (chaque valeur n’apparaît qu’une fois)'],
+        // book fr-18 mathe7-fr:
+        // book fr-20 mathe9-fr:
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -72,5 +76,7 @@ window.BuchFR && BuchFR.add('daten', {
         // histogramm: "8 Klassen der Breite 5 cm · häufigste Klasse $[165;\\,170)$ mit 10 von 40 Werten (25 %)" - French classes [165 ; 170[
         [/(\d+) Klassen der Breite (\d+) cm · häufigste Klasse \$\[(\d+);\\,(\d+)\)\$ mit (\d+) von (\d+) Werten \(/g,
             (m, k, w, a, b, c, n) => k + ' classes d’amplitude ' + w + ' cm · classe la plus fréquente $[' + a + '\\,;\\,' + b + '[$ avec ' + c + ' valeurs sur ' + n + ' ('],
+        // book fr-18 mathe7-fr:
+        // book fr-20 mathe9-fr:
     ]
 });
