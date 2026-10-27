@@ -29,6 +29,8 @@ window.BuchFR && BuchFR.add('os7', {
         'Am Ursprung ändern beide Koordinaten ihr Vorzeichen.': 'Par symétrie par rapport à l’origine, les deux coordonnées changent de signe.',
         'Ziehe P. Zuerst kommt die x-Koordinate (nach rechts oder links), dann die y-Koordinate (nach oben oder unten).':
             'Fais glisser P. On donne d’abord l’abscisse x (vers la droite ou vers la gauche), puis l’ordonnée y (vers le haut ou vers le bas).',
+        // dichteos7 (the materials are also helpers of the module; 'Stoff', 'Länge $a$', 'Breite $b$' are in js/buch-fr/gy7.js and gleichungen.js)
+        'Holz': 'Bois', 'Eis': 'Glace', 'Aluminium': 'Aluminium', 'Eisen': 'Fer', 'Gold': 'Or', 'Höhe $c$': 'Hauteur $c$',
     },
     phrase: [
         // book fr-18 mathe7-fr:
@@ -36,6 +38,10 @@ window.BuchFR && BuchFR.add('os7', {
         ['Jahreszinsen: ', 'Intérêts annuels : '],
         // quadrantos7
         ['Spiegelpunkt: ', 'Point symétrique : '],
+        // dichteos7 (the density sentence: masse volumique; the cuboid floats or sinks)
+        ['Volumen: ', 'Volume : '], ['Masse: ', 'Masse : '],
+        ['Die Dichte ist kleiner als die von Wasser (', 'La masse volumique est plus petite que celle de l’eau ('], ['): Der Körper schwimmt.', ') : le solide flotte.'],
+        ['Die Dichte ist größer als die von Wasser (', 'La masse volumique est plus grande que celle de l’eau ('], ['): Der Körper geht unter.', ') : le solide coule.'],
     ],
     rule: [
         // book fr-18 mathe7-fr:
@@ -48,5 +54,10 @@ window.BuchFR && BuchFR.add('os7', {
         // quadrantos7: "P(3 | 2)" in the label, "$P(3 ; 2)$ liegt im I. Quadranten." (the engine has already given the point its French semicolon)
         [/Koordinatensystem mit vier Quadranten, Punkt P\((-?\d+) \| (-?\d+)\)/, 'Repère avec quatre quadrants, point P($1 ; $2)'],
         [/\$ liegt (?=im |auf )/g, '$ se trouve '], [/\bim (I|II|III|IV)\. Quadranten/g, 'dans le quadrant $1'], [/\bauf einer Achse/g, 'sur un axe'],
+        // dichteos7: the label of the picture and "Dichte von Eisen: " (masse volumique du fer)
+        [/Quader aus (Holz|Eis|Aluminium|Eisen|Gold), (\d+) cm mal (\d+) cm mal (\d+) cm/, (m, st, a, b, c) => 'Pavé droit ' +
+            ({ Holz: 'en bois', Eis: 'en glace', Aluminium: 'en aluminium', Eisen: 'en fer', Gold: 'en or' })[st] + ', ' + a + ' cm sur ' + b + ' cm sur ' + c + ' cm'],
+        [/Dichte von (Fichtenholz|Eis|Aluminium|Eisen|Gold): /, (m, st) => 'Masse volumique ' +
+            ({ Fichtenholz: 'de l’épicéa', Eis: 'de la glace', Aluminium: 'de l’aluminium', Eisen: 'du fer', Gold: 'de l’or' })[st] + ' : '],
     ]
 });

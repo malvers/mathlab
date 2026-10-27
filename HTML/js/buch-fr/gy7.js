@@ -325,6 +325,10 @@ window.BuchFR && BuchFR.add('gy7', {
         [/>Lücke (\d+)°</g, '>Vide $1°<'],
         [/^(\d+) regelmäßige (\d+)-Ecke an einer Ecke$/, (m, n, k) => n + ' polygones réguliers à ' + k + ' côtés autour d’un sommet'],
         // book fr-18 mathe7-fr:
+        // faltnetz7 on a page that also loads js/buch-fr/gy6.js (OS 7, OS 8): the zufall6 rule of gy6.js turns every button
+        // data-v="wuerfel" into the die "Dé" before the cube rule above runs - the solid gets its "Cube" back, tied to its neighbours
+        [/(data-v="wuerfel">)Dé(<\/button><button type="button" data-v="quader">)/g, '$1Cube$2'],
+        [/(data-v="tetraeder">[^<]*<\/button><button type="button" data-v="wuerfel">)Dé(<)/g, '$1Cube$2'],
         // book fr-19 mathe8-fr:
         // book fr-20 mathe9-fr:
     ]

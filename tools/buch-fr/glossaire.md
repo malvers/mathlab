@@ -1114,6 +1114,16 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 | Satz von Pick $A = I + \tfrac{R}{2} - 1$ | théorème de Pick $A = I + \tfrac{B}{2} - 1$ | 4.1, as GY 6 (B for bord) |
 | Hausgiebel, Dachziegel, Gitterpapier / Karopapier | pignon, tuile, papier quadrillé | 4.1 |
 | Lab names | LABORATOIRE DES POLYGONES, PUZZLE D’ANGLES | 4.1, as GY 6/9 |
+| gerades Prisma, Grund- / Deckfläche, Mantel, Dreiecks- … Sechsecksprisma | prisme droit, base / face supérieure, surface latérale, prisme triangulaire … hexagonal | 4.2, as GY 6 and prisma6 |
+| $V = G \cdot h$, $M = u \cdot h$, $O = 2G + M$ | $V = \mathcal{B} \times h$, $A_L = P \times h$, $A = 2 \times \mathcal{B} + A_L$ | 4.2, the letters of GY 6/9; the German $G$, $M$, $O$, $u$ named once |
+| Ecken, Kanten, Flächen ($2n$, $3n$, $n + 2$) | sommets, arêtes, faces | 4.2 (faltnetz7 writes $S - A + F = 2$) |
+| Schrägbild, Zweitafelbild, Grundriss / Aufriss, Ordnungslinien, Netz, Klebelaschen | perspective cavalière, épure, vue de dessus / vue de face, lignes de rappel, patron, languettes de collage | 4.2, as GY 7 |
+| Dichte $\varrho$ („rho“), schwimmt / geht unter, Messbecher | masse volumique $\varrho$ (« rhô »), flotte / coule, verre doseur | 4.2 and the widget dichteos7 |
+| Stoffe: Holz, Eis, Aluminium, Eisen, Gold, Fichtenholz, Beton | bois, glace, aluminium, fer, or, épicéa, béton | dichteos7 (Matériau, Épicéa from gy7.js) |
+| Quader $a$, $b$, $c$ (dichteos7) | pavé droit: Longueur $a$, Largeur $b$, Hauteur $c$ | the widget letters kept |
+| Hohlkörper, umbauter Raum, Satteldach, Mehrwegglas | solide creux, volume de la maison, toit à deux pans, bocal consigné | 4.2 |
+| Pappos von Alexandria | Pappus d’Alexandrie | 4.2 excursion |
+| Lab names | SOLIDES, PRINCIPE DE CAVALIERI | 4.2, as GY 7 |
 
 ## mathe8-fr
 
