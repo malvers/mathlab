@@ -1067,3 +1067,47 @@ and js/buch-fr/daten.js, in what the widgets write.
 ## mathe10-fr
 
 <!-- fr-21: terms of this book only (OS 10), write right below this line -->
+
+Package fr-21 (Choquet), 27.10.2026: decisions made while translating OS 10; nothing above was changed. Lycée convention for
+lines ($y = mx + p$, `BuchFR.college` stays false for mathe10), × for the product in the pages (the widgets on the pages that load
+js/buch-fr/geometrie.js get it by its rule), points (2 ; 3), [AB], (AB).
+
+| German | French | Note |
+|---|---|---|
+| Oberschule, Realschulbildungsgang, Klasse 10 | Oberschule, filière Realschule, 10e année | start page: about the age of the French seconde |
+| Abschlussprüfung, Realschulabschluss | Abschlussprüfung (l’examen final), Realschulabschluss | stay German, explained once on the start page (« un peu comme le brevet »); elsewhere « l’examen final », 4.3 names it once more |
+| Wahlpflichtbereich 3 (chapter W) | Domaine au choix 3 (chapter OP) | as section 1 (Wahlpflicht) |
+| Haus der Vierecke, Drachenviereck, Schenkel (Trapez) | maison des quadrilatères, cerf-volant, côtés non parallèles | 1.1 |
+| Flächenformeln $A = g \cdot h$, $A = \tfrac{e \cdot f}{2}$ | $A = b \times h$, $A = \tfrac{D \times d}{2}$ | 1.1 (b base, D / d grande / petite diagonale); the parallelogram diagonals in 1.2 are $d$, $D$ |
+| GK : HY, AK : HY, GK : AK | opp. : hyp., adj. : hyp., opp. : adj. (SOH CAH TOA) | 1.1 Rückblick |
+| Satteldach, Giebel, First, Dachsparren | toit à deux pans, pignon, faîtage, chevrons | 1.1, 1.2 |
+| Sinussatz, Kosinussatz | loi des sinus, loi des cosinus | as fr-6; 1.2 names the théorème d’Al-Kashi once |
+| WSW, SWW, SsW · SSS, SWS | ACA, CAA, CcA · CCC, CAC | 1.2 Rückblick (C côté, A angle) |
+| Vermessungssäule, Grundlinie (Triangulation) | colonne de triangulation, base | 1.2 excursion, OP |
+| Bestimmungsdreieck, Mittelpunktswinkel, Umkreisradius | triangle élémentaire, angle au centre, rayon du cercle circonscrit | 1.3 |
+| halber Umfang $s$ (Heron) | demi-périmètre $p$ | 1.3 excursion |
+| Potenzfunktion, Normalparabel, Hyperbel, umgekehrt proportional | fonction puissance, parabole de référence, hyperbole, inversement proportionnel | 2.1 |
+| Bremsweg $s$, Rechteck $a$, $b$ | distance de freinage $d$, longueur $L$ et largeur $\ell$ | 2.1 |
+| Bestand (graph axis), Kapital $K$ | $Q$ on the hero graph of 2.2; $K_0$, $K_n$ stay | the finanz widgets (zins, tilgung) write $K_0$, $K_n$ as in GY 10 and FOS 11 - the pages follow them; wachstumsmodell keeps $B_n$ (fr-6) |
+| Zinsen für Tage $Z = K \cdot \tfrac{p}{100} \cdot \tfrac{t}{365}$ | $I = K \times \tfrac{p}{100} \times \tfrac{j}{365}$ | 4.1 (I intérêts, j jours) |
+| Bogenmaß, Einheitskreis, Periode $p$ | mesure en radians, cercle trigonométrique, période $p$ | 2.3; $p$ as the widget sinus writes it |
+| Hochwasser, Gezeitentafel | pleine mer, annuaire des marées | 2.3 |
+| Glücksrad, Weihnachtsmarkt, Garantieverlängerung | roue de loterie, marché de Noël, extension de garantie | 3, 4.3 |
+| Kopf (Münze) | face | 3 |
+| Gewinnchance, Gewinnerwartung, Auszahlung $A$ | chance de gagner, gain espéré, somme versée $V$ | 3 |
+| Reihen-, Parallelschaltung (Bauteile), Lichterkette | en série, en parallèle, guirlande lumineuse | 3 |
+| Lohnabrechnung, Brutto, Netto, Lohnsteuer, Sozialabgaben, Arbeitgeberanteil | fiche de paie, brut, net, impôt sur le revenu, cotisations sociales, part patronale | 4.1, widget lohnos10 (the German insurances: assurance retraite, maladie, dépendance, chômage) |
+| Haushaltsplan, Warmmiete, Kaufkraft, Schuldenfalle | budget, loyer charges comprises, pouvoir d’achat, piège de l’endettement | 4.1 |
+| Dispokredit, Ratenkauf, Ratenkredit, effektiver Jahreszins | découvert autorisé, achat à crédit, crédit à la consommation, TAEG | 4.1 |
+| Schuldnerberatung | services de conseil aux personnes endettées (Allemagne), « Points conseil budget » (France) | 4.1 aside |
+| Sparkasse, Sparbuch, Bausparvertrag | caisse d’épargne, livret d’épargne, plan d’épargne logement | 4.1 excursion |
+| Kegelstumpf, Pyramidenstumpf, Achsenschnitt | tronc de cône, tronc de pyramide, coupe axiale | 4.2, widget stumpfos10 |
+| Grundfläche $G$ ($G_1$, $G_2$), Mantel $M$, Mantellinie $s$, Oberfläche $O$, Dichte $\rho$ | $\mathcal{B}$ ($\mathcal{B}_1$, $\mathcal{B}_2$), $A_L$, génératrice $g$, $A$, masse volumique $\rho$ | 4.2 as fr-16; stumpfos10 by rules in js/buch-fr/os10.js |
+| Holz, Beton, Stahl | bois, béton, acier | 4.2 |
+| Fermi-Frage, Klavierstimmer | question de Fermi, accordeurs de pianos | 4.3 |
+| Grundgebühr, Tarif, Scheitelpunkt | abonnement, tarif, sommet | 4.3 |
+| Prozentpunkte | points de pourcentage | 4.3 |
+| Försterdreieck, Messrad, Peilstab, Daumensprung, Schattenmethode | triangle du forestier, roue de mesure, jalon de visée, saut du pouce, méthode des ombres | OP; widget schatten8 (fr-15: ombres $o$, $O$) |
+| Strahlensatz | théorème de Thalès | OP, as section 5 |
+| Nivellieren, Messlatte, Standlinie | nivellement, mire, base | OP |
+| Lab names | TRIGONOMÉTRIE, PYTHAGORE, LABORATOIRE DES PUISSANCES, LABORATOIRE DES PARABOLES, SIMULATION D’ÉPIDÉMIE, LE JEU DE DÉS, PLANCHE DE GALTON, SOLIDES, PRINCIPE DE CAVALIERI | « À ESSAYER AUSSI (EN ALLEMAND) » |
