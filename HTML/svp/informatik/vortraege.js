@@ -393,6 +393,14 @@
     /* which ids the database really has rows for - a duplicated topic has none
        until they are created, see ensureRows() */
     const rowsIn = new Set();
+    /* An empty answer is an answer too: a brand-new plan has no rows at all,
+       and waiting for "at least one row" meant they were never created - the
+       pupils' names went nowhere (mathe11, Doc 27.10.2026). */
+    let slotsRead = false;
+    /* KLASSE is a real Lerngruppe of this plan - only then may an EMPTY slot
+       table be filled, so a mistyped ?g= never leaves rows behind. The
+       timetable groups are confirmed in buildSwitch(). */
+    let groupKnown = !GROUPS_SRC && (PLAN_DEF.klassen || []).some((k) => k[0] === KLASSE);
     /* Wie viele Namensfelder eine Zeile zeigt. Zwei sind die Regel, drei fuer
        ein Trio - und eins fuer alle, die allein vortragen (Doc, 08.09.2026:
        "wenn man alleine arbeiten moechte soll das auch gehen"). Nur im Browser,
@@ -452,10 +460,13 @@
         }
         Object.keys(slotMap).forEach((k) => slotMap[k].forEach((s) => { s.taken = false; s.enc = null; s.name = null; }));
         rowsIn.clear();
+        slotsRead = true;
         /* Eintragen heisst UPDATE - anonyme Browser duerfen keine Zeilen anlegen.
            Fehlen sie (neue Lerngruppe, noch nicht angelegt), ginge jeder Name
-           still ins Leere. Also laut sagen statt schweigen. */
+           still ins Leere. Doc, angemeldet, legt sie hier an; alle anderen
+           bekommen es laut gesagt statt Schweigen. */
         if (!rows.length) {
+            if (a.hasSession() && groupKnown) { await ensureRows(); return; }
             setStatus('Für diese Lerngruppe sind in der Datenbank noch keine Plätze angelegt — Namen können nicht gespeichert werden.', true);
             return;
         }
@@ -1360,7 +1371,8 @@
     let rowsWarned = false;
     async function ensureRows() {
         const a = A();
-        if (!a || !rowsIn.size) return;           /* nothing read back yet */
+        if (!a || !slotsRead) return;             /* nothing read back yet */
+        if (!rowsIn.size && !groupKnown) return;  /* empty table: only for a real Lerngruppe */
         const missing = list.map((e) => e.id).filter((id) => !rowsIn.has(id));
         if (!missing.length) return;
         if (!a.hasSession()) {
@@ -1579,7 +1591,7 @@
            Der Schluessel steht in URL und Datenbank, der Klartext nur im Kopf. */
         const groups = [...seen].sort().map(g => ({ key: slug(g), label: g.replace(/,/g, ' + ') }));
         const here = groups.find(g => g.key === KLASSE);
-        if (here) groupLabel = here.label;
+        if (here) { groupLabel = here.label; groupKnown = true; }
         /* Ohne ?g stuende die erste Gruppe im Kopf, gespeichert wuerde aber unter
            data-klasse - ein stiller Fehlgriff. Also gleich umlenken. */
         if (!here) { location.replace(location.pathname + '?g=' + encodeURIComponent(groups[0].key)); return; }
