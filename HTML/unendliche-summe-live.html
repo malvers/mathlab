@@ -73,12 +73,26 @@
            (Doc, 07.10.2026: "da sind Zahlen angeschnitten, wenn die kommen") */
         .t.blass { opacity: 0; }
 
+        /* a quiet play sign behind the sum: the line is alive - there before the first click, gone while it runs, back
+           after a reset (Doc, 27.10.2026: "wir müssen da ein dezentes play icon hin machen ... ich hatte es heute
+           nicht gefunden") */
+        #play {
+            flex: none;
+            width: 30px;
+            height: 30px;
+            margin-left: 16px;
+            opacity: .4;
+            transition: opacity .3s ease, width .45s ease, margin .45s ease;
+        }
+        #box:hover #play { opacity: .75; }
+        #play.aus { opacity: 0; width: 0; margin-left: 0; }
+
         #mess { position: absolute; left: -9999px; top: 0; visibility: hidden; white-space: nowrap; font-size: 38px; }
     </style>
 </head>
 
 <body>
-    <div id="box" role="button" tabindex="0" aria-label="Die Summe läuft gegen 1 - klicken"><div id="reihe"></div></div>
+    <div id="box" role="button" tabindex="0" aria-label="Die Summe läuft gegen 1 - klicken"><div id="reihe"></div><svg id="play" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 8.2v7.6l6-3.8z" fill="currentColor"/></svg></div>
     <span id="mess"></span>
 
     <script src="morpheus/vendor/katex/katex.min.js"></script>
@@ -89,6 +103,8 @@
         const TAKT = 900;                               // ms per step
         const reihe = document.getElementById('reihe');
         const box = document.getElementById('box');
+        const play = document.getElementById('play');
+        const PLAY = 30 + 16;                           // #play's width and margin, while it shows
         // the deck's blue for numbers and formulas (deck.css --formel), so the sum wears the board's ink
         try {
             const blau = getComputedStyle(window.parent.document.documentElement).getPropertyValue('--formel').trim();
@@ -132,6 +148,7 @@
 
         function anfang() {                             // the board's box
             clearInterval(timer); timer = null;
+            play.classList.remove('aus');
             reihe.textContent = '';
             if (FORMEL) {                               // S_10 = 1 - 1/1024
                 k = 10;
@@ -212,7 +229,7 @@
         // the new numbers come, never after they were cut
         function passen() {
             const ziel = [...reihe.children].filter(e => !e.classList.contains('aus'))
-                .reduce((a, e) => a + (+e.dataset.w) * Z, 0);
+                .reduce((a, e) => a + (+e.dataset.w) * Z, 0) + (play.classList.contains('aus') ? 0 : PLAY);
             const frei = innerWidth - 12;
             box.style.transform = 'translateY(-50%)' + (ziel > frei ? ' scale(' + (frei / ziel) + ')' : '');
         }
@@ -226,6 +243,7 @@
             letzterKlick = jetzt;
             if (k >= ENDE) { anfang(); return; }        // at the end: back to the board's box
             if (timer) { clearInterval(timer); timer = null; return; }   // running: pause
+            play.classList.add('aus');
             schritt();
             timer = setInterval(schritt, TAKT);
         }
