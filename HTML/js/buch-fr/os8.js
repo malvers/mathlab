@@ -80,6 +80,14 @@ window.BuchFR && BuchFR.add('os8', {
         'Grundriss eines Zimmers und seine vier Wände nebeneinander, mit Türen und Fenstern': 'Plan d’une pièce et ses quatre murs côte à côte, avec portes et fenêtres',
         'Bodenfläche': 'Surface du sol', 'Wandfläche': 'Surface des murs', 'Farbe (2 Anstriche)': 'Peinture (2 couches)', 'Material zusammen': 'Matériel au total',
         'Luftraum des Zimmers': 'Volume d’air de la pièce',
+        // fahrrados8 (plateau, pignon, cadence, rapport de transmission, développement; the wheel's circumference is P)
+        'Reifengröße': 'Taille de roue', 'Kettenblatt vorn (Zähne)': 'Plateau avant (dents)', 'Ritzel hinten (Zähne)': 'Pignon arrière (dents)',
+        'Trittfrequenz (pro Minute)': 'Cadence (tours par minute)', 'Übersetzung': 'Rapport de transmission', 'Radumfang': 'Circonférence de la roue',
+        'Weg pro Kurbelumdrehung': 'Développement (par tour de pédalier)', 'Geschwindigkeit': 'Vitesse', 'Kurbelumdrehungen pro km': 'Tours de pédalier par km',
+        'Vereinfacht ist hier der Raddurchmesser die Zollangabe mal $2{,}54\\,\\text{cm}$. Großes Kettenblatt und kleines Ritzel: schnell, aber schwer zu treten.':
+            'Pour simplifier, le diamètre de la roue est ici la taille en pouces fois $2{,}54\\,\\text{cm}$. Grand plateau et petit pignon : rapide, mais dur à pédaler.',
+        // reifenos8
+        'Reifen': 'Pneu', 'Reifenbreite': 'Largeur du pneu', 'Raddurchmesser': 'Diamètre de la roue', 'in Zoll': 'en pouces', 'Umdrehungen pro km': 'Tours de roue par km',
     },
     phrase: [
         // book fr-19 mathe8-fr:
@@ -139,6 +147,8 @@ window.BuchFR && BuchFR.add('os8', {
         ['Annahmen: Laminat im Paket zu ', 'Hypothèses : stratifié en paquets de '],
         [' m² für 21,90 €, Tür 1,8 m², Fenster 1,56 m², 1 ℓ Farbe reicht für 7 m², Eimer zu 5 ℓ für 24,95 €. Pakete und Eimer gibt es nur ganz: Es wird aufgerundet.',
             ' m² à 21,90 €, porte 1,8 m², fenêtre 1,56 m², 1 L de peinture suffit pour 7 m², pots de 5 L à 24,95 €. Les paquets et les pots ne se vendent qu’entiers : on arrondit au-dessus.'],
+        // reifenos8
+        ['Aufschrift auf dem Reifen: ', 'Inscription sur le pneu : '], [' (Breite in mm, dann Felgendurchmesser in mm)', ' (largeur en mm, puis diamètre de la jante en mm)'],
     ],
     rule: [
         // book fr-19 mathe8-fr:
@@ -185,5 +195,15 @@ window.BuchFR && BuchFR.add('os8', {
         [/mit (\d+) % Verschnitt/g, 'avec $1 % de chutes'],
         [/ → (\d+) Pakete zu \$/g, (m, n) => ' → ' + n + (n === '1' ? ' paquet' : ' paquets') + ' de $'],
         [/\\,\\ell\$ → (\d+) Eimer zu 5 ℓ/g, (m, n) => '\\,\\text{L}$ → ' + n + (n === '1' ? ' pot' : ' pots') + ' de 5 L'],
+        // fahrrados8: the chain drive, the labels in the picture, the letter P of the circumference (u in the German table)
+        [/Kettenantrieb: Kettenblatt mit (\d+) Zähnen, Ritzel mit (\d+) Zähnen und das Hinterrad/g, 'Transmission par chaîne : plateau de $1 dents, pignon de $2 dents et la roue arrière'],
+        [/>Kettenblatt (\d+)</g, '>Plateau $1<'], [/>Ritzel (\d+)</g, '>Pignon $1<'],
+        [/\$u = \\pi \\times (?=[\d{},]+\\,\\text\{cm\})/g, () => '$P = \\pi \\times '], [/\$i \\times u \\approx /g, () => '$i \\times P \\approx '],
+        // reifenos8: the wheel in the picture and the remark on the inch size (before the inch buttons below)
+        [/Laufrad mit Felge (\d+) mm und Reifen (\d+) mm breit/g, 'Roue avec une jante de $1 mm et un pneu de $2 mm de large'],
+        [/Die Zollangabe ist eher ein Name: Ein „(\d+)-Zoll-Rad“ hat hier \$([\d{},]+)\$ Zoll\. Genauer ist die Millimeterangabe\./g,
+            (m, n, z) => 'La taille en pouces est plutôt un nom : une « roue de ' + n + ' pouces » mesure ici $' + z + '$ pouces. L’indication en millimètres est plus précise.'],
+        // fahrrados8, reifenos8: "28 Zoll" on the buttons
+        [/(\d+) Zoll\b/g, '$1 pouces'],
     ]
 });
