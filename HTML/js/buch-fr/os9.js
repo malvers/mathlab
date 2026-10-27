@@ -62,9 +62,9 @@ window.BuchFR && BuchFR.add('os9', {
         'Zylinder': 'Cylindre', 'Kegel': 'Cône', 'Halbkugel': 'Demi-boule', 'Mantellinie': 'Génératrice',
         'Zur Oberfläche gehören nur die Außenflächen: Der Deckkreis des Zylinders liegt innen und zählt nicht mit.':
             'L’aire totale ne compte que les faces extérieures : le disque supérieur du cylindre est à l’intérieur et ne compte pas.',
-        // parabelos9 (chapters 3.1, 3.2): parabole de référence, sommet, forme canonique, forme normalisée
+        // parabelos9 (chapters 3.1, 3.2): parabole de référence, sommet, forme canonique, forme normalisée; "Streckfaktor $a$" as in js/buch-fr/funktionen.js
         'Form': 'Forme', 'Graph einer quadratischen Funktion mit Scheitelpunkt': 'Courbe d’une fonction du second degré et son sommet',
-        'Streckfaktor $a$': 'Coefficient $a$', 'Verschiebung $c$': 'Translation $c$',
+        'Streckfaktor $a$': 'Facteur d’étirement $a$', 'Verschiebung $c$': 'Translation $c$',
         '$d$ (nach links, wenn positiv)': '$d$ (vers la gauche si positif)', '$e$ (nach oben, wenn positiv)': '$e$ (vers le haut si positif)',
         // quadglos9 (chapter 3.2): formule de résolution, discriminant D
         'Drei Parabeln mit zwei, einer und keiner Nullstelle': 'Trois paraboles avec deux zéros, un zéro et aucun zéro',
