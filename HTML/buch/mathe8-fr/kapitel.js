@@ -2,14 +2,12 @@
  * order of the school year (Stoffverteilungsplan svp/mathe/mathe8.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → LB 6 →
  * Wahlpflichtbereich 1; 4 Ustd./week, 100 + 8 Ustd.). Doc, 27.10.2026: the last five German books in French (French round 4,
  * tools/buch-fr/README.md, block fr-19). Terms as in tools/buch-fr/glossaire.md; collège letters for lines, f(x) = ax + b.
- * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter. No print
- * edition: druck: false hides the page overview (O) in js/buch.js.
+ * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Oberschule 8',
     short: 'Mathématiques OS 8',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour l’Oberschule (école secondaire de Saxe), 8e année, filière Realschule : expressions et calcul littéral, équations du premier degré et formules, fonctions, fonctions affines et systèmes d’équations avec des comparaisons de tarifs, cercle et théorème du demi-cercle, cylindre de révolution, agrandissements, réductions et homothéties, expériences aléatoires et arbres pondérés, les maths au quotidien avec le loyer, l’électricité et les coûts de travaux, et le vélo, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Expressions et calcul littéral',

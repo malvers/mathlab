@@ -2,14 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathe6.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 2; 5 Ustd./week,
  * 125 + 10 Ustd.). Doc, 27.10.2026: "erst die Übersetzung die restlichen 5 ins Französisch" (French round 4,
  * tools/buch-fr/README.md, block fr-17). Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents
- * (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the page
- * overview (O) in js/buch.js.
+ * (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Oberschule 6',
     short: 'Mathématiques OS 6',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour l’Oberschule (école secondaire de Saxe), 6e année : représenter, convertir et comparer les fractions et les nombres décimaux, calculer avec les fractions et les décimaux, correspondances et règle de trois, angles et triangles, aire et périmètre, solides et patrons, les mathématiques au quotidien et des jeux mathématiques, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Représenter les fractions et les décimaux',

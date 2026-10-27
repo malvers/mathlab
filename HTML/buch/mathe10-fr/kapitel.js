@@ -2,14 +2,12 @@
  * the order of the school year (Stoffverteilungsplan svp/mathe/mathe10.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlpflichtbereich 3;
  * 4 Ustd./week, 80 + 8 Ustd.). Doc, 27.10.2026: "erst die Übersetzung die restlichen 5 ins Französisch" (French round 4,
  * tools/buch-fr/README.md, block fr-21). Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents
- * (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the page
- * overview (O) in js/buch.js.
+ * (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Oberschule 10',
     short: 'Mathématiques OS 10',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour l’Oberschule (école secondaire de Saxe), 10e année, filière Realschule : triangles et polygones avec la loi des sinus et la loi des cosinus, fonctions puissances, exponentielles et sinus, variables aléatoires et espérance, salaire, épargne et crédit, solides avec le tronc de pyramide et le tronc de cône, résolution de problèmes pour l’examen final et mesures sur le terrain, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Triangles, quadrilatères et trigonométrie',

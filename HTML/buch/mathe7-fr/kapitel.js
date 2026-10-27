@@ -2,14 +2,12 @@
  * in the order of the school year (Stoffverteilungsplan svp/mathe/mathe7.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlbereich 3;
  * 4 Ustd./week, 100 + 8 Ustd.). Doc, 27.10.2026: "erst die Übersetzung die restlichen 5 ins Französisch" (French round 4,
  * tools/buch-fr/README.md, block fr-18). Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents
- * (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the page
- * overview (O) in js/buch.js.
+ * (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Oberschule 7',
     short: 'Mathématiques OS 7',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour l’Oberschule (école secondaire de Saxe), 7e année, filière Realschule : pourcentages et intérêts, hasard et fréquences, nombres rationnels, expressions et équations, quadrilatères, polygones et prismes avec masse et masse volumique, pavages à la manière d’Escher, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Pourcentages',

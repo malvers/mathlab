@@ -3,13 +3,12 @@
  * 4 Ustd./week, 100 + 8 Ustd.). Doc, 27.10.2026: the remaining five books in French (French round 4, tools/buch-fr/README.md,
  * block fr-20). Terms as in tools/buch-fr/glossaire.md, French school notation (× for the product, P perimeter, A total area,
  * points (2 ; 3), [AB] segment). Single source for the table of contents (index.html) and the previous/next cards at the end
- * of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Oberschule 9',
     short: 'Mathématiques OS 9',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour l’Oberschule (école secondaire de Saxe), 9e année, filière Realschule : le théorème de Pythagore et sa réciproque, sinus, cosinus et tangente, problèmes avec des triangles rectangles, pyramide, cône de révolution et boule, solides composés, fonctions et équations du second degré avec la formule de résolution, le nombre d’or et la statistique descriptive avec un projet personnel, avec des éléments interactifs à essayer et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Le théorème de Pythagore',
