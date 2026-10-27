@@ -25,6 +25,11 @@ window.BuchFR && BuchFR.add('os8', {
         'Faktor $a$': 'Facteur $a$', 'Länge $b$': 'Longueur $b$', 'Länge $c$': 'Longueur $c$',
         'Rechteck mit der Höhe a, aufgeteilt in zwei Teile: a mal (b plus c)': 'Rectangle de hauteur a partagé en deux parties : a fois (b plus c)',
         'Rechteck mit der Höhe a, aufgeteilt in zwei Teile: a mal (b minus c)': 'Rectangle de hauteur a partagé en deux parties : a fois (b moins c)',
+        // linearos8: the collège letters a (German m) and b (German n), as BuchFR.college does for gerade and lage
+        'Steigung $m$': 'Coefficient directeur $a$', 'y-Achsenabschnitt $n$': 'Ordonnée à l’origine $b$',
+        'Graph einer proportionalen Funktion mit Steigungsdreieck': 'Courbe d’une fonction linéaire avec le triangle de pente',
+        'Graph einer linearen Funktion mit Steigungsdreieck': 'Courbe d’une fonction affine avec le triangle de pente',
+        'Der Graph ist eine Gerade durch den Ursprung $(0 \\mid 0)$.': 'La courbe est une droite qui passe par l’origine $(0\\,;\\,0)$.',
     },
     phrase: [
         // book fr-19 mathe8-fr:
@@ -36,6 +41,11 @@ window.BuchFR && BuchFR.add('os8', {
         ['Vom ganzen Rechteck $a \\times b$ wird der schraffierte Streifen $a \\times c$ abgezogen.', 'Du rectangle entier $a \\times b$, on retire la bande hachurée $a \\times c$.'],
         ['Das ganze Rechteck ist so groß wie seine beiden Teile zusammen.', 'Le rectangle entier a la même aire que ses deux parties réunies.'],
         [' Jeder Summand in der Klammer wird mit dem Faktor $a$ multipliziert.', ' Chaque terme entre les parenthèses est multiplié par le facteur $a$.'],
+        // linearos8
+        ['Der Graph verläuft <b>waagerecht</b>.', 'La courbe est <b>horizontale</b>.'],
+        ['Jede Stelle ist eine Nullstelle.', 'Tout nombre est un zéro.'], ['Es gibt keine Nullstelle.', 'Il n’y a aucun zéro.'],
+        ['Nullstelle (türkis): $0 = ', 'Zéro (turquoise) : $0 = '], ['$, also $x_0 = ', '$, donc $x_0 = '],
+        ['Schnittpunkt mit der y-Achse (weiß): $', 'Point d’intersection avec l’axe des ordonnées (blanc) : $'],
     ],
     rule: [
         // book fr-19 mathe8-fr:
@@ -46,5 +56,9 @@ window.BuchFR && BuchFR.add('os8', {
         [/ Dass sie in (\d+) Zeilen? übereinstimmen, reicht nicht\./g, (m, n) => ' Qu’elles coïncident sur ' + n + (n === '1' ? ' ligne' : ' lignes') + ' ne suffit pas.'],
         // flaecheos8: "Probe mit $x = 5$: $3 \times (5 + 2) = 21$ und $3 \times 5 + 6 = 21$."
         [/Probe mit \$x = ([^$]+)\$: (\$[^$]+\$) und (\$[^$]+\$)\./g, 'Vérification avec $x = $1$ : $2 et $3.'],
+        // linearos8: the trend sentence, and the slope triangle's label on the canvas ("m = 0,5" → "a = 0,5", the collège letter)
+        [/Der Graph <b>steigt<\/b>: Geht man 1 nach rechts, geht es ([\d,]+) nach oben\./g, 'La courbe <b>monte</b> : quand on avance de 1 vers la droite, elle monte de $1.'],
+        [/Der Graph <b>fällt<\/b>: Geht man 1 nach rechts, geht es ([\d,]+) nach unten\./g, 'La courbe <b>descend</b> : quand on avance de 1 vers la droite, elle descend de $1.'],
+        [/^m = (?=[-−]?\d)/, 'a = '],
     ]
 });
