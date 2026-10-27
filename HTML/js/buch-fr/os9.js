@@ -74,6 +74,12 @@ window.BuchFR && BuchFR.add('os9', {
         'Quotienten benachbarter Fibonacci-Zahlen nähern sich der Zahl 1,618': 'Les quotients de nombres de Fibonacci voisins s’approchent du nombre 1,618',
         'Jede Zahl ist die Summe der beiden davor. Die Quotienten springen abwechselnd über und unter die grüne Linie $\\Phi \\approx 1{,}618$ und kommen ihr immer näher.':
             'Chaque nombre est la somme des deux précédents. Les quotients passent alternativement au-dessus et au-dessous de la ligne verte $\\Phi \\approx 1{,}618$ et s’en rapprochent de plus en plus.',
+        // spannweiteos9 (chapter 4): étendue (the row is a rule below: js/buch-fr/daten.js has "Spannweite" with its letter $e$), médiane, moyenne
+        'Ausreißer zu A (5,8 m)': 'Ajouter une valeur aberrante à A (5,8 m)', 'GRUPPE A': 'GROUPE A', 'GRUPPE B': 'GROUPE B',
+        'Weitsprungweiten zweier Gruppen mit Mittelwert und Spannweite': 'Longueurs de saut de deux groupes, avec la moyenne et l’étendue',
+        'kleinster Wert': 'plus petite valeur', 'größter Wert': 'plus grande valeur', 'Zentralwert': 'Médiane',
+        'Weiße Linie: Mittelwert. Die Klammer unter den Punkten reicht vom kleinsten bis zum größten Wert, ihre Länge ist die Spannweite. Ausgedachte Werte.':
+            'Ligne blanche : moyenne. Le crochet sous les points va de la plus petite à la plus grande valeur ; sa longueur est l’étendue. Valeurs inventées.',
     },
     phrase: [
         // book fr-20 mathe9-fr:
@@ -144,5 +150,7 @@ window.BuchFR && BuchFR.add('os9', {
                 '. Le sommet correspond à un <b>' + x.toLowerCase() + '</b>.'],
         [/(Fallend|Steigend) für \$x &lt; ([^$]*)\$, (steigend|fallend) für \$x &gt; /g,
             (m, a, x, b) => (a === 'Fallend' ? 'Décroissante' : 'Croissante') + ' pour $x &lt; ' + x + '$, ' + (b === 'steigend' ? 'croissante' : 'décroissante') + ' pour $x &gt; '],
+        // spannweiteos9: the table row "Spannweite" in bold, without the letter $e$ of the streuung table (this widget renders no TeX)
+        [/<td><b>Spannweite<\/b><\/td>/g, '<td><b>Étendue</b></td>'],
     ]
 });
