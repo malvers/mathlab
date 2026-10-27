@@ -40,6 +40,12 @@ jobs:
           mkdir -p HTML/resources/screenshots
           cp resources/screenshots/*.png HTML/resources/screenshots/ 2>/dev/null || true
 
+      # Lines-of-code counter in the intro (Doc 2026-10-27: it must follow every change, not a manual run).
+      # The runner only has this repo; Doc's other projects come from loc-extern.json, which every local
+      # run of the script refreshes. A failed count keeps the committed loc.js instead of failing the deploy.
+      - name: Count lines of code
+        run: python3 HTML/resources/scripts/update_loc.py || echo "LOC count failed - keeping the committed loc.js"
+
       # Keep the Pages artifact lean: HTML/ grew to ~288 MB and the deploy step then timed out
       # (Doc 2026-07-01, "All jobs have failed" after 10 min). Stage the site WITHOUT the source-only
       # full-res originals in resources/screenshots_original/ (~77 MB, referenced only by posterstudio.html)

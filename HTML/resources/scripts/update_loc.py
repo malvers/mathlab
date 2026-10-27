@@ -11,8 +11,13 @@ Counted: non-blank lines of real code extensions only (see CODE_EXTENSIONS) — 
 data files, no third-party vendor/minified bundles, no caches; identical files count once.
 
 Usage: python3 HTML/resources/scripts/update_loc.py   (any cwd; paths resolve from this file)
+
+Every Pages deploy runs this script too (Doc 2026-10-27: the number must follow every change). The runner only
+has this repo, so a local run also writes the count of all other sources to loc-extern.json, and a run that
+finds none of them (the runner) adds that saved count instead of dropping it.
 """
 import hashlib
+import json
 import os
 import subprocess
 from collections import Counter
@@ -20,6 +25,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OUTPUT_PATH = REPO_ROOT / 'HTML' / 'resources' / 'loc.js'
+EXTERN_PATH = Path(__file__).resolve().parent / 'loc-extern.json'
 
 CODE_EXTENSIONS = {
     '.html': 'HTML', '.js': 'JavaScript', '.mjs': 'JavaScript', '.css': 'CSS',
@@ -110,6 +116,13 @@ def main():
         tally(extra_files(d), by_lang, by_source, '~/' + d.relative_to(Path.home()).as_posix(), seen)
 
     total = sum(by_lang.values())
+    if dirs:
+        extern = total - by_source['repo']
+        EXTERN_PATH.write_text(json.dumps({'lines': extern, 'sources': len(dirs)}) + '\n', encoding='utf-8')
+    elif EXTERN_PATH.is_file():
+        extern = json.loads(EXTERN_PATH.read_text(encoding='utf-8'))['lines']
+        by_source['other projects (saved count)'] += extern
+        total += extern
     formatted = f'{total:,}'.replace(',', '.')  # 204.123 style
 
     for src, n in by_source.most_common():
