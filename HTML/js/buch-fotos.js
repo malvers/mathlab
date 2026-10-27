@@ -410,7 +410,14 @@ window.BUCH_FOTOS = {
         'kettenblatt': { artist: 'Petar Milošević', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Bicycle_crankset_Shimano_105_R7000_(chainring_50-34,_length_172.5mm,_11_speed).jpg',
             alt: { de: 'Die Kurbel mit den Kettenblättern eines Rennrads', en: 'The crankset with the chainrings of a racing bike', es: 'La biela con los platos de una bicicleta de carretera', it: 'La guarnitura con le corone di una bici da corsa', fr: 'Le pédalier avec les plateaux d’un vélo de course' } },
         'draisine': { artist: 'Daderot', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Draisine_or_Laufmaschine,_c._1820_-_Kurpf%C3%A4lzisches_Museum_der_Stadt_Heidelberg_-_Heidelberg,_Germany_-_DSC01526.jpg',
-            alt: { de: 'Eine Laufmaschine nach Karl Drais (um 1820)', en: 'A running machine after Karl Drais (around 1820)', es: 'Una máquina andante de Karl Drais (hacia 1820)', it: 'Una draisina di Karl Drais (intorno al 1820)', fr: 'Une draisienne de Karl Drais (vers 1820)' } }
+            alt: { de: 'Eine Laufmaschine nach Karl Drais (um 1820)', en: 'A running machine after Karl Drais (around 1820)', es: 'Una máquina andante de Karl Drais (hacia 1820)', it: 'Una draisina di Karl Drais (intorno al 1820)', fr: 'Une draisienne de Karl Drais (vers 1820)' } },
+        // mathe9 (2026-10-27)
+        'pilatusbahn': { artist: 'Maria Feofilova', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Pilatus_railway_train.jpg',
+            alt: { de: 'Die Pilatusbahn, die steilste Zahnradbahn der Welt', en: 'The Pilatus Railway, the steepest cogwheel railway in the world', es: 'El tren del Pilatus, el tren de cremallera más empinado del mundo', it: 'La ferrovia del Pilatus, la ferrovia a cremagliera più ripida del mondo', fr: 'Le chemin de fer du Pilate, le train à crémaillère le plus raide du monde' } },
+        'fernsehturm': { artist: 'Arild Vågen', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Berliner_Fernsehturm_November_2013.jpg',
+            alt: { de: 'Der Berliner Fernsehturm mit seiner Kugel', en: 'The Berlin TV Tower with its sphere', es: 'La torre de televisión de Berlín con su esfera', it: 'La torre della televisione di Berlino con la sua sfera', fr: 'La tour de télévision de Berlin avec sa sphère' } },
+        'fibonacci': { artist: 'Stefano Stabile', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Camposanto_monumentale_di_Pisa_-_Leonardo_Fibonacci_-_002.JPG',
+            alt: { de: 'Das Denkmal für Leonardo Fibonacci im Camposanto von Pisa', en: 'The statue of Leonardo Fibonacci in the Camposanto of Pisa', es: 'La estatua de Leonardo Fibonacci en el Camposanto de Pisa', it: 'La statua di Leonardo Fibonacci nel Camposanto di Pisa', fr: 'La statue de Leonardo Fibonacci au Camposanto de Pise' } }
     },
     books: {
         mathe11: {
@@ -1251,6 +1258,43 @@ window.BUCH_FOTOS = {
             'wb.html': [
                 { foto: 'kettenblatt', at: '#le2 .b-einstieg', put: 'in', w: 30 },
                 { foto: 'draisine', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ]
+        },
+        mathe9: {
+            'lb1-1.html': [
+                { foto: 'keilschrift', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb1-3.html': [
+                { foto: 'baldwin-street', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'pilatusbahn', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb2-1.html': [
+                { foto: 'louvre-pyramide', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb2-2.html': [
+                { foto: 'archimedes-fetti', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb2-3.html': [
+                { foto: 'kirchturm', at: '#le1 .b-einstieg', put: 'in', w: 24 },
+                { foto: 'fernsehturm', at: '#exkursion .b-row > .b-text', put: 'in', w: 22, pos: '50% 40%' }
+            ],
+            'lb3-1.html': [
+                { foto: 'muengstener-bruecke', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'galilei-fallrinne', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb3-2.html': [
+                { foto: 'ybc-7289', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb4.html': [
+                { foto: 'wahlurne', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'fahrraeder-schule', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'weitsprung', at: '#le3 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'nightingale-rosen', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'wb.html': [
+                { foto: 'sonnenblume', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'fibonacci', at: '#exkursion .b-row > .b-text', put: 'in', w: 24, pos: '50% 12%' }
             ]
         }
     }
