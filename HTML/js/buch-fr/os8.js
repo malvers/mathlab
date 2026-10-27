@@ -68,6 +68,18 @@ window.BuchFR && BuchFR.add('os8', {
         'Vorspeise: Möglichkeiten': 'Entrée : possibilités', 'Hauptgericht: Möglichkeiten': 'Plat principal : possibilités', 'Nachtisch: Möglichkeiten': 'Dessert : possibilités',
         'T-Shirt: Möglichkeiten': 'Tee-shirt : possibilités', 'Hose: Möglichkeiten': 'Pantalon : possibilités', 'Schuhe: Möglichkeiten': 'Chaussures : possibilités',
         'Das sind zu viele, um sie alle aufzuschreiben. Bei 4 Personen sind es noch 24.': 'C’est trop pour les écrire tous. Avec 4 personnes, il y en a encore 24.',
+        // stromos8 (Abschlag: mensualité, Nachzahlung: complément à payer, Guthaben: trop-perçu)
+        'Verbrauch im Jahr': 'Consommation annuelle', 'Arbeitspreis in ct/kWh': 'Prix du kWh en centimes', 'Grundpreis im Monat': 'Abonnement mensuel',
+        'Abschlag im Monat': 'Mensualité', 'Kosten': 'Coût', 'gezahlt': 'payé',
+        'Balken: Jahreskosten aus Arbeitspreis und Grundpreis gegen die gezahlten Abschläge': 'Barres : coût annuel (consommation et abonnement) comparé aux mensualités payées',
+        'Arbeitspreis': 'Consommation', 'Grundpreis': 'Abonnement', 'Jahreskosten': 'Coût annuel', 'Abschläge': 'Mensualités',
+        'Kosten und Abschläge sind genau gleich.': 'Le coût et les mensualités sont exactement égaux.',
+        // raumos8 ('Länge $a$' as in js/buch-fr/gleichungen.js, which this page does not load)
+        'Länge $a$': 'Longueur $a$', 'Breite $b$': 'Largeur $b$', 'Raumhöhe $h$': 'Hauteur de la pièce $h$', 'Türen': 'Portes', 'Fenster': 'Fenêtres',
+        'Verschnitt beim Boden': 'Chutes pour le sol',
+        'Grundriss eines Zimmers und seine vier Wände nebeneinander, mit Türen und Fenstern': 'Plan d’une pièce et ses quatre murs côte à côte, avec portes et fenêtres',
+        'Bodenfläche': 'Surface du sol', 'Wandfläche': 'Surface des murs', 'Farbe (2 Anstriche)': 'Peinture (2 couches)', 'Material zusammen': 'Matériel au total',
+        'Luftraum des Zimmers': 'Volume d’air de la pièce',
     },
     phrase: [
         // book fr-19 mathe8-fr:
@@ -119,6 +131,14 @@ window.BuchFR && BuchFR.add('os8', {
         ['Für jede Wahl im ersten Schritt gibt es alle Möglichkeiten des zweiten, für jede dieser Kombinationen alle des dritten: Die Anzahlen werden multipliziert.',
             'Pour chaque choix à la première étape, il y a toutes les possibilités de la deuxième, et pour chacune de ces combinaisons toutes celles de la troisième : on multiplie les nombres de possibilités.'],
         [' Wer die Kombination rät, trifft beim ersten Versuch mit der Wahrscheinlichkeit $', ' Celui qui devine la combinaison la trouve au premier essai avec la probabilité $'],
+        // stromos8
+        ['<b>Nachzahlung</b>: $', '<b>Complément à payer</b> : $'], ['$. Die Abschläge waren zu niedrig.', '$. Les mensualités étaient trop basses.'],
+        ['<b>Guthaben</b>: $', '<b>Trop-perçu</b> : $'], ['$ werden zurückgezahlt.', '$ sont remboursés.'],
+        [' Ein passender neuer Abschlag wäre etwa $', ' Une nouvelle mensualité adaptée serait d’environ $'], ['$ im Monat.', '$ par mois.'],
+        // raumos8 (litres are L in French, as everywhere in the French editions)
+        ['Annahmen: Laminat im Paket zu ', 'Hypothèses : stratifié en paquets de '],
+        [' m² für 21,90 €, Tür 1,8 m², Fenster 1,56 m², 1 ℓ Farbe reicht für 7 m², Eimer zu 5 ℓ für 24,95 €. Pakete und Eimer gibt es nur ganz: Es wird aufgerundet.',
+            ' m² à 21,90 €, porte 1,8 m², fenêtre 1,56 m², 1 L de peinture suffit pour 7 m², pots de 5 L à 24,95 €. Les paquets et les pots ne se vendent qu’entiers : on arrondit au-dessus.'],
     ],
     rule: [
         // book fr-19 mathe8-fr:
@@ -160,5 +180,10 @@ window.BuchFR && BuchFR.add('os8', {
         // the broad rule of js/buch-fr/gy8.js turns "10 · 2. Ring" into a product; here the dot only separates the rings
         [/(\d) × (?=[23]\. Ring: )/g, '$1 · '],
         [/([123])\. Ring: /g, (m, n) => (n === '1' ? '1re' : n + 'e') + ' molette : '],
+        // raumos8: the unrolled walls, the waste, the packs and tins, the litre (ℓ → L)
+        [/Wände abgewickelt: ([\d,]+) m lang, ([\d,]+) m hoch/g, 'Murs déroulés : $1 m de long, $2 m de haut'],
+        [/mit (\d+) % Verschnitt/g, 'avec $1 % de chutes'],
+        [/ → (\d+) Pakete zu \$/g, (m, n) => ' → ' + n + (n === '1' ? ' paquet' : ' paquets') + ' de $'],
+        [/\\,\\ell\$ → (\d+) Eimer zu 5 ℓ/g, (m, n) => '\\,\\text{L}$ → ' + n + (n === '1' ? ' pot' : ' pots') + ' de 5 L'],
     ]
 });
