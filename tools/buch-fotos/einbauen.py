@@ -20,16 +20,21 @@ credits = {}
 for name, key in spec['src'].items():
     if key == 'reuse': continue
     r = meta[tuple(key)]; src = f'dl/{name}.src'
-    for attempt in range(3):                        # a download can arrive cut off: then fetch it again
+    # a download can arrive cut off: then fetch it again. Some Commons thumbnails are cut off at one width every time
+    # (the long jump of OS 5 at 2000 px, 27.10.2026), so the last tries ask for other widths. Without an image the run
+    # stops: before, im still held the previous photo, and the cicada went up to R2 as "weitsprung".
+    im = None
+    for width in (2000, 2000, 2000, 1600, 1400):
         if not os.path.exists(src):
-            q = {'action': 'query', 'format': 'json', 'titles': r['title'], 'prop': 'imageinfo', 'iiprop': 'url', 'iiurlwidth': 2000}
+            q = {'action': 'query', 'format': 'json', 'titles': r['title'], 'prop': 'imageinfo', 'iiprop': 'url', 'iiurlwidth': width}
             d = json.load(urllib.request.urlopen(urllib.request.Request('https://commons.wikimedia.org/w/api.php?' + urllib.parse.urlencode(q), headers=UA), timeout=60))
             url = next(iter(d['query']['pages'].values()))['imageinfo'][0]['thumburl']
             open(src, 'wb').write(urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=180).read())
         try:
-            im = Image.open(src).convert('RGB'); break
+            im = Image.open(src); im.load(); im = im.convert('RGB'); break
         except OSError:
-            os.replace(src, src + '.bad')
+            im = None; os.replace(src, src + '.bad')
+    if im is None: sys.exit(f'{name}: no complete download from Commons ({r["title"]})')
     side = 2000 if name in banners else 1200
     im.thumbnail((side, side), Image.LANCZOS)
     out = f'out/{name}.jpg'; q = 82
