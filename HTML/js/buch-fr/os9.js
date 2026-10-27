@@ -54,6 +54,14 @@ window.BuchFR && BuchFR.add('os9', {
         'Eine Kugel in einem Zylinder, der genau um sie passt': 'Une boule dans le cylindre qui l’entoure exactement',
         'Die Kugel füllt immer genau $\\tfrac{2}{3}$ des Zylinders, der um sie passt. Das hat Archimedes entdeckt.':
             'La boule remplit toujours exactement les $\\tfrac{2}{3}$ du cylindre qui l’entoure. C’est Archimède qui l’a découvert.',
+        // turmos9 (chapter 2.3): cylindre + cône (génératrice g, base 𝓑) or + demi-boule; "Zylinder", "Kegel" as in js/buch-fr/gleichungen.js
+        'Turm: Zylinder + Kegel': 'Tour : cylindre + cône', 'Silo: Zylinder + Halbkugel': 'Silo : cylindre + demi-boule',
+        'Höhe des Zylinders $h$': 'Hauteur du cylindre $h$', 'Höhe des Kegels $h_K$': 'Hauteur du cône $h_{\\text{cône}}$',
+        'Turm aus einem Zylinder mit einem Kegeldach': 'Tour formée d’un cylindre et d’un toit conique',
+        'Silo aus einem Zylinder mit einer Halbkugel als Dach': 'Silo formé d’un cylindre avec une demi-boule comme toit',
+        'Zylinder': 'Cylindre', 'Kegel': 'Cône', 'Halbkugel': 'Demi-boule', 'Mantellinie': 'Génératrice',
+        'Zur Oberfläche gehören nur die Außenflächen: Der Deckkreis des Zylinders liegt innen und zählt nicht mit.':
+            'L’aire totale ne compte que les faces extérieures : le disque supérieur du cylindre est à l’intérieur et ne compte pas.',
     },
     phrase: [
         // book fr-20 mathe9-fr:
@@ -72,6 +80,9 @@ window.BuchFR && BuchFR.add('os9', {
         ['$ · Oberfläche $A = ', '$ · aire totale $A = '], ['$ · Mantel $A_L = ', '$ · aire latérale $A_L = '],
         // kugelos9 and turmos9: the volume of the cylinder V_cyl (German V_Z, Zylinder)
         ['$V_Z = ', '$V_{\\text{cyl}} = '],
+        // turmos9: V_cône, h_cône, V_demi-boule, 𝓑 (German V_K, h_K, V_H, A_G), the slant height g
+        ['$V_K = \\tfrac{1}{3}\\pi r^2 h_K', '$V_{\\text{cône}} = \\tfrac{1}{3}\\pi r^2 h_{\\text{cône}}'], ['$s = \\sqrt{r^2 + h_K^2}', '$g = \\sqrt{r^2 + h_{\\text{cône}}^2}'],
+        ['$V_H = ', '$V_{\\text{demi-boule}} = '], ['$A_G + 2\\pi r h + ', '$\\mathcal{B} + 2\\pi r h + '], ['\\pi r s \\approx ', '\\pi r g \\approx '],
     ],
     rule: [
         // book fr-20 mathe9-fr:
@@ -94,5 +105,7 @@ window.BuchFR && BuchFR.add('os9', {
         [/\$ · Oberfläche \$O = (?=a\^2 \+ 4)/g, '$$ · Oberfläche $$A = '],
         [/<svg viewBox="0 0 520 330" role="img" aria-label="Schrägbild (einer quadratischen Pyramide|eines Kegels) mit einem rechtwinkligen Dreieck">[\s\S]*/g,
             (m, k) => m.replace(/>s<\/text>/g, k === 'eines Kegels' ? '>g</text>' : '>ℓ</text>')],
+        // turmos9: the slant height of the cone roof in the picture is g
+        [/<svg viewBox="0 0 320 340" role="img" aria-label="Turm aus einem Zylinder mit einem Kegeldach">[\s\S]*?<\/svg>/g, m => m.replace(/>s<\/text>/g, '>g</text>')],
     ]
 });
