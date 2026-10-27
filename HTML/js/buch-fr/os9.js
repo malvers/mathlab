@@ -66,6 +66,9 @@ window.BuchFR && BuchFR.add('os9', {
         'Form': 'Forme', 'Graph einer quadratischen Funktion mit Scheitelpunkt': 'Courbe d’une fonction du second degré et son sommet',
         'Streckfaktor $a$': 'Coefficient $a$', 'Verschiebung $c$': 'Translation $c$',
         '$d$ (nach links, wenn positiv)': '$d$ (vers la gauche si positif)', '$e$ (nach oben, wenn positiv)': '$e$ (vers le haut si positif)',
+        // quadglos9 (chapter 3.2): formule de résolution, discriminant D
+        'Drei Parabeln mit zwei, einer und keiner Nullstelle': 'Trois paraboles avec deux zéros, un zéro et aucun zéro',
+        'Parabel y = x² + p x + q mit ihren Nullstellen': 'Parabole y = x² + p x + q et ses zéros',
     },
     phrase: [
         // book fr-20 mathe9-fr:
@@ -93,6 +96,14 @@ window.BuchFR && BuchFR.add('os9', {
         ['$ · Scheitelpunkt $S(', '$ · sommet $S('], ['$ (weiß)', '$ (en blanc)'], ['Wertebereich: $y ', 'Ensemble des images : $y '],
         ['Nullstellen (türkis): ', 'Zéros (en turquoise) : '], ['genau eine, $x_0 = ', 'un seul, $x_0 = '],
         ['keine, die Parabel trifft die x-Achse nicht', 'aucun, la parabole ne coupe pas l’axe des abscisses'],
+        // quadglos9
+        [' &nbsp; mit $p = ', ' &nbsp; avec $p = '],
+        ['<b>Zwei Lösungen</b>, weil die Diskriminante $D = ', '<b>Deux solutions</b>, car le discriminant vaut $D = '], [' &gt; 0$ ist: $x_1 ', ' &gt; 0$ : $x_1 '],
+        ['<b>Genau eine Lösung</b>, weil $D = 0$ ist: $x = ', '<b>Exactement une solution</b>, car $D = 0$ : $x = '],
+        ['$. Der Scheitelpunkt liegt auf der x-Achse.', '$. Le sommet est sur l’axe des abscisses.'],
+        ['<b>Keine Lösung</b>, weil $D = ', '<b>Aucune solution</b>, car $D = '],
+        [' &lt; 0$ ist: Aus einer negativen Zahl zieht man keine Wurzel. Die Parabel liegt ganz über der x-Achse.',
+            ' &lt; 0$ : on ne peut pas extraire la racine carrée d’un nombre négatif. La parabole est entièrement au-dessus de l’axe des abscisses.'],
     ],
     rule: [
         // book fr-20 mathe9-fr:
