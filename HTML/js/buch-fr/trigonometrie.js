@@ -99,6 +99,11 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         ['halber Öffnungswinkel:', 'Demi-angle au sommet :'], ['$ · Öffnungswinkel $2', '$ · angle au sommet $2'], ['$ · Mantel $M', '$ · aire latérale $M'],
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // sinussatz, dreiecksflaeche: the OS 10 pages also load js/buch-fr/geometrie.js, whose rule turns \cdot into \times
+        // before the pieces are looked up - the same pieces as fr-6 above, in the form they arrive in
+        ['Die Höhe aus zwei Richtungen: $h_c = b \\times \\sin\\alpha = ', 'La hauteur calculée de deux façons : $h_c = b \\times \\sin\\alpha = '],
+        ['$ und $h_c = a \\times \\sin\\beta \\approx ', '$ et $h_c = a \\times \\sin\\beta \\approx '],
+        ['Höhe $h = b \\times \\sin\\gamma = ', 'Hauteur $h = b \\times \\sin\\gamma = '],
     ],
     rule: [
         // book fr-6 mathegy10-fr:
