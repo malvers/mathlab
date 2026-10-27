@@ -353,7 +353,24 @@ window.BUCH_FOTOS = {
         'platonische-modelle': { artist: 'Prateek Karandikar', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Models_of_four_platonic_solids.JPG',
             alt: { de: 'Modelle platonischer Körper aus Stäben und Kugeln', en: 'Models of Platonic solids made of rods and balls', es: 'Modelos de sólidos platónicos hechos de varillas y bolas', it: 'Modelli di solidi platonici fatti di bastoncini e sfere', fr: 'Des modèles de solides de Platon en tiges et en boules' } },
         'kepler-mysterium': { artist: 'Johannes Kepler', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Kepler_Platonic_Solids.tif',
-            alt: { de: 'Keplers Modell des Sonnensystems aus dem Mysterium Cosmographicum (1596)', en: 'Kepler’s model of the solar system from the Mysterium Cosmographicum (1596)', es: 'El modelo del sistema solar de Kepler del Mysterium Cosmographicum (1596)', it: 'Il modello del sistema solare di Keplero dal Mysterium Cosmographicum (1596)', fr: 'Le modèle du système solaire de Kepler tiré du Mysterium Cosmographicum (1596)' } }
+            alt: { de: 'Keplers Modell des Sonnensystems aus dem Mysterium Cosmographicum (1596)', en: 'Kepler’s model of the solar system from the Mysterium Cosmographicum (1596)', es: 'El modelo del sistema solar de Kepler del Mysterium Cosmographicum (1596)', it: 'Il modello del sistema solare di Keplero dal Mysterium Cosmographicum (1596)', fr: 'Le modèle du système solaire de Kepler tiré du Mysterium Cosmographicum (1596)' } },
+        // mathegy8 (2026-10-27)
+        'viete': { artist: 'Charles Méryon', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Fran%C3%A7ois_Vi%C3%A8te_MET_DP813249.jpg',
+            alt: { de: 'François Viète, Radierung von Charles Méryon', en: 'François Viète, etching by Charles Méryon', es: 'François Viète, aguafuerte de Charles Méryon', it: 'François Viète, acquaforte di Charles Méryon', fr: 'François Viète, eau-forte de Charles Méryon' } },
+        'recorde-gleichheitszeichen': { artist: 'Robert Recorde', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Whetstone-of-Witte-pp-150-151.jpg',
+            alt: { de: 'Zwei Seiten aus Robert Recordes „The Whetstone of Witte“ (1557) mit dem ersten Gleichheitszeichen', en: 'Two pages of Robert Recorde’s “The Whetstone of Witte” (1557) with the first equals sign', es: 'Dos páginas de «The Whetstone of Witte» (1557) de Robert Recorde con el primer signo igual', it: 'Due pagine di «The Whetstone of Witte» (1557) di Robert Recorde con il primo segno di uguale', fr: 'Deux pages de « The Whetstone of Witte » (1557) de Robert Recorde avec le premier signe égal' } },
+        'ibry-fahrplan': { artist: 'Étienne-Jules Marey', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Ibry%27s_Visual_Train_Schedule.png',
+            alt: { de: 'Ein Bildfahrplan der Strecke Paris–Lyon nach Ibry', en: 'A graphical train timetable of the Paris–Lyon line after Ibry', es: 'Un horario gráfico de trenes de la línea París–Lyon según Ibry', it: 'Un orario grafico dei treni della linea Parigi–Lione secondo Ibry', fr: 'Un graphique de circulation des trains de la ligne Paris–Lyon d’après Ibry' } },
+        'fasan': { artist: 'Charles J. Sharp', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Common_pheasant_(Phasianus_colchicus)_male_3.jpg',
+            alt: { de: 'Ein Fasan auf einer Wiese', en: 'A pheasant in a meadow', es: 'Un faisán en un prado', it: 'Un fagiano in un prato', fr: 'Un faisan dans un pré' } },
+        'storchschnabel': { artist: 'Andrew Davidson', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Francis_Galton%27s_pantograph.jpg',
+            alt: { de: 'Ein Storchschnabel (Pantograf) zum Vergrößern von Zeichnungen', en: 'A pantograph for enlarging drawings', es: 'Un pantógrafo para ampliar dibujos', it: 'Un pantografo per ingrandire i disegni', fr: 'Un pantographe pour agrandir des dessins' } },
+        'baumschatten': { artist: 'Basile Morin', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Long_shadow_of_a_dead_tree_with_its_branches_on_the_dry_fields_of_Laos_-_landscape.jpg',
+            alt: { de: 'Ein Baum wirft einen langen Schatten auf ein trockenes Feld', en: 'A tree casts a long shadow on a dry field', es: 'Un árbol proyecta una larga sombra sobre un campo seco', it: 'Un albero proietta una lunga ombra su un campo secco', fr: 'Un arbre projette une longue ombre sur un champ sec' } },
+        'gulliver': { artist: 'Nevit Dilmen', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Harikalar_Diyari_Gulliver_Lilliputians_06034_nevit.jpg',
+            alt: { de: 'Eine große Gulliver-Figur zwischen kleinen Liliputanern in einem Freizeitpark', en: 'A large Gulliver figure among small Lilliputians in a theme park', es: 'Una gran figura de Gulliver entre pequeños liliputienses en un parque temático', it: 'Una grande statua di Gulliver tra piccoli lillipuziani in un parco divertimenti', fr: 'Une grande statue de Gulliver parmi de petits Lilliputiens dans un parc d’attractions' } },
+        'polya': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:ETH-BIB-Polya,_Georg_(1887-1985)-Portrait-Portr_13887-19-AL.tif',
+            alt: { de: 'George Pólya, Porträt', en: 'George Pólya, portrait', es: 'George Pólya, retrato', it: 'George Pólya, ritratto', fr: 'George Pólya, portrait' } }
     },
     books: {
         mathe11: {
@@ -977,6 +994,56 @@ window.BUCH_FOTOS = {
                 { foto: 'platonische-modelle', at: '#le1 .b-einstieg', put: 'in', w: 40 },
                 { foto: 'euler', at: '#le2 .b-einstieg', put: 'in', w: 24 },
                 { foto: 'kepler-mysterium', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ]
+        },
+        mathegy8: {
+            'lb1-1.html': [
+                { foto: 'streichhoelzer', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'viete', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb1-2.html': [
+                { foto: 'balkenwaage', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'recorde-gleichheitszeichen', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb2-1.html': [
+                { foto: 'zwei-rote-wuerfel', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'gluecksrad-kind', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'reisszwecken', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'muenzwurf', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb2-2.html': [
+                { foto: 'murmeln', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'zahlenschloss', at: '#le2 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'pascal', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb3-1.html': [
+                { foto: 'schulbus', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'ibry-fahrplan', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb3-2.html': [
+                { foto: 'taxi-koeln', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'kerze', at: '#le2 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'gauss', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb3-3.html': [
+                { foto: 'kinosaal', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'fasan', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb4-1.html': [
+                { foto: 'storchschnabel', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb4-2.html': [
+                { foto: 'baumschatten', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'gulliver', at: '#le3 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb5.html': [
+                { foto: 'polya', at: '#exkursion .b-row > .b-text', put: 'in', w: 22, pos: '50% 25%' }
+            ],
+            'wb.html': [
+                { foto: 'wuerfel-spieltisch', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'zicklein', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'monte-carlo', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
             ]
         }
     }
