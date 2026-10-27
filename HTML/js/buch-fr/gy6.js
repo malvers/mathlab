@@ -296,6 +296,9 @@ window.BuchFR && BuchFR.add('gy6', {
         // fr-15) runs before the phrases, so the sentence of fr-13 above arrives with $AB$
         ['Die gestrichelte Linie ist parallel zu $AB$. $\\alpha\'$ und $\\alpha$ sind Wechselwinkel an Parallelen, also gleich groß. Ebenso $\\beta\'$ und $\\beta$. ',
             'La ligne en pointillés est parallèle à $(AB)$. $\\alpha\'$ et $\\alpha$ sont des angles alternes-internes formés par des parallèles, donc ils ont la même mesure. De même pour $\\beta\'$ et $\\beta$. '],
+        // prisma6 on the pages that also load gy5: the rules $u = → $P = and $O = → $A = of js/buch-fr/gy5.js (rechteck5,
+        // quader5, block fr-11) run before the phrases, so two lines of fr-13 above arrive with the French letters already
+        ['$, Umfang der Grundfläche $P', '$, périmètre de la base $P'], ['Oberfläche $A = 2 \\times G + M', 'Aire totale $A = 2 \\times \\mathcal{B} + A_L'],
         // book fr-18 mathe7-fr:
         // book fr-19 mathe8-fr:
     ],
