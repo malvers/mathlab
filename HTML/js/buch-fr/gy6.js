@@ -339,7 +339,8 @@ window.BuchFR && BuchFR.add('gy6', {
         [/Bei „([^“]+)“ kommen aber (\d+) Pfeile an, rückwärts ist die Zuordnung also nicht eindeutig\./g,
             'Mais « $1 » reçoit $2 flèches : dans l’autre sens, la correspondance n’est donc pas univoque.'],
         // zufall6: the die (the cube of other books has the same word), the coin side "Zahl", the table head, the number of trials
-        [/(data-v="wuerfel">)(?:Würfel|\u0003\d+\u0004)(<)/g, '$1Dé$2'],
+        // (the die button is tied to its neighbour "rad": faltnetz7 on OS 7/8 pages has a button data-v="wuerfel" for the cube)
+        [/(data-v="wuerfel">)(?:Würfel|\u0003\d+\u0004)(<\/button><button type="button" data-v="rad">)/g, '$1Dé$2'],
         [/(<td>|<text class="d-num"[^>]*>)Zahl(<\/)/g, '$1Pile$2'],
         [/(g6-tab"><tr><th>)(?:Ergebnis|\u0003\d+\u0004)(<\/th><th>)/g, '$1Issue$2'],
         [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '0' || n === '1' ? ' essai' : ' essais') + '<'],
