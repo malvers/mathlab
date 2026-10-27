@@ -50,8 +50,6 @@ window.BuchFR && BuchFR.add('os6', {
         'Die 36 Ergebnisse zweier Würfel mit ihrer Augensumme': 'Les 36 issues de deux dés avec la somme de leurs points',
         'Säulendiagramm: relative Häufigkeiten der Augensummen': 'Diagramme en colonnes : fréquences des sommes des points',
         // book fr-18 mathe7-fr:
-        // tangramos6 (4.1): an identical copy of the fr-17 entries (Voisin, OS 6) for the pages of this book - keep one copy when merging
-        'Tangram: sieben Teile in einem Quadrat': 'Tangram : sept pièces dans un carré',
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -80,10 +78,6 @@ window.BuchFR && BuchFR.add('os6', {
             'Touche une case ou une colonne. La ligne en pointillés montre la part des cases. Le 7 a le plus de cases ('],
         ['), die 2 und die 12 nur eins.', '), le 2 et le 12 une seule.'],
         // book fr-18 mathe7-fr:
-        // tangramos6 (4.1): an identical copy of the fr-17 entries (Voisin, OS 6) for the pages of this book - keep one copy when merging
-        ['Anteil am Quadrat: ', 'Part du carré : '],
-        ['Ist das Quadrat 4 cm × 4 cm groß, hat das Teil ', 'Si le carré mesure 4 cm × 4 cm, la pièce a une aire de '],
-        ['Tippe auf ein Teil. Alle sieben zusammen ergeben das ganze Quadrat: ', 'Touche une pièce. Les sept pièces ensemble forment le carré entier : '],
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -106,8 +100,5 @@ window.BuchFR && BuchFR.add('os6', {
         [/(<p style="margin:0">)(\d+) Würfe( · zuletzt |<\/p>)/, (m, a, n, b) => a + n + (n === '0' || n === '1' ? ' lancer' : ' lancers') + b],
         [/Augensumme <b>(\d+)<\/b>: (\d+)-mal(, relativ )?/, (m, s, k, r) => 'Somme des points <b>' + s + '</b> : ' + k + ' fois' + (r ? ', fréquence ' : '')],
         // book fr-18 mathe7-fr:
-        // tangramos6 (4.1): an identical copy of the fr-17 entries (Voisin, OS 6) for the pages of this book - keep one copy when merging
-        [/(<p style="margin:0"><b>)(Quadrat|Parallelogramm)(<\/b><\/p>)/, (m, a, n, b) => a + (n === 'Quadrat' ? 'carré' : 'parallélogramme') + b],
-        [/Genauso groß: ([^(<]+) \(hell markiert\)\./, (m, l) => 'Même aire : ' + l.replace(/\bQuadrat\b/g, 'carré').replace(/\bParallelogramm\b/g, 'parallélogramme') + ' (en surbrillance).'],
     ]
 });
