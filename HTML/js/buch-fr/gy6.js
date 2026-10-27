@@ -292,6 +292,10 @@ window.BuchFR && BuchFR.add('gy6', {
         ['Damit kürzt man: $', 'On s’en sert pour simplifier : $'],
         ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'Les deux nombres n’ont aucun diviseur commun autre que 1.'],
         // book fr-17 mathe6-fr:
+        // winkelsumme6 on the pages that also load gy8: the rule \overline{AB} → AB of js/buch-fr/gy8.js (streckung8, block
+        // fr-15) runs before the phrases, so the sentence of fr-13 above arrives with $AB$
+        ['Die gestrichelte Linie ist parallel zu $AB$. $\\alpha\'$ und $\\alpha$ sind Wechselwinkel an Parallelen, also gleich groß. Ebenso $\\beta\'$ und $\\beta$. ',
+            'La ligne en pointillés est parallèle à $(AB)$. $\\alpha\'$ et $\\alpha$ sont des angles alternes-internes formés par des parallèles, donc ils ont la même mesure. De même pour $\\beta\'$ et $\\beta$. '],
         // book fr-18 mathe7-fr:
         // book fr-19 mathe8-fr:
     ],
