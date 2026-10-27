@@ -42,6 +42,12 @@ window.BuchFR && BuchFR.add('os8', {
         'Tarif A: € pro kWh': 'Tarif A : € par kWh', 'Tarif B: € pro kWh': 'Tarif B : € par kWh',
         'Tarif A: € pro km': 'Tarif A : € par km', 'Tarif B: € pro km': 'Tarif B : € par km',
         'Kosten der Tarife A und B in Abhängigkeit vom Verbrauch': 'Coût des tarifs A et B en fonction de la consommation',
+        // kreisflaecheos8 (the perimeter is P, as everywhere in the French editions)
+        'Anzahl der Stücke $n$': 'Nombre de parts $n$',
+        // rosetteos8
+        'Hilfslinien ein/aus': 'Traits de construction oui/non', 'Zweiter Ring ein/aus': 'Deuxième rangée oui/non', 'Anzahl der Blätter $n$': 'Nombre de pétales $n$',
+        'Bei 6 Blättern passt alles genau: Der Radius lässt sich sechsmal auf der Kreislinie abtragen. Jeder Bogen um einen der Punkte geht durch den Mittelpunkt und die beiden Nachbarpunkte. Die Blätter berühren sich gerade.':
+            'Avec 6 pétales, tout tombe juste : le rayon se reporte exactement six fois sur le cercle. Chaque arc centré en l’un des points passe par le centre et par les deux points voisins. Les pétales se touchent tout juste.',
     },
     phrase: [
         // book fr-19 mathe8-fr:
@@ -75,6 +81,15 @@ window.BuchFR && BuchFR.add('os8', {
         ['Beide Tarife kosten gleich viel pro Einheit, die Geraden sind parallel. ', 'Les deux tarifs coûtent autant par unité, les droites sont parallèles. '],
         ['Die Tarife sind gleich teuer.', 'Les deux tarifs coûtent autant.'],
         ['Gleichsetzen: $', 'En égalant : $'], ['$ ergibt $x \\approx ', '$ donne $x \\approx '], ['$. Dann kosten beide etwa $', '$. Les deux coûtent alors environ $'],
+        // kreisflaecheos8 (the products are \times already)
+        ['\\,\\%$ von $r$), ', '\\,\\%$ de $r$), '],
+        ['seine Länge ist der halbe Umfang $\\dfrac{u}{2} = \\pi \\times r$. Je mehr Stücke, desto genauer stimmt es:',
+            'sa longueur est la moitié du périmètre, $\\dfrac{P}{2} = \\pi \\times r$. Plus il y a de parts, plus c’est exact :'],
+        // rosetteos8
+        ['Jedes Blatt besteht aus zwei Kreisbögen mit dem Radius $r$ vom Mittelpunkt zu einem Punkt auf der Kreislinie. Die Punkte teilen den Kreis in ',
+            'Chaque pétale est formé de deux arcs de cercle de rayon $r$ qui vont du centre à un point du cercle. Les points partagent le cercle en '],
+        ['Weil jedes Blatt $60^\\circ$ breit ist, bleiben bei weniger als 6 Blättern Lücken.', 'Comme chaque pétale a une largeur de $60^\\circ$, il reste des trous avec moins de 6 pétales.'],
+        ['Weil jedes Blatt $60^\\circ$ breit ist, überlappen sich die Blätter bei mehr als 6.', 'Comme chaque pétale a une largeur de $60^\\circ$, les pétales se chevauchent quand il y en a plus de 6.'],
     ],
     rule: [
         // book fr-19 mathe8-fr:
@@ -98,5 +113,12 @@ window.BuchFR && BuchFR.add('os8', {
         [/Die Geraden schneiden sich nicht bei positivem Verbrauch: Tarif ([AB]) ist immer günstiger\./g, 'Les droites ne se coupent pas pour une consommation positive : le tarif $1 est toujours le plus avantageux.'],
         [/Tarif ([AB]) ist immer günstiger\./g, 'Le tarif $1 est toujours le plus avantageux.'],
         [/Bis etwa ([\d.,]+) (min|kWh|km) ist Tarif ([AB]) günstiger, darüber Tarif ([AB])\./g, 'Jusqu’à environ $1 $2, le tarif $3 est plus avantageux, au-delà le tarif $4.'],
+        // kreisflaecheos8: the picture's label "u : 2 = π · r" and the sentences with the number of pieces
+        [/>u : 2 = π · r</g, '>P : 2 = π × r<'],
+        [/Ein Kreis in (\d+) Stücke geschnitten und die Stücke abwechselnd nebeneinandergelegt/g, 'Un disque découpé en $1 parts posées côte à côte, tête-bêche'],
+        [/Die (\d+) Stücke bilden fast ein Rechteck\. Seine Höhe ist fast der Radius \$r\$ \(hier \$/g, 'Les $1 parts forment presque un rectangle. Sa hauteur est presque le rayon $r$ (ici $'],
+        // rosetteos8
+        [/Rosette mit (\d+) Blättern, mit dem Zirkel konstruiert/g, 'Rosace à $1 pétales construite au compas'],
+        [/ gleiche Teile von je \$([\d{},]+)\^\\circ\$\. /g, (m, d) => ' parties égales de $' + d + '^\\circ$ chacune. '],
     ]
 });
