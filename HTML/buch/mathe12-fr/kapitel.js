@@ -2,14 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe12.html: LB 1 → LB 2 → LB 5).
  * Doc, 22.10.2026: "Schnapp dir fünf Agenten und mach die Übersetzung der Bücher in Französisch. Fang mit BGY an." (package
  * fr-2, this file, the start page and the chapters). Terms as in tools/buch-fr/glossaire.md. Single source for the table of
- * contents (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the
- * page overview (O) in js/buch.js.
+ * contents (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Berufliches Gymnasium 12',
     short: 'Mathématiques 12',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Berufliches Gymnasium (lycée allemand à orientation professionnelle), 12e année, Saxe : variables aléatoires discrètes et loi binomiale, calcul différentiel des limites aux problèmes d’optimisation, et vecteurs de l’espace, avec des laboratoires, des simulations, des graphiques 3D et des autoévaluations à correction immédiate.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Probabilités conditionnelles',

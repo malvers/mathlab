@@ -3,13 +3,12 @@
  * Doc, 26.10.2026: "Wir machen jetzt noch 5 Bücher ins Französische vom Gymnasium" (French round 3,
  * tools/buch-fr/README.md, block fr-16). Terms as in tools/buch-fr/glossaire.md, French school notation (× for the product,
  * P perimeter, A total area, points (2 ; 3)). Single source for the table of contents (index.html) and the previous/next
- * cards at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 9',
     short: 'Mathématiques GY 9',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand qui mène à l’Abitur), 9e année, Saxe : puissances et racines, fonctions puissances, fonctions et équations du second degré, problèmes d’optimisation, cercle, cylindre et boule, le théorème de Pythagore et les relations métriques, trigonométrie dans le triangle rectangle, pyramide et cône, analyse de données et nombre d’or, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Puissances et racines',

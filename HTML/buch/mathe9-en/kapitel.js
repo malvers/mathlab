@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe9.html: LB 1 → LB 2 → LB 3 → Wahlpflichtbereich 1 → LB 4; 4 Ustd./week, 100 + 8 Ustd.).
  * Doc, 13.10.2026: round 3 of the English editions (Lovelace orchestrates, Einstein translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Secondary School 9',
     short: 'Mathematics OS 9',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Oberschule (secondary school), Year 9, intermediate track (Saxony): Pythagoras’ theorem and its converse, sine, cosine and tangent, right triangles in everyday life, pyramid, cone and sphere, composite solids, quadratic functions and equations with the formula, the golden ratio and descriptive statistics with a project of your own, with widgets to try out and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Pythagoras’ theorem',

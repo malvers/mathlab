@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe8.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → LB 6 → Wahlpflichtbereich 1; 4 Ustd./week, 100 + 8 Ustd.).
  * Doc, 13.10.2026: round 3, the Oberschule books 6–9 in English and Spanish (Lovelace orchestrates, Curie translates). Terms as in tools/buch-es/glosario.md.
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Oberschule 8',
     short: 'Matemáticas OS 8',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para la Oberschule (escuela secundaria sajona), 8.º curso, itinerario de Realschule (Sajonia): expresiones algebraicas y sus transformaciones, ecuaciones lineales y fórmulas, funciones, funciones lineales y sistemas de ecuaciones con comparación de tarifas, la circunferencia y el teorema de Tales, el cilindro, semejanza y homotecia, experimentos aleatorios con diagramas de árbol, las matemáticas en la vida diaria con alquiler, luz y costes de obra, y la bicicleta, con elementos interactivos y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Expresiones algebraicas y sus transformaciones',

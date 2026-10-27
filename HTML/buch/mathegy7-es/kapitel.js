@@ -2,13 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathegy7.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlbereich 3).
  * Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische" (round 2, Einstein).
  * Terms as in tools/buch-es/glosario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Gymnasium 7',
     short: 'Matemáticas GY 7',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para el Gymnasium (secundaria alemana que lleva al Abitur), 7.º curso, Sajonia: circunferencia y recta, circunferencias circunscrita e inscrita, el teorema de Tales y los ángulos en la circunferencia, construir y resolver problemas, números racionales y el cálculo con ellos, ecuaciones y fórmulas, porcentajes, prismas y pirámides en perspectiva caballera, desarrollo plano y dos vistas, área y volumen, diagramas y los sólidos platónicos, con desarrollos que se pliegan en 3D, construcciones paso a paso y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Circunferencia y recta, circunscrita e inscrita',

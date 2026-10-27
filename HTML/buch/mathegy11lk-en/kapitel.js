@@ -3,13 +3,12 @@
  * at the end of 11/I, then LB 3 → LB 4). The numbers follow the Lehrplan, so chapter 2 comes between 1.4 and 1.5.
  * Doc, 11.10.2026: "Dann fangt an" (book 9; forloop-71 orchestrates, Einstein, Turing and both Newtons translate).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 11 · Advanced Course',
     short: 'Mathematics GY 11 Advanced',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 11, advanced course (Saxony): limits and continuity, the derivative from its definition and linear approximation, rules of differentiation with proofs, investigating functions, matrices with rotations and input-output tables, functions from conditions, optimisation and regression, numerical methods up to the fixed-point theorem, vectors, lines and planes in all positions, the concept of probability, Bayes’ theorem and the binomial distribution, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Limits and continuity',

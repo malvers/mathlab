@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathegy5.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 3; 4 Ustd./week, 104 + 8 Ustd.).
  * Doc, 11.10.2026: book 15 of the English editions (forloop-71 orchestrates, Turing translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 5',
     short: 'Mathematics GY 5',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 5 (Saxony): large numbers, rounding, laws of arithmetic, powers, factors and prime numbers, fractions, decimals and percentages, coordinates, angles, symmetry and reflection, rectangles and cuboids, quantities in everyday life and the numbers of the Egyptians, Romans and Maya, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Large numbers',

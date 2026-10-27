@@ -3,13 +3,12 @@
  * then LB 3 → LB 4). The numbers follow the Lehrplan, so chapter 2 comes between 1.4 and 1.5.
  * Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch" (round 2, Pastori, block it-7).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Gymnasium 11 · Leistungskurs',
     short: 'Matematica GY 11 LK',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Gymnasium (liceo tedesco), 11ª classe, Leistungskurs (corso di livello avanzato), Sassonia: limiti e continuità, derivata per definizione e approssimazione lineare, regole di derivazione con dimostrazione, proprietà delle funzioni, matrici con rotazioni e produzione a più stadi, funzioni da condizioni date, ottimizzazione e regressione, metodi numerici fino al teorema del punto fisso, vettori, rette e piani in tutte le posizioni, concetto di probabilità, teorema di Bayes e distribuzione binomiale, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Limiti e continuità',

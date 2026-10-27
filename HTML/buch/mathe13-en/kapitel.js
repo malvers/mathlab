@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe13.html: LB 3 → LB 4 → Wahlpflicht 1 → LB 6 → Abiturvorbereitung).
  * Doc, 11.10.2026: "das nächste parallel mit Einstein" (book 3; Einstein does book 4, mathefos11-en).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Vocational Grammar School 13',
     short: 'Mathematics 13',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Berufliches Gymnasium (vocational grammar school), Year 13, Saxony: integral calculus, inferential statistics with significance tests, analytic geometry of lines and planes in 3D, further applications and a chapter to prepare for the Abitur, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb3-1.html', lb: 'Learning area 3', k: '3.1', title: 'Antiderivatives',

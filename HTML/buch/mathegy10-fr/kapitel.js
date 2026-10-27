@@ -2,14 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathegy10.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich; 4 Ustd./week).
  * Doc, 25.10.2026: "bitte beauftrage 5 Agentinnen weitere 5 Bücher in FR zu übersetzen" (French round 2,
  * tools/buch-fr/README.md, block fr-6). Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents
- * (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the page
- * overview (O) in js/buch.js.
+ * (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 10',
     short: 'Mathématiques GY 10',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand qui mène à l’Abitur), 10e année, Saxe : croissance et fonctions exponentielles, phénomènes périodiques et fonction sinus, variables aléatoires, espérance et jeux équitables, loi des sinus et loi des cosinus, logarithme et équations exponentielles, tangente, vue d’ensemble des fonctions, suites et limites, calcul des intérêts et nombres complexes, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Croissance et fonctions exponentielles',

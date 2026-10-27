@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathefos12.html: LB 1 → LB 2 → LB 3 → LB 4 → FHR-Prüfung → Wahlbereich 3; 4 Ustd./week).
  * Doc, 11.10.2026: two more books in English, four agents (book 5).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Technical College 12',
     short: 'Mathematics FOS 12',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Fachoberschule (technical college), Year 12, Saxony: vectors, lines and planes in space in real 3D, differential calculus from limits to optimisation problems, integral calculus, rational and exponential functions, training for the FHR exam and an elective with CAS, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Vectors and the scalar product',

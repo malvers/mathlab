@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe10.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlpflichtbereich 3; 4 Ustd./week, 80 + 8 Ustd.).
  * Doc, 13.10.2026: Spanish round 2 (Lovelace orchestrates, Curie translates). Terms as in tools/buch-es/glosario.md.
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Oberschule 10',
     short: 'Matemáticas OS 10',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para la Oberschule (escuela secundaria sajona), 10.º curso, itinerario de Realschule (Sajonia): triángulos y polígonos con el teorema del seno y el del coseno, funciones potencia, exponenciales y seno, variables aleatorias y esperanza, sueldo, ahorro y crédito, cuerpos con troncos de pirámide y de cono, resolución de problemas para el examen final y topografía, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Triángulos, cuadriláteros y trigonometría',

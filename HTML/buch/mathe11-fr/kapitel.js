@@ -3,13 +3,12 @@
  * Doc, 22.10.2026: "Schnapp dir fünf Agenten und mach die Übersetzung der Bücher in Französisch. Fang mit BGY an."
  * (package FR0: start page and this file, the pattern for the other four French books; the chapters: fr-1). Terms as in
  * tools/buch-fr/glossaire.md. Single source for the table of contents (index.html) and the previous/next cards at the end
- * of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Berufliches Gymnasium 11',
     short: 'Mathématiques 11',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Berufliches Gymnasium (lycée allemand à orientation professionnelle), 11e année, Saxe : équations, fonctions, systèmes d’équations, probabilités et méthodes numériques, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb2.html', lb: 'Domaine d’apprentissage 2', k: '2', title: 'Équations, formules, figures',

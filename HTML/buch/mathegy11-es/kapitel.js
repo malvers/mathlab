@@ -3,13 +3,12 @@
  * then LB 3 → LB 4; 4 Ustd./week). The numbers follow the Lehrplan, so chapter 2 comes between 1.4 and 1.5.
  * Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische" (round 2, Turing).
  * Terms as in tools/buch-es/glosario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Gymnasium 11',
     short: 'Matemáticas GY 11',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para el Gymnasium (bachillerato alemán), 11.º curso, curso básico (Sajonia): límites, la derivada y las reglas de derivación, estudio de funciones, funciones a partir de condiciones, problemas de optimización y regresión, matrices y el método de Gauss-Jordan, métodos numéricos, vectores, rectas y planos en el espacio, experimentos aleatorios de varias etapas y la distribución binomial, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Límites y continuidad',

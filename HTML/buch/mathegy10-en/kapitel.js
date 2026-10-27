@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathegy10.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich; 4 Ustd./week).
  * Doc, 11.10.2026: book 10 of the English editions (forloop-71 orchestrates, Newton translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 10',
     short: 'Mathematics GY 10',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 10 (Saxony): growth and exponential functions, periodic processes and the sine function, random variables, expected value and fair games, the sine and cosine rules, logarithms and exponential equations, the tangent function, functions at a glance, sequences and limits, interest and complex numbers, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Growth and exponential functions',

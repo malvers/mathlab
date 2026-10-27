@@ -2,13 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathegy10.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich; 4 Ustd./week).
  * Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch" (round 3, tools/buch-it/README.md, block it-15).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Gymnasium 10',
     short: 'Matematica GY 10',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Gymnasium (liceo tedesco che porta all’Abitur), 10ª classe, Sassonia: crescita e funzioni esponenziali, fenomeni periodici e la funzione seno, variabili aleatorie, valore atteso e giochi equi, teoremi dei seni e del coseno, logaritmo ed equazioni esponenziali, tangente, panoramica delle funzioni, successioni e limiti, calcolo degli interessi e numeri complessi, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Crescita e funzioni esponenziali',

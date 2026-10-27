@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathefos12.html: LB 1 → LB 2 → LB 3 → LB 4 → FHR-Prüfung → Wahlbereich 3; 4 Ustd./week).
  * Doc, 22.10.2026: "Schnapp dir fünf Agenten und mach die Übersetzung der Bücher in Französisch" (tools/buch-fr/README.md, block fr-5).
  * Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Fachoberschule 12',
     short: 'Mathématiques FOS 12',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour la Fachoberschule (lycée technique allemand), 12e année, Saxe : vecteurs, droites et plans dans l’espace en vraie 3D, calcul différentiel des limites aux problèmes d’optimisation, calcul intégral, fonctions rationnelles et exponentielles, entraînement à l’examen de la Fachhochschulreife et un domaine optionnel avec un CAS, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Vecteurs et produit scalaire',

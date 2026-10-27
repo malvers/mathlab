@@ -168,7 +168,7 @@ async function render(browser, book, v, out) {
         const json = {
             v, buch: book, erstellt: new Date().toISOString(), w: meta.w, h: meta.h,
             s: { w: SW, h: sh, cols: scols, rows: srows }, l: { per: PER, cols: LC, n: Math.ceil(n / PER) },
-            pdf: { datei: pdf, bytes: statSync(path.join(out, pdf)).size, name: (meta.kurz || book).replace(/[^\w .-]/g, '') + ' - Doc Alvers Mathe-Labor.pdf' },
+            pdf: { datei: pdf, bytes: statSync(path.join(out, pdf)).size, name: dateiname(meta.kurz || book) + ' - Doc Alvers Mathe-Labor.pdf' },
             seiten: meta.seiten,
         };
         writeFileSync(path.join(out, 'seiten.json'), JSON.stringify(json));
@@ -177,8 +177,19 @@ async function render(browser, book, v, out) {
     } finally { await ctx.close(); }
 }
 
+// the name a saved PDF gets (content-disposition): plain ASCII, accents to their letters - "Mathématiques 11" → "Mathematiques 11"
+const dateiname = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').replace(/[^\w .-]/g, '').trim();
+
 // ---------- upload: wrangler (pinned as in tools/media_publish.mjs), a few at a time, seiten.json last ----------
-function put(file, key, type, cache, more = []) {
+// three tries as in fetchRetry: one PDF of the 27.10.2026 run got "401: Unauthorized" while the uploads around it went
+// through - wrangler renewing its login while six uploads run at once
+async function put(file, key, type, cache, more = []) {
+    for (let k = 1; ; k++) {
+        try { return await putOnce(file, key, type, cache, more); }
+        catch (e) { if (k === 3) throw e; await new Promise(r => setTimeout(r, 3000 * k)); }
+    }
+}
+function putOnce(file, key, type, cache, more) {
     return new Promise((done, fail) => {
         const p = spawn('npx', ['--yes', 'wrangler@4.40.0', 'r2', 'object', 'put', 'media/' + key, '--file', file,
             '--content-type', type, '--cache-control', cache, ...more, '--remote'], { stdio: ['ignore', 'pipe', 'pipe'] });

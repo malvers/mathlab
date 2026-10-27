@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe13.html: LB 3 → LB 4 → Wahlpflicht 1 → LB 6 → Abiturvorbereitung).
  * Doc, 12.10.2026: "übersetze bitte drei Bücher ins Spanische" (package ES0: start page and this file; the chapters: ES3).
  * Terms as in tools/buch-es/glosario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Berufliches Gymnasium 13',
     short: 'Matemáticas 13',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para el Berufliches Gymnasium (bachillerato alemán de orientación profesional), 13.º curso, Sajonia: cálculo integral, estadística inferencial con contrastes de hipótesis, geometría analítica de rectas y planos en el espacio, otras aplicaciones y un capítulo para preparar el Abitur, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb3-1.html', lb: 'Área de aprendizaje 3', k: '3.1', title: 'Primitivas',

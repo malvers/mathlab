@@ -1,13 +1,12 @@
 /* kapitel.js — the chapters of the Italian edition of "Mathematik · Gymnasium 9" (buch/mathegy9/), in the order of the
  * school year. Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch" (round 3, block it-14, tools/buch-it/README.md).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Gymnasium 9',
     short: 'Matematica GY 9',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Gymnasium (liceo tedesco che porta all’Abitur), 9ª classe, Sassonia: potenze e radici, funzioni potenza, funzioni ed equazioni quadratiche, problemi di massimo e minimo, cerchio, cilindro e sfera, il gruppo dei teoremi di Pitagora, trigonometria nel triangolo rettangolo, piramide e cono, analisi dei dati e la sezione aurea, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Potenze e radici',

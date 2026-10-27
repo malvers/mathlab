@@ -2,14 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathegy6.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 3; 4 Ustd./week,
  * 104 + 8 Ustd.). Doc, 26.10.2026: "Wir machen jetzt noch 5 Bücher ins Französische vom Gymnasium" (French round 3,
  * tools/buch-fr/README.md, block fr-13). Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents
- * (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the page
- * overview (O) in js/buch.js.
+ * (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 6',
     short: 'Mathématiques GY 6',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand qui mène à l’Abitur), 6e année, Saxe : fractions, nombres décimaux et pourcentages, calcul avec les fractions, équations et problèmes, correspondances et règle de trois, triangles et quadrilatères avec la somme des angles, triangles égaux et aire, prismes, proportions et nombres premiers, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Fractions, décimaux et pourcentages',

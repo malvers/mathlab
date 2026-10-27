@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathefos12.html: LB 1 → LB 2 → LB 3 → LB 4 → FHR-Prüfung → Wahlbereich 3; 4 Ustd./week).
  * Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische" (round 2, tools/buch-es/auftrag.md section 7).
  * Terms as in tools/buch-es/glosario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Fachoberschule 12',
     short: 'Matemáticas FOS 12',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para la Fachoberschule (escuela técnica superior alemana), 12.º curso, Sajonia: vectores, rectas y planos en el espacio en 3D de verdad, cálculo diferencial desde los límites hasta los problemas de optimización, cálculo integral, funciones racionales y exponenciales, entrenamiento para el examen de la Fachhochschulreife y una optativa con CAS, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Vectores y producto escalar',

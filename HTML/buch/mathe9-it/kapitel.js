@@ -2,13 +2,12 @@
  * order of the school year (Stoffverteilungsplan svp/mathe/mathe9.html: LB 1 → LB 2 → LB 3 → Wahlpflichtbereich 1 → LB 4; 4 Ustd./week).
  * Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch" (round 3, Hack, block it-19).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Oberschule 9',
     short: 'Matematica OS 9',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per la Oberschule (scuola secondaria tedesca), 9ª classe, percorso Realschule (Sassonia): il teorema di Pitagora e il suo inverso, seno, coseno e tangente, problemi con triangoli rettangoli, piramide, cono circolare e sfera, solidi composti, funzioni ed equazioni quadratiche con la formula risolutiva, la sezione aurea e la statistica descrittiva con un progetto personale, con widget da provare e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Il teorema di Pitagora',

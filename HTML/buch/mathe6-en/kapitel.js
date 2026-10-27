@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathe6.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 2; 5 Ustd./week, 125 + 10 Ustd.).
  * Round 3 of the English editions (Lovelace Orchestration coordinates, Turing translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Secondary School 6',
     short: 'Mathematics OS 6',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Oberschule (secondary school), Year 6 (Saxony): representing, converting and comparing fractions, calculating with fractions and decimals, assignments and the rule of three, angles and triangles, area and perimeter, solids and their nets, maths in everyday life and mathematical games, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Representing fractions',

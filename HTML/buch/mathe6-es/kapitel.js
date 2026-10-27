@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathe6.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 2; 5 Ustd./week, 125 + 10 Ustd.).
  * Spanish round 3 (Lovelace Orchestration coordinates, Turing translates). Terms as in tools/buch-es/glosario.md.
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Oberschule 6',
     short: 'Matemáticas OS 6',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para la Oberschule (escuela secundaria sajona), 6.º curso (Sajonia): representar, convertir y comparar números fraccionarios, cálculo con fracciones y decimales, correspondencias y regla de tres, ángulos y triángulos, área y perímetro, cuerpos y sus desarrollos, matemáticas en la vida cotidiana y juegos matemáticos, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Representar números fraccionarios',

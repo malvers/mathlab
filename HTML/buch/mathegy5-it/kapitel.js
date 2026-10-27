@@ -2,13 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathegy5.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 3).
  * Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch" (round 3, Cornaro, block it-10).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Gymnasium 5',
     short: 'Matematica GY 5',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Gymnasium (liceo tedesco), 5ª classe, Sassonia: numeri grandi, arrotondamento, proprietà delle operazioni, potenze, divisori e numeri primi, frazioni, numeri decimali e percentuali, coordinate, angoli, simmetria e riflessione, rettangoli e parallelepipedi, grandezze nella vita di tutti i giorni e i numeri degli egizi, dei romani e dei maya, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Numeri grandi',

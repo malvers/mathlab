@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe8.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → LB 6 → Wahlpflichtbereich 1; 4 Ustd./week, 100 + 8 Ustd.).
  * Doc, 13.10.2026: round 3, the Oberschule books 6–9 in English and Spanish (Lovelace orchestrates, Curie translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Secondary School 8',
     short: 'Mathematics OS 8',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Oberschule (secondary school), Year 8, intermediate track (Saxony): terms and transforming terms, linear equations and formulas, functions, linear functions and systems of equations with tariff comparisons, the circle and Thales’ theorem, the cylinder, similarity and central dilation, random experiments with tree diagrams, mathematics in everyday life with rent, electricity and building costs, and the bicycle, with widgets to try out and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Terms and transforming terms',

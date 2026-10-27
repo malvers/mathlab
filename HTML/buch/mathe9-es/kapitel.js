@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe9.html: LB 1 → LB 2 → LB 3 → Wahlpflichtbereich 1 → LB 4; 4 Ustd./week, 100 + 8 Ustd.).
  * Doc, 14.10.2026: Spanish round 3 (Lovelace orchestrates, Einstein translates). Terms as in tools/buch-es/glosario.md.
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Oberschule 9',
     short: 'Matemáticas OS 9',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para la Oberschule (escuela secundaria sajona), 9.º curso, itinerario de Realschule (Sajonia): el teorema de Pitágoras y su recíproco, seno, coseno y tangente, triángulos rectángulos en la vida diaria, pirámide, cono y esfera, cuerpos compuestos, funciones y ecuaciones de segundo grado con la fórmula general, la proporción áurea y estadística descriptiva con un proyecto propio, con elementos interactivos para probar y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'El teorema de Pitágoras',

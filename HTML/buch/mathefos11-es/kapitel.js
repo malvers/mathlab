@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathefos11.html: LB 1 → LB 2 → Wahlbereich 2, then the outlooks of Wahlbereich 1 and 3; 3 Ustd./week).
  * Doc, 13.10.2026: "Schnappt euch die restlichen Bücher. Und übersetzt die ins Spanische" (round 2, tools/buch-es/auftrag.md section 7).
  * Terms as in tools/buch-es/glosario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Fachoberschule 11',
     short: 'Matemáticas FOS 11',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para la Fachoberschule (escuela técnica superior alemana), 11.º curso, Sajonia: términos y fórmulas, funciones lineales y cuadráticas, ecuaciones, inecuaciones y sistemas de ecuaciones, funciones polinómicas, probabilidades, recuento y cadenas de Bernoulli, matemática financiera y perspectivas sobre los números complejos y el álgebra de circuitos, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Números, términos y fórmulas',

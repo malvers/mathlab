@@ -3,13 +3,12 @@
  * then LB 3 → LB 4; 4 Ustd./week). The numbers follow the Lehrplan, so chapter 2 comes between 1.4 and 1.5.
  * Doc, 11.10.2026: "ok, go on all agents" (book 8, Einstein).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 11',
     short: 'Mathematics GY 11',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 11, basic course (Saxony): limits, the derivative and the rules of differentiation, investigating functions, functions from conditions, optimisation problems and regression, matrices and the Gauss-Jordan method, numerical methods, vectors, lines and planes in space, multi-stage random experiments and the binomial distribution, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Limits and continuity',

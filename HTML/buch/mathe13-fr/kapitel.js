@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe13.html: LB 3 → LB 4 → Wahlpflicht 1 → LB 6 → Abiturvorbereitung).
  * Doc, 22.10.2026: "Schnapp dir fünf Agenten und mach die Übersetzung der Bücher in Französisch. Fang mit BGY an."
  * (block fr-3, Lepaute). Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents (index.html) and
- * the previous/next cards at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Berufliches Gymnasium 13',
     short: 'Mathématiques 13',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Berufliches Gymnasium (lycée allemand à orientation professionnelle), 13e année, Saxe : calcul intégral, statistique inférentielle avec tests d’hypothèse, géométrie analytique des droites et des plans dans l’espace, autres applications et un chapitre de préparation à l’Abitur, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb3-1.html', lb: 'Domaine d’apprentissage 3', k: '3.1', title: 'Primitives',

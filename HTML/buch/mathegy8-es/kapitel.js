@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathegy8.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 3; 4 Ustd./week, 104 + 8 Ustd.).
  * Doc, 13.10.2026: Spanish round 2 (Lovelace orchestrates, Curie translates). Terms as in tools/buch-es/glosario.md.
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Gymnasium 8',
     short: 'Matemáticas GY 8',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para el Gymnasium (enseñanza secundaria alemana que prepara para el Abitur), 8.º curso, Sajonia: expresiones algebraicas y árboles de cálculo, identidades notables, ecuaciones e inecuaciones, experimentos aleatorios, probabilidad y diagramas de árbol, funciones y funciones lineales, sistemas de ecuaciones lineales, homotecia y semejanza, estrategias heurísticas y simulación con números aleatorios, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Variables y expresiones algebraicas',

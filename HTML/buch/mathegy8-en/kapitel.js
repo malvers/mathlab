@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathegy8.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 3; 4 Ustd./week, 104 + 8 Ustd.).
  * Doc, 11.10.2026: book 12 of the English editions (forloop-71 orchestrates, Newton translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 8',
     short: 'Mathematics GY 8',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 8 (Saxony): terms and calculation trees, binomial formulae, equations and inequalities, random experiments, probability and tree diagrams, functions and linear functions, systems of linear equations, central dilation and similarity, heuristic strategies and simulation with random numbers, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Variables and terms',

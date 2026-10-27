@@ -3,13 +3,12 @@
  * then LB 3 → LB 4). The numbers follow the Lehrplan, so chapter 2 comes between 1.4 and 1.5.
  * Doc, 25.10.2026: "bitte beauftrage 5 Agentinnen weitere 5 Bücher in FR zu übersetzen" (French round 2, Dubreil, block fr-9).
  * Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 11 · Leistungskurs',
     short: 'Mathématiques GY 11 LK',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand d’enseignement général), 11e année, Leistungskurs (cours approfondi), Saxe : limites et continuité, dérivée par la définition et approximation affine, règles de dérivation démontrées, propriétés des fonctions, matrices avec rotations et production en plusieurs étapes, fonctions à partir de conditions, optimisation et régression, méthodes numériques jusqu’au théorème du point fixe, vecteurs, droites et plans dans toutes leurs positions, notion de probabilité, formule de Bayes et loi binomiale, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Limites et continuité',

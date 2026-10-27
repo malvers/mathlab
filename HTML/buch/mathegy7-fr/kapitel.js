@@ -2,14 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathegy7.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlbereich 3; 4 Ustd./week).
  * Doc, 26.10.2026: "Wir machen jetzt noch 5 Bücher ins Französische vom Gymnasium" (French round 3,
  * tools/buch-fr/README.md, block fr-14). Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents
- * (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the page
- * overview (O) in js/buch.js.
+ * (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 7',
     short: 'Mathématiques GY 7',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand qui mène à l’Abitur), 7e année, Saxe : cercle et droite, cercle circonscrit et cercle inscrit, le triangle rectangle inscrit dans un demi-cercle et les angles inscrits, constructions et résolution de problèmes, nombres rationnels et calcul, équations et formules, pourcentages, prismes et pyramides en perspective cavalière, en patron et en vues, aire et volume, diagrammes et solides de Platon, avec des patrons qui se plient en 3D, des constructions à suivre pas à pas et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Cercle et droite, cercle circonscrit et cercle inscrit',

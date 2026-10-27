@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathefos11.html: LB 1 → LB 2 → Wahlbereich 2, then the outlooks of Wahlbereich 1 and 3; 3 Ustd./week).
  * Doc, 11.10.2026: the next books in English, in parallel (book 4).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Technical College 11',
     short: 'Mathematics FOS 11',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Fachoberschule (technical college), Year 11, Saxony: terms and formulas, linear and quadratic functions, equations, inequalities and systems of equations, polynomial functions, probabilities, counting and Bernoulli chains, financial mathematics and outlooks on complex numbers and switching algebra, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Numbers, terms and formulas',

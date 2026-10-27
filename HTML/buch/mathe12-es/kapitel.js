@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe12.html: LB 1 → LB 2 → LB 5; Grundkurs, Kurshalbjahre 12/I and 12/II).
  * Doc, 12.10.2026: "übersetze bitte drei Bücher ins Spanische" (package ES0: start page and this file; the chapters: ES2).
  * Terms as in tools/buch-es/glosario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Berufliches Gymnasium 12',
     short: 'Matemáticas 12',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para el Berufliches Gymnasium (bachillerato alemán de orientación profesional), 12.º curso, Sajonia: variables aleatorias discretas y distribución binomial, cálculo diferencial desde los límites hasta los problemas de optimización, y vectores en el espacio, con laboratorios, simulaciones, gráficos 3D y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Probabilidad condicionada',

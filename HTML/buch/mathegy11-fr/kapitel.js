@@ -3,13 +3,12 @@
  * the end of 11/I, then LB 3 → LB 4; 4 Ustd./week). The numbers follow the Lehrplan, so chapter 2 comes between 1.4 and 1.5.
  * Doc, 25.10.2026: "bitte beauftrage 5 Agentinnen weitere 5 Bücher in FR zu übersetzen" (French round 2, Vergne, block fr-7).
  * Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 11',
     short: 'Mathématiques GY 11',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand d’enseignement général), 11e année, Grundkurs (cours de base), Saxe : limites, la dérivée et les règles de dérivation, étude de fonction, fonctions à partir de conditions, problèmes d’optimisation et régression, matrices et méthode de Gauss-Jordan, méthodes numériques, vecteurs, droites et plans de l’espace, expériences aléatoires à plusieurs épreuves et la loi binomiale, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Limites et continuité',

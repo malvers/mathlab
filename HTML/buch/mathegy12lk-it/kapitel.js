@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathegy12lk.html: LB 5 → Wahlbereich 5 → LB 6 → LB 7 → LB 8 → LB 9 → Abitur; 5 Ustd./week).
  * Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch" (round 2, Gianotti, block it-9).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Gymnasium 12 · Leistungskurs',
     short: 'Matematica GY 12 LK',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Gymnasium (liceo tedesco), 12ª classe, Leistungskurs (corso di livello avanzato), Sassonia: calcolo integrale con funzione integrale, teorema fondamentale e solidi di rotazione in vero 3D, integrazione numerica fino a Simpson, variabili aleatorie normali e De Moivre-Laplace, stima e test di significatività, distanze e angoli nello spazio con la forma normale di Hesse e rette sghembe, estremi, simmetrie, regioni illimitate, famiglie e luoghi geometrici e allenamento per l’Abitur, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb5-1.html', lb: 'Area di apprendimento 5', k: '5.1', title: 'Primitive e integrazione',

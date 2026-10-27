@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathegy12.html: LB 5 → Wahlbereich 5 → LB 6 → LB 7 → LB 8 → Abitur).
  * Doc, 11.10.2026: "macht gemeinsam noch 2 Bücher" (book 6; Newton and Turing, book 5 mathefos12-en is Einstein's and Lovelace's).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 12',
     short: 'Mathematics GY 12',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 12, basic course (Saxony): integral calculus from finding antiderivatives to areas between graphs, numerical integration, estimating and significance tests, distances and angles in space in real 3D, extremal distances, reflections, families of functions and lines and training for the Abitur, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb5-1.html', lb: 'Learning area 5', k: '5.1', title: 'Antiderivatives and integration',

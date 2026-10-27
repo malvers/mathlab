@@ -2,14 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathegy8.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 3; 4 Ustd./week,
  * 104 + 8 Ustd.). Doc, 26.10.2026: "Wir machen jetzt noch 5 Bücher ins Französische vom Gymnasium" (French round 3,
  * tools/buch-fr/README.md, block fr-15). Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents
- * (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the page
- * overview (O) in js/buch.js.
+ * (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 8',
     short: 'Mathématiques GY 8',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand qui mène à l’Abitur), 8e année, Saxe : expressions et arbres de calcul, identités remarquables, équations et inéquations, expériences aléatoires, probabilités et arbres pondérés, fonctions et fonctions affines, systèmes d’équations linéaires, homothétie et figures semblables, stratégies de résolution de problèmes et simulation avec des nombres aléatoires, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Variables et expressions',

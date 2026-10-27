@@ -18,6 +18,10 @@
     const say = t => { if (status) status.textContent = t; if (ovWait) ovWait.textContent = t; };
     const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
     const wait = ms => new Promise(r => setTimeout(r, ms));
+    // the edition's language (js/buch.js): German, English, Spanish, Italian, French - the translations print too
+    // (Doc, 27.10.2026: "für alle Bücher … das Grußwort und auch den PDF Download Button"); French sets a no-break space before a colon
+    const tr = (de, en, es, it, fr) => Buch.t(de, en, es, it, fr);
+    const colon = Buch.lang === 'fr' ? '\u00a0: ' : ': ';
 
     function qrSvg(url) {
         if (typeof qrcode !== 'function') return '';
@@ -52,9 +56,9 @@
         const url = SITE + here + c.file;
         // the chapter head: number, title, where it sits in the year, QR to the interactive version
         sec.appendChild(el('div', 'd-khead',
-            '<div><p class="d-kkick">KAPITEL ' + c.k + ' · ' + c.lb.toUpperCase() + ' · ' + c.when.toUpperCase() + '</p>' +
+            '<div><p class="d-kkick">' + tr('KAPITEL', 'CHAPTER', 'CAPÍTULO', 'CAPITOLO', 'CHAPITRE') + ' ' + c.k + ' · ' + c.lb.toUpperCase() + ' · ' + c.when.toUpperCase() + '</p>' +
             '<h1 class="d-ktitle">' + c.title + '</h1><p class="d-ksub">' + c.sub + '</p></div>' +
-            '<a class="d-qr" href="' + url + '">' + qrSvg(url) + '<span>Interaktiv:<br>' + url.replace('https://', '') + '</span></a>'));
+            '<a class="d-qr" href="' + url + '">' + qrSvg(url) + '<span>' + tr('Interaktiv', 'Interactive', 'Interactivo', 'Interattivo', 'Interactif') + colon.trimEnd() + '<br>' + url.replace('https://', '') + '</span></a>'));
         sec.lastChild.dataset.ziel = c.file + '||';
         Array.from(main.children).forEach(ch => {
             if (ch.matches('.b-foot, .b-chapnav, footer')) return;
@@ -70,7 +74,7 @@
         sec.querySelectorAll('a.b-lab').forEach(labCard);
         sec.querySelectorAll('.b-sec').forEach(s => s.removeAttribute('data-toc'));
         // every interactive box says where it lives
-        sec.querySelectorAll('.b-widget').forEach(w => w.appendChild(el('p', 'd-online', 'Interaktiv im Online-Buch: ' + url.replace('https://', ''))));
+        sec.querySelectorAll('.b-widget').forEach(w => w.appendChild(el('p', 'd-online', tr('Interaktiv im Online-Buch', 'Interactive in the online book', 'Interactivo en el libro en línea', 'Interattivo nel libro online', 'Interactif dans le livre en ligne') + colon + url.replace('https://', ''))));
         return sec;
     }
 
@@ -87,7 +91,7 @@
                 const img = new Image();
                 img.src = flat.toDataURL('image/jpeg', 0.9);
                 img.className = 'd-frozen';
-                img.alt = cv.getAttribute('aria-label') || 'Grafik';
+                img.alt = cv.getAttribute('aria-label') || tr('Grafik', 'Figure', 'Gráfico', 'Grafico', 'Figure');
                 const box = cv.closest('.b-canvasbox') || cv;
                 // an equal-axes plot may be narrower than its box (js/buch-plot.js): keep its share of the width, centred
                 const share = box === cv ? 1 : cv.getBoundingClientRect().width / (box.getBoundingClientRect().width || 1);
@@ -103,7 +107,7 @@
     // solutions of tasks and self-checks move into the appendix; worked examples keep theirs in the text
     function harvest(sec, c) {
         const part = el('div', 'd-loes-kap');
-        part.appendChild(el('h3', 'd-loes-h', 'Kapitel ' + c.k + ' · ' + c.title));
+        part.appendChild(el('h3', 'd-loes-h', tr('Kapitel', 'Chapter', 'Capítulo', 'Capitolo', 'Chapitre') + ' ' + c.k + ' · ' + c.title));
         part.lastChild.dataset.ziel = c.file + '||';
         // a solution leads back to its task
         const from = (row, src) => { const z = src.closest('[data-ziel]'); if (z) row.dataset.ziel = z.dataset.ziel; };
@@ -121,7 +125,7 @@
         });
         sec.querySelectorAll('.b-check').forEach(box => {
             const qs = Array.from(box.querySelectorAll('.b-q'));
-            const title = (box.querySelector('.b-box-title')?.childNodes[0]?.textContent || 'Selbsttest').trim();
+            const title = (box.querySelector('.b-box-title')?.childNodes[0]?.textContent || tr('Selbsttest', 'Self-check', 'Autoevaluación', 'Autoverifica', 'Autoévaluation')).trim();
             const sub = el('div', 'd-loes-check'); sub.appendChild(el('p', 'd-loes-t', title));
             let has = false;
             qs.forEach((q, i) => {
@@ -198,19 +202,25 @@
         if (gruss && front) front.before(gruss);
         // page 1 is the first sheet after the cover (js/buch-druck.css .d-p1)
         (gruss || front)?.classList.add('d-p1');
+        const loesungen = tr('Lösungen', 'Solutions', 'Soluciones', 'Soluzioni', 'Solutions');
         const toc = el('section', 'd-toc');
-        toc.appendChild(el('h1', 'd-toc-h', 'Inhalt'));
+        toc.appendChild(el('h1', 'd-toc-h', tr('Inhalt', 'Contents', 'Índice', 'Indice', 'Sommaire')));
         const list = el('ol', 'd-toc-list');
         B.chapters.forEach(c => list.appendChild(el('li', '', '<a href="#kap-' + c.file.replace(/\.html$/, '') + '"><span class="d-toc-k">' + c.k + '</span><span class="d-toc-t">' + c.title +
             '<small>' + c.lb + ' · ' + c.when + '</small></span></a>')));
-        list.appendChild(el('li', 'd-toc-loes', '<a href="#loesungen"><span class="d-toc-k">L</span><span class="d-toc-t">Lösungen</span></a>'));
+        list.appendChild(el('li', 'd-toc-loes', '<a href="#loesungen"><span class="d-toc-k">L</span><span class="d-toc-t">' + loesungen + '</span></a>'));
         toc.appendChild(list);
         toc.dataset.ziel = 'index.html|kapitel|';
         book.appendChild(toc);
 
         const loes = el('section', 'd-loesungen'); loes.id = 'loesungen';
-        loes.appendChild(el('h1', 'd-ktitle', 'Lösungen'));
-        loes.appendChild(el('p', 'd-loes-intro', 'Lösungen zu den Aufgaben (nach ihrer Nummer im Kapitel) und zu den Selbsttests. Die Lösungswege der Beispiele stehen direkt im Text.'));
+        loes.appendChild(el('h1', 'd-ktitle', loesungen));
+        loes.appendChild(el('p', 'd-loes-intro', tr(
+            'Lösungen zu den Aufgaben (nach ihrer Nummer im Kapitel) und zu den Selbsttests. Die Lösungswege der Beispiele stehen direkt im Text.',
+            'Solutions to the exercises (by their number in the chapter) and to the self-checks. The worked solutions of the examples are in the text itself.',
+            'Soluciones de los ejercicios (según su número en el capítulo) y de las autoevaluaciones. Las resoluciones de los ejemplos están directamente en el texto.',
+            'Soluzioni degli esercizi (secondo il loro numero nel capitolo) e delle autoverifiche. Gli svolgimenti degli esempi si trovano direttamente nel testo.',
+            'Solutions des exercices (selon leur numéro dans le chapitre) et des autoévaluations. Les résolutions des exemples figurent directement dans le texte.')));
 
         // every chapter is drawn and frozen before the next one is loaded: Chrome keeps only about 16 WebGL contexts
         // alive and drops the oldest, so a book with many 3D pictures came out with blank first ones (LK 12, 10.10.2026)
@@ -218,7 +228,8 @@
         await Buch.fotosReady;
         for (let i = 0; i < B.chapters.length; i++) {
             const c = B.chapters[i];
-            say('Kapitel ' + c.k + ' wird geladen und gezeichnet …');
+            say(tr('Kapitel ' + c.k + ' wird geladen und gezeichnet …', 'Loading and drawing chapter ' + c.k + ' …', 'Cargando y dibujando el capítulo ' + c.k + ' …',
+                'Caricamento e disegno del capitolo ' + c.k + ' …', 'Chargement et dessin du chapitre ' + c.k + '…'));
             const sec = await chapter(c, i);
             book.appendChild(sec);
             Buch.render(sec, { print: true });
@@ -232,9 +243,10 @@
         }
         book.appendChild(loes);
         // Paged.js measures the pages: every photo has to be there with its real height first
-        say('Fotos werden geladen …');
+        say(tr('Fotos werden geladen …', 'Loading photos …', 'Cargando fotos …', 'Caricamento delle foto …', 'Chargement des photos…'));
         await Promise.all(Array.from(book.querySelectorAll('img')).map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
-        say('Seiten werden gesetzt … (das dauert einen Moment)');
+        say(tr('Seiten werden gesetzt … (das dauert einen Moment)', 'Setting the pages … (this takes a moment)', 'Maquetando las páginas … (tarda un momento)',
+            'Impaginazione in corso … (ci vuole un momento)', 'Mise en page… (cela prend un moment)'));
         const t0 = performance.now();
         if (window.Farbschema && Farbschema.freeze) Farbschema.freeze();     // Paged.js copies the sheets: nothing more to translate
         // the running head names the book (kapitel.js), e.g. "DOC ALVERS MATHE-LABOR · MATHEMATIK 12"
@@ -246,7 +258,12 @@
         frag.appendChild(book);
         await window.PagedPolyfill.preview(frag, undefined, document.getElementById('d-pages'));
         const pages = document.querySelectorAll('.pagedjs_page').length;
-        say(pages + ' Seiten fertig in ' + Math.round((performance.now() - t0) / 1000) + ' s. Drucken: Strg/Cmd + P → „Als PDF speichern“.');
+        const dauer = Math.round((performance.now() - t0) / 1000);
+        say(tr(pages + ' Seiten fertig in ' + dauer + ' s. Drucken: Strg/Cmd + P → „Als PDF speichern“.',
+            pages + ' pages ready in ' + dauer + ' s. Print: Ctrl/Cmd + P → “Save as PDF”.',
+            pages + ' páginas listas en ' + dauer + ' s. Imprimir: Ctrl/Cmd + P → «Guardar como PDF».',
+            pages + ' pagine pronte in ' + dauer + ' s. Stampa: Ctrl/Cmd + P → «Salva come PDF».',
+            pages + ' pages prêtes en ' + dauer + ' s. Imprimer\u00a0: Ctrl/Cmd + P → «\u00a0Enregistrer au format PDF\u00a0».'));
         document.body.classList.add('d-ready');
         // the local server's LOCAL badge is fixed and would land on every printed page: it moves into the status bar,
         // which Paged.js keeps off the paper (our own @media print rules do not survive Paged.js)
@@ -304,12 +321,14 @@
             const e = p.querySelector('[data-ziel]');
             p.dataset.ovZiel = last = e ? e.dataset.ziel : last;
             const c = B.chapters.find(c => last.startsWith(c.file + '|'));
-            p.title = 'Seite ' + (i + 1) + (c ? ' · Kapitel ' + c.k + ' · ' + c.title : '');
+            p.title = tr('Seite', 'Page', 'Página', 'Pagina', 'Page') + ' ' + (i + 1) + (c ? ' · ' + tr('Kapitel', 'Chapter', 'Capítulo', 'Capitolo', 'Chapitre') + ' ' + c.k + ' · ' + c.title : '');
             p.appendChild(el('span', 'd-ov-no', String(i + 1)));
         });
         root.classList.add('d-ov-ready');
         ovLayout();
-        say(pages.length + ' Seiten · Klick springt ins Online-Buch · + − Größe · O oder Esc schließt');
+        say(pages.length + tr(' Seiten · Klick springt ins Online-Buch · + − Größe · O oder Esc schließt', ' pages · a click jumps into the online book · + − size · O or Esc closes',
+            ' páginas · un clic salta al libro en línea · + − tamaño · O o Esc cierra', ' pagine · un clic salta al libro online · + − dimensione · O o Esc chiude',
+            ' pages · un clic ouvre le livre en ligne · + − taille · O ou Échap ferme'));
         const h = host();
         zeige(h ? h.wo() : '');
         window.BuchDruckOv = { zeige };
@@ -337,7 +356,7 @@
         try { const r = await fetch(base + 'seiten.json', { cache: 'no-cache' }); if (r.ok) m = await r.json(); } catch (_) { }
         if (!m || !Array.isArray(m.seiten) || !m.seiten.length) return false;
         const q = '?v=' + encodeURIComponent(m.v), small = 'url("' + base + 's.webp' + q + '")';
-        say('Seiten werden geladen …');
+        say(tr('Seiten werden geladen …', 'Loading pages …', 'Cargando páginas …', 'Caricamento delle pagine …', 'Chargement des pages…'));
         // the tiles appear once the small sprite is there, not as white sheets filling in
         await new Promise(r => { const im = new Image(); im.onload = im.onerror = r; im.src = base + 's.webp' + q; });
         const box = el('div', 'pagedjs_pages');
@@ -391,15 +410,15 @@
         document.getElementById('d-pages')?.classList.add('d-ov-pages');
         const bar = document.querySelector('.d-bar');
         if (bar) {
-            bar.querySelector('b').textContent = 'DRUCKAUSGABE · ALLE SEITEN';
+            bar.querySelector('b').textContent = tr('DRUCKAUSGABE · ALLE SEITEN', 'PRINT EDITION · ALL PAGES', 'EDICIÓN IMPRESA · TODAS LAS PÁGINAS', 'EDIZIONE A STAMPA · TUTTE LE PAGINE', 'ÉDITION IMPRIMÉE · TOUTES LES PAGES');
             if (status) status.classList.add('d-ov-hint');
             const btn = (txt, title, fn) => { const b = el('button', 'd-ov-btn', txt); b.type = 'button'; b.title = title; b.addEventListener('click', fn); bar.appendChild(b); };
-            btn('−', 'Kleiner (−)', () => ovSize(1 / 1.5));
+            btn('−', tr('Kleiner (−)', 'Smaller (−)', 'Más pequeño (−)', 'Più piccolo (−)', 'Plus petit (−)'), () => ovSize(1 / 1.5));
             bar.lastChild.classList.add('d-ov-first');
-            btn('+', 'Größer (+)', () => ovSize(1.5));
-            btn('×', 'Schließen (O oder Esc)', () => { const h = host(); if (h) h.zu(); });
+            btn('+', tr('Größer (+)', 'Larger (+)', 'Más grande (+)', 'Più grande (+)', 'Plus grand (+)'), () => ovSize(1.5));
+            btn('×', tr('Schließen (O oder Esc)', 'Close (O or Esc)', 'Cerrar (O o Esc)', 'Chiudi (O o Esc)', 'Fermer (O ou Échap)'), () => { const h = host(); if (h) h.zu(); });
         }
-        ovWait = document.body.appendChild(el('div', 'd-ov-wait', 'Wird vorbereitet …'));
+        ovWait = document.body.appendChild(el('div', 'd-ov-wait', tr('Wird vorbereitet …', 'Getting ready …', 'Preparando …', 'Preparazione …', 'Préparation…')));
         // a click on a sheet jumps, beside the sheets closes; links on the sheets (QR, contents) do not navigate the frame
         document.addEventListener('click', e => {
             if (e.target.closest('.d-bar')) return;

@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathegy7.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlbereich 3; 4 Ustd./week, 104 + 8 Ustd.).
  * Doc, 11.10.2026: book 13 of the English editions (forloop-71 orchestrates, Turing translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 7',
     short: 'Mathematics GY 7',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 7 (Saxony): circle and line, circumcircle and incircle, Thales’ theorem and the angles in a circle, constructions and problem solving, rational numbers and calculating with them, equations and formulas, percentages, prisms and pyramids in oblique drawing, net and two-view drawing, surface area and volume, charts and the Platonic solids, with nets that fold in 3D, constructions to click through and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Circle and line, circumcircle and incircle',

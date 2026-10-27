@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe10.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlpflichtbereich 3; 4 Ustd./week, 80 + 8 Ustd.).
  * Doc, 11.10.2026: book 16 of the English editions (forloop-71 orchestrates, Newton translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Secondary School 10',
     short: 'Mathematics OS 10',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Oberschule (secondary school), Year 10, intermediate track (Saxony): triangles and polygons with the sine and cosine rules, power, exponential and sine functions, random variables and expected value, wages, saving and credit, solids with frustums of pyramids and cones, problem solving for the final exam and surveying, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Triangles, quadrilaterals and trigonometry',

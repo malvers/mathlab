@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathegy12.html: LB 5 → Wahlbereich 5 → LB 6 → LB 7 → LB 8 → Abitur; 4 Ustd./week).
  * Doc, 25.10.2026: "bitte beauftrage 5 Agentinnen weitere 5 Bücher in FR zu übersetzen" (French round 2, Amice, block fr-8).
  * Terms as in tools/buch-fr/glossaire.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 12',
     short: 'Mathématiques GY 12',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand d’enseignement général), 12e année, Grundkurs (cours de base), Saxe : le calcul intégral, de la recherche des primitives à l’aire entre deux courbes, l’intégration numérique, l’estimation et les tests d’hypothèse, les distances et les angles dans l’espace en vraie 3D, les distances minimales, les symétries, les familles de fonctions et de droites et la préparation à l’Abitur, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb5-1.html', lb: 'Domaine d’apprentissage 5', k: '5.1', title: 'Primitives et intégration',

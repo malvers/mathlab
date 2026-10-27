@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe12.html: LB 1 → LB 2 → LB 5; Grundkurs, Kurshalbjahre 12/I and 12/II).
  * Doc, 11.10.2026: "mach das zweite Buch in EN".
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Vocational Grammar School 12',
     short: 'Mathematics 12',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Berufliches Gymnasium (vocational grammar school), Year 12, Saxony: discrete random variables and the binomial distribution, differential calculus from limits to optimisation problems, and vectors in space, with labs, simulations, 3D graphics and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Conditional probability',

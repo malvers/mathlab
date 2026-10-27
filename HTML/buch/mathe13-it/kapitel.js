@@ -2,14 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe13.html: LB 3 → LB 4 → Wahlpflicht 1 → LB 6 → Abiturvorbereitung).
  * Doc, 18.10.2026: "macht die Übersetzung für die Mathebücher BGY elf zwölf dreizehn. Bitte in Italienisch." (package IT0:
  * start page and this file; the chapters: IT3). Terms as in tools/buch-it/glossario.md. Single source for the table of
- * contents (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the
- * page overview (O) in js/buch.js.
+ * contents (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Berufliches Gymnasium 13',
     short: 'Matematica 13',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Berufliches Gymnasium (liceo tedesco a indirizzo professionale), 13ª classe, Sassonia: calcolo integrale, statistica inferenziale con test di significatività, geometria analitica di rette e piani nello spazio, altre applicazioni e un capitolo per prepararsi all’Abitur, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb3-1.html', lb: 'Area di apprendimento 3', k: '3.1', title: 'Primitive',

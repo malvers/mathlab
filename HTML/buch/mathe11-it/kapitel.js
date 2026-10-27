@@ -2,14 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe11.html: LB 2 → LB 3 → LB 4 → LB 1 → Wahlbereich 3).
  * Doc, 18.10.2026: "macht die Übersetzung für die Mathebücher BGY elf zwölf dreizehn. Bitte in Italienisch." (package IT0:
  * start page and this file; the chapters: IT1). Terms as in tools/buch-it/glossario.md. Single source for the table of
- * contents (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides the
- * page overview (O) in js/buch.js.
+ * contents (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Berufliches Gymnasium 11',
     short: 'Matematica 11',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Berufliches Gymnasium (liceo tedesco a indirizzo professionale), 11ª classe, Sassonia: equazioni, funzioni, sistemi di equazioni, probabilità e metodi numerici, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb2.html', lb: 'Area di apprendimento 2', k: '2', title: 'Equazioni, formule, figure',

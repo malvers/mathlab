@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathegy12lk.html: LB 5 → Wahlbereich 5 → LB 6 → LB 7 → LB 8 → LB 9 → Abitur).
  * Doc, 11.10.2026: "ok, go on all agents" (book 7; Newton and Turing, book 8 mathegy11-en is Einstein's).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 12 · Advanced Course',
     short: 'Mathematics GY 12 Advanced',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 12, advanced course (Saxony): integral calculus with the integral function, the fundamental theorem and solids of revolution in real 3D, numerical integration up to Simpson, normally distributed random variables and de Moivre-Laplace, estimating and significance tests, distances and angles in space with the Hesse normal form and skew lines, extreme values, reflections, unbounded areas, families and loci and training for the Abitur, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb5-1.html', lb: 'Learning area 5', k: '5.1', title: 'Antiderivatives and integration',

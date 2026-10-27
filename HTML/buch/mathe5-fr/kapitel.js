@@ -2,14 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathe5.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlbereich; Lehrplan Oberschule
  * 2019: 100 Ustd. Pflicht + 8 Ustd. Wahlbereich). Doc, 26.10.2026: OS 5 in English, Spanish, Italian and French at the same
  * time (block fr-11, tools/buch-fr/README.md). Terms as in tools/buch-fr/glossaire.md. Single source for the table of
- * contents (index.html) and the previous/next cards at the end of every chapter. No print edition: druck: false hides
- * the page overview (O) in js/buch.js.
+ * contents (index.html) and the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Oberschule 5',
     short: 'Mathématiques OS 5',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour l’Oberschule (école secondaire de Saxe), 5e année : grands nombres, calcul posé, propriétés des opérations et priorités de calcul, carrés parfaits, équations et divisibilité, fractions, nombres décimaux, pourcentages et grandeurs, repérage et angles, rectangle et cube, symétrie et translation, et les chiffres des Babyloniens, des Égyptiens et des Romains, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Grands nombres',

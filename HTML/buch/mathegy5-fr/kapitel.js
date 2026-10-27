@@ -3,13 +3,12 @@
  * 104 + 8 Ustd.). Doc, 26.10.2026: "Wir machen jetzt noch 5 Bücher ins Französische vom Gymnasium" (French round 3,
  * tools/buch-fr/README.md, block fr-12). Terms as in tools/buch-fr/glossaire.md (sections 1–5, ## mathe5-fr, ## mathegy5-fr).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathématiques · Gymnasium 5',
     short: 'Mathématiques GY 5',
     lang: 'fr',
-    druck: false,
     description: 'Manuel interactif de mathématiques pour le Gymnasium (lycée allemand qui mène à l’Abitur), 5e année, Saxe : grands nombres, arrondir, propriétés des opérations, puissances, diviseurs et nombres premiers, fractions, nombres décimaux et pourcentages, coordonnées, angles, symétries, rectangles et pavés droits, grandeurs de la vie quotidienne et nombres des Égyptiens, des Romains et des Mayas, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Domaine d’apprentissage 1', k: '1.1', title: 'Grands nombres',

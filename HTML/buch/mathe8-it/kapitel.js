@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathe8.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → LB 6 → Wahlpflichtbereich 1; 4 Ustd./week, 100 + 8 Ustd.).
  * Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch" (round 3, Pastori, block it-18).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Oberschule 8',
     short: 'Matematica OS 8',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per l’Oberschule (scuola secondaria sassone), 8ª classe, percorso Realschule (Sassonia): espressioni algebriche e loro trasformazioni, equazioni lineari e formule, funzioni, funzioni lineari e sistemi di equazioni con confronti di tariffe, il cerchio e il teorema di Talete, il cilindro, similitudine e omotetia, esperimenti aleatori con diagrammi ad albero, la matematica di tutti i giorni con affitto, luce e costi di costruzione, e la bicicletta, con elementi interattivi e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Espressioni algebriche e loro trasformazioni',

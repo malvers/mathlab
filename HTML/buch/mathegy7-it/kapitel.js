@@ -2,13 +2,12 @@
  * school year (Stoffverteilungsplan svp/mathe/mathegy7.html: LB 1 → LB 2 → LB 3 → LB 4 → Wahlbereich 3).
  * Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch" (round 3, Cristoforetti, block it-12).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Gymnasium 7',
     short: 'Matematica GY 7',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Gymnasium (liceo tedesco), 7ª classe, Sassonia: circonferenza e retta, circonferenza circoscritta e inscritta, il teorema di Talete e gli angoli nella circonferenza, costruire e risolvere problemi, i numeri razionali e il calcolo con essi, equazioni e formule, percentuali, prismi e piramidi in assonometria cavaliera, sviluppo piano e proiezioni ortogonali, superficie e volume, diagrammi e i solidi platonici, con sviluppi che si piegano in 3D, costruzioni passo per passo e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Circonferenza e retta, circoscritta e inscritta',

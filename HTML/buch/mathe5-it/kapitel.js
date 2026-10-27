@@ -3,13 +3,12 @@
  * 100 Ustd. Pflicht + 8 Ustd. Wahlbereich).
  * Doc, 26.10.2026: OS 5 in English, Spanish, French and Italian at the same time (Italian: Castelnuovo, block it-21).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Oberschule 5',
     short: 'Matematica OS 5',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per l’Oberschule (scuola secondaria sassone), 5ª classe (Sassonia): numeri grandi, calcolo in colonna, proprietà delle operazioni e ordine delle operazioni, quadrati, equazioni e divisibilità, frazioni, numeri decimali, percentuali e grandezze, coordinate e angoli, rettangolo e cubo, simmetria e traslazione e i simboli numerici di babilonesi, egizi e romani, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Numeri grandi',

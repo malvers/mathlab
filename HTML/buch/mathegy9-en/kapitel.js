@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathegy9.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich; 4 Ustd./week, 104 + 8 Ustd.).
  * Book 11 of the English editions (forloop-71 orchestrates, Einstein translates).
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Grammar School 9',
     short: 'Mathematics GY 9',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Gymnasium (grammar school), Year 9 (Saxony): powers and roots, power functions, quadratic functions and equations, optimisation problems, circle, cylinder and sphere, Pythagoras’ theorem and its relatives, trigonometry in right-angled triangles, pyramid and cone, analysing data and the golden ratio, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Learning area 1', k: '1.1', title: 'Powers and roots',

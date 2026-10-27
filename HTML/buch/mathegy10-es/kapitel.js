@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathegy10.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich; 4 Ustd./week, 112 Ustd.).
  * Doc, 13.10.2026: Spanish round 2 (Lovelace orchestrates and translates GY 10). Terms as in tools/buch-es/glosario.md.
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matemáticas · Gymnasium 10',
     short: 'Matemáticas GY 10',
     lang: 'es',
-    druck: false,
     description: 'Libro de texto interactivo de matemáticas para el Gymnasium (enseñanza secundaria alemana que prepara para el Abitur), 10.º curso, Sajonia: crecimiento y funciones exponenciales, procesos periódicos y la función seno, variables aleatorias, esperanza y juegos justos, teoremas del seno y del coseno, logaritmo y ecuaciones exponenciales, tangente, panorama de las funciones, sucesiones y límites, cálculo de intereses y números complejos, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Área de aprendizaje 1', k: '1.1', title: 'Crecimiento y funciones exponenciales',

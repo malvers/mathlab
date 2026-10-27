@@ -2,13 +2,12 @@
  * (Stoffverteilungsplan svp/mathe/mathegy8.html: LB 1 → LB 2 → LB 3 → LB 4 → LB 5 → Wahlbereich 3; 4 Ustd./week, 104 + 8 Ustd.).
  * Doc, 20.10.2026: "schnapp dir noch 5 Agentinnen und zieht es durch" (round 3, Nalli, block it-13).
  * Terms as in tools/buch-it/glossario.md. Single source for the table of contents (index.html) and the previous/next cards
- * at the end of every chapter. No print edition: druck: false hides the page overview (O) in js/buch.js.
+ * at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Matematica · Gymnasium 8',
     short: 'Matematica GY 8',
     lang: 'it',
-    druck: false,
     description: 'Libro di testo interattivo di matematica per il Gymnasium (la scuola secondaria tedesca che porta all’Abitur), 8ª classe, Sassonia: espressioni e alberi di calcolo, prodotti notevoli, equazioni e disequazioni, esperimenti aleatori, probabilità e diagrammi ad albero, funzioni e funzioni lineari, sistemi di equazioni lineari, omotetia e similitudine, strategie euristiche e simulazione con numeri casuali, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Area di apprendimento 1', k: '1.1', title: 'Variabili ed espressioni',

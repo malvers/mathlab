@@ -2,13 +2,12 @@
  * of the school year (Stoffverteilungsplan svp/mathe/mathe11.html: LB 2 → LB 3 → LB 4 → LB 1 → Wahlbereich 3).
  * Doc, 10.10.2026: "übersetz unser 1. Buch ins EN ... mach auf das cover oben rechts die british flag".
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet (Doc: "Druck lassen wir erstmal"): druck: false hides the page overview (O) in js/buch.js.
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Mathematics · Vocational Grammar School 11',
     short: 'Mathematics 11',
     lang: 'en',
-    druck: false,
     description: 'Interactive mathematics textbook for the Berufliches Gymnasium (vocational grammar school), Year 11, Saxony: equations, functions, linear systems, probability and numerical methods, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb2.html', lb: 'Learning area 2', k: '2', title: 'Equations, formulas, figures',
