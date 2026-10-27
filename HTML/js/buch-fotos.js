@@ -396,7 +396,10 @@ window.BUCH_FOTOS = {
         'hanoi': { artist: 'Bin im Garten', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:T%C3%BCrme_von_Hanoi_in_Bremen_7024.JPG',
             alt: { de: 'Ein Turm von Hanoi aus Holz', en: 'A wooden Tower of Hanoi', es: 'Una torre de Hanói de madera', it: 'Una torre di Hanoi in legno', fr: 'Une tour de Hanoï en bois' } },
         'fuenfzehnerspiel': { artist: 'Sam Loyd', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Sam_Loyd_-_The_14-15_Puzzle_in_Puzzleland.jpg',
-            alt: { de: 'Sam Loyds Zeichnung zum Fünfzehnerspiel', en: 'Sam Loyd’s drawing of the 15 puzzle', es: 'El dibujo de Sam Loyd sobre el juego del 15', it: 'Il disegno di Sam Loyd sul gioco del 15', fr: 'Le dessin de Sam Loyd sur le taquin' } }
+            alt: { de: 'Sam Loyds Zeichnung zum Fünfzehnerspiel', en: 'Sam Loyd’s drawing of the 15 puzzle', es: 'El dibujo de Sam Loyd sobre el juego del 15', it: 'Il disegno di Sam Loyd sul gioco del 15', fr: 'Le dessin de Sam Loyd sur le taquin' } },
+        // mathe7 (2026-10-27)
+        'kairo-parkett': { artist: 'Harry Princeton', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Cairo_Pentagonal_Tiling_in_Copenhagen_DM.jpg',
+            alt: { de: 'Ein Fußboden mit Kairo-Parkett aus Fünfecken in Kopenhagen', en: 'A floor with a Cairo pentagonal tiling in Copenhagen', es: 'Un suelo con el teselado de El Cairo de pentágonos en Copenhague', it: 'Un pavimento con la tassellatura del Cairo a pentagoni a Copenaghen', fr: 'Un sol pavé de pentagones du Caire à Copenhague' } }
     },
     books: {
         mathe11: {
@@ -1156,6 +1159,41 @@ window.BUCH_FOTOS = {
                 { foto: 'hanoi', at: '#le2 .b-einstieg', put: 'in', w: 30 },
                 { foto: 'streichhoelzer', at: '#le3 .b-einstieg', put: 'in', w: 28 },
                 { foto: 'fuenfzehnerspiel', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ]
+        },
+        mathe7: {
+            'lb1-1.html': [
+                { foto: 'fahrraeder-schule', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'basketball-wurf', at: '#le3 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb1-2.html': [
+                { foto: 'schlussverkauf', at: '#le1 .b-einstieg', put: 'in', w: 24, pos: '50% 30%' },
+                { foto: 'sparglas', at: '#le2 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'pacioli', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb2.html': [
+                { foto: 'lichtschalter', at: '#le1 .b-einstieg', put: 'in', w: 24 },
+                { foto: 'wuerfel-spieltisch', at: '#le3 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb3-1.html': [
+                { foto: 'thermometer', at: '#le1 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'rechenstaebchen', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb3-3.html': [
+                { foto: 'streichhoelzer', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'balkenwaage', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'chwarizmi-statue', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb4-1.html': [
+                { foto: 'fliesen', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'giebeldach', at: '#le4 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb4-2.html': [
+                { foto: 'bienenwaben', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'wb.html': [
+                { foto: 'alhambra-fliesen', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'kairo-parkett', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
             ]
         }
     }
