@@ -36,6 +36,7 @@ window.BuchEN && BuchEN.add('stochastik', {
         'du: bleiben': 'you: stay', 'du: wechseln': 'you: switch', 'Rechner: bleiben': 'computer: stay', 'Rechner: wechseln': 'computer: switch',
         // histo-hero, unabhaengig, zufallsgroesse, binomial, bernoulli-baum (book 2, mathe12-en)
         'Histogramm einer Binomialverteilung': 'Histogram of a binomial distribution',
+        'Histogramm einer Wahrscheinlichkeitsverteilung': 'Histogram of a probability distribution',
         'Unabhängig machen': 'Make independent', 'Unvereinbar machen': 'Make mutually exclusive',
         'Einheitsquadrat: Anteil von A in B und in nicht B': 'Unit square: share of A in B and in not B',
         'Drei Münzen': 'Three coins', 'Augensumme': 'Total score', 'Glücksrad': 'Spinner', 'Zufallsgröße': 'Random variable',

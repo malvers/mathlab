@@ -177,6 +177,7 @@ window.BuchIT && BuchIT.add('stochastik', {
         ['nach unten', 'verso il basso'],
         [' alles richtig', ' tutto corretto'],
         ['Histogramm einer Binomialverteilung', 'Istogramma di una distribuzione binomiale'],
+        ['Histogramm einer Wahrscheinlichkeitsverteilung', 'Istogramma di una distribuzione di probabilità'],
         ['Augenzahl', 'punteggio'],
         ['Anzahl Wappen', 'numero di teste'],
         ['Augensumme zweier Würfel', 'somma dei punti di due dadi'],

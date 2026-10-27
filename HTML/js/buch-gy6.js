@@ -506,7 +506,7 @@
                 '<p style="margin:0">' + (ok ? '<span class="g-ok">Passt.</span> ' : '<span class="g-warn">Passt nicht.</span> ') +
                 (P.rel === '=' ? (ok ? 'Probe: Einsetzen ergibt eine wahre Aussage.' : d < 0 ? 'Die linke Seite ist zu klein.' : 'Die linke Seite ist zu groß.') :
                     'Gesucht sind alle Zahlen, für die die linke Seite ' + (P.rel === '<' ? 'kleiner' : 'größer') + ' als $' + rt + '$ ist.') + '</p>' +
-                '<p class="b-help" style="margin:8px 0 0">Geprüft: ' + S.tried.size + ' von ' + (n + 1) + ' Werten. ' + (good.length ? 'Es passen: ' + good.map(show).join(', ') + '.' : 'Bisher passt keiner.') + '</p>';
+                '<p class="b-help" style="margin:8px 0 0">Geprüft: ' + S.tried.size + ' von ' + (n + 1) + ' Werten. ' + (good.length ? 'Es passen: ' + good.map(show).join('; ') + '.' : 'Bisher passt keiner.') + '</p>';
             math(out);
         }
         render();

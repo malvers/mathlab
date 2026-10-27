@@ -81,7 +81,7 @@ window.BuchEN && BuchEN.add('trigonometrie', {
         [' (nach unten, also negativ)', ' (downwards, so negative)'],
         // pyramidekegel
         ['Schrägbild einer quadratischen Pyramide', 'Oblique view of a square pyramid'], ['Schrägbild eines Kegels', 'Oblique view of a cone'], [' mit einem rechtwinkligen Dreieck', ' with a right-angled triangle'],
-        ['Seitenhöhe $h_a', 'Height of a side face $h_a'], ['Neigungswinkel der Seitenfläche:', 'Angle of inclination of the side face:'],
+        ['Seitenhöhe $h_s', 'Height of a side face $h_s'], ['Neigungswinkel der Seitenfläche:', 'Angle of inclination of the side face:'],
         ['Seitenkante $s', 'Lateral edge $s'], ['$ mit der Diagonale $d', '$ with the diagonal $d'], ['Neigungswinkel der Seitenkante:', 'Angle of inclination of the lateral edge:'],
         ['Volumen $V', 'Volume $V'], ['$ · Oberfläche $O', '$ · surface area $O'], ['Mantellinie $s', 'Slant height $s'],
         ['halber Öffnungswinkel:', 'half the opening angle:'], ['$ · Öffnungswinkel $2', '$ · opening angle $2'], ['$ · Mantel $M', '$ · curved surface $M']

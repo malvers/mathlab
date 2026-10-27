@@ -336,7 +336,7 @@
         const sl = div(box, '');
         range(sl, { label: 'Amplitude $a$', min: -3, max: 3, step: 0.1, value: S.a, onInput: v => { S.a = v; render(); } });
         range(sl, { label: 'Faktor $b$ (Periode $\\tfrac{2\\pi}{b}$)', min: 0.25, max: 4, step: 0.25, value: S.b, onInput: v => { S.b = v; render(); } });
-        range(sl, { label: 'Verschiebung $c$ nach rechts', min: -Math.PI, max: Math.PI, step: Math.PI / 12, value: S.c, fmt: v => fmt(v / Math.PI, 3) + 'π', onInput: v => { S.c = v; render(); } });
+        range(sl, { label: 'Verschiebung $c$ nach rechts', min: -Math.PI, max: Math.PI, step: Math.PI / 12, value: S.c, fmt: v => Math.abs(v) < 1e-9 ? '0' : fmt(v / Math.PI, 3) + 'π', onInput: v => { S.c = v; render(); } });
         range(sl, { label: 'Verschiebung $d$ nach oben', min: -3, max: 3, step: 0.5, value: S.d, onInput: v => { S.d = v; render(); } });
         math(sl);
         const plotBox = div(box, '');

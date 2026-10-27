@@ -99,14 +99,14 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         [' (nach unten, also negativ)', ' (verso il basso, quindi negativa)'],
         // pyramidekegel
         ['Schrägbild einer quadratischen Pyramide', 'Assonometria cavaliera di una piramide quadrata'], ['Schrägbild eines Kegels', 'Assonometria cavaliera di un cono'], [' mit einem rechtwinkligen Dreieck', ' con un triangolo rettangolo'],
-        ['Seitenhöhe $h_a', 'Apotema $h_a'], ['Neigungswinkel der Seitenfläche:', 'Angolo di inclinazione della faccia laterale:'],
+        ['Seitenhöhe $h_s', 'Apotema $h_s'], ['Neigungswinkel der Seitenfläche:', 'Angolo di inclinazione della faccia laterale:'],
         ['Seitenkante $s', 'Spigolo laterale $s'], ['$ mit der Diagonale $d', '$ con la diagonale $d'], ['Neigungswinkel der Seitenkante:', 'Angolo di inclinazione dello spigolo laterale:'],
         ['$ · Oberfläche $O', '$ · superficie totale $O'], ['Mantellinie $s', 'Generatrice $s'], ['Volumen $V', 'Volume $V'],
         ['halber Öffnungswinkel:', 'metà dell’angolo di apertura:'], ['$ · Öffnungswinkel $2', '$ · angolo di apertura $2'], ['$ · Mantel $M', '$ · superficie laterale $M'],
 
         // book it-19 mathe9-it:
         // pyramidekegel
-        ['Seitenhöhe $h_a = \\sqrt{', 'Apotema $h_a = \\sqrt{'], ['Neigungswinkel der Seitenfläche: $\\tan', 'Angolo di inclinazione della faccia laterale: $\\tan'],
+        ['Seitenhöhe $h_s = \\sqrt{', 'Apotema $h_s = \\sqrt{'], ['Neigungswinkel der Seitenfläche: $\\tan', 'Angolo di inclinazione della faccia laterale: $\\tan'],
         ['Seitenkante $s = \\sqrt{', 'Spigolo laterale $s = \\sqrt{'], ['$ mit der Diagonale $d = ', '$ con la diagonale $d = '], ['Neigungswinkel der Seitenkante: $\\tan', 'Angolo di inclinazione dello spigolo laterale: $\\tan'],
         ['Volumen $V = \\tfrac13', 'Volume $V = \\tfrac13'], ['$ · Oberfläche $O = ', '$ · superficie $O = '], ['Mantellinie $s = ', 'Apotema $s = '],
         ['halber Öffnungswinkel: $\\tan', 'metà dell’angolo di apertura: $\\tan'], ['$ · Mantel $M = ', '$ · superficie laterale $M = '],

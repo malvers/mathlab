@@ -155,6 +155,7 @@ window.BuchFR && BuchFR.add('stochastik', {
         ['nach oben', 'vers le haut'],
         ['nach unten', 'vers le bas'],
         ['Histogramm einer Binomialverteilung', 'Histogramme d’une loi binomiale'],
+        ['Histogramm einer Wahrscheinlichkeitsverteilung', 'Histogramme d’une loi de probabilité'],
         ['Augenzahl', 'numéro du dé'],
         ['Anzahl Wappen', 'nombre de faces'],
         ['Augensumme zweier Würfel', 'somme des points de deux dés'],

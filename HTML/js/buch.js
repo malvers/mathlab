@@ -68,6 +68,7 @@
         if (!isFinite(x)) return '–';
         let s = Number(x).toFixed(digits);
         if (s.indexOf('.') >= 0) s = s.replace(/0+$/, '').replace(/\.$/, '');
+        if (s === '-0') s = '0';                                          // a rounding rest like -2e-16 (sin 360°)
         return EN ? s : s.replace('.', ',');
     }
     // the same inside TeX: the comma must not add space ({,})

@@ -339,6 +339,8 @@ window.BuchFR && BuchFR.add('gy6', {
         [/Gesucht sind alle Zahlen, für die die linke Seite (kleiner|größer) als (\$[^$]*\$) ist\./g, (m, r, x) =>
             'On cherche tous les nombres pour lesquels le membre de gauche est ' + (r === 'kleiner' ? 'inférieur' : 'supérieur') + ' à ' + x + '.'],
         [/Geprüft: (\d+) von (\d+) Werten\. /g, (m, a, b) => (a === '1' ? 'Valeur testée : 1 sur ' : 'Valeurs testées : ' + a + ' sur ') + b + '. '],
+        // the values that fit, "2; 2,5; 3": the no-break space before the semicolon
+        [/Es passen: ([^<]*)\./g, (m, l) => 'Es passen: ' + l.replace(/; /g, ' ; ') + '.'],
         // pfeile6
         [/Die Zuordnung ist (mehrdeutig|eindeutig, aber nicht eineindeutig|eineindeutig)\. /g, (m, k) => 'La correspondance est ' +
             ({ 'mehrdeutig': 'non univoque', 'eindeutig, aber nicht eineindeutig': 'univoque, mais pas biunivoque', 'eineindeutig': 'biunivoque' })[k] + '. '],

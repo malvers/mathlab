@@ -596,11 +596,11 @@
                 F = S.tri === 'ha' ? P(0, -r, 0) : c2;
                 const ha = Math.hypot(h, r), sk = Math.hypot(h, r * Math.SQRT2);
                 rows = S.tri === 'ha'
-                    ? ['Seitenhöhe $h_a = \\sqrt{h^2 + \\left(\\tfrac{a}{2}\\right)^2} = \\sqrt{' + texNum(h * h, 2) + ' + ' + texNum(r * r, 2) + '} \\approx ' + texNum(ha, 2) + '$',
+                    ? ['Seitenhöhe $h_s = \\sqrt{h^2 + \\left(\\tfrac{a}{2}\\right)^2} = \\sqrt{' + texNum(h * h, 2) + ' + ' + texNum(r * r, 2) + '} \\approx ' + texNum(ha, 2) + '$',
                         'Neigungswinkel der Seitenfläche: $\\tan\\varepsilon = \\dfrac{h}{a/2} = \\dfrac{' + texNum(h, 1) + '}{' + texNum(r, 2) + '} \\Rightarrow \\varepsilon \\approx ' + dg(Math.atan(h / r) / RAD) + '$']
                     : ['Seitenkante $s = \\sqrt{h^2 + \\left(\\tfrac{d}{2}\\right)^2}$ mit der Diagonale $d = a\\sqrt2 \\approx ' + texNum(a * Math.SQRT2, 2) + '$: $s \\approx ' + texNum(sk, 2) + '$',
                         'Neigungswinkel der Seitenkante: $\\tan\\varphi = \\dfrac{h}{d/2} \\Rightarrow \\varphi \\approx ' + dg(Math.atan(h / (r * Math.SQRT2)) / RAD) + '$'];
-                rows.push('Volumen $V = \\tfrac13 a^2 h = \\tfrac13 \\cdot ' + texNum(a * a, 2) + ' \\cdot ' + texNum(h, 1) + ' \\approx ' + texNum(a * a * h / 3, 2) + '$ · Oberfläche $O = a^2 + 4 \\cdot \\tfrac12 a h_a = a^2 + 2a\\,h_a \\approx ' + texNum(a * a + 2 * a * ha, 2) + '$');
+                rows.push('Volumen $V = \\tfrac13 a^2 h = \\tfrac13 \\cdot ' + texNum(a * a, 2) + ' \\cdot ' + texNum(h, 1) + ' \\approx ' + texNum(a * a * h / 3, 2) + '$ · Oberfläche $O = a^2 + 4 \\cdot \\tfrac12 a h_s = a^2 + 2a\\,h_s \\approx ' + texNum(a * a + 2 * a * ha, 2) + '$');
             } else {
                 // front half solid, back half dashed (points with y > 0 lie behind)
                 const front = []; for (let i = 36; i <= 72; i++) { const t = i / 72 * 2 * Math.PI; front.push(P(r * Math.cos(t), r * Math.sin(t), 0)); }

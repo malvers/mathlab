@@ -93,7 +93,7 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         [' (nach unten, also negativ)', ' (vers le bas, donc négative)'],
         // pyramidekegel
         ['Schrägbild einer quadratischen Pyramide', 'Perspective cavalière d’une pyramide à base carrée'], ['Schrägbild eines Kegels', 'Perspective cavalière d’un cône'], [' mit einem rechtwinkligen Dreieck', ' avec un triangle rectangle'],
-        ['Seitenhöhe $h_a', 'Apothème $h_a'], ['Neigungswinkel der Seitenfläche:', 'Angle d’inclinaison de la face latérale :'],
+        ['Seitenhöhe $h_s', 'Apothème $h_a'], ['Neigungswinkel der Seitenfläche:', 'Angle d’inclinaison de la face latérale :'],
         ['Seitenkante $s', 'Arête latérale $s'], ['$ mit der Diagonale $d', '$ avec la diagonale $d'], ['Neigungswinkel der Seitenkante:', 'Angle d’inclinaison de l’arête latérale :'],
         ['$ · Oberfläche $O', '$ · aire totale $O'], ['Mantellinie $s', 'Génératrice $s'], ['Volumen $V', 'Volume $V'],
         ['halber Öffnungswinkel:', 'Demi-angle au sommet :'], ['$ · Öffnungswinkel $2', '$ · angle au sommet $2'], ['$ · Mantel $M', '$ · aire latérale $M'],
@@ -106,6 +106,8 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         ['Höhe $h = b \\times \\sin\\gamma = ', 'Hauteur $h = b \\times \\sin\\gamma = '],
     ],
     rule: [
+        // pyramidekegel: the German side height h_s is the apothème h_a in French (the label is a phrase above)
+        [/a h_s = a\^2 \+ 2a\\,h_s/g, 'a h_a = a^2 + 2a\\,h_a'],
         // book fr-6 mathegy10-fr:
         // messkurve: the unit after the distance of the markers ("$11,0$ Jahre</b>")
         [/\$ Jahre<\/b>/g, '$ ans</b>'],

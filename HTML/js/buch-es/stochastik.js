@@ -41,6 +41,7 @@ window.BuchES && BuchES.add('stochastik', {
         'Baumdiagramm': 'Diagrama de árbol', 'gerade · Vielfaches von 3': 'par · múltiplo de 3', 'Primzahl · größer als 6': 'primo · mayor que 6',
         // book es-3 mathe13-es: histo-hero, binomial
         'Histogramm einer Binomialverteilung': 'Histograma de una distribución binomial',
+        'Histogramm einer Wahrscheinlichkeitsverteilung': 'Histograma de una distribución de probabilidad',
         'Anzahl der Versuche $n$': 'Número de ensayos $n$', 'Trefferwahrscheinlichkeit $p$': 'Probabilidad de éxito $p$',
         'Was wird berechnet?': '¿Qué se calcula?', 'Histogramm der Binomialverteilung': 'Histograma de la distribución binomial',
         // book es-3 mathe13-es: stichprobe, signifikanztest
@@ -136,6 +137,7 @@ window.BuchES && BuchES.add('stochastik', {
         ['Positiv getestet werden <b>', 'Dan positivo <b>'],
         ['</b> von 10 000 Personen – ', '</b> de 10 000 personas – '],
         ['Histogramm einer Binomialverteilung', 'Histograma de una distribución binomial'],
+        ['Histogramm einer Wahrscheinlichkeitsverteilung', 'Histograma de una distribución de probabilidad'],
         ['$ und $P(A \\cap B) = ', '$ y $P(A \\cap B) = '],
         ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.', '<b>Independientes:</b> ocurra $B$ o no, la proporción de $A$ es la misma. En el cuadrado, el límite está a la misma altura en las dos columnas.'],
         ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.', '<b>Incompatibles</b> ($A \\cap B = \\emptyset$) y, por tanto, <b>dependientes</b>: si ocurre $B$, $A$ ya no puede ocurrir.'],

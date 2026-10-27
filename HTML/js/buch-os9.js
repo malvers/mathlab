@@ -149,7 +149,7 @@
                 a = 1; f = x => x * x + S.p * x + S.q; xs = -S.p / 2; ys = S.q - S.p * S.p / 4;
                 eq = 'y = x^2' + (Math.abs(S.p) < 1e-9 ? '' : (S.p < 0 ? ' - ' : ' + ') + (Math.abs(Math.abs(S.p) - 1) < 1e-9 ? '' : texNum(Math.abs(S.p), 2)) + 'x') + sgn(S.q);
                 const h = S.p / 2;
-                steps = '<p style="margin:6px 0 0">Quadratische Ergänzung: $y = x^2' + (Math.abs(S.p) < 1e-9 ? '' : (S.p < 0 ? ' - ' : ' + ') + texNum(Math.abs(S.p), 2) + 'x') + ' + ' + texNum(h * h, 4) + ' - ' + texNum(h * h, 4) + sgn(S.q) +
+                if (Math.abs(S.p) > 1e-9) steps = '<p style="margin:6px 0 0">Quadratische Ergänzung: $y = x^2' + (Math.abs(S.p) < 1e-9 ? '' : (S.p < 0 ? ' - ' : ' + ') + texNum(Math.abs(S.p), 2) + 'x') + ' + ' + texNum(h * h, 4) + ' - ' + texNum(h * h, 4) + sgn(S.q) +
                     ' = (x' + sgn(h, 2) + ')^2' + sgn(ys, 4) + '$</p>';
             }
             const L = [{ fn: x => x * x, color: 'dim', dash: true }, { fn: f, color: 'lambda', label: 'f' }];

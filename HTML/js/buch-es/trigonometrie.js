@@ -96,7 +96,7 @@ window.BuchES && BuchES.add('trigonometrie', {
         [' (nach unten, also negativ)', ' (hacia abajo, es decir, negativa)'],
         // pyramidekegel
         ['Schrägbild einer quadratischen Pyramide', 'Perspectiva caballera de una pirámide cuadrada'], ['Schrägbild eines Kegels', 'Perspectiva caballera de un cono'], [' mit einem rechtwinkligen Dreieck', ' con un triángulo rectángulo'],
-        ['Seitenhöhe $h_a', 'Apotema $h_a'], ['Neigungswinkel der Seitenfläche:', 'Ángulo de inclinación de la cara lateral:'],
+        ['Seitenhöhe $h_s', 'Apotema $h_s'], ['Neigungswinkel der Seitenfläche:', 'Ángulo de inclinación de la cara lateral:'],
         ['Seitenkante $s', 'Arista lateral $s'], ['$ mit der Diagonale $d', '$ con la diagonal $d'], ['Neigungswinkel der Seitenkante:', 'Ángulo de inclinación de la arista lateral:'],
         ['$ · Oberfläche $O', '$ · área total $O'], ['Mantellinie $s', 'Generatriz $s'],
         ['halber Öffnungswinkel:', 'mitad del ángulo de abertura:'], ['$ · Öffnungswinkel $2', '$ · ángulo de abertura $2'], ['$ · Mantel $M', '$ · superficie lateral $M'],

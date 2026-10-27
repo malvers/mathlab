@@ -557,7 +557,7 @@
                 (on ? 'fill:rgba(245,194,66,0.55);stroke:rgb(245,194,66)' : 'fill:rgba(127,216,238,0.18);stroke:rgba(127,216,238,0.6)') + ';stroke-width:1.2"/>';
             if ((k + x0) % step === 0) bars += '<text x="' + (k * bw + bw / 2).toFixed(1) + '" y="' + (Ht - 6) + '" text-anchor="middle" style="fill:#8fa3bd;font:12px Raleway,sans-serif">' + (k + x0) + '</text>';
         }
-        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" role="img" aria-label="Histogramm einer Binomialverteilung">' +
+        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" role="img" aria-label="' + (w ? 'Histogramm einer Wahrscheinlichkeitsverteilung' : 'Histogramm einer Binomialverteilung') + '">' +
             '<line x1="0" y1="' + (Ht - 22) + '" x2="' + Wd + '" y2="' + (Ht - 22) + '" style="stroke:rgba(255,255,255,0.4);stroke-width:1"/>' + bars + '</svg>';
     });
 
