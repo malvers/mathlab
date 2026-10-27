@@ -48,6 +48,12 @@ window.BuchFR && BuchFR.add('os9', {
         'Firsthöhe': 'Hauteur du faîtage', 'Sparrenlänge': 'Longueur des chevrons',
         'Die Höhe teilt den Giebel in zwei gleiche rechtwinklige Dreiecke. Dachüberstände sind hier nicht mitgerechnet.':
             'La hauteur partage le pignon en deux triangles rectangles identiques. Les débords du toit ne sont pas comptés ici.',
+        // kugelos9 (chapter 2.2): the table rows; "Volumen" and "Oberfläche" as in js/buch-fr/gy8.js, which OS 9 does not load
+        'Radius gegeben': 'Rayon donné', 'Volumen gegeben': 'Volume donné', 'Volumen $V$': 'Volume $V$', 'Radius': 'Rayon',
+        'Volumen': 'Volume', 'Oberfläche': 'Aire totale', 'Zylinder darum': 'Cylindre autour',
+        'Eine Kugel in einem Zylinder, der genau um sie passt': 'Une boule dans le cylindre qui l’entoure exactement',
+        'Die Kugel füllt immer genau $\\tfrac{2}{3}$ des Zylinders, der um sie passt. Das hat Archimedes entdeckt.':
+            'La boule remplit toujours exactement les $\\tfrac{2}{3}$ du cylindre qui l’entoure. C’est Archimède qui l’a découvert.',
     },
     phrase: [
         // book fr-20 mathe9-fr:
@@ -64,6 +70,8 @@ window.BuchFR && BuchFR.add('os9', {
         // pyramidekegel (js/buch-trigonometrie.js, chapters 2.1 and 2.2): after the rules of js/buch-fr/geometrie.js and the one below the
         // surface areas are A and A_L, so the pieces of js/buch-fr/trigonometrie.js ("$ · Oberfläche $O", "$ · Mantel $M") no longer match
         ['$ · Oberfläche $A = ', '$ · aire totale $A = '], ['$ · Mantel $A_L = ', '$ · aire latérale $A_L = '],
+        // kugelos9 and turmos9: the volume of the cylinder V_cyl (German V_Z, Zylinder)
+        ['$V_Z = ', '$V_{\\text{cyl}} = '],
     ],
     rule: [
         // book fr-20 mathe9-fr:
