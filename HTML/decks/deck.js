@@ -2175,3 +2175,32 @@ window.DeckLink = link;
     }).catch(function () { /* file not there locally - stay silent, this is a local extra */ });
   });
 })();
+
+// Live there is no editor: serve.py puts decks/deck-edit.js into the decks on Doc's Mac only. Logged in on docalvers.de
+// (the SVP session, same origin) on a Mac, the pencil in the footer and E open this slide in the local copy, where editing
+// works (Doc, 27.10.2026: "da geht Edit nie. Ich bin eingeloggt.") - nothing for the class, the HP or a tablet.
+(function () {
+  if (PRESENTER || !/(^|\.)docalvers\.de$/.test(location.hostname)) return;
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem('svp-session')); } catch (e) { }
+  if (!s || !s.refresh_token || !/Mac/.test(navigator.platform) || navigator.maxTouchPoints > 1) return;
+  const nav = document.getElementById('nav');
+  const anchor = document.getElementById('nav-laser') || document.getElementById('nav-help') || document.getElementById('nav-next');
+  if (!nav || !anchor) return;
+  function toLocal() {
+    const n = slides.filter((x, i) => i <= si && !skipped(i)).length || 1;   // what #n counts: the slides the class sees
+    location.href = 'http://localhost:8765' + location.pathname + '#' + n;
+  }
+  const b = document.createElement('button');
+  b.id = 'nav-edit'; b.type = 'button';
+  b.title = 'Bearbeiten in der lokalen Fassung (E)'; b.setAttribute('aria-label', b.title);
+  b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+    + ' stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+  b.addEventListener('click', function (e) { e.stopPropagation(); toLocal(); });
+  anchor.after(b);
+  addEventListener('keydown', function (e) {
+    if ((e.key !== 'e' && e.key !== 'E') || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, input, textarea, [contenteditable]')) return;
+    e.preventDefault(); toLocal();
+  });
+})();
