@@ -1095,6 +1095,14 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 | Zahlenmauer | pyramide de nombres | 3.2 |
 | „Der Feind meines Feindes ist mein Freund“ | « les ennemis de mes ennemis sont mes amis » | 3.2 aside |
 | Prinzip der Permanenz (Hankel) | principe de permanence | 3.2 excursion; the German book title stays (encheck lists it) |
+| Term, Termwert, Variable, einsetzen | expression, valeur de l’expression, variable (lettre), remplacer la lettre par un nombre | 3.3 |
+| Äquivalenzumformung, Probe, Rückwärtsrechnen | transformation équivalente, vérification, calculer à l’envers | 3.3 |
+| Verhältnisgleichung $a : b = c : d$ | égalité de rapports (produits en croix, said once) | 3.3, as GY 8 |
+| Umformung hinter dem Strich (`\mid +5`) | the bar written `\;\big\vert\; +5` (in the pages: `\big` and a bar) | 3.3, as the other French pages, so no `\mid` reaches the point rule |
+| Breite $b$ (Rechteck), Umfang $u$, $v = \tfrac{s}{t}$ | largeur $\ell$, périmètre $P$, $v = \tfrac{d}{t}$ | 3.3, as GY 7/8 and umstellen7 |
+| Streichhölzer, Balkenwaage, Päckchen, Grundgebühr (Taxi), Maßstab 1 : 25 000 | allumettes, balance, paquets, prise en charge, échelle 1 : 25 000 | 3.3 |
+| al-Chwarizmi, al-dschabr, al-muqabala | al-Khwârizmî, al-jabr (« la restauration »), al-muqâbala (« la confrontation ») | 3.3 excursion |
+| Lab ZAHLEN-PUZZLE | PUZZLE DE NOMBRES | as GY 5 |
 
 ## mathe8-fr
 
