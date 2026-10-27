@@ -332,6 +332,7 @@ l’accès à l’université, comme le baccalauréat.*
 | Stück (unit) | unités | "€ par unité" |
 | gleichmäßig beschleunigte Bewegung | mouvement uniformément accéléré | |
 | Zinseszins, Endkapital, Barwert, Aufzinsungsfaktor, Laufzeit | intérêts composés, capital final (valeur acquise), valeur actuelle, coefficient de capitalisation, durée | |
+| Kapital $K$, Zinssatz $p\,\%$, Zinsen $Z$, Tage $t$ (interest) | capital $C$, taux $t\,\%$, intérêts $I$, jours $j$ | every French book (Doc, 27.10.2026); the widgets zins and tilgung through the rules in js/buch-fr/finanz.js; a growth rate « croissance de $p\,\%$ » keeps $p$ |
 | Sparplan, Annuität, Tilgung, Restschuld, Tilgungsplan | plan d’épargne, annuité, amortissement, capital restant dû, tableau d’amortissement | |
 | Ratentilgung, Annuitätentilgung | amortissement constant, annuités constantes | |
 | effektiver Jahreszins, Mehrwertsteuer, brutto, netto | taux annuel effectif global (TAEG), TVA, TTC, HT | the German 19 % stays |
@@ -1121,7 +1122,7 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 | Rabatt, Skonto, Mehrwertsteuer, netto, brutto | remise, escompte, TVA, HT, TTC | 1.2, as GY 7; the German 19 % and 7 % stay, the French 20 % and 5,5 % named once |
 | Kapital $K$, Zinssatz $p\,\%$, Zinsen $Z$, Tage $t$ | capital $C$, taux d’intérêt $t\,\%$, intérêts $I$, jours $j$ | 1.2 and the widget tageszinsos7 (rules in js/buch-fr/os7.js): $I = C \times \dfrac{t}{100} \times \dfrac{j}{360}$ |
 | Zinsjahr, Jahreszinsen, Tageszinsen | année bancaire, intérêts annuels, intérêts pour quelques jours | 1.2 |
-| Zinseszins, $K_n = K_0 \cdot (1 + \tfrac{p}{100})^n$ | intérêts composés, $C_n = C_0 \times (1 + \tfrac{t}{100})^n$ | 1.2; the shared widget zins (finanz, fr-4) keeps $K_0$ and $p$ - the page says so once |
+| Zinseszins, $K_n = K_0 \cdot (1 + \tfrac{p}{100})^n$ | intérêts composés, $C_n = C_0 \times (1 + \tfrac{t}{100})^n$ | 1.2; the widget zins writes the same letters (js/buch-fr/finanz.js, 27.10.2026) |
 | Tagesgeld, Sparkonto, Girokonto, Dispokredit, auf Raten | livret d’épargne, compte d’épargne, compte courant, découvert (autorisé), en plusieurs fois | 1.2 |
 | 72er-Regel, Faustregel | règle de 72, règle empirique | 1.2 |
 | Zufallsversuch, Ergebnis, Ergebnismenge $\Omega$, Ereignis, Laplace-Versuch | expérience aléatoire, issue, univers $\Omega$, événement, expérience de Laplace | 2, as GY 8 |
@@ -1238,7 +1239,7 @@ letters for lines: $f(x) = ax + b$, also in the own widget linearos8 (block fr-1
 | Mehrwertsteuer, netto, brutto | TVA, HT, TTC | 6; the German 19 % and 7 % stay, the French 20 % and 5,5 % named once |
 | Laminat, Verschnitt, Eimer, Estrich | stratifié, chutes, pot, chape | 6, widget raumos8 (« Murs déroulés », L for litres) |
 | Rabatt, Skonto, Ratenkauf, Anzahlung | remise, escompte, paiement en plusieurs fois, acompte | 6 |
-| Zinsen $Z = K \cdot \tfrac{p}{100}$, Zinseszins | intérêts $I = K \cdot \tfrac{p}{100}$, intérêts composés | 6: $K$ and $p$ stay, as the shared widget zins (finanz) writes them |
+| Zinsen $Z = K \cdot \tfrac{p}{100}$, Zinseszins | intérêts $I = C \times \tfrac{t}{100}$, intérêts composés | 6: capital $C$ and rate $t$ as in every French book (27.10.2026), the widget zins too |
 | Zoll, Reifengröße, Felge, Raddurchmesser, Radumfang $u$ | pouce, taille de roue, jante, diamètre de la roue, circonférence de la roue $P$ | OP, widgets reifenos8, fahrrados8 (a rule turns $u$ into $P$) |
 | Kettenblatt, Ritzel, Übersetzung, Gang 44/16, Weg pro Kurbelumdrehung, Trittfrequenz | plateau, pignon, rapport de transmission, braquet 44/16, développement, cadence de pédalage | OP |
 | Rahmenhöhe, Schrittlänge, Laufmaschine, Hochrad | hauteur du cadre, longueur d’entrejambe, draisienne (« machine à courir »), grand-bi | OP |
@@ -1313,7 +1314,7 @@ js/buch-fr/geometrie.js get it by its rule), points (2 ; 3), [AB], (AB).
 | halber Umfang $s$ (Heron) | demi-périmètre $p$ | 1.3 excursion |
 | Potenzfunktion, Normalparabel, Hyperbel, umgekehrt proportional | fonction puissance, parabole de référence, hyperbole, inversement proportionnel | 2.1 |
 | Bremsweg $s$, Rechteck $a$, $b$ | distance de freinage $d$, longueur $L$ et largeur $\ell$ | 2.1 |
-| Bestand (graph axis), Kapital $K$ | $Q$ on the hero graph of 2.2; $K_0$, $K_n$ stay | the finanz widgets (zins, tilgung) write $K_0$, $K_n$ as in GY 10 and FOS 11 - the pages follow them; wachstumsmodell keeps $B_n$ (fr-6) |
+| Bestand (graph axis), Kapital $K$ | $Q$ on the hero graph of 2.2; $C_0$, $C_n$ | capital $C$ and rate $t$ as in every French book, the finanz widgets too (27.10.2026); wachstumsmodell keeps $B_n$ (fr-6) |
 | Zinsen für Tage $Z = K \cdot \tfrac{p}{100} \cdot \tfrac{t}{365}$ | $I = K \times \tfrac{p}{100} \times \tfrac{j}{365}$ | 4.1 (I intérêts, j jours) |
 | Bogenmaß, Einheitskreis, Periode $p$ | mesure en radians, cercle trigonométrique, période $p$ | 2.3; $p$ as the widget sinus writes it |
 | Hochwasser, Gezeitentafel | pleine mer, annuaire des marées | 2.3 |

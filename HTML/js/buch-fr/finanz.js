@@ -20,8 +20,8 @@ window.BuchFR && BuchFR.add('finanz', {
         // book fr-3 mathe13-fr:
         // book fr-4 mathefos11-fr:
         // zins
-        'Startkapital $K_0$ in €': 'Capital de départ $K_0$ en €',
-        'Zinssatz $p$': 'Taux d’intérêt $p$',
+        'Startkapital $K_0$ in €': 'Capital de départ $C_0$ en €',
+        'Zinssatz $p$': 'Taux d’intérêt $t$',
         'Laufzeit $n$': 'Durée $n$',
         'Jahre': 'années',
         'Jahr': 'Année',
@@ -91,6 +91,12 @@ window.BuchFR && BuchFR.add('finanz', {
         // book fr-4 mathefos11-fr:
         // slider values: "20 J." → "20 ans" (1 → "1 an")
         [/^(\d+) J\.$/, (m, n) => n + (n === '1' ? ' an' : ' ans')],
+        // the French letters of interest: capital C (German K), rate t (German p) - Doc, 27.10.2026; the product may
+        // already be \times (the rule of js/buch-fr/geometrie.js on the pages that load it)
+        [/\$K_n = K_0 (\\cdot|\\times) q\^n = /g, '$$C_n = C_0 $1 q^n = '],
+        [/\$K_0 (\\cdot|\\times) \\left\(1 \+ n (\\cdot|\\times) \\tfrac\{p\}\{100\}\\right\)/g, '$$C_0 $1 \\left(1 + n $2 \\tfrac{t}{100}\\right)'],
+        [/\(Faustregel \$72 : p /g, '(Faustregel $$72 : t '],
+        [/\$K_n = R (\\cdot|\\times) \\dfrac/g, '$$C_n = R $1 \\dfrac'],
         // book fr-5 mathefos12-fr:
         // book fr-6 mathegy10-fr:
         // book fr-18 mathe7-fr:
