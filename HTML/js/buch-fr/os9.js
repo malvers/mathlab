@@ -15,11 +15,33 @@
 window.BuchFR && BuchFR.add('os9', {
     word: {
         // book fr-20 mathe9-fr:
+        // titelbildos9 (the cover)
+        'Titelbild: ein rechtwinkliges Dreieck mit Quadraten über den Seiten, eine Wurfparabel, ein Kegel und eine Kugel':
+            'Couverture : un triangle rectangle avec les carrés construits sur ses côtés, la parabole d’un lancer, un cône et une boule',
+        // abstandos9 (chapter 1.1): the distance PQ, no bar in French
+        'Zwei verschiebbare Punkte und ihr Abstand als Hypotenuse': 'Deux points déplaçables et leur distance comme hypoténuse',
+        'Die Strecke ist die Hypotenuse eines rechtwinkligen Dreiecks, die Katheten laufen parallel zu den Achsen.':
+            'Le segment $[PQ]$ est l’hypoténuse d’un triangle rectangle dont les côtés de l’angle droit sont parallèles aux axes.',
+        // umkehros9 (chapter 1.1); the same words as js/buch-fr/trigonometrie.js, which chapter 1.1 does not load
+        'Seite $a$': 'Côté $a$', 'Seite $b$': 'Côté $b$', 'Seite $c$': 'Côté $c$',
+        'Kein Dreieck möglich': 'Aucun triangle possible', 'Aus diesen Seiten entsteht kein Dreieck.': 'Ces côtés ne forment pas de triangle.',
+        'Zwei Seiten zusammen müssen länger sein als die dritte.': 'Deux côtés réunis doivent être plus longs que le troisième.',
+        'Gleich: Nach der Umkehrung des Satzes von Pythagoras hat das Dreieck bei $C$ einen rechten Winkel.':
+            'Égalité : d’après la réciproque du théorème de Pythagore, le triangle est rectangle en $C$.',
+        'Ganze Zahlen mit $a^2 + b^2 = c^2$ heißen pythagoreische Zahlentripel.': 'Des nombres entiers tels que $a^2 + b^2 = c^2$ s’appellent des triplets pythagoriciens.',
     },
     phrase: [
         // book fr-20 mathe9-fr:
+        // abstandos9
+        ['$\\overline{PQ} = \\sqrt{\\Delta x^2 + \\Delta y^2}', '$PQ = \\sqrt{\\Delta x^2 + \\Delta y^2}'],
+        // umkehros9: "$a^2 + b^2 = 9 + 16 = 25$ und $c^2 = 25$."
+        ['$ und $c^2 = ', '$ et $c^2 = '],
     ],
     rule: [
         // book fr-20 mathe9-fr:
+        // umkehros9: the triangle's aria-label and the angle at C when a² + b² ≠ c²
+        [/^Dreieck mit den Seiten (\d+), (\d+) und (\d+)$/, 'Triangle de côtés $1, $2 et $3'],
+        [/Nicht gleich: Der Winkel bei \$C\$ ist (kleiner|größer) als \$90\^\\circ\$, nämlich etwa \$/g,
+            (m, k) => 'Pas d’égalité : l’angle en $C$ est ' + (k === 'kleiner' ? 'plus petit' : 'plus grand') + ' que $90^\\circ$, il mesure environ $'],
     ]
 });
