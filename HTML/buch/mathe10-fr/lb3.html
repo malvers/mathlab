@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques OS 10 · Chapitre 3 · Variables aléatoires et espérance | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Loi de probabilité, espérance, jeux équitables, simulation et risque. Chapitre 3 du manuel interactif Mathématiques · Oberschule 10 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · OBERSCHULE 10</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 3 · DOMAINE D’APPRENTISSAGE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 3 · DOMAINE D’APPRENTISSAGE 3 · DÉCEMBRE · JANVIER</p>
+            <h1>Variables aléatoires et espérance</h1>
+            <p class="b-hero-lead">La roue de loterie du marché de Noël vaut-elle le coup ? Une extension de garantie vaut-elle son prix ? Dans une expérience aléatoire, on s’intéresse souvent à un <b>nombre</b> :
+                la somme des points, le gain en euros, le nombre de succès. Ces nombres s’appellent des <b>variables aléatoires</b>. Leur <b>espérance</b> te dit
+                sur quoi tu peux compter à long terme.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">ESPÉRANCE</span><span class="b-chip">SIMULATION</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>décrire des variables aléatoires et donner leur <b>loi de probabilité</b> sous forme de tableau et de diagramme</li>
+                <li>calculer et interpréter l’<b>espérance</b></li>
+                <li>distinguer la <b>chance de gagner</b> et le <b>gain espéré</b>, reconnaître les jeux équitables</li>
+                <li><b>simuler</b> des expériences aléatoires et estimer des risques</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="1/6" data-ph="P ="><p class="b-q-text">Probabilité d’obtenir un 6 avec un dé ?</p><div class="b-sol"><p>Une chance sur six.</p></div></div>
+            <div class="b-q" data-ans="1/4" data-ph="P ="><p class="b-q-text">Deux fois face en lançant deux fois une pièce ?</p><div class="b-sol"><p>$\tfrac12 \times \tfrac12$</p></div></div>
+            <div class="b-q" data-ans="36" data-ph="nombre"><p class="b-q-text">Combien d’issues y a-t-il quand on lance deux dés ?</p><div class="b-sol"><p>$6 \times 6$</p></div></div>
+            <div class="b-q" data-ans="12,5" data-ph="%"><p class="b-q-text">$\tfrac18$ en pourcentage ?</p><div class="b-sol"><p>$1 : 8 = 0{,}125$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">LA SOMME DES POINTS</div>
+            <div class="b-text"><p>Lancez 50 fois deux dés et notez la somme des points.</p>
+                <ul><li>Quelle somme sort le plus souvent ? Justifiez avec un tableau des 36 couples de dés.</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA ROUE DE LOTERIE</div>
+            <div class="b-text"><p>Un tour coûte 1 €. La roue a six secteurs égaux : l’un rapporte 4 €, les autres rien.</p>
+                <ul><li>Jouez 30 parties (avec un dé). Combien avez-vous gagné ou perdu ? À quoi vous attendez-vous pour 600 parties ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Variables aléatoires et lois" data-toc-k="1" data-toc-short="1 Loi">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Les variables aléatoires et leur loi</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quand on lance deux dés, il y a 36 couples équiprobables. La somme des points associe un nombre à chaque couple : $(3\,;\,4)$ reçoit le 7.
+                Le 7 vient de six couples, le 2 d’un seul. C’est pourquoi $P(\text{somme } 7) = \tfrac{6}{36}$ et $P(\text{somme } 2) = \tfrac{1}{36}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · VARIABLE ALÉATOIRE</div>
+                <div class="b-text">
+                    <p>Une <b>variable aléatoire</b> $X$ associe un nombre à chaque issue d’une expérience aléatoire : somme des points, nombre de succès, gain en euros.</p>
+                    <p>Sa <b>loi de probabilité</b> indique avec quelle probabilité $X$ prend chaque valeur – sous forme de tableau ou de diagramme en colonnes.
+                        Toutes les probabilités réunies font 1.</p>
+                    <p>Expériences à plusieurs épreuves : <b>règle du produit</b> (on multiplie le long d’un chemin), <b>règle de la somme</b> (on additionne les chemins qui mènent à la même valeur).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Événement contraire :</b> « au moins une fois » se calcule souvent le plus vite comme 1 moins « aucune fois ».</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LOIS DE PROBABILITÉ AVEC DEUX DÉS</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une variable aléatoire. Touche une case du tableau ou une colonne : les couples de dés correspondants s’allument.</p>
+        <div data-widget="verteilung" data-start="sum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · LE NOMBRE DE SIX</div>
+            <div class="b-text"><p>On lance deux fois un dé, $X$ compte les six. Donne la loi de $X$.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac{25}{36}$, $\;P(X = 1) = 2 \times \tfrac16 \times \tfrac56 = \tfrac{10}{36}$, $\;P(X = 2) = \tfrac{1}{36}$. <span class="b-res">Somme 1</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · SANS REMISE</div>
+            <div class="b-text"><p>Une urne contient 3 boules rouges et 2 boules bleues. On en tire deux sans remise. Quelle est la probabilité qu’elles soient toutes deux rouges ?</p></div>
+            <div class="b-sol"><p>$\tfrac35 \times \tfrac24 =$ <span class="b-res">$\tfrac{3}{10}$</span>. Avec remise, on aurait $\tfrac{9}{25}$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Deux dés : calcule $P(\text{somme } 8)$ et $P(\text{double})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{5}{36}$ et $\tfrac{6}{36} = \tfrac16$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ prend les valeurs 0, 1, 2 avec $P(X = 0) = 0{,}2$ et $P(X = 1) = 0{,}5$. Combien vaut $P(X = 2)$ ?</p></div>
+            <div class="b-sol"><p>$1 - 0{,}2 - 0{,}5 = 0{,}3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>On lance trois fois une pièce, $X$ compte les faces. Donne la loi de $X$.</p></div>
+            <div class="b-sol"><p>$\tfrac18$, $\tfrac38$, $\tfrac38$, $\tfrac18$ pour 0, 1, 2, 3.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quelle est la probabilité d’obtenir au moins un 6 en deux lancers ?</p></div>
+            <div class="b-sol"><p>$1 - \tfrac{25}{36} = \tfrac{11}{36}$. Pas $\tfrac16 + \tfrac16$, sinon le double six compte deux fois.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quand on lance deux dés, $Y$ est le plus grand des deux numéros. Détermine $P(Y = 6)$ et $P(Y = 1)$.</p></div>
+            <div class="b-sol"><p>$P(Y = 6) = 1 - \tfrac{25}{36} = \tfrac{11}{36}$, $P(Y = 1) = \tfrac{1}{36}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="5/36" data-ph="P ="><p class="b-q-text">Somme des points 8 avec deux dés ?</p><div class="b-sol"><p>Cinq couples.</p></div></div>
+        <div class="b-q" data-ans="10/36" data-ph="P ="><p class="b-q-text">Exactement un six en deux lancers ?</p><div class="b-sol"><p>Deux chemins.</p></div></div>
+        <div class="b-q" data-ans="3/8" data-ph="P ="><p class="b-q-text">Exactement deux faces en trois lancers d’une pièce ?</p><div class="b-sol"><p>Trois chemins de $\tfrac18$ chacun.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Espérance et jeux équitables" data-toc-k="2" data-toc-short="2 Espérance">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Espérance et jeux équitables</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Avec la roue de loterie, tu gagnes 3 € une fois sur six (4 € versés moins 1 € de mise), sinon tu perds 1 €.
+                Sur 600 parties, cela fait environ 100 gains et 500 pertes : $100 \times 3 - 500 \times 1 = -200$ €. Par partie, tu perds donc en moyenne environ 33 centimes.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · ESPÉRANCE</div>
+                <div class="b-text">
+                    <p>$E(X) = x_1 \times P(X = x_1) + x_2 \times P(X = x_2) + \ldots$ – chaque valeur multipliée par sa probabilité, le tout additionné.</p>
+                    <p>L’espérance est la <b>moyenne à long terme</b>. Dans une seule expérience, elle n’apparaît souvent même pas.</p>
+                    <p>Un jeu est <b>équitable</b> si l’espérance du gain est nulle : somme versée espérée = mise.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Chance n’est pas espérance :</b> 90 % de chances de gagner 1 €, mais 10 % de risque de perdre 20 € : $E = 0{,}9 - 2 = -1{,}10$ €.</p>
+            <p class="b-note"><b>Roulette :</b> 37 numéros, un numéro rapporte 36 €. $E = \tfrac{36}{37} - 1 \approx -2{,}7$ centimes par euro.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · CONSTRUIRE UN JEU ÉQUITABLE</div>
+        <p class="b-help" style="margin:0 0 12px">Modifie la mise et les sommes versées jusqu’à ce que l’espérance du gain soit nulle.</p>
+        <div data-widget="fairesspiel"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · LA ROUE DE LOTERIE</div>
+            <div class="b-text"><p>Une roue ne verse rien avec la probabilité $\tfrac12$, 2 € avec $\tfrac14$ et 4 € avec $\tfrac14$. Un tour coûte 2 €. Le jeu est-il équitable ?</p></div>
+            <div class="b-sol"><p>Somme versée espérée $0 + 0{,}5 + 1 = 1{,}50$ €, gain <span class="b-res">$-0{,}50$ € par tour</span> : pas équitable.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · RENDRE ÉQUITABLE</div>
+            <div class="b-text"><p>Mise 1 €, on lance une fois un dé, on ne reçoit de l’argent qu’avec un 6. Quelle somme faut-il verser pour que le jeu soit équitable ?</p></div>
+            <div class="b-sol"><p>$V \times \tfrac16 = 1$ €, donc <span class="b-res">$V = 6$ €</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule l’espérance du numéro obtenu avec un dé équilibré.</p></div>
+            <div class="b-sol"><p>$\tfrac{1 + 2 + \ldots + 6}{6} = 3{,}5$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$X$ prend les valeurs 0, 10 et 20 avec les probabilités 0,5, 0,3 et 0,2. Calcule $E(X)$.</p></div>
+            <div class="b-sol"><p>$0 + 3 + 4 = 7$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dans une loterie de 1000 billets à 2 € chacun, il y a une fois 500 €, dix fois 50 € et cent fois 5 €. Calcule la somme versée espérée et le gain par billet.</p></div>
+            <div class="b-sol"><p>$1500 : 1000 = 1{,}50$ €, gain $-0{,}50$ € par billet.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Mise 1 €, deux lancers d’une pièce, 3 € versés pour deux faces. Calcule le gain espéré. Quelle somme versée serait équitable ?</p></div>
+            <div class="b-sol"><p>$3 \times \tfrac14 - 1 = -0{,}25$ €. Équitable avec 4 €.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Jeu A : 60 % de chances de gagner 1 €, sinon 2 € de perte. Jeu B : 10 % de chances de gagner 15 €, sinon 2 € de perte. Quel jeu est le meilleur, lequel est le plus risqué ?</p></div>
+            <div class="b-sol"><p>A : $0{,}6 - 0{,}8 = -0{,}20$ €. B : $1{,}5 - 1{,}8 = -0{,}30$ €. A est plus avantageux à long terme, B varie davantage.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3,5" data-ph="E ="><p class="b-q-text">Numéro espéré d’un dé ?</p><div class="b-sol"><p>$21 : 6$</p></div></div>
+        <div class="b-q" data-ans="-0,5" data-ph="€"><p class="b-q-text">Gain espéré de l’exemple 3, en € ?</p><div class="b-sol"><p>$1{,}50 - 2$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="€"><p class="b-q-text">Somme versée équitable dans l’exercice 9, en € ?</p><div class="b-sol"><p>$V \times \tfrac14 = 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Simulation et risque" data-toc-k="3" data-toc-short="3 Simulation">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">3</span>Simulation et risque</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Toutes les expériences aléatoires ne se calculent pas facilement. Une <b>simulation</b> aide alors : l’ordinateur produit des nombres aléatoires,
+                répète l’expérience des milliers de fois, et les fréquences fournissent des <b>estimations</b> des probabilités.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · SIMULATION ET RISQUE</div>
+                <div class="b-text">
+                    <p><b>Simuler :</b> choisir les nombres aléatoires de sorte que chaque issue ait la bonne probabilité – p. ex. les chiffres 0, 1, 2 pour un événement de probabilité 30 %.</p>
+                    <p><b>Loi des grands nombres :</b> avec beaucoup de répétitions, la fréquence se rapproche de la probabilité.</p>
+                    <p><b>Risque</b> d’un dommage : probabilité multipliée par le montant du dommage, c’est-à-dire le dommage espéré.</p>
+                    <p><b>Composants :</b> en série, tous doivent fonctionner ($p^n$). En parallèle, le système ne tombe en panne que si tous tombent en panne.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Simuler deux dés :</b> additionner deux nombres aléatoires de 1 à 6 – et non tirer un nombre aléatoire de 2 à 12, car les sommes ne sont pas équiprobables.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · MÊME ESPÉRANCE, RISQUE DIFFÉRENT</div>
+        <p class="b-help" style="margin:0 0 12px">Deux jeux de même espérance : simule beaucoup de parties et compare la dispersion des gains.</p>
+        <div data-widget="spielstreuung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LA GUIRLANDE LUMINEUSE</div>
+            <div class="b-text"><p>20 ampoules sont montées en série, chacune fonctionne avec une probabilité de 99 %. Quelle est la probabilité que la guirlande s’allume ?</p></div>
+            <div class="b-sol"><p>$0{,}99^{20} \approx$ <span class="b-res">0,818</span>, donc seulement dans environ 82 % des cas.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · S’ASSURER OU NON ?</div>
+            <div class="b-text"><p>Un téléphone vaut 400 € et se casse avec une probabilité de 5 % par an. Une assurance coûte 60 € par an.</p></div>
+            <div class="b-sol"><p>Dommage espéré $400 \times 0{,}05 =$ <span class="b-res">20 €</span>. En moyenne, l’assurance n’est pas rentable – mais celui qui ne pourrait pas payer une réparation achète de la sécurité.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Sur 200 simulations, un événement s’est produit 38 fois. Donne la fréquence. Est-ce la probabilité ?</p></div>
+            <div class="b-sol"><p>$0{,}19$ – une estimation, pas une probabilité exacte.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Comment simules-tu avec des chiffres aléatoires de 0 à 9 un événement de probabilité 70 % ?</p></div>
+            <div class="b-sol"><p>Il se produit pour sept des dix chiffres, p. ex. de 0 à 6.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deux pompes fonctionnent en parallèle, chacune tombe en panne avec une probabilité de 10 %. Quelle est la probabilité que l’installation tombe en panne ? Et si elles étaient montées en série ?</p></div>
+            <div class="b-sol"><p>En parallèle : $0{,}1^2 = 1\,\%$. En série : $1 - 0{,}9^2 = 19\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un appareil tombe en panne avec une probabilité de 2 % par an. Quelle est la probabilité qu’il tienne trois ans ? Qu’il tombe en panne au moins une fois en deux ans ?</p></div>
+            <div class="b-sol"><p>$0{,}98^3 \approx 94{,}1\,\%$. $1 - 0{,}98^2 \approx 4\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Le chevalier de Méré pariait d’obtenir au moins un 6 en quatre lancers. Calcule sa probabilité de gagner. Pourquoi $4 \times \tfrac16$ est-il faux ?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 51{,}8\,\%$. Avec $4 \times \tfrac16$, les lancers avec plusieurs six seraient comptés plusieurs fois.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,19" data-ph="f ="><p class="b-q-text">Fréquence de l’exercice 11 ?</p><div class="b-sol"><p>$38 : 200$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="%"><p class="b-q-text">Panne du montage en parallèle de l’exercice 13, en % ?</p><div class="b-sol"><p>$0{,}1 \times 0{,}1$</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="€"><p class="b-q-text">Dommage espéré de l’exemple 6, en € ?</p><div class="b-sol"><p>$400 \times 0{,}05$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance un dé 600 fois. Combien de six attends-tu ? Pourquoi exactement 100 est-il plutôt rare ?</p></div>
+            <div class="b-sol"><p>Environ 100. Le nombre varie au hasard autour de 100 ; exactement 100 n’est qu’une valeur parmi beaucoup d’autres.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>À la roulette à 37 numéros, 18 sont rouges. Celui qui mise 1 € sur le rouge et gagne reçoit 2 €. Calcule le gain espéré.</p></div>
+            <div class="b-sol"><p>$2 \times \tfrac{18}{37} - 1 \approx -0{,}027$ € : c’est le zéro vert qui fait la différence.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une réparation de 120 € survient avec une probabilité de 15 %, l’extension de garantie coûte 25 €. Est-elle rentable en moyenne ?</p></div>
+            <div class="b-sol"><p>Dommage espéré 18 € &lt; 25 € : en moyenne, non.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Lien avec le domaine d’apprentissage 4 :</b> une assurance a 10 000 clients, chacun subit avec une probabilité de 1 % un dommage de 500 €. Quelle cotisation lui faut-il au minimum ? Pourquoi demande-t-elle davantage ?</p></div>
+            <div class="b-sol"><p>Dommage espéré 5 € par client, au total 50 000 €. Il faut y ajouter les frais de gestion, les fluctuations et le bénéfice.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Pascal et Fermat" data-toc-k="X" data-toc-short="Pascal">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Un joueur et deux lettres</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Le gentilhomme français <b>Antoine Gombaud</b>, dit le chevalier de Méré, était un joueur passionné. Il demanda entre autres au mathématicien <b>Blaise Pascal</b>
+                comment partager équitablement les mises quand une partie doit être interrompue avant la fin.</p>
+            <p>En 1654, Pascal échangea à ce sujet des lettres avec <b>Pierre de Fermat</b>. Leur idée : on calcule ce que chaque joueur aurait gagné en moyenne si la partie avait continué.
+                Cette correspondance passe pour l’acte de naissance du calcul des probabilités – et l’espérance était là dès le début.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> correspondance Pascal–Fermat, 1654 ; d’après K. Devlin : The Unfinished Game. Basic Books 2008.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>VARIABLE ALÉATOIRE</h4><p>un nombre pour chaque issue, la loi a pour somme 1</p></div>
+        <div><p>Somme des points 7 : $\tfrac{6}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>ESPÉRANCE</h4><p>valeurs multipliées par leurs probabilités, additionnées</p></div>
+        <div><p>Dé : 3,5</p></div></div>
+    <div class="b-rueck"><div><h4>ÉQUITABLE</h4><p>gain espéré nul</p></div>
+        <div><p>Mise 1 €, $P = \tfrac16$ : somme versée 6 €</p></div></div>
+    <div class="b-rueck"><div><h4>SIMULATION, RISQUE</h4><p>la fréquence estime $P$, risque = $P$ multipliée par le dommage</p></div>
+        <div><p>En série : $0{,}99^{20} \approx 0{,}82$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="11/36" data-ph="P ="><p class="b-q-text">Au moins un 6 en deux lancers ?</p><div class="b-sol"><p>$1 - \tfrac{25}{36}$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="E ="><p class="b-q-text">$E(X)$ dans l’exercice 7 ?</p><div class="b-sol"><p>$3 + 4$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quand un jeu est-il équitable ?</p><div class="b-mc"><button>quand on gagne dans 50 % des cas</button><button>quand la mise est petite</button><button>quand le gain espéré est nul</button></div><div class="b-sol"><p>À long terme, personne ne gagne.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC CALCULATRICE</div>
+            <div class="b-q" data-ans="-0,33" data-tol="0.005" data-ph="€"><p class="b-q-text">Gain espéré avec la roue de loterie de la leçon 2 (mise 1 €, $\tfrac16$ pour 4 €), à deux chiffres après la virgule ?</p><div class="b-sol"><p>$3 \times \tfrac16 - \tfrac56$</p></div></div>
+            <div class="b-q" data-ans="51,8" data-tol="0.05" data-ph="%"><p class="b-q-text">Probabilité de gagner de de Méré en %, à un chiffre après la virgule ?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4$</p></div></div>
+            <div class="b-q" data-ans="94,1" data-tol="0.05" data-ph="%"><p class="b-q-text">Trois ans sans panne avec 2 % de pannes par an, en % à un chiffre après la virgule ?</p><div class="b-sol"><p>$0{,}98^3$</p></div></div>
+        </div>
+    </div>
+    <h3>À ESSAYER AUSSI (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Lancer, compter, estimer des probabilités</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Des billes tombent au hasard – et forment un motif</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Oberschule, 10e année (filière Realschule) · domaine d’apprentissage 3 d’après le programme de mathématiques de l’Oberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-spiele.js"></script>
+<script src="../../js/buch-fr/spiele.js"></script>
+</body>
+</html>
