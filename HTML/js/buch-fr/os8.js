@@ -30,6 +30,18 @@ window.BuchFR && BuchFR.add('os8', {
         'Graph einer proportionalen Funktion mit Steigungsdreieck': 'Courbe d’une fonction linéaire avec le triangle de pente',
         'Graph einer linearen Funktion mit Steigungsdreieck': 'Courbe d’une fonction affine avec le triangle de pente',
         'Der Graph ist eine Gerade durch den Ursprung $(0 \\mid 0)$.': 'La courbe est une droite qui passe par l’origine $(0\\,;\\,0)$.',
+        // lgsgrafos8 ('Nächster Schritt', 'Von vorn' as in js/buch-fr/gy5.js and gy6.js, modules this page does not load)
+        'Gleichungssystem': 'Système d’équations', 'Nächster Schritt': 'Étape suivante', 'Alle Schritte': 'Toutes les étapes', 'Von vorn': 'Recommencer',
+        'Zwei Geraden eines Gleichungssystems im Koordinatensystem': 'Deux droites d’un système d’équations dans un repère',
+        'Unendlich viele Lösungen.': 'Une infinité de solutions.', 'Keine Lösung: $L = \\{\\,\\}$': 'Aucune solution : $S = \\{\\,\\}$',
+        // tarifos8
+        'Handy': 'Téléphone', 'Strom': 'Électricité', 'Carsharing': 'Autopartage', 'Minuten': 'minutes', 'kWh im Jahr': 'kWh par an', 'Kilometer': 'kilomètres',
+        '€ pro Minute': '€ par minute', '€ pro kWh': '€ par kWh', '€ pro km': '€ par km',
+        'Tarif A: Grundgebühr': 'Tarif A : abonnement', 'Tarif B: Grundgebühr': 'Tarif B : abonnement',
+        'Tarif A: € pro Minute': 'Tarif A : € par minute', 'Tarif B: € pro Minute': 'Tarif B : € par minute',
+        'Tarif A: € pro kWh': 'Tarif A : € par kWh', 'Tarif B: € pro kWh': 'Tarif B : € par kWh',
+        'Tarif A: € pro km': 'Tarif A : € par km', 'Tarif B: € pro km': 'Tarif B : € par km',
+        'Kosten der Tarife A und B in Abhängigkeit vom Verbrauch': 'Coût des tarifs A et B en fonction de la consommation',
     },
     phrase: [
         // book fr-19 mathe8-fr:
@@ -46,6 +58,23 @@ window.BuchFR && BuchFR.add('os8', {
         ['Jede Stelle ist eine Nullstelle.', 'Tout nombre est un zéro.'], ['Es gibt keine Nullstelle.', 'Il n’y a aucun zéro.'],
         ['Nullstelle (türkis): $0 = ', 'Zéro (turquoise) : $0 = '], ['$, also $x_0 = ', '$, donc $x_0 = '],
         ['Schnittpunkt mit der y-Achse (weiß): $', 'Point d’intersection avec l’axe des ordonnées (blanc) : $'],
+        // lgsgrafos8 (after the point rule, every \mid is the French semicolon already; the letter b of the collège for the German n)
+        ['<b>Schritt 1:</b> Beide Gleichungen nach $y$ umstellen: $y = ', '<b>Étape 1 :</b> isoler $y$ dans les deux équations : $y = '],
+        ['$ und $y = ', '$ et $y = '],
+        ['<b>Schritt 2:</b> Beide Geraden zeichnen: Start bei $(0\\,;\\,n)$, dann mit dem Steigungsdreieck weiter.',
+            '<b>Étape 2 :</b> tracer les deux droites : partir de $(0\\,;\\,b)$, puis continuer avec le triangle de pente.'],
+        ['$. Probe: $', '$. Vérification : $'], ['Genau eine Lösung: $S = ', 'Exactement une solution : $S = '],
+        ['<b>Schritt 3:</b> Beide Gleichungen beschreiben <b>dieselbe Gerade</b>. Jeder Punkt auf ihr erfüllt beide Gleichungen.',
+            '<b>Étape 3 :</b> les deux équations décrivent <b>la même droite</b>. Chacun de ses points vérifie les deux équations.'],
+        ['<b>Schritt 3:</b> Gleiche Steigung, verschiedene y-Achsenabschnitte: Die Geraden sind <b>parallel</b> und schneiden sich nie.',
+            '<b>Étape 3 :</b> même coefficient directeur, ordonnées à l’origine différentes : les droites sont <b>parallèles</b> et ne se coupent jamais.'],
+        // tarifos8
+        ['Tarif A: $y = ', 'Tarif A : $y = '], ['Tarif B: $y = ', 'Tarif B : $y = '],
+        ['($x$ in Minuten, $y$ in €)', '($x$ en minutes, $y$ en €)'], ['($x$ in kWh im Jahr, $y$ in €)', '($x$ en kWh par an, $y$ en €)'],
+        ['($x$ in Kilometer, $y$ in €)', '($x$ en kilomètres, $y$ en €)'],
+        ['Beide Tarife kosten gleich viel pro Einheit, die Geraden sind parallel. ', 'Les deux tarifs coûtent autant par unité, les droites sont parallèles. '],
+        ['Die Tarife sind gleich teuer.', 'Les deux tarifs coûtent autant.'],
+        ['Gleichsetzen: $', 'En égalant : $'], ['$ ergibt $x \\approx ', '$ donne $x \\approx '], ['$. Dann kosten beide etwa $', '$. Les deux coûtent alors environ $'],
     ],
     rule: [
         // book fr-19 mathe8-fr:
@@ -60,5 +89,14 @@ window.BuchFR && BuchFR.add('os8', {
         [/Der Graph <b>steigt<\/b>: Geht man 1 nach rechts, geht es ([\d,]+) nach oben\./g, 'La courbe <b>monte</b> : quand on avance de 1 vers la droite, elle monte de $1.'],
         [/Der Graph <b>fällt<\/b>: Geht man 1 nach rechts, geht es ([\d,]+) nach unten\./g, 'La courbe <b>descend</b> : quand on avance de 1 vers la droite, elle descend de $1.'],
         [/^m = (?=[-−]?\d)/, 'a = '],
+        // lgsgrafos8, tarifos8: the example buttons; the solution set is S (gleichungen.js, which this page does not load, has its own rule)
+        [/\bBeispiel (\d+)\b/g, 'Exemple $1'],
+        [/\$L = (?=\\\{)/g, () => '$S = '],
+        // lgsgrafos8: the point is read off without a letter (I and II are the equations here)
+        [/<b>Schritt 3:<\/b> Schnittpunkt ablesen: \$S\(/g, () => '<b>Étape 3 :</b> lire le point d’intersection : $('],
+        // tarifos8
+        [/Die Geraden schneiden sich nicht bei positivem Verbrauch: Tarif ([AB]) ist immer günstiger\./g, 'Les droites ne se coupent pas pour une consommation positive : le tarif $1 est toujours le plus avantageux.'],
+        [/Tarif ([AB]) ist immer günstiger\./g, 'Le tarif $1 est toujours le plus avantageux.'],
+        [/Bis etwa ([\d.,]+) (min|kWh|km) ist Tarif ([AB]) günstiger, darüber Tarif ([AB])\./g, 'Jusqu’à environ $1 $2, le tarif $3 est plus avantageux, au-delà le tarif $4.'],
     ]
 });
