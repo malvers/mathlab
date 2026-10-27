@@ -161,8 +161,8 @@ window.svpPlanParts.push(function (P) {
     /* Doc, 01.10.2026: "eine zentrale Stelle ... Oben links neben Formelsammlung ... ein Panel, kommt mit einer Tabelle,
        mit den ganzen [Decks] vom ganzen Jahr" and "die Taste darf man natürlich nur sehen, wenn ich eingeloggt bin" -
        every deck of the tasks in one list: the decks by theme, the Vorrechnen deck of every week, the boards sent from
-       class. For Doc alone, on the page of the Vorrechnen blocks; left of the Formelsammlung in the head's button group
-       (P.kopfKnoepfe, svp-plan-search.js), dropped down like the Export menu (.export-drop, svp-dialogs.css). The table
+       class. For Doc alone, on the page of the Vorrechnen blocks; in the head's button group until 27.10.2026, now in
+       the toolbar (below), dropped down like the Export menu (.export-drop, svp-dialogs.css). The table
        is drawn anew at every opening, so a board sent meanwhile is in it. */
     function wochenRang(kw) { return +kw >= 31 ? +kw - 31 : +kw + 22; }   /* the school year starts in August */
     function montag(kw) {   /* the Monday of a calendar week of this school year as "26.10." */
@@ -177,15 +177,16 @@ window.svpPlanParts.push(function (P) {
         return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
     }
     function aufgabensammlung() {
-        if (!P.CAN_EDIT_MAT || !VORRECHNEN_SEITE.test(location.pathname) || !P.kopfKnoepfe) return;
-        if (document.querySelector('.aufg-drop')) return;
-        const gruppe = P.kopfKnoepfe();
-        if (!gruppe) return;
+        if (!P.CAN_EDIT_MAT || !VORRECHNEN_SEITE.test(location.pathname)) return;
+        /* Doc, 27.10.2026: "bring den Aufgaben-Button bitte neben Material" - out of the head, into the toolbar right
+           of "Material" (svp-plan-listen.js), in the look and width of its neighbours (svp-toolbar.css) */
+        const bar = document.querySelector('.toolbar');
+        if (!bar || bar.querySelector('.aufg-drop')) return;
         const drop = document.createElement('div');
         drop.className = 'export-drop aufg-drop';
         const knopf = document.createElement('button');
         knopf.type = 'button';
-        knopf.className = 'action secondary export-toggle';
+        knopf.className = 'action export-toggle';
         knopf.setAttribute('aria-haspopup', 'true');
         knopf.setAttribute('aria-expanded', 'false');
         knopf.title = 'Aufgabensammlung: alle Aufgaben-Decks des Schuljahrs - nur mit Anmeldung zu sehen';
@@ -195,7 +196,9 @@ window.svpPlanParts.push(function (P) {
         menu.className = 'export-menu aufg-menu';
         menu.hidden = true;
         drop.append(knopf, menu);
-        gruppe.insertBefore(drop, gruppe.firstChild);
+        const material = bar.querySelector('.zusatz-menu');
+        if (material) material.parentElement.after(drop);
+        else bar.insertBefore(drop, bar.firstChild);
 
         const jetzt = kwHeute();
         function link(text, url, titel) {

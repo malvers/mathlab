@@ -157,12 +157,13 @@ window.svpPlanParts.push(function (P) {
         if (!bar) return;
         /* both in the place of a button that is out of sight now (svp-dialogs.css) */
         listenKnopf(bar, bar.querySelector('button[onclick*="togglePlanDetails"]'), {
-            name: 'Zusatzmaterial',
+            /* "Material", not "Zusatzmaterial" (Doc, 27.10.2026: "Zusatz im Wort weg") */
+            name: 'Material',
             title: 'Alle Decks und Labs dieses Plans, Woche für Woche',
             klasse: 'zusatz-menu',
             icons: true,
             leer: 'In diesem Plan stehen noch keine Decks oder Labs.',
-            kopf: function (n) { return 'Zusatzmaterial · ' + n + ' Decks und Labs im Schuljahr'; },
+            kopf: function (n) { return 'Material · ' + n + ' Decks und Labs im Schuljahr'; },
             liste: function () {
                 return wochen(function (en) {
                     const k = P.matKind(en.url || '', en.label || '');
