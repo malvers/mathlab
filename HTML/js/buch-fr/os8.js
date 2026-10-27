@@ -15,11 +15,36 @@
 window.BuchFR && BuchFR.add('os8', {
     word: {
         // book fr-19 mathe8-fr:
+        // titelbildos8
+        'Titelbild: zwei sich schneidende Geraden, ein Kreiszylinder im Schrägbild, eine zentrische Streckung, ein Baumdiagramm und ein Kettenblatt':
+            'Couverture : deux droites sécantes, un cylindre de révolution en perspective cavalière, une homothétie, un arbre pondéré et un plateau de pédalier',
+        // termwertos8 (the sentences with "Für $x = …$" are rules below)
+        'Termpaar': 'Paire d’expressions', 'Einsetzen: $x$': 'Valeur de $x$',
+        // flaecheos8 ('Länge $b$' as in js/buch-fr/gleichungen.js, 'Darstellung' as in js/buch-fr/gy7.js: modules this page does not load)
+        'Term': 'Expression', 'Darstellung': 'Représentation', 'mit Zahlen': 'avec des nombres', 'mit x': 'avec x',
+        'Faktor $a$': 'Facteur $a$', 'Länge $b$': 'Longueur $b$', 'Länge $c$': 'Longueur $c$',
+        'Rechteck mit der Höhe a, aufgeteilt in zwei Teile: a mal (b plus c)': 'Rectangle de hauteur a partagé en deux parties : a fois (b plus c)',
+        'Rechteck mit der Höhe a, aufgeteilt in zwei Teile: a mal (b minus c)': 'Rectangle de hauteur a partagé en deux parties : a fois (b moins c)',
     },
     phrase: [
         // book fr-19 mathe8-fr:
+        // termwertos8
+        ['In allen Zeilen derselbe Wert. Die Tabelle beweist es nicht, aber eine Umformung zeigt: Die Terme sind <b>gleichwertig</b>.',
+            'La même valeur sur toutes les lignes. Le tableau ne le démontre pas, mais une transformation le montre : les expressions sont <b>équivalentes</b>.'],
+        // flaecheos8 (the products are \times already: the rule of js/buch-fr/geometrie.js runs before the pieces)
+        ['Ausmultiplizieren: ', 'Développer : '], ['Ausklammern, von rechts nach links gelesen: $', 'Factoriser, en lisant de droite à gauche : $'],
+        ['Vom ganzen Rechteck $a \\times b$ wird der schraffierte Streifen $a \\times c$ abgezogen.', 'Du rectangle entier $a \\times b$, on retire la bande hachurée $a \\times c$.'],
+        ['Das ganze Rechteck ist so groß wie seine beiden Teile zusammen.', 'Le rectangle entier a la même aire que ses deux parties réunies.'],
+        [' Jeder Summand in der Klammer wird mit dem Faktor $a$ multipliziert.', ' Chaque terme entre les parenthèses est multiplié par le facteur $a$.'],
     ],
     rule: [
         // book fr-19 mathe8-fr:
+        // termwertos8: "Für $x = -2$ ist $3(x + 2) = …$" / "und $…$." on the second line, the verdict and "Dass sie in 3 Zeilen übereinstimmen, reicht nicht."
+        [/Für \$x = ([^$]+)\$ ist \$/g, 'Pour $x = $1$ : $'],
+        [/(<p style="margin:4px 0 0">)und \$/g, '$1et $'],
+        [/Für \$x = ([^$]+)\$ sind die Werte verschieden: Die Terme sind <b>nicht gleichwertig<\/b>\./g, 'Pour $x = $1$, les valeurs sont différentes : les expressions <b>ne sont pas équivalentes</b>.'],
+        [/ Dass sie in (\d+) Zeilen? übereinstimmen, reicht nicht\./g, (m, n) => ' Qu’elles coïncident sur ' + n + (n === '1' ? ' ligne' : ' lignes') + ' ne suffit pas.'],
+        // flaecheos8: "Probe mit $x = 5$: $3 \times (5 + 2) = 21$ und $3 \times 5 + 6 = 21$."
+        [/Probe mit \$x = ([^$]+)\$: (\$[^$]+\$) und (\$[^$]+\$)\./g, 'Vérification avec $x = $1$ : $2 et $3.'],
     ]
 });
