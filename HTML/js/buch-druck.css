@@ -87,7 +87,9 @@ body.b-print .b-sec { margin-top: 18pt; }
 body.b-print .b-hero { margin: 0 0 12pt; padding: 12pt 14pt; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 body.b-print .b-hero-lead { font-size: 11pt; }
 body.b-print .b-row { display: block; }
-body.b-print .b-aside { display: flex; flex-wrap: wrap; gap: 0 18pt; }
+/* the notes stand side by side under the text - and are never split: Paged.js 0.4.3 cannot break a flex box across a page
+ * and put the rest of it ~1800 px to the right, off the sheet (Ada with druckcheck.mjs, 27.10.2026: GY 9 p. 112, OS 8 p. 49) */
+body.b-print .b-aside { display: flex; flex-wrap: wrap; gap: 0 18pt; break-inside: avoid; }
 body.b-print .b-aside > .b-note { flex: 1 1 200pt; }
 body.b-print .b-grid2 { display: block; }
 body.b-print .b-grid2 > .b-box { margin: 0 0 10pt; }
