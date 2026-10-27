@@ -96,14 +96,14 @@ window.BuchFR && BuchFR.add('os6', {
         [/Es geht auch mit (\d+) Zügen\./, 'C’est possible aussi en $1 coups.'],
         [/Geschafft in (\d+) Zügen!/, (m, n) => 'Réussi en ' + n + (n === '1' ? ' coup' : ' coups') + ' !'],
         [/Schiebepuzzle mit (\d+) Steinen/, 'Taquin à $1 carreaux'],
-        [/^(\d+) Hölzer liegen noch$/, (m, n) => 'Il reste ' + n + (n === '1' ? ' allumette' : ' allumettes')],
-        [/Noch <b>(\d+)<\/b> Hölzer\./, (m, n) => 'Il reste <b>' + n + '</b> ' + (n === '1' ? 'allumette.' : 'allumettes.')],
+        [/^(\d+) Hölzer liegen noch$/, (m, n) => n === '0' ? 'Il ne reste aucune allumette' : 'Il reste ' + n + (n === '1' ? ' allumette' : ' allumettes')],
+        [/Noch <b>(\d+)<\/b> Hölzer\./, (m, n) => n === '0' ? 'Il ne reste <b>aucune</b> allumette.' : 'Il reste <b>' + n + '</b> ' + (n === '1' ? 'allumette.' : 'allumettes.')],
         // tangramos6: the square and the parallelogram in lower case like the triangles, as the name of the piece and in
         // the list of the pieces of equal area
         [/(<p style="margin:0"><b>)(Quadrat|Parallelogramm)(<\/b><\/p>)/, (m, a, n, b) => a + (n === 'Quadrat' ? 'carré' : 'parallélogramme') + b],
         [/Genauso groß: ([^(<]+) \(hell markiert\)\./, (m, l) => 'Même aire : ' + l.replace(/\bQuadrat\b/g, 'carré').replace(/\bParallelogramm\b/g, 'parallélogramme') + ' (en surbrillance).'],
         // augensummeos6: "5 Würfe · zuletzt 3 + 4 = 7" and "Augensumme 7: 5-mal, relativ …"
-        [/(<p style="margin:0">)(\d+) Würfe( · zuletzt |<\/p>)/, (m, a, n, b) => a + n + (n === '1' ? ' lancer' : ' lancers') + b],
+        [/(<p style="margin:0">)(\d+) Würfe( · zuletzt |<\/p>)/, (m, a, n, b) => a + n + (n === '0' || n === '1' ? ' lancer' : ' lancers') + b],
         [/Augensumme <b>(\d+)<\/b>: (\d+)-mal(, relativ )?/, (m, s, k, r) => 'Somme des points <b>' + s + '</b> : ' + k + ' fois' + (r ? ', fréquence ' : '')],
         // book fr-18 mathe7-fr:
         // tangramos6 (4.1): an identical copy of the fr-17 entries (Voisin, OS 6) for the pages of this book - keep one copy when merging
