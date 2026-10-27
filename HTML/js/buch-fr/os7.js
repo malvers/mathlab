@@ -15,6 +15,9 @@
 window.BuchFR && BuchFR.add('os7', {
     word: {
         // book fr-18 mathe7-fr:
+        // titelbildos7
+        'Titelbild: ein Hunderterfeld mit 25 hellen Feldern, ein Parkett aus Sechsecken, ein Zahlenstrahl von minus 3 bis 3, ein Prisma und ein Kreisdiagramm':
+            'Couverture : une grille de cent cases dont 25 sont allumées, un pavage d’hexagones, une droite graduée de moins 3 à 3, un prisme et un diagramme circulaire',
     },
     phrase: [
         // book fr-18 mathe7-fr:
