@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques OS 7 · Chapitre 2 · Éléments de probabilités et de statistique | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Expériences aléatoires, issues et événements, fréquences et simulation, probabilité, lire les statistiques d’un œil critique. Chapitre 2 du manuel interactif Mathématiques · Oberschule 7 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · OBERSCHULE 7</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2 · DOMAINE D’APPRENTISSAGE 2 · NOVEMBRE</p>
+            <h1>Éléments de probabilités et de statistique</h1>
+            <p class="b-hero-lead">Demain, il pleuvra avec une probabilité de 70 %. Au penalty, un professionnel marque à peu près trois fois sur quatre. Et dans le journal, une barre grandit alors que la valeur n’a presque pas augmenté.
+                Dans ce chapitre, tu décris précisément des <b>expériences aléatoires</b>, tu comptes des <b>effectifs et des fréquences</b>, tu fais des simulations à l’ordinateur,
+                tu estimes des <b>probabilités</b> – et tu lis les diagrammes d’un œil <b>critique</b>.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">2 LABORATOIRES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="gluecksrad8" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li>décrire des expériences aléatoires avec leurs <b>issues</b>, leur <b>univers</b> et des <b>événements</b></li>
+                <li>relever des données dans une <b>liste brute</b> et avec des <b>traits de comptage</b>, calculer des effectifs et des fréquences, <b>simuler</b></li>
+                <li><b>estimer des probabilités</b> et les calculer quand les issues sont équiprobables</li>
+                <li>reconnaître quand un diagramme <b>déforme</b> la réalité</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Combien d’issues possibles a un lancer de dé ?</p><div class="b-sol"><p>1, 2, 3, 4, 5, 6</p></div></div>
+            <div class="b-q" data-ans="0,3" data-ph="nombre décimal"><p class="b-q-text">15 sur 50 sous forme de nombre décimal ?</p><div class="b-sol"><p>$\tfrac{15}{50} = \tfrac{3}{10}$</p></div></div>
+            <div class="b-q" data-ans="40" data-ph="%"><p class="b-q-text">$\tfrac{2}{5}$ en pourcentage ?</p><div class="b-sol"><p>$\tfrac{40}{100}$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">HASARD OU PAS ?</div>
+            <div class="b-text"><p>Rassemblez des situations : lancer un dé, tirer un billet de tombola, appuyer sur un interrupteur, l’anniversaire d’une nouvelle camarade, le retard du bus.</p>
+                <ul><li>Dans lesquelles ne connaît-on pas le résultat à l’avance ? Quels résultats sont possibles ?</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LA BRIQUE DE LEGO</div>
+            <div class="b-text"><p>🧱 Lancez une brique de Lego 100 fois. Elle peut retomber sur six faces.</p>
+                <ul><li>Notez les résultats avec des traits de comptage. Retombe-t-elle aussi souvent sur chaque face ? Qu’estimez-vous pour 1000 lancers ?</li></ul></div>
+            <span class="b-pair">→ Leçon 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DÉTECTIVES DES DIAGRAMMES</div>
+            <div class="b-text"><p>Cherchez des diagrammes dans les journaux et la publicité.</p>
+                <ul><li>Chaque axe commence-t-il à 0 ? Les différences paraissent-elles plus grandes ou plus petites qu’elles ne le sont ?</li></ul></div>
+            <span class="b-pair">→ Leçon 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Expériences aléatoires" data-toc-k="1" data-toc-short="1 Hasard">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Expériences aléatoires, issues, événements</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une <b>expérience aléatoire</b> a plusieurs issues possibles, et on ne sait pas à l’avance laquelle va se produire. Lancer un dé en est une, appuyer sur un interrupteur non.
+                Tout ce qui peut se produire, on l’écrit sous forme d’ensemble.</p></div></div>
+            <div class="b-text"><p>L’ensemble de toutes les issues possibles s’appelle l’<b>univers</b> $\Omega$ (oméga). Pour le dé, $\Omega = \{1\,;\,2\,;\,3\,;\,4\,;\,5\,;\,6\}$.
+                Si l’on regroupe certaines issues, on obtient un <b>événement</b> $E$, par exemple « nombre pair » : $E = \{2\,;\,4\,;\,6\}$.</p>
+                <p>Toutes les issues ne sont pas forcément équiprobables. Une pièce tombe presque aussi souvent sur face que sur pile, mais une brique de Lego bien plus souvent sur son grand côté que sur le petit.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · EXPÉRIENCE ALÉATOIRE</div>
+                <div class="b-text">
+                    <p><b>Expérience aléatoire :</b> plusieurs issues possibles, on ne connaît pas l’issue à l’avance</p>
+                    <p><b>Univers</b> $\Omega$ : toutes les issues possibles · <b>événement</b> $E$ : une partie de $\Omega$</p>
+                    <p><b>Expérience de Laplace :</b> toutes les issues sont équiprobables, par exemple avec un dé équilibré</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Événement contraire :</b> « nombre impair » est l’événement contraire de « nombre pair ». Ensemble, ils forment $\Omega$.</p>
+            <p class="b-note"><b>Pierre-Simon Laplace</b> (1749–1827) a décrit la probabilité, quand les cas sont également possibles, comme la proportion des cas favorables.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA ROUE DE LOTERIE</div>
+        <p class="b-help" style="margin:0 0 12px">Touche des secteurs : ils forment un événement. Fais tourner la roue et compte. Passe à « de tailles différentes » : ce n’est alors plus une expérience de Laplace.</p>
+        <div data-widget="gluecksrad8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · UNIVERS</div>
+            <div class="b-text"><p>On lance deux fois une pièce. Donne $\Omega$ et l’événement « exactement une fois face ».</p></div>
+            <div class="b-sol"><p>$\Omega = \{FF\,;\,FP\,;\,PF\,;\,PP\}$, $E = \{FP\,;\,PF\}$ (F pour face, P pour pile)</p>
+                <p><span class="b-res">4 issues, dont 2 appartiennent à E</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · LAPLACE OU PAS ?</div>
+            <div class="b-text"><p>a) dé équilibré &nbsp; b) punaise : sur la tête ou sur le côté &nbsp; c) billet tiré d’une urne contenant 100 billets identiques</p></div>
+            <div class="b-sol"><p>a) oui &nbsp; b) non, la forme n’est pas symétrique &nbsp; c) oui, chaque billet a la même chance</p>
+                <p><span class="b-res">a et c sont des expériences de Laplace</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Est-ce une expérience aléatoire ? a) tirer une carte d’un paquet mélangé &nbsp; b) calculer $3 \times 4$ &nbsp; c) faire tourner une roue de loterie &nbsp; d) lire l’heure</p></div>
+            <div class="b-sol"><p>a) oui &nbsp; b) non &nbsp; c) oui &nbsp; d) non</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dé : écris sous forme d’ensemble. a) nombre premier &nbsp; b) plus grand que 4 &nbsp; c) divisible par 3 &nbsp; d) plus petit que 7</p></div>
+            <div class="b-sol"><p>a) $\{2\,;\,3\,;\,5\}$ &nbsp; b) $\{5\,;\,6\}$ &nbsp; c) $\{3\,;\,6\}$ &nbsp; d) $\{1\,;\,2\,;\,3\,;\,4\,;\,5\,;\,6\} = \Omega$, l’événement certain</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un sac contient 3 boules rouges, 2 vertes et 1 jaune. On en tire une. Donne $\Omega$. Les issues « rouge », « vert », « jaune » sont-elles équiprobables ?</p></div>
+            <div class="b-sol"><p>$\Omega = \{\text{rouge}\,;\,\text{vert}\,;\,\text{jaune}\}$. Non : rouge est trois fois plus probable que jaune. Si l’on numérote les 6 boules, on obtient une expérience de Laplace à 6 issues.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>On lance deux dés, un rouge et un bleu. Combien d’issues a $\Omega$ ? Combien appartiennent à l’événement « double » (les deux dés identiques) ?</p></div>
+            <div class="b-sol"><p>$6 \times 6 = 36$ issues. Double : (1 ; 1), (2 ; 2), …, (6 ; 6), donc 6.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Deux lancers de pièce : combien d’issues a $\Omega$ ?</p><div class="b-sol"><p>FF, FP, PF, PP</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="nombre"><p class="b-q-text">Dé : combien d’issues a l’événement « nombre premier » ?</p><div class="b-sol"><p>2, 3, 5</p></div></div>
+        <div class="b-q" data-ans="36" data-ph="nombre"><p class="b-q-text">Deux dés : nombre d’issues ?</p><div class="b-sol"><p>$6 \times 6 = 36$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Fréquences et simulation" data-toc-k="2" data-toc-short="2 Fréquence">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Fréquences et simulation</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quand on répète souvent une expérience, on note les résultats dans l’ordre : c’est la <b>liste brute</b>, par exemple 3, 6, 1, 1, 4, …
+                C’est plus clair avec des <b>traits de comptage</b> ou dans un tableau.</p></div></div>
+            <div class="b-text"><p>L’<b>effectif</b> dit combien de fois une issue s’est produite. La <b>fréquence</b> est la proportion par rapport à toutes les épreuves. C’est elle seule qui permet de comparer des séries d’épreuves de longueurs différentes.</p>
+                <p>Au lieu de lancer soi-même un dé 1000 fois, on peut <b>simuler</b> l’expérience : la calculatrice et l’ordinateur produisent des nombres aléatoires. Dans un tableur, <b>=ALEA.ENTRE.BORNES(1;6)</b> donne un résultat de dé.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · EFFECTIFS ET FRÉQUENCES</div>
+                <div class="b-text">
+                    <p><b>Effectif</b> $N$ : le nombre de fois où une issue s’est produite</p>
+                    <p><b>Fréquence</b> $f = \dfrac{N}{n}$ ($n$ = nombre d’épreuves) · toutes ensemble font $1 = 100\,\%$</p>
+                    <p><b>Simulation :</b> reproduire une expérience aléatoire avec des nombres aléatoires</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculatrice :</b> beaucoup de calculatrices ont une touche « Ran# » ou « RanInt » pour les nombres aléatoires.</p>
+            <p class="b-note"><b>Beaucoup d’épreuves :</b> dans les longues séries, les fréquences fluctuent de moins en moins.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · SIMULATION</div>
+        <p class="b-help" style="margin:0 0 12px">Fais lancer l’ordinateur 10 ou 100 fois. Compare les fréquences avec la ligne en pointillés.</p>
+        <div data-widget="zufall6"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · DE LA LISTE BRUTE AU TABLEAU</div>
+            <div class="b-text"><p>Liste brute de 20 lancers : 3, 6, 1, 1, 4, 2, 6, 5, 3, 6, 2, 4, 6, 1, 5, 3, 6, 2, 4, 6. Combien de fois le 6 est-il sorti ?</p></div>
+            <div class="b-sol"><p>Le 6 est sorti 6 fois. Fréquence $\tfrac{6}{20} = 0{,}3 = 30\,\%$ – nettement plus que $\tfrac16$, mais 20 lancers, c’est peu.</p>
+                <p><span class="b-res">N = 6, f = 30 %</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · COMPARER DEUX SÉRIES</div>
+            <div class="b-text"><p>Groupe A : 52 fois « sur la tête » sur 80 lancers de la punaise. Groupe B : 120 fois « sur la tête » sur 200 lancers. Les résultats concordent-ils ?</p></div>
+            <div class="b-sol"><p>A : $\tfrac{52}{80} = 0{,}65$, B : $\tfrac{120}{200} = 0{,}6$. Les deux sont proches.</p>
+                <p><span class="b-res">65 % et 60 %</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dans la liste brute de l’exemple 3, compte tous les résultats et fais un tableau des effectifs. Vérifie : les effectifs font-ils 20 au total ?</p></div>
+            <div class="b-sol"><p>1 : 3 · 2 : 3 · 3 : 3 · 4 : 3 · 5 : 2 · 6 : 6. Somme 20 ✓</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Sur 250 lancers d’une brique de Lego, elle est retombée 115 fois sur son grand côté. Donne la fréquence sous forme de fraction, de nombre décimal et en pourcentage.</p></div>
+            <div class="b-sol"><p>$\tfrac{115}{250} = \tfrac{23}{50} = 0{,}46 = 46\,\%$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Regroupe les séries de l’exemple 4. Quelle est la fréquence de « sur la tête » au total ?</p></div>
+            <div class="b-sol"><p>$\tfrac{52 + 120}{80 + 200} = \tfrac{172}{280} \approx 0{,}614 \approx 61\,\%$. Ne pas prendre la moyenne de 65 % et 60 % !</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Comment simules-tu avec des nombres aléatoires de 1 à 6 a) un lancer de pièce &nbsp; b) une roue de loterie rouge pour moitié, bleue pour un tiers et verte pour un sixième ?</p></div>
+            <div class="b-sol"><p>a) 1, 2, 3 → face ; 4, 5, 6 → pile. &nbsp; b) 1, 2, 3 → rouge ; 4, 5 → bleu ; 6 → vert.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Simule avec l’élément interactif 100 lancers, trois fois de suite. Comment la fréquence du 6 fluctue-t-elle ? À quoi t’attends-tu pour 10 000 lancers ?</p></div>
+            <div class="b-sol"><p>Avec 100 lancers, elle se situe le plus souvent entre environ 10 % et 24 %. Avec 10 000 lancers, elle fluctue beaucoup moins et elle est très proche de $\tfrac16 \approx 16{,}7\,\%$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,46" data-ph="nombre décimal"><p class="b-q-text">115 sur 250, en fréquence (nombre décimal) ?</p><div class="b-sol"><p>$115 : 250 = 0{,}46$</p></div></div>
+        <div class="b-q" data-ans="30" data-ph="%"><p class="b-q-text">6 six sur 20 lancers : fréquence en % ?</p><div class="b-sol"><p>$\tfrac{6}{20} = 0{,}3$</p></div></div>
+        <div class="b-q" data-ans="65" data-ph="%"><p class="b-q-text">52 sur 80, en pourcentage ?</p><div class="b-sol"><p>$\tfrac{52}{80} = 0{,}65$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Probabilité et lecture critique des statistiques" data-toc-k="3" data-toc-short="3 Esprit critique">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">3</span>Probabilité et lecture critique des statistiques</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Avec un dé équilibré, chaque nombre est également possible. On dit : la <b>probabilité</b> du 6 est $\tfrac16$.
+                Pour une brique de Lego, on ne peut pas la calculer – mais on peut l’estimer : la fréquence après beaucoup de lancers est une bonne <b>estimation</b>.</p></div></div>
+            <div class="b-text"><p>Dans une <b>expérience de Laplace</b>, on compte : probabilité = nombre d’issues favorables divisé par le nombre de toutes les issues. Sinon, on estime avec la fréquence d’une longue série d’épreuves.</p>
+                <p>Les diagrammes aussi peuvent tromper. Si l’axe ne commence pas à 0, de petites différences paraissent énormes. Si une image grandit en hauteur <b>et</b> en largeur, elle paraît bien plus grande que le nombre ne l’est.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · PROBABILITÉ</div>
+                <div class="b-text">
+                    <p><b>Laplace :</b> $P(E) = \dfrac{\text{nombre d’issues favorables}}{\text{nombre de toutes les issues}}$</p>
+                    <p><b>Sinon :</b> la fréquence d’un grand nombre d’épreuves comme estimation · $0 \le P(E) \le 1$</p>
+                    <p><b>Vérifier les diagrammes :</b> où commence l’axe ? La graduation est-elle régulière ? Une image grandit-elle dans deux directions ?</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Impossible et certain :</b> « obtenir 7 » a la probabilité 0, « obtenir au plus 6 » la probabilité 1.</p>
+            <p class="b-note"><b>Médias :</b> un diagramme ne représente jamais la réalité de façon tout à fait exacte. Demande-toi toujours qui l’a fait et pourquoi.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ASTUCE DE L’AXE</div>
+        <p class="b-help" style="margin:0 0 12px">Fais commencer l’axe à 0, puis reviens en arrière : comment l’impression change-t-elle ? Passe aussi à « Image au lieu de barres ».</p>
+        <div data-widget="achsentrick"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LAPLACE</div>
+            <div class="b-text"><p>Avec un dé équilibré, quelle est la probabilité d’obtenir un nombre plus grand que 4 ?</p></div>
+            <div class="b-sol"><p>Favorables : 5 et 6, donc 2 sur 6.</p>
+                <p><span class="b-res">$P = \tfrac{2}{6} = \tfrac13 \approx 33\,\%$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · AXE TRONQUÉ</div>
+            <div class="b-text"><p>L’entreprise A vend 520 vélos, l’entreprise B 500. Dans le diagramme, l’axe commence à 480. De combien la barre de A paraît-elle plus grande ?</p></div>
+            <div class="b-sol"><p>On voit 40 et 20 – la barre de A paraît deux fois plus haute. En réalité, il n’y en a que $\tfrac{20}{500} = 4\,\%$ de plus.</p>
+                <p><span class="b-res">paraît deux fois plus grande, est 4 % plus grande</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dé équilibré : calcule la probabilité de a) nombre pair &nbsp; b) 1 ou 2 &nbsp; c) pas de 6 &nbsp; d) un 7</p></div>
+            <div class="b-sol"><p>a) $\tfrac12$ &nbsp; b) $\tfrac13$ &nbsp; c) $\tfrac56$ &nbsp; d) 0</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une urne de tombola contient 200 billets, dont 30 gagnants. Quelle est la probabilité de gagner ?</p></div>
+            <div class="b-sol"><p>$\tfrac{30}{200} = 0{,}15 = 15\,\%$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Sur 1000 lancers, une brique de Lego est retombée 462 fois sur son grand côté. Estime la probabilité. Combien de fois t’attends-tu au grand côté sur 50 lancers ?</p></div>
+            <div class="b-sol"><p>$P \approx 0{,}46$. Sur 50 lancers, environ 23 fois.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un journal montre le nombre de membres d’un club : 300 en 2024, 330 en 2025. L’axe commence à 290. Combien de fois plus haute que la première la deuxième barre paraît-elle, et combien de pour cent de membres en plus y a-t-il vraiment ?</p></div>
+            <div class="b-sol"><p>On voit 10 et 40 : quatre fois plus haute. En réalité, $\tfrac{30}{300} = 10\,\%$ de plus.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dans un prospectus, le chiffre d’affaires est représenté par des sacs d’argent. Le chiffre d’affaires a doublé, et le deuxième sac est dessiné deux fois plus haut et deux fois plus large. Combien de fois plus grand paraît-il ?</p></div>
+            <div class="b-sol"><p>L’aire est $2 \times 2 = 4$ fois plus grande. Le sac paraît quatre fois plus grand, alors que le chiffre d’affaires n’a fait que doubler.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1/3" data-ph="fraction"><p class="b-q-text">Dé équilibré : probabilité d’un nombre plus grand que 4 ?</p><div class="b-sol"><p>$\tfrac{2}{6} = \tfrac13$</p></div></div>
+        <div class="b-q" data-ans="15" data-ph="%"><p class="b-q-text">30 gagnants sur 200 billets : probabilité de gagner en % ?</p><div class="b-sol"><p>$\tfrac{30}{200} = 0{,}15$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="%"><p class="b-q-text">520 au lieu de 500 : combien de pour cent de plus ?</p><div class="b-sol"><p>$\tfrac{20}{500} = 0{,}04$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On tire au hasard une des lettres du mot MATHÉMATIQUE. Quelle est la probabilité de tirer un A ? Une voyelle ?</p></div>
+            <div class="b-sol"><p>12 lettres, dont 2 fois A : $\tfrac{2}{12} = \tfrac16$. Voyelles A, É, A, I, U, E : $\tfrac{6}{12} = \tfrac12$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>La météo annonce : « Probabilité de pluie 70 %. » Il ne pleut pas. La prévision était-elle fausse ?</p></div>
+            <div class="b-sol"><p>Pas forcément. 70 % veut dire : il pleut environ 7 jours sur 10 jours de ce genre. Les 3 autres jours, il fait sec. On ne voit si la prévision est bonne que sur beaucoup de jours.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Deux dés : quelle somme des points est la plus probable ? Justifie avec les 36 issues et donne sa probabilité.</p></div>
+            <div class="b-sol"><p>Le 7 : (1 ; 6), (2 ; 5), (3 ; 4), (4 ; 3), (5 ; 2), (6 ; 1), donc $\tfrac{6}{36} = \tfrac16$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : comment mentir avec les statistiques" data-toc-k="X" data-toc-short="Statistiques">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">MÉDIAS</span></div>
+    <h2>Comment mentir avec les statistiques</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En 1954, le journaliste américain <b>Darrell Huff</b> écrivit un petit livre au titre insolent : « How to Lie with Statistics » (« Comment mentir avec les statistiques »). Il y montrait comment, avec des nombres justes, on donne une impression fausse.</p>
+            <p>Tu connais maintenant deux astuces du livre : le diagramme « Gee-Whiz », dans lequel l’axe ne commence pas à 0, et l’image qui grandit dans deux directions. Huff expliquait aussi pourquoi il faut toujours se demander :
+                qui a compté ? Combien de personnes ont été interrogées ? Que manque-t-il dans le diagramme ?</p>
+            <p>Le livre est devenu l’un des livres de statistique les plus vendus de tous les temps. Son but n’était pas d’apprendre à mentir, mais à <b>démasquer</b> les mensonges.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source :</b> Darrell Huff, « How to Lie with Statistics », dessins d’Irving Geis, New York 1954.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>EXPÉRIENCE ALÉATOIRE</h4><p>univers $\Omega$, événement $E$</p></div>
+        <div><p>$\Omega = \{1\,;\,\ldots\,;\,6\}$, $E = \{2\,;\,4\,;\,6\}$</p></div></div>
+    <div class="b-rueck"><div><h4>EFFECTIFS ET FRÉQUENCES</h4><p>effectif $N$, fréquence $f = N : n$</p></div>
+        <div><p>$\tfrac{6}{20} = 30\,\%$</p></div></div>
+    <div class="b-rueck"><div><h4>SIMULATION</h4><p>des nombres aléatoires reproduisent l’expérience</p></div>
+        <div><p>1–3 face, 4–6 pile</p></div></div>
+    <div class="b-rueck"><div><h4>PROBABILITÉ</h4><p>Laplace : favorables divisées par toutes · sinon estimer</p></div>
+        <div><p>$P(\text{plus grand que } 4) = \tfrac13$</p></div></div>
+    <div class="b-rueck"><div><h4>LIRE D’UN ŒIL CRITIQUE</h4><p>axe à 0 ? image dans deux directions ?</p></div>
+        <div><p>520 au lieu de 500 : seulement 4 % de plus</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+            <div class="b-q" data-ans="1/2" data-ph="fraction"><p class="b-q-text">Dé équilibré : probabilité d’un nombre pair ?</p><div class="b-sol"><p>$\tfrac36 = \tfrac12$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Deux dés : combien d’issues sont des doubles ?</p><div class="b-sol"><p>(1 ; 1) à (6 ; 6)</p></div></div>
+            <div class="b-q" data-ans="0,6" data-ph="nombre décimal"><p class="b-q-text">120 sur 200, en fréquence ?</p><div class="b-sol"><p>$120 : 200 = 0{,}6$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · RÉFLÉCHIR</div>
+            <div class="b-q" data-ans="5/6" data-ph="fraction"><p class="b-q-text">Dé équilibré : probabilité de « pas de 6 » ?</p><div class="b-sol"><p>$\tfrac56$</p></div></div>
+            <div class="b-q" data-ans="23" data-ph="nombre"><p class="b-q-text">$P \approx 0{,}46$ : combien de fois environ sur 50 lancers ?</p><div class="b-sol"><p>$50 \times 0{,}46 = 23$</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="%"><p class="b-q-text">330 membres au lieu de 300 : combien de pour cent de plus ?</p><div class="b-sol"><p>$\tfrac{30}{300} = 0{,}1$</p></div></div>
+        </div>
+    </div>
+    <h3>À ESSAYER AUSSI (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Laisser tomber des billes et compter</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Qui gagne avec deux dés particuliers ?</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Oberschule, 7e année (filière Realschule) · domaine d’apprentissage 2 d’après le programme de mathématiques de l’Oberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux. Emoji : Apple, via emoji-data d’iamcal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-fr/geometrie.js"></script>
+<script src="../../js/buch-gy6.js"></script>
+<script src="../../js/buch-fr/gy6.js"></script>
+<script src="../../js/buch-gy7.js"></script>
+<script src="../../js/buch-fr/gy7.js"></script>
+<script src="../../js/buch-gy8.js"></script>
+<script src="../../js/buch-fr/gy8.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-daten.js"></script>
+<script src="../../js/buch-fr/daten.js"></script>
+<script src="../../js/buch-finanz.js"></script>
+<script src="../../js/buch-fr/finanz.js"></script>
+<script src="../../js/buch-gleichungen.js"></script>
+<script src="../../js/buch-fr/gleichungen.js"></script>
+<script src="../../js/buch-os6.js"></script>
+<script src="../../js/buch-fr/os6.js"></script>
+<script src="../../js/buch-os7.js"></script>
+<script src="../../js/buch-fr/os7.js"></script>
+</body>
+</html>

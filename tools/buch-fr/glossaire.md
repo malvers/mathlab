@@ -1056,6 +1056,35 @@ and js/buch-fr/daten.js, in what the widgets write.
 
 <!-- fr-18: terms of this book only (OS 7), write right below this line -->
 
+Package fr-18 (Esnault), 27.10.2026: decisions made while translating OS 7 (Realschulbildungsgang); nothing above was changed.
+The French school conventions of `## mathe5-fr` and the letters of GY 7 (`## mathegy7-fr`) hold; the pages name the German
+letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
+
+| German | French | Note |
+|---|---|---|
+| Oberschule, Klasse 7 · Realschule (Realschulbildungsgang) | Oberschule, 7e année · Realschule (filière Realschule) | start page as OS 5, plus: the Realschule track ends in the 10th year with an exam and the Realschule diploma; 7e année ≈ cinquième |
+| Wahlbereich (chapter W) | Domaine optionnel (chapter OP) | as section 1 |
+| Grundwert $G$, Prozentsatz $p\,\%$, Prozentwert $W$ | valeur de référence $V$, taux de pourcentage $t\,\%$, part $P$ | 1.1 as GY 7 and the widget prozent7: $P = V \times \dfrac{t}{100}$, $t\,\% = \dfrac{P}{V}$, $V = P \times \dfrac{100}{t}$ |
+| die drei Grundaufgaben, Dreisatz | les trois problèmes types, règle de trois | 1.1, as GY 7 |
+| bequeme Prozentsätze, Promille | pourcentages faciles, pour mille | 1.1 |
+| mit dem Geodreieck antragen | reporter avec le rapporteur | 1.1 (pie charts) |
+| vermehrter / verminderter Grundwert, Faktor | valeur de référence augmentée / diminuée, coefficient multiplicateur | 1.2 |
+| Rabatt, Skonto, Mehrwertsteuer, netto, brutto | remise, escompte, TVA, HT, TTC | 1.2, as GY 7; the German 19 % and 7 % stay, the French 20 % and 5,5 % named once |
+| Kapital $K$, Zinssatz $p\,\%$, Zinsen $Z$, Tage $t$ | capital $C$, taux d’intérêt $t\,\%$, intérêts $I$, jours $j$ | 1.2 and the widget tageszinsos7 (rules in js/buch-fr/os7.js): $I = C \times \dfrac{t}{100} \times \dfrac{j}{360}$ |
+| Zinsjahr, Jahreszinsen, Tageszinsen | année bancaire, intérêts annuels, intérêts pour quelques jours | 1.2 |
+| Zinseszins, $K_n = K_0 \cdot (1 + \tfrac{p}{100})^n$ | intérêts composés, $C_n = C_0 \times (1 + \tfrac{t}{100})^n$ | 1.2; the shared widget zins (finanz, fr-4) keeps $K_0$ and $p$ - the page says so once |
+| Tagesgeld, Sparkonto, Girokonto, Dispokredit, auf Raten | livret d’épargne, compte d’épargne, compte courant, découvert (autorisé), en plusieurs fois | 1.2 |
+| 72er-Regel, Faustregel | règle de 72, règle empirique | 1.2 |
+| Zufallsversuch, Ergebnis, Ergebnismenge $\Omega$, Ereignis, Laplace-Versuch | expérience aléatoire, issue, univers $\Omega$, événement, expérience de Laplace | 2, as GY 8 |
+| Urliste, Strichliste | liste brute, traits de comptage | 2 |
+| absolute / relative Häufigkeit $H$, $h = \tfrac{H}{n}$ | effectif $N$, fréquence $f = \tfrac{N}{n}$ | 2 (the letters of GY 8; gluecksrad8 writes $f(E)$) |
+| Münze Kopf / Zahl, $KZ$ | pièce face / pile, $FP$ | 2 |
+| Pasch, Augensumme | double, somme des points | 2 |
+| Legostein, Reißzwecke (Rücken / Seite), Lostrommel | brique de Lego, punaise (sur la tête / sur le côté), urne de tombola | 2 |
+| =ZUFALLSBEREICH(1;6) | =ALEA.ENTRE.BORNES(1;6) | 2 (French Excel) |
+| Wort MATHEMATIK (10 letters) | MATHÉMATIQUE (12 letters) | 2 task 15: the French word, the solution recomputed (2/12, 6/12) |
+| Lab names | PLANCHE DE GALTON, LE JEU DE DÉS | DOCPAD stays |
+
 ## mathe8-fr
 
 <!-- fr-19: terms of this book only (OS 8), write right below this line -->
