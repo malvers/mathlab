@@ -43,7 +43,13 @@ window.BuchFR && BuchFR.add('os10', {
         [' (Höhe $', ' (hauteur $'], [' minus abgeschnittene Spitze ', ' moins la pointe coupée '],
         ['Holz (', 'Bois ('], ['Beton (', 'Béton ('], ['Stahl (', 'Acier ('], ['): Masse ', ') : masse '],
         // lohnos10: the legend under the bar
-        ['Netto', 'Net'], ['Sozialabgaben', 'Cotisations sociales'], ['Arbeitgeberanteil', 'Part patronale'],
+        ['Netto', 'Net'], ['Lohnsteuer', 'Impôt sur le revenu'], ['Sozialabgaben', 'Cotisations sociales'], ['Arbeitgeberanteil', 'Part patronale'],
+        // lohnos10: the summary under the table, in the pieces the widget writes, with the French no-break spaces before € and %
+        ['Alle Sätze sind angenommen und vereinfacht. Abzüge zusammen ', 'Tous les taux sont supposés et simplifiés. Prélèvements au total : '],
+        [' €, das sind ', ' €, soit '], [' % des Bruttolohns. ', ' % du salaire brut. '],
+        ['Der Betrieb zahlt die Sozialabgaben noch einmal als Arbeitgeberanteil: Die Stelle kostet ihn ',
+            'L’entreprise paie les cotisations sociales une seconde fois, comme part patronale : le poste lui coûte '],
+        [' € im Monat.', ' € par mois.'],
         ['gestrichelt: Ende des Bruttolohns ', 'en pointillés : fin du salaire brut '],
     ],
     rule: [
@@ -53,9 +59,5 @@ window.BuchFR && BuchFR.add('os10', {
         [/\$ cm, Mantel \$M = \\pi s \(R \+ r\)/g, '$$ cm, aire latérale $$A_L = \\pi g (R + r)'],
         // stumpfos10, the pyramid: the base areas 𝓑₁ and 𝓑₂ (German G₁, G₂)
         [/\\bigl\(G_1 \+ \\sqrt\{G_1 G_2\} \+ G_2\\bigr\)/g, '\\bigl(\\mathcal{B}_1 + \\sqrt{\\mathcal{B}_1 \\mathcal{B}_2} + \\mathcal{B}_2\\bigr)'],
-        // lohnos10: the summary under the table, with the French no-break spaces before € and %
-        [/Alle Sätze sind angenommen und vereinfacht\. Abzüge zusammen ([^€<]+) €, das sind ([^%<]+) % des Bruttolohns\. Der Betrieb zahlt die Sozialabgaben noch einmal als Arbeitgeberanteil: Die Stelle kostet ihn ([^€<]+) € im Monat\./g,
-            (m, a, p, k) => 'Tous les taux sont supposés et simplifiés. Prélèvements au total : ' + a + ' €, soit ' + p + ' % du salaire brut. ' +
-                'L’entreprise paie les cotisations sociales une seconde fois, comme part patronale : le poste lui coûte ' + k + ' € par mois.'],
     ]
 });
