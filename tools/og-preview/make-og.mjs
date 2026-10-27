@@ -5,7 +5,7 @@
  * For every lab in HTML/js/labs-config.js it
  *   1. shoots the lab head-less (Playwright),
  *   2. renders one central card template (og-card.html) at 1200x630,
- *   3. writes HTML/resources/og/<id>.jpg,
+ *   3. writes HTML/resources/og/<id>.jpg - a book card (buch-*) goes to the R2 bucket "media" instead (og/<id>.jpg),
  *   4. injects the og:* / twitter:* meta block into the lab's HTML head.
  *
  * The meta block is delimited by OG:BEGIN / OG:END markers and is rewritten in
@@ -16,6 +16,7 @@
  *   node tools/og-preview/make-og.mjs --only brahmagupta,koerper
  *   node tools/og-preview/make-og.mjs --cards-only    # reuse cached lab shots
  *   node tools/og-preview/make-og.mjs --meta-only     # only rewrite the HTML heads
+ *   node tools/og-preview/make-og.mjs --books         # only the textbook cards (combines with the flags above)
  *   node tools/og-preview/make-og.mjs --dry           # show what would change
  */
 
@@ -23,6 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
 import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
@@ -32,6 +34,12 @@ const HTML = path.join(ROOT, 'HTML');
 const OUT = path.join(HTML, 'resources', 'og');
 const SHOTS = path.join(HERE, 'shots');
 const SITE = 'https://docalvers.de';
+// The book cards live in R2, not in git: every book in five languages brings ~250 of them and every cover change
+// rebuilds them (Doc, 27.10.2026: "mach die R2-Sachen" - 1230 cards, 120 MB of the Pages site). Rendered into R2_DIR
+// (ignored), uploaded, read back; the book covers (-cover.jpg) stay in resources/og, the hub shows them.
+const MEDIA = 'https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev';   // bucket "media", the same as the book photos
+const R2_DIR = path.join(HERE, 'r2');
+const onR2 = (lab) => lab.id.startsWith('buch-');
 
 // Playwright lives in videopipeline/ — reused here instead of a second install.
 const { chromium } = require(path.join(ROOT, 'videopipeline', 'node_modules', 'playwright'));
@@ -46,6 +54,7 @@ const ONLY = (val('--only') || '').split(',').map((s) => s.trim()).filter(Boolea
 const DRY = has('--dry');
 const CARDS_ONLY = has('--cards-only');
 const META_ONLY = has('--meta-only');
+const BOOKS = has('--books');
 
 // ---------------------------------------------------------------- lab registry
 function readLabs() {
@@ -235,11 +244,25 @@ async function renderCard(browser, lab, shotFile) {
         });
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(400);
-        const dest = path.join(OUT, lab.id + '.jpg');
+        const dest = path.join(onR2(lab) ? R2_DIR : OUT, lab.id + '.jpg');
         await page.screenshot({ path: dest, type: 'jpeg', quality: 90 });
         return dest;
     } finally {
         await ctx.close();
+    }
+}
+
+// ---------------------------------------------------------------------- R2 upload
+// wrangler pinned as in tools/media_publish.mjs (4.152 answers every put with 403 "Please enable R2", 25.10.2026)
+async function toR2(file) {
+    const key = 'og/' + path.basename(file);
+    const r = spawnSync('npx', ['--yes', 'wrangler@4.40.0', 'r2', 'object', 'put', 'media/' + key, '--file', file,
+        '--content-type', 'image/jpeg', '--cache-control', 'public, max-age=86400', '--remote'], { encoding: 'utf8' });
+    if (r.status !== 0) throw new Error('R2: ' + ((r.stdout || '') + (r.stderr || '')).trim().split('\n').pop());
+    // read back before the page links there: same size as the local card, or the upload is not trusted
+    const head = await fetch(`${MEDIA}/${key}`, { method: 'HEAD', cache: 'no-store' });
+    if (!head.ok || Number(head.headers.get('content-length')) !== fs.statSync(file).size) {
+        throw new Error(`R2: read back HTTP ${head.status}, ${head.headers.get('content-length')} bytes`);
     }
 }
 
@@ -249,7 +272,7 @@ const END = '<!-- OG:END -->';
 
 function metaBlock(lab) {
     const url = `${SITE}/${lab.href}`;
-    const img = `${SITE}/resources/og/${lab.id}.jpg`;
+    const img = onR2(lab) ? `${MEDIA}/og/${lab.id}.jpg` : `${SITE}/resources/og/${lab.id}.jpg`;
     const title = lab.id === 'index' ? 'Doc Alvers Mathe-Labore' : `${lab.title} \u2014 Doc Alvers Mathe-Labore`;
     const desc = shorten(lab.description || taglineOf(lab), 200);
     const L = [
@@ -305,9 +328,11 @@ function injectMeta(lab) {
 const main = async () => {
     let labs = [...EXTRA, ...readBooks(), ...readLabs()];
     if (ONLY.length) labs = labs.filter((l) => ONLY.includes(l.id));
+    if (BOOKS) labs = labs.filter(onR2);
     if (!labs.length) { console.error('no labs matched --only'); process.exit(1); }
 
     fs.mkdirSync(OUT, { recursive: true });
+    fs.mkdirSync(R2_DIR, { recursive: true });
     fs.mkdirSync(SHOTS, { recursive: true });
 
     let browser, srv;
@@ -325,7 +350,8 @@ const main = async () => {
                 const shot = path.join(SHOTS, lab.id + '.png');
                 const reuse = CARDS_ONLY && fs.existsSync(shot);
                 if (!reuse) await shootLab(browser, lab, srv.port);
-                await renderCard(browser, lab, fs.existsSync(shot) ? shot : null);
+                const card = await renderCard(browser, lab, fs.existsSync(shot) ? shot : null);
+                if (onR2(lab) && !DRY) await toR2(card);
             }
             const meta = injectMeta(lab);
             console.log(`${tag}  card ok  meta ${meta}`);

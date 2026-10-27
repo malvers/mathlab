@@ -21,6 +21,11 @@ node tools/og-preview/make-og.mjs --dry           # nichts an den HTMLs aendern
   Ein Lab dort aendern und `--only <id>` laufen lassen — sonst nichts anfassen.
 - **Kartenlayout:** `og-card.html` — ein zentrales Template fuer alle Labore.
 - **Screenshots:** `shots/<id>.png` (nicht im Repo, `.gitignore`).
+- **Buchkarten (`buch-*`) liegen auf R2**, nicht im Git (seit 27.10.2026): gerendert nach `r2/` (ignoriert),
+  hochgeladen nach Bucket `media`, Schlüssel `og/<id>.jpg`, zurückgelesen; `og:image` zeigt auf
+  `https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/og/<id>.jpg`. Die Cover (`buch-*-cover.jpg`) bleiben in
+  `HTML/resources/og/`, die Startseite zeigt sie. Nur die Bücher: `--books`. wrangler einmal im Terminal anmelden:
+  `npx wrangler login`.
 - **Ergebnis:** `HTML/resources/og/<id>.jpg` + Meta-Block zwischen
   `<!-- OG:BEGIN -->` und `<!-- OG:END -->` im Lab-HTML. Der Block wird bei jedem
   Lauf ersetzt — von Hand darin editieren ist zwecklos.
