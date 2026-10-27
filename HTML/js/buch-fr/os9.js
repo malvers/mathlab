@@ -69,6 +69,11 @@ window.BuchFR && BuchFR.add('os9', {
         // quadglos9 (chapter 3.2): formule de résolution, discriminant D
         'Drei Parabeln mit zwei, einer und keiner Nullstelle': 'Trois paraboles avec deux zéros, un zéro et aucun zéro',
         'Parabel y = x² + p x + q mit ihren Nullstellen': 'Parabole y = x² + p x + q et ses zéros',
+        // fibonaccios9 (chapter OP): nombres de Fibonacci, quotients, nombre d’or
+        'Anzahl der Fibonacci-Zahlen $n$': 'Nombre de termes de Fibonacci $n$', 'Wert': 'Valeur',
+        'Quotienten benachbarter Fibonacci-Zahlen nähern sich der Zahl 1,618': 'Les quotients de nombres de Fibonacci voisins s’approchent du nombre 1,618',
+        'Jede Zahl ist die Summe der beiden davor. Die Quotienten springen abwechselnd über und unter die grüne Linie $\\Phi \\approx 1{,}618$ und kommen ihr immer näher.':
+            'Chaque nombre est la somme des deux précédents. Les quotients passent alternativement au-dessus et au-dessous de la ligne verte $\\Phi \\approx 1{,}618$ et s’en rapprochent de plus en plus.',
     },
     phrase: [
         // book fr-20 mathe9-fr:
@@ -104,6 +109,8 @@ window.BuchFR && BuchFR.add('os9', {
         ['<b>Keine Lösung</b>, weil $D = ', '<b>Aucune solution</b>, car $D = '],
         [' &lt; 0$ ist: Aus einer negativen Zahl zieht man keine Wurzel. Die Parabel liegt ganz über der x-Achse.',
             ' &lt; 0$ : on ne peut pas extraire la racine carrée d’un nombre négatif. La parabole est entièrement au-dessus de l’axe des abscisses.'],
+        // fibonaccios9
+        ['Fibonacci-Zahlen: ', 'Nombres de Fibonacci : '],
     ],
     rule: [
         // book fr-20 mathe9-fr:
