@@ -1140,6 +1140,47 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 
 <!-- fr-20: terms of this book only (OS 9), write right below this line -->
 
+Package fr-20 (Serfaty), 27.10.2026: decisions made while translating OS 9 (Realschulbildungsgang); nothing above was changed.
+French school letters everywhere (Doc, 26.10.2026: "lokal bitte immer"), in the pages and, through rules in js/buch-fr/os9.js
+(only OS 9 loads it), in what the widgets write. The solids follow GY 9 (rules in js/buch-fr/geometrie.js).
+
+| German | French | Note |
+|---|---|---|
+| Oberschule, Klasse 9, Realschulbildungsgang | Oberschule, 9e année, filière Realschule | start page as mathe5-fr, plus the Realschulabschluss and « à peu près l’âge de la troisième » |
+| Wahlpflichtbereich 1 (chapter W) | Domaine au choix 1 (chapter OP) | as Wahlpflicht in section 1; chip « 100 HEURES + DOMAINE AU CHOIX » |
+| Runde 1 · im Kopf / Runde 2 · mit dem Taschenrechner, mit Rechnung | Partie 1 · de tête / Partie 2 · avec la calculatrice, avec calculs | as GY 5–8 |
+| Hypotenuse, Kathete(n), Kathetenquadrat | hypoténuse, côté(s) de l’angle droit, carré construit sur un côté de l’angle droit | 1.1, as GY 9 |
+| Stützdreieck | triangle auxiliaire | 1.1 (the widgets say « Triangle auxiliaire » for Hilfsdreieck) |
+| Zwölfknotenschnur, Knotenschnur | corde à treize nœuds, corde à nœuds | 1.1: 13 knots, 12 intervals, the French name |
+| pythagoreische Zahlentripel $(3; 4; 5)$ | triplets pythagoriciens $(3\,;\,4\,;\,5)$ | 1.1, widget umkehros9 |
+| $\overline{PQ}$ (Länge) | $PQ$ | 1.1, widget abstandos9 (phrase), as GY 9 |
+| Thaleskreis | demi-cercle (« triangle inscrit dans un demi-cercle ») | 1.1 task 17; never « Thalès » |
+| Gegenkathete, Ankathete, Umkehrtaste | côté opposé, côté adjacent, touche réciproque ($\sin^{-1}$, en France aussi Arcsin) | 1.2, CAH SOH TOA as GY 9; Bilan $\tfrac{O}{H}$, $\tfrac{A}{H}$, $\tfrac{O}{A}$ |
+| Hauptähnlichkeitssatz | critère de similitude (deux angles égaux) | 1.2 |
+| Steigung in Prozent, Steigungswinkel, waagerecht | pente en pourcentage, angle d’inclinaison, à l’horizontale | 1.3, widget steigungos9 |
+| Höhenwinkel, Tiefenwinkel, Hilfslinie, Antwortsatz | angle d’élévation, angle de dépression, tracé auxiliaire, phrase-réponse | 1.3 |
+| Satteldach: Hausbreite $b$, Hauslänge $l$, Sparren $s$, Firsthöhe | toit à deux pans : largeur $\ell$, longueur $L$, chevron $c$, hauteur du faîtage | 1.3, widget dachos9 (rules), the page as well; Seil $s$ of the mast: $\ell$ |
+| Zweitafelbild, Grundriss, Aufriss | épure, vue de dessus, vue de face | 2.1, as gy7 |
+| Körperhöhe, Seitenhöhe $h_s$, Seitenkante $s$, Mittelpunkt der Grundfläche $M$ | hauteur, apothème $h_a$, arête latérale $\ell$, centre $H$ | 2.1; widgets spitzkoerper (GY 9 rules) and pyramidekegel (rules in os9.js) |
+| $G$, $M$, $O$ (Pyramide, Kegel, Kugel) | $\mathcal{B}$, $A_L$, $A$ (aire de la sphère for the sphere) | 2.1–2.3, as GY 9 |
+| Mantellinie $s$, Mittelpunktswinkel $\varphi$ | génératrice $g$, angle au centre $\varphi$ | 2.2 |
+| Kubikwurzel | racine cubique | 2.2, widget kugelos9 |
+| $V_Z$, $V_K$, $h_K$, $V_H$, $A_G$ | $V_{\text{cyl}}$, $V_{\text{cône}}$, $h_{\text{cône}}$, $V_{\text{demi-boule}}$, $\mathcal{B}$ | 2.2, 2.3, widgets kugelos9 and turmos9 |
+| zerlegen, ergänzen, Bohrung, Halbkugel, Kegelstumpf, Litfaßsäule | décomposer, compléter, perçage, demi-boule, tronc de cône, colonne Morris | 2.3 |
+| Normalparabel, Scheitelpunkt, Streckfaktor, gestreckt / gestaucht | parabole de référence, sommet, facteur d’étirement (as funktionen.js), étirée / comprimée | 3.1, widget parabelos9 |
+| Scheitelpunktform, Normalform, quadratische Ergänzung | forme canonique, forme normalisée, mise sous forme canonique | 3.1, 3.2, as GY 9 |
+| Wertebereich, Monotonie, fallend / steigend, Punktprobe | ensemble des images, sens de variation, décroissante / croissante, test d’appartenance | 3.1 |
+| inhaltlich lösen, Produkt gleich null, Lösungsformel, Fallunterscheidung | résoudre par le raisonnement, produit nul, formule de résolution, discussion des cas | 3.2 |
+| Diskriminante $D$ | discriminant $D$ | 3.2 adds once: en France $\Delta = b^2 - 4ac$, même signe |
+| $L = \{-12;\, 12\}$, $L = \{\,\}$, $\mid :2$ | $S = \{-12\,;\,12\}$, $S = \emptyset$, « en divisant par 2 » | 3.2 |
+| goldener Schnitt, goldene Zahl, Teilungsverhältnis | section dorée, nombre d’or, rapport de partage | OP title « Le nombre d’or » as GY 9; widget goldenerschnitt (fr-16) |
+| Fibonacci-Zahlen, Fibonacci-Folge | nombres de Fibonacci, suite de Fibonacci | OP, widget fibonaccios9 |
+| absolute / relative Häufigkeit, Urliste, Strichliste | effectif / fréquence, liste brute, traits de comptage | 4, as GY 9 and OS 5 |
+| Mittelwert, Zentralwert, Modalwert, „drei Mittelwerte“ | moyenne, médiane, mode, « trois valeurs centrales » | 4, widgets mittelwerte (fr-16) and spannweiteos9 |
+| Spannweite, streuen | étendue, être dispersé | 4; the widget table says « Étendue » without the $e$ of streuung (rule in os9.js) |
+| Suggestivfrage | question orientée | 4 |
+| Lab names | PYTHAGORE, DÉMONSTRATION DE PYTHAGORE, TRIGONOMÉTRIE, LABORATOIRE DES PENTES, SOLIDES, PRINCIPE DE CAVALIERI, ASSEMBLAGES DE CUBES, LABORATOIRE DES PARABOLES, LABORATOIRE FIBONACCI, PLANCHE DE GALTON | heading « À ESSAYER AUSSI (EN ALLEMAND) » |
+
 ## mathe10-fr
 
 <!-- fr-21: terms of this book only (OS 10), write right below this line -->
