@@ -1185,6 +1185,65 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 
 <!-- fr-19: terms of this book only (OS 8), write right below this line -->
 
+Package fr-19 (Anantharaman), 27.10.2026: decisions made while translating OS 8; nothing above was changed. The French school
+conventions of `## mathe5-fr` and of the GY books hold (× for the product in the pages, by the rule of js/buch-fr/geometrie.js
+also in the widgets; P perimeter, A total area, points (2 ; 3), [AB] segment, AB its length, (AB) line, L and mL). Collège
+letters for lines: $f(x) = ax + b$, also in the own widget linearos8 (block fr-19 of js/buch-fr/os8.js).
+
+| German | French | Note |
+|---|---|---|
+| Oberschule, Klasse 8, Realschulbildungsgang | Oberschule, 8e année, filière Realschule | start page: Oberschule as OS 5, plus the Realschule track (examen final et diplôme de la Realschule en 10e année); 8e année ≈ quatrième |
+| Wahlpflichtbereich 1 (chapter W) | Domaine au choix 1 (chapter OP) | as section 1 (Wahlpflicht); chip « 100 HEURES + DOMAINE AU CHOIX » |
+| Runde 1 · im Kopf, Runde 2 · mit Überlegen / mit dem Taschenrechner | Partie 1 · de tête, Partie 2 · en réfléchissant / avec la calculatrice | test boxes |
+| Term, Termwert, gleichwertig | expression, valeur de l’expression, équivalentes | 1.1, widget termwertos8 |
+| gleichartige Glieder, zusammenfassen, Klammern auflösen, Plus-/Minusklammer | termes semblables, réduire, supprimer des parenthèses, parenthèses précédées de + / de − | 1.1 |
+| ausmultiplizieren, ausklammern, Distributivgesetz | développer, factoriser, distributivité | 1.1, widget flaecheos8 |
+| Streichholz-Muster, Beet | carrés en allumettes, potager | 1.1 |
+| lineare Gleichung, Äquivalenzumformung, Probe, $L = \{\,\}$ | équation du premier degré, transformation équivalente, vérification, $S = \{\,\}$ | 1.2 |
+| Formel umstellen, $s = v \cdot t$, $K = 45 + 38t$ | isoler une variable, $d = v \times t$, $C = 45 + 38t$ | 1.2; the letter follows the French word (distance, coût) |
+| Grundseite $g$ (triangle) | base $b$ | 1.2 test, as GY 6 |
+| Altersaufgabe, Zahlenrätsel | problème d’âges, devinette | 1.2 |
+| eindeutige Zuordnung, Argument, Funktionswert, $W$ | correspondance univoque, antécédent, image, ensemble des images $I$ | 2.1, as GY 8 and the widget pfeile6 |
+| proportionale Funktion $y = m \cdot x$, Ursprungsgerade | fonction linéaire $f(x) = a \cdot x$ (situation de proportionnalité), droite qui passe par l’origine | 2.1, widget linearos8 (data-mode="prop") |
+| lineare Funktion $y = m \cdot x + n$, Steigung $m$, y-Achsenabschnitt $n$ | fonction affine $f(x) = ax + b$, coefficient directeur $a$, ordonnée à l’origine $b$ | 2.2; linearos8 writes a and b (rules in os8.js), also its canvas label « a = 2 » |
+| Nullstelle $N(x_0 \mid 0)$, Punktprobe, $P(a \mid b)$ | zéro $(x_0\,;\,0)$ (no letter), appartenance d’un point, $P(u\,;\,v)$ | 2.2: a, b are the line’s letters, so the point is $(u\,;\,v)$, the unknown ordinate $k$ |
+| Schnittpunkt $S(1 \mid 3)$ | point d’intersection $I(1\,;\,3)$ | 2.2, as GY 8; lgsgrafos8 reads the point off without a letter (I and II are the equations) |
+| Gleichsetzungs-, Einsetzungs-, Additionsverfahren | méthode par comparaison, par substitution, par combinaison | 2.3, as GY 8 |
+| Tarif, Grundgebühr, Handy, Carsharing, Mietwagen | tarif, abonnement, téléphone, autopartage, voiture de location | 2.3, widget tarifos8 |
+| Hühner und Kaninchen; Fasanen und Hasen (Sunzi) | poules et lapins; faisans et lapins | 2.3 |
+| Passante, Sehne, Berührpunkt | droite extérieure, corde, point de contact | 3.1, as GY 7 |
+| Satz des Thales, Thaleskreis über $\overline{AB}$ | théorème du demi-cercle, cercle de diamètre $[AB]$ | 3.1, as GY 7: « Satz des Thales » named once, and the French « théorème de Thalès » is another theorem |
+| Umfang $u$, Kreiszahl $\pi$ | périmètre $P$, le nombre $\pi$ | 3.1; widgets kreisflaecheos8 (label « P : 2 = π × r »), vieleck |
+| Kreisring $r_a$, $r_i$ | couronne $r_e$, $r_i$ | 3.1, 3.2, as GY 9 |
+| Rosette, Blatt, Hilfslinien | rosace, pétale, traits de construction | 3.1, widget rosetteos8 |
+| Kreiszylinder, Hohlzylinder | cylindre de révolution (widget: Cylindre plein), cylindre creux | 3.2, widget zylinderos8 |
+| $A_G$, $A_M$, $O$ (cylinder) | $\mathcal{B}$, $A_L$, $A$ | 3.2, as GY 9; zylinderos8’s table by a rule tied to it (hollow: $A_{L,i}$ for the inner lateral surface) |
+| Dichte $\varrho$, Holz, Aluminium, Stahl | masse volumique $\varrho$, bois, aluminium, acier | 3.2 |
+| Litfaßsäule | colonne Morris | 3.2 |
+| zentrische Streckung, Zentrum $Z$, Streckfaktor $k$ | homothétie, centre $O$, rapport $k$ | 4, as GY 8 |
+| Maßstab $1 : 25\,000$ | échelle 1/25 000 | 4, as GY 8 |
+| Ähnlichkeit, Hauptähnlichkeitssatz, Kongruenz, kongruent | figures semblables, critère des deux angles, figures superposables, superposables (égales) | 4 |
+| Kongruenzsätze sss, sws, wsw, SsW; www | cas d’égalité CCC, CAC, ACA, CcA; AAA | 4, as GY 6 (the German names said once) |
+| Flächeninhalt $A' = k^2 \cdot A$ | $\mathcal{A}' = k^2 \times \mathcal{A}$ | 4.3, as GY 8 |
+| Elbsandsteingebirge, Liliputaner | Suisse saxonne, Lilliputiens | 4 |
+| Wappen / Zahl, $WWZ$; links / rechts (Galtonbrett), $LLR$ | face / pile, $FFP$; gauche / droite, $GGD$ | 5 |
+| relative Häufigkeit, Gesetz der großen Zahlen | fréquence, loi des grands nombres | 5 |
+| Baumdiagramm, Pfadregeln, Produkt-/Summenregel | arbre pondéré, règles des chemins, règle du produit / de la somme | 5, as GY 8 |
+| mit / ohne Zurücklegen, Gegenereignis | avec / sans remise, événement contraire | 5, widget baum |
+| Zählprinzip, Anordnungen, Fakultät | principe multiplicatif, rangements, factorielle | 5, widget zaehlenos8 (seg « Rangements », « Principe multiplicatif ») |
+| Zahlenschloss, Ring | cadenas à code, molette | 5, zaehlenos8 (« 1re molette ») |
+| Losbude, Niete, Torwand | stand de tombola, billet perdant, mur de tir | 5 |
+| Kaltmiete, Nebenkosten, Warmmiete | loyer hors charges, charges, loyer charges comprises | 6 |
+| Grundpreis, Arbeitspreis, Abschlag, Nachzahlung, Guthaben | abonnement, prix du kWh (widget: Consommation), mensualité, complément à payer, trop-perçu | 6, widget stromos8 |
+| Mehrwertsteuer, netto, brutto | TVA, HT, TTC | 6; the German 19 % and 7 % stay, the French 20 % and 5,5 % named once |
+| Laminat, Verschnitt, Eimer, Estrich | stratifié, chutes, pot, chape | 6, widget raumos8 (« Murs déroulés », L for litres) |
+| Rabatt, Skonto, Ratenkauf, Anzahlung | remise, escompte, paiement en plusieurs fois, acompte | 6 |
+| Zinsen $Z = K \cdot \tfrac{p}{100}$, Zinseszins | intérêts $I = K \cdot \tfrac{p}{100}$, intérêts composés | 6: $K$ and $p$ stay, as the shared widget zins (finanz) writes them |
+| Zoll, Reifengröße, Felge, Raddurchmesser, Radumfang $u$ | pouce, taille de roue, jante, diamètre de la roue, circonférence de la roue $P$ | OP, widgets reifenos8, fahrrados8 (a rule turns $u$ into $P$) |
+| Kettenblatt, Ritzel, Übersetzung, Gang 44/16, Weg pro Kurbelumdrehung, Trittfrequenz | plateau, pignon, rapport de transmission, braquet 44/16, développement, cadence de pédalage | OP |
+| Rahmenhöhe, Schrittlänge, Laufmaschine, Hochrad | hauteur du cadre, longueur d’entrejambe, draisienne (« machine à courir »), grand-bi | OP |
+| Lab names | CRYPTARITHMES, 1RE IDENTITÉ REMARQUABLE, PUZZLE DE NOMBRES, SYSTÈMES D’ÉQUATIONS, LABORATOIRE DU REPÈRE, DROITE D’AJUSTEMENT, LABORATOIRE DE LA PENTE, DIVISION DU CERCLE, SOLIDES, PRINCIPE DE CAVALIERI, FIGURES SUPERPOSABLES, PLANCHE DE GALTON, LE JEU DE DÉS | FALLING PI stays |
+
 ## mathe9-fr
 
 <!-- fr-20: terms of this book only (OS 9), write right below this line -->

@@ -60,7 +60,7 @@ window.BuchFR && BuchFR.add('os8', {
         'Im Schrägbild wird der Grundkreis zur flachen Ellipse. Verdeckte Linien sind gestrichelt.':
             'En perspective cavalière, le cercle de base devient une ellipse aplatie. Les traits cachés sont en pointillés.',
         // zaehlenos8 (the persons are the letters A, B, C …; the rings of the lock are « molettes »)
-        'Anordnungen': 'Rangements', 'Zählprinzip': 'Principe multiplicatif', 'Art': 'Type', 'Anzahl der Personen $n$': 'Nombre de personnes $n$',
+        'Anordnungen': 'Rangements', 'Zählprinzip': 'Principe multiplicatif', 'Art': 'Nature', 'Anzahl der Personen $n$': 'Nombre de personnes $n$',
         'Zahlenschloss': 'Cadenas à code', 'Menü': 'Menu', 'Outfit': 'Tenue', 'Kombinationen': 'combinaisons', 'Menüs': 'menus', 'Outfits': 'tenues',
         '1. Ring': '1re molette', '2. Ring': '2e molette', '3. Ring': '3e molette',
         'Vorspeise': 'Entrée', 'Hauptgericht': 'Plat principal', 'Nachtisch': 'Dessert', 'T-Shirt': 'Tee-shirt', 'Hose': 'Pantalon', 'Schuhe': 'Chaussures',
