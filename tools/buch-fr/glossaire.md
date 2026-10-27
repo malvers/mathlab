@@ -1103,6 +1103,17 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 | Streichhölzer, Balkenwaage, Päckchen, Grundgebühr (Taxi), Maßstab 1 : 25 000 | allumettes, balance, paquets, prise en charge, échelle 1 : 25 000 | 3.3 |
 | al-Chwarizmi, al-dschabr, al-muqabala | al-Khwârizmî, al-jabr (« la restauration »), al-muqâbala (« la confrontation ») | 3.3 excursion |
 | Lab ZAHLEN-PUZZLE | PUZZLE DE NOMBRES | as GY 5 |
+| Haus der Vierecke, Drachenviereck, Raute, gleichschenkliges Trapez | maison des quadrilatères, cerf-volant, losange, trapèze isocèle | 4.1, as GY 6 and the widget vierecke6 |
+| Planfigur, Konstruktionsbeschreibung, Stücke (eines Vierecks) | figure à main levée, programme de construction, éléments | 4.1, as GY 6 |
+| Seite $a = \overline{AB}$, Strecke $\overline{AB}$, Parallele zu $\overline{AB}$ | $a = AB$, segment $[AB]$, parallèle à $(AB)$ | 4.1 |
+| Parallelogramm $A = g \cdot h$, Dreieck $g$, $h$ | $A = b \times h$, base $b$, hauteur $h$ | 4.1, as GY 6 and the widget flaeche6 |
+| Trapez $A = \tfrac{a + c}{2} \cdot h$, Drachen $\tfrac{e \cdot f}{2}$ | letters kept ($\tfrac{a + c}{2} \times h$, $\tfrac{e \times f}{2}$) | 4.1, as GY 6; the French $\tfrac{(B + b) \times h}{2}$ named once in an aside |
+| Umfang $u$ | périmètre $P$ | 4.1 |
+| $n$-Eck, Fünf-, Sechs-, Acht-, Neun-, Zehneck | polygone à $n$ côtés, pentagone, hexagone, octogone, ennéagone, décagone | 4.1 |
+| inhaltsgleich, zerlegungsgleich | de même aire, équidécomposables | 4.1 |
+| Satz von Pick $A = I + \tfrac{R}{2} - 1$ | théorème de Pick $A = I + \tfrac{B}{2} - 1$ | 4.1, as GY 6 (B for bord) |
+| Hausgiebel, Dachziegel, Gitterpapier / Karopapier | pignon, tuile, papier quadrillé | 4.1 |
+| Lab names | LABORATOIRE DES POLYGONES, PUZZLE D’ANGLES | 4.1, as GY 6/9 |
 
 ## mathe8-fr
 
