@@ -19,6 +19,7 @@ cp "$SRC/js/track-render.js"    "$DST/js/"
 cp "$SRC/js/track-buffer.js"    "$DST/js/"
 cp "$SRC/js/cyber-clock.js"     "$DST/js/"
 cp "$SRC/js/cyber-clock.css"    "$DST/js/"
-cp "$SRC/resources/favicon.png" "$DST/resources/" 2>/dev/null || true
+# favicon-live.png: in the repo favicon.png is the red local icon (27.10.2026)
+cp "$SRC/resources/favicon-live.png" "$DST/resources/favicon.png" 2>/dev/null || true
 
 echo "Web assets copied: $SRC/tracker/tracker.html -> $DST/index.html"

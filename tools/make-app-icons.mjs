@@ -1,5 +1,5 @@
 /**
- * make-app-icons.mjs - renders the house lambda (HTML/resources/favicon.svg) into
+ * make-app-icons.mjs - renders the house lambda (HTML/resources/favicon-live.svg) into
  * the PNG sizes a web app manifest needs. Run: node tools/make-app-icons.mjs
  *
  * ONE source: the favicon SVG. Two shapes come out of it.
@@ -21,7 +21,8 @@ import path from 'node:path';
 import url from 'node:url';
 
 const HERE = path.dirname(url.fileURLToPath(import.meta.url));
-const SRC = path.join(HERE, '..', 'HTML', 'resources', 'favicon.svg');
+// favicon-live.svg, not favicon.svg: in the repo favicon.svg is the red local icon (27.10.2026)
+const SRC = path.join(HERE, '..', 'HTML', 'resources', 'favicon-live.svg');
 const OUT = path.join(HERE, '..', 'HTML', 'resources');
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PORT = 9336;

@@ -240,7 +240,8 @@ async function renderCard(browser, lab, shotFile) {
             title: forCard(lab.title),
             tagline: forCard(taglineOf(lab)),
             shot: shotFile ? dataUri(shotFile, 'image/png') : null,
-            logo: dataUri(path.join(HTML, 'resources', 'favicon.png'), 'image/png'),
+            // favicon-live.png: in the repo favicon.png is the red local icon (27.10.2026)
+            logo: dataUri(path.join(HTML, 'resources', 'favicon-live.png'), 'image/png'),
         });
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(400);

@@ -49,6 +49,15 @@ jobs:
           rsync -a --delete --exclude 'resources/screenshots_original/' HTML/ _site/
           echo "Staged site size:"; du -sh _site
 
+      # The tab icon in the repo is the RED lambda, so every local server shows red, whatever port or
+      # worktree (Doc 2026-10-27: localhost "zwingend rot", only docalvers.de may be orange). Only here,
+      # for the live site, the orange one goes over it. No `|| true`: a missing file fails the deploy
+      # instead of putting the red icon online.
+      - name: Orange tab icon for the live site
+        run: |
+          cp HTML/resources/favicon-live.svg _site/resources/favicon.svg
+          cp HTML/resources/favicon-live.png _site/resources/favicon.png
+
       # EXPERIMENT (Doc 2026-07-06): the "Stamp build id into every page" step (13a6e0d, 2026-07-03) is
       # REMOVED. It appended a <!-- build SHA --> to ALL ~103 HTML files on every deploy, forcing GitHub to
       # re-sync every page each time. Pages deploy failures escalated exactly from 2026-07-03 (≈0% for
