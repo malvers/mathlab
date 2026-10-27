@@ -45,7 +45,7 @@ window.BuchFR && BuchFR.add('os9', {
             'Le pourcentage n’augmente pas dans la même proportion que l’angle : un pourcentage double ne donne pas un angle double.',
         // dachos9 (chapter 1.3): French letters - largeur ℓ, longueur L, chevron c (German b, l, s); rules below
         'Hausbreite $b$': 'Largeur de la maison $\\ell$', 'Dachneigung $\\alpha$': 'Inclinaison du toit $\\alpha$', 'Hauslänge $l$': 'Longueur de la maison $L$',
-        'Firsthöhe': 'Hauteur du faîtage', 'Sparrenlänge': 'Longueur des chevrons', 'Dachfläche': 'Surface du toit',
+        'Firsthöhe': 'Hauteur du faîtage', 'Sparrenlänge': 'Longueur des chevrons',
         'Die Höhe teilt den Giebel in zwei gleiche rechtwinklige Dreiecke. Dachüberstände sind hier nicht mitgerechnet.':
             'La hauteur partage le pignon en deux triangles rectangles identiques. Les débords du toit ne sont pas comptés ici.',
     },
@@ -61,6 +61,9 @@ window.BuchFR && BuchFR.add('os9', {
         // dachos9: the formulas after the \\cdot → \\times rule of js/buch-fr/geometrie.js
         ['$h = \\tfrac{b}{2} \\times \\tan \\alpha = ', '$h = \\tfrac{\\ell}{2} \\times \\tan \\alpha = '],
         ['$s = \\dfrac{b/2}{\\cos \\alpha} \\approx ', '$c = \\dfrac{\\ell/2}{\\cos \\alpha} \\approx '], ['$2 \\times s \\times l \\approx ', '$2 \\times c \\times L \\approx '],
+        // pyramidekegel (js/buch-trigonometrie.js, chapters 2.1 and 2.2): after the rules of js/buch-fr/geometrie.js and the one below the
+        // surface areas are A and A_L, so the pieces of js/buch-fr/trigonometrie.js ("$ · Oberfläche $O", "$ · Mantel $M") no longer match
+        ['$ · Oberfläche $A = ', '$ · aire totale $A = '], ['$ · Mantel $A_L = ', '$ · aire latérale $A_L = '],
     ],
     rule: [
         // book fr-20 mathe9-fr:
@@ -74,5 +77,14 @@ window.BuchFR && BuchFR.add('os9', {
         [/<svg viewBox="0 0 320 320" role="img" aria-label="Querschnitt eines Satteldachs mit Neigung \d+ Grad">[\s\S]*?<\/svg>/g,
             m => m.replace(/>s<\/text>/g, '>c</text>').replace(/>b = /g, '>ℓ = ')],
         [/^Querschnitt eines Satteldachs mit Neigung (\d+) Grad$/, 'Coupe d’un toit à deux pans incliné de $1 degrés'],
+        // dachos9: the roof area (js/buch-fr/vektoren.js has "Dachfläche" as one roof face, « pan de toit »)
+        [/<td>Dachfläche<\/td><td>\$2 \\times s/g, '<td>Surface du toit</td><td>$$2 \\times s'],
+        // pyramidekegel (js/buch-trigonometrie.js, only OS 9 loads this file): the French school letters of js/buch-fr/geometrie.js -
+        // arête latérale ℓ (German s), aire totale A (German O); the cone's génératrice g and A, A_L come from the rules there
+        [/Seitenkante \$s = (\\sqrt\{h\^2 \+ \\left\(\\tfrac\{d\}\{2\}\\right\)\^2\})\$ mit der Diagonale \$d = a\\sqrt2 \\approx ([^$]*)\$: \$s \\approx /g,
+            (m, f, d) => 'Arête latérale $\\ell = ' + f + '$ avec la diagonale $d = a\\sqrt2 \\approx ' + d + '$ : $\\ell \\approx '],
+        [/\$ · Oberfläche \$O = (?=a\^2 \+ 4)/g, '$$ · Oberfläche $$A = '],
+        [/<svg viewBox="0 0 520 330" role="img" aria-label="Schrägbild (einer quadratischen Pyramide|eines Kegels) mit einem rechtwinkligen Dreieck">[\s\S]*/g,
+            (m, k) => m.replace(/>s<\/text>/g, k === 'eines Kegels' ? '>g</text>' : '>ℓ</text>')],
     ]
 });
