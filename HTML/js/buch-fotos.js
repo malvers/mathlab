@@ -385,7 +385,18 @@ window.BUCH_FOTOS = {
         'schickard-rechenuhr': { artist: 'Hughcoil', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:HNF-Schickard-Rechenmaschine.jpg',
             alt: { de: 'Ein Nachbau von Wilhelm Schickards Rechenuhr (1623)', en: 'A replica of Wilhelm Schickard’s calculating clock (1623)', es: 'Una réplica del reloj calculador de Wilhelm Schickard (1623)', it: 'Una replica dell’orologio calcolatore di Wilhelm Schickard (1623)', fr: 'Une réplique de l’horloge à calculer de Wilhelm Schickard (1623)' } },
         'konservendose': { artist: 'Rainer Zenz', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Konservendose-1.jpg',
-            alt: { de: 'Eine Konservendose, ein Kreiszylinder aus Blech', en: 'A tin can, a circular cylinder made of sheet metal', es: 'Una lata de conserva, un cilindro circular de hojalata', it: 'Una lattina, un cilindro circolare di latta', fr: 'Une boîte de conserve, un cylindre de révolution en fer-blanc' } }
+            alt: { de: 'Eine Konservendose, ein Kreiszylinder aus Blech', en: 'A tin can, a circular cylinder made of sheet metal', es: 'Una lata de conserva, un cilindro circular de hojalata', it: 'Una lattina, un cilindro circolare di latta', fr: 'Une boîte de conserve, un cylindre de révolution en fer-blanc' } },
+        // mathe6 (2026-10-27)
+        'rhind-papyrus': { artist: 'Ahmes', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Rhind_papyrus,_problem_79.jpg',
+            alt: { de: 'Ein Ausschnitt aus dem Papyrus Rhind', en: 'A section of the Rhind Papyrus', es: 'Un fragmento del papiro Rhind', it: 'Un frammento del papiro di Rhind', fr: 'Un fragment du papyrus Rhind' } },
+        'wetterhuette': { artist: 'Chinchu.c', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Weather_station_at_Nagwain.jpg',
+            alt: { de: 'Eine Wetterhütte, in der das Thermometer im Schatten misst', en: 'A Stevenson screen, where the thermometer measures in the shade', es: 'Una garita meteorológica, donde el termómetro mide a la sombra', it: 'Una capannina meteorologica, dove il termometro misura all’ombra', fr: 'Un abri météorologique, où le thermomètre mesure à l’ombre' } },
+        'nil-aus-dem-all': { artist: 'NASA Johnson Space Center', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:ISS040-E-105769_-_View_of_Egypt.jpg',
+            alt: { de: 'Das Niltal und das Nildelta von der Raumstation ISS aus gesehen', en: 'The Nile valley and delta seen from the ISS', es: 'El valle y el delta del Nilo vistos desde la ISS', it: 'La valle e il delta del Nilo visti dalla ISS', fr: 'La vallée et le delta du Nil vus depuis l’ISS' } },
+        'hanoi': { artist: 'Bin im Garten', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:T%C3%BCrme_von_Hanoi_in_Bremen_7024.JPG',
+            alt: { de: 'Ein Turm von Hanoi aus Holz', en: 'A wooden Tower of Hanoi', es: 'Una torre de Hanói de madera', it: 'Una torre di Hanoi in legno', fr: 'Une tour de Hanoï en bois' } },
+        'fuenfzehnerspiel': { artist: 'Sam Loyd', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Sam_Loyd_-_The_14-15_Puzzle_in_Puzzleland.jpg',
+            alt: { de: 'Sam Loyds Zeichnung zum Fünfzehnerspiel', en: 'Sam Loyd’s drawing of the 15 puzzle', es: 'El dibujo de Sam Loyd sobre el juego del 15', it: 'Il disegno di Sam Loyd sul gioco del 15', fr: 'Le dessin de Sam Loyd sur le taquin' } }
     },
     books: {
         mathe11: {
@@ -1103,6 +1114,48 @@ window.BUCH_FOTOS = {
             'wb.html': [
                 { foto: 'sonnenblume', at: '#le4 .b-einstieg', put: 'in', w: 28 },
                 { foto: 'pacioli', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ]
+        },
+        mathe6: {
+            'lb1-1.html': [
+                { foto: 'pizza', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'schokolade', at: '#le4 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'stevin-thiende', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb1-2.html': [
+                { foto: 'rhind-papyrus', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb1-3.html': [
+                { foto: 'murmeln', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'wetterhuette', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb2-1.html': [
+                { foto: 'kerze', at: '#le2 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'descartes', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb2-2.html': [
+                { foto: 'aepfel', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'ries-rechenbuch', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb3-1.html': [
+                { foto: 'euklid-papyrus', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb3-2.html': [
+                { foto: 'nil-aus-dem-all', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb4.html': [
+                { foto: 'konservendose', at: '#le1 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'karton', at: '#le3 .b-einstieg', put: 'in', w: 28 }
+            ],
+            'lb5.html': [
+                { foto: 'huhn', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'zwei-rote-wuerfel', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'muenzwurf', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'wb.html': [
+                { foto: 'hanoi', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'streichhoelzer', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'fuenfzehnerspiel', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
             ]
         }
     }
