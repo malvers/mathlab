@@ -35,7 +35,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 const MEDIA = 'https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/';        // the same bucket as MEDIA in js/buch.js
 const KEY = book => 'buch/seiten/' + book + '/';
 // what changes the pages besides the book itself
-const LAYOUT = ['js/buch.css', 'js/buch-titel.css', 'js/buch-druck.css', 'js/buch-druck.js'];
+const LAYOUT = ['js/buch.css', 'js/buch-titel.css', 'js/buch-druck.css', 'js/buch-druck.js', 'js/buch-gruss.js'];
 const SW = 200;                                 // width of a page in the small sprite, px
 const PER = 9, LC = 3;                          // pages per large picture, and its columns
 const FORMAT = 2;                               // raise it when the pictures change their make: every book is then out of date (2: + the PDF)

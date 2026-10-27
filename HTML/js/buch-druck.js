@@ -140,30 +140,14 @@
     // ---------- the foreword: one page before "So arbeitest du mit diesem Buch", the same in every book ----------
     // Doc, 24.10.2026, with the KDP proof: "wir brauchen ein Grußwort von Doc Alvers, was das Aim ist … dass wir investieren,
     // um bessere Bildung zu ermöglichen, dass wir das alles aus freien Stücken machen und dass es kein Geld kostet …
-    // und ein Bild von Doc Alvers". German only for now: the translated books keep their first page as it is.
-    function grusswort() {
-        if ((document.documentElement.lang || 'de') !== 'de') return null;
+    // und ein Bild von Doc Alvers". In the language of the edition (27.10.2026: "natürlich in allen Sprachen").
+    // The letter lives in js/buch-gruss.js: the same text stands first on the online start page (js/buch.js).
+    async function grusswort() {
+        const G = await Buch.gruss(), L = G && G[Buch.lang];
+        if (!L) return null;
         const sec = el('section', 'd-gruss');
-        sec.innerHTML =
-            '<h1>Grußwort</h1>' +
-            '<img class="d-gruss-foto" src="../../resources/team/alvers_final.png" alt="Dr. Michael R. Alvers">' +
-            '<div class="b-text">' +
-            '<p>Liebe Schülerin, lieber Schüler,</p>' +
-            '<p>dieses Buch ist aus einer einfachen Überzeugung entstanden: Gute Bildung darf nicht am Geld scheitern. Deshalb gibt es alles auf ' +
-            'docalvers.de kostenlos, werbefrei und ohne Anmeldung. Niemand sammelt dabei deine Daten. Auch die Videos auf meinem YouTube-Kanal ' +
-            '(youtube.com/@docalvers) stehen dir frei zur Verfügung.</p>' +
-            '<p>Ich bin Physiker, habe ein Software-Unternehmen gegründet und unterrichte heute Mathematik und Informatik in Dresden. Das Mathe-Labor ' +
-            'baue ich aus freien Stücken. Ich stecke Zeit und Geld hinein, weil ich überzeugt bin, dass sich diese Investition lohnt: in dich und in ' +
-            'bessere Bildung für alle. Geholfen hat mir dabei ein ungewöhnliches Team – KI-Agenten, die nach meinen Vorgaben programmieren, zeichnen, ' +
-            'rechnen und übersetzen. So sind rund 100 interaktive Labs und 20 Lehrbücher in mehreren Sprachen entstanden. Und es werden täglich mehr!</p>' +
-            '<p>Mathematik soll man nicht nur lesen, sondern anfassen. Im Online-Buch kannst du jeden Graphen verschieben und jeden Zufallsversuch ' +
-            'tausendmal laufen lassen, die QR-Codes in diesem Buch bringen dich direkt dorthin. Probier aus, mach Fehler – genau dabei lernt man am meisten.</p>' +
-            '<p>Und wenn du im Buch einen Fehler findest: Sag es mir. Über „Fehler melden“ im Online-Buch landet jede Meldung direkt bei mir.</p>' +
-            '<p>An die Lehrerinnen und Lehrer: Nutzen Sie alles gern im Unterricht – genau dafür ist es da.</p>' +
-            '<p>Viel Freude und viel Erfolg!</p>' +
-            '</div>' +
-            '<p class="d-gruss-sig"><b>Dr. Michael R. Alvers</b><br>Doc Alvers Mathe-Labor · docalvers.de</p>';
-        sec.dataset.ziel = 'index.html|start|';
+        sec.innerHTML = '<h1>' + Buch.grussTitel() + '</h1>' + Buch.grussHtml(L, 'd-gruss');
+        sec.dataset.ziel = 'index.html|gruss|';
         return sec;
     }
 
@@ -210,7 +194,7 @@
         const tag = (sel, z) => { const e = book.querySelector(sel); if (e) e.dataset.ziel = z; };
         tag('.d-cover', 'index.html|start|');
         tag('.d-front', 'index.html|sogehts|');
-        const gruss = grusswort(), front = book.querySelector('.d-front');
+        const gruss = await grusswort(), front = book.querySelector('.d-front');
         if (gruss && front) front.before(gruss);
         // page 1 is the first sheet after the cover (js/buch-druck.css .d-p1)
         (gruss || front)?.classList.add('d-p1');

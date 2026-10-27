@@ -570,6 +570,50 @@
         }
     }
 
+    // ---------- Doc's foreword (js/buch-gruss.js): first on the start page, page 1 of the print edition ----------
+    // Doc, 27.10.2026: "oben vor Titelseite des Buchs das Grußwort, denn das sieht man hier in der Online-Version gar
+    // nicht, nur im Print". One text for both: the print edition takes it from here too (js/buch-druck.js).
+    let grussP = null;
+    function gruss() {
+        if (!grussP) grussP = new Promise(done => {
+            if (window.BUCH_GRUSS || !ME) { done(window.BUCH_GRUSS || null); return; }
+            const sc = document.createElement('script');
+            sc.src = ME.replace(/buch\.js(\?.*)?$/, 'buch-gruss.js');
+            sc.onload = sc.onerror = () => done(window.BUCH_GRUSS || null);
+            document.head.appendChild(sc);
+        });
+        return grussP;
+    }
+    // photo, letter, signature; pre names the classes: b-gruss online (js/buch.css), d-gruss in print (js/buch-druck.css)
+    function grussHtml(G, pre) {
+        const root = ME.replace(/js\/buch\.js(\?.*)?$/, '');
+        return '<img class="' + pre + '-foto" src="' + root + G.foto + '" alt="' + G.name + '">' +
+            '<div class="b-text">' + G.text.map(p => '<p>' + p + '</p>').join('') + '</div>' +
+            '<p class="' + pre + '-sig"><b>' + G.name + '</b><br>' + G.zeile + '</p>';
+    }
+    // the section goes in at once, so the chapter list has it above "Titelseite"; the letter follows when its file is there
+    // the title stands in the chapter list before the letter has loaded, so it lives here, not in js/buch-gruss.js
+    const grussTitel = () => t('Grußwort', 'Foreword', 'Prólogo', 'Prefazione', 'Avant-propos');
+    function buildGruss() {
+        const start = FILE === 'index.html' && ME && document.getElementById('start');
+        if (!start) return;
+        const sec = document.createElement('section');
+        sec.className = 'b-sec b-gruss'; sec.id = 'gruss';
+        sec.dataset.toc = sec.dataset.tocShort = grussTitel(); sec.dataset.tocK = grussTitel()[0];
+        sec.style.marginTop = '0';
+        start.style.marginTop = '';                                              // no longer the first section
+        start.before(sec);
+        gruss().then(G => {
+            const L = G && G[LANG];
+            if (!L) { sec.hidden = true; return; }
+            sec.innerHTML = '<div class="b-band"><span class="b-band-tag">' + grussTitel().toUpperCase() + '</span></div>' + grussHtml(L, 'b-gruss');
+            // the letter pushed everything below it down: back to the section in the address, and the chapter list marks anew
+            const h = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+            if (h && h !== sec) h.scrollIntoView({ block: 'start', behavior: 'instant' });
+            dispatchEvent(new Event('scroll'));
+        });
+    }
+
     // ---------- "PDF" in the header: the print edition as a finished PDF from R2 ----------
     // Doc, 27.10.2026: a pupil saved druck.html as a PDF herself and got a blank page after every page - Safari, and every
     // browser on an iPad or iPhone, breaks an A4 sheet in two on Letter paper. tools/buch-seiten/seitenbilder.mjs makes the
@@ -646,6 +690,7 @@
     function start() {
         if (document.body.classList.contains('b-print')) return;                // the print page renders itself
         const main = document.querySelector('.b-main') || document.body;
+        buildGruss();                                                            // before the chapter list reads the sections
         ziele(main, FILE);                                                       // before render: the source order
         render(main);
         fotosReady.then(() => fotos(main, FILE));
@@ -661,5 +706,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 
-    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotosReady, media: MEDIA };
+    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotosReady, media: MEDIA, gruss, grussHtml, grussTitel };
 })();
