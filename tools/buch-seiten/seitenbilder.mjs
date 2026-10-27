@@ -13,6 +13,10 @@
  *   seiten.json   page size, fingerprint, sprite layout, and per page the jump targets (data-ziel) of its blocks
  *   s.webp        all pages small (200 px wide) in one sprite: the grid at its normal size, one request
  *   l-<k>.webp    nine pages at a time at full size (794 px), 3 × 3: loaded only when + makes the tiles bigger
+ *   <buch>.pdf    the whole print edition as a PDF, behind "PDF herunterladen" on the book's start page (js/buch.js).
+ *                 Doc, 27.10.2026: a pupil printed druck.html to PDF herself and got a blank page after every page -
+ *                 Safari, and every browser on an iPad or iPhone, breaks an A4 sheet in two on Letter paper. Made here
+ *                 by Chrome from the same set pages, it is right on every device.
  * The pages are rendered from the live site, so they show what readers see. Out of date = the fingerprint differs
  * from the one in seiten.json: a hash over the live files the pages are made of (kapitel.js, druck.html, the chapters,
  * the layout files of the print edition) and the book's entry in js/buch-fotos.js.
@@ -34,7 +38,7 @@ const KEY = book => 'buch/seiten/' + book + '/';
 const LAYOUT = ['js/buch.css', 'js/buch-titel.css', 'js/buch-druck.css', 'js/buch-druck.js'];
 const SW = 200;                                 // width of a page in the small sprite, px
 const PER = 9, LC = 3;                          // pages per large picture, and its columns
-const FORMAT = 1;                               // raise it when the pictures change their make: every book is then out of date
+const FORMAT = 2;                               // raise it when the pictures change their make: every book is then out of date (2: + the PDF)
 
 const args = process.argv.slice(2);
 const opt = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
@@ -92,7 +96,9 @@ async function online(book) {
 
 // ---------- render: druck.html, every sheet as a screenshot, put together into the sprites in a second tab ----------
 async function render(browser, book, v, out) {
-    const ctx = await browser.newContext({ viewport: { width: 1000, height: 1200 }, deviceScaleFactor: 1 });
+    // twice the pixels for the figures that druck.html freezes into pictures, so they stay sharp in the PDF;
+    // the screenshots for the sprites stay at one pixel per CSS pixel (scale: 'css')
+    const ctx = await browser.newContext({ viewport: { width: 1000, height: 1200 }, deviceScaleFactor: 2 });
     try {
         const page = await ctx.newPage();
         const errors = [];
@@ -111,7 +117,7 @@ async function render(browser, book, v, out) {
                 p.querySelectorAll('[data-ziel]').forEach(e => { if (zs[zs.length - 1] !== e.dataset.ziel) zs.push(e.dataset.ziel); });
                 return zs;
             });
-            return { w: Math.round(r.width), h: Math.round(r.height), seiten };
+            return { w: Math.round(r.width), h: Math.round(r.height), seiten, kurz: (window.BUCH && window.BUCH.short) || '' };
         });
         const n = meta.seiten.length, sh = Math.round(SW * meta.h / meta.w);
         const scols = Math.ceil(Math.sqrt(n * meta.h / meta.w * 0.75)), srows = Math.ceil(n / scols);   // a sprite a bit wider than tall
@@ -149,15 +155,20 @@ async function render(browser, book, v, out) {
 
         const sheets = page.locator('.pagedjs_page');
         for (let i = 0; i < n; i++) {
-            const png = (await sheets.nth(i).screenshot({ type: 'png', animations: 'disabled' })).toString('base64');
+            const png = (await sheets.nth(i).screenshot({ type: 'png', animations: 'disabled', scale: 'css' })).toString('base64');
             const big = await comp.evaluate(([p, i]) => window.put(p, i), [png, i]);
             if (big) writeFileSync(path.join(out, 'l-' + Math.floor(i / PER) + '.webp'), Buffer.from(big, 'base64'));
             if (i % 20 === 19) process.stdout.write('  ' + (i + 1) + '/' + n + '\r');
         }
         writeFileSync(path.join(out, 's.webp'), Buffer.from(await comp.evaluate(() => window.small()), 'base64'));
+        // the PDF from the same pages, as tools/kdp/kdp.mjs does it (with the cover: readers get the whole book)
+        await page.evaluate(() => document.documentElement.classList.remove('d-screen'));   // what "beforeprint" does (js/buch-druck.js)
+        const pdf = book + '.pdf';
+        await page.pdf({ path: path.join(out, pdf), preferCSSPageSize: true, printBackground: true });
         const json = {
             v, buch: book, erstellt: new Date().toISOString(), w: meta.w, h: meta.h,
             s: { w: SW, h: sh, cols: scols, rows: srows }, l: { per: PER, cols: LC, n: Math.ceil(n / PER) },
+            pdf: { datei: pdf, bytes: statSync(path.join(out, pdf)).size, name: (meta.kurz || book).replace(/[^\w .-]/g, '') + ' - Doc Alvers Mathe-Labor.pdf' },
             seiten: meta.seiten,
         };
         writeFileSync(path.join(out, 'seiten.json'), JSON.stringify(json));
@@ -167,21 +178,26 @@ async function render(browser, book, v, out) {
 }
 
 // ---------- upload: wrangler (pinned as in tools/media_publish.mjs), a few at a time, seiten.json last ----------
-function put(file, key, type, cache) {
+function put(file, key, type, cache, more = []) {
     return new Promise((done, fail) => {
         const p = spawn('npx', ['--yes', 'wrangler@4.40.0', 'r2', 'object', 'put', 'media/' + key, '--file', file,
-            '--content-type', type, '--cache-control', cache, '--remote'], { stdio: ['ignore', 'pipe', 'pipe'] });
+            '--content-type', type, '--cache-control', cache, ...more, '--remote'], { stdio: ['ignore', 'pipe', 'pipe'] });
         let log = '';
         p.stdout.on('data', d => log += d); p.stderr.on('data', d => log += d);
         p.on('close', code => code === 0 ? done() : fail(new Error(key + ': ' + log.trim().split('\n').slice(-3).join(' '))));
     });
 }
 async function upload(book, out, json) {
-    const files = readdirSync(out).filter(f => f.endsWith('.webp'));
-    // the pictures carry ?v=<fingerprint> in the overview, so the browser may keep them for a year
+    // the PDF first: the largest file, it goes up while the pictures follow
+    const files = [json.pdf.datei, ...readdirSync(out).filter(f => f.endsWith('.webp'))];
+    // the pictures carry ?v=<fingerprint> in the overview (the PDF on the start page), so the browser may keep them for a year
     const queue = files.slice();
     await Promise.all(Array.from({ length: 6 }, async () => {
-        for (let f; (f = queue.shift());) await put(path.join(out, f), KEY(book) + f, 'image/webp', 'public, max-age=31536000, immutable');
+        for (let f; (f = queue.shift());) {
+            if (f === json.pdf.datei) await put(path.join(out, f), KEY(book) + f, 'application/pdf', 'public, max-age=31536000, immutable',
+                ['--content-disposition', 'inline; filename="' + json.pdf.name + '"']);
+            else await put(path.join(out, f), KEY(book) + f, 'image/webp', 'public, max-age=31536000, immutable');
+        }
     }));
     // read back before seiten.json points to them
     for (const f of files) {
@@ -230,8 +246,9 @@ try {
         try {
             console.log(book + ': setzen …');
             const json = await render(browser, book, v, out);
-            const kb = readdirSync(out).reduce((s, f) => s + statSync(path.join(out, f)).size, 0) / 1024;
-            console.log(book + ': ' + json.seiten.length + ' Seiten, ' + Math.round(kb) + ' KB, ' + Math.round((Date.now() - t0) / 1000) + ' s' + (LOCAL ? '  → ' + out : ''));
+            const kb = readdirSync(out).filter(f => f.endsWith('.webp')).reduce((s, f) => s + statSync(path.join(out, f)).size, 0) / 1024;
+            console.log(book + ': ' + json.seiten.length + ' Seiten, ' + Math.round(kb) + ' KB Bilder, PDF ' + (json.pdf.bytes / 1048576).toFixed(1) + ' MB, ' +
+                Math.round((Date.now() - t0) / 1000) + ' s' + (LOCAL ? '  → ' + out : ''));
             if (!LOCAL) { await upload(book, out, json); console.log(book + ': online ' + MEDIA + KEY(book) + ' (' + Math.round((Date.now() - t0) / 1000) + ' s)'); }
         } catch (e) { failed++; console.error(book + ': ' + e.message); }
     }

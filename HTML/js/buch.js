@@ -570,6 +570,36 @@
         }
     }
 
+    // ---------- "PDF" in the header: the print edition as a finished PDF from R2 ----------
+    // Doc, 27.10.2026: a pupil saved druck.html as a PDF herself and got a blank page after every page - Safari, and every
+    // browser on an iPad or iPhone, breaks an A4 sheet in two on Letter paper. tools/buch-seiten/seitenbilder.mjs makes the
+    // PDF with Chrome after every change of the book. Its pill sits in the header beside "Seiten", on every page of the book
+    // (Doc: "den Button da oben hin"); on the start page it replaces "Als PDF drucken", which stays while there is no PDF.
+    function buildPdf() {
+        const top = document.querySelector('.b-top');
+        const book = (location.pathname.match(/\/buch\/([^/]+)\//) || [])[1];
+        if (!top || !book || !window.BUCH || window.BUCH.druck === false) return;
+        const base = MEDIA + 'seiten/' + book + '/';
+        fetch(base + 'seiten.json').then(r => r.ok ? r.json() : null).then(m => {
+            if (!m || !m.pdf) return;
+            const a = document.createElement('a');
+            a.className = 'b-ovbtn b-pdfbtn';
+            a.href = base + m.pdf.datei + '?v=' + encodeURIComponent(m.v);
+            a.target = '_blank'; a.rel = 'noopener';
+            a.title = t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF') + ' · ' +
+                m.seiten.length + ' ' + t('Seiten', 'pages', 'páginas', 'pagine', 'pages') + ' · ' + Math.max(1, Math.round(m.pdf.bytes / 1048576)) + ' MB · ' +
+                t('Stand', 'as of', 'versión del', 'aggiornato al', 'version du') + ' ' + new Date(m.erstellt).toLocaleDateString(t('de-DE', 'en-GB', 'es-ES', 'it-IT', 'fr-FR'));
+            a.setAttribute('aria-label', t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF'));
+            a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+                '<path d="M12 3.5v11.5"/><path d="M7 10.5l5 5 5-5"/><path d="M4 16.5v3.5h16v-3.5"/></svg><span class="b-ovbtn-l">PDF</span>';
+            // left of "Seiten", right of the book's name
+            const seiten = top.querySelector('.b-ovbtn:not(.b-pdfbtn)'), name = top.querySelector('.b-top-book');
+            if (seiten) seiten.before(a); else if (name) name.after(a); else top.appendChild(a);
+            const old = document.querySelector('.b-start-acts a.b-btn[href="druck.html"]');
+            if (old) old.remove();
+        }).catch(() => { });
+    }
+
     // ---------- Solita in the header, as in the decks (Doc, 09.10.2026): js/buch-solita.js loads the shared box itself ----------
     function buildSolita() {
         if (!ME || !document.querySelector('.b-top') || document.querySelector('script[src*="buch-solita.js"]')) return;
@@ -623,6 +653,7 @@
         buildBook();
         buildIndex();
         buildOverview();
+        buildPdf();
         buildSolita();
         buildFeedback();
         dbg('ready ' + KEY);
