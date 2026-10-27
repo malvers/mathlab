@@ -222,7 +222,7 @@ window.BUCH_FOTOS = {
         'spiegel': { artist: 'Acabashi', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Kelvedon_Hall_mirror_in_the_garden_room_Kelvedon_Hatch_Essex_England.jpg',
             alt: { de: 'Ein Spiegel mit Spiegelbild', en: 'A mirror with a reflection', es: 'Un espejo con un reflejo', it: 'Uno specchio con un’immagine riflessa', fr: 'Un miroir et son reflet' } },
         // mathegy11lk (2026-10-25)
-        'cauchy': { artist: '', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Augstin_Louis,_Baron_Cauchy._Lithograph_by_Z._Belliard_after_Wellcome_V0001035.jpg',
+        'cauchy': { artist: 'Wellcome Collection', license: 'CC BY 2.0', page: 'https://commons.wikimedia.org/wiki/File:Augstin_Louis,_Baron_Cauchy._Lithograph_by_Z._Belliard_after_Wellcome_V0001035.jpg',
             alt: { de: 'Augustin-Louis Cauchy, Lithografie', en: 'Augustin-Louis Cauchy, lithograph' } },
         's-kurve': { artist: 'contri from Yonezawa-Shi, Yamagata, Japan', license: 'CC BY-SA 2.0', page: 'https://commons.wikimedia.org/wiki/File:Winding_road_in_Iide,_Yamagata,_Japan.jpg',
             alt: { de: 'Eine Straße mit S-Kurve', en: 'A road with an S-bend' } },
@@ -327,7 +327,7 @@ window.BUCH_FOTOS = {
             alt: { de: 'Ein Geodreieck', en: 'A set square with protractor (Geodreieck)', es: 'Una escuadra con transportador (Geodreieck)', it: 'Una squadra goniometrica (Geodreieck)', fr: 'Une équerre-rapporteur transparente (Geodreieck)' } },
         'wuerfelzucker': { artist: 'Dietmar Rabich', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:W%C3%BCrfelzucker_--_2018_--_3582.jpg',
             alt: { de: 'Würfelzucker', en: 'Sugar cubes', es: 'Terrones de azúcar', it: 'Zollette di zucchero', fr: 'Des morceaux de sucre' } },
-        'kerbholz': { artist: '', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:SAM_PC_1_-_Tally_sticks_1_-_Item_01.jpg',
+        'kerbholz': { artist: 'Sandstein', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:SAM_PC_1_-_Tally_sticks_1_-_Item_01.jpg',
             alt: { de: 'Kerbhölzer', en: 'Tally sticks', es: 'Palos de tarja', it: 'Bastoni a tacche', fr: 'Des bâtons à encoches (tailles)' } },
         'keilschrift': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Cuneiform_Akkadian_clay_tablet_2.jpg',
             alt: { de: 'Eine Tontafel mit Keilschrift', en: 'A clay tablet with cuneiform writing', es: 'Una tablilla de arcilla con escritura cuneiforme', it: 'Una tavoletta d’argilla con scrittura cuneiforme', fr: 'Une tablette d’argile couverte d’écriture cunéiforme' } },
@@ -417,7 +417,18 @@ window.BUCH_FOTOS = {
         'fernsehturm': { artist: 'Arild Vågen', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Berliner_Fernsehturm_November_2013.jpg',
             alt: { de: 'Der Berliner Fernsehturm mit seiner Kugel', en: 'The Berlin TV Tower with its sphere', es: 'La torre de televisión de Berlín con su esfera', it: 'La torre della televisione di Berlino con la sua sfera', fr: 'La tour de télévision de Berlin avec sa sphère' } },
         'fibonacci': { artist: 'Stefano Stabile', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Camposanto_monumentale_di_Pisa_-_Leonardo_Fibonacci_-_002.JPG',
-            alt: { de: 'Das Denkmal für Leonardo Fibonacci im Camposanto von Pisa', en: 'The statue of Leonardo Fibonacci in the Camposanto of Pisa', es: 'La estatua de Leonardo Fibonacci en el Camposanto de Pisa', it: 'La statua di Leonardo Fibonacci nel Camposanto di Pisa', fr: 'La statue de Leonardo Fibonacci au Camposanto de Pise' } }
+            alt: { de: 'Das Denkmal für Leonardo Fibonacci im Camposanto von Pisa', en: 'The statue of Leonardo Fibonacci in the Camposanto of Pisa', es: 'La estatua de Leonardo Fibonacci en el Camposanto de Pisa', it: 'La statua di Leonardo Fibonacci nel Camposanto di Pisa', fr: 'La statue de Leonardo Fibonacci au Camposanto de Pise' } },
+        // mathe10 (2026-10-27)
+        'pavillon': { artist: 'Leutha', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Wooden_Gazebo,_Holy_Wells_Park,_Ipswich.jpg',
+            alt: { de: 'Ein Pavillon mit vieleckigem Dach in einem Park', en: 'A pavilion with a polygonal roof in a park', es: 'Un pabellón con tejado poligonal en un parque', it: 'Un padiglione con tetto poligonale in un parco', fr: 'Un kiosque au toit polygonal dans un parc' } },
+        'heron': { artist: 'Wellcome Collection', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Hero_of_Alexandria_Wellcome_M0004255.jpg',
+            alt: { de: 'Heron von Alexandria, Kupferstich', en: 'Hero of Alexandria, engraving', es: 'Herón de Alejandría, grabado', it: 'Erone di Alessandria, incisione', fr: 'Héron d’Alexandrie, gravure' } },
+        'eimer': { artist: 'DracoEssentialis', license: 'CC BY 3.0', page: 'https://commons.wikimedia.org/wiki/File:Metal_bucket_with_weed_and_pipes.jpg',
+            alt: { de: 'Ein Blecheimer, ein Kegelstumpf', en: 'A metal bucket, a truncated cone', es: 'Un cubo de metal, un tronco de cono', it: 'Un secchio di metallo, un tronco di cono', fr: 'Un seau en métal, un tronc de cône' } },
+        'ampel': { artist: 'Kevin Payravi', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:LED_traffic_light_on_red.jpg',
+            alt: { de: 'Eine Verkehrsampel', en: 'A traffic light', es: 'Un semáforo', it: 'Un semaforo', fr: 'Un feu de circulation' } },
+        'klavierstimmer': { artist: 'Onascout', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Piano_Tuning_Hammer_and_Mutes.jpg',
+            alt: { de: 'Ein Stimmhammer an den Stimmwirbeln eines Klaviers', en: 'A tuning hammer on the tuning pins of a piano', es: 'Una llave de afinar en las clavijas de un piano', it: 'Una chiave d’accordatura sui piroli di un pianoforte', fr: 'Une clé d’accord sur les chevilles d’un piano' } }
     },
     books: {
         mathe11: {
@@ -1295,6 +1306,47 @@ window.BUCH_FOTOS = {
             'wb.html': [
                 { foto: 'sonnenblume', at: '#le3 .b-einstieg', put: 'in', w: 28 },
                 { foto: 'fibonacci', at: '#exkursion .b-row > .b-text', put: 'in', w: 24, pos: '50% 12%' }
+            ]
+        },
+        mathe10: {
+            'lb1-1.html': [
+                { foto: 'giebeldach', at: '#le2 .b-einstieg', put: 'in', w: 30 }
+            ],
+            'lb1-2.html': [
+                { foto: 'vermessungspfeiler', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb1-3.html': [
+                { foto: 'pavillon', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'heron', at: '#exkursion .b-row > .b-text', put: 'in', w: 22 }
+            ],
+            'lb2-1.html': [
+                { foto: 'gulliver', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb2-2.html': [
+                { foto: 'wuerfel-spieltisch', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'schachbrett', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb2-3.html': [
+                { foto: 'hafen-ebbe', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb3.html': [
+                { foto: 'zwei-rote-wuerfel', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'gluecksrad-kind', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'fermat', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb4-1.html': [
+                { foto: 'sparglas', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb4-2.html': [
+                { foto: 'eimer', at: '#le2 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'moskauer-papyrus', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb4-3.html': [
+                { foto: 'ampel', at: '#le1 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'klavierstimmer', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'wb.html': [
+                { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
             ]
         }
     }
