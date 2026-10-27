@@ -6,9 +6,9 @@ window.svpPlanParts.push(function (P) {
         planSearchRun, planSearchClear, kopfKnoepfe
     });
 
-    /* The buttons at the right end of the head (.head-btns, svp-head.css): the Formelsammlung and, left of it, Doc's
-       Aufgabensammlung (svp-plan-tafel.js, 01.10.2026). One group, or the head's space-between would set the second
-       button in the middle of the line. */
+    /* The buttons at the right end of the head (.head-btns, svp-head.css): Doc's Aufgabensammlung (svp-plan-tafel.js,
+       01.10.2026); the Formelsammlung button stood right of it until 27.10.2026, its cover took over. One group, or the
+       head's space-between would set a second button in the middle of the line. */
     function kopfKnoepfe() {
         const row = document.querySelector('.page-head .head-row');
         if (!row) return null;
@@ -500,19 +500,11 @@ window.svpPlanParts.push(function (P) {
         const headRow = document.querySelector('.page-head .head-row');
         const page = location.pathname.replace(/.*\//, '').replace(/\.html$/, '');
         if (headRow && FORMELN_ON.includes(page)) {
-            const b = document.createElement('button');
-            b.className = 'action secondary';
-            b.textContent = 'Formelsammlung';
-            b.title = 'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK) - ' +
-                'das einzige zugelassene Hilfsmittel der Abiturprüfung';
-            b.addEventListener('click', function () {
-                window.open(FORMELN_URL, '_blank', 'noopener');
-            });
-            kopfKnoepfe().appendChild(b);
             /* Doc, 26.10.2026: its first page as a cover left of the textbook's (svp-plan-core.js) -
-               rendered once from the IQB PDF (pdftoppm, 690 px wide like the book covers). */
-            P.kopfCover('../../resources/og/formelsammlung-iqb-cover.jpg', FORMELN_URL,
-                'Formelsammlung', b.title, true);
+               rendered once from the IQB PDF (pdftoppm, 690 px wide like the book covers).
+               Doc, 27.10.2026: "den Button Formelsammlung weg bitte" - the cover is the way in now. */
+            P.kopfCover('../../resources/og/formelsammlung-iqb-cover.jpg', FORMELN_URL, 'Formelsammlung',
+                'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK) - das einzige zugelassene Hilfsmittel der Abiturprüfung', true);
         }
         /* Aus der Suche unter dem Laufband kommend: ?q=<wort> fuellt das Feld und
            laesst die Suche laufen, damit der Treffer hier auch angemalt ist -

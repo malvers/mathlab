@@ -65,7 +65,7 @@ window.svpPlanParts.push(function (P) {
        Die Liste steht HIER, weil zwei Stellen sie brauchen: die Zeile im Plan
        und das Fahrplan-Blatt.
        Since 29.09.2026 the week pill is gone again (see festeLinks); address and page list
-       stay here for the Formelsammlung button at the top right (svp-plan-search.js). */
+       stay here for the Formelsammlung cover in the head (svp-plan-search.js). */
     const FORMELN_URL = P.FORMELN_URL = 'https://www.iqb.hu-berlin.de/media/documents/' +
         'N_Mathematisch-naturwissenschaftliche_Formelsammlung.pdf';
     const FORMELN_ON = P.FORMELN_ON = ['mathe11', 'mathe12', 'mathe13'];
