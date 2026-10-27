@@ -334,7 +334,26 @@ window.BUCH_FOTOS = {
         'ries-rechenbuch': { artist: 'Adam Ries', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:De_Adam_Risen_Rechbuch_035.jpg',
             alt: { de: 'Eine Seite aus dem Rechenbuch von Adam Ries', en: 'A page of Adam Ries’ arithmetic book', es: 'Una página del libro de cálculo de Adam Ries', it: 'Una pagina del libro di aritmetica di Adam Ries', fr: 'Une page du livre de calcul d’Adam Ries' } },
         'ishango': { artist: 'JhowieNitnek', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Ishango_bone.jpg',
-            alt: { de: 'Der Knochen von Ishango', en: 'The Ishango bone', es: 'El hueso de Ishango', it: 'L’osso di Ishango', fr: 'L’os d’Ishango' } }
+            alt: { de: 'Der Knochen von Ishango', en: 'The Ishango bone', es: 'El hueso de Ishango', it: 'L’osso di Ishango', fr: 'L’os d’Ishango' } },
+        // mathegy7 (2026-10-27)
+        'marktbrunnen': { artist: 'Funke', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Aigen-Schl%C3%A4gl_Marktplatz_Marktbrunnen_01.jpg',
+            alt: { de: 'Ein Brunnen mitten auf einem Platz zwischen Häusern', en: 'A fountain in the middle of a square between houses', es: 'Una fuente en medio de una plaza entre casas', it: 'Una fontana in mezzo a una piazza tra le case', fr: 'Une fontaine au milieu d’une place entre des maisons' } },
+        'milet-theater': { artist: 'Bernard Gagnon', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Miletus_-_Ancient_Greek_theatre_02.jpg',
+            alt: { de: 'Das antike Theater von Milet', en: 'The ancient theatre of Miletus', es: 'El teatro antiguo de Mileto', it: 'Il teatro antico di Mileto', fr: 'Le théâtre antique de Milet' } },
+        'ybc-7289': { artist: 'A. Urcia, Yale Peabody Museum', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:YBC-7289-OBV-labeled.jpg',
+            alt: { de: 'Die Tontafel YBC 7289 mit einem Näherungswert für die Wurzel aus 2', en: 'The clay tablet YBC 7289 with an approximation of the square root of 2', es: 'La tablilla de arcilla YBC 7289 con una aproximación de la raíz cuadrada de 2', it: 'La tavoletta d’argilla YBC 7289 con un’approssimazione della radice quadrata di 2', fr: 'La tablette d’argile YBC 7289 avec une valeur approchée de la racine carrée de 2' } },
+        'balkenwaage': { artist: 'W.carter', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Modern_collapsible_balance_scale_for_jewellers_2.jpg',
+            alt: { de: 'Eine Balkenwaage mit Gewichten', en: 'A balance scale with weights', es: 'Una balanza de platillos con pesas', it: 'Una bilancia a due piatti con i pesi', fr: 'Une balance à plateaux avec des poids' } },
+        'schlussverkauf': { artist: 'LIU', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:C%26ADRE.JPG',
+            alt: { de: 'Ein Schaufenster im Schlussverkauf mit Prozentzeichen', en: 'A shop window during the sales with a percent sign', es: 'Un escaparate en rebajas con el signo de porcentaje', it: 'Una vetrina con i saldi e il segno di percentuale', fr: 'Une vitrine pendant les soldes avec le signe pour cent' } },
+        'monge': { artist: 'André Dutertre', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Portrait_de_Gaspard_Monge,_G.20828-116.jpg',
+            alt: { de: 'Bildnis von Gaspard Monge', en: 'Portrait of Gaspard Monge', es: 'Retrato de Gaspard Monge', it: 'Ritratto di Gaspard Monge', fr: 'Portrait de Gaspard Monge' } },
+        'moskauer-papyrus': { artist: 'Bakha (d\'après Vasily Vasilievich Struve)', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Papyrus-Moscou-10.jpg',
+            alt: { de: 'Eine Aufgabe des Moskauer Papyrus mit Umschrift in Hieroglyphen', en: 'A problem of the Moscow Papyrus with a transcription in hieroglyphs', es: 'Un problema del papiro de Moscú con su transcripción en jeroglíficos', it: 'Un problema del papiro di Mosca con la trascrizione in geroglifici', fr: 'Un problème du papyrus de Moscou avec sa transcription en hiéroglyphes' } },
+        'platonische-modelle': { artist: 'Prateek Karandikar', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Models_of_four_platonic_solids.JPG',
+            alt: { de: 'Modelle platonischer Körper aus Stäben und Kugeln', en: 'Models of Platonic solids made of rods and balls', es: 'Modelos de sólidos platónicos hechos de varillas y bolas', it: 'Modelli di solidi platonici fatti di bastoncini e sfere', fr: 'Des modèles de solides de Platon en tiges et en boules' } },
+        'kepler-mysterium': { artist: 'Johannes Kepler', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Kepler_Platonic_Solids.tif',
+            alt: { de: 'Keplers Modell des Sonnensystems aus dem Mysterium Cosmographicum (1596)', en: 'Kepler’s model of the solar system from the Mysterium Cosmographicum (1596)', es: 'El modelo del sistema solar de Kepler del Mysterium Cosmographicum (1596)', it: 'Il modello del sistema solare di Keplero dal Mysterium Cosmographicum (1596)', fr: 'Le modèle du système solaire de Kepler tiré du Mysterium Cosmographicum (1596)' } }
     },
     books: {
         mathe11: {
@@ -913,6 +932,51 @@ window.BUCH_FOTOS = {
                 { foto: 'roemische-uhr', at: '#le3 .b-einstieg', put: 'in', w: 28 },
                 { foto: 'ries-rechenbuch', at: '#le4 .b-einstieg', put: 'in', w: 32 },
                 { foto: 'ishango', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ]
+        },
+        mathegy7: {
+            'lb1-1.html': [
+                { foto: 'rad-am-pass', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'marktbrunnen', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'euklid-papyrus', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb1-2.html': [
+                { foto: 'geodreieck', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'fussballfeld', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'milet-theater', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb2-1.html': [
+                { foto: 'thermometer', at: '#le1 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'rechenstaebchen', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb2-2.html': [
+                { foto: 'ybc-7289', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb2-3.html': [
+                { foto: 'balkenwaage', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'chwarizmi-statue', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb2-4.html': [
+                { foto: 'schlussverkauf', at: '#le2 .b-einstieg', put: 'in', w: 24, pos: '50% 30%' },
+                { foto: 'wahlurne', at: '#le4 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'pacioli', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb3-1.html': [
+                { foto: 'buntstifte', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'monge', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb3-2.html': [
+                { foto: 'giebeldach', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'moskauer-papyrus', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb4.html': [
+                { foto: 'schulbus', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'playfair-torte', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'wb.html': [
+                { foto: 'platonische-modelle', at: '#le1 .b-einstieg', put: 'in', w: 40 },
+                { foto: 'euler', at: '#le2 .b-einstieg', put: 'in', w: 24 },
+                { foto: 'kepler-mysterium', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
             ]
         }
     }
