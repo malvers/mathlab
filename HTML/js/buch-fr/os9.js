@@ -62,6 +62,10 @@ window.BuchFR && BuchFR.add('os9', {
         'Zylinder': 'Cylindre', 'Kegel': 'Cône', 'Halbkugel': 'Demi-boule', 'Mantellinie': 'Génératrice',
         'Zur Oberfläche gehören nur die Außenflächen: Der Deckkreis des Zylinders liegt innen und zählt nicht mit.':
             'L’aire totale ne compte que les faces extérieures : le disque supérieur du cylindre est à l’intérieur et ne compte pas.',
+        // parabelos9 (chapters 3.1, 3.2): parabole de référence, sommet, forme canonique, forme normalisée
+        'Form': 'Forme', 'Graph einer quadratischen Funktion mit Scheitelpunkt': 'Courbe d’une fonction du second degré et son sommet',
+        'Streckfaktor $a$': 'Coefficient $a$', 'Verschiebung $c$': 'Translation $c$',
+        '$d$ (nach links, wenn positiv)': '$d$ (vers la gauche si positif)', '$e$ (nach oben, wenn positiv)': '$e$ (vers le haut si positif)',
     },
     phrase: [
         // book fr-20 mathe9-fr:
@@ -83,6 +87,12 @@ window.BuchFR && BuchFR.add('os9', {
         // turmos9: V_cône, h_cône, V_demi-boule, 𝓑 (German V_K, h_K, V_H, A_G), the slant height g
         ['$V_K = \\tfrac{1}{3}\\pi r^2 h_K', '$V_{\\text{cône}} = \\tfrac{1}{3}\\pi r^2 h_{\\text{cône}}'], ['$s = \\sqrt{r^2 + h_K^2}', '$g = \\sqrt{r^2 + h_{\\text{cône}}^2}'],
         ['$V_H = ', '$V_{\\text{demi-boule}} = '], ['$A_G + 2\\pi r h + ', '$\\mathcal{B} + 2\\pi r h + '], ['\\pi r s \\approx ', '\\pi r g \\approx '],
+        // parabelos9
+        ['Quadratische Ergänzung: $y = x^2', 'Mise sous forme canonique : $y = x^2'],
+        ['$: Für $a = 0$ ist der Graph keine Parabel mehr, sondern eine waagerechte Gerade.', '$ : pour $a = 0$, la courbe n’est plus une parabole, mais une droite horizontale.'],
+        ['$ · Scheitelpunkt $S(', '$ · sommet $S('], ['$ (weiß)', '$ (en blanc)'], ['Wertebereich: $y ', 'Ensemble des images : $y '],
+        ['Nullstellen (türkis): ', 'Zéros (en turquoise) : '], ['genau eine, $x_0 = ', 'un seul, $x_0 = '],
+        ['keine, die Parabel trifft die x-Achse nicht', 'aucun, la parabole ne coupe pas l’axe des abscisses'],
     ],
     rule: [
         // book fr-20 mathe9-fr:
@@ -107,5 +117,14 @@ window.BuchFR && BuchFR.add('os9', {
             (m, k) => m.replace(/>s<\/text>/g, k === 'eines Kegels' ? '>g</text>' : '>ℓ</text>')],
         // turmos9: the slant height of the cone roof in the picture is g
         [/<svg viewBox="0 0 320 340" role="img" aria-label="Turm aus einem Zylinder mit einem Kegeldach">[\s\S]*?<\/svg>/g, m => m.replace(/>s<\/text>/g, '>g</text>')],
+        // parabelos9: opening and shape of the parabola (feminine in French), the vertex as minimum or maximum, the sense of variation
+        [/Die Parabel ist nach (oben|unten) geöffnet und (so weit wie die Normalparabel|enger als die Normalparabel \(gestreckt\)|weiter als die Normalparabel \(gestaucht\))\. Der Scheitelpunkt ist ein <b>(Minimum|Maximum)<\/b>\./g,
+            (m, o, f, x) => 'La parabole est ouverte vers le ' + (o === 'oben' ? 'haut' : 'bas') + ' et ' + ({
+                'so weit wie die Normalparabel': 'aussi large que la parabole de référence',
+                'enger als die Normalparabel (gestreckt)': 'plus étroite que la parabole de référence (étirée)',
+                'weiter als die Normalparabel (gestaucht)': 'plus large que la parabole de référence (comprimée)' })[f] +
+                '. Le sommet correspond à un <b>' + x.toLowerCase() + '</b>.'],
+        [/(Fallend|Steigend) für \$x &lt; ([^$]*)\$, (steigend|fallend) für \$x &gt; /g,
+            (m, a, x, b) => (a === 'Fallend' ? 'Décroissante' : 'Croissante') + ' pour $x &lt; ' + x + '$, ' + (b === 'steigend' ? 'croissante' : 'décroissante') + ' pour $x &gt; '],
     ]
 });
