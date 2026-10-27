@@ -399,7 +399,18 @@ window.BUCH_FOTOS = {
             alt: { de: 'Sam Loyds Zeichnung zum Fünfzehnerspiel', en: 'Sam Loyd’s drawing of the 15 puzzle', es: 'El dibujo de Sam Loyd sobre el juego del 15', it: 'Il disegno di Sam Loyd sul gioco del 15', fr: 'Le dessin de Sam Loyd sur le taquin' } },
         // mathe7 (2026-10-27)
         'kairo-parkett': { artist: 'Harry Princeton', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Cairo_Pentagonal_Tiling_in_Copenhagen_DM.jpg',
-            alt: { de: 'Ein Fußboden mit Kairo-Parkett aus Fünfecken in Kopenhagen', en: 'A floor with a Cairo pentagonal tiling in Copenhagen', es: 'Un suelo con el teselado de El Cairo de pentágonos en Copenhague', it: 'Un pavimento con la tassellatura del Cairo a pentagoni a Copenaghen', fr: 'Un sol pavé de pentagones du Caire à Copenhague' } }
+            alt: { de: 'Ein Fußboden mit Kairo-Parkett aus Fünfecken in Kopenhagen', en: 'A floor with a Cairo pentagonal tiling in Copenhagen', es: 'Un suelo con el teselado de El Cairo de pentágonos en Copenhague', it: 'Un pavimento con la tassellatura del Cairo a pentagoni a Copenaghen', fr: 'Un sol pavé de pentagones du Caire à Copenhague' } },
+        // mathe8 (2026-10-27)
+        'zapfsaeule': { artist: 'Rama', license: 'CC BY-SA 2.0 fr', page: 'https://commons.wikimedia.org/wiki/File:Petrol_pump_mp3h0355.jpg',
+            alt: { de: 'Ein Auto wird an der Zapfsäule getankt', en: 'A car being filled up at a petrol pump', es: 'Un coche repostando en un surtidor', it: 'Un’auto al distributore di benzina', fr: 'Une voiture fait le plein à la pompe' } },
+        'baldwin-street': { artist: 'Mark Oliver Dittrich', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Baldwin_Street_High_Resolution_Upwards_Look.jpg',
+            alt: { de: 'Die Baldwin Street in Dunedin, Neuseeland, eine der steilsten Straßen der Welt', en: 'Baldwin Street in Dunedin, New Zealand, one of the steepest streets in the world', es: 'Baldwin Street en Dunedin, Nueva Zelanda, una de las calles más empinadas del mundo', it: 'Baldwin Street a Dunedin, in Nuova Zelanda, una delle strade più ripide del mondo', fr: 'Baldwin Street à Dunedin, en Nouvelle-Zélande, l’une des rues les plus raides du monde' } },
+        'muenzstapel': { artist: 'Dori', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Stack_of_coins_0214(cropped).jpg',
+            alt: { de: 'Stapel aus Münzen', en: 'Stacks of coins', es: 'Pilas de monedas', it: 'Pile di monete', fr: 'Des piles de pièces de monnaie' } },
+        'kettenblatt': { artist: 'Petar Milošević', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Bicycle_crankset_Shimano_105_R7000_(chainring_50-34,_length_172.5mm,_11_speed).jpg',
+            alt: { de: 'Die Kurbel mit den Kettenblättern eines Rennrads', en: 'The crankset with the chainrings of a racing bike', es: 'La biela con los platos de una bicicleta de carretera', it: 'La guarnitura con le corone di una bici da corsa', fr: 'Le pédalier avec les plateaux d’un vélo de course' } },
+        'draisine': { artist: 'Daderot', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Draisine_or_Laufmaschine,_c._1820_-_Kurpf%C3%A4lzisches_Museum_der_Stadt_Heidelberg_-_Heidelberg,_Germany_-_DSC01526.jpg',
+            alt: { de: 'Eine Laufmaschine nach Karl Drais (um 1820)', en: 'A running machine after Karl Drais (around 1820)', es: 'Una máquina andante de Karl Drais (hacia 1820)', it: 'Una draisina di Karl Drais (intorno al 1820)', fr: 'Une draisienne de Karl Drais (vers 1820)' } }
     },
     books: {
         mathe11: {
@@ -1194,6 +1205,52 @@ window.BUCH_FOTOS = {
             'wb.html': [
                 { foto: 'alhambra-fliesen', at: '#le1 .b-einstieg', put: 'in', w: 28 },
                 { foto: 'kairo-parkett', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ]
+        },
+        mathe8: {
+            'lb1-2.html': [
+                { foto: 'balkenwaage', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'chwarizmi-statue', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb2-1.html': [
+                { foto: 'zapfsaeule', at: '#le3 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'leibniz', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb2-2.html': [
+                { foto: 'fahrradhaendler', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'kerze', at: '#le2 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'taxi-koeln', at: '#le3 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'baldwin-street', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb2-3.html': [
+                { foto: 'kinosaal', at: '#le2 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'fasan', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb3-1.html': [
+                { foto: 'rad-am-pass', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'konservendose', at: '#le3 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'rhind-papyrus', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb3-2.html': [
+                { foto: 'muenzstapel', at: '#le2 .b-einstieg', put: 'in', w: 24 },
+                { foto: 'archimedes-fetti', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb4.html': [
+                { foto: 'fliesen', at: '#le4 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'gulliver', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb5.html': [
+                { foto: 'gluecksrad-kind', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'murmeln', at: '#le3 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'zahlenschloss', at: '#le4 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'pascal', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb6.html': [
+                { foto: 'ries-rechenbuch', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'wb.html': [
+                { foto: 'kettenblatt', at: '#le2 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'draisine', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
             ]
         }
     }
