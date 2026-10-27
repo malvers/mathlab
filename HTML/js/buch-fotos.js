@@ -370,7 +370,22 @@ window.BUCH_FOTOS = {
         'gulliver': { artist: 'Nevit Dilmen', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Harikalar_Diyari_Gulliver_Lilliputians_06034_nevit.jpg',
             alt: { de: 'Eine große Gulliver-Figur zwischen kleinen Liliputanern in einem Freizeitpark', en: 'A large Gulliver figure among small Lilliputians in a theme park', es: 'Una gran figura de Gulliver entre pequeños liliputienses en un parque temático', it: 'Una grande statua di Gulliver tra piccoli lillipuziani in un parco divertimenti', fr: 'Une grande statue de Gulliver parmi de petits Lilliputiens dans un parc d’attractions' } },
         'polya': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:ETH-BIB-Polya,_Georg_(1887-1985)-Portrait-Portr_13887-19-AL.tif',
-            alt: { de: 'George Pólya, Porträt', en: 'George Pólya, portrait', es: 'George Pólya, retrato', it: 'George Pólya, ritratto', fr: 'George Pólya, portrait' } }
+            alt: { de: 'George Pólya, Porträt', en: 'George Pólya, portrait', es: 'George Pólya, retrato', it: 'George Pólya, ritratto', fr: 'George Pólya, portrait' } },
+        // mathegy9 (2026-10-27)
+        'gateway-arch': { artist: 'Lewis Hulbert', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Gateway_Arch,_St._Louis.jpg',
+            alt: { de: 'Der Gateway Arch in St. Louis, ein 192 m hoher Bogen', en: 'The Gateway Arch in St. Louis, an arch 192 m high', es: 'El Gateway Arch de San Luis, un arco de 192 m de altura', it: 'Il Gateway Arch di St. Louis, un arco alto 192 m', fr: 'Le Gateway Arch à Saint-Louis, une arche de 192 m de haut' } },
+        'schafpferch': { artist: 'Acabashi', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Good_Easter,_Essex,_England_-_sheep_on_road_to_ford_over_River_Can_west_of_Good_Easter_village_02.JPG',
+            alt: { de: 'Schafe hinter einem Holzzaun', en: 'Sheep behind a wooden fence', es: 'Ovejas detrás de una valla de madera', it: 'Pecore dietro una staccionata di legno', fr: 'Des moutons derrière une clôture en bois' } },
+        'everest': { artist: 'Vyacheslav Argenberg', license: 'CC BY 4.0', page: 'https://commons.wikimedia.org/wiki/File:Everest,_Himalayas.jpg',
+            alt: { de: 'Der Gipfel des Mount Everest', en: 'The summit of Mount Everest', es: 'La cumbre del Everest', it: 'La vetta dell’Everest', fr: 'Le sommet de l’Everest' } },
+        'eratosthenes': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Eratosthenes.jpg',
+            alt: { de: 'Eratosthenes, Kupferstich', en: 'Eratosthenes, engraving', es: 'Eratóstenes, grabado', it: 'Eratostene, incisione', fr: 'Ératosthène, gravure' } },
+        'nightingale-rosen': { artist: 'Florence Nightingale', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Diagram_of_the_Causes_of_Mortality_in_the_Army_in_the_East._(IA_dr_diagram-of-the-causes-of-mortality-in-the-army-in-the-east-10563002).jpg',
+            alt: { de: 'Florence Nightingales Rosendiagramm der Todesursachen im Krimkrieg (1858)', en: 'Florence Nightingale’s rose diagram of the causes of death in the Crimean War (1858)', es: 'El diagrama de rosa de Florence Nightingale sobre las causas de muerte en la guerra de Crimea (1858)', it: 'Il diagramma a rosa di Florence Nightingale sulle cause di morte nella guerra di Crimea (1858)', fr: 'Le diagramme en rose de Florence Nightingale sur les causes de décès pendant la guerre de Crimée (1858)' } },
+        'schickard-rechenuhr': { artist: 'Hughcoil', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:HNF-Schickard-Rechenmaschine.jpg',
+            alt: { de: 'Ein Nachbau von Wilhelm Schickards Rechenuhr (1623)', en: 'A replica of Wilhelm Schickard’s calculating clock (1623)', es: 'Una réplica del reloj calculador de Wilhelm Schickard (1623)', it: 'Una replica dell’orologio calcolatore di Wilhelm Schickard (1623)', fr: 'Une réplique de l’horloge à calculer de Wilhelm Schickard (1623)' } },
+        'konservendose': { artist: 'Rainer Zenz', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Konservendose-1.jpg',
+            alt: { de: 'Eine Konservendose, ein Kreiszylinder aus Blech', en: 'A tin can, a circular cylinder made of sheet metal', es: 'Una lata de conserva, un cilindro circular de hojalata', it: 'Una lattina, un cilindro circolare di latta', fr: 'Une boîte de conserve, un cylindre de révolution en fer-blanc' } }
     },
     books: {
         mathe11: {
@@ -1044,6 +1059,50 @@ window.BUCH_FOTOS = {
                 { foto: 'wuerfel-spieltisch', at: '#le1 .b-einstieg', put: 'in', w: 30 },
                 { foto: 'zicklein', at: '#le2 .b-einstieg', put: 'in', w: 28 },
                 { foto: 'monte-carlo', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ]
+        },
+        mathegy9: {
+            'lb1-1.html': [
+                { foto: 'ybc-7289', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb1-2.html': [
+                { foto: 'tacho', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'gulliver', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'lb1-3.html': [
+                { foto: 'gateway-arch', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb1-4.html': [
+                { foto: 'basketball-wurf', at: '#le1 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'schafpferch', at: '#le4 .b-einstieg', put: 'in', w: 30 },
+                { foto: 'chwarizmi-statue', at: '#exkursion .b-row > .b-text', put: 'in', w: 24 }
+            ],
+            'lb2.html': [
+                { foto: 'pizza', at: '#le1 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'konservendose', at: '#le2 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'archimedes-fetti', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
+            ],
+            'lb3-1.html': [
+                { foto: 'keilschrift', at: '#exkursion .b-row > .b-text', put: 'in', w: 26 }
+            ],
+            'lb3-2.html': [
+                { foto: 'everest', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
+            ],
+            'lb3-3.html': [
+                { foto: 'vermessungspfeiler', at: '#le2 .b-einstieg', put: 'in', w: 26 },
+                { foto: 'eratosthenes', at: '#exkursion .b-row > .b-text', put: 'in', w: 22 }
+            ],
+            'lb4.html': [
+                { foto: 'fahrraeder-schule', at: '#le1 .b-einstieg', put: 'in', w: 32 },
+                { foto: 'thermometer', at: '#le2 .b-einstieg', put: 'in', w: 22 },
+                { foto: 'nightingale-rosen', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }
+            ],
+            'lb5.html': [
+                { foto: 'schickard-rechenuhr', at: '#exkursion .b-row > .b-text', put: 'in', w: 30 }
+            ],
+            'wb.html': [
+                { foto: 'sonnenblume', at: '#le4 .b-einstieg', put: 'in', w: 28 },
+                { foto: 'pacioli', at: '#exkursion .b-row > .b-text', put: 'in', w: 28 }
             ]
         }
     }
