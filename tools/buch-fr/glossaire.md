@@ -1089,6 +1089,12 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 | vier Quadranten, „im II. Quadranten“, gegen den Uhrzeigersinn | quatre quadrants, « dans le quadrant II », dans le sens inverse des aiguilles d’une montre | 3.1 and the widget quadrantos7 |
 | an der x-Achse / y-Achse / am Ursprung spiegeln, Bildpunkt | symétrique par rapport à l’axe des abscisses / des ordonnées / à l’origine, point image | 3.1, quadrantos7 (buttons axe des abscisses, axe des ordonnées, origine) |
 | v. Chr. / n. Chr. | av. J.-C. / apr. J.-C. | 3.1 |
+| Vorzeichenregeln, „minus mal minus ergibt plus“ | règles des signes, « moins par moins donne plus » | 3.2, as the widget vorzeichen7 |
+| Rechengesetze: Vertauschungs-, Verbindungs-, Verteilungsgesetz; Vorrangregeln | propriétés des opérations : commutativité, associativité, distributivité ; règles de priorité | 3.2, as GY 5/7 |
+| Punkt- vor Strichrechnung | × et : avant + et − | 3.2 |
+| Zahlenmauer | pyramide de nombres | 3.2 |
+| „Der Feind meines Feindes ist mein Freund“ | « les ennemis de mes ennemis sont mes amis » | 3.2 aside |
+| Prinzip der Permanenz (Hankel) | principe de permanence | 3.2 excursion; the German book title stays (encheck lists it) |
 
 ## mathe8-fr
 
