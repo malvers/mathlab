@@ -22,11 +22,20 @@ window.BuchFR && BuchFR.add('os7', {
         'Kapital $K$': 'Capital $C$', 'Zinssatz $p\\,\\%$': 'Taux d’intérêt $t\\,\\%$', 'Tage $t$': 'Jours $j$', '360 Tage': '360 jours',
         'Bei Banken hat ein Zinsjahr meist 360 Tage und jeder Monat 30 Tage. Gerundet wird erst am Ende auf ganze Cent.':
             'Pour les banques, une année bancaire compte le plus souvent 360 jours et chaque mois 30 jours. On n’arrondit au centime qu’à la fin.',
+        // quadrantos7 (symmetric point P′ with respect to an axis or the origin; the sentences with the point are rules below)
+        'nur P': 'P seul', 'an der x-Achse': 'axe des abscisses', 'an der y-Achse': 'axe des ordonnées', 'am Ursprung': 'origine', 'Spiegeln': 'Symétrie',
+        'An der x-Achse ändert die y-Koordinate ihr Vorzeichen.': 'Par symétrie par rapport à l’axe des abscisses, l’ordonnée y change de signe.',
+        'An der y-Achse ändert die x-Koordinate ihr Vorzeichen.': 'Par symétrie par rapport à l’axe des ordonnées, l’abscisse x change de signe.',
+        'Am Ursprung ändern beide Koordinaten ihr Vorzeichen.': 'Par symétrie par rapport à l’origine, les deux coordonnées changent de signe.',
+        'Ziehe P. Zuerst kommt die x-Koordinate (nach rechts oder links), dann die y-Koordinate (nach oben oder unten).':
+            'Fais glisser P. On donne d’abord l’abscisse x (vers la droite ou vers la gauche), puis l’ordonnée y (vers le haut ou vers le bas).',
     },
     phrase: [
         // book fr-18 mathe7-fr:
         // tageszinsos7
         ['Jahreszinsen: ', 'Intérêts annuels : '],
+        // quadrantos7
+        ['Spiegelpunkt: ', 'Point symétrique : '],
     ],
     rule: [
         // book fr-18 mathe7-fr:
@@ -36,5 +45,8 @@ window.BuchFR && BuchFR.add('os7', {
         [/für \$(\d+)\$ (Tag|Tage): \$Z = /g, (m, t, w) => 'pour $' + t + '$ ' + (w === 'Tag' ? 'jour' : 'jours') + ' : $I = '],
         [/Zinsjahr mit 360 Tagen, davon (\d+) Tage; Jahreszinsen und Tageszinsen als Säulen/,
             (m, t) => 'Année bancaire de 360 jours, dont ' + t + (t === '1' ? ' jour' : ' jours') + ' ; intérêts annuels et intérêts de ces jours en colonnes'],
+        // quadrantos7: "P(3 | 2)" in the label, "$P(3 ; 2)$ liegt im I. Quadranten." (the engine has already given the point its French semicolon)
+        [/Koordinatensystem mit vier Quadranten, Punkt P\((-?\d+) \| (-?\d+)\)/, 'Repère avec quatre quadrants, point P($1 ; $2)'],
+        [/\$ liegt (?=im |auf )/g, '$ se trouve '], [/\bim (I|II|III|IV)\. Quadranten/g, 'dans le quadrant $1'], [/\bauf einer Achse/g, 'sur un axe'],
     ]
 });

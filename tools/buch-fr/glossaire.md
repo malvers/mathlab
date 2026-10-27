@@ -1084,6 +1084,11 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 | =ZUFALLSBEREICH(1;6) | =ALEA.ENTRE.BORNES(1;6) | 2 (French Excel) |
 | Wort MATHEMATIK (10 letters) | MATHÉMATIQUE (12 letters) | 2 task 15: the French word, the solution recomputed (2/12, 6/12) |
 | Lab names | PLANCHE DE GALTON, LE JEU DE DÉS | DOCPAD stays |
+| Gegenzahl, Betrag $\lvert a \rvert$, Zahlengerade | opposé, valeur absolue, droite graduée | 3.1, as GY 7 |
+| $\mathbb{N}$, $\mathbb{Z}$, $\mathbb{Q}^+$ (gebrochene Zahlen), $\mathbb{Q}$ | entiers naturels (with 0, as in France), entiers relatifs, rationnels positifs $\mathbb{Q}_+$, nombres rationnels | 3.1, the subscript $\mathbb{Q}_+$ as GY 6/7 and the widget zahlbereiche7 |
+| vier Quadranten, „im II. Quadranten“, gegen den Uhrzeigersinn | quatre quadrants, « dans le quadrant II », dans le sens inverse des aiguilles d’une montre | 3.1 and the widget quadrantos7 |
+| an der x-Achse / y-Achse / am Ursprung spiegeln, Bildpunkt | symétrique par rapport à l’axe des abscisses / des ordonnées / à l’origine, point image | 3.1, quadrantos7 (buttons axe des abscisses, axe des ordonnées, origine) |
+| v. Chr. / n. Chr. | av. J.-C. / apr. J.-C. | 3.1 |
 
 ## mathe8-fr
 
