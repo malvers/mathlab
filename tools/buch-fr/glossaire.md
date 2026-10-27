@@ -1052,6 +1052,55 @@ and js/buch-fr/daten.js, in what the widgets write.
 
 <!-- fr-17: terms of this book only (OS 6), write right below this line -->
 
+Package fr-17 (Voisin), 27.10.2026: decisions made while translating OS 6; nothing above was changed. The French school
+conventions of `## mathe5-fr` and round 3 hold (× for the product, P perimeter, A total area, points (2 ; 3), [AB] segment,
+AB its length, (AB) line, sets with semicolons); most widgets are those of GY 5, GY 6 and GY 8, with their words.
+
+| German | French | Note |
+|---|---|---|
+| Oberschule, Klasse 6 | Oberschule, 6e année | start page as OS 5, « à peu près l’âge de la classe de sixième en France » |
+| Wahlbereich 2 (chapter W) | Domaine optionnel 2 (chapter OP) | as section 1 |
+| gebrochene Zahlen | nombres rationnels positifs | 1.1 lesson 1 and the widget mengen6 ($\mathbb{Q}_+$); titles say « fractions et décimaux » |
+| Teilermenge $T$, $T_{12}$ | ensemble des diviseurs $D$, $D_{12}$ | 1.1, the letter of GY 5 (GY 6 kept $T$) |
+| Teilmenge, Mengendiagramm | partie (« est inclus dans »), diagramme de Venn | 1.1 |
+| erweitern, kürzen, vollständig kürzen | amplifier, simplifier, rendre irréductible | 1.1, as OS 5 and GY 5 |
+| Dezimalzahl endlich / periodisch, Periode | écriture décimale finie / périodique, période | 1.1 says once that in France a « nombre décimal » has a finite writing |
+| gleichnamig / ungleichnamig, Hauptnenner | de même dénominateur / de dénominateurs différents, plus petit dénominateur commun | 1.2 |
+| Kehrwert, Überschlag, Komma unter Komma | inverse, ordre de grandeur, virgule sous virgule | 1.2 |
+| Noten 2, 3, 1 … | notes allemandes de 1 (la meilleure) à 6 | 1.3, said in the task |
+| Deutscher Wetterdienst | service météorologique allemand (Deutscher Wetterdienst, comme Météo-France) | 1.3 excursion |
+| Ausgangsmenge, Zielmenge, Pfeildarstellung | ensemble de départ, ensemble d’arrivée, diagramme sagittal | 2.1; eindeutig etc. as GY 6 |
+| Kennzeichen, Spind, Handytarif | plaque d’immatriculation, casier, forfait de téléphone portable | 2.1, 2.2 |
+| Grundgebühr (Taxi), Anfahrt (Handwerker) | prise en charge, déplacement | 2.1, 2.2 |
+| Dreisatz („drei Sätze“) | règle de trois (« trois valeurs connues permettent d’en trouver une quatrième ») | 2.2: the German wordplay does not carry over |
+| „Regel de tri“, Ellen, Groschen | « Regel de tri » (the origin of the French name), aunes, groschen (une ancienne pièce de monnaie) | 2.2 excursion; « Das macht nach Adam Riese » stays German with a French gloss, as OS 5 |
+| Verhältnis 2 : 3, Maßstab 1 : 25 000 | rapport 2 : 3, échelle 1 : 25 000 | 2.2 |
+| Nebenwinkel, Scheitelwinkel, Stufenwinkel, Wechselwinkel | angles adjacents supplémentaires, opposés par le sommet, correspondants (en F), alternes-internes (en Z) | 3.1, as GY 5 |
+| Innenwinkelsatz, $\angle ABC$ | somme des angles d’un triangle, $\widehat{ABC}$ | 3.1 |
+| spitz-, recht-, stumpfwinklig; unregelmäßig | acutangle, rectangle, obtusangle; quelconque | 3.1 |
+| Kongruenzsätze sss, sws, wsw, SsW, www | cas d’égalité CCC, CAC, ACA, CcA, AAA | 3.1 as GY 6; the aside says CcA is not taught in France |
+| Planfigur, Geodreieck | figure à main levée, équerre-rapporteur | 3.1 explains the Geodreieck once |
+| Grundseite $g$, Höhe $h$, Umfang $u$ | base $b$, hauteur $h$, périmètre $P$ | 3.2: $A = b \times h$, $A = \dfrac{b \times h}{2}$, $P = 2a + 2b$ (as GY 6) |
+| Drachenviereck, Raute, Trapez $a$, $c$ | cerf-volant, losange, trapèze (letters kept) | 3.2 names the French $\dfrac{(B + b) \times h}{2}$ once |
+| zerlegen / ergänzen | décomposer / compléter | 3.2, 4, as the widget rechteck5; flaeche6 says « découper et déplacer » |
+| Ruten, Quadratruten | perches, perches carrées | 3.2 excursion |
+| Vielflächner; Ecken, Kanten, Flächen | polyèdres; sommets, arêtes, faces | 4; Eulers Formel: relation d’Euler (sommets + faces − arêtes = 2) |
+| Grundriss, Vorder-, Seitenansicht, Schrägbild, Netz, Bauplan | vue de dessus, vue de face, vue de côté, perspective cavalière, patron, plan de construction | 4, widgets quader5, wuerfelbauos6 |
+| Prisma $G$, $M$, $u$, $O$; Quader $O$ | $\mathcal{B}$, $A_L$, $P$, $A$; $A$ | 4, as GY 6/GY 9; $h_\Delta$ for the height of a triangle stays |
+| Polyominos, Hexominos | polyominos, hexaminos | 4 excursion |
+| systematisch probieren, rückwärts arbeiten, auf Bekanntes zurückführen | essayer méthodiquement, raisonner à rebours, se ramener à ce qu’on connaît | 5 |
+| Hühner und Kaninchen, Köpfe, Beine | poules et lapins, têtes, pattes | 5 |
+| absolute / relative Häufigkeit, Strichliste, Chance | effectif / fréquence, traits de comptage, probabilité | 5, as GY 6 |
+| Münze Kopf / Zahl, Reißzwecke | pièce face / pile, punaise | 5 |
+| wenn – dann, je – desto, Umkehrung, Gegenbeispiel | si… alors…, plus… plus…, réciproque, contre-exemple | 5 |
+| Sprengwagen, Grundpreis | balayeuse arroseuse, prix au kilo | 5 |
+| Tangram, Soma-Würfel, zerlegungsgleich | tangram, cube Soma, équidécomposables | OP, widget tangramos6 (the pieces in lower case) |
+| Schiebepuzzle, Steine, Lücke, Züge | taquin, carreaux, case vide, coups | OP, widget schiebeos6 |
+| Turm von Hanoi, Stab, Scheibe | tour de Hanoï, tige, disque | OP, widget hanoios6 |
+| Nim-Spiel, Hölzer | jeu de Nim (le jeu des allumettes), allumettes | OP, widget nimos6; « Vierer zeigen »: montrer les groupes de quatre |
+| Würfelwettrennen, fair | course de dés, équitable | OP |
+| Lab names | DIVISION POSÉE, RALLYE DE CALCUL, PUZZLE DE NOMBRES, LABORATOIRE DU REPÈRE, LABORATOIRE DES ANGLES, DÉMONTRER LA SOMME DES ANGLES, TRIANGLE ISOCÈLE, LABORATOIRE DES POLYGONES, SOLIDES, CRYPTARITHMES, LE JEU DE DÉS | « À ESSAYER AUSSI (EN ALLEMAND) » |
+
 ## mathe7-fr
 
 <!-- fr-18: terms of this book only (OS 7), write right below this line -->
