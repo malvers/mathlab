@@ -48,6 +48,17 @@ window.BuchFR && BuchFR.add('os8', {
         'Hilfslinien ein/aus': 'Traits de construction oui/non', 'Zweiter Ring ein/aus': 'Deuxième rangée oui/non', 'Anzahl der Blätter $n$': 'Nombre de pétales $n$',
         'Bei 6 Blättern passt alles genau: Der Radius lässt sich sechsmal auf der Kreislinie abtragen. Jeder Bogen um einen der Punkte geht durch den Mittelpunkt und die beiden Nachbarpunkte. Die Blätter berühren sich gerade.':
             'Avec 6 pétales, tout tombe juste : le rayon se reporte exactement six fois sur le cercle. Chaque arc centré en l’un des points passe par le centre et par les deux points voisins. Les pétales se touchent tout juste.',
+        // zylinderos8 (the French letters of GY 9: base 𝓑, lateral area A_L, total area A, perimeter P; 'Schrägbild', 'Netz',
+        // 'Größe' as in js/buch-fr/gy7.js and gy5.js, modules this page does not load; 'Körper', 'Radius $r$', 'Höhe $h$' are in geometrie.js)
+        'Kreiszylinder': 'Cylindre plein', 'Hohlzylinder': 'Cylindre creux', 'Schrägbild': 'Perspective cavalière', 'Netz': 'Patron',
+        'Material': 'Matériau', 'Holz': 'Bois', 'Aluminium': 'Aluminium', 'Stahl': 'Acier', 'Innenradius $r_i$': 'Rayon intérieur $r_i$',
+        'Mantel': 'Surface latérale', 'u = 2πr': 'P = 2πr', 'Größe': 'Grandeur', 'Formel und Wert': 'Formule et valeur',
+        'Grundfläche (Kreisring)': 'Base (couronne)', 'Außenmantel': 'Surface latérale extérieure', 'Innenmantel': 'Surface latérale intérieure',
+        'Oberfläche': 'Aire totale', 'Volumen': 'Volume', 'Grundfläche': 'Aire de la base',
+        'Der Mantel ist ein Rechteck: so breit wie der Umfang des Grundkreises, so hoch wie der Zylinder.':
+            'La surface latérale est un rectangle : aussi large que le périmètre du cercle de base, aussi haut que le cylindre.',
+        'Im Schrägbild wird der Grundkreis zur flachen Ellipse. Verdeckte Linien sind gestrichelt.':
+            'En perspective cavalière, le cercle de base devient une ellipse aplatie. Les traits cachés sont en pointillés.',
     },
     phrase: [
         // book fr-19 mathe8-fr:
@@ -90,6 +101,8 @@ window.BuchFR && BuchFR.add('os8', {
             'Chaque pétale est formé de deux arcs de cercle de rayon $r$ qui vont du centre à un point du cercle. Les points partagent le cercle en '],
         ['Weil jedes Blatt $60^\\circ$ breit ist, bleiben bei weniger als 6 Blättern Lücken.', 'Comme chaque pétale a une largeur de $60^\\circ$, il reste des trous avec moins de 6 pétales.'],
         ['Weil jedes Blatt $60^\\circ$ breit ist, überlappen sich die Blätter bei mehr als 6.', 'Comme chaque pétale a une largeur de $60^\\circ$, les pétales se chevauchent quand il y en a plus de 6.'],
+        // zylinderos8: the mass row
+        ['Masse (Holz, $', 'Masse (bois, $'], ['Masse (Aluminium, $', 'Masse (aluminium, $'], ['Masse (Stahl, $', 'Masse (acier, $'],
     ],
     rule: [
         // book fr-19 mathe8-fr:
@@ -120,5 +133,10 @@ window.BuchFR && BuchFR.add('os8', {
         // rosetteos8
         [/Rosette mit (\d+) Blättern, mit dem Zirkel konstruiert/g, 'Rosace à $1 pétales construite au compas'],
         [/ gleiche Teile von je \$([\d{},]+)\^\\circ\$\. /g, (m, d) => ' parties égales de $' + d + '^\\circ$ chacune. '],
+        // zylinderos8: the picture's label, and the letters of the table (A_G → 𝓑, A_M → A_L, A_Mi → A_L,i, O → A), tied to its table with "A_G = \pi" (the labels between two tags are parked as words before the rules run)
+        [/(Hohlzylinder|Kreiszylinder) mit dem Radius ([\d,]+) cm und der Höhe ([\d,]+) cm/g,
+            (m, k, r, h) => (k === 'Hohlzylinder' ? 'Cylindre creux' : 'Cylindre') + ' de rayon ' + r + ' cm et de hauteur ' + h + ' cm'],
+        [/<table class="b-table g-tab">(?:(?!<\/table>)[\s\S])*?A_G = \\pi[\s\S]*?<\/table>/g,
+            t => t.replace(/A_\{Mi\}/g, 'A_{L,i}').replace(/A_\{?M\}?/g, 'A_L').replace(/A_G/g, '\\mathcal{B}').replace(/\$O = /g, '$A = ').replace(/2 \\mathcal\{B\}/g, '2\\mathcal{B}')],
     ]
 });
