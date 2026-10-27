@@ -29,6 +29,13 @@ window.BuchFR && BuchFR.add('os9', {
         'Gleich: Nach der Umkehrung des Satzes von Pythagoras hat das Dreieck bei $C$ einen rechten Winkel.':
             'Égalité : d’après la réciproque du théorème de Pythagore, le triangle est rectangle en $C$.',
         'Ganze Zahlen mit $a^2 + b^2 = c^2$ heißen pythagoreische Zahlentripel.': 'Des nombres entiers tels que $a^2 + b^2 = c^2$ s’appellent des triplets pythagoriciens.',
+        // rwdreieckos9 (chapter 1.2): côté opposé, côté adjacent, hypoténuse; "Gegeben" as in js/buch-fr/trigonometrie.js
+        '$c$ und $\\alpha$': '$c$ et $\\alpha$', '$b$ und $\\alpha$': '$b$ et $\\alpha$', '$a$ und $\\alpha$': '$a$ et $\\alpha$',
+        '$a$ und $b$': '$a$ et $b$', '$a$ und $c$': '$a$ et $c$', 'Gegeben': 'Données',
+        'Die Kathete $a$ muss kürzer sein als die Hypotenuse $c$.': 'Le côté de l’angle droit $a$ doit être plus court que l’hypoténuse $c$.',
+        'Rechtwinkliges Dreieck mit dem rechten Winkel bei C': 'Triangle rectangle en C',
+        'Gegenkathete von $\\alpha$ ist $a$, Ankathete ist $b$, Hypotenuse ist $c$. Der Taschenrechner steht auf DEG.':
+            'Le côté opposé à $\\alpha$ est $a$, le côté adjacent est $b$, l’hypoténuse est $c$. La calculatrice est en mode DEG.',
     },
     phrase: [
         // book fr-20 mathe9-fr:
