@@ -59,6 +59,15 @@ window.BuchFR && BuchFR.add('os8', {
             'La surface latérale est un rectangle : aussi large que le périmètre du cercle de base, aussi haut que le cylindre.',
         'Im Schrägbild wird der Grundkreis zur flachen Ellipse. Verdeckte Linien sind gestrichelt.':
             'En perspective cavalière, le cercle de base devient une ellipse aplatie. Les traits cachés sont en pointillés.',
+        // zaehlenos8 (the persons are the letters A, B, C …; the rings of the lock are « molettes »)
+        'Anordnungen': 'Rangements', 'Zählprinzip': 'Principe multiplicatif', 'Art': 'Type', 'Anzahl der Personen $n$': 'Nombre de personnes $n$',
+        'Zahlenschloss': 'Cadenas à code', 'Menü': 'Menu', 'Outfit': 'Tenue', 'Kombinationen': 'combinaisons', 'Menüs': 'menus', 'Outfits': 'tenues',
+        '1. Ring': '1re molette', '2. Ring': '2e molette', '3. Ring': '3e molette',
+        'Vorspeise': 'Entrée', 'Hauptgericht': 'Plat principal', 'Nachtisch': 'Dessert', 'T-Shirt': 'Tee-shirt', 'Hose': 'Pantalon', 'Schuhe': 'Chaussures',
+        '1. Ring: Möglichkeiten': '1re molette : possibilités', '2. Ring: Möglichkeiten': '2e molette : possibilités', '3. Ring: Möglichkeiten': '3e molette : possibilités',
+        'Vorspeise: Möglichkeiten': 'Entrée : possibilités', 'Hauptgericht: Möglichkeiten': 'Plat principal : possibilités', 'Nachtisch: Möglichkeiten': 'Dessert : possibilités',
+        'T-Shirt: Möglichkeiten': 'Tee-shirt : possibilités', 'Hose: Möglichkeiten': 'Pantalon : possibilités', 'Schuhe: Möglichkeiten': 'Chaussures : possibilités',
+        'Das sind zu viele, um sie alle aufzuschreiben. Bei 4 Personen sind es noch 24.': 'C’est trop pour les écrire tous. Avec 4 personnes, il y en a encore 24.',
     },
     phrase: [
         // book fr-19 mathe8-fr:
@@ -103,6 +112,13 @@ window.BuchFR && BuchFR.add('os8', {
         ['Weil jedes Blatt $60^\\circ$ breit ist, überlappen sich die Blätter bei mehr als 6.', 'Comme chaque pétale a une largeur de $60^\\circ$, les pétales se chevauchent quand il y en a plus de 6.'],
         // zylinderos8: the mass row
         ['Masse (Holz, $', 'Masse (bois, $'], ['Masse (Aluminium, $', 'Masse (aluminium, $'], ['Masse (Stahl, $', 'Masse (acier, $'],
+        // zaehlenos8
+        ['Die Wahrscheinlichkeit, dass eine zufällige Sitzordnung genau die alphabetische ist: $', 'La probabilité qu’un placement au hasard soit exactement l’ordre alphabétique : $'],
+        ['Vorspeise: ', 'Entrée : '], ['Hauptgericht: ', 'Plat principal : '], ['Nachtisch: ', 'Dessert : '], ['T-Shirt: ', 'Tee-shirt : '], ['Hose: ', 'Pantalon : '], ['Schuhe: ', 'Chaussures : '],
+        ['$ Kombinationen', '$ combinaisons'], ['$ Menüs', '$ menus'], ['$ Outfits', '$ tenues'],
+        ['Für jede Wahl im ersten Schritt gibt es alle Möglichkeiten des zweiten, für jede dieser Kombinationen alle des dritten: Die Anzahlen werden multipliziert.',
+            'Pour chaque choix à la première étape, il y a toutes les possibilités de la deuxième, et pour chacune de ces combinaisons toutes celles de la troisième : on multiplie les nombres de possibilités.'],
+        [' Wer die Kombination rät, trifft beim ersten Versuch mit der Wahrscheinlichkeit $', ' Celui qui devine la combinaison la trouve au premier essai avec la probabilité $'],
     ],
     rule: [
         // book fr-19 mathe8-fr:
@@ -138,5 +154,11 @@ window.BuchFR && BuchFR.add('os8', {
             (m, k, r, h) => (k === 'Hohlzylinder' ? 'Cylindre creux' : 'Cylindre') + ' de rayon ' + r + ' cm et de hauteur ' + h + ' cm'],
         [/<table class="b-table g-tab">(?:(?!<\/table>)[\s\S])*?A_G = \\pi[\s\S]*?<\/table>/g,
             t => t.replace(/A_\{Mi\}/g, 'A_{L,i}').replace(/A_\{?M\}?/g, 'A_L').replace(/A_G/g, '\\mathcal{B}').replace(/\$O = /g, '$A = ').replace(/2 \\mathcal\{B\}/g, '2\\mathcal{B}')],
+        // zaehlenos8: "3 Personen auf 3 Plätzen: …" and the rings of the lock in the summary line "1. Ring: 10 · 2. Ring: 10 · …"
+        [/(\d+) Personen auf (\d+) Plätzen: Für den ersten Platz gibt es (\d+) Möglichkeiten, für den zweiten noch (\d+), und so weiter bis zum letzten Platz\./g,
+            '$1 personnes sur $2 places : pour la première place, il y a $3 possibilités, pour la deuxième encore $4, et ainsi de suite jusqu’à la dernière place.'],
+        // the broad rule of js/buch-fr/gy8.js turns "10 · 2. Ring" into a product; here the dot only separates the rings
+        [/(\d) × (?=[23]\. Ring: )/g, '$1 · '],
+        [/([123])\. Ring: /g, (m, n) => (n === '1' ? '1re' : n + 'e') + ' molette : '],
     ]
 });

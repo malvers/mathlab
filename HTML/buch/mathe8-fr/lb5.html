@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques OS 8 · Chapitre 5 · Événements aléatoires | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Simuler, arbre pondéré et règles des chemins, avec et sans remise, dénombrer. Chapitre 5 du manuel interactif Mathématiques · Oberschule 8 : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · OBERSCHULE 8</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 5 · DOMAINE D’APPRENTISSAGE 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="A" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 5 · DOMAINE D’APPRENTISSAGE 5 · AVRIL</p>
+            <h1>Événements aléatoires</h1>
+            <p class="b-hero-lead">Combien de pochettes de vignettes faut-il acheter pour que l’album soit complet ? Quelle est la probabilité de gagner deux fois de suite à la roue de loterie ?
+                Combien de combinaisons a un cadenas à code ? Certaines questions se calculent, d’autres s’essaient le plus vite mille fois à l’ordinateur.
+                Tu apprends les deux : <b>simuler</b> des expériences aléatoires et déterminer des probabilités avec un <b>arbre pondéré</b>, les <b>règles des chemins</b> et un <b>dénombrement</b> astucieux.</p>
+            <div class="b-chips"><span class="b-chip">14 HEURES</span><span class="b-chip">4 LEÇONS</span><span class="b-chip">2 LABORATOIRES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="gluecksrad8" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+            <div class="b-text"><ul>
+                <li><b>simuler</b> des expériences aléatoires avec des nombres aléatoires et interpréter des fréquences</li>
+                <li>représenter des expériences aléatoires à plusieurs épreuves par un <b>arbre pondéré</b> et calculer avec les <b>règles des chemins</b></li>
+                <li>distinguer les tirages <b>avec et sans remise</b>, utiliser l’<b>événement contraire</b></li>
+                <li>dénombrer des possibilités avec le <b>principe multiplicatif</b> et avec $n!$</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+            <div class="b-q" data-ans="1/2" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité d’obtenir un nombre pair avec un dé ?</p><div class="b-sol"><p>$\tfrac{3}{6} = \tfrac{1}{2}$</p></div></div>
+            <div class="b-q" data-ans="75" data-ph="%"><p class="b-q-text">Combien de pour cent représente $\tfrac{3}{4}$ ?</p><div class="b-sol"><p>75 %</p></div></div>
+            <div class="b-q" data-ans="1/6" data-ph="fraction"><p class="b-q-text">Calcule $\tfrac{1}{2} \times \tfrac{1}{3}$.</p><div class="b-sol"><p>$\tfrac{1}{6}$</p></div></div>
+            <div class="b-q" data-ans="0,46" data-ph="nombre décimal"><p class="b-q-text">Sur 50 lancers d’une pièce, on a obtenu 23 fois face. Quelle est la fréquence ?</p><div class="b-sol"><p>$\tfrac{23}{50} = 0{,}46$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">L’ALBUM DE VIGNETTES</div>
+            <div class="b-text"><p>Un petit album a 6 vignettes, chaque pochette en contient une au hasard. Simulez-le avec un dé : lancez-le jusqu’à ce que chaque nombre soit sorti au moins une fois.</p>
+                <ul><li>Combien de fois avez-vous dû lancer le dé ? Rassemblez les résultats de toute la classe et calculez la moyenne.</li></ul></div>
+            <span class="b-pair">→ Leçon 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TIRER DEUX BOULES</div>
+            <div class="b-text"><p>Dans un sac, il y a 3 boules rouges et 2 boules bleues. Tirez successivement deux boules, sans remettre la première.</p>
+                <ul><li>Combien de fois les deux sont-elles rouges ? Faites 50 essais par groupe. Et si vous remettez la première boule ?</li></ul></div>
+            <span class="b-pair">→ Leçons 2 et 3</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">LE BANC</div>
+            <div class="b-text"><p>De combien de façons deux, trois, quatre personnes peuvent-elles s’asseoir sur un banc ?</p>
+                <ul><li>Écrivez toutes les possibilités. Trouvez-vous une règle sans tout écrire ?</li></ul></div>
+            <span class="b-pair">→ Leçon 4</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Simuler des expériences aléatoires" data-toc-k="1" data-toc-short="1 Simuler">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">1</span>Simuler des expériences aléatoires</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Le nombre de pochettes nécessaires pour l’album est difficile à calculer. Mais on peut le reproduire : un dé remplace les pochettes.
+                Si on le fait très souvent, on obtient une bonne estimation. C’est ce qu’on appelle une <b>simulation</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · FRÉQUENCE ET SIMULATION</div>
+                <div class="b-text">
+                    <p>Dans une <b>expérience aléatoire</b>, plusieurs issues sont possibles et on ne peut pas prévoir laquelle se réalisera. Un <b>événement</b> regroupe des issues, par exemple « nombre pair ».</p>
+                    <p><b>Fréquence</b> = nombre de fois où l’événement se réalise : nombre d’essais</p>
+                    <p><b>Loi des grands nombres :</b> pour un très grand nombre d’essais, la fréquence se stabilise près de la probabilité.</p>
+                    <p><b>Simulation :</b> on remplace l’expérience par un dispositif aléatoire simple, par exemple un dé, une pièce ou des nombres aléatoires, et on la répète très souvent.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Nombres aléatoires :</b> avec la touche Ran# de la calculatrice ou, dans un tableur, avec =ALEA.ENTRE.BORNES(1;6).</p>
+            <p class="b-note"><b>Expérience de Laplace :</b> si toutes les issues sont équiprobables, $P(E) = \dfrac{\text{nombre d’issues favorables}}{\text{nombre total d’issues}}$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA LOI DES GRANDS NOMBRES</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une expérience et réalise-la 10, 100 et 1000 fois. La fréquence varie d’abord beaucoup, puis se stabilise.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · QUAND L’ALBUM EST-IL COMPLET ?</div>
+        <p class="b-help" style="margin:0 0 12px">Achète pochette après pochette ou simule directement mille albums d’un coup.</p>
+        <div data-widget="sammel8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · FRÉQUENCE</div>
+            <div class="b-text"><p>On lance un dé 600 fois, le six sort 94 fois. Compare la fréquence avec la probabilité.</p></div>
+            <div class="b-sol"><p>$\tfrac{94}{600} \approx 0{,}157 = 15{,}7\,\%$. La probabilité vaut $\tfrac{1}{6} \approx 16{,}7\,\%$.</p>
+                <p><span class="b-res">Les valeurs sont proches, mais presque jamais exactement égales.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · PRÉPARER UNE SIMULATION</div>
+            <div class="b-text"><p>À un stand de tombola, un billet sur cinq gagne. Combien de fois obtient-on au moins deux gains sur 10 billets ? Prépare une simulation.</p></div>
+            <div class="b-sol"><p>Produire des nombres aléatoires de 1 à 5, le 1 signifie gagné. Chaque série de 10 nombres est un essai. Compter si le 1 apparaît au moins deux fois. Répéter cela 1000 fois.</p>
+                <p><span class="b-res">La proportion des essais avec au moins deux gains est une estimation de la probabilité.</span> Elle est d’environ 62 %.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance une pièce 200 fois, face sort 108 fois. Calcule la fréquence et compare-la avec la probabilité.</p></div>
+            <div class="b-sol"><p>$\tfrac{108}{200} = 0{,}54$. La probabilité vaut $0{,}5$. Un écart de 4 points de pourcentage est tout à fait normal sur 200 lancers.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Comment peux-tu simuler avec un dé : a) un lancer de pièce &nbsp; b) un événement de probabilité $\tfrac{1}{3}$ &nbsp; c) un événement de probabilité $\tfrac{1}{4}$ ?</p></div>
+            <div class="b-sol"><p>a) nombre pair = face &nbsp; b) 1 ou 2 = succès &nbsp; c) relancer pour 5 ou 6, sinon le 1 est un succès (1 des 4 nombres équiprobables).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une classe a répété souvent une expérience aléatoire : après 10 essais, 4 succès ; après 100 essais, 31 ; après 1000 essais, 334. Quelle probabilité supposes-tu ? Pourquoi 10 essais ne suffisent-ils pas ?</p></div>
+            <div class="b-sol"><p>0,4, puis 0,31, puis 0,334 : probablement $\tfrac{1}{3}$. Avec 10 essais, la fréquence varie encore beaucoup.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Pour un album de 6 vignettes, une simulation a donné en moyenne 14,6 pochettes. On peut montrer qu’il faut en moyenne $6 \times \left(1 + \tfrac{1}{2} + \tfrac{1}{3} + \tfrac{1}{4} + \tfrac{1}{5} + \tfrac{1}{6}\right)$ pochettes. Fais le calcul et compare.</p></div>
+            <div class="b-sol"><p>La parenthèse vaut 2,45, fois 6 font 14,7. La simulation en est très proche.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Dans un carré de côté 1 tombent 1000 points au hasard. 786 d’entre eux sont dans le quart de disque de rayon 1 centré en un sommet. Estime $\pi$ à partir de là et explique pourquoi cela fonctionne.</p></div>
+            <div class="b-sol"><p>Le quart de disque a pour aire $\tfrac{\pi}{4}$, le carré a pour aire 1. La proportion de points dans le quart de disque est donc environ $\tfrac{\pi}{4}$ : $\pi \approx 4 \times 0{,}786 = 3{,}144$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,18" data-ph="nombre décimal"><p class="b-q-text">Sur 50 lancers, le six sort 9 fois. Quelle est la fréquence ?</p><div class="b-sol"><p>$\tfrac{9}{50} = 0{,}18$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Que dit la loi des grands nombres ?</p><div class="b-mc"><button>Au bout de six lancers, un six sort forcément.</button><button>Pour beaucoup d’essais, la fréquence est proche de la probabilité.</button><button>Après beaucoup de billets perdants, un gain devient plus probable.</button></div><div class="b-sol"><p>Le dé n’a pas de mémoire. C’est seulement pour un très grand nombre d’essais que la fréquence se stabilise.</p></div></div>
+        <div class="b-q" data-ans="3,16" data-ph="π ≈"><p class="b-q-text">Sur 1000 points tirés au hasard dans le carré, 790 sont dans le quart de disque. Quelle estimation de $\pi$ cela donne-t-il ?</p><div class="b-sol"><p>$4 \times 0{,}79 = 3{,}16$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Arbre pondéré et règles des chemins" data-toc-k="2" data-toc-short="2 Chemins">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">2</span>Arbre pondéré et règles des chemins</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>On fait tourner deux fois une roue de loterie. À la première épreuve, il y a deux ou trois issues, à la seconde, pour chacune d’elles, de nouveau les mêmes.
+                Un <b>arbre pondéré</b> montre tous les chemins de façon claire, et sur chaque branche figure sa probabilité.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÈGLES DES CHEMINS</div>
+                <div class="b-text">
+                    <p>Une <b>expérience aléatoire à plusieurs épreuves</b> se compose de plusieurs expériences aléatoires successives. Dans l’arbre pondéré, la somme des probabilités des branches issues d’un même nœud vaut 1.</p>
+                    <p><b>Règle du produit (1re règle des chemins) :</b> la probabilité d’un chemin est le produit des probabilités le long de ce chemin.</p>
+                    <p><b>Règle de la somme (2e règle des chemins) :</b> la probabilité d’un événement est la somme des probabilités de tous les chemins qui y mènent.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Vérification :</b> les probabilités de tous les chemins ont pour somme 1.</p>
+            <p class="b-note"><b>Planche de Galton :</b> à chaque clou, une bille tombe à gauche ou à droite avec la probabilité $\tfrac{1}{2}$. Chaque rangée est une épreuve.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’ATELIER DE L’ARBRE PONDÉRÉ</div>
+        <p class="b-help" style="margin:0 0 12px">Règle d’abord sur « avec remise ». Choisis un événement ou touche des fins de chemins : les probabilités sont multipliées puis additionnées.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · DEUX LANCERS DE DÉ</div>
+            <div class="b-text"><p>On lance un dé deux fois. Quelle est la probabilité d’obtenir deux six ? Quelle est la probabilité d’obtenir exactement un six ?</p></div>
+            <div class="b-sol"><p>Épreuves : six avec $\tfrac{1}{6}$, pas de six avec $\tfrac{5}{6}$. Deux six : $\tfrac{1}{6} \times \tfrac{1}{6} = \tfrac{1}{36}$.</p>
+                <p>Exactement un six : deux chemins, $\tfrac{1}{6} \times \tfrac{5}{6} + \tfrac{5}{6} \times \tfrac{1}{6} = \tfrac{10}{36} = \tfrac{5}{18}$.</p>
+                <p><span class="b-res">$P(\text{deux six}) = \tfrac{1}{36} \approx 2{,}8\,\%$, $\;P(\text{exactement un}) = \tfrac{5}{18} \approx 27{,}8\,\%$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · LA ROUE DE LOTERIE</div>
+            <div class="b-text"><p>Une roue de loterie donne rouge avec $\tfrac{1}{2}$, bleu avec $\tfrac{1}{3}$, jaune avec $\tfrac{1}{6}$. On la fait tourner deux fois. Quelle est la probabilité d’obtenir deux fois la même couleur ?</p></div>
+            <div class="b-sol"><p>Trois chemins : $\tfrac{1}{2} \times \tfrac{1}{2} + \tfrac{1}{3} \times \tfrac{1}{3} + \tfrac{1}{6} \times \tfrac{1}{6} = \tfrac{9}{36} + \tfrac{4}{36} + \tfrac{1}{36} = \tfrac{14}{36}$</p>
+                <p><span class="b-res">$P = \tfrac{7}{18} \approx 38{,}9\,\%$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance une pièce trois fois. Dessine l’arbre pondéré. Quelle est la probabilité d’obtenir trois fois face, quelle est la probabilité d’obtenir exactement deux fois face ?</p></div>
+            <div class="b-sol"><p>8 chemins équiprobables. Trois fois face : $\tfrac{1}{8}$. Exactement deux fois (FFP, FPF, PFF) : $\tfrac{3}{8}$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une urne contient 4 boules rouges et 1 boule bleue. On tire deux fois avec remise. Calcule $P(\text{les deux rouges})$, $P(\text{les deux bleues})$ et $P(\text{couleurs différentes})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{16}{25}$, $\tfrac{1}{25}$ et $\tfrac{4}{25} + \tfrac{4}{25} = \tfrac{8}{25}$. Vérification : $16 + 1 + 8 = 25$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Au mur de tir, Léa marque à chaque tir avec la probabilité 0,3. Elle tire deux fois. Quelle est la probabilité qu’elle marque deux fois, et celle qu’elle marque au moins une fois ?</p></div>
+            <div class="b-sol"><p>Deux fois : $0{,}3 \times 0{,}3 = 0{,}09$. Au moins une fois : $0{,}09 + 0{,}21 + 0{,}21 = 0{,}51$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une planche de Galton a 3 rangées de clous et, en dessous, 4 cases. Quelle est la probabilité qu’une bille arrive dans la case tout à gauche, et dans la deuxième case en partant de la gauche ?</p></div>
+            <div class="b-sol"><p>Tout à gauche, seulement par le chemin GGG : $\tfrac{1}{8}$. Deuxième case : une fois à droite, trois chemins (DGG, GDG, GGD) : $\tfrac{3}{8}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Pour une roue de loterie, la probabilité d’obtenir deux fois rouge en deux tours doit valoir 0,36. Quelle doit être la proportion de rouge ? Quel angle a le secteur rouge ?</p></div>
+            <div class="b-sol"><p>$p \times p = 0{,}36$, donc $p = 0{,}6$. Angle : $0{,}6 \times 360^\circ = 216^\circ$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1/36" data-ph="fraction"><p class="b-q-text">Quelle est la probabilité d’obtenir deux six en deux lancers ?</p><div class="b-sol"><p>$\tfrac{1}{6} \times \tfrac{1}{6} = \tfrac{1}{36}$</p></div></div>
+        <div class="b-q" data-ans="0,36" data-ph="nombre décimal"><p class="b-q-text">Urne avec 3 boules rouges et 2 bleues, deux tirages avec remise. Quelle est la probabilité que les deux soient rouges ? Donne un nombre décimal.</p><div class="b-sol"><p>$\tfrac{3}{5} \times \tfrac{3}{5} = \tfrac{9}{25} = 0{,}36$</p></div></div>
+        <div class="b-q" data-ans="0,5" data-ph="nombre décimal"><p class="b-q-text">On lance une pièce deux fois. Quelle est la probabilité d’obtenir exactement une fois face ?</p><div class="b-sol"><p>$\tfrac{1}{4} + \tfrac{1}{4} = 0{,}5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Avec et sans remise" data-toc-k="3" data-toc-short="3 Remise">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">4 HEURES</span></div>
+    <h2><span class="b-no">3</span>Dépendantes ou indépendantes : avec et sans remise</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dans le sac, il y a 3 boules rouges et 2 boules bleues. Si l’on ne remet pas la première boule rouge, il ne reste au deuxième tirage que 2 boules rouges sur 4 boules.
+                Les probabilités de la deuxième épreuve dépendent du premier tirage.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · REMISE ET ÉVÉNEMENT CONTRAIRE</div>
+                <div class="b-text">
+                    <p><b>Avec remise :</b> à chaque épreuve, les probabilités sont les mêmes. Les tirages sont <b>indépendants</b> les uns des autres.</p>
+                    <p><b>Sans remise :</b> après chaque tirage, le nombre et la composition changent. Les probabilités de l’épreuve suivante <b>dépendent</b> du résultat précédent.</p>
+                    <p><b>Événement contraire :</b> $P(\overline{E}) = 1 - P(E)$. Particulièrement pratique pour « au moins une fois » : $P(\text{au moins une fois}) = 1 - P(\text{aucune fois})$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sans remise,</b> ce sont par exemple les jeux de cartes, le loto et les billets tirés d’un seau.</p>
+            <p class="b-note"><b>Pas de mémoire :</b> un dé ne sait pas ce qui est sorti avant. Les lancers sont toujours indépendants.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · SANS REMISE</div>
+        <p class="b-help" style="margin:0 0 12px">Compare les nombres sur les branches de la deuxième épreuve : sans remise et avec remise. Modifie aussi le nombre de boules.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · DEUX BOULES ROUGES</div>
+            <div class="b-text"><p>3 boules rouges et 2 bleues, on en tire deux sans remise. Quelle est la probabilité que les deux soient rouges ? Compare avec un tirage avec remise.</p></div>
+            <div class="b-sol"><p>Sans remise : $\tfrac{3}{5} \times \tfrac{2}{4} = \tfrac{6}{20} = \tfrac{3}{10} = 0{,}3$. Avec remise : $\tfrac{3}{5} \times \tfrac{3}{5} = \tfrac{9}{25} = 0{,}36$.</p>
+                <p><span class="b-res">Sans remise, « les deux rouges » est moins probable : 30 % au lieu de 36 %.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · AU MOINS UN SIX</div>
+            <div class="b-text"><p>Quelle est la probabilité d’obtenir au moins un six en quatre lancers ?</p></div>
+            <div class="b-sol"><p>Événement contraire : aucun six, $\left(\tfrac{5}{6}\right)^4 = \tfrac{625}{1296}$. Donc $1 - \tfrac{625}{1296} = \tfrac{671}{1296} \approx 0{,}518$.</p>
+                <p><span class="b-res">Un peu plus de 50 %. Sans l’événement contraire, il faudrait additionner 15 chemins.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dans un sac, il y a 2 boules rouges et 3 boules vertes. On en tire deux sans remise. Calcule $P(\text{les deux rouges})$, $P(\text{les deux vertes})$ et $P(\text{couleurs différentes})$.</p></div>
+            <div class="b-sol"><p>$\tfrac{2}{5} \times \tfrac{1}{4} = \tfrac{1}{10}$, $\;\tfrac{3}{5} \times \tfrac{2}{4} = \tfrac{3}{10}$, $\;1 - \tfrac{1}{10} - \tfrac{3}{10} = \tfrac{6}{10}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Donne la probabilité de l’événement contraire. a) obtenir un six &nbsp; b) tirer un billet gagnant à un stand de tombola avec 20 % de billets gagnants &nbsp; c) un événement avec $P(E) = 0{,}07$</p></div>
+            <div class="b-sol"><p>a) $\tfrac{5}{6}$ (pas de six) &nbsp; b) $0{,}8$ (billet perdant) &nbsp; c) $0{,}93$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dans un seau, il y a 4 billets gagnants et 16 billets perdants. Tu tires deux billets. Quelle est la probabilité que les deux soient gagnants ? Quelle est la probabilité d’avoir au moins un gain ?</p></div>
+            <div class="b-sol"><p>$\tfrac{4}{20} \times \tfrac{3}{19} = \tfrac{12}{380} \approx 0{,}032$. Au moins un gain : $1 - \tfrac{16}{20} \times \tfrac{15}{19} = 1 - \tfrac{240}{380} = \tfrac{140}{380} \approx 0{,}368$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quelle est la probabilité d’obtenir au moins un six en trois lancers ?</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac{5}{6}\right)^3 = 1 - \tfrac{125}{216} = \tfrac{91}{216} \approx 0{,}421$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Combien de fois faut-il lancer le dé au minimum pour que la probabilité d’obtenir au moins un six dépasse 90 % ? Essaie avec la calculatrice.</p></div>
+            <div class="b-sol"><p>On cherche $\left(\tfrac{5}{6}\right)^n &lt; 0{,}1$. $\left(\tfrac{5}{6}\right)^{12} \approx 0{,}112$, $\left(\tfrac{5}{6}\right)^{13} \approx 0{,}093$. Donc au moins 13 fois.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,1" data-ph="nombre décimal"><p class="b-q-text">3 boules rouges et 2 bleues, deux tirages sans remise. Quelle est la probabilité que les deux soient bleues ?</p><div class="b-sol"><p>$\tfrac{2}{5} \times \tfrac{1}{4} = \tfrac{1}{10}$</p></div></div>
+        <div class="b-q" data-ans="0,65" data-ph="nombre décimal"><p class="b-q-text">$P(E) = 0{,}35$. Quelle est la probabilité de l’événement contraire ?</p><div class="b-sol"><p>$1 - 0{,}35 = 0{,}65$</p></div></div>
+        <div class="b-q" data-ans="0,875" data-ph="nombre décimal"><p class="b-q-text">On lance une pièce trois fois. Quelle est la probabilité d’obtenir au moins une fois face ?</p><div class="b-sol"><p>$1 - \tfrac{1}{8} = \tfrac{7}{8} = 0{,}875$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Dénombrer" data-toc-k="4" data-toc-short="4 Dénombrer">
+    <div class="b-band"><span class="b-band-tag">LEÇON 4</span><span class="b-band-sub">2 HEURES</span></div>
+    <h2><span class="b-no">4</span>Dénombrer</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un antivol de vélo a trois molettes avec les chiffres de 0 à 9. Pour chaque chiffre de la première molette, il y en a 10 sur la deuxième, et pour chacune de ces paires de nouveau 10 sur la troisième.
+                Cela fait $10 \times 10 \times 10 = 1000$ possibilités. Celui qui devine a, au premier essai, une chance sur 1000, soit $\tfrac{1}{1000}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · PRINCIPE MULTIPLICATIF ET FACTORIELLE</div>
+                <div class="b-text">
+                    <p><b>Principe multiplicatif :</b> si un choix se fait en plusieurs étapes avec $n_1$, $n_2$, $n_3$, … possibilités, il y a en tout $n_1 \times n_2 \times n_3 \times \ldots$ possibilités.</p>
+                    <p><b>Rangements :</b> $n$ objets différents peuvent être rangés de $n! = n \times (n - 1) \times \ldots \times 2 \times 1$ façons ; on lit « factorielle $n$ ». Par exemple $3! = 6$, $4! = 24$, $5! = 120$.</p>
+                    <p>Si toutes les possibilités sont équiprobables, une possibilité donnée a la probabilité $\dfrac{1}{\text{nombre de possibilités}}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculatrice :</b> la touche $x!$ calcule la factorielle.</p>
+            <p class="b-note"><b>Les factorielles grandissent vite :</b> $10! = 3\,628\,800$. C’est déjà le nombre de façons d’asseoir dix personnes.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · RANGER ET DÉNOMBRER</div>
+        <p class="b-help" style="margin:0 0 12px">Sous « Rangements », tu vois toutes les façons d’asseoir jusqu’à quatre personnes. Sous « Principe multiplicatif », tu modifies le nombre de possibilités à chaque étape.</p>
+        <div data-widget="zaehlenos8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 7 · LE CODE PIN</div>
+            <div class="b-text"><p>Un code PIN a quatre chiffres de 0 à 9. Combien y a-t-il de codes PIN ? Quelle est la probabilité que quelqu’un le devine en trois essais ?</p></div>
+            <div class="b-sol"><p>$10 \times 10 \times 10 \times 10 = 10\,000$. Trois essais différents réussissent avec la probabilité $\tfrac{3}{10\,000} = 0{,}03\,\%$.</p>
+                <p><span class="b-res">10 000 codes PIN, la chance de deviner est minuscule.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 8 · LE PLAN DE TABLE</div>
+            <div class="b-text"><p>Cinq personnes s’assoient au hasard sur cinq chaises. Combien y a-t-il de plans de table ? Quelle est la probabilité qu’elles soient assises exactement dans l’ordre alphabétique ?</p></div>
+            <div class="b-sol"><p>Première chaise 5 possibilités, deuxième 4, puis 3, 2, 1 : $5! = 120$.</p>
+                <p><span class="b-res">120 plans de table, l’ordre alphabétique a la probabilité $\tfrac{1}{120}$.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Une cantine propose 3 entrées, 4 plats principaux et 2 desserts. Combien de menus différents, avec un plat de chaque sorte, y a-t-il ?</p></div>
+            <div class="b-sol"><p>$3 \times 4 \times 2 = 24$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcule $4!$, $6!$ et $7!$.</p></div>
+            <div class="b-sol"><p>$24$, $720$, $5040$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quatre coureuses franchissent la ligne d’arrivée. Combien d’ordres d’arrivée sont possibles ? Combien de possibilités y a-t-il seulement pour l’or et l’argent ?</p></div>
+            <div class="b-sol"><p>$4! = 24$ ordres d’arrivée. Or et argent : $4 \times 3 = 12$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un cadenas de valise a 4 molettes avec les chiffres de 0 à 9. Combien de temps faut-il au maximum pour essayer toutes les combinaisons si l’on met 2 secondes par combinaison ?</p></div>
+            <div class="b-sol"><p>$10\,000 \times 2\,\text{s} = 20\,000\,\text{s} \approx 5{,}6$ heures.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Avec les lettres M, A, T, H, on forme au hasard un « mot » en utilisant chaque lettre exactement une fois. Combien y a-t-il de mots ? Quelle est la probabilité qu’il commence par M ? Quelle est la probabilité que ce soit MATH ?</p></div>
+            <div class="b-sol"><p>$4! = 24$ mots. $3! = 6$ d’entre eux commencent par M : $\tfrac{6}{24} = \tfrac{1}{4}$. MATH : $\tfrac{1}{24}$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="120" data-ph="nombre"><p class="b-q-text">Calcule $5!$.</p><div class="b-sol"><p>$5 \times 4 \times 3 \times 2 \times 1 = 120$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="tenues"><p class="b-q-text">Combien de tenues peut-on composer avec 3 tee-shirts et 2 pantalons ?</p><div class="b-sol"><p>$3 \times 2 = 6$</p></div></div>
+        <div class="b-q" data-ans="0,001" data-ph="nombre décimal"><p class="b-q-text">Un cadenas a 3 molettes de 10 chiffres chacune. Quelle est la probabilité de deviner la combinaison au premier essai ?</p><div class="b-sol"><p>$\tfrac{1}{1000} = 0{,}001$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="W" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+    <div class="b-tasks" data-start="21">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>On lance deux dés. Quelle est la probabilité d’obtenir une somme des points égale à 12, et égale à 7 ?</p></div>
+            <div class="b-sol"><p>Somme 12 seulement avec 6 et 6 : $\tfrac{1}{36}$. Somme 7 avec 1+6, 2+5, 3+4, 4+3, 5+2, 6+1 : $\tfrac{6}{36} = \tfrac{1}{6}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Lien avec les pourcentages :</b> deux jours de suite, il pleut à chaque fois avec une probabilité de 20 %, indépendamment l’un de l’autre. Quelle est la probabilité que les deux jours restent secs ?</p></div>
+            <div class="b-sol"><p>$0{,}8 \times 0{,}8 = 0{,}64 = 64\,\%$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Une planche de Galton a 4 rangées et 5 cases. Quelle est la probabilité qu’une bille arrive tout à droite ? Et au milieu (deux fois à gauche, deux fois à droite) ?</p></div>
+            <div class="b-sol"><p>Tout à droite : $\left(\tfrac{1}{2}\right)^4 = \tfrac{1}{16}$. Au milieu : 6 chemins (GGDD, GDGD, GDDG, DGGD, DGDG, DDGG) : $\tfrac{6}{16} = \tfrac{3}{8}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Trois personnes se rencontrent. Quelle est la probabilité que leurs anniversaires tombent tous des jours différents ? Calcule avec 365 jours.</p></div>
+            <div class="b-sol"><p>La deuxième personne a, avec $\tfrac{364}{365}$, un autre jour que la première, la troisième, avec $\tfrac{363}{365}$, un autre jour que les deux : $\tfrac{364}{365} \times \tfrac{363}{365} \approx 0{,}992$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : un pari de 1654" data-toc-k="X" data-toc-short="De Méré">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+    <h2>Un pari de 1654</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Le gentilhomme français <b>chevalier de Méré</b> aimait parier aux dés. Son premier pari : en quatre lancers, on obtient au moins un six.
+                À la longue, il gagnait, car la probabilité vaut $1 - \left(\tfrac{5}{6}\right)^4 \approx 51{,}8\,\%$.</p>
+            <p>Son second pari : en 24 lancers de deux dés, on obtient au moins un double six. Il pensait que c’était tout aussi favorable. Mais à la longue, il perdait :
+                $1 - \left(\tfrac{35}{36}\right)^{24} \approx 49{,}1\,\%$. Il interrogea le mathématicien <b>Blaise Pascal</b>. Celui-ci échangea à ce sujet des lettres avec <b>Pierre de Fermat</b> en 1654,
+                et c’est de ces lettres qu’est né le calcul des probabilités.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Sources :</b> correspondance entre B. Pascal et P. de Fermat, été 1654 (Œuvres de Fermat, tome 2). Les nombres sont recalculés avec l’événement contraire.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="R" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+    <div class="b-rueck"><div><h4>SIMULATION</h4><p>un dispositif aléatoire à la place de l’expérience, répéter très souvent ; la fréquence approche la probabilité</p></div>
+        <div><p>94 six en 600 lancers : 15,7 %</p></div></div>
+    <div class="b-rueck"><div><h4>RÈGLES DES CHEMINS</h4><p>multiplier le long d’un chemin, additionner les chemins d’un événement</p></div>
+        <div><p>exactement un six en deux lancers : $\tfrac{10}{36}$</p></div></div>
+    <div class="b-rueck"><div><h4>REMISE · ÉVÉNEMENT CONTRAIRE</h4><p>sans remise, les probabilités changent ; $P(\overline{E}) = 1 - P(E)$</p></div>
+        <div><p>$\tfrac{3}{5} \times \tfrac{2}{4} = 0{,}3$</p></div></div>
+    <div class="b-rueck"><div><h4>DÉNOMBRER</h4><p>multiplier les nombres de possibilités des étapes ; ranger $n$ objets : $n!$</p></div>
+        <div><p>cadenas : 1000, $5! = 120$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · DE TÊTE</div>
+            <div class="b-q" data-ans="1/4" data-ph="fraction"><p class="b-q-text">On lance une pièce deux fois. Quelle est la probabilité d’obtenir deux fois pile ?</p><div class="b-sol"><p>$\tfrac{1}{2} \times \tfrac{1}{2} = \tfrac{1}{4}$</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="nombre"><p class="b-q-text">De combien de façons 4 personnes peuvent-elles se mettre en rang ?</p><div class="b-sol"><p>$4! = 24$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Pour quel tirage les probabilités changent-elles d’un tirage à l’autre ?</p><div class="b-mc"><button>sans remise</button><button>avec remise</button></div><div class="b-sol"><p>Sans remise, le contenu de l’urne change.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · EN RÉFLÉCHISSANT</div>
+            <div class="b-q" data-ans="0,6" data-ph="nombre décimal"><p class="b-q-text">Un sac contient 2 boules rouges et 3 bleues. On en tire deux sans remise. Quelle est la probabilité qu’elles soient de couleurs différentes ?</p><div class="b-sol"><p>$\tfrac{2}{5} \times \tfrac{3}{4} + \tfrac{3}{5} \times \tfrac{2}{4} = \tfrac{6}{20} + \tfrac{6}{20} = 0{,}6$</p></div></div>
+            <div class="b-q" data-ans="0,75" data-ph="nombre décimal"><p class="b-q-text">Quelle est la probabilité d’obtenir au moins une fois face en deux lancers de pièce ?</p><div class="b-sol"><p>$1 - \tfrac{1}{4} = 0{,}75$</p></div></div>
+            <div class="b-q" data-ans="60" data-ph="nombre"><p class="b-q-text">Parmi 5 personnes, on élit un ou une délégué(e) de classe, un ou une suppléant(e) et un trésorier ou une trésorière, chaque personne ayant au plus une fonction. Combien de possibilités y a-t-il ?</p><div class="b-sol"><p>$5 \times 4 \times 3 = 60$</p></div></div>
+        </div>
+    </div>
+    <h3>À ESSAYER AUSSI (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Des centaines de billes, les règles des chemins en action</span></span></a>
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LE JEU DE DÉS</span><span class="b-lab-what">Deux dés que tu numérotes toi-même : qui gagne le plus souvent ?</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Oberschule, 8e année, filière Realschule · domaine d’apprentissage 5 d’après le programme de mathématiques de l’Oberschule de Saxe.</p>
+    <p>Tous les textes, exercices et figures sont des contenus originaux. Emoji : Apple, via emoji-data d’iamcal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-fr/geometrie.js"></script>
+<script src="../../js/buch-gy8.js"></script>
+<script src="../../js/buch-fr/gy8.js"></script>
+<script src="../../js/buch-os8.js"></script>
+<script src="../../js/buch-fr/os8.js"></script>
+</body>
+</html>
