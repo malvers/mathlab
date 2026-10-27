@@ -31,6 +31,18 @@ window.BuchFR && BuchFR.add('os7', {
             'Fais glisser P. On donne d’abord l’abscisse x (vers la droite ou vers la gauche), puis l’ordonnée y (vers le haut ou vers le bas).',
         // dichteos7 (the materials are also helpers of the module; 'Stoff', 'Länge $a$', 'Breite $b$' are in js/buch-fr/gy7.js and gleichungen.js)
         'Holz': 'Bois', 'Eis': 'Glace', 'Aluminium': 'Aluminium', 'Eisen': 'Fer', 'Gold': 'Or', 'Höhe $c$': 'Hauteur $c$',
+        // parkettos7 ('Dreiecke', 'Quadrate', 'Fünfecke', 'Sechsecke' are words of js/buch-fr/gy7.js; the angles at a vertex are phrases)
+        'Achtecke und Quadrate': 'Octogones et carrés', 'Sechsecke und Dreiecke': 'Hexagones et triangles', 'Parkett': 'Pavage',
+        'Ein Parkett bedeckt die Ebene ohne Lücken und ohne Überlappung. Das geht nur, wenn die Winkel an jeder Ecke zusammen genau $360^\\circ$ ergeben. Mit nur einer Sorte regelmäßiger Vielecke klappt das bei Dreiecken, Quadraten und Sechsecken.':
+            'Un pavage recouvre le plan sans trou et sans chevauchement. Ce n’est possible que si les angles autour de chaque sommet font ensemble exactement $360^\\circ$. Avec une seule sorte de polygones réguliers, cela marche avec les triangles, les carrés et les hexagones.',
+        // escheros7
+        'Parkett aus einer verformten Quadratkachel': 'Pavage fait d’un carreau carré déformé',
+        'Ziehe den <b>roten</b> Punkt: Die linke Kante biegt sich, die rechte Kante macht genau dieselbe Form. Ziehe den <b>lila</b> Punkt: Unten und oben ändern sich gemeinsam.':
+            'Fais glisser le point <b>rouge</b> : le côté gauche se courbe, le côté droit prend exactement la même forme. Fais glisser le point <b>violet</b> : le bas et le haut changent ensemble.',
+        'Was auf einer Seite weggenommen wird, kommt auf der gegenüberliegenden Seite dazu. Darum hat die Kachel immer denselben Flächeninhalt wie das Quadrat – und sie füllt die Ebene lückenlos.':
+            'Ce qu’on enlève d’un côté est ajouté du côté opposé. C’est pourquoi le carreau a toujours la même aire que le carré – et il pave le plan sans laisser de trou.',
+        'So arbeitete M. C. Escher: Er veränderte Kanten eines Vielecks, verschob oder drehte die Änderung auf eine andere Kante und malte in die Kachel ein Tier.':
+            'C’est ainsi que travaillait M. C. Escher : il modifiait les côtés d’un polygone, faisait glisser ou tourner la modification sur un autre côté et dessinait un animal dans le carreau.',
     },
     phrase: [
         // book fr-18 mathe7-fr:
@@ -42,6 +54,10 @@ window.BuchFR && BuchFR.add('os7', {
         ['Volumen: ', 'Volume : '], ['Masse: ', 'Masse : '],
         ['Die Dichte ist kleiner als die von Wasser (', 'La masse volumique est plus petite que celle de l’eau ('], ['): Der Körper schwimmt.', ') : le solide flotte.'],
         ['Die Dichte ist größer als die von Wasser (', 'La masse volumique est plus grande que celle de l’eau ('], ['): Der Körper geht unter.', ') : le solide coule.'],
+        // parkettos7: the angles at one vertex
+        ['An einer Ecke: ', 'Autour d’un sommet : '], ['6 Dreiecke: ', '6 triangles : '], ['4 Quadrate: ', '4 carrés : '], ['3 Sechsecke: ', '3 hexagones : '],
+        ['3 Fünfecke: ', '3 pentagones : '], [' – es bleibt eine Lücke von ', ' – il reste un trou de '], ['. 4 Fünfecke: ', '. 4 pentagones : '], [', das ist zu viel.', ', c’est trop.'],
+        ['2 Achtecke und 1 Quadrat: ', '2 octogones et 1 carré : '], ['2 Sechsecke und 2 Dreiecke: ', '2 hexagones et 2 triangles : '],
     ],
     rule: [
         // book fr-18 mathe7-fr:
@@ -59,5 +75,9 @@ window.BuchFR && BuchFR.add('os7', {
             ({ Holz: 'en bois', Eis: 'en glace', Aluminium: 'en aluminium', Eisen: 'en fer', Gold: 'en or' })[st] + ', ' + a + ' cm sur ' + b + ' cm sur ' + c + ' cm'],
         [/Dichte von (Fichtenholz|Eis|Aluminium|Eisen|Gold): /, (m, st) => 'Masse volumique ' +
             ({ Fichtenholz: 'de l’épicéa', Eis: 'de la glace', Aluminium: 'de l’aluminium', Eisen: 'du fer', Gold: 'de l’or' })[st] + ' : '],
+        // parkettos7: the name of the tiling in the label of the picture
+        [/^Parkett: (Dreiecke|Quadrate|Sechsecke|Fünfecke|Achtecke und Quadrate|Sechsecke und Dreiecke)$/, (m, n) => 'Pavage : ' +
+            ({ 'Dreiecke': 'triangles', 'Quadrate': 'carrés', 'Sechsecke': 'hexagones', 'Fünfecke': 'pentagones',
+                'Achtecke und Quadrate': 'octogones et carrés', 'Sechsecke und Dreiecke': 'hexagones et triangles' })[n]],
     ]
 });

@@ -1124,6 +1124,13 @@ letters once where a reader might compare (G, p %, W in 1.1; K, p %, Z in 1.2).
 | Hohlkörper, umbauter Raum, Satteldach, Mehrwegglas | solide creux, volume de la maison, toit à deux pans, bocal consigné | 4.2 |
 | Pappos von Alexandria | Pappus d’Alexandrie | 4.2 excursion |
 | Lab names | SOLIDES, PRINCIPE DE CAVALIERI | 4.2, as GY 7 |
+| Wahlbereich 3 (chapter W), Parkettierung, Parkett | Domaine optionnel 3 (chapter OP), pavage | OP and the widget parkettos7 |
+| lückenlos, ohne Überlappung, Lücke | sans trou, sans chevauchement, trou (vide in eckenwinkel7) | OP |
+| an einer Ecke, Innenwinkel, „4.8.8“ | autour d’un sommet, angle intérieur, « 4.8.8 » | OP |
+| Siebeneck, Zwölfeck | heptagone, dodécagone | OP |
+| Kachel, Schablone, Verschiebung, Drehung (Escher) | carreau, gabarit, translation, rotation | OP and the widget escheros7 (points rouge / violet) |
+| Kaleidozyklus, Alhambra, maurische Fliesen | kaléidocycle, l’Alhambra, carreaux mauresques | OP |
+| Hausfrau (Marjorie Rice) | mère au foyer | OP excursion |
 
 ## mathe8-fr
 
