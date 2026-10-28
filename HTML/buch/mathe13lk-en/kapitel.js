@@ -24,7 +24,7 @@ window.BUCH = {
         { file: 'lb5-1.html', lb: 'Learning area 5', k: '5.1', title: 'Population and sample',
           sub: 'Estimating and testing, sample mean and sample variance', when: 'December', ustd: 5 },
         { file: 'lb5-2.html', lb: 'Learning area 5', k: '5.2', title: 'Significance tests',
-          sub: 'One- and two-tailed tests, rejection region, type I and type II errors, confidence level', when: 'December · January', ustd: 10 },
+          sub: 'One- and two-tailed tests, rejection region, type I and type II errors, statistical certainty', when: 'December · January', ustd: 10 },
         { file: 'wp1-1.html', lb: 'Elective 1', k: 'E1.1', title: 'Lines and planes',
           sub: 'Parametric equations, cross product, coordinate equation, Hesse normal form', when: 'January', ustd: 9 },
         { file: 'wp1-2.html', lb: 'Elective 1', k: 'E1.2', title: 'Relative positions and angles of intersection',
