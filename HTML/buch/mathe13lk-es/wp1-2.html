@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 13 avanzado · Capítulo OP1.2 · Posiciones relativas y ángulos de intersección | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Punto, recta, plano: intersecciones, puntos de traza, rectas de traza, ángulos de intersección. Capítulo OP1.2 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 13 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 13 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO OP1.2 · OPTATIVA OBLIGATORIA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO OP1.2 · OPTATIVA OBLIGATORIA 1 · ENERO · FEBRERO</p>
+            <h1>Posiciones relativas y ángulos de intersección</h1>
+            <p class="b-hero-lead">¿Está un punto en el plano? ¿Dónde incide un rayo láser en una pared? ¿Se cortan dos trayectorias de vuelo o <b>se cruzan</b> sin tocarse?
+                ¿En qué recta se cortan dos faldones de un tejado, y qué pendiente tienen? Con las ecuaciones del capítulo OP1.1 respondes a todo eso, calculando y en la imagen 3D que puedes girar.</p>
+            <div class="b-chips"><span class="b-chip">9 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">CAS Y GEOMETRÍA DINÁMICA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>estudiar la posición relativa de <b>punto y recta</b>, <b>punto y plano</b>, <b>recta y recta</b>, <b>recta y plano</b></li>
+                <li>calcular <b>puntos de intersección</b> y <b>puntos de traza</b>, también con CAS</li>
+                <li>determinar la posición relativa de dos <b>planos</b>, calcular su <b>recta de intersección</b> y las <b>rectas de traza</b> de un plano</li>
+                <li>calcular <b>ángulos de intersección</b> entre rectas, entre recta y plano y entre dos planos</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="12" data-ph="número"><p class="b-q-text">Calcula $(3, 4, 6) \circ (4, 0, 0)$.</p><div class="b-sol"><p>12</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">Resuelve $3x = 12$.</p><div class="b-sol"><p>4</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">¿Son paralelos $(1, 1, 0)$ y $(2, 2, 0)$?</p>
+                <div class="b-mc"><button>sí</button><button>no</button></div>
+                <div class="b-sol"><p>$(2, 2, 0) = 2 \cdot (1, 1, 0)$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">DOS BOLÍGRAFOS EN EL ESPACIO</div>
+            <div class="b-text"><p>Sostened dos bolígrafos en el aire.</p>
+                <ul><li>¿De qué formas pueden estar situados el uno respecto al otro? Encontrad cuatro posibilidades.</li><li>¿Cuál de ellas no existe en el plano (sobre la mesa)?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL PUNTERO LÁSER</div>
+            <div class="b-text"><p>Un láser ilumina desde el origen, en la dirección $(1, 2, 3)$, la pared $x + y + z = 6$.</p>
+                <ul><li>¿Dónde incide el rayo en la pared?</li><li>¿Qué tendría que cumplirse para que nunca llegara a la pared?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL TEJADO A DOS AGUAS</div>
+            <div class="b-text"><p>Los dos faldones de un tejado a dos aguas están en los planos $x + z = 4$ y $-x + z = 4$.</p>
+                <ul><li>¿Qué puntos están en los dos faldones? Describid la cumbrera.</li><li>¿Qué pendiente tienen los faldones? ¿Qué ángulo forman en la cumbrera?</li></ul></div>
+            <span class="b-pair">→ Lecciones 2 y 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Punto, recta, plano" data-toc-k="1" data-toc-short="1 Posición">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Posiciones relativas de punto, recta y plano</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dos bolígrafos en el espacio pueden coincidir, ser paralelos, cortarse o cruzarse sin tocarse. Esta última posibilidad no existe sobre la mesa.</p></div></div>
+            <div class="b-text"><p>Con cálculos se decide en dos pasos: ¿son paralelos los vectores directores? ¿Y tiene solución el sistema de ecuaciones que resulta al igualar?</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · POSICIONES RELATIVAS</div>
+                <div class="b-text">
+                    <p><b>Recta–recta</b> ($\vec{p} + t\vec{u}$, $\vec{q} + s\vec{v}$): $\vec{u} \parallel \vec{v}$ y $Q \in g$: <b>coincidentes</b> · $\vec{u} \parallel \vec{v}$, $Q \notin g$: <b>paralelas</b> ·
+                        no paralelas, al igualar hay solución: <b>secantes</b> · no paralelas, sin solución: <b>se cruzan</b>.</p>
+                    <p><b>Punto–recta</b> y <b>punto–plano</b>: prueba de pertenencia como en el capítulo OP1.1, sustituyendo en la ecuación paramétrica o en la ecuación general.</p>
+                    <p><b>Recta–plano</b> (sustituir $\vec{p} + t\vec{u}$ en $n_1x + n_2y + n_3z = d$): una solución $t$ → <b>punto de intersección</b> · $\vec{n} \circ \vec{u} = 0$: paralela, o bien <b>contenida en el plano</b> o bien <b>sin punto de intersección</b>. Los puntos de intersección de una recta con los planos coordenados se llaman <b>puntos de traza</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>CAS:</b> el sistema que resulta al igualar dos rectas tiene tres ecuaciones con dos incógnitas. Un CAS lo resuelve o indica «sin solución».</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · DOS RECTAS EN EL ESPACIO</div>
+        <p class="b-help" style="margin:0 0 12px">Elige un ejemplo o introduce tus propias rectas. Gira la imagen: las rectas que se cruzan parecen cortarse vistas de frente; de lado se ve la distancia entre ellas.</p>
+        <div data-widget="geradenlage"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · UNA RECTA CORTA UN PLANO</div>
+        <div data-widget="ebene3d" data-mode="gerade"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · DOS RECTAS</div>
+            <div class="b-text"><p>$g\colon \vec{x} = (1, 0, 1) + t\,(1, 1, 0)$, $h\colon \vec{x} = (2, 3, 0) + s\,(1, -1, 1)$. Estudia su posición relativa.</p></div>
+            <div class="b-sol"><p>No son paralelas. $1 + t = 2 + s$, $t = 3 - s$, $1 = s$. De la tercera fila, $s = 1$; entonces $t = 2$; comprobación en la primera: $3 = 3$ ✓.
+                <span class="b-res">Secantes en $S(3, 2, 1)$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · EL LÁSER</div>
+            <div class="b-text"><p>¿Dónde corta $g\colon \vec{x} = t\,(1, 2, 3)$ el plano $x + y + z = 6$?</p></div>
+            <div class="b-sol"><p>Sustituir: $t + 2t + 3t = 6 \Rightarrow t = 1$. <span class="b-res">$S(1, 2, 3)$</span>. El rayo no llegaría nunca a la pared si fuera $\vec{n} \circ \vec{u} = 0$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Estudia $g\colon \vec{x} = (1, 0, 1) + t\,(1, 1, 0)$ y $h\colon \vec{x} = (0, 2, 3) + s\,(2, 2, 0)$.</p></div>
+            <div class="b-sol"><p>$\vec{v} = 2\vec{u}$: paralelas. ¿Está $(0, 2, 3)$ en $g$? $z$: $1 = 3$, no. Son paralelas y distintas.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Demuestra que $g\colon \vec{x} = (1, 0, 1) + t\,(1, 1, 0)$ y $h\colon \vec{x} = (0, 0, 4) + s\,(0, 1, -1)$ se cruzan.</p></div>
+            <div class="b-sol"><p>No son paralelas. $1 + t = 0 \Rightarrow t = -1$, $t = s \Rightarrow s = -1$, $1 = 4 - s = 5$: contradicción. Se cruzan.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Calcula el punto de intersección de $g\colon \vec{x} = (1, 1, 0) + t\,(0, 1, 2)$ con $E\colon 2x + 3y + 6z = 12$.</p></div>
+            <div class="b-sol"><p>$2 + 3(1 + t) + 12t = 12 \Rightarrow 15t = 7 \Rightarrow t = \tfrac{7}{15}$. $S\left(1, \tfrac{22}{15}, \tfrac{14}{15}\right) \approx (1;\, 1{,}47;\, 0{,}93)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra que $g\colon \vec{x} = (1, 0, 0) + t\,(1, 1, 1)$ es paralela a $E\colon x + y - 2z = 4$. ¿Está contenida en $E$?</p></div>
+            <div class="b-sol"><p>$\vec{n} \circ \vec{u} = 1 + 1 - 2 = 0$: paralela. Punto base: $1 + 0 - 0 = 1 \neq 4$, luego $g$ no está en $E$; no hay punto de intersección.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1" data-ph="t ="><p class="b-q-text">¿Para qué $t$ corta $t\,(1, 2, 3)$ el plano $x + y + z = 6$?</p><div class="b-sol"><p>$6t = 6$</p></div></div>
+        <div class="b-q" data-mc="3"><p class="b-q-text">Dos rectas no son paralelas y al igualarlas no hay solución. Las rectas …</p>
+            <div class="b-mc"><button>son coincidentes</button><button>son paralelas</button><button>son secantes</button><button>se cruzan</button></div>
+            <div class="b-sol"><p>se cruzan</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Plano y plano" data-toc-k="2" data-toc-short="2 Recta de intersección">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Posición relativa de dos planos, recta de intersección</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Los dos faldones de un tejado a dos aguas están en $x + z = 4$ y $-x + z = 4$. Un punto está en los dos faldones si se cumplen las dos ecuaciones. Si se suman, resulta $2z = 8$; si se restan, $2x = 0$.
+                Es decir, $x = 0$ y $z = 4$, mientras que $y$ queda libre: esa es la <b>cumbrera</b>, la recta $\vec{x} = (0, 0, 4) + t(0, 1, 0)$. Dos ecuaciones con tres incógnitas dejan una incógnita libre,
+                y esta se convierte en el parámetro de la recta de intersección.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · DOS PLANOS</div>
+                <div class="b-text">
+                    <p>Dos planos son <b>paralelos</b> y distintos, <b>coincidentes</b> o se <b>cortan</b> en una recta. Un único punto en común no puede darse.</p>
+                    <p><b>Con la ecuación general:</b> si los primeros miembros son múltiplos uno del otro, decide el segundo miembro: en la misma proporción, coincidentes; si no, paralelos. En cualquier otro caso, los planos se cortan.</p>
+                    <p><b>Recta de intersección:</b> igualar una variable a $t$ y calcular las otras dos a partir de las dos ecuaciones (método de Gauss). Si uno de los planos está en forma paramétrica, se sustituye en la ecuación general del otro, se despeja un parámetro y se vuelve a sustituir.</p>
+                    <p><b>Recta sin parámetros:</b> una recta del espacio es la intersección de dos planos, así que viene dada por <b>dos</b> ecuaciones, por ejemplo $x + z = 4$ y $-x + z = 4$ para la cumbrera.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Rectas de traza:</b> la intersección de un plano con un plano coordenado. Para $x + 2y + 2z = 4$ y $z = 0$: $x + 2y = 4$ en el plano $xy$.</p>
+            <p class="b-note"><b>Tres planos</b> pueden tener exactamente un punto en común, como $x = 1$, $y = 2$, $z = 3$: un sistema de ecuaciones con tres incógnitas y solución única (11.º curso).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿CÓMO ESTÁN DOS PLANOS?</div>
+        <p class="b-help" style="margin:0 0 12px">Introduce dos planos mediante su ecuación general o elige un ejemplo. El widget reconoce planos paralelos y coincidentes y, si no, determina la recta de intersección con una variable libre.</p>
+        <div data-widget="ebenenlage"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · RECTA DE INTERSECCIÓN</div>
+            <div class="b-text"><p>Determina la recta de intersección de $E\colon x + y + z = 6$ y $F\colon x - y = 0$.</p></div>
+            <div class="b-sol"><p>Los primeros miembros no son múltiplos. Toma $x = t$. De $F$: $y = t$. De $E$: $z = 6 - 2t$.</p>
+                <p><span class="b-res">$g\colon \vec{x} = (0, 0, 6) + t(1, 1, -2)$</span>. Con $z = t$ como variable libre sale otra ecuación de la misma recta.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · LA FORMA PARAMÉTRICA SE ENCUENTRA CON LA ECUACIÓN GENERAL</div>
+            <div class="b-text"><p>$E\colon \vec{x} = r(1, 0, 1) + s(0, 1, 0)$ y $F\colon x + y + z = 2$.</p></div>
+            <div class="b-sol"><p>Sustituyendo en $F$: $r + s + r = 2$, es decir, $s = 2 - 2r$. De vuelta en $E$: $\vec{x} = r(1, 0, 1) + (2 - 2r)(0, 1, 0)$.</p>
+                <p><span class="b-res">$g\colon \vec{x} = (0, 2, 0) + r(1, -2, 1)$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Cómo están los planos? a) $2x - y + z = 3$ y $4x - 2y + 2z = 10$ &nbsp; b) $2x - y + z = 3$ y $-4x + 2y - 2z = -6$ &nbsp; c) $2x - y + z = 3$ y $x + y + z = 3$</p></div>
+            <div class="b-sol"><p>a) paralelos y distintos &nbsp; b) coincidentes &nbsp; c) secantes, los primeros miembros no son múltiplos</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina la recta de intersección de $x + 2y - z = 3$ y $2x + y + z = 6$.</p></div>
+            <div class="b-sol"><p>Al sumar se elimina $z$: $3x + 3y = 9$. Con $y = t$: $x = 3 - t$ y $z = x + 2y - 3 = t$. Por tanto, $\vec{x} = (3, 0, 0) + t(-1, 1, 1)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina las rectas de traza del plano $x + 2y + 2z = 4$ con el plano $xy$ y con el plano $yz$.</p></div>
+            <div class="b-sol"><p>Con $z = 0$: $x + 2y = 4$, es decir, $\vec{x} = (4, 0, 0) + t(-2, 1, 0)$. Con $x = 0$: $2y + 2z = 4$, es decir, $\vec{x} = (0, 2, 0) + t(0, -1, 1)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Para qué $a$ son paralelos $x + ay + 2z = 1$ y $2x + 4y + 4z = 5$? ¿Hay algún $a$ para el que sean coincidentes?</p></div>
+            <div class="b-sol"><p>El segundo primer miembro es el doble del primero exactamente para $a = 2$. A la derecha hay 5, no $2 \cdot 1$: paralelos y distintos. Coincidentes, para ningún $a$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>La recta $g$ viene dada sin parámetros por $x - y = 1$ y $z = 2x$. Da una forma paramétrica. ¿Está $P(3, 2, 6)$ en $g$? ¿Dónde atraviesa $g$ el plano $x + y + z = 7$?</p></div>
+            <div class="b-sol"><p>Con $x = t$: $y = t - 1$, $z = 2t$, es decir, $\vec{x} = (0, -1, 0) + t(1, 1, 2)$. $P$ cumple las dos ecuaciones, luego está en $g$. Sustituyendo: $t + t - 1 + 2t = 7$, $t = 2$, punto $(2, 1, 4)$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="4" data-ph="z ="><p class="b-q-text">¿Qué coordenada $z$ tiene el punto de la recta de intersección de $x + y + z = 6$ y $x - y = 0$ con $x = 1$?</p><div class="b-sol"><p>$y = 1$, $z = 4$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">¿Para qué $a$ son paralelos $x + ay + 2z = 1$ y $2x + 4y + 4z = 5$?</p><div class="b-sol"><p>$a = 2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Dos planos distintos no tienen ningún punto en común. ¿Cómo están?</p><div class="b-mc"><button>son paralelas</button><button>se cruzan</button><button>son secantes</button></div><div class="b-sol"><p>Cruzarse sin cortarse solo pueden las rectas.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Ángulos de intersección" data-toc-k="3" data-toc-short="3 Ángulos">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Ángulos de intersección de rectas y planos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El ángulo entre dos rectas ya lo conoces: es el ángulo entre sus vectores directores. En los planos se toman los vectores normales, porque giran junto con los planos.</p></div></div>
+            <div class="b-text"><p>Con una recta y un plano es algo distinto: el vector director forma con el vector normal el ángulo $90° - \varphi$. Por eso ahí aparece el seno en lugar del coseno.
+                Los ángulos de intersección están siempre entre 0° y 90°; por eso se calcula con valores absolutos.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · ÁNGULOS DE INTERSECCIÓN</div>
+                <div class="b-text">
+                    <p><b>Recta–recta:</b> $\cos \varphi = \dfrac{|\vec{u} \circ \vec{v}|}{|\vec{u}| \cdot |\vec{v}|}$</p>
+                    <p><b>Recta–plano:</b> $\sin \varphi = \dfrac{|\vec{n} \circ \vec{u}|}{|\vec{n}| \cdot |\vec{u}|}$</p>
+                    <p><b>Plano–plano:</b> $\cos \varphi = \dfrac{|\vec{n}_1 \circ \vec{n}_2|}{|\vec{n}_1| \cdot |\vec{n}_2|}$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Perpendicular:</b> recta perpendicular a un plano significa $\vec{u} \parallel \vec{n}$; planos perpendiculares entre sí significa $\vec{n}_1 \perp \vec{n}_2$.</p>
+            <p class="b-note"><b>En el elemento interactivo «Una recta corta un plano»</b> de la lección 1 se muestra también el ángulo de intersección.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · RECTA Y PLANO</div>
+            <div class="b-text"><p>¿Con qué ángulo incide el láser $\vec{x} = t\,(1, 2, 3)$ en la pared $x + y + z = 6$?</p></div>
+            <div class="b-sol"><p>$\sin \varphi = \dfrac{|1 + 2 + 3|}{\sqrt3 \cdot \sqrt{14}} = \dfrac{6}{\sqrt{42}} \approx 0{,}926$, <span class="b-res">$\varphi \approx 67{,}8°$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · DOS PLANOS</div>
+            <div class="b-text"><p>¿Qué ángulo forman $x + y + z = 6$ y el plano $xy$, $z = 0$?</p></div>
+            <div class="b-sol"><p>$\vec{n}_1 = (1, 1, 1)$, $\vec{n}_2 = (0, 0, 1)$: $\cos \varphi = \dfrac{1}{\sqrt3}$, <span class="b-res">$\varphi \approx 54{,}7°$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcula el ángulo de intersección de las rectas con vectores directores $(1, 2, 2)$ y $(2, 1, 2)$.</p></div>
+            <div class="b-sol"><p>$\cos \varphi = \tfrac{8}{9}$, $\varphi \approx 27{,}3°$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>¿Con qué ángulo corta el plano $xy$ una recta de dirección $(1, 0, 1)$?</p></div>
+            <div class="b-sol"><p>$\sin \varphi = \tfrac{1}{\sqrt2}$, $\varphi = 45°$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Calcula el ángulo entre $E_1\colon 2x + y + 2z = 6$ y $E_2\colon x - 2y + 2z = 1$.</p></div>
+            <div class="b-sol"><p>$\cos \varphi = \tfrac{|2 - 2 + 4|}{3 \cdot 3} = \tfrac49$, $\varphi \approx 63{,}6°$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un faldón de tejado pasa por los puntos de la cumbrera $(0, 0, 6)$, $(0, 10, 6)$ y por el punto del alero $(4, 0, 3)$. ¿Qué inclinación tiene el tejado (ángulo con la horizontal)?</p></div>
+            <div class="b-sol"><p>Vectores directores $(0, 10, 0)$ y $(4, 0, -3)$, $\vec{n} = (-30, 0, -40) \parallel (3, 0, 4)$. Con $z = 0$: $\cos \varphi = \tfrac{4}{5}$, $\varphi \approx 36{,}9°$.</p></div>
+        </div>
+    </div>
+
+    <h3>PARA EL CURSO AVANZADO</h3>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Justifica</b> la fórmula del ángulo entre una recta y un plano: ¿por qué aparece $\sin \varphi$ y no $\cos \varphi$? Haz un esbozo con $\vec{u}$, $\vec{n}$ y $\varphi$.</p></div>
+            <div class="b-sol"><p>$\vec{n}$ es perpendicular al plano. El ángulo $\psi$ entre $\vec{u}$ y $\vec{n}$ completa hasta 90° el ángulo buscado $\varphi$ entre la recta y el plano: $\psi = 90° - \varphi$.
+                Por tanto, $\cos \psi = \cos(90° - \varphi) = \sin \varphi$, y $\cos \psi$ lo da el producto escalar. El valor absoluto hace que $\varphi$ esté entre 0° y 90°.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>La recta $g_a\colon \vec{x} = (0, 0, 0) + t\,(1, a, 1)$ corta el plano $xy$. ¿Para qué valores de $a$ el ángulo de intersección mide exactamente 30°? ¿Hay algún $a$ para el que mida 60°?</p></div>
+            <div class="b-hint"><p>$\sin \varphi = \dfrac{1}{\sqrt{2 + a^2}}$ con $\vec{n} = (0, 0, 1)$.</p></div>
+            <div class="b-sol"><p>$\dfrac{1}{\sqrt{2 + a^2}} = \tfrac12 \iff 2 + a^2 = 4$: <span class="b-res">$a = \pm\sqrt2$</span>.</p>
+                <p>60° exige $\dfrac{1}{\sqrt{2 + a^2}} = \tfrac{\sqrt3}{2}$, es decir, $2 + a^2 = \tfrac43 &lt; 2$: imposible. El ángulo mayor es 45°, con $a = 0$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="54,74" data-tol="0.1" data-ph="grados"><p class="b-q-text">¿Ángulo entre $x + y + z = 6$ y $z = 0$?</p><div class="b-sol"><p>$\approx 54{,}74°$</p></div></div>
+        <div class="b-q" data-ans="90" data-tol="0.1" data-ph="grados"><p class="b-q-text">¿Ángulo entre las rectas de direcciones $(1, 1, 0)$ y $(1, -1, 1)$?</p><div class="b-sol"><p>Producto escalar 0: 90°</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Da la ecuación general del plano que pasa por $(0, 0, 0)$ con vector normal $(1, -1, 2)$.</p></div>
+            <div class="b-sol"><p>$x - y + 2z = 0$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Un dron vuela sobre $g\colon \vec{x} = (0, 0, 1) + t\,(2, 1, 0{,}5)$ (km). Una ladera se describe mediante $E\colon x + y + 4z = 20$. ¿Tras qué distancia de vuelo llega a la ladera?</p></div>
+            <div class="b-sol"><p>$2t + t + 4 + 2t = 20 \Rightarrow t = 3{,}2$. Distancia $3{,}2 \cdot |(2, 1, 0{,}5)| = 3{,}2 \cdot \sqrt{5{,}25} \approx 7{,}33$ km.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>El tejado a dos aguas de la exploración: $E_1\colon x + z = 4$, $E_2\colon -x + z = 4$. Determina la cumbrera, la inclinación de cada faldón respecto a la horizontal y el ángulo entre los faldones.</p></div>
+            <div class="b-sol"><p>Cumbrera: $x = 0$, $z = 4$, es decir, $\vec{x} = (0, 0, 4) + t\,(0, 1, 0)$. Inclinación: $\cos \varphi = \tfrac{|(1, 0, 1) \circ (0, 0, 1)|}{\sqrt2} = \tfrac{1}{\sqrt2}$, 45° cada uno.
+                Entre los planos: $\cos \varphi = \tfrac{|-1 + 0 + 1|}{2} = 0$, <span class="b-res">90°</span>: los faldones son perpendiculares entre sí.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Ejercicio abierto:</b> da una recta que corte el plano $E\colon x + y + z = 6$ formando 90°, una que esté contenida en $E$ y una que sea paralela a $E$ y distinta de ella. ¿Puede una recta cruzarse con un plano? Justifícalo.</p></div>
+            <div class="b-sol"><p>Cruzarse solo pueden dos rectas. Una recta y un plano se cortan, son paralelos o la recta está contenida en el plano.
+                Ejemplos: perpendicular $\vec{x} = t\,(1, 1, 1)$ (punto de intersección $(2, 2, 2)$) · en $E$: $\vec{x} = (6, 0, 0) + t\,(1, -1, 0)$ · paralela: $\vec{x} = (0, 0, 0) + t\,(1, -1, 0)$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: la luz en los videojuegos" data-toc-k="X" data-toc-short="Luz">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">VECTORES NORMALES EN CADA IMAGEN</span></div>
+    <h2>Cómo calcula la luz un ordenador</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Cada superficie de un videojuego o de una película de animación está formada por muchos triángulos pequeños, pequeños trozos de plano. Lo claro que se ve un triángulo depende
+                de lo inclinada que le llegue la luz. Para ello, el chip gráfico calcula para cada triángulo el <b>vector normal</b> y hace el <b>producto escalar</b> con la dirección de la luz.</p>
+            <p>La regla que hay detrás la describió ya en 1760 el matemático Johann Heinrich Lambert: una superficie mate se ve tanto más clara cuanto mayor es el coseno del ángulo entre la normal y la dirección de la luz.
+                También las imágenes 3D de este libro se iluminan así: millones de productos escalares por segundo.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Johann Heinrich Lambert: Photometria sive de mensura et gradibus luminis, colorum et umbrae. Augsburgo 1760.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>RECTA–RECTA</h4><p>coincidentes · paralelas · secantes · se cruzan</p></div>
+        <div><p>$S(3, 2, 1)$</p></div></div>
+    <div class="b-rueck"><div><h4>RECTA–PLANO</h4><p>Sustituir. $\vec{n} \circ \vec{u} = 0$: paralelos.</p></div>
+        <div><p>Láser: $S(1, 2, 3)$</p></div></div>
+    <div class="b-rueck"><div><h4>PLANO–PLANO</h4><p>paralelos · coincidentes · secantes en una recta; rectas de traza con los planos coordenados</p></div>
+        <div><p>$x + y + z = 6$, $x - y = 0$: $(0, 0, 6) + t\,(1, 1, -2)$</p></div></div>
+    <div class="b-rueck"><div><h4>ÁNGULOS DE INTERSECCIÓN</h4><p>Direcciones: $\cos$ · recta y plano: $\sin$ con $\vec{n}$ · planos: $\cos$ de las normales</p></div>
+        <div><p>Láser y pared: 67,8°</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">¿Para qué $a$ son paralelos $x + ay + 2z = 1$ y $2x + 4y + 4z = 5$?</p><div class="b-sol"><p>$a = 2$</p></div></div>
+            <div class="b-q" data-ans="45" data-tol="0.1" data-ph="grados"><p class="b-q-text">¿Con qué ángulo corta el plano $xy$ una recta de dirección $(1, 0, 1)$?</p><div class="b-sol"><p>$\sin \varphi = \tfrac{1}{\sqrt2}$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="63,6" data-tol="0.1" data-ph="grados"><p class="b-q-text">¿Ángulo entre $2x + y + 2z = 6$ y $x - 2y + 2z = 1$?</p><div class="b-sol"><p>$\cos \varphi = \tfrac49$</p></div></div>
+            <div class="b-q" data-ans="3,2" data-tol="0.0001" data-ph="t ="><p class="b-q-text">Dron $(0, 0, 1) + t\,(2, 1, 0{,}5)$ y ladera $x + y + 4z = 20$: ¿qué $t$?</p><div class="b-sol"><p>$5t + 4 = 20$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$\vec{n} \circ \vec{u} = 0$ para una recta y un plano significa que …</p>
+                <div class="b-mc"><button>la recta es perpendicular al plano</button><button>la recta es paralela al plano</button><button>se cortan en el origen</button></div>
+                <div class="b-sol"><p>La dirección de la recta es perpendicular a la normal.</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-gerade-ebene.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RECTA Y PLANO</span><span class="b-lab-what">Posición y punto de intersección</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-ebene-ebene.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANO Y PLANO</span><span class="b-lab-what">Recta de intersección</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-schnittwinkel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ÁNGULOS DE INTERSECCIÓN</span><span class="b-lab-what">Rectas y planos</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-vektoren-anwendungen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTORES: APLICACIONES</span><span class="b-lab-what">Posición y puntos de intersección</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 13.º curso, curso avanzado · Optativa obligatoria 1 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-es/vektoren.js"></script>
+<script src="../../js/buch-gy11lk-vek.js"></script>
+<script src="../../js/buch-es/gy11lk-vek.js"></script>
+</body>
+</html>
