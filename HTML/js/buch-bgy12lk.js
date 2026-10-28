@@ -79,8 +79,8 @@
         seg(ctl2, [['le', 'P(X ≤ b)'], ['gt', 'P(X > b)'], ['ab', 'P(a < X ≤ b)']], mode, v => { mode = v; draw(); }, 'Gesuchte Wahrscheinlichkeit');
         const help = div(box, 'b-help');
         const sl = div(box, '');
-        const p1 = new B.Plot(div(box, ''), { height: 190, yLabel: 'P', aria: 'Wahrscheinlichkeitsfunktion als Stabdiagramm' });
-        const p2 = new B.Plot(div(box, ''), { height: 230, yLabel: 'F', aria: 'Verteilungsfunktion als Treppenfunktion' });
+        const p1 = new B.Plot(div(box, ''), { height: 190, xStep: 1, yLabel: 'P', aria: 'Wahrscheinlichkeitsfunktion als Stabdiagramm' });
+        const p2 = new B.Plot(div(box, ''), { height: 230, xStep: 1, yLabel: 'F', aria: 'Verteilungsfunktion als Treppenfunktion' });
         const out = div(box, 'b-out');
         out.style.marginTop = '12px';
         let ra = null, rb = null;
