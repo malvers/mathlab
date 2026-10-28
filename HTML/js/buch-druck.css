@@ -60,7 +60,7 @@ body.b-print { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .d-gruss { page: front; break-after: page; }
 .d-gruss-foto { float: right; width: 50mm; height: 50mm; object-fit: cover; object-position: 50% 30%; border-radius: 8px; margin: 0 0 5mm 8mm; }
 .d-gruss .b-text p { font-size: 11pt; line-height: 1.55; margin: 0 0 9pt; font-family: Raleway, sans-serif; }   /* a letter: "100 Labs" in text figures, not Lab Ziffern */
-.d-gruss-sig { clear: both; margin: 10mm 0 0; font-size: 10.5pt; line-height: 1.5; color: #3a4558; }
+.d-gruss-sig { clear: both; margin: 4mm 0 0; font-size: 10.5pt; line-height: 1.5; color: #3a4558; }
 .d-gruss-sig b { font-family: 'Orbitron', sans-serif; font-size: 11pt; color: #0e244e; }
 /* the imprint (js/buch-druck.js impressum()): page 2, the back of the foreword - plain and small, as an imprint is */
 .d-impressum { page: front; break-after: page; font-family: Raleway, sans-serif; color: #18223a; }
@@ -72,6 +72,14 @@ body.b-print { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .d-impressum dd { margin: 0; }
 .d-impressum .d-qr { font-size: 10pt; color: #18223a; }
 .d-impressum .d-qr svg { width: 50pt; height: 50pt; }
+/* the how-to page: paper and screen as one book (js/buch-druck.js onlineBuch) */
+.d-online-buch { display: grid; grid-template-columns: 1fr auto; gap: 4pt 14pt; align-items: end; margin: 12pt 0 0; padding: 10pt 12pt;
+    border-left: 3pt solid rgb(245, 194, 66); background: #f6f8fc; border-radius: 0 8px 8px 0; }
+.d-online-buch h2 { grid-column: 1 / -1; margin: 0 0 2pt; font-family: 'Orbitron', sans-serif; font-size: 11pt; color: #0e244e; }
+.d-online-buch p { margin: 0 0 6pt; font-size: 10.5pt; line-height: 1.5; }
+.d-online-buch p:last-child { margin-bottom: 0; }
+.d-online-buch .d-qr { flex-direction: column; text-align: center; gap: 4pt; }
+.d-online-buch .d-qr svg { width: 56pt; height: 56pt; }
 .d-imp-copy { margin: 18pt 0 0; font-size: 10pt; color: #4c5b75; }
 .d-toc-list { list-style: none; margin: 0; padding: 0; }
 .d-toc-list li { border-bottom: 1px dotted #b8c3d4; }
@@ -93,7 +101,9 @@ body.b-print { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .d-qr { flex: 0 0 auto; display: flex; gap: 8pt; align-items: center; text-decoration: none; color: #4c5b75; font-size: 7.5pt; line-height: 1.35; }
 .d-qr svg { width: 62pt; height: 62pt; }
 .d-qr svg path, .d-qr svg rect[fill="black"] { fill: #0e244e; }
-.d-online { margin: 8pt 0 0; font-size: 8.5pt; color: #6d8199; font-style: italic; }
+.d-online { display: flex; justify-content: space-between; align-items: center; gap: 12pt; margin: 8pt 0 0; font-size: 8.5pt; color: #6d8199; font-style: italic; text-decoration: none; }
+.d-online svg { flex: 0 0 auto; width: 44pt; height: 44pt; }
+.d-online svg path, .d-online svg rect[fill="black"] { fill: #0e244e; }
 img.d-frozen { display: block; max-width: 100%; height: auto; border-radius: 6px; }
 
 /* the screen layout, flattened for paper */
@@ -134,6 +144,29 @@ body.b-print .st-tree { min-width: 0 !important; max-width: 100%; height: auto; 
 body.b-print .b-foto { break-inside: avoid; }
 body.b-print .b-foto figcaption { font-size: 7pt; }
 body.b-print .b-foto-breit img { aspect-ratio: 21 / 7; }
+/* a display formula a little tighter on paper: 1.6 px too much sent p. 8's formula alone onto the next page (28.10.2026) */
+body.b-print .katex-display { margin: 0.6em 0; }
+/* ---- white space at the foot of a page (js/buch-druck.js fillGaps, after Paged.js has set the pages) ---- */
+.d-luecke { position: absolute; left: 0; right: 0; }
+.d-gequetscht { position: absolute; left: 0; right: 0; margin: 0; }
+.d-gequetscht img { aspect-ratio: auto !important; object-fit: cover; }
+.d-luecke-fotos { display: flex; justify-content: center; gap: 6mm; }
+.d-luecke-fotos figure { margin: 0; }
+.d-luecke-fotos img { display: block; width: 100%; object-fit: cover; border-radius: 8px; }
+.d-luecke-fotos figcaption { margin-top: 2mm; font-size: 7pt; line-height: 1.35; color: #6d8199; }
+.d-luecke-fotos figcaption b { font-size: 8.5pt; font-weight: 600; color: #3a4558; }
+.d-luecke-fotos figcaption a { color: inherit; }
+.d-luecke-fotos figure.d-seite { display: flex; align-items: flex-end; gap: 6mm; }
+.d-luecke-fotos figure.d-seite figcaption { margin: 0; flex: 0 0 auto; }
+.d-notiz-h { margin: 0 0 4mm; font-family: 'Orbitron', sans-serif; font-size: 8pt; letter-spacing: 1.4px; text-transform: uppercase; color: rgb(226, 120, 0); }
+.d-notiz-h span { margin-left: 10pt; font-family: Raleway, sans-serif; font-size: 9pt; letter-spacing: 0; text-transform: none; color: #6d8199; }
+.d-luecke-notiz svg { display: block; }
+.d-luecke-notiz line { stroke: #c9d3e2; stroke-width: 0.12; }
+.d-buecher-h { margin: 0 0 4mm; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 9pt; letter-spacing: 1.4px; color: #0e244e; }
+.d-buecher { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3mm 0; justify-items: center; perspective: 900px; }
+.d-buecher img { height: var(--h); width: auto; border-radius: 2px 4px 4px 2px; transform: rotateY(-24deg); transform-origin: left center;
+    box-shadow: 4px 5px 9px rgba(14, 36, 78, 0.35); }
+.d-buecher img.d-dieses { outline: 2px solid rgb(245, 194, 66); outline-offset: 2px; }
 body.b-print .b-check-score { display: none; }
 body.b-print .b-answer { margin: 6pt 0 2pt; padding-top: 14pt; border-bottom: 1px solid #b8c3d4; width: 60%; font-size: 9pt; color: #6d8199; }
 body.b-print .b-mc { display: block; }
@@ -201,6 +234,9 @@ html.d-ov.d-ov-ready .d-ov-no {
 html.d-ov.d-ov-ready .pagedjs_page.d-ov-cur .d-ov-no { background: rgb(245, 194, 66); color: #071630; }
 /* a sheet as a picture (tools/buch-seiten/seitenbilder.mjs): image, size and position of its sprite come inline */
 html.d-ov .d-ov-bild { background-color: #fff; background-repeat: no-repeat; }
+/* the sheet under the mouse, large on the other half of the screen (js/buch-druck.js, which places it) */
+html.d-ov.d-ov-ready .d-ov-lupe .pagedjs_page { box-shadow: 0 0 0 2px rgb(245, 194, 66), 0 12px 60px rgba(0, 0, 0, 0.65); }
+html.d-ov.d-ov-ready .d-ov-lupe .d-ov-no { display: none; }
 /* phones: html.d-ov-narrow from js/buch-druck.js - Paged.js drops @media rules of the sheets it takes over */
 html.d-ov-narrow .d-bar { gap: 8px; padding: 8px 12px; }
 html.d-ov-narrow .d-ov-hint { display: none; }                      /* the hint line: no room on a phone, the tiles say it */

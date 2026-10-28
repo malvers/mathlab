@@ -12,8 +12,10 @@
  */
 import { chromium } from '../../videopipeline/node_modules/playwright/index.mjs';
 
-const [BOOK, BASE = 'https://docalvers.de'] = process.argv.slice(2);
-if (!BOOK || !/^[a-z0-9-]+$/.test(BOOK)) { console.error('usage: node tools/kdp/druckcheck.mjs <buch> [basis-url]'); process.exit(1); }
+// --letter / --a4: the other page format than the book's own (kapitel.js format)
+const args = process.argv.slice(2), FMT = args.includes('--letter') ? 'letter' : args.includes('--a4') ? 'a4' : '';
+const [BOOK, BASE = 'https://docalvers.de'] = args.filter(a => !a.startsWith('--'));
+if (!BOOK || !/^[a-z0-9-]+$/.test(BOOK)) { console.error('usage: node tools/kdp/druckcheck.mjs <buch> [basis-url] [--letter | --a4]'); process.exit(1); }
 
 const browser = await chromium.launch({ headless: true, args: ['--mute-audio'] });
 let found = 0;
@@ -22,7 +24,7 @@ try {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error' && /Layout repeated|Overflow/i.test(m.text())) errors.push(m.text()); });
-    await page.goto(BASE.replace(/\/$/, '') + '/buch/' + BOOK + '/druck.html', { waitUntil: 'load', timeout: 120000 });
+    await page.goto(BASE.replace(/\/$/, '') + '/buch/' + BOOK + '/druck.html' + (FMT ? '?format=' + FMT : ''), { waitUntil: 'load', timeout: 120000 });
     await page.waitForSelector('body.d-ready', { timeout: 400000 });
     const r = await page.evaluate(() => {
         const KEEP = 'h1, h2, h3, h4, .b-band, .d-loes-h, .d-loes-t';             // the same list as in js/buch-druck.js

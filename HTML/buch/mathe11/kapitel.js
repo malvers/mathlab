@@ -5,6 +5,10 @@
 window.BUCH = {
     title: 'Mathematik · Berufliches Gymnasium 11',
     short: 'Mathematik 11',
+    // the page format of the print edition (js/buch-druck.js; default A4): US Letter, as KDP prints Standard Color only in
+    // Letter - first this book, to see a proof (Doc, 28.10.2026: "wir machen im Moment nur das BGY11 als Letter … Ansonsten
+    // würden wir einen Switchback to A4 machen")
+    format: 'letter',
     description: 'Interaktives Lehrbuch Mathematik für das Berufliche Gymnasium, Klasse 11 (Sachsen): Gleichungen, Funktionen, Gleichungssysteme, Wahrscheinlichkeit und Numerik, mit Labs, Simulationen und Selbsttests mit sofortiger Rückmeldung.',
     chapters: [
         { file: 'lb2.html', lb: 'Lernbereich 2', k: '2', title: 'Gleichungen, Formeln, Figuren',

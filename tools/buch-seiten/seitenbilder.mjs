@@ -8,6 +8,8 @@
  *     node tools/buch-seiten/seitenbilder.mjs --alle                   every book whose pictures are out of date
  *     --basis http://localhost:8765   render another site than https://docalvers.de (a test: the pictures then show that state)
  *     --nur-lokal                     no upload, the files stay in the temp folder
+ *     --letter | --a4                 the other page format (druck.html?format=…) into buch/seiten/<buch>-letter|-a4/; a book's
+ *                                     own format (kapitel.js format, default A4) goes into buch/seiten/<buch>/ as always
  *
  * In the R2 bucket "media" (as the book photos, tools/media_publish.mjs), folder buch/seiten/<buch>/:
  *   seiten.json   page size, fingerprint, sprite layout, and per page the jump targets (data-ziel) of its blocks
@@ -26,14 +28,17 @@
 import { chromium } from '../../videopipeline/node_modules/playwright/index.mjs';
 import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, writeFileSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const MEDIA = 'https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/';        // the same bucket as MEDIA in js/buch.js
-const KEY = book => 'buch/seiten/' + book + '/';
+const FORCE = process.argv.includes('--letter') ? 'letter' : process.argv.includes('--a4') ? 'a4' : '';
+const own = book => /format:\s*'letter'/.test(readFileSync(path.join(ROOT, 'HTML/buch', book, 'kapitel.js'), 'utf8')) ? 'letter' : 'a4';
+const other = book => FORCE && FORCE !== own(book) ? FORCE : '';          // the format asked for, when it is not the book's own
+const KEY = book => 'buch/seiten/' + book + (other(book) ? '-' + other(book) : '') + '/';
 // what changes the pages besides the book itself
 const LAYOUT = ['js/buch.css', 'js/buch-titel.css', 'js/buch-druck.css', 'js/buch-druck.js', 'js/buch-gruss.js'];
 const SW = 200;                                 // width of a page in the small sprite, px
@@ -73,9 +78,12 @@ async function fingerprint(book) {
     // the photos: only this book's places and the credits of its photos - a photo in another book changes nothing here
     const fx = { window: {} };
     vm.runInNewContext(await get('js/buch-fotos.js'), fx);
-    const F = fx.window.BUCH_FOTOS, mine = F && F.books[book.replace(/-(en|es|it|fr)$/, '')] || {};
-    const used = [...new Set(Object.values(mine).flat().map(p => p.foto))].sort();
-    h.update(JSON.stringify(mine) + JSON.stringify(used.map(n => F.fotos[n] || null)));
+    const F = fx.window.BUCH_FOTOS, base = book.replace(/-(en|es|it|fr)$/, ''), mine = F && F.books[base] || {};
+    // and the pictures in white space (js/buch-druck.js fillGaps): this book's gaps and the front pages of every book
+    const gaps = (F && F.luecken && F.luecken[base]) || {}, vorn = (F && F.vorn) || {};
+    const used = [...new Set([...Object.values(mine).flat().map(p => p.foto),
+        ...Object.values(gaps).flatMap(m => Object.values(m)).flat(2), ...Object.values(vorn).flat(2)])].sort();
+    h.update(JSON.stringify(mine) + JSON.stringify(gaps) + JSON.stringify(vorn) + JSON.stringify(used.map(n => F.fotos[n] || null)));
     return h.digest('hex').slice(0, 16);
 }
 
@@ -103,7 +111,7 @@ async function render(browser, book, v, out) {
         const page = await ctx.newPage();
         const errors = [];
         page.on('pageerror', e => errors.push(e.message));
-        await page.goto(BASE + '/buch/' + book + '/druck.html', { waitUntil: 'load', timeout: 120000 });
+        await page.goto(BASE + '/buch/' + book + '/druck.html' + (other(book) ? '?format=' + other(book) : ''), { waitUntil: 'load', timeout: 120000 });
         await page.waitForSelector('body.d-ready', { timeout: 600000 });
         // the status bar and the LOCAL badge must not land on a sheet
         await page.addStyleTag({ content: '.d-bar, #local-badge { display: none !important; }' });
@@ -223,7 +231,7 @@ async function upload(book, out, json) {
 // ---------- which books ----------
 let todo = named.length ? named : null;
 if (!todo && !args.includes('--alle')) {
-    console.error('node tools/buch-seiten/seitenbilder.mjs <buch> [<buch> …] | --alle   [--basis URL] [--nur-lokal]');
+    console.error('node tools/buch-seiten/seitenbilder.mjs <buch> [<buch> …] | --alle   [--basis URL] [--nur-lokal] [--letter | --a4]');
     process.exit(1);
 }
 if (LIVE) for (let k = 0; deploying(); k++) {
@@ -252,7 +260,7 @@ try {
         // the fingerprint before the pages: a deploy during the run leaves the old one, and the next --alle comes back
         let v;
         try { v = await fingerprint(book); } catch (e) { failed++; console.error(book + ': ' + e.message); continue; }
-        const out = path.join(os.tmpdir(), 'seitenbilder', book);
+        const out = path.join(os.tmpdir(), 'seitenbilder', book + (other(book) ? '-' + other(book) : ''));
         mkdirSync(out, { recursive: true });
         try {
             console.log(book + ': setzen …');

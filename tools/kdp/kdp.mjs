@@ -1,7 +1,7 @@
 /**
  * kdp.mjs — the two print files Amazon KDP needs for a book of the online textbook (HTML/buch/<buch>/)
  *
- *     node tools/kdp/kdp.mjs mathe11 [zielordner] [--standard]
+ *     node tools/kdp/kdp.mjs mathe11 [zielordner] [--standard | --premium] [--letter | --a4] [--basis=http://localhost:8765]
  *
  * Doc, 09.10.2026: first proof print of "Mathematik · Berufliches Gymnasium 11" through KDP —
  * "Die Scripts, die brauchen wir." The PDFs themselves are made for KDP only and change with every edit of
@@ -15,23 +15,31 @@
  *                         the barcode field (bottom right of the back, 2 × 1.2 in) stays empty, KDP prints it
  *
  * Matching KDP settings: trim 8.27 x 11.69 in (A4), No Bleed, Premium Color (spine 0.002347 in per page);
- * --standard for Standard Color or white paper (0.002252 in per page). Needs qpdf (Homebrew) for the page count
+ * --standard for Standard Color or white paper (0.002252 in per page). Standard Color exists only in US Letter, not in A4:
+ * a book whose kapitel.js says format: 'letter' (Mathe 11 since 28.10.2026) gets trim 8.5 x 11 in and the Standard Color
+ * spine by itself (--premium for the other); --letter / --a4 try the other format (druck.html?format=…). --basis renders
+ * another site than docalvers.de (a test before the push); the QR code on the back always points to the live book. Needs qpdf (Homebrew) for the page count
  * and to drop the cover page. The interior is ~20 MB: above the 10 MB upload limit of Claude in Chrome, so that
  * one goes up by hand (Cmd+Shift+G in the file dialog).
  */
 import { chromium } from '../../videopipeline/node_modules/playwright/index.mjs';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
 const args = process.argv.slice(2), plain = args.filter(a => !a.startsWith('--'));
 const BOOK = plain[0];
-if (!BOOK || !/^[a-z0-9-]+$/.test(BOOK)) { console.error('usage: node tools/kdp/kdp.mjs <buch> [zielordner] [--standard]'); process.exit(1); }
-const OUT = path.resolve(plain[1] || path.join(os.tmpdir(), 'kdp-' + BOOK));
-const PER_PAGE = args.includes('--standard') ? 0.002252 : 0.002347;     // spine thickness per page in inch (KDP)
-const BLEED = 0.125, TW = 8.27, TH = 11.69;                             // KDP trim "A4", inch
-const BASE = 'https://docalvers.de/buch/' + BOOK + '/';
+if (!BOOK || !/^[a-z0-9-]+$/.test(BOOK)) { console.error('usage: node tools/kdp/kdp.mjs <buch> [zielordner] [--standard] [--letter] [--basis=url]'); process.exit(1); }
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
+const OWN = /format:\s*'letter'/.test(readFileSync(path.join(ROOT, 'HTML/buch', BOOK, 'kapitel.js'), 'utf8')) ? 'letter' : 'a4';
+const FORMAT = args.includes('--letter') ? 'letter' : args.includes('--a4') ? 'a4' : OWN, LETTER = FORMAT === 'letter';
+const OUT = path.resolve(plain[1] || path.join(os.tmpdir(), 'kdp-' + BOOK + (LETTER ? '-letter' : '')));
+const STANDARD = args.includes('--standard') || (LETTER && !args.includes('--premium'));
+const PER_PAGE = STANDARD ? 0.002252 : 0.002347;                        // spine thickness per page in inch (KDP)
+const BLEED = 0.125, TW = LETTER ? 8.5 : 8.27, TH = LETTER ? 11 : 11.69; // KDP trim US Letter or "A4", inch
+const SITE = (args.find(a => a.startsWith('--basis='))?.slice(8) || 'https://docalvers.de').replace(/\/$/, '');
+const BASE = SITE + '/buch/' + BOOK + '/', LIVE = 'https://docalvers.de/buch/' + BOOK + '/';
 mkdirSync(OUT, { recursive: true });
 const raw = path.join(OUT, BOOK + '-roh.pdf'), interior = path.join(OUT, BOOK + '-innenteil.pdf'), coverPdf = path.join(OUT, BOOK + '-umschlag.pdf');
 
@@ -42,7 +50,7 @@ try {
     page.on('pageerror', e => console.log('pageerror:', e.message));
 
     // ---------- interior ----------
-    await page.goto(BASE + 'druck.html', { waitUntil: 'load', timeout: 120000 });
+    await page.goto(BASE + 'druck.html' + (FORMAT === OWN ? '' : '?format=' + FORMAT), { waitUntil: 'load', timeout: 120000 });
     await page.waitForSelector('body.d-ready', { timeout: 300000 });
     console.log('druck.html:', await page.textContent('#d-status'));
     await page.evaluate(() => document.documentElement.classList.remove('d-screen'));   // what "beforeprint" does (js/buch-druck.js)
@@ -127,7 +135,7 @@ html, body { margin: 0; padding: 0; background: #040a18; -webkit-print-color-adj
 <script>
   document.getElementById('k-list').innerHTML = BUCH.chapters.map(c => '<li><b>' + c.k + '</b>' + c.title + '</li>').join('');
   document.getElementById('k-sp').innerHTML = BUCH.title.toUpperCase().replace(/(\\d+)$/, '<b>$1</b>');
-  const q = qrcode(0, 'M'); q.addData('${BASE}index.html'); q.make();
+  const q = qrcode(0, 'M'); q.addData('${LIVE}index.html'); q.make();
   document.getElementById('k-qr').innerHTML = q.createSvgTag({ cellSize: 3, margin: 0, scalable: true });
   Buch.render(document.querySelector('.k-front'), { print: true });
 </script>

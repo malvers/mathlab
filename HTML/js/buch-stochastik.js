@@ -463,6 +463,9 @@
         });
         addEventListener('resize', draw);
         if (window.ResizeObserver) new ResizeObserver(draw).observe(canvas);
+        // on paper 500 throws are already made, so the frequency is seen settling down (Doc, 28.10.2026, on the Letter
+        // proof: "da müsste man wahrscheinlich irgendwie ein paar Daten reinmalen im Print")
+        if (window.Buch.printing && window.Buch.printing()) run(500);
         stats(); draw();
     });
 

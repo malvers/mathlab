@@ -333,22 +333,28 @@
         sc.onload = sc.onerror = () => done();
         document.head.appendChild(sc);
     });
+    // one photo of the list: its address, alt text (also a caption) and credit line in the book's language (also js/buch-druck.js)
+    function fotoInfo(name) {
+        const F = window.BUCH_FOTOS, f = F && F.fotos[name];
+        if (!f) return null;
+        const lic = f.license === 'public domain' ? t('gemeinfrei', 'public domain', 'dominio público', 'pubblico dominio', 'domaine public') : f.license;
+        // "Bild", not "Foto": photos, paintings and engravings alike; an unknown artist is left out
+        return { src: FOTO_DIR + name + '.jpg', alt: (f.alt && (f.alt[LANG] || f.alt.de)) || '',
+            credit: t('Bild: ', 'Image: ', 'Imagen: ', 'Immagine: ', 'Image : ') + (f.artist ? f.artist + ' · ' : '') + lic +
+                ' · <a href="' + f.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>' };
+    }
     function fotos(root, file, print) {
         const F = window.BUCH_FOTOS, list = F && F.books[BOOK] && F.books[BOOK][file];
         if (!list) return;
         list.forEach(p => {
-            const f = F.fotos[p.foto], at = root.querySelector(p.at);
+            const f = fotoInfo(p.foto), at = root.querySelector(p.at);
             if (!f || !at || at.dataset.foto === p.foto) return;
             at.dataset.foto = p.foto;
             const fig = document.createElement('figure');
             fig.className = 'b-foto ' + (p.wide ? 'b-foto-breit' : 'b-foto-rechts');
             if (!p.wide) fig.style.width = (p.w || 40) + '%';
-            const lic = f.license === 'public domain' ? t('gemeinfrei', 'public domain', 'dominio público', 'pubblico dominio', 'domaine public') : f.license;
-            const alt = ((f.alt && (f.alt[LANG] || f.alt.de)) || '').replace(/"/g, '&quot;');
-            // "Bild", not "Foto": photos, paintings and engravings alike; an unknown artist is left out
-            fig.innerHTML = '<img src="' + FOTO_DIR + p.foto + '.jpg" alt="' + alt + '"' + (print ? '' : ' loading="lazy"') + (p.pos ? ' style="object-position:' + p.pos + '"' : '') + '>' +
-                '<figcaption>' + t('Bild: ', 'Image: ', 'Imagen: ', 'Immagine: ', 'Image : ') + (f.artist ? f.artist + ' · ' : '') + lic +
-                ' · <a href="' + f.page + '" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption>';
+            fig.innerHTML = '<img src="' + f.src + '" alt="' + f.alt.replace(/"/g, '&quot;') + '"' + (print ? '' : ' loading="lazy"') + (p.pos ? ' style="object-position:' + p.pos + '"' : '') + '>' +
+                '<figcaption>' + f.credit + '</figcaption>';
             if (p.put === 'after') at.after(fig);
             else { at.prepend(fig); at.classList.add('b-mit-foto'); }
         });
@@ -525,6 +531,7 @@
             frame = document.createElement('iframe');
             frame.title = t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée');
             frame.src = 'druck.html?uebersicht';
+            frame.allow = 'fullscreen';                                  // the overview's full-screen button (js/buch-druck.js)
             ov.appendChild(frame);
             document.body.appendChild(ov);
         }
@@ -707,5 +714,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 
-    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotosReady, media: MEDIA, gruss, grussHtml, grussTitel };
+    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotoInfo, fotosReady, book: BOOK, media: MEDIA, gruss, grussHtml, grussTitel };
 })();

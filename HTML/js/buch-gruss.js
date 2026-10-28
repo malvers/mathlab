@@ -20,7 +20,7 @@
                 'docalvers.de kostenlos, werbefrei und ohne Anmeldung. Niemand sammelt dabei deine Daten. Auch die Videos auf meinem YouTube-Kanal ' +
                 '(youtube.com/@docalvers) stehen dir frei zur Verfügung.',
                 // counts that do not go stale (Doc, 27.10.2026: "das sind ja heute schon 150 … weit über"): 126 labs live then, 21 books
-                'Ich bin Physiker, habe ein Software-Unternehmen gegründet und unterrichte heute Mathematik und Informatik in Dresden. Das Mathe-Labor ' +
+                'Ich bin Physiker, habe ein Software-Unternehmen gegründet und unterrichte heute Mathematik und Informatik in Dresden, in Sachsen, in Deutschland. Das Mathe-Labor ' +
                 'baue ich aus freien Stücken. Ich stecke Zeit und Geld hinein, weil ich überzeugt bin, dass sich diese Investition lohnt: in dich und in ' +
                 'bessere Bildung für alle. Geholfen hat mir dabei ein ungewöhnliches Team – KI-Agenten, die nach meinen Vorgaben programmieren, zeichnen, ' +
                 'rechnen und übersetzen. So sind weit über 100 interaktive Labs und mehr als 20 Lehrbücher in mehreren Sprachen entstanden. Und es werden täglich mehr!',
@@ -38,7 +38,7 @@
                 'This book grew out of a simple conviction: a good education must never fail for lack of money. That is why everything on ' +
                 'docalvers.de is free, without ads and without signing up. Nobody collects your data. The videos on my YouTube channel ' +
                 '(youtube.com/@docalvers) are free for you as well.',
-                'I am a physicist, I founded a software company, and today I teach mathematics and computer science in Dresden. I build the ' +
+                'I am a physicist, I founded a software company, and today I teach mathematics and computer science in Dresden, Saxony, Germany. I build the ' +
                 'Mathe-Labor of my own free will. I put time and money into it because I am convinced that the investment pays off: in you and in ' +
                 'better education for everyone. An unusual team has helped me – AI agents that program, draw, calculate and translate to my ' +
                 'specifications. This is how well over 100 interactive labs and more than 20 textbooks in several languages came about. And there are more every day!',
@@ -56,7 +56,7 @@
                 'Este libro nace de una convicción sencilla: una buena educación no puede fracasar por falta de dinero. Por eso todo en ' +
                 'docalvers.de es gratuito, sin publicidad y sin registro. Nadie recoge tus datos. También los vídeos de mi canal de YouTube ' +
                 '(youtube.com/@docalvers) están a tu libre disposición.',
-                'Soy físico, fundé una empresa de software y hoy enseño Matemáticas e Informática en Dresde. Construyo el Mathe-Labor por ' +
+                'Soy físico, fundé una empresa de software y hoy enseño Matemáticas e Informática en Dresde, en Sajonia, en Alemania. Construyo el Mathe-Labor por ' +
                 'voluntad propia. Invierto en él tiempo y dinero porque estoy convencido de que la inversión merece la pena: en ti y en una ' +
                 'educación mejor para todos. Me ha ayudado un equipo poco habitual: agentes de IA que programan, dibujan, calculan y traducen ' +
                 'según mis indicaciones. Así han surgido mucho más de 100 laboratorios interactivos y más de 20 libros de texto en varios idiomas. ¡Y cada día hay más!',
@@ -74,7 +74,7 @@
                 'Questo libro nasce da una convinzione semplice: una buona istruzione non deve mai fallire per mancanza di soldi. Per questo su ' +
                 'docalvers.de è tutto gratuito, senza pubblicità e senza registrazione. Nessuno raccoglie i tuoi dati. Anche i video del mio ' +
                 'canale YouTube (youtube.com/@docalvers) sono liberamente a tua disposizione.',
-                'Sono un fisico, ho fondato un’azienda di software e oggi insegno matematica e informatica a Dresda. Costruisco il Mathe-Labor di ' +
+                'Sono un fisico, ho fondato un’azienda di software e oggi insegno matematica e informatica a Dresda, in Sassonia, in Germania. Costruisco il Mathe-Labor di ' +
                 'mia spontanea volontà. Ci metto tempo e denaro perché sono convinto che l’investimento valga la pena: in te e in un’istruzione ' +
                 'migliore per tutti. Mi ha aiutato una squadra insolita: agenti di IA che programmano, disegnano, calcolano e traducono secondo le ' +
                 'mie indicazioni. Così sono nati ben più di 100 laboratori interattivi e oltre 20 libri di testo in più lingue. E ogni giorno se ne aggiungono altri!',
@@ -93,7 +93,7 @@
                 'Ce livre est né d’une conviction simple : une bonne éducation ne doit jamais échouer faute d’argent. C’est pourquoi tout est ' +
                 'gratuit sur docalvers.de, sans publicité et sans inscription. Personne ne collecte tes données. Les vidéos de ma chaîne YouTube ' +
                 '(youtube.com/@docalvers) sont elles aussi à ta libre disposition.',
-                'Je suis physicien, j’ai fondé une entreprise de logiciels et j’enseigne aujourd’hui les mathématiques et l’informatique à Dresde. ' +
+                'Je suis physicien, j’ai fondé une entreprise de logiciels et j’enseigne aujourd’hui les mathématiques et l’informatique à Dresde, en Saxe, en Allemagne. ' +
                 'Je construis le Mathe-Labor de mon plein gré. J’y consacre du temps et de l’argent parce que je suis convaincu que cet investissement ' +
                 'en vaut la peine : en toi et dans une meilleure éducation pour tous. Une équipe peu ordinaire m’a aidé : des agents d’IA qui ' +
                 'programment, dessinent, calculent et traduisent selon mes consignes. C’est ainsi que sont nés bien plus de 100 laboratoires interactifs ' +

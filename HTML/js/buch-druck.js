@@ -1,5 +1,5 @@
 /* buch-druck.js — the print edition of a textbook (buch/<book>/druck.html): all chapters in one document,
- * set into A4 pages by Paged.js, ready for "Drucken → Als PDF speichern".
+ * set into A4 pages by Paged.js, ready for "Drucken → Als PDF speichern". druck.html?format=letter sets US Letter for KDP.
  * Doc, 09.10.2026: "wenn man das Ganze als PDF noch ausdrucken könnte, so mit Seitenzahlen … dann gibt es halt
  * Screenshots so als Teaser".
  *
@@ -22,6 +22,13 @@
     // (Doc, 27.10.2026: "für alle Bücher … das Grußwort und auch den PDF Download Button"); French sets a no-break space before a colon
     const tr = (de, en, es, it, fr) => Buch.t(de, en, es, it, fr);
     const colon = Buch.lang === 'fr' ? '\u00a0: ' : ': ';
+    // the page format: the book's own (kapitel.js format, default A4), or ?format=letter / ?format=a4 to try the other one.
+    // KDP offers Standard Color only in US Letter, not in A4 (Doc, 28.10.2026: "Wir machen das Letter fertig")
+    const OWN = B.format === 'letter' ? 'letter' : 'a4';
+    const FORMAT = ({ letter: 'letter', a4: 'a4' })[new URLSearchParams(location.search).get('format')] || OWN;
+    const LETTER = FORMAT === 'letter';
+    // the overview sets the pages afresh instead of showing the pictures from R2 (they may be older than a local change)
+    const NEU = new URLSearchParams(location.search).has('neu');
 
     function qrSvg(url) {
         if (typeof qrcode !== 'function') return '';
@@ -67,14 +74,21 @@
         // the opener's own title is now in the chapter head
         const h = sec.querySelector('.b-hero h1'); if (h) h.remove();
         const k = sec.querySelector('.b-hero .b-kicker'); if (k) k.remove();
-        // ids unique across the whole book
-        sec.querySelectorAll('[id]').forEach(e => { if (e !== sec) e.id = pre + '-' + e.id; });
+        // ids unique across the whole book; the chapter's own id stays readable for the pictures in white space (fillGaps)
+        sec.dataset.datei = c.file;
+        sec.querySelectorAll('[id]').forEach(e => { if (e !== sec) { e.dataset.stelle = e.id; e.id = pre + '-' + e.id; } });
         sec.querySelectorAll('a[href^="#"]').forEach(a => { a.setAttribute('href', '#' + pre + '-' + a.getAttribute('href').slice(1)); });
         sec.querySelectorAll('a[href]').forEach(a => { if (!a.getAttribute('href').startsWith('#')) a.setAttribute('href', absolute(a.getAttribute('href'))); });
         sec.querySelectorAll('a.b-lab').forEach(labCard);
         sec.querySelectorAll('.b-sec').forEach(s => s.removeAttribute('data-toc'));
-        // every interactive box says where it lives
-        sec.querySelectorAll('.b-widget').forEach(w => w.appendChild(el('p', 'd-online', tr('Interaktiv im Online-Buch', 'Interactive in the online book', 'Interactivo en el libro en línea', 'Interattivo nel libro online', 'Interactif dans le livre en ligne') + colon + url.replace('https://', ''))));
+        // every interactive box says where it lives, with a QR code straight to it (Doc, 28.10.2026: "wäre schon cool,
+        // wenn man da auch den QR-Code mit hinpacken würde. Bei allen diesen lokalen Tools.")
+        sec.querySelectorAll('.b-widget').forEach(w => {
+            const at = w.closest('[data-stelle]'), wurl = url + (at ? '#' + at.dataset.stelle : '');
+            w.appendChild(el('a', 'd-online', '<span>' + tr('Interaktiv im Online-Buch', 'Interactive in the online book', 'Interactivo en el libro en línea',
+                'Interattivo nel libro online', 'Interactif dans le livre en ligne') + colon + wurl.replace('https://', '') + '</span>' + qrSvg(wurl)));
+            w.lastChild.href = wurl;
+        });
         return sec;
     }
 
@@ -198,6 +212,38 @@
             '<p class="d-imp-copy">© ' + new Date().getFullYear() + ' Dr. Michael R. Alvers</p>';
         return sec;
     }
+    // ---------- the how-to page: why the online book is the heart of it, for every book in its language ----------
+    // Doc, 28.10.2026, on the Letter proof: "dass man in der Online-Version Fehler melden kann … nochmal richtig pushen, dass
+    // der Witz eigentlich auf der Online-Version liegt, und das sozusagen ein nahtloses Ineinander möglich ist". The rest of
+    // the page stands in each book's druck.html; this part is the same everywhere, so it comes from here.
+    function onlineBuch() {
+        const online = SITE + here, q = s => Buch.lang === 'fr' ? s.replace(/ ([:?!])/g, ' $1') : s;
+        const box = el('div', 'd-online-buch');
+        box.innerHTML = '<h2>' + q(tr('Papier und Bildschirm: ein Buch', 'Paper and screen: one book', 'Papel y pantalla: un solo libro',
+                'Carta e schermo: un solo libro', 'Papier et écran : un seul livre')) + '</h2>' +
+            '<div><p>' + q(tr(
+                '<b>Das Online-Buch ist das Herzstück.</b> Dort bewegt sich alles: Du verschiebst Graphen, drehst an Parametern, lässt Zufallsversuche tausendmal laufen und bekommst bei jedem Selbsttest sofort Rückmeldung. Jeder QR-Code in diesem Heft – am Kapitelanfang, an jedem interaktiven Element, an jedem Lab-Kasten – bringt dich genau an diese Stelle.',
+                '<b>The online book is the heart of it.</b> Everything moves there: you drag graphs, turn parameters, run random experiments a thousand times and get instant feedback on every self-check. Every QR code in this book – at the start of a chapter, at every interactive element, at every lab box – takes you straight to that spot.',
+                '<b>El libro en línea es el corazón.</b> Allí todo se mueve: desplazas gráficas, cambias parámetros, repites experimentos aleatorios mil veces y recibes respuesta inmediata en cada autoevaluación. Cada código QR de este libro – al inicio de cada capítulo, en cada elemento interactivo, en cada recuadro de laboratorio – te lleva directamente a ese lugar.',
+                '<b>Il libro online è il cuore.</b> Lì tutto si muove: sposti grafici, cambi parametri, ripeti esperimenti casuali mille volte e ricevi subito un riscontro a ogni autoverifica. Ogni codice QR di questo libro – all’inizio di ogni capitolo, a ogni elemento interattivo, a ogni riquadro di laboratorio – ti porta esattamente in quel punto.',
+                '<b>Le livre en ligne est le cœur de l’ouvrage.</b> Tout y bouge : tu déplaces des courbes, tu modifies des paramètres, tu relances mille fois une expérience aléatoire et chaque auto-évaluation te répond aussitôt. Chaque code QR de ce livre – au début de chaque chapitre, à chaque élément interactif, à chaque encadré de labo – t’amène exactement à cet endroit.')) + '</p>' +
+            '<p>' + q(tr(
+                '<b>Hin und zurück:</b> Im Online-Buch zeigen die Taste O oder der Knopf „Seiten“ alle Seiten dieser Druckausgabe, ein Klick auf eine Seite führt an dieselbe Stelle online. Jedes Kapitel endet mit „Mehr üben online“, und wo Platz ist, findest du Karopapier für deine Notizen.',
+                '<b>There and back:</b> in the online book the O key or the “Pages” button shows all pages of this print edition, and a click on a page takes you to the same spot online. Every chapter ends with “More practice online”, and wherever there is room you will find squared paper for your notes.',
+                '<b>Ida y vuelta:</b> en el libro en línea, la tecla O o el botón «Páginas» muestran todas las páginas de esta edición impresa, y un clic en una página te lleva al mismo lugar en línea. Cada capítulo termina con «Más práctica en línea», y donde hay espacio encontrarás papel cuadriculado para tus notas.',
+                '<b>Andata e ritorno:</b> nel libro online il tasto O o il pulsante «Pagine» mostrano tutte le pagine di questa edizione a stampa, e un clic su una pagina ti porta allo stesso punto online. Ogni capitolo finisce con «Altri esercizi online», e dove c’è spazio trovi la carta a quadretti per i tuoi appunti.',
+                '<b>Aller-retour :</b> dans le livre en ligne, la touche O ou le bouton « Pages » affichent toutes les pages de cette édition imprimée, et un clic sur une page te mène au même endroit en ligne. Chaque chapitre se termine par « S’entraîner en ligne », et là où il reste de la place, tu trouves du papier quadrillé pour tes notes.')) + '</p>' +
+            '<p>' + q(tr(
+                '<b>Fehler gefunden?</b> Im Online-Buch gibt es den roten Knopf „Fehler melden“: einfach sagen oder tippen, was nicht stimmt. Die Meldung kommt direkt beim Autor an, online ist der Fehler meist schnell behoben – und die gedruckte Ausgabe zieht mit der nächsten Auflage nach.',
+                '<b>Found a mistake?</b> The online book has a red “Fehler melden” (report a mistake) button: just say or type what is wrong. The report goes straight to the author, the online book is usually fixed quickly – and the printed book catches up with its next edition.',
+                '<b>¿Has encontrado un error?</b> El libro en línea tiene un botón rojo «Fehler melden» (informar de un error): solo di o escribe qué está mal. El aviso llega directamente al autor, en línea suele corregirse enseguida, y el libro impreso se pone al día en su próxima edición.',
+                '<b>Hai trovato un errore?</b> Il libro online ha un pulsante rosso «Fehler melden» (segnala un errore): basta dire o scrivere che cosa non va. La segnalazione arriva direttamente all’autore, online di solito viene corretta in fretta, e il libro stampato si aggiorna con la prossima edizione.',
+                '<b>Tu as trouvé une erreur ?</b> Le livre en ligne a un bouton rouge « Fehler melden » (signaler une erreur) : dis ou écris simplement ce qui ne va pas. Le signalement arrive directement chez l’auteur, en ligne il est en général vite corrigé, et le livre imprimé suit à sa prochaine édition.')) + '</p></div>' +
+            '<a class="d-qr" href="' + online + '">' + qrSvg(online) + '<span>' + tr('Das Online-Buch', 'The online book', 'El libro en línea', 'Il libro online', 'Le livre en ligne') +
+            colon.trimEnd() + '<br>' + online.replace('https://', '') + '</span></a>';
+        return box;
+    }
+
     // photo credits stand under every photo: the imprint says so, once the chapters are in and a book has photos
     function impressumFotos(sec, book) {
         if (!sec || !book.querySelector('.b-foto')) return;
@@ -213,6 +259,7 @@
     // its heading), the page ends before it and the heading opens the next one. The approach of
     // pagedjs.org/plugins/temporary-fix-for-break-after-avoid; a heading that already opens its page stays.
     const KEEP = 'h1, h2, h3, h4, .b-band, .d-loes-h, .d-loes-t';
+    const MM = 96 / 25.4;                                                // CSS px per millimetre
     function contentNodes(area) {
         const out = [];
         const w = document.createTreeWalker(area, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
@@ -221,27 +268,210 @@
         while (w.nextNode()) out.push(w.currentNode);
         return out;
     }
+    const nodeEl = n => n.nodeType === 3 ? n.parentElement : n;
+    // a short paragraph ending in a colon announces what follows (a formula, a list): it never stays behind alone
+    // (Doc, 28.10.2026, p. 7/8: "Man schreibt sie hinter einen senkrechten Strich:" and the formula on the next page)
+    function leadIn(e) {
+        const p = e.closest('p');
+        return p && !p.hasAttribute('data-split-from') && /:\s*$/.test(p.textContent) && p.getBoundingClientRect().height < 18 * MM ? p : null;
+    }
+    const keepOf = n => nodeEl(n).closest(KEEP) || leadIn(nodeEl(n));
+    // where the visible content of a page ends: its last text, picture or the frame of the box around it
+    function contentBottom(area) {
+        const top = area.getBoundingClientRect().top, seen = new Map();
+        let max = top;
+        const range = document.createRange();
+        contentNodes(area).forEach(n => {
+            if (n.nodeType === 3) { range.selectNodeContents(n); max = Math.max(max, range.getBoundingClientRect().bottom); }
+            else max = Math.max(max, n.getBoundingClientRect().bottom);
+            for (let e = nodeEl(n); e && e !== area && !(e.parentElement && e.parentElement.classList.contains('pagedjs_page_content')); e = e.parentElement) {
+                if (seen.has(e)) { if (seen.get(e)) max = Math.max(max, seen.get(e)); continue; }
+                const cs = getComputedStyle(e), framed = cs.borderBottomWidth !== '0px' || cs.backgroundColor !== 'rgba(0, 0, 0, 0)';
+                const b = framed ? e.getBoundingClientRect().bottom : 0;
+                seen.set(e, b);
+                if (b) max = Math.max(max, b);
+            }
+        });
+        return max;
+    }
+    // the next node after n in the source (its own subtree skipped), blank text left out
+    function nextAfter(n) {
+        const up = x => { for (; x; x = x.parentNode) if (x.nextSibling) return x.nextSibling; return null; };
+        for (n = up(n); n && n.nodeType === 3 && !n.data.trim(); n = up(n));
+        return n;
+    }
     if (window.Paged && Paged.Handler) Paged.registerHandlers(class KeepWithNext extends Paged.Handler {
         afterPageLayout(pageEl, page, breakToken, chunker) {
             if (!breakToken || !breakToken.node || !page.area) return;
             const nodes = contentNodes(page.area);
             let i = nodes.length - 1, first = null;
             while (i >= 0) {
-                const n = nodes[i], h = (n.nodeType === 3 ? n.parentElement : n).closest(KEEP);
+                const h = keepOf(nodes[i]);
                 if (!h || !page.area.contains(h)) break;
                 first = h;
                 while (i >= 0 && h.contains(nodes[i])) i--;
             }
-            if (!first || i < 0) return;
-            const src = chunker.source && chunker.source.querySelector('[data-ref="' + first.dataset.ref + '"]');
-            if (!src) return;
-            breakToken.node = src;
+            // a heading with hardly anything under it goes too (Doc, 28.10.2026, p. 79: "Aufgaben" with only task 1 at
+            // the foot - "ich würde die dennoch auf die Seite 80 ziehen"); bands and headings right above it go along
+            if (!first) {
+                const end = contentBottom(page.area);
+                for (let k = nodes.length - 1; k > 0; k--) {
+                    const h = nodeEl(nodes[k]).closest(KEEP);
+                    if (!h || !page.area.contains(h)) continue;
+                    if (end - h.getBoundingClientRect().bottom > 25 * MM) break;
+                    let j = k;
+                    while (j > 0 && h.contains(nodes[j - 1])) j--;
+                    first = h; i = j - 1;
+                    while (i >= 0) { const g = keepOf(nodes[i]); if (!g || g === first) break; first = g; while (i >= 0 && g.contains(nodes[i])) i--; }
+                    break;
+                }
+            }
+            if (first && i >= 0) {
+                const src = chunker.source && chunker.source.querySelector('[data-ref="' + first.dataset.ref + '"]');
+                if (!src) return;
+                breakToken.node = src;
+                breakToken.offset = 0;
+                // off this page: the heading and the empty wrappers after it
+                for (let n = first; n && n !== page.area; n = n.parentNode) while (n.nextSibling) n.nextSibling.remove();
+                first.remove();
+                return;
+            }
+            // a wide photo that would open the next page squeezes into the white space at the foot of this one, smaller
+            // (Doc, 28.10.2026: the fire brigades alone on p. 63 - "dann würde ich sagen, machen wir das Bild kleiner")
+            const at = breakToken.offset ? null : nodeEl(breakToken.node);
+            const fig = at && at.closest && at.closest('figure.b-foto-breit');
+            if (!fig || !nodes.length) return;
+            const ar = page.area.getBoundingClientRect(), top = contentBottom(page.area) + 4 * MM;
+            const h = ar.bottom - top - 6 * MM, full = ar.width * 7 / 21;          // the print banner is 21 : 7 (js/buch-druck.css)
+            const next = nextAfter(fig);
+            if (h < full * 0.45 || h >= full || !next) return;
+            const copy = fig.cloneNode(true);
+            copy.classList.add('d-gequetscht');
+            copy.style.top = (top - ar.top) + 'px';
+            copy.querySelector('img').style.height = h + 'px';
+            page.area.style.position = 'relative';
+            page.area.appendChild(copy);
+            breakToken.node = next;
             breakToken.offset = 0;
-            // off this page: the heading and the empty wrappers after it
-            for (let n = first; n && n !== page.area; n = n.parentNode) while (n.nextSibling) n.nextSibling.remove();
-            first.remove();
         }
     });
+
+    // ---------- white space at the foot of a page: a picture or squared paper for notes ----------
+    // Doc, 28.10.2026, paging through the Letter proof: "Guck mal immer, wenn nur eine halbe Seite ausgefüllt ist, dass man da
+    // irgendwie noch coole Bilder reinmacht" - and where no picture fits: "persönliche Notizen … wirklich eine Karo-Seite".
+    // It runs after Paged.js has set the pages, so nothing moves: every edition and format fills its own gaps. The pictures
+    // come from js/buch-fotos.js: vorn (foreword, how-to) and luecken (per chapter file and section, else the whole chapter).
+    // Page 2, under the imprint, shows all the books ("Das klar wird, hier gibt es noch viel mehr").
+    const BUECHER = ['mathegy5', 'mathegy6', 'mathegy7', 'mathegy8', 'mathegy9', 'mathegy10', 'mathegy11', 'mathegy12', 'mathegy11lk', 'mathegy12lk',
+        'mathe5', 'mathe6', 'mathe7', 'mathe8', 'mathe9', 'mathe10', 'mathe11', 'mathe12', 'mathe13', 'mathefos11', 'mathefos12'];   // as in js/labs-config.js
+    function gapBox(area, cls, top, h) {
+        const box = el('div', 'd-luecke ' + cls);
+        box.style.top = top + 'px'; box.style.height = h + 'px';
+        area.style.position = 'relative';
+        area.appendChild(box);
+        return box;
+    }
+    // photos side by side, as large as the box allows, captions below; null when they would be too small
+    async function gapFotos(area, names, top, h, bottom) {
+        const fs = names.map(n => Buch.fotoInfo(n)).filter(Boolean);
+        if (!fs.length) return null;
+        const imgs = await Promise.all(fs.map(f => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = f.src; })));
+        if (imgs.some(i => !i)) return null;
+        const W = area.getBoundingClientRect().width, gap = 6 * MM;
+        const sumA = imgs.reduce((s, i) => s + i.naturalWidth / i.naturalHeight, 0);
+        // a single photo with room beside it gets its caption there, so the photo may take the whole height of the gap
+        const cw = 62 * MM, side = fs.length === 1 && W - Math.min(h, 95 * MM) * sumA >= cw + gap;
+        let ih = side ? Math.min(h, 95 * MM) : Math.min(h - 9 * MM, (W - gap * (imgs.length - 1)) / sumA, 95 * MM);
+        const box = gapBox(area, 'd-luecke-fotos', top, h);
+        const figs = fs.map(f => box.appendChild(el('figure', side ? 'd-seite' : '', '<img src="' + f.src + '" alt="' + f.alt.replace(/"/g, '&quot;') + '">' +
+            '<figcaption><b>' + f.alt + '</b><br>' + f.credit + '</figcaption>')));
+        const size = () => figs.forEach((fig, k) => {
+            const w = ih * imgs[k].naturalWidth / imgs[k].naturalHeight;
+            if (side) { fig.firstChild.style.width = w + 'px'; fig.lastChild.style.width = cw + 'px'; }
+            else fig.style.width = w + 'px';
+            fig.firstChild.style.height = ih + 'px';
+        });
+        // the captions take what they need (a narrow photo wraps its caption into many lines): the photos give way until it fits
+        let need = 0;
+        for (let k = 0; k < 5; k++) {
+            size();
+            box.style.height = 'auto';
+            need = box.offsetHeight;
+            if (need <= h + 1) break;
+            ih -= need - h;
+        }
+        // too small to be worth it - unless the photos already fill the width (a panorama is flat by nature)
+        if (need > h + 1 || ih < (ih * sumA + gap * (imgs.length - 1) > W - 2 ? 28 : 34) * MM) { box.remove(); return null; }
+        // at the foot (foreword), at the top when squared paper still fits below it, else in the middle of the gap
+        box.style.height = need + 'px';
+        box.style.top = (bottom ? top + h - need : h - need >= 80 * MM ? top : top + (h - need) / 2) + 'px';
+        return box;
+    }
+    function gapNotes(area, top, h, afterLabs) {
+        const head = 13 * MM, rows = Math.floor((h - head) / (5 * MM)), cols = Math.floor(area.getBoundingClientRect().width / (5 * MM));
+        if (rows < 6) return;
+        const box = gapBox(area, 'd-luecke-notiz', top, head + rows * 5 * MM);
+        let lines = '';
+        for (let x = 0; x <= cols; x++) lines += '<line x1="' + x * 5 + '" y1="0" x2="' + x * 5 + '" y2="' + rows * 5 + '"/>';
+        for (let y = 0; y <= rows; y++) lines += '<line x1="0" y1="' + y * 5 + '" x2="' + cols * 5 + '" y2="' + y * 5 + '"/>';
+        box.innerHTML = '<p class="d-notiz-h">' + tr('Meine Notizen', 'My notes', 'Mis notas', 'I miei appunti', 'Mes notes') +
+            (afterLabs ? '<span>' + tr('Was hast du beim Üben online herausgefunden?', 'What did you find out while practising online?',
+                '¿Qué has descubierto practicando en línea?', 'Che cosa hai scoperto esercitandoti online?', 'Qu’as-tu découvert en t’entraînant en ligne ?') + '</span>' : '') + '</p>' +
+            // 0.2 mm more all round: the outer lines sit on the edge and were cut in half - right and bottom vanished (Doc, p. 85)
+            '<svg viewBox="-0.2 -0.2 ' + (cols * 5 + 0.4) + ' ' + (rows * 5 + 0.4) + '" style="width:' + (cols * 5 + 0.4) + 'mm;height:' + (rows * 5 + 0.4) + 'mm">' + lines + '</svg>';
+    }
+    function gapBooks(area, top, h) {
+        const lang = Buch.lang && Buch.lang !== 'de' ? '-' + Buch.lang : '', title = 9 * MM, rows = 3, cols = 7;
+        const W = area.getBoundingClientRect().width;
+        const ch = Math.min((h - title - 4 * MM) / rows - 3 * MM, (W / cols) * 1.25);
+        if (ch < 22 * MM) return;
+        const box = gapBox(area, 'd-luecke-buecher', top + (h - title - rows * (ch + 3 * MM)) / 2, title + rows * (ch + 3 * MM));
+        box.innerHTML = '<p class="d-buecher-h">' + tr('Alle 21 Lehrbücher, kostenlos online', 'All 21 textbooks, free online', 'Los 21 libros de texto, gratis en línea',
+            'Tutti i 21 libri di testo, gratis online', 'Les 21 manuels, gratuits en ligne') + ' · docalvers.de</p><div class="d-buecher"></div>';
+        box.lastChild.style.setProperty('--h', ch + 'px');
+        box.lastChild.innerHTML = BUECHER.map(b => '<img src="../../resources/og/buch-' + b + lang + '-cover.jpg" alt=""' + (b === Buch.book ? ' class="d-dieses"' : '') + '>').join('');
+    }
+    async function fillGaps() {
+        await Buch.fotosReady;
+        const F = window.BUCH_FOTOS || {}, vorn = F.vorn || {}, luecken = (F.luecken || {})[Buch.book] || {}, used = new Set();
+        // the photos still free in a list, each entry a photo or a group side by side: the first that fits the gap wins
+        const free = list => (list ? [].concat(list) : []).map(x => [].concat(x)).filter(ns => ns.every(n => !used.has(n)));
+        // a box Paged.js split at its very start leaves an empty frame at the foot of the page (every Rückblick did -
+        // Doc on p. 146: "eine leere Box, die sich mit dem Bild überschneidet"): gone
+        document.querySelectorAll('.pagedjs_page [data-split-to]').forEach(e => { if (!contentNodes(e).length) e.style.display = 'none'; });
+        for (const pg of document.querySelectorAll('.pagedjs_page')) {
+            const area = pg.querySelector('.pagedjs_area');
+            if (!area || pg.querySelector('.d-cover, .d-toc, .d-loes-kap, .d-gequetscht')) continue;
+            const nodes = contentNodes(area);
+            if (!nodes.length) continue;
+            // 5 mm kept free above the page number
+            const ar = area.getBoundingClientRect(), top = contentBottom(area) + 7 * MM, h = ar.bottom - 5 * MM - top;
+            const at = top - ar.top, last = nodeEl(nodes[nodes.length - 1]);
+            if (h < 38 * MM) continue;                                   // photos from 38 mm, squared paper from 70 mm (below)
+            if (pg.querySelector('.d-impressum')) { gapBooks(area, at, h); continue; }
+            let cands = [], bottom = false;
+            if (pg.querySelector('.d-gruss')) { cands = free(vorn.gruss); bottom = true; }
+            else if (pg.querySelector('.d-front')) cands = free(vorn.sogehts);
+            else {
+                const chap = last.closest('[data-datei]'), map = chap && luecken[chap.dataset.datei];
+                // after "Mehr üben online" squared paper for what one found out there, a photo only where 'mehr' names one
+                if (map && last.closest('.b-labs')) cands = free(map.mehr);
+                else if (map) {
+                    for (let e = last.closest('[data-stelle]'); e; e = e.parentElement && e.parentElement.closest('[data-stelle]')) cands.push(...free(map[e.dataset.stelle]));
+                    cands.push(...free(map.kapitel));
+                }
+            }
+            let box = null, names = null;
+            for (const ns of cands) if ((box = await gapFotos(area, ns, at, h, bottom))) { names = ns; break; }
+            if (box) {
+                names.forEach(n => used.add(n));
+                const below = box.offsetTop + box.offsetHeight + 8 * MM;            // squared paper under a photo at the top
+                if (at + h - below >= 70 * MM && last.closest('[data-datei]')) gapNotes(area, below, at + h - below, !!last.closest('.b-labs'));
+                continue;
+            }
+            if (h >= 70 * MM && last.closest('[data-datei]')) gapNotes(area, at, h, !!last.closest('.b-labs'));
+        }
+    }
 
     async function build() {
         const book = document.getElementById('d-book');
@@ -251,7 +481,7 @@
         tag('.d-front', 'index.html|sogehts|');
         const gruss = await grusswort(), front = book.querySelector('.d-front'), imp = impressum();
         if (gruss && front) front.before(gruss);
-        if (front) front.before(imp);
+        if (front) { front.before(imp); front.appendChild(onlineBuch()); }
         // page 1 is the first sheet after the cover (js/buch-druck.css .d-p1)
         (gruss || imp).classList.add('d-p1');
         const loesungen = tr('Lösungen', 'Solutions', 'Soluciones', 'Soluzioni', 'Solutions');
@@ -306,11 +536,17 @@
         // the running head names the book (kapitel.js), e.g. "DOC ALVERS MATHE-LABOR · MATHEMATIK 12"
         const head = document.createElement('style');
         head.textContent = '@page { @top-right { content: "DOC ALVERS MATHE-LABOR · ' + String(B.short || '').toUpperCase().replace(/"/g, '') + '"; } }';
+        // Letter: the same 178 mm text width as A4 (wider side margins), so widgets look the same and only the page breaks move
+        if (LETTER) head.textContent += '@page { size: letter; margin: 17mm 18.95mm 19mm 18.95mm; }' +
+            '.d-cover, .d-cover .b-titel { width: 215.9mm; height: 279.4mm; }';
         document.head.appendChild(head);
         // only the book goes onto the pages; the status bar stays outside
         const frag = document.createDocumentFragment();
         frag.appendChild(book);
         await window.PagedPolyfill.preview(frag, undefined, document.getElementById('d-pages'));
+        await fillGaps();
+        // pictures added after the setting have to be there before anyone prints (tools/kdp/kdp.mjs waits for d-ready)
+        await Promise.all(Array.from(document.querySelectorAll('.d-luecke img, .d-gequetscht img')).map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
         const pages = document.querySelectorAll('.pagedjs_page').length;
         const dauer = Math.round((performance.now() - t0) / 1000);
         say(tr(pages + ' Seiten fertig in ' + dauer + ' s. Drucken: Strg/Cmd + P → „Als PDF speichern“.',
@@ -375,8 +611,10 @@
             const e = p.querySelector('[data-ziel]');
             p.dataset.ovZiel = last = e ? e.dataset.ziel : last;
             const c = B.chapters.find(c => last.startsWith(c.file + '|'));
-            p.title = tr('Seite', 'Page', 'Página', 'Pagina', 'Page') + ' ' + (i + 1) + (c ? ' · ' + tr('Kapitel', 'Chapter', 'Capítulo', 'Capitolo', 'Chapitre') + ' ' + c.k + ' · ' + c.title : '');
-            p.appendChild(el('span', 'd-ov-no', String(i + 1)));
+            // the number printed on the sheet: the cover does not count (Doc reads the pages by these numbers)
+            p.title = i ? tr('Seite', 'Page', 'Página', 'Pagina', 'Page') + ' ' + i + (c ? ' · ' + tr('Kapitel', 'Chapter', 'Capítulo', 'Capitolo', 'Chapitre') + ' ' + c.k + ' · ' + c.title : '')
+                : tr('Einband', 'Cover', 'Cubierta', 'Copertina', 'Couverture');
+            if (i) p.appendChild(el('span', 'd-ov-no', String(i)));
         });
         root.classList.add('d-ov-ready');
         ovLayout();
@@ -387,6 +625,10 @@
         zeige(h ? h.wo() : '');
         window.BuchDruckOv = { zeige };
         addEventListener('resize', ovLayout);
+    }
+    function vollbild() {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else document.documentElement.requestFullscreen().catch(() => { });
     }
     function ovSize(f) {
         ovScale = Math.min(6, Math.max(1, ovScale * f));
@@ -405,7 +647,8 @@
     async function ovBilder() {
         const book = (here.match(/\/buch\/([^/]+)\/$/) || [])[1];
         if (!book || !Buch.media) return false;
-        const base = Buch.media + 'seiten/' + book + '/';
+        // the pictures of the book's own format, of the other one in <buch>-letter / <buch>-a4 (seitenbilder.mjs --letter / --a4)
+        const base = Buch.media + 'seiten/' + book + (FORMAT === OWN ? '' : '-' + FORMAT) + '/';
         let m = null;
         try { const r = await fetch(base + 'seiten.json', { cache: 'no-cache' }); if (r.ok) m = await r.json(); } catch (_) { }
         if (!m || !Array.isArray(m.seiten) || !m.seiten.length) return false;
@@ -470,6 +713,13 @@
             btn('−', tr('Kleiner (−)', 'Smaller (−)', 'Más pequeño (−)', 'Più piccolo (−)', 'Plus petit (−)'), () => ovSize(1 / 1.5));
             bar.lastChild.classList.add('d-ov-first');
             btn('+', tr('Größer (+)', 'Larger (+)', 'Más grande (+)', 'Più grande (+)', 'Plus grand (+)'), () => ovSize(1.5));
+            // full screen: on the big screen the tiles get the whole of it (Doc, 28.10.2026: "gib mir auch in dieser Overview
+            // Seite ein Fullscreen-Button"); in the online book the frame allows it (js/buch.js)
+            if (document.fullscreenEnabled) {
+                btn('', tr('Vollbild (F)', 'Full screen (F)', 'Pantalla completa (F)', 'Schermo intero (F)', 'Plein écran (F)'), vollbild);
+                bar.lastChild.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">' +
+                    '<path d="M1.5 5.5v-4h4M10.5 1.5h4v4M14.5 10.5v4h-4M5.5 14.5h-4v-4"/></svg>';
+            }
             btn('×', tr('Schließen (O oder Esc)', 'Close (O or Esc)', 'Cerrar (O o Esc)', 'Chiudi (O o Esc)', 'Fermer (O ou Échap)'), () => { const h = host(); if (h) h.zu(); });
         }
         ovWait = document.body.appendChild(el('div', 'd-ov-wait', tr('Wird vorbereitet …', 'Getting ready …', 'Preparando …', 'Preparazione …', 'Préparation…')));
@@ -486,10 +736,42 @@
         }, true);
         addEventListener('keydown', e => {
             if (e.metaKey || e.ctrlKey || e.altKey) return;
+            if (e.key === 'Escape' && document.fullscreenElement) return;                // Esc leaves full screen first
             if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') { e.preventDefault(); const h = host(); if (h) h.zu(); }
+            else if ((e.key === 'f' || e.key === 'F') && document.fullscreenEnabled) vollbild();
             else if (e.key === '+' || e.key === '=') ovSize(1.5);
             else if (e.key === '-' || e.key === '−') ovSize(1 / 1.5);
         });
+        // a sheet the mouse rests on shows large on the other half of the screen, as it stands in the PDF (Doc, 28.10.2026:
+        // "dass beim Hover die Seite groß angezeigt wird, wie sie im PDF wäre"); the click still opens the online book
+        if (matchMedia('(hover: hover)').matches) {
+            // its place inline: Paged.js takes position: fixed in a sheet for an element to repeat on every page
+            const lupe = document.body.appendChild(el('div', 'd-ov-lupe'));
+            lupe.style.cssText = 'position: fixed; z-index: 50; pointer-events: none; display: none';
+            let over = null, t = 0;
+            const weg = () => { clearTimeout(t); over = null; lupe.style.display = 'none'; lupe.textContent = ''; };
+            document.addEventListener('mouseover', e => {
+                const p = e.target.closest('.pagedjs_pages .pagedjs_page');
+                if (p === over) return;
+                weg();
+                if (!p || !pageW) return;
+                over = p;
+                t = setTimeout(() => {
+                    if (bild && p.classList.contains('d-ov-bild')) gross(p);
+                    const c = p.cloneNode(true), z = 0.8 * Math.min(innerHeight * 0.94 / pageH, innerWidth * 0.48 / pageW);
+                    c.classList.remove('d-ov-cur', 'd-ov-kap');
+                    c.style.zoom = z;
+                    lupe.appendChild(c);
+                    // right beside the sheet, towards the middle of the screen, never over it ("dichter an die Maus ran")
+                    const r = p.getBoundingClientRect(), w = pageW * z, h = pageH * z, gap = 14;
+                    const x = r.left + r.width / 2 < innerWidth / 2 ? Math.min(r.right + gap, innerWidth - w - 8) : Math.max(r.left - gap - w, 8);
+                    lupe.style.left = x + 'px';
+                    lupe.style.top = Math.max(8, Math.min(r.top + r.height / 2 - h / 2, innerHeight - h - 8)) + 'px';
+                    lupe.style.display = 'block';
+                }, 250);
+            });
+            document.documentElement.addEventListener('mouseleave', weg);
+        }
     }
 
     // screen decoration (grey desk, gaps, shadows, status bar) only on screen: off while printing (js/buch-druck.css)
@@ -503,7 +785,7 @@
     document.getElementById('d-print')?.addEventListener('click', () => window.print());
     const start = () => build().catch(e => { say('Fehler: ' + e.message); console.error(e); });
     const loaded = () => { if (document.readyState === 'complete') start(); else window.addEventListener('load', start); };
-    // the overview first tries the pictures: it need not wait for the page to load, nor set anything
-    if (OV) ovBilder().catch(e => { console.error(e); return false; }).then(ok => { if (!ok) loaded(); });
+    // the overview first tries the pictures: it need not wait for the page to load, nor set anything (&neu: set afresh)
+    if (OV && !NEU) ovBilder().catch(e => { console.error(e); return false; }).then(ok => { if (!ok) loaded(); });
     else loaded();
 })();

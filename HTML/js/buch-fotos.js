@@ -13,6 +13,11 @@
  *           wide   true: across the whole column, cropped to a banner
  *           w      width of a floated photo in % of its box (default 40); floated photos are cut to 3 : 2
  *           pos    which part of the photo stays in the cut (CSS object-position, default the middle)
+ *   luecken: print only - white space at the foot of a page (js/buch-druck.js fillGaps): book → chapter file → section id
+ *           (as in the chapter file; 'kapitel' for any section, 'mehr' after "Mehr üben online") → photos to choose from,
+ *           each one at most once per book; an inner array stands side by side. Gaps without a photo get squared paper.
+ *   vorn:   print only, every book: the foot of the foreword (gruss) and of the how-to page (sogehts), as in luecken: the first
+ *           entry that fits the gap. The alt text is the caption.
  */
 window.BUCH_FOTOS = {
     fotos: {
@@ -428,7 +433,28 @@ window.BUCH_FOTOS = {
         'ampel': { artist: 'Kevin Payravi', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:LED_traffic_light_on_red.jpg',
             alt: { de: 'Eine Verkehrsampel', en: 'A traffic light', es: 'Un semáforo', it: 'Un semaforo', fr: 'Un feu de circulation' } },
         'klavierstimmer': { artist: 'Onascout', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Piano_Tuning_Hammer_and_Mutes.jpg',
-            alt: { de: 'Ein Stimmhammer an den Stimmwirbeln eines Klaviers', en: 'A tuning hammer on the tuning pins of a piano', es: 'Una llave de afinar en las clavijas de un piano', it: 'Una chiave d’accordatura sui piroli di un pianoforte', fr: 'Une clé d’accord sur les chevilles d’un piano' } }
+            alt: { de: 'Ein Stimmhammer an den Stimmwirbeln eines Klaviers', en: 'A tuning hammer on the tuning pins of a piano', es: 'Una llave de afinar en las clavijas de un piano', it: 'Una chiave d’accordatura sui piroli di un pianoforte', fr: 'Une clé d’accord sur les chevilles d’un piano' } },
+        // print only, for the white space at the foot of a page (luecken, vorn below; Doc's Letter proof 28.10.2026)
+        'schrammsteine-panorama': { artist: 'Norbert Kaiser', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Papststein_-_Blick_auf_die_Schrammsteine_und_den_Gro%C3%9Fen_Winterberg_(01-2).jpg',
+            alt: { de: 'Nationalpark Sächsische Schweiz: Blick vom Papststein auf die Schrammsteine und den Großen Winterberg', en: 'Saxon Switzerland National Park: the Schrammsteine rocks and the Großer Winterberg, seen from the Papststein', es: 'Parque Nacional de la Suiza Sajona: las rocas Schrammsteine y el Großer Winterberg vistos desde el Papststein', it: 'Parco nazionale della Svizzera Sassone: le rocce Schrammsteine e il Großer Winterberg visti dal Papststein', fr: 'Parc national de la Suisse saxonne : les rochers des Schrammsteine et le Großer Winterberg vus du Papststein' } },
+        'gutenberg-presse': { artist: 'International Printing Museum', license: 'CC0', page: 'https://commons.wikimedia.org/wiki/File:Gutenberg_press.png',
+            alt: { de: 'Um 1450 druckt Gutenberg mit beweglichen Lettern – ein Nachbau seiner Presse', en: 'Around 1450 Gutenberg prints with movable type – a replica of his press', es: 'Hacia 1450 Gutenberg imprime con tipos móviles: una réplica de su prensa', it: 'Verso il 1450 Gutenberg stampa con caratteri mobili: una replica del suo torchio', fr: 'Vers 1450, Gutenberg imprime avec des caractères mobiles : une réplique de sa presse' } },
+        'amman-buchherstellung': { artist: 'Jost Amman', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:German_book-trade_in_the_16th_century.jpg',
+            alt: { de: 'Bücher machen wie zu Gutenbergs Zeit: Papiermacher, Buchdrucker, Buchbinder (Jost Amman, 1568). Damals blieb ein Buch, wie es gedruckt war – dieses lebt online weiter.', en: 'Making books as in Gutenberg’s day: papermaker, printer, bookbinder (Jost Amman, 1568). Back then a book stayed as it was printed – this one lives on online.', es: 'Hacer libros como en tiempos de Gutenberg: papelero, impresor, encuadernador (Jost Amman, 1568). Entonces un libro quedaba tal como se imprimía; este sigue vivo en línea.', it: 'Fare libri come ai tempi di Gutenberg: cartaio, tipografo, legatore (Jost Amman, 1568). Allora un libro restava com’era stampato: questo continua a vivere online.', fr: 'Faire des livres comme au temps de Gutenberg : papetier, imprimeur, relieur (Jost Amman, 1568). Autrefois, un livre restait tel qu’il était imprimé ; celui-ci continue de vivre en ligne.' } },
+        'leibniz-rechenmaschine': { artist: 'Eremeev', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Rechenmaschine_von_Leibniz_(Nachbau)_09.jpg',
+            alt: { de: 'Die Rechenmaschine von Leibniz (um 1690) beherrschte schon alle vier Grundrechenarten – ein Nachbau', en: 'Leibniz’s calculating machine (around 1690) could already do all four basic operations – a replica', es: 'La calculadora de Leibniz (hacia 1690) ya dominaba las cuatro operaciones básicas: una réplica', it: 'La calcolatrice di Leibniz (verso il 1690) sapeva già fare le quattro operazioni: una replica', fr: 'La machine à calculer de Leibniz (vers 1690) maîtrisait déjà les quatre opérations : une réplique' } },
+        'babbage-differenzmaschine': { artist: 'Geni', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Babbage_Difference_Engine.jpg',
+            alt: { de: 'Charles Babbages Differenzmaschine Nr. 2, 1991 nach seinen Plänen gebaut (Science Museum London)', en: 'Charles Babbage’s Difference Engine No. 2, built to his plans in 1991 (Science Museum, London)', es: 'La máquina diferencial n.º 2 de Charles Babbage, construida en 1991 según sus planos (Science Museum, Londres)', it: 'La macchina differenziale n. 2 di Charles Babbage, costruita nel 1991 secondo i suoi progetti (Science Museum, Londra)', fr: 'La machine à différences n° 2 de Charles Babbage, construite en 1991 d’après ses plans (Science Museum, Londres)' } },
+        'al-khwarizmi': { artist: 'DierkA', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Muhammad_ibn_Musa_al-Khwarizmi.jpg',
+            alt: { de: 'Al-Chwarizmi, Denkmal in Usbekistan: Sein Buch über das Lösen von Gleichungen gab der Algebra ihren Namen', en: 'Al-Khwarizmi, a monument in Uzbekistan: his book on solving equations gave algebra its name', es: 'Al-Juarismi, monumento en Uzbekistán: su libro sobre la resolución de ecuaciones dio nombre al álgebra', it: 'Al-Khwarizmi, monumento in Uzbekistan: il suo libro sulla risoluzione delle equazioni ha dato il nome all’algebra', fr: 'Al-Khwârizmî, monument en Ouzbékistan : son livre sur la résolution des équations a donné son nom à l’algèbre' } },
+        'galton': { artist: 'Charles Wellington Furse', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Sir_Francis_Galton_by_Charles_Wellington_Furse.jpg',
+            alt: { de: 'Francis Galton prägte den Begriff Regression (Gemälde von Charles Wellington Furse)', en: 'Francis Galton coined the term regression (painting by Charles Wellington Furse)', es: 'Francis Galton acuñó el término regresión (retrato de Charles Wellington Furse)', it: 'Francis Galton coniò il termine regressione (ritratto di Charles Wellington Furse)', fr: 'Francis Galton a créé le terme de régression (portrait par Charles Wellington Furse)' } },
+        'napier-logarithmen': { artist: '', license: 'public domain', page: 'https://commons.wikimedia.org/wiki/File:Mirifici_Logarithmorum_canonis_Descriptio.jpg',
+            alt: { de: 'John Napier erfand die Logarithmen: das Titelblatt seiner Tafel, Edinburgh 1614', en: 'John Napier invented logarithms: the title page of his table, Edinburgh 1614', es: 'John Napier inventó los logaritmos: la portada de su tabla, Edimburgo 1614', it: 'John Napier inventò i logaritmi: il frontespizio della sua tavola, Edimburgo 1614', fr: 'John Napier a inventé les logarithmes : la page de titre de sa table, Édimbourg 1614' } },
+        'autobahnkreuz': { artist: 'HaSe', license: 'CC BY-SA 4.0', page: 'https://commons.wikimedia.org/wiki/File:Autobahnkreuz_F%C3%BCrth-Erlangen_Luftaufnahme_(2019).jpg',
+            alt: { de: 'Das Autobahnkreuz Fürth/Erlangen: Geraden, Kurven und Übergänge – Graphen aus Beton', en: 'The Fürth/Erlangen motorway interchange: straight lines, curves and transitions – graphs in concrete', es: 'El nudo de autopistas de Fürth/Erlangen: rectas, curvas y transiciones, gráficas de hormigón', it: 'Lo svincolo autostradale di Fürth/Erlangen: rette, curve e raccordi, grafici di cemento', fr: 'L’échangeur autoroutier de Fürth/Erlangen : droites, courbes et raccords, des graphes en béton' } },
+        'springender-ball': { artist: 'Michael Maggs, Richard Bartz', license: 'CC BY-SA 3.0', page: 'https://commons.wikimedia.org/wiki/File:Bouncing_ball_strobe_edit.jpg',
+            alt: { de: 'Ein springender Ball, 25-mal pro Sekunde fotografiert: Jeder Sprung ist eine Parabel', en: 'A bouncing ball, photographed 25 times a second: every bounce is a parabola', es: 'Una pelota que bota, fotografiada 25 veces por segundo: cada bote es una parábola', it: 'Una palla che rimbalza, fotografata 25 volte al secondo: ogni rimbalzo è una parabola', fr: 'Une balle qui rebondit, photographiée 25 fois par seconde : chaque rebond est une parabole' } }
     },
     books: {
         mathe11: {
@@ -1349,5 +1375,18 @@ window.BUCH_FOTOS = {
                 { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 32 }
             ]
         }
-    }
+    },
+    // white space in print: see the head of this file (js/buch-druck.js fillGaps)
+    luecken: {
+        mathe11: {
+            'lb2.html': { le3: [['leibniz-rechenmaschine', 'babbage-differenzmaschine']], kapitel: ['al-khwarizmi'] },
+            'lb3-3.html': { le3: ['springender-ball'] },
+            'lb3-5.html': { kapitel: ['galton'] },
+            'lb3-6.html': { le2: ['napier-logarithmen'] },
+            'lb3-7.html': { rueckblick: ['autobahnkreuz'] },
+            'lb4.html': { auftakt: ['gauss'] },
+            'lb1.html': { le3: ['galtonbrett'], rueckblick: ['muenzwurf'], mehr: ['bingokugeln'] }
+        }
+    },
+    vorn: { gruss: 'schrammsteine-panorama', sogehts: [['gutenberg-presse', 'amman-buchherstellung'], 'amman-buchherstellung'] }
 };
