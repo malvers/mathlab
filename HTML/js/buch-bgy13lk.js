@@ -8,6 +8,8 @@
  *   uebergang         a population model x(n+1) = U · x(n) with its transition graph and the course of the three stages:
  *                     beetles (eggs → larvae → beetles, a cycle when a · b · f = 1) or customers moving between three
  *                     providers (a stochastic matrix, its powers approaching the limit matrix, the fixed vector)
+ *   biquadratisch     x⁴ + p·x² + q = 0 by substitution z = x²: the parabola in z next to the quartic in x, each z > 0 gives ±√z,
+ *                     z = 0 gives 0, z < 0 gives nothing; p and q on sliders, the number of solutions with the reason
  * Looks: js/buch.css (shared classes only, colours of the SVG drawings as inline styles so the colour schemes translate them).
  */
 (function () {
@@ -298,5 +300,34 @@
         });
         fr.set(f);
         setup();
+    });
+    /* ---------- biquadratic equations: substitution z = x² ---------- */
+    W('biquadratisch', function (box) {
+        let p = -5, q = 4;
+        const sl = div(box, '');
+        range(sl, { label: 'Koeffizient $p$', min: -8, max: 6, step: 0.5, value: p, fmt: v => fmt(v, 1), onInput: v => { p = v; render(); } });
+        range(sl, { label: 'Koeffizient $q$', min: -4, max: 10, step: 0.5, value: q, fmt: v => fmt(v, 1), onInput: v => { q = v; render(); } });
+        math(sl);
+        const two = div(box, 'b-grid2');
+        const pz = new Plot(div(two, ''), { x: [-5, 9], y: [-8, 12], height: 260, xLabel: 'z', yLabel: '', aria: 'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen' });
+        const px = new Plot(div(two, ''), { x: [-3.5, 3.5], y: [-8, 12], height: 260, xLabel: 'x', yLabel: '', aria: 'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen' });
+        const out = div(box, 'b-out');
+        function render() {
+            const D = p * p / 4 - q, zs = [];
+            if (D > 1e-12) zs.push(-p / 2 - Math.sqrt(D), -p / 2 + Math.sqrt(D));
+            else if (Math.abs(D) <= 1e-12) zs.push(-p / 2);
+            const xs = [];
+            zs.forEach(z => { if (z > 1e-12) xs.push(-Math.sqrt(z), Math.sqrt(z)); else if (Math.abs(z) <= 1e-12) xs.push(0); });
+            const ux = [...new Set(xs.map(v => Math.round(v * 1e9) / 1e9))].sort((a, b) => a - b);
+            pz.draw([{ fn: z => z * z + p * z + q, color: 'cyan', label: 'h' }, { vline: 0, color: 'dim' },
+                { pts: zs.map(z => [z, 0, z > 1e-12 ? 'phi' : Math.abs(z) <= 1e-12 ? 'lambda' : 'red']), r: 6 }]);
+            px.draw([{ fn: x => x ** 4 + p * x * x + q, color: 'lambda', label: 'f' }, { pts: ux.map(x => [x, 0, 'phi']), r: 6 }]);
+            const zt = zs.length ? zs.map(z => '$z = ' + texNum(z, 3) + '$' + (z > 1e-12 ? ' liefert $x = \\pm' + texNum(Math.sqrt(z), 3) + '$' : Math.abs(z) <= 1e-12 ? ' liefert $x = 0$' : ' liefert nichts, denn $x^2$ ist nie negativ')).join('; ') : 'keine Lösung $z$, die Diskriminante ist negativ';
+            out.innerHTML = '<p style="margin:0 0 6px">$x^4' + B.sgx(p, 'x^2', 1) + B.sg(q, 1) + ' = 0$ wird mit $z = x^2$ zu $z^2' + B.sgx(p, 'z', 1) + B.sg(q, 1) + ' = 0$, Diskriminante $\\tfrac{p^2}{4} - q = ' + texNum(D, 3) + '$.</p>' +
+                '<p style="margin:0 0 6px">' + zt + '.</p><p style="margin:0"><b>' + (ux.length === 0 ? 'Keine Lösung' : ux.length === 1 ? 'Eine Lösung' : ux.length + ' Lösungen') + '</b>' +
+                (ux.length ? ': $x \\in \\{' + ux.map(v => texNum(v, 3)).join(';\\ ') + '\\}$' : '') + '.</p>';
+            math(out);
+        }
+        render();
     });
 })();
