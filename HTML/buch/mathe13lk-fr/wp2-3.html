@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 13 LK · Chapitre OP2.3 · Modèles de population | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Matrices de transition, puissances de matrices, matrice limite et vecteur fixe, évolution cyclique. Chapitre OP2.3 du manuel interactif Mathématiques · Berufliches Gymnasium 13 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE OP2.3 · DOMAINE AU CHOIX 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE OP2.3 · DOMAINE AU CHOIX 2 · FÉVRIER</p>
+            <h1>Modèles de population</h1>
+            <p class="b-hero-lead">Les œufs deviennent des larves, les larves des coléoptères, et les coléoptères pondent de nouveau des œufs. Combien de coléoptères y aura-t-il dans trois, dix, cent générations ?
+                Chaque année, des clients passent d’un fournisseur d’électricité à l’autre. Comment se répartissent-ils à long terme ? Une <b>matrice de transition</b> répond aux deux questions :
+                ses <b>puissances</b> montrent l’avenir, la <b>matrice limite</b> et le <b>vecteur fixe</b> l’état vers lequel tout tend.</p>
+            <div class="b-chips"><span class="b-chip">8 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">DOMAINE AU CHOIX 2</span></div>
+        </div>
+        <div class="b-hero-art">
+            <svg viewBox="0 0 320 250" role="img" aria-label="Cycle de vie d’un coléoptère : un quart des œufs deviennent des larves, la moitié des larves des coléoptères, chaque coléoptère pond huit œufs"><defs><marker id="cy13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" style="fill:#e682be"/></marker></defs><path d="M180.0 87.5 Q228.8 117.0 240.2 170.1" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="236.9" y="116.2" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">0,25</text><path d="M228.0 200.0 Q160.0 222.0 95.0 200.0" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="160.0" y="237.0" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">0,5</text><path d="M78.0 172.5 Q91.2 117.0 138.2 89.9" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="83.1" y="116.2" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">8</text><circle cx="160" cy="60" r="34" style="fill:rgb(245,194,66);fill-opacity:0.18;stroke:rgb(245,194,66);stroke-width:2.4"/><text x="160" y="65" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Œufs</text><circle cx="262" cy="200" r="34" style="fill:#7fd8ee;fill-opacity:0.18;stroke:#7fd8ee;stroke-width:2.4"/><text x="262" y="205" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Larves</text><circle cx="58" cy="200" r="34" style="fill:#b8a4f2;fill-opacity:0.18;stroke:#b8a4f2;stroke-width:2.4"/><text x="58" y="205" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Adultes</text>
+                </svg></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>décrire des transitions entre des états avec un <b>graphe de transition</b> et une <b>matrice de transition</b></li>
+                <li>calculer des évolutions avec des <b>puissances de matrices</b>, vers l’avant et vers l’arrière</li>
+                <li>reconnaître et justifier le comportement <b>cyclique</b>, la croissance et l’extinction d’une population</li>
+                <li>déterminer la <b>matrice limite</b> et le <b>vecteur fixe</b>, et les interpréter comme répartition à long terme</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="200" data-ph="coefficient"><p class="b-q-text">$\begin{pmatrix} 0 & 0 & 8 \\ 0{,}25 & 0 & 0 \\ 0 & 0{,}5 & 0 \end{pmatrix} \cdot \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$ : coefficient du milieu ?</p>
+            <div class="b-sol"><p>$0{,}25 \cdot 800$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,81" data-tol="0.0001" data-ph="valeur"><p class="b-q-text">Combien vaut $0{,}9^2$ ?</p>
+            <div class="b-sol"><p>0,81</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2/3" data-tol="0.005" data-ph="v₁ ="><p class="b-q-text">$v_1 = 2v_2$ et $v_1 + v_2 = 1$. Que vaut $v_1$ ?</p>
+            <div class="b-sol"><p>$3v_2 = 1$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE CYCLE DES COLÉOPTÈRES</div>
+        <div class="b-text"><p>Sur la figure ci-dessus : un quart des œufs deviennent des larves, la moitié des larves des coléoptères, chaque coléoptère pond 8 œufs et meurt. Au départ, il y a 800 œufs, 200 larves et 50 coléoptères.</p>
+            <ul>
+                <li>Calculez les nombres pour les trois étapes suivantes. Que remarquez-vous ?</li>
+                <li>Qu’est-ce qui change si chaque coléoptère pond 10 œufs ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçons 1 et 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">QUI PASSE OÙ ?</div>
+        <div class="b-text"><p>Parmi les clients de la régie municipale, 90 % restent chaque année, 10 % passent à la concurrence. Parmi les clients de celle-ci, 20 % reviennent chaque année.</p>
+            <ul>
+                <li>Aujourd’hui, la régie a 600 clients et la concurrence 400. Qu’en est-il dans un an, dans deux ans ?</li>
+                <li>Existe-t-il une répartition qui ne change plus ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 3</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Matrices de transition et puissances" data-toc-k="1" data-toc-short="1 Transitions">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">1</span>Matrices de transition et puissances</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Après une étape, il y a $8 \cdot 50 = 400$ œufs, $0{,}25 \cdot 800 = 200$ larves et $0{,}5 \cdot 200 = 100$ coléoptères. Chaque nouveau nombre est une somme de parts des anciens :
+                exactement une ligne d’une matrice fois le vecteur colonne des anciens nombres.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>L’état au temps $n$ est un vecteur $\vec{x}_n$. La <b>matrice de transition</b> $U$ contient dans la colonne $j$ ce que devient à l’étape suivante <b>un</b> individu de l’état $j$ :
+                la colonne signifie « de », la ligne « vers ». Le <b>graphe de transition</b> montre la même chose avec des flèches. Comme chaque étape est de nouveau la même multiplication, tout l’avenir est contenu dans les puissances de $U$.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MATRICE DE TRANSITION</div>
+        <div class="b-text"><p>$\vec{x}_{n+1} = U \cdot \vec{x}_n$ &nbsp; et donc &nbsp; $\vec{x}_n = U^n \cdot \vec{x}_0$. Le coefficient $u_{ij}$ est la part (ou le nombre) avec laquelle l’état $j$ contribue à l’état $i$.</p>
+            <p><b>Vers l’arrière :</b> si $U$ est inversible, alors $\vec{x}_{n-1} = U^{-1} \cdot \vec{x}_n$.</p>
+            <p><b>Modèle des coléoptères :</b> $U = \begin{pmatrix} 0 & 0 & f \\ a & 0 & 0 \\ 0 & b & 0 \end{pmatrix}$ avec les taux de survie $a$ (œuf → larve), $b$ (larve → coléoptère) et le nombre $f$ d’œufs par coléoptère.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Matrice de Leslie :</b> l’écologue britannique Patrick Leslie étudia en 1945 des matrices de population de ce type. Source : P. H. Leslie, On the use of matrices in certain population mathematics, Biometrika 33 (1945).</p>
+            <p class="b-note"><b>Avec le CAS</b>, on calcule $U^{10}$ directement comme puissance, sans multiplier dix fois.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · COLÉOPTÈRES ET CLIENTS</div>
+        <p class="b-help" style="margin:0 0 12px">Avance étape par étape et observe les trois courbes. Change le nombre $f$ d’œufs par coléoptère : pour quel $f$ tout se répète-t-il, quand la population croît-elle, quand s’éteint-elle ? Les mouvements de clientèle viennent dans la leçon 3.</p>
+            <div data-widget="uebergang" data-mode="kaefer"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · TROIS ÉTAPES</div>
+        <div class="b-text"><p>Calcule $\vec{x}_1$, $\vec{x}_2$, $\vec{x}_3$ pour $U = \begin{pmatrix} 0 & 0 & 8 \\ 0{,}25 & 0 & 0 \\ 0 & 0{,}5 & 0 \end{pmatrix}$ et $\vec{x}_0 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$.</p>
+            </div>
+        <div class="b-sol"><p>$\vec{x}_1 = \begin{pmatrix} 400 \\ 200 \\ 100 \end{pmatrix}$, $\vec{x}_2 = \begin{pmatrix} 800 \\ 100 \\ 100 \end{pmatrix}$, $\vec{x}_3 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$.</p>
+            <p><span class="b-res">Après trois étapes, tout est comme au départ.</span></p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · PUISSANCES</div>
+        <div class="b-text"><p>Calcule $U^2$ et $U^3$. Explique ainsi l’exemple 1.</p>
+            </div>
+        <div class="b-sol"><p>$U^2 = \begin{pmatrix} 0 & 4 & 0 \\ 0 & 0 & 2 \\ 0{,}125 & 0 & 0 \end{pmatrix}$, $U^3 = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} = I$.</p>
+            <p>$\vec{x}_3 = U^3 \cdot \vec{x}_0 = I \cdot \vec{x}_0 = \vec{x}_0$. <span class="b-res">Pour tout vecteur de départ, l’évolution se répète avec la période 3.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dessine le graphe de transition de $U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$ et interprète les trois nombres.</p>
+            </div>
+        <div class="b-sol"><p>Œuf → larve 0,5 (la moitié des œufs survit), larve → coléoptère 0,4 (40 % des larves deviennent des coléoptères), coléoptère → œuf 6 (chaque coléoptère pond 6 œufs).</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule pour cette matrice $\vec{x}_1$ et $\vec{x}_2$ avec $\vec{x}_0 = \begin{pmatrix} 600 \\ 100 \\ 50 \end{pmatrix}$.</p>
+            </div>
+        <div class="b-sol"><p>$\vec{x}_1 = \begin{pmatrix} 300 \\ 300 \\ 40 \end{pmatrix}$, $\vec{x}_2 = \begin{pmatrix} 240 \\ 150 \\ 120 \end{pmatrix}$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Dans le modèle des coléoptères avec $f = 8$ (exemple 1), on compte aujourd’hui 400 œufs, 200 larves et 100 coléoptères. À quoi ressemblait la population une étape plus tôt ? Justifie pourquoi on a ici $U^{-1} = U^2$.</p>
+            </div>
+        <div class="b-sol"><p>De $U^3 = I$, on déduit $U \cdot U^2 = I$, donc $U^{-1} = U^2$. $\vec{x}_{-1} = U^2 \cdot \begin{pmatrix} 400 \\ 200 \\ 100 \end{pmatrix} = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$, exactement $\vec{x}_0$ de l’exemple 1.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une espèce animale a trois classes d’âge : les jeunes, les individus d’un an, les adultes. 50 % des jeunes atteignent un an, 70 % des individus d’un an deviennent adultes, 80 % des adultes survivent chaque année et restent adultes. Les individus d’un an ont en moyenne 1 petit, les adultes 2. Établis $U$.</p>
+            </div>
+        <div class="b-sol"><p>Colonnes « de » jeune, individu d’un an, adulte ; lignes « vers » : $U = \begin{pmatrix} 0 & 1 & 2 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}7 & 0{,}8 \end{pmatrix}$. Le 0,8 sur la diagonale : les adultes restent adultes.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Calcule avec le CAS, pour le modèle de l’exercice précédent et $\vec{x}_0 = \begin{pmatrix} 100 \\ 50 \\ 50 \end{pmatrix}$, les valeurs $\vec{x}_{10}$ et $\vec{x}_{11}$. Par quel facteur la population finit-elle par croître chaque année ? Compare les proportions des classes d’âge.</p>
+            </div>
+        <div class="b-sol"><p>$\vec{x}_{10} \approx \begin{pmatrix} 2066 \\ 771 \\ 999 \end{pmatrix}$, $\vec{x}_{11} \approx \begin{pmatrix} 2769 \\ 1033 \\ 1339 \end{pmatrix}$ (arrondis). Chaque classe et l’effectif total croissent d’une année à l’autre du même facteur,
+                <span class="b-res">environ 1,34</span>. Les proportions restent presque les mêmes : environ 54 % de jeunes, 20 % d’individus d’un an, 26 % d’adultes. Contrairement aux coléoptères, il n’y a pas de cycle, parce que les adultes vivent plusieurs années.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="100" data-ph="coléoptères"><p class="b-q-text">Modèle des coléoptères de l’exemple 1 : combien de coléoptères y a-t-il après une étape ?</p>
+            <div class="b-sol"><p>$0{,}5 \cdot 200$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="4" data-ph="coefficient"><p class="b-q-text">Quel coefficient se trouve dans $U^2$ à la ligne 1, colonne 2 ?</p>
+            <div class="b-sol"><p>$8 \cdot 0{,}5$ : une larve donne 4 œufs au bout de deux étapes.</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Le coefficient $u_{21}$ d’une matrice de transition décrit le passage…</p>
+            <div class="b-mc"><button>de l’état 2 à l’état 1</button><button>de l’état 1 à l’état 2</button><button>de l’état 2 à lui-même</button></div>
+        <div class="b-sol"><p>Colonne = de, ligne = vers</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Cycles, croissance, extinction" data-toc-k="2" data-toc-short="2 Cycles">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">2 HEURES</span></div>
+        <h2><span class="b-no">2</span>Cycles, croissance et extinction</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dans le modèle des coléoptères, un œuf redevient au bout de trois étapes $a \cdot b \cdot f$ œufs : d’abord une larve avec la proportion $a$, puis un coléoptère avec la proportion $b$, puis $f$ œufs. Pour $a = 0{,}25$, $b = 0{,}5$, $f = 8$, cela fait exactement 1.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Il en va de même pour chaque classe. C’est pourquoi $U^3 = a\,b\,f \cdot I$ : au bout de trois étapes, chaque classe est multipliée par le facteur $q = a\,b\,f$. Seul ce facteur décide si la population survit.
+                Entre les multiples de 3, les nombres varient, parce que les classes passent l’une après l’autre.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · COMPORTEMENT À LONG TERME DANS LE MODÈLE DES COLÉOPTÈRES</div>
+        <div class="b-text"><p>$U^3 = q \cdot I$ avec $q = a \cdot b \cdot f$, donc $\vec{x}_{3k} = q^k \cdot \vec{x}_0$.</p>
+            <p>$q = 1$ : <b>cyclique</b> de période 3 · $q &gt; 1$ : <b>croissance</b> · $q &lt; 1$ : <b>extinction</b> à long terme.</p>
+            <p>En général, on lit le comportement à long terme sur les puissances $U^n$, pour de grands $n$ avec le CAS.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Maintenir l’équilibre :</b> si l’on veut maintenir une population constante alors que $q &gt; 1$, il faut prélever une part fixe à chaque cycle, par exemple par la lutte contre les ravageurs.</p>
+            </aside>
+    </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · DIX ŒUFS PAR COLÉOPTÈRE</div>
+        <div class="b-text"><p>Comment évolue la population de l’exemple 1 si chaque coléoptère pond 10 œufs ?</p>
+            </div>
+        <div class="b-sol"><p>$q = 0{,}25 \cdot 0{,}5 \cdot 10 = 1{,}25$, donc $U^3 = 1{,}25 \cdot I$ et $\vec{x}_3 = 1{,}25 \cdot \vec{x}_0 = \begin{pmatrix} 1000 \\ 250 \\ 62{,}5 \end{pmatrix}$.</p>
+            <p><span class="b-res">Toutes les trois étapes, chaque classe augmente de 25 %.</span></p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · COMBIEN D’ŒUFS FAUT-IL ?</div>
+        <div class="b-text"><p>À cause d’un produit phytosanitaire, seules 20 % des larves survivent encore. Combien d’œufs un coléoptère doit-il pondre pour que la population ne s’éteigne pas ?</p>
+            </div>
+        <div class="b-sol"><p>$q = 0{,}25 \cdot 0{,}2 \cdot f \ge 1 \iff f \ge 20$. <span class="b-res">Au moins 20 œufs par coléoptère.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Décide, pour $U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$, si la population croît, est cyclique ou s’éteint.</p>
+            </div>
+        <div class="b-sol"><p>$q = 0{,}5 \cdot 0{,}4 \cdot 6 = 1{,}2 &gt; 1$ : croissance, de 20 % toutes les trois étapes.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Calcule pour $f = 8$ et $\vec{x}_0 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$ le nombre de coléoptères après 100 étapes.</p>
+            </div>
+        <div class="b-sol"><p>$100 = 3 \cdot 33 + 1$, donc $\vec{x}_{100} = U \cdot \vec{x}_0 = \vec{x}_1$ : 100 coléoptères.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Pour quel $b$ le modèle avec $a = 0{,}2$ et $f = 25$ est-il cyclique ? Donne alors $U^2$ et $U^{-1}$.</p>
+            </div>
+        <div class="b-sol"><p>$0{,}2 \cdot b \cdot 25 = 1 \Rightarrow b = 0{,}2$. $U^2 = \begin{pmatrix} 0 & 5 & 0 \\ 0 & 0 & 5 \\ 0{,}04 & 0 & 0 \end{pmatrix} = U^{-1}$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Démontre</b> $U^3 = a\,b\,f \cdot I$ pour $U = \begin{pmatrix} 0 & 0 & f \\ a & 0 & 0 \\ 0 & b & 0 \end{pmatrix}$, en calculant d’abord $U^2$ dans le cas général. Qu’en déduit-on pour $U^{3k+1}$ ?</p>
+            </div>
+        <div class="b-sol"><p>$U^2 = \begin{pmatrix} 0 & bf & 0 \\ 0 & 0 & af \\ ab & 0 & 0 \end{pmatrix}$, $U^3 = U \cdot U^2 = \begin{pmatrix} abf & 0 & 0 \\ 0 & abf & 0 \\ 0 & 0 & abf \end{pmatrix}$. $\square$ On en déduit $U^{3k+1} = (abf)^k \cdot U$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="1,25" data-tol="0.0001" data-ph="q ="><p class="b-q-text">$a = 0{,}25$, $b = 0{,}5$, $f = 10$ : que vaut $q$ ?</p>
+            <div class="b-sol"><p>$0{,}25 \cdot 0{,}5 \cdot 10$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="20" data-ph="f ="><p class="b-q-text">$a = 0{,}25$, $b = 0{,}2$ : nombre minimal d’œufs par coléoptère pour que la population ne s’éteigne pas ?</p>
+            <div class="b-sol"><p>$0{,}05 f \ge 1$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Matrice limite et vecteur fixe" data-toc-k="3" data-toc-short="3 Vecteur fixe">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">3</span>Matrice limite et vecteur fixe</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Régie municipale $R$ et concurrence $C$ : $P = \begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$, départ $\begin{pmatrix} 600 \\ 400 \end{pmatrix}$.
+                Après un an $\begin{pmatrix} 620 \\ 380 \end{pmatrix}$, après deux $\begin{pmatrix} 634 \\ 366 \end{pmatrix}$. La régie gagne des clients, mais de plus en plus lentement. Où cela mène-t-il ?</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Dans ces mouvements, personne ne se perd et personne ne s’ajoute : chaque colonne de $P$ a pour somme 1. De telles matrices sont dites <b>stochastiques</b>. Leurs puissances $P^n$ se rapprochent souvent d’une
+                <b>matrice limite</b> $G$ dont toutes les colonnes sont égales. Ce vecteur colonne est le <b>vecteur fixe</b> $\vec{v}$ (on parle aussi d’état stable) : une répartition que $P$ ne change plus.
+                On le trouve sans puissances, par le système $P \cdot \vec{v} = \vec{v}$ avec la condition supplémentaire que les proportions ont pour somme 1.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · MATRICE LIMITE ET VECTEUR FIXE</div>
+        <div class="b-text"><p><b>Vecteur fixe :</b> $P \cdot \vec{v} = \vec{v} \iff (P - I) \cdot \vec{v} = \vec{0}$, et $v_1 + v_2 + \ldots = 1$ pour une répartition en proportions.</p>
+            <p><b>Matrice limite :</b> $G = \lim\limits_{n \to \infty} P^n$, toutes les colonnes sont $\vec{v}$. Alors, pour tout départ $\vec{x}_0$ : $\vec{x}_n \to G \cdot \vec{x}_0 = (\text{effectif total}) \cdot \vec{v}$.</p>
+            <p>À long terme, la répartition ne dépend donc pas du départ, seul l’effectif total est conservé.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Pas toujours :</b> pour le modèle cyclique des coléoptères, il n’y a pas de matrice limite, les puissances sautent sans cesse entre $U$, $U^2$ et $I$.</p>
+            <p class="b-note"><b>Avec le CAS :</b> calculer $P^{50}$ et arrondir à trois décimales. Les colonnes sont alors pratiquement le vecteur fixe.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · TROIS FOURNISSEURS</div>
+        <p class="b-help" style="margin:0 0 12px">Mouvements de clientèle entre trois fournisseurs d’électricité : avance de 10 étapes et plus. Observe comment les colonnes de $P^n$ deviennent égales et comment les courbes se stabilisent sur le vecteur fixe.</p>
+            <div data-widget="uebergang" data-mode="kunden"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LE VECTEUR FIXE</div>
+        <div class="b-text"><p>Détermine le vecteur fixe et la matrice limite de $P = \begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$.</p>
+            </div>
+        <div class="b-sol"><p>$(P - I) \cdot \vec{v} = \vec{0}$ : $-0{,}1 v_1 + 0{,}2 v_2 = 0$, donc $v_1 = 2 v_2$. Avec $v_1 + v_2 = 1$ : $v_2 = \tfrac13$, $v_1 = \tfrac23$.</p>
+            <p><span class="b-res">$\vec{v} = \begin{pmatrix} \tfrac23 \\ \tfrac13 \end{pmatrix}$, $G = \begin{pmatrix} \tfrac23 & \tfrac23 \\ \tfrac13 & \tfrac13 \end{pmatrix}$</span>. À long terme : $G \cdot \begin{pmatrix} 600 \\ 400 \end{pmatrix} \approx \begin{pmatrix} 667 \\ 333 \end{pmatrix}$.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · PUISSANCES AVEC LE CAS</div>
+        <div class="b-text"><p>Calcule $P^5$ et $P^{20}$ et compare avec $G$.</p>
+            </div>
+        <div class="b-sol"><p>$P^5 \approx \begin{pmatrix} 0{,}723 & 0{,}555 \\ 0{,}277 & 0{,}445 \end{pmatrix}$, $P^{20} \approx \begin{pmatrix} 0{,}667 & 0{,}666 \\ 0{,}333 & 0{,}334 \end{pmatrix}$.</p>
+            <p>Au bout de 20 ans, les colonnes sont pratiquement égales, <span class="b-res">$P^{20} \approx G$</span>.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Vérifie si $P = \begin{pmatrix} 0{,}8 & 0{,}1 & 0{,}2 \\ 0{,}1 & 0{,}7 & 0{,}2 \\ 0{,}1 & 0{,}2 & 0{,}6 \end{pmatrix}$ est stochastique, et interprète la colonne du fournisseur C.</p>
+            </div>
+        <div class="b-sol"><p>Sommes des colonnes : $0{,}8 + 0{,}1 + 0{,}1 = 1$, $0{,}1 + 0{,}7 + 0{,}2 = 1$, $0{,}2 + 0{,}2 + 0{,}6 = 1$ ✓ Parmi les clients de C, 20 % passent chaque année à A, 20 % à B, 60 % restent.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine le vecteur fixe de cette matrice sans CAS et compare avec le widget.</p>
+            </div>
+        <div class="b-hint"><p>Deux lignes de $(P - I)\,\vec{v} = \vec{0}$ et la condition sur la somme suffisent ; la troisième ligne découle des autres.</p>
+            </div>
+        <div class="b-sol"><p>$-0{,}2 v_1 + 0{,}1 v_2 + 0{,}2 v_3 = 0$, $0{,}1 v_1 - 0{,}3 v_2 + 0{,}2 v_3 = 0$, $v_1 + v_2 + v_3 = 1$. Solution : <span class="b-res">$\vec{v} = \begin{pmatrix} \tfrac{8}{19} \\ \tfrac{6}{19} \\ \tfrac{5}{19} \end{pmatrix} \approx \begin{pmatrix} 0{,}421 \\ 0{,}316 \\ 0{,}263 \end{pmatrix}$</span>.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Avec 10 000 clients : combien le fournisseur A en a-t-il à long terme ? Est-ce important que tous aient été chez C au départ ?</p>
+            </div>
+        <div class="b-sol"><p>$10\,000 \cdot \tfrac{8}{19} \approx 4211$. Non : la matrice limite n’a que des colonnes égales, donc tout départ avec 10 000 clients mène à la même répartition.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Démontre :</b> si $P$ est stochastique (toutes les sommes des colonnes valent 1), alors $P \cdot \vec{x}$ a la même somme des composantes que $\vec{x}$. Pourquoi est-ce sensé pour des mouvements de clientèle, mais pas pour le modèle des coléoptères ?</p>
+            </div>
+        <div class="b-sol"><p>$\sum_i (P\vec{x})_i = \sum_i \sum_j p_{ij} x_j = \sum_j x_j \sum_i p_{ij} = \sum_j x_j \cdot 1$. $\square$</p>
+            <p>Les clients ne font que changer, ils ne disparaissent pas. Les coléoptères meurent et pondent des œufs : les sommes des colonnes de la matrice des coléoptères sont $a$, $b$ et $f$, pas 1, et l’effectif total change.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="634" data-ph="clients"><p class="b-q-text">Régie municipale : départ 600 et 400. Combien de clients la régie a-t-elle au bout de deux ans ?</p>
+            <div class="b-sol"><p>$0{,}9 \cdot 620 + 0{,}2 \cdot 380$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1/3" data-tol="0.005" data-ph="v₂ ="><p class="b-q-text">Deuxième composante du vecteur fixe de $\begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$ ?</p>
+            <div class="b-sol"><p>$v_1 = 2v_2$, $v_1 + v_2 = 1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Les colonnes de la matrice limite sont…</p>
+            <div class="b-mc"><button>les colonnes de $P$.</button><button>des vecteurs unitaires.</button><button>toutes égales au vecteur fixe.</button></div>
+        <div class="b-sol"><p>Tout départ mène à la même répartition.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Une voiture de location est rendue à Dresde ou à Leipzig. Parmi les voitures louées à Dresde, 70 % reviennent à Dresde ; parmi celles louées à Leipzig, 60 % reviennent à Leipzig. Établis $P$ et détermine la répartition des voitures à long terme.</p>
+            </div>
+        <div class="b-sol"><p>$P = \begin{pmatrix} 0{,}7 & 0{,}4 \\ 0{,}3 & 0{,}6 \end{pmatrix}$. $-0{,}3 v_1 + 0{,}4 v_2 = 0$, $v_1 + v_2 = 1$ : $\vec{v} = \begin{pmatrix} \tfrac47 \\ \tfrac37 \end{pmatrix}$, donc un peu plus de 57 % à Dresde.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec le chapitre OP2.1 :</b> pourquoi l’équation $(P - I)\,\vec{v} = \vec{0}$ a-t-elle toujours une infinité de solutions pour une matrice stochastique, de sorte qu’on a besoin de la condition sur la somme ?</p>
+            </div>
+        <div class="b-sol"><p>Les sommes des colonnes de $P - I$ valent toutes $1 - 1 = 0$ : la somme de toutes les lignes est la ligne nulle, une ligne dépend des autres. $P - I$ n’est pas inversible, et avec $\vec{v}$, tout multiple $r\vec{v}$ est une solution.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec la 12e année :</b> un jeu de hasard a deux états, « en jeu » et « éliminé ». On reste en jeu à chaque tour avec la probabilité 0,8 ; une fois éliminé, on le reste. Établis $P$. Avec quelle probabilité est-on encore en jeu après 5 tours ? Quelle est la matrice limite ?</p>
+            </div>
+        <div class="b-sol"><p>$P = \begin{pmatrix} 0{,}8 & 0 \\ 0{,}2 & 1 \end{pmatrix}$. Après 5 tours : $0{,}8^5 \approx 0{,}328$. $P^n \to G = \begin{pmatrix} 0 & 0 \\ 1 & 1 \end{pmatrix}$ : à long terme, tout le monde est éliminé, « éliminé » est un état absorbant.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Exercice ouvert :</b> invente une matrice de transition $2 \times 2$ dont les puissances n’ont <b>pas</b> de matrice limite. Que se passe-t-il alors pour une répartition ?</p>
+            </div>
+        <div class="b-sol"><p>Par exemple $P = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$ : tout le monde change chaque année. $P^2 = I$, les puissances sautent entre $P$ et $I$. Une répartition $\begin{pmatrix} 600 \\ 400 \end{pmatrix}$ saute éternellement entre $\begin{pmatrix} 400 \\ 600 \end{pmatrix}$ et elle-même. Seule $\begin{pmatrix} 500 \\ 500 \end{pmatrix}$ reste fixe : le vecteur fixe $\begin{pmatrix} 0{,}5 \\ 0{,}5 \end{pmatrix}$ existe donc quand même.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Markov et Eugène Onéguine" data-toc-k="X" data-toc-short="Markov">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">DES CHAÎNES DE LETTRES</span></div>
+        <h2>Andreï Markov compte les voyelles</h2>
+    <div class="b-row">
+        <div class="b-text"><p>En 1913, le mathématicien russe Andreï Andreïevitch Markov étudia les 20 000 premières lettres du roman en vers d’Alexandre Pouchkine « Eugène Onéguine ». Il compta combien de fois une voyelle est suivie d’une voyelle
+                et combien de fois d’une consonne. Il en tira une matrice de transition $2 \times 2$, qui décrivait étonnamment bien la suite des lettres.</p>
+            <p>De tels modèles, dans lesquels l’état suivant ne dépend que de l’état actuel, s’appellent aujourd’hui des <b>chaînes de Markov</b>. Ils servent aux prévisions météorologiques, à la reconnaissance vocale,
+                au classement des moteurs de recherche et à l’écologie, quand elle calcule l’avenir de populations comme dans ce chapitre.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> A. A. Markov : « Exemple d’une étude statistique sur le texte d’Eugène Onéguine illustrant la liaison des épreuves en chaîne ». Bulletin de l’Académie impériale des sciences, Saint-Pétersbourg 1913 · MacTutor : « Andrei Andreyevich Markov ».</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>MATRICE DE TRANSITION</h4><p>Colonne = de, ligne = vers ; $\vec{x}_{n+1} = U\,\vec{x}_n$, $\vec{x}_n = U^n\,\vec{x}_0$</p>
+            </div>
+        <div>
+            <p>Coléoptères : 800, 200, 50 → 400, 200, 100</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>CYCLE</h4><p>Modèle des coléoptères : $U^3 = abf \cdot I$ ; $q = abf$ décide</p>
+            </div>
+        <div>
+            <p>$q = 1$ : période 3 · $q = 1{,}25$ : croissance</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>MATRICE STOCHASTIQUE</h4><p>Sommes des colonnes égales à 1, l’effectif total est conservé</p>
+            </div>
+        <div>
+            <p>Mouvements de clientèle</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>VECTEUR FIXE, MATRICE LIMITE</h4><p>$(P - I)\,\vec{v} = \vec{0}$, somme 1 ; $P^n \to G$ de colonnes $\vec{v}$</p>
+            </div>
+        <div>
+            <p>$\begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$ : $\vec{v} = \begin{pmatrix} \tfrac23 \\ \tfrac13 \end{pmatrix}$</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+        <div class="b-q" data-ans="300" data-ph="larves"><p class="b-q-text">$U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$, $\vec{x}_0 = \begin{pmatrix} 600 \\ 100 \\ 50 \end{pmatrix}$ : larves après une étape ?</p>
+            <div class="b-sol"><p>$0{,}5 \cdot 600$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1,2" data-tol="0.0001" data-ph="q ="><p class="b-q-text">Facteur de croissance $q$ de ce modèle au bout de trois étapes ?</p>
+            <div class="b-sol"><p>$0{,}5 \cdot 0{,}4 \cdot 6$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="4/7" data-tol="0.005" data-ph="v₁ ="><p class="b-q-text">Voitures de location : $P = \begin{pmatrix} 0{,}7 & 0{,}4 \\ 0{,}3 & 0{,}6 \end{pmatrix}$. Proportion à Dresde à long terme ?</p>
+            <div class="b-sol"><p>$0{,}3 v_1 = 0{,}4 v_2$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+        <div class="b-q" data-ans="4211" data-tol="1" data-ph="clients"><p class="b-q-text">Trois fournisseurs, 10 000 clients : combien A en a-t-il à long terme (arrondi) ?</p>
+            <div class="b-sol"><p>$10\,000 \cdot \tfrac{8}{19}$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,328" data-tol="0.001" data-ph="P ≈"><p class="b-q-text">Jeu de hasard : probabilité d’être encore en jeu après 5 tours ?</p>
+            <div class="b-sol"><p>$0{,}8^5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="100" data-ph="coléoptères"><p class="b-q-text">Modèle des coléoptères avec $f = 8$, départ 800, 200, 50 : coléoptères après 100 étapes ?</p>
+            <div class="b-sol"><p>$\vec{x}_{100} = \vec{x}_1$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-leontief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRAÎNEMENT À L’ABITUR LK</span><span class="b-lab-what">Matrices avec paramètre</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 13e année, Leistungskurs · domaine au choix 2 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-bgy13lk.js"></script>
+<script src="../../js/buch-fr/bgy13lk.js"></script>
+</body>
+</html>
