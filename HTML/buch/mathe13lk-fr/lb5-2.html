@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 13 LK · Chapitre 5.2 · Tests d’hypothèse | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Tests unilatéraux et bilatéraux, zone de rejet, erreurs de première et de deuxième espèce, signification statistique. Chapitre 5.2 du manuel interactif Mathématiques · Berufliches Gymnasium 13 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 5.2 · DOMAINE D’APPRENTISSAGE 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 5.2 · DOMAINE D’APPRENTISSAGE 5 · DÉCEMBRE · JANVIER</p>
+            <h1>Tests d’hypothèse</h1>
+            <p class="b-hero-lead">Une pièce tombe 33 fois sur face en 50 lancers. Est-elle truquée, ou était-ce le hasard ? Dans une étude, un médicament guérit 72 malades sur 100, l’ancien seulement 60 %.
+                Est-il vraiment plus efficace ? Un <b>test d’hypothèse</b> prend de telles décisions selon une règle fixée et te dit exactement à quelle fréquence on se trompe.</p>
+            <div class="b-chips"><span class="b-chip">10 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">DÉCIDER DANS L’INCERTITUDE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="50" data-p="0.5" data-lo="32" data-hi="50" data-step="10"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>formuler l’<b>hypothèse nulle</b> et l’<b>hypothèse alternative</b>, fixer la variable de décision et le <b>seuil de signification</b></li>
+                <li>déterminer la <b>zone de rejet</b> et la <b>valeur critique</b>, et énoncer une <b>règle de décision</b></li>
+                <li>effectuer des tests <b>unilatéraux</b> et <b>bilatéraux</b>, aussi avec le CAS</li>
+                <li>distinguer les <b>erreurs de première et de deuxième espèce</b>, calculer le risque de deuxième espèce et interpréter la <b>signification statistique</b></li>
+                <li><b>planifier</b> soi-même des tests, aussi avec l’approximation par la loi normale</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="25" data-ph="μ ="><p class="b-q-text">Espérance du nombre de « face » en 50 lancers d’une pièce équilibrée ?</p>
+            <div class="b-sol"><p>25</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">$P(X \ge 32)$ est égal à…</p>
+            <div class="b-mc"><button>$1 - P(X \le 32)$</button><button>$P(X \le 31)$</button><button>$1 - P(X \le 31)$</button></div>
+        <div class="b-sol"><p>L’événement contraire de « au moins 32 » est « au plus 31 ».</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="5" data-ph="pourcentage"><p class="b-q-text">Combien de pour cent représente 0,05 ?</p>
+            <div class="b-sol"><p>5 %</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">À PARTIR DE QUAND EST-ELLE TRUQUÉE ?</div>
+        <div class="b-text"><p>On lance une pièce 50 fois. Vous voulez décider si elle favorise « face ».</p>
+            <ul>
+                <li>À partir de combien de « face » diriez-vous « truquée » ? Mettez-vous d’accord sur un nombre.</li>
+                <li>À quelle fréquence accuseriez-vous ainsi à tort une pièce équilibrée ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DEUX FAÇONS DE SE TROMPER</div>
+        <div class="b-text"><p>Un test COVID, un détecteur de fumée, un tribunal : tous peuvent se tromper de deux façons différentes.</p>
+            <ul>
+                <li>Décrivez les deux erreurs pour chaque exemple. Laquelle est la plus grave à chaque fois ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE DÉ ÉQUILIBRÉ</div>
+        <div class="b-text"><p>On lance un dé 120 fois ; le six sort 28 fois.</p>
+            <ul>
+                <li>Combien de six attendez-vous ? 28 est-il suspect ?</li>
+                <li>8 serait-il suspect aussi ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Tests unilatéraux" data-toc-k="1" data-toc-short="1 Unilatéral">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">5 HEURES</span></div>
+        <h2><span class="b-no">1</span>Tests d’hypothèse unilatéraux</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un boulanger affirme : au plus $10\,\%$ de mes petits pains sont trop petits. Une cliente soupçonne qu’il y en a plus et pèse 50 petits pains.
+                Même si le boulanger a raison, il peut y en avoir par hasard plus de 5 trop petits. À partir de combien peut-elle le contredire sans se tromper trop souvent ?
+                Elle doit fixer la règle <b>avant</b> de peser.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>On teste l’<b>hypothèse nulle</b> $H_0\colon p = 0{,}1$ contre la supposition $H_1\colon p > 0{,}1$. La <b>variable de décision</b> $X$ compte les petits pains trop petits.
+                Si $H_0$ est vraie, $X$ suit la loi binomiale de paramètres $n = 50$ et $p = 0{,}1$. De grandes valeurs de $X$ parlent contre $H_0$ : la <b>zone de rejet</b> est à droite.
+                On la choisit de sorte que, si $H_0$ est vraie, elle soit atteinte au plus avec la probabilité $\alpha$, le <b>seuil de signification</b>.</p>
+            <p>Un test peut se tromper de deux façons : $H_0$ est rejetée alors qu’elle est vraie (<b>erreur de première espèce</b>, au plus $\alpha$), ou $H_0$ est conservée alors qu’elle est fausse (<b>erreur de deuxième espèce</b>).</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TEST UNILATÉRAL</div>
+        <div class="b-text"><p>1. Fixer $H_0\colon p = p_0$ et le sens. 2. Variable de décision $X$, de loi binomiale de paramètres $n$ et $p_0$ sous $H_0$. 3. Choisir le seuil de signification $\alpha$.</p>
+            <p>4. <b>À droite :</b> $K = \{k\,;\,\ldots\,;\,n\}$ avec le plus petit $k$ tel que $P(X \ge k) \le \alpha$. <b>À gauche :</b> $K = \{0\,;\,\ldots\,;\,k\}$ avec le plus grand $k$ tel que $P(X \le k) \le \alpha$. $k$ s’appelle la <b>valeur critique</b>.</p>
+            <p>5. <b>Règle de décision :</b> si le résultat de l’échantillon est dans $K$, on rejette $H_0$, sinon non.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Non rejetée ne veut pas dire démontrée :</b> si le résultat n’est pas dans $K$, les données ne suffisent simplement pas pour réfuter $H_0$.</p>
+            <p class="b-note"><b>Avec la calculatrice :</b> beaucoup d’appareils ne connaissent que $P(X \le k)$. Alors $P(X \ge k) = 1 - P(X \le k - 1)$.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE TEST D’HYPOTHÈSE</div>
+        <p class="b-help" style="margin:0 0 12px">Règle $n$, $p_0$, le sens et $\alpha$. En rouge, la zone de rejet. Affiche l’erreur de deuxième espèce et modifie la vraie valeur de $p$ : combien de fois le test ne voit-il pas que $H_0$ est fausse ?</p>
+            <div data-widget="signifikanztest"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · À DROITE : LE BOULANGER</div>
+        <div class="b-text"><p>$n = 50$, $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$, $\alpha = 5\,\%$. On a $P(X \ge 9) \approx 0{,}058$ et $P(X \ge 10) \approx 0{,}025$. La cliente trouve 9 petits pains trop petits.</p>
+            </div>
+        <div class="b-sol"><p>$k = 9$ est trop petit ($0{,}058 > 0{,}05$), $k = 10$ convient : <span class="b-res">$K = \{10\,;\,\ldots\,;\,50\}$</span>.</p>
+            <p>9 n’est pas dans $K$ : $H_0$ n’est pas rejetée. Les données ne suffisent pas pour contredire le boulanger.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · À GAUCHE : LES SEMENCES</div>
+        <div class="b-text"><p>Un marchand promet qu’au moins $90\,\%$ des graines germent. Un jardinier sème 100 graines. $H_0\colon p = 0{,}9$, $H_1\colon p < 0{,}9$, $\alpha = 5\,\%$, avec $P(X \le 84) \approx 0{,}040$ et $P(X \le 85) \approx 0{,}073$.</p>
+            </div>
+        <div class="b-sol"><p>La zone de rejet est à gauche : le plus grand $k$ tel que $P(X \le k) \le 0{,}05$ est 84.</p>
+            <p><span class="b-res">$K = \{0\,;\,\ldots\,;\,84\}$</span> : si au plus 84 graines germent, le jardinier contredit le marchand.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Donne $H_0$, $H_1$ et le type de test. a) Un nouveau médicament doit être plus efficace que l’ancien, qui a un taux de guérison de $70\,\%$. b) Un fournisseur garantit au plus $3\,\%$ de pièces défectueuses, l’acheteuse en doute. c) Un parti affirme avoir au moins $30\,\%$ d’opinions favorables.</p>
+            </div>
+        <div class="b-sol"><p>a) $H_0\colon p = 0{,}7$, $H_1\colon p > 0{,}7$, unilatéral à droite &nbsp; b) $H_0\colon p = 0{,}03$, $H_1\colon p > 0{,}03$, unilatéral à droite &nbsp; c) $H_0\colon p = 0{,}3$, $H_1\colon p < 0{,}3$, unilatéral à gauche</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>On lance une pièce 30 fois. On teste à droite si elle donne trop souvent pile : $H_0\colon p = 0{,}5$, $\alpha = 5\,\%$. On a $P(X \ge 19) \approx 0{,}100$ et $P(X \ge 20) \approx 0{,}049$. Détermine $K$.</p>
+            </div>
+        <div class="b-sol"><p>$K = \{20\,;\,\ldots\,;\,30\}$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Dans le test du boulanger ($K = \{10\,;\,\ldots\,;\,50\}$), $20\,\%$ des petits pains sont en réalité trop petits. Avec quelle probabilité la cliente ne s’en aperçoit-elle pas ? On a $P(X \le 9) \approx 0{,}444$ pour $n = 50$, $p = 0{,}2$.</p>
+            </div>
+        <div class="b-sol"><p>Erreur de deuxième espèce : le résultat n’est pas dans $K$, donc $P(X \le 9) \approx 44\,\%$. Presque un contrôle sur deux ne voit pas le mauvais boulanger.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Dans le test des semences, a) 86 graines germent, b) 83 graines germent. Formule chaque fois la décision avec des mots.</p>
+            </div>
+        <div class="b-sol"><p>a) $86 \notin K$ : l’affirmation du marchand n’est pas rejetée. b) $83 \in K$ : au seuil de $5\,\%$, le résultat parle significativement contre un taux de germination de $90\,\%$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>La cliente pèse maintenant 100 petits pains. Pour $n = 100$, $p = 0{,}1$, on a $P(X \ge 15) \approx 0{,}073$ et $P(X \ge 16) \approx 0{,}040$ ; pour $p = 0{,}2$, $P(X \le 15) \approx 0{,}129$. Détermine $K$ et l’erreur de deuxième espèce pour $p = 0{,}2$. Qu’apporte la plus grande taille d’échantillon ?</p>
+            </div>
+        <div class="b-sol"><p>$K = \{16\,;\,\ldots\,;\,100\}$, erreur de deuxième espèce $\approx 13\,\%$ au lieu de $44\,\%$. <span class="b-res">Plus de données rendent le test plus puissant</span>, avec le même $\alpha$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="10" data-ph="k ="><p class="b-q-text">Valeur critique du test du boulanger ($n = 50$, $\alpha = 5\,\%$) ?</p>
+            <div class="b-sol"><p>$P(X \ge 10) \approx 0{,}025$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="84" data-ph="k ="><p class="b-q-text">Plus grand nombre de la zone de rejet du test des semences ?</p>
+            <div class="b-sol"><p>$P(X \le 84) \approx 0{,}040$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Une erreur de première espèce signifie…</p>
+            <div class="b-mc"><button>$H_0$ est conservée alors qu’elle est fausse.</button><button>$H_0$ est rejetée alors qu’elle est vraie.</button><button>On s’est trompé dans le calcul.</button></div>
+        <div class="b-sol"><p>Sa probabilité est au plus $\alpha$.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Tests bilatéraux" data-toc-k="2" data-toc-short="2 Bilatéral">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">5 HEURES</span></div>
+        <h2><span class="b-no">2</span>Tests bilatéraux et signification statistique</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une pièce est-elle équilibrée ? Sont suspects <b>trop</b> de « pile », mais tout autant <b>trop peu</b>. La zone de rejet se compose donc de deux parties,
+                une à gauche et une à droite. Pour que le test se trompe au total au plus avec $\alpha$, chaque côté reçoit au plus $\tfrac{\alpha}{2}$.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Si $H_0$ est rejetée, on dit : le résultat est <b>significatif</b> au seuil $\alpha$. Cela veut seulement dire : si $H_0$ était vraie, un résultat aussi extrême serait rare.
+                Cela ne veut <b>pas</b> dire que $H_0$ est fausse avec la probabilité $1 - \alpha$, ni que l’écart est grand ou important.
+                La capacité d’un test à reconnaître une hypothèse fausse dépend de la vraie valeur de $p$ et de la taille de l’échantillon.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TEST BILATÉRAL</div>
+        <div class="b-text"><p>$H_0\colon p = p_0$, $H_1\colon p \neq p_0$. Zone de rejet $K = \{0\,;\,\ldots\,;\,k_l\} \cup \{k_r\,;\,\ldots\,;\,n\}$ avec</p>
+            <p>le plus grand $k_l$ tel que $P(X \le k_l) \le \tfrac{\alpha}{2}$, et le plus petit $k_r$ tel que $P(X \ge k_r) \le \tfrac{\alpha}{2}$.</p>
+            <p><b>Significatif</b> veut dire : si $H_0$ était vraie, le résultat serait tombé dans $K$ au plus avec la probabilité $\alpha$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Le sens compte :</b> qui sait à l’avance dans quel sens il cherche teste de façon unilatérale et repère plus facilement les écarts dans ce sens.</p>
+            <p class="b-note"><b>Avec le CAS :</b> afficher la table de la loi binomiale cumulée et y lire les bornes $k_l$ et $k_r$ ; le widget ci-dessous fait le même calcul.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LOI BINOMIALE CUMULÉE</div>
+        <p class="b-help" style="margin:0 0 12px">Règle $n = 100$ et $p = 0{,}5$ et choisis $P(X \le k)$. Cherche le plus grand $k$ pour lequel la probabilité vaut au plus 0,025.</p>
+            <div data-widget="binomial"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · LA PIÈCE EST-ELLE ÉQUILIBRÉE ?</div>
+        <div class="b-text"><p>$n = 100$, $H_0\colon p = 0{,}5$, $H_1\colon p \neq 0{,}5$, $\alpha = 5\,\%$. On a $P(X \le 39) \approx 0{,}018$ et $P(X \le 40) \approx 0{,}028$.</p>
+            </div>
+        <div class="b-sol"><p>À gauche : $k_l = 39$. Par symétrie, à droite $k_r = 61$.</p>
+            <p><span class="b-res">$K = \{0\,;\,\ldots\,;\,39\} \cup \{61\,;\,\ldots\,;\,100\}$</span>. Le risque de première espèce n’est même que de $2 \cdot 0{,}0176 \approx 3{,}5\,\%$.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · QUAND LA PIÈCE EST TRUQUÉE</div>
+        <div class="b-text"><p>En réalité, la pièce donne pile avec $p = 0{,}6$. Quelle est la probabilité que le test ne le détecte pas ?</p>
+            </div>
+        <div class="b-sol"><p>Erreur de deuxième espèce : $P(40 \le X \le 60)$ pour $p = 0{,}6$ $\approx 0{,}54$.</p>
+            <p><span class="b-res">Dans plus de la moitié des cas, la pièce n’est pas démasquée.</span> Pour $p = 0{,}7$, ce n’est plus qu’environ $2\,\%$.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Justifie pourquoi on teste l’équilibre d’une pièce de façon bilatérale, mais l’efficacité d’un nouveau médicament de façon unilatérale.</p>
+            </div>
+        <div class="b-sol"><p>Pour la pièce, les écarts dans les deux sens sont suspects. Pour le médicament, la seule question est de savoir s’il est meilleur.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$n = 50$, $H_0\colon p = 0{,}5$, bilatéral, $\alpha = 5\,\%$. On a $P(X \le 17) \approx 0{,}016$ et $P(X \le 18) \approx 0{,}033$. Détermine $K$.</p>
+            </div>
+        <div class="b-sol"><p>$k_l = 17$, par symétrie $k_r = 33$ : $K = \{0\,;\,\ldots\,;\,17\} \cup \{33\,;\,\ldots\,;\,50\}$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>On lance un dé 120 fois et on teste de façon bilatérale la probabilité d’un six, $\alpha = 5\,\%$. On a $P(X \le 11) \approx 0{,}014$, $P(X \le 12) \approx 0{,}028$, $P(X \ge 28) \approx 0{,}037$, $P(X \ge 29) \approx 0{,}022$. Détermine $K$. Quelle décision prend-on avec 27 six ?</p>
+            </div>
+        <div class="b-sol"><p>$K = \{0\,;\,\ldots\,;\,11\} \cup \{29\,;\,\ldots\,;\,120\}$. $27 \notin K$ : $H_0$ n’est pas rejetée.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Vrai ou faux ? a) Le résultat est significatif, donc $H_0$ est fausse avec une probabilité de $95\,\%$. b) Si $H_0$ n’est pas rejetée, elle est démontrée. c) Un $\alpha$ plus petit augmente l’erreur de deuxième espèce.</p>
+            </div>
+        <div class="b-sol"><p>a) faux : $\alpha$ décrit le comportement du test quand $H_0$ est vraie, ce n’est pas une probabilité pour $H_0$. b) faux. c) vrai, la zone de rejet devient plus petite.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une pièce a en réalité $p = 0{,}55$. Dans le test bilatéral avec $\alpha = 5\,\%$, l’erreur de deuxième espèce vaut environ 0,86 pour $n = 100$ et environ 0,52 pour $n = 400$. Interprète ces nombres. Qu’en déduit-on pour la planification d’un test ?</p>
+            </div>
+        <div class="b-sol"><p>Avec 100 lancers, les petits écarts passent presque toujours inaperçus, et même avec 400, une fois sur deux. <span class="b-res">Qui veut détecter de petites différences a besoin de très grands échantillons</span> ; il faut le prévoir avant le test.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="61" data-ph="k_r ="><p class="b-q-text">Pièce, $n = 100$, bilatéral, $\alpha = 5\,\%$ : à partir de quel nombre rejette-t-on à droite ?</p>
+            <div class="b-sol"><p>Symétrique de 39</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,025" data-ph="par côté"><p class="b-q-text">Quelle probabilité chaque côté d’un test bilatéral peut-il avoir au plus avec $\alpha = 5\,\%$ ?</p>
+            <div class="b-sol"><p>$\tfrac{\alpha}{2}$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Une taille d’échantillon plus grande…</p>
+            <div class="b-mc"><button>diminue l’erreur de deuxième espèce, à $\alpha$ égal.</button><button>augmente l’erreur de première espèce.</button><button>ne change rien.</button></div>
+        <div class="b-sol"><p>Exercice 15</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Un test de dé avec 60 lancers a $K = \{16\,;\,\ldots\,;\,60\}$. Combien de six attend-on avec un dé équilibré ? Quelle décision prend-on avec 14 et avec 18 six ?</p>
+            </div>
+        <div class="b-sol"><p>On en attend 10. Avec 14, ne pas rejeter ; avec 18, rejeter : le dé donne significativement trop souvent un six.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec la 12e année :</b> calcule avec la formule de Bernoulli $P(X \ge 9)$ pour $n = 10$ et $p = 0{,}5$. Avec 9 succès sur 10, tiendrais-tu une pièce pour truquée ($\alpha = 5\,\%$, à droite) ?</p>
+            </div>
+        <div class="b-sol"><p>$P(X = 9) + P(X = 10) = \tfrac{10 + 1}{1024} \approx 0{,}011 \le 0{,}05$ : oui, significatif au seuil de $5\,\%$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Explique pourquoi on doit fixer la zone de rejet <b>avant</b> de prélever l’échantillon.</p>
+            </div>
+        <div class="b-sol"><p>Qui ne fixe la limite qu’après avoir vu le résultat peut la placer de façon à obtenir le jugement souhaité. L’affirmation sur l’erreur de première espèce ne vaut alors plus.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un parti avait jusqu’ici $40\,\%$. Après un scandale, on interroge 200 personnes. Planifie un test avec lequel le parti peut vérifier, au seuil $\alpha = 5\,\%$, si sa part a baissé. Le CAS donne pour $n = 200$, $p = 0{,}4$ : $P(X \le 68) \approx 0{,}048$ et $P(X \le 69) \approx 0{,}064$.</p>
+            </div>
+        <div class="b-sol"><p>Unilatéral à gauche, $H_0\colon p = 0{,}4$, $H_1\colon p < 0{,}4$, $K = \{0\,;\,\ldots\,;\,68\}$. Si au plus 68 des 200 personnes interrogées veulent voter pour le parti, la baisse est significative.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec le chapitre 4 :</b> on lance une pièce 1000 fois et on teste de façon bilatérale au seuil $\alpha = 5\,\%$. Détermine avec $\mu \pm 1{,}96\sigma$ le domaine dans lequel $H_0\colon p = 0{,}5$ est conservée. Vérifie-le avec les valeurs du CAS $P(X \le 468) \approx 0{,}0231$ et $P(X \le 469) \approx 0{,}0268$.</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 500$, $\sigma \approx 15{,}81$, $1{,}96\sigma \approx 31$ : conservée de 469 à 531. Vérification : $P(X \le 468) \le 0{,}025$, mais $P(X \le 469) > 0{,}025$, donc $K = \{0\,;\,\ldots\,;\,468\} \cup \{532\,;\,\ldots\,;\,1000\}$ ✔ L’approximation tombe juste.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une boulangerie affirme qu’au plus $10\,\%$ de ses petits pains sont trop légers. Une contrôleuse pèse 400 petits pains ($\alpha = 5\,\%$, à droite). Détermine le plus petit nombre $k$ de petits pains trop légers à partir duquel elle conteste, d’abord avec l’approximation $k \ge \mu + 1{,}645\,\sigma + 0{,}5$, puis avec $P(X \ge 50) \approx 0{,}060$ et $P(X \ge 51) \approx 0{,}044$.</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 40$, $\sigma = 6$ : $k \ge 40 + 9{,}87 + 0{,}5 = 50{,}37$, donc $k = 51$. Exactement : $P(X \ge 51) \le 0{,}05 &lt; P(X \ge 50)$, <span class="b-res">$K = \{51\,;\,\ldots\,;\,400\}$</span>.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : la dame qui goûtait le thé" data-toc-k="X" data-toc-short="Thé">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">LE TEST LE PLUS CÉLÈBRE DE LA STATISTIQUE</span></div>
+        <h2>La dame qui goûtait le thé</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Dans son livre sur la planification des expériences, le statisticien anglais Ronald A. Fisher raconte l’histoire d’une dame qui affirmait reconnaître au goût
+                si l’on avait versé d’abord le lait ou d’abord le thé dans la tasse.</p>
+            <p>Fisher conçut le test ainsi : huit tasses, quatre de chaque sorte, dans un ordre aléatoire. La dame doit retrouver les quatre tasses « lait d’abord ». Si elle ne fait que deviner, il y a
+                $\binom84 = 70$ choix également probables ; trouver les quatre n’a donc qu’une probabilité de $\tfrac{1}{70} \approx 1{,}4\,\%$.
+                Si elle y parvient, on rejette l’hypothèse nulle « elle ne fait que deviner ». Fisher en fit le schéma de base de tout test d’hypothèse.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> Ronald A. Fisher : The Design of Experiments. Oliver and Boyd, Édimbourg 1935, chapitre 2.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>HYPOTHÈSES</h4><p>$H_0\colon p = p_0$ ; $H_1$ donne le sens.</p>
+            </div>
+        <div>
+            <p>Boulanger : $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>UNILATÉRAL</h4><p>$K$ à droite ou à gauche avec $P(X \in K) \le \alpha$</p>
+            </div>
+        <div>
+            <p>$n = 50$ : $K = \{10\,;\,\ldots\,;\,50\}$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>BILATÉRAL</h4><p>de chaque côté au plus $\tfrac{\alpha}{2}$</p>
+            </div>
+        <div>
+            <p>Pièce, $n = 100$ : $K = \{0\,;\,\ldots\,;\,39\} \cup \{61\,;\,\ldots\,;\,100\}$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>ERREURS</h4><p>Première espèce : $H_0$ rejetée à tort, au plus $\alpha$ ; deuxième espèce : $H_0$ conservée à tort</p>
+            </div>
+        <div>
+            <p>Pièce avec $p = 0{,}6$ : erreur de deuxième espèce $\approx 54\,\%$</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">On veut tester si un dé donne le six <b>trop souvent</b>. La zone de rejet se trouve…</p>
+            <div class="b-mc"><button>à gauche</button><button>à droite</button><button>des deux côtés</button></div>
+        <div class="b-sol"><p>Beaucoup de six parlent contre $H_0$ : à droite.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="20" data-ph="k ="><p class="b-q-text">$n = 30$, $H_0\colon p = 0{,}5$, à droite, $\alpha = 5\,\%$, $P(X \ge 20) \approx 0{,}049$, $P(X \ge 19) \approx 0{,}100$ : valeur critique ?</p>
+            <div class="b-sol"><p>Plus petit $k$ tel que $P(X \ge k) \le 0{,}05$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">« $H_0$ n’est pas rejetée » signifie…</p>
+            <div class="b-mc"><button>$H_0$ est démontrée.</button><button>$H_0$ est fausse.</button><button>Les données ne suffisent pas contre $H_0$.</button></div>
+        <div class="b-sol"><p>Pas une démonstration</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+        <div class="b-q" data-ans="51" data-ph="k ="><p class="b-q-text">Boulangerie : $n = 400$, $H_0\colon p = 0{,}1$, à droite, $\alpha = 5\,\%$, $P(X \ge 50) \approx 0{,}060$, $P(X \ge 51) \approx 0{,}044$. Valeur critique ?</p>
+            <div class="b-sol"><p>Plus petit $k$ tel que $P(X \ge k) \le 0{,}05$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,54" data-tol="0.01" data-ph="β ≈"><p class="b-q-text">Test de la pièce, $n = 100$, $K = \{0\,;\,\ldots\,;\,39\} \cup \{61\,;\,\ldots\,;\,100\}$ : erreur de deuxième espèce pour $p = 0{,}6$ ?</p>
+            <div class="b-sol"><p>$P(40 \le X \le 60)$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1/70" data-tol="0.001" data-ph="P ="><p class="b-q-text">Test du thé : probabilité de classer correctement les huit tasses en devinant ?</p>
+            <div class="b-sol"><p>$\binom84 = 70$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-signifikanztest.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TESTS UNILATÉRAUX</span><span class="b-lab-what">Hypothèses, zone de rejet, erreurs</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-zweiseitige-tests.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TESTS BILATÉRAUX</span><span class="b-lab-what">Signification statistique</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">La loi binomiale en direct</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 13e année, Leistungskurs · domaine d’apprentissage 5 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-fr/gy12.js"></script>
+</body>
+</html>
