@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 12 LK · Chapitre 1.2 · Variables aléatoires | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Loi de probabilité et fonction de répartition, espérance, variance. Chapitre 1.2 du manuel interactif Mathématiques · Berufliches Gymnasium 12 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 12 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 1.2 · DOMAINE D’APPRENTISSAGE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 1.2 · DOMAINE D’APPRENTISSAGE 1 · SEPTEMBRE · OCTOBRE</p>
+            <h1>Variables aléatoires</h1>
+            <p class="b-hero-lead">Une roue de loterie à la fête du lycée, un jeu de dés à la fête foraine, une assurance pour le vélo : derrière chaque expérience aléatoire se cachent
+                des <b>nombres</b>, des gains, des pertes, des effectifs. Ici, tu apprends à calculer avec ces nombres. L’<b>espérance</b> te dit
+                ce que l’on obtient à long terme, l’<b>écart type</b> à quel point cela fluctue.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">4 LEÇONS</span><span class="b-chip">ÉVALUER DES JEUX DE HASARD</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>définir une <b>variable aléatoire</b> et donner sa <b>loi de probabilité</b> sous forme de tableau et de diagramme en bâtons</li>
+                <li>donner la <b>fonction de répartition</b> $F(x) = P(X \le x)$ comme fonction en escalier et calculer avec elle « au plus », « plus de » et « entre »</li>
+                <li>calculer et interpréter l’<b>espérance</b>, la <b>variance</b> et l’<b>écart type</b></li>
+                <li>décider si un jeu est <b>équitable</b> et <b>démontrer</b> des règles de calcul pour l’espérance et la variance</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">Calcule la moyenne de 2, 4, 6 et 8.</p>
+            <div class="b-sol"><p>$\tfrac{2 + 4 + 6 + 8}{4} = 5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="3/8" data-tol="0.0005" data-ph="fraction"><p class="b-q-text">Calcule $\tfrac14 + \tfrac18$.</p>
+            <div class="b-sol"><p>$\tfrac28 + \tfrac18 = \tfrac38$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1/4" data-tol="0.0005" data-ph="P ="><p class="b-q-text">On lance deux pièces. Quelle est la probabilité d’obtenir deux fois face ?</p>
+            <div class="b-sol"><p>$\tfrac12 \cdot \tfrac12 = \tfrac14$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="nombre"><p class="b-q-text">Calcule $0{,}5 \cdot 4 + 0{,}5 \cdot (-2)$.</p>
+            <div class="b-sol"><p>$2 - 1 = 1$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA ROUE DE LA FÊTE DU LYCÉE</div>
+        <div class="b-text"><p>Mise : 2 €. La moitié de la roue ne rapporte rien, un quart 1 €, un huitième 2 €, un huitième 10 €.</p>
+            <ul>
+                <li>Joueriez-vous ? Estimez si la caisse de la classe gagne de l’argent.</li>
+                <li>Imaginez que 800 personnes jouent. Combien d’argent est versé ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DEUX JEUX, UNE ESPÉRANCE</div>
+        <div class="b-text"><p>Jeu A : une pièce, tu gagnes ou tu perds 1 €. Jeu B : avec une probabilité de 1 %, tu gagnes 99 €, sinon tu perds 1 €.</p>
+            <ul>
+                <li>Que gagne-t-on en moyenne dans chacun des deux jeux ?</li>
+                <li>En quoi diffèrent-ils malgré tout ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 4</span></div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">COMPTER LES SOMMES DES POINTS</div>
+        <div class="b-text"><p>Lancez deux dés 50 fois et notez chaque fois la somme des points.</p>
+            <ul>
+                <li>Quelle somme apparaît le plus souvent ? Pourquoi ?</li>
+                <li>Calculez la moyenne de vos 50 sommes. À quoi vous attendez-vous ?</li>
+                <li>Combien de fois la somme valait-elle au plus 4, au plus 7, au plus 10 ? Dessinez ces « parts au plus » comme un escalier.</li>
+                </ul></div>
+            <span class="b-pair">→ Leçons 1 à 3</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Variables aléatoires et lois" data-toc-k="1" data-toc-short="1 Loi">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">1</span>Variable aléatoire et loi de probabilité</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>On lance trois pièces. Il y a 8 issues équiprobables, de FFF à PPP. Une seule chose nous intéresse : <b>combien de fois face ?</b></p>
+            </div>
+        </div>
+        <div class="b-text"><p>Le nombre $X$ = « nombre de faces » dépend du hasard et peut prendre les valeurs 0, 1, 2, 3. En comptant les issues, on obtient :</p>
+            <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <tr><th>$x_i$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>$P(X = x_i)$</th><td>$\tfrac18$</td><td>$\tfrac38$</td><td>$\tfrac38$</td><td>$\tfrac18$</td></tr>
+                    </table></div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · VARIABLE ALÉATOIRE</div>
+        <div class="b-text"><p>Une <b>variable aléatoire</b> $X$ associe un nombre réel à chaque issue d’une expérience aléatoire.</p>
+            <p>La <b>loi de probabilité</b> de $X$ donne, pour chaque valeur $x_i$, la probabilité $P(X = x_i)$. Leur somme vaut 1.
+                        On la représente par un tableau, un <b>diagramme en bâtons</b> ou un histogramme.</p>
+            <p>« exactement $k$ » : $P(X = k)$ · « au plus $k$ » : $P(X \le k)$ · « au moins $k$ » : $P(X \ge k) = 1 - P(X \le k - 1)$</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note">Une variable aléatoire est dite <b>discrète</b> si elle ne prend que des valeurs isolées, dénombrables, par exemple des effectifs ou des sommes d’argent.</p>
+            <p class="b-note"><b>Événement contraire :</b> « au moins un » se calcule presque toujours avec $1 - P(\text{aucun})$.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">ILLUSTRATION · SOMME DES POINTS DE DEUX DÉS</div>
+        <p class="b-help" style="margin:0 0 12px">La hauteur des barres est $P(X = k)$, de $\tfrac{1}{36}$ pour 2 et 12 jusqu’à $\tfrac{6}{36}$ pour 7.</p>
+            <div data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · SOMME DES POINTS</div>
+        <div class="b-text"><p>$X$ est la somme des points de deux dés. Calcule $P(X = 7)$, $P(X \le 4)$ et $P(X \ge 10)$.</p>
+            </div>
+        <div class="b-sol"><p>$P(X = 7) = \tfrac{6}{36} = \tfrac16$ · $P(X \le 4) = \tfrac{1 + 2 + 3}{36} = \tfrac16$ · $P(X \ge 10) = \tfrac{3 + 2 + 1}{36} = \tfrac16$</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · TIRAGE SANS REMISE</div>
+        <div class="b-text"><p>D’une urne contenant 3 boules rouges et 2 boules bleues, on tire deux boules sans remise. $X$ = nombre de boules rouges. Donne la loi de $X$.</p>
+            </div>
+        <div class="b-sol"><p>$P(X = 0) = \tfrac25 \cdot \tfrac14 = \tfrac{1}{10}$, $P(X = 2) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$, $P(X = 1) = 1 - \tfrac{1}{10} - \tfrac{3}{10} = \tfrac{6}{10}$</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>On lance quatre pièces, $X$ = nombre de faces. Donne la loi de probabilité de $X$.</p>
+            </div>
+        <div class="b-hint"><p>Il y a 16 issues. Combien d’entre elles donnent exactement deux fois face ?</p>
+            </div>
+        <div class="b-sol"><p>$P(X = 0) = \tfrac{1}{16}$, $P(X = 1) = \tfrac{4}{16}$, $P(X = 2) = \tfrac{6}{16}$, $P(X = 3) = \tfrac{4}{16}$, $P(X = 4) = \tfrac{1}{16}$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Complète la probabilité manquante et calcule $P(X \ge 2)$.</p>
+            <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:360px"><tr><th>$x_i$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>$P(X = x_i)$</th><td>0,1</td><td>0,3</td><td>?</td><td>0,2</td></tr>
+                    </table></div>
+        </div>
+        <div class="b-sol"><p>$1 - 0{,}1 - 0{,}3 - 0{,}2 = 0{,}4$, $P(X \ge 2) = 0{,}4 + 0{,}2 = 0{,}6$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>On lance un dé deux fois, $X$ est le plus grand des deux résultats. Détermine la loi de $X$.</p>
+            </div>
+        <div class="b-sol"><p>$P(X = k) = \tfrac{2k - 1}{36}$ : $\tfrac{1}{36}, \tfrac{3}{36}, \tfrac{5}{36}, \tfrac{7}{36}, \tfrac{9}{36}, \tfrac{11}{36}$ pour $k = 1, \ldots, 6$.
+                Justification : les deux dés donnent au plus $k$ dans $k^2$ cas, au plus $k - 1$ dans $(k - 1)^2$ cas, la différence vaut $2k - 1$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une roue de loterie a trois secteurs d’angles au centre 180°, 120° et 60°. Ils rapportent 0 €, 2 € et 5 €. Donne la loi du gain versé et dessine un diagramme en bâtons.</p>
+            </div>
+        <div class="b-sol"><p>$P(0) = \tfrac{180}{360} = \tfrac12$, $P(2) = \tfrac{120}{360} = \tfrac13$, $P(5) = \tfrac{60}{360} = \tfrac16$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3/8" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Trois pièces, $X$ = nombre de faces. Que vaut $P(X = 2)$ ?</p>
+            <div class="b-sol"><p>FFP, FPF, PFF : $\tfrac38$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,3" data-tol="0.0001" data-ph="P ="><p class="b-q-text">Les valeurs d’une loi ont les probabilités 0,25 ; 0,35 ; ? ; 0,1. Laquelle manque ?</p>
+            <div class="b-sol"><p>$1 - 0{,}7 = 0{,}3$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1/12" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Deux dés, $X$ = somme des points. Que vaut $P(X \ge 11)$ ?</p>
+            <div class="b-sol"><p>$\tfrac{2 + 1}{36} = \tfrac{1}{12}$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="La fonction de répartition" data-toc-k="2" data-toc-short="2 F(x)">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">2</span>La fonction de répartition</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Avec trois pièces, $P(X \le 1) = \tfrac18 + \tfrac38 = \tfrac12$. Et $P(X \le 1{,}7)$ ? Aussi $\tfrac12$, car entre 1 et 2 aucune nouvelle valeur ne s’ajoute.
+                Ce n’est qu’en 2 que la « probabilité au plus » saute à $\tfrac78$. Si on la reporte pour <b>chaque</b> nombre réel, on obtient un escalier.</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · FONCTION DE RÉPARTITION</div>
+        <div class="b-text"><p>La <b>fonction de répartition</b> d’une variable aléatoire $X$ est $$F(x) = P(X \le x) \quad \text{pour tout } x \in \mathbb{R}.$$</p>
+            <p>Pour une variable aléatoire discrète, $F$ est une <b>fonction en escalier</b> : 0 à gauche de la plus petite valeur, 1 à droite de la plus grande, croissante entre les deux.
+                        En chaque valeur $x_i$, $F$ fait un saut vers le haut de $P(X = x_i)$ ; la valeur de la fonction au point de saut est la valeur du haut.</p>
+            <p>$P(X > a) = 1 - F(a)$ &nbsp;·&nbsp; $P(a < X \le b) = F(b) - F(a)$ &nbsp;·&nbsp; pour des valeurs entières, $P(X \ge k) = 1 - F(k - 1)$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Deux fonctions, une variable aléatoire :</b> la loi de probabilité $x_i \mapsto P(X = x_i)$ montre chaque bâton, la fonction de répartition $F$ leur somme cumulée. On peut calculer l’une à partir de l’autre.</p>
+            <p class="b-note"><b>Attention aux bornes :</b> pour des nombres entiers, « inférieur à 3 » signifie « au plus 2 », donc $F(2)$ et non $F(3)$.</p>
+            <p class="b-note"><b>La calculatrice et le CAS</b> donnent pour la loi binomiale exactement ces valeurs $F(k)$ comme probabilités « cumulées » (chapitre 1.3).</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DES BÂTONS À L’ESCALIER</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une variable aléatoire et une probabilité cherchée. Fais glisser $b$ (et $a$) et observe : entre deux valeurs, $F$ reste constante ; en chaque valeur, $F$ saute de la hauteur du bâton au-dessus.</p>
+            <div data-widget="verteilungsfunktion"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · TROIS PIÈCES</div>
+        <div class="b-text"><p>$X$ est le nombre de faces obtenues avec trois pièces. Donne $F$ par morceaux. Calcule $F(1{,}5)$, $P(X > 1)$ et $P(0 < X \le 2)$.</p>
+            </div>
+        <div class="b-sol"><p>$F(x) = 0$ pour $x < 0$, $\tfrac18$ pour $0 \le x < 1$, $\tfrac12$ pour $1 \le x < 2$, $\tfrac78$ pour $2 \le x < 3$ et $1$ pour $x \ge 3$.</p>
+            <p>$F(1{,}5) = \tfrac12$ · $P(X > 1) = 1 - F(1) = \tfrac12$ · $P(0 < X \le 2) = F(2) - F(0) = \tfrac78 - \tfrac18 = \tfrac34$</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · DE L’ESCALIER À LA LOI</div>
+        <div class="b-text"><p>Une variable aléatoire prend les valeurs 1, 2, 3, 4 ; sa fonction de répartition y vaut 0,1 ; 0,4 ; 0,85 ; 1. Détermine la loi de probabilité.</p>
+            </div>
+        <div class="b-sol"><p>Les hauteurs des sauts : $P(X = 1) = 0{,}1$, $P(X = 2) = 0{,}4 - 0{,}1 = 0{,}3$, $P(X = 3) = 0{,}85 - 0{,}4 = 0{,}45$, $P(X = 4) = 1 - 0{,}85 = 0{,}15$.
+                <span class="b-res">Différences de marches voisines.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ est le numéro obtenu avec un dé. Donne la fonction de répartition, esquisse-la et calcule $F(3)$, $F(4{,}5)$, $F(0)$ et $F(7)$.</p>
+            </div>
+        <div class="b-sol"><p>Escalier de six marches de hauteur $\tfrac16$ en 1, 2, …, 6. $F(3) = \tfrac12$, $F(4{,}5) = F(4) = \tfrac23$, $F(0) = 0$, $F(7) = 1$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ est la somme des points de deux dés. Exprime avec $F$ et calcule : $P(X \le 4)$, $P(X > 9)$, $P(4 < X \le 7)$.</p>
+            </div>
+        <div class="b-sol"><p>$F(4) = \tfrac{6}{36} = \tfrac16$ · $1 - F(9) = 1 - \tfrac{30}{36} = \tfrac16$ · $F(7) - F(4) = \tfrac{21}{36} - \tfrac{6}{36} = \tfrac{5}{12}$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Pour une variable aléatoire de valeurs 0, 1, 2, 3, on a $F(0) = 0{,}05$, $F(1) = 0{,}3$, $F(2) = 0{,}75$, $F(3) = 1$. Détermine la loi et $P(1 \le X \le 2)$.</p>
+            </div>
+        <div class="b-sol"><p>$0{,}05$ ; $0{,}25$ ; $0{,}45$ ; $0{,}25$. $P(1 \le X \le 2) = F(2) - F(0) = 0{,}7$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une variable aléatoire a les valeurs 1, 2, 3, 4. Lequel de ces tableaux de valeurs de $F$ en ces points ne peut pas être une fonction de répartition ? Justifie.
+                a) 0,2 ; 0,5 ; 0,4 ; 1 &nbsp; b) 0,1 ; 0,1 ; 0,6 ; 1 &nbsp; c) 0,3 ; 0,7 ; 0,9 ; 0,95</p>
+            </div>
+        <div class="b-sol"><p>a) non : $F$ descend de 0,5 à 0,4, alors qu’une fonction de répartition est croissante. b) oui : $P(X = 2) = 0$ est permis. c) non : en la plus grande valeur, $F$ doit valoir 1, les probabilités ne donneraient que 0,95.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Démontre pour $a < b$ : $P(a < X \le b) = F(b) - F(a)$. Justifie ainsi que toute fonction de répartition est croissante.</p>
+            </div>
+        <div class="b-sol"><p>L’événement $X \le b$ se décompose en les parties incompatibles $X \le a$ et $a < X \le b$. Donc $F(b) = F(a) + P(a < X \le b)$ ; en isolant, on obtient l’affirmation.</p>
+            <p>Comme une probabilité n’est jamais négative, il vient $F(b) - F(a) \ge 0$, donc $F(a) \le F(b)$ pour tous $a < b$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="7/8" data-tol="0.0005" data-ph="F(2) ="><p class="b-q-text">Trois pièces, $X$ = nombre de faces. Que vaut $F(2)$ ?</p>
+            <div class="b-sol"><p>$\tfrac18 + \tfrac38 + \tfrac38 = \tfrac78$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,2" data-tol="0.0001" data-ph="P ="><p class="b-q-text">On a $F(3) = 0{,}8$. Que vaut $P(X > 3)$ ?</p>
+            <div class="b-sol"><p>$1 - 0{,}8 = 0{,}2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,45" data-tol="0.0001" data-ph="P ="><p class="b-q-text">On a $F(1) = 0{,}2$ et $F(4) = 0{,}65$. Que vaut $P(1 < X \le 4)$ ?</p>
+            <div class="b-sol"><p>$0{,}65 - 0{,}2 = 0{,}45$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Espérance" data-toc-k="3" data-toc-short="3 Espérance">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">3</span>L’espérance</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>800 personnes jouent à la roue de la fête du lycée. Environ 400 ne reçoivent rien, 200 reçoivent 1 € chacune, 100 reçoivent 2 € et 100 reçoivent 10 €.
+                Cela fait $200 + 200 + 1000 = 1400$ €, donc en moyenne $\tfrac{1400}{800} = 1{,}75$ € par partie.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>On obtient la même chose sans les 800 personnes, directement à partir de la loi : $0 \cdot \tfrac12 + 1 \cdot \tfrac14 + 2 \cdot \tfrac18 + 10 \cdot \tfrac18 = 1{,}75$.
+                Avec une mise de 2 €, on perd en moyenne 25 centimes par partie : la caisse de la classe y gagne.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · ESPÉRANCE</div>
+        <div class="b-text"><p>Si $X$ prend les valeurs $x_1, \ldots, x_n$, son <b>espérance</b> est
+                        $$E(X) = \mu = x_1 \cdot P(X = x_1) + x_2 \cdot P(X = x_2) + \ldots + x_n \cdot P(X = x_n).$$</p>
+            <p>C’est la <b>moyenne à long terme</b> : si l’on répète l’expérience un très grand nombre de fois, la moyenne des résultats est proche de $E(X)$.</p>
+            <p>Si $X$ est le <b>gain</b> (somme versée moins la mise), un jeu est dit <b>équitable</b> lorsque $E(X) = 0$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Pas forcément une valeur possible :</b> l’espérance d’un lancer de dé vaut 3,5. Ce résultat ne sort jamais, c’est une moyenne.</p>
+            <p class="b-note"><b>Centre de gravité :</b> si l’on imagine les bâtons du diagramme comme des poids posés sur une balançoire à bascule, le point d’appui se trouve en $\mu$.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · VARIABLES ALÉATOIRES ET LEURS PARAMÈTRES</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis un exemple. Joue ensuite 10, 100 ou 1000 fois et compare la moyenne de tes parties avec l’espérance.</p>
+            <div data-widget="zufallsgroesse"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LE DÉ</div>
+        <div class="b-text"><p>Calcule l’espérance du résultat d’un lancer de dé.</p>
+            </div>
+        <div class="b-sol"><p>$E(X) = (1 + 2 + 3 + 4 + 5 + 6) \cdot \tfrac16 = \tfrac{21}{6} = 3{,}5$</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · CHUCK-A-LUCK</div>
+        <div class="b-text"><p>Tu mises 1 € sur un nombre, puis on lance trois dés. Pour chaque dé qui affiche ton nombre, tu gagnes 1 € ; si aucun ne l’affiche, la mise est perdue. Le jeu est-il équitable ?</p>
+            </div>
+        <div class="b-sol"><p>Aucune correspondance : $\left(\tfrac56\right)^3 = \tfrac{125}{216}$, une : $3 \cdot \tfrac16 \cdot \left(\tfrac56\right)^2 = \tfrac{75}{216}$, deux : $\tfrac{15}{216}$, trois : $\tfrac{1}{216}$.</p>
+            <p>$E(X) = \dfrac{-125 + 75 + 2 \cdot 15 + 3 \cdot 1}{216} = -\dfrac{17}{216} \approx -0{,}079$. <span class="b-res">Pas équitable : près de 8 centimes de perte par partie.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule $E(X)$ pour la loi $x_i$ : 0, 1, 2, 3 avec $P(X = x_i)$ : 0,1 ; 0,3 ; 0,4 ; 0,2.</p>
+            </div>
+        <div class="b-sol"><p>$0 + 0{,}3 + 0{,}8 + 0{,}6 = 1{,}7$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule l’espérance du nombre de faces obtenues avec trois pièces. Interprète le résultat.</p>
+            </div>
+        <div class="b-sol"><p>$0 \cdot \tfrac18 + 1 \cdot \tfrac38 + 2 \cdot \tfrac38 + 3 \cdot \tfrac18 = \tfrac{12}{8} = 1{,}5$. En moyenne, sur trois lancers, face sort 1,5 fois.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La roue de la fête du lycée doit devenir équitable. a) Quelle devrait être la mise ? b) La mise reste à 2 €. Quelle somme le secteur à 10 € doit-il alors verser ?</p>
+            </div>
+        <div class="b-sol"><p>a) 1,75 € &nbsp; b) $0{,}25 + 0{,}25 + \tfrac{a}{8} = 2 \Rightarrow a = 12$ €</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une tombola vend 1 000 billets à 2 € chacun. Il y a un lot de 500 €, 10 lots de 50 € et 100 lots de 5 €. Calcule l’espérance du gain pour un billet.</p>
+            </div>
+        <div class="b-sol"><p>Somme versée en moyenne : $\tfrac{500 + 500 + 500}{1000} = 1{,}5$ €. Gain : $1{,}5 - 2 = -0{,}5$ €. La tombola encaisse 500 €.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un vélo d’une valeur de 800 € est volé avec une probabilité de 3 % par an. Quelle prime annuelle serait équitable ? Une assurance demande 39 €. Pourquoi beaucoup de gens s’assurent-ils malgré tout ?</p>
+            </div>
+        <div class="b-sol"><p>Prime équitable : $800 \cdot 0{,}03 = 24$ €. Les 15 € de différence couvrent les frais et le bénéfice de l’assurance.
+                On paie une petite somme certaine pour se protéger contre une grosse perte peu probable.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Démontre $E(aX + b) = a \cdot E(X) + b$ pour des nombres réels $a$ et $b$. Un jeu a une espérance de gain de $-0{,}25$ €. L’exploitant double toutes les sommes versées et toutes les mises, et verse à chacun un bonus de 0,50 €. Quelle est la nouvelle espérance ?</p>
+            </div>
+        <div class="b-sol"><p>$E(aX + b) = \sum (a x_i + b)\, p_i = a \sum x_i p_i + b \sum p_i = a \cdot E(X) + b$, car $\sum p_i = 1$.</p>
+            <p>Nouveau gain $Y = 2X + 0{,}5$ : $E(Y) = 2 \cdot (-0{,}25) + 0{,}5 = 0$. Le jeu est maintenant équitable.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,2" data-tol="0.0001" data-ph="E(X) ="><p class="b-q-text">$X$ prend la valeur $-1$ avec la probabilité 0,6 et la valeur $2$ avec la probabilité 0,4. Calcule $E(X)$.</p>
+            <div class="b-sol"><p>$-0{,}6 + 0{,}8 = 0{,}2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="3,5" data-tol="0.0001" data-ph="euros"><p class="b-q-text">Un jeu de dé verse en euros le nombre de points obtenu. Quelle mise est équitable ?</p>
+            <div class="b-sol"><p>$E(X) = 3{,}5$ €</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,4" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$X$ ne prend que les valeurs 0 et 5, et $E(X) = 2$. Que vaut $P(X = 5)$ ?</p>
+            <div class="b-sol"><p>$5p = 2 \Rightarrow p = 0{,}4$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Variance et écart type" data-toc-k="4" data-toc-short="4 Dispersion">
+    <div class="b-band"><span class="b-band-tag">LEÇON 4</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">4</span>Variance et écart type</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Au jeu A, tu gagnes ou tu perds 1 € avec la même probabilité. Au jeu B, tu gagnes 99 € avec une probabilité de 1 %, sinon tu perds 1 €.
+                Les deux ont une espérance de 0. Pourtant, le jeu B donne une tout autre impression.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>La différence réside dans la <b>dispersion</b> : au jeu A, chaque résultat est à 1 € de l’espérance ; au jeu B, la plupart du temps à 1 €, mais rarement à 99 €.
+                On mesure la dispersion par la moyenne des <b>carrés des écarts</b> à l’espérance.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · VARIANCE ET ÉCART TYPE</div>
+        <div class="b-text"><p><b>Variance :</b> $V(X) = (x_1 - \mu)^2 \cdot P(X = x_1) + \ldots + (x_n - \mu)^2 \cdot P(X = x_n)$</p>
+            <p><b>Écart type :</b> $\sigma = \sqrt{V(X)}$. Il a la même unité que $X$ et indique de combien les valeurs s’écartent <b>typiquement</b> de l’espérance.</p>
+            <p>Jeu A : $V = 1$, $\sigma = 1$ · Jeu B : $V = 99^2 \cdot 0{,}01 + (-1)^2 \cdot 0{,}99 = 99$, $\sigma \approx 9{,}95$</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Astuce de calcul :</b> souvent plus rapide : $V(X) = E(X^2) - \mu^2$, c’est-à-dire « moyenne des carrés moins carré de la moyenne ».</p>
+            <p class="b-note"><b>Risque :</b> en finance, l’écart type sert de mesure du risque d’un placement.</p>
+            </aside>
+    </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 7 · LE DÉ</div>
+        <div class="b-text"><p>Calcule la variance et l’écart type du résultat d’un lancer de dé.</p>
+            </div>
+        <div class="b-sol"><p>Avec $\mu = 3{,}5$ : $V(X) = \tfrac16 \left(2{,}5^2 + 1{,}5^2 + 0{,}5^2 + 0{,}5^2 + 1{,}5^2 + 2{,}5^2\right) = \tfrac{17{,}5}{6} \approx 2{,}917$, $\sigma \approx 1{,}708$</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 8 · DEUX MACHINES DE REMPLISSAGE</div>
+        <div class="b-text"><p>La machine 1 remplit 498 g, 500 g, 502 g avec les probabilités 0,1 ; 0,8 ; 0,1. La machine 2 remplit 495 g, 500 g, 505 g avec 0,2 ; 0,6 ; 0,2. Laquelle est la plus précise ?</p>
+            </div>
+        <div class="b-sol"><p>Pour les deux : $\mu = 500$ g. $\sigma_1 = \sqrt{4 \cdot 0{,}1 + 4 \cdot 0{,}1} = \sqrt{0{,}8} \approx 0{,}89$ g, $\sigma_2 = \sqrt{25 \cdot 0{,}2 \cdot 2} = \sqrt{10} \approx 3{,}16$ g.
+                <span class="b-res">La machine 1 est moins dispersée.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule $V(X)$ et $\sigma$ pour le nombre de faces avec trois pièces ($\mu = 1{,}5$).</p>
+            </div>
+        <div class="b-sol"><p>$V = 2{,}25 \cdot \tfrac18 + 0{,}25 \cdot \tfrac38 + 0{,}25 \cdot \tfrac38 + 2{,}25 \cdot \tfrac18 = \tfrac68 = 0{,}75$, $\sigma \approx 0{,}866$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ prend les valeurs 0, 2 et 4 avec les probabilités 0,25 ; 0,5 ; 0,25. Calcule $\mu$, $V(X)$ et $\sigma$.</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 2$, $V = 4 \cdot 0{,}25 + 0 + 4 \cdot 0{,}25 = 2$, $\sigma = \sqrt2 \approx 1{,}414$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Compare le Chuck-a-luck (exemple 6) avec le jeu A de l’introduction : calcule l’écart type du gain au Chuck-a-luck. Vérifie avec le module interactif.</p>
+            </div>
+        <div class="b-sol"><p>$E(X^2) = \tfrac{125 + 75 + 4 \cdot 15 + 9}{216} = \tfrac{269}{216} \approx 1{,}2454$, $V = 1{,}2454 - 0{,}0787^2 \approx 1{,}239$, $\sigma \approx 1{,}113$ €</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Démontre la formule de König-Huygens $V(X) = E(X^2) - \mu^2$ dans le cas général et vérifie-la sur le dé.</p>
+            </div>
+        <div class="b-hint"><p>Développe $(x_i - \mu)^2$ et utilise $\sum P(X = x_i) = 1$ et $\sum x_i \cdot P(X = x_i) = \mu$.</p>
+            </div>
+        <div class="b-sol"><p>Avec $p_i = P(X = x_i)$ : $V(X) = \sum (x_i^2 - 2\mu x_i + \mu^2)\, p_i = \sum x_i^2 p_i - 2\mu \sum x_i p_i + \mu^2 \sum p_i = E(X^2) - 2\mu^2 + \mu^2 = E(X^2) - \mu^2$.</p>
+            <p>Dé : $E(X^2) = \tfrac{91}{6} \approx 15{,}167$, moins $3{,}5^2 = 12{,}25$, cela donne $\tfrac{35}{12} \approx 2{,}917$, comme dans l’exemple 7.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une variable aléatoire $X$ a pour espérance $\mu$ et pour variance $V(X)$. Démontre $V(aX + b) = a^2 \cdot V(X)$. Interprète : pourquoi un bonus fixe $b$ ne change-t-il pas la dispersion, alors qu’un facteur $a$ la change au carré ?</p>
+            </div>
+        <div class="b-sol"><p>$E(aX + b) = a\mu + b$ (leçon 3), donc $V(aX + b) = \sum (a x_i + b - a\mu - b)^2 p_i = a^2 \sum (x_i - \mu)^2 p_i = a^2 V(X)$.</p>
+            <p>Un bonus décale toutes les valeurs de la même quantité, les écarts à $\mu$ restent les mêmes. Un facteur multiplie tous les écarts par $a$, donc leurs carrés par $a^2$ ; l’écart type est multiplié par $|a|$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="5" data-ph="σ ="><p class="b-q-text">$X$ prend les valeurs 0 et 10, chacune avec la probabilité 0,5. Que vaut $\sigma$ ?</p>
+            <div class="b-sol"><p>$\mu = 5$, $V = 25$, $\sigma = 5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1,5" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">$V(X) = 2{,}25$. Que vaut l’écart type ?</p>
+            <div class="b-sol"><p>$\sqrt{2{,}25} = 1{,}5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Deux jeux ont la même espérance ; le jeu A a $\sigma = 2$ €, le jeu B a $\sigma = 8$ €. Lequel est le plus risqué ?</p>
+            <div class="b-mc"><button>Jeu A</button><button>Jeu B</button><button>Les deux autant</button></div>
+        <div class="b-sol"><p>Au jeu B, les résultats s’écartent typiquement beaucoup plus de l’espérance.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="20">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Justifie sans long calcul que la somme des points de deux dés a une espérance de 7.</p>
+            </div>
+        <div class="b-sol"><p>La loi est symétrique par rapport à 7. Ou bien : chaque dé a une espérance de 3,5, et les espérances s’additionnent.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Combien d’euros perd-on à long terme au Chuck-a-luck en 216 parties ? Et en 1 000 ?</p>
+            </div>
+        <div class="b-sol"><p>216 parties : environ 17 €. 1 000 parties : $1000 \cdot \tfrac{17}{216} \approx 78{,}70$ €.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relier avec le chapitre 1.1 :</b> d’une urne contenant 3 boules rouges et 2 boules bleues, tu tires deux boules sans remise. Chaque boule rouge rapporte 1 €. La mise est de 1 €. Le jeu est-il équitable ?</p>
+            </div>
+        <div class="b-sol"><p>Avec l’exemple 2 : $E(\text{somme versée}) = 0 \cdot 0{,}1 + 1 \cdot 0{,}6 + 2 \cdot 0{,}3 = 1{,}2$ €. Gain moyen : $+0{,}20$ €, favorable à la joueuse ou au joueur. Une mise de 1,20 € serait équitable.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Jeu de dé : avec un six, tu gagnes $a$ €, sinon tu perds 1 €. Pour quelle valeur de $a$ le jeu est-il équitable ? Que vaut alors $\sigma$ ?</p>
+            </div>
+        <div class="b-sol"><p>$\tfrac{a}{6} - \tfrac56 = 0 \Rightarrow a = 5$. $V = 25 \cdot \tfrac16 + 1 \cdot \tfrac56 = 5$, $\sigma = \sqrt5 \approx 2{,}24$ €.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le jeu de Saint-Pétersbourg" data-toc-k="X" data-toc-short="Saint-Pétersbourg">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">UN JEU D’ESPÉRANCE INFINIE</span></div>
+        <h2>Le jeu de Saint-Pétersbourg</h2>
+    <div class="b-row">
+        <div class="b-text"><p>On lance une pièce jusqu’à ce que pile sorte pour la première fois. Si cela arrive au $k$-ième lancer, tu reçois $2^k$ euros.
+                Avec la probabilité $\tfrac12$, tu reçois 2 €, avec $\tfrac14$ tu reçois 4 €, avec $\tfrac18$ tu reçois 8 €, et ainsi de suite.</p>
+            <p>L’espérance vaut $2 \cdot \tfrac12 + 4 \cdot \tfrac14 + 8 \cdot \tfrac18 + \ldots = 1 + 1 + 1 + \ldots$, elle est donc <b>infinie</b>.
+                Pourtant, presque personne ne miserait plus de 20 €. Pourquoi ?</p>
+            <p>Nicolas Ier Bernoulli posa la question en 1713 dans une lettre à Pierre Rémond de Montmort. Son cousin Daniel Bernoulli répondit en 1738 :
+                les gens n’évaluent pas l’argent d’après son montant, mais d’après son <b>utilité</b>, et celle-ci croît plus lentement que le montant. De plus,
+                aucune banque au monde ne pourrait verser les gains gigantesques des rares longues séries.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> Daniel Bernoulli, Specimen theoriae novae de mensura sortis. Commentarii Academiae Scientiarum Imperialis Petropolitanae 5 (1738).</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>VARIABLE ALÉATOIRE</h4><p>Associe un nombre à chaque issue. Loi : toutes les $P(X = x_i)$, de somme 1.</p>
+            </div>
+        <div>
+            <p>Nombre de faces avec trois pièces : $\tfrac18, \tfrac38, \tfrac38, \tfrac18$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>FONCTION DE RÉPARTITION</h4><p>$F(x) = P(X \le x)$, escalier de 0 à 1. $P(a < X \le b) = F(b) - F(a)$, $P(X > a) = 1 - F(a)$.</p>
+            </div>
+        <div>
+            <p>Trois pièces : $F(1{,}5) = \tfrac12$, $P(0 < X \le 2) = \tfrac34$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>ESPÉRANCE</h4><p>$E(X) = \mu = \sum x_i \cdot P(X = x_i)$, la moyenne à long terme.</p>
+            </div>
+        <div>
+            <p>Dé : 3,5 · Roue de loterie : 1,75 €</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>JEU ÉQUITABLE</h4><p>Espérance du gain égale à 0.</p>
+            </div>
+        <div>
+            <p>Chuck-a-luck : $-\tfrac{17}{216}$ €, pas équitable</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>VARIANCE ET ÉCART TYPE</h4><p>$V(X) = \sum (x_i - \mu)^2 \cdot P(X = x_i)$, $\sigma = \sqrt{V(X)}$</p>
+            </div>
+        <div>
+            <p>Dé : $V \approx 2{,}917$, $\sigma \approx 1{,}708$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>RÈGLES DE CALCUL</h4><p>$E(aX + b) = aE(X) + b$ · $V(aX + b) = a^2 V(X)$ · $V(X) = E(X^2) - \mu^2$</p>
+            </div>
+        <div>
+            <p>Doubler tous les montants : $\sigma$ double, $V$ est multipliée par quatre.</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+        <div class="b-q" data-ans="2,1" data-tol="0.0001" data-ph="E(X) ="><p class="b-q-text">$X$ prend les valeurs 1, 2, 3 avec les probabilités 0,2 ; 0,5 ; 0,3. Calcule $E(X)$.</p>
+            <div class="b-sol"><p>$0{,}2 + 1 + 0{,}9 = 2{,}1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Un jeu est dit équitable si …</p>
+            <div class="b-mc"><button>gagner est plus probable que perdre</button><button>l’espérance du gain vaut 0</button><button>l’écart type vaut 0</button></div>
+        <div class="b-sol"><p>À long terme, personne ne gagne.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="σ ="><p class="b-q-text">$X$ prend les valeurs 0 et 4, chacune avec la probabilité 0,5. Que vaut $\sigma$ ?</p>
+            <div class="b-sol"><p>$\mu = 2$, $V = 4$, $\sigma = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="12" data-ph="V ="><p class="b-q-text">On a $V(X) = 3$. Que vaut $V(2X + 5)$ ?</p>
+            <div class="b-sol"><p>$2^2 \cdot 3 = 12$, le terme 5 ne change rien.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+        <div class="b-q" data-ans="0,35" data-tol="0.0001" data-ph="P ="><p class="b-q-text">Une loi a les probabilités 0,2 ; 0,15 ; ? ; 0,3. Laquelle manque ?</p>
+            <div class="b-sol"><p>$1 - 0{,}65 = 0{,}35$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-0,2" data-tol="0.0001" data-ph="euros"><p class="b-q-text">Mise : 1 €. Avec la probabilité 0,1, on reçoit 8 €, sinon rien. Quelle est l’espérance du gain ?</p>
+            <div class="b-sol"><p>$0{,}8 - 1 = -0{,}2$ €</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="4" data-ph="V ="><p class="b-q-text">$X$ prend les valeurs $-2$ et $2$, chacune avec la probabilité 0,5. Calcule $V(X)$.</p>
+            <div class="b-sol"><p>$\mu = 0$, $V = 4$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,65" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$X$ ne prend que des valeurs entières et $F(2) = 0{,}35$. Que vaut $P(X \ge 3)$ ?</p>
+            <div class="b-sol"><p>$P(X \ge 3) = 1 - F(2) = 0{,}65$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-stochastik-uebung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXERCICES DE PROBABILITÉS</span><span class="b-lab-what">Lois et espérance</span></span></a>
+        <a class="b-lab" href="../../mathetest11-simulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULATION</span><span class="b-lab-what">La moyenne à long terme</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 12e année, Leistungskurs · domaine d’apprentissage 1 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe (2026).</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-bgy12lk.js"></script>
+<script src="../../js/buch-fr/bgy12lk.js"></script>
+</body>
+</html>
