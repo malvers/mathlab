@@ -1337,3 +1337,32 @@ js/buch-fr/geometrie.js get it by its rule), points (2 ; 3), [AB], (AB).
 | Strahlensatz | théorème de Thalès | OP, as section 5 |
 | Nivellieren, Messlatte, Standlinie | nivellement, mire, base | OP |
 | Lab names | TRIGONOMÉTRIE, PYTHAGORE, LABORATOIRE DES PUISSANCES, LABORATOIRE DES PARABOLES, SIMULATION D’ÉPIDÉMIE, LE JEU DE DÉS, PLANCHE DE GALTON, SOLIDES, PRINCIPE DE CAVALIERI | « À ESSAYER AUSSI (EN ALLEMAND) » |
+
+## mathe12lk-fr
+
+<!-- fr-22: terms of this book only (BGY 12 LK), write right below this line -->
+
+Package fr-22 (Dubreil), 28.10.2026: decisions made while translating BGY 12 Leistungskurs; nothing above was changed. Most of the
+text is the one of `mathe12-fr` (and of `mathegy11lk-fr` for 2.1, 2.2, 2.7), taken over paragraph by paragraph where the German is the same.
+
+| German | French | Note |
+|---|---|---|
+| Zulieferer $Z_i$, defekt $D$ (1.1) | fournisseur $F_i$, défectueuse $D$ | page text only; the test task « Lieferanten $L_3$ » became $F_3$ too |
+| zu spät $V$, Fahrrad $F$ (1.1, commuters) | en retard $R$, vélo $V$ | as fr-2 (bus $B$ / en retard $R$) and fr-1 (vélo $V$) |
+| krank $K$ (1.1, Bayes) | malade $M$ | as section 5 |
+| Verteilungsfunktion, Treppenfunktion, Wahrscheinlichkeitsfunktion (1.2) | fonction de répartition, fonction en escalier, loi de probabilité | widget verteilungsfunktion: js/buch-fr/bgy12lk.js |
+| Verschiebungssatz $V(X) = E(X^2) - \mu^2$ | formule de König-Huygens | 1.2 |
+| binomischer Lehrsatz | formule du binôme de Newton | 1.3, 2.3 |
+| Tombola, Los | tombola, billet | 1.3 |
+| Paketporto, Grundgebühr (taxi) | frais d’envoi d’un colis, prise en charge | 2.1 |
+| Sprungstelle, hebbare Unstetigkeit, Nahtstelle | discontinuité de saut, discontinuité supprimable, point de raccordement | as fr-9 |
+| lineare Approximation, differenzierbar heißt stetig, Knick | approximation affine, dérivable implique continue, point anguleux | 2.2 |
+| „glatt“ zusammensetzen | raccorder « sans à-coup » | 2.2 |
+| äußere / innere Ableitung, lineare Verkettung | dérivée extérieure / intérieure, composée avec une fonction affine | 2.4 (fr0 wording of the trainer) |
+| Satz vom Nullprodukt | règle du produit nul | 2.4 |
+| Bateman-Funktion, „trigonometrischer Pythagoras“ | fonction de Bateman, « Pythagore trigonométrique » | 2.4 |
+| Steckbriefe und Regression (title 2.7), Steckbriefaufgaben | Fonctions à partir de conditions et régression, carte d’identité d’une fonction | Lückenschluss (graph label): raccordement |
+| Gauß, Ceres, Braunschweig, Palermo | Gauss, Cérès, Brunswick, Palerme | 2.7 excursion; Jakob / Johann Bernoulli: Jacques / Jean (2.4) |
+| Rettungsschwimmerin | la sauveteuse | as fr-9 |
+| Zeilenvektor $(t, 2, -1)$ | $(t\,;\,2\,;\,-1)$ | 6.2, as section 4 |
+| Schwerpunkt einer dreiseitigen Pyramide | centre de gravité d’une pyramide à base triangulaire | 6.1 |
