@@ -109,6 +109,13 @@ const CLAUSE = {
         it: 'provare ogni formula, spostare ogni grafico e ruotare ogni solido nello spazio',
         fr: 'essayer chaque formule, déplacer chaque courbe et faire tourner chaque solide dans l’espace',
     },
+    // BGY 13 LK (28.10.2026, English by Taussky)
+    'jede Formel ausprobieren, jeden Graphen verschieben, jeden Körper im Raum drehen und jeden Zufallsversuch tausendmal laufen lassen': {
+        en: 'try out every formula, drag every graph, turn every solid in space and run every random experiment a thousand times',
+        es: 'probar cada fórmula, mover cada gráfica, girar cada cuerpo en el espacio y repetir mil veces cada experimento aleatorio',
+        it: 'provare ogni formula, spostare ogni grafico, ruotare ogni solido nello spazio e ripetere mille volte ogni esperimento casuale',
+        fr: 'essayer chaque formule, déplacer chaque courbe, faire tourner chaque solide dans l’espace et relancer mille fois chaque expérience aléatoire',
+    },
     'jeden Term als Rechenbaum aufbauen, jedes Glücksrad tausendmal drehen und jedes Dreieck strecken': {
         en: 'build every term as a calculation tree, spin every wheel of fortune a thousand times and stretch every triangle',
         es: 'construir cada término como árbol de cálculo, girar mil veces cada ruleta y estirar cada triángulo',
