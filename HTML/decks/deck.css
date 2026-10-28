@@ -265,6 +265,7 @@ a.fig-source:hover{color:var(--red);text-decoration:underline}
 .emo-bruch img{box-sizing:content-box;width:1em;height:1em;padding:.06em .12em;vertical-align:0}   /* content-box: with the border-box of every element the padding came off the picture and squeezed it */
 .emo-bruch img:first-child{border-bottom:.055em solid var(--formel)}
 .body .quelle{position:absolute;left:0;bottom:0;margin:0;font-size:10px;letter-spacing:.2px;color:var(--muted)}
+.body .quelle a{color:inherit;text-decoration-thickness:1px;text-underline-offset:2px}   /* a source link stays as quiet as its line */
 
 /* --- table_top ---------------------------------------------------------- */
 .dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
@@ -359,7 +360,24 @@ a.fig-source:hover{color:var(--red);text-decoration:underline}
 @media screen{
   html:not(.deck-edit) :not(.ov-thumb) > .slide .step.kommt.sanft:not(.on){opacity:0}
   html:not(.deck-edit) .slide .bis-vorbei.sanft{opacity:0;transition:opacity .6s ease,visibility 0s linear .6s}
+  /* a drum roll before a part (data-trommel, deck.js trommel): away while the roll runs, then it springs in with the
+     crash (Doc, 28.10.2026: "die 49 Cent auf Klick eingeblendet ... vorher im Trommelwirbel ... So Spannung") */
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .trommel-wartet{visibility:hidden}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .trommel-da{animation:trommel-da .7s cubic-bezier(.2,1.5,.4,1)}
+  /* the pieces of a .trommel-folge drop in one by one while it rolls */
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .trommel-folge > .trommel-da{animation:trommel-fall .28s ease-out}
+  /* data-trommel="leise": a quiet part - a source line, a note - fades in with the crash instead of springing */
+  html:not(.deck-edit) :not(.ov-thumb) > .slide [data-trommel="leise"].trommel-da{animation:trommel-leise .9s ease-out}
 }
+.slide span[data-trommel]{display:inline-block}   /* a word in a sentence can grow from its middle */
+@keyframes trommel-da{0%{transform:scale(.3);opacity:0}55%{transform:scale(1.18);opacity:1}100%{transform:scale(1)}}
+@keyframes trommel-leise{from{opacity:0}}
+@keyframes trommel-fall{0%{transform:translateY(-16px) scale(.6);opacity:0}100%{transform:none;opacity:1}}
+
+/* coins as pictures (Doc, 28.10.2026: 49 cents one by one during the drum roll - "echte Ein-Cent-Münzen als kleines
+   Bild" - then a 49-cent coin): they lie on the slide with a small shadow under them */
+.slide img.muenze{filter:drop-shadow(0 1px 1.5px rgba(14,36,78,.4))}
+.slide img.muenze.gross{filter:drop-shadow(0 6px 12px rgba(14,36,78,.35))}
 @keyframes step-now{from{opacity:0}}
 :root{--tri:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='14'%3E%3Cpath d='M0 0L11 7L0 14Z' fill='%23B02418'/%3E%3C/svg%3E")}   /* dark red like the box (Doc, 06.10.2026: "das Dreieck auch bitte") - was %23F5C242 */
 /* the marks only on a live slide - not in the overview tiles, not while editing, not on paper. On a bullet line

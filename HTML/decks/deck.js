@@ -231,6 +231,7 @@ function paint(){
   painted.forEach(f => f());
 }
 function next(){
+  if (trommel.laeuft()) return;                      // the drum still rolls: the click waits for the crash
   if (step < groups(slides[si])) { step++; }
   else { const j = seek(si + 1, 1); if (j >= 0) { si = j; step = 0; } }
   paint();
@@ -247,6 +248,75 @@ function jump(d){
   if (j >= 0) si = j;
   step = groups(slides[si]); paint();
 }
+
+/* ————— A drum roll before a part (data-trommel) ————————————————————————————
+ * Doc, 28.10.2026: "wenn die 49 Cent auf Klick eingeblendet werden, vorher im Trommelwirbel kommt. So Spannung".
+ * A step that carries data-trommel does not come with its click: the click starts the roll, the part stays away until
+ * the cymbal crash, then it springs in (deck.css). The children of a .trommel-folge in the same click group come one
+ * after another while it rolls, ever faster, the last just before the crash (Doc, 28.10.2026: "während des
+ * Trommelwirbels Münzen der Reihe nach erscheinen"). Only on one step forward - back, a jump, a #7 link and a reload
+ * show it all at once. While it rolls, a further click is swallowed, so an impatient click does not throw the moment
+ * away. In a show the beamer window drums; the presenter window stays silent, shows it all at once and waits along.
+ * The sound is resources/trommelwirbel.mp3, Doc's pick of four (28.10.2026: "Nummer 4" - "ein bisschen mehr Pathos";
+ * a roll made in Web Audio before "haut mich jetzt nicht vom Hocker"). Cut and mixed from two CC0 recordings on
+ * Freesound: zemidlo, "snare roll hit crash" (freesound.org/s/165523, from 5.05 s) and nomiqbomi, "Timpani Crescendo"
+ * (freesound.org/s/578574, 1.2 s in, its peak on the crash). The crash comes 3.5 s into the file.
+ */
+const trommel = (function () {
+  const QUELLE = '../resources/trommelwirbel.mp3', KNALL = 3.5;   // the crash, in seconds from the file's start
+  let lastSi = -1, lastStep = -1, bis = 0, wartend = [], folge = [], audio = null, uhr = 0, t0 = 0, ton = false;
+  function laden() {
+    if (!audio) { audio = new Audio(QUELLE); audio.preload = 'auto'; }
+    return audio;
+  }
+  if (!PRESENTER && document.querySelector('.step[data-trommel], .step.trommel-folge')) laden();   // the click starts it at once
+  function da(e) {
+    e.classList.remove('trommel-wartet'); e.classList.add('trommel-da');
+    e.addEventListener('animationend', () => e.classList.remove('trommel-da'), { once: true });
+  }
+  function zeigen() {
+    cancelAnimationFrame(uhr); uhr = 0; bis = 0;
+    folge.filter(e => e.classList.contains('trommel-wartet')).forEach(da);
+    wartend.forEach(da);
+    wartend = []; folge = [];
+  }
+  function abbrechen() {                              // turned back or jumped: the roll stops, all is as its step says
+    cancelAnimationFrame(uhr); uhr = 0; bis = 0;
+    if (audio) audio.pause();
+    wartend.concat(folge).forEach(e => e.classList.remove('trommel-wartet'));
+    wartend = []; folge = [];
+  }
+  function warten() {                                 // the clock is the file once it plays: the part comes with the crash
+    const lauf = (performance.now() - t0) / 1000;
+    const t = ton && !audio.paused ? audio.currentTime : lauf;
+    folge.forEach((e, i) => {
+      if (e.classList.contains('trommel-wartet') && t >= KNALL * 0.96 * Math.pow((i + 1) / folge.length, 0.8)) da(e);
+    });
+    if (t >= KNALL || lauf >= KNALL + 1.5) { zeigen(); return; }   // + 1.5 s: a sound that stalls still lets it in
+    uhr = requestAnimationFrame(warten);
+  }
+  painted.push(function () {
+    const vor = si === lastSi && step === lastStep + 1, gleich = si === lastSi && step === lastStep;
+    lastSi = si; lastStep = step;
+    if (gleich) return;                               // painted again where it stands: the roll goes on
+    if (bis || wartend.length || folge.length) abbrechen();
+    if (!vor) return;
+    const inGruppe = e => +e.dataset.g === step - 1;
+    const teile = [...slides[si].querySelectorAll('.step[data-trommel]')].filter(inGruppe);
+    const reihe = [...slides[si].querySelectorAll('.step.trommel-folge')].filter(inGruppe)
+      .reduce((a, f) => a.concat([...f.children]), []);
+    if (!teile.length && !reihe.length) return;
+    bis = Date.now() + KNALL * 1000;
+    if (PRESENTER) return;
+    wartend = teile; folge = reihe;
+    teile.concat(reihe).forEach(e => e.classList.add('trommel-wartet'));
+    const a = laden();
+    a.currentTime = 0; ton = false; t0 = performance.now();
+    a.play().then(() => { ton = true; }).catch(() => { });   // no sound: the clock runs alone
+    uhr = requestAnimationFrame(warten);
+  });
+  return { laeuft: function () { return wartend.length > 0 || folge.length > 0 || Date.now() < bis; } };
+})();
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
