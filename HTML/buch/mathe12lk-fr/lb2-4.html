@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 12 LK · Chapitre 2.4 · Règle du produit et règle de la chaîne | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Dériver des produits et des composées, racines et fonctions exponentielles. Chapitre 2.4 du manuel interactif Mathématiques · Berufliches Gymnasium 12 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 12 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.4 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.4 · DOMAINE D’APPRENTISSAGE 2 · FÉVRIER</p>
+            <h1>Règle du produit et règle de la chaîne</h1>
+            <p class="b-hero-lead">Un médicament monte dans le sang puis est éliminé : $c(t) = 10t \cdot \mathrm{e}^{-0{,}5t}$. Un thé refroidit : $T(t) = 20 + 60\,\mathrm{e}^{-0{,}1t}$.
+                Ces fonctions sont des <b>produits</b> et des <b>composées</b> des fonctions de référence du chapitre 2.3. Avec deux règles de plus, tu les dérives sans calculatrice,
+                et en Leistungskurs tu <b>démontres</b> pourquoi ces règles sont justes.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">DÉMONTRER</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["10*x*exp(-0.5*x)","10*exp(-0.5*x)*(1-0.5*x)"]' data-labels='["c","c′"]' data-lat="[5.2,1.2]" data-pts="[[2,7.358]]" data-x="-0.5,12" data-y="-3,9" data-xl="t" data-h="240" data-aria="Courbe de concentration d’un médicament avec sa dérivée ; la dérivée s’annule au maximum, au bout de 2 heures"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>dériver des produits comme $x^2 \cdot \mathrm{e}^x$ ou $(3x - 1) \cdot \sin x$ avec la <b>règle du produit</b> et <b>démontrer</b> cette règle</li>
+                <li>dériver des composées comme $\mathrm{e}^{2x - 5}$, $\ln(3x - 5)$ ou $\sqrt[3]{x^2 - 1}$ avec la <b>règle de la chaîne</b></li>
+                <li>combiner les deux règles, simplifier des dérivées en <b>factorisant</b> et trouver les zéros de $f'$</li>
+                <li>calculer et interpréter des taux de variation dans des phénomènes de croissance, de décroissance et d’oscillation</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="12" data-ph="f’(2) ="><p class="b-q-text">$f(x) = x^3$. Que vaut $f'(2)$ ?</p>
+            <div class="b-sol"><p>$3 \cdot 2^2 = 12$ (chapitre 2.3)</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Comment écrit-on $\sqrt{x}$ sous forme de puissance ?</p>
+            <div class="b-mc"><button>$x^2$</button><button>$x^{1/2}$</button><button>$x^{-2}$</button></div>
+        <div class="b-sol"><p>$\sqrt{x} = x^{\frac12}$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="nombre"><p class="b-q-text">Que vaut le nombre dérivé de $\mathrm{e}^x$ en 0 ?</p>
+            <div class="b-sol"><p>$\mathrm{e}^0 = 1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,5" data-tol="0.0001" data-ph="nombre"><p class="b-q-text">Que vaut le nombre dérivé de $\ln x$ en 2 ?</p>
+            <div class="b-sol"><p>$\tfrac12$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA DÉRIVÉE D’UN PRODUIT EST-ELLE LE PRODUIT DES DÉRIVÉES ?</div>
+        <div class="b-text"><p>Vérifiez avec $f(x) = x \cdot x^2 = x^3$ : que donne « dérivée fois dérivée », et quel est le bon résultat ?</p>
+            <ul>
+                <li>Un rectangle a pour côtés $u$ et $v$. Les deux grandissent un peu. De quelles parties l’aire augmente-t-elle ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">D’ABORD L’INTÉRIEUR, PUIS L’EXTÉRIEUR</div>
+        <div class="b-text"><p>$f(x) = (3x + 1)^2$.</p>
+            <ul>
+                <li>Dérivez, une fois après avoir développé, une fois « au jugé ». D’où vient le facteur 3 ?</li>
+                <li>Que se passe-t-il avec $(3x + 1)^{20}$, que plus personne n’a envie de développer ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">QUAND LE MÉDICAMENT AGIT-IL LE PLUS ?</div>
+        <div class="b-text"><p>La concentration d’un principe actif dans le sang est $c(t) = 10t \cdot \mathrm{e}^{-0{,}5t}$ (en mg/l, $t$ en heures).</p>
+            <ul>
+                <li>Calculez $c(1)$, $c(2)$, $c(3)$ et $c(6)$. À quel moment la concentration est-elle à peu près la plus élevée ?</li>
+                <li>Que devrait-on avoir pour la dérivée en ce point ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 3</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="La règle du produit" data-toc-k="1" data-toc-short="1 Produit">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">1</span>La règle du produit</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>« Dérivée fois dérivée » donne pour $x \cdot x^2$ l’expression $1 \cdot 2x = 2x$, alors que le bon résultat est $3x^2$. Pour le rectangle, l’aire augmente de deux bandes,
+                $u \cdot \Delta v$ et $v \cdot \Delta u$, et d’un minuscule coin. Le coin disparaît au passage à la limite, les bandes donnent $u v' + u' v$ : pour $x \cdot x^2$, exactement $x \cdot 2x + 1 \cdot x^2 = 3x^2$.</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÈGLE DU PRODUIT</div>
+        <div class="b-text"><p>Si $u$ et $v$ sont dérivables, alors $f = u \cdot v$ est aussi dérivable, et $$(u \cdot v)' = u' \cdot v + u \cdot v'.$$</p>
+            <p><b>Démonstration :</b> $\dfrac{u(x + h)v(x + h) - u(x)v(x)}{h} = \dfrac{u(x + h) - u(x)}{h} \cdot v(x + h) + u(x) \cdot \dfrac{v(x + h) - v(x)}{h}$.
+                        Comme $v$ est dérivable, donc continue, $v(x + h) \to v(x)$, et l’expression tend vers $u'v + uv'$.</p>
+            <p>La dérivée d’un produit n’est <b>pas</b> le produit des dérivées.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>L’astuce de la démonstration :</b> on soustrait une fois $u(x) v(x + h)$ et on l’ajoute à nouveau. Ce zéro, écrit sous cette forme, transforme une expression en deux taux d’accroissement.</p>
+            <p class="b-note"><b>Sans calculatrice</b>, le programme demande des produits simples des fonctions de référence, par exemple $x \cdot \mathrm{e}^x$ et $(3x - 1) \cdot \sin x$. Les expressions plus compliquées, tu les dérives avec le CAS.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA RÈGLE DU PRODUIT EN RECTANGLE</div>
+        <p class="b-help" style="margin:0 0 12px">Réduis $h$. Le coin rouge $\Delta u \cdot \Delta v$ rétrécit bien plus vite que les deux bandes.</p>
+            <div data-widget="produktregel"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · PRODUIT AVEC eˣ</div>
+        <div class="b-text"><p>Dérive $f(x) = x^2 \mathrm{e}^x$ et détermine les points où la tangente est horizontale.</p>
+            </div>
+        <div class="b-sol"><p>$u = x^2$, $v = \mathrm{e}^x$ : $f'(x) = 2x \cdot \mathrm{e}^x + x^2 \cdot \mathrm{e}^x$.</p>
+            <p><span class="b-res">$f'(x) = (x^2 + 2x)\,\mathrm{e}^x$</span>. Factoriser est utile : $f'(x) = 0 \iff x = 0$ ou $x = -2$, car $\mathrm{e}^x$ ne s’annule jamais.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · PRODUIT AVEC ln x</div>
+        <div class="b-text"><p>Dérive $g(x) = x \ln x$ et détermine où la courbe a une tangente horizontale.</p>
+            </div>
+        <div class="b-sol"><p>$g'(x) = 1 \cdot \ln x + x \cdot \tfrac1x = \ln x + 1$.</p>
+            <p>$\ln x + 1 = 0 \iff x = \mathrm{e}^{-1}$ : <span class="b-res">tangente horizontale en $x = \tfrac1{\mathrm{e}} \approx 0{,}368$</span>.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · TANGENTE ET NORMALE</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une fonction et déplace le point : la tangente et la normale, avec leurs équations.</p>
+            <div data-widget="tangente"></div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dérive avec la règle du produit : a) $x \cdot \mathrm{e}^x$ &nbsp; b) $(3x - 1) \cdot \sin x$ &nbsp; c) $x^3 \sin x$ &nbsp; d) $\mathrm{e}^x \cos x$</p>
+            </div>
+        <div class="b-sol"><p>a) $(1 + x)\,\mathrm{e}^x$ &nbsp; b) $3\sin x + (3x - 1)\cos x$ &nbsp; c) $3x^2 \sin x + x^3 \cos x$ &nbsp; d) $\mathrm{e}^x(\cos x - \sin x)$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dérive : a) $\sqrt{x}\,\ln x$ &nbsp; b) $x^2 \ln x$ &nbsp; c) $(x + 2)\,\mathrm{e}^x$</p>
+            </div>
+        <div class="b-sol"><p>a) $\tfrac{\ln x}{2\sqrt{x}} + \tfrac{1}{\sqrt{x}} = \tfrac{\ln x + 2}{2\sqrt{x}}$ &nbsp; b) $2x \ln x + x$ &nbsp; c) $(x + 3)\,\mathrm{e}^x$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine la tangente à la courbe de $f(x) = x\,\mathrm{e}^x$ à l’origine. En quel point la courbe a-t-elle une tangente horizontale ? Donne ce point.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = (1 + x)\,\mathrm{e}^x$, $f'(0) = 1$ : tangente $y = x$. Horizontale en $x = -1$, au point $\left(-1\,;\,-\tfrac1{\mathrm{e}}\right) \approx (-1\,;\,-0{,}368)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>En quels points la courbe de $f(x) = (x^2 - 3)\,\mathrm{e}^x$ a-t-elle une tangente horizontale ?</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 2x\,\mathrm{e}^x + (x^2 - 3)\,\mathrm{e}^x = (x^2 + 2x - 3)\,\mathrm{e}^x = (x - 1)(x + 3)\,\mathrm{e}^x$. Nulle en $x = 1$ et $x = -3$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$f(x) = x\,\mathrm{e}^x$. Détermine $f'$, $f''$ et $f'''$. Conjecture une formule pour la dérivée $n$-ième et justifie-la avec la règle du produit : si elle est vraie pour $n$, elle l’est aussi pour $n + 1$.</p>
+            </div>
+        <div class="b-sol"><p>$f' = (x + 1)\mathrm{e}^x$, $f'' = (x + 2)\mathrm{e}^x$, $f''' = (x + 3)\mathrm{e}^x$. Conjecture : $f^{(n)}(x) = (x + n)\mathrm{e}^x$.
+                Si elle est vraie pour $n$, alors $f^{(n+1)}(x) = 1 \cdot \mathrm{e}^x + (x + n)\mathrm{e}^x = (x + n + 1)\mathrm{e}^x$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0" data-ph="f’(0) ="><p class="b-q-text">$f(x) = x^2 \mathrm{e}^x$. Calcule $f'(0)$.</p>
+            <div class="b-sol"><p>$(0 + 0)\,\mathrm{e}^0 = 0$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="g’(e) ="><p class="b-q-text">$g(x) = x \ln x$. Calcule $g'(\mathrm{e})$.</p>
+            <div class="b-sol"><p>$\ln \mathrm{e} + 1 = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-3,1416" data-tol="0.001" data-ph="f'(π) ="><p class="b-q-text">$f(x) = x \sin x$. Calcule $f'(\pi)$ à quatre décimales.</p>
+            <div class="b-sol"><p>$f'(x) = \sin x + x\cos x$, $f'(\pi) = 0 + \pi \cdot (-1) = -\pi \approx -3{,}1416$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="La règle de la chaîne" data-toc-k="2" data-toc-short="2 Chaîne">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">5 HEURES</span></div>
+        <h2><span class="b-no">2</span>La règle de la chaîne</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$(3x + 1)^2 = 9x^2 + 6x + 1$ a pour dérivée $18x + 6 = 2(3x + 1) \cdot 3$. La fonction extérieure « carré » donne $2(3x + 1)$,
+                et comme l’intérieur $3x + 1$ croît trois fois plus vite que $x$, le facteur 3 s’ajoute. Pour $(3x + 1)^{20}$, on obtient sans aucun calcul $20(3x + 1)^{19} \cdot 3$.</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÈGLE DE LA CHAÎNE</div>
+        <div class="b-text"><p>Si $f(x) = u(v(x))$, avec une fonction intérieure $v$ dérivable et une fonction extérieure $u$ dérivable, alors $$f'(x) = u'(v(x)) \cdot v'(x),$$ « dérivée extérieure fois dérivée intérieure ».</p>
+            <p><b>Composée avec une fonction affine :</b> $\left(g(ax + b)\right)' = a \cdot g'(ax + b)$, par exemple $\left(\mathrm{e}^{2x - 5}\right)' = 2\mathrm{e}^{2x - 5}$ et $\left(\ln(3x - 5)\right)' = \tfrac{3}{3x - 5}$.</p>
+            <p>On écrit les <b>racines</b> comme des puissances, puis on dérive avec la règle de la chaîne : $\sqrt{v(x)} = v(x)^{\frac12}$ a pour dérivée $\dfrac{v'(x)}{2\sqrt{v(x)}}$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Dans la notation de Leibniz,</b> la règle ressemble à un calcul de fractions : $\tfrac{\mathrm{d}u}{\mathrm{d}x} = \tfrac{\mathrm{d}u}{\mathrm{d}v} \cdot \tfrac{\mathrm{d}v}{\mathrm{d}x}$. Ce n’est pas une démonstration, mais un bon moyen mnémotechnique.</p>
+            <p class="b-note"><b>Erreur fréquente :</b> oublier la dérivée intérieure. $\left(\sin(2x)\right)' = 2\cos(2x)$, et non $\cos(2x)$.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DÉRIVÉE EXTÉRIEURE FOIS DÉRIVÉE INTÉRIEURE</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis la fonction extérieure et la fonction intérieure. La tangente au point que tu déplaces a exactement la pente $u'(v(x)) \cdot v'(x)$.</p>
+            <div data-widget="kettenregel"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · TROIS EXEMPLES DU PROGRAMME</div>
+        <div class="b-text"><p>Dérive : a) $f(x) = \mathrm{e}^{2x - 5}$ &nbsp; b) $g(x) = \ln(3x - 5)$ &nbsp; c) $k(x) = \sqrt[3]{x^2 - 1}$</p>
+            </div>
+        <div class="b-sol"><p>a) dérivée intérieure 2 : $f'(x) = 2\mathrm{e}^{2x - 5}$ &nbsp; b) $g'(x) = \tfrac{1}{3x - 5} \cdot 3 = \tfrac{3}{3x - 5}$ pour $x > \tfrac53$</p>
+            <p>c) $k(x) = (x^2 - 1)^{\frac13}$ : <span class="b-res">$k'(x) = \tfrac13 (x^2 - 1)^{-\frac23} \cdot 2x = \dfrac{2x}{3\sqrt[3]{(x^2 - 1)^2}}$</span> pour $x^2 \neq 1$</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · aˣ AVEC LA RÈGLE DE LA CHAÎNE</div>
+        <div class="b-text"><p>Dérive $a^x$ ($a > 0$) avec la règle de la chaîne, en écrivant $a = \mathrm{e}^{\ln a}$.</p>
+            </div>
+        <div class="b-sol"><p>$a^x = \left(\mathrm{e}^{\ln a}\right)^x = \mathrm{e}^{x \ln a}$, fonction intérieure $x \ln a$, de dérivée $\ln a$.</p>
+            <p><span class="b-res">$\left(a^x\right)' = \mathrm{e}^{x \ln a} \cdot \ln a = \ln a \cdot a^x$</span>. Pour $a = 2$ : $(2^x)' \approx 0{,}693 \cdot 2^x$.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dérive : a) $\mathrm{e}^{3x}$ &nbsp; b) $\sin(2x + 1)$ &nbsp; c) $\sqrt{4x + 1}$ &nbsp; d) $(1 - x)^7$ &nbsp; e) $\ln(x^2 + 1)$</p>
+            </div>
+        <div class="b-sol"><p>a) $3\mathrm{e}^{3x}$ &nbsp; b) $2\cos(2x + 1)$ &nbsp; c) $\tfrac{2}{\sqrt{4x + 1}}$ &nbsp; d) $-7(1 - x)^6$ &nbsp; e) $\tfrac{2x}{x^2 + 1}$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dérive : a) $(x^2 + 1)^5$ &nbsp; b) $\mathrm{e}^{-x^2}$ &nbsp; c) $\cos(\pi x)$ &nbsp; d) $\sqrt{9 - x^2}$</p>
+            </div>
+        <div class="b-sol"><p>a) $10x(x^2 + 1)^4$ &nbsp; b) $-2x\,\mathrm{e}^{-x^2}$ &nbsp; c) $-\pi\sin(\pi x)$ &nbsp; d) $-\tfrac{x}{\sqrt{9 - x^2}}$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine la tangente à la courbe de $f(x) = \mathrm{e}^{-x^2}$ en $x = 1$.</p>
+            </div>
+        <div class="b-sol"><p>$f(1) = \mathrm{e}^{-1}$, $f'(x) = -2x\,\mathrm{e}^{-x^2}$, $f'(1) = -2\mathrm{e}^{-1}$. $t(x) = \mathrm{e}^{-1} - 2\mathrm{e}^{-1}(x - 1) = \tfrac{3 - 2x}{\mathrm{e}} \approx 1{,}104 - 0{,}736x$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Un thé refroidit selon $T(t) = 20 + 60\,\mathrm{e}^{-0{,}1t}$ ($T$ en °C, $t$ en minutes). À quelle vitesse refroidit-il au début, à quelle vitesse au bout de 10 minutes ? Interprète le signe.</p>
+            </div>
+        <div class="b-sol"><p>$T'(t) = 60 \cdot (-0{,}1)\,\mathrm{e}^{-0{,}1t} = -6\,\mathrm{e}^{-0{,}1t}$. $T'(0) = -6$ °C/min, $T'(10) = -6\,\mathrm{e}^{-1} \approx -2{,}2$ °C/min.
+                Négatif, car la température baisse ; le refroidissement ralentit à mesure que le thé s’approche de la température de la pièce.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Démontre la règle de la chaîne pour une fonction intérieure affine : $\left(g(ax + b)\right)' = a \cdot g'(ax + b)$ pour $a \neq 0$.</p>
+            </div>
+        <div class="b-hint"><p>Multiplie le numérateur et le dénominateur du taux d’accroissement par $a$ et pose $k = ah$.</p>
+            </div>
+        <div class="b-sol"><p>$\dfrac{g(a(x + h) + b) - g(ax + b)}{h} = a \cdot \dfrac{g(ax + b + ah) - g(ax + b)}{ah} = a \cdot \dfrac{g(z + k) - g(z)}{k}$ avec $z = ax + b$ et $k = ah$.</p>
+            <p>Quand $h \to 0$, on a aussi $k \to 0$, et la fraction tend vers $g'(z) = g'(ax + b)$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3" data-ph="f'(0) ="><p class="b-q-text">$f(x) = \mathrm{e}^{3x}$. Calcule $f'(0)$.</p>
+            <div class="b-sol"><p>$3\mathrm{e}^0 = 3$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="3" data-ph="g’(2) ="><p class="b-q-text">$g(x) = \ln(3x - 5)$. Calcule $g'(2)$.</p>
+            <div class="b-sol"><p>$\tfrac{3}{6 - 5} = 3$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Que vaut $\left(\sin(2x)\right)'$ ?</p>
+            <div class="b-mc"><button>$\cos(2x)$</button><button>$2\cos(2x)$</button><button>$2\cos x$</button></div>
+        <div class="b-sol"><p>N’oublie pas la dérivée intérieure 2.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Les deux règles ensemble" data-toc-k="3" data-toc-short="3 Ensemble">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">3</span>Règle du produit et règle de la chaîne ensemble</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La concentration $c(t) = 10t \cdot \mathrm{e}^{-0{,}5t}$ est un produit, et son second facteur est une composée.
+                Il faut donc les deux règles : à l’extérieur la règle du produit, à l’intérieur, pour $\mathrm{e}^{-0{,}5t}$, la règle de la chaîne.</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · LA MÉTHODE</div>
+        <div class="b-text"><ol>
+                    <li><b>Reconnaître la structure :</b> l’expression est-elle d’abord une somme, un produit ou une composée ? Travailler de l’extérieur vers l’intérieur.</li>
+                <li><b>Dériver :</b> la règle du produit pour le produit, et dedans la règle de la chaîne pour chaque facteur composé.</li>
+                <li><b>Simplifier :</b> mettre en facteur les facteurs communs comme $\mathrm{e}^{-0{,}5t}$. Comme $\mathrm{e}^{z} > 0$ pour tout $z$, $f'(x) = 0$ si et seulement si le reste est nul (règle du produit nul).</li>
+                </ol></div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Contrôle avec le CAS :</b> fais afficher la dérivée et compare-la avec la tienne, de préférence en deux ou trois valeurs. Des expressions différentes peuvent représenter la même fonction.</p>
+            <p class="b-note"><b>Fonction de Bateman :</b> en pharmacologie, les courbes de la forme $a\,t\,\mathrm{e}^{-bt}$ décrivent grossièrement comment un principe actif est d’abord absorbé, puis éliminé.</p>
+            </aside>
+    </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LA CONCENTRATION MAXIMALE</div>
+        <div class="b-text"><p>Quand $c(t) = 10t \cdot \mathrm{e}^{-0{,}5t}$ atteint-elle sa plus grande valeur, et combien vaut-elle ?</p>
+            </div>
+        <div class="b-sol"><p>$c'(t) = 10\,\mathrm{e}^{-0{,}5t} + 10t \cdot (-0{,}5)\,\mathrm{e}^{-0{,}5t} = 10\,\mathrm{e}^{-0{,}5t}\,(1 - 0{,}5t)$.</p>
+            <p>$c'(t) = 0 \iff t = 2$. Avant, $c' > 0$, après, $c' < 0$. <span class="b-res">Au bout de 2 heures, la concentration $c(2) = 20\,\mathrm{e}^{-1} \approx 7{,}36$ mg/l est maximale.</span></p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · UNE DÉMONSTRATION EN DÉRIVANT</div>
+        <div class="b-text"><p>Montre avec la règle de la chaîne que $f(x) = \sin^2 x + \cos^2 x$ est constante, et détermine la constante.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 2\sin x \cdot \cos x + 2\cos x \cdot (-\sin x) = 0$ pour tout $x$. Une fonction de dérivée nulle est constante.</p>
+            <p>$f(0) = 0 + 1 = 1$, donc <span class="b-res">$\sin^2 x + \cos^2 x = 1$</span> pour tout $x$, le « Pythagore trigonométrique ».</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dérive et simplifie en factorisant : a) $x^2 \mathrm{e}^{-x}$ &nbsp; b) $x\sqrt{2x + 1}$ &nbsp; c) $\mathrm{e}^{2x}\sin(3x)$</p>
+            </div>
+        <div class="b-sol"><p>a) $(2x - x^2)\,\mathrm{e}^{-x}$ &nbsp; b) $\sqrt{2x + 1} + \tfrac{x}{\sqrt{2x + 1}} = \tfrac{3x + 1}{\sqrt{2x + 1}}$ &nbsp; c) $\mathrm{e}^{2x}\left(2\sin(3x) + 3\cos(3x)\right)$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Pour un autre médicament, $c(t) = 8t \cdot \mathrm{e}^{-0{,}25t}$. Quand la concentration est-elle maximale, et combien vaut-elle alors ?</p>
+            </div>
+        <div class="b-sol"><p>$c'(t) = 8\,\mathrm{e}^{-0{,}25t}(1 - 0{,}25t) = 0 \iff t = 4$. $c(4) = 32\,\mathrm{e}^{-1} \approx 11{,}8$ mg/l au bout de 4 heures.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine tous les points de l’intervalle $[0\,;\,2\pi]$ où la courbe de $f(x) = \mathrm{e}^{x}\sin x$ a une tangente horizontale.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = \mathrm{e}^x(\sin x + \cos x) = 0 \iff \sin x = -\cos x$ : $x = \tfrac{3\pi}{4}$ et $x = \tfrac{7\pi}{4}$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec la physique :</b> un ressort oscille selon $s(t) = 2\sin(3t)$. Détermine $v(t) = s'(t)$ et $a(t) = v'(t)$ et montre que $a(t) = -9\,s(t)$.</p>
+            </div>
+        <div class="b-sol"><p>$v(t) = 6\cos(3t)$, $a(t) = -18\sin(3t) = -9 \cdot 2\sin(3t) = -9\,s(t)$. L’accélération est de sens opposé à l’élongation et proportionnelle à elle : une oscillation harmonique.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Établis la règle du quotient en écrivant $\tfrac{u}{v} = u \cdot v^{-1}$ et en appliquant la règle du produit et la règle de la chaîne. Le programme ne l’exige pas sans calculatrice, mais cette démonstration montre tout ce que contiennent les deux règles.</p>
+            </div>
+        <div class="b-sol"><p>$\left(u \cdot v^{-1}\right)' = u' v^{-1} + u \cdot (-1)v^{-2} \cdot v' = \tfrac{u'}{v} - \tfrac{uv'}{v^2} = \dfrac{u'v - uv'}{v^2}$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">$c(t) = 10t \cdot \mathrm{e}^{-0{,}5t}$. Au bout de combien d’heures $c$ est-elle maximale ?</p>
+            <div class="b-sol"><p>$1 - 0{,}5t = 0$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="f'(0) ="><p class="b-q-text">$f(x) = x\,\mathrm{e}^{2x}$. Calcule $f'(0)$.</p>
+            <div class="b-sol"><p>$f'(x) = (1 + 2x)\,\mathrm{e}^{2x}$, donc 1</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="nombre"><p class="b-q-text">Que vaut le nombre dérivé de $\sin^2 x$ en $\tfrac{\pi}{4}$ ?</p>
+            <div class="b-sol"><p>$2\sin\tfrac{\pi}{4}\cos\tfrac{\pi}{4} = 2 \cdot \tfrac12 = 1$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dérive sans calculatrice : a) $\tfrac{x^3}{3} - 4\sqrt{x}$ &nbsp; b) $x\,\mathrm{e}^{2x}$ &nbsp; c) $\ln(5x)$ &nbsp; d) $\sin^2 x$</p>
+            </div>
+        <div class="b-sol"><p>a) $x^2 - \tfrac{2}{\sqrt{x}}$ &nbsp; b) $(1 + 2x)\,\mathrm{e}^{2x}$ &nbsp; c) $\tfrac{5}{5x} = \tfrac1x$ &nbsp; d) $2\sin x \cos x$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Dérive $f(x) = (2x - 1)^4$ de deux façons : avec la règle de la chaîne et avec la règle du produit pour $(2x - 1)^2 \cdot (2x - 1)^2$. Compare.</p>
+            </div>
+        <div class="b-sol"><p>Règle de la chaîne : $4(2x - 1)^3 \cdot 2 = 8(2x - 1)^3$. Règle du produit avec $u = v = (2x - 1)^2$ et $u' = v' = 2(2x - 1) \cdot 2 = 4(2x - 1)$ :
+                $f' = u'v + uv' = 2 \cdot 4(2x - 1) \cdot (2x - 1)^2 = 8(2x - 1)^3$. Les deux chemins mènent au même résultat.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Pour quelle valeur de $k$ la courbe de $f(x) = \mathrm{e}^{kx}$ a-t-elle la pente 3 en 0 ? Donne la tangente en ce point.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = k\,\mathrm{e}^{kx}$, $f'(0) = k = 3$. Tangente $y = 3x + 1$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Montre que pour toute fonction dérivable $g$, on a $\left(\mathrm{e}^{g(x)}\right)' = g'(x) \cdot \mathrm{e}^{g(x)}$. Détermine ainsi les points de $[0\,;\,2\pi]$ où la courbe de $f(x) = \mathrm{e}^{\sin x}$ a une tangente horizontale.</p>
+            </div>
+        <div class="b-sol"><p>Règle de la chaîne avec la fonction extérieure $\mathrm{e}^z$, dont la dérivée est de nouveau $\mathrm{e}^z$. $f'(x) = \cos x \cdot \mathrm{e}^{\sin x} = 0 \iff \cos x = 0$ : $x = \tfrac{\pi}{2}$ et $x = \tfrac{3\pi}{2}$.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : la nouvelle méthode de Leibniz" data-toc-k="X" data-toc-short="Leibniz">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+        <h2>La « nouvelle méthode » de Leibniz, en 1684</h2>
+    <div class="b-row">
+        <div class="b-text"><p>En octobre 1684 parut dans la revue de Leipzig « Acta Eruditorum » un article de seulement sept pages de Gottfried Wilhelm Leibniz, au titre interminable
+                « Nova methodus pro maximis et minimis … », une nouvelle méthode pour les maximums et les minimums. C’était la première présentation imprimée du calcul différentiel.</p>
+            <p>Leibniz y écrivait des règles que tu as apprises dans ce chapitre : pour un produit, $\mathrm{d}(xv) = x\,\mathrm{d}v + v\,\mathrm{d}x$, ainsi que des règles pour les quotients et les puissances.
+                Sa notation avec $\mathrm{d}x$ et $\mathrm{d}y$ est encore utilisée aujourd’hui, entre autres parce qu’elle explique presque d’elle-même la règle de la chaîne.</p>
+            <p>L’article était si concis que presque personne ne le comprit. Ce sont les frères Jacques et Jean Bernoulli qui développèrent la méthode et la firent connaître dans toute l’Europe.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> G. W. Leibniz : « Nova methodus pro maximis et minimis, itemque tangentibus … », Acta Eruditorum, Leipzig, octobre 1684, p. 467–473.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>RÈGLE DU PRODUIT</h4><p>$(uv)' = u'v + uv'$, démontrée avec le taux d’accroissement.</p>
+            </div>
+        <div>
+            <p>$(x^2 \mathrm{e}^x)' = (x^2 + 2x)\,\mathrm{e}^x$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>RÈGLE DE LA CHAÎNE</h4><p>$\left(u(v(x))\right)' = u'(v(x)) \cdot v'(x)$ : dérivée extérieure fois dérivée intérieure.</p>
+            </div>
+        <div>
+            <p>$\left(\ln(3x - 5)\right)' = \tfrac{3}{3x - 5}$ · $\left(\sqrt[3]{x^2 - 1}\right)' = \tfrac{2x}{3\sqrt[3]{(x^2 - 1)^2}}$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>COMPOSÉE AFFINE</h4><p>$\left(g(ax + b)\right)' = a \cdot g'(ax + b)$</p>
+            </div>
+        <div>
+            <p>$\left(\mathrm{e}^{-0{,}1t}\right)' = -0{,}1\,\mathrm{e}^{-0{,}1t}$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>METTRE EN FACTEUR</h4><p>Mettre en facteur le facteur commun $\mathrm{e}^{\ldots}$, qui n’est jamais nul : $f'(x) = 0$ seulement si le reste est nul.</p>
+            </div>
+        <div>
+            <p>$c'(t) = 10\,\mathrm{e}^{-0{,}5t}(1 - 0{,}5t)$ : maximum en $t = 2$</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+        <div class="b-q" data-ans="1" data-ph="f'(0) ="><p class="b-q-text">$f(x) = x\,\mathrm{e}^x$. Calcule $f'(0)$.</p>
+            <div class="b-sol"><p>$(1 + 0)\,\mathrm{e}^0 = 1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="nombre"><p class="b-q-text">Que vaut le nombre dérivé de $\sin(2x)$ en 0 ?</p>
+            <div class="b-sol"><p>$2\cos 0 = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2/3" data-tol="0.001" data-ph="f'(2) ="><p class="b-q-text">$f(x) = \sqrt{4x + 1}$. Calcule $f'(2)$.</p>
+            <div class="b-sol"><p>$f'(x) = \tfrac{2}{\sqrt{4x + 1}}$, $f'(2) = \tfrac23$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+        <div class="b-q" data-ans="0,368" data-tol="0.001" data-ph="x ="><p class="b-q-text">Où $x \ln x$ a-t-elle une tangente horizontale (trois décimales) ?</p>
+            <div class="b-sol"><p>$x = \mathrm{e}^{-1} \approx 0{,}368$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-0,736" data-tol="0.001" data-ph="m ="><p class="b-q-text">Quelle est la pente de $\mathrm{e}^{-x^2}$ en 1 (trois décimales) ?</p>
+            <div class="b-sol"><p>$-2\mathrm{e}^{-1} \approx -0{,}736$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="7,358" data-tol="0.002" data-ph="mg/l"><p class="b-q-text">Quelle est la concentration maximale de $c(t) = 10t \cdot \mathrm{e}^{-0{,}5t}$ (trois décimales) ?</p>
+            <div class="b-sol"><p>$c(2) = 20\,\mathrm{e}^{-1} \approx 7{,}358$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-e-ln-sin-produktregel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">eˣ, ln x, sin x, RÈGLE DU PRODUIT</span><span class="b-lab-what">20 exercices avec solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-ableitungsregeln.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RÈGLES DE DÉRIVATION</span><span class="b-lab-what">20 exercices avec solutions</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATOIRE DIFFÉRENTIEL</span><span class="b-lab-what">Des fonctions et leurs dérivées</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 12e année, Leistungskurs · domaine d’apprentissage 2 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe (2026).</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-fr/gy11.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-fr/gy11lk.js"></script>
+</body>
+</html>
