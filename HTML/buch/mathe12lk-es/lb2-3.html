@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 12 avanzado · Capítulo 2.3 · Reglas de derivación | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Reglas de la potencia, del factor constante y de la suma, eˣ, ln x, sen x, cos x. Capítulo 2.3 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 12 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 12 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 2.3 · ÁREA DE APRENDIZAJE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 2.3 · ÁREA DE APRENDIZAJE 2 · ENERO</p>
+            <h1>Reglas de derivación</h1>
+            <p class="b-hero-lead">Calcular cada vez el límite del cociente incremental es pesado. Por suerte hay <b>reglas</b> con las que
+                se escribe la derivada de casi cualquier función en pocos segundos, sin herramientas. Aquí aprendes las reglas básicas, desde la regla de la potencia hasta la
+                derivada del logaritmo, y conoces la única función que no cambia al derivarla. Los productos y las composiciones llegan en el capítulo 2.4.</p>
+            <div class="b-chips"><span class="b-chip">12 SESIONES</span><span class="b-chip">4 LECCIONES</span><span class="b-chip">SIN HERRAMIENTAS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3","3*x^2"]' data-labels='["f(x) = x³","f′(x) = 3x²"]' data-lat="[1.55,-2.2]" data-x="-2.6,2.6" data-y="-4,6" data-h="240" data-aria="Gráfica de x al cubo y de su derivada"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>aplicar las <b>reglas de la potencia, del factor constante y de la suma</b>, también para raíces y fracciones</li>
+                <li>derivar $\mathrm{e}^x$, $\sin x$ y $\cos x$</li>
+                <li>justificar la derivada de la <b>función logaritmo</b> $\ln x$ a partir de la función inversa y aplicarla</li>
+                <li><b>demostrar</b> la regla de la potencia para exponentes naturales</li>
+                <li>interpretar derivadas en aplicaciones como <b>tasa de variación</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="0,5" data-tol="0.0001" data-ph="r ="><p class="b-q-text">Escribe $\sqrt{x} = x^r$. ¿Cuánto vale $r$?</p><div class="b-sol"><p>$\sqrt{x} = x^{\frac12}$</p></div></div>
+            <div class="b-q" data-ans="-2" data-ph="r ="><p class="b-q-text">Escribe $\tfrac{1}{x^2} = x^r$. ¿Cuánto vale $r$?</p><div class="b-sol"><p>$x^{-2}$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="Exponente"><p class="b-q-text">$x^3 \cdot x^2 = x^{?}$</p><div class="b-sol"><p>Se suman los exponentes: $x^5$</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="f'(5) ="><p class="b-q-text">Del capítulo 2.2: $f(x) = x^2$ tiene $f'(x) = 2x$. ¿Cuánto vale $f'(5)$?</p><div class="b-sol"><p>10</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">UN PATRÓN</div>
+            <div class="b-text"><p>Ya sabéis: $(x^2)' = 2x$ y $(x^3)' = 3x^2$.</p>
+                <ul><li>Haced una conjetura sobre $(x^4)'$ y $(x^{10})'$.</li><li>Comprobad vuestra conjetura para $x^4$ con el cociente incremental en el punto 1.</li></ul></div>
+            <span class="b-pair">→ Lección 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">ESTIRAR Y DESPLAZAR</div>
+            <div class="b-text"><p>La gráfica de $g(x) = 3x^2$ es tres veces más empinada que la de $f(x) = x^2$. La gráfica de $h(x) = x^2 + 5$ solo está desplazada.</p>
+                <ul><li>¿Qué significa eso para $g'$ y $h'$?</li><li>Formulad dos reglas.</li></ul></div>
+            <span class="b-pair">→ Lección 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA FUNCIÓN FIEL</div>
+            <div class="b-text"><p>Dibujad con precisión $f(x) = 2^x$ y $g(x) = 3^x$ y medid la pendiente de la tangente en el punto 0.</p>
+                <ul><li>Con 2 es menor que 1, con 3 es mayor. ¿Hay una base intermedia con la que sea exactamente 1?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Reglas de la potencia, del factor y de la suma" data-toc-k="1" data-toc-short="1 Potencias">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Reglas de la potencia, del factor constante y de la suma</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$(x^2)' = 2x$, $(x^3)' = 3x^2$, y con el cociente incremental se obtiene $(x^4)' = 4x^3$. El exponente pasa delante como factor y disminuye en 1.</p></div></div>
+            <div class="b-text"><p>Si una función se estira con un factor, todas las pendientes se multiplican por ese factor. Si se desplaza hacia arriba, las pendientes no cambian en absoluto.
+                Y una suma cambia tan rápido como sus sumandos juntos.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · REGLAS DE DERIVACIÓN</div>
+                <div class="b-text">
+                    <p><b>Regla de la potencia:</b> $(x^n)' = n \cdot x^{n - 1}$ &nbsp; · &nbsp; <b>Constante:</b> $(c)' = 0$</p>
+                    <p><b>Regla del factor constante:</b> $(c \cdot f(x))' = c \cdot f'(x)$ &nbsp; · &nbsp; <b>Regla de la suma:</b> $(f(x) + g(x))' = f'(x) + g'(x)$</p>
+                    <p>Así se deriva cualquier función polinómica sumando a sumando: $(a_n x^n + \ldots + a_1 x + a_0)' = n\,a_n x^{n-1} + \ldots + a_1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Paréntesis:</b> productos como $(2x - 1)(x + 3)$ o cuadrados como $(x + 2)^2$ se desarrollan primero y después se derivan.</p>
+            <p class="b-note"><b>Función lineal:</b> $(mx + n)' = m$. Esto encaja con el capítulo 2.2.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ENTRENADOR DE DERIVADAS</div>
+        <p class="b-help" style="margin:0 0 12px">Deriva y escribe tu resultado, por ejemplo <code>6x^2 - 2</code>, <code>1/(2sqrt(x))</code>, <code>e^x + cos x</code>. Se comprueba en varios puntos; da igual cómo lo escribas.</p>
+        <div data-widget="ableiten"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · SUMANDO A SUMANDO</div>
+            <div class="b-text"><p>Deriva $f(x) = 4x^5 - 3x^2 + 7x - 2$.</p></div>
+            <div class="b-sol"><p><span class="b-res">$f'(x) = 20x^4 - 6x + 7$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · PRIMERO DESARROLLAR</div>
+            <div class="b-text"><p>Deriva $f(x) = (x + 2)^2$.</p></div>
+            <div class="b-sol"><p>$f(x) = x^2 + 4x + 4$, así que <span class="b-res">$f'(x) = 2x + 4$</span>. Cuidado con los atajos: para $(2x + 2)^2 = 4x^2 + 8x + 4$ la derivada es $8x + 8$, no $2(2x + 2)$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Deriva: a) $x^7$ &nbsp; b) $5x^4$ &nbsp; c) $-2x^3$ &nbsp; d) $\tfrac12 x^2$ &nbsp; e) $9$</p></div>
+            <div class="b-sol"><p>a) $7x^6$ &nbsp; b) $20x^3$ &nbsp; c) $-6x^2$ &nbsp; d) $x$ &nbsp; e) $0$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$f(x) = x^3 - 6x^2 + 2$. Halla $f'(x)$ y $f'(2)$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 12x$, $f'(2) = 12 - 24 = -12$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Deriva $f(x) = (2x - 1)(x + 3)$.</p></div>
+            <div class="b-sol"><p>$f(x) = 2x^2 + 5x - 3$, $f'(x) = 4x + 5$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿En qué punto tiene la gráfica de $f(x) = x^2 - 4x$ pendiente 2? ¿En cuál es horizontal la tangente?</p></div>
+            <div class="b-sol"><p>$2x - 4 = 2 \Rightarrow x = 3$; $2x - 4 = 0 \Rightarrow x = 2$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra con el cociente incremental que $(x^3)' = 3x^2$.</p></div>
+            <div class="b-sol"><p>$\dfrac{(x + h)^3 - x^3}{h} = \dfrac{3x^2h + 3xh^2 + h^3}{h} = 3x^2 + 3xh + h^2 \to 3x^2$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra la regla de la potencia $(x^n)' = n \cdot x^{n - 1}$ para todo número natural $n \ge 1$.</p></div>
+            <div class="b-hint"><p>Por el teorema del binomio, $(x + h)^n = x^n + n x^{n - 1} h + \binom{n}{2} x^{n - 2} h^2 + \ldots + h^n$.</p></div>
+            <div class="b-sol"><p>$\dfrac{(x + h)^n - x^n}{h} = \dfrac{n x^{n - 1} h + \binom{n}{2} x^{n - 2} h^2 + \ldots + h^n}{h} = n x^{n - 1} + h \cdot \Bigl(\binom{n}{2} x^{n - 2} + \ldots + h^{n - 2}\Bigr)$.</p>
+                <p>El paréntesis queda acotado cuando $h \to 0$ y el factor $h$ tiende a 0. Por tanto, el límite es $n x^{n - 1}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="12" data-ph="f'(1) ="><p class="b-q-text">$f(x) = 2x^6$. ¿Cuánto vale $f'(1)$?</p><div class="b-sol"><p>$f'(x) = 12x^5$, $f'(1) = 12$</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="f'(2) ="><p class="b-q-text">$f(x) = x^3 - 5x + 4$. ¿Cuánto vale $f'(2)$?</p><div class="b-sol"><p>$3 \cdot 4 - 5 = 7$</p></div></div>
+        <div class="b-q" data-ans="-3" data-ph="x ="><p class="b-q-text">¿Dónde tiene $f(x) = x^2 + 6x$ una tangente horizontal?</p><div class="b-sol"><p>$2x + 6 = 0 \Rightarrow x = -3$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Raíces y fracciones" data-toc-k="2" data-toc-short="2 Raíces">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Potencias con exponentes racionales y negativos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En el capítulo 2.2 obtuvimos para $f(x) = \tfrac1x$ en el punto 1 la derivada $-1$. ¿Encaja esto con la regla de la potencia si escribimos $\tfrac1x = x^{-1}$?</p></div></div>
+            <div class="b-text"><p>$(x^{-1})' = -1 \cdot x^{-2} = -\tfrac{1}{x^2}$, es decir, $-1$ en el punto 1. Encaja. La regla de la potencia no solo vale para exponentes naturales.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · REGLA DE LA POTENCIA PARA TODOS LOS EXPONENTES</div>
+                <div class="b-text">
+                    <p>Para todo número real $r$ se cumple (para $x > 0$): $(x^r)' = r \cdot x^{r - 1}$.</p>
+                    <p>$\left(\sqrt{x}\right)' = \left(x^{\frac12}\right)' = \tfrac12 x^{-\frac12} = \dfrac{1}{2\sqrt{x}}$ &nbsp; · &nbsp; $\left(\dfrac1x\right)' = -\dfrac{1}{x^2}$ &nbsp; · &nbsp; $\left(\dfrac{1}{x^2}\right)' = -\dfrac{2}{x^3}$</p>
+                    <p>Cómo proceder: escribe primero las raíces y las fracciones como potencias, después deriva y por último vuelve a la forma original.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Atención:</b> $\sqrt{x}$ no es derivable en $x = 0$; allí la tangente es vertical.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · RAÍZ Y FRACCIÓN</div>
+            <div class="b-text"><p>Deriva $f(x) = 6\sqrt{x} - \dfrac{2}{x}$.</p></div>
+            <div class="b-sol"><p>$f(x) = 6x^{\frac12} - 2x^{-1}$, así que $f'(x) = 3x^{-\frac12} + 2x^{-2} = $ <span class="b-res">$\dfrac{3}{\sqrt{x}} + \dfrac{2}{x^2}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · EXPONENTE FRACCIONARIO</div>
+            <div class="b-text"><p>Deriva $f(x) = x\sqrt{x}$.</p></div>
+            <div class="b-sol"><p>$x \cdot x^{\frac12} = x^{\frac32}$, así que $f'(x) = \tfrac32 x^{\frac12} = $ <span class="b-res">$\tfrac32 \sqrt{x}$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Deriva: a) $x^{-3}$ &nbsp; b) $\dfrac{4}{x}$ &nbsp; c) $8\sqrt{x}$ &nbsp; d) $x^{\frac13}$</p></div>
+            <div class="b-sol"><p>a) $-3x^{-4}$ &nbsp; b) $-\tfrac{4}{x^2}$ &nbsp; c) $\tfrac{4}{\sqrt{x}}$ &nbsp; d) $\tfrac13 x^{-\frac23}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Calcula la pendiente de $f(x) = \sqrt{x}$ en los puntos 1, 4 y 100. ¿Qué observas?</p></div>
+            <div class="b-sol"><p>$f'(x) = \tfrac{1}{2\sqrt{x}}$: $0{,}5$; $0{,}25$; $0{,}05$. La gráfica es cada vez más plana.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Deriva $f(x) = \dfrac{x^2 + 1}{x}$ sin usar una regla del cociente.</p></div>
+            <div class="b-sol"><p>$f(x) = x + x^{-1}$, $f'(x) = 1 - \tfrac{1}{x^2}$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,25" data-tol="0.0001" data-ph="f'(4) ="><p class="b-q-text">$f(x) = \sqrt{x}$. ¿Cuánto vale $f'(4)$?</p><div class="b-sol"><p>$\tfrac{1}{2 \cdot 2} = 0{,}25$</p></div></div>
+        <div class="b-q" data-ans="-1/9" data-tol="0.0005" data-ph="f'(3) ="><p class="b-q-text">$f(x) = \tfrac1x$. ¿Cuánto vale $f'(3)$?</p><div class="b-sol"><p>$-\tfrac19$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="eˣ, sen x y cos x" data-toc-k="3" data-toc-short="3 eˣ, sen">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">3</span>La función exponencial, el seno y el coseno</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Para $2^x$ la pendiente en el punto 0 es aproximadamente 0,69; para $3^x$, aproximadamente 1,10. Para la base $\mathrm{e} \approx 2{,}718$ es exactamente 1.
+                Y aún más: la función $\mathrm{e}^x$ tiene en cada punto una pendiente igual a su valor en ese punto.</p></div></div>
+            <div class="b-text"><p>Al derivar gráficamente en el capítulo 2.2, de la curva del seno salió la curva del coseno. Si se deriva el coseno, se obtiene la curva del seno reflejada en el eje $x$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · FUNCIÓN EXPONENCIAL, SENO Y COSENO</div>
+                <div class="b-text">
+                    <p>$(\mathrm{e}^x)' = \mathrm{e}^x$ &nbsp; · &nbsp; $(\sin x)' = \cos x$ &nbsp; · &nbsp; $(\cos x)' = -\sin x$</p>
+                    <p>Con las reglas del factor constante y de la suma se combinan con potencias: $(3\mathrm{e}^x - 2\sin x + x^2)' = 3\mathrm{e}^x - 2\cos x + 2x$.</p>
+                    <p>Si se deriva el seno cuatro veces, se vuelve al seno: $\sin \to \cos \to -\sin \to -\cos \to \sin$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Radianes:</b> $(\sin x)' = \cos x$ solo es válido si $x$ se mide en radianes. Pon la calculadora en RAD.</p>
+            <p class="b-note"><b>Con un CAS</b> también puedes derivar cualquier otra función, por ejemplo para comprobar.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURA · EL SENO Y SU DERIVADA</div>
+        <p class="b-help" style="margin:0 0 12px">Dorado: $\sin x$, cian: $\cos x$. Donde el seno tiene máximos o mínimos, el coseno vale 0.</p>
+        <div data-widget="graph" data-fns='["sin(x)","cos(x)"]' data-labels='["sin x","cos x"]' data-lat="[1.2,5.9]" data-pi data-x="-0.5,7" data-y="-1.5,1.5" data-h="240" data-aria="Seno y coseno"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · SUMA</div>
+            <div class="b-text"><p>Deriva $f(x) = 3\mathrm{e}^x - 2\sin x + x^2$.</p></div>
+            <div class="b-sol"><p><span class="b-res">$f'(x) = 3\mathrm{e}^x - 2\cos x + 2x$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · TANGENTE A LA FUNCIÓN EXPONENCIAL</div>
+            <div class="b-text"><p>Determina la tangente a $f(x) = \mathrm{e}^x$ en el punto $(1, \mathrm{e})$. Demuestra que pasa por el origen.</p></div>
+            <div class="b-sol"><p>$f'(1) = \mathrm{e}$, así que $t(x) = \mathrm{e} + \mathrm{e}(x - 1) = \mathrm{e} \cdot x$.</p>
+                <p><span class="b-res">$t(0) = 0$:</span> la tangente es una recta que pasa por el origen. Es la única tangente a $\mathrm{e}^x$ con esta propiedad.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Deriva: a) $5\mathrm{e}^x$ &nbsp; b) $\sin x + \cos x$ &nbsp; c) $\mathrm{e}^x - x^3$ &nbsp; d) $4\cos x$</p></div>
+            <div class="b-sol"><p>a) $5\mathrm{e}^x$ &nbsp; b) $\cos x - \sin x$ &nbsp; c) $\mathrm{e}^x - 3x^2$ &nbsp; d) $-4\sin x$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>¿Qué pendiente tiene la gráfica de $f(x) = \mathrm{e}^x$ en los puntos 0, 1 y $-2$?</p></div>
+            <div class="b-sol"><p>$1$; $\mathrm{e} \approx 2{,}718$; $\mathrm{e}^{-2} \approx 0{,}135$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Determina la ecuación de la tangente a $f(x) = \sin x + \cos x$ en el punto $(0, 1)$ y a $g(x) = 2\mathrm{e}^x - x^2$ en el punto 0.</p></div>
+            <div class="b-sol"><p>$f'(x) = \cos x - \sin x$, $f'(0) = 1$: $t(x) = x + 1$. &nbsp; $g'(x) = 2\mathrm{e}^x - 2x$, $g(0) = 2$, $g'(0) = 2$: $t(x) = 2x + 2$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿En qué puntos de $[0,\, 2\pi]$ tiene $f(x) = \sin x$ una tangente horizontal?</p></div>
+            <div class="b-sol"><p>$\cos x = 0$ en $x = \tfrac{\pi}{2}$ y $x = \tfrac{3\pi}{2}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>¿Para qué $x$ tiene $f(x) = \mathrm{e}^x - 2x$ una tangente horizontal? Justifica que solo hay un punto así y decide si allí hay un máximo o un mínimo.</p></div>
+            <div class="b-sol"><p>$f'(x) = \mathrm{e}^x - 2 = 0 \iff \mathrm{e}^x = 2 \iff x = \ln 2 \approx 0{,}693$. Como $\mathrm{e}^x$ es estrictamente creciente, solo toma el valor 2 una vez.</p>
+                <p>A la izquierda, $f'(x) < 0$; a la derecha, $f'(x) > 0$: <span class="b-res">mínimo</span> $(\ln 2,\, 2 - 2\ln 2) \approx (0{,}693;\, 0{,}614)$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1" data-ph="f'(0) ="><p class="b-q-text">$f(x) = \mathrm{e}^x$. ¿Cuánto vale $f'(0)$?</p><div class="b-sol"><p>$\mathrm{e}^0 = 1$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="f'(0) ="><p class="b-q-text">$f(x) = 3\mathrm{e}^x + \sin x$. ¿Cuánto vale $f'(0)$?</p><div class="b-sol"><p>$f'(x) = 3\mathrm{e}^x + \cos x$, $f'(0) = 3 + 1 = 4$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">¿Cuánto es $(\cos x)'$?</p>
+            <div class="b-mc"><button>$\sin x$</button><button>$-\sin x$</button><button>$-\cos x$</button></div>
+            <div class="b-sol"><p>La curva del seno reflejada.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="La derivada de ln x" data-toc-k="4" data-toc-short="4 ln x">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 4</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">4</span>La derivada de la función logaritmo</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El logaritmo natural $\ln x$ es la <b>función inversa</b> de $\mathrm{e}^x$: su gráfica se obtiene por simetría respecto a la recta $y = x$.
+                Con esta simetría, cada punto $(u, v)$ se convierte en el punto $(v, u)$, y cada triángulo de pendiente con «1 a la derecha, $m$ hacia arriba», en uno con «$m$ a la derecha, 1 hacia arriba».
+                La pendiente se convierte, por tanto, en su <b>inversa</b>.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · DERIVADA DE ln x</div>
+                <div class="b-text">
+                    <p>$$(\ln x)' = \frac{1}{x} \quad \text{para } x > 0.$$</p>
+                    <p><b>Justificación:</b> el punto $(a, \ln a)$ de la gráfica de $\ln$ es el simétrico de $(\ln a, a)$ en la gráfica de $\mathrm{e}^x$.
+                        Allí $\mathrm{e}^x$ tiene la pendiente $\mathrm{e}^{\ln a} = a$. Con la simetría se convierte en la pendiente $\tfrac1a$.</p>
+                    <p>Con las propiedades de los logaritmos se derivan otras expresiones sin una regla nueva: $\ln(x^k) = k \ln x$ tiene la derivada $\tfrac{k}{x}$, y $\ln(c x) = \ln c + \ln x$ tiene la derivada $\tfrac1x$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Despacio, pero sin límite:</b> la pendiente $\tfrac1x$ es cada vez más pequeña, pero sigue siendo positiva. Por eso $\ln x$ crece cada vez más despacio y, aun así, supera cualquier valor.</p>
+            <p class="b-note">En el curso avanzado tienes que saber derivar $\ln x$ <b>sin herramientas</b>. Otros logaritmos, como $\log_{10} x$, se derivan con el CAS.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURA · TANGENTES SIMÉTRICAS</div>
+        <p class="b-help" style="margin:0 0 12px">Dorado: $\mathrm{e}^x$; cian: $\ln x$; violeta: el eje de simetría $y = x$. En verde, la tangente a $\mathrm{e}^x$ en el punto $(\ln 2, 2)$ con pendiente 2; en rojo, su simétrica: la tangente a $\ln x$ en el punto $(2, \ln 2)$ con pendiente $\tfrac12$.</p>
+        <div data-widget="graph" data-fns='["exp(x)","log(x)","2+2*(x-log(2))","log(2)+(x-2)/2","x"]' data-labels='["eˣ","ln x","","","y = x"]' data-lat="[1.5,4.2,0,0,-1.8]" data-x="-2.5,5" data-y="-2.5,5" data-equal data-pts="[[0.6931,2],[2,0.6931]]" data-h="300" data-aria="La función exponencial y el logaritmo natural con dos tangentes simétricas entre sí"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 7 · CON LAS PROPIEDADES DE LOS LOGARITMOS</div>
+            <div class="b-text"><p>Deriva ($x > 0$): a) $f(x) = \ln(x^3)$ &nbsp; b) $g(x) = \ln(5x)$ &nbsp; c) $h(x) = 2x - 4\ln x$</p></div>
+            <div class="b-sol"><p>a) $f(x) = 3\ln x$, así que $f'(x) = \tfrac3x$ &nbsp; b) $g(x) = \ln 5 + \ln x$, así que $g'(x) = \tfrac1x$ &nbsp; c) $h'(x) = 2 - \tfrac4x$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 8 · TANGENTE EN x = 1</div>
+            <div class="b-text"><p>Determina la tangente a $\ln x$ en el punto 1 y justifica con la gráfica que $\ln x \le x - 1$ para todo $x > 0$.</p></div>
+            <div class="b-sol"><p>$\ln 1 = 0$ y $(\ln x)' = \tfrac11 = 1$ en $x = 1$: $t(x) = x - 1$.</p>
+                <p>La gráfica de $\ln$ es cóncava hacia abajo en todas partes (la pendiente $\tfrac1x$ disminuye) y por eso queda por debajo de cada una de sus tangentes. <span class="b-res">$\ln x \le x - 1$</span>, con igualdad solo en $x = 1$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Deriva ($x > 0$): a) $4\ln x$ &nbsp; b) $\ln x + x^2$ &nbsp; c) $\ln(x^2)$ &nbsp; d) $2 - \ln x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac4x$ &nbsp; b) $\tfrac1x + 2x$ &nbsp; c) $\tfrac2x$ &nbsp; d) $-\tfrac1x$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>¿Qué pendiente tiene la gráfica de $\ln x$ en los puntos $\tfrac12$, 1 y 10?</p></div>
+            <div class="b-sol"><p>2; 1; 0,1</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿En qué punto tiene la gráfica de $\ln x$ la pendiente $\tfrac14$? Da allí la tangente.</p></div>
+            <div class="b-sol"><p>$\tfrac1x = \tfrac14$ en $x = 4$. $t(x) = \ln 4 + \tfrac14(x - 4) = \tfrac14 x + \ln 4 - 1 \approx 0{,}25x + 0{,}386$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Estudia $f(x) = x - \ln x$ para $x > 0$: ¿dónde es horizontal la tangente? ¿Dónde decrece y dónde crece la gráfica?</p></div>
+            <div class="b-sol"><p>$f'(x) = 1 - \tfrac1x = 0$ en $x = 1$. Para $0 < x < 1$, $\tfrac1x > 1$, así que $f'(x) < 0$: decreciente. Para $x > 1$, creciente. Mínimo $(1, 1)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra: la tangente a $\ln x$ en el punto $(a, \ln a)$ pasa por el origen si y solo si $a = \mathrm{e}$. Compáralo con el ejemplo 6.</p></div>
+            <div class="b-sol"><p>$t(x) = \ln a + \tfrac1a(x - a)$, así que $t(0) = \ln a - 1$. Esto es 0 exactamente cuando $\ln a = 1$, es decir, $a = \mathrm{e}$; la tangente es entonces $t(x) = \tfrac{x}{\mathrm{e}}$.</p>
+                <p>Es la simétrica de la tangente por el origen $y = \mathrm{e} \cdot x$ a $\mathrm{e}^x$ del ejemplo 6.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2,5" data-tol="0.0001" data-ph="f'(2) ="><p class="b-q-text">$f(x) = 5\ln x$. ¿Cuánto vale $f'(2)$?</p><div class="b-sol"><p>$\tfrac52 = 2{,}5$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="f'(1) ="><p class="b-q-text">$f(x) = \ln(x^4)$ para $x > 0$. ¿Cuánto vale $f'(1)$?</p><div class="b-sol"><p>$f(x) = 4\ln x$, $f'(x) = \tfrac4x$; en 1, por tanto, 4</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="x ="><p class="b-q-text">¿En qué punto tiene la gráfica de $\ln x$ la pendiente 0,2?</p><div class="b-sol"><p>$\tfrac1x = 0{,}2$ en $x = 5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="20">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Un coche frena; su recorrido es $s(t) = 20t - 2t^2$ (m, s). ¿A qué velocidad va a los 0 s y a los 3 s? ¿Cuándo se detiene?</p></div>
+            <div class="b-sol"><p>$v(t) = s'(t) = 20 - 4t$: 20 m/s y 8 m/s. Se detiene cuando $v(t) = 0$, es decir, a los 5 s.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Un cultivo de bacterias crece según $N(t) = 500 \cdot \mathrm{e}^t$ ($t$ en horas). Calcula la velocidad de crecimiento a las 2 horas. ¿Qué observas al compararla con $N(2)$?</p></div>
+            <div class="b-sol"><p>$N'(t) = 500\,\mathrm{e}^t$, $N'(2) \approx 3695$ bacterias por hora, exactamente lo mismo que $N(2)$: la velocidad de crecimiento es proporcional a la población.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relacionar con 11.º curso:</b> para la función seno $f(x) = 2\sin x$: ¿cuál es la mayor pendiente y en qué puntos se alcanza?</p></div>
+            <div class="b-sol"><p>$f'(x) = 2\cos x$, así que como máximo 2, en los puntos $x = 0, \pm 2\pi, \ldots$ (los cortes con el eje en sentido ascendente).</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Encuentra una función $f$ con $f'(x) = 6x^2 - \cos x$ y $f(0) = 3$.</p></div>
+            <div class="b-sol"><p>$f(x) = 2x^3 - \sin x + 3$. Comprobación: $f'(x) = 6x^2 - \cos x$, $f(0) = 3$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el número e" data-toc-k="X" data-toc-short="Número e">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">UN NÚMERO QUE VIENE DEL CÁLCULO DE INTERESES</span></div>
+    <h2>El número e de Euler</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En 1690 Jakob Bernoulli se preguntó: ¿qué ocurre con 1 tálero a un interés del 100 % anual si los intereses no se abonan una sola vez, sino cada semestre, cada mes, cada día, o incluso en cada instante?
+                Semestralmente se obtiene $\left(1 + \tfrac12\right)^2 = 2{,}25$, mensualmente $\left(1 + \tfrac{1}{12}\right)^{12} \approx 2{,}613$, diariamente $\left(1 + \tfrac{1}{365}\right)^{365} \approx 2{,}715$.</p>
+            <p>Los valores crecen, pero no sin límite. Tienden a un número que Leonhard Euler designó más tarde con $\mathrm{e}$:
+                $\mathrm{e} = \lim\limits_{n \to \infty} \left(1 + \tfrac1n\right)^n = 2{,}718\,281\,828\ldots$</p>
+            <p>Que precisamente $\mathrm{e}^x$ sea su propia derivada la convierte en la función más importante para el crecimiento y el decrecimiento en la naturaleza, la técnica y la economía.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuentes:</b> Jakob Bernoulli: Quaestiones nonnullae de usuris. Acta Eruditorum, 1690. Leonhard Euler: Mechanica, San Petersburgo 1736.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>REGLA DE LA POTENCIA</h4><p>$(x^r)' = r \cdot x^{r - 1}$, para todos los exponentes.</p></div>
+        <div><p>$(x^7)' = 7x^6$ · $(\sqrt{x})' = \tfrac{1}{2\sqrt{x}}$ · $(\tfrac1x)' = -\tfrac{1}{x^2}$</p></div></div>
+    <div class="b-rueck"><div><h4>REGLAS DEL FACTOR CONSTANTE Y DE LA SUMA</h4><p>Los factores se mantienen, los sumandos se derivan por separado, las constantes desaparecen.</p></div>
+        <div><p>$(4x^5 - 3x^2 + 7x - 2)' = 20x^4 - 6x + 7$</p></div></div>
+    <div class="b-rueck"><div><h4>FUNCIÓN EXPONENCIAL Y SENO</h4><p>$(\mathrm{e}^x)' = \mathrm{e}^x$ · $(\sin x)' = \cos x$ · $(\cos x)' = -\sin x$</p></div>
+        <div><p>¡En radianes!</p></div></div>
+    <div class="b-rueck"><div><h4>LOGARITMO</h4><p>$(\ln x)' = \tfrac1x$ para $x > 0$: la pendiente simétrica de la función exponencial.</p></div>
+        <div><p>$(\ln(x^3))' = \tfrac3x$ · $\ln x \le x - 1$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="-8" data-ph="f'(1) ="><p class="b-q-text">$f(x) = -2x^4 + 3$. ¿Cuánto vale $f'(1)$?</p><div class="b-sol"><p>$-8x^3$ en 1: $-8$</p></div></div>
+            <div class="b-q" data-ans="0,5" data-tol="0.0001" data-ph="f'(9) ="><p class="b-q-text">$f(x) = 3\sqrt{x}$. ¿Cuánto vale $f'(9)$?</p><div class="b-sol"><p>$\tfrac{3}{2\sqrt9} = 0{,}5$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="f'(π) ="><p class="b-q-text">$f(x) = \sin x$. ¿Cuánto vale $f'(\pi)$?</p><div class="b-sol"><p>$\cos \pi = -1$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="13" data-ph="f'(2) ="><p class="b-q-text">$f(x) = (x + 1)(2x + 3)$. ¿Cuánto vale $f'(2)$?</p><div class="b-sol"><p>$f(x) = 2x^2 + 5x + 3$, $f'(x) = 4x + 5$, $f'(2) = 13$</p></div></div>
+            <div class="b-q" data-ans="-0,25" data-tol="0.0001" data-ph="f'(2) ="><p class="b-q-text">$f(x) = \tfrac{1}{x}$. ¿Cuánto vale $f'(2)$?</p><div class="b-sol"><p>$-\tfrac14$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="f'(2) ="><p class="b-q-text">$f(x) = 2\ln x + x$. ¿Cuánto vale $f'(2)$?</p><div class="b-sol"><p>$f'(x) = \tfrac2x + 1$, $f'(2) = 2$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-ableitungsregeln.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGLAS DE DERIVACIÓN</span><span class="b-lab-what">Reglas de la potencia, de la suma y del factor constante</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATORIO DE DERIVADAS</span><span class="b-lab-what">Funciones y sus derivadas</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 12.º curso, curso avanzado · Área de aprendizaje 2 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia (2026).</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-es/analysis.js"></script>
+</body>
+</html>
