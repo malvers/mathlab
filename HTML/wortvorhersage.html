@@ -36,6 +36,16 @@
         body.wv-widget #cyber-left-chrome, body.wv-widget #cyber-left-chrome-inner, body.wv-widget #mini-rail,
         body.wv-widget #side-panel, body.wv-widget #cyber-screen-warning { display: none !important; }
         body.wv-widget #main-content { grid-column: 1 / -1 !important; }
+        /* ...and so no Start button either: the widget gets its own on the sheet - whoever presents the deck must
+           see how it runs, not know the Space key (Doc, 28.10.2026: "Kollegen ... müssen sehen, wie es läuft") */
+        /* quiet navy outline on the paper (Doc: "kleiner, dezenter") - the rail's cyber-btn is made for dark ground and vanished here */
+        #wv-fab { display: none; }
+        body.wv-widget #wv-fab { display: flex; align-items: baseline; gap: 8px; position: fixed; top: 14px; right: 22px;
+            z-index: 30; padding: 5px 12px; border: 1px solid rgba(14, 36, 78, .3); border-radius: 8px; cursor: pointer;
+            background: rgba(14, 36, 78, .06); color: #0E244E; font-family: Orbitron, sans-serif; font-size: 12px;
+            letter-spacing: .8px; }
+        body.wv-widget #wv-fab:hover { background: rgba(14, 36, 78, .13); border-color: rgba(14, 36, 78, .5); }
+        #wv-fab .wv-fab-key { font-family: Raleway, sans-serif; font-size: 10px; letter-spacing: .3px; opacity: .65; }
         /* the working area reads like paper - the cards on the left keep the dark house style */
         #canvas-container { background: #F7F2E7; }
         /* no wordmark over the sheet in THIS lab (Doc, 22.09.2026: "Branding rechts oben raus (hier)") */
@@ -215,6 +225,10 @@
         function playLabel() {
             const b = document.getElementById('wv-play');
             if (b) b.textContent = S.running ? T('btn_stop', 'Pause') : T('btn_play', 'Start');
+            const f = document.getElementById('wv-fab-l');    // the widget's button does what Space does
+            if (f) f.textContent = S.running ? '❚❚ ' + T('btn_stop', 'Pause')
+                : S.mode === 'run' && S.pos >= TEXT.length ? '⏭ ' + T('btn_next', 'Nächster Satz')
+                : '▶ ' + T('btn_play', 'Start');
         }
 
         // the picture it opens with: the whole sentence, grey where the net has it, red where it has not
@@ -572,13 +586,17 @@
         });
         editor.addEventListener('blur', () => closeEditor(true));
 
+        // Space - and the widget's button: start, pause and go on, and once the sentence is through the next one
+        function spaceAction() {
+            if (S.mode !== 'run') startRun();
+            else if (S.pos >= TEXT.length) nextText();
+            else { S.running = !S.running; S.stopAt = -1; if (S.running) S.t0 = performance.now(); playLabel(); }
+        }
         addEventListener('keydown', e => {
             if (e.key !== ' ' || e.metaKey || e.ctrlKey || e.altKey) return;
             if (e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable]')) return;
             e.preventDefault();
-            if (S.mode !== 'run') startRun();
-            else if (S.pos >= TEXT.length) nextText();
-            else { S.running = !S.running; S.stopAt = -1; if (S.running) S.t0 = performance.now(); playLabel(); }
+            spaceAction();
         });
 
         canvas.addEventListener('click', e => {
@@ -722,7 +740,15 @@
         // checking; ?start runs on its own, for the deck where nobody clicks inside the frame
         (function fromUrl() {
             const q = new URLSearchParams(location.search);
-            if (q.has('widget')) document.body.classList.add('wv-widget');
+            if (q.has('widget')) {
+                document.body.classList.add('wv-widget');
+                const fab = document.createElement('button');
+                fab.id = 'wv-fab'; fab.type = 'button';
+                fab.innerHTML = '<span id="wv-fab-l"></span><span class="wv-fab-key">' + T('key_space', 'oder Leertaste') + '</span>';
+                fab.addEventListener('click', () => { spaceAction(); fab.blur(); });   // blur: Space goes on working
+                document.body.appendChild(fab);
+                playLabel();
+            }
             // ?vorgabe=60&korpus=0&tempo=280 - the deck sets the sliders, the stored ones stay untouched
             const num = (k, lo, hi, f) => { const v = parseFloat(q.get(k)); return isFinite(v) && v >= lo && v <= hi ? v * f : null; };
             const g = num('vorgabe', 0, 100, 0.01), l = num('korpus', 0, 100, 0.01), sp = num('tempo', 80, 2000, 1);

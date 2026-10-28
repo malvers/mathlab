@@ -13,6 +13,8 @@ Every number on a figure is computed in this file, none is typed in.
 """
 import math
 import os
+import random
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -316,6 +318,219 @@ def wer_wars(desc, T, counts, verdict):
                    css(12.5, S.MUTED)))
     return c.svg("Drei Zählungen mit den Schlüsseln von Anthropic, OpenAI und DeepSeek und die daraus berechneten "
                  "Wahrscheinlichkeiten: " + ", ".join("%s %s" % (n, pct(p)) for n, p in probs)), labels
+
+
+# The essay of Beispiel 1 (Doc, 28.10.2026: "einen Text mit diesen 200 Wörtern, wo die nochmal markiert sind").
+# Written for the slide, 200 words exactly; spliced into HTML/decks/ai-wasserzeichen.html as its own slide.
+AUFSATZ = (
+    "Soziale Medien prägen heute den Alltag vieler Jugendlicher. Schon morgens greifen viele zuerst zum Smartphone, "
+    "um Nachrichten zu lesen und neue Beiträge zu entdecken. Plattformen wie Instagram, TikTok oder WhatsApp "
+    "verbinden Freunde, auch wenn sie weit voneinander entfernt wohnen. Das hat klare Vorteile: Man bleibt in "
+    "Kontakt, teilt Erlebnisse und findet schnell Gleichgesinnte. Gleichzeitig entstehen jedoch auch Probleme. "
+    "Viele Nutzer verbringen täglich mehrere Stunden online und merken kaum, wie rasch die Zeit vergeht. Ständige "
+    "Benachrichtigungen stören die Konzentration beim Lernen. Außerdem zeigen die Bilder im Netz meist nur die "
+    "schönsten Momente. Wer sich dauernd mit makellosen Körpern und Traumurlauben vergleicht, fühlt sich schnell "
+    "unzufrieden. Hinzu kommt die Frage, was mit den eigenen Daten geschieht. Jeder Klick wird gespeichert und "
+    "ausgewertet, damit Werbung gezielter passt. Deshalb ist ein bewusster Umgang besonders wichtig. Jugendliche "
+    "sollten feste Zeiten ohne Handy einplanen und Benachrichtigungen gezielt abschalten. Eltern und Schulen "
+    "können dabei helfen, indem sie offen über Chancen und Risiken sprechen. Entscheidend ist, dass man die "
+    "Plattformen nutzt, statt von ihnen genutzt zu werden. Wer kritisch bleibt und regelmäßig Pausen einlegt, kann "
+    "die Vorteile genießen, ohne die Nachteile zu unterschätzen. Soziale Medien sind weder gut noch schlecht: Es "
+    "kommt darauf an, wie wir sie verwenden.")
+# small words with no real choice - here the watermark cannot push, they stay a coin toss
+FILLER = set("der die das den dem des ein eine einen einem einer eines und oder zu zum im in mit von auf an am für "
+             "ist sind wird es man sie wir wer was wie sich nur auch noch schon nicht um bei beim aus über ohne statt "
+             "dass damit indem kann können sollten hat ihnen dabei weder darauf kommt".split())
+
+
+def aufsatz(green_total=148, seed=7):
+    """The essay coloured as the Anthropic key would show it. An illustration, not a real run: a word with room for
+    choice is green with probability 0.93, a FILLER word only 0.5, then the total is nudged to green_total (the 148
+    of Beispiel 1). Returns [(word, green)]."""
+    words = AUFSATZ.split()
+    assert len(words) == 200, len(words)
+    rnd = random.Random(seed)
+    core = [re.sub(r"[^\wäöüß]", "", w.lower()) for w in words]
+    green = [rnd.random() < (0.5 if c in FILLER else 0.93) for c in core]
+    while sum(green) < green_total:            # one more green: a red content word first
+        pool = [i for i, g in enumerate(green) if not g and core[i] not in FILLER] or \
+               [i for i, g in enumerate(green) if not g]
+        green[rnd.choice(pool)] = True
+    while sum(green) > green_total:            # one more red: a green filler word first
+        pool = [i for i, g in enumerate(green) if g and core[i] in FILLER] or [i for i, g in enumerate(green) if g]
+        green[rnd.choice(pool)] = False
+    return list(zip(words, green))
+
+
+def aufsatz_body(key="Anthropic"):
+    """The slide's picture box: count line, the essay with every word on a green or red ground, the note."""
+    rows = aufsatz()
+    n = sum(1 for _, g in rows if g)
+    red_filler = sum(1 for w, g in rows if not g and re.sub(r"[^\wäöüß]", "", w.lower()) in FILLER)
+    ground = {True: "rgba(121,158,49,.42)", False: "rgba(176,36,24,.32)"}
+    text = " ".join('<span style="background:%s;border-radius:3px;padding:0 2px">%s</span>'
+                    % (ground[g], S.esc(w)) for w, g in rows)
+    return ('<p class="fl" style="left:0px;top:0px;width:816px;font-size:16px;font-weight:600;color:%s">'
+            'Mit dem %s-Schlüssel gelesen: %d von %d Wörtern grün, %d rot</p>'
+            '<p class="fl" style="left:0px;top:30px;width:816px;font-size:12.5px;line-height:1.75;'
+            'text-align:justify;color:%s">%s</p>'
+            '<p class="fl" style="left:0px;top:306px;width:816px;font-size:13px;color:%s">Rot sind vor allem kleine '
+            'Wörter ohne Spielraum („die“, „und“, „zu“: %d der %d roten). Färbung zur Veranschaulichung.</p>'
+            % (S.INK, key, n, len(rows), len(rows) - n, S.INK, text, S.BODY, red_filler, len(rows) - n)), n
+
+
+# ------------------------------------------------------------------ a net learns to add (before the lab) ---
+# Doc, 28.10.2026: "am Perzeptron ... wie addiere ich fünf und zwei, so dass 7 rauskommt ... den Algorithmus aber
+# nicht ausführen, sondern einfach nur zeigen, dass die Dinger dicker und dünner werden, bis irgendwann hinten 7
+# rauskommt". Shown, not computed on the slide - but the numbers are real (gradient descent below).
+ADD_DATA = [(5, 2), (3, 4), (1, 6), (6, 1), (2, 2), (4, 3)]   # one sum alone would only be learnt by heart
+ADD_EPOCHS = [0, 1, 2, 4, 8, 12, 20, 40]                        # the passes the slide shows
+
+
+def add_history(w0=(0.2, 1.6), eta=0.02, n=40):
+    """Weights per pass: plain gradient descent on the squared error over ADD_DATA, no bias, linear output."""
+    w, hist = list(w0), [tuple(w0)]
+    for _ in range(n):
+        g = [0.0, 0.0]
+        for x1, x2 in ADD_DATA:
+            e = w[0] * x1 + w[1] * x2 - (x1 + x2)
+            g[0] += 2 * e * x1 / len(ADD_DATA)
+            g[1] += 2 * e * x2 / len(ADD_DATA)
+        w = [w[0] - eta * g[0], w[1] - eta * g[1]]
+        hist.append(tuple(w))
+    return hist
+
+
+def de(v, dec=2):
+    return ("%.*f" % (dec, v)).replace(".", ",")
+
+
+def netz_lernt():
+    """A perceptron learning to add 5 + 2. The SVG animates itself (SMIL, one loop of T seconds; deck.js starts it
+    from 0 when the slide comes up). Every pass: the error runs back along both connections as a red wave, the
+    connections grow thicker or thinner with their weight, the numbers run forward again as a navy wave, and the
+    output closes in on 7 while the red error bar shrinks. Backpropagation shown, not computed. Returns (svg, labels).
+    First version had small red dots racing off the neuron - Doc, 28.10.2026: "rote Punkte dicht am Neuron, die sich
+    irgendwie bewegen" - so: waves along the whole line, slower, and a legend for the two colours."""
+    hist = add_history()
+    snaps = [hist[e] for e in ADD_EPOCHS]
+    N = len(snaps)
+    HOLD0, BACK, MORPH, FWD, REST, END, RESET, FADE = 2.0, 0.7, 0.6, 0.6, 0.3, 3.5, 0.8, 0.25
+    STEP = BACK + MORPH + FWD + REST
+    T = HOLD0 + (N - 1) * STEP + END + RESET
+    tau = [HOLD0 + (k - 1) * STEP for k in range(1, N)]           # start of pass k (k = 1 .. N-1)
+    wsw = [0.0] + [t + BACK + MORPH for t in tau]                  # the weights' numbers switch
+    osw = [0.0] + [t + BACK + MORPH + FWD for t in tau]            # output, error and pass number switch
+
+    def keyed(points):
+        """(t, value) pairs -> keyTimes and values; equal times nudged apart so the list stays increasing."""
+        out, last = [], -1.0
+        for t, v in points:
+            t = max(t, last + 0.001)
+            out.append((t, v)); last = t
+        return ";".join("%.4f" % min(1.0, t / T) for t, _ in out), ";".join(str(v) for _, v in out)
+
+    def anim(attr, points, mode="linear"):
+        if mode != "discrete" and points[-1][0] < T:             # a smooth one must end at the loop's end -
+            points = points + [(T, points[-1][1])]               # otherwise the browser drops it altogether
+        kt, vals = keyed(points)
+        return ('<animate attributeName="%s" dur="%gs" repeatCount="indefinite" calcMode="%s" keyTimes="%s" '
+                'values="%s"/>' % (attr, T, mode, kt, vals))
+
+    def shown(sw, k):
+        """Opacity of snapshot k: on from its switch to the next one, snapshot 0 again during the reset."""
+        if k == 0:
+            return anim("opacity", [(0, 1), (sw[1], 0), (T - RESET, 1)], "discrete")
+        end = sw[k + 1] if k + 1 < N else T - RESET
+        return anim("opacity", [(0, 0), (sw[k], 1), (end, 0)], "discrete")
+
+    def text(x, y, s, size, color=S.INK, anchor="middle", weight=None, extra="", on=True):
+        return ('<text x="%s" y="%s" font-family="%s" font-size="%s" fill="%s" text-anchor="%s" opacity="%d"%s>%s%s</text>'
+                % (S.fmt(x), S.fmt(y), S.SANS, size, color, anchor, 1 if on else 0,
+                   ' font-weight="%s"' % weight if weight else "", s, extra))
+
+    def wave(a, b, color, phases):
+        """A line drawn from a to b during each (start, end) phase, then faded - the flow along a connection."""
+        L = math.hypot(b[0] - a[0], b[1] - a[1])
+        off, op = [(0, S.fmt(L))], [(0, 0)]
+        for t0, t1 in phases:
+            off += [(t0, S.fmt(L)), (t1, 0), (t1 + FADE, 0), (t1 + FADE + 0.001, S.fmt(L))]
+            op += [(t0 - 0.001, 0), (t0, 1), (t1, 1), (t1 + FADE, 0)]
+        return ('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="5" stroke-linecap="round" '
+                'stroke-dasharray="%s %s" stroke-dashoffset="%s" opacity="0">%s%s</line>'
+                % (S.fmt(a[0]), S.fmt(a[1]), S.fmt(b[0]), S.fmt(b[1]), color, S.fmt(L), S.fmt(L + 10), S.fmt(L),
+                   anim("stroke-dashoffset", off), anim("opacity", op)))
+
+    c = S.Canvas(W, H)
+    labels = []
+    ins = [(150, 95, "5"), (150, 235, "2")]
+    ox, oy, ro, ri = 500, 160, 52, 34
+    width = lambda w: 3 + 9 * w                                    # the weight drawn as the line's thickness
+    back = [(t, t + BACK) for t in tau]
+    fwd = [(0.4, 1.0)] + [(t + BACK + MORPH, t + BACK + MORPH + FWD) for t in tau]
+    for i, (ix, iy, _) in enumerate(ins):
+        dx, dy = ox - ix, oy - iy
+        L = math.hypot(dx, dy)
+        pin = (ix + dx / L * (ri + 4), iy + dy / L * (ri + 4))
+        pout = (ox - dx / L * (ro + 4), oy - dy / L * (ro + 4))
+        pts = [(0, width(snaps[0][i]))]
+        for k, t in enumerate(tau, 1):
+            pts += [(t + BACK, width(snaps[k - 1][i])), (t + BACK + MORPH, width(snaps[k][i]))]
+        pts += [(T - RESET, width(snaps[-1][i])), (T, width(snaps[0][i]))]
+        c.raw('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="%s" stroke-linecap="round" '
+              'opacity=".85">%s</line>' % (S.fmt(pin[0]), S.fmt(pin[1]), S.fmt(pout[0]), S.fmt(pout[1]), S.ORANGE,
+                                           S.fmt(width(snaps[0][i])), anim("stroke-width", pts)))
+        c.raw(wave(pin, pout, S.INK, fwd))                         # forward: the numbers flow to the output
+        c.raw(wave(pout, pin, S.RED, back))                        # backward: the error flows to the weights
+        bx, by = (ix + ox) / 2, (iy + oy) / 2 + (-30 if i == 0 else 36)
+        for k, wk in enumerate(snaps):
+            c.raw(text(bx, by, 'w<tspan baseline-shift="-22%%" font-size="72%%">%d</tspan> = %s' % (i + 1, de(wk[i])),
+                       15, S.BODY, extra=shown(wsw, k), on=k == 0))
+    for ix, iy, v in ins:
+        c.circle(ix, iy, ri, fill="#F4F7FC", stroke=S.INK, width=2.6)
+        c.raw(text(ix, iy + 10, v, 28, S.INK, weight="600"))
+    # output neuron with its value, the green ring at the end
+    c.circle(ox, oy, ro, fill=S.PAPER, stroke=S.INK, width=3)
+    c.raw('<circle cx="%d" cy="%d" r="%d" fill="none" stroke="%s" stroke-width="4" opacity="0">%s</circle>'
+          % (ox, oy, ro + 8, S.GREEN, anim("opacity", [(0, 0), (osw[-1], 1), (T - RESET, 0)], "discrete")))
+    errs = [abs(7 - (5 * a + 2 * b)) for a, b in snaps]
+    for k, (a, b) in enumerate(snaps):
+        c.raw(text(ox, oy + 10, de(5 * a + 2 * b), 28, S.INK, weight="600", extra=shown(osw, k), on=k == 0))
+        c.raw(text(ox + 84, 268, de(errs[k]), 16, S.RED if errs[k] > 0.05 else S.GREEN, "start", "600",
+                   extra=shown(osw, k), on=k == 0))
+        c.raw(text(412, 28, str(ADD_EPOCHS[k]), 17, S.INK, "start", "600", extra=shown(osw, k), on=k == 0))
+    # the error as a bar that shrinks pass by pass
+    bar = lambda e: 140 * e / errs[0]
+    bpts = [(0, S.fmt(bar(errs[0])))]
+    for k in range(1, N):
+        bpts += [(osw[k], S.fmt(bar(errs[k - 1]))), (osw[k] + 0.35, S.fmt(bar(errs[k])))]
+    bpts += [(T - RESET, S.fmt(bar(errs[-1]))), (T, S.fmt(bar(errs[0])))]
+    c.rect(ox - 70, 256, 140, 14, fill="#F6E4E2", rx=4)
+    c.raw('<rect x="%d" y="256" width="%s" height="14" rx="4" fill="%s">%s</rect>'
+          % (ox - 70, S.fmt(bar(errs[0])), S.RED, anim("width", bpts)))
+    # target
+    c.arrow(ox + ro + 8, oy, 640, oy, S.INK, 2)
+    c.rect(650, oy - 47, 130, 94, fill=S.PAPER, stroke=S.GREEN, width=2.4, rx=12)
+    c.raw(text(715, oy + 21, "7", 34, S.INK, weight="600"))
+    c.raw('<text x="756" y="%d" font-family="%s" font-size="26" fill="%s" opacity="0">✓%s</text>'
+          % (oy + 21, S.SANS, S.GREEN, anim("opacity", [(0, 0), (osw[-1], 1), (T - RESET, 0)], "discrete")))
+    # legend for the two waves
+    c.line(600, 24, 640, 24, S.INK, 5)
+    c.line(600, 50, 640, 50, S.RED, 5)
+    labels += [(150, 42, 160, "Eingaben", css(14, S.MUTED)),
+               (ox, 86, 160, "Ausgabe", css(14, S.MUTED)),
+               (715, oy - 29, 110, "Ziel", css(13, S.MUTED)),
+               (ox, 240, 120, "Fehler", css(13, S.MUTED)),
+               (355, 22, 100, "Durchlauf", css(14, S.MUTED, "text-align:right")),
+               (737, 24, 170, "vorwärts: rechnen", css(13, S.BODY, "text-align:left")),
+               (737, 50, 170, "rückwärts: Fehler", css(13, S.BODY, "text-align:left")),
+               (W / 2, 302, W, "Fehler rot zurück, Gewichte dicker oder dünner, Zahlen blau nach vorn — "
+                               "bis hinten 7 herauskommt.", css(14, S.BODY)),
+               (W / 2, 323, W, "Geübt an sechs Summen: Am Ende sind beide Gewichte 1 — das Netz kann jetzt addieren, "
+                               "nicht nur 5 + 2.", css(12.5, S.MUTED))]
+    return c.svg("Animation: ein Perzeptron mit den Eingaben 5 und 2 lernt addieren; der Fehler läuft rot zurück, die "
+                 "Verbindungen werden dicker und dünner, die Ausgabe nähert sich von 4,20 bis 7,00, beide Gewichte "
+                 "enden bei 1"), labels
 
 if __name__ == "__main__":
     fn = globals().get(sys.argv[1] if len(sys.argv) > 1 else "")

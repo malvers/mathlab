@@ -203,12 +203,19 @@ function stepMarks(root, st){
   root.querySelectorAll('[data-bis]').forEach(e => e.classList.toggle('bis-vorbei', +e.dataset.bis < st));
 }
 let gestartet = false;   // the start has read the #7 of a link (fromHash) - only from then on may paint() drop it
+let shownSi = -1;        // the slide paint() last showed - a slide coming up restarts its drawn animations
 function paint(){
   slides.forEach((s, i) => s.classList.toggle('on', i === si));
   const sl = slides[si];
   // dark slides (greeting, title at night): the buttons turn light (Doc, 18.09.2026: "wenn der HG dunkel ist kaum zu sehen")
   document.documentElement.classList.toggle('dark-slide', sl.matches('.greet, .title'));
   stepMarks(sl, step);
+  // a drawn animation (SMIL inside a figure's svg) starts from the beginning when its slide comes up, not somewhere
+  // in its loop (Doc, 28.10.2026: the net that learns to add, ai-wasserzeichen)
+  if (si !== shownSi) {
+    shownSi = si;
+    sl.querySelectorAll('svg').forEach(v => { if (v.setCurrentTime && v.querySelector('animate')) v.setCurrentTime(0); });
+  }
   const shown = slides.filter((s, i) => !skipped(i)).length;          // the bar counts what the class sees
   const at = slides.filter((s, i) => i <= si && !skipped(i)).length;
   document.getElementById('bar').style.width = (at / (shown || 1) * 100) + '%';
