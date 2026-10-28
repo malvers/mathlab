@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nachschreibetermine BGY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <!-- the warning line and the notes box below the table are the Schuljahr page's -->
+    <link rel="stylesheet" href="svp-schuljahr.css">
+    <link rel="stylesheet" href="svp-nachschreiben.css">
+    <script src="svp-gate.js"></script>
+</head>
+
+<body>
+    <!-- The school's make-up exam dates (a Word table in a colleague's OneDrive), read and checked
+         against the Saxon calendar by tools/nachschreiben.py, which keeps them in Supabase
+         (svp_untis, row _nachschreiben). Only Doc's account can read that row, so the page shows
+         nothing without his login - nothing of the table is in this file. -->
+    <header class="page-head">
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Nachschreibetermine BGY <span id="ns-jahr"></span></h1>
+            </div>
+        </div>
+        <div class="subtitle" id="ns-sub">Termine der Schule &middot; aus Teams</div>
+    </header>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" id="ns-next" type="button">Nächster Termin</button>
+        <button class="action" id="ns-mine" type="button" hidden>Mein Termin</button>
+        <div class="legend">
+            <span><span class="dot" style="background: rgb(240, 160, 24)"></span>nächster Termin</span>
+            <span><span class="dot" style="background: rgb(176, 36, 24)"></span>meine Aufsicht</span>
+            <span><span class="dot" style="background: var(--lambda)"></span>Hinweis</span>
+        </div>
+    </div>
+
+    <div class="sj-warn" id="ns-warn" hidden></div>
+
+    <div class="table-wrap">
+        <table id="ns-table">
+            <colgroup>
+                <col class="c-kw"><col class="c-tag"><col class="c-dat"><col>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>KW</th>
+                    <th>Tag</th>
+                    <th>Datum</th>
+                    <th>Aufsicht</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="ns-msg"><td colspan="4">Termine werden geladen &hellip;</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <section class="sj-korr" id="ns-korr" hidden>
+        <h2>Hinweise</h2>
+        <ul></ul>
+    </section>
+
+    <footer class="page-foot" id="ns-foot"></footer>
+
+    <script src="svp-auth.js"></script>
+    <script src="svp-nav.js"></script>
+    <script>
+        (function () {
+            const ROW = '_nachschreiben';
+            const TAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const table = document.getElementById('ns-table');
+            const tbody = table.querySelector('tbody');
+            const pad = n => String(n).padStart(2, '0');
+
+            function datum(iso) { const p = iso.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+            function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+            function tm(d) { return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.'; }
+            /* "08.02.–19.02.2027" / "23.12.2026–02.01.2027" */
+            function spanne(a, b) {
+                return tm(a) + (a.getFullYear() !== b.getFullYear() ? a.getFullYear() : '') + '–' + tm(b) + b.getFullYear();
+            }
+            function stempel(s) {
+                const d = new Date(s);
+                return !s || isNaN(d) ? (s || '?') : tm(d) + d.getFullYear() + ', ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' Uhr';
+            }
+            function el(tag, cls, text) {
+                const e = document.createElement(tag);
+                if (cls) e.className = cls;
+                if (text != null) e.textContent = text;
+                return e;
+            }
+            function meldung(text, knopf) {
+                tbody.innerHTML = '';
+                const tr = el('tr', 'ns-msg'), td = el('td', null, text);
+                td.colSpan = table.querySelectorAll('colgroup col').length;
+                if (knopf) td.appendChild(knopf);
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            }
+
+            function zeichne(data) {
+                const heute = iso(new Date());
+                document.getElementById('ns-jahr').textContent = data.schuljahr || '';
+                const q = data.quelle || {};
+                document.getElementById('ns-sub').textContent =
+                    [data.raum && 'Raum ' + data.raum, data.zeit].filter(Boolean).join(' · ') +
+                    ' · aus Teams, Stand der Datei ' + stempel(q.geaendert);
+
+                /* a time column only when a date keeps a time of its own - all the same, it stands in the head */
+                const zeilen = data.zeilen || [];
+                const mitZeit = zeilen.some(z => z.zeit);
+                if (mitZeit && !table.querySelector('col.c-zeit')) {
+                    const last = table.querySelector('colgroup col:last-child');
+                    last.before(el('col', 'c-zeit'));
+                    table.querySelector('thead th:last-child').before(el('th', null, 'Zeit'));
+                }
+                const spalten = mitZeit ? 5 : 4;
+                const hinweisAm = {};
+                (data.korrekturen || []).forEach(k => { if (k.d) (hinweisAm[k.d] = hinweisAm[k.d] || []).push(k.text); });
+
+                tbody.innerHTML = '';
+                const zeileVon = {};
+                let kw = null, naechste = null;
+                zeilen.forEach(function (z) {
+                    if (z.art === 'ferien') {
+                        const tr = el('tr', 'ferien'), td = el('td');
+                        td.colSpan = spalten;
+                        td.textContent = z.name + ' · ' + spanne(datum(z.von), datum(z.bis));
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
+                        kw = null;
+                        return;
+                    }
+                    const d = datum(z.d);
+                    const tr = el('tr', 'termin');
+                    if (z.kw !== kw) tr.classList.add('wk-start');
+                    kw = z.kw;
+                    if (z.d < heute) tr.classList.add('kw-past');
+                    else if (!naechste && !z.frei) { naechste = tr; tr.classList.add('kw-now'); }
+                    if (z.meins) tr.classList.add('meins');
+                    if (z.frei) tr.classList.add('frei');
+                    tr.appendChild(el('td', 'kw', z.kw));
+                    tr.appendChild(el('td', 'tag', TAGE[d.getDay()]));
+                    tr.appendChild(el('td', 'dat', tm(d) + d.getFullYear()));
+                    if (mitZeit) tr.appendChild(el('td', 'zeit', (z.zeit || data.zeit || '').replace(/\s*Uhr$/, '')));
+                    const wer = el('td', 'wer');
+                    if (z.wer) {
+                        wer.appendChild(el('span', 'name', z.wer));
+                        if (z.meins) wer.appendChild(el('span', 'ich', 'ich'));
+                    } else wer.appendChild(el('span', 'offen', 'noch offen'));
+                    if (z.frei) wer.appendChild(el('span', 'frei-tag', z.frei));
+                    if (hinweisAm[z.d]) { tr.classList.add('korr'); wer.title = hinweisAm[z.d].join('\n'); }
+                    tr.appendChild(wer);
+                    zeileVon[z.d] = tr;
+                    tbody.appendChild(tr);
+                });
+
+                const box = document.getElementById('ns-korr'), ul = box.querySelector('ul');
+                ul.innerHTML = '';
+                (data.korrekturen || []).forEach(function (k) {
+                    const li = el('li');
+                    if (k.d && zeileVon[k.d]) {
+                        const a = el('a', null, k.text);
+                        a.addEventListener('click', () => springe(zeileVon[k.d]));
+                        li.appendChild(a);
+                    } else li.textContent = k.text;
+                    ul.appendChild(li);
+                });
+                box.hidden = !ul.children.length;
+
+                const mine = tbody.querySelector('tr.meins:not(.kw-past)') || tbody.querySelector('tr.meins');
+                const knopf = document.getElementById('ns-mine');
+                knopf.hidden = !mine;
+                if (mine) knopf.onclick = () => springe(mine);
+                document.getElementById('ns-next').onclick = () => { if (naechste) springe(naechste); };
+
+                const warn = document.getElementById('ns-warn');
+                warn.hidden = !data.fehler;
+                if (data.fehler) warn.textContent = 'Die Datei ließ sich am ' + stempel(data.fehler.zeit) +
+                    ' nicht lesen (' + data.fehler.text + ') – hier steht weiter der letzte gute Stand.';
+
+                const foot = document.getElementById('ns-foot');
+                foot.textContent = 'Quelle: Teams › ';
+                if (q.link) {
+                    const a = el('a', null, q.datei || 'Word-Datei');
+                    a.href = q.link;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    foot.appendChild(a);
+                } else foot.appendChild(document.createTextNode(q.datei || 'Word-Datei'));
+                foot.appendChild(document.createTextNode(' · Stand der Datei ' + stempel(q.geaendert) +
+                    (data.abgeglichen ? ' · abgeglichen ' + stempel(data.abgeglichen) : '') +
+                    ' · Feiertage Sachsen, Ferientermine SMK. Nur mit Anmeldung sichtbar.'));
+            }
+
+            function springe(tr) {
+                tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                tr.classList.remove('flash');
+                void tr.offsetWidth;
+                tr.classList.add('flash');
+            }
+
+            async function lade() {
+                if (!svpAuth.hasSession()) {
+                    const b = el('button', 'action', 'Anmelden');
+                    b.type = 'button';
+                    b.addEventListener('click', () => svpAuth.loginDialog(lade, 'Anmelden, um die Nachschreibetermine zu sehen'));
+                    meldung('Die Nachschreibetermine sind nur mit Anmeldung sichtbar.', b);
+                    return;
+                }
+                try {
+                    const res = await svpAuth.api('svp_untis?page=eq.' + ROW + '&select=data');
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const rows = await res.json();
+                    if (!rows.length || !rows[0].data) {
+                        meldung('Für dieses Konto liegen keine Nachschreibetermine vor.');
+                        return;
+                    }
+                    zeichne(rows[0].data);
+                } catch (e) {
+                    meldung('Die Nachschreibetermine ließen sich nicht laden (' + e.message + ').');
+                }
+            }
+            lade();
+        })();
+    </script>
+</body>
+
+</html>

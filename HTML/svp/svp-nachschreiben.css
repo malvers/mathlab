@@ -1,0 +1,91 @@
+/* Nachschreibetermine (nachschreiben.html): the school's make-up exam dates, one row per date,
+   the holidays as bands between them. Holiday bands, the next date (kw-now) and the past ones
+   (kw-past) wear the plan pages' own rules (svp-table.css, svp-detail.css); the warning line and
+   the notes box come from svp-schuljahr.css - only the table itself is set here. */
+
+#ns-table { table-layout: fixed; min-width: 0; }
+#ns-table col.c-kw { width: 56px; }
+#ns-table col.c-tag { width: 64px; }
+#ns-table col.c-dat { width: 128px; }
+#ns-table col.c-zeit { width: 150px; }   /* only there when a date keeps a time of its own */
+
+#ns-table tbody tr > td { height: 44px; vertical-align: middle; }
+/* the next date: the plan's bar sits on the first column here (the plans have it on the second) */
+#ns-table tr.kw-now > td:first-child { box-shadow: inset 2px 0 0 rgb(240, 160, 24); }
+#ns-table tr.kw-now > td:nth-child(2) { box-shadow: none; }
+#ns-table td.kw { padding-left: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#ns-table td.tag { font-family: 'Orbitron', sans-serif; font-size: 0.78rem; letter-spacing: 0.06em; }
+#ns-table td.dat,
+#ns-table td.zeit { white-space: nowrap; font-variant-numeric: tabular-nums; }
+#ns-table td.wer { position: relative; }
+
+/* a new school week: a firmer line above its first date */
+#ns-table tr.wk-start > td { border-top: 1px solid var(--line); }
+
+#ns-table td.wer .offen { color: var(--muted); font-style: italic; }
+
+/* Doc's own duty: a Υ-red bar at the left edge, the name in bold, a small "ich" tag */
+#ns-table tr.meins > td:first-child { box-shadow: inset 4px 0 0 rgb(176, 36, 24); }
+#ns-table tr.meins td.wer .name { font-weight: 600; }
+#ns-table td.wer .ich {
+    margin-left: 10px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgb(176, 36, 24);
+    vertical-align: 2px;
+}
+
+/* a date that falls into the holidays: the holiday green, the reason beside the name */
+#ns-table tr.frei > td { background: rgba(var(--g-ferien), 0.28); }
+#ns-table td.wer .frei-tag {
+    margin-left: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+
+/* a note below the table belongs to this date: the λ dot of the Schuljahr page */
+#ns-table tr.korr td.wer::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    width: 7px;
+    height: 7px;
+    margin-top: -3.5px;
+    border-radius: 50%;
+    background: var(--lambda);
+}
+#ns-table tr.flash > td { animation: sj-flash 1.6s ease-out; }
+
+#ns-table tr.ns-msg td {
+    height: auto;
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--muted);
+}
+#ns-table tr.ns-msg .action { margin-left: 10px; }
+
+/* Phone: the four columns still fit in one row, just narrower */
+@media (max-width: 720px) {
+    #ns-table col.c-kw { width: 38px; }
+    #ns-table col.c-tag { width: 38px; }
+    #ns-table col.c-dat { width: 92px; }
+    #ns-table col.c-zeit { width: 96px; }
+    #ns-table td.zeit { font-size: 0.82rem; }
+    #ns-table td.kw { padding-left: 10px; }
+    #ns-table thead th, #ns-table tbody td { padding-left: 6px; padding-right: 6px; }
+    #ns-table td.wer .ich { margin-left: 6px; }
+    #ns-table td.wer .frei-tag { display: block; margin: 2px 0 0; }
+}
+
+@media print {
+    #ns-table tr.frei > td { background: #eef3e4; }
+    #ns-table tr.korr td.wer::after { background: #c80; }
+}

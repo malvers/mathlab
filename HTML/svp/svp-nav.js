@@ -67,6 +67,9 @@
         /* Doc, 24.09.2026: the run of every lesson of the week, across all plans -
            read on the phone during the lesson, not in the plan page. */
         ['fahrplan.html', 'Fahrplan', 'b-grey', 'Fahrplan der Woche'],
+        /* Doc, 28.10.2026: the school's make-up exam dates from Teams as an SVP page, in MRA after
+           Fahrplan - login only (LOGIN_ONLY), like Schuljahr */
+        ['nachschreiben.html', 'Nachschreiben', 'b-grey', 'Nachschreibetermine BGY - Termine und Aufsicht'],
         /* Doc, 10.10.2026: the reports of "Fehler melden" from the textbooks, in MRA, with the number of open ones */
         ['../buch/meldungen.html', 'Meldungen', 'b-grey', 'Fehler-Meldungen aus den Büchern'],
         /* Doc, 05.10.2026: the school's year plan from Teams, sorted and corrected - login only (LOGIN_ONLY) */
@@ -103,7 +106,7 @@
     /* Pages whose content only Doc's account may read (Supabase, RLS on his uid): logged out
        they leave the nav altogether - pill, menu entry, gear panel and link card - so the
        class never meets a page that only asks for a password. */
-    const LOGIN_ONLY = new Set(['schuljahr.html']);
+    const LOGIN_ONLY = new Set(['schuljahr.html', 'nachschreiben.html']);
     if (!hasSession()) {
         for (let i = LINKS.length - 1; i >= 0; i--) if (LOGIN_ONLY.has(LINKS[i][0])) LINKS.splice(i, 1);
     }
@@ -149,7 +152,7 @@
     // Header wie alles sonst") - it opens in place, below this nav band.
     const NEW_TAB = new Set(['../aehm.html', 'notes.html', 'fahrplan.html', '../buch/meldungen.html', 'schuljahr.html', 'konzepte.html', 'operatoren.html',
         'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', 'notenvergabe-fos.html',
-        'notenvergabe-osgy.html', '../fokus.html']);
+        'notenvergabe-osgy.html', '../fokus.html', 'nachschreiben.html']);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -189,7 +192,7 @@
                top, so the menu gets shorter - the demo class used to close the menu below a divider. */
             /* Doc, 10.10.2026: "mach MRA nur sichtbar, wenn ich eingeloggt bin" - login: the sub-menu alone goes
                (not LOGIN_ONLY: the pages and their cards stay as they were); "mach Meld. als ersten eintrag" */
-            [null, [{ sub: 'MRA', login: true, hrefs: ['../buch/meldungen.html', '../aehm.html', 'notes.html', 'fahrplan.html', '../vote.html?host', 'genii.html'] },
+            [null, [{ sub: 'MRA', login: true, hrefs: ['../buch/meldungen.html', '../aehm.html', 'notes.html', 'fahrplan.html', 'nachschreiben.html', '../vote.html?host', 'genii.html'] },
                     'schuljahr.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Noten', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
                                                   'bewertungen.html', 'notenvergabe-fos.html',
