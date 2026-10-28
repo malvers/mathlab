@@ -165,6 +165,47 @@
         return sec;
     }
 
+    // ---------- the imprint: page 2, the back of the foreword, in every book and language ----------
+    // Doc, 28.10.2026, before selling on KDP: "mach schon mal in alle Bücher ein Impressum". Self-published in Saxony,
+    // so § 6 SächsPresseG wants the name and address of author/publisher and printer, plainly visible - in no set
+    // language: the labels follow the edition, the address stays as it is (the same as on docalvers.de/impressum.html).
+    // KDP prints the actual printer and place on its own last page. An ISBN only where a book has one, by its folder.
+    const ISBN = { mathe11: '979-8161192665' };                         // free KDP ISBN of the A4 paperback draft (09.10.2026)
+    function impressum() {
+        const book = (here.match(/\/buch\/([^/]+)\/$/) || [])[1] || '';
+        const online = SITE + here;
+        const sep = Buch.lang === 'fr' ? ' ; ' : '; ';
+        const row = (k, v) => '<dt>' + k + '</dt><dd>' + v + '</dd>';
+        const sec = el('section', 'd-impressum');
+        sec.innerHTML = '<h1>' + tr('Impressum', 'Imprint', 'Créditos', 'Colophon', 'Mentions légales') + '</h1>' +
+            '<p class="d-imp-titel">' + B.title + '</p>' +
+            '<p class="d-imp-stand">' + tr('Stand', 'Edition', 'Edición', 'Edizione', 'Édition') + colon +
+            new Intl.DateTimeFormat(Buch.lang || 'de', { month: 'long', year: 'numeric' }).format(new Date()) + '</p>' +
+            '<dl>' +
+            row(tr('Autor und Verlag', 'Author and publisher', 'Autor y editor', 'Autore ed editore', 'Auteur et éditeur'),
+                'Dr. Michael R. Alvers<br>Sachsenallee 8<br>01468 Moritzburg<br>' + tr('Deutschland', 'Germany', 'Alemania', 'Germania', 'Allemagne')) +
+            row(tr('Kontakt', 'Contact', 'Contacto', 'Contatti', 'Contact'), 'info@docalvers.de<br>docalvers.de') +
+            (ISBN[book] ? row('ISBN', ISBN[book]) : '') +
+            row(tr('Druck', 'Printing', 'Impresión', 'Stampa', 'Impression'), tr(
+                'Print on Demand über Amazon KDP' + sep + 'Druckerei und Druckort stehen auf der letzten Seite.',
+                'Print on demand via Amazon KDP' + sep + 'printer and place of printing are named on the last page.',
+                'Impresión bajo demanda a través de Amazon KDP' + sep + 'la imprenta y el lugar de impresión figuran en la última página.',
+                'Stampa su richiesta tramite Amazon KDP' + sep + 'tipografia e luogo di stampa sono indicati nell’ultima pagina.',
+                'Impression à la demande via Amazon KDP' + sep + 'l’imprimeur et le lieu d’impression figurent en dernière page.')) +
+            row(tr('Interaktive Ausgabe', 'Interactive edition', 'Edición interactiva', 'Edizione interattiva', 'Édition interactive'),
+                '<a class="d-qr" href="' + online + '">' + qrSvg(online) + '<span>' + online.replace('https://', '') + '</span></a>') +
+            '</dl>' +
+            '<p class="d-imp-copy">© ' + new Date().getFullYear() + ' Dr. Michael R. Alvers</p>';
+        return sec;
+    }
+    // photo credits stand under every photo: the imprint says so, once the chapters are in and a book has photos
+    function impressumFotos(sec, book) {
+        if (!sec || !book.querySelector('.b-foto')) return;
+        sec.querySelector('dl').insertAdjacentHTML('beforeend', '<dt>' + tr('Fotos', 'Photos', 'Fotos', 'Foto', 'Photos') + '</dt><dd>' + tr(
+            'Der Bildnachweis steht bei jedem Foto.', 'The credit is given with every photo.', 'El crédito figura junto a cada foto.',
+            'Il credito è indicato accanto a ogni foto.', 'Le crédit figure à côté de chaque photo.') + '</dd>');
+    }
+
     // ---------- a heading never stays alone at the foot of a page ----------
     // Doc, 24.10.2026, with the KDP proof in hand: "Aufgaben" (p. 34), "Wiederholen · Vertiefen · Vernetzen" (p. 38),
     // "Rückblick" (p. 51) and "Gauß-Verfahren" (p. 101) stood alone at the bottom - "die fühlen sich dann auch einsam".
@@ -208,10 +249,11 @@
         const tag = (sel, z) => { const e = book.querySelector(sel); if (e) e.dataset.ziel = z; };
         tag('.d-cover', 'index.html|start|');
         tag('.d-front', 'index.html|sogehts|');
-        const gruss = await grusswort(), front = book.querySelector('.d-front');
+        const gruss = await grusswort(), front = book.querySelector('.d-front'), imp = impressum();
         if (gruss && front) front.before(gruss);
+        if (front) front.before(imp);
         // page 1 is the first sheet after the cover (js/buch-druck.css .d-p1)
-        (gruss || front)?.classList.add('d-p1');
+        (gruss || imp).classList.add('d-p1');
         const loesungen = tr('Lösungen', 'Solutions', 'Soluciones', 'Soluzioni', 'Solutions');
         const toc = el('section', 'd-toc');
         toc.appendChild(el('h1', 'd-toc-h', tr('Inhalt', 'Contents', 'Índice', 'Indice', 'Sommaire')));
@@ -253,6 +295,7 @@
             if (part) loes.appendChild(part);
         }
         book.appendChild(loes);
+        impressumFotos(imp, book);
         // Paged.js measures the pages: every photo has to be there with its real height first
         say(tr('Fotos werden geladen …', 'Loading photos …', 'Cargando fotos …', 'Caricamento delle foto …', 'Chargement des photos…'));
         await Promise.all(Array.from(book.querySelectorAll('img')).map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
