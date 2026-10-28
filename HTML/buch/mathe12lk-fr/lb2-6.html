@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 12 LK · Chapitre 2.6 · Étudier des courbes | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Symétrie, asymptotes, tangentes et normales, problèmes en contexte. Chapitre 2.6 du manuel interactif Mathématiques · Berufliches Gymnasium 12 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 12 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.6 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.6 · DOMAINE D’APPRENTISSAGE 2 · MARS · AVRIL</p>
+            <h1>Étudier des courbes</h1>
+            <p class="b-hero-lead">Des courbes symétriques, des courbes qui se rapprochent de droites, des tangentes sur une route de montagne : ici, tu rassembles tout ce que tu sais sur les fonctions.
+                Mais pas comme un schéma figé. Au centre, il y a toujours une <b>question</b> : où est-ce le plus raide ? Quand est-ce le plus haut ? Que se passe-t-il à long terme ?
+                Tu étudies exactement ce qui répond à cette question.</p>
+            <div class="b-chips"><span class="b-chip">14 HEURES</span><span class="b-chip">4 LEÇONS</span><span class="b-chip">LE PROBLÈME AVANT LE SCHÉMA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3-4*x","-4*x"]' data-labels='["f","tangente d’inflexion"]' data-lat="[2.35,0.35]" data-pts="[[0,0],[2,0],[-2,0]]" data-x="-3.2,3.2" data-y="-4,4" data-h="240" data-aria="Courbe symétrique par rapport à l’origine, avec ses zéros"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>démontrer une <b>symétrie</b> par rapport à l’axe des ordonnées ou à l’origine</li>
+                <li>utiliser les <b>asymptotes</b> et le comportement aux bornes de l’ensemble de définition</li>
+                <li>établir des équations de <b>tangentes</b> et de <b>normales</b>, y compris de tangentes aux points d’inflexion</li>
+                <li>étudier des fonctions <b>en contexte</b> de façon ciblée et interpréter les résultats</li>
+                <li>étudier des fonctions avec $\mathrm{e}^x$, $\ln x$ et $\sin x$, aussi avec un paramètre, et <b>démontrer</b> des propriétés</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="-2" data-ph="p ="><p class="b-q-text">Une droite a la pente 3 et passe par $(1\,;\,1)$. Que vaut son ordonnée à l’origine $p$ ?</p>
+            <div class="b-sol"><p>$1 = 3 + p \Rightarrow p = -2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-0,5" data-tol="0.0001" data-ph="m ="><p class="b-q-text">Quelle est la pente d’une droite perpendiculaire à une droite de pente 2 ?</p>
+            <div class="b-sol"><p>$-\tfrac12$, car $m_1 \cdot m_2 = -1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="16" data-ph="nombre"><p class="b-q-text">Combien vaut $(-2)^4$ ?</p>
+            <div class="b-sol"><p>16 : les puissances paires « avalent » le signe moins.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="4" data-ph="f'(2) ="><p class="b-q-text">$f(x) = x^2$. Que vaut $f'(2)$ ?</p>
+            <div class="b-sol"><p>$2 \cdot 2 = 4$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">IMAGES MIROIRS</div>
+        <div class="b-text"><p>Tracez avec un outil numérique $x^2$, $x^3$, $x^4$, $x^5$ ainsi que $x^4 - 3x^2 + 1$, $x^3 - 4x$, $x^3 + x^2$.</p>
+            <ul>
+                <li>Quelles courbes sont symétriques par rapport à l’axe des ordonnées, lesquelles par rapport à l’origine, lesquelles pas du tout ?</li>
+                <li>Quel rôle jouent les exposants ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA RANDONNÉE À VÉLO</div>
+        <div class="b-text"><p>Le profil d’altitude d’un parcours est $h(x) = -0{,}2x^3 + 3x^2 + 200$ (altitude en m, $x$ en km, $0 \le x \le 15$).</p>
+            <ul>
+                <li>Où se trouve le point le plus haut ? Où la montée est-elle la plus raide ?</li>
+                <li>Quelle est cette pente en pourcentage ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE TREMPLIN</div>
+        <div class="b-text"><p>Un tremplin de saut à ski se termine au point $P$ du profil. Le sauteur y continue d’abord tout droit.</p>
+            <ul>
+                <li>Dans quelle direction s’envole-t-il ? Quelle droite mathématique décrit cela ?</li>
+                <li>Quelle droite est perpendiculaire à la piste ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Symétrie et comportement" data-toc-k="1" data-toc-short="1 Symétrie">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">1</span>Symétrie et comportement aux bornes</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = x^4 - 3x^2 + 1$ donne pour $x = 2$ et pour $x = -2$ la même valeur 5. Pour $g(x) = x^3 - 4x$, on a $g(1) = -3$, mais $g(-1) = 3$.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Dans $f$, il n’y a que des puissances <b>paires</b> : le signe de $x$ ne joue aucun rôle, la courbe est symétrique par rapport à l’axe des ordonnées.
+                Dans $g$, il n’y a que des puissances <b>impaires</b> : changer le signe de $x$ change le signe de la valeur de la fonction, la courbe est symétrique par rapport à l’origine.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · SYMÉTRIE ET COMPORTEMENT AUX BORNES</div>
+        <div class="b-text"><p><b>Fonction paire</b> (courbe symétrique par rapport à l’axe des ordonnées) : $f(-x) = f(x)$ pour tout $x$. <b>Fonction impaire</b> (courbe symétrique par rapport à l’origine) : $f(-x) = -f(x)$ pour tout $x$.</p>
+            <p>Une fonction polynôme qui n’a que des exposants pairs (y compris $x^0$) est paire ; qui n’a que des exposants impairs, impaire.</p>
+            <p><b>Comportement aux bornes</b> (chapitre 2.1) : $x \to \pm\infty$ et approche des valeurs interdites. Les asymptotes horizontales et verticales ont leur place dans toute esquisse.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Économiser du travail :</b> pour une courbe symétrique, il suffit d’étudier une moitié. Pour une fonction paire, un maximum en $x = 2$ entraîne un second maximum en $x = -2$.</p>
+            <p class="b-note"><b>Mélange :</b> $x^3 + x^2$ a des exposants pairs et impairs ; elle n’est ni paire ni impaire.</p>
+            </aside>
+    </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · DÉMONTRER UNE SYMÉTRIE</div>
+        <div class="b-text"><p>Démontre que $g(x) = x^3 - 4x$ est symétrique par rapport à l’origine.</p>
+            </div>
+        <div class="b-sol"><p>$g(-x) = (-x)^3 - 4(-x) = -x^3 + 4x = -(x^3 - 4x) = -g(x)$. ✓</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · FONCTION RATIONNELLE</div>
+        <div class="b-text"><p>Étudie la symétrie et les asymptotes de $f(x) = \dfrac{2x^2}{x^2 - 4}$.</p>
+            </div>
+        <div class="b-sol"><p>$f(-x) = f(x)$ : fonction paire. Le dénominateur s’annule en $x = \pm 2$, où le numérateur vaut 8 : asymptotes verticales $x = \pm 2$. Degrés égaux : asymptote horizontale $y = 2$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">ILLUSTRATION · LA FONCTION DE L’EXEMPLE 2</div>
+        <div data-widget="graph" data-fns='["2*x^2/(x^2-4)"]' data-labels='["f"]' data-lat="[5]" data-hl="2" data-x="-7,7" data-y="-6,8" data-h="280" data-aria="Fonction rationnelle avec deux asymptotes verticales et une asymptote horizontale"></div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Décide sans calcul : a) $x^6 - 2x^2$ &nbsp; b) $3x^5 + x$ &nbsp; c) $x^3 + 1$ &nbsp; d) $\cos x$</p>
+            </div>
+        <div class="b-sol"><p>a) paire &nbsp; b) impaire &nbsp; c) aucune symétrie (le 1 est $x^0$, exposant pair) &nbsp; d) paire</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Démontre par le calcul que $f(x) = x^4 - 3x^2 + 1$ est paire. Donne sans autre calcul le second minimum, sachant que l’un se trouve en $x \approx 1{,}22$.</p>
+            </div>
+        <div class="b-sol"><p>$f(-x) = x^4 - 3x^2 + 1 = f(x)$. Second minimum en $x \approx -1{,}22$, avec la même ordonnée.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Montre que si $f$ est symétrique par rapport à l’origine et définie en 0, alors $f(0) = 0$.</p>
+            </div>
+        <div class="b-sol"><p>$f(-0) = -f(0)$, donc $f(0) = -f(0)$ et par conséquent $f(0) = 0$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$f(x) = x^5 - 2x^3$ est …</p>
+            <div class="b-mc"><button>paire</button><button>impaire</button><button>ni paire ni impaire</button></div>
+        <div class="b-sol"><p>Seulement des exposants impairs.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-7" data-ph="f(-2) ="><p class="b-q-text">$f$ est symétrique par rapport à l’origine, $f(2) = 7$. Que vaut $f(-2)$ ?</p>
+            <div class="b-sol"><p>$-7$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Tangentes et normales" data-toc-k="2" data-toc-short="2 Tangentes">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">2</span>Tangentes et normales</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La tangente à $f(x) = x^2$ au point $P(1\,;\,1)$ a la pente $f'(1) = 2$. Quelle est son équation ?</p>
+            </div>
+        </div>
+        <div class="b-text"><p>On cherche une droite $t(x) = mx + p$ avec $m = 2$ passant par $(1\,;\,1)$ : $1 = 2 \cdot 1 + p$, donc $p = -1$ et $t(x) = 2x - 1$.
+                La <b>normale</b> est perpendiculaire à la tangente en $P$. Sa pente vaut $-\tfrac12$, son équation est $n(x) = -\tfrac12 x + \tfrac32$.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TANGENTE ET NORMALE</div>
+        <div class="b-text"><p><b>Tangente</b> au point $P(x_0\,;\,f(x_0))$ : $$t(x) = f'(x_0) \cdot (x - x_0) + f(x_0)$$</p>
+            <p><b>Normale</b> (pour $f'(x_0) \neq 0$) : pente $m_n = -\dfrac{1}{f'(x_0)}$, elle aussi passant par $P$. Si $f'(x_0) = 0$, la normale est la droite verticale $x = x_0$.</p>
+            <p>Un cas important : la <b>tangente au point d’inflexion</b>, où la pente est extrémale.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Perpendiculaires :</b> deux droites sont perpendiculaires si $m_1 \cdot m_2 = -1$.</p>
+            <p class="b-note"><b>Physique :</b> la normale indique la direction de la force avec laquelle une piste lisse pousse sur un corps.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · TANGENTE ET NORMALE</div>
+        <p class="b-help" style="margin:0 0 12px">Déplace le point de contact. En cyan : la tangente ; en violet pointillé : la normale. Les deux axes ont la même échelle, pour que « perpendiculaire » ait bien l’air perpendiculaire.</p>
+            <div data-widget="tangente"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · TANGENTE ET NORMALE</div>
+        <div class="b-text"><p>Détermine la tangente et la normale à $f(x) = x^3 - 2x$ au point d’abscisse $x_0 = 1$.</p>
+            </div>
+        <div class="b-sol"><p>$f(1) = -1$, $f'(x) = 3x^2 - 2$, $f'(1) = 1$. Tangente : $t(x) = 1 \cdot (x - 1) - 1 = x - 2$. Normale : pente $-1$, $n(x) = -x$.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · TANGENTE AU POINT D’INFLEXION</div>
+        <div class="b-text"><p>Détermine la tangente au point d’inflexion de $f(x) = x^3 - 3x^2 + 2$.</p>
+            </div>
+        <div class="b-sol"><p>$f''(x) = 6x - 6 = 0$ en $x = 1$, $W(1\,;\,0)$. $f'(1) = 3 - 6 = -3$. <span class="b-res">$t(x) = -3x + 3$</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="4">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine la tangente à $f(x) = \tfrac12 x^2$ au point d’abscisse $x_0 = 2$.</p>
+            </div>
+        <div class="b-sol"><p>$f(2) = 2$, $f'(2) = 2$ : $t(x) = 2(x - 2) + 2 = 2x - 2$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine la tangente et la normale à $f(x) = \sqrt{x}$ au point $(4\,;\,2)$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(4) = \tfrac14$ : $t(x) = \tfrac14 x + 1$. Normale : pente $-4$, $n(x) = -4x + 18$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>En quel point la courbe de $f(x) = x^2 - 3x$ a-t-elle une tangente parallèle à la droite $y = x + 5$ ?</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 2x - 3 = 1 \Rightarrow x = 2$, point $(2\,;\,-2)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine la tangente à $f(x) = \mathrm{e}^x$ au point $(0\,;\,1)$ ainsi que son point d’intersection avec l’axe des abscisses.</p>
+            </div>
+        <div class="b-sol"><p>$t(x) = x + 1$, qui s’annule en $x = -1$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Depuis le point $Q(0\,;\,-1)$, on mène des tangentes à la parabole $f(x) = x^2$. Détermine les points de contact et les équations des tangentes.</p>
+            </div>
+        <div class="b-hint"><p>Tangente au point inconnu $(u\,;\,u^2)$ : $t(x) = 2u(x - u) + u^2$. Elle doit passer par $Q$.</p>
+            </div>
+        <div class="b-sol"><p>$t(0) = -2u^2 + u^2 = -u^2 = -1 \Rightarrow u = \pm 1$. Points de contact $(1\,;\,1)$ et $(-1\,;\,1)$, tangentes $t(x) = 2x - 1$ et $t(x) = -2x - 1$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="-4" data-ph="p ="><p class="b-q-text">La tangente à $f(x) = x^2$ en $x_0 = 2$ est $t(x) = 4x + p$. Que vaut $p$ ?</p>
+            <div class="b-sol"><p>$4 = 8 + p \Rightarrow p = -4$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-0,25" data-tol="0.0001" data-ph="m ="><p class="b-q-text">La tangente en $P$ a la pente 4. Quelle est la pente de la normale ?</p>
+            <div class="b-sol"><p>$-\tfrac14$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Fonctions en contexte" data-toc-k="3" data-toc-short="3 Contexte">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">3</span>Étudier une fonction en contexte</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La randonnée à vélo a le profil d’altitude $h(x) = -0{,}2x^3 + 3x^2 + 200$. On ne demande pas « toutes les propriétés », mais : où est le point le plus haut ? Où la montée est-elle la plus raide ?</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Point le plus haut : $h'(x) = -0{,}6x^2 + 6x = -0{,}6x(x - 10) = 0$ en $x = 0$ et $x = 10$. Avec les bornes $h(0) = 200$, $h(10) = 300$, $h(15) = 200$ :
+                le sommet est atteint au bout de 10 km, à 300 m. Montée la plus raide : point d’inflexion où $h''(x) = -1{,}2x + 6 = 0$, donc au bout de 5 km, avec $h'(5) = 15$ m par km, soit une pente de 1,5 %.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · ÉTUDIER AVEC UN BUT</div>
+        <div class="b-text"><p><b>1. Traduire :</b> quelle propriété de la fonction répond à la question ? Plus grande valeur → extremum (aussi aux bornes). Plus forte augmentation → point d’inflexion. À long terme → limite.</p>
+            <p><b>2. Calculer :</b> seulement ce qui est nécessaire, avec ou sans outil numérique.</p>
+            <p><b>3. Interpréter et vérifier :</b> réponse dans le contexte, avec l’unité. Le résultat est-il plausible ? Le modèle est-il valable sur tout le domaine ?</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Unités :</b> la dérivée a pour unité « unité de $y$ par unité de $x$ », ici des mètres par kilomètre. 10 m par km font une pente de 1 %.</p>
+            <p class="b-note"><b>Ensemble de définition :</b> en contexte, il est presque toujours restreint ; les bornes peuvent être la solution.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">ILLUSTRATION · PROFIL D’ALTITUDE DE LA RANDONNÉE</div>
+        <div data-widget="graph" data-fns='["-0.2*x^3+3*x^2+200"]' data-labels='["h"]' data-lat="[12.5]" data-pts="[[10,300],[5,250]]" data-x="-0.5,16" data-y="150,330" data-xl="km" data-yl="m" data-h="260" data-aria="Profil d’altitude avec le sommet et la montée la plus raide"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · LA FONTAINE</div>
+        <div class="b-text"><p>Un jet d’eau a la forme $y = -0{,}5x^2 + 2x + 1$ (m). Jusqu’à quelle hauteur monte-t-il ? Sous quel angle touche-t-il le sol en $y = 0$ ?</p>
+            </div>
+        <div class="b-sol"><p>$y' = -x + 2 = 0$ en $x = 2$ : hauteur $3$ m. Impact : $-0{,}5x^2 + 2x + 1 = 0 \Rightarrow x = 2 + \sqrt6 \approx 4{,}45$, $y'(4{,}45) \approx -2{,}45$.
+                Angle avec l’horizontale : $\arctan 2{,}45 \approx 67{,}8°$.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · L’EAU DANS LE BASSIN</div>
+        <div class="b-text"><p>Le débit entrant dans un bassin est $r(t) = -t^2 + 6t$ (m³/h, $0 \le t \le 6$). Quand le débit est-il maximal ? Que signifie $r(t) > 0$ ?</p>
+            </div>
+        <div class="b-sol"><p>$r'(t) = -2t + 6 = 0$ en $t = 3$ : débit maximal de 9 m³/h. Tant que $r(t) > 0$, la quantité d’eau augmente. Combien d’eau entre au total, le calcul intégral de la 13e année le dira.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>On lance une balle ; sa hauteur est $h(t) = -5t^2 + 10t + 1{,}5$ (m, s). Quand est-elle au plus haut, et à quelle hauteur ? Quelle est sa vitesse au bout de 0,5 s ?</p>
+            </div>
+        <div class="b-sol"><p>$h'(t) = -10t + 10 = 0$ en $t = 1$, $h(1) = 6{,}5$ m. $h'(0{,}5) = 5$ m/s vers le haut.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Le nombre de visiteurs d’un parc de loisirs entre 9 h et 19 h est décrit par $B(t) = -2t^3 + 30t^2$ ($t$ en heures après 9 h, $0 \le t \le 10$). Quand y a-t-il le plus de monde ? Quand les visiteurs affluent-ils le plus vite ?</p>
+            </div>
+        <div class="b-sol"><p>$B'(t) = -6t^2 + 60t = -6t(t - 10)$ : maximum à la borne $t = 10$ (19 h), $B = 1000$. $B''(t) = -12t + 60 = 0$ en $t = 5$ : à 14 h, avec $B'(5) = 150$ personnes par heure.
+                Critique : à 19 h, il n’y a guère encore le plus de monde. Le modèle compte plutôt le nombre total d’entrées.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Termine l’exploration « La randonnée à vélo » : quelle est la pente au km 2 ? Où le parcours descend-il, et quelle est la pente à la fin, au km 15 ?</p>
+            </div>
+        <div class="b-sol"><p>$h'(2) = 9{,}6$ m/km (0,96 %). Descente à partir du km 10. $h'(15) = -0{,}6 \cdot 225 + 90 = -45$ m/km, soit 4,5 % de pente descendante.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une entreprise a les coûts $K(x) = x^3 - 6x^2 + 15x + 10$ (en milliers d’euros, $x$ en milliers d’unités). Où les coûts augmentent-ils le plus lentement ? Que cela signifie-t-il économiquement ?</p>
+            </div>
+        <div class="b-sol"><p>$K'(x) = 3x^2 - 12x + 15$, minimum quand $K''(x) = 6x - 12 = 0$, donc $x = 2$ : $K'(2) = 3$. À 2 000 unités, chaque unité supplémentaire coûte le moins (coût marginal minimal). Au-delà, la production devient plus chère, par exemple à cause d’heures supplémentaires.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="6,5" data-tol="0.0001" data-ph="mètres"><p class="b-q-text">$h(t) = -5t^2 + 10t + 1{,}5$. Hauteur maximale en mètres ?</p>
+            <div class="b-sol"><p>$h(1) = 6{,}5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="5" data-ph="km"><p class="b-q-text">À quel kilomètre la montée de la randonnée $h(x) = -0{,}2x^3 + 3x^2 + 200$ est-elle la plus raide ?</p>
+            <div class="b-sol"><p>$h''(x) = 0$ en $x = 5$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Fonctions avec e, ln et sin" data-toc-k="4" data-toc-short="4 e, ln, sin">
+    <div class="b-band"><span class="b-band-tag">LEÇON 4</span><span class="b-band-sub">2 HEURES</span></div>
+        <h2><span class="b-no">4</span>Étudier des fonctions avec e, ln et sin</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Avec la règle du produit et la règle de la chaîne, tu peux maintenant dériver aussi des fonctions comme $(2 - x)\,\mathrm{e}^x$, $\ln(x^2 + 1)$ ou $x + 2\sin x$.
+                La démarche reste la même que pour les fonctions polynômes. Ce qui est nouveau, ce sont les bornes : qui croît le plus vite, $x^n$ ou $\mathrm{e}^x$ ? Et où $\ln$ est-elle seulement définie ?</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · CE QUI COMPTE AVEC e, ln ET sin</div>
+        <div class="b-text"><p><b>Ensemble de définition :</b> $\ln(v(x))$ seulement pour $v(x) > 0$.</p>
+            <p><b>Bornes :</b> $\mathrm{e}^x$ croît plus vite que toute puissance de $x$. C’est pourquoi $x^n \mathrm{e}^{-x} \to 0$ quand $x \to \infty$, et $\mathrm{e}^x \to 0$ quand $x \to -\infty$ donne l’asymptote horizontale $y = 0$.</p>
+            <p><b>Zéros de $f$, $f'$, $f''$ :</b> mettre en facteur $\mathrm{e}^{\ldots}$, qui n’est jamais nul. Pour le sinus et le cosinus, il y a une infinité de solutions : on les cherche dans un intervalle donné.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Avec des outils numériques :</b> les dérivées d’ordre supérieur d’expressions longues, tu les fais calculer par le CAS. Décider ce que tu dois étudier et ce que signifient les résultats, cela reste ton travail.</p>
+            <p class="b-note"><b>Pas de schéma :</b> le programme ne demande expressément pas d’étude de fonction de routine, mais les propriétés demandées et leur justification.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">FIGURE · LA FONCTION DE L’EXEMPLE 7</div>
+        <p class="b-help" style="margin:0 0 12px">Or : $f(x) = (2 - x)\,\mathrm{e}^x$ avec le maximum $(1\,;\,\mathrm{e})$ et le point d’inflexion $(0\,;\,2)$. Cyan : la tangente au point d’inflexion $y = x + 2$. Quand $x \to -\infty$, la courbe se rapproche de l’axe des abscisses.</p>
+            <div data-widget="graph" data-fns='["(2-x)*exp(x)","x+2"]' data-labels='["f","tangente d’inflexion"]' data-lat="[-3.5,0.6]" data-pts="[[1,2.718],[0,2],[2,0]]" data-x="-6,3" data-y="-3,4" data-h="280" data-aria="Courbe de (2 moins x) fois e puissance x avec le maximum, le point d’inflexion et la tangente au point d’inflexion"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 7 · UN PRODUIT AVEC eˣ</div>
+        <div class="b-text"><p>Étudie $f(x) = (2 - x)\,\mathrm{e}^x$ : zéro, comportement aux bornes, extremum et point d’inflexion, tangente au point d’inflexion.</p>
+            </div>
+        <div class="b-sol"><p>Zéro en $x = 2$. Quand $x \to -\infty$, $f(x) \to 0$ (asymptote $y = 0$) ; quand $x \to \infty$, $f(x) \to -\infty$.</p>
+            <p>$f'(x) = (1 - x)\,\mathrm{e}^x$ : maximum $(1\,;\,\mathrm{e})$. $f''(x) = -x\,\mathrm{e}^x$ change de signe en 0 : point d’inflexion $(0\,;\,2)$ avec $f'(0) = 1$,
+                    <span class="b-res">tangente au point d’inflexion $y = x + 2$.</span></p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 8 · UNE FONCTION LOGARITHME</div>
+        <div class="b-text"><p>Étudie la symétrie, les extremums et les points d’inflexion de $f(x) = \ln(x^2 + 1)$.</p>
+            </div>
+        <div class="b-sol"><p>$x^2 + 1 > 0$, donc $D = \mathbb{R}$. $f(-x) = f(x)$ : symétrique par rapport à l’axe des ordonnées. $f'(x) = \dfrac{2x}{x^2 + 1}$ : minimum $(0\,;\,0)$.</p>
+            <p>Avec la règle du produit et la règle de la chaîne pour $2x \cdot (x^2 + 1)^{-1}$ : $f''(x) = \dfrac{2(1 - x^2)}{(x^2 + 1)^2}$. <span class="b-res">Points d’inflexion $(\pm 1\,;\,\ln 2) \approx (\pm 1\,;\,0{,}693)$.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="13">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Étudie $f(x) = x\,\mathrm{e}^{-x}$ : zéro, comportement quand $x \to \pm\infty$, maximum, point d’inflexion.</p>
+            </div>
+        <div class="b-sol"><p>Zéro 0. Quand $x \to \infty$ : $f(x) \to 0$, quand $x \to -\infty$ : $f(x) \to -\infty$. $f'(x) = (1 - x)\,\mathrm{e}^{-x}$ : maximum $\left(1\,;\,\tfrac1{\mathrm{e}}\right)$.
+                $f''(x) = (x - 2)\,\mathrm{e}^{-x}$ : point d’inflexion $\left(2\,;\,\tfrac{2}{\mathrm{e}^2}\right) \approx (2\,;\,0{,}271)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine les extremums et les points d’inflexion de $f(x) = x + 2\sin x$ sur l’intervalle $]0\,;\,2\pi[$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 1 + 2\cos x = 0 \iff \cos x = -\tfrac12$ : $x = \tfrac{2\pi}{3}$ et $x = \tfrac{4\pi}{3}$. $f''(x) = -2\sin x$ :
+                maximum $\left(\tfrac{2\pi}{3}\,;\,\tfrac{2\pi}{3} + \sqrt3\right) \approx (2{,}09\,;\,3{,}83)$, minimum $\left(\tfrac{4\pi}{3}\,;\,\tfrac{4\pi}{3} - \sqrt3\right) \approx (4{,}19\,;\,2{,}46)$, point d’inflexion $(\pi\,;\,\pi)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Montre que $f(x) = x^2 \mathrm{e}^{-x}$ a exactement deux points d’inflexion, et donne leurs abscisses. Utilise $f''(x) = (x^2 - 4x + 2)\,\mathrm{e}^{-x}$ (CAS ou deux fois la règle du produit).</p>
+            </div>
+        <div class="b-sol"><p>$x^2 - 4x + 2 = 0 \iff x = 2 \pm \sqrt2$. Ce sont deux zéros simples, $f''$ y change de signe : points d’inflexion en $x \approx 0{,}586$ et $x \approx 3{,}414$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Les ventes d’un nouveau produit sont $A(t) = 50t \cdot \mathrm{e}^{-0{,}1t}$ (unités par semaine, $t$ en semaines). Quand vend-on le plus ? Quand les ventes baissent-elles le plus fortement ?</p>
+            </div>
+        <div class="b-sol"><p>$A'(t) = 50\,\mathrm{e}^{-0{,}1t}(1 - 0{,}1t) = 0$ en $t = 10$ : au plus $A(10) = 500\,\mathrm{e}^{-1} \approx 184$ unités par semaine.
+                $A''(t) = 0{,}5\,\mathrm{e}^{-0{,}1t}(t - 20)$ : point d’inflexion en $t = 20$, où $A'(20) = -50\,\mathrm{e}^{-2} \approx -6{,}8$. <span class="b-res">À la semaine 20, les ventes baissent le plus vite, d’environ 7 unités par semaine.</span></p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Pour tout $k > 0$, soit $f_k(x) = x\,\mathrm{e}^{-kx}$. Détermine le maximum en fonction de $k$ et montre : tous les maximums se trouvent sur une droite passant par l’origine.</p>
+            </div>
+        <div class="b-sol"><p>$f_k'(x) = (1 - kx)\,\mathrm{e}^{-kx} = 0 \iff x = \tfrac1k$, changement de signe de $+$ à $-$ : maximum $\left(\tfrac1k\,;\,\tfrac{1}{k\mathrm{e}}\right)$.</p>
+            <p>Avec $x = \tfrac1k$, on a $y = \tfrac{x}{\mathrm{e}}$ : <span class="b-res">tous les maximums se trouvent sur $y = \tfrac1{\mathrm{e}}\,x$.</span></p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">En quelle abscisse $f(x) = x\,\mathrm{e}^{-x}$ a-t-elle son point d’inflexion ?</p>
+            <div class="b-sol"><p>$f''(x) = (x - 2)\,\mathrm{e}^{-x}$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2,718" data-tol="0.001" data-ph="y ="><p class="b-q-text">Quelle est l’ordonnée du maximum de $f(x) = (2 - x)\,\mathrm{e}^x$ (trois décimales) ?</p>
+            <div class="b-sol"><p>$f(1) = \mathrm{e} \approx 2{,}718$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="f'(1) ="><p class="b-q-text">$f(x) = \ln(x^2 + 1)$. Que vaut $f'(1)$ ?</p>
+            <div class="b-sol"><p>$\tfrac{2 \cdot 1}{1 + 1} = 1$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="18">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Étudie la symétrie, les zéros, les extremums et les points d’inflexion de $f(x) = x^3 - 4x$, puis esquisse la courbe.</p>
+            </div>
+        <div class="b-sol"><p>Impaire. Zéros $0$, $\pm 2$. $f'(x) = 3x^2 - 4 = 0 \Rightarrow x = \pm\tfrac{2}{\sqrt3} \approx \pm 1{,}15$ : $H(-1{,}15\,;\,3{,}08)$, $T(1{,}15\,;\,-3{,}08)$. $W(0\,;\,0)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine la tangente au point d’inflexion de $f(x) = x^3 - 4x$. Sous quel angle la courbe coupe-t-elle l’axe des abscisses à l’origine ?</p>
+            </div>
+        <div class="b-sol"><p>$t(x) = -4x$. Angle : $\arctan 4 \approx 76°$ avec l’axe des abscisses (mesuré vers le bas).</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relier avec le chapitre 2.1 :</b> esquisse $f(x) = \dfrac{2x^2}{x^2 - 4}$ avec toutes ses asymptotes. Où la courbe a-t-elle un extremum ?</p>
+            </div>
+        <div class="b-sol"><p>D’après la symétrie et l’allure : maximum $H(0\,;\,0)$ entre les pôles (les valeurs y sont $\le 0$). On le confirme par le calcul en 13e année avec la règle du quotient.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Montre que les tangentes à $f(x) = x^2$ aux points $(a\,;\,a^2)$ et $\left(-\tfrac{1}{4a}\,;\,\tfrac{1}{16a^2}\right)$ sont perpendiculaires.</p>
+            </div>
+        <div class="b-sol"><p>Pentes $2a$ et $2 \cdot \left(-\tfrac{1}{4a}\right) = -\tfrac{1}{2a}$. Produit $-1$. ✓</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : d’où vient l’asymptote" data-toc-k="X" data-toc-short="Asymptote">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">UN MOT VENU DE L’ANTIQUITÉ</span></div>
+        <h2>D’où vient l’asymptote</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Vers 200 avant J.-C., Apollonius de Perga écrivit huit livres sur les coniques, les courbes obtenues en coupant un cône par un plan :
+                cercle, ellipse, parabole, hyperbole. Les noms ellipse, parabole et hyperbole viennent de lui.</p>
+            <p>Dans le deuxième livre, il étudie deux droites dont les branches d’une hyperbole se rapprochent de plus en plus, sans jamais les atteindre. Il les appela
+                <i>asymptotos</i>, « qui ne coïncident pas ». La courbe de $\tfrac1x$ est une telle hyperbole ; ses asymptotes sont les deux axes du repère.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> Apollonius de Perga, Konika (Les Coniques), livre II.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>SYMÉTRIE</h4><p>$f(-x) = f(x)$ : par rapport à l’axe des ordonnées · $f(-x) = -f(x)$ : par rapport à l’origine.</p>
+            </div>
+        <div>
+            <p>$x^4 - 3x^2 + 1$ · $x^3 - 4x$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>TANGENTE</h4><p>$t(x) = f'(x_0)(x - x_0) + f(x_0)$</p>
+            </div>
+        <div>
+            <p>$x^2$ en 1 : $t(x) = 2x - 1$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>NORMALE</h4><p>Pente $-\dfrac{1}{f'(x_0)}$, par le même point.</p>
+            </div>
+        <div>
+            <p>$x^2$ en 1 : $n(x) = -\tfrac12 x + \tfrac32$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>e, ln ET sin</h4><p>Vérifier l’ensemble de définition, mettre $\mathrm{e}^{\ldots}$ en facteur, $\mathrm{e}^x$ l’emporte sur toute puissance.</p>
+            </div>
+        <div>
+            <p>$(2 - x)\,\mathrm{e}^x$ : maximum $(1\,;\,\mathrm{e})$, tangente au point d’inflexion $y = x + 2$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>EN CONTEXTE</h4><p>Traduire la question, calculer de façon ciblée, interpréter avec l’unité, vérifier le modèle.</p>
+            </div>
+        <div>
+            <p>Randonnée : sommet au km 10, montée la plus raide au km 5</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$f(x) = 2x^4 - x^2 + 5$ est …</p>
+            <div class="b-mc"><button>paire</button><button>impaire</button><button>ni paire ni impaire</button></div>
+        <div class="b-sol"><p>Seulement des exposants pairs.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-1" data-ph="p ="><p class="b-q-text">Tangente à $f(x) = x^2$ en $(1\,;\,1)$ : $t(x) = 2x + p$. Que vaut $p$ ?</p>
+            <div class="b-sol"><p>$1 = 2 + p$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-0,5" data-tol="0.0001" data-ph="m ="><p class="b-q-text">Quelle est la pente de la normale à $f(x) = x^2$ en $(1\,;\,1)$ ?</p>
+            <div class="b-sol"><p>$-\tfrac12$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+        <div class="b-q" data-ans="3" data-ph="p ="><p class="b-q-text">Tangente au point d’inflexion de $f(x) = x^3 - 3x^2 + 2$ : $t(x) = -3x + p$. Que vaut $p$ ?</p>
+            <div class="b-sol"><p>$W(1\,;\,0)$ : $0 = -3 + p$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Où $f(x) = x^2 - 3x$ a-t-elle une tangente de pente 1 ?</p>
+            <div class="b-sol"><p>$2x - 3 = 1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="300" data-ph="mètres"><p class="b-q-text">À quelle altitude se trouve le sommet de la randonnée $h(x) = -0{,}2x^3 + 3x^2 + 200$ sur l’intervalle $0 \le x \le 15$ ?</p>
+            <div class="b-sol"><p>$h(10) = 300$ m</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-kurvendiskussion2.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ÉTUDE DE FONCTIONS II</span><span class="b-lab-what">Symétrie, tangentes, applications</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-uebung-differenzial.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXERCICES DE CALCUL DIFFÉRENTIEL</span><span class="b-lab-what">Exercices variés</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 12e année, Leistungskurs · domaine d’apprentissage 2 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe (2026).</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+</body>
+</html>
