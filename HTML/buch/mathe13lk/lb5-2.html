@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematik 13 LK · Kapitel 5.2 · Signifikanztests | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Ein- und zweiseitige Tests, Ablehnungsbereich, Fehler 1. und 2. Art, statistische Sicherheit. Kapitel 5.2 des interaktiven Lehrbuchs Mathematik · Berufliches Gymnasium 13 · Leistungskurs: Erklärungen, Beispiele, Aufgaben in drei Stufen und Selbsttests mit sofortiger Rückmeldung.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATIK · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Kapitel"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhalt des Kapitels">
+        <p class="b-toc-title">KAPITEL 5.2 · LERNBEREICH 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Auftakt" data-toc-k="A" data-toc-short="Auftakt" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">KAPITEL 5.2 · LERNBEREICH 5 · DEZEMBER · JANUAR</p>
+            <h1>Signifikanztests</h1>
+            <p class="b-hero-lead">Eine Münze zeigt in 50 Würfen 33-mal Wappen. Ist sie gezinkt, oder war es Zufall? Ein Medikament heilt in einer Studie 72 von 100 Kranken, das alte nur 60 %.
+                Wirkt es wirklich besser? Ein <b>Signifikanztest</b> trifft solche Entscheidungen nach einer festen Regel und sagt dir genau, wie oft man sich dabei irrt.</p>
+            <div class="b-chips"><span class="b-chip">10 USTD.</span><span class="b-chip">2 LERNEINHEITEN</span><span class="b-chip">ENTSCHEIDEN UNTER UNSICHERHEIT</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="50" data-p="0.5" data-lo="32" data-hi="50" data-step="10"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DAS LERNST DU IN DIESEM KAPITEL</div>
+            <div class="b-text"><ul>
+                <li><b>Nullhypothese</b> und <b>Gegenhypothese</b> formulieren, Testgröße und <b>Signifikanzniveau</b> festlegen</li>
+                <li><b>Ablehnungsbereich</b> und <b>kritischen Wert</b> bestimmen und eine <b>Entscheidungsregel</b> aufstellen</li>
+                <li><b>einseitige</b> und <b>zweiseitige</b> Tests durchführen, auch mit CAS</li>
+                <li><b>Fehler 1. und 2. Art</b> unterscheiden, den Fehler 2. Art berechnen und die <b>statistische Sicherheit</b> deuten</li>
+                <li>Tests selbst <b>planen</b>, auch mit der Näherung durch die Normalverteilung</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: DAS KANNST DU SCHON?</div>
+            <div class="b-q" data-ans="25" data-ph="μ ="><p class="b-q-text">Erwartungswert der Anzahl Wappen bei 50 Würfen einer fairen Münze?</p><div class="b-sol"><p>25</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$P(X \ge 32)$ ist gleich …</p>
+                <div class="b-mc"><button>$1 - P(X \le 32)$</button><button>$P(X \le 31)$</button><button>$1 - P(X \le 31)$</button></div>
+                <div class="b-sol"><p>Gegenereignis von „mindestens 32“ ist „höchstens 31“.</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="Prozent"><p class="b-q-text">Wie viel Prozent sind 0,05?</p><div class="b-sol"><p>5 %</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Erkundungen" data-toc-k="E" data-toc-short="Erkundungen">
+    <div class="b-band"><span class="b-band-tag">ERKUNDUNGEN</span><span class="b-band-sub">ZUM EINSTIEG · IN GRUPPEN</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">AB WANN GEZINKT?</div>
+            <div class="b-text"><p>Eine Münze wird 50-mal geworfen. Ihr wollt entscheiden, ob sie Wappen bevorzugt.</p>
+                <ul><li>Ab wie vielen Wappen würdet ihr „gezinkt“ sagen? Einigt euch auf eine Zahl.</li><li>Wie oft würdet ihr damit eine faire Münze zu Unrecht beschuldigen?</li></ul></div>
+            <span class="b-pair">→ Lerneinheit 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">ZWEI ARTEN, SICH ZU IRREN</div>
+            <div class="b-text"><p>Ein Corona-Test, ein Rauchmelder, ein Gericht: Alle können sich auf zwei verschiedene Weisen irren.</p>
+                <ul><li>Beschreibt beide Fehler für jedes Beispiel. Welcher ist jeweils schlimmer?</li></ul></div>
+            <span class="b-pair">→ Lerneinheit 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DER FAIRE WÜRFEL</div>
+            <div class="b-text"><p>Ein Würfel wird 120-mal geworfen, die Sechs kommt 28-mal.</p>
+                <ul><li>Wie viele Sechsen erwartet ihr? Ist 28 verdächtig?</li><li>Wäre auch 8 verdächtig?</li></ul></div>
+            <span class="b-pair">→ Lerneinheit 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Einseitige Signifikanztests" data-toc-k="1" data-toc-short="1 Einseitig">
+    <div class="b-band"><span class="b-band-tag">LERNEINHEIT 1</span><span class="b-band-sub">5 USTD.</span></div>
+    <h2><span class="b-no">1</span>Einseitige Signifikanztests</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Ein Bäcker sagt: Höchstens $10\,\%$ meiner Brötchen sind zu klein. Eine Kundin vermutet mehr und wiegt 50 Brötchen.
+                Selbst wenn der Bäcker recht hat, können zufällig mehr als 5 zu kleine dabei sein. Ab wie vielen darf sie ihm widersprechen, ohne sich zu oft zu irren?
+                Die Regel dafür muss sie festlegen, <b>bevor</b> sie wiegt.</p></div></div>
+            <div class="b-text"><p>Man prüft die <b>Nullhypothese</b> $H_0\colon p = 0{,}1$ gegen die Vermutung $H_1\colon p > 0{,}1$. Die <b>Testgröße</b> $X$ zählt die zu kleinen Brötchen.
+                Stimmt $H_0$, ist $X$ binomialverteilt mit $n = 50$ und $p = 0{,}1$. Große Werte von $X$ sprechen gegen $H_0$: Der <b>Ablehnungsbereich</b> liegt rechts.
+                Man wählt ihn so, dass er bei wahrem $H_0$ höchstens mit der Wahrscheinlichkeit $\alpha$, dem <b>Signifikanzniveau</b>, getroffen wird.</p>
+                <p>Ein Test kann sich auf zwei Arten irren: $H_0$ wird abgelehnt, obwohl sie stimmt (<b>Fehler 1. Art</b>, höchstens $\alpha$), oder $H_0$ wird beibehalten, obwohl sie falsch ist (<b>Fehler 2. Art</b>).</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">MERKE · EINSEITIGER SIGNIFIKANZTEST</div>
+                <div class="b-text">
+                    <p>1. $H_0\colon p = p_0$ und die Richtung festlegen. 2. Testgröße $X$, unter $H_0$ binomialverteilt mit $n$ und $p_0$. 3. Signifikanzniveau $\alpha$ wählen.</p>
+                    <p>4. <b>Rechtsseitig:</b> $K = \{k;\ \ldots;\ n\}$ mit dem kleinsten $k$, für das $P(X \ge k) \le \alpha$ ist. <b>Linksseitig:</b> $K = \{0;\ \ldots;\ k\}$ mit dem größten $k$, für das $P(X \le k) \le \alpha$ ist. $k$ heißt <b>kritischer Wert</b>.</p>
+                    <p>5. <b>Entscheidungsregel:</b> Liegt das Stichprobenergebnis in $K$, wird $H_0$ abgelehnt, sonst nicht.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Nicht abgelehnt heißt nicht bewiesen:</b> Liegt das Ergebnis nicht in $K$, reichen die Daten nur nicht aus, um $H_0$ zu widerlegen.</p>
+            <p class="b-note"><b>Am Rechner:</b> Viele Geräte kennen nur $P(X \le k)$. Dann ist $P(X \ge k) = 1 - P(X \le k - 1)$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERAKTIV · DER SIGNIFIKANZTEST</div>
+        <p class="b-help" style="margin:0 0 12px">Stelle $n$, $p_0$, die Richtung und $\alpha$ ein. Rot ist der Ablehnungsbereich. Schalte den Fehler 2. Art dazu und verändere das wahre $p$: Wie oft übersieht der Test, dass $H_0$ falsch ist?</p>
+        <div data-widget="signifikanztest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 1 · RECHTSSEITIG: DER BÄCKER</div>
+            <div class="b-text"><p>$n = 50$, $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$, $\alpha = 5\,\%$. Es gilt $P(X \ge 9) \approx 0{,}058$ und $P(X \ge 10) \approx 0{,}025$. Die Kundin findet 9 zu kleine Brötchen.</p></div>
+            <div class="b-sol"><p>$k = 9$ ist zu klein ($0{,}058 > 0{,}05$), $k = 10$ passt: <span class="b-res">$K = \{10;\ \ldots;\ 50\}$</span>.</p>
+                <p>9 liegt nicht in $K$: $H_0$ wird nicht abgelehnt. Die Daten reichen nicht, um dem Bäcker zu widersprechen.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 2 · LINKSSEITIG: DAS SAATGUT</div>
+            <div class="b-text"><p>Ein Händler verspricht, dass mindestens $90\,\%$ der Samen keimen. Ein Gärtner sät 100 Samen. $H_0\colon p = 0{,}9$, $H_1\colon p < 0{,}9$, $\alpha = 5\,\%$, mit $P(X \le 84) \approx 0{,}040$ und $P(X \le 85) \approx 0{,}073$.</p></div>
+            <div class="b-sol"><p>Der Ablehnungsbereich liegt links: größtes $k$ mit $P(X \le k) \le 0{,}05$ ist 84.</p>
+                <p><span class="b-res">$K = \{0;\ \ldots;\ 84\}$</span>: Keimen höchstens 84 Samen, widerspricht der Gärtner dem Händler.</p></div>
+        </div>
+    </div>
+
+    <h3>AUFGABEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Gib $H_0$, $H_1$ und die Art des Tests an. a) Ein neues Medikament soll besser wirken als das alte mit $70\,\%$ Heilungsquote. b) Ein Lieferant garantiert höchstens $3\,\%$ defekte Teile, die Käuferin zweifelt. c) Eine Partei behauptet, mindestens $30\,\%$ Zustimmung zu haben.</p></div>
+            <div class="b-sol"><p>a) $H_0\colon p = 0{,}7$, $H_1\colon p > 0{,}7$, rechtsseitig &nbsp; b) $H_0\colon p = 0{,}03$, $H_1\colon p > 0{,}03$, rechtsseitig &nbsp; c) $H_0\colon p = 0{,}3$, $H_1\colon p < 0{,}3$, linksseitig</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Eine Münze wird 30-mal geworfen. Getestet wird rechtsseitig, ob sie zu oft Zahl zeigt: $H_0\colon p = 0{,}5$, $\alpha = 5\,\%$. Es gilt $P(X \ge 19) \approx 0{,}100$ und $P(X \ge 20) \approx 0{,}049$. Bestimme $K$.</p></div>
+            <div class="b-sol"><p>$K = \{20;\ \ldots;\ 30\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Beim Bäckertest ($K = \{10;\ \ldots;\ 50\}$) sind in Wahrheit $20\,\%$ der Brötchen zu klein. Mit welcher Wahrscheinlichkeit merkt die Kundin das nicht? Es gilt $P(X \le 9) \approx 0{,}444$ für $n = 50$, $p = 0{,}2$.</p></div>
+            <div class="b-sol"><p>Fehler 2. Art: Das Ergebnis liegt nicht in $K$, also $P(X \le 9) \approx 44\,\%$. Fast jede zweite Prüfung übersieht den schlechten Bäcker.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Beim Saatguttest keimen a) 86 Samen, b) 83 Samen. Formuliere jeweils die Entscheidung in Worten.</p></div>
+            <div class="b-sol"><p>a) $86 \notin K$: Die Angabe des Händlers wird nicht abgelehnt. b) $83 \in K$: Auf dem Niveau $5\,\%$ spricht das Ergebnis signifikant gegen eine Keimquote von $90\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Die Kundin wiegt jetzt 100 Brötchen. Für $n = 100$, $p = 0{,}1$ gilt $P(X \ge 15) \approx 0{,}073$ und $P(X \ge 16) \approx 0{,}040$; für $p = 0{,}2$ ist $P(X \le 15) \approx 0{,}129$. Bestimme $K$ und den Fehler 2. Art bei $p = 0{,}2$. Was bringt der größere Stichprobenumfang?</p></div>
+            <div class="b-sol"><p>$K = \{16;\ \ldots;\ 100\}$, Fehler 2. Art $\approx 13\,\%$ statt $44\,\%$. <span class="b-res">Mehr Daten machen den Test schärfer</span>, bei gleichem $\alpha$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE DICH!</div>
+        <div class="b-q" data-ans="10" data-ph="k ="><p class="b-q-text">Kritischer Wert beim Bäckertest ($n = 50$, $\alpha = 5\,\%$)?</p><div class="b-sol"><p>$P(X \ge 10) \approx 0{,}025$</p></div></div>
+        <div class="b-q" data-ans="84" data-ph="k ="><p class="b-q-text">Größte Zahl im Ablehnungsbereich des Saatguttests?</p><div class="b-sol"><p>$P(X \le 84) \approx 0{,}040$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Ein Fehler 1. Art bedeutet …</p><div class="b-mc"><button>$H_0$ wird beibehalten, obwohl sie falsch ist.</button><button>$H_0$ wird abgelehnt, obwohl sie stimmt.</button><button>Man hat falsch gerechnet.</button></div><div class="b-sol"><p>Seine Wahrscheinlichkeit ist höchstens $\alpha$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Zweiseitige Tests" data-toc-k="2" data-toc-short="2 Zweiseitig">
+    <div class="b-band"><span class="b-band-tag">LERNEINHEIT 2</span><span class="b-band-sub">5 USTD.</span></div>
+    <h2><span class="b-no">2</span>Zweiseitige Tests und statistische Sicherheit</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Ist eine Münze fair? Verdächtig sind <b>zu viele</b> Zahlen, aber genauso <b>zu wenige</b>. Der Ablehnungsbereich besteht deshalb aus zwei Teilen,
+                einem links und einem rechts. Damit der Test insgesamt höchstens mit $\alpha$ irrt, bekommt jede Seite höchstens $\tfrac{\alpha}{2}$.</p></div></div>
+            <div class="b-text"><p>Wird $H_0$ abgelehnt, sagt man: Das Ergebnis ist <b>signifikant</b> auf dem Niveau $\alpha$. Das heißt nur: Wäre $H_0$ wahr, käme ein so extremes Ergebnis selten vor.
+                Es heißt <b>nicht</b>, dass $H_0$ mit der Wahrscheinlichkeit $1 - \alpha$ falsch ist, und auch nicht, dass der Unterschied groß oder wichtig ist.
+                Wie gut ein Test eine falsche Hypothese erkennt, hängt vom wahren $p$ und vom Stichprobenumfang ab.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">MERKE · ZWEISEITIGER TEST</div>
+                <div class="b-text">
+                    <p>$H_0\colon p = p_0$, $H_1\colon p \neq p_0$. Ablehnungsbereich $K = \{0;\ \ldots;\ k_l\} \cup \{k_r;\ \ldots;\ n\}$ mit</p>
+                    <p>dem größten $k_l$, für das $P(X \le k_l) \le \tfrac{\alpha}{2}$ ist, und dem kleinsten $k_r$, für das $P(X \ge k_r) \le \tfrac{\alpha}{2}$ ist.</p>
+                    <p><b>Signifikant</b> heißt: Bei wahrem $H_0$ wäre das Ergebnis höchstens mit der Wahrscheinlichkeit $\alpha$ in $K$ gelandet.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Die Richtung zählt:</b> Wer vorher weiß, in welche Richtung er sucht, testet einseitig und erkennt Abweichungen in dieser Richtung leichter.</p>
+            <p class="b-note"><b>Mit dem CAS:</b> Tabelle der kumulierten Binomialverteilung aufrufen und die Grenzen $k_l$ und $k_r$ ablesen; das Widget unten rechnet dasselbe.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERAKTIV · KUMULIERTE BINOMIALVERTEILUNG</div>
+        <p class="b-help" style="margin:0 0 12px">Stelle $n = 100$ und $p = 0{,}5$ ein und wähle $P(X \le k)$. Suche das größte $k$, für das die Wahrscheinlichkeit höchstens 0,025 ist.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 3 · IST DIE MÜNZE FAIR?</div>
+            <div class="b-text"><p>$n = 100$, $H_0\colon p = 0{,}5$, $H_1\colon p \neq 0{,}5$, $\alpha = 5\,\%$. Es gilt $P(X \le 39) \approx 0{,}018$ und $P(X \le 40) \approx 0{,}028$.</p></div>
+            <div class="b-sol"><p>Links: $k_l = 39$. Wegen der Symmetrie ist rechts $k_r = 61$.</p>
+                <p><span class="b-res">$K = \{0;\ \ldots;\ 39\} \cup \{61;\ \ldots;\ 100\}$</span>. Der Fehler 1. Art ist sogar nur $2 \cdot 0{,}0176 \approx 3{,}5\,\%$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 4 · WENN DIE MÜNZE GEZINKT IST</div>
+            <div class="b-text"><p>In Wahrheit zeigt die Münze mit $p = 0{,}6$ Zahl. Wie wahrscheinlich erkennt der Test das nicht?</p></div>
+            <div class="b-sol"><p>Fehler 2. Art: $P(40 \le X \le 60)$ bei $p = 0{,}6$ $\approx 0{,}54$.</p>
+                <p><span class="b-res">In mehr als der Hälfte der Fälle bleibt die Münze unentdeckt.</span> Bei $p = 0{,}7$ sind es nur noch etwa $2\,\%$.</p></div>
+        </div>
+    </div>
+
+    <h3>AUFGABEN</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Begründe, warum man die Fairness einer Münze zweiseitig testet, die Wirksamkeit eines neuen Medikaments aber einseitig.</p></div>
+            <div class="b-sol"><p>Bei der Münze sind Abweichungen in beide Richtungen verdächtig. Beim Medikament interessiert nur, ob es besser ist.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$n = 50$, $H_0\colon p = 0{,}5$, zweiseitig, $\alpha = 5\,\%$. Es gilt $P(X \le 17) \approx 0{,}016$ und $P(X \le 18) \approx 0{,}033$. Bestimme $K$.</p></div>
+            <div class="b-sol"><p>$k_l = 17$, symmetrisch $k_r = 33$: $K = \{0;\ \ldots;\ 17\} \cup \{33;\ \ldots;\ 50\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Ein Würfel wird 120-mal geworfen und zweiseitig auf die Wahrscheinlichkeit einer Sechs getestet, $\alpha = 5\,\%$. Es gilt $P(X \le 11) \approx 0{,}014$, $P(X \le 12) \approx 0{,}028$, $P(X \ge 28) \approx 0{,}037$, $P(X \ge 29) \approx 0{,}022$. Bestimme $K$. Wie entscheidet man bei 27 Sechsen?</p></div>
+            <div class="b-sol"><p>$K = \{0;\ \ldots;\ 11\} \cup \{29;\ \ldots;\ 120\}$. $27 \notin K$: $H_0$ wird nicht abgelehnt.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Richtig oder falsch? a) Das Ergebnis ist signifikant, also ist $H_0$ mit $95\,\%$ Wahrscheinlichkeit falsch. b) Wird $H_0$ nicht abgelehnt, ist sie bewiesen. c) Ein kleineres $\alpha$ macht den Fehler 2. Art größer.</p></div>
+            <div class="b-sol"><p>a) falsch: $\alpha$ beschreibt das Verhalten des Tests bei wahrem $H_0$, keine Wahrscheinlichkeit für $H_0$. b) falsch. c) richtig, der Ablehnungsbereich wird kleiner.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Eine Münze hat in Wahrheit $p = 0{,}55$. Beim zweiseitigen Test mit $\alpha = 5\,\%$ ist der Fehler 2. Art für $n = 100$ etwa 0,86 und für $n = 400$ etwa 0,52. Deute die Zahlen. Was folgt für die Planung eines Tests?</p></div>
+            <div class="b-sol"><p>Kleine Abweichungen bleiben bei 100 Würfen fast immer unentdeckt, selbst bei 400 in jedem zweiten Fall. <span class="b-res">Wer kleine Unterschiede finden will, braucht sehr große Stichproben</span>; das muss man vor dem Test planen.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE DICH!</div>
+        <div class="b-q" data-ans="61" data-ph="k_r ="><p class="b-q-text">Münze, $n = 100$, zweiseitig, $\alpha = 5\,\%$: Ab welcher Zahl wird rechts abgelehnt?</p><div class="b-sol"><p>Symmetrisch zu 39</p></div></div>
+        <div class="b-q" data-ans="0,025" data-ph="je Seite"><p class="b-q-text">Welche Wahrscheinlichkeit darf bei $\alpha = 5\,\%$ jede Seite eines zweiseitigen Tests höchstens haben?</p><div class="b-sol"><p>$\tfrac{\alpha}{2}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Ein größerer Stichprobenumfang …</p><div class="b-mc"><button>verkleinert bei gleichem $\alpha$ den Fehler 2. Art.</button><button>vergrößert den Fehler 1. Art.</button><button>ändert nichts.</button></div><div class="b-sol"><p>Aufgabe 15</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Wiederholen · Vertiefen · Vernetzen" data-toc-k="W" data-toc-short="Üben">
+    <div class="b-band"><span class="b-band-tag">WIEDERHOLEN · VERTIEFEN · VERNETZEN</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Ein Würfeltest mit 60 Würfen hat $K = \{16;\ \ldots;\ 60\}$. Wie viele Sechsen erwartet man bei einem fairen Würfel? Wie entscheidet man bei 14 und bei 18 Sechsen?</p></div>
+            <div class="b-sol"><p>Erwartet 10. Bei 14 nicht ablehnen, bei 18 ablehnen: Der Würfel zeigt signifikant zu oft eine Sechs.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Vernetzen mit Jahrgangsstufe 12:</b> Berechne mit der Bernoulli-Formel $P(X \ge 9)$ für $n = 10$ und $p = 0{,}5$. Würdest du bei 9 von 10 Treffern eine Münze für gezinkt halten ($\alpha = 5\,\%$, rechtsseitig)?</p></div>
+            <div class="b-sol"><p>$P(X = 9) + P(X = 10) = \tfrac{10 + 1}{1024} \approx 0{,}011 \le 0{,}05$: ja, auf dem Niveau $5\,\%$ signifikant.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Erkläre, warum man den Ablehnungsbereich festlegen muss, <b>bevor</b> man die Stichprobe zieht.</p></div>
+            <div class="b-sol"><p>Wer die Grenze erst nach dem Ergebnis setzt, kann sie so legen, dass das gewünschte Urteil herauskommt. Dann gilt die Aussage über den Fehler 1. Art nicht mehr.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Eine Partei hatte bisher $40\,\%$. Nach einem Skandal werden 200 Personen befragt. Plane einen Test, mit dem die Partei auf $\alpha = 5\,\%$ prüfen kann, ob ihr Anteil gesunken ist. Das CAS liefert für $n = 200$, $p = 0{,}4$: $P(X \le 68) \approx 0{,}048$ und $P(X \le 69) \approx 0{,}064$.</p></div>
+            <div class="b-sol"><p>Linksseitig, $H_0\colon p = 0{,}4$, $H_1\colon p < 0{,}4$, $K = \{0;\ \ldots;\ 68\}$. Wollen höchstens 68 der 200 Befragten die Partei wählen, ist der Rückgang signifikant.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Vernetzen mit Kapitel 4:</b> Eine Münze wird 1000-mal geworfen und zweiseitig auf $\alpha = 5\,\%$ getestet. Bestimme den Bereich, in dem $H_0\colon p = 0{,}5$ beibehalten wird, mit $\mu \pm 1{,}96\sigma$. Prüfe ihn mit den CAS-Werten $P(X \le 468) \approx 0{,}0231$ und $P(X \le 469) \approx 0{,}0268$.</p></div>
+            <div class="b-sol"><p>$\mu = 500$, $\sigma \approx 15{,}81$, $1{,}96\sigma \approx 31$: beibehalten für 469 bis 531. Prüfung: $P(X \le 468) \le 0{,}025$, aber $P(X \le 469) > 0{,}025$, also $K = \{0;\ \ldots;\ 468\} \cup \{532;\ \ldots;\ 1000\}$ ✔ Die Näherung trifft genau.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Eine Bäckerei behauptet, höchstens $10\,\%$ ihrer Brötchen seien zu leicht. Eine Prüferin wiegt 400 Brötchen ($\alpha = 5\,\%$, rechtsseitig). Bestimme die kleinste Zahl $k$ zu leichter Brötchen, ab der sie widerspricht, zuerst mit der Näherung $k \ge \mu + 1{,}645\,\sigma + 0{,}5$, dann mit $P(X \ge 50) \approx 0{,}060$ und $P(X \ge 51) \approx 0{,}044$.</p></div>
+            <div class="b-sol"><p>$\mu = 40$, $\sigma = 6$: $k \ge 40 + 9{,}87 + 0{,}5 = 50{,}37$, also $k = 51$. Exakt: $P(X \ge 51) \le 0{,}05 &lt; P(X \ge 50)$, <span class="b-res">$K = \{51;\ \ldots;\ 400\}$</span>.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Exkursion: Die Dame, die Tee testet" data-toc-k="X" data-toc-short="Tee">
+    <div class="b-band"><span class="b-band-tag">EXKURSION</span><span class="b-band-sub">DER BERÜHMTESTE TEST DER STATISTIK</span></div>
+    <h2>Die Dame, die Tee testet</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Der englische Statistiker Ronald A. Fisher erzählt in seinem Buch über die Planung von Experimenten von einer Dame, die behauptete, am Geschmack zu erkennen,
+                ob zuerst die Milch oder zuerst der Tee in die Tasse gegossen wurde.</p>
+            <p>Fisher plante den Test so: acht Tassen, vier von jeder Sorte, in zufälliger Reihenfolge. Die Dame soll die vier Tassen „Milch zuerst“ herausfinden. Rät sie nur, gibt es
+                $\binom84 = 70$ gleich wahrscheinliche Auswahlen, alle vier richtig also nur mit Wahrscheinlichkeit $\tfrac{1}{70} \approx 1{,}4\,\%$.
+                Gelingt ihr das, verwirft man die Nullhypothese „sie rät nur“. Fisher machte daraus das Grundmuster jedes Signifikanztests.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Quelle:</b> Ronald A. Fisher: The Design of Experiments. Oliver and Boyd, Edinburgh 1935, Kapitel 2.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Rückblick" data-toc-k="R" data-toc-short="Rückblick">
+    <div class="b-band"><span class="b-band-tag">RÜCKBLICK</span><span class="b-band-sub">DAS WICHTIGSTE AUF EINEN BLICK</span></div>
+    <div class="b-rueck"><div><h4>HYPOTHESEN</h4><p>$H_0\colon p = p_0$; $H_1$ gibt die Richtung an.</p></div>
+        <div><p>Bäcker: $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$</p></div></div>
+    <div class="b-rueck"><div><h4>EINSEITIG</h4><p>$K$ rechts oder links mit $P(X \in K) \le \alpha$</p></div>
+        <div><p>$n = 50$: $K = \{10;\ \ldots;\ 50\}$</p></div></div>
+    <div class="b-rueck"><div><h4>ZWEISEITIG</h4><p>auf jeder Seite höchstens $\tfrac{\alpha}{2}$</p></div>
+        <div><p>Münze, $n = 100$: $K = \{0;\ \ldots;\ 39\} \cup \{61;\ \ldots;\ 100\}$</p></div></div>
+    <div class="b-rueck"><div><h4>FEHLER</h4><p>1. Art: $H_0$ zu Unrecht abgelehnt, höchstens $\alpha$; 2. Art: $H_0$ zu Unrecht beibehalten</p></div>
+        <div><p>Münze mit $p = 0{,}6$: Fehler 2. Art $\approx 54\,\%$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">ZWEI RUNDEN · RÜCKMELDUNG SOFORT</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RUNDE 1 · OHNE HILFSMITTEL</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Ein Würfel soll darauf getestet werden, ob die Sechs <b>zu oft</b> fällt. Der Ablehnungsbereich liegt …</p><div class="b-mc"><button>links</button><button>rechts</button><button>auf beiden Seiten</button></div><div class="b-sol"><p>Viele Sechsen sprechen gegen $H_0$: rechtsseitig.</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="k ="><p class="b-q-text">$n = 30$, $H_0\colon p = 0{,}5$, rechtsseitig, $\alpha = 5\,\%$, $P(X \ge 20) \approx 0{,}049$, $P(X \ge 19) \approx 0{,}100$: kritischer Wert?</p><div class="b-sol"><p>Kleinstes $k$ mit $P(X \ge k) \le 0{,}05$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">„$H_0$ wird nicht abgelehnt“ bedeutet …</p><div class="b-mc"><button>$H_0$ ist bewiesen.</button><button>$H_0$ ist falsch.</button><button>Die Daten reichen nicht gegen $H_0$.</button></div><div class="b-sol"><p>Kein Beweis</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RUNDE 2 · MIT HILFSMITTELN</div>
+            <div class="b-q" data-ans="51" data-ph="k ="><p class="b-q-text">Bäckerei: $n = 400$, $H_0\colon p = 0{,}1$, rechtsseitig, $\alpha = 5\,\%$, $P(X \ge 50) \approx 0{,}060$, $P(X \ge 51) \approx 0{,}044$. Kritischer Wert?</p><div class="b-sol"><p>Kleinstes $k$ mit $P(X \ge k) \le 0{,}05$</p></div></div>
+            <div class="b-q" data-ans="0,54" data-tol="0.01" data-ph="β ≈"><p class="b-q-text">Münzentest, $n = 100$, $K = \{0;\ \ldots;\ 39\} \cup \{61;\ \ldots;\ 100\}$: Fehler 2. Art bei $p = 0{,}6$?</p><div class="b-sol"><p>$P(40 \le X \le 60)$</p></div></div>
+            <div class="b-q" data-ans="1/70" data-tol="0.001" data-ph="P ="><p class="b-q-text">Tee-Test: Wahrscheinlichkeit, durch Raten alle acht Tassen richtig einzuordnen?</p><div class="b-sol"><p>$\binom84 = 70$</p></div></div>
+        </div>
+    </div>
+    <h3>MEHR ÜBEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-signifikanztest.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EINSEITIGE TESTS</span><span class="b-lab-what">Hypothesen, Ablehnungsbereich, Fehler</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-zweiseitige-tests.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ZWEISEITIGE TESTS</span><span class="b-lab-what">Statistische Sicherheit</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTONBRETT</span><span class="b-lab-what">Binomialverteilung live</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematik, Berufliches Gymnasium Jahrgangsstufe 13, Leistungskurs · Lernbereich 5 nach dem sächsischen Lehrplan Berufliches Gymnasium Mathematik.</p>
+    <p>Alle Texte, Aufgaben und Abbildungen sind eigene Inhalte.</p>
+</footer>
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+</body>
+</html>
