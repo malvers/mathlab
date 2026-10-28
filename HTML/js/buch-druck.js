@@ -303,6 +303,12 @@
     if (window.Paged && Paged.Handler) Paged.registerHandlers(class KeepWithNext extends Paged.Handler {
         afterPageLayout(pageEl, page, breakToken, chunker) {
             if (!breakToken || !breakToken.node || !page.area) return;
+            // a page that ends at a forced break (the next chapter) keeps its white space - the section simply ends there.
+            // Moving a heading on would end the next page at the same break again: Paged.js 0.4.3 remembers every break
+            // before this hook runs, sees this one twice and stops setting the book ("Layout repeated" - OS 10 ended after
+            // p. 94 at chapter 4.2, 28.10.2026)
+            const stop = breakToken.offset ? null : nodeEl(breakToken.node);
+            if (stop && stop.matches && stop.matches('[data-break-before="page"], [data-break-before="left"], [data-break-before="right"]')) return;
             const nodes = contentNodes(page.area);
             let i = nodes.length - 1, first = null;
             while (i >= 0) {
