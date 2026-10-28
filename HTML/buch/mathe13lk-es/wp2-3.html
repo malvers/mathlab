@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 13 avanzado · Capítulo OP2.3 · Modelos de poblaciones | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Matrices de transición, potencias de matrices, matriz límite y vector fijo, evolución cíclica. Capítulo OP2.3 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 13 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 13 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO OP2.3 · OPTATIVA OBLIGATORIA 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO OP2.3 · OPTATIVA OBLIGATORIA 2 · FEBRERO</p>
+            <h1>Modelos de poblaciones</h1>
+            <p class="b-hero-lead">De los huevos salen larvas, de las larvas, escarabajos, y los escarabajos vuelven a poner huevos. ¿Cuántos escarabajos habrá dentro de tres, de diez, de cien generaciones?
+                Los clientes cambian cada año de compañía eléctrica. ¿Cómo se reparten a largo plazo? Las dos preguntas las responde una <b>matriz de transición</b>:
+                sus <b>potencias</b> muestran el futuro; la <b>matriz límite</b> y el <b>vector fijo</b>, el estado hacia el que tiende todo.</p>
+            <div class="b-chips"><span class="b-chip">8 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">OPTATIVA OBLIGATORIA 2</span></div>
+        </div>
+        <div class="b-hero-art"><svg viewBox="0 0 320 250" role="img" aria-label="Ciclo de vida de un escarabajo: una cuarta parte de los huevos se convierte en larvas, la mitad de las larvas en escarabajos, cada escarabajo pone ocho huevos"><defs><marker id="cy13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" style="fill:#e682be"/></marker></defs><path d="M180.0 87.5 Q228.8 117.0 240.2 170.1" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="236.9" y="116.2" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">0,25</text><path d="M228.0 200.0 Q160.0 222.0 95.0 200.0" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="160.0" y="237.0" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">0,5</text><path d="M78.0 172.5 Q91.2 117.0 138.2 89.9" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="83.1" y="116.2" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">8</text><circle cx="160" cy="60" r="34" style="fill:rgb(245,194,66);fill-opacity:0.18;stroke:rgb(245,194,66);stroke-width:2.4"/><text x="160" y="65" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Huevos</text><circle cx="262" cy="200" r="34" style="fill:#7fd8ee;fill-opacity:0.18;stroke:#7fd8ee;stroke-width:2.4"/><text x="262" y="205" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Larvas</text><circle cx="58" cy="200" r="34" style="fill:#b8a4f2;fill-opacity:0.18;stroke:#b8a4f2;stroke-width:2.4"/><text x="58" y="205" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Adultos</text></svg></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>describir transiciones entre estados con un <b>grafo de transición</b> y una <b>matriz de transición</b></li>
+                <li>calcular evoluciones con <b>potencias de matrices</b>, hacia delante y hacia atrás</li>
+                <li>reconocer y justificar el comportamiento <b>cíclico</b>, el crecimiento y la extinción de una población</li>
+                <li>determinar la <b>matriz límite</b> y el <b>vector fijo</b> e interpretarlos como distribución a largo plazo</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="200" data-ph="Elemento"><p class="b-q-text">$\begin{pmatrix} 0 & 0 & 8 \\ 0{,}25 & 0 & 0 \\ 0 & 0{,}5 & 0 \end{pmatrix} \cdot \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$: ¿elemento central?</p><div class="b-sol"><p>$0{,}25 \cdot 800$</p></div></div>
+            <div class="b-q" data-ans="0,81" data-tol="0.0001" data-ph="valor"><p class="b-q-text">¿Cuánto vale $0{,}9^2$?</p><div class="b-sol"><p>0,81</p></div></div>
+            <div class="b-q" data-ans="2/3" data-tol="0.005" data-ph="v₁ ="><p class="b-q-text">$v_1 = 2v_2$ y $v_1 + v_2 = 1$. ¿Cuánto vale $v_1$?</p><div class="b-sol"><p>$3v_2 = 1$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">EL CICLO DEL ESCARABAJO</div>
+            <div class="b-text"><p>En la imagen de arriba: una cuarta parte de los huevos se convierte en larvas, la mitad de las larvas en escarabajos, y cada escarabajo pone 8 huevos y muere. Al principio hay 800 huevos, 200 larvas y 50 escarabajos.</p>
+                <ul><li>Calculad los números de los tres pasos de tiempo siguientes. ¿Qué observáis?</li><li>¿Qué cambia si cada escarabajo pone 10 huevos?</li></ul></div>
+            <span class="b-pair">→ Lecciones 1 y 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">¿QUIÉN SE CAMBIA ADÓNDE?</div>
+            <div class="b-text"><p>De los clientes de la compañía municipal, cada año se quedan el 90 % y el 10 % se pasa a la competencia. De los clientes de esta, cada año vuelve el 20 %.</p>
+                <ul><li>Hoy la compañía municipal tiene 600 clientes, y la competencia, 400. ¿Cómo estará la situación dentro de uno y de dos años?</li><li>¿Existe una distribución que ya no cambie?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Matrices de transición y potencias" data-toc-k="1" data-toc-short="1 Transiciones">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Matrices de transición y potencias</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Tras un paso de tiempo hay $8 \cdot 50 = 400$ huevos, $0{,}25 \cdot 800 = 200$ larvas y $0{,}5 \cdot 200 = 100$ escarabajos. Cada número nuevo es una suma de proporciones de los antiguos:
+                exactamente una fila de una matriz por el vector columna de los números antiguos.</p></div></div>
+            <div class="b-text"><p>El estado en el instante $n$ es un vector $\vec{x}_n$. La <b>matriz de transición</b> $U$ contiene en la columna $j$ lo que sale de <b>un</b> ejemplar del estado $j$ en el paso siguiente:
+                columna significa «desde», fila significa «hacia». El <b>grafo de transición</b> muestra lo mismo con flechas. Como cada paso es de nuevo la misma multiplicación, todo el futuro está en las potencias de $U$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MATRIZ DE TRANSICIÓN</div>
+                <div class="b-text">
+                    <p>$\vec{x}_{n+1} = U \cdot \vec{x}_n$ &nbsp; y, por tanto, &nbsp; $\vec{x}_n = U^n \cdot \vec{x}_0$. El elemento $u_{ij}$ es la proporción (o el número) con que el estado $j$ contribuye al estado $i$.</p>
+                    <p><b>Hacia atrás:</b> si $U$ es invertible, entonces $\vec{x}_{n-1} = U^{-1} \cdot \vec{x}_n$.</p>
+                    <p><b>Modelo del escarabajo:</b> $U = \begin{pmatrix} 0 & 0 & f \\ a & 0 & 0 \\ 0 & b & 0 \end{pmatrix}$ con las proporciones de supervivencia $a$ (huevo → larva), $b$ (larva → escarabajo) y el número $f$ de huevos por escarabajo.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Matriz de Leslie:</b> el ecólogo británico Patrick Leslie estudió en 1945 matrices de población de este tipo. Fuente: P. H. Leslie, On the use of matrices in certain population mathematics, Biometrika 33 (1945).</p>
+            <p class="b-note"><b>En el CAS</b>, $U^{10}$ se calcula directamente como potencia, sin multiplicar diez veces.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ESCARABAJOS Y CLIENTES</div>
+        <p class="b-help" style="margin:0 0 12px">Avanza paso a paso y observa las tres curvas. Cambia el número $f$ de huevos por escarabajo: ¿con qué $f$ se repite todo, cuándo crece la población y cuándo se extingue? La migración de clientes llega en la lección 3.</p>
+        <div data-widget="uebergang" data-mode="kaefer"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · TRES PASOS</div>
+            <div class="b-text"><p>Calcula $\vec{x}_1$, $\vec{x}_2$, $\vec{x}_3$ para $U = \begin{pmatrix} 0 & 0 & 8 \\ 0{,}25 & 0 & 0 \\ 0 & 0{,}5 & 0 \end{pmatrix}$ y $\vec{x}_0 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\vec{x}_1 = \begin{pmatrix} 400 \\ 200 \\ 100 \end{pmatrix}$, $\vec{x}_2 = \begin{pmatrix} 800 \\ 100 \\ 100 \end{pmatrix}$, $\vec{x}_3 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$.</p>
+                <p><span class="b-res">Tras tres pasos todo está como al principio.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · POTENCIAS</div>
+            <div class="b-text"><p>Calcula $U^2$ y $U^3$. Explica con ello el ejemplo 1.</p></div>
+            <div class="b-sol"><p>$U^2 = \begin{pmatrix} 0 & 4 & 0 \\ 0 & 0 & 2 \\ 0{,}125 & 0 & 0 \end{pmatrix}$, $U^3 = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} = I$.</p>
+                <p>$\vec{x}_3 = U^3 \cdot \vec{x}_0 = I \cdot \vec{x}_0 = \vec{x}_0$. <span class="b-res">Para cualquier vector inicial, la evolución se repite con período 3.</span></p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dibuja el grafo de transición de $U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$ e interpreta los tres números.</p></div>
+            <div class="b-sol"><p>Huevo → larva 0,5 (sobrevive la mitad de los huevos), larva → escarabajo 0,4 (el 40 % de las larvas se convierte en escarabajos), escarabajo → huevo 6 (cada escarabajo pone 6 huevos).</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula para esta matriz $\vec{x}_1$ y $\vec{x}_2$ con $\vec{x}_0 = \begin{pmatrix} 600 \\ 100 \\ 50 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\vec{x}_1 = \begin{pmatrix} 300 \\ 300 \\ 40 \end{pmatrix}$, $\vec{x}_2 = \begin{pmatrix} 240 \\ 150 \\ 120 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En el modelo del escarabajo con $f = 8$ (ejemplo 1) se cuentan hoy 400 huevos, 200 larvas y 100 escarabajos. ¿Cómo era la población un paso antes? Justifica por qué aquí se cumple $U^{-1} = U^2$.</p></div>
+            <div class="b-sol"><p>De $U^3 = I$ se deduce $U \cdot U^2 = I$, es decir, $U^{-1} = U^2$. $\vec{x}_{-1} = U^2 \cdot \begin{pmatrix} 400 \\ 200 \\ 100 \end{pmatrix} = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$, exactamente $\vec{x}_0$ del ejemplo 1.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una especie animal tiene tres clases de edad: crías, jóvenes de un año y adultos. El 50 % de las crías llega a joven de un año, el 70 % de los jóvenes llega a adulto, y de los adultos sobrevive cada año el 80 % y sigue siendo adulto. Los jóvenes tienen de media 1 cría; los adultos, 2. Plantea $U$.</p></div>
+            <div class="b-sol"><p>Columnas «desde» cría, joven, adulto; filas «hacia»: $U = \begin{pmatrix} 0 & 1 & 2 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}7 & 0{,}8 \end{pmatrix}$. El 0,8 de la diagonal: los adultos siguen siendo adultos.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Calcula con el CAS, para el modelo del último ejercicio y $\vec{x}_0 = \begin{pmatrix} 100 \\ 50 \\ 50 \end{pmatrix}$, los valores $\vec{x}_{10}$ y $\vec{x}_{11}$. ¿En qué factor crece al final la población cada año? Compara las proporciones de las clases de edad.</p></div>
+            <div class="b-sol"><p>$\vec{x}_{10} \approx \begin{pmatrix} 2066 \\ 771 \\ 999 \end{pmatrix}$, $\vec{x}_{11} \approx \begin{pmatrix} 2769 \\ 1033 \\ 1339 \end{pmatrix}$ (redondeados). Cada clase y el total crecen de un año a otro en el mismo factor,
+                <span class="b-res">aproximadamente 1,34</span>. Las proporciones se mantienen casi iguales: alrededor del 54 % crías, 20 % jóvenes y 26 % adultos. A diferencia del escarabajo, no hay ciclo, porque los adultos viven varios años.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="100" data-ph="Escarabajos"><p class="b-q-text">Modelo del escarabajo del ejemplo 1: ¿cuántos escarabajos hay tras un paso?</p><div class="b-sol"><p>$0{,}5 \cdot 200$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="Elemento"><p class="b-q-text">¿Qué elemento está en $U^2$ en la fila 1, columna 2?</p><div class="b-sol"><p>$8 \cdot 0{,}5$: de una larva salen, tras dos pasos, 4 huevos.</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">El elemento $u_{21}$ de una matriz de transición describe la transición …</p><div class="b-mc"><button>del estado 2 al estado 1</button><button>del estado 1 al estado 2</button><button>del estado 2 a sí mismo</button></div><div class="b-sol"><p>Columna = desde, fila = hacia</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Ciclos, crecimiento, extinción" data-toc-k="2" data-toc-short="2 Ciclos">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Ciclos, crecimiento y extinción</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En el modelo del escarabajo, un huevo vuelve a convertirse tras tres pasos en $a \cdot b \cdot f$ huevos: primero larva con proporción $a$, después escarabajo con proporción $b$ y después $f$ huevos. Con $a = 0{,}25$, $b = 0{,}5$, $f = 8$ eso es exactamente 1.</p></div></div>
+            <div class="b-text"><p>Lo mismo vale para cada clase. Por eso $U^3 = a\,b\,f \cdot I$: tras tres pasos, cada clase queda multiplicada por el factor $q = a\,b\,f$. Si la población sobrevive lo decide solo este factor.
+                Entre los múltiplos de 3 los números oscilan, porque las clases van tocando una tras otra.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · COMPORTAMIENTO A LARGO PLAZO EN EL MODELO DEL ESCARABAJO</div>
+                <div class="b-text">
+                    <p>$U^3 = q \cdot I$ con $q = a \cdot b \cdot f$, por tanto $\vec{x}_{3k} = q^k \cdot \vec{x}_0$.</p>
+                    <p>$q = 1$: <b>cíclica</b> con período 3 · $q &gt; 1$: <b>crecimiento</b> · $q &lt; 1$: <b>extinción</b> a largo plazo.</p>
+                    <p>En general, el comportamiento a largo plazo se lee en las potencias $U^n$, para $n$ grande con el CAS.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Mantenerla estable:</b> si se quiere mantener constante una población con $q &gt; 1$, hay que retirar en cada ciclo una proporción fija, por ejemplo con el control de plagas.</p>
+        </aside>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · DIEZ HUEVOS POR ESCARABAJO</div>
+            <div class="b-text"><p>¿Cómo evoluciona la población del ejemplo 1 si cada escarabajo pone 10 huevos?</p></div>
+            <div class="b-sol"><p>$q = 0{,}25 \cdot 0{,}5 \cdot 10 = 1{,}25$, por tanto $U^3 = 1{,}25 \cdot I$ y $\vec{x}_3 = 1{,}25 \cdot \vec{x}_0 = \begin{pmatrix} 1000 \\ 250 \\ 62{,}5 \end{pmatrix}$.</p>
+                <p><span class="b-res">Cada tres pasos, cada clase crece un 25 %.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · ¿CUÁNTOS HUEVOS TIENEN QUE SER?</div>
+            <div class="b-text"><p>Por un pesticida, ya solo sobrevive el 20 % de las larvas. ¿Cuántos huevos tiene que poner un escarabajo para que la población no se extinga?</p></div>
+            <div class="b-sol"><p>$q = 0{,}25 \cdot 0{,}2 \cdot f \ge 1 \iff f \ge 20$. <span class="b-res">Al menos 20 huevos por escarabajo.</span></p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Decide para $U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$ si la población crece, es cíclica o se extingue.</p></div>
+            <div class="b-sol"><p>$q = 0{,}5 \cdot 0{,}4 \cdot 6 = 1{,}2 &gt; 1$: crecimiento, un 20 % cada tres pasos.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula para $f = 8$ y $\vec{x}_0 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$ el número de escarabajos tras 100 pasos.</p></div>
+            <div class="b-sol"><p>$100 = 3 \cdot 33 + 1$, por tanto $\vec{x}_{100} = U \cdot \vec{x}_0 = \vec{x}_1$: 100 escarabajos.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Para qué $b$ es cíclico el modelo con $a = 0{,}2$ y $f = 25$? Da entonces $U^2$ y $U^{-1}$.</p></div>
+            <div class="b-sol"><p>$0{,}2 \cdot b \cdot 25 = 1 \Rightarrow b = 0{,}2$. $U^2 = \begin{pmatrix} 0 & 5 & 0 \\ 0 & 0 & 5 \\ 0{,}04 & 0 & 0 \end{pmatrix} = U^{-1}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Demuestra</b> $U^3 = a\,b\,f \cdot I$ para $U = \begin{pmatrix} 0 & 0 & f \\ a & 0 & 0 \\ 0 & b & 0 \end{pmatrix}$ calculando primero $U^2$ en general. ¿Qué se deduce para $U^{3k+1}$?</p></div>
+            <div class="b-sol"><p>$U^2 = \begin{pmatrix} 0 & bf & 0 \\ 0 & 0 & af \\ ab & 0 & 0 \end{pmatrix}$, $U^3 = U \cdot U^2 = \begin{pmatrix} abf & 0 & 0 \\ 0 & abf & 0 \\ 0 & 0 & abf \end{pmatrix}$. $\square$ De ahí, $U^{3k+1} = (abf)^k \cdot U$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="1,25" data-tol="0.0001" data-ph="q ="><p class="b-q-text">$a = 0{,}25$, $b = 0{,}5$, $f = 10$: ¿cuánto vale $q$?</p><div class="b-sol"><p>$0{,}25 \cdot 0{,}5 \cdot 10$</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="f ="><p class="b-q-text">$a = 0{,}25$, $b = 0{,}2$: ¿número mínimo de huevos por escarabajo para que la población no se extinga?</p><div class="b-sol"><p>$0{,}05 f \ge 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Matriz límite y vector fijo" data-toc-k="3" data-toc-short="3 Vector fijo">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Matriz límite y vector fijo</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Compañía municipal $M$ y competencia $C$: $P = \begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$, inicio $\begin{pmatrix} 600 \\ 400 \end{pmatrix}$.
+                Tras un año, $\begin{pmatrix} 620 \\ 380 \end{pmatrix}$; tras dos, $\begin{pmatrix} 634 \\ 366 \end{pmatrix}$. La compañía municipal gana clientes, pero cada vez más despacio. ¿Adónde lleva esto?</p></div></div>
+            <div class="b-text"><p>En las migraciones nadie se pierde y nadie se añade: cada columna de $P$ suma 1. Estas matrices se llaman <b>estocásticas</b>. Sus potencias $P^n$ se acercan a menudo a una
+                <b>matriz límite</b> $G$ cuyas columnas son todas iguales. Ese vector columna es el <b>vector fijo</b> $\vec{v}$: una distribución que ya no cambia al aplicar $P$.
+                Se encuentra sin potencias mediante el sistema de ecuaciones $P \cdot \vec{v} = \vec{v}$ con la condición adicional de que las proporciones sumen 1.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MATRIZ LÍMITE Y VECTOR FIJO</div>
+                <div class="b-text">
+                    <p><b>Vector fijo:</b> $P \cdot \vec{v} = \vec{v} \iff (P - I) \cdot \vec{v} = \vec{0}$, y además $v_1 + v_2 + \ldots = 1$ para una distribución en proporciones.</p>
+                    <p><b>Matriz límite:</b> $G = \lim\limits_{n \to \infty} P^n$; todas sus columnas son $\vec{v}$. Entonces, para cualquier inicio $\vec{x}_0$: $\vec{x}_n \to G \cdot \vec{x}_0 = (\text{total}) \cdot \vec{v}$.</p>
+                    <p>Así que, a largo plazo, la distribución no depende del inicio; solo se conserva el total.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>No siempre:</b> en el modelo cíclico del escarabajo no hay matriz límite; las potencias saltan siempre entre $U$, $U^2$ e $I$.</p>
+            <p class="b-note"><b>En el CAS:</b> calcular $P^{50}$ y redondear a tres cifras. Las columnas son entonces prácticamente el vector fijo.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · TRES PROVEEDORES</div>
+        <p class="b-help" style="margin:0 0 12px">Migración de clientes entre tres compañías eléctricas: avanza 10 pasos o más. Observa cómo las columnas de $P^n$ se igualan y cómo las curvas se estabilizan en el vector fijo.</p>
+        <div data-widget="uebergang" data-mode="kunden"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · EL VECTOR FIJO</div>
+            <div class="b-text"><p>Determina el vector fijo y la matriz límite de $P = \begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$(P - I) \cdot \vec{v} = \vec{0}$: $-0{,}1 v_1 + 0{,}2 v_2 = 0$, es decir, $v_1 = 2 v_2$. Con $v_1 + v_2 = 1$: $v_2 = \tfrac13$, $v_1 = \tfrac23$.</p>
+                <p><span class="b-res">$\vec{v} = \begin{pmatrix} \tfrac23 \\ \tfrac13 \end{pmatrix}$, $G = \begin{pmatrix} \tfrac23 & \tfrac23 \\ \tfrac13 & \tfrac13 \end{pmatrix}$</span>. A largo plazo: $G \cdot \begin{pmatrix} 600 \\ 400 \end{pmatrix} \approx \begin{pmatrix} 667 \\ 333 \end{pmatrix}$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · POTENCIAS EN EL CAS</div>
+            <div class="b-text"><p>Calcula $P^5$ y $P^{20}$ y compáralas con $G$.</p></div>
+            <div class="b-sol"><p>$P^5 \approx \begin{pmatrix} 0{,}723 & 0{,}555 \\ 0{,}277 & 0{,}445 \end{pmatrix}$, $P^{20} \approx \begin{pmatrix} 0{,}667 & 0{,}666 \\ 0{,}333 & 0{,}334 \end{pmatrix}$.</p>
+                <p>Tras 20 años, las columnas son prácticamente iguales: <span class="b-res">$P^{20} \approx G$</span>.</p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Comprueba si $P = \begin{pmatrix} 0{,}8 & 0{,}1 & 0{,}2 \\ 0{,}1 & 0{,}7 & 0{,}2 \\ 0{,}1 & 0{,}2 & 0{,}6 \end{pmatrix}$ es estocástica e interpreta la columna del proveedor C.</p></div>
+            <div class="b-sol"><p>Sumas por columnas: $0{,}8 + 0{,}1 + 0{,}1 = 1$, $0{,}1 + 0{,}7 + 0{,}2 = 1$, $0{,}2 + 0{,}2 + 0{,}6 = 1$ ✓ De los clientes de C, cada año se pasa el 20 % a A, el 20 % a B, y el 60 % se queda.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina el vector fijo de esta matriz sin CAS y compáralo con el elemento interactivo.</p></div>
+            <div class="b-hint"><p>Bastan dos filas de $(P - I)\,\vec{v} = \vec{0}$ y la condición de la suma; la tercera fila se deduce de las otras.</p></div>
+            <div class="b-sol"><p>$-0{,}2 v_1 + 0{,}1 v_2 + 0{,}2 v_3 = 0$, $0{,}1 v_1 - 0{,}3 v_2 + 0{,}2 v_3 = 0$, $v_1 + v_2 + v_3 = 1$. Solución: <span class="b-res">$\vec{v} = \begin{pmatrix} \tfrac{8}{19} \\ \tfrac{6}{19} \\ \tfrac{5}{19} \end{pmatrix} \approx \begin{pmatrix} 0{,}421 \\ 0{,}316 \\ 0{,}263 \end{pmatrix}$</span>.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Con 10 000 clientes: ¿cuántos tiene el proveedor A a largo plazo? ¿Importa que al principio todos estuvieran en C?</p></div>
+            <div class="b-sol"><p>$10\,000 \cdot \tfrac{8}{19} \approx 4211$. No: la matriz límite tiene todas las columnas iguales, así que cualquier inicio con 10 000 clientes lleva a la misma distribución.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Demuestra:</b> si $P$ es estocástica (todas las sumas por columnas valen 1), entonces $P \cdot \vec{x}$ tiene la misma suma de componentes que $\vec{x}$. ¿Por qué tiene sentido para las migraciones de clientes, pero no para el modelo del escarabajo?</p></div>
+            <div class="b-sol"><p>$\sum_i (P\vec{x})_i = \sum_i \sum_j p_{ij} x_j = \sum_j x_j \sum_i p_{ij} = \sum_j x_j \cdot 1$. $\square$</p>
+                <p>Los clientes solo cambian de compañía, no desaparecen. Los escarabajos mueren y ponen huevos: las sumas por columnas de la matriz del escarabajo son $a$, $b$ y $f$, no 1, y el total cambia.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="634" data-ph="Clientes"><p class="b-q-text">Compañía municipal: inicio 600 y 400. ¿Cuántos clientes tiene la compañía municipal tras dos años?</p><div class="b-sol"><p>$0{,}9 \cdot 620 + 0{,}2 \cdot 380$</p></div></div>
+        <div class="b-q" data-ans="1/3" data-tol="0.005" data-ph="v₂ ="><p class="b-q-text">¿Segunda componente del vector fijo de $\begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$?</p><div class="b-sol"><p>$v_1 = 2v_2$, $v_1 + v_2 = 1$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Las columnas de la matriz límite son …</p><div class="b-mc"><button>las columnas de $P$.</button><button>vectores unitarios.</button><button>todas iguales al vector fijo.</button></div><div class="b-sol"><p>Cualquier inicio lleva a la misma distribución.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un coche de alquiler se devuelve en Dresde o en Leipzig. De los coches alquilados en Dresde, el 70 % vuelve a Dresde; de los alquilados en Leipzig, el 60 % vuelve a Leipzig. Plantea $P$ y determina la distribución de los coches a largo plazo.</p></div>
+            <div class="b-sol"><p>$P = \begin{pmatrix} 0{,}7 & 0{,}4 \\ 0{,}3 & 0{,}6 \end{pmatrix}$. $-0{,}3 v_1 + 0{,}4 v_2 = 0$, $v_1 + v_2 = 1$: $\vec{v} = \begin{pmatrix} \tfrac47 \\ \tfrac37 \end{pmatrix}$, es decir, algo más del 57 % en Dresde.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo OP2.1:</b> ¿por qué la ecuación $(P - I)\,\vec{v} = \vec{0}$ tiene siempre infinitas soluciones con una matriz estocástica, de modo que hace falta la condición de la suma?</p></div>
+            <div class="b-sol"><p>Las sumas por columnas de $P - I$ valen todas $1 - 1 = 0$: la suma de todas las filas es la fila nula, y una fila depende de las demás. $P - I$ no es invertible, y con $\vec{v}$ también cualquier múltiplo $r\vec{v}$ es solución.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con 12.º curso:</b> un juego de azar tiene dos estados, «en juego» y «eliminado». En juego se sigue cada ronda con probabilidad 0,8; quien está eliminado sigue eliminado. Plantea $P$. ¿Con qué probabilidad se sigue en juego tras 5 rondas? ¿Cuál es la matriz límite?</p></div>
+            <div class="b-sol"><p>$P = \begin{pmatrix} 0{,}8 & 0 \\ 0{,}2 & 1 \end{pmatrix}$. Tras 5 rondas: $0{,}8^5 \approx 0{,}328$. $P^n \to G = \begin{pmatrix} 0 & 0 \\ 1 & 1 \end{pmatrix}$: a largo plazo todos quedan eliminados; «eliminado» es un estado absorbente.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Ejercicio abierto:</b> inventa una matriz de transición $2 \times 2$ cuyas potencias <b>no</b> tengan matriz límite. ¿Qué pasa entonces con una distribución?</p></div>
+            <div class="b-sol"><p>Por ejemplo, $P = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$: todos cambian cada año. $P^2 = I$; las potencias saltan entre $P$ e $I$. Una distribución $\begin{pmatrix} 600 \\ 400 \end{pmatrix}$ salta eternamente entre $\begin{pmatrix} 400 \\ 600 \end{pmatrix}$ y ella misma. Solo $\begin{pmatrix} 500 \\ 500 \end{pmatrix}$ se queda fija, así que el vector fijo $\begin{pmatrix} 0{,}5 \\ 0{,}5 \end{pmatrix}$ existe de todos modos.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Márkov y Eugenio Oneguin" data-toc-k="X" data-toc-short="Márkov">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">CADENAS DE LETRAS</span></div>
+    <h2>Andréi Márkov cuenta vocales</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>El matemático ruso Andréi Andréyevich Márkov estudió en 1913 las primeras 20 000 letras de la novela en verso de Alexander Pushkin «Eugenio Oneguin». Contó con qué frecuencia a una vocal le sigue otra vocal
+                y con qué frecuencia una consonante. De ahí obtuvo una matriz de transición $2 \times 2$ con la que la sucesión de letras se describía sorprendentemente bien.</p>
+            <p>Estos modelos, en los que el estado siguiente solo depende del actual, se llaman hoy <b>cadenas de Márkov</b>. Con ellas trabajan las predicciones meteorológicas, el reconocimiento de voz,
+                la clasificación de los buscadores y la ecología cuando, como en este capítulo, proyecta poblaciones hacia el futuro.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> A. A. Márkov: «Ejemplo de un estudio estadístico sobre el texto de “Eugenio Oneguin” acerca de la conexión de las pruebas en cadena». Boletín de la Academia Imperial de Ciencias, San Petersburgo, 1913 · MacTutor: «Andrei Andreyevich Markov».</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>MATRIZ DE TRANSICIÓN</h4><p>Columna = desde, fila = hacia; $\vec{x}_{n+1} = U\,\vec{x}_n$, $\vec{x}_n = U^n\,\vec{x}_0$</p></div>
+        <div><p>Escarabajo: 800, 200, 50 → 400, 200, 100</p></div></div>
+    <div class="b-rueck"><div><h4>CICLO</h4><p>Modelo del escarabajo: $U^3 = abf \cdot I$; decide $q = abf$</p></div>
+        <div><p>$q = 1$: período 3 · $q = 1{,}25$: crecimiento</p></div></div>
+    <div class="b-rueck"><div><h4>MATRIZ ESTOCÁSTICA</h4><p>Sumas por columnas 1; el total se conserva</p></div>
+        <div><p>Migración de clientes</p></div></div>
+    <div class="b-rueck"><div><h4>VECTOR FIJO, MATRIZ LÍMITE</h4><p>$(P - I)\,\vec{v} = \vec{0}$, suma 1; $P^n \to G$ con columnas $\vec{v}$</p></div>
+        <div><p>$\begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$: $\vec{v} = \begin{pmatrix} \tfrac23 \\ \tfrac13 \end{pmatrix}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="300" data-ph="Larvas"><p class="b-q-text">$U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$, $\vec{x}_0 = \begin{pmatrix} 600 \\ 100 \\ 50 \end{pmatrix}$: ¿larvas tras un paso?</p><div class="b-sol"><p>$0{,}5 \cdot 600$</p></div></div>
+            <div class="b-q" data-ans="1,2" data-tol="0.0001" data-ph="q ="><p class="b-q-text">¿Factor de crecimiento $q$ de este modelo tras tres pasos?</p><div class="b-sol"><p>$0{,}5 \cdot 0{,}4 \cdot 6$</p></div></div>
+            <div class="b-q" data-ans="4/7" data-tol="0.005" data-ph="v₁ ="><p class="b-q-text">Coches de alquiler: $P = \begin{pmatrix} 0{,}7 & 0{,}4 \\ 0{,}3 & 0{,}6 \end{pmatrix}$. ¿Proporción en Dresde a largo plazo?</p><div class="b-sol"><p>$0{,}3 v_1 = 0{,}4 v_2$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="4211" data-tol="1" data-ph="Clientes"><p class="b-q-text">Tres proveedores, 10 000 clientes: ¿cuántos tiene A a largo plazo (redondeado)?</p><div class="b-sol"><p>$10\,000 \cdot \tfrac{8}{19}$</p></div></div>
+            <div class="b-q" data-ans="0,328" data-tol="0.001" data-ph="P ≈"><p class="b-q-text">Juego de azar: ¿probabilidad de seguir en juego tras 5 rondas?</p><div class="b-sol"><p>$0{,}8^5$</p></div></div>
+            <div class="b-q" data-ans="100" data-ph="Escarabajos"><p class="b-q-text">Modelo del escarabajo con $f = 8$, inicio 800, 200, 50: ¿escarabajos tras 100 pasos?</p><div class="b-sol"><p>$\vec{x}_{100} = \vec{x}_1$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-leontief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRENAMIENTO PARA EL ABITUR · CURSO AVANZADO</span><span class="b-lab-what">Matrices con parámetro</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 13.º curso, curso avanzado · Optativa obligatoria 2 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-bgy13lk.js"></script>
+<script src="../../js/buch-es/bgy13lk.js"></script>
+</body>
+</html>

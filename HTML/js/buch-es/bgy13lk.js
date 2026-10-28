@@ -24,7 +24,7 @@ window.BuchES && BuchES.add('bgy13lk', {
         // uebergang
         'Käferpopulation': 'Población de escarabajos', 'Kundenwanderung': 'Migración de clientes',
         '1 Schritt': '1 paso', '10 Schritte': '10 pasos', 'Zurück auf Start': 'Volver al inicio',
-        'Eier': 'Huevos', 'Larven': 'Larvas', 'Käfer': 'Escarabajos',
+        'Eier': 'Huevos', 'Larven': 'Larvas', 'Käfer': 'Adultos',   // node labels in a circle of 60 px: adult beetles
         'Verlauf der drei Klassen über die Schritte n': 'Evolución de las tres clases a lo largo de los pasos n',
         'Übergangsgraph mit drei Zuständen und den Übergangsanteilen an den Pfeilen':
             'Grafo de transición con tres estados y las proporciones de transición en las flechas',
