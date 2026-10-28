@@ -272,6 +272,148 @@
     cursor: default;
 }
 
+/* "Stimmt was nicht?" at the end of the Bewerten line (vortraege.js meldHtml,
+   Doc 28.10.2026): pupils ask for a change there instead of in Teams. Same
+   button as Coach/Publikum; green once something is reported for the card,
+   Upsilon red for Doc while requests are open. */
+.vt-meld { margin-left: 8px; }
+.vt-meld.sent { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
+.vt-meld.hot,
+.vt-meld.hot:hover,
+.vt-meld-btn.hot,
+.vt-meld-btn.hot:hover {
+    color: #fff;
+    background: var(--ypsilon);
+    border-color: var(--ypsilon);
+}
+.vt-meld.hot:hover,
+.vt-meld-btn.hot:hover { filter: brightness(1.12); }
+
+/* The dialogs sit on the SVP card of svp-gate.css; the page stays visible,
+   dimmed, instead of vanishing behind the gate's solid ground. */
+.svp-gate-overlay.vt-dlg {
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    backdrop-filter: blur(3px);
+    padding: 16px;
+    box-sizing: border-box;
+}
+.vt-dlg-card {
+    width: min(100%, 460px);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    text-align: left;
+    background: var(--card);
+    padding: 26px 28px;
+}
+.vt-dlg-card.vt-panel { width: min(100%, 720px); }
+.vt-dlg-card .svp-gate-title,
+.vt-dlg-card .svp-gate-sub { text-align: center; }
+.vt-dlg-card .svp-gate-err { text-align: center; }
+
+.vt-dlg-lbl {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin: 4px 0 6px;
+}
+.vt-dlg-card input { text-align: left; }
+.vt-dlg-card textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    resize: vertical;
+}
+.vt-dlg-card textarea:focus { outline: 1px solid var(--cyan); }
+
+/* what should happen: one choice, as chips (svp-gate.css makes every card
+   button full width - not these) */
+.vt-meld-arts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.vt-dlg-card .vt-meld-art {
+    width: auto;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text);
+    background: color-mix(in srgb, var(--text) 8%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 11px;
+    cursor: pointer;
+}
+.vt-dlg-card .vt-meld-art:hover { border-color: var(--lambda); }
+.vt-dlg-card .vt-meld-art[aria-checked="true"] {
+    color: #fff;
+    background: rgb(121, 158, 49);
+    border-color: rgb(121, 158, 49);
+}
+
+.vt-dlg-note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 4px; }
+
+/* Doc's panel */
+.vt-dlg-h {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--head);
+    margin: 18px 0 8px;
+}
+.vt-dlg-empty { font-size: 0.85rem; color: var(--muted); }
+.vt-panel-lock {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+.vt-dlg-card .vt-panel-lock button { width: auto; }
+.vt-meld-list, .vt-find-list { list-style: none; margin: 0; padding: 0; }
+.vt-meld-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+}
+.vt-meld-item.done { opacity: 0.6; }
+.vt-meld-head { grid-column: 1; display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 0.75rem; color: var(--muted); }
+.vt-meld-kind { color: var(--lambda); }
+.vt-meld-body { grid-column: 1; font-size: 0.92rem; color: var(--text); overflow-wrap: anywhere; }
+.vt-meld-lock { color: var(--muted); font-style: italic; }
+.vt-dlg-card .vt-meld-done { grid-column: 2; grid-row: 1 / span 2; width: auto; }
+.vt-meld-donetag { grid-column: 2; grid-row: 1 / span 2; font-size: 0.72rem; color: var(--muted); }
+.vt-meld-old summary { cursor: pointer; font-size: 0.8rem; color: var(--muted); margin: 8px 0 6px; }
+.vt-find-list li {
+    font-size: 0.88rem;
+    color: var(--text);
+    border-left: 3px solid var(--ypsilon);
+    padding: 4px 0 4px 10px;
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;
+}
+.vt-dlg-card.vt-panel .svp-gate-row { margin-top: 16px; }
+
+@media (max-width: 520px) {
+    .vt-dlg-card { padding: 20px 16px; }
+    .vt-meld-item { grid-template-columns: 1fr; }
+    .vt-dlg-card .vt-meld-done,
+    .vt-meld-donetag { grid-column: 1; grid-row: auto; justify-self: start; }
+}
+
 /* Date of the talk, in the title line (Doc, 12.09.2026). Pupils see a quiet
    tag; logged in, the tag sits over an invisible native date picker. */
 .vt-date {
@@ -588,7 +730,7 @@ body:has(.vt-list) header.page-head { margin-bottom: 10px; }
 @media print {
     .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-more-box, .vt-status,
     .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add, .vt-fundus, .vt-date.empty,
-    .vt-up { display: none !important; }
+    .vt-up, .vt-meld-btn, .vt-dlg { display: none !important; }
 
     .vt-row {
         break-inside: avoid;

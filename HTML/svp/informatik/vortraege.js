@@ -799,7 +799,7 @@
                                 (sent ? 'Bewertung ' + r[1] + ' ist abgegeben'
                                       : 'Bewertungsbogen ' + r[1] + ' für diesen Vortrag') +
                                 '">' + r[1] + (sent ? ' ✓' : '') + '</button>' + ptsHtml(i, r);
-                        }).join('') + noteHtml(i, pos) + uploadHtml() + '</div>' +
+                        }).join('') + noteHtml(i, pos) + uploadHtml() + meldHtml(i) + '</div>' +
                 /* Die Namensfelder stehen in EINEM Block, nicht als eigene
                    Grid-Zeilen: sonst dehnen sie sich mit dem Themenblock mit
                    und zwei Namen stehen weiter auseinander als drei
@@ -826,6 +826,7 @@
                 });
             });
             wireMeta(i, pos);                     /* date and mark, see META_PAGE */
+            wireMeld(i);                          /* "Stimmt was nicht?" */
             const addBtn = $('more-' + i);
             if (addBtn) addBtn.addEventListener('click', () => {
                 const next = Math.min(3, fieldCount(i) + 1);
@@ -874,6 +875,7 @@
         updateKeyBtn();
         updateEditBtns();
         renderFundus();
+        updateMeldBtn();
     }
 
     /* The tallest topic block sets the height of all of them, so the cards line
@@ -924,7 +926,15 @@
             setStatus('Eintrag gelöscht.');
             const el = $('name-' + i + '-' + j);
             if (el) el.focus();
-        } catch (e) { setStatus('Löschen fehlgeschlagen: ' + e.message, true); }
+        } catch (e) {
+            /* too late to take it back oneself - ask Doc instead, already on "Austragen" */
+            if (e.name === 'GraceOver' && meldOk) {
+                setStatus('Austragen geht selbst nur in den ersten zehn Minuten — bitte hier melden.', true);
+                meldDialog(i, 'austragen');
+                return;
+            }
+            setStatus('Löschen fehlgeschlagen: ' + e.message, true);
+        }
     }
 
     /* Texts the database turned down for good (no key, grace period over). A
@@ -1019,7 +1029,8 @@
                 failed.add(i + '-' + j);
                 lastTried[i + '-' + j] = text;
                 el.classList.add('unsaved');
-                setStatus('Aendern ist nur in den ersten zehn Minuten moeglich — bitte Herrn Alvers ansprechen.', true);
+                setStatus(meldOk ? 'Ändern geht nur in den ersten zehn Minuten — bitte an der Karte „Stimmt was nicht?“ melden.'
+                    : 'Ändern geht nur in den ersten zehn Minuten — bitte Herrn Alvers ansprechen.', true);
                 return;
             }
             if (e.name === 'SlotTaken') {
@@ -2213,6 +2224,317 @@
         if (!editing) render();
     }
 
+    /* ---------- "Stimmt was nicht?" ------------------------------------
+       Pupils can change their own entry for ten minutes only; after that
+       they came to Doc and said that "everything" was wrong (Doc, 28.10.2026).
+       Now every card carries a button for it: name, what should happen, a
+       sentence - sealed against Doc's key like the names, into
+       svp_vortrag_meldung (supabase/migrations/20261028_svp_vortrag_meldung.sql).
+       Anonymous browsers may add a request and see THAT a card has an open
+       one, never what it says. Logged in, Doc gets the requests and an
+       automatic check of the list in one panel. Until the table exists the
+       buttons simply stay away. */
+    const MELD_TABLE = 'svp_vortrag_meldung';
+    const MELD_ARTS = [
+        ['austragen', 'Austragen', 'Wer soll ausgetragen werden? (freiwillig)'],
+        ['wechseln', 'Anderes Thema', 'Welches Thema aus der Liste – und wer macht mit?'],
+        ['wunsch', 'Wunschthema', 'Titel eures Wunschthemas – und wer macht mit?'],
+        ['name', 'Name falsch oder fehlt', 'Wie muss es richtig heißen?'],
+        ['sonst', 'Etwas anderes', 'Was stimmt nicht?']
+    ];
+    const meldArt = (k) => MELD_ARTS.find((a) => a[0] === k) || MELD_ARTS[MELD_ARTS.length - 1];
+    let meldOk = false;           /* the table answered - only then the buttons show */
+    let meldGone = false;         /* 404: not created yet, stop asking for this page load */
+    let meldungen = [];           /* rows of this Lerngruppe, newest first */
+    const meldText = new Map();   /* id -> { name, text }, in memory only and only unlocked */
+
+    async function loadMeldungen() {
+        const a = A();
+        if (!a || meldGone) return;
+        const base = MELD_TABLE + '?' + QS + '&order=ts.desc&limit=200';
+        let res = null;
+        try {
+            if (a.hasSession()) res = await a.api(base + '&select=id,idx,art,ts,done,done_at,msg_enc');
+            if (!res || !res.ok) {
+                res = await fetch(a.DB_URL + '/rest/v1/' + base + '&select=id,idx,art,ts,done,done_at', {
+                    headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY }
+                });
+            }
+        } catch (e) { return; }                   /* offline for a moment: keep what we had */
+        if (res.status === 404) { meldGone = true; meldOk = false; meldungen = []; return; }
+        if (!res.ok) return;
+        meldungen = await res.json();
+        meldOk = true;
+        if (!unlocked()) { meldText.clear(); return; }
+        for (const m of meldungen) {
+            if (!m.msg_enc || meldText.has(m.id)) continue;
+            try { meldText.set(m.id, JSON.parse(await openCached(m.msg_enc))); } catch (e) { meldText.set(m.id, null); }
+        }
+    }
+
+    const meldOffen = (i) => meldungen.filter((m) => !m.done && (i === undefined || m.idx === i));
+
+    async function sendMeldung(idx, art, name, text) {
+        const a = A();
+        if (!a) throw new Error('Kein Cloud-Zugang');
+        if (!window.svpCrypto || !(await svpCrypto.hasPublic())) throw new Error('Kein Schlüssel eingerichtet');
+        const blob = await svpCrypto.seal(JSON.stringify({ name: name, text: text }));
+        /* always as a pupil: the insert policy is the same for everybody, and
+           return=minimal asks for nothing back that anon may not read */
+        const res = await fetch(a.DB_URL + '/rest/v1/' + MELD_TABLE, {
+            method: 'POST',
+            headers: {
+                apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY,
+                'Content-Type': 'application/json', Prefer: 'return=minimal'
+            },
+            body: JSON.stringify({ plan: PLAN, klasse: KLASSE, idx: idx, art: art, msg_enc: blob })
+        });
+        /* the flood guard raises PT429, which PostgREST hands on as HTTP 429 */
+        if (!res.ok) throw new Error(res.status === 429 ? 'Gerade kommen zu viele Meldungen — bitte später noch einmal' : 'HTTP ' + res.status);
+    }
+
+    /* the card a request belongs to, in words */
+    function meldOrt(idx) {
+        if (idx == null) return 'Allgemein';
+        const p = list.findIndex((e) => e.id === idx);
+        if (p >= 0) return 'Platz ' + (p + 1) + ' · ' + list[p].title;
+        const t = catalogue.find((e) => e.id === idx);
+        return t ? 'Fundus · ' + t.title : 'Nr. ' + idx + ' (keine Karte)';
+    }
+
+    /* The button at the end of a card's Bewerten line. Pupils see "Stimmt was
+       nicht?" and, once somebody has asked, "Gemeldet"; Doc sees how many
+       requests are open for this card. */
+    function meldHtml(i) {
+        if (!meldOk) return '';
+        const n = meldOffen(i).length;
+        if (logged() && n) {
+            return '<button type="button" class="vt-grade vt-meld hot" id="meld-' + i + '" title="Offene Meldungen zu diesem Vortrag ansehen">' +
+                n + (n === 1 ? ' Meldung' : ' Meldungen') + '</button>';
+        }
+        return '<button type="button" class="vt-grade vt-meld' + (n ? ' sent' : '') + '" id="meld-' + i + '" title="' +
+            (n ? 'Für diesen Vortrag ist schon etwas gemeldet — weitere Meldung schicken' : 'Austragen, Thema wechseln, Wunschthema: hier an Herrn Alvers melden') +
+            '">' + (n ? 'Gemeldet ✓' : 'Stimmt was nicht?') + '</button>';
+    }
+
+    function wireMeld(i) {
+        const b = $('meld-' + i);
+        if (!b) return;
+        b.addEventListener('click', () => {
+            if (logged() && meldOffen(i).length) meldPanel(i); else meldDialog(i);
+        });
+    }
+
+    /* Doc's button in the bar: only logged in, only when there is something */
+    function updateMeldBtn() {
+        const b = $('btn-meld');
+        const li = $('btn-meld-list');
+        const neu = $('btn-meld-new');
+        if (neu) neu.hidden = !meldOk;
+        if (li) li.hidden = !(meldOk && logged());
+        if (b) {
+            const open = meldOk && logged() ? meldOffen().length : 0;
+            const finds = logged() ? befunde().length : 0;
+            b.hidden = !(open || finds);
+            b.classList.toggle('hot', !!open);
+            b.textContent = [
+                open ? open + (open === 1 ? ' Meldung' : ' Meldungen') : '',
+                finds ? finds + (finds === 1 ? ' Hinweis' : ' Hinweise') : ''
+            ].filter(Boolean).join(' · ');
+        }
+        if (vtMenu) vtMenu.sync();
+    }
+
+    /* What a look at the list turns up without anybody asking: the cases of
+       28.10.2026 - names on a card that does not exist, a card still called
+       "Neues Thema", a name of one or two letters - and a name twice. */
+    function befunde() {
+        const out = [];
+        const known = new Set(catalogue.map((e) => e.id));
+        const nm = (s) => (unlocked() && s.name ? '„' + s.name + '“' : 'Name');
+        const ids = Object.keys(slotMap).map(Number).sort((a, b) => a - b);
+        ids.forEach((id) => {
+            const taken = slotMap[id].filter((s) => s.taken);
+            if (!taken.length) return;
+            const wer = taken.map(nm).join(', ');
+            if (!known.has(id)) out.push({ idx: id, text: wer + ' an Nr. ' + id + ' — dazu gibt es keine Karte, auf der Seite unsichtbar' });
+            else if (inFundus(id)) out.push({ idx: id, text: wer + ' im Fundus („' + catalogue.find((e) => e.id === id).title + '“) — die Karte ist ausgeblendet' });
+        });
+        list.forEach((e) => {
+            const t = (e.title || '').trim();
+            if (rowTaken(e.id) && (!t || /^neues thema$/i.test(t))) out.push({ idx: e.id, text: meldOrt(e.id) + ': Namen eingetragen, aber noch kein Titel' });
+        });
+        if (!unlocked()) return out;
+        const seen = new Map();
+        ids.forEach((id) => slotMap[id].forEach((s) => {
+            if (!s.taken || s.name == null) return;
+            if (s.name === '??') { out.push({ idx: id, text: meldOrt(id) + ': ein Name lässt sich nicht entschlüsseln' }); return; }
+            const k = s.name.trim().toLowerCase().replace(/\s+/g, ' ');
+            if (k.length <= 2) out.push({ idx: id, text: meldOrt(id) + ': sehr kurzer Name „' + s.name + '“ — Bruchstück?' });
+            if (!seen.has(k)) seen.set(k, { name: s.name, at: [] });
+            seen.get(k).at.push(id);
+        }));
+        seen.forEach((v) => {
+            if (v.at.length > 1) out.push({ idx: v.at[0], text: '„' + v.name + '“ steht ' + v.at.length + '× in der Liste: ' + v.at.map(meldOrt).join(' und ') });
+        });
+        return out;
+    }
+
+    function zeit(iso) {
+        const d = new Date(iso);
+        const p = (n) => String(n).padStart(2, '0');
+        return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '. ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+
+    /* one overlay at a time, closed by Escape, the backdrop or its own button */
+    function overlay(html) {
+        closeOverlay();
+        const ov = document.createElement('div');
+        ov.className = 'svp-gate-overlay vt-dlg';
+        ov.id = 'vt-dlg';
+        ov.innerHTML = html;
+        document.body.appendChild(ov);
+        ov.addEventListener('mousedown', (e) => { if (e.target === ov) closeOverlay(); });
+        return ov;
+    }
+    function closeOverlay() { const o = $('vt-dlg'); if (o) o.remove(); }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('vt-dlg')) closeOverlay(); });
+
+    /* The pupil's form. `art` preselects what should happen (the click on a
+       name that can no longer be deleted opens it on "Austragen"). */
+    function meldDialog(idx, art) {
+        let wahl = art || '';
+        const ov = overlay(
+            '<form class="svp-gate-card vt-dlg-card" id="vt-meld-form" autocomplete="off">' +
+                '<div class="svp-gate-title" id="vt-dlg-title">Stimmt was nicht?</div>' +
+                '<div class="svp-gate-sub">' + esc(idx == null ? 'Allgemein — kein bestimmter Vortrag' : meldOrt(idx)) + '</div>' +
+                '<label class="vt-dlg-lbl" for="vt-meld-name">Dein Name</label>' +
+                '<input type="text" id="vt-meld-name" maxlength="60" spellcheck="false" autocomplete="off">' +
+                '<div class="vt-dlg-lbl" id="vt-meld-arts-lbl">Was soll passieren?</div>' +
+                '<div class="vt-meld-arts" role="radiogroup" aria-labelledby="vt-meld-arts-lbl">' +
+                    MELD_ARTS.map((a) => '<button type="button" class="vt-meld-art" role="radio" aria-checked="false" data-art="' +
+                        a[0] + '">' + esc(a[1]) + '</button>').join('') +
+                '</div>' +
+                '<label class="vt-dlg-lbl" for="vt-meld-text">Was genau?</label>' +
+                '<textarea id="vt-meld-text" rows="3" maxlength="600"></textarea>' +
+                '<div class="svp-gate-row">' +
+                    '<button type="button" class="action secondary" id="vt-meld-cancel">Abbrechen</button>' +
+                    '<button type="submit" class="action green" id="vt-meld-go">Absenden</button>' +
+                '</div>' +
+                '<div class="svp-gate-err" id="vt-meld-err">&nbsp;</div>' +
+                '<div class="vt-dlg-note">Verschlüsselt — lesen kann es nur Herr Alvers.</div>' +
+            '</form>');
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        ov.setAttribute('aria-labelledby', 'vt-dlg-title');
+        const name = $('vt-meld-name');
+        const text = $('vt-meld-text');
+        const err = $('vt-meld-err');
+        const go = $('vt-meld-go');
+        const pick = (k) => {
+            wahl = k;
+            ov.querySelectorAll('.vt-meld-art').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.art === k)));
+            text.placeholder = k ? meldArt(k)[2] : '';
+        };
+        ov.querySelectorAll('.vt-meld-art').forEach((b) => b.addEventListener('click', () => { pick(b.dataset.art); err.innerHTML = '&nbsp;'; }));
+        pick(wahl);
+        $('vt-meld-cancel').addEventListener('click', closeOverlay);
+        $('vt-meld-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (go.disabled) return;
+            const n = name.value.trim();
+            const t = text.value.trim();
+            if (n.length < 2) { err.textContent = 'Bitte deinen Namen eintragen.'; name.focus(); return; }
+            if (!wahl) { err.textContent = 'Bitte wählen, was passieren soll.'; return; }
+            if (!t && wahl !== 'austragen') { err.textContent = 'Bitte kurz schreiben, was genau.'; text.focus(); return; }
+            go.disabled = true;
+            err.textContent = 'Sende …';
+            try {
+                await sendMeldung(idx, wahl, n, t);
+            } catch (x) {
+                err.textContent = 'Nicht gesendet: ' + x.message;
+                go.disabled = false;
+                return;
+            }
+            $('vt-meld-form').innerHTML =
+                '<div class="svp-gate-title">Danke!</div>' +
+                '<div class="svp-gate-sub">Herr Alvers sieht deine Meldung, sobald er die Liste öffnet.</div>' +
+                '<button type="button" class="action" id="vt-meld-ok">OK</button>';
+            $('vt-meld-ok').addEventListener('click', closeOverlay);
+            $('vt-meld-ok').focus();
+            setStatus('Meldung verschlüsselt an Herrn Alvers geschickt.');
+            await loadMeldungen();
+            if (!editing) render();
+        });
+        name.focus();
+    }
+
+    /* Doc's panel: the pupils' requests (decrypted once unlocked) and the
+       automatic check. `idx` puts that card's requests on top. */
+    function meldPanel(idx) {
+        const offen = meldOffen().slice().sort((a, b) => (b.idx === idx) - (a.idx === idx));
+        const erledigt = meldungen.filter((m) => m.done).slice(0, 5);
+        const finds = befunde();
+        const item = (m, done) => {
+            const tx = meldText.get(m.id);
+            const body = !unlocked() ? '<span class="vt-meld-lock">verschlüsselt — erst entsperren</span>'
+                : tx ? '<b>' + esc(tx.name || '') + '</b>' + (tx.text ? ' — ' + esc(tx.text) : '')
+                : '<span class="vt-meld-lock">nicht lesbar</span>';
+            return '<li class="vt-meld-item' + (done ? ' done' : '') + '">' +
+                '<div class="vt-meld-head"><span class="vt-meld-when">' + zeit(m.ts) + '</span>' +
+                    '<span class="vt-meld-kind">' + esc(meldArt(m.art)[1]) + '</span>' +
+                    '<span class="vt-meld-where">' + esc(meldOrt(m.idx)) + '</span></div>' +
+                '<div class="vt-meld-body">' + body + '</div>' +
+                (done ? '<div class="vt-meld-donetag">erledigt ' + zeit(m.done_at || m.ts) + '</div>'
+                    : '<button type="button" class="action green vt-meld-done" data-id="' + esc(m.id) + '">Erledigt</button>') +
+                '</li>';
+        };
+        const ov = overlay(
+            '<div class="svp-gate-card vt-dlg-card vt-panel">' +
+                '<div class="svp-gate-title" id="vt-dlg-title">Meldungen &amp; Prüfung</div>' +
+                '<div class="svp-gate-sub">' + esc((PLAN_DEF.vor || '') + klasseLabel()) + '</div>' +
+                (unlocked() ? '' : '<div class="vt-panel-lock">Namen und Texte sind verschlüsselt. ' +
+                    '<button type="button" class="action" id="vt-panel-unlock">Entsperren</button></div>') +
+                '<div class="vt-dlg-h">Von den Schülern · ' + offen.length + ' offen</div>' +
+                (offen.length ? '<ul class="vt-meld-list">' + offen.map((m) => item(m, false)).join('') + '</ul>'
+                    : '<div class="vt-dlg-empty">Keine offenen Meldungen.</div>') +
+                (erledigt.length ? '<details class="vt-meld-old"><summary>Zuletzt erledigt</summary><ul class="vt-meld-list">' +
+                    erledigt.map((m) => item(m, true)).join('') + '</ul></details>' : '') +
+                '<div class="vt-dlg-h">Automatisch gefunden · ' + finds.length + '</div>' +
+                (finds.length ? '<ul class="vt-find-list">' + finds.map((f) => '<li>' + esc(f.text) + '</li>').join('') + '</ul>'
+                    : '<div class="vt-dlg-empty">Nichts Auffälliges.</div>') +
+                (unlocked() ? '' : '<div class="vt-dlg-note">Doppelte und abgebrochene Namen findet die Prüfung erst entsperrt.</div>') +
+                '<div class="svp-gate-row"><button type="button" class="action secondary" id="vt-panel-close">Schließen</button></div>' +
+            '</div>');
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        ov.setAttribute('aria-labelledby', 'vt-dlg-title');
+        $('vt-panel-close').addEventListener('click', closeOverlay);
+        const un = $('vt-panel-unlock');
+        if (un) un.addEventListener('click', () => {
+            closeOverlay();
+            svpCrypto.passDialog('unlock', async () => { await refresh(); meldPanel(idx); });
+        });
+        ov.querySelectorAll('.vt-meld-done').forEach((b) => b.addEventListener('click', async () => {
+            b.disabled = true;
+            try {
+                const res = await A().api(MELD_TABLE + '?id=eq.' + encodeURIComponent(b.dataset.id), {
+                    method: 'PATCH', headers: { Prefer: 'return=minimal' },
+                    body: JSON.stringify({ done: true, done_at: new Date().toISOString() })
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+            } catch (x) {
+                b.disabled = false;
+                setStatus('Meldung NICHT abgehakt: ' + x.message, true);
+                return;
+            }
+            await loadMeldungen();
+            if (!editing) render();
+            meldPanel(idx);
+        }));
+        $('vt-panel-close').focus();
+    }
+
     /* ---------- the page around the list -------------------------------
        Head, button bar and hint used to stand in each of the eight HTML files:
        82 lines apiece, 63 of them identical, so every change of wording meant
@@ -2238,7 +2560,10 @@
         'Das <b>Datum</b> neben dem Titel setzt Doc Alvers angemeldet per Klick. Das Feld <b>Note</b> steht bei jedem ' +
         'Vortrag: <b>&ndash;</b> hei&szlig;t noch keine Note, <b>***</b> hei&szlig;t vergeben. Die Note selbst sieht nur er, ' +
         'angemeldet und entsperrt: errechnet aus Coach- und Publikumsbogen, von Hand &uuml;berschreibbar &mdash; ' +
-        'Feld leeren stellt die errechnete wieder her.';
+        'Feld leeren stellt die errechnete wieder her. ' +
+        'Den eigenen Eintrag &auml;ndern kann man nur in den ersten zehn Minuten. Danach &mdash; austragen, Thema ' +
+        'wechseln, Wunschthema, Name falsch &mdash; an der Karte auf <b>Stimmt was nicht?</b> klicken: die Meldung ' +
+        'geht verschl&uuml;sselt an Doc Alvers, die Karte zeigt dann &bdquo;Gemeldet&ldquo;.';
 
     /* What this page is called in prose. On a data-groups page the real name
        only arrives with svp-map.json - until then the key stands in, with
@@ -2289,6 +2614,9 @@
         bar.innerHTML =
             '<div class="vt-count" id="count"></div>' +
             '<div class="vt-actions">' +
+                /* Doc's requests and findings, see updateMeldBtn() */
+                '<button type="button" class="action vt-meld-btn" id="btn-meld" hidden ' +
+                    'title="Meldungen der Sch&uuml;ler und automatische Pr&uuml;fung der Liste"></button>' +
                 /* #confirm bleibt NEBEN dem Menue: die Rueckfrage soll stehen
                    bleiben, nachdem der Klick das Menue zugeklappt hat */
                 '<div class="vt-confirm" id="confirm">Alle Namen ' + (PLAN_DEF.artikel || 'von') + ' ' + esc(label) + ' l&ouml;schen? ' +
@@ -2304,6 +2632,10 @@
         /* btn-key wird von updateKeyBtn beschriftet und ein- oder ausgeblendet */
         menu.item({ id: 'btn-key', className: 'secondary', hidden: true, text: '' });
         menu.item({ id: 'btn-reset', className: 'secondary', text: 'Namen zurücksetzen' });
+        menu.item({ id: 'btn-meld-new', className: 'secondary', hidden: true, text: 'Stimmt was nicht?',
+            title: 'Etwas melden, das keinen bestimmten Vortrag betrifft' });
+        menu.item({ id: 'btn-meld-list', className: 'secondary', hidden: true, text: 'Meldungen & Prüfung',
+            title: 'Meldungen der Schüler und automatische Prüfung der Liste' });
         bar.querySelector('.vt-actions').appendChild(menu.el);
         vtMenu = menu;
 
@@ -2347,6 +2679,9 @@
         go('btn-reset', () => window.vtToggleConfirm(true));
         go('btn-wipe-yes', () => window.vtResetNames());
         go('btn-wipe-no', () => window.vtToggleConfirm(false));
+        go('btn-meld', () => meldPanel());
+        go('btn-meld-list', () => meldPanel());
+        go('btn-meld-new', () => meldDialog(null));
     }
 
     buildPage();
@@ -2373,6 +2708,7 @@
         await loadMeta();
         applyCloudList();
         await loadNoten();
+        await loadMeldungen();
         /* Only the 20 s poll used to respect the open edit mode; coming back to
            the tab redrew regardless and swallowed the change that had not been
            confirmed with "Fertig" yet (Doc, 04.09.2026). The fresh slot data is
