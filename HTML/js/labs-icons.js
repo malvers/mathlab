@@ -113,8 +113,34 @@ const LAB_ICONS = {
     // and in Italian (Doc, 20.10.2026: "schnapp Dir 6 Agentinnen und macht 6 weitere Bücher in Italienisch")
     // and in French (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch. Fang mit BGY an."); five covers
     // only fit the card at 80 px with an 8 px gap
-    "lehrbuch-mathe12lk": `<img src="resources/og/buch-mathe12lk-cover.jpg" alt="" loading="lazy" decoding="async"
-            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
+    "lehrbuch-mathe12lk": `<span style="display: flex; gap: 8px; align-items: center;">
+        <img src="resources/og/buch-mathe12lk-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        <span role="link" tabindex="0" title="English edition" aria-label="English edition" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12lk-en/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12lk-en/index.html'; }">
+            <img src="resources/og/buch-mathe12lk-en-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Edición española" aria-label="Edición española" lang="es" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12lk-es/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12lk-es/index.html'; }">
+            <img src="resources/og/buch-mathe12lk-es-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Edizione italiana" aria-label="Edizione italiana" lang="it" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12lk-it/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12lk-it/index.html'; }">
+            <img src="resources/og/buch-mathe12lk-it-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+        <span role="link" tabindex="0" title="Édition française" aria-label="Édition française" lang="fr" style="display: block; cursor: pointer;"
+            onclick="event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12lk-fr/index.html';"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); event.stopPropagation(); location.href = 'buch/mathe12lk-fr/index.html'; }">
+            <img src="resources/og/buch-mathe12lk-fr-cover.jpg" alt="" loading="lazy" decoding="async"
+                style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
+        </span>
+    </span>`,
     "lehrbuch-mathe13lk": `<img src="resources/og/buch-mathe13lk-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     "lehrbuch-mathefos11": `<span style="display: flex; gap: 8px; align-items: center;">
