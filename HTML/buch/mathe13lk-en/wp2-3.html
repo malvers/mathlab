@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 13 Advanced · Chapter E2.3 · Population models | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Transition matrices, powers of matrices, limit matrix and fixed vector, cyclic development. Chapter E2.3 of the interactive textbook Mathematics · Vocational Grammar School 13 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 13 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER E2.3 · ELECTIVE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER E2.3 · ELECTIVE 2 · FEBRUARY</p>
+            <h1>Population models</h1>
+            <p class="b-hero-lead">Eggs become larvae, larvae become beetles, and beetles lay eggs again. How many beetles will there be in three, in ten, in a hundred generations?
+                Customers switch back and forth between electricity providers every year. How will they be distributed in the long run? Both questions are answered by a <b>transition matrix</b>:
+                its <b>powers</b> show the future, the <b>limit matrix</b> and the <b>fixed vector</b> the state that everything is heading for.</p>
+            <div class="b-chips"><span class="b-chip">8 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">ELECTIVE 2</span></div>
+        </div>
+        <div class="b-hero-art"><svg viewBox="0 0 320 250" role="img" aria-label="Life cycle of a beetle: a quarter of the eggs become larvae, half of the larvae become beetles, every beetle lays eight eggs"><defs><marker id="cy13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" style="fill:#e682be"/></marker></defs><path d="M180.0 87.5 Q228.8 117.0 240.2 170.1" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="236.9" y="116.2" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">0.25</text><path d="M228.0 200.0 Q160.0 222.0 95.0 200.0" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="160.0" y="237.0" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">0.5</text><path d="M78.0 172.5 Q91.2 117.0 138.2 89.9" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="83.1" y="116.2" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">8</text><circle cx="160" cy="60" r="34" style="fill:rgb(245,194,66);fill-opacity:0.18;stroke:rgb(245,194,66);stroke-width:2.4"/><text x="160" y="65" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Eggs</text><circle cx="262" cy="200" r="34" style="fill:#7fd8ee;fill-opacity:0.18;stroke:#7fd8ee;stroke-width:2.4"/><text x="262" y="205" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Larvae</text><circle cx="58" cy="200" r="34" style="fill:#b8a4f2;fill-opacity:0.18;stroke:#b8a4f2;stroke-width:2.4"/><text x="58" y="205" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Beetles</text></svg></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>describe transitions between states with a <b>transition graph</b> and a <b>transition matrix</b></li>
+                <li>calculate developments with <b>powers of matrices</b>, forwards and backwards</li>
+                <li>recognise and explain <b>cyclic</b> behaviour, growth and extinction of a population</li>
+                <li>find the <b>limit matrix</b> and the <b>fixed vector</b> and interpret them as the long-term distribution</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="200" data-ph="Entry"><p class="b-q-text">$\begin{pmatrix} 0 & 0 & 8 \\ 0.25 & 0 & 0 \\ 0 & 0.5 & 0 \end{pmatrix} \cdot \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$: middle entry?</p><div class="b-sol"><p>$0.25 \cdot 800$</p></div></div>
+            <div class="b-q" data-ans="0.81" data-tol="0.0001" data-ph="value"><p class="b-q-text">What is $0.9^2$?</p><div class="b-sol"><p>0.81</p></div></div>
+            <div class="b-q" data-ans="2/3" data-tol="0.005" data-ph="v₁ ="><p class="b-q-text">$v_1 = 2v_2$ and $v_1 + v_2 = 1$. What is $v_1$?</p><div class="b-sol"><p>$3v_2 = 1$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE BEETLE CYCLE</div>
+            <div class="b-text"><p>In the picture above: a quarter of the eggs become larvae, half of the larvae become beetles, every beetle lays 8 eggs and dies. At the start there are 800 eggs, 200 larvae and 50 beetles.</p>
+                <ul><li>Calculate the numbers for the next three time steps. What do you notice?</li><li>What changes if every beetle lays 10 eggs?</li></ul></div>
+            <span class="b-pair">→ Units 1 and 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">WHO SWITCHES WHERE?</div>
+            <div class="b-text"><p>Of the customers of the municipal utility, 90% stay every year and 10% switch to the competitor. Of the competitor's customers, 20% come back every year.</p>
+                <ul><li>Today the municipal utility has 600 customers and the competitor 400. What will it look like in one year, in two years?</li><li>Is there a distribution that no longer changes?</li></ul></div>
+            <span class="b-pair">→ Unit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Transition matrices and powers" data-toc-k="1" data-toc-short="1 Transitions">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Transition matrices and powers</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>After one time step there are $8 \cdot 50 = 400$ eggs, $0.25 \cdot 800 = 200$ larvae and $0.5 \cdot 200 = 100$ beetles. Every new number is a sum of proportions of the old ones:
+                exactly one row of a matrix times the column vector of the old numbers.</p></div></div>
+            <div class="b-text"><p>The state at time $n$ is a vector $\vec{x}_n$. The <b>transition matrix</b> $U$ contains in column $j$ what <b>one</b> individual of state $j$ becomes in the next step:
+                column means “from”, row means “to”. The <b>transition graph</b> shows the same as arrows. Because every step is the same multiplication again, the whole future lies in the powers of $U$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · TRANSITION MATRIX</div>
+                <div class="b-text">
+                    <p>$\vec{x}_{n+1} = U \cdot \vec{x}_n$ &nbsp; and so &nbsp; $\vec{x}_n = U^n \cdot \vec{x}_0$. The entry $u_{ij}$ is the proportion (or the number) with which state $j$ contributes to state $i$.</p>
+                    <p><b>Backwards:</b> if $U$ is invertible, then $\vec{x}_{n-1} = U^{-1} \cdot \vec{x}_n$.</p>
+                    <p><b>Beetle model:</b> $U = \begin{pmatrix} 0 & 0 & f \\ a & 0 & 0 \\ 0 & b & 0 \end{pmatrix}$ with the survival proportions $a$ (egg → larva), $b$ (larva → beetle) and the number $f$ of eggs per beetle.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Leslie matrix:</b> population matrices of this kind were studied by the British ecologist Patrick Leslie in 1945. Source: P. H. Leslie, On the use of matrices in certain population mathematics, Biometrika 33 (1945).</p>
+            <p class="b-note"><b>On the CAS</b> you calculate $U^{10}$ directly as a power, without multiplying ten times.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · BEETLES AND CUSTOMERS</div>
+        <p class="b-help" style="margin:0 0 12px">Go step by step and watch the three curves. Change the number $f$ of eggs per beetle: for which $f$ does everything repeat, when does the population grow, when does it die out? Customers switching comes in unit 3.</p>
+        <div data-widget="uebergang" data-mode="kaefer"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · THREE STEPS</div>
+            <div class="b-text"><p>Calculate $\vec{x}_1$, $\vec{x}_2$, $\vec{x}_3$ for $U = \begin{pmatrix} 0 & 0 & 8 \\ 0.25 & 0 & 0 \\ 0 & 0.5 & 0 \end{pmatrix}$ and $\vec{x}_0 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\vec{x}_1 = \begin{pmatrix} 400 \\ 200 \\ 100 \end{pmatrix}$, $\vec{x}_2 = \begin{pmatrix} 800 \\ 100 \\ 100 \end{pmatrix}$, $\vec{x}_3 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$.</p>
+                <p><span class="b-res">After three steps everything is as at the start.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · POWERS</div>
+            <div class="b-text"><p>Calculate $U^2$ and $U^3$. Use them to explain example 1.</p></div>
+            <div class="b-sol"><p>$U^2 = \begin{pmatrix} 0 & 4 & 0 \\ 0 & 0 & 2 \\ 0.125 & 0 & 0 \end{pmatrix}$, $U^3 = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} = I$.</p>
+                <p>$\vec{x}_3 = U^3 \cdot \vec{x}_0 = I \cdot \vec{x}_0 = \vec{x}_0$. <span class="b-res">For every starting vector the development repeats with period 3.</span></p></div>
+        </div>
+    </div>
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Draw the transition graph for $U = \begin{pmatrix} 0 & 0 & 6 \\ 0.5 & 0 & 0 \\ 0 & 0.4 & 0 \end{pmatrix}$ and interpret the three numbers.</p></div>
+            <div class="b-sol"><p>Egg → larva 0.5 (half of the eggs survive), larva → beetle 0.4 (40% of the larvae become beetles), beetle → egg 6 (every beetle lays 6 eggs).</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>For this matrix calculate $\vec{x}_1$ and $\vec{x}_2$ with $\vec{x}_0 = \begin{pmatrix} 600 \\ 100 \\ 50 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\vec{x}_1 = \begin{pmatrix} 300 \\ 300 \\ 40 \end{pmatrix}$, $\vec{x}_2 = \begin{pmatrix} 240 \\ 150 \\ 120 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>In the beetle model with $f = 8$ (example 1) there are 400 eggs, 200 larvae and 100 beetles today. What did the population look like one step earlier? Explain why $U^{-1} = U^2$ here.</p></div>
+            <div class="b-sol"><p>From $U^3 = I$ it follows that $U \cdot U^2 = I$, so $U^{-1} = U^2$. $\vec{x}_{-1} = U^2 \cdot \begin{pmatrix} 400 \\ 200 \\ 100 \end{pmatrix} = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$, exactly $\vec{x}_0$ from example 1.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>An animal species has three age classes: young, yearlings, adults. 50% of the young become yearlings, 70% of the yearlings become adults, 80% of the adults survive every year and stay adults. Yearlings have 1 young on average, adults 2. Set up $U$.</p></div>
+            <div class="b-sol"><p>Columns “from” young, yearling, adult; rows “to”: $U = \begin{pmatrix} 0 & 1 & 2 \\ 0.5 & 0 & 0 \\ 0 & 0.7 & 0.8 \end{pmatrix}$. The 0.8 on the diagonal: adults stay adults.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Use the CAS to calculate $\vec{x}_{10}$ and $\vec{x}_{11}$ for the model from the last exercise and $\vec{x}_0 = \begin{pmatrix} 100 \\ 50 \\ 50 \end{pmatrix}$. By what factor does the population eventually grow per year? Compare the proportions of the age classes.</p></div>
+            <div class="b-sol"><p>$\vec{x}_{10} \approx \begin{pmatrix} 2066 \\ 771 \\ 999 \end{pmatrix}$, $\vec{x}_{11} \approx \begin{pmatrix} 2769 \\ 1033 \\ 1339 \end{pmatrix}$ (rounded). Every class and the total grow from year to year by the same factor,
+                <span class="b-res">about 1.34</span>. The proportions stay almost the same: about 54% young, 20% yearlings, 26% adults. Unlike the beetle, there is no cycle, because the adults live for several years.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="100" data-ph="Beetles"><p class="b-q-text">Beetle model from example 1: how many beetles are there after one step?</p><div class="b-sol"><p>$0.5 \cdot 200$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="Entry"><p class="b-q-text">Which entry is in row 1, column 2 of $U^2$?</p><div class="b-sol"><p>$8 \cdot 0.5$: after two steps one larva becomes 4 eggs.</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">The entry $u_{21}$ of a transition matrix describes the transition …</p><div class="b-mc"><button>from state 2 to state 1</button><button>from state 1 to state 2</button><button>from state 2 to itself</button></div><div class="b-sol"><p>Column = from, row = to</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Cycles, growth, extinction" data-toc-k="2" data-toc-short="2 Cycles">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">2 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Cycles, growth and extinction</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>In the beetle model, after three steps one egg becomes $a \cdot b \cdot f$ eggs again: first a larva with proportion $a$, then a beetle with proportion $b$, then $f$ eggs. With $a = 0.25$, $b = 0.5$, $f = 8$ that is exactly 1.</p></div></div>
+            <div class="b-text"><p>The same holds for every class. That is why $U^3 = a\,b\,f \cdot I$: after three steps every class has been multiplied by the factor $q = a\,b\,f$. Whether the population survives is decided by this factor alone.
+                Between the multiples of 3 the numbers fluctuate, because the classes take their turns one after another.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · LONG-TERM BEHAVIOUR IN THE BEETLE MODEL</div>
+                <div class="b-text">
+                    <p>$U^3 = q \cdot I$ with $q = a \cdot b \cdot f$, so $\vec{x}_{3k} = q^k \cdot \vec{x}_0$.</p>
+                    <p>$q = 1$: <b>cyclic</b> with period 3 · $q &gt; 1$: <b>growth</b> · $q &lt; 1$: <b>extinction</b> in the long run.</p>
+                    <p>In general you read off the long-term behaviour from the powers $U^n$, for large $n$ with the CAS.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Kept stable:</b> to keep a population constant when $q &gt; 1$, you have to remove a fixed proportion in every cycle, for example by pest control.</p>
+        </aside>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · TEN EGGS PER BEETLE</div>
+            <div class="b-text"><p>How does the population from example 1 develop if every beetle lays 10 eggs?</p></div>
+            <div class="b-sol"><p>$q = 0.25 \cdot 0.5 \cdot 10 = 1.25$, so $U^3 = 1.25 \cdot I$ and $\vec{x}_3 = 1.25 \cdot \vec{x}_0 = \begin{pmatrix} 1000 \\ 250 \\ 62.5 \end{pmatrix}$.</p>
+                <p><span class="b-res">Every three steps each class grows by 25%.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · HOW MANY EGGS ARE NEEDED?</div>
+            <div class="b-text"><p>Because of a pesticide only 20% of the larvae survive. How many eggs must a beetle lay so that the population does not die out?</p></div>
+            <div class="b-sol"><p>$q = 0.25 \cdot 0.2 \cdot f \ge 1 \iff f \ge 20$. <span class="b-res">At least 20 eggs per beetle.</span></p></div>
+        </div>
+    </div>
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Decide for $U = \begin{pmatrix} 0 & 0 & 6 \\ 0.5 & 0 & 0 \\ 0 & 0.4 & 0 \end{pmatrix}$ whether the population grows, is cyclic or dies out.</p></div>
+            <div class="b-sol"><p>$q = 0.5 \cdot 0.4 \cdot 6 = 1.2 &gt; 1$: growth, by 20% every three steps.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For $f = 8$ and $\vec{x}_0 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$ calculate the number of beetles after 100 steps.</p></div>
+            <div class="b-sol"><p>$100 = 3 \cdot 33 + 1$, so $\vec{x}_{100} = U \cdot \vec{x}_0 = \vec{x}_1$: 100 beetles.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For which $b$ is the model with $a = 0.2$ and $f = 25$ cyclic? Then give $U^2$ and $U^{-1}$.</p></div>
+            <div class="b-sol"><p>$0.2 \cdot b \cdot 25 = 1 \Rightarrow b = 0.2$. $U^2 = \begin{pmatrix} 0 & 5 & 0 \\ 0 & 0 & 5 \\ 0.04 & 0 & 0 \end{pmatrix} = U^{-1}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Prove</b> $U^3 = a\,b\,f \cdot I$ for $U = \begin{pmatrix} 0 & 0 & f \\ a & 0 & 0 \\ 0 & b & 0 \end{pmatrix}$ by first calculating $U^2$ in general. What follows for $U^{3k+1}$?</p></div>
+            <div class="b-sol"><p>$U^2 = \begin{pmatrix} 0 & bf & 0 \\ 0 & 0 & af \\ ab & 0 & 0 \end{pmatrix}$, $U^3 = U \cdot U^2 = \begin{pmatrix} abf & 0 & 0 \\ 0 & abf & 0 \\ 0 & 0 & abf \end{pmatrix}$. $\square$ Hence $U^{3k+1} = (abf)^k \cdot U$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="1.25" data-tol="0.0001" data-ph="q ="><p class="b-q-text">$a = 0.25$, $b = 0.5$, $f = 10$: what is $q$?</p><div class="b-sol"><p>$0.25 \cdot 0.5 \cdot 10$</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="f ="><p class="b-q-text">$a = 0.25$, $b = 0.2$: minimum number of eggs per beetle so that the population does not die out?</p><div class="b-sol"><p>$0.05 f \ge 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Limit matrix and fixed vector" data-toc-k="3" data-toc-short="3 Fixed vector">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Limit matrix and fixed vector</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Municipal utility $S$ and competitor $K$: $P = \begin{pmatrix} 0.9 & 0.2 \\ 0.1 & 0.8 \end{pmatrix}$, start $\begin{pmatrix} 600 \\ 400 \end{pmatrix}$.
+                After one year $\begin{pmatrix} 620 \\ 380 \end{pmatrix}$, after two $\begin{pmatrix} 634 \\ 366 \end{pmatrix}$. The municipal utility gains, but more and more slowly. Where does this lead?</p></div></div>
+            <div class="b-text"><p>When customers move, nobody is lost and nobody is added: every column of $P$ has the sum 1. Such matrices are called <b>stochastic</b>. Their powers $P^n$ often approach a
+                <b>limit matrix</b> $G$ whose columns are all the same. This column vector is the <b>fixed vector</b> $\vec{v}$: a distribution that no longer changes under $P$.
+                You find it without powers from the system of equations $P \cdot \vec{v} = \vec{v}$ with the extra condition that the proportions add up to 1.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · LIMIT MATRIX AND FIXED VECTOR</div>
+                <div class="b-text">
+                    <p><b>Fixed vector:</b> $P \cdot \vec{v} = \vec{v} \iff (P - I) \cdot \vec{v} = \vec{0}$, plus $v_1 + v_2 + \ldots = 1$ for a distribution in proportions.</p>
+                    <p><b>Limit matrix:</b> $G = \lim\limits_{n \to \infty} P^n$, all columns are $\vec{v}$. Then for every start $\vec{x}_0$: $\vec{x}_n \to G \cdot \vec{x}_0 = (\text{total}) \cdot \vec{v}$.</p>
+                    <p>So in the long run the distribution does not depend on the start; only the total is preserved.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Not always:</b> in the cyclic beetle model there is no limit matrix, the powers keep jumping between $U$, $U^2$ and $I$.</p>
+            <p class="b-note"><b>On the CAS:</b> calculate $P^{50}$ and round to three places. The columns are then practically the fixed vector.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THREE PROVIDERS</div>
+        <p class="b-help" style="margin:0 0 12px">Customers switching between three electricity providers: go 10 steps and more. Watch how the columns of $P^n$ become equal and how the curves settle on the fixed vector.</p>
+        <div data-widget="uebergang" data-mode="kunden"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · THE FIXED VECTOR</div>
+            <div class="b-text"><p>Find the fixed vector and the limit matrix for $P = \begin{pmatrix} 0.9 & 0.2 \\ 0.1 & 0.8 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$(P - I) \cdot \vec{v} = \vec{0}$: $-0.1 v_1 + 0.2 v_2 = 0$, so $v_1 = 2 v_2$. With $v_1 + v_2 = 1$: $v_2 = \tfrac13$, $v_1 = \tfrac23$.</p>
+                <p><span class="b-res">$\vec{v} = \begin{pmatrix} \tfrac23 \\ \tfrac13 \end{pmatrix}$, $G = \begin{pmatrix} \tfrac23 & \tfrac23 \\ \tfrac13 & \tfrac13 \end{pmatrix}$</span>. In the long run: $G \cdot \begin{pmatrix} 600 \\ 400 \end{pmatrix} \approx \begin{pmatrix} 667 \\ 333 \end{pmatrix}$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · POWERS ON THE CAS</div>
+            <div class="b-text"><p>Calculate $P^5$ and $P^{20}$ and compare with $G$.</p></div>
+            <div class="b-sol"><p>$P^5 \approx \begin{pmatrix} 0.723 & 0.555 \\ 0.277 & 0.445 \end{pmatrix}$, $P^{20} \approx \begin{pmatrix} 0.667 & 0.666 \\ 0.333 & 0.334 \end{pmatrix}$.</p>
+                <p>After 20 years the columns are practically equal, <span class="b-res">$P^{20} \approx G$</span>.</p></div>
+        </div>
+    </div>
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Check whether $P = \begin{pmatrix} 0.8 & 0.1 & 0.2 \\ 0.1 & 0.7 & 0.2 \\ 0.1 & 0.2 & 0.6 \end{pmatrix}$ is stochastic, and interpret the column for provider C.</p></div>
+            <div class="b-sol"><p>Column sums: $0.8 + 0.1 + 0.1 = 1$, $0.1 + 0.7 + 0.2 = 1$, $0.2 + 0.2 + 0.6 = 1$ ✓ Of C's customers, 20% switch to A and 20% to B every year, 60% stay.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Find the fixed vector of this matrix without a CAS and compare with the widget.</p></div>
+            <div class="b-hint"><p>Two rows of $(P - I)\,\vec{v} = \vec{0}$ and the sum condition are enough; the third row follows from the others.</p></div>
+            <div class="b-sol"><p>$-0.2 v_1 + 0.1 v_2 + 0.2 v_3 = 0$, $0.1 v_1 - 0.3 v_2 + 0.2 v_3 = 0$, $v_1 + v_2 + v_3 = 1$. Solution: <span class="b-res">$\vec{v} = \begin{pmatrix} \tfrac{8}{19} \\ \tfrac{6}{19} \\ \tfrac{5}{19} \end{pmatrix} \approx \begin{pmatrix} 0.421 \\ 0.316 \\ 0.263 \end{pmatrix}$</span>.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>With 10,000 customers: how many does provider A have in the long run? Does it matter whether everyone was with C at the start?</p></div>
+            <div class="b-sol"><p>$10{,}000 \cdot \tfrac{8}{19} \approx 4211$. No: the limit matrix has nothing but equal columns, so every start with 10,000 customers leads to the same distribution.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Prove:</b> if $P$ is stochastic (all column sums 1), then $P \cdot \vec{x}$ has the same sum of components as $\vec{x}$. Why does this make sense for customers switching, but not for the beetle model?</p></div>
+            <div class="b-sol"><p>$\sum_i (P\vec{x})_i = \sum_i \sum_j p_{ij} x_j = \sum_j x_j \sum_i p_{ij} = \sum_j x_j \cdot 1$. $\square$</p>
+                <p>Customers only switch, they do not disappear. Beetles die and lay eggs: the column sums of the beetle matrix are $a$, $b$ and $f$, not 1, and the total changes.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="634" data-ph="Customers"><p class="b-q-text">Municipal utility: start 600 and 400. How many customers does the municipal utility have after two years?</p><div class="b-sol"><p>$0.9 \cdot 620 + 0.2 \cdot 380$</p></div></div>
+        <div class="b-q" data-ans="1/3" data-tol="0.005" data-ph="v₂ ="><p class="b-q-text">Second component of the fixed vector of $\begin{pmatrix} 0.9 & 0.2 \\ 0.1 & 0.8 \end{pmatrix}$?</p><div class="b-sol"><p>$v_1 = 2v_2$, $v_1 + v_2 = 1$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">The columns of the limit matrix are …</p><div class="b-mc"><button>the columns of $P$.</button><button>unit vectors.</button><button>all equal to the fixed vector.</button></div><div class="b-sol"><p>Every start leads to the same distribution.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A hire car is returned in Dresden or Leipzig. Of the cars hired in Dresden, 70% come back to Dresden; of those hired in Leipzig, 60% come back to Leipzig. Set up $P$ and find the long-term distribution of the cars.</p></div>
+            <div class="b-sol"><p>$P = \begin{pmatrix} 0.7 & 0.4 \\ 0.3 & 0.6 \end{pmatrix}$. $-0.3 v_1 + 0.4 v_2 = 0$, $v_1 + v_2 = 1$: $\vec{v} = \begin{pmatrix} \tfrac47 \\ \tfrac37 \end{pmatrix}$, so just over 57% in Dresden.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with chapter E2.1:</b> why does the equation $(P - I)\,\vec{v} = \vec{0}$ always have infinitely many solutions for a stochastic matrix, so that you need the sum condition?</p></div>
+            <div class="b-sol"><p>The column sums of $P - I$ are all $1 - 1 = 0$: the sum of all rows is the zero row, one row depends on the others. $P - I$ is not invertible, and together with $\vec{v}$ every multiple $r\vec{v}$ is a solution.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with Year 12:</b> a game of chance has two states, “in the game” and “out”. Each round you stay in the game with probability 0.8; once out, you stay out. Set up $P$. What is the probability of still being in the game after 5 rounds? What is the limit matrix?</p></div>
+            <div class="b-sol"><p>$P = \begin{pmatrix} 0.8 & 0 \\ 0.2 & 1 \end{pmatrix}$. After 5 rounds: $0.8^5 \approx 0.328$. $P^n \to G = \begin{pmatrix} 0 & 0 \\ 1 & 1 \end{pmatrix}$: in the long run everyone drops out, “out” is an absorbing state.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Open problem:</b> invent a $2 \times 2$ transition matrix whose powers have <b>no</b> limit matrix. What happens to a distribution then?</p></div>
+            <div class="b-sol"><p>For example $P = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$: everyone switches every year. $P^2 = I$, the powers jump between $P$ and $I$. A distribution $\begin{pmatrix} 600 \\ 400 \end{pmatrix}$ jumps for ever between $\begin{pmatrix} 400 \\ 600 \end{pmatrix}$ and itself. Only $\begin{pmatrix} 500 \\ 500 \end{pmatrix}$ stays fixed, so the fixed vector $\begin{pmatrix} 0.5 \\ 0.5 \end{pmatrix}$ exists all the same.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Markov and Eugene Onegin" data-toc-k="X" data-toc-short="Markov">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">CHAINS OF LETTERS</span></div>
+    <h2>Andrei Markov counts vowels</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In 1913 the Russian mathematician Andrei Andreyevich Markov examined the first 20,000 letters of Alexander Pushkin's novel in verse “Eugene Onegin”. He counted how often a vowel was followed by another vowel
+                and how often by a consonant. From this he obtained a $2 \times 2$ transition matrix that described the sequence of letters surprisingly well.</p>
+            <p>Such models, in which the next state depends only on the present one, are called <b>Markov chains</b> today. Weather forecasts, speech recognition,
+                the ranking of search engines and ecology all work with them, when ecology projects populations into the future as in this chapter.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> A. A. Markov: An example of statistical investigation of the text “Eugene Onegin” concerning the connection of samples in chains. Bulletin of the Imperial Academy of Sciences, St Petersburg 1913 · MacTutor: “Andrei Andreyevich Markov”.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>TRANSITION MATRIX</h4><p>Column = from, row = to; $\vec{x}_{n+1} = U\,\vec{x}_n$, $\vec{x}_n = U^n\,\vec{x}_0$</p></div>
+        <div><p>Beetles: 800, 200, 50 → 400, 200, 100</p></div></div>
+    <div class="b-rueck"><div><h4>CYCLE</h4><p>Beetle model: $U^3 = abf \cdot I$; $q = abf$ decides</p></div>
+        <div><p>$q = 1$: period 3 · $q = 1.25$: growth</p></div></div>
+    <div class="b-rueck"><div><h4>STOCHASTIC MATRIX</h4><p>Column sums 1, the total is preserved</p></div>
+        <div><p>Customers switching</p></div></div>
+    <div class="b-rueck"><div><h4>FIXED VECTOR, LIMIT MATRIX</h4><p>$(P - I)\,\vec{v} = \vec{0}$, sum 1; $P^n \to G$ with columns $\vec{v}$</p></div>
+        <div><p>$\begin{pmatrix} 0.9 & 0.2 \\ 0.1 & 0.8 \end{pmatrix}$: $\vec{v} = \begin{pmatrix} \tfrac23 \\ \tfrac13 \end{pmatrix}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="300" data-ph="Larvae"><p class="b-q-text">$U = \begin{pmatrix} 0 & 0 & 6 \\ 0.5 & 0 & 0 \\ 0 & 0.4 & 0 \end{pmatrix}$, $\vec{x}_0 = \begin{pmatrix} 600 \\ 100 \\ 50 \end{pmatrix}$: larvae after one step?</p><div class="b-sol"><p>$0.5 \cdot 600$</p></div></div>
+            <div class="b-q" data-ans="1.2" data-tol="0.0001" data-ph="q ="><p class="b-q-text">Growth factor $q$ of this model after three steps?</p><div class="b-sol"><p>$0.5 \cdot 0.4 \cdot 6$</p></div></div>
+            <div class="b-q" data-ans="4/7" data-tol="0.005" data-ph="v₁ ="><p class="b-q-text">Hire cars: $P = \begin{pmatrix} 0.7 & 0.4 \\ 0.3 & 0.6 \end{pmatrix}$. Proportion in Dresden in the long run?</p><div class="b-sol"><p>$0.3 v_1 = 0.4 v_2$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="4211" data-tol="1" data-ph="Customers"><p class="b-q-text">Three providers, 10,000 customers: how many does A have in the long run (rounded)?</p><div class="b-sol"><p>$10{,}000 \cdot \tfrac{8}{19}$</p></div></div>
+            <div class="b-q" data-ans="0.328" data-tol="0.001" data-ph="P ≈"><p class="b-q-text">Game of chance: probability of still being in the game after 5 rounds?</p><div class="b-sol"><p>$0.8^5$</p></div></div>
+            <div class="b-q" data-ans="100" data-ph="Beetles"><p class="b-q-text">Beetle model with $f = 8$, start 800, 200, 50: beetles after 100 steps?</p><div class="b-sol"><p>$\vec{x}_{100} = \vec{x}_1$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-leontief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ABITUR TRAINING, ADVANCED</span><span class="b-lab-what">Matrices with a parameter</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 13, advanced course · Elective 2 of the Saxon curriculum for mathematics at the Berufliches Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-bgy13lk.js"></script>
+<script src="../../js/buch-en/bgy13lk.js"></script>
+</body>
+</html>
