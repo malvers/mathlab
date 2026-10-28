@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 12 Advanced · Chapter 1.2 · Random variables | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Probability distribution and distribution function, expected value, variance. Chapter 1.2 of the interactive textbook Mathematics · Vocational Grammar School 12 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 12 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 1.2 · LEARNING AREA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 1.2 · LEARNING AREA 1 · SEPTEMBER · OCTOBER</p>
+            <h1>Random variables</h1>
+            <p class="b-hero-lead">A spinner at the school fair, a dice game at the funfair, insurance for your bike: behind every random experiment there are
+                <b>numbers</b>, wins, losses, counts. Here you learn to calculate with these numbers. The <b>expected value</b> tells you
+                what comes out in the long run, the <b>standard deviation</b> how much it varies.</p>
+            <div class="b-chips"><span class="b-chip">12 LESSONS</span><span class="b-chip">4 UNITS</span><span class="b-chip">RATING GAMES OF CHANCE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>define a <b>random variable</b> and give its <b>probability distribution</b> as a table and a bar chart</li>
+                <li>give the <b>distribution function</b> $F(x) = P(X \le x)$ as a step function and use it to calculate “at most”, “more than” and “between”</li>
+                <li>calculate and interpret the <b>expected value</b>, the <b>variance</b> and the <b>standard deviation</b></li>
+                <li>decide whether a game is <b>fair</b>, and <b>prove</b> rules for the expected value and the variance</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="5" data-ph="number"><p class="b-q-text">Calculate the mean of 2, 4, 6 and 8.</p><div class="b-sol"><p>$\tfrac{2 + 4 + 6 + 8}{4} = 5$</p></div></div>
+            <div class="b-q" data-ans="3/8" data-tol="0.0005" data-ph="fraction"><p class="b-q-text">Calculate $\tfrac14 + \tfrac18$.</p><div class="b-sol"><p>$\tfrac28 + \tfrac18 = \tfrac38$</p></div></div>
+            <div class="b-q" data-ans="1/4" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Two coins are tossed. How likely are two heads?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12 = \tfrac14$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="number"><p class="b-q-text">Calculate $0.5 \cdot 4 + 0.5 \cdot (-2)$.</p><div class="b-sol"><p>$2 - 1 = 1$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">THE SPINNER AT THE SCHOOL FAIR</div>
+            <div class="b-text"><p>Stake €2. Half of the wheel pays nothing, a quarter pays €1, an eighth €2, an eighth €10.</p>
+                <ul><li>Would you play? Estimate whether the class fund makes money with it.</li><li>Imagine 800 people play. How much is paid out?</li></ul></div>
+            <span class="b-pair">→ Unit 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">TWO GAMES, ONE EXPECTED VALUE</div>
+            <div class="b-text"><p>Game A: a coin, you win or lose €1. Game B: with a probability of 1% you win €99, otherwise you lose €1.</p>
+                <ul><li>What do you win on average in each game?</li><li>How do they differ all the same?</li></ul></div>
+            <span class="b-pair">→ Unit 4</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">COUNTING TOTAL SCORES</div>
+            <div class="b-text"><p>Roll two dice 50 times and note the total score each time.</p>
+                <ul><li>Which total comes up most often? Why?</li><li>Calculate the mean of your 50 totals. What do you expect?</li><li>How often was the total at most 4, at most 7, at most 10? Draw these “at most” proportions as a staircase.</li></ul></div>
+            <span class="b-pair">→ Units 1 to 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Random variables and distributions" data-toc-k="1" data-toc-short="1 Distribution">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Random variable and probability distribution</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Three coins are tossed. There are 8 equally likely outcomes, from HHH to TTT. We are only interested in: <b>how many heads?</b></p></div></div>
+            <div class="b-text">
+                <p>The number $X$ = “number of heads” depends on chance and can take the values 0, 1, 2, 3. Counting the outcomes gives:</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <tr><th>$x_i$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>$P(X = x_i)$</th><td>$\tfrac18$</td><td>$\tfrac38$</td><td>$\tfrac38$</td><td>$\tfrac18$</td></tr></table></div>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · RANDOM VARIABLE</div>
+                <div class="b-text">
+                    <p>A <b>random variable</b> $X$ assigns a real number to every outcome of a random experiment.</p>
+                    <p>The <b>probability distribution</b> of $X$ gives the probability $P(X = x_i)$ for every value $x_i$. All of them together add up to 1.
+                        It is shown as a table, a <b>bar chart</b> or a histogram.</p>
+                    <p>“exactly $k$”: $P(X = k)$ · “at most $k$”: $P(X \le k)$ · “at least $k$”: $P(X \ge k) = 1 - P(X \le k - 1)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note">A random variable is called <b>discrete</b> if it only takes single, countable values, for example counts or amounts of money.</p>
+            <p class="b-note"><b>Complementary event:</b> “at least one” is almost always calculated via $1 - P(\text{none})$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURE · TOTAL SCORE OF TWO DICE</div>
+        <p class="b-help" style="margin:0 0 12px">The height of the bars is $P(X = k)$, from $\tfrac{1}{36}$ at 2 and 12 up to $\tfrac{6}{36}$ at 7.</p>
+        <div data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · TOTAL SCORE</div>
+            <div class="b-text"><p>$X$ is the total score of two dice. Calculate $P(X = 7)$, $P(X \le 4)$ and $P(X \ge 10)$.</p></div>
+            <div class="b-sol"><p>$P(X = 7) = \tfrac{6}{36} = \tfrac16$ · $P(X \le 4) = \tfrac{1 + 2 + 3}{36} = \tfrac16$ · $P(X \ge 10) = \tfrac{3 + 2 + 1}{36} = \tfrac16$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · DRAWING WITHOUT REPLACEMENT</div>
+            <div class="b-text"><p>Two balls are drawn without replacement from an urn with 3 red and 2 blue balls. $X$ = number of red ones. Give the distribution.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac25 \cdot \tfrac14 = \tfrac{1}{10}$, $P(X = 2) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$, $P(X = 1) = 1 - \tfrac{1}{10} - \tfrac{3}{10} = \tfrac{6}{10}$</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Four coins are tossed, $X$ = number of heads. Give the probability distribution.</p></div>
+            <div class="b-hint"><p>There are 16 outcomes. How many of them have exactly two heads?</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac{1}{16}$, $P(X = 1) = \tfrac{4}{16}$, $P(X = 2) = \tfrac{6}{16}$, $P(X = 3) = \tfrac{4}{16}$, $P(X = 4) = \tfrac{1}{16}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Fill in the missing probability and calculate $P(X \ge 2)$.</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:360px"><tr><th>$x_i$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>$P(X = x_i)$</th><td>0.1</td><td>0.3</td><td>?</td><td>0.2</td></tr></table></div></div>
+            <div class="b-sol"><p>$1 - 0.1 - 0.3 - 0.2 = 0.4$, $P(X \ge 2) = 0.4 + 0.2 = 0.6$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A dice is rolled twice, $X$ is the larger of the two scores. Find the distribution of $X$.</p></div>
+            <div class="b-sol"><p>$P(X = k) = \tfrac{2k - 1}{36}$: $\tfrac{1}{36}, \tfrac{3}{36}, \tfrac{5}{36}, \tfrac{7}{36}, \tfrac{9}{36}, \tfrac{11}{36}$ for $k = 1, \ldots, 6$.
+                Reason: both dice at most $k$ in $k^2$ cases, at most $k - 1$ in $(k - 1)^2$ cases, the difference is $2k - 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>A spinner has three sectors with the angles at the centre 180°, 120° and 60°. They pay out €0, €2 and €5. Give the distribution of the payout and draw a bar chart.</p></div>
+            <div class="b-sol"><p>$P(0) = \tfrac{180}{360} = \tfrac12$, $P(2) = \tfrac{120}{360} = \tfrac13$, $P(5) = \tfrac{60}{360} = \tfrac16$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3/8" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Three coins, $X$ = number of heads. What is $P(X = 2)$?</p><div class="b-sol"><p>HHT, HTH, THH: $\tfrac38$</p></div></div>
+        <div class="b-q" data-ans="0.3" data-tol="0.0001" data-ph="P ="><p class="b-q-text">The values of a distribution have the probabilities 0.25; 0.35; ?; 0.1. Which one is missing?</p><div class="b-sol"><p>$1 - 0.7 = 0.3$</p></div></div>
+        <div class="b-q" data-ans="1/12" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Two dice, $X$ = total score. What is $P(X \ge 11)$?</p><div class="b-sol"><p>$\tfrac{2 + 1}{36} = \tfrac{1}{12}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="The distribution function" data-toc-k="2" data-toc-short="2 F(x)">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>The distribution function</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>With three coins, $P(X \le 1) = \tfrac18 + \tfrac38 = \tfrac12$. And $P(X \le 1.7)$? Also $\tfrac12$, because no new value is added between 1 and 2.
+                Only at 2 does the “at most” probability jump to $\tfrac78$. If you plot it for <b>every</b> real number, you get a staircase.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · DISTRIBUTION FUNCTION</div>
+                <div class="b-text">
+                    <p>The <b>distribution function</b> of a random variable $X$ is $$F(x) = P(X \le x) \quad \text{for all } x \in \mathbb{R}.$$</p>
+                    <p>For a discrete random variable $F$ is a <b>step function</b>: 0 to the left of the smallest value, 1 to the right of the largest value, increasing monotonically in between.
+                        At every point $x_i$, $F$ jumps up by $P(X = x_i)$; the function value at the jump is the upper one.</p>
+                    <p>$P(X > a) = 1 - F(a)$ &nbsp;·&nbsp; $P(a < X \le b) = F(b) - F(a)$ &nbsp;·&nbsp; for integer values $P(X \ge k) = 1 - F(k - 1)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Two functions, one random variable:</b> the probability function $x_i \mapsto P(X = x_i)$ shows the single bars, the distribution function $F$ their running total. Either one can be calculated from the other.</p>
+            <p class="b-note"><b>Watch the boundary:</b> for whole numbers, “less than 3” means “at most 2”, so $F(2)$, not $F(3)$.</p>
+            <p class="b-note"><b>Calculators and CAS</b> give exactly these values $F(k)$ for the binomial distribution as “cumulative” probabilities (chapter 1.3).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · FROM THE BARS TO THE STAIRCASE</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a random variable and the probability you are looking for. Drag $b$ (and $a$) and watch: between two values $F$ stays the same, at every value $F$ jumps by the height of the bar above it.</p>
+        <div data-widget="verteilungsfunktion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · THREE COINS</div>
+            <div class="b-text"><p>$X$ is the number of heads with three coins. Give $F$ piecewise. Calculate $F(1.5)$, $P(X > 1)$ and $P(0 < X \le 2)$.</p></div>
+            <div class="b-sol"><p>$F(x) = 0$ for $x < 0$, $\tfrac18$ for $0 \le x < 1$, $\tfrac12$ for $1 \le x < 2$, $\tfrac78$ for $2 \le x < 3$ and $1$ for $x \ge 3$.</p>
+                <p>$F(1.5) = \tfrac12$ · $P(X > 1) = 1 - F(1) = \tfrac12$ · $P(0 < X \le 2) = F(2) - F(0) = \tfrac78 - \tfrac18 = \tfrac34$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · BACK FROM THE STAIRCASE</div>
+            <div class="b-text"><p>A random variable takes the values 1, 2, 3, 4; its distribution function has the values 0.1; 0.4; 0.85; 1 there. Find the probability distribution.</p></div>
+            <div class="b-sol"><p>The heights of the jumps: $P(X = 1) = 0.1$, $P(X = 2) = 0.4 - 0.1 = 0.3$, $P(X = 3) = 0.85 - 0.4 = 0.45$, $P(X = 4) = 1 - 0.85 = 0.15$.
+                <span class="b-res">Differences of neighbouring steps.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ is the score of a dice. Give the distribution function, sketch it and calculate $F(3)$, $F(4.5)$, $F(0)$ and $F(7)$.</p></div>
+            <div class="b-sol"><p>A staircase with six steps of height $\tfrac16$ at 1, 2, …, 6. $F(3) = \tfrac12$, $F(4.5) = F(4) = \tfrac23$, $F(0) = 0$, $F(7) = 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ is the total score of two dice. Express with $F$ and calculate: $P(X \le 4)$, $P(X > 9)$, $P(4 < X \le 7)$.</p></div>
+            <div class="b-sol"><p>$F(4) = \tfrac{6}{36} = \tfrac16$ · $1 - F(9) = 1 - \tfrac{30}{36} = \tfrac16$ · $F(7) - F(4) = \tfrac{21}{36} - \tfrac{6}{36} = \tfrac{5}{12}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>For a random variable with the values 0, 1, 2, 3, $F(0) = 0.05$, $F(1) = 0.3$, $F(2) = 0.75$, $F(3) = 1$. Find the distribution and $P(1 \le X \le 2)$.</p></div>
+            <div class="b-sol"><p>$0.05$; $0.25$; $0.45$; $0.25$. $P(1 \le X \le 2) = F(2) - F(0) = 0.7$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A random variable has the values 1, 2, 3, 4. Which of these tables of values of $F$ at these points cannot be a distribution function? Give reasons.
+                a) 0.2; 0.5; 0.4; 1 &nbsp; b) 0.1; 0.1; 0.6; 1 &nbsp; c) 0.3; 0.7; 0.9; 0.95</p></div>
+            <div class="b-sol"><p>a) no: $F$ falls from 0.5 to 0.4, but a distribution function increases monotonically. b) yes: $P(X = 2) = 0$ is allowed. c) no: at the largest value $F = 1$ must hold, the probabilities would only add up to 0.95.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Prove for $a < b$: $P(a < X \le b) = F(b) - F(a)$. Use it to show that every distribution function increases monotonically.</p></div>
+            <div class="b-sol"><p>The event $X \le b$ splits into the mutually exclusive parts $X \le a$ and $a < X \le b$. So $F(b) = F(a) + P(a < X \le b)$; rearranged, this is the claim.</p>
+                <p>Because a probability is never negative, $F(b) - F(a) \ge 0$ follows, so $F(a) \le F(b)$ for all $a < b$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="7/8" data-tol="0.0005" data-ph="F(2) ="><p class="b-q-text">Three coins, $X$ = number of heads. What is $F(2)$?</p><div class="b-sol"><p>$\tfrac18 + \tfrac38 + \tfrac38 = \tfrac78$</p></div></div>
+        <div class="b-q" data-ans="0.2" data-tol="0.0001" data-ph="P ="><p class="b-q-text">We know $F(3) = 0.8$. What is $P(X > 3)$?</p><div class="b-sol"><p>$1 - 0.8 = 0.2$</p></div></div>
+        <div class="b-q" data-ans="0.45" data-tol="0.0001" data-ph="P ="><p class="b-q-text">We know $F(1) = 0.2$ and $F(4) = 0.65$. What is $P(1 < X \le 4)$?</p><div class="b-sol"><p>$0.65 - 0.2 = 0.45$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Expected value" data-toc-k="3" data-toc-short="3 Expected value">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">3</span>The expected value</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>800 people play the spinner at the school fair. About 400 get nothing, 200 get €1 each, 100 get €2 each and 100 get €10 each.
+                That is €$200 + 200 + 1000 = 1400$, so on average $\tfrac{1400}{800} = 1.75$ euros per game.</p></div></div>
+            <div class="b-text"><p>You get the same without the 800 people, straight from the distribution: $0 \cdot \tfrac12 + 1 \cdot \tfrac14 + 2 \cdot \tfrac18 + 10 \cdot \tfrac18 = 1.75$.
+                With a stake of €2 you lose 25 cents per game on average, the class fund makes money.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · EXPECTED VALUE</div>
+                <div class="b-text">
+                    <p>If $X$ takes the values $x_1, \ldots, x_n$, the <b>expected value</b> is
+                        $$E(X) = \mu = x_1 \cdot P(X = x_1) + x_2 \cdot P(X = x_2) + \ldots + x_n \cdot P(X = x_n).$$</p>
+                    <p>It is the <b>mean in the long run</b>: after very many repetitions the mean of the results is close to $E(X)$.</p>
+                    <p>If $X$ is the <b>gain</b> (payout minus stake), a game is called <b>fair</b> if $E(X) = 0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Not a possible value:</b> the expected value when rolling a dice is 3.5. This score never comes up, it is a mean.</p>
+            <p class="b-note"><b>Centre of mass:</b> if you imagine the bars of the bar chart as weights on a seesaw, the pivot is at $\mu$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · RANDOM VARIABLES AND THEIR KEY FIGURES</div>
+        <p class="b-help" style="margin:0 0 12px">Choose an example. Then play 10, 100 or 1,000 times and compare the mean of your games with the expected value.</p>
+        <div data-widget="zufallsgroesse"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · THE DICE</div>
+            <div class="b-text"><p>Calculate the expected value of the score of a dice.</p></div>
+            <div class="b-sol"><p>$E(X) = (1 + 2 + 3 + 4 + 5 + 6) \cdot \tfrac16 = \tfrac{21}{6} = 3.5$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · CHUCK-A-LUCK</div>
+            <div class="b-text"><p>You bet €1 on a number, then three dice are rolled. For every dice showing your number you win €1, if none shows it, your stake is lost. Is the game fair?</p></div>
+            <div class="b-sol"><p>No match: $\left(\tfrac56\right)^3 = \tfrac{125}{216}$, one: $3 \cdot \tfrac16 \cdot \left(\tfrac56\right)^2 = \tfrac{75}{216}$, two: $\tfrac{15}{216}$, three: $\tfrac{1}{216}$.</p>
+                <p>$E(X) = \dfrac{-125 + 75 + 2 \cdot 15 + 3 \cdot 1}{216} = -\dfrac{17}{216} \approx -0.079$. <span class="b-res">Unfair: a loss of almost 8 cents per game.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calculate $E(X)$ for the distribution $x_i$: 0, 1, 2, 3 with $P(X = x_i)$: 0.1; 0.3; 0.4; 0.2.</p></div>
+            <div class="b-sol"><p>$0 + 0.3 + 0.8 + 0.6 = 1.7$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calculate the expected value of the number of heads with three coins. Interpret the result.</p></div>
+            <div class="b-sol"><p>$0 \cdot \tfrac18 + 1 \cdot \tfrac38 + 2 \cdot \tfrac38 + 3 \cdot \tfrac18 = \tfrac{12}{8} = 1.5$. On average, three tosses give heads 1.5 times.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>The spinner at the school fair is to become fair. a) How high would the stake have to be? b) The stake stays at €2. What amount must the €10 sector pay out then?</p></div>
+            <div class="b-sol"><p>a) €1.75 &nbsp; b) $0.25 + 0.25 + \tfrac{a}{8} = 2 \Rightarrow a = 12$ euros</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A raffle sells 1,000 tickets at €2 each. There is one prize of €500, 10 prizes of €50 and 100 prizes of €5. Calculate the expected value of the gain for one ticket.</p></div>
+            <div class="b-sol"><p>Payout on average $\tfrac{500 + 500 + 500}{1000} = 1.5$ euros. Gain $1.5 - 2 = -0.5$ euros. The raffle takes in €500.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>A bike worth €800 is stolen with a probability of 3% per year. What annual premium would be fair? An insurance company charges €39. Why do many people take out insurance all the same?</p></div>
+            <div class="b-sol"><p>Fair premium $800 \cdot 0.03 = 24$ euros. The €15 difference covers the costs and the profit of the insurance company.
+                You pay a small, certain amount to protect yourself against a large, unlikely loss.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Prove $E(aX + b) = a \cdot E(X) + b$ for real numbers $a$ and $b$. A game has an expected gain of −€0.25. The operator doubles all payouts and stakes and pays everyone a bonus of €0.50. What is the new expected value?</p></div>
+            <div class="b-sol"><p>$E(aX + b) = \sum (a x_i + b)\, p_i = a \sum x_i p_i + b \sum p_i = a \cdot E(X) + b$, because $\sum p_i = 1$.</p>
+                <p>New gain $Y = 2X + 0.5$: $E(Y) = 2 \cdot (-0.25) + 0.5 = 0$. The game is now fair.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="0.2" data-tol="0.0001" data-ph="E(X) ="><p class="b-q-text">$X$ takes $-1$ with 0.6 and $2$ with 0.4. Calculate $E(X)$.</p><div class="b-sol"><p>$-0.6 + 0.8 = 0.2$</p></div></div>
+        <div class="b-q" data-ans="3.5" data-tol="0.0001" data-ph="euros"><p class="b-q-text">A dice game pays out the score in euros. Which stake is fair?</p><div class="b-sol"><p>$E(X) = 3.5$ euros</p></div></div>
+        <div class="b-q" data-ans="0.4" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$X$ only takes the values 0 and 5 and has $E(X) = 2$. What is $P(X = 5)$?</p><div class="b-sol"><p>$5p = 2 \Rightarrow p = 0.4$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Variance and standard deviation" data-toc-k="4" data-toc-short="4 Spread">
+    <div class="b-band"><span class="b-band-tag">UNIT 4</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">4</span>Variance and standard deviation</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>In game A you win or lose €1 with equal probability. In game B you win €99 with a probability of 1%, otherwise you lose €1.
+                Both have the expected value 0. All the same, game B feels completely different.</p></div></div>
+            <div class="b-text"><p>The difference lies in the <b>spread</b>: in game A every result is €1 away from the expected value, in game B it is mostly €1, but rarely €99.
+                The spread is measured with the mean of the <b>squared deviations</b> from the expected value.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · VARIANCE AND STANDARD DEVIATION</div>
+                <div class="b-text">
+                    <p><b>Variance:</b> $V(X) = (x_1 - \mu)^2 \cdot P(X = x_1) + \ldots + (x_n - \mu)^2 \cdot P(X = x_n)$</p>
+                    <p><b>Standard deviation:</b> $\sigma = \sqrt{V(X)}$. It has the same unit as $X$ and tells you how far the values <b>typically</b> deviate from the expected value.</p>
+                    <p>Game A: $V = 1$, $\sigma = 1$ · Game B: $V = 99^2 \cdot 0.01 + (-1)^2 \cdot 0.99 = 99$, $\sigma \approx 9.95$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Shortcut:</b> often quicker is $V(X) = E(X^2) - \mu^2$, that is “mean of the squares minus square of the mean”.</p>
+            <p class="b-note"><b>Risk:</b> in finance, the standard deviation is used as a measure of the risk of an investment.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 7 · THE DICE</div>
+            <div class="b-text"><p>Calculate the variance and the standard deviation of the score of a dice.</p></div>
+            <div class="b-sol"><p>With $\mu = 3.5$: $V(X) = \tfrac16 \left(2.5^2 + 1.5^2 + 0.5^2 + 0.5^2 + 1.5^2 + 2.5^2\right) = \tfrac{17.5}{6} \approx 2.917$, $\sigma \approx 1.708$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 8 · TWO FILLING MACHINES</div>
+            <div class="b-text"><p>Machine 1 fills 498 g, 500 g, 502 g with 0.1; 0.8; 0.1. Machine 2 fills 495 g, 500 g, 505 g with 0.2; 0.6; 0.2. Which one works more precisely?</p></div>
+            <div class="b-sol"><p>Both: $\mu = 500$ g. $\sigma_1 = \sqrt{4 \cdot 0.1 + 4 \cdot 0.1} = \sqrt{0.8} \approx 0.89$ g, $\sigma_2 = \sqrt{25 \cdot 0.2 \cdot 2} = \sqrt{10} \approx 3.16$ g.
+                <span class="b-res">Machine 1 has less spread.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calculate $V(X)$ and $\sigma$ for the number of heads with three coins ($\mu = 1.5$).</p></div>
+            <div class="b-sol"><p>$V = 2.25 \cdot \tfrac18 + 0.25 \cdot \tfrac38 + 0.25 \cdot \tfrac38 + 2.25 \cdot \tfrac18 = \tfrac68 = 0.75$, $\sigma \approx 0.866$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ takes 0, 2 and 4 with 0.25; 0.5; 0.25. Calculate $\mu$, $V(X)$ and $\sigma$.</p></div>
+            <div class="b-sol"><p>$\mu = 2$, $V = 4 \cdot 0.25 + 0 + 4 \cdot 0.25 = 2$, $\sigma = \sqrt2 \approx 1.414$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Compare chuck-a-luck (example 6) with game A from the introduction: calculate the standard deviation of the gain in chuck-a-luck. Use the widget to check.</p></div>
+            <div class="b-sol"><p>$E(X^2) = \tfrac{125 + 75 + 4 \cdot 15 + 9}{216} = \tfrac{269}{216} \approx 1.2454$, $V = 1.2454 - 0.0787^2 \approx 1.239$, $\sigma \approx 1.113$ euros</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Prove the shortcut formula $V(X) = E(X^2) - \mu^2$ in general and check it with the dice.</p></div>
+            <div class="b-hint"><p>Multiply out $(x_i - \mu)^2$ and use $\sum P(X = x_i) = 1$ and $\sum x_i \cdot P(X = x_i) = \mu$.</p></div>
+            <div class="b-sol"><p>With $p_i = P(X = x_i)$: $V(X) = \sum (x_i^2 - 2\mu x_i + \mu^2)\, p_i = \sum x_i^2 p_i - 2\mu \sum x_i p_i + \mu^2 \sum p_i = E(X^2) - 2\mu^2 + \mu^2 = E(X^2) - \mu^2$.</p>
+                <p>Dice: $E(X^2) = \tfrac{91}{6} \approx 15.167$, minus $3.5^2 = 12.25$ gives $\tfrac{35}{12} \approx 2.917$, as in example 7.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>A random variable $X$ has the expected value $\mu$ and the variance $V(X)$. Prove $V(aX + b) = a^2 \cdot V(X)$. Interpret: why does a fixed bonus $b$ not change the spread, while a factor $a$ changes it quadratically?</p></div>
+            <div class="b-sol"><p>$E(aX + b) = a\mu + b$ (unit 3), so $V(aX + b) = \sum (a x_i + b - a\mu - b)^2 p_i = a^2 \sum (x_i - \mu)^2 p_i = a^2 V(X)$.</p>
+                <p>A bonus shifts all values by the same amount, the distances to $\mu$ stay the same. A factor stretches all distances by $a$, so their squares by $a^2$; the standard deviation grows with $|a|$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="5" data-ph="σ ="><p class="b-q-text">$X$ takes 0 and 10 with 0.5 each. What is $\sigma$?</p><div class="b-sol"><p>$\mu = 5$, $V = 25$, $\sigma = 5$</p></div></div>
+        <div class="b-q" data-ans="1.5" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">$V(X) = 2.25$. What is the standard deviation?</p><div class="b-sol"><p>$\sqrt{2.25} = 1.5$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Two games have the same expected value, game A has $\sigma = €2$, game B has $\sigma = €8$. Which one is riskier?</p>
+            <div class="b-mc"><button>Game A</button><button>Game B</button><button>Both the same</button></div>
+            <div class="b-sol"><p>In game B the results typically deviate much more from the expected value.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="20">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Explain without a long calculation why the total score of two dice has the expected value 7.</p></div>
+            <div class="b-sol"><p>The distribution is symmetric about 7. Or: each dice has the expected value 3.5, and expected values add up.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>How many euros do you lose in the long run in 216 games of chuck-a-luck? How many in 1,000?</p></div>
+            <div class="b-sol"><p>216 games: about €17. 1,000 games: $1000 \cdot \tfrac{17}{216} \approx 78.70$ euros.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Connecting with chapter 1.1:</b> from an urn with 3 red and 2 blue balls you draw two without replacement. For every red one you get €1. The stake is €1. Is the game fair?</p></div>
+            <div class="b-sol"><p>With example 2: $E(\text{payout}) = 0 \cdot 0.1 + 1 \cdot 0.6 + 2 \cdot 0.3 = 1.2$ euros. Average gain $+0.20$ euros: favourable for the player. A stake of €1.20 would be fair.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dice game: with a six you win $a$ euros, otherwise you lose €1. For which $a$ is the game fair? What is $\sigma$ then?</p></div>
+            <div class="b-sol"><p>$\tfrac{a}{6} - \tfrac56 = 0 \Rightarrow a = 5$. $V = 25 \cdot \tfrac16 + 1 \cdot \tfrac56 = 5$, $\sigma = \sqrt5 \approx 2.24$ euros.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: the St Petersburg game" data-toc-k="X" data-toc-short="Petersburg">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">A GAME WITH AN INFINITE EXPECTED VALUE</span></div>
+    <h2>The St Petersburg game</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>A coin is tossed until tails comes up for the first time. If that happens on the $k$-th toss, you get $2^k$ euros.
+                With probability $\tfrac12$ you get €2, with $\tfrac14$ you get €4, with $\tfrac18$ you get €8, and so on.</p>
+            <p>The expected value is $2 \cdot \tfrac12 + 4 \cdot \tfrac14 + 8 \cdot \tfrac18 + \ldots = 1 + 1 + 1 + \ldots$, that is <b>infinite</b>.
+                All the same, hardly anyone would pay a stake of more than €20. Why?</p>
+            <p>Nicolaus I Bernoulli asked the question in 1713 in a letter to Pierre Rémond de Montmort. His cousin Daniel Bernoulli answered in 1738:
+                people do not value money by its amount but by its <b>utility</b>, and that grows more slowly than the amount. On top of that,
+                no bank in the world could pay out the huge prizes of the rare long runs.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Daniel Bernoulli: Specimen theoriae novae de mensura sortis. Commentarii Academiae Scientiarum Imperialis Petropolitanae 5 (1738).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>RANDOM VARIABLE</h4><p>Assigns a number to every outcome. Distribution: all $P(X = x_i)$, total 1.</p></div>
+        <div><p>Number of heads with three coins: $\tfrac18, \tfrac38, \tfrac38, \tfrac18$</p></div></div>
+    <div class="b-rueck"><div><h4>DISTRIBUTION FUNCTION</h4><p>$F(x) = P(X \le x)$, a staircase from 0 to 1. $P(a < X \le b) = F(b) - F(a)$, $P(X > a) = 1 - F(a)$.</p></div>
+        <div><p>Three coins: $F(1.5) = \tfrac12$, $P(0 < X \le 2) = \tfrac34$</p></div></div>
+    <div class="b-rueck"><div><h4>EXPECTED VALUE</h4><p>$E(X) = \mu = \sum x_i \cdot P(X = x_i)$, the mean in the long run.</p></div>
+        <div><p>Dice: 3.5 · Spinner: €1.75</p></div></div>
+    <div class="b-rueck"><div><h4>FAIR GAME</h4><p>Expected value of the gain equal to 0.</p></div>
+        <div><p>Chuck-a-luck: $-\tfrac{17}{216}$ euros, unfair</p></div></div>
+    <div class="b-rueck"><div><h4>VARIANCE AND STANDARD DEVIATION</h4><p>$V(X) = \sum (x_i - \mu)^2 \cdot P(X = x_i)$, $\sigma = \sqrt{V(X)}$</p></div>
+        <div><p>Dice: $V \approx 2.917$, $\sigma \approx 1.708$</p></div></div>
+    <div class="b-rueck"><div><h4>RULES OF CALCULATION</h4><p>$E(aX + b) = aE(X) + b$ · $V(aX + b) = a^2 V(X)$ · $V(X) = E(X^2) - \mu^2$</p></div>
+        <div><p>Double all amounts: $\sigma$ doubles, $V$ quadruples.</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1</div>
+            <div class="b-q" data-ans="2.1" data-tol="0.0001" data-ph="E(X) ="><p class="b-q-text">$X$ takes 1, 2, 3 with 0.2; 0.5; 0.3. Calculate $E(X)$.</p><div class="b-sol"><p>$0.2 + 1 + 0.9 = 2.1$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">A game is called fair if …</p>
+                <div class="b-mc"><button>winning is more likely than losing</button><button>the expected value of the gain is 0</button><button>the standard deviation is 0</button></div>
+                <div class="b-sol"><p>In the long run nobody wins.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="σ ="><p class="b-q-text">$X$ takes 0 and 4 with 0.5 each. What is $\sigma$?</p><div class="b-sol"><p>$\mu = 2$, $V = 4$, $\sigma = 2$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="V ="><p class="b-q-text">We know $V(X) = 3$. What is $V(2X + 5)$?</p><div class="b-sol"><p>$2^2 \cdot 3 = 12$; the added 5 changes nothing.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2</div>
+            <div class="b-q" data-ans="0.35" data-tol="0.0001" data-ph="P ="><p class="b-q-text">A distribution has the probabilities 0.2; 0.15; ?; 0.3. Which one is missing?</p><div class="b-sol"><p>$1 - 0.65 = 0.35$</p></div></div>
+            <div class="b-q" data-ans="-0.2" data-tol="0.0001" data-ph="euros"><p class="b-q-text">Stake €1. With probability 0.1 €8 is paid out, otherwise nothing. Expected value of the gain?</p><div class="b-sol"><p>$0.8 - 1 = -0.2$, a loss of €0.20</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="V ="><p class="b-q-text">$X$ takes $-2$ and $2$ with 0.5 each. Calculate $V(X)$.</p><div class="b-sol"><p>$\mu = 0$, $V = 4$</p></div></div>
+            <div class="b-q" data-ans="0.65" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$X$ only takes whole numbers and $F(2) = 0.35$. What is $P(X \ge 3)$?</p><div class="b-sol"><p>$P(X \ge 3) = 1 - F(2) = 0.65$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-stochastik-uebung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBABILITY PRACTICE</span><span class="b-lab-what">Distributions and expected value</span></span></a>
+        <a class="b-lab" href="../../mathetest11-simulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULATION</span><span class="b-lab-what">The mean in the long run</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 12, advanced course · Learning area 1 of the Saxon curriculum for mathematics at the Berufliches Gymnasium (2026).</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-en/stochastik.js"></script>
+<script src="../../js/buch-bgy12lk.js"></script>
+<script src="../../js/buch-en/bgy12lk.js"></script>
+</body>
+</html>
