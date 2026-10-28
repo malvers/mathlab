@@ -3,9 +3,9 @@
    the-real-salary.html (resources/real-salary) with ONE data key: key.json holds it wrapped
    with PBKDF2(password); every <name>.bin is "CVD1" | iv 12 | AES-GCM.
    The unwrapped key is remembered on the device as a non-extractable CryptoKey in IndexedDB
-   "cv-docs" (store "keys", entry "data") – the same entry cv.html uses, so a device that has
-   opened the CV documents opens the other pages without asking again. The password itself
-   is never stored. */
+   "cv-docs" (store "keys", entry "data"), one entry for cv.html and the-real-salary.html,
+   so a device that has opened one of them opens the other without asking again. The
+   password itself is never stored. */
 (function () {
   "use strict";
   if (window.CvKey) return;

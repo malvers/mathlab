@@ -465,6 +465,7 @@
 
 <script src="js/apple-emoji.js"></script>
 <script src="js/lade-skript.js"></script>
+<script src="js/cv-key.js"></script>
 <script>
 "use strict";
 
@@ -1242,10 +1243,8 @@ for (const code of LANG_ORDER) {
 }
 
 /* documents dialog: grid of first pages ↔ all pages of one document.
-   The scans are encrypted (scripts/cv-docs.mjs): key.json holds the data key
-   wrapped with PBKDF2(password); every <page>.bin is "CVD1" | iv 12 | AES-GCM.
-   The unwrapped key is remembered on the device as a non-extractable CryptoKey
-   in IndexedDB – the password itself is never stored. Direct links:
+   The scans are encrypted (scripts/cv-docs.mjs); key, device memory and decryption
+   come from js/cv-key.js, which the-real-salary.html shares. Direct links:
    cv.html#docs (overview) and cv.html#docs/<first page> (one document). */
 const Docs = (function () {
   const $ = (id) => document.getElementById(id);
@@ -1268,74 +1267,15 @@ const Docs = (function () {
   let dataKey = null;    /* AES-GCM CryptoKey of all scans, null = locked */
   let checking = false;  /* looking for a key remembered on this device */
   let urls = {};         /* page name -> promise of a blob: URL */
-  let keyFileP = null;
 
   const code = () => DOCS_UI[document.documentElement.lang] ? document.documentElement.lang : "en";
   const docId = (d) => d.pages[0].replace(/-1$/, "");
-  const b64 = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
-
-  /* ---- crypto ---- */
-  function keyFile() {
-    keyFileP = keyFileP || fetch(DOCS_DIR + "key.json", { cache: "no-cache" }).then((r) => {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.json();
-    }).catch((e) => { keyFileP = null; throw e; });
-    return keyFileP;
-  }
-
-  async function keyFromPassword(pw) {
-    const kf = await keyFile();
-    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
-    const kek = await crypto.subtle.deriveKey(
-      { name: "PBKDF2", salt: b64(kf.salt), iterations: kf.iter, hash: "SHA-256" },
-      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
-    let raw;
-    try { raw = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(kf.iv) }, kek, b64(kf.key)); }
-    catch (e) { const err = new Error(DOCS_UI[code()].wrong); err.pw = true; throw err; }
-    return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);  /* non-extractable */
-  }
-
-  /* a remembered key fits as long as the scans were sealed with it (new password = new key) */
-  async function keyFits(key) {
-    const c = b64((await keyFile()).check);
-    try { await crypto.subtle.decrypt({ name: "AES-GCM", iv: c.subarray(0, 12) }, key, c.subarray(12)); return true; }
-    catch (e) { return false; }
-  }
 
   function blobUrl(name) {
-    urls[name] = urls[name] || fetch(DOCS_DIR + name + ".bin").then(async (r) => {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      const bin = new Uint8Array(await r.arrayBuffer());
-      const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: bin.subarray(4, 16) }, dataKey, bin.subarray(16));
-      return URL.createObjectURL(new Blob([plain], { type: "image/jpeg" }));
-    }).catch((e) => { delete urls[name]; throw e; });
+    urls[name] = urls[name] || CvKey.open(dataKey, DOCS_DIR + name + ".bin")
+      .then((plain) => URL.createObjectURL(new Blob([plain], { type: "image/jpeg" })))
+      .catch((e) => { delete urls[name]; throw e; });
     return urls[name];
-  }
-
-  /* IndexedDB "cv-docs", store "keys", entry "data" – every access may fail (private mode) */
-  function idb(mode, fn) {
-    return new Promise((resolve, reject) => {
-      const rq = indexedDB.open("cv-docs", 1);
-      rq.onupgradeneeded = () => rq.result.createObjectStore("keys");
-      rq.onerror = () => reject(rq.error);
-      rq.onsuccess = () => {
-        const tx = rq.result.transaction("keys", mode);
-        const req = fn(tx.objectStore("keys"));
-        tx.oncomplete = () => { rq.result.close(); resolve(req.result); };
-        tx.onerror = () => { rq.result.close(); reject(tx.error); };
-      };
-    });
-  }
-  const loadKey = () => idb("readonly", (st) => st.get("data")).catch(() => null);
-  const saveKey = (key) => idb("readwrite", (st) => st.put(key, "data")).catch(() => {});
-  const dropKey = () => idb("readwrite", (st) => st.delete("data")).catch(() => {});
-
-  /* the dialog unlocks by script, so Chrome would not offer to save the password by itself */
-  function rememberInChrome(pw) {
-    if (!window.PasswordCredential || !navigator.credentials) return Promise.resolve();
-    const store = navigator.credentials.store(
-      new PasswordCredential({ id: "cv-dokumente", name: "Dokumente – Dr. Michael R. Alvers", password: pw })).catch(() => {});
-    return Promise.race([store, new Promise((r) => setTimeout(r, 1500))]);
   }
 
   /* ---- rendering ---- */
@@ -1441,11 +1381,8 @@ const Docs = (function () {
     if (!dataKey) {
       checking = true;
       render();
-      try {
-        const key = await loadKey();
-        if (key && await keyFits(key)) dataKey = key;
-        else if (key) await dropKey();
-      } catch (e) { /* offline or no IndexedDB → password form */ }
+      try { dataKey = await CvKey.remembered(); }
+      catch (e) { /* offline or no IndexedDB → password form */ }
       checking = false;
     }
     show(current);
@@ -1473,15 +1410,15 @@ const Docs = (function () {
     goBtn.disabled = true;
     status(DOCS_UI[code()].busy.replace(/\s*…$/, ""), true);
     try {
-      dataKey = await keyFromPassword(pw);
-      await saveKey(dataKey);
-      await rememberInChrome(pw);
+      dataKey = await CvKey.fromPassword(pw);
+      await CvKey.save(dataKey);
+      await CvKey.rememberInChrome(pw);
       pwIn.value = "";
       status("");
       show(current);
       closeBtn.focus();
     } catch (err) {
-      status(err.pw ? err.message : "Fehler: " + err.message);
+      status(err.pw ? DOCS_UI[code()].wrong : "Fehler: " + err.message);
       pwIn.select();
     } finally {
       goBtn.disabled = false;
@@ -1490,7 +1427,7 @@ const Docs = (function () {
 
   lockBtn.addEventListener("click", () => {
     dataKey = null;
-    dropKey();
+    CvKey.drop();
     Object.values(urls).forEach((p) => p.then((u) => URL.revokeObjectURL(u)).catch(() => {}));
     urls = {};
     show(-1);
