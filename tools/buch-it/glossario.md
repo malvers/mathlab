@@ -983,3 +983,33 @@ numbers stay. The start page explains the Oberschule as in mathe6-it.
 | Keil, Winkelhaken, Sechzigersystem | cuneo, uncino, sistema sessagesimale | OP |
 | Rechenpfennig, Rechentisch, Linie, Zwischenraum | gettone da calcolo, tavolo da calcolo, linea, spazio | OP |
 | Wahlbereich (1) | area opzionale (1), chapter OP | kicker «AREA OPZIONALE · GIUGNO · LUGLIO» |
+
+## mathe12lk-it
+
+<!-- it-22: terms of this book only, write right below this line -->
+
+Cibrario, 28.10.2026: decisions made while translating BGY 12 LK; nothing above was changed. Where the German text is the
+same as in mathe12 or mathegy11lk, the Italian of mathe12-it / mathegy11lk-it was taken over unchanged.
+
+| German | Italian | Note |
+|---|---|---|
+| Berufliches Gymnasium · Leistungskurs · Jahrgangsstufe 12 | Berufliches Gymnasium · Leistungskurs · 12ª classe | start page: Grundkurs (corso di base), Leistungskurs (corso di livello avanzato); `short`: Matematica 12 LK |
+| Verteilungsfunktion, Wahrscheinlichkeitsfunktion, Treppenfunktion | funzione di ripartizione, funzione di probabilità, funzione a gradini | 1.2, widget verteilungsfunktion (js/buch-it/bgy12lk.js) |
+| „höchstens“, „mehr als“, „zwischen“ | «al massimo», «più di», «tra» | 1.2 |
+| Satz von der totalen Wahrscheinlichkeit, Satz von Bayes, Zerlegung | teorema della probabilità totale, teorema di Bayes, partizione | 1.1 |
+| Zulieferer $Z_i$, Lieferant $L_3$, defekt $D$ | fornitore $F_i$, $F_3$, difettoso $D$ | 1.1, letters changed; krank $K$ → malato $M$ as in section 5 |
+| Bus und Bahn / Fahrrad (Verspätung $V$) | autobus e treno / bici, $P_V(\text{bici})$ | 1.1; the letter $V$ stays as in mathe12-it |
+| Summensymbol, binomischer Lehrsatz | simbolo di sommatoria, sviluppo del binomio di Newton | 1.3, 2.3 |
+| Unstetigkeitsstelle, Sprungstelle, Nahtstelle | punto di discontinuità, punto di salto, punto di raccordo | 2.1 |
+| Paketporto | tariffa dei pacchi | 2.1 |
+| lineare Approximation, differenzierbar, Knick | approssimazione lineare, derivabile, spigolo | 2.2 |
+| glatt / ohne Knick zusammensetzen | raccordare senza spigoli | 2.2 |
+| Produktregel, Kettenregel, Verkettung | regola del prodotto, regola della catena, funzione composta | 2.4 |
+| Bateman-Funktion, trigonometrischer Pythagoras | funzione di Bateman, «Pitagora trigonometrico» | 2.4 |
+| globales Extremum, Rand (des Intervalls) | estremo assoluto, estremo dell’intervallo / bordo | 2.5, 2.8 |
+| offenes Intervall $]0;\, 2\pi[$ | $]0, 2\pi[$ | 2.6, 2.8 |
+| Lückenschluss (graph label 2.7) | Chiudere il vuoto | as the exploration in mathe12-it 2.6 |
+| Wendetangente (graph label) | tangente nel flesso | data-labels in the page |
+| Gauß, Ceres, Braunschweig, Hamburg, Leipzig | Gauss, Cerere, Brunswick, Amburgo, Lipsia | 2.4, 2.7 |
+| dreiseitige Pyramide, Schwerpunkt | piramide a base triangolare, baricentro | 6.1 |
+| Extremwertprobleme / Extremalaufgaben (lab cards) | PROBLEMI DI OTTIMIZZAZIONE / PROBLEMI DI MASSIMO E MINIMO | 2.8, two cards, two names |
