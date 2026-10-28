@@ -192,11 +192,11 @@
         const out = div(box, 'b-out');
         function render() {
             const x = mvec(L, y), X = LEO.A.map(r => r.map((a, j) => a * x[j]));
-            let h = '<table class="b-table"><thead><tr><th>von ↓ an →</th>' + LEO.short.map(s => '<th>' + s + '</th>').join('') + '<th>Endnachfrage</th><th>Produktion</th></tr></thead><tbody>';
+            let h = '<table class="b-table"><thead><tr><th></th>' + LEO.short.map(s => '<th>' + s + '</th>').join('') + '<th>Markt</th><th>Summe</th></tr></thead><tbody>';
             for (let i = 0; i < n; i++) {
-                h += '<tr><th>' + LEO.names[i] + '</th>' + X[i].map(v => '<td>' + fmt(v, 1) + '</td>').join('') + '<td><b>' + fmt(y[i], 0) + '</b></td><td><b>' + fmt(x[i], 1) + '</b></td></tr>';
+                h += '<tr><th>' + LEO.short[i] + '</th>' + X[i].map(v => '<td>' + fmt(v, 0) + '</td>').join('') + '<td><b>' + fmt(y[i], 0) + '</b></td><td><b>' + fmt(x[i], 0) + '</b></td></tr>';
             }
-            tab.innerHTML = h + '</tbody></table>';
+            tab.innerHTML = '<p class="b-help" style="margin:0 0 6px">' + 'Zeile: liefernder Sektor, Spalte: empfangender Sektor. ' + LEO.names.map((nm, i) => LEO.short[i] + ' = ' + nm).join(', ') + '. Summe = Produktion, alle Angaben gerundet in ME.</p>' + h + '</tbody></table>';
             out.innerHTML = '<p style="margin:0 0 6px">Technologiematrix $A = ' + tm(LEO.A, 2) + '$, Leontief-Inverse $(E - A)^{-1} \\approx ' + tm(L, 3) + '$.</p>' +
                 '<p style="margin:0">$\\vec{x} = (E - A)^{-1} \\cdot \\vec{y} \\approx ' + tv(x, 1) + '$. Jede Zeile der Tabelle geht auf: Lieferungen an die drei Sektoren plus Endnachfrage ergeben die Produktion. ' +
                 'Insgesamt werden ' + fmt(x.reduce((s, v) => s + v, 0), 0) + ' ME erzeugt, damit ' + fmt(y.reduce((s, v) => s + v, 0), 0) + ' ME den Markt erreichen.</p>';
