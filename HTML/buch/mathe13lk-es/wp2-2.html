@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 13 avanzado · Capítulo OP2.2 · Interdependencias y el modelo de Leontief | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Grafos de Gozinto, producción en varias etapas, cálculo de costes, análisis input-output. Capítulo OP2.2 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 13 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 13 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO OP2.2 · OPTATIVA OBLIGATORIA 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO OP2.2 · OPTATIVA OBLIGATORIA 2 · ENERO · FEBRERO</p>
+            <h1>Interdependencias y el modelo de Leontief</h1>
+            <p class="b-hero-lead">Un obrador de muesli mezcla copos de avena, frutos secos y fruta deshidratada, primero en dos mezclas base y, a partir de ellas, en dos variedades de muesli. ¿Cuánta materia prima necesita un pedido,
+                cuánto cuesta una bolsa, compensa la producción? Con el <b>grafo de Gozinto</b> y el producto de matrices lo calculas en pocas líneas.
+                Y toda una economía en la que cada sector abastece también a los demás la describe el <b>modelo de Leontief</b> con una sola ecuación matricial.</p>
+            <div class="b-chips"><span class="b-chip">9 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">OPTATIVA OBLIGATORIA 2</span></div>
+        </div>
+        <div class="b-hero-art"><svg viewBox="0 0 560 300" role="img" aria-label="Grafo de Gozinto del obrador de muesli: tres materias primas, dos productos intermedios, dos productos finales; en las flechas, las unidades necesarias"><defs><marker id="gz13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" style="fill:#6d8199"/></marker></defs><line x1="120" y1="50" x2="226" y2="100" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="151.8" cy="65.0" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="151.8" y="70.0" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">4</text><line x1="120" y1="50" x2="226" y2="200" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="178.3" cy="132.5" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="178.3" y="137.5" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">2</text><line x1="120" y1="150" x2="226" y2="100" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="151.8" cy="135.0" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="151.8" y="140.0" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">1</text><line x1="120" y1="150" x2="226" y2="200" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="178.3" cy="177.5" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="178.3" y="182.5" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">1</text><line x1="120" y1="250" x2="226" y2="200" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="178.3" cy="222.5" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="178.3" y="227.5" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">2</text><line x1="330" y1="100" x2="436" y2="100" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="361.8" cy="100.0" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="361.8" y="105.0" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">2</text><line x1="330" y1="100" x2="436" y2="200" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="356.5" cy="125.0" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="356.5" y="130.0" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">1</text><line x1="330" y1="200" x2="436" y2="100" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="393.6" cy="140.0" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="393.6" y="145.0" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">1</text><line x1="330" y1="200" x2="436" y2="200" style="stroke:#6d8199;stroke-width:1.6" marker-end="url(#gz13)"/><circle cx="361.8" cy="200.0" r="12" style="fill:rgba(245,194,66,0.18);stroke:rgb(245,194,66);stroke-width:1.2"/><text x="361.8" y="205.0" text-anchor="middle" style="fill:rgb(245,194,66);font:700 14px Raleway,sans-serif">2</text><rect x="20" y="26" width="100" height="48" rx="11" style="fill:rgb(245,194,66);fill-opacity:0.16;stroke:rgb(245,194,66);stroke-width:1.6"/><text x="70" y="47" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">R₁</text><text x="70" y="65" text-anchor="middle" style="fill:#9fb0c4;font:12px Raleway,sans-serif">Copos de avena</text><rect x="20" y="126" width="100" height="48" rx="11" style="fill:rgb(245,194,66);fill-opacity:0.16;stroke:rgb(245,194,66);stroke-width:1.6"/><text x="70" y="147" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">R₂</text><text x="70" y="165" text-anchor="middle" style="fill:#9fb0c4;font:12px Raleway,sans-serif">Frutos secos</text><rect x="20" y="226" width="100" height="48" rx="11" style="fill:rgb(245,194,66);fill-opacity:0.16;stroke:rgb(245,194,66);stroke-width:1.6"/><text x="70" y="247" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">R₃</text><text x="70" y="265" text-anchor="middle" style="fill:#9fb0c4;font:12px Raleway,sans-serif">Fruta deshidratada</text><rect x="230" y="76" width="100" height="48" rx="11" style="fill:#7fd8ee;fill-opacity:0.16;stroke:#7fd8ee;stroke-width:1.6"/><text x="280" y="97" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Z₁</text><text x="280" y="115" text-anchor="middle" style="fill:#9fb0c4;font:12px Raleway,sans-serif">Base</text><rect x="230" y="176" width="100" height="48" rx="11" style="fill:#7fd8ee;fill-opacity:0.16;stroke:#7fd8ee;stroke-width:1.6"/><text x="280" y="197" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Z₂</text><text x="280" y="215" text-anchor="middle" style="fill:#9fb0c4;font:12px Raleway,sans-serif">Fruta</text><rect x="440" y="76" width="100" height="48" rx="11" style="fill:rgb(160,200,90);fill-opacity:0.16;stroke:rgb(160,200,90);stroke-width:1.6"/><text x="490" y="97" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">E₁</text><text x="490" y="115" text-anchor="middle" style="fill:#9fb0c4;font:12px Raleway,sans-serif">Classic</text><rect x="440" y="176" width="100" height="48" rx="11" style="fill:rgb(160,200,90);fill-opacity:0.16;stroke:rgb(160,200,90);stroke-width:1.6"/><text x="490" y="197" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">E₂</text><text x="490" y="215" text-anchor="middle" style="fill:#9fb0c4;font:12px Raleway,sans-serif">Muesli de frutas</text></svg></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>describir procesos de producción en dos etapas con <b>grafos de Gozinto</b> y <b>matrices de necesidades</b></li>
+                <li>calcular las necesidades de materias primas y productos intermedios para un <b>plan de producción</b> y, a la inversa, deducir la producción a partir de las existencias</li>
+                <li>calcular <b>costes</b>, <b>ingresos</b>, <b>margen de contribución</b> y <b>beneficio</b> con matrices y vectores</li>
+                <li>convertir una <b>tabla input-output</b> en la matriz tecnológica y determinar la producción necesaria con la <b>inversa de Leontief</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="7" data-ph="Elemento"><p class="b-q-text">$\begin{pmatrix} 1 & 2 \\ 3 & 0 \end{pmatrix} \cdot \begin{pmatrix} 1 \\ 3 \end{pmatrix}$: ¿elemento de arriba?</p><div class="b-sol"><p>$1 + 6$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="Elemento"><p class="b-q-text">$(1 \;\; 1) \cdot \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$: ¿segundo elemento?</p><div class="b-sol"><p>$1 \cdot 2 + 1 \cdot 1$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="Elemento"><p class="b-q-text">Inversa de $\begin{pmatrix} 2 & 1 \\ 1 & 1 \end{pmatrix}$: ¿elemento de arriba a la derecha?</p><div class="b-sol"><p>$ad - bc = 1$, por tanto $-b = -1$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">¿QUÉ VA EN LA BOLSA?</div>
+            <div class="b-text"><p>Leed el grafo de Gozinto de arriba: una bolsa de Classic consta de 2 u. de base y 1 u. de fruta; una unidad de base, de 4 u. de copos de avena y 1 u. de frutos secos …</p>
+                <ul><li>¿Cuántas unidades de copos de avena hay en una bolsa de Classic? Seguid todos los caminos de $R_1$ a $E_1$.</li><li>¿Qué relación tiene vuestro cálculo con el producto de matrices?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">¿COMPENSA?</div>
+            <div class="b-text"><p>Una bolsa de Classic se vende a 25 €. Los copos de avena cuestan 0,50 € por unidad; los frutos secos, 2 €; la fruta, 1,50 €. A eso se suman los costes de mezclar y envasar.</p>
+                <ul><li>¿Qué costes hay por bolsa? ¿Qué os falta todavía para calcular el beneficio?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">ELECTRICIDAD PARA LA FÁBRICA DE ELECTRICIDAD</div>
+            <div class="b-text"><p>Una central eléctrica necesita ella misma electricidad, una acería necesita acero para sus máquinas, y las dos se abastecen mutuamente.</p>
+                <ul><li>Si los hogares quieren comprar 100 unidades de electricidad: ¿basta con producir 100 unidades?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Grafos de Gozinto y producción en varias etapas" data-toc-k="1" data-toc-short="1 Gozinto">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Grafos de Gozinto y producción en varias etapas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En una bolsa de Classic hay 2 u. de base con 4 u. de copos de avena cada una y 1 u. de fruta con 2 u. de copos de avena: $2 \cdot 4 + 1 \cdot 2 = 10$ u.
+                Es la fila $R_1$ de la matriz materias primas–productos intermedios por la columna $E_1$ de la matriz productos intermedios–productos finales: un elemento del producto de matrices.</p></div></div>
+            <div class="b-text"><p>Los números de las flechas de un <b>grafo de Gozinto</b> se reúnen en <b>matrices de necesidades</b>: las filas corresponden a lo que entra; las columnas, a lo que se obtiene.
+                Un <b>plan de producción</b> $\vec{p}$ indica cuántos productos finales se fabrican. Si se multiplica por la izquierda por las matrices de necesidades, se obtienen las necesidades en cada etapa.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PRODUCCIÓN EN DOS ETAPAS</div>
+                <div class="b-text">
+                    <p>$M_{RZ}$: materias primas por producto intermedio · $M_{ZE}$: productos intermedios por producto final · <b>matriz de necesidades total</b> $M_{RE} = M_{RZ} \cdot M_{ZE}$: materias primas por producto final.</p>
+                    <p>Necesidades para el plan de producción $\vec{p}$: productos intermedios $\vec{z} = M_{ZE} \cdot \vec{p}$, materias primas $\vec{r} = M_{RE} \cdot \vec{p} = M_{RZ} \cdot \vec{z}$.</p>
+                    <p><b>Hacia atrás:</b> de las existencias $\vec{z}$ se deduce $\vec{p} = M_{ZE}^{-1} \cdot \vec{z}$, si $M_{ZE}$ es cuadrada e invertible. Si no, resolver un sistema de ecuaciones y comprobar si cuadra.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>El nombre:</b> «Gozinto» es una broma del investigador operativo Andrew Vazsonyi, que citaba a un matemático italiano inventado, «Zepartzat Gozinto»: <i>the part that goes into</i>, la pieza que entra.</p>
+            <p class="b-note"><b>Orden:</b> $M_{RZ} \cdot M_{ZE}$ es compatible (productos intermedios en el centro); $M_{ZE} \cdot M_{RZ}$, no.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · UN GRAFO DE GOZINTO CON PLAN DE PRODUCCIÓN</div>
+        <p class="b-help" style="margin:0 0 12px">Un segundo ejemplo, una fábrica de chocolate. Ajusta el plan de producción: el grafo muestra las necesidades en cada etapa. En el elemento interactivo, las matrices se llaman brevemente $A = M_{RZ}$, $B = M_{ZE}$ y $C = M_{RE}$.</p>
+        <div data-widget="verflechtung"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · EL PEDIDO</div>
+            <div class="b-text"><p>El obrador debe entregar 30 bolsas de Classic y 20 bolsas de muesli de frutas. Determina $M_{RE}$ y las necesidades.</p></div>
+            <div class="b-sol"><p>$M_{RZ} = \begin{pmatrix} 4 & 2 \\ 1 & 1 \\ 0 & 2 \end{pmatrix}$, $M_{ZE} = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}$, $M_{RE} = M_{RZ} \cdot M_{ZE} = \begin{pmatrix} 10 & 8 \\ 3 & 3 \\ 2 & 4 \end{pmatrix}$.</p>
+                <p>$\vec{z} = M_{ZE} \cdot \begin{pmatrix} 30 \\ 20 \end{pmatrix} = \begin{pmatrix} 80 \\ 70 \end{pmatrix}$, <span class="b-res">$\vec{r} = M_{RE} \cdot \begin{pmatrix} 30 \\ 20 \end{pmatrix} = \begin{pmatrix} 460 \\ 150 \\ 140 \end{pmatrix}$</span> u. de copos de avena, frutos secos y fruta.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · ¿SE AGOTA EL ALMACÉN?</div>
+            <div class="b-text"><p>En el almacén hay 520 u. de copos de avena, 165 u. de frutos secos y 170 u. de fruta. ¿Se puede convertir todo en muesli sin que sobre nada?</p></div>
+            <div class="b-sol"><p>$M_{RE} \cdot \vec{p} = \vec{r}$: de $10a + 8b = 520$ y $3a + 3b = 165$ se deduce $a = 40$, $b = 15$.</p>
+                <p>Tercera fila: $2 \cdot 40 + 4 \cdot 15 = 140 \neq 170$. <span class="b-res">No sin que sobre nada: quedan 30 u. de fruta.</span> Tres ecuaciones, dos incógnitas: el sistema está sobredeterminado.</p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Lee en $M_{RE}$: ¿cuántas unidades de frutos secos necesita una bolsa de muesli de frutas? Confírmalo con los caminos del grafo de Gozinto.</p></div>
+            <div class="b-sol"><p>$m_{22} = 3$: por la base $1 \cdot 1 = 1$, por la fruta $1 \cdot 2 = 2$, en total 3.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula las materias primas necesarias para 50 bolsas de Classic y 10 bolsas de muesli de frutas.</p></div>
+            <div class="b-sol"><p>$M_{RE} \cdot \begin{pmatrix} 50 \\ 10 \end{pmatrix} = \begin{pmatrix} 580 \\ 180 \\ 140 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En el almacén intermedio hay 80 u. de base y 70 u. de fruta. ¿Qué plan de producción gasta las dos por completo? Calcula con $M_{ZE}^{-1}$.</p></div>
+            <div class="b-sol"><p>$M_{ZE}^{-1} = \tfrac13 \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix}$, $\vec{p} = \tfrac13 \begin{pmatrix} 160 - 70 \\ -80 + 140 \end{pmatrix} = \begin{pmatrix} 30 \\ 20 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dibuja un grafo de Gozinto para $M_{RZ} = \begin{pmatrix} 1 & 0 \\ 2 & 3 \end{pmatrix}$ y $M_{ZE} = \begin{pmatrix} 2 & 1 & 0 \\ 0 & 1 & 4 \end{pmatrix}$. ¿Cuántas materias primas, productos intermedios y productos finales hay? Calcula $M_{RE}$.</p></div>
+            <div class="b-sol"><p>2 materias primas, 2 productos intermedios, 3 productos finales. $M_{RE} = \begin{pmatrix} 2 & 1 & 0 \\ 4 & 5 & 12 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Para qué existencias $r_1$, $r_2$, $r_3$ de copos de avena, frutos secos y fruta se agota el almacén sin que sobre nada? Deduce una condición eliminando $a$ y $b$ de $\vec{r} = M_{RE} \cdot \begin{pmatrix} a \\ b \end{pmatrix}$.</p></div>
+            <div class="b-hint"><p>Expresa $a$ y $b$ en función de $r_1$ y $r_2$ con la primera y la segunda fila, y sustitúyelos en la tercera.</p></div>
+            <div class="b-sol"><p>$10a + 8b = r_1$ y $3a + 3b = r_2$ dan $a = \tfrac{3r_1 - 8r_2}{6}$ y $b = \tfrac{10r_2 - 3r_1}{6}$.</p>
+                <p>Tercera fila: $r_3 = 2a + 4b = \tfrac{6r_1 - 16r_2 + 40r_2 - 12r_1}{6} = 4r_2 - r_1$. <span class="b-res">Sin que sobre nada si y solo si $r_3 = 4r_2 - r_1$</span>, y además $a, b \ge 0$. Comprobación con el ejemplo 2: $4 \cdot 165 - 520 = 140$, pero en el almacén hay 170.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="10" data-ph="u."><p class="b-q-text">¿Cuántas unidades de copos de avena hay en una bolsa de Classic?</p><div class="b-sol"><p>$2 \cdot 4 + 1 \cdot 2$</p></div></div>
+        <div class="b-q" data-ans="140" data-ph="u."><p class="b-q-text">¿Cuántas unidades de fruta necesita el pedido de 30 bolsas de Classic y 20 bolsas de muesli de frutas?</p><div class="b-sol"><p>$2 \cdot 30 + 4 \cdot 20$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">La matriz de necesidades total es …</p><div class="b-mc"><button>$M_{RZ} \cdot M_{ZE}$</button><button>$M_{ZE} \cdot M_{RZ}$</button><button>$M_{RZ} + M_{ZE}$</button></div><div class="b-sol"><p>Materias primas a la izquierda, productos finales a la derecha</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Costes, ingresos y beneficio" data-toc-k="2" data-toc-short="2 Costes">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Cálculo de costes en procesos interdependientes lineales</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Costes de materias primas por bolsa: los copos de avena, los frutos secos y la fruta cuestan 0,50 €, 2 € y 1,50 € por unidad. Para una bolsa de Classic son
+                $0{,}5 \cdot 10 + 2 \cdot 3 + 1{,}5 \cdot 2 = 14$ €: el <b>vector fila</b> de costes por la columna $E_1$ de $M_{RE}$.</p></div></div>
+            <div class="b-text"><p>Hay costes en cada etapa: por las materias primas, por la fabricación de los productos intermedios y por el acabado de los productos finales. Los vectores de costes se escriben como filas,
+                porque se multiplican <b>por la izquierda</b> por las matrices de necesidades. Así se obtienen los <b>costes variables unitarios</b> de cada producto final. A ellos se suman los <b>costes fijos</b>, que no dependen de la cantidad.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · COSTES, INGRESOS, BENEFICIO</div>
+                <div class="b-text">
+                    <p><b>Costes variables por unidad:</b> $\vec{k}_v = \vec{k}_R \cdot M_{RE} + \vec{k}_Z \cdot M_{ZE} + \vec{k}_E$ (todos vectores fila)</p>
+                    <p><b>Costes totales</b> $K = \vec{k}_v \cdot \vec{p} + K_{\text{fix}}$ · <b>ingresos</b> $E = \vec{e} \cdot \vec{p}$ con el vector de precios $\vec{e}$ · <b>beneficio</b> $G = E - K$</p>
+                    <p><b>Margen de contribución unitario:</b> $\vec{d} = \vec{e} - \vec{k}_v$; «cubre» los costes fijos. $G = \vec{d} \cdot \vec{p} - K_{\text{fix}}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>¿Fila o columna?</b> Las cantidades son columnas (se añaden por la derecha); los precios y costes son filas (van a la izquierda). Así todos los productos son compatibles.</p>
+        </aside>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · COSTES UNITARIOS</div>
+            <div class="b-text"><p>Costes de fabricación: base 1 €, fruta 1,50 € por unidad; envasado: Classic 2 €, muesli de frutas 2,50 € por bolsa. Determina $\vec{k}_v$.</p></div>
+            <div class="b-sol"><p>$\vec{k}_R \cdot M_{RE} = (0{,}5 \;\; 2 \;\; 1{,}5) \cdot \begin{pmatrix} 10 & 8 \\ 3 & 3 \\ 2 & 4 \end{pmatrix} = (14 \;\; 16)$, $\vec{k}_Z \cdot M_{ZE} = (1 \;\; 1{,}5) \cdot \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix} = (3{,}5 \;\; 4)$.</p>
+                <p><span class="b-res">$\vec{k}_v = (14 + 3{,}5 + 2 \;\;\; 16 + 4 + 2{,}5) = (19{,}5 \;\; 22{,}5)$</span> € por bolsa.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · BENEFICIO</div>
+            <div class="b-text"><p>Precios 25 € y 30 €, costes fijos 250 €. ¿Cuál es el beneficio del pedido de 30 y 20 bolsas?</p></div>
+            <div class="b-sol"><p>Márgenes de contribución $\vec{d} = (25 - 19{,}5 \;\;\; 30 - 22{,}5) = (5{,}5 \;\; 7{,}5)$.</p>
+                <p>$G = 5{,}5 \cdot 30 + 7{,}5 \cdot 20 - 250 = 165 + 150 - 250 = $ <span class="b-res">65 €</span>. Comprobación: ingresos 1350 €, costes $19{,}5 \cdot 30 + 22{,}5 \cdot 20 + 250 = 1285$ €.</p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula los costes de materias primas del pedido del ejemplo 1 de dos maneras: con $\vec{k}_R \cdot \vec{r}$ y con $(\vec{k}_R \cdot M_{RE}) \cdot \vec{p}$.</p></div>
+            <div class="b-sol"><p>$(0{,}5 \;\; 2 \;\; 1{,}5) \cdot \begin{pmatrix} 460 \\ 150 \\ 140 \end{pmatrix} = 230 + 300 + 210 = 740$ € y $(14 \;\; 16) \cdot \begin{pmatrix} 30 \\ 20 \end{pmatrix} = 420 + 320 = 740$ € ✓ (propiedad asociativa)</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿A partir de cuántas bolsas compensa la producción si solo se fabrica Classic? ¿Y si solo se fabrica muesli de frutas?</p></div>
+            <div class="b-sol"><p>Classic: $5{,}5 \cdot a &gt; 250 \Rightarrow a \ge 46$. Muesli de frutas: $7{,}5 \cdot b &gt; 250 \Rightarrow b \ge 34$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>El precio de los frutos secos sube de 2 € a 3 € por unidad. ¿Cuánto suben los costes variables por bolsa? Lee la respuesta directamente en $M_{RE}$.</p></div>
+            <div class="b-sol"><p>La fila «frutos secos» de $M_{RE}$ es $(3 \;\; 3)$: cada bolsa se encarece en $3 \cdot 1 = 3$ €, $\vec{k}_v = (22{,}5 \;\; 25{,}5)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>El obrador puede conseguir como máximo 520 u. de copos de avena por semana; de todo lo demás hay de sobra. Vende todo lo que produce. ¿Qué plan de producción da el mayor beneficio? Justifícalo con el margen de contribución <b>por unidad de copos de avena</b>.</p></div>
+            <div class="b-hint"><p>Classic necesita 10 u. de copos de avena y aporta 5,50 € de margen de contribución; el muesli de frutas, 8 u. y 7,50 €.</p></div>
+            <div class="b-sol"><p>Por unidad de copos de avena: Classic $\tfrac{5{,}5}{10} = 0{,}55$ €, muesli de frutas $\tfrac{7{,}5}{8} \approx 0{,}94$ €. Así que solo muesli de frutas: $b = 520 : 8 = 65$ bolsas,
+                <span class="b-res">$G = 7{,}5 \cdot 65 - 250 = 237{,}50$ €</span>. Solo con Classic serían apenas $5{,}5 \cdot 52 - 250 = 36$ €.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="22,5" data-ph="€"><p class="b-q-text">¿Costes variables de una bolsa de muesli de frutas?</p><div class="b-sol"><p>$16 + 4 + 2{,}5$</p></div></div>
+        <div class="b-q" data-ans="65" data-ph="€"><p class="b-q-text">¿Beneficio con 30 bolsas de Classic y 20 bolsas de muesli de frutas, costes fijos 250 €?</p><div class="b-sol"><p>$165 + 150 - 250$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="El modelo de Leontief" data-toc-k="3" data-toc-short="3 Leontief">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">3</span>El modelo de Leontief</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dos sectores, energía $S_1$ e industria $S_2$, se abastecen mutuamente y abastecen al mercado. En un año se tiene (en u.):</p>
+                <div class="b-table-wrap"><table class="b-table"><thead><tr><th>de ↓ a →</th><th>$S_1$</th><th>$S_2$</th><th>Consumo</th><th>Producción</th></tr></thead>
+                    <tbody><tr><th>$S_1$</th><td>20</td><td>60</td><td>120</td><td>200</td></tr><tr><th>$S_2$</th><td>40</td><td>30</td><td>80</td><td>150</td></tr></tbody></table></div>
+                <p>Cada fila cuadra: $20 + 60 + 120 = 200$. De las 200 u. de energía solo quedan 120 para el mercado; el resto se consume en el propio proceso de producción.</p></div></div>
+            <div class="b-text"><p>Wassily Leontief supuso que cada sector necesita sus insumos de forma <b>proporcional</b> a su propia producción. Para 150 u. de industria, $S_2$ necesita 60 u. de energía; para una unidad, por tanto, $a_{12} = \tfrac{60}{150} = 0{,}4$.
+                Estas proporciones forman la <b>matriz tecnológica</b> $A$. La producción $\vec{x}$ consta entonces del autoconsumo $A \cdot \vec{x}$ y de lo que va al mercado, la <b>demanda final</b> $\vec{y}$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · MODELO DE LEONTIEF</div>
+                <div class="b-text">
+                    <p><b>Matriz tecnológica:</b> $a_{ij} = \dfrac{x_{ij}}{x_j}$, entrega de $S_i$ a $S_j$ dividida entre la producción del sector <b>receptor</b> $S_j$ (dividir por columnas).</p>
+                    <p>$\vec{x} = A \cdot \vec{x} + \vec{y} \iff (I - A) \cdot \vec{x} = \vec{y}$ · Si $I - A$ es invertible: $\vec{x} = (I - A)^{-1} \cdot \vec{y}$ con la <b>inversa de Leontief</b> $(I - A)^{-1}$.</p>
+                    <p>Su elemento $l_{ij}$ indica cuánto tiene que producir de más $S_i$ si la demanda final de $S_j$ aumenta en una unidad.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Trampa:</b> quien divide por filas entre la propia producción obtiene una matriz completamente distinta. Se divide entre la producción del sector que encabeza la columna.</p>
+            <p class="b-note"><b>Demanda final, consumo, entrega al mercado</b> significan lo mismo: lo que sale del circuito de producción.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · UNA ECONOMÍA CON TRES SECTORES</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta la demanda final. El elemento interactivo calcula la producción necesaria con la inversa de Leontief y rellena la tabla input-output. Fíjate en cómo una demanda mayor en un sector impulsa a los tres.</p>
+        <div data-widget="leontief"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · LA MATRIZ TECNOLÓGICA</div>
+            <div class="b-text"><p>Determina $A$ a partir de la tabla y comprueba $(I - A) \cdot \vec{x} = \vec{y}$.</p></div>
+            <div class="b-sol"><p>Columna $S_1$ entre 200, columna $S_2$ entre 150: $A = \begin{pmatrix} 0{,}1 & 0{,}4 \\ 0{,}2 & 0{,}2 \end{pmatrix}$.</p>
+                <p>$\begin{pmatrix} 0{,}9 & -0{,}4 \\ -0{,}2 & 0{,}8 \end{pmatrix} \cdot \begin{pmatrix} 200 \\ 150 \end{pmatrix} = \begin{pmatrix} 180 - 60 \\ -40 + 120 \end{pmatrix} = \begin{pmatrix} 120 \\ 80 \end{pmatrix}$ ✓ <span class="b-res">exactamente la columna del consumo</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · NUEVA DEMANDA</div>
+            <div class="b-text"><p>El año que viene, el mercado quiere 150 u. de energía y 100 u. de industria. ¿Cuánto hay que producir?</p></div>
+            <div class="b-sol"><p>$\det(I - A) = 0{,}72 - 0{,}08 = 0{,}64$, $(I - A)^{-1} = \tfrac{1}{0{,}64} \begin{pmatrix} 0{,}8 & 0{,}4 \\ 0{,}2 & 0{,}9 \end{pmatrix} = \begin{pmatrix} 1{,}25 & 0{,}625 \\ 0{,}3125 & 1{,}40625 \end{pmatrix}$.</p>
+                <p><span class="b-res">$\vec{x} = (I - A)^{-1} \cdot \begin{pmatrix} 150 \\ 100 \end{pmatrix} = \begin{pmatrix} 250 \\ 187{,}5 \end{pmatrix}$</span>. Para 30 u. más de energía en el mercado, $S_1$ tiene que producir 50 u. más.</p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Interpreta los elementos $a_{21} = 0{,}2$ y $l_{12} = 0{,}625$ en el contexto.</p></div>
+            <div class="b-sol"><p>$a_{21}$: para una unidad de energía, $S_1$ necesita 0,2 u. de la industria. $l_{12}$: si la demanda final de bienes industriales sube en una unidad, la producción de energía tiene que subir 0,625 u., porque la industria necesita energía, y la propia energía también un poco.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Elabora la tabla input-output del nuevo año del ejemplo 6: entregas $x_{ij} = a_{ij} \cdot x_j$, consumo, producción. Comprueba que cada fila cuadra.</p></div>
+            <div class="b-sol"><p>$S_1$: $0{,}1 \cdot 250 = 25$, $0{,}4 \cdot 187{,}5 = 75$, consumo 150, total 250 ✓. $S_2$: $0{,}2 \cdot 250 = 50$, $0{,}2 \cdot 187{,}5 = 37{,}5$, consumo 100, total 187,5 ✓.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>El sector energético puede producir como máximo 300 u.; la industria tiene capacidad suficiente. La demanda de bienes industriales sigue en 100 u. ¿Cuánta energía puede ir como máximo al mercado?</p></div>
+            <div class="b-sol"><p>$x_1 = 1{,}25 y_1 + 0{,}625 \cdot 100 \le 300 \Rightarrow y_1 \le 190$. <span class="b-res">Como máximo 190 u. de energía.</span> Entonces $x_2 = 0{,}3125 \cdot 190 + 140{,}625 = 200$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Demuestra en general para dos sectores: si cada suma por columnas de $A$ es menor que 1 y todos los $a_{ij} \ge 0$, entonces $\det(I - A) &gt; 0$, y todos los elementos de la inversa de Leontief son no negativos. ¿Qué significa esto económicamente?</p></div>
+            <div class="b-hint"><p>$\det(I - A) = (1 - a_{11})(1 - a_{22}) - a_{12} a_{21}$, y $a_{12} &lt; 1 - a_{22}$, $a_{21} &lt; 1 - a_{11}$.</p></div>
+            <div class="b-sol"><p>De $a_{12} &lt; 1 - a_{22}$ y $a_{21} &lt; 1 - a_{11}$ se deduce $a_{12} a_{21} &lt; (1 - a_{11})(1 - a_{22})$, es decir, $\det(I - A) &gt; 0$.
+                La inversa $\tfrac{1}{\det} \begin{pmatrix} 1 - a_{22} & a_{12} \\ a_{21} & 1 - a_{11} \end{pmatrix}$ solo tiene elementos $\ge 0$.</p>
+                <p>Económicamente: cada sector necesita, para una unidad, menos de una unidad de insumos en total. Entonces <b>cualquier</b> demanda no negativa se puede satisfacer con una producción no negativa: la economía es «productiva».</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,4" data-ph="a₁₂ ="><p class="b-q-text">$S_1$ entrega 60 u. a $S_2$, y $S_2$ produce 150 u. ¿Cuánto vale $a_{12}$?</p><div class="b-sol"><p>$\tfrac{60}{150}$</p></div></div>
+        <div class="b-q" data-ans="187,5" data-tol="0.01" data-ph="u."><p class="b-q-text">¿Producción de la industria con la demanda final de 150 u. de energía y 100 u. de industria?</p><div class="b-sol"><p>$0{,}3125 \cdot 150 + 1{,}40625 \cdot 100$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Una empresa fabrica directamente 2 productos a partir de 2 materias primas: $M_{RE} = \begin{pmatrix} 3 & 1 \\ 2 & 4 \end{pmatrix}$. ¿Cuánto de cada producto se puede fabricar sin que sobre nada con 110 u. de $R_1$ y 140 u. de $R_2$?</p></div>
+            <div class="b-sol"><p>$M_{RE}^{-1} = \tfrac{1}{10} \begin{pmatrix} 4 & -1 \\ -2 & 3 \end{pmatrix}$, $\vec{p} = \tfrac{1}{10} \begin{pmatrix} 440 - 140 \\ -220 + 420 \end{pmatrix} = \begin{pmatrix} 30 \\ 20 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo OP2.1:</b> justifica por qué se cumple $\vec{k}_R \cdot (M_{RZ} \cdot \vec{z}) = (\vec{k}_R \cdot M_{RZ}) \cdot \vec{z}$ y qué significan los dos miembros en el contexto.</p></div>
+            <div class="b-sol"><p>La propiedad asociativa del producto de matrices. Izquierda: primero las materias primas necesarias $\vec{r}$ y después su coste. Derecha: primero los costes de materias primas por producto intermedio y después por el número de piezas. Los dos son los costes de materias primas.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el área de aprendizaje 7:</b> el precio del muesli de frutas baja a $e_2 = 30 - 0{,}1\,b$ € si se quieren vender $b$ bolsas (demanda). ¿Para qué $b$ es máximo el beneficio del muesli de frutas solo?</p></div>
+            <div class="b-sol"><p>$G(b) = (30 - 0{,}1 b - 22{,}5) \cdot b - 250 = 7{,}5 b - 0{,}1 b^2 - 250$, $G'(b) = 7{,}5 - 0{,}2 b = 0$: $b = 37{,}5$, es decir, 37 o 38 bolsas, $G \approx 390{,}63 - 250 = 140{,}6$ €.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Ejercicio abierto:</b> inventa una pequeña economía con dos sectores de tu entorno (por ejemplo, panadería y molino). Elabora una tabla input-output, calcula $A$ y la inversa de Leontief, y determina la producción para una nueva demanda elegida por ti. Comprueba si tu economía es productiva.</p></div>
+            <div class="b-sol"><p>Por ejemplo: el molino se entrega 30 a sí mismo (semillas), 50 a la panadería y 20 al mercado (producción 100); la panadería entrega 10 al molino, 0 a sí misma y 90 al mercado (producción 100).
+                $A = \begin{pmatrix} 0{,}3 & 0{,}5 \\ 0{,}1 & 0 \end{pmatrix}$, sumas por columnas 0,4 y 0,5: productiva. Comprueba tu propio cálculo con $(I - A) \cdot \vec{x} = \vec{y}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Leontief y la tabla input-output" data-toc-k="X" data-toc-short="Leontief">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">UNA MATRIZ PARA UNA ECONOMÍA</span></div>
+    <h2>Wassily Leontief</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Wassily Leontief nació en 1905 en Múnich, creció en San Petersburgo, se doctoró en Berlín y en 1931 se fue a Estados Unidos. En 1936 publicó una tabla en la que la economía de Estados Unidos
+                estaba dividida en muchos sectores, con todas las entregas entre ellos. Para calcular con ella había que resolver grandes sistemas de ecuaciones, una tarea para las primeras calculadoras.</p>
+            <p>Por el análisis input-output, Leontief recibió en 1973 el Premio Nobel de Economía. Hoy las oficinas de estadística (en España, el INE; en Alemania, el Statistisches Bundesamt) publican regularmente tablas así.
+                Con ellas se estima, por ejemplo, cuántos puestos de trabajo o cuánto CO₂ dependen de una demanda adicional.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Wassily Leontief: Quantitative Input and Output Relations in the Economic System of the United States. The Review of Economic Statistics 18 (3), 1936, pp. 105–125 · Archivo del Premio Nobel, Ciencias Económicas 1973.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>NECESIDADES</h4><p>$M_{RE} = M_{RZ} \cdot M_{ZE}$, $\vec{z} = M_{ZE}\,\vec{p}$, $\vec{r} = M_{RE}\,\vec{p}$</p></div>
+        <div><p>30 y 20 bolsas: $\vec{r} = (460, 150, 140)$</p></div></div>
+    <div class="b-rueck"><div><h4>HACIA ATRÁS</h4><p>$\vec{p} = M_{ZE}^{-1}\,\vec{z}$ o sistema de ecuaciones; sobredeterminado: comprobar si cuadra</p></div>
+        <div><p>Almacén: sobran 30 u. de fruta</p></div></div>
+    <div class="b-rueck"><div><h4>COSTES</h4><p>$\vec{k}_v = \vec{k}_R M_{RE} + \vec{k}_Z M_{ZE} + \vec{k}_E$, $G = (\vec{e} - \vec{k}_v)\,\vec{p} - K_{\text{fix}}$</p></div>
+        <div><p>$\vec{k}_v = (19{,}5 \;\; 22{,}5)$, $G = 65$ €</p></div></div>
+    <div class="b-rueck"><div><h4>LEONTIEF</h4><p>$a_{ij} = \tfrac{x_{ij}}{x_j}$, $(I - A)\,\vec{x} = \vec{y}$, $\vec{x} = (I - A)^{-1}\,\vec{y}$</p></div>
+        <div><p>150 u. de energía y 100 u. de industria para el mercado: $\vec{x} = \begin{pmatrix} 250 \\ 187{,}5 \end{pmatrix}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="4" data-ph="u."><p class="b-q-text">¿Cuántas unidades de fruta necesita una bolsa de muesli de frutas ($m_{32}$ de $M_{RE}$)?</p><div class="b-sol"><p>$0 \cdot 1 + 2 \cdot 2$</p></div></div>
+            <div class="b-q" data-ans="7,5" data-ph="€"><p class="b-q-text">¿Margen de contribución de una bolsa de muesli de frutas (precio 30 €, costes variables 22,50 €)?</p><div class="b-sol"><p>$30 - 22{,}5$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">En la matriz tecnológica, cada entrega se divide entre la producción …</p><div class="b-mc"><button>del sector que suministra.</button><button>del sector receptor.</button><button>de todos los sectores juntos.</button></div><div class="b-sol"><p>Por columnas</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="250" data-ph="u."><p class="b-q-text">¿Producción de energía con la demanda final de 150 u. de energía y 100 u. de industria?</p><div class="b-sol"><p>$1{,}25 \cdot 150 + 0{,}625 \cdot 100$</p></div></div>
+            <div class="b-q" data-ans="190" data-ph="u."><p class="b-q-text">Como máximo 300 u. de energía, demanda industrial 100 u.: ¿cuánta energía puede ir al mercado?</p><div class="b-sol"><p>$1{,}25 y_1 + 62{,}5 \le 300$</p></div></div>
+            <div class="b-q" data-ans="30" data-ph="u."><p class="b-q-text">Almacén 520 / 165 / 170 u.: ¿cuántas unidades de fruta sobran?</p><div class="b-sol"><p>$170 - 140$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-matrizen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRENAMIENTO PARA EL ABITUR</span><span class="b-lab-what">Interdependencias, costes, margen de contribución</span></span></a>
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-leontief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRENAMIENTO PARA EL ABITUR · CURSO AVANZADO</span><span class="b-lab-what">Modelo de Leontief</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-drehung-verflechtung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INTERDEPENDENCIAS</span><span class="b-lab-what">Practicar con grafos de Gozinto</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 13.º curso, curso avanzado · Optativa obligatoria 2 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-es/gy11lk.js"></script>
+<script src="../../js/buch-bgy13lk.js"></script>
+<script src="../../js/buch-es/bgy13lk.js"></script>
+</body>
+</html>
