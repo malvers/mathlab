@@ -911,6 +911,8 @@ const DOCS_GROUPS = {
          fr: "Diplômes et qualifications", it: "Titoli e qualifiche" },
   ref: { de: "Referenzen und Arbeitszeugnisse", en: "References", es: "Referencias",
          fr: "Références", it: "Referenze" },
+  ws: { de: "Wertschätzung", en: "Appreciation", es: "Reconocimiento", fr: "Reconnaissance",
+        it: "Riconoscimento" },
   awd: { de: "Auszeichnungen", en: "Awards", es: "Premios", fr: "Distinctions", it: "Premi" },
   wb: { de: "Weiterbildungen", en: "Professional development", es: "Formación continua",
         fr: "Formation continue", it: "Formazione continua" }
@@ -1005,6 +1007,14 @@ const DOCS = [
          it: "Attestato dell’Istituto Alfred Wegener (spedizione al Polo Nord, nave Polarstern)" },
     s: { de: "Bremerhaven, 1991", en: "Bremerhaven, 1991", es: "Bremerhaven, 1991", fr: "Bremerhaven, 1991",
          it: "Bremerhaven, 1991" } },
+  /* ---- appreciation: a page of its own (href), sealed with the same key ---- */
+  { g: "ws", pages: ["the-real-salary"], href: "the-real-salary.html",
+    t: { de: "The Real Salary", en: "The Real Salary", es: "The Real Salary", fr: "The Real Salary", it: "The Real Salary" },
+    s: { de: "Briefe, Nachrichten, Umfragen und Fotos aus der Schule",
+         en: "Letters, messages, surveys and photos from school",
+         es: "Cartas, mensajes, encuestas y fotos de la escuela",
+         fr: "Lettres, messages, sondages et photos de l’école",
+         it: "Lettere, messaggi, sondaggi e foto dalla scuola" } },
   /* ---- awards ---- */
   { g: "awd", pages: ["red-dot-award"],
     t: { de: "red dot design award: best of the best (GoPubMed)", en: "red dot design award: best of the best (GoPubMed)",
@@ -1353,7 +1363,7 @@ const Docs = (function () {
       const img = el("img");
       fill(img, d.pages[0] + "-thumb", "");
       b.append(img, ...caption(d));
-      b.addEventListener("click", () => show(i));
+      b.addEventListener("click", () => d.href ? (location.href = d.href) : show(i));
       box.appendChild(b);
     });
   }
@@ -1417,6 +1427,7 @@ const Docs = (function () {
   }
 
   function show(i) {
+    if (i >= 0 && DOCS[i].href) { location.href = DOCS[i].href; return; }
     current = i;
     render();
     body.scrollTop = 0;
@@ -1448,7 +1459,12 @@ const Docs = (function () {
     $("docsBtn").focus();
   }
 
-  const step = (dir) => show((current + dir + DOCS.length) % DOCS.length);
+  /* prev/next leaf through the scans only, a page of its own (href) is left out */
+  function step(dir) {
+    let i = current;
+    do i = (i + dir + DOCS.length) % DOCS.length; while (DOCS[i].href);
+    show(i);
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();

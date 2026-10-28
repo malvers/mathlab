@@ -15,17 +15,22 @@
    while the password still opens key.json; a new password makes a new K, which
    locks every remembered device again.
 
-   Run: node scripts/cv-docs.mjs [source dir] */
-import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
+   Run: node scripts/cv-docs.mjs [source dir] [output dir]
+   With an output dir (e.g. HTML/resources/real-salary for the-real-salary.html) the same key
+   seals another folder – .jpg and .json files – so a device that has opened the CV documents
+   opens that page too. key.json stays in cv-docs and is never replaced from there. */
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { createCipheriv, createDecipheriv, createHmac, randomBytes, pbkdf2Sync } from "node:crypto";
 import { homedir } from "node:os";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SRC = process.argv[2] || join(homedir(), "PRIVAT MRA/Bewerbungen/cv-docs-web");
-const OUT = join(dirname(fileURLToPath(import.meta.url)), "../HTML/resources/cv-docs");
-const KEY_FILE = join(OUT, "key.json");
+const KEY_DIR = join(dirname(fileURLToPath(import.meta.url)), "../HTML/resources/cv-docs");
+const OUT = process.argv[3] ? resolve(process.argv[3]) : KEY_DIR;
+const KEY_FILE = join(KEY_DIR, "key.json");
+const SEALS = /\.(jpg|json)$/;
 const ITER = 600000;
 const MAGIC = Buffer.from("CVD1");
 
@@ -61,6 +66,11 @@ if (existsSync(KEY_FILE)) {
     console.log("Neues Passwort → neuer Schlüssel, gemerkte Geräte fragen wieder nach dem Passwort.");
   }
 }
+if (!K && OUT !== KEY_DIR) {
+  /* a new key here would lock the CV documents out of their own scans */
+  console.error("Der Schlüssel der CV-Dokumente passt nicht – erst node scripts/cv-docs.mjs ohne Ausgabeordner.");
+  process.exit(1);
+}
 if (!K) {
   K = randomBytes(32);
   const salt = randomBytes(16);
@@ -78,10 +88,12 @@ if (!K) {
 }
 
 const macKey = createHmac("sha256", K).update("cv-docs iv").digest();
-const names = readdirSync(SRC).filter((f) => f.endsWith(".jpg")).map((f) => f.slice(0, -4)).sort();
+if (!existsSync(OUT)) mkdirSync(OUT, { recursive: true });
+const files = readdirSync(SRC).filter((f) => SEALS.test(f)).sort();
+const names = files.map((f) => f.replace(SEALS, ""));
 let written = 0;
-for (const name of names) {
-  const plain = readFileSync(join(SRC, name + ".jpg"));
+for (const [i, name] of names.entries()) {
+  const plain = readFileSync(join(SRC, files[i]));
   const iv = createHmac("sha256", macKey).update(plain).digest().subarray(0, 12);
   const bin = Buffer.concat([MAGIC, iv, seal(K, iv, plain)]);
   const target = join(OUT, name + ".bin");
