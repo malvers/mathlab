@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 13 avanzado · Capítulo OP1.1 · Rectas y planos | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Ecuaciones paramétricas, producto vectorial, ecuación general, forma normal de Hesse. Capítulo OP1.1 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 13 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 13 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO OP1.1 · OPTATIVA OBLIGATORIA 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO OP1.1 · OPTATIVA OBLIGATORIA 1 · ENERO</p>
+            <h1>Rectas y planos</h1>
+            <p class="b-hero-lead">Un rayo láser, la trayectoria de un dron, la superficie de un tejado, un cristal: en el espacio, las rectas y los planos se describen con <b>vectores</b>.
+                Basta un punto para empezar y una o dos direcciones. Con el <b>producto vectorial</b> encuentras además el vector perpendicular a un plano
+                y, a partir de él, la <b>ecuación general</b> y la <b>forma normal de Hesse</b>, que te dice al instante a qué distancia está un punto del plano. Todo para girarlo en 3D de verdad.</p>
+            <div class="b-chips"><span class="b-chip">9 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">3D DE VERDAD</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>describir rectas mediante una <b>ecuación paramétrica</b> con vector de posición y vector director</li>
+                <li>comprobar con la <b>prueba de pertenencia</b> si un punto está en una recta</li>
+                <li>dar planos en <b>forma paramétrica</b></li>
+                <li>hallar un <b>vector normal</b> con el <b>producto vectorial</b></li>
+                <li>describir planos mediante una <b>ecuación general</b> y en <b>forma normal de Hesse</b>, y pasar de una forma a otra</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="-1" data-ph="número"><p class="b-q-text">$A(1, 2, 1)$, $B(2, 1, 3)$. ¿Qué componente $y$ tiene $\vec{AB}$?</p><div class="b-sol"><p>$1 - 2 = -1$</p></div></div>
+            <div class="b-q" data-ans="0" data-ph="número"><p class="b-q-text">Calcula $(1, 2, 2) \circ (2, -2, 1)$.</p><div class="b-sol"><p>$2 - 4 + 2 = 0$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="longitud"><p class="b-q-text">¿Cuánto mide el vector $(2, -1, 2)$?</p><div class="b-sol"><p>3</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL DRON EN RUTA</div>
+            <div class="b-text"><p>Un dron despega en $P(1, 2, 1)$ y cada segundo avanza $(1, -1, 2)$.</p>
+                <ul><li>¿Dónde está después de 1, 2 y 3 segundos? ¿Y hace un segundo?</li><li>¿Pasa por $Q(3, 0, 5)$? ¿Y por $R(4, 0, 7)$?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL CRISTAL</div>
+            <div class="b-text"><p>Un cristal plano pasa por los puntos $(4, 0, 0)$, $(0, 3, 0)$ y $(0, 0, 2)$.</p>
+                <ul><li>¿Cómo se llega a cualquier punto del cristal desde uno de sus vértices?</li><li>¿Hacia dónde apunta una varilla perpendicular al cristal?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">PERPENDICULAR A DOS</div>
+            <div class="b-text"><p>Se busca un vector $\vec{n}$ perpendicular a $(1, 0, 0)$ y a $(0, 1, 0)$. Y otro perpendicular a $(1, 1, 0)$ y a $(0, 1, 1)$.</p>
+                <ul><li>Plantead las condiciones con el producto escalar y resolvedlas.</li></ul></div>
+            <span class="b-pair">→ Lección 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Rectas en el espacio" data-toc-k="1" data-toc-short="1 Rectas">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Rectas: ecuación paramétrica y prueba de pertenencia</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Al cabo de $t$ segundos el dron está en el punto $X$ con $\vec{OX} = (1, 2, 1) + t \cdot (1, -1, 2)$. Con todos los $t$ reales a la vez, también los negativos, se obtiene una recta.</p></div></div>
+            <div class="b-text"><p>A cada punto de la recta se llega desde el <b>punto base</b> sumándole un múltiplo del <b>vector director</b>. A cada punto le corresponde exactamente un valor del parámetro $t$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · RECTA EN EL ESPACIO</div>
+                <div class="b-text">
+                    <p><b>Ecuación paramétrica:</b> $g\colon \vec{x} = \vec{p} + t \cdot \vec{u}$, $t \in \mathbb{R}$, con vector de posición $\vec{p}$ y vector director $\vec{u} \neq \vec{0}$.</p>
+                    <p>Recta que pasa por $A$ y $B$: $\vec{x} = \vec{OA} + t \cdot \vec{AB}$.</p>
+                    <p><b>Prueba de pertenencia:</b> $Q$ está en $g$ si $\vec{OQ} = \vec{p} + t \cdot \vec{u}$ se cumple para <b>un</b> $t$, es decir, si las tres filas dan el mismo $t$.</p>
+                    <p>Los <b>puntos de traza</b> son los puntos de intersección con los planos coordenados: por ejemplo, $z = 0$ para el plano $xy$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>No es única:</b> cualquier punto de la recta puede ser punto base, y cualquier múltiplo ($\neq 0$) de $\vec{u}$ puede ser vector director.</p>
+            <p class="b-note"><b>Segmento:</b> si se restringe $t$ a $0 \le t \le 1$, se obtiene el segmento de $A$ a $B$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · RECTA, PRUEBA DE PERTENENCIA, PUNTOS DE TRAZA</div>
+        <p class="b-help" style="margin:0 0 12px">Cambia el punto base $P$, el vector director $\vec{u}$ y el punto de prueba $Q$. Con $t$, el punto dorado $X$ recorre la recta. En rojo: los puntos de traza.</p>
+        <div data-widget="gerade3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · PRUEBA DE PERTENENCIA</div>
+            <div class="b-text"><p>¿Están $Q(3, 0, 5)$ y $R(4, 0, 7)$ en $g\colon \vec{x} = (1, 2, 1) + t \cdot (1, -1, 2)$?</p></div>
+            <div class="b-sol"><p>$Q$: $1 + t = 3$, $2 - t = 0$, $1 + 2t = 5$, siempre $t = 2$: <span class="b-res">$Q \in g$</span>.</p>
+                <p>$R$: $1 + t = 4 \Rightarrow t = 3$, pero $2 - t = 0 \Rightarrow t = 2$. Contradicción: $R \notin g$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · PUNTOS DE TRAZA</div>
+            <div class="b-text"><p>Halla los puntos de traza de la recta $g$ del ejemplo 1.</p></div>
+            <div class="b-sol"><p>Plano $xy$: $1 + 2t = 0$, $t = -\tfrac12$, $S_{xy}(0{,}5;\, 2{,}5;\, 0)$. Plano $xz$: $2 - t = 0$, $S_{xz}(3, 0, 5)$. Plano $yz$: $1 + t = 0$, $S_{yz}(0, 3, -1)$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Da una ecuación de la recta que pasa por $A(2, 0, 1)$ y $B(4, 3, 0)$. Da otros dos puntos de la recta.</p></div>
+            <div class="b-sol"><p>$\vec{x} = (2, 0, 1) + t \cdot (2, 3, -1)$. Con $t = -1$: $(0, -3, 2)$, con $t = 2$: $(6, 6, -1)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>¿Está $P(5, 1, 7)$ en $g\colon \vec{x} = (1, 3, -1) + t \cdot (2, -1, 4)$?</p></div>
+            <div class="b-sol"><p>Todas las filas dan $t = 2$: sí.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿Para qué $a$ está $Q(a, 4, 0)$ en la recta que pasa por $A(1, 2, 2)$ y $B(2, 3, 1)$?</p></div>
+            <div class="b-sol"><p>$\vec{x} = (1, 2, 2) + t \cdot (1, 1, -1)$. $z$: $2 - t = 0 \Rightarrow t = 2$, $y$: $2 + 2 = 4$ ✓, luego $a = 1 + 2 = 3$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un avión vuela desde $A(0, 0, 1)$ en línea recta en la dirección $(10, 5, 0{,}5)$ (unidades en km). La cima de una montaña está en $G(30;\, 15;\, 2{,}4)$. ¿Pasa el avión por encima?</p></div>
+            <div class="b-sol"><p>Sobre $G$ es $t = 3$ (de $x$ y de $y$); la altura de vuelo allí es $1 + 1{,}5 = 2{,}5$ km. El avión pasa 100 m por encima de la cima.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">¿Para qué $t$ es $(1, 2, 1) + t \cdot (1, -1, 2) = (3, 0, 5)$?</p><div class="b-sol"><p>$t = 2$</p></div></div>
+        <div class="b-q" data-ans="2,5" data-tol="0.0001" data-ph="y ="><p class="b-q-text">¿Qué coordenada $y$ tiene el punto de traza $S_{xy}$ de esta recta?</p><div class="b-sol"><p>$t = -0{,}5$: $y = 2{,}5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Planos y vector normal" data-toc-k="2" data-toc-short="2 Planos">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Planos en forma paramétrica y el vector normal</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El cristal contiene $A(4, 0, 0)$. Desde allí se llega a cualquiera de sus puntos sumando múltiplos de $\vec{AB} = (-4, 3, 0)$ y de $\vec{AC} = (-4, 0, 2)$.</p></div></div>
+            <div class="b-text"><p>Así pues, un plano necesita un punto base y <b>dos</b> direcciones que no sean paralelas. En lugar de dos direcciones también se puede dar un único vector
+                perpendicular al plano: el <b>vector normal</b>. Lo proporciona el producto vectorial.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PLANO Y PRODUCTO VECTORIAL</div>
+                <div class="b-text">
+                    <p><b>Forma paramétrica:</b> $E\colon \vec{x} = \vec{a} + r \cdot \vec{u} + s \cdot \vec{v}$ con vectores directores $\vec{u}$, $\vec{v}$ no paralelos. Por tres puntos: $\vec{x} = \vec{OA} + r\,\vec{AB} + s\,\vec{AC}$.</p>
+                    <p><b>Producto vectorial:</b> $$\vec{u} \times \vec{v} = \begin{pmatrix} u_2 v_3 - u_3 v_2 \\ u_3 v_1 - u_1 v_3 \\ u_1 v_2 - u_2 v_1 \end{pmatrix}$$
+                        Es perpendicular a $\vec{u}$ y a $\vec{v}$, así que es un <b>vector normal</b> del plano. Su módulo es el área del paralelogramo formado por $\vec{u}$ y $\vec{v}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Truco:</b> para la primera fila, tapa la primera fila y calcula «en cruz»; para la segunda, la segunda fila; para la tercera, la tercera. La fila del medio lleva el signo cambiado.</p>
+            <p class="b-note"><b>Comprobación:</b> $\vec{n} \circ \vec{u} = 0$ y $\vec{n} \circ \vec{v} = 0$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · PLANO Y VECTOR NORMAL</div>
+        <p class="b-help" style="margin:0 0 12px">Introduce el punto base y los vectores directores. La flecha rosa es el vector normal. Si el plano corta los tres ejes, verás el triángulo de trazas.</p>
+        <div data-widget="ebene3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · PRODUCTO VECTORIAL</div>
+            <div class="b-text"><p>Calcula $\vec{u} \times \vec{v}$ para $\vec{u} = (-4, 3, 0)$ y $\vec{v} = (-4, 0, 2)$ y compruébalo.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 3 \cdot 2 - 0 \cdot 0 \\ 0 \cdot (-4) - (-4) \cdot 2 \\ (-4) \cdot 0 - 3 \cdot (-4) \end{pmatrix} = \begin{pmatrix} 6 \\ 8 \\ 12 \end{pmatrix}$, más sencillo $\vec{n} = (3, 4, 6)$.
+                Comprobación: $-12 + 12 + 0 = 0$, $-12 + 0 + 12 = 0$ ✓</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · ÁREA DE UN TRIÁNGULO</div>
+            <div class="b-text"><p>¿Qué área tiene el triángulo de vértices $(4, 0, 0)$, $(0, 3, 0)$, $(0, 0, 2)$?</p></div>
+            <div class="b-sol"><p>Medio paralelogramo: $\tfrac12 |(6, 8, 12)| = \tfrac12 \sqrt{36 + 64 + 144} = \tfrac12 \sqrt{244} \approx 7{,}81$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Da una ecuación paramétrica del plano que pasa por $A(1, 0, 0)$, $B(0, 1, 0)$, $C(0, 0, 1)$.</p></div>
+            <div class="b-sol"><p>$\vec{x} = (1, 0, 0) + r \cdot (-1, 1, 0) + s \cdot (-1, 0, 1)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcula $(1, 0, 0) \times (0, 1, 0)$ y $(1, 1, 0) \times (0, 1, 1)$. Compara con la exploración.</p></div>
+            <div class="b-sol"><p>$(0, 0, 1)$ y $(1, -1, 1)$. Comprobación: $(1, -1, 1) \circ (1, 1, 0) = 0$, $(1, -1, 1) \circ (0, 1, 1) = 0$ ✓</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Halla un vector normal del plano del ejercicio 5 y el área del triángulo $ABC$.</p></div>
+            <div class="b-sol"><p>$(-1, 1, 0) \times (-1, 0, 1) = (1, 1, 1)$. Área $\tfrac12 \sqrt3 \approx 0{,}87$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra que $\vec{u} \times \vec{v} = -(\vec{v} \times \vec{u})$ y que $\vec{u} \times \vec{u} = \vec{0}$. ¿Qué significa lo segundo geométricamente?</p></div>
+            <div class="b-sol"><p>Al intercambiar los vectores, en cada fila se intercambian los dos productos, así que cambia el signo. $\vec{u} \times \vec{u}$: cada fila es $u_i u_j - u_j u_i = 0$. Dos vectores paralelos no forman un paralelogramo; el área es 0.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="-1" data-ph="número"><p class="b-q-text">¿Qué segunda componente tiene $(1, 1, 0) \times (0, 1, 1)$?</p><div class="b-sol"><p>$0 \cdot 0 - 1 \cdot 1 = -1$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="número"><p class="b-q-text">¿Qué tercera componente tiene $(1, 0, 0) \times (0, 1, 0)$?</p><div class="b-sol"><p>$1 \cdot 1 - 0 \cdot 0 = 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Ecuación general y forma normal de Hesse" data-toc-k="3" data-toc-short="3 Ecuación general, Hesse">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Ecuación general y forma normal de Hesse</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Para los tres vértices del cristal, $3x + 4y + 6z$ da el valor 12. No es casualidad: para cada punto $X$ del plano, $\vec{AX}$ es perpendicular a $\vec{n} = (3, 4, 6)$.</p></div></div>
+            <div class="b-text"><p>$\vec{n} \circ (\vec{x} - \vec{a}) = 0$ escrito en componentes es $3(x - 4) + 4y + 6z = 0$, es decir, $3x + 4y + 6z = 12$. Los coeficientes de $x$, $y$, $z$ son exactamente las componentes del vector normal.</p>
+                <p>Si se divide la ecuación entre la longitud de $\vec{n}$, el vector normal se convierte en un <b>vector unitario</b> $\vec{n}_0$. Si entonces se sustituye un punto, sale su <b>distancia</b> al plano, con signo:
+                    $(\vec{x} - \vec{a}) \circ \vec{n}_0$ es la longitud de la proyección de $\vec{AX}$ sobre la dirección normal. Esta forma se llama <b>forma normal de Hesse</b>, por Otto Hesse.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · ECUACIÓN GENERAL</div>
+                <div class="b-text">
+                    <p>$E\colon n_1 x + n_2 y + n_3 z = d$ con el vector normal $\vec{n} = (n_1, n_2, n_3)$ y $d = \vec{n} \circ \vec{a}$ para un punto $A$ del plano.</p>
+                    <p><b>Desde la forma paramétrica:</b> calcular $\vec{n} = \vec{u} \times \vec{v}$ y después sustituir un punto para hallar $d$. <b>Prueba de pertenencia:</b> sustituir las coordenadas.</p>
+                    <p><b>Puntos de traza</b> con los ejes: anular dos coordenadas. Si falta una variable, el plano es paralelo a ese eje.</p>
+                </div>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · FORMA NORMAL DE HESSE</div>
+                <div class="b-text">
+                    <p>$(\vec{x} - \vec{a}) \circ \vec{n}_0 = 0$ con $|\vec{n}_0| = 1$. A partir de la ecuación general: $$\frac{n_1 x + n_2 y + n_3 z - d}{\sqrt{n_1^2 + n_2^2 + n_3^2}} = 0$$</p>
+                    <p>Si se sustituye un punto $Q$, se obtiene su <b>distancia con signo</b>. Mismo signo: mismo lado del plano. Si se elige el signo de forma que $d \ge 0$, el propio $d$ es la distancia del origen, y los valores negativos están en su lado.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Ecuación segmentaria:</b> $\tfrac{x}{4} + \tfrac{y}{3} + \tfrac{z}{2} = 1$ es el mismo plano que $3x + 4y + 6z = 12$. Los denominadores dan los puntos de traza.</p>
+            <p class="b-note"><b>Otto Hesse</b> (1811–1874) enseñó en Königsberg, Heidelberg y Múnich. La forma normal aparece en sus <i>Lecciones de geometría analítica del espacio</i> (Leipzig, 1861). Fuente: MacTutor, «Otto Hesse».</p>
+            <p class="b-note"><b>Perspectiva:</b> en el capítulo OP1.3, la forma normal de Hesse da todas las distancias a planos.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿ESTÁ EL PUNTO EN EL PLANO?</div>
+        <p class="b-help" style="margin:0 0 12px">Introduce un punto $Q$. El widget lo sustituye en la ecuación general y muestra si está en el plano.</p>
+        <div data-widget="ebene3d" data-mode="punkt"></div>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA IDEA DE LA FORMA NORMAL DE HESSE, EN EL PLANO</div>
+        <p class="b-help" style="margin:0 0 12px">En el plano, una recta hace el papel del plano. Arrastra el punto base $A$ y el punto $P$ y gira el vector normal: el valor del miembro izquierdo es la distancia de $P$ a la recta, con signo. En el espacio funciona igual, solo que con tres coordenadas.</p>
+        <div data-widget="hesse2d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · DE LA FORMA PARAMÉTRICA A LA ECUACIÓN GENERAL</div>
+            <div class="b-text"><p>$E\colon \vec{x} = (1, 2, 0) + r\,(1, 0, 1) + s\,(0, 1, 2)$. Halla la ecuación general.</p></div>
+            <div class="b-sol"><p>$\vec{n} = (1, 0, 1) \times (0, 1, 2) = (-1, -2, 1)$. $d = \vec{n} \circ (1, 2, 0) = -5$.
+                $-x - 2y + z = -5$, o más bonito <span class="b-res">$x + 2y - z = 5$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · FORMA NORMAL DE HESSE</div>
+            <div class="b-text"><p>$E\colon 2x - y + 2z = -9$. Halla la forma normal de Hesse, la distancia del origen y la distancia de $Q(1, 2, 3)$.</p></div>
+            <div class="b-sol"><p>Multiplicar por −1 para que $d \ge 0$: $-2x + y - 2z = 9$, $|\vec{n}| = 3$, forma de Hesse $\tfrac13(-2x + y - 2z - 9) = 0$. Origen: distancia 3.</p>
+                <p>$Q$: $\tfrac13(-2 + 2 - 6 - 9) = -5$: <span class="b-res">$d(Q, E) = 5$</span>, en el mismo lado que el origen.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>¿Están $P(1, 1, 1)$ y $Q(3, 2, 0)$ en $E\colon 2x + 3y + 6z = 12$? Determina también los puntos de traza de $E$.</p></div>
+            <div class="b-sol"><p>$P$: $2 + 3 + 6 = 11 \neq 12$, no. $Q$: $6 + 6 + 0 = 12$, sí. Puntos de traza $S_x(6, 0, 0)$, $S_y(0, 4, 0)$, $S_z(0, 0, 2)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina la ecuación general del plano que pasa por $A(1, 0, 0)$, $B(0, 1, 0)$, $C(0, 0, 1)$ y su forma normal de Hesse. ¿A qué distancia está del origen?</p></div>
+            <div class="b-sol"><p>$\vec{n} = (1, 1, 1)$ (ejercicio 7), $d = 1$: $x + y + z = 1$. Forma de Hesse $\tfrac{x + y + z - 1}{\sqrt3} = 0$; distancia del origen $\tfrac{1}{\sqrt3} \approx 0{,}577$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Da la forma normal de Hesse de $E\colon 2x + 2y - z = 6$. ¿A qué distancia de $E$ están el origen y $P(4, 4, 1)$? ¿Están en el mismo lado?</p></div>
+            <div class="b-sol"><p>$\tfrac13(2x + 2y - z - 6) = 0$. Origen: $\tfrac{-6}{3} = -2$, distancia 2. $P$: $\tfrac13(8 + 8 - 1 - 6) = 3$: distancia 3, <span class="b-res">en el lado opuesto</span> al del origen.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Determina los dos planos que son paralelos a $E\colon 2x + y + 2z = 6$ y están a distancia 2 de él.</p></div>
+            <div class="b-sol"><p>Mismo vector normal, $|\vec{n}| = 3$: $\tfrac{|d - 6|}{3} = 2$, es decir, $d = 12$ o $d = 0$: $2x + y + 2z = 12$ y $2x + y + 2z = 0$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Halla el conjunto de todos los puntos que están a la misma distancia de $E_1\colon x + 2y + 2z = 3$ y de $E_2\colon 2x - y + 2z = 6$.</p></div>
+            <div class="b-hint"><p>Iguala en valor absoluto las formas normales de Hesse: $\tfrac{x + 2y + 2z - 3}{3} = \pm \tfrac{2x - y + 2z - 6}{3}$.</p></div>
+            <div class="b-sol"><p>Con $+$: $-x + 3y + 3 = 0$, es decir, $x - 3y = 3$. Con $-$: $3x + y + 4z = 9$. <span class="b-res">Dos planos</span> que dividen por la mitad los ángulos entre $E_1$ y $E_2$. Son perpendiculares entre sí: $(1, -3, 0) \circ (3, 1, 4) = 0$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="6" data-ph="x ="><p class="b-q-text">¿En qué $x$ corta $2x + 3y + 6z = 12$ el eje $x$?</p><div class="b-sol"><p>$2x = 12$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="distancia"><p class="b-q-text">¿Distancia de $P(4, 4, 1)$ a $2x + 2y - z = 6$?</p><div class="b-sol"><p>$\tfrac{9}{3}$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Si se sustituyen dos puntos en la forma normal de Hesse y se obtiene −2 y 3, entonces …</p><div class="b-mc"><button>están en el mismo lado.</button><button>están en lados distintos.</button><button>uno está en el plano.</button></div><div class="b-sol"><p>Signos distintos</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Da las ecuaciones de los tres ejes de coordenadas como rectas.</p></div>
+            <div class="b-sol"><p>Eje $x$: $\vec{x} = t \cdot (1, 0, 0)$, eje $y$: $t \cdot (0, 1, 0)$, eje $z$: $t \cdot (0, 0, 1)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relacionar con 12.º curso:</b> comprueba con vectores si $A(1, 1, 1)$, $B(3, 2, 3)$, $C(7, 4, 7)$ están en una misma recta.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = (2, 1, 2)$, $\vec{AC} = (6, 3, 6) = 3\vec{AB}$: paralelos y con el punto $A$ en común, luego sí.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Calcula el área del paralelogramo de vértices $A(1, 0, 2)$, $B(4, 1, 2)$, $C(5, 3, 4)$, $D(2, 2, 4)$.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = (3, 1, 0)$, $\vec{AD} = (1, 2, 2)$, $\vec{AB} \times \vec{AD} = (2, -6, 5)$, área $\sqrt{4 + 36 + 25} = \sqrt{65} \approx 8{,}06$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Ejercicio abierto:</b> da tres planos distintos que pasen todos por $A(1, 1, 1)$ y $B(3, 1, 2)$, cada uno una vez en forma paramétrica, como ecuación general y en forma normal de Hesse. ¿Qué tienen en común todos estos planos?</p></div>
+            <div class="b-hint"><p>Todos contienen la recta $AB$. Como segundo vector director puedes tomar cualquier vector que no sea paralelo a $\vec{AB} = (2, 0, 1)$.</p></div>
+            <div class="b-sol"><p>Por ejemplo, con $\vec{v} = (0, 1, 0)$: $\vec{n} = (2, 0, 1) \times (0, 1, 0) = (-1, 0, 2)$, $-x + 2z = 1$, forma de Hesse $\tfrac{-x + 2z - 1}{\sqrt5} = 0$. Con $\vec{v} = (0, 0, 1)$: $\vec{n} = (0, -2, 0)$, es decir, $y = 1$.</p>
+                <p>Todos los planos que pasan por $A$ y $B$ contienen la recta $AB$: forman un «haz de planos» que gira alrededor de esa recta como las hojas de un libro abierto alrededor del lomo.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Descartes y las coordenadas" data-toc-k="X" data-toc-short="Descartes">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">LA GEOMETRÍA SE VUELVE CÁLCULO</span></div>
+    <h2>René Descartes y la geometría analítica</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Hasta el siglo XVII, la geometría y el cálculo eran dos mundos separados. En 1637, el filósofo francés René Descartes publicó, como apéndice de su
+                «Discours de la méthode», el tratado «La Géométrie». En él tradujo problemas geométricos a ecuaciones: los puntos se convirtieron en números y las curvas en fórmulas.</p>
+            <p>De ahí nació la <b>geometría analítica</b>, que aprendes en esta optativa obligatoria. Los sistemas de coordenadas que llamamos «cartesianos» llevan su nombre latinizado, Cartesius.
+                Por cierto, ideas muy parecidas tuvo en la misma época Pierre de Fermat.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> René Descartes: La Géométrie. Apéndice del Discours de la méthode, Leiden 1637.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>RECTA</h4><p>$\vec{x} = \vec{p} + t\,\vec{u}$ · por $A$, $B$: $\vec{OA} + t\,\vec{AB}$</p></div>
+        <div><p>$(1, 2, 1) + t\,(1, -1, 2)$</p></div></div>
+    <div class="b-rueck"><div><h4>PRUEBA DE PERTENENCIA</h4><p>Las tres filas tienen que dar el mismo $t$.</p></div>
+        <div><p>$Q(3, 0, 5)$: $t = 2$ ✓</p></div></div>
+    <div class="b-rueck"><div><h4>PLANO</h4><p>$\vec{x} = \vec{a} + r\,\vec{u} + s\,\vec{v}$</p></div>
+        <div><p>Por tres puntos: $\vec{OA} + r\,\vec{AB} + s\,\vec{AC}$</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUCTO VECTORIAL</h4><p>$\vec{u} \times \vec{v}$ es perpendicular a ambos; módulo = área del paralelogramo.</p></div>
+        <div><p>$(-4, 3, 0) \times (-4, 0, 2) = (6, 8, 12)$</p></div></div>
+    <div class="b-rueck"><div><h4>ECUACIÓN GENERAL</h4><p>$n_1 x + n_2 y + n_3 z = d$; $\vec{n}$ es un vector normal.</p></div>
+        <div><p>$3x + 4y + 6z = 12$</p></div></div>
+    <div class="b-rueck"><div><h4>FORMA NORMAL DE HESSE</h4><p>dividir entre $|\vec{n}|$; al sustituir sale la distancia con signo.</p></div>
+        <div><p>$\tfrac13(2x + 2y - z - 6) = 0$, $P(4, 4, 1)$: 3</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="3" data-ph="a ="><p class="b-q-text">¿Para qué $a$ está $(a, 4, 0)$ en $\vec{x} = (1, 2, 2) + t\,(1, 1, -1)$?</p><div class="b-sol"><p>$a = 3$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">¿Cuántos vectores directores necesita un plano en forma paramétrica?</p>
+                <div class="b-mc"><button>uno</button><button>dos, no paralelos</button><button>tres</button></div>
+                <div class="b-sol"><p>Dos direcciones no paralelas.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="12" data-ph="número"><p class="b-q-text">¿Qué tercera componente tiene $(-4, 3, 0) \times (-4, 0, 2)$?</p><div class="b-sol"><p>$0 + 12 = 12$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="distancia"><p class="b-q-text">¿Distancia de $Q(1, 2, 3)$ al plano $2x - y + 2z = -9$?</p><div class="b-sol"><p>$\tfrac{|2 - 2 + 6 + 9|}{3}$</p></div></div>
+            <div class="b-q" data-ans="8,062" data-tol="0.005" data-ph="área"><p class="b-q-text">¿Área del paralelogramo formado por $(3, 1, 0)$ y $(1, 2, 2)$?</p><div class="b-sol"><p>$\sqrt{65} \approx 8{,}062$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="vektoren" href="../../vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTORES</span><span class="b-lab-what">Rectas y planos en el laboratorio</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-skalar-vektorprodukt.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRODUCTO ESCALAR Y VECTORIAL</span><span class="b-lab-what">Vector normal y áreas</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-hesse.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FORMA NORMAL DE HESSE</span><span class="b-lab-what">Distancias con signo</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-vektoren-anwendungen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTORES: APLICACIONES</span><span class="b-lab-what">Ejercicios variados</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 13.º curso, curso avanzado · Optativa obligatoria 1 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-es/vektoren.js"></script>
+<script src="../../js/buch-gy12lk.js"></script>
+<script src="../../js/buch-es/gy12lk.js"></script>
+</body>
+</html>
