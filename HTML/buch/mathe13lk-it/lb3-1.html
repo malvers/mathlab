@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica 13 LK · Capitolo 3.1 · Primitive | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Derivare all’indietro, verifica, regole di integrazione, 1/x e ln|x|, CAS. Capitolo 3.1 del libro di testo interattivo Matematica · Berufliches Gymnasium 13 · Leistungskurs: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 3.1 · AREA DI APPRENDIMENTO 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 3.1 · AREA DI APPRENDIMENTO 3 · AGOSTO · SETTEMBRE</p>
+            <h1>Primitive</h1>
+            <p class="b-hero-lead">Nella 12ª classe hai calcolato la derivata di ogni funzione. Ora si va al contrario: quale funzione ha <b>questa</b> derivata? Così dalla velocità si ricava la posizione e da una portata in entrata la quantità d’acqua. Impari gli <b>integrali immediati</b> fino a $\tfrac1x$, le regole per somme e multipli, e <b>dimostri</b> perché due primitive differiscono solo per una costante. Tutto il resto lo integra il CAS, e tu controlli il risultato.</p>
+            <div class="b-chips"><span class="b-chip">10 ORE</span><span class="b-chip">3 LEZIONI</span><span class="b-chip">DIMOSTRAZIONE</span><span class="b-chip">1 LABORATORIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3/3-x+1.2","x^3/3-x","x^3/3-x-1.2"]' data-labels='["F₁","F₂","F₃"]' data-lat="[1.9,1.9,1.9]" data-x="-2.6,2.6" data-y="-2.6,2.8" data-h="240" data-aria="Tre primitive della stessa funzione, traslate l’una rispetto all’altra verso l’alto e verso il basso"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>trovare <b>primitive</b>, verificarle derivando e scrivere l’<b>integrale indefinito</b></li>
+                <li>gli <b>integrali immediati</b> delle potenze con esponente razionale, di $\mathrm{e}^x$, $\tfrac1x$, $\sin x$ e $\cos x$</li>
+                <li>integrare funzioni composte con le <b>regole del fattore costante e della somma</b></li>
+                <li>dimostrare che due primitive su un intervallo differiscono solo per una <b>costante</b></li>
+                <li>integrare funzioni qualsiasi con il <b>CAS</b>, interpretare i risultati e <b>verificarli</b> derivando</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="4" data-ph="f′(1) ="><p class="b-q-text">$f(x) = x^4$: quanto vale $f'(1)$?</p><div class="b-sol"><p>$f'(x) = 4x^3$</p></div></div>
+            <div class="b-q" data-ans="0,5" data-ph="esponente"><p class="b-q-text">$\sqrt{x}$ scritta come potenza è $x^r$. Quanto vale $r$?</p><div class="b-sol"><p>$\sqrt{x} = x^{\frac12}$</p></div></div>
+            <div class="b-q" data-ans="-0,5" data-ph="fattore"><p class="b-q-text">$\left(x^{-2}\right)' = k \cdot x^{-3}$. Quanto vale $\tfrac{k}{4}$?</p><div class="b-sol"><p>$k = -2$, quindi $\tfrac{k}{4} = -\tfrac12$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Qual è la derivata di $\sin x$?</p><div class="b-mc"><button>$-\cos x$</button><button>$\cos x$</button><button>$-\sin x$</button></div><div class="b-sol"><p>$(\sin x)' = \cos x$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DERIVARE AL CONTRARIO</div>
+            <div class="b-text"><p>Cercate per ogni funzione un’altra funzione la cui derivata sia proprio quella: $3x^2$, $2x$, $7$, $\cos x$, $\mathrm{e}^x$.</p>
+                <ul><li>Trovate ogni volta più di una soluzione? In che cosa si distinguono le vostre soluzioni?</li><li>Come funziona con $x^5$ o con $x^{10}$? Formulate una regola.</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DAL TACHIMETRO AL PERCORSO</div> <div class="b-text"><p>Un ciclista parte dal cartello d’ingresso del paese e va sempre più veloce: dopo $t$ secondi il tachimetro segna $v(t) = 0{,}5t$ metri al secondo.</p> <ul><li>Quanta strada ha percorso dopo 4 secondi? Disegnate $v$ e cercate il percorso nel diagramma.</li><li>Quale funzione $s(t)$ ha la derivata $0{,}5t$ e soddisfa $s(0) = 0$?</li></ul></div> <span class="b-pair">→ Lezione 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">IL BUCO IN MENO UNO</div> <div class="b-text"><p>Per $x^2$, $x^{-2}$ o $x^{\frac12}$ la regola della potenza al contrario funziona. Che cosa succede con $\tfrac1x = x^{-1}$?</p> <ul><li>Applicate comunque la regola. Dove si inceppa?</li><li>Quale funzione della 12ª classe ha la derivata $\tfrac1x$? E per $x &lt; 0$?</li></ul></div> <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INTEGRALI</span><span class="b-lab-what">Aree sotto le curve (in tedesco)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Primitiva e integrale indefinito" data-toc-k="1" data-toc-short="1 Primitiva">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">1</span>Primitiva e integrale indefinito</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Quale funzione ha la derivata $2x$? $x^2$, ma anche $x^2 + 1$ e $x^2 - 7$: derivando ogni costante sparisce,
+                e tornando indietro non la si conosce. Tutte le soluzioni hanno la forma $x^2 + C$. I loro grafici sono traslati l’uno rispetto all’altro verso l’alto e verso il basso e in ogni punto hanno la stessa pendenza.</p></div></div>
+            <div class="b-text"><p>Una funzione $F$ con $F'(x) = f(x)$ si chiama <b>primitiva</b> di $f$. Integrare è quindi l’operazione inversa del derivare.
+                Trovata una primitiva, le si conosce subito tutte: due primitive della stessa funzione differiscono solo per una costante.
+                L’insieme di tutte le primitive si chiama <b>integrale indefinito</b>.</p>
+                <p>Se una primitiva è giusta lo si verifica sempre allo stesso modo: <b>derivando</b>. Se si ottiene $f$, è giusta.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · PRIMITIVA E INTEGRALE INDEFINITO</div>
+                <div class="b-text">
+                    <p>$F$ è una <b>primitiva</b> di $f$ se $F'(x) = f(x)$ per ogni $x$.</p>
+                    <p>Se $F$ lo è, lo è anche ogni funzione $F + C$, e su un intervallo non ce ne sono altre. $C$ si chiama <b>costante di integrazione</b>.</p>
+                    <p><b>Integrale indefinito:</b> $\displaystyle\int f(x)\,\mathrm{d}x = F(x) + C$ &nbsp; Si legge: «integrale di $f(x)$ in $\mathrm{d}x$».</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>La notazione</b> viene da Leibniz: il segno $\int$ è una S allungata per «somma». Il perché lo vedrai nel capitolo 3.2.</p>
+            <p class="b-note"><b>Leggere le pendenze:</b> dove $f$ è positiva, ogni primitiva $F$ cresce; dove $f$ cambia segno, $F$ ha un estremo.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-merk">
+        <div class="b-box-title">TEOREMA E DIMOSTRAZIONE · TUTTE LE PRIMITIVE</div>
+        <div class="b-text">
+            <p><b>Teorema:</b> se $F$ e $G$ sono due primitive di $f$ su un intervallo $I$, allora esiste un numero $C$ tale che $G(x) = F(x) + C$ per ogni $x \in I$.</p>
+            <p><b>Dimostrazione:</b> poni $D(x) = G(x) - F(x)$. Allora $D'(x) = G'(x) - F'(x) = f(x) - f(x) = 0$ per ogni $x \in I$. Una funzione la cui derivata è nulla in tutto un intervallo non è lì né strettamente crescente né strettamente decrescente: per il criterio di monotonia è costante. Quindi $D(x) = C$ e $G(x) = F(x) + C$. $\square$</p>
+            <p><b>L’ipotesi «intervallo» è necessaria:</b> su $\mathbb{R} \setminus \{0\}$, $\ln|x|$ e $\ln|x| + \begin{cases} 1 & x &gt; 0 \\ 0 & x &lt; 0 \end{cases}$ sono entrambe primitive di $\tfrac1x$, ma non differiscono per <b>una</b> costante.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · F E LE SUE PRIMITIVE</div>
+        <p class="b-help" style="margin:0 0 12px">In alto una primitiva $F$ con la costante $C$ regolabile e la sua tangente, in basso $f$. La pendenza di $F$ in ogni punto è il valore di $f$ in quel punto, qualunque sia $C$.</p>
+        <div data-widget="stammfunktion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · VERIFICARE DERIVANDO</div>
+            <div class="b-text"><p>$F(x) = x^3 - 2x + 5$ è una primitiva di $f(x) = 3x^2 - 2$? E $G(x) = x^3 - x^2$?</p></div>
+            <div class="b-sol"><p>$F'(x) = 3x^2 - 2 = f(x)$ ✔ Il 5 sparisce derivando.</p>
+                <p>$G'(x) = 3x^2 - 2x \neq f(x)$: <span class="b-res">$F$ sì, $G$ no</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · PER UN PUNTO</div>
+            <div class="b-text"><p>Trova la primitiva di $f(x) = 2x + 3$ il cui grafico passa per $P(1, 6)$.</p></div>
+            <div class="b-sol"><p>Tutte le primitive: $F(x) = x^2 + 3x + C$. Verifica di appartenenza: $F(1) = 1 + 3 + C = 6$, quindi $C = 2$.</p>
+                <p><span class="b-res">$F(x) = x^2 + 3x + 2$</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Verifica derivando se $F$ è una primitiva di $f$: a) $F(x) = x^4 + 1$, $f(x) = 4x^3$ &nbsp; b) $F(x) = -\cos x$, $f(x) = \sin x$ &nbsp; c) $F(x) = x^2 - 3$, $f(x) = x^2$</p></div>
+            <div class="b-sol"><p>a) sì &nbsp; b) sì, $(-\cos x)' = \sin x$ &nbsp; c) no, $F'(x) = 2x$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Indica tre primitive diverse di $f(x) = 2x$ e disegna i loro grafici in uno stesso sistema di coordinate.</p></div>
+            <div class="b-sol"><p>Per esempio $x^2$, $x^2 + 1$, $x^2 - 5$: tre parabole normali, traslate in verticale l’una rispetto all’altra.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Trova la primitiva di $f(x) = 6x^2 - 4$ il cui grafico passa per $P(1, 3)$.</p></div>
+            <div class="b-sol"><p>$F(x) = 2x^3 - 4x + C$, $F(1) = -2 + C = 3$: <span class="b-res">$F(x) = 2x^3 - 4x + 5$</span></p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$F$ è una primitiva di $f(x) = x^2 - 4$. In quali punti $F$ ha degli estremi? Di che tipo?</p></div>
+            <div class="b-hint"><p>$F' = f$: gli estremi di $F$ sono zeri di $f$ con cambio di segno.</p></div>
+            <div class="b-sol"><p>$f(x) = 0$ per $x = \pm 2$. In −2, $f$ passa da $+$ a $-$: massimo di $F$. In 2 da $-$ a $+$: minimo.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Giustifica senza calcoli, ma con il teorema qui sopra: se $F$ e $G$ sono primitive della stessa funzione e vale $F(2) = G(2)$, allora $F = G$. Vale anche se $F$ e $G$ sono definite solo su $]-\infty;\ 0[ \cup ]0;\ \infty[$?</p></div>
+            <div class="b-hint"><p>Che cosa dice il teorema su $G - F$? Per la seconda parte pensa a $\tfrac1x$.</p></div>
+            <div class="b-sol"><p>Su un intervallo $G = F + C$. Da $F(2) = G(2)$ segue $C = 0$, quindi $G = F$.</p>
+                <p>Su due intervalli separati no: la costante può essere diversa a sinistra e a destra di 0. L’uguaglianza in $x = 2$ fissa solo la costante di destra.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un ascensore sale da 10 m di altezza con la velocità $v(t) = 4t$ (in m/s), finché $t \le 2$. Trova la sua altezza $s(t)$. A che altezza si trova dopo 2 secondi?</p></div>
+            <div class="b-hint"><p>L’altezza è una primitiva della velocità: $s'(t) = v(t)$.</p></div>
+            <div class="b-sol"><p>$s(t) = 2t^2 + C$ con $s(0) = 10$: $s(t) = 2t^2 + 10$. Dopo 2 s: <span class="b-res">18 m</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="8" data-ph="F(2) ="><p class="b-q-text">La primitiva $F$ di $f(x) = 2x$ passa per $(1, 5)$. Quanto vale $F(2)$?</p><div class="b-sol"><p>$F(x) = x^2 + 4$</p></div></div>
+        <div class="b-q" data-ans="0,25" data-ph="fattore"><p class="b-q-text">$\int x^3\,\mathrm{d}x = k \cdot x^4 + C$. Quanto vale $k$?</p><div class="b-sol"><p>$\tfrac14$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Due primitive della stessa funzione su un intervallo …</p><div class="b-mc"><button>sono sempre uguali.</button><button>differiscono per un fattore.</button><button>differiscono per una costante.</button></div><div class="b-sol"><p>$F$ e $F + C$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Integrare senza calcolatrice" data-toc-k="2" data-toc-short="2 Immediati">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">4 ORE</span></div>
+    <h2><span class="b-no">2</span>Integrali immediati e regole di integrazione</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Derivando $x^n$ l’esponente scende di 1 e va davanti come fattore. Al contrario significa: <b>alzare</b> l’esponente di 1 e <b>dividere</b> per il <b>nuovo</b> esponente. Verifica per $x^4$: $\left(\tfrac{x^5}{5}\right)' = \tfrac{5x^4}{5} = x^4$ ✔</p></div></div>
+            <div class="b-text"><p>La regola vale per ogni esponente tranne −1, quindi anche per radici e frazioni, se prima le si scrive come potenze: $\sqrt{x} = x^{\frac12}$, $\tfrac{1}{x^2} = x^{-2}$. Con $r = -1$ resterebbe uno zero al denominatore. Questo buco lo riempie il logaritmo: $(\ln x)' = \tfrac1x$.</p>
+                <p>Come nella derivazione, si può integrare <b>termine per termine</b>, e un <b>fattore</b> costante resta semplicemente davanti.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · INTEGRALI IMMEDIATI E REGOLE</div>
+                <div class="b-text">
+                    <p><b>Regola della potenza:</b> $\displaystyle\int x^r\,\mathrm{d}x = \frac{x^{r+1}}{r+1} + C$ per ogni numero razionale $r \neq -1$</p>
+                    <p>$\displaystyle\int \frac1x\,\mathrm{d}x = \ln|x| + C$ · $\displaystyle\int \mathrm{e}^x\,\mathrm{d}x = \mathrm{e}^x + C$ · $\displaystyle\int \sin x\,\mathrm{d}x = -\cos x + C$ · $\displaystyle\int \cos x\,\mathrm{d}x = \sin x + C$</p>
+                    <p><b>Regola del fattore costante:</b> $\int k \cdot f(x)\,\mathrm{d}x = k \cdot \int f(x)\,\mathrm{d}x$ · <b>Regola della somma:</b> $\int \big(f(x) + g(x)\big)\,\mathrm{d}x = \int f(x)\,\mathrm{d}x + \int g(x)\,\mathrm{d}x$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Perché $|x|$?</b> Per $x < 0$, $\ln x$ non è definito, ma $\left(\ln(-x)\right)' = \tfrac{-1}{-x} = \tfrac1x$. Il valore assoluto copre entrambi i lati.</p>
+            <p class="b-note"><b>Attenzione:</b> per i prodotti non c’è una regola così semplice. $\int x \cdot x\,\mathrm{d}x$ non è $\tfrac{x^2}{2} \cdot \tfrac{x^2}{2}$: prima si sviluppa, $\int x^2\,\mathrm{d}x = \tfrac{x^3}{3} + C$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · ALLENATORE DI INTEGRALI</div>
+        <p class="b-help" style="margin:0 0 12px">Scrivi una primitiva, per esempio <code>x^4/4 - 3x</code>, <code>2/3 x^(3/2)</code> o <code>-cos(x)</code>. Il libro controlla se differisce da una soluzione corretta solo per una costante; puoi aggiungere un «+ C».</p>
+        <div data-widget="integrieren" data-kinds="potenz summe wurzel exsin mix"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · RADICI E FRAZIONI</div>
+            <div class="b-text"><p>Calcola $\displaystyle\int \left(4x^3 - 3\sqrt{x} + \frac{2}{x^2}\right)\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>Come potenze: $4x^3 - 3x^{\frac12} + 2x^{-2}$. Termine per termine: $4 \cdot \tfrac{x^4}{4} - 3 \cdot \tfrac{x^{3/2}}{3/2} + 2 \cdot \tfrac{x^{-1}}{-1}$.</p>
+                <p><span class="b-res">$x^4 - 2x^{\frac32} - \dfrac{2}{x} + C$</span>. Verifica: $\left(-2x^{\frac32}\right)' = -3x^{\frac12}$ ✔, $\left(-2x^{-1}\right)' = 2x^{-2}$ ✔</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · ESPONENZIALE, LOGARITMO, SENO</div>
+            <div class="b-text"><p>Calcola $\displaystyle\int \left(2\mathrm{e}^x - 3\sin x + \frac1x\right)\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>$2\mathrm{e}^x - 3 \cdot (-\cos x) + \ln|x|$, cioè</p>
+                <p><span class="b-res">$2\mathrm{e}^x + 3\cos x + \ln|x| + C$</span>. Verifica: $(3\cos x)' = -3\sin x$ ✔</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola: a) $\int (x^3 + 2x)\,\mathrm{d}x$ &nbsp; b) $\int 5\,\mathrm{d}x$ &nbsp; c) $\int (6x^2 - 4x + 1)\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac14 x^4 + x^2 + C$ &nbsp; b) $5x + C$ &nbsp; c) $2x^3 - 2x^2 + x + C$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola: a) $\int \sqrt{x}\,\mathrm{d}x$ &nbsp; b) $\int \tfrac{1}{x^3}\,\mathrm{d}x$ &nbsp; c) $\int 3\cos x\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac23 x^{\frac32} + C$ &nbsp; b) $-\dfrac{1}{2x^2} + C$ &nbsp; c) $3\sin x + C$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcola $\displaystyle\int \frac{x^2 + 1}{x}\,\mathrm{d}x$ per $x > 0$.</p></div>
+            <div class="b-hint"><p>Prima scomponi la frazione in due addendi.</p></div>
+            <div class="b-sol"><p>$\int \left(x + \tfrac1x\right)\mathrm{d}x = \tfrac12 x^2 + \ln x + C$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcola $\int (x + 2)^2\,\mathrm{d}x$ dopo aver sviluppato il quadrato. Lea invece scrive $\tfrac13 (x + 2)^3 + C$. Ha ragione?</p></div>
+            <div class="b-sol"><p>$\int (x^2 + 4x + 4)\,\mathrm{d}x = \tfrac13 x^3 + 2x^2 + 4x + C$. Anche la soluzione di Lea è giusta: $\tfrac13 (x + 2)^3 = \tfrac13 x^3 + 2x^2 + 4x + \tfrac83$, differisce solo per la costante $\tfrac83$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Dimostra</b> la regola $\int \tfrac1x\,\mathrm{d}x = \ln|x| + C$ separatamente per $x &gt; 0$ e per $x &lt; 0$. Quale regola di derivazione ti serve nel secondo caso?</p></div>
+            <div class="b-sol"><p>$x &gt; 0$: $|x| = x$, $(\ln x)' = \tfrac1x$ ✔</p>
+                <p>$x &lt; 0$: $|x| = -x$, con la regola della catena $\left(\ln(-x)\right)' = \tfrac{1}{-x} \cdot (-1) = \tfrac1x$ ✔ Su ciascuno dei due intervalli $\ln|x|$ è quindi una primitiva.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Trova la funzione $f$ con $f''(x) = 6x$, $f'(0) = -3$ e $f(0) = 2$. Che cosa noti in $f(1)$?</p></div>
+            <div class="b-hint"><p>Integra due volte e dopo ogni passaggio determina la costante con la condizione.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 + C_1 = 3x^2 - 3$, $f(x) = x^3 - 3x + C_2 = x^3 - 3x + 2$. $f(1) = 0$ e $f'(1) = 0$: <span class="b-res">$x = 1$ è uno zero doppio</span>, $f(x) = (x - 1)^2 (x + 2)$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="2/3" data-tol="0.005" data-ph="fattore"><p class="b-q-text">$\int \sqrt{x}\,\mathrm{d}x = k \cdot x^{\frac32} + C$. Quanto vale $k$?</p><div class="b-sol"><p>Dividere per $\tfrac32$: $\tfrac23$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="F(e) ="><p class="b-q-text">$F$ è la primitiva di $\tfrac1x$ con $F(1) = 0$. Quanto vale $F(\mathrm{e})$?</p><div class="b-sol"><p>$F(x) = \ln x$, $\ln \mathrm{e} = 1$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$\int \sin x\,\mathrm{d}x = \ldots$</p><div class="b-mc"><button>$-\cos x + C$</button><button>$\cos x + C$</button><button>$-\sin x + C$</button></div><div class="b-sol"><p>Verifica: $(-\cos x)' = \sin x$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Integrare con il CAS e verificare" data-toc-k="3" data-toc-short="3 CAS, verifica">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 3</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">3</span>Integrare con il CAS, verificare a mano</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Per $x\,\mathrm{e}^x$, $\sin(2x)$ o $\tfrac{2x}{x^2 + 1}$ gli integrali immediati non bastano. Un CAS trova subito le primitive, ma spesso mostra una forma che non ti aspettavi e omette il $+ C$. Se il calcolo è giusto non lo decide l’aspetto, ma la <b>derivata</b>.</p></div></div>
+            <div class="b-text"><p>Una <b>verifica</b> la fai con le regole di derivazione della 12ª classe: regola del prodotto per $u \cdot v$, regola della catena per le funzioni composte. Se derivando si ottiene esattamente la funzione integranda, la primitiva è dimostrata. Due risultati diversi sono giusti entrambi se la loro differenza è costante.</p>
+                <p>Alcune funzioni non hanno nessuna primitiva che si possa scrivere con le funzioni note, per esempio $\mathrm{e}^{-x^2}$, la curva a campana del capitolo 4. Allora anche il CAS calcola solo <b>numericamente</b>, vedi il capitolo 3.4.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · CAS E VERIFICA</div>
+                <div class="b-text">
+                    <p><b>Con il CAS:</b> comando dell’integrale indefinito, inserisci l’espressione e la variabile, aggiungi tu il $+ C$.</p>
+                    <p><b>Verifica:</b> $F$ è una primitiva di $f$ $\iff$ $F'(x) = f(x)$. Due risultati $F_1$, $F_2$ appartengono alla stessa funzione se $F_1 - F_2$ è costante.</p>
+                    <p><b>Utile per riconoscerle:</b> $\left(\ln g(x)\right)' = \dfrac{g'(x)}{g(x)}$ per $g(x) &gt; 0$ e $\left(\mathrm{e}^{g(x)}\right)' = \mathrm{e}^{g(x)} \cdot g'(x)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Con il CAS</b> puoi far calcolare subito anche la verifica: derivare il risultato e sottrarlo dalla funzione integranda. Se viene 0, è giusto.</p>
+            <p class="b-note">I <b>prodotti</b> come $x\,\mathrm{e}^x$ non si integrano fattore per fattore: $\tfrac12 x^2 \cdot \mathrm{e}^x$ è sbagliato, la verifica lo mostra subito.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURA · FUNZIONE E PRIMITIVA</div>
+        <p class="b-help" style="margin:0 0 12px">$f(x) = 2x\,\mathrm{e}^{-x^2}$ e una primitiva $F(x) = -\mathrm{e}^{-x^2}$, come la fornisce il CAS: dove $f$ è positiva, $F$ cresce; nello zero di $f$, $F$ ha il suo minimo.</p>
+        <div data-widget="graph" data-fns='["2*x*exp(-x*x)", "-exp(-x*x)"]' data-labels='["f", "F"]' data-lat="[0.75, 2.1]" data-x="-3,3" data-y="-1.3,1.1" data-h="240" data-aria="Grafico di f con massimo e minimo e, sotto, il grafico della primitiva F con il suo minimo in zero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 5 · LA REGOLA DEL PRODOTTO COME VERIFICA</div>
+            <div class="b-text"><p>Un CAS fornisce $\int x\,\mathrm{e}^x\,\mathrm{d}x = (x - 1)\,\mathrm{e}^x$. Verificalo.</p></div>
+            <div class="b-sol"><p>$u = x - 1$, $v = \mathrm{e}^x$: $\left((x - 1)\,\mathrm{e}^x\right)' = 1 \cdot \mathrm{e}^x + (x - 1)\,\mathrm{e}^x = x\,\mathrm{e}^x$ ✔</p>
+                <p><span class="b-res">$\int x\,\mathrm{e}^x\,\mathrm{d}x = (x - 1)\,\mathrm{e}^x + C$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 6 · DUE RISULTATI GIUSTI</div>
+            <div class="b-text"><p>Per $\int \sin(2x)\,\mathrm{d}x$ un CAS mostra $\sin^2 x$, un altro $-\tfrac12 \cos(2x)$. Chi ha ragione?</p></div>
+            <div class="b-sol"><p>Entrambe le derivate tornano: $(\sin^2 x)' = 2\sin x \cos x = \sin(2x)$ e $\left(-\tfrac12 \cos(2x)\right)' = \sin(2x)$.</p>
+                <p>Con $\cos(2x) = 1 - 2\sin^2 x$ si ha $-\tfrac12 \cos(2x) = \sin^2 x - \tfrac12$: <span class="b-res">i risultati differiscono per la costante $\tfrac12$.</span></p></div>
+        </div>
+    </div>
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="13">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Verifica che $F$ è una primitiva di $f$: a) $F(x) = \mathrm{e}^{x^2}$, $f(x) = 2x\,\mathrm{e}^{x^2}$ &nbsp; b) $F(x) = \sin(x^2)$, $f(x) = 2x \cos(x^2)$</p></div>
+            <div class="b-sol"><p>Regola della catena: a) $\mathrm{e}^{x^2} \cdot 2x$ ✔ &nbsp; b) $\cos(x^2) \cdot 2x$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Un CAS dà $\int x\,\mathrm{e}^{2x}\,\mathrm{d}x = \left(\tfrac x2 - \tfrac14\right)\mathrm{e}^{2x}$. Confermalo derivando.</p></div>
+            <div class="b-sol"><p>Regola del prodotto e della catena: $\tfrac12 \mathrm{e}^{2x} + \left(\tfrac x2 - \tfrac14\right) \cdot 2\mathrm{e}^{2x} = \tfrac12 \mathrm{e}^{2x} + x\,\mathrm{e}^{2x} - \tfrac12 \mathrm{e}^{2x} = x\,\mathrm{e}^{2x}$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Per $\int \dfrac{2x}{x^2 + 1}\,\mathrm{d}x$ il CAS mostra $\ln(x^2 + 1)$. Verificalo e spiega perché qui non serve il valore assoluto.</p></div>
+            <div class="b-sol"><p>$\left(\ln(x^2 + 1)\right)' = \dfrac{1}{x^2 + 1} \cdot 2x$ ✔ Il valore assoluto manca a ragione, perché $x^2 + 1 &gt; 0$ per ogni $x$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Il CAS dà per $\int (x - 1)^2\,\mathrm{d}x$ il risultato $\tfrac13 x^3 - x^2 + x$, Max ha $\tfrac13 (x - 1)^3$. Mostra che sono giusti entrambi e trova la costante per cui differiscono.</p></div>
+            <div class="b-sol"><p>$\tfrac13 (x - 1)^3 = \tfrac13 x^3 - x^2 + x - \tfrac13$: entrambi hanno la derivata $(x - 1)^2$, la differenza è <span class="b-res">$\tfrac13$</span>.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Lena sostiene: $\int \mathrm{e}^{x^2}\,\mathrm{d}x = \dfrac{\mathrm{e}^{x^2}}{2x} + C$, «perché bisogna dividere per la derivata interna». Confutala derivando e spiega perché la sua ricetta funziona solo con una funzione interna <b>lineare</b>.</p></div>
+            <div class="b-hint"><p>Deriva con la regola del quoziente oppure $\tfrac{1}{2x} \cdot \mathrm{e}^{x^2}$ con la regola del prodotto.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac{1}{2x}\,\mathrm{e}^{x^2}\right)' = -\tfrac{1}{2x^2}\,\mathrm{e}^{x^2} + \tfrac{1}{2x} \cdot 2x\,\mathrm{e}^{x^2} = \mathrm{e}^{x^2} - \tfrac{\mathrm{e}^{x^2}}{2x^2} \neq \mathrm{e}^{x^2}$.</p>
+                <p>Con $g(x) = ax + b$ la derivata interna è la costante $a$, e un fattore costante passa invariato attraverso la derivazione. Con $x^2$ la derivata interna $2x$ dipende da $x$ e viene derivata anch’essa.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="0,5" data-ph="costante"><p class="b-q-text">Per quale costante differiscono $\sin^2 x$ e $-\tfrac12 \cos(2x)$?</p><div class="b-sol"><p>$\cos(2x) = 1 - 2\sin^2 x$</p></div></div>
+        <div class="b-q" data-ans="1,718" data-tol="0.002" data-ph="valore"><p class="b-q-text">$F(x) = \mathrm{e}^{x^2}$ è una primitiva di $2x\,\mathrm{e}^{x^2}$. Quanto vale $F(1) - F(0)$ con tre cifre decimali?</p><div class="b-sol"><p>$\mathrm{e} - 1 \approx 1{,}718$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Un CAS mostra $\int x\,\mathrm{e}^x\,\mathrm{d}x = (x - 1)\,\mathrm{e}^x$. Con che cosa lo verifichi più in fretta?</p><div class="b-mc"><button>con la regola della potenza</button><button>con la regola del prodotto</button><button>in nessun modo, il CAS ha sempre ragione</button></div><div class="b-sol"><p>Derivando con la regola del prodotto si ottiene $x\,\mathrm{e}^x$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="18">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcola $\displaystyle\int \left(3x^2 - \frac2x + \mathrm{e}^x\right)\mathrm{d}x$ per $x > 0$.</p></div>
+            <div class="b-sol"><p>$x^3 - 2\ln x + \mathrm{e}^x + C$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Collegare con la 12ª classe:</b> $F$ è una primitiva di $f(x) = x^2 - 2x - 3$. Trova i punti di estremo e i punti di flesso di $F$ senza scrivere $F$.</p></div>
+            <div class="b-sol"><p>$f(x) = (x - 3)(x + 1)$. In $x = -1$, $f$ passa da $+$ a $-$: massimo di $F$; in $x = 3$ minimo. Punto di flesso di $F$: estremo di $f$, $f'(x) = 2x - 2 = 0$, cioè $x = 1$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quali delle funzioni $F_1(x) = \sin^2 x$, $F_2(x) = -\cos^2 x$, $F_3(x) = \tfrac12 \sin^2 x$ sono primitive di $f(x) = \sin(2x)$? Giustifica.</p></div>
+            <div class="b-sol"><p>$F_1' = 2\sin x \cos x = \sin(2x)$ ✔, $F_2' = 2\cos x \sin x = \sin(2x)$ ✔, $F_3' = \sin x \cos x = \tfrac12 \sin(2x)$ ✘. $F_1$ e $F_2$ differiscono per 1, perché $\sin^2 x + \cos^2 x = 1$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Esercizio aperto:</b> si cerca una funzione polinomiale $F$ di terzo grado la cui derivata $f$ ha zeri in $x = -1$ e $x = 2$ e il cui grafico passa per l’origine. Quante funzioni $F$ di questo tipo ci sono? Indicane due diverse e descrivi come sono legate.</p></div>
+            <div class="b-hint"><p>$f(x) = a\,(x + 1)(x - 2)$ con $a \neq 0$, poi integrare e sostituire $F(0) = 0$.</p></div>
+            <div class="b-sol"><p>$f(x) = a\,(x^2 - x - 2)$, $F(x) = a\left(\tfrac13 x^3 - \tfrac12 x^2 - 2x\right)$, la costante è 0 perché $F(0) = 0$.</p>
+                <p>Ce ne sono infinite, una per ogni $a \neq 0$, per esempio $a = 6$: $2x^3 - 3x^2 - 12x$ e $a = -6$: $-2x^3 + 3x^2 + 12x$. Si ottengono l’una dall’altra con una dilatazione in direzione $y$; i punti di estremo −1 e 2 restano.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Un treno parte da fermo con l’accelerazione costante $a(t) = 0{,}5$ m/s². Trova $v(t)$ e $s(t)$ con $v(0) = 0$ e $s(0) = 0$. Quando ha percorso 1 km e a che velocità va in quel momento?</p></div>
+            <div class="b-sol"><p>$v(t) = 0{,}5t$, $s(t) = 0{,}25t^2$. $0{,}25t^2 = 1000$: $t \approx 63{,}2$ s, poi $v \approx 31{,}6$ m/s, <span class="b-res">circa 114 km/h</span>.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: Newton e Leibniz" data-toc-k="X" data-toc-short="Newton, Leibniz">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">STORIA</span></div>
+    <h2>Newton, Leibniz e la disputa per il primato</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Il calcolo differenziale e integrale fu inventato da due uomini, indipendentemente l’uno dall’altro. Isaac Newton, in Inghilterra, chiamò il suo metodo «flussioni».
+                Lo scrisse nel 1671, ma fu stampato solo nel 1736, molto dopo la sua morte. Gottfried Wilhelm Leibniz, nato nel 1646 a Lipsia, scrisse il
+                21 novembre 1675, in un appunto, per la prima volta $\int f(x)\,\mathrm{d}x$. Nel 1684 pubblicò il calcolo differenziale nella rivista di Lipsia
+                <i>Acta Eruditorum</i>, e nel 1686 vi comparve anche il suo segno di integrale.</p>
+            <p>Più tardi i sostenitori di Newton accusarono Leibniz di aver copiato. La Royal Society di Londra nominò una commissione, il cui rapporto, all’inizio del 1713, diede ragione a Newton.
+                Lo aveva scritto, senza firmarlo, Newton stesso: era presidente della società dal 1703. Oggi si considerano inventori entrambi. Ma la notazione che si impose
+                fu quella di Leibniz: il $\int$ e il $\mathrm{d}x$ che usi in questo capitolo.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> MacTutor History of Mathematics, University of St Andrews: biografie «Gottfried Wilhelm von Leibniz» e «Isaac Newton».</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>PRIMITIVA</h4><p>$F' = f$; tutte le primitive: $F + C$</p></div>
+        <div><p>$\int (2x + 3)\,\mathrm{d}x = x^2 + 3x + C$, verifica derivando</p></div></div>
+    <div class="b-rueck"><div><h4>REGOLA DELLA POTENZA</h4><p>$\int x^r\,\mathrm{d}x = \tfrac{x^{r+1}}{r+1} + C$, $r \neq -1$</p></div>
+        <div><p>$\int \sqrt{x}\,\mathrm{d}x = \tfrac23 x^{\frac32} + C$, $\int x^{-2}\,\mathrm{d}x = -\tfrac1x + C$</p></div></div>
+    <div class="b-rueck"><div><h4>INTEGRALI IMMEDIATI</h4><p>$\tfrac1x \to \ln|x|$, $\mathrm{e}^x \to \mathrm{e}^x$, $\sin x \to -\cos x$, $\cos x \to \sin x$</p></div>
+        <div><p>$\int \left(2\mathrm{e}^x - 3\sin x\right)\mathrm{d}x = 2\mathrm{e}^x + 3\cos x + C$</p></div></div>
+    <div class="b-rueck"><div><h4>TEOREMA</h4><p>Su un intervallo due primitive differiscono solo per una costante.</p></div>
+        <div><p>Dimostrazione: $(G - F)' = 0$, quindi $G - F$ è costante.</p></div></div>
+    <div class="b-rueck"><div><h4>CAS</h4><p>I risultati possono differire per una costante.</p></div>
+        <div><p>$\sin^2 x$ e $-\tfrac12 \cos(2x)$: differenza $\tfrac12$</p></div></div>
+    <div class="b-rueck"><div><h4>VERIFICA</h4><p>Derivare finché non compare la funzione integranda: regola del prodotto e della catena.</p></div>
+        <div><p>$\left((x - 1)\,\mathrm{e}^x\right)' = x\,\mathrm{e}^x$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1 · SENZA CALCOLATRICE</div>
+            <div class="b-q" data-ans="5" data-ph="C ="><p class="b-q-text">$F(x) = 2x^3 - 4x + C$ deve passare per $(1, 3)$. Quanto vale $C$?</p><div class="b-sol"><p>$-2 + C = 3$</p></div></div>
+            <div class="b-q" data-ans="-2" data-ph="fattore"><p class="b-q-text">$\int \tfrac{2}{x^2}\,\mathrm{d}x = \tfrac{k}{x} + C$. Quanto vale $k$?</p><div class="b-sol"><p>$2 \cdot \tfrac{x^{-1}}{-1}$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$\int \cos x\,\mathrm{d}x = \ldots$</p><div class="b-mc"><button>$-\sin x + C$</button><button>$\sin x + C$</button><button>$\cos x + C$</button></div><div class="b-sol"><p>$(\sin x)' = \cos x$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2 · CON STRUMENTI DIGITALI</div>
+            <div class="b-q" data-ans="1" data-ph="F(e) ="><p class="b-q-text">$F$ è la primitiva di $\tfrac1x$ su $]0;\ \infty[$ con $F(1) = 0$. Quanto vale $F(\mathrm{e})$?</p><div class="b-sol"><p>$F(x) = \ln x$</p></div></div>
+            <div class="b-q" data-ans="0,5" data-ph="costante"><p class="b-q-text">Per quale costante differiscono $\sin^2 x$ e $-\tfrac12 \cos(2x)$?</p><div class="b-sol"><p>$\cos(2x) = 1 - 2\sin^2 x$</p></div></div>
+            <div class="b-q" data-ans="18" data-ph="metri"><p class="b-q-text">$v(t) = 4t$, partenza a 10 m di altezza: a che altezza si trova l’ascensore dopo 2 s?</p><div class="b-sol"><p>$s(t) = 2t^2 + 10$</p></div></div>
+            <div class="b-q" data-ans="0,5" data-ph="fattore"><p class="b-q-text">Un CAS fornisce $\int \tfrac{x}{x^2 + 4}\,\mathrm{d}x = k \cdot \ln(x^2 + 4)$. Quanto deve valere $k$? Controlla derivando.</p><div class="b-sol"><p>$\left(k \ln(x^2 + 4)\right)' = \tfrac{2kx}{x^2 + 4}$, quindi $2k = 1$.</p></div></div>
+        </div>
+    </div>
+    <h3>ALTRI ESERCIZI ONLINE (IN TEDESCO)</h3>
+    <div class="b-labs"><a class="b-lab" href="../../mathetest13.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TEST D’INGRESSO 13</span><span class="b-lab-what">Che cosa dovresti portare con te nella 13ª classe</span></span></a> <a class="b-lab" href="../../mathetestgy12lk-stammfunktion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRIMITIVA</span><span class="b-lab-what">Primitiva e integrale indefinito</span></span></a> <a class="b-lab" href="../../mathetestgy12lk-grundintegrale.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INTEGRALI IMMEDIATI</span><span class="b-lab-what">Integrare senza calcolatrice</span></span></a> <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REATTORE DI INTEGRALI</span><span class="b-lab-what">Sperimenta con gli integrali</span></span></a></div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Berufliches Gymnasium, 13ª classe, Leistungskurs · area di apprendimento 3 secondo il programma di matematica del Berufliches Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-it/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-it/analysis.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-it/integral.js"></script>
+</body>
+</html>
