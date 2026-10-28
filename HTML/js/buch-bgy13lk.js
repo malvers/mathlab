@@ -207,8 +207,8 @@
 
     /* ---------- population models: x(n+1) = U · x(n) ---------- */
     const UEB = {
-        kaefer: { names: ['Eier', 'Larven', 'Käfer'], cols: ['#F5C242', '#7fd8ee', '#B8A4F2'], x0: [800, 200, 50] },
-        kunden: { names: ['Anbieter A', 'Anbieter B', 'Anbieter C'], cols: ['#F5C242', '#7fd8ee', '#A0C85A'], x0: [5000, 3000, 2000],
+        kaefer: { names: ['Eier', 'Larven', 'Käfer'], short: ['Eier', 'Larven', 'Käfer'], cols: ['#F5C242', '#7fd8ee', '#B8A4F2'], x0: [800, 200, 50] },
+        kunden: { names: ['Anbieter A', 'Anbieter B', 'Anbieter C'], short: ['A', 'B', 'C'], cols: ['#F5C242', '#7fd8ee', '#A0C85A'], x0: [5000, 3000, 2000],
             U: [[0.8, 0.1, 0.2], [0.1, 0.7, 0.2], [0.1, 0.2, 0.6]] }
     };
     W('uebergang', function (box) {
@@ -261,7 +261,7 @@
             const M = U(), C = UEB[mode], N = Math.max(12, steps);
             const xs = [C.x0.slice()];
             for (let k = 0; k < N; k++) xs.push(mvec(M, xs[k]));
-            g.innerHTML = graph(M, C.names, C.cols);
+            g.innerHTML = graph(M, C.short, C.cols);
             const ymax = Math.max(...xs.flat()) * 1.1;
             p.view([0, N], [0, ymax]);
             const layers = [];
@@ -272,7 +272,8 @@
             layers.push({ vline: steps, color: 'dim' });
             p.draw(layers);
             const x = xs[steps];
-            let r = '<p style="margin:0 0 6px">$U = ' + tm(M, 2) + '$, &nbsp; $\\vec{x}_{' + steps + '} = U^{' + steps + '} \\cdot \\vec{x}_0 \\approx ' + tv(x, 0) + '$ ' +
+            const S = mode === 'kunden' ? 'P' : 'U';
+            let r = '<p style="margin:0 0 6px">$' + S + ' = ' + tm(M, 2) + '$, &nbsp; $\\vec{x}_{' + steps + '} = ' + S + '^{' + steps + '} \\cdot \\vec{x}_0 \\approx ' + tv(x, 0) + '$ ' +
                 '(' + C.names.map((nm, i) => nm + ' ' + fmt(x[i], 0)).join(', ') + ').</p>';
             if (mode === 'kaefer') {
                 const q = a * b * f;
@@ -282,8 +283,8 @@
                 const Un = Array.from({ length: Math.max(1, steps) }).reduce(P => mmul(M, P), ident(3));
                 // the fixed vector: (U - E) v = 0 with v1 + v2 + v3 = 1
                 const S = [[M[0][0] - 1, M[0][1], M[0][2]], [M[1][0], M[1][1] - 1, M[1][2]], [1, 1, 1]], v = mvec(inverse(S), [0, 0, 1]);
-                r += '<p style="margin:0 0 6px">$U^{' + Math.max(1, steps) + '} \\approx ' + tm(Un, 3) + '$. Mit wachsendem $n$ werden die Spalten von $U^n$ gleich: Sie nähern sich der <b>Grenzmatrix</b>, deren Spalten alle der <b>Fixvektor</b> sind.</p>' +
-                    '<p style="margin:0">Fixvektor aus $U \\cdot \\vec{v} = \\vec{v}$ und $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx ' + tv(v, 3) + '$. Langfristig: ' +
+                r += '<p style="margin:0 0 6px">$P^{' + Math.max(1, steps) + '} \\approx ' + tm(Un, 3) + '$. Mit wachsendem $n$ werden die Spalten von $P^n$ gleich: Sie nähern sich der <b>Grenzmatrix</b>, deren Spalten alle der <b>Fixvektor</b> sind.</p>' +
+                    '<p style="margin:0">Fixvektor aus $P \\cdot \\vec{v} = \\vec{v}$ und $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx ' + tv(v, 3) + '$. Langfristig: ' +
                     C.names.map((nm, i) => nm + ' ' + fmt(v[i] * 100, 1) + ' %').join(', ') + ' der Kundschaft, egal wie es anfing.</p>';
             }
             out.innerHTML = r; math(out);

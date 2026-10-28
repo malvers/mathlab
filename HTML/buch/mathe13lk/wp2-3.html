@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematik 13 LK · Kapitel W2.3 · Populationsmodelle | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Übergangsmatrizen, Potenzen von Matrizen, Grenzmatrix und Fixvektor, zyklische Entwicklung. Kapitel W2.3 des interaktiven Lehrbuchs Mathematik · Berufliches Gymnasium 13 · Leistungskurs: Erklärungen, Beispiele, Aufgaben in drei Stufen und Selbsttests mit sofortiger Rückmeldung.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATIK · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Kapitel"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhalt des Kapitels">
+        <p class="b-toc-title">KAPITEL W2.3 · WAHLPFLICHT 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Auftakt" data-toc-k="A" data-toc-short="Auftakt" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">KAPITEL W2.3 · WAHLPFLICHT 2 · FEBRUAR</p>
+            <h1>Populationsmodelle</h1>
+            <p class="b-hero-lead">Aus Eiern werden Larven, aus Larven Käfer, und Käfer legen wieder Eier. Wie viele Käfer gibt es in drei, in zehn, in hundert Generationen?
+                Kunden wechseln jedes Jahr zwischen Stromanbietern hin und her. Wie verteilen sie sich auf lange Sicht? Beide Fragen beantwortet eine <b>Übergangsmatrix</b>:
+                Ihre <b>Potenzen</b> zeigen die Zukunft, die <b>Grenzmatrix</b> und der <b>Fixvektor</b> den Zustand, auf den alles zuläuft.</p>
+            <div class="b-chips"><span class="b-chip">8 USTD.</span><span class="b-chip">3 LERNEINHEITEN</span><span class="b-chip">WAHLPFLICHT 2</span></div>
+        </div>
+        <div class="b-hero-art"><svg viewBox="0 0 320 250" role="img" aria-label="Lebenszyklus eines Käfers: Eier werden zu einem Viertel Larven, Larven zur Hälfte Käfer, jeder Käfer legt acht Eier"><defs><marker id="cy13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" style="fill:#e682be"/></marker></defs><path d="M180.0 87.5 Q228.8 117.0 240.2 170.1" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="236.9" y="116.2" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">0,25</text><path d="M228.0 200.0 Q160.0 222.0 95.0 200.0" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="160.0" y="237.0" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">0,5</text><path d="M78.0 172.5 Q91.2 117.0 138.2 89.9" style="fill:none;stroke:#e682be;stroke-width:2.2" marker-end="url(#cy13)"/><text x="83.1" y="116.2" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">8</text><circle cx="160" cy="60" r="34" style="fill:rgb(245,194,66);fill-opacity:0.18;stroke:rgb(245,194,66);stroke-width:2.4"/><text x="160" y="65" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Eier</text><circle cx="262" cy="200" r="34" style="fill:#7fd8ee;fill-opacity:0.18;stroke:#7fd8ee;stroke-width:2.4"/><text x="262" y="205" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Larven</text><circle cx="58" cy="200" r="34" style="fill:#b8a4f2;fill-opacity:0.18;stroke:#b8a4f2;stroke-width:2.4"/><text x="58" y="205" text-anchor="middle" style="fill:#e8edf5;font:700 14px Raleway,sans-serif">Käfer</text></svg></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DAS LERNST DU IN DIESEM KAPITEL</div>
+            <div class="b-text"><ul>
+                <li>Übergänge zwischen Zuständen mit einem <b>Übergangsgraphen</b> und einer <b>Übergangsmatrix</b> beschreiben</li>
+                <li>Entwicklungen mit <b>Potenzen von Matrizen</b> berechnen, vorwärts und rückwärts</li>
+                <li><b>zyklisches</b> Verhalten, Wachstum und Aussterben einer Population erkennen und begründen</li>
+                <li><b>Grenzmatrix</b> und <b>Fixvektor</b> bestimmen und als langfristige Verteilung deuten</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: DAS KANNST DU SCHON?</div>
+            <div class="b-q" data-ans="200" data-ph="Eintrag"><p class="b-q-text">$\begin{pmatrix} 0 & 0 & 8 \\ 0{,}25 & 0 & 0 \\ 0 & 0{,}5 & 0 \end{pmatrix} \cdot \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$: mittlerer Eintrag?</p><div class="b-sol"><p>$0{,}25 \cdot 800$</p></div></div>
+            <div class="b-q" data-ans="0,81" data-tol="0.0001" data-ph="Wert"><p class="b-q-text">Wie groß ist $0{,}9^2$?</p><div class="b-sol"><p>0,81</p></div></div>
+            <div class="b-q" data-ans="2/3" data-tol="0.005" data-ph="v₁ ="><p class="b-q-text">$v_1 = 2v_2$ und $v_1 + v_2 = 1$. Wie groß ist $v_1$?</p><div class="b-sol"><p>$3v_2 = 1$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Erkundungen" data-toc-k="E" data-toc-short="Erkundungen">
+    <div class="b-band"><span class="b-band-tag">ERKUNDUNGEN</span><span class="b-band-sub">ZUM EINSTIEG · IN GRUPPEN</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DER KÄFERKREISLAUF</div>
+            <div class="b-text"><p>Im Bild oben: Ein Viertel der Eier wird zu Larven, die Hälfte der Larven zu Käfern, jeder Käfer legt 8 Eier und stirbt. Am Anfang gibt es 800 Eier, 200 Larven und 50 Käfer.</p>
+                <ul><li>Berechnet die Zahlen für die nächsten drei Zeitschritte. Was fällt euch auf?</li><li>Was ändert sich, wenn jeder Käfer 10 Eier legt?</li></ul></div>
+            <span class="b-pair">→ Lerneinheiten 1 und 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">WER WECHSELT WOHIN?</div>
+            <div class="b-text"><p>Von den Kunden der Stadtwerke bleiben jedes Jahr 90 %, 10 % wechseln zur Konkurrenz. Von deren Kunden kommen jedes Jahr 20 % zurück.</p>
+                <ul><li>Heute haben die Stadtwerke 600 und die Konkurrenz 400 Kunden. Wie sieht es in einem, in zwei Jahren aus?</li><li>Gibt es eine Verteilung, die sich nicht mehr ändert?</li></ul></div>
+            <span class="b-pair">→ Lerneinheit 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Übergangsmatrizen und Potenzen" data-toc-k="1" data-toc-short="1 Übergänge">
+    <div class="b-band"><span class="b-band-tag">LERNEINHEIT 1</span><span class="b-band-sub">3 USTD.</span></div>
+    <h2><span class="b-no">1</span>Übergangsmatrizen und Potenzen</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Nach einem Zeitschritt gibt es $8 \cdot 50 = 400$ Eier, $0{,}25 \cdot 800 = 200$ Larven und $0{,}5 \cdot 200 = 100$ Käfer. Jede neue Zahl ist eine Summe aus Anteilen der alten:
+                genau eine Zeile einer Matrix mal den Spaltenvektor der alten Zahlen.</p></div></div>
+            <div class="b-text"><p>Der Zustand zur Zeit $n$ ist ein Vektor $\vec{x}_n$. Die <b>Übergangsmatrix</b> $U$ enthält in Spalte $j$, was aus <b>einem</b> Exemplar des Zustands $j$ im nächsten Schritt wird:
+                Spalte heißt „von“, Zeile heißt „nach“. Der <b>Übergangsgraph</b> zeigt dasselbe als Pfeile. Weil jeder Schritt wieder dieselbe Multiplikation ist, steckt die ganze Zukunft in den Potenzen von $U$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">MERKE · ÜBERGANGSMATRIX</div>
+                <div class="b-text">
+                    <p>$\vec{x}_{n+1} = U \cdot \vec{x}_n$ &nbsp; und damit &nbsp; $\vec{x}_n = U^n \cdot \vec{x}_0$. Der Eintrag $u_{ij}$ ist der Anteil (oder die Anzahl), mit dem Zustand $j$ zu Zustand $i$ beiträgt.</p>
+                    <p><b>Rückwärts:</b> Ist $U$ invertierbar, dann $\vec{x}_{n-1} = U^{-1} \cdot \vec{x}_n$.</p>
+                    <p><b>Käfermodell:</b> $U = \begin{pmatrix} 0 & 0 & f \\ a & 0 & 0 \\ 0 & b & 0 \end{pmatrix}$ mit den Überlebensanteilen $a$ (Ei → Larve), $b$ (Larve → Käfer) und der Zahl $f$ der Eier je Käfer.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Leslie-Matrix:</b> Populationsmatrizen dieser Bauart untersuchte der britische Ökologe Patrick Leslie 1945. Quelle: P. H. Leslie, On the use of matrices in certain population mathematics, Biometrika 33 (1945).</p>
+            <p class="b-note"><b>Am CAS</b> berechnet man $U^{10}$ direkt als Potenz, ohne zehnmal zu multiplizieren.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERAKTIV · KÄFER UND KUNDEN</div>
+        <p class="b-help" style="margin:0 0 12px">Gehe Schritt für Schritt und beobachte die drei Kurven. Ändere die Zahl $f$ der Eier je Käfer: Bei welchem $f$ wiederholt sich alles, wann wächst die Population, wann stirbt sie aus? Die Kundenwanderung kommt in Lerneinheit 3.</p>
+        <div data-widget="uebergang" data-mode="kaefer"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 1 · DREI SCHRITTE</div>
+            <div class="b-text"><p>Berechne $\vec{x}_1$, $\vec{x}_2$, $\vec{x}_3$ für $U = \begin{pmatrix} 0 & 0 & 8 \\ 0{,}25 & 0 & 0 \\ 0 & 0{,}5 & 0 \end{pmatrix}$ und $\vec{x}_0 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\vec{x}_1 = \begin{pmatrix} 400 \\ 200 \\ 100 \end{pmatrix}$, $\vec{x}_2 = \begin{pmatrix} 800 \\ 100 \\ 100 \end{pmatrix}$, $\vec{x}_3 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$.</p>
+                <p><span class="b-res">Nach drei Schritten ist alles wie am Anfang.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 2 · POTENZEN</div>
+            <div class="b-text"><p>Berechne $U^2$ und $U^3$. Erkläre damit Beispiel 1.</p></div>
+            <div class="b-sol"><p>$U^2 = \begin{pmatrix} 0 & 4 & 0 \\ 0 & 0 & 2 \\ 0{,}125 & 0 & 0 \end{pmatrix}$, $U^3 = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} = E$.</p>
+                <p>$\vec{x}_3 = U^3 \cdot \vec{x}_0 = E \cdot \vec{x}_0 = \vec{x}_0$. <span class="b-res">Für jeden Startvektor wiederholt sich die Entwicklung mit der Periode 3.</span></p></div>
+        </div>
+    </div>
+    <h3>AUFGABEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Zeichne den Übergangsgraphen zu $U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$ und deute die drei Zahlen.</p></div>
+            <div class="b-sol"><p>Ei → Larve 0,5 (die Hälfte der Eier überlebt), Larve → Käfer 0,4 (40 % der Larven werden Käfer), Käfer → Ei 6 (jeder Käfer legt 6 Eier).</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Berechne für diese Matrix $\vec{x}_1$ und $\vec{x}_2$ mit $\vec{x}_0 = \begin{pmatrix} 600 \\ 100 \\ 50 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\vec{x}_1 = \begin{pmatrix} 300 \\ 300 \\ 40 \end{pmatrix}$, $\vec{x}_2 = \begin{pmatrix} 240 \\ 150 \\ 120 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Im Käfermodell mit $f = 8$ (Beispiel 1) zählt man heute 400 Eier, 200 Larven und 100 Käfer. Wie sah die Population einen Schritt vorher aus? Begründe, warum hier $U^{-1} = U^2$ gilt.</p></div>
+            <div class="b-sol"><p>Aus $U^3 = E$ folgt $U \cdot U^2 = E$, also $U^{-1} = U^2$. $\vec{x}_{-1} = U^2 \cdot \begin{pmatrix} 400 \\ 200 \\ 100 \end{pmatrix} = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$, genau $\vec{x}_0$ aus Beispiel 1.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Eine Tierart hat drei Altersklassen: Jungtiere, Jährlinge, Alttiere. 50 % der Jungtiere werden Jährlinge, 70 % der Jährlinge werden Alttiere, von den Alttieren überleben jedes Jahr 80 % und bleiben Alttiere. Jährlinge haben im Mittel 1, Alttiere 2 Junge. Stelle $U$ auf.</p></div>
+            <div class="b-sol"><p>Spalten „von“ Jungtier, Jährling, Alttier; Zeilen „nach“: $U = \begin{pmatrix} 0 & 1 & 2 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}7 & 0{,}8 \end{pmatrix}$. Die 0,8 auf der Diagonale: Alttiere bleiben Alttiere.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Rechne mit dem CAS für das Modell aus der letzten Aufgabe und $\vec{x}_0 = \begin{pmatrix} 100 \\ 50 \\ 50 \end{pmatrix}$ die Werte $\vec{x}_{10}$ und $\vec{x}_{11}$ aus. Um welchen Faktor wächst die Population schließlich pro Jahr? Vergleiche die Anteile der Altersklassen.</p></div>
+            <div class="b-sol"><p>$\vec{x}_{10} \approx \begin{pmatrix} 2066 \\ 771 \\ 999 \end{pmatrix}$, $\vec{x}_{11} \approx \begin{pmatrix} 2769 \\ 1033 \\ 1339 \end{pmatrix}$ (gerundet). Jede Klasse und die Gesamtzahl wachsen von Jahr zu Jahr um denselben Faktor,
+                <span class="b-res">etwa 1,34</span>. Die Anteile bleiben fast gleich: rund 54 % Jungtiere, 20 % Jährlinge, 26 % Alttiere. Anders als beim Käfer gibt es keinen Zyklus, weil die Alttiere mehrere Jahre leben.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE DICH!</div>
+        <div class="b-q" data-ans="100" data-ph="Käfer"><p class="b-q-text">Käfermodell aus Beispiel 1: Wie viele Käfer gibt es nach einem Schritt?</p><div class="b-sol"><p>$0{,}5 \cdot 200$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="Eintrag"><p class="b-q-text">Welcher Eintrag steht in $U^2$ in Zeile 1, Spalte 2?</p><div class="b-sol"><p>$8 \cdot 0{,}5$: Aus einer Larve werden nach zwei Schritten 4 Eier.</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Der Eintrag $u_{21}$ einer Übergangsmatrix beschreibt den Übergang …</p><div class="b-mc"><button>von Zustand 2 zu Zustand 1</button><button>von Zustand 1 zu Zustand 2</button><button>von Zustand 2 zu sich selbst</button></div><div class="b-sol"><p>Spalte = von, Zeile = nach</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Zyklen, Wachstum, Aussterben" data-toc-k="2" data-toc-short="2 Zyklen">
+    <div class="b-band"><span class="b-band-tag">LERNEINHEIT 2</span><span class="b-band-sub">2 USTD.</span></div>
+    <h2><span class="b-no">2</span>Zyklen, Wachstum und Aussterben</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Ein Ei wird im Käfermodell nach drei Schritten wieder zu $a \cdot b \cdot f$ Eiern: erst Larve mit Anteil $a$, dann Käfer mit Anteil $b$, dann $f$ Eier. Bei $a = 0{,}25$, $b = 0{,}5$, $f = 8$ ist das genau 1.</p></div></div>
+            <div class="b-text"><p>Dasselbe gilt für jede Klasse. Deshalb ist $U^3 = a\,b\,f \cdot E$: Nach drei Schritten ist jede Klasse mit dem Faktor $q = a\,b\,f$ multipliziert. Ob die Population überlebt, entscheidet allein dieser Faktor.
+                Zwischen den Vielfachen von 3 schwanken die Zahlen, weil die Klassen nacheinander dran sind.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">MERKE · LANGFRISTIGES VERHALTEN IM KÄFERMODELL</div>
+                <div class="b-text">
+                    <p>$U^3 = q \cdot E$ mit $q = a \cdot b \cdot f$, also $\vec{x}_{3k} = q^k \cdot \vec{x}_0$.</p>
+                    <p>$q = 1$: <b>zyklisch</b> mit Periode 3 · $q &gt; 1$: <b>Wachstum</b> · $q &lt; 1$: <b>Aussterben</b> auf lange Sicht.</p>
+                    <p>Allgemein liest man das langfristige Verhalten aus den Potenzen $U^n$ ab, für große $n$ mit dem CAS.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Stabil gehalten:</b> Will man eine Population bei $q &gt; 1$ konstant halten, muss man in jedem Zyklus einen festen Anteil entnehmen, etwa durch Schädlingsbekämpfung.</p>
+        </aside>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 3 · ZEHN EIER JE KÄFER</div>
+            <div class="b-text"><p>Wie entwickelt sich die Population aus Beispiel 1, wenn jeder Käfer 10 Eier legt?</p></div>
+            <div class="b-sol"><p>$q = 0{,}25 \cdot 0{,}5 \cdot 10 = 1{,}25$, also $U^3 = 1{,}25 \cdot E$ und $\vec{x}_3 = 1{,}25 \cdot \vec{x}_0 = \begin{pmatrix} 1000 \\ 250 \\ 62{,}5 \end{pmatrix}$.</p>
+                <p><span class="b-res">Alle drei Schritte wächst jede Klasse um 25 %.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 4 · WIE VIELE EIER MÜSSEN ES SEIN?</div>
+            <div class="b-text"><p>Wegen eines Pflanzenschutzmittels überleben nur noch 20 % der Larven. Wie viele Eier muss ein Käfer legen, damit die Population nicht ausstirbt?</p></div>
+            <div class="b-sol"><p>$q = 0{,}25 \cdot 0{,}2 \cdot f \ge 1 \iff f \ge 20$. <span class="b-res">Mindestens 20 Eier je Käfer.</span></p></div>
+        </div>
+    </div>
+    <h3>AUFGABEN</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Entscheide für $U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$, ob die Population wächst, zyklisch ist oder ausstirbt.</p></div>
+            <div class="b-sol"><p>$q = 0{,}5 \cdot 0{,}4 \cdot 6 = 1{,}2 &gt; 1$: Wachstum, alle drei Schritte um 20 %.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Berechne für $f = 8$ und $\vec{x}_0 = \begin{pmatrix} 800 \\ 200 \\ 50 \end{pmatrix}$ die Zahl der Käfer nach 100 Schritten.</p></div>
+            <div class="b-sol"><p>$100 = 3 \cdot 33 + 1$, also $\vec{x}_{100} = U \cdot \vec{x}_0 = \vec{x}_1$: 100 Käfer.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Für welches $b$ ist das Modell mit $a = 0{,}2$ und $f = 25$ zyklisch? Gib dann $U^2$ und $U^{-1}$ an.</p></div>
+            <div class="b-sol"><p>$0{,}2 \cdot b \cdot 25 = 1 \Rightarrow b = 0{,}2$. $U^2 = \begin{pmatrix} 0 & 5 & 0 \\ 0 & 0 & 5 \\ 0{,}04 & 0 & 0 \end{pmatrix} = U^{-1}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Beweise</b> $U^3 = a\,b\,f \cdot E$ für $U = \begin{pmatrix} 0 & 0 & f \\ a & 0 & 0 \\ 0 & b & 0 \end{pmatrix}$, indem du erst $U^2$ allgemein berechnest. Was folgt für $U^{3k+1}$?</p></div>
+            <div class="b-sol"><p>$U^2 = \begin{pmatrix} 0 & bf & 0 \\ 0 & 0 & af \\ ab & 0 & 0 \end{pmatrix}$, $U^3 = U \cdot U^2 = \begin{pmatrix} abf & 0 & 0 \\ 0 & abf & 0 \\ 0 & 0 & abf \end{pmatrix}$. $\square$ Daraus $U^{3k+1} = (abf)^k \cdot U$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE DICH!</div>
+        <div class="b-q" data-ans="1,25" data-tol="0.0001" data-ph="q ="><p class="b-q-text">$a = 0{,}25$, $b = 0{,}5$, $f = 10$: Wie groß ist $q$?</p><div class="b-sol"><p>$0{,}25 \cdot 0{,}5 \cdot 10$</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="f ="><p class="b-q-text">$a = 0{,}25$, $b = 0{,}2$: Mindestzahl der Eier je Käfer, damit die Population nicht ausstirbt?</p><div class="b-sol"><p>$0{,}05 f \ge 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Grenzmatrix und Fixvektor" data-toc-k="3" data-toc-short="3 Fixvektor">
+    <div class="b-band"><span class="b-band-tag">LERNEINHEIT 3</span><span class="b-band-sub">3 USTD.</span></div>
+    <h2><span class="b-no">3</span>Grenzmatrix und Fixvektor</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Stadtwerke $S$ und Konkurrenz $K$: $P = \begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$, Start $\begin{pmatrix} 600 \\ 400 \end{pmatrix}$.
+                Nach einem Jahr $\begin{pmatrix} 620 \\ 380 \end{pmatrix}$, nach zwei $\begin{pmatrix} 634 \\ 366 \end{pmatrix}$. Die Stadtwerke gewinnen, aber immer langsamer. Wohin führt das?</p></div></div>
+            <div class="b-text"><p>Bei Wanderungen geht niemand verloren und niemand kommt dazu: Jede Spalte von $P$ hat die Summe 1. Solche Matrizen heißen <b>stochastisch</b>. Ihre Potenzen $P^n$ nähern sich oft einer
+                <b>Grenzmatrix</b> $G$, deren Spalten alle gleich sind. Dieser Spaltenvektor ist der <b>Fixvektor</b> $\vec{v}$: eine Verteilung, die sich durch $P$ nicht mehr ändert.
+                Man findet ihn ohne Potenzen über das Gleichungssystem $P \cdot \vec{v} = \vec{v}$ mit der Zusatzbedingung, dass die Anteile zusammen 1 ergeben.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">MERKE · GRENZMATRIX UND FIXVEKTOR</div>
+                <div class="b-text">
+                    <p><b>Fixvektor:</b> $P \cdot \vec{v} = \vec{v} \iff (P - E) \cdot \vec{v} = \vec{0}$, dazu $v_1 + v_2 + \ldots = 1$ für eine Verteilung in Anteilen.</p>
+                    <p><b>Grenzmatrix:</b> $G = \lim\limits_{n \to \infty} P^n$, alle Spalten sind $\vec{v}$. Dann gilt für jeden Start $\vec{x}_0$: $\vec{x}_n \to G \cdot \vec{x}_0 = (\text{Gesamtzahl}) \cdot \vec{v}$.</p>
+                    <p>Langfristig hängt die Verteilung also nicht vom Anfang ab, nur die Gesamtzahl bleibt erhalten.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Nicht immer:</b> Beim zyklischen Käfermodell gibt es keine Grenzmatrix, die Potenzen springen immer zwischen $U$, $U^2$ und $E$ hin und her.</p>
+            <p class="b-note"><b>Am CAS:</b> $P^{50}$ ausrechnen und auf drei Stellen runden. Die Spalten sind dann praktisch der Fixvektor.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERAKTIV · DREI ANBIETER</div>
+        <p class="b-help" style="margin:0 0 12px">Kundenwanderung zwischen drei Stromanbietern: Gehe 10 Schritte und mehr. Beobachte, wie die Spalten von $P^n$ gleich werden und wie sich die Kurven auf den Fixvektor einpendeln.</p>
+        <div data-widget="uebergang" data-mode="kunden"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 5 · DER FIXVEKTOR</div>
+            <div class="b-text"><p>Bestimme den Fixvektor und die Grenzmatrix für $P = \begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$(P - E) \cdot \vec{v} = \vec{0}$: $-0{,}1 v_1 + 0{,}2 v_2 = 0$, also $v_1 = 2 v_2$. Mit $v_1 + v_2 = 1$: $v_2 = \tfrac13$, $v_1 = \tfrac23$.</p>
+                <p><span class="b-res">$\vec{v} = \begin{pmatrix} \tfrac23 \\ \tfrac13 \end{pmatrix}$, $G = \begin{pmatrix} \tfrac23 & \tfrac23 \\ \tfrac13 & \tfrac13 \end{pmatrix}$</span>. Langfristig: $G \cdot \begin{pmatrix} 600 \\ 400 \end{pmatrix} \approx \begin{pmatrix} 667 \\ 333 \end{pmatrix}$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">BEISPIEL 6 · POTENZEN AM CAS</div>
+            <div class="b-text"><p>Berechne $P^5$ und $P^{20}$ und vergleiche mit $G$.</p></div>
+            <div class="b-sol"><p>$P^5 \approx \begin{pmatrix} 0{,}723 & 0{,}555 \\ 0{,}277 & 0{,}445 \end{pmatrix}$, $P^{20} \approx \begin{pmatrix} 0{,}667 & 0{,}666 \\ 0{,}333 & 0{,}334 \end{pmatrix}$.</p>
+                <p>Nach 20 Jahren sind die Spalten praktisch gleich, <span class="b-res">$P^{20} \approx G$</span>.</p></div>
+        </div>
+    </div>
+    <h3>AUFGABEN</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Prüfe, ob $P = \begin{pmatrix} 0{,}8 & 0{,}1 & 0{,}2 \\ 0{,}1 & 0{,}7 & 0{,}2 \\ 0{,}1 & 0{,}2 & 0{,}6 \end{pmatrix}$ stochastisch ist, und deute die Spalte zu Anbieter C.</p></div>
+            <div class="b-sol"><p>Spaltensummen: $0{,}8 + 0{,}1 + 0{,}1 = 1$, $0{,}1 + 0{,}7 + 0{,}2 = 1$, $0{,}2 + 0{,}2 + 0{,}6 = 1$ ✓ Von den Kunden von C wechseln jährlich 20 % zu A, 20 % zu B, 60 % bleiben.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Bestimme den Fixvektor dieser Matrix ohne CAS und vergleiche mit dem Widget.</p></div>
+            <div class="b-hint"><p>Zwei Zeilen von $(P - E)\,\vec{v} = \vec{0}$ und die Summenbedingung reichen; die dritte Zeile folgt aus den anderen.</p></div>
+            <div class="b-sol"><p>$-0{,}2 v_1 + 0{,}1 v_2 + 0{,}2 v_3 = 0$, $0{,}1 v_1 - 0{,}3 v_2 + 0{,}2 v_3 = 0$, $v_1 + v_2 + v_3 = 1$. Lösung: <span class="b-res">$\vec{v} = \begin{pmatrix} \tfrac{8}{19} \\ \tfrac{6}{19} \\ \tfrac{5}{19} \end{pmatrix} \approx \begin{pmatrix} 0{,}421 \\ 0{,}316 \\ 0{,}263 \end{pmatrix}$</span>.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Bei 10 000 Kunden: Wie viele hat Anbieter A auf lange Sicht? Spielt es eine Rolle, ob am Anfang alle bei C waren?</p></div>
+            <div class="b-sol"><p>$10\,000 \cdot \tfrac{8}{19} \approx 4211$. Nein: Die Grenzmatrix hat lauter gleiche Spalten, also führt jeder Start mit 10 000 Kunden zur selben Verteilung.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Beweise:</b> Ist $P$ stochastisch (alle Spaltensummen 1), dann hat $P \cdot \vec{x}$ dieselbe Komponentensumme wie $\vec{x}$. Warum ist das für Kundenwanderungen sinnvoll, für das Käfermodell aber nicht?</p></div>
+            <div class="b-sol"><p>$\sum_i (P\vec{x})_i = \sum_i \sum_j p_{ij} x_j = \sum_j x_j \sum_i p_{ij} = \sum_j x_j \cdot 1$. $\square$</p>
+                <p>Kunden wechseln nur, sie verschwinden nicht. Käfer sterben und legen Eier: Die Spaltensummen der Käfermatrix sind $a$, $b$ und $f$, nicht 1, und die Gesamtzahl ändert sich.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE DICH!</div>
+        <div class="b-q" data-ans="634" data-ph="Kunden"><p class="b-q-text">Stadtwerke: Start 600 und 400. Wie viele Kunden haben die Stadtwerke nach zwei Jahren?</p><div class="b-sol"><p>$0{,}9 \cdot 620 + 0{,}2 \cdot 380$</p></div></div>
+        <div class="b-q" data-ans="1/3" data-tol="0.005" data-ph="v₂ ="><p class="b-q-text">Zweite Komponente des Fixvektors von $\begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$?</p><div class="b-sol"><p>$v_1 = 2v_2$, $v_1 + v_2 = 1$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Die Spalten der Grenzmatrix sind …</p><div class="b-mc"><button>die Spalten von $P$.</button><button>Einheitsvektoren.</button><button>alle gleich dem Fixvektor.</button></div><div class="b-sol"><p>Jeder Start führt zur selben Verteilung.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Wiederholen · Vertiefen · Vernetzen" data-toc-k="W" data-toc-short="Üben">
+    <div class="b-band"><span class="b-band-tag">WIEDERHOLEN · VERTIEFEN · VERNETZEN</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Ein Mietwagen wird in Dresden oder Leipzig abgegeben. Von den in Dresden gemieteten Wagen kommen 70 % nach Dresden zurück, von den in Leipzig gemieteten 60 % nach Leipzig. Stelle $P$ auf und bestimme die langfristige Verteilung der Wagen.</p></div>
+            <div class="b-sol"><p>$P = \begin{pmatrix} 0{,}7 & 0{,}4 \\ 0{,}3 & 0{,}6 \end{pmatrix}$. $-0{,}3 v_1 + 0{,}4 v_2 = 0$, $v_1 + v_2 = 1$: $\vec{v} = \begin{pmatrix} \tfrac47 \\ \tfrac37 \end{pmatrix}$, also gut 57 % in Dresden.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Vernetzen mit Kapitel W2.1:</b> Warum hat die Gleichung $(P - E)\,\vec{v} = \vec{0}$ bei einer stochastischen Matrix immer unendlich viele Lösungen, sodass man die Summenbedingung braucht?</p></div>
+            <div class="b-sol"><p>Die Spaltensummen von $P - E$ sind alle $1 - 1 = 0$: Die Summe aller Zeilen ist die Nullzeile, eine Zeile hängt von den anderen ab. $P - E$ ist nicht invertierbar, und mit $\vec{v}$ ist jedes Vielfache $r\vec{v}$ eine Lösung.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Vernetzen mit Jahrgangsstufe 12:</b> Ein Glücksspiel hat zwei Zustände „im Spiel“ und „ausgeschieden“. Im Spiel bleibt man jede Runde mit Wahrscheinlichkeit 0,8, ausgeschieden bleibt man. Stelle $P$ auf. Mit welcher Wahrscheinlichkeit ist man nach 5 Runden noch im Spiel? Was ist die Grenzmatrix?</p></div>
+            <div class="b-sol"><p>$P = \begin{pmatrix} 0{,}8 & 0 \\ 0{,}2 & 1 \end{pmatrix}$. Nach 5 Runden: $0{,}8^5 \approx 0{,}328$. $P^n \to G = \begin{pmatrix} 0 & 0 \\ 1 & 1 \end{pmatrix}$: Auf lange Sicht scheidet jeder aus, „ausgeschieden“ ist ein absorbierender Zustand.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Offene Aufgabe:</b> Erfinde eine $2 \times 2$-Übergangsmatrix, deren Potenzen <b>keine</b> Grenzmatrix haben. Was passiert dann mit einer Verteilung?</p></div>
+            <div class="b-sol"><p>Zum Beispiel $P = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$: Alle wechseln jedes Jahr. $P^2 = E$, die Potenzen springen zwischen $P$ und $E$. Eine Verteilung $\begin{pmatrix} 600 \\ 400 \end{pmatrix}$ springt ewig zwischen $\begin{pmatrix} 400 \\ 600 \end{pmatrix}$ und sich selbst. Nur $\begin{pmatrix} 500 \\ 500 \end{pmatrix}$ bleibt fest, der Fixvektor $\begin{pmatrix} 0{,}5 \\ 0{,}5 \end{pmatrix}$ gibt es also trotzdem.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Exkursion: Markow und Eugen Onegin" data-toc-k="X" data-toc-short="Markow">
+    <div class="b-band"><span class="b-band-tag">EXKURSION</span><span class="b-band-sub">KETTEN AUS BUCHSTABEN</span></div>
+    <h2>Andrei Markow zählt Vokale</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Der russische Mathematiker Andrei Andrejewitsch Markow untersuchte 1913 die ersten 20 000 Buchstaben von Alexander Puschkins Versroman „Eugen Onegin“. Er zählte, wie oft auf einen Vokal wieder ein Vokal folgt
+                und wie oft ein Konsonant. Daraus erhielt er eine $2 \times 2$-Übergangsmatrix, mit der sich die Folge der Buchstaben erstaunlich gut beschreiben ließ.</p>
+            <p>Solche Modelle, in denen der nächste Zustand nur vom jetzigen abhängt, heißen heute <b>Markow-Ketten</b>. Mit ihnen arbeiten Wettervorhersagen, Spracherkennung,
+                die Rangliste von Suchmaschinen und die Ökologie, wenn sie wie in diesem Kapitel Populationen in die Zukunft rechnet.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Quelle:</b> A. A. Markow: Beispiel einer statistischen Untersuchung am Text „Eugen Onegin“ zur Verbindung von Proben in Ketten. Bulletin der Kaiserlichen Akademie der Wissenschaften, St. Petersburg 1913 · MacTutor: „Andrei Andreyevich Markov“.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Rückblick" data-toc-k="R" data-toc-short="Rückblick">
+    <div class="b-band"><span class="b-band-tag">RÜCKBLICK</span><span class="b-band-sub">DAS WICHTIGSTE AUF EINEN BLICK</span></div>
+    <div class="b-rueck"><div><h4>ÜBERGANGSMATRIX</h4><p>Spalte = von, Zeile = nach; $\vec{x}_{n+1} = U\,\vec{x}_n$, $\vec{x}_n = U^n\,\vec{x}_0$</p></div>
+        <div><p>Käfer: 800, 200, 50 → 400, 200, 100</p></div></div>
+    <div class="b-rueck"><div><h4>ZYKLUS</h4><p>Käfermodell: $U^3 = abf \cdot E$; $q = abf$ entscheidet</p></div>
+        <div><p>$q = 1$: Periode 3 · $q = 1{,}25$: Wachstum</p></div></div>
+    <div class="b-rueck"><div><h4>STOCHASTISCHE MATRIX</h4><p>Spaltensummen 1, die Gesamtzahl bleibt erhalten</p></div>
+        <div><p>Kundenwanderung</p></div></div>
+    <div class="b-rueck"><div><h4>FIXVEKTOR, GRENZMATRIX</h4><p>$(P - E)\,\vec{v} = \vec{0}$, Summe 1; $P^n \to G$ mit Spalten $\vec{v}$</p></div>
+        <div><p>$\begin{pmatrix} 0{,}9 & 0{,}2 \\ 0{,}1 & 0{,}8 \end{pmatrix}$: $\vec{v} = \begin{pmatrix} \tfrac23 \\ \tfrac13 \end{pmatrix}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">ZWEI RUNDEN · RÜCKMELDUNG SOFORT</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RUNDE 1 · OHNE HILFSMITTEL</div>
+            <div class="b-q" data-ans="300" data-ph="Larven"><p class="b-q-text">$U = \begin{pmatrix} 0 & 0 & 6 \\ 0{,}5 & 0 & 0 \\ 0 & 0{,}4 & 0 \end{pmatrix}$, $\vec{x}_0 = \begin{pmatrix} 600 \\ 100 \\ 50 \end{pmatrix}$: Larven nach einem Schritt?</p><div class="b-sol"><p>$0{,}5 \cdot 600$</p></div></div>
+            <div class="b-q" data-ans="1,2" data-tol="0.0001" data-ph="q ="><p class="b-q-text">Wachstumsfaktor $q$ dieses Modells nach drei Schritten?</p><div class="b-sol"><p>$0{,}5 \cdot 0{,}4 \cdot 6$</p></div></div>
+            <div class="b-q" data-ans="4/7" data-tol="0.005" data-ph="v₁ ="><p class="b-q-text">Mietwagen: $P = \begin{pmatrix} 0{,}7 & 0{,}4 \\ 0{,}3 & 0{,}6 \end{pmatrix}$. Anteil in Dresden auf lange Sicht?</p><div class="b-sol"><p>$0{,}3 v_1 = 0{,}4 v_2$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RUNDE 2 · MIT HILFSMITTELN</div>
+            <div class="b-q" data-ans="4211" data-tol="1" data-ph="Kunden"><p class="b-q-text">Drei Anbieter, 10 000 Kunden: Wie viele hat A langfristig (gerundet)?</p><div class="b-sol"><p>$10\,000 \cdot \tfrac{8}{19}$</p></div></div>
+            <div class="b-q" data-ans="0,328" data-tol="0.001" data-ph="P ≈"><p class="b-q-text">Glücksspiel: Wahrscheinlichkeit, nach 5 Runden noch im Spiel zu sein?</p><div class="b-sol"><p>$0{,}8^5$</p></div></div>
+            <div class="b-q" data-ans="100" data-ph="Käfer"><p class="b-q-text">Käfermodell mit $f = 8$, Start 800, 200, 50: Käfer nach 100 Schritten?</p><div class="b-sol"><p>$\vec{x}_{100} = \vec{x}_1$</p></div></div>
+        </div>
+    </div>
+    <h3>MEHR ÜBEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-leontief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ABITUR-TRAINING LK</span><span class="b-lab-what">Matrizen mit Parameter</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematik, Berufliches Gymnasium Jahrgangsstufe 13, Leistungskurs · Wahlpflicht 2 nach dem sächsischen Lehrplan Berufliches Gymnasium Mathematik.</p>
+    <p>Alle Texte, Aufgaben und Abbildungen sind eigene Inhalte.</p>
+</footer>
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-bgy13lk.js"></script>
+</body>
+</html>
