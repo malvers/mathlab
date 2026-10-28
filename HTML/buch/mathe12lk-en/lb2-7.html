@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 12 Advanced · Chapter 2.7 · Function profiles and regression | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Functions from conditions, regression models with technology. Chapter 2.7 of the interactive textbook Mathematics · Vocational Grammar School 12 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 12 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 2.7 · LEARNING AREA 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 2.7 · LEARNING AREA 2 · APRIL</p>
+            <h1>Function profiles and regression</h1>
+            <p class="b-hero-lead">One road is to merge into another without a kink: which function describes the connecting piece? Measured braking distances scatter: which curve fits best?
+                In the first case you know <b>exact conditions</b> and build a function from them; in the second you have <b>data</b> and let the CAS look for the best function of a chosen type.
+                Both mean: mathematics describes the world with functions.</p>
+            <div class="b-chips"><span class="b-chip">9 LESSONS</span><span class="b-chip">2 UNITS</span><span class="b-chip">MODELLING</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x&lt;0?0:(x&gt;4?2:-0.0625*x^3+0.375*x^2)"]' data-labels='["connecting piece"]' data-lat="[4.6]" data-pts="[[0,0],[4,2]]" data-x="-2,6.5" data-y="-1,3" data-h="240" data-aria="A connecting piece without a kink between two horizontal roads"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>translate properties of a graph into <b>equations</b> and determine functions from conditions (<b>function profile problems</b>), also with exponential functions</li>
+                <li>solve the resulting <b>systems of equations</b>, also with digital tools</li>
+                <li>determine a <b>regression function</b> for measured data with the CAS, choose the type with reasons and judge predictions critically</li>
+                <li>understand the <b>method of least squares</b> as an optimisation problem</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Solve the system $x + y = 5$, $x - y = -1$. What is $x$?</p><div class="b-sol"><p>Add: $2x = 4$, $x = 2$ (and $y = 3$)</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="number"><p class="b-q-text">$f(x) = ax^2 + bx + c$ with $a = 1$, $b = 2$, $c = 2$. What is $f(1)$?</p><div class="b-sol"><p>$1 + 2 + 2 = 5$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">At which point does $f(x) = -x^2 + 6x$ have its maximum?</p><div class="b-sol"><p>$-2x + 6 = 0$</p></div></div>
+            <div class="b-q" data-ans="18" data-ph="cm²"><p class="b-q-text">A rectangle is 6 cm long and half as wide as it is long. What is its area?</p><div class="b-sol"><p>$6 \cdot 3 = 18$ cm²</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">CLOSING THE GAP</div>
+            <div class="b-text"><p>Two straight roads end offset from each other: one at $(0, 0)$ in the direction of the $x$-axis, the other at $(4, 2)$, also horizontal.</p>
+                <ul><li>Sketch a connecting piece without a kink. Which conditions must it satisfy?</li><li>How many conditions are there? Which type of function fits?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span>
+        </div>
+        <div class="b-box b-erk"><div class="b-box-title">HOW FAR DOES THE CAR NEED TO STOP?</div>
+            <div class="b-text"><p>Measured braking distances: 30 km/h: 9.5 m, 50 km/h: 24 m, 70 km/h: 50 m, 90 km/h: 80 m, 110 km/h: 122 m, 130 km/h: 168 m.</p>
+                <ul><li>Plot the values. Which type of function fits?</li><li>What do you predict for 150 km/h? How sure are you?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Function profile problems" data-toc-k="1" data-toc-short="1 Profiles">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">6 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Function profile problems: functions from conditions</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>We want a parabola through the points $(0, 1)$, $(1, 0)$ and $(3, 4)$. Approach: $f(x) = ax^2 + bx + c$ with three unknown numbers.</p></div></div>
+            <div class="b-text"><p>Every point gives an equation: $f(0) = 1 \Rightarrow c = 1$; $f(1) = 0 \Rightarrow a + b + c = 0$; $f(3) = 4 \Rightarrow 9a + 3b + c = 4$.
+                The system of equations (Gaussian elimination from Year 11) gives $a = 1$, $b = -2$, $c = 1$, so $f(x) = x^2 - 2x + 1 = (x - 1)^2$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · A PROFILE IN EQUATIONS</div>
+                <div class="b-text">
+                    <p>A polynomial function of degree $n$ has $n + 1$ coefficients. For these you need $n + 1$ conditions.</p>
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th>Property</th><th>Equation</th></tr>
+                        <tr><td>point $P(x_0, y_0)$ lies on the graph</td><td>$f(x_0) = y_0$</td></tr>
+                        <tr><td>turning point (horizontal tangent) at $x_0$</td><td>$f'(x_0) = 0$</td></tr>
+                        <tr><td>point of inflection at $x_0$</td><td>$f''(x_0) = 0$</td></tr>
+                        <tr><td>gradient $m$ (tangent) at $x_0$</td><td>$f'(x_0) = m$</td></tr>
+                        <tr><td>symmetric about the $y$-axis / about the origin</td><td>only even / odd exponents in the approach</td></tr></table></div>
+                    <p>How to do it: approach with $f$, $f'$, $f''$ · translate the conditions · solve the system of equations · <b>check</b> that all conditions are satisfied.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>A maximum point is two conditions:</b> maximum $(2, 4)$ means $f(2) = 4$ <b>and</b> $f'(2) = 0$.</p>
+            <p class="b-note"><b>Digital tools:</b> from four unknowns on, the calculator is worth it (system of equations or matrix function).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · FUNCTION FROM CONDITIONS</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a profile and drag the points. The system of equations and the solution adapt at once.</p>
+        <div data-widget="steckbrief"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · MAXIMUM AND MINIMUM</div>
+            <div class="b-text"><p>A cubic function passes through the origin, has the maximum point $(1, 2)$ and a turning point at $x = 3$. Find $f$.</p></div>
+            <div class="b-sol"><p>$f(0) = 0 \Rightarrow d = 0$ · $f(1) = 2$: $a + b + c = 2$ · $f'(1) = 0$: $3a + 2b + c = 0$ · $f'(3) = 0$: $27a + 6b + c = 0$.</p>
+                <p>Solution: $a = 0.5$, $b = -3$, $c = 4.5$. <span class="b-res">$f(x) = 0.5x^3 - 3x^2 + 4.5x$</span>. Check: $f'(x) = 1.5(x - 1)(x - 3)$, $f''(1) = -3 < 0$. ✓</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · WITH SYMMETRY</div>
+            <div class="b-text"><p>A quartic function that is symmetric about the $y$-axis cuts the $y$-axis at 2 and has a minimum point at $(1, 0)$.</p></div>
+            <div class="b-sol"><p>Approach $f(x) = ax^4 + bx^2 + c$. $c = 2$, $f(1) = a + b + 2 = 0$, $f'(1) = 4a + 2b = 0$. So $b = -2a$, $a = 2$, $b = -4$.
+                <span class="b-res">$f(x) = 2x^4 - 4x^2 + 2 = 2(x^2 - 1)^2$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Translate into equations: the graph of a cubic function has the point of inflection $(1, 3)$ and cuts the $y$-axis at $-1$.</p></div>
+            <div class="b-sol"><p>$f(1) = 3$, $f''(1) = 0$, $f(0) = -1$. Those are three conditions, for degree 3 one is still missing.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Find the parabola through $(0, 3)$, $(1, 2)$ and $(2, 3)$.</p></div>
+            <div class="b-sol"><p>$c = 3$, $a + b = -1$, $4a + 2b = 0$: $a = 1$, $b = -2$. $f(x) = x^2 - 2x + 3$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Solve the exploration “Closing the gap”: find a cubic function with $f(0) = 0$, $f'(0) = 0$, $f(4) = 2$, $f'(4) = 0$.</p></div>
+            <div class="b-sol"><p>$d = 0$, $c = 0$; $64a + 16b = 2$, $48a + 8b = 0$ ⇒ $b = -6a$, $64a - 96a = 2$, $a = -\tfrac{1}{16}$, $b = \tfrac38$.
+                <span class="b-res">$f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</span>, the point of inflection lies exactly in the middle at $(2, 1)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A cubic function symmetric about the origin has a minimum point at $(1, -2)$. Find it.</p></div>
+            <div class="b-sol"><p>Approach $f(x) = ax^3 + cx$. $a + c = -2$, $3a + c = 0$: $a = 1$, $c = -3$. $f(x) = x^3 - 3x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>A bridge is to cross a 40 m wide river as a parabolic arch, 8 m high in the middle. Find an equation if the origin is in the middle at the water. How steeply does the arch rise at the bank?</p></div>
+            <div class="b-sol"><p>Symmetric: $f(x) = ax^2 + 8$, $f(20) = 0 \Rightarrow a = -0.02$. $f'(x) = -0.04x$, $f'(-20) = 0.8$: gradient 80%, angle $\arctan 0.8 \approx 38.7°$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Not every function profile leads to a polynomial function. A population grows according to $f(x) = a \cdot \mathrm{e}^{bx}$. At the start it is 3 and after 2 years 12 (in thousands).
+                Find $a$ and $b$. After how many years does it grow by 10,000 per year?</p></div>
+            <div class="b-hint"><p>The system of equations is not linear. Divide one equation by the other.</p></div>
+            <div class="b-sol"><p>$f(0) = a = 3$. $f(2) = 3\,\mathrm{e}^{2b} = 12 \iff \mathrm{e}^{2b} = 4 \iff b = \ln 2 \approx 0.693$. So $f(x) = 3\,\mathrm{e}^{x \ln 2} = 3 \cdot 2^x$.</p>
+                <p>$f'(x) = 3 \ln 2 \cdot 2^x = 10 \iff 2^x = \tfrac{10}{3\ln 2} \approx 4.81 \iff x \approx 2.27$. <span class="b-res">After a little more than 2.2 years.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="4" data-ph="how many"><p class="b-q-text">How many conditions do you need for a cubic function?</p><div class="b-sol"><p>Four coefficients $a, b, c, d$.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="how many"><p class="b-q-text">How many equations does “maximum point $(2, 5)$” give?</p><div class="b-sol"><p>$f(2) = 5$ and $f'(2) = 0$</p></div></div>
+        <div class="b-q" data-ans="-0.02" data-tol="0.0001" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + 8$ is to pass through $(20, 0)$. What is $a$?</p><div class="b-sol"><p>$400a = -8$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Regression" data-toc-k="2" data-toc-short="2 Regression">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Regression</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The braking distances do not lie exactly on a curve; measured values always scatter. What you want is the function of a chosen type that fits best <b>overall</b>.
+                For this the CAS takes the function for which the sum of the squares of the vertical deviations is smallest: the <b>method of least squares</b>.
+                Why squares? Because then positive and negative deviations do not cancel out, and you can find the minimum with the derivative (example 4).</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · REGRESSION</div>
+                <div class="b-text">
+                    <p>In a <b>regression</b> the CAS finds, for measured points $(x_i, y_i)$, the function of a given type for which $\sum (y_i - f(x_i))^2$ is minimal.</p>
+                    <p>You choose the <b>type</b> with reasons: from the context (for example $s \sim v^2$ for the braking distance) and from the picture of the points, not just by the key figure.</p>
+                    <p>The <b>coefficient of determination</b> $r^2$ lies between 0 and 1. Close to 1 means: the points lie close to the curve. It does not prove that the model is right.</p>
+                    <p>Predictions outside the measured values (<b>extrapolation</b>) are uncertain, all the more so the further away you go.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In the CAS:</b> <code>LinReg</code>, <code>QuadReg</code>, <code>CubicReg</code>, <code>ExpReg</code>, <code>PowerReg</code>. The values are in two lists.</p>
+            <p class="b-note"><b>Stay critical:</b> a polynomial of high degree passes through almost every point, $r^2 \approx 1$, and still predicts nonsense.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · THE BEST CURVE</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a series of measurements and a type of model. Compare $r^2$ and the prediction. You can move the points.</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · LINEAR OR QUADRATIC?</div>
+            <div class="b-text"><p>Investigate the braking distances from the exploration with linear and quadratic regression. Which is the better prediction for 150 km/h?</p></div>
+            <div class="b-sol"><p>Linear: $y \approx 1.595x - 52.0$ with $r^2 \approx 0.968$, prediction 187 m. Quadratic: $y \approx 0.00989x^2 + 0.0129x - 0.27$ with $r^2 \approx 0.9997$, prediction 224 m.</p>
+                <p>0.968 sounds good too, but the points lie first above, then below, then above the line again: they curve. Physically, the kinetic energy grows with $v^2$.
+                    <span class="b-res">The quadratic model is justified, about 224 m.</span> A straight line would even predict a negative braking distance at 30 km/h.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · WHY LEAST SQUARES?</div>
+            <div class="b-text"><p>We are looking for the line through the origin $y = mx$ that fits the points $(1, 2)$, $(2, 3)$, $(3, 7)$ best. Derive the formula for $m$.</p></div>
+            <div class="b-sol"><p>$S(m) = \sum (y_i - m x_i)^2$. By the chain rule: $S'(m) = -2 \sum x_i (y_i - m x_i) = 0 \iff m = \dfrac{\sum x_i y_i}{\sum x_i^2}$. Because $S''(m) = 2 \sum x_i^2 > 0$, this is a minimum.</p>
+                <p>Here: <span class="b-res">$m = \dfrac{2 + 6 + 21}{1 + 4 + 9} = \dfrac{29}{14} \approx 2.07$</span>. So regression is an optimisation problem.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Which type of function fits? Justify from the context. a) a candle burns down &nbsp; b) a braking distance &nbsp; c) hot tea cools down to room temperature &nbsp; d) a loan with a fixed rate of interest</p></div>
+            <div class="b-sol"><p>a) linear, the same amount of wax per hour &nbsp; b) quadratic, $s \sim v^2$ &nbsp; c) exponential for the difference in temperature, which decreases by the same factor every minute &nbsp; d) exponential, growth by a fixed factor</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Use the CAS to find the regression line for $(1, 2.1)$, $(2, 3.9)$, $(3, 6.2)$, $(4, 7.8)$ and $r^2$. What does it predict for $x = 10$?</p></div>
+            <div class="b-sol"><p>$y = 1.94x + 0.15$, $r^2 \approx 0.996$. For $x = 10$: 19.55, with caution, because 10 lies far outside the measured values.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>World population (billions): 1950: 2.5; 1970: 3.7; 1990: 5.32; 2010: 6.99; 2020: 7.84, and the years in between in the widget. With $x$ = years since 1950, find an exponential and a linear regression.
+                Compare their predictions for 2050 with the United Nations forecast of about 9.7 billion.</p></div>
+            <div class="b-sol"><p>Exponential (with all eight values): $y \approx 2.61 \cdot 1.0167^x$, for 2050 about 13.7 billion. Linear: $y \approx 0.078x + 2.27$, for 2050 about 10.1 billion.
+                The growth rate has been falling for decades, and the exponential function overestimates strongly. None of the curves knows the reasons for the development.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A parabola through the origin $y = ax^2$ also fits the braking distances. Find $a$ with the formula from example 4, adapted to $y = a \cdot x^2$, and compare the prediction for 150 km/h.</p></div>
+            <div class="b-sol"><p>With $u_i = x_i^2$ this is a line through the origin in $u$: $a = \tfrac{\sum x_i^2 y_i}{\sum x_i^4} \approx 0.00998$. Prediction $0.00998 \cdot 150^2 \approx 225$ m, almost the same as the full quadratic regression.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Which constant $c$ fits the measured values $y_1, \ldots, y_n$ best in the sense of least squares? Prove it with the derivative of $S(c) = \sum (y_i - c)^2$.</p></div>
+            <div class="b-sol"><p>$S'(c) = -2 \sum (y_i - c) = -2\left(\sum y_i - nc\right) = 0 \iff c = \tfrac1n \sum y_i = \bar{y}$, and $S''(c) = 2n > 0$. The mean is the best constant.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="2.214" data-tol="0.001" data-ph="m ="><p class="b-q-text">Find $m$ of the best line through the origin for $(1, 2)$, $(2, 4)$, $(3, 7)$ (three decimal places).</p><div class="b-sol"><p>$\tfrac{2 + 8 + 21}{14} = \tfrac{31}{14} \approx 2.214$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="c ="><p class="b-q-text">Which constant fits the values 3, 5 and 10 best in the sense of least squares?</p><div class="b-sol"><p>The mean: 6</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">A regression gives $r^2 = 0.99$. What follows from this?</p><div class="b-mc"><button>The model is certainly right.</button><button>The points lie close to the curve.</button><button>Predictions far outside are reliable.</button></div><div class="b-sol"><p>Only that the points are close to the curve. $r^2$ says nothing about the model or about extrapolation.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="12">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Find the quadratic function with the vertex $(2, -1)$ that passes through $(0, 3)$.</p></div>
+            <div class="b-sol"><p>$f(x) = a(x - 2)^2 - 1$, $f(0) = 4a - 1 = 3 \Rightarrow a = 1$. $f(x) = (x - 2)^2 - 1 = x^2 - 4x + 3$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>A cubic function is point-symmetric about the origin, has an extremum at $x = 1$ and passes through $(2, 4)$. Find it and state what kind of extremum there is at $x = 1$.</p></div>
+            <div class="b-sol"><p>$f(x) = ax^3 + cx$: $3a + c = 0$, $8a + 2c = 4$, so $2a = 4$, $a = 2$, $c = -6$: $f(x) = 2x^3 - 6x$. $f''(1) = 12 > 0$: minimum $T(1, -4)$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Connecting with Year 11:</b> set up the system of equations for a cubic function through $(0, 1)$, $(1, 0)$, $(-1, 4)$ and $(2, 7)$ as a matrix and solve it with Gaussian elimination or the CAS.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{cccc|c} 0 & 0 & 0 & 1 & 1 \\ 1 & 1 & 1 & 1 & 0 \\ -1 & 1 & -1 & 1 & 4 \\ 8 & 4 & 2 & 1 & 7 \end{array}\right)$ for $(a, b, c, d)$. Solution $f(x) = x^3 + x^2 - 3x + 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>For a function profile with a quartic function, someone gives only four conditions. Explain why there are then infinitely many solutions, and how a symmetry can reduce the number of unknowns.</p></div>
+            <div class="b-sol"><p>Five coefficients, but only four equations: one coefficient can be chosen freely, the system has a family of solutions. If the graph is symmetric about the $y$-axis, $b$ and $d$ drop out ($f(x) = ax^4 + cx^2 + e$), and then three conditions are enough.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Gauss finds Ceres" data-toc-k="X" data-toc-short="Ceres">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>How Gauss found a lost planet again</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>On 1 January 1801 Giuseppe Piazzi in Palermo discovered a faint point of light that moved between the stars: Ceres, classified today as a dwarf planet.
+                He could observe it for only a few weeks, then it disappeared in the light of the Sun. Calculating its orbit from so few measurements seemed impossible.</p>
+            <p>The 24-year-old Carl Friedrich Gauss from Brunswick tried a new idea: he looked for the orbit for which the sum of the squares of the deviations from all the measurements
+                is <b>smallest</b>. Following his prediction, Franz Xaver von Zach and Heinrich Olbers found Ceres again around the turn of the year 1801/1802, almost exactly at the calculated position.</p>
+            <p>The <b>method of least squares</b> is still inside every regression of your CAS today.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Carl Friedrich Gauß: “Theoria motus corporum coelestium in sectionibus conicis solem ambientium”, Hamburg 1809.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>PROFILE</h4><p>Degree $n$: $n + 1$ conditions. Point → $f(x_0) = y_0$, extremum → $f'(x_0) = 0$, point of inflection → $f''(x_0) = 0$.</p></div>
+        <div><p>Closing the gap: $f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</p></div></div>
+    <div class="b-rueck"><div><h4>CHECK</h4><p>Check all conditions, also the type of the extremum.</p></div>
+        <div><p>$f''(1) = -3 < 0$: really a maximum</p></div></div>
+    <div class="b-rueck"><div><h4>REGRESSION</h4><p>Choose the type with reasons, the CAS minimises $\sum (y_i - f(x_i))^2$. $r^2$ close to 1: the points are close to the curve, no proof of the model.</p></div>
+        <div><p>Braking distance: quadratic, about 224 m at 150 km/h</p></div></div>
+    <div class="b-rueck"><div><h4>LEAST SQUARES</h4><p>An optimisation problem: $S'(m) = 0$ gives the best line through the origin, $m = \tfrac{\sum x_i y_i}{\sum x_i^2}$.</p></div>
+        <div><p>Best constant: the mean</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="3" data-ph="how many"><p class="b-q-text">How many conditions do you need for a parabola?</p><div class="b-sol"><p>$a$, $b$, $c$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="a ="><p class="b-q-text">A parabola $f(x) = ax^2 + bx + c$ passes through $(0, 0)$, $(1, 1)$ and $(2, 4)$. What is $a$?</p><div class="b-sol"><p>It is the standard parabola: $a = 1$, $b = c = 0$.</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="c ="><p class="b-q-text">Which constant fits the measured values 2, 4 and 9 best in the sense of least squares?</p><div class="b-sol"><p>The mean $\tfrac{15}{3} = 5$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="1.571" data-tol="0.001" data-ph="m ="><p class="b-q-text">Find $m$ of the best line through the origin for $(1, 1)$, $(2, 3)$, $(3, 5)$ (three decimal places).</p><div class="b-sol"><p>$\tfrac{1 + 6 + 15}{1 + 4 + 9} = \tfrac{22}{14} \approx 1.571$</p></div></div>
+            <div class="b-q" data-ans="0.693" data-tol="0.001" data-ph="b ="><p class="b-q-text">$f(x) = a \cdot \mathrm{e}^{bx}$ passes through $(0, 5)$ and $(1, 10)$. What is $b$ (three decimal places)?</p><div class="b-sol"><p>$a = 5$, $\mathrm{e}^b = 2$, $b = \ln 2 \approx 0.693$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">A regression gives $r^2 = 0.99$. What follows from this?</p><div class="b-mc"><button>The model is certainly right.</button><button>The points lie close to the curve.</button><button>Predictions far outside are reliable.</button></div><div class="b-sol"><p>Only how close the points are to the curve.</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-steckbrief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FUNCTION PROFILE PROBLEMS</span><span class="b-lab-what">Functions from conditions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-regression.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGRESSION</span><span class="b-lab-what">Models for measured data</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 12, advanced course · Learning area 2 of the Saxon curriculum for mathematics at the Berufliches Gymnasium (2026).</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-en/analysis.js"></script>
+</body>
+</html>
