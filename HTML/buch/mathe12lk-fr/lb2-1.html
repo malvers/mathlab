@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 12 LK · Chapitre 2.1 · Limites et continuité | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Comportement à l’infini, limite en un point, points de discontinuité. Chapitre 2.1 du manuel interactif Mathématiques · Berufliches Gymnasium 12 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 12 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.1 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.1 · DOMAINE D’APPRENTISSAGE 2 · NOVEMBRE · DÉCEMBRE</p>
+            <h1>Limites et continuité</h1>
+            <p class="b-hero-lead">Un café chaud refroidit, mais jamais en dessous de la température de la pièce. Une courbe se rapproche d’une droite sans jamais l’atteindre.
+                Une fonction a un trou en un point, et pourtant on sait exactement où elle veut aller. Les <b>limites</b> décrivent ce qui se passe
+                quand on s’approche toujours plus de quelque chose. Elles sont le fondement de tout le calcul différentiel.</p>
+            <div class="b-chips"><span class="b-chip">10 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">BASE DE LA DÉRIVÉE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["(2*x+1)/(x-1)"]' data-labels='["f"]' data-lat="[5]" data-hl="2" data-x="-6,8" data-y="-6,9" data-h="240" data-aria="Courbe avec une asymptote horizontale et une asymptote verticale"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>déterminer le <b>comportement à l’infini</b> et donner les <b>asymptotes horizontales</b></li>
+                <li>étudier des <b>limites en un point</b>, y compris à gauche et à droite</li>
+                <li>distinguer les <b>pôles</b> (asymptotes verticales) des <b>trous</b></li>
+                <li>comprendre ce que signifie la <b>continuité</b>, distinguer les <b>points de discontinuité</b> selon leur type et rendre continues des fonctions définies par morceaux avec un paramètre</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="0,001" data-tol="0.000001" data-ph="nombre"><p class="b-q-text">Combien vaut $\tfrac{1}{1000}$ sous forme décimale ?</p>
+            <div class="b-sol"><p>$0{,}001$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,125" data-tol="0.0001" data-ph="nombre"><p class="b-q-text">Calcule $2^{-3}$.</p>
+            <div class="b-sol"><p>$\tfrac{1}{2^3} = \tfrac18 = 0{,}125$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Pour quelle valeur de $x$ l’expression $\tfrac{1}{x - 2}$ n’est-elle pas définie ?</p>
+            <div class="b-sol"><p>Pour $x = 2$, le dénominateur serait nul.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="6" data-ph="nombre"><p class="b-q-text">Simplifie $\tfrac{x^2 - 9}{x - 3}$, puis remplace $x$ par 3.</p>
+            <div class="b-sol"><p>$\tfrac{(x - 3)(x + 3)}{x - 3} = x + 3$, donc 6 pour $x = 3$.</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE CAFÉ</div>
+        <div class="b-text"><p>La température d’un café après $t$ minutes est donnée par $T(t) = 20 + 60 \cdot 0{,}9^t$ (en °C).</p>
+            <ul>
+                <li>Calculez $T(0)$, $T(10)$, $T(30)$, $T(60)$.</li>
+                <li>Quelle température le café n’atteint-il jamais ? Que signifie le 20 ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">TOUJOURS PLUS PRÈS DE 1</div>
+        <div class="b-text"><p>Calculez $f(x) = \tfrac{x^2 - 1}{x - 1}$ pour les valeurs 0,9 ; 0,99 ; 0,999 et 1,1 ; 1,01 ; 1,001.</p>
+            <ul>
+                <li>Qu’observez-vous ? Que se passe-t-il pour $x = 1$ ?</li>
+                <li>Tracez la courbe. À quoi ressemble-t-elle au point d’abscisse 1 ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LES FRAIS D’ENVOI</div>
+        <div class="b-text"><p>Un service de livraison de colis demande 5 € jusqu’à 2 kg, 7 € jusqu’à 5 kg et 10 € jusqu’à 10 kg.</p>
+            <ul>
+                <li>Représentez le prix en fonction de la masse.</li>
+                <li>En quels points la courbe « saute »-t-elle ? Combien coûte un colis d’exactement 2 kg ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçons 2 et 3</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Comportement à l’infini" data-toc-k="1" data-toc-short="1 Infini">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">1</span>Comportement à l’infini</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour le café, $T(60) = 20 + 60 \cdot 0{,}9^{60} \approx 20{,}11$. Plus on attend, plus $0{,}9^t$ devient petit, et $T(t)$ s’approche autant qu’on veut de 20.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>On écrit $\lim\limits_{t \to \infty} T(t) = 20$ (lire : « la limite de $T(t)$ quand $t$ tend vers l’infini vaut 20 »). La droite $y = 20$ est appelée <b>asymptote horizontale</b>.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · LIMITE À L’INFINI</div>
+        <div class="b-text"><p>$\lim\limits_{x \to \infty} f(x) = g$ signifie : $f(x)$ s’approche autant qu’on veut de $g$ dès que $x$ est assez grand. La droite $y = g$ est alors une <b>asymptote horizontale</b>.</p>
+            <p>Les <b>fonctions polynômes</b> de degré au moins 1 se comportent pour $x \to \pm\infty$ comme leur terme de plus haut degré : elles tendent vers $+\infty$ ou $-\infty$.</p>
+            <p><b>Fonctions rationnelles</b> $\tfrac{Z(x)}{N(x)}$ : degré du numérateur inférieur à celui du dénominateur → limite 0. Degrés égaux → quotient des coefficients des termes de plus haut degré.
+                        Degré du numérateur supérieur → pas d’asymptote horizontale.</p>
+            <p>De plus : $\tfrac1x \to 0$, $\mathrm{e}^{-x} \to 0$ et $q^x \to 0$ pour $0 < q < 1$, chaque fois pour $x \to \infty$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Astuce :</b> divise le numérateur et le dénominateur par la plus haute puissance du dénominateur. Tous les termes comme $\tfrac{1}{x}$ ou $\tfrac{3}{x^2}$ disparaissent pour $x \to \infty$.</p>
+            <p class="b-note">Le mot <b>asymptote</b> vient du grec et signifie « qui ne coïncide pas ».</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · PAS À PAS VERS LA LIMITE</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une fonction et le sens de l’approche. À chaque étape $k$, $x$ va dix fois plus loin vers l’extérieur ou se rapproche dix fois plus du point.</p>
+            <div data-widget="grenzwert"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · DEGRÉS ÉGAUX</div>
+        <div class="b-text"><p>Détermine $\lim\limits_{x \to \infty} \dfrac{3x^2 + 1}{x^2 + 2}$.</p>
+            </div>
+        <div class="b-sol"><p>On divise par $x^2$ : $\dfrac{3 + \frac{1}{x^2}}{1 + \frac{2}{x^2}} \to \dfrac{3 + 0}{1 + 0} = 3$. <span class="b-res">Asymptote horizontale $y = 3$.</span></p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · FONCTION POLYNÔME</div>
+        <div class="b-text"><p>Comment se comporte $f(x) = -2x^3 + 5x^2 + 1$ pour $x \to \infty$ et pour $x \to -\infty$ ?</p>
+            </div>
+        <div class="b-sol"><p>Le terme $-2x^3$ est décisif : pour $x \to \infty$, $f(x) \to -\infty$ ; pour $x \to -\infty$, $f(x) \to +\infty$.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine pour $x \to \infty$ : a) $5 - \tfrac1x$ &nbsp; b) $3 \cdot 0{,}5^x$ &nbsp; c) $\dfrac{4x + 1}{2x - 3}$ &nbsp; d) $x^3 - 100x^2$</p>
+            </div>
+        <div class="b-sol"><p>a) 5 &nbsp; b) 0 &nbsp; c) 2 &nbsp; d) $+\infty$ (pour $x$ grand, $x^3$ l’emporte)</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule $f(10)$, $f(100)$ et $f(1000)$ pour $f(x) = \tfrac{x + 1}{x}$. Vers quelle valeur $f$ tend-elle ?</p>
+            </div>
+        <div class="b-sol"><p>$1{,}1$ ; $1{,}01$ ; $1{,}001$. Limite 1, car $\tfrac{x + 1}{x} = 1 + \tfrac1x$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Exploration « Le café » : calcule $T(10)$. Au bout de combien de minutes le café est-il en dessous de 30 °C ?</p>
+            </div>
+        <div class="b-sol"><p>$T(10) = 20 + 60 \cdot 0{,}9^{10} \approx 40{,}9$ °C. $60 \cdot 0{,}9^t < 10 \Rightarrow 0{,}9^t < \tfrac16 \Rightarrow t > \tfrac{\ln(1/6)}{\ln 0{,}9} \approx 17{,}01$, donc au bout d’un peu plus de 17 minutes.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Donne les asymptotes horizontales, s’il y en a : a) $\dfrac{6x^2}{2x^2 + 5}$ &nbsp; b) $\dfrac{x + 4}{x^2 + 1}$ &nbsp; c) $\dfrac{x^3}{x + 1}$</p>
+            </div>
+        <div class="b-sol"><p>a) $y = 3$ &nbsp; b) $y = 0$ &nbsp; c) aucune, le degré du numérateur est plus grand</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Donne une fonction rationnelle dont la courbe a l’asymptote horizontale $y = -3$ et l’asymptote verticale $x = 2$.</p>
+            </div>
+        <div class="b-sol"><p>Par exemple $f(x) = \dfrac{-3x}{x - 2}$ ou $f(x) = -3 + \dfrac{1}{x - 2}$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="5" data-ph="limite"><p class="b-q-text">Détermine $\lim\limits_{x \to \infty} \dfrac{5x^2 - x}{x^2 + 4}$.</p>
+            <div class="b-sol"><p>Degrés égaux : $\tfrac51 = 5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0" data-ph="limite"><p class="b-q-text">Détermine $\lim\limits_{x \to \infty} \dfrac{7}{x + 1}$.</p>
+            <div class="b-sol"><p>Le dénominateur croît au-delà de toute borne : 0</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="4" data-ph="limite"><p class="b-q-text">Détermine $\lim\limits_{x \to \infty} \left(4 + 2\mathrm{e}^{-x}\right)$.</p>
+            <div class="b-sol"><p>$\mathrm{e}^{-x} \to 0$, donc 4</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Limite en un point, continuité" data-toc-k="2" data-toc-short="2 En un point">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">2</span>Limite en un point et continuité</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = \tfrac{x^2 - 1}{x - 1}$ n’est pas définie en $x = 1$. Les valeurs $f(0{,}999) = 1{,}999$ et $f(1{,}001) = 2{,}001$ montrent pourtant que $f(x)$ s’approche de 2 des deux côtés.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Pour $x \neq 1$, $f(x) = \tfrac{(x - 1)(x + 1)}{x - 1} = x + 1$. La courbe est la droite $y = x + 1$ avec un <b>trou</b> en $(1\,;\,2)$.
+                Il en va autrement pour $g(x) = \tfrac{1}{x - 1}$ : ici, les valeurs croissent au-delà de toute borne quand $x \to 1$, et la droite $x = 1$ est une <b>asymptote verticale</b>.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · LIMITE EN UN POINT ET CONTINUITÉ</div>
+        <div class="b-text"><p>$\lim\limits_{x \to a} f(x) = g$ signifie : $f(x)$ s’approche autant qu’on veut de $g$ dès que $x$ est assez proche de $a$, et ce <b>à gauche comme à droite</b>.</p>
+            <p><b>Pôle :</b> $|f(x)|$ croît au-delà de toute borne quand $x \to a$ ; la droite $x = a$ est une asymptote verticale, avec ou sans changement de signe.
+                        <b>Trou :</b> $f(a)$ n’est pas défini, mais la limite existe.</p>
+            <p>$f$ est dite <b>continue</b> en $a$ si $f(a)$ est défini et si $\lim\limits_{x \to a} f(x) = f(a)$. Concrètement : on peut y tracer la courbe sans lever le crayon.
+                        Les fonctions polynômes, $\mathrm{e}^x$ et $\sin x$ sont continues partout.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>À gauche, à droite :</b> si l’on obtient des valeurs différentes à gauche et à droite, il n’y a pas de limite en ce point, comme pour les frais d’envoi.</p>
+            <p class="b-note"><b>Dans le module ci-dessus,</b> tu trouves un pôle ($x \to 1$ pour la première fonction) et deux trous.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">ILLUSTRATION · PÔLES AVEC ET SANS CHANGEMENT DE SIGNE</div>
+        <p class="b-help" style="margin:0 0 12px">En doré : $f(x) = \tfrac{1}{x - 2}$ passe de $-\infty$ à $+\infty$ en $x = 2$. En cyan : $g(x) = \tfrac{1}{(x - 2)^2}$ tend vers $+\infty$ des deux côtés.</p>
+            <div data-widget="graph" data-fns='["1/(x-2)","1/((x-2)^2)"]' data-labels='["f","g"]' data-lat="[3.4,0.6]" data-x="-2,6" data-y="-5,6" data-h="280" data-aria="Deux pôles en x égal 2"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · TROU OU PÔLE ?</div>
+        <div class="b-text"><p>Étudie $f(x) = \dfrac{x^2 - 4}{x - 2}$ et $g(x) = \dfrac{x + 2}{x - 2}$ en $x = 2$.</p>
+            </div>
+        <div class="b-sol"><p>$f(x) = x + 2$ pour $x \neq 2$ : trou, $\lim\limits_{x \to 2} f(x) = 4$.</p>
+            <p>Pour $g$, le numérateur tend vers 4 et le dénominateur vers 0 : pôle avec changement de signe, asymptote verticale $x = 2$.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · LES FRAIS D’ENVOI</div>
+        <div class="b-text"><p>La fonction prix du service de livraison est-elle continue en 2 kg ?</p>
+            </div>
+        <div class="b-sol"><p>À gauche (juste en dessous de 2 kg) : 5 €. À droite (juste au-dessus de 2 kg) : 7 €. Les limites à gauche et à droite sont différentes : <span class="b-res">pas de limite, donc pas continue.</span> La courbe fait un saut.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine la valeur interdite et sa nature : a) $\dfrac{3}{x + 4}$ &nbsp; b) $\dfrac{x^2 - 9}{x + 3}$ &nbsp; c) $\dfrac{1}{x^2}$</p>
+            </div>
+        <div class="b-sol"><p>a) $x = -4$ : pôle avec changement de signe &nbsp; b) $x = -3$ : trou, limite $-6$ &nbsp; c) $x = 0$ : pôle sans changement de signe</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine $\lim\limits_{x \to 2} (x^2 + 3x)$ et $\lim\limits_{x \to 0} \dfrac{x^2 + 5x}{x}$.</p>
+            </div>
+        <div class="b-sol"><p>Fonction continue, donc on remplace : $4 + 6 = 10$. On simplifie : $x + 5 \to 5$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$f(x) = \dfrac{|x|}{x}$ pour $x \neq 0$. Calcule $f(0{,}1)$, $f(-0{,}1)$, $f(0{,}001)$, $f(-0{,}001)$. $f$ a-t-elle une limite en 0 ?</p>
+            </div>
+        <div class="b-sol"><p>Pour $x > 0$, $f(x) = 1$ ; pour $x < 0$, $f(x) = -1$. À gauche $-1$, à droite $1$ : pas de limite.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Pour quelle valeur de $c$ la fonction $f(x) = \begin{cases} x^2 & \text{pour } x \le 1 \\ 2x + c & \text{pour } x > 1 \end{cases}$ est-elle continue en 1 ?</p>
+            </div>
+        <div class="b-sol"><p>À gauche, on obtient $1^2 = 1$, à droite $2 + c$. Égalité pour $c = -1$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="6" data-ph="limite"><p class="b-q-text">Détermine $\lim\limits_{x \to 3} \dfrac{x^2 - 9}{x - 3}$.</p>
+            <div class="b-sol"><p>$x + 3 \to 6$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-5" data-ph="x ="><p class="b-q-text">En quel point $f(x) = \dfrac{1}{x + 5}$ a-t-elle un pôle ?</p>
+            <div class="b-sol"><p>$x = -5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Qu’a $f(x) = \dfrac{1}{x^2}$ en 0 ?</p>
+            <div class="b-mc"><button>un trou</button><button>un pôle avec changement de signe</button><button>un pôle sans changement de signe</button></div>
+        <div class="b-sol"><p>$x^2 > 0$ des deux côtés, donc $f(x) \to +\infty$ à gauche et à droite.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Points de discontinuité" data-toc-k="3" data-toc-short="3 Discontinuité">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">3</span>Points de discontinuité et fonctions définies par morceaux</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un taxi coûte $4 + 2{,}2x$ euros jusqu’à 5 km, ensuite $15 + 1{,}8(x - 5)$ euros. En $x = 5$, les deux expressions donnent 15 € : le prix ne fait pas de saut, seule sa pente change.
+                Les frais d’envoi d’un colis, en revanche, sautent à 2 kg de 5 € à 7 €. La fonction du taxi est <b>continue</b>, celle des frais d’envoi ne l’est pas.</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · TYPES DE DISCONTINUITÉ</div>
+        <div class="b-text"><p>$f$ est <b>continue</b> en un point $x_0$ de son ensemble de définition si la limite à gauche, la limite à droite et la valeur de la fonction coïncident. Sinon, $x_0$ est un <b>point de discontinuité</b> :</p>
+            <ul>
+                <li><b>discontinuité de saut :</b> les limites à gauche et à droite existent, mais sont différentes.</li>
+                <li><b>discontinuité supprimable :</b> la limite existe, mais $f(x_0)$ a une autre valeur. Si l’on change $f(x_0)$, $f$ devient continue.</li>
+                </ul><p>En un <b>trou</b> ou en un <b>pôle</b>, $f$ n’est pas définie. Si $f$ a une limite en un trou, on peut la <b>prolonger par continuité</b>.</p>
+            <p>Une fonction <b>définie par morceaux</b> à partir de morceaux continus est continue si et seulement si les morceaux se raccordent aux points de raccordement.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Attention :</b> $\tfrac1x$ est une fonction continue, car elle est continue en chaque point de son ensemble de définition. Le point 0 n’en fait même pas partie.</p>
+            <p class="b-note"><b>Théorème des valeurs intermédiaires :</b> si $f$ est continue sur $[a\,;\,b]$ et si $f(a)$ et $f(b)$ sont de signes contraires, alors $f$ a un zéro entre les deux. Sans continuité, c’est faux, car un saut peut passer par-dessus le zéro.</p>
+            <p class="b-note"><b>Un point anguleux est permis :</b> $|x|$ est continue en 0. Savoir si l’on peut aussi y dériver est une autre question (chapitre 2.2).</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · RENDRE CONTINU MORCEAU PAR MORCEAU</div>
+        <p class="b-help" style="margin:0 0 12px">Modifie le paramètre jusqu’à ce que les deux morceaux se raccordent. Les cercles vides n’appartiennent pas à la courbe, le point blanc est la valeur de la fonction.</p>
+            <div data-widget="stetigkeit"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · DÉTERMINER UN PARAMÈTRE</div>
+        <div class="b-text"><p>Pour quelle valeur de $a$ la fonction $f(x) = x^2 + 1$ pour $x \leq 1$ et $f(x) = ax - 1$ pour $x > 1$ est-elle continue ?</p>
+            </div>
+        <div class="b-sol"><p>À gauche : $\lim\limits_{x \to 1^-} f(x) = f(1) = 2$. À droite : $\lim\limits_{x \to 1^+} (ax - 1) = a - 1$.</p>
+            <p>Continue si et seulement si $a - 1 = 2$ : <span class="b-res">$a = 3$</span>. En tous les autres points, $f$ est de toute façon continue, car les deux morceaux sont des fonctions polynômes.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · SUPPRIMABLE OU NON ?</div>
+        <div class="b-text"><p>Étudie en 1 la fonction $g(x) = \dfrac{x^2 - 1}{x - 1}$ pour $x \neq 1$, avec $g(1) = 3$.</p>
+            </div>
+        <div class="b-sol"><p>$\lim\limits_{x \to 1} g(x) = \lim\limits_{x \to 1} (x + 1) = 2 \neq 3 = g(1)$.</p>
+            <p><span class="b-res">Discontinuité supprimable</span> : avec $g(1) = 2$, $g$ serait continue.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Continue ou non ? En cas de discontinuité, donne son type. a) $f(x) = \tfrac{x^2 - 4}{x - 2}$ pour $x \neq 2$, avec $f(2) = 0$ &nbsp; b) $|x|$ en 0 &nbsp; c) les frais d’envoi d’un colis à 5 kg &nbsp; d) $f(x) = x^2$ pour $x \neq 1$, avec $f(1) = 1$</p>
+            </div>
+        <div class="b-sol"><p>a) supprimable (limite 4) &nbsp; b) continue, un point anguleux est permis &nbsp; c) discontinuité de saut (de 7 € à 10 €) &nbsp; d) continue, $f(1)$ est exactement la limite</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine $a$ et $b$ pour que $f$ soit continue partout : $f(x) = x + a$ pour $x < 0$, $\;f(x) = x^2 + 1$ pour $0 \leq x \leq 2$, $\;f(x) = bx - 1$ pour $x > 2$.</p>
+            </div>
+        <div class="b-sol"><p>En 0 : $0 + a = 1$, donc $a = 1$. En 2 : $2b - 1 = 5$, donc $b = 3$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Montre avec le théorème des valeurs intermédiaires que $f(x) = x^3 + x - 1$ a un zéro dans $[0\,;\,1]$. Coupe l’intervalle en deux, deux fois.</p>
+            </div>
+        <div class="b-sol"><p>$f(0) = -1 < 0 < 1 = f(1)$, et $f$ est continue. $f(0{,}5) = -0{,}375$ : zéro dans $[0{,}5\,;\,1]$. $f(0{,}75) \approx 0{,}172$ : zéro dans $[0{,}5\,;\,0{,}75]$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une compagnie de taxis demande 3 € de prise en charge et 2,40 € par km pour les 5 premiers km, puis $a$ euros plus 1,60 € pour chaque km supplémentaire.
+                Écris le tarif comme une fonction définie par morceaux. Pour quel $a$ est-il continu ? Pourquoi une entreprise ne voudrait-elle pas d’un saut vers le bas ?</p>
+            </div>
+        <div class="b-sol"><p>$p(x) = 3 + 2{,}4x$ pour $0 < x \le 5$ et $p(x) = a + 1{,}6(x - 5)$ pour $x > 5$. À 5 km : $3 + 12 = 15$, continu pour <span class="b-res">$a = 15$</span>.</p>
+            <p>Avec $a < 15$, un trajet un peu plus long coûterait moins cher qu’un trajet d’exactement 5 km ; les clients demanderaient un détour.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>La fonction $f(x) = x \cdot \sin\tfrac1x$ pour $x \neq 0$ et $f(0) = 0$ est-elle continue en 0 ? Justifie sans calculatrice.</p>
+            </div>
+        <div class="b-hint"><p>Quelle est la plus grande valeur possible de $\left|\sin\tfrac1x\right|$ ?</p>
+            </div>
+        <div class="b-sol"><p>Oui. $|f(x)| = |x| \cdot \left|\sin\tfrac1x\right| \leq |x|$, donc $f(x)$ est compris entre $-|x|$ et $|x|$, et les deux tendent vers 0. Ainsi $\lim\limits_{x \to 0} f(x) = 0 = f(0)$.
+                La courbe oscille une infinité de fois, mais elle est coincée entre les droites $y = x$ et $y = -x$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3" data-ph="a ="><p class="b-q-text">$f(x) = x^2 + 1$ pour $x \leq 1$ et $f(x) = ax - 1$ pour $x > 1$. Pour quelle valeur de $a$ la fonction $f$ est-elle continue ?</p>
+            <div class="b-sol"><p>$a - 1 = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="nombre"><p class="b-q-text">Quelle valeur doit avoir $g(1)$ pour que $g(x) = \tfrac{x^2 - 1}{x - 1}$ devienne continue en 1 ?</p>
+            <div class="b-sol"><p>La limite $1 + 1 = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">La fonction $f(x) = \tfrac1x$ est-elle continue ?</p>
+            <div class="b-mc"><button>Oui, elle est continue en chaque point de son ensemble de définition.</button><button>Non, elle a un point de discontinuité en 0.</button><button>Seulement pour $x > 0$.</button></div>
+        <div class="b-sol"><p>0 n’appartient pas à l’ensemble de définition.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Donne toutes les asymptotes de la courbe de $f(x) = \dfrac{2x - 1}{x + 1}$.</p>
+            </div>
+        <div class="b-sol"><p>Horizontale $y = 2$, verticale $x = -1$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La concentration d’un médicament dans le sang est $c(t) = \dfrac{8t}{t^2 + 4}$ ($t$ en heures). Détermine $\lim\limits_{t \to \infty} c(t)$ et interprète.</p>
+            </div>
+        <div class="b-sol"><p>Degré du numérateur inférieur à celui du dénominateur : limite 0. À long terme, le médicament est entièrement éliminé.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relier avec la 11e année :</b> sur 1 000 noyaux d’iode 131, il en reste $N(t) = 1000 \cdot 0{,}5^{t/8}$ au bout de $t$ jours. Détermine la limite pour $t \to \infty$. Quand reste-t-il, par le calcul, moins d’un noyau ?</p>
+            </div>
+        <div class="b-sol"><p>Limite 0. $0{,}5^{t/8} < 0{,}001 \Rightarrow t > 8 \cdot \tfrac{\ln 0{,}001}{\ln 0{,}5} \approx 79{,}7$ jours. Pour des effectifs aussi petits, le modèle ne donne toutefois plus qu’une moyenne.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$f(x) = \dfrac{x^2 + x}{x}$ n’est pas définie en 0. Comment faut-il fixer $f(0)$ pour que $f$ soit continue partout ?</p>
+            </div>
+        <div class="b-sol"><p>$f(x) = x + 1$ pour $x \neq 0$, donc $f(0) := 1$. On parle de <b>prolongement par continuité</b>.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Achille et la tortue" data-toc-k="X" data-toc-short="Achille">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">UNE INFINITÉ D’ÉTAPES, UN BUT FINI</span></div>
+        <h2>Achille et la tortue</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Le philosophe grec Zénon d’Élée affirmait au Ve siècle avant J.-C. que le rapide Achille ne peut jamais rattraper une tortue partie avec de l’avance.
+                Car lorsqu’il arrive là où elle était, elle est déjà un peu plus loin. Lorsqu’il y arrive, elle est de nouveau plus loin, et ainsi de suite une infinité de fois.</p>
+            <p>Les limites résolvent l’énigme. Si Achille est deux fois plus rapide et que la tortue a 1 mètre d’avance, il parcourt successivement
+                $1 + \tfrac12 + \tfrac14 + \tfrac18 + \ldots$ mètres. Ces portions de chemin, en nombre infini, ont pour <b>limite</b> 2 : au bout de 2 mètres, il l’a rattrapée.</p>
+            <p>Une infinité d’étapes peut donc donner, au total, une distance finie et une durée finie. C’est exactement cette idée qui se trouve dans toute limite.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> rapporté par Aristote, Physique, livre VI, chapitre 9 (239b).</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>À L’INFINI</h4><p>$\lim\limits_{x \to \infty} f(x) = g$ : asymptote horizontale $y = g$.</p>
+            </div>
+        <div>
+            <p>$\tfrac{3x^2 + 1}{x^2 + 2} \to 3$ · $20 + 60 \cdot 0{,}9^t \to 20$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>FONCTIONS RATIONNELLES</h4><p>Degré du numérateur &lt; degré du dénominateur : 0 · égaux : quotient des coefficients · plus grand : pas d’asymptote horizontale.</p>
+            </div>
+        <div>
+            <p>$\tfrac{6x^2}{2x^2 + 5} \to 3$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>EN UN POINT</h4><p>Même valeur à gauche et à droite. Pôle : asymptote verticale. Trou : la limite existe.</p>
+            </div>
+        <div>
+            <p>$\tfrac{x^2 - 1}{x - 1}$ : trou en 1, limite 2</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>CONTINUITÉ</h4><p>$\lim\limits_{x \to a} f(x) = f(a)$ : on trace sans lever le crayon.</p>
+            </div>
+        <div>
+            <p>Frais d’envoi : sauts, pas continue</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>POINTS DE DISCONTINUITÉ</h4><p>Saut : limites à gauche et à droite différentes. Supprimable : limite $\neq f(x_0)$. Par morceaux : raccorder les morceaux aux points de raccordement.</p>
+            </div>
+        <div>
+            <p>$x^2 + 1$ et $ax - 1$ en 1 : continue pour $a = 3$</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+        <div class="b-q" data-ans="2" data-ph="limite"><p class="b-q-text">Détermine $\lim\limits_{x \to \infty} \dfrac{6x + 1}{3x - 2}$.</p>
+            <div class="b-sol"><p>$\tfrac63 = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0" data-ph="limite"><p class="b-q-text">Détermine $\lim\limits_{x \to \infty} \dfrac{1}{x^3}$.</p>
+            <div class="b-sol"><p>0</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="8" data-ph="limite"><p class="b-q-text">Détermine $\lim\limits_{x \to 4} \dfrac{x^2 - 16}{x - 4}$.</p>
+            <div class="b-sol"><p>$x + 4 \to 8$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Comment se comporte $f(x) = \dfrac{2x^3 + 1}{x^2 + 1}$ pour $x \to \infty$ ?</p>
+            <div class="b-mc"><button>$f(x) \to 2$</button><button>$f(x) \to 0$</button><button>$f(x) \to \infty$</button></div>
+        <div class="b-sol"><p>Le degré du numérateur est plus grand ; $f(x)$ se comporte à peu près comme $2x$.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="6" data-ph="x ="><p class="b-q-text">Où se trouve l’asymptote verticale de $f(x) = \dfrac{x + 1}{x - 6}$ ?</p>
+            <div class="b-sol"><p>$x = 6$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="c ="><p class="b-q-text">$f(x) = x^2$ pour $x \le 2$ et $f(x) = x + c$ pour $x > 2$. Pour quelle valeur de $c$ la fonction $f$ est-elle continue ?</p>
+            <div class="b-sol"><p>$4 = 2 + c \Rightarrow c = 2$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-grenzwerte.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMITES</span><span class="b-lab-what">À l’infini et en un point</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 12e année, Leistungskurs · domaine d’apprentissage 2 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe (2026).</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-fr/gy11lk.js"></script>
+</body>
+</html>
