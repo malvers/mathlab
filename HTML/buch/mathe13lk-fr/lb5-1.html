@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 13 LK · Chapitre 5.1 · Population et échantillon | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Estimer et tester, moyenne et variance de l’échantillon. Chapitre 5.1 du manuel interactif Mathématiques · Berufliches Gymnasium 13 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 5.1 · DOMAINE D’APPRENTISSAGE 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 5.1 · DOMAINE D’APPRENTISSAGE 5 · DÉCEMBRE</p>
+            <h1>Population et échantillon</h1>
+            <p class="b-hero-lead">Personne n’interroge tous les électeurs avant de publier une prévision. Personne n’ouvre chaque paquet pour en contrôler le contenu. On prélève un <b>échantillon</b>
+                et on en tire des conclusions sur l’ensemble. La qualité de ces conclusions dépend de la façon dont l’échantillon est prélevé et de sa taille.
+                Ici commence la <b>statistique inférentielle</b> : estimer et tester avec des probabilités.</p>
+            <div class="b-chips"><span class="b-chip">5 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">DE L’ÉCHANTILLON À L’ENSEMBLE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="20" data-p="0.4" data-lo="6" data-hi="10"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>distinguer <b>population</b> et <b>échantillon</b> et vérifier si un échantillon est représentatif</li>
+                <li>distinguer sur des exemples les <b>problèmes d’estimation</b> et les <b>problèmes de test</b></li>
+                <li>calculer la <b>moyenne de l’échantillon</b> et la <b>variance de l’échantillon</b></li>
+                <li>comprendre à quel point les résultats d’un échantillon <b>fluctuent</b> et comment la taille change cela</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="20" data-ph="μ ="><p class="b-q-text">$X$ suit la loi binomiale de paramètres $n = 50$ et $p = 0{,}4$. Combien vaut $\mu$ ?</p>
+            <div class="b-sol"><p>$50 \cdot 0{,}4 = 20$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,42" data-tol="0.0001" data-ph="proportion"><p class="b-q-text">420 personnes interrogées sur 1 000 sont d’accord. Quelle est la proportion sous forme décimale ?</p>
+            <div class="b-sol"><p>0,42</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="4" data-ph="moyenne"><p class="b-q-text">Moyenne de 2, 3, 5, 6 ?</p>
+            <div class="b-sol"><p>$\tfrac{16}{4} = 4$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">L’ENQUÊTE DANS L’ÉCOLE</div>
+        <div class="b-text"><p>Vous voulez savoir combien d’élèves de votre école viennent à vélo.</p>
+            <ul>
+                <li>Suffit-il d’interroger votre propre classe ? Ou tous ceux qui sont le matin au garage à vélos ?</li>
+                <li>Comment prélèveriez-vous un bon échantillon ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DIX PAQUETS</div>
+        <div class="b-text"><p>Dix paquets de 500 g pèsent 498, 502, 500, 497, 503, 501, 499, 500, 504, 496 g.</p>
+            <ul>
+                <li>Quelle est la masse moyenne ? À quel point les valeurs sont-elles dispersées ?</li>
+                <li>Feriez-vous confiance à la machine de remplissage ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">ESTIMER OU DÉCIDER ?</div>
+        <div class="b-text"><p>a) Quel pourcentage des électeurs vote pour le parti X ? b) Le dé est-il truqué ? c) Le nouveau médicament est-il plus efficace ?</p>
+            <ul>
+                <li>Quelle question demande un nombre, laquelle une décision par oui ou non ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Population, échantillon, estimation" data-toc-k="1" data-toc-short="1 Échantillon">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">2 HEURES</span></div>
+        <h2><span class="b-no">1</span>Population, échantillon, estimer et tester</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Lors d’un sondage auprès de 1 000 électeurs choisis au hasard, 420 déclarent voter pour le parti X. Quel pourcentage cela représente-t-il dans toute la population ?</p>
+            </div>
+        </div>
+        <div class="b-text"><p>La meilleure estimation est la fréquence observée dans l’échantillon, $h = 0{,}42$. Mais un autre échantillon aurait donné un résultat un peu différent.
+                On peut calculer à quel point de tels résultats fluctuent. Pour $n = 1000$, l’écart typique vaut $\sqrt{\tfrac{0{,}42 \cdot 0{,}58}{1000}} \approx 0{,}016$, soit environ 1,6 point de pourcentage.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · NOTIONS DE BASE</div>
+        <div class="b-text"><p>La <b>population</b> est l’ensemble de tous les objets sur lesquels on veut savoir quelque chose. Un <b>échantillon</b> est une sélection parmi eux ; sa taille est $n$.</p>
+            <p>Un échantillon est <b>représentatif</b> s’il reflète bien la population. Le plus sûr est un choix <b>au hasard</b>, où chaque élément a la même chance d’être choisi.</p>
+            <p><b>Problème d’estimation :</b> déterminer une valeur inconnue (par exemple une proportion $p$) à partir de l’échantillon. <b>Problème de test :</b> contrôler une conjecture sur $p$ à l’aide de l’échantillon et prendre une décision.</p>
+            <p>Les fréquences observées dans les échantillons fluctuent autour de $p$ avec l’écart type $\sqrt{\tfrac{p(1-p)}{n}}$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Biais :</b> si l’on n’interroge que des volontaires, ou seulement à une certaine heure, on n’atteint pas certains groupes. Une grande taille n’y change rien.</p>
+            <p class="b-note"><b>Racine de n :</b> quatre fois plus de personnes interrogées divisent la dispersion par deux, exactement comme pour la loi binomiale en 12e année.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · BEAUCOUP D’ÉCHANTILLONS D’UNE MÊME POPULATION</div>
+        <p class="b-help" style="margin:0 0 12px">Règle $p$ et $n$ et prélève beaucoup d’échantillons. Chacun donne une fréquence $h$. Observe la largeur de la distribution des $h$, puis augmente $n$.</p>
+            <div data-widget="stichprobe"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · REPRÉSENTATIF ?</div>
+        <div class="b-text"><p>Un journal veut connaître l’avis de la ville sur la nouvelle piste cyclable et fait voter ses lecteurs en ligne. 2 400 voix, 70 % contre. Est-ce significatif ?</p>
+            </div>
+        <div class="b-sol"><p>Non. Seules répondent les personnes qui lisent le journal et se sentent concernées, souvent les plus mécontentes. L’échantillon n’est <b>pas aléatoire</b>, malgré sa taille.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · QUELLE TAILLE POUR n ?</div>
+        <div class="b-text"><p>Quelle est la fluctuation typique d’une fréquence observée pour $p = 0{,}5$, avec $n = 100$ et avec $n = 400$ ?</p>
+            </div>
+        <div class="b-sol"><p>$\sqrt{\tfrac{0{,}25}{100}} = 0{,}05$ et $\sqrt{\tfrac{0{,}25}{400}} = 0{,}025$. <span class="b-res">Taille multipliée par quatre, dispersion divisée par deux.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Indique la population et l’échantillon : a) dans une usine, on mesure 20 vis chaque heure. b) avant l’élection, on appelle 1 200 électeurs.</p>
+            </div>
+        <div class="b-sol"><p>a) toutes les vis de la production / les 20 vis mesurées &nbsp; b) tous les électeurs / les 1 200 personnes interrogées</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Problème d’estimation ou de test ? a) Le dé est-il équilibré ? b) Quelle est la proportion de pièces défectueuses ? c) Le nouvel engrais est-il efficace ?</p>
+            </div>
+        <div class="b-sol"><p>a) test &nbsp; b) estimation &nbsp; c) test</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Lors d’un sondage auprès de 1 000 personnes, 42 % citent le parti X. Donne un intervalle dans lequel se trouve très probablement la vraie proportion (deux fois l’écart type).</p>
+            </div>
+        <div class="b-sol"><p>$0{,}42 \pm 2 \cdot 0{,}016 = [0{,}389\,;\,0{,}451]$, donc environ de 39 % à 45 %.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Combien de personnes faut-il interroger pour que l’écart type de la fréquence soit d’au plus 1 point de pourcentage lorsque $p = 0{,}5$ ?</p>
+            </div>
+        <div class="b-sol"><p>$\sqrt{\tfrac{0{,}25}{n}} \le 0{,}01 \Rightarrow n \ge 2500$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,05" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">Fluctuation typique de la fréquence pour $p = 0{,}5$ et $n = 100$ ?</p>
+            <div class="b-sol"><p>0,05</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Un vote en ligne avec 10 000 participants est…</p>
+            <div class="b-mc"><button>sûrement représentatif, parce qu’il est grand</button><button>le plus souvent non représentatif, parce que les participants se sélectionnent eux-mêmes</button><button>toujours plus précis qu’un échantillon aléatoire</button></div>
+        <div class="b-sol"><p>L’autosélection introduit un biais, quelle que soit la taille.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Moyenne et variance de l’échantillon" data-toc-k="2" data-toc-short="2 Moyenne">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">2</span>Moyenne et variance de l’échantillon</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Les dix paquets pèsent en moyenne exactement 500 g. Mais une machine qui remplirait alternativement 480 g et 520 g aurait la même moyenne. Comment mesurer la dispersion ?</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Comme pour les variables aléatoires en 12e année : à l’aide des carrés des écarts à la moyenne. Pour un échantillon, on divise par $n - 1$ au lieu de $n$,
+                parce que la moyenne elle-même a été estimée à partir des données.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · INDICATEURS D’UN ÉCHANTILLON</div>
+        <div class="b-text"><p><b>Moyenne de l’échantillon :</b> $\bar{x} = \dfrac{x_1 + x_2 + \ldots + x_n}{n}$</p>
+            <p><b>Variance de l’échantillon :</b> $s^2 = \dfrac{1}{n - 1} \left((x_1 - \bar{x})^2 + \ldots + (x_n - \bar{x})^2\right)$ &nbsp; · &nbsp; <b>écart type</b> $s = \sqrt{s^2}$</p>
+            <p>$\bar{x}$ et $s$ sont des estimations de la moyenne $\mu$ et de l’écart type $\sigma$ de la population.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculatrice :</b> beaucoup de calculatrices affichent les deux valeurs, $s_{n-1}$ (échantillon) et $\sigma_n$ (division par $n$). Pour un échantillon, on prend $s_{n-1}$.</p>
+            <p class="b-note"><b>Tableur :</b> <code>MOYENNE(…)</code>, <code>VAR.S(…)</code> et <code>ECARTYPE.STANDARD(…)</code> calculent avec $n - 1$, <code>VAR.P.N</code> avec $n$ (Excel en français).</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · ESTIMER LA MOYENNE ET LA VARIANCE</div>
+        <p class="b-help" style="margin:0 0 12px">Une machine remplit des bouteilles. Prélève des échantillons et compare $\bar x$ avec la valeur nominale. Avec « +1000 », tu vois que $s^2$ avec $\tfrac{1}{n-1}$ atteint en moyenne la vraie variance, mais qu’avec $\tfrac1n$ elle est trop petite.</p>
+            <div data-widget="schaetzen"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · DIX PAQUETS</div>
+        <div class="b-text"><p>Calcule $\bar{x}$ et $s$ pour 498, 502, 500, 497, 503, 501, 499, 500, 504, 496 g.</p>
+            </div>
+        <div class="b-sol"><p>$\bar{x} = 500$ g. Écarts $-2, 2, 0, -3, 3, 1, -1, 0, 4, -4$, somme des carrés 60.
+                $s^2 = \tfrac{60}{9} \approx 6{,}67$, <span class="b-res">$s \approx 2{,}58$ g</span>.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · DEUX MACHINES</div>
+        <div class="b-text"><p>La machine B donne 480, 520, 490, 510, 500 g. Compare avec l’exemple 3.</p>
+            </div>
+        <div class="b-sol"><p>$\bar{x} = 500$ g, somme des carrés $400 + 400 + 100 + 100 + 0 = 1000$, $s^2 = 250$, $s \approx 15{,}8$ g. Même moyenne, mais B est six fois plus dispersée.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule $\bar{x}$ et $s$ pour les mesures 12, 15, 11, 14, 13.</p>
+            </div>
+        <div class="b-sol"><p>$\bar{x} = 13$, somme des carrés $1 + 4 + 4 + 1 + 0 = 10$, $s^2 = 2{,}5$, $s \approx 1{,}58$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Sur 40 lancers d’un dé, la moyenne des points obtenus est 3,9. Est-ce inhabituel pour un dé équilibré ? (Un lancer a $\sigma \approx 1{,}71$, la moyenne de 40 lancers $\tfrac{1{,}71}{\sqrt{40}}$.)</p>
+            </div>
+        <div class="b-sol"><p>Écart type de la moyenne $\approx 0{,}27$. 3,9 est 0,4 au-dessus de 3,5, soit environ 1,5 écart type : remarquable, mais pas assez inhabituel pour éveiller un soupçon.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Pourquoi divise-t-on par $n - 1$ dans $s^2$ ? Réfléchis avec un échantillon d’une seule valeur.</p>
+            </div>
+        <div class="b-sol"><p>Avec $n = 1$, on a $\bar{x} = x_1$ et tout écart vaut 0. En divisant par $n$, on obtiendrait une variance nulle, comme s’il n’y avait aucune dispersion. Avec $n - 1 = 0$, $s^2$ n’est même pas défini :
+                une seule valeur ne dit rien sur la dispersion. En général, $n - 1$ compense le fait que $\bar{x}$ est plus proche des données que la vraie valeur $\mu$.</p>
+            </div>
+        </div>
+        </div>
+        <h3>POUR LE LEISTUNGSKURS · DÉMONSTRATIONS</h3>
+    <div class="b-tasks" data-start="8">
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Montre que les écarts à la moyenne de l’échantillon se compensent toujours : $\sum\limits_{i=1}^{n} (x_i - \bar{x}) = 0$. Pourquoi ne peut-on donc pas mesurer simplement la dispersion par l’écart moyen ?</p>
+            </div>
+        <div class="b-sol"><p>$\sum (x_i - \bar{x}) = \sum x_i - n\bar{x} = n\bar{x} - n\bar{x} = 0$. Les écarts positifs et négatifs se compensent, c’est pourquoi on les élève au carré (ou on prend leurs valeurs absolues).</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Démontre la <b>formule de König-Huygens</b> $\sum\limits_{i=1}^{n} (x_i - \bar{x})^2 = \sum\limits_{i=1}^{n} x_i^2 - n\,\bar{x}^2$ et calcule avec elle $s^2$ pour 12, 15, 11, 14, 13 une deuxième fois.</p>
+            </div>
+        <div class="b-hint"><p>Identité remarquable sous le signe somme, puis utiliser $\sum x_i = n\bar{x}$.</p>
+            </div>
+        <div class="b-sol"><p>$\sum (x_i^2 - 2\bar{x}x_i + \bar{x}^2) = \sum x_i^2 - 2\bar{x} \cdot n\bar{x} + n\bar{x}^2 = \sum x_i^2 - n\bar{x}^2$. $\square$</p>
+            <p>$\sum x_i^2 = 144 + 225 + 121 + 196 + 169 = 855$, $n\bar{x}^2 = 5 \cdot 169 = 845$ : somme des carrés 10, <span class="b-res">$s^2 = \tfrac{10}{4} = 2{,}5$</span> comme plus haut.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="13" data-ph="x̄ ="><p class="b-q-text">Moyenne de 12, 15, 11, 14, 13 ?</p>
+            <div class="b-sol"><p>13</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2,5" data-tol="0.0001" data-ph="s² ="><p class="b-q-text">Variance de l’échantillon 12, 15, 11, 14, 13 ?</p>
+            <div class="b-sol"><p>$\tfrac{10}{4} = 2{,}5$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Une école veut savoir dans quelle mesure les élèves sont satisfaits de la cantine. Décris une bonne et une mauvaise manière de prélever l’échantillon.</p>
+            </div>
+        <div class="b-sol"><p>Bien : tirer au hasard dans la liste des élèves, dans tous les niveaux. Mal : n’interroger que ceux qui mangent à midi à la cantine ; les mécontents mangent peut-être ailleurs.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec la 12e année :</b> la proportion de gauchers est d’environ 10 %. Dans un échantillon de 50 personnes, combien en attends-tu, et combien vaut $\sigma$ ? Quelle est la probabilité d’en avoir 10 ou plus ?</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 5$, $\sigma = \sqrt{4{,}5} \approx 2{,}12$. $P(X \ge 10) \approx 0{,}025$ : rare, mais possible.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Exercice ouvert :</b> sur 500 pièces contrôlées d’une production journalière de 20 000 unités, 12 sont défectueuses. Estime le nombre de pièces défectueuses et indique la précision de cette estimation. Combien de pièces faudrait-il contrôler pour que l’extrapolation ne varie plus que d’environ 50 pièces ?</p>
+            </div>
+        <div class="b-hint"><p>L’extrapolation est $N \cdot h$, sa dispersion $N \cdot \sqrt{\tfrac{h(1-h)}{n}}$.</p>
+            </div>
+        <div class="b-sol"><p>$h = 0{,}024$ : environ 480 pièces, dispersion $20\,000 \cdot \sqrt{\tfrac{0{,}024 \cdot 0{,}976}{500}} \approx 137$ pièces.</p>
+            <p>$20\,000 \cdot \sqrt{\tfrac{0{,}0234}{n}} \le 50$ donne $n \ge 0{,}0234 \cdot 400^2 \approx 3750$. <span class="b-res">Contrôler environ 3 750 pièces.</span> Pour une part aussi grande de la production journalière, cela ne vaut la peine que si les défauts coûtent cher.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : le plus grand sondage qui se soit jamais trompé" data-toc-k="X" data-toc-short="1936">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">LA TAILLE NE REMPLACE PAS LE HASARD</span></div>
+        <h2>L’élection de 1936</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Avant l’élection présidentielle américaine de 1936, le magazine Literary Digest envoya environ dix millions de questionnaires ; plus de deux millions revinrent. Sa prévision :
+                le challenger Alf Landon l’emporterait nettement sur le président Franklin D. Roosevelt. En réalité, Roosevelt gagna avec une grande avance.</p>
+            <p>Les adresses provenaient entre autres d’annuaires téléphoniques et de fichiers d’immatriculation de voitures, à l’époque plutôt des personnes aisées. Et ce sont surtout les mécontents du gouvernement qui répondirent.
+                Le jeune sondeur George Gallup vit juste avec un échantillon beaucoup plus petit, mais choisi avec plus de soin, et devint célèbre.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> Peverill Squire : Why the 1936 Literary Digest Poll Failed. Public Opinion Quarterly 52 (1), 1988.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>POPULATION ET ÉCHANTILLON</h4><p>Choisi au hasard, pour qu’il soit représentatif.</p>
+            </div>
+        <div>
+            <p>Literary Digest 1936 : grand, mais biaisé</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>ESTIMER ET TESTER</h4><p>Estimer : un nombre. Tester : une décision sur une conjecture.</p>
+            </div>
+        <div>
+            <p>Prévision électorale · dé équilibré ?</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>DISPERSION DE LA FRÉQUENCE</h4><p>$\sqrt{\tfrac{p(1-p)}{n}}$ ; un $n$ quatre fois plus grand la divise par deux.</p>
+            </div>
+        <div>
+            <p>$n = 1000$, $p = 0{,}42$ : 1,6 point de pourcentage</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>INDICATEURS</h4><p>$\bar{x}$ et $s^2 = \tfrac{1}{n-1} \sum (x_i - \bar{x})^2$</p>
+            </div>
+        <div>
+            <p>Paquets : $\bar{x} = 500$ g, $s \approx 2{,}58$ g</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+        <div class="b-q" data-ans="2500" data-ph="n ="><p class="b-q-text">Quelle valeur minimale doit avoir $n$ pour $p = 0{,}5$, afin que la dispersion de la fréquence soit d’au plus 0,01 ?</p>
+            <div class="b-sol"><p>2500</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="500" data-ph="x̄ ="><p class="b-q-text">Moyenne de 480, 520, 490, 510, 500 ?</p>
+            <div class="b-sol"><p>500</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+        <div class="b-q" data-ans="250" data-ph="s² ="><p class="b-q-text">Variance de l’échantillon 480, 520, 490, 510, 500 ?</p>
+            <div class="b-sol"><p>$\tfrac{1000}{4} = 250$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">« La nouvelle méthode d’apprentissage est-elle meilleure ? » est…</p>
+            <div class="b-mc"><button>un problème de test</button><button>un problème d’estimation</button><button>pas du tout un problème statistique</button></div>
+        <div class="b-sol"><p>On contrôle une conjecture.</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 13e année, Leistungskurs · domaine d’apprentissage 5 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-fr/gy12.js"></script>
+</body>
+</html>
