@@ -1072,3 +1072,23 @@ answers and numbers stay. Nothing above was changed; where this book differs fro
 | Keil, Winkelhaken (Babylonier) | cuña, espiga | |
 | Sechzigersystem | sistema sexagesimal | |
 | Rechenpfennig, Rechentisch, Zwischenraum | ficha de cálculo, mesa de cálculo, espacio | as in GY 5 |
+
+## Added by mathe12lk-es (Casamayor)
+
+| Deutsch | Español | Note |
+|---|---|---|
+| Mathematik · Berufliches Gymnasium 12 · Leistungskurs | Matemáticas · Berufliches Gymnasium 12 · Curso avanzado | `short`: Matemáticas 12 avanzado; start page explains Grundkurs / Leistungskurs once |
+| Verteilungsfunktion, Wahrscheinlichkeitsfunktion, Treppenfunktion | función de distribución, función de probabilidad, función escalonada | widget verteilungsfunktion (js/buch-es/bgy12lk.js) |
+| Höchstens-Wahrscheinlichkeit, Sprungstelle (von F) | probabilidad de «como máximo», punto de salto | |
+| Verschiebungssatz $V(X) = E(X^2) - \mu^2$ | fórmula abreviada de la varianza | |
+| Satz von der totalen Wahrscheinlichkeit, Zerlegung der Ergebnismenge | fórmula de la probabilidad total, partición del espacio muestral | |
+| Zulieferer $Z_i$, defekt $D$ | proveedor $Z_i$, defectuosa $D$ | letters kept; krank K → enfermo E as in mathe12-es |
+| Unstetigkeitsstelle, Sprungstelle, hebbare Unstetigkeit | punto de discontinuidad, discontinuidad de salto, discontinuidad evitable | |
+| Nahtstelle (abschnittsweise Funktion), Knick | punto de unión, pico | "ohne Knick" → sin picos (as knickfrei) |
+| Differenzierbarkeit, lineare Approximation | derivabilidad, aproximación lineal | "differenzierbar heißt stetig" → derivable implica continua |
+| Methode der kleinsten Quadrate, Bestimmtheitsmaß | método de los mínimos cuadrados, coeficiente de determinación | |
+| Bateman-Funktion | función de Bateman | |
+| Rettungsschwimmerin, Brechungsgesetz | socorrista, ley de la refracción | |
+| dreiseitige Pyramide, Schwerpunkt | pirámide triangular, baricentro | |
+| Paketporto | franqueo de un paquete | chapter 2.1 |
+| Graph labels in `data-labels` | translated in the page: tangente, tangente de inflexión, sen x, cierre del hueco | as in mathegy11lk-es |
