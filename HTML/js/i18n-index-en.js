@@ -47,6 +47,7 @@
                 school_gylk: "Gymnasium · Advanced Course",
                 school_os: "Oberschule",
                 school_bgy: "Vocational Gymnasium",
+                school_bgylk: "Vocational Gymnasium · Advanced Course",
                 school_fos: "Fachoberschule",
                 touren: "Tours",
                 apps: "Apps",

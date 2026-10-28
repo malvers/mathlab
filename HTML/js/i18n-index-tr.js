@@ -47,6 +47,7 @@
                 school_gylk: "Gymnasium · Leistungskurs",
                 school_os: "Oberschule",
                 school_bgy: "Mesleki Gymnasium",
+                school_bgylk: "Mesleki Gymnasium · Leistungskurs",
                 school_fos: "Fachoberschule",
                 touren: "Turlar",
                 apps: "Uygulamalar",

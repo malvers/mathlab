@@ -47,6 +47,7 @@
                 school_gylk: "Gymnasium · Curso avanzado",
                 school_os: "Oberschule",
                 school_bgy: "Gymnasium profesional",
+                school_bgylk: "Gymnasium profesional · Curso avanzado",
                 school_fos: "Fachoberschule",
                 touren: "Recorridos",
                 apps: "Apps",

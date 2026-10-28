@@ -25,7 +25,7 @@
 const LABS_DATA = [
     // one tile for all books in the "Neu" view instead of the 20 book cards (Doc, 14.10.2026:
     // "aus der Card neu ... Die Bücher raus und nur eine Kachel rein. Wo dran steht Bücher")
-    // Every book card carries "school" (gy | gylk | os | bgy | fos): the books view groups by it (Doc, 26.10.2026)
+    // Every book card carries "school" (gy | gylk | os | bgy | bgylk | fos): the books view groups by it (Doc, 26.10.2026)
     {
         "id": "buecher",
         "href": "index.html#buecher",
@@ -81,7 +81,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik 12 LK / 13 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe12lk"],
         "category": "buecher funktionen stochastik geometrie grade12",
-        "school": "bgy",
+        "school": "bgylk",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 jahrgangsstufe 12 berufliches gymnasium bgy leistungskurs lk sachsen lehrplan kapitel bedingte wahrscheinlichkeit vierfeldertafel bayes unabhaengigkeit zufallsgroesse wahrscheinlichkeitsfunktion verteilungsfunktion erwartungswert varianz standardabweichung binomialverteilung bernoulli summensymbol binomialkoeffizient grenzwert asymptote stetigkeit unstetigkeit ableitung differenzenquotient differenzialquotient lineare approximation ableitungsregeln ln logarithmus produktregel kettenregel e-funktion monotonie extrempunkt globale extrema wendepunkt symmetrie tangente normale steckbrief regression extremwertproblem randextremum vektoren linearkombination schwerpunkt pyramide skalarprodukt orthogonal winkel beweis 3d aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
@@ -93,7 +93,7 @@ const LABS_DATA = [
         "tagline": "Buch / Mathematik 13 LK / 16 Kapitel",
         "icon": LAB_ICONS["lehrbuch-mathe13lk"],
         "category": "buecher funktionen stochastik geometrie oberstufe",
-        "school": "bgy",
+        "school": "bgylk",
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 13 jahrgangsstufe 13 abitur abiturvorbereitung berufliches gymnasium bgy leistungskurs lk sachsen lehrplan kapitel stammfunktion unbestimmtes integral ln bestimmtes integral hauptsatz beweis integralfunktion rekonstruierter bestand flaeche flaeche zwischen graphen rechteckmethode trapezmethode rotationskoerper volumen normalverteilung glockenkurve dichte verteilungsfunktion sigma regeln grundgesamtheit stichprobe signifikanztest zweiseitiger test fehler erster art fehler zweiter art wahlpflicht gerade ebene parametergleichung vektorprodukt koordinatengleichung hessesche normalform lagebeziehung spurpunkt spurgerade schnittwinkel abstand prisma pyramide matrix matrizen matrizenprodukt inverse matrix gozintograph verflechtung leontief input output kostenrechnung populationsmodell uebergangsmatrix grenzmatrix fixvektor biquadratische gleichung substitution funktionenschar ortskurve parameter drehmatrix kosten erloes gewinn 3d aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },

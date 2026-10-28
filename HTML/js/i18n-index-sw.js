@@ -47,6 +47,7 @@
                 school_gylk: "Gymnasium · Leistungskurs",
                 school_os: "Oberschule",
                 school_bgy: "Gymnasium ya ufundi",
+                school_bgylk: "Gymnasium ya ufundi · Leistungskurs",
                 school_fos: "Fachoberschule",
                 touren: "Ziara",
                 apps: "Programu",

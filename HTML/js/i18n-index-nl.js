@@ -47,6 +47,7 @@
                 school_gylk: "Gymnasium · Leistungskurs",
                 school_os: "Oberschule",
                 school_bgy: "Beroepsgericht Gymnasium",
+                school_bgylk: "Beroepsgericht Gymnasium · Leistungskurs",
                 school_fos: "Fachoberschule",
                 touren: "Rondleidingen",
                 apps: "Apps",

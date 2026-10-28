@@ -48,6 +48,7 @@
                 school_gylk: "Gymnasium · Leistungskurs",
                 school_os: "Oberschule",
                 school_bgy: "Berufliches Gymnasium",
+                school_bgylk: "Berufliches Gymnasium · Leistungskurs",
                 school_fos: "Fachoberschule",
                 touren: "Touren",
                 apps: "Apps",
