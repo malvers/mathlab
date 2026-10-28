@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 12 Advanced · Chapter 2.1 · Limits and continuity | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Behaviour at infinity, limit at a point, points of discontinuity. Chapter 2.1 of the interactive textbook Mathematics · Vocational Grammar School 12 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 12 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER 2.1 · LEARNING AREA 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER 2.1 · LEARNING AREA 2 · NOVEMBER · DECEMBER</p>
+            <h1>Limits and continuity</h1>
+            <p class="b-hero-lead">A hot coffee cools down, but never below room temperature. A curve hugs a straight line without ever reaching it.
+                A function has a hole at one point, and yet you know exactly where it wants to go there. <b>Limits</b> describe what happens
+                when you get closer and closer to something. They are the foundation of all of differential calculus.</p>
+            <div class="b-chips"><span class="b-chip">10 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">BASIS FOR THE DERIVATIVE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["(2*x+1)/(x-1)"]' data-labels='["f"]' data-lat="[5]" data-hl="2" data-x="-6,8" data-y="-6,9" data-h="240" data-aria="Graph with a horizontal and a vertical asymptote"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li>determine the <b>behaviour at infinity</b> and give <b>horizontal asymptotes</b></li>
+                <li>investigate <b>limits at a point</b>, also from the left and from the right</li>
+                <li>tell <b>poles</b> (vertical asymptotes) and <b>holes</b> apart</li>
+                <li>understand what <b>continuity</b> means, tell <b>points of discontinuity</b> apart by their kind and make piecewise functions with a parameter continuous</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-ans="0.001" data-tol="0.000001" data-ph="number"><p class="b-q-text">What is $\tfrac{1}{1000}$ as a decimal?</p><div class="b-sol"><p>$0.001$</p></div></div>
+            <div class="b-q" data-ans="0.125" data-tol="0.0001" data-ph="number"><p class="b-q-text">Calculate $2^{-3}$.</p><div class="b-sol"><p>$\tfrac{1}{2^3} = \tfrac18 = 0.125$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">For which $x$ is $\tfrac{1}{x - 2}$ not defined?</p><div class="b-sol"><p>For $x = 2$ the denominator would be 0.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="number"><p class="b-q-text">Simplify $\tfrac{x^2 - 9}{x - 3}$ and then substitute $x = 3$.</p><div class="b-sol"><p>$\tfrac{(x - 3)(x + 3)}{x - 3} = x + 3$, so 6 at $x = 3$.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">THE COFFEE</div>
+            <div class="b-text"><p>The temperature of a coffee after $t$ minutes is described by $T(t) = 20 + 60 \cdot 0.9^t$ (in °C).</p>
+                <ul><li>Calculate $T(0)$, $T(10)$, $T(30)$, $T(60)$.</li><li>Which temperature does the coffee never reach? What does the 20 mean?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">CLOSER AND CLOSER TO 1</div>
+            <div class="b-text"><p>Substitute the values 0.9; 0.99; 0.999 and 1.1; 1.01; 1.001 into $f(x) = \tfrac{x^2 - 1}{x - 1}$.</p>
+                <ul><li>What do you notice? What happens at $x = 1$?</li><li>Draw the graph. What does it look like at 1?</li></ul></div>
+            <span class="b-pair">→ Unit 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">PARCEL POSTAGE</div>
+            <div class="b-text"><p>A parcel service charges €5 up to 2 kg, €7 up to 5 kg and €10 up to 10 kg.</p>
+                <ul><li>Draw the price as a function of the weight.</li><li>Where does the graph “jump”? What does a parcel of exactly 2 kg cost?</li></ul></div>
+            <span class="b-pair">→ Units 2 and 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Behaviour at infinity" data-toc-k="1" data-toc-short="1 Infinity">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">4 LESSONS</span></div>
+    <h2><span class="b-no">1</span>Behaviour at infinity</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>For the coffee, $T(60) = 20 + 60 \cdot 0.9^{60} \approx 20.11$. The longer you wait, the smaller $0.9^t$ becomes, and $T(t)$ gets arbitrarily close to 20.</p></div></div>
+            <div class="b-text"><p>You write $\lim\limits_{t \to \infty} T(t) = 20$ (read: “the limit of $T(t)$ as $t$ tends to infinity is 20”). The line $y = 20$ is called a <b>horizontal asymptote</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · LIMIT AT INFINITY</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to \infty} f(x) = g$ means: $f(x)$ gets arbitrarily close to $g$ provided $x$ is large enough. Then $y = g$ is a <b>horizontal asymptote</b>.</p>
+                    <p><b>Polynomial functions</b> of degree 1 or more behave for $x \to \pm\infty$ like their term with the highest power, they tend to $+\infty$ or $-\infty$.</p>
+                    <p><b>Rational functions</b> $\tfrac{Z(x)}{N(x)}$: degree of the numerator smaller than degree of the denominator → limit 0. Degrees equal → quotient of the coefficients of the highest power.
+                        Degree of the numerator larger → no horizontal asymptote.</p>
+                    <p>Also: $\tfrac1x \to 0$, $\mathrm{e}^{-x} \to 0$ and $q^x \to 0$ for $0 < q < 1$, each for $x \to \infty$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Trick:</b> divide the numerator and the denominator by the highest power of the denominator. All terms like $\tfrac{1}{x}$ or $\tfrac{3}{x^2}$ vanish for $x \to \infty$.</p>
+            <p class="b-note"><b>Asymptote</b> comes from Greek and means “not falling together”.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · STEP BY STEP TOWARDS THE LIMIT</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a function and the direction of approach. With every step $k$, $x$ goes ten times as far out or ten times as close to the point.</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · EQUAL DEGREES</div>
+            <div class="b-text"><p>Find $\lim\limits_{x \to \infty} \dfrac{3x^2 + 1}{x^2 + 2}$.</p></div>
+            <div class="b-sol"><p>Divide by $x^2$: $\dfrac{3 + \frac{1}{x^2}}{1 + \frac{2}{x^2}} \to \dfrac{3 + 0}{1 + 0} = 3$. <span class="b-res">Horizontal asymptote $y = 3$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · POLYNOMIAL</div>
+            <div class="b-text"><p>How does $f(x) = -2x^3 + 5x^2 + 1$ behave for $x \to \infty$ and for $x \to -\infty$?</p></div>
+            <div class="b-sol"><p>What matters is $-2x^3$: for $x \to \infty$, $f(x) \to -\infty$, for $x \to -\infty$, $f(x) \to +\infty$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Find the limit for $x \to \infty$: a) $5 - \tfrac1x$ &nbsp; b) $3 \cdot 0.5^x$ &nbsp; c) $\dfrac{4x + 1}{2x - 3}$ &nbsp; d) $x^3 - 100x^2$</p></div>
+            <div class="b-sol"><p>a) 5 &nbsp; b) 0 &nbsp; c) 2 &nbsp; d) $+\infty$ (for large $x$, $x^3$ wins)</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calculate $f(10)$, $f(100)$ and $f(1000)$ for $f(x) = \tfrac{x + 1}{x}$. Which value does $f$ tend to?</p></div>
+            <div class="b-sol"><p>$1.1$; $1.01$; $1.001$. Limit 1, because $\tfrac{x + 1}{x} = 1 + \tfrac1x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Exploration “The coffee”: calculate $T(10)$. After how many minutes is the coffee below 30 °C?</p></div>
+            <div class="b-sol"><p>$T(10) = 20 + 60 \cdot 0.9^{10} \approx 40.9$ °C. $60 \cdot 0.9^t < 10 \Rightarrow 0.9^t < \tfrac16 \Rightarrow t > \tfrac{\ln(1/6)}{\ln 0.9} \approx 17.01$, so after just over 17 minutes.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Give the horizontal asymptotes, if there are any: a) $\dfrac{6x^2}{2x^2 + 5}$ &nbsp; b) $\dfrac{x + 4}{x^2 + 1}$ &nbsp; c) $\dfrac{x^3}{x + 1}$</p></div>
+            <div class="b-sol"><p>a) $y = 3$ &nbsp; b) $y = 0$ &nbsp; c) none, the degree of the numerator is larger</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Give a rational function whose graph has the horizontal asymptote $y = -3$ and the vertical asymptote $x = 2$.</p></div>
+            <div class="b-sol"><p>For example $f(x) = \dfrac{-3x}{x - 2}$ or $f(x) = -3 + \dfrac{1}{x - 2}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="5" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to \infty} \dfrac{5x^2 - x}{x^2 + 4}$.</p><div class="b-sol"><p>Equal degrees: $\tfrac51 = 5$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to \infty} \dfrac{7}{x + 1}$.</p><div class="b-sol"><p>The denominator grows without bound: 0</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to \infty} \left(4 + 2\mathrm{e}^{-x}\right)$.</p><div class="b-sol"><p>$\mathrm{e}^{-x} \to 0$, so 4</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Limit at a point, continuity" data-toc-k="2" data-toc-short="2 At a point">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>Limit at a point and continuity</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = \tfrac{x^2 - 1}{x - 1}$ is not defined at $x = 1$. But the values $f(0.999) = 1.999$ and $f(1.001) = 2.001$ show: from both sides $f(x)$ approaches the number 2.</p></div></div>
+            <div class="b-text"><p>For $x \neq 1$, $f(x) = \tfrac{(x - 1)(x + 1)}{x - 1} = x + 1$. The graph is the line $y = x + 1$ with a <b>hole</b> at $(1, 2)$.
+                It is different with $g(x) = \tfrac{1}{x - 1}$: here the values grow without bound as $x \to 1$, the line $x = 1$ is a <b>vertical asymptote</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · LIMIT AT A POINT AND CONTINUITY</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to a} f(x) = g$ means: $f(x)$ gets arbitrarily close to $g$ if $x$ is close enough to $a$, and that <b>from the left and from the right</b>.</p>
+                    <p><b>Pole:</b> $|f(x)|$ grows without bound as $x \to a$; $x = a$ is a vertical asymptote, with or without a change of sign.
+                        <b>Hole:</b> $f(a)$ is not defined, but the limit exists.</p>
+                    <p>$f$ is called <b>continuous</b> at the point $a$ if $f(a)$ is defined and $\lim\limits_{x \to a} f(x) = f(a)$. Intuitively: you can draw the graph there without lifting the pen.
+                        Polynomial functions, $\mathrm{e}^x$ and $\sin x$ are continuous everywhere.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>From the left, from the right:</b> if different values come out from the left and from the right, there is no limit at this point, for example with parcel postage.</p>
+            <p class="b-note"><b>In the widget above</b> you find a pole ($x \to 1$ for the first function) and two holes.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURE · POLES WITH AND WITHOUT A CHANGE OF SIGN</div>
+        <p class="b-help" style="margin:0 0 12px">Gold: $f(x) = \tfrac{1}{x - 2}$ changes from $-\infty$ to $+\infty$ at $x = 2$. Cyan: $g(x) = \tfrac{1}{(x - 2)^2}$ goes to $+\infty$ from both sides.</p>
+        <div data-widget="graph" data-fns='["1/(x-2)","1/((x-2)^2)"]' data-labels='["f","g"]' data-lat="[3.4,0.6]" data-x="-2,6" data-y="-5,6" data-h="280" data-aria="Two poles at x equals 2"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · HOLE OR POLE?</div>
+            <div class="b-text"><p>Investigate $f(x) = \dfrac{x^2 - 4}{x - 2}$ and $g(x) = \dfrac{x + 2}{x - 2}$ at the point $x = 2$.</p></div>
+            <div class="b-sol"><p>$f(x) = x + 2$ for $x \neq 2$: hole, $\lim\limits_{x \to 2} f(x) = 4$.</p>
+                <p>For $g$ the numerator tends to 4, the denominator to 0: pole with a change of sign, vertical asymptote $x = 2$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · PARCEL POSTAGE</div>
+            <div class="b-text"><p>Is the price function of the parcel service continuous at 2 kg?</p></div>
+            <div class="b-sol"><p>From the left (just under 2 kg): €5. From the right (just over 2 kg): €7. The one-sided limits are different: <span class="b-res">no limit, so not continuous.</span> The graph jumps.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Find the point where the function is not defined and its type: a) $\dfrac{3}{x + 4}$ &nbsp; b) $\dfrac{x^2 - 9}{x + 3}$ &nbsp; c) $\dfrac{1}{x^2}$</p></div>
+            <div class="b-sol"><p>a) $x = -4$: pole with a change of sign &nbsp; b) $x = -3$: hole, limit $-6$ &nbsp; c) $x = 0$: pole without a change of sign</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Find $\lim\limits_{x \to 2} (x^2 + 3x)$ and $\lim\limits_{x \to 0} \dfrac{x^2 + 5x}{x}$.</p></div>
+            <div class="b-sol"><p>Continuous, so substitute: $4 + 6 = 10$. Cancel: $x + 5 \to 5$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$f(x) = \dfrac{|x|}{x}$ for $x \neq 0$. Calculate $f(0.1)$, $f(-0.1)$, $f(0.001)$, $f(-0.001)$. Does $f$ have a limit at 0?</p></div>
+            <div class="b-sol"><p>For $x > 0$, $f(x) = 1$, for $x < 0$, $f(x) = -1$. Left $-1$, right $1$: no limit.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>For which $c$ is $f(x) = \begin{cases} x^2 & \text{for } x \le 1 \\ 2x + c & \text{for } x > 1 \end{cases}$ continuous at 1?</p></div>
+            <div class="b-sol"><p>From the left you get $1^2 = 1$, from the right $2 + c$. Equal for $c = -1$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="6" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to 3} \dfrac{x^2 - 9}{x - 3}$.</p><div class="b-sol"><p>$x + 3 \to 6$</p></div></div>
+        <div class="b-q" data-ans="-5" data-ph="x ="><p class="b-q-text">Where does $f(x) = \dfrac{1}{x + 5}$ have a pole?</p><div class="b-sol"><p>$x = -5$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">What does $f(x) = \dfrac{1}{x^2}$ have at 0?</p>
+            <div class="b-mc"><button>a hole</button><button>a pole with a change of sign</button><button>a pole without a change of sign</button></div>
+            <div class="b-sol"><p>$x^2 > 0$ on both sides, so $f(x) \to +\infty$ from the left and from the right.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Points of discontinuity" data-toc-k="3" data-toc-short="3 Discontinuous">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Points of discontinuity and piecewise defined functions</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A taxi costs $4 + 2.2x$ euros up to 5 km, after that $15 + 1.8(x - 5)$ euros. At $x = 5$ both terms give €15: the price does not jump, it only changes its gradient.
+                The parcel postage, on the other hand, jumps from €5 to €7 at 2 kg. The taxi function is <b>continuous</b>, the postage function is not.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · KINDS OF DISCONTINUITY</div>
+                <div class="b-text">
+                    <p>$f$ is <b>continuous</b> at the point $x_0$ of its domain if the left-hand limit, the right-hand limit and the function value agree. Otherwise $x_0$ is a <b>point of discontinuity</b>:</p>
+                    <ul>
+                        <li><b>Jump:</b> the one-sided limits exist but are different.</li>
+                        <li><b>Removable discontinuity:</b> the limit exists, but $f(x_0)$ is a different value. If you change $f(x_0)$, $f$ becomes continuous.</li>
+                    </ul>
+                    <p>At a <b>gap</b> or a <b>pole</b> $f$ is not defined. If $f$ has a limit at a gap, it can be <b>extended continuously</b>.</p>
+                    <p>A <b>piecewise defined</b> function made of continuous pieces is continuous if and only if the pieces fit together at the joins.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Careful:</b> $\tfrac1x$ is a continuous function, because it is continuous at every point of its domain. The point 0 does not belong to it at all.</p>
+            <p class="b-note"><b>Intermediate value theorem:</b> if $f$ is continuous on $[a, b]$ and $f(a)$ and $f(b)$ have different signs, then $f$ has a zero in between. Without continuity this does not hold, because a jump can lead across zero.</p>
+            <p class="b-note"><b>A kink is allowed:</b> $|x|$ is continuous at 0. Whether you can also differentiate there is another question (chapter 2.2).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · MAKING IT CONTINUOUS PIECE BY PIECE</div>
+        <p class="b-help" style="margin:0 0 12px">Change the parameter until the two pieces fit together. Open circles do not belong to the graph, the white dot is the function value.</p>
+        <div data-widget="stetigkeit"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · FINDING THE PARAMETER</div>
+            <div class="b-text"><p>For which $a$ is $f(x) = x^2 + 1$ for $x \leq 1$ and $f(x) = ax - 1$ for $x > 1$ continuous?</p></div>
+            <div class="b-sol"><p>Left: $\lim\limits_{x \to 1^-} f(x) = f(1) = 2$. Right: $\lim\limits_{x \to 1^+} (ax - 1) = a - 1$.</p>
+                <p>Continuous if and only if $a - 1 = 2$: <span class="b-res">$a = 3$</span>. At all other points $f$ is continuous anyway, because both pieces are polynomials.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · REMOVABLE OR NOT?</div>
+            <div class="b-text"><p>Investigate $g(x) = \dfrac{x^2 - 1}{x - 1}$ for $x \neq 1$ with $g(1) = 3$ at the point 1.</p></div>
+            <div class="b-sol"><p>$\lim\limits_{x \to 1} g(x) = \lim\limits_{x \to 1} (x + 1) = 2 \neq 3 = g(1)$.</p>
+                <p><span class="b-res">Removable discontinuity</span>: with $g(1) = 2$, $g$ would be continuous.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Continuous or not? If discontinuous, give the kind. a) $f(x) = \tfrac{x^2 - 4}{x - 2}$ for $x \neq 2$ with $f(2) = 0$ &nbsp; b) $|x|$ at 0 &nbsp; c) the parcel postage at 5 kg &nbsp; d) $f(x) = x^2$ for $x \neq 1$ with $f(1) = 1$</p></div>
+            <div class="b-sol"><p>a) removable (limit 4) &nbsp; b) continuous, a kink is allowed &nbsp; c) jump (€7 to €10) &nbsp; d) continuous, $f(1)$ is exactly the limit</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Find $a$ and $b$ such that $f$ is continuous everywhere: $f(x) = x + a$ for $x < 0$, $\;f(x) = x^2 + 1$ for $0 \leq x \leq 2$, $\;f(x) = bx - 1$ for $x > 2$.</p></div>
+            <div class="b-sol"><p>At 0: $0 + a = 1$, so $a = 1$. At 2: $2b - 1 = 5$, so $b = 3$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Use the intermediate value theorem to show that $f(x) = x^3 + x - 1$ has a zero in $[0, 1]$. Halve the interval twice.</p></div>
+            <div class="b-sol"><p>$f(0) = -1 < 0 < 1 = f(1)$, and $f$ is continuous. $f(0.5) = -0.375$: zero in $[0.5, 1]$. $f(0.75) \approx 0.172$: zero in $[0.5, 0.75]$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>A taxi company charges a basic fee of €3 and €2.40 per km for the first 5 km, after that $a$ euros plus €1.60 for every further km.
+                Set up the fare as a piecewise defined function. For which $a$ is it continuous? Why would a company not want a jump downwards?</p></div>
+            <div class="b-sol"><p>$p(x) = 3 + 2.4x$ for $0 < x \le 5$ and $p(x) = a + 1.6(x - 5)$ for $x > 5$. At 5 km: $3 + 12 = 15$, continuous for <span class="b-res">$a = 15$</span>.</p>
+                <p>With $a < 15$ a slightly longer ride would cost less than a ride of exactly 5 km; passengers would order a detour.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Is $f(x) = x \cdot \sin\tfrac1x$ for $x \neq 0$ and $f(0) = 0$ continuous at the point 0? Justify without a calculator.</p></div>
+            <div class="b-hint"><p>How large can $\left|\sin\tfrac1x\right|$ be at most?</p></div>
+            <div class="b-sol"><p>Yes. $|f(x)| = |x| \cdot \left|\sin\tfrac1x\right| \leq |x|$, so $f(x)$ lies between $-|x|$ and $|x|$, and both tend to 0. Hence $\lim\limits_{x \to 0} f(x) = 0 = f(0)$.
+                The graph oscillates infinitely often, but is squeezed between the lines $y = x$ and $y = -x$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="3" data-ph="a ="><p class="b-q-text">$f(x) = x^2 + 1$ for $x \leq 1$ and $f(x) = ax - 1$ for $x > 1$. For which $a$ is $f$ continuous?</p><div class="b-sol"><p>$a - 1 = 2$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="number"><p class="b-q-text">What value must $g(1)$ have for $g(x) = \tfrac{x^2 - 1}{x - 1}$ to become continuous at 1?</p><div class="b-sol"><p>Limit $1 + 1 = 2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Is $f(x) = \tfrac1x$ a continuous function?</p><div class="b-mc"><button>Yes, it is continuous at every point of its domain.</button><button>No, it has a point of discontinuity at 0.</button><button>Only for $x > 0$.</button></div><div class="b-sol"><p>0 does not belong to the domain.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Give all asymptotes of the graph of $f(x) = \dfrac{2x - 1}{x + 1}$.</p></div>
+            <div class="b-sol"><p>Horizontal $y = 2$, vertical $x = -1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>The concentration of a drug in the blood is $c(t) = \dfrac{8t}{t^2 + 4}$ ($t$ in hours). Find $\lim\limits_{t \to \infty} c(t)$ and interpret it.</p></div>
+            <div class="b-sol"><p>Degree of the numerator smaller than degree of the denominator: limit 0. In the long run the drug is broken down completely.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Connecting with Year 11:</b> of 1,000 iodine-131 nuclei, $N(t) = 1000 \cdot 0.5^{t/8}$ are left after $t$ days. Find the limit for $t \to \infty$. When, by calculation, is less than one nucleus left?</p></div>
+            <div class="b-sol"><p>Limit 0. $0.5^{t/8} < 0.001 \Rightarrow t > 8 \cdot \tfrac{\ln 0.001}{\ln 0.5} \approx 79.7$ days. For such small numbers, however, the model is only an average.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$f(x) = \dfrac{x^2 + x}{x}$ is not defined at 0. How must $f(0)$ be defined so that $f$ is continuous everywhere?</p></div>
+            <div class="b-sol"><p>$f(x) = x + 1$ for $x \neq 0$, so $f(0) := 1$. This is called a <b>continuous extension</b>.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Achilles and the tortoise" data-toc-k="X" data-toc-short="Achilles">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">INFINITELY MANY STEPS, A FINITE GOAL</span></div>
+    <h2>Achilles and the tortoise</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In the 5th century BC the Greek philosopher Zeno of Elea claimed: swift Achilles can never catch up with a tortoise that has a head start.
+                For when he arrives where it was, it is already a bit further on. When he arrives there, it is further on again, and so on infinitely often.</p>
+            <p>With limits the puzzle is solved. If Achilles is twice as fast and the tortoise has a head start of 1 metre, he runs one after the other
+                $1 + \tfrac12 + \tfrac14 + \tfrac18 + \ldots$ metres. These infinitely many sections have the <b>limit</b> 2: after 2 metres he has caught up with it.</p>
+            <p>So infinitely many steps can add up to a finite distance and a finite time. Exactly this idea is behind every limit.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> handed down by Aristotle, Physics, book VI, chapter 9 (239b).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>AT INFINITY</h4><p>$\lim\limits_{x \to \infty} f(x) = g$: horizontal asymptote $y = g$.</p></div>
+        <div><p>$\tfrac{3x^2 + 1}{x^2 + 2} \to 3$ · $20 + 60 \cdot 0.9^t \to 20$</p></div></div>
+    <div class="b-rueck"><div><h4>RATIONAL FUNCTIONS</h4><p>Degree of numerator &lt; degree of denominator: 0 · equal: quotient of coefficients · larger: no horizontal asymptote.</p></div>
+        <div><p>$\tfrac{6x^2}{2x^2 + 5} \to 3$</p></div></div>
+    <div class="b-rueck"><div><h4>AT A POINT</h4><p>The same value from the left and from the right. Pole: vertical asymptote. Hole: the limit exists.</p></div>
+        <div><p>$\tfrac{x^2 - 1}{x - 1}$: hole at 1, limit 2</p></div></div>
+    <div class="b-rueck"><div><h4>CONTINUITY</h4><p>$\lim\limits_{x \to a} f(x) = f(a)$: can be drawn without lifting the pen.</p></div>
+        <div><p>Parcel postage: jumps, not continuous</p></div></div>
+    <div class="b-rueck"><div><h4>POINTS OF DISCONTINUITY</h4><p>Jump: one-sided limits differ. Removable: limit $\neq f(x_0)$. Piecewise: make the pieces fit at the joins.</p></div>
+        <div><p>$x^2 + 1$ and $ax - 1$ at 1: continuous for $a = 3$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1</div>
+            <div class="b-q" data-ans="2" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to \infty} \dfrac{6x + 1}{3x - 2}$.</p><div class="b-sol"><p>$\tfrac63 = 2$</p></div></div>
+            <div class="b-q" data-ans="0" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to \infty} \dfrac{1}{x^3}$.</p><div class="b-sol"><p>0</p></div></div>
+            <div class="b-q" data-ans="8" data-ph="limit"><p class="b-q-text">Find $\lim\limits_{x \to 4} \dfrac{x^2 - 16}{x - 4}$.</p><div class="b-sol"><p>$x + 4 \to 8$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2</div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">How does $f(x) = \dfrac{2x^3 + 1}{x^2 + 1}$ behave for $x \to \infty$?</p>
+                <div class="b-mc"><button>$f(x) \to 2$</button><button>$f(x) \to 0$</button><button>$f(x) \to \infty$</button></div>
+                <div class="b-sol"><p>The degree of the numerator is larger, $f(x)$ behaves roughly like $2x$.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="x ="><p class="b-q-text">Where is the vertical asymptote of $f(x) = \dfrac{x + 1}{x - 6}$?</p><div class="b-sol"><p>$x = 6$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="c ="><p class="b-q-text">$f(x) = x^2$ for $x \le 2$ and $f(x) = x + c$ for $x > 2$. For which $c$ is $f$ continuous?</p><div class="b-sol"><p>$4 = 2 + c \Rightarrow c = 2$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-grenzwerte.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMITS</span><span class="b-lab-what">At infinity and at a point</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 12, advanced course · Learning area 2 of the Saxon curriculum for mathematics at the Berufliches Gymnasium (2026).</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-en/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-en/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-en/gy11lk.js"></script>
+</body>
+</html>
