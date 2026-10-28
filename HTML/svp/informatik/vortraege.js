@@ -789,6 +789,7 @@
                         '<span class="vt-title-text">' + esc(t.title) + '</span>' +
                         timeHtml(n) + '</div>' +
                     '<div class="vt-sub">' + esc(t.sub) + '</div>' +
+                    frageHtml(i) +                /* what the card asks its pupils */
                     '<div class="vt-grades"><span class="vt-grade-lbl">Bewerten</span>' +
                         ROLES.map(function (r) {
                             const done = graded(i, r[0]);
@@ -1833,7 +1834,7 @@
     const TOPICS_SHARED = '/svp/vortraege/' + PLAN;
     const META_PAGE = TOPICS_SHARED + '/' + KLASSE;
     const TOPICS_PAGE = META_PAGE + '/themen';
-    let meta = { order: null, dates: {}, noten: {}, fundus: [], upload: '', fields: {} };
+    let meta = { order: null, dates: {}, noten: {}, fundus: [], upload: '', fields: {}, fragen: {} };
     /* the Fundus of this Lerngruppe - ids put aside, see toFundus() */
     function uniqIds(a) {
         return [...new Set((Array.isArray(a) ? a : []).map(Number).filter((n) => Number.isFinite(n) && n >= 0))];
@@ -1902,7 +1903,10 @@
                 /* Freigabelink des UPLOAD-Ordners dieser Lerngruppe */
                 upload: typeof o.upload === 'string' ? o.upload : '',
                 /* gewuenschte Zahl der Namensfelder je Thema */
-                fields: o.fields && typeof o.fields === 'object' ? o.fields : {}
+                fields: o.fields && typeof o.fields === 'object' ? o.fields : {},
+                /* what a card asks the pupils, id -> key of FRAGEN - kept here,
+                   or the next date or mark saved would drop it */
+                fragen: o.fragen && typeof o.fragen === 'object' ? o.fragen : {}
             };
             const cl = cat && cat.edits ? cleanList(cat.edits.list) : [];
             cloudCat = cl.length ? { list: cl, ts: Date.parse(cat.ts) || 0, shared: !ownCat } : null;
@@ -2238,11 +2242,39 @@
     const MELD_ARTS = [
         ['austragen', 'Austragen', 'Wer soll ausgetragen werden? (freiwillig)'],
         ['wechseln', 'Anderes Thema', 'Welches Thema aus der Liste – und wer macht mit?'],
-        ['wunsch', 'Wunschthema', 'Titel eures Wunschthemas – und wer macht mit?'],
+        ['wunsch', 'Wunschthema', 'Worum geht es? Eine Frage, die euer Vortrag beantwortet (freiwillig)'],
         ['name', 'Name falsch oder fehlt', 'Wie muss es richtig heißen?'],
         ['sonst', 'Etwas anderes', 'Was stimmt nicht?']
     ];
     const meldArt = (k) => MELD_ARTS.find((a) => a[0] === k) || MELD_ARTS[MELD_ARTS.length - 1];
+
+    /* What a card asks its pupils (Doc, 28.10.2026: "be creative"). A card
+       with names but no title asks by itself; anything else Doc puts on a
+       card from his panel ("Klasse fragen"). Only the KEY is stored, in
+       meta.fragen of the Lerngruppe - the words are here, and none of them
+       carries a name: the pupils cannot read the names, the hint must not
+       either. Each key also says what the form should start on. */
+    const FRAGEN = {
+        titel: ['wunsch', 'Euer Thema hat noch keinen Titel — wie heißt es?'],
+        kurz: ['name', 'Ein Name auf dieser Karte ist unvollständig — bitte vollständig melden.'],
+        unlesbar: ['name', 'Ein Name auf dieser Karte ist nicht lesbar — bitte neu melden.'],
+        doppelt: ['sonst', 'Ein Name steht doppelt in der Liste — bitte melden, bei welchem Vortrag ihr wirklich seid.']
+    };
+    const ohneTitel = (e) => { const t = ((e && e.title) || '').trim(); return !t || /^neues thema$/i.test(t); };
+    function frageOf(i) {
+        const k = meta.fragen && meta.fragen[i];
+        if (k) return FRAGEN[k] ? k : null;
+        const e = list.find((x) => x.id === i);
+        return e && rowTaken(i) && ohneTitel(e) ? 'titel' : null;
+    }
+    /* Lucide "flag" (ISC) */
+    const FLAG_SVG = '<svg class="vt-frage-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+        '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" fill="none" stroke="currentColor"' +
+        ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    function frageHtml(i) {
+        const k = meldOk ? frageOf(i) : null;
+        return k ? '<div class="vt-frage">' + FLAG_SVG + '<span>' + esc(FRAGEN[k][1]) + '</span></div>' : '';
+    }
     let meldOk = false;           /* the table answered - only then the buttons show */
     let meldGone = false;         /* 404: not created yet, stop asking for this page load */
     let meldungen = [];           /* rows of this Lerngruppe, newest first */
@@ -2274,11 +2306,13 @@
 
     const meldOffen = (i) => meldungen.filter((m) => !m.done && (i === undefined || m.idx === i));
 
-    async function sendMeldung(idx, art, name, text) {
+    async function sendMeldung(idx, art, name, text, titel) {
         const a = A();
         if (!a) throw new Error('Kein Cloud-Zugang');
         if (!window.svpCrypto || !(await svpCrypto.hasPublic())) throw new Error('Kein Schlüssel eingerichtet');
-        const blob = await svpCrypto.seal(JSON.stringify({ name: name, text: text }));
+        const plain = { name: name, text: text };
+        if (titel) plain.titel = titel;
+        const blob = await svpCrypto.seal(JSON.stringify(plain));
         /* always as a pupil: the insert policy is the same for everybody, and
            return=minimal asks for nothing back that anon may not read */
         const res = await fetch(a.DB_URL + '/rest/v1/' + MELD_TABLE, {
@@ -2312,6 +2346,12 @@
             return '<button type="button" class="vt-grade vt-meld hot" id="meld-' + i + '" title="Offene Meldungen zu diesem Vortrag ansehen">' +
                 n + (n === 1 ? ' Meldung' : ' Meldungen') + '</button>';
         }
+        const k = frageOf(i);
+        if (k && !n) {
+            /* the card is asking - the button answers, in the red of the hint */
+            return '<button type="button" class="vt-grade vt-meld hot" id="meld-' + i + '" title="' + esc(FRAGEN[k][1]) + '">' +
+                (k === 'titel' ? 'Thema melden' : 'Jetzt melden') + '</button>';
+        }
         return '<button type="button" class="vt-grade vt-meld' + (n ? ' sent' : '') + '" id="meld-' + i + '" title="' +
             (n ? 'Für diesen Vortrag ist schon etwas gemeldet — weitere Meldung schicken' : 'Austragen, Thema wechseln, Wunschthema: hier an Herrn Alvers melden') +
             '">' + (n ? 'Gemeldet ✓' : 'Stimmt was nicht?') + '</button>';
@@ -2321,7 +2361,9 @@
         const b = $('meld-' + i);
         if (!b) return;
         b.addEventListener('click', () => {
-            if (logged() && meldOffen(i).length) meldPanel(i); else meldDialog(i);
+            if (logged() && meldOffen(i).length) { meldPanel(i); return; }
+            const k = frageOf(i);
+            meldDialog(i, k ? FRAGEN[k][0] : undefined, k === 'titel' ? 'Wie heißt euer Thema?' : '');
         });
     }
 
@@ -2348,9 +2390,14 @@
     /* What a look at the list turns up without anybody asking: the cases of
        28.10.2026 - names on a card that does not exist, a card still called
        "Neues Thema", a name of one or two letters - and a name twice. */
+    /* Each finding says whether the class can be asked about it: `frage` is
+       the key of FRAGEN, `ids` the cards that would carry the hint (only
+       cards on the page - a card in the Fundus or no card at all is Doc's to
+       fix). `selbst`: the card is asking already, without Doc. */
     function befunde() {
         const out = [];
         const known = new Set(catalogue.map((e) => e.id));
+        const shown = (id) => list.some((e) => e.id === id);
         const nm = (s) => (unlocked() && s.name ? '„' + s.name + '“' : 'Name');
         const ids = Object.keys(slotMap).map(Number).sort((a, b) => a - b);
         ids.forEach((id) => {
@@ -2361,21 +2408,22 @@
             else if (inFundus(id)) out.push({ idx: id, text: wer + ' im Fundus („' + catalogue.find((e) => e.id === id).title + '“) — die Karte ist ausgeblendet' });
         });
         list.forEach((e) => {
-            const t = (e.title || '').trim();
-            if (rowTaken(e.id) && (!t || /^neues thema$/i.test(t))) out.push({ idx: e.id, text: meldOrt(e.id) + ': Namen eingetragen, aber noch kein Titel' });
+            if (rowTaken(e.id) && ohneTitel(e)) out.push({ idx: e.id, selbst: true, text: meldOrt(e.id) + ': Namen eingetragen, aber noch kein Titel' });
         });
         if (!unlocked()) return out;
         const seen = new Map();
         ids.forEach((id) => slotMap[id].forEach((s) => {
             if (!s.taken || s.name == null) return;
-            if (s.name === '??') { out.push({ idx: id, text: meldOrt(id) + ': ein Name lässt sich nicht entschlüsseln' }); return; }
+            const ask = shown(id) ? [id] : [];
+            if (s.name === '??') { out.push({ idx: id, frage: 'unlesbar', ids: ask, text: meldOrt(id) + ': ein Name lässt sich nicht entschlüsseln' }); return; }
             const k = s.name.trim().toLowerCase().replace(/\s+/g, ' ');
-            if (k.length <= 2) out.push({ idx: id, text: meldOrt(id) + ': sehr kurzer Name „' + s.name + '“ — Bruchstück?' });
+            if (k.length <= 2) out.push({ idx: id, frage: 'kurz', ids: ask, text: meldOrt(id) + ': sehr kurzer Name „' + s.name + '“ — Bruchstück?' });
             if (!seen.has(k)) seen.set(k, { name: s.name, at: [] });
             seen.get(k).at.push(id);
         }));
         seen.forEach((v) => {
-            if (v.at.length > 1) out.push({ idx: v.at[0], text: '„' + v.name + '“ steht ' + v.at.length + '× in der Liste: ' + v.at.map(meldOrt).join(' und ') });
+            if (v.at.length > 1) out.push({ idx: v.at[0], frage: 'doppelt', ids: [...new Set(v.at)].filter(shown),
+                text: '„' + v.name + '“ steht ' + v.at.length + '× in der Liste: ' + v.at.map(meldOrt).join(' und ') });
         });
         return out;
     }
@@ -2401,12 +2449,15 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('vt-dlg')) closeOverlay(); });
 
     /* The pupil's form. `art` preselects what should happen (the click on a
-       name that can no longer be deleted opens it on "Austragen"). */
-    function meldDialog(idx, art) {
+       name that can no longer be deleted opens it on "Austragen"), `head`
+       replaces the heading when the card itself asked. A Wunschthema brings
+       a title field of its own: that title is what Doc can take over onto
+       the card with one click (meldPanel). */
+    function meldDialog(idx, art, head) {
         let wahl = art || '';
         const ov = overlay(
             '<form class="svp-gate-card vt-dlg-card" id="vt-meld-form" autocomplete="off">' +
-                '<div class="svp-gate-title" id="vt-dlg-title">Stimmt was nicht?</div>' +
+                '<div class="svp-gate-title" id="vt-dlg-title">' + esc(head || 'Stimmt was nicht?') + '</div>' +
                 '<div class="svp-gate-sub">' + esc(idx == null ? 'Allgemein — kein bestimmter Vortrag' : meldOrt(idx)) + '</div>' +
                 '<label class="vt-dlg-lbl" for="vt-meld-name">Dein Name</label>' +
                 '<input type="text" id="vt-meld-name" maxlength="60" spellcheck="false" autocomplete="off">' +
@@ -2415,7 +2466,11 @@
                     MELD_ARTS.map((a) => '<button type="button" class="vt-meld-art" role="radio" aria-checked="false" data-art="' +
                         a[0] + '">' + esc(a[1]) + '</button>').join('') +
                 '</div>' +
-                '<label class="vt-dlg-lbl" for="vt-meld-text">Was genau?</label>' +
+                '<div id="vt-meld-titel-box" hidden>' +
+                    '<label class="vt-dlg-lbl" for="vt-meld-titel">Titel eures Themas</label>' +
+                    '<input type="text" id="vt-meld-titel" maxlength="90" autocomplete="off">' +
+                '</div>' +
+                '<label class="vt-dlg-lbl" for="vt-meld-text" id="vt-meld-text-lbl">Was genau?</label>' +
                 '<textarea id="vt-meld-text" rows="3" maxlength="600"></textarea>' +
                 '<div class="svp-gate-row">' +
                     '<button type="button" class="action secondary" id="vt-meld-cancel">Abbrechen</button>' +
@@ -2429,12 +2484,15 @@
         ov.setAttribute('aria-labelledby', 'vt-dlg-title');
         const name = $('vt-meld-name');
         const text = $('vt-meld-text');
+        const titel = $('vt-meld-titel');
         const err = $('vt-meld-err');
         const go = $('vt-meld-go');
         const pick = (k) => {
             wahl = k;
             ov.querySelectorAll('.vt-meld-art').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.art === k)));
             text.placeholder = k ? meldArt(k)[2] : '';
+            $('vt-meld-titel-box').hidden = k !== 'wunsch';
+            $('vt-meld-text-lbl').textContent = k === 'wunsch' ? 'Leitfrage' : 'Was genau?';
         };
         ov.querySelectorAll('.vt-meld-art').forEach((b) => b.addEventListener('click', () => { pick(b.dataset.art); err.innerHTML = '&nbsp;'; }));
         pick(wahl);
@@ -2446,11 +2504,13 @@
             const t = text.value.trim();
             if (n.length < 2) { err.textContent = 'Bitte deinen Namen eintragen.'; name.focus(); return; }
             if (!wahl) { err.textContent = 'Bitte wählen, was passieren soll.'; return; }
-            if (!t && wahl !== 'austragen') { err.textContent = 'Bitte kurz schreiben, was genau.'; text.focus(); return; }
+            const ti = wahl === 'wunsch' ? titel.value.trim() : '';
+            if (wahl === 'wunsch' && ti.length < 3) { err.textContent = 'Bitte den Titel eures Themas eintragen.'; titel.focus(); return; }
+            if (!t && wahl !== 'austragen' && wahl !== 'wunsch') { err.textContent = 'Bitte kurz schreiben, was genau.'; text.focus(); return; }
             go.disabled = true;
             err.textContent = 'Sende …';
             try {
-                await sendMeldung(idx, wahl, n, t);
+                await sendMeldung(idx, wahl, n, t, ti);
             } catch (x) {
                 err.textContent = 'Nicht gesendet: ' + x.message;
                 go.disabled = false;
@@ -2469,25 +2529,68 @@
         name.focus();
     }
 
-    /* Doc's panel: the pupils' requests (decrypted once unlocked) and the
-       automatic check. `idx` puts that card's requests on top. */
+    /* A request is done: ticked off in the table, and the question on its
+       card (if Doc asked one) is answered with it. */
+    async function erledigen(m) {
+        const res = await A().api(MELD_TABLE + '?id=eq.' + encodeURIComponent(m.id), {
+            method: 'PATCH', headers: { Prefer: 'return=minimal' },
+            body: JSON.stringify({ done: true, done_at: new Date().toISOString() })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (m.idx != null && meta.fragen[m.idx]) await setMeta((mm) => { delete mm.fragen[m.idx]; });
+    }
+
+    /* "Als Titel übernehmen": the pupils' title (and Leitfrage) onto their
+       card - the same write as "Fertig" in edit mode, only for one card. */
+    async function titelUebernehmen(m, tx) {
+        if (editing) throw new Error('erst „Fertig“ drücken');
+        const e = list.find((x) => x.id === m.idx);
+        if (!e) throw new Error('die Karte steht nicht in der Liste');
+        e.title = tx.titel.trim();
+        if ((tx.text || '').trim()) e.sub = tx.text.trim();
+        catalogue = mergeCatalogue(catalogue, list.concat(fundusTopics()));
+        saveJSON(KEY_TOPICS, { v: 2, list: catalogue, ts: new Date().toISOString() });
+        await queueCloud(() => postEdits(TOPICS_PAGE, { v: 2, list: catalogue }));
+    }
+
+    /* Doc's panel: the pupils' requests (decrypted once unlocked), the
+       automatic check with "Klasse fragen", and the questions on the cards.
+       `idx` puts that card's requests on top. */
     function meldPanel(idx) {
         const offen = meldOffen().slice().sort((a, b) => (b.idx === idx) - (a.idx === idx));
         const erledigt = meldungen.filter((m) => m.done).slice(0, 5);
         const finds = befunde();
+        const gefragt = Object.keys(meta.fragen || {}).map(Number).filter((id) => FRAGEN[meta.fragen[id]]);
         const item = (m, done) => {
             const tx = meldText.get(m.id);
             const body = !unlocked() ? '<span class="vt-meld-lock">verschlüsselt — erst entsperren</span>'
-                : tx ? '<b>' + esc(tx.name || '') + '</b>' + (tx.text ? ' — ' + esc(tx.text) : '')
+                : tx ? '<b>' + esc(tx.name || '') + '</b>' + (tx.titel ? ' — „' + esc(tx.titel) + '“' : '') +
+                    (tx.text ? ' — ' + esc(tx.text) : '')
                 : '<span class="vt-meld-lock">nicht lesbar</span>';
+            const take = !done && tx && tx.titel && list.some((e) => e.id === m.idx);
             return '<li class="vt-meld-item' + (done ? ' done' : '') + '">' +
                 '<div class="vt-meld-head"><span class="vt-meld-when">' + zeit(m.ts) + '</span>' +
                     '<span class="vt-meld-kind">' + esc(meldArt(m.art)[1]) + '</span>' +
                     '<span class="vt-meld-where">' + esc(meldOrt(m.idx)) + '</span></div>' +
                 '<div class="vt-meld-body">' + body + '</div>' +
                 (done ? '<div class="vt-meld-donetag">erledigt ' + zeit(m.done_at || m.ts) + '</div>'
-                    : '<button type="button" class="action green vt-meld-done" data-id="' + esc(m.id) + '">Erledigt</button>') +
+                    : '<div class="vt-meld-btns">' +
+                        (take ? '<button type="button" class="action vt-meld-take" data-id="' + esc(m.id) + '" ' +
+                            'title="Titel und Leitfrage auf die Karte schreiben und die Meldung abhaken">Als Titel übernehmen</button>' : '') +
+                        '<button type="button" class="action green vt-meld-done" data-id="' + esc(m.id) + '">Erledigt</button>' +
+                    '</div>') +
                 '</li>';
+        };
+        const findItem = (f, n) => {
+            let act = '';
+            if (f.selbst) act = '<span class="vt-find-asked">die Karte fragt die Klasse selbst</span>';
+            else if (f.frage && f.ids && f.ids.length) {
+                act = f.ids.every((id) => meta.fragen[id] === f.frage)
+                    ? '<span class="vt-find-asked">gefragt ✓</span>'
+                    : '<button type="button" class="action vt-find-ask" data-n="' + n + '" ' +
+                        'title="' + esc('An der Karte erscheint für die Schüler: ' + FRAGEN[f.frage][1]) + '">Klasse fragen</button>';
+            }
+            return '<li><span class="vt-find-text">' + esc(f.text) + '</span>' + act + '</li>';
         };
         const ov = overlay(
             '<div class="svp-gate-card vt-dlg-card vt-panel">' +
@@ -2501,9 +2604,13 @@
                 (erledigt.length ? '<details class="vt-meld-old"><summary>Zuletzt erledigt</summary><ul class="vt-meld-list">' +
                     erledigt.map((m) => item(m, true)).join('') + '</ul></details>' : '') +
                 '<div class="vt-dlg-h">Automatisch gefunden · ' + finds.length + '</div>' +
-                (finds.length ? '<ul class="vt-find-list">' + finds.map((f) => '<li>' + esc(f.text) + '</li>').join('') + '</ul>'
+                (finds.length ? '<ul class="vt-find-list">' + finds.map(findItem).join('') + '</ul>'
                     : '<div class="vt-dlg-empty">Nichts Auffälliges.</div>') +
                 (unlocked() ? '' : '<div class="vt-dlg-note">Doppelte und abgebrochene Namen findet die Prüfung erst entsperrt.</div>') +
+                (gefragt.length ? '<div class="vt-dlg-h">An der Karte gefragt · ' + gefragt.length + '</div>' +
+                    '<ul class="vt-find-list asked">' + gefragt.map((id) => '<li><span class="vt-find-text">' + esc(meldOrt(id)) +
+                        ': ' + esc(FRAGEN[meta.fragen[id]][1]) + '</span><button type="button" class="action secondary vt-find-back" data-id="' +
+                        id + '">Zurücknehmen</button></li>').join('') + '</ul>' : '') +
                 '<div class="svp-gate-row"><button type="button" class="action secondary" id="vt-panel-close">Schließen</button></div>' +
             '</div>');
         ov.setAttribute('role', 'dialog');
@@ -2515,23 +2622,31 @@
             closeOverlay();
             svpCrypto.passDialog('unlock', async () => { await refresh(); meldPanel(idx); });
         });
-        ov.querySelectorAll('.vt-meld-done').forEach((b) => b.addEventListener('click', async () => {
-            b.disabled = true;
-            try {
-                const res = await A().api(MELD_TABLE + '?id=eq.' + encodeURIComponent(b.dataset.id), {
-                    method: 'PATCH', headers: { Prefer: 'return=minimal' },
-                    body: JSON.stringify({ done: true, done_at: new Date().toISOString() })
-                });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-            } catch (x) {
-                b.disabled = false;
-                setStatus('Meldung NICHT abgehakt: ' + x.message, true);
-                return;
-            }
+        /* every button of the panel: do it, read back, redraw page and panel */
+        const act = (sel, job, fail) => ov.querySelectorAll(sel).forEach((b) => b.addEventListener('click', async () => {
+            ov.querySelectorAll('button').forEach((x) => { x.disabled = true; });
+            try { await job(b); } catch (x) { setStatus(fail + ': ' + x.message, true); }
             await loadMeldungen();
             if (!editing) render();
             meldPanel(idx);
         }));
+        const byId = (id) => meldungen.find((m) => String(m.id) === id);
+        act('.vt-meld-done', (b) => erledigen(byId(b.dataset.id)), 'Meldung NICHT abgehakt');
+        act('.vt-meld-take', async (b) => {
+            const m = byId(b.dataset.id);
+            await titelUebernehmen(m, meldText.get(m.id));
+            await erledigen(m);
+            setStatus('☁ Titel übernommen, Meldung abgehakt');
+        }, 'Titel NICHT übernommen');
+        act('.vt-find-ask', async (b) => {
+            const f = finds[+b.dataset.n];
+            await setMeta((m) => { f.ids.forEach((id) => { m.fragen[id] = f.frage; }); });
+            setStatus('☁ An der Karte steht jetzt die Frage an die Klasse');
+        }, 'Frage NICHT gespeichert');
+        act('.vt-find-back', async (b) => {
+            await setMeta((m) => { delete m.fragen[b.dataset.id]; });
+            setStatus('☁ Frage zurückgenommen');
+        }, 'Frage NICHT zurückgenommen');
         $('vt-panel-close').focus();
     }
 

@@ -397,7 +397,13 @@
 .vt-dlg-card .vt-meld-done { grid-column: 2; grid-row: 1 / span 2; width: auto; }
 .vt-meld-donetag { grid-column: 2; grid-row: 1 / span 2; font-size: 0.72rem; color: var(--muted); }
 .vt-meld-old summary { cursor: pointer; font-size: 0.8rem; color: var(--muted); margin: 8px 0 6px; }
+.vt-meld-btns { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-direction: column; gap: 6px; }
+.vt-dlg-card .vt-meld-btns button { width: auto; }
 .vt-find-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
     font-size: 0.88rem;
     color: var(--text);
     border-left: 3px solid var(--ypsilon);
@@ -405,13 +411,34 @@
     margin-bottom: 6px;
     overflow-wrap: anywhere;
 }
+.vt-find-list.asked li { border-left-color: var(--line); }
+.vt-dlg-card .vt-find-list button { width: auto; flex: none; padding: 6px 12px; }
+.vt-find-asked { flex: none; font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+
+/* What the card asks its pupils (vortraege.js frageHtml): a red line under
+   the Leitfrage, in the red-and-white of the date tags, with a drawn flag */
+.vt-frage {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 6px;
+    padding: 4px 11px;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    color: #fff;
+    background: var(--ypsilon);
+    border-radius: 8px;
+}
+.vt-frage-svg { width: 14px; height: 14px; flex: none; }
 .vt-dlg-card.vt-panel .svp-gate-row { margin-top: 16px; }
 
 @media (max-width: 520px) {
     .vt-dlg-card { padding: 20px 16px; }
     .vt-meld-item { grid-template-columns: 1fr; }
-    .vt-dlg-card .vt-meld-done,
+    .vt-meld-btns,
     .vt-meld-donetag { grid-column: 1; grid-row: auto; justify-self: start; }
+    .vt-meld-btns { flex-direction: row; flex-wrap: wrap; }
+    .vt-find-list li { flex-wrap: wrap; }
 }
 
 /* Date of the talk, in the title line (Doc, 12.09.2026). Pupils see a quiet
@@ -730,7 +757,7 @@ body:has(.vt-list) header.page-head { margin-bottom: 10px; }
 @media print {
     .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-more-box, .vt-status,
     .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add, .vt-fundus, .vt-date.empty,
-    .vt-up, .vt-meld-btn, .vt-dlg { display: none !important; }
+    .vt-up, .vt-meld-btn, .vt-dlg, .vt-frage { display: none !important; }
 
     .vt-row {
         break-inside: avoid;
