@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 13 avanzado · Capítulo 3.2 · La integral definida y el teorema fundamental | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Cantidad reconstruida, propiedades, función integral, teorema fundamental con demostración. Capítulo 3.2 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 13 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 13 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 3.2 · ÁREA DE APRENDIZAJE 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 3.2 · ÁREA DE APRENDIZAJE 3 · SEPTIEMBRE</p>
+            <h1>La integral definida y el teorema fundamental</h1>
+            <p class="b-hero-lead">Un contador de agua solo conoce el caudal; un velocímetro, solo la velocidad. Cuánta agua hay en el depósito y qué distancia ha recorrido el coche
+                está en el <b>área bajo la gráfica</b> de la tasa. Aproximas esa área con franjas, conoces la <b>integral definida</b> como su límite
+                y la calculas con el <b>teorema fundamental del cálculo</b>, sin ninguna franja.</p>
+            <div class="b-chips"><span class="b-chip">10 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">4 ELEMENTOS INTERACTIVOS</span><span class="b-chip">1 LABORATORIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["-0.5*x^2+3*x"]' data-labels='["r"]' data-lat="[7.2]" data-x="-0.5,9" data-y="-8,5.5" data-pts="[[0,0],[6,0]]" data-h="240" data-aria="Caudal de entrada de un depósito de agua: primero positivo, negativo a partir de los seis minutos"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>reconstruir la cantidad a partir de una <b>tasa de variación</b> e interpretar el resultado como un área</li>
+                <li>aproximar áreas con <b>sumas inferiores y superiores</b> y entender la integral definida como un límite</li>
+                <li>calcular con el <b>área orientada</b> y con las propiedades de la integral</li>
+                <li>aplicar el <b>teorema fundamental</b> y reconocer la <b>función integral</b> como primitiva</li>
+                <li><b>demostrar</b> el teorema fundamental, interpretar la gráfica de una función integral y leer integrales como <b>magnitudes físicas</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="9" data-ph="área"><p class="b-q-text">Un trapecio tiene los lados paralelos 2 y 4 y la altura 3. ¿Cuál es su área?</p><div class="b-sol"><p>$\tfrac{2 + 4}{2} \cdot 3$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="valor"><p class="b-q-text">$F(x) = x^3$: ¿cuánto vale $F(2) - F(1)$?</p><div class="b-sol"><p>$8 - 1$</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="litros"><p class="b-q-text">Durante 8 minutos entran 3 litros por minuto. ¿Cuántos litros son?</p><div class="b-sol"><p>$3 \cdot 8$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">¿Qué primitiva tiene $f(x) = 2x - 2$?</p><div class="b-mc"><button>2</button><button>$x^2$</button><button>$x^2 - 2x$</button></div><div class="b-sol"><p>Comprobación derivando</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">AGUA EN EL DEPÓSITO</div>
+            <div class="b-text"><p>En un depósito entran 2 litros por minuto durante diez minutos. Tras la reforma, el caudal de entrada empieza en 0 y sube de manera uniforme hasta 5 litros por minuto a los diez minutos.</p>
+                <ul><li>Dibujad los dos caudales de entrada frente al tiempo. ¿Cuánta agua entra en cada caso?</li><li>¿Qué área del diagrama corresponde a la cantidad de agua? ¿Por qué?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">HACIA DELANTE Y HACIA ATRÁS</div>
+            <div class="b-text"><p>Un coche circula 20 s a 10 m/s y después 30 s a 20 m/s. Luego da marcha atrás durante 10 s a 2 m/s, es decir, con $v = -2$ m/s.</p>
+                <ul><li>Dibujad el diagrama $v$-$t$. ¿A qué distancia de la salida está el coche al final?</li><li>¿Cómo se pueden contar con sentido las áreas que quedan bajo el eje del tiempo?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DEMASIADO PEQUEÑO Y DEMASIADO GRANDE</div>
+            <div class="b-text"><p>Dibujad $f(x) = x^2$ en $[0, 2]$ y dividid el intervalo en cuatro franjas de la misma anchura.</p>
+                <ul><li>Poned en cada franja un rectángulo con el menor valor de la función y otro con el mayor. Calculad las dos sumas.</li><li>¿Cómo cambian las sumas con ocho franjas? ¿Dónde está el área?</li></ul></div>
+            <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REACTOR DE INTEGRALES</span><span class="b-lab-what">Áreas bajo curvas (en alemán)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Cantidad a partir de tasas de variación" data-toc-k="1" data-toc-short="1 Cantidad">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">4 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Cantidad a partir de tasas de variación, sumas superiores e inferiores</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si durante 8 minutos entran 3 litros por minuto, se añaden $3 \cdot 8 = 24$ litros: exactamente el área del rectángulo bajo la gráfica del caudal.
+                Si el caudal cambia, se divide el tiempo en tramos cortos en los que es casi constante. Cada tramo da un rectángulo estrecho, y todos juntos
+                dan casi el área bajo la gráfica.</p></div></div>
+            <div class="b-text"><p>Esto vale para cualquier tasa de variación: de la velocidad se obtiene el recorrido; de la potencia, la energía; del caudal de entrada, la cantidad de agua.
+                Si la tasa es negativa, la cantidad disminuye. Por eso los trozos de área <b>bajo</b> el eje cuentan como <b>negativos</b>: se habla de <b>área orientada</b>.</p>
+                <p>Para acotar el área se toma en cada franja el menor valor de la función (<b>suma inferior</b> $U_n$) y el mayor (<b>suma superior</b> $O_n$).
+                El área está entre las dos. Si las franjas se hacen cada vez más estrechas, las dos sumas se acercan al mismo límite: la <b>integral definida</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · LA INTEGRAL DEFINIDA</div>
+                <div class="b-text">
+                    <p>Si la suma inferior y la superior de $f$ en $[a, b]$ tienen el mismo límite para $n \to \infty$, ese límite se llama <b>integral definida</b>: $$\int_a^b f(x)\,\mathrm{d}x = \lim_{n \to \infty} U_n = \lim_{n \to \infty} O_n$$</p>
+                    <p>Es un <b>área orientada</b>: las partes por encima del eje $x$ cuentan como positivas; las de debajo, como negativas.</p>
+                    <p><b>Cantidad reconstruida:</b> si $r$ es la tasa de variación de $B$, entonces $\displaystyle B(b) = B(a) + \int_a^b r(t)\,\mathrm{d}t$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Unidades:</b> tasa por tiempo. Litros por minuto por minutos da litros; metros por segundo por segundos da metros.</p>
+            <p class="b-note"><b>Nombres:</b> $a$ y $b$ se llaman <b>límites de integración</b> inferior y superior; $f$ se llama <b>integrando</b>.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · DE LA TASA A LA CANTIDAD</div>
+        <p class="b-help" style="margin:0 0 12px">Arriba, la tasa; abajo, la cantidad. Avanza el tiempo: el área bajo la tasa hasta ese instante es exactamente la variación de la cantidad. Donde la tasa se hace negativa, la cantidad baja.</p>
+        <div data-widget="bestand"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · SUMA INFERIOR Y SUMA SUPERIOR</div>
+        <p class="b-help" style="margin:0 0 12px">En verde, la suma inferior; encima, en rojo, lo que la suma superior tiene de más. Aumenta el número de franjas y observa cómo desaparece el resto rojo.</p>
+        <div data-widget="summen" data-mode="ou"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · DEMASIADO PEQUEÑO Y DEMASIADO GRANDE</div>
+            <div class="b-text"><p>Acota $\int_0^2 x^2\,\mathrm{d}x$ con cuatro franjas de anchura 0,5.</p></div>
+            <div class="b-sol"><p>$x^2$ crece en $[0, 2]$: en cada franja, el menor valor está a la izquierda y el mayor, a la derecha.</p>
+                <p>$U_4 = 0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$, $O_4 = 0{,}5 \cdot (0{,}25 + 1 + 2{,}25 + 4) = 3{,}75$: <span class="b-res">$1{,}75 \le \int_0^2 x^2\,\mathrm{d}x \le 3{,}75$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · NIVEL DEL AGUA</div>
+            <div class="b-text"><p>Un depósito contiene 20 l. Durante cuatro minutos entran 2 l/min; después el caudal baja de manera uniforme según $r(t) = 6 - t$ hasta $t = 8$. ¿Cuánta agua hay en el depósito a los 4, 6 y 8 minutos?</p></div>
+            <div class="b-sol"><p>Hasta $t = 4$: rectángulo $2 \cdot 4 = 8$, es decir, 28 l. De 4 a 6: triángulo $\tfrac12 \cdot 2 \cdot 2 = 2$, es decir, 30 l.</p>
+                <p>De 6 a 8 es $r < 0$: triángulo bajo el eje, −2. <span class="b-res">28 l, 30 l, 28 l</span>; la mayor cantidad de agua en el depósito se alcanza en $t = 6$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Un coche circula 10 s a 15 m/s y después 20 s a 25 m/s. Dibuja el diagrama $v$-$t$ y determina el recorrido.</p></div>
+            <div class="b-sol"><p>Dos rectángulos: $150 + 500 = 650$ m</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>El caudal de entrada de una piscina crece de manera uniforme según $r(t) = 0{,}5t$ (en l/min). ¿Cuánta agua entra en los primeros 10 minutos?</p></div>
+            <div class="b-sol"><p>Triángulo: $\tfrac12 \cdot 10 \cdot 5 = 25$ l</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula la suma inferior y la superior de $f(x) = x$ en $[0, 1]$ con cuatro franjas. ¿Dónde está la integral?</p></div>
+            <div class="b-sol"><p>$U_4 = 0{,}25 \cdot (0 + 0{,}25 + 0{,}5 + 0{,}75) = 0{,}375$, $O_4 = 0{,}625$. La integral $\tfrac12$ (triángulo) está justo en el medio.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una piscina al aire libre abre a las 9 h. Hasta las 12 h llegan cada hora 200 bañistas más de los que se van. De 12 a 15 h las llegadas y las salidas se compensan; de 15 a 19 h se van cada hora 150 bañistas más de los que llegan. ¿Cuántos bañistas hay en la piscina a las 12, a las 15 y a las 19 h?</p></div>
+            <div class="b-sol"><p>600, 600, $600 - 4 \cdot 150 = 0$: a las 19 h la piscina está vacía.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Para $f(x) = x^2$ en $[0, 1]$ con $n$ franjas se cumple $U_n = \dfrac{(n - 1)\,n\,(2n - 1)}{6n^3}$ y $O_n = \dfrac{n\,(n + 1)\,(2n + 1)}{6n^3}$. Calcula $U_{10}$ y $O_{10}$ y halla el límite común.</p></div>
+            <div class="b-hint"><p>Para el límite, divide el numerador y el denominador entre $n^3$.</p></div>
+            <div class="b-sol"><p>$U_{10} = \tfrac{9 \cdot 10 \cdot 19}{6000} = 0{,}285$, $O_{10} = \tfrac{10 \cdot 11 \cdot 21}{6000} = 0{,}385$. Para $n \to \infty$ las dos tienden a $\tfrac{2}{6} = \tfrac13$: <span class="b-res">$\int_0^1 x^2\,\mathrm{d}x = \tfrac13$</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,375" data-ph="U₄ ="><p class="b-q-text">¿Suma inferior de $f(x) = x$ en $[0, 1]$ con cuatro franjas?</p><div class="b-sol"><p>$0{,}25 \cdot 1{,}5$</p></div></div>
+        <div class="b-q" data-ans="25" data-ph="litros"><p class="b-q-text">Caudal de entrada $r(t) = 0{,}5t$ l/min: ¿cuántos litros entran en 10 minutos?</p><div class="b-sol"><p>Área del triángulo</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">La tasa de variación de una cantidad es negativa. Entonces …</p><div class="b-mc"><button>la cantidad es negativa.</button><button>la cantidad disminuye.</button><button>la integral es cero.</button></div><div class="b-sol"><p>Área orientada bajo el eje</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Propiedades y teorema fundamental" data-toc-k="2" data-toc-short="2 Teorema">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Propiedades de la integral y teorema fundamental</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Con el caudal de entrada $r(t) = 0{,}5t$ entraron 25 litros en diez minutos. $R(t) = 0{,}25t^2$ es una primitiva de $r$, y $R(10) - R(0) = 25$.
+                ¿Casualidad? No: el área bajo una gráfica siempre se puede leer a partir de una primitiva.</p></div></div>
+            <div class="b-text"><p>La razón está en la <b>función integral</b> $I_a(x) = \int_a^x f(t)\,\mathrm{d}t$, el área desde $a$ hasta el límite variable $x$.
+                Si se avanza $x$ un trocito $h$, se añade una franja estrecha, casi un rectángulo de área $f(x) \cdot h$.
+                Así que el área crece con la tasa $f(x)$: $I_a'(x) = f(x)$. La función integral es una <b>primitiva</b>, y cualquier otra solo se diferencia de ella en una constante.
+                En $F(b) - F(a)$ esa constante desaparece.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · TEOREMA FUNDAMENTAL DEL CÁLCULO</div>
+                <div class="b-text">
+                    <p>Si $F$ es una primitiva cualquiera de la función continua $f$, entonces $$\int_a^b f(x)\,\mathrm{d}x = \Big[F(x)\Big]_a^b = F(b) - F(a)$$</p>
+                    <p><b>Función integral:</b> $I_a(x) = \int_a^x f(t)\,\mathrm{d}t$ es una primitiva de $f$ con $I_a(a) = 0$.</p>
+                    <p><b>Propiedades:</b> $\int_a^a f(x)\,\mathrm{d}x = 0$ · $\int_a^b f + \int_b^c f = \int_a^c f$ · $\int_b^a f = -\int_a^b f$ · $\int_a^b (k f + g) = k\int_a^b f + \int_a^b g$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Dos caras de la misma moneda:</b> derivar e integrar se anulan mutuamente. Eso hace tan potente el teorema fundamental: en lugar de sumar franjas, se busca una primitiva.</p>
+            <p class="b-note"><b>En el CAS</b> se introducen el integrando, la variable y los dos límites. La variable de integración puede llamarse como quiera: $\int_0^2 t^2\,\mathrm{d}t = \int_0^2 x^2\,\mathrm{d}x$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ÁREA ORIENTADA ENTRE LOS LÍMITES</div>
+        <p class="b-help" style="margin:0 0 12px">Arrastra los límites $a$ y $b$. Los trozos amarillos están por encima del eje y cuentan como positivos; los rojos, por debajo, y cuentan como negativos. Compara la integral con la suma de los trozos de área.</p>
+        <div data-widget="integral"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · CON EL TEOREMA FUNDAMENTAL</div>
+            <div class="b-text"><p>Calcula $\int_1^3 (x^2 - 2x + 2)\,\mathrm{d}x$.</p></div>
+            <div class="b-sol"><p>Primitiva $F(x) = \tfrac13 x^3 - x^2 + 2x$: $F(3) = 9 - 9 + 6 = 6$, $F(1) = \tfrac13 - 1 + 2 = \tfrac43$.</p>
+                <p><span class="b-res">$6 - \tfrac43 = \tfrac{14}{3} \approx 4{,}67$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · UNA FUNCIÓN INTEGRAL</div>
+            <div class="b-text"><p>Halla $I_0(x) = \int_0^x (2t - 2)\,\mathrm{d}t$. ¿Dónde es $I_0(x) = 0$ y qué significa?</p></div>
+            <div class="b-sol"><p>$I_0(x) = \left[t^2 - 2t\right]_0^x = x^2 - 2x$, comprobación $I_0'(x) = 2x - 2$ ✔. Cero en $x = 0$ y $x = 2$.</p>
+                <p><span class="b-res">En $x = 2$ se compensan el trozo bajo el eje ($[0, 1]$) y el de encima ($[1, 2]$).</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula: a) $\int_1^3 2x\,\mathrm{d}x$ &nbsp; b) $\int_0^1 (3x^2 + 1)\,\mathrm{d}x$ &nbsp; c) $\int_0^\pi \sin x\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $9 - 1 = 8$ &nbsp; b) $[x^3 + x]_0^1 = 2$ &nbsp; c) $[-\cos x]_0^\pi = 1 + 1 = 2$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula $\int_0^4 (4 - x)\,\mathrm{d}x$ y comprueba el resultado con el área de un triángulo.</p></div>
+            <div class="b-sol"><p>$\left[4x - \tfrac12 x^2\right]_0^4 = 16 - 8 = 8$, triángulo $\tfrac12 \cdot 4 \cdot 4 = 8$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Se sabe que $\int_0^2 f(x)\,\mathrm{d}x = 3$ y $\int_2^5 f(x)\,\mathrm{d}x = -1$. Halla a) $\int_0^5 f(x)\,\mathrm{d}x$ &nbsp; b) $\int_5^0 f(x)\,\mathrm{d}x$ &nbsp; c) $\int_0^2 3f(x)\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) 2 (aditividad respecto al intervalo) &nbsp; b) −2 (límites intercambiados) &nbsp; c) 9 (regla del factor)</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>En un depósito con 20 l entra agua con el caudal $r(t) = -0{,}5t^2 + 3t$ (en l/min). ¿Cuánta agua hay en el depósito a los 6 y a los 9 minutos? ¿Cuándo está más lleno?</p></div>
+            <div class="b-sol"><p>$R(t) = -\tfrac16 t^3 + 1{,}5t^2$: $R(6) = 18$, $R(9) = 0$. Es decir, 38 l y de nuevo 20 l. Está más lleno en $t = 6$, donde $r$ cambia de signo.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Sea $I_0(x) = \int_0^x (t^2 - 4)\,\mathrm{d}t$ para $x \ge 0$. Halla $I_0$, su extremo y su cero positivo. Interpreta el cero como un balance de áreas.</p></div>
+            <div class="b-sol"><p>$I_0(x) = \tfrac13 x^3 - 4x$. $I_0' = x^2 - 4 = 0$: mínimo en $x = 2$. $\tfrac13 x^3 = 4x$ da <span class="b-res">$x = \sqrt{12} \approx 3{,}46$</span>: hasta ahí, el trozo por encima del eje ($[2, \sqrt{12}]$) es tan grande como el de debajo ($[0, 2]$).</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="8/3" data-tol="0.01" data-ph="valor"><p class="b-q-text">Calcula $\int_0^2 x^2\,\mathrm{d}x$.</p><div class="b-sol"><p>$\tfrac83$</p></div></div>
+        <div class="b-q" data-ans="14/3" data-tol="0.01" data-ph="valor"><p class="b-q-text">Calcula $\int_1^3 (x^2 - 2x + 2)\,\mathrm{d}x$.</p><div class="b-sol"><p>$6 - \tfrac43$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Para la función integral $I_a(x) = \int_a^x f(t)\,\mathrm{d}t$ se cumple siempre …</p><div class="b-mc"><button>$I_a(a) = 0$</button><button>$I_a(0) = 0$</button><button>$I_a' = 0$</button></div><div class="b-sol"><p>De $a$ a $a$ no hay área.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Función integral y demostración" data-toc-k="3" data-toc-short="3 Demostración">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">3</span>La función integral, una demostración y magnitudes físicas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En la lección 2 se añadía una franja estrecha que era «casi un rectángulo». En el curso avanzado convertimos eso en una <b>demostración</b>. Para ello solo hacen falta dos cosas:
+                una franja está siempre entre el rectángulo más pequeño y el más grande que caben en ella, y una función continua apenas cambia en un intervalo diminuto.</p></div></div>
+            <div class="b-text"><p>Además, la función integral $I_a$ tiene su propia gráfica, que se puede leer a partir de la gráfica de $f$: tiene un cero en $a$, crece donde $f$ es positiva,
+                tiene extremos donde $f$ cambia de signo y puntos de inflexión en los extremos de $f$. Por último, las integrales no son solo áreas: si se integra una tasa respecto al tiempo
+                o una fuerza respecto al camino, salen <b>magnitudes físicas</b> como el recorrido, la carga o el trabajo.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · DEMOSTRACIÓN DEL TEOREMA FUNDAMENTAL</div>
+                <div class="b-text">
+                    <p>Sea $f$ continua, $h > 0$ pequeño, y $m_h$ y $M_h$ el mínimo y el máximo de $f$ en $[x, x + h]$. La franja está entre los rectángulos:
+                        $$m_h \cdot h \le I_a(x + h) - I_a(x) = \int_x^{x+h} f(t)\,\mathrm{d}t \le M_h \cdot h$$</p>
+                    <p>Dividiendo entre $h$: $m_h \le \dfrac{I_a(x + h) - I_a(x)}{h} \le M_h$. Para $h \to 0$, $m_h$ y $M_h$ tienden a $f(x)$, porque $f$ es continua. Así que $I_a'(x) = f(x)$ (igual para $h &lt; 0$).</p>
+                    <p>Si $F$ es una primitiva cualquiera, entonces $F = I_a + C$, y $\int_a^b f(x)\,\mathrm{d}x = I_a(b) = F(b) - F(a)$. <span class="b-res">∎</span></p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>¿Para qué continua?</b> En un salto, la función integral tiene un pico. Allí no es derivable, y $I_a' = f$ no se cumple en ese punto.</p>
+            <p class="b-note"><b>Física:</b> recorrido $s = \int v\,\mathrm{d}t$ · carga $Q = \int I\,\mathrm{d}t$ · trabajo $W = \int F\,\mathrm{d}s$. La unidad de la integral es la unidad del integrando por la unidad de la variable.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · LA FUNCIÓN INTEGRAL</div>
+        <p class="b-help" style="margin:0 0 12px">Arrastra el punto amarillo por el eje $x$. Arriba crece el área de $a$ a $x$; abajo aparece, punto a punto, la gráfica de $I_a$. La tangente rosa tiene siempre la pendiente $f(x)$.</p>
+        <div data-widget="integralfunktion" data-fn="parabel"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · LA GRÁFICA DE LA FUNCIÓN INTEGRAL</div>
+            <div class="b-text"><p>$f(x) = x^2 - 2x$, $I_0(x) = \int_0^x f(t)\,\mathrm{d}t$. Halla los ceros, los extremos y los puntos de inflexión de $I_0$.</p></div>
+            <div class="b-sol"><p>$I_0(x) = \tfrac13 x^3 - x^2 = x^2\left(\tfrac13 x - 1\right)$: ceros 0 y 3. $I_0' = f = x(x - 2)$: máximo en 0, mínimo en 2 con $I_0(2) = -\tfrac43$.</p>
+                <p>$I_0'' = f' = 2x - 2$: <span class="b-res">punto de inflexión en $x = 1$, el mínimo de $f$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · TRABAJO SOBRE UN MUELLE</div>
+            <div class="b-text"><p>Un muelle con la constante elástica $D = 200$ N/m se estira 10 cm desde la posición de equilibrio. La fuerza crece según la ley de Hooke: $F(s) = D \cdot s$. ¿Qué trabajo hace falta?</p></div>
+            <div class="b-sol"><p>$W = \int_0^{0{,}1} 200\,s\,\mathrm{d}s = \left[100\,s^2\right]_0^{0{,}1} = 1$ N·m.</p>
+                <p><span class="b-res">$W = 1$ J</span>; en general, $W = \tfrac12 D s^2$. Un producto «fuerza por camino» no basta, porque la fuerza no es constante.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Escribe la función integral $I_1(x) = \int_1^x 3t^2\,\mathrm{d}t$ sin el signo de integral y confirma $I_1(1) = 0$ e $I_1' = 3x^2$.</p></div>
+            <div class="b-sol"><p>$I_1(x) = x^3 - 1$, $I_1(1) = 0$, $I_1'(x) = 3x^2$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Una batería se carga con la intensidad de corriente $I(t) = 2 - 0{,}2t$ (en A, $t$ en h) hasta que la corriente es cero. ¿Qué carga circula?</p></div>
+            <div class="b-sol"><p>$I(t) = 0$ en $t = 10$: $Q = \int_0^{10} (2 - 0{,}2t)\,\mathrm{d}t = 20 - 10 = 10$ Ah.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Es toda primitiva también una función integral? Estudia $F(x) = x^2 + 1$ como primitiva de $f(x) = 2x$.</p></div>
+            <div class="b-sol"><p>No. $I_a(x) = x^2 - a^2$ tiene siempre un cero en $a$. $x^2 + 1$ no tiene ceros, así que no es una función integral de $2x$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>La fuerza gravitatoria sobre un satélite de masa $m$ a la distancia $r$ del centro de la Tierra es $F(r) = \dfrac{G M m}{r^2}$. ¿Qué trabajo hace falta para elevarlo desde el radio terrestre $R$ hasta $2R$, y cuál para llevarlo «infinitamente lejos»?</p></div>
+            <div class="b-hint"><p>Para la segunda pregunta: poner el límite $b$ y estudiar $b \to \infty$.</p></div>
+            <div class="b-sol"><p>$W = \int_R^{2R} \tfrac{GMm}{r^2}\,\mathrm{d}r = GMm\left[-\tfrac1r\right]_R^{2R} = \tfrac{GMm}{2R}$. Hasta $b$: $GMm\left(\tfrac1R - \tfrac1b\right) \to \tfrac{GMm}{R}$, es decir, solo el doble. De ahí se obtiene la velocidad de escape.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="-4/3" data-tol="0.01" data-ph="valor"><p class="b-q-text">$I_0(x) = \int_0^x (t^2 - 2t)\,\mathrm{d}t$: ¿valor en el mínimo $x = 2$?</p><div class="b-sol"><p>$\tfrac83 - 4$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="Julios"><p class="b-q-text">Trabajo para estirar 0,1 m un muelle con $D = 200$ N/m, en julios.</p><div class="b-sol"><p>$\tfrac12 \cdot 200 \cdot 0{,}01$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">¿Dónde tiene la función integral $I_a$ sus puntos de inflexión?</p><div class="b-mc"><button>en los ceros de $f$</button><button>en los extremos de $f$</button><button>en $x = a$</button></div><div class="b-sol"><p>$I_a'' = f'$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Justifica sin calcular que $\int_{-1}^{1} (x^3 + x)\,\mathrm{d}x = 0$.</p></div>
+            <div class="b-sol"><p>La gráfica es simétrica respecto al origen: el trozo bajo el eje a la izquierda es tan grande como el trozo de encima a la derecha.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con la física:</b> un coche frena con $v(t) = 20 - 4t$ (en m/s) hasta pararse. ¿Cuánto mide la distancia de frenado?</p></div>
+            <div class="b-sol"><p>Se para en $t = 5$: $\int_0^5 (20 - 4t)\,\mathrm{d}t = \left[20t - 2t^2\right]_0^5 = 50$ m</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Justifica: para una función creciente, la suma inferior es la suma con los rectángulos por la izquierda. ¿Qué pasa con una función decreciente?</p></div>
+            <div class="b-sol"><p>Creciente: el borde izquierdo de cada franja tiene el menor valor. Decreciente: allí está el mayor valor, y los rectángulos por la izquierda forman la suma superior.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con la economía:</b> una empresa conoce su coste marginal $K'(x) = 0{,}03x^2 - 1{,}2x + 20$ (en € por unidad) y sus costes fijos de 500 €. Determina la función de costes $K$ y el coste de 40 unidades. ¿Qué significa $\int_{20}^{40} K'(x)\,\mathrm{d}x$?</p></div>
+            <div class="b-hint"><p>$K$ es la primitiva de $K'$ con $K(0) = 500$.</p></div>
+            <div class="b-sol"><p>$K(x) = 0{,}01x^3 - 0{,}6x^2 + 20x + 500$, $K(40) = 640 - 960 + 800 + 500 = 980$ €.</p>
+                <p>$\int_{20}^{40} K'(x)\,\mathrm{d}x = K(40) - K(20) = 980 - 740 = 240$: <span class="b-res">esto es lo que cuestan de más las unidades 21 a 40.</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>¿Para qué $b > 0$ se cumple $\int_0^b (6 - 2x)\,\mathrm{d}x = 8$? Explica por qué hay dos soluciones.</p></div>
+            <div class="b-sol"><p>$6b - b^2 = 8$, es decir, $b^2 - 6b + 8 = 0$: <span class="b-res">$b = 2$ o $b = 4$</span>. A partir de $x = 3$ el integrando es negativo: entre 3 y 4 se añade un trozo bajo el eje que anula exactamente el trozo entre 2 y 3.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: Bernhard Riemann" data-toc-k="X" data-toc-short="Riemann">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">HISTORIA</span></div>
+    <h2>Bernhard Riemann y las franjas</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Newton y Leibniz sabían calcular con integrales, pero durante mucho tiempo no estuvo claro qué es exactamente una integral. ¿Para qué funciones se acercan las sumas de franjas
+                de verdad a un valor fijo? Esta pregunta la respondió Bernhard Riemann (17 de septiembre de 1826 – 20 de julio de 1866) en su tesis de habilitación en Gotinga.
+                En realidad trataba de cuándo una función se puede representar mediante series trigonométricas. De paso, fijó lo que hoy llamamos
+                la <b>integral de Riemann</b> y dio condiciones bajo las cuales una función es integrable.</p>
+            <p>Las sumas superiores e inferiores que usas en este capítulo se llaman también, en su honor, <b>sumas de Riemann</b>. Riemann se hizo famoso además por su
+                lección de habilitación de 1854 sobre los fundamentos de la geometría. Sus ideas sobre la geometría de los espacios curvos marcaron profundamente
+                la física teórica moderna. Riemann solo vivió 39 años.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> MacTutor History of Mathematics, University of St Andrews: biografía «Georg Friedrich Bernhard Riemann».</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>CANTIDAD</h4><p>$B(b) = B(a) + \int_a^b r(t)\,\mathrm{d}t$</p></div>
+        <div><p>Depósito: 20 l, $r(t) = 6 - t$ a partir de $t = 4$: nivel máximo 30 l en $t = 6$</p></div></div>
+    <div class="b-rueck"><div><h4>SUMA INFERIOR Y SUPERIOR</h4><p>$U_n \le \int_a^b f(x)\,\mathrm{d}x \le O_n$, límite común</p></div>
+        <div><p>$x^2$ en $[0, 2]$, $n = 4$: 1,75 y 3,75</p></div></div>
+    <div class="b-rueck"><div><h4>ORIENTADA</h4><p>Bajo el eje cuenta como negativa.</p></div>
+        <div><p>$\int_0^4 (6 - 2x)\,\mathrm{d}x = 8 = \int_0^2 (6 - 2x)\,\mathrm{d}x$</p></div></div>
+    <div class="b-rueck"><div><h4>TEOREMA FUNDAMENTAL</h4><p>$\int_a^b f(x)\,\mathrm{d}x = F(b) - F(a)$</p></div>
+        <div><p>$\int_1^3 (x^2 - 2x + 2)\,\mathrm{d}x = \tfrac{14}{3}$</p></div></div>
+    <div class="b-rueck"><div><h4>FUNCIÓN INTEGRAL</h4><p>$I_a(x) = \int_a^x f(t)\,\mathrm{d}t$, $I_a' = f$, $I_a(a) = 0$</p></div>
+        <div><p>$\int_0^x (2t - 2)\,\mathrm{d}t = x^2 - 2x$</p></div></div>
+    <div class="b-rueck"><div><h4>MAGNITUDES FÍSICAS</h4><p>tasa respecto al tiempo, fuerza respecto al camino</p></div>
+        <div><p>$W = \int_0^{0{,}1} 200\,s\,\mathrm{d}s = 1$ J</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="9" data-ph="valor"><p class="b-q-text">Calcula $\int_0^3 2x\,\mathrm{d}x$.</p><div class="b-sol"><p>$\left[x^2\right]_0^3$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="valor"><p class="b-q-text">$\int_0^2 f = 3$, $\int_2^5 f = -1$: ¿cuánto vale $\int_0^5 f(x)\,\mathrm{d}x$?</p><div class="b-sol"><p>$3 + (-1)$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Para $f$ creciente, la suma con rectángulos por la izquierda es …</p><div class="b-mc"><button>la suma superior.</button><button>la suma inferior.</button><button>exactamente la integral.</button></div><div class="b-sol"><p>A la izquierda está el menor valor.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="38" data-ph="litros"><p class="b-q-text">Depósito con 20 l, caudal $-0{,}5t^2 + 3t$: ¿cuántos litros contiene a los 6 minutos?</p><div class="b-sol"><p>$20 + 18$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="b ="><p class="b-q-text">¿Menor $b > 0$ con $\int_0^b (6 - 2x)\,\mathrm{d}x = 8$?</p><div class="b-sol"><p>$b^2 - 6b + 8 = 0$</p></div></div>
+            <div class="b-q" data-ans="3,46" data-tol="0.01" data-ph="x ≈"><p class="b-q-text">¿Cero positivo de $\int_0^x (t^2 - 4)\,\mathrm{d}t$, con dos decimales?</p><div class="b-sol"><p>$x = \sqrt{12}$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-bestand.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CANTIDAD</span><span class="b-lab-what">Área y magnitud física</span></span></a>
+        <a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REACTOR DE INTEGRALES</span><span class="b-lab-what">Experimenta con integrales</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-hauptsatz.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TEOREMA FUNDAMENTAL</span><span class="b-lab-what">Propiedades, función integral, teorema fundamental</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 13.º curso, curso avanzado · Área de aprendizaje 3 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-es/integral.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-es/gy12.js"></script>
+<script src="../../js/buch-gy12lk.js"></script>
+<script src="../../js/buch-es/gy12lk.js"></script>
+</body>
+</html>
