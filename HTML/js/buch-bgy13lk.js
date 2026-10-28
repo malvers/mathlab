@@ -223,6 +223,10 @@
         math(sl);
         const two = div(box, 'b-grid2');
         const g = div(two, 'b-svgbox');
+        // the graph at most 340 px wide: in print the two columns stack and a full-width graph took the whole page,
+        // the widget then broke and left its last line alone on the next one (Doc, 28.10.2026: "Witwen und Waisen")
+        g.style.maxWidth = '340px';
+        g.style.margin = '0 auto';
         const pbox = div(two, '');
         const p = new Plot(pbox, { x: [0, 12], y: [0, 1000], height: 260, xLabel: 'n', yLabel: '', aria: 'Verlauf der drei Klassen über die Schritte n' });
         const ctr = div(box, 'b-ctrls', '<button type="button" class="b-btn b-go" data-s>1 Schritt</button><button type="button" class="b-btn" data-s10>10 Schritte</button>' +

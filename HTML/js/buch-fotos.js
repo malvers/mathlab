@@ -592,6 +592,107 @@ window.BUCH_FOTOS = {
                 { foto: 'autofabrik', at: '#le4 .b-einstieg', put: 'in', w: 34 }
             ]
         },
+        // the two BGY LK books (28.10.2026): the photos of the chapters they took over from mathe12, mathe13, mathegy11lk and
+        // mathegy12lk where the text is the same (the comment names the source), two more for new chapters
+        mathe12lk: {
+            'lb1-1.html': [
+                { foto: 'justitia', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 18%' },   // mathe12/lb1-1.html
+                { foto: 'schulbus', at: '#le1 .b-einstieg', put: 'in', w: 32 }   // mathe12/lb1-1.html
+            ],
+            'lb1-2.html': [
+                { foto: 'winterpalast', at: '#exkursion .b-row > .b-text', put: 'in', w: 38 },   // mathe12/lb1-2.html
+                { foto: 'gluecksrad-kind', at: '#le3 .b-einstieg', put: 'in', w: 32, pos: '50% 28%' }   // mathe12/lb1-2.html
+            ],
+            'lb1-3.html': [
+                { foto: 'galtonbrett', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 },   // mathe12/lb1-3.html
+                { foto: 'widerstaende', at: '#le2 .b-einstieg', put: 'in', w: 32 }   // mathe12/lb1-3.html
+            ],
+            'lb2-1.html': [
+                { foto: 'schildkroete', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 },   // mathe12/lb2-1.html
+                { foto: 'kaffee', at: '#le1 .b-einstieg', put: 'in', w: 26 }   // mathe12/lb2-1.html
+            ],
+            'lb2-2.html': [
+                { foto: 'tacho', at: '#auftakt .b-hero', put: 'after', wide: true },   // mathe12/lb2-2.html
+                { foto: 'newton', at: '#exkursion .b-row > .b-text', put: 'in', w: 32, pos: '50% 30%' }   // mathe12/lb2-2.html
+            ],
+            'lb2-3.html': [
+                { foto: 'euler', at: '#exkursion .b-row > .b-text', put: 'in', w: 30, pos: '50% 25%' }   // mathe12/lb2-3.html
+            ],
+            'lb2-4.html': [
+                { foto: 'leibniz', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }   // the Leibniz excursion
+            ],
+            'lb2-5.html': [
+                { foto: 'alpenpanorama', at: '#auftakt .b-hero', put: 'after', wide: true },   // mathe12/lb2-4.html
+                { foto: 'fermat', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 22%' }   // mathe12/lb2-4.html
+            ],
+            'lb2-6.html': [
+                { foto: 'rad-am-pass', at: '#le3 .b-einstieg', put: 'in', w: 34 }   // mathe12/lb2-5.html
+            ],
+            'lb2-7.html': [
+                { foto: 'bremsspuren', at: '#le2 .b-einstieg', put: 'in', w: 30 }   // mathegy11lk/lb1-5.html
+            ],
+            'lb2-8.html': [
+                { foto: 'karton', at: '#le1 .b-einstieg', put: 'in', w: 30 },   // mathe12/lb2-6.html
+                { foto: 'rettungsturm', at: '#le2 .b-einstieg', put: 'in', w: 32 }   // mathegy11lk/lb1-5.html
+            ],
+            'lb6-1.html': [
+                { foto: 'drohne', at: '#le2 .b-einstieg', put: 'in', w: 32 }   // mathe12/lb5-1.html
+            ],
+            'lb6-2.html': [
+                { foto: 'rechenzentrum', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }   // mathe12/lb5-2.html
+            ]
+        },
+        mathe13lk: {
+            'lb3-1.html': [
+                { foto: 'leibniz', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' }   // mathegy12lk/lb5-1.html
+            ],
+            'lb3-2.html': [
+                { foto: 'riemann', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 25%' },   // mathegy12lk/lb5-2.html
+                { foto: 'wasserhahn', at: '#le1 .b-einstieg', put: 'in', w: 30 }   // mathegy12lk/lb5-2.html
+            ],
+            'lb3-3.html': [
+                { foto: 'feldermosaik', at: '#auftakt .b-hero', put: 'after', wide: true },   // mathegy12lk/lb5-3.html
+                { foto: 'archimedes-fetti', at: '#exkursion .b-row > .b-text', put: 'in', w: 30, pos: '50% 30%' }   // mathe13/lb3-3.html
+            ],
+            'lb3-4.html': [
+                { foto: 'weinfaesser', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 },   // mathe13/lb3-4.html
+                { foto: 'thermometer', at: '#le3 .b-einstieg', put: 'in', w: 26, pos: '50% 40%' }   // mathe13/lb3-4.html
+            ],
+            'lb4.html': [
+                { foto: 'abfuellanlage', at: '#le2 .b-einstieg', put: 'in', w: 32 }   // mathegy12lk/lb6.html
+            ],
+            'lb5-1.html': [
+                { foto: 'wahlurne', at: '#le1 .b-einstieg', put: 'in', w: 34 },   // mathe13/lb4-1.html
+                { foto: 'verpackung', at: '#le2 .b-einstieg', put: 'in', w: 32 }   // mathe13/lb4-1.html
+            ],
+            'lb5-2.html': [
+                { foto: 'milchtee', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 },   // mathe13/lb4-2.html
+                { foto: 'broetchen', at: '#le1 .b-einstieg', put: 'in', w: 30 },   // mathegy12lk/lb7.html
+                { foto: 'muenzwurf', at: '#le2 .b-einstieg', put: 'in', w: 26, pos: '50% 30%' }   // mathegy12lk/lb7.html
+            ],
+            'wp1-1.html': [
+                { foto: 'descartes', at: '#exkursion .b-row > .b-text', put: 'in', w: 28, pos: '50% 25%' },   // mathe13/wp1-1.html
+                { foto: 'drohne', at: '#le1 .b-einstieg', put: 'in', w: 30 },   // mathe13/wp1-1.html
+                { foto: 'glasfassade', at: '#le2 .b-einstieg', put: 'in', w: 30 }   // mathe13/wp1-1.html
+            ],
+            'wp1-2.html': [
+                { foto: 'raytracing', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 },   // mathe13/wp1-2.html
+                { foto: 'buntstifte', at: '#le1 .b-einstieg', put: 'in', w: 32 },   // mathe13/wp1-2.html
+                { foto: 'giebeldach', at: '#le2 .b-einstieg', put: 'in', w: 30 }   // mathegy11lk/lb3-3.html
+            ],
+            'wp1-3.html': [
+                { foto: 'gizeh', at: '#exkursion .b-row > .b-text', put: 'in', w: 36 }   // mathe13/wp1-3.html
+            ],
+            'wp2-1.html': [
+                { foto: 'cayley', at: '#exkursion .b-row > .b-text', put: 'in', w: 26, pos: '50% 30%' }   // as in mathegy11lk/lb2.html
+            ],
+            'lb7-2.html': [
+                { foto: 'autofabrik', at: '#le4 .b-einstieg', put: 'in', w: 34 }   // mathe13/lb6.html
+            ],
+            'abi.html': [
+                { foto: 'zicklein', at: '#exkursion .b-row > .b-text', put: 'in', w: 34 }   // mathegy12lk/abi.html
+            ]
+        },
         mathefos11: {
             'lb1-1.html': [
                 { foto: 'fahrradhaendler', at: '#le3 .b-einstieg', put: 'in', w: 32 }
@@ -1386,6 +1487,41 @@ window.BUCH_FOTOS = {
             'lb3-7.html': { rueckblick: ['autobahnkreuz'] },
             'lb4.html': { auftakt: ['gauss'] },
             'lb1.html': { le3: ['galtonbrett'], rueckblick: ['muenzwurf'], mehr: ['bingokugeln'] }
+        },
+        // the two BGY LK books (28.10.2026): photos of the chapter's topic for the white space at a page foot, none of them
+        // in the book's text already; gaps without a fitting photo get squared paper as everywhere
+        mathe12lk: {
+            'lb1-1.html': { kapitel: ['schnelltest', 'zwei-rote-wuerfel'] },
+            'lb1-2.html': { kapitel: ['wuerfel-spieltisch', 'bingokugeln', 'muenzstapel', 'murmeln', 'zahlenschloss', 'schachbrett'] },
+            'lb1-3.html': { kapitel: ['reisszwecken', 'jakob-bernoulli', 'ars-conjectandi', 'pascal'] },
+            'lb2-1.html': { kapitel: ['cauchy', 'kerze', 'thermometer', 'gabriels-horn'] },
+            'lb2-2.html': { kapitel: ['baldwin-street', 'stoppuhr', 'radar', 'pilatusbahn', 'draisine'] },
+            'lb2-3.html': { kapitel: ['rechenschieber', 'basketball-wurf', 'wasserbogen'] },
+            'lb2-4.html': { kapitel: ['zahnraeder', 'tabletten', 'kettenblatt', 'sonnenblume'] },
+            'lb2-5.html': { kapitel: ['achterbahn', 'riesenrad-wien', 'springender-ball'] },
+            'lb2-6.html': { kapitel: ['muengstener-bruecke', 'gateway-arch', 'autobahnkreuz'] },
+            'lb2-7.html': { kapitel: ['gauss', 'galton', 'fachwerkbruecke', 'kepler-mysterium', 'sonnenflecken'] },
+            'lb2-8.html': { kapitel: ['konservendose', 'dido-karthago', 'schokolade'] },
+            'lb6-1.html': { kapitel: ['gps-satellit', 'kran', 'laserstrahlen', 'platonische-modelle'] },
+            'lb6-2.html': { kapitel: ['schlitten', 'kondensstreifen', 'geodreieck', 'storchschnabel'] }
+        },
+        mathe13lk: {
+            'lb3-1.html': { kapitel: ['kerze', 'zapfsaeule', 'barrow'] },
+            'lb3-2.html': { kapitel: ['stoppuhr', 'zapfsaeule', 'tacho', 'wetterhuette', 'gesteinsschichten'] },
+            'lb3-3.html': { kapitel: ['fliesen', 'pizza', 'alhambra-fliesen'] },
+            'lb3-4.html': { kapitel: ['eimer', 'gabriels-horn', 'konservendose'] },
+            'lb4.html': { kapitel: ['gauss', 'galtonbrett', 'erbsenteller'] },
+            'lb5-1.html': { kapitel: ['bonbons', 'gummibaerchen', 'aepfel'] },
+            'lb5-2.html': { kapitel: ['keimlinge', 'tabletten', 'zwei-rote-wuerfel'] },
+            'wp1-1.html': { kapitel: ['laserstrahlen', 'gps-satellit', 'vermessungspfeiler', 'kirchturm', 'tipi'] },
+            'wp1-2.html': { kapitel: ['solardach', 'louvre-pyramide', 'kondensstreifen'] },
+            'wp1-3.html': { kapitel: ['louvre-pyramide', 'pyrit', 'platonische-modelle', 'euklid-papyrus'] },
+            'wp2-1.html': { kapitel: ['kaffeeroesterei', 'schokolade', 'kuchen'] },
+            'wp2-2.html': { kapitel: ['zahnraeder', 'kaffeeroesterei', 'hafen-ebbe', 'schlussverkauf'] },
+            'wp2-3.html': { kapitel: ['zikade', 'huhn'] },
+            'lb7-1.html': { kapitel: ['gateway-arch', 'geodreieck', 'wasserbogen'] },
+            'lb7-2.html': { kapitel: ['kran', 'schlitten', 'fahrradhaendler', 'kantine'] },
+            'abi.html': { kapitel: ['siegerpodest', 'stoppuhr', 'taschenrechner', 'fussballfeld'] }
         }
     },
     vorn: { gruss: 'schrammsteine-panorama', sogehts: [['gutenberg-presse', 'amman-buchherstellung'], 'amman-buchherstellung'] }
