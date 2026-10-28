@@ -1092,3 +1092,27 @@ answers and numbers stay. Nothing above was changed; where this book differs fro
 | dreiseitige Pyramide, Schwerpunkt | pirámide triangular, baricentro | |
 | Paketporto | franqueo de un paquete | chapter 2.1 |
 | Graph labels in `data-labels` | translated in the page: tangente, tangente de inflexión, sen x, cierre del hueco | as in mathegy11lk-es |
+
+## Added by mathe13lk-es (Bayer)
+
+| Deutsch | Español | Note |
+|---|---|---|
+| Mathematik · Berufliches Gymnasium 13 · Leistungskurs | Matemáticas · Berufliches Gymnasium 13 · Curso avanzado | `short`: Matemáticas 13 avanzado |
+| Kapitel W1.1 … W2.3 (Wahlpflicht 1 und 2) | OP1.1 … OP2.3 (optativa obligatoria 1 y 2) | as OP.1 in mathe13-es |
+| Einheitsmatrix $E$, $(E - A)^{-1}$, $U^3 = abf \cdot E$ | matriz identidad $I$, $(I - A)^{-1}$, $U^3 = abf \cdot I$ | as in mathe11-es; the economic letters $K$, $E$ (ingresos), $G$ stay as in mathe13-es |
+| Typ $(m, n)$ einer Matrix | dimensión $m \times n$ | |
+| verkettet (Matrizen), Falksches Schema | compatibles, esquema de Falk | |
+| Gozintograph, Bedarfsmatrix, Gesamtbedarfsmatrix, Produktionsplan | grafo de Gozinto, matriz de necesidades, matriz de necesidades total, plan de producción | letters $R$, $Z$, $E$ kept as in mathegy11lk-es |
+| Mengeneinheit ME | u. (unidades) | widget leontief: slider values and totals |
+| Deckungsbeitrag, variable Stückkosten | margen de contribución, costes variables unitarios | |
+| Technologiematrix, Leontief-Inverse, Endnachfrage, Input-Output-Tabelle | matriz tecnológica, inversa de Leontief, demanda final, tabla input-output | sectors in the widget: A (agricultura), I (industria), S (servicios) |
+| Übergangsmatrix, -graph, Grenzmatrix, Fixvektor, stochastische Matrix | matriz de transición, grafo de transición, matriz límite, vector fijo, matriz estocástica | |
+| Eier, Larven, Käfer (Knoten im Graphen) | Huevos, Larvas, Adultos | "Escarabajos" does not fit the circle; running text: escarabajos |
+| biquadratische Gleichung, Substitution, Rücksubstitution | ecuación bicuadrada, cambio de variable, deshacer el cambio | solution sets $\{-2, -1, 1, 2\}$ with commas (rule in js/buch-es/bgy13lk.js) |
+| Lösungsvielfalt, kritische Werte, Fallunterscheidung | número de soluciones, valores críticos, distinción de casos | |
+| Hessesche Normalform (HNF) | forma normal de Hesse (short: forma de Hesse) | no abbreviation |
+| Lotfußpunkt, Lotgerade, Hüllkurve, Drehmatrix | pie de la perpendicular, recta perpendicular, envolvente, matriz de giro | |
+| Rotationskörper | sólido de revolución | |
+| $N(\mu;\ \sigma^2)$, NORM.VERT / NORM.INV | $N(\mu, \sigma^2)$, DISTR.NORM.N / INV.NORM | as in mathegy12lk-es |
+| Sekundarstufe I | ESO | chapter 3.4 |
+| Stadtwerke $S$, Konkurrenz $K$ | compañía municipal $M$, competencia $C$ | chapter OP2.3 |
