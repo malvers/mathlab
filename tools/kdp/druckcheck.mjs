@@ -7,6 +7,7 @@
  * Reports, by printed page number (the cover does not count):
  *   rule 1  a heading as the last content of a page (the KEEP list of js/buch-druck.js)
  *   rule 3  an element wider than the page area
+ *   rule 8  a single line of a paragraph alone at the foot or the top of a page (orphan, widow)
  * plus Paged.js errors ("Layout repeated") and script errors. Exit code 1 when something was found.
  * Rules 2 (dark on dark) and 4 (empty boxes) still need eyes: look at the pages.
  */
@@ -29,7 +30,21 @@ try {
     const r = await page.evaluate(() => {
         const KEEP = 'h1, h2, h3, h4, .b-band, .d-loes-h, .d-loes-t';             // the same list as in js/buch-druck.js
         const pages = [...document.querySelectorAll('.pagedjs_page')];
-        const orphans = [], wide = new Set();
+        const orphans = [], wide = new Set(), lone = [];
+        // the lines of a laid-out element on its page (parts of a formula sit a little higher or lower: neighbours merge)
+        const lines = e => {
+            const ys = [], rg = document.createRange(), w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+            while (w.nextNode()) {
+                const t = w.currentNode;
+                if (!t.data.trim() || t.parentElement.closest('.katex-mathml')) continue;
+                rg.selectNodeContents(t);
+                for (const b of rg.getClientRects()) if (b.width > 1) ys.push(b.bottom);
+            }
+            ys.sort((a, b) => a - b);
+            let n = 0, prev = -1e9;
+            for (const y of ys) { if (y - prev > 6) n++; prev = y; }
+            return n;
+        };
         pages.forEach((p, k) => {
             const no = k;                                                       // printed number: the cover is not counted
             const area = p.querySelector('.pagedjs_area');
@@ -42,6 +57,11 @@ try {
                 const h = (last.nodeType === 3 ? last.parentElement : last).closest(KEEP);
                 if (h) orphans.push('S. ' + no + ': „' + h.textContent.trim().replace(/\s+/g, ' ').slice(0, 50) + '“');
             }
+            // a paragraph Paged.js broke so that one of its parts is a single line
+            area.querySelectorAll('p[data-split-to], li[data-split-to], p[data-split-from], li[data-split-from]').forEach(e => {
+                if (e.closest('.d-luecke') || lines(e) !== 1) return;
+                lone.push('S. ' + no + ': „' + e.textContent.trim().replace(/\s+/g, ' ').slice(0, 50) + '“ (' + (e.hasAttribute('data-split-to') ? 'unten' : 'oben') + ')');
+            });
             // the content wrapper of Paged.js runs into hidden columns by design; MathML and SVG insides are not drawn
             const ar = area.getBoundingClientRect();
             area.querySelectorAll('.pagedjs_page_content > div *').forEach(e => {
@@ -50,14 +70,15 @@ try {
                 if (b.width && b.right > ar.right + 2) wide.add('S. ' + no + ': ' + e.tagName.toLowerCase() + (e.classList.length ? '.' + [...e.classList].join('.') : '') + ' +' + Math.round(b.right - ar.right) + ' px');
             });
         });
-        return { n: pages.length, orphans, wide: [...wide] };
+        return { n: pages.length, orphans, wide: [...wide], lone };
     });
     console.log(BOOK + ': ' + r.n + ' Seiten (mit Einband)');
     const list = (title, xs) => { if (!xs.length) return; found += xs.length; console.log('\n' + title); xs.forEach(x => console.log('  ' + x)); };
     list('Regel 1 · Überschrift allein am Seitenende:', r.orphans);
     list('Regel 3 · breiter als der Satzspiegel:', r.wide);
+    list('Regel 8 · eine einzelne Zeile allein am Seitenende oder -anfang:', r.lone);
     list('Fehler beim Setzen:', errors);
-    if (!found) console.log('Regeln 1 und 3: alles in Ordnung. Regeln 2 und 4 bitte ansehen (tools/kdp/druckregeln.md).');
+    if (!found) console.log('Regeln 1, 3 und 8: alles in Ordnung. Regeln 2 und 4 bitte ansehen (tools/kdp/druckregeln.md).');
 } finally {
     await browser.close();
 }

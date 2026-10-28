@@ -300,6 +300,43 @@
         for (n = up(n); n && n.nodeType === 3 && !n.data.trim(); n = up(n));
         return n;
     }
+    // the visible characters of a node list (KaTeX keeps a second, hidden copy of every formula for screen readers)
+    const visible = ts => ts.reduce((s, t) => s + (t.parentElement && t.parentElement.closest('.katex-mathml') ? 0 : t.data.replace(/\s+/g, ' ').length), 0);
+    function textIn(root, range) {
+        const out = [], w = root.ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);   // the source of Paged.js is a document of its own
+        while (w.nextNode()) if (w.currentNode.data.trim() && (!range || range.intersectsNode(w.currentNode))) out.push(w.currentNode);
+        return out;
+    }
+    // the lines a laid-out element takes on its page (parts of a formula sit a little higher or lower: neighbours merge)
+    function lineCount(e) {
+        const ys = [], r = document.createRange();
+        textIn(e).forEach(t => {
+            if (t.parentElement.closest('.katex-mathml')) return;
+            r.selectNodeContents(t);
+            for (const b of r.getClientRects()) if (b.width > 1) ys.push(b.bottom);
+        });
+        ys.sort((a, b) => a - b);
+        let n = 0, prev = -1e9;
+        for (const y of ys) { if (y - prev > 6) n++; prev = y; }
+        return n;
+    }
+    // the paragraph Paged.js breaks at the foot of this page when one of its parts is a single line and the part here has
+    // at most five lines; null when it is the first thing on the page (moving it would only repeat the break)
+    function loneLine(area, breakToken) {
+        const bn = breakToken.node, at = bn && (bn.nodeType === 3 ? bn.parentNode : bn);
+        const src = at && at.closest && at.closest('p, li');
+        if (!src || !src.dataset.ref || src === bn && !breakToken.offset) return null;
+        const el = area.querySelector('[data-ref="' + src.dataset.ref + '"]'), all = contentNodes(area);
+        if (!el || !all.length || el.contains(all[0])) return null;
+        const n = lineCount(el);
+        if (!n || n > 5) return null;
+        if (n === 1) return el;
+        const r = src.ownerDocument.createRange();
+        if (bn.nodeType === 3) r.setStart(bn, breakToken.offset || 0); else r.setStartBefore(bn);
+        r.setEndAfter(src.lastChild);
+        const rest = visible(textIn(src, r)) - (bn.nodeType === 3 ? (breakToken.offset || 0) : 0);
+        return rest > 0 && rest <= 0.9 * visible(textIn(el)) / n ? el : null;
+    }
     if (window.Paged && Paged.Handler) Paged.registerHandlers(class KeepWithNext extends Paged.Handler {
         afterPageLayout(pageEl, page, breakToken, chunker) {
             if (!breakToken || !breakToken.node || !page.area) return;
@@ -331,6 +368,15 @@
                     while (i >= 0) { const g = keepOf(nodes[i]); if (!g || g === first) break; first = g; while (i >= 0 && g.contains(nodes[i])) i--; }
                     break;
                 }
+            }
+            // a paragraph never leaves a single line behind: its first line alone at the foot of the page or its last line
+            // alone at the top of the next one - a short paragraph moves on whole, a heading right above it goes along
+            // (Doc, 28.10.2026, before translating the two LK books: "oder dass es Witwen und Waisen gibt")
+            const para = !first && loneLine(page.area, breakToken);
+            if (para) {
+                i = nodes.indexOf(contentNodes(para)[0]) - 1;
+                first = para;
+                while (i >= 0) { const g = keepOf(nodes[i]); if (!g) break; first = g; while (i >= 0 && g.contains(nodes[i])) i--; }
             }
             if (first && i >= 0) {
                 const src = chunker.source && chunker.source.querySelector('[data-ref="' + first.dataset.ref + '"]');
@@ -369,7 +415,7 @@
     // come from js/buch-fotos.js: vorn (foreword, how-to) and luecken (per chapter file and section, else the whole chapter).
     // Page 2, under the imprint, shows all the books ("Das klar wird, hier gibt es noch viel mehr").
     const BUECHER = ['mathegy5', 'mathegy6', 'mathegy7', 'mathegy8', 'mathegy9', 'mathegy10', 'mathegy11', 'mathegy12', 'mathegy11lk', 'mathegy12lk',
-        'mathe5', 'mathe6', 'mathe7', 'mathe8', 'mathe9', 'mathe10', 'mathe11', 'mathe12', 'mathe13', 'mathefos11', 'mathefos12'];   // as in js/labs-config.js
+        'mathe5', 'mathe6', 'mathe7', 'mathe8', 'mathe9', 'mathe10', 'mathe11', 'mathe12', 'mathe13', 'mathe12lk', 'mathe13lk', 'mathefos11', 'mathefos12'];   // as in js/labs-config.js
     function gapBox(area, cls, top, h) {
         const box = el('div', 'd-luecke ' + cls);
         box.style.top = top + 'px'; box.style.height = h + 'px';
@@ -427,15 +473,20 @@
             '<svg viewBox="-0.2 -0.2 ' + (cols * 5 + 0.4) + ' ' + (rows * 5 + 0.4) + '" style="width:' + (cols * 5 + 0.4) + 'mm;height:' + (rows * 5 + 0.4) + 'mm">' + lines + '</svg>';
     }
     function gapBooks(area, top, h) {
-        const lang = Buch.lang && Buch.lang !== 'de' ? '-' + Buch.lang : '', title = 9 * MM, rows = 3, cols = 7;
+        // as many columns as three rows need, and the count in the title from the list itself: the wall never goes stale
+        // (Doc, 28.10.2026, two new books: "So schnell veraltet etwas ... müssen jetzt 23 stehen")
+        const lang = Buch.lang && Buch.lang !== 'de' ? '-' + Buch.lang : '', title = 9 * MM, rows = 3, cols = Math.ceil(BUECHER.length / rows), n = BUECHER.length;
         const W = area.getBoundingClientRect().width;
         const ch = Math.min((h - title - 4 * MM) / rows - 3 * MM, (W / cols) * 1.25);
         if (ch < 22 * MM) return;
         const box = gapBox(area, 'd-luecke-buecher', top + (h - title - rows * (ch + 3 * MM)) / 2, title + rows * (ch + 3 * MM));
-        box.innerHTML = '<p class="d-buecher-h">' + tr('Alle 21 Lehrbücher, kostenlos online', 'All 21 textbooks, free online', 'Los 21 libros de texto, gratis en línea',
-            'Tutti i 21 libri di testo, gratis online', 'Les 21 manuels, gratuits en ligne') + ' · docalvers.de</p><div class="d-buecher"></div>';
+        box.innerHTML = '<p class="d-buecher-h">' + tr('Alle ' + n + ' Lehrbücher, kostenlos online', 'All ' + n + ' textbooks, free online', 'Los ' + n + ' libros de texto, gratis en línea',
+            'Tutti i ' + n + ' libri di testo, gratis online', 'Les ' + n + ' manuels, gratuits en ligne') + ' · docalvers.de</p><div class="d-buecher"></div>';
         box.lastChild.style.setProperty('--h', ch + 'px');
-        box.lastChild.innerHTML = BUECHER.map(b => '<img src="../../resources/og/buch-' + b + lang + '-cover.jpg" alt=""' + (b === Buch.book ? ' class="d-dieses"' : '') + '>').join('');
+        box.lastChild.style.setProperty('--cols', cols);
+        // a book not yet translated shows its German cover in the other editions
+        box.lastChild.innerHTML = BUECHER.map(b => '<img src="../../resources/og/buch-' + b + lang + '-cover.jpg" alt=""' + (b === Buch.book ? ' class="d-dieses"' : '') +
+            (lang ? ' onerror="this.onerror=null;this.src=\'../../resources/og/buch-' + b + '-cover.jpg\'"' : '') + '>').join('');
     }
     async function fillGaps() {
         await Buch.fotosReady;

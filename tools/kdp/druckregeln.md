@@ -72,7 +72,18 @@ sehen; S. 29 Batman und Herz 3D; S. 41 „Mehr üben online“ ohne passendes Ic
 KDP druckt mit 300 dpi. `kdp.mjs` friert Canvas-Grafiken mit dem Faktor 3,2 ein (≈ 300 dpi). Fotos müssen
 dieselbe Auflösung haben, frei lizenziert sein und eine Quellenangabe tragen.
 
-## Noch nicht abgedeckt
+## 8. Keine einzelne Zeile allein
 
-- Hurenkind und Schusterjunge **innerhalb** von Absätzen (CSS `widows`/`orphans`): Paged.js setzt Text
-  selbst um und hält sich nicht daran. Bisher ist das im Probedruck nicht aufgefallen.
+Hurenkind und Schusterjunge **innerhalb** von Absätzen: Paged.js setzt Text selbst um und hält sich nicht an CSS
+`widows`/`orphans`. Deshalb prüft der Handler `KeepWithNext` in `buch-druck.js` (`loneLine()`) jeden Absatz und jeden
+Listenpunkt, den er am Seitenende trennt: Bleibt die erste Zeile allein unten oder käme die letzte allein auf die
+nächste Seite, wandert ein kurzer Absatz (höchstens fünf Zeilen auf dieser Seite) ganz auf die nächste Seite, eine
+Überschrift direkt darüber geht mit. `druckcheck.mjs` meldet, was trotzdem übrig bleibt.
+
+Vorfälle (28.10.2026, die beiden BGY-LK-Bücher vor dem Übersetzen): BGY 12 LK S. 79 „selbst, damals Präsident der
+Royal Society.“ allein oben, BGY 13 LK S. 13/14 ein Absatz in zwei Einzelzeilen, S. 174/175 und 221/222 die letzte
+Zeile des Übergangs-Widgets allein, weil die Grafik im Druck eine ganze Seite füllte (jetzt höchstens 340 px breit).
+
+**Weißraum am Seitenende** füllt `fillGaps()` in `buch-druck.js`: ab 38 mm ein Foto aus `luecken` in
+`js/buch-fotos.js` (pro Kapitel eine Liste zum Thema, jedes Foto einmal je Buch, keins, das schon im Text steht),
+ab 70 mm sonst Karo „Meine Notizen“. Ein neues Buch bekommt deshalb gleich seine `luecken`-Listen.
