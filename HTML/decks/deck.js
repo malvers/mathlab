@@ -904,7 +904,8 @@ const ANI_ICON = {
   pause: '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1h2.6v8H1.5zM5.9 1h2.6v8H5.9z"/></svg>',
   stop: '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5h7v7h-7z"/></svg>'
 };
-function aniCtl(svg) {
+// i: the slide's index - the presenter view works on a copy of the slide, so the svg cannot tell it itself
+function aniCtl(svg, i) {
   const bar = document.createElement('div');
   bar.className = 'ani-ctl';
   bar.innerHTML = '<button type="button"></button><button type="button">' + ANI_ICON.stop + 'Stop</button>';
@@ -913,15 +914,42 @@ function aniCtl(svg) {
     play.innerHTML = !svg.animationsPaused() ? ANI_ICON.pause + 'Pause'
       : ANI_ICON.play + (svg.getCurrentTime() > 0.05 ? 'Weiter' : 'Start');
   };
-  svg.aniReset = () => { svg.pauseAnimations(); svg.setCurrentTime(0); label(); };
-  play.addEventListener('click', () => { if (svg.animationsPaused()) svg.unpauseAnimations(); else svg.pauseAnimations(); label(); });
-  stop.addEventListener('click', svg.aniReset);
+  // act: 'play' | 'pause' | 'stop'; at: the clock to stand on, so both windows of a show show the same frame
+  svg.aniDo = (act, at) => {
+    if (act !== 'play') svg.pauseAnimations();
+    if (act === 'stop') at = 0;
+    if (at !== undefined) svg.setCurrentTime(at);
+    if (act === 'play') svg.unpauseAnimations();
+    label();
+  };
+  svg.aniReset = () => svg.aniDo('stop');
+  // a press goes to the other window of a show too - beamer and laptop are two windows, and the beamer's copy only
+  // moved on the laptop (Doc, 28.10.2026: "war im Präsimode bei mir auf dem Mac zu sehen aber auf der Promethean nicht")
+  const press = act => {
+    const at = act === 'stop' ? 0 : svg.getCurrentTime();
+    svg.aniDo(act, at);
+    const s = svg.closest('.slide'), n = slides.indexOf(s);   // a slide of the deck asks the deck (slides can be moved)
+    link.ani(n >= 0 ? n : i, aniOf(s).indexOf(svg), act, at);
+  };
+  play.addEventListener('click', () => press(svg.animationsPaused() ? 'play' : 'pause'));
+  stop.addEventListener('click', () => press('stop'));
   // the buttons are not the board: a click here never turns the page, a press never starts the pen
   ['click', 'pointerdown', 'mousedown'].forEach(t => bar.addEventListener(t, e => e.stopPropagation()));
   (svg.closest('.pic') || svg.parentNode).appendChild(bar);
   svg.aniReset();
 }
-document.querySelectorAll('#deck .slide svg').forEach(v => { if (v.pauseAnimations && v.querySelector('animate')) aniCtl(v); });
+const aniOf = s => s ? [...s.querySelectorAll('svg')].filter(v => v.aniDo) : [];
+// every drawn animation of a slide (or of the presenter's live copy of slide i) gets its buttons
+function aniAll(s, i) {
+  s.querySelectorAll('svg').forEach(v => { if (v.pauseAnimations && v.querySelector('animate')) aniCtl(v, i); });
+}
+// a press in the other window of a show: the same animation of the same slide - in the presenter view the live copy
+function aniApply(m) {
+  const s = !PRESENTER ? slides[m.si] : m.si === si ? document.querySelector('#pres .p-cur .slide.live') : null;
+  const v = aniOf(s)[m.k | 0];
+  if (v) v.aniDo(m.act, m.at);
+}
+slides.forEach((s, i) => { if (s.closest('#deck')) aniAll(s, i); });
 // the slide that was kept (or slide 1) may have been hidden meanwhile: start on the next one that is shown
 if (skipped(si)) { const j = seek(si, 1); si = j >= 0 ? j : Math.max(0, seek(si, -1)); step = 0; }
 paint();
@@ -1379,6 +1407,7 @@ const link = (function () {
       if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); laser.mirrorOn(m.on); return; }
       if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }
       if (m.t === 'ask-out') { if (window.DeckAsk) DeckAsk.shown(m); return; }   // the beamer's answer box, mirrored
+      if (m.t === 'ani') { aniApply(m); return; }    // Start / Pause / Stop pressed on the board
       if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
       else if (m.t === 'go') {
         // answers to our hello: the window that opened us beats a fullscreen one beats any other tab
@@ -1404,6 +1433,7 @@ const link = (function () {
       if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
     }
     else if (m.t === 'play') { if (narr.toggle) narr.toggle(); }
+    else if (m.t === 'ani') aniApply(m);                                     // a drawn animation started there
     else if (m.t === 'ask') { if (window.DeckAsk) DeckAsk.ask(m.q); }          // asked in the presenter: answered here
     else if (m.t === 'ask-live') { if (window.DeckAsk) DeckAsk.live(m.q); }    // dictated there, already on screen here
     else if (m.t === 'ask-hush') { if (window.DeckAsk) DeckAsk.hush(); }       // the presenter's mic is on: her voice off
@@ -1977,7 +2007,7 @@ const link = (function () {
     function shot(i, st, live) {                     // slide i as it stands after st clicks
       const c = slides[i].cloneNode(true);
       c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
-      c.querySelectorAll('.play-big, .play-big-label').forEach(function (e) { e.remove(); });
+      c.querySelectorAll('.play-big, .play-big-label, .ani-ctl').forEach(function (e) { e.remove(); });   // copied buttons are dead
       if (live) {                                    // the current slide: real labs and dice, mirrored to the beamer
         c.classList.add('live');
         c.querySelectorAll('iframe').forEach(function (f, k) {
@@ -2078,7 +2108,10 @@ const link = (function () {
       if (!ready) return;
       if (!cells.length) buildStrip();
       const n1 = ahead({ si: si, step: step }), n2 = ahead(n1);
-      if (si !== liveSi || !liveNode) { liveSi = si; liveNode = shot(si, step, true); put(frames[0], liveNode); }
+      if (si !== liveSi || !liveNode) {
+        liveSi = si; liveNode = shot(si, step, true); put(frames[0], liveNode);
+        aniAll(liveNode, si);                        // in the page: a drawn animation waits at its start, as on the beamer
+      }
       else stepMarks(liveNode, step);
       put(frames[1], n1 ? shot(n1.si, n1.step) : theEnd());
       put(frames[2], n2 ? shot(n2.si, n2.step) : n1 ? theEnd() : null);
@@ -2175,7 +2208,9 @@ const link = (function () {
     return { render: render };
   }
   return { present: present, send: send,
-           skip: function (i, on) { send({ t: 'skip', i: i, on: !!on }); } };
+           skip: function (i, on) { send({ t: 'skip', i: i, on: !!on }); },
+           // Start / Pause / Stop of a drawn animation (aniCtl), only within a show
+           ani: function (i, k, act, at) { if (linked) send({ t: 'ani', si: i, k: k, act: act, at: at }); } };
 })();
 window.DeckLink = link;
 
