@@ -8,9 +8,6 @@
  */
 window.BuchEN && BuchEN.add('bgy12lk', {
     word: {
-        // titelbildbgy12lk
-        'Titelbild: eine Verteilungsfunktion als Treppe über ihren Stäben, eine Kurve mit der Tangente, die sie im Berührpunkt ersetzt, und eine dreiseitige Pyramide mit ihrem Schwerpunkt':
-            'Cover picture: a distribution function as a staircase over its bars, a curve with the tangent that replaces it at the point of contact, and a triangular pyramid with its centroid',
         // verteilungsfunktion
         'Drei Münzen': 'Three coins', 'Würfel': 'Dice', 'Glücksrad': 'Spinner', 'Zufallsgröße': 'Random variable',
         'Gesuchte Wahrscheinlichkeit': 'Probability wanted',
@@ -18,6 +15,9 @@ window.BuchEN && BuchEN.add('bgy12lk', {
         'Verteilungsfunktion als Treppenfunktion': 'Distribution function as a step function'
     },
     phrase: [
+        // titelbildbgy12lk: the aria-label sits in a string piece that starts inside the <svg> tag, so it is a phrase, not a word
+        ['Titelbild: eine Verteilungsfunktion als Treppe über ihren Stäben, eine Kurve mit der Tangente, die sie im Berührpunkt ersetzt, und eine dreiseitige Pyramide mit ihrem Schwerpunkt',
+            'Cover picture: a distribution function as a staircase over its bars, a curve with the tangent that replaces it at the point of contact, and a triangular pyramid with its centroid'],
         // verteilungsfunktion: "$X$ = " + the name of the random variable + the sentence below
         ['Anzahl Wappen bei drei Münzwürfen', 'number of heads in three coin tosses'],
         ['Augenzahl eines Würfels', 'score of a dice'],
