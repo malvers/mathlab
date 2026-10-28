@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 13 avanzado · Capítulo 7.2 · Parámetros y extremos en el espacio y en la economía | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Sistemas de ecuaciones con parámetro, matrices de giro, distancias mínimas, costes, ingresos y beneficio. Capítulo 7.2 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 13 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 13 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 7.2 · ÁREA DE APRENDIZAJE 7</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 7.2 · ÁREA DE APRENDIZAJE 7 · MARZO</p>
+            <h1>Parámetros y extremos en el espacio y en la economía</h1>
+            <p class="b-hero-lead">Un sistema de ecuaciones tiene una solución, ninguna o infinitas, según el valor de un parámetro. Un dron pasa junto a una torre: ¿cuándo está más cerca de ella?
+                Una empresa fija su precio: ¿cuándo es máximo el beneficio? Este capítulo une el análisis con tu optativa obligatoria.
+                Las lecciones 2 y 3 corresponden a las rectas y los planos (optativa obligatoria 1); la lección 4, a las matrices (optativa obligatoria 2).</p>
+            <div class="b-chips"><span class="b-chip">7 SESIONES</span><span class="b-chip">4 LECCIONES</span><span class="b-chip">SEGÚN LA OPTATIVA OBLIGATORIA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["-0.02*x^3+1.2*x^2-200"]' data-labels='["G"]' data-lat="[52]" data-x="-2,62" data-y="-300,500" data-pts="[[40,440]]" data-h="240" data-aria="Función de beneficio de una empresa con el beneficio máximo en 40 unidades"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>estudiar la <b>resolubilidad</b> de sistemas de ecuaciones lineales con parámetro, también en forma matricial</li>
+                <li>plantear y componer <b>matrices de giro</b> en el plano (optativa obligatoria 1)</li>
+                <li>resolver <b>distancias mínimas</b> en el espacio como problema de optimización (optativa obligatoria 1)</li>
+                <li>estudiar <b>costes, ingresos y beneficio</b> y determinar el beneficio máximo y el precio mínimo (optativa obligatoria 2)</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="3" data-ph="t ="><p class="b-q-text">¿Dónde tiene $d^2(t) = 2t^2 - 12t + 24$ su mínimo?</p><div class="b-sol"><p>$4t - 12 = 0$</p></div></div>
+            <div class="b-q" data-ans="0" data-ph="valor"><p class="b-q-text">Calcula $(1, -1, -2) \circ (1, 1, 0)$.</p><div class="b-sol"><p>$1 - 1 + 0$</p></div></div>
+            <div class="b-q" data-ans="0,5" data-tol="0.0001" data-ph="cos 60° ="><p class="b-q-text">¿Cuánto vale $\cos 60°$?</p><div class="b-sol"><p>$\tfrac12$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DOS RECTAS, UN PARÁMETRO</div>
+            <div class="b-text"><p>Las ecuaciones $x + 2y = 4$ y $2x + ay = 8$ describen dos rectas.</p>
+                <ul><li>Dibujadlas para $a = 1$, $a = 4$ y $a = 6$. ¿Cuántos puntos comunes hay?</li><li>¿Qué tiene de especial $a = 4$?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">EL DRON Y LA TORRE</div>
+            <div class="b-text"><p>Un dron vuela a ras de suelo por la trayectoria $X(t, t, 0)$; la punta de la torre está en $P(2, 4, 2)$.</p>
+                <ul><li>Calculad su distancia a la punta para $t = 0$, 2, 3, 4. ¿Cuándo está más cerca?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">EL PRECIO ADECUADO</div>
+            <div class="b-text"><p>Una empresa vende menos cuanto más alto es el precio.</p>
+                <ul><li>¿Por qué el precio más alto no es automáticamente el mejor? ¿Y por qué la mayor cantidad tampoco?</li></ul></div>
+            <span class="b-pair">→ Lección 4</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Sistemas de ecuaciones con parámetro" data-toc-k="1" data-toc-short="1 Sistemas">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Sistemas de ecuaciones con parámetro</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>El sistema $x + 2y = 4$, $2x + ay = b$ tiene dos rectas como conjuntos solución. Según $a$ y $b$, se cortan, son paralelas o coinciden.</p></div></div>
+            <div class="b-text"><p>Con el método de Gauss de 11.º curso se calcula hasta la forma escalonada y después se mira la última fila. Si allí hay un parámetro delante de la incógnita, decide su valor.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · RESOLUBILIDAD</div>
+                <div class="b-text">
+                    <p>Última fila de la forma escalonada: $c \cdot z = e$.</p>
+                    <p>$c \neq 0$: <b>exactamente una solución</b> · $c = 0$ y $e = 0$: <b>infinitas soluciones</b> · $c = 0$ y $e \neq 0$: <b>ninguna solución</b>.</p>
+                    <p>Que $c$ o $e$ sean cero depende del parámetro. Esos valores son los casos especiales.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>En forma matricial</b> $A_a \cdot \vec{x} = \vec{b}$: hay exactamente una solución si $A_a$ es invertible. En matrices $2 \times 2$ eso significa $\det A_a \neq 0$; si no, el CAS da el determinante.</p>
+            <p class="b-note"><b>Geométricamente:</b> tres ecuaciones con tres incógnitas son tres planos. Infinitas soluciones significa que tienen una recta común (o que son iguales).</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · DOS ECUACIONES</div>
+            <div class="b-text"><p>Estudia la resolubilidad de $x + 2y = 4$, $2x + ay = b$.</p></div>
+            <div class="b-sol"><p>Segunda menos dos veces la primera: $(a - 4)\,y = b - 8$. $a \neq 4$: exactamente una solución. $a = 4$, $b = 8$: infinitas (la misma recta). $a = 4$, $b \neq 8$: ninguna (rectas paralelas).</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · TRES ECUACIONES</div>
+            <div class="b-text"><p>$x + y + z = 3$, $x + 2y + 3z = 6$, $x + 3y + az = 9$. ¿Para qué $a$ hay infinitas soluciones?</p></div>
+            <div class="b-sol"><p>Gauss: $y + 2z = 3$, $2y + (a - 1)z = 6$, luego $(a - 5)\,z = 0$. Para $a \neq 5$: $z = 0$, $y = 3$, $x = 0$. Para <span class="b-res">$a = 5$</span>, $z$ es libre: infinitas soluciones.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿Para qué $a$ no tiene solución $2x - y = 1$, $ax + 3y = 4$?</p></div>
+            <div class="b-sol"><p>De la primera, $y = 2x - 1$; sustituyendo: $(a + 6)\,x = 7$. Para $a = -6$ queda $0 = 7$: ninguna solución.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>¿Para qué valores de $a$ es invertible $A_a = \begin{pmatrix} a & 2 \\ 2 & a - 3 \end{pmatrix}$? ¿Qué significa eso para $A_a \cdot \vec{x} = \vec{b}$?</p></div>
+            <div class="b-sol"><p>$\det A_a = a(a - 3) - 4 = a^2 - 3a - 4 = (a - 4)(a + 1)$. Invertible para $a \neq 4$ y $a \neq -1$: entonces el sistema tiene exactamente una solución para cada $\vec{b}$. Para $a = 4$ o $a = -1$, ninguna o infinitas, según $\vec{b}$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>¿Para qué valores de $a$ están los vectores $\begin{pmatrix} 1 \\ 0 \\ 1 \end{pmatrix}$, $\begin{pmatrix} 2 \\ 1 \\ a \end{pmatrix}$ y $\begin{pmatrix} 0 \\ 1 \\ 1 \end{pmatrix}$ en un plano que pasa por el origen?</p></div>
+            <div class="b-hint"><p>Están en un plano si $r\,\vec{u} + s\,\vec{v} + t\,\vec{w} = \vec{0}$ tiene una solución que no sea toda de ceros.</p></div>
+            <div class="b-sol"><p>$r + 2s = 0$, $s + t = 0$, $r + as + t = 0$. Con $r = -2s$ y $t = -s$: $-2s + as - s = (a - 3)\,s = 0$. Para <span class="b-res">$a = 3$</span>, $s$ queda libre, por ejemplo $s = 1$, $r = -2$, $t = -1$. Si no, solo la solución nula.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>En el sistema del ejemplo 2 se sustituye el término independiente de la tercera ecuación por $c$. ¿Para qué $a$ y $c$ no hay solución?</p></div>
+            <div class="b-sol"><p>Última fila $(a - 5)\,z = c - 9$: ninguna solución para $a = 5$ y $c \neq 9$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="4" data-ph="a ="><p class="b-q-text">¿Para qué $a$ no tiene $x + 2y = 4$, $2x + ay = b$ exactamente una solución?</p><div class="b-sol"><p>$a = 4$</p></div></div>
+        <div class="b-q" data-ans="5" data-ph="a ="><p class="b-q-text">Ejemplo 2: ¿para qué $a$ se puede elegir $z$ libremente?</p><div class="b-sol"><p>$a = 5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Matrices de giro en el plano" data-toc-k="2" data-toc-short="2 Giro">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">1 SESIÓN · CON LA OPTATIVA OBLIGATORIA 1</span></div>
+    <h2><span class="b-no">2</span>Matrices de giro en el plano</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si se gira el punto $(1, 0)$ un ángulo $\varphi$ alrededor del origen, llega a $(\cos\varphi, \sin\varphi)$; el punto $(0, 1)$ llega a $(-\sin\varphi, \cos\varphi)$.
+                Estas dos imágenes son exactamente las columnas de la <b>matriz de giro</b>. Cualquier otro punto es una combinación de ambos, así que basta una multiplicación «matriz por vector». El ángulo de giro es el parámetro de la matriz.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · GIRO ALREDEDOR DEL ORIGEN</div>
+                <div class="b-text">
+                    <p>$\vec{p}\,{}' = D_\varphi \cdot \vec{p}$ con $D_\varphi = \begin{pmatrix} \cos\varphi & -\sin\varphi \\ \sin\varphi & \cos\varphi \end{pmatrix}$ (en sentido antihorario).</p>
+                    <p>Dos giros seguidos: $D_\beta \cdot D_\alpha = D_{\alpha + \beta}$. Deshacer el giro: $D_\varphi^{-1} = D_{-\varphi}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Conserva las longitudes:</b> un giro no cambia ninguna distancia al origen, porque $\cos^2\varphi + \sin^2\varphi = 1$.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · GIRAR EN EL PLANO</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta el ángulo de giro. La matriz de giro transforma la bandera amarilla en la azul; debajo, el cálculo para el punto $P(3, 1)$.</p>
+        <div data-widget="drehmatrix"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · GIRAR UN TRIÁNGULO</div>
+            <div class="b-text"><p>Gira el triángulo $A(1, 0)$, $B(4, 0)$, $C(4, 2)$ $90°$ alrededor del origen. Demuestra que dos giros de $90°$ dan un giro de $180°$.</p></div>
+            <div class="b-sol"><p>$D_{90°} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$, así que $\begin{pmatrix} x \\ y \end{pmatrix} \mapsto \begin{pmatrix} -y \\ x \end{pmatrix}$: $A'(0, 1)$, $B'(0, 4)$, $C'(-2, 4)$.</p>
+                <p>$D_{90°} \cdot D_{90°} = \begin{pmatrix} -1 & 0 \\ 0 & -1 \end{pmatrix} = D_{180°}$: <span class="b-res">cada punto se refleja respecto al origen.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · SE BUSCA EL ÁNGULO</div>
+            <div class="b-text"><p>¿Qué ángulo hay que girar $P(4, 0)$ para que $P'$ quede en la recta $y = x$?</p></div>
+            <div class="b-sol"><p>$P' = (4\cos\varphi, 4\sin\varphi)$ con $\sin\varphi = \cos\varphi$, es decir, $\tan\varphi = 1$: <span class="b-res">$\varphi = 45°$ o $\varphi = 225°$</span>.</p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Da $D_{45°}$ de forma exacta y gira $P(2, 0)$. Comprueba que la distancia al origen no cambia.</p></div>
+            <div class="b-sol"><p>$D_{45°} = \tfrac{\sqrt2}{2}\begin{pmatrix} 1 & -1 \\ 1 & 1 \end{pmatrix}$, $P'(\sqrt2, \sqrt2)$. Distancia $\sqrt{2 + 2} = 2$, como antes.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Demuestra con las fórmulas de adición $\cos(\alpha + \beta) = \cos\alpha\cos\beta - \sin\alpha\sin\beta$ y $\sin(\alpha + \beta) = \sin\alpha\cos\beta + \cos\alpha\sin\beta$
+                que se cumple $D_\alpha \cdot D_\beta = D_{\alpha + \beta}$. Deduce que los giros alrededor del origen son conmutables y que $D_\varphi^{-1} = D_{-\varphi}$.</p></div>
+            <div class="b-sol"><p>$$D_\alpha \cdot D_\beta = \begin{pmatrix} \cos\alpha\cos\beta - \sin\alpha\sin\beta & -(\cos\alpha\sin\beta + \sin\alpha\cos\beta) \\ \sin\alpha\cos\beta + \cos\alpha\sin\beta & \cos\alpha\cos\beta - \sin\alpha\sin\beta \end{pmatrix} = D_{\alpha + \beta}$$</p>
+                <p>Como $\alpha + \beta = \beta + \alpha$, se tiene $D_\alpha D_\beta = D_\beta D_\alpha$. Y $D_\varphi \cdot D_{-\varphi} = D_0 = I$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="-1" data-ph="x′ ="><p class="b-q-text">$P(3, 1)$ se gira $90°$ alrededor del origen. ¿Cuál es la coordenada $x$ de $P'$?</p><div class="b-sol"><p>$(x, y) \mapsto (-y, x)$: $P'(-1, 3)$</p></div></div>
+        <div class="b-q" data-ans="45" data-ph="grados"><p class="b-q-text">¿Menor ángulo de giro positivo que lleva $(4, 0)$ a la recta $y = x$?</p><div class="b-sol"><p>$\tan\varphi = 1$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Distancias en el espacio" data-toc-k="3" data-toc-short="3 Distancias">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">2 SESIONES · CON LA OPTATIVA OBLIGATORIA 1</span></div>
+    <h2><span class="b-no">3</span>Distancias en el espacio como problema de optimización</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En el instante $t$ el dron está en $X(t, t, 0)$. Su distancia a la punta de la torre $P(2, 4, 2)$ es $d(t) = \sqrt{(2 - t)^2 + (4 - t)^2 + 2^2}$.</p></div></div>
+            <div class="b-text"><p>Buscamos el mínimo de $d$. Como la raíz es creciente, basta con buscar el mínimo de $d^2$. Es una función cuadrática de $t$, sin raíz mucho más fácil de derivar.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · DISTANCIA PUNTO–RECTA</div>
+                <div class="b-text">
+                    <p>Para un punto genérico $X(t)$ de la recta: plantear $d(t)^2 = |\vec{PX}(t)|^2$ y minimizarla con $\left(d^2\right)' = 0$.</p>
+                    <p>En el mínimo, $\vec{PX}$ es <b>perpendicular</b> al vector director: $\vec{PX} \circ \vec{u} = 0$. Así también se halla el pie de la perpendicular.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Tres caminos</b> para la distancia punto–recta: minimizar $d^2(t)$, la ortogonalidad $\vec{PX} \circ \vec{u} = 0$ o un plano auxiliar que pasa por $P$ con el vector normal $\vec{u}$ (capítulo OP1.3).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · PUNTO Y RECTA EN EL ESPACIO</div>
+        <p class="b-help" style="margin:0 0 12px">Introduce la recta y el punto: el elemento interactivo determina el pie de la perpendicular $F$ mediante la ortogonalidad y comprueba la distancia. El primer ajuste predefinido muestra $P(4, 0, 4)$ y $g\colon \vec{x} = (1, 0, 1) + t\,(1, 2, 2)$ con la distancia 3. Arrastrando se gira la imagen.</p>
+        <div data-widget="abstand3d" data-mode="pg"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · EL DRON</div>
+            <div class="b-text"><p>¿Cuándo está el dron más cerca de la punta de la torre, y a qué distancia?</p></div>
+            <div class="b-sol"><p>$d^2(t) = (2 - t)^2 + (4 - t)^2 + 4 = 2t^2 - 12t + 24$. $(d^2)' = 4t - 12 = 0 \Rightarrow t = 3$.
+                $d^2(3) = 6$, <span class="b-res">$d = \sqrt6 \approx 2{,}45$</span> en el punto $(3, 3, 0)$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · COMPROBACIÓN CON EL PRODUCTO ESCALAR</div>
+            <div class="b-text"><p>Comprueba que, para $t = 3$, $\vec{PX}$ es perpendicular a $\vec{u} = (1, 1, 0)$.</p></div>
+            <div class="b-sol"><p>$\vec{PX} = (3 - 2, 3 - 4, 0 - 2) = (1, -1, -2)$, $\vec{PX} \circ \vec{u} = 1 - 1 + 0 = 0$ ✓</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Determina la distancia del punto $P(1, 2, 3)$ al eje $x$, $\vec{x} = t\,(1, 0, 0)$.</p></div>
+            <div class="b-sol"><p>$d^2 = (t - 1)^2 + 4 + 9$, mínima para $t = 1$: $d = \sqrt{13} \approx 3{,}61$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Determina la distancia de $P(3, 0, 3)$ a la recta $\vec{x} = (1, 1, 0) + t\,(1, 0, 1)$.</p></div>
+            <div class="b-sol"><p>$\vec{PX} = (t - 2, 1, t - 3)$, $\vec{PX} \circ (1, 0, 1) = 2t - 5 = 0 \Rightarrow t = 2{,}5$. $\vec{PX} = (0{,}5;\, 1;\, -0{,}5)$, $d = \sqrt{1{,}5} \approx 1{,}22$.</p></div>
+        </div>
+            <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dos aviones vuelan en línea recta: $A(t) = (0, 0, 8) + t\,(4, 2, 0)$ y $B(t) = (20, 0, 9) + t\,(0, 4, 0)$ (en km, $t$ en minutos). ¿Cuánto se acercan, y cuándo? ¿Dónde se acercan más sus trayectorias?</p></div>
+            <div class="b-hint"><p>Para la primera pregunta, minimizar la distancia $|B(t) - A(t)|$ en el mismo instante. La segunda pregunta es otra: allí cada avión puede estar en el punto en su propio instante.</p></div>
+            <div class="b-sol"><p>$B(t) - A(t) = (20 - 4t,\ 2t,\ 1)$, $d^2(t) = (20 - 4t)^2 + 4t^2 + 1 = 20t^2 - 160t + 401$, mínima en $t = 4$: $d^2 = 81$, <span class="b-res">$d = 9$ km a los 4 minutos</span>.</p>
+                <p>Las trayectorias en sí: $(4s, 2s, 8)$ y $(20, 4u, 9)$ están una encima de otra para $s = 5$, $u = 2{,}5$, a 1 km de distancia en altura. Así que las trayectorias se acercan hasta 1 km, pero los aviones solo hasta 9 km, porque pasan por allí en instantes distintos.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="2,449" data-tol="0.002" data-ph="d ="><p class="b-q-text">¿Distancia mínima del dron a la punta de la torre?</p><div class="b-sol"><p>$\sqrt6 \approx 2{,}449$</p></div></div>
+        <div class="b-q" data-ans="3,606" data-tol="0.002" data-ph="d ="><p class="b-q-text">¿Distancia de $P(1, 2, 3)$ al eje $x$?</p><div class="b-sol"><p>$\sqrt{13} \approx 3{,}606$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Costes, ingresos, beneficio" data-toc-k="4" data-toc-short="4 Beneficio">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 4</span><span class="b-band-sub">2 SESIONES · CON LA OPTATIVA OBLIGATORIA 2</span></div>
+    <h2><span class="b-no">4</span>Costes, ingresos y beneficio</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Una empresa tiene la función de costes $K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + 200$ y vende a un precio de 30 € por unidad. ¿Cuándo obtiene beneficio, y cuánto como máximo?</p></div></div>
+            <div class="b-text"><p>Los ingresos son $E(x) = 30x$ y el beneficio $G(x) = E(x) - K(x)$. Los ceros de $G$ delimitan la zona de beneficio; el máximo de $G$ da la mejor cantidad.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · FUNCIONES ECONÓMICAS</div>
+                <div class="b-text">
+                    <p><b>Costes</b> $K(x) = K_v(x) + K_f$ (costes variables + fijos) · <b>Ingresos</b> $E(x) = p \cdot x$ · <b>Beneficio</b> $G(x) = E(x) - K(x)$</p>
+                    <p><b>Umbral de rentabilidad</b> y <b>límite de beneficio</b>: los ceros de $G$. <b>Beneficio máximo</b>: $G'(x) = 0$, es decir, $E'(x) = K'(x)$ (ingreso marginal = coste marginal).</p>
+                    <p><b>Coste unitario</b> $k(x) = \tfrac{K(x)}{x}$. Su mínimo se llama óptimo de explotación y es el precio mínimo a largo plazo.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Costes en forma de S:</b> una función de costes de tercer grado crece primero cada vez más despacio y luego cada vez más deprisa. El punto de inflexión es el lugar del coste marginal mínimo.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · COSTES, INGRESOS, BENEFICIO</div>
+        <p class="b-help" style="margin:0 0 12px">Cambia el precio y observa cómo se desplazan la zona de beneficio y el beneficio máximo.</p>
+        <div data-widget="gewinn"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 7 · ZONA DE BENEFICIO Y MÁXIMO</div>
+            <div class="b-text"><p>Para $p = 30$, determina la zona de beneficio y el beneficio máximo.</p></div>
+            <div class="b-sol"><p>$G(x) = -0{,}02x^3 + 1{,}2x^2 - 200$. Ceros con CAS: $x \approx 14{,}9$ y $x \approx 56{,}9$. $G'(x) = -0{,}06x^2 + 2{,}4x = 0 \Rightarrow x = 40$.
+                <span class="b-res">Como máximo 440 € con 40 unidades.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 8 · PRECIO MÍNIMO</div>
+            <div class="b-text"><p>¿Hasta dónde puede bajar el precio como mucho a largo plazo?</p></div>
+            <div class="b-sol"><p>Mínimo del coste unitario $k(x) = 0{,}02x^2 - 1{,}2x + 30 + \tfrac{200}{x}$ con CAS: en $x \approx 34{,}3$ con $k \approx 18{,}20$ €.
+                Por debajo de este precio no hay ninguna cantidad con beneficio.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Para $K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + 200$, determina los costes fijos y el lugar del coste marginal mínimo.</p></div>
+            <div class="b-sol"><p>Costes fijos $K(0) = 200$ €. $K''(x) = 0{,}12x - 2{,}4 = 0 \Rightarrow x = 20$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Determina con el widget el beneficio máximo para $p = 25$ y $p = 40$. ¿Qué observas?</p></div>
+            <div class="b-sol"><p>$p = 25$: unos 245 € con 38 unidades. $p = 40$: unos 860 € con 44 unidades. Un precio más alto desplaza el óptimo hacia cantidades mayores.</p></div>
+        </div>
+            <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>El precio como parámetro:</b> ¿para qué precios $p$ obtiene beneficio la empresa con $K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + 200$? Justifica por qué la respuesta es el precio mínimo del ejemplo 8.</p></div>
+            <div class="b-sol"><p>$G_p(x) = px - K(x) &gt; 0 \iff p &gt; \tfrac{K(x)}{x} = k(x)$. Existe un $x$ así si y solo si $p$ es mayor que el mínimo del coste unitario. <span class="b-res">Hay beneficio posible para $p &gt; 18{,}20$ €</span> (redondeado); con $p$ exactamente igual al mínimo, $G_p$ tiene un solo cero (punto de tangencia).</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Monopolio:</b> una empresa con $K(x) = 0{,}5x^2 + 10x + 300$ puede fijar el precio ella misma; la demanda sigue $p(x) = 70 - 1{,}5x$. Determina el beneficio máximo, el precio y el punto de Cournot.</p></div>
+            <div class="b-sol"><p>$E(x) = 70x - 1{,}5x^2$, $G(x) = -2x^2 + 60x - 300$, $G'(x) = -4x + 60 = 0$: $x = 15$, $G(15) = 150$ €. Precio $p(15) = 47{,}50$ €. <span class="b-res">Punto de Cournot $C(15; 47{,}5)$</span>; ingreso marginal $E'(15) = 25 = K'(15)$ ✓</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="440" data-ph="euros"><p class="b-q-text">¿Beneficio máximo para $p = 30$?</p><div class="b-sol"><p>440 €</p></div></div>
+        <div class="b-q" data-ans="40" data-ph="unidades"><p class="b-q-text">¿Con qué cantidad se alcanza?</p><div class="b-sol"><p>40 unidades</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el punto de Cournot" data-toc-k="X" data-toc-short="Cournot">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">LA DERIVADA LLEGA A LA ECONOMÍA</span></div>
+    <h2>El punto de Cournot</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En 1838 el matemático francés Antoine Augustin Cournot publicó un libro sobre los principios matemáticos de la teoría de la riqueza. En él fue uno de los primeros en calcular
+                con funciones de demanda y derivadas: un oferente que fija él mismo el precio obtiene el mayor beneficio allí donde el ingreso marginal es igual al coste marginal.</p>
+            <p>El punto correspondiente de la curva de demanda se sigue llamando hoy punto de Cournot. En su momento el libro apenas tuvo eco; solo décadas más tarde Cournot pasó a ser uno de los padres fundadores de la economía matemática.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuente:</b> Antoine Augustin Cournot: Recherches sur les principes mathématiques de la théorie des richesses. París 1838.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>MATRIZ DE GIRO</h4><p>$D_\varphi = \begin{pmatrix} \cos\varphi & -\sin\varphi \\ \sin\varphi & \cos\varphi \end{pmatrix}$, $D_\beta D_\alpha = D_{\alpha + \beta}$</p></div>
+        <div><p>$90°$: $(x, y) \mapsto (-y, x)$</p></div></div>
+    <div class="b-rueck"><div><h4>DISTANCIA PUNTO–RECTA</h4><p>Minimizar $d^2(t)$ o usar $\vec{PX} \circ \vec{u} = 0$.</p></div>
+        <div><p>Dron: $\sqrt6$</p></div></div>
+    <div class="b-rueck"><div><h4>SISTEMAS CON PARÁMETRO</h4><p>Última fila $cz = e$: una, ninguna o infinitas soluciones.</p></div>
+        <div><p>$(a - 4)y = b - 8$</p></div></div>
+    <div class="b-rueck"><div><h4>BENEFICIO</h4><p>$G = E - K$, beneficio máximo donde $E' = K'$.</p></div>
+        <div><p>$p = 30$: 440 € con 40 unidades</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="4" data-ph="a ="><p class="b-q-text">¿Para qué $a$, con $a &gt; 0$, no es invertible $\begin{pmatrix} a & 2 \\ 2 & a - 3 \end{pmatrix}$?</p><div class="b-sol"><p>$(a - 4)(a + 1) = 0$</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="x ="><p class="b-q-text">¿Lugar del coste marginal mínimo de $K(x) = 0{,}02x^3 - 1{,}2x^2 + 30x + 200$?</p><div class="b-sol"><p>20</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="-6" data-ph="a ="><p class="b-q-text">¿Para qué $a$ no tiene solución $2x - y = 1$, $ax + 3y = 4$?</p><div class="b-sol"><p>−6</p></div></div>
+            <div class="b-q" data-ans="1,225" data-tol="0.002" data-ph="d ="><p class="b-q-text">¿Distancia de $P(3, 0, 3)$ a la recta $(1, 1, 0) + t\,(1, 0, 1)$?</p><div class="b-sol"><p>$\sqrt{1{,}5} \approx 1{,}225$</p></div></div>
+            <div class="b-q" data-ans="150" data-ph="€"><p class="b-q-text">Monopolio: $G(x) = -2x^2 + 60x - 300$. ¿Beneficio máximo?</p><div class="b-sol"><p>$G(15)$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-extremale-abstaende.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DISTANCIAS EXTREMAS</span><span class="b-lab-what">Distancias como problema de optimización</span></span></a>
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-extremwert.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRENAMIENTO PARA EL ABITUR</span><span class="b-lab-what">Problemas de optimización</span></span></a>
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-leontief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRENAMIENTO PARA EL ABITUR · CURSO AVANZADO</span><span class="b-lab-what">Matrices con parámetro</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 13.º curso, curso avanzado · Área de aprendizaje 7 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-es/analysis.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-es/vektoren.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-es/gy11.js"></script>
+<script src="../../js/buch-gy12lk.js"></script>
+<script src="../../js/buch-es/gy12lk.js"></script>
+</body>
+</html>
