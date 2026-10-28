@@ -45,9 +45,9 @@ window.BuchFR && BuchFR.add('bgy13lk', {
         ['Die dritte Zeile von $A$ ist die Summe der ersten beiden. Dann hat $A \\cdot \\vec{x} = \\vec{b}$ entweder keine oder unendlich viele Lösungen, nie genau eine.',
             'La troisième ligne de $A$ est la somme des deux premières. Alors $A \\cdot \\vec{x} = \\vec{b}$ n’a aucune solution ou une infinité de solutions, jamais exactement une.'],
         ['Weiter mit „Nächster Schritt“.', 'Continue avec « Étape suivante ».'],
-        // leontief: the sectors agriculture (A), industrie (I), services (S); ME: u. (unités de quantité) as js/buch-fr/gy11lk.js
+        // leontief: the sectors agriculture (Agr), industrie (Ind), services (Serv); ME: u. (unités de quantité) as js/buch-fr/gy11lk.js
         ['Endnachfrage Landwirtschaft', 'Demande finale de l’agriculture'], ['Endnachfrage Industrie', 'Demande finale de l’industrie'],
-        ['Endnachfrage Dienstleistung', 'Demande finale des services'],
+        ['Endnachfrage Dienstleistung', 'Demande finale des services'], ['Endnachfrage ', 'Demande finale '],
         ['Landwirtschaft', 'agriculture'], ['Industrie', 'industrie'], ['Dienstleistung', 'services'], [' ME', ' u.'],
         ['Zeile: liefernder Sektor, Spalte: empfangender Sektor. ', 'Ligne : secteur qui livre, colonne : secteur qui reçoit. '],
         ['. Summe = Produktion, alle Angaben gerundet in ME.', '. Total = production, toutes les valeurs sont arrondies, en u.'],
@@ -83,8 +83,9 @@ window.BuchFR && BuchFR.add('bgy13lk', {
         [/Zeile (I{1,3}) durch \$([^$]*)\$ teilen: Das Pivotelement wird 1\./g, (m, r, p) => 'Diviser la ligne ' + r + ' par $' + p + '$ : le pivot devient 1.'],
         [/In Spalte (\d) Nullen erzeugen: \$/g, 'Faire apparaître des zéros dans la colonne $1 : $'],
         // leontief: the sector letters of the table and the help line, only in this widget's table
-        [/^(<p class="b-help" style="margin:0 0 6px">Zeile: liefernder Sektor[\s\S]*)$/, m => m.replace(/<th>L<\/th>/g, '<th>A</th>').replace(/<th>D<\/th>/g, '<th>S</th>')
-            .replace('L = Landwirtschaft, I = Industrie, D = Dienstleistung', 'A = Landwirtschaft, I = Industrie, S = Dienstleistung')],
+        // (Agr, Ind, Serv: one letter A would clash with the technology matrix A next to the table)
+        [/^(<p class="b-help" style="margin:0 0 6px">Zeile: liefernder Sektor[\s\S]*)$/, m => m.replace(/<th>L<\/th>/g, '<th>Agr</th>').replace(/<th>I<\/th>/g, '<th>Ind</th>')
+            .replace(/<th>D<\/th>/g, '<th>Serv</th>').replace('L = Landwirtschaft, I = Industrie, D = Dienstleistung', 'Agr = Landwirtschaft, Ind = Industrie, Serv = Dienstleistung')],
         // uebergang: the identity matrix is I in French ("U^3 = a · b · f · E = 1 · E")
         [/(U\^3 = a \\cdot b \\cdot f \\cdot )E = ([^$]*) \\cdot E\$/g, (m, a, q) => a + 'I = ' + q + ' \\cdot I$'],
         // biquadratisch: the solution set {−2 ; −1 ; 1 ; 2} with the French semicolon
