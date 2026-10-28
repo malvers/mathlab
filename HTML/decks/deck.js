@@ -210,11 +210,11 @@ function paint(){
   // dark slides (greeting, title at night): the buttons turn light (Doc, 18.09.2026: "wenn der HG dunkel ist kaum zu sehen")
   document.documentElement.classList.toggle('dark-slide', sl.matches('.greet, .title'));
   stepMarks(sl, step);
-  // a drawn animation (SMIL inside a figure's svg) starts from the beginning when its slide comes up, not somewhere
-  // in its loop (Doc, 28.10.2026: the net that learns to add, ai-wasserzeichen)
+  // a drawn animation (SMIL inside a figure's svg) waits at its beginning when its slide comes up - Start is the
+  // presenter's (aniCtl below; Doc, 28.10.2026: the net that learns to add, ai-wasserzeichen)
   if (si !== shownSi) {
     shownSi = si;
-    sl.querySelectorAll('svg').forEach(v => { if (v.setCurrentTime && v.querySelector('animate')) v.setCurrentTime(0); });
+    sl.querySelectorAll('svg').forEach(v => { if (v.aniReset) v.aniReset(); });
   }
   const shown = slides.filter((s, i) => !skipped(i)).length;          // the bar counts what the class sees
   const at = slides.filter((s, i) => i <= si && !skipped(i)).length;
@@ -894,6 +894,34 @@ if (!location.hash) {
     step = m[3] !== undefined && +m[2] >= +m[3] ? groups(slides[si]) : Math.min(+m[2], groups(slides[si]));
   }
 }
+// A drawn animation (SMIL inside a figure's svg) gets three quiet buttons on its picture: Start / Pause / Weiter and
+// Stop, which goes back to the beginning (Doc, 28.10.2026: "lass mich die ani start/stop/break"). It waits paused
+// until Start; paint() puts it back to the beginning whenever its slide comes up. deck.css .ani-ctl
+// the three icons drawn, one size for all - text glyphs came from different fallback fonts, the square far too small
+// (Doc, 28.10.2026: "die icons der butts gleich groß")
+const ANI_ICON = {
+  play: '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1 9 5 2 9Z"/></svg>',
+  pause: '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1h2.6v8H1.5zM5.9 1h2.6v8H5.9z"/></svg>',
+  stop: '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5h7v7h-7z"/></svg>'
+};
+function aniCtl(svg) {
+  const bar = document.createElement('div');
+  bar.className = 'ani-ctl';
+  bar.innerHTML = '<button type="button"></button><button type="button">' + ANI_ICON.stop + 'Stop</button>';
+  const [play, stop] = bar.children;
+  const label = () => {
+    play.innerHTML = !svg.animationsPaused() ? ANI_ICON.pause + 'Pause'
+      : ANI_ICON.play + (svg.getCurrentTime() > 0.05 ? 'Weiter' : 'Start');
+  };
+  svg.aniReset = () => { svg.pauseAnimations(); svg.setCurrentTime(0); label(); };
+  play.addEventListener('click', () => { if (svg.animationsPaused()) svg.unpauseAnimations(); else svg.pauseAnimations(); label(); });
+  stop.addEventListener('click', svg.aniReset);
+  // the buttons are not the board: a click here never turns the page, a press never starts the pen
+  ['click', 'pointerdown', 'mousedown'].forEach(t => bar.addEventListener(t, e => e.stopPropagation()));
+  (svg.closest('.pic') || svg.parentNode).appendChild(bar);
+  svg.aniReset();
+}
+document.querySelectorAll('#deck .slide svg').forEach(v => { if (v.pauseAnimations && v.querySelector('animate')) aniCtl(v); });
 // the slide that was kept (or slide 1) may have been hidden meanwhile: start on the next one that is shown
 if (skipped(si)) { const j = seek(si, 1); si = j >= 0 ? j : Math.max(0, seek(si, -1)); step = 0; }
 paint();

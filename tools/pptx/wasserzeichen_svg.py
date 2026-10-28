@@ -414,6 +414,7 @@ def netz_lernt():
     irgendwie bewegen" - so: waves along the whole line, slower, and a legend for the two colours."""
     hist = add_history()
     snaps = [hist[e] for e in ADD_EPOCHS]
+    FX, FY = 352, 304                    # where the KaTeX part of the formula ends, and the baseline of the numbers
     N = len(snaps)
     HOLD0, BACK, MORPH, FWD, REST, END, RESET, FADE = 2.0, 0.7, 0.6, 0.6, 0.3, 3.5, 0.8, 0.25
     STEP = BACK + MORPH + FWD + REST
@@ -496,17 +497,22 @@ def netz_lernt():
     errs = [abs(7 - (5 * a + 2 * b)) for a, b in snaps]
     for k, (a, b) in enumerate(snaps):
         c.raw(text(ox, oy + 10, de(5 * a + 2 * b), 28, S.INK, weight="600", extra=shown(osw, k), on=k == 0))
-        c.raw(text(ox + 84, 268, de(errs[k]), 16, S.RED if errs[k] > 0.05 else S.GREEN, "start", "600",
+        c.raw(text(ox + 84, 254, de(errs[k]), 16, S.RED if errs[k] > 0.05 else S.GREEN, "start", "600",
                    extra=shown(osw, k), on=k == 0))
         c.raw(text(412, 28, str(ADD_EPOCHS[k]), 17, S.INK, "start", "600", extra=shown(osw, k), on=k == 0))
+        # what the neuron computes, this pass's numbers right of the KaTeX sum (Doc, 28.10.2026: "Bitte noch die
+        # Formel" - "mit dem Summenzeichen")
+        c.raw('<text x="%s" y="%d" font-family="KaTeX_Main, Cambria Math, serif" font-size="20" fill="%s" '
+              'opacity="%d">5 · %s + 2 · %s = <tspan font-weight="700">%s</tspan>%s</text>'
+              % (S.fmt(FX + 8), FY, S.INK, 1 if k == 0 else 0, de(a), de(b), de(5 * a + 2 * b), shown(osw, k)))
     # the error as a bar that shrinks pass by pass
     bar = lambda e: 140 * e / errs[0]
     bpts = [(0, S.fmt(bar(errs[0])))]
     for k in range(1, N):
         bpts += [(osw[k], S.fmt(bar(errs[k - 1]))), (osw[k] + 0.35, S.fmt(bar(errs[k])))]
     bpts += [(T - RESET, S.fmt(bar(errs[-1]))), (T, S.fmt(bar(errs[0])))]
-    c.rect(ox - 70, 256, 140, 14, fill="#F6E4E2", rx=4)
-    c.raw('<rect x="%d" y="256" width="%s" height="14" rx="4" fill="%s">%s</rect>'
+    c.rect(ox - 70, 242, 140, 14, fill="#F6E4E2", rx=4)
+    c.raw('<rect x="%d" y="242" width="%s" height="14" rx="4" fill="%s">%s</rect>'
           % (ox - 70, S.fmt(bar(errs[0])), S.RED, anim("width", bpts)))
     # target
     c.arrow(ox + ro + 8, oy, 640, oy, S.INK, 2)
@@ -515,18 +521,18 @@ def netz_lernt():
     c.raw('<text x="756" y="%d" font-family="%s" font-size="26" fill="%s" opacity="0">✓%s</text>'
           % (oy + 21, S.SANS, S.GREEN, anim("opacity", [(0, 0), (osw[-1], 1), (T - RESET, 0)], "discrete")))
     # legend for the two waves
-    c.line(600, 24, 640, 24, S.INK, 5)
-    c.line(600, 50, 640, 50, S.RED, 5)
+    c.line(588, 24, 624, 24, S.INK, 5)
+    c.line(588, 50, 624, 50, S.RED, 5)
     labels += [(150, 42, 160, "Eingaben", css(14, S.MUTED)),
                (ox, 86, 160, "Ausgabe", css(14, S.MUTED)),
                (715, oy - 29, 110, "Ziel", css(13, S.MUTED)),
-               (ox, 240, 120, "Fehler", css(13, S.MUTED)),
+               (ox, 228, 120, "Fehler", css(13, S.MUTED)),
+               (FX - 110, FY - 18, 220, "$y = \\sum\\limits_{i=1}^{2} w_i \\cdot x_i =$",
+                css(16.5, S.INK, "text-align:right")),
                (355, 22, 100, "Durchlauf", css(14, S.MUTED, "text-align:right")),
-               (737, 24, 170, "vorwärts: rechnen", css(13, S.BODY, "text-align:left")),
-               (737, 50, 170, "rückwärts: Fehler", css(13, S.BODY, "text-align:left")),
-               (W / 2, 302, W, "Fehler rot zurück, Gewichte dicker oder dünner, Zahlen blau nach vorn — "
-                               "bis hinten 7 herauskommt.", css(14, S.BODY)),
-               (W / 2, 323, W, "Geübt an sechs Summen: Am Ende sind beide Gewichte 1 — das Netz kann jetzt addieren, "
+               (722, 24, 180, "vorwärts: rechnen", css(13, S.BODY, "text-align:left")),
+               (722, 50, 180, "rückwärts: Backpropagation", css(13, S.BODY, "text-align:left")),
+               (W / 2, 343, W, "Geübt an sechs Summen: Am Ende sind beide Gewichte 1 — das Netz kann jetzt addieren, "
                                "nicht nur 5 + 2.", css(12.5, S.MUTED))]
     return c.svg("Animation: ein Perzeptron mit den Eingaben 5 und 2 lernt addieren; der Fehler läuft rot zurück, die "
                  "Verbindungen werden dicker und dünner, die Ausgabe nähert sich von 4,20 bis 7,00, beide Gewichte "
