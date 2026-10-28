@@ -1366,3 +1366,34 @@ text is the one of `mathe12-fr` (and of `mathegy11lk-fr` for 2.1, 2.2, 2.7), tak
 | Rettungsschwimmerin | la sauveteuse | as fr-9 |
 | Zeilenvektor $(t, 2, -1)$ | $(t\,;\,2\,;\,-1)$ | 6.2, as section 4 |
 | Schwerpunkt einer dreiseitigen Pyramide | centre de gravité d’une pyramide à base triangulaire | 6.1 |
+
+## mathe13lk-fr
+
+<!-- fr-23: terms of this book only (BGY 13 LK), write right below this line -->
+
+Package fr-23 (Schwartz), 28.10.2026: decisions made while translating BGY 13 Leistungskurs; nothing above was changed. Most of the
+text is the one of `mathe13-fr`, `mathegy12lk-fr` and `mathe12lk-fr`, taken over paragraph by paragraph where the German is the same.
+
+| German | French | Note |
+|---|---|---|
+| Wahlpflicht 1 / 2, Kapitel W1.1 … W2.3 | Domaine au choix 1 / 2, chapitre OP1.1 … OP2.3 | as OP.1 in mathe13-fr |
+| Einheitsmatrix $E$ (W2, 7.2, A) | matrice identité $I$ | page text and widgets (matrixinverse, leontief, uebergang); OP2.1 says once: le manuel allemand la note $E$ |
+| Typ einer Matrix $(2, 3)$, verkettet, Eintrag | taille $(2, 3)$, compatibles, coefficient | as fr-9; data-ph « coefficient » |
+| Falksches Schema, Determinante, regulär / singulär | schéma de Falk, déterminant, régulière / singulière | OP2.1 |
+| Gozintograph, Bedarfsmatrix, Gesamtbedarfsmatrix, Produktionsplan | graphe de Gozinto, matrice des besoins, matrice des besoins totaux, plan de production | OP2.2; indices R, Z, E stay (German initials, said once) |
+| Rohstoff, Zwischenprodukt, Endprodukt, ME | matière première, produit intermédiaire, produit fini, u. | as fr-9 |
+| Deckungsbeitrag, variable Stückkosten | marge sur coût variable, coûts variables unitaires | OP2.2 |
+| Technologiematrix, Leontief-Inverse, Endnachfrage, Vorleistungen, Input-Output-Tabelle | matrice technologique, inverse de Leontief, demande finale, consommations intermédiaires, tableau entrées-sorties | OP2.2; widget leontief: sectors Agr, Ind, Serv (one letter A would clash with the matrix A) |
+| K, E, G (Kosten, Erlös, Gewinn) | letters stay | as mathe13-fr, said once in OP2.2 |
+| Übergangsmatrix, Übergangsgraph, Grenzmatrix, Fixvektor, stochastische Matrix | matrice de transition, graphe de transition, matrice limite, vecteur fixe (état stable), matrice stochastique | OP2.3 |
+| Käfer, Eier, Larven | coléoptères, œufs, larves | the nodes of the graph (hero and widget uebergang): Œufs, Larves, Adultes (« Coléoptères » does not fit the circle) |
+| Kundenwanderung, Stromanbieter, Stadtwerke $S$ / Konkurrenz $K$ | mouvements de clientèle, fournisseur d’électricité, régie municipale $R$ / concurrence $C$ | OP2.3 |
+| Markow, Eugen Onegin, Puschkin | Markov, Eugène Onéguine, Pouchkine | OP2.3 excursion |
+| biquadratische Gleichung, Substitution, Rücksubstitution | équation bicarrée, changement de variable, retour à la variable $x$ | 7.1 |
+| Diskriminante $\tfrac{p^2}{4} - q$ bzw. $1 + a$ (pq form) | discriminant réduit | 7.1; $b^2 - 4ac$ stays discriminant |
+| Lösungsvielfalt, kritische Werte, Fallunterscheidung | nombre de solutions, valeurs critiques, distinction de cas | 7.1 |
+| Drehmatrix | matrice de rotation | 7.2 |
+| Carsharing-Anbieter | service d’autopartage | A |
+| Tabellenkalkulation: NORM.VERT, NORM.INV, MITTELWERT, STABW.S, VAR.P | LOI.NORMALE.N, LOI.NORMALE.INVERSE.N, MOYENNE, ECARTYPE.STANDARD, VAR.P.N | 4, 5.1 (Excel en français) |
+| Verschiebungssatz | formule de König-Huygens | 5.1, as fr-22 |
+| Abitur-Training (LK) | ENTRAÎNEMENT À L’ABITUR (LK) | lab cards; « Konsultation » stays as in mathegy12lk-fr |
