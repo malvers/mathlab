@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 13 LK · Chapitre OP1.1 · Droites et plans | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Représentations paramétriques, produit vectoriel, équation cartésienne, forme normale de Hesse. Chapitre OP1.1 du manuel interactif Mathématiques · Berufliches Gymnasium 13 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE OP1.1 · DOMAINE AU CHOIX 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE OP1.1 · DOMAINE AU CHOIX 1 · JANVIER</p>
+            <h1>Droites et plans</h1>
+            <p class="b-hero-lead">Un rayon laser, la trajectoire d’un drone, un pan de toit, une vitre : dans l’espace, on décrit les droites et les plans avec des <b>vecteurs</b>.
+                Un point de départ et une ou deux directions suffisent. Avec le <b>produit vectoriel</b>, tu trouves en plus le vecteur perpendiculaire à un plan,
+                et à partir de lui l’<b>équation cartésienne</b> et la <b>forme normale de Hesse</b>, qui te dit tout de suite à quelle distance du plan se trouve un point. Le tout à faire tourner en vraie 3D.</p>
+            <div class="b-chips"><span class="b-chip">9 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">VRAIE 3D</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>décrire une droite par une <b>représentation paramétrique</b> avec un vecteur position et un vecteur directeur</li>
+                <li>vérifier par un <b>test d’appartenance</b> si un point est sur une droite</li>
+                <li>donner un plan sous <b>forme paramétrique</b></li>
+                <li>déterminer un <b>vecteur normal</b> avec le <b>produit vectoriel</b></li>
+                <li>décrire des plans par une <b>équation cartésienne</b> et par leur <b>forme normale de Hesse</b>, et passer d’une forme à l’autre</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="-1" data-ph="nombre"><p class="b-q-text">$A(1\,;\,2\,;\,1)$, $B(2\,;\,1\,;\,3)$. Quelle est la composante en $y$ de $\vec{AB}$ ?</p>
+            <div class="b-sol"><p>$1 - 2 = -1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0" data-ph="nombre"><p class="b-q-text">Calcule $(1\,;\,2\,;\,2) \circ (2\,;\,-2\,;\,1)$.</p>
+            <div class="b-sol"><p>$2 - 4 + 2 = 0$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="3" data-ph="longueur"><p class="b-q-text">Quelle est la longueur du vecteur $(2\,;\,-1\,;\,2)$ ?</p>
+            <div class="b-sol"><p>3</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE DRONE SUR SA TRAJECTOIRE</div>
+        <div class="b-text"><p>Un drone part de $P(1\,;\,2\,;\,1)$ et se déplace de $(1\,;\,-1\,;\,2)$ à chaque seconde.</p>
+            <ul>
+                <li>Où est-il au bout de 1, 2, 3 secondes ? Et une seconde avant le départ ?</li>
+                <li>Passe-t-il par $Q(3\,;\,0\,;\,5)$ ? Par $R(4\,;\,0\,;\,7)$ ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA VITRE</div>
+        <div class="b-text"><p>Une vitre plane passe par les points $(4\,;\,0\,;\,0)$, $(0\,;\,3\,;\,0)$ et $(0\,;\,0\,;\,2)$.</p>
+            <ul>
+                <li>Comment atteindre chaque point de la vitre à partir d’un sommet ?</li>
+                <li>Dans quelle direction pointe une tige perpendiculaire à la vitre ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">PERPENDICULAIRE À DEUX VECTEURS</div>
+        <div class="b-text"><p>On cherche un vecteur $\vec{n}$ orthogonal à $(1\,;\,0\,;\,0)$ et à $(0\,;\,1\,;\,0)$. Et un autre, orthogonal à $(1\,;\,1\,;\,0)$ et à $(0\,;\,1\,;\,1)$.</p>
+            <ul>
+                <li>Écrivez les conditions avec le produit scalaire et résolvez-les.</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Droites dans l’espace" data-toc-k="1" data-toc-short="1 Droites">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">1</span>Droites : représentation paramétrique et test d’appartenance</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Au bout de $t$ secondes, le drone est au point $X$ tel que $\vec{OX} = (1\,;\,2\,;\,1) + t \cdot (1\,;\,-1\,;\,2)$. Pour tous les réels $t$ réunis, même négatifs, on obtient une droite.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>On atteint chaque point de la droite à partir d’un <b>point connu de la droite</b> en ajoutant un multiple du <b>vecteur directeur</b>. À chaque point correspond exactement une valeur du paramètre $t$.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · DROITE DANS L’ESPACE</div>
+        <div class="b-text"><p><b>Représentation paramétrique :</b> $g\colon \vec{x} = \vec{p} + t \cdot \vec{u}$, $t \in \mathbb{R}$, avec le vecteur position $\vec{p}$ et le vecteur directeur $\vec{u} \neq \vec{0}$.</p>
+            <p>Droite passant par $A$ et $B$ : $\vec{x} = \vec{OA} + t \cdot \vec{AB}$.</p>
+            <p><b>Test d’appartenance :</b> $Q$ est sur $g$ si $\vec{OQ} = \vec{p} + t \cdot \vec{u}$ pour <b>un</b> $t$, c’est-à-dire si les trois lignes donnent le même $t$.</p>
+            <p>Les <b>points de percée</b> sont les points d’intersection avec les plans de coordonnées : par exemple $z = 0$ pour le plan $xy$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Pas unique :</b> n’importe quel point de la droite peut servir de point de départ, tout multiple ($\neq 0$) de $\vec{u}$ de vecteur directeur.</p>
+            <p class="b-note"><b>Segment :</b> si l’on restreint $t$ à $0 \le t \le 1$, on obtient le segment de $A$ à $B$.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · DROITE, TEST D’APPARTENANCE, POINTS DE PERCÉE</div>
+        <p class="b-help" style="margin:0 0 12px">Modifie le point $P$ de la droite, le vecteur directeur $\vec{u}$ et le point à tester $Q$. Avec $t$, le point doré $X$ se déplace sur la droite. En rouge : les points de percée.</p>
+            <div data-widget="gerade3d"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · TEST D’APPARTENANCE</div>
+        <div class="b-text"><p>Les points $Q(3\,;\,0\,;\,5)$ et $R(4\,;\,0\,;\,7)$ sont-ils sur $g\colon \vec{x} = (1\,;\,2\,;\,1) + t \cdot (1\,;\,-1\,;\,2)$ ?</p>
+            </div>
+        <div class="b-sol"><p>$Q$ : $1 + t = 3$, $2 - t = 0$, $1 + 2t = 5$, chaque fois $t = 2$ : <span class="b-res">$Q \in g$</span>.</p>
+            <p>$R$ : $1 + t = 4 \Rightarrow t = 3$, mais $2 - t = 0 \Rightarrow t = 2$. Contradiction : $R \notin g$.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · POINTS DE PERCÉE</div>
+        <div class="b-text"><p>Détermine les points de percée de la droite $g$ de l’exemple 1.</p>
+            </div>
+        <div class="b-sol"><p>Plan $xy$ : $1 + 2t = 0$, $t = -\tfrac12$, $S_{xy}(0{,}5\,;\,2{,}5\,;\,0)$. Plan $xz$ : $2 - t = 0$, $S_{xz}(3\,;\,0\,;\,5)$. Plan $yz$ : $1 + t = 0$, $S_{yz}(0\,;\,3\,;\,-1)$.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Donne une équation de la droite passant par $A(2\,;\,0\,;\,1)$ et $B(4\,;\,3\,;\,0)$. Donne deux autres points de la droite.</p>
+            </div>
+        <div class="b-sol"><p>$\vec{x} = (2\,;\,0\,;\,1) + t \cdot (2\,;\,3\,;\,-1)$. Avec $t = -1$ : $(0\,;\,-3\,;\,2)$, avec $t = 2$ : $(6\,;\,6\,;\,-1)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Le point $P(5\,;\,1\,;\,7)$ est-il sur $g\colon \vec{x} = (1\,;\,3\,;\,-1) + t \cdot (2\,;\,-1\,;\,4)$ ?</p>
+            </div>
+        <div class="b-sol"><p>Toutes les lignes donnent $t = 2$ : oui.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Pour quelle valeur de $a$ le point $Q(a\,;\,4\,;\,0)$ est-il sur la droite passant par $A(1\,;\,2\,;\,2)$ et $B(2\,;\,3\,;\,1)$ ?</p>
+            </div>
+        <div class="b-sol"><p>$\vec{x} = (1\,;\,2\,;\,2) + t \cdot (1\,;\,1\,;\,-1)$. $z$ : $2 - t = 0 \Rightarrow t = 2$, $y$ : $2 + 2 = 4$ ✓, donc $a = 1 + 2 = 3$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un avion part de $A(0\,;\,0\,;\,1)$ en ligne droite dans la direction $(10\,;\,5\,;\,0{,}5)$ (unités en km). Un sommet de montagne se trouve en $G(30\,;\,15\,;\,2{,}4)$. L’avion passe-t-il au-dessus ?</p>
+            </div>
+        <div class="b-sol"><p>À la verticale de $G$, on a $t = 3$ (d’après $x$ et $y$) ; l’altitude de vol y est de $1 + 1{,}5 = 2{,}5$ km. L’avion passe 100 m au-dessus du sommet.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">Pour quel $t$ a-t-on $(1\,;\,2\,;\,1) + t \cdot (1\,;\,-1\,;\,2) = (3\,;\,0\,;\,5)$ ?</p>
+            <div class="b-sol"><p>$t = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2,5" data-tol="0.0001" data-ph="y ="><p class="b-q-text">Quelle est la coordonnée $y$ du point de percée $S_{xy}$ de cette droite ?</p>
+            <div class="b-sol"><p>$t = -0{,}5$ : $y = 2{,}5$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Plans et vecteur normal" data-toc-k="2" data-toc-short="2 Plans">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">2</span>Plans sous forme paramétrique et vecteur normal</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La vitre contient $A(4\,;\,0\,;\,0)$. À partir de là, on atteint chacun de ses points en ajoutant des multiples de $\vec{AB} = (-4\,;\,3\,;\,0)$ et de $\vec{AC} = (-4\,;\,0\,;\,2)$.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Un plan a donc besoin d’un point et de <b>deux</b> directions non parallèles. Au lieu de deux directions, on peut aussi donner un seul vecteur,
+                perpendiculaire au plan : le <b>vecteur normal</b>. C’est le produit vectoriel qui le fournit.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · PLAN ET PRODUIT VECTORIEL</div>
+        <div class="b-text"><p><b>Forme paramétrique :</b> $E\colon \vec{x} = \vec{a} + r \cdot \vec{u} + s \cdot \vec{v}$ avec deux vecteurs directeurs $\vec{u}$, $\vec{v}$ non parallèles. Par trois points : $\vec{x} = \vec{OA} + r\,\vec{AB} + s\,\vec{AC}$.</p>
+            <p><b>Produit vectoriel :</b> $$\vec{u} \times \vec{v} = \begin{pmatrix} u_2 v_3 - u_3 v_2 \\ u_3 v_1 - u_1 v_3 \\ u_1 v_2 - u_2 v_1 \end{pmatrix}$$
+                        Il est orthogonal à $\vec{u}$ et à $\vec{v}$ ; c’est donc un <b>vecteur normal</b> du plan. Sa norme est l’aire du parallélogramme construit sur $\vec{u}$ et $\vec{v}$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Moyen mnémotechnique :</b> pour la première ligne, cache la première ligne et calcule « en croix » ; pour la deuxième, la deuxième ligne ; pour la troisième, la troisième. La ligne du milieu change de signe.</p>
+            <p class="b-note"><b>Vérification :</b> $\vec{n} \circ \vec{u} = 0$ et $\vec{n} \circ \vec{v} = 0$.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · PLAN ET VECTEUR NORMAL</div>
+        <p class="b-help" style="margin:0 0 12px">Entre un point du plan et les vecteurs directeurs. La flèche rose est le vecteur normal. Si le plan coupe les trois axes, tu vois le triangle des traces.</p>
+            <div data-widget="ebene3d"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · PRODUIT VECTORIEL</div>
+        <div class="b-text"><p>Calcule $\vec{u} \times \vec{v}$ pour $\vec{u} = (-4\,;\,3\,;\,0)$ et $\vec{v} = (-4\,;\,0\,;\,2)$, puis vérifie.</p>
+            </div>
+        <div class="b-sol"><p>$\begin{pmatrix} 3 \cdot 2 - 0 \cdot 0 \\ 0 \cdot (-4) - (-4) \cdot 2 \\ (-4) \cdot 0 - 3 \cdot (-4) \end{pmatrix} = \begin{pmatrix} 6 \\ 8 \\ 12 \end{pmatrix}$, plus simplement $\vec{n} = (3\,;\,4\,;\,6)$.
+                Vérification : $-12 + 12 + 0 = 0$, $-12 + 0 + 12 = 0$ ✓</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · AIRE D’UN TRIANGLE</div>
+        <div class="b-text"><p>Quelle est l’aire du triangle de sommets $(4\,;\,0\,;\,0)$, $(0\,;\,3\,;\,0)$, $(0\,;\,0\,;\,2)$ ?</p>
+            </div>
+        <div class="b-sol"><p>La moitié du parallélogramme : $\tfrac12 |(6\,;\,8\,;\,12)| = \tfrac12 \sqrt{36 + 64 + 144} = \tfrac12 \sqrt{244} \approx 7{,}81$.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Donne une représentation paramétrique du plan passant par $A(1\,;\,0\,;\,0)$, $B(0\,;\,1\,;\,0)$, $C(0\,;\,0\,;\,1)$.</p>
+            </div>
+        <div class="b-sol"><p>$\vec{x} = (1\,;\,0\,;\,0) + r \cdot (-1\,;\,1\,;\,0) + s \cdot (-1\,;\,0\,;\,1)$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcule $(1\,;\,0\,;\,0) \times (0\,;\,1\,;\,0)$ et $(1\,;\,1\,;\,0) \times (0\,;\,1\,;\,1)$. Compare avec l’exploration.</p>
+            </div>
+        <div class="b-sol"><p>$(0\,;\,0\,;\,1)$ et $(1\,;\,-1\,;\,1)$. Vérification : $(1\,;\,-1\,;\,1) \circ (1\,;\,1\,;\,0) = 0$, $(1\,;\,-1\,;\,1) \circ (0\,;\,1\,;\,1) = 0$ ✓</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine un vecteur normal du plan de l’exercice 5 et l’aire du triangle $ABC$.</p>
+            </div>
+        <div class="b-sol"><p>$(-1\,;\,1\,;\,0) \times (-1\,;\,0\,;\,1) = (1\,;\,1\,;\,1)$. Aire $\tfrac12 \sqrt3 \approx 0{,}87$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Montre que $\vec{u} \times \vec{v} = -(\vec{v} \times \vec{u})$ et que $\vec{u} \times \vec{u} = \vec{0}$. Que signifie la deuxième égalité géométriquement ?</p>
+            </div>
+        <div class="b-sol"><p>Échanger les vecteurs échange dans chaque ligne les deux produits, donc change le signe. $\vec{u} \times \vec{u}$ : chaque ligne vaut $u_i u_j - u_j u_i = 0$. Deux vecteurs parallèles ne forment pas de parallélogramme ; l’aire est nulle.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="-1" data-ph="nombre"><p class="b-q-text">Quelle est la deuxième composante de $(1\,;\,1\,;\,0) \times (0\,;\,1\,;\,1)$ ?</p>
+            <div class="b-sol"><p>$0 \cdot 0 - 1 \cdot 1 = -1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="nombre"><p class="b-q-text">Quelle est la troisième composante de $(1\,;\,0\,;\,0) \times (0\,;\,1\,;\,0)$ ?</p>
+            <div class="b-sol"><p>$1 \cdot 1 - 0 \cdot 0 = 1$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Équation cartésienne et forme normale de Hesse" data-toc-k="3" data-toc-short="3 Cartésienne, Hesse">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">3</span>Équation cartésienne et forme normale de Hesse</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour les trois sommets de la vitre, $3x + 4y + 6z$ vaut 12. Ce n’est pas un hasard : pour tout point $X$ du plan, $\vec{AX}$ est orthogonal à $\vec{n} = (3\,;\,4\,;\,6)$.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Écrite en entier, $\vec{n} \circ (\vec{x} - \vec{a}) = 0$ donne $3(x - 4) + 4y + 6z = 0$, c’est-à-dire $3x + 4y + 6z = 12$. Les coefficients de $x$, $y$, $z$ sont exactement les composantes du vecteur normal.</p>
+            <p>Si l’on divise l’équation par la norme de $\vec{n}$, le vecteur normal devient un <b>vecteur unitaire</b> $\vec{n}_0$. Si l’on remplace alors par les coordonnées d’un point, on obtient sa <b>distance</b> au plan, avec un signe :
+                    $(\vec{x} - \vec{a}) \circ \vec{n}_0$ est la longueur de la projection de $\vec{AX}$ sur la direction normale. Cette forme s’appelle la <b>forme normale de Hesse</b>, d’après Otto Hesse.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · ÉQUATION CARTÉSIENNE</div>
+        <div class="b-text"><p>$E\colon n_1 x + n_2 y + n_3 z = d$ avec le vecteur normal $\vec{n} = (n_1\,;\,n_2\,;\,n_3)$ et $d = \vec{n} \circ \vec{a}$ pour un point $A$ du plan.</p>
+            <p><b>À partir de la forme paramétrique :</b> déterminer $\vec{n} = \vec{u} \times \vec{v}$, puis remplacer par un point pour trouver $d$. <b>Test d’appartenance :</b> remplacer par les coordonnées.</p>
+            <p><b>Points d’intersection</b> avec les axes : annuler deux coordonnées. S’il manque une variable, le plan est parallèle à l’axe correspondant.</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · FORME NORMALE DE HESSE</div>
+        <div class="b-text"><p>$(\vec{x} - \vec{a}) \circ \vec{n}_0 = 0$ avec $|\vec{n}_0| = 1$. À partir de l’équation cartésienne : $$\frac{n_1 x + n_2 y + n_3 z - d}{\sqrt{n_1^2 + n_2^2 + n_3^2}} = 0$$</p>
+            <p>Si l’on remplace par un point $Q$, on obtient sa <b>distance avec un signe</b>. Même signe : même côté du plan. Si l’on choisit le signe de sorte que $d \ge 0$, alors $d$ est lui-même la distance de l’origine au plan, et les valeurs négatives sont du côté de l’origine.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Équation par les points d’intersection avec les axes :</b> $\tfrac{x}{4} + \tfrac{y}{3} + \tfrac{z}{2} = 1$ est le même plan que $3x + 4y + 6z = 12$. Les dénominateurs donnent les points d’intersection avec les axes.</p>
+            <p class="b-note"><b>Otto Hesse</b> (1811–1874) enseigna à Königsberg, Heidelberg et Munich. La forme normale figure dans ses <i>Vorlesungen über analytische Geometrie des Raumes</i> (« Leçons de géométrie analytique de l’espace », Leipzig 1861). Source : MacTutor, « Otto Hesse ».</p>
+            <p class="b-note"><b>Perspective :</b> au chapitre OP1.3, la forme normale de Hesse donne toutes les distances à des plans.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE POINT EST-IL DANS LE PLAN ?</div>
+        <p class="b-help" style="margin:0 0 12px">Entre un point $Q$. Le widget le remplace dans l’équation cartésienne et montre s’il appartient au plan.</p>
+            <div data-widget="ebene3d" data-mode="punkt"></div>
+        </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · L’IDÉE DE LA FORME NORMALE DE HESSE, DANS LE PLAN</div>
+        <p class="b-help" style="margin:0 0 12px">Dans le plan, une droite joue le rôle du plan de l’espace. Fais glisser le point $A$ de la droite et le point $P$, et fais tourner le vecteur normal : la valeur du membre de gauche est la distance de $P$ à la droite, avec un signe. Dans l’espace, c’est pareil, seulement avec trois coordonnées.</p>
+            <div data-widget="hesse2d"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · DE LA FORME PARAMÉTRIQUE À L’ÉQUATION CARTÉSIENNE</div>
+        <div class="b-text"><p>$E\colon \vec{x} = (1\,;\,2\,;\,0) + r\,(1\,;\,0\,;\,1) + s\,(0\,;\,1\,;\,2)$. Détermine l’équation cartésienne.</p>
+            </div>
+        <div class="b-sol"><p>$\vec{n} = (1\,;\,0\,;\,1) \times (0\,;\,1\,;\,2) = (-1\,;\,-2\,;\,1)$. $d = \vec{n} \circ (1\,;\,2\,;\,0) = -5$.
+                $-x - 2y + z = -5$, ou plus joliment <span class="b-res">$x + 2y - z = 5$</span>.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · FORME NORMALE DE HESSE</div>
+        <div class="b-text"><p>$E\colon 2x - y + 2z = -9$. Détermine la forme normale de Hesse, la distance de l’origine et la distance du point $Q(1\,;\,2\,;\,3)$.</p>
+            </div>
+        <div class="b-sol"><p>On multiplie par −1 pour avoir $d \ge 0$ : $-2x + y - 2z = 9$, $|\vec{n}| = 3$, forme normale de Hesse $\tfrac13(-2x + y - 2z - 9) = 0$. Origine : distance 3.</p>
+            <p>$Q$ : $\tfrac13(-2 + 2 - 6 - 9) = -5$ : <span class="b-res">$d(Q, E) = 5$</span>, du même côté que l’origine.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Les points $P(1\,;\,1\,;\,1)$ et $Q(3\,;\,2\,;\,0)$ appartiennent-ils à $E\colon 2x + 3y + 6z = 12$ ? Détermine aussi les points d’intersection de $E$ avec les axes.</p>
+            </div>
+        <div class="b-sol"><p>$P$ : $2 + 3 + 6 = 11 \neq 12$, non. $Q$ : $6 + 6 + 0 = 12$, oui. Points d’intersection avec les axes $S_x(6\,;\,0\,;\,0)$, $S_y(0\,;\,4\,;\,0)$, $S_z(0\,;\,0\,;\,2)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine l’équation cartésienne du plan passant par $A(1\,;\,0\,;\,0)$, $B(0\,;\,1\,;\,0)$, $C(0\,;\,0\,;\,1)$ et sa forme normale de Hesse. À quelle distance de l’origine se trouve-t-il ?</p>
+            </div>
+        <div class="b-sol"><p>$\vec{n} = (1\,;\,1\,;\,1)$ (exercice 7), $d = 1$ : $x + y + z = 1$. Forme normale de Hesse $\tfrac{x + y + z - 1}{\sqrt3} = 0$, distance de l’origine $\tfrac{1}{\sqrt3} \approx 0{,}577$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Donne la forme normale de Hesse de $E\colon 2x + 2y - z = 6$. À quelle distance de $E$ se trouvent l’origine et le point $P(4\,;\,4\,;\,1)$ ? Sont-ils du même côté ?</p>
+            </div>
+        <div class="b-sol"><p>$\tfrac13(2x + 2y - z - 6) = 0$. Origine : $\tfrac{-6}{3} = -2$, distance 2. $P$ : $\tfrac13(8 + 8 - 1 - 6) = 3$ : distance 3, <span class="b-res">de l’autre côté</span> par rapport à l’origine.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine les deux plans parallèles à $E\colon 2x + y + 2z = 6$ situés à la distance 2 de $E$.</p>
+            </div>
+        <div class="b-sol"><p>Même vecteur normal, $|\vec{n}| = 3$ : $\tfrac{|d - 6|}{3} = 2$, donc $d = 12$ ou $d = 0$ : $2x + y + 2z = 12$ et $2x + y + 2z = 0$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Détermine l’ensemble des points équidistants de $E_1\colon x + 2y + 2z = 3$ et de $E_2\colon 2x - y + 2z = 6$.</p>
+            </div>
+        <div class="b-hint"><p>Égale les formes normales de Hesse en valeur absolue : $\tfrac{x + 2y + 2z - 3}{3} = \pm \tfrac{2x - y + 2z - 6}{3}$.</p>
+            </div>
+        <div class="b-sol"><p>Avec $+$ : $-x + 3y + 3 = 0$, donc $x - 3y = 3$. Avec $-$ : $3x + y + 4z = 9$. <span class="b-res">Deux plans</span>, qui partagent en deux les angles entre $E_1$ et $E_2$. Ils sont perpendiculaires : $(1\,;\,-3\,;\,0) \circ (3\,;\,1\,;\,4) = 0$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="6" data-ph="x ="><p class="b-q-text">En quel $x$ le plan $2x + 3y + 6z = 12$ coupe-t-il l’axe des $x$ ?</p>
+            <div class="b-sol"><p>$2x = 12$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="3" data-ph="distance"><p class="b-q-text">Distance de $P(4\,;\,4\,;\,1)$ à $2x + 2y - z = 6$ ?</p>
+            <div class="b-sol"><p>$\tfrac{9}{3}$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">On remplace par deux points dans la forme normale de Hesse et on obtient −2 et 3. Alors…</p>
+            <div class="b-mc"><button>ils sont du même côté.</button><button>ils sont de côtés différents.</button><button>l’un est dans le plan.</button></div>
+        <div class="b-sol"><p>Signes différents</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Donne des équations des trois axes de coordonnées vus comme des droites.</p>
+            </div>
+        <div class="b-sol"><p>Axe des $x$ : $\vec{x} = t \cdot (1\,;\,0\,;\,0)$, axe des $y$ : $t \cdot (0\,;\,1\,;\,0)$, axe des $z$ : $t \cdot (0\,;\,0\,;\,1)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec la 12e année :</b> vérifie avec des vecteurs si $A(1\,;\,1\,;\,1)$, $B(3\,;\,2\,;\,3)$, $C(7\,;\,4\,;\,7)$ sont alignés.</p>
+            </div>
+        <div class="b-sol"><p>$\vec{AB} = (2\,;\,1\,;\,2)$, $\vec{AC} = (6\,;\,3\,;\,6) = 3\vec{AB}$ : colinéaires avec le point commun $A$, donc oui.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Calcule l’aire du parallélogramme de sommets $A(1\,;\,0\,;\,2)$, $B(4\,;\,1\,;\,2)$, $C(5\,;\,3\,;\,4)$, $D(2\,;\,2\,;\,4)$.</p>
+            </div>
+        <div class="b-sol"><p>$\vec{AB} = (3\,;\,1\,;\,0)$, $\vec{AD} = (1\,;\,2\,;\,2)$, $\vec{AB} \times \vec{AD} = (2\,;\,-6\,;\,5)$, aire $\sqrt{4 + 36 + 25} = \sqrt{65} \approx 8{,}06$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Exercice ouvert :</b> donne trois plans différents qui passent tous par $A(1\,;\,1\,;\,1)$ et $B(3\,;\,1\,;\,2)$, chacun une fois sous forme paramétrique, par une équation cartésienne et sous sa forme normale de Hesse. Qu’ont tous ces plans en commun ?</p>
+            </div>
+        <div class="b-hint"><p>Ils contiennent tous la droite $(AB)$. Comme deuxième vecteur directeur, tu peux prendre n’importe quel vecteur qui n’est pas colinéaire à $\vec{AB} = (2\,;\,0\,;\,1)$.</p>
+            </div>
+        <div class="b-sol"><p>Par exemple avec $\vec{v} = (0\,;\,1\,;\,0)$ : $\vec{n} = (2\,;\,0\,;\,1) \times (0\,;\,1\,;\,0) = (-1\,;\,0\,;\,2)$, $-x + 2z = 1$, forme normale de Hesse $\tfrac{-x + 2z - 1}{\sqrt5} = 0$. Avec $\vec{v} = (0\,;\,0\,;\,1)$ : $\vec{n} = (0\,;\,-2\,;\,0)$, donc $y = 1$.</p>
+            <p>Tous les plans passant par $A$ et $B$ contiennent la droite $(AB)$ : ils forment un « faisceau de plans », qui tourne autour de cette droite comme les pages d’un livre ouvert autour de son dos.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Descartes et les coordonnées" data-toc-k="X" data-toc-short="Descartes">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">LA GÉOMÉTRIE DEVIENT CALCUL</span></div>
+        <h2>René Descartes et la géométrie analytique</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Jusqu’au XVIIe siècle, la géométrie et le calcul étaient deux mondes séparés. En 1637, le philosophe français René Descartes publia, en appendice à son
+                « Discours de la méthode », le traité « La Géométrie ». Il y traduisait des problèmes géométriques en équations : les points devenaient des nombres, les courbes des formules.</p>
+            <p>C’est ainsi qu’est née la <b>géométrie analytique</b>, que tu étudies dans ce domaine au choix. Les repères que nous appelons « cartésiens » portent son nom latinisé, Cartesius.
+                Au même moment, Pierre de Fermat avait d’ailleurs eu des idées très semblables.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> René Descartes : La Géométrie. Appendice au Discours de la méthode, Leyde 1637.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>DROITE</h4><p>$\vec{x} = \vec{p} + t\,\vec{u}$ · par $A$, $B$ : $\vec{OA} + t\,\vec{AB}$</p>
+            </div>
+        <div>
+            <p>$(1\,;\,2\,;\,1) + t\,(1\,;\,-1\,;\,2)$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>TEST D’APPARTENANCE</h4><p>Les trois lignes doivent donner le même $t$.</p>
+            </div>
+        <div>
+            <p>$Q(3\,;\,0\,;\,5)$ : $t = 2$ ✓</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>PLAN</h4><p>$\vec{x} = \vec{a} + r\,\vec{u} + s\,\vec{v}$</p>
+            </div>
+        <div>
+            <p>Par trois points : $\vec{OA} + r\,\vec{AB} + s\,\vec{AC}$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>PRODUIT VECTORIEL</h4><p>$\vec{u} \times \vec{v}$ est orthogonal aux deux, norme = aire du parallélogramme.</p>
+            </div>
+        <div>
+            <p>$(-4\,;\,3\,;\,0) \times (-4\,;\,0\,;\,2) = (6\,;\,8\,;\,12)$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>ÉQUATION CARTÉSIENNE</h4><p>$n_1 x + n_2 y + n_3 z = d$, $\vec{n}$ est un vecteur normal.</p>
+            </div>
+        <div>
+            <p>$3x + 4y + 6z = 12$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>FORME NORMALE DE HESSE</h4><p>diviser par $|\vec{n}|$ ; remplacer par un point donne la distance avec un signe.</p>
+            </div>
+        <div>
+            <p>$\tfrac13(2x + 2y - z - 6) = 0$, $P(4\,;\,4\,;\,1)$ : 3</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+        <div class="b-q" data-ans="3" data-ph="a ="><p class="b-q-text">Pour quel $a$ le point $(a\,;\,4\,;\,0)$ est-il sur $\vec{x} = (1\,;\,2\,;\,2) + t\,(1\,;\,1\,;\,-1)$ ?</p>
+            <div class="b-sol"><p>$a = 3$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">De combien de vecteurs directeurs un plan a-t-il besoin sous forme paramétrique ?</p>
+            <div class="b-mc"><button>un</button><button>deux, non parallèles</button><button>trois</button></div>
+        <div class="b-sol"><p>Deux directions non parallèles.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+        <div class="b-q" data-ans="12" data-ph="nombre"><p class="b-q-text">Quelle est la troisième composante de $(-4\,;\,3\,;\,0) \times (-4\,;\,0\,;\,2)$ ?</p>
+            <div class="b-sol"><p>$0 + 12 = 12$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="5" data-ph="distance"><p class="b-q-text">Distance de $Q(1\,;\,2\,;\,3)$ au plan $2x - y + 2z = -9$ ?</p>
+            <div class="b-sol"><p>$\tfrac{|2 - 2 + 6 + 9|}{3}$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="8,062" data-tol="0.005" data-ph="aire"><p class="b-q-text">Aire du parallélogramme construit sur $(3\,;\,1\,;\,0)$ et $(1\,;\,2\,;\,2)$ ?</p>
+            <div class="b-sol"><p>$\sqrt{65} \approx 8{,}062$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="vektoren" href="../../vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTEURS</span><span class="b-lab-what">Droites et plans dans le laboratoire</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-skalar-vektorprodukt.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PRODUIT SCALAIRE ET PRODUIT VECTORIEL</span><span class="b-lab-what">Vecteur normal et aires</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-hesse.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FORME NORMALE DE HESSE</span><span class="b-lab-what">Distances avec un signe</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-vektoren-anwendungen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VECTEURS : APPLICATIONS</span><span class="b-lab-what">Exercices variés</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 13e année, Leistungskurs · domaine au choix 1 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-fr/vektoren.js"></script>
+<script src="../../js/buch-gy12lk.js"></script>
+<script src="../../js/buch-fr/gy12lk.js"></script>
+</body>
+</html>
