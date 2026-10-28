@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 12 LK · Chapitre 2.7 · Fonctions à partir de conditions et régression | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Des fonctions à partir de conditions, modèles de régression avec des outils numériques. Chapitre 2.7 du manuel interactif Mathématiques · Berufliches Gymnasium 12 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 12 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.7 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.7 · DOMAINE D’APPRENTISSAGE 2 · AVRIL</p>
+            <h1>Fonctions à partir de conditions et régression</h1>
+            <p class="b-hero-lead">Une route doit se raccorder à une autre sans point anguleux : quelle fonction décrit le tronçon de raccordement ? Des mesures de distances de freinage sont dispersées : quelle courbe convient le mieux ?
+                Dans le premier cas, tu connais des <b>conditions exactes</b> et tu en déduis une fonction ; dans le second, tu as des <b>données</b> et tu laisses le CAS chercher la meilleure fonction d’un type choisi.
+                Dans les deux cas, les mathématiques décrivent le monde avec des fonctions.</p>
+            <div class="b-chips"><span class="b-chip">9 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">MODÉLISER</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x&lt;0?0:(x&gt;4?2:-0.0625*x^3+0.375*x^2)"]' data-labels='["raccordement"]' data-lat="[4.6]" data-pts="[[0,0],[4,2]]" data-x="-2,6.5" data-y="-1,3" data-h="240" data-aria="Un tronçon de raccordement sans point anguleux entre deux routes horizontales"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>traduire des propriétés d’une courbe en <b>équations</b> et déterminer des fonctions à partir de conditions (<b>carte d’identité d’une fonction</b>), aussi avec des fonctions $\mathrm{e}$</li>
+                <li>résoudre les <b>systèmes d’équations</b> obtenus, aussi avec des outils numériques</li>
+                <li>déterminer avec le CAS une <b>fonction de régression</b> pour des valeurs mesurées, choisir le type de façon justifiée et évaluer les prévisions de façon critique</li>
+                <li>comprendre la <b>méthode des moindres carrés</b> comme un problème d’optimisation</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Résous le système $x + y = 5$, $x - y = -1$. Que vaut $x$ ?</p>
+            <div class="b-sol"><p>On additionne : $2x = 4$, $x = 2$ (et $y = 3$)</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">$f(x) = ax^2 + bx + c$ avec $a = 1$, $b = 2$, $c = 2$. Que vaut $f(1)$ ?</p>
+            <div class="b-sol"><p>$1 + 2 + 2 = 5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">En quelle valeur de $x$ la fonction $f(x) = -x^2 + 6x$ atteint-elle son maximum ?</p>
+            <div class="b-sol"><p>$-2x + 6 = 0$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="18" data-ph="cm²"><p class="b-q-text">Un rectangle mesure 6 cm de long, et sa largeur vaut la moitié de sa longueur. Quelle est son aire ?</p>
+            <div class="b-sol"><p>$6 \cdot 3 = 18$ cm²</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">COMBLER LE DÉCALAGE</div>
+        <div class="b-text"><p>Deux routes droites se terminent de façon décalée : l’une en $(0\,;\,0)$ dans la direction de l’axe des abscisses, l’autre en $(4\,;\,2)$, elle aussi horizontale.</p>
+            <ul>
+                <li>Esquissez un tronçon de raccordement sans cassure. Quelles conditions doit-il remplir ?</li>
+                <li>Combien de conditions cela fait-il ? Quel type de fonction convient ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">SUR QUELLE DISTANCE LA VOITURE FREINE-T-ELLE ?</div>
+        <div class="b-text"><p>Distances de freinage mesurées : 30 km/h : 9,5 m, 50 km/h : 24 m, 70 km/h : 50 m, 90 km/h : 80 m, 110 km/h : 122 m, 130 km/h : 168 m.</p>
+            <ul>
+                <li>Placez les valeurs dans un repère. Quel type de fonction convient ?</li>
+                <li>Que prévoyez-vous pour 150 km/h ? Êtes-vous sûrs de vous ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Déterminer des fonctions" data-toc-k="1" data-toc-short="1 Déterminer">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">6 HEURES</span></div>
+        <h2><span class="b-no">1</span>Déterminer une fonction à partir de ses propriétés</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>On cherche une parabole passant par les points $(0\,;\,1)$, $(1\,;\,0)$ et $(3\,;\,4)$. On pose : $f(x) = ax^2 + bx + c$, avec trois nombres inconnus.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Chaque point fournit une équation : $f(0) = 1 \Rightarrow c = 1$ ; $f(1) = 0 \Rightarrow a + b + c = 0$ ; $f(3) = 4 \Rightarrow 9a + 3b + c = 4$.
+                Le système d’équations (méthode de Gauss vue en 11e année) donne $a = 1$, $b = -2$, $c = 1$, donc $f(x) = x^2 - 2x + 1 = (x - 1)^2$.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · LA CARTE D’IDENTITÉ EN ÉQUATIONS</div>
+        <div class="b-text"><p>Une fonction polynôme de degré $n$ a $n + 1$ coefficients. Il faut donc $n + 1$ conditions.</p>
+            <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th>Propriété</th><th>Équation</th></tr>
+                    <tr><td>Le point $P(x_0\,;\,y_0)$ est sur la courbe</td><td>$f(x_0) = y_0$</td></tr>
+                    <tr><td>Extremum (tangente horizontale) en $x_0$</td><td>$f'(x_0) = 0$</td></tr>
+                    <tr><td>Point d’inflexion en $x_0$</td><td>$f''(x_0) = 0$</td></tr>
+                    <tr><td>Pente $m$ (tangente) en $x_0$</td><td>$f'(x_0) = m$</td></tr>
+                    <tr><td>fonction paire / impaire</td><td>seulement des exposants pairs / impairs dans l’expression de départ</td></tr>
+                    </table></div>
+        <p>Méthode : poser $f$, $f'$, $f''$ · traduire les conditions · résoudre le système · <b>vérifier</b> que toutes les conditions sont remplies.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Un maximum, ce sont deux conditions :</b> $H(2\,;\,4)$ signifie $f(2) = 4$ <b>et</b> $f'(2) = 0$.</p>
+            <p class="b-note"><b>Outils numériques :</b> à partir de quatre inconnues, la calculatrice vaut la peine (fonction de résolution de systèmes ou fonction matricielle).</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · UNE FONCTION À PARTIR DE CONDITIONS</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une carte d’identité et déplace les points. Le système d’équations et la solution s’adaptent aussitôt.</p>
+            <div data-widget="steckbrief"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · MAXIMUM ET MINIMUM</div>
+        <div class="b-text"><p>Une fonction de degré 3 passe par l’origine, a le maximum $H(1\,;\,2)$ et un extremum en $x = 3$. Détermine $f$.</p>
+            </div>
+        <div class="b-sol"><p>$f(0) = 0 \Rightarrow d = 0$ · $f(1) = 2$ : $a + b + c = 2$ · $f'(1) = 0$ : $3a + 2b + c = 0$ · $f'(3) = 0$ : $27a + 6b + c = 0$.</p>
+            <p>Solution : $a = 0{,}5$, $b = -3$, $c = 4{,}5$. <span class="b-res">$f(x) = 0{,}5x^3 - 3x^2 + 4{,}5x$</span>. Vérification : $f'(x) = 1{,}5(x - 1)(x - 3)$, $f''(1) = -3 < 0$. ✓</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · AVEC UNE SYMÉTRIE</div>
+        <div class="b-text"><p>Une fonction paire de degré 4 coupe l’axe des ordonnées en 2 et a un minimum en $(1\,;\,0)$.</p>
+            </div>
+        <div class="b-sol"><p>On pose $f(x) = ax^4 + bx^2 + c$. $c = 2$, $f(1) = a + b + 2 = 0$, $f'(1) = 4a + 2b = 0$. Donc $b = -2a$, $a = 2$, $b = -4$.
+                <span class="b-res">$f(x) = 2x^4 - 4x^2 + 2 = 2(x^2 - 1)^2$</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Traduis en équations : la courbe d’une fonction de degré 3 a le point d’inflexion $W(1\,;\,3)$ et coupe l’axe des ordonnées en $-1$.</p>
+            </div>
+        <div class="b-sol"><p>$f(1) = 3$, $f''(1) = 0$, $f(0) = -1$. Cela fait trois conditions ; pour le degré 3, il en manque encore une.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine la parabole passant par $(0\,;\,3)$, $(1\,;\,2)$ et $(2\,;\,3)$.</p>
+            </div>
+        <div class="b-sol"><p>$c = 3$, $a + b = -1$, $4a + 2b = 0$ : $a = 1$, $b = -2$. $f(x) = x^2 - 2x + 3$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Résous l’exploration « Combler le décalage » : détermine une fonction de degré 3 telle que $f(0) = 0$, $f'(0) = 0$, $f(4) = 2$, $f'(4) = 0$.</p>
+            </div>
+        <div class="b-sol"><p>$d = 0$, $c = 0$ ; $64a + 16b = 2$, $48a + 8b = 0$ ⇒ $b = -6a$, $64a - 96a = 2$, $a = -\tfrac{1}{16}$, $b = \tfrac38$.
+                <span class="b-res">$f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</span> ; le point d’inflexion se trouve exactement au milieu, en $(2\,;\,1)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une fonction impaire de degré 3 a un minimum en $(1\,;\,-2)$. Détermine-la.</p>
+            </div>
+        <div class="b-sol"><p>On pose $f(x) = ax^3 + cx$. $a + c = -2$, $3a + c = 0$ : $a = 1$, $c = -3$. $f(x) = x^3 - 3x$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un pont doit enjamber une rivière de 40 m de large sous la forme d’un arc parabolique, haut de 8 m au milieu. Détermine une équation, l’origine étant au milieu, au niveau de l’eau. Quelle est la pente de l’arc au bord de la rive ?</p>
+            </div>
+        <div class="b-sol"><p>Symétrie : $f(x) = ax^2 + 8$, $f(20) = 0 \Rightarrow a = -0{,}02$. $f'(x) = -0{,}04x$, $f'(-20) = 0{,}8$ : pente de 80 %, angle $\arctan 0{,}8 \approx 38{,}7°$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Toutes les conditions ne mènent pas à une fonction polynôme. Une population croît selon $f(x) = a \cdot \mathrm{e}^{bx}$. Elle vaut 3 au début et 12 au bout de 2 ans (en milliers).
+                Détermine $a$ et $b$. Au bout de combien d’années croît-elle de 10 000 par an ?</p>
+            </div>
+        <div class="b-hint"><p>Le système d’équations n’est pas linéaire. Divise les deux équations l’une par l’autre.</p>
+            </div>
+        <div class="b-sol"><p>$f(0) = a = 3$. $f(2) = 3\,\mathrm{e}^{2b} = 12 \iff \mathrm{e}^{2b} = 4 \iff b = \ln 2 \approx 0{,}693$. Donc $f(x) = 3\,\mathrm{e}^{x \ln 2} = 3 \cdot 2^x$.</p>
+            <p>$f'(x) = 3 \ln 2 \cdot 2^x = 10 \iff 2^x = \tfrac{10}{3\ln 2} \approx 4{,}81 \iff x \approx 2{,}27$. <span class="b-res">Au bout d’un peu plus de 2,2 ans.</span></p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="4" data-ph="nombre"><p class="b-q-text">Combien de conditions faut-il pour une fonction de degré 3 ?</p>
+            <div class="b-sol"><p>Quatre coefficients $a, b, c, d$.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="nombre"><p class="b-q-text">Combien d’équations fournit « maximum $H(2\,;\,5)$ » ?</p>
+            <div class="b-sol"><p>$f(2) = 5$ et $f'(2) = 0$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-0,02" data-tol="0.0001" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + 8$ doit passer par $(20\,;\,0)$. Que vaut $a$ ?</p>
+            <div class="b-sol"><p>$400a = -8$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Régression" data-toc-k="2" data-toc-short="2 Régression">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">3 HEURES</span></div>
+        <h2><span class="b-no">2</span>Régression</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Les distances de freinage ne sont pas exactement sur une courbe : les valeurs mesurées sont toujours dispersées. On cherche la fonction d’un type choisi qui convient le mieux <b>dans l’ensemble</b>.
+                Le CAS prend pour cela la fonction pour laquelle la somme des carrés des écarts verticaux est la plus petite : la <b>méthode des moindres carrés</b>.
+                Pourquoi justement des carrés ? Parce qu’alors les écarts positifs et négatifs ne se compensent pas, et qu’on trouve le minimum avec la dérivée (exemple 4).</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÉGRESSION</div>
+        <div class="b-text"><p>Lors d’une <b>régression</b>, le CAS détermine, pour des points de mesure $(x_i\,;\,y_i)$, la fonction d’un type donné pour laquelle $\sum (y_i - f(x_i))^2$ est minimale.</p>
+            <p>Tu choisis le <b>type</b> de façon justifiée : d’après le contexte (par exemple $s \sim v^2$ pour la distance de freinage) et d’après l’allure des points, pas seulement d’après un indicateur.</p>
+            <p>Le <b>coefficient de détermination</b> $r^2$ est compris entre 0 et 1. Proche de 1 signifie : les points sont près de la courbe. Cela ne prouve pas que le modèle est juste.</p>
+            <p>Les prévisions en dehors des valeurs mesurées (<b>extrapolation</b>) sont incertaines, d’autant plus qu’on s’en éloigne.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Dans le CAS :</b> <code>LinReg</code>, <code>QuadReg</code>, <code>CubicReg</code>, <code>ExpReg</code>, <code>PowerReg</code>. Les valeurs sont dans deux listes.</p>
+            <p class="b-note"><b>Rester critique :</b> un polynôme de degré élevé passe presque par chaque point, $r^2 \approx 1$, et prédit pourtant n’importe quoi.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA MEILLEURE COURBE</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une série de mesures et un type de modèle. Compare $r^2$ et la prévision. Tu peux déplacer les points.</p>
+            <div data-widget="regression"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · LINÉAIRE OU QUADRATIQUE ?</div>
+        <div class="b-text"><p>Étudie les distances de freinage de l’exploration avec une régression linéaire et une régression quadratique. Quelle est la meilleure prévision pour 150 km/h ?</p>
+            </div>
+        <div class="b-sol"><p>Linéaire : $y \approx 1{,}595x - 52{,}0$ avec $r^2 \approx 0{,}968$, prévision 187 m. Quadratique : $y \approx 0{,}00989x^2 + 0{,}0129x - 0{,}27$ avec $r^2 \approx 0{,}9997$, prévision 224 m.</p>
+            <p>0,968 semble bien aussi, mais les points sont d’abord au-dessus, puis en dessous, puis de nouveau au-dessus de la droite : ils s’incurvent. En physique, l’énergie cinétique croît avec $v^2$.
+                    <span class="b-res">Le modèle quadratique est justifié : environ 224 m.</span> Une droite prédirait même une distance de freinage négative à 30 km/h.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · POURQUOI LES MOINDRES CARRÉS ?</div>
+        <div class="b-text"><p>On cherche la droite passant par l’origine $y = mx$ qui convient le mieux aux points $(1\,;\,2)$, $(2\,;\,3)$, $(3\,;\,7)$. Établis la formule de $m$.</p>
+            </div>
+        <div class="b-sol"><p>$S(m) = \sum (y_i - m x_i)^2$. D’après la règle de la chaîne : $S'(m) = -2 \sum x_i (y_i - m x_i) = 0 \iff m = \dfrac{\sum x_i y_i}{\sum x_i^2}$. Comme $S''(m) = 2 \sum x_i^2 > 0$, c’est un minimum.</p>
+            <p>Ici : <span class="b-res">$m = \dfrac{2 + 6 + 21}{1 + 4 + 9} = \dfrac{29}{14} \approx 2{,}07$</span>. La régression est donc un problème d’optimisation.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Quel type de fonction convient ? Justifie d’après le contexte. a) une bougie se consume &nbsp; b) une distance de freinage &nbsp; c) un thé chaud refroidit jusqu’à la température de la pièce &nbsp; d) un crédit à taux fixe</p>
+            </div>
+        <div class="b-sol"><p>a) linéaire, la même quantité de cire par heure &nbsp; b) quadratique, $s \sim v^2$ &nbsp; c) exponentielle pour l’écart de température, qui diminue chaque minute du même facteur &nbsp; d) exponentielle, croissance d’un facteur fixe</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine avec le CAS la droite de régression des points $(1\,;\,2{,}1)$, $(2\,;\,3{,}9)$, $(3\,;\,6{,}2)$, $(4\,;\,7{,}8)$ et $r^2$. Que prédit-elle pour $x = 10$ ?</p>
+            </div>
+        <div class="b-sol"><p>$y = 1{,}94x + 0{,}15$, $r^2 \approx 0{,}996$. Pour $x = 10$ : 19,55, avec prudence, car 10 est très en dehors des valeurs mesurées.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Population mondiale (en milliards) : 1950 : 2,5 ; 1970 : 3,7 ; 1990 : 5,32 ; 2010 : 6,99 ; 2020 : 7,84, et les années intermédiaires dans le widget. Avec $x$ = années depuis 1950, détermine une régression exponentielle et une régression linéaire.
+                Compare leurs prévisions pour 2050 avec la projection des Nations unies d’environ 9,7 milliards.</p>
+            </div>
+        <div class="b-sol"><p>Exponentielle (avec les huit valeurs) : $y \approx 2{,}61 \cdot 1{,}0167^x$, pour 2050 environ 13,7 milliards. Linéaire : $y \approx 0{,}078x + 2{,}27$, pour 2050 environ 10,1 milliards.
+                Le taux de croissance baisse depuis des décennies, la fonction exponentielle surestime fortement. Aucune des courbes ne connaît les causes de l’évolution.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Pour les distances de freinage, une parabole passant par l’origine $y = ax^2$ convient aussi. Détermine $a$ avec la formule de l’exemple 4, adaptée à $y = a \cdot x^2$, et compare la prévision pour 150 km/h.</p>
+            </div>
+        <div class="b-sol"><p>Avec $u_i = x_i^2$, c’est une droite passant par l’origine en $u$ : $a = \tfrac{\sum x_i^2 y_i}{\sum x_i^4} \approx 0{,}00998$. Prévision $0{,}00998 \cdot 150^2 \approx 225$ m, presque comme la régression quadratique complète.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Quelle constante $c$ convient le mieux, au sens des moindres carrés, à des valeurs mesurées $y_1, \ldots, y_n$ ? Démontre-le avec la dérivée de $S(c) = \sum (y_i - c)^2$.</p>
+            </div>
+        <div class="b-sol"><p>$S'(c) = -2 \sum (y_i - c) = -2\left(\sum y_i - nc\right) = 0 \iff c = \tfrac1n \sum y_i = \bar{y}$, et $S''(c) = 2n > 0$. La moyenne est la meilleure constante.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2,214" data-tol="0.001" data-ph="m ="><p class="b-q-text">Détermine $m$ pour la meilleure droite passant par l’origine pour $(1\,;\,2)$, $(2\,;\,4)$, $(3\,;\,7)$ (trois décimales).</p>
+            <div class="b-sol"><p>$\tfrac{2 + 8 + 21}{14} = \tfrac{31}{14} \approx 2{,}214$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="6" data-ph="c ="><p class="b-q-text">Quelle constante convient le mieux, au sens des moindres carrés, aux valeurs 3, 5 et 10 ?</p>
+            <div class="b-sol"><p>La moyenne : 6</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Une régression donne $r^2 = 0{,}99$. Qu’en déduit-on ?</p>
+            <div class="b-mc"><button>Le modèle est certainement juste.</button><button>Les points sont près de la courbe.</button><button>Les prévisions très en dehors des mesures sont fiables.</button></div>
+        <div class="b-sol"><p>Seulement que les points sont près de la courbe. Sur le modèle et l’extrapolation, $r^2$ ne dit rien.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="12">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine la fonction du second degré de sommet $S(2\,;\,-1)$ qui passe par $(0\,;\,3)$.</p>
+            </div>
+        <div class="b-sol"><p>$f(x) = a(x - 2)^2 - 1$, $f(0) = 4a - 1 = 3 \Rightarrow a = 1$. $f(x) = (x - 2)^2 - 1 = x^2 - 4x + 3$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une fonction de degré 3 est symétrique par rapport à l’origine, a un extremum en $x = 1$ et passe par $(2\,;\,4)$. Détermine-la et donne la nature de l’extremum en $x = 1$.</p>
+            </div>
+        <div class="b-sol"><p>$f(x) = ax^3 + cx$ : $3a + c = 0$, $8a + 2c = 4$, donc $2a = 4$, $a = 2$, $c = -6$ : $f(x) = 2x^3 - 6x$. $f''(1) = 12 > 0$ : minimum $T(1\,;\,-4)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec la 11e année :</b> écris sous forme de matrice le système d’équations d’une fonction de degré 3 passant par $(0\,;\,1)$, $(1\,;\,0)$, $(-1\,;\,4)$ et $(2\,;\,7)$, et résous-le avec la méthode du pivot de Gauss ou le CAS.</p>
+            </div>
+        <div class="b-sol"><p>$\left(\begin{array}{cccc|c} 0 & 0 & 0 & 1 & 1 \\ 1 & 1 & 1 & 1 & 0 \\ -1 & 1 & -1 & 1 & 4 \\ 8 & 4 & 2 & 1 & 7 \end{array}\right)$ pour $(a, b, c, d)$. Solution $f(x) = x^3 + x^2 - 3x + 1$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Pour déterminer une fonction de degré 4, quelqu’un ne donne que quatre conditions. Justifie qu’il y a alors une infinité de solutions, et explique comment une symétrie peut réduire le nombre d’inconnues.</p>
+            </div>
+        <div class="b-sol"><p>Cinq coefficients, mais seulement quatre équations : un coefficient reste libre, le système a une famille de solutions. Si la courbe est symétrique par rapport à l’axe des ordonnées, $b$ et $d$ disparaissent ($f(x) = ax^4 + cx^2 + e$) ; trois conditions suffisent alors.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : Gauss retrouve Cérès" data-toc-k="X" data-toc-short="Cérès">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+        <h2>Comment Gauss retrouva une planète perdue</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Le 1er janvier 1801, Giuseppe Piazzi découvrit à Palerme un faible point lumineux qui se déplaçait parmi les étoiles : Cérès, classée aujourd’hui comme planète naine.
+                Il ne put l’observer que quelques semaines, puis elle disparut dans la lumière du Soleil. Calculer son orbite à partir de si peu de mesures semblait impossible.</p>
+            <p>Carl Friedrich Gauss, 24 ans, de Brunswick, essaya avec une idée nouvelle : il chercha l’orbite pour laquelle la somme des carrés des écarts à toutes les mesures
+                est <b>la plus petite</b>. Grâce à sa prévision, Franz Xaver von Zach et Heinrich Olbers retrouvèrent Cérès au tournant de l’année 1801/1802, presque exactement à l’endroit calculé.</p>
+            <p>La <b>méthode des moindres carrés</b> se cache aujourd’hui encore dans chaque régression de ton CAS.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> Carl Friedrich Gauss : « Theoria motus corporum coelestium in sectionibus conicis solem ambientium », Hambourg 1809.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>CARTE D’IDENTITÉ</h4><p>Degré $n$ : $n + 1$ conditions. Point → $f(x_0) = y_0$, extremum → $f'(x_0) = 0$, point d’inflexion → $f''(x_0) = 0$.</p>
+            </div>
+        <div>
+            <p>Raccordement : $f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>VÉRIFICATION</h4><p>Contrôler toutes les conditions, y compris la nature de l’extremum.</p>
+            </div>
+        <div>
+            <p>$f''(1) = -3 < 0$ : c’est bien un maximum</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>RÉGRESSION</h4><p>Choisir le type de façon justifiée ; le CAS minimise $\sum (y_i - f(x_i))^2$. $r^2$ proche de 1 : points proches de la courbe, ce n’est pas une preuve que le modèle est bon.</p>
+            </div>
+        <div>
+            <p>Distance de freinage : quadratique, environ 224 m à 150 km/h</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>MOINDRES CARRÉS</h4><p>Un problème d’optimisation : $S'(m) = 0$ donne la meilleure droite passant par l’origine, $m = \tfrac{\sum x_i y_i}{\sum x_i^2}$.</p>
+            </div>
+        <div>
+            <p>Meilleure constante : la moyenne</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+        <div class="b-q" data-ans="3" data-ph="nombre"><p class="b-q-text">Combien de conditions faut-il pour une parabole ?</p>
+            <div class="b-sol"><p>$a$, $b$, $c$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="a ="><p class="b-q-text">Une parabole $f(x) = ax^2 + bx + c$ passe par $(0\,;\,0)$, $(1\,;\,1)$ et $(2\,;\,4)$. Que vaut $a$ ?</p>
+            <div class="b-sol"><p>C’est la parabole $y = x^2$ : $a = 1$, $b = c = 0$.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="5" data-ph="c ="><p class="b-q-text">Quelle constante convient le mieux, au sens des moindres carrés, aux valeurs mesurées 2, 4 et 9 ?</p>
+            <div class="b-sol"><p>La moyenne $\tfrac{15}{3} = 5$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+        <div class="b-q" data-ans="1,571" data-tol="0.001" data-ph="m ="><p class="b-q-text">Détermine $m$ pour la meilleure droite passant par l’origine pour $(1\,;\,1)$, $(2\,;\,3)$, $(3\,;\,5)$ (trois décimales).</p>
+            <div class="b-sol"><p>$\tfrac{1 + 6 + 15}{1 + 4 + 9} = \tfrac{22}{14} \approx 1{,}571$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,693" data-tol="0.001" data-ph="b ="><p class="b-q-text">$f(x) = a \cdot \mathrm{e}^{bx}$ passe par $(0\,;\,5)$ et $(1\,;\,10)$. Combien vaut $b$ (trois décimales) ?</p>
+            <div class="b-sol"><p>$a = 5$, $\mathrm{e}^b = 2$, $b = \ln 2 \approx 0{,}693$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Une régression donne $r^2 = 0{,}99$. Qu’en déduit-on ?</p>
+            <div class="b-mc"><button>Le modèle est certainement juste.</button><button>Les points sont près de la courbe.</button><button>Les prévisions très en dehors des mesures sont fiables.</button></div>
+        <div class="b-sol"><p>Seulement la proximité des points à la courbe.</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-steckbrief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FONCTIONS À PARTIR DE CONDITIONS</span><span class="b-lab-what">Déterminer des fonctions</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11lk-regression.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RÉGRESSION</span><span class="b-lab-what">Des modèles pour des mesures</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 12e année, Leistungskurs · domaine d’apprentissage 2 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe (2026).</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+</body>
+</html>
