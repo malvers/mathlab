@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics 13 Advanced · Chapter E2.1 · Multiplying and inverting matrices | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Matrix product, identity matrix, inverse matrix, systems of equations with the inverse. Chapter E2.1 of the interactive textbook Mathematics · Vocational Grammar School 13 · Advanced Course: explanations, examples, exercises at three levels, self-checks and labs to try out.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHEMATICS · VOCATIONAL GRAMMAR SCHOOL 13 · ADVANCED COURSE</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapter"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contents of the chapter">
+        <p class="b-toc-title">CHAPTER E2.1 · ELECTIVE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Opener" data-toc-k="O" data-toc-short="Opener" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPTER E2.1 · ELECTIVE 2 · JANUARY</p>
+            <h1>Multiplying and inverting matrices</h1>
+            <p class="b-hero-lead">A bakery has two tables: how much flour and butter goes into each pastry, and how much each café orders. How much flour does it need per café?
+                The <b>product of two matrices</b> links exactly such tables. And backwards: to work out the numbers of pieces from what was used, there is the <b>inverse matrix</b>.
+                You calculate with both throughout Elective 2, from the Gozinto graph to the beetle population.</p>
+            <div class="b-chips"><span class="b-chip">8 LESSONS</span><span class="b-chip">3 UNITS</span><span class="b-chip">ELECTIVE 2</span></div>
+        </div>
+        <div class="b-hero-art"><svg viewBox="0 0 320 240" role="img" aria-label="Falk's scheme: on the left the matrix A, at the top the matrix B, at the bottom right the product; a row of A and a column of B meet in one cell of the product">
+            <g style="fill:none;stroke:#6d8199;stroke-width:1.4">
+                <rect x="20" y="110" width="110" height="110" rx="8"/><rect x="150" y="10" width="150" height="80" rx="8"/><rect x="150" y="110" width="150" height="110" rx="8"/>
+            </g>
+            <rect x="26" y="146" width="98" height="30" rx="6" style="fill:rgba(245,194,66,0.25);stroke:rgb(245,194,66);stroke-width:1.6"/>
+            <rect x="222" y="16" width="34" height="68" rx="6" style="fill:rgba(127,216,238,0.22);stroke:#7fd8ee;stroke-width:1.6"/>
+            <rect x="222" y="146" width="34" height="30" rx="6" style="fill:rgba(230,130,190,0.35);stroke:#e682be;stroke-width:2"/>
+            <line x1="124" y1="161" x2="218" y2="161" style="stroke:rgb(245,194,66);stroke-width:1.4;stroke-dasharray:4 4"/>
+            <line x1="239" y1="84" x2="239" y2="142" style="stroke:#7fd8ee;stroke-width:1.4;stroke-dasharray:4 4"/>
+            <text x="75" y="236" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">A</text>
+            <text x="225" y="104" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">B</text>
+            <text x="225" y="236" text-anchor="middle" style="fill:#e8edf5;font:700 15px Raleway,sans-serif">A · B</text>
+            <text x="239" y="166" text-anchor="middle" style="fill:#e8edf5;font:700 13px Raleway,sans-serif">c</text>
+        </svg></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">WHAT YOU WILL LEARN IN THIS CHAPTER</div>
+            <div class="b-text"><ul>
+                <li><b>multiply two compatible matrices</b> and interpret the product in context</li>
+                <li>know the rules: <b>no commutative law</b>, the associative law, the identity matrix, <b>powers</b> of square matrices</li>
+                <li>find the <b>inverse matrix</b> with the Gauss-Jordan method, for $2 \times 2$ matrices also with a formula</li>
+                <li>solve <b>systems of linear equations</b> and <b>matrix equations</b> with the inverse, also with a CAS</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: CAN YOU ALREADY DO THIS?</div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">A matrix has 2 rows and 3 columns. What is its type?</p><div class="b-mc"><button>$(2, 3)$</button><button>$(3, 2)$</button><button>$(6, 1)$</button></div><div class="b-sol"><p>Rows first, then columns.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="Entry"><p class="b-q-text">$A = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}$. Which entry is in row 2, column 1 of $2 \cdot A$?</p><div class="b-sol"><p>$2 \cdot 3$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Solve $x + y = 5$, $x - y = 1$. What is $x$?</p><div class="b-sol"><p>Add: $2x = 6$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">The transpose of a $(2, 3)$ matrix has the type …</p><div class="b-mc"><button>$(2, 3)$</button><button>$(3, 2)$</button><button>$(3, 3)$</button></div><div class="b-sol"><p>Rows become columns.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">TO GET STARTED · IN GROUPS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">THE BAKERY</div>
+            <div class="b-text"><p>A bread roll contains 60 g of flour and 5 g of butter, a pretzel 80 g of flour and 10 g of butter. Café 1 orders 40 rolls and 20 pretzels, café 2 orders 30 rolls and 50 pretzels.</p>
+                <ul><li>How much flour and how much butter does the bakery need for each café? Arrange your calculation in a table.</li><li>Which numbers are multiplied by which, and added?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DOES THE ORDER MATTER?</div>
+            <div class="b-text"><p>Multiply $\begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$ and $\begin{pmatrix} 1 & 0 \\ 3 & 1 \end{pmatrix}$ following the pattern from the bakery, once in this order and once in the other.</p>
+                <ul><li>What do you notice? Is it the same with numbers?</li></ul></div>
+            <span class="b-pair">→ Unit 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">WORKING BACKWARDS</div>
+            <div class="b-text"><p>At the end of the day the bakery has used 7 kg of flour and 700 g of butter, only for rolls and pretzels.</p>
+                <ul><li>How many rolls and pretzels did it bake? Set up a system of equations.</li><li>Is there a matrix that “undoes” the ingredient calculation?</li></ul></div>
+            <span class="b-pair">→ Units 2 and 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="The matrix product" data-toc-k="1" data-toc-short="1 Product">
+    <div class="b-band"><span class="b-band-tag">UNIT 1</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">1</span>The product of two matrices</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The ingredients per piece are in $Z = \begin{pmatrix} 60 & 80 \\ 5 & 10 \end{pmatrix}$ (rows: flour, butter; columns: roll, pretzel), the orders in
+                $M = \begin{pmatrix} 40 & 30 \\ 20 & 50 \end{pmatrix}$ (rows: roll, pretzel; columns: café 1, café 2). Flour for café 1: $60 \cdot 40 + 80 \cdot 20 = 4000$ g, i.e.
+                the <b>row</b> “flour” of $Z$ times the <b>column</b> “café 1” of $M$.</p></div></div>
+            <div class="b-text"><p>This is how every entry of the product is made: row times column, multiply piece by piece and add everything up. This only works if a row of $A$ is as long as a column of $B$,
+                that is, if $A$ has as many <b>columns</b> as $B$ has <b>rows</b>. The matrices are then called <b>compatible</b>. The labels then also “fit” in meaning: the columns of $Z$ and the rows of $M$ are both the kinds of pastry.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · MATRIX PRODUCT</div>
+                <div class="b-text">
+                    <p>If $A$ has the type $(m, n)$ and $B$ the type $(n, k)$, then $C = A \cdot B$ has the type $(m, k)$ with $$c_{ij} = a_{i1} b_{1j} + a_{i2} b_{2j} + \ldots + a_{in} b_{nj} \quad \text{(row } i \text{ of } A \text{ times column } j \text{ of } B\text{)}$$</p>
+                    <p><b>Rules:</b> $(A \cdot B) \cdot C = A \cdot (B \cdot C)$ · $A \cdot (B + C) = A \cdot B + A \cdot C$ · $A \cdot I = I \cdot A = A$. But in general <b>$A \cdot B \neq B \cdot A$</b>.</p>
+                    <p><b>Powers</b> of a square matrix: $A^2 = A \cdot A$, $A^3 = A \cdot A \cdot A$, … and $A^0 = I$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Falk's scheme:</b> write $A$ at the bottom left and $B$ at the top right. Every cell of the product lies where a row of $A$ and a column of $B$ cross, as in the picture above.</p>
+            <p class="b-note"><b>Matrix times vector</b> is the special case $k = 1$: a system of equations can be written briefly as $A \cdot \vec{x} = \vec{b}$.</p>
+            <p class="b-note"><b>On the CAS</b> matrices are entered row by row, and the product with the ordinary multiplication sign.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · ROW TIMES COLUMN</div>
+        <p class="b-help" style="margin:0 0 12px">Choose the types and click on a cell of the result: the matching row and column light up. Swap the order and compare.</p>
+        <div data-widget="matrixprodukt"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 1 · THE BAKERY</div>
+            <div class="b-text"><p>Calculate $Z \cdot M$ and interpret the entries.</p></div>
+            <div class="b-sol"><p>$Z \cdot M = \begin{pmatrix} 60 \cdot 40 + 80 \cdot 20 & 60 \cdot 30 + 80 \cdot 50 \\ 5 \cdot 40 + 10 \cdot 20 & 5 \cdot 30 + 10 \cdot 50 \end{pmatrix} = \begin{pmatrix} 4000 & 5800 \\ 400 & 650 \end{pmatrix}$</p>
+                <p><span class="b-res">Café 1 needs 4 kg of flour and 400 g of butter, café 2 needs 5.8 kg of flour and 650 g of butter.</span> Rows: ingredients, columns: cafés.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 2 · ORDER AND POWER</div>
+            <div class="b-text"><p>$A = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$, $B = \begin{pmatrix} 1 & 0 \\ 3 & 1 \end{pmatrix}$. Calculate $A \cdot B$, $B \cdot A$ and $A^2$.</p></div>
+            <div class="b-sol"><p>$A \cdot B = \begin{pmatrix} 7 & 2 \\ 3 & 1 \end{pmatrix}$, $B \cdot A = \begin{pmatrix} 1 & 2 \\ 3 & 7 \end{pmatrix}$: <span class="b-res">different</span>.</p>
+                <p>$A^2 = \begin{pmatrix} 1 & 4 \\ 0 & 1 \end{pmatrix}$. Conjecture: $A^n = \begin{pmatrix} 1 & 2n \\ 0 & 1 \end{pmatrix}$.</p></div>
+        </div>
+    </div>
+    <h3>EXERCISES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $A \cdot B$ and $B \cdot A$ for $A = \begin{pmatrix} 2 & -1 \\ 0 & 3 \end{pmatrix}$ and $B = \begin{pmatrix} 1 & 4 \\ 2 & -2 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$A \cdot B = \begin{pmatrix} 0 & 10 \\ 6 & -6 \end{pmatrix}$, $B \cdot A = \begin{pmatrix} 2 & 11 \\ 4 & -8 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$A$ has the type $(2, 3)$, $B$ the type $(3, 4)$, $C$ the type $(4, 2)$. Which of the products $A \cdot B$, $B \cdot A$, $B \cdot C$, $C \cdot A$, $A \cdot B \cdot C$ exist, and what type do they have?</p></div>
+            <div class="b-sol"><p>$A \cdot B$: $(2, 4)$ · $B \cdot A$: not defined · $B \cdot C$: $(3, 2)$ · $C \cdot A$: $(4, 3)$ · $A \cdot B \cdot C$: $(2, 2)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>The bakery sells rolls for €0.40 and pretzels for €0.90. Write the prices as a row vector $\vec{p}^{\,T}$ and calculate $\vec{p}^{\,T} \cdot M$. What does the result mean?</p></div>
+            <div class="b-sol"><p>$(0.4 \;\; 0.9) \cdot \begin{pmatrix} 40 & 30 \\ 20 & 50 \end{pmatrix} = (34 \;\; 57)$: <span class="b-res">café 1 pays €34, café 2 pays €57.</span></p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For $A = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}$ calculate the powers $A^2$, $A^3$ and $A^4$. What do you notice? Which matrix is $A^{2026}$, then?</p></div>
+            <div class="b-sol"><p>$A^2 = \begin{pmatrix} -1 & 0 \\ 0 & -1 \end{pmatrix} = -I$, $A^3 = -A$, $A^4 = I$. The powers repeat with period 4. $2026 = 4 \cdot 506 + 2$: <span class="b-res">$A^{2026} = A^2 = -I$</span>.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Show that for $A = \begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}$ and $B = \begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}$ the product $A \cdot B$ is the zero matrix, although neither $A$ nor $B$ is the zero matrix. What does this mean for “cancelling” in matrix equations?</p></div>
+            <div class="b-sol"><p>$A \cdot B = \begin{pmatrix} 1 - 1 & -1 + 1 \\ 1 - 1 & -1 + 1 \end{pmatrix} = 0$. With matrices you may not conclude $A = 0$ or $B = 0$ from $A \cdot B = 0$, nor $X = Y$ from $A \cdot X = A \cdot Y$.
+                That is only allowed if $A$ has an inverse (unit 2).</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="5800" data-ph="grams"><p class="b-q-text">How many grams of flour does café 2 need (entry $c_{12}$ of $Z \cdot M$)?</p><div class="b-sol"><p>$60 \cdot 30 + 80 \cdot 50$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">$A$ has the type $(2, 3)$, $B$ the type $(3, 1)$. What type does $A \cdot B$ have?</p><div class="b-mc"><button>$(3, 3)$</button><button>$(3, 1)$</button><button>$(2, 1)$</button></div><div class="b-sol"><p>Rows of $A$, columns of $B$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="Entry"><p class="b-q-text">$A = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$. Which entry is at the top right of $A^3$?</p><div class="b-sol"><p>$A^n = \begin{pmatrix} 1 & 2n \\ 0 & 1 \end{pmatrix}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="The inverse matrix" data-toc-k="2" data-toc-short="2 Inverse">
+    <div class="b-band"><span class="b-band-tag">UNIT 2</span><span class="b-band-sub">3 LESSONS</span></div>
+    <h2><span class="b-no">2</span>The inverse matrix</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>With numbers you solve $2x = 6$ by multiplying by $2^{-1} = \tfrac12$, because $\tfrac12 \cdot 2 = 1$. For matrices we look for the same thing: a matrix $A^{-1}$ that
+                “cancels” $A$, so that $A^{-1} \cdot A = I$. Then $A \cdot \vec{x} = \vec{b}$ immediately gives $\vec{x} = A^{-1} \cdot \vec{b}$.</p></div></div>
+            <div class="b-text"><p>We are looking for $X$ with $A \cdot X = I$. Column by column this is a system of equations with the matrix $A$, only with different right-hand sides: the columns of $I$.
+                You solve them all at once by writing $I$ next to $A$ and producing the identity matrix on the left with the <b>Gauss-Jordan method</b>. What is then on the right is $A^{-1}$.
+                If this does not work because a zero row appears on the left, $A$ has <b>no</b> inverse.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · INVERSE MATRIX</div>
+                <div class="b-text">
+                    <p>A square matrix $A$ is called <b>invertible</b> (non-singular) if there is a matrix $A^{-1}$ with $A \cdot A^{-1} = A^{-1} \cdot A = I$.</p>
+                    <p><b>Gauss-Jordan:</b> $(A \mid I) \;\longrightarrow\; (I \mid A^{-1})$ by row operations. If a zero row appears on the left, $A$ is not invertible (singular).</p>
+                    <p><b>For $2 \times 2$ matrices:</b> $A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}$ is invertible exactly when $ad - bc \neq 0$, and then $$A^{-1} = \frac{1}{ad - bc} \begin{pmatrix} d & -b \\ -c & a \end{pmatrix}$$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Determinant:</b> the number $ad - bc$ is called the determinant of $A$, $\det A$ for short. Larger matrices have one, too; the CAS calculates it, and $\det A \neq 0$ again means: invertible.</p>
+            <p class="b-note"><b>Check:</b> always calculate $A \cdot A^{-1}$. If you get $I$, the inverse is correct.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVE · GAUSS-JORDAN STEP BY STEP</div>
+        <p class="b-help" style="margin:0 0 12px">Choose a matrix and go step by step. All fractions are exact. With the third matrix you see how to recognise a matrix that is not invertible.</p>
+        <div data-widget="matrixinverse"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 3 · WITH THE FORMULA</div>
+            <div class="b-text"><p>Find the inverse of $A = \begin{pmatrix} 2 & 1 \\ 5 & 3 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$ad - bc = 6 - 5 = 1$, so $A^{-1} = \begin{pmatrix} 3 & -1 \\ -5 & 2 \end{pmatrix}$.</p>
+                <p>Check: $\begin{pmatrix} 2 & 1 \\ 5 & 3 \end{pmatrix} \cdot \begin{pmatrix} 3 & -1 \\ -5 & 2 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$ ✓</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 4 · WITH GAUSS-JORDAN</div>
+            <div class="b-text"><p>Find the inverse of $A = \begin{pmatrix} 1 & 0 & 2 \\ 2 & 1 & 3 \\ 0 & 1 & 1 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>$\text{II} - 2 \cdot \text{I}$, then $\text{III} - \text{II}$, then clear the third column (step by step in the widget).</p>
+                <p><span class="b-res">$A^{-1} = \begin{pmatrix} -1 & 1 & -1 \\ -1 & \tfrac12 & \tfrac12 \\ 1 & -\tfrac12 & \tfrac12 \end{pmatrix}$</span>, check: first row of $A$ times first column: $-1 + 0 + 2 = 1$ ✓</p></div>
+        </div>
+    </div>
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Find the inverses if possible: a) $\begin{pmatrix} 4 & 3 \\ 1 & 1 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 2 & 4 \\ 1 & 2 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) $ad - bc = 1$: $\begin{pmatrix} 1 & -3 \\ -1 & 4 \end{pmatrix}$ &nbsp; b) $ad - bc = 0$: not invertible, the first row is twice the second.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Check by multiplying whether $\begin{pmatrix} 3 & -1 \\ -5 & 2 \end{pmatrix} \cdot \begin{pmatrix} 2 & 1 \\ 5 & 3 \end{pmatrix} = I$. What does this show together with example 3?</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 6 - 5 & 3 - 3 \\ -10 + 10 & -5 + 6 \end{pmatrix} = I$ ✓ The inverse works from both sides: $A^{-1} \cdot A = A \cdot A^{-1} = I$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Use the Gauss-Jordan method to find the inverse of $\begin{pmatrix} 1 & 1 & 0 \\ 0 & 1 & 1 \\ 1 & 0 & 1 \end{pmatrix}$ and check it.</p></div>
+            <div class="b-sol"><p>$A^{-1} = \tfrac12 \begin{pmatrix} 1 & -1 & 1 \\ 1 & 1 & -1 \\ -1 & 1 & 1 \end{pmatrix}$. Check, first row times first column: $\tfrac12 (1 + 1 + 0) = 1$, first row times second column: $\tfrac12 (-1 + 1 + 0) = 0$ ✓</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>For which numbers $a$ is $\begin{pmatrix} a & 2 \\ 3 & a \end{pmatrix}$ invertible? Give the inverse for $a = 3$.</p></div>
+            <div class="b-sol"><p>$a^2 - 6 \neq 0$, so $a \neq \pm\sqrt6$. For $a = 3$: $ad - bc = 3$, $A^{-1} = \tfrac13 \begin{pmatrix} 3 & -2 \\ -3 & 3 \end{pmatrix} = \begin{pmatrix} 1 & -\tfrac23 \\ -1 & 1 \end{pmatrix}$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Prove:</b> a) A matrix has at most one inverse. b) If $A$ and $B$ are invertible, then $(A \cdot B)^{-1} = B^{-1} \cdot A^{-1}$. Why not $A^{-1} \cdot B^{-1}$?</p></div>
+            <div class="b-hint"><p>a) Assume $X$ and $Y$ are both inverses of $A$, and calculate $X \cdot A \cdot Y$ in two ways.</p></div>
+            <div class="b-sol"><p>a) $X = X \cdot I = X \cdot (A \cdot Y) = (X \cdot A) \cdot Y = I \cdot Y = Y$. $\square$</p>
+                <p>b) $(A \cdot B) \cdot (B^{-1} \cdot A^{-1}) = A \cdot (B \cdot B^{-1}) \cdot A^{-1} = A \cdot I \cdot A^{-1} = I$, and because of a) this is the inverse. $\square$ With $A^{-1} \cdot B^{-1}$, $B$ and $B^{-1}$ would not stand next to each other, and you may not swap. As with getting dressed: if you put on socks first and then shoes, you take off the shoes first.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="-5" data-ph="Entry"><p class="b-q-text">Which entry is at the bottom left of the inverse of $\begin{pmatrix} 2 & 1 \\ 5 & 3 \end{pmatrix}$?</p><div class="b-sol"><p>$-c$ divided by $ad - bc = 1$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="ad − bc ="><p class="b-q-text">Calculate $ad - bc$ for $\begin{pmatrix} 2 & 4 \\ 1 & 2 \end{pmatrix}$.</p><div class="b-sol"><p>$4 - 4$: not invertible</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">In the Gauss-Jordan method for $(A \mid I)$ a zero row appears on the left. Then …</p><div class="b-mc"><button>$A^{-1} = 0$.</button><button>$A$ has no inverse.</button><button>you have to swap the rows.</button></div><div class="b-sol"><p>$A$ is singular.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Systems of equations with the inverse" data-toc-k="3" data-toc-short="3 Systems">
+    <div class="b-band"><span class="b-band-tag">UNIT 3</span><span class="b-band-sub">2 LESSONS</span></div>
+    <h2><span class="b-no">3</span>Systems of equations and matrix equations</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>The bakery has used 7000 g of flour and 700 g of butter. With the numbers of pieces $\vec{x}$ we have $Z \cdot \vec{x} = \begin{pmatrix} 7000 \\ 700 \end{pmatrix}$.
+                Multiplying <b>from the left</b> by $Z^{-1}$ leaves $\vec{x} = Z^{-1} \cdot \begin{pmatrix} 7000 \\ 700 \end{pmatrix}$.</p></div></div>
+            <div class="b-text"><p>The advantage shows when many days with different consumption have to be evaluated: you calculate the inverse once, after that every day is a single multiplication.
+                If the unknown matrix $X$ is in an equation, you have to watch the <b>side</b> from which you multiply, because the order counts.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">KEY POINT · SOLVING WITH THE INVERSE</div>
+                <div class="b-text">
+                    <p>$A \cdot \vec{x} = \vec{b}$ with an invertible $A$ has exactly one solution: $\vec{x} = A^{-1} \cdot \vec{b}$.</p>
+                    <p>$A \cdot X = B \;\Rightarrow\; X = A^{-1} \cdot B$ (from the left) &nbsp; · &nbsp; $X \cdot A = B \;\Rightarrow\; X = B \cdot A^{-1}$ (from the right)</p>
+                    <p>If $A$ is not invertible, $A \cdot \vec{x} = \vec{b}$ has no solution or infinitely many. Then only Gaussian elimination helps.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In the widget above</b> a system of equations is solved right after the inverse. Compare with example 4.</p>
+        </aside>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 5 · THE BAKERY BACKWARDS</div>
+            <div class="b-text"><p>How many rolls and pretzels were baked with 7000 g of flour and 700 g of butter?</p></div>
+            <div class="b-sol"><p>$ad - bc = 600 - 400 = 200$, $Z^{-1} = \tfrac{1}{200} \begin{pmatrix} 10 & -80 \\ -5 & 60 \end{pmatrix} = \begin{pmatrix} 0.05 & -0.4 \\ -0.025 & 0.3 \end{pmatrix}$.</p>
+                <p>$\vec{x} = Z^{-1} \cdot \begin{pmatrix} 7000 \\ 700 \end{pmatrix} = \begin{pmatrix} 350 - 280 \\ -175 + 210 \end{pmatrix} = \begin{pmatrix} 70 \\ 35 \end{pmatrix}$: <span class="b-res">70 rolls and 35 pretzels</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXAMPLE 6 · A MATRIX EQUATION</div>
+            <div class="b-text"><p>Solve $A \cdot X = B$ with $A = \begin{pmatrix} 2 & 1 \\ 5 & 3 \end{pmatrix}$ and $B = \begin{pmatrix} 1 & 0 \\ 2 & 4 \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>From the left with $A^{-1}$ from example 3: $X = A^{-1} \cdot B = \begin{pmatrix} 3 & -1 \\ -5 & 2 \end{pmatrix} \cdot \begin{pmatrix} 1 & 0 \\ 2 & 4 \end{pmatrix} = $ <span class="b-res">$\begin{pmatrix} 1 & -4 \\ -1 & 8 \end{pmatrix}$</span>.</p></div>
+        </div>
+    </div>
+    <h3>EXERCISES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Solve $\begin{pmatrix} 2 & 1 \\ 5 & 3 \end{pmatrix} \cdot \vec{x} = \begin{pmatrix} 1 \\ 2 \end{pmatrix}$ with the inverse from example 3.</p></div>
+            <div class="b-sol"><p>$\vec{x} = \begin{pmatrix} 3 - 2 \\ -5 + 4 \end{pmatrix} = \begin{pmatrix} 1 \\ -1 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>On another day the bakery uses 6.2 kg of flour and 600 g of butter. How many rolls and pretzels were there?</p></div>
+            <div class="b-sol"><p>$Z^{-1} \cdot \begin{pmatrix} 6200 \\ 600 \end{pmatrix} = \begin{pmatrix} 310 - 240 \\ -155 + 180 \end{pmatrix} = \begin{pmatrix} 70 \\ 25 \end{pmatrix}$: 70 rolls, 25 pretzels.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Solve $X \cdot A = (1 \;\; 1)$ with $A = \begin{pmatrix} 2 & 1 \\ 5 & 3 \end{pmatrix}$. Why do you have to multiply from the right here?</p></div>
+            <div class="b-sol"><p>$X = (1 \;\; 1) \cdot A^{-1} = (1 \;\; 1) \cdot \begin{pmatrix} 3 & -1 \\ -5 & 2 \end{pmatrix} = (-2 \;\; 1)$. Check: $(-2 \;\; 1) \cdot A = (1 \;\; 1)$ ✓ $X$ is to the left of $A$, so $A^{-1}$ has to be added on the right to make $A \cdot A^{-1} = I$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Solve $\begin{pmatrix} 1 & 0 & 2 \\ 2 & 1 & 3 \\ 0 & 1 & 1 \end{pmatrix} \cdot \vec{x} = \begin{pmatrix} 5 \\ 9 \\ 2 \end{pmatrix}$ with the inverse from example 4 and check the solution in the system.</p></div>
+            <div class="b-sol"><p>$\vec{x} = A^{-1} \cdot \vec{b} = \begin{pmatrix} -5 + 9 - 2 \\ -5 + 4.5 + 1 \\ 5 - 4.5 + 1 \end{pmatrix} = \begin{pmatrix} 2 \\ 0.5 \\ 1.5 \end{pmatrix}$. Check: $2 + 3 = 5$, $4 + 0.5 + 4.5 = 9$, $0.5 + 1.5 = 2$ ✓</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST YOURSELF!</div>
+        <div class="b-q" data-ans="35" data-ph="Pretzels"><p class="b-q-text">Bakery: 7000 g of flour and 700 g of butter. How many pretzels?</p><div class="b-sol"><p>$-0.025 \cdot 7000 + 0.3 \cdot 700$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$X \cdot A = B$ with an invertible $A$. Then $X = \ldots$</p><div class="b-mc"><button>$B \cdot A^{-1}$</button><button>$A^{-1} \cdot B$</button><button>$B : A$</button></div><div class="b-sol"><p>Multiply from the right</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Review · Deepen · Connect" data-toc-k="P" data-toc-short="Practice">
+    <div class="b-band"><span class="b-band-tag">REVIEW · DEEPEN · CONNECT</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calculate $D^2$, $D^3$ and $D^n$ for the diagonal matrix $D = \begin{pmatrix} 2 & 0 \\ 0 & 0.5 \end{pmatrix}$. What happens to $D^n$ for large $n$?</p></div>
+            <div class="b-sol"><p>$D^n = \begin{pmatrix} 2^n & 0 \\ 0 & 0.5^n \end{pmatrix}$. The first entry grows beyond all bounds, the second tends to 0. With diagonal matrices you simply raise the diagonal to the power.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Connecting with Year 11:</b> solve $x + 2z = 5$, $2x + y + 3z = 9$, $y + z = 2$ once with Gaussian elimination and once with the inverse. When is which way worth it?</p></div>
+            <div class="b-sol"><p>Both ways give $x = 2$, $y = 0.5$, $z = 1.5$. For a single system Gauss is quicker. The inverse is worth it when the same matrix comes with many right-hand sides, as in the bakery on many days.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Use $A = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix}$ and $B = \begin{pmatrix} 1 & 0 \\ 3 & 1 \end{pmatrix}$ to show that $(A + B)^2 \neq A^2 + 2AB + B^2$. Which formula holds instead?</p></div>
+            <div class="b-sol"><p>$(A + B)^2 = A^2 + A B + B A + B^2$. Because $AB = \begin{pmatrix} 7 & 2 \\ 3 & 1 \end{pmatrix} \neq BA = \begin{pmatrix} 1 & 2 \\ 3 & 7 \end{pmatrix}$, you may not combine $AB + BA$ into $2AB$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Open problem:</b> find a $2 \times 2$ matrix $A$ with $A^2 = I$ that is neither $I$ nor $-I$. How many are there? Describe as many as you can.</p></div>
+            <div class="b-hint"><p>Try diagonal matrices, swaps and $\begin{pmatrix} a & b \\ c & -a \end{pmatrix}$.</p></div>
+            <div class="b-sol"><p>For example $\begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}$ (reflection in the $x$-axis) or $\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$ (reflection in $y = x$).</p>
+                <p>There are infinitely many: every matrix $\begin{pmatrix} a & b \\ c & -a \end{pmatrix}$ with $a^2 + bc = 1$ satisfies $A^2 = (a^2 + bc)\,I = I$. Geometrically they are reflections: reflecting twice is like not reflecting at all.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion: Cayley and the matrices" data-toc-k="X" data-toc-short="Cayley">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTORY</span></div>
+    <h2>How tables became objects to calculate with</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Number schemes for solving systems of equations were known in China more than 2000 years ago. But only in the 19th century did they become objects of their own that you calculate with.
+                The name <i>matrix</i> (Latin for “womb”, i.e. something from which other things arise) was coined in 1850 by the English mathematician James Joseph Sylvester.</p>
+            <p>His friend Arthur Cayley, who worked as a lawyer for a long time, published a paper on the “theory of matrices” in 1858. It contains multiplication, the identity matrix
+                and the inverse matrix exactly as you use them in this chapter, and the observation that $A \cdot B$ and $B \cdot A$ can be different.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Source:</b> Arthur Cayley: “A Memoir on the Theory of Matrices”, Philosophical Transactions of the Royal Society of London 148 (1858), pp. 17–37 · MacTutor History of Mathematics: “James Joseph Sylvester”.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Looking back" data-toc-k="L" data-toc-short="Looking back">
+    <div class="b-band"><span class="b-band-tag">LOOKING BACK</span><span class="b-band-sub">THE ESSENTIALS AT A GLANCE</span></div>
+    <div class="b-rueck"><div><h4>MATRIX PRODUCT</h4><p>Type $(m, n) \cdot (n, k) = (m, k)$; entry: row times column</p></div>
+        <div><p>Bakery: $Z \cdot M = \begin{pmatrix} 4000 & 5800 \\ 400 & 650 \end{pmatrix}$</p></div></div>
+    <div class="b-rueck"><div><h4>LAWS OF ARITHMETIC</h4><p>associative, distributive, $A \cdot I = A$, but $A \cdot B \neq B \cdot A$</p></div>
+        <div><p>$A^n = A \cdot A \cdots A$</p></div></div>
+    <div class="b-rueck"><div><h4>INVERSE</h4><p>$A \cdot A^{-1} = A^{-1} \cdot A = I$; $(A \mid I) \to (I \mid A^{-1})$</p></div>
+        <div><p>$\begin{pmatrix} a & b \\ c & d \end{pmatrix}^{-1} = \tfrac{1}{ad - bc} \begin{pmatrix} d & -b \\ -c & a \end{pmatrix}$</p></div></div>
+    <div class="b-rueck"><div><h4>EQUATIONS</h4><p>$A\vec{x} = \vec{b} \Rightarrow \vec{x} = A^{-1}\vec{b}$; $XA = B \Rightarrow X = BA^{-1}$</p></div>
+        <div><p>70 rolls, 35 pretzels</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">TWO ROUNDS · INSTANT FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">ROUND 1 · WITHOUT AIDS</div>
+            <div class="b-q" data-ans="10" data-ph="Entry"><p class="b-q-text">$\begin{pmatrix} 2 & -1 \\ 0 & 3 \end{pmatrix} \cdot \begin{pmatrix} 1 & 4 \\ 2 & -2 \end{pmatrix}$: entry at the top right?</p><div class="b-sol"><p>$2 \cdot 4 + (-1) \cdot (-2)$</p></div></div>
+            <div class="b-q" data-ans="-3" data-ph="Entry"><p class="b-q-text">Inverse of $\begin{pmatrix} 4 & 3 \\ 1 & 1 \end{pmatrix}$: entry at the top right?</p><div class="b-sol"><p>$-b$ divided by $ad - bc = 1$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Which statement holds for all square matrices $A$, $B$ of the same type?</p><div class="b-mc"><button>$A \cdot B = B \cdot A$</button><button>$A \cdot B = 0 \Rightarrow A = 0$ or $B = 0$</button><button>$(A \cdot B) \cdot C = A \cdot (B \cdot C)$</button></div><div class="b-sol"><p>Only the associative law always holds.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">ROUND 2 · WITH AIDS</div>
+            <div class="b-q" data-ans="25" data-ph="Pretzels"><p class="b-q-text">Bakery: 6200 g of flour and 600 g of butter. How many pretzels?</p><div class="b-sol"><p>$-0.025 \cdot 6200 + 0.3 \cdot 600$</p></div></div>
+            <div class="b-q" data-ans="1.5" data-tol="0.001" data-ph="z ="><p class="b-q-text">$x + 2z = 5$, $2x + y + 3z = 9$, $y + z = 2$: what is $z$?</p><div class="b-sol"><p>$\vec{x} = A^{-1}\vec{b} = \begin{pmatrix} 2 \\ 0.5 \\ 1.5 \end{pmatrix}$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="Entry"><p class="b-q-text">$A = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}$: which entry is at the top left of $A^{2026}$?</p><div class="b-sol"><p>$A^{2026} = A^2 = -I$</p></div></div>
+        </div>
+    </div>
+    <h3>MORE PRACTICE ONLINE (IN GERMAN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-matrizen-gauss.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MATRICES AND GAUSS</span><span class="b-lab-what">Product, systems of equations</span></span></a>
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-matrizen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ABITUR TRAINING</span><span class="b-lab-what">Linear algebra, Elective 2</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathematics, Vocational Grammar School Year 13, advanced course · Elective 2 of the Saxon curriculum for mathematics at the Berufliches Gymnasium.</p>
+    <p>All texts, exercises and figures are original content.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-en.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-lgs.js"></script>
+<script src="../../js/buch-en/lgs.js"></script>
+<script src="../../js/buch-gy11.js"></script>
+<script src="../../js/buch-en/gy11.js"></script>
+<script src="../../js/buch-bgy13lk.js"></script>
+<script src="../../js/buch-en/bgy13lk.js"></script>
+</body>
+</html>
