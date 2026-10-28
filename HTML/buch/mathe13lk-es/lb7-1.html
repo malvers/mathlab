@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 13 avanzado · Capítulo 7.1 · Ecuaciones bicuadradas y familias de funciones | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Cambio de variable, familias, parámetros y número de soluciones, lugares geométricos. Capítulo 7.1 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 13 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 13 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 7.1 · ÁREA DE APRENDIZAJE 7</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="I" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 7.1 · ÁREA DE APRENDIZAJE 7 · FEBRERO · MARZO</p>
+            <h1>Ecuaciones bicuadradas y familias de funciones</h1>
+            <p class="b-hero-lead">$x^4 - 5x^2 + 4 = 0$ parece una ecuación de cuarto grado, pero es una ecuación de segundo grado disfrazada. Con un truco, el <b>cambio de variable</b>, la resuelves sin CAS.
+                Después hay un <b>parámetro</b> en la función: toda una familia de gráficas cuyos máximos y mínimos se desplazan por un <b>lugar geométrico</b>.
+                Y, por último, la pregunta del curso avanzado por excelencia: ¿para qué valores del parámetro no hay ninguna solución, hay una, dos o infinitas?</p>
+            <div class="b-chips"><span class="b-chip">8 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">DISTINCIÓN DE CASOS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^4-5*x^2+4"]' data-labels='["f"]' data-lat="[2.3]" data-x="-3,3" data-y="-3,6" data-pts="[[-2,0],[-1,0],[1,0],[2,0]]" data-h="240" data-aria="La gráfica de x elevado a 4 menos 5 x al cuadrado más 4, con cuatro ceros en menos 2, menos 1, 1 y 2"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>resolver <b>ecuaciones bicuadradas</b> mediante un cambio de variable y justificar el número de soluciones</li>
+                <li>estudiar <b>familias de funciones</b>: puntos comunes, extremos y puntos de inflexión en función del parámetro, <b>lugares geométricos</b></li>
+                <li>resolver ecuaciones y problemas con parámetros y describir por completo su <b>número de soluciones</b> distinguiendo casos</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="4" data-ph="z ="><p class="b-q-text">$z^2 - 5z + 4 = 0$. ¿Cuánto vale la solución mayor?</p><div class="b-sol"><p>$z = \tfrac52 \pm \sqrt{\tfrac{25}{4} - 4} = \tfrac52 \pm \tfrac32$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">¿Cuántas soluciones tiene $x^2 = -3$?</p><div class="b-mc"><button>dos</button><button>uno</button><button>ninguna</button></div><div class="b-sol"><p>Los cuadrados nunca son negativos.</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="número"><p class="b-q-text">¿Cuántas soluciones tiene $x^2 - 6x + 9 = 0$?</p><div class="b-sol"><p>$(x - 3)^2 = 0$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">SEGUNDO GRADO DISFRAZADO</div>
+            <div class="b-text"><p>En $x^4 - 5x^2 + 4 = 0$ solo aparecen $x^4 = (x^2)^2$ y $x^2$.</p>
+                <ul><li>Llamad $x^2$ simplemente $z$. ¿Qué ecuación sale? Resolvedla.</li><li>¿Cómo volvéis de las soluciones en $z$ a $x$? ¿Cuántos valores de $x$ hay?</li></ul></div>
+            <span class="b-pair">→ Lección 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">VÉRTICES QUE SE DESPLAZAN</div>
+            <div class="b-text"><p>Dibujad las parábolas $f_a(x) = -x^2 + ax$ para $a = -2$, 0, 2 y 4 en un mismo sistema de coordenadas.</p>
+                <ul><li>¿Qué punto tienen todas en común?</li><li>¿En qué curva están los vértices?</li></ul></div>
+            <span class="b-pair">→ Lección 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">¿CUÁNTOS PUNTOS DE INTERSECCIÓN?</div>
+            <div class="b-text"><p>La parábola normal $y = x^2$ y las rectas $y = 2x + a$.</p>
+                <ul><li>Probad con $a = 3$, $a = 0$, $a = -1$, $a = -2$. ¿Cuántos puntos de intersección hay en cada caso?</li><li>¿Para qué $a$ cambia el número? ¿Qué tiene de especial ese valor?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Ecuaciones bicuadradas" data-toc-k="1" data-toc-short="1 Bicuadradas">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Ecuaciones bicuadradas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Si en $x^4 - 5x^2 + 4 = 0$ se sustituye $x^2$ por la nueva variable $z$, sale $z^2 - 5z + 4 = 0$, con las soluciones $z = 1$ y $z = 4$.
+                De vuelta: $x^2 = 1$ da $x = \pm 1$, y $x^2 = 4$ da $x = \pm 2$. Cuatro soluciones, sin ninguna fórmula para ecuaciones de cuarto grado.</p></div></div>
+            <div class="b-text"><p>Las ecuaciones de la forma $ax^4 + bx^2 + c = 0$ se llaman <b>bicuadradas</b>. El <b>cambio de variable</b> $z = x^2$ las convierte en una ecuación de segundo grado.
+                Al <b>deshacer el cambio</b> decide el signo de cada solución $z$: una positiva da dos soluciones $x$; el cero, una; una negativa, ninguna.
+                Por eso una ecuación bicuadrada puede tener de cero a cuatro soluciones. Sus soluciones son simétricas respecto a 0, porque si $x$ es solución, también lo es $-x$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · CAMBIO DE VARIABLE</div>
+                <div class="b-text">
+                    <p>$ax^4 + bx^2 + c = 0$ &nbsp; con $z = x^2$: &nbsp; resolver $az^2 + bz + c = 0$.</p>
+                    <p><b>Deshacer el cambio:</b> $z &gt; 0 \Rightarrow x = \pm\sqrt z$ · $z = 0 \Rightarrow x = 0$ · $z &lt; 0 \Rightarrow$ ninguna solución.</p>
+                    <p>La misma idea sirve para $x^6 + px^3 + q = 0$ con $z = x^3$ y en todos los casos en que aparecen una expresión y su cuadrado.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Gráfica:</b> $f(x) = ax^4 + bx^2 + c$ es simétrica respecto al eje $y$. Por eso sus ceros van siempre por parejas $\pm x_0$, salvo quizá el 0.</p>
+            <p class="b-note"><b>Cuidado:</b> no olvides deshacer el cambio. $z = 4$ no es solución de $x^4 - 5x^2 + 4 = 0$.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · DE z A x</div>
+        <p class="b-help" style="margin:0 0 12px">A la izquierda, la parábola en $z$; a la derecha, la gráfica en $x$. Mueve $p$ y $q$: cada cero positivo de la izquierda produce dos ceros a la derecha, y uno negativo, ninguno. ¿Encuentras ajustes con exactamente una y con exactamente tres soluciones?</p>
+        <div data-widget="biquadratisch"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · DOS SOLUCIONES</div>
+            <div class="b-text"><p>Resuelve $x^4 + x^2 - 12 = 0$.</p></div>
+            <div class="b-sol"><p>$z^2 + z - 12 = 0$: $z = 3$ o $z = -4$. Solo $z = 3 &gt; 0$ da soluciones.</p>
+                <p><span class="b-res">$x = \pm\sqrt3 \approx \pm 1{,}73$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · CEROS Y EXTREMOS</div>
+            <div class="b-text"><p>Halla los ceros y los extremos de $f(x) = \tfrac14 x^4 - 2x^2 + 3$.</p></div>
+            <div class="b-sol"><p>Por 4: $x^4 - 8x^2 + 12 = 0$, $z = 2$ o $z = 6$: <span class="b-res">$x = \pm\sqrt2$, $x = \pm\sqrt6$</span>.</p>
+                <p>$f'(x) = x^3 - 4x = x(x^2 - 4)$: máximo $(0, 3)$, mínimos $(\pm 2, -1)$.</p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Resuelve: a) $x^4 - 10x^2 + 9 = 0$ &nbsp; b) $x^4 - 3x^2 - 4 = 0$ &nbsp; c) $x^4 - 4x^2 = 0$</p></div>
+            <div class="b-sol"><p>a) $z = 1$, $z = 9$: $x = \pm 1$, $\pm 3$ &nbsp; b) $z = 4$, $z = -1$: $x = \pm 2$ &nbsp; c) sacar factor común o $z = 0$, $z = 4$: $x = 0$, $\pm 2$, tres soluciones</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿En qué puntos se cortan las gráficas de $f(x) = x^4$ y $g(x) = 3x^2 + 4$?</p></div>
+            <div class="b-sol"><p>$x^4 - 3x^2 - 4 = 0$: $x = \pm 2$ (del ejercicio 1 b). Puntos de intersección $(-2, 16)$ y $(2, 16)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Resuelve $x^6 - 9x^3 + 8 = 0$ con un cambio de variable adecuado. ¿Por qué aquí solo hay dos soluciones, aunque los dos valores de $z$ son positivos?</p></div>
+            <div class="b-sol"><p>$z = x^3$: $z^2 - 9z + 8 = 0$, $z = 1$ o $z = 8$. $x^3 = 1$ y $x^3 = 8$ tienen cada una exactamente una solución real: $x = 1$, $x = 2$. La raíz cúbica es única, a diferencia de la raíz cuadrada.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula el área que encierra la gráfica de $f(x) = 4 - \tfrac14 x^4$ con el eje $x$.</p></div>
+            <div class="b-sol"><p>$x^4 = 16$, es decir, $x = \pm 2$. $A = \int_{-2}^{2} \left(4 - \tfrac14 x^4\right)\mathrm{d}x = \left[4x - \tfrac{1}{20} x^5\right]_{-2}^{2} = 2\,(8 - 1{,}6) = 12{,}8$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Estudia cuántas soluciones tiene $x^4 - 2ax^2 + a^2 - 1 = 0$ según el valor de $a$. Da todos los casos.</p></div>
+            <div class="b-hint"><p>La ecuación en $z$ se puede factorizar: $(z - a)^2 = 1$.</p></div>
+            <div class="b-sol"><p>$z = a + 1$ o $z = a - 1$.</p>
+                <p>$a &gt; 1$: las dos positivas, <b>cuatro</b> soluciones $\pm\sqrt{a + 1}$, $\pm\sqrt{a - 1}$ · $a = 1$: $z = 2$, $z = 0$, <b>tres</b> soluciones · $-1 &lt; a &lt; 1$: solo $a + 1 &gt; 0$, <b>dos</b> soluciones · $a = -1$: $z = 0$, <b>una</b> solución, $x = 0$ · $a &lt; -1$: <b>ninguna</b> solución.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="4" data-ph="número"><p class="b-q-text">¿Cuántas soluciones tiene $x^4 - 5x^2 + 4 = 0$?</p><div class="b-sol"><p>$\pm 1$, $\pm 2$</p></div></div>
+        <div class="b-q" data-ans="1,732" data-tol="0.002" data-ph="x ="><p class="b-q-text">¿Solución mayor de $x^4 + x^2 - 12 = 0$, con tres decimales?</p><div class="b-sol"><p>$\sqrt3$</p></div></div>
+        <div class="b-q" data-ans="3" data-ph="número"><p class="b-q-text">¿Cuántas soluciones tiene $x^4 - 2ax^2 + a^2 - 1 = 0$ para $a = 1$?</p><div class="b-sol"><p>$z = 0$ y $z = 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Familias de funciones y lugares geométricos" data-toc-k="2" data-toc-short="2 Familias">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Familias de funciones y lugares geométricos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Para cada valor de $a$, $f_a(x) = -x^2 + ax$ es una parábola distinta. Todas pasan por el origen, porque $f_a(0) = 0$. Sus vértices están en
+                $\left(\tfrac a2, \tfrac{a^2}{4}\right)$. Si se pone $x = \tfrac a2$, es decir, $a = 2x$, queda $y = \tfrac{a^2}{4} = x^2$: todos los vértices están en la parábola normal.</p></div></div>
+            <div class="b-text"><p>Una familia así se llama <b>familia de funciones</b>, y $a$ es su <b>parámetro</b>. Se estudia como una función sola, solo que $a$ va incluido como un número fijo pero desconocido.
+                A menudo hacen falta distinciones de casos: para algunos $a$ hay extremos y para otros no. La curva en la que están todos los extremos (o puntos de inflexión) se llama <b>lugar geométrico</b>.
+                Un CAS con deslizador ayuda a descubrirlo; la justificación sale del cálculo.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · FAMILIAS DE FUNCIONES</div>
+                <div class="b-text">
+                    <p><b>Puntos comunes:</b> resolver $f_a(x) = f_b(x)$ para $a \neq b$; las soluciones no dependen del parámetro.</p>
+                    <p><b>Puntos característicos:</b> derivar respecto a $x$, tratando $a$ como un número; distinguir casos para $a$.</p>
+                    <p><b>Lugar geométrico:</b> punto $\big(x(a), y(a)\big)$; despejar $a$ en la ecuación $x = x(a)$ y sustituirlo en $y(a)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notación:</b> $f_a$ es una función de $x$; el subíndice $a$ dice qué miembro de la familia se considera. $f_a'$ es la derivada respecto a $x$.</p>
+            <p class="b-note"><b>Determinar parámetros:</b> escribir la condición (punto, pendiente, área) y despejar $a$, como en los problemas de «buscar la función» de 12.º curso.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · UNA FAMILIA Y SU LUGAR GEOMÉTRICO</div>
+        <p class="b-help" style="margin:0 0 12px">Mueve el parámetro $a$. En gris, los demás miembros de la familia; en violeta, el lugar geométrico de todos los extremos.</p>
+        <div data-widget="schar"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · UNA FAMILIA CÚBICA</div>
+            <div class="b-text"><p>Estudia $f_a(x) = x^3 - 3ax^2$ para $a > 0$: extremos y puntos de inflexión. ¿En qué curva están los puntos de inflexión?</p></div>
+            <div class="b-sol"><p>$f_a'(x) = 3x(x - 2a)$: máximo $(0, 0)$, mínimo $(2a, -4a^3)$. $f_a''(x) = 6x - 6a = 0$: punto de inflexión $(a, -2a^3)$.</p>
+                <p>Sustituyendo $x = a$: <span class="b-res">lugar geométrico de los puntos de inflexión $y = -2x^3$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · EL PARÁMETRO A PARTIR DE UN ÁREA</div>
+            <div class="b-text"><p>La gráfica de $f_t(x) = tx - x^2$ con $t > 0$ encierra con el eje $x$ un área. ¿Para qué $t$ vale 36?</p></div>
+            <div class="b-sol"><p>Ceros 0 y $t$: $\int_0^t (tx - x^2)\,\mathrm{d}x = \tfrac{t^3}{2} - \tfrac{t^3}{3} = \tfrac{t^3}{6}$.</p>
+                <p>$\tfrac{t^3}{6} = 36$: <span class="b-res">$t = 6$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Halla el vértice de $f_a(x) = x^2 - 2ax$ y el lugar geométrico de todos los vértices.</p></div>
+            <div class="b-sol"><p>$f_a'(x) = 2x - 2a = 0$: vértice $(a, -a^2)$. Lugar geométrico $y = -x^2$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>¿Qué puntos tienen en común todas las gráficas de $f_a(x) = a\,x\,(x - 2)$ con $a \neq 0$?</p></div>
+            <div class="b-sol"><p>$(a - b)\,x\,(x - 2) = 0$: $(0, 0)$ y $(2, 0)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Cuántos ceros tiene $f_a(x) = x^3 - ax$ según el valor de $a$? ¿Dónde están los extremos para $a > 0$?</p></div>
+            <div class="b-sol"><p>$x(x^2 - a) = 0$: para $a > 0$, tres (0, $\pm\sqrt a$); para $a \le 0$, uno. Extremos: $3x^2 = a$, $x = \pm\sqrt{\tfrac a3}$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Halla para $f_a(x) = \mathrm{e}^x - ax$ con $a > 0$ el mínimo y su lugar geométrico. ¿Para qué $a$ está el mínimo en el eje $x$?</p></div>
+            <div class="b-sol"><p>$\mathrm{e}^x = a$: $T(\ln a,\ a - a\ln a)$. Con $a = \mathrm{e}^x$: lugar geométrico $y = \mathrm{e}^x (1 - x)$. En el eje: $a(1 - \ln a) = 0$, <span class="b-res">$a = \mathrm{e}$</span>.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Sea $f_a(x) = x^2 - ax$ con $a > 0$. a) ¿Para qué $a$ está el mínimo en $x = 3$? b) ¿Para qué $a$ encierra la gráfica con el eje $x$ el área 36? ¿Qué observas?</p></div>
+            <div class="b-sol"><p>a) $2x - a = 0$ en $x = 3$: $a = 6$. b) Ceros 0 y $a$, área $\tfrac{a^3}{6} = 36$: $a = 6$. Es el mismo miembro de la familia, y es el reflejo de $f_6$ del ejemplo 4 respecto al eje $x$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="-4" data-ph="y ="><p class="b-q-text">Lugar geométrico de los vértices de $x^2 - 2ax$: ¿qué valor $y$ tiene en $x = 2$?</p><div class="b-sol"><p>$y = -x^2$</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="t ="><p class="b-q-text">¿Para qué $t > 0$ encierra $tx - x^2$ con el eje el área 36?</p><div class="b-sol"><p>$t^3 = 216$</p></div></div>
+        <div class="b-q" data-ans="2,72" data-tol="0.01" data-ph="a ≈"><p class="b-q-text">¿Para qué $a$ está el mínimo de $\mathrm{e}^x - ax$ en el eje $x$?</p><div class="b-sol"><p>$a = \mathrm{e}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Parámetros y número de soluciones" data-toc-k="3" data-toc-short="3 Número de soluciones">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Parámetros y número de soluciones</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$x^2 = 2x + a$ lleva a $x^2 - 2x - a = 0$, con el discriminante $1 + a$. Para $a &gt; -1$ la recta corta dos veces a la parábola; para $a = -1$ la toca (tangente); para $a &lt; -1$, ninguna.</p></div></div>
+            <div class="b-text"><p>Un problema con parámetro solo está resuelto cuando está claro qué pasa para <b>cada</b> valor del parámetro. Los valores del parámetro en los que cambia el número de soluciones son los <b>valores críticos</b>.
+                Aparecen donde algo se anula: un discriminante, un coeficiente principal, un denominador, una pendiente. Entre dos valores críticos la situación no cambia.
+                También importa si una condición es <b>necesaria</b> o <b>suficiente</b>: $f'(x) = 0$ es necesaria para un extremo, pero no suficiente.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · DISTINCIÓN DE CASOS</div>
+                <div class="b-text">
+                    <p>1. Plantear la ecuación y transformarla en general todo lo posible. &nbsp; 2. Buscar los <b>valores críticos</b>: ¿dónde se divide entre cero, dónde se anula un coeficiente o el discriminante?</p>
+                    <p>3. Estudiar <b>por separado</b> cada valor crítico y cada intervalo entre ellos. &nbsp; 4. Dar el resultado como resumen completo; no puede faltar ningún caso.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Error más frecuente:</b> dividir entre una expresión con parámetro sin tratar aparte el caso «expresión igual a cero».</p>
+            <p class="b-note"><b>En el CAS:</b> un deslizador para el parámetro muestra dónde cambia algo. Aun así, hay que justificarlo con el cálculo.</p>
+        </aside>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · EL CASO OLVIDADO</div>
+            <div class="b-text"><p>¿Cuántas soluciones tiene $ax^2 + 2x + 1 = 0$ según el valor de $a$?</p></div>
+            <div class="b-sol"><p>$a = 0$: no es una ecuación de segundo grado, sino $2x + 1 = 0$, con exactamente una solución, $x = -\tfrac12$.</p>
+                <p>$a \neq 0$: discriminante $4 - 4a$. <span class="b-res">$a &lt; 1$, $a \neq 0$: dos · $a = 1$: una ($x = -1$) · $a &gt; 1$: ninguna</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · RECTA Y FUNCIÓN EXPONENCIAL</div>
+            <div class="b-text"><p>¿Cuántos puntos de intersección tienen $f(x) = \mathrm{e}^x$ y la recta que pasa por el origen $g_a(x) = ax$?</p></div>
+            <div class="b-sol"><p>Tangencia: $\mathrm{e}^x = ax$ y $\mathrm{e}^x = a$ a la vez, es decir, $x = 1$, $a = \mathrm{e}$. $h(x) = \mathrm{e}^x - ax$ tiene para $a &gt; 0$ el mínimo $a(1 - \ln a)$ en $x = \ln a$.</p>
+                <p><span class="b-res">$a &lt; 0$: uno · $0 \le a &lt; \mathrm{e}$: ninguno · $a = \mathrm{e}$: uno (tangente) · $a &gt; \mathrm{e}$: dos</span>.</p></div>
+        </div>
+    </div>
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Cuántos ceros tiene $f_a(x) = x^3 - 3x + a$ según el valor de $a$?</p></div>
+            <div class="b-hint"><p>Los extremos están en $x = -1$ y $x = 1$. ¿Cuándo están el máximo y el mínimo a distintos lados del eje $x$?</p></div>
+            <div class="b-sol"><p>$f_a(-1) = 2 + a$ (máximo), $f_a(1) = a - 2$ (mínimo). <span class="b-res">$-2 &lt; a &lt; 2$: tres · $a = \pm 2$: dos (uno doble) · $|a| &gt; 2$: uno</span>.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>¿Para qué valores de $a$ tiene $\dfrac{x + a}{x - 1} = 2$ exactamente una solución? Fíjate en el dominio.</p></div>
+            <div class="b-sol"><p>$x + a = 2x - 2$, es decir, $x = a + 2$. Solo está permitido si $x \neq 1$, es decir, $a \neq -1$. <span class="b-res">Exactamente una solución para $a \neq -1$, ninguna para $a = -1$.</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><b>Ejercicio abierto:</b> inventa una ecuación con un parámetro $a$ que tenga exactamente tres soluciones para $a = 1$, cuatro para $a &gt; 1$ y como mucho dos para $a &lt; 1$. Justifícalo.</p></div>
+            <div class="b-sol"><p>Por ejemplo, la ecuación del ejercicio 5: $x^4 - 2ax^2 + a^2 - 1 = 0$. Para $a = 1$, $z = 0$ es una solución (da $x = 0$) y $z = 2$ también (da $\pm\sqrt2$). Otros ejemplos son correctos si la distinción de casos es correcta.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="-1" data-ph="a ="><p class="b-q-text">¿Para qué $a$ es $y = 2x + a$ tangente a $y = x^2$?</p><div class="b-sol"><p>Discriminante $1 + a = 0$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="número"><p class="b-q-text">¿Cuántas soluciones tiene $ax^2 + 2x + 1 = 0$ para $a = 0$?</p><div class="b-sol"><p>$2x + 1 = 0$</p></div></div>
+        <div class="b-q" data-ans="2,718" data-tol="0.002" data-ph="a ≈"><p class="b-q-text">¿Para qué $a$ es $y = ax$ tangente a la gráfica de $\mathrm{e}^x$?</p><div class="b-sol"><p>$a = \mathrm{e}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="P" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Halla los ceros, los extremos y los puntos de inflexión de $f(x) = x^4 - 2x^2$.</p></div>
+            <div class="b-sol"><p>Ceros 0 y $\pm\sqrt2$. $f'(x) = 4x(x^2 - 1)$: máximo $(0, 0)$, mínimos $(\pm 1, -1)$. $f''(x) = 12x^2 - 4 = 0$: puntos de inflexión en $x = \pm\tfrac{1}{\sqrt3}$ con $y = -\tfrac59$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 3.3:</b> ¿para qué $a &gt; 0$ encierra $f_a(x) = x^4 - a^2 x^2$ con el eje $x$, entre los ceros exteriores, un área de $\tfrac{16}{15}$?</p></div>
+            <div class="b-sol"><p>Ceros 0, $\pm a$; entre $-a$ y $a$, bajo el eje. $\int_0^a (a^2x^2 - x^4)\,\mathrm{d}x = \tfrac{a^5}{3} - \tfrac{a^5}{5} = \tfrac{2a^5}{15}$; las dos mitades: $\tfrac{4a^5}{15} = \tfrac{16}{15}$, es decir, $a^5 = 4$, <span class="b-res">$a = \sqrt[5]{4} \approx 1{,}32$</span>.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar con el capítulo 5.2:</b> la región de rechazo de un contraste depende del nivel de significación $\alpha$, como una solución depende del parámetro. Explica por qué un $\alpha$ menor nunca amplía la región de rechazo.</p></div>
+            <div class="b-sol"><p>En un contraste por la derecha, $K = \{k, \ldots, n\}$ con el menor $k$ para el que $P(X \ge k) \le \alpha$. Si $\alpha$ disminuye, menos valores de $k$ cumplen esta condición, y el menor $k$ posible aumenta o se mantiene.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Sea la familia $f_a(x) = x^4 - ax^2$ con $a &gt; 0$. Halla los mínimos y su lugar geométrico. ¿Para qué $a$ están los mínimos en la recta $y = -4$?</p></div>
+            <div class="b-sol"><p>$f_a'(x) = 4x^3 - 2ax = 0$: $x = 0$ o $x = \pm\sqrt{\tfrac a2}$. Mínimos $\left(\pm\sqrt{\tfrac a2}, -\tfrac{a^2}{4}\right)$. Con $a = 2x^2$: <span class="b-res">lugar geométrico $y = -x^4$</span>. $-\tfrac{a^2}{4} = -4$: $a = 4$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: una parábola hecha solo de rectas" data-toc-k="X" data-toc-short="Hilos">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">MATEMÁTICAS QUE ASOMBRAN</span></div>
+    <h2>Una parábola hecha solo de rectas</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Si se tensan hilos entre los dos lados de un ángulo recto, el primer punto de un lado con el último del otro, el segundo con el penúltimo, y así sucesivamente,
+                aparece una curva redondeada, aunque cada hilo es recto. Los hilos solo tocan la curva: es la <b>envolvente</b> de la familia de rectas.</p>
+            <p>Para una familia sencilla de rectas puedes comprobarlo: las rectas $y = ax - \tfrac{a^2}{4}$ son todas tangentes a la parábola normal, cada una en un punto distinto. También la curva del dibujo de hilos
+                es una parábola. Lados sobre los ejes, hilos de $(k, 0)$ a $(0, c - k)$: la envolvente tiene la ecuación $\sqrt x + \sqrt y = \sqrt c$ y, si se eleva al cuadrado dos veces,
+                sale la ecuación de una parábola inclinada respecto a los ejes.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Para comprobarlo:</b> elevar $\sqrt x + \sqrt y = \sqrt c$ al cuadrado dos veces da $(x - y)^2 - 2c(x + y) + c^2 = 0$, una parábola con el eje de simetría $y = x$.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>SUSTITUCIÓN</h4><p>$z = x^2$; deshacer el cambio: $z &gt; 0$ dos, $z = 0$ una, $z &lt; 0$ ninguna solución</p></div>
+        <div><p>$x^4 - 5x^2 + 4 = 0$: $\pm 1$, $\pm 2$</p></div></div>
+    <div class="b-rueck"><div><h4>FAMILIA DE FUNCIONES</h4><p>tratar el parámetro como un número; puntos comunes, extremos, casos</p></div>
+        <div><p>$x^3 - 3ax^2$: punto de inflexión $(a, -2a^3)$</p></div></div>
+    <div class="b-rueck"><div><h4>LUGAR GEOMÉTRICO</h4><p>despejar $a$ en $x(a)$ y sustituir en $y(a)$</p></div>
+        <div><p>$-x^2 + ax$: vértices en $y = x^2$</p></div></div>
+    <div class="b-rueck"><div><h4>NÚMERO DE SOLUCIONES</h4><p>buscar los valores críticos, cada caso por separado, resumen completo</p></div>
+        <div><p>$ax^2 + 2x + 1 = 0$: no olvidar el caso $a = 0$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SIN CALCULADORA</div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">¿Solución mayor de $x^4 - 10x^2 + 9 = 0$?</p><div class="b-sol"><p>$z = 9$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="número"><p class="b-q-text">¿Cuántas soluciones tiene $x^4 - 3x^2 - 4 = 0$?</p><div class="b-sol"><p>$z = 4$ y $z = -1$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$f_a(x) = x^3 - 3x + a$ tiene tres ceros exactamente para …</p><div class="b-mc"><button>$a &gt; 2$</button><button>$-2 &lt; a &lt; 2$</button><button>$a = \pm 2$</button></div><div class="b-sol"><p>Máximo y mínimo a distintos lados del eje</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · CON HERRAMIENTAS DIGITALES</div>
+            <div class="b-q" data-ans="12,8" data-tol="0.01" data-ph="área"><p class="b-q-text">¿Área entre $4 - \tfrac14 x^4$ y el eje $x$?</p><div class="b-sol"><p>$2\,(8 - 1{,}6)$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="a ="><p class="b-q-text">¿Para qué $a$ están los mínimos de $x^4 - ax^2$ en $y = -4$?</p><div class="b-sol"><p>$\tfrac{a^2}{4} = 4$</p></div></div>
+            <div class="b-q" data-ans="1,32" data-tol="0.01" data-ph="a ≈"><p class="b-q-text">¿Para qué $a &gt; 0$ vale $\tfrac{16}{15}$ el área de $x^4 - a^2x^2$?</p><div class="b-sol"><p>$a^5 = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-scharen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FAMILIAS</span><span class="b-lab-what">Familias de funciones y lugares geométricos</span></span></a>
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-schar.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRENAMIENTO PARA EL ABITUR</span><span class="b-lab-what">Familia de funciones</span></span></a>
+        <a class="b-lab" href="../../aufgaben/abitur-bgy-analysis-lk.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ENTRENAMIENTO PARA EL ABITUR · CURSO AVANZADO</span><span class="b-lab-what">Análisis en el curso avanzado</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 13.º curso, curso avanzado · Área de aprendizaje 7 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia.</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-es/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-es/analysis.js"></script>
+<script src="../../js/buch-bgy13lk.js"></script>
+<script src="../../js/buch-es/bgy13lk.js"></script>
+</body>
+</html>

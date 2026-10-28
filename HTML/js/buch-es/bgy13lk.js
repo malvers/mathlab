@@ -90,5 +90,7 @@ window.BuchES && BuchES.add('bgy13lk', {
         [/auf das ([\d,]+)-Fache <b>geschrumpft<\/b>, die Population stirbt langfristig aus\./g, 'se ha <b>reducido</b> a $1 veces su tamaño: a largo plazo la población se extingue.'],
         // biquadratisch: "<b>2 Lösungen</b>"
         [/<b>(\d) Lösungen<\/b>/g, '<b>$1 soluciones</b>'],
+        // the solution set "x \in \{-2;\ -1;\ 1;\ 2\}" → commas, as long as no number has a decimal comma
+        [/(\\in \\\{)([^$]*?)(\\\})/g, (m, a, s, b) => /,/.test(s) ? m : a + s.replace(/;\\ /g, ', ') + b],
     ]
 });
