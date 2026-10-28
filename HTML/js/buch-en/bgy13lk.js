@@ -82,6 +82,8 @@ window.BuchEN && BuchEN.add('bgy13lk', {
         [/Insgesamt werden ([\d.,]+) ME erzeugt, damit ([\d.,]+) ME den Markt erreichen\./, (m, a, b) => 'In total ' + a + ' units are produced so that ' + b + ' units reach the market.'],
         // uebergang: growing and shrinking after three steps
         [/um den Faktor ([\d.,]+) <b>gewachsen<\/b>\./, (m, q) => 'has <b>grown</b> by a factor of ' + q + '.'],
-        [/auf das ([\d.,]+)-Fache <b>geschrumpft<\/b>, die Population stirbt langfristig aus\./, (m, q) => 'has <b>shrunk</b> to ' + q + ' times its size; the population dies out in the long run.']
+        [/auf das ([\d.,]+)-Fache <b>geschrumpft<\/b>, die Population stirbt langfristig aus\./, (m, q) => 'has <b>shrunk</b> to ' + q + ' times its size; the population dies out in the long run.'],
+        // biquadratisch: the solution set {−2; −1; 1; 2} with commas
+        [/(x \\in \\\{)([^$]*?)(\\\})/, (m, a, b, c) => a + b.replace(/;\\ /g, ',\\ ') + c]
     ]
 });
