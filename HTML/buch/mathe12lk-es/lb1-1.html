@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas 12 avanzado · Capítulo 1.1 · Probabilidad condicionada | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Diagramas de árbol, tablas de contingencia, teorema de Bayes, independencia. Capítulo 1.1 del libro de texto interactivo Matemáticas · Berufliches Gymnasium 12 · Curso avanzado: explicaciones, ejemplos, ejercicios en tres niveles, autoevaluaciones y laboratorios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICAS · BERUFLICHES GYMNASIUM 12 · CURSO AVANZADO</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenido del capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.1 · ÁREA DE APRENDIZAJE 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introducción" data-toc-k="A" data-toc-short="Introducción" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.1 · ÁREA DE APRENDIZAJE 1 · AGOSTO · SEPTIEMBRE</p>
+            <h1>Probabilidad condicionada</h1>
+            <p class="b-hero-lead">Un test médico da positivo. ¿Hasta qué punto es segura la enfermedad? Quien viene en autobús llega tarde más a menudo. ¿Es casualidad?
+                En cuanto se <b>sabe algo</b>, las probabilidades cambian. En este capítulo calculas con ese conocimiento y compruebas
+                cuándo dos sucesos <b>no tienen nada que ver entre sí</b> de verdad.</p>
+            <div class="b-chips"><span class="b-chip">8 SESIONES</span><span class="b-chip">3 LECCIONES</span><span class="b-chip">CONTINUACIÓN DE 11.º CURSO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">LO QUE APRENDERÁS EN ESTE CAPÍTULO</div>
+            <div class="b-text"><ul>
+                <li>determinar <b>probabilidades condicionadas</b> $P_B(A)$ a partir de diagramas de árbol y tablas de contingencia 2×2</li>
+                <li><b>invertir</b> árboles y calcular con la <b>fórmula de la probabilidad total</b> y el <b>teorema de Bayes</b>, también con más de dos ramas</li>
+                <li>comprobar la <b>independencia</b> de sucesos y distinguirla de la <b>incompatibilidad</b></li>
+                <li><b>demostrar</b> la independencia y determinar parámetros de modo que los sucesos sean independientes</li>
+                <li><b>interpretar</b> resultados en contexto, por ejemplo en tests médicos</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: ¿YA SABES HACERLO?</div>
+            <div class="b-q" data-ans="1/36" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Se lanzan dos dados. ¿Cuál es la probabilidad de sacar dos seises?</p><div class="b-sol"><p>Regla de las ramas: $\tfrac16 \cdot \tfrac16 = \tfrac{1}{36}$</p></div></div>
+            <div class="b-q" data-ans="0,65" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}35$. ¿Cuánto vale $P(\overline{A})$?</p><div class="b-sol"><p>$1 - 0{,}35 = 0{,}65$</p></div></div>
+            <div class="b-q" data-ans="3/10" data-tol="0.0005" data-ph="P ="><p class="b-q-text">De una urna con 3 bolas rojas y 2 azules se extraen dos sin reemplazamiento. ¿Qué probabilidad hay de que ambas sean rojas?</p><div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p></div></div>
+            <div class="b-q" data-ans="0,6" data-tol="0.0001" data-ph="proporción"><p class="b-q-text">120 de 200 encuestados tienen una característica. ¿Cuál es la proporción expresada como número decimal?</p><div class="b-sol"><p>$\tfrac{120}{200} = 0{,}6$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Exploraciones" data-toc-k="E" data-toc-short="Exploraciones">
+    <div class="b-band"><span class="b-band-tag">EXPLORACIONES</span><span class="b-band-sub">PARA EMPEZAR · EN GRUPOS</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">EL TEST POSITIVO</div>
+            <div class="b-text"><p>Una enfermedad afecta al 2 % de la población. Un test detecta al 90 % de los enfermos, pero también da positivo en el 5 % de los sanos.</p>
+                <ul><li>Estimad: ¿qué probabilidad hay de que alguien con un test positivo esté realmente enfermo?</li><li>Comprobadlo con 10 000 personas. ¿Os sorprende el resultado?</li></ul></div>
+            <span class="b-pair">→ Lecciones 1 y 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">AUTOBÚS Y RETRASO</div>
+            <div class="b-text"><p>Preguntad en vuestra clase: ¿quién viene en autobús? ¿Quién ha llegado tarde al menos una vez esta semana?</p>
+                <ul><li>Anotad las respuestas en una tabla de contingencia 2×2.</li><li>¿Llegan tarde más a menudo quienes vienen en autobús que los demás? ¿Cómo podéis justificarlo con números?</li></ul></div>
+            <span class="b-pair">→ Lecciones 1 y 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">¿SE DA CUENTA EL DADO DE ALGO?</div>
+            <div class="b-text"><p>Se lanzan dos dados. $A$: el primero muestra un seis. $B$: la suma de puntos es 7.</p>
+                <ul><li>¿Se vuelve $B$ más probable si ya sabéis que ha ocurrido $A$?</li><li>¿Y con suma de puntos 8 en lugar de 7?</li></ul></div>
+            <span class="b-pair">→ Lección 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Probabilidad condicionada" data-toc-k="1" data-toc-short="1 Condicionada">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 1</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">1</span>Probabilidad bajo una condición</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>En un instituto se preguntó a 250 alumnas y alumnos: ¿vienes en autobús ($B$)? ¿Has llegado tarde esta semana ($V$)?</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:420px">
+                    <tr><th></th><th>$V$</th><th>$\overline{V}$</th><th>Total</th></tr>
+                    <tr><th>$B$</th><td>30</td><td>120</td><td>150</td></tr>
+                    <tr><th>$\overline{B}$</th><td>10</td><td>90</td><td>100</td></tr>
+                    <tr><th>Total</th><td>40</td><td>210</td><td>250</td></tr></table></div></div></div>
+            <div class="b-text">
+                <p>En total llegaron tarde $\tfrac{40}{250} = 16\,\%$. Si se mira <b>solo a quienes vienen en autobús</b>, son $\tfrac{30}{150} = 20\,\%$;
+                    entre los demás, solo $\tfrac{10}{100} = 10\,\%$. La condición «viene en autobús» reduce el conjunto de referencia a 150 personas.</p>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PROBABILIDAD CONDICIONADA</div>
+                <div class="b-text">
+                    <p>La probabilidad de $A$ <b>bajo la condición</b> $B$ (con $P(B) > 0$) es
+                        $$P_B(A) = \frac{P(A \cap B)}{P(B)}.$$</p>
+                    <p>Despejando se obtiene la <b>regla de la multiplicación</b> $P(A \cap B) = P(B) \cdot P_B(A)$. En el diagrama de árbol, en la segunda etapa están precisamente estas probabilidades condicionadas.</p>
+                    <p>Atención: en general, $P_B(A)$ y $P_A(B)$ son <b>distintas</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notación:</b> en lugar de $P_B(A)$ también se escribe $P(A \mid B)$, que se lee «P de A dado B».</p>
+            <p class="b-note"><b>Árbol inverso:</b> a partir de una tabla de contingencia 2×2 puedes dibujar dos árboles, uno con $B$ primero y otro con $V$ primero. Ambos describen las mismas cuatro probabilidades de las intersecciones.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · EL TEST RÁPIDO</div>
+        <p class="b-help" style="margin:0 0 12px">Ajusta lo frecuente que es la enfermedad y lo bien que funciona el test. Observa cuántas de las personas con test positivo están realmente enfermas.</p>
+        <div data-widget="schnelltest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 1 · AUTOBÚS Y RETRASO</div>
+            <div class="b-text"><p>Determina con la tabla de arriba $P_B(V)$ y $P_V(B)$. Interpreta ambos números.</p></div>
+            <div class="b-sol"><p>$P_B(V) = \tfrac{30}{150} = 0{,}2$: de quienes vienen en autobús, el 20 % llegó tarde.</p>
+                <p>$P_V(B) = \tfrac{30}{40} = 0{,}75$: de quienes llegaron tarde, el 75 % vino en autobús. <span class="b-res">Dos preguntas distintas, dos respuestas distintas.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 2 · EL TEST POSITIVO</div>
+            <div class="b-text"><p>El 2 % está enfermo ($E$). El test detecta al 90 % de los enfermos y da un falso positivo en el 5 % de los sanos. ¿Cuánto vale $P_+(E)$?</p></div>
+            <div class="b-sol"><p>$P(E \cap +) = 0{,}02 \cdot 0{,}9 = 0{,}018$ y $P(\overline{E} \cap +) = 0{,}98 \cdot 0{,}05 = 0{,}049$, por tanto $P(+) = 0{,}067$.</p>
+                <p>$P_+(E) = \dfrac{0{,}018}{0{,}067} \approx 0{,}269$. <span class="b-res">Solo algo más de una de cada cuatro personas con test positivo está enferma.</span> El motivo: hay muchas más personas sanas que enfermas.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>De 300 encuestados, 120 llevan gafas ($B$). 45 personas con gafas y 54 sin gafas leen a diario ($L$). Elabora la tabla de contingencia 2×2 y calcula $P(L)$, $P_B(L)$ y $P_L(B)$.</p></div>
+            <div class="b-sol"><p>$B$: 45 | 75 | 120 · $\overline{B}$: 54 | 126 | 180 · Total: 99 | 201 | 300.</p>
+                <p>$P(L) = \tfrac{99}{300} = 0{,}33$, $P_B(L) = \tfrac{45}{120} = 0{,}375$, $P_L(B) = \tfrac{45}{99} \approx 0{,}455$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>En el árbol, $P(A) = 0{,}6$, $P_A(B) = 0{,}3$ y $P_{\overline{A}}(B) = 0{,}5$. Calcula $P(B)$ y $P_B(A)$.</p></div>
+            <div class="b-sol"><p>$P(B) = 0{,}6 \cdot 0{,}3 + 0{,}4 \cdot 0{,}5 = 0{,}18 + 0{,}2 = 0{,}38$, $P_B(A) = \tfrac{0{,}18}{0{,}38} \approx 0{,}474$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La máquina M1 fabrica el 70 % de todas las piezas, de las cuales el 2 % son defectuosas. La máquina M2 fabrica el 30 %, de las cuales el 5 % son defectuosas. Una pieza es defectuosa. ¿Con qué probabilidad procede de M2?</p></div>
+            <div class="b-sol"><p>$P(F) = 0{,}7 \cdot 0{,}02 + 0{,}3 \cdot 0{,}05 = 0{,}014 + 0{,}015 = 0{,}029$, $P_F(M_2) = \tfrac{0{,}015}{0{,}029} \approx 0{,}517$.
+                Aunque M2 fabrica menos, más de la mitad de las piezas defectuosas proceden de ella.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Se sabe que $P(A) = 0{,}4$, $P_A(B) = 0{,}25$ y $P(B) = 0{,}3$. Completa la tabla de contingencia 2×2 y dibuja el árbol inverso (primero $B$). ¿Cuánto valen $P_B(A)$ y $P_{\overline{B}}(A)$?</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}1$, $P(A \cap \overline{B}) = 0{,}3$, $P(\overline{A} \cap B) = 0{,}2$, $P(\overline{A} \cap \overline{B}) = 0{,}4$.</p>
+                <p>$P_B(A) = \tfrac{0{,}1}{0{,}3} = \tfrac13$, $P_{\overline{B}}(A) = \tfrac{0{,}3}{0{,}7} \approx 0{,}429$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Según el ejemplo 2, alguien con un test positivo solo está enfermo con una probabilidad de aproximadamente el 26,9 %. La persona se hace un segundo test independiente del mismo tipo, que vuelve a dar positivo. ¿Qué probabilidad hay ahora de que esté enferma?</p></div>
+            <div class="b-hint"><p>Toma 0,269 como nueva probabilidad inicial de $E$ y calcula como en el ejemplo 2.</p></div>
+            <div class="b-sol"><p>$\dfrac{0{,}269 \cdot 0{,}9}{0{,}269 \cdot 0{,}9 + 0{,}731 \cdot 0{,}05} = \dfrac{0{,}2421}{0{,}2421 + 0{,}03655} \approx 0{,}869$.
+                <span class="b-res">Tras dos tests positivos, aproximadamente un 87 %.</span> Por eso un test rápido positivo suele confirmarse con un segundo test.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,6" data-tol="0.0001" data-ph="P ="><p class="b-q-text">De 50 personas, 20 tienen perro. 12 de los dueños de perro hacen footing a diario. ¿Cuál es la probabilidad de que un dueño de perro haga footing a diario?</p><div class="b-sol"><p>$\tfrac{12}{20} = 0{,}6$</p></div></div>
+        <div class="b-q" data-ans="0,4" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}5$ y $P(A \cap B) = 0{,}2$. ¿Cuánto vale $P_A(B)$?</p><div class="b-sol"><p>$\tfrac{0{,}2}{0{,}5} = 0{,}4$</p></div></div>
+        <div class="b-q" data-ans="0,29" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}3$, $P_A(B) = 0{,}5$, $P_{\overline{A}}(B) = 0{,}2$. ¿Cuánto vale $P(B)$?</p><div class="b-sol"><p>$0{,}3 \cdot 0{,}5 + 0{,}7 \cdot 0{,}2 = 0{,}15 + 0{,}14 = 0{,}29$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="El teorema de Bayes" data-toc-k="2" data-toc-short="2 Bayes">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 2</span><span class="b-band-sub">3 SESIONES</span></div>
+    <h2><span class="b-no">2</span>Probabilidad total y teorema de Bayes</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Una empresa compra sensores a tres proveedores. Se sabe cuántas piezas suministra cada uno y con qué frecuencia sus piezas son defectuosas,
+                es decir, $P(Z_i)$ y $P_{Z_i}(D)$. Pero el control de calidad encuentra una pieza defectuosa y pregunta al revés: ¿de quién viene? Se busca $P_D(Z_i)$.
+                Para ello hay que <b>dar la vuelta</b> al árbol.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · PROBABILIDAD TOTAL Y TEOREMA DE BAYES</div>
+                <div class="b-text">
+                    <p>Los sucesos $A_1, A_2, \ldots, A_n$ son incompatibles dos a dos y juntos abarcan todos los resultados (una <b>partición</b> del espacio muestral; en el árbol, las ramas de la primera etapa).</p>
+                    <p><b>Fórmula de la probabilidad total:</b> $$P(B) = P(A_1) \cdot P_{A_1}(B) + P(A_2) \cdot P_{A_2}(B) + \ldots + P(A_n) \cdot P_{A_n}(B),$$ la suma de todas las ramas que terminan en $B$.</p>
+                    <p><b>Teorema de Bayes:</b> $$P_B(A_k) = \frac{P(A_k) \cdot P_{A_k}(B)}{P(B)}.$$ Con dos ramas $A$ y $\overline{A}$, en el denominador está $P(A) \cdot P_A(B) + P(\overline{A}) \cdot P_{\overline{A}}(B)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Frecuencias naturales:</b> si se calcula con 1000 o 10 000 personas en lugar de con porcentajes, el teorema de Bayes se convierte en contar: los casos buscados divididos entre todos los casos con la característica observada.</p>
+            <p class="b-note"><b>Médicos a prueba:</b> Gerd Gigerenzer planteó un problema así sobre la mamografía a 160 ginecólogas y ginecólogos. La respuesta más frecuente fue 90 %; la correcta es alrededor del 10 %. Con frecuencias naturales, la respuesta más frecuente fue la correcta.
+                Fuente: G. Gigerenzer et al.: «Helping Doctors and Patients Make Sense of Health Statistics», Psychological Science in the Public Interest 8 (2007), págs. 53-96.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · DAR LA VUELTA AL ÁRBOL</div>
+        <p class="b-help" style="margin:0 0 12px">El primer árbol muestra «primero $A$, después $B$»; el segundo, el mismo azar al revés: «primero $B$, después $A$». La tabla de contingencia une los dos. Cambia las tres probabilidades o elige un ejemplo.</p>
+        <div data-widget="umkehrbaum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 3 · TRES PROVEEDORES</div>
+            <div class="b-text"><p>El proveedor $Z_1$ suministra el 50 % de los sensores, $Z_2$ el 30 % y $Z_3$ el 20 %. Son defectuosas el 1 %, el 2 % y el 4 % de sus piezas.
+                a) ¿Qué proporción de sensores es defectuosa en total? b) Un sensor es defectuoso. ¿De qué proveedor viene con mayor probabilidad?</p></div>
+            <div class="b-sol"><p>a) $P(D) = 0{,}5 \cdot 0{,}01 + 0{,}3 \cdot 0{,}02 + 0{,}2 \cdot 0{,}04 = 0{,}005 + 0{,}006 + 0{,}008 = 0{,}019$, es decir, el 1,9 %.</p>
+                <p>b) $P_D(Z_1) = \tfrac{0{,}005}{0{,}019} \approx 0{,}263$, $P_D(Z_2) = \tfrac{0{,}006}{0{,}019} \approx 0{,}316$, $P_D(Z_3) = \tfrac{0{,}008}{0{,}019} \approx 0{,}421$.
+                    <span class="b-res">Con mayor probabilidad viene de $Z_3$,</span> aunque $Z_3$ es el que menos piezas suministra. Los tres valores suman 1.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 4 · CALCULAR CON 1000 PERSONAS</div>
+            <div class="b-text"><p>El 1 % de las mujeres examinadas tiene cáncer de mama. La mamografía detecta al 90 % de las enfermas y da positivo en el 9 % de las sanas. ¿Con qué probabilidad está enferma una mujer con resultado positivo?</p></div>
+            <div class="b-sol"><p>De 1000 mujeres, 10 están enfermas, y de ellas 9 dan positivo. De las 990 sanas, unas 89 dan positivo.</p>
+                <p>$P_+(E) \approx \tfrac{9}{9 + 89} = \tfrac{9}{98} \approx 0{,}092$. <span class="b-res">Solo alrededor del 9 % de los resultados positivos corresponden a enfermas.</span> Con el teorema de Bayes: $\tfrac{0{,}01 \cdot 0{,}9}{0{,}01 \cdot 0{,}9 + 0{,}99 \cdot 0{,}09} = \tfrac{0{,}009}{0{,}0981} \approx 0{,}092$.</p></div>
+        </div>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>La urna $U_1$ contiene 3 bolas rojas y 1 azul; la urna $U_2$, 1 roja y 3 azules. Una moneda elige la urna y después se saca una bola. Calcula $P(\text{roja})$ y $P_{\text{roja}}(U_1)$.</p></div>
+            <div class="b-sol"><p>$P(\text{roja}) = \tfrac12 \cdot \tfrac34 + \tfrac12 \cdot \tfrac14 = \tfrac12$ y $P_{\text{roja}}(U_1) = \dfrac{3/8}{1/2} = \tfrac34$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>En una ciudad, el 40 % de los trabajadores va al trabajo en autobús y tren, el 35 % en coche y el 25 % en bicicleta. Llegan tarde el 10 %, el 6 % y el 2 % de ellos, respectivamente.
+                ¿Qué porcentaje llega tarde? Una persona ha llegado tarde. ¿Con qué probabilidad fue en bicicleta y con qué probabilidad en autobús y tren?</p></div>
+            <div class="b-sol"><p>$P(V) = 0{,}4 \cdot 0{,}1 + 0{,}35 \cdot 0{,}06 + 0{,}25 \cdot 0{,}02 = 0{,}04 + 0{,}021 + 0{,}005 = 0{,}066$, es decir, el 6,6 %.</p>
+                <p>$P_V(\text{bicicleta}) = \tfrac{0{,}005}{0{,}066} \approx 0{,}076$ y $P_V(\text{autobús y tren}) = \tfrac{0{,}04}{0{,}066} \approx 0{,}606$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La mujer del ejemplo 4 se somete a una segunda prueba, independiente de la primera, y el resultado vuelve a ser positivo. ¿Con qué probabilidad está enferma ahora?</p></div>
+            <div class="b-hint"><p>El resultado de hoy es la probabilidad inicial de mañana: toma $P(E) \approx 0{,}0917$.</p></div>
+            <div class="b-sol"><p>$\dfrac{0{,}0917 \cdot 0{,}9}{0{,}0917 \cdot 0{,}9 + 0{,}9083 \cdot 0{,}09} \approx \dfrac{0{,}0826}{0{,}1643} \approx 0{,}50$. Solo después de dos resultados positivos es tan probable como sacar cara al lanzar una moneda.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>El 2 % de un grupo está enfermo. Un test detecta al 95 % de los enfermos. ¿En qué porcentaje de los sanos puede dar como máximo un falso positivo para que un resultado positivo sea correcto con una probabilidad de al menos el 50 %?</p></div>
+            <div class="b-hint"><p>Llama $q$ a la proporción de sanos con falso positivo y plantea $P_+(E) \geq 0{,}5$ como inecuación en $q$.</p></div>
+            <div class="b-sol"><p>$P_+(E) = \dfrac{0{,}02 \cdot 0{,}95}{0{,}02 \cdot 0{,}95 + 0{,}98 \cdot q} = \dfrac{0{,}019}{0{,}019 + 0{,}98q} \geq 0{,}5 \iff 0{,}019 \geq 0{,}98q \iff q \leq 0{,}0194$.</p>
+                <p><span class="b-res">Como máximo, alrededor del 1,9 % de falsos positivos.</span> En las enfermedades raras, un test no solo tiene que detectar bien a los enfermos, sino también clasificar mal a muy pocos sanos.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra la fórmula de la probabilidad total para tres ramas $A_1, A_2, A_3$ y, a partir de ella, el teorema de Bayes.</p></div>
+            <div class="b-sol"><p>Como $A_1, A_2, A_3$ forman una partición, $B$ se descompone en las partes incompatibles dos a dos $A_1 \cap B$, $A_2 \cap B$, $A_3 \cap B$. Por tanto,
+                $P(B) = P(A_1 \cap B) + P(A_2 \cap B) + P(A_3 \cap B)$, y por la regla de la multiplicación $P(A_i \cap B) = P(A_i) \cdot P_{A_i}(B)$.</p>
+                <p>Bayes: $P_B(A_k) = \dfrac{P(A_k \cap B)}{P(B)} = \dfrac{P(A_k) \cdot P_{A_k}(B)}{P(B)}$, con $P(B)$ de la primera parte.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,26" data-tol="0.0001" data-ph="P(B) ="><p class="b-q-text">$P(A) = 0{,}1$, $P_A(B) = 0{,}8$, $P_{\overline{A}}(B) = 0{,}2$. ¿Cuánto vale $P(B)$?</p><div class="b-sol"><p>$0{,}08 + 0{,}9 \cdot 0{,}2 = 0{,}26$</p></div></div>
+        <div class="b-q" data-ans="0,308" data-tol="0.001" data-ph="P ="><p class="b-q-text">Con los mismos números: ¿cuánto vale $P_B(A)$ con tres decimales?</p><div class="b-sol"><p>$\tfrac{0{,}08}{0{,}26} \approx 0{,}308$</p></div></div>
+        <div class="b-q" data-ans="0,625" data-tol="0.001" data-ph="P ="><p class="b-q-text">La máquina 1 fabrica el 60 % de las piezas con un 2 % de piezas defectuosas; la máquina 2, el resto con un 5 %. ¿Con qué probabilidad viene de la máquina 2 una pieza defectuosa?</p><div class="b-sol"><p>$\dfrac{0{,}4 \cdot 0{,}05}{0{,}6 \cdot 0{,}02 + 0{,}4 \cdot 0{,}05} = \dfrac{0{,}02}{0{,}032} = 0{,}625$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Independencia de sucesos" data-toc-k="3" data-toc-short="3 Independencia">
+    <div class="b-band"><span class="b-band-tag">LECCIÓN 3</span><span class="b-band-sub">2 SESIONES</span></div>
+    <h2><span class="b-no">3</span>Independencia estocástica</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Se lanza un dado. $A$: número par. $B$: como mucho 2. ¿Cambia la probabilidad de sacar un número par si sabes que ha salido como mucho un 2?</p></div></div>
+            <div class="b-text"><p>$P(A) = \tfrac12$. Bajo la condición $B = \{1, 2\}$ solo el 2 es par, por tanto $P_B(A) = \tfrac12$. Saber algo sobre $B$ no cambia nada en $A$.
+                Estos sucesos se llaman <b>independientes</b>. Con el autobús y el retraso era distinto: $P_B(V) = 0{,}2$, pero $P(V) = 0{,}16$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RECUERDA · INDEPENDENCIA</div>
+                <div class="b-text">
+                    <p>Dos sucesos $A$ y $B$ se llaman <b>independientes</b> si se cumple: $$P(A \cap B) = P(A) \cdot P(B).$$</p>
+                    <p>Para $P(B) > 0$ esto equivale a $P_B(A) = P(A)$. En caso contrario, $A$ y $B$ se llaman <b>dependientes</b>.</p>
+                    <p><b>Incompatibles</b> significa otra cosa: $A \cap B = \emptyset$, los sucesos no pueden ocurrir a la vez. Los sucesos incompatibles con $P(A) > 0$ y $P(B) > 0$ son siempre <b>dependientes</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>En el árbol:</b> $A$ y $B$ son independientes si en las dos ramas de la segunda etapa aparece la misma probabilidad para $B$: $P_A(B) = P_{\overline{A}}(B)$.</p>
+            <p class="b-note"><b>Dependiente no significa causal:</b> la dependencia muestra una relación, pero no cuál es la causa.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIVO · ¿INDEPENDIENTES O NO?</div>
+        <p class="b-help" style="margin:0 0 12px">Modifica $P(A)$, $P(B)$ y $P(A \cap B)$. En el cuadrado unidad, la columna izquierda es $B$ y la derecha $\overline{B}$. En dorado está en cada caso la parte correspondiente a $A$.</p>
+        <div data-widget="unabhaengig"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 5 · AUTOBÚS Y RETRASOS</div>
+            <div class="b-text"><p>¿Son independientes $B$ (autobús) y $V$ (retraso) de la lección 1?</p></div>
+            <div class="b-sol"><p>$P(B) \cdot P(V) = 0{,}6 \cdot 0{,}16 = 0{,}096$, pero $P(B \cap V) = \tfrac{30}{250} = 0{,}12$. <span class="b-res">Dependientes.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EJEMPLO 6 · LA SUMA DE PUNTOS 7</div>
+            <div class="b-text"><p>Dos dados. $A$: el primero muestra un seis. $B$: la suma de puntos es 7. ¿Independientes?</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac16$, $P(B) = \tfrac{6}{36} = \tfrac16$, $P(A \cap B) = P(\{(6, 1)\}) = \tfrac{1}{36} = \tfrac16 \cdot \tfrac16$. <span class="b-res">Independientes.</span>
+                Muestre lo que muestre el primer dado, exactamente un número del segundo completa la suma hasta 7.</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EL JUEGO DE DADOS</span><span class="b-lab-what">Diagramas de árbol y reglas de las ramas (en alemán)</span></span></a>
+    </div>
+
+    <h3>EJERCICIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Se sabe que $P(A) = 0{,}4$ y $P(B) = 0{,}5$. ¿Son $A$ y $B$ independientes si a) $P(A \cap B) = 0{,}2$ &nbsp; b) $P(A \cap B) = 0{,}25$?</p></div>
+            <div class="b-sol"><p>$P(A) \cdot P(B) = 0{,}2$. a) independientes &nbsp; b) dependientes</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Un dado: $A$ = «1», $B$ = «6». ¿Son incompatibles los sucesos? ¿Son independientes?</p></div>
+            <div class="b-sol"><p>Incompatibles, porque ambos a la vez no es posible. $P(A \cap B) = 0 \neq \tfrac16 \cdot \tfrac16$, por tanto dependientes: quien sabe que ha salido un 6 sabe con seguridad que no ha salido un 1.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$A$ y $B$ son independientes con $P(A) = 0{,}3$ y $P(B) = 0{,}6$. Completa la tabla de contingencia 2×2 con probabilidades.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}18$, $P(A \cap \overline{B}) = 0{,}12$, $P(\overline{A} \cap B) = 0{,}42$, $P(\overline{A} \cap \overline{B}) = 0{,}28$. Cada casilla es el producto de sus valores marginales.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Dos dados: $A$ = «suma de puntos 8», $B$ = «el primer dado muestra un 6». Comprueba si son independientes y compáralo con el ejemplo 6.</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac{5}{36}$, $P(B) = \tfrac16$, $P(A \cap B) = P(\{(6, 2)\}) = \tfrac{1}{36} = \tfrac{6}{216}$, pero $P(A) \cdot P(B) = \tfrac{5}{216}$.
+                Dependientes: si el primer lanzamiento es un 1, la suma 8 es imposible; si es un 6, no.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dos bombas fallan independientemente una de otra, cada una con una probabilidad del 5 %. ¿Qué probabilidad hay de que falle el sistema si a) basta con una bomba, b) tienen que funcionar las dos? ¿Por qué es crítica aquí la hipótesis de independencia?</p></div>
+            <div class="b-sol"><p>a) fallan las dos: $0{,}05^2 = 0{,}0025$ &nbsp; b) falla al menos una: $1 - 0{,}95^2 = 0{,}0975$.</p>
+                <p>Una causa común (un apagón, una inundación) a menudo deja fuera de servicio a las dos a la vez. Entonces los fallos son dependientes y a) es demasiado optimista.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>En un curso hay 12 alumnas, 4 de las cuales cantan en el coro ($C$), y 18 alumnos, de los cuales $x$ cantan en el coro. ¿Para qué $x$ son independientes los sucesos «alumna» ($A$) y $C$? Justifícalo sin probar valores.</p></div>
+            <div class="b-hint"><p>Independientes significa: la proporción de quienes cantan en el coro es la misma en los dos grupos, $P_A(C) = P_{\overline{A}}(C)$.</p></div>
+            <div class="b-sol"><p>$P_A(C) = \tfrac{4}{12} = \tfrac13$ tiene que ser igual a $P_{\overline{A}}(C) = \tfrac{x}{18}$, así que $x = 6$.
+                Comprobación: $P(A \cap C) = \tfrac{4}{30}$ y $P(A) \cdot P(C) = \tfrac{12}{30} \cdot \tfrac{10}{30} = \tfrac{4}{30}$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra: si $A$ y $B$ son a la vez incompatibles e independientes, entonces $P(A) = 0$ o $P(B) = 0$. ¿Qué significa esto para los sucesos que se estudian en la práctica?</p></div>
+            <div class="b-sol"><p>Incompatibles: $P(A \cap B) = P(\emptyset) = 0$. Independientes: $P(A \cap B) = P(A) \cdot P(B)$. Por tanto, $P(A) \cdot P(B) = 0$, y un producto solo es cero si uno de los factores es cero.</p>
+                <p>Por eso, los sucesos que pueden ocurrir de verdad nunca son a la vez incompatibles e independientes. Quien confunde «se excluyen» con «no tienen nada que ver» calcula mal.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">¡PONTE A PRUEBA!</div>
+        <div class="b-q" data-ans="0,2" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$ y $B$ son independientes, $P(A) = 0{,}5$, $P(B) = 0{,}4$. ¿Cuánto vale $P(A \cap B)$?</p><div class="b-sol"><p>$0{,}5 \cdot 0{,}4 = 0{,}2$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$P(A) = 0{,}2$, $P(B) = 0{,}3$ y $P(A \cap B) = 0{,}1$. Entonces $A$ y $B$ son …</p>
+            <div class="b-mc"><button>independientes</button><button>dependientes</button><button>incompatibles</button></div>
+            <div class="b-sol"><p>$0{,}2 \cdot 0{,}3 = 0{,}06 \neq 0{,}1$</p></div></div>
+        <div class="b-q" data-ans="0,05" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$ y $B$ son independientes con $P(A) = 0{,}25$ y $P(B) = 0{,}8$. ¿Cuánto vale $P(A \cap \overline{B})$?</p><div class="b-sol"><p>También $A$ y $\overline{B}$ son independientes: $0{,}25 \cdot 0{,}2 = 0{,}05$</p></div></div>
+        <div class="b-q" data-ans="0,4" data-tol="0.0001" data-ph="p ="><p class="b-q-text">$P(A) = 0{,}3$, $P(A \cap B) = 0{,}12$ y $P(B) = p$. ¿Para qué $p$ son independientes $A$ y $B$?</p><div class="b-sol"><p>$0{,}3 \cdot p = 0{,}12$, así que $p = 0{,}4$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Repasar · Profundizar · Relacionar" data-toc-k="W" data-toc-short="Practicar">
+    <div class="b-band"><span class="b-band-tag">REPASAR · PROFUNDIZAR · RELACIONAR</span></div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">ENTRENAMIENTO · COMPLETAR TABLAS DE CONTINGENCIA 2×2</div>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+    <div class="b-tasks" data-start="18">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>En un curso con 120 alumnas y alumnos, 48 cursan Informática ($I$); 30 de ellos están también en el grupo de teatro ($T$). En total hay 50 en el grupo de teatro. Calcula $P_I(T)$ y $P_T(I)$. ¿Son $I$ y $T$ independientes?</p></div>
+            <div class="b-sol"><p>$P_I(T) = \tfrac{30}{48} = 0{,}625$, $P_T(I) = \tfrac{30}{50} = 0{,}6$. $P(I) \cdot P(T) = 0{,}4 \cdot \tfrac{5}{12} \approx 0{,}167$, pero $P(I \cap T) = 0{,}25$: dependientes.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>El 40 % de todos los correos electrónicos son spam. La palabra «premio» aparece en el 30 % de los correos spam, pero solo en el 2 % de los demás. Un correo contiene «premio». ¿Qué probabilidad hay de que sea spam?</p></div>
+            <div class="b-sol"><p>$\dfrac{0{,}4 \cdot 0{,}3}{0{,}4 \cdot 0{,}3 + 0{,}6 \cdot 0{,}02} = \dfrac{0{,}12}{0{,}132} \approx 0{,}909$. Así funcionan los filtros de spam sencillos.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relacionar con 11.º curso:</b> en el problema de Monty Hall eliges la puerta 1 y el presentador abre la puerta 3, tras la que hay una cabra. Justifica con probabilidades condicionadas por qué cambiar de puerta gana con probabilidad $\tfrac23$.</p></div>
+            <div class="b-sol"><p>Si el coche está tras la puerta 2 (probabilidad $\tfrac13$), el presentador tiene que abrir la puerta 3. Si está tras la puerta 1 ($\tfrac13$), solo abre la puerta 3 con probabilidad $\tfrac12$.
+                $P_{\text{abre la 3}}(\text{coche tras la 2}) = \dfrac{\frac13 \cdot 1}{\frac13 \cdot 1 + \frac13 \cdot \frac12} = \tfrac23$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demuestra: si $A$ y $B$ son independientes, también lo son $A$ y $\overline{B}$.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = P(A) - P(A \cap B) = P(A) - P(A) \cdot P(B) = P(A) \cdot (1 - P(B)) = P(A) \cdot P(\overline{B})$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursión: el caso Sally Clark" data-toc-k="X" data-toc-short="Sally Clark">
+    <div class="b-band"><span class="b-band-tag">EXCURSIÓN</span><span class="b-band-sub">CUANDO SE SUPONE INDEPENDENCIA SIN RAZÓN</span></div>
+    <h2>El caso Sally Clark</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>En 1999, en Inglaterra, la abogada Sally Clark fue condenada porque sus dos hijos habían muerto poco después de nacer. Un pediatra declaró como perito
+                que, en una familia como la suya, la probabilidad de una muerte súbita del lactante era de aproximadamente 1 entre 8543. Para dos casos multiplicó:
+                $\left(\tfrac{1}{8543}\right)^2 \approx \tfrac{1}{73\,000\,000}$.</p>
+            <p>Multiplicar presupone que las dos muertes son <b>independientes</b>. Sin embargo, causas genéticas o domésticas comunes hacen que un segundo caso sea
+                bastante más probable. A esto se sumó un segundo error: incluso una probabilidad pequeña de los datos bajo la hipótesis de inocencia no es la
+                probabilidad de la inocencia. $P_{\text{inocente}}(\text{datos})$ y $P_{\text{datos}}(\text{inocente})$ son cosas distintas, como $P_B(V)$ y $P_V(B)$.</p>
+            <p>En 2001, la Royal Statistical Society señaló públicamente estos errores. En 2003 se anuló la sentencia.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fuentes:</b> Royal Statistical Society, declaración sobre el caso Sally Clark del 23 de octubre de 2001; Court of Appeal, R v Clark [2003] EWCA Crim 1020.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Repaso final" data-toc-k="R" data-toc-short="Repaso final">
+    <div class="b-band"><span class="b-band-tag">REPASO FINAL</span><span class="b-band-sub">LO MÁS IMPORTANTE DE UN VISTAZO</span></div>
+    <div class="b-rueck"><div><h4>PROBABILIDAD CONDICIONADA</h4><p>$P_B(A) = \dfrac{P(A \cap B)}{P(B)}$: el conjunto de referencia se reduce a $B$.</p></div>
+        <div><p>Autobús: $P_B(V) = \tfrac{30}{150} = 0{,}2$ · $P_V(B) = \tfrac{30}{40} = 0{,}75$</p></div></div>
+    <div class="b-rueck"><div><h4>REGLA DE LA MULTIPLICACIÓN Y ÁRBOL</h4><p>$P(A \cap B) = P(A) \cdot P_A(B)$. Segunda etapa del árbol: probabilidades condicionadas.</p></div>
+        <div><p>Árbol inverso a partir de la misma tabla de contingencia 2×2</p></div></div>
+    <div class="b-rueck"><div><h4>PROBABILIDAD TOTAL Y BAYES</h4><p>$P(B) = \sum P(A_i) \cdot P_{A_i}(B)$ y $P_B(A_k) = \dfrac{P(A_k) \cdot P_{A_k}(B)}{P(B)}$.</p></div>
+        <div><p>Tres proveedores: $P(D) = 0{,}019$, $P_D(Z_3) \approx 0{,}421$</p></div></div>
+    <div class="b-rueck"><div><h4>INDEPENDENCIA</h4><p>$P(A \cap B) = P(A) \cdot P(B)$; equivale a $P_B(A) = P(A)$.</p></div>
+        <div><p>Primer dado 6 y suma de puntos 7: independientes</p></div></div>
+    <div class="b-rueck"><div><h4>INCOMPATIBLES ≠ INDEPENDIENTES</h4><p>$A \cap B = \emptyset$. Con probabilidades positivas, siempre dependientes.</p></div>
+        <div><p>«1» y «6» con un dado</p></div></div>
+    <div class="b-rueck"><div><h4>INTERPRETAR</h4><p>Los tests positivos en enfermedades poco frecuentes son a menudo falsos positivos.</p></div>
+        <div><p>2 % enfermos, 90 % / 5 %: $P_+(E) \approx 27\,\%$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DOS RONDAS · RESPUESTA INMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="0,3" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A \cap B) = 0{,}12$ y $P(B) = 0{,}4$. ¿Cuánto vale $P_B(A)$?</p><div class="b-sol"><p>$\tfrac{0{,}12}{0{,}4} = 0{,}3$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$A$ y $B$ son incompatibles y ambos tienen probabilidad positiva. Entonces son …</p>
+                <div class="b-mc"><button>independientes</button><button>dependientes</button><button>depende de los números</button></div>
+                <div class="b-sol"><p>$P(A \cap B) = 0$, pero $P(A) \cdot P(B) > 0$.</p></div></div>
+            <div class="b-q" data-ans="0,75" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}5$, $P_A(B) = 0{,}6$, $P_{\overline{A}}(B) = 0{,}2$. ¿Cuánto vale $P_B(A)$?</p><div class="b-sol"><p>$P(B) = 0{,}3 + 0{,}1 = 0{,}4$, $P_B(A) = \tfrac{0{,}3}{0{,}4} = 0{,}75$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="0,8" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$, $B$ independientes, $P(A) = 0{,}6$, $P(B) = 0{,}5$. ¿Cuánto vale $P(A \cup B)$?</p><div class="b-sol"><p>$0{,}6 + 0{,}5 - 0{,}6 \cdot 0{,}5 = 0{,}8$</p></div></div>
+            <div class="b-q" data-ans="0,4706" data-tol="0.005" data-ph="P ="><p class="b-q-text">El 10 % está enfermo. Un test detecta al 80 % de los enfermos y da un falso positivo en el 10 % de los sanos. ¿Cuánto vale $P_+(E)$?</p><div class="b-sol"><p>$\dfrac{0{,}08}{0{,}08 + 0{,}09} = \tfrac{8}{17} \approx 0{,}471$</p></div></div>
+            <div class="b-q" data-ans="7/9" data-tol="0.002" data-ph="P ="><p class="b-q-text">Tres proveedores suministran el 20 %, el 30 % y el 50 % de la mercancía con un 2 %, un 1 % y un 0,4 % de piezas defectuosas. Una pieza es defectuosa. ¿Con qué probabilidad no viene del tercer proveedor?</p><div class="b-sol"><p>$P(D) = 0{,}004 + 0{,}003 + 0{,}002 = 0{,}009$, $P_D(L_3) = \tfrac{0{,}002}{0{,}009} = \tfrac29$, así que $1 - \tfrac29 = \tfrac79 \approx 0{,}778$.</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Se cumple $P(A) = 0{,}3$ y $P_B(A) = 0{,}3$. Entonces $A$ y $B$ son …</p>
+                <div class="b-mc"><button>independientes</button><button>dependientes</button><button>incompatibles</button></div>
+                <div class="b-sol"><p>La condición $B$ no cambia la probabilidad de $A$.</p></div></div>
+        </div>
+    </div>
+    <h3>MÁS PRÁCTICA EN LÍNEA (EN ALEMÁN)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TABLAS DE CONTINGENCIA 2×2</span><span class="b-lab-what">Probabilidad condicionada</span></span></a>
+        <a class="b-lab" href="../../mathetest11-baumdiagramme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIAGRAMAS DE ÁRBOL</span><span class="b-lab-what">Experimentos aleatorios de varias etapas</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemáticas, Berufliches Gymnasium, 12.º curso, curso avanzado · Área de aprendizaje 1 según el plan de estudios de matemáticas del Berufliches Gymnasium de Sajonia (2026).</p>
+    <p>Todos los textos, ejercicios y figuras son contenido original.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-es.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-es/stochastik.js"></script>
+<script src="../../js/buch-gy11lk-stoch.js"></script>
+<script src="../../js/buch-es/gy11lk-stoch.js"></script>
+</body>
+</html>
