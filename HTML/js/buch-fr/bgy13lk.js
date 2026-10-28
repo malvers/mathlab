@@ -89,6 +89,8 @@ window.BuchFR && BuchFR.add('bgy13lk', {
         // uebergang: the identity matrix is I in French ("U^3 = a · b · f · E = 1 · E")
         [/(U\^3 = a \\cdot b \\cdot f \\cdot )E = ([^$]*) \\cdot E\$/g, (m, a, q) => a + 'I = ' + q + ' \\cdot I$'],
         // biquadratisch: the solution set {−2 ; −1 ; 1 ; 2} with the French semicolon
-        [/(x \\in \\\{)([^}]*)(\\\})/g, (m, a, b, c) => a + b.replace(/;\\ /g, '\\,;\\,') + c],
+        [/(x \\in \\\{)([\s\S]*?)(\\\})/g, (m, a, b, c) => a + b.replace(/;\\ /g, '\\,;\\,') + c],
+        // biquadratisch: French spacing before the semicolon between the z values and before the colon after the count
+        [/; \$z = /g, '\u00a0; $z = '], [/<\/b>: \$x \\in /g, '</b>\u00a0: $x \\in '],
     ]
 });
