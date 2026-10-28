@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 12 LK · Chapitre 2.8 · Problèmes d’optimisation | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Modéliser, extremums au bord, distinctions de cas. Chapitre 2.8 du manuel interactif Mathématiques · Berufliches Gymnasium 12 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 12 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.8 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.8 · DOMAINE D’APPRENTISSAGE 2 · MAI</p>
+            <h1>Problèmes d’optimisation</h1>
+            <p class="b-hero-lead">Le calcul différentiel devient maintenant un outil. Avec un carton, on veut faire une boîte de volume le plus grand possible ; une boîte de conserve doit utiliser le moins de tôle possible ;
+                une sauveteuse doit rejoindre le plus vite possible une personne qui se noie. Tu apprends à trouver la <b>meilleure</b> solution parmi beaucoup de possibilités, à ne pas oublier les bornes
+                et à distinguer des cas quand le problème dépend d’un paramètre.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">2 LEÇONS</span><span class="b-chip">APPLIQUER · MODÉLISER</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x*(30-2*x)*(20-2*x)"]' data-labels='["V"]' data-lat="[7.6]" data-pts="[[3.92,1056.3]]" data-x="-0.5,10.5" data-y="-100,1250" data-xl="x" data-yl="V" data-h="240" data-aria="Fonction volume de la boîte, avec son maximum"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>pour les <b>problèmes d’optimisation</b>, établir la fonction à optimiser, la contrainte et l’ensemble de définition</li>
+                <li>tenir compte des <b>extremums au bord</b> et <b>évaluer de façon critique</b> les modèles</li>
+                <li>écrire des fonctions à optimiser avec des racines et des fonctions $\mathrm{e}$, optimiser des <b>distances</b> et des <b>chemins les plus rapides</b></li>
+                <li>résoudre des problèmes avec un <b>paramètre</b> en <b>distinguant des cas</b></li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Résous le système $x + y = 5$, $x - y = -1$. Que vaut $x$ ?</p>
+            <div class="b-sol"><p>On additionne : $2x = 4$, $x = 2$ (et $y = 3$)</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="5" data-ph="nombre"><p class="b-q-text">$f(x) = ax^2 + bx + c$ avec $a = 1$, $b = 2$, $c = 2$. Que vaut $f(1)$ ?</p>
+            <div class="b-sol"><p>$1 + 2 + 2 = 5$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">En quelle valeur de $x$ la fonction $f(x) = -x^2 + 6x$ atteint-elle son maximum ?</p>
+            <div class="b-sol"><p>$-2x + 6 = 0$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="18" data-ph="cm²"><p class="b-q-text">Un rectangle mesure 6 cm de long, et sa largeur vaut la moitié de sa longueur. Quelle est son aire ?</p>
+            <div class="b-sol"><p>$6 \cdot 3 = 18$ cm²</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA BOÎTE</div>
+        <div class="b-text"><p>Découpez aux quatre coins d’une feuille A4 des carrés de même taille et pliez une boîte ouverte.</p>
+            <ul>
+                <li>Essayez différentes tailles de carrés. Quelle boîte contient le plus ?</li>
+                <li>De quoi dépend le volume ? Établissez une formule.</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA BOÎTE DE CONSERVE AU SUPERMARCHÉ</div>
+        <div class="b-text"><p>Mesurez le diamètre et la hauteur de trois boîtes de conserve et calculez leur volume.</p>
+            <ul>
+                <li>À volume égal, d’autres dimensions économiseraient-elles du matériau ?</li>
+                <li>Pourquoi les vraies boîtes sont-elles malgré tout souvent différentes ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE TRAJET LE PLUS RAPIDE</div>
+        <div class="b-text"><p>Une sauveteuse se tient à 30 m de l’eau. Un nageur est à 20 m du rivage et décalé de 50 m sur le côté. Elle court à 6 m/s et nage à 2 m/s.</p>
+            <ul>
+                <li>Le trajet en ligne droite est-il le plus rapide ? Ou devrait-elle courir jusqu’en face du nageur ?</li>
+                <li>Estimez où elle devrait entrer dans l’eau, et calculez deux trajets.</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Fonction à optimiser et contrainte" data-toc-k="1" data-toc-short="1 Optimiser">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">7 HEURES</span></div>
+        <h2><span class="b-no">1</span>Fonction à optimiser, contrainte, ensemble de définition</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Dans un carton de 30 cm × 20 cm, on découpe aux coins des carrés de côté $x$. Pour quelle valeur de $x$ la boîte contient-elle le plus ?</p>
+            </div>
+        </div>
+        <div class="b-text"><p>La boîte mesure $30 - 2x$ de long, $20 - 2x$ de large et $x$ de haut. Son volume est la <b>fonction à optimiser</b> $V(x) = x(30 - 2x)(20 - 2x) = 4x^3 - 100x^2 + 600x$
+                d’ensemble de définition $0 < x < 10$. $V'(x) = 12x^2 - 200x + 600 = 0$ donne $x \approx 3{,}92$ cm (la seconde solution, 12,74, est en dehors). Le volume vaut alors environ 1 056 cm³.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÉSOUDRE UN PROBLÈME D’OPTIMISATION</div>
+        <div class="b-text"><p><b>1. Fonction à optimiser :</b> quelle grandeur doit être maximale ou minimale ? En établir la formule, souvent avec deux variables.</p>
+            <p><b>2. Contrainte :</b> qu’est-ce qui est fixé (périmètre, volume, matériau) ? S’en servir pour remplacer une variable, de sorte que la fonction à optimiser ne dépende plus que d’une seule.</p>
+            <p><b>3. Ensemble de définition :</b> le fixer d’après le contexte.</p>
+            <p><b>4. Extremum :</b> le déterminer avec $f' = 0$ et une condition suffisante. Comparer avec les <b>valeurs aux bornes</b>.</p>
+            <p><b>5. Réponse</b> dans le contexte, avec l’unité, et examen critique du modèle.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Extremum au bord :</b> si la valeur où $f' = 0$ est hors de l’ensemble de définition, l’optimum peut se trouver à une borne.</p>
+            <p class="b-note"><b>Sans dérivée :</b> quand une fonction à optimiser est trop compliquée, les ordinateurs cherchent l’optimum par des essais habiles, par exemple avec des essaims de particules.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · OPTIMISER</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis un problème et cherche l’optimum avec le curseur. Compare ensuite avec la solution obtenue par la dérivée.</p>
+            <div data-widget="optimieren"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · RECTANGLE SOUS UNE PARABOLE</div>
+        <div class="b-text"><p>Sous la parabole $f(x) = 9 - x^2$ se trouve un rectangle dont un côté est sur l’axe des abscisses et deux sommets sur la parabole. Quand son aire est-elle maximale ?</p>
+            </div>
+        <div class="b-sol"><p>Sommets en $\pm u$ : largeur $2u$, hauteur $9 - u^2$. $A(u) = 2u(9 - u^2) = 18u - 2u^3$, $0 < u < 3$.</p>
+            <p>$A'(u) = 18 - 6u^2 = 0 \Rightarrow u = \sqrt3 \approx 1{,}73$, $A''(u) = -12u < 0$. <span class="b-res">$A_{\max} = 12\sqrt3 \approx 20{,}8$</span> unités d’aire.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · LA BOÎTE DE CONSERVE</div>
+        <div class="b-text"><p>Une boîte doit contenir 1 litre. Quelles dimensions demandent le moins de tôle ?</p>
+            </div>
+        <div class="b-sol"><p>Contrainte $\pi r^2 h = 1000 \Rightarrow h = \tfrac{1000}{\pi r^2}$. Fonction à optimiser $O(r) = 2\pi r^2 + 2\pi r h = 2\pi r^2 + \tfrac{2000}{r}$.</p>
+            <p>$O'(r) = 4\pi r - \tfrac{2000}{r^2} = 0 \Rightarrow r^3 = \tfrac{500}{\pi}$, $r \approx 5{,}42$ cm, $h \approx 10{,}84$ cm. <span class="b-res">La boîte la plus économe est aussi haute que large.</span></p>
+            </div>
+        </div>
+        </div>
+        <div class="b-labs">
+        <a class="b-lab" data-lab="particleswarm" href="../../particleswarm.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ESSAIM DE PARTICULES</span><span class="b-lab-what">Optimiser sans dérivée (en allemand)</span></span></a>
+    </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Deux nombres ont pour somme 20. Quand leur produit est-il le plus grand ?</p>
+            </div>
+        <div class="b-sol"><p>$P(x) = x(20 - x)$, $P'(x) = 20 - 2x = 0$ : $x = 10$, les deux nombres valent 10, produit 100.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Avec 60 m de clôture, on délimite un rectangle le long d’un mur (le mur formant un côté). Détermine l’aire la plus grande.</p>
+            </div>
+        <div class="b-sol"><p>$A(x) = x(60 - 2x)$, $A'(x) = 60 - 4x = 0$ : $x = 15$ m, côté le long du mur 30 m, $A = 450$ m².</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Comme l’exercice 2, mais le mur ne mesure que 20 m. Qu’est-ce qui change ?</p>
+            </div>
+        <div class="b-sol"><p>Il faut maintenant $60 - 2x \le 20$, donc $x \ge 20$. Sur $[20\,;\,30[$, $A$ est décroissante, l’optimum est à la <b>borne</b> $x = 20$ : $A = 20 \cdot 20 = 400$ m².</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Le bénéfice d’une entreprise est $G(x) = -x^3 + 6x^2 + 15x - 20$ (en milliers d’euros, $x$ en centaines d’unités, $0 \le x \le 8$). Pour quelle quantité est-il le plus grand ?</p>
+            </div>
+        <div class="b-sol"><p>$G'(x) = -3x^2 + 12x + 15 = 0 \Rightarrow x^2 - 4x - 5 = 0 \Rightarrow x = 5$. $G''(5) = -18 < 0$. $G(5) = 80$, donc 80 000 € pour 500 unités. Bornes : $G(0) = -20$, $G(8) = -28$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Une fenêtre est formée d’un rectangle surmonté d’un demi-cercle. Le périmètre vaut 6 m. Pour quel rayon laisse-t-elle passer le plus de lumière ?</p>
+            </div>
+        <div class="b-hint"><p>Largeur $2r$, hauteur du rectangle $h$. Périmètre $2r + 2h + \pi r = 6$. Aire $A = 2rh + \tfrac{\pi}{2} r^2$.</p>
+            </div>
+        <div class="b-sol"><p>$h = 3 - r - \tfrac{\pi}{2} r$, $A(r) = 6r - 2r^2 - \tfrac{\pi}{2} r^2$, $A'(r) = 6 - (4 + \pi) r = 0$ : $r = \tfrac{6}{4 + \pi} \approx 0{,}84$ m.
+                Alors $h \approx 0{,}84$ m aussi : la hauteur du rectangle est égale au rayon.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="450" data-ph="m²"><p class="b-q-text">Aire maximale pour la clôture le long du mur (60 m de clôture) ?</p>
+            <div class="b-sol"><p>$15 \cdot 30 = 450$ m²</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="25" data-ph="produit"><p class="b-q-text">Deux nombres positifs ont pour somme 10. Quelle est la plus grande valeur possible de leur produit ?</p>
+            <div class="b-sol"><p>$5 \cdot 5 = 25$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">La solution de $f'(x) = 0$ est hors de l’ensemble de définition. Où se trouve l’optimum ?</p>
+            <div class="b-mc"><button>il n’y en a pas</button><button>à une borne de l’ensemble de définition</button><button>malgré tout en la solution de $f'(x) = 0$</button></div>
+        <div class="b-sol"><p>Il faut alors comparer les valeurs aux bornes.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Distances, chemins et paramètres" data-toc-k="2" data-toc-short="2 Chemins">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">5 HEURES</span></div>
+        <h2><span class="b-no">2</span>Distances, chemins et paramètres</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Le temps de la sauveteuse dépend de l’endroit $x$ où elle entre dans l’eau. Si elle prend le chemin en ligne droite, il lui faut 21,2 s ;
+                si elle court jusqu’en face, 19,7 s. Entre les deux, il y a un meilleur point. La fonction à optimiser contient maintenant des <b>racines</b>, sa dérivée demande la règle de la chaîne du chapitre 2.4,
+                et le mieux est de résoudre l’équation $T'(x) = 0$ avec le CAS.</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · RÉSOUDRE UN PROBLÈME D’OPTIMISATION</div>
+        <div class="b-text"><ol>
+                    <li>Nommer la <b>grandeur à optimiser</b> et l’écrire sous forme d’expression, souvent d’abord avec plusieurs variables.</li>
+                <li>Avec la <b>contrainte</b>, remplacer toutes les variables sauf une : on obtient la <b>fonction à optimiser</b>.</li>
+                <li>Donner l’<b>ensemble de définition</b> pertinent.</li>
+                <li>Déterminer les extremums locaux avec la dérivée et les comparer aux <b>valeurs aux bornes</b> : on cherche l’extremum global.</li>
+                <li>Répondre à la question <b>dans le contexte</b>.</li>
+                </ol></div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · UN PARAMÈTRE DANS LE PROBLÈME</div>
+        <div class="b-text"><p>Si le problème dépend d’une grandeur $m$, par exemple la longueur d’un mur, l’optimum peut se trouver, selon $m$, à l’intérieur ou à la <b>borne</b>. On distingue alors les cas
+                        et on donne le résultat pour chaque cas.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Astuce :</b> au lieu d’une distance $d = \sqrt{\ldots}$, on minimise $d^2$. La racine carrée est strictement croissante, les deux ont leur minimum au même endroit, mais $d^2$ se dérive plus facilement.</p>
+            <p class="b-note"><b>Avec le CAS :</b> si l’équation $Z'(x) = 0$ est difficile, on la résout numériquement ou on lit le minimum sur la courbe. Justifier qu’il s’agit de l’optimum global reste ton travail.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LE TRAJET LE PLUS RAPIDE</div>
+        <p class="b-help" style="margin:0 0 12px">Déplace le point $P$ le long du bord de l’eau. À droite, tu vois le temps $T(x)$. Modifie les vitesses et observe comment le minimum se déplace.</p>
+            <div data-widget="rettung"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · LA PLUS COURTE DISTANCE</div>
+        <div class="b-text"><p>Quel point de la parabole $y = x^2$ est le plus proche du point $P(3\,;\,0)$ ? Quelle est la distance ?</p>
+            </div>
+        <div class="b-sol"><p>Un point de la parabole s’écrit $Q(x\,;\,x^2)$. Fonction à optimiser : $d^2(x) = (x - 3)^2 + x^4$, $D = \mathbb{R}$.</p>
+            <p>$\left(d^2\right)'(x) = 2(x - 3) + 4x^3 = 0 \iff 2x^3 + x - 3 = 0$. On devine : $x = 1$. Division euclidienne : $(x - 1)(2x^2 + 2x + 3)$, et le second facteur n’a aucun zéro.</p>
+            <p>$\left(d^2\right)'$ passe en 1 de $-$ à $+$ : <span class="b-res">$Q(1\,;\,1)$, distance $d = \sqrt{4 + 1} = \sqrt5 \approx 2{,}24$</span>. Quand $x \to \pm\infty$, $d^2$ dépasse toute borne, donc le minimum est global.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · LA SAUVETEUSE</div>
+        <div class="b-text"><p>Elle se trouve en $A(0\,;\,30)$, le nageur en $B(50\,;\,-20)$, et le bord de l’eau est l’axe des abscisses. Elle court à 6 m/s et nage à 2 m/s. Où devrait-elle entrer dans l’eau ?</p>
+            </div>
+        <div class="b-sol"><p>Distance en courant $\sqrt{30^2 + x^2}$, distance à la nage $\sqrt{20^2 + (50 - x)^2}$. Fonction à optimiser $T(x) = \tfrac{\sqrt{900 + x^2}}{6} + \tfrac{\sqrt{400 + (50 - x)^2}}{2}$ sur $D = [0\,;\,50]$.</p>
+            <p>Le CAS résout $T'(x) = 0$ : $x \approx 44{,}3$, $T \approx 19{,}3$ s. Valeurs aux bornes : $T(0) \approx 31{,}9$ s, $T(50) \approx 19{,}7$ s.</p>
+            <p><span class="b-res">Elle devrait entrer dans l’eau à environ 44 m sur le côté</span> et gagne presque 2 s par rapport au trajet en ligne droite.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Un jardin rectangulaire doit avoir une aire de 400 m². Pour quelles dimensions faut-il le moins de clôture ?</p>
+            </div>
+        <div class="b-sol"><p>$xy = 400$, $U(x) = 2x + \tfrac{800}{x}$ pour $x > 0$. $U'(x) = 2 - \tfrac{800}{x^2} = 0$ en $x = 20$ : un carré de 20 m de côté, 80 m de clôture.
+                Quand $x \to 0$ et $x \to \infty$, $U$ dépasse toute borne : le minimum est donc global.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Un rectangle du premier quadrant a un sommet à l’origine et le sommet opposé sur la courbe de $f(x) = \mathrm{e}^{-x}$. Quand son aire est-elle la plus grande ?</p>
+            </div>
+        <div class="b-sol"><p>$A(u) = u\,\mathrm{e}^{-u}$ pour $u > 0$. $A'(u) = (1 - u)\,\mathrm{e}^{-u} = 0$ en $u = 1$, changement de signe de $+$ à $-$ : $A = \tfrac1{\mathrm{e}} \approx 0{,}368$ (compare avec l’exemple 7 du chapitre 2.5).</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Avec 60 m de clôture, on délimite un rectangle le long d’un mur de longueur $m$ ; le mur remplace un côté. Détermine l’aire la plus grande en fonction de $m$. Compare avec les exercices 2 et 3.</p>
+            </div>
+        <div class="b-hint"><p>Appelle $y$ le côté le long du mur. Alors $0 < y \le m$ et $2x + y = 60$.</p>
+            </div>
+        <div class="b-sol"><p>$A(y) = \tfrac{y(60 - y)}{2}$, $A'(y) = 30 - y = 0$ en $y = 30$.</p>
+            <p><b>Cas $m \ge 30$ :</b> $y = 30$, $x = 15$, $A = 450$ m². <b>Cas $m < 30$ :</b> $A$ croît sur $]0\,;\,m]$, le maximum est à la borne $y = m$ : $A = \tfrac{m(60 - m)}{2}$, donc 400 m² pour $m = 20$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dans un cône de rayon 6 cm et de hauteur 12 cm, on place un cylindre dont le cercle supérieur touche la surface latérale. Quel est le plus grand volume possible du cylindre ?
+                Quelle fraction du cône cela représente-t-il ?</p>
+            </div>
+        <div class="b-sol"><p>Théorème de Thalès : $\tfrac{12 - h}{r} = \tfrac{12}{6}$, donc $h = 12 - 2r$. $V(r) = \pi r^2 (12 - 2r)$ sur $[0\,;\,6]$. $V'(r) = \pi(24r - 6r^2) = 0$ en $r = 4$, $h = 4$ :
+                $V = 64\pi \approx 201$ cm³. Aux bornes, $V = 0$. Le cône a un volume de $144\pi$ cm³, le cylindre en remplit les $\tfrac49$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un rectangle est posé symétriquement sur l’axe des abscisses, sous la courbe de $f_a(x) = a - x^2$ ($a > 0$). Détermine l’aire la plus grande en fonction de $a$ et vérifie ton résultat sur l’exemple 1.</p>
+            </div>
+        <div class="b-sol"><p>$A(u) = 2u(a - u^2)$ sur $]0\,;\,\sqrt{a}[$, $A'(u) = 2a - 6u^2 = 0 \iff u = \sqrt{\tfrac{a}{3}}$. Aire la plus grande $A = 2\sqrt{\tfrac{a}{3}} \cdot \tfrac{2a}{3} = \tfrac{4a}{3}\sqrt{\tfrac{a}{3}}$.</p>
+            <p>Pour $a = 9$ : $u = \sqrt3$, $A = 12\sqrt3 \approx 20{,}8$, comme dans l’exemple 1.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2,236" data-tol="0.002" data-ph="d ="><p class="b-q-text">Quelle est la plus petite distance entre la parabole $y = x^2$ et le point $P(3\,;\,0)$ (trois décimales) ?</p>
+            <div class="b-sol"><p>Point le plus proche $(1\,;\,1)$, $d = \sqrt5 \approx 2{,}236$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="40" data-ph="m"><p class="b-q-text">Un rectangle a une aire de 100 m². Quel est son périmètre minimal ?</p>
+            <div class="b-sol"><p>Un carré de 10 m de côté : 40 m</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="400" data-ph="m²"><p class="b-q-text">60 m de clôture, mur de 20 m de long (exercice 8). Quelle est l’aire la plus grande ?</p>
+            <div class="b-sol"><p>Extremum au bord $y = 20$ : $\tfrac{20 \cdot 40}{2} = 400$ m²</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Résous l’exploration « La boîte » pour une feuille A4 (29,7 cm × 21 cm). Quelle valeur de $x$ est optimale ?</p>
+            </div>
+        <div class="b-sol"><p>$V(x) = x(29{,}7 - 2x)(21 - 2x)$, $V'(x) = 12x^2 - 202{,}8x + 623{,}7 = 0$. Solution dans $0 < x < 10{,}5$ : $x \approx 4{,}04$ cm, $V \approx 1128$ cm³.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec le chapitre 2.5 :</b> justifie que pour la boîte, il s’agit bien d’un maximum, et ce sans dérivée seconde.</p>
+            </div>
+        <div class="b-sol"><p>Aux bornes $x = 0$ et $x = 10$, $V = 0$ ; entre les deux, $V > 0$. Le seul point intérieur où $V' = 0$ doit être le maximum.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Critique du modèle de la boîte de conserve : les vraies boîtes sont souvent plus hautes que ne le propose le calcul $h = 2r$. Donne des raisons pour lesquelles le modèle ne rend compte qu’en partie de la réalité.</p>
+            </div>
+        <div class="b-sol"><p>Par exemple : le couvercle et le fond sont plus épais que la paroi ou ont un sertissage qui consomme du matériau. Les boîtes doivent tenir dans les rayons, dans la main et sur les machines.
+                Le prix de la tôle n’est qu’une partie des coûts. L’étiquette et l’empilement jouent aussi un rôle.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Lien avec la physique :</b> montre de façon générale pour la sauveteuse : de $T'(x) = 0$, il découle $\tfrac{\sin\alpha}{v_1} = \tfrac{\sin\beta}{v_2}$, où $\alpha$ et $\beta$ sont les angles des trajets avec la normale au bord de l’eau.</p>
+            </div>
+        <div class="b-sol"><p>Avec $A(0\,;\,a)$, $B(b\,;\,-c)$ : $T(x) = \tfrac{\sqrt{a^2 + x^2}}{v_1} + \tfrac{\sqrt{c^2 + (b - x)^2}}{v_2}$. Avec la règle de la chaîne : $T'(x) = \tfrac{x}{v_1\sqrt{a^2 + x^2}} - \tfrac{b - x}{v_2\sqrt{c^2 + (b - x)^2}}$.
+                Les fractions $\tfrac{x}{\sqrt{a^2 + x^2}}$ et $\tfrac{b - x}{\sqrt{c^2 + (b - x)^2}}$ sont exactement $\sin\alpha$ et $\sin\beta$. C’est la loi de la réfraction de la lumière (Snell-Descartes).</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dans un tronc d’arbre de section circulaire (diamètre 40 cm), on taille une poutre de section rectangulaire. Sa résistance est proportionnelle à $b \cdot h^2$.
+                Pour quelles dimensions est-elle la plus résistante ?</p>
+            </div>
+        <div class="b-sol"><p>$b^2 + h^2 = 40^2$, donc $T(b) = b(1600 - b^2)$ sur $]0\,;\,40[$. $T'(b) = 1600 - 3b^2 = 0$ : $b = \tfrac{40}{\sqrt3} \approx 23{,}1$ cm, $h = 40\sqrt{\tfrac23} \approx 32{,}7$ cm. Le rapport vaut $h : b = \sqrt2$.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : la lumière prend le chemin le plus rapide" data-toc-k="X" data-toc-short="Fermat">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE ET PHYSIQUE</span></div>
+        <h2>La lumière prend le chemin le plus rapide</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Un bâton plongé dans l’eau paraît brisé, parce que la lumière change de direction à la surface de l’eau. Willebrord Snell et René Descartes en avaient trouvé la loi :
+                le rapport des sinus des deux angles avec la normale est constant. Mais pourquoi justement les sinus ?</p>
+            <p>Pierre de Fermat répondit à cette question en 1662 dans deux écrits qu’il joignit à une lettre au médecin Marin Cureau de la Chambre. Son hypothèse : la nature ne choisit pas le chemin le plus court,
+                mais le plus <b>rapide</b>, et la lumière est plus lente dans l’eau que dans l’air. Avec sa méthode des maximums et des minimums, il traita exactement le problème de la sauveteuse
+                et obtint, à sa propre surprise, la loi des sinus (exercice 14).</p>
+            <p>Les partisans de Descartes lui en voulurent, car Descartes avait supposé que la lumière était plus rapide dans l’eau. Fermat avait raison : en 1850, Léon Foucault mesura que la lumière est plus lente dans l’eau.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> Pierre de Fermat : « Analysis ad refractiones » et « Synthesis ad refractiones », joints à une lettre à Marin Cureau de la Chambre, 1662.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>PROBLÈME D’OPTIMISATION</h4><p>Fonction à optimiser, contrainte, ensemble de définition, $f' = 0$, bornes, réponse.</p>
+            </div>
+        <div>
+            <p>Boîte : $x \approx 3{,}92$ cm · Boîte de conserve : $h = 2r$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>EXTREMUM AU BORD</h4><p>Si $f' = 0$ est hors du domaine, c’est la borne qui décide.</p>
+            </div>
+        <div>
+            <p>Clôture le long d’un mur de 20 m : 400 m²</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>DISTANCES ET CHEMINS</h4><p>Minimiser $d^2$ au lieu de $d$. Fonctions à optimiser avec des racines : règle de la chaîne, $T'(x) = 0$ souvent avec le CAS.</p>
+            </div>
+        <div>
+            <p>Sauveteuse : environ 44 m sur le côté, 19,3 s</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>PARAMÈTRES</h4><p>Si l’optimum se trouve, selon le paramètre, à l’intérieur ou à la borne : distinguer les cas.</p>
+            </div>
+        <div>
+            <p>Mur $m \ge 30$ : 450 m² · $m < 30$ : $\tfrac{m(60 - m)}{2}$</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+        <div class="b-q" data-ans="25" data-ph="produit"><p class="b-q-text">Deux nombres positifs ont pour somme 10. Quelle est la plus grande valeur possible de leur produit ?</p>
+            <div class="b-sol"><p>$5 \cdot 5 = 25$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="20" data-ph="m"><p class="b-q-text">Un jardin rectangulaire doit avoir une aire de 400 m². Quelle est la longueur du côté du rectangle qui demande la clôture la plus courte ?</p>
+            <div class="b-sol"><p>Un carré : 20 m</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="10" data-ph="x ="><p class="b-q-text">Pour quelle valeur de $x$ l’expression $x(20 - x)$ est-elle maximale ?</p>
+            <div class="b-sol"><p>$20 - 2x = 0$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+        <div class="b-q" data-ans="1,732" data-tol="0.005" data-ph="u ="><p class="b-q-text">Rectangle sous $f(x) = 9 - x^2$ : pour quelle valeur de $u$ l’aire $A(u) = 18u - 2u^3$ est-elle maximale ?</p>
+            <div class="b-sol"><p>$u = \sqrt3 \approx 1{,}732$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="80" data-ph="milliers d’€"><p class="b-q-text">$G(x) = -x^3 + 6x^2 + 15x - 20$. Bénéfice maximal en milliers d’euros ?</p>
+            <div class="b-sol"><p>$G(5) = 80$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Pour la boîte de conserve la plus économe, on a …</p>
+            <div class="b-mc"><button>$h = 2r$</button><button>$h = r$</button><button>$h = \pi r$</button></div>
+        <div class="b-sol"><p>La hauteur est égale au diamètre.</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-extremwertprobleme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBLÈMES D’OPTIMISATION</span><span class="b-lab-what">Leistungskurs, avec solutions</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-extremalaufgaben.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXERCICES D’OPTIMISATION</span><span class="b-lab-what">Fonction à optimiser et contrainte</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 12e année, Leistungskurs · domaine d’apprentissage 2 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe (2026).</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-fr/gy11lk.js"></script>
+</body>
+</html>
