@@ -74,6 +74,30 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathe12lk",
+        "href": "buch/mathe12lk/index.html",
+        "title": "Mathematik BGY 12 LK",
+        "description": "Das interaktive Lehrbuch Mathematik für das Berufliche Gymnasium, Jahrgangsstufe 12, Leistungskurs, nach dem sächsischen Lehrplan von 2026. Dreizehn Kapitel in der Reihenfolge des Schuljahres – bedingte Wahrscheinlichkeit mit dem Satz von Bayes, Zufallsgrößen mit Verteilungsfunktion, die Binomialverteilung mit Summensymbol und gesuchtem n und p, die ganze Differenzialrechnung von Grenzwerten und Stetigkeit über Produkt- und Kettenregel, ln x und lineare Approximation bis zu Regression und Extremwertproblemen mit Fallunterscheidungen, dazu Vektoren im Raum, Schwerpunkte und das Skalarprodukt mit Beweisen. Zum Ausprobieren: Verteilungsfunktion als Treppe, Sekanten, die zu Tangenten werden, Produktregel als Rechteck, Funktionen aus ziehbaren Bedingungen, Regressionsmodelle, die Rettungsschwimmerin und Vektoren in echtem 3D. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik 12 LK / 13 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe12lk"],
+        "category": "buecher funktionen stochastik geometrie grade12",
+        "school": "bgy",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 jahrgangsstufe 12 berufliches gymnasium bgy leistungskurs lk sachsen lehrplan kapitel bedingte wahrscheinlichkeit vierfeldertafel bayes unabhaengigkeit zufallsgroesse wahrscheinlichkeitsfunktion verteilungsfunktion erwartungswert varianz standardabweichung binomialverteilung bernoulli summensymbol binomialkoeffizient grenzwert asymptote stetigkeit unstetigkeit ableitung differenzenquotient differenzialquotient lineare approximation ableitungsregeln ln logarithmus produktregel kettenregel e-funktion monotonie extrempunkt globale extrema wendepunkt symmetrie tangente normale steckbrief regression extremwertproblem randextremum vektoren linearkombination schwerpunkt pyramide skalarprodukt orthogonal winkel beweis 3d aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
+        "id": "lehrbuch-mathe13lk",
+        "href": "buch/mathe13lk/index.html",
+        "title": "Mathematik BGY 13 LK",
+        "description": "Das interaktive Lehrbuch Mathematik für das Berufliche Gymnasium, Jahrgangsstufe 13, Leistungskurs, das Abiturjahr nach dem sächsischen Lehrplan von 2026. Sechzehn Kapitel – Stammfunktionen mit ln|x|, bestimmtes Integral und Hauptsatz mit Beweis, Flächen mit Parameter, numerische Integration und Rotationskörper, normalverteilte Zufallsgrößen, Stichproben und ein- und zweiseitige Signifikanztests, beide Wahlpflichtbereiche (Geraden und Ebenen mit Lagebeziehungen, Schnittwinkeln und Abständen oder Matrizen mit inverser Matrix, Gozintographen, Leontief-Modell und Populationsmodellen mit Grenzmatrix und Fixvektor), biquadratische Gleichungen, Scharen und Extremwerte im Raum und in der Wirtschaft – und zum Schluss ein ganzes Kapitel „Fit fürs Abitur“. Zum Ausprobieren: Rotationskörper in echtem 3D, die Glockenkurve über dem Binomialhistogramm, Signifikanztests mit Fehler 2. Art, Ebenen in 3D, eine inverse Matrix Schritt für Schritt, eine Input-Output-Tabelle und Käfer, die durch ihre Lebensstadien wandern.",
+        "tagline": "Buch / Mathematik 13 LK / 16 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathe13lk"],
+        "category": "buecher funktionen stochastik geometrie oberstufe",
+        "school": "bgy",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 13 jahrgangsstufe 13 abitur abiturvorbereitung berufliches gymnasium bgy leistungskurs lk sachsen lehrplan kapitel stammfunktion unbestimmtes integral ln bestimmtes integral hauptsatz beweis integralfunktion rekonstruierter bestand flaeche flaeche zwischen graphen rechteckmethode trapezmethode rotationskoerper volumen normalverteilung glockenkurve dichte verteilungsfunktion sigma regeln grundgesamtheit stichprobe signifikanztest zweiseitiger test fehler erster art fehler zweiter art wahlpflicht gerade ebene parametergleichung vektorprodukt koordinatengleichung hessesche normalform lagebeziehung spurpunkt spurgerade schnittwinkel abstand prisma pyramide matrix matrizen matrizenprodukt inverse matrix gozintograph verflechtung leontief input output kostenrechnung populationsmodell uebergangsmatrix grenzmatrix fixvektor biquadratische gleichung substitution funktionenschar ortskurve parameter drehmatrix kosten erloes gewinn 3d aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathefos11",
         "href": "buch/mathefos11/index.html",
         "title": "Mathematik FOS 11",
