@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematica 13 LK · Capitolo 5.1 · Popolazione e campione | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Stimare e verificare, media campionaria e varianza campionaria. Capitolo 5.1 del libro di testo interattivo Matematica · Berufliches Gymnasium 13 · Leistungskurs: spiegazioni, esempi, esercizi su tre livelli, autoverifiche e laboratori da provare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATICA · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capitolo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenuto del capitolo">
+        <p class="b-toc-title">CAPITOLO 5.1 · AREA DI APPRENDIMENTO 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduzione" data-toc-k="I" data-toc-short="Introduzione" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPITOLO 5.1 · AREA DI APPRENDIMENTO 5 · DICEMBRE</p>
+            <h1>Popolazione e campione</h1>
+            <p class="b-hero-lead">Nessuno interroga tutti gli aventi diritto al voto prima di fare una previsione. Nessuno apre ogni confezione per controllarne il contenuto. Si prende un <b>campione</b> e da esso si traggono conclusioni sul tutto. Quanto bene funzioni dipende da come viene estratto il campione e da quanto è grande. Qui comincia la <b>statistica inferenziale</b>: stimare e verificare con le probabilità.</p>
+            <div class="b-chips"><span class="b-chip">5 ORE</span><span class="b-chip">2 LEZIONI</span><span class="b-chip">DAL CAMPIONE AL TUTTO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="20" data-p="0.4" data-lo="6" data-hi="10"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CHE COSA IMPARERAI IN QUESTO CAPITOLO</div>
+            <div class="b-text"><ul>
+                <li>distinguere tra <b>popolazione</b> e <b>campione</b> e verificare se un campione è rappresentativo</li>
+                <li>distinguere con esempi i <b>problemi di stima</b> dai <b>problemi di test</b></li>
+                <li>calcolare la <b>media campionaria</b> e la <b>varianza campionaria</b></li>
+                <li>capire quanto <b>oscillano</b> i risultati di un campione e come ciò dipende dall’ampiezza</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: LO SAI GIÀ FARE?</div>
+            <div class="b-q" data-ans="20" data-ph="μ ="><p class="b-q-text">$X$ ha una distribuzione binomiale con $n = 50$ e $p = 0{,}4$. Quanto vale $\mu$?</p><div class="b-sol"><p>$50 \cdot 0{,}4 = 20$</p></div></div>
+            <div class="b-q" data-ans="0,42" data-tol="0.0001" data-ph="proporzione"><p class="b-q-text">420 intervistati su 1 000 sono d’accordo. Qual è la proporzione espressa come numero decimale?</p><div class="b-sol"><p>0,42</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="media"><p class="b-q-text">Media di 2, 3, 5, 6?</p><div class="b-sol"><p>$\tfrac{16}{4} = 4$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Esplorazioni" data-toc-k="E" data-toc-short="Esplorazioni">
+    <div class="b-band"><span class="b-band-tag">ESPLORAZIONI</span><span class="b-band-sub">PER COMINCIARE · IN GRUPPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">IL SONDAGGIO A SCUOLA</div>
+            <div class="b-text"><p>Volete sapere quante studentesse e quanti studenti della vostra scuola vengono in bicicletta.</p>
+                <ul><li>Basta chiedere nella vostra classe? Oppure a tutti quelli che la mattina sono vicino alla rastrelliera delle bici?</li><li>Come estrarreste un buon campione?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DIECI CONFEZIONI</div>
+            <div class="b-text"><p>Dieci confezioni da 500 g pesano 498, 502, 500, 497, 503, 501, 499, 500, 504, 496 g.</p>
+                <ul><li>Qual è il peso medio? Quanto sono dispersi i valori?</li><li>Vi fidereste della macchina confezionatrice?</li></ul></div>
+            <span class="b-pair">→ Lezione 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">STIMARE O DECIDERE?</div>
+            <div class="b-text"><p>a) Quale percentuale degli elettori vota il partito X? b) Il dado è truccato? c) Il nuovo farmaco funziona meglio?</p>
+                <ul><li>Quale domanda richiede un numero e quale una decisione sì o no?</li></ul></div>
+            <span class="b-pair">→ Lezione 1</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Popolazione, campione, stima" data-toc-k="1" data-toc-short="1 Campione">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 1</span><span class="b-band-sub">2 ORE</span></div>
+    <h2><span class="b-no">1</span>Popolazione, campione, stima e test</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>In un sondaggio su 1 000 aventi diritto al voto scelti a caso, 420 dichiarano di votare il partito X. Qual è la percentuale nell’intera popolazione?</p></div></div>
+            <div class="b-text"><p>La stima migliore è la proporzione campionaria $h = 0{,}42$. Ma un altro campione avrebbe dato un risultato un po’ diverso. Quanto oscillano risultati di questo tipo si può calcolare. Con $n = 1000$ lo scarto tipico è $\sqrt{\tfrac{0{,}42 \cdot 0{,}58}{1000}} \approx 0{,}016$, cioè circa 1,6 punti percentuali.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · CONCETTI DI BASE</div>
+                <div class="b-text">
+                    <p>La <b>popolazione</b> è l’insieme di tutti gli oggetti su cui si vuole sapere qualcosa. Un <b>campione</b> è una selezione da essa; la sua ampiezza è $n$.</p>
+                    <p>Un campione è <b>rappresentativo</b> se rispecchia bene la popolazione. La cosa più sicura è una selezione <b>casuale</b>, in cui ogni elemento ha la stessa probabilità di essere scelto.</p>
+                    <p><b>Problema di stima:</b> determinare un valore sconosciuto (per esempio una proporzione $p$) a partire dal campione. <b>Problema di test:</b> verificare con il campione un’ipotesi su $p$ e decidere.</p>
+                    <p>Le proporzioni campionarie si disperdono attorno a $p$ con la deviazione standard $\sqrt{\tfrac{p(1-p)}{n}}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Distorsione:</b> chi interroga solo volontari o solo a una certa ora non raggiunge alcuni gruppi. Un’ampiezza grande non serve a rimediare.</p>
+            <p class="b-note"><b>Radice di n:</b> un numero di intervistati quattro volte maggiore dimezza la dispersione, esattamente come con la distribuzione binomiale nella 12ª classe.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · MOLTI CAMPIONI DA UNA POPOLAZIONE</div>
+        <p class="b-help" style="margin:0 0 12px">Imposta $p$ e $n$ ed estrai molti campioni. Ognuno dà una proporzione $h$. Osserva quanto è larga la distribuzione delle $h$ e poi aumenta $n$.</p>
+        <div data-widget="stichprobe"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 1 · RAPPRESENTATIVO?</div>
+            <div class="b-text"><p>Un giornale vuole conoscere l’opinione della città sulla nuova pista ciclabile e fa votare i lettori online. 2 400 voti, il 70 % contrari. È un risultato significativo?</p></div>
+            <div class="b-sol"><p>No. Rispondono solo persone che leggono il giornale e si sentono chiamate in causa, spesso quelle particolarmente arrabbiate. Il campione <b>non è casuale</b>, nonostante la sua grandezza.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 2 · QUANTO DEVE ESSERE GRANDE n?</div>
+            <div class="b-text"><p>Quanto oscilla tipicamente una proporzione campionaria con $p = 0{,}5$ per $n = 100$ e $n = 400$?</p></div>
+            <div class="b-sol"><p>$\sqrt{\tfrac{0{,}25}{100}} = 0{,}05$ e $\sqrt{\tfrac{0{,}25}{400}} = 0{,}025$. <span class="b-res">Ampiezza quadrupla, metà della dispersione.</span></p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Indica la popolazione e il campione: a) In una fabbrica si misurano ogni ora 20 viti. b) Prima delle elezioni si telefona a 1 200 aventi diritto al voto.</p></div>
+            <div class="b-sol"><p>a) tutte le viti della produzione / le 20 misurate &nbsp; b) tutti gli aventi diritto al voto / i 1 200 intervistati</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Problema di stima o di test? a) Il dado è equo? b) Qual è la proporzione di pezzi difettosi? c) Il nuovo fertilizzante funziona?</p></div>
+            <div class="b-sol"><p>a) test &nbsp; b) stima &nbsp; c) test</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>In un sondaggio su 1 000 persone, il 42 % indica il partito X. Indica un intervallo in cui la proporzione vera si trova con grande sicurezza (doppio della deviazione standard).</p></div>
+            <div class="b-sol"><p>$0{,}42 \pm 2 \cdot 0{,}016 = [0{,}389;\, 0{,}451]$, cioè circa dal 39 % al 45 %.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Quante persone bisogna intervistare perché la deviazione standard della proporzione con $p = 0{,}5$ sia al massimo di 1 punto percentuale?</p></div>
+            <div class="b-sol"><p>$\sqrt{\tfrac{0{,}25}{n}} \le 0{,}01 \Rightarrow n \ge 2500$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="0,05" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">Oscillazione tipica della proporzione con $p = 0{,}5$ e $n = 100$?</p><div class="b-sol"><p>0,05</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Un sondaggio online con 10 000 partecipanti è …</p>
+            <div class="b-mc"><button>sicuramente rappresentativo, perché è grande</button><button>di solito non rappresentativo, perché i partecipanti si selezionano da soli</button><button>sempre più preciso di un campione casuale</button></div>
+            <div class="b-sol"><p>L’autoselezione distorce, qualunque sia l’ampiezza.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Media e varianza campionarie" data-toc-k="2" data-toc-short="2 Media">
+    <div class="b-band"><span class="b-band-tag">LEZIONE 2</span><span class="b-band-sub">3 ORE</span></div>
+    <h2><span class="b-no">2</span>Media campionaria e varianza campionaria</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Le dieci confezioni pesano in media esattamente 500 g. Ma una macchina che confezionasse alternativamente 480 g e 520 g avrebbe la stessa media. Come si misura la dispersione?</p></div></div>
+            <div class="b-text"><p>Come per le variabili aleatorie nella 12ª classe: tramite gli scarti al quadrato dalla media. Nei campioni però si divide per $n - 1$ invece che per $n$, perché la media stessa è stata stimata dai dati.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RICORDA · PARAMETRI CAMPIONARI</div>
+                <div class="b-text">
+                    <p><b>Media campionaria:</b> $\bar{x} = \dfrac{x_1 + x_2 + \ldots + x_n}{n}$</p>
+                    <p><b>Varianza campionaria:</b> $s^2 = \dfrac{1}{n - 1} \left((x_1 - \bar{x})^2 + \ldots + (x_n - \bar{x})^2\right)$ &nbsp; · &nbsp; <b>deviazione standard</b> $s = \sqrt{s^2}$</p>
+                    <p>$\bar{x}$ e $s$ stimano la media $\mu$ e la deviazione standard $\sigma$ della popolazione.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calcolatrice:</b> molte calcolatrici mostrano entrambi i valori, $s_{n-1}$ (campione) e $\sigma_n$ (dividendo per $n$). Per i campioni si usa $s_{n-1}$.</p>
+            <p class="b-note"><b>Foglio di calcolo:</b> <code>MEDIA(…)</code>, <code>VAR.C(…)</code> e <code>DEV.ST.C(…)</code> calcolano con $n - 1$, <code>VAR.P</code> con $n$.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATTIVO · STIMARE MEDIA E VARIANZA</div>
+        <p class="b-help" style="margin:0 0 12px">Un impianto riempie bottiglie. Estrai campioni e confronta $\bar x$ con il valore nominale. Con «+1000» vedi che $s^2$ con $\tfrac{1}{n-1}$ coglie in media la varianza vera, mentre con $\tfrac1n$ viene troppo piccola.</p>
+        <div data-widget="schaetzen"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 3 · DIECI CONFEZIONI</div>
+            <div class="b-text"><p>Calcola $\bar{x}$ e $s$ per 498, 502, 500, 497, 503, 501, 499, 500, 504, 496 g.</p></div>
+            <div class="b-sol"><p>$\bar{x} = 500$ g. Scarti $-2, 2, 0, -3, 3, 1, -1, 0, 4, -4$, somma dei quadrati 60. $s^2 = \tfrac{60}{9} \approx 6{,}67$, <span class="b-res">$s \approx 2{,}58$ g</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ESEMPIO 4 · DUE MACCHINE</div>
+            <div class="b-text"><p>La macchina B dà 480, 520, 490, 510, 500 g. Confrontala con l’esempio 3.</p></div>
+            <div class="b-sol"><p>$\bar{x} = 500$ g, somma dei quadrati $400 + 400 + 100 + 100 + 0 = 1000$, $s^2 = 250$, $s \approx 15{,}8$ g. Stessa media, ma B ha una dispersione sei volte maggiore.</p></div>
+        </div>
+    </div>
+
+    <h3>ESERCIZI</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcola $\bar{x}$ e $s$ per i valori misurati 12, 15, 11, 14, 13.</p></div>
+            <div class="b-sol"><p>$\bar{x} = 13$, somma dei quadrati $1 + 4 + 4 + 1 + 0 = 10$, $s^2 = 2{,}5$, $s \approx 1{,}58$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>In 40 lanci di un dado la media dei punteggi è stata 3,9. È insolito per un dado equo? (Un lancio ha $\sigma \approx 1{,}71$; la media di 40 lanci $\tfrac{1{,}71}{\sqrt{40}}$.)</p></div>
+            <div class="b-sol"><p>Deviazione standard della media $\approx 0{,}27$. 3,9 è 0,4 sopra 3,5, cioè circa 1,5 deviazioni standard: notevole, ma non abbastanza insolito per un sospetto.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Perché in $s^2$ si divide per $n - 1$? Riflettici con un campione di un solo valore.</p></div>
+            <div class="b-sol"><p>Con $n = 1$ si ha $\bar{x} = x_1$ e ogni scarto è 0. Dividendo per $n$ verrebbe varianza 0, come se non ci fosse dispersione. Con $n - 1 = 0$, $s^2$ non è nemmeno definita: da un solo valore non si può dire nulla sulla dispersione. In generale $n - 1$ compensa il fatto che $\bar{x}$ è più vicina ai dati della vera $\mu$.</p></div>
+        </div>
+    </div>
+
+    <h3>PER IL LEISTUNGSKURS · DIMOSTRAZIONI</h3>
+    <div class="b-tasks" data-start="8">
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Mostra che gli scarti dalla media campionaria si compensano sempre: $\sum\limits_{i=1}^{n} (x_i - \bar{x}) = 0$. Perché allora non si può misurare la dispersione semplicemente come scarto medio?</p></div>
+            <div class="b-sol"><p>$\sum (x_i - \bar{x}) = \sum x_i - n\bar{x} = n\bar{x} - n\bar{x} = 0$. Gli scarti positivi e negativi si compensano, per questo li si eleva al quadrato (o si prendono i valori assoluti).</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dimostra la <b>formula di König</b> $\sum\limits_{i=1}^{n} (x_i - \bar{x})^2 = \sum\limits_{i=1}^{n} x_i^2 - n\,\bar{x}^2$ e usala per calcolare una seconda volta $s^2$ per 12, 15, 11, 14, 13.</p></div>
+            <div class="b-hint"><p>Sviluppa il quadrato del binomio sotto il simbolo di sommatoria, poi usa $\sum x_i = n\bar{x}$.</p></div>
+            <div class="b-sol"><p>$\sum (x_i^2 - 2\bar{x}x_i + \bar{x}^2) = \sum x_i^2 - 2\bar{x} \cdot n\bar{x} + n\bar{x}^2 = \sum x_i^2 - n\bar{x}^2$. $\square$</p>
+                <p>$\sum x_i^2 = 144 + 225 + 121 + 196 + 169 = 855$, $n\bar{x}^2 = 5 \cdot 169 = 845$: somma dei quadrati 10, <span class="b-res">$s^2 = \tfrac{10}{4} = 2{,}5$</span> come sopra.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">METTITI ALLA PROVA!</div>
+        <div class="b-q" data-ans="13" data-ph="x̄ ="><p class="b-q-text">Media di 12, 15, 11, 14, 13?</p><div class="b-sol"><p>13</p></div></div>
+        <div class="b-q" data-ans="2,5" data-tol="0.0001" data-ph="s² ="><p class="b-q-text">Varianza campionaria dei valori 12, 15, 11, 14, 13?</p><div class="b-sol"><p>$\tfrac{10}{4} = 2{,}5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Ripassare · Approfondire · Collegare" data-toc-k="P" data-toc-short="Pratica">
+    <div class="b-band"><span class="b-band-tag">RIPASSARE · APPROFONDIRE · COLLEGARE</span></div>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Una scuola vuole sapere quanto gli studenti sono soddisfatti della mensa. Descrivi un modo buono e uno cattivo di estrarre il campione.</p></div>
+            <div class="b-sol"><p>Buono: scegliere a caso dall’elenco degli studenti, in tutte le classi. Cattivo: intervistare solo chi pranza in mensa; gli insoddisfatti forse mangiano altrove.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Collegare con la 12ª classe:</b> la proporzione di mancini è circa il 10 %. In un campione di 50 persone, quanti te ne aspetti e quanto vale $\sigma$? Qual è la probabilità di 10 o più?</p></div>
+            <div class="b-sol"><p>$\mu = 5$, $\sigma = \sqrt{4{,}5} \approx 2{,}12$. $P(X \ge 10) \approx 0{,}025$: raro, ma possibile.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Esercizio aperto:</b> su 500 pezzi controllati di una produzione giornaliera di 20 000 pezzi, 12 sono difettosi. Stima il numero di pezzi difettosi e indica quanto è precisa questa stima. Quanti pezzi bisognerebbe controllare perché la proiezione oscilli solo di circa 50 pezzi?</p></div>
+            <div class="b-hint"><p>La proiezione è $N \cdot h$, la sua dispersione $N \cdot \sqrt{\tfrac{h(1-h)}{n}}$.</p></div>
+            <div class="b-sol"><p>$h = 0{,}024$: circa 480 pezzi, dispersione $20\,000 \cdot \sqrt{\tfrac{0{,}024 \cdot 0{,}976}{500}} \approx 137$ pezzi.</p>
+                <p>$20\,000 \cdot \sqrt{\tfrac{0{,}0234}{n}} \le 50$ dà $n \ge 0{,}0234 \cdot 400^2 \approx 3750$. <span class="b-res">Controllare circa 3 750 pezzi.</span> Con una parte così grande della produzione giornaliera conviene solo se gli errori costano cari.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Escursione: il più grande sondaggio che abbia mai sbagliato" data-toc-k="X" data-toc-short="1936">
+    <div class="b-band"><span class="b-band-tag">ESCURSIONE</span><span class="b-band-sub">LA GRANDEZZA NON SOSTITUISCE LA SELEZIONE CASUALE</span></div>
+    <h2>Le elezioni del 1936</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Prima delle elezioni presidenziali statunitensi del 1936 la rivista Literary Digest inviò circa dieci milioni di questionari, e ne tornarono più di due milioni. La sua previsione: lo sfidante Alf Landon avrebbe battuto nettamente il presidente Franklin D. Roosevelt. In realtà Roosevelt vinse con un grande vantaggio.</p>
+            <p>Gli indirizzi provenivano, tra l’altro, da elenchi telefonici e registri automobilistici, cioè da persone piuttosto benestanti per l’epoca. E risposero soprattutto gli scontenti del governo. Il giovane sondaggista George Gallup indovinò con un campione molto più piccolo, ma scelto con più cura, e diventò famoso.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Peverill Squire: Why the 1936 Literary Digest Poll Failed. Public Opinion Quarterly 52 (1), 1988.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Riepilogo" data-toc-k="R" data-toc-short="Riepilogo">
+    <div class="b-band"><span class="b-band-tag">RIEPILOGO</span><span class="b-band-sub">L’ESSENZIALE A COLPO D’OCCHIO</span></div>
+    <div class="b-rueck"><div><h4>POPOLAZIONE E CAMPIONE</h4><p>Scelto a caso, perché sia rappresentativo.</p></div>
+        <div><p>Literary Digest 1936: grande, ma distorto</p></div></div>
+    <div class="b-rueck"><div><h4>STIMARE E TESTARE</h4><p>Stimare: un numero. Testare: una decisione su un’ipotesi.</p></div>
+        <div><p>Previsione elettorale · dado equo?</p></div></div>
+    <div class="b-rueck"><div><h4>DISPERSIONE DELLA PROPORZIONE</h4><p>$\sqrt{\tfrac{p(1-p)}{n}}$; quadruplicare $n$ la dimezza.</p></div>
+        <div><p>$n = 1000$, $p = 0{,}42$: 1,6 punti percentuali</p></div></div>
+    <div class="b-rueck"><div><h4>PARAMETRI</h4><p>$\bar{x}$ e $s^2 = \tfrac{1}{n-1} \sum (x_i - \bar{x})^2$</p></div>
+        <div><p>Confezioni: $\bar{x} = 500$ g, $s \approx 2{,}58$ g</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DUE PARTI · RISPOSTA IMMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTE 1</div>
+            <div class="b-q" data-ans="2500" data-ph="n ="><p class="b-q-text">Quanto deve valere almeno $n$ con $p = 0{,}5$ perché la dispersione della proporzione sia al massimo 0,01?</p><div class="b-sol"><p>2500</p></div></div>
+            <div class="b-q" data-ans="500" data-ph="x̄ ="><p class="b-q-text">Media di 480, 520, 490, 510, 500?</p><div class="b-sol"><p>500</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTE 2</div>
+            <div class="b-q" data-ans="250" data-ph="s² ="><p class="b-q-text">Varianza campionaria di 480, 520, 490, 510, 500?</p><div class="b-sol"><p>$\tfrac{1000}{4} = 250$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">«Il nuovo metodo di studio è migliore?» è …</p>
+                <div class="b-mc"><button>un problema di test</button><button>un problema di stima</button><button>nessun problema statistico</button></div>
+                <div class="b-sol"><p>Si verifica un’ipotesi.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematica, Berufliches Gymnasium, 13ª classe, Leistungskurs · area di apprendimento 5 secondo il programma di matematica del Berufliches Gymnasium della Sassonia.</p>
+    <p>Tutti i testi, gli esercizi e le figure sono contenuti originali.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-it.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-it/stochastik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-it/gy12.js"></script>
+</body>
+</html>
