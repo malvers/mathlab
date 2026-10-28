@@ -1013,3 +1013,37 @@ same as in mathe12 or mathegy11lk, the Italian of mathe12-it / mathegy11lk-it wa
 | Gauß, Ceres, Braunschweig, Hamburg, Leipzig | Gauss, Cerere, Brunswick, Amburgo, Lipsia | 2.4, 2.7 |
 | dreiseitige Pyramide, Schwerpunkt | piramide a base triangolare, baricentro | 6.1 |
 | Extremwertprobleme / Extremalaufgaben (lab cards) | PROBLEMI DI OTTIMIZZAZIONE / PROBLEMI DI MASSIMO E MINIMO | 2.8, two cards, two names |
+
+## mathe13lk-it
+
+<!-- it-23: terms of this book only, write right below this line -->
+
+Pastori, 28.10.2026: decisions made while translating BGY 13 LK; nothing above was changed. Where the German text is the
+same as in mathe13, mathe12lk, mathegy12lk or mathegy11lk, the Italian of those editions was taken over unchanged.
+
+| German | Italian | Note |
+|---|---|---|
+| Kapitel W1.1 … W2.3 (two Wahlpflicht areas) | OP1.1 … OP2.3, "Area a scelta 1 / 2" | kapitel.js; fits the chapter card at 390 px |
+| Einheitsmatrix $E$, $(E - A)^{-1}$, $(A \mid E)$, $P - E$ | matrice identità $I$, $(I - A)^{-1}$, $(A \mid I)$, $P - I$ | also in maths-only lines (FIX), the widget pieces in js/buch-it/bgy13lk.js; $E$ for Erlös and for planes stays |
+| Typ einer Matrix, verkettet, Falksches Schema | dimensione, compatibili, schema di Falk | W2.1 |
+| Gauß-Jordan-Verfahren, Nullzeile, singulär / regulär | metodo di Gauss-Jordan, riga nulla, singolare / regolare | W2.1 |
+| Bäckerei, Brötchen, Brezel, Café 1 | panetteria, panino, brezel (invariable), bar 1 | W2.1 |
+| Gozintograph, Bedarfsmatrix, Gesamtbedarfsmatrix, Produktionsplan | grafo di Gozinto, matrice dei fabbisogni, matrice del fabbisogno totale, piano di produzione | W2.2; letters $R$, $Z$, $E$ and $M_{RZ}$ … stay |
+| ME (Mengeneinheit) | unità (in the widget: u.) | W2.2, as gy11lk |
+| Deckungsbeitrag, variable Stückkosten, Fixkosten | margine di contribuzione, costi variabili unitari, costi fissi | W2.2 |
+| Müsli-Manufaktur: Haferflocken, Nüsse, Trockenfrüchte; Basis, Frucht; Classic, Frucht-Müsli | laboratorio di muesli: fiocchi d’avena, noci, frutta essiccata; Base, Frutta; Classic, Muesli Frutta | W2.2 ("frutta secca" would be nuts) |
+| Technologiematrix, Endnachfrage, Leontief-Inverse, Input-Output-Tabelle, Vorleistungen | matrice tecnologica, domanda finale, inversa di Leontief, tavola input-output, consumi intermedi | W2.2 |
+| Landwirtschaft, Industrie, Dienstleistung (widget leontief) | agricoltura, industria, servizi | the letters L, I, D stay in the table |
+| Statistisches Bundesamt | in Italia l’ISTAT | W2.2 excursion, local |
+| Übergangsmatrix, Übergangsgraph, Grenzmatrix, Fixvektor, stochastische Matrix | matrice di transizione, grafo di transizione, matrice limite, vettore stazionario, matrice stocastica | W2.3 |
+| Eier, Larven, Käfer | uova, larve, coleotteri; in the transition graph of the widget the stage is "Adulti" | "Coleotteri" does not fit the 60 px node |
+| Stadtwerke $S$, Konkurrenz $K$, Kundenwanderung | azienda municipale $S$, concorrenza $K$, flussi di clienti | W2.3 |
+| Markow-Kette, Eugen Onegin, Puschkin | catena di Markov, «Eugenio Onegin», Puškin | W2.3 excursion |
+| biquadratisch, Substitution, Rücksubstitution | biquadratica, sostituzione, sostituzione inversa | 7.1 |
+| Lösungsvielfalt, kritische Werte, Fallunterscheidung | numero di soluzioni, valori critici, distinzione dei casi | 7.1 |
+| Verschiebungssatz (Stichprobenvarianz) | formula alternativa della varianza | 5.1 ("di König" would read as German in the checks) |
+| Tabellenkalkulation: NORM.VERT(…; WAHR), NORM.INV, MITTELWERT, VAR.S, STABW.S | DISTRIB.NORM.N(…; VERO), INV.NORM.N, MEDIA, VAR.C, DEV.ST.C | 4, 5.1, Italian Excel |
+| Hessesche Normalform (HNF) | forma normale di Hesse, short: forma di Hesse | W1.1 |
+| Lotfußpunkt, Lotgerade | piede della perpendicolare, retta perpendicolare | W1.3 |
+| Für den Leistungskurs (heading) | PER IL LEISTUNGSKURS | 5.1, W1.2, W1.3 |
+| Gebiet 1–4 (abi) | Blocco 1–4 | as section 2 |
