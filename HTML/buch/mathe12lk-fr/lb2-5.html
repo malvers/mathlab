@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 12 LK · Chapitre 2.5 · Variations, extremums, points d’inflexion | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Conditions nécessaires et suffisantes, extremums globaux. Chapitre 2.5 du manuel interactif Mathématiques · Berufliches Gymnasium 12 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 12 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 2.5 · DOMAINE D’APPRENTISSAGE 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 2.5 · DOMAINE D’APPRENTISSAGE 2 · FÉVRIER · MARS</p>
+            <h1>Variations, extremums, points d’inflexion</h1>
+            <p class="b-hero-lead">Quand le chiffre d’affaires est-il le plus élevé ? À partir de quand croît-il plus lentement ? Où une route est-elle la plus raide ? La dérivée révèle où une courbe
+                <b>monte</b> et <b>descend</b>, où se trouvent ses <b>maximums et minimums</b> et où elle passe d’un virage à gauche à un virage à droite.
+                Avec $f'$ et $f''$, tu lis une courbe sans la tracer.</p>
+            <div class="b-chips"><span class="b-chip">14 HEURES</span><span class="b-chip">4 LEÇONS</span><span class="b-chip">2 LABORATOIRES</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["0.25*x^3-3*x+1"]' data-labels='["f"]' data-lat="[4.1]" data-pts="[[-2,5],[2,-3],[0,1]]" data-x="-5,5" data-y="-6,8" data-h="240" data-aria="Courbe avec un maximum, un minimum et un point d’inflexion"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>déterminer le <b>sens de variation</b> à partir du signe de $f'$</li>
+                <li>calculer des <b>extremums</b> avec une condition nécessaire et une condition suffisante, distinguer <b>local</b> et <b>global</b></li>
+                <li>étudier la <b>convexité</b> avec $f''$ et déterminer des <b>points d’inflexion</b></li>
+                <li>associer entre elles les courbes de $f$, $f'$ et $f''$</li>
+                <li>déterminer des <b>extremums globaux</b> sur des intervalles et sur tout $\mathbb{R}$, aussi pour des fonctions exponentielles</li>
+                <li>étudier des fonctions dépendant d’un <b>paramètre</b> en faisant des <b>distinctions de cas</b></li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="6" data-ph="f'(2) ="><p class="b-q-text">$f(x) = 3x^2 - 6x$. Que vaut $f'(2)$ ?</p>
+            <div class="b-sol"><p>$f'(x) = 6x - 6$, $f'(2) = 6$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Résous $4x - 8 = 0$.</p>
+            <div class="b-sol"><p>$x = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">L’équation $x^2 - 9 = 0$ a deux solutions. Donne la solution positive.</p>
+            <div class="b-sol"><p>$x = \pm 3$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$f'(x) > 0$ sur un intervalle signifie que la courbe de $f$ …</p>
+            <div class="b-mc"><button>y monte</button><button>y descend</button><button>est au-dessus de l’axe des abscisses</button></div>
+        <div class="b-sol"><p>Pente de la tangente positive.</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LES MONTAGNES RUSSES</div>
+        <div class="b-text"><p>Dessinez le profil de montagnes russes sous forme de courbe.</p>
+            <ul>
+                <li>Marquez tous les sommets et tous les creux. Quelle est la pente en ces points ?</li>
+                <li>Où le parcours passe-t-il d’un virage à gauche à un virage à droite, si on le parcourt de gauche à droite ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçons 2 et 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">HORIZONTAL, MAIS PAS UN SOMMET</div>
+        <div class="b-text"><p>Tracez $f(x) = x^3$ au voisinage de 0.</p>
+            <ul>
+                <li>Comment est la tangente en $x = 0$ ?</li>
+                <li>$f$ y a-t-elle un maximum ou un minimum ? Qu’en déduisez-vous pour la condition $f'(x) = 0$ ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LE SUCCÈS DE VENTE</div>
+        <div class="b-text"><p>Un nouveau jeu se vend pendant les 12 premiers mois environ selon $V(t) = -t^3 + 12t^2$ (total, en centaines d’exemplaires).</p>
+            <ul>
+                <li>Quel mois a-t-on gagné le plus de nouveaux acheteurs ?</li>
+                <li>Quand le nombre total est-il le plus grand ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 3</span>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Sens de variation" data-toc-k="1" data-toc-short="1 Variations">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">1</span>Sens de variation et dérivée première</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = x^3 - 3x^2$ a pour dérivée $f'(x) = 3x^2 - 6x = 3x(x - 2)$. Pour $x < 0$ et $x > 2$, $f'(x) > 0$ ; entre les deux, $f'(x) < 0$.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Là où toutes les tangentes montent, la courbe monte. Donc $f$ est croissante pour $x \le 0$, décroissante pour $0 \le x \le 2$ et de nouveau croissante pour $x \ge 2$.
+                Les valeurs où $f'$ s’annule sont les bornes des intervalles de monotonie.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · SIGNE DE LA DÉRIVÉE ET VARIATIONS</div>
+        <div class="b-text"><p>Si $f'(x) > 0$ pour tout $x$ d’un intervalle, alors $f$ y est <b>strictement croissante</b>.</p>
+            <p>Si $f'(x) < 0$ pour tout $x$ d’un intervalle, alors $f$ y est <b>strictement décroissante</b>.</p>
+            <p>Méthode : déterminer les valeurs où $f'$ s’annule, puis tester le signe de $f'$ en un point de chaque intervalle.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>La réciproque n’est pas tout à fait vraie :</b> $f(x) = x^3$ est strictement croissante partout, bien que $f'(0) = 0$. Des zéros isolés de $f'$ ne gênent pas.</p>
+            <p class="b-note"><b>Tableau de signes :</b> il range clairement les intervalles, comme dans le module interactif de la leçon suivante.</p>
+            </aside>
+    </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · INTERVALLES DE MONOTONIE</div>
+        <div class="b-text"><p>Étudie le sens de variation de $f(x) = x^2 - 6x + 5$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 2x - 6$, qui s’annule en $x = 3$. Pour $x < 3$ : $f' < 0$, $f$ est décroissante. Pour $x > 3$ : $f' > 0$, $f$ est croissante.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · TOUJOURS CROISSANTE</div>
+        <div class="b-text"><p>Montre que $f(x) = x^3 + x$ est strictement croissante partout.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 3x^2 + 1 \ge 1 > 0$ pour tout $x$. <span class="b-res">Strictement croissante.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine les intervalles de monotonie : a) $f(x) = x^2 + 4x$ &nbsp; b) $f(x) = -x^2 + 2x + 3$</p>
+            </div>
+        <div class="b-sol"><p>a) $f'(x) = 2x + 4$ : décroissante pour $x \le -2$, croissante pour $x \ge -2$ &nbsp; b) $f'(x) = -2x + 2$ : croissante pour $x \le 1$, décroissante pour $x \ge 1$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine les intervalles de monotonie de $f(x) = x^3 - 12x$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 3x^2 - 12 = 3(x - 2)(x + 2)$ : croissante pour $x \le -2$, décroissante pour $-2 \le x \le 2$, croissante pour $x \ge 2$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Montre que $f(x) = \mathrm{e}^x - x$ est croissante pour $x > 0$ et décroissante pour $x < 0$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = \mathrm{e}^x - 1$. Pour $x > 0$, $\mathrm{e}^x > 1$, donc $f' > 0$. Pour $x < 0$, $\mathrm{e}^x < 1$, donc $f' < 0$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Pour quelles valeurs de $a$ la fonction $f(x) = x^3 + ax$ est-elle strictement croissante partout ?</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 3x^2 + a$. Pour $a \ge 0$, $f' \ge 0$ avec au plus un zéro en 0 : croissante. Pour $a < 0$, $f'(0) = a < 0$ : pas croissante partout. Donc $a \ge 0$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">$f(x) = x^2 - 8x$. À partir de quelle valeur de $x$ la fonction $f$ est-elle croissante ?</p>
+            <div class="b-sol"><p>$2x - 8 \ge 0 \Rightarrow x \ge 4$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$f'(x) = -(x - 1)^2 - 2$. Alors $f$ est …</p>
+            <div class="b-mc"><button>croissante partout</button><button>décroissante partout</button><button>d’abord croissante, puis décroissante</button></div>
+        <div class="b-sol"><p>$f'(x) \le -2 < 0$ pour tout $x$.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Extremums" data-toc-k="2" data-toc-short="2 Extremums">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">2</span>Calculer des extremums</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour $f(x) = x^3 - 3x^2$, $f'$ passe de $+$ à $-$ en $x = 0$ et de $-$ à $+$ en $x = 2$. Qu’est-ce que cela signifie pour la courbe ?</p>
+            </div>
+        </div>
+        <div class="b-text"><p>En $x = 0$, la courbe cesse de monter et commence à descendre : un <b>maximum</b> $H(0\,;\,0)$. En $x = 2$, c’est l’inverse : un <b>minimum</b> $T(2\,;\,-4)$.
+                Dans les deux cas, la tangente est horizontale. Mais toute tangente horizontale n’appartient pas à un extremum : pour $x^3$ en 0, la courbe monte avant et après.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · EXTREMUMS</div>
+        <div class="b-text"><p><b>Condition nécessaire :</b> si $f$ admet un extremum local en $x_0$, alors $f'(x_0) = 0$.</p>
+            <p><b>Condition suffisante :</b> si $f'(x_0) = 0$ et $f''(x_0) < 0$, on a un <b>maximum</b> ; si $f'(x_0) = 0$ et $f''(x_0) > 0$, un <b>minimum</b>.
+                        De façon équivalente : $f'$ change de signe en $x_0$ (de $+$ à $-$ : maximum).</p>
+            <p><b>Local et global :</b> un extremum local est la plus grande ou la plus petite valeur dans son voisinage. Pour trouver la plus grande ou la plus petite valeur sur tout l’intervalle,
+                        on compare les extremums locaux avec les <b>valeurs aux bornes</b>.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Dérivée seconde :</b> $f''$ est la dérivée de $f'$. Pour $f(x) = x^3 - 3x^2$ : $f'(x) = 3x^2 - 6x$, $f''(x) = 6x - 6$.</p>
+            <p class="b-note"><b>Si $f''(x_0) = 0$ :</b> seul le changement de signe de $f'$ permet de conclure. Sans changement : point d’inflexion à tangente horizontale.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · ÉTUDIER DES COURBES DE DEGRÉ 3</div>
+        <p class="b-help" style="margin:0 0 12px">Modifie les coefficients. En rouge : maximum, en vert : minimum, en blanc : point d’inflexion. Affiche $f'$ et $f''$ et compare leurs zéros avec les points marqués.</p>
+            <div data-widget="kurve"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · MAXIMUM ET MINIMUM</div>
+        <div class="b-text"><p>Détermine les extremums de $f(x) = -x^3 + 3x + 2$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = -3x^2 + 3 = 0 \Rightarrow x = \pm 1$. $f''(x) = -6x$.</p>
+            <p>$f''(1) = -6 < 0$ : maximum $H(1\,;\,4)$. $f''(-1) = 6 > 0$ : minimum $T(-1\,;\,0)$.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · GLOBAL, AVEC LES BORNES</div>
+        <div class="b-text"><p>Détermine la plus grande et la plus petite valeur de $f(x) = x^3 - 3x$ sur l’intervalle $[-2\,;\,3]$.</p>
+            </div>
+        <div class="b-sol"><p>Local : $H(-1\,;\,2)$, $T(1\,;\,-2)$. Bornes : $f(-2) = -2$, $f(3) = 18$.</p>
+            <p><span class="b-res">Maximum global 18 en $x = 3$</span> (à la borne), minimum global $-2$ en $x = 1$ et en $x = -2$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-labs">
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATOIRE DIFFÉRENTIEL</span><span class="b-lab-what">L’étude de fonctions à essayer (en allemand)</span></span></a>
+    </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine les extremums : a) $f(x) = x^2 - 4x + 1$ &nbsp; b) $f(x) = x^3 - 3x^2$</p>
+            </div>
+        <div class="b-sol"><p>a) $f'(x) = 2x - 4 = 0$ en $x = 2$, $f'' = 2 > 0$ : $T(2\,;\,-3)$ &nbsp; b) $H(0\,;\,0)$, $T(2\,;\,-4)$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine les extremums de $f(x) = \tfrac12 x^3 - \tfrac32 x$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = \tfrac32 x^2 - \tfrac32 = 0 \Rightarrow x = \pm 1$, $f''(x) = 3x$ : $T(1\,;\,-1)$, $H(-1\,;\,1)$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Montre que $f(x) = x^4 - 2x^2$ a deux minimums et un maximum.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 4x^3 - 4x = 4x(x^2 - 1)$, qui s’annule en $-1$, $0$, $1$. $f''(x) = 12x^2 - 4$ : $f''(\pm1) = 8 > 0$, $f''(0) = -4 < 0$.
+                $T(-1\,;\,-1)$, $H(0\,;\,0)$, $T(1\,;\,-1)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine le minimum de $f(x) = x \cdot \mathrm{e}^x$ (d’après le chapitre 2.4 : $f'(x) = (1 + x)\,\mathrm{e}^x$).</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 0$ seulement en $x = -1$ ; $f'$ y passe de $-$ à $+$. $T\left(-1\,;\,-\tfrac{1}{\mathrm{e}}\right) \approx T(-1\,;\,-0{,}368)$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Étudie $f(x) = x^4$ et $g(x) = x^3$ en 0. Les deux vérifient $f'(0) = f''(0) = 0$. Laquelle a un extremum en ce point ? Justifie avec le changement de signe de $f'$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 4x^3$ passe de $-$ à $+$ en 0 : minimum. $g'(x) = 3x^2 \ge 0$ ne change pas de signe : pas d’extremum, mais un point d’inflexion à tangente horizontale.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">En quelle valeur de $x$ la fonction $f(x) = x^2 - 6x + 2$ atteint-elle son minimum ?</p>
+            <div class="b-sol"><p>$2x - 6 = 0 \Rightarrow x = 3$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="16" data-ph="y ="><p class="b-q-text">$f(x) = -x^2 + 8x$. Quelle est l’ordonnée du maximum ?</p>
+            <div class="b-sol"><p>$x = 4$, $f(4) = -16 + 32 = 16$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$f'(2) = 0$ et $f''(2) = -3$. Alors $f$ a en $x = 2$ …</p>
+            <div class="b-mc"><button>un minimum</button><button>un maximum</button><button>un point d’inflexion</button></div>
+        <div class="b-sol"><p>$f'' < 0$ : courbe concave, donc maximum.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Convexité et points d’inflexion" data-toc-k="3" data-toc-short="3 Inflexion">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">3</span>Convexité et points d’inflexion</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Pour le succès de vente $V(t) = -t^3 + 12t^2$, $V'(t) = -3t^2 + 24t$ est le nombre de nouveaux acheteurs par mois. Quand est-il le plus grand ?</p>
+            </div>
+        </div>
+        <div class="b-text"><p>$V'$ est maximal là où $V''(t) = -6t + 24 = 0$, donc en $t = 4$. C’est là que les ventes augmentent le plus fortement : $V'(4) = 48$, soit 4 800 exemplaires par mois.
+                Jusqu’à $t = 4$, la montée devient plus raide (virage à gauche), ensuite plus douce (virage à droite). Le point $W(4\,;\,128)$ est un <b>point d’inflexion</b>.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · CONVEXITÉ ET POINT D’INFLEXION</div>
+        <div class="b-text"><p>$f''(x) > 0$ : la courbe est <b>convexe</b> (virage à gauche, la pente augmente). $f''(x) < 0$ : elle est <b>concave</b> (virage à droite, la pente diminue).</p>
+            <p>En un <b>point d’inflexion</b>, la courbe change de convexité. Condition : $f''(x_0) = 0$ et $f''$ y change de signe (ou $f'''(x_0) \neq 0$).</p>
+            <p>Un point d’inflexion est un point de <b>pente extrémale</b> : le taux de variation instantané y est le plus grand ou le plus petit.
+                        Si la tangente y est en plus horizontale, on parle de <b>point d’inflexion à tangente horizontale</b> (en allemand Sattelpunkt, d’où la lettre $S$).</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Moyen mnémotechnique :</b> si tu parcours la courbe à vélo de gauche à droite, tu tournes le guidon vers la gauche dans une partie convexe.</p>
+            <p class="b-note"><b>Dans le module ci-dessus,</b> le point d’inflexion d’une courbe de degré 3 se trouve toujours exactement au milieu entre le maximum et le minimum.</p>
+            </aside>
+    </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · POINT D’INFLEXION</div>
+        <div class="b-text"><p>Détermine les extremums et les points d’inflexion de $f(x) = x^3 - 6x^2 + 9x + 1$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 3x^2 - 12x + 9 = 3(x - 1)(x - 3)$, $f''(x) = 6x - 12$.</p>
+            <p>$H(1\,;\,5)$, $T(3\,;\,1)$. $f''(x) = 0$ en $x = 2$ avec changement de signe : <span class="b-res">$W(2\,;\,3)$</span>, où la courbe descend le plus fortement, $f'(2) = -3$.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · TANGENTE HORIZONTALE</div>
+        <div class="b-text"><p>Étudie $f(x) = x^3$ en 0.</p>
+            </div>
+        <div class="b-sol"><p>$f'(0) = 0$, $f''(x) = 6x$ change de signe en 0. <span class="b-res">$S(0\,;\,0)$</span> : point d’inflexion à tangente horizontale.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine les points d’inflexion : a) $f(x) = x^3 - 3x^2 + 1$ &nbsp; b) $f(x) = -2x^3 + 6x$</p>
+            </div>
+        <div class="b-sol"><p>a) $f''(x) = 6x - 6 = 0$ en $x = 1$ : $W(1\,;\,-1)$ &nbsp; b) $f''(x) = -12x = 0$ en $x = 0$ : $W(0\,;\,0)$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Où la courbe de $f(x) = x^3 - 3x^2 + 1$ est-elle convexe, où est-elle concave ?</p>
+            </div>
+        <div class="b-sol"><p>$f''(x) = 6x - 6$ : concave pour $x < 1$, convexe pour $x > 1$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Détermine les points d’inflexion de $f(x) = x^4 - 2x^2$.</p>
+            </div>
+        <div class="b-sol"><p>$f''(x) = 12x^2 - 4 = 0 \Rightarrow x = \pm\tfrac{1}{\sqrt3} \approx \pm 0{,}577$, avec changement de signe. $f\left(\pm\tfrac{1}{\sqrt3}\right) = \tfrac19 - \tfrac23 = -\tfrac59$.
+                $W_{1,2}\left(\pm 0{,}577\,;\,-0{,}556\right)$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Résous entièrement l’exploration « Le succès de vente » : quand le nombre total est-il le plus grand, et combien vaut-il ? Pourquoi le modèle s’arrête-t-il ensuite ?</p>
+            </div>
+        <div class="b-sol"><p>$V'(t) = 3t(8 - t) = 0$ en $t = 8$, $V''(8) = -24 < 0$ : maximum $V(8) = 256$, soit 25 600 exemplaires. Ensuite $V$ diminuerait, mais des jeux vendus ne disparaissent pas : le modèle ne vaut que jusqu’à $t = 8$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Montre que toute fonction $f(x) = ax^3 + bx^2 + cx + d$ avec $a \neq 0$ a exactement un point d’inflexion, situé en $x = -\tfrac{b}{3a}$.</p>
+            </div>
+        <div class="b-sol"><p>$f''(x) = 6ax + 2b = 0 \Rightarrow x = -\tfrac{b}{3a}$. $f''$ est une droite de pente $6a \neq 0$, elle y change donc de signe.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">En quelle valeur de $x$ la courbe de $f(x) = x^3 - 6x^2 + 5$ a-t-elle son point d’inflexion ?</p>
+            <div class="b-sol"><p>$f''(x) = 6x - 12 = 0 \Rightarrow x = 2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$f''(x) > 0$ sur un intervalle signifie …</p>
+            <div class="b-mc"><button>courbe convexe, la pente augmente</button><button>courbe concave, la pente diminue</button><button>la courbe monte</button></div>
+        <div class="b-sol"><p>$f''$ est le taux de variation de la pente.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="Extremums globaux et paramètres" data-toc-k="4" data-toc-short="4 Global">
+    <div class="b-band"><span class="b-band-tag">LEÇON 4</span><span class="b-band-sub">2 HEURES</span></div>
+        <h2><span class="b-no">4</span>Extremums globaux et fonctions dépendant d’un paramètre</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Un maximum n’est le point le plus haut que <b>localement</b>, dans son voisinage. Les bornes de l’intervalle
+                ou le comportement à l’infini décident si la courbe monte plus haut ailleurs. Et si une fonction dépend d’un paramètre, il peut y avoir, selon sa valeur, deux extremums, un seul ou aucun.</p>
+            </div>
+        </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · EXTREMUMS GLOBAUX ET DISTINCTION DE CAS</div>
+        <div class="b-text"><p><b>Sur un intervalle $[a\,;\,b]$</b>, seuls peuvent être des extremums globaux : les points intérieurs où $f'(x) = 0$ et les deux <b>bornes</b>. On compare toutes les valeurs de la fonction.</p>
+            <p><b>Sur $\mathbb{R}$ ou sur un intervalle ouvert</b>, on compare les extremums locaux avec le comportement aux bornes de l’ensemble de définition. Il peut arriver qu’il n’y ait pas d’extremum global.</p>
+            <p><b>Avec un paramètre :</b> si le nombre de solutions de $f'(x) = 0$ dépend du paramètre, on distingue les cas et on étudie chacun séparément.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Nécessaire et suffisant :</b> $f'(x_0) = 0$ est nécessaire pour un extremum à l’intérieur, mais pas suffisant ($x^3$ en 0). À une borne de l’intervalle, $f'(x_0) = 0$ n’est même pas nécessaire.</p>
+            <p class="b-note"><b>Critère avec $f''$ :</b> $f''(x_0) \neq 0$ est suffisant, mais pas nécessaire. $x^4$ a un minimum en 0, bien que $f''(0) = 0$. Le changement de signe de $f'$ aide alors.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LOCAL OU GLOBAL ?</div>
+        <p class="b-help" style="margin:0 0 12px">Choisis une fonction et déplace les bornes de l’intervalle. Le tableau compare tous les candidats : les points d’extremum local et les deux bornes.</p>
+            <div data-widget="randextrema"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 7 · GLOBAL SUR UN INTERVALLE</div>
+        <div class="b-text"><p>Détermine les extremums globaux de $f(x) = x\,\mathrm{e}^{-x}$ sur $[0\,;\,4]$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = \mathrm{e}^{-x} - x\,\mathrm{e}^{-x} = (1 - x)\,\mathrm{e}^{-x} = 0 \iff x = 1$. Candidats : $f(0) = 0$, $f(1) = \mathrm{e}^{-1} \approx 0{,}368$, $f(4) = 4\mathrm{e}^{-4} \approx 0{,}073$.</p>
+            <p><span class="b-res">Maximum global $\tfrac1{\mathrm{e}}$ en $x = 1$, minimum global 0 à la borne $x = 0$.</span></p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 8 · TROIS CAS</div>
+        <div class="b-text"><p>Cherche les extremums de $f_a(x) = x^3 - 3ax$ avec $a \in \mathbb{R}$.</p>
+            </div>
+        <div class="b-sol"><p>$f_a'(x) = 3x^2 - 3a = 0 \iff x^2 = a$.</p>
+            <p><b>$a > 0$ :</b> $x = \pm\sqrt{a}$ ; avec $f_a''(x) = 6x$ : maximum en $-\sqrt{a}$, minimum en $\sqrt{a}$. <b>$a = 0$ :</b> $f_0(x) = x^3$, point d’inflexion à tangente horizontale à l’origine, pas d’extremum.
+                    <b>$a < 0$ :</b> $f_a'(x) > 0$ partout, pas d’extremum. <span class="b-res">Il n’y a d’extremums que pour $a > 0$, et alors exactement deux.</span></p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine les extremums globaux de $f(x) = x^3 - 3x$ sur $[-2\,;\,3]$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = 3x^2 - 3 = 0$ en $x = \pm 1$. Valeurs : $f(-2) = -2$, $f(-1) = 2$, $f(1) = -2$, $f(3) = 18$.
+                Maximum global 18 à la borne $x = 3$, minimum global $-2$ en $-2$ et en $1$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Cherche les extremums locaux et globaux de $f(x) = x^2 \mathrm{e}^{-x}$ pour $x \ge 0$. Utilise $\lim\limits_{x \to \infty} x^2 \mathrm{e}^{-x} = 0$.</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = (2x - x^2)\,\mathrm{e}^{-x} = x(2 - x)\,\mathrm{e}^{-x}$ : nulle en 0 et en 2. Maximum $(2\,;\,4\mathrm{e}^{-2}) \approx (2\,;\,0{,}541)$.
+                Comme $f(x) \ge 0$ et $f(x) \to 0$ quand $x \to \infty$ : maximum global $4\mathrm{e}^{-2}$ en 2, minimum global 0 en 0.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Pour quelles valeurs de $a$ la fonction $f_a(x) = x^3 - 3ax$ a-t-elle deux extremums ? Donne-les en fonction de $a$.</p>
+            </div>
+        <div class="b-sol"><p>Pour $a > 0$ : maximum $\left(-\sqrt{a}\,;\,2a\sqrt{a}\right)$, minimum $\left(\sqrt{a}\,;\,-2a\sqrt{a}\right)$, car $f_a(\sqrt{a}) = a\sqrt{a} - 3a\sqrt{a} = -2a\sqrt{a}$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Le nombre d’utilisateurs d’une appli est $N(t) = -0{,}5t^3 + 9t^2$ (en milliers, $t$ en mois, $0 \le t \le 12$). Quand le nombre d’utilisateurs croît-il le plus vite, et à quelle vitesse ?</p>
+            </div>
+        <div class="b-hint"><p>On cherche le maximum global du taux de variation $N'$ sur $[0\,;\,12]$, donc un point d’inflexion de $N$ ou une borne.</p>
+            </div>
+        <div class="b-sol"><p>$N'(t) = -1{,}5t^2 + 18t$, $N''(t) = -3t + 18 = 0$ en $t = 6$. $N'(6) = 54$, aux bornes $N'(0) = N'(12) = 0$.
+                <span class="b-res">Au bout de 6 mois, avec 54 000 nouveaux utilisateurs par mois.</span></p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Démontre $\mathrm{e}^x \ge x + 1$ pour tout $x \in \mathbb{R}$ en déterminant le minimum global de $g(x) = \mathrm{e}^x - x - 1$.</p>
+            </div>
+        <div class="b-sol"><p>$g'(x) = \mathrm{e}^x - 1 = 0 \iff x = 0$. Pour $x < 0$, $g'(x) < 0$, pour $x > 0$, $g'(x) > 0$ : $g$ décroît jusqu’en 0 puis croît. Donc $g(0) = 0$ est le minimum global, $g(x) \ge 0$.</p>
+            <p>Géométriquement : la courbe de $\mathrm{e}^x$ est partout au-dessus de sa tangente $y = x + 1$ au point $(0\,;\,1)$.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="18" data-ph="maximum"><p class="b-q-text">Que vaut le maximum global de $f(x) = x^3 - 3x$ sur $[-2\,;\,3]$ ?</p>
+            <div class="b-sol"><p>$f(3) = 18$ à la borne</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-2" data-ph="x =">
+                <p class="b-q-text">$f_a(x) = x^3 - 3ax$ avec $a = 4$. En quelle valeur de $x$ se trouve le maximum ?</p>
+            <div class="b-sol"><p>$x = -\sqrt4 = -2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,368" data-tol="0.001" data-ph="maximum"><p class="b-q-text">Que vaut le maximum global de $x\,\mathrm{e}^{-x}$ sur $[0\,;\,4]$ (trois décimales) ?</p>
+            <div class="b-sol"><p>$f(1) = \mathrm{e}^{-1} \approx 0{,}368$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="20">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Détermine les extremums et les points d’inflexion de $f(x) = \tfrac14 x^3 - 3x + 1$ et compare avec le module interactif (valeurs de départ).</p>
+            </div>
+        <div class="b-sol"><p>$f'(x) = \tfrac34 x^2 - 3 = 0 \Rightarrow x = \pm 2$ ; $H(-2\,;\,5)$, $T(2\,;\,-3)$ ; $f''(x) = \tfrac32 x$ : $W(0\,;\,1)$</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>La température au cours d’une journée est décrite pour $0 \le t \le 24$ par $T(t) = -0{,}01t^3 + 0{,}3t^2 - 1{,}5t + 10$ (°C, $t$ en heures). Quand fait-il le plus froid, quand le plus chaud ? Quand la température monte-t-elle le plus vite ?</p>
+            </div>
+        <div class="b-sol"><p>$T'(t) = -0{,}03t^2 + 0{,}6t - 1{,}5 = 0 \Rightarrow t^2 - 20t + 50 = 0 \Rightarrow t = 10 \pm \sqrt{50}$, donc $t \approx 2{,}93$ ou $t \approx 17{,}07$.
+                Minimum vers 2 h 56 ($T \approx 7{,}9$ °C), maximum vers 17 h 04 ($T \approx 22{,}1$ °C). Les valeurs aux bornes $T(0) = 10$ et $T(24) \approx 8{,}6$ °C sont comprises entre les deux : les extremums sont donc aussi globaux.
+                Montée la plus rapide pour $T''(t) = -0{,}06t + 0{,}6 = 0$ : à 10 h, avec $T'(10) = 1{,}5$ °C par heure.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relier avec le chapitre 2.2 :</b> pour $f(x) = x^3 - 3x$, esquisse les courbes de $f'$ et $f''$ l’une sous l’autre. Marque les points qui se correspondent.</p>
+            </div>
+        <div class="b-sol"><p>Extremums de $f$ ($x = \pm1$) ↔ zéros de $f'$. Point d’inflexion de $f$ ($x = 0$) ↔ minimum de $f'$ ↔ zéro de $f''$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Donne une fonction de degré 3 qui a en $x = 1$ un point d’inflexion à tangente horizontale.</p>
+            </div>
+        <div class="b-sol"><p>Par exemple $f(x) = (x - 1)^3$ : $f'(x) = 3(x - 1)^2$ a en 1 un zéro double sans changement de signe, et $f''(1) = 0$ avec changement de signe.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : la méthode de Fermat" data-toc-k="X" data-toc-short="Fermat">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">DES EXTREMUMS AVANT LA DÉRIVÉE</span></div>
+        <h2>La méthode de Fermat pour les maximums et les minimums</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Environ 50 ans avant Newton et Leibniz, le juriste et mathématicien français Pierre de Fermat cherchait déjà des extremums. Son idée : près d’un maximum,
+                la valeur de la fonction change à peine si l’on déplace $x$ d’une toute petite quantité $e$. On pose $f(x + e)$ et $f(x)$ « à peu près égaux », on divise par $e$, puis on supprime $e$.</p>
+            <p>Son exemple : un segment de longueur $a$ doit être partagé en deux parties $x$ et $a - x$ dont le produit soit le plus grand possible.
+                De $(x + e)(a - x - e) \approx x(a - x)$, on obtient, après développement et division par $e$ : $a - 2x - e \approx 0$, et en supprimant $e$, $x = \tfrac{a}{2}$.</p>
+            <p>C’est, au fond, exactement notre condition $f'(x) = 0$. Fermat décrivit la méthode vers 1636 dans des lettres ; elle ne fut imprimée qu’après sa mort.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Source :</b> Pierre de Fermat, Methodus ad disquirendam maximam et minimam. Dans : Varia Opera Mathematica, Toulouse 1679.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>SENS DE VARIATION</h4><p>$f' > 0$ : croissante · $f' < 0$ : décroissante.</p>
+            </div>
+        <div>
+            <p>$x^3 - 3x^2$ : croissante, décroissante sur $[0\,;\,2]$, croissante</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>EXTREMUMS</h4><p>$f'(x_0) = 0$ et $f''(x_0) < 0$ : maximum, $f''(x_0) > 0$ : minimum. Ou changement de signe de $f'$.</p>
+            </div>
+        <div>
+            <p>$-x^3 + 3x + 2$ : $H(1\,;\,4)$, $T(-1\,;\,0)$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>GLOBAL</h4><p>Comparer les extremums locaux avec les valeurs aux bornes.</p>
+            </div>
+        <div>
+            <p>$x^3 - 3x$ sur $[-2\,;\,3]$ : maximum 18 à la borne</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>PARAMÈTRES</h4><p>Les solutions de $f_a'(x) = 0$ dépendent de $a$ : distinguer les cas.</p>
+            </div>
+        <div>
+            <p>$x^3 - 3ax$ : deux extremums pour $a > 0$, aucun pour $a \le 0$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>CONVEXITÉ</h4><p>$f'' > 0$ : convexe · $f'' < 0$ : concave.</p>
+            </div>
+        <div>
+            <p>La règle du vélo</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>POINT D’INFLEXION</h4><p>$f''(x_0) = 0$ avec changement de signe : point de pente extrémale. À tangente horizontale : en plus $f'(x_0) = 0$.</p>
+            </div>
+        <div>
+            <p>$x^3 - 6x^2 + 9x + 1$ : $W(2\,;\,3)$ · $x^3$ : tangente horizontale en 0</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1</div>
+        <div class="b-q" data-ans="-1" data-ph="x ="><p class="b-q-text">$f(x) = x^3 - 3x$. En quelle valeur de $x$ se trouve le maximum ?</p>
+            <div class="b-sol"><p>$3x^2 - 3 = 0 \Rightarrow x = \pm1$, $f''(-1) = -6 < 0$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="-2" data-ph="y ="><p class="b-q-text">Quelle est l’ordonnée du minimum de $f(x) = x^3 - 3x$ ?</p>
+            <div class="b-sol"><p>$f(1) = -2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">En quelle valeur de $x$ la courbe de $f(x) = 2x^3 - 6x^2 + 1$ a-t-elle son point d’inflexion ?</p>
+            <div class="b-sol"><p>$f''(x) = 12x - 12 = 0$</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2</div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">$f'(x_0) = 0$ et $f''(x_0) = 0$. Que peut-on conclure à coup sûr ?</p>
+            <div class="b-mc"><button>un maximum</button><button>un point d’inflexion à tangente horizontale</button><button>rien de sûr, il faut poursuivre l’étude</button></div>
+        <div class="b-sol"><p>$x^4$ a un minimum en 0, $x^3$ un point d’inflexion à tangente horizontale.</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="12" data-ph="maximum"><p class="b-q-text">Plus grande valeur de $f(x) = x^2$ sur l’intervalle $[-2\,;\,2\sqrt3]$ ?</p>
+            <div class="b-sol"><p>Valeur à la borne $f(2\sqrt3) = 12$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="48" data-ph="f'(4) ="><p class="b-q-text">$V(t) = -t^3 + 12t^2$. Quelle est la pente au point d’inflexion ?</p>
+            <div class="b-sol"><p>$W$ en $t = 4$, $V'(4) = -48 + 96 = 48$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-kurvendiskussion1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ÉTUDE DE FONCTIONS I</span><span class="b-lab-what">Extremums et points d’inflexion</span></span></a>
+        <a class="b-lab" data-lab="potenzlabor" href="../../potenzlabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATOIRE DES PUISSANCES</span><span class="b-lab-what">Étude des fonctions puissances</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 12e année, Leistungskurs · domaine d’apprentissage 2 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe (2026).</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-fr/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-fr/gy11lk.js"></script>
+</body>
+</html>
