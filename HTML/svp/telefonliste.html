@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telefonliste IBB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <!-- the warning line and the notes box below the table are the Schuljahr page's -->
+    <link rel="stylesheet" href="svp-schuljahr.css">
+    <link rel="stylesheet" href="svp-telefonliste.css">
+    <script src="svp-gate.js"></script>
+</head>
+
+<body>
+    <!-- The school's staff directory (an Excel workbook on the SharePoint site "Personal"), read by
+         tools/telefonliste.py, which keeps it in Supabase (svp_untis, row _telefonliste). Only Doc's
+         account can read that row, so the page shows nothing without his login - nothing of the
+         list is in this file. -->
+    <header class="page-head">
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Telefonliste IBB</h1>
+            </div>
+        </div>
+        <div class="subtitle" id="tl-sub">Kolleginnen und Kollegen &middot; aus Teams</div>
+    </header>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" id="tl-mine" type="button" hidden>Mein Eintrag</button>
+        <button class="action" id="tl-orte-btn" type="button" hidden>Standorte</button>
+        <input class="svp-search plan-search" id="tl-q" type="search" autocomplete="off" spellcheck="false"
+            placeholder="Suchen &hellip; Name, Kürzel, Raum, Tel." aria-label="Telefonliste durchsuchen">
+        <span class="svp-search-count" id="tl-count" hidden></span>
+    </div>
+
+    <div class="tl-filter" id="tl-filter" hidden></div>
+
+    <div class="sj-warn" id="tl-warn" hidden></div>
+
+    <div class="table-wrap">
+        <table id="tl-table">
+            <colgroup>
+                <col class="c-name"><col class="c-kz"><col class="c-tel"><col class="c-raum"><col class="c-schule"><col>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Kürzel</th>
+                    <th>Tel.</th>
+                    <th>Raum</th>
+                    <th>Schule</th>
+                    <th>E-Mail</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="tl-msg"><td colspan="6">Telefonliste wird geladen &hellip;</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <section class="tl-orte" id="tl-orte" hidden>
+        <h2>Standorte</h2>
+        <div class="tl-orte-grid"></div>
+    </section>
+
+    <section class="sj-korr" id="tl-korr" hidden>
+        <h2>Hinweise</h2>
+        <ul></ul>
+    </section>
+
+    <footer class="page-foot" id="tl-foot"></footer>
+
+    <script src="svp-auth.js"></script>
+    <script src="svp-nav.js"></script>
+    <script>
+        (function () {
+            const ROW = '_telefonliste';
+            const VORWAHL = '0351';
+            const table = document.getElementById('tl-table');
+            const tbody = table.querySelector('tbody');
+            const feld = document.getElementById('tl-q');
+            const zahl = document.getElementById('tl-count');
+            const filterBox = document.getElementById('tl-filter');
+            const pad = n => String(n).padStart(2, '0');
+            let zeilen = [], schule = '';
+
+            function stempel(s) {
+                const d = new Date(s);
+                return !s || isNaN(d) ? (s || '?') : pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' +
+                    d.getFullYear() + ', ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' Uhr';
+            }
+            function el(tag, cls, text) {
+                const e = document.createElement(tag);
+                if (cls) e.className = cls;
+                if (text != null) e.textContent = text;
+                return e;
+            }
+            function meldung(text, knopf) {
+                tbody.innerHTML = '';
+                const tr = el('tr', 'tl-msg'), td = el('td', null, text);
+                td.colSpan = 6;
+                if (knopf) td.appendChild(knopf);
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            }
+            /* one line per value: two numbers or rooms stand one above the other */
+            function liste(td, werte) {
+                (werte || []).forEach(w => td.appendChild(el('span', 'l', w)));
+                return td;
+            }
+            /* "Ä" files under A, like the school's own list */
+            function buchstabe(name) {
+                return name.charAt(0).toLocaleUpperCase('de').normalize('NFD').charAt(0);
+            }
+
+            function zeichne(data) {
+                const leute = data.leute || [];
+                const q = data.quelle || {};
+                document.getElementById('tl-sub').textContent = leute.length + ' Kolleginnen und Kollegen' +
+                    ' · aus Teams, Stand der Datei ' + stempel(q.geaendert);
+
+                tbody.innerHTML = '';
+                zeilen = [];
+                let band = null;
+                leute.forEach(function (p) {
+                    const b = buchstabe(p.name);
+                    if (!band || band.b !== b) {
+                        const tr = el('tr', 'tl-band'), td = el('td', null, b);
+                        td.colSpan = 6;
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
+                        band = { b: b, tr: tr, rows: [] };
+                    }
+                    const tr = el('tr', 'tl-p');
+                    if (p.ich) tr.classList.add('meins');
+
+                    const name = el('td', 'name');
+                    name.appendChild(el('span', 'nn', p.name));
+                    const vor = [p.titel, p.vorname].filter(Boolean).join(' ');
+                    if (vor) name.appendChild(el('span', 'vn', ', ' + vor));
+                    if (p.ich) name.appendChild(el('span', 'ich', 'ich'));
+                    tr.appendChild(name);
+                    tr.appendChild(el('td', 'kz', p.kuerzel || ''));
+                    tr.appendChild(liste(el('td', 'tel'), p.tel));
+                    tr.appendChild(liste(el('td', 'raum'), p.raum));
+                    const sch = el('td', 'schule');
+                    (p.schulen || []).forEach(s => sch.appendChild(el('span', 's', s)));
+                    tr.appendChild(sch);
+                    const mail = el('td', 'mail');
+                    if (p.mail) {
+                        const a = el('a', null, p.mail);
+                        a.href = 'mailto:' + p.mail;
+                        a.title = p.mail;
+                        mail.appendChild(a);
+                    }
+                    tr.appendChild(mail);
+                    tbody.appendChild(tr);
+
+                    /* the search reads everything in the row, the umlauts folded (Muller finds Müller) */
+                    const text = [p.name, p.vorname, p.titel, p.kuerzel, p.mail, p.anrede]
+                        .concat(p.tel || [], p.raum || [], p.schulen || []).filter(Boolean).join(' ');
+                    const z = { tr: tr, band: band, p: p, text: falte(text) };
+                    band.rows.push(z);
+                    zeilen.push(z);
+                });
+
+                baueFilter(data.schulen || []);
+                baueOrte(data.standorte || []);
+
+                const box = document.getElementById('tl-korr'), ul = box.querySelector('ul');
+                ul.innerHTML = '';
+                (data.korrekturen || []).forEach(k => ul.appendChild(el('li', null, k.text)));
+                box.hidden = !ul.children.length;
+
+                const mine = zeilen.find(z => z.p.ich);
+                const knopf = document.getElementById('tl-mine');
+                knopf.hidden = !mine;
+                if (mine) knopf.onclick = () => { setzeFilter('', ''); springe(mine.tr); };
+
+                const warn = document.getElementById('tl-warn');
+                warn.hidden = !data.fehler;
+                if (data.fehler) warn.textContent = 'Die Datei ließ sich am ' + stempel(data.fehler.zeit) +
+                    ' nicht lesen (' + data.fehler.text + ') – hier steht weiter der letzte gute Stand.';
+
+                const foot = document.getElementById('tl-foot');
+                foot.textContent = 'Quelle: Teams › Personal › ';
+                if (q.link) {
+                    const a = el('a', null, q.datei || 'Excel-Datei');
+                    a.href = q.link;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    foot.appendChild(a);
+                } else foot.appendChild(document.createTextNode(q.datei || 'Excel-Datei'));
+                foot.appendChild(document.createTextNode(' · Stand der Datei ' + stempel(q.geaendert) +
+                    (data.abgeglichen ? ' · abgeglichen ' + stempel(data.abgeglichen) : '') +
+                    ' · Nur mit Anmeldung sichtbar.'));
+
+                suche();
+            }
+            feld.addEventListener('input', suche);
+
+            function falte(s) {
+                return s.toLocaleLowerCase('de').normalize('NFD').replace(/[̀-ͯ]/g, '');
+            }
+
+            /* one pill per school, "Alle" first; the number says how many work there */
+            function baueFilter(schulen) {
+                filterBox.innerHTML = '';
+                const pille = function (wert, label, n) {
+                    const b = el('button', 'badge b-grey tl-chip');
+                    b.type = 'button';
+                    b.dataset.s = wert;
+                    b.appendChild(document.createTextNode(label));
+                    b.appendChild(el('span', 'n', String(n)));
+                    b.addEventListener('click', () => setzeFilter(schule === wert && wert ? '' : wert));
+                    filterBox.appendChild(b);
+                };
+                pille('', 'Alle', zeilen.length);
+                schulen.forEach(s => pille(s, s, zeilen.filter(z => (z.p.schulen || []).includes(s)).length));
+                filterBox.hidden = !schulen.length;
+                markiereFilter();
+            }
+            function markiereFilter() {
+                filterBox.querySelectorAll('.tl-chip').forEach(b => b.classList.toggle('on', b.dataset.s === schule));
+            }
+            function setzeFilter(wert, text) {
+                schule = wert;
+                if (text !== undefined) feld.value = text;
+                markiereFilter();
+                suche();
+            }
+
+            /* filter by school pill and search words (every word must hit), hits painted like the plan search */
+            function suche() {
+                const woerter = falte(feld.value.trim()).split(/\s+/).filter(Boolean);
+                let n = 0;
+                zeilen.forEach(function (z) {
+                    const ok = (!schule || (z.p.schulen || []).includes(schule)) &&
+                        woerter.every(w => z.text.includes(w));
+                    z.tr.hidden = !ok;
+                    if (ok) n++;
+                });
+                const baender = new Set(zeilen.map(z => z.band));
+                baender.forEach(b => { b.tr.hidden = !b.rows.some(z => !z.tr.hidden); });
+                const aktiv = woerter.length || schule;
+                zahl.hidden = !aktiv;
+                zahl.textContent = n + ' von ' + zeilen.length;
+                zahl.classList.toggle('none', aktiv && !n);
+                male(woerter);
+            }
+
+            function male(woerter) {
+                if (!window.CSS || !CSS.highlights || typeof Highlight === 'undefined') return;
+                CSS.highlights.delete('plan-find');
+                if (!woerter.length) return;
+                const ranges = [];
+                zeilen.forEach(function (z) {
+                    if (z.tr.hidden) return;
+                    const walker = document.createTreeWalker(z.tr, NodeFilter.SHOW_TEXT);
+                    let node;
+                    while ((node = walker.nextNode())) {
+                        /* folding "ü" to "u" keeps the length, so an index in the folded text is one in the node */
+                        const t = falte(node.nodeValue);
+                        if (t.length !== node.nodeValue.length) continue;
+                        woerter.forEach(function (w) {
+                            let i = t.indexOf(w);
+                            while (i !== -1) {
+                                const r = new Range();
+                                r.setStart(node, i);
+                                r.setEnd(node, i + w.length);
+                                ranges.push(r);
+                                i = t.indexOf(w, i + w.length);
+                            }
+                        });
+                    }
+                });
+                if (ranges.length) CSS.highlights.set('plan-find', new Highlight(...ranges));
+            }
+
+            function baueOrte(orte) {
+                const box = document.getElementById('tl-orte'), grid = box.querySelector('.tl-orte-grid');
+                grid.innerHTML = '';
+                orte.forEach(function (o) {
+                    const k = el('div', 'tl-ort');
+                    if (o.haus) k.appendChild(el('span', 'haus', o.haus));
+                    if (o.stufe) k.appendChild(el('div', 'stufe', o.stufe));
+                    k.appendChild(el('div', 'oname', o.name));
+                    if (o.zusatz) k.appendChild(el('div', 'zusatz', o.zusatz));
+                    k.appendChild(el('div', 'adr', o.strasse + ', ' + o.ort));
+                    if (o.tel) {
+                        const z = el('div', 'nr');
+                        z.appendChild(el('span', 'lbl', 'Tel.'));
+                        const a = el('a', null, VORWAHL + ' ' + o.tel);
+                        if (o.tel_link) a.href = 'tel:' + o.tel_link;
+                        z.appendChild(a);
+                        k.appendChild(z);
+                    }
+                    if (o.fax) {
+                        const z = el('div', 'nr');
+                        z.appendChild(el('span', 'lbl', 'Fax'));
+                        z.appendChild(document.createTextNode(VORWAHL + ' ' + o.fax));
+                        k.appendChild(z);
+                    }
+                    if (o.mail) {
+                        const a = el('a', 'om', o.mail);
+                        a.href = 'mailto:' + o.mail;
+                        k.appendChild(a);
+                    }
+                    grid.appendChild(k);
+                });
+                box.hidden = !orte.length;
+                const knopf = document.getElementById('tl-orte-btn');
+                knopf.hidden = !orte.length;
+                knopf.onclick = () => box.scrollIntoView({ block: 'start', behavior: 'smooth' });
+            }
+
+            function springe(tr) {
+                tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                tr.classList.remove('flash');
+                void tr.offsetWidth;
+                tr.classList.add('flash');
+            }
+
+            async function lade() {
+                if (!svpAuth.hasSession()) {
+                    const b = el('button', 'action', 'Anmelden');
+                    b.type = 'button';
+                    b.addEventListener('click', () => svpAuth.loginDialog(lade, 'Anmelden, um die Telefonliste zu sehen'));
+                    meldung('Die Telefonliste ist nur mit Anmeldung sichtbar.', b);
+                    return;
+                }
+                try {
+                    const res = await svpAuth.api('svp_untis?page=eq.' + ROW + '&select=data');
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const rows = await res.json();
+                    if (!rows.length || !rows[0].data) {
+                        meldung('Für dieses Konto liegt keine Telefonliste vor.');
+                        return;
+                    }
+                    zeichne(rows[0].data);
+                } catch (e) {
+                    meldung('Die Telefonliste ließ sich nicht laden (' + e.message + ').');
+                }
+            }
+            lade();
+        })();
+    </script>
+</body>
+
+</html>

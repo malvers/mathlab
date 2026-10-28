@@ -1,0 +1,198 @@
+/* Telefonliste (telefonliste.html): the school's staff directory, one row per person, a letter band
+   before each initial, the school pills above as a filter and the sites as cards below. The search
+   field and its hits are the plan search's (svp-search.css), the notes box the Schuljahr page's
+   (svp-schuljahr.css) - only the table, the pills and the cards are set here. */
+
+#tl-table { table-layout: fixed; min-width: 0; }
+#tl-table col.c-name { width: 26%; }
+#tl-table col.c-kz { width: 92px; }
+#tl-table col.c-tel { width: 72px; }
+#tl-table col.c-raum { width: 104px; }
+#tl-table col.c-schule { width: 176px; }
+
+#tl-table tbody tr > td { height: 40px; vertical-align: middle; }
+#tl-table td.name { padding-left: 16px; }
+#tl-table td.name .nn { font-weight: 600; }
+#tl-table td.name .vn { color: var(--muted); }
+#tl-table td.kz {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+#tl-table td.tel,
+#tl-table td.raum { white-space: nowrap; font-variant-numeric: tabular-nums; }
+#tl-table td.tel { font-weight: 600; }
+#tl-table td .l { display: block; }
+#tl-table td.schule { line-height: 1.6; }
+#tl-table td.schule .s {
+    display: inline-block;
+    margin: 1px 4px 1px 0;
+    padding: 0 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.56rem;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+#tl-table td.mail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#tl-table td.mail a { color: var(--cyan); text-decoration: none; }
+#tl-table td.mail a:hover { text-decoration: underline; }
+
+/* "189 von 189" is wider than the plans' "3 von 38" - the count gets more room inside the field */
+.toolbar #tl-q { padding-right: 96px; }
+.toolbar #tl-count { margin-left: -96px; min-width: 86px; }
+
+/* the initial before its names: a quiet band in the head's font */
+#tl-table tr.tl-band > td {
+    height: auto;
+    padding: 5px 16px;
+    background: rgba(var(--tint), 0.07);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+}
+#tl-table tr[hidden] { display: none; }
+
+/* Doc's own row: the Υ-red bar and "ich" tag of the Nachschreiben page */
+#tl-table tr.meins > td:first-child { box-shadow: inset 4px 0 0 rgb(176, 36, 24); }
+#tl-table td.name .ich {
+    margin-left: 10px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgb(176, 36, 24);
+    vertical-align: 2px;
+}
+#tl-table tr.flash > td { animation: sj-flash 1.6s ease-out; }
+
+#tl-table tr.tl-msg td {
+    height: auto;
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--muted);
+}
+#tl-table tr.tl-msg .action { margin-left: 10px; }
+
+/* the school pills: one line under the toolbar, the chosen one in the button blue */
+.tl-filter {
+    max-width: 1200px;
+    margin: 0 auto 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.tl-filter[hidden] { display: none; }
+.tl-filter .tl-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    box-sizing: border-box;
+    padding: 0 9px;
+    font-size: 0.62rem;
+    cursor: pointer;
+}
+.tl-filter .tl-chip .n { opacity: 0.6; font-variant-numeric: tabular-nums; }
+.tl-filter .tl-chip:hover { filter: brightness(1.15); }
+.tl-filter .tl-chip.on {
+    color: var(--text);
+    background: rgba(var(--g-btn), 0.3);
+    border-color: rgb(var(--tint));
+}
+
+/* the sites: cards below the table, the house code in the corner */
+.tl-orte { max-width: 1200px; margin: 22px auto 0; }
+.tl-orte[hidden] { display: none; }
+.tl-orte h2,
+.sj-korr h2 { scroll-margin-top: 20px; }
+.tl-orte h2 {
+    margin: 0 0 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+}
+.tl-orte-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+.tl-ort {
+    position: relative;
+    padding: 12px 14px;
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+.tl-ort .haus {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+.tl-ort .stufe {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.tl-ort .oname { font-weight: 600; padding-right: 36px; }
+.tl-ort .zusatz { color: var(--muted); font-size: 0.82rem; }
+.tl-ort .adr { margin-bottom: 4px; }
+.tl-ort .nr { font-variant-numeric: tabular-nums; }
+.tl-ort .lbl { display: inline-block; width: 34px; color: var(--muted); font-size: 0.8rem; }
+.tl-ort a { color: var(--cyan); text-decoration: none; }
+.tl-ort a:hover { text-decoration: underline; }
+.tl-ort .om { display: block; margin-top: 2px; overflow-wrap: anywhere; }
+
+/* Phone: every person becomes a little card - name on top, number, room, initials and school
+   in one line below, the mail address last */
+@media (max-width: 720px) {
+    #tl-table colgroup,
+    #tl-table thead { display: none; }
+    #tl-table,
+    #tl-table tbody { display: block; }
+    #tl-table tr.tl-p {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 2px 12px;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--row-line);
+    }
+    #tl-table tr.tl-p[hidden] { display: none; }
+    #tl-table tr.tl-p > td { display: block; height: auto; padding: 0; border: 0; }
+    #tl-table tr.tl-p > td:empty { display: none; }
+    #tl-table td.name { flex-basis: 100%; padding-left: 0; }
+    #tl-table td .l { display: inline; }
+    #tl-table td .l + .l::before { content: " / "; color: var(--muted); font-weight: 400; }
+    #tl-table td.mail { flex-basis: 100%; font-size: 0.86rem; }
+    #tl-table tr.meins { box-shadow: inset 4px 0 0 rgb(176, 36, 24); }
+    #tl-table tr.meins > td:first-child { box-shadow: none; }
+    #tl-table tr.tl-band { display: block; }
+    #tl-table tr.tl-band > td { display: block; padding: 4px 12px; }
+    #tl-table tr.tl-msg,
+    #tl-table tr.tl-msg > td { display: block; }
+    .tl-orte-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+    .tl-filter { display: none; }
+    #tl-table tr.tl-band > td { background: #eef1f6; }
+    #tl-table td.mail a, .tl-ort a { color: inherit; }
+    .tl-ort { break-inside: avoid; background: #fff; border-color: #bbb; }
+}
