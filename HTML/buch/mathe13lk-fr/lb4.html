@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathématiques 13 LK · Chapitre 4 · Variables aléatoires de loi normale | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Courbe en cloche, densité et fonction de répartition, espérance, écart type, règles des σ. Chapitre 4 du manuel interactif Mathématiques · Berufliches Gymnasium 13 · Leistungskurs : explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATHÉMATIQUES · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Chapitre"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Contenu du chapitre">
+        <p class="b-toc-title">CHAPITRE 4 · DOMAINE D’APPRENTISSAGE 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introduction" data-toc-k="I" data-toc-short="Introduction" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CHAPITRE 4 · DOMAINE D’APPRENTISSAGE 4 · NOVEMBRE</p>
+            <h1>Variables aléatoires de loi normale</h1>
+            <p class="b-hero-lead">Le remplissage des bouteilles, la taille des personnes, les erreurs de mesure, le nombre de « face » sur mille lancers de pièce : toujours la même forme réapparaît,
+                la <b>courbe en cloche de Gauss</b>. Tu apprends à calculer des probabilités comme des <b>aires sous une densité</b>, à travailler avec la fonction de répartition $\Phi$ et les
+                <b>règles des $\sigma$</b>, et à comprendre pourquoi toute loi binomiale avec un grand $n$ épouse cette courbe.</p>
+            <div class="b-chips"><span class="b-chip">12 HEURES</span><span class="b-chip">3 LEÇONS</span><span class="b-chip">3 WIDGETS</span><span class="b-chip">1 LABORATOIRE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["exp(-x*x/2)/sqrt(2*PI)", "exp(-(x-1)*(x-1)/8)/(2*sqrt(2*PI))"]' data-labels='["φ", "σ = 2"]' data-lat="[0.6, 3.4]" data-x="-4,5" data-y="-0.05,0.48" data-h="240" data-yl="φ" data-aria="Deux courbes en cloche : la loi normale centrée réduite et une courbe plus large et plus plate, d’espérance 1 et d’écart type 2"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">CE QUE TU VAS APPRENDRE DANS CE CHAPITRE</div>
+        <div class="b-text"><ul>
+                <li>décrire des <b>variables aléatoires continues</b> par une fonction de densité : la probabilité est une aire</li>
+                <li>connaître la <b>courbe en cloche de Gauss</b> $\varphi_{\mu;\sigma}$ et expliquer l’influence de $\mu$ et $\sigma$, aussi à l’aide des dérivées</li>
+                <li>calculer des probabilités et des bornes avec la <b>fonction de répartition</b> et en <b>centrant et réduisant</b>, utiliser les règles des $\sigma$</li>
+                <li>approcher des lois binomiales par la loi normale avec le théorème de <b>Moivre-Laplace</b> et juger de la qualité de l’approximation</li>
+                </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN : SAIS-TU DÉJÀ LE FAIRE ?</div>
+        <div class="b-q" data-ans="30" data-ph="μ ="><p class="b-q-text">Espérance de $X \sim B(100\,;\,0{,}3)$ ?</p>
+            <div class="b-sol"><p>$\mu = n \cdot p$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="5" data-ph="σ ="><p class="b-q-text">Écart type de $X \sim B(100\,;\,0{,}5)$ ?</p>
+            <div class="b-sol"><p>$\sqrt{100 \cdot 0{,}5 \cdot 0{,}5}$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="1" data-ph="Valeur"><p class="b-q-text">Calcule $\int_0^1 2x\,\mathrm{d}x$.</p>
+            <div class="b-sol"><p>$\left[x^2\right]_0^1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,2" data-ph="Valeur"><p class="b-q-text">$P(X \le 3) = 0{,}8$. Que vaut $P(X > 3)$ ?</p>
+            <div class="b-sol"><p>Événement contraire</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorations" data-toc-k="E" data-toc-short="Explorations">
+    <div class="b-band"><span class="b-band-tag">EXPLORATIONS</span><span class="b-band-sub">POUR COMMENCER · EN GROUPE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">EXACTEMENT 180 CENTIMÈTRES</div>
+        <div class="b-text"><p>Quelle est la probabilité qu’une personne choisie au hasard mesure <b>exactement</b> 180 cm, c’est-à-dire $180{,}000\ldots$ cm ?</p>
+            <ul>
+                <li>Comparez avec « entre 179,5 et 180,5 cm » et « entre 179,95 et 180,05 cm ».</li>
+                <li>Que reste-t-il quand l’intervalle devient de plus en plus étroit ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA MACHINE DE REMPLISSAGE</div>
+        <div class="b-text"><p>Une machine remplit des bouteilles avec en moyenne 500 ml ; les quantités se dispersent avec $\sigma = 4$ ml. Sur la bouteille, il est écrit 495 ml.</p>
+            <ul>
+                <li>Estimez : quel pourcentage des bouteilles contient moins ?</li>
+                <li>De combien faudrait-il augmenter la moyenne pour qu’il n’y en ait plus que $1\,\%$ ?</li>
+                </ul></div>
+            <span class="b-pair">→ Leçon 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">LA PLANCHE DE GALTON</div>
+        <div class="b-text"><p>Des billes tombent à travers des rangées de clous et rebondissent au hasard à gauche ou à droite sur chaque clou.</p>
+            <ul>
+                <li>Quelle loi suivent les cases dans lesquelles les billes atterrissent ?</li>
+                <li>Que devient la forme quand il y a de plus en plus de rangées ?</li>
+                </ul></div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Des billes, des clous et la cloche (laboratoire en allemand)</span></span></a></div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Densité et courbe en cloche" data-toc-k="1" data-toc-short="1 Densité">
+    <div class="b-band"><span class="b-band-tag">LEÇON 1</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">1</span>Variables aléatoires continues et courbe en cloche</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Une taille peut prendre n’importe quelle valeur d’un intervalle, pas seulement des centimètres entiers. Une telle <b>variable aléatoire continue</b> a pour chaque valeur isolée la
+                probabilité 0. Seuls les intervalles ont un sens. Un histogramme aux classes de plus en plus fines, dont les aires des barres sont les probabilités, se rapproche d’une courbe :
+                la <b>fonction de densité</b>.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Pour une densité, c’est l’<b>aire</b> qui est la probabilité, pas la valeur de la fonction. C’est pourquoi l’aire totale sous la courbe doit valoir 1. La densité la plus importante est la
+                courbe en cloche de Gauss. Son maximum est à l’espérance $\mu$, ses points d’inflexion sont exactement à un écart type à gauche et à droite. Un grand $\sigma$
+                rend la cloche large et plate, car l’aire reste égale à 1.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · DENSITÉ ET LOI NORMALE</div>
+        <div class="b-text"><p>Une <b>fonction de densité</b> $f$ vérifie $f(x) \ge 0$ et $\displaystyle\int_{-\infty}^{\infty} f(x)\,\mathrm{d}x = 1$. Pour la variable aléatoire $X$, on a $P(a \le X \le b) = \displaystyle\int_a^b f(x)\,\mathrm{d}x$.</p>
+            <p>On dit que $X$ suit la <b>loi normale</b> de paramètres $\mu$ et $\sigma > 0$, en bref $X \sim N(\mu\,;\,\sigma^2)$, si sa densité est
+                        $\varphi_{\mu;\sigma}(x) = \dfrac{1}{\sigma\sqrt{2\pi}}\,\mathrm{e}^{-\frac{(x - \mu)^2}{2\sigma^2}}$.</p>
+            <p>Alors $E(X) = \mu$, $V(X) = \sigma^2$. La courbe est symétrique par rapport à $x = \mu$, a son maximum en ce point et des points d’inflexion en $\mu \pm \sigma$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>$\le$ ou $&lt;$ ?</b> Pour les variables aléatoires continues, cela ne change rien, car $P(X = a) = 0$. Pour la loi binomiale, c’est une grande différence.</p>
+            <p class="b-note"><b>Loi normale centrée réduite :</b> $\mu = 0$, $\sigma = 1$. Sa densité se note simplement $\varphi$, sa fonction de répartition $\Phi$.</p>
+            <p class="b-note"><b>Avec le CAS :</b> <i>normPdf(x, μ, σ)</i> pour la densité, <i>normCdf(a, b, μ, σ)</i> pour $P(a \le X \le b)$.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA COURBE EN CLOCHE</div>
+        <p class="b-help" style="margin:0 0 12px">Modifie $\mu$ et $\sigma$ et observe la position, la hauteur et la largeur. L’aire jaune est la probabilité. Choisis « Règles des $\sigma$ » pour voir les trois intervalles.</p>
+            <div data-widget="normalverteilung" data-mu="0" data-sigma="1" data-xr="-4,4" data-a="-1" data-b="1"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 1 · LES POINTS D’INFLEXION DÉMONTRÉS</div>
+        <div class="b-text"><p>Montre que $\varphi(x) = \tfrac{1}{\sqrt{2\pi}}\,\mathrm{e}^{-x^2/2}$ a des points d’inflexion en $x = \pm 1$.</p>
+            </div>
+        <div class="b-sol"><p>Règle de la chaîne : $\varphi'(x) = -x\,\varphi(x)$. Règle du produit : $\varphi''(x) = -\varphi(x) - x\,\varphi'(x) = (x^2 - 1)\,\varphi(x)$.</p>
+            <p>Comme $\varphi(x) > 0$, on a $\varphi''(x) = 0$ exactement pour $x = \pm 1$, et $x^2 - 1$ y change de signe : <span class="b-res">points d’inflexion en $\pm 1 = \mu \pm \sigma$</span>.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 2 · LA PROBABILITÉ COMME AIRE</div>
+        <div class="b-text"><p>$X \sim N(0\,;\,1)$. Calcule $P(-1 \le X \le 1)$ et $P(X > 2)$.</p>
+            </div>
+        <div class="b-sol"><p>$P(-1 \le X \le 1) = \int_{-1}^{1} \varphi(x)\,\mathrm{d}x \approx 0{,}6827$ (CAS). Il n’existe pas de primitive sous forme explicite, c’est pourquoi on calcule avec $\Phi$ ou le CAS.</p>
+            <p>$P(X > 2) = 1 - \Phi(2) \approx 1 - 0{,}9772 = $ <span class="b-res">0,0228</span>, donc un peu plus de $2\,\%$.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Pour $X \sim N(170\,;\,8^2)$ (taille en cm), donne la position du maximum et des points d’inflexion de la densité. Quelle est la hauteur du maximum ?</p>
+            </div>
+        <div class="b-sol"><p>Maximum en $x = 170$, points d’inflexion en 162 et 178. Hauteur $\varphi_{170;8}(170) = \tfrac{1}{8\sqrt{2\pi}} \approx 0{,}0499$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Deux courbes en cloche ont la même espérance. L’une est deux fois plus large. Que dire de leurs maximums ? Justifie avec l’aire.</p>
+            </div>
+        <div class="b-sol"><p>Doubler $\sigma$ divise par deux le facteur $\tfrac{1}{\sigma\sqrt{2\pi}}$ : le maximum est deux fois moins haut. Les deux aires valent 1.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Vérifie si $f(x) = \tfrac{3}{4}(1 - x^2)$ pour $-1 \le x \le 1$ (et 0 ailleurs) est une densité, et calcule $P(X \ge 0{,}5)$.</p>
+            </div>
+        <div class="b-sol"><p>$f \ge 0$ et $\int_{-1}^{1} \tfrac34(1 - x^2)\,\mathrm{d}x = \tfrac34 \cdot \tfrac43 = 1$ : oui. $P(X \ge 0{,}5) = \tfrac34\left[x - \tfrac13 x^3\right]_{0{,}5}^{1} = \tfrac34\left(\tfrac23 - \tfrac{11}{24}\right) = \tfrac{5}{32} \approx 0{,}156$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Montre dans le cas général : les points d’inflexion de $\varphi_{\mu;\sigma}$ sont en $\mu \pm \sigma$.</p>
+            </div>
+        <div class="b-hint"><p>Écris $\varphi_{\mu;\sigma}(x) = c \cdot \mathrm{e}^{-u^2/2}$ avec $u = \tfrac{x - \mu}{\sigma}$.</p>
+            </div>
+        <div class="b-sol"><p>$\varphi' = -\tfrac{x - \mu}{\sigma^2}\varphi$, $\varphi'' = \left(\tfrac{(x - \mu)^2}{\sigma^4} - \tfrac{1}{\sigma^2}\right)\varphi = 0 \iff (x - \mu)^2 = \sigma^2 \iff x = \mu \pm \sigma$, avec changement de signe.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Le temps d’attente $T$ (en min) à un feu rouge a la densité $f(t) = \tfrac12$ pour $0 \le t \le 2$. Calcule $E(T) = \int t\,f(t)\,\mathrm{d}t$ et $V(T) = \int (t - \mu)^2 f(t)\,\mathrm{d}t$.</p>
+            </div>
+        <div class="b-sol"><p>$E(T) = \int_0^2 \tfrac t2\,\mathrm{d}t = 1$. $V(T) = \int_0^2 \tfrac12 (t - 1)^2\,\mathrm{d}t = \tfrac12 \cdot \tfrac23 = \tfrac13$, donc $\sigma \approx 0{,}58$ min. C’est ainsi qu’on transpose $E$ et $V$ des sommes aux intégrales.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,6827" data-tol="0.001" data-ph="P"><p class="b-q-text">$P(-1 \le Z \le 1)$ pour $Z \sim N(0\,;\,1)$ ? Quatre décimales.</p>
+            <div class="b-sol"><p>$\Phi(1) - \Phi(-1)$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="178" data-ph="x ="><p class="b-q-text">$X \sim N(170\,;\,8^2)$ : point d’inflexion de droite de la densité ?</p>
+            <div class="b-sol"><p>$\mu + \sigma$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Pour $X$ continue, $P(X = 3)$ est…</p>
+            <div class="b-mc"><button>égal à $f(3)$.</button><button>égal à 0.</button><button>non défini.</button></div>
+        <div class="b-sol"><p>Un point n’a pas d’aire.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Fonction de répartition et règles des σ" data-toc-k="2" data-toc-short="2 Φ et σ">
+    <div class="b-band"><span class="b-band-tag">LEÇON 2</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">2</span>Fonction de répartition, centrer et réduire, règles des $\sigma$</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>La machine de remplissage : $X \sim N(500\,;\,4^2)$. Combien de bouteilles contiennent moins de 492 ml ? 492 est exactement à deux écarts types sous $\mu$.
+                Pour la loi normale centrée réduite, on sait que $P(Z \le -2) \approx 0{,}0228$. Il y en a donc un peu plus de $2\,\%$, sans aucun nouveau calcul, rien qu’en comptant en <b>écarts types</b>.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>C’est l’idée de <b>centrer et réduire</b> : toute loi normale est une loi normale centrée réduite translatée et étirée. Avec $z = \tfrac{x - \mu}{\sigma}$, on compte
+                à combien d’écarts types $x$ se trouve de l’espérance. Une seule fonction, $\Phi$, suffit alors pour toutes les lois normales. Inversement, on peut déterminer
+                des bornes, des moyennes et des dispersions quand une probabilité est donnée.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · FONCTION DE RÉPARTITION, CENTRER ET RÉDUIRE</div>
+        <div class="b-text"><p>$F(x) = P(X \le x) = \displaystyle\int_{-\infty}^{x} \varphi_{\mu;\sigma}(t)\,\mathrm{d}t = \Phi\!\left(\dfrac{x - \mu}{\sigma}\right)$</p>
+            <p>$P(a \le X \le b) = \Phi\!\left(\tfrac{b - \mu}{\sigma}\right) - \Phi\!\left(\tfrac{a - \mu}{\sigma}\right)$ · $P(X \ge a) = 1 - \Phi\!\left(\tfrac{a - \mu}{\sigma}\right)$ · $\Phi(-z) = 1 - \Phi(z)$</p>
+            <p><b>Règles des $\sigma$ :</b> dans $[\mu - \sigma\,;\,\mu + \sigma]$ se trouvent $68{,}3\,\%$, dans $\mu \pm 2\sigma$ $95{,}4\,\%$, dans $\mu \pm 3\sigma$ $99{,}7\,\%$.
+                        Inversement : $90\,\%$ dans $\mu \pm 1{,}64\sigma$, $95\,\%$ dans $\mu \pm 1{,}96\sigma$, $99\,\%$ dans $\mu \pm 2{,}58\sigma$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculer à l’envers :</b> si une probabilité est donnée, on cherche le $z$ qui convient avec <i>invNorm</i> sur le CAS : $\Phi(z) = 0{,}95$ donne $z \approx 1{,}645$.</p>
+            <p class="b-note"><b>Esquisse :</b> dessiner la cloche, marquer $\mu$, hachurer l’aire cherchée. On voit alors tout de suite s’il faut $\Phi$, $1 - \Phi$ ou une différence.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA MACHINE DE REMPLISSAGE</div>
+        <p class="b-help" style="margin:0 0 12px">Calcule avec $\Phi$ au lieu de l’aire : choisis « Fonction de répartition ». La probabilité cherchée y est la différence de hauteur de la courbe.</p>
+            <div data-widget="normalverteilung" data-mu="500" data-sigma="4" data-xr="480,520" data-unit="ml" data-a="495" data-b="505"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 3 · ENTRE DEUX BORNES</div>
+        <div class="b-text"><p>$X \sim N(500\,;\,4^2)$. Quelle proportion des bouteilles contient entre 495 et 505 ml ?</p>
+            </div>
+        <div class="b-sol"><p>$z_1 = \tfrac{495 - 500}{4} = -1{,}25$, $z_2 = 1{,}25$. $P = \Phi(1{,}25) - \Phi(-1{,}25) = 2\,\Phi(1{,}25) - 1 \approx 2 \cdot 0{,}8944 - 1$ : <span class="b-res">$\approx 0{,}789$</span>.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 4 · LIMITER LA DISPERSION</div>
+        <div class="b-text"><p>Au plus $1\,\%$ des bouteilles peut contenir moins de 490 ml ($\mu = 500$). Quelle est la valeur maximale de $\sigma$ ?</p>
+            </div>
+        <div class="b-sol"><p>$\Phi\!\left(\tfrac{490 - 500}{\sigma}\right) \le 0{,}01$. $\Phi(z) = 0{,}01$ pour $z \approx -2{,}326$. Donc $-\tfrac{10}{\sigma} \le -2{,}326$ :
+                <span class="b-res">$\sigma \le \tfrac{10}{2{,}326} \approx 4{,}30$ ml</span>.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>La taille des jeunes hommes suit la loi $N(180\,;\,7^2)$ (en cm). Calcule la proportion au-dessus de 190 cm et la proportion entre 170 et 185 cm.</p>
+            </div>
+        <div class="b-sol"><p>$1 - \Phi\!\left(\tfrac{10}{7}\right) \approx 1 - 0{,}9234 = 0{,}077$. $\Phi\!\left(\tfrac57\right) - \Phi\!\left(-\tfrac{10}{7}\right) \approx 0{,}7625 - 0{,}0766 = 0{,}686$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Avec les règles des $\sigma$, sans calcul : dans quel intervalle autour de 500 ml se trouvent environ $95\,\%$ des quantités ($\sigma = 4$) ?</p>
+            </div>
+        <div class="b-sol"><p>$500 \pm 1{,}96 \cdot 4$, donc environ $[492{,}2\,;\,507{,}8]$ ml.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Quelle quantité est dépassée par $95\,\%$ des bouteilles ($\mu = 500$, $\sigma = 4$) ?</p>
+            </div>
+        <div class="b-sol"><p>On cherche $x$ tel que $P(X \le x) = 0{,}05$ : $z \approx -1{,}645$, $x = 500 - 1{,}645 \cdot 4 \approx 493{,}4$ ml.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Sur quelle moyenne faut-il régler la machine ($\sigma = 4$) pour que seulement $1\,\%$ des bouteilles contiennent moins de 495 ml ?</p>
+            </div>
+        <div class="b-sol"><p>$\tfrac{495 - \mu}{4} = -2{,}326$, donc $\mu = 495 + 9{,}31 \approx 504{,}3$ ml.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>À un examen, les nombres de points suivent à peu près une loi normale. $15\,\%$ des candidats ont plus de 80 points, $10\,\%$ moins de 40. Détermine $\mu$ et $\sigma$.</p>
+            </div>
+        <div class="b-hint"><p>Deux conditions donnent deux équations : $\tfrac{80 - \mu}{\sigma} = z_1$ et $\tfrac{40 - \mu}{\sigma} = z_2$.</p>
+            </div>
+        <div class="b-sol"><p>$\Phi(z_1) = 0{,}85$ : $z_1 \approx 1{,}036$. $\Phi(z_2) = 0{,}10$ : $z_2 \approx -1{,}282$. $80 - \mu = 1{,}036\sigma$, $40 - \mu = -1{,}282\sigma$. En soustrayant : $40 = 2{,}318\sigma$,
+                donc <span class="b-res">$\sigma \approx 17{,}3$, $\mu \approx 62{,}1$</span>.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,0228" data-tol="0.0005" data-ph="P"><p class="b-q-text">$X \sim N(500\,;\,4^2)$ : $P(X &lt; 492)$ ? Quatre décimales.</p>
+            <div class="b-sol"><p>$\Phi(-2)$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,789" data-tol="0.002" data-ph="P"><p class="b-q-text">$X \sim N(500\,;\,4^2)$ : $P(495 \le X \le 505)$ ? Trois décimales.</p>
+            <div class="b-sol"><p>$2\,\Phi(1{,}25) - 1$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="4,3" data-tol="0.02" data-ph="σ ≤"><p class="b-q-text">Quelle est la valeur maximale de $\sigma$ si au plus $1\,\%$ des bouteilles doit contenir moins de 490 ml ($\mu = 500$) ? Une décimale.</p>
+            <div class="b-sol"><p>$10 / 2{,}326$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Moivre-Laplace" data-toc-k="3" data-toc-short="3 Moivre">
+    <div class="b-band"><span class="b-band-tag">LEÇON 3</span><span class="b-band-sub">4 HEURES</span></div>
+        <h2><span class="b-no">3</span>De la loi binomiale à la loi normale</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>1000 lancers d’une pièce : quelle est la probabilité d’obtenir entre 480 et 520 fois « face » ? Le calcul exact a 41 termes avec des coefficients binomiaux gigantesques.
+                Mais l’histogramme de $B(1000\,;\,0{,}5)$ ressemble à une cloche avec $\mu = 500$ et $\sigma = \sqrt{250} \approx 15{,}8$. Si l’on calcule l’aire sous cette cloche
+                de 479,5 à 520,5, on obtient 0,8052. La valeur exacte est 0,8052.</p>
+            </div>
+        </div>
+        <div class="b-text"><p>Pourquoi 479,5 et pas 480 ? Chaque barre de l’histogramme repose sur un intervalle de largeur 1 centré sur sa valeur $k$. Les barres de 480 à 520 vont donc
+                de 479,5 à 520,5. Cette <b>correction de continuité</b> améliore nettement l’approximation. Sa qualité dépend de $\sigma$ : si $\sigma$ est petit ou si
+                $p$ est proche de 0 ou de 1, l’histogramme est dissymétrique et la cloche symétrique convient mal.</p>
+            </div>
+        <div class="b-box b-merk">
+                <div class="b-box-title">À RETENIR · THÉORÈME DE MOIVRE-LAPLACE</div>
+        <div class="b-text"><p>Si $X \sim B(n\,;\,p)$ avec $\mu = np$ et $\sigma = \sqrt{np(1 - p)}$, alors pour $n$ grand, on a approximativement</p>
+            <p>$P(X \le k) \approx \Phi\!\left(\dfrac{k + 0{,}5 - \mu}{\sigma}\right)$ et $P(X = k) \approx \dfrac{1}{\sigma}\,\varphi\!\left(\dfrac{k - \mu}{\sigma}\right)$.</p>
+            <p>Règle empirique (<b>condition de Laplace</b>) : l’approximation est utilisable quand $\sigma > 3$.</p>
+            </div>
+        </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Aujourd’hui :</b> le CAS calcule aussi $B(1000\,;\,0{,}5)$ exactement. L’approximation reste importante, car elle montre <b>pourquoi</b> tant de grandeurs suivent une loi normale : ce sont des sommes de nombreuses petites influences aléatoires.</p>
+            <p class="b-note"><b>Planche de Galton :</b> chaque bille réalise un schéma de Bernoulli. Avec beaucoup de rangées, la répartition dans les cases devient une cloche.</p>
+            </aside>
+    </div>
+        <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIF · LA CLOCHE SUR L’HISTOGRAMME</div>
+        <p class="b-help" style="margin:0 0 12px">Augmente $n$ et observe comment les barres se rapprochent de la courbe. Règle $p = 0{,}05$ : pour un petit $n$, l’histogramme est dissymétrique. Dans l’affichage centré réduit, tous les histogrammes sont sur la même courbe.</p>
+            <div data-widget="moivre" data-n="20" data-p="0.3"></div>
+        </div>
+        <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 5 · UNE PROBABILITÉ PONCTUELLE</div>
+        <div class="b-text"><p>$X \sim B(100\,;\,0{,}5)$. Donne une valeur approchée de $P(X = 50)$ et compare avec la valeur exacte.</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 50$, $\sigma = 5$ : $P(X = 50) \approx \tfrac15\,\varphi(0) = \tfrac{1}{5\sqrt{2\pi}} \approx 0{,}0798$. Valeur exacte : $\binom{100}{50} \cdot 0{,}5^{100} \approx 0{,}0796$.
+                <span class="b-res">Écart inférieur à $0{,}3\,\%$ de la valeur</span>.</p>
+            </div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLE 6 · LÀ OÙ L’APPROXIMATION FAIBLIT</div>
+        <div class="b-text"><p>Une compagnie aérienne vend 300 billets pour 285 places. Chaque passager se présente avec $p = 0{,}92$. Quelle est la probabilité que les places suffisent ?</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 276$, $\sigma \approx 4{,}70 > 3$. Approximation : $\Phi\!\left(\tfrac{285{,}5 - 276}{4{,}70}\right) = \Phi(2{,}02) \approx 0{,}978$. Valeur exacte avec le CAS : 0,984.</p>
+            <p><span class="b-res">Utilisable, mais moins précise</span> : $p$ est proche de 1, l’histogramme est dissymétrique.</p>
+            </div>
+        </div>
+        </div>
+        <h3>EXERCICES</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Vérifie la condition de Laplace pour $B(50\,;\,0{,}1)$, $B(200\,;\,0{,}1)$ et $B(100\,;\,0{,}5)$.</p>
+            </div>
+        <div class="b-sol"><p>$\sigma = \sqrt{4{,}5} \approx 2{,}12$ (non), $\sqrt{18} \approx 4{,}24$ (oui), 5 (oui).</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$X \sim B(200\,;\,0{,}3)$. Donne une valeur approchée de $P(X \le 50)$ avec et sans correction de continuité. La valeur exacte est $P(X \le 50) \approx 0{,}0695$.</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 60$, $\sigma = \sqrt{42} \approx 6{,}48$. Avec correction : $\Phi\!\left(\tfrac{50{,}5 - 60}{6{,}48}\right) = \Phi(-1{,}47) \approx 0{,}071$. Sans : $\Phi(-1{,}54) \approx 0{,}062$. La correction est plus juste.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>On lance un dé 600 fois. Dans quel intervalle symétrique autour de l’espérance le nombre de six se trouve-t-il avec une probabilité d’environ $95\,\%$ ?</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 100$, $\sigma = \sqrt{600 \cdot \tfrac16 \cdot \tfrac56} \approx 9{,}13$. $100 \pm 1{,}96 \cdot 9{,}13$ : environ $[82\,;\,118]$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Combien de fois au moins faut-il lancer une pièce pour que la fréquence de « face » s’écarte d’au plus 0,01 de 0,5 avec une probabilité de $95\,\%$ ?</p>
+            </div>
+        <div class="b-hint"><p>Pour la fréquence $H = \tfrac Xn$, on a $\sigma_H = \sqrt{\tfrac{p(1 - p)}{n}}$.</p>
+            </div>
+        <div class="b-sol"><p>$1{,}96 \cdot \sqrt{\tfrac{0{,}25}{n}} \le 0{,}01 \iff \sqrt n \ge 98 \iff n \ge 9604$. Pour une précision d’un point de pourcentage, il faut près de dix mille lancers : la loi des grands nombres est lente.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTE-TOI !</div>
+        <div class="b-q" data-ans="0,0798" data-tol="0.0005" data-ph="P ≈"><p class="b-q-text">Valeur approchée de $P(X = 50)$ pour $X \sim B(100\,;\,0{,}5)$ ? Quatre décimales.</p>
+            <div class="b-sol"><p>$\tfrac{1}{5\sqrt{2\pi}}$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="9604" data-ph="n ≥"><p class="b-q-text">Nombre minimal de lancers pour $|H - 0{,}5| \le 0{,}01$ avec $95\,\%$ ?</p>
+            <div class="b-sol"><p>$(1{,}96 \cdot 0{,}5 / 0{,}01)^2$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Pour quelle loi la condition de Laplace est-elle remplie ?</p>
+            <div class="b-mc"><button>$B(50\,;\,0{,}1)$</button><button>$B(30\,;\,0{,}5)$</button><button>$B(200\,;\,0{,}1)$</button></div>
+        <div class="b-sol"><p>$\sigma = \sqrt{18} > 3$</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Réviser · Approfondir · Relier" data-toc-k="S" data-toc-short="S’entraîner">
+    <div class="b-band"><span class="b-band-tag">RÉVISER · APPROFONDIR · RELIER</span></div>
+        <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Les pommes d’une variété pèsent en moyenne 180 g avec $\sigma = 15$ g (loi normale). Les pommes de moins de 160 g vont au jus. Quelle proportion cela représente-t-il ?</p>
+            </div>
+        <div class="b-sol"><p>$\Phi\!\left(\tfrac{160 - 180}{15}\right) = \Phi(-1{,}33) \approx 0{,}091$, un peu plus de $9\,\%$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Lien avec le chapitre 3.4 :</b> calcule $\int_{-3}^{3} \varphi(x)\,\mathrm{d}x$ avec la méthode des trapèzes et $n = 6$ bandes, et compare avec 0,9973.</p>
+            </div>
+        <div class="b-sol"><p>Valeurs en $-3, \ldots, 3$ : $0{,}0044\,;\,0{,}0540\,;\,0{,}2420\,;\,0{,}3989\,;\,0{,}2420\,;\,0{,}0540\,;\,0{,}0044$. Trapèzes : $1 \cdot \left(\tfrac{0{,}0044 + 0{,}0044}{2} + 0{,}0540 + 0{,}2420 + 0{,}3989 + 0{,}2420 + 0{,}0540\right) \approx 0{,}995$. Avec six bandes, on est déjà très près.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Une machine coupe des barres avec $\sigma = 0{,}8$ mm. Tolérance : $200 \pm 1{,}5$ mm. Quel est le taux de rebut pour $\mu = 200$ mm, et quel est-il si la machine est déréglée à 200,5 mm ?</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 200$ : $1 - (\Phi(1{,}875) - \Phi(-1{,}875)) \approx 1 - 0{,}939 = 0{,}061$. $\mu = 200{,}5$ : $1 - (\Phi(1{,}25) - \Phi(-2{,}5)) \approx 1 - (0{,}894 - 0{,}006) = 0{,}112$. Le décalage double presque le rebut.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Avec le tableur :</b> la fonction de répartition s’y appelle <code>LOI.NORMALE.N(x; μ; σ; VRAI)</code>, sa réciproque <code>LOI.NORMALE.INVERSE.N(p; μ; σ)</code> (Excel en français). Des machines de remplissage versent en moyenne 500 g avec $\sigma = 4$ g. Crée un tableau qui montre, pour $\mu$ de 500 à 510 g par pas de 1 g, la proportion des paquets de moins de 495 g. À partir de quel $\mu$ est-elle inférieure à 1 % ?</p>
+            </div>
+        <div class="b-hint"><p>Dans chaque ligne <code>=LOI.NORMALE.N(495; A2; 4; VRAI)</code>, si $\mu$ est dans la colonne A.</p>
+            </div>
+        <div class="b-sol"><p>$P(X &lt; 495) = \Phi\!\left(\tfrac{495 - \mu}{4}\right) &lt; 0{,}01$ exige $\tfrac{495 - \mu}{4} &lt; -2{,}326$, donc $\mu &gt; 504{,}3$ g. Dans le tableau : à 504 g encore 1,2 %, <span class="b-res">à partir de 505 g moins de 1 %</span> (0,62 %).</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Un QCM a 100 questions avec chacune 4 réponses. Pour quelqu’un qui répond au hasard : quelle est la probabilité d’avoir au moins 35 bonnes réponses ? Donne une valeur approchée avec Moivre-Laplace et justifie si l’approximation est permise.</p>
+            </div>
+        <div class="b-sol"><p>$\mu = 25$, $\sigma = \sqrt{18{,}75} \approx 4{,}33 > 3$ : permise. $P(X \ge 35) = 1 - P(X \le 34) \approx 1 - \Phi\!\left(\tfrac{34{,}5 - 25}{4{,}33}\right) = 1 - \Phi(2{,}19) \approx 0{,}014$.</p>
+            </div>
+        </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursion : la cloche dans le porte-monnaie" data-toc-k="X" data-toc-short="Cloche">
+    <div class="b-band"><span class="b-band-tag">EXCURSION</span><span class="b-band-sub">HISTOIRE</span></div>
+        <h2>La cloche dans le porte-monnaie</h2>
+    <div class="b-row">
+        <div class="b-text"><p>Le 12 novembre 1733, le mathématicien Abraham de Moivre (1667–1754), un huguenot réfugié à Londres, distribua à des amis un opuscule latin de sept pages :
+                <i>Approximatio ad Summam Terminorum Binomii (a + b)<sup>n</sup> in Seriem expansi</i>. Il y approche les termes du binôme, pour $n$ grand, par une courbe que nous appelons aujourd’hui
+                la courbe en cloche, et il reconnaît l’écart type comme l’unité naturelle de la dispersion. Seuls deux exemplaires de l’opuscule sont conservés. Il en inclut une version anglaise
+                en 1738 dans la deuxième édition de son livre <i>The Doctrine of Chances</i>.</p>
+            <p>La courbe reçut pourtant le nom d’un autre : Carl Friedrich Gauss l’utilisa en 1809 dans sa <i>Theoria motus corporum coelestium</i> comme loi des erreurs d’observation,
+                quand il calculait des orbites de planètes à partir de mesures imprécises. Pierre-Simon Laplace démontra en 1812, dans sa <i>Théorie analytique des probabilités</i>, une forme générale du
+                théorème limite : les sommes de nombreuses petites influences aléatoires suivent approximativement une loi normale.</p>
+            <p>De 1991 à fin 2001, chaque billet allemand de dix marks portait le portrait de Gauss, derrière lui des maisons de Göttingen et, à côté, la courbe en cloche avec sa formule. La Bundesbank l’émit
+                pour la première fois le 16 avril 1991. Jamais sans doute une formule du calcul des probabilités ne s’est trouvée aussi souvent dans autant de poches.</p>
+            </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sources :</b> MacTutor History of Mathematics (St Andrews), « Abraham de Moivre » ; W. E. Deming, Nature 132 (1933), p. 713 ; Deutsche Bundesbank, billets en DM, série BBK III.</p>
+            </aside>
+    </div>
+        </section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Bilan" data-toc-k="B" data-toc-short="Bilan">
+    <div class="b-band"><span class="b-band-tag">BILAN</span><span class="b-band-sub">L’ESSENTIEL EN UN COUP D’ŒIL</span></div>
+        <div class="b-rueck"><div>
+            <h4>DENSITÉ</h4><p>$f \ge 0$, aire totale 1, probabilité $=$ aire</p>
+            </div>
+        <div>
+            <p>$P(a \le X \le b) = \int_a^b f(x)\,\mathrm{d}x$, $P(X = a) = 0$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>LOI NORMALE</h4><p>$\varphi_{\mu;\sigma}(x) = \tfrac{1}{\sigma\sqrt{2\pi}}\,\mathrm{e}^{-\frac{(x - \mu)^2}{2\sigma^2}}$</p>
+            </div>
+        <div>
+            <p>Maximum en $\mu$, points d’inflexion en $\mu \pm \sigma$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>CENTRER ET RÉDUIRE</h4><p>$P(X \le x) = \Phi\!\left(\tfrac{x - \mu}{\sigma}\right)$</p>
+            </div>
+        <div>
+            <p>$N(500\,;\,4^2)$ : $P(X &lt; 492) = \Phi(-2) \approx 0{,}023$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>RÈGLES DES σ</h4><p>$68{,}3\,\%$ · $95{,}4\,\%$ · $99{,}7\,\%$</p>
+            </div>
+        <div>
+            <p>$95\,\%$ se trouvent dans $\mu \pm 1{,}96\sigma$</p>
+            </div>
+        </div>
+        <div class="b-rueck"><div>
+            <h4>MOIVRE-LAPLACE</h4><p>$P(X \le k) \approx \Phi\!\left(\tfrac{k + 0{,}5 - \mu}{\sigma}\right)$ pour $\sigma > 3$</p>
+            </div>
+        <div>
+            <p>1000 lancers de pièce, 480 à 520 fois « face » : $\approx 0{,}805$</p>
+            </div>
+        </div>
+        </section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">DEUX PARTIES · CORRECTION IMMÉDIATE</span></div>
+        <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">PARTIE 1 · SANS CALCULATRICE</div>
+        <div class="b-q" data-ans="162" data-ph="x ="><p class="b-q-text">$X \sim N(170\,;\,8^2)$ : point d’inflexion de gauche de la densité ?</p>
+            <div class="b-sol"><p>$\mu - \sigma$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,954" data-tol="0.002" data-ph="P ≈"><p class="b-q-text">Probabilité de $\mu - 2\sigma \le X \le \mu + 2\sigma$ ? Trois décimales.</p>
+            <div class="b-sol"><p>Règle des $\sigma$</p>
+            </div>
+        </div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Si l’on double $\sigma$, le maximum de la cloche devient…</p>
+            <div class="b-mc"><button>deux fois moins haut.</button><button>deux fois plus haut.</button><button>aussi haut.</button></div>
+        <div class="b-sol"><p>L’aire reste égale à 1.</p>
+            </div>
+        </div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">PARTIE 2 · AVEC OUTILS NUMÉRIQUES</div>
+        <div class="b-q" data-ans="0,077" data-tol="0.002" data-ph="P ≈"><p class="b-q-text">$X \sim N(180\,;\,7^2)$ : $P(X &gt; 190)$ ? Trois décimales.</p>
+            <div class="b-sol"><p>$1 - \Phi(10/7)$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="504,3" data-tol="0.1" data-ph="μ ="><p class="b-q-text">$\sigma = 4$ : quel $\mu$ donne exactement $1\,\%$ sous 495 ml ? Une décimale.</p>
+            <div class="b-sol"><p>$495 + 2{,}326 \cdot 4$</p>
+            </div>
+        </div>
+        <div class="b-q" data-ans="0,014" data-tol="0.002" data-ph="P ≈"><p class="b-q-text">Réponses au hasard à 100 questions avec $p = 0{,}25$ : valeur approchée de $P(X \ge 35)$ ? Trois décimales.</p>
+            <div class="b-sol"><p>$1 - \Phi(9{,}5 / 4{,}33)$</p>
+            </div>
+        </div>
+        </div>
+        </div>
+        <h3>S’ENTRAÎNER EN LIGNE (EN ALLEMAND)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-normalverteilung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LOI NORMALE</span><span class="b-lab-what">Densité, Φ, règles des σ</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-moivre-laplace.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MOIVRE-LAPLACE</span><span class="b-lab-what">Loi binomiale et loi normale</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PLANCHE DE GALTON</span><span class="b-lab-what">Les schémas de Bernoulli deviennent une cloche</span></span></a>
+    </div>
+        </section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Mathématiques, Berufliches Gymnasium, 13e année, Leistungskurs · domaine d’apprentissage 4 d’après le programme de mathématiques du Berufliches Gymnasium de Saxe.</p>
+            <p>Tous les textes, exercices et figures sont des contenus originaux.</p>
+            </footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-fr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-fr/funktionen.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-fr/stochastik.js"></script>
+<script src="../../js/buch-gy12lk.js"></script>
+<script src="../../js/buch-fr/gy12lk.js"></script>
+</body>
+</html>
