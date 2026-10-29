@@ -7,11 +7,16 @@
   <!-- Klassenarbeiten BGY (Doc, 29.10.2026: "täglich aktuell halten"): every hour tools/klassenarbeiten.py reads the
        school's plans in Teams (synced by OneDrive) and pushes to Supabase only when something changed - the log
        stays quiet otherwise. Runs only while the Mac is awake and OneDrive syncs.
+       Not python itself: macOS refuses a background job the OneDrive files, so this opens the little app
+       ~/Applications/Klassenarbeiten-Abgleich.app (source and build: tools/klassenarbeiten-abgleich.applescript),
+       which macOS asked Doc about once.
        Installed copy: ~/Library/LaunchAgents/de.docalvers.klassenarbeiten.plist (this file is its source). -->
   <key>ProgramArguments</key>
   <array>
-    <string>/usr/bin/python3</string>
-    <string>/Users/malvers/IdeaProjects/forloop/tools/klassenarbeiten.py</string>
+    <string>/usr/bin/open</string>
+    <string>-g</string>
+    <string>-j</string>
+    <string>/Users/malvers/Applications/Klassenarbeiten-Abgleich.app</string>
   </array>
 
   <key>StartInterval</key><integer>3600</integer>

@@ -1,0 +1,13 @@
+-- Klassenarbeiten BGY, the hourly sync (Doc, 29.10.2026).
+-- macOS does not let a background job (launchd -> /usr/bin/python3) read the OneDrive files: the system
+-- log says "access request result was 0" for the file provider and no dialog can come up. An app may
+-- ask - so the LaunchAgent de.docalvers.klassenarbeiten opens this little app every hour, the app runs
+-- tools/klassenarbeiten.py, and macOS asked Doc once whether it may read OneDrive.
+-- Build (the app is not in the repo; rebuilding it makes macOS ask again):
+--   osacompile -o ~/Applications/Klassenarbeiten-Abgleich.app tools/klassenarbeiten-abgleich.applescript
+--   plutil -replace LSUIElement -bool true ~/Applications/Klassenarbeiten-Abgleich.app/Contents/Info.plist
+--   plutil -insert CFBundleIdentifier -string de.docalvers.klassenarbeiten-abgleich ~/Applications/Klassenarbeiten-Abgleich.app/Contents/Info.plist
+--   codesign --force --sign - ~/Applications/Klassenarbeiten-Abgleich.app
+-- LSUIElement keeps it out of the Dock; "|| true" keeps an error of the script out of a dialog - it
+-- lands in the log and, as before, red on the page.
+do shell script "/usr/bin/python3 /Users/malvers/IdeaProjects/forloop/tools/klassenarbeiten.py >> /Users/malvers/Library/Logs/klassenarbeiten.log 2>&1 || true"
