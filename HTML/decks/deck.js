@@ -210,7 +210,10 @@ function stepMarks(root, st){
   const all = [...root.querySelectorAll('.step')];
   let top = -1;
   all.forEach(e => { const g = grp(e); if (g < st && g > top) top = g; });
-  const cur = all.find(e => grp(e) === top);
+  const first = all.find(e => grp(e) === top);
+  // a part of a line that comes with a click of its own (<b class="step kommt">): the line keeps the triangle and the
+  // box (Doc, 29.10.2026: "lass bitte die rund 4,1 Mio auf Click erscheinen")
+  const cur = first && first.matches('.kommt') && first.parentElement.closest('p.line.step') || first;
   all.forEach(e => {
     const g = grp(e);
     e.classList.toggle('on', g < st); e.classList.toggle('past', g < top); e.classList.toggle('now', e === cur);

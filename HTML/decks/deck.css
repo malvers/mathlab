@@ -408,6 +408,19 @@ a.fig-source:hover{color:var(--red);text-decoration:underline}
      into the coloured bar on top and read as a yellow border (Doc, 26.10.2026: "Die Rahmen ... noch nicht so gelungen") */
   html:not(.deck-edit) :not(.ov-thumb) > .slide .card.now{outline:1.5px solid var(--red);outline-offset:6px;animation:step-now .25s ease-out}
   html:not(.deck-edit) :not(.ov-thumb) > .slide .step.ghost.now::after{display:none}
+  /* a table row with a click of its own (<tr class="step" data-g="k">): the triangle left of the table and the same dark
+     red box round the row (Doc, 29.10.2026: "auf Klick noch eine rote Box drum, denn das ist ja eine Ausnahme") */
+  /* Both hang on the first cell and are placed from the row: a pseudo-element of the row itself becomes a cell of its own
+     in Chrome and pushes the row one column to the right. The row's edges lie on the middle of the grid lines, so the
+     frame, half its width out, lies exactly on the row's own lines (Doc, 29.10.2026: "exakt um die Tabellenzeile") */
+  .dtable tr.step{position:relative}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .dtable tr.step.now::after{display:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .dtable tr.step.now > :first-child::before{content:"";position:absolute;
+    left:-.75px;right:-.75px;top:-.75px;bottom:-.75px;border:1.5px solid var(--red);pointer-events:none;
+    animation:step-now .25s ease-out}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .dtable tr.step.now > :first-child::after{content:"";position:absolute;
+    left:-20px;top:calc(50% - 7px);width:11px;height:14px;background:var(--tri) no-repeat;pointer-events:none;
+    animation:step-now .25s ease-out}
 }
 
 /* --- HUD ---------------------------------------------------------------- */
