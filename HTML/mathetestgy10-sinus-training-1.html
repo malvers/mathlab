@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Sinusfunktion: Grundlagen sichern — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathegy10-training-sinus-1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Sinusfunktion: Grundlagen sichern',
+  subtitle: 'Gymnasium · Klasse 10 · Training 1 von 2 · 20 Aufgaben: Einheitskreis und Bogenmaß, Sinus und Kosinus beliebiger Winkel, b und p, Funktionswerte · genau eine Antwort pro Aufgabe',
+  dashSub: 'Gymnasium · Klasse 10 · Training Sinus 1 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: '', /* opened from the plan */
+  /* Blocks: unit circle and radians (1-6), sin/cos of any angle (7-11), b and p (12-16), function values (17-20). */
+  questions: [
+    {
+      q: 'In welchem Quadranten liegt der Winkel $\\dfrac{5\\pi}{4}$?',
+      opts: ['im 2. Quadranten', 'im 3. Quadranten', 'im 1. Quadranten', 'im 4. Quadranten'],
+      steps: [
+        '$\\pi$ ist eine halbe Runde ($180^\\circ$), also $\\pi = \\dfrac{4\\pi}{4}$.',
+        '$\\dfrac{4\\pi}{4} < \\dfrac{5\\pi}{4} < \\dfrac{6\\pi}{4} = \\dfrac{3\\pi}{2}$: Der Winkel liegt zwischen $180^\\circ$ und $270^\\circ$, also im 3. Quadranten.',
+        'Falle: $\\dfrac{\\pi}{4}$ ist ein Achtel der Runde ($45^\\circ$), nicht ein Viertel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viel Grad sind $\\dfrac{3\\pi}{4}$?',
+      opts: ['$135^\\circ$', '$270^\\circ$', '$75^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\pi = 180^\\circ$, also $\\dfrac{\\pi}{4} = 45^\\circ$.',
+        '$\\dfrac{3\\pi}{4} = 3 \\cdot 45^\\circ = 135^\\circ$.',
+        '$270^\\circ$ wären drei Viertel einer ganzen Runde, das ist $\\dfrac{3\\pi}{2}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Winkel im Bogenmaß gehört zu $300^\\circ$?',
+      opts: ['$\\dfrac{10\\pi}{3}$', '$\\dfrac{5\\pi}{6}$', '$\\dfrac{3\\pi}{5}$', '$\\dfrac{5\\pi}{3}$'],
+      steps: [
+        'Umrechnen: $\\dfrac{300^\\circ}{180^\\circ} \\cdot \\pi$.',
+        '$\\dfrac{300}{180} = \\dfrac{5}{3}$, also $\\dfrac{5\\pi}{3}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist $\\sin(\\alpha)$ am Einheitskreis?',
+      opts: ['die Länge des Bogens bis zum Punkt', 'der Winkel $\\alpha$ im Bogenmaß', 'die $x$-Koordinate des Punktes auf dem Kreis', 'die Höhe ($y$-Koordinate) des Punktes auf dem Kreis'],
+      steps: [
+        'Zum Winkel $\\alpha$ gehört ein Punkt auf dem Kreis mit Radius 1.',
+        'Seine $y$-Koordinate ist $\\sin(\\alpha)$, seine $x$-Koordinate ist $\\cos(\\alpha)$.',
+        'Darum liegt jeder Sinuswert zwischen $-1$ und $1$. Ein Ergebnis mit $\\pi$ kann kein Sinuswert sein.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Winkel zwischen $0$ und $2\\pi$ gehört zum selben Punkt auf dem Einheitskreis wie $\\dfrac{17\\pi}{6}$?',
+      opts: ['$\\dfrac{5\\pi}{6}$', '$\\dfrac{11\\pi}{6}$', '$\\dfrac{\\pi}{6}$', '$\\dfrac{7\\pi}{6}$'],
+      steps: [
+        'Eine ganze Runde ist $2\\pi = \\dfrac{12\\pi}{6}$.',
+        '$\\dfrac{17\\pi}{6} - \\dfrac{12\\pi}{6} = \\dfrac{5\\pi}{6}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In welchem Quadranten liegt $\\dfrac{11\\pi}{4}$?',
+      opts: ['im 2. Quadranten', 'im 4. Quadranten', 'im 1. Quadranten', 'im 3. Quadranten'],
+      steps: [
+        'Erst eine ganze Runde abziehen: $\\dfrac{11\\pi}{4} - \\dfrac{8\\pi}{4} = \\dfrac{3\\pi}{4}$.',
+        '$\\dfrac{2\\pi}{4} < \\dfrac{3\\pi}{4} < \\dfrac{4\\pi}{4}$, also zwischen $90^\\circ$ und $180^\\circ$: 2. Quadrant.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme $\\sin\\left(\\dfrac{5\\pi}{4}\\right)$.',
+      opts: ['$-\\dfrac{1}{2}$', '$\\dfrac{\\pi}{4}$', '$\\dfrac{\\sqrt{2}}{2}$', '$-\\dfrac{\\sqrt{2}}{2}$'],
+      steps: [
+        'Quadrant: $\\pi < \\dfrac{5\\pi}{4} < \\dfrac{3\\pi}{2}$, also 3. Quadrant, dort ist der Sinus negativ.',
+        'Bezugswinkel: $\\dfrac{5\\pi}{4} - \\pi = \\dfrac{\\pi}{4}$.',
+        '$\\sin\\left(\\dfrac{5\\pi}{4}\\right) = -\\sin\\left(\\dfrac{\\pi}{4}\\right) = -\\dfrac{\\sqrt{2}}{2}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\cos\\left(\\dfrac{2\\pi}{3}\\right)$.',
+      opts: ['$\\dfrac{\\sqrt{3}}{2}$', '$-\\dfrac{1}{2}$', '$\\dfrac{1}{2}$', '$-\\dfrac{\\sqrt{3}}{2}$'],
+      steps: [
+        'Quadrant: $\\dfrac{3\\pi}{6} < \\dfrac{4\\pi}{6} < \\dfrac{6\\pi}{6}$, also 2. Quadrant, dort ist der Kosinus negativ.',
+        'Bezugswinkel: $\\pi - \\dfrac{2\\pi}{3} = \\dfrac{\\pi}{3}$, und $\\cos\\left(\\dfrac{\\pi}{3}\\right) = \\dfrac{1}{2}$.',
+        'Also $\\cos\\left(\\dfrac{2\\pi}{3}\\right) = -\\dfrac{1}{2}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme $\\sin\\left(\\dfrac{13\\pi}{6}\\right)$.',
+      opts: ['$-\\dfrac{1}{2}$', '$\\dfrac{\\pi}{6}$', '$\\dfrac{\\sqrt{3}}{2}$', '$\\dfrac{1}{2}$'],
+      steps: [
+        'Eine ganze Runde abziehen: $\\dfrac{13\\pi}{6} - \\dfrac{12\\pi}{6} = \\dfrac{\\pi}{6}$.',
+        '$\\sin\\left(\\dfrac{\\pi}{6}\\right) = \\dfrac{1}{2}$. Gefragt ist der Wert, nicht der Winkel $\\dfrac{\\pi}{6}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\cos\\left(-\\dfrac{\\pi}{3}\\right)$.',
+      opts: ['$\\dfrac{1}{2}$', '$-\\dfrac{\\sqrt{3}}{2}$', '$-\\dfrac{1}{2}$', '$\\dfrac{\\sqrt{3}}{2}$'],
+      steps: [
+        'Ein Minus beim Winkel heißt: im Uhrzeigersinn drehen. Der Punkt wird an der $x$-Achse gespiegelt.',
+        'Die $x$-Koordinate ändert sich dabei nicht: $\\cos\\left(-\\dfrac{\\pi}{3}\\right) = \\cos\\left(\\dfrac{\\pi}{3}\\right) = \\dfrac{1}{2}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aussage stimmt?',
+      opts: ['$\\sin\\left(\\dfrac{5\\pi}{6}\\right) < \\cos\\left(\\dfrac{5\\pi}{6}\\right)$', '$\\sin\\left(\\dfrac{5\\pi}{6}\\right)$ und $\\cos\\left(\\dfrac{5\\pi}{6}\\right)$ sind beide negativ', '$\\sin\\left(\\dfrac{5\\pi}{6}\\right) = \\cos\\left(\\dfrac{5\\pi}{6}\\right)$', '$\\sin\\left(\\dfrac{5\\pi}{6}\\right) > \\cos\\left(\\dfrac{5\\pi}{6}\\right)$'],
+      steps: [
+        '$\\dfrac{5\\pi}{6} = 150^\\circ$ liegt im 2. Quadranten: Der Punkt ist links oben.',
+        '$\\sin\\left(\\dfrac{5\\pi}{6}\\right) = \\dfrac{1}{2}$ (oben, positiv), $\\cos\\left(\\dfrac{5\\pi}{6}\\right) = -\\dfrac{\\sqrt{3}}{2}$ (links, negativ).',
+        'Eine positive Zahl ist größer als eine negative.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Sinusfunktion $f(x) = \\sin(b \\cdot x)$ hat die Periodenlänge $p = 6\\pi$. Bestimme $b$.',
+      opts: ['$12\\pi^2$', '$3$', '$\\dfrac{1}{3}$', '$3\\pi$'],
+      steps: [
+        '$b = \\dfrac{2\\pi}{p} = \\dfrac{2\\pi}{6\\pi}$.',
+        'Erst $\\pi$ kürzen, dann normal kürzen: $\\dfrac{2}{6} = \\dfrac{1}{3}$.',
+        'Probe: $b \\cdot p = \\dfrac{1}{3} \\cdot 6\\pi = 2\\pi$. Große Periode heißt kleines $b$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Funktion hat die Periodenlänge $10$?',
+      opts: ['$f(x) = \\sin(5\\pi x)$', '$f(x) = \\sin\\left(\\dfrac{1}{10} x\\right)$', '$f(x) = \\sin\\left(\\dfrac{\\pi}{5} x\\right)$', '$f(x) = \\sin(10x)$'],
+      steps: [
+        '$b = \\dfrac{2\\pi}{p} = \\dfrac{2\\pi}{10} = \\dfrac{\\pi}{5}$.',
+        'Zum Vergleich: $\\sin(10x)$ hat $p = \\dfrac{2\\pi}{10} = \\dfrac{\\pi}{5}$, $\\sin\\left(\\dfrac{x}{10}\\right)$ hat $p = 20\\pi$, $\\sin(5\\pi x)$ hat $p = \\dfrac{2}{5}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Sinusfunktion hat die Periodenlänge $p = 5$. Bestimme $b$.',
+      opts: ['$\\dfrac{5}{2\\pi}$', '$\\dfrac{2\\pi}{5}$', '$10\\pi$', '$\\dfrac{2}{5}$'],
+      steps: [
+        '$b = \\dfrac{2\\pi}{p} = \\dfrac{2\\pi}{5}$.',
+        'Hier gibt es kein $\\pi$ zum Kürzen. Die Periode muss kein Vielfaches von $\\pi$ sein.',
+        'Probe: $\\dfrac{2\\pi}{5} \\cdot 5 = 2\\pi$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Periodenlänge von $g(x) = \\sin\\left(\\dfrac{\\pi}{3} x\\right)$.',
+      opts: ['$6\\pi$', '$\\dfrac{2\\pi^2}{3}$', '$6$', '$\\dfrac{1}{6}$'],
+      steps: [
+        '$p = \\dfrac{2\\pi}{b} = 2\\pi : \\dfrac{\\pi}{3}$.',
+        'Durch einen Bruch teilen heißt: mit dem Kehrwert malnehmen. $2\\pi \\cdot \\dfrac{3}{\\pi} = 6$.',
+        'Probe: $b \\cdot p = \\dfrac{\\pi}{3} \\cdot 6 = 2\\pi$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Periodenlänge von $f(x) = \\sin\\left(\\dfrac{1}{2} x\\right)$.',
+      opts: ['$\\dfrac{\\pi}{4}$', '$4\\pi$', '$\\pi$', '$4$'],
+      steps: [
+        '$p = \\dfrac{2\\pi}{b} = 2\\pi : \\dfrac{1}{2} = 2\\pi \\cdot 2 = 4\\pi$.',
+        '$\\pi$ käme heraus, wenn man malnimmt statt teilt. Probe: $\\dfrac{1}{2} \\cdot 4\\pi = 2\\pi$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben ist $f(x) = 4 \\sin\\left(\\dfrac{\\pi}{6}(x - 2)\\right) + 5$. Berechne $f(5)$.',
+      opts: ['$2\\pi + 5$', '$9$', '$5$', '$1$'],
+      steps: [
+        'Von innen nach außen. Klammer: $5 - 2 = 3$.',
+        'Mal $b$: $\\dfrac{\\pi}{6} \\cdot 3 = \\dfrac{\\pi}{2}$. Sinus: $\\sin\\left(\\dfrac{\\pi}{2}\\right) = 1$.',
+        'Mal $a$, plus $d$: $4 \\cdot 1 + 5 = 9$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Höhe einer Gondel ist $h(t) = 15 \\sin\\left(\\dfrac{\\pi}{20}(t - 10)\\right) + 17$ (in m, $t$ in s). Berechne $h(0)$.',
+      opts: ['$32$', '$-\\dfrac{15\\pi}{2} + 17$', '$2$', '$17$'],
+      steps: [
+        'Klammer: $0 - 10 = -10$. Mal $b$: $\\dfrac{\\pi}{20} \\cdot (-10) = -\\dfrac{\\pi}{2}$.',
+        'Sinus: $\\sin\\left(-\\dfrac{\\pi}{2}\\right) = -1$.',
+        '$15 \\cdot (-1) + 17 = 2$. Die Gondel ist am Start ganz unten, 2 m über dem Boden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Temperaturmodell lautet $T(t) = 5 \\sin\\left(\\dfrac{\\pi}{12}(t - 8)\\right) + 15$. Welche Temperatur sagt es für $t = 8$ voraus?',
+      opts: ['$15$ °C', '$\\dfrac{5\\pi}{12} + 15$ °C', '$0$ °C', '$20$ °C'],
+      steps: [
+        'Einsetzen, nicht nach 0 auflösen: $T(8) = 5 \\sin\\left(\\dfrac{\\pi}{12} \\cdot (8 - 8)\\right) + 15$.',
+        '$\\dfrac{\\pi}{12} \\cdot 0 = 0$ und $\\sin(0) = 0$.',
+        '$5 \\cdot 0 + 15 = 15$, also 15 °C.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für $f(x) = 2 \\sin\\left(\\dfrac{\\pi}{6}(x + 2)\\right) + 1$ soll man zeigen, dass $f(1) = 3$ ist. Welcher Rechenweg ist richtig?',
+      opts: ['$f(1) = 2 \\sin\\left(\\dfrac{\\pi}{6} + 2\\right) + 1$, dann ausrechnen', '$0 = 2 \\sin\\left(\\dfrac{\\pi}{6}(1 + 2)\\right) + 1$, dann nach $x$ auflösen', '$f(1) = 2 \\sin\\left(\\dfrac{\\pi}{6} \\cdot 3\\right) + 1$ $= 2 \\sin\\left(\\dfrac{\\pi}{2}\\right) + 1$ $= 2 \\cdot 1 + 1 = 3$', '$f(1) = 2 \\sin\\left(\\dfrac{\\pi}{2}\\right) + 1 = 2 \\cdot \\dfrac{\\pi}{2} + 1 = \\pi + 1$'],
+      steps: [
+        'Bei „Zeige, dass …“ setzt man nur ein und rechnet aus. Am Ende muss 3 herauskommen.',
+        'Klammer: $1 + 2 = 3$, mal $b$: $\\dfrac{\\pi}{6} \\cdot 3 = \\dfrac{\\pi}{2}$, $\\sin\\left(\\dfrac{\\pi}{2}\\right) = 1$.',
+        '$2 \\cdot 1 + 1 = 3$. Den Sinus darf man nicht weglassen, und $b$ multipliziert die ganze Klammer.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
