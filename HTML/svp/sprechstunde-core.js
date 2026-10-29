@@ -85,12 +85,42 @@
         box.dataset.painted = '1';
     }
 
-    /* The compose field grows with its text, up to the CSS max-height. */
+    /* The compose field grows with its text, up to the CSS max-height. The border counts into the
+       height (border-box), and the scroll bar only comes once the field is full - before, a one-line
+       field showed a white bar (Doc's screenshot, 29.10.2026). */
     function autoGrow(ta) {
-        const fit = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+        const fit = () => {
+            ta.style.height = 'auto';
+            const want = ta.scrollHeight + ta.offsetHeight - ta.clientHeight;
+            const max = parseFloat(getComputedStyle(ta).maxHeight) || Infinity;
+            ta.style.height = Math.min(want, max) + 'px';
+            ta.style.overflowY = want > max ? 'auto' : 'hidden';
+        };
         ta.addEventListener('input', fit);
         fit();
         return fit;
+    }
+
+    /* The red telephone opens the chat in a window of its own, the size of a phone (Doc, 29.10.2026:
+       "in einem extra Fenster ... dass klar ist, hier wird gechattet"). On a phone or a touch screen
+       the link just opens the page - a popup there is only a new tab. */
+    function openChat(link) {
+        link.addEventListener('click', e => {
+            if (matchMedia('(pointer: coarse)').matches || innerWidth < 700) return;
+            const w = 420, h = Math.min(720, screen.availHeight - 40);
+            const left = Math.round(screenX + (outerWidth - w) / 2), top = Math.round(screenY + (outerHeight - h) / 2);
+            const win = window.open(link.href, 'svp-kontakt', 'popup,width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
+            if (win) { e.preventDefault(); win.focus(); }
+        });
+    }
+
+    /* In that window the back arrow closes it (there is nothing to go back to). */
+    function backOrClose(el) {
+        if (!el || !window.opener || window.name !== 'svp-kontakt') return;
+        el.title = 'Schließen';
+        el.setAttribute('aria-label', 'Schließen');
+        el.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+        el.addEventListener('click', e => { e.preventDefault(); window.close(); });
     }
 
     /* Run fn now, then every `ms` while the page is visible, and right away when it comes back. */
@@ -103,5 +133,5 @@
         start();
     }
 
-    window.Sprechstunde = { PHONE, SEND_SVG, MAX_LEN, rpc, available, fmtTime, bubble, paint, autoGrow, poll };
+    window.Sprechstunde = { PHONE, SEND_SVG, MAX_LEN, rpc, available, fmtTime, bubble, paint, autoGrow, poll, openChat, backOrClose };
 })();

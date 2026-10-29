@@ -15,7 +15,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Sprechstunde | VGP</title>
+    <title>Kontakt | VGP</title>
     <meta name="robots" content="noindex">
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,7 @@
 </head>
 
 <body class="sp-page">
+    <div class="sp-window">
     <header class="sp-head">
         <div class="sp-wrap">
             <button class="sp-back" id="back" type="button" aria-label="Zurück" title="Zurück">
@@ -33,7 +34,7 @@
             </button>
             <span id="phone"></span>
             <div class="sp-title">
-                <h1 id="title">Sprechstunde</h1>
+                <h1 id="title">Kontakt</h1>
                 <p id="sub">&nbsp;</p>
             </div>
             <div class="sp-tools" id="tools" hidden>
@@ -58,6 +59,7 @@
             <button class="sp-send" id="send" type="submit" aria-label="Senden" title="Senden" disabled></button>
         </div>
     </form>
+    </div>
 
     <script src="../svp/svp-auth.js"></script>
     <script src="../svp/svp-crypto.js"></script>
@@ -110,7 +112,7 @@
                 const ul = $('list');
                 ul.innerHTML = '';
                 const total = threads.reduce((s, t) => s + unreadOf(t), 0);
-                $('title').textContent = 'Sprechstunde';
+                $('title').textContent = 'Kontakt';
                 $('sub').textContent = threads.length
                     ? threads.length + (threads.length === 1 ? ' Chat' : ' Chats') + (total ? ' · ' + total + ' neu' : '')
                     : 'Noch niemand hat geschrieben.';
@@ -254,15 +256,15 @@
                 if (rows && rows[0] && rows[0].value === vgpPub) return;
                 await api('chat_config', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
                     body: JSON.stringify([{ key: 'push_pubkey', value: vgpPub }]) });
-                note('Benachrichtigungen der Sprechstunde kommen ab jetzt auf dieses Gerät (VGP-Push).');
+                note('Benachrichtigungen für den Kontakt kommen ab jetzt auf dieses Gerät (VGP-Push).');
             }
 
             async function start() {
-                if (!A.hasSession()) { A.loginDialog(start, 'Sprechstunde: mit dem SVP-Konto anmelden'); return; }
-                if (uid() !== DOC_UID) { note('Die Sprechstunde gehört Dr. Alvers. Dieses Konto hat keinen Zugang.', true); return; }
-                if (!(await S.available())) { note('Die Sprechstunde ist noch nicht eingerichtet: Das SQL fehlt noch.', true); return; }
+                if (!A.hasSession()) { A.loginDialog(start, 'Kontakt: mit dem SVP-Konto anmelden'); return; }
+                if (uid() !== DOC_UID) { note('Der Kontakt gehört Dr. Alvers. Dieses Konto hat keinen Zugang.', true); return; }
+                if (!(await S.available())) { note('Der Kontakt ist noch nicht eingerichtet: Das SQL fehlt noch.', true); return; }
                 await C.ready;
-                if (!C.hasPrivate()) { C.passDialog('unlock', start, 'Sprechstunde'); return; }
+                if (!C.hasPrivate()) { C.passDialog('unlock', start, 'Kontakt'); return; }
                 pushHere().catch(e => note('Push-Ziel nicht gespeichert: ' + e.message, true));
                 S.poll(() => (open ? loadThread() : loadList()).catch(e => note('Nicht ladbar: ' + e.message, true)), 20000);
             }

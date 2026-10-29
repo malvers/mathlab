@@ -21,7 +21,7 @@
     const div = document.createElement('div');
     div.className = 'contact sprechstunde';
     div.id = 'sprechstunde-row';
-    div.innerHTML = '<span class="av">' + Sprechstunde.PHONE + '</span><span class="nm">Sprechstunde</span><div class="c-meta"></div>';
+    div.innerHTML = '<span class="av">' + Sprechstunde.PHONE + '</span><span class="nm">Kontakt</span><div class="c-meta"></div>';
     const img = div.querySelector('img');
     img.style.width = img.style.height = '30px';   // the red telephone in VGP's avatar circle
     div.onclick = () => {

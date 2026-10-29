@@ -15,7 +15,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Sprechstunde | Dr. Michael R. Alvers</title>
+    <title>Kontakt | Dr. Michael R. Alvers</title>
     <meta name="robots" content="noindex">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,14 +26,15 @@
 </head>
 
 <body class="sp-page">
+    <div class="sp-window">
     <header class="sp-head">
         <div class="sp-wrap">
-            <a class="sp-back" href="meinplan.html" aria-label="Zurück zum Stundenplan" title="Zurück zum Stundenplan">
+            <a class="sp-back" id="back" href="meinplan.html" aria-label="Zurück zum Stundenplan" title="Zurück zum Stundenplan">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
             </a>
             <span id="phone"></span>
             <div class="sp-title">
-                <h1>Sprechstunde</h1>
+                <h1>Kontakt</h1>
                 <p>Dr. Michael R. Alvers</p>
             </div>
         </div>
@@ -54,6 +55,7 @@
             <button class="sp-send" id="send" type="submit" aria-label="Senden" title="Senden" disabled></button>
         </div>
     </form>
+    </div>
 
     <script src="svp-auth.js"></script>
     <script src="svp-crypto.js"></script>
@@ -66,6 +68,7 @@
             const K_KEY = 'svp-sprechstunde-key', K_PAIR = 'svp-sprechstunde-pair', K_MINE = 'svp-sprechstunde-mine';
 
             $('phone').innerHTML = S.PHONE;
+            S.backOrClose($('back'));   // in its own chat window the arrow closes it
             $('send').innerHTML = S.SEND_SVG;
 
             const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
@@ -153,7 +156,7 @@
             });
 
             S.available().then(ok => {
-                if (!ok) { warn('Die Sprechstunde ist noch nicht eingerichtet.'); ta.disabled = true; return; }
+                if (!ok) { warn('Der Kontakt ist noch nicht eingerichtet.'); ta.disabled = true; return; }
                 S.poll(refresh, 15000);
             });
         })();
