@@ -33,6 +33,7 @@ FILES = {
     'kontakt/apple-touch-icon.png': 'apple-touch-icon.png',
     'kontakt/badge-96.png': 'badge-96.png',
     'kontakt/kontakt-k.mp3': 'kontakt-k.mp3',          # notification sound: Morse K ("bitte kommen"), Doc sets it on the phone
+    'kontakt/kontakt-piep.mp3': 'kontakt-piep.mp3',    # notification sound Doc chose: four very short, quiet blips
     'svp/sprechstunde.css': 'svp/sprechstunde.css',
     'svp/sprechstunde-bg.svg': 'svp/sprechstunde-bg.svg',    # sprechstunde.css loads it next to itself
     'svp/sprechstunde-core.js': 'svp/sprechstunde-core.js',
