@@ -131,6 +131,20 @@
     }
     return null;
   }
+  // the frame line itself, RIM screen px either side - only there a box is taken to move it; the empty inside of the
+  // frame is nothing to grab (Doc, 29.10.2026: "dass man wirklich über dem Rahmen sein muss und erst dann der Cursor
+  // erscheint, dass man bewegen kann")
+  const RIM = 6;
+  function rimAt(e) {
+    const p = at(e), d = RIM / scale(), all = document.querySelectorAll(BOXES);
+    for (let i = all.length - 1; i >= 0; i--) {
+      const o = outline(all[i]);
+      const out = p.x >= o.x - d && p.x <= o.x + o.w + d && p.y >= o.y - d && p.y <= o.y + o.h + d;
+      const inside = p.x > o.x + d && p.x < o.x + o.w - d && p.y > o.y + d && p.y < o.y + o.h - d;
+      if (out && !inside) return all[i];
+    }
+    return null;
+  }
   function frame() {
     if (!sel) return;
     // same box, same coordinates, right above the label - put there once: moving the node under a pressed pointer on
@@ -149,7 +163,7 @@
   function unselect() { sel = null; armed = false; box.remove(); onSelect(); }
   function hover(e) {                                  // the hand over a box's rim, never over a text
     const t = e.target, on = E.on() && !!t.closest && !!t.closest('#deck')
-      && !t.closest('[data-ed], img, #pic-box, #lbl-box [data-c], ' + LABELS) && !!boxAt(e);
+      && !t.closest('[data-ed], img, #pic-box, #lbl-box [data-c], ' + LABELS) && !!rimAt(e);
     if (on !== grab) { grab = on; document.documentElement.classList.toggle('box-grab', on); }
   }
 
@@ -209,7 +223,8 @@
   }
 
   // pointer events, not clicks: in edit mode deck-edit.js keeps every click inside #deck for itself. A handle takes
-  // the pointer at once; a label or a box's text only once it really moves - a plain click still opens the text.
+  // the pointer at once; a label only once it really moves - a plain click still opens the text. A box moves by its
+  // rim only: its text is for typing and marking.
   addEventListener('pointerdown', function (e) {
     if (!E.on() || e.button !== 0 || !e.target.closest) return;
     const t = e.target;
@@ -217,10 +232,11 @@
     if (handle && handle.dataset.c === 'del') { e.preventDefault(); e.stopPropagation(); return; }   // the click removes
     let el = handle ? sel : t.closest(LABELS), typing = false;
     if (!el && t.closest('#deck') && !t.closest('img, #pic-box')) {   // a picture is deck-image.js's, even over a box
-      el = boxAt(e);                                   // inside its frame - the empty rest of the box is not the box
-      if (el && t.closest('[data-ed]')) {
-        if (el.contains(t)) typing = true;             // its own text: opens on the click, the frame shows the x
-        else el = null;                                // another element's text that only reaches into the rim
+      const rim = t.closest('[data-ed]') ? null : rimAt(e);   // the frame line: the box, to move it
+      el = rim || boxAt(e);
+      if (el && !rim) {
+        if (t.closest('[data-ed]') && el.contains(t)) typing = true;   // its own text: opens, the frame shows the x
+        else el = null;                                // the empty inside, or another element's text reaching in
       }
     }
     if (!el) {
@@ -233,7 +249,10 @@
     // a box's text is for typing: arrow keys and Backspace stay with the page afterwards - only a box chosen by its
     // rim (or dragged) takes them
     if (!handle && isBox(el)) armed = !typing;
-    if (!handle && isBox(el) && !typing) e.preventDefault();   // the rim: no text selection starts there
+    // a box moves by its rim only - pressed in its text, a drag marks words (Doc, 29.10.2026: "irgendwie darf die Box
+    // sich nur verschieben, wenn ich wirklich am Rahmen anpacke")
+    if (typing) return;
+    if (!handle && isBox(el)) e.preventDefault();      // the rim: no text selection starts there
     const s0 = isBox(el) ? null : parseFloat(getComputedStyle(el).fontSize) || 12.5;
     const g = geo(el);
     let inner = null;                                  // a box: what it holds, in its own unscaled px (corner anchors)

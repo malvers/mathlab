@@ -54,6 +54,9 @@ def _bold(part):
     esc = re.sub(r"&lt;(/?)([bius])&gt;", r"<\1\2>", esc)
     esc = re.sub(r"&lt;([cfmz])([1-9])&gt;", r'<span class="\1\2">', esc)
     esc = re.sub(r"&lt;/[cfmz][1-9]&gt;", "</span>", esc)
+    # <nl> breaks the line - not <br>, which an HTML deck shows as text (fos12-html-grundlagen: "<img>, <br>")
+    # (Doc, 29.10.2026: "die Unterbullets, die kann ich gar nicht editieren. Das ist aber wichtig.")
+    esc = esc.replace("&lt;nl&gt;", "<br>")
     return _EMO.sub(_emo, esc)
 
 

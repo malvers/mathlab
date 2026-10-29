@@ -403,8 +403,35 @@ function bareLab(f) {
     if (f.contentWindow.CPWide) f.contentWindow.CPWide(99);
   } catch (e) { }                                     // a lab from elsewhere keeps its ground
 }
-document.addEventListener('load', e => bareLab(e.target), true);   // a frame's load does not bubble: caught on the way down
+// a lab on a slide scrolls with the start page's bar (index.html: thin, dark track, muted blue-grey thumb), not the
+// browser's broad white one (Doc, 29.10.2026, the book on the lab slide: "die Scrollbar ... sieht sehr unschön aus ...
+// Guck mal auf Index, da haben wir schöne Scrollbars") - only inside DocPoint, the page itself keeps its own
+function labBar(f) {
+  if (!f || f.tagName !== 'IFRAME' || !f.closest('.labframe')) return;
+  try {
+    const d = f.contentDocument;
+    if (!d || !d.head || d.getElementById('deck-lab-bar')) return;
+    const s = d.createElement('style');
+    s.id = 'deck-lab-bar';
+    // the webkit rules, not scrollbar-width/-color: Chrome drops those rules as soon as the standard pair is set, and
+    // "thin" cannot be made narrower (Doc, 29.10.2026: "etwas schmaler noch") - the pair only where webkit is missing
+    // the track in the lab's own ground, solid: a see-through one let the frame's white page ground shine through
+    // (Doc, 29.10.2026: "dahinter doch noch irgendwas Weißes")
+    const clear = c => /^rgba\(.*,\s*0\)$|transparent/.test(c);   // body first, else the page's own ground
+    const gb = getComputedStyle(d.body).backgroundColor, gh = getComputedStyle(d.documentElement).backgroundColor;
+    const ground = !clear(gb) ? gb : !clear(gh) ? gh : 'transparent';
+    s.textContent = '::-webkit-scrollbar{width:7px;height:7px;background:' + ground + '}'
+      + '::-webkit-scrollbar-track{background:' + ground + '}'
+      + '::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(78,92,118,.95) 0%,rgba(52,64,86,.92) 100%);'
+      + 'border-radius:999px;border:1px solid rgba(34,42,58,.85);box-shadow:0 0 8px rgba(0,0,0,.35)}'
+      + '::-webkit-scrollbar-corner{background:transparent}'
+      + '@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgba(72,88,112,.95) rgba(38,46,64,.88)}}';
+    d.head.appendChild(s);
+  } catch (e) { }                                     // a lab from elsewhere keeps its bar
+}
+document.addEventListener('load', e => { bareLab(e.target); labBar(e.target); }, true);   // a frame's load does not bubble: caught on the way down
 document.querySelectorAll('.labframe.bare iframe').forEach(bareLab);
+document.querySelectorAll('.labframe iframe').forEach(labBar);
 // the footer triangles: one whole slide back or forth, shown fully built - no click steps
 (function () {
   const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
@@ -1661,7 +1688,13 @@ const link = (function () {
         t = byId || onPath || doc.activeElement || doc.body;
       }
       if (!t) return;
-      if (m.type === 'scroll') { t.scrollTop = m.st; t.scrollLeft = m.sl; return; }
+      // instant, not with the lab's own smooth scrolling (the book: js/buch.css scroll-behavior:smooth) - every mirrored
+      // step started a glide of its own and cut off the one before, the beamer only moved a bit (Doc, 29.10.2026:
+      // "im Zuschauermodus springt es ein ganz kleines Stück und erst wenn ich ein zweites Mal klicke ...")
+      if (m.type === 'scroll') {
+        try { t.scrollTo({ left: m.sl, top: m.st, behavior: 'instant' }); } catch (e) { t.scrollTop = m.st; t.scrollLeft = m.sl; }
+        return;
+      }
       const mods = m.mods || [];
       const base = { bubbles: true, cancelable: true, composed: true, view: w,
                      altKey: !!mods[0], ctrlKey: !!mods[1], metaKey: !!mods[2], shiftKey: !!mods[3] };

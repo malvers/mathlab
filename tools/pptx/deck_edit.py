@@ -5,7 +5,9 @@ Only the local dev server (serve.py, 127.0.0.1:8765) talks to this module; the l
     GET  /__deck/source?deck=<name>.html  -> {selector, slides: [[source or null, ...], ...]}
     POST /__deck/save  {deck, slide, n, old, new}  -> {html, src}   one element rewritten in the file
     POST /__deck/line  {deck, slide, n, old, op}  -> {own, g}   Cmd-D copies a line below itself, Cmd-Backspace removes it,
-                                                    op in/out (Tab, Shift-Tab) -> {level}: the bullet one level in or out
+                                                    op in/out (Tab, Shift-Tab) -> {level}: the bullet one level in or out,
+                                                    op split {head, tail} (Enter) -> {own, g, html, src}: two lines,
+                                                    op up/down (Alt-Up, Alt-Down) -> {narration}: swapped with its neighbour
     POST /__deck/slide {deck, index, op, to}  -> {order|hidden|at}   the overview: move, hide, show, insert, dup, del
     POST /__deck/publish  {deck}  -> {commit, files}   the deck (and pictures it needs) onto origin/main
     POST /__deck/undo  {deck, redo}  -> {what, mtime, pending}   one step back or forward (deck_undo.py)
@@ -155,6 +157,8 @@ class _Source(HTMLParser):
                 self.out.append("<emo:%s>" % m.group(1))
             else:
                 self.bad = True
+        elif tag == "br" and not attrs:                # a line break inside a line (deck_markup: <nl>), no end tag
+            self.out.append("<nl>")
         elif tag == "b" and not attrs:
             self.out.append("**" if self.bold else "<b>")
             self.stack.append("**" if self.bold else "</b>")
@@ -250,8 +254,10 @@ def _shift(text, above, by):
     return STEP_TAG.sub(one, text)
 
 
-def line(deck, slide, n, old, op):
+def line(deck, slide, n, old, op, head=None, tail=None):
     """op "dup": copy element n of slide `slide` right below it; op "del": remove it. Returns (status, reply).
+    op "split" (Enter, as in PowerPoint): the line keeps `head`, a copy right below it gets `tail` - one write, so one
+    undo step (Doc, 29.10.2026: "Wenn ich also irgendwo einen Return mache, soll ein neuer Bullet Point entstehen").
 
     A line alone in its click group brings (or takes away) a group of its own: the groups after it move one on,
     and so do Solita's parts and clips for that slide - the copy is silent (Doc, 17.09.2026: "erst mal nix").
@@ -280,13 +286,44 @@ def line(deck, slide, n, old, op):
         if el["tag"] != "p" or not set(el["cls"]) & set(LINES):
             return 422, {"error": "Kopieren und Löschen geht nur bei Aufzählungszeilen."}
         lines = [x for x in els[slide] if x["tag"] == "p" and set(x["cls"]) & set(LINES)]
+        if op in ("up", "down"):                     # Alt-Up / Alt-Down: the line changes places with its neighbour
+            k = lines.index(el) + (-1 if op == "up" else 1)
+            top, low = (lines[k], el) if op == "up" else (el, lines[k] if k < len(lines) else None)
+            if k < 0 or low is None or page[top["oe"]:low["os"]].strip():
+                return 422, {"error": "Weiter geht es nicht – die Zeile steht schon am Rand ihrer Liste."}
+            a, b = bounds[slide]
+            tt, tl = page[top["os"]:top["oe"]], page[low["os"]:low["oe"]]
+            gt = _group(tt[:tt.index(">") + 1])
+            gl = _group(tl[:tl.index(">") + 1])
+            if gt is not None and gl is not None:    # the places keep their click groups: the slide still builds top down
+                tt, tl = DATA_G.sub('data-g="%d"' % gl, tt, count=1), DATA_G.sub('data-g="%d"' % gt, tl, count=1)
+            spoken = False
+            alone = lambda g: sum(_group(t) == g for t in STEP_TAG.findall(page[a:b])) == 1
+            page = page[:top["os"]] + tl + page[top["oe"]:low["os"]] + tt + page[low["oe"]:]
+            if gt is not None and gl is not None and gt != gl and alone(gt) and alone(gl):
+                page, spoken = _narration_swap(page, deck, slide, gt + 1, gl + 1)   # their words go along
+            _write(deck, page, gen, what="Zeile verschoben", stuck=spoken)
+            return 200, {"narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
         if op == "del" and len(lines) == 1:
             return 422, {"error": "Die letzte Zeile einer Folie bleibt – sonst gibt es nichts mehr zum Kopieren."}
         a, b = bounds[slide]
         g = _group(page[el["os"]:page.index(">", el["os"]) + 1])
         own = g is not None and sum(_group(t) == g for t in STEP_TAG.findall(page[a:b])) == 1
-        by = 1 if op == "dup" else -1
-        if op == "dup":
+        by = -1 if op == "del" else 1
+        parts = []
+        if op == "split":
+            for t in (head, tail):
+                inner = gen.markup(re.sub(r"\s*\n\s*", " ", t or "").strip())
+                if to_source(inner, gen.markup) is None:
+                    return 422, {"error": "So kann ich das nicht sauber teilen – steht irgendwo ein ** oder $ zu viel?"}
+                parts.append(inner)
+            copy = page[el["os"]:el["s"]] + parts[1] + page[el["e"]:el["oe"]]
+            if own:
+                copy = DATA_G.sub('data-g="%d"' % (g + 1), copy, count=1)
+            before = page[a:el["os"]] + page[el["os"]:el["s"]] + parts[0] + page[el["e"]:el["oe"]]
+            after = page[el["oe"]:b]
+            body = (_shift(before, g, by) + "\n" + copy + _shift(after, g, by)) if own else before + "\n" + copy + after
+        elif op == "dup":
             copy = page[el["os"]:el["oe"]]
             if own:
                 copy = DATA_G.sub('data-g="%d"' % (g + 1), copy, count=1)
@@ -307,8 +344,11 @@ def line(deck, slide, n, old, op):
         spoken = False
         if own:
             page, spoken = _narration(page, deck, slide, g + 1, by)
-        _write(deck, page, gen, what="Zeile kopiert" if op == "dup" else "Zeile gelöscht", stuck=spoken)
-    return 200, {"own": own, "g": g, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
+        _write(deck, page, gen, what={"dup": "Zeile kopiert", "split": "Zeile geteilt"}.get(op, "Zeile gelöscht"), stuck=spoken)
+    reply = {"own": own, "g": g, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
+    if parts:                                         # the two halves as the file now holds them
+        reply.update(html=parts, src=[to_source(p, gen.markup) for p in parts])
+    return 200, reply
 
 
 # ------------------------------------------------------------- whole slides ---
@@ -447,6 +487,42 @@ def _reorder(page, deck, mapping):
                 with open(texts_path, "w", encoding="utf-8") as f:
                     f.write(json.dumps(texts, ensure_ascii=False, indent=1))
     return page, spoken
+
+
+def _narration_swap(page, deck, slide, i, j):
+    """Solita's parts i and j of `slide` change places, and so do their clips - two lines swapped, their words go along.
+    Returns (page, whether anything spoken moved)."""
+    m = NARRATION.search(page)
+    if not m or not m.group(2).strip():
+        return page, False
+    data = json.loads(m.group(2).replace("<\\/", "</"))
+    parts = data.get("slides", {}).get(str(slide))
+    if not parts or max(i, j) >= len(parts):
+        return page, False
+    parts[i], parts[j] = parts[j], parts[i]
+    text = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    page = page[:m.start(2)] + text + page[m.end(2):]
+    folder = os.path.join(DECKS, "audio", data.get("deck") or deck[:-5])
+    if os.path.isdir(folder):
+        na, nb = "s%02d-%02d.mp3" % (slide, i), "s%02d-%02d.mp3" % (slide, j)
+        pa, pb = os.path.join(folder, na), os.path.join(folder, nb)
+        if os.path.exists(pa):
+            os.replace(pa, pa + ".swap")
+        if os.path.exists(pb):
+            os.replace(pb, pa)
+        if os.path.exists(pa + ".swap"):
+            os.replace(pa + ".swap", pb)
+        texts_path = os.path.join(folder, "texts.json")
+        if os.path.exists(texts_path):                # same order and format as deck_audio.mjs writes it
+            texts = json.load(open(texts_path, encoding="utf-8"))
+            va, vb = texts.pop(na, None), texts.pop(nb, None)
+            if vb is not None:
+                texts[na] = vb
+            if va is not None:
+                texts[nb] = va
+            with open(texts_path, "w", encoding="utf-8") as f:
+                f.write(json.dumps(texts, ensure_ascii=False, indent=1))
+    return page, True
 
 
 def _narration(page, deck, slide, part, by):
@@ -717,7 +793,7 @@ def handle(method, path, headers, body):
             if not (headers.get("Content-Type") or "").startswith("application/json"):
                 return 415, {"error": "json only"}
             q = json.loads(body.decode("utf-8"))
-            return line(q["deck"], int(q["slide"]), int(q["n"]), q["old"], q["op"])
+            return line(q["deck"], int(q["slide"]), int(q["n"]), q["old"], q["op"], q.get("head"), q.get("tail"))
         if method == "POST" and url.path == "/__deck/slide":
             if not (headers.get("Content-Type") or "").startswith("application/json"):
                 return 415, {"error": "json only"}

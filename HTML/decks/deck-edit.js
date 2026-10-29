@@ -4,6 +4,8 @@
 // the change (Doc, 17.09.2026: "Deck ist Master"). What counts as a text and how it is written back lives in
 // tools/pptx/deck_edit.py - this page only asks it.
 // In an open bullet line Cmd-D puts a copy right below it (open for typing), Cmd-Backspace removes the line.
+// Enter in a bullet line works as in PowerPoint: the rest after the caret becomes a new bullet below, Shift-Enter only
+// breaks the line, Cmd-Enter writes and closes, Alt-Up / Alt-Down move the line one place (Doc, 29.10.2026).
 // The pencil is yellow while editing. As soon as the deck differs from what is live, a green cloud button shows up
 // next to it - a click puts the deck live (commit + push of this one deck, Doc's standing go-ahead). Both sit in the
 // footer next to the slide triangles; top left stays free (Doc, 17.09.2026: "mach hier ein Stift ... oben links weg").
@@ -39,9 +41,14 @@
     '#nav #nav-live[hidden]{display:none}',
     '#nav #nav-live:disabled{opacity:.55;cursor:progress}',
     'html.deck-edit .slide .step{opacity:1!important;filter:none!important}',
+    // a widget (live-frame) is wider than what it draws: while editing it takes no pointer, so a box or picture under
+    // its see-through rim can still be taken (Doc, 29.10.2026: "Ich kann ihn da kaum bewegen ... dass ein Widget da drüber liegt")
+    'html.deck-edit .slide .live-frame{pointer-events:none}',
     /* thin and grey: the frames say where a text is, they are not the thing to look at
        (Doc, 22.09.2026: "alle Linien duenner und gray") - the deck's own muted blue-grey, never black */
-    'html.deck-edit [data-ed]{cursor:text;outline:.5px dashed rgba(110,126,159,.5);outline-offset:3px}',
+    // 1 px out, not 3: sub-points stand 6 px apart and their frames ran into each other (Doc, 29.10.2026: "dass die
+    // halt nicht überlappen")
+    'html.deck-edit [data-ed]{cursor:text;outline:.5px dashed rgba(110,126,159,.5);outline-offset:1px}',
     'html.deck-edit [data-ed]:hover{outline:1px dashed rgba(110,126,159,.85)}',
     'html.deck-edit [data-ed].ed-on{outline:1px solid rgba(110,126,159,.95);background:rgba(110,126,159,.10);',
     '  white-space:pre-wrap;caret-color:rgb(176,36,24)}',
@@ -180,7 +187,8 @@
   // What travels back to the server is markup again, so the file keeps the shape html_deck.py writes.
   const B0 = String.fromCharCode(2), B1 = String.fromCharCode(3);   // a **...** around a formula, kept through the split at $
   const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const clean = s => s.replace(/\s*\n\s*/g, ' ').trim();
+  // a line break the browser leaves at either end (Shift-Enter at the end writes two) is none of the file's
+  const clean = s => s.replace(/\s*\n\s*/g, ' ').replace(/\s*<nl>\s*/g, '<nl>').replace(/^(?:<nl>)+|(?:<nl>)+$/g, '').trim();
 
   function inline(part) {
     return esc(part)
@@ -188,7 +196,8 @@
       .replace(/&lt;(\/?)([bius])&gt;/g, '<$1$2>')
       .replace(/&lt;([cfmz])([1-9])&gt;/g, '<span class="$1$2">')
       .replace(/&lt;\/[cfmz][1-9]&gt;/g, '</span>')
-      .replace(/&lt;emo:([a-z0-9-]+)\.(webp|png)&gt;/g, '<img class="emo" src="../svp/emo/$1.$2" alt="$1">');
+      .replace(/&lt;emo:([a-z0-9-]+)\.(webp|png)&gt;/g, '<img class="emo" src="../svp/emo/$1.$2" alt="$1">')
+      .replace(/&lt;nl&gt;/g, '<br>');                // a line break inside a line (deck_markup.py)
   }
 
   function srcToHtml(src) {
@@ -218,7 +227,7 @@
     node.childNodes.forEach(function (n) {
       if (n.nodeType === 3) { out += n.nodeValue; return; }
       if (n.nodeType !== 1) return;
-      if (n.nodeName === 'BR') { out += ' '; return; }
+      if (n.nodeName === 'BR') { out += '<nl>'; return; }   // clean() drops the ones the browser adds at the ends
       if (n.nodeName === 'IMG') {                     // one of the Fahrplan's pictures - any other picture falls away
         const m = n.classList.contains('emo') && /^\.\.\/svp\/emo\/([a-z0-9-]+\.(?:webp|png))$/.exec(n.getAttribute('src') || '');
         if (m) out += '<emo:' + m[1] + '>';
@@ -650,7 +659,9 @@
   // our own write is no reason for live reload (tools/live_reload.py) to reload the page
   const rebase = () => { try { if (window.__liveReload) window.__liveReload.rebase(); } catch (e) { } };
 
-  function begin(el) {
+  // x, y: where the click landed - the caret goes there, not to the end (Doc, 29.10.2026: "Ich möchte den aber bitte
+  // unbedingt immer da haben, wo ich auch wirklich reinklicke")
+  function begin(el, x, y) {
     cur = { el: el, html: el.innerHTML, src: SRC.get(el), open: '', blur: null, input: null, paste: null };
     el.classList.add('ed-on');
     // the text as it reads, not as it is spelled: bold is bold, a colour is a colour, only $...$ stays text
@@ -670,7 +681,16 @@
     el.addEventListener('input', cur.input);
     el.addEventListener('paste', cur.paste);
     el.focus();
-    const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
+    let r = null;
+    if (x !== undefined) {                            // the source view is laid out anew: ask it where that point is now
+      if (document.caretRangeFromPoint) r = document.caretRangeFromPoint(x, y);
+      else if (document.caretPositionFromPoint) {
+        const p = document.caretPositionFromPoint(x, y);
+        if (p) { r = document.createRange(); r.setStart(p.offsetNode, p.offset); }
+      }
+      if (r && !el.contains(r.startContainer)) r = null;
+    }
+    if (!r) { r = document.createRange(); r.selectNodeContents(el); r.collapse(false); }   // no point: at the end, as before
     const s = getSelection(); s.removeAllRanges(); s.addRange(r);
     state();
   }
@@ -680,6 +700,9 @@
   function end(keep) {
     if (!cur || busy) return Promise.resolve(false);
     const c = cur, el = c.el;
+    // a bullet Enter made and nothing was typed into: gone again, no empty square left on the slide
+    if (FRESH.has(el) && !clean(htmlToSrc(el))) { FRESH.delete(el); line('del'); return Promise.resolve(false); }
+    FRESH.delete(el);
     // an untouched text goes back as it came: never let <b> and ** argue about the same word
     const text = el.innerHTML === c.open ? c.src : clean(htmlToSrc(el));
     el.removeEventListener('blur', c.blur);
@@ -769,6 +792,59 @@
     });
   }
 
+  // Enter in a bullet line, as in PowerPoint: what stands before the caret stays, the rest becomes a new line right
+  // below on the same level, open with the caret at its start (Doc, 29.10.2026: "Wenn ich also irgendwo einen Return
+  // mache, soll ein neuer Bullet Point entstehen"). One write in the file (deck_edit.line "split"), so one Cmd-Z.
+  // Anything else - a title, a cell, a label - Enter writes and closes as before.
+  const FRESH = new WeakSet();                        // lines Enter made: left empty, they go again (end)
+  function split() {
+    if (!cur || busy) return;
+    const c = cur, el = c.el, s = getSelection();
+    if (!el.matches('p.line, p.col') || !s.rangeCount || !el.contains(s.getRangeAt(0).startContainer)) { end(true); return; }
+    const r = s.getRangeAt(0);
+    const half = function (first) {                   // the text before / after the caret, its bold and colours kept
+      const h = document.createRange(); h.selectNodeContents(el);
+      if (first) h.setEnd(r.startContainer, r.startOffset); else h.setStart(r.endContainer, r.endOffset);
+      const box = document.createElement('div'); box.appendChild(h.cloneContents());
+      return clean(htmlToSrc(box));
+    };
+    const head = half(true), tail = half(false);
+    if (!head && !tail && FRESH.has(el)) { end(true); return; }   // Enter on a new empty bullet: done, it goes again
+    const at = el.dataset.ed.split(':').map(Number), to = where(el);
+    busy = true; el.classList.add('ed-busy');
+    fetch('/__deck/line', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deck: to.deck, slide: to.slide, n: to.n, old: c.src, op: 'split', head: head, tail: tail })
+    })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
+      .then(function (j) {
+        el.removeEventListener('blur', c.blur);
+        el.removeEventListener('input', c.input);
+        el.removeEventListener('paste', c.paste);
+        el.removeAttribute('contenteditable');
+        el.classList.remove('ed-on', 'ed-busy'); FRESH.delete(el); cur = null; dirty = false;
+        took(j, to); rebase();
+        const put = function (x, html) { if (x) { x.innerHTML = html; tex(x); lead(x); nr(x); } };
+        const copy = restructure(slides[at[0]], at[1], 'dup', j.own, j.g);
+        put(el, j.html[0]); put(copy, j.html[1]);
+        const tile = document.querySelectorAll('#overview .ov-thumb')[at[0]];
+        if (tile) { const tc = restructure(tile, at[1], 'dup', j.own, j.g); put(tile.querySelectorAll(selector)[at[1]], j.html[0]); put(tc, j.html[1]); }
+        return load().then(function () {
+          label();
+          if (!copy || !copy.dataset.ed) { msg('Neu laden (Cmd-Shift-R), dann geht es weiter.'); return; }
+          busy = false;
+          FRESH.add(copy); begin(copy);
+          const a = document.createRange(); a.selectNodeContents(copy); a.collapse(true);   // the caret at its start
+          const sl = getSelection(); sl.removeAllRanges(); sl.addRange(a);
+          msg('Neue Zeile' + (j.narration ? ' – für Solita einmal neu laden' : ''));
+        });
+      })
+      .catch(function (err) {                          // nothing changed in the file - the line stays open as it was
+        msg('Nicht geteilt: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message));
+      })
+      .finally(function () { busy = false; el.classList.remove('ed-busy'); });
+  }
+
   // Tab / Shift-Tab and the two indent buttons: a bullet line one level in or out (l0 .. l2, deck_edit.line). What was
   // typed is written first; the line stays open for typing afterwards, as in the Fahrplan.
   function level(op) {
@@ -791,6 +867,45 @@
           [el, copy].forEach(function (x) { if (x) { x.classList.remove('l0', 'l1', 'l2'); x.classList.add('l' + j.level); } });
         })
         .catch(function (err) { msg('Nicht gerückt: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message)); })
+        .finally(function () { busy = false; el.classList.remove('ed-busy'); begin(el); });
+    });
+  }
+
+  // Alt-Up / Alt-Down: the open line changes places with the one above or below, as in PowerPoint - the click groups
+  // stay with the places, so the slide still builds from the top (Doc, 29.10.2026). The line stays open: press again.
+  function move(op) {
+    if (!cur || busy) return;
+    const el = cur.el;
+    if (!el.matches('p.line, p.col')) { msg('Verschieben geht nur bei Aufzählungszeilen.'); return; }
+    end(true).then(function (ok) {
+      if (!ok) return;
+      const at = el.dataset.ed.split(':').map(Number), to = where(el);
+      busy = true; el.classList.add('ed-busy');
+      return fetch('/__deck/line', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deck: to.deck, slide: to.slide, n: to.n, old: SRC.get(el), op: op })
+      })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
+        .then(function (j) {
+          took(j, to); rebase();
+          const swap = function (box, n) {               // the same on the slide and on its overview copy
+            const all = box.querySelectorAll(selector), x = all[n], y = all[n + (op === 'up' ? -1 : 1)];
+            if (!x || !y) return;
+            ['g', 'k'].forEach(function (d) {
+              const v = x.dataset[d];
+              if (v !== undefined && y.dataset[d] !== undefined) { x.dataset[d] = y.dataset[d]; y.dataset[d] = v; }
+            });
+            if (op === 'up') y.before(x); else y.after(x);
+          };
+          swap(slides[at[0]], at[1]);
+          const tile = document.querySelectorAll('#overview .ov-thumb')[at[0]];
+          if (tile) swap(tile, at[1]);
+          return load().then(function () {
+            label();
+            msg('Zeile verschoben' + (j.narration ? ' – Solitas Aufnahmen sind mitgewandert' : ''));
+          });
+        })
+        .catch(function (err) { msg('Nicht verschoben: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message)); })
         .finally(function () { busy = false; el.classList.remove('ed-busy'); begin(el); });
     });
   }
@@ -925,6 +1040,18 @@
   }, true);
   addEventListener('dragend', function () { clearMarks(); from = -1; }, true);
 
+  // pressing in a text opens it at once, so a drag from there marks words as in any text field - the box only moves
+  // by its rim (deck-label.js) (Doc, 29.10.2026: "wenn ich klicke und sofort ziehe, soll sich ... Text markieren").
+  // A figure's label still opens on the click: dragging it by its words moves it. Links are the click's (below).
+  addEventListener('mousedown', function (e) {
+    if (PRES || !on || busy || e.button !== 0 || !e.target.closest || !e.target.closest('#deck')) return;
+    const el = e.target.closest('[data-ed]');
+    if (!el || el.matches('.pic p.fl') || e.target.closest('a') || (cur && cur.el === el)) return;
+    if (held && Date.now() - held < 400) return;     // a label was just dragged
+    if (cur) end(true);
+    if (!cur && !busy) begin(el, e.clientX, e.clientY);
+  }, true);
+
   // capture phase: in edit mode a click on the slide edits and never turns the page
   addEventListener('click', function (e) {
     if (PRES || !on || !e.target.closest || !e.target.closest('#deck')) return;
@@ -944,7 +1071,7 @@
     if (held && Date.now() - held < 400) { held = 0; return; }   // a label was just dragged - nothing to open
     held = 0;                                        // a handle drag ends without a click: the hold must not outlive it
     const el = e.target.closest('[data-ed]');
-    if (el && !cur && !busy) begin(el);
+    if (el && !cur && !busy) begin(el, e.clientX, e.clientY);
   }, true);
 
   // capture phase: keys typed into a text never reach the deck (arrows, space, digits, P, F ...)
@@ -957,8 +1084,11 @@
       else if (cmd(e) && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); apply('underline'); }
       else if (cmd(e) && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); line('dup'); }
       else if (cmd(e) && e.key === 'Backspace') { e.preventDefault(); line('del'); }
+      else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); move(e.key === 'ArrowUp' ? 'up' : 'down'); }
       else if (e.key === 'Tab') { e.preventDefault(); level(e.shiftKey ? 'out' : 'in'); }
-      else if (e.key === 'Enter') { e.preventDefault(); end(true); }
+      else if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); document.execCommand('insertLineBreak'); }   // a break inside the line
+      else if (e.key === 'Enter' && cmd(e)) { e.preventDefault(); end(true); }
+      else if (e.key === 'Enter') { e.preventDefault(); split(); }
       else if (e.key === 'Escape') { e.preventDefault(); end(false); }
       else if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); end(true); }
       return;

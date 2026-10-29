@@ -303,11 +303,15 @@ a.fig-source:hover{color:var(--red);text-decoration:underline}
 
 /* --- lab in a slide ------------------------------------------------------ */
 .labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+/* a picture placed freely on a slide (DocPoint's picture editor) casts a soft shadow - drop-shadow follows a cut-out's
+   own outline, so a figure without ground gets no grey box behind it (Doc, 29.10.2026: "für die Bilder irgendwie so ein
+   bisschen Schatten"). Here and not in the picture's style: the editor writes that style anew on every move */
+.slide .free-pic{filter:drop-shadow(0 1px 4px rgba(14,36,78,.30))}
 /* round corners with the scaled lab clipped to them (Doc, 16.09.2026). No border: it pushed the lab 2 px in
    and left a light step along the top and left edge ("da gibt es eine leichte Stufe") - a soft shadow sets
    the frame off without taking any room, and the lab sits flush at 0,0 */
 .labframe{position:absolute;left:72px;width:816px;overflow:hidden;
-  background:var(--card);border-radius:10px;isolation:isolate;box-shadow:0 1px 5px rgba(14,36,78,.28)}
+  background:var(--card);border-radius:6px;isolation:isolate;box-shadow:0 1px 5px rgba(14,36,78,.28)}   /* 6 px, was 10: the lab's scrollbar runs into the corner (Doc, 29.10.2026: "ein bisschen weniger rund") */
 .labframe iframe{border:0;transform-origin:0 0;display:block;position:absolute;left:0;top:0}
 /* a lab that stands free on the slide, without a card (Doc, 05.10.2026, DOCPAD: "die schwarzen Ecken und die schwarzen
    Ränder weg ... Der muss frei stehen"); deck.js clears its page's own ground */
