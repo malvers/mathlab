@@ -152,7 +152,19 @@ body.sp-page {
 
 /* --- the conversation ---------------------------------------------------- */
 
-.sp-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.sp-main { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; isolation: isolate; }
+
+/* Wallpaper behind the conversation (Doc, 29.10.2026: "ein schönes Hintergrundbild, natürlich
+   abgedimmt"): a tile of maths doodles in the palette, faint enough that the bubbles stay in front. */
+.sp-main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('sprechstunde-bg.svg') center top / 300px repeat;
+    opacity: 0.10;
+    pointer-events: none;
+}
 .sp-main > .sp-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
 .sp-msgs {
