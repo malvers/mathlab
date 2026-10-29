@@ -1,5 +1,5 @@
 // VGP — the "Sprechstunde" row on top of the contact list (Doc, 29.10.2026): pupils write to Doc
-// anonymously from the students' plan (svp/sprechstunde.html), he answers in vgpsprechstunde.html.
+// anonymously from the students' plan (svp/sprechstunde.html), he answers in his Kontakt app (../kontakt/).
 // Shown ONLY when this browser is logged in with Doc's SVP account - family members never see it,
 // and nothing else in VGP changes. Loaded after vgp-contacts.js (wraps renderContacts) and after
 // ../svp/svp-auth.js + ../svp/sprechstunde-core.js (session, red phone).
@@ -24,10 +24,7 @@
     div.innerHTML = '<span class="av">' + Sprechstunde.PHONE + '</span><span class="nm">Kontakt</span><div class="c-meta"></div>';
     const img = div.querySelector('img');
     img.style.width = img.style.height = '30px';   // the red telephone in VGP's avatar circle
-    div.onclick = () => {
-      const me = typeof myPubB64 !== 'undefined' && myPubB64 ? myPubB64 : '';
-      location.href = 'vgpsprechstunde.html' + (me ? '?vgp=' + encodeURIComponent(me) : '');
-    };
+    div.onclick = () => { location.href = '../kontakt/'; };
     return div;
   }
 

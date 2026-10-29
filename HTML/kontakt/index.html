@@ -2,10 +2,11 @@
 <html lang="de">
 
 <!--
-    Sprechstunde - Doc's side, inside VGP (Doc, 29.10.2026). The pupils write on svp/sprechstunde.html
-    (the red phone on meinplan.html); here Doc reads and answers. Reached from the "Sprechstunde" row in
-    the VGP sidebar (js/vgp-sprechstunde.js), which hands over this device's VGP identity (?vgp=) - it is
-    stored as the target of the push, so the VGP notification comes to the phone Doc last opened this on.
+    Kontakt - Doc's side, a small app of its own with the red telephone (Doc, 29.10.2026: VGP was far
+    too much for this). The pupils write on svp/sprechstunde.html (the red phone on meinplan.html); here
+    Doc reads and answers. Installable (manifest.json, sw.js in this folder). The bell sends the push to
+    this device: its subscription goes to chat_config (Doc's account only), and the push function
+    (supabase/functions/push-on-message) seals "Nachricht vom Stundenplan" for it.
 
     Doc's SVP account reads the tables (RLS: his uid only); pupils' messages open with his private key
     (svp-crypto.js, the passphrase of the talk names), replies are sealed for the pupil's device and,
@@ -15,21 +16,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Kontakt | VGP</title>
+    <title>Kontakt</title>
     <meta name="robots" content="noindex">
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <meta name="theme-color" content="#050b18">
-    <link rel="stylesheet" href="../svp/sprechstunde.css?v=20261029-3">
+    <link rel="stylesheet" href="../svp/sprechstunde.css?v=20261029-4">
 </head>
 
 <body class="sp-page">
     <div class="sp-window">
     <header class="sp-head">
         <div class="sp-wrap">
-            <button class="sp-back" id="back" type="button" aria-label="Zurück" title="Zurück">
+            <button class="sp-back" id="back" type="button" aria-label="Zurück zur Liste" title="Zurück zur Liste" hidden>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
             </button>
             <span id="phone"></span>
@@ -37,6 +40,10 @@
                 <h1 id="title">Kontakt</h1>
                 <p id="sub">&nbsp;</p>
             </div>
+            <button class="sp-bell" id="bell" type="button" aria-label="Benachrichtigungen auf dieses Gerät" title="Benachrichtigungen auf dieses Gerät" hidden>
+                <!-- Lucide "bell" (ISC licence) -->
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+            </button>
             <div class="sp-tools" id="tools" hidden>
                 <button class="sp-btn" id="block" type="button">Sperren</button>
                 <button class="sp-btn danger" id="del" type="button">Löschen</button>
@@ -69,7 +76,15 @@
             const S = window.Sprechstunde, A = window.svpAuth, C = window.svpCrypto;
             const DOC_UID = '2889073e-cbb8-4ca1-ad48-5234abe40585';   // same uid as in the RLS policies
             const $ = id => document.getElementById(id);
-            const vgpPub = new URLSearchParams(location.search).get('vgp') || '';
+
+            // VGP's VAPID pair: the public half is safe to ship, the private half is a secret of the push function
+            const VAPID_PUBLIC = 'BG84swdCjSLS8IzPrfbyokHl-gjdx5MEahdLbZDbDgxzd9x7_BV6iqrVVveWfw4bPwV5Rach0K2_RfzL5RCOvW8';
+            const canPush = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+            // own worker, scope /kontakt/: the app installs, and its push subscription stays apart from VGP's
+            const swReady = 'serviceWorker' in navigator
+                ? navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready) : Promise.reject(new Error('no service worker'));
+            swReady.catch(() => {});
+            const b64urlBytes = b64 => Uint8Array.from(atob((b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
 
             $('phone').innerHTML = S.PHONE;
             $('send').innerHTML = S.SEND_SVG;
@@ -148,6 +163,8 @@
                 $('msgs').hidden = false;
                 $('compose').hidden = false;
                 $('tools').hidden = false;
+                $('back').hidden = false;
+                $('bell').hidden = true;
                 $('msgs').dataset.painted = '';
                 paintTools();
                 await loadThread();
@@ -190,6 +207,8 @@
                 $('msgs').hidden = true;
                 $('compose').hidden = true;
                 $('tools').hidden = true;
+                $('back').hidden = true;
+                $('bell').hidden = !canPush;
                 loadList().catch(e => note('Liste nicht ladbar: ' + e.message, true));
             }
 
@@ -236,7 +255,7 @@
                 showList();
             });
 
-            $('back').addEventListener('click', () => { if (open) showList(); else location.href = 'vgpchat.html'; });
+            $('back').addEventListener('click', () => { if (open) showList(); });
 
             const ta = $('text');
             const fit = S.autoGrow(ta);
@@ -248,16 +267,45 @@
                 if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer: coarse)').matches) { e.preventDefault(); reply(); }
             });
 
-            /* --- start: login (Doc's SVP account), key, push target ---------------------------------- */
+            /* --- the bell: push to this device ------------------------------------------------------- */
+            /* The device that tapped the bell last gets the push. Its subscription is kept in chat_config
+               (push_endpoint, push_key, push_auth - Doc's account only), where the push function reads it. */
 
-            async function pushHere() {
-                if (!vgpPub) return;
-                const rows = await api('chat_config?key=eq.push_pubkey&select=value');
-                if (rows && rows[0] && rows[0].value === vgpPub) return;
-                await api('chat_config', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-                    body: JSON.stringify([{ key: 'push_pubkey', value: vgpPub }]) });
-                note('Benachrichtigungen für den Kontakt kommen ab jetzt auf dieses Gerät (VGP-Push).');
+            async function bellState() {
+                const bell = $('bell');
+                let on = false;
+                try {
+                    // no permission check: Chrome drops the subscription itself when notifications get blocked
+                    const sub = await (await swReady).pushManager.getSubscription();
+                    if (sub) {
+                        const rows = await api('chat_config?key=eq.push_endpoint&select=value');
+                        on = !!(rows && rows[0] && rows[0].value === sub.endpoint);
+                    }
+                } catch (e) { /* offline - leave it off */ }
+                bell.classList.toggle('on', on);
+                bell.setAttribute('aria-pressed', String(on));
+                bell.title = on ? 'Benachrichtigungen kommen auf dieses Gerät' : 'Benachrichtigungen auf dieses Gerät holen';
             }
+
+            async function bellOn() {
+                if (await Notification.requestPermission() !== 'granted') {
+                    note('Benachrichtigungen sind in diesem Browser blockiert (Website-Einstellungen).', true);
+                    return;
+                }
+                const reg = await swReady;
+                const sub = await reg.pushManager.getSubscription()
+                    || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64urlBytes(VAPID_PUBLIC) });
+                const k = sub.toJSON().keys;
+                await api('chat_config', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+                    body: JSON.stringify([{ key: 'push_endpoint', value: sub.endpoint }, { key: 'push_key', value: k.p256dh },
+                        { key: 'push_auth', value: k.auth }]) });
+                note('Benachrichtigungen kommen ab jetzt auf dieses Gerät.');
+                bellState();
+            }
+
+            $('bell').addEventListener('click', () => bellOn().catch(e => note('Benachrichtigung nicht eingerichtet: ' + e.message, true)));
+
+            /* --- start: login (Doc's SVP account), key, bell ---------------------------------------- */
 
             async function start() {
                 if (!A.hasSession()) { A.loginDialog(start, 'Kontakt: mit dem SVP-Konto anmelden'); return; }
@@ -265,7 +313,8 @@
                 if (!(await S.available())) { note('Der Kontakt ist noch nicht eingerichtet: Das SQL fehlt noch.', true); return; }
                 await C.ready;
                 if (!C.hasPrivate()) { C.passDialog('unlock', start, 'Kontakt'); return; }
-                pushHere().catch(e => note('Push-Ziel nicht gespeichert: ' + e.message, true));
+                $('bell').hidden = !canPush || !!open;
+                bellState();
                 S.poll(() => (open ? loadThread() : loadList()).catch(e => note('Nicht ladbar: ' + e.message, true)), 20000);
             }
             start();

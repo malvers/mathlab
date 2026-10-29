@@ -1,5 +1,5 @@
-// Sprechstunde - what the pupils' page (svp/sprechstunde.html) and Doc's view in VGP
-// (vgp/vgpsprechstunde.html) share: the red phone, the function calls, time labels and the
+// Sprechstunde - what the pupils' page (svp/sprechstunde.html) and Doc's Kontakt app
+// (kontakt/index.html) share: the red phone, the function calls, time labels and the
 // message bubbles. Look: sprechstunde.css. Tables + functions: supabase/migrations/20261029_chat.sql.
 // Needs svp-auth.js (DB_URL / DB_KEY). Exposes window.Sprechstunde.
 (function () {

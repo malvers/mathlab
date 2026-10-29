@@ -4,9 +4,10 @@
 // message, so nothing decryptable is ever sent — just a wakeup that makes the SW show a generic
 // notification. VAPID is signed here with Web Crypto (ES256); no external dependency.
 //
-// Kontakt (the pupils' chat, webhook "ping-on-sprechstunde" on `chat_msg`): the ping carries a fixed
-// label, sealed for the device (encrypt.ts, RFC 8291), so Doc's phone says "Nachricht vom Stundenplan"
-// and the tap opens the Kontakt view. Still nothing from the message itself.
+// Kontakt (the pupils' chat, webhook "ping-on-sprechstunde" on `chat_msg`): goes to Doc's Kontakt app
+// (HTML/kontakt/), not to VGP - the device that tapped the app's bell, kept in chat_config (push_endpoint,
+// push_key, push_auth). The ping carries a fixed label, sealed for the device (encrypt.ts, RFC 8291), so
+// the phone says "Nachricht vom Stundenplan". Still nothing from the message itself.
 //
 // Secrets to set (dashboard → Edge Functions → Secrets):
 //   VAPID_PUBLIC   – base64url of the 65-byte public point (same one the client uses)
@@ -18,7 +19,8 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { encryptPush } from './encrypt.ts';
 
 // What the service worker (HTML/sw.js) shows for a Kontakt message.
-const KONTAKT = { title: 'Nachricht vom Stundenplan', body: 'Kontakt', tag: 'kontakt', url: '/vgp/vgpsprechstunde.html' };
+const KONTAKT = { title: 'Nachricht vom Stundenplan', body: 'Kontakt' };
+const KONTAKT_KEYS = ['push_endpoint', 'push_key', 'push_auth'];
 
 const b64urlToBytes = (s: string): Uint8Array => {
   const b64 = (s + '='.repeat((4 - (s.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/');
@@ -77,16 +79,22 @@ async function sendPush(s: Sub, note?: object): Promise<number> {
 Deno.serve(async (req) => {
   const body = await req.json().catch(() => null);
   const msg = body?.record;                                            // Database Webhook payload
-  console.log('WEBHOOK in:', JSON.stringify({ has_record: !!msg, room_id: msg?.room_id, recipient: msg?.recipient_pubkey, sender: msg?.pubkey }));
+  console.log('WEBHOOK in:', JSON.stringify({ table: body?.table, has_record: !!msg, room_id: msg?.room_id, recipient: msg?.recipient_pubkey, sender: msg?.pubkey }));
   if (!msg) return new Response('no record', { status: 200 });
 
   const supa = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
-  const note = body.table === 'chat_msg' ? KONTAKT : undefined;      // Kontakt → labelled ping
+  const kontakt = body.table === 'chat_msg';                          // Kontakt → labelled ping to the app
+  const note = kontakt ? KONTAKT : undefined;
 
   // Who should be pinged?
   let subs: Sub[] = [];
-  if (msg.room_id) {                                                   // "an alle" → every member of the room
+  if (kontakt) {                                                       // the Kontakt app's device
+    const { data, error } = await supa.from('chat_config').select('key,value').in('key', KONTAKT_KEYS);
+    if (error) console.log('QUERY error (kontakt):', error.message);
+    const v = Object.fromEntries((data || []).map((r) => [r.key, r.value]));
+    if (v.push_endpoint) subs = [{ endpoint: v.push_endpoint, pubkey: '', p256dh: v.push_key, auth: v.push_auth }];
+  } else if (msg.room_id) {                                            // "an alle" → every member of the room
     const { data, error } = await supa.from('push_subscriptions').select('endpoint,pubkey,p256dh,auth').contains('rooms', [msg.room_id]);
     if (error) console.log('QUERY error (room):', error.message);
     subs = (data || []).filter((s) => s.pubkey !== msg.pubkey);        // not the sender
@@ -102,8 +110,9 @@ Deno.serve(async (req) => {
     try {
       const status = await sendPush(s, note);
       console.log('PUSH', s.endpoint.slice(-16), '→ status', status);
-      if (status === 404 || status === 410) {
-        await supa.from('push_subscriptions').delete().eq('endpoint', s.endpoint);   // prune dead subscription
+      if (status === 404 || status === 410) {                          // prune dead subscription
+        if (kontakt) await supa.from('chat_config').delete().in('key', KONTAKT_KEYS);
+        else await supa.from('push_subscriptions').delete().eq('endpoint', s.endpoint);
       } else if (status >= 200 && status < 300) {
         sent++;
       }
