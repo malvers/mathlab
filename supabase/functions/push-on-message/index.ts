@@ -1,8 +1,12 @@
-// VGP — push-on-message Edge Function.
+// VGP — push-on-message Edge Function (deployed under the slug "dynamic-responder").
 // Triggered by a Database Webhook on `messages` INSERT. Sends a CONTENT-LESS web-push ping
 // ("you have a new message") to the recipients' subscriptions. E2E: the server can't read the
 // message, so nothing decryptable is ever sent — just a wakeup that makes the SW show a generic
 // notification. VAPID is signed here with Web Crypto (ES256); no external dependency.
+//
+// Kontakt (the pupils' chat, webhook "ping-on-sprechstunde" on `chat_msg`): the ping carries a fixed
+// label, sealed for the device (encrypt.ts, RFC 8291), so Doc's phone says "Nachricht vom Stundenplan"
+// and the tap opens the Kontakt view. Still nothing from the message itself.
 //
 // Secrets to set (dashboard → Edge Functions → Secrets):
 //   VAPID_PUBLIC   – base64url of the 65-byte public point (same one the client uses)
@@ -11,6 +15,10 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { encryptPush } from './encrypt.ts';
+
+// What the service worker (HTML/sw.js) shows for a Kontakt message.
+const KONTAKT = { title: 'Nachricht vom Stundenplan', body: 'Kontakt', tag: 'kontakt', url: '/vgp/vgpsprechstunde.html' };
 
 const b64urlToBytes = (s: string): Uint8Array => {
   const b64 = (s + '='.repeat((4 - (s.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/');
@@ -49,12 +57,20 @@ async function vapidAuthHeader(endpoint: string): Promise<string> {
   return `vapid t=${signingInput}.${bytesToB64url(sig)}, k=${Deno.env.get('VAPID_PUBLIC')}`;
 }
 
-// Send one content-less push. Returns the HTTP status (404/410 = subscription is dead).
-async function sendPush(endpoint: string): Promise<number> {
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { Authorization: await vapidAuthHeader(endpoint), TTL: '60', 'Content-Length': '0' },
-  });
+type Sub = { endpoint: string; pubkey: string; p256dh?: string; auth?: string };
+
+// Send one push: content-less, or with `note` sealed for this subscription (falls back to content-less
+// when the subscription has no keys). Returns the HTTP status (404/410 = subscription is dead).
+async function sendPush(s: Sub, note?: object): Promise<number> {
+  const headers: Record<string, string> = { Authorization: await vapidAuthHeader(s.endpoint), TTL: '60' };
+  let body: Uint8Array | undefined;
+  if (note && s.p256dh && s.auth) {
+    body = await encryptPush(new TextEncoder().encode(JSON.stringify(note)), b64urlToBytes(s.p256dh), b64urlToBytes(s.auth));
+    headers['Content-Encoding'] = 'aes128gcm';
+    headers['Content-Type'] = 'application/octet-stream';
+  }
+  headers['Content-Length'] = String(body ? body.length : 0);
+  const res = await fetch(s.endpoint, { method: 'POST', headers, body });
   return res.status;
 }
 
@@ -66,14 +82,16 @@ Deno.serve(async (req) => {
 
   const supa = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
+  const note = body.table === 'chat_msg' ? KONTAKT : undefined;      // Kontakt → labelled ping
+
   // Who should be pinged?
-  let subs: { endpoint: string; pubkey: string }[] = [];
+  let subs: Sub[] = [];
   if (msg.room_id) {                                                   // "an alle" → every member of the room
-    const { data, error } = await supa.from('push_subscriptions').select('endpoint,pubkey').contains('rooms', [msg.room_id]);
+    const { data, error } = await supa.from('push_subscriptions').select('endpoint,pubkey,p256dh,auth').contains('rooms', [msg.room_id]);
     if (error) console.log('QUERY error (room):', error.message);
     subs = (data || []).filter((s) => s.pubkey !== msg.pubkey);        // not the sender
   } else if (msg.recipient_pubkey) {                                   // 1:1 → just the recipient's device(s)
-    const { data, error } = await supa.from('push_subscriptions').select('endpoint,pubkey').eq('pubkey', msg.recipient_pubkey);
+    const { data, error } = await supa.from('push_subscriptions').select('endpoint,pubkey,p256dh,auth').eq('pubkey', msg.recipient_pubkey);
     if (error) console.log('QUERY error (1:1):', error.message);
     subs = data || [];
   }
@@ -82,7 +100,7 @@ Deno.serve(async (req) => {
   let sent = 0;
   for (const s of subs) {
     try {
-      const status = await sendPush(s.endpoint);
+      const status = await sendPush(s, note);
       console.log('PUSH', s.endpoint.slice(-16), '→ status', status);
       if (status === 404 || status === 410) {
         await supa.from('push_subscriptions').delete().eq('endpoint', s.endpoint);   // prune dead subscription

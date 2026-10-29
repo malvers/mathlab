@@ -5,7 +5,7 @@
 // SW_VERSION: bump this string whenever you need every browser to drop stale caches. Changing the
 // file's bytes makes the browser fetch+install this SW as a NEW version → activate() runs → it purges
 // ANY caches left behind by older SW versions that used to serve stale pages.
-const SW_VERSION = '2026-05-25-push-1';
+const SW_VERSION = '2026-10-29-kontakt-1';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -22,21 +22,28 @@ self.addEventListener('fetch', () => {});
 
 // --- VGP Web Push ---------------------------------------------------------------------------------
 // Content-less ping (the server can't read E2E messages). Show a generic notification; an optional
-// JSON payload may override the title/body. VGP-only; other labs never subscribe, so this never fires
-// for them.
+// JSON payload may override title, body, tag and the page a tap opens - the Kontakt ping carries
+// "Nachricht vom Stundenplan" and its own tag, so it never replaces a family notification.
+// VGP-only; other labs never subscribe, so this never fires for them.
 self.addEventListener('push', (e) => {
-  let title = 'VGP', body = 'Neue Nachricht';
-  if (e.data) { try { const d = e.data.json(); title = d.title || title; body = d.body || body; } catch (_) {} }
+  let title = 'VGP', body = 'Neue Nachricht', tag = 'vgp-msg', url = '';
+  if (e.data) { try { const d = e.data.json(); title = d.title || title; body = d.body || body; tag = d.tag || tag; url = d.url || ''; } catch (_) {} }
   e.waitUntil(self.registration.showNotification(title, {
-    body, icon: '/vgp/icons/icon-192.png', badge: '/vgp/icons/icon-192.png', tag: 'vgp-msg', renotify: true
+    body, icon: '/vgp/icons/icon-192.png', badge: '/vgp/icons/icon-192.png', tag, renotify: true, data: { url }
   }));
 });
 
-// Tap a notification → focus an open VGP window, else open the chat.
+// Tap a notification → its own page (Kontakt) if it names one, else focus an open VGP window, else open the chat.
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '';
   e.waitUntil((async () => {
     const wins = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (url) {
+      for (const w of wins) { if (w.url.includes(url) && 'focus' in w) return w.focus(); }
+      if (clients.openWindow) return clients.openWindow(url);
+      return;
+    }
     for (const w of wins) { if (w.url.includes('/vgp/') && 'focus' in w) return w.focus(); }
     if (clients.openWindow) return clients.openWindow('/vgp/vgpchat.html');
   })());
