@@ -180,27 +180,47 @@ addEventListener('resize', fit); fit();
 addEventListener('load', dock);                      // the overview and play buttons join the HUD later
 painted.push(dock);                                  // "9 / 23" and "10 / 23" differ in width: the ◀ moves along
 
+// Sub-points take a click of their own (Doc, 29.10.2026: "dass die Unterpunkte auch auf Klick eine eigene Box
+// bekommen ... für alle dieser Art"): a bullet line under another line of its click group becomes the next click, the
+// groups after it move up. The file keeps its numbers (data-g - the editor and Solita's clips count those), the clicks
+// run on data-k. Lines in a card stay with the card's box.
+function grp(e){ return +(e.dataset.k !== undefined ? e.dataset.k : e.dataset.g); }
+function clickOf(root, g){                           // the click a group of the file starts with
+  return g + [...root.querySelectorAll('.step.sub-klick')].filter(e => +e.dataset.g < g).length;
+}
+slides.forEach(sl => {
+  const all = [...sl.querySelectorAll('.step')];
+  const subs = all.filter((e, i) => e.matches('p.line.l1, p.line.l2') && !e.closest('.card') &&
+    all.slice(0, i).some(f => f.matches('p.line') && f.dataset.g === e.dataset.g));
+  if (!subs.length) return;
+  subs.forEach(e => e.classList.add('sub-klick'));
+  all.forEach(e => {
+    const g = +e.dataset.g;
+    if (isNaN(g)) return;
+    e.dataset.k = clickOf(sl, g) + subs.filter(f => f.dataset.g === e.dataset.g).indexOf(e) + 1;
+  });
+});
 function groups(sl){
-  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+  return [...new Set([...sl.querySelectorAll('.step')].map(grp))].length;
 }
 // every line is in view from the start; the group clicked last carries the triangle and the box - on its first
-// element, so a line with sub-lines gets one mark, not five; what was shown before steps back a little
+// element; what was shown before steps back a little
 // (Doc, 27.09.2026: "alle sichtbar ... ein Dreieck davor", "die schon gezeigten ein klein wenig heller")
 function stepMarks(root, st){
   const all = [...root.querySelectorAll('.step')];
   let top = -1;
-  all.forEach(e => { const g = +e.dataset.g; if (g < st && g > top) top = g; });
-  const cur = all.find(e => +e.dataset.g === top);
+  all.forEach(e => { const g = grp(e); if (g < st && g > top) top = g; });
+  const cur = all.find(e => grp(e) === top);
   all.forEach(e => {
-    const g = +e.dataset.g;
+    const g = grp(e);
     e.classList.toggle('on', g < st); e.classList.toggle('past', g < top); e.classList.toggle('now', e === cur);
   });
   // a card that is one group as a whole is its own box - a box around the heading alone would cut into the card
   root.querySelectorAll('.card').forEach(c => c.classList.toggle('now', !!cur && c.contains(cur) &&
-    [...c.querySelectorAll('.step')].every(e => +e.dataset.g === top)));
+    [...c.querySelectorAll('.step')].every(e => grp(e) === top)));
   // a part that goes again: data-bis="k" - gone once group k is on (deck.css .bis-vorbei; Doc, 06.10.2026: a frame that
   // walks from pair to pair, a line covered)
-  root.querySelectorAll('[data-bis]').forEach(e => e.classList.toggle('bis-vorbei', +e.dataset.bis < st));
+  root.querySelectorAll('[data-bis]').forEach(e => e.classList.toggle('bis-vorbei', clickOf(root, +e.dataset.bis) < st));
 }
 let gestartet = false;   // the start has read the #7 of a link (fromHash) - only from then on may paint() drop it
 let shownSi = -1;        // the slide paint() last showed - a slide coming up restarts its drawn animations
@@ -301,7 +321,7 @@ const trommel = (function () {
     if (gleich) return;                               // painted again where it stands: the roll goes on
     if (bis || wartend.length || folge.length) abbrechen();
     if (!vor) return;
-    const inGruppe = e => +e.dataset.g === step - 1;
+    const inGruppe = e => grp(e) === step - 1;
     const teile = [...slides[si].querySelectorAll('.step[data-trommel]')].filter(inGruppe);
     const reihe = [...slides[si].querySelectorAll('.step.trommel-folge')].filter(inGruppe)
       .reduce((a, f) => a.concat([...f.children]), []);
@@ -907,7 +927,8 @@ const narr = (function () {
       wait = setTimeout(function () { if (!api.playing) return; si++; step = 0; part = 0; paint(); run(); }, 1600);
       return;
     }
-    if (part > 0) { step = Math.min(part, groups(slides[si])); paint(); }
+    // clip k speaks about group k - 1 of the file: the mark goes to its first click, sub-points are in view
+    if (part > 0) { step = Math.min(clickOf(slides[si], part - 1) + 1, groups(slides[si])); paint(); }
     // a line copied in the deck editor has an empty part (Doc, 17.09.2026: "erst mal nix"): it comes in, a pause, on
     if (!String(data.slides[si][part] || '').trim()) { wait = setTimeout(function () { part++; run(); }, 1200); return; }
     aSlide = si;
@@ -928,7 +949,9 @@ const narr = (function () {
     if (api.playing) { api.playing = false; if (audio) audio.pause(); show(); return; }
     api.playing = true; show();
     if (audio && aSlide === si && audio.paused && !audio.ended && audio.currentTime > 0) { audio.play(); return; }
-    part = step; audio = null; run();                 // start where the page stands
+    // start where the page stands - on a sub-point, with the clip of its group
+    const here = [...slides[si].querySelectorAll('.step')].find(e => grp(e) === step - 1);
+    part = here ? +here.dataset.g + 1 : step; audio = null; run();
   }
   api.stop = function () {
     clearTimeout(wait);
