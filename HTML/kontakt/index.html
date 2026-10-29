@@ -209,7 +209,20 @@
                 $('tools').hidden = true;
                 $('back').hidden = true;
                 $('bell').hidden = !canPush;
-                loadList().catch(e => note('Liste nicht ladbar: ' + e.message, true));
+                refresh();
+            }
+
+            // Reload on every poll (20 s) and whenever the app comes back to the front. One failure is mostly a
+            // phone just woken without network yet and says nothing; only a minute without the server (3 in a
+            // row) shows the red line, and the next success takes it away again (Doc, 29.10.2026).
+            let failed = 0;
+            function refresh() {
+                return (open ? loadThread() : loadList()).then(() => {
+                    if (failed >= 3) note('');
+                    failed = 0;
+                }, () => {
+                    if (++failed === 3) note('Keine Verbindung zum Server – die Anzeige ist vielleicht nicht aktuell.', true);
+                });
             }
 
             async function reply() {
@@ -315,7 +328,7 @@
                 if (!C.hasPrivate()) { C.passDialog('unlock', start, 'Kontakt'); return; }
                 $('bell').hidden = !canPush || !!open;
                 bellState();
-                S.poll(() => (open ? loadThread() : loadList()).catch(e => note('Nicht ladbar: ' + e.message, true)), 20000);
+                S.poll(refresh, 20000);
             }
             start();
         })();
