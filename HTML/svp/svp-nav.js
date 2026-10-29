@@ -70,6 +70,9 @@
         /* Doc, 28.10.2026: the school's make-up exam dates from Teams as an SVP page, in MRA after
            Fahrplan - login only (LOGIN_ONLY), like Schuljahr */
         ['nachschreiben.html', 'Nachschreiben', 'b-grey', 'Nachschreibetermine BGY - Termine und Aufsicht'],
+        /* Doc, 29.10.2026: the school's plans of all Klassenarbeiten and Klausuren (Excel + Word per year group
+           in Teams) as one SVP page with the rule of BGySO § 17 (4), in MRA after Nachschreiben - login only */
+        ['klassenarbeiten.html', 'Klassenarbeiten', 'b-grey', 'Klassenarbeiten BGY - alle Jahrgänge, Regel § 17 BGySO'],
         /* Doc, 28.10.2026: the school's staff directory (Excel on the SharePoint site "Personal") as an SVP
            page, in MRA after Nachschreiben - login only (LOGIN_ONLY), like Schuljahr */
         ['telefonliste.html', 'Telefonliste', 'b-grey', 'Telefonliste IBB - Durchwahl, Raum, Schule, E-Mail'],
@@ -109,7 +112,7 @@
     /* Pages whose content only Doc's account may read (Supabase, RLS on his uid): logged out
        they leave the nav altogether - pill, menu entry, gear panel and link card - so the
        class never meets a page that only asks for a password. */
-    const LOGIN_ONLY = new Set(['schuljahr.html', 'nachschreiben.html', 'telefonliste.html']);
+    const LOGIN_ONLY = new Set(['schuljahr.html', 'nachschreiben.html', 'klassenarbeiten.html', 'telefonliste.html']);
     if (!hasSession()) {
         for (let i = LINKS.length - 1; i >= 0; i--) if (LOGIN_ONLY.has(LINKS[i][0])) LINKS.splice(i, 1);
     }
@@ -155,7 +158,7 @@
     // Header wie alles sonst") - it opens in place, below this nav band.
     const NEW_TAB = new Set(['../aehm.html', 'notes.html', 'fahrplan.html', '../buch/meldungen.html', 'schuljahr.html', 'konzepte.html', 'operatoren.html',
         'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', 'notenvergabe-fos.html',
-        'notenvergabe-osgy.html', '../fokus.html', 'nachschreiben.html', 'telefonliste.html']);
+        'notenvergabe-osgy.html', '../fokus.html', 'nachschreiben.html', 'klassenarbeiten.html', 'telefonliste.html']);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -195,7 +198,7 @@
                top, so the menu gets shorter - the demo class used to close the menu below a divider. */
             /* Doc, 10.10.2026: "mach MRA nur sichtbar, wenn ich eingeloggt bin" - login: the sub-menu alone goes
                (not LOGIN_ONLY: the pages and their cards stay as they were); "mach Meld. als ersten eintrag" */
-            [null, [{ sub: 'MRA', login: true, hrefs: ['../buch/meldungen.html', '../aehm.html', 'notes.html', 'fahrplan.html', 'nachschreiben.html', 'telefonliste.html', '../vote.html?host', 'genii.html'] },
+            [null, [{ sub: 'MRA', login: true, hrefs: ['../buch/meldungen.html', '../aehm.html', 'notes.html', 'fahrplan.html', 'nachschreiben.html', 'klassenarbeiten.html', 'telefonliste.html', '../vote.html?host', 'genii.html'] },
                     'schuljahr.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Noten', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
                                                   'bewertungen.html', 'notenvergabe-fos.html',

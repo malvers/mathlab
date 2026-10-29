@@ -1,0 +1,139 @@
+/* Klassenarbeiten BGY (klassenarbeiten.html): all written tests of the year groups, one row per
+   school week, one column per year group (or one class group of 11 through the filter pills).
+   Holiday bands, this week (kw-now) and the past ones (kw-past) wear the plan pages' own rules
+   (svp-table.css, svp-detail.css); the warning line and the notes boxes come from
+   svp-schuljahr.css - only the table, the pills and the entries are set here. */
+
+#ka-table { table-layout: fixed; min-width: 0; }
+#ka-table col.c-kw { width: 52px; }
+#ka-table col.c-wk { width: 118px; }
+
+#ka-table tbody tr > td { height: 40px; vertical-align: top; padding-top: 9px; padding-bottom: 9px; }
+#ka-table td.kw { padding-left: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#ka-table td.wk { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+#ka-table td.wk .wk-frei {
+    display: block;
+    margin-top: 2px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    color: rgb(var(--g-ferien));
+}
+#ka-table tr.woche > td { border-top: 1px solid var(--row-line); }
+#ka-table tr.woche.leer > td { height: 30px; }
+/* this week: the plan's bar on the first column */
+#ka-table tr.kw-now > td:first-child { box-shadow: inset 2px 0 0 rgb(240, 160, 24); }
+/* a week that breaks the rule: a Υ-red bar instead */
+#ka-table tr.regel > td:first-child { box-shadow: inset 4px 0 0 rgb(176, 36, 24); }
+#ka-table tr.flash > td { animation: sj-flash 1.6s ease-out; }
+
+/* the entries of one year group in one week */
+#ka-table td.j ul { margin: 0; padding: 0; list-style: none; }
+#ka-table li.ka-e {
+    display: grid;
+    grid-template-columns: 6.4em 1fr auto;
+    column-gap: 8px;
+    align-items: baseline;
+    margin: 0 -6px 3px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+#ka-table li.ka-e:last-child { margin-bottom: 0; }
+#ka-table li.ka-e .tag { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text); }
+#ka-table li.ka-e .tag.offen { color: var(--muted); font-style: italic; }
+#ka-table li.ka-e .was { min-width: 0; }
+#ka-table li.ka-e .fach { font-weight: 600; }
+#ka-table li.ka-e .wer,
+#ka-table li.ka-e .raum { color: var(--muted); }
+#ka-table li.ka-e .wer::before,
+#ka-table li.ka-e .raum::before { content: " · "; }
+#ka-table li.ka-e .chips { display: inline-flex; gap: 4px; white-space: nowrap; }
+#ka-table .chip {
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+    border: 1px solid rgba(var(--tint), 0.45);
+    color: var(--muted);
+    vertical-align: 1px;
+}
+#ka-table .chip.kl { border-color: rgba(var(--g-violet), 0.6); color: var(--violet); }
+#ka-table .chip.ich { border-color: rgb(176, 36, 24); background: rgb(176, 36, 24); color: #fff; text-transform: uppercase; }
+
+/* a clash with BGySO § 17 (4): Υ-red; two subjects on one day in 12/13: the "check" orange */
+#ka-table li.ka-e.regel { background: rgba(176, 36, 24, 0.2); box-shadow: inset 3px 0 0 rgb(176, 36, 24); }
+#ka-table li.ka-e.pruefen { background: rgba(240, 160, 24, 0.16); box-shadow: inset 3px 0 0 rgb(240, 160, 24); }
+#ka-table li.ka-e.frei { background: rgba(var(--g-ferien), 0.28); }
+#ka-table li.ka-e.meins .fach { color: var(--head); }
+#ka-table li.ka-marke {
+    margin-top: 3px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--lambda);
+}
+
+#ka-table tr.ka-msg td {
+    height: auto;
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--muted);
+}
+#ka-table tr.ka-msg .action { margin-left: 10px; }
+
+/* the filter: one pill per year group, one per class group of 11 */
+.ka-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+.ka-pill {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid rgba(var(--tint), 0.35);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+.ka-pill:hover { color: var(--text); border-color: rgb(var(--tint)); }
+.ka-pill.on { color: var(--text); background: rgba(var(--g-btn), 0.3); border-color: rgb(var(--tint)); }
+
+/* the rule box: red and orange dots instead of the λ dots of the notes */
+.ka-regel li.regel::before { background: rgb(176, 36, 24); }
+.ka-regel li.pruefen::before { background: rgb(240, 160, 24); }
+
+/* Phone: every week becomes a small card, the year groups stack with their name, empty ones drop out */
+@media (max-width: 720px) {
+    #ka-table { table-layout: auto; }
+    #ka-table thead, #ka-table colgroup { display: none; }
+    #ka-table, #ka-table tbody, #ka-table tr, #ka-table td { display: block; width: auto; }
+    #ka-table tr.woche { padding: 6px 0 8px; border-bottom: 1px solid var(--row-line); }
+    #ka-table tbody tr.woche > td { height: auto; border: 0; padding-top: 2px; padding-bottom: 2px; }
+    #ka-table tr.woche td.kw,
+    #ka-table tr.woche td.wk { display: inline-block; padding: 4px 6px 2px 12px; }
+    #ka-table tr.woche td.wk .wk-frei { display: inline; margin-left: 8px; }
+    #ka-table tr.woche td.j { padding: 2px 12px; }
+    #ka-table tr.woche td.j::before {
+        content: attr(data-j);
+        display: block;
+        margin: 2px 0 2px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.6rem;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+    }
+    #ka-table tr.woche td.j.leer { display: none; }
+    #ka-table li.ka-e { grid-template-columns: 5.6em 1fr; font-size: 0.86rem; }
+    #ka-table li.ka-e .chips { grid-column: 2; }
+    #ka-table tr.ferien td { display: block; height: auto; }
+    .ka-filter { width: 100%; }
+}
+
+@media print {
+    .ka-filter { display: none; }
+    #ka-table li.ka-e.regel { background: #f6dcd9; }
+    #ka-table li.ka-e.pruefen { background: #fbeccd; }
+    #ka-table li.ka-e.frei { background: #eef3e4; }
+}

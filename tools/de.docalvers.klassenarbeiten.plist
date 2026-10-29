@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>de.docalvers.klassenarbeiten</string>
+
+  <!-- Klassenarbeiten BGY (Doc, 29.10.2026: "täglich aktuell halten"): every hour tools/klassenarbeiten.py reads the
+       school's plans in Teams (synced by OneDrive) and pushes to Supabase only when something changed - the log
+       stays quiet otherwise. Runs only while the Mac is awake and OneDrive syncs.
+       Installed copy: ~/Library/LaunchAgents/de.docalvers.klassenarbeiten.plist (this file is its source). -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/malvers/IdeaProjects/forloop/tools/klassenarbeiten.py</string>
+  </array>
+
+  <key>StartInterval</key><integer>3600</integer>
+  <key>RunAtLoad</key><true/>
+
+  <key>StandardOutPath</key><string>/Users/malvers/Library/Logs/klassenarbeiten.log</string>
+  <key>StandardErrorPath</key><string>/Users/malvers/Library/Logs/klassenarbeiten.log</string>
+</dict>
+</plist>

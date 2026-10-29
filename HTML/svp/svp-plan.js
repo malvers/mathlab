@@ -30,6 +30,7 @@
         'rows',             // open weeks, holiday folds, the table rows themselves
         'untis-text',       // class book texts: abbreviations, 250-character fit (also read by tools/webuntis.js)
         'untis',            // WebUntis: chips, dates, the class book dialog
+        'klassenarbeiten',  // the class's Klassenarbeiten of a week from the school's plans (login only)
         'cards',            // Lernbereich pills inside the cards
         'search',           // search in the plan
         'listen',           // "Zusatzmaterial" and "Videos" in the toolbar: the decks, labs and films of every week

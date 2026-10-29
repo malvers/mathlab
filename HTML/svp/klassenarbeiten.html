@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klassenarbeiten BGY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <!-- the warning line and the notes boxes below the table are the Schuljahr page's -->
+    <link rel="stylesheet" href="svp-schuljahr.css">
+    <link rel="stylesheet" href="svp-klassenarbeiten.css">
+    <script src="svp-gate.js"></script>
+</head>
+
+<body>
+    <!-- All Klassenarbeiten and Klausuren of the BGY year groups from the school's plans in Teams
+         (an Excel sheet and a Word table per year group), read, put together and checked against
+         BGySO § 17 (4) by tools/klassenarbeiten.py, which keeps them in Supabase (svp_untis, row
+         _klassenarbeiten). Only Doc's account can read that row, so the page shows nothing without
+         his login - nothing of the plans is in this file. -->
+    <header class="page-head">
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Klassenarbeiten BGY <span id="ka-jahr"></span></h1>
+            </div>
+        </div>
+        <div class="subtitle" id="ka-sub">Klassenarbeiten und Klausuren aller Jahrgänge &middot; aus Teams</div>
+    </header>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" id="ka-jetzt" type="button">Diese Woche</button>
+        <div class="ka-filter" id="ka-filter" role="group" aria-label="Klasse"></div>
+        <div class="legend">
+            <span><span class="dot" style="background: rgb(176, 36, 24)"></span>Regel verletzt</span>
+            <span><span class="dot" style="background: rgb(240, 160, 24)"></span>prüfen</span>
+            <span><span class="dot" style="background: var(--lambda)"></span>Hinweis</span>
+        </div>
+    </div>
+
+    <div class="sj-warn" id="ka-warn" hidden></div>
+
+    <div class="table-wrap">
+        <table id="ka-table">
+            <colgroup>
+                <col class="c-kw"><col class="c-wk">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>KW</th>
+                    <th>Woche</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="ka-msg"><td colspan="5">Termine werden geladen &hellip;</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <section class="sj-korr ka-regel" id="ka-regel" hidden>
+        <h2>Regel BGySO § 17 (4): höchstens eine am Tag, drei in der Woche</h2>
+        <ul></ul>
+    </section>
+
+    <section class="sj-korr" id="ka-korr" hidden>
+        <h2>Hinweise zu den Dateien</h2>
+        <ul></ul>
+    </section>
+
+    <footer class="page-foot" id="ka-foot"></footer>
+
+    <script src="svp-auth.js"></script>
+    <script src="svp-nav.js"></script>
+    <script>
+        (function () {
+            const ROW = '_klassenarbeiten';
+            const FILTER_KEY = 'svp-ka-filter';
+            const TAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const table = document.getElementById('ka-table');
+            const tbody = table.querySelector('tbody');
+            const pad = n => String(n).padStart(2, '0');
+            let DATA = null;
+            let filter = 'alle';
+            try { filter = localStorage.getItem(FILTER_KEY) || 'alle'; } catch (e) { /* private window */ }
+
+            function datum(iso) { const p = iso.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+            function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+            function tm(d) { return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.'; }
+            function plus(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+            function montag(d) { return plus(d, -((d.getDay() + 6) % 7)); }
+            function kwVon(d) {
+                const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+                t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+                return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
+            }
+            function stempel(s) {
+                const d = new Date(s);
+                return !s || isNaN(d) ? (s || '?') : tm(d) + d.getFullYear() + ', ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' Uhr';
+            }
+            function el(tag, cls, text) {
+                const e = document.createElement(tag);
+                if (cls) e.className = cls;
+                if (text != null) e.textContent = text;
+                return e;
+            }
+            function gruppe(g) { return g ? g.replace(',', '/') : ''; }
+            function meldung(text, knopf) {
+                tbody.innerHTML = '';
+                const tr = el('tr', 'ka-msg'), td = el('td', null, text);
+                td.colSpan = 5;
+                if (knopf) td.appendChild(knopf);
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            }
+
+            /* "alle", a year group ("BGY25") or a class group of 11 ("BGY26|1,2") */
+            function passt(e) {
+                if (filter === 'alle') return true;
+                const p = filter.split('|');
+                return e.j === p[0] && (!p[1] || e.g === p[1]);
+            }
+            function spalten() {
+                const js = (DATA.jahrgaenge || []);
+                return filter === 'alle' ? js : js.filter(j => j.j === filter.split('|')[0]);
+            }
+
+            function zeichneFilter() {
+                const box = document.getElementById('ka-filter');
+                box.innerHTML = '';
+                const wahl = [['alle', 'Alle']];
+                (DATA.jahrgaenge || []).forEach(function (j) {
+                    if (j.gruppen && j.gruppen.length) j.gruppen.forEach(g => wahl.push([j.j + '|' + g, j.j.slice(3) + '-' + gruppe(g)]));
+                    else wahl.push([j.j, j.j]);
+                });
+                if (!wahl.some(w => w[0] === filter)) filter = 'alle';
+                wahl.forEach(function (w) {
+                    const b = el('button', 'ka-pill' + (w[0] === filter ? ' on' : ''), w[1]);
+                    b.type = 'button';
+                    b.setAttribute('aria-pressed', w[0] === filter);
+                    b.addEventListener('click', function () {
+                        filter = w[0];
+                        try { localStorage.setItem(FILTER_KEY, filter); } catch (e) { /* private window */ }
+                        zeichne();
+                    });
+                    box.appendChild(b);
+                });
+            }
+
+            function eintragEl(e, mitGruppe) {
+                const li = el('li', 'ka-e');
+                if (e.verstoss === 'regel') li.classList.add('regel');
+                else if (e.verstoss === 'pruefen') li.classList.add('pruefen');
+                if (e.meins) li.classList.add('meins');
+                if (e.frei) li.classList.add('frei');
+                const tag = el('span', 'tag');
+                if (e.d) {
+                    const d = datum(e.d);
+                    tag.textContent = TAGE[d.getDay()] + ' ' + tm(d) + (e.unsicher ? '?' : '');
+                } else {
+                    tag.textContent = e.unsicher || 'Woche';
+                    tag.classList.add('offen');
+                }
+                li.appendChild(tag);
+                const was = el('span', 'was');
+                was.appendChild(el('span', 'fach', e.fach || '–'));
+                if (e.wer) was.appendChild(el('span', 'wer', e.wer));
+                if (e.raum) was.appendChild(el('span', 'raum', e.raum));
+                li.appendChild(was);
+                const chips = el('span', 'chips');
+                if (mitGruppe && e.g) chips.appendChild(el('span', 'chip grp', gruppe(e.g)));
+                if (e.art) chips.appendChild(el('span', 'chip kl', 'KL'));
+                if (e.meins) chips.appendChild(el('span', 'chip ich', 'ich'));
+                if (chips.children.length) li.appendChild(chips);
+                const info = [
+                    e.art, e.zusatz && e.zusatz.join(', '), e.unsicher && 'in der Datei: ' + e.unsicher,
+                    e.aufsicht && 'Aufsicht: ' + e.aufsicht, e.raum && 'Raum: ' + e.raum,
+                    e.frei && 'unterrichtsfrei: ' + e.frei, 'steht in: ' + (e.quellen || []).join(' + ')
+                ].filter(Boolean);
+                li.title = info.join('\n');
+                return li;
+            }
+
+            function zeichne() {
+                zeichneFilter();
+                const cols = spalten();
+                const heute = new Date();
+                const diesMo = iso(montag(heute));
+
+                /* the head: KW, week, one column per year group */
+                const cg = table.querySelector('colgroup'), hr = table.querySelector('thead tr');
+                while (cg.children.length > 2) cg.lastElementChild.remove();
+                while (hr.children.length > 2) hr.lastElementChild.remove();
+                cols.forEach(function (j) {
+                    cg.appendChild(el('col', 'c-j'));
+                    const th = el('th', null, j.j + ' · Kl. ' + j.stufe);
+                    if (filter.indexOf('|') > 0) th.textContent = 'BGY' + filter.split('|')[0].slice(3) + '-' + gruppe(filter.split('|')[1]) + ' · Kl. ' + j.stufe;
+                    hr.appendChild(th);
+                });
+                const n = 2 + cols.length;
+
+                const eintraege = (DATA.eintraege || []).filter(passt);
+                const marken = (DATA.marken || []).filter(m => filter === 'alle' || m.j === filter.split('|')[0]);
+                const alle = (DATA.eintraege || []);
+                if (!alle.length) { meldung('Keine Einträge.'); return; }
+                let mo = datum(alle.reduce((a, e) => (e.mo < a ? e.mo : a), alle[0].mo));
+                const ende = datum(alle.reduce((a, e) => (e.mo > a ? e.mo : a), alle[0].mo));
+                const ferien = (DATA.ferien || []).map(f => ({ name: f.name, von: datum(f.von), bis: datum(f.bis) }));
+
+                tbody.innerHTML = '';
+                const zeileVon = {};
+                let jetzt = null;
+                for (; mo <= ende; mo = plus(mo, 7)) {
+                    const fr = plus(mo, 4);
+                    const f = ferien.find(x => x.von <= mo && x.bis >= fr);
+                    if (f) {
+                        /* a whole week of holidays: one band, the next weeks of the same holidays join it */
+                        const last = tbody.lastElementChild;
+                        if (last && last.dataset.ferien === f.name) continue;
+                        const tr = el('tr', 'ferien'), td = el('td', null, f.name + ' · ' + tm(f.von) + '–' + tm(f.bis) + f.bis.getFullYear());
+                        tr.dataset.ferien = f.name;
+                        td.colSpan = n;
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
+                        continue;
+                    }
+                    const key = iso(mo);
+                    const tr = el('tr', 'woche');
+                    if (key < diesMo) tr.classList.add('kw-past');
+                    else if (key === diesMo) { tr.classList.add('kw-now'); jetzt = tr; }
+                    tr.appendChild(el('td', 'kw', kwVon(mo)));
+                    const teil = ferien.find(x => x.von <= fr && x.bis >= mo);
+                    const wk = el('td', 'wk', tm(mo) + '–' + tm(fr));
+                    if (teil) wk.appendChild(el('span', 'wk-frei', teil.name));
+                    tr.appendChild(wk);
+                    let leer = true;
+                    cols.forEach(function (j) {
+                        const td = el('td', 'j');
+                        td.dataset.j = j.j + ' · Kl. ' + j.stufe;
+                        const ul = el('ul');
+                        eintraege.filter(e => e.j === j.j && e.mo === key).forEach(e => ul.appendChild(eintragEl(e, filter === 'alle' || filter === j.j)));
+                        marken.filter(m => m.j === j.j && iso(montag(datum(m.d))) === key).forEach(function (m) {
+                            const d = datum(m.d);
+                            ul.appendChild(el('li', 'ka-marke', TAGE[d.getDay()] + ' ' + tm(d) + ' ' + m.text));
+                        });
+                        if (ul.children.length) { td.appendChild(ul); leer = false; }
+                        else td.classList.add('leer');
+                        if (j.j === 'BGY26' || j.stufe === 11) td.classList.add('stufe11');
+                        tr.appendChild(td);
+                    });
+                    if (leer) tr.classList.add('leer');
+                    if ((DATA.verstoesse || []).some(v => v.art !== 'pruefen' && (v.mo === key || (v.d && iso(montag(datum(v.d))) === key)) && passtV(v))) tr.classList.add('regel');
+                    zeileVon[key] = tr;
+                    tbody.appendChild(tr);
+                }
+
+                liste('ka-regel', (DATA.verstoesse || []).filter(passtV), v => v.mo || iso(montag(datum(v.d))), zeileVon,
+                      v => (v.art === 'pruefen' ? 'pruefen' : 'regel'));
+                liste('ka-korr', (DATA.korrekturen || []).filter(k => filter === 'alle' || !k.j || k.j === filter.split('|')[0]),
+                      k => (k.d ? iso(montag(datum(k.d))) : null), zeileVon);
+
+                document.getElementById('ka-jetzt').onclick = function () {
+                    const ziel = jetzt || [...tbody.querySelectorAll('tr.woche')].find(t => !t.classList.contains('kw-past'));
+                    if (ziel) springe(ziel);
+                };
+            }
+
+            function passtV(v) {
+                if (filter === 'alle') return true;
+                const p = filter.split('|');
+                return v.j === p[0] && (!p[1] || !v.g || v.g === p[1]);
+            }
+
+            function liste(id, items, woche, zeileVon, klasse) {
+                const box = document.getElementById(id), ul = box.querySelector('ul');
+                ul.innerHTML = '';
+                items.forEach(function (k) {
+                    const li = el('li');
+                    if (klasse) li.className = klasse(k);
+                    const tr = zeileVon[woche(k)];
+                    if (tr) {
+                        const a = el('a', null, k.text);
+                        a.addEventListener('click', () => springe(tr));
+                        li.appendChild(a);
+                    } else li.textContent = k.text;
+                    ul.appendChild(li);
+                });
+                box.hidden = !ul.children.length;
+            }
+
+            function springe(tr) {
+                tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                tr.classList.remove('flash');
+                void tr.offsetWidth;
+                tr.classList.add('flash');
+            }
+
+            function kopf(data) {
+                document.getElementById('ka-jahr').textContent = data.schuljahr || '';
+                const dateien = (data.quelle && data.quelle.dateien) || [];
+                const neu = dateien.reduce((a, f) => (f.mtime && (!a || f.mtime > a) ? f.mtime : a), null);
+                document.getElementById('ka-sub').textContent = 'Klassenarbeiten und Klausuren aller Jahrgänge · aus Teams, ' +
+                    'zuletzt geändert ' + stempel(neu);
+                const warn = document.getElementById('ka-warn');
+                warn.hidden = !data.fehler;
+                if (data.fehler) warn.textContent = 'Die Dateien ließen sich am ' + stempel(data.fehler.zeit) +
+                    ' nicht lesen (' + data.fehler.text + ') – hier steht weiter der letzte gute Stand.';
+                const foot = document.getElementById('ka-foot');
+                foot.textContent = 'Quelle: Teams › ' + ((data.quelle && data.quelle.ordner) || '').split('/').join(' › ') +
+                    ' – ' + dateien.map(f => f.datei + ' (' + stempel(f.mtime) + ')').join(', ') +
+                    (data.abgeglichen ? ' · abgeglichen ' + stempel(data.abgeglichen) : '') +
+                    ' · Regel: ';
+                const a = el('a', null, 'BGySO § 17 (4)');
+                a.href = 'https://www.revosax.sachsen.de/vorschrift/21010';
+                a.target = '_blank';
+                a.rel = 'noopener';
+                foot.appendChild(a);
+                foot.appendChild(document.createTextNode(', Komplexe Leistungen (KL) zählen nicht mit · Feiertage Sachsen, Ferientermine SMK. Nur mit Anmeldung sichtbar.'));
+            }
+
+            async function lade() {
+                if (!svpAuth.hasSession()) {
+                    const b = el('button', 'action', 'Anmelden');
+                    b.type = 'button';
+                    b.addEventListener('click', () => svpAuth.loginDialog(lade, 'Anmelden, um die Klassenarbeiten zu sehen'));
+                    meldung('Die Klassenarbeiten sind nur mit Anmeldung sichtbar.', b);
+                    return;
+                }
+                try {
+                    const res = await svpAuth.api('svp_untis?page=eq.' + ROW + '&select=data');
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const rows = await res.json();
+                    if (!rows.length || !rows[0].data) {
+                        meldung('Für dieses Konto liegen keine Klassenarbeiten vor.');
+                        return;
+                    }
+                    DATA = rows[0].data;
+                    kopf(DATA);
+                    zeichne();
+                } catch (e) {
+                    meldung('Die Klassenarbeiten ließen sich nicht laden (' + e.message + ').');
+                }
+            }
+            lade();
+        })();
+    </script>
+</body>
+
+</html>
