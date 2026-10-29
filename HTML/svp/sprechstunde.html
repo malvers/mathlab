@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
     <meta name="theme-color" content="#050b18">
-    <link rel="stylesheet" href="sprechstunde.css">
+    <link rel="stylesheet" href="sprechstunde.css?v=20261029-2">
 </head>
 
 <body class="sp-page">
@@ -58,8 +58,8 @@
     </div>
 
     <script src="svp-auth.js"></script>
-    <script src="svp-crypto.js"></script>
-    <script src="sprechstunde-core.js"></script>
+    <script src="svp-crypto.js?v=20261029-2"></script>
+    <script src="sprechstunde-core.js?v=20261029-2"></script>
     <script>
         (function () {
             const S = window.Sprechstunde, C = window.svpCrypto;
@@ -68,7 +68,7 @@
             const K_KEY = 'svp-sprechstunde-key', K_PAIR = 'svp-sprechstunde-pair', K_MINE = 'svp-sprechstunde-mine';
 
             $('phone').innerHTML = S.PHONE;
-            S.backOrClose($('back'));   // in its own chat window the arrow closes it
+            if (S.backOrClose) S.backOrClose($('back'));   // in its own chat window the arrow closes it
             $('send').innerHTML = S.SEND_SVG;
 
             const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
