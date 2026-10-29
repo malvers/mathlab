@@ -254,6 +254,33 @@
         const nameText = txt => INDEX && INDEX.names
             ? txt.replace(/[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{4,}/g, m => INDEX.names[m] ? INDEX.names[m] : m) : txt;
 
+        // One own appointment as a tile, placed like a lesson (look: .tt-termin in svp-timetable.css)
+        function terminTile(it, y, scale) {
+            const t = it.l, a = toMin(t.startTime), b = toMin(t.endTime);
+            const el = document.createElement('div');
+            el.className = 'tt-lesson tt-termin';
+            el.style.top = y(a) + 'px';
+            el.style.height = Math.max(16, (b - a) * scale - 3) + 'px';
+            el.style.left = 'calc(' + (it.col * 100 / it.of) + '% + 3px)';
+            el.style.width = 'calc(' + (100 / it.of) + '% - 6px)';
+            const time = document.createElement('span');
+            time.className = 'tt-termin-time';
+            time.textContent = hhmm(t.startTime);
+            el.appendChild(time);
+            const who = document.createElement('span');
+            who.className = 'tt-termin-who';
+            who.textContent = t.who || t.title || 'Termin';
+            el.appendChild(who);
+            if (t.who && t.title) {
+                const what = document.createElement('span');
+                what.className = 'tt-termin-what';
+                what.textContent = t.title;
+                el.appendChild(what);
+            }
+            el.title = [t.title, t.who, t.info, hhmm(t.startTime) + '–' + hhmm(t.endTime)].filter(Boolean).join(' · ');
+            return el;
+        }
+
         // --- state ---------------------------------------------------------
         let INDEX = null;      // plandaten/index.json: weeks, staff, school year
         let DATA = null;       // the week currently on screen
@@ -270,6 +297,10 @@
         let RUNNING = false;   // an optimizer run is on - hide the previous result
         let PLAN = null;          // { lessons, mode } - what the grid currently shows
         let LAYOUT = null;        // time axis of the current grid (for drop zones)
+        /* Own appointments next to the lessons (Coaching etc., Doc 29.10.2026). They live in
+           plandaten/termine.json - gitignored like the plan, because they carry students' names -
+           and are drawn only: no clash, no lesson count, never handed to the optimizer. */
+        let TERMINE = [];
 
         // School branch from the class name prefix. Measured against the real
         // WebUntis departments: GS = dep 3 (1a-4b), OS = dep 1 (5a-12),
@@ -539,8 +570,12 @@
                 // a double period is one tile (mergeRuns); it clashes when any of its periods does
                 const items = mergeRuns(gridLessons.filter(l => l.date === d))
                     .map(l => ({ l, clash: l.parts.some(p => clash.has(pos.get(p))) }));
+                // own appointments share the columns, so they sit beside a lesson, not on top of it
+                const showTermine = !CONF && mode !== 'diff' && (!selected || selected === INDEX.teacher);
+                if (showTermine) for (const t of TERMINE) if (t.date === d) items.push({ l: { ...t, termin: true }, clash: false });
                 for (const it of layoutColumns(items)) {
                     const l = it.l;
+                    if (l.termin) { col.appendChild(terminTile(it, y, scale)); continue; }
                     const a = toMin(l.startTime), b = toMin(l.endTime);
                     const el = document.createElement('div');
                     el.className = 'tt-lesson'
@@ -1732,6 +1767,11 @@
                 }
                 syncScopeOption();
                 showWeek(startWeek());
+                // appointments are optional: no file (e.g. on docalvers.de) = none
+                fetch('plandaten/termine.json?v=' + Date.now())
+                    .then(r => r.ok ? r.json() : { termine: [] })
+                    .then(j => { TERMINE = (j && j.termine) || []; if (DATA && TERMINE.length) render(DATA, SELECTED); })
+                    .catch(() => {});
             })
             .catch(e => {
                 document.getElementById('grid').innerHTML =

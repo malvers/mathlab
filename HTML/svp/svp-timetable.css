@@ -246,6 +246,53 @@
     border-left-width: 5px;
 }
 
+/* Own appointment (Coaching etc.) - a φ-green card, one line, so a 15-min slot
+   (15 * 1.6 - 3 = 21 px) still reads; the full text sits in the tooltip.
+   No dashed outline (Doc, 29.10.2026: "nicht so schön"). */
+.tt-lesson.tt-termin {
+    --hue: var(--phi);
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding: 1px 6px;
+    background: color-mix(in srgb, var(--hue) 16%, var(--card));
+    font-size: 0.78rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.tt-termin .tt-termin-who {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.tt-termin .tt-termin-what {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    color: var(--hue);
+}
+
+@container (max-width: 150px) {
+    .tt-termin .tt-termin-what { display: none; }
+}
+
+/* the grid's time axis tells the time; the phone list has none, so the tile says it */
+.tt-termin .tt-termin-time {
+    display: none;
+    flex: 0 0 auto;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--hue);
+}
+
+@media (max-width: 720px) {
+    .tt-termin .tt-termin-time { display: inline; }
+}
+
 .tt-empty {
     /* Span the whole grid - in the 62px axis column the message wraps
        one word per line. */
