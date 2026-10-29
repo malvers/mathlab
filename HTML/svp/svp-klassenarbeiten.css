@@ -20,12 +20,17 @@
     color: rgb(var(--g-ferien));
 }
 #ka-table tr.woche > td { border-top: 1px solid var(--row-line); }
+/* a thin line in front of every year group (Doc, 29.10.2026: between them, then "vor BGY 26 auch") */
+#ka-table thead th:nth-child(n+3),
+#ka-table td.j { border-left: 1px solid var(--line); }
 #ka-table tr.woche.leer > td { height: 30px; }
 /* this week: the plan's bar on the first column */
 #ka-table tr.kw-now > td:first-child { box-shadow: inset 2px 0 0 rgb(240, 160, 24); }
 /* a week that breaks the rule: a Υ-red bar instead */
 #ka-table tr.regel > td:first-child { box-shadow: inset 4px 0 0 rgb(176, 36, 24); }
 #ka-table tr.flash > td { animation: sj-flash 1.6s ease-out; }
+/* folded weeks are gone completely (the bands and their chevron: svp-detail.css, like the plans) */
+#ka-table tr.ferien-folded { display: none; }
 
 /* the entries of one year group in one week */
 #ka-table td.j ul { margin: 0; padding: 0; list-style: none; }
@@ -66,14 +71,22 @@
 /* a clash with BGySO § 17 (4): Υ-red; two subjects on one day in 12/13: the "check" orange */
 #ka-table li.ka-e.regel { background: rgba(176, 36, 24, 0.2); box-shadow: inset 3px 0 0 rgb(176, 36, 24); }
 #ka-table li.ka-e.pruefen { background: rgba(240, 160, 24, 0.16); box-shadow: inset 3px 0 0 rgb(240, 160, 24); }
-#ka-table li.ka-e.frei { background: rgba(var(--g-ferien), 0.28); }
+/* a test on a day without lessons is a note of the list below, so it wears the λ of the legend's "Hinweis"
+   (Doc, 29.10.2026: "der ist grün unterlegt, muss nicht blau? Hinweis?") */
+#ka-table li.ka-e.frei { background: color-mix(in srgb, var(--lambda) 18%, transparent); box-shadow: inset 3px 0 0 var(--lambda); }
 #ka-table li.ka-e.meins .fach { color: var(--head); }
+/* a date of the school's own (Notenstopp): a big Υ-red pill (Doc, 29.10.2026: "groß rote pille") */
 #ka-table li.ka-marke {
-    margin-top: 3px;
+    display: inline-block;
+    margin: 6px 0 2px;
+    padding: 6px 14px;
+    border-radius: 999px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.62rem;
+    font-size: 0.72rem;
+    line-height: 1.25;
     letter-spacing: 0.06em;
-    color: var(--lambda);
+    color: #fff;
+    background: var(--ypsilon);
 }
 
 #ka-table tr.ka-msg td {
@@ -84,17 +97,20 @@
 }
 #ka-table tr.ka-msg .action { margin-left: 10px; }
 
-/* the filter: one pill per year group, one per class group of 11 */
-.ka-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+/* the filter: one pill per year group, one per class group of 11 - as big as the toolbar's buttons
+   (Doc, 29.10.2026: "die butts gleich groß"), and all of one width */
+.ka-filter { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
 .ka-pill {
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.66rem;
+    font-size: 0.72rem;
+    line-height: 1.25;
     letter-spacing: 0.06em;
     color: var(--muted);
     background: transparent;
     border: 1px solid rgba(var(--tint), 0.35);
     border-radius: 8px;
-    padding: 6px 10px;
+    padding: 9px 16px;
+    white-space: nowrap;
     cursor: pointer;
 }
 .ka-pill:hover { color: var(--text); border-color: rgb(var(--tint)); }
@@ -128,12 +144,16 @@
     #ka-table li.ka-e { grid-template-columns: 5.6em 1fr; font-size: 0.86rem; }
     #ka-table li.ka-e .chips { grid-column: 2; }
     #ka-table tr.ferien td { display: block; height: auto; }
-    .ka-filter { width: 100%; }
+    #ka-table td.j { border-left: 0; }
+    .ka-filter { width: 100%; grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); }
+    .ka-pill { padding-left: 6px; padding-right: 6px; }
 }
 
 @media print {
     .ka-filter { display: none; }
+    #ka-table tr.ferien-folded { display: table-row; }
     #ka-table li.ka-e.regel { background: #f6dcd9; }
     #ka-table li.ka-e.pruefen { background: #fbeccd; }
-    #ka-table li.ka-e.frei { background: #eef3e4; }
+    #ka-table li.ka-e.frei { background: #e3e9f4; }
+    #ka-table li.ka-marke { color: #000; background: none; border: 2px solid #b02418; }
 }

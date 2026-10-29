@@ -92,6 +92,12 @@
             let DATA = null;
             let filter = 'alle';
             try { filter = localStorage.getItem(FILTER_KEY) || 'alle'; } catch (e) { /* private window */ }
+            /* holiday bands fold the weeks behind them, up to the next band, and F folds all - the way the
+               plans do it (svp-plan-rows.js; Doc, 29.10.2026: "wie im SVP die Ferien zuklappbar (f für alle)").
+               Remembered per page and browser under the plans' key; a band is known by name and first day. */
+            const FOLD_KEY = 'svp-ferien-fold:' + location.pathname;
+            let gefaltet;
+            try { gefaltet = new Set(JSON.parse(localStorage.getItem(FOLD_KEY) || '[]')); } catch (e) { gefaltet = new Set(); }
 
             function datum(iso) { const p = iso.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
             function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
@@ -213,12 +219,15 @@
                 const alle = (DATA.eintraege || []);
                 if (!alle.length) { meldung('Keine Einträge.'); return; }
                 let mo = datum(alle.reduce((a, e) => (e.mo < a ? e.mo : a), alle[0].mo));
-                const ende = datum(alle.reduce((a, e) => (e.mo > a ? e.mo : a), alle[0].mo));
+                const ende = datum([DATA.bis].concat(alle.map(e => e.mo)).filter(Boolean).reduce((a, b) => (b > a ? b : a)));
                 const ferien = (DATA.ferien || []).map(f => ({ name: f.name, von: datum(f.von), bis: datum(f.bis) }));
 
                 tbody.innerHTML = '';
                 const zeileVon = {};
                 let jetzt = null;
+                /* the summer holidays before the school year head the first block, as in the plans */
+                const jahr = parseInt(DATA.schuljahr, 10);
+                if (jahr) tbody.appendChild(band('Sommerferien ' + jahr, 'pre', n));
                 for (; mo <= ende; mo = plus(mo, 7)) {
                     const fr = plus(mo, 4);
                     const f = ferien.find(x => x.von <= mo && x.bis >= fr);
@@ -226,10 +235,8 @@
                         /* a whole week of holidays: one band, the next weeks of the same holidays join it */
                         const last = tbody.lastElementChild;
                         if (last && last.dataset.ferien === f.name) continue;
-                        const tr = el('tr', 'ferien'), td = el('td', null, f.name + ' · ' + tm(f.von) + '–' + tm(f.bis) + f.bis.getFullYear());
+                        const tr = band(f.name + ' · ' + tm(f.von) + '–' + tm(f.bis) + f.bis.getFullYear(), f.name + '|' + iso(f.von), n);
                         tr.dataset.ferien = f.name;
-                        td.colSpan = n;
-                        tr.appendChild(td);
                         tbody.appendChild(tr);
                         continue;
                     }
@@ -263,6 +270,18 @@
                     tbody.appendChild(tr);
                 }
 
+                /* only a band with weeks behind it folds anything */
+                tbody.querySelectorAll('tr.ferien').forEach(function (b) {
+                    const next = b.nextElementSibling;
+                    if (!next || !next.classList.contains('woche')) return;
+                    b.classList.add('foldable');
+                    const chev = el('span', 'chev', '▸');
+                    chev.title = 'Wochen bis zu den nächsten Ferien ein- oder ausklappen (F: alle)';
+                    b.firstElementChild.prepend(chev);
+                    b.addEventListener('click', () => falte(b.dataset.fold));
+                });
+                faltenAnwenden();
+
                 liste('ka-regel', (DATA.verstoesse || []).filter(passtV), v => v.mo || iso(montag(datum(v.d))), zeileVon,
                       v => (v.art === 'pruefen' ? 'pruefen' : 'regel'));
                 liste('ka-korr', (DATA.korrekturen || []).filter(k => filter === 'alle' || !k.j || k.j === filter.split('|')[0]),
@@ -273,6 +292,53 @@
                     if (ziel) springe(ziel);
                 };
             }
+
+            function band(text, key, n) {
+                const tr = el('tr', 'ferien'), td = el('td');
+                td.appendChild(el('span', 'ferien-text', text));
+                td.colSpan = n;
+                tr.dataset.fold = key;
+                tr.appendChild(td);
+                return tr;
+            }
+            function faltenAnwenden() {
+                let zu = false;
+                for (const tr of tbody.children) {
+                    if (tr.classList.contains('ferien')) {
+                        zu = tr.classList.contains('foldable') && gefaltet.has(tr.dataset.fold);
+                        tr.classList.toggle('folded', zu);
+                    } else tr.classList.toggle('ferien-folded', zu);
+                }
+            }
+            function setzeFalten(set) {
+                gefaltet = set;
+                faltenAnwenden();
+                try { localStorage.setItem(FOLD_KEY, JSON.stringify([...gefaltet])); } catch (e) { /* private window */ }
+            }
+            function falte(key) {
+                const next = new Set(gefaltet);
+                if (!next.delete(key)) next.add(key);
+                setzeFalten(next);
+            }
+            /* F - as long as one block still shows, the next act folds them all */
+            function alleFalten() {
+                const keys = [...tbody.querySelectorAll('tr.ferien.foldable')].map(b => b.dataset.fold);
+                setzeFalten(new Set(keys.some(k => !gefaltet.has(k)) ? keys : []));
+            }
+            /* a jump to a week must not land on a folded one */
+            function aufklappenFuer(tr) {
+                if (!tr.classList.contains('ferien-folded')) return;
+                let b = tr.previousElementSibling;
+                while (b && !b.classList.contains('ferien')) b = b.previousElementSibling;
+                if (b) falte(b.dataset.fold);
+            }
+            window.svpKeys = (window.svpKeys || []).concat([[['F'], 'Alle Ferienblöcke ein- oder ausklappen']]);
+            document.addEventListener('keydown', function (e) {
+                if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented || e.repeat) return;
+                const t = e.target;
+                if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+                if ((e.key || '').toLowerCase() === 'f' && DATA) alleFalten();
+            });
 
             function passtV(v) {
                 if (filter === 'alle') return true;
@@ -298,6 +364,7 @@
             }
 
             function springe(tr) {
+                aufklappenFuer(tr);
                 tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
                 tr.classList.remove('flash');
                 void tr.offsetWidth;
@@ -315,10 +382,21 @@
                 if (data.fehler) warn.textContent = 'Die Dateien ließen sich am ' + stempel(data.fehler.zeit) +
                     ' nicht lesen (' + data.fehler.text + ') – hier steht weiter der letzte gute Stand.';
                 const foot = document.getElementById('ka-foot');
-                foot.textContent = 'Quelle: Teams › ' + ((data.quelle && data.quelle.ordner) || '').split('/').join(' › ') +
-                    ' – ' + dateien.map(f => f.datei + ' (' + stempel(f.mtime) + ')').join(', ') +
-                    (data.abgeglichen ? ' · abgeglichen ' + stempel(data.abgeglichen) : '') +
-                    ' · Regel: ';
+                foot.textContent = 'Quelle: Teams › ' + ((data.quelle && data.quelle.ordner) || '').split('/').join(' › ') + ' – ';
+                /* each file name opens the file in Teams (Doc, 29.10.2026) - the links live in the data only */
+                dateien.forEach(function (f, i) {
+                    if (i) foot.appendChild(document.createTextNode(', '));
+                    if (f.link) {
+                        const a = el('a', null, f.datei);
+                        a.href = f.link;
+                        a.target = '_blank';
+                        a.rel = 'noopener';
+                        foot.appendChild(a);
+                    } else foot.appendChild(document.createTextNode(f.datei));
+                    foot.appendChild(document.createTextNode(' (' + stempel(f.mtime) + ')'));
+                });
+                foot.appendChild(document.createTextNode((data.abgeglichen ? ' · abgeglichen ' + stempel(data.abgeglichen) : '') +
+                    ' · Regel: '));
                 const a = el('a', null, 'BGySO § 17 (4)');
                 a.href = 'https://www.revosax.sachsen.de/vorschrift/21010';
                 a.target = '_blank';

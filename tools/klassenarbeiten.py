@@ -16,6 +16,8 @@ Nothing of the plans goes into the repo (colleagues' names, rooms).
     python3 tools/klassenarbeiten.py           # read, push when something changed
     python3 tools/klassenarbeiten.py --dry     # print the result, push nothing
     python3 tools/klassenarbeiten.py --force   # push even when nothing changed
+    python3 tools/klassenarbeiten.py --basis URL   # the Teams library ("…/sites/<team>/Shared Documents"),
+                                                   # kept in the data only: the page links each file
 """
 import datetime as dt
 import glob
@@ -23,6 +25,8 @@ import json
 import os
 import re
 import sys
+import unicodedata
+import urllib.parse
 import xml.etree.ElementTree as ET
 import zipfile
 
@@ -55,6 +59,7 @@ KOMPLEX = re.compile(r"kompl(exe|\.)\s*l(eistung)?\.?|\(KL\)", re.I)
 FUELL = re.compile(r"\bKlassenarbeit\b|\bKlausur\b|\bKA\b|[_:]", re.I)
 RAUM = re.compile(r"^(K[EÖ]S?\s?\d{3}|\d{3}|Campus)$")
 UNKLAR = {"?", "offen", "-", "–"}
+FREI = re.compile(r"bu(ß|ss)\s*(-|&|und)?\s*bettag|feiertag|ferien|betriebsruhe|unterrichtsfrei", re.I)
 
 
 def glatt(s):
@@ -151,6 +156,10 @@ def read_xlsx(path):
             v, t = c.find(X + "v"), c.get("t")
             if v is not None:
                 val = ss[int(v.text)] if t == "s" else v.text
+                # "10.12" typed into a cell is the number 10.12 for Excel (stored as 10.119999999999999):
+                # back to two places, so it reads as the day it was meant to be - "10.1" was 10.10.
+                if t is None and re.fullmatch(r"\d{1,2}\.\d+", val or ""):
+                    val = "%.2f" % float(val)
             else:
                 isx = c.find(X + "is")
                 val = "".join(x.text or "" for x in isx.iter(X + "t")) if isx is not None else None
@@ -211,6 +220,7 @@ class Jahr:
         self.y1 = y1
         self.namen = set()
         self.notes = []
+        self.bis = None   # the last week the files plan for (their last KW row), empty or not
 
     def note(self, text, d=None, j=None):
         n = {"text": text}
@@ -352,6 +362,7 @@ def aus_excel(jahr, j, path):
         m = KW_LABEL.search(cells.get((r, "A"), ""))
         if m:
             kw_mo = dt.date.fromisocalendar(2000 + int(m[2]), int(m[1]), 1)
+            jahr.bis = max(jahr.bis or kw_mo, kw_mo)
         b = cells.get((r, "B"), "")
         row_d = excel_date(b)
         row_text = sj.ddmm(row_d, True) if row_d else b
@@ -413,6 +424,7 @@ def aus_word(jahr, j, path):
             if not m[3] and m[6] and int(m[2]) > int(m[5]):
                 y -= 1            # a week across the new year
             kw_mo = monday(dt.date(y, int(m[2]), int(m[1])))
+            jahr.bis = max(jahr.bis or kw_mo, kw_mo)
         elif first and DATE.search(first):
             # a line of its own with a date: "22.01.2027 Notenstopp 11"
             md = DATE.search(first)
@@ -662,7 +674,12 @@ def build(today):
     if not eintraege:
         raise RuntimeError("keine Einträge in " + folder)
 
-    eintraege = [e for e in eintraege if e["mo"]]
+    # "Notenstopp" without its grade (BGY24 writes it bare): the grade like the others ("Notenstopp 12")
+    for m in marken:
+        if re.fullmatch(r"Notenstopp", m["text"], re.I):
+            m["text"] = f"Notenstopp {stufe_von[m['j']]}"
+    # a day off the school writes into a column ("Buß & Bettag") is no test - the calendar knows it anyway
+    eintraege = [e for e in eintraege if e["mo"] and not (not e["wer"] and FREI.search(e["fach"]))]
     eintraege.sort(key=lambda e: (e["mo"], e["d"] or e["mo"] + dt.timedelta(days=7), e["j"], e["g"] or "", e["fach"]))
     ferien = kalender(eintraege, jahr)
     verstoesse = pruefe(eintraege, jahr, stufe_von)
@@ -694,12 +711,21 @@ def build(today):
         out.append(o)
 
     first = min(dt.date.fromisoformat(o["mo"]) for o in out)
-    last = max(dt.date.fromisoformat(o["mo"]) for o in out) + dt.timedelta(days=6)
+    # the table runs to the last week the files plan for - past the last test, so a Notenstopp shows too
+    bis = max([dt.date.fromisoformat(o["mo"]) for o in out] + [monday(dt.date.fromisoformat(m["d"])) for m in marken]
+              + ([jahr.bis] if jahr.bis else []))
+    # and on to the next holidays, so the table closes with their band (Doc, 29.10.2026: "am Ende einen Balken
+    # Winterferien") - like a block of the plans, which always runs up to holidays
+    nxt = min((f for f in ferien if f[1] > bis), key=lambda f: f[1], default=None)
+    if nxt:
+        bis = monday(nxt[2])
+    last = bis + dt.timedelta(days=6)
     return {
         "schuljahr": f"{y1}/{str(y1 + 1)[2:]}",
         "jahrgaenge": jahrgaenge,
         "eintraege": out,
         "marken": sorted(marken, key=lambda m: m["d"]),
+        "bis": bis.isoformat(),
         "ferien": [{"name": n, "von": a.isoformat(), "bis": b.isoformat()} for n, a, b in ferien
                    if a <= last and b >= first],
         "verstoesse": verstoesse,
@@ -731,13 +757,34 @@ def save_cache(data):
         json.dump(data, f, ensure_ascii=False, indent=1)
 
 
+def verlinke(data, basis):
+    """Each file gets its link in Teams - the library's address comes from --basis or the last run,
+    never from the repo (it is the school's internal site)."""
+    if not basis:
+        return
+    data["quelle"]["basis"] = basis
+    for f in data["quelle"]["dateien"]:
+        # the Mac keeps "ä" decomposed (a + ¨) in file names, SharePoint wants it composed
+        rel = unicodedata.normalize("NFC", "/".join([data["quelle"]["ordner"], f["j"], f["datei"]]))
+        f["link"] = urllib.parse.quote(basis.rstrip("/") + "/" + rel, safe=":/") + "?web=1"
+
+
 def main():
-    args = set(sys.argv[1:])
+    argv = sys.argv[1:]
+    basis = None
+    if "--basis" in argv:
+        i = argv.index("--basis")
+        basis = argv[i + 1]
+        del argv[i:i + 2]
+    args = set(argv)
     now = dt.datetime.now().astimezone()
     stamp = now.strftime("%Y-%m-%d %H:%M")
     cache = load_cache()
+    if basis is None and cache:
+        basis = (cache.get("quelle") or {}).get("basis")
     try:
         data = build(now.date())
+        verlinke(data, basis)
     except Exception as e:          # keep the last good plan online, with the reason beside it
         msg = f"{type(e).__name__}: {e}"
         print(stamp, "FEHLER", msg, file=sys.stderr)
