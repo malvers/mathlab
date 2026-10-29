@@ -75,6 +75,32 @@
         return toMin(a.startTime) < toMin(b.endTime) && toMin(b.startTime) < toMin(a.endTime);
     }
 
+    /* Untis sends every 45-min period as a lesson of its own, so a double period stood
+       on the grid as two tiles (Doc, 29.10.2026: "Wieso sind die Stunden splitted?").
+       Back-to-back periods of one unit - same day, subject, classes, teachers, rooms and
+       status, the next one starting the minute the last one ends - become one entry that
+       spans them all. A real break (15 min in Doc's plan) keeps two tiles apart.
+       `parts` holds the original periods: Klassenbuch marks and plan indices stay per period. */
+    function mergeRuns(lessons) {
+        const unit = l => [l.date, l.subject, (l.classes || []).join(','), (l.teachers || []).join(','),
+            (l.rooms || []).join(','), l.code || '', !!l.moved, !!l.ghost].join('#');
+        const sorted = [...lessons].sort((a, b) => a.date - b.date || toMin(a.startTime) - toMin(b.startTime));
+        const runs = new Map();     // unit -> its latest run, still open for a next period
+        const out = [];
+        for (const l of sorted) {
+            const k = unit(l), run = runs.get(k);
+            if (run && toMin(run.endTime) === toMin(l.startTime)) {
+                run.endTime = l.endTime;
+                run.parts.push(l);
+                continue;
+            }
+            const m = { ...l, parts: [l] };
+            runs.set(k, m);
+            out.push(m);
+        }
+        return out;
+    }
+
     // Side-by-side placement for overlapping lessons within one day.
     function layoutColumns(items) {
         const sorted = [...items].sort((x, y) => toMin(x.l.startTime) - toMin(y.l.startTime));
@@ -96,6 +122,6 @@
 
     root.SvpTimetable = {
         PX_PER_MIN, toMin, hhmm, parseYmd, isBanner,
-        HUES, SUBJECT_HUE, hueOf, jahrgangOf, overlaps, layoutColumns,
+        HUES, SUBJECT_HUE, hueOf, jahrgangOf, overlaps, mergeRuns, layoutColumns,
     };
 })(window);

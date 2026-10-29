@@ -219,7 +219,8 @@
                 });
                 // phones only: a day without lessons says so (the desktop column just stays empty)
                 if (!dayLessons.length && !dayBanners.length) html.push('<div class="mp-free">frei</div>');
-                for (const it of T.layoutColumns(dayLessons.map(l => ({ l })))) {
+                // a double period is one tile (svp-timetable.js mergeRuns)
+                for (const it of T.layoutColumns(T.mergeRuns(dayLessons).map(l => ({ l })))) {
                     html.push(lessonTile(it, y, scale));
                 }
                 html.push('</div>');

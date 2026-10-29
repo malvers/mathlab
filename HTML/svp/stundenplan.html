@@ -162,7 +162,7 @@
 
         const DAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
         // Tile height per minute is shared with meinplan.html (svp-timetable.js).
-        const { PX_PER_MIN, toMin, hhmm, parseYmd, jahrgangOf, overlaps, layoutColumns } = SvpTimetable;
+        const { PX_PER_MIN, toMin, hhmm, parseYmd, jahrgangOf, overlaps, mergeRuns, layoutColumns } = SvpTimetable;
         function pxPerMin() {
             return PX_PER_MIN;
         }
@@ -237,6 +237,9 @@
            ein A (Doc, 21.09.2026). Gleiche Schluessel, gleiche Quelle. */
         const UNTIS_CHECKED = new Set();
         const untisKey = (l) => l.date + '|' + hhmm(l.startTime) + '|' + (l.classes || []).join(',');
+        /* A double period is one tile: it gets the L or A only when EVERY period has it -
+           a gap in the Klassenbuch must not hide behind the half that is done. */
+        const untisAll = (set, periods) => periods.every(p => set.has(untisKey(p)));
 
         // The conflict chip next to "Optimieren" - fed by render() and live by the optimizer run
         function setConfChip(n) {
@@ -502,6 +505,7 @@
             }
             grid.appendChild(axis);
 
+            const pos = new Map(gridLessons.map((l, i) => [l, i]));   // period -> its index in the clash set
             for (const d of dates) {
                 const col = document.createElement('div');
                 col.className = 'tt-col';
@@ -532,18 +536,26 @@
                     col.appendChild(el);
                 });
 
-                const items = gridLessons.map((l, i) => ({ l, i })).filter(o => o.l.date === d);
+                // a double period is one tile (mergeRuns); it clashes when any of its periods does
+                const items = mergeRuns(gridLessons.filter(l => l.date === d))
+                    .map(l => ({ l, clash: l.parts.some(p => clash.has(pos.get(p))) }));
                 for (const it of layoutColumns(items)) {
                     const l = it.l;
                     const a = toMin(l.startTime), b = toMin(l.endTime);
                     const el = document.createElement('div');
                     el.className = 'tt-lesson'
                         + (l.code ? ' code-' + l.code : '')
-                        + (clash.has(it.i) ? ' clash' : '')
+                        + (it.clash ? ' clash' : '')
                         + (l.moved ? ' moved' : '')
                         + (l.ghost ? ' ghost' : '');
                     el.style.setProperty('--hue', 'var(' + hueOf(l.subject, l.teachers) + ')');
-                    if (!l.ghost) el.dataset.idx = l._i;
+                    /* idx = the first period: drag, menu and click work on the optimizer's
+                       block, which holds the whole double anyway. parts = all of them, for
+                       the L/A marks that arrive after the first draw. */
+                    if (!l.ghost) {
+                        el.dataset.idx = l._i;
+                        el.dataset.parts = l.parts.map(p => p._i).join(',');
+                    }
                     el.style.top = y(a) + 'px';
                     el.style.height = Math.max(16, (b - a) * scale - 3) + 'px';
                     el.style.left = 'calc(' + (it.col * 100 / it.of) + '% + 3px)';
@@ -571,9 +583,9 @@
                     el.innerHTML = parts.join('');
                     /* Oranges L, sobald im Klassenbuch Lehrstoff steht - A daneben, sobald
                        die Anwesenheit kontrolliert ist. */
-                    if (!l.ghost && UNTIS_WRITTEN.has(untisKey(l))) markUntis(el);
-                    if (!l.ghost && UNTIS_CHECKED.has(untisKey(l))) markAbsence(el);
-                    if (clash.has(it.i)) {
+                    if (!l.ghost && untisAll(UNTIS_WRITTEN, l.parts)) markUntis(el);
+                    if (!l.ghost && untisAll(UNTIS_CHECKED, l.parts)) markAbsence(el);
+                    if (it.clash) {
                         const flag = document.createElement('div');
                         // big warning sign when the tile has room for it, small on slim tiles
                         const h = Math.max(16, (b - a) * scale - 3);
@@ -1436,10 +1448,11 @@
                 /* Die Datei kommt meist NACH dem ersten Zeichnen an - dann die schon
                    gebauten Kacheln nachtraeglich markieren, statt alles neu zu rendern. */
                 for (const tile of document.querySelectorAll('.tt-lesson[data-idx]')) {
-                    const l = PLAN && PLAN.lessons[+tile.dataset.idx];
-                    if (!l) continue;
-                    if (UNTIS_WRITTEN.has(untisKey(l))) markUntis(tile);
-                    if (UNTIS_CHECKED.has(untisKey(l))) markAbsence(tile);
+                    const periods = (tile.dataset.parts || tile.dataset.idx).split(',')
+                        .map(i => PLAN && PLAN.lessons[+i]);
+                    if (periods.some(p => !p)) continue;
+                    if (untisAll(UNTIS_WRITTEN, periods)) markUntis(tile);
+                    if (untisAll(UNTIS_CHECKED, periods)) markAbsence(tile);
                 }
             })
             .catch(() => { });
