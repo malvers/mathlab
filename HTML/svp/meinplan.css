@@ -84,6 +84,30 @@
     .mp-chat img { width: 34px; height: 34px; }
 }
 
+/* On a computer the red phone opens the chat over the plan, not as a window of its own
+   (Sprechstunde.openChat in sprechstunde-core.js): a phone-sized card on a dimmed page. */
+.sp-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: rgba(2, 6, 14, 0.62);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.sp-layer iframe {
+    width: min(440px, 100%);
+    height: min(760px, 100%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 20px;
+    background: #050b18;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+}
+
 /* The week itself is the shared time-axis grid (svp-timetable.css, same as the
    staff view); only what the students' page adds lives here. */
 .mp-wrap {

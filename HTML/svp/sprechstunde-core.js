@@ -104,23 +104,46 @@
     /* The red telephone opens the chat in a window of its own, the size of a phone (Doc, 29.10.2026:
        "in einem extra Fenster ... dass klar ist, hier wird gechattet"). On a phone or a touch screen
        the link just opens the page - a popup there is only a new tab. */
+    /* No browser window of its own (Doc, 29.10.2026: "das muss kein wirkliches Fenster sein"): on a computer
+       the chat lies over the plan as a card on a dimmed page, the chat page inside a frame (look: .sp-layer
+       in meinplan.css). ✕ in its head, Esc or a click beside the card closes it. A phone opens the page. */
     function openChat(link) {
+        let layer = null;
+        const close = () => {
+            if (!layer) return;
+            layer.remove();
+            layer = null;
+            link.focus();
+        };
+        addEventListener('message', e => { if (e.origin === location.origin && e.data === 'svp-kontakt-close') close(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
         link.addEventListener('click', e => {
             if (matchMedia('(pointer: coarse)').matches || innerWidth < 700) return;
-            const w = 420, h = Math.min(720, screen.availHeight - 40);
-            const left = Math.round(screenX + (outerWidth - w) / 2), top = Math.round(screenY + (outerHeight - h) / 2);
-            const win = window.open(link.href, 'svp-kontakt', 'popup,width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
-            if (win) { e.preventDefault(); win.focus(); }
+            e.preventDefault();
+            if (layer) return;
+            layer = document.createElement('div');
+            layer.className = 'sp-layer';
+            const frame = document.createElement('iframe');
+            frame.name = 'svp-kontakt';
+            frame.title = 'Kontakt';
+            frame.src = link.href;
+            layer.appendChild(frame);
+            layer.addEventListener('click', ev => { if (ev.target === layer) close(); });
+            document.body.appendChild(layer);
+            frame.focus();
         });
     }
 
-    /* In that window the back arrow closes it (there is nothing to go back to). */
+    /* In that frame the back arrow becomes ✕ at the top right and closes the chat (nothing to go back to). */
     function backOrClose(el) {
-        if (!el || !window.opener || window.name !== 'svp-kontakt') return;
+        if (!el || window.parent === window || window.name !== 'svp-kontakt') return;
         el.title = 'Schließen';
         el.setAttribute('aria-label', 'Schließen');
+        el.classList.add('sp-x');
         el.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
-        el.addEventListener('click', e => { e.preventDefault(); window.close(); });
+        const close = () => parent.postMessage('svp-kontakt-close', location.origin);
+        el.addEventListener('click', e => { e.preventDefault(); close(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
     }
 
     /* Run fn now, then every `ms` while the page is visible, and right away when it comes back. */
