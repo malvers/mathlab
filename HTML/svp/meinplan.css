@@ -59,6 +59,38 @@
     color: var(--muted);
 }
 
+/* Teacher name + the red phone of the Sprechstunde in one row (Doc, 29.10.2026) */
+.mp-who {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.mp-chat {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    transition: border-color 0.12s ease, transform 0.12s ease;
+}
+
+.mp-chat:hover { border-color: rgb(176, 36, 24); transform: translateY(-1px); }
+.mp-chat[hidden] { display: none; }
+
+/* Apple's red telephone (sprechstunde-core.js PHONE) */
+.mp-chat img { width: 32px; height: 32px; display: block; }
+
+@media (max-width: 720px) {
+    .mp-chat { width: 40px; height: 40px; border-radius: 10px; }
+    .mp-chat img { width: 28px; height: 28px; }
+}
+
 /* The week itself is the shared time-axis grid (svp-timetable.css, same as the
    staff view); only what the students' page adds lives here. */
 .mp-wrap {

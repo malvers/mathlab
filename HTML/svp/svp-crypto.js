@@ -72,6 +72,17 @@
     async function seal(text) {
         const pub = await publicKey();
         if (!pub) throw new Error('Es ist noch kein Schlüssel eingerichtet');
+        return sealTo(pub, text);
+    }
+
+    async function open(blob) {
+        if (!privKey) throw new Error('gesperrt');
+        return openWith(privKey, blob);
+    }
+
+    /* The same scheme for any key pair, not only Doc's (the chat, 29.10.2026: a pupil's device
+       makes its own pair, Doc's replies are sealed for its public key). */
+    async function sealTo(pub, text) {
         const eph = await subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
         const aes = await subtle.deriveKey({ name: 'ECDH', public: pub }, eph.privateKey,
             { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
@@ -81,15 +92,33 @@
         return 'v1.' + b64(raw) + '.' + b64(iv) + '.' + b64(ct);
     }
 
-    async function open(blob) {
-        if (!privKey) throw new Error('gesperrt');
+    async function openWith(priv, blob) {
         const p = String(blob || '').split('.');
         if (p.length !== 4 || p[0] !== 'v1') throw new Error('unbekanntes Format');
         const ephPub = await subtle.importKey('raw', unb64(p[1]), { name: 'ECDH', namedCurve: 'P-256' }, false, []);
-        const aes = await subtle.deriveKey({ name: 'ECDH', public: ephPub }, privKey,
+        const aes = await subtle.deriveKey({ name: 'ECDH', public: ephPub }, priv,
             { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
         const pt = await subtle.decrypt({ name: 'AES-GCM', iv: unb64(p[2]) }, aes, unb64(p[3]));
         return dec.decode(pt);
+    }
+
+    /* public JWK (object or JSON text) -> sealed blob, for whoever holds the matching private key */
+    async function sealFor(pubJwk, text) {
+        const jwk = typeof pubJwk === 'string' ? JSON.parse(pubJwk) : pubJwk;
+        const pub = await subtle.importKey('jwk', jwk, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+        return sealTo(pub, text);
+    }
+
+    /* a fresh pair as JWKs - the caller decides where the private half lives */
+    async function newPair() {
+        const pair = await subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
+        return { pub: await subtle.exportKey('jwk', pair.publicKey), priv: await subtle.exportKey('jwk', pair.privateKey) };
+    }
+
+    /* open with a private JWK the caller keeps (e.g. a pupil's chat key) */
+    async function openFor(privJwk, blob) {
+        const priv = await subtle.importKey('jwk', privJwk, { name: 'ECDH', namedCurve: 'P-256' }, false, ['deriveKey']);
+        return openWith(priv, blob);
     }
 
     /* ---------- passphrase wrapping of the private key ---------- */
@@ -280,6 +309,9 @@
         hasPublic: async function () { return !!(await publicKey()); },
         seal: seal,
         open: open,
+        sealFor: sealFor,
+        openFor: openFor,
+        newPair: newPair,
         unlock: unlock,
         lock: lock,
         createKeypair: createKeypair,

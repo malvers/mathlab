@@ -1,0 +1,278 @@
+/* Sprechstunde - the one look of both ends: the pupils' page (svp/sprechstunde.html) and Doc's
+   view inside VGP (vgp/vgpsprechstunde.html). Palette exact (λ orange, Υ red, φ green), ground
+   almost black blue, Orbitron for headings. Phone first: the page is the screen, the compose field
+   sits at the bottom, the list scrolls in between. */
+
+:root {
+    --sp-lambda: rgb(245, 194, 66);
+    --sp-ypsilon: rgb(176, 36, 24);
+    --sp-phi: rgb(121, 158, 49);
+    --sp-ground: #050b18;
+    --sp-panel: #0d1a30;
+    --sp-line: rgba(255, 255, 255, 0.10);
+    --sp-text: #e8edf6;
+    --sp-muted: #8a96ab;
+    --sp-mine: rgba(121, 158, 49, 0.22);
+    --sp-theirs: #14233d;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --sp-ground: #f4f6fa;
+        --sp-panel: #ffffff;
+        --sp-line: rgba(10, 20, 40, 0.12);
+        --sp-text: #142033;
+        --sp-muted: #5d6779;
+        --sp-mine: rgba(121, 158, 49, 0.20);
+        --sp-theirs: #ffffff;
+    }
+}
+
+* { box-sizing: border-box; }
+
+/* the pages switch views with the hidden attribute - it must beat the display rules below */
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body.sp-page {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--sp-ground);
+    color: var(--sp-text);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-size: 16px;
+}
+
+.sp-wrap {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* --- head: back, red phone, title --------------------------------------- */
+
+.sp-head {
+    border-bottom: 1px solid var(--sp-line);
+    background: var(--sp-panel);
+    padding-top: env(safe-area-inset-top);
+}
+
+.sp-head .sp-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+}
+
+.sp-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--sp-line);
+    color: var(--sp-muted);
+    text-decoration: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.sp-back svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.sp-back:hover { color: var(--sp-text); border-color: var(--sp-muted); }
+
+.sp-phone-ico { width: 34px; height: 34px; flex: 0 0 auto; display: block; }
+
+.sp-title { min-width: 0; flex: 1; }
+
+.sp-title h1 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sp-title p { margin: 2px 0 0; font-size: 0.82rem; color: var(--sp-muted); }
+
+.sp-tools { display: flex; gap: 8px; flex: 0 0 auto; }
+
+/* --- notes under the head ------------------------------------------------ */
+
+.sp-note {
+    margin: 10px 0 0;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border-left: 3px solid var(--sp-phi);
+    background: color-mix(in srgb, var(--sp-phi) 10%, transparent);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--sp-muted);
+}
+
+.sp-note.warn { border-left-color: var(--sp-ypsilon); background: color-mix(in srgb, var(--sp-ypsilon) 12%, transparent); color: var(--sp-text); }
+
+/* --- the conversation ---------------------------------------------------- */
+
+.sp-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.sp-main > .sp-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+.sp-msgs {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sp-empty { margin: auto; color: var(--sp-muted); text-align: center; font-size: 0.95rem; line-height: 1.5; }
+
+.sp-msg { max-width: 82%; display: flex; flex-direction: column; }
+.sp-msg.mine { align-self: flex-end; align-items: flex-end; }
+.sp-msg.theirs { align-self: flex-start; align-items: flex-start; }
+
+.sp-body {
+    padding: 9px 13px;
+    border-radius: 16px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border: 1px solid var(--sp-line);
+}
+
+.sp-msg.mine .sp-body { background: var(--sp-mine); border-bottom-right-radius: 5px; }
+.sp-msg.theirs .sp-body { background: var(--sp-theirs); border-bottom-left-radius: 5px; }
+.sp-msg.pending { opacity: 0.6; }
+.sp-msg.failed .sp-body { border-color: var(--sp-ypsilon); }
+
+.sp-meta { margin-top: 3px; font-size: 0.72rem; color: var(--sp-muted); }
+
+/* --- compose ------------------------------------------------------------- */
+
+.sp-compose {
+    border-top: 1px solid var(--sp-line);
+    background: var(--sp-panel);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sp-compose .sp-wrap { display: flex; align-items: flex-end; gap: 10px; padding-top: 10px; padding-bottom: 10px; }
+
+.sp-compose textarea {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+    max-height: 9.5em;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--sp-line);
+    background: var(--sp-ground);
+    color: var(--sp-text);
+    font: inherit;
+    line-height: 1.35;
+}
+
+.sp-compose textarea:focus { outline: none; border-color: var(--sp-phi); }
+
+.sp-send {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--sp-phi);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.sp-send svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.sp-send:disabled { opacity: 0.4; cursor: default; }
+
+.sp-count { font-size: 0.72rem; color: var(--sp-muted); text-align: right; padding: 0 0 6px; }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* --- Doc's view: list of chats ------------------------------------------- */
+
+.sp-list { list-style: none; margin: 0; padding: 10px 0; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+
+.sp-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--sp-panel);
+    border: 1px solid var(--sp-line);
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    width: 100%;
+}
+
+.sp-item:hover { border-color: var(--sp-muted); }
+.sp-item .sp-item-main { flex: 1; min-width: 0; }
+.sp-item .sp-item-name { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.95rem; }
+.sp-item .sp-item-sub { font-size: 0.8rem; color: var(--sp-muted); margin-top: 2px; }
+.sp-item.blocked .sp-item-name { text-decoration: line-through; text-decoration-color: var(--sp-ypsilon); }
+
+.sp-badge {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 11px;
+    background: var(--sp-phi);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sp-btn {
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid var(--sp-line);
+    background: transparent;
+    color: var(--sp-text);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.sp-btn:hover { border-color: var(--sp-muted); }
+.sp-btn.danger { color: var(--sp-ypsilon); border-color: color-mix(in srgb, var(--sp-ypsilon) 50%, transparent); }
+.sp-btn.armed { background: var(--sp-ypsilon); color: #fff; }
+
+@media (max-width: 480px) {
+    .sp-btn { padding: 0 10px; font-size: 0.8rem; }
+    .sp-msg { max-width: 88%; }
+}
+
+/* --- login + key dialogs (svpAuth.loginDialog, svpCrypto.passDialog) on these svp.css-less pages ---- */
+
+.svp-gate-overlay { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; background: rgba(2, 6, 16, 0.7); padding: 16px; }
+.svp-gate-card { width: min(100%, 360px); padding: 26px 24px; border-radius: 16px; background: var(--sp-panel); border: 1px solid var(--sp-line); text-align: center; }
+.svp-gate-title { font-family: 'Orbitron', sans-serif; font-size: 1.02rem; letter-spacing: 0.05em; margin-bottom: 6px; }
+.svp-gate-sub { font-size: 0.85rem; color: var(--sp-muted); margin-bottom: 16px; line-height: 1.4; }
+.svp-gate-card input { width: 100%; margin-bottom: 12px; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--sp-line); background: var(--sp-ground); color: var(--sp-text); font: inherit; text-align: center; }
+.svp-gate-card input:focus { outline: none; border-color: var(--sp-phi); }
+.svp-gate-row { display: flex; gap: 10px; }
+.svp-gate-card button { flex: 1; height: 44px; border-radius: 10px; border: 1px solid var(--sp-line); background: transparent; color: var(--sp-text); font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 0.05em; cursor: pointer; }
+.svp-gate-card button.action:not(.secondary) { background: var(--sp-phi); border-color: var(--sp-phi); color: #fff; }
+.svp-gate-err { margin-top: 10px; min-height: 1em; font-size: 0.8rem; color: var(--sp-ypsilon); }

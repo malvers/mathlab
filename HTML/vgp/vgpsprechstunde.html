@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<!--
+    Sprechstunde - Doc's side, inside VGP (Doc, 29.10.2026). The pupils write on svp/sprechstunde.html
+    (the red phone on meinplan.html); here Doc reads and answers. Reached from the "Sprechstunde" row in
+    the VGP sidebar (js/vgp-sprechstunde.js), which hands over this device's VGP identity (?vgp=) - it is
+    stored as the target of the push, so the VGP notification comes to the phone Doc last opened this on.
+
+    Doc's SVP account reads the tables (RLS: his uid only); pupils' messages open with his private key
+    (svp-crypto.js, the passphrase of the talk names), replies are sealed for the pupil's device and,
+    as Doc's own copy, for his key. Tables: supabase/migrations/20261029_chat.sql.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sprechstunde | VGP</title>
+    <meta name="robots" content="noindex">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#050b18">
+    <link rel="stylesheet" href="../svp/sprechstunde.css">
+</head>
+
+<body class="sp-page">
+    <header class="sp-head">
+        <div class="sp-wrap">
+            <button class="sp-back" id="back" type="button" aria-label="Zurück" title="Zurück">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <span id="phone"></span>
+            <div class="sp-title">
+                <h1 id="title">Sprechstunde</h1>
+                <p id="sub">&nbsp;</p>
+            </div>
+            <div class="sp-tools" id="tools" hidden>
+                <button class="sp-btn" id="block" type="button">Sperren</button>
+                <button class="sp-btn danger" id="del" type="button">Löschen</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="sp-main">
+        <div class="sp-wrap">
+            <p class="sp-note" id="note" hidden></p>
+            <ul class="sp-list" id="list"></ul>
+            <div class="sp-msgs" id="msgs" hidden aria-live="polite"></div>
+        </div>
+    </main>
+
+    <form class="sp-compose" id="compose" autocomplete="off" hidden>
+        <div class="sp-wrap">
+            <label class="sr" for="text">Antwort</label>
+            <textarea id="text" rows="1" placeholder="Antwort …" enterkeyhint="send"></textarea>
+            <button class="sp-send" id="send" type="submit" aria-label="Senden" title="Senden" disabled></button>
+        </div>
+    </form>
+
+    <script src="../svp/svp-auth.js"></script>
+    <script src="../svp/svp-crypto.js"></script>
+    <script src="../svp/sprechstunde-core.js"></script>
+    <script>
+        (function () {
+            const S = window.Sprechstunde, A = window.svpAuth, C = window.svpCrypto;
+            const DOC_UID = '2889073e-cbb8-4ca1-ad48-5234abe40585';   // same uid as in the RLS policies
+            const $ = id => document.getElementById(id);
+            const vgpPub = new URLSearchParams(location.search).get('vgp') || '';
+
+            $('phone').innerHTML = S.PHONE;
+            $('send').innerHTML = S.SEND_SVG;
+
+            function note(text, warn) {
+                const n = $('note');
+                n.hidden = !text;
+                n.textContent = text || '';
+                n.classList.toggle('warn', !!warn);
+            }
+
+            function uid() {
+                try {
+                    const p = A.session.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                    return JSON.parse(atob(p)).sub;
+                } catch (e) { return ''; }
+            }
+
+            async function api(path, opts) {
+                const res = await A.api(path, opts);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.status === 204 ? null : res.json().catch(() => null);
+            }
+
+            let threads = [], metas = [], open = null;     // open = the thread on screen, null = the list
+
+            /* --- the list ---------------------------------------------------------------------------- */
+
+            async function loadList() {
+                threads = await api('chat_thread?select=id,nr,pub,created_at,last_at,doc_seen_at,blocked&order=last_at.desc');
+                metas = await api('chat_msg?select=thread,from_doc,created_at&order=id');
+                if (!open) paintList();
+            }
+
+            function unreadOf(t) {
+                return metas.filter(m => m.thread === t.id && !m.from_doc && new Date(m.created_at) > new Date(t.doc_seen_at)).length;
+            }
+
+            function paintList() {
+                const ul = $('list');
+                ul.innerHTML = '';
+                const total = threads.reduce((s, t) => s + unreadOf(t), 0);
+                $('title').textContent = 'Sprechstunde';
+                $('sub').textContent = threads.length
+                    ? threads.length + (threads.length === 1 ? ' Chat' : ' Chats') + (total ? ' · ' + total + ' neu' : '')
+                    : 'Noch niemand hat geschrieben.';
+                for (const t of threads) {
+                    const li = document.createElement('li');
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'sp-item' + (t.blocked ? ' blocked' : '');
+                    const n = metas.filter(m => m.thread === t.id).length;
+                    b.innerHTML = '<div class="sp-item-main"><div class="sp-item-name"></div><div class="sp-item-sub"></div></div>';
+                    b.querySelector('.sp-item-name').textContent = 'Chat ' + t.nr;
+                    b.querySelector('.sp-item-sub').textContent = S.fmtTime(t.last_at) + ' · ' + n + (n === 1 ? ' Nachricht' : ' Nachrichten')
+                        + (t.blocked ? ' · gesperrt' : '');
+                    const u = unreadOf(t);
+                    if (u) {
+                        const badge = document.createElement('span');
+                        badge.className = 'sp-badge';
+                        badge.textContent = u > 99 ? '99+' : u;
+                        b.appendChild(badge);
+                    }
+                    b.addEventListener('click', () => openThread(t.id));
+                    li.appendChild(b);
+                    ul.appendChild(li);
+                }
+            }
+
+            /* --- one chat ---------------------------------------------------------------------------- */
+
+            async function openThread(id) {
+                open = threads.find(t => t.id === id) || null;
+                if (!open) return showList();
+                $('list').hidden = true;
+                $('msgs').hidden = false;
+                $('compose').hidden = false;
+                $('tools').hidden = false;
+                $('msgs').dataset.painted = '';
+                paintTools();
+                await loadThread();
+                $('text').focus();
+            }
+
+            async function loadThread() {
+                if (!open) return;
+                const rows = await api('chat_msg?thread=eq.' + open.id + '&select=id,from_doc,body_enc,copy_enc,created_at&order=id');
+                const out = [];
+                for (const r of rows) {
+                    let text;
+                    try { text = await C.open(r.from_doc ? r.copy_enc : r.body_enc); } catch (e) { text = '🔒 (nicht lesbar)'; }
+                    out.push({ id: r.id, mine: r.from_doc, text: text, at: r.created_at });
+                }
+                S.paint($('msgs'), out, 'Leer.');
+                $('title').textContent = 'Chat ' + open.nr;
+                $('sub').textContent = 'anonym · seit ' + S.fmtTime(open.created_at) + (open.blocked ? ' · gesperrt' : '');
+                // seen up to the pupil's last message (the trigger does it for replies; reading alone does it
+                // here) - its server time, not this phone's clock, so a clock running late cannot keep it unread
+                const last = rows.filter(r => !r.from_doc).pop();
+                if (last && new Date(last.created_at) > new Date(open.doc_seen_at)) {
+                    await api('chat_thread?id=eq.' + open.id, { method: 'PATCH', headers: { Prefer: 'return=minimal' },
+                        body: JSON.stringify({ doc_seen_at: last.created_at }) });
+                    open.doc_seen_at = last.created_at;
+                }
+            }
+
+            function paintTools() {
+                $('block').textContent = open.blocked ? 'Entsperren' : 'Sperren';
+                const del = $('del');
+                delete del.dataset.armed;
+                del.classList.remove('armed');
+                del.textContent = 'Löschen';
+            }
+
+            function showList() {
+                open = null;
+                $('list').hidden = false;
+                $('msgs').hidden = true;
+                $('compose').hidden = true;
+                $('tools').hidden = true;
+                loadList().catch(e => note('Liste nicht ladbar: ' + e.message, true));
+            }
+
+            async function reply() {
+                const ta = $('text');
+                const text = ta.value.trim();
+                if (!open || !text || text.length > S.MAX_LEN) return;
+                $('send').disabled = true;
+                try {
+                    const body = await C.sealFor(open.pub, text);     // for the pupil's device
+                    const copy = await C.seal(text);                  // Doc's own copy
+                    await api('chat_msg', { method: 'POST', headers: { Prefer: 'return=minimal' },
+                        body: JSON.stringify({ thread: open.id, from_doc: true, body_enc: body, copy_enc: copy }) });
+                    ta.value = '';
+                    fit();
+                    await loadThread();
+                } catch (e) {
+                    note('Nicht gesendet: ' + e.message, true);
+                }
+                sync();
+            }
+
+            $('block').addEventListener('click', async () => {
+                if (!open) return;
+                await api('chat_thread?id=eq.' + open.id, { method: 'PATCH', headers: { Prefer: 'return=minimal' },
+                    body: JSON.stringify({ blocked: !open.blocked }) }).catch(e => note(e.message, true));
+                open.blocked = !open.blocked;
+                paintTools();
+                loadThread();
+            });
+
+            /* no native confirm: a second tap within 3 s deletes (same as the timetable versions) */
+            $('del').addEventListener('click', async () => {
+                const del = $('del');
+                if (!del.dataset.armed) {
+                    del.dataset.armed = '1';
+                    del.classList.add('armed');
+                    del.textContent = 'Sicher?';
+                    setTimeout(() => { if (open) paintTools(); }, 3000);
+                    return;
+                }
+                await api('chat_thread?id=eq.' + open.id, { method: 'DELETE', headers: { Prefer: 'return=minimal' } })
+                    .catch(e => note(e.message, true));
+                showList();
+            });
+
+            $('back').addEventListener('click', () => { if (open) showList(); else location.href = 'vgpchat.html'; });
+
+            const ta = $('text');
+            const fit = S.autoGrow(ta);
+            const sync = () => { $('send').disabled = !ta.value.trim() || ta.value.length > S.MAX_LEN; };
+            ta.addEventListener('input', sync);
+            ta.setAttribute('maxlength', S.MAX_LEN);
+            $('compose').addEventListener('submit', e => { e.preventDefault(); reply(); });
+            ta.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer: coarse)').matches) { e.preventDefault(); reply(); }
+            });
+
+            /* --- start: login (Doc's SVP account), key, push target ---------------------------------- */
+
+            async function pushHere() {
+                if (!vgpPub) return;
+                const rows = await api('chat_config?key=eq.push_pubkey&select=value');
+                if (rows && rows[0] && rows[0].value === vgpPub) return;
+                await api('chat_config', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+                    body: JSON.stringify([{ key: 'push_pubkey', value: vgpPub }]) });
+                note('Benachrichtigungen der Sprechstunde kommen ab jetzt auf dieses Gerät (VGP-Push).');
+            }
+
+            async function start() {
+                if (!A.hasSession()) { A.loginDialog(start, 'Sprechstunde: mit dem SVP-Konto anmelden'); return; }
+                if (uid() !== DOC_UID) { note('Die Sprechstunde gehört Dr. Alvers. Dieses Konto hat keinen Zugang.', true); return; }
+                if (!(await S.available())) { note('Die Sprechstunde ist noch nicht eingerichtet: Das SQL fehlt noch.', true); return; }
+                await C.ready;
+                if (!C.hasPrivate()) { C.passDialog('unlock', start, 'Sprechstunde'); return; }
+                pushHere().catch(e => note('Push-Ziel nicht gespeichert: ' + e.message, true));
+                S.poll(() => (open ? loadThread() : loadList()).catch(e => note('Nicht ladbar: ' + e.message, true)), 20000);
+            }
+            start();
+        })();
+    </script>
+</body>
+
+</html>

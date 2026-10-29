@@ -37,8 +37,11 @@
 <body>
     <header class="page-head">
         <div class="head-row">
-            <div class="title-group">
+            <div class="title-group mp-who">
                 <h1 id="who">Mein Stundenplan</h1>
+                <!-- the red phone (Doc, 29.10.2026): pupils write to him anonymously, he answers in VGP -->
+                <a class="mp-chat" id="chat" href="sprechstunde.html" title="Sprechstunde: anonym schreiben"
+                    aria-label="Sprechstunde: anonym schreiben" hidden></a>
             </div>
         </div>
     </header>
@@ -62,8 +65,13 @@
 
     <script src="svp-woche.js"></script>
     <script src="svp-timetable.js"></script>
+    <script src="svp-auth.js"></script>
+    <script src="sprechstunde-core.js"></script>
     <script>
         'use strict';
+
+        document.getElementById('chat').innerHTML = Sprechstunde.PHONE;   // the red telephone, from one place
+        Sprechstunde.available().then(ok => { document.getElementById('chat').hidden = !ok; });   // only once the SQL is in
 
         const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
         const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key - public by design */

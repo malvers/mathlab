@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<!--
+    Sprechstunde - pupils write to Doc, anonymously (Doc, 29.10.2026). Reached through the red phone
+    behind his name on meinplan.html; Doc answers in VGP (vgp/vgpsprechstunde.html).
+
+    No login. This device makes, on the first message, a random key (finds the thread) and an ECDH key
+    pair (Doc's replies are sealed for its public half). A message is sealed against Doc's public key
+    before it leaves the browser; the database sees ciphertext only. Because of that the device cannot
+    read its own messages back from the server - it keeps its own copy. New device or cleared browser
+    = new, empty chat. Tables and limits: supabase/migrations/20261029_chat.sql.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sprechstunde | Dr. Michael R. Alvers</title>
+    <meta name="robots" content="noindex">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <meta name="theme-color" content="#050b18">
+    <link rel="stylesheet" href="sprechstunde.css">
+</head>
+
+<body class="sp-page">
+    <header class="sp-head">
+        <div class="sp-wrap">
+            <a class="sp-back" href="meinplan.html" aria-label="Zurück zum Stundenplan" title="Zurück zum Stundenplan">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+            <span id="phone"></span>
+            <div class="sp-title">
+                <h1>Sprechstunde</h1>
+                <p>Dr. Michael R. Alvers</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="sp-main">
+        <div class="sp-wrap">
+            <p class="sp-note" id="note">Anonym. Ende-zu-Ende verschlüsselt: Nur Dr. Alvers kann die Nachrichten lesen.
+                Dieses Gerät merkt sich den Chat, nach 30 Tagen ohne neue Nachricht wird alles gelöscht.</p>
+            <div class="sp-msgs" id="msgs" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <form class="sp-compose" id="compose" autocomplete="off">
+        <div class="sp-wrap">
+            <label class="sr" for="text">Nachricht</label>
+            <textarea id="text" rows="1" placeholder="Nachricht …" enterkeyhint="send"></textarea>
+            <button class="sp-send" id="send" type="submit" aria-label="Senden" title="Senden" disabled></button>
+        </div>
+    </form>
+
+    <script src="svp-auth.js"></script>
+    <script src="svp-crypto.js"></script>
+    <script src="sprechstunde-core.js"></script>
+    <script>
+        (function () {
+            const S = window.Sprechstunde, C = window.svpCrypto;
+            const $ = id => document.getElementById(id);
+            /* this device's chat: random key, key pair, own copies of what it sent (id -> text) */
+            const K_KEY = 'svp-sprechstunde-key', K_PAIR = 'svp-sprechstunde-pair', K_MINE = 'svp-sprechstunde-mine';
+
+            $('phone').innerHTML = S.PHONE;
+            $('send').innerHTML = S.SEND_SVG;
+
+            const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+            const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
+            let canStore = save('svp-sprechstunde-probe', 1);
+            try { localStorage.removeItem('svp-sprechstunde-probe'); } catch (e) { }
+
+            function warn(text) { const n = $('note'); n.textContent = text; n.classList.add('warn'); }
+            if (!C.available) warn('Dieser Browser kann nicht verschlüsseln. Bitte einen aktuellen Browser nehmen.');
+            else if (!canStore) warn('Dieser Browser speichert nichts (privater Modus?). Senden geht, aber die Antwort kann hier nicht ankommen.');
+
+            function randomKey() {
+                const b = crypto.getRandomValues(new Uint8Array(32));
+                return btoa(String.fromCharCode.apply(null, b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            }
+
+            /* key + pair exist from the first message on; before that the page only shows the empty chat */
+            let me = { key: load(K_KEY), pair: load(K_PAIR) };
+            async function ensureIdentity() {
+                if (me.key && me.pair) return me;
+                me = { key: randomKey(), pair: await C.newPair() };
+                save(K_KEY, me.key);
+                save(K_PAIR, me.pair);
+                return me;
+            }
+
+            let shown = [];         // what is on screen, incl. a pending message
+            let blocked = false;
+
+            async function refresh() {
+                if (!me.key || !me.pair) { S.paint($('msgs'), shown, 'Schreib einfach los. Dr. Alvers antwortet hier.'); return; }
+                let rows;
+                try { rows = await S.rpc('chat_read', { p_key: me.key }); }
+                catch (e) { return; }          // offline or not set up yet - try again on the next tick
+                const mine = load(K_MINE) || {};
+                const out = [];
+                for (const r of rows) {
+                    let text;
+                    if (r.from_doc) {
+                        try { text = await C.openFor(me.pair.priv, r.body_enc); } catch (e) { text = '🔒 (nicht lesbar)'; }
+                    } else {
+                        text = mine[r.id] != null ? mine[r.id] : '(auf diesem Gerät nicht gespeichert)';
+                    }
+                    out.push({ id: r.id, mine: !r.from_doc, text: text, at: r.created_at });
+                    blocked = !!r.blocked;
+                }
+                shown = out.concat(shown.filter(m => m.state === 'pending' || m.state === 'failed'));
+                S.paint($('msgs'), shown, 'Schreib einfach los. Dr. Alvers antwortet hier.');
+                if (blocked) warn('Dieser Chat ist gesperrt.');
+            }
+
+            const ta = $('text');
+            const fit = S.autoGrow(ta);
+            const sync = () => { $('send').disabled = !ta.value.trim() || ta.value.length > S.MAX_LEN || blocked; };
+            ta.addEventListener('input', sync);
+            ta.setAttribute('maxlength', S.MAX_LEN);
+
+            async function send() {
+                const text = ta.value.trim();
+                if (!text || text.length > S.MAX_LEN) return;
+                const pending = { mine: true, text: text, state: 'pending' };
+                shown.push(pending);
+                S.paint($('msgs'), shown);
+                ta.value = ''; fit(); sync();
+                try {
+                    const id = await ensureIdentity();
+                    const body = await C.seal(text);
+                    const newId = await S.rpc('chat_send', { p_key: id.key, p_pub: JSON.stringify(id.pair.pub), p_body: body });
+                    const mine = load(K_MINE) || {};
+                    mine[newId] = text;
+                    save(K_MINE, mine);
+                    shown = shown.filter(m => m !== pending);
+                    await refresh();
+                } catch (e) {
+                    pending.state = 'failed';
+                    S.paint($('msgs'), shown);
+                    warn('Nicht gesendet: ' + e.message);
+                }
+            }
+
+            $('compose').addEventListener('submit', e => { e.preventDefault(); send(); });
+            /* Enter sends on a computer; on a phone Enter stays a new line (the send button is right there) */
+            ta.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer: coarse)').matches) { e.preventDefault(); send(); }
+            });
+
+            S.available().then(ok => {
+                if (!ok) { warn('Die Sprechstunde ist noch nicht eingerichtet.'); ta.disabled = true; return; }
+                S.poll(refresh, 15000);
+            });
+        })();
+    </script>
+</body>
+
+</html>
