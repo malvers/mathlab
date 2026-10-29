@@ -2,7 +2,7 @@
 // owns the app's push subscription, apart from VGP's (../sw.js). No caching: every request goes to the
 // network. The push function seals "Nachricht vom Stundenplan" for this device; without a payload the
 // same words are shown anyway.
-const SW_VERSION = '2026-10-29-2';
+const SW_VERSION = '2026-10-29-3';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
@@ -13,8 +13,10 @@ self.addEventListener('fetch', () => {});
 self.addEventListener('push', (e) => {
   let title = 'Nachricht vom Stundenplan', body = 'Kontakt';
   if (e.data) { try { const d = e.data.json(); title = d.title || title; body = d.body || body; } catch (_) {} }
+  // a tag of its own per message: each one is a new notification with its own sound - with one shared
+  // tag a second message only replaced the first one silently (Doc's test 2, 29.10.2026)
   e.waitUntil(self.registration.showNotification(title, {
-    body, icon: 'icon-192.png', badge: 'badge-96.png', tag: 'kontakt', renotify: true
+    body, icon: 'icon-192.png', badge: 'badge-96.png', tag: 'kontakt-' + Date.now()
   }));
 });
 
