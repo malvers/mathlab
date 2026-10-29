@@ -63,8 +63,11 @@ type Sub = { endpoint: string; pubkey: string; p256dh?: string; auth?: string };
 
 // Send one push: content-less, or with `note` sealed for this subscription (falls back to content-less
 // when the subscription has no keys). Returns the HTTP status (404/410 = subscription is dead).
-async function sendPush(s: Sub, note?: object): Promise<number> {
-  const headers: Record<string, string> = { Authorization: await vapidAuthHeader(s.endpoint), TTL: '60' };
+// `urgent` (Kontakt): Urgency high wakes a locked, sleeping phone at once (FCM high priority), and a day
+// of TTL keeps the ping waiting while it is offline - with 60 s it was often gone before Doze let it in.
+async function sendPush(s: Sub, note?: object, urgent = false): Promise<number> {
+  const headers: Record<string, string> = { Authorization: await vapidAuthHeader(s.endpoint), TTL: urgent ? '86400' : '60' };
+  if (urgent) headers['Urgency'] = 'high';
   let body: Uint8Array | undefined;
   if (note && s.p256dh && s.auth) {
     body = await encryptPush(new TextEncoder().encode(JSON.stringify(note)), b64urlToBytes(s.p256dh), b64urlToBytes(s.auth));
@@ -108,7 +111,7 @@ Deno.serve(async (req) => {
   let sent = 0;
   for (const s of subs) {
     try {
-      const status = await sendPush(s, note);
+      const status = await sendPush(s, note, kontakt);
       console.log('PUSH', s.endpoint.slice(-16), '→ status', status);
       if (status === 404 || status === 410) {                          // prune dead subscription
         if (kontakt) await supa.from('chat_config').delete().in('key', KONTAKT_KEYS);
