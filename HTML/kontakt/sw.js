@@ -2,7 +2,7 @@
 // owns the app's push subscription, apart from VGP's (../sw.js). No caching: every request goes to the
 // network. The push function seals "Nachricht vom Stundenplan" for this device; without a payload the
 // same words are shown anyway.
-const SW_VERSION = '2026-10-29-1';
+const SW_VERSION = '2026-10-29-2';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
@@ -18,12 +18,13 @@ self.addEventListener('push', (e) => {
   }));
 });
 
-// Tap → the open Kontakt window, else open the app.
+// Tap → the open Kontakt window (inside this worker's scope: /kontakt/ here, / on doc-kontakt.pages.dev),
+// else open the app.
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
   e.waitUntil((async () => {
     const wins = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const w of wins) { if (w.url.includes('/kontakt/') && 'focus' in w) return w.focus(); }
+    for (const w of wins) { if (w.url.startsWith(self.registration.scope) && 'focus' in w) return w.focus(); }
     if (clients.openWindow) return clients.openWindow('./');
   })());
 });
