@@ -29,12 +29,12 @@ const LABS_DATA = [
     {
         "id": "buecher",
         "href": "index.html#buecher",
-        "title": "{n} Bücher in 4 Sprachen",
-        "description": "Alle unsere interaktiven Lehrbücher an einem Ort: Mathematik von Klasse 5 bis zum Abitur, für Gymnasium, Oberschule, Berufliches Gymnasium und Fachoberschule — jedes Buch auch auf Englisch, Spanisch und Italienisch. Mit Erkundungen, Selbsttests, Labs zum Ausprobieren und einer Druckausgabe.",
-        "tagline": "Bücher / Books / Libros / Libri",
+        "title": "{n} Bücher in 5 Sprachen",
+        "description": "Alle unsere interaktiven Lehrbücher an einem Ort: Mathematik von Klasse 5 bis zum Abitur, für Gymnasium, Oberschule, Berufliches Gymnasium und Fachoberschule — jedes Buch auch auf Englisch, Spanisch, Italienisch und Französisch. Mit Erkundungen, Selbsttests, Labs zum Ausprobieren und einer Druckausgabe.",
+        "tagline": "Bücher / Books / Libros / Libri / Livres",
         "icon": LAB_ICONS["buecher"],
         "category": "neu",
-        "keywords": "buch buecher lehrbuch lehrbuecher schulbuch mathebuch mathematik books libros libri",
+        "keywords": "buch buecher lehrbuch lehrbuecher schulbuch mathebuch mathematik books libros libri livres",
         "color": "gold"
     },
     {

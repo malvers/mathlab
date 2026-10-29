@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 123 labs, 2157 terms, 2026-10-28
+ * 123 labs, 2157 terms, 2026-10-29
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],

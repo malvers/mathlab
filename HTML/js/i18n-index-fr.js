@@ -96,7 +96,7 @@
                 exit: "Quitter"
             },
             labs: {
-                "buecher": { title: "{n} livres en 4 langues", description: "Tous nos manuels interactifs réunis : les mathématiques de la 5e année scolaire jusqu'à l'Abitur, selon le programme de Saxe, pour le Gymnasium, l'Oberschule, le Gymnasium professionnel et la Fachoberschule — chaque livre en allemand, en anglais, en espagnol et en italien. Avec des explorations, des autotests, des labos à essayer et une édition imprimable." },
+                "buecher": { title: "{n} livres en 5 langues", description: "Tous nos manuels interactifs réunis : les mathématiques de la 5e année scolaire jusqu'à l'Abitur, selon le programme de Saxe, pour le Gymnasium, l'Oberschule, le Gymnasium professionnel et la Fachoberschule — chaque livre en allemand, en anglais, en espagnol, en italien et en français. Avec des explorations, des autotests, des labos à essayer et une édition imprimable." },
                 "fourier": { title: "Transformée de Fourier", description: "La musique des mathématiques. Décomposez des formes complexes en oscillations circulaires harmoniques." },
                 "mandelbrot-deep": { title: "Fractales", description: "Ensembles de Mandelbrot et Julia dans le plan complexe : dynamique en temps d'échappement de z↦z²+c via itération GPU en shader fragmentaire ; exploration paramétrique de c et profondeur d'itération adaptive au voisinage de la frontière fractale." },
                 "atomorbitale": { title: "Orbitales Atomiques", description: "Harmoniques sphériques Y_ℓ^m en 3D : nuages de probabilité et nombres quantiques." },

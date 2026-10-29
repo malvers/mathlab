@@ -26,8 +26,8 @@ window.BuchIT && BuchIT.add('bgy13lk', {
         '1 Schritt': '1 passo', '10 Schritte': '10 passi', 'Zurück auf Start': 'Torna all’inizio',
         'Verlauf der drei Klassen über die Schritte n': 'Andamento delle tre classi lungo i passi n',
         'Übergangsgraph mit drei Zuständen und den Übergangsanteilen an den Pfeilen': 'Grafo di transizione con tre stati e le quote di transizione sulle frecce',
-        // the beetle node of the graph is a circle of 60 px: "Coleotteri" does not fit, the stage is called "Adulti"
-        'Eier': 'Uova', 'Larven': 'Larve', 'Käfer': 'Adulti',
+        // the beetle node of the graph widens to an ellipse, so "Coleotteri" fits
+        'Eier': 'Uova', 'Larven': 'Larve', 'Käfer': 'Coleotteri',
         // biquadratisch
         'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'La parabola h(z) = z² + p·z + q con i suoi zeri',
         'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'Il grafico di f(x) = x⁴ + p·x² + q con i suoi zeri',
@@ -59,7 +59,7 @@ window.BuchIT && BuchIT.add('bgy13lk', {
         [' ME', ' u.'],
         // uebergang
         ['Eier je Käfer', 'Uova per coleottero'],
-        ['Eier', 'Uova'], ['Larven', 'Larve'], ['Käfer', 'Adulti'],
+        ['Eier', 'Uova'], ['Larven', 'Larve'], ['Käfer', 'Coleotteri'],
         ['Anbieter', 'Fornitore'],
         ['a \\cdot b \\cdot f \\cdot E = ', 'a \\cdot b \\cdot f \\cdot I = '],
         [' \\cdot E$: Nach jeweils drei Schritten ist jede Klasse ', ' \\cdot I$: ogni tre passi ogni classe '],

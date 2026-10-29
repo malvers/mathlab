@@ -20,8 +20,8 @@ window.BuchFR && BuchFR.add('bgy13lk', {
         'Nächster Schritt': 'Étape suivante', 'Alle Schritte': 'Toutes les étapes', 'Von vorn': 'Recommencer',
         // leontief ('Summe' is 'Total' in js/buch-fr.js)
         'Markt': 'Marché',
-        // uebergang: the stages in the graph (« Adultes » fits the node, the text says « coléoptères »), the buttons as in js/buch-fr/lgs.js
-        'Eier': 'Œufs', 'Larven': 'Larves', 'Käfer': 'Adultes',
+        // uebergang: the stages in the graph (the beetle node widens to an ellipse for « Coléoptères »), the buttons as in js/buch-fr/lgs.js
+        'Eier': 'Œufs', 'Larven': 'Larves', 'Käfer': 'Coléoptères',
         'Käferpopulation': 'Population de coléoptères', 'Kundenwanderung': 'Mouvements de clientèle',
         '1 Schritt': '1 étape', '10 Schritte': '10 étapes', 'Zurück auf Start': 'Retour au départ',
         'Verlauf der drei Klassen über die Schritte n': 'Évolution des trois classes au fil des étapes n',

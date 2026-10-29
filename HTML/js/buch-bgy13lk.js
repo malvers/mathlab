@@ -236,8 +236,15 @@
         const id = 'b13u' + (++uid);
         const U = () => mode === 'kunden' ? UEB.kunden.U : [[0, 0, f], [a, 0, 0], [0, b, 0]];
         function setup() { segm.set(mode); sl.style.display = mode === 'kaefer' ? '' : 'none'; render(); }
+        // a long stage name ("Escarabajos", "Coléoptères") widens its node to an ellipse instead of running over the border;
+        // measureText goes through the translation hook of the editions, so it measures the translated word
+        const ctx2 = document.createElement('canvas').getContext('2d');
+        ctx2.font = '700 13px Raleway, sans-serif';
+        if (document.fonts) document.fonts.ready.then(() => render());
         function graph(M, names, cols) {
             const P = [[160, 66], [262, 216], [58, 216]], R = 30;
+            const RX = names.map(nm => Math.max(R, Math.ceil(ctx2.measureText(nm).width / 2) + 8));
+            const rad = (k, ux, uy) => 1 / Math.hypot(ux / RX[k], uy / R);   // centre to border of node k in direction (ux, uy)
             let s = '<svg viewBox="0 0 320 290" role="img" aria-label="Übergangsgraph mit drei Zuständen und den Übergangsanteilen an den Pfeilen">' +
                 '<defs><marker id="' + id + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" style="fill:#e682be"/></marker></defs>';
             for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) {
@@ -253,12 +260,13 @@
                 }
                 const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, bend = 18;
                 const mx = (x1 + x2) / 2 + uy * bend, my = (y1 + y2) / 2 - ux * bend;
-                s += '<path d="M' + (x1 + ux * R).toFixed(1) + ' ' + (y1 + uy * R).toFixed(1) + ' Q' + mx.toFixed(1) + ' ' + my.toFixed(1) + ' ' + (x2 - ux * (R + 3)).toFixed(1) + ' ' + (y2 - uy * (R + 3)).toFixed(1) +
+                const r1 = rad(j, ux, uy), r2 = rad(i, ux, uy) + 3;
+                s += '<path d="M' + (x1 + ux * r1).toFixed(1) + ' ' + (y1 + uy * r1).toFixed(1) + ' Q' + mx.toFixed(1) + ' ' + my.toFixed(1) + ' ' + (x2 - ux * r2).toFixed(1) + ' ' + (y2 - uy * r2).toFixed(1) +
                     '" style="fill:none;stroke:#e682be;stroke-width:1.8" marker-end="url(#' + id + ')"/>';
                 s += lab.replace('LX', (mx + uy * 6).toFixed(1)).replace('LY', (my - ux * 6 + 5).toFixed(1));
             }
             P.forEach(([x, y], i) => {
-                s += '<circle cx="' + x + '" cy="' + y + '" r="' + R + '" style="fill:' + cols[i] + ';fill-opacity:0.18;stroke:' + cols[i] + ';stroke-width:2.2"/>' +
+                s += '<ellipse cx="' + x + '" cy="' + y + '" rx="' + RX[i] + '" ry="' + R + '" style="fill:' + cols[i] + ';fill-opacity:0.18;stroke:' + cols[i] + ';stroke-width:2.2"/>' +
                     '<text x="' + x + '" y="' + (y + 5) + '" text-anchor="middle" style="fill:#e8edf5;font:700 13px Raleway,sans-serif">' + names[i] + '</text>';
             });
             return s + '</svg>';

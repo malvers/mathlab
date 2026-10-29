@@ -97,7 +97,7 @@
                 exit: "Beenden"
             },
             labs: {
-                "buecher": { title: "{n} Bücher in 4 Sprachen", description: "Alle unsere interaktiven Lehrbücher an einem Ort: Mathematik von Klasse 5 bis zum Abitur, für Gymnasium, Oberschule, Berufliches Gymnasium und Fachoberschule — jedes Buch auch auf Englisch, Spanisch und Italienisch. Mit Erkundungen, Selbsttests, Labs zum Ausprobieren und einer Druckausgabe." },
+                "buecher": { title: "{n} Bücher in 5 Sprachen", description: "Alle unsere interaktiven Lehrbücher an einem Ort: Mathematik von Klasse 5 bis zum Abitur, für Gymnasium, Oberschule, Berufliches Gymnasium und Fachoberschule — jedes Buch auch auf Englisch, Spanisch, Italienisch und Französisch. Mit Erkundungen, Selbsttests, Labs zum Ausprobieren und einer Druckausgabe." },
                 "fourier": { title: "Fourier-Transformation", description: "Die Musik der Mathematik. Zerlege komplexe Formen in harmonische Kreisschwingungen." },
                 "mandelbrot-deep": { title: "Fraktale", description: "Mandelbrot- und Julia-Mengen in der komplexen Ebene: Escapingzeit-Dynamik der Abbildung z↦z²+c als GPU-gestützte Iteration im Fragment-Shader; parametrisierte Exploration von c mit adaptiver Iterationstiefe entlang der fraktalen Randstruktur." },
                 "atomorbitale": { title: "Atomorbitale", description: "Kugelflächenfunktionen Y_ℓ^m in 3D: Wahrscheinlichkeitswolken und Quantenzahlen." },
