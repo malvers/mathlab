@@ -254,33 +254,6 @@
         const nameText = txt => INDEX && INDEX.names
             ? txt.replace(/[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{4,}/g, m => INDEX.names[m] ? INDEX.names[m] : m) : txt;
 
-        // One own appointment as a tile, placed like a lesson (look: .tt-termin in svp-timetable.css)
-        function terminTile(it, y, scale) {
-            const t = it.l, a = toMin(t.startTime), b = toMin(t.endTime);
-            const el = document.createElement('div');
-            el.className = 'tt-lesson tt-termin';
-            el.style.top = y(a) + 'px';
-            el.style.height = Math.max(16, (b - a) * scale - 3) + 'px';
-            el.style.left = 'calc(' + (it.col * 100 / it.of) + '% + 3px)';
-            el.style.width = 'calc(' + (100 / it.of) + '% - 6px)';
-            const time = document.createElement('span');
-            time.className = 'tt-termin-time';
-            time.textContent = hhmm(t.startTime);
-            el.appendChild(time);
-            const who = document.createElement('span');
-            who.className = 'tt-termin-who';
-            who.textContent = t.who || t.title || 'Termin';
-            el.appendChild(who);
-            if (t.who && t.title) {
-                const what = document.createElement('span');
-                what.className = 'tt-termin-what';
-                what.textContent = t.title;
-                el.appendChild(what);
-            }
-            el.title = [t.title, t.who, t.info, hhmm(t.startTime) + '–' + hhmm(t.endTime)].filter(Boolean).join(' · ');
-            return el;
-        }
-
         // --- state ---------------------------------------------------------
         let INDEX = null;      // plandaten/index.json: weeks, staff, school year
         let DATA = null;       // the week currently on screen
@@ -575,7 +548,7 @@
                 if (showTermine) for (const t of TERMINE) if (t.date === d) items.push({ l: { ...t, termin: true }, clash: false });
                 for (const it of layoutColumns(items)) {
                     const l = it.l;
-                    if (l.termin) { col.appendChild(terminTile(it, y, scale)); continue; }
+                    if (l.termin) { col.appendChild(SvpTimetable.terminTile(it, y, scale)); continue; }
                     const a = toMin(l.startTime), b = toMin(l.endTime);
                     const el = document.createElement('div');
                     el.className = 'tt-lesson'

@@ -963,6 +963,15 @@ async function publishPlan(dir = path.join(REPO, 'HTML', 'svp', 'plandaten')) {
       }
       return [];
     };
+    // Own appointments (Coaching etc.) from the local, gitignored termine.json. Only the explicit
+    // public label leaves this machine (Doc, 29.10.2026: first names only) - never the full name.
+    let termine = [];
+    try { termine = JSON.parse(fs.readFileSync(path.join(dir, 'termine.json'), 'utf8')).termine || []; } catch (e) { /* optional */ }
+    const weekTermine = wk => {
+      const fri = parseYmd(wk); fri.setDate(fri.getDate() + 4);
+      return termine.filter(t => t.date >= Number(wk) && t.date <= Number(ymd(fri)))
+        .map(t => ({ date: t.date, startTime: t.startTime, endTime: t.endTime, title: t.title || 'Termin', who: t.publicWho || '' }));
+    };
     const slim = l => ({
       date: l.date, startTime: l.startTime, endTime: l.endTime,
       subject: l.subject, classes: l.classes || [],
@@ -976,6 +985,7 @@ async function publishPlan(dir = path.join(REPO, 'HTML', 'svp', 'plandaten')) {
         week: wk, teacher: PUBLIC_TEACHER, school: index.school, generatedAt: index.generatedAt,
         timegrid: d.timegrid,
         lessons: d.lessons.filter(l => (l.teachers || []).includes(index.teacher)).map(slim),
+        termine: weekTermine(wk),
       } };
     });
     const tag = '$p' + crypto.randomBytes(6).toString('hex') + '$';

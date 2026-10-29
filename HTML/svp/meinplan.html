@@ -152,6 +152,8 @@
             const all = payload.lessons || [];
             const lessons = all.filter(l => !T.isBanner(l));
             const banners = all.filter(T.isBanner);
+            // own appointments (Coaching etc.) - the publisher lets out first names only
+            const termine = (payload.termine || []).map(t => ({ ...t, termin: true }));
 
             const mon = parseYmd(payload.week);
             const dates = [];
@@ -163,7 +165,7 @@
             /* The axis runs from this week's first lesson to its last, on half hours.
                A week with banners only falls back to the school's timegrid. */
             const units = (payload.timegrid && payload.timegrid[0] && payload.timegrid[0].timeUnits) || [];
-            const spanSrc = lessons.length ? lessons : units;
+            const spanSrc = lessons.length || termine.length ? lessons.concat(termine) : units;
             if (!spanSrc.length) {
                 grid.innerHTML = '<div class="tt-empty">In dieser Woche keine Stunden.</div>';
                 return;
@@ -205,6 +207,7 @@
             dates.forEach((d, i) => {
                 const dayLessons = lessons.filter(l => l.date === d);
                 const dayBanners = banners.filter(b => b.date === d);
+                const dayTermine = termine.filter(t => t.date === d);
                 html.push('<div class="tt-col" style="height:' + height + 'px" data-day="' +
                     DAYS[i] + ', ' + dmy(parseYmd(d)) + '">');
                 // a line at every full and half hour, like the staff view
@@ -218,10 +221,11 @@
                         '<span class="tt-br">' + esc((b.classes || []).join(', ')) + '</span></div>');
                 });
                 // phones only: a day without lessons says so (the desktop column just stays empty)
-                if (!dayLessons.length && !dayBanners.length) html.push('<div class="mp-free">frei</div>');
-                // a double period is one tile (svp-timetable.js mergeRuns)
-                for (const it of T.layoutColumns(T.mergeRuns(dayLessons).map(l => ({ l })))) {
-                    html.push(lessonTile(it, y, scale));
+                if (!dayLessons.length && !dayBanners.length && !dayTermine.length) html.push('<div class="mp-free">frei</div>');
+                // a double period is one tile (svp-timetable.js mergeRuns); appointments share the columns
+                const items = T.mergeRuns(dayLessons).map(l => ({ l })).concat(dayTermine.map(t => ({ l: t })));
+                for (const it of T.layoutColumns(items)) {
+                    html.push(it.l.termin ? T.terminTile(it, y, scale).outerHTML : lessonTile(it, y, scale));
                 }
                 html.push('</div>');
             });

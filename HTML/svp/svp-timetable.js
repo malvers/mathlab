@@ -120,8 +120,32 @@
         return sorted;
     }
 
+    /* One own appointment (Coaching etc.) as a tile, placed like a lesson by layoutColumns.
+       { date, startTime, endTime, title, who } - stundenplan.html has the full name in who,
+       the public meinplan.html only what the publisher lets out (first names). Look: .tt-termin. */
+    function terminTile(it, y, scale) {
+        const t = it.l, a = toMin(t.startTime), b = toMin(t.endTime);
+        const el = document.createElement('div');
+        el.className = 'tt-lesson tt-termin';
+        el.style.top = y(a) + 'px';
+        el.style.height = Math.max(16, (b - a) * scale - 3) + 'px';
+        el.style.left = 'calc(' + (it.col * 100 / it.of) + '% + 3px)';
+        el.style.width = 'calc(' + (100 / it.of) + '% - 6px)';
+        const part = (cls, text) => {
+            const s = document.createElement('span');
+            s.className = cls;
+            s.textContent = text;
+            el.appendChild(s);
+        };
+        part('tt-termin-time', hhmm(t.startTime));      // shown on phones only
+        part('tt-termin-who', t.who || t.title || 'Termin');
+        if (t.who && t.title) part('tt-termin-what', t.title);
+        el.title = [t.title, t.who, t.info, hhmm(t.startTime) + '–' + hhmm(t.endTime)].filter(Boolean).join(' · ');
+        return el;
+    }
+
     root.SvpTimetable = {
         PX_PER_MIN, toMin, hhmm, parseYmd, isBanner,
-        HUES, SUBJECT_HUE, hueOf, jahrgangOf, overlaps, mergeRuns, layoutColumns,
+        HUES, SUBJECT_HUE, hueOf, jahrgangOf, overlaps, mergeRuns, layoutColumns, terminTile,
     };
 })(window);
