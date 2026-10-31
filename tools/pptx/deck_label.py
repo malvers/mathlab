@@ -37,7 +37,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LABEL = re.compile(r'<p class="(fl(?: [^"]*)?)"((?: data-g="\d+")?(?: data-bis="\d+")?) style="([^"]*)">')
 # the text boxes that stand on a slide as html_deck.py writes them - tag.class, or a bare heading (deck-label.js: KINDS)
 KINDS = ("div.body", "div.colgrid", "div.codepanel", "table.dtable", "h1", "h2", "h3", "p.kicker", "p.sub",
-         "p.satz", "p.label", "p.labnote", "p.greet-lead", "p.greet-quote", "p.greet-author", "div.labbar")
+         "p.satz", "p.label", "p.labnote", "p.greet-lead", "p.greet-quote", "p.greet-author", "div.labbar",
+         "a.chap-credit", "a.fig-source", "a.side-credit")   # a picture's caption, moved like a text box (30.10.2026)
 RIGHT = ("div.labbar",)                                # hangs from the right in deck.css: moved, it needs right:auto
 VOID = ("area", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr")
 STYLE = re.compile(r'\sstyle="[^"]*"')
@@ -86,7 +87,8 @@ def move(q):
 
 
 def _restyle(old, q, kind=""):
-    """The box's style with its new left/top - width and scale once a handle changed them; the rest as it was."""
+    """The box's style with its new left/top - width and scale once a handle changed them, the text alignment once
+    the edit bar set it (align: left/center/right, "" takes it off); the rest as it was."""
     from deck_image import _num
     decl = [(k.strip(), v.strip()) for k, v in (d.split(":", 1) for d in (old or "").split(";") if ":" in d)]
     was = dict(decl)
@@ -103,6 +105,12 @@ def _restyle(old, q, kind=""):
     elif scale is None and was.get("scale"):
         out += ["scale:" + was["scale"], "transform-origin:0 0"]
     gone = ("left", "top", "width", "scale", "transform-origin")
+    if "align" in q:                                  # the edit bar's three buttons (Doc, 30.10.2026)
+        if q["align"] not in ("", "left", "center", "right"):
+            raise ValueError("align out of range")
+        if q["align"]:
+            out.append("text-align:" + q["align"])
+        gone += ("text-align",)
     if kind in RIGHT:
         out.append("right:auto")
         gone += ("right", "bottom")

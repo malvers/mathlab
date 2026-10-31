@@ -33,8 +33,8 @@ d = MathDeck("ai-wasserzeichen.pptx")
 
 def side_bullets(title, lines, img, alt, caption, url):
     """Bullets with a square photo on the right - the has-side layout of mathe11-exponential (deck.css .side-pic)."""
-    fig = ('<figure class="side-pic"><img src="%s" alt="%s"><figcaption><a href="%s" target="_blank" rel="noopener">'
-           '%s</a></figcaption></figure>' % (img, alt, url, caption))
+    fig = ('<figure class="side-pic"><img src="%s" alt="%s"></figure><a class="side-credit" href="%s" target="_blank" '
+           'rel="noopener">%s</a>' % (img, alt, url, caption))
     d._slide("content has-side", '<h3>%s</h3><div class="rules"></div><div class="body">%s</div>%s'
              % (markup(title), bullet_list(lines)[0], fig))
 
@@ -54,17 +54,6 @@ def wortvorhersage_lab():
 d.title("Informatik — Künstliche Intelligenz", "Unsichtbare Wasserzeichen",
         "Wie Claude, Gemini & Co. ihre Texte markieren — und wie man es nachweist")
 d.summary("Titel: Unsichtbare Wasserzeichen in KI-Texten - wie Sprachmodelle ihre Texte markieren und wie man es nachweist.")
-
-d.bullets("Anlass: eine Mail von Anthropic", [
-    ("Ab **3. November 2026** markiert Anthropic auch ältere Claude-Modelle", 0),
-    ("Neuere Modelle wie Claude Opus 5.5 tragen das Zeichen **schon heute**", 0),
-    ("Das Zeichen ist ein **unmerkliches Muster in der Wortwahl**", 0),
-    ("Kein Zeichen, kein Token mehr — Bedeutung und Qualität bleiben **gleich**", 0),
-    ("Es verrät **nichts** über Nutzer oder Gespräch, nur: **„von einer KI“**", 0),
-])
-d.summary("Anlass: Mail von Anthropic vom 28.10.2026 - ab 3. November 2026 auch ältere Claude-Modelle mit Wasserzeichen, "
-          "neuere wie Opus 5.5 schon jetzt; unmerkliches Muster in der Wortwahl, keine zusätzlichen Zeichen oder Token, "
-          "keine Information über Nutzer.")
 
 # ------------------------------------------------------------- Kapitel 01 ---
 d.chapter(1, "Das Prinzip", "Ein Zeichen, das man nicht sieht", image="img/wasserzeichen-buetten.jpg",
@@ -96,6 +85,26 @@ side_bullets("So entsteht ein Wasserzeichen im Papier", [
    "https://commons.wikimedia.org/wiki/File:QueenVictoriaWatermark.jpg")
 d.summary("Papier-Wasserzeichen: Drahtbild auf dem Schöpfsieb, dort weniger Papierbrei, Papier dünner, gegen das Licht heller; "
           "Teil des Papiers, nicht aufgedruckt. Beim KI-Text entsteht das Zeichen ebenso beim Schreiben.")
+
+d.bullets("Motivation für Wasserzeichen in KI-erstellten Texten", [
+    ("KI-erstellte Texte sind **schwer zu identifizieren**", 0),
+    ("Daher benötigt man ein **Verfahren**, um KI-generierte von nicht-KI-generierten Texten zu unterscheiden", 0),
+])
+d.summary("Motivation: KI-erstellte Texte sind schwer zu identifizieren - man braucht ein Verfahren, "
+          "das KI-generierte von nicht-KI-generierten Texten unterscheidet.")
+
+d.bullets("Wasserzeichen in KI-erstellten Texten", [
+    ("Ab **3. November 2026** markiert Anthropic auch ältere KI-Modelle mit Wasserzeichen", 0),
+    ("Neuere Modelle wie Claude Opus 5.5 tragen das Zeichen **schon heute**", 0),
+    ("Das Zeichen ist ein **unmerkliches Muster in der Wortwahl**", 0),
+    ("Kein **zusätzliches** Schriftzeichen, kein **zusätzliches** Wort", 0),
+    ("Die Aussagen und die linguistische Qualität des Textes bleiben **gleich**", 0),
+    ("Das Wasserzeichen verrät **nichts** darüber, welcher Nutzer den Text in Auftrag gegeben hat", 0),
+    ("Es kann nur erkannt werden, dass der Text **von einer künstlichen Intelligenz** erstellt wurde", 0),
+])
+d.summary("Anlass: Mail von Anthropic vom 28.10.2026 - ab 3. November 2026 auch ältere Claude-Modelle mit Wasserzeichen, "
+          "neuere wie Opus 5.5 schon jetzt; unmerkliches Muster in der Wortwahl, keine zusätzlichen Zeichen oder Token, "
+          "keine Information über Nutzer.")
 
 d.bullets("Erinnerung: Wie ein Sprachmodell schreibt", [
     ("Es sagt immer nur das **nächste Wort** voraus (genauer: das nächste Token)", 0),

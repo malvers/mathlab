@@ -117,24 +117,33 @@ def schluessel():
 
 
 def bonus():
-    """The same candidates before and after the green bonus - the ranking tips towards green."""
+    """The same candidates before and after the green bonus - the ranking tips towards green. Laid out like
+    spielraum() (Doc, 30.10.2026: "angleichen, auch im Design ... dass man sieht, das ist ja das Gleiche"):
+    horizontal bars, the words right-aligned on the left, the share behind the bar; both panels on one scale."""
     c = S.Canvas(W, H)
     labels = []
-    base, scale, bw, step = 236, 450.0, 40, 58
-    panels = ((210, [(w, p, g) for w, p, g in CANDS], "ohne Wasserzeichen"),
-              (606, with_bonus(), "mit Wasserzeichen: Grün bekommt einen Bonus"))
-    for cx, rows, head in panels:
-        labels.append((cx, 22, 380, head, css(16, extra="font-weight:600")))
-        x = cx - step * len(rows) / 2
-        c.line(x - 6, base, x + step * len(rows) + 6, base, S.MUTED, 1.4)
-        for word, p, green in rows:
-            mid = x + step / 2
-            c.rect(mid - bw / 2, base - p * scale, bw, p * scale, fill=S.GREEN if green else S.RED, rx=4)
-            c.text(mid, base - p * scale - 8, "%d %%" % round(p * 100), 13, S.INK)
-            labels.append((mid, base + 18, step, word, css(13.5)))
-            x += step
-    c.arrow(392, 150, 420, 150, S.INK, 2.4)
-    labels.append((W / 2, 302, W, "Die Rangfolge kippt: Rote Wörter werden selten, grüne häufig — "
+    top, rh, bh, scale = 54, 33, 22, 640.0
+    after = with_bonus()
+    rest_after = 1 - sum(p for _, p, _ in after)
+    # left the bars of spielraum() as they were - without a watermark green and red play no part (Doc, 30.10.2026:
+    # "die Farben bei dem linken Diagramm ... gelb lassen. Denn das Rot-Grün kommt ja erst rechts rein")
+    panels = ((0, [(w, p, "orange") for w, p, g in CANDS] + [("alle anderen", REST, None)], "Ohne Wasserzeichen"),
+              (420, after + [("alle anderen", rest_after, None)], "Mit Wasserzeichen"))
+    for ox, rows, head in panels:
+        x0 = ox + 104
+        labels.append((ox + 198, 8, 396, head, css(16, extra="font-weight:600")))   # a little above the bars
+        for i, (word, p, green) in enumerate(rows):
+            y = top + i * rh
+            fill = S.MUTED if green is None else S.ORANGE if green == "orange" else S.GREEN if green else S.RED
+            c.rect(x0, y, max(2, p * scale), bh, fill=fill, rx=5)
+            c.text(x0 + p * scale + 8, y + bh / 2 + 5, "%d %%" % round(p * 100), 14, S.INK, "start")
+            labels.append((x0 - 52, y + bh / 2, 96, word, css(15, extra="text-align:right")))
+    # a drawn block arrow between the panels, green like the bonus it stands for, with a short word above it
+    # (Doc, 30.10.2026: "einen schönen ordentlichen gezeichneten Pfeil ... irgendwas Sinnvolles, kompaktes")
+    c.poly([(325, 143), (387, 143), (387, 132), (413, 150), (387, 168), (387, 157), (325, 157)],   # 3 px right: the tip makes it look left
+           stroke=S.GREEN, width=1.5, fill=S.GREEN)
+    labels.append((366, 118, 130, "Bonus für Grün", css(14, S.GREEN, "font-weight:700")))
+    labels.append((W / 2, 314, W, "Die Rangfolge kippt: Rote Wörter werden selten, grüne häufig — "
                                   "und jedes davon passt in den Satz.", css(15, S.BODY)))
     return c.svg("Balken der Wortwahrscheinlichkeiten vor und nach dem Bonus für grüne Wörter: "
                  "sonnig steigt von 21 auf 38 Prozent, schön fällt von 24 auf 6 Prozent"), labels

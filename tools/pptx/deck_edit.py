@@ -50,7 +50,10 @@ EDITED_MARK = "<!-- deck-master: edited in the browser (tools/pptx/deck_edit.py)
 EDITABLE_TAGS = ("h1", "h2", "h3", "th", "td")
 EDITABLE_P = ("kicker", "sub", "line", "col", "satz", "label", "labnote", "greet-quote", "greet-author",
               "fl")   # a figure's words over its SVG (html_deck.figure)
-SELECTOR = ",".join(EDITABLE_TAGS + tuple("p." + c for c in EDITABLE_P))
+# a picture's caption and source line, a link of its own - its text is edited like any other, the link stays
+# (Doc, 30.10.2026: "kann die Bildunterschrift wieder nicht verändern ... das muss bitte zentral sein")
+EDITABLE_A = ("chap-credit", "fig-source", "side-credit")
+SELECTOR = ",".join(EDITABLE_TAGS + tuple("p." + c for c in EDITABLE_P) + tuple("a." + c for c in EDITABLE_A))
 # a deck, or a file of slides several decks show (decks/vorspann, deck.js data-aus) - edited from the deck that shows it
 # (Doc, 05.10.2026: "Ich kann die ganze Textbox nicht editieren. Die beginnt mit geboren 1946 ... Möchte ich bitte.")
 DECK_NAME = re.compile(r"(?:vorspann/)?[a-z0-9][a-z0-9._-]*\.html")
@@ -69,9 +72,9 @@ def _gen():
 def _editable(tag, attrs):
     if tag in EDITABLE_TAGS:
         return True
-    if tag != "p":
+    if tag not in ("p", "a"):
         return False
-    return bool(set((dict(attrs).get("class") or "").split()) & set(EDITABLE_P))
+    return bool(set((dict(attrs).get("class") or "").split()) & set(EDITABLE_P if tag == "p" else EDITABLE_A))
 
 
 class _Ranges(HTMLParser):

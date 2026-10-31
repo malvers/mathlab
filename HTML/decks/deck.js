@@ -201,7 +201,9 @@ slides.forEach(sl => {
   });
 });
 function groups(sl){
-  return [...new Set([...sl.querySelectorAll('.step')].map(grp))].length;
+  // a data-ab="k" no step carries is a click of its own: only something changes there (deck.css .vorhang)
+  return [...new Set([...sl.querySelectorAll('.step')].map(grp)
+    .concat([...sl.querySelectorAll('[data-ab]')].map(e => +e.dataset.ab)))].length;
 }
 // every line is in view from the start; the group clicked last carries the triangle and the box - on its first
 // element; what was shown before steps back a little
@@ -224,6 +226,9 @@ function stepMarks(root, st){
   // a part that goes again: data-bis="k" - gone once group k is on (deck.css .bis-vorbei; Doc, 06.10.2026: a frame that
   // walks from pair to pair, a line covered)
   root.querySelectorAll('[data-bis]').forEach(e => e.classList.toggle('bis-vorbei', clickOf(root, +e.dataset.bis) < st));
+  // a part that changes from click group k on: data-ab="k" (deck.css .ab-da) - the box in the middle (.vorhang) shrinks
+  // to the top right (Doc, 30.10.2026: "auf den nächsten Klick die Box ... verkleinern und nach rechts oben schieben")
+  root.querySelectorAll('[data-ab]').forEach(e => e.classList.toggle('ab-da', clickOf(root, +e.dataset.ab) < st));
 }
 let gestartet = false;   // the start has read the #7 of a link (fromHash) - only from then on may paint() drop it
 let shownSi = -1;        // the slide paint() last showed - a slide coming up restarts its drawn animations
@@ -360,9 +365,9 @@ addEventListener('click', e => {
   if (e.target.closest('#pres')) return;             // the presenter view handles its own clicks
   const help = document.getElementById('help');     // a click beside the open help only closes it
   if (help && !help.hidden) { help.hidden = true; return; }
-  narr.stop();                                       // a click turns the page by hand
-  if (e.target.closest('.labbar button')) { next(); return; }
-  next();
+  // a click on the slide no longer turns the page - the arrow keys and the buttons do (Doc, 30.10.2026: "Nimm mal
+  // bitte raus, dass ein Klick die nächste Folie oder die vorhergehende Folie macht. Das macht mich wahnsinnig.")
+  if (e.target.closest('.labbar button')) { narr.stop(); next(); }
 });   // clicks inside a lab stay in the lab - they never reach this document
 // Chrome's own menu (save image, copy image, inspect ...) never comes up in a deck: a right click or a long press
 // on the board opened it over the slide (Doc, 28.09.2026: "das dumme Menu von Chrome ... unbedingt überschreiben
@@ -943,7 +948,7 @@ const narr = (function () {
   btn.hidden = false;
   function show() {
     const icon = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (api.playing ? PAUSE : PLAY) + '</svg>';
-    const t = api.playing ? 'Pause (p)' : held >= 0 ? 'Weiter mit Klick (p)' : 'Solita erklärt (p)';
+    const t = api.playing ? 'Pause (p)' : held >= 0 ? 'Weiter mit Pfeiltaste (p)' : 'Solita erklärt (p)';
     [btn, big].forEach(b => { b.innerHTML = icon; b.title = t; b.setAttribute('aria-label', t); });
   }
   function run() {
@@ -2074,7 +2079,7 @@ const link = (function () {
       + '<span class="p-clock" title="Uhrzeit"></span>'
       + '<button type="button" class="p-end-btn" title="Präsentation beenden (Esc)" aria-label="Präsentation beenden">'
       + svg('<path d="M18 6 6 18M6 6l12 12"/>') + '</button></div>'
-      + '<div class="p-cur"><div class="p-fit" title="Klick: weiter"><div class="p-frame"></div></div>'
+      + '<div class="p-cur"><div class="p-fit"><div class="p-frame"></div></div>'
       + '<div class="p-nav"><button type="button" class="p-prev" title="Zurück" aria-label="Zurück">' + svg('<path d="m15 5-7 7 7 7"/>') + '</button>'
       + '<div class="p-pos"><span class="p-count"></span><div class="p-prog"><i></i></div></div>'
       + '<button type="button" class="p-next" title="Weiter" aria-label="Weiter">' + svg('<path d="m9 5 7 7-7 7"/>') + '</button></div>'
@@ -2296,7 +2301,7 @@ const link = (function () {
     else q('.p-ov').remove();
     q('.p-prev').onclick = function () { prev(); };
     q('.p-next').onclick = function () { next(); };
-    fits[0].addEventListener('click', function () { next(); });   // a click on the slide goes on, as on the beamer
+    // a click on the slide no longer goes on, as on the beamer (Doc, 30.10.2026) - the buttons and arrow keys do
     // a click on a preview goes there - one click ahead, or two (Doc, 28.09.2026: "die großen rechts ... bitte da auch")
     [1, 2].forEach(function (k) {
       fits[k].title = k === 1 ? 'Klick: zur nächsten Folie' : 'Klick: zur übernächsten Folie';

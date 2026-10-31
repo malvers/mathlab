@@ -5,7 +5,8 @@
 //                                                                only, Alt: no snapping)
 //   touch a picture the generator placed                      -> it becomes a free picture right where it is, then as above
 //                                                                (Doc, 23.09.2026: "verschieben etc ... IMMER!")
-//   drag a corner / a side handle                             -> resizes with the proportions / stretches one way
+//   drag a corner / a side handle                             -> resizes with the proportions / stretches one way;
+//                                                                Shift+Ctrl: around its middle (Doc, 30.10.2026)
 //   drag the knob above it                                    -> rotates (snaps to 0/90/180/270; Shift: 15° steps)
 //   Backspace / Delete, arrow keys (Shift: 10 px)             -> removes, nudges
 // The file side lives in tools/pptx/deck_image.py; it goes live with the green cloud like every text change.
@@ -62,7 +63,7 @@
     const turn = /rotate\((-?[\d.]+)deg\)/.exec(img.style.transform || '');
     return { x: parseFloat(img.style.left) || 0, y: parseFloat(img.style.top) || 0,
              w: parseFloat(img.style.width) || img.offsetWidth, h: parseFloat(img.style.height) || img.offsetHeight,
-             r: turn ? parseFloat(turn[1]) : 0, fixed: !!img.style.height };
+             r: turn ? parseFloat(turn[1]) : 0, fixed: !!img.style.height, round: parseFloat(img.style.borderRadius) || 0 };
   }
   function place(img, g) {
     // the file's style, taken before the first change - a picture loaded with the page has no entry yet
@@ -95,10 +96,13 @@
     const slide = img.closest('.slide'), src = img.getAttribute('src'), box = img.parentElement;
     const n = [...slide.querySelectorAll('img:not(.free-pic)')].filter(function (i) { return i.getAttribute('src') === src; }).indexOf(img);
     const g = shown(img);
+    // a photo keeps its rounded corners - on the picture itself (.side-pic) or on its box (.chap-pic.foto)
+    const rad = parseFloat(getComputedStyle(img).borderTopLeftRadius)
+      || (box.matches('.foto') ? parseFloat(getComputedStyle(box).borderTopLeftRadius) : 0) || 0;
     ORIG.set(img, { src: src, n: n });
     img.className = 'free-pic';
     img.setAttribute('style', 'position:absolute;left:' + round(g.x) + 'px;top:' + round(g.y) + 'px;width:' + round(g.w) + 'px'
-      + (g.fixed ? ';height:' + round(g.h) + 'px' : ''));
+      + (g.fixed ? ';height:' + round(g.h) + 'px' : '') + (rad ? ';border-radius:' + round(rad) + 'px' : ''));
     slide.insertBefore(img, slide.querySelector(':scope > p.foot'));
     if (emptyBox(box)) box.remove();
     E.msg('Bild ist frei – ziehen verschiebt, Ecken und Seiten ändern die Größe, der Knopf oben dreht');
@@ -149,7 +153,8 @@
   function save(img) {
     const old = saved(img), g = geo(img), i = slides.indexOf(img.closest('.slide')), o = ORIG.get(img);
     if (o) {                                           // the first change of a generator picture: it enters the file free
-      return send({ slide: i, op: 'free', src: o.src, n: o.n, x: g.x, y: g.y, w: g.w, h: g.fixed ? g.h : null, r: g.r || null })
+      return send({ slide: i, op: 'free', src: o.src, n: o.n, x: g.x, y: g.y, w: g.w, h: g.fixed ? g.h : null, r: g.r || null,
+                    round: g.round || null })
         .then(function (j) {
           ORIG.delete(img); img.dataset.pic = j.id; SAVED.set(img, j.style);
           freeTile(img, o, true);
@@ -157,7 +162,7 @@
         .catch(function (err) { E.msg('Bild nicht gespeichert: ' + why(err)); });
     }
     return send({ slide: i, op: 'move', id: img.dataset.pic, old: old,
-                  x: g.x, y: g.y, w: g.w, h: g.fixed ? g.h : null, r: g.r || null })
+                  x: g.x, y: g.y, w: g.w, h: g.fixed ? g.h : null, r: g.r || null, round: g.round || null })
       .then(function (j) {
         SAVED.set(img, j.style);
         const c = tilePic(img);
@@ -317,19 +322,30 @@
       return;
     }
 
-    // resize in the picture's own (turned) axes; the opposite corner or side stays where it is
+    // resize in the picture's own (turned) axes; the opposite corner or side stays where it is -
+    // with Shift+Ctrl the middle stays and both sides follow the handle (Doc, 30.10.2026: "um das Zentrum vergrößert")
     const t = g.r * Math.PI / 180, cos = Math.cos(t), sin = Math.sin(t);
     const lx = dx * cos + dy * sin, ly = -dx * sin + dy * cos;
     const sx = drag.c.indexOf('e') >= 0 ? 1 : drag.c.indexOf('w') >= 0 ? -1 : 0;
     const sy = drag.c.indexOf('s') >= 0 ? 1 : drag.c.indexOf('n') >= 0 ? -1 : 0;
-    let w = sx ? Math.max(16, g.w + sx * lx) : g.w;
-    let h = sy ? Math.max(16, g.h + sy * ly) : g.h;
+    const mid = e.shiftKey && e.ctrlKey, k = mid ? 2 : 1;
+    let w = sx ? Math.max(16, g.w + k * sx * lx) : g.w;
+    let h = sy ? Math.max(16, g.h + k * sy * ly) : g.h;
     if (sx && sy) h = w * g.h / g.w;                   // a corner keeps the proportions
+    if (mid) {
+      place(sel, { x: drag.centre.x - w / 2, y: drag.centre.y - h / 2, w: w, h: h, r: g.r, fixed: g.fixed || !(sx && sy) });
+      return;
+    }
     const ax = -sx * g.w / 2, ay = -sy * g.h / 2;      // the anchor, seen from the old middle
     const px = drag.centre.x + ax * cos - ay * sin, py = drag.centre.y + ax * sin + ay * cos;
     const bx = -sx * w / 2, by = -sy * h / 2;          // the same anchor, seen from the new middle
     const cx = px - (bx * cos - by * sin), cy = py - (bx * sin + by * cos);
     place(sel, { x: cx - w / 2, y: cy - h / 2, w: w, h: h, r: g.r, fixed: g.fixed || !(sx && sy) });
+  }, true);
+
+  // Ctrl+click is the right click on a Mac: no context menu over a handle or while a picture is dragged (Shift+Ctrl above)
+  addEventListener('contextmenu', function (e) {
+    if (E.on() && (drag || (e.target.closest && e.target.closest('#pic-box')))) e.preventDefault();
   }, true);
 
   addEventListener('pointerup', function () {

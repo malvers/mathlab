@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Ein Netz lernt Ziffern</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&family=Raleway:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        .mn-rows { display: flex; flex-direction: column; gap: 7px; }
+        .mn-row { display: flex; justify-content: space-between; gap: 10px; font-size: .82rem; }
+        .mn-key { color: #9fb2c8; }
+        .mn-val { color: #9de8ff; font-family: Orbitron, sans-serif; }
+        .mn-btns { display: flex; gap: 8px; }
+        .mn-btns .cyber-btn { flex: 1; }
+        .mn-note a { color: #9de8ff; }
+        /* ?widget - the sheet alone, no rail and no cards: what the deck's frame shows (same as wortvorhersage) */
+        body.mn-widget { grid-template-columns: 0 minmax(0, 1fr) !important; }
+        body.mn-widget #cyber-left-chrome, body.mn-widget #cyber-left-chrome-inner, body.mn-widget #mini-rail,
+        body.mn-widget #side-panel, body.mn-widget #cyber-screen-warning { display: none !important; }
+        body.mn-widget #main-content { grid-column: 1 / -1 !important; }
+        /* the widget's own buttons on the sheet - quiet navy outline on the paper, like the Wortvorhersage widget */
+        #mn-bar { display: none; }
+        body.mn-widget #mn-bar { display: flex; gap: 8px; position: fixed; top: 14px; right: 22px; z-index: 30; }
+        #mn-bar button { display: flex; align-items: center; gap: 7px; padding: 5px 12px; cursor: pointer;
+            border: 1px solid rgba(14, 36, 78, .3); border-radius: 8px; background: rgba(14, 36, 78, .06);
+            color: #0E244E; font-family: Orbitron, sans-serif; font-size: 12px; letter-spacing: .8px; }
+        #mn-bar button:hover { background: rgba(14, 36, 78, .13); border-color: rgba(14, 36, 78, .5); }
+        #mn-bar svg { width: 10px; height: 10px; fill: currentColor; flex: 0 0 auto; }
+        /* the working area reads like paper, as in the deck - the cards on the left keep the dark house style */
+        #canvas-container { background: #F7F2E7; }
+        body.mn-widget .canvas-branding { display: none; }
+    </style>
+    <script src="js/farbschema.js"></script>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <!-- ?widget: the buttons sit on the sheet itself, whoever presents must see them -->
+    <div id="mn-bar">
+        <button type="button" id="mn-w-play" title="Start / Pause (Leertaste)">
+            <svg id="mn-w-play-i" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M2 1 L9 5 L2 9 Z"/></svg>
+            <span id="mn-w-play-l">Start</span></button>
+        <button type="button" id="mn-w-next" title="Nächste Ziffer (Taste N)">
+            <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M1 1 L7 5 L1 9 Z"/><rect x="7.5" y="1" width="1.6" height="8"/></svg>
+            <span>Nächste Ziffer</span></button>
+        <button type="button" id="mn-w-reset" title="Neue Zufallsgewichte">
+            <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M5 1.2 A3.8 3.8 0 1 0 8.8 5 L7.4 5 A2.4 2.4 0 1 1 5 2.6 L5 4.2 L7.6 1.9 L5 -0.4 Z"/></svg>
+            <span>Neu</span></button>
+    </div>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Ein Netz lernt Ziffern',
+        });
+        CyberUI.init();
+
+        (function setCoachTitleFromI18n() {
+            const el = document.getElementById('coach-title-slot');
+            if (el && typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function') {
+                el.textContent = CyberI18n.get('ui.description');
+            }
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+        const log = (m) => { if (typeof dbg === 'function') dbg('[mnist-netz] ' + m); };
+        const T = (k, fb) => (window.CyberI18n && CyberI18n.getOr) ? CyberI18n.getOr('mn.' + k, fb) : fb;
+        const fmt = n => Math.round(n).toLocaleString('de-DE');
+        const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+        // ------------------------------------------------------------------ colours ---
+        const NAVY = '#0E244E';
+        const INK = a => 'rgba(14,36,78,' + a + ')';
+        const GREEN = [121, 158, 49], RED = [176, 36, 24], ORANGE = [245, 194, 66];
+        const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+        const mixWhite = (c, t) => 'rgb(' + Math.round(255 + (c[0] - 255) * t) + ',' + Math.round(255 + (c[1] - 255) * t)
+            + ',' + Math.round(255 + (c[2] - 255) * t) + ')';
+
+        // --------------------------------------------------------------------- data ---
+        // A small slice of MNIST (LeCun, Cortes, Burges; CC BY-SA 3.0): 3,000 training and 300 test digits,
+        // averaged down to 14 x 14 pixels with 16 grey levels, two pixels per byte, base64 in JSON.
+        const PIX = 196;
+        const DATA = { train: null, test: null, error: null };
+        function decode(set) {
+            const bin = atob(set.pixels);
+            const X = new Float32Array(set.n * PIX);
+            for (let i = 0; i < set.n * PIX / 2; i++) {
+                const b = bin.charCodeAt(i);
+                X[2 * i] = (b >> 4) / 15;
+                X[2 * i + 1] = (b & 15) / 15;
+            }
+            const Y = new Uint8Array(set.n);
+            for (let i = 0; i < set.n; i++) Y[i] = set.labels.charCodeAt(i) - 48;
+            return { X, Y, n: set.n, at: k => X.subarray(k * PIX, k * PIX + PIX) };
+        }
+
+        // ---------------------------------------------------------------------- net ---
+        // 196 inputs -> 16 -> 16 -> 10. Every unit is a perceptron: weighted sum of its inputs plus a threshold,
+        // then a soft step (sigmoid) in the hidden layers and softmax over the ten outputs. Plain SGD, one
+        // example at a time, cross-entropy loss - backpropagation exactly as on the slide before, only wider.
+        const SIZES = [PIX, 16, 16, 10];
+        const LR = 0.1;
+        let net = null;
+        function makeNet() {
+            const layers = [];
+            for (let l = 1; l < SIZES.length; l++) {
+                const nin = SIZES[l - 1], nout = SIZES[l];
+                const lim = Math.sqrt(6 / (nin + nout));           // Glorot-uniform
+                const W = new Float32Array(nin * nout);
+                for (let i = 0; i < W.length; i++) W[i] = (Math.random() * 2 - 1) * lim;
+                layers.push({ nin, nout, W, b: new Float32Array(nout), a: new Float32Array(nout), d: new Float32Array(nout) });
+            }
+            return layers;
+        }
+        function forward(x) {
+            let inp = x;
+            for (let l = 0; l < net.length; l++) {
+                const { nin, nout, W, b, a } = net[l];
+                for (let j = 0; j < nout; j++) {
+                    let s = b[j];
+                    const o = j * nin;
+                    for (let i = 0; i < nin; i++) s += W[o + i] * inp[i];
+                    a[j] = s;
+                }
+                if (l === net.length - 1) {                        // softmax: ten values that add up to 1
+                    let m = -Infinity, z = 0;
+                    for (let j = 0; j < nout; j++) m = Math.max(m, a[j]);
+                    for (let j = 0; j < nout; j++) { a[j] = Math.exp(a[j] - m); z += a[j]; }
+                    for (let j = 0; j < nout; j++) a[j] /= z;
+                } else {
+                    for (let j = 0; j < nout; j++) a[j] = 1 / (1 + Math.exp(-a[j]));
+                }
+                inp = a;
+            }
+            return inp;
+        }
+        function trainOne(x, y) {
+            forward(x);
+            const n = net.length;
+            const out = net[n - 1];
+            for (let j = 0; j < out.nout; j++) out.d[j] = out.a[j] - (j === y ? 1 : 0);
+            for (let l = n - 1; l >= 0; l--) {
+                const { nin, nout, W, b, d } = net[l];
+                const inp = l ? net[l - 1].a : x;
+                if (l) {                                           // the error flows back one layer
+                    const pd = net[l - 1].d, pa = net[l - 1].a;
+                    for (let i = 0; i < nin; i++) {
+                        let s = 0;
+                        for (let j = 0; j < nout; j++) s += W[j * nin + i] * d[j];
+                        pd[i] = s * pa[i] * (1 - pa[i]);
+                    }
+                }
+                for (let j = 0; j < nout; j++) {                  // every weight moves a tiny step
+                    const g = LR * d[j], o = j * nin;
+                    for (let i = 0; i < nin; i++) W[o + i] -= g * inp[i];
+                    b[j] -= g;
+                }
+            }
+        }
+        const argmax = a => { let k = 0; for (let j = 1; j < a.length; j++) if (a[j] > a[k]) k = j; return k; };
+        function evalTest() {
+            let ok = 0;
+            for (let k = 0; k < DATA.test.n; k++) if (argmax(forward(DATA.test.at(k))) === DATA.test.Y[k]) ok++;
+            return ok / DATA.test.n;
+        }
+
+        // -------------------------------------------------------------------- state ---
+        const S = {
+            running: false,
+            rate: 400,          // training examples per second
+            seen: 0,            // examples trained so far
+            order: [], cursor: 0,
+            show: 0,            // the test digit on display - test #0 is the famous first MNIST 7
+            lastTrain: -1,      // the training example that went through last (the small picture)
+            acc: 0, hist: [],   // test accuracy now and over time [seen, acc]
+            lastEval: 0, carry: 0, lastT: 0,
+            speed: 0, speedN: 0, speedT: 0   // measured examples per second
+        };
+        const rateFromSlider = v => Math.round(20 * Math.pow(300, v / 100));
+        const sliderFromRate = r => Math.round(100 * Math.log(r / 20) / Math.log(300));
+
+        function shuffle() {
+            const o = S.order;
+            for (let i = o.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const t = o[i]; o[i] = o[j]; o[j] = t; }
+            S.cursor = 0;
+        }
+        function resetNet() {
+            net = makeNet();
+            // untrained, it must guess the shown digit wrong - a lucky right guess spoilt the moment the net learns it
+            // (Doc, 30.10.2026: "das untrainierte Netz so einstellen, dass es zu Beginn immer falsch rät")
+            for (let tries = 0; DATA.test && tries < 100 && argmax(forward(DATA.test.at(S.show))) === DATA.test.Y[S.show]; tries++)
+                net = makeNet();
+            S.seen = 0; S.lastTrain = -1; S.hist = []; S.running = false;
+            if (DATA.train) {
+                S.order = Array.from({ length: DATA.train.n }, (_, i) => i);
+                shuffle();
+                S.acc = evalTest();
+                S.hist.push([0, S.acc]);
+            }
+            playLabel(); showStats();
+        }
+        function nextDigit() {
+            if (!DATA.test) return;
+            const was = DATA.test.Y[S.show];
+            let k = S.show;
+            for (let tries = 0; tries < 50 && (k === S.show || DATA.test.Y[k] === was); tries++) k = (Math.random() * DATA.test.n) | 0;
+            S.show = k;
+        }
+        function toggleRun() {
+            if (!DATA.train) return;
+            S.running = !S.running;
+            S.lastT = 0; S.carry = 0; S.speedN = 0; S.speedT = 0;
+            playLabel();
+        }
+        function playLabel() {
+            const b = document.getElementById('mn-play');
+            if (b) b.textContent = S.running ? T('btn_pause', 'Pause') : T('btn_play', 'Start');
+            const l = document.getElementById('mn-w-play-l'), i = document.getElementById('mn-w-play-i');
+            if (l) l.textContent = S.running ? T('btn_pause', 'Pause') : T('btn_play', 'Start');
+            if (i) i.innerHTML = S.running ? '<rect x="1.5" y="1" width="2.6" height="8"/><rect x="5.9" y="1" width="2.6" height="8"/>'
+                : '<path d="M2 1 L9 5 L2 9 Z"/>';
+        }
+
+        // ---------------------------------------------------------------- training ---
+        function trainFor(dt) {
+            S.carry += S.rate * dt;
+            let n = Math.floor(S.carry);
+            S.carry -= n;
+            const t0 = performance.now();
+            let done = 0;
+            while (done < n) {                                     // a time budget keeps slow devices smooth
+                if (S.cursor >= S.order.length) shuffle();
+                const k = S.order[S.cursor++];
+                trainOne(DATA.train.at(k), DATA.train.Y[k]);
+                S.lastTrain = k; S.seen++; done++;
+                if ((done & 15) === 0 && performance.now() - t0 > 10) { S.carry = 0; break; }
+            }
+            S.speedN += done; S.speedT += dt;
+            if (S.speedT >= 1) { S.speed = S.speedN / S.speedT; S.speedN = 0; S.speedT = 0; }
+        }
+
+        // ------------------------------------------------------------------- layout ---
+        let LY = null;
+        const CAP1 = [[T('cap_a', 'Jedes Neuron ist ein '), 0], [T('cap_b', 'Perzeptron'), 1], [T('cap_c', ' wie eben: Summe aus '), 0],
+            [T('cap_d', 'Gewicht × Eingabe'), 1]];
+        const CAP2 = T('cap2', '42 Perzeptronen in drei Schichten, 3.552 Gewichte – alle lernen gleichzeitig per Backpropagation.');
+
+        // rich text -> wrapped lines of [text, bold] runs
+        function wrapRuns(runs, maxW, font, fontB) {
+            const words = [];
+            runs.forEach(([t, b]) => t.split(/(\s+)/).forEach(w => { if (w) words.push([w, b]); }));
+            const lines = [[]];
+            let w = 0;
+            for (const [t, b] of words) {
+                ctx.font = b ? fontB : font;
+                const tw = ctx.measureText(t).width;
+                if (w + tw > maxW && w > 0 && !/^\s+$/.test(t)) { lines.push([]); w = 0; }
+                if (w === 0 && /^\s+$/.test(t)) continue;
+                lines[lines.length - 1].push([t, b, tw]);
+                w += tw;
+            }
+            return lines;
+        }
+
+        function brandingBox() {
+            const b = document.querySelector('.canvas-branding');
+            if (!b) return null;
+            const r = b.getBoundingClientRect();
+            if (!r.width || !r.height) return null;
+            const c = canvas.getBoundingClientRect();
+            if (r.bottom < c.top || r.left > c.right) return null;
+            return { left: r.left - c.left, bottom: r.bottom - c.top };
+        }
+
+        function layout(W, H) {
+            const portrait = W < 700 && H > W * 1.05;
+            const s = portrait ? clamp(W / 430, 0.7, 1.3) : clamp(Math.min(W / 1133, H / 536), 0.55, 1.7);
+            const pad = 22 * s;
+            const L = { W, H, s, pad, portrait };
+            const bar = document.getElementById('mn-bar');
+            let barW = document.body.classList.contains('mn-widget') && bar ? bar.getBoundingClientRect().width + 16 : 0;
+            let capTop = pad;
+            const bb = brandingBox();                  // the house wordmark top right: write beside it, or below it on a phone
+            if (bb) {
+                const need = W - bb.left + 12 * s;
+                if (need > W * 0.45) capTop = Math.max(capTop, bb.bottom + 8 * s);
+                else barW = Math.max(barW, need);
+            }
+            L.f1 = '500 ' + (19 * s).toFixed(1) + 'px Raleway, sans-serif';
+            L.f1b = '700 ' + (19 * s).toFixed(1) + 'px Raleway, sans-serif';
+            L.f2 = '400 ' + (14 * s).toFixed(1) + 'px Raleway, sans-serif';
+            L.cap1 = wrapRuns(CAP1, W - 2 * pad - barW, L.f1, L.f1b);
+            L.cap2 = wrapRuns([[CAP2, 0]], W - 2 * pad - (L.cap1.length > 1 ? 0 : barW), L.f2, L.f2);
+            L.capY = capTop + 14 * s;
+            const capBottom = L.capY + (L.cap1.length - 1) * 24 * s + 10 * s + L.cap2.length * 19 * s;
+
+            if (!portrait) {
+                L.fH = 62 * s;
+                L.fy = H - L.fH - 18 * s;
+                const nTop = capBottom + 34 * s, nBot = L.fy - 16 * s, span = nBot - nTop;
+                L.labY = nTop - 12 * s;
+                L.img = Math.min(0.19 * W, span - 56 * s);
+                L.imgX = pad;
+                L.imgY = nTop + (span - L.img - 46 * s) / 2;
+                const x1 = W * 0.43, x2 = W * 0.595, x3 = W * 0.75;
+                const sp16 = span / 16, sp10 = span / 10;
+                L.rH = Math.min(10 * s, sp16 * 0.38);
+                L.rO = Math.min(17 * s, sp10 * 0.40);
+                L.h1 = Array.from({ length: 16 }, (_, j) => [x1, nTop + sp16 * (j + 0.5)]);
+                L.h2 = Array.from({ length: 16 }, (_, j) => [x2, nTop + sp16 * (j + 0.5)]);
+                L.out = Array.from({ length: 10 }, (_, j) => [x3, nTop + sp10 * (j + 0.5)]);
+                L.barX0 = x3 + L.rO + 12 * s; L.barX1 = W - pad - 54 * s;
+                L.labels = [[T('l_in', 'EINGABE · 196 PIXEL'), L.imgX + L.img / 2, 'center'],
+                    [T('l_h', '16 PERZEPTRONEN'), x1, 'center'], [T('l_h', '16 PERZEPTRONEN'), x2, 'center'],
+                    [T('l_out', 'AUSGABE · ZIFFER 0–9'), x3 - L.rO, 'left']];
+                L.verdictX = L.imgX; L.verdictY = L.imgY + L.img + 24 * s; L.verdictAlign = 'left';
+            } else {
+                L.fH = 112 * s;
+                L.fy = H - L.fH - 18 * s;
+                const top = capBottom + 22 * s;
+                L.img = Math.min(0.40 * W, 150 * s);
+                L.imgX = pad; L.imgY = top;
+                L.verdictX = L.imgX + L.img + 14 * s; L.verdictY = top + 22 * s; L.verdictAlign = 'left';
+                const rows = L.fy - 14 * s - (top + L.img);
+                const y1 = top + L.img + rows * 0.26, y2 = top + L.img + rows * 0.50, y3 = top + L.img + rows * 0.74;
+                const sp16 = (W - 2 * pad) / 16, sp10 = (W - 2 * pad) / 10;
+                L.rH = Math.min(9 * s, sp16 * 0.36);
+                L.rO = Math.min(15 * s, sp10 * 0.38);
+                L.h1 = Array.from({ length: 16 }, (_, j) => [pad + sp16 * (j + 0.5), y1]);
+                L.h2 = Array.from({ length: 16 }, (_, j) => [pad + sp16 * (j + 0.5), y2]);
+                L.out = Array.from({ length: 10 }, (_, j) => [pad + sp10 * (j + 0.5), y3]);
+                L.barTop = y3 + L.rO + 6 * s; L.barBot = L.fy - 26 * s;
+                L.labels = [[T('l_h', '16 PERZEPTRONEN'), pad, 'left', y1 - L.rH - 8 * s],
+                    [T('l_h', '16 PERZEPTRONEN'), pad, 'left', y2 - L.rH - 8 * s],
+                    [T('l_out', 'AUSGABE · ZIFFER 0–9'), pad, 'left', y3 - L.rO - 8 * s]];
+            }
+            return L;
+        }
+
+        // ----------------------------------------------------------------- drawing ---
+        // Lines are bucketed by sign and strength, so a thousand of them cost a few strokes, not a thousand.
+        const LEVELS = 8;
+        function bucketLines(segs, widthOf, alphaOf) {
+            // segs: flat array [x0, y0, x1, y1, sign, level, ...]
+            for (let sgn = 0; sgn < 2; sgn++) for (let lv = 0; lv < LEVELS; lv++) {
+                ctx.beginPath();
+                let any = false;
+                for (let i = 0; i < segs.length; i += 6) {
+                    if (segs[i + 4] !== sgn || segs[i + 5] !== lv) continue;
+                    ctx.moveTo(segs[i], segs[i + 1]); ctx.lineTo(segs[i + 2], segs[i + 3]); any = true;
+                }
+                if (!any) continue;
+                ctx.strokeStyle = rgba(sgn ? GREEN : RED, alphaOf(lv));
+                ctx.lineWidth = widthOf(lv);
+                ctx.stroke();
+            }
+        }
+        const level = (v, full) => Math.min(LEVELS - 1, Math.floor(clamp(v / full, 0, 0.9999) * LEVELS));
+
+        const pixCanvas = document.createElement('canvas');
+        pixCanvas.width = 14; pixCanvas.height = 14;
+        const pixCtx = pixCanvas.getContext('2d');
+        const pixImg = pixCtx.createImageData(14, 14);
+        function drawDigit(x, img, px, py, size, grid) {
+            for (let i = 0; i < PIX; i++) {          // ink = navy on white paper
+                const v = x[i];
+                pixImg.data[4 * i] = Math.round(255 + (14 - 255) * v);
+                pixImg.data[4 * i + 1] = Math.round(255 + (36 - 255) * v);
+                pixImg.data[4 * i + 2] = Math.round(255 + (78 - 255) * v);
+                pixImg.data[4 * i + 3] = 255;
+            }
+            pixCtx.putImageData(pixImg, 0, 0);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(pixCanvas, px, py, size, size);
+            if (grid) {                               // 196 single inputs, not one picture
+                ctx.strokeStyle = INK(0.08); ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (let k = 1; k < 14; k++) {
+                    const o = Math.round(k * size / 14) + 0.5;
+                    ctx.moveTo(px + o, py); ctx.lineTo(px + o, py + size);
+                    ctx.moveTo(px, py + o); ctx.lineTo(px + size, py + o);
+                }
+                ctx.stroke();
+            }
+            ctx.strokeStyle = INK(0.45); ctx.lineWidth = 1;
+            ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
+        }
+
+        function text(t, x, y, font, color, align, spacing) {
+            ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic';
+            if ('letterSpacing' in ctx) ctx.letterSpacing = spacing || '0px';
+            ctx.fillText(t, x, y);
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        }
+        // the same on a patch of paper, where lines run underneath
+        function textOnPaper(t, x, y, font, color, align, spacing) {
+            ctx.font = font;
+            if ('letterSpacing' in ctx) ctx.letterSpacing = spacing || '0px';
+            const m = ctx.measureText(t), h = parseFloat(font.split(' ')[1]) || 12;
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+            const x0 = align === 'center' ? x - m.width / 2 : align === 'right' ? x - m.width : x;
+            roundRect(x0 - 4, y - h * 0.95, m.width + 8, h * 1.3, 4);
+            ctx.fillStyle = 'rgba(247,242,231,0.9)'; ctx.fill();
+            text(t, x, y, font, color, align, spacing);
+        }
+        function roundRect(x, y, w, h, r) {
+            ctx.beginPath();
+            if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
+        }
+        function icon(ok, x, y, sz) {                 // check or cross, drawn as a path
+            ctx.strokeStyle = ok ? rgba(GREEN, 1) : rgba(RED, 1);
+            ctx.lineWidth = sz * 0.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.beginPath();
+            if (ok) { ctx.moveTo(x, y + sz * 0.55); ctx.lineTo(x + sz * 0.38, y + sz * 0.9); ctx.lineTo(x + sz, y + sz * 0.1); }
+            else { ctx.moveTo(x + sz * 0.1, y + sz * 0.1); ctx.lineTo(x + sz * 0.9, y + sz * 0.9); ctx.moveTo(x + sz * 0.9, y + sz * 0.1); ctx.lineTo(x + sz * 0.1, y + sz * 0.9); }
+            ctx.stroke(); ctx.lineCap = 'butt';
+        }
+
+        function draw() {
+            const W = canvas.clientWidth, H = canvas.clientHeight;
+            // a deck loads this frame while its slide is still hidden: no size yet, nothing to draw (radii came out
+            // negative, the exception stopped the script before the data and the loop - Doc, 30.10.2026: "es läuft nie")
+            if (W < 60 || H < 60) return;
+            ctx.clearRect(0, 0, W, H);
+            const now = performance.now();               // again now and then: the wordmark and the fonts arrive late
+            if (!LY || LY.W !== W || LY.H !== H || now - LY.at > 1000) { LY = layout(W, H); LY.at = now; }
+            const L = LY, s = L.s;
+
+            // caption
+            let cy = L.capY;
+            L.cap1.forEach(line => {
+                let cx = L.pad;
+                line.forEach(([t, b, tw]) => { text(t, cx, cy, b ? L.f1b : L.f1, NAVY); cx += tw; });
+                cy += 24 * s;
+            });
+            cy += 10 * s - 24 * s + 19 * s;
+            L.cap2.forEach(line => { text(line.map(r => r[0]).join(''), L.pad, cy, L.f2, INK(0.7)); cy += 19 * s; });
+
+            if (!DATA.test) {
+                text(DATA.error ? T('err', 'Die MNIST-Daten ließen sich nicht laden.') : T('loading', 'Lade 3.300 handgeschriebene Ziffern …'),
+                    W / 2, H / 2, '500 ' + (16 * s) + 'px Raleway, sans-serif', INK(0.7), 'center');
+                return;
+            }
+
+            const x = DATA.test.at(S.show);
+            const p = forward(x);                       // activations of THIS digit, with the weights as they are now
+            const a1 = net[0].a, a2 = net[1].a;
+            const cell = L.img / 14;
+
+            // input fan: only pixels with ink send anything (weight x 0 = 0); strength = pixel x |weight|
+            const segs = [];
+            const W1 = net[0].W;
+            for (let i = 0; i < PIX; i++) {
+                if (x[i] < 0.1) continue;
+                const px = L.imgX + (i % 14 + 0.5) * cell, py = L.imgY + ((i / 14 | 0) + 0.5) * cell;
+                for (let j = 0; j < 16; j++) {
+                    const w = W1[j * PIX + i];
+                    segs.push(px, py, L.h1[j][0], L.h1[j][1], w >= 0 ? 1 : 0, level(Math.abs(w) * x[i], 0.6));
+                }
+            }
+            bucketLines(segs, lv => (0.5 + lv * 0.22) * s, lv => 0.07 + lv * 0.07);
+
+            // hidden -> hidden -> output: every line, colour = sign, width and opacity = size of the weight
+            const segs2 = [];
+            const pushLayer = (Wm, from, to, nin) => {
+                for (let j = 0; j < to.length; j++) for (let i = 0; i < from.length; i++) {
+                    const w = Wm[j * nin + i];
+                    segs2.push(from[i][0], from[i][1], to[j][0], to[j][1], w >= 0 ? 1 : 0, level(Math.abs(w), 3.2));
+                }
+            };
+            pushLayer(net[1].W, L.h1, L.h2, 16);
+            pushLayer(net[2].W, L.h2, L.out, 16);
+            bucketLines(segs2, lv => (0.6 + lv * 0.62) * s, lv => 0.22 + lv * 0.1);
+
+            // the digit on top of where its lines start
+            drawDigit(x, null, L.imgX, L.imgY, L.img, true);
+
+            // neurons: filled orange as strongly as they fire
+            const neuron = (c, r, act, lw, stroke) => {
+                ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, Math.PI * 2);
+                ctx.fillStyle = mixWhite(ORANGE, clamp(act, 0, 1)); ctx.fill();
+                ctx.strokeStyle = stroke || NAVY; ctx.lineWidth = lw; ctx.stroke();
+            };
+            L.h1.forEach((c, j) => neuron(c, L.rH, a1[j], 1.3 * s));
+            L.h2.forEach((c, j) => neuron(c, L.rH, a2[j], 1.3 * s));
+            const win = argmax(p), truth = DATA.test.Y[S.show];
+            L.out.forEach((c, j) => {
+                if (j === win) {
+                    ctx.beginPath(); ctx.arc(c[0], c[1], L.rO + 5 * s, 0, Math.PI * 2);
+                    ctx.strokeStyle = rgba(ORANGE, 0.9); ctx.lineWidth = 3.2 * s; ctx.stroke();
+                }
+                neuron(c, L.rO, p[j], (j === win ? 2.2 : 1.4) * s);
+                text(String(j), c[0], c[1] + L.rO * 0.36, '700 ' + (L.rO * 1.0).toFixed(1) + 'px Orbitron, sans-serif', NAVY, 'center');
+            });
+
+            // the ten outputs as bars
+            const pct = v => Math.round(v * 100) + ' %';
+            if (!L.portrait) {
+                const bw = L.barX1 - L.barX0, bh = Math.min(12 * s, L.rO * 0.8);
+                L.out.forEach((c, j) => {
+                    roundRect(L.barX0, c[1] - bh / 2, bw, bh, bh / 2); ctx.fillStyle = INK(0.07); ctx.fill();
+                    const w = Math.max(bh, bw * p[j]);
+                    roundRect(L.barX0, c[1] - bh / 2, w, bh, bh / 2);
+                    ctx.fillStyle = j === win ? rgba(ORANGE, 1) : INK(0.32); ctx.fill();
+                    text(pct(p[j]), L.barX1 + 8 * s, c[1] + 4.5 * s, (j === win ? '700 ' : '400 ') + (12.5 * s).toFixed(1) + 'px Orbitron, sans-serif',
+                        j === win ? NAVY : INK(0.6), 'left');
+                });
+            } else {
+                const bw = Math.min(14 * s, L.rO * 0.9), full = L.barBot - L.barTop;
+                L.out.forEach((c, j) => {
+                    roundRect(c[0] - bw / 2, L.barTop, bw, full, bw / 2); ctx.fillStyle = INK(0.07); ctx.fill();
+                    const h = Math.max(bw, full * p[j]);
+                    roundRect(c[0] - bw / 2, L.barBot - h, bw, h, bw / 2);
+                    ctx.fillStyle = j === win ? rgba(ORANGE, 1) : INK(0.32); ctx.fill();
+                });
+                const c = L.out[win];
+                text(pct(p[win]), c[0], L.barBot + 16 * s, '700 ' + (12 * s).toFixed(1) + 'px Orbitron, sans-serif', NAVY, 'center');
+            }
+
+            // column labels
+            L.labels.forEach(([t, lx, al, ly]) => textOnPaper(t, lx, ly || L.labY, '700 ' + (10.5 * s).toFixed(1) + 'px Orbitron, sans-serif', INK(0.55), al, (1.2 * s).toFixed(1) + 'px'));
+
+            // verdict under (or beside) the digit
+            const vf = '700 ' + (15 * s).toFixed(1) + 'px Raleway, sans-serif';
+            const vs = '400 ' + (12.5 * s).toFixed(1) + 'px Raleway, sans-serif';
+            let vx = L.verdictX;
+            if (S.seen === 0) {
+                textOnPaper(T('v_guess', 'Untrainiert: das Netz rät ') + win, vx, L.verdictY, vf, INK(0.75));
+            } else {
+                const ok = win === truth;
+                const vt = ok ? T('v_ok', 'Erkannt: ') + truth : T('v_no', 'Netz sagt ') + win + T('v_no2', ', richtig wäre ') + truth;
+                ctx.font = vf;
+                roundRect(vx - 4, L.verdictY - 15 * s, ctx.measureText(vt).width + 28 * s, 20 * s, 4);
+                ctx.fillStyle = 'rgba(247,242,231,0.9)'; ctx.fill();
+                icon(ok, vx, L.verdictY - 12 * s, 13 * s); vx += 20 * s;
+                text(vt, vx, L.verdictY, vf, ok ? rgba(GREEN, 1) : rgba(RED, 1));
+            }
+            textOnPaper(T('v_test', 'Testziffer – nie zum Training benutzt'), L.verdictX, L.verdictY + 19 * s, vs, INK(0.6));
+
+            drawFooter(L);
+        }
+
+        function drawFooter(L) {
+            const s = L.s, W = L.W, pad = L.pad;
+            roundRect(pad, L.fy, W - 2 * pad, L.fH, 10 * s);
+            ctx.fillStyle = INK(0.045); ctx.fill();
+            ctx.strokeStyle = INK(0.12); ctx.lineWidth = 1; ctx.stroke();
+            const lab = '700 ' + (10 * s).toFixed(1) + 'px Orbitron, sans-serif', ls = (1.1 * s).toFixed(1) + 'px';
+            const big = '700 ' + (19 * s).toFixed(1) + 'px Orbitron, sans-serif';
+
+            // left: what is being trained right now
+            const th = (L.portrait ? 38 : 40) * s, tx = pad + 12 * s, ty = L.fy + (L.portrait ? 10 * s : (L.fH - th) / 2);
+            if (S.lastTrain >= 0) drawDigit(DATA.train.at(S.lastTrain), null, tx, ty, th, false);
+            else { ctx.strokeStyle = INK(0.25); ctx.setLineDash([3, 3]); ctx.strokeRect(tx + 0.5, ty + 0.5, th - 1, th - 1); ctx.setLineDash([]); }
+            const ex = tx + th + 12 * s;
+            text(T('f_train', 'TRAINING'), ex, ty + 12 * s, lab, INK(0.55), 'left', ls);
+            text(fmt(S.seen) + ' ' + T('f_ex', 'Beispiele'), ex, ty + 34 * s, big, NAVY, 'left');
+
+            // right: accuracy on the 300 test digits
+            const rx = W - pad - 14 * s;
+            text(L.portrait ? T('f_acc_short', 'TREFFER') : T('f_acc', 'TREFFER BEI 300 NEUEN ZIFFERN'), rx, ty + 12 * s, lab, INK(0.55), 'right', ls);
+            text(Math.round(S.acc * 100) + ' %', rx, ty + 34 * s, big, NAVY, 'right');
+
+            // middle (below in portrait): the accuracy climbing over the examples seen
+            let cx0, cx1, cy0, cy1;
+            if (!L.portrait) { cx0 = W * 0.33; cx1 = W * 0.70; cy0 = L.fy + 9 * s; cy1 = L.fy + L.fH - 13 * s; }
+            else { cx0 = pad + 40 * s; cx1 = W - pad - 14 * s; cy0 = L.fy + 60 * s; cy1 = L.fy + L.fH - 16 * s; }
+            drawChart(cx0, cy0, cx1, cy1, s);
+
+            // credit - the short form where the long one does not fit
+            const cf = '400 ' + (10 * s).toFixed(1) + 'px Raleway, sans-serif';
+            let credit = T('credit', 'Daten: MNIST – Yann LeCun, Corinna Cortes, Christopher J. C. Burges · CC BY-SA 3.0 · verkleinert auf 14 × 14');
+            ctx.font = cf;
+            if (ctx.measureText(credit).width > W - 2 * pad) credit = T('credit_short', 'Daten: MNIST (LeCun, Cortes, Burges) · CC BY-SA 3.0');
+            text(credit, W - pad, L.H - 5 * s, cf, INK(0.5), 'right');
+        }
+
+        function drawChart(x0, y0, x1, y1, s) {
+            const span = Math.max(6000, Math.ceil(S.seen * 1.08 / 2000) * 2000);
+            const X = v => x0 + (x1 - x0) * v / span, Y = a => y1 - (y1 - y0) * a;
+            const small = '400 ' + (9.5 * s).toFixed(1) + 'px Orbitron, sans-serif';
+            ctx.strokeStyle = INK(0.25); ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(x0, y1 + 0.5); ctx.lineTo(x1, y1 + 0.5); ctx.stroke();
+            ctx.strokeStyle = INK(0.1);
+            ctx.beginPath(); ctx.moveTo(x0, Math.round(Y(1)) + 0.5); ctx.lineTo(x1, Math.round(Y(1)) + 0.5); ctx.stroke();
+            ctx.setLineDash([3 * s, 3 * s]); ctx.strokeStyle = INK(0.35);           // pure guessing: 1 in 10
+            ctx.beginPath(); ctx.moveTo(x0, Y(0.1)); ctx.lineTo(x1, Y(0.1)); ctx.stroke(); ctx.setLineDash([]);
+            text('100 %', x0 - 5 * s, Y(1) + 3.5 * s, small, INK(0.5), 'right');
+            text(T('c_guess', 'raten'), x0 - 5 * s, Y(0.1) + 3.5 * s, small, INK(0.5), 'right');
+            text(fmt(span), x1, y1 + 10 * s, small, INK(0.45), 'right');
+            const h = S.hist;
+            if (h.length > 1) {
+                ctx.beginPath(); ctx.moveTo(X(h[0][0]), y1);
+                h.forEach(([n, a]) => ctx.lineTo(X(n), Y(a)));
+                ctx.lineTo(X(h[h.length - 1][0]), y1); ctx.closePath();
+                ctx.fillStyle = rgba(ORANGE, 0.35); ctx.fill();
+                ctx.beginPath();
+                h.forEach(([n, a], i) => i ? ctx.lineTo(X(n), Y(a)) : ctx.moveTo(X(n), Y(a)));
+                ctx.strokeStyle = NAVY; ctx.lineWidth = 2 * s; ctx.lineJoin = 'round'; ctx.stroke();
+            }
+            const last = h[h.length - 1];
+            if (last) {
+                ctx.beginPath(); ctx.arc(X(last[0]), Y(last[1]), 3.5 * s, 0, Math.PI * 2);
+                ctx.fillStyle = rgba(ORANGE, 1); ctx.fill(); ctx.strokeStyle = NAVY; ctx.lineWidth = 1.5 * s; ctx.stroke();
+            }
+        }
+
+        // ------------------------------------------------------------------ the loop ---
+        function frame(t) {
+            requestAnimationFrame(frame);               // first: a failing frame must not end the loop
+            resizeCanvasToContainer();                  // the layout may settle long after load
+            if (S.running && DATA.train) {
+                const dt = S.lastT ? Math.min(0.1, (t - S.lastT) / 1000) : 0;
+                S.lastT = t;
+                trainFor(dt);
+                if (t - S.lastEval > 250) {
+                    S.lastEval = t;
+                    S.acc = evalTest();
+                    const h = S.hist;
+                    if (!h.length || S.seen - h[h.length - 1][0] >= 50) h.push([S.seen, S.acc]);
+                    if (h.length > 600) S.hist = h.filter((_, i) => i % 2 === 0 || i === h.length - 1);
+                    showStats();
+                }
+            }
+            draw();
+        }
+
+        function showStats() {
+            const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+            set('mn-seen', fmt(S.seen));
+            set('mn-epoch', DATA.train ? (S.seen / DATA.train.n).toLocaleString('de-DE', { maximumFractionDigits: 1 }) : '–');
+            set('mn-acc', Math.round(S.acc * 100) + ' %');
+            set('mn-speed', S.running ? fmt(S.speed) + ' / s' : '–');
+        }
+
+        // ----------------------------------------------------------------------- UI ---
+        function buildUI() {
+            CyberUI.createCard('ui-container', T('card_run', 'Ablauf'), `
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div class="mn-btns">
+                        <button class="cyber-btn" id="mn-play">${T('btn_play', 'Start')}</button>
+                        <button class="cyber-btn" id="mn-next">${T('btn_next', 'Nächste Ziffer')}</button>
+                    </div>
+                    <div class="mn-btns">
+                        <button class="cyber-btn" id="mn-reset">${T('btn_reset', 'Neue Zufallsgewichte')}</button>
+                    </div>
+                    <div>
+                        <div class="label-row"><span>${T('l_rate', 'Tempo')}</span>
+                            <span id="mn-rate-l" class="cyber-number" style="font-size:.8rem; color:#9de8ff;">${fmt(S.rate)} / s</span></div>
+                        <input type="range" id="mn-rate" min="0" max="100" step="1" value="${sliderFromRate(S.rate)}" aria-label="${T('l_rate_aria', 'Trainingsbeispiele pro Sekunde')}">
+                    </div>
+                    <div class="lab-note">${T('hint', 'Leertaste startet und hält an, N zeigt eine andere Ziffer (oder auf die Ziffer klicken). Das Netz lernt nur aus den 3.000 Trainingsziffern — die Ziffer links und die 300 Testziffern hat es nie gesehen.')}</div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_stats', 'Stand'), `
+                <div class="mn-rows">
+                    <div class="mn-row"><span class="mn-key">${T('s_seen', 'Beispiele trainiert')}</span><span class="mn-val" id="mn-seen">0</span></div>
+                    <div class="mn-row"><span class="mn-key">${T('s_epoch', 'Durchgänge')}</span><span class="mn-val" id="mn-epoch">0</span></div>
+                    <div class="mn-row"><span class="mn-key">${T('s_acc', 'Treffer (300 Testziffern)')}</span><span class="mn-val" id="mn-acc">–</span></div>
+                    <div class="mn-row"><span class="mn-key">${T('s_speed', 'gemessen')}</span><span class="mn-val" id="mn-speed">–</span></div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_net', 'Das Netz'), `
+                <div class="lab-note mn-note">${T('net_text', 'Jeder Kreis ist ein Perzeptron: Er multipliziert jede Eingabe mit ihrem Gewicht, addiert alles und seine Schwelle und gibt das Ergebnis weich gestuft weiter. 196 Pixel gehen in 16 Neuronen, die in 16 weitere, die in 10 Ausgaben — eine pro Ziffer. Das sind 3.552 Gewichte und 42 Schwellen. Grün heißt positives Gewicht, Rot negatives, je dicker, desto größer. Nach jedem Beispiel läuft der Fehler rückwärts durchs Netz (Backpropagation, Lernrate 0,1), und alle Gewichte rücken ein Stück.')}</div>
+                <div class="lab-note mn-note" style="margin-top:10px;">${T('net_credit', 'Daten: <a href="http://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener">MNIST</a> von Yann LeCun, Corinna Cortes und Christopher J. C. Burges, <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a>. Hier eine Auswahl von 3.300 Ziffern, verkleinert auf 14 × 14 Pixel mit 16 Graustufen.')}</div>`);
+
+            const on = (id, ev, fn) => { const e = document.getElementById(id); if (e) e.addEventListener(ev, fn); };
+            on('mn-play', 'click', toggleRun);
+            on('mn-next', 'click', nextDigit);
+            on('mn-reset', 'click', resetNet);
+            on('mn-rate', 'input', e => {
+                S.rate = rateFromSlider(parseInt(e.target.value, 10));
+                document.getElementById('mn-rate-l').textContent = fmt(S.rate) + ' / s';
+            });
+            // the widget's buttons do the same; blur so Space keeps working
+            const wire = (id, fn) => on(id, 'click', e => { fn(); e.currentTarget.blur(); });
+            wire('mn-w-play', toggleRun);
+            wire('mn-w-next', nextDigit);
+            wire('mn-w-reset', resetNet);
+        }
+
+        addEventListener('keydown', e => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;     // Cmd/Ctrl belong to the browser (reload!)
+            if (e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable]')) return;
+            if (e.key === ' ') { e.preventDefault(); toggleRun(); }
+            else if (e.key === 'n' || e.key === 'N') { e.preventDefault(); nextDigit(); }
+        });
+        const onDigit = e => {
+            if (!LY) return false;
+            const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+            return x >= LY.imgX && x <= LY.imgX + LY.img && y >= LY.imgY && y <= LY.imgY + LY.img;
+        };
+        canvas.addEventListener('click', e => { if (onDigit(e)) nextDigit(); });
+        canvas.addEventListener('mousemove', e => { canvas.style.cursor = onDigit(e) ? 'pointer' : 'default'; });
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            const w = Math.floor(Math.max(1, rect.width) * dpr);
+            const h = Math.floor(Math.max(1, rect.height) * dpr);
+            if (canvas.width === w && canvas.height === h) return false;
+            canvas.width = w;
+            canvas.height = h;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            LY = null;
+            return true;
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            LY = null;
+            draw();
+        }
+
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);                // measure the caption again with the real fonts
+        if (window.ResizeObserver) new ResizeObserver(init).observe(container);
+
+        // ?widget (the deck's frame), ?tempo=400 (examples per second), ?ziffer=17 (test digit), ?start (runs at once)
+        const Q = new URLSearchParams(location.search);
+        if (Q.has('widget')) document.body.classList.add('mn-widget');
+        (function rateFromUrl() {
+            const v = parseFloat(Q.get('tempo'));
+            if (isFinite(v) && v >= 1 && v <= 20000) S.rate = Math.round(v);
+        })();
+
+        buildUI();
+        net = makeNet();
+        init();
+        requestAnimationFrame(frame);
+
+        fetch('data/mnist-mini.json')
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(d => {
+                DATA.train = decode(d.train);
+                DATA.test = decode(d.test);
+                const z = parseInt(Q.get('ziffer'), 10);
+                if (z >= 0 && z < DATA.test.n) S.show = z;
+                resetNet();
+                log('MNIST: ' + DATA.train.n + ' Training, ' + DATA.test.n + ' Test, Start ' + Math.round(S.acc * 100) + ' %');
+                if (Q.has('start')) toggleRun();
+            })
+            .catch(err => { DATA.error = err; log('MNIST laden fehlgeschlagen: ' + err.message); });
+    </script>
+</body>
+
+</html>

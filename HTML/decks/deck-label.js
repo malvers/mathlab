@@ -27,7 +27,8 @@
   const LABELS = '#deck .slide.on:not([data-aus]) .pic p.fl';   // data-aus: from its own file
   // the text boxes that stand on a slide - the same list as tools/pptx/deck_label.py KINDS, keep both in step
   const KINDS = ['div.body', 'div.colgrid', 'div.codepanel', 'table.dtable', 'h1', 'h2', 'h3', 'p.kicker', 'p.sub',
-                 'p.satz', 'p.label', 'p.labnote', 'p.greet-lead', 'p.greet-quote', 'p.greet-author', 'div.labbar'];
+                 'p.satz', 'p.label', 'p.labnote', 'p.greet-lead', 'p.greet-quote', 'p.greet-author', 'div.labbar',
+                 'a.chap-credit', 'a.fig-source', 'a.side-credit'];   // a picture's caption, moved like a text box (30.10.2026)
   const RIGHT = ['div.labbar'];                        // hangs from the right in deck.css: moved, it needs right:auto
   const BOXES = KINDS.map(k => '#deck .slide.on:not([data-aus]) > ' + k).join(', ');
   const SAVED = new WeakMap();                         // label or box -> its style as the file holds it
@@ -178,12 +179,12 @@
     return fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); });
   }
-  function save(el) {                                  // one write after the other, in the order they were made
+  function save(el, extra) {                           // one write after the other, in the order they were made
     const old = saved(el), g = geo(el), slide = el.closest('.slide');
     const n = peers(slide, kind(el)).indexOf(el);
     const q = isBox(el)
-      ? { deck: E.deck, slide: slides.indexOf(slide), kind: kind(el), n: n, old: old, op: 'move', x: g.x, y: g.y,
-          w: g.wSet ? g.w : null, scale: g.sc }
+      ? Object.assign({ deck: E.deck, slide: slides.indexOf(slide), kind: kind(el), n: n, old: old, op: 'move', x: g.x, y: g.y,
+          w: g.wSet ? g.w : null, scale: g.sc }, extra || {})
       : { deck: E.deck, slide: slides.indexOf(slide), n: n, old: old, x: g.x, y: g.y, w: g.w, size: g.s };
     const p = queue.then(function () { return post(isBox(el) ? '/__deck/box' : '/__deck/label', q); })
       .then(function (j) {
@@ -397,13 +398,47 @@
       clearTimeout(nudgeT);
       nudgeT = setTimeout(function () { save(el); }, 400);   // a row of presses is one write
     }
-    onSelect = showSize;                               // a label chosen or let go: the number follows
-    document.addEventListener('deck-edit-state', showSize);   // a text opened, closed or marked (deck-edit.js state())
+    // Left / centred / right for the chosen text box, or the box the open text stands in (a bullet: its whole body)
+    // - written into the box's style like a move (Doc, 30.10.2026: "oben im Edit-Modus zwei Tasten für links und
+    // rechtsbündig. Und zentriert"). Lucide "align-left/-center/-right" (ISC), as the bar's other drawn icons.
+    const ALIGN = [['left', 'M15 12H3M17 18H3', 'Linksbündig'], ['center', 'M17 12H7M19 18H5', 'Zentriert'],
+                   ['right', 'M21 12H9M21 18H7', 'Rechtsbündig']];
+    const boxOf = el => { for (let x = el; x && x.parentElement; x = x.parentElement) if (isBox(x)) return x; return null; };
+    const target = () => sel && isBox(sel) ? sel : open() ? boxOf(open()) : null;
+    const aligns = ALIGN.map(function (a) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.title = a[2]; b.setAttribute('aria-label', a[2]); b.dataset.own = 'label';
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+        + 'stroke-linejoin="round" aria-hidden="true"><path d="M21 6H3"/><path d="' + a[1] + '"/></svg>';
+      b.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the caret stays in an open text
+      b.addEventListener('click', function (e) { e.stopPropagation(); alignTo(a[0]); });
+      return b;
+    });
+    const aslot = bar.querySelector('[data-slot=align]');
+    aligns.forEach(function (b) { (aslot || bar).appendChild(b); });
+    function alignTo(v) {
+      const el = target();
+      if (!el) { E.msg('Erst eine Textbox anklicken'); return; }
+      if (!SAVED.has(el)) SAVED.set(el, saved(el));    // the file's style, before the change
+      el.style.textAlign = v;
+      if (el === sel) frame();
+      showAlign();
+      clearTimeout(nudgeT);
+      save(el, { align: v });
+    }
+    function showAlign() {
+      const el = E.on() ? target() : null, v = el ? getComputedStyle(el).textAlign : '';
+      const now = v === 'start' ? 'left' : v === 'end' ? 'right' : v;
+      aligns.forEach(function (b, k) { b.classList.toggle('on', !!el && ALIGN[k][0] === now); });
+    }
+    const both = function () { showSize(); showAlign(); };
+    onSelect = both;                                   // a label chosen or let go: the number and the alignment follow
+    document.addEventListener('deck-edit-state', both);   // a text opened, closed or marked (deck-edit.js state())
     addEventListener('keyup', showSize);
     document.addEventListener('selectionchange', showSize);   // marking other words: their size
-    document.addEventListener('deck-edit-off', showSize);
-    painted.push(showSize);
-    showSize();
+    document.addEventListener('deck-edit-off', both);
+    painted.push(both);
+    both();
   }
 
   document.addEventListener('deck-edit-off', function () {

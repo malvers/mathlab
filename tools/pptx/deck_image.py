@@ -42,7 +42,8 @@ IMG = re.compile(r'<img\b[^>]*>')
 IMG_SRC = re.compile(r'\ssrc="([^"]*)"')
 # a generator box that holds nothing but the picture: it leaves with it (an empty .pic/.below is invisible, an empty
 # .chap-pic would stay as a bare card)
-BOX_OPEN = re.compile(r'<(div|figure) class="(?:pic|below|chap-pic)(?: [a-z-]+)*">\s*$')
+# - also one with a style of its own (a chapter photo sized by hand, 30.10.2026: its bare card stayed as a shadow frame)
+BOX_OPEN = re.compile(r'<(div|figure) class="(?:pic|below|chap-pic)(?: [a-z-]+)*"(?: style="[^"]*")?>\s*$')
 BOX_CLOSE = re.compile(r'\s*</(div|figure)>')
 SRC = re.compile(r"img/[a-z0-9._-]+\.(?:png|jpg|webp|gif|svg)")
 # an SVG in an <img> runs no script, but opened on its own on docalvers.de it would
@@ -106,7 +107,8 @@ def _num(q, key, lo, hi):
 
 def _style(q):
     """left/top/width in slide px (960x540), a height only once a side handle stretched the picture, a rotation
-    only when it is turned - the only things the page may set."""
+    only when it is turned, rounded corners only for a photo that had them in its box - the only things the page may
+    set (Doc, 30.10.2026: "abgerundete Ecken vom Bild. Und Schatten")."""
     style = "position:absolute;left:%gpx;top:%gpx;width:%gpx" % (
         _num(q, "x", -2000, 3000), _num(q, "y", -2000, 3000), _num(q, "w", 8, 3000))
     if q.get("h") is not None:
@@ -115,6 +117,8 @@ def _style(q):
         r = _num(q, "r", -360, 360)
         if r % 360:
             style += ";transform:rotate(%gdeg)" % r
+    if q.get("round"):
+        style += ";border-radius:%gpx" % _num(q, "round", 0, 200)
     return style
 
 

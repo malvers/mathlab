@@ -294,6 +294,8 @@
             ['in', '', '', 'Einrücken (Tab)'],
             ['out', '', '', 'Ausrücken (Shift+Tab)'],
             null,
+            ['slot:align'],                          // left / centred / right for a text box (deck-label.js)
+            null,
             ['schrift', 'Aa', 'ed-schrift', 'Schrift waehlen']]);
 
   const tools = document.createElement('div');
@@ -1042,11 +1044,13 @@
 
   // pressing in a text opens it at once, so a drag from there marks words as in any text field - the box only moves
   // by its rim (deck-label.js) (Doc, 29.10.2026: "wenn ich klicke und sofort ziehe, soll sich ... Text markieren").
-  // A figure's label still opens on the click: dragging it by its words moves it. Links are the click's (below).
+  // A figure's label still opens on the click: dragging it by its words moves it. Links are the click's (below) -
+  // except a picture's caption, a link that is a text of its own: it opens for typing, Cmd-click follows it, as in
+  // PowerPoint (Doc, 30.10.2026: "kann die Bildunterschrift wieder nicht verändern")
   addEventListener('mousedown', function (e) {
     if (PRES || !on || busy || e.button !== 0 || !e.target.closest || !e.target.closest('#deck')) return;
-    const el = e.target.closest('[data-ed]');
-    if (!el || el.matches('.pic p.fl') || e.target.closest('a') || (cur && cur.el === el)) return;
+    const el = e.target.closest('[data-ed]'), a = e.target.closest('a');
+    if (!el || el.matches('.pic p.fl') || (a && (a !== el || e.metaKey)) || (cur && cur.el === el)) return;
     if (held && Date.now() - held < 400) return;     // a label was just dragged
     if (cur) end(true);
     if (!cur && !busy) begin(el, e.clientX, e.clientY);
