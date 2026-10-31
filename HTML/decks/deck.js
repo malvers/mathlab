@@ -49,6 +49,23 @@
 
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
+// every multiplication dot round: "·" in the slides' text is set in Times New Roman, Raleway draws it small and square
+// (Doc, 31.10.2026: "alle Malpunkte immer in Times New Roman, die sollen schön rund sein"). Formulas and SVG keep theirs.
+(function roundDots(){
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n =>
+    n.data.includes('\u00B7') && n.parentElement.closest('.slide, .pop')
+      && !n.parentElement.closest('.katex, .tex, svg, script, style, .f3, [contenteditable]')
+      ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT });
+  const hits = []; while (w.nextNode()) hits.push(w.currentNode);
+  hits.forEach(n => {
+    const f = document.createDocumentFragment();
+    n.data.split('\u00B7').forEach((part, i) => {
+      if (i) { const d = document.createElement('span'); d.className = 'f3'; d.textContent = '\u00B7'; f.appendChild(d); }
+      if (part) f.appendChild(document.createTextNode(part));
+    });
+    n.replaceWith(f);
+  });
+})();
 let si = 0, step = 0;
 // the screenshot of a lab or 3D die for the presenter's previews and strip (tools/pptx/deck_shots.mjs takes them):
 // named by what the frame shows and its size, not by its place - a moved lab or reordered slides keep their picture
@@ -374,20 +391,35 @@ addEventListener('click', e => {
   // bitte raus, dass ein Klick die nächste Folie oder die vorhergehende Folie macht. Das macht mich wahnsinnig.")
   if (e.target.closest('.labbar button')) { narr.stop(); next(); }
 });   // clicks inside a lab stay in the lab - they never reach this document
+// A box that opens on a click (Doc, 31.10.2026: "wenn jemand fragt, hat man da nochmal den Zusammenhang"): an element
+// with data-pop="id" opens the .pop with that id; the x, a click beside it, Esc or turning the page close it again.
+// Never in the editor - there a click picks the element.
+addEventListener('click', e => {
+  if (document.documentElement.classList.contains('deck-edit') || !e.target.closest) return;
+  const open = document.querySelector('.pop:not([hidden])'), t = e.target.closest('[data-pop]');
+  if (open && (!e.target.closest('.pop') || e.target.closest('.pop-x'))) open.hidden = true;
+  if (t && !(open && t.dataset.pop === open.id)) { const p = document.getElementById(t.dataset.pop); if (p) p.hidden = false; }
+}, true);
+addEventListener('keydown', e => {
+  const p = document.querySelector('.pop:not([hidden])');
+  if (!p || !(e.key === 'Escape' || /^(Arrow|Page|Home|End)/.test(e.key))) return;
+  p.hidden = true;
+  if (e.key === 'Escape') e.stopImmediatePropagation();   // Esc only closes the box
+}, true);
 // On a tablet a finger steps through the slide as the arrow keys do: a tap on, a swipe to the left on, to the right back.
 // The mouse click stays out (30.10.2026) - only touch and pen (Doc, 31.10.2026: "wie man auf dem Pad die Animation
 // überhaupt ausführen kann. Denn dadurch, dass jetzt der Mausklick weg ist"). Never while editing, drawing or remote
 // controlling, and never on a button, a link, a field, Solita's box, a lab or an open overview.
 (function () {
   const NOT = '#hud, #nav, #ask, #ask-line, #ask-panel, #pres, #help, #overview, #ink-bar, a, button, input, textarea, '
-    + 'select, label, .play-big, .labframe, .ani-ctl, [contenteditable]';
+    + 'select, label, .play-big, .labframe, .ani-ctl, [contenteditable], [data-pop], .pop';
   let down = null;
   addEventListener('pointerdown', e => {
     down = null;
     if (e.pointerType === 'mouse' || !e.isPrimary || !e.target.closest) return;
     const r = document.documentElement.classList;
     if (r.contains('deck-edit') || r.contains('ink-pen') || r.contains('ink-remote') || r.contains('presenter')) return;
-    if (e.target.closest(NOT)) return;
+    if (e.target.closest(NOT) || document.querySelector('.pop:not([hidden])')) return;   // a tap beside an open box only closes it
     down = { x: e.clientX, y: e.clientY, t: e.timeStamp };
   }, true);
   addEventListener('pointercancel', () => { down = null; }, true);

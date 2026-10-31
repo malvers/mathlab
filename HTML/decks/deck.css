@@ -73,6 +73,36 @@ b{font-weight:600;color:var(--fg,var(--formel))}   /* bold inside a colour keeps
 .c1{--fg:var(--orange)}.c2{--fg:var(--red)}.c3{--fg:var(--green)}
 .c4{--fg:var(--blue)}.c5{--fg:var(--teal)}.c6{--fg:var(--violet)}
 .c7{--fg:var(--magenta)}.c8{--fg:var(--brown)}.c9{--fg:var(--slate)}
+.boxed{padding:0 .3em;border:1.5px solid var(--stroke);border-radius:6px;background:rgba(255,255,255,.85)}   /* a box around a word that is hard to see in its colour, e.g. orange (Doc, 31.10.2026) */
+.boxed.c1{--fg:#D4960F}   /* the orange a bit darker inside the box (Doc, 31.10.2026) */
+.boxed-soft .c1,h3 .c1{--fg:#D4960F}   /* the same darker orange in a quiet frame and in a title, on a light ground (Doc, 31.10.2026) */
+.boxed-soft{padding:2px .45em;border:1.2px solid var(--muted);border-radius:8px;background:rgba(255,255,255,.55)}   /* a quiet frame around the core of a line, e.g. the formula (Doc, 31.10.2026) */
+.boxed-soft.tiny{display:inline-block;box-sizing:border-box;height:16px;line-height:14px;padding:0 .55em;letter-spacing:.4px;border-width:1px;border-radius:5px}   /* the same frame for a small sum of exact height, so a line can start at its edge */
+/* a box that opens on a click on [data-pop] (deck.js) - for the question someone may ask (Doc, 31.10.2026) */
+[data-pop]{cursor:pointer}
+.pop{position:absolute;left:50%;top:calc(50% + var(--pop-dy,0px));transform:translate(-50%,-50%) scale(var(--pop-scale,1));width:var(--pop-w,min-content);max-width:848px;max-height:452px;z-index:40;background:#fff;color:var(--body);
+  border:2px solid var(--stroke);border-radius:14px;box-shadow:0 14px 44px rgba(14,36,78,.35);padding:18px 26px;overflow:auto}
+.pop[hidden]{display:none}
+.pic .fl.pop-mark{display:flex}
+.pop-list{margin:10px 0 0 1.2em;padding:0;font-size:15px;line-height:1.45}
+.pop-list li{margin-top:6px}
+.pop-mark{display:inline-flex;vertical-align:.1em;width:18px;height:18px;box-sizing:border-box;border:1.2px solid #A8A18F;border-radius:50%;
+  align-items:center;justify-content:center;padding:0 0 0 .6px;font:700 10.5px/1 Arial,Helvetica,sans-serif;color:#A8A18F;background:rgba(255,255,255,.75);cursor:pointer}   /* the ? in a circle that says: a click opens more */
+.pop h4{margin:0 0 12px;font:700 19px Orbitron,system-ui,sans-serif;color:var(--stroke)}
+.pop p{margin:12px 0 0;font-size:15px;line-height:1.45}
+.pop .dtable{position:static}
+.dtable th .tex{color:#fff}   /* a formula in a table head stays readable on the dark ground */
+.dtable tr.frame td{border-top:2px solid var(--red);border-bottom:2px solid var(--red)}   /* a row traced in red, the dividers stay (Doc, 31.10.2026) */
+/* a number that turns red when its click comes and fades back over 5 s (Doc, 31.10.2026: "dass man sieht,
+   wo die 407 eigentlich ...") - <span class="step flash" data-g="n">; only while its click is the newest, so a slide
+   reached built in full does not flash */
+.step.flash:not(.on){transform:none}
+.step.flash.on:not(.past),.step.flash.on:not(.past) *{animation:flash-red 5s ease-in}
+@keyframes flash-red{from{color:var(--red)}}
+.dtable tr.frame td:first-child{border-left:2px solid var(--red)}.dtable tr.frame td:last-child{border-right:2px solid var(--red)}
+.pop-x{position:absolute;top:8px;right:12px;width:34px;height:34px;border:0;border-radius:8px;background:none;
+  font:400 26px/1 system-ui,sans-serif;color:var(--stroke);cursor:pointer}
+.pop-x:hover{background:#EEF2F8}
 .f1{font-family:var(--deck-schrift)}
 .f2{font-family:Orbitron,system-ui,sans-serif}
 .f3{font-family:"Times New Roman",Times,Georgia,serif}
@@ -225,6 +255,8 @@ a.fig-source:hover{color:var(--red);text-decoration:underline}
 .pic svg,.below svg{max-width:100%;max-height:100%;display:block}   /* a drawn figure (inline SVG) fits the box like a picture */
 .pic .katex svg,.below .katex svg{max-width:none;max-height:none}   /* ... but not KaTeX's own small svgs in a figure's words (a root, a stroke through a term): the fit squeezed them to 0 px high (06.10.2026) */
 .pic .fl{position:absolute;margin:0;text-align:center;font-size:12.5px;line-height:1.28;color:var(--muted)}   /* a figure's words, laid over the SVG - the editor's text; unitless line height, so a label scaled up keeps its own */
+.pic .fl.calc{display:grid;grid-template-columns:1.2em 1.1em .6em 1.1em 1.2em;font-family:Arial,Helvetica,sans-serif}   /* a short sum in a figure: number, sign, number, =, result in columns, so the signs stand under each other (Doc, 31.10.2026) */
+.pic .fl.calc>:nth-child(odd){text-align:right}.pic .fl.calc>:nth-child(even){text-align:center}
 .pic.left{justify-content:flex-start}
 /* a small drawn figure in the free room right of the heading, above a hero formula (Doc, 03.10.2026: "oben wo die freie
    Fläche ist, ein Integral hin") - its .fl words as in any .pic */
