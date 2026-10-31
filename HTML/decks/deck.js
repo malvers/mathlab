@@ -205,6 +205,9 @@ function groups(sl){
   return [...new Set([...sl.querySelectorAll('.step')].map(grp)
     .concat([...sl.querySelectorAll('[data-ab]')].map(e => +e.dataset.ab)))].length;
 }
+// a slide reached with a footer triangle stands built in full - then no box on its last part (Doc, 31.10.2026: "mach den
+// roten Kasten für das letzte Bullet immer weg"); the next step by click, key or finger brings the box back
+let ganz = false;
 // every line is in view from the start; the group clicked last carries the triangle and the box - on its first
 // element; what was shown before steps back a little
 // (Doc, 27.09.2026: "alle sichtbar ... ein Dreieck davor", "die schon gezeigten ein klein wenig heller")
@@ -215,7 +218,7 @@ function stepMarks(root, st){
   const first = all.find(e => grp(e) === top);
   // a part of a line that comes with a click of its own (<b class="step kommt">): the line keeps the triangle and the
   // box (Doc, 29.10.2026: "lass bitte die rund 4,1 Mio auf Click erscheinen")
-  const cur = first && first.matches('.kommt') && first.parentElement.closest('p.line.step') || first;
+  const cur = ganz ? null : first && first.matches('.kommt') && first.parentElement.closest('p.line.step') || first;
   all.forEach(e => {
     const g = grp(e);
     e.classList.toggle('on', g < st); e.classList.toggle('past', g < top); e.classList.toggle('now', e === cur);
@@ -260,11 +263,13 @@ function paint(){
 }
 function next(){
   if (trommel.laeuft()) return;                      // the drum still rolls: the click waits for the crash
+  ganz = false;
   if (step < groups(slides[si])) { step++; }
   else { const j = seek(si + 1, 1); if (j >= 0) { si = j; step = 0; } }
   paint();
 }
 function prev(){
+  ganz = false;
   if (step > 0) { step--; }
   else { const j = seek(si - 1, -1); if (j >= 0) { si = j; step = groups(slides[si]); } }
   paint();
@@ -274,7 +279,7 @@ function jump(d){
   if (typeof narr !== 'undefined') narr.stop();     // turning by hand pauses Solita
   const j = seek(si + d, d > 0 ? 1 : -1);
   if (j >= 0) si = j;
-  step = groups(slides[si]); paint();
+  step = groups(slides[si]); ganz = true; paint();
 }
 
 /* ————— A drum roll before a part (data-trommel) ————————————————————————————
@@ -369,6 +374,33 @@ addEventListener('click', e => {
   // bitte raus, dass ein Klick die nächste Folie oder die vorhergehende Folie macht. Das macht mich wahnsinnig.")
   if (e.target.closest('.labbar button')) { narr.stop(); next(); }
 });   // clicks inside a lab stay in the lab - they never reach this document
+// On a tablet a finger steps through the slide as the arrow keys do: a tap on, a swipe to the left on, to the right back.
+// The mouse click stays out (30.10.2026) - only touch and pen (Doc, 31.10.2026: "wie man auf dem Pad die Animation
+// überhaupt ausführen kann. Denn dadurch, dass jetzt der Mausklick weg ist"). Never while editing, drawing or remote
+// controlling, and never on a button, a link, a field, Solita's box, a lab or an open overview.
+(function () {
+  const NOT = '#hud, #nav, #ask, #ask-line, #ask-panel, #pres, #help, #overview, #ink-bar, a, button, input, textarea, '
+    + 'select, label, .play-big, .labframe, .ani-ctl, [contenteditable]';
+  let down = null;
+  addEventListener('pointerdown', e => {
+    down = null;
+    if (e.pointerType === 'mouse' || !e.isPrimary || !e.target.closest) return;
+    const r = document.documentElement.classList;
+    if (r.contains('deck-edit') || r.contains('ink-pen') || r.contains('ink-remote') || r.contains('presenter')) return;
+    if (e.target.closest(NOT)) return;
+    down = { x: e.clientX, y: e.clientY, t: e.timeStamp };
+  }, true);
+  addEventListener('pointercancel', () => { down = null; }, true);
+  addEventListener('pointerup', e => {
+    const d = down; down = null;
+    if (!d || e.pointerType === 'mouse') return;
+    const dx = e.clientX - d.x, dy = e.clientY - d.y;
+    const help = document.getElementById('help');
+    if (help && !help.hidden) return;                // the click handler closes the help
+    if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) { narr.stop(); if (dx < 0) next(); else prev(); }
+    else if (Math.abs(dx) < 12 && Math.abs(dy) < 12 && e.timeStamp - d.t < 600) { narr.stop(); next(); }
+  }, true);
+})();
 // Chrome's own menu (save image, copy image, inspect ...) never comes up in a deck: a right click or a long press
 // on the board opened it over the slide (Doc, 28.09.2026: "das dumme Menu von Chrome ... unbedingt überschreiben
 // (nix)"). The deck's own menus (Solita's box, the overview's slide menu) still open; text fields keep theirs, to paste.
@@ -1408,6 +1440,32 @@ gestartet = true;
     }
     painted.push(placeRow);                             // the footer moves with the slide scale and the page
     addEventListener('resize', placeRow);
+    // On a tablet the pad's keyboard covered the line in the footer, and its small field was hard to hit (Doc, 31.10.2026:
+    // "das Passwort für Solita einzugeben, ist schier unmöglich ... wird auch teilweise überdeckt"): while the keyboard is
+    // up and the field has the cursor, the line stands big in the middle right above the keyboard, the answers over it.
+    // The keyboard is what the visual viewport loses at the bottom; Chrome on the pad keeps the layout viewport as it is.
+    function lift() {
+      const vv = window.visualViewport, f = sf.feld();
+      const kb = vv ? innerHeight - (vv.height + vv.offsetTop) : 0;
+      const up = kb > 120 && document.activeElement === f && line.contains(f) && line.classList.contains('on')
+        && !document.documentElement.classList.contains('presenter');
+      if (!up) {
+        if (line.classList.contains('hoch')) { line.classList.remove('hoch'); placeRow(); }
+        return;
+      }
+      line.classList.add('hoch');
+      const w = Math.min(560, innerWidth - 24), h = line.offsetHeight, foot = vv.offsetTop + vv.height - 12;
+      line.style.left = Math.round((innerWidth - w) / 2) + 'px'; line.style.width = w + 'px';
+      line.style.top = Math.round(foot - h / 2) + 'px';
+      const r = f.getBoundingClientRect();
+      panel.style.left = Math.round(r.left) + 'px'; panel.style.width = Math.round(r.width) + 'px';
+      panel.style.bottom = Math.round(innerHeight - (foot - h) + 8) + 'px';
+    }
+    painted.push(lift);
+    addEventListener('resize', lift);
+    if (window.visualViewport) { visualViewport.addEventListener('resize', lift); visualViewport.addEventListener('scroll', lift); }
+    line.addEventListener('focusin', function () { setTimeout(lift, 350); });   // the keyboard slides in first
+    line.addEventListener('focusout', function () { setTimeout(lift, 50); });
     if (document.fonts) {                               // Orbitron arrives late: the page number's edge moves with it
       document.fonts.ready.then(placeRow);
       document.fonts.addEventListener('loadingdone', placeRow);
