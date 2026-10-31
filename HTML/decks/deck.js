@@ -393,19 +393,65 @@ addEventListener('click', e => {
 });   // clicks inside a lab stay in the lab - they never reach this document
 // A box that opens on a click (Doc, 31.10.2026: "wenn jemand fragt, hat man da nochmal den Zusammenhang"): an element
 // with data-pop="id" opens the .pop with that id; the x, a click beside it, Esc or turning the page close it again.
-// Never in the editor - there a click picks the element.
+// Never in the editor - there a click picks the element. The presenter's slide is a copy without ids (shot() keeps the
+// id as data-pop-id), and what it opens there the beamer opens too.
+function popTell(id) { if (PRESENTER) link.send({ t: 'pop', si: si, box: id || '' }); }
+function popApply(m) {                               // beamer: as the presenter has it
+  document.querySelectorAll('.pop:not([hidden])').forEach(p => { p.hidden = true; });
+  const p = m.box && document.getElementById(m.box);
+  if (p) p.hidden = false;
+}
 addEventListener('click', e => {
   if (document.documentElement.classList.contains('deck-edit') || !e.target.closest) return;
   const open = document.querySelector('.pop:not([hidden])'), t = e.target.closest('[data-pop]');
-  if (open && (!e.target.closest('.pop') || e.target.closest('.pop-x'))) open.hidden = true;
-  if (t && !(open && t.dataset.pop === open.id)) { const p = document.getElementById(t.dataset.pop); if (p) p.hidden = false; }
+  const id = t && t.dataset.pop, was = open && (open.id || open.dataset.popId);
+  if (open && (!e.target.closest('.pop') || e.target.closest('.pop-x'))) { open.hidden = true; popTell(''); }
+  if (t && id !== was) {
+    const s = t.closest('.slide'), p = s && s.querySelector('[data-pop-id="' + id + '"]') || document.getElementById(id);
+    if (p) { p.hidden = false; popTell(id); }
+  }
+  if (t || e.target.closest('.pop')) e.stopPropagation();   // in the presenter view it must not turn the page as well
 }, true);
 addEventListener('keydown', e => {
   const p = document.querySelector('.pop:not([hidden])');
   if (!p || !(e.key === 'Escape' || /^(Arrow|Page|Home|End)/.test(e.key))) return;
-  p.hidden = true;
+  p.hidden = true; popTell('');
   if (e.key === 'Escape') e.stopImmediatePropagation();   // Esc only closes the box
 }, true);
+// A picture with data-zoom stands big in the middle of the slide (Doc, 31.10.2026: "on hover ... soll der 10-Euro-Schein
+// riesengroß in der Mitte erscheinen") as long as the mouse is on it or on the big one; from the file itself, so that file
+// should be sharp.
+// Hovered on the presenter's slide it shows on the beamer too. Only a real mouse, and never while editing.
+const hoverZoom = (function () {
+  let cur = null, wait = 0;
+  function show(slide, src) {
+    document.querySelectorAll('.zoom-big').forEach(z => z.remove());
+    if (!slide || !src) return;
+    const z = new Image();
+    z.className = 'zoom-big'; z.alt = '';
+    z.onload = () => { z.style.width = Math.min(800, 440 * z.naturalWidth / z.naturalHeight) + 'px'; };   // a tall one fits the slide
+    z.src = src;
+    slide.appendChild(z);
+  }
+  function to(t) {
+    clearTimeout(wait);
+    if (t === cur) return;
+    cur = t;
+    show(t && t.closest('.slide'), t && t.src);
+    if (PRESENTER) link.send({ t: 'zoom', si: si, src: t ? t.src : '' });
+  }
+  addEventListener('pointerover', e => {
+    if (e.pointerType !== 'mouse' || !e.target.closest) return;
+    if (e.target.classList.contains('zoom-big')) { clearTimeout(wait); return; }   // on the big picture it stays: there Doc points at things
+    const t = e.target.closest('[data-zoom]');
+    if (t && !t.matches('.step:not(.on)') && !document.documentElement.classList.contains('deck-edit')
+      && (!PRESENTER || t.closest('.slide.live'))) to(t);
+    else if (cur) { clearTimeout(wait); wait = setTimeout(() => to(null), 450); }   // time to get from a small picture over to its big one
+  }, true);
+  document.documentElement.addEventListener('pointerleave', () => to(null));
+  addEventListener('keydown', e => { if (/^(Arrow|Page|Home|End|Esc)/.test(e.key)) to(null); }, true);   // not l for the laser
+  return { apply: m => show(slides[m.si], m.src) };   // beamer: as the presenter has it
+})();
 // On a tablet a finger steps through the slide as the arrow keys do: a tap on, a swipe to the left on, to the right back.
 // The mouse click stays out (30.10.2026) - only touch and pen (Doc, 31.10.2026: "wie man auf dem Pad die Animation
 // überhaupt ausführen kann. Denn dadurch, dass jetzt der Mausklick weg ist"). Never while editing, drawing or remote
@@ -1656,6 +1702,8 @@ const link = (function () {
     else if (m.t === 'ask-live') { if (window.DeckAsk) DeckAsk.live(m.q); }    // dictated there, already on screen here
     else if (m.t === 'ask-hush') { if (window.DeckAsk) DeckAsk.hush(); }       // the presenter's mic is on: her voice off
     else if (m.t === 'go') apply(m);
+    else if (m.t === 'pop') popApply(m);                                       // a box opened in the presenter
+    else if (m.t === 'zoom') hoverZoom.apply(m);                               // a picture under the presenter's mouse
     else if (m.t === 'ev') mirror.replay(m);
     else if (m.t === 'laser') laser.show(m);
     else if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); laser.mirrorOn(m.on); }   // L over there
@@ -2230,6 +2278,7 @@ const link = (function () {
     }
     function shot(i, st, live) {                     // slide i as it stands after st clicks
       const c = slides[i].cloneNode(true);
+      c.querySelectorAll('.pop[id]').forEach(function (p) { p.dataset.popId = p.id; });
       c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
       c.querySelectorAll('.play-big, .play-big-label, .ani-ctl').forEach(function (e) { e.remove(); });   // copied buttons are dead
       if (live) {                                    // the current slide: real labs and dice, mirrored to the beamer

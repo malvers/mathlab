@@ -80,9 +80,12 @@ b{font-weight:600;color:var(--fg,var(--formel))}   /* bold inside a colour keeps
 .boxed-soft.tiny{display:inline-block;box-sizing:border-box;height:16px;line-height:14px;padding:0 .55em;letter-spacing:.4px;border-width:1px;border-radius:5px}   /* the same frame for a small sum of exact height, so a line can start at its edge */
 /* a box that opens on a click on [data-pop] (deck.js) - for the question someone may ask (Doc, 31.10.2026) */
 [data-pop]{cursor:pointer}
-.pop{position:absolute;left:50%;top:calc(50% + var(--pop-dy,0px));transform:translate(-50%,-50%) scale(var(--pop-scale,1));width:var(--pop-w,min-content);max-width:848px;max-height:452px;z-index:40;background:#fff;color:var(--body);
+.pop{position:absolute;left:50%;top:calc(50% + var(--pop-dy,0px));transform:translate(-50%,-50%) scale(var(--pop-scale,1));width:var(--pop-w,min-content);max-width:848px;max-height:452px;z-index:27;background:#fff;color:var(--body);
   border:2px solid var(--stroke);border-radius:14px;box-shadow:0 14px 44px rgba(14,36,78,.35);padding:18px 26px;overflow:auto}
 .pop[hidden]{display:none}
+.p-frame > .slide.live [data-pop],.p-frame > .slide.live [data-zoom],.p-frame > .slide.live .pop,.p-frame > .slide.live .pop *{pointer-events:auto}   /* the presenter's current slide takes the pointer here too */
+[data-zoom]{cursor:zoom-in}
+.zoom-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:28;pointer-events:auto;border-radius:10px;box-shadow:0 14px 44px rgba(14,36,78,.45)}   /* the picture big in the middle while the mouse is on it or on the big one (deck.js) */
 .pic .fl.pop-mark{display:flex}
 .pop-list{margin:10px 0 0 1.2em;padding:0;font-size:15px;line-height:1.45}
 .pop-list li{margin-top:6px}
