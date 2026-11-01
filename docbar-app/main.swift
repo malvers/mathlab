@@ -13,7 +13,8 @@ private enum Style {
     static let inset: CGFloat = 14
     static let pad: CGFloat = 8
     static let icon = "d.circle"        // D as in Doc: letter drawn, ring only an outline
-    static let iconAlert = "d.circle.fill"  // alert reverses it: white D punched out of a red disc
+    static let iconFilled = "d.circle.fill" // reversed: white D punched out of a coloured disc
+    static let hereGreen = NSColor(red: 121 / 255, green: 158 / 255, blue: 49 / 255, alpha: 1)
     static let font = NSFont.systemFont(ofSize: 13)
     static let nameFont = NSFont.systemFont(ofSize: 13, weight: .semibold)
     static let subFont = NSFont.systemFont(ofSize: 11)
@@ -377,16 +378,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func isRunning(_ app: DocBarMenu) -> Bool { kill(app.pid, 0) == 0 || errno == EPERM }
 
-    /// Red icon whenever a running tool has raised its alert flag.
+    /// Red icon whenever a running tool has raised its alert flag, green while Doc sits here.
     private func refreshIcon(_ apps: [DocBarMenu]) {
         guard let button = statusItem.button else { return }
         let alerting = apps.contains { $0.alert == true && isRunning($0) }
-        let base = NSImage(systemSymbolName: alerting ? Style.iconAlert : Style.icon,
+        let here = apps.contains { $0.here == true && isRunning($0) }
+        let filled = alerting || here
+        let base = NSImage(systemSymbolName: filled ? Style.iconFilled : Style.icon,
                            accessibilityDescription: "DocBar")
         // Bigger than the system default: the D is the one icon of ours left up there.
         // The ring is drawn thin so it matches the fine frames of the neighbouring
         // status items (measured: their frame is a single point, semibold is 2.5).
-        let size = NSImage.SymbolConfiguration(pointSize: 20, weight: alerting ? .semibold : .light)
+        let size = NSImage.SymbolConfiguration(pointSize: 20, weight: filled ? .semibold : .light)
         // Grown by a point at the top, which pushes the glyph that far down in the bar.
         func loweredByOne(_ image: NSImage?) -> NSImage? {
             guard let image = image else { return nil }
@@ -397,11 +400,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return out
         }
 
-        if alerting {
+        if filled {
             // Palette instead of hierarchical: hierarchical punches the D out of the disc,
             // so the wallpaper shows through it instead of white.
+            let disc: NSColor = alerting ? .systemRed : Style.hereGreen
             button.image = loweredByOne(base?.withSymbolConfiguration(
-                size.applying(NSImage.SymbolConfiguration(paletteColors: [.white, .systemRed]))))
+                size.applying(NSImage.SymbolConfiguration(paletteColors: [.white, disc]))))
             button.image?.isTemplate = false
         } else {
             button.image = loweredByOne(base?.withSymbolConfiguration(size))
