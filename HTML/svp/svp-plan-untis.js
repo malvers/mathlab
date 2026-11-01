@@ -131,10 +131,7 @@ window.svpPlanParts.push(function (P) {
         for (const list of termine.values()) {
             const day = list[s.block];
             if (!day) continue;
-            const half = day.length >= 4
-                ? (s.half ? day.slice(2) : day.slice(0, 2))
-                : (s.half ? [] : day);
-            out.push(...half);
+            out.push(...svpTermine.halfOf(day, s.half));
         }
         return out;
     }

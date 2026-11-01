@@ -48,7 +48,7 @@ window.svpPlanParts.push(function (P) {
             const art = P.pruefArt(cfg);
             rb.className = 'red-btn' + (art === 'klausur' ? '' : ' nachweis');
             const lbl = document.createElement('span');
-            lbl.textContent = cfg.label;
+            lbl.textContent = svpPruefungen.buttonText(cfg);
             rb.appendChild(lbl);
             rb.addEventListener('click', function (e) { e.stopPropagation(); });
             if ((cfg.items && cfg.items.length) || cfg.src) {

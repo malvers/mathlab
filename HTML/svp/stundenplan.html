@@ -145,6 +145,8 @@
     <script src="svp-auth.js"></script>
     <script src="stundenplan-optimizer.js"></script>
     <script src="svp-timetable.js"></script>
+    <script src="svp-termine.js"></script>
+    <script src="svp-pruefungen.js"></script>
     <script>
         // Local rebuild of the WebUntis timetable. Data comes from
         //   node tools/webuntis.js year
@@ -575,7 +577,7 @@
                        for bigger type on a 45-min tile; the Jahrgang rides in a third. */
                     const parts = ['<div class="tt-cols">'
                         + '<div class="tt-col">'
-                        + '<div class="tt-subject">' + (l.subject || '—') + '</div>'
+                        + '<div class="tt-subject">' + (l.subject || '—') + (l.ghost ? '' : svpPruefungen.pill(l)) + '</div>'
                         + (who ? '<div class="tt-who">' + who + '</div>' : '')
                         + '</div>'
                         + '<div class="tt-col">'
@@ -1432,7 +1434,11 @@
         let SVP_MAP = null;
         fetch('svp-map.json?v=' + Date.now())
             .then(r => r.ok ? r.json() : null)
-            .then(m => { SVP_MAP = m; })
+            .then(m => {
+                SVP_MAP = m;
+                // tests of the plans as pills on the tiles (svp-pruefungen.js)
+                if (m) svpPruefungen.load(m.pages).then(found => { if (found && DATA) render(DATA, SELECTED); });
+            })
             .catch(() => { });
 
         /* Welche Stunde traegt schon Stoff im WebUntis-Klassenbuch? Erzeugt von

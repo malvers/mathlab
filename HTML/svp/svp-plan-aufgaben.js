@@ -356,16 +356,6 @@ window.svpPlanParts.push(function (P) {
             p.style.maxHeight = Math.round(above) + 'px';
         }
     }
-    /* ---- Welche Farbe traegt der Pruefungsknopf? ------------------------
-       Doc, 22.09.2026: "leistungsnachweis bitte -> immer so,
-       Klassenarbeiten/Klausuren machen wir rot". Rot ist damit den grossen
-       Arbeiten vorbehalten; ein Leistungsnachweis traegt Orange mit Navy -
-       derselbe Ton wie das wichtige Material (--g-wichtig, svp-tokens.css).
-       Entschieden wird am Wort, damit eine neue Planzeile nichts zusaetzlich
-       angeben muss: rot nur, wo "Klausur", "Klassenarbeit" oder
-       "Schulaufgabe" steht. Wer es anders braucht, schreibt es hin -
-       redBtn.art = 'klausur' oder 'nachweis' sticht die Regel. */
-    const ROT_WORT = /klausur|klassenarbeit|schulaufgabe/i;
 
     /* Doc, 26.10.2026: the same 30 questions in two rows of FO 12 - in termin
        mode the groups reach their next lesson in different rows. Such a list
@@ -400,11 +390,8 @@ window.svpPlanParts.push(function (P) {
         return redSrc[cfg.src];
     }
 
-    function pruefArt(cfg) {
-        if (cfg && (cfg.art === 'klausur' || cfg.art === 'nachweis')) return cfg.art;
-        const wort = (cfg && (cfg.title || cfg.label)) || '';
-        return ROT_WORT.test(wort) ? 'klausur' : 'nachweis';
-    }
+    /* red or orange: the rule lives in svp-pruefungen.js, the timetable pills follow it too */
+    function pruefArt(cfg) { return svpPruefungen.pruefArt(cfg); }
 
     function buildRedList(title, items, art) {
         if (!redListWired) {

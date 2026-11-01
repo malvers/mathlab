@@ -66,6 +66,8 @@
     <script src="svp-woche.js"></script>
     <script src="svp-timetable.js"></script>
     <script src="svp-auth.js"></script>
+    <script src="svp-termine.js"></script>
+    <script src="svp-pruefungen.js"></script>
     <script src="sprechstunde-core.js?v=20261029-3"></script>
     <script>
         'use strict';
@@ -95,7 +97,13 @@
         let SVP_MAP = null;
         fetch('svp-map.json?v=' + Date.now())
             .then(r => r.ok ? r.json() : null)
-            .then(m => { SVP_MAP = m; if (CURRENT && cache.has(CURRENT)) render(cache.get(CURRENT)); })
+            .then(m => {
+                const repaint = () => { if (CURRENT && cache.has(CURRENT)) render(cache.get(CURRENT)); };
+                SVP_MAP = m;
+                repaint();
+                // tests of the plans as pills on the tiles, with a login only (svp-pruefungen.js)
+                if (m) svpPruefungen.load(m.pages).then(found => { if (found) repaint(); });
+            })
             .catch(() => { });
 
         function svpEntryFor(l) {
@@ -272,7 +280,7 @@
             return open + ' style="' + style + '" title="' + esc(title) + '">' +
                 '<div class="tt-cols">' +
                 '<div class="tt-col">' +
-                '<div class="tt-subject">' + esc(l.subject || '—') + '</div>' +
+                '<div class="tt-subject">' + esc(l.subject || '—') + svpPruefungen.pill(l) + '</div>' +
                 '<div class="tt-who">' + esc((l.classes || []).join(', ')) + '</div>' +
                 '</div>' +
                 '<div class="tt-col">' +

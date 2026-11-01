@@ -54,6 +54,7 @@
        sein Blatt, und notes.html soll dieselbe bekommen. */
     document.write('<script src="' + dir + 'svp-woche.js"><\/script>'
         + '<script src="' + dir + 'svp-termine.js"><\/script>'
+        + '<script src="' + dir + 'svp-pruefungen.js"><\/script>'
         + '<script src="' + dir + 'svp-falten.js"><\/script>'
         + '<script src="' + dir + 'svp-fmtbar.js"><\/script>'
         /* the gong at the start of a lesson, and its button on the Fahrplan sheet (Doc, 28.09.2026) */

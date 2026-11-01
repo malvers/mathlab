@@ -49,11 +49,19 @@
         return { block: Math.floor(n / 2), half: n % 2 };
     }
 
+    /* The lessons of one double period of an appointment. A day with fewer than four lessons (cancelled)
+       gives the first half all of them and the second none - no proposal beats a wrong one. */
+    function halfOf(day, half) {
+        return day.length >= 4
+            ? (half ? day.slice(2) : day.slice(0, 2))
+            : (half ? [] : day);
+    }
+
     /* "20260928" -> the ISO week of that day */
     function kwOf(ymd) {
         const s = String(ymd);
         return global.svpIsoWeek(new Date(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6, 8)));
     }
 
-    global.svpTermine = { groupKey, termine, slot, kwOf };
+    global.svpTermine = { groupKey, termine, slot, halfOf, kwOf };
 })(window);
