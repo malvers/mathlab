@@ -1,8 +1,9 @@
 // GlobeMic — hold the Globe key to dictate into the Claude panel of VS Code, release to send.
 // Holding Globe presses Cmd+D, letting go ends the dictation and presses Return. Return only
 // goes out when a new microphone capture really started: with the cursor anywhere else Cmd+D
-// never opens the mic, so nothing can land in the code. The tap only listens, a hang in here
-// can not block the keyboard.
+// never opens the mic, so nothing can land in the code. A dictation that reads exactly
+// "Slash clear" becomes the real /clear. The tap only listens, a hang in here can not block
+// the keyboard.
 
 import Cocoa
 import CoreAudio
@@ -17,6 +18,10 @@ enum Timing {
     static let send = 0.12      // pause between ending the dictation and Return
     static let poll = 0.05      // how often the mic is checked during a hold
     static let beep = 0.60      // a hold this long without a mic gets a beep, a slow tap does not
+    static let command = 6.0    // only a hold this short can be a spoken command
+    static let copy = 0.05      // pause between select all and copy, and after each copy check
+    static let copyTries = 8    // gives the panel 0.4 s to answer Cmd+C
+    static let menu = 0.15      // the slash menu needs a moment before Return
 }
 
 enum Key {
@@ -24,9 +29,18 @@ enum Key {
     static let command: CGKeyCode = 55
     static let d: CGKeyCode = 2
     static let enter: CGKeyCode = 36
+    static let a: CGKeyCode = 0
+    static let c: CGKeyCode = 8
 }
 
 let vsCodeBundle = "com.microsoft.VSCode"
+
+/// True only when the whole field says exactly this, anything else stays a normal message.
+/// Short dictations often already arrive as "/clear." with a period that breaks the command.
+func isClearCommand(_ text: String) -> Bool {
+    let compact = text.lowercased().filter { $0.isLetter || $0.isNumber || $0 == "/" }
+    return compact == "slashclear" || compact == "/clear"
+}
 
 // MARK: - log
 
@@ -81,6 +95,25 @@ enum Mic {
     }
 }
 
+// MARK: - clipboard
+
+enum Clipboard {
+    static func snapshot() -> [NSPasteboardItem] {
+        (NSPasteboard.general.pasteboardItems ?? []).map { item in
+            let copy = NSPasteboardItem()
+            for type in item.types {
+                if let data = item.data(forType: type) { copy.setData(data, forType: type) }
+            }
+            return copy
+        }
+    }
+
+    static func restore(_ items: [NSPasteboardItem]) {
+        NSPasteboard.general.clearContents()
+        if !items.isEmpty { NSPasteboard.general.writeObjects(items) }
+    }
+}
+
 // MARK: - keyboard
 
 enum Keyboard {
@@ -106,6 +139,26 @@ enum Keyboard {
     static func tapEnter() {
         post(Key.enter, down: true)
         post(Key.enter, down: false)
+    }
+
+    private static func tapWithCommand(_ key: CGKeyCode) {
+        post(key, down: true, flags: .maskCommand)
+        post(key, down: false, flags: .maskCommand)
+    }
+
+    static func selectAll() { tapWithCommand(Key.a) }
+    static func copy() { tapWithCommand(Key.c) }
+
+    /// Types by character, so the keyboard layout does not matter.
+    static func type(_ text: String) {
+        for var unit in text.utf16 {
+            for down in [true, false] {
+                guard let event = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: down) else { continue }
+                event.keyboardSetUnicodeString(stringLength: 1, unicodeString: &unit)
+                event.flags = []
+                event.post(tap: .cghidEventTap)
+            }
+        }
     }
 }
 
@@ -307,9 +360,48 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + Timing.send) { [weak self] in
             guard let self = self else { return }
-            if self.vsCodeInFront { Keyboard.tapEnter() }
-            log(self.vsCodeInFront ? "sent" : "VS Code left the front, nothing sent")
-            self.phase = .idle
+            guard self.vsCodeInFront, held <= Timing.command else { self.deliver("sent"); return }
+            self.readField { text in
+                if let text = text { log("read \(text.count) characters") }
+                guard let text = text, isClearCommand(text) else { self.deliver("sent"); return }
+                Keyboard.type("/clear")
+                DispatchQueue.main.asyncAfter(deadline: .now() + Timing.menu) { self.deliver("spoken /clear") }
+            }
+        }
+    }
+
+    private func deliver(_ what: String) {
+        if vsCodeInFront { Keyboard.tapEnter() }
+        log(vsCodeInFront ? what : "VS Code left the front, nothing sent")
+        phase = .idle
+    }
+
+    // MARK: reading the field
+
+    /// Reads the input field through the clipboard, which is given back right away.
+    private func readField(_ done: @escaping (String?) -> Void) {
+        let saved = Clipboard.snapshot()
+        let count = NSPasteboard.general.changeCount
+        Keyboard.selectAll()
+        DispatchQueue.main.asyncAfter(deadline: .now() + Timing.copy) { [weak self] in
+            Keyboard.copy()
+            self?.awaitCopy(since: count, tries: Timing.copyTries) { text in
+                if text != nil { Clipboard.restore(saved) }
+                done(text)
+            }
+        }
+    }
+
+    private func awaitCopy(since count: Int, tries: Int, _ done: @escaping (String?) -> Void) {
+        if NSPasteboard.general.changeCount != count {
+            done(NSPasteboard.general.string(forType: .string) ?? "")
+        } else if tries > 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Timing.copy) { [weak self] in
+                self?.awaitCopy(since: count, tries: tries - 1, done)
+            }
+        } else {
+            log("field could not be read")
+            done(nil)
         }
     }
 }
