@@ -2,8 +2,8 @@
 // Holding Globe presses Cmd+D, letting go ends the dictation and presses Return. Return only
 // goes out when a new microphone capture really started: with the cursor anywhere else Cmd+D
 // never opens the mic, so nothing can land in the code. A dictation that reads exactly
-// "Slash clear" becomes the real /clear. The tap only listens, a hang in here can not block
-// the keyboard.
+// "Slash clear", "Slash usage" or "Slash context" becomes the real command. The tap only
+// listens, a hang in here can not block the keyboard.
 
 import Cocoa
 import CoreAudio
@@ -35,11 +35,17 @@ enum Key {
 
 let vsCodeBundle = "com.microsoft.VSCode"
 
-/// True only when the whole field says exactly this, anything else stays a normal message.
+/// Spoken word to real command. German dictation writes "Kontext" just as well as "context".
+let spokenCommands = ["clear": "/clear", "usage": "/usage", "context": "/context", "kontext": "/context"]
+
+/// The command the whole field stands for, anything else stays a normal message (nil).
 /// Short dictations often already arrive as "/clear." with a period that breaks the command.
-func isClearCommand(_ text: String) -> Bool {
+func spokenCommand(_ text: String) -> String? {
     let compact = text.lowercased().filter { $0.isLetter || $0.isNumber || $0 == "/" }
-    return compact == "slashclear" || compact == "/clear"
+    for slash in ["slash", "/"] where compact.hasPrefix(slash) {
+        if let command = spokenCommands[String(compact.dropFirst(slash.count))] { return command }
+    }
+    return nil
 }
 
 // MARK: - log
@@ -363,9 +369,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard self.vsCodeInFront, held <= Timing.command else { self.deliver("sent"); return }
             self.readField { text in
                 if let text = text { log("read \(text.count) characters") }
-                guard let text = text, isClearCommand(text) else { self.deliver("sent"); return }
-                Keyboard.type("/clear")
-                DispatchQueue.main.asyncAfter(deadline: .now() + Timing.menu) { self.deliver("spoken /clear") }
+                guard let text = text, let command = spokenCommand(text) else { self.deliver("sent"); return }
+                Keyboard.type(command)
+                DispatchQueue.main.asyncAfter(deadline: .now() + Timing.menu) { self.deliver("spoken \(command)") }
             }
         }
     }
