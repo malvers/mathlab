@@ -120,6 +120,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store, max-age=0')
         super().end_headers()
 
+    def log_request(self, code='-', size='-'):
+        """No line for live reload's polling: every open page asks once a second, the log had grown to 2.7 GB (01.11.2026)."""
+        if not getattr(self, 'path', '').startswith('/__live/stamp'):
+            super().log_request(code, size)
+
     def deck_api(self):
         """The deck editor's endpoints - the module is reloaded per call, so no restart after a change."""
         n = int(self.headers.get('Content-Length') or 0)
@@ -237,8 +242,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return super().do_GET()              # css, js, images, json ... untouched
         deck = os.path.dirname(os.path.abspath(path)) == os.path.join(HTML_DIR, 'decks')
         try:
+            served = b'reload.js?served=%d' % time.time_ns()   # before the read: what changes after this is not in the page
             with open(path, 'rb') as f:
-                body = inject(f.read(), LIVE_RELOAD + (DECK_EDITOR if deck else b''), lag=True)
+                body = inject(f.read(), LIVE_RELOAD.replace(b'reload.js', served) + (DECK_EDITOR if deck else b''), lag=True)
         except OSError:
             return self.send_error(404, 'File not found')
         self.send_response(200)

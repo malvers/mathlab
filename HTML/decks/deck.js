@@ -49,6 +49,25 @@
 
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
+// The two strokes under a title sit higher now; a title of two lines would run into them, so its slide keeps the old place
+// (.slide.h3-zwei in deck.css). A hidden slide has no layout: each title is measured in a hidden copy, once Orbitron is there.
+function titleLines() {
+  const host = slides[0] && slides[0].parentNode;
+  if (!host) return;
+  const probe = document.createElement('div');
+  host.appendChild(probe);
+  document.querySelectorAll('.slide').forEach(s => {
+    const h = s.querySelector(':scope > h3');
+    if (!h || !s.querySelector(':scope > .rules')) return;
+    probe.className = s.className;
+    probe.style.cssText = 'display:block;visibility:hidden;pointer-events:none';
+    probe.replaceChildren(h.cloneNode(true));
+    s.classList.toggle('h3-zwei', probe.firstChild.offsetHeight > 40);
+  });
+  probe.remove();
+}
+if (document.fonts) document.fonts.ready.then(() => document.fonts.load('700 28px Orbitron')).then(titleLines, titleLines);
+else titleLines();
 // every multiplication dot round: "·" in the slides' text is set in Times New Roman, Raleway draws it small and square
 // (Doc, 31.10.2026: "alle Malpunkte immer in Times New Roman, die sollen schön rund sein"). Formulas and SVG keep theirs.
 (function roundDots(){
@@ -429,7 +448,11 @@ const hoverZoom = (function () {
     if (!slide || !src) return;
     const z = new Image();
     z.className = 'zoom-big'; z.alt = '';
-    z.onload = () => { z.style.width = Math.min(800, 440 * z.naturalWidth / z.naturalHeight) + 'px'; };   // a tall one fits the slide
+    z.style.visibility = 'hidden';                   // until it has its size: at file size it would flash and take the clicks
+    z.onload = () => {                               // a tall one fits the slide
+      z.style.width = Math.min(800, 440 * z.naturalWidth / z.naturalHeight) + 'px';
+      z.style.visibility = '';
+    };
     z.src = src;
     slide.appendChild(z);
   }
@@ -451,6 +474,55 @@ const hoverZoom = (function () {
   document.documentElement.addEventListener('pointerleave', () => to(null));
   addEventListener('keydown', e => { if (/^(Arrow|Page|Home|End|Esc)/.test(e.key)) to(null); }, true);   // not l for the laser
   return { apply: m => show(slides[m.si], m.src) };   // beamer: as the presenter has it
+})();
+// A strip on a chart: while the mouse is on it, a box above says how rare that spot is if it were chance (Doc, 31.10.2026:
+// "für die Mausposition eins von x"). <div class="hover-tail" data-t="200" data-von="128.3" data-bis="169.4"><p
+// class="hover-tail-box" hidden>... {G} ... {N} ...</p></div>: von and bis are the counts at the strip's two ends, t the
+// words; {G} is the count at the mouse, {N} the bell curve's one in N. Hovered on the presenter's slide it shows on the
+// beamer too. Only a real mouse, and never while editing.
+const hoverTail = (function () {
+  let cur = null;
+  const UNITS = [[1e24, 'Quadrillion', 'Quadrillionen'], [1e21, 'Trilliarde', 'Trilliarden'], [1e18, 'Trillion', 'Trillionen'],
+                 [1e15, 'Billiarde', 'Billiarden'], [1e12, 'Billion', 'Billionen'], [1e9, 'Milliarde', 'Milliarden'], [1e6, 'Million', 'Millionen']];
+  const two = v => +v.toPrecision(2);                 // two digits are all a bell curve promises out here
+  function nice(n) {                                  // 1,3 Billionen, 48.000
+    for (const [u, one, many] of UNITS) if (n >= u) {
+      const v = two(n / u);
+      return v.toLocaleString('de-DE') + ' ' + (v === 1 ? one : many);
+    }
+    return two(n).toLocaleString('de-DE');
+  }
+  function oneIn(g, t) {                              // upper tail of the normal curve, asymptotic: fine from z = 3 on
+    const z = (g - t / 2) / Math.sqrt(t / 4), i = 1 / (z * z);
+    return Math.sqrt(2 * Math.PI) * z * Math.exp(z * z / 2) / (1 - i + 3 * i * i - 15 * i * i * i);
+  }
+  function show(el, f) {
+    const box = el.querySelector('.hover-tail-box');
+    if (!box.dataset.tpl) box.dataset.tpl = box.innerHTML;
+    if (f === null) { box.hidden = true; return; }
+    const t = +el.dataset.t, von = +el.dataset.von, bis = +el.dataset.bis;
+    const g = Math.max(Math.ceil(von), Math.round(von + f * (bis - von)));   // whole words, the first one past the start
+    box.innerHTML = box.dataset.tpl.replace('{G}', g).replace('{N}', nice(oneIn(g, t)));
+    box.style.left = f * 100 + '%';
+    box.hidden = false;
+  }
+  function to(el, f) {
+    if (cur && cur !== el) show(cur, null);
+    cur = el;
+    if (el) show(el, f);
+    if (PRESENTER) link.send({ t: 'tail', si: si, f: el ? f : null });
+  }
+  addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse' || !e.target.closest) return;
+    const el = e.target.closest('.hover-tail');
+    if (!el || el.matches('.step:not(.on)') || document.documentElement.classList.contains('deck-edit')
+      || (PRESENTER && !el.closest('.slide.live'))) { if (cur) to(null); return; }
+    const r = el.getBoundingClientRect();
+    to(el, Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)));
+  }, true);
+  document.documentElement.addEventListener('pointerleave', () => { if (cur) to(null); });
+  addEventListener('keydown', e => { if (cur && /^(Arrow|Page|Home|End|Esc)/.test(e.key)) to(null); }, true);
+  return { apply: m => { const el = slides[m.si] && slides[m.si].querySelector('.hover-tail'); if (el) show(el, m.f); } };   // beamer
 })();
 // On a tablet a finger steps through the slide as the arrow keys do: a tap on, a swipe to the left on, to the right back.
 // The mouse click stays out (30.10.2026) - only touch and pen (Doc, 31.10.2026: "wie man auf dem Pad die Animation
@@ -1703,6 +1775,7 @@ const link = (function () {
     else if (m.t === 'ask-hush') { if (window.DeckAsk) DeckAsk.hush(); }       // the presenter's mic is on: her voice off
     else if (m.t === 'go') apply(m);
     else if (m.t === 'pop') popApply(m);                                       // a box opened in the presenter
+    else if (m.t === 'tail') hoverTail.apply(m);                               // the presenter's mouse on a strip
     else if (m.t === 'zoom') hoverZoom.apply(m);                               // a picture under the presenter's mouse
     else if (m.t === 'ev') mirror.replay(m);
     else if (m.t === 'laser') laser.show(m);

@@ -100,9 +100,9 @@
     const rad = parseFloat(getComputedStyle(img).borderTopLeftRadius)
       || (box.matches('.foto') ? parseFloat(getComputedStyle(box).borderTopLeftRadius) : 0) || 0;
     ORIG.set(img, { src: src, n: n });
-    img.className = 'free-pic';
+    img.className = rad ? 'free-pic rund' : 'free-pic';
     img.setAttribute('style', 'position:absolute;left:' + round(g.x) + 'px;top:' + round(g.y) + 'px;width:' + round(g.w) + 'px'
-      + (g.fixed ? ';height:' + round(g.h) + 'px' : '') + (rad ? ';border-radius:' + round(rad) + 'px' : ''));
+      + (g.fixed ? ';height:' + round(g.h) + 'px' : ''));
     slide.insertBefore(img, slide.querySelector(':scope > p.foot'));
     if (emptyBox(box)) box.remove();
     E.msg('Bild ist frei – ziehen verschiebt, Ecken und Seiten ändern die Größe, der Knopf oben dreht');

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Wasserzeichen im Text</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script src="js/farbschema.js"></script>
+    <style>
+        /* the sheet takes the working area; ?widget shows it alone, for the deck's frame (as in mnist-netz) */
+        body.wz-widget { grid-template-columns: 0 minmax(0, 1fr) !important; }
+        body.wz-widget #cyber-left-chrome, body.wz-widget #cyber-left-chrome-inner, body.wz-widget #mini-rail,
+        body.wz-widget #side-panel, body.wz-widget #cyber-screen-warning { display: none !important; }
+        body.wz-widget #main-content { grid-column: 1 / -1 !important; }
+        body.wz-widget .canvas-branding, #math-coach-box { display: none; }
+        #canvas-container { background: #F7F2E7; }
+        body:not(.wz-widget) #wz { top: 50px; padding-top: 0; }   /* room for the branding */
+        #wz { position: absolute; inset: 0; z-index: 2; box-sizing: border-box; padding: 16px 20px 22px; overflow: auto; display: grid; gap: 10px 18px;
+            grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto;
+            grid-template-areas: "top head" "text right" "text right"; color: #2C3C60; font: 400 14px/1.4 Raleway, system-ui, sans-serif; }
+        .wz-top { grid-area: top; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+        .wz-text { grid-area: text; position: relative; display: flex; flex-direction: column; min-height: 0; gap: 8px; }
+        .wz-right { grid-area: right; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+        .wz-bell, .wz-keys { box-sizing: border-box; padding: 9px 5%; background: rgba(255, 255, 255, .5); border: 1px solid rgba(14, 36, 78, .25); border-radius: 10px; }
+        .wz-bell { flex: 1 1 0; display: flex; flex-direction: column; min-height: 0; }
+        #wz h2 { margin: 0 0 3px; font: 700 12px Orbitron, sans-serif; letter-spacing: .4px; color: #0E244E; }
+        #wz .wz-head { grid-area: head; box-sizing: border-box; height: 29px; display: flex; align-items: center; justify-content: center; margin: 0; border: 1px solid rgba(14, 36, 78, .3); border-radius: 8px; background: rgba(255, 255, 255, .5); }   /* a pill on the line of the slider, ground as the boxes below */
+        #wz-bell-svg, #wz-keys-svg { display: block; width: 100%; height: auto; font-family: Raleway, sans-serif; }
+        #wz button svg { flex: none; }
+        #wz-bell-svg { flex: 1 1 0; height: 0; min-height: 150px; }   /* the bell takes the free height, drawn to the measured size */
+        #wz-text { flex: 1; min-height: 0; overflow: auto; padding: 10px 12px; background: rgba(255, 255, 255, .5); border: 1px solid rgba(14, 36, 78, .25); border-radius: 10px;
+            font-size: 14px; line-height: 1.5; color: #2C3C60; white-space: pre-wrap; }
+        #wz::-webkit-scrollbar, #wz-text::-webkit-scrollbar { width: 7px; height: 7px; background: transparent !important; }
+        #wz::-webkit-scrollbar-track, #wz-text::-webkit-scrollbar-track { background: transparent !important; margin: 8px 0; }
+        #wz::-webkit-scrollbar-thumb, #wz-text::-webkit-scrollbar-thumb { background: rgba(14, 36, 78, .2) !important; border: 0 !important; box-shadow: none !important; border-radius: 4px; }   /* !important: the deck puts dark bars of its own into every lab */
+        #wz::-webkit-scrollbar-thumb:hover, #wz-text::-webkit-scrollbar-thumb:hover { background: rgba(14, 36, 78, .38) !important; }
+        #wz::-webkit-scrollbar-corner { background: transparent; }
+        #wz .g { color: #799E31; font-weight: 600; } #wz .r { color: #B02418; font-weight: 600; }
+        #wz .ch { text-decoration: underline dotted; text-underline-offset: 3px; }
+        #wz button { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; cursor: pointer; border: 1px solid rgba(14, 36, 78, .3); border-radius: 8px;
+            background: rgba(14, 36, 78, .06); color: #0E244E; font: 400 12px Orbitron, sans-serif; letter-spacing: .5px; }
+        #wz button:hover { background: rgba(14, 36, 78, .13); border-color: rgba(14, 36, 78, .5); }
+        .wz-stil { display: flex; gap: 6px; }
+        #wz .wz-stil button.on { background: #0E244E; border-color: #0E244E; color: #fff; }
+        .wz-bonus { flex: 1 1 200px; box-sizing: border-box; height: 29px; padding: 0 12px; border: 1px solid rgba(14, 36, 78, .3); border-radius: 8px; background: rgba(14, 36, 78, .06); display: flex; align-items: center; gap: 8px; font: 400 12px Orbitron, sans-serif; color: #0E244E; }
+        #wz-d { -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 18px !important; margin: 0; padding: 0; border: 0; background: transparent !important; box-shadow: none; }
+        #wz-d::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: rgba(14, 36, 78, .25); }
+        #wz-d::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; margin-top: -5.5px; border: 0; border-radius: 50%; background: #799E31; box-shadow: none; cursor: pointer; }
+        .wz-att { display: flex; flex-wrap: wrap; gap: 8px; }
+        .wz-att button { position: relative; flex: 1 1 auto; justify-content: center; }
+        #wz-note { position: absolute; left: 50%; top: 100%; margin-top: 1px; transform: translateX(-50%); font: 400 9.5px/22px Raleway, sans-serif; letter-spacing: 0; white-space: nowrap; pointer-events: none; color: #6E7E9F; }   /* in the padding under its button, attack() moves it there: it comes and goes, nothing moves */
+        #wz #wz-verdict.ok { color: #4F6E1E; }
+        #wz-lies { color: #D4960F; font-weight: 700; }
+        .wz-khead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+        .wz-hint { font-size: 12px; color: #6E7E9F; white-space: nowrap; }
+        #wz-rare .katex { font-size: 12.45px; }   /* all in one formula, its tall letters as high as the W of the verdict beside it (Doc, 01.11.2026) */
+        .hit { cursor: pointer; }
+        .wz-y { paint-order: stroke; stroke: #FBF8F3; stroke-width: 3px; }   /* the scale over the bars stays readable */
+        .wz-card p { margin: 0 0 8px; font-size: .84rem; line-height: 1.4; }
+        @media (max-width: 760px) {
+            #wz { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "top" "text" "head" "right"; }
+            #wz-text { min-height: 240px; }
+            .wz-att { row-gap: 16px; margin-bottom: 8px; }
+            #wz-note { line-height: 14px; }
+            .wz-khead { flex-wrap: wrap; gap: 0 10px; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <div id="wz">
+                <div class="wz-top">
+                    <div class="wz-stil"><button type="button" data-s="goethe">Goethe</button><button type="button" data-s="dickens">Dickens</button><button type="button" data-s="zeitung">Zeitung</button></div>
+                    <label class="wz-bonus">Bonus <input id="wz-d" type="range" min="0" max="5" step="1" aria-label="Bonus"> <b id="wz-dv"></b></label>
+                </div>
+                <div class="wz-text">
+                    <div id="wz-text"></div>
+                    <div class="wz-att">
+                        <button type="button" id="wz-um" title="Das Modell formuliert den Text mit eigenen Worten um">Umschreiben</button>
+                        <button type="button" id="wz-tr" title="Deutsch, Englisch, Deutsch">Hin und zurück übersetzen</button>
+                        <button type="button" id="wz-org" title="Den geschriebenen Text wiederherstellen">Original</button>
+                    </div>
+                    <div id="wz-note"></div>
+                </div>
+                <h2 class="wz-head">Auswertung</h2>
+                <div class="wz-right">
+                <div class="wz-bell">
+                    <div class="wz-khead"><h2 id="wz-verdict"></h2><span class="wz-hint" id="wz-rare"></span></div>
+                    <svg id="wz-bell-svg" viewBox="0 0 480 206" role="img" aria-label="Glockenkurve der Zufallstexte mit der Schwelle und dem aktuellen Anteil grüner Wörter"></svg>
+                </div>
+                <div class="wz-keys">
+                    <div class="wz-khead"><h2>Gelesen mit <span id="wz-lies"></span></h2><span class="wz-hint">Klick auf einen Balken: mit ihm lesen.</span></div>
+                    <svg id="wz-keys-svg" viewBox="0 0 480 139" role="img" aria-label="Anteil grüner Wörter für die Schlüssel 0 bis 99"></svg>
+                </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="morpheus/vendor/katex/katex.min.js"></script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Wasserzeichen im Text',
+        });
+        CyberUI.init();
+
+        (function setCoachTitleFromI18n() {
+            const el = document.getElementById('coach-title-slot');
+            if (el && typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function') {
+                el.textContent = CyberI18n.get('ui.description');
+            }
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const $ = id => document.getElementById(id);
+        const log = m => { if (typeof dbg === 'function') dbg('[wasserzeichen] ' + m); };
+        const Q = new URLSearchParams(location.search);
+        if (Q.has('widget')) document.body.classList.add('wz-widget');
+        const KEYS = 100, BONI = [0, 1, 2, 3, 4, 6];
+        const NAVY = '#0E244E', GREEN = '#799E31', RED = '#B02418', KEY = '#D4960F', GREY = '#B8C1D3', MUTED = '#6E7E9F';
+        const S = { b: 2, style: 'goethe', key: 7, read: 7, W: [], shown: 0, timer: 0, rounds: 0, orig: '', bits: null };
+        const num = (id, lo, hi, fb) => { const v = parseFloat(Q.get(id)); return v >= lo && v <= hi ? v : fb; };
+        S.b = num('bonus', 0, 6, 2);
+        const TEMPO = num('tempo', 2, 500, 18);
+        let D = null;
+
+        // ---------------------------------------------------------------- the secret test ---
+        // The deck reckons with the last digit, which any child can follow. There the key only counts by its last digit, so a
+        // scan over 100 keys would show ten spikes: the lab mixes with a hash instead, as real systems do. The same test as in
+        // tools/wz_texte.py. It looks at the first two letters of a word and of the word before, so any text can be coloured.
+        const cut2 = w => w.toLowerCase().slice(0, 2);
+        function hash(key, a, b) {
+            let h = 0x811c9dc5, s = key + '|' + a + '|' + b;
+            for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+            h ^= h >>> 15; h = Math.imul(h, 0x2c1b3c6d); h ^= h >>> 12; h = Math.imul(h, 0x297a2d39); h ^= h >>> 15;
+            return h >>> 31;                                  // half of all words, at random: 1 = green
+        }
+        const scanWords = text => {
+            const W = [];
+            text.split(/([A-Za-zÄÖÜäöüß]+)/).forEach((t, i) => { if (t) W.push({ t, word: !!(i % 2), ch: false }); });
+            return W;
+        };
+        function scan() {                                     // every word's colour under every key, once per text
+            const W = S.W; S.bits = [];
+            for (let k = 0; k < KEYS; k++) {
+                const row = new Int8Array(W.length).fill(-1);
+                let prev = '';
+                W.forEach((x, i) => { if (x.word) { const w = cut2(x.t); row[i] = hash(k, prev, w); prev = w; } });
+                S.bits.push(row);
+            }
+        }
+        const count = k => { let T = 0, G = 0; const r = S.bits[k]; for (let i = 0; i < S.shown; i++) if (r[i] >= 0) { T++; G += r[i]; } return { T, G }; };
+
+        // ---------------------------------------------------------------- how rare ---
+        const UNITS = [[1e24, 'Quadrillion', 'Quadrillionen'], [1e21, 'Trilliarde', 'Trilliarden'], [1e18, 'Trillion', 'Trillionen'], [1e15, 'Billiarde', 'Billiarden'], [1e12, 'Billion', 'Billionen'], [1e9, 'Milliarde', 'Milliarden'], [1e6, 'Million', 'Millionen']];
+        function nice(n) {
+            if (n >= 1e27) return '10^{' + Math.round(Math.log10(n)) + '}';
+            const two = v => +v.toPrecision(2), num = v => v.toLocaleString('de-DE').replace(',', '{,}');
+            for (const [u, one, many] of UNITS) if (n >= u) { const v = two(n / u); return num(v) + '\\text{ ' + (v === 1 ? one : many) + '}'; }
+            return num(two(n));
+        }
+        function oneIn(z) { const i = 1 / (z * z); return Math.sqrt(2 * Math.PI) * z * Math.exp(z * z / 2) / (1 - i + 3 * i * i - 15 * i * i * i); }
+
+        // ---------------------------------------------------------------- drawing ---
+        function renderText() {
+            const r = S.bits ? S.bits[S.read] : null;
+            let h = '';
+            for (let i = 0; i < S.shown; i++) {
+                const x = S.W[i], e = x.t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                if (!x.word) { h += e; continue; }
+                h += '<span class="' + (r[i] ? 'g' : 'r') + (x.ch ? ' ch' : '') + '">' + e + '</span>';
+            }
+            $('wz-text').innerHTML = h;
+            $('wz-text').scrollTop = $('wz-text').scrollHeight;
+        }
+        function renderBell() {
+            const { T: T0, G: G0 } = count(S.read), z0 = T0 ? (G0 - T0 / 2) / Math.sqrt(T0) * 2 : 0;
+            const v = $('wz-verdict');
+            v.className = T0 && z0 >= 4 ? 'ok' : '';
+            v.textContent = !T0 ? '' : z0 >= 4 ? 'Wasserzeichen erkannt' : z0 >= 2 ? 'Auffällig' : 'Sieht aus wie Zufall';
+            $('wz-rare').innerHTML = z0 >= 2 ? katex.renderToString('\\text{zufällig nur }1\\text{ von }' + nice(oneIn(z0))) : '';
+            const box = $('wz-bell-svg').getBoundingClientRect(), VH = box.width ? Math.max(60, box.height * 480 / box.width) : 206;   // never above the measured size: it would shrink the width too
+            $('wz-bell-svg').setAttribute('viewBox', '0 0 480 ' + VH.toFixed(1));
+                        const { T, G } = count(S.read), L = .5, R = 479.5, B = VH - 20, top = 12;
+            const X = p => L + (p - .3) / .7 * (R - L), s = .5 / Math.sqrt(Math.max(T, 1));
+            let path = 'M ' + L + ' ' + B;
+            for (let i = 0; i <= 160; i++) { const p = .3 + .7 * i / 160, z = (p - .5) / s; path += ' L ' + X(p).toFixed(1) + ' ' + (B - (B - top) * Math.exp(-z * z / 2)).toFixed(1); }
+            // what chance gives in 19 of 20 texts: the same bounds as on slide 22, one in 40 beyond each. Nine stripes as there, the tails stay empty
+            const lo = .5 - 1.96 * s, hi = .5 + 1.96 * s, yy = p => B - (B - top) * Math.exp(-(((p - .5) / s) ** 2) / 2);
+            let band = 'M ' + X(lo).toFixed(1) + ' ' + B;
+            for (let i = 0; i <= 60; i++) { const p = lo + (hi - lo) * i / 60; band += ' L ' + X(p).toFixed(1) + ' ' + yy(p).toFixed(1); }
+            const stripe = (B - top) / 9;
+            let o = '<defs><pattern id="wz-streifen" width="10" height="' + 2 * stripe + '" patternUnits="userSpaceOnUse" patternTransform="translate(0 ' + B + ')"><rect width="10" height="' + stripe + '" fill="' + GREEN + '"/><rect y="' + stripe + '" width="10" height="' + stripe + '" fill="' + RED + '"/></pattern></defs>';
+            o += '<path d="' + band + ' L ' + X(hi).toFixed(1) + ' ' + B + ' Z" fill="url(#wz-streifen)" opacity=".34"/>';
+            o += '<path d="' + path + '" fill="none" stroke="' + NAVY + '" stroke-width="1.4"/>';
+            o += '<line x1="' + L + '" y1="' + B + '" x2="' + R + '" y2="' + B + '" stroke="' + NAVY + '" stroke-width="1.2"/>';
+            for (let p = 30; p <= 100; p += 10) o += '<line x1="' + X(p / 100) + '" y1="' + B + '" x2="' + X(p / 100) + '" y2="' + (B + 4) + '" stroke="' + NAVY + '"/><text x="' + X(p / 100) + '" y="' + (B + 16) + '" text-anchor="' + (p === 100 ? 'end' : p === 30 ? 'start' : 'middle') + '" font-size="10.5" fill="' + MUTED + '">' + p + ' %</text>';
+            const th = .5 + 4 * s, H = top + 18, z = T ? (G - T / 2) / Math.sqrt(T) * 2 : 0, g = T ? G / T : .5, pc = Math.round(g * 100);
+            const mark = (p, c, w, a, b, dy = 0) => {                 // a line at p with two lines of text beside it, on the side with room
+                const x = X(Math.max(.3, p)), end = p > .8, tx = end ? x - 5 : x + 5, anchor = end ? 'end' : 'start';
+                return '<line x1="' + x + '" y1="' + B + '" x2="' + x + '" y2="' + (end ? H : H + dy) + '" stroke="' + c + '" stroke-width="' + w + '"/>'
+                    + '<g class="wz-lab"><text x="' + tx + '" y="' + (H + 9 + dy) + '" text-anchor="' + anchor + '" font-size="11.5" font-weight="700" fill="' + c + '">' + a + '</text>'
+                    + '<text x="' + tx + '" y="' + (H + 23 + dy) + '" text-anchor="' + anchor + '" font-size="10.5" fill="' + c + '">' + b + '</text></g>';
+            };
+            if (th < 1) o += mark(th, MUTED, 1, 'Schwelle: ' + Math.round(th * 100) + ' %', Math.ceil(th * T) + ' von ' + T + ' Wörtern');
+            if (T) o += mark(g, NAVY, 1.6, pc + ' % <tspan fill="' + GREEN + '">grün</tspan>', G + ' von ' + T + ' Wörtern', th < 1 && X(g) - X(th) > -105 && X(g) - X(th) < (g > .8 ? 225 : 125) ? 48 : 0);   // two labels side by side would touch
+            $('wz-bell-svg').innerHTML = o;
+            $('wz-bell-svg').querySelectorAll('.wz-lab').forEach(l => {   // a soft ground as wide as its words: readable over the stripes, the bell still shows through
+                const q = l.getBBox();
+                l.insertAdjacentHTML('afterbegin', '<rect x="' + (q.x - 4) + '" y="' + (q.y - 2) + '" width="' + (q.width + 8) + '" height="' + (q.height + 4) + '" rx="4" fill="#FBF8F3" fill-opacity=".78"/>');
+            });
+        }
+        function renderKeys() {
+            const L = .5, R = 479.5, B = 123, top = 6, w = (R - L) / KEYS, Y = p => B - p * (B - top);
+            let o = '<line x1="' + L + '" y1="' + Y(.5) + '" x2="' + R + '" y2="' + Y(.5) + '" stroke="' + MUTED + '" stroke-width=".7"/>';
+            const half = '<text class="wz-y" x="' + (L + 3) + '" y="' + (Y(.5) - 4) + '" font-size="10" fill="' + MUTED + '">50 %</text>';
+            const scale = '<text class="wz-y" x="' + (L + 3) + '" y="' + (Y(1) + 7) + '" font-size="10" fill="' + MUTED + '">100 %</text>';
+            for (let k = 0; k < KEYS; k++) {
+                const { T, G } = count(k), p = T ? G / T : .5, x = L + k * w;
+                o += '<rect x="' + (x + .4).toFixed(1) + '" y="' + Y(p).toFixed(1) + '" width="' + (w - .8).toFixed(2) + '" height="' + (B - Y(p)).toFixed(1) + '" fill="' + (k === S.read ? KEY : GREY) + '"/>';
+                o += '<rect class="hit" data-k="' + k + '" x="' + x.toFixed(1) + '" y="' + top + '" width="' + w.toFixed(2) + '" height="' + (B - top + 14) + '" fill="transparent"/>';
+            }
+            o += '<line x1="' + L + '" y1="' + B + '" x2="' + R + '" y2="' + B + '" stroke="' + NAVY + '" stroke-width="1.2"/>';
+            for (const k of [0, 25, 50, 75, 99]) o += '<text x="' + (k === 99 ? R : k ? L + (k + .5) * w : L) + '" y="' + (B + 13) + '" text-anchor="' + (k === 99 ? 'end' : k ? 'middle' : 'start') + '" font-size="10" fill="' + MUTED + '">' + k + '</text>';
+            $('wz-keys-svg').innerHTML = o + half + scale;
+            $('wz-lies').textContent = 'Schlüssel ' + S.read;
+        }
+        function render() { renderText(); renderBell(); renderKeys(); }
+        function finish() { clearInterval(S.timer); S.timer = 0; S.shown = S.W.length; }
+        const entry = () => D[S.style];
+        function load(text, mark) {                           // mark: show which words the attack changed
+            const had = new Set(scanWords(S.orig).map(x => x.t));
+            S.W = scanWords(text);
+            if (mark) S.W.forEach(x => { x.ch = x.word && !had.has(x.t); });
+            scan();
+        }
+        function pickBonus() {                                // the bonus level that exists, while the texts are still being made
+            const have = Object.keys(entry().bonus).map(Number);
+            return have.reduce((a, b) => Math.abs(b - S.b) < Math.abs(a - S.b) ? b : a, have[0]);
+        }
+        function start() {
+            S.orig = entry().bonus[pickBonus()]; S.rounds = 0;
+            $('wz-note').textContent = '';
+            load(S.orig, false);
+            S.shown = 0; clearInterval(S.timer);
+            document.querySelectorAll('.wz-stil button').forEach(b => b.classList.toggle('on', b.dataset.s === S.style));
+            S.timer = setInterval(() => { S.shown++; if (S.shown >= S.W.length) finish(); render(); }, TEMPO);
+        }
+        function attack(text, note, btn) {                    // the attacks were made on the texts with bonus 2
+            if (!text) { $('wz-note').textContent = 'Noch nicht gerechnet.'; return; }
+            finish();
+            if (S.b !== 2) { S.b = 2; $('wz-d').value = BONI.indexOf(2); $('wz-dv').textContent = 2; S.orig = entry().bonus[2]; }
+            load(text, true); S.shown = S.W.length;
+            btn.appendChild($('wz-note'));
+            $('wz-note').textContent = note;
+            render();
+        }
+
+        // ---------------------------------------------------------------- controls ---
+        document.querySelectorAll('.wz-stil button').forEach(b => b.addEventListener('click', () => {
+            if (!D || !D[b.dataset.s] || !Object.keys(D[b.dataset.s].bonus).length) { $('wz-note').textContent = 'Dieser Text wird noch gerechnet.'; return; }
+            S.style = b.dataset.s; start();
+        }));
+        $('wz-d').value = BONI.indexOf(BONI.includes(S.b) ? S.b : 2); $('wz-dv').textContent = BONI[$('wz-d').value];
+        $('wz-d').addEventListener('input', e => { S.b = BONI[+e.target.value]; $('wz-dv').textContent = S.b; start(); });
+        $('wz-um').addEventListener('click', () => { S.rounds = 0; attack(entry().um, 'Vom Modell mit eigenen Worten', $('wz-um')); });
+        $('wz-tr').addEventListener('click', () => {
+            const t = entry().trips || [];
+            S.rounds = Math.min(S.rounds + 1, Math.max(t.length, 1));
+            attack(t[S.rounds - 1], S.rounds + '-mal Deutsch, Englisch, Deutsch', $('wz-tr'));
+        });
+        $('wz-org').addEventListener('click', () => { finish(); S.rounds = 0; load(S.orig, false); S.shown = S.W.length; $('wz-note').textContent = ''; render(); });
+        $('wz-keys-svg').addEventListener('click', e => { const k = e.target.dataset && e.target.dataset.k; if (k === undefined) return; S.read = +k; render(); });
+
+        CyberUI.createCard('ui-container', 'So geht es', '<div class="wz-card"><p><b>Bonus:</b> Grüne Wörter bekommen Lose dazu. Dreh ihn hoch: Der Text wird grüner und schlechter.</p><p><b>Glocke:</b> Je länger der Text, desto schmaler die Kurve.</p><p><b>Schlüssel:</b> Nur der richtige zeigt das Zeichen. Klick auf einen Balken liest mit diesem Schlüssel.</p><p><b>Angriffe:</b> Umschreiben und Übersetzen schwächen das Zeichen.</p></div>');
+        CyberUI.createCard('ui-container', 'Die Texte', '<div class="wz-card"><p>Ein Sprachmodell (Qwen) hat sie auf dem Rechner geschrieben, Wort für Wort mit echtem Bonus und Schlüssel 7. Auch die Angriffe sind echt: Das Modell hat umgeschrieben und übersetzt. Für das Wasserzeichen rechnet das Lab mit einer Hash-Funktion statt mit der letzten Ziffer.</p></div>');
+
+        function init() { if (D) render(); }
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);                      // the bell measures its box: the headings must have their font
+        fetch('data/wasserzeichen-lab-texte.json')
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(d => {
+                D = d;
+                if (Q.has('stil') && D[Q.get('stil')]) S.style = Q.get('stil');
+                start(); finish(); render();
+                document.querySelectorAll('.wz-stil button').forEach(b => { if (D[b.dataset.s]) b.textContent = D[b.dataset.s].label; });
+            })
+            .catch(e => { $('wz-text').textContent = 'Die Texte ließen sich nicht laden.'; log('Texte: ' + e.message); });
+    </script>
+</body>
+
+</html>

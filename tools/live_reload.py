@@ -10,6 +10,7 @@ serve.py reloads this module on every call - a change here needs no restart of t
 import json
 import os
 import re
+import time
 from urllib.parse import urlsplit, parse_qs
 
 HTML_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "HTML"))
@@ -84,6 +85,10 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
 (function () {
   if (window.__liveReload) return;
   const page = location.pathname;
+  // when the server read this page (serve.py): a change after that moment is not in what we show, even if it came while
+  // the page was still loading. Taken as the first ground it would be swallowed: of two saves in a row the reload showed
+  // the first and sat on the second until a hand reload (Doc, 01.11.2026: "wenn du nur was änderst, passiert" nichts)
+  const served = new URL(document.currentScript.src).searchParams.get('served');
   // not [contenteditable="false"]: the Fahrplan sheet keeps the focus while it is only read, with exactly that -
   // and waited for ever as if typed in (Doc, 29.09.2026: "wenn dieses Panel auf ist, kommt nichts")
   const TYPING = 'input:not([type]),input[type=text],input[type=search],input[type=number],input[type=password],'
@@ -141,7 +146,7 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
         // A page that loads more scripts later watches more files than a moment ago - that is a longer list, not a
         // change on disk. Taking it for one would reload, and after the reload again: a loop. So: take the new
         // ground and wait for a REAL change.
-        if (first === null) { first = j.stamp; firstRefs = now; return; }
+        if (first === null) { first = served && j.stamp > served && j.stamp <= j.now ? served : j.stamp; firstRefs = now; return; }
         if (now !== firstRefs) {
           // ... but first ask with the OLD list whether something already changed meanwhile - otherwise the new
           // ground swallows it (27.09.2026: vorrechnen loaded the QR library on a tap, and the edit made just
@@ -184,5 +189,5 @@ def handle(path):
         q = parse_qs(url.query)
         page = q.get("page", ["/"])[0]
         refs = [r for r in q.get("refs", [""])[0].split(",") if r]
-        return 200, "application/json", json.dumps({"stamp": stamp(page, refs)}).encode("utf-8")
+        return 200, "application/json", json.dumps({"stamp": stamp(page, refs), "now": str(time.time_ns())}).encode("utf-8")   # now: a file dated in the future must not reload for ever
     return 404, "application/json", b'{"error": "unknown"}'
