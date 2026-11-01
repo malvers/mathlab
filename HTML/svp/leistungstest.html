@@ -280,6 +280,8 @@
         .lt-tile:hover { border-color: var(--muted); }
         .lt-tile.sel { box-shadow: 0 0 0 2px rgba(120, 160, 220, 0.7); }
         .lt-tile .tl-name { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* big enough to read out across the room */
+        .lt-tile .tl-code { font-family: Orbitron, system-ui, sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.1em; line-height: 1.2; }
         .lt-tile .tl-sub { font-family: Orbitron, system-ui, sans-serif; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--muted);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .lt-tile .tl-main { font-family: Orbitron, system-ui, sans-serif; font-size: 1.2rem; margin-top: 6px; min-height: 1.5em; white-space: nowrap; }
@@ -408,6 +410,16 @@
             body.print-list .lt-slipcard { display: none !important; }
             /* the warning always prints on the list sheet, folded away or not */
             body.print-list .lt-warn, body.print-list .lt-warn[hidden] { display: block; }
+            /* plan B sheet: name and code to read out, plus the test address for whoever has no slip */
+            body.print-list .lt-mc, body.print-list .lt-tiles, body.print-list .lt-detail { display: none !important; }
+            body.print-list .lt-scroll { display: block !important; overflow: visible; }
+            body.print-list .lt-tab th:nth-child(2), body.print-list .lt-tab td:nth-child(2),
+            body.print-list .lt-tab th:nth-child(n+4), body.print-list .lt-tab td:nth-child(n+4) { display: none; }
+            body.print-list .lt-tab { width: 100%; }
+            body.print-list .lt-tab td { color: #000; font-size: 12.5pt; padding: 1.6mm 3mm; }
+            body.print-list .lt-tab td.code { font-family: Orbitron, system-ui, sans-serif; font-size: 13.5pt; letter-spacing: 0.08em; }
+            body.print-list .lt-listqr, body.print-list .lt-listqr[hidden] { display: flex; align-items: center; gap: 6mm; margin: 0 0 4mm; font-size: 10.5pt; color: #000; }
+            body.print-list .lt-listqr svg { width: 26mm; height: 26mm; flex: none; }
 
             body.print-slips .lt-slips {
                 grid-template-columns: 1fr 1fr;
@@ -499,6 +511,7 @@
                         <option value="../infotest9.html?klasse=9b">Informatik &middot; 9b</option>
                         <option value="../infotest9-leistungstest-9a.html?klasse=9a">Informatik &middot; 9a &middot; Leistungstest 1</option>
                         <option value="../infotest9-leistungstest-9b.html?klasse=9b">Informatik &middot; 9b &middot; Leistungstest 1</option>
+                        <option value="../infotest-ki-fog252b.html?klasse=FOG-FOW25-2">Informatik &middot; FOG25-2 + FOW25-2 &middot; Klassenarbeit KI, Online-Fassung 02.11.</option>
                         <option value="../infotest-ki-fog252.html?klasse=FOG25-2">Informatik &middot; FOG25-2 + FOW25-2 &middot; Leistungstest KI</option>
                         <option value="../infotest-ki-bgy26.html?klasse=BGY26">Informatik &middot; BGY26-1 + 2 &middot; Leistungstest KI</option>
                         <option value="../infotest-ki-fos251.html?klasse=FOS25-1">Informatik &middot; FOS25-1 &middot; Leistungstest KI</option>
@@ -527,6 +540,7 @@
 
         <section class="lt-card lt-listcard" id="ltListCard" hidden>
             <div class="lt-title">Zuordnungsliste &mdash; nur f&uuml;r dich</div>
+            <div class="lt-listqr" id="ltListQr" hidden></div>
             <div class="lt-mc" id="ltMc" hidden>
                 <span class="lt-mc-title">Mission Control</span>
                 <span class="lt-mc-view" role="group" aria-label="Ansicht">
@@ -806,7 +820,8 @@
                 elTiles.innerHTML = entries.map(function (e) {
                     return '<button type="button" class="lt-tile none" data-code="' + esc(e.code) + '">' +
                         '<span class="tl-name">' + (e.name ? esc(e.name) : esc(e.alias)) + '</span>' +
-                        '<span class="tl-sub">' + (e.name ? esc(e.alias) + ' \u00b7 ' : '') + esc(e.code) + '</span>' +
+                        (e.name ? '<span class="tl-sub">' + esc(e.alias) + '</span>' : '') +
+                        '<span class="tl-code">' + esc(e.code) + '</span>' +
                         '<span class="tl-main">\u2014</span><span class="tl-state"></span>' +
                         '<span class="tl-bar"><i></i></span></button>';
                 }).join('');
@@ -817,6 +832,11 @@
                 watchControl();
 
                 const url = testUrl();
+                /* the list sheet carries the test address without a code: without ?klasse a
+                   submission would land in another pool, past Mission Control */
+                const addr = absoluteUrl(url, '').replace(/&code$/, '');
+                document.getElementById('ltListQr').innerHTML = qrSvg(addr) + '<div><b>Ohne Zettel:</b> QR scannen oder ' +
+                    esc(addr.replace('https://www.', '')) + ' eingeben, dann den Code aus dieser Liste oben im Test eintragen.</div>';
                 elSlips.innerHTML = '';
                 entries.forEach(function (e) {
                     const slip = document.createElement('div');
