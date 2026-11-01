@@ -145,6 +145,8 @@
                 const row = el('div', 'd-loes'); row.appendChild(el('span', 'd-loes-no', no ? no.textContent : '•')); from(row, t);
                 const body = el('div', 'd-loes-body'); body.innerHTML = sol.innerHTML; row.appendChild(body);
                 part.appendChild(row);
+                // a figure of a solution is a block of its own: a row may not break, and text with two figures would jump to the next page whole
+                body.querySelectorAll(':scope > .b-fig').forEach(f => part.appendChild(f));
             });
         });
         sec.querySelectorAll('.b-check').forEach(box => {
@@ -415,7 +417,7 @@
     // come from js/buch-fotos.js: vorn (foreword, how-to) and luecken (per chapter file and section, else the whole chapter).
     // Page 2, under the imprint, shows all the books ("Das klar wird, hier gibt es noch viel mehr").
     const BUECHER = ['mathegy5', 'mathegy6', 'mathegy7', 'mathegy8', 'mathegy9', 'mathegy10', 'mathegy11', 'mathegy12', 'mathegy11lk', 'mathegy12lk',
-        'mathe5', 'mathe6', 'mathe7', 'mathe8', 'mathe9', 'mathe10', 'mathe11', 'mathe12', 'mathe13', 'mathe12lk', 'mathe13lk', 'mathefos11', 'mathefos12'];   // as in js/labs-config.js
+        'mathe5', 'mathe6', 'mathe7', 'mathe8', 'mathe9', 'mathe10', 'mathe11', 'mathe12', 'mathe13', 'mathe12lk', 'mathe13lk', 'pruefung', 'mathefos11', 'mathefos12'];   // as in js/labs-config.js
     function gapBox(area, cls, top, h) {
         const box = el('div', 'd-luecke ' + cls);
         box.style.top = top + 'px'; box.style.height = h + 'px';

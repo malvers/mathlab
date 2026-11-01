@@ -3,6 +3,7 @@
  * A chapter page is plain HTML; this file turns its markup into the book:
  *   section.b-sec[id][data-toc]          → entry in the chapter list (left) and the pill strip (narrow screens)
  *   .b-tasks > .b-task[data-lvl]         → numbered task with level mark, "Tipp" / "Lösung" buttons for .b-hint / .b-sol
+ *   .b-tasks[data-abc="3"]               → the same tasks as parts of task 3: numbered 3a, 3b, ...
  *   .b-check > .b-q[data-ans] / [data-mc]→ self-check: answer field (fraction, decimal comma or percent) or choice
  *   a.b-lab[data-lab]                    → lab card with the lab's own icon from js/labs-icons.js (without: the book icon)
  *   [data-widget="name"]                 → interactive widget registered with Buch.widget(name, init)
@@ -160,6 +161,8 @@
     function buildTasks(root) {
         root.querySelectorAll('.b-tasks').forEach(list => {
             let no = parseInt(list.dataset.start || '1', 10);
+            // a task with parts (training book, data-abc="3"): the parts count 3a, 3b, ... - also in the print appendix
+            const abc = list.dataset.abc;
             list.querySelectorAll(':scope > .b-task').forEach(task => {
                 const q = task.querySelector(':scope > .b-task-q');
                 const hint = task.querySelector(':scope > .b-hint');
@@ -167,7 +170,7 @@
                 const head = document.createElement('div');
                 head.className = 'b-task-head';
                 const num = document.createElement('div');
-                num.className = 'b-task-no'; num.textContent = no++;
+                num.className = 'b-task-no'; num.textContent = abc ? abc + String.fromCharCode(96 + no++) : no++;
                 head.appendChild(num);
                 const lvl = document.createElement('span');
                 lvl.className = 'b-lvl'; lvl.dataset.lvl = task.dataset.lvl || '1';

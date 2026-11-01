@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de" data-fs-force="light" data-fs-nobutton>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prüfungstraining Mathematik · Druckausgabe | Doc Alvers Mathe-Labor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <link rel="stylesheet" href="../../js/buch-titel.css" data-fs-skip>
+    <link rel="stylesheet" href="../../js/buch-druck.css" data-fs-skip>
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book b-print">
+
+<div class="d-bar">
+    <span class="b-logo" aria-hidden="true"></span>
+    <b>DRUCKAUSGABE</b>
+    <span id="d-status">Wird vorbereitet …</span>
+    <button type="button" class="b-btn b-go" id="d-print">Drucken / als PDF speichern</button>
+</div>
+
+<div id="d-book">
+    <section class="d-cover">
+        <div class="b-titel b-titel-pruefung">
+            <div class="b-titel-art" data-widget="titelbildpruefung"></div>
+            <div class="b-titel-top"><span class="b-logo" aria-hidden="true"></span><span>DOC ALVERS MATHE-LABOR</span></div>
+            <div class="b-titel-main">
+                <p class="b-titel-kicker">INTERAKTIVES ÜBUNGSBUCH · DRUCKAUSGABE</p>
+                <h1>Mathematik</h1>
+                <p class="b-titel-sub">Prüfungstraining<br><b>Abitur · BLF</b></p>
+            </div>
+            <div class="b-titel-foot"><span>SACHSEN</span><span>SCHULJAHR 2026/27</span></div>
+        </div>
+    </section>
+
+    <section class="d-front">
+        <h1>So arbeitest du mit diesem Buch</h1>
+        <div class="b-text">
+            <p>Dieses Buch gibt es zweimal: als Online-Buch, in dem du Graphen verschieben und Ergebnisse eintippen kannst, und als Druckausgabe in deiner Hand.
+                Jedes Kapitel beginnt mit einem <b>QR-Code</b>, der direkt zu seiner interaktiven Fassung führt. Die Grafiken in diesem Heft zeigen die interaktiven Elemente in ihrem Anfangszustand.</p>
+            <p>Jedes Kapitel hat denselben Aufbau: <b>Auftakt</b> mit dem, was geprüft wird, und einem Check-in, <b>Werkzeugkasten</b> mit Merkkasten und Widget,
+                <b>drei Aufgaben</b> im Prüfungsformat, ein <b>Rückblick</b> mit der Idee und der Falle jeder Aufgabe und ein <b>Test</b> mit neuen Zahlen.</p>
+            <p>Die Aufgaben folgen den Anforderungsbereichen:
+                <span class="b-lvl" data-lvl="1" style="display:inline-block;vertical-align:-1px"></span> AFB I,
+                <span class="b-lvl" data-lvl="2" style="display:inline-block;vertical-align:-1px"></span> AFB II,
+                <span class="b-lvl" data-lvl="3" style="display:inline-block;vertical-align:-1px"></span> AFB III.
+                Die Lösungen aller Aufgaben und Selbsttests stehen im Anhang. Die Aufgaben stehen im Ton der Prüfung, also mit „Berechnen Sie“.</p>
+            <p>Was in einem orangen <b>Merkkasten</b> steht, musst du in der Prüfung abrufen können. Alles andere hilft dir dabei, es zu verstehen.</p>
+        </div>
+    </section>
+</div>
+
+<div id="d-pages"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="../../svp/qrcode.min.js"></script>
+<script src="../../js/labs-icons.js"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch.js"></script>
+__SCRIPTS__
+<script>window.PagedConfig = { auto: false };</script>
+<script src="https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.polyfill.min.js"></script>
+<script src="../../js/buch-druck.js"></script>
+<script>
+    // the cover art is a widget outside the chapters: draw it now
+    Buch.render(document.querySelector('.d-cover'), { print: true });
+</script>
+</body>
+</html>

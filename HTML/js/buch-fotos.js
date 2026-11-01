@@ -457,6 +457,31 @@ window.BUCH_FOTOS = {
             alt: { de: 'Ein springender Ball, 25-mal pro Sekunde fotografiert: Jeder Sprung ist eine Parabel', en: 'A bouncing ball, photographed 25 times a second: every bounce is a parabola', es: 'Una pelota que bota, fotografiada 25 veces por segundo: cada bote es una parábola', it: 'Una palla che rimbalza, fotografata 25 volte al secondo: ogni rimbalzo è una parabola', fr: 'Une balle qui rebondit, photographiée 25 fois par seconde : chaque rebond est une parabole' } }
     },
     books: {
+        // the training book (01.11.2026): only photos with a real link to their task, in the task's own opening text
+        pruefung: {
+            'abi-ueberblick.html': [{ foto: 'geodreieck', at: '#aufbau .b-box .b-text', put: 'in', w: 34 }],
+            'abi-analysis.html': [{ foto: 'kaffee', at: '#a3 > .b-text', put: 'in', w: 28 }],
+            'abi-analysis-lk.html': [{ foto: 'stimmgabel-kurven', at: '#a2 > .b-text', put: 'in', w: 32 }],
+            'abi-integral.html': [{ foto: 'solardach', at: '#a3 > .b-text', put: 'in', w: 32 }],
+            'abi-extremwert.html': [{ foto: 'konservendose', at: '#a2 > .b-text', put: 'in', w: 26 }],
+            'abi-modellieren.html': [{ foto: 'achterbahn', at: '#a2 > .b-text', put: 'in', w: 32 }],
+            'abi-geometrie.html': [{ foto: 'baumschatten', at: '#a3 > .b-text', put: 'in', w: 30 }],
+            'abi-geometrie-lk.html': [{ foto: 'giebeldach', at: '#a1 > .b-text', put: 'in', w: 28 }],
+            'abi-matrizen.html': [{ foto: 'abfuellanlage', at: '#a1 > .b-text', put: 'in', w: 28 }],
+            'abi-leontief.html': [{ foto: 'zahnraeder', at: '#a1 > .b-text', put: 'in', w: 28 }],
+            'abi-stochastik.html': [{ foto: 'bingokugeln', at: '#a2 > .b-text', put: 'in', w: 28 }],
+            'abi-erwartungswert.html': [{ foto: 'murmeln', at: '#a1 > .b-text', put: 'in', w: 26 }, { foto: 'gluecksrad-kind', at: '#a2 > .b-text', put: 'in', w: 30 }],
+            'abi-simulation.html': [{ foto: 'pavillon', at: '#a2 > .b-text', put: 'in', w: 30 }, { foto: 'karton', at: '#a3 > .b-text', put: 'in', w: 24 }],
+            'blf-ueberblick.html': [{ foto: 'stoppuhr', at: '#aufbau .b-box .b-text', put: 'in', w: 30 }],
+            'blf-teila.html': [{ foto: 'gluecksrad-kind', at: '#a3 > .b-text', put: 'in', w: 30 }],
+            'blf-teila2.html': [{ foto: 'zahlenschloss', at: '#a1 > .b-text', put: 'in', w: 28 }],
+            'blf-funktionen.html': [{ foto: 'wasserbogen', at: '#a3 > .b-text', put: 'in', w: 32 }],
+            'blf-wachstum.html': [{ foto: 'riesenrad-wien', at: '#a2 > .b-text', put: 'in', w: 30 }, { foto: 'tee', at: '#a3 > .b-text', put: 'in', w: 26 }],
+            'blf-trigonometrie.html': [{ foto: 'vermessungspfeiler', at: '#a2 > .b-text', put: 'in', w: 28 }, { foto: 'fernsehturm', at: '#a3 > .b-text', put: 'in', w: 26 }],
+            'blf-koerper.html': [{ foto: 'keimlinge', at: '#a1 > .b-text', put: 'in', w: 28 }, { foto: 'louvre-pyramide', at: '#a2 > .b-text', put: 'in', w: 32 }],
+            'blf-stochastik.html': [{ foto: 'fahrraeder-schule', at: '#a1 > .b-text', put: 'in', w: 30 }, { foto: 'zwei-rote-wuerfel', at: '#a3 > .b-text', put: 'in', w: 26 }],
+            'blf-simulation.html': [{ foto: 'rutsche', at: '#a3 > .b-text', put: 'in', w: 26 }]
+        },
         mathe11: {
             'lb1.html': [
                 { foto: 'wuerfel-spieltisch', at: '#auftakt .b-hero', put: 'after', wide: true },
@@ -1479,6 +1504,31 @@ window.BUCH_FOTOS = {
     },
     // white space in print: see the head of this file (js/buch-druck.js fillGaps)
     luecken: {
+        // the training book (01.11.2026): the people behind each topic for the white space at a page foot
+        pruefung: {
+            'abi-teila.html': { kapitel: ['taschenrechner'] },
+            'abi-analysis.html': { kapitel: ['newton'] },
+            'abi-analysis-lk.html': { kapitel: ['euler'] },
+            'abi-schar.html': { kapitel: ['leibniz'] },
+            'abi-integral.html': { kapitel: ['archimedes-fetti'] },
+            'abi-extremwert.html': { kapitel: ['dido-karthago'] },
+            'abi-modellieren.html': { kapitel: ['muengstener-bruecke'] },
+            'abi-wachstum.html': { kapitel: ['napier-logarithmen'] },
+            'abi-geometrie.html': { kapitel: ['descartes'] },
+            'abi-geometrie-lk.html': { kapitel: ['grassmann-ausdehnungslehre'] },
+            'abi-matrizen.html': { kapitel: ['cayley'] },
+            'abi-leontief.html': { kapitel: ['autofabrik'] },
+            'abi-stochastik.html': { kapitel: ['jakob-bernoulli'] },
+            'abi-erwartungswert.html': { kapitel: ['pascal'] },
+            'abi-stochastik-lk.html': { kapitel: ['galtonbrett'] },
+            'blf-teila.html': { kapitel: ['recorde-gleichheitszeichen'] },
+            'blf-teila2.html': { kapitel: ['euklid-papyrus'] },
+            'blf-funktionen.html': { kapitel: ['gateway-arch'] },
+            'blf-wachstum.html': { kapitel: ['sonnenblume'] },
+            'blf-trigonometrie.html': { kapitel: ['eratosthenes'] },
+            'blf-koerper.html': { kapitel: ['gizeh'] },
+            'blf-stochastik.html': { kapitel: ['nightingale-rosen'] }
+        },
         mathe11: {
             'lb2.html': { le3: [['leibniz-rechenmaschine', 'babbage-differenzmaschine']], kapitel: ['al-khwarizmi'] },
             'lb3-3.html': { le3: ['springender-ball'] },

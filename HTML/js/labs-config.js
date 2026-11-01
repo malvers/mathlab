@@ -98,6 +98,18 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-pruefung",
+        "href": "buch/pruefung/index.html",
+        "title": "Prüfungstraining Abitur und BLF",
+        "description": "Das interaktive Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium und Besondere Leistungsfeststellung in Klasse 10 am Gymnasium. Sechsundzwanzig Kapitel mit 72 eigenen Aufgaben im Prüfungsformat – Teil A ohne Hilfsmittel, Analysis, Geometrie, Lineare Algebra, Stochastik, Trigonometrie, Körper – dazu Lösungswege, die typische Falle jeder Aufgabe, Selbsttests mit neuen Zahlen und zwei Generalproben mit Uhr. Ohne Anmeldung.",
+        "tagline": "Buch / Prüfungstraining / 26 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-pruefung"],
+        "category": "buecher funktionen stochastik geometrie oberstufe",
+        "school": "bgy",
+        "keywords": "buch buecher uebungsbuch prüfungstraining pruefungstraining pruefung abitur abiturvorbereitung abi blf besondere leistungsfeststellung klasse 10 klasse 13 berufliches gymnasium bgy gymnasium sachsen teil a ohne hilfsmittel ankreuzen pflichtaufgabe analysis funktionenschar integral extremwert steckbrief wachstum geometrie schattenwurf lineare algebra leontief stochastik binomialverteilung hypothesentest erwartungswert trigonometrie koerper generalprobe simulation",
+        "color": "gold"
+    },
+    {
         "id": "lehrbuch-mathefos11",
         "href": "buch/mathefos11/index.html",
         "title": "Mathematik FOS 11",

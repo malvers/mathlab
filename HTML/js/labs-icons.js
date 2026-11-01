@@ -169,6 +169,8 @@ const LAB_ICONS = {
                 style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
+    "lehrbuch-pruefung": `<img src="resources/og/buch-pruefung-cover.jpg" alt="" loading="lazy" decoding="async"
+            style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">`,
     "lehrbuch-mathefos11": `<span style="display: flex; gap: 8px; align-items: center;">
         <img src="resources/og/buch-mathefos11-cover.jpg" alt="" loading="lazy" decoding="async"
             style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">

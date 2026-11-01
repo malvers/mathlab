@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 123 labs, 2157 terms, 2026-10-29
+ * 124 labs, 2185 terms, 2026-11-01
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -85,6 +85,7 @@ const LABS_TERMS = {
     "lehrbuch-mathegy7": ["Änderung um", "Daten darstellen", "Dichte", "Ein Mathebuch, das mitrechnet", "Falten", "Gleichungen und Formeln", "Höhe einer Sonnenblume, jede Woche gemessen", "Klassensprecherwahl: Stimmen", "Konstruieren und Problemlösen", "Kreis und Gerade, Umkreis und Inkreis", "Mathematik", "Mathematik · Gymnasium 7", "Oberfläche, Volumen und Masse", "Platonische Körper", "Prismen und Pyramiden darstellen", "Prozentrechnung", "Pyramide", "Quader", "Quadrate abschneiden", "Rationale Zahlen", "Rechnen mit rationalen Zahlen", "Rechteck", "Sätze am Kreis", "Umfang", "Zusammenschieben"],
     "lehrbuch-mathegy8": ["Ähnlichkeit", "Binomische Formeln und Gleichungen", "Ein Mathebuch, das mitspielt", "Funktionen und ihre Eigenschaften", "Heuristische Strategien", "Lineare Funktionen", "Lineare Gleichungssysteme", "Mathematik", "Mathematik · Gymnasium 8", "Mehrstufige Zufallsversuche und Zählen", "Quadrate abschneiden", "Simulation mit Zufallszahlen", "Sonnenhöhe", "Variablen und Terme", "Zentrische Streckung", "Zufallsversuche und Wahrscheinlichkeit"],
     "lehrbuch-mathegy9": ["Daten auswerten", "Der goldene Schnitt", "Die Satzgruppe des Pythagoras", "Ein Mathebuch, das mitrechnet", "Kreis, Zylinder und Kugel", "Mathematik", "Mathematik · Gymnasium 9", "Mathematik und moderne Rechentechnik", "Parameter und quadratische Funktionen", "Potenzen und Wurzeln", "Potenzfunktionen", "Pyramide und Kreiskegel", "Quadrate abschneiden", "Quadratische Gleichungen und Extremwerte", "Trigonometrie im rechtwinkligen Dreieck"],
+    "lehrbuch-pruefung": ["Analysis", "Analysis im Leistungskurs", "Analytische Geometrie", "Daten und Zufall", "Erwartungswert und faire Spiele", "Extremwertaufgaben", "Funktionen", "Funktionenscharen", "Generalprobe Teil B", "Geometrie im Leistungskurs", "Integralrechnung", "Körper und Flächen", "Leontief-Modell", "Lineare Algebra", "Mathematik", "Modellieren", "Prüfungstraining Mathematik · Abitur und BLF", "So ist das Abitur gebaut", "So ist die BLF gebaut", "Stochastik", "Stochastik im Leistungskurs", "Teil A, Satz 1", "Teil A, Satz 2", "Teil A: ohne Hilfsmittel", "Trigonometrie", "Üben wie in der Prüfung", "Wachstum und periodische Vorgänge", "Wachstum und Zerfall"],
     "lissajous": ["Amplitude A", "Amplitude B", "Kurvenfarbe (Hue)", "LISSAJOUS · PARAMETRISCHE KURVEN", "Pfad-Umfang (× Perioden)", "Phase δ (Grad)", "SIMULATION", "ωₓ (Kreisfrequenz)", "ωᵧ (Kreisfrequenz)"],
     "litchi3d": ["Form-Faktor (Y)", "Frucht-Reife", "SDF KONTROLLE", "Stachel-Intensität"],
     "logikspiel": ["Antwort", "BESTÄTIGEN", "HILFE ANFORDERN", "HILFE-PROTOKOLL", "LEVEL", "MISSIONS-STATUS", "MUL (X)", "NÄCHSTES PROTOKOLL", "PROTOKOLL GELÖST!", "PROTOKOLL NEUSTART", "PROTOKOLL-AUSWAHL", "RECHEN-MODUS", "Zahlen-Puzzle", "ZEIT", "ZÜGE"],
