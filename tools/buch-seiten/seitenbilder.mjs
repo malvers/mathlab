@@ -8,10 +8,12 @@
  *     node tools/buch-seiten/seitenbilder.mjs --alle                   every book whose pictures are out of date
  *     --basis http://localhost:8765   render another site than https://docalvers.de (a test: the pictures then show that state)
  *     --nur-lokal                     no upload, the files stay in the temp folder
- *     --letter | --a4                 the other page format (druck.html?format=…) into buch/seiten/<buch>-letter|-a4/; a book's
+ *     --parallel N                    set N books at a time (default 3: the M3 has four fast cores, one stays for the Mac)
+ *     --letter | --a4                the other page format (druck.html?format=…) into buch/seiten/<buch>-letter|-a4/; a book's
  *                                     own format (kapitel.js format, default A4) goes into buch/seiten/<buch>/ as always
  *
- * In the R2 bucket "media" (as the book photos, tools/media_publish.mjs), folder buch/seiten/<buch>/:
+ * In the R2 bucket "media" (as the book photos, tools/media_publish.mjs), folder buch/seiten/<buch>/, uploaded with a key
+ * for that bucket alone from the keychain (see upload below):
  *   seiten.json   page size, fingerprint, sprite layout, and per page the jump targets (data-ziel) of its blocks
  *   s.webp        all pages small (200 px wide) in one sprite: the grid at its normal size, one request
  *   l-<k>.webp    nine pages at a time at full size (794 px), 3 × 3: loaded only when + makes the tiles bigger
@@ -26,8 +28,8 @@
  * sets the pages itself, as before.
  */
 import { chromium } from '../../videopipeline/node_modules/playwright/index.mjs';
-import { execFileSync, spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { createHash, createHmac } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -49,7 +51,8 @@ const args = process.argv.slice(2);
 const opt = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
 const BASE = (opt('--basis') || 'https://docalvers.de').replace(/\/$/, '');
 const LIVE = BASE === 'https://docalvers.de', LOCAL = args.includes('--nur-lokal');
-const named = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--basis');
+const JOBS = Math.max(1, +opt('--parallel') || 3);
+const named = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--basis' && args[i - 1] !== '--parallel');
 
 // every book with a print edition
 function books() {
@@ -166,7 +169,7 @@ async function render(browser, book, v, out) {
             const png = (await sheets.nth(i).screenshot({ type: 'png', animations: 'disabled', scale: 'css' })).toString('base64');
             const big = await comp.evaluate(([p, i]) => window.put(p, i), [png, i]);
             if (big) writeFileSync(path.join(out, 'l-' + Math.floor(i / PER) + '.webp'), Buffer.from(big, 'base64'));
-            if (i % 20 === 19) process.stdout.write('  ' + (i + 1) + '/' + n + '\r');
+            if (JOBS === 1 && i % 20 === 19) process.stdout.write('  ' + (i + 1) + '/' + n + '\r');   // books set side by side would mix their counts
         }
         writeFileSync(path.join(out, 's.webp'), Buffer.from(await comp.evaluate(() => window.small()), 'base64'));
         // the PDF from the same pages, as tools/kdp/kdp.mjs does it (with the cover: readers get the whole book)
@@ -188,36 +191,70 @@ async function render(browser, book, v, out) {
 // the name a saved PDF gets (content-disposition): plain ASCII, accents to their letters - "Mathématiques 11" → "Mathematiques 11"
 const dateiname = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').replace(/[^\w .-]/g, '').trim();
 
-// ---------- upload: wrangler (pinned as in tools/media_publish.mjs), a few at a time, seiten.json last ----------
-// three tries as in fetchRetry: one PDF of the 27.10.2026 run got "401: Unauthorized" while the uploads around it went
-// through - wrangler renewing its login while six uploads run at once
-async function put(file, key, type, cache, more = []) {
+// ---------- upload: R2's S3 interface with a key for the bucket "media" alone, a few at a time, seiten.json last ----------
+// Until 02.11.2026 wrangler: a process and a login check per file, 22 per book. Six at a time ran into Cloudflare's rate
+// limit (10429) and the login died mid-run (01.11.2026); even two at a time took 2.5 h for 116 books (Doc: "intelligentere
+// Lösung"). The key: Cloudflare → R2 → API tokens → Object Read & Write, bucket media only. Into the keychain, never the repo:
+//     security add-generic-password -U -s r2-media -a key-id -w
+//     security add-generic-password -U -s r2-media -a secret -w
+//     security add-generic-password -U -s r2-media -a account -w        (the account ID, as wrangler whoami shows it)
+// -w at the end asks for the value, so it lands in no shell history.
+let R2 = null;
+function r2() {
+    if (R2) return R2;
+    const read = a => { try { return execFileSync('security', ['find-generic-password', '-s', 'r2-media', '-a', a, '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch (_) { return ''; } };
+    const [id, secret, account] = ['key-id', 'secret', 'account'].map(read);
+    if (!id || !secret || !account) throw new Error('kein R2-Schlüssel im Schlüsselbund (security … -s r2-media), siehe upload in seitenbilder.mjs');
+    return (R2 = { id, secret, host: account + '.r2.cloudflarestorage.com' });
+}
+// one PUT, signed with AWS Signature V4 as R2 wants it (region "auto"); the body itself is not hashed into the signature
+// (UNSIGNED-PAYLOAD), the read back in upload checks it
+async function putOnce(file, key, type, cache, disposition) {
+    const { id, secret, host } = r2();
+    const now = new Date().toISOString().replace(/[-:]|\.\d+/g, ''), day = now.slice(0, 8);     // 20261102T180500Z
+    const url = '/media/' + key.split('/').map(encodeURIComponent).join('/');
+    const h = { 'cache-control': cache, 'content-type': type, host, 'x-amz-content-sha256': 'UNSIGNED-PAYLOAD', 'x-amz-date': now };
+    if (disposition) h['content-disposition'] = disposition;
+    const names = Object.keys(h).sort(), scope = day + '/auto/s3/aws4_request';
+    const canon = ['PUT', url, '', ...names.map(n => n + ':' + h[n]), '', names.join(';'), 'UNSIGNED-PAYLOAD'].join('\n');
+    const hmac = (k, s) => createHmac('sha256', k).update(s).digest();
+    const sign = hmac(hmac(hmac(hmac('AWS4' + secret, day), 'auto'), 's3'), 'aws4_request');
+    const sig = createHmac('sha256', sign).update(['AWS4-HMAC-SHA256', now, scope, createHash('sha256').update(canon).digest('hex')].join('\n')).digest('hex');
+    delete h.host;                                                      // fetch sets it itself
+    h.authorization = 'AWS4-HMAC-SHA256 Credential=' + id + '/' + scope + ', SignedHeaders=' + names.join(';') + ', Signature=' + sig;
+    const r = await fetch('https://' + host + url, { method: 'PUT', headers: h, body: readFileSync(file) });
+    if (!r.ok) throw new Error(key + ': HTTP ' + r.status + ' ' + (await r.text()).slice(0, 200));
+}
+// three tries as in fetchRetry
+async function put(file, key, type, cache, disposition) {
     for (let k = 1; ; k++) {
-        try { return await putOnce(file, key, type, cache, more); }
+        try { return await putOnce(file, key, type, cache, disposition); }
         catch (e) { if (k === 3) throw e; await new Promise(r => setTimeout(r, 3000 * k)); }
     }
 }
-function putOnce(file, key, type, cache, more) {
-    return new Promise((done, fail) => {
-        const p = spawn('npx', ['--yes', 'wrangler@4.40.0', 'r2', 'object', 'put', 'media/' + key, '--file', file,
-            '--content-type', type, '--cache-control', cache, ...more, '--remote'], { stdio: ['ignore', 'pipe', 'pipe'] });
-        let log = '';
-        p.stdout.on('data', d => log += d); p.stderr.on('data', d => log += d);
-        p.on('close', code => code === 0 ? done() : fail(new Error(key + ': ' + log.trim().split('\n').slice(-3).join(' '))));
-    });
+// a picture whose bytes are already online stays: a new book changes only the page with the wall of covers, the other
+// pictures come out the same (R2's ETag of a single PUT is the MD5 of the file)
+async function same(file, key) {
+    try {
+        const r = await fetchRetry(MEDIA + key + '?t=' + Date.now(), { method: 'HEAD' });
+        return r.ok && r.headers.get('etag') === '"' + createHash('md5').update(readFileSync(file)).digest('hex') + '"';
+    } catch (_) { return false; }
 }
 async function upload(book, out, json) {
     // the PDF first: the largest file, it goes up while the pictures follow
     const files = [json.pdf.datei, ...readdirSync(out).filter(f => f.endsWith('.webp'))];
     // the pictures carry ?v=<fingerprint> in the overview (the PDF on the start page), so the browser may keep them for a year
     const queue = files.slice();
+    let kept = 0;
     await Promise.all(Array.from({ length: 6 }, async () => {
         for (let f; (f = queue.shift());) {
             if (f === json.pdf.datei) await put(path.join(out, f), KEY(book) + f, 'application/pdf', 'public, max-age=31536000, immutable',
-                ['--content-disposition', 'inline; filename="' + json.pdf.name + '"']);
+                'inline; filename="' + json.pdf.name + '"');
+            else if (await same(path.join(out, f), KEY(book) + f)) kept++;
             else await put(path.join(out, f), KEY(book) + f, 'image/webp', 'public, max-age=31536000, immutable');
         }
     }));
+    if (kept) console.log(book + ': ' + kept + ' von ' + (files.length - 1) + ' Bildern waren schon so online');
     // read back before seiten.json points to them
     for (const f of files) {
         const r = await fetchRetry(MEDIA + KEY(book) + f + '?v=' + json.v, { method: 'HEAD' });
@@ -252,10 +289,15 @@ if (todo) {
     console.log(todo.length ? 'veraltet: ' + todo.join(', ') : 'Alle ' + all.length + ' Bücher sind aktuell.');
 }
 
+if (!LOCAL && todo.length) try { r2(); } catch (e) { console.error(e.message); process.exit(1); }   // before hours of setting, not after
+
 const browser = await chromium.launch({ headless: true, args: ['--mute-audio'] });
 let failed = 0;
+const queue = todo.slice();
 try {
-    for (const book of todo) {
+    // several books at a time, each in its own tab: setting a book keeps about one core busy (measured 02.11.2026:
+    // 83 s a book, 28 of them Paged.js, 45 the screenshots)
+    await Promise.all(Array.from({ length: Math.min(JOBS, todo.length) }, async () => { for (let book; (book = queue.shift());) {
         const t0 = Date.now();
         // the fingerprint before the pages: a deploy during the run leaves the old one, and the next --alle comes back
         let v;
@@ -270,6 +312,6 @@ try {
                 Math.round((Date.now() - t0) / 1000) + ' s' + (LOCAL ? '  → ' + out : ''));
             if (!LOCAL) { await upload(book, out, json); console.log(book + ': online ' + MEDIA + KEY(book) + ' (' + Math.round((Date.now() - t0) / 1000) + ' s)'); }
         } catch (e) { failed++; console.error(book + ': ' + e.message); }
-    }
+    } }));
 } finally { await browser.close(); }
 process.exit(failed ? 1 : 0);
