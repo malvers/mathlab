@@ -25,7 +25,7 @@ struct DocBarMenu: Codable {
     var rank: Int?            // panel order; lower comes first, unranked tools follow
     var primary: String?      // item fired by clicking the app's own row
     var alert: Bool?          // turns the DocBar icon red while this tool needs to be seen
-    var here: Bool?           // turns the DocBar icon green while Doc sits at the Mac
+    var here: Bool?           // turns the D of the DocBar icon green while Doc sits at the Mac
     var toggle: Bool?         // shows an ON/OFF pill on the app's row; the row flips it
     var pid: Int32
     var launchPath: String    // used to start the app again when it is not running

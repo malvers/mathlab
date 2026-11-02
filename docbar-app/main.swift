@@ -15,6 +15,7 @@ private enum Style {
     static let icon = "d.circle"        // D as in Doc: letter drawn, ring only an outline
     static let iconFilled = "d.circle.fill" // reversed: white D punched out of a coloured disc
     static let hereGreen = NSColor(red: 121 / 255, green: 158 / 255, blue: 49 / 255, alpha: 1)
+    static let alertRed = NSColor(red: 176 / 255, green: 36 / 255, blue: 24 / 255, alpha: 1)
     static let font = NSFont.systemFont(ofSize: 13)
     static let nameFont = NSFont.systemFont(ofSize: 13, weight: .semibold)
     static let subFont = NSFont.systemFont(ofSize: 11)
@@ -183,7 +184,7 @@ final class PanelController: NSViewController {
             pill.wantsLayer = true
             // Red where the tool also raises its alert flag, so the pill says the same
             // thing as the red D in the menu bar; plain green for a harmless switch.
-            let onColor: NSColor = app.alert == true ? .systemRed : .systemGreen
+            let onColor: NSColor = app.alert == true ? Style.alertRed : .systemGreen
             pill.layer?.backgroundColor = (on ? onColor : NSColor.tertiaryLabelColor).cgColor
             pill.layer?.cornerRadius = 8
             pill.translatesAutoresizingMaskIntoConstraints = false
@@ -378,39 +379,60 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func isRunning(_ app: DocBarMenu) -> Bool { kill(app.pid, 0) == 0 || errno == EPERM }
 
-    /// Red icon whenever a running tool has raised its alert flag, green while Doc sits here.
+    /// Two states that read apart: the disc is red whenever a running tool has raised its
+    /// alert flag, the letter is green while Doc sits here.
     private func refreshIcon(_ apps: [DocBarMenu]) {
         guard let button = statusItem.button else { return }
         let alerting = apps.contains { $0.alert == true && isRunning($0) }
         let here = apps.contains { $0.here == true && isRunning($0) }
-        let filled = alerting || here
-        let base = NSImage(systemSymbolName: filled ? Style.iconFilled : Style.icon,
-                           accessibilityDescription: "DocBar")
         // Bigger than the system default: the D is the one icon of ours left up there.
         // The ring is drawn thin so it matches the fine frames of the neighbouring
         // status items (measured: their frame is a single point, semibold is 2.5).
-        let size = NSImage.SymbolConfiguration(pointSize: 20, weight: filled ? .semibold : .light)
-        // Grown by a point at the top, which pushes the glyph that far down in the bar.
-        func loweredByOne(_ image: NSImage?) -> NSImage? {
-            guard let image = image else { return nil }
-            let out = NSImage(size: NSSize(width: image.size.width, height: image.size.height + 1))
+        func symbol(_ name: String, _ weight: NSFont.Weight, _ colors: [NSColor]? = nil) -> NSImage? {
+            var config = NSImage.SymbolConfiguration(pointSize: 20, weight: weight)
+            if let colors = colors {
+                config = config.applying(NSImage.SymbolConfiguration(paletteColors: colors))
+            }
+            return NSImage(systemSymbolName: name, accessibilityDescription: "DocBar")?
+                .withSymbolConfiguration(config)
+        }
+        // Layers centred over each other, as their sizes differ by weight, then grown by a
+        // point at the top, which pushes the glyph that far down in the bar.
+        func loweredByOne(_ layers: [NSImage?]) -> NSImage? {
+            let sizes = layers.compactMap { $0?.size }
+            guard let width = sizes.map({ $0.width }).max(),
+                  let height = sizes.map({ $0.height }).max() else { return nil }
+            let out = NSImage(size: NSSize(width: width, height: height + 1))
             out.lockFocus()
-            image.draw(in: NSRect(origin: .zero, size: image.size))
+            for case let image? in layers {
+                image.draw(in: NSRect(x: (width - image.size.width) / 2, y: (height - image.size.height) / 2,
+                                      width: image.size.width, height: image.size.height))
+            }
             out.unlockFocus()
             return out
         }
 
-        if filled {
+        let layers: [NSImage?]
+        if alerting && here {
+            // Phi green on red is only 2.2:1, so this D is bolder than the white one. The disc
+            // has its own D filled in red, else the clear letter would let the bar show through.
+            layers = [symbol(Style.iconFilled, .semibold, [Style.alertRed, Style.alertRed]),
+                      symbol(Style.iconFilled, .bold, [Style.hereGreen, .clear])]
+        } else if alerting {
             // Palette instead of hierarchical: hierarchical punches the D out of the disc,
             // so the wallpaper shows through it instead of white.
-            let disc: NSColor = alerting ? .systemRed : Style.hereGreen
-            button.image = loweredByOne(base?.withSymbolConfiguration(
-                size.applying(NSImage.SymbolConfiguration(paletteColors: [.white, disc]))))
-            button.image?.isTemplate = false
+            layers = [symbol(Style.iconFilled, .semibold, [.white, Style.alertRed])]
+        } else if here {
+            // Colours rule out a template, so the ring takes its ink from the bar it sits in.
+            let bar = button.effectiveAppearance.bestMatch(from: [.aqua, .vibrantLight, .darkAqua, .vibrantDark])
+            let ink: NSColor = bar == .darkAqua || bar == .vibrantDark ? .white : .black
+            layers = [symbol(Style.icon, .light, [.clear, ink]),
+                      symbol(Style.icon, .semibold, [Style.hereGreen, .clear])]
         } else {
-            button.image = loweredByOne(base?.withSymbolConfiguration(size))
-            button.image?.isTemplate = true
+            layers = [symbol(Style.icon, .light)]
         }
+        button.image = loweredByOne(layers)
+        button.image?.isTemplate = !alerting && !here
     }
 
     /// Redraws the panel and resizes the popover to what the panel now needs.
