@@ -1569,6 +1569,28 @@
             window.open(page + '?kw=' + kw + svpGroupFor(l), '_blank', 'noopener');
         });
 
+        /* A click on an appointment's pill ticks "war da" (Doc, 02.11.2026). The local server keeps it
+           in plandaten/termine-status.json; when it cannot (docalvers.de, another host) the tick goes back. */
+        document.addEventListener('click', e => {
+            const pill = e.target.closest('.tt-termin-da');
+            if (!pill) return;
+            const t = TERMINE.find(x => SvpTimetable.terminKey(x) === pill.dataset.key);
+            if (!t) return;
+            const show = da => {
+                t.da = da;
+                pill.classList.toggle('da', da);
+                pill.setAttribute('aria-pressed', String(da));
+                pill.title = da ? 'war da' : 'war da? anklicken';
+            };
+            const da = !t.da;
+            show(da);
+            fetch('/__termine/da', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: pill.dataset.key, da }),
+            }).then(r => { if (!r.ok) throw new Error(r.status); })
+                .catch(() => show(!da));
+        });
+
         // The week containing today, or the next one the school year has.
         function weekForToday() {
             const now = new Date();
@@ -1747,10 +1769,16 @@
                 syncScopeOption();
                 showWeek(startWeek());
                 // appointments are optional: no file (e.g. on docalvers.de) = none
-                fetch('plandaten/termine.json?v=' + Date.now())
-                    .then(r => r.ok ? r.json() : { termine: [] })
-                    .then(j => { TERMINE = (j && j.termine) || []; if (DATA && TERMINE.length) render(DATA, SELECTED); })
-                    .catch(() => {});
+                const optional = (file, empty) => fetch('plandaten/' + file + '?v=' + Date.now())
+                    .then(r => r.ok ? r.json() : empty).catch(() => empty);
+                Promise.all([optional('termine.json', { termine: [] }), optional('termine-status.json', { da: {} })])
+                    .then(([j, s]) => {
+                        TERMINE = (j && j.termine) || [];
+                        // a person's appointment carries its "war da" tick, which makes its pill a button
+                        const da = (s && s.da) || {};
+                        for (const t of TERMINE) if (t.who) t.da = !!da[SvpTimetable.terminKey(t)];
+                        if (DATA && TERMINE.length) render(DATA, SELECTED);
+                    });
             })
             .catch(e => {
                 document.getElementById('grid').innerHTML =

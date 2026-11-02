@@ -279,8 +279,8 @@
 .tt-lesson.tt-termin {
     --hue: var(--phi);
     flex-wrap: nowrap;
-    gap: 5px;
-    padding: 1px 6px;
+    gap: 4px;
+    padding: 1px 5px;
     background: color-mix(in srgb, var(--hue) 16%, var(--card));
     font-size: 0.78rem;
     line-height: 1;
@@ -294,30 +294,71 @@
     font-weight: 600;
 }
 
+.tt-termin .tt-termin-who.tt-name {
+    display: flex;
+    gap: 0.28em;
+}
+
+/* short of room the first name gives way to "Ma…", the surname always stays (Doc, 02.11.2026) */
+.tt-termin .tt-fn {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tt-termin .tt-ln {
+    flex: 0 0 auto;
+}
+
+/* The title as a pill, cut like the test pills (.tt-pruef): a φ outline, filled with white
+   letters once "war da" is ticked (Doc, 02.11.2026). */
 .tt-termin .tt-termin-what {
     flex: 0 0 auto;
-    margin-left: auto;
+    margin: 0 0 0 auto;
+    padding: 0 5px;
+    border: 1px solid var(--hue);
+    border-radius: 999px;
+    background: transparent;
     font-family: Orbitron, sans-serif;
-    font-size: 0.62rem;
-    letter-spacing: 0.04em;
+    font-weight: 700;
+    font-size: 0.52rem;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
     color: var(--hue);
+}
+
+.tt-termin button.tt-termin-what { cursor: pointer; }
+
+.tt-termin .tt-termin-what.da {
+    background: var(--hue);
+    color: #fff;
 }
 
 @container (max-width: 150px) {
     .tt-termin .tt-termin-what { display: none; }
 }
 
-/* the grid's time axis tells the time; the phone list has none, so the tile says it */
+/* the start time on every tile - the axis alone was too far off to read it (Doc, 02.11.2026) */
 .tt-termin .tt-termin-time {
-    display: none;
     flex: 0 0 auto;
+    font-size: 0.7rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--hue);
 }
 
-@media (max-width: 720px) {
-    .tt-termin .tt-termin-time { display: inline; }
+/* A block without a person (IA) has its label on top, always - centred, it sat under the coaching
+   slots (Doc, 02.11.2026: "und immer oben"). The one that holds slots lies behind them and stays
+   there on hover: raised, it would cover the slots. */
+.tt-lesson.tt-termin.tt-block {
+    align-items: flex-start;
+    align-content: flex-start;
+    padding-top: 4px;
+}
+
+.tt-lesson.tt-termin.back:hover {
+    z-index: auto;
+    transform: none;
 }
 
 .tt-empty {

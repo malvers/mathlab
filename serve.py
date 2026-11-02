@@ -181,6 +181,26 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def termine_api(self):
+        """The "war da" ticks of stundenplan.html (tools/termine_status.py) - reloaded per call, no restart after a change."""
+        n = int(self.headers.get('Content-Length') or 0)
+        if n > 4096:
+            return self.send_error(413, 'too large')
+        data = self.rfile.read(n) if n else b''
+        try:
+            if TOOLS not in sys.path:
+                sys.path.insert(0, TOOLS)
+            import termine_status
+            status, reply = importlib.reload(termine_status).handle(self.command, self.path, self.headers, data)
+        except Exception as err:
+            status, reply = 500, {'error': 'serve.py: %s: %s' % (type(err).__name__, err)}
+        body = json.dumps(reply, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def local_caller(self):
         """Only our own pages may write here (audit 27.09.2026).
 
@@ -201,6 +221,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.deck_api()
         if self.path.startswith('/__proben/'):
             return self.proben_api()
+        if self.path.startswith('/__termine/'):
+            return self.termine_api()
         self.send_error(405, 'read-only server')
 
     def one_address(self):

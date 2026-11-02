@@ -101,9 +101,19 @@
         return out;
     }
 
+    const holds = (a, b) => toMin(a.startTime) <= toMin(b.startTime) && toMin(b.endTime) <= toMin(a.endTime);
+
     // Side-by-side placement for overlapping lessons within one day.
     function layoutColumns(items) {
-        const sorted = [...items].sort((x, y) => toMin(x.l.startTime) - toMin(y.l.startTime));
+        /* An own appointment that holds others (the IA block with the coaching slots in it) lies
+           behind them at full width instead of taking a column - side by side a 15-min slot was
+           100 px wide and lost its name (Doc, 02.11.2026). Only when nothing but appointments
+           overlap it, so it never hides under a lesson. */
+        const back = items.filter(it => it.l.termin
+            && items.some(o => o !== it && o.l.termin && holds(it.l, o.l))
+            && items.every(o => o === it || o.l.termin || !overlaps(o.l, it.l)));
+        for (const it of back) { it.back = true; it.col = 0; it.of = 1; }
+        const sorted = items.filter(it => !it.back).sort((x, y) => toMin(x.l.startTime) - toMin(y.l.startTime));
         const cols = [];
         for (const it of sorted) {
             let c = cols.findIndex(col => col.every(o => !overlaps(o.l, it.l)));
@@ -116,36 +126,71 @@
         for (const it of sorted) {
             const group = sorted.filter(o => overlaps(o.l, it.l) || o === it);
             it.of = Math.max(...group.map(o => o.col)) + 1;
+            it.over = back.some(o => overlaps(o.l, it.l));
         }
-        return sorted;
+        return back.concat(sorted);     // backdrops first, so the slots paint over them
     }
 
+    // One appointment per person and day - the "war da" tick survives a move to another time.
+    const terminKey = t => [t.date, t.title || '', t.who || ''].join('|');
+
     /* One own appointment (Coaching etc.) as a tile, placed like a lesson by layoutColumns.
-       { date, startTime, endTime, title, who } - stundenplan.html has the full name in who,
-       the public meinplan.html only what the publisher lets out (first names). Look: .tt-termin. */
+       { date, startTime, endTime, title, who, da } - stundenplan.html has the full name in who,
+       the public meinplan.html only what the publisher lets out (first names). Look: .tt-termin.
+       The title is a pill; where the page keeps "war da" ticks (da true/false, stundenplan.html)
+       it is a button, φ-filled once ticked (Doc, 02.11.2026). */
     function terminTile(it, y, scale) {
         const t = it.l, a = toMin(t.startTime), b = toMin(t.endTime);
         const el = document.createElement('div');
-        el.className = 'tt-lesson tt-termin';
+        el.className = 'tt-lesson tt-termin' + (t.who ? '' : ' tt-block') + (it.back ? ' back' : '');
         el.style.top = y(a) + 'px';
         el.style.height = Math.max(16, (b - a) * scale - 3) + 'px';
-        el.style.left = 'calc(' + (it.col * 100 / it.of) + '% + 3px)';
-        el.style.width = 'calc(' + (100 / it.of) + '% - 6px)';
-        const part = (cls, text) => {
-            const s = document.createElement('span');
+        /* a slot on a backdrop keeps clear of its edges, left and right (Doc, 02.11.2026: "rechts mehr
+           Luft"), and every person's slot is that narrow, on a backdrop or not ("außerhalb auch so schmal") */
+        const inset = it.over || t.who ? 10 : 0;
+        el.style.left = 'calc(' + (it.col * 100 / it.of) + '% + ' + (3 + inset) + 'px)';
+        el.style.width = 'calc(' + (100 / it.of) + '% - ' + (6 + 2 * inset) + 'px)';
+        const part = (cls, text, tag) => {
+            const s = document.createElement(tag || 'span');
             s.className = cls;
             s.textContent = text;
             el.appendChild(s);
+            return s;
         };
-        part('tt-termin-time', hhmm(t.startTime));      // shown on phones only
-        part('tt-termin-who', t.who || t.title || 'Termin');
-        if (t.who && t.title) part('tt-termin-what', t.title);
+        // a block (IA) says when it ends too - a person's slot is always 15 min and short of room (Doc, 02.11.2026)
+        part('tt-termin-time', hhmm(t.startTime) + (t.who ? '' : '–' + hhmm(t.endTime)));
+        const who =part('tt-termin-who', t.who ? '' : t.title || 'Termin');
+        if (t.who) {
+            // first name and surname apart: short of room the first name gives way, the surname stays
+            const cut = t.who.trim().lastIndexOf(' ');
+            const name = (cls, text) => {
+                const s = document.createElement('span');
+                s.className = cls;
+                s.textContent = text;
+                who.appendChild(s);
+            };
+            who.classList.add('tt-name');
+            if (cut > 0) name('tt-fn', t.who.trim().slice(0, cut));
+            name('tt-ln', t.who.trim().slice(cut + 1));
+        }
+        if (t.who && t.title) {
+            const tick = typeof t.da === 'boolean';
+            const pill = part('tt-termin-what', t.title, tick ? 'button' : 'span');
+            if (tick) {
+                pill.type = 'button';
+                pill.classList.add('tt-termin-da');
+                pill.classList.toggle('da', t.da);
+                pill.dataset.key = terminKey(t);
+                pill.setAttribute('aria-pressed', String(t.da));
+                pill.title = t.da ? 'war da' : 'war da? anklicken';
+            }
+        }
         el.title = [t.title, t.who, t.info, hhmm(t.startTime) + '–' + hhmm(t.endTime)].filter(Boolean).join(' · ');
         return el;
     }
 
     root.SvpTimetable = {
         PX_PER_MIN, toMin, hhmm, parseYmd, isBanner,
-        HUES, SUBJECT_HUE, hueOf, jahrgangOf, overlaps, mergeRuns, layoutColumns, terminTile,
+        HUES, SUBJECT_HUE, hueOf, jahrgangOf, overlaps, mergeRuns, layoutColumns, terminKey, terminTile,
     };
 })(window);
