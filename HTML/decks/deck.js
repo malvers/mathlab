@@ -388,6 +388,30 @@ const trommel = (function () {
   });
   return { laeuft: function () { return wartend.length > 0 || folge.length > 0 || Date.now() < bis; } };
 })();
+
+/* ————— A sound with a part (data-ton="file") ——————————————————————————————
+ * Doc, 02.11.2026, the closing slide: "noch den Sound einblenden, wenn docalvers.de unten kommt. Wo die alle so jubeln".
+ * The step plays its file when its click comes - only on one step forward, as the drum roll; turning back or leaving
+ * the slide stops it. The presenter window stays silent.
+ */
+(function () {
+  let lastSi = -1, lastStep = -1, audio = null;
+  const holen = src => { if (!audio || audio.dataset.src !== src) { audio = new Audio(src); audio.preload = 'auto'; audio.dataset.src = src; } return audio; };
+  painted.push(function () {
+    const vor = si === lastSi && step === lastStep + 1, gleich = si === lastSi && step === lastStep, zurueck = si !== lastSi || step < lastStep;
+    lastSi = si; lastStep = step;
+    if (gleich || PRESENTER) return;
+    if (audio && zurueck) audio.pause();
+    const teile = [...slides[si].querySelectorAll('.step[data-ton]')];
+    if (!teile.length) return;
+    if (!vor) { holen(teile[0].dataset.ton); return; }   // on the slide: loaded before its click
+    const e = teile.find(x => grp(x) === step - 1);
+    if (!e) return;
+    const a = holen(e.dataset.ton);
+    a.currentTime = 0;
+    a.play().catch(() => { });
+  });
+})();
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
@@ -1121,20 +1145,26 @@ const narr = (function () {
   let wait = 0;                                       // pending pause after a clip or before the next slide
   const holds = data.hold || [];
   let held = -1;                                      // slide where Solita waits for a click
+  let halt = false;                                   // paused by Space or p, even between two clips
   const big = document.createElement('button');
   big.type = 'button';
   big.className = 'play-big';
   const label = document.createElement('div');
   label.className = 'play-big-label';
   label.textContent = 'Solita erklärt';
+  const face = document.createElement('button');      // no <img>: the deck editor counts a slide's pictures against its file
+  face.type = 'button';
+  face.className = 'play-big play-face';
   const home = document.querySelector('.slide.title') || slides[0];   // title slide, in the orbit ring
-  home.appendChild(big);
+  home.appendChild(face);
   home.appendChild(label);
+  home.appendChild(big);
   btn.hidden = false;
   function show() {
     const icon = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (api.playing ? PAUSE : PLAY) + '</svg>';
     const t = api.playing ? 'Pause (p)' : held >= 0 ? 'Weiter mit Pfeiltaste (p)' : 'Solita erklärt (p)';
-    [btn, big].forEach(b => { b.innerHTML = icon; b.title = t; b.setAttribute('aria-label', t); });
+    [btn, big].forEach(b => { b.innerHTML = icon; });
+    [btn, big, face].forEach(b => { b.title = t; b.setAttribute('aria-label', t); });
   }
   function run() {
     if (!api.playing) return;
@@ -1153,9 +1183,53 @@ const narr = (function () {
     if (!String(data.slides[si][part] || '').trim()) { wait = setTimeout(function () { part++; run(); }, 1200); return; }
     aSlide = si;
     audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
-    audio.onended = function () { part++; wait = setTimeout(run, part < parts(si) ? 900 : 0); };
+    demo(si, audio, part);
+    const began = Date.now(), drawn = drawing(si);
+    audio.onended = function () { part++; wait = setTimeout(run, Math.max(part < parts(si) ? 900 : 0, drawn - (Date.now() - began))); };
     audio.onerror = function () { part++; run(); };   // a missing clip must not hang the talk
     audio.play().catch(function () { api.playing = false; show(); });
+  }
+  // she shows what she explains (Doc, 01.11.2026: "sie soll das Ding auch vorführen", "alle Tools"): narration "demo"
+  // {slide: [[ms, what], ...]}, ms = the place in her first clip, so a pause holds the demo too (Doc, 02.11.2026: "die scheint
+  // den Button nicht zu drücken"), what = a selector on the slide, or "lab:..." inside its iframe, "lab:space" for its key.
+  // A later clip of the slide has its own list under "slide.part" ("13.8": clip 8 of slide 13), its ms counted in that clip -
+  // a widget that comes with a later click (Doc, 02.11.2026: the DocPoint slide of mathe11-lehrbuch)
+  function demo(n, clip, k) {
+    const todo = ((data.demo || {})[k ? n + '.' + k : n] || []).slice();
+    clip.ontimeupdate = function () {
+      while (todo.length && clip.currentTime * 1000 >= todo[0][0]) {
+        const f = slides[n].querySelector('iframe'), what = todo.shift()[1];
+        if (what === 'lab:space') { if (f) f.contentWindow.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })); continue; }
+        // she shows a page, not only a button (Doc, 02.11.2026, the book on mathe11-lehrbuch: "mal runterscrollen,
+        // Inhaltsverzeichnis, dann eins aufmachen und die interaktiven Widgets zeigen"): "lab:reset" brings the frame back to
+        // its own page, "lab:scroll:sel" scrolls the frame (only the frame, not the deck) to sel, "lab:slide:v:sel" draws
+        // the slider sel to v, so the widget moves while she talks
+        if (what === 'lab:reset') { if (f && f.contentWindow.location.href !== new URL(f.getAttribute('src'), location.href).href) f.src = f.getAttribute('src'); continue; }
+        if (/^lab:scroll:/.test(what)) {
+          const w = f && f.contentWindow, el = w && w.document.querySelector(what.slice(11));
+          // below a page's fixed top bar (the book's), not under it
+          const bar = [...w.document.body.querySelectorAll('*')].find(e => /^(fixed|sticky)$/.test(w.getComputedStyle(e).position) && e.getBoundingClientRect().top <= 0 && e.offsetHeight < w.innerHeight / 3);
+          if (el) w.scrollTo({ top: el.getBoundingClientRect().top + w.scrollY - 12 - (bar ? bar.offsetHeight : 0), behavior: 'smooth' });
+          continue;
+        }
+        if (/^lab:slide:/.test(what)) {
+          const rest = what.slice(10), i = rest.indexOf(':'), to = +rest.slice(0, i), el = f && f.contentDocument.querySelector(rest.slice(i + 1));
+          if (el) { const from = +el.value, t0 = performance.now(); (function zug(t) { const q = Math.min(1, (t - t0) / 1600); el.value = from + (to - from) * q; el.dispatchEvent(new Event('input', { bubbles: true })); if (q < 1) requestAnimationFrame(zug); })(t0); }
+          continue;
+        }
+        const el = /^lab:/.test(what) ? f && f.contentDocument.querySelector(what.slice(4)) : slides[n].querySelector(what);
+        if (el) el.click();
+      }
+    };
+  }
+  // a group that draws itself piece by piece (inline transition-delay) gets its time, neither the next group nor the next
+  // slide cuts it off (Doc, 02.11.2026: "die Folie 20 wird zu schnell abgebrochen")
+  function drawing(n) {
+    let ms = 0;
+    slides[n].querySelectorAll('.step').forEach(function (e) {
+      if (grp(e) === step - 1) ms = Math.max(ms, (parseFloat(e.style.transitionDelay) || 0) * 1000 + 600);
+    });
+    return ms;
   }
   function resume(n) {                                // go on talking from the top of slide n
     clearTimeout(wait);
@@ -1175,6 +1249,7 @@ const narr = (function () {
   }
   api.stop = function () {
     clearTimeout(wait);
+    halt = false;
     if (held >= 0) {
       // waiting at a hold: the click that turns to the next slide lets Solita go on there
       // (stop runs before the page handler's next(), so look once that has happened)
@@ -1186,10 +1261,25 @@ const narr = (function () {
     api.playing = false; if (audio) audio.pause(); audio = null; show();
   };
   api.toggle = toggle;                                // 'p' pressed in the presenter window
+  api.pause = function () { if (api.playing) { halt = true; toggle(); } };   // she stops while Doc comments (deck-kritik.js)
+  api.weiter = function () { if (halt) { halt = false; toggle(); } };
+  api.clip = function () { return part; };
+  // while she talks or stands paused, Space and p pause and go on - they would open Frag Solita, and that is not what is
+  // wanted in the middle of her talk (Doc, 01.11.2026). Before the question box's own listener: this one is registered first
+  addEventListener('keydown', function (e) {
+    if (e.key !== ' ' && e.key !== 'p' && e.key !== 'P') return;
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+    if (!api.playing && !halt) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (api.kommentar && api.kommentar(e.key)) return;   // on Doc's Mac Space takes a spoken remark instead
+    halt = api.playing;
+    toggle();
+  }, true);
   // stop the click here: toggle redraws the icon, and the page's click handler would then no
   // longer see the (detached) target inside #hud - it turned the page and paused Solita again
   btn.onclick = function (e) { e.stopPropagation(); toggle(); };
-  big.onclick = function (e) { e.stopPropagation(); toggle(); };
+  big.onclick = face.onclick = function (e) { e.stopPropagation(); toggle(); };
   // P belongs to Solita's mic since 23.09.2026 ("shift space und P sollen das Mic starten") - the talk starts
   // and pauses with its button in the HUD and the big one on the slide.
   show();
@@ -1381,7 +1471,7 @@ gestartet = true;
         } catch (e) { }                               // a lab from elsewhere: nothing to read
       });
       const spoken = NARR && NARR.slides && NARR.slides[String(i)];
-      if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' '));
+      if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' ').replace(/\[[\d.]+s\]/g, ''));   // [0.7s]: her pause, deck_audio.mjs
     });
     if (ahead.length) {
       lines.push('', 'Wichtig: Die Lösung zu Folie ' + (last + 1) + ' hat die Klasse noch nicht gesehen. '
@@ -1515,7 +1605,7 @@ gestartet = true;
       let fits = false;
       // her greeting page shows her large already: nothing of her below the slide, no picture, no corner - and the
       // corner is not reserved either (Doc, 23.09.2026: "auf der 1. Seite nicht bitte", then "nimm sie ganz raus")
-      const greet = !!s && s.classList.contains('greet');
+      const greet = !!s && s.matches('.greet, .ende');   // the closing slide too: no bubble, no question line, nothing of her (Doc, 02.11.2026: "alles weg")
       if (greet !== box.classList.contains('greet')) { box.classList.toggle('greet', greet); if (typeof dock === 'function') dock(); }
       if (greet) return;
       if (edge && pn !== edgeOn) { edge.disconnect(); if (pn) edge.observe(pn); edgeOn = pn; }
@@ -1655,6 +1745,7 @@ gestartet = true;
       oeffnen: function () { open(); slideRow(); },    // out of her picture, then listen
       innen: box,                                      // panel, footer line or her picture
       tasten: ['p', 'P'],
+      wenn: function () { return !box.classList.contains('greet'); },   // where she is hidden (greeting, closing slide) no key asks her (Doc, 02.11.2026: "alles weg")
     });
     // the mic line grows out of her picture instead of jumping there. While it grows the field is clipped, so its
     // width says nothing - the box above would become a pencil (Doc, 23.09.2026, screenshot).
