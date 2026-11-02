@@ -287,6 +287,13 @@
     white-space: nowrap;
 }
 
+/* A tile with a person (Coaching) is grounded in a light shade of the orange of its pill;
+   the IA blocks keep φ (Doc, 02.11.2026: "auch den HG der großen pillen aber heller").
+   Specific enough to beat the light scheme's tint below. */
+.tt-lesson.tt-termin:not(.tt-block) {
+    background: color-mix(in srgb, rgb(var(--g-wichtig)) 22%, var(--card));
+}
+
 .tt-termin .tt-termin-who {
     min-width: 0;
     overflow: hidden;
@@ -310,26 +317,30 @@
     flex: 0 0 auto;
 }
 
-/* The title as a pill, cut like the test pills (.tt-pruef): a φ outline, filled with white
-   letters once "war da" is ticked (Doc, 02.11.2026). */
+/* The title as a pill, cut like the test pills (.tt-pruef): our orange, filled, with navy
+   letters like the Leistungstest pill (Doc, 02.11.2026: "coaching pills orangschish");
+   once "war da" is ticked it turns φ green with white letters (Doc, 02.11.2026).
+   Corners concentric with the tile's: its 7px less the ~3px the pill sits inside it - fully
+   round, the pill's ends bulged against the flatter tile corners (Doc, 02.11.2026). */
 .tt-termin .tt-termin-what {
     flex: 0 0 auto;
     margin: 0 0 0 auto;
     padding: 0 5px;
-    border: 1px solid var(--hue);
-    border-radius: 999px;
-    background: transparent;
+    border: 1px solid rgb(var(--g-wichtig));
+    border-radius: 4px;
+    background: rgb(var(--g-wichtig));
     font-family: Orbitron, sans-serif;
     font-weight: 700;
     font-size: 0.52rem;
     line-height: 1.6;
     letter-spacing: 0.03em;
-    color: var(--hue);
+    color: rgb(var(--g-wichtig-ink));
 }
 
 .tt-termin button.tt-termin-what { cursor: pointer; }
 
 .tt-termin .tt-termin-what.da {
+    border-color: var(--hue);
     background: var(--hue);
     color: #fff;
 }
