@@ -588,8 +588,9 @@
             margin-top: 0;
         }
 
-        /* the "Making of" banner as one tile of the books grid */
+        /* the "Making of" banner: one tile wide, in the last column of a row of its own above the first section */
         #tool-container .book-kino {
+            grid-column: -2 / -1;
             align-self: start;
             margin: 0;
         }
@@ -2440,8 +2441,9 @@
             { key: 'uebung', label: 'Übungsmaterial' }   /* the green exam training book (Doc, 02.11.2026: "eine eigene Rubrik") */
         ];
 
-        /* "The Making of" right of the first two BGY books, so it is the first thing seen (Doc, 02.11.2026: "oben ... rechts bei
-           Büchern, dass man das sofort dort sieht") - the cinema banner of the book's title page, styles in js/buch-titel.css */
+        /* "The Making of" top right above all sections, it stands for every book (Doc, 02.11.2026: "oben ... rechts bei Büchern,
+           dass man das sofort dort sieht", "oben drüber, nicht in der Rubrik") - the cinema banner of the book's title page,
+           styles in js/buch-titel.css */
         function bookKino() {
             const a = document.createElement('a');
             a.className = 'b-kino book-kino';
@@ -2474,6 +2476,7 @@
             }
             const gradeOf = (lab) => parseInt((lab.title.match(/\d+/) || ['0'])[0], 10);
             const frag = document.createDocumentFragment();
+            frag.appendChild(bookKino());
             BOOK_SCHOOLS.forEach(school => {
                 const books = LABS_DATA
                     .filter(lab => lab.school === school.key)
@@ -2487,10 +2490,9 @@
                 line.className = 'line';
                 head.append(h2, line);
                 frag.appendChild(head);
-                books.forEach((lab, i) => {
+                books.forEach(lab => {
                     const card = box.querySelector(`.card[data-lab-id="${lab.id}"]`);
                     if (card) frag.appendChild(card);
-                    if (school.key === 'bgy' && i === 1) frag.appendChild(bookKino());
                 });
             });
             box.prepend(frag);
