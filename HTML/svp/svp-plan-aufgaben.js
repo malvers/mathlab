@@ -301,12 +301,13 @@ window.svpPlanParts.push(function (P) {
        knows the group's own date (r.terminYmd, svp-plan-untis.js); of all rows
        carrying the same list only the first one on or after `ab` keeps its
        button - for each group its next lesson from that day. Without group
-       dates (all groups together, or not logged in) every such row shows it. */
+       dates (all groups together, or not logged in) every such row shows it.
+       redBtn.abGruppe gives single groups a later day (svpPruefungen.abFor). */
     function redBtnKey(c) { return c.src || c.title || c.label; }
     function redBtnShown(ref) {
         const cfg = ref.redBtn;
         if (!cfg || !cfg.ab || !ref.terminYmd) return true;
-        const ab = String(cfg.ab).replace(/-/g, '');
+        const ab = svpPruefungen.abFor(cfg, P.GROUP);
         for (const r of P.rendered) {
             const c = r.redBtn;
             if (!c || !c.ab || redBtnKey(c) !== redBtnKey(cfg)) continue;

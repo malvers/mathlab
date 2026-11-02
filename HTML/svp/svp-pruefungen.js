@@ -33,6 +33,16 @@
         return cfg.label + (day.length === 3 ? ' ' + +day[2] + '.' + +day[1] + '.' : '');
     }
 
+    /* From which day a dated test counts for one group, as 'YYYYMMDD' ('' = no date). redBtn.ab holds for
+       every group; redBtn.abGruppe = { 'FOG25-2_FOW25-2': 'YYYY-MM-DD' } moves single groups (Doc, 02.11.2026:
+       the KA of that group goes to its appointment two weeks later). The plan page and the timetable both
+       read it here. */
+    function abFor(cfg, group) {
+        const own = cfg && cfg.abGruppe && group
+            && Object.keys(cfg.abGruppe).find(k => svpTermine.groupKey(k) === svpTermine.groupKey(group));
+        return String((own && cfg.abGruppe[own]) || (cfg && cfg.ab) || '').replace(/-/g, '');
+    }
+
     const TEST_WORD = /klausur|klassenarbeit|leistungs(test|kontrolle|nachweis|erhebung)/i;
     const pills = new Map();        // date|start|subject|group -> { short, title, ... }
 
@@ -61,7 +71,7 @@
         return {
             short: !red ? 'LT' : /klausur/i.test(cfg.title || cfg.label) ? 'KL' : 'KA',
             title: cfg.label,
-            from: cfg.ab && cfg.ab.replace(/-/g, ''),
+            cfg,
             on: cfg.am && cfg.am.replace(/-/g, ''),
             list: cfg.src || cfg.title || cfg.label,
         };
@@ -70,15 +80,16 @@
     /* Each group its own date, counted as in the plan's group view. A test with `ab` stands on several rows,
        and of those only the group's first one from that day on counts (redBtnShown in svp-plan-aufgaben.js). */
     function inTerminPlan(rows, raw, untis) {
-        for (const days of svpTermine.termine(untis).values()) {
+        for (const [klasse, days] of svpTermine.termine(untis)) {
             const taken = new Set();
             rows.forEach((row, i) => {
                 const test = testOf(row);
                 if (!test) return;
                 const s = svpTermine.slot(raw, i), day = days[s.block];
                 if (!day) return;
-                if (test.from) {
-                    if (day[0].date < test.from || taken.has(test.list)) return;
+                const from = abFor(test.cfg, klasse);
+                if (from) {
+                    if (day[0].date < from || taken.has(test.list)) return;
                     taken.add(test.list);
                 }
                 svpTermine.halfOf(day, s.half).forEach(e => mark(e, test));
@@ -129,5 +140,5 @@
         return '';
     }
 
-    global.svpPruefungen = { pruefArt, buttonText, load, pill };
+    global.svpPruefungen = { pruefArt, buttonText, abFor, load, pill };
 })(window);
