@@ -98,6 +98,9 @@
             '.svp-gate-card button{width:100%;font-family:Orbitron,sans-serif;font-size:0.72rem;',
             'letter-spacing:0.06em;color:rgb(14,36,78);background:linear-gradient(180deg,#fff,rgb(232,238,248));',
             'border:1px solid rgba(40,70,120,0.3);border-radius:10px;padding:10px 14px;cursor:pointer;}',
+            /* login dialog (svp-auth.js loginDialog): Abbrechen | Login side by side, as in svp-gate.css */
+            '.svp-gate-card .svp-gate-row{display:flex;gap:10px;}',
+            '.svp-gate-card .svp-gate-row button{flex:1;width:auto;}',
             '.svp-gate-err{margin-top:10px;font-size:0.8rem;color:rgb(176,36,24);min-height:1em;}'
         ].join('');
         document.head.appendChild(st);
