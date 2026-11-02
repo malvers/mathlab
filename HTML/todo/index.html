@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#08142a">
+    <title>To-do</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Doc's own Supabase account (shared SVP login): only that uid may read or write table todo (RLS) -->
+    <script src="../svp/svp-gate.js"></script>
+    <script src="../svp/svp-auth.js"></script>
+    <!-- dictation: the shared tap-to-talk engine (listens through pauses, "bin fertig" ends) -->
+    <script src="../js/solita-listen.js"></script>
+    <style>
+        /* --- plain standalone page (like grateful), deliberately no lab shell CSS --- */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --card: rgb(14, 36, 78);
+            --line: rgba(120, 160, 220, .22);
+            --text: rgb(214, 226, 245);
+            --muted: rgb(110, 128, 160);
+            --lambda: rgb(245, 194, 66);
+            --upsilon: rgb(176, 36, 24);
+            --phi: rgb(121, 158, 49);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; background: var(--bg); color: var(--text); }
+        body {
+            font-family: Orbitron, sans-serif;
+            padding: 0 16px max(40px, env(safe-area-inset-bottom));
+        }
+        .wrap { max-width: 640px; margin: 0 auto; }
+        /* heading and entry field stay at the top while the list scrolls under them */
+        .top {
+            position: sticky; top: 0; z-index: 2; background: var(--bg);
+            padding: max(20px, env(safe-area-inset-top)) 0 12px;
+        }
+        h1 { font-size: clamp(21px, 6vw, 30px); font-weight: 700; margin: 0 0 12px; letter-spacing: .04em; }
+
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+
+        .row { display: flex; gap: 10px; }
+        input.new {
+            flex: 1 1 auto; min-width: 0; height: 58px; background: var(--bg); color: var(--text);
+            border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: 20px Raleway, sans-serif;
+        }
+        input.new:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
+        button.add, button.mic {
+            flex: 0 0 58px; height: 58px; border-radius: 12px; cursor: pointer; display: grid; place-items: center; padding: 0;
+        }
+        button.add { background: var(--lambda); color: var(--bg); border: 0; }
+        button.add svg { width: 32px; height: 32px; fill: currentColor; }
+        button.mic { background: transparent; color: var(--text); border: 1px solid var(--line); }
+        button.mic svg { width: 26px; height: 26px; fill: currentColor; }
+        button.mic.on { background: var(--upsilon); border-color: var(--upsilon); animation: pulse 1.2s ease-in-out infinite; }
+        @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(176, 36, 24, .35); } }
+        button:disabled { opacity: .5; cursor: default; }
+        .status { min-height: 1.4em; margin-top: 10px; font: 14px Raleway, sans-serif; color: var(--muted); }
+        .status:empty { min-height: 0; margin-top: 0; }
+        .status.err { color: var(--lambda); }
+
+        /* open items on top (newest first), checked ones below them (last checked first) */
+        ul.list { list-style: none; margin: 0; padding: 0; }
+        ul.list li {
+            display: grid; grid-template-columns: 44px 1fr auto; align-items: start; gap: 6px;
+            padding: 4px 0; border-top: 1px solid var(--line); background: var(--bg);
+            font: 18px/1.45 Raleway, sans-serif; font-variant-numeric: lining-nums;
+        }
+        ul.list li:first-child { border-top: 0; }
+        ul.list li.first-done { margin-top: 22px; border-top: 0; }   /* a little air between open and checked */
+        ul.list li.empty { display: block; padding: 14px 4px; color: var(--muted); }
+        button.chk, button.del {
+            width: 44px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer;
+            display: grid; place-items: center; color: var(--muted);
+        }
+        button.chk svg { width: 28px; height: 28px; fill: currentColor; }
+        button.del svg { width: 22px; height: 22px; fill: currentColor; }
+        button.chk:hover { color: var(--lambda); }
+        li.done button.chk { color: var(--phi); }
+        .txt { padding: 9px 2px; min-height: 44px; cursor: text; white-space: pre-wrap; overflow-wrap: anywhere; }
+        li.done .txt { color: var(--muted); text-decoration: line-through; }
+        .txt.editing { outline: 2px solid var(--lambda); border-radius: 8px; padding: 9px 8px; color: var(--text); text-decoration: none; }
+
+        .gate { text-align: center; padding: 30px 16px; }
+        .gate p { font: 15px/1.5 Raleway, sans-serif; color: var(--muted); margin: 0 0 18px; }
+        .gate button {
+            width: 100%; max-width: 260px; height: 58px; border: 0; border-radius: 12px; cursor: pointer;
+            background: var(--lambda); color: var(--bg); font: 700 15px Orbitron, sans-serif; letter-spacing: .04em;
+        }
+        [hidden] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="top">
+            <h1>To-do</h1>
+
+            <div class="card gate" id="gate" hidden>
+                <p>Bitte einmal anmelden, danach merkt sich das Gerät die Anmeldung.</p>
+                <button id="loginBtn" type="button">Anmelden</button>
+            </div>
+
+            <div class="card" id="entry" hidden>
+                <div class="row">
+                    <input class="new" id="text" type="text" enterkeyhint="done" autocomplete="off" placeholder="Was ist zu tun?" aria-label="Neue Aufgabe">
+                    <!-- add: Material Icons "add", mic: Material Icons "mic" (Apache 2.0) -->
+                    <button class="add" id="addBtn" type="button" aria-label="Hinzufügen">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    </button>
+                    <button class="mic" id="micBtn" type="button" aria-label="Diktieren">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+                    </button>
+                </div>
+                <div class="status" id="status" role="status"></div>
+            </div>
+        </div>
+
+        <ul class="list" id="list" aria-label="Aufgaben" hidden></ul>
+    </div>
+
+    <script>
+        (() => {
+            const auth = window.svpAuth;
+            const $ = id => document.getElementById(id);
+            const DRAFT_KEY = 'todo-draft';   // the text typed into the entry field
+            const CACHE_KEY = 'todo-cache';   // last known list: shows at once, also without network
+            const DONE_MAX = 100;             // checked items loaded (newest first)
+
+            // Material Icons (Apache 2.0): "radio_button_unchecked", "check_circle", "delete"
+            const ICON_OPEN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>';
+            const ICON_DONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+            const ICON_DEL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+
+            let items = [];          // { id, text, done, done_at, created_at }
+            let editingId = null;    // item whose text is being edited in place - no re-render meanwhile
+            let busy = 0;            // writes in flight - a reload now could bring back the old state
+
+            const byId = id => items.find(x => x.id === id);
+            const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const ms = s => (s ? Date.parse(s) : 0);   // server and client write the timestamps differently (+00:00 / Z)
+
+            function status(msg, cls) {
+                const el = $('status');
+                el.textContent = msg || '';
+                el.className = 'status' + (cls ? ' ' + cls : '');
+            }
+
+            function cache() { try { localStorage.setItem(CACHE_KEY, JSON.stringify(items)); } catch (e) { } }
+            function saveDraft() { try { localStorage.setItem(DRAFT_KEY, $('text').value); } catch (e) { } }
+
+            /* PostgREST call that returns the touched rows, or throws */
+            async function send(path, method, body) {
+                const opts = { method: method || 'GET', headers: { Prefer: 'return=representation' } };
+                if (body !== undefined) opts.body = JSON.stringify(body);
+                const res = await auth.api(path, opts);
+                if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto' : 'HTTP ' + res.status);
+                return res.json();
+            }
+
+            async function load() {
+                const cols = 'select=id,text,done,done_at,created_at';
+                const [open, done] = await Promise.all([
+                    send(`todo?${cols}&done=is.false&order=created_at.desc`),
+                    send(`todo?${cols}&done=is.true&order=done_at.desc&limit=${DONE_MAX}`)
+                ]);
+                items = open.concat(done);
+                cache();
+            }
+
+            /* Rows that change place slide there (FLIP): measure before, render, push back, let go */
+            function render() {
+                if (editingId) return;
+                const list = $('list');
+                const before = new Map();
+                for (const li of list.children) if (li.dataset.id) before.set(li.dataset.id, li.getBoundingClientRect().top);
+
+                const open = items.filter(x => !x.done).sort((a, b) => ms(b.created_at) - ms(a.created_at) || b.id - a.id);
+                const done = items.filter(x => x.done).sort((a, b) => ms(b.done_at) - ms(a.done_at) || b.id - a.id);
+                list.innerHTML = !items.length ? '<li class="empty">Nichts zu tun.</li>' : open.concat(done).map((x, i) =>
+                    `<li data-id="${x.id}" class="${x.done ? 'done' : ''}${x.done && i === open.length && open.length ? ' first-done' : ''}">` +
+                    `<button class="chk" type="button" aria-label="${x.done ? 'Wieder offen' : 'Abhaken'}">${x.done ? ICON_DONE : ICON_OPEN}</button>` +
+                    `<span class="txt">${esc(x.text)}</span>` +
+                    (x.done ? `<button class="del" type="button" aria-label="Löschen">${ICON_DEL}</button>` : '<span></span>') +
+                    '</li>'
+                ).join('');
+
+                const moved = [];
+                for (const li of list.children) {
+                    const old = before.get(li.dataset.id);
+                    const dy = old === undefined ? 0 : old - li.getBoundingClientRect().top;
+                    if (!dy) continue;
+                    li.style.transition = 'none';
+                    li.style.transform = `translateY(${dy}px)`;
+                    moved.push(li);
+                }
+                if (!moved.length) return;
+                list.offsetHeight;   // apply the pushed-back positions before the transition starts
+                for (const li of moved) {
+                    li.style.transition = 'transform .35s ease';
+                    li.style.transform = '';
+                }
+            }
+
+            /* a write: change locally at once, then tell the server; on failure undo and say so */
+            async function write(apply, undo, request) {
+                apply();
+                render();
+                cache();
+                busy++;
+                try {
+                    const rows = await request();
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    status('');
+                } catch (e) {
+                    undo();
+                    render();
+                    cache();
+                    status('Nicht gespeichert (' + e.message + ') – bitte nochmal.', 'err');
+                } finally {
+                    busy--;
+                }
+            }
+
+            function toggle(id) {
+                const x = byId(id);
+                if (!x) return;
+                const prev = { done: x.done, done_at: x.done_at };
+                const next = { done: !x.done, done_at: x.done ? null : new Date().toISOString() };
+                write(() => Object.assign(x, next), () => Object.assign(x, prev),
+                    () => send(`todo?id=eq.${id}`, 'PATCH', next));
+            }
+
+            function remove(id) {
+                const x = byId(id);
+                if (!x) return;
+                write(() => { items = items.filter(y => y !== x); }, () => { items.push(x); },
+                    () => send(`todo?id=eq.${id}`, 'DELETE'));
+            }
+
+            async function add() {
+                // still dictating: end it first, the final text is added right after (onFinal)
+                if (ear && ear.active) { addAfterDictation = true; ear.stop(); return; }
+                const text = $('text').value.trim();
+                if (!text) { $('text').focus(); return; }
+                $('addBtn').disabled = true;
+                busy++;
+                try {
+                    const rows = await send('todo', 'POST', [{ text }]);
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    items.push(rows[0]);
+                    $('text').value = '';
+                    saveDraft();
+                    status('');
+                    render();
+                    cache();
+                } catch (e) {
+                    status('Nicht gespeichert (' + e.message + ') – der Text bleibt hier stehen.', 'err');
+                } finally {
+                    busy--;
+                    $('addBtn').disabled = false;
+                }
+            }
+
+            /* tap on a text: edit it in place; Enter or tapping elsewhere saves, Escape reverts */
+            function edit(li) {
+                const x = byId(Number(li.dataset.id));
+                const span = li.querySelector('.txt');
+                if (!x || editingId) return;
+                editingId = x.id;
+                try { span.contentEditable = 'plaintext-only'; } catch (e) { span.contentEditable = 'true'; }
+                span.classList.add('editing');
+                span.focus();
+                const r = document.createRange();
+                r.selectNodeContents(span);
+                r.collapse(false);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(r);
+                span.onkeydown = e => {
+                    if (e.key === 'Enter') { e.preventDefault(); span.blur(); }
+                    if (e.key === 'Escape') { span.textContent = x.text; span.blur(); }
+                };
+                span.onblur = () => {
+                    span.onblur = span.onkeydown = null;
+                    span.contentEditable = 'false';
+                    span.classList.remove('editing');
+                    editingId = null;
+                    const text = span.textContent.replace(/\s+/g, ' ').trim();
+                    if (!text || text === x.text) { span.textContent = x.text; return; }
+                    const old = x.text;
+                    write(() => { x.text = text; }, () => { x.text = old; },
+                        () => send(`todo?id=eq.${x.id}`, 'PATCH', { text }));
+                };
+            }
+
+            /* Dictation: the spoken text lands behind what is already typed, live while speaking */
+            let ear = null, dictBase = '', addAfterDictation = false;
+            const join = (a, b) => (a && b ? a + ' ' + b : a || b);
+            const capital = t => t.charAt(0).toUpperCase() + t.slice(1);
+            function setMic(on) {
+                $('micBtn').classList.toggle('on', on);
+                $('micBtn').setAttribute('aria-label', on ? 'Diktat beenden' : 'Diktieren');
+            }
+            function dictated(t) {
+                $('text').value = join(dictBase, dictBase ? t : capital(t));
+                saveDraft();
+            }
+            function dictate() {
+                if (ear && ear.active) { ear.stop(); return; }
+                if (!window.SolitaListen) { status('Diktieren ist hier nicht geladen.', 'err'); return; }
+                if (!ear) ear = window.SolitaListen({
+                    lang: 'de-DE',
+                    onState: st => {
+                        if (st === 'unsupported') status('Diktieren geht in diesem Browser nicht – die Mikrofon-Taste der Tastatur geht immer.', 'err');
+                        setMic(st === 'listening');
+                    },
+                    onPartial: t => { if (t) dictated(t); },
+                    onFinal: t => {
+                        dictated(t);
+                        setMic(false);
+                        if (addAfterDictation) { addAfterDictation = false; add(); }
+                    },
+                    log: m => console.log('[todo]', m)
+                });
+                dictBase = $('text').value.trim();
+                status('');
+                ear.start();
+            }
+
+            async function refresh() {
+                try { await load(); status(''); } catch (e) { status(e.message, 'err'); }
+                render();
+            }
+
+            function showApp() {
+                $('gate').hidden = true;
+                $('entry').hidden = false;
+                $('list').hidden = false;
+                try { items = JSON.parse(localStorage.getItem(CACHE_KEY)) || []; } catch (e) { items = []; }
+                try { $('text').value = localStorage.getItem(DRAFT_KEY) || ''; } catch (e) { }
+                render();
+                refresh();
+            }
+
+            function init() {
+                $('text').addEventListener('input', saveDraft);
+                $('text').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+                $('addBtn').addEventListener('pointerdown', e => e.preventDefault());   // keep the keyboard open on the phone
+                $('addBtn').onclick = add;
+                $('micBtn').onclick = dictate;
+                $('list').addEventListener('click', e => {
+                    const li = e.target.closest('li[data-id]');
+                    if (!li) return;
+                    const id = Number(li.dataset.id);
+                    if (e.target.closest('.chk')) toggle(id);
+                    else if (e.target.closest('.del')) remove(id);
+                    else if (e.target.closest('.txt')) edit(li);
+                });
+                // back in the foreground (phone) or focused again (Mac): fetch what the other device changed
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden && auth.hasSession() && !$('entry').hidden && !editingId && !busy) refresh();
+                });
+                $('loginBtn').onclick = () => auth.loginDialog(showApp, 'Anmelden für deine To-do-Liste');
+
+                if (auth.hasSession()) showApp(); else $('gate').hidden = false;
+            }
+
+            init();
+        })();
+    </script>
+</body>
+
+</html>
