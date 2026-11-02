@@ -127,6 +127,8 @@ if (!PRESENTER && document.querySelector('.slide.title'))
 // the pen (s): ink on the slides, and a tablet as a remote pen (deck-ink.js, Doc 27.09.2026) - a module runs only
 // after this whole file, so everything it uses is there
 import('./deck-ink.js').catch(function () { });
+// the board on the laptop (t): its real picture in a small floating window (deck-spiegel.js, Doc 02.11.2026)
+import('./deck-spiegel.js').catch(function () { });
 // slide and click survive a reload (Doc, 17.09.2026: "persist slide and click") - per tab, so a new tab still
 // starts at the beginning; a #7 in the URL wins
 const KEEP = 'deck-pos:' + location.pathname + (PRESENTER ? ':presenter' : '');
@@ -718,6 +720,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
       ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
     [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
+    [K(['T']) + hint('Tafel'), 'Rückspiegel: die Tafel live in einem kleinen Fenster auf dem Laptop'],
     [K(['N']) + hint('Natur'), 'Naturbild hinter den Folien wechseln – nach dem letzten wieder ohne'],
     null,
     [K(['Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
