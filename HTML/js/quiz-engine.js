@@ -809,15 +809,21 @@
      As in the Saxon Kompetenztest (onlinetest.schule): with a slip code the
      test starts in full screen, and leaving it - another tab or app, the
      window losing focus, Esc out of full screen - covers the test with a red
-     lock screen. The pupil goes on by themselves, as in the original, but
-     every leave is reported (rpc quiz_leave) and shows up next to the name in
-     svp/leistungstest.html. A web page cannot lock the device: this locks the
-     test, not the screen. Anonymous tests and exercise sheets stay untouched;
-     QUIZ.guard = false switches it off for a single test. */
+     lock screen. Every leave is reported (rpc quiz_leave) and shows up next to
+     the name in svp/leistungstest.html. Since 02.11.2026 only the teacher lets
+     the pupil go on (Doc: "Weitermachen nur ich!"): the lock has no button,
+     the server holds the leave open until Mission Control releases it (rpc
+     quiz_release), and quiz_ping answers 'away' until then - also after a
+     reload. A web page cannot lock the device: this locks the test, not the
+     screen. Anonymous tests and exercise sheets stay untouched; QUIZ.guard =
+     false switches it off for a single test. */
   const GUARD_ON = CFG.guard !== false && CFG.submit !== false;
   let guardEl = null;
   let guardArmed = false;     /* from "Test starten" until the submission */
-  let guardAway = false;      /* lock screen showing */
+  let guardAway = false;      /* lock screen showing, waiting for the teacher */
+  let guardAwaySeen = false;  /* the server has this leave - only then is 'running' a release */
+  let guardKind = '';         /* what the open leave was, to report it again if it got lost */
+  let awayTimer = null;       /* faster beat while locked, so a release shows within seconds */
   let guardAborted = false;   /* the teacher ended this test (Mission Control) */
   let guardLeaves = 0;
   let guardQuietUntil = 0;    /* going full screen may blur the window for a moment */
@@ -867,8 +873,9 @@
 
   /* Mission Control (svp/leistungstest.html): a heartbeat every 15 s plus one
      shortly after each answer tells the teacher "working, 12 of 20"; the reply
-     carries the run state, so an abort by the teacher arrives here within one
-     beat - and so does taking it back. */
+     carries the run state ('running' | 'away' | 'aborted'), so an abort or a
+     release by the teacher arrives here within one beat - and so does taking
+     an abort back. */
   function guardPing() {
     fetch(DB_URL + '/rest/v1/rpc/quiz_ping', {
       method: 'POST',
@@ -887,20 +894,40 @@
       return res.ok ? res.json() : null;
     }).then(function (state) {
       if (!guardArmed) return;
-      if (state === 'aborted' && !guardAborted) {
+      if (state === 'aborted') {
+        if (guardAborted) return;
         guardAborted = true;
         guardAway = false;
+        awayPoll(false);
         /* "Er" stays with its sentence (no-break space) - on a phone it stood alone at the line's end (Doc, 19.09.2026) */
         showGuard('abort', 'Test beendet',
           'Deine Lehrkraft hat deinen Test beendet. Er wird nicht gewertet.',
           'Bitte melde dich bei deiner Lehrkraft.', '');
+      } else if (state === 'away') {
+        guardAwaySeen = true;
+        guardAborted = false;
+        /* the server still holds a leave: after a reload, or an abort taken back */
+        if (!guardAway) lockGuard('');
       } else if (state === 'running' && guardAborted) {
         guardAborted = false;
         showGuard('start', 'Es geht weiter',
           'Deine Lehrkraft hat deinen Test wieder freigegeben.',
           slipLabel(), 'Weiter mit dem Test');
+      } else if (state === 'running' && guardAway) {
+        /* the report of the leave got lost (network): send it again, never
+           read that as a release */
+        if (!guardAwaySeen) { reportGuard(guardKind); return; }
+        guardAway = false;
+        awayPoll(false);
+        showGuard('start', 'Es geht weiter',
+          'Deine Lehrkraft hat dich wieder freigegeben.',
+          slipLabel(), 'Weiter mit dem Test');
       }
     }).catch(function () { /* next beat */ });
+  }
+  function awayPoll(on) {
+    clearInterval(awayTimer);
+    awayTimer = on ? setInterval(guardPing, 3000) : null;
   }
   function guardProgress() {
     if (!guardArmed) return;
@@ -949,15 +976,15 @@
     try { if (!TEST_MODE && localStorage.getItem(DONE_KEY) === '1') return; } catch (e) { /* no storage */ }
     showGuard('start', 'Leistungstest',
       'Der Test läuft im Vollbild. Verlässt du ihn (anderer Tab, andere App, Esc), ' +
-      'wird er unterbrochen, und deine Lehrkraft sieht das.',
+      'wird er unterbrochen, und nur deine Lehrkraft kann dich wieder freigeben.',
       slipLabel(),
       'Test starten');
   }
 
-  /* "Test starten" and "Weiter mit dem Test". 'back' also closes a leave the
-     server still holds open, e.g. from a reload in the middle of the test. */
+  /* "Test starten", and "Weiter mit dem Test" once the teacher has released
+     the pupil or taken an abort back. */
   function guardGo() {
-    if (guardAborted) return;
+    if (guardAborted || guardAway) return;
     guardQuietUntil = Date.now() + 1500;
     enterFullscreen();
     if (!guardArmed) {
@@ -968,22 +995,28 @@
       guardPing();
       pingTimer = setInterval(guardPing, 15000);
     }
-    reportGuard('back');
-    guardAway = false;
     hideGuard();
+  }
+
+  /* The red lock: no button - it lifts only when the teacher releases. hhmm is
+     empty when the lock comes from the server (a leave from before a reload). */
+  function lockGuard(hhmm) {
+    guardAway = true;
+    awayPoll(true);
+    showGuard('lock', 'Test unterbrochen',
+      (hhmm ? 'Du hast den Test um ' + hhmm + ' Uhr verlassen.' : 'Du hast den Test verlassen.') +
+      ' Nur deine Lehrkraft kann dich wieder freigeben – bitte melde dich.',
+      hhmm ? guardLeaves + '. Unterbrechung' : slipLabel(), '');
   }
 
   function guardLeave(kind) {
     if (!guardArmed || guardAway || guardAborted || locked || Date.now() < guardQuietUntil) return;
-    guardAway = true;
     guardLeaves++;
+    guardKind = kind;
+    guardAwaySeen = false;
     reportGuard(kind);
     const t = new Date();
-    const hhmm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
-    showGuard('lock', 'Test unterbrochen',
-      'Du hast den Test um ' + hhmm + ' Uhr verlassen. Deine Lehrkraft sieht das.',
-      guardLeaves + '. Unterbrechung',
-      'Weiter mit dem Test');
+    lockGuard(String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0'));
   }
 
   /* After the submission there is nothing left to guard. */
@@ -993,6 +1026,7 @@
     guardAway = false;
     clearInterval(pingTimer);
     clearTimeout(pingSoon);
+    awayPoll(false);
     hideGuard();
     exitFullscreen();
   }
