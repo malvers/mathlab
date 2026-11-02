@@ -159,6 +159,37 @@
   const answers = new Array(QUESTIONS.length).fill(-1);
   let locked = false;
 
+  /* Answers survive a reload (KA KI FOG/FOW25-2, 02.11.2026: a swipe reloaded
+     the page and "everything was gone"). Kept per test in this browser, with
+     the code they were given under; after the submission they bring the
+     result back instead of an empty test. Demo mode and exercise sheets keep
+     nothing. */
+  const KEEP_KEY = 'answers-' + QUIZ_ID;
+  const KEEP_ON = !TEST_MODE && CFG.submit !== false;
+  function keepAnswers() {
+    if (!KEEP_ON) return;
+    try { localStorage.setItem(KEEP_KEY, JSON.stringify({ code: code, answers: answers })); } catch (e) { /* no storage */ }
+  }
+  /* true when answers came back; marks them like a pick does */
+  function restoreAnswers() {
+    if (!KEEP_ON) return false;
+    let kept = null;
+    try { kept = JSON.parse(localStorage.getItem(KEEP_KEY) || 'null'); } catch (e) { return false; }
+    if (!kept || !Array.isArray(kept.answers) || kept.answers.length !== QUESTIONS.length) return false;
+    /* another slip on this device: its answers are not ours */
+    if (code && kept.code && kept.code !== code) return false;
+    /* typed by hand last time: the reload lost it from the field, not from here */
+    if (!code && kept.code && CODE_RE.test(kept.code)) { code = kept.code; tagFooter(); }
+    kept.answers.forEach(function (oi, qi) {
+      if (!(oi >= 0 && oi < QUESTIONS[qi].opts.length)) return;
+      answers[qi] = oi;
+      document.querySelectorAll('.opt[data-q="' + qi + '"]').forEach(function (b) {
+        b.classList.toggle('sel', Number(b.dataset.o) === oi);
+      });
+    });
+    return true;
+  }
+
   /* Formulas are written as $...$ inside the question/option strings and
      rendered with KaTeX. Plain text parts stay plain text (no innerHTML). */
   function renderMath(el, src) {
@@ -319,6 +350,7 @@
     card.querySelectorAll('.opt').forEach(function (b) {
       b.classList.toggle('sel', Number(b.dataset.o) === oi);
     });
+    keepAnswers();
     updateSubmitState();
     guardProgress();
   }
@@ -789,6 +821,11 @@
   let guardAborted = false;   /* the teacher ended this test (Mission Control) */
   let guardLeaves = 0;
   let guardQuietUntil = 0;    /* going full screen may blur the window for a moment */
+  /* Tablets and phones drop full screen by themselves: a swipe down at the
+     top ends it (FOG/FOW25-2, 02.11.2026: "scrolled down, kicked out"). There
+     a lost full screen is no leave - the next tap brings it back; another tab
+     or app still locks the test. */
+  const GUARD_TOUCH = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   let pingTimer = null;
   let pingSoon = null;
 
@@ -970,8 +1007,15 @@
       setTimeout(function () { if (!document.hasFocus()) guardLeave('focus'); }, 250);
     });
     ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
-      document.addEventListener(ev, function () { if (!fsElement()) guardLeave('fullscreen'); });
+      document.addEventListener(ev, function () { if (!fsElement() && !GUARD_TOUCH) guardLeave('fullscreen'); });
     });
+    if (GUARD_TOUCH) {
+      document.addEventListener('click', function () {
+        if (!guardArmed || guardAway || guardAborted || locked || fsElement()) return;
+        guardQuietUntil = Date.now() + 1500;
+        enterFullscreen();
+      }, true);
+    }
   }
 
   /* KaTeX is deferred: if it arrives after the first paint, redraw the math.
@@ -995,6 +1039,7 @@
   } else {
     if (submitBtn) submitBtn.addEventListener('click', submit);
     render();
+    const restored = restoreAnswers();
     QuizCollapse.init(quizEl);
     /* Uebungsmodus (submit:false): es wird nie etwas abgegeben, also fuehren
        die beiden Lehrer-Pillen - Live-Auswertung und QR-Code-Zettel - ins
@@ -1008,6 +1053,11 @@
     tagContext();
     guardWatch();
     guardOffer();
+    /* submitted before the reload: show the result again, nothing is sent twice
+       (sendStats only reads the class average once DONE_KEY is set) */
+    let doneHere = false;
+    try { doneHere = localStorage.getItem(DONE_KEY) === '1'; } catch (e) { /* no storage */ }
+    if (restored && doneHere) submit();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
     if (TEST_MODE) {
       document.addEventListener('keydown', function (e) {
