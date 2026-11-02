@@ -1778,6 +1778,7 @@ const link = (function () {
     else if (m.t === 'tail') hoverTail.apply(m);                               // the presenter's mouse on a strip
     else if (m.t === 'zoom') hoverZoom.apply(m);                               // a picture under the presenter's mouse
     else if (m.t === 'ev') mirror.replay(m);
+    else if (m.t === 'lab-fresh') mirror.fresh(m.si);                         // the presenter's labs of that slide are new
     else if (m.t === 'laser') laser.show(m);
     else if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); laser.mirrorOn(m.on); }   // L over there
     else if (m.t === 'laser-toggle') laser.toggle();     // a presenter window from before 23.09.2026
@@ -1944,7 +1945,20 @@ const link = (function () {
       try { t.dispatchEvent(ev); } catch (e) { }
       if (shifted) delete w.performance.now;
     }
-    return { watch: watch, replay: replay };
+    // beamer: the presenter loaded the labs of slide n afresh (it does on every arrival), so its own copies start over
+    // too - only presses travel, not a lab's state, and a lab that had run before took them from another place on
+    // (Doc, 02.11.2026: on the laptop all went with his clicks, on the beamer the Wortvorhersage ran on to the end)
+    function fresh(n) {
+      const slide = slides[n];
+      if (!slide) return;
+      slide.querySelectorAll('iframe').forEach(function (f) {
+        try {
+          if (f.contentWindow.location.href === 'about:blank') return;   // still on its way: it comes fresh anyway
+          f.contentWindow.location.reload();
+        } catch (e) { }                               // a frame from elsewhere is not mirrored: left alone
+      });
+    }
+    return { watch: watch, replay: replay, fresh: fresh };
   })();
   window.DeckLabMirror = mirror;                      // the tablet replays with it (deck-ink.js)
   // The deck window watches its own labs as well: only input that really comes from a hand counts (isTrusted),
@@ -2457,6 +2471,7 @@ const link = (function () {
       if (si !== liveSi || !liveNode) {
         liveSi = si; liveNode = shot(si, step, true); put(frames[0], liveNode);
         aniAll(liveNode, si);                        // in the page: a drawn animation waits at its start, as on the beamer
+        if (liveNode.querySelector('iframe')) send({ t: 'lab-fresh', si: si });   // its labs load anew: the beamer's too
       }
       else stepMarks(liveNode, step);
       put(frames[1], n1 ? shot(n1.si, n1.step) : theEnd());
