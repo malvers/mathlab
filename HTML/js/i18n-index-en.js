@@ -49,6 +49,7 @@
                 school_bgy: "Vocational Gymnasium",
                 school_bgylk: "Vocational Gymnasium · Advanced Course",
                 school_fos: "Fachoberschule",
+                school_uebung: "Practice material",
                 touren: "Tours",
                 apps: "Apps",
                 fun: "Fun",

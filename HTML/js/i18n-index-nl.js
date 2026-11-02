@@ -49,6 +49,7 @@
                 school_bgy: "Beroepsgericht Gymnasium",
                 school_bgylk: "Beroepsgericht Gymnasium · Leistungskurs",
                 school_fos: "Fachoberschule",
+                school_uebung: "Oefenmateriaal",
                 touren: "Rondleidingen",
                 apps: "Apps",
                 fun: "Fun",

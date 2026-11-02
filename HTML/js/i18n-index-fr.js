@@ -49,6 +49,7 @@
                 school_bgy: "Gymnasium professionnel",
                 school_bgylk: "Gymnasium professionnel · Leistungskurs",
                 school_fos: "Fachoberschule",
+                school_uebung: "Matériel d’exercices",
                 touren: "Visites",
                 apps: "Applis",
                 fun: "Amusant",

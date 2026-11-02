@@ -96,6 +96,7 @@
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/index-tool-view-tiles.css">
     <link rel="stylesheet" href="js/labor-scan-search.css">
+    <link rel="stylesheet" href="js/buch-titel.css">   <!-- the "Making of" banner in the books view -->
     <script src="js/ui.js?v=4"></script>
     <style>
         /* Page-specific layout; portal tile tokens → js/index-portal-tokens.css */
@@ -585,6 +586,12 @@
 
         #tool-container .book-school-head:first-child {
             margin-top: 0;
+        }
+
+        /* the "Making of" banner as one tile of the books grid */
+        #tool-container .book-kino {
+            align-self: start;
+            margin: 0;
         }
 
         @media (max-width: 520px) {
@@ -2429,13 +2436,32 @@
             { key: 'gy', label: 'Gymnasium' },
             { key: 'gylk', label: 'Gymnasium · Leistungskurs' },
             { key: 'os', label: 'Oberschule' },
-            { key: 'fos', label: 'Fachoberschule' }
+            { key: 'fos', label: 'Fachoberschule' },
+            { key: 'uebung', label: 'Übungsmaterial' }   /* the green exam training book (Doc, 02.11.2026: "eine eigene Rubrik") */
         ];
+
+        /* "The Making of" right of the first two BGY books, so it is the first thing seen (Doc, 02.11.2026: "oben ... rechts bei
+           Büchern, dass man das sofort dort sieht") - the cinema banner of the book's title page, styles in js/buch-titel.css */
+        function bookKino() {
+            const a = document.createElement('a');
+            a.className = 'b-kino book-kino';
+            a.href = 'decks/mathe11-lehrbuch.html';
+            a.setAttribute('aria-label', 'The Making of: ein ganzes Lehrbuch für 0,49 € – zur Präsentation');
+            a.innerHTML = '<span class="b-kino-strip" aria-hidden="true"></span><span class="b-kino-frame">'
+                + '<span class="b-kino-beam" aria-hidden="true"></span>'
+                + '<span class="b-kino-pre">DOC ALVERS MATHE-LABOR PRÄSENTIERT</span>'
+                + '<span class="b-kino-title">THE MAKING OF</span>'
+                + '<span class="b-kino-tag">Ein ganzes Lehrbuch für <b>0,49 €</b></span>'
+                + '<span class="b-kino-credits"><span>11 KAPITEL · 179 AUFGABEN</span><span>192 SELBSTTESTS · 24 WIDGETS</span><span>1.682 ÜBUNGEN ONLINE</span></span>'
+                + '<span class="b-kino-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5Z"/></svg></span>'
+                + '</span><span class="b-kino-strip" aria-hidden="true"></span>';
+            return a;
+        }
 
         function groupBooksBySchool(on) {
             const box = document.getElementById('tool-container');
             if (!box || typeof LABS_DATA === 'undefined') return;
-            box.querySelectorAll('.book-school-head').forEach(h => h.remove());
+            box.querySelectorAll('.book-school-head, .book-kino').forEach(h => h.remove());
             if (!on) {
                 if (box.dataset.grouped) {
                     LABS_DATA.forEach(lab => {
@@ -2461,9 +2487,10 @@
                 line.className = 'line';
                 head.append(h2, line);
                 frag.appendChild(head);
-                books.forEach(lab => {
+                books.forEach((lab, i) => {
                     const card = box.querySelector(`.card[data-lab-id="${lab.id}"]`);
                     if (card) frag.appendChild(card);
+                    if (school.key === 'bgy' && i === 1) frag.appendChild(bookKino());
                 });
             });
             box.prepend(frag);

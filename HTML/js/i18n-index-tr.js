@@ -49,6 +49,7 @@
                 school_bgy: "Mesleki Gymnasium",
                 school_bgylk: "Mesleki Gymnasium · Leistungskurs",
                 school_fos: "Fachoberschule",
+                school_uebung: "Alıştırma materyali",
                 touren: "Turlar",
                 apps: "Uygulamalar",
                 fun: "Eğlenceli",

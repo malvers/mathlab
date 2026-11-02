@@ -49,6 +49,7 @@
                 school_bgy: "Gymnasium ya ufundi",
                 school_bgylk: "Gymnasium ya ufundi · Leistungskurs",
                 school_fos: "Fachoberschule",
+                school_uebung: "Nyenzo za mazoezi",
                 touren: "Ziara",
                 apps: "Programu",
                 fun: "Burudani",

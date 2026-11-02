@@ -105,7 +105,7 @@ const LABS_DATA = [
         "tagline": "Buch / Prüfungstraining / 26 Kapitel",
         "icon": LAB_ICONS["lehrbuch-pruefung"],
         "category": "buecher funktionen stochastik geometrie oberstufe",
-        "school": "bgy",
+        "school": "uebung",   // own section "Übungsmaterial" in the books view (Doc, 02.11.2026)
         "keywords": "buch buecher uebungsbuch prüfungstraining pruefungstraining pruefung abitur abiturvorbereitung abi blf besondere leistungsfeststellung klasse 10 klasse 13 berufliches gymnasium bgy gymnasium sachsen teil a ohne hilfsmittel ankreuzen pflichtaufgabe analysis funktionenschar integral extremwert steckbrief wachstum geometrie schattenwurf lineare algebra leontief stochastik binomialverteilung hypothesentest erwartungswert trigonometrie koerper generalprobe simulation",
         "color": "gold"
     },

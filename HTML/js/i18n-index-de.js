@@ -50,6 +50,7 @@
                 school_bgy: "Berufliches Gymnasium",
                 school_bgylk: "Berufliches Gymnasium · Leistungskurs",
                 school_fos: "Fachoberschule",
+                school_uebung: "Übungsmaterial",
                 touren: "Touren",
                 apps: "Apps",
                 fun: "Fun",

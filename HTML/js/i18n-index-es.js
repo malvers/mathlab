@@ -49,6 +49,7 @@
                 school_bgy: "Gymnasium profesional",
                 school_bgylk: "Gymnasium profesional · Curso avanzado",
                 school_fos: "Fachoberschule",
+                school_uebung: "Material de práctica",
                 touren: "Recorridos",
                 apps: "Apps",
                 fun: "Diversión",
