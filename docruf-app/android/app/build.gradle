@@ -1,0 +1,25 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'de.docalvers.docruf'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'de.docalvers.docruf'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+        // the call channel's topic is its only secret: build.sh hands it over from the Keychain, never the source
+        buildConfigField 'String', 'TOPIC', "\"${System.getenv('DOCRUF_TOPIC') ?: ''}\""
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

@@ -11,6 +11,7 @@ einen Geräte-Build sonst nicht bezeugen; genau diese Lücke hat hier „APK off
 
 ## Builds (neueste zuerst)
 
+- **2026-11-02 · docruf · vc1** · neue App: Solita ruft Doc aufs Pixel (ntfy.sh-Leitung im Vordergrund-Dienst, Quittung an den Mac, Ansage mit Solitas MP3 oder Phone-Stimme); per USB mit `docruf-app/build.sh` installiert, Kanal aus der Keychain — Doc bestätigt 21:13: „absolut funktioniert“
 - **2026-06-19 · tracker · vc2** *(Bump offen — s. ⚠️ unten)* · native Plugins aus OTWA-Merge `3fa27a3`: Mic/Solita-STT, Kompass (`@capacitor/motion`), Aktivitäts-Indikator (`ActivityRecognition`), Sprach-Navi-TTS (`@capacitor-community/text-to-speech`) — Doc bestätigt gebaut
 - **2026-06-19 · krass · —** *(noch kein committed Gradle-Projekt; lokal via `npx cap add android` aus `krass-app/native/`)* · erster Geräte-Build, Vosk-Foreground-Service zählt „krass/solita/solida" — Doc bestätigt gebaut + installiert
 - **2026-06-08 · tracker · vc2 / 1.1** · Voice-Spur (natives `capacitor-voice-recorder`, `RECORD_AUDIO`) + In-App-Update (`AppUpdatePlugin`, `REQUEST_INSTALL_PACKAGES`) — dokumentiert in `allowance.md`
