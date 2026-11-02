@@ -15,10 +15,12 @@ import android.util.Log;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -203,20 +205,27 @@ public class RufService extends Service {
         }
     }
 
-    /** A call from the phone to itself: the whole way through ntfy.sh, receipt included. */
+    /**
+     * A call from the phone to itself: the whole way through ntfy.sh, receipt included. The phone cannot make
+     * Solita's voice, so her recording of the sentence (res/raw/probe.mp3, Google Studio-C) travels along.
+     */
     static void probe(Context c) {
         String topic = BuildConfig.TOPIC;
         if (topic.isEmpty()) return;
+        String text = "Doc, hier ist Solita. Das ist mein Probe-Ruf. Wenn Du mich hörst, steht die Leitung.";
         new Thread(() -> {
             try {
-                HttpURLConnection h = (HttpURLConnection) new URL(HOST + topic).openConnection();
+                // the text rides in the query, which keeps umlauts intact; the body is the attachment
+                URL u = new URL(HOST + topic + "?title=Probe&message=" + URLEncoder.encode(text, "UTF-8"));
+                HttpURLConnection h = (HttpURLConnection) u.openConnection();
                 h.setConnectTimeout(10000);
-                h.setReadTimeout(10000);
+                h.setReadTimeout(20000);
                 h.setDoOutput(true);
-                h.setRequestMethod("POST");
-                h.setRequestProperty("Title", "Probe");
-                try (OutputStream o = h.getOutputStream()) {
-                    o.write("Doc, hier ist DocRuf. So klingt ein Ruf auf dem Phone.".getBytes(StandardCharsets.UTF_8));
+                h.setRequestMethod("PUT");
+                h.setRequestProperty("Filename", "solita.mp3");
+                try (InputStream in = c.getResources().openRawResource(R.raw.probe); OutputStream o = h.getOutputStream()) {
+                    byte[] buf = new byte[16384];
+                    for (int n; (n = in.read(buf)) > 0; ) o.write(buf, 0, n);
                 }
                 h.getResponseCode();
                 h.disconnect();
