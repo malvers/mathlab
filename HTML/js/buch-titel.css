@@ -149,7 +149,14 @@
 .b-kino-play::after { animation-delay: 1.1s; }
 .b-kino:hover .b-kino-play { transform: scale(1.1); }
 
-/* narrow banner (phone): line one and the credits run under the play button, the credits in two lines */
+/* the credits in one line need a banner of about 900px - below that one credit per line, they never wrap, so in a single
+   line they ran past the gold rule into the play button (tablet, docalvers.de/makingof/) */
+@container (max-width: 900px) {
+    .b-kino-credits > span { display: block; }
+    .b-kino-credits > span + span::before { content: none; }
+}
+
+/* narrow banner (phone): line one and the credits run under the play button */
 @container (max-width: 480px) {
     .b-kino .b-kino-frame > .b-kino-pre, .b-kino .b-kino-frame > .b-kino-credits { grid-column: 1 / -1; }
     .b-kino-play { grid-row: 2 / span 2; width: 13cqi; }
@@ -158,8 +165,6 @@
     .b-kino-pre { letter-spacing: 0.16em; }
     .b-kino-tag { font-size: 3.6cqi; }
     .b-kino-credits { font-size: 3.9cqi; }   /* the three lines bigger (Doc, 03.11.2026: "text kann größer" - "noch bissl") */
-    .b-kino-credits > span { display: block; }
-    .b-kino-credits > span + span::before { content: none; }
 }
 
 @keyframes b-kino-run { to { background-position: 18px 50%; } }
