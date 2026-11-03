@@ -23,8 +23,8 @@ window.BuchSW && BuchSW.add('numerik', {
         // book sw-1 mathe11-sw:
         // bisektion, flaeche, mc-flaeche
         [' · Startintervall $', ' · muda wa mwanzo $'], ['$ mit $f(', '$ ambapo $f('], ['$ und $f(', '$ na $f('],
-        ['Näherung mit $n = ', 'Makadirio kwa $n = '], [' · genauer Wert $', ' · thamani kamili $'], [' · Fehler $', ' · kosa $'],
-        ['$ · genauer Wert $', '$ · thamani kamili $'], ['$ · Fehler $', '$ · kosa $'],
+        ['Näherung mit $n = ', 'Makadirio kwa $n = '], [' · genauer Wert $', ' · thamani sahihi $'], [' · Fehler $', ' · kosa $'],
+        ['$ · genauer Wert $', '$ · thamani sahihi $'], ['$ · Fehler $', '$ · kosa $'],
         ['$ unter der Parabel. Rechteck: ', '$ ziko chini ya parabola. Mstatili: '],
         ['Schätzwert: $A', 'Makadirio: $A'], [' · genau: $', ' · kamili: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Tupa nukta za nasibu ndani ya mstatili '],
         ['. Der Anteil der Treffer unter ', '. Sehemu ya nukta zilizo chini ya '], [' schätzt den Anteil der Fläche.', ' inakadiria sehemu ya eneo.'],

@@ -11,12 +11,78 @@ window.BuchSW && BuchSW.add('bgy13lk', {
     word: {
         // sw0: the helpers of the module (outside every widget)
         // book sw-5 mathe13lk-sw:
+        // titelbildbgy13lk
+        'Titelbild: Trapeze unter einer Kurve, eine Glockenkurve mit rotem Ablehnungsbereich, ein Kreislauf Ei, Larve, Käfer':
+            'Picha ya jalada: trapeza chini ya mkunjo, mkunjo wa kengele wenye eneo jekundu la kukataa, mzunguko wa yai, buu na mende',
+        // biquadratisch (7.1)
+        'Koeffizient $p$': 'Kigawo $p$', 'Koeffizient $q$': 'Kigawo $q$', 'Keine Lösung': 'Hakuna suluhisho', 'Eine Lösung': 'Suluhisho moja',
+        'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'Parabola h(z) = z² + p·z + q pamoja na sifuri zake',
+        'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'Grafu ya f(x) = x⁴ + p·x² + q pamoja na sifuri zake',
+        // matrixinverse (H2.1; 'Nächster Schritt' is in js/buch-sw/lgs.js, which the same page loads)
+        'nicht invertierbar': 'haina kinyume', 'Beispielmatrix': 'Matriki ya mfano', 'Alle Schritte': 'Hatua zote', 'Von vorn': 'Anza upya',
+        // leontief (H2.2): the sectors kilimo (K), viwanda (V), huduma (H); 'Summe' is 'Jumla' in js/buch-sw.js
+        'Markt': 'Soko',
+        // uebergang (H2.3): Eier, Larven, Käfer = mayai, mabuu, mende; Anbieter = muuzaji; the buttons as in js/buch-sw/lgs.js
+        'Eier': 'Mayai', 'Larven': 'Mabuu', 'Käfer': 'Mende', 'Käferpopulation': 'Idadi ya mende', 'Kundenwanderung': 'Uhamaji wa wateja',
+        'Eier je Käfer $f$': 'Mayai kwa kila mende $f$', '1 Schritt': 'Hatua 1', '10 Schritte': 'Hatua 10', 'Zurück auf Start': 'Rudi mwanzo',
+        'Verlauf der drei Klassen über die Schritte n': 'Mwenendo wa makundi matatu katika hatua n',
+        'Übergangsgraph mit drei Zuständen und den Übergangsanteilen an den Pfeilen': 'Grafu ya mpito yenye hali tatu na sehemu za mpito kwenye mishale',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
         // book sw-5 mathe13lk-sw:
+        // biquadratisch ("<b>4 Lösungen</b>" is a rule)
+        [' liefert $x = \\pm', ' inatoa $x = \\pm'], [' liefert $x = 0$', ' inatoa $x = 0$'], [' liefert nichts, denn $x^2$ ist nie negativ', ' haitoi chochote, kwa sababu $x^2$ si hasi kamwe'],
+        ['keine Lösung $z$, die Diskriminante ist negativ', 'hakuna suluhisho $z$, kibainishi ni hasi'],
+        ['$ wird mit $z = x^2$ zu $z^2', '$ inakuwa, kwa $z = x^2$, $z^2'], [' = 0$, Diskriminante $\\tfrac{p^2}{4} - q = ', ' = 0$, kibainishi $\\tfrac{p^2}{4} - q = '],
+        // matrixinverse: the identity matrix is I in Kenya (German E)
+        ['Neben $A$ steht die Einheitsmatrix $E$. Ziel: links $E$ erzeugen, mit denselben Zeilenumformungen wie rechts.',
+            'Kando ya $A$ kuna matriki ya utambulisho $I$. Lengo: kuunda $I$ upande wa kushoto, kwa hatua zile zile za safu mlalo kama upande wa kulia.'],
+        ['Links lässt sich keine Einheitsmatrix mehr erzeugen: Eine Zeile wird links ganz null, oder in einer Spalte gibt es keine Zahl $\\neq 0$ mehr. <b>$A$ ist nicht invertierbar.</b>',
+            'Upande wa kushoto haiwezekani tena kuunda matriki ya utambulisho: safu mlalo moja upande wa kushoto inakuwa sifuri yote, au katika safu wima moja hakuna tena namba $\\neq 0$. <b>$A$ haina kinyume.</b>'],
+        ['Links steht $E$, rechts steht $A^{-1}$.', 'Kushoto kuna $I$, kulia kuna $A^{-1}$.'],
+        ['. Probe: $A \\cdot A^{-1} = E$, zum Beispiel erste Zeile mal erste Spalte: $', '. Ukaguzi: $A \\cdot A^{-1} = I$, kwa mfano safu mlalo ya kwanza mara safu wima ya kwanza: $'],
+        ['Das Gleichungssystem $A \\cdot \\vec{x} = ', 'Mfumo wa milinganyo $A \\cdot \\vec{x} = '], ['$ hat die Lösung $\\vec{x} = A^{-1} \\cdot \\vec{b} = ', '$ una suluhisho $\\vec{x} = A^{-1} \\cdot \\vec{b} = '],
+        ['Die dritte Zeile von $A$ ist die Summe der ersten beiden. Dann hat $A \\cdot \\vec{x} = \\vec{b}$ entweder keine oder unendlich viele Lösungen, nie genau eine.',
+            'Safu mlalo ya tatu ya $A$ ni jumla ya zile mbili za kwanza. Basi $A \\cdot \\vec{x} = \\vec{b}$ ama haina suluhisho ama ina mengi bila kikomo, kamwe si moja tu.'],
+        ['Weiter mit „Nächster Schritt“.', 'Endelea kwa “Hatua inayofuata”.'],
+        // leontief (ME = vizio; the identity matrix I)
+        ['Endnachfrage Landwirtschaft', 'Mahitaji ya mwisho ya kilimo'], ['Endnachfrage Industrie', 'Mahitaji ya mwisho ya viwanda'],
+        ['Endnachfrage Dienstleistung', 'Mahitaji ya mwisho ya huduma'], ['Landwirtschaft', 'kilimo'], ['Industrie', 'viwanda'], ['Dienstleistung', 'huduma'],
+        ['Zeile: liefernder Sektor, Spalte: empfangender Sektor. ', 'Safu mlalo: sekta inayouza, safu wima: sekta inayopokea. '],
+        ['. Summe = Produktion, alle Angaben gerundet in ME.', '. Jumla = uzalishaji, thamani zote zimekadiriwa, kwa vizio.'],
+        ['Technologiematrix $A = ', 'Matriki ya teknolojia $A = '], ['$, Leontief-Inverse $(E - A)^{-1} \\approx ', '$, kinyume cha Leontief $(I - A)^{-1} \\approx '],
+        ['$\\vec{x} = (E - A)^{-1} \\cdot \\vec{y} \\approx ', '$\\vec{x} = (I - A)^{-1} \\cdot \\vec{y} \\approx '],
+        ['. Jede Zeile der Tabelle geht auf: Lieferungen an die drei Sektoren plus Endnachfrage ergeben die Produktion. ',
+            '. Kila safu mlalo ya jedwali inalingana: mauzo kwa sekta tatu pamoja na mahitaji ya mwisho yanatoa uzalishaji. '],
+        // uebergang: in sentences "(Eier 400, Larven 200, Käfer 100)" → "(mayai 400, mabuu 200, mende 100)"; growth and shrinking are rules
+        ['Eier ', 'mayai '], ['Larven ', 'mabuu '], ['Käfer ', 'mende '],
+        ['Anbieter A', 'muuzaji A'], ['Anbieter B', 'muuzaji B'], ['Anbieter C', 'muuzaji C'],
+        ['$: Nach jeweils drei Schritten ist jede Klasse ', '$: baada ya kila hatua tatu kila kundi '],
+        ['<b>genau so groß wie vorher</b>, die Population schwankt zyklisch.', 'ni <b>kubwa sawa kabisa na awali</b>, idadi inabadilika kwa mzunguko.'],
+        ['. Mit wachsendem $n$ werden die Spalten von $P^n$ gleich: Sie nähern sich der <b>Grenzmatrix</b>, deren Spalten alle der <b>Fixvektor</b> sind.',
+            '. Kadiri $n$ inavyokua, safu wima za $P^n$ zinakuwa sawa: zinakaribia <b>matriki ya kikomo</b>, ambayo safu wima zake zote ni <b>vekta tuli</b>.'],
+        ['Fixvektor aus $P \\cdot \\vec{v} = \\vec{v}$ und $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx ', 'Vekta tuli kutoka $P \\cdot \\vec{v} = \\vec{v}$ na $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx '],
+        ['$. Langfristig: ', '$. Kwa muda mrefu: '], [' der Kundschaft, egal wie es anfing.', ' ya wateja, bila kujali mwanzo ulikuwaje.'],
     ],
     rule: [
         // book sw-5 mathe13lk-sw:
+        // biquadratisch: "<b>4 Lösungen</b>" → "<b>masuluhisho 4</b>"; the solution set {−2;\ −1;\ 1;\ 2} with commas
+        [/<b>(\d) Lösungen<\/b>/g, '<b>masuluhisho $1</b>'],
+        [/(x \\in \\\{)([\s\S]*?)(\\\})/g, (m, a, b, c) => a + b.replace(/;\\ /g, ',\\ ') + c],
+        // matrixinverse: "Schritt 2 von 6: ", the row swap, the pivot and the zeros of a column (row numbers I, II, III stay)
+        [/Schritt (\d+) von (\d+): /g, 'Hatua $1 kati ya $2: '],
+        [/Zeilen (I{1,3}) und (I{1,3}) tauschen, damit in Spalte (\d) oben keine Null steht\./g, (m, a, b, c) => 'Badilishana safu mlalo ' + a + ' na ' + b + ', ili juu katika safu wima ' + c + ' kusiwe na sifuri.'],
+        [/Zeile (I{1,3}) durch \$([^$]*)\$ teilen: Das Pivotelement wird 1\./g, (m, r, p) => 'Gawanya safu mlalo ' + r + ' kwa $' + p + '$: kipengele egemeo (pivot) kinakuwa 1.'],
+        [/In Spalte (\d) Nullen erzeugen: \$/g, (m, c) => 'Unda sifuri katika safu wima ' + c + ': $'],
+        // leontief: the slider values "200 ME" → "vizio 200", the total sentence, the sector letters of the table (K, V, H; I is the identity matrix)
+        [/^(\d[\d,]*) ME$/, 'vizio $1'],
+        [/Insgesamt werden ([\d,]+) ME erzeugt, damit ([\d,]+) ME den Markt erreichen\./g, 'Kwa jumla vizio $1 vinazalishwa, ili vizio $2 vifike sokoni.'],
+        [/^(<p class="b-help" style="margin:0 0 6px">Zeile: liefernder Sektor[\s\S]*)$/, m => m.replace(/<th>L<\/th>/g, '<th>K</th>').replace(/<th>I<\/th>/g, '<th>V</th>')
+            .replace(/<th>D<\/th>/g, '<th>H</th>').replace('L = Landwirtschaft, I = Industrie, D = Dienstleistung', 'K = Landwirtschaft, V = Industrie, H = Dienstleistung')],
+        // uebergang: the identity matrix is I ("U^3 = a · b · f · E = 1 · E"), growth and shrinking with the factor after the verb
+        [/(U\^3 = a \\cdot b \\cdot f \\cdot )E = ([^$]*) \\cdot E\$/g, (m, a, q) => a + 'I = ' + q + ' \\cdot I$'],
+        [/um den Faktor ([\d.]+) <b>gewachsen<\/b>\./g, '<b>limekua</b> mara $1.'],
+        [/auf das ([\d.]+)-Fache <b>geschrumpft<\/b>, die Population stirbt langfristig aus\./g, '<b>limepungua</b> hadi mara $1 ya awali, na kwa muda mrefu idadi inatoweka.'],
     ]
 });

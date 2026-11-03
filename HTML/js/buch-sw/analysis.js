@@ -56,6 +56,8 @@ window.BuchSW && BuchSW.add('analysis', {
         // book sw-4 mathe12lk-sw:
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // integrieren (LK 3.1, the kinds with 1/x and the linear chain)
+        'Lineare Verkettung': 'Fanksheni ya ndani ya mstari', 'z. B. x^3/3 - 2x oder -cos(2x)/2': 'k.m. x^3/3 - 2x au -cos(2x)/2',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -167,6 +169,8 @@ window.BuchSW && BuchSW.add('analysis', {
         // book sw-4 mathe12lk-sw:
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // integrieren
+        ['Bestimme eine Stammfunktion: $f(x) = ', 'Tafuta fanksheni asili: $f(x) = '], ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Bado. Nyambua suluhisho lako ili ukague. Dokezo: '],
     ],
     rule: [
         // book sw-2 mathe12-sw:

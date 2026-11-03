@@ -37,6 +37,10 @@ window.BuchSW && BuchSW.add('gy11lk', {
         'Sprung bei 0': 'Mruko kwenye 0', 'Zucker': 'Sukari', 'Milch': 'Maziwa', 'Zartbitter': 'Chokoleti chungu', 'Vollmilch': 'Chokoleti ya maziwa',
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // verflechtung (H2.2; the product names Zucker, Milch, Zartbitter, Vollmilch are in the sw-4 block above, ME = vizio)
+        'Tafeln „Classic“ $e_1$': 'Vipande vya chokoleti “Classic” $e_1$', 'Boxen „Mix“ $e_2$': 'Masanduku “Mix” $e_2$',
+        'Gozinto-Graph: drei Rohstoffe, zwei Zwischenprodukte, zwei Endprodukte, an den Pfeilen die benötigten Mengen':
+            'Grafu ya Gozinto: malighafi tatu, bidhaa mbili za kati, bidhaa mbili za mwisho, kwenye mishale viasi vinavyohitajika',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -73,6 +77,9 @@ window.BuchSW && BuchSW.add('gy11lk', {
         ['$ und $\\dfrac{\\sin ', '$ na $\\dfrac{\\sin '], ['$, das Brechungsgesetz.', '$: sheria ya Snell ya mnyumbuliko wa mwanga.'],
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // verflechtung
+        ['Zwischenprodukte: $\\vec{z} = B', 'Bidhaa za kati: $\\vec{z} = B'], ['Rohstoffe: $\\vec{r} = A', 'Malighafi: $\\vec{r} = A'],
+        ['In einem Schritt: $C = A', 'Kwa hatua moja: $C = A'], ['$ gibt den Rohstoffbedarf je Endprodukt an, und $C', '$ inatoa mahitaji ya malighafi kwa kila bidhaa ya mwisho, na $C'],
     ],
     rule: [
         // book sw-4 mathe12lk-sw:
@@ -82,5 +89,9 @@ window.BuchSW && BuchSW.add('gy11lk', {
         [/\[([-−]?\d+(?:\.\d+)?);\\, ([-−]?\d+(?:\.\d+)?)\]/g, '[$1, $2]'],
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // verflechtung: the quantities in the graph ">12 ME<" → ">vizio 12<", the sentence with the raw materials
+        [/>(\d+) ME</g, '>vizio $1<'],
+        [/Für (\d+) Tafeln und (\d+) Boxen braucht man <b>(\d+) ME Kakao, (\d+) ME Zucker und (\d+) ME Milch<\/b>\./g,
+            (m, a, b, c, d, e) => 'Kwa vipande ' + a + ' vya chokoleti na masanduku ' + b + ' unahitaji <b>vizio ' + c + ' vya kakao, vizio ' + d + ' vya sukari na vizio ' + e + ' vya maziwa</b>.'],
     ]
 });
