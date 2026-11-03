@@ -40,8 +40,9 @@ window.BuchSW && BuchSW.add('gy12', {
     ],
     rule: [
         // book sw-5 mathe13lk-sw:
-        // summen (the exact value "thamani sahihi" comes from js/buch-sw/numerik.js): the factor of the error; the head of the
-        // error table (no bare word 'Fehler': the header button "Fehler<br>melden")
+        // summen: the exact value is "thamani sahihi" as in js/buch-sw/numerik.js (a rule here, because the pages of summen do not
+        // load numerik); the factor of the error; the head of the error table (no bare word 'Fehler': the header button "Fehler<br>melden")
+        [/\$ · genauer Wert \$/g, '$ · thamani sahihi $'],
         [/Doppelt so viele Streifen: Der Fehler wird etwa um den Faktor \$([^$]*)\$ kleiner\./g, (m, k) => 'Vipande mara mbili zaidi: kosa linakuwa dogo takriban mara $' + k + '$.'],
         [/<th>Näherung<\/th><th>Fehler<\/th>/g, '<th>Makadirio</th><th>Kosa</th>'],
         // schaetzen: "Im Mittel über 1000 Stichproben: $" and "(12 Werte)", the number after its noun
