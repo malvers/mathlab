@@ -11,6 +11,9 @@ window.BuchSW && BuchSW.add('bgy13lk', {
     word: {
         // sw0: the helpers of the module (outside every widget)
         // book sw-5 mathe13lk-sw:
+        // titelbildbgy13lk
+        'Titelbild: Trapeze unter einer Kurve, eine Glockenkurve mit rotem Ablehnungsbereich, ein Kreislauf Ei, Larve, Käfer':
+            'Picha ya jalada: trapeza chini ya mkunjo, mkunjo wa kengele wenye eneo jekundu la kukataa, mzunguko wa yai, buu na mende',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
