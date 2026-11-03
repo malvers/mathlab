@@ -22,6 +22,11 @@ window.BuchSW && BuchSW.add('bgy13lk', {
         'nicht invertierbar': 'haina kinyume', 'Beispielmatrix': 'Matriki ya mfano', 'Alle Schritte': 'Hatua zote', 'Von vorn': 'Anza upya',
         // leontief (H2.2): the sectors kilimo (K), viwanda (V), huduma (H); 'Summe' is 'Jumla' in js/buch-sw.js
         'Markt': 'Soko',
+        // uebergang (H2.3): Eier, Larven, Käfer = mayai, mabuu, mende; Anbieter = muuzaji; the buttons as in js/buch-sw/lgs.js
+        'Eier': 'Mayai', 'Larven': 'Mabuu', 'Käfer': 'Mende', 'Käferpopulation': 'Idadi ya mende', 'Kundenwanderung': 'Uhamaji wa wateja',
+        'Eier je Käfer $f$': 'Mayai kwa kila mende $f$', '1 Schritt': 'Hatua 1', '10 Schritte': 'Hatua 10', 'Zurück auf Start': 'Rudi mwanzo',
+        'Verlauf der drei Klassen über die Schritte n': 'Mwenendo wa makundi matatu katika hatua n',
+        'Übergangsgraph mit drei Zuständen und den Übergangsanteilen an den Pfeilen': 'Grafu ya mpito yenye hali tatu na sehemu za mpito kwenye mishale',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -50,6 +55,15 @@ window.BuchSW && BuchSW.add('bgy13lk', {
         ['$\\vec{x} = (E - A)^{-1} \\cdot \\vec{y} \\approx ', '$\\vec{x} = (I - A)^{-1} \\cdot \\vec{y} \\approx '],
         ['. Jede Zeile der Tabelle geht auf: Lieferungen an die drei Sektoren plus Endnachfrage ergeben die Produktion. ',
             '. Kila safu mlalo ya jedwali inalingana: mauzo kwa sekta tatu pamoja na mahitaji ya mwisho yanatoa uzalishaji. '],
+        // uebergang: in sentences "(Eier 400, Larven 200, Käfer 100)" → "(mayai 400, mabuu 200, mende 100)"; growth and shrinking are rules
+        ['Eier ', 'mayai '], ['Larven ', 'mabuu '], ['Käfer ', 'mende '],
+        ['Anbieter A', 'muuzaji A'], ['Anbieter B', 'muuzaji B'], ['Anbieter C', 'muuzaji C'],
+        ['$: Nach jeweils drei Schritten ist jede Klasse ', '$: baada ya kila hatua tatu kila kundi '],
+        ['<b>genau so groß wie vorher</b>, die Population schwankt zyklisch.', 'ni <b>kubwa sawa kabisa na awali</b>, idadi inabadilika kwa mzunguko.'],
+        ['. Mit wachsendem $n$ werden die Spalten von $P^n$ gleich: Sie nähern sich der <b>Grenzmatrix</b>, deren Spalten alle der <b>Fixvektor</b> sind.',
+            '. Kadiri $n$ inavyokua, safu wima za $P^n$ zinakuwa sawa: zinakaribia <b>matriki ya kikomo</b>, ambayo safu wima zake zote ni <b>vekta tuli</b>.'],
+        ['Fixvektor aus $P \\cdot \\vec{v} = \\vec{v}$ und $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx ', 'Vekta tuli kutoka $P \\cdot \\vec{v} = \\vec{v}$ na $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx '],
+        ['$. Langfristig: ', '$. Kwa muda mrefu: '], [' der Kundschaft, egal wie es anfing.', ' ya wateja, bila kujali mwanzo ulikuwaje.'],
     ],
     rule: [
         // book sw-5 mathe13lk-sw:
@@ -66,5 +80,9 @@ window.BuchSW && BuchSW.add('bgy13lk', {
         [/Insgesamt werden ([\d,]+) ME erzeugt, damit ([\d,]+) ME den Markt erreichen\./g, 'Kwa jumla vizio $1 vinazalishwa, ili vizio $2 vifike sokoni.'],
         [/^(<p class="b-help" style="margin:0 0 6px">Zeile: liefernder Sektor[\s\S]*)$/, m => m.replace(/<th>L<\/th>/g, '<th>K</th>').replace(/<th>I<\/th>/g, '<th>V</th>')
             .replace(/<th>D<\/th>/g, '<th>H</th>').replace('L = Landwirtschaft, I = Industrie, D = Dienstleistung', 'K = Landwirtschaft, V = Industrie, H = Dienstleistung')],
+        // uebergang: the identity matrix is I ("U^3 = a · b · f · E = 1 · E"), growth and shrinking with the factor after the verb
+        [/(U\^3 = a \\cdot b \\cdot f \\cdot )E = ([^$]*) \\cdot E\$/g, (m, a, q) => a + 'I = ' + q + ' \\cdot I$'],
+        [/um den Faktor ([\d.]+) <b>gewachsen<\/b>\./g, '<b>limekua</b> mara $1.'],
+        [/auf das ([\d.]+)-Fache <b>geschrumpft<\/b>, die Population stirbt langfristig aus\./g, '<b>limepungua</b> hadi mara $1 ya awali, na kwa muda mrefu idadi inatoweka.'],
     ]
 });
