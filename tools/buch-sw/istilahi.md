@@ -243,6 +243,41 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 
 | Deutsch | Kiswahili | English (Kenya) | Hinweis |
 |---|---|---|---|
+| Leistungskurs · Grundkurs | Leistungskurs (kozi ya kina) · Grundkurs (kozi ya msingi) | advanced · basic course | bleibt Deutsch, einmal auf der Startseite erklärt (wie mathe12-sw) |
+| Satz von der totalen Wahrscheinlichkeit | kanuni ya uwezekano jumla | law of total probability | |
+| Satz von Bayes | nadharia ya Bayes | Bayes’ theorem | |
+| Zerlegung der Ergebnismenge | ugawaji wa seti ya matokeo yote | partition of the sample space | beschreibend |
+| natürliche Häufigkeiten | idadi halisi | natural frequencies | beschreibend |
+| Zulieferer $Z_i$ · defekt $D$ | msambazaji $M_i$ · ina kasoro $K$ | supplier · defective | Buchstaben aus Suaheli; krank $K$ → mgonjwa $M$ wie BGY 12 |
+| Wahrscheinlichkeitsfunktion | fanksheni ya uwezekano | probability (mass) function | |
+| Verteilungsfunktion $F(x) = P(X \le x)$ | fanksheni ya mgawanyo limbikizi | cumulative distribution function | „limbikizi“ wie bei der kumulierten Binomialverteilung, auch im Widget |
+| Treppenfunktion · diskret | fanksheni ngazi · diskreti | step function · discrete | „diskreti“ Lehnwort |
+| höchstens · mindestens · mehr als · zwischen | isiyozidi · angalau · zaidi ya · kati ya | at most · at least · more than · between | |
+| monoton wachsend (Verteilungsfunktion) | haipungui kamwe | non-decreasing | beschreibend |
+| Verschiebungssatz | fomula ya mkato $V(X) = E(X^2) - \mu^2$ | computational (shortcut) formula for the variance | kein fester Schulbegriff |
+| binomischer Lehrsatz · Summensymbol | nadharia ya binomia · alama ya jumla $\sum$ | binomial theorem · summation sign | |
+| Unstetigkeitsstelle · Sprungstelle | nukta ya kutoendelea · nukta ya mruko | point of discontinuity · jump | zu endelevu / mwendelezo (BGY 12) |
+| hebbare Unstetigkeit · stetig ergänzen | kutoendelea kunakoondolewa · kulijaza pengo | removable discontinuity · continuous extension | pengo wie BGY 12 |
+| abschnittsweise definiert · Nahtstelle | iliyofafanuliwa kwa vipande · nukta ya muunganiko | piecewise-defined · junction | beschreibend |
+| Zwischenwertsatz | nadharia ya thamani ya kati | intermediate value theorem | |
+| Knick | kona kali | corner (kink) | |
+| lineare Approximation | ukadiriaji wa mstari | linear approximation | |
+| Differenzierbarkeit | unyambulikaji | differentiability | zu inanyambulika (BGY 12) |
+| Umkehrfunktion · Kehrwert | fanksheni kinyume · kinyume chake | inverse function · reciprocal | wie mathe11-sw |
+| Verkettung · innere · äußere Funktion | fanksheni changamano · fanksheni ya ndani · ya nje | composite function · inner · outer function | „kuunganisha“ heißt schon integrieren |
+| Produktregel · Kettenregel · Quotientenregel | kanuni ya zao · kanuni ya mnyororo · kanuni ya mgawo | product · chain · quotient rule | |
+| Ausklammern · Satz vom Nullprodukt | kutoa kigawo cha pamoja · kanuni ya zao sifuri | factorise · null factor law | |
+| harmonische Schwingung · Auslenkung · Beschleunigung | mtetemo sahili · uhamisho · mchapuko | simple harmonic motion · displacement · acceleration | |
+| Konzentration · Wirkstoff | ukolezi · kiambato hai | concentration · active substance | |
+| globales Extremum · Fallunterscheidung | upeo wa jumla (maupeo) · kuchambua hali mbalimbali / kutenganisha hali | global extremum · case analysis | |
+| Kandidaten (für Extrema) | nukta zinazowezekana | candidates | auch im Widget randextrema |
+| Regression · Methode der kleinsten Quadrate | regresheni · mbinu ya miraba midogo zaidi | regression · method of least squares | |
+| Bestimmtheitsmaß $r^2$ · Extrapolation | kipimo cha ulinganifu $r^2$ · ekstrapolesheni | coefficient of determination · extrapolation | wie BGY 11 |
+| Bremsweg | umbali wa kusimama | braking distance | |
+| Rettungsschwimmerin · Brechungsgesetz · Lot | mwokoaji · sheria ya Snell ya mnyumbuliko wa mwanga · normali | lifeguard · Snell’s law of refraction · normal | |
+| Strahlensatz | pembetatu zinazofanana | similar triangles | Kenia rechnet mit ähnlichen Dreiecken |
+| Seitenhalbierende · Schwerpunkt (Dreieck, Pyramide) | mstari wa kati · sentroidi | median · centroid | |
+| Exkursion (Inhaltsverzeichnis) | ziara, Buchstabe $Z$ | excursion | wie alle sw-Bücher (deutsch $X$) |
 
 ## mathe13lk-sw (BGY 13 Leistungskurs)
 

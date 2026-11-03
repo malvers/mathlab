@@ -26,6 +26,8 @@ window.BuchSW && BuchSW.add('bgy12lk', {
         ['Anzahl Wappen bei drei Münzwürfen', 'idadi ya vichwa katika mirusho mitatu ya sarafu'],
         ['Augenzahl eines Würfels', 'alama inayotokea kwenye dadu'],
         ['Gewinn in € (Auszahlung minus 2 € Einsatz)', 'faida kwa € (malipo toa dau la €2)'],
+        // the same after the money rule of stochastik.js ("2 €" → "€2"), which runs first on lb1-2
+        ['Gewinn in € (Auszahlung minus €2 Einsatz)', 'faida kwa € (malipo toa dau la €2)'],
         ['. Oben die Wahrscheinlichkeitsfunktion', '. Juu: fanksheni ya uwezekano'],
         [', unten die Verteilungsfunktion', ', chini: fanksheni ya mgawanyo limbikizi'],
     ],

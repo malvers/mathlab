@@ -33,6 +33,8 @@ window.BuchSW && BuchSW.add('gy11lk', {
         'Strand und Wasser: der Weg der Rettungsschwimmerin von A über den Punkt P an der Wasserlinie zum Schwimmer B':
             'Ufuo na maji: njia ya mwokoaji kutoka A kupitia nukta P kwenye ukingo wa maji hadi kwa mwogeleaji B',
         'Die Zeit T in Abhängigkeit vom Punkt x, an dem sie ins Wasser geht': 'Muda T kulingana na nukta x ambapo anaingia majini',
+        // helpers of the module that check.mjs reads on every page loading gy11lk (epsdelta, verflechtung: not in LK 12)
+        'Sprung bei 0': 'Mruko kwenye 0', 'Zucker': 'Sukari', 'Milch': 'Maziwa', 'Zartbitter': 'Chokoleti chungu', 'Vollmilch': 'Chokoleti ya maziwa',
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
     },

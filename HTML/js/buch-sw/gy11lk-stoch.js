@@ -12,7 +12,7 @@ window.BuchSW && BuchSW.add('gy11lk-stoch', {
         // sw0: the helpers of the module (outside every widget)
         // book sw-4 mathe12lk-sw:
         // umkehrbaum ("Beispiel", "Darstellung", "Wahrscheinlichkeiten", "krank", "gesund": js/buch-sw.js and stochastik.js)
-        'Schnelltest': 'Kipimo cha haraka', 'Spamfilter': 'Kichujio cha barua taka', 'Zwei Maschinen': 'Mashine mbili', 'von 10 000': 'kati ya 10,000',
+        'Schnelltest': 'Kipimo cha haraka', 'Spamfilter': 'Kichujio cha barua taka', 'Zwei Maschinen': 'Mashine mbili', 'von 10 000': 'kati ya 10,000',
         'Baumdiagramm: erst A, dann B': 'Mchoro wa mti: kwanza A, kisha B', 'Umgekehrtes Baumdiagramm: erst B, dann A': 'Mchoro wa mti uliogeuzwa: kwanza B, kisha A',
         'Dieses Bild braucht js/buch-stochastik.js.': 'Picha hii inahitaji js/buch-stochastik.js.',
         // galton
