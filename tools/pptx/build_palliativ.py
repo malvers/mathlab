@@ -5,12 +5,15 @@ Doc, 03.11.2026: after the PowerPoint design proposal for her ("Die zunehmende B
 Palliativversorgung in Anbetracht des demographischen Wandels", 03.09.2024) - "ein Deck in unserem Stil bauen,
 genauso wie du das da gemacht hast". Same ten slide types as the proposal, her own content and numbers.
 
-Published on Doc's word (03.11.2026: "push pls"). The talk, its numbers and the two foreign pictures
-(Destatis chart, Letzte Hilfe) are hers - should she object, this deck comes down again.
+Published on Doc's word (03.11.2026: "push pls"), behind a password since the same day ("mach bitte ein pwd
+davor"): save() is followed by deck_seal.mjs, so no unsealed copy stays in HTML/decks/. The password lives in the
+Keychain (service docpoint-deck-palliativversorgung), never here. The talk, its numbers and the two foreign
+pictures (Destatis chart, Letzte Hilfe) are hers - should she object, this deck comes down again.
 
     python3 tools/pptx/html_deck.py build_palliativ.py
 """
 import os
+import subprocess
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from omml import MathDeck
@@ -65,4 +68,5 @@ d.picture_bullets("Letzte Hilfe Kurse", LETZTE_HILFE, [
 
 d.merksatz("Es gibt viel zu tun …", label="Vielen Dank für Ihre Aufmerksamkeit")
 
-d.save()
+path = d.save()
+subprocess.run(["node", os.path.join(os.path.dirname(os.path.abspath(__file__)), "deck_seal.mjs"), path], check=True)
