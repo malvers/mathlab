@@ -163,8 +163,9 @@
     // remembered: a widget draws the same labels again and again
     const memo = { p: new Map(), h: new Map() };
     function tr(s, kind) {
-        // one difference to js/buch-en.js (as in js/buch-fr.js): a backslash counts too, so a bare interval "$[1;\,2]$" turns
-        if (typeof s !== 'string' || !s || s.length > 20000 || !/[A-Za-zÄÖÜäöüß {\\]/.test(s)) return s;
+        // one difference to js/buch-en.js (as in js/buch-fr.js): a backslash counts too (and the euro sign, so a bare "2 €" reaches
+        // the euro rule of js/buch-sw/stochastik.js and becomes "€2"), so a bare interval "$[1;\,2]$" turns
+        if (typeof s !== 'string' || !s || s.length > 20000 || !/[A-Za-zÄÖÜäöüß {\\€]/.test(s)) return s;
         if (dirty) compile();
         const m = memo[kind];
         let r = m.get(s);

@@ -23,8 +23,8 @@ const ALLOW_ES = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(
 const ALLOW_IT = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Edizione tedesca|English edition|Edición española|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
 // French: the same names, the buttons of the other editions, the second school name of the FOS books
 const ALLOW_FR = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Édition allemande|English edition|Edición española|Edizione italiana|Berufliches Gymnasium|Fachoberschule|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
-// Swahili: the same names, the buttons of the other editions
-const ALLOW_SW = /Doc Alvers Mathe-Labor|Graßmann|Edition allemande|Toleo la Kijerumani|Deutsche Ausgabe|English edition|Edición española|Edizione italiana|Édition française|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
+// Swahili: the same names, the buttons of the other editions, the photographers and places with umlauts in the photo credits
+const ALLOW_SW = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Süßen|Mücke|Müngsten|Edition allemande|Toleo la Kijerumani|Deutsche Ausgabe|English edition|Edición española|Edizione italiana|Édition française|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
 const ALLOW = LANG === 'sw' ? ALLOW_SW : LANG === 'es' ? ALLOW_ES : LANG === 'it' ? ALLOW_IT : LANG === 'fr' ? ALLOW_FR : /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Möbius|Schütz|Müller/g;
 const GERMAN_DE = /[äöüÄÖÜß]|\b(der|die|das|und|nicht|ist|mit|von|für|auf|eine?|einer|wird|sind|oder|zum|zur|bei|wie|auch|noch|nach|aus|Lösung|Aufgabe|Ergebnis|Zeile|Schritt|Funktion|Gerade|Seite|Zurück|Neue|keine|Anzahl|Summe|Wahrscheinlichkeit)\b/;
 // French: word boundaries that know accented letters (\b alone finds "mit" in "extrémités" and "der" in "procéder")
