@@ -41,7 +41,7 @@ window.BUCH = {
           sub: 'Matriki za mpito, vipeo vya matriki, matriki ya kikomo na vekta tuli, mwenendo wa mzunguko', when: 'Februari', ustd: 8 },
         { file: 'lb7-1.html', lb: 'Eneo la kujifunza 7', k: '7.1', title: 'Milinganyo bikwadratiki na familia za fanksheni',
           sub: 'Kuweka badala, familia za fanksheni, vigezo na idadi ya masuluhisho, njia za nukta', when: 'Februari · Machi', ustd: 8 },
-        { file: 'lb7-2.html', lb: 'Eneo la kujifunza 7', k: '7.2', title: 'Vigezo na thamani za juu kabisa katika nafasi na uchumi',
+        { file: 'lb7-2.html', lb: 'Eneo la kujifunza 7', k: '7.2', title: 'Vigezo na maupeo katika nafasi na uchumi',
           sub: 'Mifumo ya milinganyo yenye kigezo, matriki za mzunguko, umbali mfupi zaidi, gharama, mapato na faida', when: 'Machi', ustd: 7 },
         { file: 'abi.html', lb: 'Abitur', k: 'A', title: 'Tayari kwa Abitur',
           sub: 'Orodha za ukaguzi, mitego ya makosa na maswali ya muundo wa Abitur wa Leistungskurs kutoka darasa la 11, 12 na 13', when: 'Machi · Aprili', ustd: 0 }

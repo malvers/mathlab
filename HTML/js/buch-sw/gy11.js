@@ -13,12 +13,17 @@ window.BuchSW && BuchSW.add('gy11', {
         // book sw-4 mathe12lk-sw:
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // drehmatrix (7.2): Drehmatrix = matriki ya mzunguko
+        'Drehwinkel $\\varphi$': 'Pembe ya mzunguko $\\varphi$',
+        'Eine Figur wird mit einer Drehmatrix um den Ursprung gedreht': 'Umbo linazungushwa kuzunguka nukta ya asili kwa matriki ya mzunguko',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
         // book sw-4 mathe12lk-sw:
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // drehmatrix
+        ['$ · Gedreht wird um den Ursprung gegen den Uhrzeigersinn.', '$ · Mzunguko ni kuzunguka nukta ya asili, kinyume na mwelekeo wa saa.'],
     ],
     rule: [
         // book sw-4 mathe12lk-sw:
