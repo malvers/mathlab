@@ -598,18 +598,19 @@ html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:r
   html.fs-on:not(.ink-remote) .pageno{right:16px!important}
   html.fs-on:not(.ink-remote):not(.dark-slide) #deck > .deck-name{display:block}
 }
-/* a touch screen in fullscreen: a round x top right leaves it - no Esc there, and the footer buttons are small
-   (Doc, 03.11.2026: "der blockiert mein Telefon, ich komme hier nicht mehr raus"); deck.js makes it */
-#fs-x{display:none}
+/* a touch screen: a round button top right - in fullscreen an x leaves it (no Esc there, and the footer buttons are
+   small; Doc, 03.11.2026: "der blockiert mein Telefon, ich komme hier nicht mehr raus"), outside the corner brackets go
+   in ("genauso wie das Kreuz"); deck.js makes it */
+#fs-touch{display:none}
 @media (hover:none),(pointer:coarse){
-  html.fs-on:not(.presenter) #fs-x{display:grid;place-items:center;position:fixed;z-index:50;
+  html:not(.presenter) #fs-touch:not([hidden]){display:grid;place-items:center;position:fixed;z-index:50;
     top:calc(10px + env(safe-area-inset-top, 0px));right:calc(10px + env(safe-area-inset-right, 0px));
     width:44px;height:44px;padding:0;border:0;border-radius:50%;cursor:pointer;
     background:rgba(7,22,48,.6);color:#E6ECF8;box-shadow:inset 0 0 0 1px rgba(230,236,248,.3);
     -webkit-tap-highlight-color:transparent}
-  #fs-x svg{display:block;width:20px;height:20px}
+  #fs-touch svg{display:block;width:20px;height:20px}
 }
-@media print{#fs-x{display:none!important}}
+@media print{#fs-touch{display:none!important}}
 #deck > .deck-name{display:none;position:absolute;left:16px;top:516px;max-width:300px;overflow:hidden;white-space:nowrap;
   text-overflow:ellipsis;line-height:12px;font-size:10px;letter-spacing:1.2px;color:var(--muted);pointer-events:none}
 /* "H" right of the triangles: every key the deck knows, in a card like Solita's panel (Doc, 17.09.2026).

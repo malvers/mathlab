@@ -1148,19 +1148,31 @@ if (document.documentElement.requestFullscreen || document.documentElement.webki
 else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
 // On a phone or tablet the fullscreen has no Esc and the footer buttons are small: a round x in the top right corner
 // leaves it (Doc, 03.11.2026: "ein Icon, wo man tippen kann, dass der Fullscreen-Modus verlassen wird ... der blockiert
-// mein Telefon, ich komme hier nicht mehr raus"). That corner lies beside the slide on a phone - the bars at the sides
-// across, the room above it upright. deck.css shows it only in fullscreen on a touch screen; in the frame of
-// "The Making of" it closes the frame, and Solita with it.
+// mein Telefon, ich komme hier nicht mehr raus"), and outside the fullscreen the same button with the corner brackets
+// goes in (Doc: "genauso wie das Kreuz, es in den Fullscreen-Modus zu bringen"). That corner lies beside the slide on a
+// phone - the bars at the sides across, the room above it upright. deck.css shows it only on a touch screen; in the
+// frame of "The Making of" the x closes the frame, and Solita with it.
 (function () {
-  const x = document.createElement('button');
-  x.id = 'fs-x';
-  x.type = 'button';
-  x.title = 'Vollbild verlassen';
-  x.setAttribute('aria-label', 'Vollbild verlassen');
-  x.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
-    + 'aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-  x.addEventListener('click', function (e) { e.stopPropagation(); if (fsOn()) fsExit(); });
-  document.body.appendChild(x);
+  const b = document.createElement('button');
+  b.id = 'fs-touch';
+  b.type = 'button';
+  const el = document.documentElement;
+  b.hidden = !(el.requestFullscreen || el.webkitRequestFullscreen);   // iPhone Safari: no fullscreen to go into
+  const X = '<path d="M6 6l12 12M18 6L6 18"/>';
+  function paint() {
+    const on = fsOn(), t = on ? 'Vollbild verlassen' : 'Vollbild';
+    b.title = t;
+    b.setAttribute('aria-label', t);
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+      + 'stroke-linejoin="round" aria-hidden="true">' + (on ? X : ICON_ENTER) + '</svg>';
+  }
+  b.addEventListener('click', function (e) { e.stopPropagation(); if (fsOn()) fsExit(); else full(); });
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(t => {
+    document.addEventListener(t, paint);
+    if (fsHost) fsHost.addEventListener(t, paint);
+  });
+  paint();
+  document.body.appendChild(b);
 })();
 
 // #7 in the URL opens slide 7 fully built - handy for linking a single slide
