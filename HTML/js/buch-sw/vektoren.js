@@ -41,6 +41,11 @@ window.BuchSW && BuchSW.add('vektoren', {
         // book sw-4 mathe12lk-sw:
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // lot3d (H1.3): the presets, the slider, the mirror box (Lotfußpunkt = kitako cha wima, Lotgerade = mstari wa wima)
+        'Punkt über E': 'Nukta juu ya E', 'Ursprung': 'Nukta ya asili', 'Punkt unter E': 'Nukta chini ya E', 'Punkt in E': 'Nukta ndani ya E',
+        'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Konstanti $d$ katika $\\vec{n} \\cdot \\vec{r} = d$', 'Spiegelpunkt P′ zeigen': 'Onyesha nukta iliyoakisiwa P′',
+        'Der Normalenvektor darf nicht der Nullvektor sein.': 'Vekta ya normali haiwezi kuwa vekta sifuri.',
+        '$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.': '$t = 0$: nukta $P$ yenyewe iko ndani ya bapa, umbali wake ni $0$.',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -93,6 +98,10 @@ window.BuchSW && BuchSW.add('vektoren', {
         // book sw-4 mathe12lk-sw:
         // (sw-4 above, sw-5 below)
         // book sw-5 mathe13lk-sw:
+        // lot3d
+        ['Lotgerade $l', 'mstari wa wima $l'], ['$l$ in $E$ einsetzen: $', 'Weka $l$ ndani ya $E$: $'], ['$, also $t = ', '$, kwa hiyo $t = '],
+        ['$ · Lotfußpunkt $F(', '$ · kitako cha wima $F('], ['Abstand: $|\\vec{PF}|', 'Umbali: $|\\vec{PF}|'], ['$ · ohne Lotfußpunkt: $', '$ · bila kitako cha wima: $'],
+        ['Spiegelpunkt: $t$ verdoppeln, $', 'Nukta iliyoakisiwa: zidisha $t$ mara mbili, $'], ['$, also $P\'(', '$, kwa hiyo $P\'('],
     ],
     rule: [
         // book sw-2 mathe12-sw:
