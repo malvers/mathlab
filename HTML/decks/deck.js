@@ -51,12 +51,22 @@ const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
 // The two strokes under a title sit higher now; a title of two lines would run into them, so its slide keeps the old place
 // (.slide.h3-zwei in deck.css). A hidden slide has no layout: each title is measured in a hidden copy, once Orbitron is there.
+// The title slide's h1 the same way: more than two lines ran into the subtitle (.slide.title.h1-lang, Doc 03.11.2026 on the
+// card of "Wie Informationssysteme arbeiten": "noch nicht so toll ... ein bisschen korrigieren").
 function titleLines() {
   const host = slides[0] && slides[0].parentNode;
   if (!host) return;
   const probe = document.createElement('div');
   host.appendChild(probe);
   document.querySelectorAll('.slide').forEach(s => {
+    const t = s.classList.contains('title') && s.querySelector(':scope > h1');
+    if (t) {
+      probe.className = s.className.replace(/\bh1-lang\b/, '');   // measured at the full size
+      probe.style.cssText = 'display:block;visibility:hidden;pointer-events:none';
+      probe.replaceChildren(t.cloneNode(true));
+      s.classList.toggle('h1-lang', probe.firstChild.offsetHeight > 100);   // two lines at 44px: 95px
+      return;
+    }
     const h = s.querySelector(':scope > h3');
     if (!h || !s.querySelector(':scope > .rules')) return;
     probe.className = s.className;
