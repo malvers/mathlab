@@ -28,6 +28,9 @@
 //                                                     HTML/buch/*-fr/, js/buch-fr.js, js/buch-fr/<module>.js,
 //                                                     tools/buch-fr/known.json, words of /usr/share/dict/french if any;
 //                                                     "des" is French there, not a German word)
+//        node tools/buch-en/check.mjs --lang sw [book-sw …]   the same for the Swahili editions (package SW0, 03.11.2026:
+//                                                     HTML/buch/*-sw/, js/buch-sw.js, js/buch-sw/<module>.js,
+//                                                     tools/buch-sw/known.json; "bei" (price) is Swahili there)
 import fs from 'fs';
 import vm from 'vm';
 import path from 'path';
@@ -37,8 +40,8 @@ const ROOT = process.env.BUCH_EN_ROOT ? path.resolve(process.env.BUCH_EN_ROOT) +
 const args = process.argv.slice(2);
 // the language of the editions: en (default) or es (package ES0, 12.10.2026)
 const LANG = args.includes('--lang') ? args.splice(args.indexOf('--lang'), 2)[1] : 'en';
-if (!['en', 'es', 'it', 'fr'].includes(LANG)) { console.log('✗ unknown language ' + LANG); process.exit(1); }
-const NAME = { en: 'English', es: 'Spanish', it: 'Italian', fr: 'French' }[LANG];
+if (!['en', 'es', 'it', 'fr', 'sw'].includes(LANG)) { console.log('✗ unknown language ' + LANG); process.exit(1); }
+const NAME = { en: 'English', es: 'Spanish', it: 'Italian', fr: 'French', sw: 'Swahili' }[LANG];
 const KNOWN = new URL(LANG === 'en' ? 'known.json' : '../buch-' + LANG + '/known.json', import.meta.url).pathname;
 const accept = args.includes('--accept');
 const books = args.filter(a => !a.startsWith('--'));
@@ -63,7 +66,7 @@ function attrs(src) {
 }
 const MODULE = /<script src="\.\.\/\.\.\/js\/buch-([a-z0-9-]+)\.js"><\/script>/g;
 const DICT = new RegExp('<script src="\\.\\./\\.\\./js/buch-' + LANG + '/([a-z0-9-]+)\\.js"></script>', 'g');
-const NOT_WIDGETS = new Set(['en', 'es', 'it', 'fr', 'druck']);
+const NOT_WIDGETS = new Set(['en', 'es', 'it', 'fr', 'sw', 'druck']);
 
 // the widgets of every module: W('name', …) up to its closing bracket; everything outside them are the helpers
 const modules = {};
@@ -157,7 +160,7 @@ function engine(dicts) {
         const f = ROOT + 'js/buch-' + LANG + '/' + d + '.js';
         if (fs.existsSync(f)) vm.runInContext(read(f), ctx, { filename: 'buch-' + LANG + '/' + d + '.js' });
     }
-    return (engines[key] = LANG === 'en' ? ctx.BuchEN : LANG === 'it' ? ctx.BuchIT : LANG === 'fr' ? ctx.BuchFR : ctx.BuchES);
+    return (engines[key] = LANG === 'en' ? ctx.BuchEN : LANG === 'it' ? ctx.BuchIT : LANG === 'fr' ? ctx.BuchFR : LANG === 'sw' ? ctx.BuchSW : ctx.BuchES);
 }
 
 // what counts as German: umlauts, frequent small words, typical words of the widgets - outside of tags and maths
@@ -165,6 +168,8 @@ let GERMAN = /[äöüÄÖÜß]|\b(der|die|das|den|dem|des|und|oder|nicht|ist|sin
 // French: "des" is a French word (des fonctions), so it does not count as German there; and the word boundaries know accented
 // letters (\b alone finds "mit" in "extrémités" and "der" in "procéder")
 if (LANG === 'fr') GERMAN = new RegExp(GERMAN.source.replace('|des|', '|').replace('\\b(', '(?<![\\p{L}\\p{N}_])(').replace(/\)\\b$/, ')(?![\\p{L}\\p{N}_])'), 'u');
+// Swahili: "bei" is a Swahili word (bei ya tiketi, the price of the ticket)
+if (LANG === 'sw') GERMAN = new RegExp(GERMAN.source.replace('|bei|', '|'));
 // the words a reader sees: tags out (their title, aria-label, placeholder, alt stay), TeX commands out, maths out -
 // but "$ und $" is not maths, a dollar pair counts as maths only without a word of three letters inside
 const visible = s => s.replace(/<[^>]*>/g, t => ' ' + [...t.matchAll(/\s(?:title|aria-label|placeholder|alt)="([^"]*)"/g)].map(m => m[1]).join(' ') + ' ')
@@ -175,7 +180,7 @@ const visible = s => s.replace(/<[^>]*>/g, t => ' ' + [...t.matchAll(/\s(?:title
 // word of the English dictionaries.
 // Spanish: the words of /usr/share/dict/spanish if there is one; else none, and only the Spanish dictionaries count
 // Italian the same with /usr/share/dict/italian, French with /usr/share/dict/french
-const WORDLIST = LANG === 'en' ? '/usr/share/dict/words' : LANG === 'it' ? '/usr/share/dict/italian' : LANG === 'fr' ? '/usr/share/dict/french' : '/usr/share/dict/spanish';
+const WORDLIST = LANG === 'en' ? '/usr/share/dict/words' : LANG === 'it' ? '/usr/share/dict/italian' : LANG === 'fr' ? '/usr/share/dict/french' : LANG === 'sw' ? '/usr/share/dict/swahili' : '/usr/share/dict/spanish';
 const ENGLISH = fs.existsSync(WORDLIST) ? new Set(read(WORDLIST).toLowerCase().split('\n')) : LANG === 'en' ? null : new Set();
 const SAFE = new Set('orbitron raleway rgba hsla svg viewbox katex px em rem nbsp xmidymid pagerank anscombe dresden gauss jordan monty hall use strict'.split(' '));
 function englishWords(B) {

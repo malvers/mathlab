@@ -18,6 +18,9 @@
  * (a missing Italian falls back to German), numbers keep the decimal comma, the widget modules are translated by js/buch-it.js.
  * French editions (buch/<book>-fr/, <html lang="fr">, package FR0, 22.10.2026): t(de, en, es, it, fr) picks the fifth word
  * (a missing French falls back to German), numbers keep the decimal comma, the widget modules are translated by js/buch-fr.js.
+ * Swahili editions (buch/<book>-sw/, <html lang="sw">, package SW0, 03.11.2026, Kenya): t(de, en, es, it, fr, sw) picks the
+ * sixth word (a missing Swahili falls back to German); numbers get a decimal point as in Kenyan schools (Buch.dot, true for
+ * English and Swahili), the widget modules are translated by js/buch-sw.js. Buch.en stays true only for English.
  */
 (function () {
     'use strict';
@@ -26,11 +29,14 @@
     // and Spanish editions (Doc, 12.10.2026: "übersetze bitte drei Bücher ins Spanische"): Buch.lang = 'de' | 'en' | 'es'
     // and Italian editions (Doc, 18.10.2026: "Bitte in Italienisch"): Buch.lang = 'de' | 'en' | 'es' | 'it'
     // and French editions (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch"): Buch.lang = … | 'fr'
+    // and Swahili editions for Kenya (Doc, 03.11.2026: "übersetz mal bitte BGY11 in Suaheli (Kenia)"): Buch.lang = … | 'sw'
     const LANG = /^en/i.test(document.documentElement.lang || '') ? 'en' : /^es/i.test(document.documentElement.lang || '') ? 'es' : /^it/i.test(document.documentElement.lang || '') ? 'it' :
-        /^fr/i.test(document.documentElement.lang || '') ? 'fr' : 'de';
-    const EN = LANG === 'en', ES = LANG === 'es', IT = LANG === 'it', FR = LANG === 'fr';
-    // a word without its Spanish (Italian, French) falls back to German, never to English
-    const t = (de, en, es, it, fr) => EN ? en : ES && es !== undefined ? es : IT && it !== undefined ? it : FR && fr !== undefined ? fr : de;
+        /^fr/i.test(document.documentElement.lang || '') ? 'fr' : /^sw/i.test(document.documentElement.lang || '') ? 'sw' : 'de';
+    const EN = LANG === 'en', ES = LANG === 'es', IT = LANG === 'it', FR = LANG === 'fr', SW = LANG === 'sw';
+    // the decimal point: English, and Swahili as Kenyan schools write it (0.5 · 10,000 · 30%)
+    const DOT = EN || SW;
+    // a word without its Spanish (Italian, French, Swahili) falls back to German, never to English
+    const t = (de, en, es, it, fr, sw) => EN ? en : ES && es !== undefined ? es : IT && it !== undefined ? it : FR && fr !== undefined ? fr : SW && sw !== undefined ? sw : de;
 
     // The debug window only on request: ?debug in the address (Doc, 09.10.2026: "im Moment brauchen wir es ja nicht").
     // Loaded from beside this file; its own autostart (DOMContentLoaded) may already be past, so start it here.
@@ -70,7 +76,7 @@
         let s = Number(x).toFixed(digits);
         if (s.indexOf('.') >= 0) s = s.replace(/0+$/, '').replace(/\.$/, '');
         if (s === '-0') s = '0';                                          // a rounding rest like -2e-16 (sin 360°)
-        return EN ? s : s.replace('.', ',');
+        return DOT ? s : s.replace('.', ',');
     }
     // the same inside TeX: the comma must not add space ({,})
     function texNum(x, digits = 4) { return fmt(x, digits).replace(',', '{,}'); }
@@ -91,7 +97,7 @@
         // eslint-disable-next-line no-new-func
         return new Function('x', 'with (Math) { return (' + e + '); }');
     }
-    function pct(x, digits = 1) { return fmt(x * 100, digits) + (EN ? '%' : ' %'); }
+    function pct(x, digits = 1) { return fmt(x * 100, digits) + (DOT ? '%' : ' %'); }
 
     // what a student types: "1/36", "0,25", "25 %", "≈ 0.49", "1 / 3"
     function parseAnswer(raw) {
@@ -105,7 +111,7 @@
         if (s.endsWith('%')) { percent = true; s = s.slice(0, -1); }
         const unit = s.match(/^(.*\d)([a-zA-ZäöüÄÖÜß°€²³µ\/.]{1,12})$/);
         if (unit && !/^e-?\d/i.test(unit[2])) s = unit[1];
-        if (EN && /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, '');   // English "1,500" is fifteen hundred
+        if (DOT && /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, '');  // English (and Kenyan) "1,500" is fifteen hundred
         s = s.replace(/,/g, '.');
         let v;
         const m = s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
@@ -175,8 +181,8 @@
                 const lvl = document.createElement('span');
                 lvl.className = 'b-lvl'; lvl.dataset.lvl = task.dataset.lvl || '1';
                 lvl.title = (EN ? ['', 'Basic', 'Intermediate', 'Advanced'] : ES ? ['', 'Básico', 'Intermedio', 'Avanzado'] : IT ? ['', 'Base', 'Intermedio', 'Avanzato'] :
-                    FR ? ['', 'Base', 'Intermédiaire', 'Avancé'] : ['', 'Grundlage', 'Mittel', 'Anspruchsvoll'])[+lvl.dataset.lvl] || '';
-                lvl.setAttribute('aria-label', t('Niveau: ', 'Level: ', 'Nivel: ', 'Livello: ', 'Niveau : ') + lvl.title);
+                    FR ? ['', 'Base', 'Intermédiaire', 'Avancé'] : SW ? ['', 'Msingi', 'Kati', 'Juu'] : ['', 'Grundlage', 'Mittel', 'Anspruchsvoll'])[+lvl.dataset.lvl] || '';
+                lvl.setAttribute('aria-label', t('Niveau: ', 'Level: ', 'Nivel: ', 'Livello: ', 'Niveau : ', 'Kiwango: ') + lvl.title);
                 head.appendChild(lvl);
                 task.insertBefore(head, q);
                 if (q) head.appendChild(q);
@@ -184,7 +190,7 @@
                 const acts = document.createElement('div');
                 acts.className = 'b-acts';
                 task.insertBefore(acts, hint || sol);
-                [[hint, t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice'), 'b-hintbtn'], [sol, t('Lösung', 'Solution', 'Solución', 'Soluzione', 'Solution'), '']].forEach(([box, label, cls]) => {
+                [[hint, t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice', 'Dokezo'), 'b-hintbtn'], [sol, t('Lösung', 'Solution', 'Solución', 'Soluzione', 'Solution', 'Suluhisho'), '']].forEach(([box, label, cls]) => {
                     if (!box) return;
                     box.classList.add('b-reveal');
                     const b = document.createElement('button');
@@ -219,7 +225,7 @@
             const isHint = box.classList.contains('b-hint');
             const b = document.createElement('button');
             b.type = 'button'; b.className = 'b-btn' + (isHint ? ' b-hintbtn' : '');
-            b.textContent = isHint ? t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice') : t('Lösung zeigen', 'Show solution', 'Ver solución', 'Mostra la soluzione', 'Voir la solution');
+            b.textContent = isHint ? t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice', 'Dokezo') : t('Lösung zeigen', 'Show solution', 'Ver solución', 'Mostra la soluzione', 'Voir la solution', 'Onyesha suluhisho');
             b.addEventListener('click', () => b.classList.toggle('open', box.classList.toggle('open')));
             acts.appendChild(b);
         });
@@ -273,7 +279,7 @@
                 if (q.dataset.ans == null) return;
                 if (PRINT) {                                                       // paper: a line to write on
                     const line = document.createElement('div');
-                    line.className = 'b-answer'; line.textContent = (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat')) + ':';
+                    line.className = 'b-answer'; line.textContent = (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat', 'Jibu')) + ':';
                     q.insertBefore(line, sol || null);
                     return;
                 }
@@ -281,9 +287,9 @@
                 row.className = 'b-ask';
                 const inId = 'b-in-' + id + '-' + i;
                 row.innerHTML =
-                    '<label for="' + inId + '">' + (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat')) + '</label>' +
-                    '<input class="b-in" id="' + inId + '" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="' + (q.dataset.ph || t('z. B. 3/10', 'e.g. 3/10', 'p. ej. 3/10', 'per es. 3/10', 'p. ex. 3/10')) + '">' +
-                    '<button type="button" class="b-btn">' + t('Prüfen', 'Check', 'Comprobar', 'Verifica', 'Vérifier') + '</button>' +
+                    '<label for="' + inId + '">' + (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat', 'Jibu')) + '</label>' +
+                    '<input class="b-in" id="' + inId + '" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="' + (q.dataset.ph || t('z. B. 3/10', 'e.g. 3/10', 'p. ej. 3/10', 'per es. 3/10', 'p. ex. 3/10', 'k.m. 3/10')) + '">' +
+                    '<button type="button" class="b-btn">' + t('Prüfen', 'Check', 'Comprobar', 'Verifica', 'Vérifier', 'Kagua') + '</button>' +
                     '<span class="b-fb" aria-live="polite"></span>';
                 q.insertBefore(row, sol || null);
                 const input = row.querySelector('input'), btn = row.querySelector('button'), fb = row.querySelector('.b-fb');
@@ -292,16 +298,16 @@
                     const ok = matches(input.value, q.dataset.ans, q.dataset.tol != null ? parseFloat(q.dataset.tol) : null);
                     input.classList.toggle('ok', ok); input.classList.toggle('bad', !ok);
                     fb.className = 'b-fb ' + (ok ? 'ok' : 'bad');
-                    if (ok) { fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct'); solved(input.value); dbg('check ' + sk + ' ok'); return; }
+                    if (ok) { fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct', ' sahihi'); solved(input.value); dbg('check ' + sk + ' ok'); return; }
                     tries++;
-                    fb.innerHTML = ICON.bad + (tries >= 2 && sol ? t(' noch nicht – schau dir die Lösung an', ' not yet – have a look at the solution', ' todavía no – mira la solución', ' non ancora – guarda la soluzione', ' pas encore – regarde la solution') : t(' noch nicht – versuch es noch einmal', ' not yet – try again', ' todavía no – inténtalo otra vez', ' non ancora – riprova', ' pas encore – réessaie'));
+                    fb.innerHTML = ICON.bad + (tries >= 2 && sol ? t(' noch nicht – schau dir die Lösung an', ' not yet – have a look at the solution', ' todavía no – mira la solución', ' non ancora – guarda la soluzione', ' pas encore – regarde la solution', ' bado – angalia suluhisho') : t(' noch nicht – versuch es noch einmal', ' not yet – try again', ' todavía no – inténtalo otra vez', ' non ancora – riprova', ' pas encore – réessaie', ' bado – jaribu tena'));
                     if (tries >= 2) showSol();
                 }
                 btn.addEventListener('click', check);
                 input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
                 if (state[sk]) {
                     input.value = typeof state[sk] === 'string' ? state[sk] : '';
-                    input.classList.add('ok'); fb.className = 'b-fb ok'; fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct'); showSol();
+                    input.classList.add('ok'); fb.className = 'b-fb ok'; fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct', ' sahihi'); showSol();
                 }
             });
             updateScore();
@@ -323,7 +329,7 @@
     // ---------- photos (js/buch-fotos.js): one list for every book and every language ----------
     // Doc, 24.10.2026: "Bilder aus der Lebensrealität … das wünsche ich mir wirklich sehr"; 25.10.: the translations
     // get them too, so the photos are placed by this code, not written into each chapter file.
-    const BOOK = ((location.pathname.match(/\/buch\/([^/]+)\//) || [])[1] || '').replace(/-(en|es|it|fr)$/, '');
+    const BOOK = ((location.pathname.match(/\/buch\/([^/]+)\//) || [])[1] || '').replace(/-(en|es|it|fr|sw)$/, '');
     // the photos live in Cloudflare R2 (bucket "media", folder buch/fotos/), not in git: free delivery, 10 GB
     // (Doc, 25.10.2026: "warum nicht R2?" - "ja! Toll!"); upload: node tools/media_publish.mjs <file> buch/fotos/<name>.jpg
     // The pictures of the print pages for the overview sit beside them (buch/seiten/, js/buch-druck.js).
@@ -340,10 +346,10 @@
     function fotoInfo(name) {
         const F = window.BUCH_FOTOS, f = F && F.fotos[name];
         if (!f) return null;
-        const lic = f.license === 'public domain' ? t('gemeinfrei', 'public domain', 'dominio público', 'pubblico dominio', 'domaine public') : f.license;
+        const lic = f.license === 'public domain' ? t('gemeinfrei', 'public domain', 'dominio público', 'pubblico dominio', 'domaine public', 'milki ya umma') : f.license;
         // "Bild", not "Foto": photos, paintings and engravings alike; an unknown artist is left out
         return { src: FOTO_DIR + name + '.jpg', alt: (f.alt && (f.alt[LANG] || f.alt.de)) || '',
-            credit: t('Bild: ', 'Image: ', 'Imagen: ', 'Immagine: ', 'Image : ') + (f.artist ? f.artist + ' · ' : '') + lic +
+            credit: t('Bild: ', 'Image: ', 'Imagen: ', 'Immagine: ', 'Image : ', 'Picha: ') + (f.artist ? f.artist + ' · ' : '') + lic +
                 ' · <a href="' + f.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>' };
     }
     function fotos(root, file, print) {
@@ -456,18 +462,18 @@
         if (top && top.tagName !== 'A') {
             const a = document.createElement('a');
             a.className = 'b-top-book'; a.href = 'index.html'; a.textContent = top.textContent;
-            a.title = t('Inhaltsverzeichnis des Buches', 'Contents of the book', 'Índice del libro', 'Indice del libro', 'Sommaire du manuel');
+            a.title = t('Inhaltsverzeichnis des Buches', 'Contents of the book', 'Índice del libro', 'Indice del libro', 'Sommaire du manuel', 'Yaliyomo katika kitabu');
             top.replaceWith(a);
         }
         if (i < 0) return;
         const prev = B.chapters[i - 1], next = B.chapters[i + 1];
         const nav = document.createElement('nav');
-        nav.className = 'b-chapnav'; nav.setAttribute('aria-label', t('Blättern', 'Turn the page', 'Pasar página', 'Sfoglia le pagine', 'Changer de chapitre'));
+        nav.className = 'b-chapnav'; nav.setAttribute('aria-label', t('Blättern', 'Turn the page', 'Pasar página', 'Sfoglia le pagine', 'Changer de chapitre', 'Kurasa'));
         const card = (c, dir) => c
-            ? '<a class="b-chapcard ' + dir + '" href="' + c.file + '"><span class="b-chapcard-k">' + (dir === 'prev' ? t('← ZURÜCK', '← BACK', '← ATRÁS', '← INDIETRO', '← PRÉCÉDENT') : t('WEITER →', 'NEXT →', 'SIGUIENTE →', 'AVANTI →', 'SUIVANT →')) +
-              t(' · KAPITEL ', ' · CHAPTER ', ' · CAPÍTULO ', ' · CAPITOLO ', ' · CHAPITRE ') + c.k + '</span><span class="b-chapcard-t">' + c.title + '</span></a>'
-            : '<a class="b-chapcard ' + dir + '" href="index.html"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ' : '') + t('INHALT', 'CONTENTS', 'ÍNDICE', 'INDICE', 'SOMMAIRE') + (dir === 'next' ? ' →' : '') +
-              '</span><span class="b-chapcard-t">' + t('Alle Kapitel', 'All chapters', 'Todos los capítulos', 'Tutti i capitoli', 'Tous les chapitres') + '</span></a>';
+            ? '<a class="b-chapcard ' + dir + '" href="' + c.file + '"><span class="b-chapcard-k">' + (dir === 'prev' ? t('← ZURÜCK', '← BACK', '← ATRÁS', '← INDIETRO', '← PRÉCÉDENT', '← NYUMA') : t('WEITER →', 'NEXT →', 'SIGUIENTE →', 'AVANTI →', 'SUIVANT →', 'MBELE →')) +
+              t(' · KAPITEL ', ' · CHAPTER ', ' · CAPÍTULO ', ' · CAPITOLO ', ' · CHAPITRE ', ' · SURA ') + c.k + '</span><span class="b-chapcard-t">' + c.title + '</span></a>'
+            : '<a class="b-chapcard ' + dir + '" href="index.html"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ' : '') + t('INHALT', 'CONTENTS', 'ÍNDICE', 'INDICE', 'SOMMAIRE', 'YALIYOMO') + (dir === 'next' ? ' →' : '') +
+              '</span><span class="b-chapcard-t">' + t('Alle Kapitel', 'All chapters', 'Todos los capítulos', 'Tutti i capitoli', 'Tous les chapitres', 'Sura zote') + '</span></a>';
         nav.innerHTML = card(prev, 'prev') + card(next, 'next');
         const foot = document.querySelector('.b-foot');
         if (foot) foot.parentNode.insertBefore(nav, foot); else document.querySelector('.b-main').appendChild(nav);
@@ -483,10 +489,10 @@
             if (c.lb !== last) { html += '<p class="b-lbhead">' + c.lb.toUpperCase() + '</p>'; last = c.lb; }
             let solved = 0;
             try { solved = Object.keys(JSON.parse(localStorage.getItem('buch:' + folder + c.file) || '{}')).length; } catch (_) { }
-            html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>' + t('KAPITEL', 'CHAPTER', 'CAPÍTULO', 'CAPITOLO', 'CHAPITRE') + '</small></span>' +
+            html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>' + t('KAPITEL', 'CHAPTER', 'CAPÍTULO', 'CAPITOLO', 'CHAPITRE', 'SURA') + '</small></span>' +
                 '<span><span class="b-chap-t">' + c.title + '</span><span class="b-chap-s">' + c.sub + '</span></span>' +
-                '<span class="b-chap-m">' + c.when.toUpperCase() + (c.ustd ? '<br>' + c.ustd + t(' USTD.', ' LESSONS', ' SESIONES', ' ORE', ' HEURES') : '') +
-                (solved ? '<br><span class="b-done">' + solved + t(' GELÖST', ' SOLVED', ' RESUELTOS', ' RISOLTI', ' RÉSOLUS') + '</span>' : '') + '</span></a>';
+                '<span class="b-chap-m">' + c.when.toUpperCase() + (c.ustd ? '<br>' + c.ustd + t(' USTD.', ' LESSONS', ' SESIONES', ' ORE', ' HEURES', ' VIPINDI') : '') +
+                (solved ? '<br><span class="b-done">' + solved + t(' GELÖST', ' SOLVED', ' RESUELTOS', ' RISOLTI', ' RÉSOLUS', ' YAMETATULIWA') + '</span>' : '') + '</span></a>';
         });
         box.innerHTML = html;
     }
@@ -532,7 +538,7 @@
             ov = document.createElement('div');
             ov.className = 'b-ov';
             frame = document.createElement('iframe');
-            frame.title = t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée');
+            frame.title = t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée', 'Kurasa zote za toleo la kuchapishwa');
             frame.src = 'druck.html?uebersicht';
             frame.allow = 'fullscreen';                                  // the overview's full-screen button (js/buch-druck.js)
             ov.appendChild(frame);
@@ -556,11 +562,11 @@
         if (!top || !window.BUCH || window.BUCH.druck === false) return;
         ovBtn = document.createElement('button');
         ovBtn.type = 'button'; ovBtn.className = 'b-ovbtn';
-        ovBtn.title = t('Alle Seiten der Druckausgabe (O)', 'All pages of the print edition (O)', 'Todas las páginas de la edición impresa (O)', 'Tutte le pagine dell’edizione a stampa (O)', 'Toutes les pages de l’édition imprimée (O)');
-        ovBtn.setAttribute('aria-label', t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée'));
+        ovBtn.title = t('Alle Seiten der Druckausgabe (O)', 'All pages of the print edition (O)', 'Todas las páginas de la edición impresa (O)', 'Tutte le pagine dell’edizione a stampa (O)', 'Toutes les pages de l’édition imprimée (O)', 'Kurasa zote za toleo la kuchapishwa (O)');
+        ovBtn.setAttribute('aria-label', t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée', 'Kurasa zote za toleo la kuchapishwa'));
         ovBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
             '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="1.2"/>' +
-            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">' + t('Seiten', 'Pages', 'Páginas', 'Pagine', 'Pages') + '</span>';
+            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">' + t('Seiten', 'Pages', 'Páginas', 'Pagine', 'Pages', 'Kurasa') + '</span>';
         const book = top.querySelector('.b-top-book');
         if (book) book.after(ovBtn); else top.appendChild(ovBtn);
         ovBtn.addEventListener('click', () => { if (ov && !ov.hidden) zu(); else auf(); });
@@ -604,7 +610,7 @@
     }
     // the section goes in at once, so the chapter list has it above "Titelseite"; the letter follows when its file is there
     // the title stands in the chapter list before the letter has loaded, so it lives here, not in js/buch-gruss.js
-    const grussTitel = () => t('Grußwort', 'Foreword', 'Prólogo', 'Prefazione', 'Avant-propos');
+    const grussTitel = () => t('Grußwort', 'Foreword', 'Prólogo', 'Prefazione', 'Avant-propos', 'Dibaji');
     function buildGruss() {
         const start = FILE === 'index.html' && ME && document.getElementById('start');
         if (!start) return;
@@ -641,10 +647,10 @@
             a.className = 'b-ovbtn b-pdfbtn';
             a.href = base + m.pdf.datei + '?v=' + encodeURIComponent(m.v);
             a.target = '_blank'; a.rel = 'noopener';
-            a.title = t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF') + ' · ' +
-                m.seiten.length + ' ' + t('Seiten', 'pages', 'páginas', 'pagine', 'pages') + ' · ' + Math.max(1, Math.round(m.pdf.bytes / 1048576)) + ' MB · ' +
-                t('Stand', 'as of', 'versión del', 'aggiornato al', 'version du') + ' ' + new Date(m.erstellt).toLocaleDateString(t('de-DE', 'en-GB', 'es-ES', 'it-IT', 'fr-FR'));
-            a.setAttribute('aria-label', t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF'));
+            a.title = t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF', 'Pakua PDF') + ' · ' +
+                m.seiten.length + ' ' + t('Seiten', 'pages', 'páginas', 'pagine', 'pages', 'kurasa') + ' · ' + Math.max(1, Math.round(m.pdf.bytes / 1048576)) + ' MB · ' +
+                t('Stand', 'as of', 'versión del', 'aggiornato al', 'version du', 'toleo la') + ' ' + new Date(m.erstellt).toLocaleDateString(t('de-DE', 'en-GB', 'es-ES', 'it-IT', 'fr-FR', 'sw-KE'));
+            a.setAttribute('aria-label', t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF', 'Pakua PDF'));
             a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
                 '<path d="M12 3.5v11.5"/><path d="M7 10.5l5 5 5-5"/><path d="M4 16.5v3.5h16v-3.5"/></svg><span class="b-ovbtn-l">PDF</span>';
             // left of "Seiten", right of the book's name
@@ -717,5 +723,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 
-    window.Buch = { en: EN, lang: LANG, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotoInfo, fotosReady, book: BOOK, media: MEDIA, gruss, grussHtml, grussTitel };
+    window.Buch = { en: EN, lang: LANG, dot: DOT, t, widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele, later, settled, printing: () => PRINT, sg, co, sgx, compile, fotos, fotoInfo, fotosReady, book: BOOK, media: MEDIA, gruss, grussHtml, grussTitel };
 })();

@@ -107,5 +107,25 @@
                 'Bonne lecture et bonne réussite !',
             ],
         },
+        // Swahili for Kenya (package SW0, 03.11.2026); the header button reads "Ripoti kosa" there (js/buch-sw.js)
+        sw: {
+            foto, name, zeile,
+            text: [
+                'Mwanafunzi mpendwa,',
+                'Kitabu hiki kimetokana na imani rahisi: elimu bora haipaswi kamwe kukwama kwa sababu ya ukosefu wa pesa. Ndiyo sababu kila kitu kwenye ' +
+                'docalvers.de ni bure, bila matangazo na bila kujisajili. Hakuna anayekusanya data zako. Video za chaneli yangu ya YouTube ' +
+                '(youtube.com/@docalvers) pia ziko wazi kwako bila malipo.',
+                'Mimi ni mwanafizikia, nilianzisha kampuni ya programu za kompyuta, na leo ninafundisha hisabati na sayansi ya kompyuta mjini Dresden, katika jimbo la Saksonia, ' +
+                'nchini Ujerumani. Ninajenga Mathe-Labor kwa hiari yangu mwenyewe. Ninaweka muda na pesa ndani yake kwa sababu nina hakika kwamba uwekezaji huu ' +
+                'una faida: kwako wewe na kwa elimu bora kwa wote. Nimesaidiwa na timu isiyo ya kawaida – mawakala wa akili bandia wanaoandika programu, ' +
+                'kuchora, kuhesabu na kutafsiri kufuata maelekezo yangu. Hivyo ndivyo zilivyopatikana maabara shirikishi zaidi ya 100 na vitabu vya kiada ' +
+                'zaidi ya 20 katika lugha kadhaa. Na vinaongezeka kila siku!',
+                'Hisabati si ya kusomwa tu, bali ya kushikwa. Katika kitabu cha mtandaoni unaweza kusogeza kila grafu na kurudia kila jaribio la nasibu ' +
+                'mara elfu; misimbo ya QR katika kitabu hiki inakupeleka moja kwa moja huko. Jaribu, kosea – hivyo ndivyo tunavyojifunza zaidi.',
+                'Na ukipata kosa kitabuni, niambie. Kupitia kitufe chekundu “Ripoti kosa” katika kitabu cha mtandaoni, kila ripoti inanifikia moja kwa moja.',
+                'Kwa walimu: karibuni kutumia yote haya darasani – hayo ndiyo madhumuni yake.',
+                'Furahia, na nakutakia mafanikio mema!',
+            ],
+        },
     };
 })();

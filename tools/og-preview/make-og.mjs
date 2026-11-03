@@ -109,7 +109,10 @@ const BOOK_WORDS = {
     // space before the colon of the chapter card title ("Chapitre 2 : Équations, formules, figures")
     fr: { tagline: (n) => `Manuel interactif / ${n} chapitres`, coverAlt: 'couverture du manuel interactif', chapter: 'Chapitre',
         chapterAlt: 'aperçu du manuel interactif', locale: 'fr_FR', colon: '\u00a0:',
-        desc: (c, B) => `${c.sub}. Chapitre ${c.k} du manuel interactif ${B.title}\u00a0: explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.` },
+        desc: (c, B) => `${c.sub}. Chapitre ${c.k} du manuel interactif ${B.title}\u00a0: explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.` },    // the Swahili editions for Kenya (package SW0, 03.11.2026); desc as tools/buch-en/wrap.py --lang sw writes it
+    sw: { tagline: (n) => `Kitabu shirikishi cha kiada / sura ${n}`, coverAlt: 'jalada la kitabu shirikishi cha kiada', chapter: 'Sura',
+        chapterAlt: 'onyesho kutoka kitabu shirikishi cha kiada', locale: 'sw_KE',
+        desc: (c, B) => `${c.sub}. Sura ya ${c.k} ya kitabu shirikishi cha kiada ${B.title}: maelezo, mifano, mazoezi ya viwango vitatu, majaribio ya kujipima na maabara ya kujaribu.` },
 };
 
 // The textbooks (HTML/buch/<book>/): a card for the cover page and one per chapter. The texts come from the
@@ -124,7 +127,7 @@ function readBooks() {
         new Function('window', fs.readFileSync(k, 'utf8'))(win);
         const B = win.BUCH;
         if (!B || !B.chapters) continue;
-        // the English, Spanish, Italian and French editions (kapitel.js lang: 'en' / 'es' / 'it' / 'fr') get their card texts
+        // the English, Spanish, Italian, French and Swahili editions (kapitel.js lang: 'en' / 'es' / 'it' / 'fr' / 'sw') get their card texts
         // in their own language
         // (Doc, 12.10.2026: "Bitte stell sicher, dass alle Bücher auch eine Vorschau haben")
         const lang = B.lang || 'de';

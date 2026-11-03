@@ -17,6 +17,9 @@ js/buch-es/<module>.js, header and title in Spanish. Without --lang everything i
 js/buch-it/<module>.js, header and title in Italian.
 --lang fr (package FR0, 22.10.2026): the same for a French edition - HTML/buch/<book>-fr/, js/buch-fr.js and
 js/buch-fr/<module>.js, header and title in French (a no-break space before the colon of the description).
+--lang sw (package SW0, 03.11.2026): the same for a Swahili edition (Kenya) - HTML/buch/<book>-sw/, js/buch-sw.js and
+js/buch-sw/<module>.js, header and title in Swahili; numbers as in English (decimal point), so the skeleton compare
+reads a decimal comma and a decimal point in data-ans alike.
 """
 import sys, os, re, json, subprocess, html.parser, difflib
 
@@ -27,7 +30,7 @@ out_dir = sys.argv[sys.argv.index('--out') + 1] if '--out' in sys.argv else None
 if out_dir: args.remove(out_dir)
 LANG = sys.argv[sys.argv.index('--lang') + 1] if '--lang' in sys.argv else 'en'
 if '--lang' in sys.argv: args.remove(LANG)
-assert LANG in ('en', 'es', 'it', 'fr'), 'unknown language ' + LANG
+assert LANG in ('en', 'es', 'it', 'fr', 'sw'), 'unknown language ' + LANG
 book, name, src = args
 name = name[:-5] if name.endswith('.html') else name
 DE_DIR = os.path.join(HTML, 'buch', book)
@@ -50,6 +53,10 @@ WORDS = {
            'title': '%s · Chapitre %s · %s | Doc Alvers Mathe-Labor',
            'desc': '%s. Chapitre %s du manuel interactif %s\u00a0: explications, exemples, exercices sur trois niveaux, autoévaluations et laboratoires à essayer.',
            'langname': 'French'},
+    'sw': {'Kapitel': 'Sura', 'Inhalt des Kapitels': 'Yaliyomo katika sura', 'CHAPTER': 'SURA %s · ',
+           'title': '%s · Sura %s · %s | Doc Alvers Mathe-Labor',
+           'desc': '%s. Sura ya %s ya kitabu shirikishi cha kiada %s: maelezo, mifano, mazoezi ya viwango vitatu, majaribio ya kujipima na maabara ya kujaribu.',
+           'langname': 'Swahili'},
 }[LANG]
 
 
@@ -93,9 +100,22 @@ made = []
 def dictionary(m):
     mod = m.group(1)
     src_js = os.path.join(HTML, 'js', 'buch-%s.js' % mod)
-    if mod in ('en', 'es', 'it', 'fr', 'druck') or not os.path.exists(src_js) or not re.search(r"^[ \t]*W\('", open(src_js, encoding='utf-8').read(), re.M):
+    if mod in ('en', 'es', 'it', 'fr', 'sw', 'druck') or not os.path.exists(src_js) or not re.search(r"^[ \t]*W\('", open(src_js, encoding='utf-8').read(), re.M):
         return m.group(0)
     f = os.path.join(HTML, 'js', 'buch-' + LANG, mod + '.js')
+    if not os.path.exists(f) and LANG == 'sw':
+        # Swahili (SW0): numbers as in English, a decimal point
+        os.makedirs(os.path.dirname(f), exist_ok=True)
+        open(f, 'w', encoding='utf-8').write(
+            "/* js/buch-sw/%s.js — Swahili for the widgets of js/buch-%s.js.\n"
+            " * Loaded by the Swahili editions right after js/buch-%s.js; the engine and the shared words are in js/buch-sw.js.\n"
+            " *   word    a whole label → its Swahili\n"
+            " *   phrase  German sentence pieces exactly as the widget source writes them → Swahili\n"
+            " *   rule    word order and notation (after the number and point rules of js/buch-sw.js, before its header rules)\n"
+            " * Terms: tools/buch-sw/istilahi.md. After changing a German widget sentence: node tools/buch-en/check.mjs --lang sw\n"
+            " */\n"
+            "window.BuchSW && BuchSW.add('%s', {\n    word: {\n    },\n    phrase: [\n    ],\n    rule: []\n});\n" % (mod, mod, mod, mod))
+        made.append(f)
     if not os.path.exists(f) and LANG in ('es', 'it', 'fr'):
         # Spanish (ES0), Italian (IT0), French (FR0): the same stub, numbers keep their German form
         L, E = {'es': ('Spanish', 'BuchES'), 'it': ('Italian', 'BuchIT'), 'fr': ('French', 'BuchFR')}[LANG]
