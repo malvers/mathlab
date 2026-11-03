@@ -141,3 +141,11 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Stichprobenmittel · Stichprobenvarianz | wastani wa sampuli $\bar{x}$ · variansi ya sampuli $s^2$ | sample mean · sample variance | „variansi“ Lehnwort |
 | Standardabweichung · Streuung | mkengeuko sanifu · mtawanyiko | standard deviation · spread | |
 | Binomialverteilung · Erwartungswert · Zufallsgröße | mgawanyo wa binomia · thamani tarajiwa · kigeu nasibu | binomial distribution · expected value · random variable | |
+| Signifikanztest · Signifikanzniveau · signifikant | jaribio la umuhimu · kiwango cha umuhimu $\alpha$ · muhimu kitakwimu | significance test · significance level · significant | |
+| Hypothese · Nullhypothese · Gegenhypothese | nadharia tete · nadharia tete sifuri $H_0$ · nadharia tete mbadala $H_1$ | hypothesis · null · alternative hypothesis | „nadharia tete“ wie in der Forschungsmethodik auf Suaheli; Alternative „dhanio“ |
+| Testgröße · Treffer | kigeu cha jaribio · fanikio (mafanikio) | test statistic · success | |
+| Ablehnungsbereich · kritischer Wert · Entscheidungsregel | eneo la kukataa $\overline{A}$ · thamani ya mpaka · kanuni ya uamuzi | critical (rejection) region · critical value · decision rule | Zeichen $\overline{A}$ bleibt wie im Widget |
+| H₀ verwerfen · nicht verwerfen | kukataa $H_0$ · kutokataa $H_0$ | reject · do not reject $H_0$ | |
+| einseitig (links/rechts) · zweiseitig | upande mmoja (wa kushoto / wa kulia) · pande mbili | one-tailed (left/right) · two-tailed | |
+| Fehler 1. Art · Fehler 2. Art | kosa la aina ya I · kosa la aina ya II | Type I · Type II error | |
+| Irrtumswahrscheinlichkeit | uwezekano wa kukosea | probability of error | |

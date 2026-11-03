@@ -53,6 +53,12 @@ window.BuchSW && BuchSW.add('stochastik', {
         'Anteil in der Grundgesamtheit $p$': 'Uwiano katika kundi zima $p$', 'Stichprobenumfang $n$': 'Ukubwa wa sampuli $n$',
         'Stichproben ziehen:': 'Chomoa sampuli:', 'Noch keine Stichprobe gezogen.': 'Bado hakuna sampuli iliyochomolewa.',
         'Verteilung der relativen Häufigkeiten vieler Stichproben': 'Mgawanyo wa marudio ya uwiano ya sampuli nyingi',
+        // signifikanztest
+        'Nullhypothese $p_0$': 'Nadharia tete sifuri $p_0$', 'Test:': 'Jaribio:', 'linksseitig': 'upande wa kushoto', 'rechtsseitig': 'upande wa kulia',
+        'zweiseitig': 'pande mbili', 'Art des Tests': 'Aina ya jaribio', 'Signifikanzniveau $\\alpha$:': 'Kiwango cha umuhimu $\\alpha$:',
+        'Signifikanzniveau': 'Kiwango cha umuhimu', 'Beobachtete Trefferzahl $k$': 'Idadi ya mafanikio iliyoonekana $k$',
+        'Fehler 2. Art zeigen: wahres $p$ =': 'Onyesha kosa la aina ya II: $p$ halisi =',
+        'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Mgawanyo wa binomia chini ya nadharia tete sifuri, pamoja na eneo la kukataa',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -82,6 +88,13 @@ window.BuchSW && BuchSW.add('stochastik', {
         [' · letzte: $h = ', ' · ya mwisho: $h = '], ['$ (gold)', '$ (dhahabu)'],
         ['Mittelwert der $h$: $', 'Wastani wa $h$: $'], ['$ · Standardabweichung der $h$: $', '$ · mkengeuko sanifu wa $h$: $'],
         ['Theorie: $', 'Nadharia: $'], ['$. Viermal so großes $n$ halbiert die Streuung.', '$. $n$ mara nne zaidi inagawanya nusu mtawanyiko.'],
+        // signifikanztest
+        ['$ gegen $H_1\\colon ', '$ dhidi ya $H_1\\colon '], ['Ablehnungsbereich (rot): $', 'Eneo la kukataa (jekundu): $'],
+        ['$ · tatsächliche Irrtumswahrscheinlichkeit $\\approx ', '$ · uwezekano halisi wa kukosea $\\approx '], ['Beobachtet $k = ', 'Imeonekana $k = '],
+        ['<b>$H_0$ wird abgelehnt.</b> Das Ergebnis ist signifikant.', '<b>$H_0$ inakataliwa.</b> Matokeo ni muhimu kitakwimu.'],
+        ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>$H_0$ haikataliwi.</b> Lakini hilo halithibitishi kwamba $H_0$ ni kweli.'],
+        ['Ist in Wahrheit $p = ', 'Ikiwa kwa kweli $p = '], ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (zambarau), $H_0$ inabakizwa kimakosa kwa $\\beta \\approx '],
+        ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (kosa la aina ya II).'],
     ],
     rule: [
         // book sw-1 mathe11-sw:
