@@ -21,6 +21,7 @@ enum Setting {
     static let minPixels: CGFloat = 640     // never capture smaller than this
     static let settle = 1.0                 // screens report several changes in a row
     static let retry = 3.0                  // a lost stream starts again after this
+    static let windowRadius: CGFloat = 15   // measured on macOS 26: the panel's round corners
     static let gripZone: CGFloat = 32       // a press this close to a corner resizes
     static let gripLength: CGFloat = 18
     static let gripInset: CGFloat = 6
@@ -203,11 +204,12 @@ final class MirrorView: NSView {
     private func gripPath() -> CGPath {
         let path = CGMutablePath()
         let (w, h, i, l) = (bounds.width, bounds.height, Setting.gripInset, Setting.gripLength)
+        let radius = Setting.windowRadius - i      // bends parallel to the window's round corner
         let corners: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [(i, i, 1, 1), (w - i, i, -1, 1),
                                                                (i, h - i, 1, -1), (w - i, h - i, -1, -1)]
         for (x, y, dx, dy) in corners {
             path.move(to: CGPoint(x: x + dx * l, y: y))
-            path.addLine(to: CGPoint(x: x, y: y))
+            path.addArc(tangent1End: CGPoint(x: x, y: y), tangent2End: CGPoint(x: x, y: y + dy * l), radius: radius)
             path.addLine(to: CGPoint(x: x, y: y + dy * l))
         }
         return path
