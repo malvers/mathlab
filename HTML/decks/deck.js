@@ -417,8 +417,14 @@ addEventListener('keydown', e => {
   const k = e.key;
   // turning pages by hand pauses Solita - but an arrow while she talks skips: she goes on at the new point
   // (Doc, 03.11.2026: "wenn ich unterwegs die Pfeile benutze hört sie auf zu sprechen" - "ja")
-  // (Shift+arrows show a whole slide built and still pause; during a drum roll the click waits, she too)
+  // (during a drum roll the click waits, she too)
   const talking = narr.playing && !e.shiftKey && /^(Arrow|Page)/.test(k);
+  // Shift+arrows while she talks: a whole slide on or back, and she tells that one from its top
+  // (Doc, 03.11.2026: "Sie hört jetzt einfach auf und das ist Mist")
+  if (narr.playing && e.shiftKey && (k === 'ArrowRight' || k === 'ArrowLeft')) {
+    const d = k === 'ArrowRight' ? 1 : -1, j = seek(si + d, d);
+    if (j >= 0) { narr.stop(); narr.from(j); e.preventDefault(); return; }
+  }
   if (talking && trommel.laeuft()) { e.preventDefault(); return; }
   if (/^(Arrow|Page|Home|End)/.test(k)) narr.stop();
   if (talking) setTimeout(function () { if (!narr.playing) narr.toggle(); }, 0);   // after the turn below
@@ -970,7 +976,14 @@ const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1
 const fullBtn = document.getElementById('full');
 // with the overview on the left (Doc, 30.09.2026: "die auch nach links") - the deck pages still put it in the HUD
 { const ov = document.getElementById('ovbtn'); if (fullBtn && ov && ov.parentNode.id === 'nav') ov.after(fullBtn); }
-const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+// In the frame of js/deck-fullscreen.js ("The Making of" opens in fullscreen at once, Doc, 03.11.2026) the page around the
+// deck holds the fullscreen: it counts as ours, and leaving it ends it there (the frame closes with it)
+const fsHost = (function () {
+  try { return window.frameElement && window.frameElement.closest('.deck-fullscreen') ? parent.document : null; } catch (e) { return null; }
+})();
+const fsIn = d => !!(d && (d.fullscreenElement || d.webkitFullscreenElement));
+const fsOn = () => fsIn(document) || fsIn(fsHost);
+const fsExit = () => { const d = fsIn(document) ? document : fsHost; (d.exitFullscreen || d.webkitExitFullscreen).call(d); };
 // screen.isExtended only exists where the browser can tell (Chrome). The dot on the button says what the
 // screen is doing: orange = not extended, at the board that means mirrored -> Cmd F1 / Win P (mirroring and
 // "no beamer" look the same to the browser, so it also shows on the laptop alone), green = extended and ready
@@ -1044,7 +1057,7 @@ async function screenProbe(){
 }
 function full(){
   const el = document.documentElement;
-  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  if (fsOn()) fsExit();
   // a second screen (Chrome knows): fullscreen goes to the beamer, the presenter view to the laptop
   else if (!PRESENTER && screen.isExtended && window.getScreenDetails) link.present();
   else {
@@ -1055,6 +1068,7 @@ function full(){
 fullBtn.onclick = full;
 document.addEventListener('fullscreenchange', paintFull);
 document.addEventListener('webkitfullscreenchange', paintFull);
+if (fsHost) ['fullscreenchange', 'webkitfullscreenchange'].forEach(t => fsHost.addEventListener(t, paintFull));
 if (screen.addEventListener) screen.addEventListener('change', paintFull);   // beamer plugged in or out
 if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
 else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
@@ -1171,6 +1185,7 @@ const narr = (function () {
     const t = api.playing ? 'Pause (p)' : held >= 0 ? 'Weiter mit Pfeiltaste (p)' : 'Solita erklärt (p)';
     [btn, big].forEach(b => { b.innerHTML = icon; });
     [btn, big, face].forEach(b => { b.title = t; b.setAttribute('aria-label', t); });
+    big.classList.toggle('playing', api.playing);     // its rings rest while she talks (deck.css)
   }
   function run() {
     if (!api.playing) return;
@@ -1267,6 +1282,7 @@ const narr = (function () {
     api.playing = false; if (audio) audio.pause(); audio = null; show();
   };
   api.toggle = toggle;                                // 'p' pressed in the presenter window
+  api.from = resume;                                  // Shift+arrow while she talks: on with that slide
   api.pause = function () { if (api.playing) { halt = true; toggle(); } };   // she stops while Doc comments (deck-kritik.js)
   api.weiter = function () { if (halt) { halt = false; toggle(); } };
   api.clip = function () { return part; };
@@ -1875,7 +1891,7 @@ const link = (function () {
     if (m.t === 'bye') { if (!mine) linked = false; laser.show(m); }
     else if (m.t === 'end') {                        // Esc in the presenter window ended the show
       showing = false; linked = false; mine = false; laser.show(m);
-      if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      if (fsOn()) fsExit();
     }
     else if (m.t === 'play') { if (narr.toggle) narr.toggle(); }
     else if (m.t === 'ani') aniApply(m);                                     // a drawn animation started there

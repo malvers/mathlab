@@ -647,6 +647,13 @@ html.laser-armed #deck{touch-action:none}
 .play-big-label{position:absolute;left:760px;width:200px;top:292px;text-align:center;
   font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--green);
   text-transform:uppercase}
+/* the play button pulses like the one on "The Making of" card (js/buch-titel.css .b-kino-play; Doc, 03.11.2026: "so wabern
+   wie auf der ersten Kachel. Dass klar wird, hier ist der Play-Button") - two rings in turn, still while she talks */
+.play-big:not(.play-face)::before,.play-big:not(.play-face)::after{content:"";position:absolute;inset:0;border-radius:50%;
+  border:2px solid var(--green);box-shadow:0 0 6px var(--green);animation:play-ring 2.2s ease-out infinite;pointer-events:none}
+.play-big:not(.play-face)::after{animation-delay:1.1s}
+.play-big.playing::before,.play-big.playing::after{animation:none;opacity:0}
+@keyframes play-ring{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
 /* slide number typed for a jump (1 7 Enter) */
 #jump{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
   background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.28);color:#0E244E;
