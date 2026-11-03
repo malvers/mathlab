@@ -47,6 +47,12 @@ window.BuchSW && BuchSW.add('stochastik', {
         // unabhaengig (lb1-1): "unvereinbar" = "hayawezi kutokea pamoja" as in sw0, "abhängig" = "tegemezi"
         'Unabhängig machen': 'Yafanye yawe huru', 'Unvereinbar machen': 'Yafanye yasiweze kutokea pamoja',
         'Einheitsquadrat: Anteil von A in B und in nicht B': 'Mraba kizio: sehemu ya A ndani ya B na ndani ya si B',
+        // histo-hero, zufallsgroesse (lb1-2): Zufallsgröße = kigeu cha nasibu, Erwartungswert = thamani tarajiwa, Varianz = variansi,
+        // Standardabweichung = mkengeuko sanifu, Einsatz = dau, Auszahlung = malipo, Gewinn = faida; money as "€1.75" (rule below)
+        'Histogramm einer Wahrscheinlichkeitsverteilung': 'Histogramu ya mgawanyo wa uwezekano', 'Histogramm einer Binomialverteilung': 'Histogramu ya mgawanyo wa binomia',
+        'Drei Münzen': 'Sarafu tatu', 'Augensumme': 'Jumla ya alama', 'Glücksrad': 'Gurudumu la bahati', 'Zufallsgröße': 'Kigeu cha nasibu', 'Einsatz': 'Dau',
+        'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Mgawanyo wa uwezekano kama mchoro wa vipau', 'Spielen:': 'Cheza:',
+        'SPIELE n': 'MICHEZO n', 'MITTELWERT': 'WASTANI', 'ERWARTUNGSWERT': 'THAMANI TARAJIWA', 'LETZTE': 'YA MWISHO',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -78,6 +84,14 @@ window.BuchSW && BuchSW.add('stochastik', {
             '<b>Huru:</b> $B$ itokee au isitokee, sehemu ya $A$ inabaki ile ile. Katika mraba mpaka uko kwenye kimo kile kile katika safu wima zote mbili.'],
         ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
             '<b>Hayawezi kutokea pamoja</b> ($A \\cap B = \\emptyset$), kwa hiyo ni <b>tegemezi</b>: $B$ ikitokea, $A$ haiwezi tena kutokea.'],
+        // zufallsgroesse: the help "$X$ = …." and the results (the euro rule has already turned "1 €" into "€1")
+        ['Augensumme zweier Würfel', 'jumla ya alama za dadu mbili'], ['Augenzahl', 'alama ya dadu'], ['Anzahl Wappen', 'idadi ya vichwa'],
+        ['Gewinn = Auszahlung − Einsatz', 'faida = malipo − dau'], ['Gewinn bei €1 Einsatz', 'faida kwa dau la €1'],
+        [' Auszahlungen €0, €1, €2, €10 mit den Wahrscheinlichkeiten ', ' Malipo €0, €1, €2, €10 kwa uwezekano '],
+        [' Du setzt €1 auf eine Zahl, dann werden drei Würfel geworfen. Für jeden Würfel mit deiner Zahl bekommst du €1 Gewinn, sonst ist der Einsatz weg.',
+            ' Unaweka dau la €1 kwenye namba moja, kisha dadu tatu zinarushwa. Kwa kila dadu inayoonyesha namba yako unapata faida ya €1, vinginevyo dau linapotea.'],
+        ['Erwartungswert: ', 'Thamani tarajiwa: '], ['Varianz: ', 'Variansi: '], [' · Standardabweichung: ', ' · Mkengeuko sanifu: '],
+        [' · Das Spiel ist <b>fair</b>.', ' · Mchezo ni <b>wa haki</b>.'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
@@ -105,6 +119,10 @@ window.BuchSW && BuchSW.add('stochastik', {
         // unabhaengig: "B verändert die Wahrscheinlichkeit von A nach oben" → "B inaongeza uwezekano wa A"
         [/<b>Abhängig:<\/b> \$B\$ verändert die Wahrscheinlichkeit von \$A\$ nach (oben|unten)\./g,
             (m, d) => '<b>Tegemezi:</b> $B$ ' + (d === 'oben' ? 'inaongeza' : 'inapunguza') + ' uwezekano wa $A$.'],
+        // zufallsgroesse: money the Kenyan way, the sign before the euro: "1.75 €" → "€1.75", "-0.25 €" → "-€0.25"
+        [/(^|[^\d.,])([-−]?)(\d+(?:\.\d+)?) €/g, '$1$2€$3'],
+        [/ · Auf lange Sicht <b>(verlierst|gewinnst)<\/b> du im Mittel (\$[^$]*\$) € pro Spiel\./g,
+            (m, w, x) => ' · Kwa muda mrefu, kwa wastani <b>' + (w === 'verlierst' ? 'unapoteza' : 'unapata') + '</b> €' + x + ' kwa kila mchezo.'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ]
