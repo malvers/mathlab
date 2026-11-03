@@ -20,6 +20,10 @@ window.BuchSW && BuchSW.add('vektoren', {
         'Punkte und Verbindungsvektor': 'Nukta na vekta ya kuunganisha', 'Summe und Differenz': 'Jumla na tofauti', 'Vielfaches': 'Kizidisho',
         'Was wird gezeigt?': 'Nini kinaonyeshwa?', 'Mittelpunkt M zeigen': 'Onyesha nukta ya kati M', 'Summe oder Differenz': 'Jumla au tofauti',
         'Faktor $r$': 'Kizidishi $r$',
+        // skalarprodukt, viereck3d (lb5-2): Skalarprodukt = zao la skala (written a · b, rule below), orthogonal = wima, spitz /
+        // stumpf = kali / butu, Raute = rombasi, Viereck = pembenne
+        'spitzer Winkel': 'pembe kali', 'orthogonal': 'wima', 'stumpfer Winkel': 'pembe butu', 'parallel': 'sambamba',
+        'Parallelogramm': 'Msambamba', 'Rechteck': 'Mstatili', 'Raute': 'Rombasi', 'Quadrat': 'Mraba', 'Trapez': 'Trapeza',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -35,6 +39,16 @@ window.BuchSW && BuchSW.add('vektoren', {
             'Kujumlisha maana yake ni kuunganisha $\\vec{b}$ kwenye ncha ya $\\vec{a}$. Jumla ni kiulalo cha msambamba.'],
         ['Ein negativer Faktor dreht die Richtung um.', 'Kizidishi hasi kinageuza mwelekeo.'], ['Mit $r = 0$ entsteht der Nullvektor.', 'Kwa $r = 0$ tunapata vekta sifuri.'],
         [' Die Länge wird mit $|r| = ', ' Urefu unazidishwa kwa $|r| = '], ['$ multipliziert: $|r', '$: $|r'],
+        // skalarprodukt, viereck3d
+        ['$ und $', '$ na $'], [', also $', ', kwa hiyo $'], [' (stumpf: das Skalarprodukt ist negativ)', ' (butu: zao la skala ni hasi)'],
+        [' (spitz: das Skalarprodukt ist positiv)', ' (kali: zao la skala ni chanya)'], [' (parallel, gleiche Richtung)', ' (sambamba, mwelekeo ule ule)'],
+        ['Mit dem Nullvektor gibt es keinen Winkel.', 'Kwa vekta sifuri hakuna pembe.'],
+        ['kein ebenes Viereck: Die vier Punkte liegen nicht in einer Ebene.', 'si pembenne bapa: nukta nne haziko katika bapa moja.'],
+        ['ein <b>Quadrat</b>', '<b>mraba</b>'], ['ein <b>Rechteck</b>', '<b>mstatili</b>'], ['eine <b>Raute</b>', '<b>rombasi</b>'],
+        ['ein <b>Parallelogramm</b>', '<b>msambamba</b>'], ['ein <b>Trapez</b> (ein Paar paralleler Seiten)', '<b>trapeza</b> (jozi moja ya pande sambamba)'],
+        ['ein allgemeines Viereck', 'pembenne ya kawaida'], ['$: gegenüberliegende Seiten parallel und gleich lang', '$: pande zinazokabiliana ni sambamba na zina urefu sawa'],
+        ['$: rechter Winkel bei $A$', '$: pembe mraba kwenye $A$'], ['$: benachbarte Seiten gleich lang', '$: pande jirani zina urefu sawa'],
+        ['$: Diagonalen senkrecht zueinander', '$: viulalo ni wima kwa kila kimoja'], ['$ABCD$ ist ', '$ABCD$ ni '],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
@@ -42,6 +56,12 @@ window.BuchSW && BuchSW.add('vektoren', {
         // book sw-2 mathe12-sw:
         // the coordinate inputs: aria-label "Vektor a, x-Koordinate" / "Punkt A, y-Koordinate"
         [/^(Vektor|Punkt) (\S+), ([xyz])-Koordinate$/, (m, w, n, ax) => (w === 'Vektor' ? 'Vekta ' : 'Nukta ') + n + ', koodineti ya ' + ax],
+        // the scalar product is a · b in Kenyan (and English) schools, German a ∘ b: every " \circ " between two terms; degrees "^\circ"
+        // have no space before and stay
+        [/ \\circ /g, ' \\cdot '],
+        // skalarprodukt: a number times a bracket is a product of two numbers too, "2 \cdot (-1)" → "2 \times (-1)", as the
+        // engine writes "1 \times 2"
+        [/(\d) ?\\cdot ?(?=\(-?\d)/g, '$1 \\times '],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ]
