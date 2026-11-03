@@ -415,7 +415,13 @@ const trommel = (function () {
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
-  if (/^(Arrow|Page|Home|End)/.test(k)) narr.stop();   // turning pages by hand pauses Solita
+  // turning pages by hand pauses Solita - but an arrow while she talks skips: she goes on at the new point
+  // (Doc, 03.11.2026: "wenn ich unterwegs die Pfeile benutze hört sie auf zu sprechen" - "ja")
+  // (Shift+arrows show a whole slide built and still pause; during a drum roll the click waits, she too)
+  const talking = narr.playing && !e.shiftKey && /^(Arrow|Page)/.test(k);
+  if (talking && trommel.laeuft()) { e.preventDefault(); return; }
+  if (/^(Arrow|Page|Home|End)/.test(k)) narr.stop();
+  if (talking) setTimeout(function () { if (!narr.playing) narr.toggle(); }, 0);   // after the turn below
   if (e.shiftKey && (k === 'ArrowRight' || k === 'ArrowLeft')) { jump(k === 'ArrowRight' ? 1 : -1); e.preventDefault(); }
   // not Space: it is the mic's key (Doc, 30.09.2026: "das Space, das die Folien weiterschaltet, nehmen wir raus, denn
   // dafür haben wir ja die Pfeiltasten") - js/solita-frage.js takes it
@@ -1279,7 +1285,16 @@ const narr = (function () {
   // stop the click here: toggle redraws the icon, and the page's click handler would then no
   // longer see the (detached) target inside #hud - it turned the page and paused Solita again
   btn.onclick = function (e) { e.stopPropagation(); toggle(); };
-  big.onclick = face.onclick = function (e) { e.stopPropagation(); toggle(); };
+  // the big button on the title slide starts her talk in fullscreen (Doc, 03.11.2026: "wenn man Solita erklärt Play
+  // drückt bitte in den Fullscreen schalten") - only when it starts her, never on a pause; the presenter view stays a window
+  big.onclick = face.onclick = function (e) {
+    e.stopPropagation();
+    if (!api.playing && !PRESENTER && !fsOn()) {
+      const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) Promise.resolve(req.call(el)).catch(() => {});
+    }
+    toggle();
+  };
   // P belongs to Solita's mic since 23.09.2026 ("shift space und P sollen das Mic starten") - the talk starts
   // and pauses with its button in the HUD and the big one on the slide.
   show();

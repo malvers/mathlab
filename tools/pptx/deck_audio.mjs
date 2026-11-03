@@ -26,6 +26,8 @@ const SAY = { Backpropagation: 'Bäck Propagehschen', Deepfakes: 'Diepfäiks', D
   // a path is spoken with "Schrägstrich" (03.11.2026), the longer key has to come before docalvers.de
   DocPoint: 'Dock Peunt', Doc: 'Dock', 'docalvers\\.de/buch/mathe11': 'Dock Alvers Punkt D E Schrägstrich Buch Schrägstrich Mathe elf',
   'docalvers\\.de': 'Dock Alvers Punkt D E', IT: 'Ai-Tíeh', 'Røde': 'Röde',
+  // "interaktive" came out with the r rolled into the a; Doc picked "inter-aktive" by ear out of five (03.11.2026: "2")
+  'interaktiv(e|en|er|es|em)?': 'inter-aktiv$1',
   Schwenkarm: 'Schwenk-Arm' };   // in one word it came out as "schwarzen Kahn" (Doc and Gemini heard the same)
 const fix = t => Object.entries(SAY).reduce((x, [w, s]) => x.replace(new RegExp('(?<![\\p{L}])' + w + '(?![\\p{L}])', 'gu'), s), t.replace(/\bSolita\b/g, 'Solíta').replace(/\bDOCPAD\b/g, 'Dockpäd'))
   .replace(/\bKI-/g, 'Ka I ').replace(/\bKI\b/g, 'Ka I');   // spelled out, "KI-Text" came out as "Kitext" and "Key Text"
