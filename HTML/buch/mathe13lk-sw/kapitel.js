@@ -22,7 +22,7 @@ window.BUCH = {
         { file: 'lb3-4.html', lb: 'Eneo la kujifunza 3', k: '3.4', title: 'Uunganishaji wa kinamba na magimba ya mzunguko',
           sub: 'Mbinu ya mistatili na kanuni ya trapeza, ujazo wa mzunguko kuzunguka mhimili wa x', when: 'Oktoba · Novemba', ustd: 10 },
         { file: 'lb4.html', lb: 'Eneo la kujifunza 4', k: '4', title: 'Vigeu vya nasibu vyenye mgawanyo wa kawaida',
-          sub: 'Mkunjo wa kengele, fanksheni ya msongamano na ya mgawanyo, thamani tarajiwa, mkengeuko sanifu, kanuni za σ', when: 'Novemba', ustd: 12 },
+          sub: 'Mkunjo wa kengele, fanksheni ya msongamano na fanksheni ya mgawanyo limbikizi, thamani tarajiwa, mkengeuko sanifu, kanuni za σ', when: 'Novemba', ustd: 12 },
         { file: 'lb5-1.html', lb: 'Eneo la kujifunza 5', k: '5.1', title: 'Kundi zima na sampuli',
           sub: 'Kukadiria na kupima, wastani na variansi ya sampuli', when: 'Desemba', ustd: 5 },
         { file: 'lb5-2.html', lb: 'Eneo la kujifunza 5', k: '5.2', title: 'Majaribio ya umuhimu',

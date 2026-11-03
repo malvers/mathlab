@@ -13,7 +13,7 @@ window.BuchSW && BuchSW.add('gy12lk', {
         // book sw-5 mathe13lk-sw:
         // normalverteilung ('Was wird berechnet?' is in js/buch-sw/stochastik.js, which the same page loads)
         'Erwartungswert $\\mu$': 'Thamani tarajiwa $\\mu$', 'Standardabweichung $\\sigma$': 'Mkengeuko sanifu $\\sigma$', '$\\sigma$-Regeln': 'Kanuni za $\\sigma$',
-        'Dichte': 'Msongamano', 'Verteilungsfunktion': 'Fanksheni ya mgawanyo', 'Ansicht': 'Mwonekano',
+        'Dichte': 'Msongamano', 'Verteilungsfunktion': 'Fanksheni ya mgawanyo limbikizi', 'Ansicht': 'Mwonekano',
         'Dichtefunktion der Normalverteilung mit markierter Fläche': 'Fanksheni ya msongamano ya mgawanyo wa kawaida, yenye eneo lililowekwa alama',
         // moivre ('Anzahl der Versuche $n$', 'Trefferwahrscheinlichkeit $p$': js/buch-sw/stochastik.js)
         'Histogramm': 'Histogramu', 'standardisiert': 'iliyosanifishwa', 'erfüllt': 'limetimizwa', 'nicht erfüllt': 'halijatimizwa',
@@ -40,7 +40,7 @@ window.BuchSW && BuchSW.add('gy12lk', {
         // normalverteilung (N(μ; σ²) is a rule)
         ['$ mit $\\mu = ', '$ ambapo $\\mu = '], ['$ und $\\sigma = ', '$ na $\\sigma = '],
         ['Standardisieren: $Z = \\dfrac{X - \\mu}{\\sigma}$ ist standardnormalverteilt.', 'Kusanifisha: $Z = \\dfrac{X - \\mu}{\\sigma}$ ina mgawanyo wa kawaida sanifu.'],
-        ['. Das ist die gelbe Fläche.', '. Hili ndilo eneo la njano.'], ['. Das ist der gelbe Anstieg der Verteilungsfunktion.', '. Hili ndilo ongezeko la njano la fanksheni ya mgawanyo.'],
+        ['. Das ist die gelbe Fläche.', '. Hili ndilo eneo la njano.'], ['. Das ist der gelbe Anstieg der Verteilungsfunktion.', '. Hili ndilo ongezeko la njano la fanksheni ya mgawanyo limbikizi.'],
         // moivre
         ['Erwartungswert $\\mu = n', 'Thamani tarajiwa $\\mu = n'], ['$, Standardabweichung $\\sigma = \\sqrt{', '$, mkengeuko sanifu $\\sigma = \\sqrt{'],
         ['Laplace-Bedingung $\\sigma > 3$: ', 'Sharti la Laplace $\\sigma > 3$: '],
