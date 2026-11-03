@@ -154,3 +154,87 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 
 | Deutsch | Kiswahili | English (Kenya) | Hinweis |
 |---|---|---|---|
+| Ableitung · ableiten | kinyambuo · kunyambua | derivative · differentiate | wie BGY 11 („kinyambuo“); „kunyambua“ als Verb dazu |
+| Stammfunktion | fanksheni asili | antiderivative | „asili“ = Ursprung, wie „Stamm“; kein fester Schulbegriff, Alternative „kinyume cha kinyambuo“ |
+| unbestimmtes · bestimmtes Integral | kiunganishi kisicho dhahiri · kiunganishi dhahiri | indefinite · definite integral | „kiunganishi“ wie BGY 11 (wb3) |
+| integrieren · Integration · Integralrechnung | kuunganisha · uunganishaji · kalkulasi ya kiunganishi | integrate · integration · integral calculus | |
+| Integrationskonstante | konstanti $C$ | constant of integration | Lehnwort; Großbuchstabe $C$ bleibt, weil $c$ in $y = mx + c$ schon belegt ist |
+| Potenz-, Faktor-, Summen-, Produktregel | kanuni ya kipeo · ya kizidishi · ya jumla · ya zao | power · constant multiple · sum · product rule | „vipeo“ wie „sheria za vipeo“ (laws of indices) |
+| ganzrationale Funktion | polinomia | polynomial | |
+| waagerechte Tangente | tanjenti mlalo | horizontal tangent | |
+| Hochpunkt · Tiefpunkt | nukta ya juu · nukta ya chini | maximum · minimum point | mit (maximum)/(minimum) in Klammern |
+| e-Funktion · Winkelfunktionen | fanksheni ya e · fanksheni za trigonometria | exponential function $\mathrm{e}^x$ · trigonometric functions | |
+| CAS | CAS (programu ya aljebra ya kompyuta) | CAS | |
+| Bestand · rekonstruierter Bestand · Anfangsbestand | kiasi · kiasi kilichoundwa upya · kiasi cha mwanzo | amount · reconstructed amount · initial amount | beschreibend |
+| Änderungsrate · Zuflussrate · Gesamtänderung | kiwango cha badiliko · kiwango cha uingiaji · badiliko la jumla | rate of change · rate of inflow · total change | |
+| Hauptsatz der Differenzial- und Integralrechnung | nadharia kuu ya kalkulasi | fundamental theorem of calculus | |
+| Integrationsgrenzen · obere/untere Grenze | mipaka (mpaka wa juu / wa chini) | limits of integration | |
+| Intervall · Intervalladditivität · Linearität | muda $[a, b]$ · kugawanya muda · sifa ya mstari | additivity over intervals · linearity | beschreibend |
+| stetig · Grenzwert | endelevu · kikomo | continuous · limit | |
+| Flächeninhalt · Flächenfunktion | eneo · fanksheni ya eneo | area · area function | |
+| Betrag · exakter Wert | thamani kamili · thamani sahihi | absolute value · exact value | „thamani kamili“ wie in BGY 11 (Betrag einer Zahl); der exakte Wert heißt deshalb „thamani sahihi“ |
+| Schnittstelle · Schnittpunkt | thamani ya $x$ ya makutano · nukta ya makutano | $x$-value of intersection · point of intersection | „makutano“ wie BGY 11 |
+| Differenzfunktion | fanksheni ya tofauti | difference function | |
+| Extrempunkte | nukta za kugeuka | turning points | |
+| Parabelsegment · Querschnitt | kipande cha parabola · sehemu ya mkato | parabolic segment · cross-section | |
+| Grenzkosten · Fixkosten | gharama ya ziada · gharama zisizobadilika | marginal cost · fixed costs | |
+| numerische Integration · Messwerte | uunganishaji wa kinamba · vipimo | numerical integration · measurements | |
+| Rechteckmethode (Mittelpunkte) · Trapezmethode | mbinu ya mistatili · kanuni ya trapeza | mid-ordinate rule · trapezium rule | KCSE-Namen in Klammern; „vipande“ (Streifen) wie BGY 11 |
+| Stützstellen · Streifenmitten | thamani za mgawanyo · katikati ya vipande | ordinates · midpoints | |
+| linksgekrümmt · rechtsgekrümmt | imepinda kuelekea juu · kuelekea chini | concave up · concave down | |
+| Sehne | kamba | chord | |
+| Mittelwert einer Funktion | thamani ya wastani | mean value | |
+| Leistung (elektrisch) · Energie · Arbeit · Kraft | nguvu ya umeme · nishati · kazi · nguvu | power · energy · work · force | „nguvu“ allein ist Kraft |
+| Keplersche Fassregel | kanuni ya mapipa ya Kepler | Simpson’s rule | |
+| Grundgesamtheit · Stichprobe · Stichprobenumfang | kundi zima · sampuli · ukubwa wa sampuli | population · sample · sample size | Alternative „jamii lengwa“ (Forschungsmethodik); „kundi zima“ passt auch für Schrauben |
+| repräsentativ · Verzerrung | wakilishi · upendeleo | representative · bias | |
+| beurteilende Statistik · Schätzen · Testen | takwimu za kukisia · kukadiria · kupima | inferential statistics · estimating · testing | |
+| Anteil · Stichprobenanteil | uwiano · uwiano wa sampuli $h$ | proportion · sample proportion | |
+| Stichprobenmittel · Stichprobenvarianz | wastani wa sampuli $\bar{x}$ · variansi ya sampuli $s^2$ | sample mean · sample variance | „variansi“ Lehnwort |
+| Standardabweichung · Streuung | mkengeuko sanifu · mtawanyiko | standard deviation · spread | |
+| Binomialverteilung · Erwartungswert · Zufallsgröße | mgawanyo wa binomia · thamani tarajiwa · kigeu nasibu | binomial distribution · expected value · random variable | |
+| Signifikanztest · Signifikanzniveau · signifikant | jaribio la umuhimu · kiwango cha umuhimu $\alpha$ · muhimu kitakwimu | significance test · significance level · significant | |
+| Hypothese · Nullhypothese · Gegenhypothese | nadharia tete · nadharia tete sifuri $H_0$ · nadharia tete mbadala $H_1$ | hypothesis · null · alternative hypothesis | „nadharia tete“ wie in der Forschungsmethodik auf Suaheli; Alternative „dhanio“ |
+| Testgröße · Treffer | kigeu cha jaribio · fanikio (mafanikio) | test statistic · success | |
+| Ablehnungsbereich · kritischer Wert · Entscheidungsregel | eneo la kukataa $\overline{A}$ · thamani ya mpaka · kanuni ya uamuzi | critical (rejection) region · critical value · decision rule | Zeichen $\overline{A}$ bleibt wie im Widget |
+| H₀ verwerfen · nicht verwerfen | kukataa $H_0$ · kutokataa $H_0$ | reject · do not reject $H_0$ | |
+| einseitig (links/rechts) · zweiseitig | upande mmoja (wa kushoto / wa kulia) · pande mbili | one-tailed (left/right) · two-tailed | |
+| Fehler 1. Art · Fehler 2. Art | kosa la aina ya I · kosa la aina ya II | Type I · Type II error | |
+| Irrtumswahrscheinlichkeit | uwezekano wa kukosea | probability of error | |
+| Vektor · Nullvektor · Komponente · Betrag | vekta · vekta sifuri $\vec{0}$ · kijenzi · ukubwa (urefu) | vector · zero vector · component · magnitude | Spaltenvektoren $\begin{pmatrix} 1 \\ 2 \\ 1 \end{pmatrix}$ wie in Kenia, Punkte $(1, 2, 1)$ |
+| Gerade · Ebene | mstari · bapa (mabapa) | line · plane | „bapa“ wie in „jiometri bapa“; Alternative „uso bapa“ |
+| Parametergleichung einer Geraden | mlinganyo wa vekta $\vec{r} = \vec{p} + t\,\vec{u}$ | vector equation of a line | $\vec{r}$ statt $\vec{x}$ wie in englischen Büchern (auch in den Widgets: Regel in vektoren.js) |
+| Parameterform einer Ebene | umbo la vigezo $\vec{r} = \vec{a} + \lambda\,\vec{u} + \mu\,\vec{v}$ | parametric (vector) form of a plane | $\lambda, \mu$ statt $r, s$ (sonst Zusammenstoß mit $\vec{r}$) |
+| Stützpunkt · Stützvektor · Ortsvektor · Richtungsvektor · Spannvektoren | nukta ya msingi · vekta ya mahali ya nukta ya msingi · vekta ya mahali · vekta ya mwelekeo · vekta za mwelekeo | point on the line · its position vector · position vector · direction vector(s) | „vekta ya mahali“ wie BGY 12 |
+| Punktprobe · Spurpunkte | jaribio la nukta · nukta za kukata | checking a point · trace points / intercepts | |
+| Koordinate · Koordinatenebene · Koordinatenachse | kiwianishi · bapa la viwianishi · mhimili wa viwianishi | coordinate · coordinate plane · axis | |
+| Skalarprodukt · Vektorprodukt | zao la skala $\vec{a} \cdot \vec{b}$ · zao la vekta $\vec{a} \times \vec{b}$ | dot (scalar) product · cross (vector) product | Punkt statt $\circ$, auch in den Widgets (Regel in vektoren.js) |
+| Normalenvektor · senkrecht | vekta ya normali · wima kwa | normal vector · perpendicular to | |
+| Parallelogramm · Strecke | msambamba · kipande cha mstari | parallelogram · line segment | |
+| analytische Geometrie · kartesisch | jiometri ya uchanganuzi · ya kartesia | analytic geometry · Cartesian | |
+| Koordinatengleichung · Achsenabschnittsform | mlinganyo wa kartesia · umbo la vikatizo | Cartesian equation · intercept form | |
+| Lagebeziehungen | mikao | relative positions | |
+| identisch · (echt) parallel · schneidend · windschief | inaambatana · sambamba (na tofauti) · inakatana · inapitana bila kukutana | coincident · parallel (distinct) · intersecting · skew | „skew“ in Klammern beim ersten Mal |
+| Gleichsetzen · Unbekannte | kulinganisha · visivyojulikana | equating · unknowns | |
+| Koeffizient | kigawo | coefficient | wie „kigawo“ (Faktor) in BGY 11 |
+| Schnittwinkel | pembe ya makutano | angle of intersection | |
+| Prisma · Pyramide · Pyramidenstumpf | prizimu · piramidi · piramidi iliyokatwa | prism · pyramid · frustum | |
+| Oberfläche · Mantel · Grundfläche · Deckfläche | eneo la uso · uso wa pembeni · (eneo la) kitako $G$ · uso wa juu | surface area · lateral surface · base (area) · top face | Zeichen $O$, $G$ bleiben wie im Widget |
+| Volumen · Höhe · Spitze · Kante | ujazo · kimo · kilele · ukingo | volume · height · apex · edge | |
+| Elle (Längenmaß) · Papyrus | dhiraa · mafunjo | cubit · papyrus | |
+| Funktionenschar · Ortskurve | familia ya fanksheni $f_a$ · njia ya nukta | family of functions · locus | |
+| Extremwertproblem · Lotfußpunkt | tatizo la thamani ya juu / ya chini kabisa · kitako cha wima | optimisation problem · foot of the perpendicular | beschreibend |
+| Lösbarkeit · Sonderfälle | kutatulika · hali maalum | solvability · special cases | |
+| Kosten · Erlös · Gewinn | gharama $K$ · mapato $E$ · faida $G$ | cost · revenue · profit | Buchstaben $K$, $E$, $G$ bleiben wie im Widget (Kenia schriebe $C$, $R$, $P$) |
+| Gewinnschwelle · Gewinngrenze · Gewinnmaximum | kizingiti cha faida · kikomo cha faida · faida kubwa zaidi | break-even point · profit limit · maximum profit | |
+| Stückkosten · Grenzerlös · Preisuntergrenze | gharama kwa kipande · mapato ya ziada · bei ya chini kabisa | unit cost · marginal revenue · price floor | |
+| Wendepunkt | nukta ya mgeuko | point of inflection | |
+| Abiturvorbereitung · Abituraufgabe · Checkliste | maandalizi ya Abitur · swali la Abitur · orodha ya ukaguzi | exam preparation · exam question · checklist | „Abitur“ bleibt, erklärt auf der Startseite (wie KCSE) |
+| Analysis · Stochastik · Geometrie (Gebiete) | kalkulasi · takwimu na uwezekano · jiometri | calculus · statistics and probability · geometry | |
+| ohne / mit Hilfsmittel(n) | bila kikokotoo / kwa kikokotoo | without / with a calculator | wie BGY 11 |
+| Operatoren (berechne, begründe, zeige, deute) | maneno ya amri (hesabu, eleza sababu, onyesha, fasiri) | command words | |
+| Folgefehler | makosa yanayofuata (alama za kufuatia) | follow-through (marks) | Kenias Bewertungspraxis |
+| Sattelpunkt | nukta tandiko $T$ | saddle point (stationary point of inflection) | wie BGY 12 |
+| Binomialkoeffizient | koefisienti ya binomia ${}^nC_k$ | binomial coefficient ⁿCₖ | wie BGY 12 (Kenia schreibt ⁿCₖ, nicht $\binom{n}{k}$) |
+| Hoch-, Tief-, Wendepunkt als Buchstabe | $J$ (juu) · $C$ (chini) · $M$ (mgeuko) | maximum · minimum · inflection point | wie BGY 12 (Regel in analysis.js) |
+| Oberfläche (Pyramide, Prisma) | eneo la uso wote $A_J$ | total surface area | $J$ = jumla; $A$ ist dort eine Ecke (sw-merge) |
