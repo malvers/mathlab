@@ -238,9 +238,12 @@
                     '2027-02-24', '2027-03-10']),
                 'FOS25-2': twice(['2026-11-11', '2026-11-25', '2026-12-09', '2027-01-06', '2027-01-20',
                     '2027-02-03', '2027-03-03']),
-                /* 27.10. ("Projekt") and 22.12. are cancelled in Untis */
-                'FOW25-1': twice(['2026-11-10', '2026-11-24', '2026-12-08', '2027-01-05', '2027-01-19',
-                    '2027-02-02', '2027-03-02'])
+                /* 27.10. ("Projekt") and 22.12. are cancelled in Untis. Three talks per appointment from 24.11. on, so all
+                   eleven come before the Notenstopp Mon 18.01.2027 (Doc, 03.11.2026: "notfalls ... 3 Vortraege halten
+                   und Period"); 10.11. keeps its two beside the Klassenarbeit KI. */
+                'FOW25-1': ['2026-11-10', '2026-11-10', '2026-11-24', '2026-11-24', '2026-11-24', '2026-12-08', '2026-12-08',
+                    '2026-12-08', '2027-01-05', '2027-01-05', '2027-01-05']
+                    .concat(twice(['2027-01-19', '2027-02-02', '2027-03-02']))
             },
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3A', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
