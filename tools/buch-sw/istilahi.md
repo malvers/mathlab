@@ -117,7 +117,7 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Änderungsrate · Zuflussrate · Gesamtänderung | kiwango cha badiliko · kiwango cha uingiaji · badiliko la jumla | rate of change · rate of inflow · total change | |
 | Hauptsatz der Differenzial- und Integralrechnung | nadharia kuu ya kalkulasi | fundamental theorem of calculus | |
 | Integrationsgrenzen · obere/untere Grenze | mipaka (mpaka wa juu / wa chini) | limits of integration | |
-| Intervalladditivität · Linearität | kujumlisha vipindi · sifa ya mstari | additivity over intervals · linearity | beschreibend |
+| Intervall · Intervalladditivität · Linearität | muda $[a, b]$ · kugawanya muda · sifa ya mstari | additivity over intervals · linearity | beschreibend |
 | stetig · Grenzwert | endelevu · kikomo | continuous · limit | |
 | Flächeninhalt · Flächenfunktion | eneo · fanksheni ya eneo | area · area function | |
 | Betrag | thamani halisi | absolute value | Alternative „thamani kamili“; „kamili“ ist aber schon „namba kamili“ (integer) |
@@ -126,3 +126,11 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Extrempunkte | nukta za kugeuka | turning points | |
 | Parabelsegment · Querschnitt | kipande cha parabola · sehemu ya mkato | parabolic segment · cross-section | |
 | Grenzkosten · Fixkosten | gharama ya ziada · gharama zisizobadilika | marginal cost · fixed costs | |
+| numerische Integration · Messwerte | uunganishaji wa kinamba · vipimo | numerical integration · measurements | |
+| Rechteckmethode (Mittelpunkte) · Trapezmethode | mbinu ya mistatili · kanuni ya trapeza | mid-ordinate rule · trapezium rule | KCSE-Namen in Klammern; „vipande“ (Streifen) wie BGY 11 |
+| Stützstellen · Streifenmitten | thamani za mgawanyo · katikati ya vipande | ordinates · midpoints | |
+| linksgekrümmt · rechtsgekrümmt | imepinda kuelekea juu · kuelekea chini | concave up · concave down | |
+| Sehne | kamba | chord | |
+| Mittelwert einer Funktion | thamani ya wastani | mean value | |
+| Leistung (elektrisch) · Energie · Arbeit · Kraft | nguvu ya umeme · nishati · kazi · nguvu | power · energy · work · force | „nguvu“ allein ist Kraft |
+| Keplersche Fassregel | kanuni ya mapipa ya Kepler | Simpson’s rule | |
