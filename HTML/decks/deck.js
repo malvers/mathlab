@@ -595,9 +595,18 @@ const hoverTail = (function () {
     const dx = e.clientX - d.x, dy = e.clientY - d.y;
     const help = document.getElementById('help');
     if (help && !help.hidden) return;                // the click handler closes the help
-    if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) { narr.stop(); if (dx < 0) next(); else prev(); }
-    else if (Math.abs(dx) < 12 && Math.abs(dy) < 12 && e.timeStamp - d.t < 600) { narr.stop(); next(); }
+    if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) turn(dx < 0 ? next : prev);
+    else if (Math.abs(dx) < 12 && Math.abs(dy) < 12 && e.timeStamp - d.t < 600) turn(next);
   }, true);
+  // a finger while Solita talks skips as the arrows do: she goes on at the new point (Doc, 03.11.2026, on the phone:
+  // "wenn ich da links und rechts auf die Folie tippe, dann hört Solita wieder auf zu sprechen"); during a drum roll
+  // the turn waits, she too
+  function turn(go) {
+    const talking = narr.playing;
+    if (talking && trommel.laeuft()) return;
+    narr.stop(); go();
+    if (talking) setTimeout(function () { if (!narr.playing) narr.toggle(); }, 0);
+  }
 })();
 // Chrome's own menu (save image, copy image, inspect ...) never comes up in a deck: a right click or a long press
 // on the board opened it over the slide (Doc, 28.09.2026: "das dumme Menu von Chrome ... unbedingt überschreiben
@@ -1134,6 +1143,22 @@ if (fsHost) ['fullscreenchange', 'webkitfullscreenchange'].forEach(t => fsHost.a
 if (screen.addEventListener) screen.addEventListener('change', paintFull);   // beamer plugged in or out
 if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
 else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+// On a phone or tablet the fullscreen has no Esc and the footer buttons are small: a round x in the top right corner
+// leaves it (Doc, 03.11.2026: "ein Icon, wo man tippen kann, dass der Fullscreen-Modus verlassen wird ... der blockiert
+// mein Telefon, ich komme hier nicht mehr raus"). That corner lies beside the slide on a phone - the bars at the sides
+// across, the room above it upright. deck.css shows it only in fullscreen on a touch screen; in the frame of
+// "The Making of" it closes the frame, and Solita with it.
+(function () {
+  const x = document.createElement('button');
+  x.id = 'fs-x';
+  x.type = 'button';
+  x.title = 'Vollbild verlassen';
+  x.setAttribute('aria-label', 'Vollbild verlassen');
+  x.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+    + 'aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  x.addEventListener('click', function (e) { e.stopPropagation(); if (fsOn()) fsExit(); });
+  document.body.appendChild(x);
+})();
 
 // #7 in the URL opens slide 7 fully built - handy for linking a single slide
 function fromHash(){
