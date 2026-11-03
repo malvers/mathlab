@@ -27,6 +27,10 @@ window.BuchSW && BuchSW.add('integral', {
         // integral
         'Bestimmtes Integral zwischen zwei Grenzen': 'Kiunganishi dhahiri kati ya mipaka miwili',
         'v in m/s': 'v kwa m/s', 's in m': 's kwa m',
+        // zwischenflaeche
+        'Parabel und Gerade': 'Parabola na mstari', 'Kubik und Parabel': 'Kipeo cha tatu na parabola', 'Sinus und Kosinus': 'Sine na cosine',
+        'Funktionen': 'Fanksheni', 'Fläche zwischen zwei Graphen': 'Eneo kati ya grafu mbili',
+        'Zu wenige Schnittstellen im Bild.': 'Thamani za makutano zilizo kwenye picha ni chache mno.',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -41,6 +45,8 @@ window.BuchSW && BuchSW.add('integral', {
         ['Flächeninhalt zwischen Graph und $x$-Achse: $A \\approx ', 'Eneo kati ya grafu na mhimili wa $x$: $A \\approx '],
         [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · Kiunganishi ni kidogo zaidi, kwa sababu maeneo chini ya mhimili (mekundu) yanahesabiwa kuwa hasi.'],
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Tahadhari: $a > b$ inabadilisha ishara.'],
+        // zwischenflaeche
+        ['$ · Schnittstellen: ', '$ · thamani za makutano: '],
     ],
     rule: [
         // book sw-3 mathe13-sw:

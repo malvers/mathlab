@@ -113,3 +113,16 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Hochpunkt · Tiefpunkt | nukta ya juu · nukta ya chini | maximum · minimum point | mit (maximum)/(minimum) in Klammern |
 | e-Funktion · Winkelfunktionen | fanksheni ya e · fanksheni za trigonometria | exponential function $\mathrm{e}^x$ · trigonometric functions | |
 | CAS | CAS (programu ya aljebra ya kompyuta) | CAS | |
+| Bestand · rekonstruierter Bestand · Anfangsbestand | kiasi · kiasi kilichoundwa upya · kiasi cha mwanzo | amount · reconstructed amount · initial amount | beschreibend |
+| Änderungsrate · Zuflussrate · Gesamtänderung | kiwango cha badiliko · kiwango cha uingiaji · badiliko la jumla | rate of change · rate of inflow · total change | |
+| Hauptsatz der Differenzial- und Integralrechnung | nadharia kuu ya kalkulasi | fundamental theorem of calculus | |
+| Integrationsgrenzen · obere/untere Grenze | mipaka (mpaka wa juu / wa chini) | limits of integration | |
+| Intervalladditivität · Linearität | kujumlisha vipindi · sifa ya mstari | additivity over intervals · linearity | beschreibend |
+| stetig · Grenzwert | endelevu · kikomo | continuous · limit | |
+| Flächeninhalt · Flächenfunktion | eneo · fanksheni ya eneo | area · area function | |
+| Betrag | thamani halisi | absolute value | Alternative „thamani kamili“; „kamili“ ist aber schon „namba kamili“ (integer) |
+| Schnittstelle · Schnittpunkt | thamani ya $x$ ya makutano · nukta ya makutano | $x$-value of intersection · point of intersection | „makutano“ wie BGY 11 |
+| Differenzfunktion | fanksheni ya tofauti | difference function | |
+| Extrempunkte | nukta za kugeuka | turning points | |
+| Parabelsegment · Querschnitt | kipande cha parabola · sehemu ya mkato | parabolic segment · cross-section | |
+| Grenzkosten · Fixkosten | gharama ya ziada · gharama zisizobadilika | marginal cost · fixed costs | |
