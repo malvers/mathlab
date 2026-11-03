@@ -44,6 +44,9 @@ window.BuchSW && BuchSW.add('stochastik', {
         'Strategie': 'Mkakati', 'Spiele': 'Michezo', 'Autos': 'Magari', 'Gewinnquote': 'Kiwango cha ushindi',
         'du: bleiben': 'wewe: baki', 'du: wechseln': 'wewe: badili', 'Rechner: bleiben': 'kompyuta: baki', 'Rechner: wechseln': 'kompyuta: badili',
         // book sw-2 mathe12-sw:
+        // unabhaengig (lb1-1): "unvereinbar" = "hayawezi kutokea pamoja" as in sw0, "abhängig" = "tegemezi"
+        'Unabhängig machen': 'Yafanye yawe huru', 'Unvereinbar machen': 'Yafanye yasiweze kutokea pamoja',
+        'Einheitsquadrat: Anteil von A in B und in nicht B': 'Mraba kizio: sehemu ya A ndani ya B na ndani ya si B',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -69,6 +72,12 @@ window.BuchSW && BuchSW.add('stochastik', {
         ['TÜR', 'MLANGO'], ['Tür', 'Mlango'], ['Gewonnen – das Auto! ', 'Umeshinda – gari! '], ['Leider eine Ziege. ', 'Pole, ni mbuzi. '],
         ['Du hast gewechselt.', 'Ulibadili.'], ['Du bist geblieben.', 'Ulibaki.'],
         // book sw-2 mathe12-sw:
+        // unabhaengig
+        ['$ und $', '$ na $'],
+        ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.',
+            '<b>Huru:</b> $B$ itokee au isitokee, sehemu ya $A$ inabaki ile ile. Katika mraba mpaka uko kwenye kimo kile kile katika safu wima zote mbili.'],
+        ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
+            '<b>Hayawezi kutokea pamoja</b> ($A \\cap B = \\emptyset$), kwa hiyo ni <b>tegemezi</b>: $B$ ikitokea, $A$ haiwezi tena kutokea.'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
@@ -93,6 +102,9 @@ window.BuchSW && BuchSW.add('stochastik', {
             'Mwendeshaji anajua gari liko wapi, na anafungua mlango $1: mbuzi. Utabaki au utabadili?'],
         [/Bei Tür (\d) bleiben/g, 'Baki kwenye mlango $1'], [/Zu Tür (\d) wechseln/g, 'Hamia mlango $1'],
         // book sw-2 mathe12-sw:
+        // unabhaengig: "B verändert die Wahrscheinlichkeit von A nach oben" → "B inaongeza uwezekano wa A"
+        [/<b>Abhängig:<\/b> \$B\$ verändert die Wahrscheinlichkeit von \$A\$ nach (oben|unten)\./g,
+            (m, d) => '<b>Tegemezi:</b> $B$ ' + (d === 'oben' ? 'inaongeza' : 'inapunguza') + ' uwezekano wa $A$.'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ]
