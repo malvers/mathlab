@@ -20,6 +20,8 @@ window.BuchSW && BuchSW.add('bgy13lk', {
         'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'Grafu ya f(x) = x⁴ + p·x² + q pamoja na sifuri zake',
         // matrixinverse (H2.1; 'Nächster Schritt' is in js/buch-sw/lgs.js, which the same page loads)
         'nicht invertierbar': 'haina kinyume', 'Beispielmatrix': 'Matriki ya mfano', 'Alle Schritte': 'Hatua zote', 'Von vorn': 'Anza upya',
+        // leontief (H2.2): the sectors kilimo (K), viwanda (V), huduma (H); 'Summe' is 'Jumla' in js/buch-sw.js
+        'Markt': 'Soko',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -39,6 +41,15 @@ window.BuchSW && BuchSW.add('bgy13lk', {
         ['Die dritte Zeile von $A$ ist die Summe der ersten beiden. Dann hat $A \\cdot \\vec{x} = \\vec{b}$ entweder keine oder unendlich viele Lösungen, nie genau eine.',
             'Safu mlalo ya tatu ya $A$ ni jumla ya zile mbili za kwanza. Basi $A \\cdot \\vec{x} = \\vec{b}$ ama haina suluhisho ama ina mengi bila kikomo, kamwe si moja tu.'],
         ['Weiter mit „Nächster Schritt“.', 'Endelea kwa “Hatua inayofuata”.'],
+        // leontief (ME = vizio; the identity matrix I)
+        ['Endnachfrage Landwirtschaft', 'Mahitaji ya mwisho ya kilimo'], ['Endnachfrage Industrie', 'Mahitaji ya mwisho ya viwanda'],
+        ['Endnachfrage Dienstleistung', 'Mahitaji ya mwisho ya huduma'], ['Landwirtschaft', 'kilimo'], ['Industrie', 'viwanda'], ['Dienstleistung', 'huduma'],
+        ['Zeile: liefernder Sektor, Spalte: empfangender Sektor. ', 'Safu mlalo: sekta inayouza, safu wima: sekta inayopokea. '],
+        ['. Summe = Produktion, alle Angaben gerundet in ME.', '. Jumla = uzalishaji, thamani zote zimekadiriwa, kwa vizio.'],
+        ['Technologiematrix $A = ', 'Matriki ya teknolojia $A = '], ['$, Leontief-Inverse $(E - A)^{-1} \\approx ', '$, kinyume cha Leontief $(I - A)^{-1} \\approx '],
+        ['$\\vec{x} = (E - A)^{-1} \\cdot \\vec{y} \\approx ', '$\\vec{x} = (I - A)^{-1} \\cdot \\vec{y} \\approx '],
+        ['. Jede Zeile der Tabelle geht auf: Lieferungen an die drei Sektoren plus Endnachfrage ergeben die Produktion. ',
+            '. Kila safu mlalo ya jedwali inalingana: mauzo kwa sekta tatu pamoja na mahitaji ya mwisho yanatoa uzalishaji. '],
     ],
     rule: [
         // book sw-5 mathe13lk-sw:
@@ -50,5 +61,10 @@ window.BuchSW && BuchSW.add('bgy13lk', {
         [/Zeilen (I{1,3}) und (I{1,3}) tauschen, damit in Spalte (\d) oben keine Null steht\./g, (m, a, b, c) => 'Badilishana safu mlalo ' + a + ' na ' + b + ', ili juu katika safu wima ' + c + ' kusiwe na sifuri.'],
         [/Zeile (I{1,3}) durch \$([^$]*)\$ teilen: Das Pivotelement wird 1\./g, (m, r, p) => 'Gawanya safu mlalo ' + r + ' kwa $' + p + '$: kipengele egemeo (pivot) kinakuwa 1.'],
         [/In Spalte (\d) Nullen erzeugen: \$/g, (m, c) => 'Unda sifuri katika safu wima ' + c + ': $'],
+        // leontief: the slider values "200 ME" → "vizio 200", the total sentence, the sector letters of the table (K, V, H; I is the identity matrix)
+        [/^(\d[\d,]*) ME$/, 'vizio $1'],
+        [/Insgesamt werden ([\d,]+) ME erzeugt, damit ([\d,]+) ME den Markt erreichen\./g, 'Kwa jumla vizio $1 vinazalishwa, ili vizio $2 vifike sokoni.'],
+        [/^(<p class="b-help" style="margin:0 0 6px">Zeile: liefernder Sektor[\s\S]*)$/, m => m.replace(/<th>L<\/th>/g, '<th>K</th>').replace(/<th>I<\/th>/g, '<th>V</th>')
+            .replace(/<th>D<\/th>/g, '<th>H</th>').replace('L = Landwirtschaft, I = Industrie, D = Dienstleistung', 'K = Landwirtschaft, V = Industrie, H = Dienstleistung')],
     ]
 });
