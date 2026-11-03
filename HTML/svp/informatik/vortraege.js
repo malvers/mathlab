@@ -215,7 +215,7 @@
            lb3 "Projekt Webtechnologie", wb "Objektorientierte Programmierung" */
         fos12: {
             page: 'fos12.html', back: 'Informatik FOS 12',
-            sub: 'Lernbereich 1 \u201eDatenbanken\u201c, Lernbereich 2 \u201eAlgorithmen und Programme\u201c, Lernbereich 3A \u201eWebtechnologie\u201c + Wahlbereich \u201eOOP\u201c',
+            sub: 'Lernbereich 1 \u201eDatenbanken\u201c, Lernbereich 2 \u201eAlgorithmen und Programme\u201c, Lernbereich 3A \u201eWebtechnologie\u201c + Wahlbereich \u201eOOP\u201c \u00b7 Wer erst nach dem Notenstopp (Mo 18.01.2027) dran ist, l\u00e4dt die Pr\u00e4sentation bis Fr 15.01.2027 hoch \u2013 bewertet wird sie im 1. Halbjahr',
             switchLabel: 'Klasse wechseln',
             klassen: [['a', 'FOS25-1'], ['b', 'FOS25-2']],
             /* Talk dates by PLACE, one list per Lerngruppe (key = the group key in
