@@ -248,3 +248,43 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 
 | Deutsch | Kiswahili | English (Kenya) | Hinweis |
 |---|---|---|---|
+| Leistungskurs · Wahlpflicht 1 / 2 | Leistungskurs (kozi ya kiwango cha juu) · eneo la hiari 1 / 2 | advanced course · elective 1 / 2 | „Leistungskurs“ bleibt deutsch, auf der Startseite erklärt; Kapitel W1.1 … W2.3 heißen H1.1 … H2.3 (H = hiari), wie H.1 in mathe13-sw |
+| Exponent | kipeo | exponent, index | wie die Widgets seit BGY 11 („ongeza kipeo kwa 1“), nicht „kielelezo“ |
+| Grundintegrale · Integrand | viunganishi vya msingi · kinachounganishwa | standard integrals · integrand | beschreibend |
+| Untersumme · Obersumme | jumla ya chini $U_n$ · jumla ya juu $O_n$ | lower · upper sum | Buchstaben bleiben wie im Widget |
+| orientierter Flächeninhalt | eneo lenye ishara | signed area | |
+| Integralfunktion | fanksheni ya kiunganishi $I_a$ | integral function | |
+| Rotationskörper · Kreisscheibe · Hohlkörper | gimba la mzunguko (magimba) · diski · gimba lenye uwazi ndani | solid of revolution · disc · hollow solid | „diski“ für die Scheiben, damit „vipande“ die Streifen bleiben |
+| stetige Zufallsgröße · Dichtefunktion | kigeu cha nasibu endelevu · fanksheni ya msongamano | continuous random variable · probability density function | |
+| Verteilungsfunktion $\Phi$ | fanksheni ya mgawanyo limbikizi | cumulative distribution function | wie mathe12lk-sw |
+| Normalverteilung · Standardnormalverteilung · Glockenkurve | mgawanyo wa kawaida $N(\mu, \sigma^2)$ · mgawanyo wa kawaida sanifu · mkunjo wa kengele | normal · standard normal distribution · bell curve | Komma statt Semikolon in $N(\mu, \sigma^2)$ und $B(n, p)$, auch im Widget (Regel in gy12lk.js) |
+| Standardisieren · Stetigkeitskorrektur · Laplace-Bedingung | kusanifisha · marekebisho ya mwendelezo · sharti la Laplace | standardising · continuity correction · Laplace condition | |
+| Ablehnungsbereich (LK) | eneo la kukataa $K$ | critical region | Zeichen $K$ wie im deutschen LK-Buch (BGY 13: $\overline{A}$); Mengen mit Kommas $\{10, \ldots, 50\}$ |
+| Hessesche Normalform · Abstand mit Vorzeichen | umbo la normali la Hesse (HNF) · umbali wenye ishara | Hesse normal form · signed distance | in Kenia nicht im Lehrplan, darum mit englischem Namen |
+| Lotfußpunkt · Lotgerade | kitako cha wima $F$ · mstari wa wima | foot of the perpendicular · perpendicular line | „kitako“ ist sonst die Grundfläche; der Zusatz „cha wima“ trennt beides |
+| Schnittgerade · Spurgerade · Ebenenbüschel | mstari wa makutano · mstari wa kukata · kifurushi cha mabapa | line of intersection · trace line · pencil of planes | |
+| Satteldach · First | paa lenye miteremko miwili · ukingo wa juu | gable roof · ridge | |
+| Drehmatrix · Additionstheoreme | matriki ya mzunguko $D_\varphi$ · fomula za pembe mchanganyiko | rotation matrix · compound angle formulae | Buchstabe $D$ bleibt wie im Widget |
+| Typ einer Matrix | daraja $2 \times 3$ | order $2 \times 3$ | statt $(2, 3)$, auch im Widget matrixprodukt (Regel in gy11.js) |
+| Einheitsmatrix | matriki ya utambulisho $I$ | identity matrix | auch in den Widgets $E \to I$ (Regeln in bgy13lk.js); $E_1$, $E_2$ (Endprodukte) und $E$ (Erlös) bleiben |
+| verkettet · Nullmatrix · Diagonalmatrix | zinaoana · matriki sifuri · matriki ya kilalo | compatible · zero matrix · diagonal matrix | |
+| inverse Matrix · invertierbar · singulär | matriki kinyume · ina kinyume · haina kinyume (singular) | inverse · invertible · singular | |
+| Determinante | diterminanti | determinant | Lehnwort; „kibainishi“ ist schon die Diskriminante |
+| Kommutativgesetz · Assoziativgesetz | sheria ya kubadilishana · sheria ya kuambatanisha | commutative · associative law | |
+| Falksches Schema · Zeilenumformung · Pivotelement | mpangilio wa Falk · hatua ya safu mlalo · kipengele egemeo | Falk scheme · row operation · pivot | |
+| Gozintograph · Bedarfsmatrix · Gesamtbedarfsmatrix | grafu ya Gozinto · matriki ya mahitaji · matriki ya mahitaji yote | Gozinto graph · requirement matrix · total requirement matrix | |
+| Rohstoff · Zwischenprodukt · Endprodukt · Produktionsplan | malighafi · bidhaa ya kati · bidhaa ya mwisho · mpango wa uzalishaji | raw material · intermediate · final product · production plan | |
+| Mengeneinheit (ME) | kizio (vizio) | unit | „vizio 12“, auch in den Widgets (Regeln in gy11lk.js, bgy13lk.js) |
+| Deckungsbeitrag · variable Stückkosten | mchango wa faida · gharama zinazobadilika kwa kipande | contribution margin · variable unit costs | |
+| Leontief-Modell · Technologiematrix · Leontief-Inverse | modeli ya Leontief · matriki ya teknolojia · kinyume cha Leontief $(I - A)^{-1}$ | Leontief model · technology matrix · Leontief inverse | |
+| Endnachfrage · Input-Output-Tabelle | mahitaji ya mwisho · jedwali la pembejeo na matokeo | final demand · input-output table | |
+| Landwirtschaft · Industrie · Dienstleistung | kilimo $K$ · viwanda $V$ · huduma $H$ | agriculture · industry · services | Buchstaben im Widget leontief (Regel); $I$ bleibt die Einheitsmatrix |
+| Übergangsmatrix · Übergangsgraph · stochastische Matrix | matriki ya mpito · grafu ya mpito · matriki ya kistokastiki | transition matrix · transition graph · stochastic matrix | |
+| Grenzmatrix · Fixvektor · absorbierender Zustand | matriki ya kikomo $G$ · vekta tuli $\vec{v}$ · hali ya kufyonza | limit matrix · fixed (steady-state) vector · absorbing state | |
+| Eier · Larven · Käfer | mayai · mabuu · mende | eggs · larvae · beetles | auch im Widget uebergang |
+| Markow-Kette | mnyororo wa Markov | Markov chain | |
+| biquadratische Gleichung · Substitution · Rücksubstitution | mlinganyo bikwadratiki · kuweka badala · kurudisha badala | biquadratic equation · substitution · back-substitution | „bikwadratiki“ Lehnwort |
+| kritische Werte · Fallunterscheidung | thamani za mpaka · kutofautisha hali | critical values · case analysis | „thamani ya mpaka“ wie der kritische Wert beim Test |
+| Hüllkurve · Fadenbild | mkunjo bahasha · picha ya nyuzi | envelope · string art | |
+| Extremwerte (Kapiteltitel 7.2) | maupeo | extreme values | wie „upeo“ in mathe12-sw |
+| Brötchen · Brezel · Müsli | mkate mdogo · andazi (maandazi) · muesli | bread roll · mandazi · muesli | Brezel durch den kenianischen Andazi ersetzt; Müsli-Sorten „Classic“ und „Matunda“ |
