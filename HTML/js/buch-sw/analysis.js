@@ -70,7 +70,7 @@ window.BuchSW && BuchSW.add('analysis', {
         ["$\\int (ax+b)^n\\,\\mathrm{d}x = \\dfrac{(ax+b)^{n+1}}{a\\,(n+1)} + C$: Potenzregel für die Klammer, dann durch die innere Ableitung teilen.", "$\\int (ax+b)^n\\,\\mathrm{d}x = \\dfrac{(ax+b)^{n+1}}{a\\,(n+1)} + C$: kanuni ya vipeo kwa mabano, kisha gawanya kwa kinyambuo cha ndani."],
         // kurve (abi)
         [" · Sattelpunkt bei $x = ", " · nukta ya mgeuko tambarare (saddle point) kwenye $x = "],
-        ["Wendepunkt $W", "Nukta ya mgeuko $W"],
+        ["Wendepunkt", "Nukta ya mgeuko"],
         ["$: Dort ist $f''(x) = 0$ und die Steigung ", "$: hapo $f''(x) = 0$ na mwinamo ni "],
         ["am kleinsten", "mdogo kabisa"],
         ["am größten", "mkubwa kabisa"],

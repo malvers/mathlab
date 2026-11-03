@@ -15,7 +15,7 @@ window.BuchSW && BuchSW.add('vektoren', {
         // book sw-3 mathe13-sw:
         // the 3D stage and raum-hero (helpers of the module, BGY 12 has them too)
         'Räumliches Koordinatensystem': 'Mfumo wa viwianishi wa pande tatu', 'Ziehen zum Drehen': 'Buruta ili kuzungusha',
-        'Räumliches Koordinatensystem mit einem Punkt und seinem Ortsvektor': 'Mfumo wa viwianishi wa pande tatu wenye nukta moja na vekta yake ya nafasi',
+        'Räumliches Koordinatensystem mit einem Punkt und seinem Ortsvektor': 'Mfumo wa viwianishi wa pande tatu wenye nukta moja na vekta yake ya mahali',
         // gerade3d
         'Parameter $t$': 'Kigezo $t$', 'Der Richtungsvektor darf nicht der Nullvektor sein.': 'Vekta ya mwelekeo haiwezi kuwa vekta sifuri.',
         // ebene3d

@@ -153,7 +153,7 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Gerade · Ebene | mstari · bapa (mabapa) | line · plane | „bapa“ wie in „jiometri bapa“; Alternative „uso bapa“ |
 | Parametergleichung einer Geraden | mlinganyo wa vekta $\vec{r} = \vec{p} + t\,\vec{u}$ | vector equation of a line | $\vec{r}$ statt $\vec{x}$ wie in englischen Büchern (auch in den Widgets: Regel in vektoren.js) |
 | Parameterform einer Ebene | umbo la vigezo $\vec{r} = \vec{a} + \lambda\,\vec{u} + \mu\,\vec{v}$ | parametric (vector) form of a plane | $\lambda, \mu$ statt $r, s$ (sonst Zusammenstoß mit $\vec{r}$) |
-| Stützpunkt · Stützvektor · Richtungsvektor · Spannvektoren | nukta ya msingi · vekta ya msingi · vekta ya mwelekeo · vekta za mwelekeo | point on the line · position vector · direction vector · direction vectors | |
+| Stützpunkt · Stützvektor · Ortsvektor · Richtungsvektor · Spannvektoren | nukta ya msingi · vekta ya mahali ya nukta ya msingi · vekta ya mahali · vekta ya mwelekeo · vekta za mwelekeo | point on the line · its position vector · position vector · direction vector(s) | „vekta ya mahali“ wie BGY 12 |
 | Punktprobe · Spurpunkte | jaribio la nukta · nukta za kukata | checking a point · trace points / intercepts | |
 | Koordinate · Koordinatenebene · Koordinatenachse | kiwianishi · bapa la viwianishi · mhimili wa viwianishi | coordinate · coordinate plane · axis | |
 | Skalarprodukt · Vektorprodukt | zao la skala $\vec{a} \cdot \vec{b}$ · zao la vekta $\vec{a} \times \vec{b}$ | dot (scalar) product · cross (vector) product | Punkt statt $\circ$, auch in den Widgets (Regel in vektoren.js) |
@@ -183,3 +183,5 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Operatoren (berechne, begründe, zeige, deute) | maneno ya amri (hesabu, eleza sababu, onyesha, fasiri) | command words | |
 | Folgefehler | makosa yanayofuata (alama za kufuatia) | follow-through (marks) | Kenias Bewertungspraxis |
 | Sattelpunkt | nukta ya mgeuko tambarare | saddle point (stationary point of inflection) | |
+| Binomialkoeffizient | koefisienti ya binomia ${}^nC_k$ | binomial coefficient ⁿCₖ | wie BGY 12 (Kenia schreibt ⁿCₖ, nicht $\binom{n}{k}$) |
+| Hoch-, Tief-, Wendepunkt als Buchstabe | $J$ (juu) · $C$ (chini) · $M$ (mgeuko) | maximum · minimum · inflection point | wie BGY 12 (Regel in analysis.js) |
