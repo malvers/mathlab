@@ -20,6 +20,13 @@ window.BuchSW && BuchSW.add('analysis', {
         // grenzwert (lb2-1): Grenzwert = kikomo, waagerechte / senkrechte Asymptote = asimptoti mlalo / wima, Loch = tundu
         'Annäherung, Schritt $k$': 'Kukaribia, hatua $k$', 'Graph mit Annäherung an einen Grenzwert': 'Grafu inayokaribia kikomo',
         'Annäherung:': 'Kukaribia:', 'Richtung': 'Mwelekeo', '$x$ links': '$x$ kushoto', '$x$ rechts': '$x$ kulia',
+        // sekante, ableitungsgraph (lb2-2): Sekante = sekanti, Tangente = tanjenti, Steigung = mwinamo, f′ = "f dashi"
+        'Abstand $h$ von $P$ zu $Q$': 'Umbali $h$ kutoka $P$ hadi $Q$', 'Tangente zeigen': 'Onyesha tanjenti', 'Tangente ausblenden': 'Ficha tanjenti',
+        'Sekante durch P und Q nähert sich der Tangente': 'Sekanti inayopita P na Q inakaribia tanjenti',
+        'Ganzen Graphen von f′ zeigen': 'Onyesha grafu nzima ya f′', 'Spur löschen': 'Futa alama',
+        'Oben: f mit Tangente. Ziehe den Punkt P. Unten: Jede Tangentensteigung wird zu einem Punkt des Graphen von f′.':
+            'Juu: f pamoja na tanjenti. Vuta nukta P. Chini: kila mwinamo wa tanjenti unakuwa nukta ya grafu ya f′.',
+        'Graph von f mit Tangente': 'Grafu ya f pamoja na tanjenti', 'Graph der Ableitung f Strich': 'Grafu ya kinyambuo f dashi',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -56,6 +63,10 @@ window.BuchSW && BuchSW.add('analysis', {
         ['Bei $x = 0$ ist $f$ nicht definiert. Die Werte kommen trotzdem beliebig nah an 1 heran.', 'Kwenye $x = 0$, $f$ haijafasiliwa. Hata hivyo thamani zinakaribia 1 kadiri tunavyotaka.'],
         ['Der Graph pendelt um die $x$-Achse, die Ausschläge werden immer kleiner.', 'Grafu inayumba kuzunguka mhimili wa $x$, na mayumbo yanazidi kuwa madogo.'],
         ['$ für $', '$ kwa $'], ['Waagerechte Asymptote: $y = ', 'Asimptoti mlalo: $y = '],
+        // sekante, ableitungsgraph
+        ['$ mit $h = ', '$ ambapo $h = '], ['Sekantensteigung (Differenzenquotient): $', 'Mwinamo wa sekanti (uwiano wa tofauti): $'],
+        ['Tangentensteigung: $f', 'Mwinamo wa tanjenti: $f'], ['· Für $h \\to 0$ wird aus der Sekante die Tangente.', '· Kwa $h \\to 0$ sekanti inakuwa tanjenti.'],
+        ['· Mach $h$ kleiner.', '· Punguza $h$.'], ['$ · Steigung in $P', '$ · Mwinamo kwenye $P'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
