@@ -17,6 +17,9 @@ window.BuchSW && BuchSW.add('analysis', {
         // the cover of the start page (BGY 12)
         'Titelbild: Kurve mit Wendetangente und Ableitung, Binomialverteilung und ein Vektor im Raum':
             'Picha ya jalada: mkunjo wenye tanjenti kwenye nukta ya mgeuko na kinyambuo chake, mgawanyo wa binomia na vekta katika nafasi',
+        // grenzwert (lb2-1): Grenzwert = kikomo, waagerechte / senkrechte Asymptote = asimptoti mlalo / wima, Loch = tundu
+        'Annäherung, Schritt $k$': 'Kukaribia, hatua $k$', 'Graph mit Annäherung an einen Grenzwert': 'Grafu inayokaribia kikomo',
+        'Annäherung:': 'Kukaribia:', 'Richtung': 'Mwelekeo', '$x$ links': '$x$ kushoto', '$x$ rechts': '$x$ kulia',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -44,6 +47,15 @@ window.BuchSW && BuchSW.add('analysis', {
         ['$: erst die Stammfunktion von $\\sin$, dann durch die innere Ableitung $a$ teilen.', '$: kwanza fanksheni asili ya $\\sin$, kisha gawanya kwa kinyambuo cha ndani $a$.'],
         ['$: Potenzregel für die Klammer, dann durch die innere Ableitung teilen.', '$: kanuni ya kipeo kwa mabano, kisha gawanya kwa kinyambuo cha ndani.'],
         // book sw-2 mathe12-sw:
+        // grenzwert
+        ['links gegen $-\\infty$, rechts gegen $+\\infty$: kein Grenzwert, senkrechte Asymptote $x = 1$',
+            'inaelekea $-\\infty$ upande wa kushoto na $+\\infty$ upande wa kulia: hakuna kikomo, asimptoti wima $x = 1$'],
+        ['wächst über alle Grenzen: $f(x) \\to \\infty$, kein Grenzwert', 'inakua bila kikomo: $f(x) \\to \\infty$, hakuna kikomo'],
+        ['An der Stelle $x = 1$ ist $f$ nicht definiert, der Graph hat dort ein Loch. Der Grenzwert existiert trotzdem: Kürzen gibt $',
+            'Kwenye nukta $x = 1$, $f$ haijafasiliwa, na grafu ina tundu hapo. Hata hivyo kikomo kipo: kurahisisha kunatoa $'],
+        ['Bei $x = 0$ ist $f$ nicht definiert. Die Werte kommen trotzdem beliebig nah an 1 heran.', 'Kwenye $x = 0$, $f$ haijafasiliwa. Hata hivyo thamani zinakaribia 1 kadiri tunavyotaka.'],
+        ['Der Graph pendelt um die $x$-Achse, die Ausschläge werden immer kleiner.', 'Grafu inayumba kuzunguka mhimili wa $x$, na mayumbo yanazidi kuwa madogo.'],
+        ['$ für $', '$ kwa $'], ['Waagerechte Asymptote: $y = ', 'Asimptoti mlalo: $y = '],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
