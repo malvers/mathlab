@@ -23,7 +23,9 @@ const SAY = { Backpropagation: 'Bäck Propagehschen', Deepfakes: 'Diepfäiks', D
   // "Widdschets" came out as "Witschets"); IT alone is "it", and Doc wants it English, /aɪ tiː/ ("Ei wie das Ei, T wie tea"):
   // Doc picked "Ai-Tíeh" by ear out of four (02.11.2026: "Ganz klar 3"), the stress on the T as in English; "Eitíe" still leaned
   // on the I, a separate "Tie" is read as English "tie". In the deck it is said as IT-Company, IT-Firma kept the German stress
-  DocPoint: 'Dock Peunt', Doc: 'Dock', 'docalvers\\.de': 'Dock Alvers Punkt D E', IT: 'Ai-Tíeh', 'Røde': 'Röde',
+  // a path is spoken with "Schrägstrich" (03.11.2026), the longer key has to come before docalvers.de
+  DocPoint: 'Dock Peunt', Doc: 'Dock', 'docalvers\\.de/buch/mathe11': 'Dock Alvers Punkt D E Schrägstrich Buch Schrägstrich Mathe elf',
+  'docalvers\\.de': 'Dock Alvers Punkt D E', IT: 'Ai-Tíeh', 'Røde': 'Röde',
   Schwenkarm: 'Schwenk-Arm' };   // in one word it came out as "schwarzen Kahn" (Doc and Gemini heard the same)
 const fix = t => Object.entries(SAY).reduce((x, [w, s]) => x.replace(new RegExp('(?<![\\p{L}])' + w + '(?![\\p{L}])', 'gu'), s), t.replace(/\bSolita\b/g, 'Solíta').replace(/\bDOCPAD\b/g, 'Dockpäd'))
   .replace(/\bKI-/g, 'Ka I ').replace(/\bKI\b/g, 'Ka I');   // spelled out, "KI-Text" came out as "Kitext" and "Key Text"
