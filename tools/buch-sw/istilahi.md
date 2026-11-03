@@ -170,3 +170,10 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Oberfläche · Mantel · Grundfläche · Deckfläche | eneo la uso · uso wa pembeni · (eneo la) kitako $G$ · uso wa juu | surface area · lateral surface · base (area) · top face | Zeichen $O$, $G$ bleiben wie im Widget |
 | Volumen · Höhe · Spitze · Kante | ujazo · kimo · kilele · ukingo | volume · height · apex · edge | |
 | Elle (Längenmaß) · Papyrus | dhiraa · mafunjo | cubit · papyrus | |
+| Funktionenschar · Ortskurve | familia ya fanksheni $f_a$ · njia ya nukta | family of functions · locus | |
+| Extremwertproblem · Lotfußpunkt | tatizo la thamani ya juu / ya chini kabisa · kitako cha wima | optimisation problem · foot of the perpendicular | beschreibend |
+| Lösbarkeit · Sonderfälle | kutatulika · hali maalum | solvability · special cases | |
+| Kosten · Erlös · Gewinn | gharama $K$ · mapato $E$ · faida $G$ | cost · revenue · profit | Buchstaben $K$, $E$, $G$ bleiben wie im Widget (Kenia schriebe $C$, $R$, $P$) |
+| Gewinnschwelle · Gewinngrenze · Gewinnmaximum | kizingiti cha faida · kikomo cha faida · faida kubwa zaidi | break-even point · profit limit · maximum profit | |
+| Stückkosten · Grenzerlös · Preisuntergrenze | gharama kwa kipande · mapato ya ziada · bei ya chini kabisa | unit cost · marginal revenue · price floor | |
+| Wendepunkt | nukta ya mgeuko | point of inflection | |
