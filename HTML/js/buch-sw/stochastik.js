@@ -59,6 +59,9 @@ window.BuchSW && BuchSW.add('stochastik', {
         'Signifikanzniveau': 'Kiwango cha umuhimu', 'Beobachtete Trefferzahl $k$': 'Idadi ya mafanikio iliyoonekana $k$',
         'Fehler 2. Art zeigen: wahres $p$ =': 'Onyesha kosa la aina ya II: $p$ halisi =',
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Mgawanyo wa binomia chini ya nadharia tete sifuri, pamoja na eneo la kukataa',
+        // binomial (abi)
+        "Anzahl der Versuche $n$": "Idadi ya majaribio $n$", "Trefferwahrscheinlichkeit $p$": "Uwezekano wa fanikio $p$", "Was wird berechnet?": "Kinahesabiwa nini?",
+        "Histogramm der Binomialverteilung": "Histogramu ya mgawanyo wa binomia",
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -95,6 +98,11 @@ window.BuchSW && BuchSW.add('stochastik', {
         ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>$H_0$ haikataliwi.</b> Lakini hilo halithibitishi kwamba $H_0$ ni kweli.'],
         ['Ist in Wahrheit $p = ', 'Ikiwa kwa kweli $p = '], ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (zambarau), $H_0$ inabakizwa kimakosa kwa $\\beta \\approx '],
         ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (kosa la aina ya II).'],
+        // binomial (abi)
+        ["$X$ ist binomialverteilt mit $n = ", "$X$ ina mgawanyo wa binomia wenye $n = "],
+        ["$ und $p = ", "$ na $p = "],
+        ["Erwartungswert $\\mu", "Thamani tarajiwa $\\mu"],
+        ["$ · Standardabweichung $", "$ · mkengeuko sanifu $"],
     ],
     rule: [
         // book sw-1 mathe11-sw:

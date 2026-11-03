@@ -17,6 +17,11 @@ window.BuchSW && BuchSW.add('analysis', {
         "Funktionenschar": "Familia ya fanksheni", "Ortskurve der Extrempunkte zeigen": "Onyesha njia ya nukta za kugeuka", "Funktionenschar mit Ortskurve": "Familia ya fanksheni pamoja na njia ya nukta", "Parameter $a$": "Kigezo $a$",
         "Verkaufspreis $p$ (€ pro Stück)": "Bei ya kuuza $p$ (€ kwa kipande)", "x in Stück": "x kwa vipande", "Kosten, Erlös und Gewinn": "Gharama, mapato na faida",
         "Karton mit ausgeschnittenen Ecken": "Kisanduku chenye kona zilizokatwa", "Gehege an einer Mauer": "Uzio kando ya ukuta", "Mauer": "Ukuta",
+        // kurve (abi)
+        "$a$ (vor $x^3$)": "$a$ (mbele ya $x^3$)", "$b$ (vor $x^2$)": "$b$ (mbele ya $x^2$)", "$c$ (vor $x$)": "$c$ (mbele ya $x$)",
+        "Zeige auch:": "Onyesha pia:", "nur f": "f tu", "f′ und f″": "f′ na f″",
+        "Ableitungen zeigen": "Onyesha vinyambuo", "Graph einer Funktion dritten Grades mit Extrem- und Wendepunkten": "Grafu ya fanksheni ya daraja la tatu yenye nukta za kugeuka na za mgeuko", "Intervall": "Muda",
+        "konstant": "haibadiliki", "steigt ↗": "inaongezeka ↗", "fällt ↘": "inapungua ↘",
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -63,6 +68,13 @@ window.BuchSW && BuchSW.add('analysis', {
         ["Lineare Verkettung: $\\int \\mathrm{e}^{ax+b}\\,\\mathrm{d}x = \\tfrac1a\\,\\mathrm{e}^{ax+b} + C$. Probe: Die Kettenregel liefert den Faktor $a$, $\\tfrac1a$ hebt ihn auf.", "Mnyororo wa mstari: $\\int \\mathrm{e}^{ax+b}\\,\\mathrm{d}x = \\tfrac1a\\,\\mathrm{e}^{ax+b} + C$. Ukaguzi: kanuni ya mnyororo inatoa kizidishi $a$, na $\\tfrac1a$ inakifuta."],
         ["$\\int \\sin(ax+b)\\,\\mathrm{d}x = -\\tfrac1a \\cos(ax+b) + C$: erst die Stammfunktion von $\\sin$, dann durch die innere Ableitung $a$ teilen.", "$\\int \\sin(ax+b)\\,\\mathrm{d}x = -\\tfrac1a \\cos(ax+b) + C$: kwanza fanksheni asili ya $\\sin$, kisha gawanya kwa kinyambuo cha ndani $a$."],
         ["$\\int (ax+b)^n\\,\\mathrm{d}x = \\dfrac{(ax+b)^{n+1}}{a\\,(n+1)} + C$: Potenzregel für die Klammer, dann durch die innere Ableitung teilen.", "$\\int (ax+b)^n\\,\\mathrm{d}x = \\dfrac{(ax+b)^{n+1}}{a\\,(n+1)} + C$: kanuni ya vipeo kwa mabano, kisha gawanya kwa kinyambuo cha ndani."],
+        // kurve (abi)
+        [" · Sattelpunkt bei $x = ", " · nukta ya mgeuko tambarare (saddle point) kwenye $x = "],
+        ["Wendepunkt $W", "Nukta ya mgeuko $W"],
+        ["$: Dort ist $f''(x) = 0$ und die Steigung ", "$: hapo $f''(x) = 0$ na mwinamo ni "],
+        ["am kleinsten", "mdogo kabisa"],
+        ["am größten", "mkubwa kabisa"],
+        ["Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.", "Kwa $a = 0$, $f$ ni parabola (au mstari) bila nukta ya mgeuko."],
     ],
     rule: [
         // book sw-2 mathe12-sw:

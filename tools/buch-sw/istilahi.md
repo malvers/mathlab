@@ -177,3 +177,9 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Gewinnschwelle · Gewinngrenze · Gewinnmaximum | kizingiti cha faida · kikomo cha faida · faida kubwa zaidi | break-even point · profit limit · maximum profit | |
 | Stückkosten · Grenzerlös · Preisuntergrenze | gharama kwa kipande · mapato ya ziada · bei ya chini kabisa | unit cost · marginal revenue · price floor | |
 | Wendepunkt | nukta ya mgeuko | point of inflection | |
+| Abiturvorbereitung · Abituraufgabe · Checkliste | maandalizi ya Abitur · swali la Abitur · orodha ya ukaguzi | exam preparation · exam question · checklist | „Abitur“ bleibt, erklärt auf der Startseite (wie KCSE) |
+| Analysis · Stochastik · Geometrie (Gebiete) | kalkulasi · takwimu na uwezekano · jiometri | calculus · statistics and probability · geometry | |
+| ohne / mit Hilfsmittel(n) | bila kikokotoo / kwa kikokotoo | without / with a calculator | wie BGY 11 |
+| Operatoren (berechne, begründe, zeige, deute) | maneno ya amri (hesabu, eleza sababu, onyesha, fasiri) | command words | |
+| Folgefehler | makosa yanayofuata (alama za kufuatia) | follow-through (marks) | Kenias Bewertungspraxis |
+| Sattelpunkt | nukta ya mgeuko tambarare | saddle point (stationary point of inflection) | |
