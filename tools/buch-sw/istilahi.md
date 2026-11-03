@@ -165,3 +165,8 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | identisch · (echt) parallel · schneidend · windschief | inaambatana · sambamba (na tofauti) · inakatana · inapitana bila kukutana | coincident · parallel (distinct) · intersecting · skew | „skew“ in Klammern beim ersten Mal |
 | Gleichsetzen · Unbekannte | kulinganisha · visivyojulikana | equating · unknowns | |
 | Koeffizient | kigawo | coefficient | wie „kigawo“ (Faktor) in BGY 11 |
+| Schnittwinkel | pembe ya makutano | angle of intersection | |
+| Prisma · Pyramide · Pyramidenstumpf | prizimu · piramidi · piramidi iliyokatwa | prism · pyramid · frustum | |
+| Oberfläche · Mantel · Grundfläche · Deckfläche | eneo la uso · uso wa pembeni · (eneo la) kitako $G$ · uso wa juu | surface area · lateral surface · base (area) · top face | Zeichen $O$, $G$ bleiben wie im Widget |
+| Volumen · Höhe · Spitze · Kante | ujazo · kimo · kilele · ukingo | volume · height · apex · edge | |
+| Elle (Längenmaß) · Papyrus | dhiraa · mafunjo | cubit · papyrus | |

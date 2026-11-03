@@ -26,6 +26,9 @@ window.BuchSW && BuchSW.add('vektoren', {
         // geradenlage
         'schneidend': 'inakatana', 'parallel': 'sambamba', 'identisch': 'inaambatana', 'windschief': 'inapitana bila kukutana',
         'Richtungsvektoren dürfen nicht der Nullvektor sein.': 'Vekta za mwelekeo haziwezi kuwa vekta sifuri.',
+        // pyramide
+        'Pyramide': 'Piramidi', 'Prisma (schief möglich)': 'Prizimu (inaweza kuinama)', 'Körper': 'Umbo', 'Grundkante $a$': 'Ukingo wa kitako $a$',
+        'Höhe $h$': 'Kimo $h$', 'Verschiebung der Spitze in $x$': 'Kuhamisha kilele kwa mwelekeo wa $x$',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -49,6 +52,13 @@ window.BuchSW && BuchSW.add('vektoren', {
         ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Si sambamba. Kulinganisha kunatoa $t = '], ['$: <b>schneidend</b> im Punkt $S(', '$: <b>inakatana</b> kwenye nukta $S('],
         ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ',
             'Si sambamba na mfumo wa milinganyo hauna suluhisho: <b>inapitana bila kukutana</b>. Umbali mfupi zaidi (mstari mwekundu wa vistari) $\\approx '],
+        // pyramide
+        ['Grundfläche $G', 'Eneo la kitako $G'], ['$, Spitze $S(', '$, kilele $S('], ['$, Höhe $h = ', '$, kimo $h = '], ['$ (rot)', '$ (nyekundu)'],
+        ['Volumen $V', 'Ujazo $V'], [' · Mantel (4 Dreiecke, je $', ' · uso wa pembeni (pembetatu 4, kila moja $'],
+        [' · Mantel (4 Parallelogramme, je $', ' · uso wa pembeni (misambamba 4, kila mmoja $'],
+        ['Oberfläche $O = ', 'Eneo la uso $O = '], [' (Prinzip von Cavalieri: auch schief)', ' (kanuni ya Cavalieri: hata ikiinama)'],
+        [' · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', ' · Ukihamisha kilele kwa mlalo, ujazo unabaki ule ule, uso wa pembeni haubaki.'],
+        ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, kuhamishwa kwa uso wa juu $\\vec{w} = '],
     ],
     rule: [
         // book sw-2 mathe12-sw:
