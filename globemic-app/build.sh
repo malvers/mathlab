@@ -9,7 +9,7 @@ APP="/Applications/GlobeMic.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-swiftc -O -o "$APP/Contents/MacOS/GlobeMic" main.swift ../docbar-app/docbarclient.swift -framework Cocoa -framework CoreAudio -framework ServiceManagement
+swiftc -O -o "$APP/Contents/MacOS/GlobeMic" main.swift ../docbar-app/docbarclient.swift -framework Cocoa -framework CoreAudio -framework ServiceManagement -framework AVFoundation -framework Speech
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -23,9 +23,11 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>1.0</string>
   <key>CFBundleVersion</key><string>1</string>
-  <key>LSMinimumSystemVersion</key><string>14.4</string>
+  <key>LSMinimumSystemVersion</key><string>26.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHumanReadableCopyright</key><string>Dr. Michael R. Alvers</string>
+  <key>NSMicrophoneUsageDescription</key><string>DocMic records while you hold Globe and writes it down on this Mac.</string>
+  <key>NSSpeechRecognitionUsageDescription</key><string>DocMic writes your dictation down on this Mac.</string>
 </dict>
 </plist>
 PLIST
