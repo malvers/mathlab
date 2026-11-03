@@ -39,6 +39,14 @@ window.BuchSW && BuchSW.add('analysis', {
         'Intervall': 'Muda', 'konstant': 'haibadiliki', 'steigt ↗': 'inaongezeka ↗', 'fällt ↘': 'inapungua ↘',
         // tangente (lb2-5): Normale = normali, Berührpunkt = nukta ya mguso
         'Tangente und Normale an einen Graphen': 'Tanjenti na normali ya grafu',
+        // steckbrief, optimieren (lb2-6): Steckbrief = fanksheni kutokana na masharti, Ansatz = fanksheni ya kuanzia, Zielfunktion =
+        // fanksheni lengwa, Nebenbedingung = sharti la ziada; the surface of the tin is A (Kenyan), not O (rule below)
+        'Parabel durch 3 Punkte': 'Parabola kupitia nukta 3', 'Kubisch: Extrempunkt + 2 Punkte': 'Daraja la tatu: nukta ya kugeuka + nukta 2',
+        'Kubisch: Wendepunkt mit Tangente + Punkt': 'Daraja la tatu: nukta ya mgeuko na tanjenti + nukta', 'Bedingungen': 'Masharti',
+        'Steigung im Wendepunkt $m$': 'Mwinamo kwenye nukta ya mgeuko $m$', 'Funktion aus Bedingungen': 'Fanksheni kutokana na masharti',
+        'Schachtel': 'Boksi', 'Dose': 'Mkebe', 'Zaun an der Mauer': 'Uzio kando ya ukuta', 'Problem': 'Tatizo', 'Zielfunktion': 'Fanksheni lengwa',
+        'Lösung mit der Ableitung': 'Suluhisho kwa kinyambuo', 'x in cm': 'x kwa cm', 'V in cm³': 'V kwa cm³', 'r in cm': 'r kwa cm',
+        'O in cm²': 'A kwa cm²', 'x in m': 'x kwa m', 'A in m²': 'A kwa m²',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -91,6 +99,23 @@ window.BuchSW && BuchSW.add('analysis', {
         // tangente
         ['$ · Berührpunkt $P', '$ · nukta ya mguso $P'], ['Tangente: $', 'Tanjenti: $'],
         ['Normale (senkrecht zur Tangente, $m_n = -\\tfrac{1}{m_t}$): $', 'Normali (wima kwa tanjenti, $m_n = -\\tfrac{1}{m_t}$): $'],
+        // steckbrief
+        ['Lösung: $f(x) = ', 'Suluhisho: $f(x) = '], ['Ansatz: $f(x) = ', 'Fanksheni ya kuanzia: $f(x) = '], ['Probe: $', 'Uthibitisho: $'],
+        ['Achtung: Bei $E$ ist $f\'\'(x) = 0$, das ist ein Sattelpunkt, kein Extrempunkt.', 'Tahadhari: kwenye $K$, $f\'\'(x) = 0$; hiyo ni nukta tandiko, si nukta ya kugeuka.'],
+        ['< 0$, also ein Hochpunkt.', '< 0$, kwa hiyo ni nukta ya juu.'], ['> 0$, also ein Tiefpunkt.', '> 0$, kwa hiyo ni nukta ya chini.'],
+        ['Mit diesen Bedingungen hat das Gleichungssystem keine eindeutige Lösung. Zwei Punkte mit gleichem $x$?',
+            'Kwa masharti haya mfumo wa milinganyo hauna suluhisho moja tu. Je, kuna nukta mbili zenye $x$ ile ile?'],
+        // optimieren (the engine has already written "2 \times 15")
+        ['Aus einem Karton von 30 cm × 20 cm werden an den Ecken Quadrate mit der Seite $x$ ausgeschnitten und die Ränder hochgeklappt. Für welches $x$ wird das Volumen der offenen Schachtel am größten?',
+            'Kutoka kwenye karatasi ngumu ya cm 30 × cm 20, kwenye pembe zake miraba yenye upande $x$ inakatwa na kingo zinakunjwa juu. Kwa $x$ ipi ujazo wa boksi lisilo na mfuniko ni mkubwa kabisa?'],
+        ['Eine zylindrische Dose soll 1 Liter fassen ($V = \\pi r^2 h = 1000\\,\\text{cm}^3$). Für welchen Radius $r$ braucht man am wenigsten Blech?',
+            'Mkebe wa silinda unapaswa kubeba lita 1 ($V = \\pi r^2 h = 1000\\,\\text{cm}^3$). Kwa nusukipenyo $r$ kipi unahitaji bati kidogo kabisa?'],
+        ['Mit 60 m Zaun soll an einer Mauer ein rechteckiges Gehege abgesteckt werden. Die Mauer bildet eine Seite. Wie groß wird die Fläche höchstens?',
+            'Kwa uzio wa m 60 zizi la mstatili linapaswa kuzungushiwa kando ya ukuta. Ukuta ni upande mmoja. Eneo linaweza kuwa kubwa kiasi gani kabisa?'],
+        ['Bei $', 'Kwa $'], ['$ ergibt $', '$ inatoa $'], ['$ mit $', '$, ambapo $'], ['(Maximum)', '(upeo wa juu)'], ['(Minimum)', '(upeo wa chini)'],
+        [' Die zweite Lösung $x \\approx ', ' Suluhisho la pili $x \\approx '], ['$ liegt außerhalb von $0 < x < 10$.', '$ liko nje ya $0 < x < 10$.'],
+        [' Dann ist $h = ', ' Hapo $h = '], ['\\,\\text{cm} = 2r$: Die beste Dose ist so hoch wie breit.', '\\,\\text{cm} = 2r$: mkebe bora zaidi una kimo sawa na upana wake.'],
+        [' Die Seite parallel zur Mauer ist dann $60 - 2 \\times 15 = 30\\,\\text{m}$ lang.', ' Hapo upande ulio sambamba na ukuta una urefu wa $60 - 2 \\times 15 = 30\\,\\text{m}$.'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
@@ -101,6 +126,10 @@ window.BuchSW && BuchSW.add('analysis', {
         // kurve, schar, steckbrief: the letters drawn alone on the canvas, H/T/W (Hochpunkt, Tiefpunkt, Wendepunkt) → J/C/M (juu,
         // chini, mgeuko); only a string that is nothing but the letter (no widget sentence is), the sentences have their phrases
         [/^H$/, 'J'], [/^T$/, 'C'], [/^W$/, 'M'],
+        // steckbrief: the extreme point E on the canvas → K (nukta ya kugeuka), as H/T/W above
+        [/^E$/, 'K'],
+        // optimieren: the surface of the tin is A in Kenyan schools (German O): "$O(r)", "$O'(r)", "$O \approx"
+        [/(^|\$)O('?\(r\)| \\approx)/g, '$1A$2'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ]
