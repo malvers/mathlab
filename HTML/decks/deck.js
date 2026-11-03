@@ -738,43 +738,95 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
     : '<kbd>' + k + '</kbd>').join('');
   const hint = word => '<span class="hint">' + word + '</span>';   // what the letter stands for
   const avatar = document.querySelector('#ask-btn img');   // her photo bottom right, shown small in the Solita row
-  // null = a thin line between the groups: navigate | present | Solita | help (Doc, 17.09.2026)
-  const rows = [
-    [K(['→']), 'Nächster Schritt – auch ein Klick auf die Folie'],
-    [K(['←']), 'Einen Schritt zurück'],
-    [K(['A']) + hint('Alles'), 'Alles auf der Folie zeigen'],
-    [K(['Shift', '→', '/', 'Shift', '←']), 'Ganze Folie vor / zurück – wie '
-      + '<span class="navbtn">' + tri(PREV) + '</span><span class="navbtn">' + tri(NEXT) + '</span>'],
-    [K(['Home', '|', 'End']), 'Erste / letzte Folie'],
-    [K(['1', '7', 'Enter']), 'Zu Folie 17 springen'],
-    [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
-    null,
-    [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
-    [K(['R']), 'Referentenansicht von Hand öffnen'],
-    [K(['Cmd', 'F1', '/', 'Win', 'P']), 'Keine Referentenansicht? Bildschirm erweitern statt spiegeln – <b>erst dann</b> das Deck neu laden und starten'],
-    ...('isExtended' in screen ? [['<span class="help-dot one"></span>',
-      'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
-      ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
-    [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
-    [K(['T']) + hint('Tafel'), 'Rückspiegel: die Tafel live in der Referentenansicht statt der übernächsten Folie – Chrome fragt beim Start'],
-    [K(['N']) + hint('Natur'), 'Naturbild hinter den Folien wechseln – nach dem letzten wieder ohne'],
-    null,
-    [K(['Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
-      + (avatar ? ' <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
-    null,
-    [K(['Esc']), 'Schließen – beendet auch die Präsentation'],
-    [K(['H']), 'Diese Hilfe']
+  const pic = avatar ? ' <img class="navpic" src="' + avatar.src + '" alt="">' : '';
+  // Tabs (Doc, 03.11.2026: "mindestens die drei Tabs ... die wichtigsten natürlich sofort im ersten Tab"): what a talk
+  // needs, then beamer and tools; deck-edit.js adds "Bearbeiten" on Doc's machine (window.DeckHelp.tab). The help always
+  // opens on the first. null = a thin line between groups (Doc, 17.09.2026)
+  const tabs = [
+    { name: 'Vortragen', rows: [
+      [K(['→', '|', '↓']), 'Nächster Schritt – auch ein Klick auf die Folie'],
+      [K(['←', '|', '↑']), 'Einen Schritt zurück'],
+      [K(['A']) + hint('Alles'), 'Alles auf der Folie zeigen'],
+      [K(['Shift', '→', '/', 'Shift', '←']), 'Ganze Folie vor / zurück – wie '
+        + '<span class="navbtn">' + tri(PREV) + '</span><span class="navbtn">' + tri(NEXT) + '</span>'],
+      [K(['Home', '|', 'End']), 'Erste / letzte Folie'],
+      [K(['1', '7', 'Enter']), 'Zu Folie 17 springen'],
+      [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
+      [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
+      null,
+      [K(['Leertaste', '/', 'P']), 'Während Solita erklärt: Pause / weiter – ein Pfeil springt, sie spricht dort weiter' + pic],
+      null,
+      [K(['Esc']), 'Schließen – beendet auch die Präsentation'],
+      [K(['H']), 'Diese Hilfe']
+    ] },
+    { name: 'Beamer & Werkzeuge', rows: [
+      [K(['R']), 'Referentenansicht von Hand öffnen'],
+      [K(['Cmd', 'F1', '/', 'Win', 'P']), 'Keine Referentenansicht? Bildschirm erweitern statt spiegeln – <b>erst dann</b> das Deck neu laden und starten'],
+      ...('isExtended' in screen ? [['<span class="help-dot one"></span>',
+        'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
+        ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
+      [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
+      [K(['T']) + hint('Tafel'), 'Rückspiegel: die Tafel live in der Referentenansicht statt der übernächsten Folie – Chrome fragt beim Start'],
+      [K(['N']) + hint('Natur'), 'Naturbild hinter den Folien wechseln – nach dem letzten wieder ohne'],
+      null,
+      [K(['Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen' + pic]
+    ] }
   ];
-  help.innerHTML = '<h4>Tastenkürzel</h4><table>'
-    + rows.map(r => r ? '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'
-                      : '<tr class="sep"><td colspan="2"></td></tr>').join('') + '</table>';
+  let open = 0;
+  // every tab's table in the same grid cell: the card keeps the size of the largest, the tab row never jumps
+  function paintHelp() {
+    // the title a filled pill "Hilfe": as plain caps beside the tabs it read as a tab of its own (Doc, 03.11.2026)
+    help.innerHTML = '<div class="help-head"><h4 class="help-pill">Hilfe</h4><div class="help-tabs" role="tablist">'
+      + tabs.map((t, i) => '<button type="button" role="tab" data-i="' + i + '" aria-selected="' + (i === open) + '">' + t.name + '</button>').join('')
+      + '</div></div><div class="help-pages">'
+      + tabs.map((t, i) => '<table' + (i === open ? ' class="on"' : '') + ' role="tabpanel">'
+        + t.rows.map(r => r ? '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'
+                            : '<tr class="sep"><td colspan="2"></td></tr>').join('') + '</table>').join('')
+      + '</div>';
+  }
+  function pick(i) {
+    open = i;
+    help.querySelectorAll('.help-tabs button').forEach((b, j) => b.setAttribute('aria-selected', String(j === i)));
+    help.querySelectorAll('.help-pages table').forEach((t, j) => t.classList.toggle('on', j === i));
+  }
+  help.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('.help-tabs button');
+    if (b) { e.stopPropagation(); pick(+b.dataset.i); }
+  });
+  const toggleHelp = () => {
+    help.hidden = !help.hidden;
+    if (help.hidden) return;
+    pick(0);
+    // it opens upwards from the footer: never higher than the room above it (a phone has the footer mid-screen);
+    // measured once shown - a hidden card has no offsetParent
+    const p = help.offsetParent;
+    help.style.maxHeight = p ? Math.max(160, p.getBoundingClientRect().top - 18) + 'px' : '';
+  };
+  // while the help is open the deck gets no key at all: ← → go through the tabs, H and Esc close it, everything else
+  // stops here (Doc, 03.11.2026: "sollten sich die Pfeiltasten auf die Tabs oben beziehen ... das Deck muss dann
+  // vollständig außen vor sein"). Window capture, registered before the deck's other key listeners, so it comes first;
+  // Cmd/Ctrl/Alt keys pass (a reload must still work), a text being typed keeps its keys
+  addEventListener('keydown', e => {
+    if (help.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, input, textarea, [contenteditable]')) return;
+    e.stopImmediatePropagation();
+    const k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowLeft') {
+      e.preventDefault();
+      pick((open + (k === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length);
+    } else if (k === 'h' || k === 'H' || k === 'Escape') { e.preventDefault(); toggleHelp(); }
+    else if (k === ' ' || /^Arrow|^Page|^Home$|^End$/.test(k)) e.preventDefault();
+  }, true);
+  // a tab of its own from another script: rows(K, hint) gives [keys, text] rows as above
+  window.DeckHelp = { tab(name, rows) { tabs.push({ name, rows: rows(K, hint) }); paintHelp(); } };
+  paintHelp();
   nextB.after(helpB);
   helpB.after(help);
-  helpB.onclick = () => { help.hidden = !help.hidden; };
+  helpB.onclick = toggleHelp;
   addEventListener('keydown', e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, input, textarea')) return;   // a "?" typed to Solita
-    if (e.key === 'h' || e.key === 'H') { help.hidden = !help.hidden; e.preventDefault(); }   // only H - the ? belongs to Solita's line (Doc, 23.09.2026)
+    if (e.key === 'h' || e.key === 'H') { toggleHelp(); e.preventDefault(); }   // only H - the ? belongs to Solita's line (Doc, 23.09.2026)
     else if (e.key === 'Escape' && !help.hidden) help.hidden = true;
   });
 })();

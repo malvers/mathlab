@@ -613,10 +613,26 @@ html.laser-hand #deck,html.laser-hand #deck *{cursor:none!important}
    stift/Finger?") */
 html.laser-armed #deck{touch-action:none}
 #help{position:absolute;left:0;bottom:calc(100% + 10px);width:max-content;max-width:calc(100vw - 24px);
+  overflow-y:auto;   /* a phone: deck.js sets max-height to the room above the footer, the card scrolls instead of running off the top */
   background:#EAF0FA;color:#0E244E;border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
   padding:11px 16px 12px;font:400 13px/1.35 Raleway,system-ui,sans-serif;cursor:default}
 #help[hidden]{display:none}
 #help h4{margin:0 0 8px;font:400 10px Orbitron,sans-serif;letter-spacing:1.1px;text-transform:uppercase;color:#7E8FB5}
+/* tabs (Doc, 03.11.2026: "mindestens die drei Tabs"): the title, then the tab names in its type; every table in one grid
+   cell, so the card keeps the size of the largest and the tab row stays where it is */
+#help .help-head{display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px;margin:0 0 9px}
+#help .help-head h4{margin:0}
+#help .help-head h4.help-pill{padding:4px 11px 3px;border-radius:999px;background:#0E244E;color:#EAF0FA;letter-spacing:1.3px}
+#help .help-tabs{display:flex;flex-wrap:wrap;gap:4px}
+/* [role] lifts these over "#nav button" (22 px squares) and its dark-slide colours */
+#help .help-tabs button[role="tab"]{display:block;width:auto;height:auto;opacity:1;white-space:nowrap;
+  font:400 10px Orbitron,sans-serif;letter-spacing:1.1px;text-transform:uppercase;color:#7E8FB5;
+  background:none;border:0;border-bottom:2px solid transparent;border-radius:0;padding:5px 8px 4px;cursor:pointer}
+#help .help-tabs button[role="tab"]:hover{color:#0E244E;background:none}
+#help .help-tabs button[role="tab"][aria-selected="true"]{color:#0E244E;border-bottom-color:#F5C242}
+#help .help-pages{display:grid}
+#help .help-pages table{grid-area:1/1;align-self:start}
+#help .help-pages table:not(.on){visibility:hidden}
 #help table{border-collapse:collapse}
 #help td{padding:3px 0;vertical-align:middle}
 #help td:first-child{padding-right:16px;white-space:nowrap}

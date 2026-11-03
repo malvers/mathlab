@@ -1115,6 +1115,28 @@
     else if (on && e.key === 'Escape' && !cur) { e.stopPropagation(); toggle(); }
   }, true);
 
+  // the keys above in the help (H), a tab of their own (Doc, 03.11.2026: "Hier fehlen noch die Hoch- und Runter-Tasten.
+  // Dass man die Bullet Points verschieben kann" - and the help in tabs). The pictures' and labels' keys (deck-image.js,
+  // deck-label.js) and the spoken remarks (deck-kritik.js) are edit mode too, so they stand here as well
+  if (window.DeckHelp && !PRES) DeckHelp.tab('Bearbeiten', function (K, hint) {
+    return [
+      [K(['E']) + hint('Edit'), 'Bearbeiten an / aus – auch der Stift unten'],
+      [hint('Klick'), 'Einen Text öffnen – darin wie gewohnt schreiben'],
+      [K(['Alt', '↑', '/', 'Alt', '↓']), 'Aufzählungspunkt nach oben / unten verschieben'],
+      [K(['Tab', '/', 'Shift', 'Tab']), 'Punkt einrücken / ausrücken'],
+      [K(['Enter', '/', 'Shift', 'Enter']), 'Neuer Punkt darunter / Zeilenumbruch im Punkt'],
+      [K(['Cmd', 'D', '/', 'Cmd', '⌫']), 'Punkt verdoppeln / löschen'],
+      [K(['Cmd', 'B', '|', 'I', '|', 'U']), 'Fett, kursiv, unterstrichen'],
+      [K(['Cmd', 'Enter', '/', 'Esc']), 'Text speichern / verwerfen – Esc ohne offenen Text: Bearbeiten aus'],
+      [K(['Cmd', 'Z', '/', 'Cmd', 'Shift', 'Z']), 'Rückgängig / wiederholen – wenn kein Text offen ist'],
+      null,
+      [K(['←', '|', '→', '|', '↑', '|', '↓']), 'Bild oder Kasten verschieben – mit Shift in 10er-Schritten'],
+      [K(['⌫']), 'Bild oder Kasten löschen'],
+      null,
+      [K(['Leertaste', '/', 'K']), 'Kommentar zur Folie einsprechen – nochmal drücken speichert']
+    ];
+  });
+
   // turning the page with a text still open saves it first
   painted.push(function () { if (cur && !cur.el.closest('.slide.on')) end(true); });
 
