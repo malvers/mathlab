@@ -133,15 +133,18 @@
            kommt aus svp-map.json — deshalb data-groups auf der Seite. */
         inf12: {
             page: 'inf12.html', back: 'Informatik BGY 12',
-            sub: 'Lernbereich 1 \u201eInformatische Modellierung\u201c, Lernbereich 2 \u201eModellierung von Datenbanken\u201c, Lernbereich 3 \u201eAlgorithmen und Programme\u201c + Wahlbereich \u201eK\u00fcnstliche Intelligenz\u201c',
+            sub: 'Lernbereich 1 \u201eInformatische Modellierung\u201c, Lernbereich 2 \u201eModellierung von Datenbanken\u201c, Lernbereich 3 \u201eAlgorithmen und Programme\u201c + Wahlbereich \u201eK\u00fcnstliche Intelligenz\u201c \u00b7 Wer erst nach dem Notenstopp (Mo 18.01.2027) dran ist, l\u00e4dt die Pr\u00e4sentation bis Do 14.01.2027 hoch \u2013 bewertet wird sie im 1. Halbjahr',
             switchLabel: 'Kurs wechseln',
             klassen: [['a', 'BGY25']],
             /* Talk dates by PLACE: one talk per week, Doc's date on the page wins.
                Since the autumn holidays BGY25 has Informatik on THURSDAY (Untis, 14:45),
-               no longer on Tuesday; talks from next week on (Doc, 26.10.2026). 19.11. is
-               left out - "Betriebsruhe Campus" for the whole staff, although Untis still
-               lists the lesson. */
-            dates: ['2026-11-05', '2026-11-12', '2026-11-26', '2026-12-03', '2026-12-10',
+               no longer on Tuesday; talks from next week on (Doc, 26.10.2026). 19.11. was
+               left out for "Betriebsruhe Campus" - that only concerns the Campus, not KES
+               (Doc, 28.10.2026). Place 4 moves from 03.12. (Klausur 1) to 10.12., two talks
+               that day; places 9 to 12 come after the Notenstopp of Mon 18.01.2027 and hand
+               their presentation in by Thu 14.01., see sub (Doc, 03.11.2026: "freie Hand",
+               "Hauptsache, wir sind compliant"). */
+            dates: ['2026-11-05', '2026-11-12', '2026-11-26', '2026-12-10', '2026-12-10',
                     '2026-12-17', '2027-01-07', '2027-01-14', '2027-01-21', '2027-01-28',
                     '2027-02-04', '2027-02-25'],
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
