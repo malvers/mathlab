@@ -2492,10 +2492,29 @@
             return a;
         }
 
+        /* the Swahili edition of BGY 11 right of the tour, a book card like the others, its words in Swahili (Doc, 03.11.2026:
+           "neben den ersten beiden Cards ... rechts eine Kachel machen, mit genau diesem einen Buch im Stil der anderen Bücher.
+           Natürlich Swahili") - built here like the Making of, it lives only in the books view */
+        function bookSw() {
+            const a = document.createElement('a');
+            a.className = 'card book-sw';
+            a.href = 'buch/mathe11-sw/index.html';
+            a.lang = 'sw';
+            a.innerHTML = '<div class="card-icon"><img src="resources/og/buch-mathe11-sw-cover.jpg" alt="" loading="lazy" decoding="async"'
+                + ' style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);"></div>'
+                + '<h3>Hisabati BGY 11</h3>'
+                + '<p class="card-desc">Kitabu chetu cha kwanza kwa Kiswahili: kitabu shirikishi cha kiada cha hisabati kwa Berufliches Gymnasium, darasa la 11, '
+                + 'kwa kufuata mtaala wa Saksonia. Sura kumi na moja kwa mpangilio wa mwaka wa masomo – milinganyo, fanksheni kuanzia za mstari hadi sine, '
+                + 'regresheni na logariti, mifumo ya milinganyo na matriki, uwezekano na mbinu za kinamba. Kila sura ina uchunguzi, mifano, mazoezi ya viwango '
+                + 'vitatu, majaribio ya kujipima yanayotoa jibu papo hapo na maabara za kujaribu.</p>'
+                + '<div class="btn">Anza</div>';
+            return a;
+        }
+
         function groupBooksBySchool(on) {
             const box = document.getElementById('tool-container');
             if (!box || typeof LABS_DATA === 'undefined') return;
-            box.querySelectorAll('.book-school-head, .book-kino').forEach(h => h.remove());
+            box.querySelectorAll('.book-school-head, .book-kino, .book-sw').forEach(h => h.remove());
             if (!on) {
                 if (box.dataset.grouped) {
                     LABS_DATA.forEach(lab => {
@@ -2516,6 +2535,7 @@
                 tour.style.display = 'flex';
                 frag.appendChild(tour);
             }
+            frag.appendChild(bookSw());
             const ref = box.querySelector('.card[data-lab-id="lehrbuch-mathe11"]');   // the Making of is as high as a book card
             if (bookKinoFit) bookKinoFit.disconnect();
             if (ref && window.ResizeObserver) {
