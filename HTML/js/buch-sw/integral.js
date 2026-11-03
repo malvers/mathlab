@@ -11,6 +11,9 @@ window.BuchSW && BuchSW.add('integral', {
     word: {
         // sw0: the helpers of the module (outside every widget)
         // book sw-3 mathe13-sw:
+        // titelbild13 (the cover of the start page)
+        'Titelbild: Glockenkurve über dem Histogramm eines Tests mit Ablehnungsbereich, eine Ebene im Raum mit Normalenvektor und Gerade':
+            'Picha ya jalada: mkunjo wa kengele juu ya histogramu ya jaribio lenye eneo la kukataa, bapa katika nafasi lenye vekta ya normali, na mstari',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
