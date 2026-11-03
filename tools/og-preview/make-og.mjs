@@ -279,6 +279,9 @@ async function shootLab(browser, lab, port) {
         if (lab.href.startsWith('buch/')) {
             await page.evaluate(() => document.querySelectorAll('.b-solita.offen').forEach((e) => e.classList.remove('offen'))).catch(() => {});
             await page.addStyleTag({ content: '.b-meld-rot,.b-solita .sf-in,.b-solita .sf-eye,.b-solita .sf-mic,.b-solita .sf-stop,.b-solita .sf-send,.b-solita-x{display:none!important}' }).catch(() => {});
+            // the cover page: the foreword stands above the cover since 27.10.2026 (js/buch.js buildGruss) - the card shows
+            // the cover, as the first book cards did (Swahili card, 03.11.2026: the letter filled the whole picture)
+            if (lab.cover) await page.addStyleTag({ content: '.b-gruss{display:none!important}' }).catch(() => {});
             await page.waitForTimeout(300);
         }
         await page.screenshot({ path: dest });
