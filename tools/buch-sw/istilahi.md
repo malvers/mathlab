@@ -160,3 +160,8 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Normalenvektor · senkrecht | vekta ya normali · wima kwa | normal vector · perpendicular to | |
 | Parallelogramm · Strecke | msambamba · kipande cha mstari | parallelogram · line segment | |
 | analytische Geometrie · kartesisch | jiometri ya uchanganuzi · ya kartesia | analytic geometry · Cartesian | |
+| Koordinatengleichung · Achsenabschnittsform | mlinganyo wa kartesia · umbo la vikatizo | Cartesian equation · intercept form | |
+| Lagebeziehungen | mikao | relative positions | |
+| identisch · (echt) parallel · schneidend · windschief | inaambatana · sambamba (na tofauti) · inakatana · inapitana bila kukutana | coincident · parallel (distinct) · intersecting · skew | „skew“ in Klammern beim ersten Mal |
+| Gleichsetzen · Unbekannte | kulinganisha · visivyojulikana | equating · unknowns | |
+| Koeffizient | kigawo | coefficient | wie „kigawo“ (Faktor) in BGY 11 |

@@ -23,6 +23,9 @@ window.BuchSW && BuchSW.add('vektoren', {
         'Was wird gezeigt?': 'Kinaonyeshwa nini?',
         '$\\vec{u}$ und $\\vec{v}$ sind parallel, sie spannen keine Ebene auf.': '$\\vec{u}$ na $\\vec{v}$ ni sambamba, haziundi bapa.',
         'Beispiele:': 'Mifano:',
+        // geradenlage
+        'schneidend': 'inakatana', 'parallel': 'sambamba', 'identisch': 'inaambatana', 'windschief': 'inapitana bila kukutana',
+        'Richtungsvektoren dürfen nicht der Nullvektor sein.': 'Vekta za mwelekeo haziwezi kuwa vekta sifuri.',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -39,6 +42,13 @@ window.BuchSW && BuchSW.add('vektoren', {
         ['$: <b>$Q$ liegt in $E$</b>.', '$: <b>$Q$ iko ndani ya $E$</b>.'], ['$: <b>$Q$ liegt nicht in $E$</b>. Abstand $\\approx ', '$: <b>$Q$ haiko ndani ya $E$</b>. Umbali $\\approx '],
         ['$: Die Gerade ist parallel zur Ebene ', '$: Mstari ni sambamba na bapa '], ['und liegt in ihr.', 'na uko ndani yake.'], ['und schneidet sie nicht.', 'na haulikati.'],
         ['Einsetzen von $g$ in $E$: $t = ', 'Kuweka $g$ ndani ya $E$: $t = '], ['$, Schnittpunkt $S(', '$, nukta ya makutano $S('], ['$ · Schnittwinkel: $', '$ · pembe ya makutano: $'],
+        // geradenlage
+        ['Die Richtungsvektoren sind parallel ($\\vec{v} = ', 'Vekta za mwelekeo ni sambamba ($\\vec{v} = '],
+        ['Der Stützpunkt $Q$ liegt auf $g$: <b>identisch</b>.', 'Nukta ya msingi $Q$ iko kwenye $g$: <b>inaambatana</b>.'],
+        ['Der Stützpunkt $Q$ liegt nicht auf $g$: <b>echt parallel</b>.', 'Nukta ya msingi $Q$ haiko kwenye $g$: <b>sambamba na tofauti</b>.'],
+        ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Si sambamba. Kulinganisha kunatoa $t = '], ['$: <b>schneidend</b> im Punkt $S(', '$: <b>inakatana</b> kwenye nukta $S('],
+        ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ',
+            'Si sambamba na mfumo wa milinganyo hauna suluhisho: <b>inapitana bila kukutana</b>. Umbali mfupi zaidi (mstari mwekundu wa vistari) $\\approx '],
     ],
     rule: [
         // book sw-2 mathe12-sw:
