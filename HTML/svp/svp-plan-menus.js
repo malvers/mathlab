@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        exportTitle
+        exportTitle, planMapEntry
     });
 
     // Password-gate the plain "Drucken" button too — centrally, overriding the

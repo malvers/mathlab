@@ -5,7 +5,7 @@ window.svpPlanParts.push(function (P) {
     Object.assign(P, {
         quizSource, buildQuizBtn, buildAufgabenCell, fillAufgabenPane, watchRedBtn,
         closeRedList, placeRedList, buildRedList, redListItems, pruefArt,
-        redBtnShown, applyRedBtnDates
+        redBtnShown, applyRedBtnDates, initRedBtnDates
     });
 
     // --- Material quick-add (per week row, owner only) -------------------
@@ -301,26 +301,53 @@ window.svpPlanParts.push(function (P) {
        knows the group's own date (r.terminYmd, svp-plan-untis.js); of all rows
        carrying the same list only the first one on or after `ab` keeps its
        button - for each group its next lesson from that day. Without group
-       dates (all groups together, or not logged in) every such row shows it.
+       dates (all groups together, or not logged in - every pupil) only the
+       last of those rows shows it: one test, one button (Doc, 03.11.2026:
+       FOG25-2 took the buttons in two past weeks for two tests written).
        redBtn.abGruppe gives single groups a later day (svpPruefungen.abFor). */
     function redBtnKey(c) { return c.src || c.title || c.label; }
     function redBtnShown(ref) {
         const cfg = ref.redBtn;
-        if (!cfg || !cfg.ab || !ref.terminYmd) return true;
+        if (!cfg || !cfg.ab) return true;
+        const same = P.rendered.filter(r => r.redBtn && r.redBtn.ab && redBtnKey(r.redBtn) === redBtnKey(cfg));
+        if (!same.some(r => r.terminYmd)) return ref === same[same.length - 1];
         const ab = svpPruefungen.abFor(cfg, P.GROUP);
-        for (const r of P.rendered) {
-            const c = r.redBtn;
-            if (!c || !c.ab || redBtnKey(c) !== redBtnKey(cfg)) continue;
-            if (r.terminYmd && r.terminYmd >= ab) return r === ref;
-        }
-        return false;
+        return ref === same.find(r => !r.terminYmd || r.terminYmd >= ab);
+    }
+    /* The button names the group's day: its own appointment when the plan
+       knows the group's dates, else the day from the published timetable
+       (svpPruefungen.publicDay, fetched once by initRedBtnDates). */
+    const publicDays = new Map();          /* redBtnKey -> 'YYYYMMDD' */
+    function redBtnDay(ref) {
+        if (ref.terminYmd && ref.terminYmd >= svpPruefungen.abFor(ref.redBtn, P.GROUP)) return ref.terminYmd;
+        return publicDays.get(redBtnKey(ref.redBtn)) || '';
     }
     /* .red-btn sets its own display, so [hidden] would not hide it */
     function applyRedBtnDates() {
         for (const r of P.rendered) {
-            if (r.redBtnEl) r.redBtnEl.style.display = redBtnShown(r) ? '' : 'none';
+            if (!r.redBtnEl) continue;
+            const shown = redBtnShown(r);
+            r.redBtnEl.style.display = shown ? '' : 'none';
+            if (shown && r.redBtn.ab) r.redBtnEl.firstChild.textContent = svpPruefungen.buttonText(r.redBtn, redBtnDay(r));
         }
         placeRedBtns();
+    }
+    /* After the rows are built (svp-plan-rows.js): while a row is built the
+       rows after it are not there yet, so "the last row" is decided here. In
+       the group view the day comes from the published timetable, for the
+       plan's subjects (svp-map.json). */
+    function initRedBtnDates() {
+        applyRedBtnDates();
+        if (!P.GROUP) return;
+        const cfgs = new Map();
+        for (const r of P.rendered) if (r.redBtn && r.redBtn.ab) cfgs.set(redBtnKey(r.redBtn), r.redBtn);
+        if (!cfgs.size) return;
+        P.planMapEntry(location.pathname)
+            .then(entry => Promise.all([...cfgs].map(([key, cfg]) =>
+                svpPruefungen.publicDay(cfg, P.GROUP, entry && entry.subjects)
+                    .then(day => { if (day) publicDays.set(key, day); }))))
+            .then(applyRedBtnDates)
+            .catch(() => { /* offline: the button keeps its plain label */ });
     }
 
     /* Doc, 18.09.2026: "eine Liste von 30 Punkten unter den butt ... gib mir

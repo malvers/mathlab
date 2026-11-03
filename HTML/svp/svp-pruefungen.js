@@ -27,9 +27,10 @@
 
     /* The text on a plan's button. With redBtn.am it names the day, from the same field the pill reads:
        a class that meets several times a week has to know which day (Doc, 01.11.2026, Mathe: "dass die
-       auch wissen, an welchem Tag das passiert"). */
-    function buttonText(cfg) {
-        const day = String(cfg.am || '').split('-');
+       auch wissen, an welchem Tag das passiert"). A dated test (redBtn.ab) passes the group's own day as
+       ymd ('YYYYMMDD'). */
+    function buttonText(cfg, ymd) {
+        const day = (ymd ? String(ymd).replace(/^(\d{4})(\d\d)(\d\d)$/, '$1-$2-$3') : String(cfg.am || '')).split('-');
         return cfg.label + (day.length === 3 ? ' ' + +day[2] + '.' + +day[1] + '.' : '');
     }
 
@@ -41,6 +42,33 @@
         const own = cfg && cfg.abGruppe && group
             && Object.keys(cfg.abGruppe).find(k => svpTermine.groupKey(k) === svpTermine.groupKey(group));
         return String((own && cfg.abGruppe[own]) || (cfg && cfg.ab) || '').replace(/-/g, '');
+    }
+
+    /* The day a dated test falls on for one group, from Doc's published timetable (svp_public_plan, which
+       anyone may read - meinplan.html shows it): the group's first lesson of the plan's subjects on or after
+       abFor(). The plan's own group dates come from svp_untis and need Doc's login, so without this a
+       pupil's button names no day (Doc, 03.11.2026: FOG25-2 took two buttons in past weeks for two tests
+       already written). Resolves 'YYYYMMDD', or '' when the published weeks do not say. */
+    async function publicDay(cfg, group, subjects) {
+        const from = abFor(cfg, group);
+        if (!from || !group || !global.svpAuth) return '';
+        const d = new Date(+from.slice(0, 4), +from.slice(4, 6) - 1, +from.slice(6, 8));
+        d.setDate(d.getDate() - (d.getDay() + 6) % 7);            /* a published week is keyed by its Monday */
+        const monday = String(d.getFullYear()) + String(d.getMonth() + 1).padStart(2, '0')
+            + String(d.getDate()).padStart(2, '0');
+        const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_public_plan?select=payload&order=week.asc&limit=8'
+            + '&week=gte.' + monday, { headers: { apikey: svpAuth.DB_KEY } });
+        if (!res.ok) return '';
+        const want = svpTermine.groupKey(group);
+        for (const row of await res.json()) {
+            const day = ((row.payload && row.payload.lessons) || [])
+                .filter(l => l.code !== 'cancelled' && String(l.date) >= from
+                    && svpTermine.groupKey(l.classes) === want
+                    && (!subjects || !subjects.length || subjects.includes(l.subject)))
+                .map(l => String(l.date)).sort()[0];
+            if (day) return day;
+        }
+        return '';
     }
 
     const TEST_WORD = /klausur|klassenarbeit|leistungs(test|kontrolle|nachweis|erhebung)/i;
@@ -140,5 +168,5 @@
         return '';
     }
 
-    global.svpPruefungen = { pruefArt, buttonText, abFor, load, pill };
+    global.svpPruefungen = { pruefArt, buttonText, abFor, publicDay, load, pill };
 })(window);

@@ -661,6 +661,7 @@ window.svpPlanParts.push(function (P) {
         P.rendered.push(ref);
     });
     applyFerienFolds();   /* restore the remembered holiday folds */
+    P.initRedBtnDates();  /* a dated test: one button, with the group's day (svp-plan-aufgaben.js) */
     P.loadTalks();
 
     /* Alle Bereich-Pillen gleich breit. Ohne das misst jede Zeile ihre eigene
