@@ -1489,13 +1489,13 @@ const LABS_DATA = [
     },
     {
         "id": "tour-mathe11-lehrbuch",
-        "href": "decks/mathe11-lehrbuch.html",
+        "href": "tours/mathe11-lehrbuch.html",
         "title": "Tour: Ein Lehrbuch für 49 Cent",
-        "description": "Präsentation in DocPoint, gesprochen von Solita: das Lehrbuch Mathematik für Klasse 11 am Beruflichen Gymnasium, elf Kapitel, 183 Seiten, 24 Widgets, mit Claude in knapp anderthalb Stunden entstanden, für 49 Cent. Was hätten ein Verlag oder eine IT-Firma dafür verlangt, und was hat das ganze Projekt bis heute gekostet? Zum Schluss führt Solita das Buch live vor. 16 Folien, etwa 7 Minuten, jederzeit anhalten.",
-        "tagline": "Live-Tour / Making-of / DocPoint",
+        "description": "Live-Tour durch das Lehrbuch Mathematik für Klasse 11 am Beruflichen Gymnasium: Solita führt mit Stimme, Cursor und Untertiteln durch das echte Buch, vom Inhalt über ein Kapitel, die Parabel-Werkstatt, Tipp und Lösung, einen Selbsttest und Galileis Fallrinne bis zum Parabellabor, den fünf Sprachen und der Druckausgabe. Entstanden in knapp anderthalb Stunden, für 49 Cent. 11 Szenen, etwa 4½ Minuten, jederzeit anhalten und selbst ausprobieren.",
+        "tagline": "Live-Tour / Lehrbuch / Mathe 11",
         "icon": LAB_ICONS["lehrbuch-mathe11"],
         "category": "touren",
-        "keywords": "tour touren live-tour rundgang fuehrung solita stimme docpoint praesentation deck folien making-of lehrbuch buch mathe 11 bgy berufliches gymnasium kosten 49 cent verlag it-firma claude ki widgets",
+        "keywords": "tour touren live-tour rundgang fuehrung solita stimme untertitel lehrbuch buch mathe 11 bgy berufliches gymnasium kapitel parabel werkstatt widget aufgaben tipp loesung selbsttest galilei fallrinne parabellabor sprachen druckausgabe pdf 49 cent",
         "color": "blue"
     },
     {

@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 125 labs, 2210 terms, 2026-11-03
+ * 125 labs, 2196 terms, 2026-11-03
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -112,7 +112,7 @@ const LABS_TERMS = {
     "stimmklon": ["alle Texte zeigen", "Aussteuerung automatisch", "Diff", "heller Grund", "Klon", "Mikrofon", "Original", "Original — Doc am RØDE", "Recording", "Spektrum", "Systemvorgabe"],
     "subtraktion": ["Minuend", "SCHRIFTLICHE SUBTRAKTION", "Subtrahend"],
     "tour-kreisteilung": ["Abspielen", "Die Formel", "Jedes Mal das Doppelte", "Kreisteilung", "Nummern", "Regelmäßig oder allgemein", "Und dann 31", "Was kommt dann?", "Was man sieht", "Zwei Punkte, eine Sehne"],
-    "tour-mathe11-lehrbuch": ["Alle Bücher in Codezeilen", "armenian", "brahmic", "cjk", "Claude - Vorher und nachher", "cyrillic", "Das Buch live", "Das erste Lehrbuch ... von 24", "Das ist DocPoint", "Das ist gar kein PowerPoint", "Die Kapitel — in der Reihenfolge des Lehrplans", "Einordnung", "Exkursion", "Folie", "Für Euch!", "georgian", "hangul", "Inhalt", "latin", "Lehrbuch Mathe BGY 11", "Und für alle 24 Bücher?", "Und sonst noch …", "Vergleich Verlag und IT-Firma", "Was haben wir dafür bezahlt?", "Was hat das Projekt bis heute gekostet?"],
+    "tour-mathe11-lehrbuch": ["Aufgaben", "Die Druckausgabe", "Ein Kapitel", "Ein Lehrbuch für 49 Cent", "Elf Kapitel", "Exkursion", "Fünf Sprachen", "Für euch", "Labore", "Selbsttests", "Widgets"],
     "tour-maya": ["Der Pfeil", "Die zwanzig Ziffern", "Die Zwanziger-Stelle", "Ein leeres Brett", "Eine Zahl eintippen", "Eine Ziffer legen", "Farben", "Hochkant", "Kalender oder rein zwanzig", "Maya-Zahlen", "Übertrag", "Wie viele Stellen", "Würfeln und legen"],
     "tour-mission-control": ["Abgabe", "Der rote Knopf", "Die ganze Klasse im Blick", "Die Klasse als Ganzes", "Die Klasse legt los", "Die Zettel", "Frage für Frage", "Kein Name auf dem Server", "Kurz mal weg", "Offline", "QR scannen"],
     "tour-trigonometrie": ["Das Bogenmaß", "Das rechtwinklige Dreieck", "Der Einheitskreis", "Der Tangens", "Die Ableitung", "Die Kosinuskurve", "Die Sinuskurve", "Gleichungen", "Tageslänge in Dresden", "Trigonometrie", "Vier Parameter", "Vom Dreieck zur Welle", "Zwei Dreiecke"],
