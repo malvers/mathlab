@@ -31,6 +31,12 @@ window.BuchSW && BuchSW.add('analysis', {
         'Potenzen': 'Vipeo', 'Summen': 'Jumla', 'Wurzeln und Brüche': 'Vipeuo na sehemu', 'eˣ und sin x': 'eˣ na sin x', 'Produkte': 'Mazao',
         'Gemischt': 'Mchanganyiko', 'Aufgabenart': 'Aina ya zoezi', 'z. B. 6x^2 - 2 oder cos x': 'k.m. 6x^2 - 2 au cos x', 'Lösung': 'Suluhisho',
         'Neue Aufgabe': 'Zoezi jipya',
+        // kurve (lb2-4): Hochpunkt / Tiefpunkt / Wendepunkt / Sattelpunkt = nukta ya juu J / nukta ya chini C / nukta ya mgeuko M /
+        // nukta tandiko; the letters on the canvas by the rule below
+        '$a$ (vor $x^3$)': '$a$ (ya $x^3$)', '$b$ (vor $x^2$)': '$b$ (ya $x^2$)', '$c$ (vor $x$)': '$c$ (ya $x$)', 'Zeige auch:': 'Onyesha pia:',
+        'nur f': 'f peke yake', 'f′ und f″': 'f′ na f″', 'Ableitungen zeigen': 'Onyesha vinyambuo',
+        'Graph einer Funktion dritten Grades mit Extrem- und Wendepunkten': 'Grafu ya fanksheni ya daraja la tatu yenye nukta za kugeuka na nukta ya mgeuko',
+        'Intervall': 'Muda', 'konstant': 'haibadiliki', 'steigt ↗': 'inaongezeka ↗', 'fällt ↘': 'inapungua ↘',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -74,6 +80,12 @@ window.BuchSW && BuchSW.add('analysis', {
         // ableiten
         ['Leite ab: $f(x) = ', 'Nyambua: $f(x) = '], ['Das kann ich nicht lesen. Schreibe zum Beispiel ', 'Siwezi kusoma hili. Andika kwa mfano '],
         ['<b>Richtig!</b>', '<b>Sahihi!</b>'], ['Noch nicht. Tipp: ', 'Bado. Dokezo: '],
+        // kurve
+        ['Hochpunkt $H', 'Nukta ya juu $J'], ['Tiefpunkt $T', 'Nukta ya chini $C'], ['keine Extrempunkte', 'Hakuna nukta za kugeuka'],
+        [' · Sattelpunkt bei $x = ', ' · nukta tandiko kwenye $x = '], ['Wendepunkt $W', 'Nukta ya mgeuko $M'],
+        ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am kleinsten.', '$: hapo $f\'\'(x) = 0$ na mwinamo ni mdogo kabisa.'],
+        ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am größten.', '$: hapo $f\'\'(x) = 0$ na mwinamo ni mkubwa kabisa.'],
+        ['Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.', 'Kwa $a = 0$, $f$ ni parabola (au mstari) isiyo na nukta ya mgeuko.'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
@@ -81,6 +93,9 @@ window.BuchSW && BuchSW.add('analysis', {
         // book sw-2 mathe12-sw:
         // ableiten: "· 3 von 5 gelöst" → "· umetatua 3 kati ya 5"
         [/ · (\d+) von (\d+) gelöst/g, ' · umetatua $1 kati ya $2'],
+        // kurve, schar, steckbrief: the letters drawn alone on the canvas, H/T/W (Hochpunkt, Tiefpunkt, Wendepunkt) → J/C/M (juu,
+        // chini, mgeuko); only a string that is nothing but the letter (no widget sentence is), the sentences have their phrases
+        [/^H$/, 'J'], [/^T$/, 'C'], [/^W$/, 'M'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ]
