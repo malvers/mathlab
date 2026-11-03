@@ -27,6 +27,10 @@ window.BuchSW && BuchSW.add('analysis', {
         'Oben: f mit Tangente. Ziehe den Punkt P. Unten: Jede Tangentensteigung wird zu einem Punkt des Graphen von f′.':
             'Juu: f pamoja na tanjenti. Vuta nukta P. Chini: kila mwinamo wa tanjenti unakuwa nukta ya grafu ya f′.',
         'Graph von f mit Tangente': 'Grafu ya f pamoja na tanjenti', 'Graph der Ableitung f Strich': 'Grafu ya kinyambuo f dashi',
+        // ableiten (lb2-3): ableiten = kunyambua ("Nyambua"), Potenzen = vipeo, Wurzeln = vipeuo, Produkte = mazao
+        'Potenzen': 'Vipeo', 'Summen': 'Jumla', 'Wurzeln und Brüche': 'Vipeuo na sehemu', 'eˣ und sin x': 'eˣ na sin x', 'Produkte': 'Mazao',
+        'Gemischt': 'Mchanganyiko', 'Aufgabenart': 'Aina ya zoezi', 'z. B. 6x^2 - 2 oder cos x': 'k.m. 6x^2 - 2 au cos x', 'Lösung': 'Suluhisho',
+        'Neue Aufgabe': 'Zoezi jipya',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -67,11 +71,16 @@ window.BuchSW && BuchSW.add('analysis', {
         ['$ mit $h = ', '$ ambapo $h = '], ['Sekantensteigung (Differenzenquotient): $', 'Mwinamo wa sekanti (uwiano wa tofauti): $'],
         ['Tangentensteigung: $f', 'Mwinamo wa tanjenti: $f'], ['· Für $h \\to 0$ wird aus der Sekante die Tangente.', '· Kwa $h \\to 0$ sekanti inakuwa tanjenti.'],
         ['· Mach $h$ kleiner.', '· Punguza $h$.'], ['$ · Steigung in $P', '$ · Mwinamo kwenye $P'],
+        // ableiten
+        ['Leite ab: $f(x) = ', 'Nyambua: $f(x) = '], ['Das kann ich nicht lesen. Schreibe zum Beispiel ', 'Siwezi kusoma hili. Andika kwa mfano '],
+        ['<b>Richtig!</b>', '<b>Sahihi!</b>'], ['Noch nicht. Tipp: ', 'Bado. Dokezo: '],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
     rule: [
         // book sw-2 mathe12-sw:
+        // ableiten: "· 3 von 5 gelöst" → "· umetatua 3 kati ya 5"
+        [/ · (\d+) von (\d+) gelöst/g, ' · umetatua $1 kati ya $2'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ]
