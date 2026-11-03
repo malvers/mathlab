@@ -17,6 +17,7 @@
  *   node tools/og-preview/make-og.mjs --cards-only    # reuse cached lab shots
  *   node tools/og-preview/make-og.mjs --meta-only     # only rewrite the HTML heads
  *   node tools/og-preview/make-og.mjs --books         # only the textbook cards (combines with the flags above)
+ *   node tools/og-preview/make-og.mjs --decks         # only the slide decks (HTML/decks/, cards on R2 as well)
  *   node tools/og-preview/make-og.mjs --dry           # show what would change
  */
 
@@ -39,7 +40,9 @@ const SITE = 'https://docalvers.de';
 // (ignored), uploaded, read back; the book covers (-cover.jpg) stay in resources/og, the hub shows them.
 const MEDIA = 'https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev';   // bucket "media", the same as the book photos
 const R2_DIR = path.join(HERE, 'r2');
-const onR2 = (lab) => lab.id.startsWith('buch-');
+// the deck cards too: 220 decks, every slide change may call for a new one (Doc, 03.11.2026: "für die einzelnen Bücher
+// haben wir noch keine schöne Vorschauen" - the link was the Making-of deck)
+const onR2 = (lab) => lab.id.startsWith('buch-') || lab.id.startsWith('deck-');
 
 // Playwright lives in videopipeline/ — reused here instead of a second install.
 const { chromium } = require(path.join(ROOT, 'videopipeline', 'node_modules', 'playwright'));
@@ -55,6 +58,7 @@ const DRY = has('--dry');
 const CARDS_ONLY = has('--cards-only');
 const META_ONLY = has('--meta-only');
 const BOOKS = has('--books');
+const DECKS = has('--decks');
 
 // ---------------------------------------------------------------- lab registry
 function readLabs() {
@@ -136,6 +140,30 @@ function readBooks() {
     return out;
 }
 
+// The slide decks (HTML/decks/*.html): one card each, its picture the deck's title slide. The texts are the deck's own
+// <title> and description (html_deck.py writes the subtitle there), the kicker of the title slide says which course.
+// Left out: a deck behind a password (deck-lock.js) - its title slide would give it away - and a deck without a title
+// slide of its own (tafel.html builds its slides from a database row).
+function readDecks() {
+    const out = [], dir = path.join(HTML, 'decks');
+    if (!fs.existsSync(dir)) return out;
+    const plain = (s) => unesc(String(s || '').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
+    for (const f of fs.readdirSync(dir).sort()) {
+        if (!f.endsWith('.html')) continue;
+        const src = fs.readFileSync(path.join(dir, f), 'utf8');
+        if (!src.includes('<div id="deck">') || src.includes('deck-lock') || !/<section class="slide title\b/.test(src)) continue;
+        const ts = src.slice(src.search(/<section class="slide title\b/));
+        const head = src.slice(0, src.indexOf('</head>'));
+        const title = plain((head.match(/<title>([\s\S]*?)<\/title>/i) || [])[1]);
+        const desc = plain((head.match(/<meta\s+name=["']description["']\s+content="([^"]*)"/i) || [])[1]);
+        const kicker = plain((ts.match(/<p class="kicker">([\s\S]*?)<\/p>/) || [])[1]);
+        if (!title) continue;
+        out.push({ id: 'deck-' + f.replace(/\.html$/, ''), href: `decks/${f}`, deck: true, title,
+            tagline: kicker || desc, description: desc || kicker || title, alt: `${title} — Titelfolie des Decks` });
+    }
+    return out;
+}
+
 // ------------------------------------------------------------------- text bits
 // Orbitron has no glyph for these; they would render as empty boxes on the card.
 const GLYPH_FIX = [[/[\u00b7\u2022]/g, '/'], [/[\u201e\u201c\u201d]/g, '"'], [/[\u2018\u2019]/g, "'"]];
@@ -157,6 +185,12 @@ function shorten(s, max) {
 
 function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// read back from an HTML file, so esc() does not escape it twice
+function unesc(s) {
+    return String(s).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
 }
 
 function taglineOf(lab) {
@@ -193,7 +227,36 @@ function startServer() {
 // ------------------------------------------------------------------ screenshots
 const SHOT_VIEWPORT = { width: 1400, height: 880 };
 
+// A deck: its title slide alone, fully built, at 16:9 filling the window - no "Good morning" slide before it, no buttons,
+// no Solita ring, no page number; the card shows it edge to edge (og-card.html .full).
+async function shootDeck(browser, lab, port) {
+    const dest = path.join(SHOTS, lab.id + '.png');
+    const ctx = await browser.newContext({ viewport: { width: 1200, height: 675 }, deviceScaleFactor: 1.5 });
+    const page = await ctx.newPage();
+    // the night of the title slide runs live in WebGL (deck-flow.js) - head-less without a GPU that takes minutes a
+    // frame; without it the slide shows the still picture deck.css gives it, as the presenter view does
+    await page.route('**/deck-flow.js', (r) => r.abort());
+    try {
+        await page.goto(`http://127.0.0.1:${port}/${lab.href}`, { waitUntil: 'load', timeout: 30000 });
+        await page.waitForTimeout(1000);
+        // deck.js: #n opens the n-th slide the class sees, fully built
+        const n = await page.evaluate(() => {
+            const seen = [...document.querySelectorAll('#deck > section.slide')].filter((s) => !s.classList.contains('skip'));
+            return seen.findIndex((s) => s.classList.contains('title')) + 1;
+        });
+        if (n < 1) throw new Error('no title slide shown');
+        await page.evaluate((k) => { location.hash = '#' + k; }, n);
+        await page.addStyleTag({ content: 'body>*:not(#stage){display:none!important}#deck .slide .pageno,#deck .slide .foot{visibility:hidden!important}' });
+        await page.waitForTimeout(2500);          // fonts, KaTeX and the slide's picture
+        await page.screenshot({ path: dest });
+        return dest;
+    } finally {
+        await ctx.close();
+    }
+}
+
 async function shootLab(browser, lab, port) {
+    if (lab.deck) return shootDeck(browser, lab, port);
     const dest = path.join(SHOTS, lab.id + '.png');
     const ctx = await browser.newContext({ viewport: SHOT_VIEWPORT, deviceScaleFactor: 1.5 });
     const page = await ctx.newPage();
@@ -240,6 +303,7 @@ async function renderCard(browser, lab, shotFile) {
             title: forCard(lab.title),
             tagline: forCard(taglineOf(lab)),
             shot: shotFile ? dataUri(shotFile, 'image/png') : null,
+            full: !!lab.deck,                     // the title slide carries its own title: no text panel
             // favicon-live.png: in the repo favicon.png is the red local icon (27.10.2026)
             logo: dataUri(path.join(HTML, 'resources', 'favicon-live.png'), 'image/png'),
         });
@@ -327,9 +391,9 @@ function injectMeta(lab) {
 
 // --------------------------------------------------------------------------- run
 const main = async () => {
-    let labs = [...EXTRA, ...readBooks(), ...readLabs()];
+    let labs = [...EXTRA, ...readBooks(), ...readDecks(), ...readLabs()];
     if (ONLY.length) labs = labs.filter((l) => ONLY.includes(l.id));
-    if (BOOKS) labs = labs.filter(onR2);
+    if (BOOKS || DECKS) labs = labs.filter((l) => (BOOKS && l.id.startsWith('buch-')) || (DECKS && l.deck));
     if (!labs.length) { console.error('no labs matched --only'); process.exit(1); }
 
     fs.mkdirSync(OUT, { recursive: true });

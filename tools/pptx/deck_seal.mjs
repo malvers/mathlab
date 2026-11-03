@@ -57,5 +57,12 @@ html = html.replace(deck[0], '<div id="deck"></div></div>\n<div id="bar">')
   .replace(summ[0], '<script id="summary" type="application/json">{}</script>')
   .replace('<script src="deck.js"></script>', '<script id="sealed" type="application/json">' + blob +
     '</script>\n<script src="deck-lock.js"></script>');
+// no picture in a link preview of a sealed deck: the card of tools/og-preview/make-og.mjs is the title slide (make-og
+// leaves sealed decks alone) - the block goes, its plain description stays; a card already on R2 (og/deck-<name>.jpg)
+// stays reachable by its address until it is deleted there
+html = html.replace(/[ \t]*<!-- OG:BEGIN[\s\S]*?<!-- OG:END -->\n?/, (b) => {
+  const d = b.match(/<meta name="description" content="[^"]*">/);
+  return d ? d[0] + '\n' : '';
+});
 fs.writeFileSync(file, html);
 console.log(file + '  versiegelt (' + Math.round(ct.length / 1024) + ' KB)');

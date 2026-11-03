@@ -547,12 +547,13 @@ class HtmlDeck:
         path = path or os.path.join(OUT_DIR, self.name + ".html")
         # a deck edited in the browser is the master now (Doc, 17.09.2026) - its script would undo the edits
         from deck_edit import EDITED_MARK
-        if not INLINE_DIR and os.path.exists(path) and EDITED_MARK in open(path, encoding="utf-8").read():
+        old = open(path, encoding="utf-8").read() if not INLINE_DIR and os.path.exists(path) else ""
+        if EDITED_MARK in old:
             print("%s  NICHT überschrieben: im Browser bearbeitet (Marke deck-master in der Datei)"
                   % os.path.normpath(path))
             return path
         with open(path, "w", encoding="utf-8") as f:
-            f.write(self.render())
+            f.write(keep_og(old, self.render()))
         print("%s  (%d Folien)" % (os.path.normpath(path), len(self.slides)))
         return path
 
@@ -654,6 +655,21 @@ def page_inline_base(tpl):
     return tpl.replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="%s">\n' % SITE, 1)
 
 
+# the link preview (tools/og-preview/make-og.mjs) - a card on R2 and the og:/twitter: tags between these marks
+_OG_BLOCK = re.compile(r"[ \t]*<!-- OG:BEGIN.*?<!-- OG:END -->\n?", re.S)
+
+
+def keep_og(old, new):
+    """A rebuilt page keeps the link-preview block of the deck on disk, in place of its plain description (the block
+    carries one of its own) - as make-og.mjs puts it there. Changed title or subtitle: run make-og --only deck-<name>."""
+    m = _OG_BLOCK.search(old or "")
+    if not m or _OG_BLOCK.search(new):
+        return new
+    new = re.sub(r'<meta name="description" content="[^"]*">\n', "", new, count=1)
+    i = new.index("</title>\n") + len("</title>\n")
+    return new[:i] + m.group(0) + new[i:]
+
+
 def page(title, sub, slides_html, narr, summ):
     """The whole deck page. title and sub arrive HTML-escaped."""
     if INLINE_DIR:
@@ -685,7 +701,7 @@ def reshell():
         sub = re.search(r'<meta name="description" content="(.*?)">', s, re.S).group(1)
         narr = re.search(r'<script id="narration" type="application/json">(.*?)</script>', s, re.S)
         summ = re.search(r'<script id="summary" type="application/json">(.*?)</script>', s, re.S)
-        t = page(title, sub, slides_html, narr.group(1) if narr else "", summ.group(1) if summ else "{}")
+        t = keep_og(s, page(title, sub, slides_html, narr.group(1) if narr else "", summ.group(1) if summ else "{}"))
         if t != s:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(t)

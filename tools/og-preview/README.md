@@ -26,6 +26,13 @@ node tools/og-preview/make-og.mjs --dry           # nichts an den HTMLs aendern
   `https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/og/<id>.jpg`. Die Cover (`buch-*-cover.jpg`) bleiben in
   `HTML/resources/og/`, die Startseite zeigt sie. Nur die Bücher: `--books`. wrangler einmal im Terminal anmelden:
   `npx wrangler login`.
+- **Deck-Karten (`deck-*`) liegen ebenfalls auf R2** (seit 03.11.2026): eine Karte pro Deck in `HTML/decks/`, das Bild
+  ist die Titelfolie randlos (nicht die „Good morning"-Folie davor), ohne Knöpfe und Seitenzahl, nur mit dem Logo oben
+  links (`og-card.html`, Klasse `full`). Die Live-Nacht der Titelfolie (`deck-flow.js`, WebGL) wird beim Foto
+  gesperrt, sonst braucht der Kopflos-Browser Minuten; es gilt das Standbild aus `deck.css`. Texte: `<title>` und
+  Beschreibung des Decks. Ausgelassen: versiegelte Decks (`deck-lock.js`, `deck_seal.mjs` nimmt den Block beim
+  Versiegeln heraus) und `tafel.html`. Nur die Decks: `--decks`. `html_deck.py` behält den Block bei jedem Neubau
+  (`keep_og`); nach einem neuen Titel/Untertitel `--only deck-<name>` laufen lassen.
 - **Ergebnis:** `HTML/resources/og/<id>.jpg` + Meta-Block zwischen
   `<!-- OG:BEGIN -->` und `<!-- OG:END -->` im Lab-HTML. Der Block wird bei jedem
   Lauf ersetzt — von Hand darin editieren ist zwecklos.

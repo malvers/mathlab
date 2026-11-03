@@ -139,6 +139,23 @@
                 linear-gradient(0deg, rgba(8, 20, 42, .55) 0%, rgba(8, 20, 42, 0) 38%);
         }
 
+        /* ---- full: a deck's title slide edge to edge, it carries its own title ----
+           Only the wordmark stays, on a dark pill so it reads on any slide; the slide's footer is cut at the bottom. */
+        .card.full { display: block; }
+        .card.full .shot { position: absolute; inset: 0; }
+        .card.full .shot img { object-position: top center; }
+        .card.full .shot::after { background: none; }
+        .card.full .panel { position: absolute; top: 0; left: 0; padding: 30px 0 0 34px; }
+        .card.full .mid, .card.full .foot { display: none; }
+        .card.full .brand {
+            padding: 9px 18px 9px 9px;
+            border-radius: 16px;
+            background: rgba(8, 20, 42, .62);
+            box-shadow: 0 0 0 1px rgba(143, 168, 204, .18);
+        }
+        .card.full .brand img { width: 44px; height: 44px; border-radius: 10px; }
+        .card.full .brand span { font-size: 15px; color: #cfdcf2; }
+
         /* Thin accent edge along the bottom of the whole card. */
         .card::after {
             content: '';
@@ -171,8 +188,9 @@
     </div>
 
     <script>
-        // Called by make-og.mjs with { title, tagline, shot, logo } (images as data URIs).
+        // Called by make-og.mjs with { title, tagline, shot, logo, full } (images as data URIs).
         window.ogFill = function (data) {
+            document.querySelector('.card').classList.toggle('full', !!data.full);
             document.getElementById('og-title').textContent = data.title || '';
             document.getElementById('og-tagline').textContent = data.tagline || '';
             if (data.shot) document.getElementById('og-shot').src = data.shot;
