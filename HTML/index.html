@@ -595,7 +595,7 @@
             box-sizing: border-box;
             padding: 0;
             overflow: hidden;
-            border-radius: 8px;   /* the perforation runs to the edge, a 20px corner would cut the outer holes (Doc: "bis zum Rand") */
+            border-radius: 20px;   /* the corners of the other cards, the outer holes run under them (Doc, 03.11.2026: "mach die ecken") */
         }
 
         #tool-container .book-kino .card-icon {
@@ -2508,6 +2508,13 @@
             const gradeOf = (lab) => parseInt((lab.title.match(/\d+/) || ['0'])[0], 10);
             const frag = document.createDocumentFragment();
             const kino = frag.appendChild(bookKino());
+            /* the live tour through the book right beside it (Doc, 03.11.2026: "bring das bitte auch zu Büchern rechts neben
+               the making") - the Touren card itself, moved here while the view is open */
+            const tour = box.querySelector('.card[data-lab-id="tour-mathe11-lehrbuch"]');
+            if (tour) {
+                tour.style.display = 'flex';
+                frag.appendChild(tour);
+            }
             const ref = box.querySelector('.card[data-lab-id="lehrbuch-mathe11"]');   // the Making of is as high as a book card
             if (bookKinoFit) bookKinoFit.disconnect();
             if (ref && window.ResizeObserver) {
@@ -2601,7 +2608,9 @@
             let visibleCount = 0;
 
             tools.forEach(tool => {
-                const categories = tool.getAttribute('data-category').split(' ');
+                // the "Making of" card of the books view has no category; without the fallback the loop threw on it and
+                // books -> another view (e.g. Back after the Bücher tile in "Neu") kept the books and the tour card visible
+                const categories = (tool.getAttribute('data-category') || '').split(' ');
                 if (categories.includes(categoryToken)) {
                     tool.style.display = 'flex';
                     visibleCount++;
