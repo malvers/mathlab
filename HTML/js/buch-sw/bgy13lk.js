@@ -14,12 +14,23 @@ window.BuchSW && BuchSW.add('bgy13lk', {
         // titelbildbgy13lk
         'Titelbild: Trapeze unter einer Kurve, eine Glockenkurve mit rotem Ablehnungsbereich, ein Kreislauf Ei, Larve, Käfer':
             'Picha ya jalada: trapeza chini ya mkunjo, mkunjo wa kengele wenye eneo jekundu la kukataa, mzunguko wa yai, buu na mende',
+        // biquadratisch (7.1)
+        'Koeffizient $p$': 'Kigawo $p$', 'Koeffizient $q$': 'Kigawo $q$', 'Keine Lösung': 'Hakuna suluhisho', 'Eine Lösung': 'Suluhisho moja',
+        'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'Parabola h(z) = z² + p·z + q pamoja na sifuri zake',
+        'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'Grafu ya f(x) = x⁴ + p·x² + q pamoja na sifuri zake',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
         // book sw-5 mathe13lk-sw:
+        // biquadratisch ("<b>4 Lösungen</b>" is a rule)
+        [' liefert $x = \\pm', ' inatoa $x = \\pm'], [' liefert $x = 0$', ' inatoa $x = 0$'], [' liefert nichts, denn $x^2$ ist nie negativ', ' haitoi chochote, kwa sababu $x^2$ si hasi kamwe'],
+        ['keine Lösung $z$, die Diskriminante ist negativ', 'hakuna suluhisho $z$, kibainishi ni hasi'],
+        ['$ wird mit $z = x^2$ zu $z^2', '$ inakuwa, kwa $z = x^2$, $z^2'], [' = 0$, Diskriminante $\\tfrac{p^2}{4} - q = ', ' = 0$, kibainishi $\\tfrac{p^2}{4} - q = '],
     ],
     rule: [
         // book sw-5 mathe13lk-sw:
+        // biquadratisch: "<b>4 Lösungen</b>" → "<b>masuluhisho 4</b>"; the solution set {−2;\ −1;\ 1;\ 2} with commas
+        [/<b>(\d) Lösungen<\/b>/g, '<b>masuluhisho $1</b>'],
+        [/(x \\in \\\{)([\s\S]*?)(\\\})/g, (m, a, b, c) => a + b.replace(/;\\ /g, ',\\ ') + c],
     ]
 });
