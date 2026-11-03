@@ -97,6 +97,58 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 
 | Deutsch | Kiswahili | English (Kenya) | Hinweis |
 |---|---|---|---|
+| bedingte Wahrscheinlichkeit $P_B(A)$ | uwezekano wenye sharti | conditional probability | Schreibweise $P_B(A)$ wie im Widget, $P(A \mid B)$ als englische genannt |
+| stochastisch unabhängig · abhängig | huru · tegemezi | independent · dependent | |
+| unvereinbar | hayawezi kutokea pamoja | mutually exclusive | wie sw0 |
+| Multiplikationssatz | kanuni ya kuzidisha | multiplication rule | |
+| Zufallsgröße | kigeu cha nasibu (vigeu) | random variable | |
+| Wahrscheinlichkeitsverteilung | mgawanyo wa uwezekano | probability distribution | |
+| Stabdiagramm · Histogramm | mchoro wa vipau · histogramu | bar chart · histogram | |
+| Erwartungswert | thamani tarajiwa | expected value | |
+| Varianz | variansi | variance | Lehnwort; Alternative „tofautiano“ |
+| Standardabweichung · Streuung | mkengeuko sanifu · mtawanyiko | standard deviation · spread | |
+| faires Spiel · Einsatz · Auszahlung · Gewinn | mchezo wa haki · dau · malipo · faida | fair game · stake · payout · gain | Geld „€1.75“ auch im Widget (Regel) |
+| Bernoulli-Experiment · Bernoulli-Kette | jaribio la Bernoulli · mfululizo wa Bernoulli | Bernoulli trial · sequence of Bernoulli trials | |
+| Treffer · Niete | fanikio (mafanikio) · kushindwa | success · failure | Buchstaben im Baum F/K statt T/N |
+| Binomialkoeffizient · Fakultät | koefisienti ya binomia · faktoria | binomial coefficient ${}^nC_k$ · factorial | Lehnwort; Alternative „mgawo wa binomia“ |
+| Binomialverteilung · kumuliert | mgawanyo wa binomia · limbikizi | binomial distribution · cumulative | „limbikizi“ wie marudio limbikizi |
+| rechtsschief · linksschief | imepinda kulia · imepinda kushoto | positively · negatively skewed | |
+| Grenzwert | kikomo (vikomo) | limit | |
+| Verhalten im Unendlichen | mwenendo kuelekea infiniti | behaviour as $x \to \infty$ | |
+| waagerechte · senkrechte Asymptote | asimptoti mlalo · asimptoti wima | horizontal · vertical asymptote | |
+| Polstelle (mit / ohne Vorzeichenwechsel) | nguzo (yenye / isiyo na mabadiliko ya ishara) | pole | Lehnübersetzung; das Lehnwort „pole“ heißt auf Suaheli „Entschuldigung“ |
+| Definitionslücke · Loch | pengo · tundu | removable discontinuity · hole | |
+| stetig · Stetigkeit | endelevu · mwendelezo | continuous · continuity | |
+| ganzrationale · gebrochenrationale Funktion | fanksheni ya polinomia · fanksheni wiano | polynomial · rational function | wiano wie namba wiano |
+| Zählergrad · Nennergrad | daraja la kiasi · daraja la kiasili | degree of the numerator · denominator | kiasi / kiasili wie mathe11-sw |
+| Ableitung · ableiten · differenzierbar | kinyambuo (vinyambuo) · kunyambua · inanyambulika | derivative · differentiate · differentiable | $\tfrac{\mathrm{d}y}{\mathrm{d}x}$ als kenianische Schreibweise genannt |
+| Differenzialrechnung | unyambuaji | differential calculus | |
+| mittlere · lokale Änderungsrate | kiwango cha wastani cha mabadiliko · kiwango cha mabadiliko kwenye nukta | average rate of change · rate of change at a point | |
+| Differenzenquotient | uwiano wa tofauti | difference quotient | beschreibend |
+| Sekante · Tangente · Normale | sekanti · tanjenti · normali | secant (chord) · tangent · normal | Lehnwörter |
+| Ableitungsfunktion | fanksheni kinyambuo | derived function, gradient function | |
+| Potenz-, Faktor-, Summen-, Produkt-, Kettenregel | kanuni ya kipeo, ya kizidishi, ya jumla, ya zao, ya mnyororo | power, constant multiple, sum, product, chain rule | |
+| Hochpunkt $H$ · Tiefpunkt $T$ | nukta ya juu $J$ · nukta ya chini $C$ | maximum point · minimum point | Buchstaben aus juu / chini, auch auf der Leinwand der Widgets (Regel) |
+| Extrempunkt · lokales / globales Extremum | nukta ya kugeuka · upeo wa ndani / wa jumla (maupeo) | turning point · local / global extremum | |
+| notwendige · hinreichende Bedingung | sharti la lazima · sharti linalotosha | necessary · sufficient condition | |
+| Krümmung · links- / rechtsgekrümmt | mpindo · mpindo wa kushoto / wa kulia | concavity · concave up / down | Links-/Rechtskurve = kona ya kushoto / ya kulia |
+| Wendepunkt $W$ · Sattelpunkt | nukta ya mgeuko $M$ · nukta tandiko $T$ | point of inflection · saddle point (stationary point of inflection) | $W$ → $M$ auch im Widget |
+| Wendetangente | tanjenti ya mgeuko | tangent at the point of inflection | |
+| achsen- · punktsymmetrische Funktion | fanksheni shufwa · fanksheni witiri | even · odd function | |
+| Steckbriefaufgabe · Ansatz | kuunda fanksheni kutokana na masharti · fanksheni ya kuanzia | finding a function from conditions | beschreibend, kein fester Begriff |
+| Extremwertproblem · Zielfunktion · Nebenbedingung | tatizo la upeo · fanksheni lengwa · sharti la ziada | optimisation problem · objective function · constraint | |
+| Randextremum · Randwert | upeo wa mpakani · thamani ya mpakani | boundary extremum · end value | |
+| Oberfläche $O$ (Dose) | eneo la uso $A$ | surface area $A$ | Buchstabe $A$ wie in Kenia, auch im Widget |
+| Stammfunktion | fanksheni asili | antiderivative | nur in den Hilfen von ableiten/integrieren (sw0); mit mathe13-sw abstimmen |
+| Vektor · Ortsvektor · Verbindungsvektor | vekta · vekta ya mahali · vekta ya kuunganisha | vector · position vector · vector $\vec{AB}$ | |
+| Betrag · Einheitsvektor · Nullvektor | ukubwa · vekta kizio · vekta sifuri $\vec{0}$ | magnitude · unit vector · zero vector | „Betrag“ einer Zahl bleibt thamani kamili |
+| Linearkombination · parallel (kollinear) | mchanganyiko wa mstari · sambamba | linear combination · parallel (collinear) | |
+| Mittelpunkt $M$ · Schwerpunkt $S$ | nukta ya kati $M$ · sentroidi $S$ | midpoint · centroid | |
+| Skalarprodukt $\vec{a} \circ \vec{b}$ | zao la skala $\vec{a} \cdot \vec{b}$ | scalar product, dot product | Punkt statt Kringel wie in Kenia, auch im Widget (Regel) |
+| orthogonal | wima | perpendicular, orthogonal | |
+| spitzer · stumpfer Winkel | pembe kali · pembe butu | acute · obtuse angle | |
+| Quader · Würfel · Raumdiagonale | mche mstatili · mchemraba · kiulalo cha nafasi | cuboid · cube · space diagonal | |
+| Parallelogramm · Raute · Trapez · Viereck | msambamba · rombasi · trapeza · pembenne | parallelogram · rhombus · trapezium · quadrilateral | |
 
 ## mathe13-sw (BGY 13: Integral, Tests, Geraden und Ebenen)
 
