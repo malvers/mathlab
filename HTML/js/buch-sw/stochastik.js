@@ -53,6 +53,10 @@ window.BuchSW && BuchSW.add('stochastik', {
         'Drei Münzen': 'Sarafu tatu', 'Augensumme': 'Jumla ya alama', 'Glücksrad': 'Gurudumu la bahati', 'Zufallsgröße': 'Kigeu cha nasibu', 'Einsatz': 'Dau',
         'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Mgawanyo wa uwezekano kama mchoro wa vipau', 'Spielen:': 'Cheza:',
         'SPIELE n': 'MICHEZO n', 'MITTELWERT': 'WASTANI', 'ERWARTUNGSWERT': 'THAMANI TARAJIWA', 'LETZTE': 'YA MWISHO',
+        // bernoulli-baum, binomial (lb1-3): Treffer = fanikio (mafanikio), Niete = kushindwa; the tree letters T/N → F/K (rule below)
+        'Stufen $n$:': 'Hatua $n$:', 'Anzahl der Stufen': 'Idadi ya hatua', 'Trefferwahrscheinlichkeit $p$': 'Uwezekano wa fanikio $p$',
+        'Genau $k$ Treffer:': 'Mafanikio $k$ hasa:', 'Anzahl der Treffer': 'Idadi ya mafanikio', 'Baumdiagramm einer Bernoulli-Kette': 'Mchoro wa mti wa mfululizo wa Bernoulli',
+        'Anzahl der Versuche $n$': 'Idadi ya majaribio $n$', 'Was wird berechnet?': 'Nini kinahesabiwa?', 'Histogramm der Binomialverteilung': 'Histogramu ya mgawanyo wa binomia',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -92,6 +96,10 @@ window.BuchSW && BuchSW.add('stochastik', {
             ' Unaweka dau la €1 kwenye namba moja, kisha dadu tatu zinarushwa. Kwa kila dadu inayoonyesha namba yako unapata faida ya €1, vinginevyo dau linapotea.'],
         ['Erwartungswert: ', 'Thamani tarajiwa: '], ['Varianz: ', 'Variansi: '], [' · Standardabweichung: ', ' · Mkengeuko sanifu: '],
         [' · Das Spiel ist <b>fair</b>.', ' · Mchezo ni <b>wa haki</b>.'],
+        // bernoulli-baum, binomial
+        ['$ · jeder hat die Wahrscheinlichkeit $', '$ · kila moja ina uwezekano $'], ['Formel von Bernoulli: $', 'Fomula ya Bernoulli: $'],
+        ['$X$ ist binomialverteilt mit $n = ', '$X$ ina mgawanyo wa binomia wenye $n = '],
+        ['Erwartungswert $\\mu', 'Thamani tarajiwa $\\mu'], [' · Standardabweichung $\\sigma', ' · Mkengeuko sanifu $\\sigma'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
@@ -123,6 +131,13 @@ window.BuchSW && BuchSW.add('stochastik', {
         [/(^|[^\d.,])([-−]?)(\d+(?:\.\d+)?) €/g, '$1$2€$3'],
         [/ · Auf lange Sicht <b>(verlierst|gewinnst)<\/b> du im Mittel (\$[^$]*\$) € pro Spiel\./g,
             (m, w, x) => ' · Kwa muda mrefu, kwa wastani <b>' + (w === 'verlierst' ? 'unapoteza' : 'unapata') + '</b> €' + x + ' kwa kila mchezo.'],
+        // bernoulli-baum: "Pfade mit genau 2 Treffern: …" → "Njia zenye mafanikio 2 hasa: …"
+        [/Pfade mit genau (\d+) Treffern: /g, 'Njia zenye mafanikio $1 hasa: '],
+        // bernoulli-baum: the letters of the tree T/N (Treffer/Niete) → F/K (fanikio/kushindwa), only inside this tree, so the
+        // N of the urn trees (from R, rule of sw-1) stays N
+        [/^(<svg class="st-tree"[^>]*aria-label="Baumdiagramm einer Bernoulli-Kette">)([\s\S]*)$/, (m, head, body) => head + body
+            .replace(/(font-weight:700">)([TN])(<\/text>)/g, (x, a, l, b) => a + (l === 'T' ? 'F' : 'K') + b)
+            .replace(/(<text x="10" y="20">)([TN]+)(<\/text>)/g, (x, a, k, b) => a + k.replace(/[TN]/g, l => (l === 'T' ? 'F' : 'K')) + b)],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ]
