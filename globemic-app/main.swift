@@ -1,4 +1,4 @@
-// GlobeMic — hold the Globe key to dictate into the Claude panel of VS Code, release to send.
+// DocMic (app file: GlobeMic) — hold the Globe key to dictate into the Claude panel of VS Code, release to send.
 // Holding Globe presses Cmd+D, letting go ends the dictation and presses Return. Return only
 // goes out when a new microphone capture really started: with the cursor anywhere else Cmd+D
 // never opens the mic, so nothing can land in the code. A dictation that reads exactly
@@ -196,7 +196,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ note: Notification) {
-        bar = DocBarClient(id: "de.docalvers.globemic", name: "GlobeMic",
+        bar = DocBarClient(id: "de.docalvers.globemic", name: "DocMic",
                            symbol: "mic.fill", rank: 20) { [weak self] item in self?.clicked(item) }
 
         if !UserDefaults.standard.bool(forKey: "loginSet") {
@@ -225,7 +225,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                      DocBarItem("login", "Start at login", state: startsAtLogin)]
         if !canListen { items.append(DocBarItem("listen", "Allow Input Monitoring …")) }
         if !canPost { items.append(DocBarItem("post", "Allow Accessibility access …")) }
-        items.append(DocBarItem("quit", "Quit GlobeMic"))
+        items.append(DocBarItem("quit", "Quit DocMic"))
 
         let ready = tap != nil && canPost
         let status = !ready ? "needs a permission" : enabled ? "hold Globe to dictate" : "off"

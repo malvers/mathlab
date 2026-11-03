@@ -1,4 +1,4 @@
-// Spiegel — shows the second screen in a small window on the Mac's own screen, so Doc sees
+// DocMirror (app file: Spiegel) — shows the second screen in a small window on the Mac's own screen, so Doc sees
 // what the board in the classroom shows while he works on the Mac. It comes by itself when a
 // screen is extended next to the built-in display and goes with that screen; a mirrored
 // screen needs no mirror. Frames go straight from ScreenCaptureKit into the window, nothing
@@ -313,7 +313,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationDidFinishLaunching(_ note: Notification) {
         makePanel()
-        bar = DocBarClient(id: "de.docalvers.spiegel", name: "Spiegel",
+        bar = DocBarClient(id: "de.docalvers.spiegel", name: "DocMirror",
                            symbol: "pip", rank: 40) { [weak self] item in self?.clicked(item) }
         if !UserDefaults.standard.bool(forKey: "loginSet") {
             UserDefaults.standard.set(true, forKey: "loginSet")
@@ -482,7 +482,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                      DocBarItem("corner", "Back to the corner"),
                      DocBarItem("login", "Start at login", state: startsAtLogin)]
         if problem != nil { items.append(DocBarItem("settings", "Screen Recording settings")) }
-        items.append(DocBarItem("quit", "Quit Spiegel"))
+        items.append(DocBarItem("quit", "Quit DocMirror"))
         let status = !enabled ? "off" : problem ?? (shown.isEmpty ? "no second screen" : "shows \(shown)")
         bar?.publish(status: status, items: items, primary: "toggle", alert: problem != nil, toggle: enabled)
     }

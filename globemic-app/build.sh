@@ -16,8 +16,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>GlobeMic</string>
-  <key>CFBundleDisplayName</key><string>GlobeMic</string>
+  <key>CFBundleName</key><string>DocMic</string>
+  <key>CFBundleDisplayName</key><string>DocMic</string>
   <key>CFBundleExecutable</key><string>GlobeMic</string>
   <key>CFBundleIdentifier</key><string>de.docalvers.globemic</string>
   <key>CFBundlePackageType</key><string>APPL</string>
