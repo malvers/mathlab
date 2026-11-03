@@ -127,7 +127,7 @@ if (!PRESENTER && document.querySelector('.slide.title'))
 // the pen (s): ink on the slides, and a tablet as a remote pen (deck-ink.js, Doc 27.09.2026) - a module runs only
 // after this whole file, so everything it uses is there
 import('./deck-ink.js').catch(function () { });
-// the board on the laptop (t): its real picture in a small floating window (deck-spiegel.js, Doc 02.11.2026)
+// the board on the laptop (t): its real picture where the presenter view shows the slide after next (deck-spiegel.js)
 import('./deck-spiegel.js').catch(function () { });
 // slide and click survive a reload (Doc, 17.09.2026: "persist slide and click") - per tab, so a new tab still
 // starts at the beginning; a #7 in the URL wins
@@ -744,7 +744,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
       ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
     [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
-    [K(['T']) + hint('Tafel'), 'Rückspiegel: die Tafel live in einem kleinen Fenster auf dem Laptop'],
+    [K(['T']) + hint('Tafel'), 'Rückspiegel: die Tafel live in der Referentenansicht statt der übernächsten Folie – Chrome fragt beim Start'],
     [K(['N']) + hint('Natur'), 'Naturbild hinter den Folien wechseln – nach dem letzten wieder ohne'],
     null,
     [K(['Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
@@ -2299,6 +2299,10 @@ const link = (function () {
   // One click, two windows: Chrome lets a page that may place windows ("Fenster verwalten", asked once)
   // go fullscreen on one screen and open a popup on another from the same click - fullscreen first.
   async function present() {
+    // the board's picture first (deck-spiegel.js): asked in the show, Chrome's question would take the beamer's
+    // fullscreen. It uses up the click, so the card takes the fresh one, as after "Fenster verwalten" (Doc, 03.11.2026:
+    // "ich habe nur Angst, dass ich vergesse T zu drücken")
+    if (window.DeckSpiegel && DeckSpiegel.wanted()) { await DeckSpiegel.ask(); offer(true); return; }
     const el = document.documentElement;
     let sd = null;
     try { sd = await window.getScreenDetails(); } catch (e) { }   // refused: plain fullscreen as before
@@ -2362,10 +2366,17 @@ const link = (function () {
       if (fsOn()) { presFull = true; return; }
       if (!presFull) return;
       presFull = false;
+      // Chrome drops fullscreen for its question what the mirror (t) shall show - not Doc's Esc: the show goes on and
+      // the next key or tap goes fullscreen again (Doc, 03.11.2026: "T schließt das Fenster")
+      if (window.DeckSpiegel && DeckSpiegel.dropped()) { document.dispatchEvent(new Event('deck-refull')); return; }
       endShow();
       return;
     }
-    if (fsOn() || !showing || Date.now() - showAt < 1500) return;
+    if (fsOn() || !showing) return;
+    // Chrome drops the beamer's fullscreen for its question what the mirror (t in the presenter view) shall show -
+    // not Doc's Esc: the show goes on, the presenter's next key gives the fullscreen back (deck-spiegel.js)
+    if (window.DeckSpiegel && DeckSpiegel.dropped()) return;
+    if (Date.now() - showAt < 1500) return;
     showing = false;
     send({ t: 'end' });
     linked = false; mine = false; peer = null;
@@ -2644,8 +2655,11 @@ const link = (function () {
     // never reaches the page, the second one goes fullscreen - the beamer window stays fullscreen meanwhile.
     // Handing the focus over by script (popup.focus()) makes Chrome drop the beamer's fullscreen - never do that.
     let wentFull = false;
+    // t (the mirror) never: Chrome's question right after would drop the fullscreen again
     function goFull(e) {
-      if (wentFull || fsOn() || (e && e.key === 'Escape')) return;
+      if (wentFull || fsOn() || (e && (e.key === 'Escape' || e.key === 't' || e.key === 'T'))) return;
+      // the board waits for its own fullscreen: this key hands it over first (deck-spiegel.js), the next one is ours
+      if (window.DeckSpiegel && DeckSpiegel.boardWaits()) return;
       wentFull = true;
       const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
       // a refusal is shown, not swallowed - Chrome's reason is the only clue on a real two-screen setup
@@ -2656,6 +2670,7 @@ const link = (function () {
     }
     addEventListener('pointerdown', goFull, true);
     addEventListener('keydown', goFull, true);
+    document.addEventListener('deck-refull', function () { wentFull = false; });
     if (window.ResizeObserver) new ResizeObserver(fitAll).observe(root);
     else addEventListener('resize', fitAll);
     addEventListener('load', function () { ready = true; render(); });   // after KaTeX has set the formulas
