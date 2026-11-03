@@ -53,6 +53,9 @@ window.BuchSW && BuchSW.add('analysis', {
         "Funktionenschar": "Familia ya fanksheni", "Ortskurve der Extrempunkte zeigen": "Onyesha njia ya nukta za kugeuka", "Funktionenschar mit Ortskurve": "Familia ya fanksheni pamoja na njia ya nukta", "Parameter $a$": "Kigezo $a$",
         "Verkaufspreis $p$ (€ pro Stück)": "Bei ya kuuza $p$ (€ kwa kipande)", "x in Stück": "x kwa vipande", "Kosten, Erlös und Gewinn": "Gharama, mapato na faida",
         // kurve (abi)
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -161,6 +164,9 @@ window.BuchSW && BuchSW.add('analysis', {
         ["$: Dort ist $f''(x) = 0$ und die Steigung ", "$: hapo $f''(x) = 0$ na mwinamo ni "],
         ["am kleinsten", "mdogo kabisa"],
         ["am größten", "mkubwa kabisa"],
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     ],
     rule: [
         // book sw-2 mathe12-sw:
@@ -174,5 +180,8 @@ window.BuchSW && BuchSW.add('analysis', {
         [/(^|\$)O('?\(r\)| \\approx)/g, '$1A$2'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     ]
 });

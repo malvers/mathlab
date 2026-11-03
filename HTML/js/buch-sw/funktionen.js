@@ -77,6 +77,9 @@ window.BuchSW && BuchSW.add('funktionen', {
         // book sw-2 mathe12-sw:
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     },
     phrase: [
         // book sw-1 mathe11-sw:
@@ -132,6 +135,9 @@ window.BuchSW && BuchSW.add('funktionen', {
         // book sw-2 mathe12-sw:
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     ],
     rule: [
         // sw0: lines are y = mx + c in Kenyan schools (German y = mx + n): the zero of gerade
@@ -166,5 +172,8 @@ window.BuchSW && BuchSW.add('funktionen', {
         // book sw-2 mathe12-sw:
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     ]
 });

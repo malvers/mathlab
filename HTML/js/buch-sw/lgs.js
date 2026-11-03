@@ -18,6 +18,7 @@ window.BuchSW && BuchSW.add('lgs', {
         'mit $r =$': 'kwa $r =$', 'Neue Matrizen': 'Matriki mpya', 'Wähle eine Rechnung.': 'Chagua hesabu.',
         '1 Schritt': 'Hatua 1', '10 Schritte': 'Hatua 10', 'Vier Webseiten und ihre Links': 'Kurasa nne za wavuti na viungo vyake',
         // book sw-3 mathe13-sw:
+        // book sw-5 mathe13lk-sw:
     },
     phrase: [
         // book sw-1 mathe11-sw:
@@ -40,6 +41,7 @@ window.BuchSW && BuchSW.add('lgs', {
         ['Aus Zeilen werden Spalten: aus einer $2 \\times 3$- wird eine $3 \\times 2$-Matrix.', 'Safu mlalo zinakuwa safu wima: matriki ya $2 \\times 3$ inakuwa matriki ya $3 \\times 2$.'],
         ['Summe: $', 'Jumla: $'],
         // book sw-3 mathe13-sw:
+        // book sw-5 mathe13lk-sw:
     ],
     rule: [
         // book sw-1 mathe11-sw:
@@ -48,5 +50,6 @@ window.BuchSW && BuchSW.add('lgs', {
             'Katika safu wima ya $1 hakuna pivoti tena: mfumo hauna suluhisho, au una masuluhisho mengi bila kikomo.'],
         [/Schritt (\d+):/g, 'Hatua ya $1:'],
         // book sw-3 mathe13-sw:
+        // book sw-5 mathe13lk-sw:
     ]
 });

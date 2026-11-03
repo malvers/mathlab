@@ -71,6 +71,9 @@ window.BuchSW && BuchSW.add('stochastik', {
         'Fehler 2. Art zeigen: wahres $p$ =': 'Onyesha kosa la aina ya II: $p$ halisi =',
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Mgawanyo wa binomia chini ya nadharia tete sifuri, pamoja na eneo la kukataa',
         // binomial (abi)
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -128,6 +131,9 @@ window.BuchSW && BuchSW.add('stochastik', {
         // binomial (abi)
         ["$ und $p = ", "$ na $p = "],
         ["$ · Standardabweichung $", "$ · mkengeuko sanifu $"],
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     ],
     rule: [
         // book sw-1 mathe11-sw:
@@ -168,5 +174,8 @@ window.BuchSW && BuchSW.add('stochastik', {
         // book sw-3 mathe13-sw:
         // stichprobe: "120 Stichproben vom Umfang 50" → "Sampuli 120 zenye ukubwa 50" (the number goes behind the noun)
         [/(\d[\d,]*) (Stichproben?) vom Umfang (\d+)/g, (m, k, w, n) => 'Sampuli ' + k + (w === 'Stichprobe' ? ' yenye' : ' zenye') + ' ukubwa ' + n],
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     ]
 });

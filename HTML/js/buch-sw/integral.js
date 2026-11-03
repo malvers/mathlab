@@ -31,6 +31,7 @@ window.BuchSW && BuchSW.add('integral', {
         'Parabel und Gerade': 'Parabola na mstari', 'Kubik und Parabel': 'Kipeo cha tatu na parabola', 'Sinus und Kosinus': 'Sine na cosine',
         'Funktionen': 'Fanksheni', 'Fläche zwischen zwei Graphen': 'Eneo kati ya grafu mbili',
         'Zu wenige Schnittstellen im Bild.': 'Thamani za makutano zilizo kwenye picha ni chache mno.',
+        // book sw-5 mathe13lk-sw:
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -47,8 +48,10 @@ window.BuchSW && BuchSW.add('integral', {
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Tahadhari: $a > b$ inabadilisha ishara.'],
         // zwischenflaeche
         ['$ · Schnittstellen: ', '$ · thamani za makutano: '],
+        // book sw-5 mathe13lk-sw:
     ],
     rule: [
         // book sw-3 mathe13-sw:
+        // book sw-5 mathe13lk-sw:
     ]
 });

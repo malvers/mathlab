@@ -17,6 +17,7 @@ window.BuchSW && BuchSW.add('numerik', {
         'Anzahl der Streifen $n$': 'Idadi ya vipande $n$', 'Flächeninhalt mit Streifen angenähert': 'Eneo limekadiriwa kwa vipande',
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Nukta za nasibu ndani ya mstatili, zile zilizo chini ya parabola',
         // book sw-3 mathe13-sw:
+        // book sw-5 mathe13lk-sw:
     },
     phrase: [
         // book sw-1 mathe11-sw:
@@ -28,6 +29,7 @@ window.BuchSW && BuchSW.add('numerik', {
         ['Schätzwert: $A', 'Makadirio: $A'], [' · genau: $', ' · kamili: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Tupa nukta za nasibu ndani ya mstatili '],
         ['. Der Anteil der Treffer unter ', '. Sehemu ya nukta zilizo chini ya '], [' schätzt den Anteil der Fläche.', ' inakadiria sehemu ya eneo.'],
         // book sw-3 mathe13-sw:
+        // book sw-5 mathe13lk-sw:
     ],
     rule: [
         // book sw-1 mathe11-sw:
@@ -37,5 +39,6 @@ window.BuchSW && BuchSW.add('numerik', {
         // mc-flaeche "Von $500$ Punkten liegen $160$ unter …" → "Kati ya nukta $500$, $160$ ziko chini ya …"
         [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'Kati ya nukta $' + n + '$, $'],
         // book sw-3 mathe13-sw:
+        // book sw-5 mathe13lk-sw:
     ]
 });

@@ -238,3 +238,13 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Binomialkoeffizient | koefisienti ya binomia ${}^nC_k$ | binomial coefficient ⁿCₖ | wie BGY 12 (Kenia schreibt ⁿCₖ, nicht $\binom{n}{k}$) |
 | Hoch-, Tief-, Wendepunkt als Buchstabe | $J$ (juu) · $C$ (chini) · $M$ (mgeuko) | maximum · minimum · inflection point | wie BGY 12 (Regel in analysis.js) |
 | Oberfläche (Pyramide, Prisma) | eneo la uso wote $A_J$ | total surface area | $J$ = jumla; $A$ ist dort eine Ecke (sw-merge) |
+
+## mathe12lk-sw (BGY 12 Leistungskurs)
+
+| Deutsch | Kiswahili | English (Kenya) | Hinweis |
+|---|---|---|---|
+
+## mathe13lk-sw (BGY 13 Leistungskurs)
+
+| Deutsch | Kiswahili | English (Kenya) | Hinweis |
+|---|---|---|---|

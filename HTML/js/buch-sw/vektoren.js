@@ -38,6 +38,9 @@ window.BuchSW && BuchSW.add('vektoren', {
         // pyramide
         'Pyramide': 'Piramidi', 'Prisma (schief möglich)': 'Prizimu (inaweza kuinama)', 'Körper': 'Umbo', 'Grundkante $a$': 'Ukingo wa kitako $a$',
         'Höhe $h$': 'Kimo $h$', 'Verschiebung der Spitze in $x$': 'Kuhamisha kilele kwa mwelekeo wa $x$',
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget)
@@ -87,6 +90,9 @@ window.BuchSW && BuchSW.add('vektoren', {
         ['Oberfläche $O = ', 'Eneo la uso wote $A_J = '], [' (Prinzip von Cavalieri: auch schief)', ' (kanuni ya Cavalieri: hata ikiinama)'],
         [' · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', ' · Ukihamisha kilele kwa mlalo, ujazo unabaki ule ule, uso wa pembeni haubaki.'],
         ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, kuhamishwa kwa uso wa juu $\\vec{w} = '],
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     ],
     rule: [
         // book sw-2 mathe12-sw:
@@ -108,5 +114,8 @@ window.BuchSW && BuchSW.add('vektoren', {
         // the coordinate inputs: "Vektor u, x-Koordinate" → "Vekta u, kiwianishi cha x", and the bars between them are commas
         [/\b(Vektor|Punkt) ([^,"]+), ([xyz])-Koordinate/g, (m, k, n, c) => (k === 'Vektor' ? 'Vekta ' : 'Nukta ') + n + ', kiwianishi cha ' + c],
         [/<span class="vk-par">\|<\/span>/g, '<span class="vk-par">,</span>'],
+        // book sw-4 mathe12lk-sw:
+        // (sw-4 above, sw-5 below)
+        // book sw-5 mathe13lk-sw:
     ]
 });
