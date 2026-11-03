@@ -324,8 +324,11 @@ function prev(){
 }
 // a whole slide back or forth, shown fully built - the footer triangles and Shift+arrows (Doc, 17.09.2026)
 function jump(d){
-  if (typeof narr !== 'undefined') narr.stop();     // turning by hand pauses Solita
   const j = seek(si + d, d > 0 ? 1 : -1);
+  // while Solita talks the triangles do what Shift+arrows do: she tells that slide from its top (Doc, 03.11.2026, on
+  // the phone: "wenn ich unten die Navigationsdreiecke bediene, hört Solita immer noch auf")
+  if (typeof narr !== 'undefined' && narr.playing && j >= 0) { narr.stop(); narr.from(j); return; }
+  if (typeof narr !== 'undefined') narr.stop();     // paused: turning by hand only turns
   if (j >= 0) si = j;
   step = groups(slides[si]); ganz = true; paint();
 }
@@ -1295,7 +1298,10 @@ const narr = (function () {
     const began = Date.now(), drawn = drawing(si);
     audio.onended = function () { part++; wait = setTimeout(run, Math.max(part < parts(si) ? 900 : 0, drawn - (Date.now() - began))); };
     audio.onerror = function () { part++; run(); };   // a missing clip must not hang the talk
-    audio.play().catch(function () { api.playing = false; show(); });
+    // only the clip that still speaks may stop her: a turn while a clip still loads (a phone on the net) pauses it, its
+    // play() then fails - after the next clip has begun, and she fell silent there (03.11.2026)
+    const a = audio;
+    audio.play().catch(function () { if (audio !== a) return; api.playing = false; show(); });
   }
   // she shows what she explains (Doc, 01.11.2026: "sie soll das Ding auch vorführen", "alle Tools"): narration "demo"
   // {slide: [[ms, what], ...]}, ms = the place in her first clip, so a pause holds the demo too (Doc, 02.11.2026: "die scheint
