@@ -37,6 +37,8 @@ window.BuchSW && BuchSW.add('analysis', {
         'nur f': 'f peke yake', 'f′ und f″': 'f′ na f″', 'Ableitungen zeigen': 'Onyesha vinyambuo',
         'Graph einer Funktion dritten Grades mit Extrem- und Wendepunkten': 'Grafu ya fanksheni ya daraja la tatu yenye nukta za kugeuka na nukta ya mgeuko',
         'Intervall': 'Muda', 'konstant': 'haibadiliki', 'steigt ↗': 'inaongezeka ↗', 'fällt ↘': 'inapungua ↘',
+        // tangente (lb2-5): Normale = normali, Berührpunkt = nukta ya mguso
+        'Tangente und Normale an einen Graphen': 'Tanjenti na normali ya grafu',
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     },
@@ -86,6 +88,9 @@ window.BuchSW && BuchSW.add('analysis', {
         ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am kleinsten.', '$: hapo $f\'\'(x) = 0$ na mwinamo ni mdogo kabisa.'],
         ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am größten.', '$: hapo $f\'\'(x) = 0$ na mwinamo ni mkubwa kabisa.'],
         ['Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.', 'Kwa $a = 0$, $f$ ni parabola (au mstari) isiyo na nukta ya mgeuko.'],
+        // tangente
+        ['$ · Berührpunkt $P', '$ · nukta ya mguso $P'], ['Tangente: $', 'Tanjenti: $'],
+        ['Normale (senkrecht zur Tangente, $m_n = -\\tfrac{1}{m_t}$): $', 'Normali (wima kwa tanjenti, $m_n = -\\tfrac{1}{m_t}$): $'],
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
     ],
