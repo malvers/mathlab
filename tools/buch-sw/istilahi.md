@@ -102,3 +102,14 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 
 | Deutsch | Kiswahili | English (Kenya) | Hinweis |
 |---|---|---|---|
+| Ableitung · ableiten | kinyambuo · kunyambua | derivative · differentiate | wie BGY 11 („kinyambuo“); „kunyambua“ als Verb dazu |
+| Stammfunktion | fanksheni asili | antiderivative | „asili“ = Ursprung, wie „Stamm“; kein fester Schulbegriff, Alternative „kinyume cha kinyambuo“ |
+| unbestimmtes · bestimmtes Integral | kiunganishi kisicho dhahiri · kiunganishi dhahiri | indefinite · definite integral | „kiunganishi“ wie BGY 11 (wb3) |
+| integrieren · Integration · Integralrechnung | kuunganisha · uunganishaji · kalkulasi ya kiunganishi | integrate · integration · integral calculus | |
+| Integrationskonstante | konstanti $C$ | constant of integration | Lehnwort; Großbuchstabe $C$ bleibt, weil $c$ in $y = mx + c$ schon belegt ist |
+| Potenz-, Faktor-, Summen-, Produktregel | kanuni ya vipeo · ya kizidishi · ya jumla · ya zao | power · constant multiple · sum · product rule | „vipeo“ wie „sheria za vipeo“ (laws of indices) |
+| ganzrationale Funktion | polinomia | polynomial | |
+| waagerechte Tangente | tanjenti mlalo | horizontal tangent | |
+| Hochpunkt · Tiefpunkt | nukta ya juu · nukta ya chini | maximum · minimum point | mit (maximum)/(minimum) in Klammern |
+| e-Funktion · Winkelfunktionen | fanksheni ya e · fanksheni za trigonometria | exponential function $\mathrm{e}^x$ · trigonometric functions | |
+| CAS | CAS (programu ya aljebra ya kompyuta) | CAS | |
