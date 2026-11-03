@@ -149,3 +149,14 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | einseitig (links/rechts) · zweiseitig | upande mmoja (wa kushoto / wa kulia) · pande mbili | one-tailed (left/right) · two-tailed | |
 | Fehler 1. Art · Fehler 2. Art | kosa la aina ya I · kosa la aina ya II | Type I · Type II error | |
 | Irrtumswahrscheinlichkeit | uwezekano wa kukosea | probability of error | |
+| Vektor · Nullvektor · Komponente · Betrag | vekta · vekta sifuri $\vec{0}$ · kijenzi · ukubwa (urefu) | vector · zero vector · component · magnitude | Spaltenvektoren $\begin{pmatrix} 1 \\ 2 \\ 1 \end{pmatrix}$ wie in Kenia, Punkte $(1, 2, 1)$ |
+| Gerade · Ebene | mstari · bapa (mabapa) | line · plane | „bapa“ wie in „jiometri bapa“; Alternative „uso bapa“ |
+| Parametergleichung einer Geraden | mlinganyo wa vekta $\vec{r} = \vec{p} + t\,\vec{u}$ | vector equation of a line | $\vec{r}$ statt $\vec{x}$ wie in englischen Büchern (auch in den Widgets: Regel in vektoren.js) |
+| Parameterform einer Ebene | umbo la vigezo $\vec{r} = \vec{a} + \lambda\,\vec{u} + \mu\,\vec{v}$ | parametric (vector) form of a plane | $\lambda, \mu$ statt $r, s$ (sonst Zusammenstoß mit $\vec{r}$) |
+| Stützpunkt · Stützvektor · Richtungsvektor · Spannvektoren | nukta ya msingi · vekta ya msingi · vekta ya mwelekeo · vekta za mwelekeo | point on the line · position vector · direction vector · direction vectors | |
+| Punktprobe · Spurpunkte | jaribio la nukta · nukta za kukata | checking a point · trace points / intercepts | |
+| Koordinate · Koordinatenebene · Koordinatenachse | kiwianishi · bapa la viwianishi · mhimili wa viwianishi | coordinate · coordinate plane · axis | |
+| Skalarprodukt · Vektorprodukt | zao la skala $\vec{a} \cdot \vec{b}$ · zao la vekta $\vec{a} \times \vec{b}$ | dot (scalar) product · cross (vector) product | Punkt statt $\circ$, auch in den Widgets (Regel in vektoren.js) |
+| Normalenvektor · senkrecht | vekta ya normali · wima kwa | normal vector · perpendicular to | |
+| Parallelogramm · Strecke | msambamba · kipande cha mstari | parallelogram · line segment | |
+| analytische Geometrie · kartesisch | jiometri ya uchanganuzi · ya kartesia | analytic geometry · Cartesian | |
