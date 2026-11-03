@@ -46,6 +46,13 @@ window.BuchSW && BuchSW.add('stochastik', {
         // book sw-2 mathe12-sw:
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
+        // histo-hero (the picture at the top of lb4-1 and lb4-2)
+        'Histogramm einer Binomialverteilung': 'Histogramu ya mgawanyo wa binomia',
+        'Histogramm einer Wahrscheinlichkeitsverteilung': 'Histogramu ya mgawanyo wa uwezekano',
+        // stichprobe
+        'Anteil in der Grundgesamtheit $p$': 'Uwiano katika kundi zima $p$', 'Stichprobenumfang $n$': 'Ukubwa wa sampuli $n$',
+        'Stichproben ziehen:': 'Chomoa sampuli:', 'Noch keine Stichprobe gezogen.': 'Bado hakuna sampuli iliyochomolewa.',
+        'Verteilung der relativen Häufigkeiten vieler Stichproben': 'Mgawanyo wa marudio ya uwiano ya sampuli nyingi',
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -71,6 +78,10 @@ window.BuchSW && BuchSW.add('stochastik', {
         // book sw-2 mathe12-sw:
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
+        // stichprobe ("120 Stichproben vom Umfang 50" is a rule below)
+        [' · letzte: $h = ', ' · ya mwisho: $h = '], ['$ (gold)', '$ (dhahabu)'],
+        ['Mittelwert der $h$: $', 'Wastani wa $h$: $'], ['$ · Standardabweichung der $h$: $', '$ · mkengeuko sanifu wa $h$: $'],
+        ['Theorie: $', 'Nadharia: $'], ['$. Viermal so großes $n$ halbiert die Streuung.', '$. $n$ mara nne zaidi inagawanya nusu mtawanyiko.'],
     ],
     rule: [
         // book sw-1 mathe11-sw:
@@ -95,5 +106,7 @@ window.BuchSW && BuchSW.add('stochastik', {
         // book sw-2 mathe12-sw:
         // (sw-2 above, sw-3 below)
         // book sw-3 mathe13-sw:
+        // stichprobe: "120 Stichproben vom Umfang 50" → "Sampuli 120 zenye ukubwa 50" (the number goes behind the noun)
+        [/(\d[\d,]*) (Stichproben?) vom Umfang (\d+)/g, (m, k, w, n) => 'Sampuli ' + k + (w === 'Stichprobe' ? ' yenye' : ' zenye') + ' ukubwa ' + n],
     ]
 });

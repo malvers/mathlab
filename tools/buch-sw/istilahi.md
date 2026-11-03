@@ -134,3 +134,10 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Mittelwert einer Funktion | thamani ya wastani | mean value | |
 | Leistung (elektrisch) · Energie · Arbeit · Kraft | nguvu ya umeme · nishati · kazi · nguvu | power · energy · work · force | „nguvu“ allein ist Kraft |
 | Keplersche Fassregel | kanuni ya mapipa ya Kepler | Simpson’s rule | |
+| Grundgesamtheit · Stichprobe · Stichprobenumfang | kundi zima · sampuli · ukubwa wa sampuli | population · sample · sample size | Alternative „jamii lengwa“ (Forschungsmethodik); „kundi zima“ passt auch für Schrauben |
+| repräsentativ · Verzerrung | wakilishi · upendeleo | representative · bias | |
+| beurteilende Statistik · Schätzen · Testen | takwimu za kukisia · kukadiria · kupima | inferential statistics · estimating · testing | |
+| Anteil · Stichprobenanteil | uwiano · uwiano wa sampuli $h$ | proportion · sample proportion | |
+| Stichprobenmittel · Stichprobenvarianz | wastani wa sampuli $\bar{x}$ · variansi ya sampuli $s^2$ | sample mean · sample variance | „variansi“ Lehnwort |
+| Standardabweichung · Streuung | mkengeuko sanifu · mtawanyiko | standard deviation · spread | |
+| Binomialverteilung · Erwartungswert · Zufallsgröße | mgawanyo wa binomia · thamani tarajiwa · kigeu nasibu | binomial distribution · expected value · random variable | |
