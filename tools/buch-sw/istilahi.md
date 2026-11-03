@@ -92,3 +92,13 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 | Bisektionsverfahren | mbinu ya kugawanya nusu | bisection method | |
 | Streifen · Rechteck · Trapez | kipande · mstatili · trapeza | strip · rectangle · trapezium | |
 | Tabellenkalkulation | lahajedwali | spreadsheet | |
+
+## mathe12-sw (BGY 12: Analysis, Vektoren, Stochastik)
+
+| Deutsch | Kiswahili | English (Kenya) | Hinweis |
+|---|---|---|---|
+
+## mathe13-sw (BGY 13: Integral, Tests, Geraden und Ebenen)
+
+| Deutsch | Kiswahili | English (Kenya) | Hinweis |
+|---|---|---|---|

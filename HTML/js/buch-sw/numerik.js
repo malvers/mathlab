@@ -16,6 +16,7 @@ window.BuchSW && BuchSW.add('numerik', {
         'Rechtecke links': 'Mistatili ya kushoto', 'Rechtecke Mitte': 'Mistatili ya katikati', 'Trapeze': 'Trapeza', 'Verfahren': 'Mbinu',
         'Anzahl der Streifen $n$': 'Idadi ya vipande $n$', 'Flächeninhalt mit Streifen angenähert': 'Eneo limekadiriwa kwa vipande',
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Nukta za nasibu ndani ya mstatili, zile zilizo chini ya parabola',
+        // book sw-3 mathe13-sw:
     },
     phrase: [
         // book sw-1 mathe11-sw:
@@ -26,6 +27,7 @@ window.BuchSW && BuchSW.add('numerik', {
         ['$ unter der Parabel. Rechteck: ', '$ ziko chini ya parabola. Mstatili: '],
         ['Schätzwert: $A', 'Makadirio: $A'], [' · genau: $', ' · kamili: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Tupa nukta za nasibu ndani ya mstatili '],
         ['. Der Anteil der Treffer unter ', '. Sehemu ya nukta zilizo chini ya '], [' schätzt den Anteil der Fläche.', ' inakadiria sehemu ya eneo.'],
+        // book sw-3 mathe13-sw:
     ],
     rule: [
         // book sw-1 mathe11-sw:
@@ -34,5 +36,6 @@ window.BuchSW && BuchSW.add('numerik', {
         [/\+([\d,]+) Punkte(?=<|$)/g, 'Nukta +$1'],
         // mc-flaeche "Von $500$ Punkten liegen $160$ unter …" → "Kati ya nukta $500$, $160$ ziko chini ya …"
         [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'Kati ya nukta $' + n + '$, $'],
+        // book sw-3 mathe13-sw:
     ]
 });

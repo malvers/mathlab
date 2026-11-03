@@ -74,6 +74,9 @@ window.BuchSW && BuchSW.add('funktionen', {
         'Grundfunktion': 'Fanksheni ya msingi', 'Grundfunktion und veränderte Funktion': 'Fanksheni ya msingi na fanksheni iliyobadilishwa',
         'Das ist die Grundfunktion selbst.': 'Hii ndiyo fanksheni ya msingi yenyewe.',
         'Graph, zu dem der Term gesucht ist': 'Grafu ambayo usemi wake unatafutwa', 'Nächster Graph': 'Grafu inayofuata',
+        // book sw-2 mathe12-sw:
+        // (sw-2 above, sw-3 below)
+        // book sw-3 mathe13-sw:
     },
     phrase: [
         // book sw-1 mathe11-sw:
@@ -126,6 +129,9 @@ window.BuchSW && BuchSW.add('funktionen', {
         // parameter: the slider labels "$c \cdot f(x)$: strecken in $y$-Richtung"
         [': strecken in $y$-Richtung', ': nyoosha katika mwelekeo wa $y$'], [': verschieben in $y$-Richtung', ': hamisha katika mwelekeo wa $y$'],
         [': stauchen in $x$-Richtung', ': bana katika mwelekeo wa $x$'], [': verschieben in $x$-Richtung', ': hamisha katika mwelekeo wa $x$'],
+        // book sw-2 mathe12-sw:
+        // (sw-2 above, sw-3 below)
+        // book sw-3 mathe13-sw:
     ],
     rule: [
         // sw0: lines are y = mx + c in Kenyan schools (German y = mx + n): the zero of gerade
@@ -157,5 +163,8 @@ window.BuchSW && BuchSW.add('funktionen', {
             (m, c, d) => 'imehamishwa $' + c + '$ ' + { links: 'kwenda kushoto', rechts: 'kwenda kulia', oben: 'kwenda juu', unten: 'kwenda chini' }[d]],
         // graphquiz score: "3 richtig" → "sahihi 3"
         [/^(\d+) richtig$/, (m, n) => 'sahihi ' + n],
+        // book sw-2 mathe12-sw:
+        // (sw-2 above, sw-3 below)
+        // book sw-3 mathe13-sw:
     ]
 });

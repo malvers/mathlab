@@ -43,6 +43,9 @@ window.BuchSW && BuchSW.add('stochastik', {
         'Neues Spiel': 'Mchezo mpya', '1000 Spiele vom Rechner spielen lassen': 'Acha kompyuta icheze michezo 1000',
         'Strategie': 'Mkakati', 'Spiele': 'Michezo', 'Autos': 'Magari', 'Gewinnquote': 'Kiwango cha ushindi',
         'du: bleiben': 'wewe: baki', 'du: wechseln': 'wewe: badili', 'Rechner: bleiben': 'kompyuta: baki', 'Rechner: wechseln': 'kompyuta: badili',
+        // book sw-2 mathe12-sw:
+        // (sw-2 above, sw-3 below)
+        // book sw-3 mathe13-sw:
     },
     phrase: [
         // sw0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -65,6 +68,9 @@ window.BuchSW && BuchSW.add('stochastik', {
         [' alles richtig', ' yote sahihi'], ['Ereignis: <b>', 'Tukio: <b>'], ['Zuletzt: ', 'Ya mwisho: '],
         ['TÜR', 'MLANGO'], ['Tür', 'Mlango'], ['Gewonnen – das Auto! ', 'Umeshinda – gari! '], ['Leider eine Ziege. ', 'Pole, ni mbuzi. '],
         ['Du hast gewechselt.', 'Ulibadili.'], ['Du bist geblieben.', 'Ulibaki.'],
+        // book sw-2 mathe12-sw:
+        // (sw-2 above, sw-3 below)
+        // book sw-3 mathe13-sw:
     ],
     rule: [
         // book sw-1 mathe11-sw:
@@ -86,5 +92,8 @@ window.BuchSW && BuchSW.add('stochastik', {
         [/Der Moderator weiß, wo das Auto steht, und öffnet Tür (\d): eine Ziege\. Bleibst du oder wechselst du\?/g,
             'Mwendeshaji anajua gari liko wapi, na anafungua mlango $1: mbuzi. Utabaki au utabadili?'],
         [/Bei Tür (\d) bleiben/g, 'Baki kwenye mlango $1'], [/Zu Tür (\d) wechseln/g, 'Hamia mlango $1'],
+        // book sw-2 mathe12-sw:
+        // (sw-2 above, sw-3 below)
+        // book sw-3 mathe13-sw:
     ]
 });

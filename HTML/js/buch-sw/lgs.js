@@ -17,6 +17,7 @@ window.BuchSW && BuchSW.add('lgs', {
         'eine Lösung': 'suluhisho moja', 'keine Lösung': 'hakuna suluhisho', 'unendlich viele': 'mengi bila kikomo', 'Zwei Geraden': 'Mistari miwili',
         'mit $r =$': 'kwa $r =$', 'Neue Matrizen': 'Matriki mpya', 'Wähle eine Rechnung.': 'Chagua hesabu.',
         '1 Schritt': 'Hatua 1', '10 Schritte': 'Hatua 10', 'Vier Webseiten und ihre Links': 'Kurasa nne za wavuti na viungo vyake',
+        // book sw-3 mathe13-sw:
     },
     phrase: [
         // book sw-1 mathe11-sw:
@@ -38,6 +39,7 @@ window.BuchSW && BuchSW.add('lgs', {
         ['Jeder Eintrag wird mit $r$ multipliziert.', 'Kila elementi inazidishwa kwa $r$.'],
         ['Aus Zeilen werden Spalten: aus einer $2 \\times 3$- wird eine $3 \\times 2$-Matrix.', 'Safu mlalo zinakuwa safu wima: matriki ya $2 \\times 3$ inakuwa matriki ya $3 \\times 2$.'],
         ['Summe: $', 'Jumla: $'],
+        // book sw-3 mathe13-sw:
     ],
     rule: [
         // book sw-1 mathe11-sw:
@@ -45,5 +47,6 @@ window.BuchSW && BuchSW.add('lgs', {
         [/In Spalte (\d) gibt es keinen Pivot mehr: Das LGS hat keine oder unendlich viele Lösungen\./g,
             'Katika safu wima ya $1 hakuna pivoti tena: mfumo hauna suluhisho, au una masuluhisho mengi bila kikomo.'],
         [/Schritt (\d+):/g, 'Hatua ya $1:'],
+        // book sw-3 mathe13-sw:
     ]
 });
