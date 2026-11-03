@@ -599,6 +599,18 @@
             border-radius: 20px;   /* the corners of the other cards, the outer holes run under them (Doc, 03.11.2026: "mach die ecken") */
         }
 
+        /* the Swahili card: the Kenyan flag top right, in the corner beside the cover (Doc, 03.11.2026: "oben rechts eine große
+           kenianische Flagge ... groß, nicht ganz groß, aber schön sichtbar") */
+        #tool-container .book-sw .book-sw-flag {
+            position: absolute;
+            top: 20px;
+            right: 22px;
+            width: 104px;
+            min-width: 0;
+            margin: 0;
+            border-radius: 4px;
+        }
+
         #tool-container .book-kino .card-icon {
             align-self: stretch;
             flex: 1;
@@ -1117,6 +1129,12 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.4));
+        }
+
+        /* the books view: six languages in its title (Vitabu since 03.11.2026), a little smaller so they stay on one line */
+        body.view-buecher #view-title {
+            font-size: 1.55rem;
+            letter-spacing: 3px;
         }
 
         .btn-back {
@@ -2500,8 +2518,12 @@
             a.className = 'card book-sw';
             a.href = 'buch/mathe11-sw/index.html';
             a.lang = 'sw';
+            // the cover as high as the covers of the other book cards (80 px), not like a single cover (Doc, 03.11.2026: "so groß, wie
+            // die Covers in den anderen Büchern")
             a.innerHTML = '<div class="card-icon"><img src="resources/og/buch-mathe11-sw-cover.jpg" alt="" loading="lazy" decoding="async"'
-                + ' style="height: 96px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);"></div>'
+                + ' style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);"></div>'
+                // the Kenyan flag of the cover (js/buch-titel.css), top right and well visible (Doc: "groß, nicht ganz groß, aber schön sichtbar")
+                + '<span class="b-titel-flag b-titel-flag-ke book-sw-flag" role="img" aria-label="Kenya"></span>'
                 + '<h3>Hisabati BGY 11</h3>'
                 + '<p class="card-desc">Kitabu chetu cha kwanza kwa Kiswahili: kitabu shirikishi cha kiada cha hisabati kwa Berufliches Gymnasium, darasa la 11, '
                 + 'kwa kufuata mtaala wa Saksonia. Sura kumi na moja kwa mpangilio wa mwaka wa masomo – milinganyo, fanksheni kuanzia za mstari hadi sine, '
@@ -2613,7 +2635,8 @@
                 'sonst': 'Sonst noch …',
                 'neu': 'Die neuen Werkzeuge',
                 'touren': CyberI18n.getOr('index.ui.touren', 'Touren'),
-                'buecher': countLabsInCategory('buecher') + ' Bücher\u00a0· Books\u00a0· Libros\u00a0· Libri\u00a0· Livres',   /* "20 BÜCHER · …" - number of book cards */
+                /* "20 BÜCHER · …" - number of book cards; Vitabu for the Swahili BGY 11 (Doc, 03.11.2026: "Bücher auf Swahili mit dazu") */
+                'buecher': countLabsInCategory('buecher') + ' Bücher\u00a0· Books\u00a0· Libros\u00a0· Libri\u00a0· Livres\u00a0· Vitabu',
                 'fraktale': CyberI18n.get('index.ui.fraktale'),
                 'uni': CyberI18n.get('index.ui.university'),
                 'university': CyberI18n.get('index.ui.university')
