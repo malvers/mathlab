@@ -324,8 +324,11 @@ function prev(){
 }
 // a whole slide back or forth, shown fully built - the footer triangles and Shift+arrows (Doc, 17.09.2026)
 function jump(d){
-  if (typeof narr !== 'undefined') narr.stop();     // turning by hand pauses Solita
   const j = seek(si + d, d > 0 ? 1 : -1);
+  // while Solita talks the triangles do what Shift+arrows do: she tells that slide from its top (Doc, 03.11.2026, on
+  // the phone: "wenn ich unten die Navigationsdreiecke bediene, hört Solita immer noch auf")
+  if (typeof narr !== 'undefined' && narr.playing && j >= 0) { narr.stop(); narr.from(j); return; }
+  if (typeof narr !== 'undefined') narr.stop();     // paused: turning by hand only turns
   if (j >= 0) si = j;
   step = groups(slides[si]); ganz = true; paint();
 }
@@ -595,9 +598,18 @@ const hoverTail = (function () {
     const dx = e.clientX - d.x, dy = e.clientY - d.y;
     const help = document.getElementById('help');
     if (help && !help.hidden) return;                // the click handler closes the help
-    if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) { narr.stop(); if (dx < 0) next(); else prev(); }
-    else if (Math.abs(dx) < 12 && Math.abs(dy) < 12 && e.timeStamp - d.t < 600) { narr.stop(); next(); }
+    if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) turn(dx < 0 ? next : prev);
+    else if (Math.abs(dx) < 12 && Math.abs(dy) < 12 && e.timeStamp - d.t < 600) turn(next);
   }, true);
+  // a finger while Solita talks skips as the arrows do: she goes on at the new point (Doc, 03.11.2026, on the phone:
+  // "wenn ich da links und rechts auf die Folie tippe, dann hört Solita wieder auf zu sprechen"); during a drum roll
+  // the turn waits, she too
+  function turn(go) {
+    const talking = narr.playing;
+    if (talking && trommel.laeuft()) return;
+    narr.stop(); go();
+    if (talking) setTimeout(function () { if (!narr.playing) narr.toggle(); }, 0);
+  }
 })();
 // Chrome's own menu (save image, copy image, inspect ...) never comes up in a deck: a right click or a long press
 // on the board opened it over the slide (Doc, 28.09.2026: "das dumme Menu von Chrome ... unbedingt überschreiben
@@ -1134,6 +1146,34 @@ if (fsHost) ['fullscreenchange', 'webkitfullscreenchange'].forEach(t => fsHost.a
 if (screen.addEventListener) screen.addEventListener('change', paintFull);   // beamer plugged in or out
 if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
 else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+// On a phone or tablet the fullscreen has no Esc and the footer buttons are small: a round x in the top right corner
+// leaves it (Doc, 03.11.2026: "ein Icon, wo man tippen kann, dass der Fullscreen-Modus verlassen wird ... der blockiert
+// mein Telefon, ich komme hier nicht mehr raus"), and outside the fullscreen the same button with the corner brackets
+// goes in (Doc: "genauso wie das Kreuz, es in den Fullscreen-Modus zu bringen"). That corner lies beside the slide on a
+// phone - the bars at the sides across, the room above it upright. deck.css shows it only on a touch screen; in the
+// frame of "The Making of" the x closes the frame, and Solita with it.
+(function () {
+  const b = document.createElement('button');
+  b.id = 'fs-touch';
+  b.type = 'button';
+  const el = document.documentElement;
+  b.hidden = !(el.requestFullscreen || el.webkitRequestFullscreen);   // iPhone Safari: no fullscreen to go into
+  const X = '<path d="M6 6l12 12M18 6L6 18"/>';
+  function paint() {
+    const on = fsOn(), t = on ? 'Vollbild verlassen' : 'Vollbild';
+    b.title = t;
+    b.setAttribute('aria-label', t);
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+      + 'stroke-linejoin="round" aria-hidden="true">' + (on ? X : ICON_ENTER) + '</svg>';
+  }
+  b.addEventListener('click', function (e) { e.stopPropagation(); if (fsOn()) fsExit(); else full(); });
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(t => {
+    document.addEventListener(t, paint);
+    if (fsHost) fsHost.addEventListener(t, paint);
+  });
+  paint();
+  document.body.appendChild(b);
+})();
 
 // #7 in the URL opens slide 7 fully built - handy for linking a single slide
 function fromHash(){
@@ -1270,7 +1310,10 @@ const narr = (function () {
     const began = Date.now(), drawn = drawing(si);
     audio.onended = function () { part++; wait = setTimeout(run, Math.max(part < parts(si) ? 900 : 0, drawn - (Date.now() - began))); };
     audio.onerror = function () { part++; run(); };   // a missing clip must not hang the talk
-    audio.play().catch(function () { api.playing = false; show(); });
+    // only the clip that still speaks may stop her: a turn while a clip still loads (a phone on the net) pauses it, its
+    // play() then fails - after the next clip has begun, and she fell silent there (03.11.2026)
+    const a = audio;
+    audio.play().catch(function () { if (audio !== a) return; api.playing = false; show(); });
   }
   // she shows what she explains (Doc, 01.11.2026: "sie soll das Ding auch vorführen", "alle Tools"): narration "demo"
   // {slide: [[ms, what], ...]}, ms = the place in her first clip, so a pause holds the demo too (Doc, 02.11.2026: "die scheint
