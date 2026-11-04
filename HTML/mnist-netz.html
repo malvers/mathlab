@@ -36,6 +36,20 @@
             color: #0E244E; font-family: Orbitron, sans-serif; font-size: 12px; letter-spacing: .8px; }
         #mn-bar button:hover { background: rgba(14, 36, 78, .13); border-color: rgba(14, 36, 78, .5); }
         #mn-bar svg { width: 10px; height: 10px; fill: currentColor; flex: 0 0 auto; }
+        /* the speed before Start (Doc, 04.11.2026: "oben ... einen Slider, vor Start, der die Geschwindigkeit einstellt") */
+        #mn-w-tempo { display: flex; align-items: center; gap: 8px; padding: 0 6px; color: #0E244E;
+            font-family: Orbitron, sans-serif; font-size: 12px; letter-spacing: .8px; }
+        /* in the sheet's navy, not the dark labs' cyan: a track one can see, a navy knob (Doc, 04.11.2026: "so ein
+           furchtbares Cyan", "die Sliderbar ist kaum zu erkennen", "einen Tick breiter") */
+        #mn-w-tempo input[type="range"] { width: 116px; min-height: 18px; margin: 0; cursor: pointer; background: transparent; }
+        #mn-w-tempo input[type="range"]::-webkit-slider-runnable-track { height: 5px; border-radius: 3px; background: rgba(14, 36, 78, .28); }
+        #mn-w-tempo input[type="range"]::-webkit-slider-thumb { width: 14px; height: 14px; margin-top: -4.5px;
+            background: #0E244E; border: 2px solid #F7F2E7; box-shadow: 0 0 0 1px rgba(14, 36, 78, .45); }
+        #mn-w-tempo input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.1); box-shadow: 0 0 0 1px rgba(14, 36, 78, .6); }
+        #mn-w-tempo input[type="range"]::-moz-range-track { height: 5px; border-radius: 3px; background: rgba(14, 36, 78, .28); }
+        #mn-w-tempo input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; background: #0E244E;
+            border: 2px solid #F7F2E7; box-shadow: 0 0 0 1px rgba(14, 36, 78, .45); }
+        #mn-w-tempo b { min-width: 56px; font-weight: 400; font-size: 11px; color: rgba(14, 36, 78, .7); }
         /* the working area reads like paper, as in the deck - the cards on the left keep the dark house style */
         #canvas-container { background: #F7F2E7; }
         body.mn-widget .canvas-branding { display: none; }
@@ -71,15 +85,22 @@
 
     <!-- ?widget: the buttons sit on the sheet itself, whoever presents must see them -->
     <div id="mn-bar">
+        <label id="mn-w-tempo" title="Wie schnell das Netz übt"><span>Tempo</span>
+            <input type="range" id="mn-w-rate" min="0" max="100" step="1" aria-label="Trainingsbeispiele pro Sekunde">
+            <b id="mn-w-rate-l"></b></label>
         <button type="button" id="mn-w-play" title="Start / Pause (Leertaste)">
             <svg id="mn-w-play-i" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M2 1 L9 5 L2 9 Z"/></svg>
             <span id="mn-w-play-l">Start</span></button>
-        <button type="button" id="mn-w-next" title="Nächste Ziffer (Taste N)">
-            <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M1 1 L7 5 L1 9 Z"/><rect x="7.5" y="1" width="1.6" height="8"/></svg>
-            <span>Nächste Ziffer</span></button>
         <button type="button" id="mn-w-reset" title="Neue Zufallsgewichte">
-            <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M5 1.2 A3.8 3.8 0 1 0 8.8 5 L7.4 5 A2.4 2.4 0 1 1 5 2.6 L5 4.2 L7.6 1.9 L5 -0.4 Z"/></svg>
+            <!-- Feather "rotate-cw" (MIT): the hand-drawn arrow before was clumsy (Doc, 04.11.2026: "hässlich ... oder du machst ihn schön") -->
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;width:11px;height:11px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
             <span>Neu</span></button>
+        <!-- full screen for the lab: on a deck slide it fills the presentation (and with the deck in full screen, the
+             screen), alone it is the browser's full screen - CyberBranding.toggleFullscreen decides (Doc, 04.11.2026:
+             "nicht Fullscreen Screen, sondern Fullscreen Presentation"); Feather maximize / minimize (MIT), four corners - the
+             two diagonal arrows looked squeezed (Doc) -->
+        <button type="button" id="mn-w-full" title="Vollbild – auf der Folie füllt das Lab die Präsentation (Esc: zurück)" aria-label="Vollbild">
+            <svg id="mn-w-full-i" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;width:12px;height:12px"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
     </div>
 
     <script src="js/cyber-left-chrome.js"></script>
@@ -89,6 +110,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -239,8 +261,17 @@
             lastEval: 0, carry: 0, lastT: 0,
             speed: 0, speedN: 0, speedT: 0   // measured examples per second
         };
-        const rateFromSlider = v => Math.round(20 * Math.pow(300, v / 100));
-        const sliderFromRate = r => Math.round(100 * Math.log(r / 20) / Math.log(300));
+        // 5 to 1000 examples a second, 400 at the start: slow enough to watch single digits (Doc, 04.11.2026: "runter bis
+        // 5"), up to 1000 for a quick run ("den Slider auf der rechten Seite auf 1000 ... Default ist 400")
+        const rateFromSlider = v => Math.round(5 * Math.pow(200, v / 100));
+        const sliderFromRate = r => Math.max(0, Math.min(100, Math.round(100 * Math.log(r / 5) / Math.log(200))));
+        // the speed in both places - the side panel's slider and the widget's one over the sheet
+        function setRate(r) {
+            S.rate = r;
+            const lab = fmt(r) + ' / s';
+            ['mn-rate', 'mn-w-rate'].forEach(id => { const e = document.getElementById(id); if (e) e.value = sliderFromRate(r); });
+            ['mn-rate-l', 'mn-w-rate-l'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = lab; });
+        }
 
         function shuffle() {
             const o = S.order;
@@ -268,6 +299,13 @@
             let k = S.show;
             for (let tries = 0; tries < 50 && (k === S.show || DATA.test.Y[k] === was); tries++) k = (Math.random() * DATA.test.n) | 0;
             S.show = k;
+        }
+        // a test digit of the chosen kind, another one than the one on show (the row 0-9 above it)
+        function pickDigit(d) {
+            if (!DATA.test) return;
+            const ks = [];
+            for (let k = 0; k < DATA.test.n; k++) if (DATA.test.Y[k] === d && k !== S.show) ks.push(k);
+            if (ks.length) S.show = ks[(Math.random() * ks.length) | 0];
         }
         function toggleRun() {
             if (!DATA.train) return;
@@ -304,9 +342,11 @@
 
         // ------------------------------------------------------------------- layout ---
         let LY = null;
-        const CAP1 = [[T('cap_a', 'Jedes Neuron ist ein '), 0], [T('cap_b', 'Perzeptron'), 1], [T('cap_c', ' wie eben: Summe aus '), 0],
-            [T('cap_d', 'Gewicht × Eingabe'), 1]];
-        const CAP2 = T('cap2', '42 Perzeptronen in drei Schichten, 3.552 Gewichte – alle lernen gleichzeitig per Backpropagation.');
+        // in a net of many layers one speaks of neurons, not perceptrons - the slide's title still says "Perzeptronen",
+        // Doc explains the step when presenting (Doc, 04.11.2026)
+        const CAP1 = [[T('cap_a', 'Jedes '), 0], [T('cap_b', 'Neuron'), 1], [T('cap_c', ' rechnet wie eben: Summe aus '), 0],
+            [T('cap_d', 'Gewichten · Eingaben'), 1]];   // plural: each neuron has many (Doc, 04.11.2026)
+        const CAP2 = T('cap2', '42 Neuronen in drei Schichten, 3.552 Gewichte – alle lernen gleichzeitig per Backpropagation.');
 
         // rich text -> wrapped lines of [text, bold] runs
         function wrapRuns(runs, maxW, font, fontB) {
@@ -342,6 +382,9 @@
             const L = { W, H, s, pad, portrait };
             const bar = document.getElementById('mn-bar');
             let barW = document.body.classList.contains('mn-widget') && bar ? bar.getBoundingClientRect().width + 16 : 0;
+            // the buttons end where the sheet's content ends - the percentages and the box below (Doc, 04.11.2026: "nicht
+            // rechts aligned ist mit Prozent und der Box unten"); the margin grows with the lab's scale
+            if (bar) bar.style.right = (pad - 1).toFixed(1) + 'px';   // 1 further right than the edge: it looked short (Doc)
             let capTop = pad;
             const bb = brandingBox();                  // the house wordmark top right: write beside it, or below it on a phone
             if (bb) {
@@ -352,19 +395,43 @@
             L.f1 = '500 ' + (19 * s).toFixed(1) + 'px Raleway, sans-serif';
             L.f1b = '700 ' + (19 * s).toFixed(1) + 'px Raleway, sans-serif';
             L.f2 = '400 ' + (14 * s).toFixed(1) + 'px Raleway, sans-serif';
+            // the caption on one line where it can be: a little smaller rather than one word alone in a second line (the
+            // lab grown to the presentation is narrower - Doc, 04.11.2026: "im Fullscreen-Modus passt die Überschrift
+            // oben nie hin"); at most a quarter smaller
+            {
+                let full = 0;
+                CAP1.forEach(([t, b]) => { ctx.font = b ? L.f1b : L.f1; full += ctx.measureText(t).width; });
+                const k = Math.max(0.75, Math.min(1, (W - 2 * pad - barW) / full));
+                if (k < 1) {
+                    L.f1 = '500 ' + (19 * s * k).toFixed(1) + 'px Raleway, sans-serif';
+                    L.f1b = '700 ' + (19 * s * k).toFixed(1) + 'px Raleway, sans-serif';
+                }
+            }
             L.cap1 = wrapRuns(CAP1, W - 2 * pad - barW, L.f1, L.f1b);
-            L.cap2 = wrapRuns([[CAP2, 0]], W - 2 * pad - (L.cap1.length > 1 ? 0 : barW), L.f2, L.f2);
+            // the second line runs under the buttons when they sit on the first line's height (widget, no wordmark beside)
+            L.cap2 = wrapRuns([[CAP2, 0]], W - 2 * pad - (L.cap1.length > 1 || (barW && capTop === pad) ? 0 : barW), L.f2, L.f2);
             L.capY = capTop + 14 * s;
-            const capBottom = L.capY + (L.cap1.length - 1) * 24 * s + 10 * s + L.cap2.length * 19 * s;
+            // with the buttons over the sheet: the caption on the line of "Tempo", baseline to baseline - it stood about 3
+            // lower (Doc, 04.11.2026: "nicht y-aligned ... die Überschrift einen Tick hochziehen"); the line below follows
+            if (barW && bar && capTop === pad) {
+                const br = bar.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
+                if (br.height) L.capY = (br.top + br.bottom) / 2 - cr.top + 0.36 * 12;
+            }
+            const capBottom = L.capY + (L.cap1.length - 1) * 24 * s + 10 * s + L.cap2.length * 19 * s;   // the net stays put
 
             if (!portrait) {
                 L.fH = 62 * s;
                 L.fy = H - L.fH - 18 * s;
-                const nTop = capBottom + 34 * s, nBot = L.fy - 16 * s, span = nBot - nTop;
-                L.labY = nTop - 12 * s;
-                L.img = Math.min(0.19 * W, span - 56 * s);
+                const NDY = 3 * s;                     // the whole net 3 lower, labels to verdict (Doc, 04.11.2026: "zwei Pixel" - "noch eins")
+                const nTop = capBottom + 34 * s + NDY, nBot = L.fy - 16 * s + NDY, span = nBot - nTop;
+                L.labY = nTop - 10 * s;                // the four labels 2 closer to their columns (Doc, 04.11.2026)
+                // the row 0-9 over the test digit picks which one to show - it replaces the "Nächste Ziffer" button
+                // (Doc, 04.11.2026: "über die 7 zehn Ziffern, die die nächste Ziffer ersetzen")
+                const pkH = 22 * s, pkGap = 10 * s;
+                L.img = Math.min(0.19 * W, span - 56 * s - pkH - pkGap);
                 L.imgX = pad;
-                L.imgY = nTop + (span - L.img - 46 * s) / 2;
+                L.imgY = nTop + pkH + pkGap + (span - pkH - pkGap - L.img - 46 * s) / 2;
+                L.pk = { x: L.imgX, y: L.imgY - pkGap - pkH, w: L.img, h: pkH };
                 const x1 = W * 0.43, x2 = W * 0.595, x3 = W * 0.75;
                 const sp16 = span / 16, sp10 = span / 10;
                 L.rH = Math.min(10 * s, sp16 * 0.38);
@@ -374,13 +441,15 @@
                 L.out = Array.from({ length: 10 }, (_, j) => [x3, nTop + sp10 * (j + 0.5)]);
                 L.barX0 = x3 + L.rO + 12 * s; L.barX1 = W - pad - 54 * s;
                 L.labels = [[T('l_in', 'EINGABE · 196 PIXEL'), L.imgX + L.img / 2, 'center'],
-                    [T('l_h', '16 PERZEPTRONEN'), x1, 'center'], [T('l_h', '16 PERZEPTRONEN'), x2, 'center'],
-                    [T('l_out', 'AUSGABE · ZIFFER 0–9'), x3 - L.rO, 'left']];
+                    [T('l_h', '16 NEURONEN'), x1, 'center'], [T('l_h', '16 NEURONEN'), x2, 'center'],
+                    [T('l_out', 'AUSGABE'), x3, 'center']];   // centred over the ten outputs (Doc, 04.11.2026)
                 L.verdictX = L.imgX; L.verdictY = L.imgY + L.img + 24 * s; L.verdictAlign = 'left';
             } else {
                 L.fH = 112 * s;
                 L.fy = H - L.fH - 18 * s;
-                const top = capBottom + 22 * s;
+                const pkH = 26 * s;
+                L.pk = { x: pad, y: capBottom + 22 * s, w: W - 2 * pad, h: pkH };    // the row 0-9, full width on a phone
+                const top = capBottom + 22 * s + pkH + 12 * s;
                 L.img = Math.min(0.40 * W, 150 * s);
                 L.imgX = pad; L.imgY = top;
                 L.verdictX = L.imgX + L.img + 14 * s; L.verdictY = top + 22 * s; L.verdictAlign = 'left';
@@ -393,9 +462,9 @@
                 L.h2 = Array.from({ length: 16 }, (_, j) => [pad + sp16 * (j + 0.5), y2]);
                 L.out = Array.from({ length: 10 }, (_, j) => [pad + sp10 * (j + 0.5), y3]);
                 L.barTop = y3 + L.rO + 6 * s; L.barBot = L.fy - 26 * s;
-                L.labels = [[T('l_h', '16 PERZEPTRONEN'), pad, 'left', y1 - L.rH - 8 * s],
-                    [T('l_h', '16 PERZEPTRONEN'), pad, 'left', y2 - L.rH - 8 * s],
-                    [T('l_out', 'AUSGABE · ZIFFER 0–9'), pad, 'left', y3 - L.rO - 8 * s]];
+                L.labels = [[T('l_h', '16 NEURONEN'), pad, 'left', y1 - L.rH - 8 * s],
+                    [T('l_h', '16 NEURONEN'), pad, 'left', y2 - L.rH - 8 * s],
+                    [T('l_out', 'AUSGABE'), pad, 'left', y3 - L.rO - 8 * s]];
             }
             return L;
         }
@@ -449,11 +518,36 @@
             ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
         }
 
+        // a middle dot never in the running font - Orbitron and Raleway draw it as a little square - but as Times New
+        // Roman's round one, same weight and size (Doc, 04.11.2026: "Ich möchte damit immer Punkte sehen. Mit Times New
+        // Roman. Schöne Punkte.")
+        const dotFont = font => font.split(' ').slice(0, 2).join(' ') + ' "Times New Roman", Times, serif';
+        function dotted(t, x, y, font, color, align, spacing) {
+            const parts = t.split('·'), ls = spacing || '0px';
+            const wOf = (str, f) => { ctx.font = f; if ('letterSpacing' in ctx) ctx.letterSpacing = f === font ? ls : '0px'; const w = ctx.measureText(str).width; return w; };
+            const segs = [];
+            parts.forEach((p, i) => { if (p) segs.push([p, font]); if (i < parts.length - 1) segs.push(['·', dotFont(font)]); });
+            const widths = segs.map(([str, f]) => wOf(str, f)), total = widths.reduce((a, b) => a + b, 0);
+            let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+            ctx.fillStyle = color; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+            segs.forEach(([str, f], i) => {
+                ctx.font = f; if ('letterSpacing' in ctx) ctx.letterSpacing = f === font ? ls : '0px';
+                ctx.fillText(str, cx, y); cx += widths[i];
+            });
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        }
         function text(t, x, y, font, color, align, spacing) {
+            if (typeof t === 'string' && t.indexOf('·') >= 0) return dotted(t, x, y, font, color, align, spacing);
             ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic';
             if ('letterSpacing' in ctx) ctx.letterSpacing = spacing || '0px';
             ctx.fillText(t, x, y);
             if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        }
+        // a running number: its digits in fixed cells of the site's digits widget, so nothing beside it jumps
+        // (Doc, 04.11.2026: "das zuckt hin und her" - js/cyber-clock.js, CyberClock.draw)
+        function num(t, x, y, font, color, align, minDigits) {
+            if (!window.CyberClock || !CyberClock.draw) return text(t, x, y, font, color, align);
+            CyberClock.draw(ctx, t, x, y, { font, color, align, minDigits });
         }
         // the same on a patch of paper, where lines run underneath
         function textOnPaper(t, x, y, font, color, align, spacing) {
@@ -496,7 +590,7 @@
                 line.forEach(([t, b, tw]) => { text(t, cx, cy, b ? L.f1b : L.f1, NAVY); cx += tw; });
                 cy += 24 * s;
             });
-            cy += 10 * s - 24 * s + 19 * s;
+            cy += 7 * s - 24 * s + 19 * s;           // the line below 3 closer (Doc, 04.11.2026)
             L.cap2.forEach(line => { text(line.map(r => r[0]).join(''), L.pad, cy, L.f2, INK(0.7)); cy += 19 * s; });
 
             if (!DATA.test) {
@@ -510,15 +604,19 @@
             const a1 = net[0].a, a2 = net[1].a;
             const cell = L.img / 14;
 
-            // input fan: only pixels with ink send anything (weight x 0 = 0); strength = pixel x |weight|
+            // input fan: only pixels with ink send anything (weight x 0 = 0); strength = pixel x |weight|. With the mouse
+            // over the digit every one of the 196 squares shows its 16 lines and the digit turns see-through: each
+            // square is an input neuron (Doc, 04.11.2026: "dass jedes kleine Kästchen ... eine Connection hat")
+            const overImg = !!mouse && !L.portrait && mouse.x >= L.imgX && mouse.x < L.imgX + L.img
+                && mouse.y >= L.imgY && mouse.y < L.imgY + L.img;
             const segs = [];
             const W1 = net[0].W;
             for (let i = 0; i < PIX; i++) {
-                if (x[i] < 0.1) continue;
+                if (x[i] < 0.1 && !overImg) continue;
                 const px = L.imgX + (i % 14 + 0.5) * cell, py = L.imgY + ((i / 14 | 0) + 0.5) * cell;
                 for (let j = 0; j < 16; j++) {
                     const w = W1[j * PIX + i];
-                    segs.push(px, py, L.h1[j][0], L.h1[j][1], w >= 0 ? 1 : 0, level(Math.abs(w) * x[i], 0.6));
+                    segs.push(px, py, L.h1[j][0], L.h1[j][1], w >= 0 ? 1 : 0, level(Math.abs(w) * (overImg ? Math.max(x[i], 0.35) : x[i]), 0.6));
                 }
             }
             bucketLines(segs, lv => (0.5 + lv * 0.22) * s, lv => 0.07 + lv * 0.07);
@@ -535,8 +633,11 @@
             pushLayer(net[2].W, L.h2, L.out, 16);
             bucketLines(segs2, lv => (0.6 + lv * 0.62) * s, lv => 0.22 + lv * 0.1);
 
-            // the digit on top of where its lines start
+            // the digit on top of where its lines start, and the row 0-9 that chooses it
+            if (overImg) ctx.globalAlpha = 0.3;          // see-through while the mouse is on it, the lines show
             drawDigit(x, null, L.imgX, L.imgY, L.img, true);
+            ctx.globalAlpha = 1;
+            drawPicker(L);
 
             // neurons: filled orange as strongly as they fire
             const neuron = (c, r, act, lw, stroke) => {
@@ -565,8 +666,9 @@
                     const w = Math.max(bh, bw * p[j]);
                     roundRect(L.barX0, c[1] - bh / 2, w, bh, bh / 2);
                     ctx.fillStyle = j === win ? rgba(ORANGE, 1) : INK(0.32); ctx.fill();
-                    text(pct(p[j]), L.barX1 + 8 * s, c[1] + 4.5 * s, (j === win ? '700 ' : '400 ') + (12.5 * s).toFixed(1) + 'px Orbitron, sans-serif',
-                        j === win ? NAVY : INK(0.6), 'left');
+                    // right-aligned at the sheet's edge, digit under digit (Doc, 04.11.2026: "mit den Prozenten rechtsbündig")
+                    num(pct(p[j]), L.W - L.pad, c[1] + 4.5 * s, (j === win ? '700 ' : '400 ') + (12.5 * s).toFixed(1) + 'px Orbitron, sans-serif',
+                        j === win ? NAVY : INK(0.6), 'right');
                 });
             } else {
                 const bw = Math.min(14 * s, L.rO * 0.9), full = L.barBot - L.barTop;
@@ -584,23 +686,132 @@
             L.labels.forEach(([t, lx, al, ly]) => textOnPaper(t, lx, ly || L.labY, '700 ' + (10.5 * s).toFixed(1) + 'px Orbitron, sans-serif', INK(0.55), al, (1.2 * s).toFixed(1) + 'px'));
 
             // verdict under (or beside) the digit
-            const vf = '700 ' + (15 * s).toFixed(1) + 'px Raleway, sans-serif';
-            const vs = '400 ' + (12.5 * s).toFixed(1) + 'px Raleway, sans-serif';
+            // the two lines fit under the digit's box (Doc, 04.11.2026: "dass der Text genau unter die Box passt"): the
+            // verdict shrinks when it is wider, the fixed line below is set to the box's width exactly
+            const vW = L.portrait ? L.W - L.pad - L.verdictX : L.img;
+            const fit = (weight, size, t, extra, exact) => {
+                ctx.font = weight + ' ' + (size * s).toFixed(1) + 'px Raleway, sans-serif';
+                const k = (vW - (extra || 0)) / ctx.measureText(t).width;
+                return weight + ' ' + (size * s * (exact ? k : Math.min(1, k))).toFixed(2) + 'px Raleway, sans-serif';
+            };
+            const testT = T('v_test', 'Testziffer – nie zum Training benutzt');
+            const vs = fit('400', 12.5, testT, 0, !L.portrait);
             let vx = L.verdictX;
             if (S.seen === 0) {
-                textOnPaper(T('v_guess', 'Untrainiert: das Netz rät ') + win, vx, L.verdictY, vf, INK(0.75));
+                const gt = T('v_guess', 'Untrainiert: das Netz rechnet ') + win;   // "rechnet", not "rät" (Doc, 04.11.2026)
+                textOnPaper(gt, vx, L.verdictY, fit('700', 15, gt), INK(0.75));
             } else {
                 const ok = win === truth;
                 const vt = ok ? T('v_ok', 'Erkannt: ') + truth : T('v_no', 'Netz sagt ') + win + T('v_no2', ', richtig wäre ') + truth;
+                const vf = fit('700', 15, vt, 20 * s);
                 ctx.font = vf;
                 roundRect(vx - 4, L.verdictY - 15 * s, ctx.measureText(vt).width + 28 * s, 20 * s, 4);
                 ctx.fillStyle = 'rgba(247,242,231,0.9)'; ctx.fill();
                 icon(ok, vx, L.verdictY - 12 * s, 13 * s); vx += 20 * s;
                 text(vt, vx, L.verdictY, vf, ok ? rgba(GREEN, 1) : rgba(RED, 1));
             }
-            textOnPaper(T('v_test', 'Testziffer – nie zum Training benutzt'), L.verdictX, L.verdictY + 19 * s, vs, INK(0.6));
+            textOnPaper(testT, L.verdictX, L.verdictY + 19 * s, vs, INK(0.6));
 
             drawFooter(L);
+            drawHover(L, x, p, a1, a2);
+        }
+
+        // ---- hover: what is under the mouse, as a number - a line's weight, a neuron's output, a pixel's grey value.
+        //      The colours are only sign and size; the net is numbers (Doc, 04.11.2026: "über die Linien hovert, dass
+        //      wir da einen Zahlenwert zu sehen kriegen ... das sind nie Farben, sondern das sind Zahlen"). Live while it
+        //      learns. Neurons first, then the line nearest to the mouse within a few pixels.
+        let mouse = null;
+        const de2 = v => (v < 0 ? '−' : '') + Math.abs(v).toFixed(2).replace('.', ',');
+        function segDist(px, py, x0, y0, x1, y1) {
+            const dx = x1 - x0, dy = y1 - y0, l2 = dx * dx + dy * dy;
+            const t = l2 ? clamp(((px - x0) * dx + (py - y0) * dy) / l2, 0, 1) : 0;
+            return Math.hypot(px - x0 - t * dx, py - y0 - t * dy);
+        }
+        function drawHover(L, x, p, a1, a2) {
+            if (!mouse || L.portrait) return;
+            const s = L.s, mx = mouse.x, my = mouse.y, cell = L.img / 14;
+            let hit = null;
+            // neurons: outputs, the two hidden layers, then the input pixels of the digit
+            L.out.forEach((c, j) => { if (!hit && Math.hypot(mx - c[0], my - c[1]) <= L.rO + 2 * s) hit = { kind: 'n', c, r: L.rO, label: T('h_out', 'Ausgabe'), v: p[j] }; });
+            [[L.h1, a1], [L.h2, a2]].forEach(([layer, a]) => layer.forEach((c, j) => {
+                if (!hit && Math.hypot(mx - c[0], my - c[1]) <= Math.max(L.rH, 7 * s)) hit = { kind: 'n', c, r: L.rH, label: T('h_neuron', 'Neuron'), v: a[j] };
+            }));
+            if (!hit && mx >= L.imgX && mx < L.imgX + L.img && my >= L.imgY && my < L.imgY + L.img) {
+                const i = ((my - L.imgY) / cell | 0) * 14 + ((mx - L.imgX) / cell | 0);
+                hit = { kind: 'px', i, label: T('h_px', 'Pixel'), v: x[i] };
+            }
+            // lines: the one nearest to the mouse, within 5 px
+            if (!hit) {
+                let best = 5 * s;
+                const tryLine = (x0, y0, x1, y1, w) => { const d = segDist(mx, my, x0, y0, x1, y1); if (d < best) { best = d; hit = { kind: 'w', seg: [x0, y0, x1, y1], v: w }; } };
+                const W1 = net[0].W;
+                for (let i = 0; i < PIX; i++) {
+                    if (x[i] < 0.1) continue;                    // only the lines that are drawn: pixels with ink
+                    const px = L.imgX + (i % 14 + 0.5) * cell, py = L.imgY + ((i / 14 | 0) + 0.5) * cell;
+                    for (let j = 0; j < 16; j++) tryLine(px, py, L.h1[j][0], L.h1[j][1], W1[j * PIX + i]);
+                }
+                [[net[1].W, L.h1, L.h2, 16], [net[2].W, L.h2, L.out, 16]].forEach(([Wm, from, to, nin]) => {
+                    for (let j = 0; j < to.length; j++) for (let i = 0; i < nin; i++)
+                        tryLine(from[i][0], from[i][1], to[j][0], to[j][1], Wm[j * nin + i]);
+                });
+            }
+            canvas.style.cursor = hit ? 'crosshair' : canvas.style.cursor;
+            if (!hit) return;
+            // the thing itself, marked
+            if (hit.kind === 'w') {
+                const [x0, y0, x1, y1] = hit.seg;
+                ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1);
+                ctx.strokeStyle = rgba(hit.v >= 0 ? GREEN : RED, 1); ctx.lineWidth = 3.2 * s; ctx.lineCap = 'round'; ctx.stroke();
+                ctx.lineCap = 'butt';
+            } else if (hit.kind === 'n') {
+                ctx.beginPath(); ctx.arc(hit.c[0], hit.c[1], hit.r + 3.5 * s, 0, Math.PI * 2);
+                ctx.strokeStyle = NAVY; ctx.lineWidth = 2 * s; ctx.stroke();
+            } else {
+                // the square's own 16 connections to the first layer, in full: colour = sign, width = size of the weight
+                // (Doc, 04.11.2026: "alle mit diesem Kästchen assoziierten Verbindungen auch anzeigen")
+                const i = hit.i, W1 = net[0].W;
+                const px = L.imgX + (i % 14 + 0.5) * cell, py = L.imgY + ((i / 14 | 0) + 0.5) * cell;
+                ctx.lineCap = 'round';
+                for (let j = 0; j < 16; j++) {
+                    const w = W1[j * PIX + i];
+                    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(L.h1[j][0], L.h1[j][1]);
+                    ctx.strokeStyle = rgba(w >= 0 ? GREEN : RED, 0.95); ctx.lineWidth = (2 + 5 * Math.min(1, Math.abs(w) / 0.4)) * s;   // thicker (Doc)
+                    ctx.stroke();
+                }
+                ctx.lineCap = 'butt';
+                ctx.strokeStyle = rgba(ORANGE, 1); ctx.lineWidth = 2 * s;
+                ctx.strokeRect(L.imgX + (i % 14) * cell, L.imgY + (i / 14 | 0) * cell, cell, cell);
+            }
+            // over a square: its thick lines AND its grey value - "nicht mit Zahl" meant the lines, not the square (Doc,
+            // 04.11.2026: "schade ... die Grauwerte ... geht jetzt verloren")
+            // the number beside the mouse: a word, then the value in LaTeX's font; w with its sign in the line's colour
+            const lf = '500 ' + (12 * s).toFixed(1) + 'px Raleway, sans-serif';
+            const nf = '700 ' + (17 * s).toFixed(1) + 'px KaTeX_Main, "Times New Roman", serif';
+            const word = hit.kind === 'w' ? T('h_w', 'Gewicht') : hit.label, val = de2(hit.v);
+            ctx.font = lf; const ww = ctx.measureText(word + ' ').width;
+            ctx.font = nf; const vw = ctx.measureText(val).width;
+            const bw = ww + vw + 18 * s, bh = 28 * s;
+            let bx = mx + 14 * s, by = my - bh - 10 * s;
+            if (bx + bw > L.W - 4) bx = mx - bw - 14 * s;
+            if (by < 4) by = my + 16 * s;
+            roundRect(bx, by, bw, bh, 7 * s);
+            ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fill();
+            ctx.strokeStyle = INK(0.35); ctx.lineWidth = 1; ctx.stroke();
+            text(word, bx + 9 * s, by + bh / 2 + 4.5 * s, lf, INK(0.7), 'left');
+            const vcol = hit.kind === 'w' ? rgba(hit.v >= 0 ? GREEN : RED, 1) : NAVY;
+            text(val, bx + 9 * s + ww, by + bh / 2 + 6 * s, nf, vcol, 'left');
+        }
+
+        function drawPicker(L) {
+            const pk = L.pk, s = L.s, on = DATA.test.Y[S.show], gap = 3 * s, cw = (pk.w - 9 * gap) / 10;
+            const fs = Math.min(pk.h * 0.55, cw * 0.62), font = '700 ' + fs.toFixed(1) + 'px Orbitron, sans-serif';
+            for (let d = 0; d < 10; d++) {
+                const x = pk.x + d * (cw + gap);
+                roundRect(x, pk.y, cw, pk.h, 4 * s);
+                ctx.fillStyle = d === on ? NAVY : 'rgba(255,255,255,0.75)'; ctx.fill();
+                ctx.strokeStyle = d === on ? NAVY : INK(0.28); ctx.lineWidth = 1; ctx.stroke();
+                text(String(d), x + cw / 2, pk.y + pk.h / 2 + fs * 0.36, font, d === on ? '#FFFFFF' : NAVY, 'center');
+            }
         }
 
         function drawFooter(L) {
@@ -616,26 +827,35 @@
             if (S.lastTrain >= 0) drawDigit(DATA.train.at(S.lastTrain), null, tx, ty, th, false);
             else { ctx.strokeStyle = INK(0.25); ctx.setLineDash([3, 3]); ctx.strokeRect(tx + 0.5, ty + 0.5, th - 1, th - 1); ctx.setLineDash([]); }
             const ex = tx + th + 12 * s;
+            // just "TRAINING" again - the digit beside it says enough (Doc, 04.11.2026: "lass das weg ... das reicht völlig")
             text(T('f_train', 'TRAINING'), ex, ty + 12 * s, lab, INK(0.55), 'left', ls);
-            text(fmt(S.seen) + ' ' + T('f_ex', 'Beispiele'), ex, ty + 34 * s, big, NAVY, 'left');
+            num(fmt(S.seen) + ' ' + T('f_ex', 'Beispiele'), ex, ty + 34 * s, big, NAVY, 'left');
 
             // right: accuracy on the 300 test digits
             const rx = W - pad - 14 * s;
-            text(L.portrait ? T('f_acc_short', 'TREFFER') : T('f_acc', 'TREFFER BEI 300 NEUEN ZIFFERN'), rx, ty + 12 * s, lab, INK(0.55), 'right', ls);
-            text(Math.round(S.acc * 100) + ' %', rx, ty + 34 * s, big, NAVY, 'right');
+            // short and still saying what it counts: "TREFFERQUOTE" over the share, and beside the big number how it came about,
+            // "186 von 300 unbekannten" - the test digits the net never saw (Doc, 04.11.2026: "Klassifikationsgenauigkeit ist
+            // halt brutal lang ... be creative")
+            text(T('f_acc', 'TREFFERQUOTE'), rx, ty + 12 * s, lab, INK(0.55), 'right', ls);
+            const accT = Math.round(S.acc * 100) + ' %';
+            num(accT, rx, ty + 34 * s, big, NAVY, 'right', 2);
+            if (!L.portrait && DATA.test) {
+                const hits = Math.round(S.acc * DATA.test.n);
+                const accW = window.CyberClock && CyberClock.width ? CyberClock.width(ctx, accT, { font: big, minDigits: 2 })
+                    : (ctx.font = big, ctx.measureText(accT).width);
+                num(fmt(hits) + ' ' + T('f_of', 'von') + ' ' + fmt(DATA.test.n) + ' ' + T('f_unseen', 'unbekannten Ziffern'),
+                    rx - accW - 12 * s, ty + 34 * s, '500 ' + (11.5 * s).toFixed(1) + 'px Raleway, sans-serif', INK(0.6), 'right', 3);
+            }
 
             // middle (below in portrait): the accuracy climbing over the examples seen
             let cx0, cx1, cy0, cy1;
-            if (!L.portrait) { cx0 = W * 0.33; cx1 = W * 0.70; cy0 = L.fy + 9 * s; cy1 = L.fy + L.fH - 13 * s; }
-            else { cx0 = pad + 40 * s; cx1 = W - pad - 14 * s; cy0 = L.fy + 60 * s; cy1 = L.fy + L.fH - 16 * s; }
+            // the 0 % line 4 lower than before (Doc, 04.11.2026: "die 0%-Linie ein Stück nach unten, gefühlte 4 Pixel")
+            if (!L.portrait) { cx0 = W * 0.33; cx1 = W * 0.70; cy0 = L.fy + 9 * s; cy1 = L.fy + L.fH - 9 * s; }
+            else { cx0 = pad + 40 * s; cx1 = W - pad - 14 * s; cy0 = L.fy + 60 * s; cy1 = L.fy + L.fH - 12 * s; }
             drawChart(cx0, cy0, cx1, cy1, s);
 
-            // credit - the short form where the long one does not fit
-            const cf = '400 ' + (10 * s).toFixed(1) + 'px Raleway, sans-serif';
-            let credit = T('credit', 'Daten: MNIST – Yann LeCun, Corinna Cortes, Christopher J. C. Burges · CC BY-SA 3.0 · verkleinert auf 14 × 14');
-            ctx.font = cf;
-            if (ctx.measureText(credit).width > W - 2 * pad) credit = T('credit_short', 'Daten: MNIST (LeCun, Cortes, Burges) · CC BY-SA 3.0');
-            text(credit, W - pad, L.H - 5 * s, cf, INK(0.5), 'right');
+            // no credit line on the sheet any more: the data's source stands in the side panel here and on the deck's sources
+            // slide (Doc, 04.11.2026: "Quellenangabe unten im Lab ... machen wir dort weg ... in die Quelle")
         }
 
         function drawChart(x0, y0, x1, y1, s) {
@@ -646,11 +866,12 @@
             ctx.beginPath(); ctx.moveTo(x0, y1 + 0.5); ctx.lineTo(x1, y1 + 0.5); ctx.stroke();
             ctx.strokeStyle = INK(0.1);
             ctx.beginPath(); ctx.moveTo(x0, Math.round(Y(1)) + 0.5); ctx.lineTo(x1, Math.round(Y(1)) + 0.5); ctx.stroke();
-            ctx.setLineDash([3 * s, 3 * s]); ctx.strokeStyle = INK(0.35);           // pure guessing: 1 in 10
-            ctx.beginPath(); ctx.moveTo(x0, Y(0.1)); ctx.lineTo(x1, Y(0.1)); ctx.stroke(); ctx.setLineDash([]);
-            text('100 %', x0 - 5 * s, Y(1) + 3.5 * s, small, INK(0.5), 'right');
-            text(T('c_guess', 'raten'), x0 - 5 * s, Y(0.1) + 3.5 * s, small, INK(0.5), 'right');
-            text(fmt(span), x1, y1 + 10 * s, small, INK(0.45), 'right');
+            // no dashed "raten" line any more, 0 % at the bottom like 100 % at the top, and the examples' scale right of
+            // the line's end (Doc, 04.11.2026: "die gestrichelte Linie raus", "das Wort raten gefällt mir nie",
+            // "die 6000 ... rechts neben die Linie")
+            text('100 %', x0 - 9 * s, Y(1) + 3.5 * s, small, INK(0.5), 'right');   // a little further off the chart (Doc)
+            text('0 %', x0 - 9 * s, y1 + 3.5 * s, small, INK(0.5), 'right');
+            text(fmt(span), x1 + 6 * s, y1 + 3.5 * s, small, INK(0.45), 'left');
             const h = S.hist;
             if (h.length > 1) {
                 ctx.beginPath(); ctx.moveTo(X(h[0][0]), y1);
@@ -663,8 +884,9 @@
             }
             const last = h[h.length - 1];
             if (last) {
-                ctx.beginPath(); ctx.arc(X(last[0]), Y(last[1]), 3.5 * s, 0, Math.PI * 2);
-                ctx.fillStyle = rgba(ORANGE, 1); ctx.fill(); ctx.strokeStyle = NAVY; ctx.lineWidth = 1.5 * s; ctx.stroke();
+                // the point where it stands now, quieter: smaller, a thin rim (Doc: "zu präsent ... den Rahmen kleiner")
+                ctx.beginPath(); ctx.arc(X(last[0]), Y(last[1]), 2.8 * s, 0, Math.PI * 2);
+                ctx.fillStyle = rgba(ORANGE, 1); ctx.fill(); ctx.strokeStyle = NAVY; ctx.lineWidth = 0.8 * s; ctx.stroke();
             }
         }
 
@@ -702,7 +924,6 @@
                 <div style="display:flex; flex-direction:column; gap:14px;">
                     <div class="mn-btns">
                         <button class="cyber-btn" id="mn-play">${T('btn_play', 'Start')}</button>
-                        <button class="cyber-btn" id="mn-next">${T('btn_next', 'Nächste Ziffer')}</button>
                     </div>
                     <div class="mn-btns">
                         <button class="cyber-btn" id="mn-reset">${T('btn_reset', 'Neue Zufallsgewichte')}</button>
@@ -712,7 +933,7 @@
                             <span id="mn-rate-l" class="cyber-number" style="font-size:.8rem; color:#9de8ff;">${fmt(S.rate)} / s</span></div>
                         <input type="range" id="mn-rate" min="0" max="100" step="1" value="${sliderFromRate(S.rate)}" aria-label="${T('l_rate_aria', 'Trainingsbeispiele pro Sekunde')}">
                     </div>
-                    <div class="lab-note">${T('hint', 'Leertaste startet und hält an, N zeigt eine andere Ziffer (oder auf die Ziffer klicken). Das Netz lernt nur aus den 3.000 Trainingsziffern — die Ziffer links und die 300 Testziffern hat es nie gesehen.')}</div>
+                    <div class="lab-note">${T('hint', 'Leertaste startet und hält an, die Reihe 0–9 über der Ziffer wählt eine Sorte, N zeigt eine andere. Das Netz lernt nur aus den 3.000 Trainingsziffern — die Ziffer links und die 300 Testziffern hat es nie gesehen.')}</div>
                 </div>`);
 
             CyberUI.createCard('ui-container', T('card_stats', 'Stand'), `
@@ -724,22 +945,31 @@
                 </div>`);
 
             CyberUI.createCard('ui-container', T('card_net', 'Das Netz'), `
-                <div class="lab-note mn-note">${T('net_text', 'Jeder Kreis ist ein Perzeptron: Er multipliziert jede Eingabe mit ihrem Gewicht, addiert alles und seine Schwelle und gibt das Ergebnis weich gestuft weiter. 196 Pixel gehen in 16 Neuronen, die in 16 weitere, die in 10 Ausgaben — eine pro Ziffer. Das sind 3.552 Gewichte und 42 Schwellen. Grün heißt positives Gewicht, Rot negatives, je dicker, desto größer. Nach jedem Beispiel läuft der Fehler rückwärts durchs Netz (Backpropagation, Lernrate 0,1), und alle Gewichte rücken ein Stück.')}</div>
-                <div class="lab-note mn-note" style="margin-top:10px;">${T('net_credit', 'Daten: <a href="http://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener">MNIST</a> von Yann LeCun, Corinna Cortes und Christopher J. C. Burges, <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a>. Hier eine Auswahl von 3.300 Ziffern, verkleinert auf 14 × 14 Pixel mit 16 Graustufen.')}</div>`);
+                <div class="lab-note mn-note">${T('net_text', 'Jeder Kreis ist ein Neuron: Er multipliziert jede Eingabe mit ihrem Gewicht, addiert alles und seine Schwelle und gibt das Ergebnis weich gestuft weiter. 196 Pixel gehen in 16 Neuronen, die in 16 weitere, die in 10 Ausgaben — eine pro Ziffer. Das sind 3.552 Gewichte und 42 Schwellen. Grün heißt positives Gewicht, Rot negatives, je dicker, desto größer. Nach jedem Beispiel läuft der Fehler rückwärts durchs Netz (Backpropagation, Lernrate 0,1), und alle Gewichte rücken ein Stück.')}</div>
+                <div class="lab-note mn-note" style="margin-top:10px;">${T('net_credit', 'Daten: <a href="http://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener">MNIST</a> von Yann LeCun, Corinna Cortes und Christopher J. C. Burges, <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a>. Hier eine Auswahl von 3.300 Ziffern, verkleinert auf 14 · 14 Pixel mit 16 Graustufen.')}</div>`);
 
             const on = (id, ev, fn) => { const e = document.getElementById(id); if (e) e.addEventListener(ev, fn); };
             on('mn-play', 'click', toggleRun);
-            on('mn-next', 'click', nextDigit);
             on('mn-reset', 'click', resetNet);
-            on('mn-rate', 'input', e => {
-                S.rate = rateFromSlider(parseInt(e.target.value, 10));
-                document.getElementById('mn-rate-l').textContent = fmt(S.rate) + ' / s';
-            });
+            on('mn-rate', 'input', e => setRate(rateFromSlider(parseInt(e.target.value, 10))));
+            on('mn-w-rate', 'input', e => setRate(rateFromSlider(parseInt(e.target.value, 10))));
+            on('mn-w-rate', 'change', e => e.target.blur());     // let go: Space starts and stops again
             // the widget's buttons do the same; blur so Space keeps working
             const wire = (id, fn) => on(id, 'click', e => { fn(); e.currentTarget.blur(); });
             wire('mn-w-play', toggleRun);
-            wire('mn-w-next', nextDigit);
             wire('mn-w-reset', resetNet);
+            wire('mn-w-full', () => { if (window.CyberBranding) CyberBranding.toggleFullscreen(); });
+            // the icon says what a press does next: grow or shrink back, whichever way the lab got there
+            const fullLabel = () => {
+                const on = window.CyberDeckLab ? CyberDeckLab.isFull() : !!document.fullscreenElement;
+                const b = document.getElementById('mn-w-full'), i = document.getElementById('mn-w-full-i');
+                if (b) b.setAttribute('aria-label', on ? T('btn_unfull', 'Zurück') : T('btn_full', 'Vollbild'));   // only the icon shows (Doc)
+                if (i) i.innerHTML = on
+                    ? '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>'
+                    : '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
+            };
+            window.addEventListener('deck-lab-full', fullLabel);
+            document.addEventListener('fullscreenchange', fullLabel);
         }
 
         addEventListener('keydown', e => {
@@ -753,11 +983,29 @@
             const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
             return x >= LY.imgX && x <= LY.imgX + LY.img && y >= LY.imgY && y <= LY.imgY + LY.img;
         };
-        canvas.addEventListener('click', e => { if (onDigit(e)) nextDigit(); });
-        canvas.addEventListener('mousemove', e => { canvas.style.cursor = onDigit(e) ? 'pointer' : 'default'; });
+        const onPick = e => {                                    // which of the row 0-9, or -1
+            if (!LY || !LY.pk) return -1;
+            const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, pk = LY.pk;
+            if (x < pk.x || x > pk.x + pk.w || y < pk.y || y > pk.y + pk.h) return -1;
+            return Math.min(9, Math.floor((x - pk.x) / (pk.w / 10)));
+        };
+        // the row 0-9 picks on hover, not on a click (Doc, 04.11.2026: "über Hover und nicht über Klick"): moving onto a
+        // digit shows one of that kind, staying on it changes nothing. A tap on a tablet brings its own mousemove first.
+        let hoverD = -1;
+        const hoverPick = e => {
+            const d = onPick(e);
+            if (d >= 0 && d !== hoverD && DATA.test && DATA.test.Y[S.show] !== d) pickDigit(d);
+            hoverD = d;
+            return d;
+        };
+        canvas.addEventListener('click', e => { if (hoverPick(e) < 0 && onDigit(e)) nextDigit(); });
+        canvas.addEventListener('mousemove', e => { const d = hoverPick(e); canvas.style.cursor = onDigit(e) || d >= 0 ? 'pointer' : 'default'; });
+        canvas.addEventListener('mouseleave', () => { hoverD = -1; mouse = null; });
+        canvas.addEventListener('mousemove', e => { const r = canvas.getBoundingClientRect(); mouse = { x: e.clientX - r.left, y: e.clientY - r.top }; });
 
         function resizeCanvasToContainer() {
-            const dpr = window.devicePixelRatio || 1;
+            // finer where the deck shows the lab bigger than its pixels (CyberDeckLab.zoom, js/branding.js), at most 3x
+            const dpr = Math.min(3, (window.devicePixelRatio || 1) * (window.CyberDeckLab && CyberDeckLab.zoom ? CyberDeckLab.zoom() : 1));
             const rect = canvas.getBoundingClientRect();
             const w = Math.floor(Math.max(1, rect.width) * dpr);
             const h = Math.floor(Math.max(1, rect.height) * dpr);
@@ -789,6 +1037,7 @@
         })();
 
         buildUI();
+        setRate(S.rate);
         net = makeNet();
         init();
         requestAnimationFrame(frame);

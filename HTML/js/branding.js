@@ -38,6 +38,19 @@ window.CyberDeckLab = {
         const f = window.frameElement;
         f.dispatchEvent(new f.ownerDocument.defaultView.CustomEvent('lab-slide-full', { bubbles: true }));
     },
+    // How much bigger than its own CSS pixels the lab stands on the screen: the deck scales the slide and the lab's
+    // frame with CSS transforms, and a canvas is only stretched by them. A canvas lab multiplies its devicePixelRatio
+    // by this and stays sharp, on the slide and grown to the whole presentation (Doc, 04.11.2026: "die Schrift ... wird
+    // total unscharf. Ist das kein Vektor?"). 1 outside a deck.
+    zoom() {
+        try {
+            const f = window.frameElement;
+            if (!f || !f.clientWidth) return 1;
+            return Math.max(1, f.getBoundingClientRect().width / f.clientWidth);
+        } catch (e) {
+            return 1;
+        }
+    },
 };
 // After the click the keys stay in the lab's iframe - so Esc shrinks the lab back from here, too
 window.addEventListener('keydown', (e) => {

@@ -5,6 +5,7 @@
 //   CyberClock.mountNum(el, opts) / setNum(el, 12.5)     right-aligned stats (tracker)
 //   CyberClock.digits(el, value, opts)                   anything else: lab telemetry, counters,
 //                                                        score columns ("26/33"), stopwatches
+//   CyberClock.draw(ctx, text, x, y, opts) / width(...)   the same fixed slots on a <canvas>
 //
 // Usage:
 //   CyberClock.mount(el, { size:'1.3rem', digitColor:'#fff', colonColor:'#00d2ff', seconds:true });
@@ -126,5 +127,49 @@
             if (st.shadow)     el.style.setProperty('--cc-shadow', st.shadow);
         }
     }
-    window.CyberClock = { mount: mount, set: set, mountNum: mountNum, setNum: setNum, digits: digits };
+    // ---- canvas face: draw(ctx, text, x, y, { font, color, align, minDigits }) - every digit of the
+    //      text in a cell as wide as the font's widest digit, every other character at its own width,
+    //      so a running number never shifts the words beside it ("2.506 Beispiele", "64 %"). minDigits
+    //      puts blank cells before the first digit, so a column of numbers stands digit under digit.
+    //      width(ctx, text, opts) gives the width draw() will use. Canvas text has no fixed-slot font
+    //      feature for Orbitron, hence the cells (Doc, 04.11.2026, mnist-netz: "das zuckt hin und her,
+    //      das kannst du dir nicht angucken" - "wir haben ein Widget ..."). ----
+    function cells(ctx, text, opts) {
+        opts = opts || {};
+        if (opts.font) ctx.font = opts.font;
+        let cw = 0;
+        for (let d = 0; d <= 9; d++) cw = Math.max(cw, ctx.measureText(String(d)).width);
+        const s = String(text);
+        let pad = 0;
+        if (opts.minDigits) {
+            const first = s.search(/[0-9]/);
+            const run = first < 0 ? 0 : s.slice(first).match(/^[0-9.,]*/)[0].replace(/\D/g, '').length;
+            pad = Math.max(0, opts.minDigits - run);
+        }
+        let w = pad * cw;
+        const parts = [];
+        for (const ch of s) {
+            const dw = /[0-9]/.test(ch) ? cw : ctx.measureText(ch).width;
+            parts.push([ch, w, dw]); w += dw;
+        }
+        return { parts: parts, width: w, cw: cw };
+    }
+    function width(ctx, text, opts) { return cells(ctx, text, opts).width; }
+    function draw(ctx, text, x, y, opts) {
+        opts = opts || {};
+        ctx.save();
+        const c = cells(ctx, text, opts);
+        if (opts.color) ctx.fillStyle = opts.color;
+        ctx.textBaseline = 'alphabetic';
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        const x0 = opts.align === 'right' ? x - c.width : opts.align === 'center' ? x - c.width / 2 : x;
+        for (const [ch, at, dw] of c.parts) {
+            const digit = /[0-9]/.test(ch);
+            ctx.textAlign = digit ? 'center' : 'left';
+            ctx.fillText(ch, digit ? x0 + at + dw / 2 : x0 + at, y);
+        }
+        ctx.restore();
+        return c.width;
+    }
+    window.CyberClock = { mount: mount, set: set, mountNum: mountNum, setNum: setNum, digits: digits, draw: draw, width: width };
 })();

@@ -704,6 +704,10 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       f.style.width = frame.clientWidth / s + 'px';
       f.style.transform = 'scale(' + s + ')';
     } else f.style.cssText = f.dataset.small;
+    // a lab grown to the whole presentation lies over the deck's own controls - they hide while it is (Doc, 04.11.2026:
+    // "im Vollbildmodus ... oben drüber, dass man die Bedienelemente gar nicht mehr sieht"); Esc and the lab's own
+    // button bring them back. deck.css html.lab-voll
+    document.documentElement.classList.toggle('lab-voll', !!document.querySelector('.labframe.full'));
     try { f.contentWindow.dispatchEvent(new f.contentWindow.Event('deck-lab-full')); } catch (e) { }
     try { f.contentWindow.document.dispatchEvent(new f.contentWindow.Event('fullscreenchange')); } catch (e) { }
   }

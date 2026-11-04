@@ -30,7 +30,13 @@ html,body{height:100%;background:var(--night);overflow:hidden}
 /* Since 09.10.2026 the text no longer takes these faces: LaTeX digits ONLY inside a formula ($...$ = KaTeX), every
    other number - 11 Kapitel, 107 €, 37 % - stands in Raleway with lining figures (Doc: "nur mathematische Formeln
    LaTeX und sonst Raleway"), headings stay Orbitron. The faces stay defined; deckNr in deck.js now finds nothing to do. */
-:root{--deck-schrift:Raleway,system-ui,sans-serif}
+/* The middle dot - "28 · 28", "EINGABE · 196 PIXEL" - always Times New Roman's round one; Raleway, bold above all, draws
+   a little square (Doc, 04.11.2026: "Ich möchte damit immer Punkte sehen. Mit Times New Roman. Schöne Punkte."). A face
+   of the computer's own Times that takes nothing but the dots, first in the deck's font: every text in --deck-schrift
+   gets it, nothing else changes. */
+@font-face{font-family:'Deck Punkt';src:local('Times New Roman'),local('TimesNewRomanPSMT'),local('Times');font-weight:400;unicode-range:U+00B7,U+22C5,U+2219}
+@font-face{font-family:'Deck Punkt';src:local('Times New Roman Bold'),local('TimesNewRomanPS-BoldMT'),local('Times Bold');font-weight:600 900;unicode-range:U+00B7,U+22C5,U+2219}
+:root{--deck-schrift:'Deck Punkt',Raleway,system-ui,sans-serif}
 body{font-family:var(--deck-schrift);font-variant-numeric:lining-nums;color:var(--body)}
 /* ... but a number that names something - Beweis 1, Kapitel 2, Klasse 9 - wears the text's font: LaTeX only for
    mathematics (Doc, 06.10.2026: "wenn da steht Beweis 1, dann ... so wie die Schrift"). deck.js deckNr sets the span. */
@@ -84,6 +90,12 @@ b{font-weight:600;color:var(--fg,var(--formel))}   /* bold inside a colour keeps
 [data-pop]{cursor:pointer}
 .pop{position:absolute;left:50%;top:calc(50% + var(--pop-dy,0px));transform:translate(-50%,-50%) scale(var(--pop-scale,1));width:var(--pop-w,min-content);max-width:848px;max-height:452px;z-index:27;background:#fff;color:var(--body);
   border:2px solid var(--stroke);border-radius:14px;box-shadow:0 14px 44px rgba(14,36,78,.35);padding:18px 26px;overflow:auto}
+/* a pop that scrolls (the MNIST box with its gallery below the text) gets a slim bar in the decks' blue, never the fat
+   native one; webkit and Firefox apart, Safari drops the webkit rules otherwise (Doc, 04.11.2026: "eine kleine schöne Scrollbar") */
+.pop::-webkit-scrollbar{width:10px}
+.pop::-webkit-scrollbar-thumb{background:#7E8FB5;border-radius:5px;border:2px solid #fff}
+.pop::-webkit-scrollbar-track{background:transparent;margin:14px 0}
+@supports (-moz-appearance:none){.pop{scrollbar-width:thin;scrollbar-color:#7E8FB5 transparent}}
 .pop[hidden]{display:none}
 .p-frame > .slide.live .hover-tail,.p-frame > .slide.live [data-pop],.p-frame > .slide.live [data-zoom],.p-frame > .slide.live .pop,.p-frame > .slide.live .pop *{pointer-events:auto}   /* the presenter's current slide takes the pointer here too */
 [data-zoom]{cursor:zoom-in}
@@ -430,12 +442,18 @@ a.side-credit:hover{color:var(--red);text-decoration:underline}
   align-items:center;font-family:Orbitron,sans-serif;font-size:8px}
 .labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
 .labbar a:hover{color:var(--red)}
+/* presenting, "Öffne das Lab in neuem Tab" is gone: a click there would leave the presentation (Doc, 04.11.2026: "wenn
+   ich es dort mache, verlasse ich die Präsentation und es gibt nur Ärger") - presenting full screen and in the presenter
+   view; in a plain window it stays */
+html.fs-on .labbar a[target="_blank"],html.presenter .labbar a[target="_blank"]{display:none}
 .labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
   border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:3px 7px;letter-spacing:1px}
 .labbar button:hover{border-color:var(--red);color:var(--red)}
 #deck > .slide:last-child .labnext{display:none}   /* a lab on the last slide: nothing to go on to (Doc, 16.09.2026) */
 /* the lab's fullscreen icon grows the lab to the whole slide, over title, note and lab bar (Doc, 17.09.2026) */
 .labframe.full{inset:0 !important;width:auto !important;height:auto !important;border-radius:0;box-shadow:none;z-index:3}
+/* while a lab fills the presentation the deck's controls step aside: nav, the buttons right, Solita's line (deck.js labFull) */
+html.lab-voll #nav,html.lab-voll #hud,html.lab-voll #ask{opacity:0;pointer-events:none}
 /* a free-standing lab on the whole slide (DOCPAD, Doc 05.10.2026: "auf die Folie beziehen"): its frame has no ground of
    its own, so the rest of the slide steps aside instead of showing through - the lab stands alone before the photo */
 .slide:has(> .labframe.bare.full) > :not(.labframe){visibility:hidden}
