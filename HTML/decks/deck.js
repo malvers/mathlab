@@ -1448,11 +1448,33 @@ function aniCtl(svg, i) {
   const bar = document.createElement('div');
   bar.className = 'ani-ctl';
   bar.innerHTML = '<button type="button"></button><button type="button">' + ANI_ICON.stop + 'Stop</button>';
+  // a figure may name the place of its buttons: a <rect class="ani-ort"> in its svg, in picture-box px like its labels;
+  // the bar then stands there, as wide as the rect, the two buttons sharing it (Doc, 04.11.2026, the perceptron:
+  // "Start-Stop über Durchlauf oben, in Gruppe zentriert, so breit wie Durchlauf")
+  const ort = svg.querySelector('rect.ani-ort');
+  if (ort) {
+    bar.classList.add('am-ort');
+    bar.style.left = ort.getAttribute('x') + 'px';
+    bar.style.top = ort.getAttribute('y') + 'px';
+    bar.style.width = ort.getAttribute('width') + 'px';
+  }
   const [play, stop] = bar.children;
+  // an animation that runs once (none of its parts repeats "indefinite") stands at its end, frozen, and offers Start
+  // again instead of Pause (Doc, 04.11.2026, the perceptron: "soll enden, wenn der Fehler 0 ist")
+  const parts = [...svg.querySelectorAll('animate, animateTransform, animateMotion, set')];
+  const end = parts.some(a => a.getAttribute('repeatCount') === 'indefinite' || a.getAttribute('repeatDur'))
+    ? Infinity : Math.max(...parts.map(a => parseFloat(a.getAttribute('dur')) || 0));
+  const ended = () => svg.getCurrentTime() >= end - 0.02;
   const label = () => {
-    play.innerHTML = !svg.animationsPaused() ? ANI_ICON.pause + 'Pause'
-      : ANI_ICON.play + (svg.getCurrentTime() > 0.05 ? 'Weiter' : 'Start');
+    play.innerHTML = !svg.animationsPaused() && !ended() ? ANI_ICON.pause + 'Pause'
+      : ANI_ICON.play + (svg.getCurrentTime() > 0.05 && !ended() ? 'Weiter' : 'Start');
+    // waiting at its beginning, Start breathes softly (Doc, 04.11.2026: "den Startknopf bitte so leicht wabernd, leicht")
+    play.classList.toggle('lockt', svg.animationsPaused() && svg.getCurrentTime() <= 0.05);
   };
+  if (end < Infinity) {
+    const last = parts.find(a => (parseFloat(a.getAttribute('dur')) || 0) === end);
+    last.addEventListener('endEvent', () => { if (ended()) { svg.pauseAnimations(); label(); } });
+  }
   // act: 'play' | 'pause' | 'stop'; at: the clock to stand on, so both windows of a show show the same frame
   svg.aniDo = (act, at) => {
     if (act !== 'play') svg.pauseAnimations();
@@ -1465,15 +1487,17 @@ function aniCtl(svg, i) {
   // a press goes to the other window of a show too - beamer and laptop are two windows, and the beamer's copy only
   // moved on the laptop (Doc, 28.10.2026: "war im Präsimode bei mir auf dem Mac zu sehen aber auf der Promethean nicht")
   const press = act => {
-    const at = act === 'stop' ? 0 : svg.getCurrentTime();
+    const at = act === 'stop' || (act === 'play' && ended()) ? 0 : svg.getCurrentTime();   // Start at the end: again
     svg.aniDo(act, at);
     const s = svg.closest('.slide'), n = slides.indexOf(s);   // a slide of the deck asks the deck (slides can be moved)
     link.ani(n >= 0 ? n : i, aniOf(s).indexOf(svg), act, at);
   };
-  play.addEventListener('click', () => press(svg.animationsPaused() ? 'play' : 'pause'));
+  svg.aniToggle = () => press(svg.animationsPaused() || ended() ? 'play' : 'pause');   // the button, and Space (below)
+  play.addEventListener('click', svg.aniToggle);
   stop.addEventListener('click', () => press('stop'));
   // the buttons are not the board: a click here never turns the page, a press never starts the pen
   ['click', 'pointerdown', 'mousedown'].forEach(t => bar.addEventListener(t, e => e.stopPropagation()));
+  bar.addEventListener('mousedown', e => e.preventDefault());   // no focus: Space must not press the button a second time
   (svg.closest('.pic') || svg.parentNode).appendChild(bar);
   svg.aniReset();
 }
@@ -1488,6 +1512,18 @@ function aniApply(m) {
   const v = aniOf(s)[m.k | 0];
   if (v) v.aniDo(m.act, m.at);
 }
+// Space starts and pauses the drawn animation of the slide on show, like its button (Doc, 04.11.2026: "Spacebar should
+// start. And stop."). On such a slide Space is no longer the mic's key - P still is. Registered before js/solita-frage.js
+// (loaded later) takes Space; Solita's own Space while she talks (narration, registered earlier) still comes first.
+addEventListener('keydown', e => {
+  if (e.key !== ' ' || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+  if (document.documentElement.classList.contains('deck-edit')) return;
+  const v = aniOf(!PRESENTER ? slides[si] : document.querySelector('#pres .p-cur .slide.live'))[0];
+  if (!v) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if (!e.repeat) v.aniToggle();
+}, true);
 slides.forEach((s, i) => { if (s.closest('#deck')) aniAll(s, i); });
 // the slide that was kept (or slide 1) may have been hidden meanwhile: start on the next one that is shown
 if (skipped(si)) { const j = seek(si, 1); si = j >= 0 ? j : Math.max(0, seek(si, -1)); step = 0; }
