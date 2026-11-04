@@ -44,6 +44,16 @@
         return String((own && cfg.abGruppe[own]) || (cfg && cfg.ab) || '').replace(/-/g, '');
     }
 
+    /* The button of a plan row for one group. A row holds one button, but a group may need another one there:
+       row.redBtnGruppe = { 'FOS25-1': { ...redBtn } } stands in for row.redBtn in that group's view and on its
+       timetable (Doc, 04.11.2026: FOS25-1 writes the KA KI in the first double period of an appointment whose
+       row carries the Mini-Test of the other groups). Without a group (all groups together) row.redBtn. */
+    function btnFor(row, group) {
+        const own = row && row.redBtnGruppe && group
+            && Object.keys(row.redBtnGruppe).find(k => svpTermine.groupKey(k) === svpTermine.groupKey(group));
+        return own ? row.redBtnGruppe[own] : row && row.redBtn;
+    }
+
     /* The day a dated test falls on for one group, from Doc's published timetable (svp_public_plan, which
        anyone may read - meinplan.html shows it): the group's first lesson of the plan's subjects on or after
        abFor(). The plan's own group dates come from svp_untis and need Doc's login, so without this a
@@ -111,7 +121,7 @@
         for (const [klasse, days] of svpTermine.termine(untis)) {
             const taken = new Set();
             rows.forEach((row, i) => {
-                const test = testOf(row);
+                const test = testOf({ ...row, redBtn: btnFor(row, klasse) });
                 if (!test) return;
                 const s = svpTermine.slot(raw, i), day = days[s.block];
                 if (!day) return;
@@ -173,5 +183,5 @@
         return '';
     }
 
-    global.svpPruefungen = { pruefArt, buttonText, abFor, publicDay, load, pill };
+    global.svpPruefungen = { pruefArt, buttonText, abFor, btnFor, publicDay, load, pill };
 })(window);

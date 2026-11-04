@@ -324,8 +324,9 @@ window.svpPlanParts.push(function (P) {
             upBtn: upBtn,
             /* optional red button left of the Aufgaben pill: row.redBtn = 'Label'
                or { label, title, items } - items open as a list under it;
-               { label, title, src } reads them from a JSON file instead */
-            redBtn: row.redBtn || null
+               { label, title, src } reads them from a JSON file instead;
+               row.redBtnGruppe gives the group of this view its own (svpPruefungen.btnFor) */
+            redBtn: svpPruefungen.btnFor(row, P.GROUP) || null
         };
 
         // Expandable sub-row, created on demand: bullets under the topic
