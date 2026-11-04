@@ -144,6 +144,11 @@
   /* the scale actually in force, for the Note column of svp/leistungstest.html
      (it loads this page in a hidden frame) - one scale, not a copy there */
   window.quizGradeScale = GRADE_SCALE;
+  /* A Klassenarbeit with a paper part (Doc, 04.11.2026): QUIZ.partB = the points
+     of Teil B, written on paper. The page then shows only the points of Teil A -
+     the grade of A + B comes from svp/leistungstest.html once Teil B is entered
+     there, so no pupil sees a grade that is not the final one. */
+  const PART_B = Number(CFG.partB) > 0 ? Number(CFG.partB) : 0;
 
   function gradeFor(pct) {
     for (let i = 0; i < GRADE_SCALE.length; i++) {
@@ -382,10 +387,16 @@
     const resEl = document.getElementById('result');
     resEl.style.display = 'block';
     const pctOwn = Math.round(score / QUESTIONS.length * 100);
-    document.getElementById('score').innerHTML =
-      score + ' / ' + QUESTIONS.length +
-      ' <span style="font-size:0.6em">· ' + pctOwn + ' % · Note <span style="color:' +
-      barColor(pctOwn) + '">' + gradeFor(pctOwn) + '</span></span>';
+    if (PART_B) {
+      document.getElementById('score').innerHTML =
+        score + ' / ' + QUESTIONS.length + ' <span style="font-size:0.6em">· Punkte in Teil A</span>' +
+        '<div style="font-size:0.45em; margin-top:8px">Die Note gibt es zusammen mit Teil B.</div>';
+    } else {
+      document.getElementById('score').innerHTML =
+        score + ' / ' + QUESTIONS.length +
+        ' <span style="font-size:0.6em">· ' + pctOwn + ' % · Note <span style="color:' +
+        barColor(pctOwn) + '">' + gradeFor(pctOwn) + '</span></span>';
+    }
 
     resEl.scrollIntoView({ behavior: 'smooth' });
 
