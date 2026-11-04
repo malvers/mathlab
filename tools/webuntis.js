@@ -375,20 +375,28 @@ function isoWeek(d) {
 
 // Pull "window.PLAN = [ ... ];" and "window.BADGE = { ... };" out of a plan
 // page by bracket counting, then evaluate just that literal.
+// Comments are skipped like strings: until 04.11.2026 they were not, and the apostrophe in
+// "the class's choice" (a comment in inf11.html since 29.10.) opened a string that never
+// closed - Info 11 came back as an empty plan, its lessons of 03.11. as "keine Planzeile",
+// and the 18:00 app said "alles eingetragen".
 function extractLiteral(src, name, open, close) {
   const at = src.indexOf('window.' + name);
   if (at < 0) return null;
   const start = src.indexOf(open, at);
   if (start < 0) return null;
-  let depth = 0, inStr = null, esc = false;
+  let depth = 0, inStr = null, esc = false, inLine = false, inBlock = false;
   for (let i = start; i < src.length; i++) {
-    const c = src[i];
+    const c = src[i], next = src[i + 1];
+    if (inLine) { if (c === '\n') inLine = false; continue; }
+    if (inBlock) { if (c === '*' && next === '/') { inBlock = false; i++; } continue; }
     if (inStr) {
       if (esc) esc = false;
       else if (c === '\\') esc = true;
       else if (c === inStr) inStr = null;
       continue;
     }
+    if (c === '/' && next === '/') { inLine = true; i++; continue; }
+    if (c === '/' && next === '*') { inBlock = true; i++; continue; }
     if (c === '"' || c === "'" || c === '`') { inStr = c; continue; }
     if (c === open) depth++;
     else if (c === close && --depth === 0) {
@@ -487,7 +495,8 @@ async function loadPlan(pageRel) {
      Kalenderwoche - siehe svp-plan.js. Dieses Kommando kann das (noch) nicht,
      also fasst es sie gar nicht erst an, statt die falsche Zeile zu schreiben. */
   const termin = /window\.UNTIS_TERMIN\s*=\s*true/.test(src);
-  return { rows: merged, badge, overrideTs: ts, pagePath, termin };
+  // No rows at all means the literal could not be read - say so instead of "keine Planzeile".
+  return { rows: merged, badge, overrideTs: ts, pagePath, termin, unreadable: !rows.length };
 }
 
 // One line for the classbook: topic, Lernbereich, Ustd. and the planned steps,
@@ -639,7 +648,8 @@ async function proposals(lessons, all, pages, plans) {
     const page = pageFor(l, pages);
     if (!page) { out.push({ l, page: null, text: null, why: 'keine Planseite' }); continue; }
     if (!plans[page]) plans[page] = await loadPlan(page);
-    const { rows, badge, termin } = plans[page];
+    const { rows, badge, termin, unreadable } = plans[page];
+    if (unreadable) { out.push({ l, page, text: null, why: `Plan nicht lesbar: ${path.basename(page)}` }); continue; }
     let text = null, why = '';
     if (termin) {
       const key = groupKey(l);
@@ -1337,7 +1347,14 @@ async function main() {
 
     // Read the current classbook state in ONE pass - the clean way, no student data.
     const askable = props.filter(p => p.text && p.l.code !== 'cancelled');
-    const current = await readTopics(askable.map(p => p.l.ttId));
+    // Lessons whose plan gives no text (no row for the week, an unreadable plan, a placeholder
+    // topic): the button cannot fill them, but if they are empty in WebUntis they ARE gaps. Until
+    // 04.11.2026 they were dropped here and the line said "alles eingetragen" - Info 11 on 03.11.
+    const textless = props.filter(p => p.page && !p.text && p.l.code !== 'cancelled');
+    const current = await readTopics([...askable, ...textless].map(p => p.l.ttId));
+    const gaps = textless.filter(p => !(current[String(p.l.ttId)] || '').trim());
+    const gapList = gaps.map(p => `${p.l.date.slice(6)}.${p.l.date.slice(4, 6)}. ${p.l.start} ${p.l.subject} `
+      + `${p.l.klassen.join(',')} (${p.why})`).join(', ');
 
     const open = [], conflicts = [];
     for (const p of askable) {
@@ -1356,13 +1373,16 @@ async function main() {
         // The app ("WebUntis holen", deliberately not rebuilt - a rebuild resets its macOS
         // permissions) shows the Eintragen button only for a line containing "ohne Lernstoff" or
         // "FEHLGESCHLAGEN". So an open tick is reported together with the (true) "0 Stunden ohne
-        // Lernstoff", otherwise there would be no button to set it.
+        // Lernstoff", otherwise there would be no button to set it. The gaps without plan text
+        // count as "ohne Lernstoff" too, so the line turns red, and are named at the end.
         const parts = [];
-        if (open.length || tickable.length) parts.push(`${open.length} Stunde${open.length === 1 ? '' : 'n'} ohne Lernstoff`);
+        const empty = open.length + gaps.length;
+        if (empty || tickable.length) parts.push(`${empty} Stunde${empty === 1 ? '' : 'n'} ohne Lernstoff`);
         if (tickable.length) parts.push(`Anwesenheit offen: ${tickable.length} Stunde${tickable.length === 1 ? '' : 'n'}`);
-        const groups = [...new Set([...open.map(p => p.l.klassen.join(',')), ...tickable.map(l => l.klassen.join(','))])];
+        const groups = [...new Set([...open, ...gaps].map(p => p.l.klassen.join(',')).concat(tickable.map(l => l.klassen.join(','))))];
         console.log('KLASSENBUCH: ' + (parts.length
           ? parts.join(' \u00b7 ') + (groups.length ? ' \u00b7 ' + groups.join(', ') : '')
+            + (gaps.length ? ` \u00b7 PLAN OHNE TEXT: ${gapList}` : '')
           : 'alles eingetragen'));
         process.exitCode = parts.length ? 1 : 0;
         return;
@@ -1393,7 +1413,8 @@ async function main() {
          an Eintragen at 18:01: "L, aber ich habe nicht das A"). */
       if (patched.length || getickt.length) await patchStatus(session, patched, getickt);
       console.log('KLASSENBUCH: ' + `${done} Stunde${done === 1 ? '' : 'n'} eingetragen` + tick
-        + (bad.length ? ` \u00b7 ${bad.length} FEHLGESCHLAGEN: ${bad.join(', ')}` : ''));
+        + (bad.length ? ` \u00b7 ${bad.length} FEHLGESCHLAGEN: ${bad.join(', ')}` : '')
+        + (gaps.length ? ` \u00b7 ${gaps.length} Stunde${gaps.length === 1 ? '' : 'n'} ohne Lernstoff, PLAN OHNE TEXT: ${gapList}` : ''));
       process.exitCode = bad.length ? 1 : 0;
       return;
     }
@@ -1427,7 +1448,8 @@ async function main() {
         catch (e) { say(`"Anwesenheit kontrolliert" FEHLGESCHLAGEN: ${e.message}`); }
       }
     }
-    if (!open.length) say('Nichts offen - alles steht schon im Klassenbuch.');
+    if (gaps.length) say(`${gaps.length} Stunde${gaps.length === 1 ? '' : 'n'} OHNE LERNSTOFF, aber der Plan liefert keinen Text - von Hand eintragen oder den Plan reparieren: ${gapList}`);
+    else if (!open.length) say('Nichts offen - alles steht schon im Klassenbuch.');
     if (unmapped.size) say(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
     if (patched.length || getickt.length) { say('Badge-Daten aktualisieren:'); await patchStatus(session, patched, getickt); }
     return;
