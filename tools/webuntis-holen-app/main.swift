@@ -15,6 +15,11 @@
 // without that click: Doc presses send himself, that was the deal (01.09.2026), and it keeps
 // the timing plausible for the Untis server.
 //
+// Since 04.11.2026 a third line compares the tests: "webuntis.js pruefungen --line" ->
+// "PRÜFUNGEN: ..." says whether WebUntis and the plan name the same tests for the next 14 days,
+// and which tests the next school day has (Doc, 04.11.2026, after BGY 13 read an old Mini-Test
+// date in WebUntis). Read-only, nothing to press.
+//
 // Since 22.09.2026 nothing is cut off any more: every line wraps, each fact separated by " · "
 // gets its own line, and the window grows to whatever it needs. Green rgb(121,158,49) means
 // fine, red rgb(176,36,24) means something wants doing - the palette values as they are, on
@@ -50,6 +55,7 @@ final class App: NSObject, NSApplicationDelegate {
     let bar = NSProgressIndicator()
     let verdict = NSTextField(labelWithString: "")
     let book = NSTextField(labelWithString: "")
+    let exams = NSTextField(labelWithString: "")
     let ok = NSButton(title: "OK", target: nil, action: nil)
     let fill = NSButton(title: "Eintragen", target: nil, action: nil)
     var summary: [String] = []
@@ -86,8 +92,12 @@ final class App: NSObject, NSApplicationDelegate {
         book.font = NSFont.boldSystemFont(ofSize: 13)
         v.addSubview(book)
 
+        // third verdict: do WebUntis and the plan name the same tests?
+        exams.font = NSFont.boldSystemFont(ofSize: 13)
+        v.addSubview(exams)
+
         // every label wraps instead of truncating - the window makes room for it
-        for f in [title, status, verdict, book] {
+        for f in [title, status, verdict, book, exams] {
             f.usesSingleLineMode = false
             f.cell?.wraps = true
             f.cell?.isScrollable = false
@@ -122,10 +132,11 @@ final class App: NSObject, NSApplicationDelegate {
     // Stacks the rows top down and resizes the window to fit, keeping its top edge where it is
     // so the dialog grows downwards instead of jumping around under the pointer.
     func relayout() {
-        let tH = height(title), sH = height(status), vH = height(verdict), bH = height(book)
+        let tH = height(title), sH = height(status), vH = height(verdict), bH = height(book), eH = height(exams)
         var total: CGFloat = 16 + tH + 12 + 20 + 10 + sH
         if vH > 0 { total += 12 + vH }
         if bH > 0 { total += 8 + bH }
+        if eH > 0 { total += 8 + eH }
         total += 16 + 28 + 14
 
         var fr = window.frameRect(forContentRect: NSRect(x: 0, y: 0, width: WIN, height: total))
@@ -141,6 +152,7 @@ final class App: NSObject, NSApplicationDelegate {
         status.frame = NSRect(x: PAD, y: y, width: COL, height: sH)
         if vH > 0 { y -= 12 + vH; verdict.frame = NSRect(x: PAD, y: y, width: COL, height: vH) }
         if bH > 0 { y -= 8 + bH; book.frame = NSRect(x: PAD, y: y, width: COL, height: bH) }
+        if eH > 0 { y -= 8 + eH; exams.frame = NSRect(x: PAD, y: y, width: COL, height: eH) }
         y -= 16 + 28
         ok.frame = NSRect(x: WIN - PAD - 70, y: y, width: 70, height: 28)
         fill.frame = NSRect(x: WIN - PAD - 70 - 10 - 115, y: y, width: 115, height: 28)
@@ -153,7 +165,8 @@ final class App: NSObject, NSApplicationDelegate {
         // not a failure - hence the test wrappers, or the app would go red every time.
         p.arguments = ["-lc", "cd \"\(REPO)\" && \"\(NODE)\" tools/webuntis.js year && \"\(NODE)\" tools/webuntis.js names"
             + " && { \"\(NODE)\" tools/plan-diff.mjs --save --line; test $? -le 1; }"
-            + " && { \"\(NODE)\" tools/webuntis.js plan --offen --dry --line; test $? -le 1; }"]
+            + " && { \"\(NODE)\" tools/webuntis.js plan --offen --dry --line; test $? -le 1; }"
+            + " && { \"\(NODE)\" tools/webuntis.js pruefungen --line; test $? -le 1; }"]
         let pipe = Pipe()
         p.standardOutput = pipe; p.standardError = pipe
         pipe.fileHandleForReading.readabilityHandler = { h in
@@ -186,6 +199,10 @@ final class App: NSObject, NSApplicationDelegate {
             }
             if line.hasPrefix("KLASSENBUCH:") {
                 showBook(line)
+                continue
+            }
+            if line.hasPrefix("PRÜFUNGEN:") {
+                showExams(line)
                 continue
             }
             if line.contains("Stunden") || line.contains("Namen") { summary.append(line) }
@@ -230,6 +247,16 @@ final class App: NSObject, NSApplicationDelegate {
         let open = line.contains("ohne Lernstoff") || line.contains("FEHLGESCHLAGEN")
         book.textColor = open ? docRed : docGreen
         fill.isHidden = !open || writing
+        relayout()
+    }
+
+    // Third line, the tests: red when WebUntis and the plan disagree or the check failed.
+    // Nothing to press - a test is moved by hand in WebUntis, after Doc's yes.
+    func showExams(_ line: String) {
+        exams.stringValue = broken(line)
+        exams.toolTip = line
+        let off = line.contains("Abweichung") || line.contains("FEHLGESCHLAGEN")
+        exams.textColor = off ? docRed : docGreen
         relayout()
     }
 

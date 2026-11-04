@@ -1521,6 +1521,9 @@ async function main() {
 
   if (cmd === 'status') { await runStatus(session); return; }
 
+  // Read-only check: do WebUntis and the plan pills name the same tests? (tools/pruefungen-abgleich.js)
+  if (cmd === 'pruefungen') { await require('./pruefungen-abgleich.js').run({ intern, rpc, args: process.argv.slice(3) }); return; }
+
   const map = { klassen: 'getKlassen', subjects: 'getSubjects', teachers: 'getTeachers', rooms: 'getRooms', timegrid: 'getTimegridUnits', holidays: 'getHolidays', years: 'getSchoolyears' };
   if (map[cmd]) { console.log(JSON.stringify(await rpc(map[cmd]), null, 2)); return; }
 
