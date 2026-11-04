@@ -230,7 +230,7 @@
                 h += '<span class="' + (r[i] ? 'g' : 'r') + (x.ch ? ' ch' : '') + '">' + e + '</span>';
             }
             $('wz-text').innerHTML = h;
-            $('wz-text').scrollTop = $('wz-text').scrollHeight;
+            if (S.timer) $('wz-text').scrollTop = $('wz-text').scrollHeight;   // only while it is being written (Doc, 02.11.2026: "am Anfang abgeschnitten")
         }
         function renderBell() {
             const { T: T0, G: G0 } = count(S.read), z0 = T0 ? (G0 - T0 / 2) / Math.sqrt(T0) * 2 : 0;
@@ -285,7 +285,7 @@
             $('wz-lies').textContent = 'Schlüssel ' + S.read;
         }
         function render() { renderText(); renderBell(); renderKeys(); }
-        function finish() { clearInterval(S.timer); S.timer = 0; S.shown = S.W.length; }
+        function finish() { clearInterval(S.timer); S.timer = 0; S.shown = S.W.length; $('wz-text').scrollTop = 0; }
         const entry = () => D[S.style];
         function load(text, mark) {                           // mark: show which words the attack changed
             const had = new Set(scanWords(S.orig).map(x => x.t));
